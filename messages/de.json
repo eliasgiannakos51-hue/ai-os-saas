@@ -358,7 +358,7 @@
       },
       "marketplace": {
         "title": "Marktplatz",
-        "description": "Kaufe und verkaufe Agenten, Automatisierungen und Vorlagen."
+        "description": "Fertige Agenten-Vorlagen zum Teilen und Wiederverwenden. Kostenlos — nichts wird gekauft oder verkauft."
       },
       "router": {
         "title": "Universeller KI-Router",
@@ -2818,7 +2818,7 @@
     },
     "marketplace": {
       "is": "Der Ort, an dem Leute ihre Agents, Website-Vorlagen und Workflows teilen werden.",
-      "does": "Noch nichts. Diese Seite hält den Platz für eine Funktion frei, die noch nicht gebaut ist.",
+      "does": "Zeigt die gemeinsame Bibliothek fertiger Agenten-Vorlagen. Suchen, eine auswählen, das Thema angeben — und sie wird zu einem Agenten auf Ihrer Agenten-Seite. Kostenlos — hier wird nichts gekauft oder verkauft.",
       "doesNot": "Sie ist nicht wegen deines Tarifs leer, und ein Upgrade öffnet sie nicht. Der Button unten ist deaktiviert, weil nichts dahinter liegt."
     },
     "settings": {

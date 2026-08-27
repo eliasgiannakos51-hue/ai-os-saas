@@ -358,7 +358,7 @@
       },
       "marketplace": {
         "title": "Mercado",
-        "description": "Compra y vende agentes, automatizaciones y plantillas."
+        "description": "Plantillas de agentes listas para usar, compartidas y reutilizables. Gratis: aquí no se compra ni se vende nada."
       },
       "router": {
         "title": "Router Universal de IA",
@@ -2818,7 +2818,7 @@
     },
     "marketplace": {
       "is": "El lugar donde la gente compartirá los agentes, plantillas de sitios y flujos que ha creado.",
-      "does": "Nada todavía. Esta página reserva el sitio para una función que no está construida.",
+      "does": "Muestra la biblioteca compartida de plantillas de agentes. Búscala, elige una, di de qué debe tratar y se convierte en un agente en tu pantalla de Agentes. Gratis: aquí no se compra ni se vende nada.",
       "doesNot": "No está vacía por su plan, y mejorar de plan no la abrirá. El botón de abajo está desactivado porque no hay nada detrás."
     },
     "settings": {

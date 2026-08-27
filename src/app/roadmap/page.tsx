@@ -88,6 +88,23 @@ const SECTIONS: RoadmapSection[] = [
       { icon: Globe, key: "websiteBuilder" },
       { icon: Workflow, key: "automationBuilder" },
       { icon: Brain, key: "aiMemory" },
+      // MOVED UP FROM "future", V4 #19, #20, #34/#35 and the template
+      // library. Seven people tried the product and none of them found
+      // these; this page was telling them they did not exist.
+      //
+      // WHAT WAS CHECKED BEFORE MOVING EACH ONE — a directory is not a
+      // feature. /dashboard/images exists too and stays in "future",
+      // because build-modules.ts declares it a LOG with "no AI call
+      // anywhere in it". These four produce:
+      //   coding        five real operations through lib/coding/operations.ts
+      //   dataAnalysis  parses an uploaded sheet, profiles it, charts it
+      //   router        lib/ai/routing/route.ts + the provider adapters
+      //   marketplace   agent_templates, browsed and adopted
+      // roadmap-truth.test.mjs now checks that reasoning mechanically.
+      { icon: Code2, key: "coding" },
+      { icon: LineChart, key: "dataAnalysis" },
+      { icon: Shuffle, key: "router" },
+      { icon: Store, key: "marketplace" },
     ],
   },
   {
@@ -104,13 +121,9 @@ const SECTIONS: RoadmapSection[] = [
       { icon: Video, key: "videoGeneration" },
       { icon: FileText, key: "presentations" },
       { icon: Megaphone, key: "marketingBuilder" },
-      { icon: Code2, key: "coding" },
-      { icon: LineChart, key: "dataAnalysis" },
       { icon: UsersRound, key: "teamGenerator" },
       { icon: ClipboardList, key: "projectManager" },
       { icon: Briefcase, key: "ceoAdvisor" },
-      { icon: Store, key: "marketplace" },
-      { icon: Shuffle, key: "router" },
       { icon: RefreshCw, key: "sync" },
     ],
   },

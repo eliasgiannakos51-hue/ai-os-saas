@@ -358,7 +358,7 @@
       },
       "marketplace": {
         "title": "Marketplace",
-        "description": "Compra e vendi agenti, automazioni e template."
+        "description": "Modelli di agenti già pronti, condivisi e riutilizzabili. Gratis: qui non si compra e non si vende nulla."
       },
       "router": {
         "title": "Router AI universale",
@@ -2818,7 +2818,7 @@
     },
     "marketplace": {
       "is": "Il posto dove si condivideranno agent, modelli di sito e flussi già costruiti.",
-      "does": "Ancora niente. Questa pagina tiene il posto per una funzione che non è stata costruita.",
+      "does": "Mostra la libreria condivisa di modelli di agenti già pronti. Cerca, scegline uno, indica di cosa deve occuparsi e diventa un agente nella schermata Agenti. Gratis: qui non si compra e non si vende nulla.",
       "doesNot": "Non è vuota per via del tuo piano, e passare a un piano superiore non la aprirà. Il pulsante qui sotto è disabilitato perché dietro non c'è nulla."
     },
     "settings": {

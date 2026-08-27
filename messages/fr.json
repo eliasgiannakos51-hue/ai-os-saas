@@ -358,7 +358,7 @@
       },
       "marketplace": {
         "title": "Marketplace",
-        "description": "Achetez et vendez des agents, automatisations et modèles."
+        "description": "Des modèles d'agents prêts à l'emploi, partagés et réutilisables. Gratuit — rien n'est acheté ni vendu."
       },
       "router": {
         "title": "Routeur IA universel",
@@ -2818,7 +2818,7 @@
     },
     "marketplace": {
       "is": "L'endroit où l'on partagera les agents, modèles de sites et workflows créés.",
-      "does": "Rien pour l'instant. Cette page réserve la place d'une fonctionnalité qui n'existe pas encore.",
+      "does": "Affiche la bibliothèque partagée de modèles d'agents. Cherchez, choisissez-en un, dites sur quoi il doit porter, et il devient un agent sur votre écran Agents. Gratuit — rien n'est acheté ni vendu ici.",
       "doesNot": "Elle n'est pas vide à cause de votre formule, et changer de formule ne l'ouvrira pas. Le bouton ci-dessous est désactivé parce qu'il n'y a rien derrière."
     },
     "settings": {

@@ -300,9 +300,14 @@ export const HELP_TIPS: HelpTip[] = [
       "that a number here could be a model's estimate, or that a huge file was read whole",
   },
   {
-    id: "finance",
-    file: "src/app/dashboard/finance/page.tsx",
-    keyPrefix: "help.finance",
+    // MOVED, AND RENAMED WITH THE PAGE. This was `finance`, at
+    // /dashboard/finance, which is the slug of a business module — the
+    // static segment shadowed the [module] catch-all and every non-owner
+    // pressing "Finances" in the nav got a 404. The owner dashboard is
+    // Business health now and the module has its route back.
+    id: "businessHealth",
+    file: "src/app/dashboard/business-health/page.tsx",
+    keyPrefix: "help.businessHealth",
     corrects:
       "that a missing figure would be shown as zero rather than as missing",
   },

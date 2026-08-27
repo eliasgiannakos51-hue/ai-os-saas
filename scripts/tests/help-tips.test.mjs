@@ -397,7 +397,7 @@ checkList(
 // has to actually refuse, and to refuse with notFound rather than a
 // message that confirms the page exists.
 for (const [id, file] of [
-  ["finance", "src/app/dashboard/finance/page.tsx"],
+  ["businessHealth", "src/app/dashboard/business-health/page.tsx"],
   ["routing", "src/app/dashboard/routing/page.tsx"],
   ["systemHealth", "src/app/dashboard/system-health/page.tsx"],
 ]) {
@@ -411,7 +411,7 @@ for (const [id, file] of [
 // the authority, and the page renders MetricCard from its states.
 const metrics = readFileSync("src/lib/billing/metrics.ts", "utf8");
 check(
-  "finance: a metric without its input really reports what it needs",
+  "businessHealth: a metric without its input really reports what it needs",
   /needs/i.test(metrics) && /computeMetrics/.test(metrics),
 );
 // Routing: the empty table says so in words rather than rendering zeros.

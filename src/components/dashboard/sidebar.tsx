@@ -12,6 +12,7 @@ import {
   ALL_SIDEBAR_GROUPS,
   MAIN_SIDEBAR_GROUPS,
   SETTINGS_GROUP,
+  visibleGroups,
   type SidebarGroupConfig,
   type SidebarItem,
 } from "@/lib/sidebar-nav";
@@ -64,7 +65,18 @@ function groupTone(heading: string): string {
   }
 }
 
-export function Sidebar({ email = "", planName = "" }: { email?: string; planName?: string }) {
+export function Sidebar({
+  email = "",
+  planName = "",
+  isOwner = false,
+}: {
+  email?: string;
+  planName?: string;
+  /** Owner-only nav items are removed for everybody else — see
+   *  lib/sidebar-nav.ts's `ownerOnly`. Defaults to false, so a caller
+   *  that forgets to pass it hides too much rather than too little. */
+  isOwner?: boolean;
+}) {
   const pathname = usePathname();
   const t = useTranslations("sidebar");
   const tCommon = useTranslations("common");
@@ -279,10 +291,12 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
         </div>
 
         <nav className="space-y-5 p-3">
-          {MAIN_SIDEBAR_GROUPS.map(renderGroup)}
+          {visibleGroups(MAIN_SIDEBAR_GROUPS, isOwner).map(renderGroup)}
         </nav>
 
-        <div className="border-t border-white/[0.07] p-3">{renderGroup(SETTINGS_GROUP)}</div>
+        <div className="border-t border-white/[0.07] p-3">
+            {visibleGroups([SETTINGS_GROUP], isOwner).map(renderGroup)}
+          </div>
 
         {/* Account card. Both values come from the already-loaded session
             in dashboard/layout.tsx — no extra query, and nothing is

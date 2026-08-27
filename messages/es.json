@@ -131,7 +131,8 @@
       "help": "Centro de ayuda",
       "affiliate": "Afiliados",
       "formSubmissions": "Envíos de formularios",
-      "routing": "Enrutado de modelos"
+      "routing": "Enrutado de modelos",
+      "businessHealth": "Salud del negocio"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -177,7 +178,8 @@
       "deepResearch": "Dale un tema: busca, contrasta y escribe un informe con fuentes",
       "help": "Respuestas a las preguntas más frecuentes, sin gastar créditos.",
       "affiliate": "Tu enlace de referido, lo que has ganado y cómo cobras.",
-      "formSubmissions": "Todo lo que los visitantes enviaron por un formulario en tus sitios publicados"
+      "formSubmissions": "Todo lo que los visitantes enviaron por un formulario en tus sitios publicados",
+      "businessHealth": "MRR, margen, bajas y liquidez. Solo el propietario."
     },
     "closeMenu": "Cerrar el menú"
   },
@@ -2904,11 +2906,6 @@
       "does": "Sube un CSV o Excel de hasta 8 MB: cada columna se perfila, los gráficos se calculan en el servidor a partir de las filas reales, y tu pregunta se ejecuta como consulta sobre esas filas.",
       "doesNot": "No adivina ninguna cifra. Nada se estima a partir de una muestra, y por encima de 50.000 filas dice en voz alta que leyó las primeras 50.000, en vez de describir un archivo que no leyó."
     },
-    "finance": {
-      "is": "Las cifras del propio negocio: ingresos, margen, bajas, liquidez. Solo para el propietario.",
-      "does": "Calcula cada métrica a partir de filas reales de suscripción y coste, y te pide las tres cifras que ninguna base de datos puede saber: gasto en marketing, costes fijos y saldo de caja.",
-      "doesNot": "No muestra una cifra que no pueda justificar. Una métrica a la que le falta un dato dice qué necesita en lugar de calcular desde cero, y nada se rellena hacia atrás: el histórico empieza el día en que esto se publicó."
-    },
     "formSubmissions": {
       "is": "Todos los contactos que recogieron tus sitios publicados.",
       "does": "Muestra lo que los visitantes enviaron por un formulario, de qué sitio vino, si marcaron el consentimiento y si el correo de aviso salió de verdad. Exporta todo en CSV.",
@@ -2943,6 +2940,11 @@
       "is": "Todo lo relacionado con el trading en una sola pantalla.",
       "does": "Las mismas operaciones que el módulo Trading, más sus enlaces, su historial, patrones por día, hora, símbolo y racha de pérdidas, y accesos directos a Mentor y a Misión.",
       "doesNot": "Los patrones son recuentos de operaciones que ya hiciste, no predicciones, y no son asesoramiento de inversión. Tampoco es un segundo conjunto de operaciones: son las mismas filas que el módulo Trading."
+    },
+    "businessHealth": {
+      "is": "Las cifras del propio negocio: ingresos, margen, bajas, liquidez. Solo para el propietario.",
+      "does": "Calcula cada métrica a partir de filas reales de suscripción y coste, y te pide las tres cifras que ninguna base de datos puede saber: gasto en marketing, costes fijos y saldo de caja.",
+      "doesNot": "No muestra una cifra que no pueda justificar. Una métrica a la que le falta un dato dice qué necesita en lugar de calcular desde cero, y nada se rellena hacia atrás: el histórico empieza el día en que esto se publicó."
     }
   },
   "helpCentre": {
@@ -3333,7 +3335,7 @@
     }
   },
   "finance": {
-    "title": "Finanzas",
+    "title": "Salud del negocio",
     "description": "Cada cifra se calcula de filas reales, o dice por qué no puede.",
     "needsInput": "Necesita: {fields}",
     "needsHistory": "Necesita {need} meses de historial — tenemos {have}.",

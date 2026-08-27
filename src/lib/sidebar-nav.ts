@@ -23,6 +23,7 @@ import {
   MISSION_ICON,
   REFLECTION_ICON,
   TRADING_WORKFLOW_ICON,
+  BUSINESS_HEALTH_ICON,
   WEBSITE_BUILDER_ICON,
   PRODUCT_WORKFLOW_ICON,
   PUBLISHED_SITES_ICON,
@@ -36,20 +37,14 @@ import {
 // Single source of truth for every sidebar link — shared by the Sidebar
 // (grouped, collapsible) and the command palette (flattened, searchable),
 // so the two never drift out of sync.
-export type SidebarItem = {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  /** i18n key under sidebar.hints.<hintKey> — the tooltip on hover. */
-  hintKey?: string;
-};
-export type SidebarGroupConfig = {
-  heading: string;
-  items: SidebarItem[];
-  // Workspace holds the core always-visible nav (Home, Ionexa Chat, AI
-  // Memory) and is never collapsed — every other group can be toggled.
-  collapsible: boolean;
-};
+//
+// The SHAPES and the role filter live in lib/sidebar-visibility.ts, which
+// imports no icons, so the gates can execute `visibleGroups` instead of
+// reading it as text. Re-exported here because this is the file every
+// consumer already imports.
+export type { SidebarItem, SidebarGroupConfig } from "@/lib/sidebar-visibility";
+export { visibleGroups } from "@/lib/sidebar-visibility";
+import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 
 export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
   {
@@ -159,7 +154,19 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     collapsible: true,
     items: [
       { href: "/dashboard/analytics", label: "Analytics", icon: MODULE_ICONS.analytics , hintKey: "analytics" },
+      // The MODULE — a log of the user's own income and expenses, served
+      // by the [module] catch-all. It spent two releases pointing at the
+      // owner-only dashboard that shadowed it.
       { href: "/dashboard/finance", label: "Finance", icon: MODULE_ICONS.finance , hintKey: "finance" },
+      // The OWNER's dashboard, at its own route now. Owners only, so it
+      // is the nav item that made the flag necessary.
+      {
+        href: "/dashboard/business-health",
+        label: "Business health",
+        icon: BUSINESS_HEALTH_ICON,
+        hintKey: "businessHealth",
+        ownerOnly: true,
+      },
       { href: "/dashboard/content", label: "Content", icon: MODULE_ICONS.content , hintKey: "content" },
       { href: "/dashboard/sales", label: "Sales", icon: MODULE_ICONS.sales , hintKey: "sales" },
       { href: "/dashboard/products", label: "Products", icon: MODULE_ICONS.products , hintKey: "products" },

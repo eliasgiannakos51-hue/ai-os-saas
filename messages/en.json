@@ -131,7 +131,8 @@
       "help": "Help Centre",
       "affiliate": "Affiliate",
       "formSubmissions": "Form submissions",
-      "routing": "Model routing"
+      "routing": "Model routing",
+      "businessHealth": "Business health"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -177,7 +178,8 @@
       "deepResearch": "Give it a topic and it searches, cross-checks and writes a sourced report",
       "help": "Answers to the questions people ask most — no credits used.",
       "affiliate": "Your referral link, what you've earned, and how you get paid.",
-      "formSubmissions": "Everything visitors sent through a form on your published sites"
+      "formSubmissions": "Everything visitors sent through a form on your published sites",
+      "businessHealth": "MRR, margin, churn and runway. Owner only."
     },
     "closeMenu": "Close menu"
   },
@@ -2904,11 +2906,6 @@
       "does": "Upload a CSV or Excel file up to 8 MB: every column is profiled, the charts are computed on the server from the real rows, and a question you ask runs as a query over those rows.",
       "doesNot": "It does not guess a number. Nothing is estimated from a sample — and past 50,000 rows it says out loud that it read the first 50,000, instead of describing a file it never read."
     },
-    "finance": {
-      "is": "The business's own numbers — revenue, margin, churn, runway. Owner only.",
-      "does": "Computes each metric from real subscription and cost rows, and asks you for the three figures no database can know: marketing spend, fixed costs, cash balance.",
-      "doesNot": "It does not show a number it cannot justify. A metric missing an input says what it needs instead of computing from a zero, and nothing is back-filled — the history starts the day this shipped."
-    },
     "formSubmissions": {
       "is": "Every lead your published sites collected.",
       "does": "Lists what visitors sent through a form, which site it came from, whether they ticked consent, and whether the notification email actually got out. Export the lot as CSV.",
@@ -2943,6 +2940,11 @@
       "is": "Everything trading on one screen.",
       "does": "The same trade entries as the Trading module, plus their links, their history, patterns by day, hour, symbol and losing streak, and one-press Mentor and Mission entry points.",
       "doesNot": "The patterns are counts of trades you already made, not predictions, and they are not investment advice. Nor is this a second set of trades: these are the same rows as the Trading module."
+    },
+    "businessHealth": {
+      "is": "The business's own numbers — revenue, margin, churn, runway. Owner only.",
+      "does": "Computes each metric from real subscription and cost rows, and asks you for the three figures no database can know: marketing spend, fixed costs, cash balance.",
+      "doesNot": "It does not show a number it cannot justify. A metric missing an input says what it needs instead of computing from a zero, and nothing is back-filled — the history starts the day this shipped."
     }
   },
   "helpCentre": {
@@ -3333,7 +3335,7 @@
     }
   },
   "finance": {
-    "title": "Finances",
+    "title": "Business health",
     "description": "Every figure is computed from real rows, or says why it cannot be.",
     "needsInput": "Needs: {fields}",
     "needsHistory": "Needs {need} months of history — we have {have}.",

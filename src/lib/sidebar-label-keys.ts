@@ -73,6 +73,7 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Apps: "apps",
   Images: "images",
   Videos: "videos",
+  "Business health": "businessHealth",
   "AI Coding": "coding",
   "Data Analysis": "dataAnalysis",
   Documents: "documents",

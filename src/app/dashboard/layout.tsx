@@ -127,7 +127,7 @@ export default async function DashboardLayout({
                 updating. Renders nothing while the connection is fine. */}
             <OfflineBanner />
             <div className="relative z-10 flex min-h-screen">
-              <Sidebar email={user.email ?? ""} planName={plan.name} />
+              <Sidebar email={user.email ?? ""} planName={plan.name} isOwner={isAdmin} />
               <div className="flex min-w-0 flex-1 flex-col">
                 <TopNav email={user.email ?? ""} />
                 {/* Wraps only the page body, not the Sidebar/TopNav —
@@ -140,7 +140,7 @@ export default async function DashboardLayout({
             </div>
             <ToastContainer />
             <AchievementUnlockBridge />
-            <CommandPalette />
+            <CommandPalette isOwner={isAdmin} />
             </VoiceAvailabilityProvider>
           </CreditsProvider>
           {/* Service worker + add-to-home-screen prompt. Mounted here, not

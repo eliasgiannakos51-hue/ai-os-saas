@@ -131,7 +131,8 @@
       "help": "Hilfe-Center",
       "affiliate": "Partnerprogramm",
       "formSubmissions": "Formulareingänge",
-      "routing": "Modell-Routing"
+      "routing": "Modell-Routing",
+      "businessHealth": "Geschäftslage"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -177,7 +178,8 @@
       "deepResearch": "Thema angeben — es recherchiert, gleicht ab und schreibt einen belegten Bericht",
       "help": "Antworten auf die häufigsten Fragen — ohne Credits zu verbrauchen.",
       "affiliate": "Dein Empfehlungslink, dein Verdienst und wie du ausgezahlt wirst.",
-      "formSubmissions": "Alles, was Besucher über ein Formular auf Ihren veröffentlichten Seiten gesendet haben"
+      "formSubmissions": "Alles, was Besucher über ein Formular auf Ihren veröffentlichten Seiten gesendet haben",
+      "businessHealth": "MRR, Marge, Abwanderung und Liquidität. Nur für den Inhaber."
     },
     "closeMenu": "Menü schließen"
   },
@@ -2904,11 +2906,6 @@
       "does": "Laden Sie eine CSV- oder Excel-Datei bis 8 MB hoch: Jede Spalte wird profiliert, die Diagramme werden auf dem Server aus den echten Zeilen berechnet, und Ihre Frage läuft als Abfrage über diese Zeilen.",
       "doesNot": "Es rät keine Zahl. Nichts wird aus einer Stichprobe geschätzt — und ab 50.000 Zeilen sagt es ausdrücklich, dass es die ersten 50.000 gelesen hat, statt eine Datei zu beschreiben, die es nie gelesen hat."
     },
-    "finance": {
-      "is": "Die Zahlen des Unternehmens selbst — Umsatz, Marge, Abwanderung, Liquidität. Nur für den Inhaber.",
-      "does": "Berechnet jede Kennzahl aus echten Abo- und Kostenzeilen und fragt Sie nach den drei Werten, die keine Datenbank kennen kann: Marketingausgaben, Fixkosten, Kassenbestand.",
-      "doesNot": "Es zeigt keine Zahl, die es nicht begründen kann. Einer Kennzahl ohne Eingabe sagt, was ihr fehlt, statt aus einer Null zu rechnen, und nichts wird rückwirkend ergänzt — die Historie beginnt am Tag der Veröffentlichung."
-    },
     "formSubmissions": {
       "is": "Jeder Kontakt, den Ihre veröffentlichten Seiten gesammelt haben.",
       "does": "Listet auf, was Besucher über ein Formular geschickt haben, von welcher Seite es kam, ob sie die Einwilligung gesetzt haben und ob die Benachrichtigungs-E-Mail wirklich hinausging. Alles als CSV exportierbar.",
@@ -2943,6 +2940,11 @@
       "is": "Alles rund ums Trading auf einem Bildschirm.",
       "does": "Dieselben Trade-Einträge wie das Modul Trading, dazu ihre Verknüpfungen, ihre Historie, Muster nach Tag, Stunde, Symbol und Verlustserie sowie Direktzugänge zu Mentor und Mission.",
       "doesNot": "Die Muster sind Auszählungen bereits getätigter Trades, keine Vorhersagen, und sie sind keine Anlageberatung. Es ist auch kein zweiter Satz Trades: Es sind dieselben Zeilen wie im Modul Trading."
+    },
+    "businessHealth": {
+      "is": "Die Zahlen des Unternehmens selbst — Umsatz, Marge, Abwanderung, Liquidität. Nur für den Inhaber.",
+      "does": "Berechnet jede Kennzahl aus echten Abo- und Kostenzeilen und fragt Sie nach den drei Werten, die keine Datenbank kennen kann: Marketingausgaben, Fixkosten, Kassenbestand.",
+      "doesNot": "Es zeigt keine Zahl, die es nicht begründen kann. Einer Kennzahl ohne Eingabe sagt, was ihr fehlt, statt aus einer Null zu rechnen, und nichts wird rückwirkend ergänzt — die Historie beginnt am Tag der Veröffentlichung."
     }
   },
   "helpCentre": {
@@ -3333,7 +3335,7 @@
     }
   },
   "finance": {
-    "title": "Finanzen",
+    "title": "Geschäftslage",
     "description": "Jede Zahl wird aus echten Zeilen berechnet — oder sagt, warum sie es nicht kann.",
     "needsInput": "Fehlt: {fields}",
     "needsHistory": "Braucht {need} Monate Historie — wir haben {have}.",

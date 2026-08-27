@@ -131,7 +131,8 @@
       "help": "Centre d’aide",
       "affiliate": "Affiliation",
       "formSubmissions": "Envois de formulaires",
-      "routing": "Routage des modèles"
+      "routing": "Routage des modèles",
+      "businessHealth": "Santé de l'entreprise"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -177,7 +178,8 @@
       "deepResearch": "Donnez un sujet : il cherche, recoupe et rédige un rapport sourcé",
       "help": "Les réponses aux questions les plus fréquentes, sans consommer de crédits.",
       "affiliate": "Votre lien de parrainage, vos gains et comment vous êtes payé.",
-      "formSubmissions": "Tout ce que les visiteurs ont envoyé via un formulaire sur vos sites publiés"
+      "formSubmissions": "Tout ce que les visiteurs ont envoyé via un formulaire sur vos sites publiés",
+      "businessHealth": "MRR, marge, attrition et trésorerie. Propriétaire uniquement."
     },
     "closeMenu": "Fermer le menu"
   },
@@ -2904,11 +2906,6 @@
       "does": "Déposez un CSV ou un Excel jusqu'à 8 Mo : chaque colonne est profilée, les graphiques sont calculés sur le serveur à partir des vraies lignes, et votre question devient une requête sur ces lignes.",
       "doesNot": "Il ne devine aucun chiffre. Rien n'est estimé à partir d'un échantillon, et au-delà de 50 000 lignes il dit clairement qu'il a lu les 50 000 premières, au lieu de décrire un fichier qu'il n'a pas lu."
     },
-    "finance": {
-      "is": "Les chiffres de l'entreprise elle-même : revenus, marge, attrition, trésorerie. Réservé au propriétaire.",
-      "does": "Calcule chaque indicateur à partir de vraies lignes d'abonnement et de coût, et vous demande les trois chiffres qu'aucune base ne peut connaître : dépense marketing, coûts fixes, solde de trésorerie.",
-      "doesNot": "Il n'affiche aucun chiffre qu'il ne peut pas justifier. Un indicateur auquel il manque une saisie dit ce qu'il lui faut au lieu de calculer à partir d'un zéro, et rien n'est rempli rétroactivement : l'historique commence le jour de la mise en ligne."
-    },
     "formSubmissions": {
       "is": "Tous les contacts recueillis par vos sites publiés.",
       "does": "Liste ce que les visiteurs ont envoyé via un formulaire, de quel site cela vient, s'ils ont coché le consentement, et si l'e-mail de notification est bien parti. Exportez le tout en CSV.",
@@ -2943,6 +2940,11 @@
       "is": "Tout ce qui touche au trading sur un seul écran.",
       "does": "Les mêmes transactions que le module Trading, plus leurs liens, leur historique, des motifs par jour, heure, symbole et série de pertes, et des accès directs vers Mentor et Mission.",
       "doesNot": "Les motifs sont des comptages de transactions déjà faites, pas des prédictions, et ce ne sont pas des conseils en investissement. Ce n'est pas non plus un second jeu de transactions : ce sont les mêmes lignes que le module Trading."
+    },
+    "businessHealth": {
+      "is": "Les chiffres de l'entreprise elle-même : revenus, marge, attrition, trésorerie. Réservé au propriétaire.",
+      "does": "Calcule chaque indicateur à partir de vraies lignes d'abonnement et de coût, et vous demande les trois chiffres qu'aucune base ne peut connaître : dépense marketing, coûts fixes, solde de trésorerie.",
+      "doesNot": "Il n'affiche aucun chiffre qu'il ne peut pas justifier. Un indicateur auquel il manque une saisie dit ce qu'il lui faut au lieu de calculer à partir d'un zéro, et rien n'est rempli rétroactivement : l'historique commence le jour de la mise en ligne."
     }
   },
   "helpCentre": {
@@ -3333,7 +3335,7 @@
     }
   },
   "finance": {
-    "title": "Finances",
+    "title": "Santé de l'entreprise",
     "description": "Chaque chiffre est calculé à partir de vraies lignes, ou dit pourquoi il ne peut pas l'être.",
     "needsInput": "Il manque : {fields}",
     "needsHistory": "Il faut {need} mois d'historique — nous en avons {have}.",

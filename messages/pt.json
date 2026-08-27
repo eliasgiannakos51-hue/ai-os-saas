@@ -131,7 +131,8 @@
       "help": "Centro de ajuda",
       "affiliate": "Afiliados",
       "formSubmissions": "Envios de formulários",
-      "routing": "Encaminhamento de modelos"
+      "routing": "Encaminhamento de modelos",
+      "businessHealth": "Saúde do negócio"
     },
     "hints": {
       "chat": "Pergunte qualquer coisa — sem ligação a nenhum módulo.",
@@ -177,7 +178,8 @@
       "deepResearch": "Dá um tema: pesquisa, cruza fontes e escreve um relatório com referências",
       "help": "Respostas às perguntas mais frequentes, sem gastar créditos.",
       "affiliate": "O teu link de referência, o que ganhaste e como recebes.",
-      "formSubmissions": "Tudo o que os visitantes enviaram por um formulário nos seus sites publicados"
+      "formSubmissions": "Tudo o que os visitantes enviaram por um formulário nos seus sites publicados",
+      "businessHealth": "MRR, margem, cancelamentos e tesouraria. Apenas o proprietário."
     },
     "closeMenu": "Fechar o menu"
   },
@@ -2904,11 +2906,6 @@
       "does": "Carregue um CSV ou Excel até 8 MB: cada coluna é analisada, os gráficos são calculados no servidor a partir das linhas reais, e a sua pergunta corre como consulta sobre essas linhas.",
       "doesNot": "Não adivinha nenhum número. Nada é estimado a partir de uma amostra — e acima de 50.000 linhas diz claramente que leu as primeiras 50.000, em vez de descrever um ficheiro que não leu."
     },
-    "finance": {
-      "is": "Os números do próprio negócio: receita, margem, cancelamentos, tesouraria. Apenas para o proprietário.",
-      "does": "Calcula cada métrica a partir de linhas reais de subscrição e de custo, e pede-lhe os três valores que nenhuma base de dados pode saber: gasto em marketing, custos fixos e saldo de caixa.",
-      "doesNot": "Não mostra um número que não consiga justificar. Uma métrica a que falta um dado diz o que precisa em vez de calcular a partir de zero, e nada é preenchido retroativamente: o histórico começa no dia em que isto entrou em funcionamento."
-    },
     "formSubmissions": {
       "is": "Todos os contactos recolhidos pelos seus sites publicados.",
       "does": "Lista o que os visitantes enviaram por um formulário, de que site veio, se marcaram o consentimento e se o email de aviso saiu mesmo. Exporte tudo em CSV.",
@@ -2943,6 +2940,11 @@
       "is": "Tudo o que toca ao trading num só ecrã.",
       "does": "As mesmas operações do módulo Trading, mais as suas ligações, o seu histórico, padrões por dia, hora, símbolo e série de perdas, e atalhos para Mentor e Missão.",
       "doesNot": "Os padrões são contagens de operações que já fez, não previsões, e não são aconselhamento de investimento. Nem é um segundo conjunto de operações: são as mesmas linhas do módulo Trading."
+    },
+    "businessHealth": {
+      "is": "Os números do próprio negócio: receita, margem, cancelamentos, tesouraria. Apenas para o proprietário.",
+      "does": "Calcula cada métrica a partir de linhas reais de subscrição e de custo, e pede-lhe os três valores que nenhuma base de dados pode saber: gasto em marketing, custos fixos e saldo de caixa.",
+      "doesNot": "Não mostra um número que não consiga justificar. Uma métrica a que falta um dado diz o que precisa em vez de calcular a partir de zero, e nada é preenchido retroativamente: o histórico começa no dia em que isto entrou em funcionamento."
     }
   },
   "helpCentre": {
@@ -3333,7 +3335,7 @@
     }
   },
   "finance": {
-    "title": "Finanças",
+    "title": "Saúde do negócio",
     "description": "Cada número é calculado a partir de linhas reais, ou diz porque não pode ser.",
     "needsInput": "Falta: {fields}",
     "needsHistory": "Precisa de {need} meses de histórico — temos {have}.",

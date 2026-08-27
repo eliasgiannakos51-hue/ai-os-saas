@@ -367,6 +367,34 @@
       "sync": {
         "title": "Cross-Platform Sync",
         "description": "A unified experience across web, mobile, and desktop."
+      },
+      "clarity": {
+        "title": "Understanding it in one sentence",
+        "description": "A first minute that explains itself: one sentence that says what this is, the chat visible from the start, and setup finished in under two minutes."
+      },
+      "voice": {
+        "title": "Voice",
+        "description": "Speak instead of typing, and have answers read back. The code is here; it goes live on a deployment once the speech provider keys are configured."
+      },
+      "pushNotifications": {
+        "title": "Push notifications",
+        "description": "A notification on your phone when an agent finishes or something needs you. Built and waiting on the deployment's push keys."
+      },
+      "workflowBuilder": {
+        "title": "Workflow builder",
+        "description": "Chain steps together — this, then that, and only if — instead of one agent per job."
+      },
+      "desktopApp": {
+        "title": "Desktop app",
+        "description": "The same workspace in its own window, without a browser tab."
+      },
+      "messagingChannels": {
+        "title": "Telegram and WhatsApp",
+        "description": "Get an agent's result — and reply to it — where you already are."
+      },
+      "socialPosting": {
+        "title": "Social posting",
+        "description": "Take what was written here and publish it, instead of copying it out by hand."
       }
     },
     "metaDescription": "What's live in Ionexa AI today, what's coming next, and where we're headed."
@@ -2825,6 +2853,31 @@
       "is": "Your account: the plan you are on, the credits you hold, and everything you have logged.",
       "does": "Change your plan, buy credits, set the language and theme, name the assistant, and download every record in the account as one file.",
       "doesNot": "It does not hold your records — each module keeps its own. And Delete account is not a way to clear them and start again: it ends the account, takes everything with it, and there is no undo. Export first."
+    },
+    "overview": {
+      "is": "A summary of what you have logged, and one thing to do next.",
+      "does": "Reads your own entries across the modules and shows a health score, what changed recently, and a suggested next step.",
+      "doesNot": "It does not connect to your bank, your CRM or your inbox. Every figure here comes from something you or your agents put in — so an empty week really is empty, not a loading problem."
+    },
+    "chat": {
+      "is": "The assistant, with the web and your connected accounts available to it.",
+      "does": "Answers, drafts and explains. It can search the web, and search the integrations you have connected, so the answer comes from real sources rather than memory.",
+      "doesNot": "It does not change anything in your account. It has no tool that writes, so nothing you discuss here exists as a record until you create it. Free messages get no search at all and see less of the conversation."
+    },
+    "create": {
+      "is": "One sentence in, the right thing out.",
+      "does": "You describe what you want in your own words; the studio works out whether it is a module entry, a website, a mission, an automation, an agent or a document, and makes it.",
+      "doesNot": "It does not silently guess. When it cannot tell what you meant, or cannot build the thing you asked for, it says so rather than producing the nearest other kind — which is what it used to do with agents."
+    },
+    "costs": {
+      "is": "What the AI actually cost, for the account owner.",
+      "does": "Shows measured provider spend by feature and by day, from the same aggregates the cost alerts read — so the dashboard and the alerts cannot disagree.",
+      "doesNot": "It is not your credit balance and not an invoice. It is the operator's view of real cost, visible only to the owner; what you are charged is on the Billing page."
+    },
+    "trackingModule": {
+      "is": "A notebook for this kind of work — not a generator.",
+      "does": "Keeps rows you type yourself: what you are planning, what you already did, and how it went. You can link entries to other modules and search across all of them.",
+      "doesNot": "Nothing on this page is produced by AI. It does not make the website, the image, the video, the deck or the campaign — it records the ones you make elsewhere. The Website Builder and Create Studio are where things get built."
     }
   },
   "helpCentre": {

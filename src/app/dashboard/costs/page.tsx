@@ -7,8 +7,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { MARGIN_TARGET } from "@/lib/billing/margin-report";
-import { monthlyRecurringRevenue, type MrrInputRow } from "@/lib/billing/monthly-revenue";
-import { CostDashboard, type CostDashboardData } from "@/components/costs/cost-dashboard";
+import {
+  monthlyRecurringRevenue,
+  type MrrInputRow,
+} from "@/lib/billing/monthly-revenue";
+import {
+  CostDashboard,
+  type CostDashboardData,
+} from "@/components/costs/cost-dashboard";
 import { getLocale } from "next-intl/server";
 
 export function generateMetadata(): Promise<Metadata> {
@@ -39,7 +45,10 @@ export default async function CostsPage() {
 
   const admin = createAdminClient();
   const unavailable: string[] = [];
-  const call = async <T,>(name: string, args: Record<string, unknown>): Promise<T[]> => {
+  const call = async <T,>(
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<T[]> => {
     try {
       const { data, error } = await admin.rpc(name, args);
       if (error) throw error;
@@ -54,10 +63,12 @@ export default async function CostsPage() {
   };
 
   const [daily, features, topUsers, alerts, mrrRows] = await Promise.all([
-    call<{ day: string; cost_eur: string; calls: number; credits_charged: number }>(
-      "cost_daily_totals",
-      { p_days: 30 }
-    ),
+    call<{
+      day: string;
+      cost_eur: string;
+      calls: number;
+      credits_charged: number;
+    }>("cost_daily_totals", { p_days: 30 }),
     call<{
       feature: string;
       cost_eur: string;
@@ -66,10 +77,12 @@ export default async function CostsPage() {
       charged_calls: number;
       margin_sum: string;
     }>("cost_by_feature", { p_days: 30 }),
-    call<{ user_id: string; cost_eur: string; calls: number; credits_charged: number }>(
-      "cost_by_user",
-      { p_days: 30, p_limit: 15 }
-    ),
+    call<{
+      user_id: string;
+      cost_eur: string;
+      calls: number;
+      credits_charged: number;
+    }>("cost_by_user", { p_days: 30, p_limit: 15 }),
     (async () => {
       try {
         const { data, error } = await admin
@@ -91,10 +104,12 @@ export default async function CostsPage() {
         return [];
       }
     })(),
-    call<{ tier: string; billing_interval: string; subscribers: number; seats: number }>(
-      "mrr_inputs",
-      {}
-    ),
+    call<{
+      tier: string;
+      billing_interval: string;
+      subscribers: number;
+      seats: number;
+    }>("mrr_inputs", {}),
   ]);
 
   const revenue = monthlyRecurringRevenue(
@@ -104,8 +119,8 @@ export default async function CostsPage() {
         billingInterval: r.billing_interval,
         subscribers: Number(r.subscribers ?? 0),
         seats: Number(r.seats ?? 0),
-      })
-    )
+      }),
+    ),
   );
 
   const data: CostDashboardData = {
@@ -127,7 +142,8 @@ export default async function CostsPage() {
         // averaged over ALL calls would divide real margin by a count
         // that includes calls which produced no revenue — and every
         // feature the owner uses would read as a shortfall.
-        margin: chargedCalls > 0 ? Number(f.margin_sum ?? 0) / chargedCalls : null,
+        margin:
+          chargedCalls > 0 ? Number(f.margin_sum ?? 0) / chargedCalls : null,
       };
     }),
     topUsers: topUsers.map((u) => ({
@@ -155,6 +171,7 @@ export default async function CostsPage() {
           icon={Coins}
           title="Costs"
           description="What the last 30 days cost, and what fired. Owner only."
+          helpKey="help.costs"
         />
         <CostDashboard data={data} locale={locale} />
       </div>

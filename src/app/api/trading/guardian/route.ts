@@ -32,7 +32,10 @@ export async function POST() {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      return NextResponse.json({ ok: false, code: "unauthenticated", error: "Not authenticated." }, { status: 401 });
+      return NextResponse.json(
+        { ok: false, code: "unauthenticated", error: "Not authenticated." },
+        { status: 401 },
+      );
     }
 
     const limited = await checkRateLimit({
@@ -43,24 +46,39 @@ export async function POST() {
     });
     if (!limited.allowed) {
       return NextResponse.json(
-        { ok: false, code: "rate_limited", error: "Too many re-checks in the last hour." },
-        { status: 429 }
+        {
+          ok: false,
+          code: "rate_limited",
+          error: "Too many re-checks in the last hour.",
+        },
+        { status: 429 },
       );
     }
 
-    const { trades, rules, accounts } = await loadJournal(supabase);
+    const { trades, rules } = await loadJournal(supabase);
     // Per account, because a percentage-risk rule divides by THAT
     // account's starting balance. Evaluating every trade against one
     // balance would report violations on the wrong accounts and miss them
     // on the right ones.
     const byAccount = new Map<string | null, typeof trades>();
     for (const trade of trades) {
-      byAccount.set(trade.accountId, [...(byAccount.get(trade.accountId) ?? []), trade]);
+      byAccount.set(trade.accountId, [
+        ...(byAccount.get(trade.accountId) ?? []),
+        trade,
+      ]);
     }
 
     const rows: Record<string, unknown>[] = [];
     for (const [accountId, group] of byAccount) {
-      const balance = accounts.find((a) => a.id === accountId)?.startingBalance ?? null;
+      // NULL, WHICH IS WHAT IT ALREADY WAS. This read a starting balance
+      // out of trading_accounts, and nothing in the application has ever
+      // written a row to that table — so the lookup missed every time and
+      // this was `null` on every evaluation. The behaviour is unchanged;
+      // what is gone is the query that fetched an empty list to miss in.
+      // A percentage-risk rule with no balance is skipped by evaluate(),
+      // exactly as before. See the note in lib/trading/load.ts.
+      void accountId;
+      const balance: number | null = null;
       const result = evaluate(group, rules, { startingBalance: balance });
       for (const violation of result.violations) {
         rows.push({
@@ -75,23 +93,56 @@ export async function POST() {
       }
     }
 
-    const { error: clearError } = await supabase.from("rule_violations").delete().eq("user_id", user.id);
+    const { error: clearError } = await supabase
+      .from("rule_violations")
+      .delete()
+      .eq("user_id", user.id);
     if (clearError) {
-      logApiError("/api/trading/guardian", clearError, { stage: "clear", userId: user.id });
-      return NextResponse.json({ ok: false, code: "recheck_failed", error: "Could not refresh the rule check." }, { status: 500 });
+      logApiError("/api/trading/guardian", clearError, {
+        stage: "clear",
+        userId: user.id,
+      });
+      return NextResponse.json(
+        {
+          ok: false,
+          code: "recheck_failed",
+          error: "Could not refresh the rule check.",
+        },
+        { status: 500 },
+      );
     }
 
     if (rows.length > 0) {
-      const { error: insertError } = await supabase.from("rule_violations").insert(rows);
+      const { error: insertError } = await supabase
+        .from("rule_violations")
+        .insert(rows);
       if (insertError) {
-        logApiError("/api/trading/guardian", insertError, { stage: "insert", userId: user.id });
-        return NextResponse.json({ ok: false, code: "recheck_failed", error: "Could not refresh the rule check." }, { status: 500 });
+        logApiError("/api/trading/guardian", insertError, {
+          stage: "insert",
+          userId: user.id,
+        });
+        return NextResponse.json(
+          {
+            ok: false,
+            code: "recheck_failed",
+            error: "Could not refresh the rule check.",
+          },
+          { status: 500 },
+        );
       }
     }
 
-    return NextResponse.json({ ok: true, violations: rows.length, trades: trades.length, rules: rules.length });
+    return NextResponse.json({
+      ok: true,
+      violations: rows.length,
+      trades: trades.length,
+      rules: rules.length,
+    });
   } catch (err) {
     logApiError("/api/trading/guardian", err, { stage: "unhandled" });
-    return NextResponse.json({ ok: false, code: "failed", error: "Something went wrong." }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, code: "failed", error: "Something went wrong." },
+      { status: 500 },
+    );
   }
 }

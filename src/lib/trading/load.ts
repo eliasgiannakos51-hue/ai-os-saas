@@ -1,7 +1,11 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isTradingSession, type JournalTrade } from "@/lib/trading/journal";
-import { isRuleKind, parseRuleParams, type TradingRule } from "@/lib/trading/rules";
+import {
+  isRuleKind,
+  parseRuleParams,
+  type TradingRule,
+} from "@/lib/trading/rules";
 
 /**
  * ROWS INTO THE SHAPES THE PURE MODULES EXPECT.
@@ -39,7 +43,8 @@ export function toJournalTrade(row: Record<string, unknown>): JournalTrade {
     riskAmount: num(row.risk_amount),
     commission: num(row.commission),
     pnl: num(row.pnl),
-    enteredAt: str(row.entered_at) ?? str(row.occurred_at) ?? str(row.created_at),
+    enteredAt:
+      str(row.entered_at) ?? str(row.occurred_at) ?? str(row.created_at),
     exitedAt: str(row.exited_at) ?? str(row.occurred_at) ?? str(row.created_at),
     session: isTradingSession(session) ? session : null,
   };
@@ -53,7 +58,9 @@ export function toJournalTrade(row: Record<string, unknown>): JournalTrade {
  * invented threshold — that rule would then measure somebody's trading
  * against a number nobody chose.
  */
-export function toTradingRule(row: Record<string, unknown>): TradingRule | null {
+export function toTradingRule(
+  row: Record<string, unknown>,
+): TradingRule | null {
   const kind = row.kind;
   if (!isRuleKind(kind)) return null;
   const params = parseRuleParams(kind, row.params);
@@ -68,23 +75,23 @@ export function toTradingRule(row: Record<string, unknown>): TradingRule | null 
   };
 }
 
-export type TradingAccount = {
-  id: string;
-  name: string;
-  currency: string;
-  startingBalance: number | null;
-  isActive: boolean;
-};
-
-export function toTradingAccount(row: Record<string, unknown>): TradingAccount {
-  return {
-    id: String(row.id),
-    name: String(row.name ?? ""),
-    currency: String(row.currency ?? "EUR"),
-    startingBalance: num(row.starting_balance),
-    isActive: row.is_active !== false,
-  };
-}
+// THE ACCOUNTS QUERY IS GONE, AND THE TABLE STAYS.
+//
+// public.trading_accounts exists, with its RLS policies, and nothing in
+// this application has ever written a row to it: no form, no route, no
+// import path. So this query returned an empty array on every journal
+// load, the account-filter nav it fed rendered only `when accounts.length
+// > 0` and therefore never rendered, and `?account=` could not be reached
+// because nothing produced a link to it. A round trip on every page load
+// for a list that cannot have members.
+//
+// The table is deliberately NOT dropped. Multi-account journalling is a
+// reasonable thing to build, the schema for it is already right, and
+// deleting it would throw away a decision somebody made on purpose. What
+// is removed is the cost of pretending it is wired up. To build it: add a
+// producer (a form or an import mapping), then restore this select, the
+// TradingAccount type and the nav in dashboard/trading-journal/page.tsx —
+// all three are in the history of this commit.
 
 /** Everything the journal page needs, in the ORDER the statistics
  *  require: oldest first. The drawdown, the equity curve, the after-loss
@@ -92,27 +99,28 @@ export function toTradingAccount(row: Record<string, unknown>): TradingAccount {
  *  fetched newest-first would produce confident wrong numbers. */
 export async function loadJournal(
   supabase: SupabaseClient,
-  options: { accountId?: string | null } = {}
-): Promise<{ trades: JournalTrade[]; rules: TradingRule[]; accounts: TradingAccount[] }> {
+  options: { accountId?: string | null } = {},
+): Promise<{ trades: JournalTrade[]; rules: TradingRule[] }> {
   let tradeQuery = supabase
     .from("trades")
     .select("*")
     .order("exited_at", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: true })
     .limit(2000);
-  if (options.accountId) tradeQuery = tradeQuery.eq("account_id", options.accountId);
+  if (options.accountId)
+    tradeQuery = tradeQuery.eq("account_id", options.accountId);
 
-  const [{ data: tradeRows }, { data: ruleRows }, { data: accountRows }] = await Promise.all([
+  const [{ data: tradeRows }, { data: ruleRows }] = await Promise.all([
     tradeQuery,
     supabase.from("trading_rules").select("*").eq("is_active", true),
-    supabase.from("trading_accounts").select("*").order("created_at", { ascending: true }),
   ]);
 
   return {
-    trades: (tradeRows ?? []).map((r) => toJournalTrade(r as Record<string, unknown>)),
+    trades: (tradeRows ?? []).map((r) =>
+      toJournalTrade(r as Record<string, unknown>),
+    ),
     rules: (ruleRows ?? [])
       .map((r) => toTradingRule(r as Record<string, unknown>))
       .filter((r): r is TradingRule => r !== null),
-    accounts: (accountRows ?? []).map((r) => toTradingAccount(r as Record<string, unknown>)),
   };
 }

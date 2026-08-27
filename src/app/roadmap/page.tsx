@@ -26,6 +26,12 @@ import {
   Store,
   Shuffle,
   RefreshCw,
+  Compass,
+  Mic,
+  Bell,
+  Monitor,
+  Send,
+  Share2,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { AppBackground } from "@/components/ui/app-background";
@@ -110,7 +116,25 @@ const SECTIONS: RoadmapSection[] = [
   {
     status: "soon",
     emoji: "🔜",
-    items: [],
+    // WHAT IS ACTUALLY NEXT, named by the owner. No dates: a date on a
+    // roadmap is a promise with a deadline attached, and this page has
+    // already been wrong once in the other direction.
+    //
+    // Voice and push are the two that are BUILT and DARK — the code is
+    // here, and neither works until the provider keys are configured on
+    // the deployment. That is not "available" (nobody can use it) and not
+    // "future" (it is written), which is what the third status is for, and
+    // roadmap-truth.test.mjs now checks that distinction rather than
+    // leaving this section unguarded.
+    items: [
+      { icon: Compass, key: "clarity" },
+      { icon: Mic, key: "voice" },
+      { icon: Bell, key: "pushNotifications" },
+      { icon: Workflow, key: "workflowBuilder" },
+      { icon: Monitor, key: "desktopApp" },
+      { icon: Send, key: "messagingChannels" },
+      { icon: Share2, key: "socialPosting" },
+    ],
   },
   {
     status: "future",

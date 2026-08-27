@@ -59,12 +59,16 @@ export async function BuildModulePage({
   const isAdmin = isAdminEmail(user.email);
   const planSlug = await resolveEffectivePlanSlug(user);
 
-  if (!isAdmin && config.minPlanSlug && !planMeetsMinimum(planSlug, config.minPlanSlug)) {
+  if (
+    !isAdmin &&
+    config.minPlanSlug &&
+    !planMeetsMinimum(planSlug, config.minPlanSlug)
+  ) {
     const requiredPlan = getPlan(config.minPlanSlug);
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={icon} title={title} />
+          <PageHeader icon={icon} title={title} helpKey="help.trackingModule" />
           <UpgradeRequired
             featureName={title}
             planName={requiredPlan?.name ?? config.minPlanSlug}
@@ -88,10 +92,11 @@ export async function BuildModulePage({
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={icon} title={title} />
+        <PageHeader icon={icon} title={title} helpKey="help.trackingModule" />
 
-
-        {error && <ErrorMessage detail={`loading ${config.table}: ${error.message}`} />}
+        {error && (
+          <ErrorMessage detail={`loading ${config.table}: ${error.message}`} />
+        )}
 
         <GenericList
           module={config}

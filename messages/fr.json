@@ -1323,7 +1323,7 @@
       "badgeCurated": "Intégré",
       "badgeCommunity": "Partagé",
       "badgeMine": "Le vôtre",
-      "usedTimes": "utilisé {count} fois",
+      "usedTimes": "{count, plural, =0 {pas encore utilisé} one {utilisé une fois} other {utilisé # fois}}",
       "useThis": "Utiliser ce modèle",
       "subjectLabel": "Sur quoi doit-il porter ?",
       "subjectHelp": "Le modèle fait le travail ; ceci est ce sur quoi il le fait.",

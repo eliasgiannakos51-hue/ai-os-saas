@@ -1323,7 +1323,7 @@
       "badgeCurated": "標準",
       "badgeCommunity": "共有",
       "badgeMine": "あなたの",
-      "usedTimes": "{count} 回使用",
+      "usedTimes": "{count, plural, =0 {まだ使われていません} other {# 回使用}}",
       "useThis": "このテンプレートを使う",
       "subjectLabel": "何についてですか？",
       "subjectHelp": "作業はテンプレートが行います。ここに書くのは、その対象です。",

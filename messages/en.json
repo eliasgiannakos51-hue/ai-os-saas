@@ -1323,7 +1323,7 @@
       "badgeCurated": "Built in",
       "badgeCommunity": "Shared",
       "badgeMine": "Yours",
-      "usedTimes": "used {count} times",
+      "usedTimes": "{count, plural, =0 {not used yet} one {used once} other {used # times}}",
       "useThis": "Use this template",
       "subjectLabel": "What should it be about?",
       "subjectHelp": "The template does the work; this is the thing it does it on.",

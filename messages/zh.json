@@ -1323,7 +1323,7 @@
       "badgeCurated": "内置",
       "badgeCommunity": "已分享",
       "badgeMine": "你的",
-      "usedTimes": "已使用 {count} 次",
+      "usedTimes": "{count, plural, =0 {尚未使用} other {已使用 # 次}}",
       "useThis": "使用此模板",
       "subjectLabel": "关于什么？",
       "subjectHelp": "模板负责工作，这里填写它要处理的对象。",

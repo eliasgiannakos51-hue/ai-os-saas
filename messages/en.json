@@ -2825,6 +2825,31 @@
       "is": "Your account: the plan you are on, the credits you hold, and everything you have logged.",
       "does": "Change your plan, buy credits, set the language and theme, name the assistant, and download every record in the account as one file.",
       "doesNot": "It does not hold your records — each module keeps its own. And Delete account is not a way to clear them and start again: it ends the account, takes everything with it, and there is no undo. Export first."
+    },
+    "overview": {
+      "is": "A summary of what you have logged, and one thing to do next.",
+      "does": "Reads your own entries across the modules and shows a health score, what changed recently, and a suggested next step.",
+      "doesNot": "It does not connect to your bank, your CRM or your inbox. Every figure here comes from something you or your agents put in — so an empty week really is empty, not a loading problem."
+    },
+    "chat": {
+      "is": "The assistant, with the web and your connected accounts available to it.",
+      "does": "Answers, drafts and explains. It can search the web, and search the integrations you have connected, so the answer comes from real sources rather than memory.",
+      "doesNot": "It does not change anything in your account. It has no tool that writes, so nothing you discuss here exists as a record until you create it. Free messages get no search at all and see less of the conversation."
+    },
+    "create": {
+      "is": "One sentence in, the right thing out.",
+      "does": "You describe what you want in your own words; the studio works out whether it is a module entry, a website, a mission, an automation, an agent or a document, and makes it.",
+      "doesNot": "It does not silently guess. When it cannot tell what you meant, or cannot build the thing you asked for, it says so rather than producing the nearest other kind — which is what it used to do with agents."
+    },
+    "costs": {
+      "is": "What the AI actually cost, for the account owner.",
+      "does": "Shows measured provider spend by feature and by day, from the same aggregates the cost alerts read — so the dashboard and the alerts cannot disagree.",
+      "doesNot": "It is not your credit balance and not an invoice. It is the operator's view of real cost, visible only to the owner; what you are charged is on the Billing page."
+    },
+    "trackingModule": {
+      "is": "A notebook for this kind of work — not a generator.",
+      "does": "Keeps rows you type yourself: what you are planning, what you already did, and how it went. You can link entries to other modules and search across all of them.",
+      "doesNot": "Nothing on this page is produced by AI. It does not make the website, the image, the video, the deck or the campaign — it records the ones you make elsewhere. The Website Builder and Create Studio are where things get built."
     }
   },
   "helpCentre": {

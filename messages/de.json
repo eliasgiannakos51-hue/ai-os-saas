@@ -2825,6 +2825,31 @@
       "is": "Dein Konto: dein Tarif, deine verbleibenden Credits und alles, was du erfasst hast.",
       "does": "Tarif wechseln, Credits kaufen, Sprache und Design festlegen, dem Assistenten einen Namen geben und jeden Datensatz des Kontos als eine Datei herunterladen.",
       "doesNot": "Deine Datensätze liegen nicht hier — jedes Modul verwaltet seine eigenen. Und Konto löschen ist kein Weg, sie zu bereinigen und neu anzufangen: es beendet das Konto, nimmt alles mit, und es gibt kein Zurück. Vorher exportieren."
+    },
+    "overview": {
+      "is": "Eine Übersicht dessen, was Sie erfasst haben — und ein nächster Schritt.",
+      "does": "Liest Ihre eigenen Einträge aus allen Modulen und zeigt einen Health-Score, die jüngsten Änderungen und einen Vorschlag, was als Nächstes zu tun ist.",
+      "doesNot": "Es verbindet sich nicht mit Ihrer Bank, Ihrem CRM oder Ihrem Postfach. Jede Zahl hier stammt aus etwas, das Sie oder Ihre Agenten eingetragen haben — eine leere Woche ist also wirklich leer und kein Ladeproblem."
+    },
+    "chat": {
+      "is": "Der Assistent — mit Zugriff auf das Web und Ihre verbundenen Konten.",
+      "does": "Antwortet, entwirft und erklärt. Er kann im Web suchen und in den verbundenen Integrationen, damit die Antwort aus echten Quellen kommt und nicht aus dem Gedächtnis.",
+      "doesNot": "Er ändert nichts in Ihrem Konto. Er hat kein Werkzeug, das schreibt — was Sie hier besprechen, existiert erst als Eintrag, wenn Sie es anlegen. Kostenlose Nachrichten haben gar keine Suche und sehen weniger vom Gespräch."
+    },
+    "create": {
+      "is": "Ein Satz hinein, das Richtige heraus.",
+      "does": "Sie beschreiben in eigenen Worten, was Sie wollen; das Studio erkennt, ob es ein Moduleintrag, eine Website, eine Mission, eine Automatisierung, ein Agent oder ein Dokument ist — und baut es.",
+      "doesNot": "Es rät nicht stillschweigend. Wenn es Sie nicht versteht oder das Gewünschte nicht bauen kann, sagt es das, statt die nächstähnliche Art zu erzeugen — genau das tat es früher bei Agenten."
+    },
+    "costs": {
+      "is": "Was die KI wirklich gekostet hat — für den Kontoinhaber.",
+      "does": "Zeigt gemessene Anbieterkosten nach Funktion und Tag, aus denselben Aggregaten, die auch die Kostenwarnungen lesen — Dashboard und Warnungen können sich also nicht widersprechen.",
+      "doesNot": "Das ist nicht Ihr Guthaben und keine Rechnung. Es ist die Betreibersicht auf die echten Kosten, nur für den Inhaber sichtbar; was Ihnen berechnet wird, steht unter Abrechnung."
+    },
+    "trackingModule": {
+      "is": "Ein Notizbuch für diese Art Arbeit — kein Generator.",
+      "does": "Hält Zeilen fest, die Sie selbst eintragen: was Sie planen, was Sie schon getan haben und wie es lief. Einträge lassen sich mit anderen Modulen verknüpfen und modulübergreifend durchsuchen.",
+      "doesNot": "Nichts auf dieser Seite wird von der KI erzeugt. Sie baut weder die Website noch das Bild, das Video, die Präsentation oder die Kampagne — sie hält fest, was Sie anderswo erstellen. Gebaut wird im Website Builder und im Create Studio."
     }
   },
   "helpCentre": {

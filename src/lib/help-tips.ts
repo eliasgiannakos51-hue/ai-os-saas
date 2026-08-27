@@ -116,7 +116,8 @@ export const HELP_TIPS: HelpTip[] = [
     // remembers about me". It is a search across the module tables and
     // holds no conversation at all. This one caught me out while writing
     // its own empty state, which is the best possible argument for it.
-    corrects: "that this stores your chat history or anything the AI decided to keep",
+    corrects:
+      "that this stores your chat history or anything the AI decided to keep",
   },
   {
     id: "mission",
@@ -131,7 +132,8 @@ export const HELP_TIPS: HelpTip[] = [
     file: "src/app/dashboard/integrations/page.tsx",
     keyPrefix: "help.integrations",
     // providers.ts: gmail "read", google_drive "read", slack "read_write".
-    corrects: "that connecting an account lets the AI write, send or delete in it",
+    corrects:
+      "that connecting an account lets the AI write, send or delete in it",
   },
   {
     id: "team",
@@ -151,6 +153,27 @@ export const HELP_TIPS: HelpTip[] = [
     file: "src/app/dashboard/favorites/page.tsx",
     keyPrefix: "help.favorites",
     corrects: "that starring something copies or moves it",
+  },
+  {
+    // ONE ENTRY, SIX PAGES. Apps, Images, Videos, Website plans, Campaigns
+    // and Presentations all render through BuildModulePage, so the "?" is
+    // attached there rather than six times. Their file is the one that
+    // declares them logs: build-modules.ts says every entry in it "is a
+    // LOG: a table of rows the user types by hand, with no AI call anywhere
+    // in it" — and "Images" reads as a generator to everybody who has not
+    // read that file.
+    id: "trackingModule",
+    file: "src/components/modules/build-module-page.tsx",
+    keyPrefix: "help.trackingModule",
+    corrects:
+      "that a page called Images, Videos or Presentations generates them",
+  },
+  {
+    id: "costs",
+    file: "src/app/dashboard/costs/page.tsx",
+    keyPrefix: "help.costs",
+    corrects:
+      "that this is your credit balance rather than the operator's view of real provider cost",
   },
   {
     id: "marketplace",

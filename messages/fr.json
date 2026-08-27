@@ -2825,6 +2825,31 @@
       "is": "Votre compte : votre offre, les crédits qu'il vous reste et tout ce que vous avez consigné.",
       "does": "Changez d'offre, achetez des crédits, choisissez la langue et le thème, nommez l'assistant et téléchargez chaque enregistrement du compte dans un seul fichier.",
       "doesNot": "Vos enregistrements ne sont pas ici : chaque module garde les siens. Et Supprimer le compte n'est pas une façon de faire le ménage et de repartir de zéro : cela met fin au compte, emporte tout avec lui, et rien ne peut être annulé. Exportez d'abord."
+    },
+    "overview": {
+      "is": "Un résumé de ce que vous avez consigné, et une chose à faire ensuite.",
+      "does": "Lit vos propres entrées dans tous les modules et affiche un score de santé, ce qui a changé récemment et une prochaine étape suggérée.",
+      "doesNot": "Il ne se connecte ni à votre banque, ni à votre CRM, ni à votre messagerie. Chaque chiffre vient de ce que vous ou vos agents avez saisi — une semaine vide est donc vraiment vide, ce n'est pas un chargement."
+    },
+    "chat": {
+      "is": "L'assistant, avec le web et vos comptes connectés à sa disposition.",
+      "does": "Répond, rédige et explique. Il peut chercher sur le web et dans les intégrations que vous avez connectées, pour que la réponse vienne de sources réelles et non de sa mémoire.",
+      "doesNot": "Il ne modifie rien dans votre compte. Il n'a aucun outil qui écrit : ce dont vous parlez ici n'existe comme enregistrement qu'une fois que vous le créez. Les messages gratuits n'ont aucune recherche et voient moins de la conversation."
+    },
+    "create": {
+      "is": "Une phrase en entrée, la bonne chose en sortie.",
+      "does": "Vous décrivez ce que vous voulez avec vos mots ; le studio détermine s'il s'agit d'une entrée de module, d'un site, d'une mission, d'une automatisation, d'un agent ou d'un document, et le crée.",
+      "doesNot": "Il ne devine pas en silence. S'il ne comprend pas, ou ne peut pas construire ce que vous demandez, il le dit au lieu de produire le type le plus proche — ce qu'il faisait auparavant avec les agents."
+    },
+    "costs": {
+      "is": "Ce que l'IA a réellement coûté, pour le propriétaire du compte.",
+      "does": "Affiche la dépense fournisseur mesurée par fonctionnalité et par jour, à partir des mêmes agrégats que lisent les alertes de coût — le tableau de bord et les alertes ne peuvent donc pas diverger.",
+      "doesNot": "Ce n'est pas votre solde de crédits ni une facture. C'est la vue de l'exploitant sur le coût réel, visible du seul propriétaire ; ce qui vous est facturé se trouve dans Facturation."
+    },
+    "trackingModule": {
+      "is": "Un carnet pour ce type de travail — pas un générateur.",
+      "does": "Conserve des lignes que vous saisissez : ce que vous prévoyez, ce que vous avez déjà fait, et comment cela s'est passé. Vous pouvez relier des entrées à d'autres modules et chercher dans l'ensemble.",
+      "doesNot": "Rien sur cette page n'est produit par l'IA. Elle ne fabrique ni le site, ni l'image, ni la vidéo, ni la présentation, ni la campagne : elle consigne ceux que vous créez ailleurs. La création se fait dans le Website Builder et Create Studio."
     }
   },
   "helpCentre": {

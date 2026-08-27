@@ -2825,6 +2825,31 @@
       "is": "Tu cuenta: el plan que tienes, los créditos que te quedan y todo lo que has registrado.",
       "does": "Cambia de plan, compra créditos, elige idioma y tema, pon nombre al asistente y descarga cada registro de la cuenta en un solo archivo.",
       "doesNot": "No guarda aquí tus registros: cada módulo guarda los suyos. Y Eliminar cuenta no es una forma de limpiarlos y empezar de cero: termina la cuenta, se lleva todo con ella y no se puede deshacer. Exporta antes."
+    },
+    "overview": {
+      "is": "Un resumen de lo que has registrado, y una cosa que hacer a continuación.",
+      "does": "Lee tus propias entradas en todos los módulos y muestra una puntuación de salud, lo que ha cambiado y un siguiente paso sugerido.",
+      "doesNot": "No se conecta a tu banco, tu CRM ni tu correo. Cada cifra viene de algo que tú o tus agentes habéis introducido, así que una semana vacía está realmente vacía: no es que esté cargando."
+    },
+    "chat": {
+      "is": "El asistente, con la web y tus cuentas conectadas a su disposición.",
+      "does": "Responde, redacta y explica. Puede buscar en la web y en las integraciones que hayas conectado, para que la respuesta venga de fuentes reales y no de la memoria.",
+      "doesNot": "No cambia nada en tu cuenta. No tiene ninguna herramienta que escriba, así que lo que hablas aquí no existe como registro hasta que lo crees. Los mensajes gratis no tienen búsqueda y ven menos conversación."
+    },
+    "create": {
+      "is": "Una frase dentro, la cosa correcta fuera.",
+      "does": "Describes con tus palabras lo que quieres; el estudio averigua si es una entrada de módulo, un sitio web, una misión, una automatización, un agente o un documento, y lo crea.",
+      "doesNot": "No adivina en silencio. Cuando no entiende qué querías, o no puede construir lo que pediste, lo dice en vez de producir el tipo más parecido — que es justo lo que hacía antes con los agentes."
+    },
+    "costs": {
+      "is": "Lo que la IA costó de verdad, para el propietario de la cuenta.",
+      "does": "Muestra el gasto medido del proveedor por función y por día, desde los mismos agregados que leen las alertas de coste, para que el panel y las alertas no puedan discrepar.",
+      "doesNot": "No es tu saldo de créditos ni una factura. Es la vista del operador sobre el coste real, visible solo para el propietario; lo que se te cobra está en Facturación."
+    },
+    "trackingModule": {
+      "is": "Un cuaderno para este tipo de trabajo, no un generador.",
+      "does": "Guarda filas que escribes tú: lo que planeas, lo que ya hiciste y cómo fue. Puedes enlazar entradas con otros módulos y buscar en todos.",
+      "doesNot": "Nada de esta página lo produce la IA. No crea el sitio, la imagen, el vídeo, la presentación ni la campaña: registra los que haces en otro sitio. Se construye en el Website Builder y en Create Studio."
     }
   },
   "helpCentre": {

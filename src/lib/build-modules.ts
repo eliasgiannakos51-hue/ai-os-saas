@@ -39,7 +39,23 @@ export const BUILD_MODULES: ModuleConfig[] = [
     titleKey: "sidebar.items.websites",
     table: "ai_websites",
     headlineKey: "name",
-    creditCost: 100,
+    // NO creditCost. It was 100 — EUR 2.00 on Starter, a tenth of that
+    // plan's entire monthly allowance — charged for inserting a row the
+    // user typed by hand. The header of this file says what every entry in
+    // it is: "a table of rows the user types by hand, with no AI call
+    // anywhere in it", and scripts/tests/sidebar-naming.test.mjs proves
+    // that mechanically for every slug here. Nothing was generated,
+    // nothing was spent on the user's behalf, and the form never named a
+    // price before the click.
+    //
+    // The number was almost certainly written for the AI generation the
+    // sidebar hint used to promise ("Describe an app and get a real one
+    // built"), which does not exist. When it does, it charges the way
+    // every other AI route in this app charges — reserve against an
+    // estimate, settle against real usage — not a flat fee for an INSERT.
+    //
+    // minPlanSlug stays: which plans may open the page is a product
+    // decision, unrelated to what a row costs.
     minPlanSlug: "starter",
     fields: [
       { key: "name", labelKey: "moduleData.fields.name", type: "text", required: true },
@@ -61,7 +77,9 @@ export const BUILD_MODULES: ModuleConfig[] = [
     titleKey: "sidebar.items.apps",
     table: "ai_apps",
     headlineKey: "name",
-    creditCost: 300,
+    // NO creditCost — same as `websites` above, and worse: 300 credits is
+    // EUR 5.00 on Growth, a tenth of that plan's month, for one hand-typed
+    // note. See the note on `websites`.
     minPlanSlug: "growth",
     fields: [
       { key: "name", labelKey: "moduleData.fields.name", type: "text", required: true },

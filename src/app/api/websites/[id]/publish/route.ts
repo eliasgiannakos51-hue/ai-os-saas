@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
@@ -25,7 +25,7 @@ import {
   MAX_SITE_VERSIONS,
   MAX_LIVE_EDITS_PER_SITE_PER_DAY,
 } from "@/lib/publishing/publish-limits";
-import { getSiteUrl } from "@/lib/site-url";
+import { getSiteUrl, getSiteHostname } from "@/lib/site-url";
 import type { UserWebsite } from "@/types/user-website";
 import { normalisePages } from "@/lib/publishing/website-pages";
 
@@ -278,7 +278,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       html: makeGeneratedLinksSafe(stripDisallowedExternalScripts(pg.html), siteContext).html,
     }));
     const issues = [html, ...safePages.map((pg) => pg.html)].flatMap((doc) =>
-      scanWebsiteHtmlForSecurityIssues(doc)
+      scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined })
     );
     if (issues.length > 0) {
       const described = issues.map(describeSecurityScanIssue);

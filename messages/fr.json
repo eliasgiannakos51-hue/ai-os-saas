@@ -64,7 +64,13 @@
     "creditsUnlimited": "Illimités",
     "whatIsThis": "Qu'est-ce que c'est ?",
     "examplesLabel": "Essayez :",
-    "newMessagesBelow": "Nouveau message en bas"
+    "newMessagesBelow": "Nouveau message en bas",
+    "downloadPdf": {
+      "label": "Télécharger le PDF",
+      "preparing": "Préparation…",
+      "failed": "Le PDF n’a pas pu être créé",
+      "notReady": "Ce n’est pas encore terminé"
+    }
   },
   "sidebar": {
     "groups": {
@@ -127,13 +133,6 @@
       "formSubmissions": "Envois de formulaires",
       "routing": "Routage des modèles"
     },
-    "groupHints": {
-      "create": "Générez un site, planifiez un objectif, rédigez un document.",
-      "myBusiness": "Argent, clients, produits et comment ils se portent.",
-      "operations": "Travail récurrent et flux en plusieurs étapes.",
-      "insights": "Revoyez ce que vous avez fait et ce que l'IA retient.",
-      "marketplace": "Partagez et découvrez des configurations — pas encore ouvert."
-    },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
       "create": "Décrivez ce que vous voulez en une phrase ; il déduit le reste.",
@@ -163,12 +162,12 @@
       "reflection": "Un résumé hebdomadaire de vos progrès.",
       "memory": "Ce que l'IA retient de vous.",
       "favorites": "Tout ce que vous avez mis en favori.",
-      "marketplace": "Partagez et découvrez des configurations — pas encore ouvert.",
+      "marketplace": "Partagez la forme d'un agent comme modèle et partez de celui qu'une autre personne a partagé.",
       "team": "Invitez des personnes dans votre espace.",
-      "apps": "Décrivez une appli et obtenez-la vraiment. Pas encore prêt.",
-      "images": "Générez des images à partir d'une description. Pas encore prêt.",
-      "videos": "Générez une vidéo à partir d'une description. Pas encore prêt.",
-      "coding": "Décrivez ce qu'il vous faut et obtenez du code qui marche. Pas encore prêt.",
+      "apps": "Suivez les applis que vous préparez ou avez déjà livrées. Ne les construit pas.",
+      "images": "Suivez les images que vous préparez ou avez déjà faites. Ne les génère pas.",
+      "videos": "Suivez les vidéos que vous préparez ou avez déjà faites. Ne les génère pas.",
+      "coding": "Écrivez, expliquez, corrigez, convertissez et testez des extraits de code. N'exécute pas de code et n'ouvre pas de dépôt.",
       "presentations": "Suivez les présentations que vous préparez ou avez déjà faites. Ne crée pas de diapositives.",
       "home": "Votre tableau de bord — activité, statistiques et actions rapides.",
       "settings": "Compte, facturation, langue et préférences.",
@@ -180,7 +179,6 @@
       "affiliate": "Votre lien de parrainage, vos gains et comment vous êtes payé.",
       "formSubmissions": "Tout ce que les visiteurs ont envoyé via un formulaire sur vos sites publiés"
     },
-    "comingSoon": "Bientôt",
     "closeMenu": "Fermer le menu"
   },
   "landing": {
@@ -1314,13 +1312,29 @@
     },
     "marketplace": {
       "title": "Place de marché",
-      "description": "Achetez et vendez des agents, automatisations et modèles — bientôt disponible.",
-      "comingSoon": "Bientôt disponible",
-      "publishButton": "Publier un Modèle",
+      "description": "Des modèles d’agents créés et partagés par d’autres. Gratuits — rien ne s’achète ni ne se vend ici.",
       "empty": {
-        "title": "La Marketplace n'est pas encore ouverte",
-        "why": "L'idée est de permettre de partager les agents, modèles de sites et workflows créés. Rien n'est actif ici : le bouton ci-dessous est désactivé parce que la fonctionnalité n'existe pas encore, pas à cause de votre formule."
-      }
+        "title": "Pas encore de modèles",
+        "why": "Les modèles apparaissent ici dès que quelqu’un en partage un depuis l’écran Agents. Partager prend un agent qui fonctionne déjà et le réduit à une forme réutilisable."
+      },
+      "searchPlaceholder": "Rechercher des modèles",
+      "counted": "{shown} sur {total} affichés",
+      "noMatches": "Rien ne correspond à « {query} ».",
+      "badgeCurated": "Intégré",
+      "badgeCommunity": "Partagé",
+      "badgeMine": "Le vôtre",
+      "usedTimes": "utilisé {count} fois",
+      "useThis": "Utiliser ce modèle",
+      "subjectLabel": "Sur quoi doit-il porter ?",
+      "subjectHelp": "Le modèle fait le travail ; ceci est ce sur quoi il le fait.",
+      "subjectPlaceholder": "nos trois plus gros concurrents",
+      "createFromTemplate": "Créer l’agent",
+      "adopting": "Création…",
+      "cancel": "Annuler",
+      "adopted": "Agent créé pour « {subject} ».",
+      "adoptError": "L’agent n’a pas pu être créé.",
+      "subjectRequired": "Dites d’abord sur quoi il doit porter.",
+      "loadError": "Les modèles n’ont pas pu être chargés."
     },
     "automation": {
       "realizeSectionTitle": "Concrétiser une idée",
@@ -1667,7 +1681,11 @@
           "contains_numbers": "La tâche contient un long nombre — un téléphone, un compte ou une référence. Retirez-le.",
           "too_short": "Ce qu'il reste est trop court pour aider quiconque.",
           "too_long": "Cette tâche est trop longue à partager."
-        }
+        },
+        "withdraw": "La retirer",
+        "withdrawing": "Retrait...",
+        "withdrawn": "Retiré. Ce n'est plus dans la bibliothèque.",
+        "withdrawFailed": "Impossible de retirer. C'est toujours partagé."
       }
     },
     "publishing": {

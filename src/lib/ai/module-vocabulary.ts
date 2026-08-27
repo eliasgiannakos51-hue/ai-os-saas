@@ -2,12 +2,12 @@ import "server-only";
 import en from "../../../messages/en.json";
 import el from "../../../messages/el.json";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
-import { buildModuleVocabulary, type ModuleVocabulary } from "@/lib/ai/context-relevance";
+import { buildModuleVocabulary, type ModuleVocabulary } from "@/lib/ai/module-relevance";
 
 /**
  * The module vocabulary, built once per process.
  *
- * Separate from lib/ai/context-relevance.ts so that file stays pure and
+ * Separate from lib/ai/module-relevance.ts so that file stays pure and
  * loadable by the build-gate harness — the same split
  * lib/chat/memory-policy.ts made from lib/chat/memory.ts, for the same
  * reason: the rule belongs inside the gate, the catalogues do not.

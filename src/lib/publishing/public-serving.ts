@@ -1,5 +1,6 @@
 import "server-only";
 import { createHash } from "node:crypto";
+import { ALLOWED_IFRAME_EMBEDS } from "@/lib/website-html-security-scan";
 
 // Everything the public site route needs that is not a database call.
 //
@@ -30,8 +31,13 @@ import { createHash } from "node:crypto";
 //     SVGs and real photos from Unsplash. (There is no picsum fallback any
 //     more — an unresolved photo placeholder has its <img> removed rather
 //     than filled with a random image; see lib/website-image-resolver.ts.)
-//   frame-src is the same allowlist the static scan enforces (maps,
-//     video), so the two cannot disagree.
+//   frame-src is BUILT FROM the static scan's own allowlist below, so the
+//     two cannot disagree. They used to be two hand-written lists with
+//     this same comment claiming they could not — and they did: the scan
+//     allowed "youtube.com" with no subdomain, which this directive's
+//     https://www.youtube.com blocks. A page passed the scan, got
+//     published, and then failed to render its own video with no error
+//     anywhere. The comment is true now because there is one list.
 //   form-action is restricted to self, so a page cannot POST a visitor's
 //     details to a third party — the one thing a phishing page most wants
 //     to do, and the reason this is not just 'default-src'.
@@ -47,7 +53,7 @@ const CSP_DIRECTIVES = [
   "media-src 'self' https:",
   "connect-src 'self'",
   "form-action 'self'",
-  "frame-src https://www.google.com https://maps.google.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
+  `frame-src ${ALLOWED_IFRAME_EMBEDS.map((embed) => `https://${embed.host}`).join(" ")}`,
   "frame-ancestors 'none'",
   "base-uri 'none'",
   "object-src 'none'",

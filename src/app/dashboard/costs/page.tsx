@@ -5,7 +5,7 @@ import { Coins } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { MARGIN_TARGET } from "@/lib/billing/margin-report";
 import { monthlyRecurringRevenue, type MrrInputRow } from "@/lib/billing/monthly-revenue";
 import { CostDashboard, type CostDashboardData } from "@/components/costs/cost-dashboard";

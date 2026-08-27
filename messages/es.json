@@ -64,7 +64,13 @@
     "creditsUnlimited": "Ilimitados",
     "whatIsThis": "¿Qué es esto?",
     "examplesLabel": "Prueba:",
-    "newMessagesBelow": "Mensaje nuevo abajo"
+    "newMessagesBelow": "Mensaje nuevo abajo",
+    "downloadPdf": {
+      "label": "Descargar PDF",
+      "preparing": "Preparando…",
+      "failed": "No se pudo crear el PDF",
+      "notReady": "Todavía no ha terminado"
+    }
   },
   "sidebar": {
     "groups": {
@@ -127,13 +133,6 @@
       "formSubmissions": "Envíos de formularios",
       "routing": "Enrutado de modelos"
     },
-    "groupHints": {
-      "create": "Genera un sitio, planifica un objetivo, escribe un documento.",
-      "myBusiness": "Dinero, clientes, productos y cómo van.",
-      "operations": "Trabajo recurrente y los flujos de varios pasos.",
-      "insights": "Mira lo que has hecho y lo que la IA recuerda.",
-      "marketplace": "Comparte y descubre configuraciones — aún no está abierto."
-    },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
       "create": "Describe lo que quieres en una frase; el resto lo deduce.",
@@ -163,12 +162,12 @@
       "reflection": "Un resumen semanal de tu progreso.",
       "memory": "Lo que la IA recuerda de ti.",
       "favorites": "Todo lo que has marcado.",
-      "marketplace": "Comparte y descubre configuraciones — aún no está abierto.",
+      "marketplace": "Comparte la forma de un agente como plantilla y empieza desde una que compartió otra persona.",
       "team": "Invita gente a tu espacio.",
-      "apps": "Describe una app y obtén una real. Todavía no está listo.",
-      "images": "Genera imágenes a partir de una descripción. Todavía no está listo.",
-      "videos": "Genera vídeo a partir de una descripción. Todavía no está listo.",
-      "coding": "Describe lo que necesitas y obtén código que funciona. Todavía no está listo.",
+      "apps": "Lleva el control de las apps que planeas o ya has lanzado. No las construye.",
+      "images": "Lleva el control de las imágenes que planeas o ya has hecho. No las genera.",
+      "videos": "Lleva el control de los vídeos que planeas o ya has hecho. No los genera.",
+      "coding": "Escribe, explica, corrige, convierte y prueba fragmentos de código. No ejecuta código ni abre un repositorio.",
       "presentations": "Lleva el control de las presentaciones que planeas o ya has hecho. No crea diapositivas.",
       "home": "Tu panel: actividad, estadísticas y acciones rápidas.",
       "settings": "Cuenta, facturación, idioma y preferencias.",
@@ -180,7 +179,6 @@
       "affiliate": "Tu enlace de referido, lo que has ganado y cómo cobras.",
       "formSubmissions": "Todo lo que los visitantes enviaron por un formulario en tus sitios publicados"
     },
-    "comingSoon": "Próximamente",
     "closeMenu": "Cerrar el menú"
   },
   "landing": {
@@ -1314,13 +1312,29 @@
     },
     "marketplace": {
       "title": "Mercado",
-      "description": "Compra y vende agentes, automatizaciones y plantillas — próximamente.",
-      "comingSoon": "Próximamente",
-      "publishButton": "Publicar una Plantilla",
+      "description": "Plantillas de agentes creadas y compartidas por otras personas. Gratis: aquí no se compra ni se vende nada.",
       "empty": {
-        "title": "El Marketplace aún no está abierto",
-        "why": "La idea es que la gente comparta los agentes, plantillas de sitios y flujos que ha creado. Aquí no hay nada activo: el botón de abajo está desactivado porque la función todavía no existe, no por su plan."
-      }
+        "title": "Todavía no hay plantillas",
+        "why": "Las plantillas aparecen aquí cuando alguien comparte una desde la pantalla de Agentes. Compartir toma un agente que ya funciona y lo reduce a una forma reutilizable."
+      },
+      "searchPlaceholder": "Buscar plantillas",
+      "counted": "Mostrando {shown} de {total}",
+      "noMatches": "Nada coincide con «{query}».",
+      "badgeCurated": "Incluida",
+      "badgeCommunity": "Compartida",
+      "badgeMine": "Tuya",
+      "usedTimes": "usada {count} veces",
+      "useThis": "Usar esta plantilla",
+      "subjectLabel": "¿Sobre qué debe tratar?",
+      "subjectHelp": "La plantilla hace el trabajo; esto es aquello sobre lo que lo hace.",
+      "subjectPlaceholder": "nuestros tres mayores competidores",
+      "createFromTemplate": "Crear el agente",
+      "adopting": "Creando…",
+      "cancel": "Cancelar",
+      "adopted": "Agente creado para «{subject}».",
+      "adoptError": "No se pudo crear el agente.",
+      "subjectRequired": "Di primero sobre qué debe tratar.",
+      "loadError": "No se pudieron cargar las plantillas."
     },
     "automation": {
       "realizeSectionTitle": "Hacer realidad una idea",
@@ -1667,7 +1681,11 @@
           "contains_numbers": "La tarea contiene un número largo: un teléfono, una cuenta o una referencia. Quítalo.",
           "too_short": "Lo que queda es demasiado corto para servirle a nadie.",
           "too_long": "Esa tarea es demasiado larga para compartirla."
-        }
+        },
+        "withdraw": "Retirarla",
+        "withdrawing": "Retirando...",
+        "withdrawn": "Retirada. Ya no está en la biblioteca.",
+        "withdrawFailed": "No se pudo retirar. Sigue compartida."
       }
     },
     "publishing": {

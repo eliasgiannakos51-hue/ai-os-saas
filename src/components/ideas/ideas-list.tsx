@@ -6,7 +6,7 @@ import { MODULE_ICONS } from "@/lib/module-icons";
 import type { Idea } from "@/types/ideas";
 import type { LinkedEntity } from "@/lib/entity-links";
 import { IdeaRow } from "@/components/ideas/idea-row";
-import { toCSV, downloadCSV, todayForFilename } from "@/lib/csv";
+import { toCSV, downloadCSV, todayForFilename } from "@/lib/download/table-csv";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";

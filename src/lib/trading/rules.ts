@@ -173,7 +173,29 @@ export function parseRulesFromText(text: string): ParsedRule[] {
 
   // Sentences, so "Max 2% risk. Only London." yields two rules and the
   // matched text of each is the clause it came from.
-  const clauses = text.split(/[.;\n·]+/).map((c) => c.trim()).filter(Boolean);
+  //
+  // A FULL STOP BETWEEN TWO DIGITS IS A DECIMAL POINT, NOT A SENTENCE END,
+  // and splitting on it did not merely lose rules — it produced WRONG
+  // NUMBERS in a risk-control feature. Measured, before this line was
+  // guarded:
+  //
+  //     "max 2.5% risk"        -> max_risk_percent { percent: 5 }
+  //     "max daily loss 1500.50" -> max_daily_loss { amount: 1500 }
+  //     "max size 0.5 lots"    -> nothing at all
+  //
+  // The first is the one that matters. "max 2.5% risk" split into
+  // "max 2" and "5% risk"; the second half matched the percent branch on
+  // its own and the rule became FIVE percent — twice the risk the trader
+  // asked for — while the UI showed their own sentence saying 2.5% right
+  // beside it. A rule that silently doubles is worse than a rule that
+  // silently fails.
+  //
+  // `\.(?!\d)` keeps every real sentence break: "risk. Only London" has a
+  // space after the stop, and a trailing "risk." has nothing after it.
+  const clauses = text
+    .split(/[;\n·]+|\.(?!\d)/)
+    .map((c) => c.trim())
+    .filter(Boolean);
 
   for (const clause of clauses) {
     // FOLDED, NOT LOWER-CASED, and the difference is the whole feature in
@@ -234,22 +256,53 @@ export function parseRulesFromText(text: string): ParsedRule[] {
       }
     }
 
-    // "max daily loss 500", "μέγιστη ημερήσια ζημιά 500"
-    const dailyLoss = folded.match(/(?:daily\s*loss|loss\s*per\s*day|ημερησια\s*ζημι\w*|ζημι\w*\s*τη[νσ]?\s*(?:μερα|ημερα))[^\d]*(\d+(?:[.,]\d+)?)/);
+    // "max daily loss 500", "μέγιστη ημερήσια ζημιά 500", "ζημιά την ημέρα 500"
+    //
+    // \w IS ASCII, AND THAT KILLED ONE OF THE TWO GREEK ALTERNATIVES.
+    // JavaScript's \w is [A-Za-z0-9_] — with or without the u flag — so
+    // `ζημι\w*` matches "ζημι" and stops dead at the "ά". In the FIRST
+    // alternative that is harmless: `[^\d]*` then swallows the rest on its
+    // way to the number. In the second it is fatal, because what follows
+    // is `\s*τη[νσ]?`, and neither \w* nor \s* can consume that "α".
+    //
+    // Measured, on the folded text the parser actually sees:
+    //
+    //     ημερησια ζημια 500          -> 500   (first alternative)
+    //     ζημια την ημερα 500         -> NO MATCH
+    //     μεγιστη ζημια την ημερα 500 -> NO MATCH
+    //
+    // So "μέγιστη ζημιά την ημέρα 500" — the ordinary way to say it in
+    // Greek without the word "ημερήσια" — parsed as nothing, and the rule
+    // silently never existed. Same shape as the \bμόνο\b defect twenty
+    // lines above; this is the second place it hid.
+    //
+    // GREEK_WORD is [\p{L}\p{N}_] with the u flag: the letter class the
+    // ASCII \w was standing in for.
+    const dailyLoss = folded.match(
+      /(?:daily\s*loss|loss\s*per\s*day|ημερησια\s*ζημι[\p{L}\p{N}_]*|ζημι[\p{L}\p{N}_]*\s*τη[νσ]?\s*(?:μερα|ημερα))[^\d]*(\d+(?:[.,]\d+)?)/u
+    );
     if (dailyLoss) {
       push(parseRuleParams("max_daily_loss", { amount: num(dailyLoss[1]) }), clause);
       continue;
     }
 
     // "no trade for 30 minutes after a loss"
-    const afterLoss = folded.match(/(\d+)\s*(?:min\w*|λεπτ\w*)[\s\S]{0,30}?(?:after|μετα)[\s\S]{0,20}?(?:loss|ζημι\w*)/);
+    // The same ASCII \w after a Greek stem. These three survive it by
+    // accident — a following [\s\S] or [^\d] happens to swallow what \w*
+    // could not — which is a worse state than being broken, because the
+    // next edit to any of them silently becomes the bug above.
+    const afterLoss = folded.match(
+      /(\d+)\s*(?:min[\p{L}\p{N}_]*|λεπτ[\p{L}\p{N}_]*)[\s\S]{0,30}?(?:after|μετα)[\s\S]{0,20}?(?:loss|ζημι[\p{L}\p{N}_]*)/u
+    );
     if (afterLoss) {
       push(parseRuleParams("no_trade_after_loss", { withinMinutes: Number(afterLoss[1]) }), clause);
       continue;
     }
 
     // "max size 0.5 lots"
-    const size = folded.match(/(?:max|μεγιστ\w*)[^\d]{0,20}(\d+(?:[.,]\d+)?)\s*(?:lots?|contracts?|λοτ\w*)/);
+    const size = folded.match(
+      /(?:max|μεγιστ[\p{L}\p{N}_]*)[^\d]{0,20}(\d+(?:[.,]\d+)?)\s*(?:lots?|contracts?|λοτ[\p{L}\p{N}_]*)/u
+    );
     if (size) {
       push(parseRuleParams("max_position_size", { size: num(size[1]) }), clause);
       continue;

@@ -116,6 +116,7 @@ check(
       return false;
     }
   });
+  check(`the slugs scan found ${slugs.length}`, slugs.length >= 36, "a filter of an empty list is empty, and every check below it would pass");
 
   const trackerPages = slugs.filter((slug) =>
     /BuildModulePage/.test(readFileSync(`${dashboard}/${slug}/page.tsx`, "utf8"))

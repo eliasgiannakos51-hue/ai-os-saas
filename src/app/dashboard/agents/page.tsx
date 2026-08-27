@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import { MODULE_ICONS } from "@/lib/module-icons";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { maxAgentsForPlan, DEFAULT_AGENT_LIMITS } from "@/lib/agents/agent-limits";
 import { agentRunEstimatesByDepth } from "@/lib/agents/execute-agent";
 import { resolveEffectivePlan, getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";

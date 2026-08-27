@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
+import { DownloadPdfButton } from "@/components/ui/download-pdf-button";
 import { EmptyState } from "@/components/empty-state";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useToast } from "@/components/toast/toast-context";
@@ -574,6 +575,13 @@ export function ResearchWorkspace({
             </div>
           )}
 
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Built from `sections` and `sources`, not from the saved
+                document copy: the copy is editable, so a report the user
+                has since pruned would download as the pruned version under
+                the word "report", and the source numbering that the claims
+                cite would not survive the flattening. */}
+            <DownloadPdfButton href={`/api/research/${open.id}/pdf`} fallbackName="research-report" />
           {open.document_id && (
             <Link
               href={`/dashboard/documents/${open.document_id}`}
@@ -583,6 +591,7 @@ export function ResearchWorkspace({
               {t("openDocument")}
             </Link>
           )}
+          </div>
         </section>
       )}
     </div>

@@ -85,6 +85,14 @@ if (!explicit) {
   cleanup = () => pg.stop();
 }
 
+// An optional substring filter, so one suite can be run against a
+// provisioned database without the other fourteen — `npm run test:db --
+// user-metadata`. Without it nothing changes: every suite runs, fail-fast,
+// as before. This exists because the loop below stops at the first failure,
+// so a new suite at the end of the alphabet cannot be exercised at all
+// while anything ahead of it is red.
+const only = process.argv.slice(2).filter((a) => !a.startsWith("-"));
+
 const dbtestDir = path.join(ROOT, "scripts/tests");
 const files = [
   ...readdirSync(dbtestDir)
@@ -98,7 +106,16 @@ const files = [
   // certain about. It is the one file in this repo that reliably gets a
   // real database to run against.
   "scripts/tests/db-migrations.test.mjs",
-];
+].filter((f) => only.length === 0 || only.some((needle) => f.includes(needle)));
+
+if (files.length === 0) {
+  console.error(`No dbtest matches ${JSON.stringify(only)}`);
+  cleanup();
+  process.exit(1);
+}
+if (only.length > 0) {
+  console.log(`(filtered to ${files.length} of the suites by ${JSON.stringify(only)})`);
+}
 
 // Fail-fast, same convention as test:unit/test:integration/test:prod's
 // own shell loops in package.json.

@@ -213,6 +213,60 @@ for (const file of tsFiles) {
     if (values.length >= 2) unions.push({ name: m[1], file: path.relative(ROOT, file), values });
   }
 }
+// ALIASES. `export type AgentDeliveryMethod = DeliveryChannel;` and
+// `export const AGENT_DELIVERY_METHODS: AgentDeliveryMethod[] =
+// DELIVERY_CHANNELS;` are both real, exported, DB-backed names that the two
+// regexes above cannot see, because neither declaration contains a single
+// string literal — the values live one hop away.
+//
+// That is not a cosmetic gap. The alias is what the rest of the app imports:
+// execute-agent.ts, deliver.ts and agent-config.ts all speak in
+// `AgentDeliveryMethod`, never in `DeliveryChannel`. Repointing the alias at
+// a different union is a one-line change that would move every one of those
+// call sites onto a different value set, and an unresolved alias means this
+// file would not notice.
+//
+// Resolved to a fixed point, because `AGENT_DELIVERY_METHODS` resolves
+// through `DELIVERY_CHANNELS`, which is itself resolved in the same pass —
+// a single pass would find one of the two and depend on file order for the
+// other.
+const aliasDecls = [];
+for (const file of tsFiles) {
+  const source = readFileSync(file, "utf8");
+  const code = source
+    .split("\n")
+    .filter((line) => !/^\s*(\/\/|\*)/.test(line))
+    .join("\n");
+  // type X = Y;   (single bare identifier, no literals, no unions)
+  for (const m of code.matchAll(/export\s+type\s+(\w*(?:Status|DeliveryMethod|Channel))\s*=\s*(\w+)\s*;/g)) {
+    aliasDecls.push({ name: m[1], target: m[2], file: path.relative(ROOT, file) });
+  }
+  // const X: T[] = Y;   (bare identifier on the right)
+  for (const m of code.matchAll(
+    /const\s+(\w*(?:STATUSES|METHODS|CHANNELS))\s*(?::[^=]+)?=\s*(\w+)\s*;/g
+  )) {
+    aliasDecls.push({ name: m[1], target: m[2], file: path.relative(ROOT, file) });
+  }
+}
+
+let resolvedAny = true;
+const aliasResolved = [];
+while (resolvedAny) {
+  resolvedAny = false;
+  const byName = new Map(unions.map((u) => [u.name, u]));
+  for (const alias of aliasDecls) {
+    if (byName.has(alias.name)) continue; // already resolved, or declared directly
+    const target = byName.get(alias.target);
+    if (!target) continue;
+    unions.push({ name: alias.name, file: alias.file, values: target.values });
+    aliasResolved.push(`${alias.name} -> ${alias.target}`);
+    resolvedAny = true;
+  }
+}
+if (aliasResolved.length > 0) {
+  console.log(`  ....  resolved ${aliasResolved.length} aliases: ${aliasResolved.join(", ")}`);
+}
+
 console.log(`  ....  found ${unions.length} status unions in TypeScript`);
 
 // Which constraint each union has to satisfy. Explicit, because the link
@@ -277,6 +331,38 @@ for (const union of unions) {
 // but the count is printed so a genuinely new DB-backed status is visible.
 console.log(`  ....  ${unmapped.length} status unions are not DB-backed and were not checked:`);
 for (const u of unmapped) console.log(`          ${u}`);
+
+// THE COMPLETENESS ASSERTION THE COMMENT ABOVE MAPPING PROMISED.
+//
+// It said "The completeness assertion below is what stops this list going
+// stale" — and there was none. Only the console.log above, which nobody
+// reads in CI. So MAPPING could name a constraint that no longer exists,
+// or miss every union in the file, and this file would still print ALL
+// PASS. A comment describing a check that was never written is worse than
+// no comment: it is the reason nobody went looking.
+//
+// Two halves, and both are needed:
+{
+  // 1. THE UNION SCANNER FOUND SOMETHING. Both patterns it uses are
+  //    regexes over source; a rename of `export type ...Status` breaks
+  //    them and every check in section 2 then loops over an empty array.
+  //    Measured today: the scanner finds unions in double figures.
+  check(`the union scanner found status unions (${unions.length})`, unions.length >= 8, true);
+
+  // 2. EVERY MAPPING ENTRY POINTS AT A CONSTRAINT THAT EXISTS. A stale
+  //    key here is silent: `MAPPING[union.name]` simply returns a name
+  //    the SQL does not contain, and the union falls into the "constraint
+  //    exists in SQL" failure — but a mapping entry whose UNION no longer
+  //    exists fails nothing at all, because nothing ever looks it up.
+  const mappedNames = new Set(unions.map((u) => u.name));
+  const deadMappings = Object.keys(MAPPING).filter((name) => !mappedNames.has(name));
+  check("no MAPPING entry names a union that no longer exists", deadMappings, []);
+
+  // 3. AND EVERY MAPPED CONSTRAINT IS A REAL ONE.
+  const knownConstraints = new Set(perFile.keys());
+  const deadConstraints = [...new Set(Object.values(MAPPING))].filter((c) => !knownConstraints.has(c));
+  check("no MAPPING entry names a constraint no migration defines", deadConstraints, []);
+}
 
 // ---------------------------------------------------------------------
 console.log("\n== 3. the flagged path is whole, not just permitted ==");
@@ -352,6 +438,8 @@ console.log("\n== 5. a disabled Publish button explains itself ==");
 
   // In every language, or a Greek user reads an untranslated key.
   const langs = readdirSync(path.join(ROOT, "messages")).filter((f) => f.endsWith(".json"));
+  check(`the langs scan found ${langs.length}`, langs.length >= 10,
+    true);
   const missing = [];
   for (const f of langs) {
     const j = JSON.parse(readFileSync(path.join(ROOT, "messages", f), "utf8"));

@@ -64,7 +64,13 @@
     "creditsUnlimited": "Unlimited",
     "whatIsThis": "What is this?",
     "examplesLabel": "Try:",
-    "newMessagesBelow": "New message below"
+    "newMessagesBelow": "New message below",
+    "downloadPdf": {
+      "label": "Download PDF",
+      "preparing": "Preparing…",
+      "failed": "The PDF could not be created",
+      "notReady": "This is not finished yet"
+    }
   },
   "sidebar": {
     "groups": {
@@ -127,13 +133,6 @@
       "formSubmissions": "Form submissions",
       "routing": "Model routing"
     },
-    "groupHints": {
-      "create": "Generate a site, plan a goal, write a document.",
-      "myBusiness": "Money, customers, products and how they're doing.",
-      "operations": "Recurring work and the multi-step workflows.",
-      "insights": "Look back at what you've done and what the AI remembers.",
-      "marketplace": "Share and discover setups — not open yet."
-    },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
       "create": "Describe what you want in one sentence; it works out the rest.",
@@ -163,12 +162,12 @@
       "reflection": "A weekly summary of your progress.",
       "memory": "What the AI remembers about you.",
       "favorites": "Everything you've starred.",
-      "marketplace": "Share and discover setups — not open yet.",
+      "marketplace": "Share an agent's shape as a template, and start from one someone else shared.",
       "team": "Invite people to your workspace.",
-      "apps": "Describe an app and get a real one built. Not ready yet.",
-      "images": "Generate images from a prompt. Not ready yet.",
-      "videos": "Generate video from a prompt. Not ready yet.",
-      "coding": "Describe what you need and get working code. Not ready yet.",
+      "apps": "Keep track of apps you are planning or have already shipped. It does not build them.",
+      "images": "Keep track of images you are planning or have already made. It does not generate them.",
+      "videos": "Keep track of videos you are planning or have already made. It does not generate them.",
+      "coding": "Write, explain, fix, convert and test snippets of code. It does not run code or open a repository.",
       "presentations": "Keep track of decks you are planning or have already made. It does not create slides.",
       "home": "Your dashboard — activity, stats and quick actions.",
       "settings": "Account, billing, language and preferences.",
@@ -180,7 +179,6 @@
       "affiliate": "Your referral link, what you've earned, and how you get paid.",
       "formSubmissions": "Everything visitors sent through a form on your published sites"
     },
-    "comingSoon": "Coming soon",
     "closeMenu": "Close menu"
   },
   "landing": {
@@ -1314,13 +1312,29 @@
     },
     "marketplace": {
       "title": "Marketplace",
-      "description": "Buy and sell agents, automations, and templates — coming soon.",
-      "comingSoon": "Coming soon",
-      "publishButton": "Publish a Template",
+      "description": "Agent templates people have built and shared. Free — nothing is bought or sold here.",
       "empty": {
-        "title": "The Marketplace is not open yet",
-        "why": "The plan is to let people share the agents, website templates and workflows they have built. Nothing here is live — the button below is disabled because the feature does not exist yet, not because of your plan."
-      }
+        "title": "No templates yet",
+        "why": "Templates appear here once somebody shares one from the Agents screen. Sharing one takes a working agent you already have and strips it down to a reusable shape."
+      },
+      "searchPlaceholder": "Search templates",
+      "counted": "Showing {shown} of {total}",
+      "noMatches": "Nothing matches “{query}”.",
+      "badgeCurated": "Built in",
+      "badgeCommunity": "Shared",
+      "badgeMine": "Yours",
+      "usedTimes": "used {count} times",
+      "useThis": "Use this template",
+      "subjectLabel": "What should it be about?",
+      "subjectHelp": "The template does the work; this is the thing it does it on.",
+      "subjectPlaceholder": "our three biggest competitors",
+      "createFromTemplate": "Create the agent",
+      "adopting": "Creating…",
+      "cancel": "Cancel",
+      "adopted": "Agent created for “{subject}”.",
+      "adoptError": "The agent could not be created.",
+      "subjectRequired": "Say what it should be about first.",
+      "loadError": "The templates could not be loaded."
     },
     "automation": {
       "realizeSectionTitle": "Make an idea real",
@@ -1667,7 +1681,11 @@
           "contains_numbers": "The task contains a long number — a phone, an account or a reference. Remove it before sharing.",
           "too_short": "What is left is too short to help anybody else.",
           "too_long": "That task is too long to share."
-        }
+        },
+        "withdraw": "Withdraw it",
+        "withdrawing": "Withdrawing...",
+        "withdrawn": "Withdrawn. It is no longer in the library.",
+        "withdrawFailed": "That could not be withdrawn. It is still shared."
       }
     },
     "publishing": {

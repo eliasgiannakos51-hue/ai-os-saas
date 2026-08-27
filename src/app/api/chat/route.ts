@@ -11,7 +11,7 @@ import {
   SEARCH_TOOL_NAME,
   MAX_TOOL_ROUNDS,
 } from "@/lib/integrations/chat-tool";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
@@ -50,7 +50,7 @@ import { loadMentorContext } from "@/lib/chat/mentor-context";
 import { loadTradingMentorContext } from "@/lib/chat/trading-mentor-context";
 import { loadProductMentorContext } from "@/lib/chat/product-mentor-context";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
-import { selectRelevantModules, resolveSelectionConfig } from "@/lib/ai/context-relevance";
+import { selectRelevantModules, resolveSelectionConfig } from "@/lib/ai/module-relevance";
 import { loadCodingContextForChat } from "@/lib/ai/cross-module-store";
 import { moduleVocabulary } from "@/lib/ai/module-vocabulary";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
@@ -446,7 +446,7 @@ export async function POST(request: Request) {
     let userContext = "";
     try {
       const fullContext = await getUserFullContext(supabase, user.id);
-      // NARROWING IS OFF BY DEFAULT — see lib/ai/context-relevance.ts.
+      // NARROWING IS OFF BY DEFAULT — see lib/ai/module-relevance.ts.
       //
       // With CONTEXT_RELEVANCE unset (which is every deployment until
       // somebody measures quality) this returns every module and the
@@ -588,7 +588,7 @@ export async function POST(request: Request) {
 
     // Credits: 1 credit per Ionexa Chat message, deducted from user_credits
     // (see lib/billing/credits.ts), the same shared budget Create Anything
-    // draws from. Admin-listed accounts (see lib/admin.ts) and beta
+    // draws from. Admin-listed accounts (see lib/auth/admin-emails.ts) and beta
     // testers (see lib/beta.ts) skip this entirely — treated as unlimited.
     // Only a READ-ONLY check happens here (reject early, before even
     // creating/touching the conversation, if obviously insufficient); the

@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { loadWeeklyReflectionStats } from "@/lib/reflection";
 import { buildReflectionUserMessage, generateWeeklyReflection, REFLECTION_MODEL } from "@/lib/reflection-agent";
 import { logApiError } from "@/lib/log-error";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";

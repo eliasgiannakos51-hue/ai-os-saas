@@ -100,6 +100,8 @@ const routes = [];
     else if (entry === "route.ts") routes.push(full);
   }
 })("src/app/api");
+check(`the api route walk found routes (${routes.length})`, routes.length >= 100,
+  "the offender list below is a filter of this — an empty walk makes it pass on nothing");
 
 let declared = 0;
 const offenders = [];

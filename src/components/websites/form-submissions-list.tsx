@@ -19,7 +19,7 @@ import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { matchesSearch } from "@/lib/text/search-match";
-import { toCSV, downloadCSV, todayForFilename } from "@/lib/csv";
+import { toCSV, downloadCSV, todayForFilename } from "@/lib/download/table-csv";
 import {
   FORM_TYPES,
   submissionHeadline,

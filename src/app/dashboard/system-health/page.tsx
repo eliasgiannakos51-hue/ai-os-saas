@@ -5,7 +5,7 @@ import { Activity } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { logApiError } from "@/lib/log-error";
 import { ErrorList, type ProductionErrorRow } from "@/components/system-health/error-list";
 import { StorageDiagnostics } from "@/components/system-health/storage-diagnostics";

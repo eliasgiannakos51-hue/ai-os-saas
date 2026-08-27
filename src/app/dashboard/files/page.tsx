@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { FolderOpen } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { maxFilesForPlan, maxStorageBytesForPlan } from "@/lib/files/limits";
 import { FILE_LIST_COLUMNS } from "@/lib/files/store";

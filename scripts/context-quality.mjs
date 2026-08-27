@@ -40,7 +40,7 @@ if (!KEY) {
 const MODEL = "claude-sonnet-4-6";
 const anthropic = new Anthropic({ apiKey: KEY });
 
-const cr = await loadTs("src/lib/ai/context-relevance.ts");
+const cr = await loadTs("src/lib/ai/module-relevance.ts");
 const cm = await loadTs("src/lib/classifier-modules.ts");
 const uc = await loadTs("src/lib/user-context.ts");
 const en = JSON.parse(readFileSync("messages/en.json", "utf8"));

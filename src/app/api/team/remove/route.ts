@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
+import { mergeUserMetadata } from "@/lib/auth/user-metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -100,9 +101,12 @@ export async function POST(request: Request) {
         // kept being charged while the app treated them as a free user.
         // Removing someone from a team is not a billing action and must
         // not behave like one.
-        const nextMetadata = { ...memberData.user.user_metadata };
-        delete nextMetadata.team_owner_id;
-        delete nextMetadata.team_granted_tier;
+        // TWO REMOVED KEYS AND, SOMETIMES, ONE SET KEY — expressed as
+        // exactly that, instead of as a whole rebuilt object. The old form
+        // copied the member's entire metadata snapshot, deleted two keys
+        // from the copy and wrote the copy back, so anything another writer
+        // put there in between was dropped with it.
+        const snapshot = memberData.user.user_metadata ?? {};
 
         // THE ACCOUNTS ALREADY DAMAGED by the old behaviour, handled here
         // rather than left to a migration nobody runs. Their own tier was
@@ -112,17 +116,24 @@ export async function POST(request: Request) {
         // and the next webhook corrects it. Only an account with no
         // subscription at all is put on Free, where it belongs.
         const paysForThemselves = Boolean(
-          nextMetadata.stripe_subscription_id ?? nextMetadata.stripe_customer_id
+          snapshot.stripe_subscription_id ?? snapshot.stripe_customer_id
         );
-        if (!paysForThemselves && memberData.user.user_metadata?.team_granted_tier === undefined) {
-          nextMetadata.subscription_tier = "free";
+        const patch: Record<string, unknown> = {};
+        if (!paysForThemselves && snapshot.team_granted_tier === undefined) {
+          patch.subscription_tier = "free";
         }
 
-        const { error: revokeError } = await admin.auth.admin.updateUserById(member.member_user_id, {
-          user_metadata: nextMetadata,
+        // Removal runs before the patch is merged (see the SQL), which is
+        // what lets this drop team_granted_tier and set subscription_tier in
+        // the same statement without one undoing the other.
+        const merged = await mergeUserMetadata(member.member_user_id, patch, {
+          remove: ["team_owner_id", "team_granted_tier"],
+          context: "/api/team/remove",
         });
-        if (revokeError) {
-          logApiError("/api/team/remove", revokeError, { stage: "revoke_access" });
+        if (!merged) {
+          logApiError("/api/team/remove", new Error("merge_user_metadata failed"), {
+            stage: "revoke_access",
+          });
         }
       }
     }

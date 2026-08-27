@@ -1,7 +1,7 @@
 import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { monthlyRecurringRevenue } from "@/lib/billing/monthly-revenue";
 import { logApiError } from "@/lib/log-error";
 import { TrendingUp, AlertTriangle } from "lucide-react";

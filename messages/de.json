@@ -64,7 +64,13 @@
     "creditsUnlimited": "Unbegrenzt",
     "whatIsThis": "Was ist das?",
     "examplesLabel": "Probier:",
-    "newMessagesBelow": "Neue Nachricht unten"
+    "newMessagesBelow": "Neue Nachricht unten",
+    "downloadPdf": {
+      "label": "PDF herunterladen",
+      "preparing": "Wird vorbereitet…",
+      "failed": "Das PDF konnte nicht erstellt werden",
+      "notReady": "Das ist noch nicht fertig"
+    }
   },
   "sidebar": {
     "groups": {
@@ -127,13 +133,6 @@
       "formSubmissions": "Formulareingänge",
       "routing": "Modell-Routing"
     },
-    "groupHints": {
-      "create": "Eine Website erzeugen, ein Ziel planen, ein Dokument schreiben.",
-      "myBusiness": "Geld, Kunden, Produkte — und wie sie laufen.",
-      "operations": "Wiederkehrende Arbeit und die mehrstufigen Abläufe.",
-      "insights": "Zurückschauen: was du getan hast und was die KI sich merkt.",
-      "marketplace": "Setups teilen und entdecken — noch nicht offen."
-    },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
       "create": "Beschreibe in einem Satz, was du willst; den Rest findet es heraus.",
@@ -163,12 +162,12 @@
       "reflection": "Eine wöchentliche Zusammenfassung deines Fortschritts.",
       "memory": "Was die KI sich über dich merkt.",
       "favorites": "Alles, was du markiert hast.",
-      "marketplace": "Setups teilen und entdecken — noch nicht offen.",
+      "marketplace": "Teilen Sie die Form eines Agenten als Vorlage und starten Sie mit einer, die jemand anders geteilt hat.",
       "team": "Lade Leute in deinen Arbeitsbereich ein.",
-      "apps": "Beschreibe eine App und bekomme sie wirklich gebaut. Noch nicht fertig.",
-      "images": "Bilder aus einer Beschreibung erzeugen. Noch nicht fertig.",
-      "videos": "Video aus einer Beschreibung erzeugen. Noch nicht fertig.",
-      "coding": "Beschreibe, was du brauchst, und bekomme funktionierenden Code. Noch nicht fertig.",
+      "apps": "Behalten Sie geplante oder bereits veröffentlichte Apps im Blick. Baut sie nicht.",
+      "images": "Behalten Sie geplante oder bereits erstellte Bilder im Blick. Erzeugt sie nicht.",
+      "videos": "Behalten Sie geplante oder bereits erstellte Videos im Blick. Erzeugt sie nicht.",
+      "coding": "Codeausschnitte schreiben, erklären, korrigieren, umwandeln und testen. Führt keinen Code aus und öffnet kein Repository.",
       "presentations": "Behalten Sie geplante oder bereits erstellte Präsentationen im Blick. Erstellt keine Folien.",
       "home": "Ihr Dashboard — Aktivität, Statistiken und Schnellaktionen.",
       "settings": "Konto, Abrechnung, Sprache und Einstellungen.",
@@ -180,7 +179,6 @@
       "affiliate": "Dein Empfehlungslink, dein Verdienst und wie du ausgezahlt wirst.",
       "formSubmissions": "Alles, was Besucher über ein Formular auf Ihren veröffentlichten Seiten gesendet haben"
     },
-    "comingSoon": "Demnächst",
     "closeMenu": "Menü schließen"
   },
   "landing": {
@@ -1314,13 +1312,29 @@
     },
     "marketplace": {
       "title": "Marktplatz",
-      "description": "Kaufe und verkaufe Agents, Automatisierungen und Vorlagen — bald verfügbar.",
-      "comingSoon": "Bald verfügbar",
-      "publishButton": "Vorlage Veröffentlichen",
+      "description": "Agentenvorlagen, die andere gebaut und geteilt haben. Kostenlos — hier wird nichts gekauft oder verkauft.",
       "empty": {
-        "title": "Der Marketplace ist noch nicht offen",
-        "why": "Geplant ist, dass Leute ihre Agents, Website-Vorlagen und Workflows teilen können. Hier läuft noch nichts — der Button unten ist deaktiviert, weil es die Funktion noch nicht gibt, nicht wegen deines Tarifs."
-      }
+        "title": "Noch keine Vorlagen",
+        "why": "Vorlagen erscheinen hier, sobald jemand eine über den Agenten-Bildschirm teilt. Beim Teilen wird ein bereits funktionierender Agent auf eine wiederverwendbare Form reduziert."
+      },
+      "searchPlaceholder": "Vorlagen durchsuchen",
+      "counted": "{shown} von {total} werden angezeigt",
+      "noMatches": "Nichts passt zu „{query}“.",
+      "badgeCurated": "Mitgeliefert",
+      "badgeCommunity": "Geteilt",
+      "badgeMine": "Deine",
+      "usedTimes": "{count} mal verwendet",
+      "useThis": "Diese Vorlage verwenden",
+      "subjectLabel": "Worum soll es gehen?",
+      "subjectHelp": "Die Vorlage macht die Arbeit; dies ist der Gegenstand, an dem sie sie macht.",
+      "subjectPlaceholder": "unsere drei größten Wettbewerber",
+      "createFromTemplate": "Agent erstellen",
+      "adopting": "Wird erstellt…",
+      "cancel": "Abbrechen",
+      "adopted": "Agent für „{subject}“ erstellt.",
+      "adoptError": "Der Agent konnte nicht erstellt werden.",
+      "subjectRequired": "Sag zuerst, worum es gehen soll.",
+      "loadError": "Die Vorlagen konnten nicht geladen werden."
     },
     "automation": {
       "realizeSectionTitle": "Eine Idee real machen",
@@ -1667,7 +1681,11 @@
           "contains_numbers": "Die Aufgabe enthält eine lange Zahl — Telefon, Konto oder Referenz. Entfernen Sie sie.",
           "too_short": "Was übrig bleibt, ist zu kurz, um jemandem zu helfen.",
           "too_long": "Diese Aufgabe ist zu lang zum Teilen."
-        }
+        },
+        "withdraw": "Zurückziehen",
+        "withdrawing": "Wird zurückgezogen...",
+        "withdrawn": "Zurückgezogen. Nicht mehr in der Bibliothek.",
+        "withdrawFailed": "Konnte nicht zurückgezogen werden. Es ist weiterhin geteilt."
       }
     },
     "publishing": {

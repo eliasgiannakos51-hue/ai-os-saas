@@ -82,7 +82,7 @@ const GATE = "scripts/tests/cross-module-context.test.mjs";
 
 const CONTEXT = "src/lib/ai/cross-module-context.ts";
 const STORE = "src/lib/ai/cross-module-store.ts";
-const RELEVANCE = "src/lib/ai/context-relevance.ts";
+const RELEVANCE = "src/lib/ai/module-relevance.ts";
 const CHAT_ROUTE = "src/app/api/chat/route.ts";
 const CODING_ROUTE = "src/app/api/coding/run/route.ts";
 

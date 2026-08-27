@@ -22,7 +22,10 @@ export type SecurityScanIssue =
   | { type: "external_iframe"; src: string }
   | { type: "dynamic_code_execution"; snippet: string };
 
-const ALLOWED_FORM_ACTION_SUBSTRING = "/api/websites/";
+// The app's own form endpoint, as a PATH. Matched against a parsed URL's
+// pathname, never against the whole URL string — see isExternalFormTarget.
+const FORM_ACTION_PATH_PREFIX = "/api/websites/";
+const FORM_ACTION_PATH_SUFFIX = "/submit-form";
 
 const SCRIPT_SRC_RE = /<script\b[^>]*\bsrc="([^"]*)"[^>]*>/gi;
 // Captures the full attribute (name="value") so its VALUE can be checked
@@ -43,18 +46,114 @@ const FORM_ACTION_RE = /<form\b[^>]*\baction="([^"]*)"[^>]*>/gi;
 // domains are allowed through; anything else still has no legitimate
 // use in this app's generation contract and is flagged.
 const IFRAME_SRC_RE = /<iframe\b[^>]*\bsrc="([^"]*)"[^>]*>/gi;
-const ALLOWED_IFRAME_HOSTS = [
-  "google.com/maps",
-  "maps.google.com",
-  "www.google.com/maps",
-  "youtube.com",
-  "www.youtube.com",
-  "youtube-nocookie.com",
-  "www.youtube-nocookie.com",
-  "player.vimeo.com",
+
+/**
+ * The embeds a generated page may carry, as EXACT hosts.
+ *
+ * THIS IS ALSO THE CSP's frame-src. lib/publishing/public-serving.ts
+ * builds that directive from this array rather than repeating it, because
+ * the previous arrangement was two hand-written lists with a comment
+ * claiming they could not disagree — and they did: the scan allowed
+ * "youtube.com" with no subdomain, which the CSP's
+ * `https://www.youtube.com` blocks. A page could pass the scan, get
+ * published, and then fail to render its own video with no error anywhere.
+ */
+export const ALLOWED_IFRAME_EMBEDS: readonly { host: string; pathPrefix?: string }[] = [
+  { host: "www.google.com", pathPrefix: "/maps" },
+  { host: "maps.google.com" },
+  { host: "www.youtube.com" },
+  { host: "www.youtube-nocookie.com" },
+  { host: "player.vimeo.com" },
 ];
+
+/**
+ * An absolute http(s) URL, or null for anything else.
+ *
+ * `javascript:`, `data:` and a bare relative path all come back null and
+ * are handled by the caller — an iframe with any of those is not an
+ * allowed embed, and a relative form action is not an external target.
+ */
+function parseHttpUrl(raw: string): URL | null {
+  try {
+    const url = new URL(raw.trim());
+    return url.protocol === "https:" || url.protocol === "http:" ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * WHAT WAS WRONG, and it is the whole reason this function exists.
+ *
+ * The check was `ALLOWED_IFRAME_HOSTS.some((host) => src.includes(host))`.
+ * A substring test against the whole URL string, so every one of these
+ * passed as "YouTube":
+ *
+ *     https://youtube.com.attacker.net/frame     host is attacker.net
+ *     https://notyoutube.com/frame               host is notyoutube.com
+ *     https://evil.example/?ref=youtube.com      host is evil.example
+ *     https://youtube.com@evil.example/frame     host is evil.example
+ *
+ * The last one is the classic: everything before the @ is userinfo, not a
+ * host, and a reader scanning the string sees "youtube.com" first.
+ *
+ * The URL is parsed now and the HOSTNAME is compared exactly. No subdomain
+ * wildcard either — the CSP names exact origins, and a scan that is looser
+ * than the CSP passes pages the browser then refuses to render.
+ */
 function isAllowedIframeSrc(src: string): boolean {
-  return ALLOWED_IFRAME_HOSTS.some((host) => src.includes(host));
+  const url = parseHttpUrl(src);
+  if (!url) return false;
+  const hostname = url.hostname.toLowerCase();
+  return ALLOWED_IFRAME_EMBEDS.some(
+    (embed) =>
+      hostname === embed.host &&
+      (!embed.pathPrefix ||
+        url.pathname === embed.pathPrefix ||
+        url.pathname.startsWith(`${embed.pathPrefix}/`))
+  );
+}
+
+/**
+ * Does this form post a visitor's details somewhere that is not us?
+ *
+ * SAME BUG, SAME SHAPE. The check was
+ * `!action.includes("/api/websites/")`, so a form posting to
+ *
+ *     https://evil.example/collect?next=/api/websites/x/submit-form
+ *
+ * contained the allowed substring in its QUERY STRING and was waved
+ * through. On a published page the CSP's `form-action 'self'` stops it
+ * anyway — but this scan exists for the DOWNLOADED file, which the user
+ * can host anywhere with no CSP at all, and it is also the gate that
+ * decides whether a page may be published in the first place.
+ *
+ * The pathname is what is checked now, and when the caller knows the app's
+ * own host (the routes pass it) the host must match too — otherwise
+ * https://evil.example/api/websites/x/submit-form would still read as ours.
+ *
+ * A RELATIVE action is not an external target and is not flagged, exactly
+ * as before: it posts to whatever origin the page is served from, which is
+ * the site's own.
+ */
+function isExternalFormTarget(action: string, appHost?: string): boolean {
+  const raw = action.trim();
+  const url = parseHttpUrl(raw);
+
+  if (!url) {
+    // A scheme that is not http(s) — javascript:, data:, vbscript:. Not
+    // "external" in the exfiltration sense, but it is not a form target
+    // this app's generation contract permits either, and the old check
+    // ignored it entirely.
+    return /^[a-z][a-z0-9+.-]*:/i.test(raw) && !raw.startsWith("//");
+  }
+
+  const pathOk =
+    url.pathname.startsWith(FORM_ACTION_PATH_PREFIX) &&
+    url.pathname.endsWith(FORM_ACTION_PATH_SUFFIX);
+  if (!pathOk) return true;
+  if (!appHost) return false;
+  return url.hostname.toLowerCase() !== appHost.toLowerCase();
 }
 // eval(...) / new Function(...) — no legitimate use in a static
 // marketing/business site's generated JS, and both are classic vectors
@@ -62,7 +161,10 @@ function isAllowedIframeSrc(src: string): boolean {
 // evade the other, more literal checks above.
 const DYNAMIC_CODE_RE = /\b(?:eval\s*\(|new\s+Function\s*\()/g;
 
-export function scanWebsiteHtmlForSecurityIssues(html: string): SecurityScanIssue[] {
+export function scanWebsiteHtmlForSecurityIssues(
+  html: string,
+  options: { appHost?: string } = {}
+): SecurityScanIssue[] {
   const issues: SecurityScanIssue[] = [];
   let match: RegExpExecArray | null;
 
@@ -82,7 +184,7 @@ export function scanWebsiteHtmlForSecurityIssues(html: string): SecurityScanIssu
   FORM_ACTION_RE.lastIndex = 0;
   while ((match = FORM_ACTION_RE.exec(html))) {
     const action = match[1];
-    if ((action.startsWith("http://") || action.startsWith("https://")) && !action.includes(ALLOWED_FORM_ACTION_SUBSTRING)) {
+    if (isExternalFormTarget(action, options.appHost)) {
       issues.push({ type: "external_form_target", action });
     }
   }

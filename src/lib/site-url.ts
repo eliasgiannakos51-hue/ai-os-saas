@@ -26,3 +26,22 @@ export function getSiteUrl(): string {
 
   return "http://localhost:3000";
 }
+
+/**
+ * Just the hostname of getSiteUrl(), for comparing against a URL somebody
+ * else wrote.
+ *
+ * Used by the generated-HTML security scan: a form action pointing at
+ * `https://<us>/api/websites/x/submit-form` is ours, and one pointing at
+ * `https://evil.example/api/websites/x/submit-form` is not — a difference
+ * the path alone cannot see. Returns null rather than a wrong answer if
+ * the configured URL will not parse, so the scan falls back to checking
+ * the path only instead of comparing against garbage.
+ */
+export function getSiteHostname(): string | null {
+  try {
+    return new URL(getSiteUrl()).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}

@@ -137,7 +137,36 @@ checkTrue("goes through the AI circuit breaker", route.includes("checkAiCallAllo
 checkTrue("reserves credits before the call", route.includes("reserveCredits("));
 checkTrue("settles against measured usage", route.includes("settleReservation("));
 checkTrue("releases the hold when the call fails", route.includes("releaseReservation("));
-checkTrue("caps the request length", route.includes("MAX_REQUEST_LENGTH"));
+// NOT `route.includes("MAX_REQUEST_LENGTH")`. That asserted the TOKEN
+// appears in the file. Declaring the constant and never comparing against
+// it — or renaming it to MAX_LEN and leaving one stale mention in a
+// comment — keeps that green while the cap is gone.
+//
+// The property is three things, and each is checked: the constant holds a
+// NUMBER, the incoming length is COMPARED against it, and the comparison
+// GUARDS a refusal rather than a log line.
+{
+  const routeCode = route
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .split("\n")
+    .filter((l) => !/^\s*(\/\/|\*)/.test(l))
+    .join("\n");
+  const declared = routeCode.match(/const\s+MAX_REQUEST_LENGTH\s*=\s*(\d[\d_]*)\s*;/);
+  checkTrue(
+    `the request cap is a number (${declared?.[1] ?? "not declared"})`,
+    Boolean(declared) && Number(String(declared[1]).replace(/_/g, "")) > 0
+  );
+  checkTrue(
+    "and the incoming length is compared against it",
+    /\.length\s*>\s*MAX_REQUEST_LENGTH/.test(routeCode)
+  );
+  // The comparison has to REFUSE. A cap that only logs is not a cap.
+  const guardBlock = routeCode.slice(routeCode.search(/\.length\s*>\s*MAX_REQUEST_LENGTH/));
+  checkTrue(
+    "and the comparison refuses the request rather than noting it",
+    /NextResponse\.json\(/.test(guardBlock.slice(0, 400)) && /status:\s*4\d\d/.test(guardBlock.slice(0, 400))
+  );
+}
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSiteHostname } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
@@ -86,7 +87,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
 
     const html = stripDisallowedExternalScripts(version.html_content);
-    const issues = scanWebsiteHtmlForSecurityIssues(html);
+    const issues = scanWebsiteHtmlForSecurityIssues(html, { appHost: getSiteHostname() ?? undefined });
     if (issues.length > 0) {
       const described = issues.map(describeSecurityScanIssue);
       void logSecurityCheck(supabase, {

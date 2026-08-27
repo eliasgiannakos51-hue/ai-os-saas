@@ -153,8 +153,19 @@ try {
   console.log("\n== 1b. the migration applies, twice ==");
   const migration = path.join(ROOT, "supabase/migrations/20260815_purchased_credits.sql");
   applyFile(migration);
-  applyFile(migration);
-  check("migration applies twice cleanly", true, true);
+  let reapplyError = null;
+  try {
+    applyFile(migration);
+  } catch (err) {
+    reapplyError = err;
+  }
+  // NOT `check(name, true, true)`. That asserted a constant: it could not
+  // fail, and its label claimed something it never verified. It carried a
+  // little signal — the file aborts if the apply throws — but only until
+  // somebody wraps the call above in a try/catch, after which the line
+  // keeps printing PASS about nothing. The second apply is caught here
+  // instead, so the check has an outcome that can be wrong.
+  check("migration applies twice cleanly", reapplyError === null, true);
 
   console.log("\n== 2. the backfill recovers what is still in the balance ==");
   {

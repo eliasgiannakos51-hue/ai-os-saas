@@ -64,7 +64,13 @@
     "creditsUnlimited": "无限制",
     "whatIsThis": "这是什么？",
     "examplesLabel": "试试：",
-    "newMessagesBelow": "下方有新消息"
+    "newMessagesBelow": "下方有新消息",
+    "downloadPdf": {
+      "label": "下载 PDF",
+      "preparing": "正在准备…",
+      "failed": "无法创建 PDF",
+      "notReady": "尚未完成"
+    }
   },
   "sidebar": {
     "groups": {
@@ -127,13 +133,6 @@
       "formSubmissions": "表单提交",
       "routing": "模型路由"
     },
-    "groupHints": {
-      "create": "生成网站、规划目标、撰写文档。",
-      "myBusiness": "资金、客户、产品，以及它们的表现。",
-      "operations": "重复性工作和多步骤流程。",
-      "insights": "回看你做过什么，以及 AI 记住了什么。",
-      "marketplace": "分享与发现配置——尚未开放。"
-    },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",
       "create": "用一句话描述你要什么，其余的它自己判断。",
@@ -163,12 +162,12 @@
       "reflection": "每周进度小结。",
       "memory": "AI 记住的关于你的事。",
       "favorites": "你收藏的一切。",
-      "marketplace": "分享与发现配置——尚未开放。",
+      "marketplace": "把一个智能体的结构作为模板分享，也可以从别人分享的模板开始。",
       "team": "邀请他人加入你的工作区。",
-      "apps": "描述一个应用，真正把它做出来。尚未就绪。",
-      "images": "根据描述生成图片。尚未就绪。",
-      "videos": "根据描述生成视频。尚未就绪。",
-      "coding": "描述你的需求，得到可运行的代码。尚未就绪。",
+      "apps": "记录你正在筹划或已经上线的应用。它不会构建应用。",
+      "images": "记录你正在筹划或已经做好的图片。它不会生成图片。",
+      "videos": "记录你正在筹划或已经做好的视频。它不会生成视频。",
+      "coding": "编写、解释、修复、转换和测试代码片段。它不运行代码，也不访问代码仓库。",
       "presentations": "记录你正在筹划或已经做好的演示文稿。它不会生成幻灯片。",
       "home": "你的仪表板——活动、统计和快捷操作。",
       "settings": "账户、账单、语言和偏好设置。",
@@ -180,7 +179,6 @@
       "affiliate": "你的推广链接、已赚金额，以及如何收款。",
       "formSubmissions": "访客通过已发布网站上的表单提交的全部内容"
     },
-    "comingSoon": "即将推出",
     "closeMenu": "关闭菜单"
   },
   "landing": {
@@ -1314,13 +1312,29 @@
     },
     "marketplace": {
       "title": "市场",
-      "description": "买卖代理、自动化和模板 — 即将推出。",
-      "comingSoon": "即将推出",
-      "publishButton": "发布模板",
+      "description": "其他人构建并分享的智能体模板。免费——这里不买卖任何东西。",
       "empty": {
-        "title": "市场还没有开放",
-        "why": "计划是让大家分享自己做的 agent、网站模板和工作流。这里还没有任何东西上线——下方的按钮是灰的，因为功能还不存在，跟你的套餐无关。"
-      }
+        "title": "还没有模板",
+        "why": "当有人从智能体页面分享模板后，它们会出现在这里。分享会把一个已经在运行的智能体化为可复用的形式。"
+      },
+      "searchPlaceholder": "搜索模板",
+      "counted": "显示 {total} 个中的 {shown} 个",
+      "noMatches": "没有与“{query}”匹配的内容。",
+      "badgeCurated": "内置",
+      "badgeCommunity": "已分享",
+      "badgeMine": "你的",
+      "usedTimes": "已使用 {count} 次",
+      "useThis": "使用此模板",
+      "subjectLabel": "关于什么？",
+      "subjectHelp": "模板负责工作，这里填写它要处理的对象。",
+      "subjectPlaceholder": "我们最大的三家竞争对手",
+      "createFromTemplate": "创建智能体",
+      "adopting": "正在创建…",
+      "cancel": "取消",
+      "adopted": "已为“{subject}”创建智能体。",
+      "adoptError": "无法创建智能体。",
+      "subjectRequired": "请先说明关于什么。",
+      "loadError": "无法加载模板。"
     },
     "automation": {
       "realizeSectionTitle": "将想法变为现实",
@@ -1667,7 +1681,11 @@
           "contains_numbers": "任务里含有长数字——电话、账号或参考编号。请删除。",
           "too_short": "剩下的内容太短，对别人没有帮助。",
           "too_long": "这个任务太长，无法作为模板分享。"
-        }
+        },
+        "withdraw": "撤回",
+        "withdrawing": "正在撤回...",
+        "withdrawn": "已撤回，它已不在库中。",
+        "withdrawFailed": "无法撤回，它仍处于共享状态。"
       }
     },
     "publishing": {

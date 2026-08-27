@@ -19,7 +19,7 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/context-optimization.test.mjs";
 const CACHED = "src/lib/ai/cached-system.ts";
-const RELEVANCE = "src/lib/ai/context-relevance.ts";
+const RELEVANCE = "src/lib/ai/module-relevance.ts";
 const CONTEXT = "src/lib/user-context.ts";
 const ROUTE = "src/app/api/chat/route.ts";
 const MEASURE = "scripts/measure-context.mjs";
@@ -154,10 +154,27 @@ const MUTANTS = [
     to: "    if (!vocab) return { item: s, score: 0, unjudgeable: true };",
   },
   {
+    // The `from` carried six spaces of indentation and the line has four —
+    // it was written when this code sat one block deeper. An indentation
+    // that no longer matches is not a failure: the harness prints "target
+    // no longer exists" and the mutation silently stops applying.
     name: "matching becomes a substring test, so every module matches everything",
     file: RELEVANCE,
-    from: "      if (words.has(folded)) score += 1;",
-    to: "      if (q.includes(folded)) score += 1;",
+    from: "    if (words.has(folded)) score += 1;",
+    to: "    if (foldedQuestion.includes(folded)) score += 1;",
+  },
+  {
+    // THE GUARD ON THE FALLBACK, which is the thing that actually keeps
+    // the line below from being the substring test above. A multi-word
+    // term cannot be found in a word SET, so it is matched against the
+    // question directly — but only because `folded.includes(" ")` proves
+    // it is multi-word. Drop that and every single-word term goes back to
+    // substring matching: "car" matches "carpet", "invoice" matches
+    // "invoiced", and a module scores on a word the user never wrote.
+    name: "the multi-word guard is dropped, so single words go back to substring matching",
+    file: RELEVANCE,
+    from: '    else if (folded.includes(" ") && foldedQuestion.includes(folded)) score += 1;',
+    to: "    else if (foldedQuestion.includes(folded)) score += 1;",
   },
   {
     name: "the kept modules are re-sorted by score, changing how the prompt reads",
@@ -200,16 +217,23 @@ const MUTANTS = [
   {
     name: "entity mentions go back into the middle, killing the per-user cache",
     file: ROUTE,
-    from: "    const systemDynamicSuffix = buildEntityMentionPromptAddition(mentionedEntities);",
-    to: "    const systemDynamicSuffix = \"\";",
+    // The suffix gained `+ codingContext` when the coding module landed,
+    // and this `from` did not, so the mutation stopped applying to the one
+    // wiring it exists to guard.
+    from: "    const systemDynamicSuffix = buildEntityMentionPromptAddition(mentionedEntities) + codingContext;",
+    to: "    const systemDynamicSuffix = codingContext;",
     edits: [
       {
         from: "    const systemPerUser =\n      buildMemoryPromptAddition(memories) +",
         to: "    const systemPerUser =\n      buildMemoryPromptAddition(memories) +\n      buildEntityMentionPromptAddition(mentionedEntities) +",
       },
       {
-        from: "    const systemDynamicSuffix = buildEntityMentionPromptAddition(mentionedEntities);",
-        to: '    const systemDynamicSuffix = "";',
+        // Stale for the same reason as the top-level `from` above: the
+        // suffix gained `+ codingContext`. `edits` takes precedence over
+        // from/to (line 282), so fixing only the top-level left this
+        // mutation still not applying.
+        from: "    const systemDynamicSuffix = buildEntityMentionPromptAddition(mentionedEntities) + codingContext;",
+        to: "    const systemDynamicSuffix = codingContext;",
       },
     ],
   },

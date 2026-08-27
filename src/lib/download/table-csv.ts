@@ -1,3 +1,15 @@
+// Turning a table on screen into a file the browser saves.
+//
+// RENAMED FROM lib/csv.ts. There is a second csv.ts —
+// lib/data-analysis/csv.ts — and it is the opposite direction: it PARSES an
+// uploaded spreadsheet, with a delimiter detector, a row cap and a column
+// cap. Nothing is shared between them; the exports are disjoint and so are
+// the importers.
+//
+// Two live files one directory apart with the same name is how
+// cross-module-context-chat-coding.mutation.mjs came to name the wrong
+// gate — one suffix off, wrong file loaded, fourteen mutations unnoticed.
+// scripts/tests/module-name-collisions.test.mjs refuses the shape now.
 import { neutraliseFormula } from "@/lib/import/csv-parse";
 
 /**
@@ -50,19 +62,12 @@ export function downloadCSV(filename: string, csvContent: string): void {
   URL.revokeObjectURL(url);
 }
 
-export function downloadJSON(filename: string, data: unknown): void {
-  const blob = new Blob([JSON.stringify(data, null, 2)], {
-    type: "application/json;charset=utf-8;",
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
+// downloadJSON was here and had no callers — nothing in src/ imported it.
+// An exported helper with no call sites is a claim that the app can hand the
+// user a .json file, which it could not, and it is the kind of claim someone
+// reads and builds a feature plan on. When JSON export is wanted it belongs
+// beside the CSV and Markdown paths in the download menu, tested like them,
+// not sitting unused in a lib.
 
 export function todayForFilename(): string {
   return new Date().toISOString().slice(0, 10);

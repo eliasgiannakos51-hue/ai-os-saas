@@ -1,5 +1,17 @@
 // WHICH cross-module material reaches a prompt, and what it costs.
 //
+// RENAMED FROM lib/context-relevance.ts, AND THAT MATTERS. There was a
+// second file called lib/ai/context-relevance.ts — a different module with
+// a different API, deciding which MODULES are relevant rather than scoring
+// text against a budget. Two live files one directory apart with the same
+// name is how cross-module-context-chat-coding.mutation.mjs came to name
+// cross-module-context.test.mjs: the string is one suffix away from the
+// right one, the wrong gate loaded the wrong file, and fourteen mutations
+// went unnoticed for months while the suite reported them as holes.
+//
+// So this one is named for what it does — score terms and spend a
+// character budget — and the other is lib/ai/module-relevance.ts.
+//
 // The brief for this work said "use context-relevance.ts from #11". There
 // is no such file: it has never existed on any branch and the word
 // "relevance" does not appear anywhere in src/. What DOES exist is
@@ -81,7 +93,7 @@ export type SelectionOptions = {
   maxItems: number;
 };
 
-export type Selection<T> = {
+export type BudgetedSelection<T> = {
   selected: T[];
   /** Characters the selected items actually contribute. */
   chars: number;
@@ -114,7 +126,7 @@ export function selectWithinBudget<T>(
   items: T[],
   textOf: (item: T) => string,
   options: SelectionOptions
-): Selection<T> {
+): BudgetedSelection<T> {
   const scored = items.map((item, index) => ({
     item,
     index,

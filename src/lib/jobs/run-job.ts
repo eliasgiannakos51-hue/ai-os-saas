@@ -5,7 +5,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { settleReservation, releaseReservation } from "@/lib/billing/reservations";
 import { resolveEffectivePlan } from "@/lib/billing/credits";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { internalHandoffToken, INTERNAL_HANDOFF_HEADER } from "@/lib/function-limits";
 import {

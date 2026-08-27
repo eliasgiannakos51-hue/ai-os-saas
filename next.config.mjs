@@ -26,6 +26,36 @@ const nextConfig = {
     staleTimes: {
       dynamic: 0,
     },
+    // THE FONTS ARE DATA, NOT IMPORTS. Nothing in the code `import`s a .ttf —
+    // registerPdfFonts() reads them from disk by path — so Next's file
+    // tracing sees no reference and ships none of them. Without this entry
+    // every PDF route throws on the first request in production and works
+    // perfectly in development, which is the worst shape a deployment bug
+    // can have.
+    //
+    // UNDER `experimental`, because this is Next 14.2. At the top level the
+    // key is silently ignored with only a build warning — which is the same
+    // bug as having no entry at all, wearing a green build.
+    outputFileTracingIncludes: {
+      "/api/**": ["./src/lib/pdf/fonts/*.ttf"],
+    },
+    // AND WHAT MUST NEVER GO IN. registerPdfFonts reads its files through
+    // `path.join(process.cwd(), ...)`, which Next's tracer cannot resolve
+    // statically, so it falls back to including far more of the repository
+    // than the route needs. Measured on the documents PDF route: 16.4 MB of
+    // `.git/objects`, plus 1.4 MB screenshots from agent-shots/ and
+    // files-shots/ — none of which any function reads, all of which would be
+    // uploaded on every deploy.
+    outputFileTracingExcludes: {
+      "*": [
+        "./.git/**",
+        "./agent-shots/**",
+        "./files-shots/**",
+        "./scripts/**",
+        "./supabase/**",
+        "./.next/cache/**",
+      ],
+    },
   },
 };
 

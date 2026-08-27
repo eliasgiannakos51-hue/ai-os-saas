@@ -232,17 +232,45 @@ export async function sendOverageWarnings(params: { userId: string; state: Overa
     });
     if (due.length === 0) return;
 
-    // MARKED BEFORE SENDING. A send that fails means one warning missed;
-    // a mark that fails after a successful send means the warning repeats
-    // on every action for the rest of the month, which is the thing that
-    // makes somebody switch notifications off entirely.
-    const patch: Record<string, string> = {};
-    if (due.includes("80")) patch.warned_80_month = state.month;
-    if (due.includes("100")) patch.warned_100_month = state.month;
-    await admin.from("usage_overage_settings").update(patch).eq("user_id", userId);
+    // MARKED BEFORE SENDING, AND THE MARK IS THE CLAIM.
+    //
+    // A send that fails means one warning missed; a mark that fails after
+    // a successful send means the warning repeats on every action for the
+    // rest of the month, which is the thing that makes somebody switch
+    // notifications off entirely. So the mark goes first.
+    //
+    // But this function is called AFTER EVERY CHARGE, so two charges
+    // landing together both read "not warned yet", both decide the
+    // warning is due, and both send it. The read above cannot prevent
+    // that — it is a read.
+    //
+    // So the UPDATE re-asserts what the read saw, one column at a time,
+    // and only the caller whose update actually matched a row goes on to
+    // send. A second caller in the same instant updates nothing, gets an
+    // empty array back, and stays quiet. Same shape as the agent claim in
+    // api/cron/agent-runs.
+    const claimed: ("80" | "100")[] = [];
+    for (const level of due) {
+      const column = level === "80" ? "warned_80_month" : "warned_100_month";
+      const { data: marked, error: markError } = await admin
+        .from("usage_overage_settings")
+        .update({ [column]: state.month })
+        .eq("user_id", userId)
+        .or(`${column}.is.null,${column}.neq.${state.month}`)
+        .select("user_id");
+      if (markError) {
+        // Not sent. A warning nobody can prove was recorded is a warning
+        // that will be sent again on the next charge, and again after
+        // that — the failure mode this whole block exists to avoid.
+        logApiError("billing:sendOverageWarnings", markError, { userId, level });
+        continue;
+      }
+      if (marked && marked.length > 0) claimed.push(level);
+    }
+    if (claimed.length === 0) return;
 
     const { dispatchNotification } = await import("@/lib/notify/dispatch");
-    for (const level of due) {
+    for (const level of claimed) {
       const percent = level === "80" ? 80 : 100;
       await dispatchNotification({
         userId,

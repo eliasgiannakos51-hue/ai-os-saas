@@ -12,7 +12,7 @@ import { buildOutputSummary, buildMissionContextSystemPromptAddition } from "@/l
 import { logApiError } from "@/lib/log-error";
 import { MAX_MESSAGE_LENGTH, MODEL } from "@/lib/create-studio/route-entry";
 import { startJob } from "@/lib/jobs/start-job";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";

@@ -4,7 +4,7 @@ import { getModule, type FieldConfig } from "@/lib/modules";
 import { getBuildModule } from "@/lib/build-modules";
 import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
 import { deductCredits, hasEnoughCredits, insufficientCreditsMessage, resolveEffectivePlanSlug } from "@/lib/billing/credits";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { logApiError } from "@/lib/log-error";
 import { enModuleTitle, enFieldLabel } from "@/lib/module-labels";

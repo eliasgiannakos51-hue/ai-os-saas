@@ -5,6 +5,7 @@ import { grantCredits } from "@/lib/billing/credits";
 import { getPlan } from "@/lib/billing/plans";
 import { sendWelcomeEmail } from "@/lib/email/send-welcome-email";
 import { logApiError } from "@/lib/log-error";
+import { mergeUserMetadata } from "@/lib/auth/user-metadata";
 import { attributeReferral } from "@/lib/affiliate/store";
 import { REFERRAL_COOKIE } from "@/lib/affiliate/cookie";
 
@@ -60,10 +61,13 @@ export async function GET(request: Request) {
   const needsBootstrap = !user.user_metadata?.subscription_tier;
 
   if (needsBootstrap) {
-    const admin = createAdminClient();
-    const { error: updateError } = await admin.auth.admin.updateUserById(user.id, {
-      user_metadata: {
-        ...user.user_metadata,
+    // Merged, not replaced — see lib/auth/user-metadata.ts. terms_accepted_at
+    // is a legal record written exactly once, and a Stripe webhook landing in
+    // the read-write window of the old code erased it along with everything
+    // else this bootstrap had just set.
+    const merged = await mergeUserMetadata(
+      user.id,
+      {
         // Same shape api/signup writes. Accepting the terms is implicit in
         // completing the provider's consent screen, which the social
         // buttons disclose in their own helper text before the redirect.
@@ -72,9 +76,12 @@ export async function GET(request: Request) {
         seat_count: 0,
         signup_provider: user.app_metadata?.provider ?? "oauth",
       },
-    });
-    if (updateError) {
-      logApiError("/auth/callback", updateError, { stage: "bootstrap_user_metadata" });
+      { context: "/auth/callback" }
+    );
+    if (!merged) {
+      logApiError("/auth/callback", new Error("merge_user_metadata failed"), {
+        stage: "bootstrap_user_metadata",
+      });
     }
 
     const freePlan = getPlan("free")!;

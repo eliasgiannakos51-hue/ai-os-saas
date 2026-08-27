@@ -206,11 +206,40 @@ export async function dispatchNotification(input: DispatchInput): Promise<Dispat
     try {
       const admin = createAdminClient();
       const nextCount = open.groupCount + 1;
-      await admin
+      // THE COUNT THE ROW HAD IS RE-ASSERTED, because absorbing a burst is
+      // this function's whole job and a burst is by definition concurrent.
+      // findOpenGroup read group_count a round trip ago; five agent runs
+      // finishing together all read the same number, all compute the same
+      // +1, and the row lands one higher instead of five. The digest
+      // renders `group_count - 1` as "and N more", so the user is told two
+      // things happened when five did.
+      //
+      // On a miss the row was moved by somebody else, and the retry below
+      // re-reads it rather than writing a number derived from a value that
+      // is already stale.
+      const { data: bumped } = await admin
         .from("user_notifications")
         .update({ group_count: nextCount, body, title })
         .eq("id", open.id)
-        .eq("user_id", input.userId);
+        .eq("user_id", input.userId)
+        .eq("group_count", open.groupCount)
+        .select("id");
+
+      if (!bumped || bumped.length === 0) {
+        const { data: current } = await admin
+          .from("user_notifications")
+          .select("group_count")
+          .eq("id", open.id)
+          .eq("user_id", input.userId)
+          .maybeSingle();
+        const seen = Number(current?.group_count ?? open.groupCount);
+        await admin
+          .from("user_notifications")
+          .update({ group_count: seen + 1, body, title })
+          .eq("id", open.id)
+          .eq("user_id", input.userId)
+          .eq("group_count", seen);
+      }
       delivered.push("in_app");
       for (const channel of channels) {
         if (channel === "in_app") continue;

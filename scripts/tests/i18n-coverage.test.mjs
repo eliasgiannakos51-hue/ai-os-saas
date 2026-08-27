@@ -66,6 +66,8 @@ function walk(dir) {
   return out;
 }
 const sources = walk("src");
+check(`the sources scan found ${sources.length}`, sources.length >= 779,
+  true);
 
 console.log("== 1. no user-facing string is hardcoded in a component ==");
 // The three calls that put a string straight in front of the user. A
@@ -1032,6 +1034,8 @@ console.log("\n== 1e. the sentence that says nothing is gone from the client =="
 // that is the 518-string convention counted above, and the client no
 // longer shows it at the converted call sites.
 const clientFiles = sources.filter((f) => !f.startsWith("src/app/api/") && !f.startsWith("src/lib/"));
+check(`the clientFiles scan found ${clientFiles.length}`, clientFiles.length >= 296,
+  true);
 const banned = [];
 for (const file of clientFiles) {
   const src = stripComments(readFileSync(file, "utf8"));

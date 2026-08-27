@@ -275,9 +275,9 @@ console.log("\n5. The CSV");
   ok("...and no rows", submissionsToCsv([]).values.length === 0);
 
   // FORMULA INJECTION. The values come from strangers on the internet
-  // and the file gets opened in Excel; lib/csv.ts is what defuses them,
+  // and the file gets opened in Excel; lib/download/table-csv.ts is what defuses them,
   // and this is the check that this export goes through it.
-  const csv = await loadTs("src/lib/csv.ts");
+  const csv = await loadTs("src/lib/download/table-csv.ts");
   const evil = csv.toCSV(["a"], [["=cmd|' /c calc'!A1"]]);
   ok("a formula is neutralised on the way into the file", !/^a\r\n=/.test(csv.toCSV(["a"], [["=1+1"]])), evil);
   ok("the list component builds its file with toCSV", /toCSV\(headers, values\)/.test(listSrc));

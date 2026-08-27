@@ -176,9 +176,22 @@ try {
   );
 
   console.log("\n== still idempotent overall ==");
-  applySequence();
-  applySequence();
-  check("a third and fourth run of the whole sequence both apply cleanly", true);
+  // NOT `check(..., true)`. That asserted a literal: it could not go red.
+  // If a re-run failed, `applySequence` would throw and the suite would
+  // die with an uncaught exception ABOVE this line — a crash, not a FAIL
+  // line naming what broke. Catch it and assert on the error.
+  let rerunError = null;
+  try {
+    applySequence();
+    applySequence();
+  } catch (err) {
+    rerunError = err;
+  }
+  check(
+    "a third and fourth run of the whole sequence both apply cleanly",
+    rerunError === null,
+    rerunError ? String(rerunError).slice(0, 300) : ""
+  );
   const n2 = Number(await sql(`select count(*)::int from pg_proc p join pg_namespace ns on ns.oid=p.pronamespace
      where ns.nspname='public' and p.proname='grant_credits_idempotent'`));
   check("…and still leave exactly one overload", n2 === 1, `got ${n2}`);

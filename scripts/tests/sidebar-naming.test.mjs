@@ -45,6 +45,7 @@ const buildModules = readFileSync("src/lib/build-modules.ts", "utf8");
 
 /** Every heading the sidebar actually renders. */
 const headings = [...navSrc.matchAll(/heading: "([^"]+)"/g)].map((m) => m[1]);
+check(`the headings scan found ${headings.length}`, headings.length >= 8, "a filter of an empty list is empty, and every check below it would pass");
 /** The heading -> message-key map, as the code really holds it. */
 const headingKeys = Object.fromEntries(
   keysSrc
@@ -80,12 +81,23 @@ for (const heading of headings) {
 }
 // The mirror fault: a key here that no heading uses is dead weight, and
 // dead entries are exactly what hid the four missing ones.
+check(`the heading key map was read (${Object.keys(headingKeys).length})`,
+  Object.keys(headingKeys).length >= 5,
+  "an empty key map makes the dead-key check below pass on nothing");
 const deadHeadingKeys = Object.keys(headingKeys).filter((h) => !headings.includes(h));
 check("no heading key points at a heading that does not exist", deadHeadingKeys.length === 0, deadHeadingKeys.join(", "));
 
 console.log("\n== 2. every ITEM the sidebar renders can be translated ==");
 const labels = [...navSrc.matchAll(/label: "([^"]+)"/g)].map((m) => m[1]);
 const unmappedItems = labels.filter((l) => !itemKeys[l] && l !== "Create Studio");
+// `labels.filter(...).length === 0` is true of an empty list, so the floor
+// is what makes the line above a statement about the sidebar rather than
+// about the regex that reads it. Forty items today.
+check(
+  `the sidebar label scan found items (${labels.length})`,
+  labels.length >= 40,
+  `the nav source yielded ${labels.length} labels`
+);
 check(`all ${labels.length} item labels have a message key`, unmappedItems.length === 0, unmappedItems.join(", "));
 
 console.log("\n== 3. NOTHING IN 'BUILD' THAT DOES NOT BUILD ==");
@@ -95,6 +107,28 @@ console.log("\n== 3. NOTHING IN 'BUILD' THAT DOES NOT BUILD ==");
 // a log, by its own file's admission.
 const trackingSlugs = [...buildModules.matchAll(/slug: "([^"]+)"/g)].map((m) => m[1]);
 console.log(`        tracking tables (no AI generation): ${trackingSlugs.join(", ")}`);
+
+// A FLOOR, BECAUSE THIS ONE ARRAY DRIVES FOUR SECTIONS OF THIS FILE.
+//
+// `offenders`, `misfiled` and `secretlyProducing` are all
+// `trackingSlugs.filter(...)`, each asserted `.length === 0`, and section 4
+// is `for (const slug of trackingSlugs)`. Every one of them is satisfied by
+// an EMPTY array — filtering nothing yields nothing, and looping over
+// nothing runs no checks at all. So a rename of `slug:` to `id:` in
+// build-modules.ts, or a move to a JSON manifest, or a switch to single
+// quotes, would take this file from 120 assertions to about 90 and print
+// ALL PASS while checking none of the thing it exists for.
+//
+// Six today: websites, apps, images, videos, presentations, campaigns.
+// If a tracking module legitimately leaves — because it grew a generator
+// and moved under Build, which section 3 is watching for — lower this
+// number in the same commit that moves it. That is the point: the move
+// should be visible, not silent.
+check(
+  `the tracking-module scan found modules (${trackingSlugs.length})`,
+  trackingSlugs.length >= 6,
+  `build-modules.ts yielded ${trackingSlugs.length} slugs — the four checks below all pass vacuously on an empty list`
+);
 const groupOf = (heading) => {
   const start = navSrc.indexOf(`heading: "${heading}"`);
   const end = navSrc.indexOf("heading: \"", start + 10);
@@ -119,6 +153,15 @@ check("and every one of them IS under Tracking", misfiled.length === 0, misfiled
 // The other direction: what is left in Build must really build.
 const buildHrefs = [...buildGroup.matchAll(/href: "([^"]+)"/g)].map((m) => m[1]);
 console.log(`        Build now holds: ${buildHrefs.join(", ")}`);
+// Same reasoning, other direction: the three `buildHrefs.includes(...)`
+// checks below would each go red on an empty list, so those are safe — but
+// the allowlist check further down is `buildHrefs.filter(...)`, which is
+// not. Six today.
+check(
+  `the Build group scan found hrefs (${buildHrefs.length})`,
+  buildHrefs.length >= 6,
+  `groupOf("Build") yielded ${buildHrefs.length} hrefs`
+);
 check("Build still holds the agent builder", buildHrefs.includes("/dashboard/agents"));
 check("...the website builder", buildHrefs.includes("/dashboard/website-builder"));
 check("...and what it published", buildHrefs.includes("/dashboard/published"));
@@ -293,7 +336,20 @@ console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
   for (const href of buildHrefs) {
     const slug = href.replace("/dashboard/", "");
     if (href in DOWNSTREAM) {
-      check(`${href} is downstream of a producer: ${DOWNSTREAM[href]}`, true);
+      // AN EXEMPTION HAS TO EARN ITSELF. This was `check(name, true)` — a
+      // PASS line that printed the reason from the map and verified none
+      // of it. Two things make the exemption true, and both can rot: the
+      // page has to still be there, and it has to still be downstream
+      // (a page that grew a generator belongs with the producers above,
+      // not behind a note saying it only displays).
+      const exists = existsSync(`src/app/dashboard/${slug}/page.tsx`);
+      check(
+        `${href} is downstream of a producer: ${DOWNSTREAM[href]}`,
+        exists && !producesFor(slug),
+        !exists
+          ? `no src/app/dashboard/${slug}/page.tsx — the exemption names a page that is gone`
+          : `it reaches a model itself now, so it is a producer, not a downstream view`
+      );
       continue;
     }
     check(

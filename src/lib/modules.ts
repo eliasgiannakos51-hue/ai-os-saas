@@ -140,6 +140,17 @@ export type ModuleConfig = {
   creditCost?: number;
   minPlanSlug?: PlanSlug;
   /**
+   * Send this module's inserts through /api/modules/create even though it
+   * has no price and no plan gate.
+   *
+   * GenericAddForm decides between the server route and a direct client
+   * insert, and it used to decide on `creditCost || minPlanSlug` alone.
+   * That made "is this validated server-side?" a consequence of "does this
+   * cost money?" — unrelated questions — and it meant removing a charge
+   * silently removed the validation. Stated on its own here.
+   */
+  serverInsert?: boolean;
+  /**
    * The module's own empty screen, as the key GROUP holding its title,
    * why and example (see EmptyStatePart above).
    *
@@ -356,7 +367,25 @@ export const MODULES: ModuleConfig[] = [
     titleKey: "sidebar.items.automation",
     table: "automations",
     headlineKey: "task_name",
-    creditCost: 50,
+    // NO creditCost. It was 50 — HALF of a Free account's entire monthly
+    // allowance of 100 — charged for inserting a row into `automations`,
+    // which is a note the user types. Nothing here calls a model.
+    //
+    // The charge was also a SECOND one. /dashboard/automation's "Make this
+    // real" button turns a note into a running automation through
+    // api/automations/create, and that route reserves against an estimate
+    // and settles against real usage like every other AI route. So a user
+    // who used the feature as designed paid 50 credits to write the note
+    // and then paid again, correctly, to run it.
+    //
+    // serverInsert keeps this module on the /api/modules/create path, where
+    // its required-field validation and value coercion live. That routing
+    // used to be a side effect of having a price (isGatedModule read
+    // `creditCost || minPlanSlug`), so removing the price would have
+    // silently moved the module to a direct client insert and dropped the
+    // validation with it — a billing fix quietly becoming a validation
+    // regression.
+    serverInsert: true,
     fields: [
       { key: "task_name", labelKey: "moduleData.fields.taskName", type: "text", required: true },
       { key: "time_saved", labelKey: "moduleData.fields.timeSaved", type: "text", badge: true },

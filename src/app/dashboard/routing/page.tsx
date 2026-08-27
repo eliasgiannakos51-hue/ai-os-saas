@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getTranslations, getLocale } from "next-intl/server";
 import { Route } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { pageTitle } from "@/lib/page-title";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { formatNumber } from "@/lib/format-number";

@@ -62,6 +62,8 @@ function walk(dir) {
 }
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 const sources = walk("src");
+check(`the sources scan found ${sources.length}`, sources.length >= 779,
+  true);
 
 console.log("== 1. the mismatch is real, not theoretical ==");
 // Demonstrated against the platform, so this test states a fact about

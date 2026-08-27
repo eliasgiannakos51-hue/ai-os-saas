@@ -249,7 +249,7 @@ console.log("=".repeat(78));
   console.log("    — paid back by the second message of the conversation.");
 
   // And what NARROWING would add, if quality ever justifies turning it on.
-  console.log("\n  If CONTEXT_RELEVANCE were on (it is not — see lib/ai/context-relevance.ts):");
+  console.log("\n  If CONTEXT_RELEVANCE were on (it is not — see lib/ai/module-relevance.ts):");
   const lifeFull = lifeContextChars ?? 0;
   console.log(`    AI Life Context ${lifeFull} chars; dropping 6 of ${MODULE_COUNT} modules removes ~${Math.round((lifeFull * 6) / MODULE_COUNT)} chars`);
   console.log("    — but that block is now CACHED, so the saving is on a 0.1x line, not a 1.0x one.");

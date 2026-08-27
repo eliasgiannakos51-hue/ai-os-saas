@@ -99,11 +99,36 @@ console.log("\n== 4. EVERY page goes through EVERY check ==");
     ["link safety", /documents\.map\(\s*\(doc\) => makeGeneratedLinksSafe\(doc, \{ pageSlugs: generatedSlugs \}\)\.html\s*\)/],
     ["unsplash attribution", /cleaned\.map\(\(doc\) => enforceUnsplashAttribution\(doc\)\)/],
     ["script stripping", /cleaned\.map\(\(doc\) => stripDisallowedExternalScripts\(doc\)\)/],
-    ["security scan", /stripped\.flatMap\(\(doc\) => scanWebsiteHtmlForSecurityIssues\(doc\)\)/],
+    // NOT THE WHOLE CALL SPELLED OUT. This used to be
+    // /stripped\.flatMap\(\(doc\) => scanWebsiteHtmlForSecurityIssues\(doc\)\)/,
+    // which went red the moment the scan gained a second argument — the
+    // check was on the punctuation, not on the property. The property is
+    // that the scan runs over `stripped`, one call per document.
+    ["security scan", /stripped\.flatMap\(\s*\(doc\)\s*=>\s*scanWebsiteHtmlForSecurityIssues\(\s*doc\b/],
   ];
   for (const [name, re] of PER_PAGE) {
     ok(`${name} runs on every document`, re.test(gen), name);
   }
+
+  // A SECOND PROPERTY OF THE SAME CALL, CHECKED SEPARATELY.
+  //
+  // The per-page regex above stops at `doc` on purpose — it is about how
+  // many documents the scan sees, and pinning the rest of the arguments is
+  // what made it break on a signature change. But that left the arguments
+  // guarded by nothing, and one of them decides whether the scan can tell
+  // this app's own submit endpoint from somebody else's.
+  //
+  // isExternalFormTarget accepts a form action whose path looks like
+  // /api/websites/<id>/submit-form. WITHOUT appHost it cannot check the
+  // HOST, so the same path on an attacker's domain — which is where the
+  // customer's form data would go — reads as ours and passes the publish
+  // gate. Dropping `{ appHost: ... }` is a one-word edit; the mutation
+  // suite found that nothing here noticed it.
+  ok("...and the security scan is told which host is ours",
+    /scanWebsiteHtmlForSecurityIssues\(\s*doc,\s*\{\s*appHost:/.test(gen),
+    "without appHost, a submit-form path on ANY host reads as this app's own");
+  ok("...from the real site URL, not a literal",
+    /appHost:\s*getSiteHostname\(\)/.test(gen));
   // The AI content review is deliberately ONE call over the whole site:
   // content is content wherever it sits, and four reviews would cost four
   // times as much to answer the same question.

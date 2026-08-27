@@ -6,7 +6,7 @@ import { Globe } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { maxPublishedSitesForPlan, MAX_SITE_VERSIONS } from "@/lib/publishing/publish-limits";
 import { publishedSiteUrl } from "@/lib/publishing/subdomain";

@@ -34,7 +34,7 @@ const MAX_TEXTAREA_LENGTH = 10000;
 // a direct client insert can't be. Every other module keeps the original
 // direct-insert path below unchanged.
 function isGatedModule(module: ModuleConfig): boolean {
-  return Boolean(module.creditCost || module.minPlanSlug);
+  return Boolean(module.creditCost || module.minPlanSlug || module.serverInsert);
 }
 
 export function GenericAddForm({

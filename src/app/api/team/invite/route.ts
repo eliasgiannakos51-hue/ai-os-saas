@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPlan } from "@/lib/billing/plans";
 import { sendTeamInviteEmail } from "@/lib/email/send-team-invite-email";
 import { logApiError } from "@/lib/log-error";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
-    // Admin-listed accounts (see lib/admin.ts) get full Enterprise-tier
+    // Admin-listed accounts (see lib/auth/admin-emails.ts) get full Enterprise-tier
     // access, including team invites, without a real Stripe subscription.
     const isAdmin = isAdminEmail(user.email);
     const tier = isAdmin ? "enterprise" : (user.user_metadata?.subscription_tier as string | undefined);

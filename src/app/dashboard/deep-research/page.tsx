@@ -6,7 +6,7 @@ import { Telescope } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { maxResearchRunsForPlan } from "@/lib/files/limits";
 import { ResearchWorkspace, type ResearchReport } from "@/components/research/research-workspace";

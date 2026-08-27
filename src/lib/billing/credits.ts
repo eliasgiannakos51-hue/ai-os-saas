@@ -11,7 +11,7 @@ import {
   type Plan,
   type PlanSlug,
 } from "./plans";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { clearLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 
 // The plan an account is on is resolved in lib/billing/plan-resolution.ts
@@ -395,15 +395,35 @@ export async function getPurchasedPackCreditPriceEur(userId: string): Promise<nu
 export async function recordPackPurchaseRate(userId: string, pricePerCreditEur: number): Promise<void> {
   if (!Number.isFinite(pricePerCreditEur) || pricePerCreditEur <= 0) return;
   try {
-    const existing = await getPurchasedPackCreditPriceEur(userId);
-    const next = existing === null ? pricePerCreditEur : Math.min(existing, pricePerCreditEur);
-    if (existing !== null && next === existing) return;
-
+    // THE MINIMUM IS TAKEN BY THE DATABASE, NOT IN TYPESCRIPT.
+    //
+    // This used to read the current value, compute Math.min against it,
+    // and write the result back. That is a read-modify-write, and this
+    // function is called from the STRIPE WEBHOOK — where two pack
+    // purchases seconds apart, or a webhook Stripe replays, run
+    // concurrently by design.
+    //
+    // Both readers would see the old rate, both would compute a minimum
+    // against it, and the later write would win. Buying a 0.015 pack
+    // moments after a 0.010 pack would leave 0.015 stored, and settlement
+    // divides by this number — so the customer is charged at a rate worse
+    // than the one they actually paid, permanently, and nothing anywhere
+    // reports it.
+    //
+    // The read is gone. The WHERE clause is the comparison: the row is
+    // only touched when what is there is absent or genuinely dearer, so
+    // any interleaving of any number of writers converges on the true
+    // minimum. `next.toFixed(8)` matches numeric(12, 8) exactly and keeps
+    // exponent notation ("1e-7") out of a PostgREST filter value.
+    const filterValue = pricePerCreditEur.toFixed(8);
     const admin = createAdminClient();
     const { error } = await admin
       .from("user_credits")
-      .update({ min_pack_credit_price_eur: next })
-      .eq("user_id", userId);
+      .update({ min_pack_credit_price_eur: pricePerCreditEur })
+      .eq("user_id", userId)
+      .or(
+        `min_pack_credit_price_eur.is.null,min_pack_credit_price_eur.gt.${filterValue}`
+      );
     if (error) logApiError("recordPackPurchaseRate", error, { userId, pricePerCreditEur });
   } catch (err) {
     logApiError("recordPackPurchaseRate", err, { userId, stage: "unhandled" });

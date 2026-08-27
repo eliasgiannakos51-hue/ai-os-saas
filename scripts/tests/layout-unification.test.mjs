@@ -45,6 +45,17 @@ function checkTrue(name, cond, detail) {
 }
 const read = (p) => (existsSync(p) ? readFileSync(p, "utf8") : "");
 
+// THE COMMENTS ARE NOT THE CODE. Section 4 below asserted "its action is
+// disabled" and went on passing for a page whose disabled button had been
+// deleted, because the file's doc comment still describes what the page USED
+// to be. Anything reading for a rendered element reads through this.
+const stripComments = (src) =>
+  src
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "))
+    .split("\n")
+    .map((l) => (/^\s*(\/\/|\*)/.test(l) ? "" : l))
+    .join("\n");
+
 const LAYOUT = read("src/components/ui/list-layout.tsx");
 
 console.log("== 1. the shared primitive is the Website Builder's arrangement ==");
@@ -121,15 +132,27 @@ for (const m of TRACKER_SLUGS) {
   checkTrue(`/${m} uses the shared BuildModulePage`, /BuildModulePage/.test(read(`src/app/dashboard/${m}/page.tsx`)));
 }
 
-console.log("\n== 4. Marketplace has no list to unify ==");
-// It is a "coming soon" empty state: no records, no search, no sort.
-// Bolting a list toolbar onto a page with nothing in it would be worse
-// than leaving it, so this asserts the REASON rather than the pattern.
-const market = read("src/app/dashboard/marketplace/page.tsx");
-checkTrue("it renders an EmptyState", /<EmptyState/.test(market));
-checkTrue("its action is disabled", /disabled/.test(market));
-checkTrue("and labelled coming soon", /comingSoon/.test(market));
-checkTrue("so it has no grid of its own to diverge", !/<ListLayout|grid-cols/.test(market));
+console.log("\n== 4. Marketplace is a list like all the others ==");
+// IT USED TO HAVE NOTHING TO UNIFY. This section asserted that reason: a
+// "coming soon" empty state with a disabled publish button, no records, no
+// search, no sort. The agent_templates library has been real since the
+// 20260826 migration and the page browses it now, so the claim that holds
+// is the ordinary one — it uses the shared toolbar rather than arriving at
+// its own arrangement, which is the whole subject of this file.
+//
+// Read through stripComments, because the old version of this check went on
+// passing over a page that no longer had a disabled button: the word was
+// still in the doc comment explaining that it once did.
+const market = stripComments(
+  read("src/app/dashboard/marketplace/page.tsx") +
+    "\n" +
+    read("src/components/marketplace/template-browser.tsx")
+);
+checkTrue("the marketplace files were read", market.length > 500, `${market.length} chars`);
+checkTrue("it browses through the shared ListLayout", /<ListLayout/.test(market));
+checkTrue("it still has an EmptyState for a library with nothing in it", /<EmptyState/.test(market));
+checkTrue("nothing is labelled coming soon any more", !/comingSoon/.test(market));
+checkTrue("and it has no grid of its own to diverge", !/grid-cols/.test(market));
 
 console.log("\n== 5. nobody hand-rolls a list toolbar ==");
 // The failure this guards: a new page gets its own search box and its own
@@ -140,6 +163,11 @@ const SURFACES = [
   "src/components/favorites/favorites-list.tsx",
   "src/components/modules/generic-list.tsx",
   "src/components/website-builder/website-builder-workspace.tsx",
+  // Added when the Marketplace stopped being a "coming soon" page. It
+  // shipped with its own search box, arranged its own way, for exactly the
+  // reason this section exists: nobody writing a new list looks up which
+  // toolbar the app already has.
+  "src/components/marketplace/template-browser.tsx",
 ];
 for (const file of SURFACES) {
   const src = read(file);

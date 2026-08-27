@@ -12,7 +12,7 @@ import {
   loadRecordConversationContext,
   buildRecordConversationPromptAddition,
 } from "@/lib/chat/record-conversation-context";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {

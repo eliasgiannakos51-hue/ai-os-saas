@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AI_QUALITY_CYCLE_TRANSFORM_EN } from "@/lib/ai-quality-checklist";
 import { AI_SAFETY_COMPACT_EL } from "@/lib/ai-conduct";
 import { logApiError } from "@/lib/log-error";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";

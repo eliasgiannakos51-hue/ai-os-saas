@@ -7,7 +7,7 @@ import type { ChatConversation } from "@/types/chat";
 import { resolveEffectivePlan } from "@/lib/billing/credits";
 import { loadLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 import { getFreeChatStatus } from "@/lib/billing/free-chat-usage";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { loadFavoriteIds } from "@/lib/favorites";
 

@@ -47,7 +47,7 @@ export type EstimateInput = {
   /**
    * Extra "continue where you left off" rounds the action may need when a
    * single call's output ceiling isn't enough (Website Builder allows
-   * MAX_CONTINUATION_ROUNDS = 2, see lib/website-builder.ts).
+   * MAX_CONTINUATION_ROUNDS = 4, see lib/website-builder.ts).
    *
    * These are not free repeats of the first call — each round re-sends
    * everything written so far as INPUT, so the input cost grows with each
@@ -157,8 +157,29 @@ export const ACTION_PROFILES = {
     // balance go negative.
     baseOutputChars: 34000,
     outputCharsPerInputChar: 9,
-    // MAX_CONTINUATION_ROUNDS in lib/website-builder.ts.
-    continuationRounds: 2,
+    // MAX_CONTINUATION_ROUNDS in lib/website-builder.ts, which is 4 — and
+    // its loop is `for (round = 0; round <= MAX_CONTINUATION_ROUNDS)`, so
+    // one initial call plus up to FOUR continuations.
+    //
+    // This said 2, with a comment asserting MAX_CONTINUATION_ROUNDS was 2.
+    // It has been 4. The hold was therefore short of what a full-length
+    // generation can cost by a measured 26-32%, across every plan:
+    //
+    //   plan        input chars   held (2)   needed (4)   short by
+    //   free               1200         87          114     27 (+31%)
+    //   starter            1200         73           95     22 (+30%)
+    //   pro                3000         74           95     21 (+28%)
+    //
+    // A hold that is short is not a smaller charge — settlement bills the
+    // real usage either way. It is a balance that can go negative on the
+    // longest generations, which is the one thing a reservation exists to
+    // prevent, and the same failure the baseOutputChars note above this
+    // was written to fix.
+    //
+    // The two numbers are kept in step by
+    // scripts/tests/module-charges.test.mjs, which reads both files: a
+    // comment claiming they agree is what let them disagree.
+    continuationRounds: 4,
   },
   websiteEdit: {
     systemPromptTokens: 2900,

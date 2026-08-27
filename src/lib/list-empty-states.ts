@@ -61,7 +61,8 @@ export const LIST_EMPTY_STATES: ListEmptyState[] = [
     file: "src/components/mission/mission-list.tsx",
     keyPrefix: "dashboard.mission.empty",
     interactive: true,
-    fills: "MissionForm's goal field — the form is already on the page, collapsed",
+    fills:
+      "MissionForm's goal field — the form is already on the page, collapsed",
   },
   {
     id: "websiteBuilder",
@@ -117,7 +118,8 @@ export const LIST_EMPTY_STATES: ListEmptyState[] = [
     // were written by Chat. They are not — dashboard/memory/page.tsx
     // reads CLASSIFIER_MODULES and BUILD_MODULES and no conversation is
     // involved at any point. help.memory.doesNot now says so out loud.
-    whyNot: "the only input is a search box, and this state means there is nothing to search",
+    whyNot:
+      "the only input is a search box, and this state means there is nothing to search",
   },
   {
     id: "team",
@@ -131,14 +133,16 @@ export const LIST_EMPTY_STATES: ListEmptyState[] = [
     file: "src/components/favorites/favorites-list.tsx",
     keyPrefix: "dashboard.favorites.empty",
     interactive: false,
-    whyNot: "a favourite is made by pressing the star on an item, on another page",
+    whyNot:
+      "a favourite is made by pressing the star on an item, on another page",
   },
   {
     id: "publishing",
     file: "src/components/publishing/published-sites-list.tsx",
     keyPrefix: "dashboard.publishing.empty",
     interactive: false,
-    whyNot: "publishing happens in the Website Builder, on a site that already exists",
+    whyNot:
+      "publishing happens in the Website Builder, on a site that already exists",
   },
   {
     id: "timeline",
@@ -149,20 +153,27 @@ export const LIST_EMPTY_STATES: ListEmptyState[] = [
   },
   {
     id: "marketplace",
-    file: "src/app/dashboard/marketplace/page.tsx",
+    // The empty state moved with the page: it now lives in the browser
+    // component, which is the thing that knows whether the library came
+    // back empty. The page itself only fetches.
+    file: "src/components/marketplace/template-browser.tsx",
     keyPrefix: "dashboard.marketplace.empty",
     interactive: false,
-    // This page already refuses to pretend: its one button is rendered
-    // DISABLED with a "Coming Soon" badge beside it, because the feature
-    // does not exist yet. Adding a working example button under a
-    // disabled action would be the page contradicting itself.
-    whyNot: "the feature is not built — the page's own button is disabled and says so",
+    // The page is real now — it lists the agent_templates library and runs
+    // one — so the old reason ("the feature is not built") is gone. This
+    // state appears only when there are genuinely no templates, and the one
+    // action that fills it is on ANOTHER screen: sharing takes a working
+    // agent you already have. A pressable example here would either build
+    // an agent nobody asked for or navigate away pretending to be an
+    // example.
+    whyNot:
+      "the action that fills it lives on the Agents screen — sharing needs an agent that already works",
   },
 ];
 
 export function listEmptyStateKey(
   entry: ListEmptyState,
-  part: "title" | "why" | "example"
+  part: "title" | "why" | "example",
 ): string {
   return `${entry.keyPrefix}.${part}`;
 }

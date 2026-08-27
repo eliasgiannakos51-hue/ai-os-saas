@@ -2,21 +2,38 @@ import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Store } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { EmptyState } from "@/components/empty-state";
 import { MARKETPLACE_ICON } from "@/lib/module-icons";
+import {
+  TemplateBrowser,
+  type BrowsableTemplate,
+} from "@/components/marketplace/template-browser";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.marketplace");
 }
 
-// No table, no listings, no buy/sell flow yet — the previous version of
-// this page showed hardcoded demo listings with "Coming Soon" badges,
-// which read as real (if unpurchasable) products. Replaced with a plain,
-// honest empty state instead, per the brief: nothing fake shown as if it
-// exists.
+export const dynamic = "force-dynamic";
+
+/**
+ * THE LIBRARY THAT WAS ALREADY THERE.
+ *
+ * This page used to be an honest empty state with a disabled "Publish a
+ * Template" button, written when there was no table behind it. There has
+ * been one since the 20260826 migration — agent_templates, with curated
+ * built-ins and anything users have shared from the Agents screen — plus
+ * routes to share and to adopt. What was missing was the only part a person
+ * could use: somewhere to LOOK. A template nobody happened to describe in
+ * the right words on the create screen was invisible, however good it was.
+ *
+ * It is still not a shop, and the copy no longer promises one. Nothing is
+ * bought or sold here; the templates are free and the page says what it is.
+ *
+ * READ UNDER THE USER'S OWN SESSION. agent_templates_select_all grants
+ * select to any signed-in user, so RLS is what decides this, not a filter
+ * written here that could be forgotten.
+ */
 export default async function MarketplacePage() {
   const t = await getTranslations("dashboard.marketplace");
   const supabase = createClient();
@@ -24,42 +41,54 @@ export default async function MarketplacePage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
-  if (!user) {
-    redirect("/login");
-  }
+  const { data, error } = await supabase
+    .from("agent_templates")
+    .select(
+      "slug, title, description, task_pattern, schedule_cron, depth, output_format, keywords, use_count, shared_by",
+    )
+    // MOST USED FIRST, and `created_at` only to break ties — otherwise the
+    // order of two never-used templates changes between page loads, which
+    // reads as the list shuffling itself.
+    .order("use_count", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  const templates: BrowsableTemplate[] = (data ?? []).map((row) => ({
+    slug: String(row.slug ?? ""),
+    title: String(row.title ?? ""),
+    description: String(row.description ?? ""),
+    taskPattern: String(row.task_pattern ?? ""),
+    scheduleCron: String(row.schedule_cron ?? ""),
+    depth: String(row.depth ?? "standard"),
+    outputFormat: String(row.output_format ?? "summary"),
+    keywords: Array.isArray(row.keywords) ? row.keywords.map(String) : [],
+    useCount: Number(row.use_count ?? 0),
+    curated: row.shared_by === null,
+    mine: row.shared_by === user.id,
+  }));
 
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader helpKey="help.marketplace" icon={MARKETPLACE_ICON} title={t("title")} description={t("description")} />
-
-        {/* No worked example, and this page is the clearest case for why:
-            its own action is rendered DISABLED with a "Coming Soon" badge,
-            because the feature does not exist. A pressable example under a
-            disabled button would be the page contradicting itself in the
-            same breath. */}
-        <EmptyState icon={Store} title={t("empty.title")}>
-          <p>{t("empty.why")}</p>
-          <div className="mt-4 flex flex-col items-center gap-2">
-            <button
-              type="button"
-              disabled
-              title={t("comingSoon")}
-              aria-disabled="true"
-              className="inline-flex min-h-[44px] cursor-not-allowed items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-muted opacity-60"
-            >
-              {t("publishButton")}
-            </button>
-            {/* Redundant with the button's `title` tooltip on purpose — a
-                hover-only tooltip is invisible on touch devices, so the
-                reason it's disabled needs to be visible without a hover
-                for mobile users too. */}
-            <span className="inline-flex items-center rounded-full border border-orange-500/40 bg-orange-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange-400">
-              {t("comingSoon")}
-            </span>
-          </div>
-        </EmptyState>
+        <PageHeader
+          helpKey="help.marketplace"
+          icon={MARKETPLACE_ICON}
+          title={t("title")}
+          description={t("description")}
+        />
+        {/* A READ THAT FAILED IS NOT AN EMPTY LIBRARY. Supabase returns an
+            empty array for a denied policy as readily as for no rows, so a
+            silent fallback would show "nothing here yet" to somebody whose
+            request was refused. */}
+        {error ? (
+          <p className="rounded-xl border border-red-900 bg-red-950/40 px-4 py-3 text-sm text-red-400">
+            {t("loadError")}
+          </p>
+        ) : (
+          <TemplateBrowser templates={templates} />
+        )}
       </div>
     </main>
   );

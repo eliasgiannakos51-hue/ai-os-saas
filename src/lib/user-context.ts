@@ -15,7 +15,7 @@ const MISSION_RECENT_DAYS = 14;
 
 export type UserFullContext = {
   /** `slug` is carried alongside the display title so a caller can
-   *  decide which modules to send (lib/ai/context-relevance.ts) without
+   *  decide which modules to send (lib/ai/module-relevance.ts) without
    *  matching on a translated string. */
   moduleSummaries: {
     slug: string;

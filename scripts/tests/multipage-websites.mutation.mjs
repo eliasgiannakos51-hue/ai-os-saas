@@ -38,10 +38,26 @@ const MUTANTS = [
     to: "      const cleaned = [makeGeneratedLinksSafe(documents[0], { pageSlugs: generatedSlugs }).html, ...documents.slice(1)];",
   },
   {
+    // The `from` used to omit the appHost argument, because the scan did
+    // not take one until the form-action check learned to tell this app's
+    // own submit endpoint from somebody else's. A mutation whose target no
+    // longer exists is not a failure — the harness prints "target no longer
+    // exists" and the hole shows up only in the summary — so it stopped
+    // guarding the sub-pages the moment the call site grew an option.
     name: "the security scan sees the home page only",
     file: GEN,
-    from: "const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc));",
-    to: "const securityIssues = scanWebsiteHtmlForSecurityIssues(stripped[0]);",
+    from: "const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined }));",
+    to: "const securityIssues = scanWebsiteHtmlForSecurityIssues(stripped[0], { appHost: getSiteHostname() ?? undefined });",
+  },
+  {
+    // AND THE HOST ITSELF. Dropping appHost is a one-word edit that makes
+    // every form action pointing at a correctly-shaped path on ANY host
+    // read as this app's own — the exact substring-vs-host confusion the
+    // scan was rewritten to stop.
+    name: "the scan stops being told which host is ours, so any host's submit path passes",
+    file: GEN,
+    from: "scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined })",
+    to: "scanWebsiteHtmlForSecurityIssues(doc)",
   },
   {
     name: "scripts are stripped from the home page only",

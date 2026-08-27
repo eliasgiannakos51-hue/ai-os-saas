@@ -2,7 +2,7 @@ import "server-only";
 import { sendPushToUser } from "@/lib/push/web-push";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import {
   hasEnoughCredits,

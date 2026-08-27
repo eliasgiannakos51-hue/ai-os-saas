@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlan } from "@/lib/billing/plans";
 import { logApiError } from "@/lib/log-error";
+import { mergeUserMetadata } from "@/lib/auth/user-metadata";
 
 // Best-effort, called on every dashboard page load (see dashboard/layout.tsx)
 // for the currently logged-in user. A no-op for the overwhelming majority
@@ -51,16 +52,19 @@ export async function acceptPendingTeamInvite(userId: string, email: string): Pr
     //
     // resolvePlanSlug now returns the HIGHER of the two, so a grant can
     // only ever add.
-    const { data: memberData } = await admin.auth.admin.getUserById(userId);
-    const { error: updateUserError } = await admin.auth.admin.updateUserById(userId, {
-      user_metadata: {
-        ...memberData?.user?.user_metadata,
-        team_granted_tier: ownerTier,
-        team_owner_id: pending.owner_id,
-      },
-    });
-    if (updateUserError) {
-      logApiError("accept-pending-invite", updateUserError, { stage: "update_user" });
+    // Two keys, merged in one statement. The read that used to precede this
+    // existed only to be spread back over the write, and that spread is what
+    // made a concurrent Stripe webhook able to undo the grant — or be undone
+    // by it. There is nothing to read here any more.
+    const merged = await mergeUserMetadata(
+      userId,
+      { team_granted_tier: ownerTier, team_owner_id: pending.owner_id },
+      { context: "accept-pending-invite" }
+    );
+    if (!merged) {
+      logApiError("accept-pending-invite", new Error("merge_user_metadata failed"), {
+        stage: "update_user",
+      });
     }
   } catch (err) {
     logApiError("accept-pending-invite", err);

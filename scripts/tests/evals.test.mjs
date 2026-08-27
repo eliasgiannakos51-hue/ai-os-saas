@@ -184,6 +184,8 @@ console.log("\n== 6. THE 154 CASES THEMSELVES ==");
 // =====================================================================
 const DIR = "scripts/evals/datasets";
 const files = readdirSync(DIR).filter((f) => f.endsWith(".jsonl")).sort();
+ok(`the files scan found ${files.length}`, files.length >= 7,
+  "a filter or loop over an empty list leaves every check below it passing on nothing");
 eq("one dataset per capability", files.map((f) => f.replace(/\.jsonl$/, "")), [...s.CAPABILITIES].sort());
 
 const allCases = [];

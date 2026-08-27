@@ -124,8 +124,14 @@ function walk(dir, out = []) {
   return out;
 }
 
+const SRC_FILES = walk(path.join(ROOT, "src"));
+// THE FLOOR. Every `offenders`-style list below is filled by a loop over
+// this array and then asserted EMPTY. If the walk returns nothing the
+// loop never runs, the list stays empty, and every one of those checks
+// passes while reading no files at all.
+check("the source walk found files (" + SRC_FILES.length + ")", SRC_FILES.length >= 700, true);
 const offenders = [];
-for (const file of walk(path.join(ROOT, "src"))) {
+for (const file of SRC_FILES) {
   const source = readFileSync(file, "utf8");
   const code = source
     .replace(/\/\*[\s\S]*?\*\//g, "")
@@ -143,7 +149,7 @@ for (const file of walk(path.join(ROOT, "src"))) {
   }
 }
 
-// lib/admin.ts compares an email against a configured allowlist and
+// lib/auth/admin-emails.ts compares an email against a configured allowlist and
 // lib/website-html-extract.ts finds "</html>" in generated markup — both
 // pure-ASCII by construction, and both are `X.includes(y.toLowerCase())`
 // rather than the broken shape, so neither appears here. If either ever
@@ -179,7 +185,7 @@ check("no component compares user text with toLowerCase().includes()", offenders
   const COMPARE_METHODS = "includes|indexOf|startsWith|endsWith";
   const indirectOffenders = [];
 
-  for (const file of walk(path.join(ROOT, "src"))) {
+  for (const file of SRC_FILES) {
     const rel = path.relative(ROOT, file);
     const source = readFileSync(file, "utf8");
     const code = source
@@ -221,7 +227,7 @@ check("no component compares user text with toLowerCase().includes()", offenders
   //                              ("failed to fetch") — machine-generated
   //                              ASCII, not user text.
   //   lib/files/limits.ts        the literal "unlimited".
-  //   lib/admin.ts               an email against the admin allowlist —
+  //   lib/auth/admin-emails.ts               an email against the admin allowlist —
   //                              already excluded above for the chained
   //                              shape; the inline-argument shape
   //                              (`.includes(email.toLowerCase())`) is
@@ -273,7 +279,7 @@ check("no component compares user text with toLowerCase().includes()", offenders
   const ASCII_BY_CONSTRUCTION = [
     "src/lib/network/offline.ts",
     "src/lib/files/limits.ts",
-    "src/lib/admin.ts",
+    "src/lib/auth/admin-emails.ts",
     "src/components/ideas/idea-row.tsx",
     "src/lib/trading-pattern.ts",
     "src/lib/import/coerce.ts",
@@ -315,7 +321,7 @@ check("no component compares user text with toLowerCase().includes()", offenders
 {
   const SEARCH_KEY = /\.join\([^)]*\)\s*\n?\s*\.toLowerCase\(\)/;
   const indirect = [];
-  for (const file of walk(path.join(ROOT, "src"))) {
+  for (const file of SRC_FILES) {
     if (SEARCH_KEY.test(readFileSync(file, "utf8"))) indirect.push(path.relative(ROOT, file));
   }
   check("no helper builds a search haystack by lower-casing it", indirect, []);
@@ -388,7 +394,7 @@ console.log("\n== 6. alphabetical sort is offered and is locale-aware ==");
   // …and no list renders a SortToggle without forwarding the flag, which
   // would silently drop A–Z from that one page.
   const unforwarded = [];
-  for (const file of walk(path.join(ROOT, "src"))) {
+  for (const file of SRC_FILES) {
     const s = readFileSync(file, "utf8");
     for (const m of s.matchAll(/<SortToggle\b[^>]*>/g)) {
       if (!m[0].includes("alphabetical")) unforwarded.push(path.relative(ROOT, file));
@@ -402,6 +408,7 @@ console.log("\n== 7. the sort labels exist in all ten languages ==");
 // ---------------------------------------------------------------------
 {
   const langs = readdirSync(path.join(ROOT, "messages")).filter((f) => f.endsWith(".json"));
+  check(`the langs scan found ${langs.length}`, langs.length >= 10, true);
   const missing = langs.filter((f) => {
     const j = JSON.parse(readFileSync(path.join(ROOT, "messages", f), "utf8"));
     return !j?.module?.sort?.az || !j?.module?.sort?.za;

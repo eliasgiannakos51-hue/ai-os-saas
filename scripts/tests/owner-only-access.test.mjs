@@ -13,7 +13,7 @@
 // anything touching platform-wide data proves it checked.
 //
 // Run: node scripts/tests/owner-only-access.test.mjs
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 
 let pass = 0;
@@ -41,7 +41,7 @@ function walk(dir, filename) {
 }
 
 console.log("== 1. the owner check itself ==");
-const admin = readFileSync("src/lib/admin.ts", "utf8");
+const admin = readFileSync("src/lib/auth/admin-emails.ts", "utf8");
 check("it is server-only", /^import "server-only";/m.test(admin));
 check("the list comes from ADMIN_EMAILS plus a hardcoded owner", /HARDCODED_ADMIN_EMAILS/.test(admin) && /process\.env\.ADMIN_EMAILS/.test(admin));
 check("comparison is case-insensitive", /toLowerCase\(\)/.test(admin));
@@ -61,11 +61,34 @@ function everyFile(dir) {
   })(dir);
   return out;
 }
-const clientFilesImportingAdmin = everyFile("src")
-  .filter((f) => /^\s*"use client";/m.test(readFileSync(f, "utf8")))
-  .filter((f) => /from "@\/lib\/admin"/.test(readFileSync(f, "utf8")));
+// THE MODULE PATH LIVES IN ONE PLACE AND IS PROVEN TO EXIST.
+//
+// This read /from "@\/lib\/admin"/ — the path spelled into a regex. The
+// file was renamed to @/lib/auth/admin-emails and the regex kept matching
+// nothing, so `clientFilesImportingAdmin.length === 0` stayed true and this
+// check passed while looking at no files at all. An assertion about the
+// ABSENCE of something is the one shape a stale path can satisfy forever.
+//
+// Two changes. The path is a constant, checked to resolve to a real file
+// before it is used; and the scan is proven non-vacuous by counting the
+// SERVER files that do import it, which must not be zero.
+const ADMIN_MODULE = "@/lib/auth/admin-emails";
+const adminModuleFile = `src/${ADMIN_MODULE.slice("@/".length)}.ts`;
+check(`${ADMIN_MODULE} resolves to a real file`, existsSync(adminModuleFile), adminModuleFile);
+
+const importsAdmin = (f) => readFileSync(f, "utf8").includes(`from "${ADMIN_MODULE}"`);
+const allImporters = everyFile("src").filter(importsAdmin);
 check(
-  "no client component imports lib/admin",
+  `the scan found files importing it (${allImporters.length})`,
+  allImporters.length >= 15,
+  "a rename would otherwise make the check below pass by looking at nothing"
+);
+
+const clientFilesImportingAdmin = allImporters.filter((f) =>
+  /^\s*"use client";/m.test(readFileSync(f, "utf8"))
+);
+check(
+  `no client component imports ${ADMIN_MODULE}`,
   clientFilesImportingAdmin.length === 0,
   clientFilesImportingAdmin.join(", ")
 );
@@ -110,6 +133,8 @@ console.log("\n== 4. NO API route exposes platform-wide data unguarded ==");
 const routes = walk("src/app/api", "route.ts");
 check(`the scan found the API surface (${routes.length} routes)`, routes.length >= 40);
 
+check(`the service-role route scan found ${routes.length} routes`, routes.length >= 116,
+  "the offender list below is filled by a loop over these — an empty list makes it pass on nothing");
 const offenders = [];
 for (const file of routes) {
   const src = readFileSync(file, "utf8");
@@ -195,14 +220,34 @@ check(
 
 console.log("\n== 6. there is still no unguarded margin endpoint ==");
 // The brief's exact worry. If someone later adds one, this catches it.
+// THREE VACUOUS CHECKS SAT HERE, and the middle one was the plainest
+// possible version of the mistake: its condition was the literal `true`.
+// It could not fail. It reported the claim in its own name — "ai_cost_log
+// is not read by any unguarded route" — while asserting nothing at all.
+// Removed rather than repaired; the loop below is the real check, and it
+// now has a floor so it cannot pass by iterating nothing.
+//
+// The margin check was vacuous in the other way: `marginRoutes` is EMPTY
+// today (measured: 0 of 116 api routes match /margin/i), and `.every()`
+// over an empty array is true. That is the correct outcome here — the
+// brief's worry was that somebody might ADD one — so the emptiness is
+// asserted explicitly instead of being mistaken for a pass.
 const marginRoutes = routes.filter((f) => /margin/i.test(f));
 check(
   `no /api route serves margin data (${marginRoutes.length} found)`,
-  marginRoutes.every((f) => /isAdminEmail\(/.test(readFileSync(f, "utf8"))),
-  marginRoutes.join(", ")
+  marginRoutes.filter((f) => !/isAdminEmail\(/.test(readFileSync(f, "utf8"))),
+  []
 );
-check("and ai_cost_log is not read by any unguarded route", true);
 const costLogRoutes = routes.filter((f) => /ai_cost_log/.test(readFileSync(f, "utf8")));
+// THE FLOOR. Measured: two api routes read ai_cost_log. Zero would mean
+// the loop below runs zero times and says nothing — which is exactly how
+// "and ai_cost_log is not read by any unguarded route" came to be true by
+// construction.
+check(
+  `some api route reads ai_cost_log (${costLogRoutes.length} found)`,
+  costLogRoutes.length >= 2,
+  "0 here means the per-route check below iterates nothing"
+);
 for (const file of costLogRoutes) {
   const src = readFileSync(file, "utf8");
   check(

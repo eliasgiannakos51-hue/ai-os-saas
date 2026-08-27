@@ -36,7 +36,13 @@ import {
  * prompt forbids reproducing more than a short quotation and requires
  * attribution for everything — not as a nicety but because a report that
  * silently reprints a paywalled article is a liability we would be
- * handing to the user along with their PDF.
+ * handing to the user along with their report.
+ *
+ * (That sentence said "along with their PDF". There is no PDF: a finished
+ * report is read on the page, saved into Documents, and rendered to HTML by
+ * report-to-html.ts. "PDF" was the only occurrence of the word anywhere in
+ * the research feature, and a comment naming a deliverable that does not
+ * exist is how a reader concludes the export already works.)
  */
 
 const PLAN_MAX_TOKENS = 900;

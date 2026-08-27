@@ -32,7 +32,6 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/ai-providers.test.mjs";
 
-const TYPES = "src/lib/ai/providers/types.ts";
 const CATALOG = "src/lib/ai/providers/catalog.ts";
 const CACHE = "src/lib/ai/providers/cache-policy.ts";
 const REGISTRY = "src/lib/ai/providers/registry.ts";

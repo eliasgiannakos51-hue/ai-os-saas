@@ -1323,7 +1323,7 @@
       "badgeCurated": "مُضمَّن",
       "badgeCommunity": "مُشارَك",
       "badgeMine": "قالبك",
-      "usedTimes": "استُخدم {count} مرة",
+      "usedTimes": "{count, plural, =0 {لم يُستخدم بعد} one {استُخدم مرة واحدة} two {استُخدم مرتين} few {استُخدم # مرات} many {استُخدم # مرة} other {استُخدم # مرة}}",
       "useThis": "استخدم هذا القالب",
       "subjectLabel": "عن ماذا يكون؟",
       "subjectHelp": "القالب يقوم بالعمل؛ وهذا هو الموضوع الذي يقوم به عليه.",

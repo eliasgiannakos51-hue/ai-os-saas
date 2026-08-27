@@ -206,6 +206,25 @@ const MUTANTS = [
     expect: "promises an unbuilt feature",
   },
 
+  {
+    // "used 1 times". It shipped that way in ten locales before the plural
+    // check existed.
+    name: "the use count goes back to a bare interpolation",
+    file: EN,
+    from: '      "usedTimes": "{count, plural, =0 {not used yet} one {used once} other {used # times}}",',
+    to: '      "usedTimes": "used {count} times",',
+    expect: "real plural",
+  },
+  {
+    // A BRACE SHORT. This is what a regex cannot see and a render can: the
+    // string still contains the word `plural` and still looks like ICU.
+    name: "the plural is malformed, so it throws where the page renders",
+    file: EN,
+    from: '      "usedTimes": "{count, plural, =0 {not used yet} one {used once} other {used # times}}",',
+    to: '      "usedTimes": "{count, plural, =0 {not used yet} one {used once} other {used # times}",',
+    expect: "real plural",
+  },
+
   // ---- 4. the search --------------------------------------------------
   {
     // THE BUG THIS CHECK WAS WRITTEN OVER. matchesSearch takes the haystack

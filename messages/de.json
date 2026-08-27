@@ -1323,7 +1323,7 @@
       "badgeCurated": "Mitgeliefert",
       "badgeCommunity": "Geteilt",
       "badgeMine": "Deine",
-      "usedTimes": "{count} mal verwendet",
+      "usedTimes": "{count, plural, =0 {noch nicht verwendet} one {einmal verwendet} other {# mal verwendet}}",
       "useThis": "Diese Vorlage verwenden",
       "subjectLabel": "Worum soll es gehen?",
       "subjectHelp": "Die Vorlage macht die Arbeit; dies ist der Gegenstand, an dem sie sie macht.",

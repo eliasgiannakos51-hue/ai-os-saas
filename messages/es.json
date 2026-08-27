@@ -1323,7 +1323,7 @@
       "badgeCurated": "Incluida",
       "badgeCommunity": "Compartida",
       "badgeMine": "Tuya",
-      "usedTimes": "usada {count} veces",
+      "usedTimes": "{count, plural, =0 {aún sin usar} one {usada una vez} other {usada # veces}}",
       "useThis": "Usar esta plantilla",
       "subjectLabel": "¿Sobre qué debe tratar?",
       "subjectHelp": "La plantilla hace el trabajo; esto es aquello sobre lo que lo hace.",

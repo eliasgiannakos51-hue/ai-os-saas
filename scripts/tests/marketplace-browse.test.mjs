@@ -233,6 +233,62 @@ console.log("\n== 3. nothing here claims to be a shop ==");
     stillPromising.join("\n        "),
   );
 
+  // A COUNT WITHOUT A PLURAL IS WRONG AT n=1 IN EVERY LANGUAGE. This key
+  // read "used 1 times" in all ten locales when it was written, and Arabic
+  // wants six forms where English wants two. Rendered through the app's OWN
+  // formatter rather than pattern-matched, because a malformed ICU string
+  // does not fail a regex — it throws where the page renders.
+  {
+    const { createTranslator } = await import("next-intl");
+    const broken = [];
+    for (const locale of locales) {
+      const messages = JSON.parse(
+        readFileSync(`messages/${locale}.json`, "utf8"),
+      );
+      const errors = [];
+      const t = createTranslator({
+        locale,
+        messages,
+        namespace: "dashboard.marketplace",
+        onError: (e) => errors.push(String(e)),
+      });
+      const rendered = [0, 1, 2, 5, 11].map((count) => {
+        try {
+          return t("usedTimes", { count });
+        } catch (e) {
+          errors.push(String(e));
+          return "";
+        }
+      });
+      if (errors.length > 0) {
+        broken.push(`${locale}: ${errors[0].slice(0, 110)}`);
+        continue;
+      }
+      if (rendered.some((r) => typeof r !== "string" || r.trim() === "")) {
+        broken.push(`${locale}: renders nothing for some count`);
+        continue;
+      }
+      // THE SINGULAR, WHERE THE LANGUAGE HAS ONE — and Intl decides that,
+      // not a list written here. Japanese and Chinese put 1 in the `other`
+      // bucket and are right to have no separate form, so demanding a
+      // one{} branch of them would be demanding a mistake.
+      const src = String(messages.dashboard.marketplace.usedTimes ?? "");
+      if (
+        new Intl.PluralRules(locale).select(1) === "one" &&
+        !/\bone\s*\{/.test(src)
+      ) {
+        broken.push(
+          `${locale}: has a distinct singular and no one{} branch — "${rendered[1]}"`,
+        );
+      }
+    }
+    ok(
+      `the use count is a real plural in every locale (${broken.length} are not)`,
+      broken.length === 0,
+      broken.join("\n        "),
+    );
+  }
+
   // And the page renders none of the retired strings.
   ok(
     "the page no longer renders a disabled button",

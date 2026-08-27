@@ -233,7 +233,7 @@
     "setUpTeam": "Set Up Team",
     "features": {
       "basicAiChat": "Basic AI chat",
-      "creditsPerMonth": "{count} credits/month",
+      "creditsPerMonth": "{count, plural, one {# credit} other {# credits}}/month",
       "aiMemory": "AI Memory",
       "websiteAutomationBuilderAccess": "Website & Automation Builder access",
       "everythingInStarter": "Everything in Starter",
@@ -498,7 +498,7 @@
       "totalEntries": "Total Entries",
       "mostActiveModule": "Most Active Module",
       "unlimited": "Unlimited",
-      "wouldHaveCost": "Would have cost {credits} credits"
+      "wouldHaveCost": "Would have cost {credits, plural, one {# credit} other {# credits}}"
     },
     "theme": {
       "title": "Theme",
@@ -642,7 +642,7 @@
     "marginReport": {
       "title": "Margin Report",
       "ownerOnly": "Owner",
-      "description": "Average achieved margin per feature over the last {days} days, from real measured AI cost.",
+      "description": "Average achieved margin per feature over the last {days, plural, one {# day} other {# days}}, from real measured AI cost.",
       "empty": "No AI actions recorded in this window yet.",
       "unavailable": "Could not load the report. Check that ai_cost_log exists.",
       "colFeature": "Feature",
@@ -661,7 +661,7 @@
       "sumTop": "Costliest feature",
       "sumTopHint": "{percent}% of all spend",
       "projectionOnly": "No charged actions yet — every margin below is a projection from bypass records, not revenue.",
-      "belowTargetAlert": "{count} feature(s) below the {target}x target: {features}. An alert has been emailed.",
+      "belowTargetAlert": "{count, plural, one {# feature} other {# features}} below the {target}x target: {features}. An alert has been emailed.",
       "cacheTitle": "Prompt cache",
       "cacheDescription": "Share of prompt tokens served from cache instead of paid at full price.",
       "cacheHitRate": "Hit rate",
@@ -670,7 +670,7 @@
       "cacheColWrite": "Written",
       "cacheEmpty": "No prompt tokens recorded yet.",
       "cacheMiscachedAlert": "{features}: writing to cache but reading nothing back — the breakpoint is on content that changes every request.",
-      "absorbedRefusals": "Absorbed refusals: {calls} agent run(s) refused the task and were not charged — €{cost} of model cost carried by us.",
+      "absorbedRefusals": "Absorbed refusals: {calls, plural, one {# agent run refused the task and was} other {# agent runs refused the task and were}} not charged — €{cost} of model cost carried by us.",
       "absorbedRefusalsShare": "That is {share}% of revenue in this window; the review threshold is {limit}%.",
       "absorbedRefusalsShareUnknown": "Share of revenue is not shown: this report has no revenue figure to measure against."
     },
@@ -780,7 +780,7 @@
         "heading": "What you are agreeing to",
         "rate": "€{price} per credit, fixed at today's price.",
         "cap": "Never more than €{cap} in one calendar month.",
-        "credits": "That buys up to {credits} extra credits.",
+        "credits": "That buys up to {credits, plural, one {# extra credit} other {# extra credits}}.",
         "invoice": "Charged as its own line on your next invoice, separate from your plan."
       },
       "agree": "Turn on overage",
@@ -1088,7 +1088,7 @@
           "medium": "Steady energy — good next step",
           "deep": "Good energy — take this on"
         },
-        "heldBack": "{count} heavier steps held back for now"
+        "heldBack": "{count, plural, one {# heavier step} other {# heavier steps}} held back for now"
       },
       "stillPlanning": "Still planning — this is taking a while. It will keep going, and the plan will be on your missions list when it is ready.",
       "planStalled": "That plan stopped unexpectedly. No credits were charged — please try again.",
@@ -1099,7 +1099,7 @@
       },
       "deleteMission": "Delete mission",
       "deleteConfirmMission": "Delete the mission “{goal}”?",
-      "deleteConfirmLoses": "This removes {steps} step(s) — {completed} already completed — and {scheduled} scheduled run(s). It cannot be undone.",
+      "deleteConfirmLoses": "This removes {steps, plural, one {# step} other {# steps}} — {completed} already completed — and {scheduled, plural, one {# scheduled run} other {# scheduled runs}}. It cannot be undone.",
       "deletedMission": "Mission deleted",
       "deleteFailed": "Could not delete this mission.",
       "deleteStep": "Delete step",
@@ -1119,7 +1119,7 @@
       "generating": "Generating...",
       "entriesTitle": "New entries (this week / last week)",
       "noModuleActivity": "No activity in any module in the last two weeks.",
-      "missionStepsLabel": "{completed} mission steps completed, {pending} still pending",
+      "missionStepsLabel": "{completed, plural, one {# mission step completed} other {# mission steps completed}}, {pending} still pending",
       "reflectionLabel": "Reflection"
     },
     "tradingWorkflow": {
@@ -1188,7 +1188,7 @@
       "generating": "Generating...",
       "generated": "Website generated",
       "duplicateGenerationSuppressed": "A generation is already in progress for this — showing its current progress instead of starting a new one.",
-      "estimatedCost": "Estimated cost: {count} credits",
+      "estimatedCost": "Estimated cost: {count, plural, one {# credit} other {# credits}}",
       "estimatedTimeWithImages": "Complex websites with images may take 10+ minutes to generate — feel free to leave this page.",
       "estimatedTimeLargeRequest": "Very large or detailed requests (long description or 10+ images) can take 20-30 minutes to generate — feel free to leave this page, it'll keep working.",
       "clarificationTitle": "A couple of quick questions before generating:",
@@ -1222,9 +1222,9 @@
       "backToLatest": "Back to latest",
       "previewIncompleteTitle": "Preview unavailable",
       "previewIncompleteBody": "This generated page looks incomplete or got cut off, so it can't be shown safely. Try regenerating with a shorter description, or edit it again.",
-      "unfilledTitle": "{count} thing(s) still to fill in",
+      "unfilledTitle": "{count, plural, one {# thing} other {# things}} still to fill in",
       "unfilledBody": "The AI never invents a phone number, price or opening time — it leaves a visible blank instead. Use \"Ask for a change\" to fill these in, or edit them after publishing.",
-      "inventedTitle": "{count} number(s) on the page you never gave",
+      "inventedTitle": "{count, plural, one {# number} other {# numbers}} on the page you never gave",
       "inventedBody": "These appear on the page but not in your brief. The AI is told never to invent a phone number, price, opening time or figure — check each one before you publish, and use \"Ask for a change\" to correct it.",
       "inventedKind": {
         "phone": "phone",
@@ -1260,7 +1260,7 @@
         "clear": "Clear",
         "background": "Background",
         "ownPhotoNeedsUpload": "Upload a photo above first.",
-        "imageUse": "Your {count} uploaded photo(s)",
+        "imageUse": "{count, plural, one {Your uploaded photo} other {Your # uploaded photos}}",
         "backgrounds": {
           "auto": "You choose",
           "solid": "Solid",
@@ -1305,7 +1305,7 @@
       "pageSelectLabel": "Pages of this site",
       "pageHome": "Home",
       "editPageGone": "That page is no longer part of this site — reopen it to see the current pages.",
-      "stockNoticeTitle": "{count} stock photographs on this site",
+      "stockNoticeTitle": "{count, plural, one {# stock photograph} other {# stock photographs}} on this site",
       "stockNoticeBody": "Upload your own for a more authentic result — Unsplash has a business like yours, not yours.",
       "stockNoticeAction": "Upload photos",
       "storageFull": "Not enough space for these images — {needed} needed, {free} free."
@@ -1400,7 +1400,7 @@
       "detectedType": "Type",
       "estimatedTime": "Estimated time",
       "estimatedCredits": "Estimated credits",
-      "creditsApprox": "~{count} credits",
+      "creditsApprox": "~{count, plural, one {# credit} other {# credits}}",
       "noCreditCost": "No credits",
       "create": "Create",
       "editDescription": "Edit description",
@@ -1484,7 +1484,7 @@
       "previewCostPerRun": "Cost per run",
       "previewNextRuns": "First three runs",
       "previewTask": "See the exact task",
-      "creditsPerRun": "~{credits} credits",
+      "creditsPerRun": "~{credits, plural, one {# credit} other {# credits}}",
       "createButton": "Create agent",
       "creating": "Creating...",
       "discard": "Discard",
@@ -1505,7 +1505,7 @@
       "updateSuccess": "Agent updated.",
       "saveError": "Could not save that change. Please try again.",
       "confirmDelete": "Delete \"{name}\"? Its run history goes with it, and this can't be undone.",
-      "runSuccess": "Done — {credits} credits. The result was emailed to you.",
+      "runSuccess": "Done — {credits, plural, one {# credit} other {# credits}}. The result was emailed to you.",
       "runSuccessUnlimitedCost": "Done — unlimited on your account (would have cost {credits} credits). The result was emailed to you.",
       "runSuccessUnlimited": "Done — unlimited on your account, no credits charged. The result was emailed to you.",
       "runNothingToReport": "Nothing new to report this time.",
@@ -1527,7 +1527,7 @@
       "runRunning": "Running",
       "runManual": "Run now",
       "runScheduled": "Scheduled",
-      "runCredits": "{credits} credits",
+      "runCredits": "{credits, plural, one {# credit} other {# credits}}",
       "runCreditsUnlimited": "unlimited (would have cost {credits})",
       "viewOutput": "See the result",
       "scheduleFrequencyLabel": "How often",
@@ -1636,7 +1636,7 @@
         "legend": "How hard it works",
         "perRun": "per run",
         "suggested": "Suggested",
-        "facts": "{sources} sources · {steps} steps · about {seconds}s",
+        "facts": "{sources, plural, one {# source} other {# sources}} · {steps, plural, one {# step} other {# steps}} · about {seconds}s",
         "runOnce": "Run once at",
         "runOnceHint": "Only this run. The schedule keeps using {depth}.",
         "simple": {
@@ -1653,9 +1653,9 @@
         }
       },
       "templates": {
-        "found": "{count} ready-made agent(s) already do this",
-        "use": "Use this one — {credits} credits",
-        "buildNew": "Build a new one — {credits} credits",
+        "found": "{count, plural, one {# ready-made agent already does this} other {# ready-made agents already do this}}",
+        "use": "Use this one — {credits, plural, one {# credit} other {# credits}}",
+        "buildNew": "Build a new one — {credits, plural, one {# credit} other {# credits}}",
         "adopted": "Agent created, watching: {subject}",
         "adoptError": "That template could not be used. Nothing was created."
       },
@@ -1716,7 +1716,7 @@
       "copyFailed": "Couldn't copy the link.",
       "statusLive": "Live",
       "statusUnpublished": "Offline",
-      "viewsThisWeek": "{count} views this week",
+      "viewsThisWeek": "{count, plural, one {# view} other {# views}} this week",
       "viewsTotal": "{count} total",
       "close": "Close",
       "versionHistory": "Version history",
@@ -1825,11 +1825,11 @@
       "unsupportedType": "{name} is not a supported type. Upload a PDF, Word, Excel, CSV, Markdown or text file.",
       "emptyFile": "{name} is empty — there is nothing to read in it.",
       "used": "{used} of {cap} files",
-      "usedUnlimited": "{used} files",
+      "usedUnlimited": "{used, plural, one {# file} other {# files}}",
       "storage": "{used} of {cap}",
       "empty": "No files yet. Upload one to start asking questions about it.",
       "uploadedAt": "Uploaded {when}",
-      "pages": "{count} pages",
+      "pages": "{count, plural, one {# page} other {# pages}}",
       "statusReady": "Ready",
       "statusFailed": "Unreadable",
       "statusProcessing": "Processing",
@@ -1843,12 +1843,12 @@
       "deleteError": "The file could not be deleted.",
       "collections": "Collections",
       "collectionPlaceholder": "Name a collection…",
-      "saveSelection": "Save {count} selected",
+      "saveSelection": "{count, plural, one {Save # selected} other {Save # selected}}",
       "collectionCreated": "Collection {name} saved",
       "collectionError": "The collection could not be saved.",
       "askTitle": "Ask my documents",
       "askNothingSelected": "Tick the files the answer should come from. Nothing else will be used.",
-      "askSelected": "Answering from {count} file(s): {names}",
+      "askSelected": "Answering from {count, plural, one {# file} other {# files}}: {names}",
       "tooManySelected": "Ask about up to {max} files at a time.",
       "askPlaceholder": "Ask something about the selected files…",
       "ask": "Ask",
@@ -1857,11 +1857,11 @@
       "selectFirst": "Select at least one file first.",
       "notInDocuments": "The selected documents do not answer this. Nothing below comes from them.",
       "citations": "Sources in your documents",
-      "removedCitations": "{count} reference(s) pointed at pages that were not supplied and were removed.",
+      "removedCitations": "{count, plural, one {# reference pointed} other {# references pointed}} at pages that were not supplied and {count, plural, one {was} other {were}} removed.",
       "uncitedAnswer": "This answer carries no verifiable page references. Treat it with caution and check the documents directly.",
       "truncatedWarning": "Even read in parts, the selection was larger than one question can cover, so the answer may be incomplete. Ask about fewer files at a time.",
       "skippedFiles": "Skipped (no readable text): {names}",
-      "creditsCharged": "{credits} credits",
+      "creditsCharged": "{credits, plural, one {# credit} other {# credits}}",
       "stepsLabel": "How this page works",
       "step1Title": "1. Upload files",
       "step1Hint": "PDF, Word, Excel, CSV or text.",
@@ -1912,7 +1912,7 @@
       "planError": "The topic could not be turned into research questions.",
       "planTitle": "Before it starts",
       "planIntro": "These are the questions it will search. Nothing has been charged for them yet.",
-      "estimate": "Running this costs about {credits} credits.",
+      "estimate": "Running this costs about {credits, plural, one {# credit} other {# credits}}.",
       "estimateNote": "An estimate, not a charge. You are billed for the tokens and searches actually used, and the difference is released.",
       "start": "Start the research",
       "notNow": "Not now",
@@ -1924,8 +1924,8 @@
       "statusSynthesising": "Writing",
       "statusReady": "Ready",
       "statusFailed": "Failed",
-      "questionCount": "{count} questions",
-      "creditsCharged": "{credits} credits",
+      "questionCount": "{count, plural, one {# question} other {# questions}}",
+      "creditsCharged": "{credits, plural, one {# credit} other {# credits}}",
       "createdAt": "Started {when}",
       "openReport": "Open the report",
       "openDocument": "Open as a document",
@@ -1993,10 +1993,10 @@
       "counts": "{ready} of {total} rows are ready to import",
       "skippedRows": "{count} skipped",
       "truncated": "only the first rows were read",
-      "importRows": "Import {count} rows",
+      "importRows": "{count, plural, one {Import # row} other {Import # rows}}",
       "importing": "Importing…",
-      "imported": "{count} rows imported",
-      "importedSummary": "{count} rows are now in your account.",
+      "imported": "{count, plural, one {# row imported} other {# rows imported}}",
+      "importedSummary": "{count, plural, one {# row is} other {# rows are}} now in your account.",
       "importError": "The import did not go through.",
       "pasteTitle": "Paste anything",
       "pasteHint": "A business plan, meeting notes, a list of clients. We pull out what can be recorded and leave the rest alone.",
@@ -2014,7 +2014,7 @@
     },
     "insights": {
       "title": "What I noticed",
-      "basedOn": "from {count} of your records",
+      "basedOn": "from {count, plural, one {# of your records} other {# of your records}}",
       "checkIt": "Check it yourself",
       "showNumbers": "Show the numbers",
       "hideNumbers": "Hide the numbers",
@@ -2067,7 +2067,7 @@
     "affiliate": {
       "title": "Affiliate",
       "description": "Share Ionexa, earn a share of what the people you send keep paying.",
-      "pitch": "Earn {percent}% of every payment your referrals make, every month, for {months} months.",
+      "pitch": "Earn {percent}% of every payment your referrals make, every month, for {months, plural, one {# month} other {# months}}.",
       "pitchTerms": "You can't refer yourself, and each person can only be referred once. Commission starts on their first payment.",
       "join": "Get my link",
       "joining": "Setting up…",
@@ -2075,7 +2075,7 @@
       "yourLink": "Your link",
       "copy": "Copy",
       "copied": "Copied",
-      "terms": "{percent}% of every payment, for {months} months from their first one.",
+      "terms": "{percent}% of every payment, for {months, plural, one {# month} other {# months}} from their first one.",
       "suspended": "This affiliate account is suspended, so no new commission is being earned. Contact support if you think that's wrong.",
       "stat": {
         "signups": "Signed up",
@@ -2159,7 +2159,7 @@
         "no_key": "No emails are being sent: this deployment has no email API key.",
         "unverified_domain": "Emails are not arriving: the sending domain is not verified.",
         "failed": "Some notification emails could not be sent.",
-        "affected": "{count} submission(s) are saved here but were never emailed to you. Nothing has been lost."
+        "affected": "{count, plural, one {# submission is saved} other {# submissions are saved}} here but {count, plural, one {was} other {were}} never emailed to you. Nothing has been lost."
       }
     },
     "trading": {
@@ -2203,7 +2203,7 @@
         "noLosses": "No losing trades in this sample",
         "beforeCosts": "These figures are before commission — add it to your trades to see them net.",
         "afterCosts": "These figures are net of the commission you recorded.",
-        "unscoreable": "{count} trades could not be scored (missing prices or P&L)"
+        "unscoreable": "{count, plural, one {# trade could not be scored} other {# trades could not be scored}} (missing prices or P&L)"
       },
       "pattern": {
         "title": "After a loss",
@@ -2220,7 +2220,7 @@
         "add": "Add rule",
         "empty": "No rules yet. Write one above and every trade will be checked against it.",
         "delete": "Delete rule",
-        "saved": "{count} rules saved",
+        "saved": "{count, plural, one {# rule saved} other {# rules saved}}",
         "saveFailed": "Could not save that rule.",
         "deleteFailed": "Could not delete that rule."
       },
@@ -2236,18 +2236,18 @@
       },
       "ruleSummary": {
         "max_risk_percent": "Risk at most {percent}% per trade",
-        "max_trades_per_day": "At most {count} trades a day",
+        "max_trades_per_day": "At most {count, plural, one {# trade} other {# trades}} a day",
         "min_risk_reward": "Reward at least {ratio}x the risk",
         "allowed_sessions": "Only these sessions: {sessions}",
         "allowed_instruments": "Only these instruments: {instruments}",
         "max_daily_loss": "Stop after losing {amount} in a day",
-        "no_trade_after_loss": "Wait {minutes} minutes after a loss",
+        "no_trade_after_loss": "Wait {minutes, plural, one {# minute} other {# minutes}} after a loss",
         "max_position_size": "Position size at most {size}"
       },
       "violations": {
-        "count": "Broken {count} times",
+        "count": "{count, plural, one {Broken once} other {Broken # times}}",
         "none": "Not broken",
-        "uncheckable": "{count} checks could not run because the trades were missing a price, a risk amount or a time."
+        "uncheckable": "{count, plural, one {# check could not run} other {# checks could not run}} because the trades were missing a price, a risk amount or a time."
       },
       "errors": {
         "bad_request": "That request could not be read.",
@@ -2420,27 +2420,27 @@
       "upgradePlan": "Upgrade plan"
     },
     "low": {
-      "remaining": "{count} credits left this month",
+      "remaining": "{count, plural, one {# credit left} other {# credits left}} this month",
       "none": "No credits left this month",
       "hint": "top up now so nothing interrupts you.",
       "topUp": "Top up"
     },
     "estimate": {
-      "approx": "~{count} credits",
+      "approx": "~{count, plural, one {# credit} other {# credits}}",
       "confirmTitle": "This is a large action",
-      "confirmBody": "This will cost about {count} credits. You can continue, or edit your request to make it smaller.",
+      "confirmBody": "This will cost about {count, plural, one {# credit} other {# credits}}. You can continue, or edit your request to make it smaller.",
       "cancel": "Cancel",
       "continue": "Continue"
     },
     "freeChat": {
-      "remaining": "{count} free messages left this month",
+      "remaining": "{count, plural, one {# free message left} other {# free messages left}} this month",
       "exhausted": "Free messages used up — this month's chats now use credits",
-      "largeMessage": "This message is large — it will be charged about {count} credits"
+      "largeMessage": "This message is large — it will be charged about {count, plural, one {# credit} other {# credits}}"
     },
-    "used": "Used {count} credits",
-    "usedWithRemaining": "Used {count} credits · {remaining} left",
+    "used": "{count, plural, one {Used # credit} other {Used # credits}}",
+    "usedWithRemaining": "{count, plural, one {Used # credit} other {Used # credits}} · {remaining} left",
     "unlimited": "Unlimited — no credits used",
-    "unlimitedWouldHaveCost": "Unlimited — would have cost {count} credits",
+    "unlimitedWouldHaveCost": "Unlimited — would have cost {count, plural, one {# credit} other {# credits}}",
     "freeMessage": "Free message · {count} left this month"
   },
   "cookies": {
@@ -3003,7 +3003,7 @@
   },
   "voice": {
     "listen": "Listen",
-    "listenFor": "Listen · {credits} credits",
+    "listenFor": "Listen · {credits, plural, one {# credit} other {# credits}}",
     "pause": "Pause",
     "speed": "Playback speed",
     "voice": "Voice",
@@ -3011,7 +3011,7 @@
     "listeningHint": "Speak, then press Stop. Nothing is sent until you have read it.",
     "startListening": "Speak instead of typing",
     "stopListening": "Stop",
-    "costPerMinute": "{credits} credits per minute of speech",
+    "costPerMinute": "{credits, plural, one {# credit} other {# credits}} per minute of speech",
     "outOfMinutes": "No voice minutes left this month",
     "states": {
       "idle": "Ready",
@@ -3045,7 +3045,7 @@
       "pressToStart": "Recording starts only when you press, and stops when you press again.",
       "notStored": "The audio is sent for transcription and stored nowhere — not by us, not afterwards.",
       "editFirst": "You read and correct the text before anything is sent.",
-      "cost": "{credits} credits per minute, {minutes} minutes a month on your plan.",
+      "cost": "{credits, plural, one {# credit} other {# credits}} per minute, {minutes, plural, one {# minute} other {# minutes}} a month on your plan.",
       "allow": "Open the microphone",
       "cancel": "Not now"
     },
@@ -3077,9 +3077,9 @@
       "exhausted": "No minutes left this month. They reset on the first.",
       "notConfigured": "Voice is not set up on this deployment, so the microphone and Listen buttons do not appear.",
       "notIncluded": "Voice is not included on your plan. Everything here can still be typed and read.",
-      "perMinute": "{credits} credits a minute",
+      "perMinute": "{credits, plural, one {# credit} other {# credits}} a minute",
       "privacy": "Recording only ever starts when you press. The audio is sent for transcription and stored nowhere — we keep the number of seconds, and nothing else.",
-      "remaining": "{minutes} minutes left",
+      "remaining": "{minutes, plural, one {# minute left} other {# minutes left}}",
       "speakLabel": "Having it read to you",
       "title": "Voice",
       "transcribeLabel": "Speaking to it",
@@ -3094,15 +3094,15 @@
       "description": "CSV or Excel, up to 8 MB. Nothing is charged for reading a file.",
       "button": "Choose a file",
       "working": "Reading…",
-      "done": "Read {rows} rows",
+      "done": "{rows, plural, one {Read # row} other {Read # rows}}",
       "failed": "That file couldn't be read.",
       "tooLarge": "That file is too big — 8 MB is the limit."
     },
     "summary": {
-      "counts": "{rows} rows · {columns} columns",
-      "duplicates": "{count} exact duplicate rows",
+      "counts": "{rows, plural, one {# row} other {# rows}} · {columns, plural, one {# column} other {# columns}}",
+      "duplicates": "{count, plural, one {# exact duplicate row} other {# exact duplicate rows}}",
       "truncated": "We read the first 50,000 rows. The charts describe those, not the whole file.",
-      "ragged": "{count} rows didn't line up with the header — check the file was saved with the right separator."
+      "ragged": "{count, plural, one {# row didn't line up} other {# rows didn't line up}} with the header — check the file was saved with the right separator."
     },
     "columns": {
       "name": "Column",
@@ -3139,7 +3139,7 @@
       "working": "Asking…",
       "failed": "That question couldn't be answered.",
       "matched": "{matched} of {total} rows matched",
-      "rowCount": "{count} rows"
+      "rowCount": "{count, plural, one {# row} other {# rows}}"
     },
     "legacy": {
       "title": "Your earlier notes",
@@ -3220,8 +3220,8 @@
     "needsInput": "Needs: {fields}",
     "needsHistory": "Needs {need} months of history — we have {have}.",
     "noChangeYet": "no change yet",
-    "notEnoughDays": "{days} day(s) of history so far.",
-    "provenance": "History began the day this shipped: {months} month(s) of subscriber data and {days} daily snapshots. Nothing is back-filled — a back-filled figure would be today's prices applied to a past nobody recorded.",
+    "notEnoughDays": "{days, plural, one {# day} other {# days}} of history so far.",
+    "provenance": "History began the day this shipped: {months, plural, one {# month} other {# months}} of subscriber data and {days, plural, one {# daily snapshot} other {# daily snapshots}}. Nothing is back-filled — a back-filled figure would be today's prices applied to a past nobody recorded.",
     "inputs": {
       "marketing_spend": "marketing spend",
       "fixed_costs": "fixed costs",
@@ -3291,8 +3291,8 @@
       "removedThisMonth": "Badge removed this month.",
       "cancelledKeepsMonth": "Auto-renewal is off. The badge stays away until the end of this month, then returns.",
       "stopRenewing": "Stop renewing",
-      "offer": "Remove the \"Made with Ionexa\" badge from this site for {credits} credits a month (about €{eur}).",
-      "affordable": "You have {balance} credits — about {months} month(s) for this site.",
+      "offer": "Remove the “Made with Ionexa” badge from this site for {credits, plural, one {# credit} other {# credits}} a month (about €{eur}).",
+      "affordable": "You have {balance, plural, one {# credit} other {# credits}} — about {months, plural, one {# month} other {# months}} for this site.",
       "notEnough": "You have {balance} credits and need {needed}.",
       "remove": "Remove the badge"
     }

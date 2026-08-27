@@ -18,7 +18,7 @@
     "viewPlans": "Δες τα πλάνα",
     "chooseFiles": "Επιλογή αρχείων",
     "noFileChosen": "Δεν επιλέχθηκε αρχείο",
-    "filesSelected": "{count} επιλεγμένα",
+    "filesSelected": "{count, plural, one {# επιλεγμένο} other {# επιλεγμένα}}",
     "networkError": "Σφάλμα δικτύου — δοκιμάστε ξανά.",
     "notAuthenticated": "Δεν έχετε συνδεθεί.",
     "created": "✓ δημιουργήθηκε",
@@ -56,7 +56,7 @@
     "offline": {
       "title": "Είσαι εκτός σύνδεσης.",
       "showingCached": "Τίποτα σε αυτή τη σελίδα δεν ενημερώνεται.",
-      "showingCachedAge": "Τίποτα εδώ δεν ενημερώνεται — φορτώθηκε πριν από {minutes} λεπτά.",
+      "showingCachedAge": "Τίποτα εδώ δεν ενημερώνεται — φορτώθηκε πριν από {minutes, plural, one {# λεπτό} other {# λεπτά}}.",
       "retry": "Δοκίμασε ξανά",
       "checking": "Ελέγχω…",
       "stillOffline": "Ακόμα χωρίς σύνδεση."
@@ -233,7 +233,7 @@
     "setUpTeam": "Δημιουργία Ομάδας",
     "features": {
       "basicAiChat": "Βασική συνομιλία AI",
-      "creditsPerMonth": "{count} credits/μήνα",
+      "creditsPerMonth": "{count, plural, one {# credit} other {# credits}}/μήνα",
       "aiMemory": "Μνήμη AI",
       "websiteAutomationBuilderAccess": "Πρόσβαση σε Website & Automation Builder",
       "everythingInStarter": "Ό,τι περιλαμβάνει το Starter",
@@ -498,7 +498,7 @@
       "totalEntries": "Σύνολο Εγγραφών",
       "mostActiveModule": "Πιο Ενεργό Module",
       "unlimited": "Απεριόριστα",
-      "wouldHaveCost": "Θα κόστιζαν {credits} credits"
+      "wouldHaveCost": "Θα κόστιζε {credits, plural, one {# credit} other {# credits}}"
     },
     "theme": {
       "title": "Θέμα",
@@ -642,7 +642,7 @@
     "marginReport": {
       "title": "Αναφορά Περιθωρίου",
       "ownerOnly": "Ιδιοκτήτης",
-      "description": "Μέσο επιτευχθέν περιθώριο ανά λειτουργία τις τελευταίες {days} ημέρες, από πραγματικό μετρημένο κόστος AI.",
+      "description": "Μέσο επιτευχθέν περιθώριο ανά λειτουργία {days, plural, one {την τελευταία # ημέρα} other {τις τελευταίες # ημέρες}}, από πραγματικό μετρημένο κόστος AI.",
       "empty": "Καμία ενέργεια AI καταγεγραμμένη σε αυτό το διάστημα ακόμα.",
       "unavailable": "Δεν ήταν δυνατή η φόρτωση της αναφοράς. Έλεγξε ότι υπάρχει ο πίνακας ai_cost_log.",
       "colFeature": "Λειτουργία",
@@ -661,7 +661,7 @@
       "sumTop": "Ακριβότερο feature",
       "sumTopHint": "{percent}% της συνολικής δαπάνης",
       "projectionOnly": "Δεν υπάρχουν χρεωμένες ενέργειες — κάθε margin παρακάτω είναι πρόβλεψη από bypass εγγραφές, όχι έσοδα.",
-      "belowTargetAlert": "{count} feature κάτω από τον στόχο {target}x: {features}. Στάλθηκε ειδοποίηση με email.",
+      "belowTargetAlert": "{count, plural, one {# feature} other {# features}} κάτω από τον στόχο {target}x: {features}. Στάλθηκε ειδοποίηση με email.",
       "cacheTitle": "Προσωρινή μνήμη prompt",
       "cacheDescription": "Ποσοστό των tokens του prompt που εξυπηρετήθηκαν από την cache αντί να χρεωθούν σε πλήρη τιμή.",
       "cacheHitRate": "Ποσοστό επιτυχίας",
@@ -670,7 +670,7 @@
       "cacheColWrite": "Εγγραφή",
       "cacheEmpty": "Δεν έχουν καταγραφεί ακόμα tokens prompt.",
       "cacheMiscachedAlert": "{features}: γράφει στην cache αλλά δεν διαβάζει τίποτα πίσω — το σημείο διακοπής βρίσκεται σε περιεχόμενο που αλλάζει σε κάθε αίτημα.",
-      "absorbedRefusals": "Απορροφημένες αρνήσεις: {calls} εκτέλεση/εις agent αρνήθηκαν την εργασία και δεν χρεώθηκαν — €{cost} κόστος μοντέλου το επωμιζόμαστε εμείς.",
+      "absorbedRefusals": "Απορροφημένες αρνήσεις: {calls, plural, one {# εκτέλεση agent αρνήθηκε} other {# εκτελέσεις agent αρνήθηκαν}} την εργασία και δεν {calls, plural, one {χρεώθηκε} other {χρεώθηκαν}} — €{cost} κόστος μοντέλου το επωμιζόμαστε εμείς.",
       "absorbedRefusalsShare": "Είναι {share}% των εσόδων σε αυτό το διάστημα· το κατώφλι επανεξέτασης είναι {limit}%.",
       "absorbedRefusalsShareUnknown": "Το ποσοστό επί των εσόδων δεν εμφανίζεται: αυτή η αναφορά δεν έχει μέγεθος εσόδων για να το μετρήσει."
     },
@@ -780,7 +780,7 @@
         "heading": "Τι συμφωνείς",
         "rate": "€{price} ανά credit, κλειδωμένο στη σημερινή τιμή.",
         "cap": "Ποτέ πάνω από €{cap} μέσα σε έναν ημερολογιακό μήνα.",
-        "credits": "Αυτό αγοράζει έως {credits} επιπλέον credits.",
+        "credits": "Αυτό αγοράζει έως {credits, plural, one {# επιπλέον credit} other {# επιπλέον credits}}.",
         "invoice": "Χρεώνεται ως ξεχωριστή γραμμή στο επόμενο τιμολόγιο, χωριστά από το πλάνο σου."
       },
       "agree": "Ενεργοποίηση υπέρβασης",
@@ -1080,7 +1080,7 @@
       "noSteps": "Αυτή η αποστολή δεν έχει ακόμα βήματα σχεδίου.",
       "reviewNotRunYet": "Όλα τα βήματα ολοκληρώθηκαν — τρέξτε τον Αξιολογητή για σύνοψη.",
       "reviewLocked": "Ο Αξιολογητής τρέχει μόλις ολοκληρωθούν όλα τα βήματα.",
-      "stepMinutes": "~{count} λεπτά",
+      "stepMinutes": "~{count, plural, one {# λεπτό} other {# λεπτά}}",
       "updatedElsewhere": "Αυτή η αποστολή ενημερώθηκε αλλού μόλις τώρα — ανανέωση για την τελευταία κατάσταση.",
       "energy": {
         "heading": {
@@ -1088,7 +1088,7 @@
           "medium": "Σταθερή ενέργεια — καλό επόμενο βήμα",
           "deep": "Καλή ενέργεια — πιάσε αυτό"
         },
-        "heldBack": "{count} πιο βαριά βήματα στην άκρη προς το παρόν"
+        "heldBack": "{count, plural, one {# πιο βαρύ βήμα} other {# πιο βαριά βήματα}} στην άκρη προς το παρόν"
       },
       "stillPlanning": "Ακόμη σχεδιάζει — παίρνει λίγη ώρα. Συνεχίζει κανονικά και το πλάνο θα βρίσκεται στη λίστα αποστολών σου μόλις ετοιμαστεί.",
       "planStalled": "Το πλάνο σταμάτησε απροσδόκητα. Δεν χρεώθηκαν credits — δοκίμασε ξανά.",
@@ -1099,7 +1099,7 @@
       },
       "deleteMission": "Διαγραφή αποστολής",
       "deleteConfirmMission": "Να διαγραφεί η αποστολή «{goal}»;",
-      "deleteConfirmLoses": "Χάνονται {steps} βήμα(τα) — τα {completed} ολοκληρωμένα — και {scheduled} προγραμματισμένη(ες) εκτέλεση(εις). Δεν αναιρείται.",
+      "deleteConfirmLoses": "Χάνονται {steps, plural, one {# βήμα} other {# βήματα}} — τα {completed} ολοκληρωμένα — και {scheduled, plural, one {# προγραμματισμένη εκτέλεση} other {# προγραμματισμένες εκτελέσεις}}. Δεν αναιρείται.",
       "deletedMission": "Η αποστολή διαγράφηκε",
       "deleteFailed": "Δεν ήταν δυνατή η διαγραφή της αποστολής.",
       "deleteStep": "Διαγραφή βήματος",
@@ -1119,7 +1119,7 @@
       "generating": "Δημιουργία...",
       "entriesTitle": "Νέες εγγραφές (αυτή τη βδομάδα / προηγούμενη)",
       "noModuleActivity": "Καμία δραστηριότητα σε κανένα module τις τελευταίες δύο βδομάδες.",
-      "missionStepsLabel": "{completed} βήματα missions ολοκληρώθηκαν, {pending} παραμένουν σε εκκρεμότητα",
+      "missionStepsLabel": "{completed, plural, one {# βήμα mission ολοκληρώθηκε} other {# βήματα missions ολοκληρώθηκαν}}, {pending, plural, one {# παραμένει σε εκκρεμότητα} other {# παραμένουν σε εκκρεμότητα}}",
       "reflectionLabel": "Αναστοχασμός"
     },
     "tradingWorkflow": {
@@ -1188,7 +1188,7 @@
       "generating": "Δημιουργία...",
       "generated": "Η ιστοσελίδα δημιουργήθηκε",
       "duplicateGenerationSuppressed": "Μια δημιουργία βρίσκεται ήδη σε εξέλιξη για αυτό — εμφανίζεται η τρέχουσα πρόοδος αντί να ξεκινήσει νέα.",
-      "estimatedCost": "Εκτιμώμενο κόστος: {count} credits",
+      "estimatedCost": "Εκτιμώμενο κόστος: {count, plural, one {# credit} other {# credits}}",
       "estimatedTimeWithImages": "Πολύπλοκα websites με εικόνες μπορεί να χρειαστούν 10+ λεπτά για να δημιουργηθούν — μπορείς να φύγεις από τη σελίδα.",
       "estimatedTimeLargeRequest": "Πολύ μεγάλα ή λεπτομερή αιτήματα (μεγάλη περιγραφή ή 10+ εικόνες) μπορεί να χρειαστούν 20-30 λεπτά για να δημιουργηθούν — μπορείς να φύγεις από τη σελίδα, θα συνεχίσει να δουλεύει.",
       "clarificationTitle": "Λίγες γρήγορες ερωτήσεις πριν τη δημιουργία:",
@@ -1222,9 +1222,9 @@
       "backToLatest": "Επιστροφή στην τελευταία",
       "previewIncompleteTitle": "Η προεπισκόπηση δεν είναι διαθέσιμη",
       "previewIncompleteBody": "Αυτή η σελίδα φαίνεται ημιτελής ή κόπηκε, οπότε δεν μπορεί να εμφανιστεί με ασφάλεια. Δοκίμασε να τη δημιουργήσεις ξανά με μικρότερη περιγραφή, ή επεξεργάσου την ξανά.",
-      "unfilledTitle": "{count} στοιχείο(-α) μένουν να συμπληρωθούν",
+      "unfilledTitle": "{count, plural, one {# στοιχείο μένει} other {# στοιχεία μένουν}} να συμπληρωθ{count, plural, one {εί} other {ούν}}",
       "unfilledBody": "Το AI δεν εφευρίσκει ποτέ τηλέφωνο, τιμή ή ωράριο — αφήνει ορατό κενό. Χρησιμοποίησε το «Ζήτα μια αλλαγή» για να τα συμπληρώσεις, ή διόρθωσέ τα μετά τη δημοσίευση.",
-      "inventedTitle": "{count} νούμερο(-α) στη σελίδα που δεν έδωσες",
+      "inventedTitle": "{count, plural, one {# νούμερο} other {# νούμερα}} στη σελίδα που δεν έδωσες",
       "inventedBody": "Εμφανίζονται στη σελίδα αλλά όχι σε όσα έγραψες. Το AI έχει εντολή να μην εφευρίσκει ποτέ τηλέφωνο, τιμή, ώρα λειτουργίας ή νούμερο — έλεγξέ τα πριν δημοσιεύσεις και διόρθωσέ τα με το «Ζήτα μια αλλαγή».",
       "inventedKind": {
         "phone": "τηλέφωνο",
@@ -1260,7 +1260,7 @@
         "clear": "Καθάρισε",
         "background": "Φόντο",
         "ownPhotoNeedsUpload": "Ανέβασε πρώτα μια φωτογραφία παραπάνω.",
-        "imageUse": "Οι {count} φωτογραφίες σου",
+        "imageUse": "{count, plural, one {Η φωτογραφία σου} other {Οι # φωτογραφίες σου}}",
         "backgrounds": {
           "auto": "Διάλεξε εσύ",
           "solid": "Μονόχρωμο",
@@ -1305,7 +1305,7 @@
       "pageSelectLabel": "Σελίδες αυτού του site",
       "pageHome": "Αρχική",
       "editPageGone": "Αυτή η σελίδα δεν ανήκει πλέον σε αυτό το site — άνοιξέ το ξανά για να δεις τις τρέχουσες σελίδες.",
-      "stockNoticeTitle": "{count} stock φωτογραφίες σε αυτό το site",
+      "stockNoticeTitle": "{count, plural, one {# stock φωτογραφία} other {# stock φωτογραφίες}} σε αυτό το site",
       "stockNoticeBody": "Ανέβασε δικές σου για πιο αυθεντικό αποτέλεσμα — το Unsplash έχει μια επιχείρηση σαν τη δική σου, όχι τη δική σου.",
       "stockNoticeAction": "Ανέβασε φωτογραφίες",
       "storageFull": "Δεν χωράνε αυτές οι εικόνες — χρειάζονται {needed}, ελεύθερα {free}."
@@ -1400,7 +1400,7 @@
       "detectedType": "Τύπος",
       "estimatedTime": "Εκτιμώμενος χρόνος",
       "estimatedCredits": "Εκτιμώμενα credits",
-      "creditsApprox": "~{count} credits",
+      "creditsApprox": "~{count, plural, one {# credit} other {# credits}}",
       "noCreditCost": "Χωρίς χρέωση",
       "create": "Δημιουργία",
       "editDescription": "Επεξεργασία περιγραφής",
@@ -1484,7 +1484,7 @@
       "previewCostPerRun": "Κόστος ανά εκτέλεση",
       "previewNextRuns": "Οι τρεις πρώτες εκτελέσεις",
       "previewTask": "Δες την ακριβή εργασία",
-      "creditsPerRun": "~{credits} credits",
+      "creditsPerRun": "~{credits, plural, one {# credit} other {# credits}}",
       "createButton": "Δημιουργία πράκτορα",
       "creating": "Δημιουργία...",
       "discard": "Απόρριψη",
@@ -1505,7 +1505,7 @@
       "updateSuccess": "Ο πράκτορας ενημερώθηκε.",
       "saveError": "Δεν ήταν δυνατή η αποθήκευση. Δοκίμασε ξανά.",
       "confirmDelete": "Διαγραφή του \"{name}\"; Διαγράφεται και το ιστορικό εκτελέσεων και δεν αναιρείται.",
-      "runSuccess": "Έτοιμο — {credits} credits. Το αποτέλεσμα στάλθηκε στο email σου.",
+      "runSuccess": "Έτοιμο — {credits, plural, one {# credit} other {# credits}}. Το αποτέλεσμα στάλθηκε στο email σου.",
       "runSuccessUnlimitedCost": "Έτοιμο — απεριόριστο στον λογαριασμό σου (θα κόστιζε {credits} credits). Το αποτέλεσμα στάλθηκε στο email σου.",
       "runSuccessUnlimited": "Έτοιμο — απεριόριστο στον λογαριασμό σου, χωρίς χρέωση credits. Το αποτέλεσμα στάλθηκε στο email σου.",
       "runNothingToReport": "Δεν υπάρχει κάτι νέο αυτή τη φορά.",
@@ -1527,7 +1527,7 @@
       "runRunning": "Εκτελείται",
       "runManual": "Χειροκίνητη",
       "runScheduled": "Προγραμματισμένη",
-      "runCredits": "{credits} credits",
+      "runCredits": "{credits, plural, one {# credit} other {# credits}}",
       "runCreditsUnlimited": "απεριόριστο (θα κόστιζε {credits})",
       "viewOutput": "Δες το αποτέλεσμα",
       "scheduleFrequencyLabel": "Πόσο συχνά",
@@ -1636,7 +1636,7 @@
         "legend": "Πόσο βαθιά δουλεύει",
         "perRun": "ανά εκτέλεση",
         "suggested": "Προτεινόμενο",
-        "facts": "{sources} πηγές · {steps} βήματα · περίπου {seconds}δ",
+        "facts": "{sources, plural, one {# πηγή} other {# πηγές}} · {steps, plural, one {# βήμα} other {# βήματα}} · περίπου {seconds}δ",
         "runOnce": "Μία εκτέλεση σε",
         "runOnceHint": "Μόνο αυτή η εκτέλεση. Το πρόγραμμα συνεχίζει με {depth}.",
         "simple": {
@@ -1653,9 +1653,9 @@
         }
       },
       "templates": {
-        "found": "{count} έτοιμοι agents κάνουν ήδη αυτό",
-        "use": "Χρήσε αυτόν — {credits} credits",
-        "buildNew": "Φτιάξε νέο — {credits} credits",
+        "found": "{count, plural, one {# έτοιμος agent κάνει ήδη αυτό} other {# έτοιμοι agents κάνουν ήδη αυτό}}",
+        "use": "Χρήσε αυτόν — {credits, plural, one {# credit} other {# credits}}",
+        "buildNew": "Φτιάξε νέο — {credits, plural, one {# credit} other {# credits}}",
         "adopted": "Ο agent δημιουργήθηκε, παρακολουθεί: {subject}",
         "adoptError": "Το πρότυπο δεν μπόρεσε να χρησιμοποιηθεί. Δεν δημιουργήθηκε τίποτα."
       },
@@ -1716,7 +1716,7 @@
       "copyFailed": "Δεν ήταν δυνατή η αντιγραφή του συνδέσμου.",
       "statusLive": "Ζωντανό",
       "statusUnpublished": "Εκτός",
-      "viewsThisWeek": "{count} προβολές αυτή την εβδομάδα",
+      "viewsThisWeek": "{count, plural, one {# προβολή} other {# προβολές}} αυτή την εβδομάδα",
       "viewsTotal": "{count} συνολικά",
       "close": "Κλείσιμο",
       "versionHistory": "Ιστορικό εκδόσεων",
@@ -1825,11 +1825,11 @@
       "unsupportedType": "Το {name} δεν είναι υποστηριζόμενος τύπος. Ανέβασε PDF, Word, Excel, CSV, Markdown ή αρχείο κειμένου.",
       "emptyFile": "Το {name} είναι κενό — δεν υπάρχει τίποτα να διαβαστεί.",
       "used": "{used} από {cap} αρχεία",
-      "usedUnlimited": "{used} αρχεία",
+      "usedUnlimited": "{used, plural, one {# αρχείο} other {# αρχεία}}",
       "storage": "{used} από {cap}",
       "empty": "Δεν υπάρχουν αρχεία ακόμη. Ανέβασε ένα για να αρχίσεις να ρωτάς.",
       "uploadedAt": "Ανέβηκε {when}",
-      "pages": "{count} σελίδες",
+      "pages": "{count, plural, one {# σελίδα} other {# σελίδες}}",
       "statusReady": "Έτοιμο",
       "statusFailed": "Μη αναγνώσιμο",
       "statusProcessing": "Επεξεργασία",
@@ -1843,12 +1843,12 @@
       "deleteError": "Το αρχείο δεν διαγράφηκε.",
       "collections": "Συλλογές",
       "collectionPlaceholder": "Όνομα συλλογής…",
-      "saveSelection": "Αποθήκευση {count} επιλεγμένων",
+      "saveSelection": "{count, plural, one {Αποθήκευση # επιλεγμένου} other {Αποθήκευση # επιλεγμένων}}",
       "collectionCreated": "Η συλλογή {name} αποθηκεύτηκε",
       "collectionError": "Η συλλογή δεν αποθηκεύτηκε.",
       "askTitle": "Ρώτα τα έγγραφά μου",
       "askNothingSelected": "Τσέκαρε τα αρχεία από τα οποία θα προέλθει η απάντηση. Τίποτε άλλο δεν θα χρησιμοποιηθεί.",
-      "askSelected": "Απάντηση από {count} αρχείο(-α): {names}",
+      "askSelected": "Απάντηση από {count, plural, one {# αρχείο} other {# αρχεία}}: {names}",
       "tooManySelected": "Ρώτα για έως {max} αρχεία τη φορά.",
       "askPlaceholder": "Ρώτα κάτι για τα επιλεγμένα αρχεία…",
       "ask": "Ρώτα",
@@ -1857,11 +1857,11 @@
       "selectFirst": "Επίλεξε πρώτα τουλάχιστον ένα αρχείο.",
       "notInDocuments": "Τα επιλεγμένα έγγραφα δεν το απαντούν αυτό. Τίποτα παρακάτω δεν προέρχεται από αυτά.",
       "citations": "Πηγές στα έγγραφά σου",
-      "removedCitations": "{count} παραπομπή(-ές) έδειχναν σε σελίδες που δεν δόθηκαν και αφαιρέθηκαν.",
+      "removedCitations": "{count, plural, one {# παραπομπή έδειχνε} other {# παραπομπές έδειχναν}} σε σελίδες που δεν δόθηκαν και {count, plural, one {αφαιρέθηκε} other {αφαιρέθηκαν}}.",
       "uncitedAnswer": "Αυτή η απάντηση δεν περιέχει επαληθεύσιμες αναφορές σελίδων. Αντιμετώπισέ την με επιφύλαξη και έλεγξε απευθείας τα έγγραφα.",
       "truncatedWarning": "Ακόμα και σε μέρη, η επιλογή ήταν μεγαλύτερη από όσο καλύπτει μία ερώτηση, οπότε η απάντηση μπορεί να είναι ελλιπής. Ρώτησε για λιγότερα αρχεία κάθε φορά.",
       "skippedFiles": "Παραλείφθηκαν (χωρίς αναγνώσιμο κείμενο): {names}",
-      "creditsCharged": "{credits} credits",
+      "creditsCharged": "{credits, plural, one {# credit} other {# credits}}",
       "stepsLabel": "Πώς λειτουργεί αυτή η σελίδα",
       "step1Title": "1. Ανέβασε αρχεία",
       "step1Hint": "PDF, Word, Excel, CSV ή κείμενο.",
@@ -1912,7 +1912,7 @@
       "planError": "Το θέμα δεν μετατράπηκε σε ερευνητικά ερωτήματα.",
       "planTitle": "Πριν ξεκινήσει",
       "planIntro": "Αυτά είναι τα ερωτήματα που θα ψάξει. Δεν έχει χρεωθεί ακόμη τίποτα γι' αυτά.",
-      "estimate": "Η εκτέλεση κοστίζει περίπου {credits} credits.",
+      "estimate": "Η εκτέλεση κοστίζει περίπου {credits, plural, one {# credit} other {# credits}}.",
       "estimateNote": "Εκτίμηση, όχι χρέωση. Χρεώνεσαι για τα tokens και τις αναζητήσεις που όντως χρησιμοποιήθηκαν, και η διαφορά αποδεσμεύεται.",
       "start": "Ξεκίνα την έρευνα",
       "notNow": "Όχι τώρα",
@@ -1924,8 +1924,8 @@
       "statusSynthesising": "Γράφει",
       "statusReady": "Έτοιμη",
       "statusFailed": "Απέτυχε",
-      "questionCount": "{count} ερωτήματα",
-      "creditsCharged": "{credits} credits",
+      "questionCount": "{count, plural, one {# ερώτημα} other {# ερωτήματα}}",
+      "creditsCharged": "{credits, plural, one {# credit} other {# credits}}",
       "createdAt": "Ξεκίνησε {when}",
       "openReport": "Άνοιγμα αναφοράς",
       "openDocument": "Άνοιγμα ως έγγραφο",
@@ -1993,10 +1993,10 @@
       "counts": "{ready} από {total} γραμμές είναι έτοιμες",
       "skippedRows": "{count} παραλείφθηκαν",
       "truncated": "διαβάστηκαν μόνο οι πρώτες γραμμές",
-      "importRows": "Εισαγωγή {count} γραμμών",
+      "importRows": "{count, plural, one {Εισαγωγή # γραμμής} other {Εισαγωγή # γραμμών}}",
       "importing": "Εισαγωγή…",
-      "imported": "Εισήχθησαν {count} γραμμές",
-      "importedSummary": "{count} γραμμές είναι πλέον στον λογαριασμό σου.",
+      "imported": "{count, plural, one {Εισήχθη # γραμμή} other {Εισήχθησαν # γραμμές}}",
+      "importedSummary": "{count, plural, one {# γραμμή είναι} other {# γραμμές είναι}} πλέον στον λογαριασμό σου.",
       "importError": "Η εισαγωγή δεν ολοκληρώθηκε.",
       "pasteTitle": "Επικόλλησε οτιδήποτε",
       "pasteHint": "Ένα business plan, σημειώσεις, μια λίστα πελατών. Βγάζουμε ό,τι μπορεί να καταγραφεί και αφήνουμε τα υπόλοιπα.",
@@ -2014,7 +2014,7 @@
     },
     "insights": {
       "title": "Τι πρόσεξα",
-      "basedOn": "από {count} εγγραφές σου",
+      "basedOn": "από {count, plural, one {# εγγραφή σου} other {# εγγραφές σου}}",
       "checkIt": "Δες το ο ίδιος",
       "showNumbers": "Δείξε τους αριθμούς",
       "hideNumbers": "Κρύψε τους αριθμούς",
@@ -2067,7 +2067,7 @@
     "affiliate": {
       "title": "Συνεργάτες",
       "description": "Μοιράσου το Ionexa και κέρδισε μέρος από ό,τι πληρώνουν όσοι φέρνεις.",
-      "pitch": "Κέρδισε {percent}% από κάθε πληρωμή όσων φέρνεις, κάθε μήνα, για {months} μήνες.",
+      "pitch": "Κέρδισε {percent}% από κάθε πληρωμή όσων φέρνεις, κάθε μήνα, για {months, plural, one {# μήνα} other {# μήνες}}.",
       "pitchTerms": "Δεν μπορείς να συστήσεις τον εαυτό σου, και κάθε άτομο μετράει μία φορά. Η προμήθεια ξεκινά με την πρώτη του πληρωμή.",
       "join": "Πάρε τον σύνδεσμό μου",
       "joining": "Ετοιμάζεται…",
@@ -2075,7 +2075,7 @@
       "yourLink": "Ο σύνδεσμός σου",
       "copy": "Αντιγραφή",
       "copied": "Αντιγράφηκε",
-      "terms": "{percent}% από κάθε πληρωμή, για {months} μήνες από την πρώτη τους.",
+      "terms": "{percent}% από κάθε πληρωμή, για {months, plural, one {# μήνα} other {# μήνες}} από την πρώτη τους.",
       "suspended": "Αυτός ο λογαριασμός συνεργάτη είναι σε αναστολή, οπότε δεν κερδίζεις νέα προμήθεια. Επικοινώνησε μαζί μας αν νομίζεις ότι είναι λάθος.",
       "stat": {
         "signups": "Εγγραφές",
@@ -2159,7 +2159,7 @@
         "no_key": "Δεν στέλνεται κανένα email: αυτό το deployment δεν έχει κλειδί API για email.",
         "unverified_domain": "Τα email δεν φτάνουν: το domain αποστολής δεν είναι επαληθευμένο.",
         "failed": "Ορισμένα email ειδοποίησης δεν στάλθηκαν.",
-        "affected": "{count} υποβολή/ές είναι αποθηκευμένες εδώ αλλά δεν σας στάλθηκαν ποτέ με email. Δεν χάθηκε τίποτα."
+        "affected": "{count, plural, one {# υποβολή είναι αποθηκευμένη} other {# υποβολές είναι αποθηκευμένες}} εδώ αλλά δεν σας {count, plural, one {στάλθηκε} other {στάλθηκαν}} ποτέ με email. Δεν χάθηκε τίποτα."
       }
     },
     "trading": {
@@ -2203,7 +2203,7 @@
         "noLosses": "Καμία ζημιογόνος συναλλαγή σε αυτό το δείγμα",
         "beforeCosts": "Τα νούμερα είναι προ προμηθειών — συμπλήρωσέ τες στις συναλλαγές για να τα δεις καθαρά.",
         "afterCosts": "Τα νούμερα είναι καθαρά, μετά τις προμήθειες που κατέγραψες.",
-        "unscoreable": "{count} συναλλαγές δεν μπόρεσαν να υπολογιστούν (λείπουν τιμές ή P&L)"
+        "unscoreable": "{count, plural, one {# συναλλαγή δεν μπόρεσε} other {# συναλλαγές δεν μπόρεσαν}} να υπολογιστ{count, plural, one {εί} other {ούν}} (λείπουν τιμές ή P&L)"
       },
       "pattern": {
         "title": "Μετά από ζημιά",
@@ -2220,7 +2220,7 @@
         "add": "Πρόσθεσε κανόνα",
         "empty": "Δεν υπάρχουν κανόνες ακόμη. Γράψε έναν παραπάνω και κάθε συναλλαγή θα ελέγχεται με βάση αυτόν.",
         "delete": "Διαγραφή κανόνα",
-        "saved": "Αποθηκεύτηκαν {count} κανόνες",
+        "saved": "{count, plural, one {Αποθηκεύτηκε # κανόνας} other {Αποθηκεύτηκαν # κανόνες}}",
         "saveFailed": "Δεν ήταν δυνατή η αποθήκευση του κανόνα.",
         "deleteFailed": "Δεν ήταν δυνατή η διαγραφή του κανόνα."
       },
@@ -2236,18 +2236,18 @@
       },
       "ruleSummary": {
         "max_risk_percent": "Ρίσκο το πολύ {percent}% ανά συναλλαγή",
-        "max_trades_per_day": "Το πολύ {count} συναλλαγές τη μέρα",
+        "max_trades_per_day": "Το πολύ {count, plural, one {# συναλλαγή} other {# συναλλαγές}} τη μέρα",
         "min_risk_reward": "Ανταμοιβή τουλάχιστον {ratio}x το ρίσκο",
         "allowed_sessions": "Μόνο αυτά τα sessions: {sessions}",
         "allowed_instruments": "Μόνο αυτά τα εργαλεία: {instruments}",
         "max_daily_loss": "Σταμάτα αφού χάσεις {amount} σε μία μέρα",
-        "no_trade_after_loss": "Περίμενε {minutes} λεπτά μετά από ζημιά",
+        "no_trade_after_loss": "Περίμενε {minutes, plural, one {# λεπτό} other {# λεπτά}} μετά από ζημιά",
         "max_position_size": "Μέγεθος θέσης το πολύ {size}"
       },
       "violations": {
-        "count": "Παραβιάστηκε {count} φορές",
+        "count": "{count, plural, one {Παραβιάστηκε # φορά} other {Παραβιάστηκε # φορές}}",
         "none": "Δεν παραβιάστηκε",
-        "uncheckable": "{count} έλεγχοι δεν έγιναν επειδή στις συναλλαγές έλειπε τιμή, ποσό ρίσκου ή ώρα."
+        "uncheckable": "{count, plural, one {# έλεγχος δεν έγινε} other {# έλεγχοι δεν έγιναν}} επειδή στις συναλλαγές έλειπε τιμή, ποσό ρίσκου ή ώρα."
       },
       "errors": {
         "bad_request": "Αυτό το αίτημα δεν διαβάστηκε.",
@@ -2420,27 +2420,27 @@
       "upgradePlan": "Αναβάθμιση πλάνου"
     },
     "low": {
-      "remaining": "{count} credits απομένουν αυτόν τον μήνα",
+      "remaining": "{count, plural, one {# credit απομένει} other {# credits απομένουν}} αυτόν τον μήνα",
       "none": "Δεν απομένουν credits αυτόν τον μήνα",
       "hint": "κάνε ανεφοδιασμό τώρα για να μη διακοπείς.",
       "topUp": "Ανεφοδιασμός"
     },
     "estimate": {
-      "approx": "~{count} credits",
+      "approx": "~{count, plural, one {# credit} other {# credits}}",
       "confirmTitle": "Αυτή είναι μεγάλη ενέργεια",
-      "confirmBody": "Αυτό θα κοστίσει περίπου {count} credits. Μπορείς να συνεχίσεις ή να επεξεργαστείς το αίτημά σου ώστε να είναι μικρότερο.",
+      "confirmBody": "Αυτό θα κοστίσει περίπου {count, plural, one {# credit} other {# credits}}. Μπορείς να συνεχίσεις ή να επεξεργαστείς το αίτημά σου ώστε να είναι μικρότερο.",
       "cancel": "Ακύρωση",
       "continue": "Συνέχεια"
     },
     "freeChat": {
-      "remaining": "{count} δωρεάν μηνύματα απομένουν αυτόν τον μήνα",
+      "remaining": "{count, plural, one {# δωρεάν μήνυμα απομένει} other {# δωρεάν μηνύματα απομένουν}} αυτόν τον μήνα",
       "exhausted": "Τα δωρεάν μηνύματα εξαντλήθηκαν — οι συνομιλίες πλέον χρεώνονται σε credits",
-      "largeMessage": "Αυτό το μήνυμα είναι μεγάλο — θα χρεωθεί περίπου {count} credits"
+      "largeMessage": "Αυτό το μήνυμα είναι μεγάλο — θα χρεωθεί περίπου {count, plural, one {# credit} other {# credits}}"
     },
-    "used": "Χρεώθηκαν {count} credits",
-    "usedWithRemaining": "Χρεώθηκαν {count} credits · απομένουν {remaining}",
+    "used": "{count, plural, one {Χρεώθηκε # credit} other {Χρεώθηκαν # credits}}",
+    "usedWithRemaining": "{count, plural, one {Χρεώθηκε # credit} other {Χρεώθηκαν # credits}} · {remaining, plural, one {απομένει #} other {απομένουν #}}",
     "unlimited": "Απεριόριστα — δεν χρεώθηκαν credits",
-    "unlimitedWouldHaveCost": "Απεριόριστα — θα κόστιζε {count} credits",
+    "unlimitedWouldHaveCost": "Απεριόριστα — θα κόστιζε {count, plural, one {# credit} other {# credits}}",
     "freeMessage": "Δωρεάν μήνυμα · απομένουν {count} αυτόν τον μήνα"
   },
   "cookies": {
@@ -3003,7 +3003,7 @@
   },
   "voice": {
     "listen": "Άκου",
-    "listenFor": "Άκου · {credits} credits",
+    "listenFor": "Άκου · {credits, plural, one {# credit} other {# credits}}",
     "pause": "Παύση",
     "speed": "Ταχύτητα αναπαραγωγής",
     "voice": "Φωνή",
@@ -3011,7 +3011,7 @@
     "listeningHint": "Μίλα και μετά πάτα Σταμάτα. Τίποτα δεν στέλνεται πριν το διαβάσεις.",
     "startListening": "Μίλα αντί να γράφεις",
     "stopListening": "Σταμάτα",
-    "costPerMinute": "{credits} credits ανά λεπτό ομιλίας",
+    "costPerMinute": "{credits, plural, one {# credit} other {# credits}} ανά λεπτό ομιλίας",
     "outOfMinutes": "Δεν έμειναν λεπτά φωνής αυτόν τον μήνα",
     "states": {
       "idle": "Έτοιμο",
@@ -3045,7 +3045,7 @@
       "pressToStart": "Η εγγραφή ξεκινάει μόνο όταν πατήσεις και σταματάει όταν ξαναπατήσεις.",
       "notStored": "Ο ήχος στέλνεται για μεταγραφή και δεν αποθηκεύεται πουθενά — ούτε από εμάς, ούτε μετά.",
       "editFirst": "Διαβάζεις και διορθώνεις το κείμενο πριν σταλεί οτιδήποτε.",
-      "cost": "{credits} credits ανά λεπτό, {minutes} λεπτά τον μήνα στο πλάνο σου.",
+      "cost": "{credits, plural, one {# credit} other {# credits}} ανά λεπτό, {minutes, plural, one {# λεπτό} other {# λεπτά}} τον μήνα στο πλάνο σου.",
       "allow": "Άνοιξε το μικρόφωνο",
       "cancel": "Όχι τώρα"
     },
@@ -3077,9 +3077,9 @@
       "exhausted": "Δεν απομένουν λεπτά αυτόν τον μήνα. Ανανεώνονται την πρώτη.",
       "notConfigured": "Η φωνή δεν είναι ρυθμισμένη σε αυτή την εγκατάσταση, οπότε το μικρόφωνο και το «Άκου» δεν εμφανίζονται.",
       "notIncluded": "Η φωνή δεν περιλαμβάνεται στο πλάνο σου. Όλα εδώ γράφονται και διαβάζονται κανονικά.",
-      "perMinute": "{credits} credits το λεπτό",
+      "perMinute": "{credits, plural, one {# credit} other {# credits}} το λεπτό",
       "privacy": "Η εγγραφή ξεκινάει μόνο όταν πατήσεις. Ο ήχος στέλνεται για μεταγραφή και δεν αποθηκεύεται πουθενά — κρατάμε τα δευτερόλεπτα και τίποτε άλλο.",
-      "remaining": "Απομένουν {minutes} λεπτά",
+      "remaining": "{minutes, plural, one {Απομένει # λεπτό} other {Απομένουν # λεπτά}}",
       "speakLabel": "Να σου διαβάζει",
       "title": "Φωνή",
       "transcribeLabel": "Να του μιλάς",
@@ -3094,15 +3094,15 @@
       "description": "CSV ή Excel, έως 8 MB. Η ανάγνωση του αρχείου δεν χρεώνεται.",
       "button": "Διάλεξε αρχείο",
       "working": "Διαβάζω…",
-      "done": "Διάβασα {rows} γραμμές",
+      "done": "{rows, plural, one {Διάβασα # γραμμή} other {Διάβασα # γραμμές}}",
       "failed": "Το αρχείο δεν διαβάστηκε.",
       "tooLarge": "Το αρχείο είναι πολύ μεγάλο — το όριο είναι 8 MB."
     },
     "summary": {
-      "counts": "{rows} γραμμές · {columns} στήλες",
-      "duplicates": "{count} πανομοιότυπες γραμμές",
+      "counts": "{rows, plural, one {# γραμμή} other {# γραμμές}} · {columns, plural, one {# στήλη} other {# στήλες}}",
+      "duplicates": "{count, plural, one {# πανομοιότυπη γραμμή} other {# πανομοιότυπες γραμμές}}",
       "truncated": "Διαβάσαμε τις πρώτες 50.000 γραμμές. Τα γραφήματα αφορούν αυτές, όχι όλο το αρχείο.",
-      "ragged": "{count} γραμμές δεν ταίριαξαν με την κεφαλίδα — έλεγξε αν το αρχείο αποθηκεύτηκε με τον σωστό διαχωριστή."
+      "ragged": "{count, plural, one {# γραμμή δεν ταίριαξε} other {# γραμμές δεν ταίριαξαν}} με την κεφαλίδα — έλεγξε αν το αρχείο αποθηκεύτηκε με τον σωστό διαχωριστή."
     },
     "columns": {
       "name": "Στήλη",
@@ -3139,7 +3139,7 @@
       "working": "Ρωτάω…",
       "failed": "Η ερώτηση δεν απαντήθηκε.",
       "matched": "{matched} από {total} γραμμές ταίριαξαν",
-      "rowCount": "{count} γραμμές"
+      "rowCount": "{count, plural, one {# γραμμή} other {# γραμμές}}"
     },
     "legacy": {
       "title": "Οι παλιές σου σημειώσεις",
@@ -3220,8 +3220,8 @@
     "needsInput": "Χρειάζεται: {fields}",
     "needsHistory": "Χρειάζεται {need} μήνες ιστορικού — έχουμε {have}.",
     "noChangeYet": "καμία μεταβολή ακόμα",
-    "notEnoughDays": "{days} ημέρα/ες ιστορικού μέχρι τώρα.",
-    "provenance": "Το ιστορικό ξεκίνησε την ημέρα που μπήκε αυτό: {months} μήνας/ες δεδομένων συνδρομητών και {days} ημερήσια στιγμιότυπα. Τίποτα δεν συμπληρώνεται αναδρομικά — ένα αναδρομικό νούμερο θα ήταν οι σημερινές τιμές πάνω σε παρελθόν που κανείς δεν κατέγραψε.",
+    "notEnoughDays": "{days, plural, one {# ημέρα} other {# ημέρες}} ιστορικού μέχρι τώρα.",
+    "provenance": "Το ιστορικό ξεκίνησε την ημέρα που μπήκε αυτό: {months, plural, one {# μήνα} other {# μήνες}} δεδομένων συνδρομητών και {days, plural, one {# ημερήσιο στιγμιότυπο} other {# ημερήσια στιγμιότυπα}}. Τίποτα δεν συμπληρώνεται αναδρομικά — ένα αναδρομικό νούμερο θα ήταν οι σημερινές τιμές πάνω σε παρελθόν που κανείς δεν κατέγραψε.",
     "inputs": {
       "marketing_spend": "δαπάνη μάρκετινγκ",
       "fixed_costs": "σταθερά κόστη",
@@ -3291,8 +3291,8 @@
       "removedThisMonth": "Το σήμα αφαιρέθηκε αυτόν τον μήνα.",
       "cancelledKeepsMonth": "Η αυτόματη ανανέωση είναι κλειστή. Το σήμα μένει κρυμμένο μέχρι το τέλος του μήνα και μετά επιστρέφει.",
       "stopRenewing": "Διακοπή ανανέωσης",
-      "offer": "Αφαίρεσε το σήμα «Made with Ionexa» από αυτό το site με {credits} credits τον μήνα (περίπου €{eur}).",
-      "affordable": "Έχεις {balance} credits — περίπου {months} μήνα(ες) για αυτό το site.",
+      "offer": "Αφαίρεσε το σήμα «Made with Ionexa» από αυτό το site με {credits, plural, one {# credit} other {# credits}} τον μήνα (περίπου €{eur}).",
+      "affordable": "Έχεις {balance, plural, one {# credit} other {# credits}} — περίπου {months, plural, one {# μήνα} other {# μήνες}} για αυτό το site.",
       "notEnough": "Έχεις {balance} credits και χρειάζονται {needed}.",
       "remove": "Αφαίρεση σήματος"
     }

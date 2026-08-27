@@ -124,14 +124,14 @@ const MUTANTS = [
   {
     name: "the recorder leaves the tracks live after stopping, so the browser's dot stays on",
     file: RECORDER,
-    from: "      releaseStream(media);\n      setStream(null);\n      recorderRef.current = null;\n      setState(\"idle\");\n      if (blob.size === 0) {",
-    to: "      setStream(null);\n      recorderRef.current = null;\n      setState(\"idle\");\n      if (blob.size === 0) {",
+    from: '      releaseStream(media);\n      setStream(null);\n      recorderRef.current = null;\n      setState("idle");\n      if (blob.size === 0) {',
+    to: '      setStream(null);\n      recorderRef.current = null;\n      setState("idle");\n      if (blob.size === 0) {',
   },
   {
     name: "the stream is released AFTER the callback, so the dot lingers through the upload",
     file: RECORDER,
-    from: "      releaseStream(media);\n      setStream(null);\n      recorderRef.current = null;\n      setState(\"idle\");",
-    to: "      setStream(null);\n      recorderRef.current = null;\n      setState(\"idle\");\n      queueMicrotask(() => releaseStream(media));",
+    from: '      releaseStream(media);\n      setStream(null);\n      recorderRef.current = null;\n      setState("idle");',
+    to: '      setStream(null);\n      recorderRef.current = null;\n      setState("idle");\n      queueMicrotask(() => releaseStream(media));',
   },
   {
     name: "the hard clip ceiling is removed, so a stuck tab streams a room until the browser closes",
@@ -160,8 +160,8 @@ const MUTANTS = [
   {
     name: "the transcript is handed straight to the parent with no chance to correct it",
     file: INPUT,
-    from: "        setDraft(String(data.text ?? \"\"));",
-    to: "        onTranscript(String(data.text ?? \"\"));",
+    from: '        setDraft(String(data.text ?? ""));',
+    to: '        onTranscript(String(data.text ?? ""));',
   },
 
   // ------------------------------------------------------------------
@@ -182,8 +182,14 @@ const MUTANTS = [
   {
     name: "speaking and listening share a pulse ceiling AND a colour, so the two states look identical",
     edits: [
-      { from: "  speaking: { min: 1, max: 1.16 },", to: "  speaking: { min: 1, max: 1.28 }," },
-      { from: 'speaking: "--voice-speaking",', to: 'speaking: "--voice-listening",' },
+      {
+        from: "  speaking: { min: 1, max: 1.16 },",
+        to: "  speaking: { min: 1, max: 1.28 },",
+      },
+      {
+        from: 'speaking: "--voice-speaking",',
+        to: 'speaking: "--voice-listening",',
+      },
     ],
     file: VISUAL,
   },
@@ -286,7 +292,7 @@ const MUTANTS = [
   {
     name: "an unknown locale gets English forced on it as a language constraint",
     file: CONFIG,
-    from: '  return isVoiceLanguage(locale) ? locale : undefined;',
+    from: "  return isVoiceLanguage(locale) ? locale : undefined;",
     to: '  return isVoiceLanguage(locale) ? locale : "en";',
   },
   {
@@ -316,13 +322,13 @@ const MUTANTS = [
   {
     name: "the price placeholder is dropped from the Listen button in English",
     file: EN,
-    from: '"listenFor": "Listen · {credits} credits"',
+    from: '"listenFor": "Listen · {credits, plural, one {# credit} other {# credits}}"',
     to: '"listenFor": "Listen"',
   },
   {
     name: "the permission dialog stops naming the monthly minute limit",
     file: EN,
-    from: '"cost": "{credits} credits per minute, {minutes} minutes a month on your plan."',
+    from: '"cost": "{credits, plural, one {# credit} other {# credits}} per minute, {minutes, plural, one {# minute} other {# minutes}} a month on your plan."',
     to: '"cost": "{credits} credits per minute."',
   },
   {
@@ -371,14 +377,20 @@ for (const m of MUTANTS) {
   const edits = m.edits ?? [{ from: m.from, to: m.to }];
   const stale = edits.find((e) => !original.includes(e.from));
   if (stale) {
-    missed.push({ ...m, why: `the mutation target no longer exists in ${m.file}` });
+    missed.push({
+      ...m,
+      why: `the mutation target no longer exists in ${m.file}`,
+    });
     console.log(`  STALE   ${m.name}\n          anchor not found in ${m.file}`);
     continue;
   }
   let mutated = original;
   for (const e of edits) mutated = mutated.replace(e.from, e.to);
   if (mutated === original) {
-    missed.push({ ...m, why: "the mutation left the file byte-identical — it is not a defect" });
+    missed.push({
+      ...m,
+      why: "the mutation left the file byte-identical — it is not a defect",
+    });
     console.log(`  NO-OP   ${m.name}`);
     continue;
   }
@@ -393,7 +405,11 @@ for (const m of MUTANTS) {
   } catch (e) {
     failed = true;
     const out = String(e.stdout || "") + String(e.stderr || "");
-    detail = (out.split("\n").find((l) => l.includes("FAIL")) || out.split("\n")[0] || "").trim();
+    detail = (
+      out.split("\n").find((l) => l.includes("FAIL")) ||
+      out.split("\n")[0] ||
+      ""
+    ).trim();
   } finally {
     writeFileSync(m.file, original);
   }
@@ -401,7 +417,10 @@ for (const m of MUTANTS) {
     caught++;
     console.log(`  CAUGHT  ${m.name}\n          ${detail.slice(0, 130)}`);
   } else {
-    missed.push({ ...m, why: "the gate stayed green with the defect re-introduced" });
+    missed.push({
+      ...m,
+      why: "the gate stayed green with the defect re-introduced",
+    });
     console.log(`  MISSED  ${m.name}`);
   }
 }
@@ -410,7 +429,9 @@ for (const gate of [GATE, CEILING_GATE]) {
   try {
     execFileSync("node", [gate], { stdio: "pipe" });
   } catch {
-    console.log(`\nBASELINE IS RED (${gate}) — a mutation was not restored. Check \`git diff\`.`);
+    console.log(
+      `\nBASELINE IS RED (${gate}) — a mutation was not restored. Check \`git diff\`.`,
+    );
     process.exit(1);
   }
 }

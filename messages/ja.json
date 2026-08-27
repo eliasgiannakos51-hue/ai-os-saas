@@ -780,7 +780,7 @@
         "heading": "同意する内容",
         "rate": "1クレジットあたり€{price}、本日の価格で固定されます。",
         "cap": "暦月あたり€{cap}を超えることはありません。",
-        "credits": "最大{credits}クレジット分に相当します。",
+        "credits": "最大 {credits} クレジット分に相当します。",
         "invoice": "次回の請求書にプランとは別の明細行として計上されます。"
       },
       "agree": "追加利用をオンにする",
@@ -1088,7 +1088,7 @@
           "medium": "安定したエネルギー — 次に適したステップ",
           "deep": "エネルギー十分 — これに取り組みましょう"
         },
-        "heldBack": "負荷の高い{count}件のステップは今は保留"
+        "heldBack": "負荷の高い {count} 件のステップは今は保留"
       },
       "stillPlanning": "まだ計画中です。少し時間がかかっています。処理は続いており、完成すると計画がミッション一覧に表示されます。",
       "planStalled": "計画が予期せず停止しました。クレジットは請求されていません。もう一度お試しください。",
@@ -1305,7 +1305,7 @@
       "pageSelectLabel": "このサイトのページ",
       "pageHome": "ホーム",
       "editPageGone": "このページはもうこのサイトにありません。開き直して現在のページを確認してください。",
-      "stockNoticeTitle": "このサイトにはストック写真が{count}枚あります",
+      "stockNoticeTitle": "このサイトにはストック写真が {count} 枚あります",
       "stockNoticeBody": "自分の写真を使うとより本物らしくなります。Unsplashにあるのは「同業の店」であって、あなたの店ではありません。",
       "stockNoticeAction": "写真をアップロード",
       "storageFull": "この画像には容量が足りません — 必要 {needed}、空き {free}。"
@@ -1400,7 +1400,7 @@
       "detectedType": "種類",
       "estimatedTime": "所要時間の目安",
       "estimatedCredits": "推定クレジット",
-      "creditsApprox": "約 {count} クレジット",
+      "creditsApprox": "~{count} クレジット",
       "noCreditCost": "クレジット不要",
       "create": "作成",
       "editDescription": "説明を編集",
@@ -2203,7 +2203,7 @@
         "noLosses": "この標本に負け取引はありません",
         "beforeCosts": "これらの数値は手数料を含みません — 取引に手数料を入力すると純額で表示されます。",
         "afterCosts": "これらの数値は記録された手数料を差し引いた純額です。",
-        "unscoreable": "{count}件の取引は計算できませんでした（価格または損益が不足）"
+        "unscoreable": "{count} 件の取引は計算できませんでした（価格または損益が不足）"
       },
       "pattern": {
         "title": "損失のあと",
@@ -2220,7 +2220,7 @@
         "add": "ルールを追加",
         "empty": "まだルールがありません。上に書けば、以降すべての取引が照合されます。",
         "delete": "ルールを削除",
-        "saved": "{count}件のルールを保存しました",
+        "saved": "{count} 件のルールを保存しました",
         "saveFailed": "そのルールを保存できませんでした。",
         "deleteFailed": "そのルールを削除できませんでした。"
       },
@@ -2236,18 +2236,18 @@
       },
       "ruleSummary": {
         "max_risk_percent": "1取引あたりのリスクは最大{percent}%",
-        "max_trades_per_day": "1日最大{count}取引",
+        "max_trades_per_day": "1日最大 {count} 取引",
         "min_risk_reward": "リワードはリスクの{ratio}倍以上",
         "allowed_sessions": "このセッションのみ: {sessions}",
         "allowed_instruments": "この銘柄のみ: {instruments}",
         "max_daily_loss": "1日に{amount}負けたら止める",
-        "no_trade_after_loss": "損失後は{minutes}分待つ",
+        "no_trade_after_loss": "損失後は {minutes} 分待つ",
         "max_position_size": "ポジションサイズは最大{size}"
       },
       "violations": {
-        "count": "{count}回破られました",
+        "count": "{count} 回破られました",
         "none": "破られていません",
-        "uncheckable": "取引に価格・リスク額・時刻のいずれかが欠けていたため、{count}件の照合ができませんでした。"
+        "uncheckable": "取引に価格・リスク額・時刻のいずれかが欠けていたため、{count} 件の照合ができませんでした。"
       },
       "errors": {
         "bad_request": "そのリクエストを読み取れませんでした。",
@@ -2426,7 +2426,7 @@
       "topUp": "補充"
     },
     "estimate": {
-      "approx": "約 {count} クレジット",
+      "approx": "~{count} クレジット",
       "confirmTitle": "これは大きな操作です",
       "confirmBody": "この操作には約 {count} クレジットかかります。続行するか、リクエストを小さくしてください。",
       "cancel": "キャンセル",
@@ -2435,7 +2435,7 @@
     "freeChat": {
       "remaining": "今月の無料メッセージは残り {count} 件です",
       "exhausted": "無料メッセージを使い切りました — 以降のチャットはクレジットを消費します",
-      "largeMessage": "このメッセージは大きいため、約{count}クレジットが課金されます"
+      "largeMessage": "このメッセージは大きいため、約 {count} クレジットが課金されます。"
     },
     "used": "{count} クレジットを使用",
     "usedWithRemaining": "{count} クレジットを使用 · 残り {remaining}",
@@ -3102,7 +3102,7 @@
       "counts": "{rows} 行 · {columns} 列",
       "duplicates": "完全に重複した行が {count} 件",
       "truncated": "最初の 50,000 行を読み込みました。グラフはその範囲のもので、ファイル全体ではありません。",
-      "ragged": "{count} 行がヘッダーと一致しませんでした。保存時の区切り文字を確認してください。"
+      "ragged": "ヘッダーと一致しない行が {count} 件あります — 保存時の区切り文字を確認してください。"
     },
     "columns": {
       "name": "列",
@@ -3220,7 +3220,7 @@
     "needsInput": "不足：{fields}",
     "needsHistory": "{need} か月分の履歴が必要です。現在 {have} か月分あります。",
     "noChangeYet": "まだ変化なし",
-    "notEnoughDays": "現在の履歴は {days} 日分です。",
+    "notEnoughDays": "{days} 日分の履歴が現在あります。",
     "provenance": "履歴は公開した日から始まります：購読データ {months} か月分、日次スナップショット {days} 件。さかのぼって埋めることはしません — 遡及的な数字は、誰も記録していない過去に今日の価格を当てたものだからです。",
     "inputs": {
       "marketing_spend": "マーケティング費用",
@@ -3291,8 +3291,8 @@
       "removedThisMonth": "今月はバッジを非表示にしています。",
       "cancelledKeepsMonth": "自動更新はオフです。今月末まではバッジは表示されず、その後戻ります。",
       "stopRenewing": "更新を停止",
-      "offer": "このサイトから「Made with Ionexa」バッジを月{credits}クレジット（約€{eur}）で非表示にします。",
-      "affordable": "残高は{balance}クレジット — このサイトで約{months}か月分です。",
+      "offer": "このサイトから「Made with Ionexa」バッジを月 {credits} クレジット（約 €{eur}）で非表示にします。",
+      "affordable": "残高は {balance} クレジット — このサイトで約 {months} か月分です。",
       "notEnough": "残高は{balance}クレジットで、{needed}必要です。",
       "remove": "バッジを非表示にする"
     }

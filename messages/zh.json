@@ -498,7 +498,7 @@
       "totalEntries": "总记录数",
       "mostActiveModule": "最活跃模块",
       "unlimited": "无限制",
-      "wouldHaveCost": "本应消耗 {credits} 额度"
+      "wouldHaveCost": "本应消耗 {credits} 积分"
     },
     "theme": {
       "title": "主题",
@@ -780,7 +780,7 @@
         "heading": "你将同意的内容",
         "rate": "每点数 €{price}，按今日价格锁定。",
         "cap": "同一自然月内绝不超过 €{cap}。",
-        "credits": "这最多可换 {credits} 点额外额度。",
+        "credits": "这最多可换 {credits} 积分。",
         "invoice": "在下一张账单上单列一行，与套餐分开计费。"
       },
       "agree": "开启超额用量",
@@ -1119,7 +1119,7 @@
       "generating": "生成中...",
       "entriesTitle": "新记录(本周 / 上周)",
       "noModuleActivity": "过去两周内所有模块均无活动。",
-      "missionStepsLabel": "已完成 {completed} 个任务步骤,{pending} 个仍待处理",
+      "missionStepsLabel": "已完成 {completed} 个任务步骤，{pending} 个仍待处理",
       "reflectionLabel": "回顾"
     },
     "tradingWorkflow": {
@@ -1400,7 +1400,7 @@
       "detectedType": "类型",
       "estimatedTime": "预计用时",
       "estimatedCredits": "预计 credits",
-      "creditsApprox": "约 {count} credits",
+      "creditsApprox": "~{count} 积分",
       "noCreditCost": "不消耗 credits",
       "create": "创建",
       "editDescription": "修改描述",
@@ -2426,7 +2426,7 @@
       "topUp": "充值"
     },
     "estimate": {
-      "approx": "约 {count} 积分",
+      "approx": "~{count} 积分",
       "confirmTitle": "这是一次大型操作",
       "confirmBody": "此操作约需 {count} 积分。您可以继续，或缩减请求内容。",
       "cancel": "取消",
@@ -2435,7 +2435,7 @@
     "freeChat": {
       "remaining": "本月还剩 {count} 条免费消息",
       "exhausted": "免费消息已用完 — 本月的对话将开始消耗积分",
-      "largeMessage": "此消息较大——将收取约 {count} 个积分"
+      "largeMessage": "此消息较大——将收取约 {count} 积分。"
     },
     "used": "已使用 {count} 积分",
     "usedWithRemaining": "已使用 {count} 积分 · 剩余 {remaining}",
@@ -3003,7 +3003,7 @@
   },
   "voice": {
     "listen": "朗读",
-    "listenFor": "朗读 · {credits} 个积分",
+    "listenFor": "朗读 · {credits} 积分",
     "pause": "暂停",
     "speed": "播放速度",
     "voice": "音色",
@@ -3011,7 +3011,7 @@
     "listeningHint": "说完后按停止。在你读过之前，什么都不会发送。",
     "startListening": "用说的，不用打字",
     "stopListening": "停止",
-    "costPerMinute": "每分钟语音 {credits} 个积分",
+    "costPerMinute": "每分钟语音 {credits} 积分",
     "outOfMinutes": "本月的语音分钟数已用完",
     "states": {
       "idle": "就绪",
@@ -3045,7 +3045,7 @@
       "pressToStart": "只有你按下时才开始录音，再按一次即停止。",
       "notStored": "音频仅用于转写，不会被保存在任何地方——我们不存，之后也不存。",
       "editFirst": "在发送任何内容之前，由你阅读并修改文字。",
-      "cost": "每分钟 {credits} 个积分，你的方案每月 {minutes} 分钟。",
+      "cost": "每分钟 {credits} 积分，你的方案每月 {minutes} 分钟。",
       "allow": "打开麦克风",
       "cancel": "暂不"
     },
@@ -3077,7 +3077,7 @@
       "exhausted": "本月分钟数已用完，将于每月一号重置。",
       "notConfigured": "此部署尚未配置语音，因此不会出现麦克风和朗读按钮。",
       "notIncluded": "你的方案不包含语音。这里的一切仍然可以打字和阅读。",
-      "perMinute": "每分钟 {credits} 个积分",
+      "perMinute": "每分钟 {credits} 积分",
       "privacy": "只有你按下时才开始录音。音频仅用于转写，不会保存在任何地方——我们只保留秒数，别的都不留。",
       "remaining": "还剩 {minutes} 分钟",
       "speakLabel": "让它读给你听",
@@ -3102,7 +3102,7 @@
       "counts": "{rows} 行 · {columns} 列",
       "duplicates": "{count} 行完全重复",
       "truncated": "我们读取了前 50,000 行。图表描述的是这些行，而不是整份文件。",
-      "ragged": "有 {count} 行与表头对不上——请检查保存时用的分隔符。"
+      "ragged": "有 {count} 行与表头不一致——请检查保存文件时使用的分隔符。"
     },
     "columns": {
       "name": "列",
@@ -3220,7 +3220,7 @@
     "needsInput": "还需要：{fields}",
     "needsHistory": "需要 {need} 个月的历史数据——目前有 {have} 个月。",
     "noChangeYet": "暂无变化",
-    "notEnoughDays": "目前只有 {days} 天的历史数据。",
+    "notEnoughDays": "{days} 天的历史数据（目前）。",
     "provenance": "历史从上线那天开始：{months} 个月的订阅数据和 {days} 份每日快照。不做回填——回填出来的数字，是用今天的价格套在没人记录过的过去上。",
     "inputs": {
       "marketing_spend": "营销支出",
@@ -3291,8 +3291,8 @@
       "removedThisMonth": "本月已移除徽标。",
       "cancelledKeepsMonth": "自动续订已关闭。徽标在本月底前保持隐藏，之后会重新出现。",
       "stopRenewing": "停止续订",
-      "offer": "以每月 {credits} 点数（约 €{eur}）移除本站点的“Made with Ionexa”徽标。",
-      "affordable": "你有 {balance} 点数——够这个站点约 {months} 个月。",
+      "offer": "以每月 {credits} 积分（约 €{eur}）移除本站点的“Made with Ionexa”徽标。",
+      "affordable": "你有 {balance} 积分——够这个站点约 {months} 个月。",
       "notEnough": "你有 {balance} 点数，需要 {needed}。",
       "remove": "移除徽标"
     }

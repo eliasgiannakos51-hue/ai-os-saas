@@ -18,7 +18,7 @@
     "viewPlans": "عرض الخطط",
     "chooseFiles": "اختر الملفات",
     "noFileChosen": "لم يتم اختيار ملف",
-    "filesSelected": "{count} محدد",
+    "filesSelected": "{count, plural, zero {لا شيء محدد} one {عنصر واحد محدد} two {عنصران محددان} few {# عناصر محددة} many {# عنصرًا محددًا} other {# عنصر محدد}}",
     "networkError": "خطأ في الشبكة — يرجى المحاولة مرة أخرى.",
     "notAuthenticated": "غير مُصادَق عليه.",
     "created": "✓ تم الإنشاء",
@@ -56,7 +56,7 @@
     "offline": {
       "title": "أنت غير متصل.",
       "showingCached": "لا شيء في هذه الصفحة يتحدّث.",
-      "showingCachedAge": "لا شيء هنا يتحدّث — جرى تحميله قبل {minutes} دقيقة.",
+      "showingCachedAge": "لا شيء هنا يتحدّث — جرى تحميله قبل {minutes, plural, zero {أقل من دقيقة} one {دقيقة واحدة} two {دقيقتين} few {# دقائق} many {# دقيقة} other {# دقيقة}}.",
       "retry": "حاول مجددًا",
       "checking": "جارٍ التحقق…",
       "stillOffline": "لا يزال بلا اتصال."
@@ -233,7 +233,7 @@
     "setUpTeam": "إعداد الفريق",
     "features": {
       "basicAiChat": "محادثة ذكاء اصطناعي أساسية",
-      "creditsPerMonth": "{count} رصيد/شهر",
+      "creditsPerMonth": "{count, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}/شهر",
       "aiMemory": "ذاكرة الذكاء الاصطناعي",
       "websiteAutomationBuilderAccess": "الوصول إلى منشئ المواقع والأتمتة",
       "everythingInStarter": "كل ما في باقة Starter",
@@ -470,7 +470,7 @@
       "title": "ذاكرة المحادثة",
       "toggleLabel": "تذكّر السياق بين المحادثات",
       "toggleDescription": "يلتقط Ionexa Chat الحقائق والتفضيلات الدائمة من محادثاتك ويتذكرها في المحادثات المستقبلية.",
-      "thingsRemembered": "{count, plural, one {عنصر واحد محفوظ} other {# عنصر محفوظ}}",
+      "thingsRemembered": "{count, plural, zero {لا عناصر محفوظة} one {عنصر واحد محفوظ} two {عنصران محفوظان} few {# عناصر محفوظة} many {# عنصرًا محفوظًا} other {# عنصر محفوظ}}",
       "clearAll": "مسح كل الذاكرة",
       "clearing": "جارٍ المسح...",
       "couldNotUpdatePreference": "✗ تعذّر تحديث التفضيل",
@@ -498,7 +498,7 @@
       "totalEntries": "إجمالي الإدخالات",
       "mostActiveModule": "الوحدة الأكثر نشاطًا",
       "unlimited": "غير محدود",
-      "wouldHaveCost": "كان سيكلّف {credits} رصيدًا"
+      "wouldHaveCost": "كان سيكلّف {credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}"
     },
     "theme": {
       "title": "السمة",
@@ -642,7 +642,7 @@
     "marginReport": {
       "title": "تقرير الهامش",
       "ownerOnly": "المالك",
-      "description": "متوسط الهامش المحقق لكل ميزة خلال آخر {days} يومًا، من التكلفة الفعلية المقاسة للذكاء الاصطناعي.",
+      "description": "متوسط الهامش المحقق لكل ميزة خلال آخر {days, plural, zero {يوم} one {يوم واحد} two {يومين} few {# أيام} many {# يومًا} other {# يوم}}، من التكلفة الفعلية المقاسة للذكاء الاصطناعي.",
       "empty": "لا توجد إجراءات ذكاء اصطناعي مسجلة في هذه الفترة بعد.",
       "unavailable": "تعذّر تحميل التقرير. تحقّق من وجود جدول ai_cost_log.",
       "colFeature": "الميزة",
@@ -661,7 +661,7 @@
       "sumTop": "أغلى ميزة",
       "sumTopHint": "{percent}% من إجمالي الإنفاق",
       "projectionOnly": "لا توجد إجراءات محاسَبة بعد — كل هامش أدناه تقدير من سجلات بلا محاسبة، وليس إيرادًا.",
-      "belowTargetAlert": "{count} ميزة أقل من هدف {target}x: {features}. تم إرسال تنبيه بالبريد.",
+      "belowTargetAlert": "{count, plural, zero {لا ميزات} one {ميزة واحدة} two {ميزتان} few {# ميزات} many {# ميزة} other {# ميزة}} أقل من هدف {target}x: {features}. تم إرسال تنبيه بالبريد.",
       "cacheTitle": "ذاكرة التخزين المؤقت للموجّه",
       "cacheDescription": "نسبة رموز الموجّه التي جرى تقديمها من ذاكرة التخزين المؤقت بدلاً من احتسابها بالسعر الكامل.",
       "cacheHitRate": "معدّل الإصابة",
@@ -670,7 +670,7 @@
       "cacheColWrite": "مكتوبة",
       "cacheEmpty": "لم تُسجَّل أي رموز موجّه حتى الآن.",
       "cacheMiscachedAlert": "{features}: يكتب في الذاكرة المؤقتة دون قراءة أي شيء منها — نقطة التوقف على محتوى يتغيّر مع كل طلب.",
-      "absorbedRefusals": "رفض مُستوعَب: رفض {calls} تشغيل/تشغيلات للوكيل المهمة ولم تُحتسب — €{cost} من تكلفة النموذج نتحملها نحن.",
+      "absorbedRefusals": "رفض مُستوعَب: {calls, plural, zero {لم يرفض أي تشغيل} one {رفض تشغيل واحد للوكيل} two {رفض تشغيلان للوكيل} few {رفضت # تشغيلات للوكيل} many {رفض # تشغيلًا للوكيل} other {رفض # تشغيل للوكيل}} المهمة ولم تُحتسب — €{cost} من تكلفة النموذج نتحملها نحن.",
       "absorbedRefusalsShare": "أي {share}% من الإيرادات في هذه الفترة؛ عتبة المراجعة {limit}%.",
       "absorbedRefusalsShareUnknown": "لا تُعرض النسبة من الإيرادات: لا يتوفر لهذا التقرير رقم إيرادات للمقارنة."
     },
@@ -780,7 +780,7 @@
         "heading": "ما الذي توافق عليه",
         "rate": "{price} يورو لكل نقطة، مثبَّت على سعر اليوم.",
         "cap": "لن يتجاوز {cap} يورو في الشهر الميلادي الواحد.",
-        "credits": "هذا يكفي لما يصل إلى {credits} نقطة إضافية.",
+        "credits": "هذا يكفي لما يصل إلى {credits, plural, zero {لا أرصدة إضافية} one {رصيد إضافي واحد} two {رصيدين إضافيين} few {# أرصدة إضافية} many {# رصيدًا إضافيًا} other {# رصيد إضافي}}.",
         "invoice": "يُحصَّل كبند مستقل في فاتورتك القادمة، منفصلاً عن خطتك."
       },
       "agree": "تفعيل الاستخدام الإضافي",
@@ -827,7 +827,7 @@
     "overview": {
       "mostActiveModule": "الوحدة الأكثر نشاطًا",
       "acrossAllModules": "عبر جميع الوحدات",
-      "entry": "{count, plural, one {إدخال واحد} other {# إدخال}}",
+      "entry": "{count, plural, zero {لا إدخالات} one {إدخال واحد} two {إدخالان} few {# إدخالات} many {# إدخالًا} other {# إدخال}}",
       "statRow": {
         "totalEntries": "إجمالي الإدخالات",
         "thisWeek": "هذا الأسبوع",
@@ -847,7 +847,7 @@
       "aiCoach": {
         "title": "مدرب الذكاء الاصطناعي",
         "noActivity": "لا يوجد نشاط بعد هذا الأسبوع — سجّل شيئًا للبدء.",
-        "entryCount": "{count, plural, one {إدخال جديد واحد في {module}} other {# إدخال جديد في {module}}}",
+        "entryCount": "{count, plural, zero {لا إدخالات جديدة في {module}} one {إدخال جديد واحد في {module}} two {إدخالان جديدان في {module}} few {# إدخالات جديدة في {module}} many {# إدخالًا جديدًا في {module}} other {# إدخال جديد في {module}}}",
         "mostActiveIn": "الأكثر نشاطًا في {module}"
       },
       "activeMission": {
@@ -1080,7 +1080,7 @@
       "noSteps": "لا توجد خطوات خطة لهذه المهمة بعد.",
       "reviewNotRunYet": "اكتملت كل الخطوات — شغّل المراجِع للحصول على ملخص.",
       "reviewLocked": "يعمل المراجِع بمجرد اكتمال جميع الخطوات.",
-      "stepMinutes": "~{count} دقيقة",
+      "stepMinutes": "~{count, plural, zero {٠ دقيقة} one {دقيقة واحدة} two {دقيقتان} few {# دقائق} many {# دقيقة} other {# دقيقة}}",
       "updatedElsewhere": "تم تحديث هذه المهمة في مكان آخر للتو — يتم التحديث لعرض أحدث حالة.",
       "energy": {
         "heading": {
@@ -1088,7 +1088,7 @@
           "medium": "طاقة ثابتة — خطوة تالية جيدة",
           "deep": "طاقة جيدة — تولَّ هذه"
         },
-        "heldBack": "تم تأجيل {count} خطوات أثقل في الوقت الحالي"
+        "heldBack": "تم تأجيل {count, plural, zero {لا خطوات} one {خطوة واحدة أثقل} two {خطوتين أثقل} few {# خطوات أثقل} many {# خطوة أثقل} other {# خطوة أثقل}} في الوقت الحالي"
       },
       "stillPlanning": "لا يزال التخطيط جاريًا — يستغرق بعض الوقت. سيستمر العمل، وسيظهر الخطة في قائمة مهامك عند جاهزيتها.",
       "planStalled": "توقّفت الخطة بشكل غير متوقع. لم يتم خصم أي رصيد — يرجى المحاولة مرة أخرى.",
@@ -1099,7 +1099,7 @@
       },
       "deleteMission": "حذف المهمة",
       "deleteConfirmMission": "هل تريد حذف المهمة «{goal}»؟",
-      "deleteConfirmLoses": "سيؤدي هذا إلى حذف {steps} خطوة — منها {completed} مكتملة — و{scheduled} تشغيل مجدول. لا يمكن التراجع.",
+      "deleteConfirmLoses": "سيؤدي هذا إلى حذف {steps, plural, zero {لا خطوات} one {خطوة واحدة} two {خطوتين} few {# خطوات} many {# خطوة} other {# خطوة}} — منها {completed} مكتملة — و{scheduled, plural, zero {لا تشغيلات مجدولة} one {تشغيل مجدول واحد} two {تشغيلين مجدولين} few {# تشغيلات مجدولة} many {# تشغيلًا مجدولًا} other {# تشغيل مجدول}}. لا يمكن التراجع.",
       "deletedMission": "تم حذف المهمة",
       "deleteFailed": "تعذّر حذف المهمة.",
       "deleteStep": "حذف الخطوة",
@@ -1119,7 +1119,7 @@
       "generating": "جارٍ الإنشاء...",
       "entriesTitle": "إدخالات جديدة (هذا الأسبوع / الأسبوع الماضي)",
       "noModuleActivity": "لا يوجد نشاط في أي وحدة خلال الأسبوعين الماضيين.",
-      "missionStepsLabel": "اكتملت {completed} خطوات مهمة، ولا تزال {pending} معلقة",
+      "missionStepsLabel": "{completed, plural, zero {لم تكتمل أي خطوة} one {اكتملت خطوة مهمة واحدة} two {اكتملت خطوتا مهمة} few {اكتملت # خطوات مهمة} many {اكتملت # خطوة مهمة} other {اكتملت # خطوة مهمة}}، ولا تزال {pending, plural, zero {لا خطوة} one {خطوة واحدة} two {خطوتان} few {# خطوات} many {# خطوة} other {# خطوة}} معلقة",
       "reflectionLabel": "التأمل"
     },
     "tradingWorkflow": {
@@ -1188,7 +1188,7 @@
       "generating": "جارٍ الإنشاء...",
       "generated": "تم إنشاء الموقع",
       "duplicateGenerationSuppressed": "هناك عملية إنشاء قيد التقدم بالفعل لهذا العنصر — يتم عرض التقدم الحالي بدلاً من بدء عملية جديدة.",
-      "estimatedCost": "التكلفة المقدرة: {count} رصيد",
+      "estimatedCost": "التكلفة المقدرة: {count, plural, zero {لا شيء} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
       "estimatedTimeWithImages": "قد تستغرق المواقع المعقدة التي تحتوي على صور أكثر من 10 دقائق لإنشائها — يمكنك مغادرة هذه الصفحة.",
       "estimatedTimeLargeRequest": "قد تستغرق الطلبات الكبيرة جدًا أو المفصلة (وصف طويل أو أكثر من 10 صور) من 20 إلى 30 دقيقة لإنشائها — يمكنك مغادرة هذه الصفحة، ستستمر المعالجة.",
       "clarificationTitle": "بضعة أسئلة سريعة قبل الإنشاء:",
@@ -1222,9 +1222,9 @@
       "backToLatest": "العودة إلى الأحدث",
       "previewIncompleteTitle": "المعاينة غير متاحة",
       "previewIncompleteBody": "يبدو أن هذه الصفحة المُنشأة غير مكتملة أو تم قطعها، لذا لا يمكن عرضها بأمان. جرّب إعادة الإنشاء بوصف أقصر، أو عدّلها مرة أخرى.",
-      "unfilledTitle": "ما زال {count} عنصرًا بحاجة إلى تعبئة",
+      "unfilledTitle": "{count, plural, zero {لا عناصر بحاجة إلى تعبئة} one {ما زال عنصر واحد بحاجة إلى تعبئة} two {ما زال عنصران بحاجة إلى تعبئة} few {ما زالت # عناصر بحاجة إلى تعبئة} many {ما زال # عنصرًا بحاجة إلى تعبئة} other {ما زال # عنصر بحاجة إلى تعبئة}}",
       "unfilledBody": "لا يخترع الذكاء الاصطناعي رقم هاتف أو سعرًا أو مواعيد عمل أبدًا — بل يترك فراغًا ظاهرًا. استخدم «اطلب تغييرًا» لتعبئتها، أو عدّلها بعد النشر.",
-      "inventedTitle": "{count} رقم في الصفحة لم تقدّمه",
+      "inventedTitle": "{count, plural, zero {لا أرقام} one {رقم واحد} two {رقمان} few {# أرقام} many {# رقمًا} other {# رقم}} في الصفحة لم تقدّمه",
       "inventedBody": "تظهر هذه الأرقام في الصفحة لكنها ليست في وصفك. الذكاء الاصطناعي مُوجَّه بألّا يخترع أبدًا رقم هاتف أو سعرًا أو ساعة عمل أو رقمًا إحصائيًا — راجع كل واحد قبل النشر وصحّحه عبر «اطلب تغييرًا».",
       "inventedKind": {
         "phone": "هاتف",
@@ -1260,7 +1260,7 @@
         "clear": "مسح",
         "background": "الخلفية",
         "ownPhotoNeedsUpload": "ارفع صورة في الأعلى أولًا.",
-        "imageUse": "صورك المرفوعة ({count})",
+        "imageUse": "{count, plural, zero {لا صور مرفوعة} one {صورتك المرفوعة} two {صورتاك المرفوعتان} few {صورك المرفوعة (#)} many {صورك المرفوعة (#)} other {صورك المرفوعة (#)}}",
         "backgrounds": {
           "auto": "اتركه للذكاء الاصطناعي",
           "solid": "لون واحد",
@@ -1305,7 +1305,7 @@
       "pageSelectLabel": "صفحات هذا الموقع",
       "pageHome": "الرئيسية",
       "editPageGone": "لم تعد هذه الصفحة جزءًا من هذا الموقع — أعد فتحه لعرض الصفحات الحالية.",
-      "stockNoticeTitle": "{count} صورة مخزَّنة في هذا الموقع",
+      "stockNoticeTitle": "{count, plural, zero {لا صور مخزَّنة} one {صورة مخزَّنة واحدة} two {صورتان مخزَّنتان} few {# صور مخزَّنة} many {# صورة مخزَّنة} other {# صورة مخزَّنة}} في هذا الموقع",
       "stockNoticeBody": "ارفع صورك للحصول على نتيجة أصدق — لدى Unsplash نشاط مثل نشاطك، لا نشاطك.",
       "stockNoticeAction": "رفع صور",
       "storageFull": "لا توجد مساحة كافية لهذه الصور — المطلوب {needed}، المتاح {free}."
@@ -1400,7 +1400,7 @@
       "detectedType": "النوع",
       "estimatedTime": "الوقت المُقدَّر",
       "estimatedCredits": "الأرصدة المُقدَّرة",
-      "creditsApprox": "~{count} رصيد",
+      "creditsApprox": "~{count, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
       "noCreditCost": "بدون أرصدة",
       "create": "إنشاء",
       "editDescription": "تعديل الوصف",
@@ -1484,7 +1484,7 @@
       "previewCostPerRun": "التكلفة لكل تشغيل",
       "previewNextRuns": "أول ثلاث عمليات تشغيل",
       "previewTask": "اعرض المهمة بالتفصيل",
-      "creditsPerRun": "~{credits} رصيد",
+      "creditsPerRun": "~{credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
       "createButton": "إنشاء الوكيل",
       "creating": "جارٍ الإنشاء...",
       "discard": "تجاهل",
@@ -1505,7 +1505,7 @@
       "updateSuccess": "تم تحديث الوكيل.",
       "saveError": "تعذّر حفظ هذا التغيير. حاول مرة أخرى.",
       "confirmDelete": "هل تريد حذف \"{name}\"؟ سيُحذف سجل التشغيل معه، ولا يمكن التراجع.",
-      "runSuccess": "تم — {credits} رصيد. أُرسلت النتيجة إلى بريدك.",
+      "runSuccess": "تم — {credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}. أُرسلت النتيجة إلى بريدك.",
       "runSuccessUnlimitedCost": "تم — حسابك غير محدود (كان سيكلّف {credits} رصيدًا). أُرسلت النتيجة إلى بريدك.",
       "runSuccessUnlimited": "تم — حسابك غير محدود، ولم تُخصم أي أرصدة. أُرسلت النتيجة إلى بريدك.",
       "runNothingToReport": "لا جديد لإبلاغك به هذه المرة.",
@@ -1527,7 +1527,7 @@
       "runRunning": "قيد التشغيل",
       "runManual": "يدوي",
       "runScheduled": "مجدول",
-      "runCredits": "{credits} رصيد",
+      "runCredits": "{credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
       "runCreditsUnlimited": "غير محدود (كان سيكلّف {credits})",
       "viewOutput": "اعرض النتيجة",
       "scheduleFrequencyLabel": "عدد المرات",
@@ -1636,7 +1636,7 @@
         "legend": "مدى العمق",
         "perRun": "لكل تشغيل",
         "suggested": "مقترح",
-        "facts": "{sources} مصادر · {steps} خطوات · نحو {seconds} ثانية",
+        "facts": "{sources, plural, zero {لا مصادر} one {مصدر واحد} two {مصدران} few {# مصادر} many {# مصدرًا} other {# مصدر}} · {steps, plural, zero {لا خطوات} one {خطوة واحدة} two {خطوتان} few {# خطوات} many {# خطوة} other {# خطوة}} · نحو {seconds} ثانية",
         "runOnce": "تشغيل مرة واحدة بمستوى",
         "runOnceHint": "هذا التشغيل فقط. الجدولة تبقى على {depth}.",
         "simple": {
@@ -1653,9 +1653,9 @@
         }
       },
       "templates": {
-        "found": "{count} وكيل جاهز يفعل هذا بالفعل",
-        "use": "استخدم هذا — {credits} رصيد",
-        "buildNew": "أنشئ واحدًا جديدًا — {credits} رصيد",
+        "found": "{count, plural, zero {لا يوجد وكيل جاهز} one {وكيل جاهز واحد يفعل هذا بالفعل} two {وكيلان جاهزان يفعلان هذا بالفعل} few {# وكلاء جاهزون يفعلون هذا بالفعل} many {# وكيلًا جاهزًا يفعل هذا بالفعل} other {# وكيل جاهز يفعل هذا بالفعل}}",
+        "use": "استخدم هذا — {credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
+        "buildNew": "أنشئ واحدًا جديدًا — {credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
         "adopted": "تم إنشاء الوكيل، يتابع: {subject}",
         "adoptError": "تعذّر استخدام هذا القالب. لم يُنشأ شيء."
       },
@@ -1716,7 +1716,7 @@
       "copyFailed": "تعذّر نسخ الرابط.",
       "statusLive": "منشور",
       "statusUnpublished": "غير منشور",
-      "viewsThisWeek": "{count} مشاهدة هذا الأسبوع",
+      "viewsThisWeek": "{count, plural, zero {لا مشاهدات} one {مشاهدة واحدة} two {مشاهدتان} few {# مشاهدات} many {# مشاهدة} other {# مشاهدة}} هذا الأسبوع",
       "viewsTotal": "{count} إجمالًا",
       "close": "إغلاق",
       "versionHistory": "سجل الإصدارات",
@@ -1825,11 +1825,11 @@
       "unsupportedType": "{name} ليس نوعًا مدعومًا. ارفع ملف PDF أو Word أو Excel أو CSV أو Markdown أو ملفًا نصيًا.",
       "emptyFile": "الملف {name} فارغ — لا يوجد شيء لقراءته.",
       "used": "{used} من {cap} ملفًا",
-      "usedUnlimited": "{used} ملفًا",
+      "usedUnlimited": "{used, plural, zero {لا ملفات} one {ملف واحد} two {ملفان} few {# ملفات} many {# ملفًا} other {# ملف}}",
       "storage": "{used} من {cap}",
       "empty": "لا توجد ملفات بعد. ارفع ملفًا لتبدأ بطرح الأسئلة.",
       "uploadedAt": "رُفع في {when}",
-      "pages": "{count} صفحة",
+      "pages": "{count, plural, zero {لا صفحات} one {صفحة واحدة} two {صفحتان} few {# صفحات} many {# صفحة} other {# صفحة}}",
       "statusReady": "جاهز",
       "statusFailed": "غير قابل للقراءة",
       "statusProcessing": "قيد المعالجة",
@@ -1843,12 +1843,12 @@
       "deleteError": "تعذّر حذف الملف.",
       "collections": "المجموعات",
       "collectionPlaceholder": "سمِّ المجموعة…",
-      "saveSelection": "احفظ {count} المحدد",
+      "saveSelection": "{count, plural, zero {لا شيء محدد} one {احفظ العنصر المحدد} two {احفظ العنصرين المحددين} few {احفظ # عناصر محددة} many {احفظ # عنصرًا محددًا} other {احفظ # عنصر محدد}}",
       "collectionCreated": "تم حفظ المجموعة {name}",
       "collectionError": "تعذّر حفظ المجموعة.",
       "askTitle": "اسأل مستنداتي",
       "askNothingSelected": "حدّد الملفات التي ينبغي أن تأتي منها الإجابة. لن يُستخدم غيرها.",
-      "askSelected": "الإجابة من {count} ملف: {names}",
+      "askSelected": "الإجابة من {count, plural, zero {لا ملفات} one {ملف واحد} two {ملفين} few {# ملفات} many {# ملفًا} other {# ملف}}: {names}",
       "tooManySelected": "اسأل عن {max} ملفات كحد أقصى في المرة الواحدة.",
       "askPlaceholder": "اسأل شيئًا عن الملفات المحددة…",
       "ask": "اسأل",
@@ -1857,11 +1857,11 @@
       "selectFirst": "اختر ملفًا واحدًا على الأقل أولًا.",
       "notInDocuments": "المستندات المحددة لا تجيب عن هذا. لا شيء أدناه مأخوذ منها.",
       "citations": "المصادر داخل مستنداتك",
-      "removedCitations": "أشارت {count} من المراجع إلى صفحات غير مُتاحة وتمت إزالتها.",
+      "removedCitations": "{count, plural, zero {لم تُشِر أي مراجع} one {أشار مرجع واحد} two {أشار مرجعان} few {أشارت # مراجع} many {أشار # مرجعًا} other {أشار # مرجع}} إلى صفحات غير مُتاحة وتمت إزالتها.",
       "uncitedAnswer": "لا تحتوي هذه الإجابة على مراجع صفحات يمكن التحقق منها. تعامل معها بحذر وراجع المستندات مباشرة.",
       "truncatedWarning": "حتى بقراءتها على أجزاء، كان التحديد أكبر مما يغطيه سؤال واحد، لذا قد تكون الإجابة ناقصة. اسأل عن عدد أقل من الملفات في المرة الواحدة.",
       "skippedFiles": "تم تخطّيها (لا نص قابل للقراءة): {names}",
-      "creditsCharged": "{credits} رصيد",
+      "creditsCharged": "{credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
       "stepsLabel": "كيف تعمل هذه الصفحة",
       "step1Title": "١. ارفع الملفات",
       "step1Hint": "PDF أو Word أو Excel أو CSV أو نص.",
@@ -1912,7 +1912,7 @@
       "planError": "تعذّر تحويل الموضوع إلى أسئلة بحثية.",
       "planTitle": "قبل البدء",
       "planIntro": "هذه هي الأسئلة التي سيبحث عنها. لم يُحتسب عليها أي رصيد بعد.",
-      "estimate": "يكلّف التنفيذ نحو {credits} رصيد.",
+      "estimate": "يكلّف التنفيذ نحو {credits, plural, zero {لا شيء} one {رصيد واحد} two {رصيدين} few {# أرصدة} many {# رصيدًا} other {# رصيد}}.",
       "estimateNote": "هذا تقدير وليس خصمًا. تُحاسب على ما استُخدم فعليًا من الرموز وعمليات البحث، ويُفرج عن الفرق.",
       "start": "ابدأ البحث",
       "notNow": "ليس الآن",
@@ -1924,8 +1924,8 @@
       "statusSynthesising": "قيد الكتابة",
       "statusReady": "جاهز",
       "statusFailed": "فشل",
-      "questionCount": "{count} سؤالًا",
-      "creditsCharged": "{credits} رصيد",
+      "questionCount": "{count, plural, zero {لا أسئلة} one {سؤال واحد} two {سؤالان} few {# أسئلة} many {# سؤالًا} other {# سؤال}}",
+      "creditsCharged": "{credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
       "createdAt": "بدأ في {when}",
       "openReport": "افتح التقرير",
       "openDocument": "افتح كمستند",
@@ -1993,10 +1993,10 @@
       "counts": "{ready} من {total} صفًا جاهزة للاستيراد",
       "skippedRows": "تم تخطّي {count}",
       "truncated": "قُرئت الصفوف الأولى فقط",
-      "importRows": "استورد {count} صفًا",
+      "importRows": "{count, plural, zero {لا صفوف للاستيراد} one {استورد صفًا واحدًا} two {استورد صفين} few {استورد # صفوف} many {استورد # صفًا} other {استورد # صف}}",
       "importing": "جارٍ الاستيراد…",
-      "imported": "تم استيراد {count} صفًا",
-      "importedSummary": "أصبح لديك {count} صفًا في حسابك.",
+      "imported": "{count, plural, zero {لم يتم استيراد أي صف} one {تم استيراد صف واحد} two {تم استيراد صفين} few {تم استيراد # صفوف} many {تم استيراد # صفًا} other {تم استيراد # صف}}",
+      "importedSummary": "{count, plural, zero {لا صفوف في حسابك} one {أصبح لديك صف واحد في حسابك} two {أصبح لديك صفان في حسابك} few {أصبح لديك # صفوف في حسابك} many {أصبح لديك # صفًا في حسابك} other {أصبح لديك # صف في حسابك}}.",
       "importError": "لم تكتمل عملية الاستيراد.",
       "pasteTitle": "الصق أي شيء",
       "pasteHint": "خطة عمل أو ملاحظات اجتماع أو قائمة عملاء. نستخرج ما يمكن تسجيله ونترك الباقي.",
@@ -2014,7 +2014,7 @@
     },
     "insights": {
       "title": "ما لاحظته",
-      "basedOn": "من {count} من سجلاتك",
+      "basedOn": "من {count, plural, zero {لا سجلات} one {سجل واحد من سجلاتك} two {سجلين من سجلاتك} few {# سجلات من سجلاتك} many {# سجلًا من سجلاتك} other {# سجل من سجلاتك}}",
       "checkIt": "تحقّق بنفسك",
       "showNumbers": "اعرض الأرقام",
       "hideNumbers": "أخفِ الأرقام",
@@ -2067,7 +2067,7 @@
     "affiliate": {
       "title": "برنامج الشركاء",
       "description": "شارك إيونكسا واكسب جزءًا مما يدفعه من تجلبهم.",
-      "pitch": "اكسب {percent}% من كل دفعة يسددها من تُحيلهم، شهريًا، لمدة {months} شهرًا.",
+      "pitch": "اكسب {percent}% من كل دفعة يسددها من تُحيلهم، شهريًا، لمدة {months, plural, zero {لا أشهر} one {شهر واحد} two {شهرين} few {# أشهر} many {# شهرًا} other {# شهر}}.",
       "pitchTerms": "لا يمكنك إحالة نفسك، وكل شخص يُحتسب مرة واحدة فقط. تبدأ العمولة من أول دفعة له.",
       "join": "احصل على رابطي",
       "joining": "جارٍ الإعداد…",
@@ -2075,7 +2075,7 @@
       "yourLink": "رابطك",
       "copy": "نسخ",
       "copied": "تم النسخ",
-      "terms": "{percent}% من كل دفعة، لمدة {months} شهرًا من أول دفعة لهم.",
+      "terms": "{percent}% من كل دفعة، لمدة {months, plural, zero {لا أشهر} one {شهر واحد} two {شهرين} few {# أشهر} many {# شهرًا} other {# شهر}} من أول دفعة لهم.",
       "suspended": "حساب الشريك هذا موقوف، لذا لا تُحتسب عمولة جديدة. راسلنا إن كنت ترى ذلك خطأً.",
       "stat": {
         "signups": "تسجيلات",
@@ -2159,7 +2159,7 @@
         "no_key": "لا يُرسَل أي بريد: لا يوجد مفتاح API للبريد في هذا النشر.",
         "unverified_domain": "الرسائل لا تصل: نطاق الإرسال غير موثّق.",
         "failed": "تعذّر إرسال بعض رسائل الإشعار.",
-        "affected": "{count} إرسال محفوظ هنا لكنه لم يصلك بالبريد قط. لم يُفقد شيء."
+        "affected": "{count, plural, zero {لا إرساليات محفوظة} one {إرسالية واحدة محفوظة} two {إرساليتان محفوظتان} few {# إرساليات محفوظة} many {# إرسالية محفوظة} other {# إرسالية محفوظة}} هنا ولم تصلك بالبريد قط. لم يُفقد شيء."
       }
     },
     "trading": {
@@ -2203,7 +2203,7 @@
         "noLosses": "لا توجد صفقة خاسرة في هذه العيّنة",
         "beforeCosts": "هذه الأرقام قبل العمولات — أضِفها إلى صفقاتك لتراها صافية.",
         "afterCosts": "هذه الأرقام صافية بعد العمولات التي سجّلتها.",
-        "unscoreable": "تعذّر حساب {count} صفقة (ينقصها السعر أو الأرباح والخسائر)"
+        "unscoreable": "{count, plural, zero {لم يتعذّر حساب أي صفقة} one {تعذّر حساب صفقة واحدة} two {تعذّر حساب صفقتين} few {تعذّر حساب # صفقات} many {تعذّر حساب # صفقة} other {تعذّر حساب # صفقة}} (ينقصها السعر أو الأرباح والخسائر)"
       },
       "pattern": {
         "title": "بعد الخسارة",
@@ -2220,7 +2220,7 @@
         "add": "أضف قاعدة",
         "empty": "لا توجد قواعد بعد. اكتب واحدة أعلاه وستُفحَص كل صفقة على أساسها.",
         "delete": "حذف القاعدة",
-        "saved": "حُفظت {count} قواعد",
+        "saved": "{count, plural, zero {لم تُحفظ أي قاعدة} one {حُفظت قاعدة واحدة} two {حُفظت قاعدتان} few {حُفظت # قواعد} many {حُفظت # قاعدة} other {حُفظت # قاعدة}}",
         "saveFailed": "تعذّر حفظ هذه القاعدة.",
         "deleteFailed": "تعذّر حذف هذه القاعدة."
       },
@@ -2236,18 +2236,18 @@
       },
       "ruleSummary": {
         "max_risk_percent": "المخاطرة بما لا يزيد عن {percent}% لكل صفقة",
-        "max_trades_per_day": "{count} صفقات يوميًا كحد أقصى",
+        "max_trades_per_day": "{count, plural, zero {لا صفقات} one {صفقة واحدة} two {صفقتان} few {# صفقات} many {# صفقة} other {# صفقة}} يوميًا كحد أقصى",
         "min_risk_reward": "عائد لا يقل عن {ratio} ضعف المخاطرة",
         "allowed_sessions": "هذه الجلسات فقط: {sessions}",
         "allowed_instruments": "هذه الأدوات فقط: {instruments}",
         "max_daily_loss": "التوقّف بعد خسارة {amount} في اليوم",
-        "no_trade_after_loss": "الانتظار {minutes} دقيقة بعد خسارة",
+        "no_trade_after_loss": "الانتظار {minutes, plural, zero {بلا دقائق} one {دقيقة واحدة} two {دقيقتين} few {# دقائق} many {# دقيقة} other {# دقيقة}} بعد خسارة",
         "max_position_size": "حجم المركز بحد أقصى {size}"
       },
       "violations": {
-        "count": "خُرقت {count} مرات",
+        "count": "{count, plural, zero {لم تُخرق} one {خُرقت مرة واحدة} two {خُرقت مرتين} few {خُرقت # مرات} many {خُرقت # مرة} other {خُرقت # مرة}}",
         "none": "لم تُخرق",
-        "uncheckable": "لم تُنفَّذ {count} عملية فحص لأن الصفقات كان ينقصها سعر أو مبلغ مخاطرة أو وقت."
+        "uncheckable": "{count, plural, zero {لم تُلغَ أي عملية فحص} one {لم تُنفَّذ عملية فحص واحدة} two {لم تُنفَّذ عمليتا فحص} few {لم تُنفَّذ # عمليات فحص} many {لم تُنفَّذ # عملية فحص} other {لم تُنفَّذ # عملية فحص}} لأن الصفقات كان ينقصها سعر أو مبلغ مخاطرة أو وقت."
       },
       "errors": {
         "bad_request": "تعذّرت قراءة هذا الطلب.",
@@ -2420,27 +2420,27 @@
       "upgradePlan": "ترقية الخطة"
     },
     "low": {
-      "remaining": "تبقّى {count} رصيد هذا الشهر",
+      "remaining": "{count, plural, zero {لم يتبقَّ أي رصيد} one {تبقّى رصيد واحد} two {تبقّى رصيدان} few {تبقّت # أرصدة} many {تبقّى # رصيدًا} other {تبقّى # رصيد}} هذا الشهر",
       "none": "لا توجد أرصدة متبقية هذا الشهر",
       "hint": "أعد الشحن الآن حتى لا ينقطع عملك.",
       "topUp": "إعادة الشحن"
     },
     "estimate": {
-      "approx": "~{count} رصيد",
+      "approx": "~{count, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
       "confirmTitle": "هذا إجراء كبير",
-      "confirmBody": "سيكلّف هذا نحو {count} رصيد. يمكنك المتابعة أو تقليص طلبك.",
+      "confirmBody": "سيكلّف هذا نحو {count, plural, zero {لا شيء} one {رصيد واحد} two {رصيدين} few {# أرصدة} many {# رصيدًا} other {# رصيد}}. يمكنك المتابعة أو تقليص طلبك.",
       "cancel": "إلغاء",
       "continue": "متابعة"
     },
     "freeChat": {
-      "remaining": "تبقّى لديك {count} رسالة مجانية هذا الشهر",
+      "remaining": "{count, plural, zero {لم تتبقَّ رسائل مجانية} one {تبقّت لديك رسالة مجانية واحدة} two {تبقّت لديك رسالتان مجانيتان} few {تبقّت لديك # رسائل مجانية} many {تبقّت لديك # رسالة مجانية} other {تبقّت لديك # رسالة مجانية}} هذا الشهر",
       "exhausted": "انتهت الرسائل المجانية — أصبحت المحادثات تستهلك الأرصدة",
-      "largeMessage": "هذه الرسالة كبيرة — سيتم خصم حوالي {count} من الرصيد"
+      "largeMessage": "هذه الرسالة كبيرة — سيتم خصم نحو {count, plural, zero {لا شيء} one {رصيد واحد} two {رصيدين} few {# أرصدة} many {# رصيدًا} other {# رصيد}}"
     },
-    "used": "تم استخدام {count} رصيد",
-    "usedWithRemaining": "تم استخدام {count} رصيد · متبقٍ {remaining}",
+    "used": "{count, plural, zero {لم يُستخدم أي رصيد} one {تم استخدام رصيد واحد} two {تم استخدام رصيدين} few {تم استخدام # أرصدة} many {تم استخدام # رصيدًا} other {تم استخدام # رصيد}}",
+    "usedWithRemaining": "{count, plural, zero {لم يُستخدم أي رصيد} one {تم استخدام رصيد واحد} two {تم استخدام رصيدين} few {تم استخدام # أرصدة} many {تم استخدام # رصيدًا} other {تم استخدام # رصيد}} · متبقٍ {remaining}",
     "unlimited": "غير محدود — لم تُستخدم أرصدة",
-    "unlimitedWouldHaveCost": "غير محدود — كان سيكلف {count} رصيد",
+    "unlimitedWouldHaveCost": "غير محدود — كان سيكلف {count, plural, zero {لا شيء} one {رصيدًا واحدًا} two {رصيدين} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
     "freeMessage": "رسالة مجانية · متبقٍ {count} هذا الشهر"
   },
   "cookies": {
@@ -2836,7 +2836,7 @@
     "notFoundBody": "اسأل في الدردشة — فكل ما يخص حسابك أو بياناتك تأتي إجابته من الذكاء الاصطناعي لا من هذه الصفحة.",
     "openChat": "افتح الدردشة",
     "pricingLink": "الأسعار والخطط",
-    "answerCount": "{count} إجابة",
+    "answerCount": "{count, plural, zero {لا إجابات} one {إجابة واحدة} two {إجابتان} few {# إجابات} many {# إجابة} other {# إجابة}}",
     "categories": {
       "getting-started": "البداية",
       "billing": "الفوترة والخطط",
@@ -3003,7 +3003,7 @@
   },
   "voice": {
     "listen": "استمع",
-    "listenFor": "استمع · {credits} من الرصيد",
+    "listenFor": "استمع · {credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
     "pause": "إيقاف مؤقت",
     "speed": "سرعة التشغيل",
     "voice": "الصوت",
@@ -3011,7 +3011,7 @@
     "listeningHint": "تحدّث ثم اضغط إيقاف. لا يُرسل شيء قبل أن تقرأه.",
     "startListening": "تحدّث بدل الكتابة",
     "stopListening": "إيقاف",
-    "costPerMinute": "{credits} من الرصيد لكل دقيقة كلام",
+    "costPerMinute": "{credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}} لكل دقيقة كلام",
     "outOfMinutes": "لم تتبقّ دقائق صوتية هذا الشهر",
     "states": {
       "idle": "جاهز",
@@ -3045,7 +3045,7 @@
       "pressToStart": "لا يبدأ التسجيل إلا عند الضغط، ويتوقّف عند الضغط مرة أخرى.",
       "notStored": "يُرسل الصوت لتحويله إلى نص ولا يُحفظ في أي مكان — لا لدينا ولا بعد ذلك.",
       "editFirst": "تقرأ النص وتصحّحه قبل إرسال أي شيء.",
-      "cost": "{credits} من الرصيد لكل دقيقة، و{minutes} دقيقة شهريًا في خطتك.",
+      "cost": "{credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}} لكل دقيقة، و{minutes, plural, zero {لا دقائق} one {دقيقة واحدة} two {دقيقتان} few {# دقائق} many {# دقيقة} other {# دقيقة}} شهريًا في خطتك.",
       "allow": "افتح الميكروفون",
       "cancel": "ليس الآن"
     },
@@ -3077,9 +3077,9 @@
       "exhausted": "لم تتبقّ دقائق هذا الشهر. تتجدّد في الأول من كل شهر.",
       "notConfigured": "الصوت غير مُعدّ في هذا التثبيت، لذلك لا يظهر زر الميكروفون ولا زر الاستماع.",
       "notIncluded": "الصوت غير مشمول في خطتك. كل ما هنا يمكن كتابته وقراءته كالمعتاد.",
-      "perMinute": "{credits} من الرصيد لكل دقيقة",
+      "perMinute": "{credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}} لكل دقيقة",
       "privacy": "لا يبدأ التسجيل إلا عند الضغط. يُرسل الصوت لتحويله إلى نص ولا يُحفظ في أي مكان — نحتفظ بعدد الثواني فقط.",
-      "remaining": "تبقّت {minutes} دقيقة",
+      "remaining": "{minutes, plural, zero {لم تتبقَّ دقائق} one {تبقّت دقيقة واحدة} two {تبقّت دقيقتان} few {تبقّت # دقائق} many {تبقّت # دقيقة} other {تبقّت # دقيقة}}",
       "speakLabel": "أن يقرأ لك",
       "title": "الصوت",
       "transcribeLabel": "أن تتحدّث إليه",
@@ -3094,15 +3094,15 @@
       "description": "CSV أو Excel، حتى 8 ميغابايت. قراءة الملف لا تكلّف شيئًا.",
       "button": "اختر ملفًا",
       "working": "جارٍ القراءة…",
-      "done": "قرأنا {rows} صفًا",
+      "done": "{rows, plural, zero {لم نقرأ أي صفوف} one {قرأنا صفًا واحدًا} two {قرأنا صفين} few {قرأنا # صفوف} many {قرأنا # صفًا} other {قرأنا # صف}}",
       "failed": "تعذّرت قراءة هذا الملف.",
       "tooLarge": "هذا الملف كبير جدًا — الحد هو 8 ميغابايت."
     },
     "summary": {
-      "counts": "{rows} صفًا · {columns} عمودًا",
-      "duplicates": "{count} صفوف مكررة تمامًا",
+      "counts": "{rows, plural, zero {لا صفوف} one {صف واحد} two {صفان} few {# صفوف} many {# صفًا} other {# صف}} · {columns, plural, zero {لا أعمدة} one {عمود واحد} two {عمودان} few {# أعمدة} many {# عمودًا} other {# عمود}}",
+      "duplicates": "{count, plural, zero {لا صفوف مكررة} one {صف واحد مكرر تمامًا} two {صفان مكرران تمامًا} few {# صفوف مكررة تمامًا} many {# صفًا مكررًا تمامًا} other {# صف مكرر تمامًا}}",
       "truncated": "قرأنا أول 50,000 صف. الرسوم تصف هذه الصفوف لا الملف كله.",
-      "ragged": "{count} صفوف لم تتطابق مع الترويسة — تأكد من الفاصل المستخدم عند الحفظ."
+      "ragged": "{count, plural, zero {لم تختلف أي صفوف} one {صف واحد لم يتطابق} two {صفان لم يتطابقا} few {# صفوف لم تتطابق} many {# صفًا لم يتطابق} other {# صف لم يتطابق}} مع الترويسة — تحقّق من الفاصل المستخدم عند الحفظ."
     },
     "columns": {
       "name": "العمود",
@@ -3139,7 +3139,7 @@
       "working": "جارٍ السؤال…",
       "failed": "تعذّرت الإجابة عن هذا السؤال.",
       "matched": "تطابق {matched} من {total} صفًا",
-      "rowCount": "{count} صفًا"
+      "rowCount": "{count, plural, zero {لا صفوف} one {صف واحد} two {صفان} few {# صفوف} many {# صفًا} other {# صف}}"
     },
     "legacy": {
       "title": "ملاحظاتك السابقة",
@@ -3220,8 +3220,8 @@
     "needsInput": "ينقص: {fields}",
     "needsHistory": "يحتاج {need} أشهر من السجل — لدينا {have}.",
     "noChangeYet": "لا تغيّر بعد",
-    "notEnoughDays": "لدينا حتى الآن {days} يومًا من السجل.",
-    "provenance": "بدأ السجل يوم إطلاق هذا: {months} شهرًا من بيانات المشتركين و{days} لقطة يومية. لا يُملأ شيء بأثر رجعي — الرقم الرجعي هو أسعار اليوم مطبّقة على ماضٍ لم يسجّله أحد.",
+    "notEnoughDays": "{days, plural, zero {لا أيام} one {يوم واحد} two {يومين} few {# أيام} many {# يومًا} other {# يوم}} من السجل حتى الآن.",
+    "provenance": "بدأ السجل يوم إطلاق هذا: {months, plural, zero {لا أشهر} one {شهر واحد} two {شهرين} few {# أشهر} many {# شهرًا} other {# شهر}} من بيانات المشتركين و{days, plural, zero {لا لقطات} one {لقطة يومية واحدة} two {لقطتان يوميتان} few {# لقطات يومية} many {# لقطة يومية} other {# لقطة يومية}}. لا يُملأ شيء بأثر رجعي — الرقم الرجعي هو أسعار اليوم مطبّقة على ماضٍ لم يسجّله أحد.",
     "inputs": {
       "marketing_spend": "إنفاق التسويق",
       "fixed_costs": "التكاليف الثابتة",
@@ -3291,8 +3291,8 @@
       "removedThisMonth": "أُزيلت الشارة هذا الشهر.",
       "cancelledKeepsMonth": "التجديد التلقائي متوقف. تبقى الشارة مخفية حتى نهاية الشهر ثم تعود.",
       "stopRenewing": "إيقاف التجديد",
-      "offer": "أزل شارة «Made with Ionexa» من هذا الموقع مقابل {credits} نقطة شهرياً (نحو {eur} يورو).",
-      "affordable": "لديك {balance} نقطة — نحو {months} شهر لهذا الموقع.",
+      "offer": "أزل شارة «Made with Ionexa» من هذا الموقع مقابل {credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}} شهريًا (نحو {eur} يورو).",
+      "affordable": "لديك {balance, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}} — نحو {months, plural, zero {لا أشهر} one {شهر واحد} two {شهرين} few {# أشهر} many {# شهرًا} other {# شهر}} لهذا الموقع.",
       "notEnough": "لديك {balance} نقطة وتحتاج {needed}.",
       "remove": "إزالة الشارة"
     }

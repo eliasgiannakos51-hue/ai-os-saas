@@ -18,7 +18,7 @@
     "viewPlans": "Vedi i piani",
     "chooseFiles": "Scegli file",
     "noFileChosen": "Nessun file selezionato",
-    "filesSelected": "{count} selezionati",
+    "filesSelected": "{count, plural, one {# selezionato} other {# selezionati}}",
     "networkError": "Errore di rete — riprova.",
     "notAuthenticated": "Non autenticato.",
     "created": "✓ creato",
@@ -233,7 +233,7 @@
     "setUpTeam": "Configura Team",
     "features": {
       "basicAiChat": "Chat IA di base",
-      "creditsPerMonth": "{count} crediti/mese",
+      "creditsPerMonth": "{count, plural, one {# credito} other {# crediti}}/mese",
       "aiMemory": "Memoria IA",
       "websiteAutomationBuilderAccess": "Accesso a Website & Automation Builder",
       "everythingInStarter": "Tutto ciò che include Starter",
@@ -498,7 +498,7 @@
       "totalEntries": "Voci totali",
       "mostActiveModule": "Modulo più attivo",
       "unlimited": "Illimitato",
-      "wouldHaveCost": "Sarebbe costato {credits} crediti"
+      "wouldHaveCost": "Sarebbe costato {credits, plural, one {# credito} other {# crediti}}"
     },
     "theme": {
       "title": "Tema",
@@ -642,7 +642,7 @@
     "marginReport": {
       "title": "Rapporto Margine",
       "ownerOnly": "Proprietario",
-      "description": "Margine medio ottenuto per funzione negli ultimi {days} giorni, dal costo IA reale misurato.",
+      "description": "Margine medio ottenuto per funzione {days, plural, one {nell'ultimo # giorno} other {negli ultimi # giorni}}, dal costo IA reale misurato.",
       "empty": "Nessuna azione IA registrata in questo periodo.",
       "unavailable": "Impossibile caricare il rapporto. Verifica che ai_cost_log esista.",
       "colFeature": "Funzione",
@@ -661,7 +661,7 @@
       "sumTop": "Funzione più costosa",
       "sumTopHint": "{percent}% della spesa totale",
       "projectionOnly": "Nessuna azione addebitata finora: ogni margine qui sotto è una proiezione da record bypass, non un ricavo.",
-      "belowTargetAlert": "{count} funzione/i sotto l’obiettivo di {target}x: {features}. È stato inviato un avviso via email.",
+      "belowTargetAlert": "{count, plural, one {# funzione} other {# funzioni}} sotto l’obiettivo di {target}x: {features}. È stato inviato un avviso via email.",
       "cacheTitle": "Cache del prompt",
       "cacheDescription": "Quota di token del prompt serviti dalla cache invece di essere pagati a prezzo pieno.",
       "cacheHitRate": "Tasso di successo",
@@ -670,7 +670,7 @@
       "cacheColWrite": "Scritti",
       "cacheEmpty": "Nessun token di prompt registrato finora.",
       "cacheMiscachedAlert": "{features}: scrive nella cache ma non legge nulla — il punto di interruzione è su contenuto che cambia a ogni richiesta.",
-      "absorbedRefusals": "Rifiuti assorbiti: {calls} esecuzione/i di agente hanno rifiutato il compito e non sono state addebitate — €{cost} di costo del modello a nostro carico.",
+      "absorbedRefusals": "Rifiuti assorbiti: {calls, plural, one {# esecuzione di agente ha rifiutato il compito e non è stata addebitata} other {# esecuzioni di agente hanno rifiutato il compito e non sono state addebitate}} — €{cost} di costo del modello a nostro carico.",
       "absorbedRefusalsShare": "Pari al {share}% dei ricavi in questo periodo; la soglia di revisione è {limit}%.",
       "absorbedRefusalsShareUnknown": "La quota sui ricavi non viene mostrata: questo report non ha un dato di ricavo con cui confrontarla."
     },
@@ -780,7 +780,7 @@
         "heading": "Che cosa stai accettando",
         "rate": "{price} € per credito, bloccato al prezzo di oggi.",
         "cap": "Mai più di {cap} € in un mese solare.",
-        "credits": "Bastano per {credits} crediti aggiuntivi.",
+        "credits": "Bastano per {credits, plural, one {# credito aggiuntivo} other {# crediti aggiuntivi}}.",
         "invoice": "Addebitato come voce separata sulla prossima fattura, distinta dal piano."
       },
       "agree": "Attiva l'utilizzo extra",
@@ -1088,7 +1088,7 @@
           "medium": "Energia stabile — buon passo successivo",
           "deep": "Buona energia — affronta questo"
         },
-        "heldBack": "{count} passi più impegnativi rimandati per ora"
+        "heldBack": "{count, plural, one {# passo più impegnativo rimandato} other {# passi più impegnativi rimandati}} per ora"
       },
       "stillPlanning": "Sta ancora pianificando — ci vuole un po'. Continuerà, e il piano sarà nel tuo elenco missioni quando è pronto.",
       "planStalled": "Il piano si è interrotto inaspettatamente. Nessun credito è stato addebitato — riprova.",
@@ -1099,7 +1099,7 @@
       },
       "deleteMission": "Elimina missione",
       "deleteConfirmMission": "Eliminare la missione «{goal}»?",
-      "deleteConfirmLoses": "Vengono rimossi {steps} passaggio(i) — {completed} già completati — e {scheduled} esecuzione(i) pianificata(e). Non è reversibile.",
+      "deleteConfirmLoses": "{steps, plural, one {Viene rimosso # passaggio} other {Vengono rimossi # passaggi}} — {completed} già completati — e {scheduled, plural, one {# esecuzione pianificata} other {# esecuzioni pianificate}}. Non è reversibile.",
       "deletedMission": "Missione eliminata",
       "deleteFailed": "Impossibile eliminare la missione.",
       "deleteStep": "Elimina passaggio",
@@ -1119,7 +1119,7 @@
       "generating": "Generazione...",
       "entriesTitle": "Nuove voci (questa settimana / la scorsa)",
       "noModuleActivity": "Nessuna attività in nessun modulo nelle ultime due settimane.",
-      "missionStepsLabel": "{completed} passaggi missione completati, {pending} ancora in sospeso",
+      "missionStepsLabel": "{completed, plural, one {# passaggio missione completato} other {# passaggi missione completati}}, {pending, plural, one {# ancora in sospeso} other {# ancora in sospeso}}",
       "reflectionLabel": "Riflessione"
     },
     "tradingWorkflow": {
@@ -1188,7 +1188,7 @@
       "generating": "Generazione...",
       "generated": "Sito generato",
       "duplicateGenerationSuppressed": "È già in corso una generazione per questo elemento — viene mostrato il suo avanzamento attuale invece di avviarne una nuova.",
-      "estimatedCost": "Costo stimato: {count} crediti",
+      "estimatedCost": "Costo stimato: {count, plural, one {# credito} other {# crediti}}",
       "estimatedTimeWithImages": "I siti complessi con immagini possono richiedere oltre 10 minuti per essere generati — puoi lasciare questa pagina.",
       "estimatedTimeLargeRequest": "Le richieste molto grandi o dettagliate (descrizione lunga o oltre 10 immagini) possono richiedere 20-30 minuti per essere generate — puoi lasciare questa pagina, continuerà a funzionare.",
       "clarificationTitle": "Un paio di domande veloci prima di generare:",
@@ -1222,9 +1222,9 @@
       "backToLatest": "Torna all'ultima versione",
       "previewIncompleteTitle": "Anteprima non disponibile",
       "previewIncompleteBody": "Questa pagina generata sembra incompleta o è stata interrotta, quindi non può essere mostrata in modo sicuro. Prova a rigenerarla con una descrizione più breve, oppure modificala di nuovo.",
-      "unfilledTitle": "{count} elemento(i) ancora da compilare",
+      "unfilledTitle": "{count, plural, one {# elemento ancora} other {# elementi ancora}} da compilare",
       "unfilledBody": "L'IA non inventa mai un numero di telefono, un prezzo o un orario: lascia uno spazio visibile. Usa «Chiedi una modifica» per completarli, oppure modificali dopo la pubblicazione.",
-      "inventedTitle": "{count} numero(i) sulla pagina che non hai fornito",
+      "inventedTitle": "{count, plural, one {# numero} other {# numeri}} sulla pagina che non hai fornito",
       "inventedBody": "Compaiono sulla pagina ma non nella tua descrizione. All'IA è vietato inventare un numero di telefono, un prezzo, un orario o una cifra: controllali prima di pubblicare e correggili con «Chiedi una modifica».",
       "inventedKind": {
         "phone": "telefono",
@@ -1260,7 +1260,7 @@
         "clear": "Cancella",
         "background": "Sfondo",
         "ownPhotoNeedsUpload": "Carica prima una foto qui sopra.",
-        "imageUse": "Le tue {count} foto caricate",
+        "imageUse": "{count, plural, one {La tua foto caricata} other {Le tue # foto caricate}}",
         "backgrounds": {
           "auto": "Scegli tu",
           "solid": "Tinta unita",
@@ -1305,7 +1305,7 @@
       "pageSelectLabel": "Pagine di questo sito",
       "pageHome": "Home",
       "editPageGone": "Questa pagina non fa più parte di questo sito: riaprilo per vedere le pagine attuali.",
-      "stockNoticeTitle": "{count} foto stock su questo sito",
+      "stockNoticeTitle": "{count, plural, one {# foto stock} other {# foto stock}} su questo sito",
       "stockNoticeBody": "Carica le tue per un risultato più autentico — Unsplash ha un'attività come la tua, non la tua.",
       "stockNoticeAction": "Carica foto",
       "storageFull": "Spazio insufficiente per queste immagini — servono {needed}, liberi {free}."
@@ -1400,7 +1400,7 @@
       "detectedType": "Tipo",
       "estimatedTime": "Tempo stimato",
       "estimatedCredits": "Crediti stimati",
-      "creditsApprox": "~{count} crediti",
+      "creditsApprox": "~{count, plural, one {# credito} other {# crediti}}",
       "noCreditCost": "Nessun credito",
       "create": "Crea",
       "editDescription": "Modifica descrizione",
@@ -1484,7 +1484,7 @@
       "previewCostPerRun": "Costo per esecuzione",
       "previewNextRuns": "Le prime tre esecuzioni",
       "previewTask": "Vedi il compito esatto",
-      "creditsPerRun": "~{credits} crediti",
+      "creditsPerRun": "~{credits, plural, one {# credito} other {# crediti}}",
       "createButton": "Crea agente",
       "creating": "Creazione...",
       "discard": "Scarta",
@@ -1505,7 +1505,7 @@
       "updateSuccess": "Agente aggiornato.",
       "saveError": "Non è stato possibile salvare la modifica. Riprova.",
       "confirmDelete": "Eliminare \"{name}\"? Anche la cronologia delle esecuzioni verrà eliminata e non è reversibile.",
-      "runSuccess": "Fatto — {credits} crediti. Il risultato ti è stato inviato via email.",
+      "runSuccess": "Fatto — {credits, plural, one {# credito} other {# crediti}}. Il risultato ti è stato inviato via email.",
       "runSuccessUnlimitedCost": "Fatto: illimitato sul tuo account (sarebbe costato {credits} crediti). Il risultato ti è stato inviato per email.",
       "runSuccessUnlimited": "Fatto: illimitato sul tuo account, nessun credito addebitato. Il risultato ti è stato inviato per email.",
       "runNothingToReport": "Niente di nuovo da segnalare questa volta.",
@@ -1527,7 +1527,7 @@
       "runRunning": "In corso",
       "runManual": "Manuale",
       "runScheduled": "Pianificata",
-      "runCredits": "{credits} crediti",
+      "runCredits": "{credits, plural, one {# credito} other {# crediti}}",
       "runCreditsUnlimited": "illimitato (sarebbe costato {credits})",
       "viewOutput": "Vedi il risultato",
       "scheduleFrequencyLabel": "Ogni quanto",
@@ -1636,7 +1636,7 @@
         "legend": "Quanto lavora",
         "perRun": "per esecuzione",
         "suggested": "Suggerito",
-        "facts": "{sources} fonti · {steps} passaggi · circa {seconds}s",
+        "facts": "{sources, plural, one {# fonte} other {# fonti}} · {steps, plural, one {# passaggio} other {# passaggi}} · circa {seconds}s",
         "runOnce": "Esegui una volta come",
         "runOnceHint": "Solo questa esecuzione. La pianificazione resta su {depth}.",
         "simple": {
@@ -1653,9 +1653,9 @@
         }
       },
       "templates": {
-        "found": "{count} agenti pronti fanno già questo",
-        "use": "Usa questo — {credits} crediti",
-        "buildNew": "Creane uno nuovo — {credits} crediti",
+        "found": "{count, plural, one {# agente pronto fa già questo} other {# agenti pronti fanno già questo}}",
+        "use": "Usa questo — {credits, plural, one {# credito} other {# crediti}}",
+        "buildNew": "Creane uno nuovo — {credits, plural, one {# credito} other {# crediti}}",
         "adopted": "Agente creato, osserva: {subject}",
         "adoptError": "Non è stato possibile usare quel modello. Non è stato creato nulla."
       },
@@ -1716,7 +1716,7 @@
       "copyFailed": "Non è stato possibile copiare il link.",
       "statusLive": "Online",
       "statusUnpublished": "Offline",
-      "viewsThisWeek": "{count} visualizzazioni questa settimana",
+      "viewsThisWeek": "{count, plural, one {# visualizzazione} other {# visualizzazioni}} questa settimana",
       "viewsTotal": "{count} in totale",
       "close": "Chiudi",
       "versionHistory": "Cronologia versioni",
@@ -1825,11 +1825,11 @@
       "unsupportedType": "{name} non è un tipo supportato. Carica un file PDF, Word, Excel, CSV, Markdown o di testo.",
       "emptyFile": "{name} è vuoto: non c'è nulla da leggere.",
       "used": "{used} di {cap} file",
-      "usedUnlimited": "{used} file",
+      "usedUnlimited": "{used, plural, one {# file} other {# file}}",
       "storage": "{used} di {cap}",
       "empty": "Ancora nessun file. Caricane uno per iniziare a fare domande.",
       "uploadedAt": "Caricato {when}",
-      "pages": "{count} pagine",
+      "pages": "{count, plural, one {# pagina} other {# pagine}}",
       "statusReady": "Pronto",
       "statusFailed": "Illeggibile",
       "statusProcessing": "In elaborazione",
@@ -1843,12 +1843,12 @@
       "deleteError": "Impossibile eliminare il file.",
       "collections": "Raccolte",
       "collectionPlaceholder": "Dai un nome alla raccolta…",
-      "saveSelection": "Salva {count} selezionati",
+      "saveSelection": "{count, plural, one {Salva # selezionato} other {Salva # selezionati}}",
       "collectionCreated": "Raccolta {name} salvata",
       "collectionError": "Impossibile salvare la raccolta.",
       "askTitle": "Chiedi ai miei documenti",
       "askNothingSelected": "Seleziona i file da cui deve venire la risposta. Non verrà usato altro.",
-      "askSelected": "Risposta da {count} file: {names}",
+      "askSelected": "Risposta da {count, plural, one {# file} other {# file}}: {names}",
       "tooManySelected": "Chiedi al massimo di {max} file alla volta.",
       "askPlaceholder": "Chiedi qualcosa sui file selezionati…",
       "ask": "Chiedi",
@@ -1857,11 +1857,11 @@
       "selectFirst": "Seleziona prima almeno un file.",
       "notInDocuments": "I documenti selezionati non rispondono a questo. Nulla di seguito proviene da essi.",
       "citations": "Fonti nei tuoi documenti",
-      "removedCitations": "{count} riferimento(i) puntavano a pagine non fornite e sono stati rimossi.",
+      "removedCitations": "{count, plural, one {# riferimento puntava} other {# riferimenti puntavano}} a pagine non fornite ed {count, plural, one {è stato rimosso} other {sono stati rimossi}}.",
       "uncitedAnswer": "Questa risposta non contiene riferimenti di pagina verificabili. Trattala con cautela e controlla direttamente i documenti.",
       "truncatedWarning": "Anche letta a parti, la selezione superava quanto può coprire una singola domanda, quindi la risposta può essere incompleta. Chiedi di meno file per volta.",
       "skippedFiles": "Saltati (nessun testo leggibile): {names}",
-      "creditsCharged": "{credits} crediti",
+      "creditsCharged": "{credits, plural, one {# credito} other {# crediti}}",
       "stepsLabel": "Come funziona questa pagina",
       "step1Title": "1. Carica i file",
       "step1Hint": "PDF, Word, Excel, CSV o testo.",
@@ -1912,7 +1912,7 @@
       "planError": "Impossibile trasformare l'argomento in domande di ricerca.",
       "planTitle": "Prima di iniziare",
       "planIntro": "Queste sono le domande che cercherà. Non è ancora stato addebitato nulla.",
-      "estimate": "L'esecuzione costa circa {credits} crediti.",
+      "estimate": "L'esecuzione costa circa {credits, plural, one {# credito} other {# crediti}}.",
       "estimateNote": "Una stima, non un addebito. Ti vengono fatturati i token e le ricerche effettivamente usati, e la differenza viene rilasciata.",
       "start": "Avvia la ricerca",
       "notNow": "Non ora",
@@ -1924,8 +1924,8 @@
       "statusSynthesising": "In scrittura",
       "statusReady": "Pronto",
       "statusFailed": "Non riuscito",
-      "questionCount": "{count} domande",
-      "creditsCharged": "{credits} crediti",
+      "questionCount": "{count, plural, one {# domanda} other {# domande}}",
+      "creditsCharged": "{credits, plural, one {# credito} other {# crediti}}",
       "createdAt": "Avviato {when}",
       "openReport": "Apri il report",
       "openDocument": "Apri come documento",
@@ -1993,10 +1993,10 @@
       "counts": "{ready} righe su {total} sono pronte",
       "skippedRows": "{count} saltate",
       "truncated": "sono state lette solo le prime righe",
-      "importRows": "Importa {count} righe",
+      "importRows": "{count, plural, one {Importa # riga} other {Importa # righe}}",
       "importing": "Importazione…",
-      "imported": "{count} righe importate",
-      "importedSummary": "Ora ci sono {count} righe nel tuo account.",
+      "imported": "{count, plural, one {# riga importata} other {# righe importate}}",
+      "importedSummary": "Ora {count, plural, one {c'è # riga} other {ci sono # righe}} nel tuo account.",
       "importError": "L'importazione non è andata a buon fine.",
       "pasteTitle": "Incolla qualsiasi cosa",
       "pasteHint": "Un business plan, appunti di riunione, un elenco clienti. Estraiamo ciò che è registrabile e lasciamo il resto.",
@@ -2014,7 +2014,7 @@
     },
     "insights": {
       "title": "Cosa ho notato",
-      "basedOn": "da {count} dei tuoi record",
+      "basedOn": "da {count, plural, one {# dei tuoi record} other {# dei tuoi record}}",
       "checkIt": "Verificalo tu stesso",
       "showNumbers": "Mostra i numeri",
       "hideNumbers": "Nascondi i numeri",
@@ -2067,7 +2067,7 @@
     "affiliate": {
       "title": "Affiliazione",
       "description": "Condividi Ionexa e guadagna una parte di quello che pagano le persone che porti.",
-      "pitch": "Guadagna il {percent}% di ogni pagamento dei tuoi referral, ogni mese, per {months} mesi.",
+      "pitch": "Guadagna il {percent}% di ogni pagamento dei tuoi referral, ogni mese, per {months, plural, one {# mese} other {# mesi}}.",
       "pitchTerms": "Non puoi segnalare te stesso, e ogni persona conta una volta sola. La commissione parte dal loro primo pagamento.",
       "join": "Voglio il mio link",
       "joining": "Preparazione…",
@@ -2075,7 +2075,7 @@
       "yourLink": "Il tuo link",
       "copy": "Copia",
       "copied": "Copiato",
-      "terms": "{percent}% di ogni pagamento, per {months} mesi dal primo.",
+      "terms": "{percent}% di ogni pagamento, per {months, plural, one {# mese} other {# mesi}} dal primo.",
       "suspended": "Questo account affiliato è sospeso, quindi non maturi nuove commissioni. Scrivici se pensi sia un errore.",
       "stat": {
         "signups": "Iscritti",
@@ -2159,7 +2159,7 @@
         "no_key": "Non viene inviata nessuna email: questo deployment non ha una chiave API per le email.",
         "unverified_domain": "Le email non arrivano: il dominio di invio non è verificato.",
         "failed": "Alcune email di notifica non sono state inviate.",
-        "affected": "{count} invio/i sono salvati qui ma non ti sono mai stati inviati per email. Non è andato perso nulla."
+        "affected": "{count, plural, one {# invio è salvato} other {# invii sono salvati}} qui ma non ti {count, plural, one {è mai stato inviato} other {sono mai stati inviati}} per email. Non è andato perso nulla."
       }
     },
     "trading": {
@@ -2203,7 +2203,7 @@
         "noLosses": "Nessuna operazione in perdita in questo campione",
         "beforeCosts": "Queste cifre sono al lordo delle commissioni — inseriscile nelle operazioni per vederle nette.",
         "afterCosts": "Queste cifre sono al netto delle commissioni che hai registrato.",
-        "unscoreable": "{count} operazioni non sono state calcolate (mancano prezzi o P&L)"
+        "unscoreable": "{count, plural, one {# operazione non è stata calcolata} other {# operazioni non sono state calcolate}} (mancano prezzi o P&L)"
       },
       "pattern": {
         "title": "Dopo una perdita",
@@ -2220,7 +2220,7 @@
         "add": "Aggiungi regola",
         "empty": "Nessuna regola per ora. Scrivine una sopra e ogni operazione sarà verificata.",
         "delete": "Elimina regola",
-        "saved": "{count} regole salvate",
+        "saved": "{count, plural, one {# regola salvata} other {# regole salvate}}",
         "saveFailed": "Non è stato possibile salvare la regola.",
         "deleteFailed": "Non è stato possibile eliminare la regola."
       },
@@ -2236,18 +2236,18 @@
       },
       "ruleSummary": {
         "max_risk_percent": "Rischiare al massimo il {percent}% per operazione",
-        "max_trades_per_day": "Al massimo {count} operazioni al giorno",
+        "max_trades_per_day": "Al massimo {count, plural, one {# operazione} other {# operazioni}} al giorno",
         "min_risk_reward": "Rendimento almeno {ratio}x il rischio",
         "allowed_sessions": "Solo queste sessioni: {sessions}",
         "allowed_instruments": "Solo questi strumenti: {instruments}",
         "max_daily_loss": "Fermarsi dopo aver perso {amount} in un giorno",
-        "no_trade_after_loss": "Aspettare {minutes} minuti dopo una perdita",
+        "no_trade_after_loss": "Aspettare {minutes, plural, one {# minuto} other {# minuti}} dopo una perdita",
         "max_position_size": "Dimensione della posizione al massimo {size}"
       },
       "violations": {
-        "count": "Infranta {count} volte",
+        "count": "{count, plural, one {Infranta # volta} other {Infranta # volte}}",
         "none": "Non infranta",
-        "uncheckable": "{count} verifiche non sono state eseguite perché alle operazioni mancava un prezzo, un importo di rischio o un orario."
+        "uncheckable": "{count, plural, one {# verifica non è stata eseguita} other {# verifiche non sono state eseguite}} perché alle operazioni mancava un prezzo, un importo di rischio o un orario."
       },
       "errors": {
         "bad_request": "Non è stato possibile leggere quella richiesta.",
@@ -2420,27 +2420,27 @@
       "upgradePlan": "Cambia piano"
     },
     "low": {
-      "remaining": "{count} crediti rimasti questo mese",
+      "remaining": "{count, plural, one {# credito rimasto} other {# crediti rimasti}} questo mese",
       "none": "Nessun credito rimasto questo mese",
       "hint": "ricarica ora per non interromperti.",
       "topUp": "Ricarica"
     },
     "estimate": {
-      "approx": "~{count} crediti",
+      "approx": "~{count, plural, one {# credito} other {# crediti}}",
       "confirmTitle": "Questa è un'azione impegnativa",
-      "confirmBody": "Questo costerà circa {count} crediti. Puoi continuare o ridurre la richiesta.",
+      "confirmBody": "Questo costerà circa {count, plural, one {# credito} other {# crediti}}. Puoi continuare o ridurre la richiesta.",
       "cancel": "Annulla",
       "continue": "Continua"
     },
     "freeChat": {
-      "remaining": "Ti restano {count} messaggi gratuiti questo mese",
+      "remaining": "{count, plural, one {Ti resta # messaggio gratuito} other {Ti restano # messaggi gratuiti}} questo mese",
       "exhausted": "Messaggi gratuiti esauriti: le chat ora consumano crediti",
-      "largeMessage": "Questo messaggio è grande — verranno addebitati circa {count} crediti"
+      "largeMessage": "Questo messaggio è grande — verrà addebitato circa {count, plural, one {# credito} other {# crediti}}"
     },
-    "used": "Usati {count} crediti",
-    "usedWithRemaining": "Usati {count} crediti · {remaining} rimasti",
+    "used": "{count, plural, one {Usato # credito} other {Usati # crediti}}",
+    "usedWithRemaining": "{count, plural, one {Usato # credito} other {Usati # crediti}} · {remaining, plural, one {# rimasto} other {# rimasti}}",
     "unlimited": "Illimitato — nessun credito usato",
-    "unlimitedWouldHaveCost": "Illimitato — sarebbe costato {count} crediti",
+    "unlimitedWouldHaveCost": "Illimitato — sarebbe costato {count, plural, one {# credito} other {# crediti}}",
     "freeMessage": "Messaggio gratuito · {count} rimasti questo mese"
   },
   "cookies": {
@@ -3003,7 +3003,7 @@
   },
   "voice": {
     "listen": "Ascolta",
-    "listenFor": "Ascolta · {credits} crediti",
+    "listenFor": "Ascolta · {credits, plural, one {# credito} other {# crediti}}",
     "pause": "Pausa",
     "speed": "Velocità di riproduzione",
     "voice": "Voce",
@@ -3011,7 +3011,7 @@
     "listeningHint": "Parla, poi premi Ferma. Nulla viene inviato prima che tu l'abbia letto.",
     "startListening": "Parla invece di scrivere",
     "stopListening": "Ferma",
-    "costPerMinute": "{credits} crediti al minuto di parlato",
+    "costPerMinute": "{credits, plural, one {# credito} other {# crediti}} al minuto di parlato",
     "outOfMinutes": "Nessun minuto di voce rimasto questo mese",
     "states": {
       "idle": "Pronto",
@@ -3045,7 +3045,7 @@
       "pressToStart": "La registrazione parte solo quando premi e si ferma quando premi di nuovo.",
       "notStored": "L'audio viene inviato per la trascrizione e non viene conservato da nessuna parte — né da noi né dopo.",
       "editFirst": "Leggi e correggi il testo prima che venga inviato qualsiasi cosa.",
-      "cost": "{credits} crediti al minuto, {minutes} minuti al mese nel tuo piano.",
+      "cost": "{credits, plural, one {# credito} other {# crediti}} al minuto, {minutes, plural, one {# minuto} other {# minuti}} al mese nel tuo piano.",
       "allow": "Apri il microfono",
       "cancel": "Non ora"
     },
@@ -3077,9 +3077,9 @@
       "exhausted": "Nessun minuto rimasto questo mese. Si rinnovano il primo.",
       "notConfigured": "La voce non è configurata su questa installazione, quindi i pulsanti microfono e Ascolta non compaiono.",
       "notIncluded": "La voce non è inclusa nel tuo piano. Tutto qui si può comunque scrivere e leggere.",
-      "perMinute": "{credits} crediti al minuto",
+      "perMinute": "{credits, plural, one {# credito} other {# crediti}} al minuto",
       "privacy": "La registrazione parte solo quando premi. L'audio viene inviato per la trascrizione e non viene conservato da nessuna parte: teniamo i secondi e nient'altro.",
-      "remaining": "Restano {minutes} minuti",
+      "remaining": "{minutes, plural, one {Resta # minuto} other {Restano # minuti}}",
       "speakLabel": "Farsi leggere",
       "title": "Voce",
       "transcribeLabel": "Parlargli",
@@ -3094,15 +3094,15 @@
       "description": "CSV o Excel, fino a 8 MB. Leggere un file non costa nulla.",
       "button": "Scegli un file",
       "working": "Sto leggendo…",
-      "done": "Lette {rows} righe",
+      "done": "{rows, plural, one {Letta # riga} other {Lette # righe}}",
       "failed": "Non è stato possibile leggere quel file.",
       "tooLarge": "Quel file è troppo grande — il limite è 8 MB."
     },
     "summary": {
-      "counts": "{rows} righe · {columns} colonne",
-      "duplicates": "{count} righe esattamente duplicate",
+      "counts": "{rows, plural, one {# riga} other {# righe}} · {columns, plural, one {# colonna} other {# colonne}}",
+      "duplicates": "{count, plural, one {# riga esattamente duplicata} other {# righe esattamente duplicate}}",
       "truncated": "Abbiamo letto le prime 50.000 righe. I grafici descrivono quelle, non tutto il file.",
-      "ragged": "{count} righe non combaciavano con l'intestazione — controlla il separatore usato al salvataggio."
+      "ragged": "{count, plural, one {# riga non combaciava} other {# righe non combaciavano}} con l'intestazione — controlla il separatore usato al salvataggio."
     },
     "columns": {
       "name": "Colonna",
@@ -3139,7 +3139,7 @@
       "working": "Sto chiedendo…",
       "failed": "Non è stato possibile rispondere.",
       "matched": "{matched} righe su {total} corrispondono",
-      "rowCount": "{count} righe"
+      "rowCount": "{count, plural, one {# riga} other {# righe}}"
     },
     "legacy": {
       "title": "Le tue note precedenti",
@@ -3220,8 +3220,8 @@
     "needsInput": "Serve: {fields}",
     "needsHistory": "Servono {need} mesi di storico — ne abbiamo {have}.",
     "noChangeYet": "nessuna variazione ancora",
-    "notEnoughDays": "{days} giorno/i di storico finora.",
-    "provenance": "Lo storico inizia il giorno in cui questo è stato pubblicato: {months} mese/i di dati sugli abbonati e {days} istantanee giornaliere. Niente viene ricostruito a ritroso — una cifra retroattiva sarebbero i prezzi di oggi applicati a un passato che nessuno ha registrato.",
+    "notEnoughDays": "{days, plural, one {# giorno} other {# giorni}} di storico finora.",
+    "provenance": "Lo storico inizia il giorno in cui questo è stato pubblicato: {months, plural, one {# mese} other {# mesi}} di dati sugli abbonati e {days, plural, one {# istantanea giornaliera} other {# istantanee giornaliere}}. Niente viene ricostruito a ritroso — una cifra retroattiva sarebbero i prezzi di oggi applicati a un passato che nessuno ha registrato.",
     "inputs": {
       "marketing_spend": "spesa di marketing",
       "fixed_costs": "costi fissi",
@@ -3291,8 +3291,8 @@
       "removedThisMonth": "Badge rimosso questo mese.",
       "cancelledKeepsMonth": "Il rinnovo automatico è disattivato. Il badge resta nascosto fino a fine mese, poi torna.",
       "stopRenewing": "Interrompi il rinnovo",
-      "offer": "Rimuovi il badge «Made with Ionexa» da questo sito per {credits} crediti al mese (circa {eur} €).",
-      "affordable": "Hai {balance} crediti: circa {months} mese/i per questo sito.",
+      "offer": "Rimuovi il badge «Made with Ionexa» da questo sito per {credits, plural, one {# credito} other {# crediti}} al mese (circa {eur} €).",
+      "affordable": "Hai {balance, plural, one {# credito} other {# crediti}}: circa {months, plural, one {# mese} other {# mesi}} per questo sito.",
       "notEnough": "Hai {balance} crediti e ne servono {needed}.",
       "remove": "Rimuovi il badge"
     }

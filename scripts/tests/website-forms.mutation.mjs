@@ -170,7 +170,7 @@ const MUTANTS = [
   {
     name: "the consent tick is only read from the top level",
     file: ROUTE,
-    from: "        body?.consent ?? (typeof rawFields._consent === \"string\" ? rawFields._consent : undefined);",
+    from: '        body?.consent ?? (typeof rawFields._consent === "string" ? rawFields._consent : undefined);',
     to: "        body?.consent;",
   },
   {
@@ -188,7 +188,7 @@ const MUTANTS = [
   {
     name: "the honeypot stops being checked",
     file: ROUTE,
-    from: "    if (typeof rawFields._hp === \"string\" && rawFields._hp.trim() !== \"\") {",
+    from: '    if (typeof rawFields._hp === "string" && rawFields._hp.trim() !== "") {',
     to: "    if (false) {",
   },
   {
@@ -204,7 +204,10 @@ const MUTANTS = [
       // The insert moves BELOW the send, which is the defect: an email
       // outage then loses the lead instead of merely failing to announce
       // it. Done as two edits because that is what reordering is.
-      { from: "    const { data: inserted, error: insertError } = await admin\n      .from(\"website_form_submissions\")\n      .insert({\n        website_id: websiteId,", to: "    const { data: inserted, error: insertError } = { data: null, error: null } as never;\n    void admin;\n    const unusedInsert = {\n        website_id: websiteId," },
+      {
+        from: '    const { data: inserted, error: insertError } = await admin\n      .from("website_form_submissions")\n      .insert({\n        website_id: websiteId,',
+        to: "    const { data: inserted, error: insertError } = { data: null, error: null } as never;\n    void admin;\n    const unusedInsert = {\n        website_id: websiteId,",
+      },
     ],
   },
 
@@ -302,7 +305,7 @@ const MUTANTS = [
   {
     name: "the quote fields are retyped into the prompt instead of rendered",
     file: BUILDER,
-    from: "${Object.entries(QUOTE_FIELDS_BY_INDUSTRY)\n  .map(([industry, fields]) => `   - ${industry}: ${fields.join(\", \")}`)\n  .join(\"\\n\")}",
+    from: '${Object.entries(QUOTE_FIELDS_BY_INDUSTRY)\n  .map(([industry, fields]) => `   - ${industry}: ${fields.join(", ")}`)\n  .join("\\n")}',
     to: "   - trades: property type, job description",
   },
   {
@@ -366,8 +369,8 @@ const MUTANTS = [
   {
     name: "search stops looking at what the visitor actually wrote",
     file: LIST,
-    from: "      const haystack = [row.website_name, row.form_type, ...Object.values(row.fields)].join(\" \");",
-    to: "      const haystack = [row.website_name, row.form_type].join(\" \");",
+    from: '      const haystack = [row.website_name, row.form_type, ...Object.values(row.fields)].join(" ");',
+    to: '      const haystack = [row.website_name, row.form_type].join(" ");',
   },
   {
     name: "the CSV takes its columns from the first row only",
@@ -418,8 +421,8 @@ const MUTANTS = [
   {
     name: "field keys are matched case-sensitively",
     file: TYPES,
-    from: "    const k = key.toLowerCase().replace(/[\\s-]/g, \"\");",
-    to: "    const k = key.replace(/[\\s-]/g, \"\");",
+    from: '    const k = key.toLowerCase().replace(/[\\s-]/g, "");',
+    to: '    const k = key.replace(/[\\s-]/g, "");',
   },
   {
     name: "a blank value is picked over a later real one",
@@ -448,8 +451,12 @@ const MUTANTS = [
   {
     name: "the Greek affected-count loses its placeholder",
     file: EL,
-    from: '"affected": "{count} υποβολή/ές είναι αποθηκευμένες',
-    to: '"affected": "Κάποιες υποβολές είναι αποθηκευμένες',
+    // Retargeted when the sentence became an ICU plural. The whole value is
+    // replaced, not a prefix of it: cutting an ICU string in half leaves
+    // stray braces and the gate would then go red for a parse error rather
+    // than for the missing count.
+    from: '"affected": "{count, plural, one {# υποβολή είναι αποθηκευμένη} other {# υποβολές είναι αποθηκευμένες}} εδώ αλλά δεν σας {count, plural, one {στάλθηκε} other {στάλθηκαν}} ποτέ με email. Δεν χάθηκε τίποτα."',
+    to: '"affected": "Κάποιες υποβολές είναι αποθηκευμένες εδώ αλλά δεν σας στάλθηκαν ποτέ με email. Δεν χάθηκε τίποτα."',
   },
   {
     name: "one form type loses its Greek label",
@@ -472,14 +479,20 @@ for (const m of MUTANTS) {
   const edits = m.edits ?? [{ from: m.from, to: m.to }];
   const stale = edits.find((e) => !original.includes(e.from));
   if (stale) {
-    missed.push({ ...m, why: `the mutation target no longer exists in ${m.file}` });
+    missed.push({
+      ...m,
+      why: `the mutation target no longer exists in ${m.file}`,
+    });
     console.log(`  STALE   ${m.name}\n          anchor not found in ${m.file}`);
     continue;
   }
   let mutated = original;
   for (const e of edits) mutated = mutated.replace(e.from, e.to);
   if (mutated === original) {
-    missed.push({ ...m, why: "the mutation left the file byte-identical — it is not a defect" });
+    missed.push({
+      ...m,
+      why: "the mutation left the file byte-identical — it is not a defect",
+    });
     console.log(`  NO-OP   ${m.name}`);
     continue;
   }
@@ -495,7 +508,11 @@ for (const m of MUTANTS) {
   } catch (e) {
     failed = true;
     const out = String(e.stdout || "") + String(e.stderr || "");
-    detail = (out.split("\n").find((l) => l.includes("FAIL")) || out.split("\n")[0] || "").trim();
+    detail = (
+      out.split("\n").find((l) => l.includes("FAIL")) ||
+      out.split("\n")[0] ||
+      ""
+    ).trim();
   } finally {
     writeFileSync(m.file, original);
   }
@@ -503,7 +520,10 @@ for (const m of MUTANTS) {
     caught++;
     console.log(`  CAUGHT  ${m.name}\n          ${detail.slice(0, 130)}`);
   } else {
-    missed.push({ ...m, why: "the gate stayed green with the defect re-introduced" });
+    missed.push({
+      ...m,
+      why: "the gate stayed green with the defect re-introduced",
+    });
     console.log(`  MISSED  ${m.name}`);
   }
 }
@@ -512,7 +532,9 @@ try {
   execFileSync("node", [GATE], { stdio: "pipe" });
   console.log("\nbaseline: the gate is green on the unmutated tree");
 } catch {
-  console.log("\nBASELINE IS RED — a mutation was not restored. Check `git diff`.");
+  console.log(
+    "\nBASELINE IS RED — a mutation was not restored. Check `git diff`.",
+  );
   process.exit(1);
 }
 console.log(`\n${caught} of ${MUTANTS.length} mutations caught.`);

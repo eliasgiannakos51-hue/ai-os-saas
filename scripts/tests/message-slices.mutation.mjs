@@ -22,8 +22,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 
-const GATE = "scripts/tests/marketing-messages.test.mjs";
-const LIB = "src/lib/i18n/marketing-messages.ts";
+const GATE = "scripts/tests/message-slices.test.mjs";
+const LIB = "src/lib/i18n/message-slices.ts";
 const GRAPH = "scripts/lib/route-graph.mjs";
 const BANNER = "src/components/cookie-consent-banner.tsx";
 const MIDDLEWARE = "src/middleware.ts";
@@ -31,90 +31,12 @@ const LAYOUT = "src/app/layout.tsx";
 const TARGETS = [GATE, LIB, GRAPH, BANNER, MIDDLEWARE, LAYOUT];
 
 const MUTANTS = [
+  // ---- THE OUTAGE, PUT BACK -----------------------------------------
   {
-    // THE BUG THIS IS ALL FOR: a public component asks for a namespace
-    // that will not be in its payload.
-    name: "a public component starts using an undeclared namespace",
-    file: BANNER,
-    from: 'const t = useTranslations("cookies.banner");',
-    to: 'const t = useTranslations("dashboard.overview");',
-    expect: "every namespace used is declared",
-  },
-  {
-    name: "a declared namespace is dropped while still in use",
-    file: LIB,
-    from: '  "cookies",\n',
-    to: "",
-    expect: "every namespace used is declared",
-  },
-  {
-    name: "a namespace nobody uses is left in the list",
-    file: LIB,
-    from: '  "pricing",\n]',
-    to: '  "pricing",\n  "moduleData",\n]',
-    expect: "every declared namespace is actually used",
-  },
-  {
-    // No static list can bound a runtime key.
-    name: "a public component asks for its namespace at runtime",
-    file: BANNER,
-    from: 'const t = useTranslations("cookies.banner");',
-    to: "const t = useTranslations();",
-    expect: "no public client component can reach an unlisted key",
-  },
-  {
-    name: "a public component computes its key",
-    file: BANNER,
-    from: 'const t = useTranslations("cookies.banner");',
-    to: 'const t = useTranslations("cookies.banner");\n  const which = "title";\n  void t(which);',
-    expect: "no public client component can reach an unlisted key",
-  },
-  {
-    // THE CLASSIFICATION ITSELF. /onboarding is behind a login and its
-    // tree contains a component that calls useTranslations() with no
-    // namespace. Call it public and the gate must notice.
-    name: "an authenticated area is reclassified as public",
-    file: LIB,
-    from: 'export const APP_ROUTE_PREFIXES = ["/dashboard", "/onboarding"] as const;',
-    to: 'export const APP_ROUTE_PREFIXES = ["/dashboard"] as const;',
-    expect: "no public client component can reach an unlisted key",
-  },
-
-  // ---- the instruments ----------------------------------------------
-  {
-    name: "the import walk follows nothing",
-    file: GRAPH,
-    from: '      ...[...source.matchAll(/from\\s+["\']([^"\']+)["\']/g)].map((m) => m[1]),',
-    to: "      ...[],",
-    expect: "files reachable from them",
-  },
-  {
-    name: "no file is recognised as a client component",
-    file: GRAPH,
-    from: '  /^\\s*["\']use client["\']/m.test(readFileSync(file, "utf8"));',
-    to: '  /^\\s*["\']use serverXX["\']/m.test(readFileSync(file, "utf8"));',
-    expect: "client components among them",
-  },
-  {
-    name: "the entry scan finds no routes",
-    file: GRAPH,
-    from: "      else if (/^(page|layout|template|error|not-found|loading)\\.tsx$/.test(entry.name)) out.push(full);",
-    to: "      else if (false) out.push(full);",
-    expect: "public entry points",
-  },
-  {
-    name: "the picker hands back the whole catalogue",
-    file: LIB,
-    from: "    if (name in messages) picked[name] = messages[name];",
-    to: "    if (name in messages) Object.assign(picked, messages);",
-    expect: "it picks only what is named",
-  },
-  // ---- the revert, which is now the thing being protected -----------
-  {
-    // THE OUTAGE, PUT BACK. Trimming here broke every dashboard page,
-    // because a shared root layout is not re-rendered across client-side
-    // navigations: the slice chosen for /login was still in force on
-    // /dashboard/overview and the sidebar rendered its own key names.
+    // Trimming in the root layout broke every dashboard page: a shared
+    // layout is not re-rendered across client-side navigations, so the
+    // slice chosen for /login was still in force on /dashboard/overview
+    // and 121 of 188 client components rendered raw key names.
     name: "the root layout trims the catalogue again",
     file: LAYOUT,
     from: "  const clientMessages = messages;",
@@ -142,12 +64,95 @@ const MUTANTS = [
     to: "shared layout is rendered once and reused",
     expect: "the layout records why it cannot be trimmed here",
   },
+
+  // ---- THE QUESTION THE OLD GATE NEVER ASKED ------------------------
+  {
+    // A namespace removed from the DASHBOARD's list. The old gate had no
+    // dashboard in it at all, so this mutation had nothing to fail.
+    name: "a namespace is dropped from the dashboard's list",
+    file: LIB,
+    from: '      "settings", "sidebar", "voice",',
+    to: '      "settings", "voice",',
+    expect: "dashboard: every namespace used is declared",
+  },
+  {
+    name: "a namespace nobody uses is added to the dashboard's list",
+    file: LIB,
+    from: '      "settings", "sidebar", "voice",\n    ],',
+    to: '      "settings", "sidebar", "voice", "roadmap",\n    ],',
+    expect: "dashboard: every declared namespace is used",
+  },
+  {
+    // The count that decides whether a group may EVER be trimmed.
+    name: "the dashboard under-reports its unbounded components",
+    file: LIB,
+    from: "    unbounded: 61,",
+    to: "    unbounded: 0,",
+    expect: "dashboard: 61 unbounded component(s)",
+  },
+  {
+    // With no prefix the dashboard stops claiming its own routes, they
+    // fall to the catch-all group, and the namespace lists stop matching
+    // what each group really reaches.
+    name: "a route group stops claiming its prefix",
+    file: LIB,
+    from: '    prefixes: ["/dashboard"],',
+    to: "    prefixes: [],",
+    expect: "dashboard: every namespace used is declared",
+  },
+
+  // ---- THE FAIL-SAFE ------------------------------------------------
+  {
+    // An unrecognisable path must land on a group that gets everything.
+    name: "an unrecognisable path falls to a trimmable group",
+    file: LIB,
+    from: "    return ROUTE_GROUPS.find((g) => g.unbounded > 0) ?? ROUTE_GROUPS[0];",
+    to: "    return ROUTE_GROUPS.find((g) => g.unbounded === 0) ?? ROUTE_GROUPS[0];",
+    expect: "something that is not a path gets an untrimmable group",
+  },
+  {
+    name: "canTrim stops caring about unbounded components",
+    file: LIB,
+    from: "  return group.unbounded === 0 && group.namespaces.length > 0;",
+    to: "  return group.namespaces.length > 0;",
+    expect: "the dashboard is not trimmable",
+  },
   {
     name: "the path matcher goes back to a raw prefix",
     file: LIB,
-    from: "    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),",
-    to: "    (prefix) => pathname.startsWith(prefix),",
-    expect: "a lookalike path is still marketing",
+    from: "    g.prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`)),",
+    to: "    g.prefixes.some((p) => pathname.startsWith(p)),",
+    expect: "a lookalike path is not the dashboard",
+  },
+
+  // ---- THE INSTRUMENTS ----------------------------------------------
+  {
+    name: "the import walk follows nothing",
+    file: GRAPH,
+    from: '      ...[...source.matchAll(/from\\s+["\']([^"\']+)["\']/g)].map((m) => m[1]),',
+    to: "      ...[],",
+    expect: "the dashboard walk is real",
+  },
+  {
+    name: "no file is recognised as a client component",
+    file: GRAPH,
+    from: '  /^\\s*["\']use client["\']/m.test(readFileSync(file, "utf8"));',
+    to: '  /^\\s*["\']use serverXX["\']/m.test(readFileSync(file, "utf8"));',
+    expect: "the dashboard walk is real",
+  },
+  {
+    name: "the entry scan finds no routes",
+    file: GRAPH,
+    from: "      else if (/^(page|layout|template|error|not-found|loading)\\.tsx$/.test(entry.name)) out.push(full);",
+    to: "      else if (false) out.push(full);",
+    expect: "the entry scan found routes",
+  },
+  {
+    name: "the picker hands back the whole catalogue",
+    file: LIB,
+    from: "    if (name in messages) picked[name] = messages[name];",
+    to: "    if (name in messages) Object.assign(picked, messages);",
+    expect: "it picks only what is named",
   },
 ];
 

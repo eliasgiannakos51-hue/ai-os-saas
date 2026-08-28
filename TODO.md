@@ -29,6 +29,54 @@ Neither blocks anything already built or already promised on /roadmap or
 /pricing — they were never listed as shipped or as "soon" there. Revisit
 when V4 planning starts.
 
+## The rule this branch paid for: prove what you do NOT remove
+
+An optimisation that removes something must prove what it does NOT
+remove, on every path — not only on the paths it was written for.
+
+It cost one production outage. The root layout began sending public pages
+five message namespaces instead of forty, on the strength of a gate that
+walked 15 public entry points, 79 files and 18 client components, derived
+the five namespaces rather than declaring them, and caught 11 of 11
+mutations. Every one of those mutations asked the same question from a
+different angle: "what do public pages need?"
+
+None asked what the change did to the 41 dashboard entry points, their
+477 files, or their 188 client components. 121 of those would have
+rendered raw key names, and did: `sidebar.items.home`,
+`sidebar.groups.workspace`, and eight more, on every dashboard page, for
+every user. Only `common` strings survived, which is why "Make anything"
+looked fine while the nav did not.
+
+The mechanism was not the namespace list. app/layout.tsx is the ROOT
+layout, and a shared layout is rendered once and reused across
+client-side navigations beneath it. login-form.tsx does
+`router.push("/dashboard/overview")` — a client-side navigation — so the
+slice chosen for /login was still in force on the dashboard. No list
+could have fixed that.
+
+Two things follow, and both are now enforced by
+scripts/tests/message-slices.test.mjs:
+
+- A gate for a change that removes something must render EVERY route
+  group, not the group the change is about.
+- A group containing even one component that reaches a key unpredictably
+  — useTranslations() with no namespace, useMessages(), t() with a
+  computed key — can never be trimmed by a static list. The dashboard has
+  sixty-one.
+
+It is the same shape as the NaN-credits bug in the same branch: a check
+that supplies its own inputs never sees what the real world supplies.
+
+## Still unclaimed: 93% of the catalogue on public pages
+
+The measurement stands — a Greek public page carries 159,737 characters
+of message catalogue and reads 11,267 of them; the live home page is
+303,706 characters in Greek against 210,565 in English. Claiming it needs
+a layout per route group, each with its own NextIntlClientProvider, so
+the slice is chosen where the group is. lib/i18n/message-slices.ts holds
+the per-group namespace lists, derived and gated, ready for that.
+
 ## Done: the affiliate programme
 
 Listed above as "not being built in this pass", and built. What exists:

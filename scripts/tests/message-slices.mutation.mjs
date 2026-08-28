@@ -22,8 +22,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 
-const GATE = "scripts/tests/marketing-messages.test.mjs";
-const LIB = "src/lib/i18n/marketing-messages.ts";
+const GATE = "scripts/tests/message-slices.test.mjs";
+const LIB = "src/lib/i18n/message-slices.ts";
 const GRAPH = "scripts/lib/route-graph.mjs";
 const BANNER = "src/components/cookie-consent-banner.tsx";
 const MIDDLEWARE = "src/middleware.ts";
@@ -31,76 +31,121 @@ const LAYOUT = "src/app/layout.tsx";
 const TARGETS = [GATE, LIB, GRAPH, BANNER, MIDDLEWARE, LAYOUT];
 
 const MUTANTS = [
+  // ---- THE OUTAGE, PUT BACK -----------------------------------------
   {
-    // THE BUG THIS IS ALL FOR: a public component asks for a namespace
-    // that will not be in its payload.
-    name: "a public component starts using an undeclared namespace",
-    file: BANNER,
-    from: 'const t = useTranslations("cookies.banner");',
-    to: 'const t = useTranslations("dashboard.overview");',
-    expect: "every namespace used is declared",
+    // Trimming in the root layout broke every dashboard page: a shared
+    // layout is not re-rendered across client-side navigations, so the
+    // slice chosen for /login was still in force on /dashboard/overview
+    // and 121 of 188 client components rendered raw key names.
+    name: "the root layout trims the catalogue again",
+    file: LAYOUT,
+    from: "  const clientMessages = messages;",
+    to: "  const clientMessages = pickNamespaces(messages);",
+    expect: "the provider is given the whole catalogue",
   },
   {
-    name: "a declared namespace is dropped while still in use",
-    file: LIB,
-    from: '  "cookies",\n',
-    to: "",
-    expect: "every namespace used is declared",
+    name: "the layout goes back to reading a path it cannot trust",
+    file: LAYOUT,
+    from: "  const clientMessages = messages;",
+    to: '  const pathname = headers().get("x-pathname");\n  const clientMessages = messages;',
+    expect: "the root layout does not read a path it cannot trust",
   },
   {
-    name: "a namespace nobody uses is left in the list",
-    file: LIB,
-    from: '  "pricing",\n]',
-    to: '  "pricing",\n  "moduleData",\n]',
-    expect: "every declared namespace is actually used",
+    name: "the middleware starts setting x-pathname again",
+    file: MIDDLEWARE,
+    from: "  const requestHeaders = request.headers;",
+    to: '  const requestHeaders = new Headers(request.headers);\n  requestHeaders.set("x-pathname", request.nextUrl.pathname);',
+    expect: "the middleware sets no x-pathname header",
   },
   {
-    // No static list can bound a runtime key.
-    name: "a public component asks for its namespace at runtime",
-    file: BANNER,
-    from: 'const t = useTranslations("cookies.banner");',
-    to: "const t = useTranslations();",
-    expect: "no public client component can reach an unlisted key",
-  },
-  {
-    name: "a public component computes its key",
-    file: BANNER,
-    from: 'const t = useTranslations("cookies.banner");',
-    to: 'const t = useTranslations("cookies.banner");\n  const which = "title";\n  void t(which);',
-    expect: "no public client component can reach an unlisted key",
-  },
-  {
-    // THE CLASSIFICATION ITSELF. /onboarding is behind a login and its
-    // tree contains a component that calls useTranslations() with no
-    // namespace. Call it public and the gate must notice.
-    name: "an authenticated area is reclassified as public",
-    file: LIB,
-    from: 'export const APP_ROUTE_PREFIXES = ["/dashboard", "/onboarding"] as const;',
-    to: 'export const APP_ROUTE_PREFIXES = ["/dashboard"] as const;',
-    expect: "no public client component can reach an unlisted key",
+    name: "the explanation is deleted, inviting the next person to redo it",
+    file: LAYOUT,
+    from: "shared layout is rendered once and REUSED",
+    to: "shared layout is rendered once and reused",
+    expect: "the layout records why it cannot be trimmed here",
   },
 
-  // ---- the instruments ----------------------------------------------
+  // ---- THE QUESTION THE OLD GATE NEVER ASKED ------------------------
+  {
+    // A namespace removed from the DASHBOARD's list. The old gate had no
+    // dashboard in it at all, so this mutation had nothing to fail.
+    name: "a namespace is dropped from the dashboard's list",
+    file: LIB,
+    from: '      "settings", "sidebar", "voice",',
+    to: '      "settings", "voice",',
+    expect: "dashboard: every namespace used is declared",
+  },
+  {
+    name: "a namespace nobody uses is added to the dashboard's list",
+    file: LIB,
+    from: '      "settings", "sidebar", "voice",\n    ],',
+    to: '      "settings", "sidebar", "voice", "roadmap",\n    ],',
+    expect: "dashboard: every declared namespace is used",
+  },
+  {
+    // The count that decides whether a group may EVER be trimmed.
+    name: "the dashboard under-reports its unbounded components",
+    file: LIB,
+    from: "    unbounded: 61,",
+    to: "    unbounded: 0,",
+    expect: "dashboard: 61 unbounded component(s)",
+  },
+  {
+    // With no prefix the dashboard stops claiming its own routes, they
+    // fall to the catch-all group, and the namespace lists stop matching
+    // what each group really reaches.
+    name: "a route group stops claiming its prefix",
+    file: LIB,
+    from: '    prefixes: ["/dashboard"],',
+    to: "    prefixes: [],",
+    expect: "dashboard: every namespace used is declared",
+  },
+
+  // ---- THE FAIL-SAFE ------------------------------------------------
+  {
+    // An unrecognisable path must land on a group that gets everything.
+    name: "an unrecognisable path falls to a trimmable group",
+    file: LIB,
+    from: "    return ROUTE_GROUPS.find((g) => g.unbounded > 0) ?? ROUTE_GROUPS[0];",
+    to: "    return ROUTE_GROUPS.find((g) => g.unbounded === 0) ?? ROUTE_GROUPS[0];",
+    expect: "something that is not a path gets an untrimmable group",
+  },
+  {
+    name: "canTrim stops caring about unbounded components",
+    file: LIB,
+    from: "  return group.unbounded === 0 && group.namespaces.length > 0;",
+    to: "  return group.namespaces.length > 0;",
+    expect: "the dashboard is not trimmable",
+  },
+  {
+    name: "the path matcher goes back to a raw prefix",
+    file: LIB,
+    from: "    g.prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`)),",
+    to: "    g.prefixes.some((p) => pathname.startsWith(p)),",
+    expect: "a lookalike path is not the dashboard",
+  },
+
+  // ---- THE INSTRUMENTS ----------------------------------------------
   {
     name: "the import walk follows nothing",
     file: GRAPH,
     from: '      ...[...source.matchAll(/from\\s+["\']([^"\']+)["\']/g)].map((m) => m[1]),',
     to: "      ...[],",
-    expect: "files reachable from them",
+    expect: "the dashboard walk is real",
   },
   {
     name: "no file is recognised as a client component",
     file: GRAPH,
     from: '  /^\\s*["\']use client["\']/m.test(readFileSync(file, "utf8"));',
     to: '  /^\\s*["\']use serverXX["\']/m.test(readFileSync(file, "utf8"));',
-    expect: "client components among them",
+    expect: "the dashboard walk is real",
   },
   {
     name: "the entry scan finds no routes",
     file: GRAPH,
     from: "      else if (/^(page|layout|template|error|not-found|loading)\\.tsx$/.test(entry.name)) out.push(full);",
     to: "      else if (false) out.push(full);",
-    expect: "public entry points",
+    expect: "the entry scan found routes",
   },
   {
     name: "the picker hands back the whole catalogue",
@@ -108,44 +153,6 @@ const MUTANTS = [
     from: "    if (name in messages) picked[name] = messages[name];",
     to: "    if (name in messages) Object.assign(picked, messages);",
     expect: "it picks only what is named",
-  },
-  // ---- the wiring ---------------------------------------------------
-  {
-    name: "the middleware stops telling the layout the path",
-    file: MIDDLEWARE,
-    from: 'requestHeaders.set("x-pathname", request.nextUrl.pathname);',
-    to: 'requestHeaders.set("x-pathnameXX", request.nextUrl.pathname);',
-    expect: "the middleware tells the layout which path is rendering",
-  },
-  {
-    name: "one NextResponse.next is left on the original headers",
-    file: MIDDLEWARE,
-    from: "    const rebuilt = NextResponse.next({ request: { headers: requestHeaders } });",
-    to: "    const rebuilt = NextResponse.next({ request: { headers: request.headers } });",
-    expect: "every NextResponse.next carries the copy",
-  },
-  {
-    // THE FAIL-SAFE. Without the pathname guard, a request the middleware
-    // never touched would be trimmed on a guess.
-    name: "a missing path is treated as marketing instead of unknown",
-    file: LAYOUT,
-    from: "    pathname && isMarketingPath(pathname) ? pickNamespaces(messages) : messages;",
-    to: "    isMarketingPath(pathname ?? \"/\") ? pickNamespaces(messages) : messages;",
-    expect: "...and sends everything when the path is unknown",
-  },
-  {
-    name: "the provider goes back to the whole catalogue",
-    file: LAYOUT,
-    from: "<NextIntlClientProvider locale={locale} messages={clientMessages}>",
-    to: "<NextIntlClientProvider locale={locale} messages={messages}>",
-    expect: "the provider is given the trimmed object",
-  },
-  {
-    name: "the path matcher goes back to a raw prefix",
-    file: LIB,
-    from: "    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),",
-    to: "    (prefix) => pathname.startsWith(prefix),",
-    expect: "a lookalike path is still marketing",
   },
 ];
 

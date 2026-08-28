@@ -4,22 +4,13 @@ import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, SUPPORTED_LOCALES } from "@/i18n/
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  // THE PATH, FOR THE ROOT LAYOUT.
-  //
-  // A server component cannot ask which route is rendering — layouts get
-  // no pathname — and the root layout needs it to decide how much of the
-  // message catalogue to serialise into the page (see
-  // lib/i18n/marketing-messages.ts: a Greek public page ships 93 KB it
-  // never reads). A request header set here is the supported way across.
-  //
-  // SET, NOT APPENDED, ON A COPY. A browser may send anything it likes
-  // called x-pathname; overwriting it unconditionally means the value the
-  // layout reads is always this middleware's. Worth being exact about
-  // even though the blast radius is small: the header chooses a MESSAGE
-  // SLICE, never an identity and never a permission, so the worst a
-  // forged one can do is give the sender a page with missing strings.
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  // NO x-pathname HEADER. One was set here for a single deploy, so the
+  // root layout could trim the message catalogue per path. It could not:
+  // a shared layout is not re-rendered across client-side navigations, so
+  // the slice chosen for /login was still in force on /dashboard/overview
+  // and the sidebar rendered its own key names. Reverted with the layout;
+  // see app/layout.tsx.
+  const requestHeaders = request.headers;
 
   let response = NextResponse.next({
     request: { headers: requestHeaders },

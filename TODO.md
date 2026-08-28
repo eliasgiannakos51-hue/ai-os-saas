@@ -29,6 +29,46 @@ Neither blocks anything already built or already promised on /roadmap or
 /pricing — they were never listed as shipped or as "soon" there. Revisit
 when V4 planning starts.
 
+## The six ways a gate lies
+
+Five were already named; the sixth cost the message-payload outage.
+
+1. **A stale anchor.** A mutation whose `from` string no longer appears
+   cannot re-introduce anything. Guarded by
+   scripts/tests/mutation-suite-shape.test.mjs.
+2. **A vacuous assertion.** `list.length === 0` over a list nothing ever
+   fills. Guarded by scripts/tests/gate-vacuity.test.mjs.
+3. **A runtime string the compiler never checks.** A Recharts `dataKey`,
+   a `.from("table")`, an `p_*` argument to `.rpc()`, an env var named as
+   a literal inside a map. Each needed its own scanner.
+4. **A check that cannot go red.** Proven by mutation, per gate.
+5. **An off-by-one in a positional comparison.** `-1` treated as a real
+   index.
+6. **Every mutation probing the same property.** THE NEW ONE.
+
+Number six is the hardest, because a suite in that state looks its best.
+marketing-messages.mutation.mjs had eleven mutations, eleven caught, and
+named eight distinct checks between them — broad by any metric the
+codebase could compute. All eleven asked "what do public pages need?"
+None rendered a dashboard route, because the gate had no notion of one:
+it scanned 15 of the app's 56 entry points and asserted nothing about the
+other 41. The optimisation shipped and every dashboard page rendered raw
+key names.
+
+WHAT IS AND IS NOT CHECKABLE, since the difference matters:
+
+- NOT checkable by shape. Counting distinct expected checks per suite
+  would have called that suite healthy. The narrowness was in the GATE's
+  domain, not in the suite's spread.
+- CHECKABLE as a precondition: a mutation must NAME the check that
+  catches it. Without that, a mutation broken by an unrelated failure
+  scores as caught, and nobody can see which assertions the suite really
+  exercises. Ten of forty-five suites do this today; section 4 of
+  mutation-suite-shape.test.mjs holds that number as a rising floor.
+- ANSWERABLE ONLY BY ASKING: what does this change do to the paths it was
+  NOT written for? That is the rule above, and it is a question a person
+  has to put to their own diff.
+
 ## The rule this branch paid for: prove what you do NOT remove
 
 An optimisation that removes something must prove what it does NOT

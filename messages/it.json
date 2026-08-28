@@ -185,7 +185,6 @@
     "closeMenu": "Chiudi il menu"
   },
   "landing": {
-    "hero": "Il tuo business, organizzato — con un'IA che aiuta davvero.",
     "description": "Tieni traccia di idee, finanze, trading, ricerca, decisioni e altro — tutto in un unico posto, con un assistente IA che capisce i tuoi dati e ti aiuta a ragionarci sopra. Basta con note sparse, fogli di calcolo e finestre di chat.",
     "logIn": "Accedi",
     "signUp": "Registrati",
@@ -3417,5 +3416,8 @@
       "notEnough": "Hai {balance} crediti e ne servono {needed}.",
       "remove": "Rimuovi il badge"
     }
+  },
+  "promise": {
+    "oneSentence": "L'IA che conosce già il tuo lavoro. Chiedile qualsiasi cosa."
   }
 }

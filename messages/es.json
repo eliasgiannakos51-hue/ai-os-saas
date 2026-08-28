@@ -185,7 +185,6 @@
     "closeMenu": "Cerrar el menú"
   },
   "landing": {
-    "hero": "Tu negocio, organizado — con una IA que realmente ayuda.",
     "description": "Registra ideas, finanzas, trading, investigación, decisiones y más — todo en un solo lugar, con un asistente de IA que entiende tus datos y te ayuda a pensarlo con claridad. Se acabaron las notas dispersas, las hojas de cálculo y las ventanas de chat.",
     "logIn": "Iniciar sesión",
     "signUp": "Regístrate",
@@ -3417,5 +3416,8 @@
       "notEnough": "Tienes {balance} créditos y necesitas {needed}.",
       "remove": "Quitar la insignia"
     }
+  },
+  "promise": {
+    "oneSentence": "La IA que ya conoce tu trabajo. Pregúntale lo que sea."
   }
 }

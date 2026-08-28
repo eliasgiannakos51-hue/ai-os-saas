@@ -185,7 +185,6 @@
     "closeMenu": "Menü schließen"
   },
   "landing": {
-    "hero": "Dein Unternehmen, organisiert — mit KI, die wirklich hilft.",
     "description": "Behalte Ideen, Finanzen, Trading, Recherche, Entscheidungen und mehr im Blick — alles an einem Ort, mit einem KI-Assistenten, der deine Daten versteht und dir beim Durchdenken hilft. Schluss mit verstreuten Notizen, Tabellen und Chat-Fenstern.",
     "logIn": "Anmelden",
     "signUp": "Registrieren",
@@ -3417,5 +3416,8 @@
       "notEnough": "Sie haben {balance} Credits und benötigen {needed}.",
       "remove": "Badge entfernen"
     }
+  },
+  "promise": {
+    "oneSentence": "Die KI, die Ihre Arbeit schon kennt. Fragen Sie sie alles."
   }
 }

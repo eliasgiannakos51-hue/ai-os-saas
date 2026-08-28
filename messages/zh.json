@@ -185,7 +185,6 @@
     "closeMenu": "关闭菜单"
   },
   "landing": {
-    "hero": "你的业务，井井有条——配上真正有用的 AI。",
     "description": "在一个地方追踪创意、财务、交易、调研、决策等——配备理解你的数据并帮你理清思路的 AI 助手。告别散乱的笔记、表格和聊天窗口。",
     "logIn": "登录",
     "signUp": "注册",
@@ -3417,5 +3416,8 @@
       "notEnough": "你有 {balance} 点数，需要 {needed}。",
       "remove": "移除徽标"
     }
+  },
+  "promise": {
+    "oneSentence": "已经了解你工作的 AI。什么都可以问它。"
   }
 }

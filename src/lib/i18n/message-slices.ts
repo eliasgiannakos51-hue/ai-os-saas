@@ -86,8 +86,8 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     namespaces: [
       "achievements", "aiSteps", "askAi", "coding", "common", "credits",
       "dashboard", "dataAnalysis", "entityLinks", "errors", "favorites",
-      "finance", "language", "module", "publishing", "pwa", "security",
-      "settings", "sidebar", "voice",
+      "finance", "language", "module", "promise", "publishing", "pwa",
+      "security", "settings", "sidebar", "voice",
     ],
     // SIXTY-ONE, not the twenty I first wrote. Twenty call
     // useTranslations() with no namespace; the rest reach a key through a
@@ -98,7 +98,12 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
   {
     name: "onboarding",
     prefixes: ["/onboarding"],
-    namespaces: ["common", "dashboard"],
+    // "promise" is here because the one sentence (lib/i18n/one-sentence.ts)
+    // opens the first onboarding step as well as the first screen after
+    // signing in. It is one key, and it is still declared: a namespace
+    // that reaches a group without appearing here is exactly the drift
+    // that shipped a dashboard of raw keys.
+    namespaces: ["common", "dashboard", "promise"],
     unbounded: 3,
   },
   {

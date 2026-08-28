@@ -185,7 +185,6 @@
     "closeMenu": "Fermer le menu"
   },
   "landing": {
-    "hero": "Votre entreprise, organisée — avec une IA qui aide vraiment.",
     "description": "Suivez vos idées, finances, trading, recherches, décisions et plus encore — le tout au même endroit, avec un assistant IA qui comprend vos données et vous aide à y voir clair. Fini les notes éparpillées, les tableurs et les fenêtres de chat.",
     "logIn": "Connexion",
     "signUp": "Inscription",
@@ -3417,5 +3416,8 @@
       "notEnough": "Vous avez {balance} crédits et il en faut {needed}.",
       "remove": "Retirer le badge"
     }
+  },
+  "promise": {
+    "oneSentence": "L'IA qui connaît déjà votre travail. Demandez-lui n'importe quoi."
   }
 }

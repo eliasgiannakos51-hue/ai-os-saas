@@ -185,7 +185,6 @@
     "closeMenu": "Close menu"
   },
   "landing": {
-    "hero": "Your business, organized — with AI that actually helps.",
     "description": "Track ideas, finance, trading, research, decisions and more — all in one place, with an AI assistant that understands your data and helps you think it through. No more scattered notes, spreadsheets, and chat windows.",
     "logIn": "Log In",
     "signUp": "Sign Up",
@@ -3417,5 +3416,8 @@
       "notEnough": "You have {balance} credits and need {needed}.",
       "remove": "Remove the badge"
     }
+  },
+  "promise": {
+    "oneSentence": "The AI that already knows your work. Ask it anything."
   }
 }

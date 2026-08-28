@@ -7,14 +7,21 @@ import { AppBackground } from "@/components/ui/app-background";
 import { Logo } from "@/components/logo";
 
 // The landing page's title and description are the SAME sentences the
-// page itself renders (landing.hero / landing.description) rather than a
+// page itself renders (promise.oneSentence / landing.description) rather
+// than a
 // second English copy of them kept in this file. That copy was how a
 // Greek visitor could read a Greek hero under a tab that said "Your
 // business, organized with AI that actually helps." — and how the share
 // card said it too.
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("landing");
-  const title = `Ionexa AI — ${t("hero")}`;
+  // ONE SENTENCE, AND THE TAB SAYS IT TOO. See lib/i18n/one-sentence.ts:
+  // the landing hero, the first screen after signing in and the first
+  // step of onboarding used to carry three different descriptions of the
+  // product, which is how seven testers gave six different answers to
+  // "what does it do".
+  const tPromise = await getTranslations("promise");
+  const title = `Ionexa AI — ${tPromise("oneSentence")}`;
   const description = t("description");
 
   return {
@@ -43,6 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   const t = await getTranslations("landing");
+  const tPromiseHero = await getTranslations("promise");
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 text-center">
@@ -63,7 +71,7 @@ export default async function Home() {
         </div>
 
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          {t("hero")}
+          {tPromiseHero("oneSentence")}
         </h1>
         <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-muted">
           {t("description")}

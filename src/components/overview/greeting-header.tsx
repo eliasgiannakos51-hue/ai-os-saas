@@ -14,6 +14,7 @@ export function GreetingHeader({ email }: { email: string }) {
   // whose OS timezone lags their real location; for everyone else the two
   // give the same answer.
   const t = useTranslations("dashboard.overview");
+  const tPromise = useTranslations("promise");
   const [greeting, setGreeting] = useState(() => timeOfDayGreeting());
   const name = displayNameFromEmail(email);
 
@@ -28,8 +29,17 @@ export function GreetingHeader({ email }: { email: string }) {
   // as context rather than as a second heading competing for attention.
   return (
     <div className="mb-8 text-center">
-      <p className="text-sm text-muted sm:text-base" suppressHydrationWarning>
-        {greeting.text}, {name} {greeting.emoji}
+      {/* THE SENTENCE, WHERE THE GREETING WAS.
+          "Good evening, Elias 👋" occupied the one line above the largest
+          heading in the product — the first line a person reads after
+          signing in — and spent it on the time of day. Seven testers gave
+          six different answers to "what does this do"; not one of the
+          three places that could have told them said the same thing as
+          the other two. This is that one thing, in the position that was
+          being wasted. The greeting moves below the question, where being
+          pleasant costs nothing. */}
+      <p className="text-sm font-medium text-foreground sm:text-base">
+        {tPromise("oneSentence")}
       </p>
       {/* THE "?" BESIDE THE PAGE'S ONE FOCAL POINT. This page renders no
           PageHeader on purpose — a shared header above a personal
@@ -50,6 +60,9 @@ export function GreetingHeader({ email }: { email: string }) {
         </h1>
         <HelpTip helpKey="help.overview" />
       </div>
+      <p className="mt-2 text-sm text-muted" suppressHydrationWarning>
+        {greeting.text}, {name} {greeting.emoji}
+      </p>
     </div>
   );
 }

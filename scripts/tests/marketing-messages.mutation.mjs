@@ -109,36 +109,38 @@ const MUTANTS = [
     to: "    if (name in messages) Object.assign(picked, messages);",
     expect: "it picks only what is named",
   },
-  // ---- the wiring ---------------------------------------------------
+  // ---- the revert, which is now the thing being protected -----------
   {
-    name: "the middleware stops telling the layout the path",
-    file: MIDDLEWARE,
-    from: 'requestHeaders.set("x-pathname", request.nextUrl.pathname);',
-    to: 'requestHeaders.set("x-pathnameXX", request.nextUrl.pathname);',
-    expect: "the middleware tells the layout which path is rendering",
-  },
-  {
-    name: "one NextResponse.next is left on the original headers",
-    file: MIDDLEWARE,
-    from: "    const rebuilt = NextResponse.next({ request: { headers: requestHeaders } });",
-    to: "    const rebuilt = NextResponse.next({ request: { headers: request.headers } });",
-    expect: "every NextResponse.next carries the copy",
-  },
-  {
-    // THE FAIL-SAFE. Without the pathname guard, a request the middleware
-    // never touched would be trimmed on a guess.
-    name: "a missing path is treated as marketing instead of unknown",
+    // THE OUTAGE, PUT BACK. Trimming here broke every dashboard page,
+    // because a shared root layout is not re-rendered across client-side
+    // navigations: the slice chosen for /login was still in force on
+    // /dashboard/overview and the sidebar rendered its own key names.
+    name: "the root layout trims the catalogue again",
     file: LAYOUT,
-    from: "    pathname && isMarketingPath(pathname) ? pickNamespaces(messages) : messages;",
-    to: "    isMarketingPath(pathname ?? \"/\") ? pickNamespaces(messages) : messages;",
-    expect: "...and sends everything when the path is unknown",
+    from: "  const clientMessages = messages;",
+    to: "  const clientMessages = pickNamespaces(messages);",
+    expect: "the provider is given the whole catalogue",
   },
   {
-    name: "the provider goes back to the whole catalogue",
+    name: "the layout goes back to reading a path it cannot trust",
     file: LAYOUT,
-    from: "<NextIntlClientProvider locale={locale} messages={clientMessages}>",
-    to: "<NextIntlClientProvider locale={locale} messages={messages}>",
-    expect: "the provider is given the trimmed object",
+    from: "  const clientMessages = messages;",
+    to: '  const pathname = headers().get("x-pathname");\n  const clientMessages = messages;',
+    expect: "the root layout does not read a path it cannot trust",
+  },
+  {
+    name: "the middleware starts setting x-pathname again",
+    file: MIDDLEWARE,
+    from: "  const requestHeaders = request.headers;",
+    to: '  const requestHeaders = new Headers(request.headers);\n  requestHeaders.set("x-pathname", request.nextUrl.pathname);',
+    expect: "the middleware sets no x-pathname header",
+  },
+  {
+    name: "the explanation is deleted, inviting the next person to redo it",
+    file: LAYOUT,
+    from: "shared layout is rendered once and REUSED",
+    to: "shared layout is rendered once and reused",
+    expect: "the layout records why it cannot be trimmed here",
   },
   {
     name: "the path matcher goes back to a raw prefix",

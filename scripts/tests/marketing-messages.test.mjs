@@ -169,37 +169,51 @@ check("...including every declared prefix", APP_ROUTE_PREFIXES.every((p) => !isM
 check("a lookalike path is still marketing", isMarketingPath("/dashboards-public"));
 check("anything that is not a path is not marketing", !isMarketingPath("dashboard"));
 
-console.log("\n== 6. the two halves are actually wired ==");
-// A LIST NOBODY READS IS A LIST THAT CANNOT BE WRONG. Everything above
-// checks the slice is complete; these check something uses it.
-const middleware = readFileSync("src/middleware.ts", "utf8");
-check(
-  "the middleware tells the layout which path is rendering",
-  /requestHeaders\.set\("x-pathname", request\.nextUrl\.pathname\)/.test(middleware),
-);
-// SET ON A COPY, and every NextResponse.next in the file must carry that
-// copy — one left on the original headers is one request shape where the
-// layout sees nothing and silently ships the whole catalogue.
-const nextCalls = middleware.match(/NextResponse\.next\(\{\s*request:\s*\{\s*headers:\s*(\w+)/g) ?? [];
-check(
-  `every NextResponse.next carries the copy (${nextCalls.length} calls)`,
-  nextCalls.length >= 3 && nextCalls.every((c) => /headers:\s*requestHeaders/.test(c)),
-  nextCalls.join(" | "),
-);
+console.log("\n== 6. NOTHING IS TRIMMED, AND THAT IS THE POINT ==");
+// THIS SECTION USED TO ASSERT THE OPPOSITE. It checked that the
+// middleware set an x-pathname header and the root layout used it to
+// send a public page five namespaces instead of forty. That shipped, and
+// it broke every dashboard page: the sidebar rendered `sidebar.items.home`
+// and `sidebar.groups.workspace` as raw key names.
+//
+// WHY THE GATE ABOVE DID NOT CATCH IT, stated plainly because it is the
+// lesson. Sections 1-5 answer "what do public pages need". They never
+// asked "what happens on the routes that are NOT public" — and the answer
+// is that the root layout is SHARED. In the App Router it renders once
+// and is reused across client-side navigations beneath it, so the slice
+// chosen for /login was still in force after signing in and landing on
+// /dashboard/overview. No list of namespaces could have fixed that; the
+// pathname is simply not available to a component that does not re-run
+// when the path changes.
+//
+// The same shape as the NaN credits bug earlier in this branch: a check
+// that supplies its own inputs never sees what the real world supplies.
+//
+// So this now pins the REVERT. The analysis in sections 1-5 is kept —
+// it is a true and useful account of what a public page needs — and this
+// makes sure it stays analysis until a layout per route group exists to
+// act on it safely.
 const layout = readFileSync("src/app/layout.tsx", "utf8");
 check(
-  "the layout reads it and trims on a marketing path",
-  /headers\(\)\.get\("x-pathname"\)/.test(layout) &&
-    /isMarketingPath\(pathname\) \? pickNamespaces\(messages\) : messages/.test(layout),
+  "the provider is given the whole catalogue",
+  /const clientMessages = messages;/.test(layout) &&
+    /<NextIntlClientProvider locale=\{locale\} messages=\{clientMessages\}>/.test(layout),
+  "a shared root layout cannot vary its payload per child route",
 );
 check(
-  "...and sends everything when the path is unknown",
-  /pathname && isMarketingPath\(pathname\)/.test(layout),
-  "no header must mean the full catalogue, not an empty one",
+  "the root layout does not read a path it cannot trust",
+  !/x-pathname/.test(layout) && !/isMarketingPath/.test(layout),
 );
+const middleware = readFileSync("src/middleware.ts", "utf8");
 check(
-  "the provider is given the trimmed object, not the original",
-  /<NextIntlClientProvider locale=\{locale\} messages=\{clientMessages\}>/.test(layout),
+  "the middleware sets no x-pathname header",
+  !/requestHeaders\.set\("x-pathname"/.test(middleware),
+);
+// AND THE REASON IS WRITTEN WHERE THE NEXT PERSON WILL LOOK. A revert
+// with no explanation is an invitation to redo it.
+check(
+  "the layout records why it cannot be trimmed here",
+  /shared layout is rendered once and REUSED/.test(layout),
 );
 
 console.log(

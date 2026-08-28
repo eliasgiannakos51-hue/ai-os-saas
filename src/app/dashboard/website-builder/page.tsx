@@ -2,12 +2,14 @@ import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { WebsiteBuilderWorkspace } from "@/components/website-builder/website-builder-workspace";
 import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import { loadFavoriteIds } from "@/lib/favorites";
 import type { UserWebsite } from "@/types/user-website";
+import { RECORD_CAP } from "@/lib/record-cap";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.websiteBuilder");
@@ -24,9 +26,7 @@ export default async function WebsiteBuilderPage() {
   const t = await getTranslations("dashboard.websiteBuilder");
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");
@@ -35,7 +35,8 @@ export default async function WebsiteBuilderPage() {
   const { data: websites } = await supabase
     .from("user_websites")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(RECORD_CAP);
 
   const websiteRows = (websites as UserWebsite[] | null) ?? [];
   const favoritedWebsiteIds = [

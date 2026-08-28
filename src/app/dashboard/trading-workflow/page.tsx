@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
@@ -13,6 +14,7 @@ import { PatternInsightCard } from "@/components/trading-workflow/pattern-insigh
 import { TradingMentorButton } from "@/components/trading-workflow/trading-mentor-button";
 import { TradingMissionButton } from "@/components/trading-workflow/trading-mission-button";
 import { getModule } from "@/lib/modules";
+import { RECORD_CAP } from "@/lib/record-cap";
 import { TRADING_WORKFLOW_ICON } from "@/lib/module-icons";
 import { loadLinkedEntities } from "@/lib/entity-links";
 import { loadFavoriteIds } from "@/lib/favorites";
@@ -41,9 +43,7 @@ export default async function TradingWorkflowPage() {
   const t = await getTranslations("dashboard.tradingWorkflow");
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");
@@ -54,10 +54,13 @@ export default async function TradingWorkflowPage() {
     redirect("/dashboard/trading");
   }
 
+  // Capped like the Trading module page it mirrors — these are the same
+  // rows, so an uncapped read here would undo the cap there.
   const { data: trades, error } = await supabase
     .from("trades")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(RECORD_CAP);
 
   const tradeRows = (trades as ModuleRecord[] | null) ?? [];
 
@@ -137,7 +140,12 @@ export default async function TradingWorkflowPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={TRADING_WORKFLOW_ICON} title={t("title")} description={t("description")} />
+        <PageHeader
+          icon={TRADING_WORKFLOW_ICON}
+          title={t("title")}
+          description={t("description")}
+          helpKey="help.tradingWorkflow"
+        />
 
         <PatternInsightCard title={t("insight.title")} messages={insightMessages} />
 
@@ -177,7 +185,7 @@ export default async function TradingWorkflowPage() {
           {error && <ErrorMessage detail={`loading trades: ${error.message}`} />}
 
 
-          <GenericList module={tradingModule} records={tradeRows} linkedEntities={linkedEntities} favoritedIds={favoritedIds} />
+          <GenericList module={tradingModule} cap={RECORD_CAP} records={tradeRows} linkedEntities={linkedEntities} favoritedIds={favoritedIds} />
         </div>
       </div>
     </main>

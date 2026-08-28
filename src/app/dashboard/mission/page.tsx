@@ -3,10 +3,13 @@ import type { Metadata } from "next";
 import { diagLog } from "@/lib/diag";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { getCurrentUserResult } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
 import { MissionList } from "@/components/mission/mission-list";
+import { ListCappedNotice } from "@/components/ui/list-capped-notice";
+import { RECORD_CAP, isCapped } from "@/lib/record-cap";
 import { loadFavoriteIds } from "@/lib/favorites";
 import { loadLatestEnergyCheckIn } from "@/lib/energy-checkins";
 import { ScheduledRunsList } from "@/components/mission/scheduled-runs-list";
@@ -47,10 +50,7 @@ export default async function MissionPage() {
   const reqId = Math.random().toString(36).slice(2, 8);
   diagLog(`[mission-diag ${reqId}] request start at ${new Date().toISOString()}`);
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const { user, error: userError } = await getCurrentUserResult();
 
   diagLog(`[mission-diag ${reqId}] auth.getUser() -> user=${user?.id ?? "null"} error=${userError?.message ?? "none"}`);
 
@@ -79,13 +79,15 @@ export default async function MissionPage() {
       .from("ai_missions")
       .select("*")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })
+      .limit(RECORD_CAP),
     supabase
       .from("scheduled_agent_runs")
       .select("*")
       .eq("user_id", user.id)
       .eq("status", "pending")
-      .order("scheduled_for", { ascending: true }),
+      .order("scheduled_for", { ascending: true })
+      .limit(RECORD_CAP),
   ]);
 
   diagLog(`[mission-diag ${reqId}] ai_missions query -> rows=${missions?.length ?? "null"} error=${error?.message ?? "none"} ids=${
@@ -152,6 +154,10 @@ export default async function MissionPage() {
             middleware keeps the refresh-token chain intact. */}
         {!error && sessionDegraded && (
           <ErrorMessage message={t("sessionExpired")} />
+        )}
+
+        {!sessionDegraded && isCapped(missionRows, RECORD_CAP) && (
+          <ListCappedNotice cap={RECORD_CAP} />
         )}
 
         {!sessionDegraded && (

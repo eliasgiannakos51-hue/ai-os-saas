@@ -1,11 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { Sparkles, TrendingDown, TrendingUp } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useCredits } from "@/components/credits/credits-context";
-import { MessageContent } from "@/components/chat/message-content";
+// DEFERRED. MessageContent is react-markdown plus remark-gfm — the
+// biggest single dependency on this page — and it renders nothing until
+// somebody presses Generate and a paid call comes back. Chat imports it
+// statically because there it IS the page; here it is the last step of an
+// on-demand action, which is exactly the shape next/dynamic is for.
+const MessageContent = dynamic(
+  () => import("@/components/chat/message-content").then((m) => m.MessageContent),
+  { ssr: false },
+);
 import type { WeeklyReflectionStats } from "@/lib/reflection";
 
 // On-demand only — no auto-generation on page load, since this is a paid

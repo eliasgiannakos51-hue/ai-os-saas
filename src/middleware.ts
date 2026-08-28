@@ -4,8 +4,25 @@ import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, SUPPORTED_LOCALES } from "@/i18n/
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  // THE PATH, FOR THE ROOT LAYOUT.
+  //
+  // A server component cannot ask which route is rendering — layouts get
+  // no pathname — and the root layout needs it to decide how much of the
+  // message catalogue to serialise into the page (see
+  // lib/i18n/marketing-messages.ts: a Greek public page ships 93 KB it
+  // never reads). A request header set here is the supported way across.
+  //
+  // SET, NOT APPENDED, ON A COPY. A browser may send anything it likes
+  // called x-pathname; overwriting it unconditionally means the value the
+  // layout reads is always this middleware's. Worth being exact about
+  // even though the blast radius is small: the header chooses a MESSAGE
+  // SLICE, never an identity and never a permission, so the worst a
+  // forged one can do is give the sender a page with missing strings.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+
   let response = NextResponse.next({
-    request: { headers: request.headers },
+    request: { headers: requestHeaders },
   });
 
   // TEMPORARY diagnostic logging for the "Mission Control/Timeline data
@@ -29,7 +46,7 @@ export async function middleware(request: NextRequest) {
         setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
           cookieRefreshHappened = true;
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request: { headers: request.headers } });
+          response = NextResponse.next({ request: { headers: requestHeaders } });
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
           );
@@ -81,7 +98,7 @@ export async function middleware(request: NextRequest) {
     // same trick setAll() above uses); the response cookie is what the
     // browser keeps for the next request.
     request.cookies.set(LOCALE_COOKIE, preferredLocale);
-    const rebuilt = NextResponse.next({ request: { headers: request.headers } });
+    const rebuilt = NextResponse.next({ request: { headers: requestHeaders } });
     // Carry over anything setAll() already wrote — rebuilding the response
     // from scratch would drop a rotated Supabase refresh token, which is
     // the exact failure DEFECT 1 below documents.

@@ -70,7 +70,8 @@
       "preparing": "Preparing…",
       "failed": "The PDF could not be created",
       "notReady": "This is not finished yet"
-    }
+    },
+    "listCapped": "Showing the most recent {count, number}. Older entries are still saved — use Search my records to find them."
   },
   "sidebar": {
     "groups": {
@@ -103,10 +104,10 @@
       "apps": "App notes",
       "images": "Image notes",
       "videos": "Video notes",
-      "coding": "Coding notes",
-      "dataAnalysis": "Analysis notes",
+      "coding": "AI Coding",
+      "dataAnalysis": "Data Analysis",
       "documents": "Documents",
-      "presentations": "Presentation Notes",
+      "presentations": "Presentation notes",
       "campaigns": "Campaign notes",
       "analytics": "Analytics",
       "finance": "Finances",
@@ -131,7 +132,8 @@
       "help": "Help Centre",
       "affiliate": "Affiliate",
       "formSubmissions": "Form submissions",
-      "routing": "Model routing"
+      "routing": "Model routing",
+      "businessHealth": "Business health"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -177,7 +179,8 @@
       "deepResearch": "Give it a topic and it searches, cross-checks and writes a sourced report",
       "help": "Answers to the questions people ask most — no credits used.",
       "affiliate": "Your referral link, what you've earned, and how you get paid.",
-      "formSubmissions": "Everything visitors sent through a form on your published sites"
+      "formSubmissions": "Everything visitors sent through a form on your published sites",
+      "businessHealth": "MRR, margin, churn and runway. Owner only."
     },
     "closeMenu": "Close menu"
   },
@@ -2878,6 +2881,71 @@
       "is": "A notebook for this kind of work — not a generator.",
       "does": "Keeps rows you type yourself: what you are planning, what you already did, and how it went. You can link entries to other modules and search across all of them.",
       "doesNot": "Nothing on this page is produced by AI. It does not make the website, the image, the video, the deck or the campaign — it records the ones you make elsewhere. The Website Builder and Create Studio are where things get built."
+    },
+    "businessModule": {
+      "is": "A table you keep yourself, for one kind of work.",
+      "does": "You add rows by hand or through Create Studio, and the AI reads them: Chat, Search my records, History and the weekly reflection all draw on what is here, and any row can be linked to a row in another module.",
+      "doesNot": "It does not fill itself in. Nothing arrives here from your email, your bank or your chats — an empty table is empty because nothing was entered — and deleting a row here removes it everywhere it is shown."
+    },
+    "documents": {
+      "is": "A blank page that stays with your work.",
+      "does": "Write long-form here — a brief, a draft, meeting notes. It saves as you type, exports to PDF, and finished research reports land here too.",
+      "doesNot": "This is not the Files page. Nothing here is uploaded and nothing here is read for chat answers: Files is where a PDF goes when you want the AI to read it, Documents is where you write your own."
+    },
+    "affiliate": {
+      "is": "Your referral link, and what it has earned.",
+      "does": "Share the link; when somebody you sent subscribes you earn 25% of every payment they make, every month, for 12 months. Stripe pays out once you are owed at least €20.",
+      "doesNot": "You cannot refer yourself, and somebody already referred by another affiliate does not count for you. Commission starts at their first payment, not at signup, and stops after twelve months."
+    },
+    "coding": {
+      "is": "A code assistant that works on exactly the text you paste.",
+      "does": "Five things: writes a snippet, explains code, finds bugs and names the input that breaks them, converts between languages, and writes tests.",
+      "doesNot": "It has no repository. It cannot see your codebase, it runs nothing — not your code, not the code it writes — and it makes no commits, branches or pull requests. One function, one file, one paste."
+    },
+    "dataAnalysis": {
+      "is": "A spreadsheet, read properly.",
+      "does": "Upload a CSV or Excel file up to 8 MB: every column is profiled, the charts are computed on the server from the real rows, and a question you ask runs as a query over those rows.",
+      "doesNot": "It does not guess a number. Nothing is estimated from a sample — and past 50,000 rows it says out loud that it read the first 50,000, instead of describing a file it never read."
+    },
+    "formSubmissions": {
+      "is": "Every lead your published sites collected.",
+      "does": "Lists what visitors sent through a form, which site it came from, whether they ticked consent, and whether the notification email actually got out. Export the lot as CSV.",
+      "doesNot": "It does not reply for you and it pushes nothing to a CRM. And an email marked undelivered is not a broken form — the submission is safely here; it is the sending domain that is unverified."
+    },
+    "productWorkflow": {
+      "is": "Everything about your products on one screen.",
+      "does": "Shows the same product entries as the Products module, plus their links, their history, a pattern worked out without AI, and one-press Mentor and Mission entry points.",
+      "doesNot": "It is not a second place to keep products. These are the same rows as the Products module — add one here and it appears there — and the pattern is arithmetic over what you wrote, not a forecast."
+    },
+    "reflection": {
+      "is": "What you actually finished this week, against what you planned.",
+      "does": "Counts new entries in every module for this week and last, counts mission steps done and still pending, and asks for a short honest synthesis of the gap.",
+      "doesNot": "Nothing here is stored. Every press recomputes from your live data, so there is no history of past reflections — and it counts what you logged, not what you did away from the app."
+    },
+    "routing": {
+      "is": "Which model served which request, and what routing cost. Owner only.",
+      "does": "Shows 30 days of routing decisions per model and feature: what was charged to customers, what we absorbed on failed cheap attempts, and the success rates the router has learned.",
+      "doesNot": "It does not choose models for you and it changes nothing. It is a report — and an empty table means no decisions were recorded, not that the router is idle."
+    },
+    "systemHealth": {
+      "is": "What is broken in production right now. Owner only.",
+      "does": "Lists production errors deduplicated by message, unresolved first, with how often each happened and how many people it touched, plus storage diagnostics and app-install adoption.",
+      "doesNot": "It does not watch the site for you and it raises no alert. Errors appear here because the application recorded them, so anything that never reached the logger is not here."
+    },
+    "tradingJournal": {
+      "is": "Your own trades, your own rules, counted.",
+      "does": "Works out win rate, profit factor, average win and loss, your equity curve, and how many times each rule you wrote was broken — all arithmetic over the trades you recorded.",
+      "doesNot": "This is a record, not advice. It does not connect to a broker, it does not import trades, and it says nothing about what any market will do next."
+    },
+    "tradingWorkflow": {
+      "is": "Everything trading on one screen.",
+      "does": "The same trade entries as the Trading module, plus their links, their history, patterns by day, hour, symbol and losing streak, and one-press Mentor and Mission entry points.",
+      "doesNot": "The patterns are counts of trades you already made, not predictions, and they are not investment advice. Nor is this a second set of trades: these are the same rows as the Trading module."
+    },
+    "businessHealth": {
+      "is": "The business's own numbers — revenue, margin, churn, runway. Owner only.",
+      "does": "Computes each metric from real subscription and cost rows, and asks you for the three figures no database can know: marketing spend, fixed costs, cash balance.",
+      "doesNot": "It does not show a number it cannot justify. A metric missing an input says what it needs instead of computing from a zero, and nothing is back-filled — the history starts the day this shipped."
     }
   },
   "helpCentre": {
@@ -3268,7 +3336,7 @@
     }
   },
   "finance": {
-    "title": "Finances",
+    "title": "Business health",
     "description": "Every figure is computed from real rows, or says why it cannot be.",
     "needsInput": "Needs: {fields}",
     "needsHistory": "Needs {need} months of history — we have {have}.",

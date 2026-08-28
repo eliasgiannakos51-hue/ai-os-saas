@@ -2,6 +2,7 @@ import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { listSlackChannels } from "@/lib/integrations/read";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -23,6 +24,8 @@ import {
 } from "@/lib/agents/agent-depth";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { AgentsWorkspace } from "@/components/agents/agents-workspace";
+import { ListCappedNotice } from "@/components/ui/list-capped-notice";
+import { RECORD_CAP, isCapped } from "@/lib/record-cap";
 import type { AgentRun, UserAgent } from "@/lib/agents/agent-config";
 
 export const dynamic = "force-dynamic";
@@ -48,9 +51,7 @@ const RUN_HISTORY_LIMIT = 60;
 export default async function AgentsPage() {
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");
@@ -89,7 +90,10 @@ export default async function AgentsPage() {
       .from("user_agents")
       .select("*")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })
+      // Far above any plan's agent cap, so nobody reaches it in practice
+      // — but a list with no ceiling is a list that grows without one.
+      .limit(RECORD_CAP),
     supabase
       .from("agent_runs")
       .select("*")
@@ -177,6 +181,9 @@ export default async function AgentsPage() {
           {t("aiDisclosure")}
         </p>
 
+        {isCapped((agents as UserAgent[] | null) ?? [], RECORD_CAP) && (
+          <ListCappedNotice cap={RECORD_CAP} />
+        )}
         {agentsError && <ErrorMessage detail={`loading agents: ${agentsError.message}`} />}
         {runsError && <ErrorMessage detail={`loading agent runs: ${runsError.message}`} />}
 

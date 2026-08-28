@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { PwaProvider } from "@/components/pwa/pwa-provider";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { SidebarProvider } from "@/components/dashboard/sidebar-context";
@@ -29,9 +30,7 @@ export default async function DashboardLayout({
 }) {
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");
@@ -127,7 +126,7 @@ export default async function DashboardLayout({
                 updating. Renders nothing while the connection is fine. */}
             <OfflineBanner />
             <div className="relative z-10 flex min-h-screen">
-              <Sidebar email={user.email ?? ""} planName={plan.name} />
+              <Sidebar email={user.email ?? ""} planName={plan.name} isOwner={isAdmin} />
               <div className="flex min-w-0 flex-1 flex-col">
                 <TopNav email={user.email ?? ""} />
                 {/* Wraps only the page body, not the Sidebar/TopNav —
@@ -140,7 +139,7 @@ export default async function DashboardLayout({
             </div>
             <ToastContainer />
             <AchievementUnlockBridge />
-            <CommandPalette />
+            <CommandPalette isOwner={isAdmin} />
             </VoiceAvailabilityProvider>
           </CreditsProvider>
           {/* Service worker + add-to-home-screen prompt. Mounted here, not

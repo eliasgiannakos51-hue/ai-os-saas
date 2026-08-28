@@ -100,16 +100,35 @@ for (const file of pages) {
   const start = source.indexOf("export default async function");
   if (start < 0) continue;
   const body = source.slice(start);
-  const serial = (body.match(/^ {2}(?:const|let)[^\n]*=\s*await [^\n]*$|^ {2}await [^\n]*$/gm) ?? []).filter(
-    (line) => !FREE.test(line)
-  );
-  // A destructured await spans lines; count its opening brace too.
-  const destructured = (body.match(/^ {2}(?:const|let) \{[\s\S]*?\} = await [^\n]*$/gm) ?? []).filter(
+  // ONE AWAIT, COUNTED ONCE. This used to match single-line awaits and
+  // destructured awaits with two separate patterns and ADD the two
+  // counts — so `const { user, error } = await getCurrentUserResult();`,
+  // which is both, was counted twice and Timeline was reported as waiting
+  // on five things when it waits on three.
+  //
+  // Worse in the other direction: the multi-line form
+  //
+  //     const {
+  //       data: { user },
+  //     } = await supabase.auth.getUser();
+  //
+  // never matched the single-line pattern at all, and thirty of these
+  // thirty-eight pages were written that way. The double-count and the
+  // blind spot happened to cancel out often enough that nothing looked
+  // wrong. Multi-line blocks are consumed FIRST and blanked, then the
+  // single-line pattern runs on what is left, so neither can happen.
+  let remaining = body;
+  const destructured = [];
+  for (const m of body.matchAll(/^ {2}(?:const|let) \{[\s\S]*?\} = await [^\n]*$/gm)) {
+    if (!FREE.test(m[0])) destructured.push(m[0]);
+    remaining = remaining.replace(m[0], m[0].replace(/[^\n]/g, " "));
+  }
+  const serial = (remaining.match(/^ {2}(?:const|let)[^\n]*=\s*await [^\n]*$|^ {2}await [^\n]*$/gm) ?? []).filter(
     (line) => !FREE.test(line)
   );
   const total = serial.length + destructured.length;
   if (total > SERIAL_AWAIT_CEILING) {
-    overBudget.push(`${file.replace("src/app/dashboard/", "")}: ${total}\n          ` + serial.map((l) => l.trim()).join("\n          "));
+    overBudget.push(`${file.replace("src/app/dashboard/", "")}: ${total}\n          ` + [...destructured, ...serial].map((l) => l.trim().split("\n")[0]).join("\n          "));
   }
 }
 check(

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { FileText } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
@@ -26,9 +27,7 @@ export default async function DocumentsPage() {
   const t = await getTranslations("dashboard.documents");
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");
@@ -65,7 +64,12 @@ export default async function DocumentsPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={FileText} title={t("title")} description={t("description")} />
+        <PageHeader
+          icon={FileText}
+          title={t("title")}
+          description={t("description")}
+          helpKey="help.documents"
+        />
 
         {error && <ErrorMessage detail={`loading documents: ${error.message}`} />}
 

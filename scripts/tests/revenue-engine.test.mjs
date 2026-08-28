@@ -34,7 +34,7 @@
 //   customer.subscription.updated for both. Section 6.
 //
 // Run: node scripts/tests/revenue-engine.test.mjs
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 
 let pass = 0;
@@ -599,9 +599,18 @@ const by = (list, key) => list.find((m) => m.key === key);
   ok("…needs_history", /needs_history/.test(card));
   ok("…and renders an em dash rather than a zero", card.includes("—"));
 
-  const page = strip(read("src/app/dashboard/finance/page.tsx"));
+  // MOVED, NOT RENAMED IN PLACE. This read /dashboard/finance, which was
+  // also the slug of a business module — the static segment shadowed the
+  // [module] catch-all, so every non-owner pressing "Finances" in the nav
+  // got this page's 404 and the module was unreachable. The dashboard is
+  // at /dashboard/business-health now; see route-shadowing.test.mjs.
+  const page = strip(read("src/app/dashboard/business-health/page.tsx"));
   ok("the dashboard is owner-only", /isAdminEmail\(user\.email\)/.test(page));
   ok("…and a stranger gets a 404, not a 403", /notFound\(\)/.test(page));
+  ok(
+    "…and it no longer sits on a module's slug",
+    !existsSync("src/app/dashboard/finance/page.tsx"),
+  );
 }
 
 // =====================================================================

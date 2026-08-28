@@ -1,9 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { Link2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { LinkToModal } from "@/components/entity-links/link-to-modal";
+// Deferred, same reason as the Ask-AI modal beside it: a picker that
+// searches every module, on a button that sits on every record.
+const LinkToModal = dynamic(
+  () => import("@/components/entity-links/link-to-modal").then((m) => m.LinkToModal),
+  { ssr: false },
+);
 import {
   recordActionClasses,
   recordActionIconClasses,
@@ -63,7 +69,7 @@ export function LinkToButton({
         <Link2 className={recordActionIconClasses(variant)} />
         {variant !== "icon" && t("buttonLabel")}
       </button>
-      {!onOpen && (
+      {!onOpen && open && (
       <LinkToModal
         open={open}
         onClose={() => setOpen(false)}

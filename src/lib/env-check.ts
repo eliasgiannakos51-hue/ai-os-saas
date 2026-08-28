@@ -82,8 +82,22 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
     fallback: "400",
     suspicious: numberIn(200, 1_000_000),
   },
-  { name: "STRIPE_SECRET_KEY", level: "recommended", what: "Checkout and subscriptions" },
-  { name: "STRIPE_WEBHOOK_SECRET", level: "recommended", what: "Verifying Stripe webhooks. Without it, grants never land" },
+  {
+    name: "STRIPE_SECRET_KEY",
+    level: "recommended",
+    what: "Checkout and subscriptions",
+    fallback:
+      "no Checkout session and no billing portal — the product runs as a free tier and nobody can pay. Refused outright rather than half-completed",
+    secret: true,
+  },
+  {
+    name: "STRIPE_WEBHOOK_SECRET",
+    level: "recommended",
+    what: "Verifying Stripe webhooks. Without it, grants never land",
+    fallback:
+      "every webhook is rejected unverified, so a customer PAYS and is never upgraded — the worst shape of failure in the product, because Stripe reports success",
+    secret: true,
+  },
 
   // --- degrade gracefully, but a user notices ------------------------
   {
@@ -100,8 +114,22 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
     fallback: "800 (a Pro/Fluid figure — on a smaller plan, long generations are killed mid-work and force-failed as stale)",
     suspicious: numberIn(10, 3600),
   },
-  { name: "CRON_SECRET", level: "recommended", what: "Authenticates scheduled runs. Without it cron endpoints return 503" },
-  { name: "RESEND_API_KEY", level: "recommended", what: "All outbound email, including margin and error alerts" },
+  {
+    name: "CRON_SECRET",
+    level: "recommended",
+    what: "Authenticates scheduled runs. Without it cron endpoints return 503",
+    fallback:
+      "every cron route refuses to run (503), so credits are never reset, scheduled agent runs never fire and the weekly digest never goes out. It fails CLOSED on purpose: unset used to mean wide open, on the three endpoints that rewrite balances, spend money and email everybody",
+    secret: true,
+  },
+  {
+    name: "RESEND_API_KEY",
+    level: "recommended",
+    what: "All outbound email, including margin and error alerts",
+    fallback:
+      "nothing is sent and nothing errors: welcome emails, agent results, form-submission notifications, the weekly digest, and the cost and error alerts addressed to the operator all stop silently",
+    secret: true,
+  },
   {
     // Upgraded from "optional" after production logged 20 refused emails:
     // Resend's shared onboarding@resend.dev sender is TESTING mode, which

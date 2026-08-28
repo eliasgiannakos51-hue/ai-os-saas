@@ -4,6 +4,7 @@ import { diagLog } from "@/lib/diag";
 import { ErrorMessage } from "@/components/error-message";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { getCurrentUserResult } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { TimelineFilters } from "@/components/timeline/timeline-filters";
@@ -40,10 +41,7 @@ export default async function TimelinePage({
   const reqId = Math.random().toString(36).slice(2, 8);
   diagLog(`[timeline-diag ${reqId}] request start at ${new Date().toISOString()}`);
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const { user, error: userError } = await getCurrentUserResult();
 
   diagLog(`[timeline-diag ${reqId}] auth.getUser() -> user=${user?.id ?? "null"} error=${userError?.message ?? "none"}`);
 

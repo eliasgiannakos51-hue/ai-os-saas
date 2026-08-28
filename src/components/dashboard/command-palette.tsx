@@ -15,7 +15,7 @@ import {
   HelpCircle,
   type LucideIcon,
 } from "lucide-react";
-import { ALL_SIDEBAR_GROUPS, type SidebarItem } from "@/lib/sidebar-nav";
+import { ALL_SIDEBAR_GROUPS, visibleGroups, type SidebarItem } from "@/lib/sidebar-nav";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 import { normalizeForSearch } from "@/lib/text/search-match";
@@ -36,7 +36,12 @@ import {
 // Every sidebar link is searchable here too, flattened out of its groups.
 // Every item is navigable again — the coming-soon exclusion that used to
 // filter this list is gone along with the greyed-out states themselves.
-const PALETTE_ITEMS: SidebarItem[] = ALL_SIDEBAR_GROUPS.flatMap((group) => group.items);
+// NOT A MODULE-LEVEL CONSTANT ANY MORE. It was every nav item in the
+// product, flattened once at import time — so an owner-only page hidden
+// from the sidebar would still have been one keystroke away here, which
+// is not hiding it.
+const paletteItems = (isOwner: boolean): SidebarItem[] =>
+  visibleGroups(ALL_SIDEBAR_GROUPS, isOwner).flatMap((group) => group.items);
 
 // One icon per kind, so a glance down the list tells you what sort of
 // thing each row is without reading the heading above it.
@@ -132,7 +137,7 @@ function isTypingTarget(target: EventTarget | null): boolean {
   return target.getAttribute("role") === "textbox";
 }
 
-export function CommandPalette() {
+export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
   const router = useRouter();
   const tCommon = useTranslations("common");
   const tSidebar = useTranslations("sidebar");
@@ -162,7 +167,10 @@ export function CommandPalette() {
     return key ? tKey(key) : slug;
   }
 
-  const pageResults = useMemo(() => filterAndRankItems(PALETTE_ITEMS, query), [query]);
+  const pageResults = useMemo(
+    () => filterAndRankItems(paletteItems(isOwner), query),
+    [query, isOwner],
+  );
 
   // ONE REQUEST, debounced, cached, and last-one-wins.
   //

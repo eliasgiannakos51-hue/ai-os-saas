@@ -11,6 +11,7 @@ import {
   Flag,
   FolderOpen,
   GitBranch,
+  Gauge,
   Globe,
   GraduationCap,
   History,
@@ -89,6 +90,11 @@ export const REFLECTION_ICON: LucideIcon = CalendarClock;
 // Distinct from MODULE_ICONS.trading (TrendingUp) — this is the unified
 // Trading Workflow page, not the raw Trading module list.
 export const TRADING_WORKFLOW_ICON: LucideIcon = LineChart;
+// The owner's own dashboard — MRR, margin, churn, runway. Deliberately
+// NOT the module icon: /dashboard/finance is the log a user keeps of
+// their own income and expenses, and the two must not read as the same
+// thing in a nav that shows both.
+export const BUSINESS_HEALTH_ICON: LucideIcon = Gauge;
 // Distinct from MODULE_ICONS.websites (Globe) — this is the real AI
 // generator (dashboard/website-builder), not the "Websites" Build
 // module's plain idea tracker.

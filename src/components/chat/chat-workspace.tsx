@@ -11,6 +11,7 @@ import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { InlineTitle } from "@/components/chat/inline-title";
+import { HelpTip } from "@/components/ui/help-tip";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { MessageContent } from "@/components/chat/message-content";
 import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
@@ -571,6 +572,16 @@ export function ChatWorkspace({
               </span>
             </button>
           </Tooltip>
+
+          {/* THE "?" FOR THE WHOLE PAGE, in the one row that is always
+              here. Chat is <main className="h-[calc(100vh-4rem)]"> — full
+              viewport by design, with no PageHeader to hang a tip from —
+              and this bar already holds a 44px control, so the tip's own
+              44px hit area adds no height at all.
+              NOT beside the conversation title: that row only renders
+              once a conversation exists, and a brand new chat is exactly
+              where somebody asks what this page can do. */}
+          <HelpTip helpKey="help.chat" />
 
           {/* The open conversation's own star, top-right — the same
               control as in the list, so starring is reachable whichever

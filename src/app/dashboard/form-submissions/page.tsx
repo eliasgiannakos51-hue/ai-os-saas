@@ -3,9 +3,12 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Inbox } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
+import { ListCappedNotice } from "@/components/ui/list-capped-notice";
+import { isCapped } from "@/lib/record-cap";
 import {
   FormSubmissionsList,
   type SubmissionRow,
@@ -37,9 +40,7 @@ const PAGE_SIZE = 200;
 export default async function FormSubmissionsPage() {
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");
@@ -101,7 +102,18 @@ export default async function FormSubmissionsPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={Inbox} title={t("title")} description={t("description")} />
+        <PageHeader
+          icon={Inbox}
+          title={t("title")}
+          description={t("description")}
+          helpKey="help.formSubmissions"
+        />
+
+        {/* THE SAME SILENT CAP, FOUND WHILE FIXING THE OTHERS. This page
+            has read at most PAGE_SIZE submissions since it was written and
+            never said so — and of every list in the product this is the
+            one where a missing row is a lost customer. */}
+        {isCapped(rows, PAGE_SIZE) && <ListCappedNotice cap={PAGE_SIZE} />}
 
         {error && <ErrorMessage detail={`loading form submissions: ${error.message}`} />}
 

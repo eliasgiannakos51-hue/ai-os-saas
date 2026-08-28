@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { LineChart } from "lucide-react";
+import { BUSINESS_HEALTH_ICON } from "@/lib/module-icons";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -15,12 +16,29 @@ import { loadMetricInputs, loadTrend, monthKey } from "@/lib/billing/revenue-his
 
 export const dynamic = "force-dynamic";
 
+// ITS OWN NAV KEY, NOT THE MODULE'S. `sidebar.items.finance` names the
+// twelve-module Finances log at /dashboard/finance — a table of the
+// user's own income and expenses. This page is the operator's view of the
+// business itself and now has a name and a route of its own.
 export function generateMetadata(): Promise<Metadata> {
-  return pageTitle("sidebar.items.finance");
+  return pageTitle("sidebar.items.businessHealth");
 }
 
 /**
  * THE FINANCIAL DASHBOARD (V4 #26). OWNER-ONLY.
+ *
+ * AT /dashboard/business-health, AND IT USED TO BE AT /dashboard/finance.
+ * That was a silent, total outage of a different feature. `finance` is
+ * also the slug of a business module (lib/modules.ts, table
+ * finance_entries), served by the [module] catch-all — and a STATIC
+ * segment wins over a dynamic one in Next.js, with no warning at build
+ * time and no warning at runtime. So every non-owner who pressed
+ * "Finances" in the main nav got a 404, the module's rows could not be
+ * read or created through any screen, and /api/insights/generate went on
+ * reading finance_entries and citing a module nobody could open.
+ *
+ * scripts/tests/route-shadowing.test.mjs now fails the build if any
+ * module slug gains a static directory again.
  *
  * A NOT-FOUND, NOT A "you are not allowed". A 403 tells a stranger the
  * page exists and is worth coming back for; a 404 tells them nothing. The
@@ -35,9 +53,7 @@ export function generateMetadata(): Promise<Metadata> {
 export default async function FinancePage() {
   const t = await getTranslations("finance");
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (!isAdminEmail(user.email)) notFound();
 
@@ -58,7 +74,12 @@ export default async function FinancePage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6">
-      <PageHeader icon={LineChart} title={t("title")} description={t("description")} />
+      <PageHeader
+        icon={BUSINESS_HEALTH_ICON}
+        title={t("title")}
+        description={t("description")}
+        helpKey="help.businessHealth"
+      />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {metrics.map((metric) => (

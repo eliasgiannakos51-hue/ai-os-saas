@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { pageTitle } from "@/lib/page-title";
 import { notFound, redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { DocumentEditor } from "@/components/documents/document-editor";
 import { loadFavoriteIds } from "@/lib/favorites";
@@ -16,9 +17,7 @@ export const fetchCache = "force-no-store";
 export default async function DocumentEditorPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");

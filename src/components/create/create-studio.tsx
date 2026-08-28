@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { HelpTip } from "@/components/ui/help-tip";
 import {
   AlertTriangle,
   ArrowRight,
@@ -187,7 +188,18 @@ export function CreateStudio() {
           <span className={`mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border ${moduleAccent("createStudio")}`}>
             <Sparkles className="h-6 w-6" aria-hidden="true" />
           </span>
-          <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">{t("title")}</h1>
+          {/* THE "?" GOES BESIDE THE TITLE, as it does on the other
+              twenty-eight pages — a help affordance that moves between
+              pages is one people stop looking for. The `mt-4` moves from
+              the heading to the row so the spacing above is unchanged,
+              and the row centres exactly where the heading did; nothing
+              else on the hero moves. flex-wrap because a long title in
+              German or Arabic must push the icon to its own line rather
+              than squeeze the words. */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h1>
+            <HelpTip helpKey="help.create" />
+          </div>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted">{t("subtitle")}</p>
         </div>
 

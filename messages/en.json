@@ -904,7 +904,6 @@
           "consistency": "Try logging something every day this week."
         }
       },
-      "heroQuestion": "What do you want to build today?",
       "recentEntries": {
         "title": "Recent Entries",
         "empty": "No entries yet."
@@ -933,6 +932,21 @@
       "templateFailed": "We couldn't apply that template. Try again in a moment — nothing was added.",
       "quickStartBlurb": "Add a few example entries so you can see what a filled-in workspace looks like.",
       "quickStartAdd": "Add"
+    },
+    "firstScreen": {
+      "label": "Press one — it runs right away",
+      "build": {
+        "verb": "Build",
+        "example": "Build a website for my shop"
+      },
+      "understand": {
+        "verb": "Understand",
+        "example": "What do my numbers say this week?"
+      },
+      "repeat": {
+        "verb": "Repeat",
+        "example": "Every Monday, a summary of my sales"
+      }
     },
     "team": {
       "title": "Team",

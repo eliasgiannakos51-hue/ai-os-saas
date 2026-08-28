@@ -89,11 +89,17 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
       "finance", "language", "module", "promise", "publishing", "pwa",
       "security", "settings", "sidebar", "voice",
     ],
-    // SIXTY-ONE, not the twenty I first wrote. Twenty call
-    // useTranslations() with no namespace; the rest reach a key through a
-    // template literal or a variable, which is just as unpredictable.
-    // Counting only the first shape is how a number becomes comfortable.
-    unbounded: 61,
+    // SIXTY-TWO, and it was twenty when I first wrote this number down.
+    // Twenty call useTranslations() with no namespace; the rest reach a
+    // key through a template literal or a variable, which is just as
+    // unpredictable. Counting only the first shape is how a number
+    // becomes comfortable.
+    //
+    // The sixty-second is overview/first-screen-examples.tsx, which
+    // renders `t(\`${id}.verb\`)` for each of the three capabilities.
+    // The gate found it, which is the point of counting rather than
+    // asserting.
+    unbounded: 62,
   },
   {
     name: "onboarding",

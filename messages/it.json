@@ -904,7 +904,6 @@
           "consistency": "Prova a registrare qualcosa ogni giorno questa settimana."
         }
       },
-      "heroQuestion": "Cosa vuoi creare oggi?",
       "recentEntries": {
         "title": "Voci Recenti",
         "empty": "Nessuna voce ancora."
@@ -933,6 +932,21 @@
       "templateFailed": "Non siamo riusciti ad applicare questo modello. Riprova tra poco — non è stato aggiunto nulla.",
       "quickStartBlurb": "Aggiungi qualche voce di esempio per vedere com'è fatto uno spazio di lavoro pieno.",
       "quickStartAdd": "Aggiungi"
+    },
+    "firstScreen": {
+      "label": "Premi uno — parte subito",
+      "build": {
+        "verb": "Crea",
+        "example": "Crea un sito per il mio negozio"
+      },
+      "understand": {
+        "verb": "Capisci",
+        "example": "Cosa dicono i miei numeri questa settimana?"
+      },
+      "repeat": {
+        "verb": "Ripeti",
+        "example": "Ogni lunedì, un riepilogo delle mie vendite"
+      }
     },
     "team": {
       "title": "Team",

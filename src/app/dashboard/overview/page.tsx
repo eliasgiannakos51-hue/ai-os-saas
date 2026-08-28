@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { GreetingHeader } from "@/components/overview/greeting-header";
 import { InsightList, type Insight } from "@/components/onboarding/insight-list";
 import { CreateChat } from "@/components/create/create-chat";
+import { FirstScreenExamples } from "@/components/overview/first-screen-examples";
 import { QuickActionCard } from "@/components/overview/quick-action-card";
 import { LowCreditsBanner } from "@/components/credits/low-credits-banner";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
@@ -469,6 +470,11 @@ export default async function OverviewPage() {
 
         <div className="mt-6">
           <CreateChat showHeading={false} />
+          {/* UNDER the input, not above it. Above, they read as the
+              screen's own suggestions and compete with the box; below,
+              they read as answers to "what could I type here?" — which
+              is the question nobody in the test could answer. */}
+          <FirstScreenExamples />
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">

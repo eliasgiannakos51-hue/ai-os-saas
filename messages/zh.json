@@ -904,7 +904,6 @@
           "consistency": "试着这周每天都记录一些内容。"
         }
       },
-      "heroQuestion": "你今天想构建什么？",
       "recentEntries": {
         "title": "最近条目",
         "empty": "还没有条目。"
@@ -933,6 +932,21 @@
       "templateFailed": "无法应用该模板。请稍后重试 — 未添加任何内容。",
       "quickStartBlurb": "添加几条示例记录，看看填充后的工作区是什么样子。",
       "quickStartAdd": "添加"
+    },
+    "firstScreen": {
+      "label": "点一个 — 立刻运行",
+      "build": {
+        "verb": "构建",
+        "example": "为我的店铺做一个网站"
+      },
+      "understand": {
+        "verb": "理解",
+        "example": "我这周的数据说明了什么？"
+      },
+      "repeat": {
+        "verb": "重复",
+        "example": "每周一，给我一份销售汇总"
+      }
     },
     "team": {
       "title": "团队",

@@ -904,7 +904,6 @@
           "consistency": "Versuche, diese Woche jeden Tag etwas einzutragen."
         }
       },
-      "heroQuestion": "Was möchtest du heute bauen?",
       "recentEntries": {
         "title": "Letzte Einträge",
         "empty": "Noch keine Einträge."
@@ -933,6 +932,21 @@
       "templateFailed": "Wir konnten diese Vorlage nicht anwenden. Versuch es gleich noch einmal — es wurde nichts hinzugefügt.",
       "quickStartBlurb": "Füge ein paar Beispieleinträge hinzu, um zu sehen, wie ein gefüllter Arbeitsbereich aussieht.",
       "quickStartAdd": "Hinzufügen"
+    },
+    "firstScreen": {
+      "label": "Eine antippen — sie läuft sofort",
+      "build": {
+        "verb": "Erstellen",
+        "example": "Erstelle eine Website für meinen Laden"
+      },
+      "understand": {
+        "verb": "Verstehen",
+        "example": "Was sagen meine Zahlen diese Woche?"
+      },
+      "repeat": {
+        "verb": "Wiederholen",
+        "example": "Jeden Montag eine Zusammenfassung meiner Verkäufe"
+      }
     },
     "team": {
       "title": "Team",

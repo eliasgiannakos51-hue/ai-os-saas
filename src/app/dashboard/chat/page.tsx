@@ -11,6 +11,7 @@ import { getFreeChatStatus } from "@/lib/billing/free-chat-usage";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { loadFavoriteIds } from "@/lib/favorites";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.chat");
@@ -19,7 +20,11 @@ export function generateMetadata(): Promise<Metadata> {
 export default async function ChatPage({
   searchParams,
 }: {
-  searchParams: { preset?: string; c?: string };
+  // `ask` is the Home screen's "understand" example (see
+  // lib/overview/first-screen-examples.ts). The name is a runtime string
+  // on both sides — nothing here would stop compiling if the link sent
+  // `?question=` instead — so first-screen.test.mjs compares the two.
+  searchParams: { preset?: string; c?: string; ask?: string };
 }) {
   const supabase = createClient();
 
@@ -86,6 +91,10 @@ export default async function ChatPage({
             : undefined
         }
         initialFreeChatRemaining={freeChat && freeChat.limit > 0 ? freeChat.remaining : undefined}
+        // ASKED ON ARRIVAL, not typed. Clamped rather than trusted: this
+        // comes out of a URL anyone can edit, and the send path charges
+        // credits.
+        initialAsk={readExampleParam(searchParams.ask)}
       />
     </main>
   );

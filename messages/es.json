@@ -904,7 +904,6 @@
           "consistency": "Intenta registrar algo todos los días esta semana."
         }
       },
-      "heroQuestion": "¿Qué quieres construir hoy?",
       "recentEntries": {
         "title": "Entradas Recientes",
         "empty": "Aún no hay entradas."
@@ -933,6 +932,21 @@
       "templateFailed": "No hemos podido aplicar esa plantilla. Inténtalo de nuevo en un momento: no se ha añadido nada.",
       "quickStartBlurb": "Añade algunas entradas de ejemplo para ver cómo se ve un espacio de trabajo con contenido.",
       "quickStartAdd": "Añadir"
+    },
+    "firstScreen": {
+      "label": "Pulsa uno — se ejecuta al instante",
+      "build": {
+        "verb": "Crea",
+        "example": "Crea una web para mi tienda"
+      },
+      "understand": {
+        "verb": "Entiende",
+        "example": "¿Qué dicen mis números esta semana?"
+      },
+      "repeat": {
+        "verb": "Repite",
+        "example": "Cada lunes, un resumen de mis ventas"
+      }
     },
     "team": {
       "title": "Equipo",

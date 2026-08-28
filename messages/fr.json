@@ -904,7 +904,6 @@
           "consistency": "Essayez d'enregistrer quelque chose chaque jour cette semaine."
         }
       },
-      "heroQuestion": "Que voulez-vous créer aujourd'hui ?",
       "recentEntries": {
         "title": "Entrées Récentes",
         "empty": "Aucune entrée pour l'instant."
@@ -933,6 +932,21 @@
       "templateFailed": "Nous n'avons pas pu appliquer ce modèle. Réessayez dans un instant — rien n'a été ajouté.",
       "quickStartBlurb": "Ajoutez quelques entrées d'exemple pour voir à quoi ressemble un espace de travail rempli.",
       "quickStartAdd": "Ajouter"
+    },
+    "firstScreen": {
+      "label": "Cliquez sur l’un — il s’exécute aussitôt",
+      "build": {
+        "verb": "Créez",
+        "example": "Créez un site pour ma boutique"
+      },
+      "understand": {
+        "verb": "Comprenez",
+        "example": "Que disent mes chiffres cette semaine ?"
+      },
+      "repeat": {
+        "verb": "Répétez",
+        "example": "Chaque lundi, un résumé de mes ventes"
+      }
     },
     "team": {
       "title": "Équipe",

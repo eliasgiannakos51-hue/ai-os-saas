@@ -904,7 +904,6 @@
           "consistency": "今週は毎日何かを記録してみましょう。"
         }
       },
-      "heroQuestion": "今日は何を作りますか？",
       "recentEntries": {
         "title": "最近の項目",
         "empty": "まだ項目がありません。"
@@ -933,6 +932,21 @@
       "templateFailed": "このテンプレートを適用できませんでした。少し待ってからお試しください — 何も追加されていません。",
       "quickStartBlurb": "サンプルをいくつか追加して、中身の入ったワークスペースがどう見えるか確かめてみてください。",
       "quickStartAdd": "追加"
+    },
+    "firstScreen": {
+      "label": "ひとつ押すと、すぐ動きます",
+      "build": {
+        "verb": "作る",
+        "example": "私の店のウェブサイトを作って"
+      },
+      "understand": {
+        "verb": "わかる",
+        "example": "今週の私の数字は何を示している？"
+      },
+      "repeat": {
+        "verb": "繰り返す",
+        "example": "毎週月曜日に、売上のまとめを"
+      }
     },
     "team": {
       "title": "チーム",

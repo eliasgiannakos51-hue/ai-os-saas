@@ -86,9 +86,9 @@ const MUTANTS = [
     // The count that decides whether a group may EVER be trimmed.
     name: "the dashboard under-reports its unbounded components",
     file: LIB,
-    from: "    unbounded: 61,",
+    from: "    unbounded: 62,",
     to: "    unbounded: 0,",
-    expect: "dashboard: 61 unbounded component(s)",
+    expect: "dashboard: 62 unbounded component(s)",
   },
   {
     // With no prefix the dashboard stops claiming its own routes, they

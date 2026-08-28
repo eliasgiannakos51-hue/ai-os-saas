@@ -183,10 +183,22 @@ ok(
   `${NAMES_ITS_CHECK.length} — this floor rises as suites are rewritten, and never falls`,
 );
 // And the ones that do must not have gone hollow: a declared `expect`
-// the runner never compares against is decoration.
-const hollow = NAMES_ITS_CHECK.filter(
-  (file) => !/onTarget/.test(readFileSync(path.join(DIR, file), "utf8")),
-);
+// that never reaches the OUTPUT is decoration. A suite that decides
+// caught-or-missed from it and then reports only "the gate stayed green"
+// leaves the reader unable to tell a narrow gate from a broken mutant,
+// which is the entire reason for naming the check.
+//
+// THIS WAS A NAME CHECK AND NOT A BEHAVIOUR CHECK. It matched the
+// identifier `onTarget`, which is a convention eleven suites happened to
+// share — so a twelfth suite that named its check, compared against it
+// and printed it, but called the variable something else, failed here
+// for using a different word. A stale anchor in an instrument. It now
+// asks what it means to ask: does the expected check appear in what a
+// miss prints.
+const hollow = NAMES_ITS_CHECK.filter((file) => {
+  const src = readFileSync(path.join(DIR, file), "utf8");
+  return !/\$\{m\.expect\}|\$\{JSON\.stringify\(wanted\)\}/.test(src);
+});
 ok(
   "every suite that names a check actually reports on it",
   hollow.length === 0,

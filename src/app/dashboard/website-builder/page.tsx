@@ -10,6 +10,7 @@ import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import { loadFavoriteIds } from "@/lib/favorites";
 import type { UserWebsite } from "@/types/user-website";
 import { RECORD_CAP } from "@/lib/record-cap";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.websiteBuilder");
@@ -22,7 +23,16 @@ export function generateMetadata(): Promise<Metadata> {
 // that module is a plain idea/status CRUD tracker with no AI call and
 // already has its own credit cost + plan gating; this page doesn't touch
 // it at all.
-export default async function WebsiteBuilderPage() {
+export default async function WebsiteBuilderPage({
+  searchParams,
+}: {
+  // `brief` is the Home screen's "build" example (see
+  // lib/overview/first-screen-examples.ts). A runtime string on both
+  // sides — rename it in the link and this page still compiles and still
+  // renders, it just stops doing anything — so first-screen.test.mjs
+  // compares the two names.
+  searchParams: { brief?: string };
+}) {
   const t = await getTranslations("dashboard.websiteBuilder");
   const supabase = createClient();
 
@@ -50,6 +60,9 @@ export default async function WebsiteBuilderPage() {
         <WebsiteBuilderWorkspace
           initialWebsites={websiteRows}
           favoritedWebsiteIds={favoritedWebsiteIds}
+          // BUILDING ON ARRIVAL. Clamped rather than trusted: this comes
+          // out of a URL anyone can edit.
+          initialBrief={readExampleParam(searchParams.brief)}
         />
       </div>
     </main>

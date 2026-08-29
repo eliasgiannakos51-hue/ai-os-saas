@@ -75,18 +75,10 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "Arbeitsbereich",
+      "daily": "Täglich",
       "build": "Erstellen",
-      "business": "Business",
-      "strategy": "Strategie",
-      "operations": "Abläufe",
-      "marketplace": "Marktplatz",
-      "settings": "Einstellungen",
-      "create": "Erstellen",
       "myBusiness": "Mein Geschäft",
-      "track": "Erfassen",
-      "insights": "Was mir aufgefallen ist",
-      "tracking": "Erfassung"
+      "settings": "Einstellungen"
     },
     "items": {
       "home": "Start",
@@ -133,7 +125,10 @@
       "affiliate": "Partnerprogramm",
       "formSubmissions": "Formulareingänge",
       "routing": "Modell-Routing",
-      "businessHealth": "Geschäftslage"
+      "businessHealth": "Geschäftslage",
+      "library": "Meine Sachen",
+      "records": "Meine Einträge",
+      "newEntry": "Neuer Eintrag"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -180,7 +175,10 @@
       "help": "Antworten auf die häufigsten Fragen — ohne Credits zu verbrauchen.",
       "affiliate": "Dein Empfehlungslink, dein Verdienst und wie du ausgezahlt wirst.",
       "formSubmissions": "Alles, was Besucher über ein Formular auf Ihren veröffentlichten Seiten gesendet haben",
-      "businessHealth": "MRR, Marge, Abwanderung und Liquidität. Nur für den Inhaber."
+      "businessHealth": "MRR, Marge, Abwanderung und Liquidität. Nur für den Inhaber.",
+      "library": "Favoriten, Neuestes und Suche — alles Eigene an einem Ort",
+      "records": "Alle Ihre Einträge, nach Art gefiltert",
+      "newEntry": "Schreiben Sie irgendetwas auf — es ordnet sich selbst ein"
     },
     "closeMenu": "Menü schließen"
   },
@@ -952,6 +950,24 @@
         "verb": "Wiederholen",
         "example": "Jeden Montag eine Zusammenfassung meiner Verkäufe"
       }
+    },
+    "library": {
+      "title": "Meine Sachen",
+      "description": "Alles, was Sie hier abgelegt haben: neu, markiert oder gesucht.",
+      "tabs": {
+        "recent": "Neuestes",
+        "starred": "Markiert",
+        "search": "Suchen"
+      },
+      "searchPlaceholder": "Alles durchsuchen, was Sie geschrieben haben",
+      "searchNoResults": "Nichts passt zu „{query}“."
+    },
+    "records": {
+      "title": "Meine Einträge",
+      "description": "Alle Ihre Einträge an einem Ort.",
+      "filterPlaceholder": "Nach Namen filtern",
+      "noMatch": "Nichts passt zu „{query}“.",
+      "count": "{shown} von {total}"
     },
     "team": {
       "title": "Team",
@@ -2964,6 +2980,16 @@
       "is": "Die Zahlen des Unternehmens selbst — Umsatz, Marge, Abwanderung, Liquidität. Nur für den Inhaber.",
       "does": "Berechnet jede Kennzahl aus echten Abo- und Kostenzeilen und fragt Sie nach den drei Werten, die keine Datenbank kennen kann: Marketingausgaben, Fixkosten, Kassenbestand.",
       "doesNot": "Es zeigt keine Zahl, die es nicht begründen kann. Einer Kennzahl ohne Eingabe sagt, was ihr fehlt, statt aus einer Null zu rechnen, und nichts wird rückwirkend ergänzt — die Historie beginnt am Tag der Veröffentlichung."
+    },
+    "library": {
+      "is": "Alles, was Sie hier abgelegt haben, an einem Ort.",
+      "does": "Zeigt Ihre neuesten Einträge, die markierten und eine Suche über alles, was Sie geschrieben haben.",
+      "doesNot": "Es wird nichts doppelt gespeichert. Es sind dieselben Einträge, die die Module zeigen — ändern Sie einen hier, ändert er sich dort."
+    },
+    "records": {
+      "is": "Ein Zugang zu jeder Liste, die Sie führen.",
+      "does": "Listet alle neunzehn Eintragsseiten auf und filtert sie nach Namen, damit Sie sich nicht merken müssen, unter welcher Gruppe eine Liste stand.",
+      "doesNot": "Es ersetzt sie nicht, und nichts wurde entfernt. Jede hat weiterhin ihre eigene Adresse, und Ihre Lesezeichen funktionieren."
     }
   },
   "helpCentre": {

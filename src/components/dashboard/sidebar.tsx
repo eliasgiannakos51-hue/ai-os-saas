@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { Tooltip } from "@/components/ui/tooltip";
 import { displayNameFromEmail } from "@/lib/greeting";
 import { ChevronRight, X } from "lucide-react";
-import { OVERVIEW_NAV_ITEM } from "@/lib/modules";
+import { OVERVIEW_NAV_ITEM, CREATE_NAV_ITEM } from "@/lib/modules";
 import {
   ALL_SIDEBAR_GROUPS,
   MAIN_SIDEBAR_GROUPS,
@@ -20,6 +20,7 @@ import { useSidebar } from "@/components/dashboard/sidebar-context";
 import { useToast } from "@/components/toast/toast-context";
 import { Logo } from "@/components/logo";
 import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
+import { CREATE_ICON } from "@/lib/module-icons";
 
 function isActive(pathname: string | null, href: string) {
   if (href === "/dashboard") return pathname === "/dashboard";
@@ -290,7 +291,31 @@ export function Sidebar({
           </button>
         </div>
 
-        <nav className="space-y-5 p-3">
+        {/* THE ONE ACTION, ABOVE EVERYTHING.
+            `prominent` has been in renderItem since the sidebar was
+            written, with a comment describing "the three daily entry
+            points" — and no call site ever passed it. It was dead the
+            whole time, so every row in this menu had exactly the same
+            weight, and the thing a person does most often looked like
+            the thirty-ninth thing they could do.
+            Recording something is that action, and it is the only row
+            above the groups: one press, from anywhere, to put something
+            in. The rest of the menu is where things are, not what to
+            do. */}
+        <div className="px-3 pb-1 pt-1">
+          {renderItem(
+            {
+              href: CREATE_NAV_ITEM.href,
+              label: "New entry",
+              icon: CREATE_ICON,
+              hintKey: "newEntry",
+            },
+            "text-orange-300",
+            true,
+          )}
+        </div>
+
+        <nav className="space-y-5 p-3 pt-2">
           {visibleGroups(MAIN_SIDEBAR_GROUPS, isOwner).map(renderGroup)}
         </nav>
 

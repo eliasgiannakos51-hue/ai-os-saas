@@ -408,6 +408,29 @@ export const HELP_TIPS: HelpTip[] = [
     corrects:
       "that the figures come from your bank, your CRM or your inbox rather than from what you logged",
   },
+  {
+    // The three doors into a person's own data, merged into one. The
+    // wrong assumption it corrects is the one the merge itself invites:
+    // that this page holds everything the AI can see. It holds what the
+    // user typed and what the product filed — not their files, not their
+    // chats.
+    id: "library",
+    file: "src/app/dashboard/library/page.tsx",
+    route: "src/app/dashboard/library/page.tsx",
+    keyPrefix: "help.library",
+    corrects:
+      "that this is a second copy of your data rather than the same records the modules show",
+  },
+  {
+    // One row in the sidebar now stands for nineteen log screens, so the
+    // assumption to correct is that the nineteen went away.
+    id: "records",
+    file: "src/app/dashboard/records/page.tsx",
+    route: "src/app/dashboard/records/page.tsx",
+    keyPrefix: "help.records",
+    corrects:
+      "that these lists were removed or merged when the sidebar stopped listing them one by one",
+  },
 ];
 
 export type HelpTipPart = "is" | "does" | "doesNot";

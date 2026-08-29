@@ -75,18 +75,10 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "Espacio de trabajo",
-      "build": "Crear",
-      "business": "Negocio",
-      "strategy": "Estrategia",
-      "operations": "Operaciones",
-      "marketplace": "Mercado",
-      "settings": "Configuración",
-      "create": "Crear",
+      "daily": "Cada día",
+      "build": "Crea",
       "myBusiness": "Mi negocio",
-      "track": "Registrar",
-      "insights": "Lo que he notado",
-      "tracking": "Seguimiento"
+      "settings": "Ajustes"
     },
     "items": {
       "home": "Inicio",
@@ -133,7 +125,10 @@
       "affiliate": "Afiliados",
       "formSubmissions": "Envíos de formularios",
       "routing": "Enrutado de modelos",
-      "businessHealth": "Salud del negocio"
+      "businessHealth": "Salud del negocio",
+      "library": "Mis cosas",
+      "records": "Mis registros",
+      "newEntry": "Nueva entrada"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -180,7 +175,10 @@
       "help": "Respuestas a las preguntas más frecuentes, sin gastar créditos.",
       "affiliate": "Tu enlace de referido, lo que has ganado y cómo cobras.",
       "formSubmissions": "Todo lo que los visitantes enviaron por un formulario en tus sitios publicados",
-      "businessHealth": "MRR, margen, bajas y liquidez. Solo el propietario."
+      "businessHealth": "MRR, margen, bajas y liquidez. Solo el propietario.",
+      "library": "Favoritos, recientes y búsqueda — todo lo tuyo en un sitio",
+      "records": "Todos tus registros, filtrados por tipo",
+      "newEntry": "Escribe cualquier cosa — se archiva sola"
     },
     "closeMenu": "Cerrar el menú"
   },
@@ -952,6 +950,24 @@
         "verb": "Repite",
         "example": "Cada lunes, un resumen de mis ventas"
       }
+    },
+    "library": {
+      "title": "Mis cosas",
+      "description": "Todo lo que has puesto aquí: reciente, favorito o buscado.",
+      "tabs": {
+        "recent": "Reciente",
+        "starred": "Favoritos",
+        "search": "Buscar"
+      },
+      "searchPlaceholder": "Busca en todo lo que has escrito",
+      "searchNoResults": "Nada coincide con «{query}»."
+    },
+    "records": {
+      "title": "Mis registros",
+      "description": "Todos tus registros, en un solo sitio.",
+      "filterPlaceholder": "Filtrar por nombre",
+      "noMatch": "Nada coincide con «{query}».",
+      "count": "{shown} de {total}"
     },
     "team": {
       "title": "Equipo",
@@ -2964,6 +2980,16 @@
       "is": "Las cifras del propio negocio: ingresos, margen, bajas, liquidez. Solo para el propietario.",
       "does": "Calcula cada métrica a partir de filas reales de suscripción y coste, y te pide las tres cifras que ninguna base de datos puede saber: gasto en marketing, costes fijos y saldo de caja.",
       "doesNot": "No muestra una cifra que no pueda justificar. Una métrica a la que le falta un dato dice qué necesita en lugar de calcular desde cero, y nada se rellena hacia atrás: el histórico empieza el día en que esto se publicó."
+    },
+    "library": {
+      "is": "Todo lo que has puesto aquí, en un solo sitio.",
+      "does": "Muestra tus entradas recientes, las que marcaste como favoritas y una búsqueda en todo lo que has escrito.",
+      "doesNot": "No guarda una segunda copia de nada. Son los mismos registros que muestran los módulos: si editas uno aquí, cambia allí."
+    },
+    "records": {
+      "is": "Una entrada a todas las listas que llevas.",
+      "does": "Enumera las diecinueve pantallas de registros y las filtra por nombre, para no tener que recordar en qué grupo estaba cada una.",
+      "doesNot": "No las sustituye y no se ha eliminado nada. Cada una conserva su dirección y tus marcadores siguen funcionando."
     }
   },
   "helpCentre": {

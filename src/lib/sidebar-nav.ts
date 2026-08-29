@@ -44,45 +44,70 @@ import {
 // consumer already imports.
 export type { SidebarItem, SidebarGroupConfig } from "@/lib/sidebar-visibility";
 export { visibleGroups } from "@/lib/sidebar-visibility";
-import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
+import type { SidebarGroupConfig, SidebarItem } from "@/lib/sidebar-visibility";
 
+/**
+ * FOUR GROUPS, NAMED FOR WHAT A PERSON IS DOING.
+ *
+ * There were eight, called Workspace, Build, Tracking, Business,
+ * Strategy, Operations, Marketplace and Settings. Five of those are
+ * nouns a stranger cannot place — nobody arrives wanting to do
+ * "Operations" — and the split between Business, Strategy and Tracking
+ * described how the code is organised, not how anybody works.
+ *
+ * Now: what you open every day · what makes something · your business ·
+ * settings.
+ *
+ * AND THE NINETEEN LOG SCREENS LEFT. Twelve business modules, six
+ * tracking tables and Ideas were nineteen sidebar rows that all do the
+ * same thing — list rows you typed — and every one of them is still
+ * served by the same [module] component. They are one row now, pointing
+ * at a hub that filters. They are NOT gone: RECORD_DESTINATIONS below is
+ * what the hub lists and what the command palette searches, so every one
+ * of them is still one keystroke away. A menu that gets shorter by
+ * making pages unreachable has not been simplified, it has been damaged,
+ * and scripts/tests/sidebar-density.test.mjs fails if a destination
+ * stops being reachable.
+ */
 export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
   {
-    heading: "Workspace",
+    // Never collapsed: these are the rows somebody opens without
+    // thinking, and a daily action behind a disclosure triangle is a
+    // daily action somebody stops taking.
+    heading: "Daily",
     collapsible: false,
     items: [
       { href: OVERVIEW_NAV_ITEM.href, label: "Home", icon: OVERVIEW_ICON, hintKey: "home" },
-      { href: CREATE_NAV_ITEM.href, label: CREATE_NAV_ITEM.label, icon: CREATE_ICON, hintKey: "create" },
       { href: CHAT_NAV_ITEM.href, label: "Ionexa Chat", icon: CHAT_ICON, hintKey: "chat" },
-      { href: TIMELINE_NAV_ITEM.href, label: TIMELINE_NAV_ITEM.label, icon: TIMELINE_ICON, hintKey: "timeline" },
-      { href: "/dashboard/favorites", label: "Favorites", icon: FAVORITES_ICON , hintKey: "favorites" },
-      { href: MISSION_NAV_ITEM.href, label: MISSION_NAV_ITEM.label, icon: MISSION_ICON, hintKey: "missionControl" },
-      { href: REFLECTION_NAV_ITEM.href, label: REFLECTION_NAV_ITEM.label, icon: REFLECTION_ICON, hintKey: "reflection" },
-      { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON , hintKey: "memory" },
-      { href: "/dashboard/documents", label: "Documents", icon: MODULE_ICONS.documents , hintKey: "documents" },
-      // Next to Documents rather than in Build: both are about writing,
-      // and the difference — documents the AI wrote for you vs files you
-      // brought in for it to read — is exactly the distinction a user
-      // needs the two entries to be adjacent to notice.
+      { href: CREATE_NAV_ITEM.href, label: CREATE_NAV_ITEM.label, icon: CREATE_ICON, hintKey: "create" },
+      // FAVOURITES + HISTORY + SEARCH, WHICH WERE THREE. Starred things
+      // were /dashboard/favorites, everything in order was
+      // /dashboard/timeline, and searching your own records was a
+      // keyboard shortcut nobody on a phone can press. Three doors into
+      // "the things I already put in here" is two doors too many.
+      { href: "/dashboard/library", label: "My stuff", icon: FAVORITES_ICON, hintKey: "library" },
+      // Next to My stuff rather than under Build: a file you uploaded is
+      // something you already have, not something the product made.
       { href: "/dashboard/files", label: "Files", icon: FILES_ICON, hintKey: "files" },
-      // NOT /dashboard/research: that route is the Knowledge tracker, a
-      // place to save links by hand. This is the autonomous job that goes
-      // and finds them. Sharing a route would have made one of the two
-      // unreachable.
-      { href: "/dashboard/deep-research", label: "Deep Research", icon: DEEP_RESEARCH_ICON, hintKey: "deepResearch" },
+      // NOT UNDER BUILD, and the gate is why. Documents was filed there
+      // in the first writing of these four groups; sidebar-naming's
+      // model-reachability check went red on it, and it was right:
+      // /api/documents POST inserts a row with `content: { html: "" }`.
+      // It is an editor you type in, next to the files you brought in —
+      // not something the product produces for you.
+      { href: "/dashboard/documents", label: "Documents", icon: MODULE_ICONS.documents, hintKey: "documents" },
+      { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON, hintKey: "memory" },
     ],
   },
   {
     // BUILD MEANS SOMETHING IS PRODUCED, and the gate proves it rather
     // than trusting it: every href here must have an API route behind it
     // that actually calls a model, and every module in
-    // lib/build-modules.ts must NOT. The agent builder, the site builder,
-    // what it published, what those sites produced, and — since V4 #19 +
-    // #20 — the two former trackers that became real tools.
+    // lib/build-modules.ts must NOT be here.
     heading: "Build",
     collapsible: true,
     items: [
-      { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents , hintKey: "agents" },
+      { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents, hintKey: "agents" },
       {
         href: "/dashboard/website-builder",
         label: "Website Builder",
@@ -93,10 +118,7 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: "/dashboard/published", label: "Published Sites", icon: PUBLISHED_SITES_ICON, hintKey: "published" },
       // Directly under Published Sites, for the same reason Published
       // Sites sits under the Builder: a form submission is what a
-      // published site produced, and until this entry existed the table
-      // it lands in had no screen at all — the owner's only evidence a
-      // form worked was an email that, without a verified sending
-      // domain, never arrived.
+      // published site produced.
       {
         href: "/dashboard/form-submissions",
         label: "Form Submissions",
@@ -104,14 +126,11 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         hintKey: "formSubmissions",
       },
       // MOVED UP FROM TRACKING IN V4 #19 + #20, because they stopped
-      // being logs. Data Analysis parses a real uploaded spreadsheet,
-      // profiles every column in TypeScript and draws charts from the
-      // real rows; Coding runs five operations that return code, an
-      // explanation, a bug list, a conversion or tests. Both have an API
-      // route that makes a model call, which is what
-      // scripts/tests/sidebar-naming.test.mjs now REQUIRES of anything
-      // filed here — the heading is checked against the code rather than
-      // against a list somebody keeps up to date.
+      // being logs. Data Analysis parses a real uploaded spreadsheet and
+      // draws charts from the real rows; Coding runs five operations that
+      // return code. Both have an API route that makes a model call,
+      // which is what scripts/tests/sidebar-naming.test.mjs REQUIRES of
+      // anything filed here.
       {
         href: "/dashboard/data-analysis",
         label: "Data Analysis",
@@ -119,47 +138,24 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         hintKey: "dataAnalysis",
       },
       { href: "/dashboard/coding", label: "AI Coding", icon: MODULE_ICONS.coding, hintKey: "coding" },
+      // NOT /dashboard/research: that route is the Knowledge tracker, a
+      // place to save links by hand. This is the autonomous job that goes
+      // and finds them, and it produces a report — which is why it is
+      // here and the tracker is in the records hub.
+      { href: "/dashboard/deep-research", label: "Deep Research", icon: DEEP_RESEARCH_ICON, hintKey: "deepResearch" },
     ],
   },
   {
-    // THE EIGHT THAT PRODUCE NOTHING.
-    //
-    // lib/build-modules.ts says it in its own words: "Each is purely a
-    // tracking/log table for now — no real AI generation happens yet".
-    // They sat under a heading called Build, next to two features that
-    // genuinely build things, with names like "AI Coding" and "Images".
-    // A user who opens AI Coding expecting code and finds a form to
-    // describe code they will write themselves has not met a limitation,
-    // they have met a claim that was not true — and it is the same
-    // sentence they will use about the features that DO work.
-    //
-    // Grouping them separately is the half of the fix that does not
-    // depend on agreeing new names for them.
-    heading: "Tracking",
+    heading: "My business",
     collapsible: true,
     items: [
-      { href: "/dashboard/websites", label: "Websites", icon: MODULE_ICONS.websites , hintKey: "websites" },
-      { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps , hintKey: "apps" },
-      { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images , hintKey: "images" },
-      { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos , hintKey: "videos" },
-      {
-        href: "/dashboard/presentations",
-        label: "Presentation notes",
-        icon: MODULE_ICONS.presentations, hintKey: "presentations" },
-      { href: "/dashboard/campaigns", label: "Campaigns", icon: MODULE_ICONS.campaigns , hintKey: "campaigns" },
-    ],
-  },
-  {
-    heading: "Business",
-    collapsible: true,
-    items: [
-      { href: "/dashboard/analytics", label: "Analytics", icon: MODULE_ICONS.analytics , hintKey: "analytics" },
-      // The MODULE — a log of the user's own income and expenses, served
-      // by the [module] catch-all. It spent two releases pointing at the
-      // owner-only dashboard that shadowed it.
-      { href: "/dashboard/finance", label: "Finance", icon: MODULE_ICONS.finance , hintKey: "finance" },
-      // The OWNER's dashboard, at its own route now. Owners only, so it
-      // is the nav item that made the flag necessary.
+      // THE NINETEEN, AS ONE ROW. Every log-style screen — the twelve
+      // business modules, the six tracking tables and Ideas — behind a
+      // hub that filters, because they were nineteen rows of the same
+      // shape and the difference between them is a word, not a workflow.
+      { href: "/dashboard/records", label: "My records", icon: MODULE_ICONS.ideas, hintKey: "records" },
+      // The OWNER's dashboard. Owners only, so it is the nav item that
+      // made the flag necessary.
       {
         href: "/dashboard/business-health",
         label: "Business health",
@@ -167,28 +163,8 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         hintKey: "businessHealth",
         ownerOnly: true,
       },
-      { href: "/dashboard/content", label: "Content", icon: MODULE_ICONS.content , hintKey: "content" },
-      { href: "/dashboard/sales", label: "Sales", icon: MODULE_ICONS.sales , hintKey: "sales" },
-      { href: "/dashboard/products", label: "Products", icon: MODULE_ICONS.products , hintKey: "products" },
-      { href: "/dashboard/research", label: "Research", icon: MODULE_ICONS.research , hintKey: "research" },
-      { href: "/dashboard/learning", label: "Learning", icon: MODULE_ICONS.learning , hintKey: "learning" },
-    ],
-  },
-  {
-    heading: "Strategy",
-    collapsible: true,
-    items: [
-      { href: "/dashboard", label: "Ideas", icon: MODULE_ICONS.ideas , hintKey: "ideas" },
-      { href: "/dashboard/competitors", label: "Competitors", icon: MODULE_ICONS.competitors , hintKey: "competitors" },
-      { href: "/dashboard/decisions", label: "Decisions", icon: MODULE_ICONS.decisions , hintKey: "decisions" },
-      { href: "/dashboard/feedback", label: "Feedback", icon: MODULE_ICONS.feedback , hintKey: "feedback" },
-    ],
-  },
-  {
-    heading: "Operations",
-    collapsible: true,
-    items: [
-      { href: "/dashboard/trading", label: "Trading", icon: MODULE_ICONS.trading , hintKey: "trading" },
+      { href: MISSION_NAV_ITEM.href, label: MISSION_NAV_ITEM.label, icon: MISSION_ICON, hintKey: "missionControl" },
+      { href: REFLECTION_NAV_ITEM.href, label: REFLECTION_NAV_ITEM.label, icon: REFLECTION_ICON, hintKey: "reflection" },
       {
         href: "/dashboard/trading-workflow",
         label: "Trading Workflow",
@@ -197,21 +173,49 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         href: "/dashboard/product-workflow",
         label: "Product Workflow",
         icon: PRODUCT_WORKFLOW_ICON, hintKey: "productWorkflow" },
-      { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation , hintKey: "automation" },
-      // Operations rather than Settings: connecting Gmail is something a
+      // Here rather than in Settings: connecting Gmail is something a
       // user does to change how the product WORKS for them, not a
-      // preference. It sits next to Automation because both answer "what
-      // does this do on my behalf".
+      // preference.
       { href: "/dashboard/integrations", label: "Integrations", icon: INTEGRATIONS_ICON, hintKey: "integrations" },
+      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON, hintKey: "marketplace" },
     ],
   },
+];
+
+/**
+ * The nineteen log screens the sidebar no longer lists one by one.
+ *
+ * STILL REACHABLE, and that is the condition on the whole restructure.
+ * These feed two surfaces: /dashboard/records, which lists and filters
+ * them, and the command palette, which searches them alongside the
+ * sidebar's own rows. Their routes are untouched — every bookmark, every
+ * link the classifier hands back and every favourite still resolves.
+ */
+export const RECORD_DESTINATIONS: SidebarItem[] = [
+  { href: "/dashboard", label: "Ideas", icon: MODULE_ICONS.ideas, hintKey: "ideas" },
+  { href: "/dashboard/analytics", label: "Analytics", icon: MODULE_ICONS.analytics, hintKey: "analytics" },
+  // The MODULE — a log of the user's own income and expenses, served by
+  // the [module] catch-all, not the owner-only dashboard that shadowed it.
+  { href: "/dashboard/finance", label: "Finance", icon: MODULE_ICONS.finance, hintKey: "finance" },
+  { href: "/dashboard/content", label: "Content", icon: MODULE_ICONS.content, hintKey: "content" },
+  { href: "/dashboard/sales", label: "Sales", icon: MODULE_ICONS.sales, hintKey: "sales" },
+  { href: "/dashboard/products", label: "Products", icon: MODULE_ICONS.products, hintKey: "products" },
+  { href: "/dashboard/research", label: "Research", icon: MODULE_ICONS.research, hintKey: "research" },
+  { href: "/dashboard/learning", label: "Learning", icon: MODULE_ICONS.learning, hintKey: "learning" },
+  { href: "/dashboard/competitors", label: "Competitors", icon: MODULE_ICONS.competitors, hintKey: "competitors" },
+  { href: "/dashboard/decisions", label: "Decisions", icon: MODULE_ICONS.decisions, hintKey: "decisions" },
+  { href: "/dashboard/feedback", label: "Feedback", icon: MODULE_ICONS.feedback, hintKey: "feedback" },
+  { href: "/dashboard/trading", label: "Trading", icon: MODULE_ICONS.trading, hintKey: "trading" },
+  { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation" },
+  { href: "/dashboard/websites", label: "Websites", icon: MODULE_ICONS.websites, hintKey: "websites" },
+  { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps, hintKey: "apps" },
+  { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images, hintKey: "images" },
+  { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos, hintKey: "videos" },
   {
-    heading: "Marketplace",
-    collapsible: true,
-    items: [
-      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON , hintKey: "marketplace" },
-    ],
-  },
+    href: "/dashboard/presentations",
+    label: "Presentation notes",
+    icon: MODULE_ICONS.presentations, hintKey: "presentations" },
+  { href: "/dashboard/campaigns", label: "Campaigns", icon: MODULE_ICONS.campaigns, hintKey: "campaigns" },
 ];
 
 export const SETTINGS_GROUP: SidebarGroupConfig = {

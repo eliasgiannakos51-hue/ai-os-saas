@@ -20,6 +20,7 @@
 //
 // Run: node scripts/tests/sidebar-naming.test.mjs
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { reachableFrom } from "../lib/route-graph.mjs";
 
 let pass = 0;
 const failures = [];
@@ -45,7 +46,13 @@ const buildModules = readFileSync("src/lib/build-modules.ts", "utf8");
 
 /** Every heading the sidebar actually renders. */
 const headings = [...navSrc.matchAll(/heading: "([^"]+)"/g)].map((m) => m[1]);
-check(`the headings scan found ${headings.length}`, headings.length >= 8, "a filter of an empty list is empty, and every check below it would pass");
+// FOUR, AND IT WAS EIGHT. The floor exists so a broken scan cannot
+// return [] and make every filter below it vacuous — not to pin a
+// number. Workspace, Tracking, Business, Strategy, Operations and
+// Marketplace merged into Daily / Build / My business / Settings, so the
+// floor comes down with them, in the same commit that moved them. That
+// is the point: the move is visible, not silent.
+check(`the headings scan found ${headings.length}`, headings.length >= 4, "a filter of an empty list is empty, and every check below it would pass");
 /** The heading -> message-key map, as the code really holds it. */
 const headingKeys = Object.fromEntries(
   keysSrc
@@ -82,7 +89,7 @@ for (const heading of headings) {
 // The mirror fault: a key here that no heading uses is dead weight, and
 // dead entries are exactly what hid the four missing ones.
 check(`the heading key map was read (${Object.keys(headingKeys).length})`,
-  Object.keys(headingKeys).length >= 5,
+  Object.keys(headingKeys).length >= 4,
   "an empty key map makes the dead-key check below pass on nothing");
 const deadHeadingKeys = Object.keys(headingKeys).filter((h) => !headings.includes(h));
 check("no heading key points at a heading that does not exist", deadHeadingKeys.length === 0, deadHeadingKeys.join(", "));
@@ -135,8 +142,53 @@ const groupOf = (heading) => {
   return navSrc.slice(start, end === -1 ? undefined : end);
 };
 const buildGroup = groupOf("Build");
-const trackingGroup = groupOf("Tracking");
-check("a Tracking group exists", trackingGroup.length > 0);
+
+// THE TRACKING GROUP IS GONE, AND THE RULE IT CARRIED IS NOT.
+//
+// There used to be a heading called "Tracking" holding the six tables
+// that produce nothing, and this file asked two things of it: that
+// nothing tracking-only sat under Build, and that every tracker sat
+// under Tracking. The first is the rule; the second was a way of
+// spelling "and it is still reachable".
+//
+// The six now live in RECORD_DESTINATIONS with the twelve business
+// modules and Ideas — one sidebar row pointing at /dashboard/records —
+// so reachability is asked of that list directly. Which is a stronger
+// question than the old one: a tracker dropped from the sidebar
+// altogether used to fail this only by leaving a group, and would now
+// fail by being unreachable, which is the thing that actually matters.
+// THE ARRAY LITERAL, NOT THE REST OF THE FILE. Slicing to the end of
+// the file meant an emptied RECORD_DESTINATIONS still "contained" every
+// href, because the entries were merely moved below it — the scan read
+// the text, not the list. Bounded at the array's own closing bracket so
+// emptying it actually empties this.
+// WHERE THE ARRAY REALLY ENDS. Bounding at the first "\n];" was still a
+// text scan a rename can walk around: emptying the array and moving the
+// entries into a second `const` below it leaves every href inside the
+// slice. The block ends at its own closing bracket OR at whatever
+// top-level declaration comes next, whichever arrives first.
+function declarationBlock(source, marker) {
+  const start = source.indexOf(marker);
+  if (start === -1) return "";
+  // source.length is the floor in the spread, so there is no
+  // "the list came back empty" branch to get wrong — and nothing here
+  // asserts a scanned collection is empty, which the emptiness meta-gate
+  // was right to flag in the first writing of this.
+  const end = Math.min(
+    ...["\n];", "\nconst ", "\nexport ", "\nfunction "]
+      .map((token) => source.indexOf(token, start + marker.length))
+      .filter((i) => i !== -1),
+    source.length,
+  );
+  return source.slice(start, end);
+}
+const recordsBlock = declarationBlock(navSrc, "export const RECORD_DESTINATIONS");
+const recordHrefs = [...recordsBlock.matchAll(/href: "([^"]+)"/g)].map((m) => m[1]);
+check(
+  `the records list was read (${recordHrefs.length})`,
+  recordHrefs.length >= 19,
+  "an empty RECORD_DESTINATIONS makes the reachability check below pass on nothing",
+);
 
 const offenders = trackingSlugs.filter((slug) => {
   const href = `/dashboard/${slug}`;
@@ -147,8 +199,12 @@ check(
   offenders.length === 0,
   offenders.length ? `these produce nothing but sit under "Build": ${offenders.join(", ")}` : ""
 );
-const misfiled = trackingSlugs.filter((slug) => !trackingGroup.includes(`/dashboard/${slug}`));
-check("and every one of them IS under Tracking", misfiled.length === 0, misfiled.join(", "));
+const misfiled = trackingSlugs.filter((slug) => !recordHrefs.includes(`/dashboard/${slug}`));
+check(
+  "and every one of them is still reachable, through the records hub",
+  misfiled.length === 0,
+  misfiled.length ? `no longer in the sidebar and not in RECORD_DESTINATIONS: ${misfiled.join(", ")}` : "",
+);
 
 // The other direction: what is left in Build must really build.
 const buildHrefs = [...buildGroup.matchAll(/href: "([^"]+)"/g)].map((m) => m[1]);
@@ -189,6 +245,12 @@ const BUILD_ALLOWED = {
   // this comment.
   "/dashboard/data-analysis": "parses, profiles and charts a real uploaded file",
   "/dashboard/coding": "five operations that really produce code",
+  // The autonomous research job. It really does reach a model —
+  // components/research/research-workspace.tsx fetches /api/research,
+  // which constructs an Anthropic client — and section 3b proves it now
+  // that the tracer follows the page's imports instead of guessing a
+  // folder from the slug.
+  "/dashboard/deep-research": "runs a real research job and writes the report",
 };
 const unexpected = buildHrefs.filter((href) => !(href in BUILD_ALLOWED));
 check(
@@ -285,8 +347,27 @@ console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
 
   /** The API routes a page (or its components) actually fetches. */
   const routesFetchedBy = (slug) => {
-    const roots = [`src/app/dashboard/${slug}`, `src/components/${slug}`];
-    const files = [];
+    // THE PAGE'S REAL IMPORTS, not a folder guessed from the slug.
+    //
+    // This used to scan `src/app/dashboard/<slug>` and
+    // `src/components/<slug>`, which is a naming convention rather than a
+    // fact — and Deep Research does not follow it. /dashboard/deep-research
+    // renders components/research/research-workspace.tsx, so the scan
+    // looked in `src/components/deep-research`, found nothing, and
+    // reported that a page which really does call Anthropic produces
+    // nothing. A check that says "this does not build" about something
+    // that does is worse than no check: it teaches the next person that
+    // this section cries wolf.
+    //
+    // reachableFrom walks the import graph from the page itself, so the
+    // component can live anywhere and be renamed at will. The two folder
+    // roots stay as extra seeds — a page whose fetch lives in a sibling
+    // file the page does not import is still worth catching.
+    const files = new Set();
+    const pageFile = `src/app/dashboard/${slug}/page.tsx`;
+    if (existsSync(pageFile)) {
+      for (const file of reachableFrom([pageFile])) files.add(file);
+    }
     const walk = (path) => {
       let entries = [];
       try {
@@ -297,11 +378,16 @@ console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
       for (const entry of entries) {
         const full = `${path}/${entry}`;
         if (statSync(full).isDirectory()) walk(full);
-        else if (/\.tsx?$/.test(entry)) files.push(full);
+        else if (/\.tsx?$/.test(entry)) files.add(full);
       }
     };
-    for (const root of roots) walk(root);
+    for (const root of [`src/app/dashboard/${slug}`, `src/components/${slug}`]) walk(root);
 
+    return routesFetchedFrom(files);
+  };
+
+  /** Which API route files a set of source files actually fetches. */
+  function routesFetchedFrom(files) {
     const paths = new Set();
     for (const file of files) {
       const src = readFileSync(file, "utf8");
@@ -323,11 +409,35 @@ console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
       });
     });
     return matched;
-  };
+  }
+
+  /**
+   * The API routes EVERY module page can reach through shared chrome.
+   *
+   * All six tracking pages render components/modules/build-module-page,
+   * and the twelve business modules render generic-list; both subtrees
+   * carry the Ask-AI control, which fetches a route that really does call
+   * a model. So once the tracer started following real imports, every one
+   * of the eighteen "produced something" — through a button that is
+   * offered on every list in the product and says nothing about the
+   * module behind it.
+   *
+   * A module that grows a generator of its own fetches it from its own
+   * page or its own component. What the shared renderer can reach is
+   * subtracted here, and the cost of that is stated plainly: a generator
+   * added INSIDE the shared renderer would be invisible to this check.
+   */
+  const CHROME_SEEDS = [
+    "src/components/modules/build-module-page.tsx",
+    "src/components/modules/generic-list.tsx",
+  ].filter((f) => existsSync(f));
+  const chromeRoutes = new Set(
+    CHROME_SEEDS.flatMap((seed) => routesFetchedFrom(reachableFrom([seed]))),
+  );
 
   const producesFor = (slug) => {
     const sources = [
-      ...routesFetchedBy(slug),
+      ...routesFetchedBy(slug).filter((route) => !chromeRoutes.has(route)),
       ...(existsSync(`src/app/dashboard/${slug}/page.tsx`) ? [`src/app/dashboard/${slug}/page.tsx`] : []),
     ];
     return sources.some((file) => callsModel(file));

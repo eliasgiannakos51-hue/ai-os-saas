@@ -75,18 +75,10 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "工作区",
-      "build": "创建",
-      "business": "业务",
-      "strategy": "策略",
-      "operations": "运营",
-      "marketplace": "市场",
-      "settings": "设置",
-      "create": "创建",
+      "daily": "每天",
+      "build": "构建",
       "myBusiness": "我的业务",
-      "track": "记录",
-      "insights": "我注意到的",
-      "tracking": "记录"
+      "settings": "设置"
     },
     "items": {
       "home": "主页",
@@ -133,7 +125,10 @@
       "affiliate": "推广合作",
       "formSubmissions": "表单提交",
       "routing": "模型路由",
-      "businessHealth": "经营健康度"
+      "businessHealth": "经营健康度",
+      "library": "我的东西",
+      "records": "我的记录",
+      "newEntry": "新记录"
     },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",
@@ -180,7 +175,10 @@
       "help": "最常见问题的答案，不消耗额度。",
       "affiliate": "你的推广链接、已赚金额，以及如何收款。",
       "formSubmissions": "访客通过已发布网站上的表单提交的全部内容",
-      "businessHealth": "MRR、毛利、流失与现金。仅限所有者。"
+      "businessHealth": "MRR、毛利、流失与现金。仅限所有者。",
+      "library": "收藏、最近和搜索 —— 你的东西都在这里",
+      "records": "你保存的所有记录，按类型筛选",
+      "newEntry": "随便写点什么 —— 它会自己归位"
     },
     "closeMenu": "关闭菜单"
   },
@@ -952,6 +950,24 @@
         "verb": "重复",
         "example": "每周一，给我一份销售汇总"
       }
+    },
+    "library": {
+      "title": "我的东西",
+      "description": "你放进来的一切：最近的、收藏的，或搜索到的。",
+      "tabs": {
+        "recent": "最近",
+        "starred": "收藏",
+        "search": "搜索"
+      },
+      "searchPlaceholder": "搜索你写过的一切",
+      "searchNoResults": "没有匹配「{query}」的内容。"
+    },
+    "records": {
+      "title": "我的记录",
+      "description": "你保存的所有记录，都在这里。",
+      "filterPlaceholder": "按名称筛选",
+      "noMatch": "没有匹配「{query}」的内容。",
+      "count": "{total} 中的 {shown}"
     },
     "team": {
       "title": "团队",
@@ -2964,6 +2980,16 @@
       "is": "这门生意自身的数字——收入、毛利、流失、现金。仅限所有者查看。",
       "does": "每项指标都由真实的订阅行和成本行算出，并请你填写数据库无从知晓的三个数字：市场投入、固定成本、现金余额。",
       "doesNot": "它不会显示自己无法交代来源的数字。缺少输入的指标会说明它还需要什么，而不是拿零去算；也没有任何数据是事后补录的——历史从上线那天开始。"
+    },
+    "library": {
+      "is": "你放进来的一切，都在一个地方。",
+      "does": "显示你最近的记录、你收藏的内容，以及对你写过的一切的搜索。",
+      "doesNot": "它不会另存一份副本。这些就是各模块显示的同一批记录 —— 在这里改一条，那边也会变。"
+    },
+    "records": {
+      "is": "通往你所有列表的一个入口。",
+      "does": "列出全部十九个记录页面并按名称筛选，你不必再记住某个列表被归在哪一组。",
+      "doesNot": "它不会取代那些页面，也没有删除任何东西。每个页面仍有自己的网址，你的书签依然有效。"
     }
   },
   "helpCentre": {

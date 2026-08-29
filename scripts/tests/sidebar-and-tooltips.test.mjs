@@ -69,16 +69,94 @@ check("no coming-soon toast", /comingSoonToast/.test(sidebar), false);
 // The palette used to filter these out; it must not any more.
 check("the command palette no longer filters items out", /comingSoon/.test(palette), false);
 
-console.log("\n== 2. the pre-restructure grouping is back ==");
-// Three pinned items outside every group was the restructure being undone.
+console.log("\n== 2. the grouping, and the ONE row above it ==");
+// WHAT THIS SECTION USED TO PIN, AND WHY IT CHANGED.
+//
+// It held a revert: an earlier restructure had greyed five modules out
+// behind "Soon" badges and moved three items out of the groups as pinned
+// rows, and undoing it restored Workspace / Build / Business / Strategy
+// / Operations / Marketplace. The badges are the defect this file exists
+// for and they are still asserted gone, above.
+//
+// The eight groups are now four — Daily / Build / My business /
+// Settings — named for what somebody is doing rather than for how the
+// code is filed. And exactly ONE row sits outside them again: the record
+// action, deliberately, because renderItem's `prominent` branch had
+// existed since the sidebar was written with a comment about "the three
+// daily entry points" and NO call site ever passed it, so every row in
+// the menu had identical weight.
+//
+// This is not the old pinned block coming back by another name, and the
+// difference is asserted rather than asserted-about: ONE row, it is a
+// link, and it carries no coming-soon shape. A second pinned row is a
+// decision somebody has to write down here.
 check("PINNED_SIDEBAR_ITEMS is gone from the config", /PINNED_SIDEBAR_ITEMS/.test(nav), false);
-check("...and from the sidebar", /PINNED_SIDEBAR_ITEMS/.test(sidebar), false);
 check("...and from the command palette", /PINNED_SIDEBAR_ITEMS/.test(palette), false);
-const HEADINGS = ["Workspace", "Build", "Business", "Strategy", "Operations", "Marketplace"];
+const prominentCalls = [...sidebar.matchAll(/renderItem\([\s\S]{0,400}?true,\s*\n?\s*\)/g)];
+check("exactly one row is rendered above the groups", prominentCalls.length, 1);
+checkTrue(
+  "...and it is the record action",
+  /label: "New entry"/.test(sidebar) && /CREATE_NAV_ITEM\.href/.test(sidebar),
+);
+checkTrue(
+  "...rendered by the same renderItem as every other row, so it is a real link",
+  /function renderItem\(item: SidebarItem, tone: string, prominent = false\)/.test(sidebar),
+);
+
+const HEADINGS = ["Daily", "Build", "My business"];
 for (const h of HEADINGS) {
   checkTrue(`the "${h}" group exists`, nav.includes(`heading: "${h}"`));
 }
-checkTrue("Workspace is the always-open group", /heading: "Workspace",\s*\n\s*collapsible: false/.test(nav));
+checkTrue("Settings is still its own group", /heading: "Settings"/.test(nav));
+checkTrue("Daily is the always-open group", /heading: "Daily",\s*\n\s*collapsible: false/.test(nav));
+
+// THE CONDITION ON THE WHOLE RESTRUCTURE. Nineteen log screens left the
+// sidebar for one row pointing at /dashboard/records. If they had left
+// the command palette with it, the menu would have got shorter by making
+// nineteen pages harder to reach — a shorter menu is not the goal, and
+// somebody typing "finance" must still land on Finance.
+// SPREAD, not merely imported. `/RECORD_DESTINATIONS/.test(palette)`
+// stayed true when the spread was deleted, because the import line never
+// went away — the same substring-versus-import mistake this repo has now
+// made in three separate gates.
+checkTrue(
+  "the command palette still searches the nineteen the sidebar stopped listing",
+  /\.\.\.RECORD_DESTINATIONS/.test(palette),
+);
+checkTrue("...and the sidebar config is where that list lives", /RECORD_DESTINATIONS/.test(nav));
+// An owner-only page in that list would be hidden from the sidebar and
+// still one keystroke away here, which is not hiding it — the exact
+// mistake visibleGroups exists to prevent.
+// WHERE THE ARRAY REALLY ENDS. Bounding at the first "\n];" was still a
+// text scan a rename can walk around: emptying the array and moving the
+// entries into a second `const` below it leaves every href inside the
+// slice. The block ends at its own closing bracket OR at whatever
+// top-level declaration comes next, whichever arrives first.
+function declarationBlock(source, marker) {
+  const start = source.indexOf(marker);
+  if (start === -1) return "";
+  // source.length is the floor in the spread, so there is no
+  // "the list came back empty" branch to get wrong — and nothing here
+  // asserts a scanned collection is empty, which the emptiness meta-gate
+  // was right to flag in the first writing of this.
+  const end = Math.min(
+    ...["\n];", "\nconst ", "\nexport ", "\nfunction "]
+      .map((token) => source.indexOf(token, start + marker.length))
+      .filter((i) => i !== -1),
+    source.length,
+  );
+  return source.slice(start, end);
+}
+const recordsBlock = declarationBlock(nav, "export const RECORD_DESTINATIONS");
+check("no owner-only page hides in the records list", /ownerOnly/.test(recordsBlock), false);
+// The six headings that merged away must not linger: a group nobody
+// renders is a translation key nobody can reach, which is how
+// lib/sidebar-label-keys.ts came to describe a rename that was never
+// made.
+const GONE = ["Workspace", "Tracking", "Business", "Strategy", "Operations", "Marketplace"];
+for (const h of GONE) {
+  check(`the "${h}" group is gone`, nav.includes(`heading: "${h}"`), false);
+}
 
 console.log("\n== 3. tooltips are a real component, not a title attribute ==");
 checkTrue("a Tooltip component exists", existsSync("src/components/ui/tooltip.tsx"));

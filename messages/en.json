@@ -75,18 +75,10 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "Workspace",
+      "daily": "Daily",
       "build": "Build",
-      "business": "Business",
-      "strategy": "Strategy",
-      "operations": "Operations",
-      "marketplace": "Marketplace",
-      "settings": "Settings",
-      "create": "Create",
-      "myBusiness": "My Business",
-      "track": "Track",
-      "insights": "What I noticed",
-      "tracking": "Tracking"
+      "myBusiness": "My business",
+      "settings": "Settings"
     },
     "items": {
       "home": "Home",
@@ -133,7 +125,10 @@
       "affiliate": "Affiliate",
       "formSubmissions": "Form submissions",
       "routing": "Model routing",
-      "businessHealth": "Business health"
+      "businessHealth": "Business health",
+      "library": "My stuff",
+      "records": "My records",
+      "newEntry": "New entry"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -180,7 +175,10 @@
       "help": "Answers to the questions people ask most — no credits used.",
       "affiliate": "Your referral link, what you've earned, and how you get paid.",
       "formSubmissions": "Everything visitors sent through a form on your published sites",
-      "businessHealth": "MRR, margin, churn and runway. Owner only."
+      "businessHealth": "MRR, margin, churn and runway. Owner only.",
+      "library": "Starred, recent and search — all your own entries in one place",
+      "records": "Every log you keep, filtered by kind",
+      "newEntry": "Write anything down — it files itself"
     },
     "closeMenu": "Close menu"
   },
@@ -952,6 +950,24 @@
         "verb": "Repeat",
         "example": "Every Monday, a summary of my sales"
       }
+    },
+    "library": {
+      "title": "My stuff",
+      "description": "Everything you have put in here: recent, starred, or searched.",
+      "tabs": {
+        "recent": "Recent",
+        "starred": "Starred",
+        "search": "Search"
+      },
+      "searchPlaceholder": "Search everything you have written",
+      "searchNoResults": "Nothing matches “{query}”."
+    },
+    "records": {
+      "title": "My records",
+      "description": "Every log you keep, in one place.",
+      "filterPlaceholder": "Filter by name",
+      "noMatch": "Nothing matches “{query}”.",
+      "count": "{shown} of {total}"
     },
     "team": {
       "title": "Team",
@@ -2964,6 +2980,16 @@
       "is": "The business's own numbers — revenue, margin, churn, runway. Owner only.",
       "does": "Computes each metric from real subscription and cost rows, and asks you for the three figures no database can know: marketing spend, fixed costs, cash balance.",
       "doesNot": "It does not show a number it cannot justify. A metric missing an input says what it needs instead of computing from a zero, and nothing is back-filled — the history starts the day this shipped."
+    },
+    "library": {
+      "is": "Everything you have put in here, in one place.",
+      "does": "Shows your recent entries, the ones you starred, and a search across everything you have written.",
+      "doesNot": "It does not store a second copy of anything. These are the same records the modules show — edit one here and it changes there."
+    },
+    "records": {
+      "is": "One way in to every list you keep.",
+      "does": "Lists all nineteen record screens and filters them by name, so you do not have to remember which group a list was filed under.",
+      "doesNot": "It does not replace those screens and nothing was removed. Every one of them still has its own address, and your bookmarks still work."
     }
   },
   "helpCentre": {

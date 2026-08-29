@@ -15,7 +15,12 @@ import {
   HelpCircle,
   type LucideIcon,
 } from "lucide-react";
-import { ALL_SIDEBAR_GROUPS, visibleGroups, type SidebarItem } from "@/lib/sidebar-nav";
+import {
+  ALL_SIDEBAR_GROUPS,
+  RECORD_DESTINATIONS,
+  visibleGroups,
+  type SidebarItem,
+} from "@/lib/sidebar-nav";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 import { normalizeForSearch } from "@/lib/text/search-match";
@@ -40,8 +45,18 @@ import {
 // product, flattened once at import time — so an owner-only page hidden
 // from the sidebar would still have been one keystroke away here, which
 // is not hiding it.
-const paletteItems = (isOwner: boolean): SidebarItem[] =>
-  visibleGroups(ALL_SIDEBAR_GROUPS, isOwner).flatMap((group) => group.items);
+// AND THE NINETEEN THE SIDEBAR STOPPED LISTING. The twelve business
+// modules, the six tracking tables and Ideas moved behind one row
+// pointing at /dashboard/records. If they had left this list with it,
+// the menu would have got shorter by making nineteen pages harder to
+// reach, which is not a simplification — somebody who types "finance"
+// must still land on Finance. RECORD_DESTINATIONS carries no ownerOnly
+// item, so it needs no filtering; sidebar-density.test.mjs fails if one
+// ever appears there.
+const paletteItems = (isOwner: boolean): SidebarItem[] => [
+  ...visibleGroups(ALL_SIDEBAR_GROUPS, isOwner).flatMap((group) => group.items),
+  ...RECORD_DESTINATIONS,
+];
 
 // One icon per kind, so a glance down the list tells you what sort of
 // thing each row is without reading the heading above it.

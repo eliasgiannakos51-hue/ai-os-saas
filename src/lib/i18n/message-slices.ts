@@ -95,11 +95,12 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // unpredictable. Counting only the first shape is how a number
     // becomes comfortable.
     //
-    // The sixty-second is overview/first-screen-examples.tsx, which
-    // renders `t(\`${id}.verb\`)` for each of the three capabilities.
-    // The gate found it, which is the point of counting rather than
-    // asserting.
-    unbounded: 62,
+    // Sixty-two of them were there before V4.6; the sixty-third and
+    // sixty-fourth are overview/first-screen-examples.tsx and
+    // records/records-hub.tsx, both of which reach a key through a
+    // template literal. The gate found each one, which is the point of
+    // counting rather than asserting.
+    unbounded: 64,
   },
   {
     name: "onboarding",

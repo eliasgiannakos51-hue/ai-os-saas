@@ -75,18 +75,10 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "Espace de travail",
-      "build": "Créer",
-      "business": "Entreprise",
-      "strategy": "Stratégie",
-      "operations": "Opérations",
-      "marketplace": "Place de marché",
-      "settings": "Paramètres",
-      "create": "Créer",
+      "daily": "Au quotidien",
+      "build": "Créez",
       "myBusiness": "Mon activité",
-      "track": "Suivre",
-      "insights": "Ce que j’ai remarqué",
-      "tracking": "Suivi"
+      "settings": "Réglages"
     },
     "items": {
       "home": "Accueil",
@@ -133,7 +125,10 @@
       "affiliate": "Affiliation",
       "formSubmissions": "Envois de formulaires",
       "routing": "Routage des modèles",
-      "businessHealth": "Santé de l'entreprise"
+      "businessHealth": "Santé de l'entreprise",
+      "library": "Mes affaires",
+      "records": "Mes fiches",
+      "newEntry": "Nouvelle entrée"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -180,7 +175,10 @@
       "help": "Les réponses aux questions les plus fréquentes, sans consommer de crédits.",
       "affiliate": "Votre lien de parrainage, vos gains et comment vous êtes payé.",
       "formSubmissions": "Tout ce que les visiteurs ont envoyé via un formulaire sur vos sites publiés",
-      "businessHealth": "MRR, marge, attrition et trésorerie. Propriétaire uniquement."
+      "businessHealth": "MRR, marge, attrition et trésorerie. Propriétaire uniquement.",
+      "library": "Favoris, récents et recherche — tout ce qui est à vous",
+      "records": "Tous vos relevés, filtrés par type",
+      "newEntry": "Écrivez n’importe quoi — le classement se fait tout seul"
     },
     "closeMenu": "Fermer le menu"
   },
@@ -952,6 +950,24 @@
         "verb": "Répétez",
         "example": "Chaque lundi, un résumé de mes ventes"
       }
+    },
+    "library": {
+      "title": "Mes affaires",
+      "description": "Tout ce que vous avez mis ici : récent, favori ou recherché.",
+      "tabs": {
+        "recent": "Récent",
+        "starred": "Favoris",
+        "search": "Rechercher"
+      },
+      "searchPlaceholder": "Cherchez dans tout ce que vous avez écrit",
+      "searchNoResults": "Rien ne correspond à « {query} »."
+    },
+    "records": {
+      "title": "Mes fiches",
+      "description": "Tous vos relevés, au même endroit.",
+      "filterPlaceholder": "Filtrer par nom",
+      "noMatch": "Rien ne correspond à « {query} ».",
+      "count": "{shown} sur {total}"
     },
     "team": {
       "title": "Équipe",
@@ -2964,6 +2980,16 @@
       "is": "Les chiffres de l'entreprise elle-même : revenus, marge, attrition, trésorerie. Réservé au propriétaire.",
       "does": "Calcule chaque indicateur à partir de vraies lignes d'abonnement et de coût, et vous demande les trois chiffres qu'aucune base ne peut connaître : dépense marketing, coûts fixes, solde de trésorerie.",
       "doesNot": "Il n'affiche aucun chiffre qu'il ne peut pas justifier. Un indicateur auquel il manque une saisie dit ce qu'il lui faut au lieu de calculer à partir d'un zéro, et rien n'est rempli rétroactivement : l'historique commence le jour de la mise en ligne."
+    },
+    "library": {
+      "is": "Tout ce que vous avez mis ici, au même endroit.",
+      "does": "Affiche vos entrées récentes, celles que vous avez mises en favori, et une recherche dans tout ce que vous avez écrit.",
+      "doesNot": "Rien n’est stocké en double. Ce sont les mêmes fiches que les modules affichent : modifiez-en une ici et elle change là-bas."
+    },
+    "records": {
+      "is": "Une porte d’entrée vers chaque liste que vous tenez.",
+      "does": "Liste les dix-neuf écrans de relevés et les filtre par nom, pour ne pas avoir à retenir dans quel groupe chacun était classé.",
+      "doesNot": "Cela ne les remplace pas et rien n’a été supprimé. Chacun garde son adresse et vos favoris fonctionnent toujours."
     }
   },
   "helpCentre": {

@@ -19,16 +19,14 @@
 // here is untranslated. Both are checked by
 // scripts/tests/sidebar-naming.test.mjs rather than by reading.
 export const GROUP_HEADING_KEYS: Record<string, string> = {
-  Workspace: "workspace",
-  // Build now holds only the three things that really generate
-  // something: the agent builder, the site builder, and what it
-  // published. Everything else moved to Tracking.
+  // FOUR, NAMED FOR WHAT A PERSON IS DOING. Workspace, Tracking,
+  // Business, Strategy, Operations and Marketplace were six nouns that
+  // described how the code is filed; nobody arrives wanting to do
+  // "Operations". The eight keys they used are gone from messages/*.json
+  // rather than left orphaned, so none of them can quietly come back.
+  Daily: "daily",
   Build: "build",
-  Tracking: "tracking",
-  Business: "business",
-  Strategy: "strategy",
-  Operations: "operations",
-  Marketplace: "marketplace",
+  "My business": "myBusiness",
   Settings: "settings",
 };
 
@@ -61,6 +59,12 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   "Ionexa Chat": "chat",
   Timeline: "timeline",
   Favorites: "favorites",
+  // The three that became one: starred, everything-in-order and search.
+  "My stuff": "library",
+  // The one row the nineteen log screens became.
+  "My records": "records",
+  // The pinned action above the groups.
+  "New entry": "newEntry",
   "Mission Control": "missionControl",
   "Weekly Reflection": "reflection",
   "AI Memory": "memory",

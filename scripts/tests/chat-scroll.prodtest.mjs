@@ -290,6 +290,105 @@ try {
   s = await scrollState();
   check(`the view is at the bottom again (${Math.round(s.fromBottom)}px)`, s.fromBottom < 120);
   check("and the button is gone", !(await jump.isVisible()));
+
+  console.log("\n== 6. THE REPORTED CASE: scrolling WHILE the reply is arriving ==");
+  // Steps 1-5 scroll while IDLE and then send, so the scroll event has
+  // long been delivered before a chunk lands. The user's sentence is the
+  // other order — "the AI is writing AND it takes the screen down" — and
+  // that is a race between an asynchronously-dispatched scroll event and
+  // a re-render happening several times a second.
+  //
+  // route.fulfill() cannot express it: it hands over the whole body at
+  // once, so nothing arrives "during" anything. The page's own fetch is
+  // replaced here with one that emits the same NDJSON over roughly two
+  // seconds — a real stream through the real client path.
+  //
+  // WHAT THIS STEP DOES AND DOES NOT PROVE, because it was checked both
+  // ways rather than assumed: it exercises the mid-stream path that steps
+  // 1-5 never touch, and it is green. But reverting the fix in
+  // lib/chat/follow-decision.ts leaves it GREEN TOO — Playwright's
+  // mouse.wheel dispatches its scroll events promptly enough that the
+  // flag is current before the next chunk renders, so the race window
+  // never opens here.
+  //
+  // So this is a regression guard on the mid-stream path, NOT the proof
+  // that the race is what users hit. The proof that the OLD rule answers
+  // "scroll" where the new one answers "notify" is
+  // scripts/tests/chat-scroll-race.test.mjs, which runs the decision as
+  // five numbers and does not depend on browser event timing. Claiming
+  // this step catches the race would be claiming a green light means
+  // something it does not.
+  await page.evaluate((CONVO_ID_FOR_TEST) => {
+    const real = window.fetch;
+    window.fetch = async (input, init) => {
+      const url = typeof input === "string" ? input : (input && input.url) || "";
+      if (!url.includes("/api/chat")) return real(input, init);
+      const lines = [
+        JSON.stringify({ type: "meta", conversationId: CONVO_ID_FOR_TEST, isNewConversation: false }),
+        ...Array.from({ length: 25 }, (_, i) =>
+          JSON.stringify({ type: "delta", text: `slow chunk ${i} of a reply that arrives over time. ` })
+        ),
+        JSON.stringify({ type: "done", credits: 1 }),
+      ];
+      const encoder = new TextEncoder();
+      let i = 0;
+      const stream = new ReadableStream({
+        pull(controller) {
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              if (i >= lines.length) controller.close();
+              else controller.enqueue(encoder.encode(lines[i++] + "\n"));
+              resolve();
+            }, 80);
+          });
+        },
+      });
+      return new Response(stream, {
+        status: 200,
+        headers: { "Content-Type": "application/x-ndjson" },
+      });
+    };
+  }, CONVO_ID);
+
+  await thread().evaluate((el) => {
+    el.scrollTop = el.scrollHeight;
+  });
+  await page.waitForTimeout(200);
+  await page.fill("textarea", "Third question, and I will scroll while you answer");
+  await page.keyboard.press("Enter");
+
+  // UNDER WAY, not finished. Then wheel the way a person does — several
+  // turns rather than one assignment, because a scripted scrollTop write
+  // dispatches its event promptly and a gesture does not.
+  await page.waitForSelector("text=slow chunk 3", { timeout: 20000 });
+  const box = await thread().boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  for (let i = 0; i < 12; i++) {
+    await page.mouse.wheel(0, -400);
+    await page.waitForTimeout(35);
+  }
+  s = await scrollState();
+  console.log(`        wheeled up mid-stream to scrollTop ${Math.round(s.top)}`);
+  check(
+    `the wheel actually moved the view (${Math.round(s.fromBottom)}px from bottom)`,
+    s.fromBottom > 300,
+    "the gesture did not move it, so the assertion below would pass on nothing"
+  );
+
+  // Now let the rest of the stream land. Every remaining chunk
+  // re-renders and calls follow(); this is the moment the bug happens.
+  await page.waitForSelector("text=slow chunk 24", { timeout: 25000 });
+  await page.waitForTimeout(700);
+  s = await scrollState();
+  check(
+    `the view stayed where the reader put it (${Math.round(s.fromBottom)}px from bottom)`,
+    s.fromBottom > 300,
+    `dragged back down to ${Math.round(s.fromBottom)}px — the reported bug, mid-stream`
+  );
+  check(
+    "and the new-message affordance is offered instead",
+    await page.locator('[data-testid="chat-jump-to-latest"]').isVisible()
+  );
 } catch (err) {
   failures.push("unhandled error");
   console.log(`  FAIL  unhandled error\n        ${err.stack ?? err.message}`);

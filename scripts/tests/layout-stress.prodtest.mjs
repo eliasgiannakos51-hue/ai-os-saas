@@ -353,7 +353,7 @@ const PROBE = () => {
 const fixture = await buildFixture();
 const harness = await startProdHarness({ tableRows: fixture, supaPort: 54331 });
 const { chromium } = await import("playwright");
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 
 // Census across everything measured, so the log carries the real numbers
 // even on a run where nothing regressed.

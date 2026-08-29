@@ -126,7 +126,16 @@ export function TopNav({ email }: { email: string }) {
           className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] lg:px-3.5"
         >
           <Plus className="h-4 w-4" />
-          <span className="hidden lg:inline">{t("newProject")}</span>
+          {/* THE BUTTON AND THE PAGE IT OPENS SAY THE SAME WORD.
+              It said "New Project" — Title Case, and a promise of a
+              thing this app has no concept of. It opens Create Studio,
+              which the sidebar, the command palette and the page's own
+              heading all call "Make anything" / "Φτιάξε κάτι". Four
+              surfaces, one destination, and the loudest of them had a
+              fifth name for it. `common.createStudio` is that one name;
+              `common.newProject` had this as its only reader and is
+              gone. */}
+          <span className="hidden lg:inline">{t("createStudio")}</span>
         </button>
 
         <div className="relative shrink-0">

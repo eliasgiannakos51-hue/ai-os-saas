@@ -220,7 +220,7 @@ if (!up || /EADDRINUSE|Failed to start server/.test(serverLog)) {
 console.log(`production server up on :${PORT} (next start, NODE_ENV=production)`);
 
 const { chromium } = await import("playwright");
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 const context = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
 await context.addCookies([
   { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
@@ -399,7 +399,13 @@ console.log("\n== 3. the rows a person can actually read on arrival ==");
 //
 //              rows in DOM   readable @1080p   readable @768p   content height
 //   before            44             14               11            1385px
-//   after             15             15               10            1125px
+//   after             15             15               11            1071px
+//
+// The 768p line moved from 10 to 11 when the sidebar logo went from 130px
+// wide to 72px. The full logo's viewBox is 202x190, so 130px of width was
+// 122px of height and the header block measured 146px — more than any
+// group of links, in a panel whose whole problem was height. At 72px it
+// is 92px. Fifty-four pixels is 1.2 rows, and one of them landed.
 //
 // The 1080p line is the result: everything the sidebar has, readable
 // without scrolling, where before you could see fourteen of forty-four.
@@ -419,7 +425,7 @@ console.log("\n== 3. the rows a person can actually read on arrival ==");
 // What did change at 768p is how far the scroll goes: 1125px of content
 // instead of 1385px, so what is left below the fold is five rows rather
 // than thirty-three.
-const FLOOR = { "1080p (1920x1080)": 15, "768p  (1366x768)": 10 };
+const FLOOR = { "1080p (1920x1080)": 15, "768p  (1366x768)": 11 };
 for (const vp of VIEWPORTS) {
   const m = results[vp.name];
   if (m.error) continue;
@@ -463,11 +469,11 @@ console.log("\n== 4. the nav is shorter than it was, and stays shorter ==");
 // much as a row — so the thing that actually decides whether somebody
 // scrolls is measured here, in pixels, from the rendered page.
 //
-// 1200 rather than 1125 exactly: a font fallback or a locale with longer
+// 1100 rather than 1071 exactly: a font fallback or a locale with longer
 // labels moves this by a few pixels, and a gate that fails on a font is
-// a gate people learn to ignore. It is 260px below where it started,
-// which is what it is here to defend.
-const HEIGHT_CEILING = 1200;
+// a gate people learn to ignore. It is 314px below where it started,
+// which is what it is here to defend. The number only ever comes down.
+const HEIGHT_CEILING = 1100;
 for (const vp of VIEWPORTS) {
   const e = expanded[vp.name];
   if (!e || e.error) continue;

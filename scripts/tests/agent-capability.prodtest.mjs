@@ -235,7 +235,7 @@ if (!(await waitForServer())) {
 console.log(`production server up on :${PORT}`);
 
 const { chromium } = await import("playwright");
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 
 function newContext(locale, viewport = { width: 1280, height: 900 }) {
   return browser.newContext({

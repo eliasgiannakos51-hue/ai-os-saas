@@ -300,7 +300,13 @@ export function Sidebar({
       >
         <div className="relative flex items-center justify-center px-4 py-3">
           <Link href={OVERVIEW_NAV_ITEM.href} onClick={closeOnMobile} className="flex items-center">
-            <Logo className="h-auto w-[130px] max-w-full" />
+            {/* 72px, not 130px. The full logo's viewBox is 202x190 — very
+                nearly square — so 130px of width was 122px of height, and
+                the header block measured 146px in a 768px-tall viewport:
+                more than any group of links. Measured at 72px it is 92px,
+                which is 54px back, and 54px is 1.2 rows of nav. The mark
+                is unchanged; only its size is. */}
+            <Logo className="h-auto w-[72px] max-w-full" />
           </Link>
           <button
             type="button"

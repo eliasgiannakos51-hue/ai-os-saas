@@ -291,7 +291,7 @@ const TOUCH_ROUTES = [
 ];
 
 const { chromium } = await import("playwright");
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 
 // An unresolved next-intl key renders as its own dotted path. Matching
 // VISIBLE TEXT rather than raw HTML avoids flagging class names and

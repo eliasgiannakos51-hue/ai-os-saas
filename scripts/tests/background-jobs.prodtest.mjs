@@ -442,7 +442,7 @@ if (!up) {
 console.log(`production server up on :${PORT}\n`);
 
 const { chromium } = await import("playwright");
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 const newContext = () =>
   browser.newContext({
     viewport: { width: 1280, height: 900 },

@@ -1,0 +1,142 @@
+# WHAT RUNS WITHOUT SOMEBODY REMEMBERING TO RUN IT.
+#
+# Until this file existed, nothing did. There was no .github/workflows at
+# all, and the only automatic guard in the repository was a pre-commit
+# hook installed by `npm install` that checks for mutation markers and
+# nothing else. `npm run build` — the command Vercel runs — covers the
+# function limits, the marker check, the i18n check, the unit suite and
+# `next build`. It does NOT run the mutation suites, the integration
+# suites, the database suites or the production browser tests.
+#
+# THE COST OF THAT WAS MEASURED, not imagined. Commit d2c4d81 (2026-08-27)
+# correctly fixed a "NaN credits/month" bug by removing formatNumber()
+# from eight components — two of which were quoted verbatim as mutation
+# anchors in scripts/tests/voice.mutation.mjs. The anchors went stale, the
+# mutations stopped applying, and `npm run test:mutation` was red for two
+# days and twenty-seven commits before anybody ran it. Nobody was at
+# fault: the command that would have said so was not run by anything.
+name: verify
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+  # THE NIGHTLY TRIGGER FOR THE prodtests JOB BELOW. Without this line
+  # that job's `if:` names an event this workflow never receives, so it
+  # would have sat in the file looking like coverage and running never.
+  schedule:
+    - cron: "0 3 * * *"
+
+concurrency:
+  # A second push to the same branch cancels the first: the answer that
+  # matters is the one about the current head.
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: typecheck · lint · build · mutations · database
+    runs-on: ubuntu-latest
+    # The mutation suites alone take roughly twenty minutes: forty-six
+    # files, each of which edits the working tree, runs a gate, and
+    # restores. The default six-hour cap is not a limit, it is an absence
+    # of one; this is set to something a stuck run will actually hit.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      # `npm ci`, not `npm install`: the lockfile is the input, and a
+      # resolution that drifts silently in CI is a build that does not
+      # describe the commit.
+      - name: install
+        run: npm ci
+
+      - name: typecheck
+        run: npx tsc --noEmit
+
+      - name: lint
+        run: npx eslint
+
+      # Covers the function limits, the mutation-MARKER check, the i18n
+      # check, the whole unit suite and a real `next build` — see the
+      # "build" script in package.json. NO env vars are supplied on
+      # purpose: the build must not need secrets to compile.
+      - name: build (no env vars — a clean-clone build must not need any)
+        run: npm run build
+
+      # THE ONE THIS FILE WAS WRITTEN FOR.
+      - name: mutation suites
+        run: npm run test:mutation
+
+      # A mutation suite that dies part-way leaves its edit in the working
+      # tree — it restores in a `finally`, but a hard kill has no finally.
+      # A green run that left the tree dirty is not a green run, and the
+      # next step would otherwise inherit somebody else's mutant.
+      - name: the mutation suites put the tree back
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::a mutation suite left the working tree modified"
+            git status --porcelain
+            git diff
+            exit 1
+          fi
+          echo "working tree clean"
+
+      # scripts/db/run-dbtests.mjs provisions a throwaway PostgreSQL with
+      # initdb, applies bootstrap-supabase.sql and every migration in
+      # order, and runs the suites against it — no secrets needed.
+      - name: postgres, for the database suites
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql
+          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
+
+      # ITS EXIT CODE CANNOT TELL YOU IT RAN. run-dbtests.mjs exits 0 when
+      # no Postgres is reachable — deliberately, and its own header says
+      # so in as many words: "nothing here distinguishes skipped from
+      # passed AT THE EXIT CODE". In CI that is the difference between a
+      # gate and a green tick, so the log is read for the skip it prints.
+      - name: database suites
+        run: |
+          set -o pipefail
+          npm run test:db 2>&1 | tee /tmp/dbtests.log
+          if grep -q "SKIPPED" /tmp/dbtests.log; then
+            echo "::error::test:db skipped — it exits 0 when no Postgres is reachable, so this would have been a false green"
+            exit 1
+          fi
+
+  # THE BROWSER TESTS ARE NOT IN THE JOB ABOVE, and the reason is arithmetic
+  # rather than judgement: there are thirty-one *.prodtest.mjs files and
+  # each one runs its own `next build` before it opens a browser, so the
+  # set takes well over an hour. Blocking every push on that would teach
+  # people to skip CI, so they run nightly and on demand instead.
+  #
+  # This means a browser-only regression can reach the default branch and
+  # be caught the following night rather than at the push. That is a real
+  # gap, written down rather than papered over.
+  prodtests:
+    name: production browser tests (nightly)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      # Every prodtest reads CHROMIUM_PATH before falling back to the
+      # image-local path this repo's own sandbox uses.
+      - name: chromium
+        run: |
+          npx playwright install --with-deps chromium
+          echo "CHROMIUM_PATH=$(node -e 'console.log(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
+      - name: production browser tests
+        run: npm run test:prod

@@ -193,6 +193,15 @@ check(
   /\{destinationLabelKey\(studio\.result\.destinationKey\)\s*\n?\s*\?/.test(uiSrc),
   "branching on the raw key would name a destination it cannot name"
 );
+// THE HANDLE THE BROWSER GATE FINDS IT BY. Without it,
+// create-destination.prodtest.mjs located the link as
+// a[href="/dashboard/mission"] and matched the SIDEBAR's "Goals & Plans",
+// passing two of that case's assertions on a nav item.
+check(
+  "the link carries the handle the browser gate reads",
+  /data-testid="studio-destination-link"/.test(uiSrc),
+  "the prodtest would fall back to matching by href, which the nav also has"
+);
 check(
   "and falls back rather than rendering nothing",
   /: t\("openCreated"\)/.test(uiSrc),

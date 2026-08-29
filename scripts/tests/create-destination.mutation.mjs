@@ -23,12 +23,13 @@
  *  13. the helper points at a different namespace
  *  14. the prefix test loses its separator
  *  15. the empty remainder is returned as a key
+ *  16. the confirmation link loses the handle the browser gate reads
  *
  * And two on the gate itself, because a scan that finds nothing agrees
  * with everything:
  *
- *  16. the setResult scan matches no blocks
- *  17. the destinationKey scan matches no keys
+ *  17. the setResult scan matches no blocks
+ *  18. the destinationKey scan matches no keys
  *
  * Run: node scripts/tests/create-destination.mutation.mjs
  */
@@ -128,6 +129,15 @@ const MUTANTS = [
     from: "                {destinationLabelKey(studio.result.destinationKey)\n",
     to: "                {studio.result.destinationKey\n",
     expect: "the choice is made on the split key",
+  },
+  {
+    // Removing it does not change a pixel; it changes which element the
+    // browser gate reads, and the nav has a link to the same place.
+    name: "the confirmation link loses its handle",
+    file: UI,
+    from: '\n                data-testid="studio-destination-link"',
+    to: "",
+    expect: "the handle the browser gate reads",
   },
   {
     name: "the helper points at a different namespace",

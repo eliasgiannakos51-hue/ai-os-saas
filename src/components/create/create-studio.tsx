@@ -458,6 +458,7 @@ export function CreateStudio() {
             {studio.result?.href && (
               <Link
                 href={studio.result.href}
+                data-testid="studio-destination-link"
                 className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
               >
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

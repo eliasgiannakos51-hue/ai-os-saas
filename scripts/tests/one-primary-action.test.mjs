@@ -50,10 +50,31 @@ function check(name, cond, detail) {
 
 const FILLED = /\bbg-(?:orange-400|orange-500|amber-500)(?![/\w-])/;
 
+// AN IMPORT LINE IS NOT A USE, and the census below could not tell.
+//
+// `bg-(?:gradient-to-\w+|\[linear-gradient)` matches inside
+// `import { X } from "./styles/bg-gradient-to-r"`, and so do the
+// bg-clip-text and glow patterns against a path or a token named after
+// the class. No such import exists in this repository today, which is
+// exactly the problem: the census numbers were right by luck rather than
+// by construction, and the first file to import a helper named after a
+// utility would have inflated them silently.
+//
+// The button scan never had this fault — it requires a `<button`,
+// `<a` or `<Link` JSX tag, and an import statement has none — but it is
+// fed the same stripped source so there is one rule, proved once, in
+// section 0.
+function stripCode(src) {
+  return stripComments(src)
+    .split("\n")
+    .map((line) => (/^\s*import\b/.test(line) || /^\s*export .* from ["']/.test(line) ? "" : line))
+    .join("\n");
+}
+
 // Split from the file reader so section 0 can hand it samples. A checker
 // that only ever sees real files is a checker nothing proves can say no.
 function controlsInSource(src, file = "<sample>") {
-  const stripped = stripComments(src);
+  const stripped = stripCode(src);
   const hits = [];
   for (const m of stripped.matchAll(/<(button|a|Link)\b[^>]*?\/?>/gs)) {
     if (FILLED.test(m[0])) {
@@ -125,6 +146,48 @@ check(
 check(
   "...nor one in a JSX comment explaining the rule",
   controlsInSource('{/* never write <button className="bg-orange-500"> twice */}').length === 0
+);
+
+// AN IMPORT LINE IS NOT A USE. Named here because the same mistake was
+// made four times in an earlier pass: a file's import list mentions the
+// thing it is about, and a scan that reads the whole file counts the
+// mention. The button scan cannot make it (an import has no JSX tag) and
+// these samples say so out loud; the census below CAN, which is why both
+// go through stripCode().
+check(
+  "a default import is not a button",
+  controlsInSource('import Link from "next/link";').length === 0
+);
+check(
+  "nor is a named one",
+  controlsInSource('import { Link } from "next/link";').length === 0
+);
+check(
+  "nor is an import from a path named after the class",
+  controlsInSource('import { x } from "./styles/bg-orange-500";').length === 0
+);
+// THE CENSUS COULD, AND THAT IS THE ONE WORTH PROVING. Three separate
+// patterns, each of which matches inside a module path.
+const CENSUS_IMPORTS = [
+  'import { X } from "./styles/bg-gradient-to-r";',
+  'import { clip } from "./bg-clip-text";',
+  'import { glow } from "./shadow-[0_0_16px_rgba(249,115,22,0.35)]";',
+].join("\n");
+const stripped = stripCode(CENSUS_IMPORTS);
+check(
+  "and the census counts none of the three import lines that look like classes",
+  (stripped.match(/bg-(?:gradient-to-\w+|\[linear-gradient)/g) ?? []).length === 0 &&
+    (stripped.match(/bg-clip-text/g) ?? []).length === 0 &&
+    (stripped.match(/shadow-\[[^\]]*249,\s*115,\s*22[^\]]*\]/g) ?? []).length === 0,
+  JSON.stringify(stripped)
+);
+// ...while a real one on a real element still counts, so the stripper
+// cannot have simply blanked everything.
+const REAL = '<div className="bg-gradient-to-br shadow-[0_0_16px_rgba(249,115,22,0.35)]" />';
+check(
+  "but a real gradient and a real glow on an element still do",
+  (stripCode(REAL).match(/bg-gradient-to-\w+/g) ?? []).length === 1 &&
+    (stripCode(REAL).match(/shadow-\[[^\]]*249,\s*115,\s*22[^\]]*\]/g) ?? []).length === 1
 );
 
 // THE OTHER INERT CLAUSE. layoutChain() adds the layouts Next composes
@@ -274,7 +337,7 @@ let gradientText = 0;
 for (const f of allFiles) {
   let src;
   try {
-    src = stripComments(readFileSync(f, "utf8"));
+    src = stripCode(readFileSync(f, "utf8"));
   } catch {
     continue;
   }
@@ -295,6 +358,43 @@ check(`gradient backgrounds: ${gradients}, ceiling 13`, gradients <= 13, String(
 // floored: a second would be the thing the brief warns about, and zero
 // would mean the decision was taken without being recorded here.
 check(`gradient text: ${gradientText}, pinned at 1`, gradientText === 1, String(gradientText));
+
+// ---------------------------------------------------------------------
+console.log("\n== 5. how many different accent shades the product uses ==");
+// FIFTEEN. Eight oranges and seven ambers, from orange-200 to orange-950.
+//
+// This is not the same complaint as the filled-button count and it is
+// worth keeping separate: two buttons both in bg-orange-500 compete for
+// attention, while orange-400 next to orange-500 next to amber-400 reads
+// as three different meanings that turn out to be none. The count is
+// capped where it stands rather than reduced, because which shades merge
+// is a design decision.
+//
+// NOT A THEME BUG, checked before it was called one. tailwind.config.ts
+// deliberately routes textColor and borderColor through theme tokens and
+// leaves backgroundColor's orange-500 on Tailwind's own palette — its
+// comment gives the measurement (7.49:1 as a filled button with black
+// text) and scripts/tests/light-theme-contrast.test.mjs holds the rest.
+const shadeCounts = new Map();
+for (const f of allFiles) {
+  let src;
+  try {
+    src = stripCode(readFileSync(f, "utf8"));
+  } catch {
+    continue;
+  }
+  for (const m of src.matchAll(/\b(?:orange|amber)-([0-9]{2,3})\b/g)) {
+    shadeCounts.set(m[0], (shadeCounts.get(m[0]) ?? 0) + 1);
+  }
+}
+const shades = [...shadeCounts].sort((a, b) => b[1] - a[1]);
+console.log(`        ${shades.map(([k, v]) => `${k}(${v})`).join(" ")}`);
+check(
+  `the shade scan found shades (${shades.length})`,
+  shades.length >= 5,
+  "a ceiling checked against nothing passes for the wrong reason"
+);
+check(`${shades.length} distinct accent shades, ceiling 15`, shades.length <= 15, shades.map(([k]) => k).join(", "));
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

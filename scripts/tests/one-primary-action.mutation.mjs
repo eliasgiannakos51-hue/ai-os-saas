@@ -76,7 +76,12 @@ const MUTANTS = [
     // use of it. Four other gates in this directory had this fault.
     name: "the scan counts comments as code",
     file: GATE,
-    from: "  const stripped = stripComments(src);",
+    // Repointed when the reader gained an import-stripping step and
+    // stripComments(src) became stripCode(src). An anchor that quotes a
+    // line the file no longer has does not apply, and a mutation that
+    // does not apply proves nothing — the same fault this branch found in
+    // voice.mutation.mjs.
+    from: "  const stripped = stripCode(src);",
     to: "  const stripped = src;",
     expect: "a button inside a // comment is not a button",
   },

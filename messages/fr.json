@@ -3448,5 +3448,16 @@
       "notEnough": "Vous avez {balance} crédits et il en faut {needed}.",
       "remove": "Retirer le badge"
     }
+  },
+  "sampleData": {
+    "load": "Voir avec des données d'exemple",
+    "loading": "Chargement…",
+    "loadFree": "Gratuit : rien n'est généré, et vous pouvez tout retirer en un clic",
+    "loadFailed": "Cela n'a pas marché. Réessayez.",
+    "banner": "Données d'exemple",
+    "bannerDetail": "Ces entrées sont une démo : trois mois d'un petit studio de design. Elles ne sont pas les vôtres.",
+    "clear": "Retirer l'exemple",
+    "clearing": "Retrait…",
+    "clearFailed": "Cela n'a pas marché."
   }
 }

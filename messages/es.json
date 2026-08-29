@@ -3448,5 +3448,16 @@
       "notEnough": "Tienes {balance} créditos y necesitas {needed}.",
       "remove": "Quitar la insignia"
     }
+  },
+  "sampleData": {
+    "load": "Verlo con datos de ejemplo",
+    "loading": "Cargando…",
+    "loadFree": "Gratis: no se genera nada y puedes quitarlo con un clic",
+    "loadFailed": "No funcionó. Inténtalo otra vez.",
+    "banner": "Datos de ejemplo",
+    "bannerDetail": "Estas entradas son una demo: los últimos tres meses de un pequeño estudio de diseño. No son tuyas.",
+    "clear": "Quitar el ejemplo",
+    "clearing": "Quitando…",
+    "clearFailed": "No funcionó."
   }
 }

@@ -3448,5 +3448,16 @@
       "notEnough": "你有 {balance} 点数，需要 {needed}。",
       "remove": "移除徽标"
     }
+  },
+  "sampleData": {
+    "load": "用示例数据查看",
+    "loading": "加载中…",
+    "loadFree": "免费——不生成任何内容，一键即可移除",
+    "loadFailed": "没有成功，请重试。",
+    "banner": "示例数据",
+    "bannerDetail": "这些条目是演示数据——一家小设计工作室最近三个月的记录，不是你的。",
+    "clear": "移除示例",
+    "clearing": "移除中…",
+    "clearFailed": "没有成功。"
   }
 }

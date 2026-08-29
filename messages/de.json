@@ -3448,5 +3448,16 @@
       "notEnough": "Sie haben {balance} Credits und benötigen {needed}.",
       "remove": "Badge entfernen"
     }
+  },
+  "sampleData": {
+    "load": "Mit Beispieldaten ansehen",
+    "loading": "Lädt…",
+    "loadFree": "Kostenlos — es wird nichts generiert, und du entfernst es mit einem Klick",
+    "loadFailed": "Das hat nicht geklappt. Versuch es nochmal.",
+    "banner": "Beispieldaten",
+    "bannerDetail": "Diese Einträge sind eine Demo — drei Monate eines kleinen Designstudios. Sie gehören nicht dir.",
+    "clear": "Beispiel entfernen",
+    "clearing": "Wird entfernt…",
+    "clearFailed": "Das hat nicht geklappt."
   }
 }

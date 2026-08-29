@@ -19,6 +19,8 @@ import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { logApiError } from "@/lib/log-error";
 import { AmbientDots } from "@/components/ui/ambient-dots";
+import { SampleDataBanner } from "@/components/sample-data/sample-data-banner";
+import { findSampleImport } from "@/lib/sample-data/apply";
 import { DashboardBackground } from "@/components/dashboard/dashboard-background";
 import { AchievementUnlockBridge } from "@/components/achievements/achievement-unlock-bridge";
 import { PageTransition } from "@/components/page-transition";
@@ -72,6 +74,14 @@ export default async function DashboardLayout({
     credits = { credits_remaining: 0, credits_total: 0, min_pack_credit_price_eur: null };
   }
   const packCreditPriceEur = packCreditPriceEurFromRow(credits);
+
+  // ON EVERY PAGE, NOT JUST HOME — V4.6 #6 asks for the marker to be
+  // visible continuously. The sample shows up in the finance charts, in
+  // the leads list and in what the chat answers with, and any of those is
+  // somewhere a person can land without passing Home. One indexed read
+  // (user_imports has user_created_idx) against a table with at most a
+  // handful of rows per account.
+  const sampleImport = await findSampleImport(supabase, user.id);
 
 
   return (
@@ -129,6 +139,11 @@ export default async function DashboardLayout({
               <Sidebar email={user.email ?? ""} planName={plan.name} isOwner={isAdmin} />
               <div className="flex min-w-0 flex-1 flex-col">
                 <TopNav email={user.email ?? ""} />
+                {/* Below the top bar and ABOVE the page transition, so it
+                    does not fade in and out on every navigation: a
+                    warning that flickers reads as a notification rather
+                    than as a standing fact about the account. */}
+                {sampleImport && <SampleDataBanner />}
                 {/* Wraps only the page body, not the Sidebar/TopNav —
                     the chrome must stay visually fixed while the content
                     beneath it fades/slides in on each navigation. */}

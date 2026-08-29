@@ -35,6 +35,8 @@ import {
 } from "@/lib/health-score";
 import { HealthScoreCard } from "@/components/overview/health-score-card";
 import { SetupProgressCard, type SetupStep } from "@/components/overview/setup-progress-card";
+import { LoadSampleButton } from "@/components/sample-data/load-sample-button";
+import { findSampleImport } from "@/lib/sample-data/apply";
 import { loadLatestEnergyCheckIn } from "@/lib/energy-checkins";
 import { EnergyCheckinWidget } from "@/components/overview/energy-checkin-widget";
 import { Database, TrendingUp, Layers } from "lucide-react";
@@ -390,6 +392,8 @@ export default async function OverviewPage() {
   // total, the per-module summaries and the active mission are all
   // already read above — a setup checklist that cost its own round trip
   // would be a worse trade than the number it replaces.
+  const sampleLoaded = Boolean(await findSampleImport(supabase, user.id));
+
   const setupSteps: SetupStep[] = [
     {
       id: "onboarding",
@@ -486,6 +490,13 @@ export default async function OverviewPage() {
             steps={setupSteps}
           />
         )}
+
+        {/* THE WAY OUT OF AN EMPTY ACCOUNT — V4.6 #6. Offered only while
+            there is nothing to look at and no sample already loaded: once
+            either is true the button is an invitation to duplicate work,
+            and the banner in the layout is what handles the sample from
+            then on. */}
+        {totalEntries === 0 && !sampleLoaded && <LoadSampleButton className="mt-4" />}
 
         <EnergyCheckinWidget initialCheckIn={latestEnergyCheckIn} />
 

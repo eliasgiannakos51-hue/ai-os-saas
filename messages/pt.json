@@ -3448,5 +3448,16 @@
       "notEnough": "Tem {balance} créditos e precisa de {needed}.",
       "remove": "Remover o emblema"
     }
+  },
+  "sampleData": {
+    "load": "Ver com dados de exemplo",
+    "loading": "A carregar…",
+    "loadFree": "Grátis — não é gerado nada, e remove com um clique",
+    "loadFailed": "Não resultou. Tente de novo.",
+    "banner": "Dados de exemplo",
+    "bannerDetail": "Estas entradas são uma demonstração — três meses de um pequeno estúdio de design. Não são suas.",
+    "clear": "Remover o exemplo",
+    "clearing": "A remover…",
+    "clearFailed": "Não resultou."
   }
 }

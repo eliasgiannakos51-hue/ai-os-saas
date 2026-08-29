@@ -27,7 +27,8 @@ import { execFileSync } from "node:child_process";
 const GATE = "scripts/tests/sidebar-naming.test.mjs";
 const EN = "messages/en.json";
 const EL = "messages/el.json";
-const TARGETS = [GATE, EN, EL];
+const JA = "messages/ja.json";
+const TARGETS = [GATE, EN, EL, JA];
 
 const MUTANTS = [
   {
@@ -60,6 +61,39 @@ const MUTANTS = [
     from: 'const rendersOwnTitle = /<PageHeader[\\s\\S]{0,220}?title=\\{t\\("title"\\)\\}/.test(src);',
     to: 'const rendersOwnTitle = /<PageHeaderXX[\\s\\S]{0,220}?title=\\{t\\("title"\\)\\}/.test(src);',
     expect: "the scan found the pages that name themselves twice",
+  },
+  {
+    // SECTION 5b. A heading that drifts in ONE language, on a row section
+    // 5's six-item English list never looks at. This is the shape the
+    // whole section exists for: English agrees with itself, and the
+    // Japanese reader gets two names.
+    name: "a page heading drifts from its nav row in Japanese only",
+    file: JA,
+    from: '"deepResearch": {\n      "title": "ディープリサーチ"',
+    to: '"deepResearch": {\n      "title": "詳細リサーチ"',
+    expect: "no row disagrees with its page in any language",
+  },
+  {
+    // The derivation, not the data. If it stops recognising the shape
+    // "the page renders the config's own key", those rows silently leave
+    // the comparison and the gate reports a smaller, cleaner world.
+    // The twelve module rows have no page file; the [module] catch-all
+    // renders their heading from the same key the sidebar uses. If that
+    // stops being recognised they leave the count silently.
+    name: "5b stops recognising the [module] catch-all",
+    file: GATE,
+    from: 'const DYNAMIC_USES_CONFIG_KEY = /title=\\{t\\(moduleConfig\\.titleKey\\)\\}/.test(dynamicSrc);',
+    to: 'const DYNAMIC_USES_CONFIG_KEY = /title=\\{t\\(moduleConfigXX\\.titleKey\\)\\}/.test(dynamicSrc);',
+    expect: "rows whose page renders the sidebar's own key",
+  },
+  {
+    // ...and if it stops finding page headings at all, every row becomes
+    // "no heading to compare" and the section asserts nothing.
+    name: "5b stops finding page headings",
+    file: GATE,
+    from: 'const ph = src.match(/<PageHeader[\\s\\S]{0,400}?title=\\{(\\w+)\\("([\\w.]+)"\\)\\}/);',
+    to: 'const ph = src.match(/<PageHeaderNope[\\s\\S]{0,400}?title=\\{(\\w+)\\("([\\w.]+)"\\)\\}/);',
+    expect: "rows compared string-by-string in all 10 locales",
   },
   {
     // The comparison itself. Inverted rather than defanged: a defanged

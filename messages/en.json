@@ -231,7 +231,7 @@
     },
     "businessTitle": "Business",
     "businessSubtitle": "For teams building together",
-    "businessExplanation": "Choose Professional or Ultimate as your base plan — both unlock team collaboration. Then invite team members: each one gets full access at your plan's tier, for +{price}/member/month on Professional, or included free on Ultimate.",
+    "businessExplanation": "Choose Professional or Ultimate as your base plan — both include team collaboration. Then invite team members: each one gets full access at your plan's tier, for +{price}/member/month on Professional, or included free on Ultimate.",
     "businessCardDescription": "Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.",
     "businessFeatureBase": "Choose Professional or Ultimate as your base plan",
     "businessFeatureFullAccess": "Every member gets full access at your plan's tier",
@@ -481,7 +481,7 @@
       "missingToken": "This link is missing its confirmation token. Please use the link from your email exactly as sent.",
       "warning": "This will permanently delete your account and every record you've logged. This can't be undone.",
       "deleting": "Deleting…",
-      "confirmButton": "Permanently delete my account",
+      "confirmButton": "Permanently delete your account",
       "cancel": "Cancel and go back",
       "confirmFailed": "We couldn't complete the deletion. Your account is still here — try the link again, or contact support."
     }
@@ -879,7 +879,7 @@
         "openCredits": "See the ledger →"
       },
       "betaFeedback": {
-        "message": "Thanks for testing Ionexa AI! I'd love your feedback.",
+        "message": "Thanks for testing Ionexa AI. Your feedback is welcome.",
         "linkLabel": "Share feedback"
       },
       "progress": {
@@ -977,7 +977,7 @@
       "removeTitle": "Remove member",
       "descriptionIncluded": "On the {plan} plan — invited members get full access at this tier, included at no extra charge.",
       "seatsUsed": "{used} of {total} seats used",
-      "setupSuccessTitle": "Your team is ready!",
+      "setupSuccessTitle": "Your team is ready",
       "setupSuccessBody": "Invite your first team member below.",
       "roleLabel": "Role / Position",
       "rolePlaceholder": "What does this person do?",
@@ -1529,14 +1529,14 @@
       "requestLabel": "What should this agent do for you?",
       "requestPlaceholder": "e.g. Every morning, send me the latest news about Nvidia",
       "deliveryNote": "Results are emailed to {email} — the address on your account.",
-      "designButton": "Design my agent",
+      "designButton": "Design your agent",
       "designing": "Designing...",
       "buildError": "Couldn't design that agent. Please try again.",
       "clarificationTitle": "A couple of quick questions first:",
       "clarificationSkip": "Skip, build it anyway",
       "clarificationContinue": "Continue",
       "clarificationAnswerPlaceholder": "Your answer...",
-      "previewTitle": "Here's what I'll build",
+      "previewTitle": "What this agent will do",
       "previewName": "Name",
       "previewSchedule": "Runs",
       "previewCostPerRun": "Cost per run",
@@ -1677,7 +1677,7 @@
         "noCharge": "You have not been charged — nothing ran.",
         "noChargeYet": "Nothing has been charged yet.",
         "tryInstead": "Try asking for research, monitoring or a summary instead — for example, \"every Monday, summarise what's new in my industry\".",
-        "rephrase": "Rewrite my request",
+        "rephrase": "Rewrite your request",
         "partialTitle": "Part of this can't be done",
         "partialWillDo": "The agent would do this instead: {parts}",
         "partialContinue": "Build the part that works",
@@ -1904,7 +1904,7 @@
       "saveSelection": "{count, plural, one {Save # selected} other {Save # selected}}",
       "collectionCreated": "Collection {name} saved",
       "collectionError": "The collection could not be saved.",
-      "askTitle": "Ask my documents",
+      "askTitle": "Ask your documents",
       "askNothingSelected": "Tick the files the answer should come from. Nothing else will be used.",
       "askSelected": "Answering from {count, plural, one {# file} other {# files}}: {names}",
       "tooManySelected": "Ask about up to {max} files at a time.",
@@ -2068,11 +2068,11 @@
       "noneTitle": "Nothing solid to report yet",
       "noneNeedMore": "There isn't enough here yet for anything to be worth calling a pattern. A few dozen rows with dates on them is usually the point where things start showing up — and we would rather say nothing than make something up.",
       "noneYet": "Add a bit more and run this again from your dashboard.",
-      "goToDashboard": "Go to my dashboard"
+      "goToDashboard": "Go to your dashboard"
     },
     "insights": {
       "title": "What I noticed",
-      "basedOn": "from {count, plural, one {# of your records} other {# of your records}}",
+      "basedOn": "from {count, plural, one {# of your entries} other {# of your entries}}",
       "checkIt": "Check it yourself",
       "showNumbers": "Show the numbers",
       "hideNumbers": "Hide the numbers",
@@ -2127,7 +2127,7 @@
       "description": "Share Ionexa, earn a share of what the people you send keep paying.",
       "pitch": "Earn {percent}% of every payment your referrals make, every month, for {months, plural, one {# month} other {# months}}.",
       "pitchTerms": "You can't refer yourself, and each person can only be referred once. Commission starts on their first payment.",
-      "join": "Get my link",
+      "join": "Get your link",
       "joining": "Setting up…",
       "joinError": "Could not set that up. Please try again.",
       "yourLink": "Your link",
@@ -2155,7 +2155,7 @@
     "search": {
       "kinds": {
         "page": "Pages",
-        "module": "Records",
+        "module": "Entries",
         "file": "Files",
         "chat": "Conversations",
         "website": "Websites",
@@ -2396,7 +2396,7 @@
   "askAi": {
     "buttonLabel": "Ask AI",
     "title": "Ask AI about this {title}",
-    "subtitle": "The AI already knows this entry's data — just ask.",
+    "subtitle": "The AI already has this entry's data. Ask anything about it.",
     "placeholder": "Ask anything about this entry...",
     "emptyState": "Ask a question about this entry — no need to explain the context, the AI already has it.",
     "send": "Send",
@@ -2454,11 +2454,11 @@
     },
     "firstEntityLink": {
       "title": "Connector",
-      "description": "Link two records together in the Knowledge Graph."
+      "description": "Link two entries together in the Knowledge Graph."
     },
     "tenEntityLinks": {
       "title": "Network Builder",
-      "description": "Link 10 records together across modules."
+      "description": "Link 10 entries together across modules."
     },
     "firstEnergyCheckin": {
       "title": "Check-In",
@@ -3319,7 +3319,7 @@
     "copied": "Copied",
     "language": "Language",
     "targetLanguage": "Convert to",
-    "useWorkspace": "Use my other modules for context",
+    "useWorkspace": "Use your other modules for context",
     "run": "Run",
     "running": "Working…",
     "result": "Result",

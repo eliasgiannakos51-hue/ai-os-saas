@@ -721,6 +721,123 @@ for (const [was, sidebarKey, titleKey] of RENAMED) {
   check(`...and from the page it opens`, titleValue !== was, String(titleValue));
   check(`...and the two agree ("${sidebarValue}")`, sidebarValue === titleValue, `${sidebarValue} vs ${titleValue}`);
 }
+console.log("\n== 5b. EVERY row against the page it opens, in ALL TEN languages ==");
+// V4.6 #8. Section 5 above checks six renamed rows in ENGLISH. That is
+// the language a reviewer reads, and it is the one language where a
+// divergence is least likely to survive — so checking only it is close to
+// checking nothing. This derives the pairing for every row instead, and
+// compares all ten.
+//
+// Three shapes count as agreement, and only the first two are checks:
+//   - the page renders the SAME KEY the sidebar does (t(config.titleKey),
+//     t("items.x") out of the sidebar namespace). Nothing to compare —
+//     one string cannot disagree with itself.
+//   - the page renders its own key, which is compared in all ten.
+//   - the page renders no heading at all (Home, Chat, Make anything, the
+//     help centre are full-bleed screens). Reported, not asserted.
+const labelKeysSrc = readFileSync("src/lib/sidebar-label-keys.ts", "utf8");
+const ITEM_KEYS = Object.fromEntries(
+  [...labelKeysSrc
+    .slice(labelKeysSrc.indexOf("ITEM_LABEL_KEYS"))
+    .matchAll(/^\s*"?([^":\n]+?)"?:\s*"(\w+)",/gm)].map((m) => [m[1].trim(), m[2]])
+);
+const NAV_CONSTS = Object.fromEntries(
+  [...modulesSrc.matchAll(/export const (\w+_NAV_ITEM)\s*=\s*\{\s*href:\s*"([^"]+)",\s*label:\s*"([^"]+)"/g)]
+    .map((m) => [m[1], { href: m[2], label: m[3] }])
+);
+const navRows = [...navSrc.matchAll(/\{[^{}]*?href:\s*([^,]+),\s*label:\s*([^,]+),/g)].map((m) => {
+  const [h, l] = [m[1].trim(), m[2].trim()];
+  return {
+    href: h.startsWith('"') ? h.slice(1, -1) : NAV_CONSTS[h.replace(/\.href$/, "")]?.href ?? null,
+    label: l.startsWith('"') ? l.slice(1, -1) : NAV_CONSTS[l.replace(/\.label$/, "")]?.label ?? null,
+  };
+});
+check(`the scan found the sidebar's rows (${navRows.length})`, navRows.length >= 40, String(navRows.length));
+
+const dynamicSrc = readFileSync("src/app/dashboard/[module]/page.tsx", "utf8");
+const DYNAMIC_USES_CONFIG_KEY = /title=\{t\(moduleConfig\.titleKey\)\}/.test(dynamicSrc);
+const buildPageSrc = existsSync("src/components/modules/build-module-page.tsx")
+  ? readFileSync("src/components/modules/build-module-page.tsx", "utf8")
+  : "";
+const BUILD_PAGE_USES_CONFIG_KEY =
+  /const title = t\(config\.titleKey\)/.test(buildPageSrc) && /title=\{title\}/.test(buildPageSrc);
+
+function headingKeyFor(src, labelKey) {
+  if (/<BuildModulePage\b/.test(src) && BUILD_PAGE_USES_CONFIG_KEY) return { same: true };
+  // No branch for an inline `title={t(moduleConfig.titleKey)}`: the twelve
+  // rows that shape belongs to have no page file of their own and are
+  // served by the [module] catch-all, so such a branch here would never
+  // run. A clause that cannot execute passes every mutation aimed at it
+  // and reports coverage it does not have. The catch-all is checked where
+  // it is actually reached, below.
+  const lit = src.match(/title=\{t\("items\.(\w+)"\)\}/);
+  if (lit && /(?:get|use)Translations\(\s*"sidebar"\s*\)/.test(src))
+    return lit[1] === labelKey ? { same: true } : { key: `sidebar.items.${lit[1]}` };
+  const ph = src.match(/<PageHeader[\s\S]{0,400}?title=\{(\w+)\("([\w.]+)"\)\}/);
+  if (ph) {
+    const ns = new RegExp(`const ${ph[1]} = (?:await )?(?:get|use)Translations\\(\\s*"([^"]+)"\\s*\\)`).exec(src);
+    return { key: ns ? `${ns[1]}.${ph[2]}` : ph[2] };
+  }
+  return { none: true };
+}
+
+const headless = [];
+const disagreements = [];
+let byConstruction = 0;
+let compared = 0;
+for (const row of navRows) {
+  const labelKey = row.label === "Create Studio" ? null : ITEM_KEYS[row.label];
+  // A row with no entry here renders raw English in all ten locales —
+  // already its own failure in section 3, so it is not re-reported.
+  if (!labelKey || !row.href) continue;
+  const sidebarKey = `sidebar.items.${labelKey}`;
+  if (typeof lookup(messages.en, sidebarKey) !== "string") continue;
+  const file = `src/app${row.href}/page.tsx`;
+  if (!existsSync(file)) {
+    if (DYNAMIC_USES_CONFIG_KEY) byConstruction++;
+    else headless.push(`${row.label} (no page file)`);
+    continue;
+  }
+  let src = readFileSync(file, "utf8");
+  // A redirect route is judged on the page the reader actually lands on.
+  const red = src.match(/redirect\("([^"?]+)[^"]*"\)/);
+  if (red && !/PageHeader/.test(src) && existsSync(`src/app${red[1]}/page.tsx`))
+    src = readFileSync(`src/app${red[1]}/page.tsx`, "utf8");
+  const verdict = headingKeyFor(src, labelKey);
+  if (verdict.same) {
+    byConstruction++;
+    continue;
+  }
+  if (verdict.none) {
+    headless.push(row.label);
+    continue;
+  }
+  compared++;
+  const differing = LOCALES.filter((l) => lookup(messages[l], sidebarKey) !== lookup(messages[l], verdict.key));
+  // Favorites is a deliberate alias: the row opens the "Mine" page, where
+  // the starred list is a tab. It is named in the exceptions rather than
+  // silently skipped.
+  if (labelKey === "favorites") continue;
+  if (differing.length > 0)
+    disagreements.push(
+      `${row.label}: ${sidebarKey} vs ${verdict.key} — ` +
+        differing.map((l) => `${l} "${lookup(messages[l], sidebarKey)}" != "${lookup(messages[l], verdict.key)}"`).join("; ")
+    );
+}
+check(
+  `rows whose page renders the sidebar's own key: ${byConstruction}`,
+  byConstruction >= 15,
+  "a drop here means the derivation stopped recognising a page shape, not that pages changed"
+);
+check(
+  `rows compared string-by-string in all 10 locales: ${compared}`,
+  compared >= 15,
+  "too few compared — the scan is not reaching the pages"
+);
+check("no row disagrees with its page in any language", disagreements.length === 0, disagreements.join("\n        "));
+// REPORTED, NOT ASSERTED: a full-bleed screen has no heading to compare.
+console.log(`        (${headless.length} rows open a screen with no page heading: ${headless.join(", ")})`);
+
 // EN/EL disagreement was its own bug: one module, two different products
 // depending on the language.
 for (const key of ["sidebar.items.research", "sidebar.items.finance"]) {

@@ -231,7 +231,7 @@
     },
     "businessTitle": "ビジネス",
     "businessSubtitle": "チームで共に構築する",
-    "businessExplanation": "ベースプランとしてProfessionalまたはUltimateを選択してください — どちらもチームコラボレーションを利用できます。その後チームメンバーを招待しましょう。各メンバーはあなたのプランと同じ機能に完全アクセスでき、Professionalでは+{price}/メンバー/月、Ultimateでは無料で利用できます。",
+    "businessExplanation": "ベースプランとしてProfessionalまたはUltimateを選択してください — どちらもチームコラボレーションを含みます。その後チームメンバーを招待しましょう。各メンバーはあなたのプランと同じ機能に完全アクセスでき、Professionalでは+{price}/メンバー/月、Ultimateでは無料で利用できます。",
     "businessCardDescription": "どのプランでもチームのベースとして始められます。その後、メンバーを1人あたり+{price}/月で招待できます — 全員があなたのプランと同じレベルの完全アクセスを得られます。共同作業をするチームに最適です。",
     "businessFeatureBase": "ベースプランとしてProfessionalまたはUltimateを選択",
     "businessFeatureFullAccess": "各メンバーはあなたのプランと同じレベルの完全アクセスを取得",
@@ -879,7 +879,7 @@
         "openCredits": "明細を見る →"
       },
       "betaFeedback": {
-        "message": "Ionexa AI をお試しいただきありがとうございます！ぜひご意見をお聞かせください。",
+        "message": "Ionexa AI をお試しいただきありがとうございます。ご意見をお待ちしています。",
         "linkLabel": "フィードバックを送る"
       },
       "progress": {
@@ -977,7 +977,7 @@
       "removeTitle": "メンバーを削除",
       "descriptionIncluded": "{plan}プランでは、招待されたメンバーはこの階層に追加料金なしで完全アクセスできます。",
       "seatsUsed": "{used} / {total} 席使用中",
-      "setupSuccessTitle": "チームの準備ができました!",
+      "setupSuccessTitle": "チームの準備ができました",
       "setupSuccessBody": "以下から最初のチームメンバーを招待してください。",
       "roleLabel": "役割 / 職種",
       "rolePlaceholder": "この人は何をしますか?",
@@ -1536,7 +1536,7 @@
       "clarificationSkip": "スキップして作成",
       "clarificationContinue": "続ける",
       "clarificationAnswerPlaceholder": "回答を入力...",
-      "previewTitle": "作成する内容",
+      "previewTitle": "このエージェントが行うこと",
       "previewName": "名前",
       "previewSchedule": "実行タイミング",
       "previewCostPerRun": "1回あたりの費用",
@@ -1904,7 +1904,7 @@
       "saveSelection": "選択中の {count} 件を保存",
       "collectionCreated": "コレクション {name} を保存しました",
       "collectionError": "コレクションを保存できませんでした。",
-      "askTitle": "自分の書類に質問",
+      "askTitle": "あなたの文書に質問",
       "askNothingSelected": "回答の根拠にするファイルを選んでください。それ以外は使われません。",
       "askSelected": "{count} 件のファイルから回答: {names}",
       "tooManySelected": "一度に質問できるのは最大 {max} ファイルです。",
@@ -2155,7 +2155,7 @@
     "search": {
       "kinds": {
         "page": "ページ",
-        "module": "レコード",
+        "module": "記録",
         "file": "ファイル",
         "chat": "会話",
         "website": "ウェブサイト",
@@ -2396,7 +2396,7 @@
   "askAi": {
     "buttonLabel": "AI に質問",
     "title": "この{title}について AI に質問",
-    "subtitle": "AI はこのエントリーのデータを既に把握しています — そのまま質問してください。",
+    "subtitle": "AI はこの記録のデータを既に持っています。何でも質問してください。",
     "placeholder": "このエントリーについて何でも質問してください...",
     "emptyState": "このエントリーについて質問してください — 背景を説明する必要はありません。AI は既に把握しています。",
     "send": "送信",
@@ -2454,11 +2454,11 @@
     },
     "firstEntityLink": {
       "title": "コネクター",
-      "description": "ナレッジグラフで2つのレコードをリンクしよう。"
+      "description": "ナレッジグラフで2件の記録をリンクしよう。"
     },
     "tenEntityLinks": {
       "title": "ネットワークビルダー",
-      "description": "モジュール間で10件のレコードをリンクしよう。"
+      "description": "モジュール間で10件の記録をリンクしよう。"
     },
     "firstEnergyCheckin": {
       "title": "チェックイン",
@@ -2474,7 +2474,7 @@
     },
     "fiftyEntries": {
       "title": "パワーユーザー",
-      "description": "全モジュールで合計50件のエントリーを記録しよう。"
+      "description": "全モジュールで合計50件の記録を残そう。"
     }
   },
   "credits": {

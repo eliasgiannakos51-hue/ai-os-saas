@@ -231,7 +231,7 @@
     },
     "businessTitle": "商业版",
     "businessSubtitle": "为共同打造的团队而生",
-    "businessExplanation": "选择 Professional 或 Ultimate 作为您的基础方案 — 两者都可解锁团队协作。然后邀请团队成员:每位成员都可获得与您方案同等级别的完整访问权限,Professional 方案每位成员每月 +{price},Ultimate 方案则免费包含。",
+    "businessExplanation": "选择 Professional 或 Ultimate 作为你的基础方案 — 两者都包含团队协作。然后邀请团队成员：每位成员都可获得与你方案同等级别的完整访问权限，Professional 方案每位成员每月 +{price}，Ultimate 方案则免费包含。",
     "businessCardDescription": "选择任意方案作为团队的基础方案,然后以每位成员 +{price}/月 的价格邀请成员 — 每个人都能获得与您方案同等级别的完整访问权限。非常适合共同协作的团队。",
     "businessFeatureBase": "选择 Professional 或 Ultimate 作为基础方案",
     "businessFeatureFullAccess": "每位成员都能获得与您方案同等级别的完整访问权限",
@@ -481,7 +481,7 @@
       "missingToken": "此链接缺少确认令牌。请完全按照邮件中发送的链接使用。",
       "warning": "此操作将永久删除您的账户以及您记录的所有条目，且无法撤销。",
       "deleting": "正在删除…",
-      "confirmButton": "永久删除我的账户",
+      "confirmButton": "永久删除你的账户",
       "cancel": "取消并返回",
       "confirmFailed": "无法完成删除。你的账户仍然存在 — 请重新点击链接，或联系客服。"
     }
@@ -879,7 +879,7 @@
         "openCredits": "查看明细 →"
       },
       "betaFeedback": {
-        "message": "感谢你测试 Ionexa AI！我们很想听听你的反馈。",
+        "message": "感谢你测试 Ionexa AI。欢迎提供反馈。",
         "linkLabel": "提交反馈"
       },
       "progress": {
@@ -977,7 +977,7 @@
       "removeTitle": "移除成员",
       "descriptionIncluded": "在 {plan} 方案下 — 受邀成员可获得该等级的完整访问权限,无需额外付费。",
       "seatsUsed": "已使用 {used} / {total} 个席位",
-      "setupSuccessTitle": "您的团队已准备就绪!",
+      "setupSuccessTitle": "你的团队已准备就绪",
       "setupSuccessBody": "在下方邀请您的第一位团队成员。",
       "roleLabel": "角色 / 职位",
       "rolePlaceholder": "此人负责什么工作?",
@@ -1529,14 +1529,14 @@
       "requestLabel": "你希望这个智能体为你做什么？",
       "requestPlaceholder": "例如：每天早上把英伟达的最新消息发给我",
       "deliveryNote": "结果将发送到 {email}，即你账户的邮箱地址。",
-      "designButton": "设计我的智能体",
+      "designButton": "设计你的智能体",
       "designing": "设计中……",
       "buildError": "无法设计该智能体，请重试。",
       "clarificationTitle": "先问两个简短的问题：",
       "clarificationSkip": "跳过，直接创建",
       "clarificationContinue": "继续",
       "clarificationAnswerPlaceholder": "你的回答……",
-      "previewTitle": "我将创建的内容",
+      "previewTitle": "这个智能体会做什么",
       "previewName": "名称",
       "previewSchedule": "运行时间",
       "previewCostPerRun": "每次运行费用",
@@ -1677,7 +1677,7 @@
         "noCharge": "未向你收费——什么都没有运行。",
         "noChargeYet": "目前尚未收取任何费用。",
         "tryInstead": "换成研究、监测或摘要类的请求试试——例如「每周一，总结我所在行业的最新动态」。",
-        "rephrase": "我想重写请求",
+        "rephrase": "重写你的请求",
         "partialTitle": "其中一部分无法完成",
         "partialWillDo": "智能体会改为做这些：{parts}",
         "partialContinue": "只创建可行的部分",
@@ -1904,7 +1904,7 @@
       "saveSelection": "保存所选 {count} 个",
       "collectionCreated": "文件集 {name} 已保存",
       "collectionError": "无法保存该文件集。",
-      "askTitle": "向我的文档提问",
+      "askTitle": "向你的文档提问",
       "askNothingSelected": "勾选答案应当来源的文件。除此之外不会使用任何内容。",
       "askSelected": "依据 {count} 个文件回答：{names}",
       "tooManySelected": "每次最多可就 {max} 个文件提问。",
@@ -2068,7 +2068,7 @@
       "noneTitle": "暂时还没有可靠的发现",
       "noneNeedMore": "目前的数据还不足以称为规律。通常几十行带日期的记录就会开始显现出一些东西——我们宁可不说，也不会编造。",
       "noneYet": "再添加一些数据，然后从仪表板重新运行。",
-      "goToDashboard": "前往我的仪表板"
+      "goToDashboard": "前往你的仪表板"
     },
     "insights": {
       "title": "我注意到的",
@@ -2127,7 +2127,7 @@
       "description": "分享 Ionexa，从你带来的人持续付费中获得分成。",
       "pitch": "你推荐的人每次付费，你都能拿 {percent}%，按月结算，持续 {months} 个月。",
       "pitchTerms": "不能推荐自己，每个人只计一次。佣金从对方第一次付费开始计算。",
-      "join": "获取我的链接",
+      "join": "获取你的链接",
       "joining": "正在创建…",
       "joinError": "创建失败，请重试。",
       "yourLink": "你的链接",
@@ -2396,7 +2396,7 @@
   "askAi": {
     "buttonLabel": "问 AI",
     "title": "就这条 {title} 询问 AI",
-    "subtitle": "AI 已经了解这条记录的数据——直接提问即可。",
+    "subtitle": "AI 已经有这条记录的数据。想问什么都可以。",
     "placeholder": "询问关于这条记录的任何问题...",
     "emptyState": "就这条记录提出一个问题——无需解释背景，AI 已经掌握了。",
     "send": "发送",
@@ -2454,11 +2454,11 @@
     },
     "firstEntityLink": {
       "title": "连接者",
-      "description": "在知识图谱中链接两条记录。"
+      "description": "在知识图谱中关联两条记录。"
     },
     "tenEntityLinks": {
       "title": "网络构建者",
-      "description": "跨模块链接10条记录。"
+      "description": "在不同模块之间关联 10 条记录。"
     },
     "firstEnergyCheckin": {
       "title": "签到",
@@ -2474,7 +2474,7 @@
     },
     "fiftyEntries": {
       "title": "高级用户",
-      "description": "在所有模块中记录50条条目。"
+      "description": "在所有模块中记录 50 条记录。"
     }
   },
   "credits": {
@@ -3319,7 +3319,7 @@
     "copied": "已复制",
     "language": "语言",
     "targetLanguage": "转换为",
-    "useWorkspace": "用我的其他模块作为上下文",
+    "useWorkspace": "用你的其他模块作为上下文",
     "run": "运行",
     "running": "处理中…",
     "result": "结果",

@@ -231,7 +231,7 @@
     },
     "businessTitle": "Business",
     "businessSubtitle": "Para equipos que construyen juntos",
-    "businessExplanation": "Elige Professional o Ultimate como tu plan base — ambos desbloquean la colaboración en equipo. Luego invita a miembros del equipo: cada uno obtiene acceso completo al nivel de tu plan, por +{price}/miembro/mes en Professional, o incluido gratis en Ultimate.",
+    "businessExplanation": "Elige Professional o Ultimate como tu plan base — ambos incluyen la colaboración en equipo. Luego invita a miembros del equipo: cada uno obtiene acceso completo al nivel de tu plan, por +{price}/miembro/mes en Professional, o incluido gratis en Ultimate.",
     "businessCardDescription": "Empieza con cualquier plan como base de tu equipo, luego invita a miembros por +{price}/mes cada uno — todos obtienen acceso completo al nivel de tu plan. Perfecto para equipos que trabajan juntos.",
     "businessFeatureBase": "Elige Professional o Ultimate como tu plan base",
     "businessFeatureFullAccess": "Cada miembro obtiene acceso completo al nivel de tu plan",
@@ -481,7 +481,7 @@
       "missingToken": "A este enlace le falta su token de confirmación. Usa el enlace de tu correo exactamente como se envió.",
       "warning": "Esto eliminará permanentemente tu cuenta y todos los registros que hayas guardado. No se puede deshacer.",
       "deleting": "Eliminando…",
-      "confirmButton": "Eliminar mi cuenta permanentemente",
+      "confirmButton": "Eliminar tu cuenta permanentemente",
       "cancel": "Cancelar y volver",
       "confirmFailed": "No hemos podido completar la eliminación. Tu cuenta sigue existiendo: vuelve a usar el enlace o contacta con soporte."
     }
@@ -879,7 +879,7 @@
         "openCredits": "Ver el historial →"
       },
       "betaFeedback": {
-        "message": "¡Gracias por probar Ionexa AI! Nos encantaría conocer tu opinión.",
+        "message": "Gracias por probar Ionexa AI. Tu opinión es bienvenida.",
         "linkLabel": "Enviar comentarios"
       },
       "progress": {
@@ -977,7 +977,7 @@
       "removeTitle": "Quitar miembro",
       "descriptionIncluded": "En el plan {plan} — los miembros invitados obtienen acceso completo a este nivel, incluido sin cargo adicional.",
       "seatsUsed": "{used} de {total} asientos usados",
-      "setupSuccessTitle": "¡Tu equipo está listo!",
+      "setupSuccessTitle": "Tu equipo está listo",
       "setupSuccessBody": "Invita a tu primer miembro del equipo a continuación.",
       "roleLabel": "Rol / Puesto",
       "rolePlaceholder": "¿Qué hace esta persona?",
@@ -1529,14 +1529,14 @@
       "requestLabel": "¿Qué quieres que haga este agente por ti?",
       "requestPlaceholder": "p. ej. Cada mañana, envíame las últimas noticias sobre Nvidia",
       "deliveryNote": "Los resultados se envían a {email}, la dirección de tu cuenta.",
-      "designButton": "Diseñar mi agente",
+      "designButton": "Diseñar tu agente",
       "designing": "Diseñando...",
       "buildError": "No se pudo diseñar ese agente. Inténtalo de nuevo.",
       "clarificationTitle": "Un par de preguntas rápidas primero:",
       "clarificationSkip": "Omitir y crearlo igualmente",
       "clarificationContinue": "Continuar",
       "clarificationAnswerPlaceholder": "Tu respuesta...",
-      "previewTitle": "Esto es lo que voy a crear",
+      "previewTitle": "Qué hará este agente",
       "previewName": "Nombre",
       "previewSchedule": "Se ejecuta",
       "previewCostPerRun": "Coste por ejecución",
@@ -1677,7 +1677,7 @@
         "noCharge": "No se te ha cobrado nada: no se ha ejecutado nada.",
         "noChargeYet": "Todavía no se ha cobrado nada.",
         "tryInstead": "Prueba a pedir investigación, seguimiento o un resumen; por ejemplo, «cada lunes, resume las novedades de mi sector».",
-        "rephrase": "Quiero reescribir mi petición",
+        "rephrase": "Reescribir tu petición",
         "partialTitle": "Una parte de esto no se puede hacer",
         "partialWillDo": "En su lugar, el agente haría esto: {parts}",
         "partialContinue": "Crear solo la parte que funciona",
@@ -1904,7 +1904,7 @@
       "saveSelection": "{count, plural, one {Guardar # seleccionado} other {Guardar # seleccionados}}",
       "collectionCreated": "Colección {name} guardada",
       "collectionError": "No se pudo guardar la colección.",
-      "askTitle": "Preguntar a mis documentos",
+      "askTitle": "Preguntar a tus documentos",
       "askNothingSelected": "Marca los archivos de los que debe salir la respuesta. No se usará nada más.",
       "askSelected": "Respondiendo desde {count, plural, one {# archivo} other {# archivos}}: {names}",
       "tooManySelected": "Pregunta sobre un máximo de {max} archivos a la vez.",
@@ -2068,11 +2068,11 @@
       "noneTitle": "Aún no hay nada sólido",
       "noneNeedMore": "Todavía no hay suficiente para hablar de un patrón. Unas decenas de filas con fechas suele ser el punto en que empiezan a aparecer cosas, y preferimos no decir nada antes que inventarlo.",
       "noneYet": "Añade algo más y vuelve a ejecutarlo desde tu panel.",
-      "goToDashboard": "Ir a mi panel"
+      "goToDashboard": "Ir a tu panel"
     },
     "insights": {
       "title": "Lo que he notado",
-      "basedOn": "de {count, plural, one {# de tus registros} other {# de tus registros}}",
+      "basedOn": "de {count, plural, one {# de tus entradas} other {# de tus entradas}}",
       "checkIt": "Compruébalo tú mismo",
       "showNumbers": "Ver los números",
       "hideNumbers": "Ocultar los números",
@@ -2127,7 +2127,7 @@
       "description": "Comparte Ionexa y gana parte de lo que sigan pagando las personas que traigas.",
       "pitch": "Gana el {percent}% de cada pago de tus referidos, cada mes, durante {months, plural, one {# mes} other {# meses}}.",
       "pitchTerms": "No puedes referirte a ti mismo, y cada persona solo cuenta una vez. La comisión empieza con su primer pago.",
-      "join": "Quiero mi enlace",
+      "join": "Obtener tu enlace",
       "joining": "Preparando…",
       "joinError": "No se pudo. Inténtalo de nuevo.",
       "yourLink": "Tu enlace",
@@ -2155,7 +2155,7 @@
     "search": {
       "kinds": {
         "page": "Páginas",
-        "module": "Registros",
+        "module": "Entradas",
         "file": "Archivos",
         "chat": "Conversaciones",
         "website": "Sitios web",
@@ -2396,7 +2396,7 @@
   "askAi": {
     "buttonLabel": "Preguntar a la IA",
     "title": "Pregunta a la IA sobre este {title}",
-    "subtitle": "La IA ya conoce los datos de esta entrada — solo pregunta.",
+    "subtitle": "La IA ya tiene los datos de esta entrada. Pregunta lo que quieras.",
     "placeholder": "Pregunta cualquier cosa sobre esta entrada...",
     "emptyState": "Haz una pregunta sobre esta entrada — no hace falta explicar el contexto, la IA ya lo tiene.",
     "send": "Enviar",
@@ -2454,11 +2454,11 @@
     },
     "firstEntityLink": {
       "title": "Conector",
-      "description": "Enlaza dos registros en el Knowledge Graph."
+      "description": "Enlaza dos entradas en el Grafo de Conocimiento."
     },
     "tenEntityLinks": {
       "title": "Constructor de Red",
-      "description": "Enlaza 10 registros entre distintos módulos."
+      "description": "Enlaza 10 entradas entre distintos módulos."
     },
     "firstEnergyCheckin": {
       "title": "Check-In",
@@ -3319,7 +3319,7 @@
     "copied": "Copiado",
     "language": "Lenguaje",
     "targetLanguage": "Convertir a",
-    "useWorkspace": "Usar mis otros módulos como contexto",
+    "useWorkspace": "Usar tus otros módulos como contexto",
     "run": "Ejecutar",
     "running": "Trabajando…",
     "result": "Resultado",

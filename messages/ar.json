@@ -231,7 +231,7 @@
     },
     "businessTitle": "الأعمال",
     "businessSubtitle": "للفرق التي تبني معًا",
-    "businessExplanation": "اختر Professional أو Ultimate كخطتك الأساسية — كلاهما يفتح التعاون الجماعي. ثم ادعُ أعضاء الفريق: يحصل كل عضو على وصول كامل بمستوى خطتك، مقابل +{price}/عضو/شهريًا في Professional، أو مجانًا ضمن Ultimate.",
+    "businessExplanation": "اختر Professional أو Ultimate كخطتك الأساسية — كلاهما يشمل التعاون الجماعي. ثم ادعُ أعضاء الفريق: يحصل كل عضو على وصول كامل بمستوى خطتك، مقابل +{price}/عضو/شهريًا في Professional، أو مجانًا ضمن Ultimate.",
     "businessCardDescription": "ابدأ بأي خطة كأساس لفريقك، ثم ادعُ الأعضاء مقابل +{price}/شهريًا لكل عضو — يحصل الجميع على وصول كامل بمستوى خطتك. مثالي للفرق التي تعمل معًا.",
     "businessFeatureBase": "اختر Professional أو Ultimate كخطتك الأساسية",
     "businessFeatureFullAccess": "يحصل كل عضو على وصول كامل بمستوى خطتك",
@@ -481,7 +481,7 @@
       "missingToken": "هذا الرابط تنقصه رمز التأكيد. يرجى استخدام الرابط من بريدك الإلكتروني كما أُرسل تمامًا.",
       "warning": "سيؤدي هذا إلى حذف حسابك وكل سجل أضفته نهائيًا. لا يمكن التراجع عن ذلك.",
       "deleting": "جارٍ الحذف…",
-      "confirmButton": "حذف حسابي نهائيًا",
+      "confirmButton": "حذف حسابك نهائيًا",
       "cancel": "إلغاء والعودة",
       "confirmFailed": "تعذّر إتمام الحذف. حسابك ما زال موجودًا — أعد المحاولة عبر الرابط أو تواصل مع الدعم."
     }
@@ -868,18 +868,18 @@
         "thisWeek": "هذا الأسبوع",
         "mostActive": "الأكثر نشاطًا",
         "creditsRemaining": "الرصيد المتبقي",
-        "fillsAfter": "يمتلئ بعد {count} مدخلات",
+        "fillsAfter": "يمتلئ بعد {count} إدخالات",
         "totalEntriesExplain": "كل ما سجّلته، في كل وحدة، منذ البداية.",
         "thisWeekExplain": "ما سُجّل في آخر سبعة أيام — مدى نشاط هذا الأسبوع.",
         "mostActiveExplain": "الوحدة التي تكتب فيها أكثر. حيث يذهب انتباهك.",
         "creditsExplain": "ما تبقّى من حصتك الشهرية لعمل الذكاء الاصطناعي.",
         "ofTotal": "{count, plural, zero {من # إجمالًا} one {من # إجمالًا} two {من # إجمالًا} few {من # إجمالًا} many {من # إجمالًا} other {من # إجمالًا}}",
-        "fromEntries": "{count, plural, zero {من # مدخل} one {من # مدخل} two {من # مدخلين} few {من # مدخلات} many {من # مدخلًا} other {من # مدخل}}",
+        "fromEntries": "{count, plural, zero {من # إدخال} one {من # إدخال} two {من # إدخالين} few {من # إدخالات} many {من # إدخالًا} other {من # إدخال}}",
         "openEntries": "اعرض المدخلات ←",
         "openCredits": "اعرض السجل ←"
       },
       "betaFeedback": {
-        "message": "شكرًا لتجربتك Ionexa AI! يسعدنا سماع رأيك.",
+        "message": "شكرًا لتجربتك Ionexa AI. رأيك موضع ترحيب.",
         "linkLabel": "إرسال ملاحظات"
       },
       "progress": {
@@ -950,7 +950,7 @@
       "setupProgress": {
         "title": "تقدّم الإعداد",
         "count": "{done} من {total} خطوات",
-        "suggestion": "تظهر درجة نشاطك بعد تسجيل {count} مدخلات — عدد يكفي ألّا يحدّدها مدخل واحد.",
+        "suggestion": "تظهر درجة نشاطك بعد تسجيل {count} إدخالات — عدد يكفي ألّا يحدّدها إدخال واحد.",
         "steps": {
           "onboarding": "أكمل أسئلة الترحيب",
           "firstEntry": "سجّل مدخلك الأول",
@@ -977,7 +977,7 @@
       "removeTitle": "إزالة العضو",
       "descriptionIncluded": "في خطة {plan} — يحصل الأعضاء المدعوون على وصول كامل بهذا المستوى، متضمن دون أي رسوم إضافية.",
       "seatsUsed": "تم استخدام {used} من {total} مقعد",
-      "setupSuccessTitle": "فريقك جاهز الآن!",
+      "setupSuccessTitle": "فريقك جاهز الآن",
       "setupSuccessBody": "ادعُ أول عضو في فريقك أدناه.",
       "roleLabel": "الدور / المنصب",
       "rolePlaceholder": "ماذا يفعل هذا الشخص؟",
@@ -1529,14 +1529,14 @@
       "requestLabel": "ماذا تريد أن يفعل هذا الوكيل من أجلك؟",
       "requestPlaceholder": "مثال: كل صباح، أرسل لي آخر أخبار Nvidia",
       "deliveryNote": "تُرسَل النتائج إلى {email}، وهو عنوان حسابك.",
-      "designButton": "صمّم وكيلي",
+      "designButton": "صمّم وكيلك",
       "designing": "جارٍ التصميم...",
       "buildError": "تعذّر تصميم هذا الوكيل. حاول مرة أخرى.",
       "clarificationTitle": "سؤالان سريعان أولاً:",
       "clarificationSkip": "تخطَّ وأنشئه على أي حال",
       "clarificationContinue": "متابعة",
       "clarificationAnswerPlaceholder": "إجابتك...",
-      "previewTitle": "هذا ما سأبنيه",
+      "previewTitle": "ما سيفعله هذا الوكيل",
       "previewName": "الاسم",
       "previewSchedule": "يعمل",
       "previewCostPerRun": "التكلفة لكل تشغيل",
@@ -1677,7 +1677,7 @@
         "noCharge": "لم يتم خصم أي مبلغ منك — لم يُنفَّذ شيء.",
         "noChargeYet": "لم يتم خصم أي شيء حتى الآن.",
         "tryInstead": "جرّب بدلاً من ذلك طلب بحث أو متابعة أو ملخّص — مثلاً: «كل يوم اثنين، لخّص لي جديد قطاعي».",
-        "rephrase": "أريد إعادة صياغة الطلب",
+        "rephrase": "أعد صياغة طلبك",
         "partialTitle": "جزء من هذا غير ممكن",
         "partialWillDo": "سيقوم الوكيل بهذا بدلاً منه: {parts}",
         "partialContinue": "أنشئ الجزء الممكن فقط",
@@ -1904,7 +1904,7 @@
       "saveSelection": "{count, plural, zero {لا شيء محدد} one {احفظ العنصر المحدد} two {احفظ العنصرين المحددين} few {احفظ # عناصر محددة} many {احفظ # عنصرًا محددًا} other {احفظ # عنصر محدد}}",
       "collectionCreated": "تم حفظ المجموعة {name}",
       "collectionError": "تعذّر حفظ المجموعة.",
-      "askTitle": "اسأل مستنداتي",
+      "askTitle": "اسأل مستنداتك",
       "askNothingSelected": "حدّد الملفات التي ينبغي أن تأتي منها الإجابة. لن يُستخدم غيرها.",
       "askSelected": "الإجابة من {count, plural, zero {لا ملفات} one {ملف واحد} two {ملفين} few {# ملفات} many {# ملفًا} other {# ملف}}: {names}",
       "tooManySelected": "اسأل عن {max} ملفات كحد أقصى في المرة الواحدة.",
@@ -2072,7 +2072,7 @@
     },
     "insights": {
       "title": "ما لاحظته",
-      "basedOn": "من {count, plural, zero {لا سجلات} one {سجل واحد من سجلاتك} two {سجلين من سجلاتك} few {# سجلات من سجلاتك} many {# سجلًا من سجلاتك} other {# سجل من سجلاتك}}",
+      "basedOn": "من {count, plural, zero {لا إدخالات} one {إدخال واحد من إدخالاتك} two {إدخالين من إدخالاتك} few {# إدخالات من إدخالاتك} many {# إدخالًا من إدخالاتك} other {# إدخال من إدخالاتك}}",
       "checkIt": "تحقّق بنفسك",
       "showNumbers": "اعرض الأرقام",
       "hideNumbers": "أخفِ الأرقام",
@@ -2127,7 +2127,7 @@
       "description": "شارك إيونكسا واكسب جزءًا مما يدفعه من تجلبهم.",
       "pitch": "اكسب {percent}% من كل دفعة يسددها من تُحيلهم، شهريًا، لمدة {months, plural, zero {لا أشهر} one {شهر واحد} two {شهرين} few {# أشهر} many {# شهرًا} other {# شهر}}.",
       "pitchTerms": "لا يمكنك إحالة نفسك، وكل شخص يُحتسب مرة واحدة فقط. تبدأ العمولة من أول دفعة له.",
-      "join": "احصل على رابطي",
+      "join": "احصل على رابطك",
       "joining": "جارٍ الإعداد…",
       "joinError": "لم ينجح الأمر. حاول مرة أخرى.",
       "yourLink": "رابطك",
@@ -2155,7 +2155,7 @@
     "search": {
       "kinds": {
         "page": "الصفحات",
-        "module": "السجلات",
+        "module": "الإدخالات",
         "file": "الملفات",
         "chat": "المحادثات",
         "website": "المواقع",
@@ -2396,7 +2396,7 @@
   "askAi": {
     "buttonLabel": "اسأل الذكاء الاصطناعي",
     "title": "اسأل الذكاء الاصطناعي عن هذا {title}",
-    "subtitle": "الذكاء الاصطناعي يعرف بيانات هذا الإدخال بالفعل — فقط اسأل.",
+    "subtitle": "الذكاء الاصطناعي لديه بيانات هذا الإدخال بالفعل. اسأل ما تشاء.",
     "placeholder": "اسأل أي شيء عن هذا الإدخال...",
     "emptyState": "اطرح سؤالاً عن هذا الإدخال — لا حاجة لشرح السياق، فالذكاء الاصطناعي يعرفه بالفعل.",
     "send": "إرسال",
@@ -2454,11 +2454,11 @@
     },
     "firstEntityLink": {
       "title": "الرابط",
-      "description": "اربط سجلّين معًا في رسم المعرفة."
+      "description": "اربط إدخالين معًا في رسم المعرفة."
     },
     "tenEntityLinks": {
       "title": "بنّاء الشبكة",
-      "description": "اربط 10 سجلات معًا عبر الوحدات."
+      "description": "اربط 10 إدخالات معًا عبر الوحدات."
     },
     "firstEnergyCheckin": {
       "title": "تسجيل الحضور",
@@ -3319,7 +3319,7 @@
     "copied": "تم النسخ",
     "language": "اللغة",
     "targetLanguage": "التحويل إلى",
-    "useWorkspace": "استخدام وحداتي الأخرى كسياق",
+    "useWorkspace": "استخدام وحداتك الأخرى كسياق",
     "run": "تشغيل",
     "running": "جارٍ العمل…",
     "result": "النتيجة",

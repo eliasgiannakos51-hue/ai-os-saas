@@ -25,11 +25,19 @@ export function HomeStatCard({
   label,
   value,
   trend,
+  placeholderLabel,
 }: {
   icon: ReactNode;
   label: string;
   value: string;
   trend?: number[];
+  /**
+   * Shown INSTEAD of the line when `trend` exists but is still all
+   * zeroes — "fills in after 3 entries", or whatever the caller words it
+   * as. Optional: a card that passes no trend at all (Most Active,
+   * Credits Remaining) has no chart to stand in for and gets nothing.
+   */
+  placeholderLabel?: string;
 }) {
   const chartData = trend?.map((count, i) => ({ i, count }));
   const hasTrend = chartData && chartData.length > 1 && chartData.some((d) => d.count > 0);
@@ -51,6 +59,28 @@ export function HomeStatCard({
           {icon}
         </span>
       </div>
+      {/* NEVER AN EMPTY CHART, AND NEVER A MISSING ONE EITHER — V4.6 #5.
+          An all-zero series used to render nothing at all, so the card
+          silently changed height between an account with data and one
+          without, and a new user was never told the space would ever
+          fill. This is the same 32px slot holding a flat, dimmed
+          placeholder curve and a sentence saying what fills it.
+
+          The placeholder is deliberately NOT the real dataKey and not the
+          accent colour: it must not be mistakable for a reading of zero.
+          aria-hidden because the sentence beside it already says the
+          thing a screen reader needs. */}
+      {!hasTrend && placeholderLabel && chartData && (
+        <div className="relative z-[1] mt-3 h-8 w-full">
+          <div
+            className="absolute inset-x-0 top-1/2 h-px bg-[repeating-linear-gradient(90deg,rgb(255_255_255/0.14)_0_6px,transparent_6px_12px)]"
+            aria-hidden="true"
+          />
+          <p className="absolute inset-x-0 bottom-0 truncate text-[10px] leading-none text-muted">
+            {placeholderLabel}
+          </p>
+        </div>
+      )}
       {hasTrend && (
         <div className="relative z-[1] mt-3 h-8 w-full" aria-hidden="true">
           <ResponsiveContainer width="100%" height="100%">

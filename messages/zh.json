@@ -867,7 +867,8 @@
         "totalEntries": "总记录数",
         "thisWeek": "本周",
         "mostActive": "最活跃",
-        "creditsRemaining": "剩余额度"
+        "creditsRemaining": "剩余额度",
+        "fillsAfter": "记录 {count} 条后填充"
       },
       "betaFeedback": {
         "message": "感谢你测试 Ionexa AI！我们很想听听你的反馈。",
@@ -937,7 +938,18 @@
       "quickStart": "快速开始",
       "templateFailed": "无法应用该模板。请稍后重试 — 未添加任何内容。",
       "quickStartBlurb": "添加几条示例记录，看看填充后的工作区是什么样子。",
-      "quickStartAdd": "添加"
+      "quickStartAdd": "添加",
+      "setupProgress": {
+        "title": "设置进度",
+        "count": "{total} 步中的 {done} 步",
+        "suggestion": "记录 {count} 条条目后会出现活跃度评分——足够多，才不会由某一条决定。",
+        "steps": {
+          "onboarding": "完成欢迎问题",
+          "firstEntry": "记录你的第一条条目",
+          "secondModule": "在第二个领域记录一些内容",
+          "mission": "设定一个目标"
+        }
+      }
     },
     "team": {
       "title": "团队",

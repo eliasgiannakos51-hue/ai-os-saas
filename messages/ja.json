@@ -867,7 +867,8 @@
         "totalEntries": "合計エントリー数",
         "thisWeek": "今週",
         "mostActive": "最も活発",
-        "creditsRemaining": "残りクレジット"
+        "creditsRemaining": "残りクレジット",
+        "fillsAfter": "{count} 件記録すると表示されます"
       },
       "betaFeedback": {
         "message": "Ionexa AI をお試しいただきありがとうございます！ぜひご意見をお聞かせください。",
@@ -937,7 +938,18 @@
       "quickStart": "クイックスタート",
       "templateFailed": "このテンプレートを適用できませんでした。少し待ってからお試しください — 何も追加されていません。",
       "quickStartBlurb": "サンプルをいくつか追加して、中身の入ったワークスペースがどう見えるか確かめてみてください。",
-      "quickStartAdd": "追加"
+      "quickStartAdd": "追加",
+      "setupProgress": {
+        "title": "セットアップの進捗",
+        "count": "{total} 件中 {done} 件",
+        "suggestion": "{count} 件記録すると活動スコアが表示されます。1 件で決まってしまわない程度の数です。",
+        "steps": {
+          "onboarding": "ようこそ質問に答える",
+          "firstEntry": "最初の記録をつける",
+          "secondModule": "2 つ目の領域にも記録する",
+          "mission": "目標を設定する"
+        }
+      }
     },
     "team": {
       "title": "チーム",

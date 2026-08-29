@@ -867,7 +867,8 @@
         "totalEntries": "Einträge insgesamt",
         "thisWeek": "Diese Woche",
         "mostActive": "Aktivstes",
-        "creditsRemaining": "Verbleibende Credits"
+        "creditsRemaining": "Verbleibende Credits",
+        "fillsAfter": "Füllt sich nach {count} Einträgen"
       },
       "betaFeedback": {
         "message": "Danke, dass du Ionexa AI testest! Wir freuen uns über dein Feedback.",
@@ -937,7 +938,18 @@
       "quickStart": "Schnellstart",
       "templateFailed": "Wir konnten diese Vorlage nicht anwenden. Versuch es gleich noch einmal — es wurde nichts hinzugefügt.",
       "quickStartBlurb": "Füge ein paar Beispieleinträge hinzu, um zu sehen, wie ein gefüllter Arbeitsbereich aussieht.",
-      "quickStartAdd": "Hinzufügen"
+      "quickStartAdd": "Hinzufügen",
+      "setupProgress": {
+        "title": "Einrichtungsfortschritt",
+        "count": "{done} von {total} Schritten",
+        "suggestion": "Dein Aktivitätswert erscheint, sobald du {count} Einträge erfasst hast — genug, dass kein einzelner ihn entscheidet.",
+        "steps": {
+          "onboarding": "Beantworte die Willkommensfragen",
+          "firstEntry": "Erfasse deinen ersten Eintrag",
+          "secondModule": "Erfasse etwas in einem zweiten Bereich",
+          "mission": "Setze ein Ziel"
+        }
+      }
     },
     "team": {
       "title": "Team",

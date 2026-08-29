@@ -867,7 +867,8 @@
         "totalEntries": "Total Entries",
         "thisWeek": "This Week",
         "mostActive": "Most Active",
-        "creditsRemaining": "Credits Remaining"
+        "creditsRemaining": "Credits Remaining",
+        "fillsAfter": "Fills in after {count} entries"
       },
       "betaFeedback": {
         "message": "Thanks for testing Ionexa AI! I'd love your feedback.",
@@ -937,7 +938,18 @@
       "quickStart": "Quick Start",
       "templateFailed": "We couldn't apply that template. Try again in a moment — nothing was added.",
       "quickStartBlurb": "Add a few example entries so you can see what a filled-in workspace looks like.",
-      "quickStartAdd": "Add"
+      "quickStartAdd": "Add",
+      "setupProgress": {
+        "title": "Setup progress",
+        "count": "{done} of {total} steps",
+        "suggestion": "Your activity score appears once you have logged {count} entries — enough that no single one decides it.",
+        "steps": {
+          "onboarding": "Finish the welcome questions",
+          "firstEntry": "Log your first entry",
+          "secondModule": "Log something in a second area",
+          "mission": "Set a goal"
+        }
+      }
     },
     "team": {
       "title": "Team",

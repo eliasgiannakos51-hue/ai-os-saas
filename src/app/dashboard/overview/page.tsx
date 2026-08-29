@@ -27,8 +27,14 @@ import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
 import { logApiError } from "@/lib/log-error";
 import { isActiveMission, missionProgressPercent } from "@/lib/mission-progress";
 import { computeNextAction } from "@/lib/next-action";
-import { computeHealthScore } from "@/lib/health-score";
+import {
+  computeHealthScore,
+  hasEnoughDataForScore,
+  HEALTH_SCORE_MIN_ENTRIES,
+  CHART_MIN_ENTRIES,
+} from "@/lib/health-score";
 import { HealthScoreCard } from "@/components/overview/health-score-card";
+import { SetupProgressCard, type SetupStep } from "@/components/overview/setup-progress-card";
 import { loadLatestEnergyCheckIn } from "@/lib/energy-checkins";
 import { EnergyCheckinWidget } from "@/components/overview/energy-checkin-widget";
 import { Database, TrendingUp, Layers } from "lucide-react";
@@ -380,6 +386,37 @@ export default async function OverviewPage() {
           t("aiCoach.mostActiveIn", { module: tKey(topModulesThisWeek[0].module.titleKey) }),
         ].join(". ");
 
+  // FOUR STEPS, NONE OF THEM A NEW QUERY. Onboarding state, the entry
+  // total, the per-module summaries and the active mission are all
+  // already read above — a setup checklist that cost its own round trip
+  // would be a worse trade than the number it replaces.
+  const setupSteps: SetupStep[] = [
+    {
+      id: "onboarding",
+      label: t("setupProgress.steps.onboarding"),
+      done: Boolean(onboardingState?.completed_at || onboardingState?.skipped_at),
+      href: "/onboarding",
+    },
+    {
+      id: "firstEntry",
+      label: t("setupProgress.steps.firstEntry"),
+      done: totalEntries > 0,
+      href: "/dashboard/records",
+    },
+    {
+      id: "secondModule",
+      label: t("setupProgress.steps.secondModule"),
+      done: summaries.filter((s) => s.count > 0).length >= 2,
+      href: "/dashboard/records",
+    },
+    {
+      id: "mission",
+      label: t("setupProgress.steps.mission"),
+      done: Boolean(activeMission),
+      href: "/dashboard/mission",
+    },
+  ];
+
   return (
     <main className="min-h-full">
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
@@ -401,12 +438,14 @@ export default async function OverviewPage() {
           <HomeStatCard
             icon={<Database className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.totalEntries")}
+            placeholderLabel={t("statRow.fillsAfter", { count: CHART_MIN_ENTRIES })}
             value={formatNumber(totalEntries, locale)}
             trend={weeklySparkline}
           />
           <HomeStatCard
             icon={<TrendingUp className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.thisWeek")}
+            placeholderLabel={t("statRow.fillsAfter", { count: CHART_MIN_ENTRIES })}
             value={formatNumber(totalThisWeek, locale)}
             trend={weeklySparkline}
           />
@@ -418,13 +457,35 @@ export default async function OverviewPage() {
           <CreditsHomeStat label={t("statRow.creditsRemaining")} />
         </div>
 
-        <HealthScoreCard
-          title={t("healthScore.title")}
-          score={healthScore.score}
-          rangeLabel={healthScoreRangeLabel}
-          suggestion={healthScoreSuggestion}
-          trend={weeklySparkline}
-        />
+        {/* NO VERDICT BEFORE THERE IS EVIDENCE — V4.6 #5.
+            Measured before this branch existed: a real production build,
+            a real account with no rows, and the ring read "Business
+            Health Score: 0 / 100" under the words "Just getting started".
+            Zero out of a hundred is a judgement, and the account had not
+            done anything to be judged for.
+            HEALTH_SCORE_MIN_ENTRIES is five, and lib/health-score.ts
+            carries the table that picked it: the first entry alone moves
+            the score thirty points, and only from five does no single
+            entry move it more than six. */}
+        {hasEnoughDataForScore(totalEntries) ? (
+          <HealthScoreCard
+            title={t("healthScore.title")}
+            score={healthScore.score}
+            rangeLabel={healthScoreRangeLabel}
+            suggestion={healthScoreSuggestion}
+            trend={weeklySparkline}
+          />
+        ) : (
+          <SetupProgressCard
+            title={t("setupProgress.title")}
+            countLabel={t("setupProgress.count", {
+              done: setupSteps.filter((s) => s.done).length,
+              total: setupSteps.length,
+            })}
+            suggestion={t("setupProgress.suggestion", { count: HEALTH_SCORE_MIN_ENTRIES })}
+            steps={setupSteps}
+          />
+        )}
 
         <EnergyCheckinWidget initialCheckIn={latestEnergyCheckIn} />
 

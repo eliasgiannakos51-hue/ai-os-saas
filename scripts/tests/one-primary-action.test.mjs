@@ -345,6 +345,36 @@ for (const f of allFiles) {
   gradients += (src.match(/bg-(?:gradient-to-\w+|\[linear-gradient)/g) ?? []).length;
   gradientText += (src.match(/bg-clip-text/g) ?? []).length;
 }
+// AND THE ONE WRITTEN IN CSS RATHER THAN IN TAILWIND, which this census
+// reported as not existing.
+//
+// It counted `bg-clip-text` in .tsx and stopped there, so it found ONE
+// piece of gradient text — the health score's range label, amber into
+// orange — and the conclusion drawn from it was that the brief's
+// complaint about "the pink/purple gradient in the title" did not hold.
+// It did hold. The Home page's H1 carries `.hero-gradient-text`, declared
+// in globals.css as white -> #ffd9a0 -> #f97316 -> #a855f7: white,
+// through amber, into violet, at 3.4rem, and it is the largest thing on
+// the page. A scan that only reads one of the two ways a codebase can
+// clip a background to text will always be able to say the other one is
+// absent.
+const cssText = readFileSync("src/app/globals.css", "utf8");
+const cssGradientClasses = new Set(
+  [...cssText.matchAll(/^\.([\w-]+)\s*\{[^}]*?background-clip:\s*text/gms)].map((m) => m[1])
+);
+let cssGradientTextUses = 0;
+for (const f of allFiles) {
+  let src;
+  try {
+    src = stripCode(readFileSync(f, "utf8"));
+  } catch {
+    continue;
+  }
+  for (const cls of cssGradientClasses) {
+    cssGradientTextUses += (src.match(new RegExp(`\\b${cls}\\b`, "g")) ?? []).length;
+  }
+}
+gradientText += cssGradientTextUses;
 console.log(`        accent box-shadows: ${glow} · gradient backgrounds: ${gradients} · gradient text: ${gradientText}`);
 // 48, not the 44 a first scan reported: that one measured only the files
 // a page imports, and the layout chain — which every dashboard screen
@@ -352,12 +382,25 @@ console.log(`        accent box-shadows: ${glow} · gradient backgrounds: ${grad
 // page look like it had a single primary action.
 check(`accent box-shadows: ${glow}, ceiling 48`, glow <= 48, String(glow));
 check(`gradient backgrounds: ${gradients}, ceiling 13`, gradients <= 13, String(gradients));
-// EXACTLY ONE PIECE OF GRADIENT TEXT IN THE PRODUCT, and it is the
-// Business Health Score's range label (amber-300 to orange-400, in
-// components/overview/health-score-card.tsx). Pinned at one rather than
-// floored: a second would be the thing the brief warns about, and zero
-// would mean the decision was taken without being recorded here.
-check(`gradient text: ${gradientText}, pinned at 1`, gradientText === 1, String(gradientText));
+// TWO PIECES OF GRADIENT TEXT, and the second is the one the brief was
+// about all along:
+//   1. the health score's range label — bg-clip-text, amber-300 to
+//      orange-400, in components/overview/health-score-card.tsx
+//   2. the Home page's H1 — .hero-gradient-text, white through amber into
+//      VIOLET (#a855f7), at 3.4rem, the largest thing on the page
+// Pinned at two rather than floored: a third is the thing the brief warns
+// about, and going to one means a decision was taken and should be
+// recorded here.
+check(
+  `gradient text: ${gradientText} (${gradientText - cssGradientTextUses} Tailwind, ${cssGradientTextUses} CSS), pinned at 2`,
+  gradientText === 2,
+  String(gradientText)
+);
+check(
+  `the CSS gradient-text classes were found (${[...cssGradientClasses].join(", ") || "NONE"})`,
+  cssGradientClasses.size >= 1,
+  "a scan that finds no class counts no uses of it, and reports the CSS half as absent"
+);
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. how many different accent shades the product uses ==");

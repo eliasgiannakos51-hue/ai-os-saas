@@ -867,7 +867,8 @@
         "totalEntries": "إجمالي الإدخالات",
         "thisWeek": "هذا الأسبوع",
         "mostActive": "الأكثر نشاطًا",
-        "creditsRemaining": "الرصيد المتبقي"
+        "creditsRemaining": "الرصيد المتبقي",
+        "fillsAfter": "يمتلئ بعد {count} مدخلات"
       },
       "betaFeedback": {
         "message": "شكرًا لتجربتك Ionexa AI! يسعدنا سماع رأيك.",
@@ -937,7 +938,18 @@
       "quickStart": "بداية سريعة",
       "templateFailed": "تعذّر تطبيق هذا القالب. حاول بعد قليل — لم تتم إضافة أي شيء.",
       "quickStartBlurb": "أضف بعض الإدخالات كأمثلة لترى كيف يبدو مساحة عمل ممتلئة.",
-      "quickStartAdd": "إضافة"
+      "quickStartAdd": "إضافة",
+      "setupProgress": {
+        "title": "تقدّم الإعداد",
+        "count": "{done} من {total} خطوات",
+        "suggestion": "تظهر درجة نشاطك بعد تسجيل {count} مدخلات — عدد يكفي ألّا يحدّدها مدخل واحد.",
+        "steps": {
+          "onboarding": "أكمل أسئلة الترحيب",
+          "firstEntry": "سجّل مدخلك الأول",
+          "secondModule": "سجّل شيئًا في مجال ثانٍ",
+          "mission": "حدّد هدفًا"
+        }
+      }
     },
     "team": {
       "title": "الفريق",

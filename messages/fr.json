@@ -867,7 +867,8 @@
         "totalEntries": "Total des Entrées",
         "thisWeek": "Cette Semaine",
         "mostActive": "Le Plus Actif",
-        "creditsRemaining": "Crédits Restants"
+        "creditsRemaining": "Crédits Restants",
+        "fillsAfter": "Se remplit après {count} entrées"
       },
       "betaFeedback": {
         "message": "Merci de tester Ionexa AI ! Votre avis nous intéresse beaucoup.",
@@ -937,7 +938,18 @@
       "quickStart": "Démarrage rapide",
       "templateFailed": "Nous n'avons pas pu appliquer ce modèle. Réessayez dans un instant — rien n'a été ajouté.",
       "quickStartBlurb": "Ajoutez quelques entrées d'exemple pour voir à quoi ressemble un espace de travail rempli.",
-      "quickStartAdd": "Ajouter"
+      "quickStartAdd": "Ajouter",
+      "setupProgress": {
+        "title": "Progression de la configuration",
+        "count": "{done} sur {total} étapes",
+        "suggestion": "Votre score d'activité apparaît une fois {count} entrées enregistrées — assez pour qu'aucune seule ne le décide.",
+        "steps": {
+          "onboarding": "Terminez les questions d'accueil",
+          "firstEntry": "Enregistrez votre première entrée",
+          "secondModule": "Enregistrez quelque chose dans un deuxième domaine",
+          "mission": "Définissez un objectif"
+        }
+      }
     },
     "team": {
       "title": "Équipe",

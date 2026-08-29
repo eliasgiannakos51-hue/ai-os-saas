@@ -61,6 +61,31 @@ export function FirstScreenExamples() {
                   <span className="mt-0.5 block text-sm leading-snug text-foreground">
                     {sentence}
                   </span>
+                  {/* WHAT IT COSTS, BEFORE THE PRESS. Two of these three
+                      reach a route that spends credits — the website
+                      pre-check settles the measured cost of its own
+                      Anthropic call, and a chat message reserves once
+                      the account's monthly free messages are gone. A
+                      press that quietly moves the balance is how
+                      somebody finds out they paid after paying.
+                      The wording comes from the cost the shared list
+                      records, and first-screen.test.mjs checks that
+                      record against the billing calls in the route
+                      itself — a label nobody verifies is a label that
+                      drifts the first time a route grows a charge. */}
+                  <span
+                    className={`mt-1 block text-[11px] ${
+                      // Full opacity, no /90: an alpha-modified themed
+                      // utility needs its own light-theme rule to stop
+                      // the alpha washing toward white instead of
+                      // dimming toward black, and this badge does not
+                      // need one badly enough to add a CSS rule for it.
+                      // light-theme-contrast.test.mjs caught the /90.
+                      example.cost === "charged" ? "text-orange-400" : "text-muted"
+                    }`}
+                  >
+                    {t(`cost.${example.cost}`)}
+                  </span>
                 </span>
               </Link>
             </li>

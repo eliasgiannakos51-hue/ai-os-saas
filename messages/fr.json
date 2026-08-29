@@ -935,6 +935,11 @@
     },
     "firstScreen": {
       "label": "Cliquez sur l’un — il s’exécute aussitôt",
+      "cost": {
+        "free": "Gratuit",
+        "freeAllowance": "Gratuit jusqu’à votre limite mensuelle",
+        "charged": "Consomme des crédits"
+      },
       "build": {
         "verb": "Créez",
         "example": "Créez un site pour ma boutique"

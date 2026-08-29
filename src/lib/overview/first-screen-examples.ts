@@ -29,6 +29,25 @@
 
 export type FirstScreenCapability = "build" | "understand" | "repeat";
 
+/**
+ * What pressing an example costs.
+ *
+ * NOBODY LEARNS THEY PAID AFTER PAYING. Two of these three reach a route
+ * that spends credits, and a press with no warning is exactly the shape
+ * of "I clicked an example and my balance went down". The card carries
+ * the answer before the press.
+ *
+ *   free           nothing is charged, ever
+ *   freeAllowance  free while the account's monthly free messages last
+ *   charged        credits are spent on the first press
+ *
+ * NOT A NUMBER, and deliberately. The chat's cost depends on the length
+ * of the reply and the website precheck settles the measured cost of the
+ * call it makes; a figure printed here would be one somebody made up.
+ * What each card says is what the code can be checked against.
+ */
+export type FirstScreenCost = "free" | "freeAllowance" | "charged";
+
 export type FirstScreenExample = {
   /** One per capability. Two examples of the same one teaches nothing. */
   id: FirstScreenCapability;
@@ -54,6 +73,18 @@ export type FirstScreenExample = {
   page: string;
   /** The client component that must act on it once it arrives. */
   workspace: string;
+  /** What one press costs. Shown on the card. */
+  cost: FirstScreenCost;
+  /**
+   * The route whose billing decides `cost`.
+   *
+   * DERIVED, NOT DECLARED. first-screen.test.mjs opens this file and
+   * looks for the calls that actually spend credits, so a "free" label
+   * on a route that reserves or settles goes red. A cost claim nobody
+   * checks is a cost claim that drifts the first time a route grows a
+   * charge.
+   */
+  billedBy: string;
 };
 
 /**
@@ -94,6 +125,12 @@ export const FIRST_SCREEN_EXAMPLES: readonly FirstScreenExample[] = [
     param: "brief",
     page: "src/app/dashboard/website-builder/page.tsx",
     workspace: "src/components/website-builder/website-builder-workspace.tsx",
+    // The clarification pre-check is a real Anthropic call and
+    // settlePrechecks() settles its measured cost before the questions
+    // come back — so the press spends, even though the generation has
+    // not started.
+    cost: "charged",
+    billedBy: "src/app/api/websites/generate/route.ts",
   },
   {
     // UNDERSTAND. Lands in the chat with the question already sent and
@@ -107,6 +144,12 @@ export const FIRST_SCREEN_EXAMPLES: readonly FirstScreenExample[] = [
     param: "ask",
     page: "src/app/dashboard/chat/page.tsx",
     workspace: "src/components/chat/chat-workspace.tsx",
+    // Free while the account's monthly free messages last (15 on Free,
+    // 43 Starter, 107 Growth, 215 Professional, 430 Ultimate — see
+    // billing/free-chat.ts). After that the route reserves credits like
+    // any other message.
+    cost: "freeAllowance",
+    billedBy: "src/app/api/chat/route.ts",
   },
   {
     // REPEAT. Lands in the agent builder with the request already
@@ -119,6 +162,11 @@ export const FIRST_SCREEN_EXAMPLES: readonly FirstScreenExample[] = [
     param: "agent",
     page: "src/app/dashboard/agents/page.tsx",
     workspace: "src/components/agents/agents-workspace.tsx",
+    // Postgres full-text over the template library. No AI call, no
+    // reservation, no settlement — and the expensive builder is not
+    // called on arrival precisely so this stays true.
+    cost: "free",
+    billedBy: "src/app/api/agents/templates/route.ts",
   },
 ];
 

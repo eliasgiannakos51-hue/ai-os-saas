@@ -935,6 +935,11 @@
     },
     "firstScreen": {
       "label": "ひとつ押すと、すぐ動きます",
+      "cost": {
+        "free": "無料",
+        "freeAllowance": "月の無料枠まで無料",
+        "charged": "クレジットを消費"
+      },
       "build": {
         "verb": "作る",
         "example": "私の店のウェブサイトを作って"

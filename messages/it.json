@@ -935,6 +935,11 @@
     },
     "firstScreen": {
       "label": "Premi uno — parte subito",
+      "cost": {
+        "free": "Gratis",
+        "freeAllowance": "Gratis fino al limite mensile",
+        "charged": "Consuma crediti"
+      },
       "build": {
         "verb": "Crea",
         "example": "Crea un sito per il mio negozio"

@@ -935,6 +935,11 @@
     },
     "firstScreen": {
       "label": "Press one — it runs right away",
+      "cost": {
+        "free": "Free",
+        "freeAllowance": "Free up to your monthly limit",
+        "charged": "Uses credits"
+      },
       "build": {
         "verb": "Build",
         "example": "Build a website for my shop"

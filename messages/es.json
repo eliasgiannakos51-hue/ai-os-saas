@@ -935,6 +935,11 @@
     },
     "firstScreen": {
       "label": "Pulsa uno — se ejecuta al instante",
+      "cost": {
+        "free": "Gratis",
+        "freeAllowance": "Gratis hasta tu límite mensual",
+        "charged": "Consume créditos"
+      },
       "build": {
         "verb": "Crea",
         "example": "Crea una web para mi tienda"

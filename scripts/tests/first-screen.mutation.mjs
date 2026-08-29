@@ -37,7 +37,8 @@ const CHAT_WS = "src/components/chat/chat-workspace.tsx";
 const AGENTS_WS = "src/components/agents/agents-workspace.tsx";
 const EN = "messages/en.json";
 const EL = "messages/el.json";
-const TARGETS = [LIB, STRIP, GREETING, OVERVIEW, CHAT_PAGE, CHAT_WS, AGENTS_WS, EN, EL];
+const TEMPLATES_ROUTE = "src/app/api/agents/templates/route.ts";
+const TARGETS = [LIB, STRIP, GREETING, OVERVIEW, CHAT_PAGE, CHAT_WS, AGENTS_WS, EN, EL, TEMPLATES_ROUTE];
 
 const MUTANTS = [
   // ---- A. THE CAPABILITIES ------------------------------------------
@@ -132,6 +133,40 @@ const MUTANTS = [
     from: "  return `${example.path}?${example.param}=${encodeURIComponent(text.slice(0, MAX_EXAMPLE_CHARS))}`;",
     to: "  return example.path;",
     expect: "the link carries ?brief=",
+  },
+
+  // ---- I. THE PRICE IS VISIBLE --------------------------------------
+  {
+    dimension: "I. price is visible",
+    name: "a charging example claims to be free",
+    file: LIB,
+    from: '    cost: "charged",',
+    to: '    cost: "free",',
+    expect: 'build: "free" agrees with what generate actually does',
+  },
+  {
+    dimension: "I. price is visible",
+    name: "a free route grows a charge and the card is not updated",
+    file: TEMPLATES_ROUTE,
+    from: "export const dynamic = \"force-dynamic\";",
+    to: "export const dynamic = \"force-dynamic\";\nimport { reserveCredits } from \"@/lib/billing/credits\";",
+    expect: 'repeat: "free" agrees with what templates actually does',
+  },
+  {
+    dimension: "I. price is visible",
+    name: "the card stops showing what it costs",
+    file: STRIP,
+    from: "                    {t(`cost.${example.cost}`)}",
+    to: "                    {null}",
+    expect: "the strip renders the cost of every card",
+  },
+  {
+    dimension: "I. price is visible",
+    name: "Greek loses the wording for a cost",
+    file: EL,
+    from: '"charged": "Χρεώνει credits"',
+    to: '"chargedXX": "Χρεώνει credits"',
+    expect: 'build: the "charged" wording exists in all ten locales',
   },
 
   // ---- H. NOT TWICE -------------------------------------------------

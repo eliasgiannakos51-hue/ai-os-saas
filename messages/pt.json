@@ -935,6 +935,11 @@
     },
     "firstScreen": {
       "label": "Carregue num — corre logo",
+      "cost": {
+        "free": "Grátis",
+        "freeAllowance": "Grátis até ao limite mensal",
+        "charged": "Consome créditos"
+      },
       "build": {
         "verb": "Cria",
         "example": "Cria um site para a minha loja"

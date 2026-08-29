@@ -263,6 +263,48 @@ check(
 }
 
 // ---------------------------------------------------------------------
+console.log("\n== 4b. NOBODY LEARNS THEY PAID AFTER PAYING ==");
+
+// The cost on each card is checked against the ROUTE, not against
+// itself. A press that spends credits with a card saying "Free" is the
+// exact complaint this section exists for, and a label nobody verifies
+// drifts the first time a route grows a charge.
+//
+// Comments stripped first: /api/agents/templates says "before anything
+// is charged" and "costs no AI call" in prose, and prose is not code.
+const { stripComments } = await import("../lib/test-export-drift.mjs");
+const SPENDS = /\b(reserveCredits|settleReservation|settlePrechecks|hasEnoughCredits|chargeCredits)\b/;
+
+for (const example of FIRST_SCREEN_EXAMPLES) {
+  const route = read(example.billedBy);
+  check(`${example.id}: ${example.billedBy} exists`, route.length > 0);
+  const spends = SPENDS.test(stripComments(route));
+  check(
+    `${example.id}: "${example.cost}" agrees with what ${example.billedBy.split("/").slice(-2)[0]} actually does`,
+    (example.cost === "free") === !spends,
+    `cost says ${example.cost}, the route ${spends ? "DOES" : "does not"} call a billing function`,
+  );
+  // And the card has to say it. A cost recorded in a list nobody renders
+  // warns nobody.
+  const missing = LOCALES.filter(
+    (locale) => typeof messages[locale]?.dashboard?.firstScreen?.cost?.[example.cost] !== "string",
+  );
+  checkList(`${example.id}: the "${example.cost}" wording exists in all ten locales`, missing);
+}
+check(
+  "the strip renders the cost of every card",
+  read(STRIP).includes("cost.${example.cost}") || /t\(`cost\.\$\{example\.cost\}`\)/.test(read(STRIP)),
+);
+// At least one card must be able to say each thing, or a wording nobody
+// can reach is a wording nobody maintains.
+checkList(
+  "no cost wording is unreachable",
+  ["free", "freeAllowance", "charged"].filter(
+    (cost) => !FIRST_SCREEN_EXAMPLES.some((e) => e.cost === cost),
+  ),
+);
+
+// ---------------------------------------------------------------------
 console.log("\n== 5. the strip is on the first screen, under the input ==");
 
 const overview = read(OVERVIEW);

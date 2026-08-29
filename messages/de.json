@@ -935,6 +935,11 @@
     },
     "firstScreen": {
       "label": "Eine antippen — sie läuft sofort",
+      "cost": {
+        "free": "Kostenlos",
+        "freeAllowance": "Kostenlos bis zu Ihrem Monatslimit",
+        "charged": "Verbraucht Credits"
+      },
       "build": {
         "verb": "Erstellen",
         "example": "Erstelle eine Website für meinen Laden"

@@ -935,6 +935,11 @@
     },
     "firstScreen": {
       "label": "Πάτα ένα — τρέχει αμέσως",
+      "cost": {
+        "free": "Δωρεάν",
+        "freeAllowance": "Δωρεάν μέχρι το μηνιαίο όριο",
+        "charged": "Χρεώνει credits"
+      },
       "build": {
         "verb": "Φτιάξε",
         "example": "Φτιάξε site για το μαγαζί μου"

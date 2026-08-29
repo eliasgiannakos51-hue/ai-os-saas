@@ -935,6 +935,11 @@
     },
     "firstScreen": {
       "label": "点一个 — 立刻运行",
+      "cost": {
+        "free": "免费",
+        "freeAllowance": "在每月额度内免费",
+        "charged": "消耗额度"
+      },
       "build": {
         "verb": "构建",
         "example": "为我的店铺做一个网站"

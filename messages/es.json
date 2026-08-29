@@ -1515,7 +1515,8 @@
       "typeAgent": "Agente IA",
       "agentDesignFailed": "No se pudo diseñar ese agente.",
       "agentSaveFailed": "El agente se diseñó pero no se pudo guardar.",
-      "unsupportedType": "Create Studio todavía no puede crear eso."
+      "unsupportedType": "Create Studio todavía no puede crear eso.",
+      "madeItHere": "Lo creé aquí → {where}"
     },
     "agents": {
       "title": "Agentes IA",

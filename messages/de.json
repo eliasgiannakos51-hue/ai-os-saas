@@ -1515,7 +1515,8 @@
       "typeAgent": "KI-Agent",
       "agentDesignFailed": "Dieser Agent konnte nicht entworfen werden.",
       "agentSaveFailed": "Der Agent wurde entworfen, konnte aber nicht gespeichert werden.",
-      "unsupportedType": "Create Studio kann das noch nicht erstellen."
+      "unsupportedType": "Create Studio kann das noch nicht erstellen.",
+      "madeItHere": "Hier erstellt → {where}"
     },
     "agents": {
       "title": "KI-Agenten",

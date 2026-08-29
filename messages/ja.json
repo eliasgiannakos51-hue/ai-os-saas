@@ -1515,7 +1515,8 @@
       "typeAgent": "AI エージェント",
       "agentDesignFailed": "そのエージェントを設計できませんでした。",
       "agentSaveFailed": "エージェントは設計されましたが、保存できませんでした。",
-      "unsupportedType": "Create Studio はまだそれを作成できません。"
+      "unsupportedType": "Create Studio はまだそれを作成できません。",
+      "madeItHere": "ここに作りました → {where}"
     },
     "agents": {
       "title": "AI エージェント",

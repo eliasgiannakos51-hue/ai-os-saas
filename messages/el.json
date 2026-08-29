@@ -1515,7 +1515,8 @@
       "typeAgent": "AI Πράκτορας",
       "agentDesignFailed": "Δεν μπόρεσα να σχεδιάσω αυτόν τον agent.",
       "agentSaveFailed": "Ο agent σχεδιάστηκε αλλά δεν αποθηκεύτηκε.",
-      "unsupportedType": "Το Create Studio δεν μπορεί ακόμη να το φτιάξει αυτό."
+      "unsupportedType": "Το Create Studio δεν μπορεί ακόμη να το φτιάξει αυτό.",
+      "madeItHere": "Το έφτιαξα εδώ → {where}"
     },
     "agents": {
       "title": "AI Πράκτορες",

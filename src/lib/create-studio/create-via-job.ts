@@ -40,6 +40,12 @@ export type CreateOutcome = {
   questionSuggestions?: string[][];
   outOfCredits?: boolean;
   moduleTitle?: string;
+  /**
+   * The module's sidebar key, so the confirmation can name the
+   * destination with the SAME word the nav uses. `moduleTitle` above is
+   * the already-rendered name and cannot be re-resolved per locale.
+   */
+  moduleTitleKey?: string;
   href?: string;
   message?: string;
   error?: string;
@@ -96,6 +102,7 @@ export async function createViaJob(body: Record<string, unknown>): Promise<Creat
     matched: Boolean(r.matched),
     module: r.module == null ? undefined : String(r.module),
     moduleTitle: r.moduleTitle == null ? undefined : String(r.moduleTitle),
+    moduleTitleKey: r.moduleTitleKey == null ? undefined : String(r.moduleTitleKey),
     href: r.href == null ? undefined : String(r.href),
     outputSummary: r.outputSummary == null ? undefined : String(r.outputSummary),
     message: String(r.message ?? ""),

@@ -1515,7 +1515,8 @@
       "typeAgent": "وكيل ذكاء اصطناعي",
       "agentDesignFailed": "تعذّر تصميم هذا الوكيل.",
       "agentSaveFailed": "تم تصميم الوكيل لكن تعذّر حفظه.",
-      "unsupportedType": "لا يستطيع Create Studio إنشاء ذلك بعد."
+      "unsupportedType": "لا يستطيع Create Studio إنشاء ذلك بعد.",
+      "madeItHere": "أنشأته هنا ← {where}"
     },
     "agents": {
       "title": "وكلاء الذكاء الاصطناعي",

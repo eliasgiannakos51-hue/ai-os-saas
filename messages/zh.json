@@ -1515,7 +1515,8 @@
       "typeAgent": "AI 智能体",
       "agentDesignFailed": "无法设计该智能体。",
       "agentSaveFailed": "智能体已设计完成，但保存失败。",
-      "unsupportedType": "Create Studio 还无法创建该内容。"
+      "unsupportedType": "Create Studio 还无法创建该内容。",
+      "madeItHere": "已创建在 → {where}"
     },
     "agents": {
       "title": "AI 智能体",

@@ -29,6 +29,21 @@ export type StudioResult = {
   website: UserWebsite | null;
   /** Module entry only — the module it was routed into. */
   moduleTitle: string | null;
+  /**
+   * WHERE IT WENT, as the sidebar's own key for that place.
+   *
+   * V4.6 #11.3. The report was "I said something to the AI, it put the
+   * post somewhere else, I did not understand what it does there" — and
+   * the link that was there said "Open it", which names nothing. All six
+   * types shared that one string, so the only type that told you the
+   * destination was moduleEntry, and only through a separate line.
+   *
+   * The sidebar's key rather than a literal: the destination is a place
+   * in this app and it already has a translated name in ten languages.
+   * Writing a second one here is how "Goals & Plans" in the nav becomes
+   * "Mission Control" in a confirmation.
+   */
+  destinationKey: string | null;
   /** Anything the creating route said, shown verbatim. */
   message: string | null;
 };
@@ -145,6 +160,7 @@ export function useCreateStudio() {
               type: "website",
               title: record.name,
               href: `/dashboard/website-builder?project=${record.id}`,
+              destinationKey: "sidebar.items.websiteBuilder",
               website: record,
               moduleTitle: null,
               message: null,
@@ -188,6 +204,7 @@ export function useCreateStudio() {
                   type: "mission",
                   title: detection.title,
                   href: "/dashboard/mission",
+                  destinationKey: "sidebar.items.missionControl",
                   website: null,
                   moduleTitle: null,
                   message: null,
@@ -209,6 +226,7 @@ export function useCreateStudio() {
               type: "mission",
               title: planned.mission?.goal ?? detection.title,
               href: "/dashboard/mission",
+              destinationKey: "sidebar.items.missionControl",
               website: null,
               moduleTitle: null,
               message: null,
@@ -235,6 +253,9 @@ export function useCreateStudio() {
               type: "moduleEntry",
               title: detection.title,
               href: data.href ?? null,
+              // The module's own name, already resolved by the route that
+              // classified it — so this is the same word the nav uses.
+              destinationKey: data.moduleTitleKey ?? null,
               website: null,
               moduleTitle: data.moduleTitle ?? null,
               message: data.message ?? null,
@@ -265,6 +286,7 @@ export function useCreateStudio() {
               type: "automation",
               title: detection.title,
               href: "/dashboard/automation",
+              destinationKey: "sidebar.items.automation",
               website: null,
               moduleTitle: null,
               message: data.message ?? null,
@@ -308,6 +330,7 @@ export function useCreateStudio() {
                   type: "agent",
                   title: detection.title,
                   href: "/dashboard/agents",
+                  destinationKey: "sidebar.items.agents",
                   website: null,
                   moduleTitle: null,
                   message: null,
@@ -353,6 +376,7 @@ export function useCreateStudio() {
               // list will show — not the detector's guess.
               title: typeof built.draft.name === "string" ? built.draft.name : detection.title,
               href: `/dashboard/agents?agent=${data.agent.id}`,
+              destinationKey: "sidebar.items.agents",
               website: null,
               moduleTitle: null,
               message: null,
@@ -386,6 +410,7 @@ export function useCreateStudio() {
               type: "document",
               title: detection.title,
               href: `/dashboard/documents/${data.id}`,
+              destinationKey: "sidebar.items.documents",
               website: null,
               moduleTitle: null,
               message: null,

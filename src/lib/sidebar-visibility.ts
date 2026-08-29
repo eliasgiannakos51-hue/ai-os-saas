@@ -31,13 +31,34 @@ export type SidebarItem = {
    * points at a page that refuses non-owners without carrying it.
    */
   ownerOnly?: true;
+  /**
+   * In the config, but NOT drawn in the sidebar.
+   *
+   * V4.6 #3. The sidebar had eight groups and forty-five links, which is
+   * not a navigation aid — it is a directory, and a directory is what a
+   * user scrolls past on the way to the four things they came for.
+   *
+   * The obvious fix — delete the entries — is the wrong one, because the
+   * command palette is built from THIS SAME LIST (see
+   * command-palette.tsx, which flattens `visibleGroups`). Deleting an
+   * item to tidy the sidebar would also delete it from search, which is
+   * the opposite of making it reachable.
+   *
+   * So the item stays here, keeps its owner-only flag, keeps its
+   * translation, keeps its place in the palette, and is additionally
+   * listed on the hub page at /dashboard/records — it simply is not one
+   * of the sixteen rows drawn down the left. `sidebarGroups()` is the
+   * only reader of this flag; `visibleGroups()` deliberately ignores it,
+   * so search and the hub still see everything.
+   */
+  hidden?: true;
 };
 
 export type SidebarGroupConfig = {
   heading: string;
   items: SidebarItem[];
-  // Workspace holds the core always-visible nav (Home, Ionexa Chat, AI
-  // Memory) and is never collapsed — every other group can be toggled.
+  // "Daily" holds the five things somebody opens the app to do and is
+  // never collapsed — every other group can be toggled.
   collapsible: boolean;
 };
 
@@ -60,5 +81,27 @@ export function visibleGroups(
   if (isOwner) return groups;
   return groups
     .map((group) => ({ ...group, items: group.items.filter((i) => !i.ownerOnly) }))
+    .filter((group) => group.items.length > 0);
+}
+
+/**
+ * The groups the SIDEBAR draws: role-filtered, then stripped of every
+ * `hidden` item, then stripped of any group left empty.
+ *
+ * TWO FILTERS, NOT ONE, AND THE ORDER MATTERS. Role first, so an
+ * owner-only item cannot be revealed by being un-hidden; `hidden` second,
+ * so tidying the sidebar can never widen who sees what. Composed from
+ * `visibleGroups` rather than reimplementing it, so there is exactly one
+ * place that knows what `ownerOnly` means.
+ *
+ * The command palette calls `visibleGroups` instead, on purpose: an item
+ * kept out of the sidebar is still searchable, and still owner-filtered.
+ */
+export function sidebarGroups(
+  groups: SidebarGroupConfig[],
+  isOwner: boolean,
+): SidebarGroupConfig[] {
+  return visibleGroups(groups, isOwner)
+    .map((group) => ({ ...group, items: group.items.filter((i) => !i.hidden) }))
     .filter((group) => group.items.length > 0);
 }

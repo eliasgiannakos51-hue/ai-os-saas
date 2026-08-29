@@ -45,7 +45,26 @@ const buildModules = readFileSync("src/lib/build-modules.ts", "utf8");
 
 /** Every heading the sidebar actually renders. */
 const headings = [...navSrc.matchAll(/heading: "([^"]+)"/g)].map((m) => m[1]);
-check(`the headings scan found ${headings.length}`, headings.length >= 8, "a filter of an empty list is empty, and every check below it would pass");
+// V4.6 #3 TOOK THIS FROM EIGHT HEADINGS TO FOUR, so the old `>= 8` floor
+// had to move. It is replaced by two assertions that are harder to
+// satisfy by accident than any number: the scan must find something, and
+// every heading it finds must be DISTINCT. A regex that stopped matching
+// yields zero and fails the first; a copy-paste that gives two groups the
+// same heading — which would silently merge them in the sidebar's
+// accordion state, keyed by heading — fails the second, and nothing
+// checked for that before.
+//
+// The real anti-vacuity guard is the PAIR further down: "all headings
+// have a message key" (vacuous on an empty list) together with "no
+// heading key points at a heading that does not exist" (fails loudly on
+// one, because all four keys become dead). Neither can pass on a broken
+// scan while the other does.
+check(`the headings scan found ${headings.length}`, headings.length >= 4, "a filter of an empty list is empty, and every check below it would pass");
+check(
+  "and every heading is distinct",
+  new Set(headings).size === headings.length,
+  headings.join(", ")
+);
 /** The heading -> message-key map, as the code really holds it. */
 const headingKeys = Object.fromEntries(
   keysSrc
@@ -81,8 +100,13 @@ for (const heading of headings) {
 }
 // The mirror fault: a key here that no heading uses is dead weight, and
 // dead entries are exactly what hid the four missing ones.
-check(`the heading key map was read (${Object.keys(headingKeys).length})`,
-  Object.keys(headingKeys).length >= 5,
+// SIZE-MATCHED TO THE SCAN, not floored at a number somebody has to
+// remember to lower. The map and the nav describe the same four groups,
+// so anything that reads one without the other — a broken regex, a map
+// entry left behind by a rename — shows up as a mismatch here before it
+// reaches the two direction checks below.
+check(`the heading key map was read (${Object.keys(headingKeys).length}) and matches the nav (${headings.length})`,
+  Object.keys(headingKeys).length === headings.length && headings.length > 0,
   "an empty key map makes the dead-key check below pass on nothing");
 const deadHeadingKeys = Object.keys(headingKeys).filter((h) => !headings.includes(h));
 check("no heading key points at a heading that does not exist", deadHeadingKeys.length === 0, deadHeadingKeys.join(", "));
@@ -135,8 +159,14 @@ const groupOf = (heading) => {
   return navSrc.slice(start, end === -1 ? undefined : end);
 };
 const buildGroup = groupOf("Build");
-const trackingGroup = groupOf("Tracking");
-check("a Tracking group exists", trackingGroup.length > 0);
+// V4.6 #3 FOLDED "Tracking" INTO "My business" along with the twelve
+// business modules and Ideas — nineteen logs that all render the same
+// GenericList, and that the sidebar listed as nineteen rows. The RULE is
+// unchanged and is what this section has always been for: a module that
+// generates nothing must not sit under the heading that promises
+// generation. Only the name of the group it must sit under moved.
+const trackingGroup = groupOf("My business");
+check("the group the logs live in exists", trackingGroup.length > 0);
 
 const offenders = trackingSlugs.filter((slug) => {
   const href = `/dashboard/${slug}`;
@@ -148,7 +178,19 @@ check(
   offenders.length ? `these produce nothing but sit under "Build": ${offenders.join(", ")}` : ""
 );
 const misfiled = trackingSlugs.filter((slug) => !trackingGroup.includes(`/dashboard/${slug}`));
-check("and every one of them IS under Tracking", misfiled.length === 0, misfiled.join(", "));
+check("and every one of them IS under My business", misfiled.length === 0, misfiled.join(", "));
+// AND NONE OF THEM WAS QUIETLY DROPPED. Consolidating a sidebar is one
+// keystroke away from deleting entries instead of grouping them, and a
+// deleted entry leaves the page live but unreachable from the nav AND
+// from the command palette, which is built from this same list. The
+// check above only says "not filed wrong"; an entry that is gone
+// altogether is filed nowhere and would pass it.
+const vanished = trackingSlugs.filter((slug) => !navSrc.includes(`"/dashboard/${slug}"`));
+check(
+  "and none of them was dropped from the nav config entirely",
+  vanished.length === 0,
+  vanished.length ? `no longer reachable from the sidebar or the palette: ${vanished.join(", ")}` : ""
+);
 
 // The other direction: what is left in Build must really build.
 const buildHrefs = [...buildGroup.matchAll(/href: "([^"]+)"/g)].map((m) => m[1]);
@@ -189,6 +231,12 @@ const BUILD_ALLOWED = {
   // this comment.
   "/dashboard/data-analysis": "parses, profiles and charts a real uploaded file",
   "/dashboard/coding": "five operations that really produce code",
+  // V4.6 #3. It was under "Workspace" next to Files and Documents, which
+  // reads as a place to store things; it is a job that goes and writes a
+  // report. /api/research/[id]/run reaches lib/research/research.ts,
+  // which awaits anthropic.messages.create three times — and section 3b
+  // below proves that from the imports rather than from this sentence.
+  "/dashboard/deep-research": "plans, runs and writes up a real research job",
 };
 const unexpected = buildHrefs.filter((href) => !(href in BUILD_ALLOWED));
 check(
@@ -285,7 +333,27 @@ console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
 
   /** The API routes a page (or its components) actually fetches. */
   const routesFetchedBy = (slug) => {
+    // THE COMPONENT FOLDER IS NOT ALWAYS THE SLUG, and guessing that it
+    // is made this a false NEGATIVE generator. /dashboard/deep-research
+    // renders components/research/*, so `src/components/deep-research`
+    // does not exist, the scan read the server page alone, found no
+    // fetch() at all, and reported a feature that runs a real multi-step
+    // research job as producing nothing. A check that says "this does not
+    // build" about something that does is the same class of untruth this
+    // whole file exists to catch — it just points the other way, and it
+    // is the direction that teaches somebody to loosen the rule.
+    //
+    // So the page's own imports are followed instead of its name being
+    // guessed from. The name guess is KEPT as well, because a page may
+    // reach components it does not import directly.
     const roots = [`src/app/dashboard/${slug}`, `src/components/${slug}`];
+    const pageFile = `src/app/dashboard/${slug}/page.tsx`;
+    if (existsSync(pageFile)) {
+      for (const m of readFileSync(pageFile, "utf8").matchAll(/from "@\/components\/([\w.-]+)/g)) {
+        const dir = `src/components/${m[1]}`;
+        if (existsSync(dir) && statSync(dir).isDirectory() && !roots.includes(dir)) roots.push(dir);
+      }
+    }
     const files = [];
     const walk = (path) => {
       let entries = [];
@@ -637,7 +705,12 @@ const RENAMED = [
   ["AI Memory", "sidebar.items.memory", "dashboard.memory.title"],
   ["Mission Control", "sidebar.items.missionControl", "dashboard.mission.title"],
   ["Create Studio", "common.createStudio", "dashboard.createStudio.title"],
-  ["Timeline", "sidebar.items.timeline", "dashboard.timeline.title"],
+  // V4.6 #3 renamed the row again — "History" became "Mine" when
+  // Favorites and History merged into one entry with two tabs — so the
+  // key it reads moved with it. Pointing this at the abandoned
+  // `sidebar.items.timeline` would have compared the page against a
+  // string nothing renders, and passed.
+  ["Timeline", "sidebar.items.mine", "dashboard.timeline.title"],
   ["Website Builder", "sidebar.items.websiteBuilder", "dashboard.websiteBuilder.title"],
   ["Published Sites", "sidebar.items.published", "dashboard.publishing.title"],
 ];

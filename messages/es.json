@@ -86,7 +86,8 @@
       "myBusiness": "Mi negocio",
       "track": "Registrar",
       "insights": "Lo que he notado",
-      "tracking": "Seguimiento"
+      "tracking": "Seguimiento",
+      "daily": "A diario"
     },
     "items": {
       "home": "Inicio",
@@ -133,7 +134,9 @@
       "affiliate": "Afiliados",
       "formSubmissions": "Envíos de formularios",
       "routing": "Enrutado de modelos",
-      "businessHealth": "Salud del negocio"
+      "businessHealth": "Salud del negocio",
+      "mine": "Lo mío",
+      "records": "Mis registros"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -180,7 +183,9 @@
       "help": "Respuestas a las preguntas más frecuentes, sin gastar créditos.",
       "affiliate": "Tu enlace de referido, lo que has ganado y cómo cobras.",
       "formSubmissions": "Todo lo que los visitantes enviaron por un formulario en tus sitios publicados",
-      "businessHealth": "MRR, margen, bajas y liquidez. Solo el propietario."
+      "businessHealth": "MRR, margen, bajas y liquidez. Solo el propietario.",
+      "mine": "Todo lo que has creado, lo más reciente primero, con una pestaña de destacados",
+      "records": "Todos los registros en un solo lugar: filtra por tipo en vez de buscar en el menú"
     },
     "closeMenu": "Cerrar el menú"
   },
@@ -1044,7 +1049,7 @@
       "recordItAnyway": "Registrarla igualmente"
     },
     "timeline": {
-      "title": "Historial",
+      "title": "Lo mío",
       "allModules": "Todos los módulos",
       "showOnly": "Mostrar solo: {module}",
       "rangeToday": "Hoy",
@@ -1054,7 +1059,9 @@
       "empty": {
         "title": "Su trabajo, en el orden en que ocurrió",
         "why": "Se escribe solo. Todo lo que registra en cualquier módulo llega aquí en un único flujo, que es como se responde a «qué hice realmente el mes pasado»."
-      }
+      },
+      "tabAll": "Todo",
+      "tabStarred": "Destacados"
     },
     "favorites": {
       "title": "Favoritos",
@@ -2292,6 +2299,14 @@
         "too_long": "Eso es más largo de lo que necesita una regla.",
         "unauthenticated": "Has cerrado la sesión. Inicia sesión y vuelve a intentarlo."
       }
+    },
+    "records": {
+      "title": "Mis registros",
+      "description": "Cada registro, herramienta y ajuste en un solo lugar. Filtra por tipo en vez de buscar en el menú.",
+      "searchLabel": "Buscar por nombre",
+      "allTypes": "Todos los tipos",
+      "count": "{count, plural, one {# lugar} other {# lugares}}",
+      "noMatch": "Nada coincide con ese nombre. Prueba una palabra más corta o quita el filtro."
     }
   },
   "module": {
@@ -2946,6 +2961,11 @@
       "is": "Las cifras del propio negocio: ingresos, margen, bajas, liquidez. Solo para el propietario.",
       "does": "Calcula cada métrica a partir de filas reales de suscripción y coste, y te pide las tres cifras que ninguna base de datos puede saber: gasto en marketing, costes fijos y saldo de caja.",
       "doesNot": "No muestra una cifra que no pueda justificar. Una métrica a la que le falta un dato dice qué necesita en lugar de calcular desde cero, y nada se rellena hacia atrás: el histórico empieza el día en que esto se publicó."
+    },
+    "records": {
+      "is": "Una página con todos los tipos de registro, herramienta y ajuste que puedes abrir.",
+      "does": "La barra lateral listaba diecinueve registros que funcionan igual. Están aquí, con un filtro por tipo, así encontrar uno es leer una lista en vez de recordar un menú.",
+      "doesNot": "Nada se movió ni se fusionó. Cada página conserva su dirección, sus entradas y su formulario: esto es una entrada, no un nuevo lugar donde viven tus datos."
     }
   },
   "helpCentre": {

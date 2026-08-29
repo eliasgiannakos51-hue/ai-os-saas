@@ -86,7 +86,8 @@
       "myBusiness": "Mon activité",
       "track": "Suivre",
       "insights": "Ce que j’ai remarqué",
-      "tracking": "Suivi"
+      "tracking": "Suivi",
+      "daily": "Au quotidien"
     },
     "items": {
       "home": "Accueil",
@@ -133,7 +134,9 @@
       "affiliate": "Affiliation",
       "formSubmissions": "Envois de formulaires",
       "routing": "Routage des modèles",
-      "businessHealth": "Santé de l'entreprise"
+      "businessHealth": "Santé de l'entreprise",
+      "mine": "Mes éléments",
+      "records": "Mes enregistrements"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -180,7 +183,9 @@
       "help": "Les réponses aux questions les plus fréquentes, sans consommer de crédits.",
       "affiliate": "Votre lien de parrainage, vos gains et comment vous êtes payé.",
       "formSubmissions": "Tout ce que les visiteurs ont envoyé via un formulaire sur vos sites publiés",
-      "businessHealth": "MRR, marge, attrition et trésorerie. Propriétaire uniquement."
+      "businessHealth": "MRR, marge, attrition et trésorerie. Propriétaire uniquement.",
+      "mine": "Tout ce que vous avez créé, du plus récent au plus ancien, avec un onglet favoris",
+      "records": "Tous vos enregistrements au même endroit : filtrez par type au lieu de fouiller le menu"
     },
     "closeMenu": "Fermer le menu"
   },
@@ -1044,7 +1049,7 @@
       "recordItAnyway": "L'enregistrer quand même"
     },
     "timeline": {
-      "title": "Historique",
+      "title": "Mes éléments",
       "allModules": "Tous les modules",
       "showOnly": "Afficher uniquement : {module}",
       "rangeToday": "Aujourd'hui",
@@ -1054,7 +1059,9 @@
       "empty": {
         "title": "Votre travail, dans l'ordre où il s'est fait",
         "why": "Cela s'écrit tout seul. Tout ce que vous consignez dans n'importe quel module arrive ici en un seul fil : c'est ainsi qu'on répond à « qu'ai-je fait le mois dernier »."
-      }
+      },
+      "tabAll": "Tout",
+      "tabStarred": "Favoris"
     },
     "favorites": {
       "title": "Favoris",
@@ -2292,6 +2299,14 @@
         "too_long": "C'est plus long que ce qu'une règle demande.",
         "unauthenticated": "Vous êtes déconnecté. Connectez-vous et réessayez."
       }
+    },
+    "records": {
+      "title": "Mes enregistrements",
+      "description": "Chaque journal, outil et réglage au même endroit. Filtrez par type au lieu de fouiller le menu.",
+      "searchLabel": "Rechercher par nom",
+      "allTypes": "Tous les types",
+      "count": "{count, plural, one {# emplacement} other {# emplacements}}",
+      "noMatch": "Rien ne correspond à ce nom. Essayez un mot plus court ou retirez le filtre."
     }
   },
   "module": {
@@ -2946,6 +2961,11 @@
       "is": "Les chiffres de l'entreprise elle-même : revenus, marge, attrition, trésorerie. Réservé au propriétaire.",
       "does": "Calcule chaque indicateur à partir de vraies lignes d'abonnement et de coût, et vous demande les trois chiffres qu'aucune base ne peut connaître : dépense marketing, coûts fixes, solde de trésorerie.",
       "doesNot": "Il n'affiche aucun chiffre qu'il ne peut pas justifier. Un indicateur auquel il manque une saisie dit ce qu'il lui faut au lieu de calculer à partir d'un zéro, et rien n'est rempli rétroactivement : l'historique commence le jour de la mise en ligne."
+    },
+    "records": {
+      "is": "Une page qui liste chaque type d'enregistrement, d'outil et de réglage que vous pouvez ouvrir.",
+      "does": "Le menu latéral listait dix-neuf journaux qui fonctionnent tous pareil. Ils sont ici, avec un filtre par type : trouver revient à lire une liste plutôt qu'à se souvenir d'un menu.",
+      "doesNot": "Rien n'a été déplacé ni fusionné. Chaque page garde son adresse, ses entrées et son formulaire — ceci est une porte d'entrée, pas un nouvel endroit où vivent vos données."
     }
   },
   "helpCentre": {

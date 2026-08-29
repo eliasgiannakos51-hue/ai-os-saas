@@ -86,7 +86,8 @@
       "myBusiness": "Mein Geschäft",
       "track": "Erfassen",
       "insights": "Was mir aufgefallen ist",
-      "tracking": "Erfassung"
+      "tracking": "Erfassung",
+      "daily": "Täglich"
     },
     "items": {
       "home": "Start",
@@ -133,7 +134,9 @@
       "affiliate": "Partnerprogramm",
       "formSubmissions": "Formulareingänge",
       "routing": "Modell-Routing",
-      "businessHealth": "Geschäftslage"
+      "businessHealth": "Geschäftslage",
+      "mine": "Meine Sachen",
+      "records": "Meine Einträge"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -180,7 +183,9 @@
       "help": "Antworten auf die häufigsten Fragen — ohne Credits zu verbrauchen.",
       "affiliate": "Dein Empfehlungslink, dein Verdienst und wie du ausgezahlt wirst.",
       "formSubmissions": "Alles, was Besucher über ein Formular auf Ihren veröffentlichten Seiten gesendet haben",
-      "businessHealth": "MRR, Marge, Abwanderung und Liquidität. Nur für den Inhaber."
+      "businessHealth": "MRR, Marge, Abwanderung und Liquidität. Nur für den Inhaber.",
+      "mine": "Alles, was du erstellt hast, neueste zuerst — mit einem Tab nur für Favoriten",
+      "records": "Alle Einträge an einem Ort — nach Typ filtern statt im Menü zu suchen"
     },
     "closeMenu": "Menü schließen"
   },
@@ -1044,7 +1049,7 @@
       "recordItAnyway": "Trotzdem ablegen"
     },
     "timeline": {
-      "title": "Verlauf",
+      "title": "Meine Sachen",
       "allModules": "Alle Module",
       "showOnly": "Nur anzeigen: {module}",
       "rangeToday": "Heute",
@@ -1054,7 +1059,9 @@
       "empty": {
         "title": "Deine Arbeit, in der Reihenfolge, in der sie passierte",
         "why": "Das schreibt sich von selbst. Alles, was du in irgendeinem Modul erfasst, landet hier in einem Strom — so beantwortest du \"was habe ich letzten Monat eigentlich getan\"."
-      }
+      },
+      "tabAll": "Alles",
+      "tabStarred": "Favoriten"
     },
     "favorites": {
       "title": "Favoriten",
@@ -2292,6 +2299,14 @@
         "too_long": "Das ist länger, als eine Regel sein muss.",
         "unauthenticated": "Du bist abgemeldet. Melde dich an und versuch es erneut."
       }
+    },
+    "records": {
+      "title": "Meine Einträge",
+      "description": "Jedes Protokoll, Werkzeug und jede Einstellung an einem Ort. Nach Typ filtern statt im Menü zu suchen.",
+      "searchLabel": "Nach Namen suchen",
+      "allTypes": "Alle Typen",
+      "count": "{count, plural, one {# Stelle} other {# Stellen}}",
+      "noMatch": "Nichts passt zu diesem Namen. Versuche ein kürzeres Wort oder entferne den Filter."
     }
   },
   "module": {
@@ -2946,6 +2961,11 @@
       "is": "Die Zahlen des Unternehmens selbst — Umsatz, Marge, Abwanderung, Liquidität. Nur für den Inhaber.",
       "does": "Berechnet jede Kennzahl aus echten Abo- und Kostenzeilen und fragt Sie nach den drei Werten, die keine Datenbank kennen kann: Marketingausgaben, Fixkosten, Kassenbestand.",
       "doesNot": "Es zeigt keine Zahl, die es nicht begründen kann. Einer Kennzahl ohne Eingabe sagt, was ihr fehlt, statt aus einer Null zu rechnen, und nichts wird rückwirkend ergänzt — die Historie beginnt am Tag der Veröffentlichung."
+    },
+    "records": {
+      "is": "Eine Seite mit jeder Art von Eintrag, Werkzeug und Einstellung, die du öffnen kannst.",
+      "does": "In der Seitenleiste standen neunzehn Protokolle, die alle gleich funktionieren. Sie sind jetzt hier, mit einem Typfilter — suchen heißt eine Liste lesen statt ein Menü auswendig zu kennen.",
+      "doesNot": "Nichts wurde verschoben oder zusammengelegt. Jede Seite behält ihre Adresse, ihre Einträge und ihr Formular — das hier ist ein Zugang, kein neuer Ort für deine Daten."
     }
   },
   "helpCentre": {

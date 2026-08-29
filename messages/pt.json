@@ -86,7 +86,8 @@
       "myBusiness": "O meu negócio",
       "track": "Registar",
       "insights": "O que reparei",
-      "tracking": "Acompanhamento"
+      "tracking": "Acompanhamento",
+      "daily": "No dia a dia"
     },
     "items": {
       "home": "Início",
@@ -133,7 +134,9 @@
       "affiliate": "Afiliados",
       "formSubmissions": "Envios de formulários",
       "routing": "Encaminhamento de modelos",
-      "businessHealth": "Saúde do negócio"
+      "businessHealth": "Saúde do negócio",
+      "mine": "As minhas coisas",
+      "records": "Os meus registos"
     },
     "hints": {
       "chat": "Pergunte qualquer coisa — sem ligação a nenhum módulo.",
@@ -180,7 +183,9 @@
       "help": "Respostas às perguntas mais frequentes, sem gastar créditos.",
       "affiliate": "O teu link de referência, o que ganhaste e como recebes.",
       "formSubmissions": "Tudo o que os visitantes enviaram por um formulário nos seus sites publicados",
-      "businessHealth": "MRR, margem, cancelamentos e tesouraria. Apenas o proprietário."
+      "businessHealth": "MRR, margem, cancelamentos e tesouraria. Apenas o proprietário.",
+      "mine": "Tudo o que criou, do mais recente, com um separador só de favoritos",
+      "records": "Todos os registos num só lugar — filtre por tipo em vez de procurar no menu"
     },
     "closeMenu": "Fechar o menu"
   },
@@ -1044,7 +1049,7 @@
       "recordItAnyway": "Registar mesmo assim"
     },
     "timeline": {
-      "title": "Histórico",
+      "title": "As minhas coisas",
       "allModules": "Todos os módulos",
       "showOnly": "Mostrar apenas: {module}",
       "rangeToday": "Hoje",
@@ -1054,7 +1059,9 @@
       "empty": {
         "title": "O seu trabalho, pela ordem em que aconteceu",
         "why": "Escreve-se sozinho. Tudo o que regista em qualquer módulo chega aqui num único fluxo, que é como se responde a «o que fiz eu no mês passado»."
-      }
+      },
+      "tabAll": "Tudo",
+      "tabStarred": "Favoritos"
     },
     "favorites": {
       "title": "Favoritos",
@@ -2292,6 +2299,14 @@
         "too_long": "Isso é mais longo do que uma regra precisa.",
         "unauthenticated": "A tua sessão terminou. Inicia sessão e tenta de novo."
       }
+    },
+    "records": {
+      "title": "Os meus registos",
+      "description": "Cada registo, ferramenta e definição num só lugar. Filtre por tipo em vez de procurar no menu.",
+      "searchLabel": "Procurar por nome",
+      "allTypes": "Todos os tipos",
+      "count": "{count, plural, one {# local} other {# locais}}",
+      "noMatch": "Nada corresponde a esse nome. Experimente uma palavra mais curta ou limpe o filtro."
     }
   },
   "module": {
@@ -2946,6 +2961,11 @@
       "is": "Os números do próprio negócio: receita, margem, cancelamentos, tesouraria. Apenas para o proprietário.",
       "does": "Calcula cada métrica a partir de linhas reais de subscrição e de custo, e pede-lhe os três valores que nenhuma base de dados pode saber: gasto em marketing, custos fixos e saldo de caixa.",
       "doesNot": "Não mostra um número que não consiga justificar. Uma métrica a que falta um dado diz o que precisa em vez de calcular a partir de zero, e nada é preenchido retroativamente: o histórico começa no dia em que isto entrou em funcionamento."
+    },
+    "records": {
+      "is": "Uma página com todos os tipos de registo, ferramenta e definição que pode abrir.",
+      "does": "A barra lateral listava dezanove registos que funcionam da mesma forma. Estão aqui, com um filtro por tipo, para encontrar lendo uma lista em vez de decorar um menu.",
+      "doesNot": "Nada foi movido nem fundido. Cada página mantém o seu endereço, as suas entradas e o seu formulário — isto é uma entrada, não um novo sítio onde os seus dados vivem."
     }
   },
   "helpCentre": {

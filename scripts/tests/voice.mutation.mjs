@@ -332,9 +332,19 @@ const MUTANTS = [
     to: '"cost": "{credits} credits per minute."',
   },
   {
+    // THE ANCHOR WAS STALE BECAUSE THE BUG IT NAMED WAS FIXED. It quoted
+    // `formatNumber(estimatedCredits, locale)`, and `listenFor` is an ICU
+    // PLURAL: a plural picks its category with Number(), formatNumber(1000)
+    // is "1,000", and Number("1,000") is NaN — so the button printed NaN
+    // credits. The formatting was correctly removed (ICU's `#` formats for
+    // the locale itself) and this file was not updated, so the mutation
+    // silently stopped applying and the price on the button stopped being
+    // checked at all. scripts/tests/plural-forms.test.mjs is what now
+    // refuses the formatted-string form; this one guards the price being
+    // there.
     name: "the Listen button loses the price it charges, so the cost is discovered afterwards",
     file: PLAYER,
-    from: '{playing ? t("pause") : t("listenFor", { credits: formatNumber(estimatedCredits, locale) })}',
+    from: '{playing ? t("pause") : t("listenFor", { credits: estimatedCredits })}',
     to: '{playing ? t("pause") : t("listen")}',
   },
   {
@@ -350,10 +360,12 @@ const MUTANTS = [
     to: 't("notIncluded")',
   },
   {
+    // Stale for the same reason as the player anchor above: `perMinute`
+    // is a plural too, so the formatNumber() wrapper had to go.
     name: "the settings panel quotes one price for both kinds of voice work",
     file: SETTINGS,
-    from: "credits: formatNumber(v.creditsPerMinute.speak, locale)",
-    to: "credits: formatNumber(v.creditsPerMinute.transcribe, locale)",
+    from: "credits: v.creditsPerMinute.speak",
+    to: "credits: v.creditsPerMinute.transcribe",
   },
   {
     name: "the settings page stops mounting the panel, so the minutes are nowhere",

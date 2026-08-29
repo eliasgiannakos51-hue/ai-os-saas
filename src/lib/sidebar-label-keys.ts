@@ -19,16 +19,15 @@
 // here is untranslated. Both are checked by
 // scripts/tests/sidebar-naming.test.mjs rather than by reading.
 export const GROUP_HEADING_KEYS: Record<string, string> = {
-  Workspace: "workspace",
-  // Build now holds only the three things that really generate
-  // something: the agent builder, the site builder, and what it
-  // published. Everything else moved to Tracking.
+  // FOUR, since V4.6 #3. The eight that were here — Workspace, Build,
+  // Tracking, Business, Strategy, Operations, Marketplace, Settings —
+  // were filing categories; these are what a person is doing. Every one
+  // of the four resolves in all ten locales, and a heading with no entry
+  // here prints raw English in all ten, which is the fault this map was
+  // written for and which sidebar-naming.test.mjs still fails on.
+  Daily: "daily",
   Build: "build",
-  Tracking: "tracking",
-  Business: "business",
-  Strategy: "strategy",
-  Operations: "operations",
-  Marketplace: "marketplace",
+  "My business": "myBusiness",
   Settings: "settings",
 };
 
@@ -59,7 +58,10 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Websites: "websites",
   Integrations: "integrations",
   "Ionexa Chat": "chat",
-  Timeline: "timeline",
+  // Was "Timeline". One row now answers "where is the thing I made?" —
+  // the page it opens carries the everything view and the starred view
+  // as tabs, and /dashboard/favorites redirects into the starred one.
+  Mine: "mine",
   Favorites: "favorites",
   "Mission Control": "missionControl",
   "Weekly Reflection": "reflection",
@@ -74,6 +76,7 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Images: "images",
   Videos: "videos",
   "Business health": "businessHealth",
+  "My records": "records",
   "AI Coding": "coding",
   "Data Analysis": "dataAnalysis",
   Documents: "documents",

@@ -74,11 +74,45 @@ console.log("\n== 2. the pre-restructure grouping is back ==");
 check("PINNED_SIDEBAR_ITEMS is gone from the config", /PINNED_SIDEBAR_ITEMS/.test(nav), false);
 check("...and from the sidebar", /PINNED_SIDEBAR_ITEMS/.test(sidebar), false);
 check("...and from the command palette", /PINNED_SIDEBAR_ITEMS/.test(palette), false);
-const HEADINGS = ["Workspace", "Build", "Business", "Strategy", "Operations", "Marketplace"];
-for (const h of HEADINGS) {
-  checkTrue(`the "${h}" group exists`, nav.includes(`heading: "${h}"`));
-}
-checkTrue("Workspace is the always-open group", /heading: "Workspace",\s*\n\s*collapsible: false/.test(nav));
+// PINNED BY SHAPE, NOT BY NAME.
+//
+// This was a hardcoded list — Workspace, Build, Business, Strategy,
+// Operations, Marketplace — and what it actually protected was that the
+// nav is GROUPED with ONE always-open group at the top, not that those
+// six words exist. V4.6 #3 renamed and merged them to four, and a name
+// list turns every legitimate rename into a failure that says nothing
+// about the property it was defending.
+//
+// The shape checks below are strictly harder to satisfy: the old list
+// passed just as happily with the always-open group moved to the bottom,
+// with two of them, or with a group that was empty. None of those pass
+// now. Which four headings exist, and that each is translated, is
+// checked from the config in scripts/tests/sidebar-naming.test.mjs.
+const groupBlocks = [...nav.matchAll(/heading: "([^"]+)",\s*\n\s*collapsible: (true|false)/g)].map(
+  (m) => ({ heading: m[1], collapsible: m[2] === "true" }),
+);
+checkTrue(
+  `the group scan read the config (${groupBlocks.length} groups)`,
+  groupBlocks.length >= 2,
+  "a scan that finds nothing agrees with every claim below it",
+);
+const alwaysOpen = groupBlocks.filter((g) => !g.collapsible);
+check("exactly one group is always open", alwaysOpen.length, 1);
+checkTrue(
+  `and it is the first one (${groupBlocks[0]?.heading})`,
+  groupBlocks[0] && !groupBlocks[0].collapsible,
+  groupBlocks.map((g) => `${g.heading}:${g.collapsible ? "collapsible" : "open"}`).join(", "),
+);
+// Every group must actually contain something: a heading with no items
+// is a row of chrome that opens onto nothing, and `visibleGroups` only
+// drops groups emptied by the ROLE filter, not ones that shipped empty.
+const emptyGroups = groupBlocks.filter((g) => {
+  const start = nav.indexOf(`heading: "${g.heading}"`);
+  const next = nav.indexOf('heading: "', start + 10);
+  const block = nav.slice(start, next === -1 ? undefined : next);
+  return !/href:/.test(block);
+});
+checkTrue("no group is empty", emptyGroups.length === 0, emptyGroups.map((g) => g.heading).join(", "));
 
 console.log("\n== 3. tooltips are a real component, not a title attribute ==");
 checkTrue("a Tooltip component exists", existsSync("src/components/ui/tooltip.tsx"));

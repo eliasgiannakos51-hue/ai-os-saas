@@ -83,10 +83,11 @@
       "marketplace": "Marketplace",
       "settings": "Settings",
       "create": "Create",
-      "myBusiness": "My Business",
+      "myBusiness": "My business",
       "track": "Track",
       "insights": "What I noticed",
-      "tracking": "Tracking"
+      "tracking": "Tracking",
+      "daily": "Daily"
     },
     "items": {
       "home": "Home",
@@ -133,7 +134,9 @@
       "affiliate": "Affiliate",
       "formSubmissions": "Form submissions",
       "routing": "Model routing",
-      "businessHealth": "Business health"
+      "businessHealth": "Business health",
+      "mine": "Mine",
+      "records": "My records"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -180,7 +183,9 @@
       "help": "Answers to the questions people ask most — no credits used.",
       "affiliate": "Your referral link, what you've earned, and how you get paid.",
       "formSubmissions": "Everything visitors sent through a form on your published sites",
-      "businessHealth": "MRR, margin, churn and runway. Owner only."
+      "businessHealth": "MRR, margin, churn and runway. Owner only.",
+      "mine": "Everything you have made, newest first — with a starred-only tab",
+      "records": "Every log in one place — filter by type instead of hunting the menu"
     },
     "closeMenu": "Close menu"
   },
@@ -1044,7 +1049,7 @@
       "recordItAnyway": "Record it anyway"
     },
     "timeline": {
-      "title": "History",
+      "title": "Mine",
       "allModules": "All Modules",
       "showOnly": "Show only: {module}",
       "rangeToday": "Today",
@@ -1054,7 +1059,9 @@
       "empty": {
         "title": "Your work, in the order it happened",
         "why": "This writes itself. Everything you log in any module lands here in one stream, which is how you answer \"what did I actually do last month\"."
-      }
+      },
+      "tabAll": "Everything",
+      "tabStarred": "Starred"
     },
     "favorites": {
       "title": "Favorites",
@@ -2292,6 +2299,14 @@
         "too_long": "That is longer than a rule needs to be.",
         "unauthenticated": "You are signed out. Sign in and try again."
       }
+    },
+    "records": {
+      "title": "My records",
+      "description": "Every log, tool and setting in one place. Filter by type instead of hunting the menu.",
+      "searchLabel": "Search by name",
+      "allTypes": "All types",
+      "count": "{count, plural, one {# place} other {# places}}",
+      "noMatch": "Nothing matches that name. Try a shorter word, or clear the filter."
     }
   },
   "module": {
@@ -2946,6 +2961,11 @@
       "is": "The business's own numbers — revenue, margin, churn, runway. Owner only.",
       "does": "Computes each metric from real subscription and cost rows, and asks you for the three figures no database can know: marketing spend, fixed costs, cash balance.",
       "doesNot": "It does not show a number it cannot justify. A metric missing an input says what it needs instead of computing from a zero, and nothing is back-filled — the history starts the day this shipped."
+    },
+    "records": {
+      "is": "One page listing every kind of record, tool and setting you can open.",
+      "does": "The sidebar used to list nineteen logs that all work the same way. They are here instead, with a type filter, so finding one is reading a list rather than remembering a menu.",
+      "doesNot": "Nothing moved and nothing was merged. Every page still has its own address, its own entries and its own form — this is a way in, not a new place your data lives."
     }
   },
   "helpCentre": {

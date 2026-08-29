@@ -201,10 +201,28 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that this is a diary you write in",
   },
   {
+    // V4.6 #3 MERGED FAVORITES INTO "Mine". The starred list is now a tab
+    // on the timeline page, rendered by the same FavoritesList off the
+    // same loadAllFavorites query — so the tip moved to the file that
+    // draws it, and it stayed its own entry rather than being folded into
+    // the timeline one: "starring does not copy or move anything" and
+    // "you do not write here" correct two different wrong beliefs, and a
+    // merge that deleted one would have been a nav change quietly costing
+    // a piece of the help.
     id: "favorites",
-    file: "src/app/dashboard/favorites/page.tsx",
+    file: "src/app/dashboard/timeline/page.tsx",
+    // /dashboard/favorites is now a bare redirect into the starred tab.
+    // It renders no header, so it needs naming here or the "every page
+    // without a header is answered too" check counts it as unanswered.
+    route: "src/app/dashboard/favorites/page.tsx",
     keyPrefix: "help.favorites",
     corrects: "that starring something copies or moves it",
+  },
+  {
+    id: "records",
+    file: "src/app/dashboard/records/page.tsx",
+    keyPrefix: "help.records",
+    corrects: "that this is a new place your entries live, rather than a way into the ones you already have",
   },
   {
     // ONE ENTRY, SIX PAGES. Apps, Images, Videos, Website plans, Campaigns

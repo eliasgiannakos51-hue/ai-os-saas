@@ -1054,7 +1054,18 @@
       "pinError": "Il fissaggio non è stato salvato. Riprova.",
       "renameError": "Il nuovo nome non è stato salvato: resta quello precedente.",
       "renameLabel": "Nuovo nome per «{title}»",
-      "emptyHint": "Chiedi qualsiasi cosa: cultura generale, idee, aiuto nella scrittura o solo due chiacchiere."
+      "emptyHint": "Chiedi qualsiasi cosa: cultura generale, idee, aiuto nella scrittura o solo due chiacchiere.",
+      "provenance": {
+        "plain": "In base a {count, plural, one {# voce} other {# voci}} in {modules, plural, one {# modulo} other {# moduli}}",
+        "withPeriod": "In base a {count, plural, one {# voce} other {# voci}} in {modules, plural, one {# modulo} other {# moduli}}, {period}",
+        "capped": "In base alle {cap} più recenti per ciascuno di {modules, plural, one {# modulo} other {# moduli}} — {count, plural, one {# voce letta} other {# voci lette}}, non tutto quello che hai",
+        "cappedWithPeriod": "In base alle {cap} più recenti per ciascuno di {modules, plural, one {# modulo} other {# moduli}} — {count, plural, one {# voce letta} other {# voci lette}}, {period}. Non tutto quello che hai.",
+        "nothingIn": "Non è stato letto nulla da: {modules}"
+      },
+      "dataScope": {
+        "title": "Cosa può vedere",
+        "body": "Vede le tue voci, i tuoi obiettivi e i file che hai caricato. Non vede nulla che tu non abbia aggiunto. Non cambia nulla se non lo chiedi."
+      }
     },
     "create": {
       "title": "Crea Qualsiasi Cosa",

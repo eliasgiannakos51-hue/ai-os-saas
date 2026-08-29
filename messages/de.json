@@ -1054,7 +1054,18 @@
       "pinError": "Das Anheften wurde nicht gespeichert. Versuch es noch einmal.",
       "renameError": "Der neue Name wurde nicht gespeichert — der alte bleibt.",
       "renameLabel": "Neuer Name für „{title}“",
-      "emptyHint": "Frag alles — Allgemeinwissen, Ideen, Hilfe beim Schreiben oder einfach ein Gespräch."
+      "emptyHint": "Frag alles — Allgemeinwissen, Ideen, Hilfe beim Schreiben oder einfach ein Gespräch.",
+      "provenance": {
+        "plain": "Auf Basis von {count, plural, one {# Eintrag} other {# Einträgen}} aus {modules, plural, one {# Modul} other {# Modulen}}",
+        "withPeriod": "Auf Basis von {count, plural, one {# Eintrag} other {# Einträgen}} aus {modules, plural, one {# Modul} other {# Modulen}}, {period}",
+        "capped": "Auf Basis der {cap} neuesten aus je {modules, plural, one {# Modul} other {# Modulen}} — {count, plural, one {# Eintrag} other {# Einträge}} gelesen, nicht alles, was du hast",
+        "cappedWithPeriod": "Auf Basis der {cap} neuesten aus je {modules, plural, one {# Modul} other {# Modulen}} — {count, plural, one {# Eintrag} other {# Einträge}} gelesen, {period}. Nicht alles, was du hast.",
+        "nothingIn": "Aus diesen wurde nichts gelesen: {modules}"
+      },
+      "dataScope": {
+        "title": "Was es sehen kann",
+        "body": "Es sieht deine Einträge, deine Ziele und die Dateien, die du hochgeladen hast. Es sieht nichts, was du nicht hinzugefügt hast. Es ändert nichts, ohne dass du darum bittest."
+      }
     },
     "create": {
       "title": "Alles Erstellen",

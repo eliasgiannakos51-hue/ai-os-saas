@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import {
+  summariseProvenance,
+  provenanceBriefing,
+  hasProvenance,
+  type Provenance,
+} from "@/lib/chat/provenance";
 import { autoTitleFromMessage } from "@/lib/chat/conversation-title";
 import { listIntegrations } from "@/lib/integrations/store";
 import {
@@ -444,6 +450,7 @@ export async function POST(request: Request) {
     // Mode, per the brief. Best-effort: a failure here degrades to no
     // extra context rather than breaking the chat request.
     let userContext = "";
+    let provenance: Provenance | null = null;
     try {
       const fullContext = await getUserFullContext(supabase, user.id);
       // NARROWING IS OFF BY DEFAULT — see lib/ai/module-relevance.ts.
@@ -470,6 +477,29 @@ export async function POST(request: Request) {
         ...fullContext,
         moduleSummaries: selection.keep,
       });
+      // WHERE THE ANSWER WILL HAVE COME FROM — V4.6 #9.
+      //
+      // Computed from `selection.keep`, NOT from fullContext: the
+      // narrowing above decides what the model is shown, and a
+      // provenance line built on the full scan would credit modules the
+      // model never saw. The dropped ones join the empty ones, because
+      // from the answer's point of view they are the same thing — data
+      // that was not read.
+      provenance = summariseProvenance(
+        [
+          ...selection.keep.map((m) => ({ slug: m.slug, title: m.title, rows: m.rows })),
+          ...fullContext.emptyModules.map((m) => ({ ...m, rows: [] })),
+          ...fullContext.moduleSummaries
+            .filter((m) => !selection.keep.some((k) => k.slug === m.slug))
+            .map((m) => ({ slug: m.slug, title: m.title, rows: [] })),
+        ],
+        fullContext.perModuleCap
+      );
+      // The model is told what it was given so it can be honest about the
+      // boundary. It is NOT asked to cite: the citation under the answer
+      // is rendered from this same object, so there is nothing for it to
+      // fabricate.
+      userContext += `\n\n${provenanceBriefing(provenance, "el")}`;
     } catch (err) {
       logApiError("/api/chat", err, { stage: "user_full_context" });
     }
@@ -794,6 +824,12 @@ export async function POST(request: Request) {
             conversationId: finalConversationId,
             isNewConversation,
             title: newConversationTitle,
+            // WHAT THIS ANSWER WAS BUILT FROM (V4.6 #9). Arithmetic on the
+            // rows that went into the prompt, not a claim the model made —
+            // so the line under the answer stays true even when the answer
+            // above it is wrong. Omitted entirely when nothing was read;
+            // an empty sources line is a fourth way of saying nothing.
+            provenance: hasProvenance(provenance) ? provenance : undefined,
             // So the composer can say how many free messages are left the
             // moment one is used, rather than on the next page load.
             freeMessage: isFreeMessage,

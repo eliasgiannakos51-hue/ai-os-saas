@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { SearchX, Download } from "lucide-react";
@@ -80,6 +81,28 @@ export function GenericList({
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [selected, setSelected] = useState<{ id: string; tab: RecordDetailTab } | null>(null);
+
+  // ?record=<id> OPENS THAT ENTRY — V4.6 #9.
+  //
+  // "Every answer that uses data: 'based on 12 entries from March', and
+  // clickable — it should open the entry." There was nothing to click to.
+  // Which record is open lived only in the state above, so a record had no
+  // address: a chat answer could name the entry it read and then have
+  // nowhere to send the reader.
+  //
+  // Read once per id rather than kept in sync both ways. Pushing every
+  // open and close into the URL would put a history entry behind each
+  // press of a card, and the back button would then walk a reader
+  // backwards through rows they browsed rather than out of the page.
+  const searchParams = useSearchParams();
+  const requestedRecordId = searchParams.get("record");
+  useEffect(() => {
+    if (!requestedRecordId) return;
+    // Only if it is on this page. A stale or foreign id opens nothing,
+    // rather than opening a panel with no record in it.
+    if (!records.some((r) => r.id === requestedRecordId)) return;
+    setSelected((current) => (current?.id === requestedRecordId ? current : { id: requestedRecordId, tab: "details" }));
+  }, [requestedRecordId, records]);
   // Pressing the worked example on the empty screen hands its text to the
   // add form below, which opens with the headline field already filled.
   //

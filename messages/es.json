@@ -1054,7 +1054,18 @@
       "pinError": "No se guardó el anclaje. Inténtalo de nuevo.",
       "renameError": "El nuevo nombre no se guardó: sigue el anterior.",
       "renameLabel": "Nuevo nombre para «{title}»",
-      "emptyHint": "Pregunta lo que quieras: conocimientos generales, ideas, ayuda para escribir o simplemente conversar."
+      "emptyHint": "Pregunta lo que quieras: conocimientos generales, ideas, ayuda para escribir o simplemente conversar.",
+      "provenance": {
+        "plain": "Basado en {count, plural, one {# entrada} other {# entradas}} en {modules, plural, one {# módulo} other {# módulos}}",
+        "withPeriod": "Basado en {count, plural, one {# entrada} other {# entradas}} en {modules, plural, one {# módulo} other {# módulos}}, {period}",
+        "capped": "Basado en las {cap} más recientes de cada uno de {modules, plural, one {# módulo} other {# módulos}} — {count, plural, one {# entrada leída} other {# entradas leídas}}, no todo lo que tienes",
+        "cappedWithPeriod": "Basado en las {cap} más recientes de cada uno de {modules, plural, one {# módulo} other {# módulos}} — {count, plural, one {# entrada leída} other {# entradas leídas}}, {period}. No todo lo que tienes.",
+        "nothingIn": "No se leyó nada de: {modules}"
+      },
+      "dataScope": {
+        "title": "Qué puede ver",
+        "body": "Ve tus entradas, tus objetivos y los archivos que subiste. No ve nada que no hayas añadido. No cambia nada a menos que se lo pidas."
+      }
     },
     "create": {
       "title": "Crear Cualquier Cosa",

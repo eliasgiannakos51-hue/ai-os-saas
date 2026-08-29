@@ -23,6 +23,8 @@ import { VoiceConversation } from "@/components/voice/voice-conversation";
 import { useVoiceAvailability } from "@/components/voice/voice-availability";
 import { useStickToBottom } from "@/hooks/use-stick-to-bottom";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
+import { ProvenanceLine } from "@/components/chat/provenance-line";
+import type { Provenance } from "@/lib/chat/provenance";
 
 // Remembered across visits, per the focus-mode toggle below.
 const CHAT_SIDEBAR_STORAGE_KEY = "chat-sidebar";
@@ -84,7 +86,11 @@ export function ChatWorkspace({
   const [activeId, setActiveId] = useState<string | null>(null);
   const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
   const [headerRenaming, setHeaderRenaming] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // The provenance rides on the message it belongs to rather than in a
+  // parallel map: a reply and the list of entries it was built from are
+  // one thing, and two structures keyed by id drift the moment a message
+  // is removed from one of them.
+  const [messages, setMessages] = useState<(ChatMessage & { provenance?: Provenance })[]>([]);
   // The text being typed lives INSIDE ChatComposer, not here: as state on
   // this component, every keystroke re-rendered the whole workspace —
   // thread, sidebar, header — measured at 128ms median per key with a
@@ -407,10 +413,12 @@ export function ChatWorkspace({
       // what keeps a reply the user already watched arrive from being
       // discarded when the connection drops partway through it.
       let usageEvent: unknown = null;
+      let provenance: Provenance | null = null;
       const { interrupted } = await readNdjsonStream(res.body, (event) => {
         if (event.type === "done") usageEvent = event;
         if (event.type === "meta") {
           resolvedConversationId = (event.conversationId as string | null) ?? null;
+          provenance = (event.provenance as Provenance | undefined) ?? null;
           if (typeof event.freeRemaining === "number") {
             setFreeRemaining(event.freeRemaining);
           }
@@ -458,6 +466,7 @@ export function ChatWorkspace({
             role: "assistant",
             content: accumulatedText,
             created_at: new Date().toISOString(),
+            provenance: provenance ?? undefined,
           },
         ]);
         if (resolvedConversationId) {
@@ -581,7 +590,7 @@ export function ChatWorkspace({
               NOT beside the conversation title: that row only renders
               once a conversation exists, and a brand new chat is exactly
               where somebody asks what this page can do. */}
-          <HelpTip helpKey="help.chat" />
+          <HelpTip helpKey="help.chat" scopeKey="dashboard.chat.dataScope" />
 
           {/* The open conversation's own star, top-right — the same
               control as in the list, so starring is reachable whichever
@@ -645,6 +654,17 @@ export function ChatWorkspace({
                   Chat met an English explanation of what it is for — which
                   is the one moment the explanation has to land. */}
               <p className="mt-2 text-sm text-muted">{t("emptyHint")}</p>
+              {/* WHAT IT CAN SEE — V4.6 #9, on the first screen.
+                  "The user does not know what data the AI is reading.
+                  That creates both anxiety and wrong expectations." This
+                  is the one moment before they have typed anything, which
+                  is the only moment the expectation is still being set.
+                  The same three sentences are in the chat's help entry;
+                  one wording, two places. */}
+              <div className="mt-5 w-full rounded-xl border border-border bg-panel/60 px-4 py-3 text-left">
+                <p className="text-xs font-semibold text-foreground/80">{t("dataScope.title")}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted">{t("dataScope.body")}</p>
+              </div>
               {/* AND WHAT TO ACTUALLY SAY. "Ask anything" is true and
                   useless: the reported confusion was somebody deciding this
                   product was "several LLMs in one, cheaper", which is
@@ -686,6 +706,12 @@ export function ChatWorkspace({
                       <div className="mt-2">
                         <VoicePlayer text={msg.content} compact />
                       </div>
+                      {/* WHERE IT CAME FROM — V4.6 #9. Only on messages
+                          that carried one: a reply reloaded from the
+                          database has no provenance, and inventing an
+                          empty one would render a source line under an
+                          answer whose sources nobody recorded. */}
+                      <ProvenanceLine provenance={msg.provenance} />
                       <AiGeneratedNotice />
                     </div>
                   </div>

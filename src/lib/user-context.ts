@@ -21,12 +21,25 @@ export type UserFullContext = {
     slug: string;
     title: string;
     headlines: string[];
+    /** THE ROWS THE HEADLINES CAME FROM — id and timestamp, so an answer
+     *  built on them can say which entries it read and link to them
+     *  (lib/chat/provenance.ts). Same rows, same order; nothing extra is
+     *  queried for this, because `select("*")` already returns both. */
+    rows: { id: string | null; headline: string; atMs: number | null }[];
     /** When this module was last written in. Carried so a caller
      *  narrowing the context can keep the modules the user is actually
      *  working in, rather than the ones that happen to come first in a
      *  config array. Null when nothing is dated. */
     lastActivityMs: number | null;
   }[];
+  /** Every module the scan LOOKED AT and found empty. An empty module is
+   *  information — it is what turns "I have no data" into "you have
+   *  nothing in Finance yet" — and a caller that only sees the non-empty
+   *  summaries cannot recover it. */
+  emptyModules: { slug: string; title: string }[];
+  /** The per-module row cap the scan ran under, so a reader of this
+   *  object cannot mistake `rows.length` for a total. */
+  perModuleCap: number;
   activeMissions: { goal: string; stepsCompleted: number; stepsTotal: number }[];
   latestEnergyCheckIn: EnergyCheckIn | null;
   healthScore: HealthScoreResult;
@@ -38,6 +51,7 @@ type ModuleScan = {
   slug: string;
   title: string;
   headlines: string[];
+  rows: { id: string | null; headline: string; atMs: number | null }[];
   hasRows: boolean;
   lastActivityMs: number | null;
   activeDays: Set<string>;
@@ -140,11 +154,23 @@ export async function getUserFullContext(
       slug: m.slug,
       title: m.title,
       headlines: m.headlines,
+      rows: m.rows,
       lastActivityMs: m.lastActivityMs,
     }));
 
+  // THE EMPTY ONES, KEPT. The filter above is right for the prompt — a
+  // module with nothing in it contributes no headlines — but it is what
+  // makes "I have no data" the only possible refusal. Knowing WHICH
+  // modules are empty is what turns that into "you have nothing in
+  // Finance yet; add an entry and I can answer".
+  const emptyModules = perModule
+    .filter((m) => m.headlines.length === 0)
+    .map((m) => ({ slug: m.slug, title: m.title }));
+
   return {
     moduleSummaries,
+    emptyModules,
+    perModuleCap: PER_MODULE_LIMIT,
     activeMissions,
     latestEnergyCheckIn,
     healthScore,
@@ -163,6 +189,7 @@ async function scanModule(
     slug: config.slug,
     title: enModuleTitle(config),
     headlines: [],
+    rows: [],
     hasRows: false,
     lastActivityMs: null,
     activeDays: new Set(),
@@ -185,10 +212,24 @@ async function scanModule(
     }
 
     const rows = data as Record<string, unknown>[];
-    const headlines = rows
-      .map((row) => String(row[config.headlineKey] ?? "").trim())
-      .filter(Boolean)
-      .map((h) => (h.length > MAX_HEADLINE_LENGTH ? `${h.slice(0, MAX_HEADLINE_LENGTH).trimEnd()}…` : h));
+    // ONE LIST, TWO VIEWS. The headlines are what goes into the prompt
+    // and `carried` is what the provenance line names; deriving them
+    // separately lets a blank headline drop from one and not the other,
+    // and then the source list credits an entry the model never saw.
+    const carried = rows
+      .map((row) => {
+        const raw = String(row[config.headlineKey] ?? "").trim();
+        const at = new Date(String(row.created_at)).getTime();
+        return {
+          id: typeof row.id === "string" ? row.id : null,
+          headline: raw.length > MAX_HEADLINE_LENGTH ? `${raw.slice(0, MAX_HEADLINE_LENGTH).trimEnd()}…` : raw,
+          atMs: Number.isFinite(at) ? at : null,
+          raw,
+        };
+      })
+      .filter((r) => r.raw.length > 0)
+      .map(({ raw: _raw, ...rest }) => rest);
+    const headlines = carried.map((r) => r.headline);
 
     const lastActivityMs = rows[0] ? new Date(String(rows[0].created_at)).getTime() : null;
 
@@ -204,6 +245,7 @@ async function scanModule(
       slug: config.slug,
       title: enModuleTitle(config),
       headlines,
+      rows: carried,
       hasRows: rows.length > 0,
       lastActivityMs,
       activeDays,

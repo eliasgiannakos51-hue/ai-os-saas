@@ -1054,7 +1054,18 @@
       "pinError": "L'épinglage n'a pas été enregistré. Réessayez.",
       "renameError": "Le nouveau nom n'a pas été enregistré — l'ancien reste.",
       "renameLabel": "Nouveau nom pour « {title} »",
-      "emptyHint": "Demandez ce que vous voulez : culture générale, idées, aide à la rédaction ou simple conversation."
+      "emptyHint": "Demandez ce que vous voulez : culture générale, idées, aide à la rédaction ou simple conversation.",
+      "provenance": {
+        "plain": "D'après {count, plural, one {# entrée} other {# entrées}} dans {modules, plural, one {# module} other {# modules}}",
+        "withPeriod": "D'après {count, plural, one {# entrée} other {# entrées}} dans {modules, plural, one {# module} other {# modules}}, {period}",
+        "capped": "D'après les {cap} plus récentes de chacun de {modules, plural, one {# module} other {# modules}} — {count, plural, one {# entrée lue} other {# entrées lues}}, pas tout ce que vous avez",
+        "cappedWithPeriod": "D'après les {cap} plus récentes de chacun de {modules, plural, one {# module} other {# modules}} — {count, plural, one {# entrée lue} other {# entrées lues}}, {period}. Pas tout ce que vous avez.",
+        "nothingIn": "Rien n'a été lu dans : {modules}"
+      },
+      "dataScope": {
+        "title": "Ce qu'il voit",
+        "body": "Il voit vos entrées, vos objectifs et les fichiers que vous avez téléversés. Il ne voit rien que vous n'ayez pas ajouté. Il ne modifie rien sans que vous le demandiez."
+      }
     },
     "create": {
       "title": "Créer N'importe Quoi",

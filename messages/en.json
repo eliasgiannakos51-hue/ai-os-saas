@@ -1054,7 +1054,18 @@
       "pinError": "The pin didn't save. Try again.",
       "renameError": "The new name didn't save — the old one is still there.",
       "renameLabel": "New name for \"{title}\"",
-      "emptyHint": "Ask anything — general knowledge, brainstorming, writing help, or just a conversation."
+      "emptyHint": "Ask anything — general knowledge, brainstorming, writing help, or just a conversation.",
+      "provenance": {
+        "plain": "Based on {count, plural, one {# entry} other {# entries}} across {modules, plural, one {# module} other {# modules}}",
+        "withPeriod": "Based on {count, plural, one {# entry} other {# entries}} across {modules, plural, one {# module} other {# modules}}, {period}",
+        "capped": "Based on the {cap} most recent in each of {modules, plural, one {# module} other {# modules}} — {count, plural, one {# entry} other {# entries}} read, not everything you have",
+        "cappedWithPeriod": "Based on the {cap} most recent in each of {modules, plural, one {# module} other {# modules}} — {count, plural, one {# entry} other {# entries}} read, {period}. Not everything you have.",
+        "nothingIn": "Nothing was read from: {modules}"
+      },
+      "dataScope": {
+        "title": "What it can see",
+        "body": "It sees your entries, your goals and the files you uploaded. It does not see anything you have not added. It does not change anything unless you ask."
+      }
     },
     "create": {
       "title": "Create Anything",

@@ -1054,7 +1054,18 @@
       "pinError": "A fixação não foi guardada. Tente de novo.",
       "renameError": "O novo nome não foi guardado — fica o anterior.",
       "renameLabel": "Novo nome para «{title}»",
-      "emptyHint": "Pergunta o que quiseres — conhecimentos gerais, ideias, ajuda a escrever ou só conversar."
+      "emptyHint": "Pergunta o que quiseres — conhecimentos gerais, ideias, ajuda a escrever ou só conversar.",
+      "provenance": {
+        "plain": "Com base em {count, plural, one {# entrada} other {# entradas}} em {modules, plural, one {# módulo} other {# módulos}}",
+        "withPeriod": "Com base em {count, plural, one {# entrada} other {# entradas}} em {modules, plural, one {# módulo} other {# módulos}}, {period}",
+        "capped": "Com base nas {cap} mais recentes de cada um de {modules, plural, one {# módulo} other {# módulos}} — {count, plural, one {# entrada lida} other {# entradas lidas}}, não tudo o que tens",
+        "cappedWithPeriod": "Com base nas {cap} mais recentes de cada um de {modules, plural, one {# módulo} other {# módulos}} — {count, plural, one {# entrada lida} other {# entradas lidas}}, {period}. Não tudo o que tens.",
+        "nothingIn": "Nada foi lido de: {modules}"
+      },
+      "dataScope": {
+        "title": "O que consegue ver",
+        "body": "Vê as tuas entradas, os teus objetivos e os ficheiros que carregaste. Não vê nada que não tenhas adicionado. Não altera nada sem que peças."
+      }
     },
     "create": {
       "title": "Criar Qualquer Coisa",

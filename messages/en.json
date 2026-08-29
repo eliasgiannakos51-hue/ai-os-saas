@@ -868,7 +868,15 @@
         "thisWeek": "This Week",
         "mostActive": "Most Active",
         "creditsRemaining": "Credits Remaining",
-        "fillsAfter": "Fills in after {count} entries"
+        "fillsAfter": "Fills in after {count} entries",
+        "totalEntriesExplain": "Everything you have logged, in every module, since you started.",
+        "thisWeekExplain": "Logged in the last seven days — how active this week has been.",
+        "mostActiveExplain": "The module you have written in most. Where your attention has gone.",
+        "creditsExplain": "What is left of this month's allowance for AI work.",
+        "ofTotal": "{count, plural, one {of # in total} other {of # in total}}",
+        "fromEntries": "{count, plural, one {from # entry} other {from # entries}}",
+        "openEntries": "See the entries →",
+        "openCredits": "See the ledger →"
       },
       "betaFeedback": {
         "message": "Thanks for testing Ionexa AI! I'd love your feedback.",

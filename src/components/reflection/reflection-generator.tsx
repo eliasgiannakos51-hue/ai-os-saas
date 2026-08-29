@@ -3,7 +3,8 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Sparkles, TrendingDown, TrendingUp } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatNumber } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useCredits } from "@/components/credits/credits-context";
 // DEFERRED. MessageContent is react-markdown plus remark-gfm — the
@@ -29,6 +30,7 @@ import type { WeeklyReflectionStats } from "@/lib/reflection";
 // bodyless POST exactly as before — zero change to default behavior.
 export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" } = {}) {
   const t = useTranslations("dashboard.reflection");
+  const locale = useLocale();
   const tKey = useTranslations();
   const tCommon = useTranslations("common");
   const { reportUsage } = useCredits();
@@ -74,6 +76,24 @@ export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" }
     (m) => m.thisWeek > 0 || m.lastWeek > 0
   );
 
+  /**
+   * Up, down, or nothing worth colouring.
+   *
+   * Three states rather than two, because a two-state comparison has to
+   * put "equal" on one side of the line and both answers are wrong. And
+   * two empty weeks are not "equal", they are "no data" — colouring them
+   * green is the punishment-of-the-new-user fault in miniature.
+   */
+  const weekTone: "up" | "down" | "flat" = !stats
+    ? "flat"
+    : stats.totalThisWeek === 0 && stats.totalLastWeek === 0
+      ? "flat"
+      : stats.totalThisWeek > stats.totalLastWeek
+        ? "up"
+        : stats.totalThisWeek < stats.totalLastWeek
+          ? "down"
+          : "flat";
+
   return (
     <div className="space-y-4">
       <button
@@ -96,17 +116,27 @@ export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" }
         <div className="rounded-2xl border border-border bg-panel p-5">
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-semibold text-foreground">{t("entriesTitle")}</p>
+            {/* COLOUR ONLY WHEN THERE IS SOMETHING TO SAY — V4.6 #7.
+                This was `thisWeek >= lastWeek ? emerald : red`, and the
+                `>=` is what made it wrong: 0 and 0 is `0 >= 0`, so an
+                account that logged nothing either week got a GREEN
+                UP-ARROW congratulating it. "The same" is not "better",
+                and "nothing at all" is neither.
+                Equal is now neutral and unarrowed, and two empty weeks
+                are neutral too — the same "no verdict without evidence"
+                rule the health score follows since #5. */}
             <span
               className={`inline-flex shrink-0 items-center gap-1 text-xs font-medium ${
-                stats.totalThisWeek >= stats.totalLastWeek ? "text-emerald-400" : "text-red-400"
+                weekTone === "up"
+                  ? "text-emerald-400"
+                  : weekTone === "down"
+                    ? "text-red-400"
+                    : "text-muted"
               }`}
             >
-              {stats.totalThisWeek >= stats.totalLastWeek ? (
-                <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
-              ) : (
-                <TrendingDown className="h-3.5 w-3.5" aria-hidden="true" />
-              )}
-              {stats.totalThisWeek} / {stats.totalLastWeek}
+              {weekTone === "up" && <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />}
+              {weekTone === "down" && <TrendingDown className="h-3.5 w-3.5" aria-hidden="true" />}
+              {formatNumber(stats.totalThisWeek, locale)} / {formatNumber(stats.totalLastWeek, locale)}
             </span>
           </div>
 

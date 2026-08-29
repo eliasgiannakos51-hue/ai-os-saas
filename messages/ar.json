@@ -868,7 +868,15 @@
         "thisWeek": "هذا الأسبوع",
         "mostActive": "الأكثر نشاطًا",
         "creditsRemaining": "الرصيد المتبقي",
-        "fillsAfter": "يمتلئ بعد {count} مدخلات"
+        "fillsAfter": "يمتلئ بعد {count} مدخلات",
+        "totalEntriesExplain": "كل ما سجّلته، في كل وحدة، منذ البداية.",
+        "thisWeekExplain": "ما سُجّل في آخر سبعة أيام — مدى نشاط هذا الأسبوع.",
+        "mostActiveExplain": "الوحدة التي تكتب فيها أكثر. حيث يذهب انتباهك.",
+        "creditsExplain": "ما تبقّى من حصتك الشهرية لعمل الذكاء الاصطناعي.",
+        "ofTotal": "{count, plural, zero {من # إجمالًا} one {من # إجمالًا} two {من # إجمالًا} few {من # إجمالًا} many {من # إجمالًا} other {من # إجمالًا}}",
+        "fromEntries": "{count, plural, zero {من # مدخل} one {من # مدخل} two {من # مدخلين} few {من # مدخلات} many {من # مدخلًا} other {من # مدخل}}",
+        "openEntries": "اعرض المدخلات ←",
+        "openCredits": "اعرض السجل ←"
       },
       "betaFeedback": {
         "message": "شكرًا لتجربتك Ionexa AI! يسعدنا سماع رأيك.",

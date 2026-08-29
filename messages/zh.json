@@ -868,7 +868,15 @@
         "thisWeek": "本周",
         "mostActive": "最活跃",
         "creditsRemaining": "剩余额度",
-        "fillsAfter": "记录 {count} 条后填充"
+        "fillsAfter": "记录 {count} 条后填充",
+        "totalEntriesExplain": "你在所有模块中记录过的全部内容。",
+        "thisWeekExplain": "最近七天记录的条目——本周的活跃程度。",
+        "mostActiveExplain": "你写得最多的模块，也就是注意力所在。",
+        "creditsExplain": "本月 AI 额度的剩余部分。",
+        "ofTotal": "{count, plural, other {共 # 条中的}}",
+        "fromEntries": "{count, plural, other {来自 # 条记录}}",
+        "openEntries": "查看条目 →",
+        "openCredits": "查看明细 →"
       },
       "betaFeedback": {
         "message": "感谢你测试 Ionexa AI！我们很想听听你的反馈。",

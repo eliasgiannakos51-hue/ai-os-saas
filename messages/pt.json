@@ -868,7 +868,15 @@
         "thisWeek": "Esta Semana",
         "mostActive": "Mais Ativo",
         "creditsRemaining": "Créditos Restantes",
-        "fillsAfter": "Preenche-se após {count} entradas"
+        "fillsAfter": "Preenche-se após {count} entradas",
+        "totalEntriesExplain": "Tudo o que registou, em cada módulo, desde o início.",
+        "thisWeekExplain": "Registado nos últimos sete dias — o quão ativa foi a semana.",
+        "mostActiveExplain": "O módulo onde mais escreve. Para onde vai a sua atenção.",
+        "creditsExplain": "O que resta da sua quota mensal para trabalho com IA.",
+        "ofTotal": "{count, plural, one {de # no total} other {de # no total}}",
+        "fromEntries": "{count, plural, one {a partir de # entrada} other {a partir de # entradas}}",
+        "openEntries": "Ver as entradas →",
+        "openCredits": "Ver o histórico →"
       },
       "betaFeedback": {
         "message": "Obrigado por testar o Ionexa AI! Adoraríamos receber seu feedback.",

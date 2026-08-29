@@ -439,12 +439,21 @@ export default async function OverviewPage() {
         )}
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {/* EVERY NUMBER CARRIES ITS OWN LINE, AND OPENS — V4.6 #7.
+              The destinations are not new: /dashboard/timeline has taken
+              ?range= and ?module= since it was built, so "click the
+              number to see the records behind it" is a href, not a
+              feature. `explain` is a REQUIRED prop precisely so the next
+              card cannot be added without one. */}
           <HomeStatCard
             icon={<Database className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.totalEntries")}
             placeholderLabel={t("statRow.fillsAfter", { count: CHART_MIN_ENTRIES })}
             value={formatNumber(totalEntries, locale)}
             trend={weeklySparkline}
+            explain={t("statRow.totalEntriesExplain")}
+            href="/dashboard/timeline"
+            openLabel={t("statRow.openEntries")}
           />
           <HomeStatCard
             icon={<TrendingUp className="h-4 w-4" aria-hidden="true" />}
@@ -452,13 +461,36 @@ export default async function OverviewPage() {
             placeholderLabel={t("statRow.fillsAfter", { count: CHART_MIN_ENTRIES })}
             value={formatNumber(totalThisWeek, locale)}
             trend={weeklySparkline}
+            explain={t("statRow.thisWeekExplain")}
+            // NOT a raw count as the basis — the denominator is what
+            // makes a numerator mean anything. "4" says nothing; "4, from
+            // 36 in total" says the week was quiet.
+            basis={totalEntries > 0 ? t("statRow.ofTotal", { count: totalEntries }) : undefined}
+            href="/dashboard/timeline?range=week"
+            openLabel={t("statRow.openEntries")}
           />
           <HomeStatCard
             icon={<Layers className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.mostActive")}
             value={mostActive && mostActive.count > 0 ? tKey(mostActive.module.titleKey) : "—"}
+            explain={t("statRow.mostActiveExplain")}
+            basis={
+              mostActive && mostActive.count > 0
+                ? t("statRow.fromEntries", { count: mostActive.count })
+                : undefined
+            }
+            href={
+              mostActive && mostActive.count > 0
+                ? `/dashboard/timeline?module=${mostActive.module.slug}`
+                : undefined
+            }
+            openLabel={t("statRow.openEntries")}
           />
-          <CreditsHomeStat label={t("statRow.creditsRemaining")} />
+          <CreditsHomeStat
+            label={t("statRow.creditsRemaining")}
+            explain={t("statRow.creditsExplain")}
+            openLabel={t("statRow.openCredits")}
+          />
         </div>
 
         {/* NO VERDICT BEFORE THERE IS EVIDENCE — V4.6 #5.

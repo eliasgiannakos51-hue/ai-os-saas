@@ -194,7 +194,7 @@ export const BUILD_MODULES: ModuleConfig[] = [
         badge: true,
         options: ["email", "social", "paid ads", "content", "seo", "event", "other"],
       },
-      { key: "budget", labelKey: "moduleData.fields.budget", type: "number", badge: true },
+      { key: "budget", labelKey: "moduleData.fields.budget", type: "number", badge: true, money: true },
       {
         key: "status",
         labelKey: "moduleData.fields.status",

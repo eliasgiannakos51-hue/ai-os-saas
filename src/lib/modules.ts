@@ -43,6 +43,22 @@ export type FieldConfig = {
   full?: boolean;
   badge?: boolean;
   /**
+   * This number is an amount of money, so it is written the way the
+   * user's language writes money.
+   *
+   * `type: "number"` cannot say this. A finance amount and a lead score
+   * are both numbers and must not be rendered alike: 95.6 is "95,60 €" in
+   * one case and "96" in the other, and the renderer has no way to tell
+   * them apart from the type alone. Measured before this existed: the
+   * module cards printed the raw stored value, so a Greek user read
+   * "95.6" where their language writes "95,60 €".
+   *
+   * Four fields carry it — finance.amount, trading.pnl, products.value,
+   * campaigns.budget — and scripts/tests/metric-clarity.test.mjs fails
+   * the build if a field whose key looks like money is missing it.
+   */
+  money?: true;
+  /**
    * The values STORED IN THE DATABASE, untranslated on purpose: a row
    * whose status reads "in progress" must keep reading "in progress"
    * whatever language the person who typed it was using, or a filter set
@@ -240,7 +256,7 @@ export const MODULES: ModuleConfig[] = [
         badge: true,
         options: ["income", "expense"],
       },
-      { key: "amount", labelKey: "moduleData.fields.amount", type: "number", required: true, badge: true },
+      { key: "amount", labelKey: "moduleData.fields.amount", type: "number", required: true, badge: true, money: true },
     ],
   },
   {
@@ -267,7 +283,7 @@ export const MODULES: ModuleConfig[] = [
       { key: "symbol", labelKey: "moduleData.fields.symbol", type: "text", required: true },
       { key: "direction", labelKey: "moduleData.fields.direction", type: "text", badge: true, placeholderKey: "moduleData.placeholders.longShort" },
       { key: "result", labelKey: "moduleData.fields.result", type: "text", badge: true, placeholderKey: "moduleData.placeholders.winLoss" },
-      { key: "pnl", labelKey: "moduleData.fields.pnl", type: "number", badge: true },
+      { key: "pnl", labelKey: "moduleData.fields.pnl", type: "number", badge: true, money: true },
       { key: "notes", labelKey: "moduleData.fields.notes", type: "textarea", full: true },
     ],
   },
@@ -356,7 +372,7 @@ export const MODULES: ModuleConfig[] = [
     headlineKey: "metric_name",
     fields: [
       { key: "metric_name", labelKey: "moduleData.fields.metricName", type: "text", required: true },
-      { key: "value", labelKey: "moduleData.fields.value", type: "number", badge: true },
+      { key: "value", labelKey: "moduleData.fields.value", type: "number", badge: true, money: true },
       { key: "notes", labelKey: "moduleData.fields.notes", type: "textarea", full: true },
     ],
   },

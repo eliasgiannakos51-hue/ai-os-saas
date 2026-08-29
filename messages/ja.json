@@ -868,7 +868,15 @@
         "thisWeek": "今週",
         "mostActive": "最も活発",
         "creditsRemaining": "残りクレジット",
-        "fillsAfter": "{count} 件記録すると表示されます"
+        "fillsAfter": "{count} 件記録すると表示されます",
+        "totalEntriesExplain": "これまでに全モジュールで記録したものすべて。",
+        "thisWeekExplain": "直近 7 日間の記録——今週どれだけ動いたか。",
+        "mostActiveExplain": "いちばん書いているモジュール。注意が向いている場所です。",
+        "creditsExplain": "今月の AI 利用枠の残りです。",
+        "ofTotal": "{count, plural, other {全 # 件中}}",
+        "fromEntries": "{count, plural, other {# 件の記録から}}",
+        "openEntries": "記録を見る →",
+        "openCredits": "明細を見る →"
       },
       "betaFeedback": {
         "message": "Ionexa AI をお試しいただきありがとうございます！ぜひご意見をお聞かせください。",

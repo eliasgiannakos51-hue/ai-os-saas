@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { ResponsiveContainer, LineChart, Line } from "recharts";
 import { useCountUp, splitLeadingNumber } from "@/hooks/use-count-up";
 import { usePulseOnChange } from "@/hooks/use-pulse-on-change";
@@ -26,11 +27,45 @@ export function HomeStatCard({
   value,
   trend,
   placeholderLabel,
+  explain,
+  basis,
+  href,
+  openLabel,
 }: {
   icon: ReactNode;
   label: string;
   value: string;
   trend?: number[];
+  /**
+   * One line: what this number counts, and why anybody should care.
+   *
+   * V4.6 #7. A number with a two-word label is a number the reader has to
+   * guess at — "This week" of WHAT, counted how, since when. Required
+   * rather than optional, because an optional explanation is the one that
+   * does not get written for the next card.
+   */
+  explain: string;
+  /**
+   * What it was computed from — "from 24 entries".
+   *
+   * Optional, and absent means something specific: this number is not an
+   * aggregate of anything countable (a credit balance is a balance, not a
+   * summary of rows). A card that HAS a basis and omits it is the case
+   * this parameter exists to make awkward.
+   */
+  basis?: string;
+  /**
+   * Where the records behind the number live.
+   *
+   * THE POINT OF THE WHOLE SECTION. A number you cannot open is a number
+   * you have to trust; a number you can open is one you can check. The
+   * destinations already existed — /dashboard/timeline takes ?range= and
+   * ?module= and has since it was built — so this is a link, not a
+   * feature.
+   */
+  href?: string;
+  /** "See the entries" — the affordance on a card that links. */
+  openLabel?: string;
   /**
    * Shown INSTEAD of the line when `trend` exists but is still all
    * zeroes — "fills in after 3 entries", or whatever the caller words it
@@ -46,8 +81,16 @@ export function HomeStatCard({
   // icon parked top-right in its own tinted chip. The number is the
   // largest thing in the card because it is the thing being reported;
   // the label above it is a quiet caption, not a heading.
+  // A LINK WHEN THERE IS SOMEWHERE TO GO, a plain box when there is not.
+  // Not a button that navigates: a real <a> so it opens in a new tab,
+  // shows its destination on hover and reaches the keyboard for free.
+  const Shell = href ? Link : "div";
+  const shellProps = href
+    ? { href, className: "glass-card group relative block overflow-hidden rounded-2xl p-4 transition-colors duration-150 hover:border-orange-500/40" }
+    : { className: "glass-card relative overflow-hidden rounded-2xl p-4" };
+
   return (
-    <div className="glass-card relative overflow-hidden rounded-2xl p-4">
+    <Shell {...(shellProps as { href: string; className: string })}>
       <div className="relative z-[1] flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate text-[11px] uppercase tracking-wider text-muted">{label}</p>
@@ -103,7 +146,20 @@ export function HomeStatCard({
           </ResponsiveContainer>
         </div>
       )}
-    </div>
+
+      {/* THE LINE THE BRIEF ASKED FOR, under the number rather than in a
+          tooltip: a hover is not available on a phone and is not there
+          when somebody is reading rather than pointing. */}
+      <p className="relative z-[1] mt-2 text-[11px] leading-snug text-muted">{explain}</p>
+      {basis && (
+        <p className="relative z-[1] mt-0.5 text-[10px] leading-none text-muted/70">{basis}</p>
+      )}
+      {href && (
+        <span className="relative z-[1] mt-1.5 block text-[10px] font-medium text-muted transition-colors duration-150 group-hover:text-orange-300">
+          {openLabel}
+        </span>
+      )}
+    </Shell>
   );
 }
 

@@ -82,6 +82,69 @@ check(`only the ${Object.keys(EXPECTED).length} argued-for functions are callabl
   unexpected.length === 0, "unexpected: " + unexpected.join(", "));
 check("...and every entry on that list is still real", stale.length === 0, "stale: " + stale.join(", "));
 
+console.log("\n== 1b. and the extension functions, which ARE this product's problem ==");
+// SECTION 1 EXCLUDES THEM, AND ITS REASON IS HALF RIGHT.
+//
+// Its comment says pgcrypto, pg_trgm and unaccent "Supabase exposes to
+// anon and authenticated as a matter of course", and that asserting over
+// all 119 would be asserting about Postgres extensions rather than about
+// this product. The premise is correct — CREATE EXTENSION grants EXECUTE
+// to PUBLIC, and anon is a member of PUBLIC. The conclusion was not.
+//
+// It is this product's anon key that reaches them. PostgREST exposes
+// `public` as an RPC surface, so a holder of the key that ships in the
+// browser bundle can send
+//
+//     select crypt('x', gen_salt('bf', 31))
+//
+// which is 2^31 bcrypt rounds: one request, one pinned worker, no
+// authentication, and nothing in any rate limit this app owns, because it
+// never reaches this app. "It came from an extension" describes where the
+// grant came from, not who is exposed by it.
+//
+// 20260916000000_extension_functions_not_anon takes those grants off
+// PUBLIC and gives them back to authenticated and service_role by name.
+// authenticated is not optional there: gen_random_uuid() is the DEFAULT
+// on most primary keys in this schema, and a DEFAULT is evaluated as the
+// INSERTING role.
+{
+  const extFns = rows(`
+    select p.oid::regprocedure::text, e.extname,
+           has_function_privilege('anon', p.oid, 'execute'),
+           has_function_privilege('authenticated', p.oid, 'execute'),
+           has_function_privilege('service_role', p.oid, 'execute')
+      from pg_proc p
+      join pg_namespace n on n.oid = p.pronamespace
+      join pg_depend d on d.objid = p.oid and d.classid = 'pg_proc'::regclass and d.deptype = 'e'
+      join pg_extension e on e.oid = d.refobjid
+     where n.nspname = 'public'
+     order by 1`);
+  // A FLOOR, because "none of them is executable by anon" is trivially
+  // true of a database where the extensions live in another schema — and
+  // that is exactly what a real Supabase project may look like. This
+  // suite runs against a plain Postgres where they are in `public`, so
+  // the floor says the check had something to check.
+  check(`extension functions were found in public (${extFns.length})`, extFns.length >= 60, String(extFns.length));
+  const anonExt = extFns.filter((r) => r[2] === "t");
+  check("anon can execute NONE of them", anonExt.length === 0,
+    anonExt.slice(0, 8).map((r) => r[0]).join(", "));
+  // AND THE OTHER HALF. Revoking from PUBLIC without granting back is how
+  // this migration would break every insert in the product.
+  const authMissing = extFns.filter((r) => r[3] !== "t");
+  check("authenticated can still execute them — gen_random_uuid() is a column DEFAULT",
+    authMissing.length === 0, authMissing.slice(0, 8).map((r) => r[0]).join(", "));
+  const svcMissing = extFns.filter((r) => r[4] !== "t");
+  check("and so can service_role — bypassrls does not bypass function EXECUTE",
+    svcMissing.length === 0, svcMissing.slice(0, 8).map((r) => r[0]).join(", "));
+  // The specific primitive that made this worth doing.
+  const bcrypt = rows(`select p.oid::regprocedure::text, has_function_privilege('anon', p.oid, 'execute')
+      from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+     where n.nspname='public' and p.proname in ('crypt','gen_salt')`);
+  check(`crypt and gen_salt are present to be checked (${bcrypt.length})`, bcrypt.length >= 3, String(bcrypt.length));
+  check("...and anon can reach neither", bcrypt.every((r) => r[1] === "f"),
+    bcrypt.filter((r) => r[1] === "t").map((r) => r[0]).join(", "));
+}
+
 console.log("\n== 5. the one that takes ANOTHER user's id, attacked ==");
 // voice_usage_this_month(p_user_id) is callable by any signed-in user and
 // takes an arbitrary id. That is only safe because it is SECURITY INVOKER

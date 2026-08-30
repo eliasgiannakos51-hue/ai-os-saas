@@ -114,3 +114,58 @@ console.log(`  +${Math.round(tok(totalChars) / Math.max(1, fired))} on the messa
 console.log("");
 console.log("  NOT MEASURED: answer quality. This file counts characters.");
 console.log("  Tokens are chars/4, the app's own assumption; Greek tokenizes worse.");
+
+// ==========================================================================
+// THE TIE: SPLIT THE DEPTH, OR SAY SO?
+// ==========================================================================
+//
+// "Compare my sales and my finance numbers" scores two modules alike and
+// currently reaches neither. The user asked something specific and gets a
+// shallow answer without being told why. Two ways out:
+//
+//   (a) read BOTH at half depth — 12 rows each instead of 25 of one
+//   (b) read neither, and have the answer say "I looked at both only
+//       briefly; ask about one at a time for a deeper read"
+console.log(`\n${"=".repeat(78)}`);
+console.log("THE TIE CASE: (a) split the depth vs (b) say so");
+console.log("=".repeat(78));
+{
+  const tie = "Compare my sales and my finance numbers";
+  const half = Math.floor(dd.DEEP_DIVE_ROW_LIMIT / 2);
+  let splitChars = 0;
+  for (const slug of ["sales", "finance"]) {
+    const config = CLASSIFIER_MODULES.find((m) => m.slug === slug);
+    const fields = (config.fields ?? [])
+      .filter((f) => f.money === true || f.type === "number" || f.type === "date" || f.type === "select")
+      .slice(0, 4)
+      .map((f) => ({ key: f.key, label: f.key }));
+    const { text, omitted } = dd.formatDeepDive(
+      slug, config.headlineKey, fields, rowsFor(slug), dd.DEEP_DIVE_CHAR_BUDGET / 2, half
+    );
+    const block = dd.deepDivePromptAddition(slug, text, text ? text.split("\n").length : 0, omitted, "el");
+    splitChars += block.length;
+  }
+  // (b) is one sentence in the prompt telling the model to say it read
+  // both shallowly. Measured, not guessed: the sentence itself.
+  const noticeEl =
+    "\n\nΗ ερώτηση αφορά περισσότερες από μία ενότητες, οπότε δεν διάβασες καμία σε βάθος. " +
+    "Πες το: πρότεινε στον χρήστη να ρωτήσει για μία ενότητα τη φορά για πιο αναλυτική απάντηση.";
+  console.log(`  question: "${tie}"`);
+  console.log("");
+  console.log(`  (a) both at half depth (${half} rows each)   ${String(splitChars).padStart(5)} chars   ${String(tok(splitChars)).padStart(4)} tok`);
+  console.log(`  (b) a sentence saying it read neither deeply ${String(noticeEl.length).padStart(5)} chars   ${String(tok(noticeEl.length)).padStart(4)} tok`);
+  console.log("");
+  console.log(`  (b) costs ${(tok(splitChars) / Math.max(1, tok(noticeEl.length))).toFixed(0)}x less.`);
+  console.log("");
+  console.log("  BUT THE COMPARISON IS NOT ONLY COST. (a) answers the question");
+  console.log("  asked — a comparison needs both sides — and (b) answers a");
+  console.log("  different, easier question and explains itself. The honest");
+  console.log("  reading of the numbers: (b) is cheap enough to do ALWAYS, and");
+  console.log("  (a) is cheap enough that refusing on cost grounds would be a");
+  // 302 is the flat-5 -> flat-20 figure from scripts/measure-context.mjs,
+  // named rather than recomputed here so the two files cannot disagree
+  // about it silently.
+  console.log(`  pretext — ${tok(splitChars)} tokens on the rare tied question is beside the`);
+  console.log("  +302 that raising the flat limit to 20 would have cost on EVERY");
+  console.log("  message (scripts/measure-context.mjs).");
+}

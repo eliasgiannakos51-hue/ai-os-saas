@@ -60,6 +60,29 @@ export const DEEP_DIVE_MIN_SCORE = 1;
 export const DEEP_DIVE_MIN_QUESTION_CHARS = 15;
 
 /**
+ * The same floor for a script that needs a third of the characters.
+ *
+ * Fifteen is right for English and wrong for Chinese: "总收入是多少？"
+ * ("how much revenue in total?") is SEVEN characters and a complete
+ * question, and the flat floor rejected it before anything was scored.
+ * Measured: Chinese was 0 of 5 while every one of those five scored the
+ * correct module — the vocabulary was working and the length gate threw
+ * the answer away.
+ *
+ * Six still rejects the greetings the floor exists for: 谢谢 (thanks) is
+ * two characters, ありがとう five.
+ */
+export const DEEP_DIVE_MIN_QUESTION_CHARS_CJK = 6;
+
+const CJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
+
+/** How long a question must be to be worth placing, for the script it is
+ *  written in. */
+export function minQuestionChars(question: string): number {
+  return CJK.test(question) ? DEEP_DIVE_MIN_QUESTION_CHARS_CJK : DEEP_DIVE_MIN_QUESTION_CHARS;
+}
+
+/**
  * A module's score, with subject words worth twice an associated one.
  *
  * TWO KINDS OF EVIDENCE, and they are not equal. "σχόλια" says the
@@ -104,7 +127,7 @@ export function pickDeepDiveModule(
   scored: readonly { slug: string; score: number }[],
   minScore: number = DEEP_DIVE_MIN_SCORE
 ): DeepDiveChoice | null {
-  if (question.trim().length < DEEP_DIVE_MIN_QUESTION_CHARS) return null;
+  if (question.trim().length < minQuestionChars(question)) return null;
   if (scored.length === 0) return null;
   const ranked = [...scored].sort((a, b) => b.score - a.score);
   const top = ranked[0];

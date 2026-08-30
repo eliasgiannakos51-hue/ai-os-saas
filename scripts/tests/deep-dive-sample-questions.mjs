@@ -43,11 +43,31 @@ const syn = await loadTs("src/lib/ai/module-synonyms.ts");
 const { CLASSIFIER_MODULES } = await loadTs("src/lib/classifier-modules.ts");
 const { materialiseSampleData } = await loadTs("src/lib/sample-data/dataset.ts");
 
-const en = JSON.parse(readFileSync("messages/en.json", "utf8"));
-const el = JSON.parse(readFileSync("messages/el.json", "utf8"));
+const LOCALES = ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
+// EVERY CATALOGUE, exactly as lib/ai/module-vocabulary.ts builds it.
+// Loading two here while the app loads ten would test a vocabulary the
+// app does not have.
+const catalogues = LOCALES.map((l) => JSON.parse(readFileSync(`messages/${l}.json`, "utf8")));
 const vocab = rel
-  .buildModuleVocabulary(CLASSIFIER_MODULES, [en, el])
+  .buildModuleVocabulary(CLASSIFIER_MODULES, catalogues)
   .map((v) => ({ ...v, terms: [...v.terms, ...syn.synonymsFor(v.slug)] }));
+
+function place(question) {
+  const folded = fold(question);
+  const words = rel.questionWords(folded);
+  const scored = vocab.map((v) => ({
+    slug: v.slug,
+    score: dd.deepDiveScore(
+      rel.scoreTerms(words, folded, v.terms),
+      rel.scoreTerms(words, folded, syn.associatedFor(v.slug))
+    ),
+  }));
+  return {
+    choice: dd.pickDeepDiveModule(question, scored),
+    top: [...scored].sort((a, b) => b.score - a.score).filter((x) => x.score > 0)
+      .slice(0, 3).map((x) => `${x.slug}:${x.score}`).join(" ") || "none",
+  };
+}
 
 const NOW = Date.parse("2026-08-30T12:00:00Z");
 const sample = materialiseSampleData(NOW);
@@ -112,6 +132,75 @@ for (const item of QUESTIONS) {
   const dated = text.split("\n").filter((l) => /^- \d{4}-\d{2}-\d{2}/.test(l)).length;
   check(`  ...every row dated (${dated}/${shown})`, dated === shown, text.split("\n").find((l) => !/^- \d{4}-\d{2}-\d{2}/.test(l)) ?? "");
 }
+
+console.log("\n== the same five questions, in every language the app ships ==");
+// V4.6 #1 shipped this working in two languages of ten and nobody could
+// have told from the English. Measured before this section existed:
+// el 5/5, en 5/5, and es 1/5, fr 1/5, ar 0/5, zh 0/5 — three separate
+// faults, each invisible from the language it was not in.
+//
+//   1. the vocabulary was built from the English and Greek catalogues
+//      only, so six languages had nothing but the English slug;
+//   2. matching was whole-word, and Chinese and Japanese have no word
+//      separator (the whole sentence is one token) while Arabic glues
+//      its clitics on ("مصروفاتي" is never equal to "مصروفات");
+//   3. the minimum question length was 15 characters, which is right for
+//      English and rejects "总收入是多少？" — seven characters and a
+//      complete question.
+const BY_LANGUAGE = {
+  en: [["How much did I spend in the last two months?", "finance"],
+       ["Which leads are worth chasing first?", "sales"],
+       ["What ideas have I recorded and how are they scored?", "ideas"],
+       ["What feedback have I had from customers?", "feedback"],
+       ["How much revenue came in overall?", "finance"]],
+  es: [["¿Cuántos gastos tuve en los últimos dos meses?", "finance"],
+       ["¿Qué clientes vale la pena perseguir primero?", "sales"],
+       ["¿Qué ideas he registrado y qué puntuación tienen?", "ideas"],
+       ["¿Qué comentarios he recibido de clientes?", "feedback"],
+       ["¿Cuántos ingresos entraron en total?", "finance"]],
+  fr: [["Combien de dépenses ai-je eu ces deux derniers mois ?", "finance"],
+       ["Quels prospects valent la peine d'être relancés ?", "sales"],
+       ["Quelles idées ai-je notées et quel score ont-elles ?", "ideas"],
+       ["Quels retours ai-je reçus des clients ?", "feedback"],
+       ["Combien de revenus sont entrés au total ?", "finance"]],
+  de: [["Wie hoch waren meine Ausgaben in den letzten zwei Monaten?", "finance"],
+       ["Welche Leads lohnt es sich zuerst zu verfolgen?", "sales"],
+       ["Welche Ideen habe ich notiert und wie bewertet?", "ideas"],
+       ["Welches Feedback habe ich von Kunden bekommen?", "feedback"],
+       ["Wie hoch waren die Einnahmen insgesamt?", "finance"]],
+  zh: [["我过去两个月的支出是多少？", "finance"],
+       ["哪些客户值得优先跟进？", "sales"],
+       ["我记录了哪些想法，评分如何？", "ideas"],
+       ["客户给了我哪些反馈？", "feedback"],
+       ["总收入是多少？", "finance"]],
+  ja: [["この2か月の支出はいくらですか？", "finance"],
+       ["どのリードを先に追うべきですか？", "sales"],
+       ["どんなアイデアを記録しましたか？", "ideas"],
+       ["顧客からどんなフィードバックをもらいましたか？", "feedback"],
+       ["収入は合計いくらですか？", "finance"]],
+  ar: [["كم كانت مصروفاتي في الشهرين الماضيين؟", "finance"],
+       ["أي العملاء يستحق المتابعة أولاً؟", "sales"],
+       ["ما الأفكار التي سجلتها وما تقييمها؟", "ideas"],
+       ["ما الملاحظات التي تلقيتها من العملاء؟", "feedback"],
+       ["كم بلغت الإيرادات إجمالاً؟", "finance"]],
+};
+for (const [lang, list] of Object.entries(BY_LANGUAGE)) {
+  const wrong = [];
+  for (const [q, want] of list) {
+    const { choice, top } = place(q);
+    if (!choice || choice.slug !== want) wrong.push(`${q.slice(0, 30)} -> ${choice?.slug ?? "nothing"} (want ${want}; ${top})`);
+  }
+  check(`${lang}: all five questions reach the right module`, wrong.length === 0, wrong.join("\n        "));
+}
+// Greek is covered by the five above; this asserts it is the same five.
+check("Greek was checked above", QUESTIONS.length === 5, String(QUESTIONS.length));
+
+console.log("\n== and a greeting still reaches nothing, in every script ==");
+// The length floor exists to stop "thanks" pulling a module. Lowering it
+// for CJK must not lower it into greetings.
+const GREETINGS = ["thanks", "and?", "ok", "ευχαριστώ", "谢谢", "ありがとう", "شكرا", "gracias", "merci", "danke"];
+const pulled = GREETINGS.filter((g) => place(g).choice !== null);
+check("no greeting places a module", pulled.length === 0, pulled.join(", "));
 
 console.log("\n== what this does NOT prove ==");
 console.log("  No model was called: this environment has no ANTHROPIC_API_KEY.");

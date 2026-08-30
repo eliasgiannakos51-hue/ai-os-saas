@@ -108,6 +108,25 @@ export function questionWords(foldedQuestion: string): Set<string> {
  * exception and are matched against the folded question directly,
  * because "cash flow" cannot be found in a set of single words.
  */
+/**
+ * Scripts with no word separator (Han, Hiragana, Katakana) or with
+ * clitics glued to the word (Arabic). A term in one of these is matched
+ * as a substring; everything else is matched whole.
+ */
+const SUBSTRING_SCRIPTS = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Arabic}]/u;
+
+export function needsSubstringMatch(folded: string): boolean {
+  return SUBSTRING_SCRIPTS.test(folded);
+}
+
+/**
+ * Three characters is the right floor for a Latin or Greek word and the
+ * wrong one for Chinese, where 支出 (expenses) and 收入 (revenue) are two
+ * characters and carry more meaning than most English words of five. A
+ * flat three silently excluded the commonest terms in two languages.
+ */
+const MIN_TERM_LENGTH = (folded: string): number => (needsSubstringMatch(folded) ? 2 : 3);
+
 export function scoreTerms(
   words: ReadonlySet<string>,
   foldedQuestion: string,
@@ -125,8 +144,29 @@ export function scoreTerms(
   let score = 0;
   for (const term of terms) {
     const folded = foldForMatch(term);
-    if (folded.length < 3) continue;
+    if (folded.length < MIN_TERM_LENGTH(folded)) continue;
     if (counted.has(folded)) continue;
+    // WHOLE WORDS, EXCEPT WHERE THERE ARE NO WORDS.
+    //
+    // Measured, in every language this app ships: Chinese and Japanese
+    // scored 0 of 5 on questions that plainly name a module, because
+    // questionWords splits on non-letters and "我过去两个月的支出是多少"
+    // has no separator in it — the whole sentence is ONE token, so no
+    // term can ever equal it. Arabic scored 1 of 5 for a related reason:
+    // clitics attach, so "مصروفاتي" (my expenses) is never equal to
+    // "مصروفات".
+    //
+    // For those scripts a substring test is not the sloppy option, it is
+    // the only one that can work — and the danger it carries elsewhere
+    // ("art" inside "start") is a property of alphabetic scripts, where
+    // whole-word matching is still used.
+    if (needsSubstringMatch(folded)) {
+      if (foldedQuestion.includes(folded)) {
+        counted.add(folded);
+        score += 1;
+      }
+      continue;
+    }
     if (words.has(folded)) {
       counted.add(folded);
       score += 1;
@@ -279,6 +319,19 @@ const GENERIC_LABEL_WORDS = new Set(
     "πελατης", "πελατες", "πελατων", "πελατη", "χρηστης", "χρηστες", "ατομα",
     // Same shape: several modules have a "Company"/"Market" field.
     "company", "companies", "market", "εταιρεια", "εταιρειες", "αγορα",
+    // TEN LANGUAGES, because the fault is in every one of them. Competitors
+    // has a "Customers" field, so whatever that word is in Spanish it
+    // becomes a subject-weight term for Competitors — and "¿Qué
+    // comentarios he recibido de clientes?" was read as a question about
+    // competitors. Listing only the English and Greek forms fixed one
+    // language out of ten.
+    "clientes", "cliente", "clients", "kunden", "kunde", "kundschaft",
+    "clienti", "usuarios", "utilisateurs", "benutzer", "utenti",
+    "客户", "顾客", "用户", "顧客", "ユーザー",
+    "العملاء", "عملاء", "زبائن", "المستخدمين", "مستخدمين",
+    "empresa", "empresas", "entreprise", "entreprises", "unternehmen",
+    "azienda", "aziende", "mercado", "marche", "markt", "mercato",
+    "公司", "市场", "会社", "市場", "شركة", "شركات", "السوق", "سوق",
   ].map((w) => foldForMatch(w))
 );
 

@@ -6,6 +6,8 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { CapabilityStatus, type CapabilityRow } from "@/components/system-health/capability-status";
+import { ENV_REQUIREMENTS } from "@/lib/env-check";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { logApiError } from "@/lib/log-error";
 import { ErrorList, type ProductionErrorRow } from "@/components/system-health/error-list";
@@ -35,6 +37,18 @@ export default async function SystemHealthPage() {
   // notFound() rather than a redirect or a "not allowed" message: a
   // non-owner should not learn that this page exists at all.
   if (!isAdminEmail(user.email)) notFound();
+
+  // READ ONCE, ON THE SERVER, AND REDUCED TO BOOLEANS. `process.env` is
+  // not available in the browser for anything without a NEXT_PUBLIC_
+  // prefix, and the ones that DO have it are exactly the ones whose
+  // values are public — but a component that received values could leak
+  // one by rendering it, so it never receives any.
+  const capabilities: CapabilityRow[] = ENV_REQUIREMENTS.map((req) => ({
+    name: req.name,
+    level: req.level,
+    what: req.what,
+    set: (process.env[req.name] ?? "").trim() !== "",
+  }));
 
   let rows: ProductionErrorRow[] = [];
   let failed = false;
@@ -138,6 +152,12 @@ export default async function SystemHealthPage() {
         <PwaAdoption row={pwa} days={PWA_WINDOW_DAYS} />
 
         <StorageDiagnostics />
+
+        {/* WHAT IS SILENTLY OFF — V4.6. Every variable's status is
+            computed here, on the server, and only its NAME and a boolean
+            cross the boundary. checkEnv already refuses to put a secret's
+            value in a report; this does not give it the chance. */}
+        <CapabilityStatus rows={capabilities} />
       </div>
     </main>
   );

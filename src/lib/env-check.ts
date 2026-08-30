@@ -225,6 +225,36 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
     fallback: "the microphone button is not rendered; every text path is unaffected",
     secret: true,
   },
+  // THE TWO FAILOVER PROVIDERS, WHICH THIS LIST DID NOT KNOW ABOUT.
+  //
+  // lib/ai/providers/registry.ts reads GOOGLE_API_KEY and GROQ_API_KEY by
+  // name and computes, for each, `disabledReason: "<VAR> is not set"`.
+  // That reason went to the failover chain, which used it to pick the
+  // next provider and said nothing to anybody. Neither variable was in
+  // this array, so the boot check never mentioned them either — two
+  // providers wired into the reliability path and invisible from both
+  // ends. scripts/tests/capability-visibility.test.mjs is what found it:
+  // it cross-checks PROVIDER_KEY_ENV_VARS against this list.
+  //
+  // OPTIONAL is the honest level. Nothing breaks without them: the chain
+  // is one provider shorter. What is lost is the thing failover exists
+  // for — when Anthropic is unreachable, an AI call fails instead of
+  // being served by somebody else — and losing that silently is exactly
+  // the shape being fixed.
+  {
+    name: "GOOGLE_API_KEY",
+    level: "optional",
+    what: "Gemini as a FAILOVER provider for AI calls (lib/ai/providers/registry.ts)",
+    fallback: "the provider is skipped; if Anthropic is unreachable the call fails rather than failing over",
+    secret: true,
+  },
+  {
+    name: "GROQ_API_KEY",
+    level: "optional",
+    what: "Groq as a FAILOVER provider for AI calls (lib/ai/providers/registry.ts)",
+    fallback: "the provider is skipped; if Anthropic is unreachable the call fails rather than failing over",
+    secret: true,
+  },
   {
     name: "ELEVENLABS_API_KEY",
     level: "optional",

@@ -839,6 +839,16 @@ const BARE_TEXT_BASELINE = {
     // 'browser'") name browser concepts that would be less clear
     // translated than left alone.
     "src/components/system-health/pwa-adoption.tsx": 8,
+    // Same page, same audience, and one reason more: the SENTENCES this
+    // component renders are not its own. They come verbatim from
+    // ENV_REQUIREMENTS in lib/env-check.ts — "nothing is sent and nothing
+    // errors: welcome emails, agent results, ... all stop silently" —
+    // where they are the text the boot check writes to the server log.
+    // Translating the headings while the body stayed English would be
+    // worse than leaving both, and moving 42 operational sentences into
+    // ten locale files would put the log's wording and the screen's
+    // wording in two places that could disagree.
+    "src/components/system-health/capability-status.tsx": 3,
     "src/components/text-actions/text-actions-textarea.tsx": 2,
     "src/components/ui/widget-boundary.tsx": 2,
   };

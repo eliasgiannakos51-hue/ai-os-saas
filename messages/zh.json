@@ -1755,7 +1755,9 @@
         "withdrawing": "正在撤回...",
         "withdrawn": "已撤回，它已不在库中。",
         "withdrawFailed": "无法撤回，它仍处于共享状态。"
-      }
+      },
+      "failingWarning": "最近连续 {failures} 次运行失败。达到 {max} 次后，该智能体会自动关闭。",
+      "disabledReason": "最近一次失败：{reason}"
     },
     "publishing": {
       "title": "已上线网站",

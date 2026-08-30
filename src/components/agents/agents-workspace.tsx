@@ -34,6 +34,7 @@ import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { formatDateTimeInZone, formatNumber } from "@/lib/format-number";
 import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarification-client";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { AGENT_MAX_CONSECUTIVE_FAILURES } from "@/lib/agents/agent-failure-limits";
 import { useAiJob } from "@/lib/jobs/use-ai-job";
 import { AiJobProgress } from "@/components/ui/ai-job-progress";
 import { ProblemNotice } from "@/components/errors/problem-notice";
@@ -1302,11 +1303,40 @@ export function AgentsWorkspace({
             </button>
           </div>
 
-          {selected.status === "disabled" && (
-            <p className="rounded-lg border border-red-500/40 bg-red-500/10 p-2.5 text-xs leading-relaxed text-red-300">
-              {t("disabledExplanation", { failures: selected.consecutive_failures })}
-            </p>
-          )}
+          {/* WHY IT DIED, AND THAT IT IS DYING — V4.6.
+              Two gaps, both silent. An agent at three failures of five
+              showed NOTHING: consecutive_failures was rendered only once
+              the agent was already off, so the first thing the user saw
+              was a dead agent. And the disabled notice gave a COUNT and
+              told them to "check the task", without saying what went
+              wrong — the reason existed, and went only into an email.
+              The last failed run already carries it. */}
+          {(() => {
+            const lastFailure = selectedRuns.find((r) => r.status === "failed" && r.error);
+            const reason = lastFailure?.error ?? null;
+            if (selected.status === "disabled") {
+              return (
+                <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-2.5 text-xs leading-relaxed text-red-300">
+                  <p>{t("disabledExplanation", { failures: selected.consecutive_failures })}</p>
+                  {reason && <p className="mt-1.5 text-red-200/90">{t("disabledReason", { reason })}</p>}
+                </div>
+              );
+            }
+            if (selected.consecutive_failures > 0) {
+              return (
+                <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2.5 text-xs leading-relaxed text-amber-200">
+                  <p>
+                    {t("failingWarning", {
+                      failures: selected.consecutive_failures,
+                      max: AGENT_MAX_CONSECUTIVE_FAILURES,
+                    })}
+                  </p>
+                  {reason && <p className="mt-1.5 text-amber-200/80">{t("disabledReason", { reason })}</p>}
+                </div>
+              );
+            }
+            return null;
+          })()}
 
           {editing && editDraft ? (
             <div className="space-y-3">

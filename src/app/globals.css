@@ -426,7 +426,12 @@
   color: rgb(var(--danger-text));
 }
 
-[data-theme="light"] .text-red-300\/80 {
+[data-theme="light"] .text-red-300\/80,
+/* /90 arrived with the agent failure notice: the "last failure: ..." line
+   under a disabled agent. Same ink as /80 — on white the alpha washes the
+   text toward the background instead of dimming it, which is exactly what
+   a reason line must not do. */
+[data-theme="light"] .text-red-200\/90 {
   color: rgb(var(--danger-text-soft));
 }
 

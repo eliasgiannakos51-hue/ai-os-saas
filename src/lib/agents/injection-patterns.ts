@@ -32,7 +32,15 @@
 // always loses eventually — the boundary is the capability model (an agent
 // has no tools, a fixed delivery address, and output validated against a
 // schema; see agent-config.ts). These are a cheap filter for the obvious
-// cases, and they now cover the obvious cases in more than one language.
+// cases, in ALL TEN languages the app ships: en el es fr de it pt zh ja ar.
+//
+// THAT SENTENCE USED TO READ "and they now cover the obvious cases in more
+// than one language". Every word of it was true — and it covered two of
+// ten, and read as though the job were finished. A claim of coverage with
+// no number beside it cannot be checked, and an uncheckable claim is the
+// one nobody re-examines. scripts/tests/injection-patterns.test.mjs runs
+// four override payloads per language, forty in all, plus ten ordinary
+// agent briefs that must NOT be caught.
 //
 // Every literal below is written in FOLDED form: lower case, no accents,
 // σ never ς. A literal that is not folded can never match the folded text
@@ -244,8 +252,9 @@ export const INJECTION_PATTERNS: RegExp[] = [
   symbolPattern("(?:システムプロンプト|プロンプト|指示)(?:を)?(?:見せて|教えて|表示|出力)"),
 
   // ------------------------------------------------------------------
-  // Role-tag smuggling — script-independent, so one set covers every
-  // language. These start with a symbol, which is its own boundary.
+  // Role-tag smuggling — two patterns, and they need no per-language
+  // vocabulary because the payload is ASCII markup in every language:
+  // </system>, [INST]. The symbol is its own boundary.
   // ------------------------------------------------------------------
   symbolPattern("<\\/?\\s*(?:system|assistant|human|user)\\s*>"),
   symbolPattern("\\[\\/?\\s*(?:inst|sys|system)\\s*\\]"),

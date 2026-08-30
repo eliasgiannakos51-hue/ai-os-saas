@@ -1755,7 +1755,9 @@
         "withdrawing": "取り下げています...",
         "withdrawn": "取り下げました。ライブラリにはもうありません。",
         "withdrawFailed": "取り下げられませんでした。まだ共有されています。"
-      }
+      },
+      "failingWarning": "直近 {failures} 回連続で実行に失敗しました。{max} 回でこのエージェントは自動的に停止します。",
+      "disabledReason": "最後の失敗: {reason}"
     },
     "publishing": {
       "title": "公開中のサイト",

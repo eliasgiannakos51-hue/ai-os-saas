@@ -186,6 +186,95 @@ console.log("\n== the check can go red ==");
   ok("...while a sample with both is", all.cjk && all.rtl);
 }
 
+console.log("\n== a claim about language coverage names how many ==");
+// THE NINTH SHAPE: a comment technically true that reads as complete.
+//
+// lib/agents/injection-patterns.ts said its patterns "now cover the
+// obvious cases in more than one language". True. It covered two of ten,
+// and an override written in Spanish went through untouched. Nobody
+// re-read it because there was nothing in it to check.
+//
+// The broad version of this — every "covers"/"handles"/"supports" in the
+// tree — is a finding aid with too many false positives to be a gate:
+// "the anchor covers the content" and "the balance could not cover the
+// action" are ordinary English. So this pins the narrow case that
+// actually burned us and IS mechanically checkable: a comment that claims
+// coverage OF LANGUAGES must say how many, in digits or in words.
+// THE CLAIM SHAPE, not "a verb near the word language". Four sentences
+// tripped the loose version and none was a coverage claim: "a boundary
+// that works for its script", "Whisper detects the language itself".
+// What makes it a claim is a QUANTIFIER — every, all, more than one,
+// multiple — between the verb and the noun.
+const LANG_CLAIM =
+  /\b(?:cover|covers|covering|handle|handles|handling|support|supports|supporting|catch|catches|neutralise|neutralises|match|matches)\b[^\n]{0,50}\b(?:all|every|each|multiple|several|many|more than one|any)\b[^\n]{0,30}\b(?:languages?|locales?|scripts?|alphabets?)\b/i;
+// "MORE THAN ONE" CONTAINS A NUMBER WORD AND COUNTS NOTHING. The probe
+// below caught that: the original offending comment says "in more than
+// one language", and a naive number check reads the "one" and passes it.
+// That phrasing is the thing being forbidden, so it cannot be what
+// exempts it.
+const HEDGED = /\b(?:more than|at least|over|upwards of|no fewer than)\s+(?:one|two|\d+)\b/i;
+const COUNTED = (line) =>
+  !HEDGED.test(line) &&
+  /\b\d+\b|\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|both)\b/i.test(line);
+// The gate files this suite already walks, plus the source tree, because
+// the comment that burned us was in src/.
+const srcFiles = [];
+(function walkSrc(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) walkSrc(full);
+    else if (/\.tsx?$/.test(entry.name)) srcFiles.push(full);
+  }
+})("src");
+const claimTargets = files.map((f) => path.join(DIR, f)).concat(srcFiles);
+// A FLOOR ON THE SCAN, not on its result. "No vague claims" is trivially
+// true of a walk that found no files to read.
+ok(`the claim scan has files to read (${claimTargets.length})`, claimTargets.length >= 500, String(claimTargets.length));
+
+// DERIVED FROM THE WALK, not accumulated into a bare array — so the
+// floor on claimTargets above is on the same chain as the assertion
+// below, and gate-vacuity.test.mjs can see that this scan looked at
+// something. It flagged the first version for exactly that.
+const QUOTING_IT = new Set([
+  // QUOTING A BAD COMMENT IS NOT MAKING ONE. Two files have to contain
+  // the sentence verbatim — the gate that tests for it, and the one that
+  // records why its own wording changed — and a rule that cannot tell a
+  // quotation from a claim would forbid documenting the fix. Named rather
+  // than pattern-matched, so a third file cannot quietly acquire the
+  // licence by adding a quotation mark.
+  "scripts/tests/injection-patterns.test.mjs",
+  "scripts/tests/language-extremes.test.mjs",
+]);
+const vagueClaims = claimTargets.flatMap((file) => {
+  if (QUOTING_IT.has(file.split(path.sep).join("/"))) return [];
+  return readFileSync(file, "utf8")
+    .split("\n")
+    .map((line, i) => ({ line, i }))
+    .filter(({ line }) => {
+      const t = line.trim();
+      if (!t.startsWith("//") && !t.startsWith("*") && !t.startsWith("--")) return false;
+      return LANG_CLAIM.test(line) && !COUNTED(line);
+    })
+    .map(({ line, i }) => `${file}:${i + 1}  ${line.trim().slice(0, 88)}`);
+});
+ok(
+  "no comment claims language coverage without saying how many",
+  vagueClaims.length === 0,
+  vagueClaims.join("\n        ") +
+    "\n        Say the number. \"more than one language\" was true of two out of ten."
+);
+// AND THE CHECK CAN GO RED, shown on strings rather than on the tree.
+// THE EXACT SENTENCE THAT BURNED US, as the probe.
+const OFFENDER = "// cases, and they now cover the obvious cases in more than one language.";
+ok("the claim matcher recognises the sentence that burned us", LANG_CLAIM.test(OFFENDER), OFFENDER);
+ok("...and does not accept its hedged 'one' as a count", !COUNTED(OFFENDER));
+ok("...while a real count is accepted", COUNTED("// covers all ten languages the app ships"));
+ok("...and a digit too", COUNTED("// handles all 10 locales"));
+ok(
+  "...and does not fire on prose that merely mentions a language",
+  !LANG_CLAIM.test("// the Greek page renders right-to-left text correctly")
+);
+
 console.log(
   failures.length === 0
     ? `\nALL ${pass} CHECKS PASSED`

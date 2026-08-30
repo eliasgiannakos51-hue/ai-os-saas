@@ -1755,7 +1755,9 @@
         "withdrawing": "Retirando...",
         "withdrawn": "Retirada. Ya no está en la biblioteca.",
         "withdrawFailed": "No se pudo retirar. Sigue compartida."
-      }
+      },
+      "failingWarning": "{failures} de las últimas {max} ejecuciones fallaron seguidas. Tras {max}, este agente se apaga solo.",
+      "disabledReason": "Último fallo: {reason}"
     },
     "publishing": {
       "title": "Sitios en vivo",

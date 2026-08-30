@@ -1755,7 +1755,9 @@
         "withdrawing": "Wird zurückgezogen...",
         "withdrawn": "Zurückgezogen. Nicht mehr in der Bibliothek.",
         "withdrawFailed": "Konnte nicht zurückgezogen werden. Es ist weiterhin geteilt."
-      }
+      },
+      "failingWarning": "{failures} der letzten {max} Läufe sind nacheinander fehlgeschlagen. Nach {max} schaltet sich dieser Agent selbst ab.",
+      "disabledReason": "Letzter Fehler: {reason}"
     },
     "publishing": {
       "title": "Live-Seiten",

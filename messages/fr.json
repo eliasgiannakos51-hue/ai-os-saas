@@ -1755,7 +1755,9 @@
         "withdrawing": "Retrait...",
         "withdrawn": "Retiré. Ce n'est plus dans la bibliothèque.",
         "withdrawFailed": "Impossible de retirer. C'est toujours partagé."
-      }
+      },
+      "failingWarning": "{failures} des {max} dernières exécutions ont échoué d'affilée. Après {max}, cet agent s'éteint tout seul.",
+      "disabledReason": "Dernier échec : {reason}"
     },
     "publishing": {
       "title": "Sites en ligne",

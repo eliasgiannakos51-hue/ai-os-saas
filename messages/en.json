@@ -1755,7 +1755,9 @@
         "withdrawing": "Withdrawing...",
         "withdrawn": "Withdrawn. It is no longer in the library.",
         "withdrawFailed": "That could not be withdrawn. It is still shared."
-      }
+      },
+      "failingWarning": "{failures} of the last {max} runs failed in a row. After {max}, this agent switches itself off.",
+      "disabledReason": "Last failure: {reason}"
     },
     "publishing": {
       "title": "Live sites",

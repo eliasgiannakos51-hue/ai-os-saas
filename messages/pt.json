@@ -1755,7 +1755,9 @@
         "withdrawing": "A retirar...",
         "withdrawn": "Retirado. Já não está na biblioteca.",
         "withdrawFailed": "Não foi possível retirar. Continua partilhado."
-      }
+      },
+      "failingWarning": "{failures} das últimas {max} execuções falharam seguidas. Após {max}, este agente desliga-se sozinho.",
+      "disabledReason": "Última falha: {reason}"
     },
     "publishing": {
       "title": "Sites no ar",

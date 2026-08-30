@@ -1755,7 +1755,9 @@
         "withdrawing": "جارٍ السحب...",
         "withdrawn": "تم السحب. لم يعد في المكتبة.",
         "withdrawFailed": "تعذَّر السحب. ما زال مشاركًا."
-      }
+      },
+      "failingWarning": "فشلت {failures} من آخر {max} عمليات تشغيل على التوالي. بعد {max}، يتوقف هذا الوكيل تلقائيًا.",
+      "disabledReason": "آخر إخفاق: {reason}"
     },
     "publishing": {
       "title": "المواقع المنشورة",

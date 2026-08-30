@@ -137,6 +137,24 @@ export function foldForMatch(input: string): string {
   for (const ch of src) {
     let folded = ch.toLowerCase();
     if (folded === "ς") folded = "σ";
+    // WHAT SURVIVES A STRIP, AND WHY — checked across every script in
+    // scripts/tests/host-and-word-boundaries.test.mjs, not reasoned about
+    // here. Korean jamo, Thai tone marks, Hebrew niqqud, Devanagari
+    // matras and Arabic harakat are all safe, and not by design: they are
+    // SEPARATE code points, so stripping them changes the length and the
+    // `stripped.length === ch.length` guard below rejects it. Kana was
+    // the exception because プ has a precomposed single-codepoint form.
+    //
+    // VIETNAMESE IS A KNOWN, DELIBERATE COLLISION. má and mà fold
+    // together, and its tones are phonemic exactly as kana voicing is.
+    // It is not fixable by inspecting the mark: the acute on á is the
+    // same code point in "café", where stripping it is the whole point.
+    // Distinguishing them needs the language, which this function does
+    // not have. French, Spanish and Portuguese are shipped locales and
+    // Vietnamese is not, so the trade is made in their favour — recorded
+    // here and asserted in the gate so it stays a decision rather than
+    // becoming a discovery.
+    //
     // KANA VOICING MARKS ARE NOT ACCENTS. U+3099 and U+309A turn ハ into
     // バ and パ — different consonants, different words. Unicode calls
     // them Diacritic, so a blanket \p{Diacritic} strip folded バグ (bug)

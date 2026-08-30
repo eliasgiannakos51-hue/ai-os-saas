@@ -1755,7 +1755,9 @@
         "withdrawing": "Ritiro in corso...",
         "withdrawn": "Ritirato. Non è più nella libreria.",
         "withdrawFailed": "Non è stato possibile ritirarlo. È ancora condiviso."
-      }
+      },
+      "failingWarning": "{failures} delle ultime {max} esecuzioni sono fallite di seguito. Dopo {max}, questo agente si spegne da solo.",
+      "disabledReason": "Ultimo errore: {reason}"
     },
     "publishing": {
       "title": "Siti online",

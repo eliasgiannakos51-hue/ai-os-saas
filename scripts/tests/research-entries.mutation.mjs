@@ -25,13 +25,32 @@ const CITATIONS = "src/lib/verification/citations.ts";
 const ENTRIES = "src/lib/research/entry-sources.ts";
 const CONTEXT = "src/lib/research/research-context.ts";
 
-function gateIsGreen() {
+/**
+ * Green, or the gate's OWN first failing line.
+ *
+ * NAMING WHICH CHECK CAUGHT IT, which this file did not do and 57 of the
+ * other 58 suites in this directory do. "CAUGHT" on its own says a
+ * mutation turned something red; it does not say WHAT, and a mutation
+ * caught by the wrong assertion is a mutation nobody has really tested —
+ * the classic case being a syntax error that reddens every check at once
+ * and looks like coverage.
+ *
+ * Read from the gate's stdout rather than predicted here: a label I write
+ * is my belief about which check fires, and the point of running the
+ * thing is to stop believing.
+ */
+function runGate() {
   try {
     execFileSync("node", [GATE], { stdio: "pipe" });
-    return true;
-  } catch {
-    return false;
+    return { green: true, firstFailure: null };
+  } catch (e) {
+    const out = String(e.stdout || "");
+    const line = out.split("\n").find((l) => l.includes("FAIL"));
+    return { green: false, firstFailure: (line ?? "").trim() };
   }
+}
+function gateIsGreen() {
+  return runGate().green;
 }
 
 // THE SIDECAR. A restore that lives only in a `finally` is a restore a
@@ -169,7 +188,8 @@ for (const m of MUTATIONS) {
   writeFileSync(SIDECAR, JSON.stringify({ [m.file]: before }));
   writeFileSync(m.file, before.replace(m.from, m.to));
 
-  const red = !gateIsGreen();
+  const result = runGate();
+  const red = !result.green;
 
   writeFileSync(m.file, before);
   execFileSync("rm", ["-f", SIDECAR]);
@@ -177,6 +197,7 @@ for (const m of MUTATIONS) {
   if (red) {
     caught++;
     console.log(`  CAUGHT  ${m.name}`);
+    console.log(`          -> ${result.firstFailure}`);
   } else {
     survivors.push(`${m.name} (${m.file}) — the gate stayed GREEN`);
     console.log(`  SURVIVED  ${m.name}`);

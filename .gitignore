@@ -57,3 +57,4 @@ test-results/
 # scripts rather than carrying tens of megabytes of PNGs in history.
 /prod-audit/
 /variety-out/
+scripts/tests/.guard-sidecar/

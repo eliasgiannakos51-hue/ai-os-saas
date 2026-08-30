@@ -30,7 +30,28 @@ import type { Provenance } from "@/lib/chat/provenance";
 const CHAT_SIDEBAR_STORAGE_KEY = "chat-sidebar";
 // Tailwind's `md`. Only used for the FIRST-visit default, never for
 // layout — the layout itself is done with real md: classes.
-const SIDEBAR_BREAKPOINT_PX = 768;
+// THE FIRST FIX COUNTED ONE SIDEBAR AND THERE ARE TWO — V4.6 #12.
+//
+// This was 768 (`md`), moved there because "at 375px a 256px in-flow
+// sidebar left the thread 119px wide, which is not a layout, it is a
+// squeeze". That was true and the fix was partial: at 768 the DASHBOARD
+// nav is in flow as well, so the arithmetic is 768 - 240 (nav) - 256
+// (this sidebar) - 48 (padding) and the reading column is what is left.
+//
+// Measured on a real build at 768 before this changed
+// (scripts/tests/chat-measure.prodtest.mjs):
+//   column 182px of a 224px measure at 15px — TWENTY-FOUR characters
+//   per line, against a brief asking for 60-75. The 390px phone, with
+//   no sidebars at all, held 41.
+// A tablet reading a narrower column than a phone is the signal that
+// something is being counted once and paid for twice.
+//
+// 1280 (`xl`) is the width at which both columns and a 60-75 character
+// measure fit at the same time: 1280 - 240 - 256 - 48 = 736px of thread,
+// which the 68ch cap then limits to about 71 characters at 16px. At 1024
+// the same sum leaves 480px, about 58 characters — under the band, so
+// `lg` is not enough and is not used.
+const SIDEBAR_BREAKPOINT_PX = 1280;
 
 let localIdCounter = 0;
 function nextLocalId(prefix: string) {
@@ -513,11 +534,11 @@ export function ChatWorkspace({
 
   return (
     <div className="relative flex h-full overflow-hidden">
-      {/* On md+ the sidebar is a real in-flow column. Below md it is an
-          overlay drawer: at 375px a 256px in-flow sidebar left the thread
-          119px wide, which is not a layout, it is a squeeze. */}
+      {/* On xl+ the sidebar is a real in-flow column; below that it is an
+          overlay drawer. See SIDEBAR_BREAKPOINT_PX for the arithmetic —
+          and for why `md` was the wrong answer to the same question. */}
       <div
-        className={`absolute inset-y-0 left-0 z-30 md:relative md:z-auto ${
+        className={`absolute inset-y-0 left-0 z-30 xl:relative xl:z-auto ${
           sidebarOpen ? "flex" : "hidden"
         }`}
       >
@@ -539,14 +560,17 @@ export function ChatWorkspace({
         />
       </div>
 
-      {/* Tap-anywhere-else to close, phones only — the desktop column has
-          nothing to dismiss. */}
+      {/* Tap-anywhere-else to close, wherever the sidebar is an overlay —
+          the in-flow column at xl+ has nothing to dismiss. This said
+          `md:hidden` while the drawer itself became an overlay below xl,
+          so between 768 and 1279 the drawer covered the thread with no
+          way to dismiss it except the toggle. */}
       {sidebarOpen && (
         <button
           type="button"
           aria-label={t("hideConversations")}
           onClick={toggleSidebar}
-          className="absolute inset-0 z-20 bg-black/50 md:hidden"
+          className="absolute inset-0 z-20 bg-black/50 xl:hidden"
         />
       )}
 
@@ -677,11 +701,40 @@ export function ChatWorkspace({
               />
             </div>
           ) : (
-            <div className="mx-auto max-w-2xl space-y-4">
+            /* NO BUBBLE ON THE ANSWER — V4.6 #12.
+               The reply used to sit in `rounded-2xl border border-border
+               bg-panel`, an opaque card that covered the backdrop the
+               product is built around. The answer is the page; a card
+               around it says the page is a container for messages.
+               So the assistant's text now paints straight onto the
+               backdrop and the globe is behind it, which is what makes
+               the contrast measurement in
+               scripts/tests/chat-measure.prodtest.mjs necessary rather
+               than decorative: nine points, and if any of them falls
+               below 4.5:1 the fix is to dim the GLOBE, never the text.
+               That is also why `text-foreground/90` is gone — a 90%
+               foreground is dimmed text, which is exactly the move the
+               brief forbids.
+
+               THE PERSON KEEPS A GROUND, because without one there is
+               nothing to tell a question from an answer once both are
+               bare text on the same surface. It is a quiet one: the
+               panel colour with an accent EDGE, not the filled
+               `bg-orange-500 text-black` slab it was. Opaque on purpose
+               — a translucent tint over a moving wireframe is a
+               contrast figure that changes with the pixel underneath.
+
+               THE SPACING DOES WHAT THE BORDER DID. The AI Act notice,
+               the sources line and the "listen" control sat inside the
+               card so they could not be read as belonging to the next
+               message. With no card, the gap between turns (space-y-8)
+               is larger than the gap inside one (mt-2), which is the
+               same signal without the box. */
+            <div className="chat-measure space-y-8">
               {messages.map((msg) =>
                 msg.role === "user" ? (
                   <div key={msg.id} className="flex items-start justify-end gap-2">
-                    <div className="max-w-[80%] whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-orange-500 px-4 py-2.5 text-sm text-black">
+                    <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-tr-sm border border-orange-500/30 bg-panel px-4 py-2.5 text-foreground">
                       {msg.content}
                     </div>
                     <span
@@ -692,13 +745,10 @@ export function ChatWorkspace({
                     </span>
                   </div>
                 ) : (
-                  <div key={msg.id} className="flex items-start gap-2">
+                  <div key={msg.id} className="flex items-start gap-2.5">
                     <AssistantAvatar />
-                    {/* EU AI Act art. 50 — on the reply itself, not in
-                        metadata. Inside the bubble so it cannot be read as
-                        belonging to the next message. */}
-                    <div className="max-w-[80%] rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-2.5 text-foreground/90">
-                      <MessageContent content={msg.content} />
+                    <div className="min-w-0 flex-1 text-foreground">
+                      <MessageContent content={msg.content} className="leading-relaxed" />
                       {/* "LISTEN" — on the finished answer only. Never on
                           the one still streaming: half a sentence read
                           aloud is a clip charged for text that changed a
@@ -712,6 +762,8 @@ export function ChatWorkspace({
                           empty one would render a source line under an
                           answer whose sources nobody recorded. */}
                       <ProvenanceLine provenance={msg.provenance} />
+                      {/* EU AI Act art. 50 — on the reply itself, not in
+                          metadata. */}
                       <AiGeneratedNotice />
                     </div>
                   </div>
@@ -719,15 +771,15 @@ export function ChatWorkspace({
               )}
 
               {sending && (
-                <div className="flex items-start gap-2">
+                <div className="flex items-start gap-2.5">
                   <AssistantAvatar />
                   {streamingText !== null ? (
-                    <div className="max-w-[80%] rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-2.5 text-foreground/90">
-                      <MessageContent content={streamingText} />
+                    <div className="min-w-0 flex-1 text-foreground">
+                      <MessageContent content={streamingText} className="leading-relaxed" />
                       <AiGeneratedNotice />
                     </div>
                   ) : (
-                    <AiActivity kind="chat" className="rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-3.5" />
+                    <AiActivity kind="chat" className="py-1" />
                   )}
                 </div>
               )}
@@ -751,7 +803,12 @@ export function ChatWorkspace({
         </div>
 
         <div className="border-t border-border p-4 sm:p-6">
-          <div className="mx-auto max-w-2xl">
+          {/* THE COMPOSER SHARES THE THREAD'S MEASURE. It was
+              `max-w-2xl` while the thread was too, so they lined up by
+              coincidence rather than by construction; the moment the
+              thread's cap became a character count they would have
+              drifted apart at every breakpoint. One class, one rule. */}
+          <div className="chat-measure">
             <div className="mb-2 flex flex-wrap justify-end gap-2">
               {/* PRESS ONCE, THEN TALK (#2). Hidden entirely unless both
                   halves of voice are usable here — a hands-free loop that

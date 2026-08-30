@@ -19,7 +19,13 @@ import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
 import { useStickToBottom } from "@/hooks/use-stick-to-bottom";
 
-type Turn = { id: number; role: "user" | "assistant"; content: string };
+type Turn = {
+  id: number;
+  role: "user" | "assistant";
+  content: string;
+  /** Past chat turns this answer also read (V4.6 #9). Assistant only. */
+  readPastMessages?: number;
+};
 
 let localIdCounter = 0;
 function nextLocalId(): number {
@@ -125,8 +131,15 @@ export function AskAiModal({
       // Never throws — a dropped connection must not delete the answer
       // the user already watched stream in. See lib/ndjson-stream.ts.
       let usageEvent: unknown = null;
+      // How many past chat turns went into this answer. The record itself
+      // is on screen; the conversation is the input the reader has no way
+      // to know about (V4.6 #9).
+      let readPastMessages = 0;
       const { interrupted } = await readNdjsonStream(res.body, (event) => {
         if (event.type === "done") usageEvent = event;
+        if (event.type === "meta" && typeof event.readPastMessages === "number") {
+          readPastMessages = event.readPastMessages;
+        }
         if (event.type === "delta") {
           if (typeof event.text === "string") {
             accumulatedText += event.text;
@@ -138,7 +151,10 @@ export function AskAiModal({
       });
 
       if (accumulatedText) {
-        setMessages((m) => [...m, { id: nextLocalId(), role: "assistant", content: accumulatedText }]);
+        setMessages((m) => [
+          ...m,
+          { id: nextLocalId(), role: "assistant", content: accumulatedText, readPastMessages },
+        ]);
       }
 
       if (streamError) {
@@ -226,6 +242,15 @@ export function AskAiModal({
                     </span>
                     <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-border bg-input px-4 py-2.5 text-foreground/90">
                       <MessageContent content={msg.content} />
+                      {/* ONLY WHEN THERE WERE SOME. "and 0 past messages"
+                          is a sentence that answers a question nobody
+                          asked; the absence of the line is the honest
+                          version of zero. */}
+                      {(msg.readPastMessages ?? 0) > 0 && (
+                        <p className="mt-2 border-t border-border/60 pt-2 text-xs text-muted">
+                          {t("alsoRead", { count: msg.readPastMessages ?? 0 })}
+                        </p>
+                      )}
                     </div>
                   </div>
                 )

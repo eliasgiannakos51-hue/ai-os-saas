@@ -21,6 +21,15 @@ export async function loadProductMentorContext(
     const { data, error } = await supabase
       .from("products")
       .select("*")
+      // EXPLICIT, NOT LEFT TO RLS. lib/user-context.ts carries the long
+      // version of this: it relied on RLS alone until two job handlers
+      // began passing the SERVICE-ROLE client, for which RLS does not
+      // apply at all, and every row of every user was in scope. This file
+      // has always taken `userId` and never used it for anything but an
+      // error log — safe only for as long as every caller happens to pass
+      // a session client. That is a property of the callers, not of this
+      // query, and it is one edit away from not being true.
+      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(PRODUCT_LIMIT);
 

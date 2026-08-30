@@ -724,8 +724,8 @@
       "notConfigured": "Las notificaciones push no están configuradas en esta instalación.",
       "agentResults": "Resultados de agentes",
       "agentResultsHint": "Cuando un agente programado termina una ejecución",
-      "missionReminders": "Recordatorios de misión",
-      "missionRemindersHint": "Cuando se ejecuta un paso de misión programado",
+      "missionReminders": "Recordatorios de plan",
+      "missionRemindersHint": "Cuando se ejecuta un paso de plan programado",
       "lowCredits": "Pocos créditos",
       "lowCreditsHint": "Cuando el trabajo se detiene porque se acabó el saldo",
       "collaboration": "Colaboración",
@@ -895,12 +895,12 @@
         "mostActiveIn": "Más activo en {module}"
       },
       "activeMission": {
-        "title": "Misión Activa",
+        "title": "Plan activo",
         "stepsLabel": "{completed}/{total} pasos completados"
       },
       "nextAction": {
         "title": "¿Qué Sigue?",
-        "continueMission": "Continúa: {step} de tu misión \"{goal}\"",
+        "continueMission": "Continúa: {step} de tu plan \"{goal}\"",
         "revisitLink": "Vinculaste \"{source}\" con \"{target}\" hace unos días — ¿vale la pena revisarlo?",
         "startNew": "Sin actividad nueva en los últimos 3 días — ¿listo para empezar algo nuevo?",
         "cta": "Ir allí →"
@@ -914,7 +914,7 @@
         "suggestion": {
           "recency": "No has registrado nada en un tiempo — añade una nueva entrada para retomar el ritmo.",
           "coverage": "Prueba a explorar un módulo que aún no hayas usado.",
-          "missionSteps": "Completa un paso de la misión para mantener tu impulso.",
+          "missionSteps": "Completa un paso del plan para mantener tu impulso.",
           "consistency": "Intenta registrar algo todos los días esta semana."
         }
       },
@@ -1120,7 +1120,7 @@
       "scheduledForDate": "Se ejecuta el {date}",
       "cancelScheduled": "Cancelar",
       "viewIn": "Ver en {module}",
-      "reviewMission": "Evaluar Misión",
+      "reviewMission": "Evaluar plan",
       "reviewing": "Evaluando...",
       "reviewerLabel": "Reviewer",
       "statusPlanning": "Planificando",
@@ -1139,17 +1139,17 @@
       "retry": "Reintentar ({attempts}/{max})",
       "stepFailedMax": "Falló {max} veces — no se reintentará automáticamente. Intenta reformular el paso o crearlo manualmente.",
       "sessionExpired": "Tu sesión expiró durante la carga. No se perdió nada: recarga la página.",
-      "newMission": "Nueva misión",
+      "newMission": "Nuevo plan",
       "tabSteps": "Pasos",
       "tabReview": "Revisión",
       "stepsProgress": "{done}/{total} pasos",
       "statusFilterLabel": "Estado",
       "nextStep": "Siguiente: {step}",
-      "noSteps": "Esta misión todavía no tiene pasos de plan.",
+      "noSteps": "Este plan todavía no tiene pasos.",
       "reviewNotRunYet": "Todos los pasos están hechos: ejecuta el Revisor para obtener un resumen.",
       "reviewLocked": "El Revisor se ejecuta cuando todos los pasos estén completos.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "Esta misión se acaba de actualizar en otro lugar; recargando para mostrar el estado más reciente.",
+      "updatedElsewhere": "Este plan se acaba de actualizar en otro lugar; recargando para mostrar el estado más reciente.",
       "energy": {
         "heading": {
           "light": "Poca energía — empieza aquí",
@@ -1158,18 +1158,18 @@
         },
         "heldBack": "{count, plural, one {# paso más exigente aplazado} other {# pasos más exigentes aplazados}} por ahora"
       },
-      "stillPlanning": "Sigue planificando — está tardando. Continuará, y el plan estará en tu lista de misiones cuando esté listo.",
+      "stillPlanning": "Sigue planificando — está tardando. Continuará, y el plan estará en tu lista de planes cuando esté listo.",
       "planStalled": "El plan se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo.",
       "empty": {
         "title": "Un objetivo, dividido en pasos",
         "why": "Diga qué quiere conseguir y esto lo convierte en un plan con pasos fechados que puede ir marcando, no en una lista de deseos.",
         "example": "Conseguir los 10 primeros clientes de pago"
       },
-      "deleteMission": "Eliminar misión",
-      "deleteConfirmMission": "¿Eliminar la misión «{goal}»?",
+      "deleteMission": "Eliminar plan",
+      "deleteConfirmMission": "¿Eliminar el plan «{goal}»?",
       "deleteConfirmLoses": "Se {steps, plural, one {elimina # paso} other {eliminan # pasos}} — {completed} ya completados — y {scheduled, plural, one {# ejecución programada} other {# ejecuciones programadas}}. No se puede deshacer.",
-      "deletedMission": "Misión eliminada",
-      "deleteFailed": "No se pudo eliminar la misión.",
+      "deletedMission": "Plan eliminado",
+      "deleteFailed": "No se pudo eliminar el plan.",
       "deleteStep": "Eliminar paso",
       "editStep": "Editar paso",
       "saveStep": "Guardar",
@@ -1187,12 +1187,12 @@
       "generating": "Generando...",
       "entriesTitle": "Nuevas entradas (esta semana / la semana pasada)",
       "noModuleActivity": "Sin actividad en ningún módulo en las últimas dos semanas.",
-      "missionStepsLabel": "{completed, plural, one {# paso de misión completado} other {# pasos de misión completados}}, {pending, plural, one {# aún pendiente} other {# aún pendientes}}",
+      "missionStepsLabel": "{completed, plural, one {# paso del plan completado} other {# pasos del plan completados}}, {pending, plural, one {# aún pendiente} other {# aún pendientes}}",
       "reflectionLabel": "Reflexión"
     },
     "tradingWorkflow": {
       "title": "Flujo de Trabajo de Trading",
-      "description": "Todo el trading en un solo lugar — tus operaciones, enlaces del Knowledge Graph, Timeline, Mentor, Misiones y Reflexión Semanal.",
+      "description": "Todo el trading en un solo lugar — tus operaciones, enlaces del Knowledge Graph, Timeline, Mentor, Planes y Reflexión Semanal.",
       "insight": {
         "title": "Insight de Patrón de Trading",
         "noTrades": "Registra una operación para empezar a ver patrones aquí.",
@@ -1207,7 +1207,7 @@
       "mentorButtonDescription": "Abre Ionexa Chat en Modo Mentor con tus últimas 20 operaciones ya cargadas como contexto.",
       "mentorChatPrefill": "Analiza mis operaciones recientes y dame feedback para mejorar mi win rate.",
       "missionButton": "Iniciar una Meta de Trading",
-      "missionButtonDescription": "Crea un plan de misión de IA para mejorar tu trading, por ejemplo el win rate de este mes.",
+      "missionButtonDescription": "Crea un plan de IA para mejorar tu trading, por ejemplo el win rate de este mes.",
       "missionButtonCreating": "Creando...",
       "missionGoal": "Mejorar mi win rate de trading este mes",
       "timelineTitle": "Timeline de Trading",
@@ -1217,7 +1217,7 @@
     },
     "productWorkflow": {
       "title": "Flujo de Trabajo de Producto",
-      "description": "Todo el lanzamiento de producto en un solo lugar — tus productos, enlaces del Knowledge Graph, Timeline, Mentor, Misiones y Reflexión Semanal.",
+      "description": "Todo el lanzamiento de producto en un solo lugar — tus productos, enlaces del Knowledge Graph, Timeline, Mentor, Planes y Reflexión Semanal.",
       "insight": {
         "title": "Insight de Patrón de Producto",
         "noProducts": "Añade un producto para empezar a ver patrones aquí.",
@@ -1228,7 +1228,7 @@
       "mentorButtonDescription": "Abre Ionexa Chat en Modo Mentor con tus últimos 20 productos ya cargados como contexto.",
       "mentorChatPrefill": "Revisa mis planes de producto y dame feedback sobre lo que falta antes del lanzamiento.",
       "missionButton": "Lanzar un Nuevo Producto",
-      "missionButtonDescription": "Crea un plan de misión de IA para lanzar un nuevo producto — audiencia, precios, landing page y más.",
+      "missionButtonDescription": "Crea un plan de IA para lanzar un nuevo producto — audiencia, precios, landing page y más.",
       "missionButtonCreating": "Creando...",
       "missionGoal": "Lanzar un nuevo producto: definir la audiencia objetivo, fijar el precio y crear una landing page",
       "timelineTitle": "Timeline de Producto",
@@ -1459,7 +1459,7 @@
       "subtitle": "Describe en una frase lo que quieres. No hay herramienta que elegir: el estudio deduce qué es, te muestra lo que entendió y solo entonces lo crea.",
       "inputLabel": "¿Qué quieres crear?",
       "inputPlaceholder": "p. ej. Una página de aterrizaje para mi negocio de coaching, cálida y profesional",
-      "noToolPickerHint": "Sitios web, misiones, entradas, automatizaciones y documentos empiezan todos aquí.",
+      "noToolPickerHint": "Sitios web, planes, entradas, automatizaciones y documentos empiezan todos aquí.",
       "continue": "Continuar",
       "detecting": "Leyendo tu petición…",
       "detectFailed": "No se pudo interpretar esa petición.",
@@ -1475,7 +1475,7 @@
       "changeType": "Cambiar tipo",
       "pickTypePrompt": "Elige qué tipo de cosa debería ser:",
       "typeWebsite": "Sitio web",
-      "typeMission": "Misión",
+      "typeMission": "Plan",
       "typeModuleEntry": "Entrada del espacio",
       "typeModuleEntryNamed": "Entrada en {module}",
       "typeAutomation": "Automatización",
@@ -1505,7 +1505,7 @@
       "progress": {
         "creatingProject": "Creando el proyecto",
         "generatingWebsite": "Generando el sitio web",
-        "planningMission": "Planificando la misión",
+        "planningMission": "Creando el plan",
         "routingEntry": "Enviándolo al módulo correcto",
         "schedulingAutomation": "Programando la automatización",
         "creatingDocument": "Creando el documento",
@@ -2172,7 +2172,7 @@
         "website": "Sitios web",
         "agent": "Agentes",
         "research": "Investigación",
-        "mission": "Misiones",
+        "mission": "Planes",
         "help": "Ayuda"
       },
       "filters": {
@@ -2413,7 +2413,8 @@
     "send": "Enviar",
     "close": "Cerrar",
     "streamInterrupted": "La conexión se interrumpió antes de que terminara la respuesta.",
-    "streamInterruptedPartial": "La conexión se interrumpió: la respuesta anterior puede estar incompleta."
+    "streamInterruptedPartial": "La conexión se interrumpió: la respuesta anterior puede estar incompleta.",
+    "alsoRead": "También leyó {count, plural, one {# mensaje anterior} other {# mensajes anteriores}} sobre esta entrada"
   },
   "entityLinks": {
     "buttonLabel": "Vincular a...",
@@ -2448,8 +2449,8 @@
       "description": "Registra tu primera entrada en {module}."
     },
     "firstMission": {
-      "title": "Misión Cumplida",
-      "description": "Completa tu primera misión de IA."
+      "title": "Primer plan completado",
+      "description": "Completa tu primer plan de IA."
     },
     "streak": {
       "title": "Campeón de la Consistencia",
@@ -2915,7 +2916,7 @@
     },
     "create": {
       "is": "Una frase dentro, la cosa correcta fuera.",
-      "does": "Describes con tus palabras lo que quieres; el estudio averigua si es una entrada de módulo, un sitio web, una misión, una automatización, un agente o un documento, y lo crea.",
+      "does": "Describes con tus palabras lo que quieres; el estudio averigua si es una entrada de módulo, un sitio web, un plan, una automatización, un agente o un documento, y lo crea.",
       "doesNot": "No adivina en silencio. Cuando no entiende qué querías, o no puede construir lo que pediste, lo dice en vez de producir el tipo más parecido — que es justo lo que hacía antes con los agentes."
     },
     "costs": {
@@ -2960,12 +2961,12 @@
     },
     "productWorkflow": {
       "is": "Todo sobre tus productos en una sola pantalla.",
-      "does": "Muestra las mismas entradas de producto que el módulo Productos, más sus enlaces, su historial, un patrón calculado sin IA y accesos directos a Mentor y a Misión.",
+      "does": "Muestra las mismas entradas de producto que el módulo Productos, más sus enlaces, su historial, un patrón calculado sin IA y accesos directos a Mentor y a Plan.",
       "doesNot": "No es un segundo sitio donde guardar productos. Son las mismas filas que el módulo Productos — añades una aquí y aparece allí — y el patrón es aritmética sobre lo que escribiste, no un pronóstico."
     },
     "reflection": {
       "is": "Lo que realmente terminaste esta semana, frente a lo que habías planeado.",
-      "does": "Cuenta las entradas nuevas de cada módulo de esta semana y la anterior, cuenta los pasos de misión hechos y pendientes, y pide una síntesis breve y honesta de la diferencia.",
+      "does": "Cuenta las entradas nuevas de cada módulo de esta semana y la anterior, cuenta los pasos de plan hechos y pendientes, y pide una síntesis breve y honesta de la diferencia.",
       "doesNot": "Aquí no se guarda nada. Cada pulsación vuelve a calcular con tus datos en vivo, así que no hay historial de reflexiones anteriores, y cuenta lo que registraste, no lo que hiciste fuera de la aplicación."
     },
     "routing": {
@@ -2985,7 +2986,7 @@
     },
     "tradingWorkflow": {
       "is": "Todo lo relacionado con el trading en una sola pantalla.",
-      "does": "Las mismas operaciones que el módulo Trading, más sus enlaces, su historial, patrones por día, hora, símbolo y racha de pérdidas, y accesos directos a Mentor y a Misión.",
+      "does": "Las mismas operaciones que el módulo Trading, más sus enlaces, su historial, patrones por día, hora, símbolo y racha de pérdidas, y accesos directos a Mentor y a Plan.",
       "doesNot": "Los patrones son recuentos de operaciones que ya hiciste, no predicciones, y no son asesoramiento de inversión. Tampoco es un segundo conjunto de operaciones: son las mismas filas que el módulo Trading."
     },
     "businessHealth": {
@@ -3015,7 +3016,7 @@
       "credits": "Créditos",
       "websites": "Sitios web",
       "agents": "Agentes de IA",
-      "missions": "Misiones",
+      "missions": "Planes",
       "chat": "Chat",
       "files": "Archivos",
       "integrations": "Conexiones",

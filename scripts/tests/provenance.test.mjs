@@ -101,6 +101,51 @@ const undated = summariseProvenance(
 check("an unparseable date is dropped, not read as 1970", undated.oldestMs === null && undated.newestMs === null);
 check("...and the entries still count", undated.entryCount === 2, String(undated.entryCount));
 
+console.log("\n== 3b. two scans, one count ==");
+// A Mentor Mode request builds its prompt from TWO scans over overlapping
+// module lists (lib/user-context.ts over the classifier modules,
+// lib/chat/mentor-context.ts over the linkable ones). Summing both
+// reports twelve entries as twenty-four and prints each one twice.
+const twice = summariseProvenance(
+  [
+    { slug: "finance", title: "Finances", rows: [row("f1", "Invoice 1", MAR), row("f2", "Invoice 2", MAY)] },
+    { slug: "finance", title: "Finances", rows: [row("f1", "Invoice 1", MAR), row("f3", "Invoice 3", MAY)] },
+  ],
+  5
+);
+check("an entry read by both scans counts once", twice.entryCount === 3, String(twice.entryCount));
+check("...and appears once in the list", twice.sources.filter((s) => s.id === "f1").length === 1);
+check("...while the entry only one scan saw survives", twice.sources.some((s) => s.id === "f3"));
+// A row with no id still has to dedupe on something.
+const noIds = summariseProvenance(
+  [
+    { slug: "ideas", title: "Ideas", rows: [row(null, "Same headline", MAY)] },
+    { slug: "ideas", title: "Ideas", rows: [row(null, "Same headline", MAY)] },
+  ],
+  5
+);
+check("an id-less row dedupes on its headline", noIds.entryCount === 1, String(noIds.entryCount));
+// AND THE EMPTY LIST MUST AGREE WITH THE SOURCES. One scan can find a
+// module empty while the other reads five rows from it; saying "you have
+// nothing in Finance" under an answer that just cited Finance is worse
+// than saying nothing.
+const mixed = summariseProvenance(
+  [
+    { slug: "finance", title: "Finances", rows: [] },
+    { slug: "finance", title: "Finances", rows: [row("f1", "Invoice", MAY)] },
+    { slug: "sales", title: "Sales", rows: [] },
+    { slug: "sales", title: "Sales", rows: [] },
+  ],
+  5
+);
+check(
+  "a module one scan found empty and the other did not is NOT called empty",
+  !mixed.emptyModules.some((m) => m.slug === "finance"),
+  mixed.emptyModules.map((m) => m.slug).join(", ")
+);
+check("a module both scans found empty still is", mixed.emptyModules.some((m) => m.slug === "sales"));
+check("...and is listed once, not once per scan", mixed.emptyModules.filter((m) => m.slug === "sales").length === 1);
+
 console.log("\n== 4. the briefing tells the model the boundary, not to cite ==");
 for (const lang of ["en", "el"]) {
   const brief = provenanceBriefing(p, lang);
@@ -126,6 +171,36 @@ check("the cap is published rather than re-guessed downstream", /perModuleCap: P
 
 const routeSrc = stripComments(readFileSync("src/app/api/chat/route.ts", "utf8"));
 check("the route summarises what it sent", /summariseProvenance\(/.test(routeSrc));
+// MENTOR MODE READS MORE AND MUST ACCOUNT FOR MORE. Its scan is a
+// separate one that goes into the same prompt.
+check(
+  "the mentor scan's rows are counted too",
+  /\.\.\.mentor\.modules,/.test(routeSrc),
+  "an answer built on both scans and crediting one is quietly wrong"
+);
+const mentorSrc = stripComments(readFileSync("src/lib/chat/mentor-context.ts", "utf8"));
+check("the mentor scan returns its rows, not just a string", /modules: withData\.map/.test(mentorSrc));
+check(
+  "...only the modules that survived its own cap",
+  /withData\.map\(\(m\) => \(\{ slug: m\.slug, title: m\.title, rows: m\.rows \}\)\)/.test(mentorSrc),
+  "MAX_MODULES_IN_SUMMARY drops modules AFTER they are read; crediting those names entries the model never saw"
+);
+// EVERY SCAN THAT FEEDS A PROMPT FILTERS ON user_id EXPLICITLY.
+// lib/user-context.ts carries the long version: relying on RLS alone
+// broke the moment a caller passed the service-role client.
+for (const f of [
+  "src/lib/chat/mentor-context.ts",
+  "src/lib/chat/product-mentor-context.ts",
+  "src/lib/chat/trading-mentor-context.ts",
+]) {
+  const src = stripComments(readFileSync(f, "utf8"));
+  const takesUserId = /userId: string/.test(src);
+  check(
+    `${f.split("/").pop()}: filters on user_id rather than trusting RLS`,
+    !takesUserId || /\.eq\("user_id", userId\)/.test(src),
+    "it takes a userId and never uses it to filter — safe only while every caller passes a session client"
+  );
+}
 // FROM THE NARROWED SET. The relevance pass decides what the model is
 // shown; provenance built on the full scan credits modules it never saw.
 check(

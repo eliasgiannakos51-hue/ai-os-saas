@@ -33,8 +33,10 @@ const ROUTE = "src/app/api/chat/route.ts";
 const LINE = "src/components/chat/provenance-line.tsx";
 const LIST = "src/components/modules/generic-list.tsx";
 const WS = "src/components/chat/chat-workspace.tsx";
+const MENTOR = "src/lib/chat/mentor-context.ts";
+const TRADING = "src/lib/chat/trading-mentor-context.ts";
 const JA = "messages/ja.json";
-const TARGETS = [GATE, PROV, CTX, ROUTE, LINE, LIST, WS, JA];
+const TARGETS = [GATE, PROV, CTX, ROUTE, LINE, LIST, WS, MENTOR, TRADING, JA];
 
 const MUTANTS = [
   {
@@ -94,6 +96,51 @@ const MUTANTS = [
     from: "          ...selection.keep.map((m) => ({ slug: m.slug, title: m.title, rows: m.rows })),",
     to: "          ...fullContext.moduleSummaries.map((m) => ({ slug: m.slug, title: m.title, rows: m.rows })),",
     expect: "from the modules that were actually sent",
+  },
+  {
+    // Twelve entries reported as twenty-four, each printed twice.
+    name: "the two scans stop deduping",
+    file: PROV,
+    from: "      if (seen.has(key)) continue;",
+    to: "",
+    expect: "an entry read by both scans counts once",
+  },
+  {
+    name: "a module one scan found empty is called empty anyway",
+    file: PROV,
+    from: "      !contributing.has(m.slug) && emptyModules.findIndex((o) => o.slug === m.slug) === i",
+    to: "      emptyModules.findIndex((o) => o.slug === m.slug) === i",
+    expect: "is NOT called empty",
+  },
+  {
+    name: "the mentor scan's rows stop being counted",
+    file: ROUTE,
+    from: "          ...mentor.modules,\n",
+    to: "",
+    expect: "the mentor scan's rows are counted too",
+  },
+  {
+    // The scan takes a userId and used to use it only for an error log.
+    name: "a prompt scan goes back to trusting RLS alone",
+    file: MENTOR,
+    from: '          .eq("user_id", userId)\n',
+    to: "",
+    expect: "filters on user_id rather than trusting RLS",
+  },
+  {
+    name: "...and so does the trading one",
+    file: TRADING,
+    from: '      .eq("user_id", userId)\n',
+    to: "",
+    expect: "filters on user_id rather than trusting RLS",
+  },
+  {
+    // MAX_MODULES_IN_SUMMARY drops modules after they are read.
+    name: "the mentor scan credits modules it read but did not send",
+    file: MENTOR,
+    from: "      modules: withData.map((m) => ({ slug: m.slug, title: m.title, rows: m.rows })),",
+    to: "      modules: perModule.filter((m) => m !== null).map((m) => ({ slug: m.slug, title: m.title, rows: m.rows })),",
+    expect: "only the modules that survived its own cap",
   },
   {
     name: "the meta event stops carrying it",

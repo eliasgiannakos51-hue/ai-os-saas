@@ -79,14 +79,35 @@ export function summariseProvenance(modules: ProvenanceModule[], perModuleCap: n
   const emptyModules: Provenance["emptyModules"] = [];
   let capped = false;
 
+  // THE SAME ENTRY CAN ARRIVE TWICE. A chat request in Mentor Mode builds
+  // its prompt from two scans — lib/user-context.ts over the classifier
+  // modules and lib/chat/mentor-context.ts over the linkable ones — and
+  // those lists overlap. Summing both without deduping reports "24
+  // entries" for twelve, and prints each one twice in the list under the
+  // answer, which is the first thing a reader would notice and the last
+  // thing that would get fixed.
+  //
+  // Keyed on the row, not the module: an id when there is one, the
+  // headline when there is not. Two different entries with the same
+  // headline in the same module collapse to one, which undercounts by
+  // one rather than inventing a source — the safe direction.
+  const seen = new Set();
+  const emptySlugs = new Set();
   for (const m of modules) {
     const rows = m.rows ?? [];
     if (rows.length === 0) {
+      // A module can be listed empty by one scan and full by the other.
+      // It is only really empty if NO scan found anything in it, so the
+      // decision waits until every module has been walked.
+      emptySlugs.add(m.slug);
       emptyModules.push({ slug: m.slug, title: m.title });
       continue;
     }
     if (rows.length >= perModuleCap) capped = true;
     for (const r of rows) {
+      const key = `${m.slug}\u0000${r.id ?? r.headline}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
       sources.push({
         slug: m.slug,
         title: m.title,
@@ -99,6 +120,12 @@ export function summariseProvenance(modules: ProvenanceModule[], perModuleCap: n
 
   const times = sources.map((s) => s.atMs).filter((t): t is number => t !== null);
   const contributing = new Set(sources.map((s) => s.slug));
+  // "You have nothing in Finance" must not be said about a module the
+  // other scan read five rows from.
+  const trulyEmpty = emptyModules.filter(
+    (m, i) =>
+      !contributing.has(m.slug) && emptyModules.findIndex((o) => o.slug === m.slug) === i
+  );
 
   return {
     entryCount: sources.length,
@@ -107,7 +134,7 @@ export function summariseProvenance(modules: ProvenanceModule[], perModuleCap: n
     newestMs: times.length > 0 ? Math.max(...times) : null,
     perModuleCap,
     capped,
-    emptyModules,
+    emptyModules: trulyEmpty,
     sources,
   };
 }

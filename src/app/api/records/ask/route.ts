@@ -315,6 +315,20 @@ export async function POST(request: Request) {
         let assistantText = "";
         let webSearchCount = 0;
         try {
+          // WHAT THIS ANSWER READ BESIDES THE RECORD — V4.6 #9.
+          //
+          // The entry itself is on screen, so saying "it read this entry"
+          // tells the reader nothing they cannot see. The part they have
+          // no way to know about is the conversation: this endpoint pulls
+          // past chat turns that mention the entry, and until now nothing
+          // said so. That is the whole hidden input, and it is the only
+          // one worth a line.
+          controller.enqueue(
+            ndjsonLine({
+              type: "meta",
+              readPastMessages: recordConversation.turns.length,
+            })
+          );
           void recordAiCallForDailySpend(CREDIT_COSTS.chatMessage);
           const claudeStream = anthropic.messages.stream({
             model: MODEL,

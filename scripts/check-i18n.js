@@ -46,6 +46,13 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // V4.6 #8. "Mission" became "Plan" across all ten languages, and
+  // Spanish for a plan is "plan" — same five letters as English. French
+  // ("Plan") and German ("Plan") coincide too and pass only because
+  // their neighbouring keys differ enough for the heuristic; Spanish
+  // does not, so it is declared. Checked against the nav name this
+  // rename propagates from: es "Objetivos y planes".
+  "es:dashboard.createStudio.typeMission",
   // Trading journal (V4 #14). Two classes, both checked by hand.
   //
   //   CITY NAMES. Sydney, Tokyo, London and New York are spelled the same

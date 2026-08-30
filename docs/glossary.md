@@ -66,6 +66,39 @@ not advice" — so the gate checks the **counted** form (`{count} X`, `# X`,
 | entry | ar | مدخل, مدخلات, سجل, سجلات |
 <!-- FORBIDDEN:END -->
 
+## Forbidden outright, in any form
+
+The counted-form rule above works for a unit noun, which is always counted.
+It does not work for a **name**: "Delete the mission" carries no number, so
+a counted-form check would never see it come back. These words are
+forbidden wherever they appear.
+
+<!-- FORBIDDEN_ANY:START -->
+| concept | language | forbidden |
+|---|---|---|
+| plan | en | mission, missions |
+| plan | fr | mission, missions |
+| plan | de | Mission, Missionen, Missionsschritt |
+| plan | it | missione, missioni |
+| plan | pt | missão, missões |
+| plan | es | misión, misiones |
+| plan | ja | ミッション |
+<!-- FORBIDDEN_ANY:END -->
+
+Three languages are **deliberately absent** from that table, and saying so
+is the point of writing it down:
+
+- **Greek** — `Αποστολή` is the ordinary word for *sending*, used by
+  "Αποστολή link επαναφοράς" and five other unrelated strings. Forbidding
+  it would fail the build on correct copy.
+- **Chinese** (任务) and **Arabic** (مهمة) — both are the word this app
+  uses for **task**, the instruction text given to an agent, which the
+  glossary declares a separate concept below. The word is right; it just
+  belongs to the other concept.
+
+A gate that cannot check three of ten languages should say which three
+rather than report a clean sweep.
+
 ## Exceptions
 
 Two navigation names use "records" as a **collective** — not a count of
@@ -97,6 +130,13 @@ These are NOT the same thing and must not be unified:
 - **goal** vs **plan** — the goal is the sentence a person writes; the plan
   is what the system produces from it. Both are needed, and the nav names
   the pair: "Goals & Plans".
+
+  The object used to be called a **mission** everywhere inside the feature
+  the nav called "Goals & Plans" — 28 strings, in ten languages. The nav
+  name was already approved, so the rename propagated it inward rather
+  than deciding anything new. `achievements.firstMission.title` lost a pun
+  ("Mission Accomplished") in the process; a pun that names the thing
+  wrongly is worse than no pun.
 
 ## Words that are banned outright
 

@@ -146,6 +146,77 @@ const probe = LOCALES.filter((lang) => {
 check("the matcher finds a planted violation in every language", probe.length === 0, probe.join(", "));
 
 // ---------------------------------------------------------------------
+console.log("\n== 2b. a NAME cannot be caught by a counted-form rule ==");
+// "Delete the mission" carries no number, so section 2 would never see it
+// come back. A name is forbidden wherever it appears instead.
+//
+// THREE LANGUAGES ARE ABSENT FROM THAT TABLE ON PURPOSE — Greek, where
+// Αποστολή is the ordinary word for "sending"; Chinese and Arabic, where
+// the word is the one this app uses for "task", a concept the glossary
+// declares separate. A gate that cannot check three of ten languages says
+// which three rather than reporting a clean sweep.
+const forbiddenAny = table("FORBIDDEN_ANY");
+check(
+  "the FORBIDDEN_ANY table is present and populated (>= 5 rows)",
+  forbiddenAny !== null && forbiddenAny.length >= 5,
+  forbiddenAny === null ? "the START/END markers are gone" : `${forbiddenAny.length} rows`
+);
+if (forbiddenAny !== null) {
+  const covered = new Set(forbiddenAny.map((r) => r[1]));
+  const uncovered = LOCALES.filter((l) => !covered.has(l));
+  // Named in prose, by the language's English name, in the paragraph
+  // under the table. The first version of this also tested a constant
+  // regex that did not mention the language at all — a clause that could
+  // not go red, sitting inside the check meant to stop a silent skip.
+  const ENGLISH_NAME = {
+    en: "English", el: "Greek", es: "Spanish", fr: "French", de: "German",
+    it: "Italian", pt: "Portuguese", zh: "Chinese", ja: "Japanese", ar: "Arabic",
+  };
+  // SCOPED TO THE PARAGRAPH UNDER THAT TABLE, not to the whole file.
+  // "Greek" also appears in the collision table at the top, so a
+  // document-wide search stayed true after the explanation was renamed
+  // away — the mutation aimed at this reported itself MISSED.
+  const explainFrom = md.indexOf("<!-- FORBIDDEN_ANY:END -->");
+  const explainTo = md.indexOf("\n## ", explainFrom);
+  const explanation = explainFrom < 0 ? "" : md.slice(explainFrom, explainTo < 0 ? undefined : explainTo);
+  const unexplained = uncovered.filter((l) => !explanation.includes(ENGLISH_NAME[l]));
+  check(
+    `every language absent from the table is explained (${uncovered.map((l) => ENGLISH_NAME[l]).join(", ") || "none absent"})`,
+    unexplained.length === 0,
+    `${unexplained.map((l) => ENGLISH_NAME[l]).join(", ")} — absent from the table and unexplained in the glossary`
+  );
+  for (const [, lang, words] of forbiddenAny) {
+    const list = words.split(",").map((w) => w.trim()).filter(Boolean);
+    check(`${lang}: the row names words`, list.length > 0, words);
+    const hits = [];
+    for (const [key, value] of strings[lang]) {
+      if (EXCEPT.has(key)) continue;
+      for (const w of list) {
+        // WORD BOUNDARIES MATTER HERE. Spanish "comisión" contains
+        // "misión"; a substring check would fail the build on six correct
+        // affiliate strings.
+        const re = /^[\p{L}]+$/u.test(w) && /[a-zA-Z\u00C0-\u024F]/.test(w)
+          ? new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "iu")
+          : new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "iu");
+        if (re.test(value)) {
+          hits.push(`${key}  [${w}]  ${value.slice(0, 60)}`);
+          break;
+        }
+      }
+    }
+    check(`${lang}: the old name is gone`, hits.length === 0, listOf(lang, hits));
+  }
+  // The matcher must be able to find one.
+  const planted = forbiddenAny.map(([, lang, words]) => {
+    const w = words.split(",")[0].trim();
+    const re = /^[\p{L}]+$/u.test(w) && /[a-zA-Z\u00C0-\u024F]/.test(w)
+      ? new RegExp(`\\b${w}\\b`, "iu")
+      : new RegExp(w, "iu");
+    return re.test(`Delete the ${w} now`) ? null : lang;
+  }).filter(Boolean);
+  check("the name matcher finds a planted violation", planted.length === 0, planted.join(", "));
+}
+
 console.log("\n== 3. the words that are banned outright ==");
 // COMMENTS ARE NOT CODE, and neither is the glossary: docs/glossary.md
 // contains every banned word by definition, so it is never scanned.

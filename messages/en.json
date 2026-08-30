@@ -724,8 +724,8 @@
       "notConfigured": "Push notifications are not configured on this deployment.",
       "agentResults": "Agent results",
       "agentResultsHint": "When a scheduled agent finishes a run",
-      "missionReminders": "Mission reminders",
-      "missionRemindersHint": "When a scheduled mission step runs",
+      "missionReminders": "Plan reminders",
+      "missionRemindersHint": "When a scheduled plan step runs",
       "lowCredits": "Low credits",
       "lowCreditsHint": "When work stops because the balance ran out",
       "collaboration": "Collaboration",
@@ -895,12 +895,12 @@
         "mostActiveIn": "Most active in {module}"
       },
       "activeMission": {
-        "title": "Active Mission",
+        "title": "Active plan",
         "stepsLabel": "{completed}/{total} steps completed"
       },
       "nextAction": {
         "title": "What's Next?",
-        "continueMission": "Continue: {step} from your \"{goal}\" mission",
+        "continueMission": "Continue: {step} from your \"{goal}\" plan",
         "revisitLink": "You linked \"{source}\" to \"{target}\" a few days ago — worth revisiting?",
         "startNew": "No new activity in the last 3 days — ready to start something new?",
         "cta": "Go there →"
@@ -914,7 +914,7 @@
         "suggestion": {
           "recency": "You haven't logged anything in a while — add a new entry to pick things back up.",
           "coverage": "Try exploring a module you haven't used yet.",
-          "missionSteps": "Complete a mission step to keep your momentum going.",
+          "missionSteps": "Complete a plan step to keep your momentum going.",
           "consistency": "Try logging something every day this week."
         }
       },
@@ -1120,7 +1120,7 @@
       "scheduledForDate": "Runs {date}",
       "cancelScheduled": "Cancel",
       "viewIn": "View in {module}",
-      "reviewMission": "Review Mission",
+      "reviewMission": "Review plan",
       "reviewing": "Reviewing...",
       "reviewerLabel": "Reviewer",
       "statusPlanning": "Planning",
@@ -1139,17 +1139,17 @@
       "retry": "Retry ({attempts}/{max})",
       "stepFailedMax": "Failed {max}x — won't retry automatically. Try rephrasing the step or building it manually.",
       "sessionExpired": "Your session expired while loading. Nothing was lost — please reload the page.",
-      "newMission": "New Mission",
+      "newMission": "New plan",
       "tabSteps": "Steps",
       "tabReview": "Review",
       "stepsProgress": "{done}/{total} steps",
       "statusFilterLabel": "Status",
       "nextStep": "Next: {step}",
-      "noSteps": "This mission has no plan steps yet.",
+      "noSteps": "This plan has no steps yet.",
       "reviewNotRunYet": "Every step is done — run the Reviewer to get a summary.",
       "reviewLocked": "The Reviewer runs once every step is complete.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "This mission was updated elsewhere just now — refreshing to show the latest state.",
+      "updatedElsewhere": "This plan was updated elsewhere just now — refreshing to show the latest state.",
       "energy": {
         "heading": {
           "light": "Low energy — start here",
@@ -1158,18 +1158,18 @@
         },
         "heldBack": "{count, plural, one {# heavier step} other {# heavier steps}} held back for now"
       },
-      "stillPlanning": "Still planning — this is taking a while. It will keep going, and the plan will be on your missions list when it is ready.",
+      "stillPlanning": "Still planning — this is taking a while. It will keep going, and the plan will be on your plans list when it is ready.",
       "planStalled": "That plan stopped unexpectedly. No credits were charged — please try again.",
       "empty": {
         "title": "One goal, broken into steps",
         "why": "Say what you are trying to achieve and this turns it into a plan with dated steps you can tick off — not a wish list.",
         "example": "Get the first 10 paying customers"
       },
-      "deleteMission": "Delete mission",
-      "deleteConfirmMission": "Delete the mission “{goal}”?",
+      "deleteMission": "Delete plan",
+      "deleteConfirmMission": "Delete the plan “{goal}”?",
       "deleteConfirmLoses": "This removes {steps, plural, one {# step} other {# steps}} — {completed} already completed — and {scheduled, plural, one {# scheduled run} other {# scheduled runs}}. It cannot be undone.",
-      "deletedMission": "Mission deleted",
-      "deleteFailed": "Could not delete this mission.",
+      "deletedMission": "Plan deleted",
+      "deleteFailed": "Could not delete this plan.",
       "deleteStep": "Delete step",
       "editStep": "Edit step",
       "saveStep": "Save",
@@ -1187,12 +1187,12 @@
       "generating": "Generating...",
       "entriesTitle": "New entries (this week / last week)",
       "noModuleActivity": "No activity in any module in the last two weeks.",
-      "missionStepsLabel": "{completed, plural, one {# mission step completed} other {# mission steps completed}}, {pending} still pending",
+      "missionStepsLabel": "{completed, plural, one {# plan step completed} other {# plan steps completed}}, {pending} still pending",
       "reflectionLabel": "Reflection"
     },
     "tradingWorkflow": {
       "title": "Trading Workflow",
-      "description": "Everything trading in one place — your trades, Knowledge Graph links, Timeline, Mentor, Missions, and Reflection.",
+      "description": "Everything trading in one place — your trades, Knowledge Graph links, Timeline, Mentor, Plans, and Reflection.",
       "insight": {
         "title": "Trading Pattern Insight",
         "noTrades": "Log a trade to start seeing patterns here.",
@@ -1207,7 +1207,7 @@
       "mentorButtonDescription": "Open Ionexa Chat in Mentor Mode with your last 20 trades already loaded as context.",
       "mentorChatPrefill": "Analyze my recent trades and give me feedback to improve my win rate.",
       "missionButton": "Start a Trading Goal",
-      "missionButtonDescription": "Create an AI mission plan to improve your trading, e.g. this month's win rate.",
+      "missionButtonDescription": "Create an AI plan to improve your trading, e.g. this month's win rate.",
       "missionButtonCreating": "Creating...",
       "missionGoal": "Improve my trading win rate this month",
       "timelineTitle": "Trading Timeline",
@@ -1217,7 +1217,7 @@
     },
     "productWorkflow": {
       "title": "Product Workflow",
-      "description": "Everything product launch in one place — your products, Knowledge Graph links, Timeline, Mentor, Missions, and Reflection.",
+      "description": "Everything product launch in one place — your products, Knowledge Graph links, Timeline, Mentor, Plans, and Reflection.",
       "insight": {
         "title": "Product Pattern Insight",
         "noProducts": "Add a product to start seeing patterns here.",
@@ -1228,7 +1228,7 @@
       "mentorButtonDescription": "Open Ionexa Chat in Mentor Mode with your last 20 products already loaded as context.",
       "mentorChatPrefill": "Review my product plans and give me feedback on what's missing before launch.",
       "missionButton": "Launch a New Product",
-      "missionButtonDescription": "Create an AI mission plan to launch a new product — audience, pricing, landing page, and more.",
+      "missionButtonDescription": "Create an AI plan to launch a new product — audience, pricing, landing page, and more.",
       "missionButtonCreating": "Creating...",
       "missionGoal": "Launch a new product: define the target audience, set pricing, and create a landing page",
       "timelineTitle": "Product Timeline",
@@ -1459,7 +1459,7 @@
       "subtitle": "Describe what you want in one sentence. No tool to pick — the studio works out what it is, shows you what it understood, and only then creates it.",
       "inputLabel": "What do you want to create?",
       "inputPlaceholder": "e.g. A landing page for my coaching business, warm and professional",
-      "noToolPickerHint": "Websites, missions, entries, automations and documents all start here.",
+      "noToolPickerHint": "Websites, plans, entries, automations and documents all start here.",
       "continue": "Continue",
       "detecting": "Reading your request…",
       "detectFailed": "Could not read that request.",
@@ -1475,7 +1475,7 @@
       "changeType": "Change type",
       "pickTypePrompt": "Pick the kind of thing this should be:",
       "typeWebsite": "Website",
-      "typeMission": "Mission",
+      "typeMission": "Plan",
       "typeModuleEntry": "Workspace entry",
       "typeModuleEntryNamed": "Entry in {module}",
       "typeAutomation": "Automation",
@@ -1505,7 +1505,7 @@
       "progress": {
         "creatingProject": "Creating the project",
         "generatingWebsite": "Generating the website",
-        "planningMission": "Planning the mission",
+        "planningMission": "Building the plan",
         "routingEntry": "Routing it to the right module",
         "schedulingAutomation": "Scheduling the automation",
         "creatingDocument": "Creating the document",
@@ -2172,7 +2172,7 @@
         "website": "Websites",
         "agent": "Agents",
         "research": "Research",
-        "mission": "Missions",
+        "mission": "Plans",
         "help": "Help"
       },
       "filters": {
@@ -2413,7 +2413,8 @@
     "send": "Send",
     "close": "Close",
     "streamInterrupted": "The connection dropped before the reply finished.",
-    "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete."
+    "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
+    "alsoRead": "It also read {count, plural, one {# past message} other {# past messages}} about this entry"
   },
   "entityLinks": {
     "buttonLabel": "Link to...",
@@ -2448,8 +2449,8 @@
       "description": "Log your first entry in {module}."
     },
     "firstMission": {
-      "title": "Mission Accomplished",
-      "description": "Complete your first AI mission."
+      "title": "First plan done",
+      "description": "Complete your first AI plan."
     },
     "streak": {
       "title": "Consistency Champion",
@@ -2915,7 +2916,7 @@
     },
     "create": {
       "is": "One sentence in, the right thing out.",
-      "does": "You describe what you want in your own words; the studio works out whether it is a module entry, a website, a mission, an automation, an agent or a document, and makes it.",
+      "does": "You describe what you want in your own words; the studio works out whether it is a module entry, a website, a plan, an automation, an agent or a document, and makes it.",
       "doesNot": "It does not silently guess. When it cannot tell what you meant, or cannot build the thing you asked for, it says so rather than producing the nearest other kind — which is what it used to do with agents."
     },
     "costs": {
@@ -2960,12 +2961,12 @@
     },
     "productWorkflow": {
       "is": "Everything about your products on one screen.",
-      "does": "Shows the same product entries as the Products module, plus their links, their history, a pattern worked out without AI, and one-press Mentor and Mission entry points.",
+      "does": "Shows the same product entries as the Products module, plus their links, their history, a pattern worked out without AI, and one-press Mentor and Plan entry points.",
       "doesNot": "It is not a second place to keep products. These are the same rows as the Products module — add one here and it appears there — and the pattern is arithmetic over what you wrote, not a forecast."
     },
     "reflection": {
       "is": "What you actually finished this week, against what you planned.",
-      "does": "Counts new entries in every module for this week and last, counts mission steps done and still pending, and asks for a short honest synthesis of the gap.",
+      "does": "Counts new entries in every module for this week and last, counts plan steps done and still pending, and asks for a short honest synthesis of the gap.",
       "doesNot": "Nothing here is stored. Every press recomputes from your live data, so there is no history of past reflections — and it counts what you logged, not what you did away from the app."
     },
     "routing": {
@@ -2985,7 +2986,7 @@
     },
     "tradingWorkflow": {
       "is": "Everything trading on one screen.",
-      "does": "The same trade entries as the Trading module, plus their links, their history, patterns by day, hour, symbol and losing streak, and one-press Mentor and Mission entry points.",
+      "does": "The same trade entries as the Trading module, plus their links, their history, patterns by day, hour, symbol and losing streak, and one-press Mentor and Plan entry points.",
       "doesNot": "The patterns are counts of trades you already made, not predictions, and they are not investment advice. Nor is this a second set of trades: these are the same rows as the Trading module."
     },
     "businessHealth": {
@@ -3015,7 +3016,7 @@
       "credits": "Credits",
       "websites": "Websites",
       "agents": "AI Agents",
-      "missions": "Missions",
+      "missions": "Plans",
       "chat": "Chat",
       "files": "Files",
       "integrations": "Integrations",

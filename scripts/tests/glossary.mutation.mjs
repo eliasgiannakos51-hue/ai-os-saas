@@ -7,6 +7,7 @@
  * working: delete a marker and every loop below runs zero times and passes.
  * So two of these mutations are aimed at the gate, not the product.
  *
+ *   0. the old name of a renamed concept comes back (three ways)
  *   1. English uses the forbidden noun for the counted unit again
  *   2. ...Japanese does (the CJK path the first matcher could not see)
  *   3. ...Arabic does
@@ -27,10 +28,11 @@ import { execFileSync } from "node:child_process";
 const GATE = "scripts/tests/glossary.test.mjs";
 const DOC = "docs/glossary.md";
 const EN = "messages/en.json";
+const ES = "messages/es.json";
 const JA = "messages/ja.json";
 const AR = "messages/ar.json";
 const ZH = "messages/zh.json";
-const TARGETS = [GATE, DOC, EN, JA, AR, ZH];
+const TARGETS = [GATE, DOC, EN, ES, JA, AR, ZH];
 
 const MUTANTS = [
   {
@@ -92,6 +94,42 @@ const MUTANTS = [
     from: "The AI already has this entry's data. Ask anything about it.",
     to: "The AI already has this entry's data. Just ask about it.",
     expect: 'no minimising "just X" in English',
+  },
+  {
+    // THE PRE-RENAME NAME, put back. A counted-form rule can never see
+    // this: "Delete the mission" carries no number.
+    name: "the old name comes back in English",
+    file: EN,
+    from: '"deleteConfirmMission": "Delete the plan',
+    to: '"deleteConfirmMission": "Delete the mission',
+    expect: "en: the old name is gone",
+  },
+  {
+    // Word boundaries. Spanish "comisión" contains "misión", so a
+    // substring check would fail the build on six correct affiliate
+    // strings — and a check that cries wolf gets switched off.
+    name: "a Spanish word merely CONTAINING the old name is flagged",
+    file: ES,
+    from: '"suspended": "Esta cuenta de afiliado está suspendida',
+    to: '"suspended": "Esta cuenta de comisión está suspendida',
+    expect: null,
+    expectGreen: true,
+  },
+  {
+    name: "Japanese gets the old name back",
+    file: JA,
+    from: '"typeMission": "プラン"',
+    to: '"typeMission": "ミッション"',
+    expect: "ja: the old name is gone",
+  },
+  {
+    // The uncovered languages are Greek, Chinese and Arabic. Dropping the
+    // explanation makes the gate silently check seven of ten.
+    name: "GATE: a language leaves the table with no explanation",
+    file: DOC,
+    from: "- **Greek** — `Αποστολή` is the ordinary word for *sending*",
+    to: "- **Hellenic** — `Αποστολή` is the ordinary word for *sending*",
+    expect: "absent from the table and unexplained",
   },
   {
     // THE RULES LIVE IN A MARKDOWN FILE. Lose the marker and every loop
@@ -166,6 +204,19 @@ try {
       result = runGate();
     } finally {
       restoreAll();
+    }
+    // A NEGATIVE CONTROL. Some mutations must leave the gate GREEN: they
+    // plant something that LOOKS like a violation and is not, and a gate
+    // that goes red on them is a gate that will be switched off.
+    if (m.expectGreen) {
+      if (result.green) {
+        caught++;
+        console.log(`  CAUGHT  ${m.name} (stayed green, as it must)`);
+      } else {
+        missed.push({ ...m, why: `false positive: went red on "${result.failed.slice(0, 2).join('", "')}"` });
+        console.log(`  FALSE+  ${m.name}`);
+      }
+      continue;
     }
     if (result.green) {
       missed.push({ ...m, why: "the gate stayed green — nothing here is load-bearing" });

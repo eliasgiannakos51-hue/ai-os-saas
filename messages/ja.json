@@ -724,8 +724,8 @@
       "notConfigured": "このデプロイではプッシュ通知が設定されていません。",
       "agentResults": "エージェントの結果",
       "agentResultsHint": "スケジュールされたエージェントの実行が完了したとき",
-      "missionReminders": "ミッションのリマインダー",
-      "missionRemindersHint": "スケジュールされたミッションステップが実行されたとき",
+      "missionReminders": "プランのリマインダー",
+      "missionRemindersHint": "スケジュールされたプランのステップが実行されたとき",
       "lowCredits": "クレジット残量わずか",
       "lowCreditsHint": "残高が尽きて処理が停止したとき",
       "collaboration": "コラボレーション",
@@ -895,12 +895,12 @@
         "mostActiveIn": "{module} で最もアクティブ"
       },
       "activeMission": {
-        "title": "進行中のミッション",
+        "title": "進行中のプラン",
         "stepsLabel": "{completed}/{total} ステップ完了"
       },
       "nextAction": {
         "title": "次にすべきこと",
-        "continueMission": "続ける: \"{goal}\" ミッションの {step}",
+        "continueMission": "続ける: 「{goal}」プランの {step}",
         "revisitLink": "数日前に \"{source}\" を \"{target}\" にリンクしました — 見直す価値があるかも?",
         "startNew": "過去3日間新しい活動がありません — 何か新しいことを始めませんか?",
         "cta": "移動する →"
@@ -914,7 +914,7 @@
         "suggestion": {
           "recency": "しばらく記録がありません — 新しいエントリを追加して再開しましょう。",
           "coverage": "まだ使っていないモジュールを試してみましょう。",
-          "missionSteps": "ミッションのステップを完了して勢いを維持しましょう。",
+          "missionSteps": "プランのステップを完了して勢いを維持しましょう。",
           "consistency": "今週は毎日何かを記録してみましょう。"
         }
       },
@@ -1120,7 +1120,7 @@
       "scheduledForDate": "{date}に実行",
       "cancelScheduled": "キャンセル",
       "viewIn": "{module}で表示",
-      "reviewMission": "ミッションを評価",
+      "reviewMission": "プランを評価",
       "reviewing": "評価中...",
       "reviewerLabel": "Reviewer",
       "statusPlanning": "計画中",
@@ -1139,17 +1139,17 @@
       "retry": "再試行 ({attempts}/{max})",
       "stepFailedMax": "{max}回失敗しました — 自動的には再試行されません。ステップの言い方を変えるか、手動で作成してください。",
       "sessionExpired": "読み込み中にセッションが期限切れになりました。データは失われていません — ページを再読み込みしてください。",
-      "newMission": "新しいミッション",
+      "newMission": "新しいプラン",
       "tabSteps": "ステップ",
       "tabReview": "レビュー",
       "stepsProgress": "{total} 中 {done} ステップ",
       "statusFilterLabel": "ステータス",
       "nextStep": "次: {step}",
-      "noSteps": "このミッションにはまだ計画ステップがありません。",
+      "noSteps": "このプランにはまだステップがありません。",
       "reviewNotRunYet": "すべてのステップが完了しました。レビュアーを実行して要約を取得してください。",
       "reviewLocked": "レビュアーはすべてのステップ完了後に実行されます。",
       "stepMinutes": "約 {count} 分",
-      "updatedElsewhere": "このミッションは別の場所で更新されました — 最新の状態を表示するために再読み込みします。",
+      "updatedElsewhere": "このプランは別の場所で更新されました — 最新の状態を表示するために再読み込みします。",
       "energy": {
         "heading": {
           "light": "エネルギー低め — ここから始めましょう",
@@ -1158,18 +1158,18 @@
         },
         "heldBack": "負荷の高い {count} 件のステップは今は保留"
       },
-      "stillPlanning": "まだ計画中です。少し時間がかかっています。処理は続いており、完成すると計画がミッション一覧に表示されます。",
+      "stillPlanning": "まだ計画中です。少し時間がかかっています。処理は続いており、完成するとプラン一覧に表示されます。",
       "planStalled": "計画が予期せず停止しました。クレジットは請求されていません。もう一度お試しください。",
       "empty": {
         "title": "ひとつの目標を、手順に分ける",
         "why": "達成したいことを書けば、日付つきでチェックできる手順に変わります。願望リストではありません。",
         "example": "最初の有料顧客10人を獲得する"
       },
-      "deleteMission": "ミッションを削除",
-      "deleteConfirmMission": "ミッション「{goal}」を削除しますか？",
+      "deleteMission": "プランを削除",
+      "deleteConfirmMission": "プラン「{goal}」を削除しますか？",
       "deleteConfirmLoses": "ステップ {steps} 件（うち完了 {completed} 件）と予約実行 {scheduled} 件が削除されます。元に戻せません。",
-      "deletedMission": "ミッションを削除しました",
-      "deleteFailed": "ミッションを削除できませんでした。",
+      "deletedMission": "プランを削除しました",
+      "deleteFailed": "プランを削除できませんでした。",
       "deleteStep": "ステップを削除",
       "editStep": "ステップを編集",
       "saveStep": "保存",
@@ -1187,12 +1187,12 @@
       "generating": "生成中...",
       "entriesTitle": "新規エントリー(今週 / 先週)",
       "noModuleActivity": "過去2週間、どのモジュールにも活動がありません。",
-      "missionStepsLabel": "ミッションステップ {completed} 件完了、{pending} 件保留中",
+      "missionStepsLabel": "プランのステップ {completed} 件完了、{pending} 件保留中",
       "reflectionLabel": "振り返り"
     },
     "tradingWorkflow": {
       "title": "トレーディングワークフロー",
-      "description": "トレードの記録、ナレッジグラフのリンク、タイムライン、メンター、ミッション、週次振り返りをすべて一箇所に。",
+      "description": "トレードの記録、ナレッジグラフのリンク、タイムライン、メンター、プラン、週次振り返りをすべて一箇所に。",
       "insight": {
         "title": "トレーディングパターンインサイト",
         "noTrades": "トレードを記録すると、ここにパターンが表示され始めます。",
@@ -1207,7 +1207,7 @@
       "mentorButtonDescription": "直近20件のトレードをコンテキストとして読み込んだ状態で、Ionexa Chatをメンターモードで開きます。",
       "mentorChatPrefill": "最近のトレードを分析して、勝率を改善するためのフィードバックをください。",
       "missionButton": "トレーディング目標を開始",
-      "missionButtonDescription": "トレードを改善するためのAIミッションプラン(例:今月の勝率)を作成します。",
+      "missionButtonDescription": "トレードを改善するためのAIプラン(例:今月の勝率)を作成します。",
       "missionButtonCreating": "作成中...",
       "missionGoal": "今月のトレーディング勝率を改善する",
       "timelineTitle": "トレーディングタイムライン",
@@ -1217,7 +1217,7 @@
     },
     "productWorkflow": {
       "title": "プロダクトワークフロー",
-      "description": "製品の記録、ナレッジグラフのリンク、タイムライン、メンター、ミッション、週次振り返りをすべて一箇所に。",
+      "description": "製品の記録、ナレッジグラフのリンク、タイムライン、メンター、プラン、週次振り返りをすべて一箇所に。",
       "insight": {
         "title": "プロダクトパターンインサイト",
         "noProducts": "製品を追加すると、ここにパターンが表示され始めます。",
@@ -1228,7 +1228,7 @@
       "mentorButtonDescription": "直近20件の製品をコンテキストとして読み込んだ状態で、Ionexa Chatをメンターモードで開きます。",
       "mentorChatPrefill": "私の製品計画を確認して、ローンチ前に不足している点についてフィードバックをください。",
       "missionButton": "新製品をローンチ",
-      "missionButtonDescription": "新製品をローンチするためのAIミッションプラン(ターゲット層、価格設定、ランディングページなど)を作成します。",
+      "missionButtonDescription": "新製品をローンチするためのAIプラン(ターゲット層、価格設定、ランディングページなど)を作成します。",
       "missionButtonCreating": "作成中...",
       "missionGoal": "新製品をローンチする：ターゲット層を定義し、価格を設定し、ランディングページを作成する",
       "timelineTitle": "プロダクトタイムライン",
@@ -1459,7 +1459,7 @@
       "subtitle": "作りたいものを一文で書いてください。ツールを選ぶ必要はありません。スタジオが何かを判断し、理解した内容を先に見せてから作成します。",
       "inputLabel": "何を作りますか？",
       "inputPlaceholder": "例: コーチング事業向けの、温かく professional なランディングページ",
-      "noToolPickerHint": "ウェブサイト、ミッション、エントリー、自動化、ドキュメント — すべてここから始まります。",
+      "noToolPickerHint": "ウェブサイト、プラン、記録、自動化、ドキュメントはすべてここから始まります。",
       "continue": "続ける",
       "detecting": "リクエストを読み取っています…",
       "detectFailed": "このリクエストを読み取れませんでした。",
@@ -1475,7 +1475,7 @@
       "changeType": "種類を変更",
       "pickTypePrompt": "どの種類にするか選んでください:",
       "typeWebsite": "ウェブサイト",
-      "typeMission": "ミッション",
+      "typeMission": "プラン",
       "typeModuleEntry": "ワークスペースのエントリー",
       "typeModuleEntryNamed": "{module} のエントリー",
       "typeAutomation": "自動化",
@@ -1505,7 +1505,7 @@
       "progress": {
         "creatingProject": "プロジェクトを作成中",
         "generatingWebsite": "ウェブサイトを生成中",
-        "planningMission": "ミッションを計画中",
+        "planningMission": "プランを作成中",
         "routingEntry": "適切なモジュールへ振り分け中",
         "schedulingAutomation": "自動化をスケジュール中",
         "creatingDocument": "ドキュメントを作成中",
@@ -2172,7 +2172,7 @@
         "website": "ウェブサイト",
         "agent": "エージェント",
         "research": "リサーチ",
-        "mission": "ミッション",
+        "mission": "プラン",
         "help": "ヘルプ"
       },
       "filters": {
@@ -2413,7 +2413,8 @@
     "send": "送信",
     "close": "閉じる",
     "streamInterrupted": "応答が完了する前に接続が切断されました。",
-    "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。"
+    "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。",
+    "alsoRead": "この記録に関する過去のメッセージ {count} 件も読み込みました"
   },
   "entityLinks": {
     "buttonLabel": "リンク...",
@@ -2448,8 +2449,8 @@
       "description": "{module}に最初のエントリーを記録しましょう。"
     },
     "firstMission": {
-      "title": "ミッション達成",
-      "description": "最初のAIミッションを完了しましょう。"
+      "title": "最初のプラン達成",
+      "description": "最初のAIプランを完了しましょう。"
     },
     "streak": {
       "title": "継続チャンピオン",
@@ -2915,7 +2916,7 @@
     },
     "create": {
       "is": "一文を入れると、正しいものが出てきます。",
-      "does": "やりたいことを自分の言葉で書くと、モジュールの記録・ウェブサイト・ミッション・自動化・エージェント・ドキュメントのどれかを判断して作成します。",
+      "does": "やりたいことを自分の言葉で書くと、モジュールの記録・ウェブサイト・プラン・自動化・エージェント・ドキュメントのどれかを判断して作成します。",
       "doesNot": "黙って推測はしません。意図が分からないとき、または依頼されたものを作れないときは、近い別の種類を作るのではなく、その旨を伝えます — 以前エージェントで起きていたのがまさにそれでした。"
     },
     "costs": {
@@ -2960,12 +2961,12 @@
     },
     "productWorkflow": {
       "is": "製品にまつわるすべてを一画面に集めたものです。",
-      "does": "「製品」モジュールとまったく同じ項目に加えて、そのつながり、履歴、AI を使わずに算出した傾向、そしてメンターとミッションへのワンタップの入口を表示します。",
+      "does": "「製品」モジュールとまったく同じ項目に加えて、そのつながり、履歴、AI を使わずに算出した傾向、そしてメンターとプランへのワンタップの入口を表示します。",
       "doesNot": "製品を置く二つ目の場所ではありません。これは「製品」モジュールと同じ行です——ここで追加すればあちらにも現れます——そして傾向はあなたが書いた内容に対する算術であり、予測ではありません。"
     },
     "reflection": {
       "is": "今週実際に終わったことを、予定していたことと突き合わせます。",
-      "does": "今週と先週の各モジュールの新規項目を数え、完了したミッションの手順と残っている手順を数え、その差について短く正直な総括を求めます。",
+      "does": "今週と先週の各モジュールの新規項目を数え、完了したプランの手順と残っている手順を数え、その差について短く正直な総括を求めます。",
       "doesNot": "ここには何も保存されません。押すたびに最新のデータから計算し直すので過去の振り返りの履歴はありません。数えるのは記録したことであって、アプリの外でしたことではありません。"
     },
     "routing": {
@@ -2985,7 +2986,7 @@
     },
     "tradingWorkflow": {
       "is": "取引にまつわるすべてを一画面に集めたものです。",
-      "does": "「取引」モジュールと同じ記録に加えて、そのつながり、履歴、曜日・時間帯・銘柄・連敗ごとの傾向、そしてメンターとミッションへのワンタップの入口を表示します。",
+      "does": "「取引」モジュールと同じ記録に加えて、そのつながり、履歴、曜日・時間帯・銘柄・連敗ごとの傾向、そしてメンターとプランへのワンタップの入口を表示します。",
       "doesNot": "傾向はすでに行った取引の集計であって予測ではなく、投資助言でもありません。二つ目の取引記録でもありません。これは「取引」モジュールと同じ行です。"
     },
     "businessHealth": {
@@ -3015,7 +3016,7 @@
       "credits": "クレジット",
       "websites": "ウェブサイト",
       "agents": "AIエージェント",
-      "missions": "ミッション",
+      "missions": "プラン",
       "chat": "チャット",
       "files": "ファイル",
       "integrations": "連携",

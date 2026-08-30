@@ -427,7 +427,10 @@ export async function POST(request: Request) {
     // Mentor Mode's proactive cross-module summary (lib/chat/mentor-context.ts)
     // only loads when the toggle is on — the default chat pays nothing extra
     // for it, per the brief.
-    const mentorContext = mentorMode ? await loadMentorContext(supabase, user.id) : "";
+    const mentor = mentorMode
+      ? await loadMentorContext(supabase, user.id)
+      : { prompt: "", modules: [] };
+    const mentorContext = mentor.prompt;
     // Trading Workflow's "Trading Mentor" preset (see
     // trading-mentor-button.tsx) — only loaded when the client explicitly
     // opted into it via mentorPreset, on top of Mentor Mode already being
@@ -487,6 +490,12 @@ export async function POST(request: Request) {
       // that was not read.
       provenance = summariseProvenance(
         [
+          // MENTOR MODE READS MORE, so it must also account for more. Its
+          // scan is a separate one (lib/chat/mentor-context.ts, its own
+          // cap, its own module list) and it goes into the same prompt —
+          // an answer built on both and crediting one is the version of
+          // this line that is quietly wrong.
+          ...mentor.modules,
           ...selection.keep.map((m) => ({ slug: m.slug, title: m.title, rows: m.rows })),
           ...fullContext.emptyModules.map((m) => ({ ...m, rows: [] })),
           ...fullContext.moduleSummaries

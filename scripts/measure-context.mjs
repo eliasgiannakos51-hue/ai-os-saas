@@ -258,6 +258,138 @@ console.log("=".repeat(78));
   void cached; void MODEL;
 }
 
+
+// ==========================================================================
+// RAISING PER_MODULE_LIMIT — what it costs, before anyone raises it
+// ==========================================================================
+//
+// The product's one sentence is "it already knows your work". At five
+// headlines per module, four questions in five come back with no numbers
+// in them, so the sentence is not true. The question is what the true
+// version costs.
+//
+// THE ANSWER TURNS ON WHERE THE BLOCK SITS. AI Life Context is inside
+// systemPerUser, which is CACHED (see api/chat/route.ts): after the first
+// message of a conversation it is billed at cacheRead, which Anthropic
+// prices at 0.1x input. Growing a cached block is a tenth as expensive as
+// growing an uncached one, and that is the whole finding here.
+console.log(`\n${"=".repeat(78)}`);
+console.log("PER_MODULE_LIMIT: 5 vs 20 vs 50");
+console.log("=".repeat(78));
+{
+  const buildAt = (limit) =>
+    chars(
+      uc.buildUserContextPromptAdditionGreek({
+        moduleSummaries: cm.CLASSIFIER_MODULES.map((m) => ({
+          title: m.slug.slice(0, ASSUMED.moduleTitleChars),
+          headlines: Array.from({ length: limit }, () => "x".repeat(ASSUMED.headlineChars)),
+        })),
+        activeMissions: Array.from({ length: ASSUMED.missionCount }, () => ({
+          goal: "x".repeat(ASSUMED.missionChars),
+          stepsCompleted: 2,
+          stepsTotal: 5,
+        })),
+        latestEnergyCheckIn: { energyLevel: 4, note: "x".repeat(40) },
+        healthScore: { score: 72 },
+        knowledgeGraphLinkCount: 41,
+        knowledgeGraphLinksThisWeek: 6,
+      })
+    );
+
+  // Sonnet list price, from the app's own table rather than from memory.
+  const INPUT_USD_PER_MTOK = 3;
+  const CACHE_READ_MULT = 0.1;
+  const CACHE_WRITE_MULT = 1.25;
+
+  const base = buildAt(PER_MODULE_LIMIT ?? 5);
+  const rows = [5, 20, 50].map((limit) => {
+    const c = buildAt(limit);
+    const t = tok(c);
+    return {
+      limit,
+      chars: c,
+      tokens: t,
+      readUsd: (t / 1_000_000) * INPUT_USD_PER_MTOK * CACHE_READ_MULT,
+      writeUsd: (t / 1_000_000) * INPUT_USD_PER_MTOK * CACHE_WRITE_MULT,
+      deltaTok: t - tok(base),
+    };
+  });
+
+  console.log(`  ${MODULE_COUNT} modules, headlines modelled at ${ASSUMED.headlineChars} chars (MAX_HEADLINE_LENGTH)`);
+  console.log("");
+  console.log("  rows/module   chars   tokens   cached read   cache write   vs 5 rows");
+  for (const r of rows) {
+    console.log(
+      `  ${String(r.limit).padStart(6)}   ${String(r.chars).padStart(8)}   ${String(r.tokens).padStart(6)}` +
+        `   $${r.readUsd.toFixed(6)}     $${r.writeUsd.toFixed(5)}    ${r.deltaTok >= 0 ? "+" : ""}${r.deltaTok} tok`
+    );
+  }
+
+  const perMessageBefore = 590;
+  console.log("");
+  for (const r of rows.slice(1)) {
+    const extraFullPriceEquivalent = Math.round(r.deltaTok * CACHE_READ_MULT);
+    const pctOf = ((extraFullPriceEquivalent / perMessageBefore) * 100).toFixed(1);
+    console.log(
+      `  at ${r.limit} rows: +${r.deltaTok} cached tokens = +${extraFullPriceEquivalent} full-price-equivalent ` +
+        `(+${pctOf}% of a ${perMessageBefore}-token message)`
+    );
+  }
+  console.log("");
+  console.log("  MARGIN. The multiplier is applied to MEASURED cost per action");
+  console.log("  (lib/billing/margin-policy.ts), so a cost that rises by x% raises");
+  console.log("  the charge by x% and the RATIO is unchanged. Raising this limit");
+  console.log("  cannot move the 4x margin; it moves the price of a message.");
+  console.log("");
+  console.log("  NOT MEASURED: whether more rows produce better answers. That is a");
+  console.log("  quality question and this file counts characters.");
+
+  // --------------------------------------------------------------------
+  // THE THREE WAYS TO GET MORE ROWS, PRICED.
+  //
+  // The obvious answer is "stop sending a flat 5 and send what the
+  // question is about". lib/ai/module-relevance.ts already scores that,
+  // and the scoring is already exported. It is used ONLY TO DROP modules,
+  // never to deepen one, and it is off by default.
+  //
+  // The catch is the cache, and it is the whole reason this comparison
+  // exists. AI Life Context lives in systemPerUser, which is stable
+  // across the messages of a conversation and therefore cached. A
+  // per-question allocation is DIFFERENT ON EVERY MESSAGE, so it cannot
+  // sit there: it would break the prefix and put the entire per-user
+  // block back on a full-price line. That makes the clever option more
+  // expensive than the blunt one, which is not the answer anyone expects.
+  console.log("");
+  console.log("  " + "-".repeat(74));
+  console.log("  THREE WAYS TO GET MORE ROWS, in full-price-equivalent tokens per message");
+  console.log("  " + "-".repeat(74));
+  const perUserBlockTok = 1385; // from BEFORE/AFTER above
+  const flat20 = Math.round((tok(buildAt(20)) - tok(buildAt(5))) * CACHE_READ_MULT);
+  // Same total rows as a flat 5 (13 x 5 = 65), redistributed: 30 to the
+  // module the question is about, 15 to the runner-up, 2 to the rest.
+  const redistributedRows = 30 + 15 + (MODULE_COUNT - 2) * 2;
+  const flatRows = MODULE_COUNT * (PER_MODULE_LIMIT ?? 5);
+  // Breaking the cache costs the block at full price instead of 0.1x.
+  const cacheLoss = Math.round(perUserBlockTok * (1 - CACHE_READ_MULT));
+  // A separate uncached block appended AFTER the cached one: the cache
+  // survives, and only the extra rows are at full price.
+  const deepDiveRows = 25;
+  const deepDiveTok = tok(deepDiveRows * (ASSUMED.headlineChars + 2));
+  console.log(`  A. flat 5 -> 20 everywhere          +${flat20} tok   cache intact, 20 rows in all ${MODULE_COUNT} modules`);
+  console.log(
+    `  B. relevance-weighted, same ${flatRows} rows   +${cacheLoss} tok   ${redistributedRows} rows, but the block ` +
+      `changes per message`
+  );
+  console.log(`     (0 extra characters — the entire cost is the broken cache)`);
+  console.log(
+    `  C. keep flat 5 cached, append ${deepDiveRows}    +${deepDiveTok} tok   cache intact, ${deepDiveRows} extra rows ` +
+      `in the module asked about`
+  );
+  console.log("");
+  console.log("  B sends the FEWEST characters and costs the MOST. That is the finding.");
+  console.log("  C is A's price with better aim: the deep rows go where the question is.");
+}
+
 // =====================================================================
 // WHAT CROSS-MODULE CONTEXT ADDS (V4 #36)
 // =====================================================================

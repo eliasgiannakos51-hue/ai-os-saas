@@ -724,8 +724,8 @@
       "notConfigured": "此部署未配置推送通知。",
       "agentResults": "智能体结果",
       "agentResultsHint": "当计划的智能体完成一次运行时",
-      "missionReminders": "任务提醒",
-      "missionRemindersHint": "当计划的任务步骤运行时",
+      "missionReminders": "计划提醒",
+      "missionRemindersHint": "当计划的步骤运行时",
       "lowCredits": "积分不足",
       "lowCreditsHint": "当余额用尽导致工作停止时",
       "collaboration": "协作",
@@ -895,12 +895,12 @@
         "mostActiveIn": "在 {module} 中最活跃"
       },
       "activeMission": {
-        "title": "进行中的任务",
+        "title": "进行中的计划",
         "stepsLabel": "已完成 {completed}/{total} 步"
       },
       "nextAction": {
         "title": "接下来做什么?",
-        "continueMission": "继续:来自你的\"{goal}\"任务的 {step}",
+        "continueMission": "继续：来自你的\"{goal}\"计划的 {step}",
         "revisitLink": "你几天前把\"{source}\"关联到了\"{target}\" — 值得重新看看吗?",
         "startNew": "过去3天没有新活动 — 准备好开始新的事情了吗?",
         "cta": "前往 →"
@@ -914,7 +914,7 @@
         "suggestion": {
           "recency": "你有一段时间没有记录任何内容了 — 添加一条新条目继续前进。",
           "coverage": "试试探索一个你还没用过的模块。",
-          "missionSteps": "完成一个任务步骤以保持你的势头。",
+          "missionSteps": "完成一个计划步骤以保持你的势头。",
           "consistency": "试着这周每天都记录一些内容。"
         }
       },
@@ -1120,7 +1120,7 @@
       "scheduledForDate": "将于{date}执行",
       "cancelScheduled": "取消",
       "viewIn": "在{module}中查看",
-      "reviewMission": "评估任务",
+      "reviewMission": "评估计划",
       "reviewing": "评估中...",
       "reviewerLabel": "Reviewer",
       "statusPlanning": "规划中",
@@ -1139,17 +1139,17 @@
       "retry": "重试 ({attempts}/{max})",
       "stepFailedMax": "已失败 {max} 次——不会自动重试。请尝试重新表述该步骤或手动创建。",
       "sessionExpired": "加载时会话已过期。没有丢失任何内容 — 请重新加载页面。",
-      "newMission": "新建任务",
+      "newMission": "新建计划",
       "tabSteps": "步骤",
       "tabReview": "评审",
       "stepsProgress": "{done}/{total} 个步骤",
       "statusFilterLabel": "状态",
       "nextStep": "下一步：{step}",
-      "noSteps": "此任务尚无计划步骤。",
+      "noSteps": "此计划尚无步骤。",
       "reviewNotRunYet": "所有步骤已完成——运行评审员以获取总结。",
       "reviewLocked": "所有步骤完成后评审员才会运行。",
       "stepMinutes": "约 {count} 分钟",
-      "updatedElsewhere": "该任务刚刚在别处被更新——正在刷新以显示最新状态。",
+      "updatedElsewhere": "该计划刚刚在别处被更新——正在刷新以显示最新状态。",
       "energy": {
         "heading": {
           "light": "精力较低——从这里开始",
@@ -1158,18 +1158,18 @@
         },
         "heldBack": "暂时搁置了 {count} 个较重的步骤"
       },
-      "stillPlanning": "仍在规划中——需要一点时间。它会继续运行，完成后计划会出现在你的任务列表里。",
+      "stillPlanning": "仍在规划中——需要一点时间。它会继续运行，完成后计划会出现在你的计划列表里。",
       "planStalled": "该计划意外中断。未扣除任何积分——请重试。",
       "empty": {
         "title": "一个目标，拆成若干步",
         "why": "说出你想达成什么，这里会把它变成有日期、可勾选的计划，而不是一张愿望清单。",
         "example": "拿下头 10 个付费客户"
       },
-      "deleteMission": "删除任务",
-      "deleteConfirmMission": "删除任务“{goal}”？",
+      "deleteMission": "删除计划",
+      "deleteConfirmMission": "删除计划“{goal}”？",
       "deleteConfirmLoses": "这将删除 {steps} 个步骤（其中 {completed} 个已完成）和 {scheduled} 个预定执行。无法撤销。",
-      "deletedMission": "任务已删除",
-      "deleteFailed": "无法删除该任务。",
+      "deletedMission": "计划已删除",
+      "deleteFailed": "无法删除该计划。",
       "deleteStep": "删除步骤",
       "editStep": "编辑步骤",
       "saveStep": "保存",
@@ -1187,12 +1187,12 @@
       "generating": "生成中...",
       "entriesTitle": "新记录(本周 / 上周)",
       "noModuleActivity": "过去两周内所有模块均无活动。",
-      "missionStepsLabel": "已完成 {completed} 个任务步骤，{pending} 个仍待处理",
+      "missionStepsLabel": "已完成 {completed} 个计划步骤，{pending} 个仍待处理",
       "reflectionLabel": "回顾"
     },
     "tradingWorkflow": {
       "title": "交易工作流",
-      "description": "把交易记录、知识图谱链接、时间线、导师、任务和每周回顾整合在一个地方。",
+      "description": "把交易记录、知识图谱链接、时间线、导师、计划和每周回顾整合在一个地方。",
       "insight": {
         "title": "交易模式洞察",
         "noTrades": "记录一笔交易即可在此查看模式。",
@@ -1207,7 +1207,7 @@
       "mentorButtonDescription": "以导师模式打开 Ionexa Chat,并已加载你最近20笔交易作为上下文。",
       "mentorChatPrefill": "分析我最近的交易,并给我反馈以提高我的胜率。",
       "missionButton": "开始一个交易目标",
-      "missionButtonDescription": "创建一个AI任务计划来改善你的交易,例如本月的胜率。",
+      "missionButtonDescription": "创建一个AI 计划来改善你的交易,例如本月的胜率。",
       "missionButtonCreating": "创建中...",
       "missionGoal": "本月提高我的交易胜率",
       "timelineTitle": "交易时间线",
@@ -1217,7 +1217,7 @@
     },
     "productWorkflow": {
       "title": "产品工作流",
-      "description": "把产品发布记录、知识图谱链接、时间线、导师、任务和每周回顾整合在一个地方。",
+      "description": "把产品发布记录、知识图谱链接、时间线、导师、计划和每周回顾整合在一个地方。",
       "insight": {
         "title": "产品模式洞察",
         "noProducts": "添加一个产品即可在此查看模式。",
@@ -1228,7 +1228,7 @@
       "mentorButtonDescription": "以导师模式打开 Ionexa Chat,并已加载你最近20个产品作为上下文。",
       "mentorChatPrefill": "审查我的产品计划,并就发布前还缺少什么给我反馈。",
       "missionButton": "启动一个新产品",
-      "missionButtonDescription": "创建一个AI任务计划来发布新产品——目标受众、定价、落地页等。",
+      "missionButtonDescription": "创建一个AI 计划来发布新产品——目标受众、定价、落地页等。",
       "missionButtonCreating": "创建中...",
       "missionGoal": "发布一个新产品：确定目标受众、设定价格并创建落地页",
       "timelineTitle": "产品时间线",
@@ -1459,7 +1459,7 @@
       "subtitle": "用一句话描述你想要什么。无需选择工具——工作室会判断它是什么，先告诉你它的理解，然后才动手创建。",
       "inputLabel": "你想创建什么？",
       "inputPlaceholder": "例如：为我的教练业务做一个温暖专业的落地页",
-      "noToolPickerHint": "网站、任务、条目、自动化和文档，都从这里开始。",
+      "noToolPickerHint": "网站、计划、记录、自动化和文档都从这里开始。",
       "continue": "继续",
       "detecting": "正在理解你的请求…",
       "detectFailed": "无法理解该请求。",
@@ -1475,7 +1475,7 @@
       "changeType": "更改类型",
       "pickTypePrompt": "选择它应该是哪一类：",
       "typeWebsite": "网站",
-      "typeMission": "任务",
+      "typeMission": "计划",
       "typeModuleEntry": "工作区条目",
       "typeModuleEntryNamed": "{module} 中的条目",
       "typeAutomation": "自动化",
@@ -1505,7 +1505,7 @@
       "progress": {
         "creatingProject": "正在创建项目",
         "generatingWebsite": "正在生成网站",
-        "planningMission": "正在规划任务",
+        "planningMission": "正在生成计划",
         "routingEntry": "正在归入合适的模块",
         "schedulingAutomation": "正在安排自动化",
         "creatingDocument": "正在创建文档",
@@ -2172,7 +2172,7 @@
         "website": "网站",
         "agent": "智能体",
         "research": "研究",
-        "mission": "任务",
+        "mission": "计划",
         "help": "帮助"
       },
       "filters": {
@@ -2413,7 +2413,8 @@
     "send": "发送",
     "close": "关闭",
     "streamInterrupted": "连接在回复完成前中断。",
-    "streamInterruptedPartial": "连接已中断——上面的回复可能不完整。"
+    "streamInterruptedPartial": "连接已中断——上面的回复可能不完整。",
+    "alsoRead": "它还读取了关于这条记录的 {count} 条历史消息"
   },
   "entityLinks": {
     "buttonLabel": "关联到...",
@@ -2448,8 +2449,8 @@
       "description": "在{module}中记录你的第一条条目。"
     },
     "firstMission": {
-      "title": "任务完成",
-      "description": "完成你的第一个AI任务。"
+      "title": "完成第一个计划",
+      "description": "完成你的第一个 AI 计划。"
     },
     "streak": {
       "title": "坚持冠军",
@@ -2915,7 +2916,7 @@
     },
     "create": {
       "is": "输入一句话，输出正确的东西。",
-      "does": "你用自己的话描述想要什么；工作室判断它是模块记录、网站、任务、自动化、智能体还是文档，然后创建它。",
+      "does": "你用自己的话描述想要什么；工作室判断它是模块记录、网站、计划、自动化、智能体还是文档，然后创建它。",
       "doesNot": "它不会默默猜测。当它无法判断你的意思，或做不出你要的东西时，它会直说，而不是生成最接近的另一种类型——那正是它以前对智能体所做的。"
     },
     "costs": {
@@ -2960,12 +2961,12 @@
     },
     "productWorkflow": {
       "is": "关于你产品的一切，集中在一个屏幕上。",
-      "does": "显示与「产品」模块完全相同的产品条目，外加它们的关联、历史、一个不用 AI 算出来的规律，以及一键进入导师模式和任务计划的入口。",
+      "does": "显示与「产品」模块完全相同的产品条目，外加它们的关联、历史、一个不用 AI 算出来的规律，以及一键进入导师模式和计划的入口。",
       "doesNot": "它不是第二个存放产品的地方。这些就是「产品」模块里的同一批记录——在这里添加，那边也会出现——而那个规律是对你所写内容的算术统计，不是预测。"
     },
     "reflection": {
       "is": "这一周你真正完成了什么，对照你原本计划的。",
-      "does": "统计本周与上周每个模块的新增条目，统计已完成和仍待办的任务步骤，并请求对这段差距做一次简短诚实的归纳。",
+      "does": "统计本周与上周每个模块的新增条目，统计已完成和仍待办的计划步骤，并请求对这段差距做一次简短诚实的归纳。",
       "doesNot": "这里什么都不会保存。每次点击都会用你的实时数据重新计算，因此没有历次回顾的存档——而且它统计的是你记录下来的事，不是你在应用之外做过的事。"
     },
     "routing": {
@@ -2985,7 +2986,7 @@
     },
     "tradingWorkflow": {
       "is": "与交易有关的一切，集中在一个屏幕上。",
-      "does": "与「交易」模块完全相同的交易记录，外加它们的关联、历史，按星期、时段、品种和连亏统计的规律，以及一键进入导师模式和任务计划的入口。",
+      "does": "与「交易」模块完全相同的交易记录，外加它们的关联、历史，按星期、时段、品种和连亏统计的规律，以及一键进入导师模式和计划的入口。",
       "doesNot": "这些规律是对你已经做过的交易的计数，不是预测，也不构成投资建议。它也不是第二套交易记录：就是「交易」模块里的同一批记录。"
     },
     "businessHealth": {
@@ -3015,7 +3016,7 @@
       "credits": "额度",
       "websites": "网站",
       "agents": "AI 智能体",
-      "missions": "任务",
+      "missions": "计划",
       "chat": "聊天",
       "files": "文件",
       "integrations": "连接",

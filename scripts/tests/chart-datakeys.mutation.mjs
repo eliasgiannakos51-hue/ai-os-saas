@@ -79,11 +79,19 @@ const MUTANTS = [
   {
     // A global regex remembers where it stopped, so .test() in a filter
     // skips every other file. This found four of five.
+    //
+    // AND THE FLOOR DID NOT CATCH IT. .test() advances lastIndex only on
+    // a MATCH and resets on a miss, so the skip needs two chart files
+    // ADJACENT in SOURCES — which today's directory order does not
+    // produce. This was a survivor for exactly that reason: a real bug
+    // that the current file layout hides. The gate now asks the filter
+    // the same question twice instead of trusting the corpus to contain
+    // the hazard.
     name: "the file filter goes back to the shared global regex",
     file: GATE,
     from: "const hasChartKey = (source) => new RegExp(KEY_ATTR.source).test(source);",
     to: "const hasChartKey = (source) => KEY_ATTR.test(source);",
-    expect: "chart files were found",
+    expect: "the filter answers the same question twice",
   },
   {
     name: "the attribute pattern stops matching nameKey and dataKey",

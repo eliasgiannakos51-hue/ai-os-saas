@@ -28,6 +28,7 @@ const ok = (name, cond, detail) => {
 
 const cached = await loadTs("src/lib/ai/cached-system.ts");
 const cr = await loadTs("src/lib/ai/module-relevance.ts");
+const fold = await loadTs("src/lib/text/unicode-patterns.ts");
 const uc = await loadTs("src/lib/user-context.ts");
 const cm = await loadTs("src/lib/classifier-modules.ts");
 const en = JSON.parse(readFileSync("messages/en.json", "utf8"));
@@ -248,6 +249,47 @@ console.log("\n== 3. narrowing is OFF, and every doubt sends everything ==");
       r.keep.map((k) => k.slug).join(",") ===
         "ideas,finance,decisions,products,content,sales,feedback",
       r.keep.map((k) => k.slug).join(","));
+
+    // THE MATCHER ITSELF, ASKED DIRECTLY — and this is the clause the
+    // block above was missing.
+    //
+    // Everything before this line computes its OWN substring and
+    // whole-word counts from the vocabulary and never calls the matcher.
+    // So a matcher that started matching substrings changed none of those
+    // numbers, and none of these checks moved: with its anchors repaired,
+    // context-optimization.mutation.mjs reported BOTH of its matcher
+    // mutations as genuine survivors. A gate that re-implements the thing
+    // it is testing is testing its own re-implementation.
+    //
+    // Why this gate and not only cross-module-context's: the subject here
+    // is CONTEXT SIZE, and the sentence three comments up is the reason —
+    // "a matcher that matches everything narrows nothing while looking
+    // like it works". That is a context-size regression, so it is proved
+    // here as well as there.
+    {
+      const sentence = "please restart the cartography module and check the margins";
+      const folded = fold.foldForMatch(sentence);
+      const words = cr.questionWords(folded);
+      // "art" sits inside restart AND cartography; "margin" inside margins.
+      ok("a term that appears only INSIDE a longer word scores nothing",
+        cr.scoreTerms(words, folded, ["art"]) === 0,
+        String(cr.scoreTerms(words, folded, ["art"])));
+      ok("...and neither does one inside a plural",
+        cr.scoreTerms(words, folded, ["margin"]) === 0,
+        String(cr.scoreTerms(words, folded, ["margin"])));
+      ok("...nor two of them together",
+        cr.scoreTerms(words, folded, ["art", "margin"]) === 0);
+      // The other half of the same claim: whole words still count, so the
+      // check above is not passing because the matcher matches nothing.
+      const alone = fold.foldForMatch("art and margin, standing alone");
+      ok("the same two words, standing alone, DO score",
+        cr.scoreTerms(cr.questionWords(alone), alone, ["art", "margin"]) === 2,
+        String(cr.scoreTerms(cr.questionWords(alone), alone, ["art", "margin"])));
+      // And the multi-word fallback, which is the ONLY thing allowed to
+      // match against the raw question rather than against its words.
+      ok("a MULTI-WORD term is still matched against the whole question",
+        cr.scoreTerms(words, folded, ["cartography module"]) === 1);
+    }
   }
 
   // A module with no vocabulary is never dropped: "we have no words for

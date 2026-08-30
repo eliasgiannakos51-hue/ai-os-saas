@@ -158,10 +158,14 @@ const MUTANTS = [
     // it was written when this code sat one block deeper. An indentation
     // that no longer matches is not a failure: the harness prints "target
     // no longer exists" and the mutation silently stops applying.
+    // ANCHOR REPAIRED. The whole-word branch grew a `counted` set and an
+    // explicit multi-word else when the CJK/Arabic substring rule landed;
+    // the old one-line `from` stopped matching and the mutation silently
+    // never ran. STALE is not SURVIVED and it is not CAUGHT either.
     name: "matching becomes a substring test, so every module matches everything",
     file: RELEVANCE,
-    from: "    if (words.has(folded)) score += 1;",
-    to: "    if (foldedQuestion.includes(folded)) score += 1;",
+    from: "    if (words.has(folded)) {\n      counted.add(folded);",
+    to: "    if (foldedQuestion.includes(folded)) {\n      counted.add(folded);",
   },
   {
     // THE GUARD ON THE FALLBACK, which is the thing that actually keeps
@@ -171,10 +175,11 @@ const MUTANTS = [
     // it is multi-word. Drop that and every single-word term goes back to
     // substring matching: "car" matches "carpet", "invoice" matches
     // "invoiced", and a module scores on a word the user never wrote.
+    // ANCHOR REPAIRED, same refactor as above.
     name: "the multi-word guard is dropped, so single words go back to substring matching",
     file: RELEVANCE,
-    from: '    else if (folded.includes(" ") && foldedQuestion.includes(folded)) score += 1;',
-    to: "    else if (foldedQuestion.includes(folded)) score += 1;",
+    from: '    } else if (folded.includes(" ") && foldedQuestion.includes(folded)) {',
+    to: "    } else if (foldedQuestion.includes(folded)) {",
   },
   {
     name: "the kept modules are re-sorted by score, changing how the prompt reads",
@@ -183,10 +188,14 @@ const MUTANTS = [
     to: "    keep: [...summaries.filter((s) => kept.has(s))].reverse(),",
   },
   {
-    name: "the vocabulary stops reading the Greek catalogue",
+    // ANCHOR REPAIRED, AND THE MUTATION IS BIGGER THAN IT WAS. When this
+    // was written the catalogue was two languages; it is ten now, because
+    // the deep dive scored el 5/5, en 5/5 and 0-1/5 for the other eight.
+    // Dropping to English alone is the regression that measured against.
+    name: "the vocabulary stops reading every language's catalogue but English",
     file: "src/lib/ai/module-vocabulary.ts",
-    from: "      [en as unknown as Record<string, unknown>, el as unknown as Record<string, unknown>]",
-    to: "      [en as unknown as Record<string, unknown>]",
+    from: "      [en, el, es, fr, de, it, pt, zh, ja, ar] as unknown as Record<string, unknown>[]",
+    to: "      [en] as unknown as Record<string, unknown>[]",
   },
   {
     name: "the vocabulary stops reading field labels, so only the module's own name matches",
@@ -217,23 +226,31 @@ const MUTANTS = [
   {
     name: "entity mentions go back into the middle, killing the per-user cache",
     file: ROUTE,
-    // The suffix gained `+ codingContext` when the coding module landed,
-    // and this `from` did not, so the mutation stopped applying to the one
-    // wiring it exists to guard.
-    from: "    const systemDynamicSuffix = buildEntityMentionPromptAddition(mentionedEntities) + codingContext;",
-    to: "    const systemDynamicSuffix = codingContext;",
+    // THIS ANCHOR HAS NOW GONE STALE TWICE, for the same reason both
+    // times: the suffix gained `+ codingContext` when the coding module
+    // landed, and `+ deepDive.prompt` when Deep Research learned to read
+    // the account. Anchoring on the whole expression means every addition
+    // to it breaks this mutation — so it now anchors on the FIRST TERM
+    // only, which is the thing the mutation is actually about (entity
+    // mentions must not sit in the cached per-user block), and which a
+    // further addition to the suffix cannot invalidate.
+    from: "      buildEntityMentionPromptAddition(mentionedEntities) + codingContext",
+    to: "      codingContext",
     edits: [
       {
         from: "    const systemPerUser =\n      buildMemoryPromptAddition(memories) +",
         to: "    const systemPerUser =\n      buildMemoryPromptAddition(memories) +\n      buildEntityMentionPromptAddition(mentionedEntities) +",
       },
       {
-        // Stale for the same reason as the top-level `from` above: the
-        // suffix gained `+ codingContext`. `edits` takes precedence over
-        // from/to (line 282), so fixing only the top-level left this
-        // mutation still not applying.
-        from: "    const systemDynamicSuffix = buildEntityMentionPromptAddition(mentionedEntities) + codingContext;",
-        to: "    const systemDynamicSuffix = codingContext;",
+        // `edits` TAKES PRECEDENCE OVER from/to, so this is the one that
+        // has to be right — and it has now gone stale twice for the same
+        // reason: the suffix gained `+ codingContext` when the coding
+        // module landed and `+ deepDive.prompt` when Deep Research
+        // learned to read the account. Anchored on the first TERM now
+        // rather than the whole expression, so a third addition to the
+        // suffix cannot silently switch this mutation off again.
+        from: "      buildEntityMentionPromptAddition(mentionedEntities) + codingContext",
+        to: "      codingContext",
       },
     ],
   },

@@ -175,6 +175,33 @@ function availableNames(code) {
 // every other file was skipped and this found four of the five chart files.
 // Resetting lastIndex afterwards does not un-skip the ones already missed.
 const hasChartKey = (source) => new RegExp(KEY_ATTR.source).test(source);
+
+// THE FILTER, TESTED ON ITSELF, BEFORE IT IS USED ON ANYTHING.
+//
+// The floor below was supposed to catch a regression to `KEY_ATTR.test()`
+// and does not, for a reason worth writing down: .test() on a global
+// regex advances lastIndex ONLY ON A MATCH, and resets it to 0 on a
+// miss. So the skipping happens strictly between two CONSECUTIVE
+// matching files — and whether two of the five chart files are adjacent
+// in SOURCES is an accident of directory order, not a property of the
+// gate. chart-datakeys.mutation.mjs reported that mutation as a survivor:
+// today's layout separates them, so the bug is invisible and the count
+// still reaches five.
+//
+// A gate that is correct only because of the order readdirSync happened
+// to return is not correct. This is the same hazard stated as something
+// that cannot depend on the corpus: ask the filter twice about one
+// string that matches. A fresh regex says yes both times; a shared global
+// one says yes then no.
+{
+  const twice = '<Bar dataKey="value" />';
+  ok(
+    "the filter answers the same question twice (a shared global regex would not)",
+    hasChartKey(twice) && hasChartKey(twice),
+    "lastIndex survived between calls — every second matching file is skipped"
+  );
+}
+
 const chartFiles = SOURCES.filter((f) => hasChartKey(readFileSync(f, "utf8")));
 // A FLOOR. This whole file is one attribute name away from finding nothing,
 // and "no broken key" is trivially true of an empty list.

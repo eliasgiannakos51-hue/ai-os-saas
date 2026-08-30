@@ -81,9 +81,17 @@ const MUTANTS = [
     // The direct-mount branch. "On all of its headers" reads 0 === 0 on a
     // component with no PageHeader, so a deleted <HelpTip> would have
     // passed; this is the clause that replaced it.
+    //
+    // THIS ANCHOR WENT STALE ONCE, and the suite was right to stop rather
+    // than report a pass. V4.6 #12 rebuilt the chat workspace and added
+    // scopeKey to this element; the mutation's `from` still named the
+    // one-attribute version, so it matched nothing and never ran. Reported
+    // as STALE, exit 1 — which is the whole reason a missed anchor is kept
+    // apart from a survivor: a suite that silently skips a mutation
+    // reports the same "all caught" as one that ran it.
     name: "Chat loses the tip it mounts itself",
     file: CHAT_WORKSPACE,
-    from: '          <HelpTip helpKey="help.chat" />\n',
+    from: '          <HelpTip helpKey="help.chat" scopeKey="dashboard.chat.dataScope" />\n',
     to: "",
     expect: "chat: src/components/chat/chat-workspace.tsx passes helpKey",
   },

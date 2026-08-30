@@ -417,7 +417,9 @@
       "signUp": "注册",
       "forgotPassword": "忘记密码？",
       "resetSuccess": "密码已更新——请使用新密码登录。",
-      "failed": "无法登录。请检查邮箱和密码，如不确定可重置密码。"
+      "failed": "无法登录。请检查邮箱和密码，如不确定可重置密码。",
+      "oauthFailed": "该登录未完成。请重试，或在下方使用邮箱和密码登录。",
+      "sharedSignInFirst": "登录后即可保存你分享的内容。"
     },
     "signup": {
       "chooseYourPlan": "选择你的方案",
@@ -672,7 +674,11 @@
         "endingIn": "{days, plural, =0 {你的订阅今天到期。} other {你的订阅将在 # 天后到期。}}"
       },
       "creditsSplit": "每月 {monthly} + 已购买 {purchased}（永不过期）",
-      "noSubscriptionToCancel": "没有可取消的订阅——所有者权限和 Beta 期会自行结束。"
+      "noSubscriptionToCancel": "没有可取消的订阅——所有者权限和 Beta 期会自行结束。",
+      "checkout": {
+        "success": "已收到付款。Stripe 确认后，你的方案会在这里更新，通常只需几秒。",
+        "cancelled": "结账已取消，未产生任何费用。"
+      }
     },
     "marginReport": {
       "title": "利润率报告",

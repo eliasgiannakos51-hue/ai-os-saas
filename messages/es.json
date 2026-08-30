@@ -417,7 +417,9 @@
       "signUp": "Regístrate",
       "forgotPassword": "¿Olvidaste tu contraseña?",
       "resetSuccess": "Contraseña actualizada — inicia sesión con tu nueva contraseña.",
-      "failed": "No hemos podido iniciar tu sesión. Revisa el correo y la contraseña, o restablécela si no estás seguro."
+      "failed": "No hemos podido iniciar tu sesión. Revisa el correo y la contraseña, o restablécela si no estás seguro.",
+      "oauthFailed": "Ese inicio de sesión no se completó. Vuelve a intentarlo o usa tu correo y contraseña abajo.",
+      "sharedSignInFirst": "Inicia sesión para guardar lo que compartiste."
     },
     "signup": {
       "chooseYourPlan": "Elige tu plan",
@@ -672,7 +674,11 @@
         "endingIn": "{days, plural, =0 {Tu suscripción termina hoy.} one {Tu suscripción termina en # día.} other {Tu suscripción termina en # días.}}"
       },
       "creditsSplit": "{monthly} mensuales + {purchased} comprados (no caducan nunca)",
-      "noSubscriptionToCancel": "No hay suscripción que cancelar: el acceso de propietario y las ventanas beta terminan solos."
+      "noSubscriptionToCancel": "No hay suscripción que cancelar: el acceso de propietario y las ventanas beta terminan solos.",
+      "checkout": {
+        "success": "Pago recibido. Tu plan se actualiza aquí en cuanto Stripe lo confirme, normalmente en unos segundos.",
+        "cancelled": "El pago se canceló. No se cobró nada."
+      }
     },
     "marginReport": {
       "title": "Informe de Margen",

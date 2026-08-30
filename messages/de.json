@@ -417,7 +417,9 @@
       "signUp": "Registrieren",
       "forgotPassword": "Passwort vergessen?",
       "resetSuccess": "Passwort aktualisiert — melde dich mit deinem neuen Passwort an.",
-      "failed": "Wir konnten dich nicht anmelden. Prüfe E-Mail und Passwort, oder setze das Passwort zurück, wenn du unsicher bist."
+      "failed": "Wir konnten dich nicht anmelden. Prüfe E-Mail und Passwort, oder setze das Passwort zurück, wenn du unsicher bist.",
+      "oauthFailed": "Diese Anmeldung wurde nicht abgeschlossen. Versuche es erneut oder nutze unten E-Mail und Passwort.",
+      "sharedSignInFirst": "Melde dich an, um das Geteilte zu speichern."
     },
     "signup": {
       "chooseYourPlan": "Wähle deinen Plan",
@@ -672,7 +674,11 @@
         "endingIn": "{days, plural, =0 {Dein Abo endet heute.} one {Dein Abo endet in # Tag.} other {Dein Abo endet in # Tagen.}}"
       },
       "creditsSplit": "{monthly} monatlich + {purchased} gekauft (verfallen nie)",
-      "noSubscriptionToCancel": "Kein Abo zum Kündigen — Inhaberzugang und Beta-Zeitraum enden von selbst."
+      "noSubscriptionToCancel": "Kein Abo zum Kündigen — Inhaberzugang und Beta-Zeitraum enden von selbst.",
+      "checkout": {
+        "success": "Zahlung erhalten. Dein Tarif wird hier aktualisiert, sobald Stripe ihn bestätigt — meist innerhalb weniger Sekunden.",
+        "cancelled": "Der Bezahlvorgang wurde abgebrochen. Es wurde nichts berechnet."
+      }
     },
     "marginReport": {
       "title": "Margenbericht",

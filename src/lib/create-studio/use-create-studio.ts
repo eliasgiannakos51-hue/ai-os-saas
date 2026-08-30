@@ -215,7 +215,16 @@ export function useCreateStudio() {
               setError(getErrorMessage(outcome.error, "Could not create a plan."));
               return;
             }
-            const planned = outcome.result as { planned?: boolean; message?: string; mission?: { goal?: string } };
+            const planned = outcome.result as {
+              planned?: boolean;
+              message?: string;
+              // `id` as well as `goal` — the job handler has always
+              // returned the whole inserted row (jobs/handlers/
+              // mission-plan.ts does `.select("*").single()`), and this
+              // cast was what narrowed it away. Without the id the
+              // confirmation could only offer the list.
+              mission?: { id?: string; goal?: string };
+            };
             if (!planned.planned) {
               finishStep("plan", "failed");
               setError(planned.message ?? "Could not create a plan.");
@@ -225,7 +234,15 @@ export function useCreateStudio() {
             setResult({
               type: "mission",
               title: planned.mission?.goal ?? detection.title,
-              href: "/dashboard/mission",
+              // AT THE PLAN, not at the list of plans — V4.6 #11.3.
+              // components/mission/mission-list.tsx reads `?mission=` and
+              // opens the detail panel for it. The still_running branch
+              // above keeps the bare list URL on purpose: there is no id
+              // yet, because this page stopped watching before the row
+              // came back.
+              href: planned.mission?.id
+                ? `/dashboard/mission?mission=${encodeURIComponent(planned.mission.id)}`
+                : "/dashboard/mission",
               destinationKey: "sidebar.items.missionControl",
               website: null,
               moduleTitle: null,
@@ -285,7 +302,17 @@ export function useCreateStudio() {
             setResult({
               type: "automation",
               title: detection.title,
-              href: "/dashboard/automation",
+              // AT THE AUTOMATION — V4.6 #11.3. /api/automations/create
+              // returns the inserted row (and the existing one on the
+              // duplicate-suppressed path, which is the right target
+              // too: the user asked for that automation and it is
+              // already there). components/automation/
+              // automation-active-list.tsx scrolls to `?automation=` and
+              // marks it; there is no detail view to open because an
+              // automation does not have one.
+              href: data.automation?.id
+                ? `/dashboard/automation?automation=${encodeURIComponent(String(data.automation.id))}`
+                : "/dashboard/automation",
               destinationKey: "sidebar.items.automation",
               website: null,
               moduleTitle: null,

@@ -417,7 +417,9 @@
       "signUp": "Registrati",
       "forgotPassword": "Password dimenticata?",
       "resetSuccess": "Password aggiornata — accedi con la tua nuova password.",
-      "failed": "Non siamo riusciti ad accedere. Controlla email e password, oppure reimposta la password se non sei sicuro."
+      "failed": "Non siamo riusciti ad accedere. Controlla email e password, oppure reimposta la password se non sei sicuro.",
+      "oauthFailed": "L'accesso non è stato completato. Riprova oppure usa email e password qui sotto.",
+      "sharedSignInFirst": "Accedi per salvare ciò che hai condiviso."
     },
     "signup": {
       "chooseYourPlan": "Scegli il tuo piano",
@@ -672,7 +674,11 @@
         "endingIn": "{days, plural, =0 {Il tuo abbonamento termina oggi.} one {Il tuo abbonamento termina tra # giorno.} other {Il tuo abbonamento termina tra # giorni.}}"
       },
       "creditsSplit": "{monthly} mensili + {purchased} acquistati (non scadono mai)",
-      "noSubscriptionToCancel": "Nessun abbonamento da annullare: l'accesso proprietario e il periodo beta finiscono da soli."
+      "noSubscriptionToCancel": "Nessun abbonamento da annullare: l'accesso proprietario e il periodo beta finiscono da soli.",
+      "checkout": {
+        "success": "Pagamento ricevuto. Il tuo piano si aggiorna qui appena Stripe lo conferma, di solito in pochi secondi.",
+        "cancelled": "Il pagamento è stato annullato. Non è stato addebitato nulla."
+      }
     },
     "marginReport": {
       "title": "Rapporto Margine",

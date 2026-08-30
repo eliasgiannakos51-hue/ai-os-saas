@@ -223,12 +223,31 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
     return { refund: true, result: { matched: false, insertFailed: true, message: "" } };
   }
 
+  // THE LINK OPENS THE ROW, NOT THE LIST — V4.6 #11.3.
+  //
+  // This was `moduleHref(moduleConfig.slug)`: Create Studio said "made it
+  // here -> Finance", the reader pressed it, and landed on a list of every
+  // finance entry they have ever made, newest first, with nothing marking
+  // which one was just created. On an account with three rows that reads
+  // as working. On one with three hundred it is the reported bug.
+  //
+  // The id was already in hand — `insertedRecord` is the row that was just
+  // written — and the receiving end already understood the address:
+  // components/modules/generic-list.tsx has read `?record=` since the
+  // provenance work, and opens the detail panel for it when the id is in
+  // the loaded set. A record created a second ago is the newest row, so it
+  // is always inside RECORD_CAP. The only missing piece was this line
+  // throwing the id away.
+  const insertedId = (insertedRecord as { id?: unknown } | null)?.id;
   return {
     result: {
       matched: true,
       module: moduleConfig.slug,
       moduleTitleKey: moduleConfig.titleKey,
-      href: moduleHref(moduleConfig.slug),
+      href:
+        typeof insertedId === "string" && insertedId
+          ? `${moduleHref(moduleConfig.slug)}?record=${encodeURIComponent(insertedId)}`
+          : moduleHref(moduleConfig.slug),
       message: toolInput.message,
       outputSummary: buildOutputSummary(
         moduleConfig,

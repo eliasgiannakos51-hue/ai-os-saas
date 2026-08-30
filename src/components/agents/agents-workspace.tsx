@@ -250,6 +250,28 @@ export function AgentsWorkspace({
     () => agents.find((a) => a.id === selectedId) ?? null,
     [agents, selectedId]
   );
+
+  // DEEP LINK FOR ?agent=<id> — V4.6 #11.3.
+  //
+  // THE LINK ALREADY SHIPPED. lib/create-studio/use-create-studio.ts has
+  // sent people to `/dashboard/agents?agent=${data.agent.id}` since the
+  // agent branch was added; nothing on this page has ever read the
+  // parameter, so the confirmation said "made it here -> Agents" and then
+  // showed the list with nothing selected. An address only works if both
+  // ends agree, and only one end was written.
+  //
+  // Same mechanism and same reasons as website-builder-workspace.tsx:
+  // window.location on mount, and only when the id is one of this
+  // account's own agents — a stale or foreign id selects nothing rather
+  // than leaving the panel pointing at a row that is not there.
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("agent");
+    if (requested && agents.some((a) => a.id === requested)) {
+      setSelectedId(requested);
+      setCreating(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const selectedRuns = useMemo(
     () => (selected ? runs.filter((r) => r.agent_id === selected.id) : []),
     [runs, selected]

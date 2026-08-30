@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Repeat, Trash2 } from "lucide-react";
@@ -21,6 +21,31 @@ export function AutomationActiveList({ automations }: { automations: UserAutomat
   const router = useRouter();
   const supabase = createClient();
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  // DEEP LINK FOR ?automation=<id> — V4.6 #11.3.
+  //
+  // WHAT THIS IS AND WHAT IT IS NOT. Every other surface Create Studio
+  // creates into has something to OPEN — a detail panel, a project, a
+  // document. An automation has no detail view at all: this list is the
+  // whole of it, four lines and two controls per row. So the honest
+  // equivalent of "open the thing you just made" here is to scroll to it
+  // and mark it, and that is exactly what this does. Claiming a detail
+  // route that does not exist would be the worse answer.
+  //
+  // The mark is left in place rather than timed out. A highlight that
+  // fades is a highlight somebody who looked away has already missed,
+  // and it survives to the next navigation either way.
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const highlightRef = useRef<HTMLLIElement | null>(null);
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("automation");
+    if (requested && automations.some((a) => a.id === requested)) setHighlightId(requested);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (!highlightId) return;
+    highlightRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [highlightId]);
 
   if (automations.length === 0) return null;
 
@@ -64,7 +89,12 @@ export function AutomationActiveList({ automations }: { automations: UserAutomat
         {automations.map((automation) => (
           <li
             key={automation.id}
-            className="flex items-center gap-3 rounded-lg border border-border bg-input px-3 py-2.5"
+            ref={automation.id === highlightId ? highlightRef : undefined}
+            className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 ${
+              automation.id === highlightId
+                ? "border-orange-500 bg-orange-500/[0.07]"
+                : "border-border bg-input"
+            }`}
           >
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm text-foreground">{automation.description}</p>

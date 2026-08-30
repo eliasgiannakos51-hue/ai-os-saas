@@ -20,13 +20,45 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
+  /** Set when the Web Share target bounced an unauthenticated share here. */
+  const [sharePrompt, setSharePrompt] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
 
+  // WHAT SENT SOMEBODY HERE, said out loud — V4.6 #11.3.
+  //
+  // Three routes redirect to this page with a reason attached and this
+  // effect read exactly one of them. auth/callback/route.ts appends
+  // `?error=` on all three of its failure paths (the provider's own
+  // error, a missing code, a failed exchange) and share/route.ts appends
+  // `?shared=1` when somebody shares a file into an app they are not
+  // signed in to. Both landed on a plain login form: the OAuth attempt
+  // that just failed looked like a page that had simply reloaded, and
+  // the shared file looked like it had been thrown away.
+  //
+  // THE PROVIDER'S STRING IS NOT RENDERED, and there is ONE sentence for
+  // every value. `?error=` can carry whatever the identity provider chose
+  // to put in it, and a crafted link can carry anything at all. React
+  // would escape it, so this is not about injection — it is that
+  // "missing_code" is not a message to a person.
+  //
+  // One sentence rather than three, deliberately: the app generates
+  // `missing_code` and `oauth_failed`, and a reader can do exactly the
+  // same thing about either — try again, or use email and password. A
+  // branch whose arms say the same thing is a branch that cannot be
+  // wrong and cannot be right, and the first draft of this block had
+  // one.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("reset") === "success") {
       setResetSuccess(true);
     }
+    if (params.has("error")) {
+      setError(t("oauthFailed"));
+    }
+    if (params.has("shared")) {
+      setSharePrompt(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleSubmit(e: FormEvent) {
@@ -100,6 +132,12 @@ export function LoginForm() {
         {resetSuccess && (
           <p className="mb-4 rounded-xl border border-emerald-800 bg-emerald-950/30 px-3 py-2 text-center text-xs text-emerald-400">
             {t("resetSuccess")}
+          </p>
+        )}
+
+        {sharePrompt && (
+          <p className="mb-4 rounded-xl border border-border bg-panel px-3 py-2 text-center text-xs text-muted">
+            {t("sharedSignInFirst")}
           </p>
         )}
 

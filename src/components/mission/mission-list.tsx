@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus, Rocket, SearchX, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { EmptyState } from "@/components/empty-state";
@@ -52,6 +52,30 @@ export function MissionList({
   const [statusFilter, setStatusFilter] = useState("");
   const [selected, setSelected] = useState<{ id: string; tab: MissionDetailTab } | null>(null);
   const favoritedSet = useMemo(() => new Set(favoritedIds), [favoritedIds]);
+
+  // DEEP LINK FOR ?mission=<id> — V4.6 #11.2/#11.3.
+  //
+  // Which plan is open lived only in the state above, so a plan had no
+  // address, and everything that wanted to send somebody to one sent them
+  // here instead: lib/favoritable.ts returned the bare list URL for a
+  // STARRED mission, and Create Studio's confirmation link said "made it
+  // here -> Plans" and then showed every plan the account has.
+  //
+  // Read from window.location rather than useSearchParams, and only on
+  // mount: same reason website-builder-workspace.tsx gives — this is a
+  // client component inside a page that would otherwise need a Suspense
+  // boundary, and the value is wanted once.
+  //
+  // Only if the id is on this page. A stale or foreign id opens nothing
+  // rather than opening a panel with no plan in it.
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("mission");
+    if (requested && missions.some((m) => m.id === requested)) {
+      setSelected({ id: requested, tab: "steps" });
+      setShowForm(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim();

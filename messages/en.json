@@ -417,7 +417,9 @@
       "signUp": "Sign up",
       "forgotPassword": "Forgot password?",
       "resetSuccess": "Password updated — sign in with your new password.",
-      "failed": "We couldn't sign you in. Check the email and password, or reset your password if you're not sure."
+      "failed": "We couldn't sign you in. Check the email and password, or reset your password if you're not sure.",
+      "oauthFailed": "That sign-in didn't complete. Try again, or use your email and password below.",
+      "sharedSignInFirst": "Sign in to save what you shared."
     },
     "signup": {
       "chooseYourPlan": "Choose your plan",
@@ -672,7 +674,11 @@
         "endingIn": "{days, plural, =0 {Your subscription ends today.} one {Your subscription ends in # day.} other {Your subscription ends in # days.}}"
       },
       "creditsSplit": "{monthly} monthly + {purchased} purchased (never expire)",
-      "noSubscriptionToCancel": "No subscription to cancel — owner access and beta windows end on their own."
+      "noSubscriptionToCancel": "No subscription to cancel — owner access and beta windows end on their own.",
+      "checkout": {
+        "success": "Payment received. Your plan updates here as soon as Stripe confirms it — usually within a few seconds.",
+        "cancelled": "Checkout was cancelled. Nothing was charged."
+      }
     },
     "marginReport": {
       "title": "Margin Report",

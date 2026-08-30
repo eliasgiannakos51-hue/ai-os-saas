@@ -83,7 +83,28 @@ export async function loadWeeklyReflectionStats(
   const totalThisWeek = moduleStats.reduce((sum, m) => sum + m.thisWeek, 0);
   const totalLastWeek = moduleStats.reduce((sum, m) => sum + m.lastWeek, 0);
 
-  const { data: missionRows, error: missionError } = await supabase.from("ai_missions").select("*");
+  // THREE COLUMNS, NOT EVERY COLUMN — and NOT a limit.
+  //
+  // This was `select("*")` with no bound at all: every plan an account
+  // has ever made, with every column, to compute five integers.
+  //
+  // A `.limit()` would have been the wrong fix and is the reason this
+  // comment exists. The loop below COUNTS over the rows —
+  // activeMissions, stepsCompleted, stepsPending and the two
+  // touched-this-week figures are all totals — so capping the read caps
+  // the counts, and the reflection would report "3 active plans" to an
+  // account with forty. That is an optimisation that removes something
+  // without proving what it does not remove, and the thing it removes
+  // here is the correctness of every number in the section.
+  //
+  // Narrowing the SELECT costs nothing and proves itself: the loop reads
+  // mission.status, mission.plan_steps and mission.updated_at, and
+  // nothing else. Every other column — the goal text, the id, created_at
+  // — was fetched and discarded. The counts are computed over exactly
+  // the same rows as before.
+  const { data: missionRows, error: missionError } = await supabase
+    .from("ai_missions")
+    .select("status, plan_steps, updated_at");
   if (missionError) {
     logApiError("reflection:loadWeeklyReflectionStats", missionError, { stage: "missions" });
   }

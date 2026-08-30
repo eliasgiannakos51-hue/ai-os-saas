@@ -155,11 +155,14 @@ console.log("== 0. the database really is the one the migrations build ==");
 // 98 -> 99: V4 #34 + #35 added routing_decisions — every routing
 // decision and what came of it, which is what the router learns from.
 // 99 -> 100: badge removal with credits added site_badge_removals.
+// 100 -> 105 across the migrations up to 20260914.
+// 105 -> 106: 20260915's nav_events — the first table in this schema
+// that records what a user LOOKED AT rather than what they wrote.
 // MEASURED ON THE MERGED TREE, not added. Each branch counted against
 // its own migration set; summing two ratchets is arithmetic across two
-// different schemas. Built from bootstrap-supabase.sql plus all 43
-// migrations on a real Postgres 16: 105.
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 105);
+// different schemas. Built from bootstrap-supabase.sql plus every
+// migration in supabase/migrations on a real Postgres 16: 106.
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 106);
 eq(
   "the credit functions exist",
   Number(

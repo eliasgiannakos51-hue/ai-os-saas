@@ -454,11 +454,14 @@ if (!DB) {
   // 20260903's revenue engine took 91 to 98; 20260904's routing_decisions
   // took 98 to 99.
   // 20260905's site_badge_removals took 99 to 100.
+  // 100 -> 105 across the migrations up to 20260914.
+  // 105 -> 106: 20260915's nav_events — the first table in this schema
+  // that records what a user LOOKED AT rather than what they wrote.
   // MEASURED ON THE MERGED TREE, not added. Each branch counted against
   // its own migration set; summing two ratchets is arithmetic across two
-  // different schemas. Built from bootstrap-supabase.sql plus all 43
-  // migrations on a real Postgres 16: 105.
-  check(`105 tables`, tables === 105, `got ${tables}`);
+  // different schemas. Built from bootstrap-supabase.sql plus every
+  // migration in supabase/migrations on a real Postgres 16: 106.
+  check(`106 tables`, tables === 106, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 

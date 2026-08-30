@@ -44,7 +44,26 @@ function allSql() {
   return sql;
 }
 const SQL = allSql();
-const blocks = [...SQL.matchAll(/create table (?:if not exists )?(?:public\.)?([a-z_]+)\s*\(([\s\S]*?)\n\);/gi)];
+// A BODY MAY NOT CONTAIN ANOTHER `create table`, and this tempering is
+// not cosmetic. The lazy body runs to the next "\n);", and a
+// `create table` that has none — because it is inside a quoted string in
+// a DO block, like the throwaway probe in
+// 20260909000000_revoke_anon_default_privileges — swallows every file
+// after it until one turns up.
+//
+// Measured when nav_events was added: the probe's "body" was 30,272
+// characters long, ended halfway through nav_events' own definition, and
+// therefore (a) reported `zz_anon_default_probe` as a table carrying a
+// user_id, which it does not, and (b) hid nav_events from this check
+// entirely, so a new table full of one person's browsing history was
+// never asked for a GDPR classification at all. The gate was red, and it
+// was red about the wrong table — which is worse than being green,
+// because the name in the failure is the thing somebody goes and fixes.
+//
+// Tempering the body costs nothing on real definitions (the longest is
+// 3,064 characters) and changes exactly two entries in the result: the
+// phantom out, nav_events in.
+const blocks = [...SQL.matchAll(/create table (?:if not exists )?(?:public\.)?([a-z_]+)\s*\(((?:(?!create table)[\s\S])*?)\n\);/gi)];
 const tablesWithUserId = new Set();
 const cascadeByTable = new Map();
 for (const [, name, body] of blocks) {

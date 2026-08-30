@@ -209,6 +209,28 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // the same reading as credit_transactions beside it. Removed by the
   // auth.users cascade.
   { table: "site_badge_removals", label: "badge_removals", scope: "account" },
+  // WHICH SCREENS THIS PERSON OPENED, and when. ACCOUNT scope, and it is
+  // the entry in this registry that most needed writing down.
+  //
+  // Everything else here is data the user PUT somewhere. nav_events is
+  // data the product collected ABOUT them without their typing anything
+  // — which does not make it less theirs, it makes it more clearly a
+  // subject-access matter. A person who asks what we hold on them and
+  // gets back their ideas and their invoices, but not the record of
+  // every screen they opened for ninety days, has been given an answer
+  // that is true and incomplete.
+  //
+  // NOT "not_personal", even though the only readers are two aggregate
+  // views. The aggregate is our business; the row names a person, says
+  // where they went and what screen they came from, and that is theirs
+  // — the same reading as ai_provider_log and routing_decisions above.
+  //
+  // It carries no query strings and no identifiers (see
+  // 20260915000000_nav_events.sql), so there is nothing to redact: the
+  // path is a route name from the app's own list. Removed by the
+  // auth.users cascade, and by public.prune_nav_events() after 90 days
+  // whether the account is deleted or not.
+  { table: "nav_events", label: "navigation_history", scope: "account" },
 
   // --- Trading journal (V4 #14) ---
   //

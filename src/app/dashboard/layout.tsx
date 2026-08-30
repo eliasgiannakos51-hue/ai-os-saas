@@ -23,6 +23,7 @@ import { SampleDataBanner } from "@/components/sample-data/sample-data-banner";
 import { findSampleImport } from "@/lib/sample-data/apply";
 import { DashboardBackground } from "@/components/dashboard/dashboard-background";
 import { AchievementUnlockBridge } from "@/components/achievements/achievement-unlock-bridge";
+import { NavTracker } from "@/components/dashboard/nav-tracker";
 import { PageTransition } from "@/components/page-transition";
 
 export default async function DashboardLayout({
@@ -153,6 +154,15 @@ export default async function DashboardLayout({
               </div>
             </div>
             <ToastContainer />
+            {/* ONE ROW PER SCREEN CHANGE, for every dashboard page.
+                Mounted HERE and nowhere else: this layout is what
+                survives a client-side navigation, so usePathname()
+                inside it reports each change. A tracker inside a page
+                would fire on arrival and be destroyed before the
+                departure, which records half of every journey. Renders
+                nothing; the writing is app/api/nav/track and the
+                reading is the two views in the nav_events migration. */}
+            <NavTracker />
             <AchievementUnlockBridge />
             <CommandPalette isOwner={isAdmin} />
             </VoiceAvailabilityProvider>

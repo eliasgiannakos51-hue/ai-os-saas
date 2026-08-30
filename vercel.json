@@ -21,6 +21,10 @@
       "schedule": "0 3 * * *"
     },
     {
+      "path": "/api/cron/nav-retention",
+      "schedule": "0 5 * * *"
+    },
+    {
       "path": "/api/cron/reset-credits",
       "schedule": "0 3 1 * *"
     },

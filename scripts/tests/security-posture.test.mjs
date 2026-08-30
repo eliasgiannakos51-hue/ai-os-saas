@@ -364,6 +364,8 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/r/[code]/route.ts":
     "the affiliate share link. The visitor is a stranger by definition — requiring a session would defeat the only thing the URL is for. It touches NO database (so a million hits write nothing), never validates the code against the table (which would make it an oracle for enumerating real codes), and always redirects to /signup rather than anywhere the code asks for.",
   "src/app/api/weekly-digest/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
+  "src/app/api/cron/nav-retention/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED. It DELETES, which puts it in the same class as website-storage-cleanup rather than the read-only jobs — but the deciding is not done here: the route calls public.prune_nav_events(), a security-definer function whose day count is clamped so that a null, a zero or a negative becomes 90 rather than 1, and whose DELETE always carries a WHERE. It reads no request body and takes no parameter from the caller. scripts/tests/nav-events.dbtest.mjs measures the clamp against a real Postgres; nav-events.test.mjs holds the route to calling the function rather than issuing a DELETE of its own.",
   "src/app/api/cron/monthly-credits/route.ts":
     "authenticated by CRON_SECRET (lib/cron-auth.ts); grants every annual subscriber their monthly credit allowance, so it moves real entitlement across many accounts per call",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",

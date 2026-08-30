@@ -18,6 +18,12 @@
 // call, but the full client code path: streamingText updates, message
 // append, credit receipt.
 //
+// TWO DEVICES. Every step below runs on a desktop mouse wheel AND on a
+// phone-sized touch drag, because the reported bug is a scrolling bug and
+// scrolling is the most device-dependent thing a web page does. See the
+// DEVICES list for why the touch gesture goes through CDP rather than
+// through dispatchEvent.
+//
 // MUTATION: make the follow unconditional again (call follow() without
 // the at-bottom check, or scroll on every delta) -> step 3 goes red.
 //
@@ -27,13 +33,18 @@ import { spawn } from "node:child_process";
 
 let pass = 0;
 const failures = [];
+// EVERY CHECK CARRIES ITS DEVICE. The same assertion runs on a desktop
+// wheel and on a phone drag; a failure line that does not say which one
+// sends whoever reads it to the wrong half of the problem.
+let deviceLabel = "";
 function check(name, cond, detail) {
+  const tagged = deviceLabel ? `[${deviceLabel}] ${name}` : name;
   if (cond) {
     pass++;
-    console.log(`  PASS  ${name}`);
+    console.log(`  PASS  ${tagged}`);
   } else {
-    failures.push(name);
-    console.log(`  FAIL  ${name}${detail !== undefined ? "\n        " + detail : ""}`);
+    failures.push(tagged);
+    console.log(`  FAIL  ${tagged}${detail !== undefined ? "\n        " + detail : ""}`);
   }
 }
 
@@ -204,199 +215,342 @@ if (!(await waitForServer())) {
 }
 console.log(`production server up on :${PORT}\n`);
 
+
+// ---------------------------------------------------------------------
+// TWO DEVICES, BECAUSE A WHEEL IS NOT A THUMB.
+//
+// V4.6 #11.1. This file ran at 1280x900 with a mouse and nothing else,
+// and the bug that was reported is a scrolling bug — the single most
+// device-dependent thing a web page does. A wheel emits discrete deltas
+// and its scroll events are dispatched promptly; a touch drag is
+// continuous, keeps moving after the finger leaves (momentum), and on a
+// phone the element that scrolls may not even be the same one.
+//
+// So every step below runs twice, and the gesture is the device's own.
+//
+// THE TOUCH GESTURE GOES THROUGH CDP, not through dispatchEvent. A touch
+// event created by dispatchEvent is untrusted and the browser does not
+// scroll for it — the test would move nothing and then assert about it,
+// which is the "test that supplies its own arguments" shape. CDP's
+// Input.dispatchTouchEvent produces trusted input and real native
+// scrolling, momentum included.
+const DEVICES = [
+  {
+    label: "desktop 1280x900, mouse wheel",
+    context: {
+      viewport: { width: 1280, height: 900 },
+      storageState: { cookies: [{ ...AUTH_COOKIE, domain: "127.0.0.1", path: "/" }], origins: [] },
+    },
+    async scrollUp(page, thread) {
+      const box = await thread.boundingBox();
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      for (let i = 0; i < 12; i++) {
+        await page.mouse.wheel(0, -400);
+        await page.waitForTimeout(35);
+      }
+    },
+  },
+  {
+    // 390x844 is the iPhone 14/15 CSS viewport and the size
+    // layout-stress.prodtest.mjs already calls "the phone the app is most
+    // used on" at 375. hasTouch/isMobile switch Chromium into the mobile
+    // input and viewport model, which is what makes the difference below
+    // a real one rather than a narrow window.
+    label: "mobile 390x844, touch drag",
+    context: {
+      viewport: { width: 390, height: 844 },
+      hasTouch: true,
+      isMobile: true,
+      deviceScaleFactor: 3,
+      storageState: { cookies: [{ ...AUTH_COOKIE, domain: "127.0.0.1", path: "/" }], origins: [] },
+    },
+    async scrollUp(page, thread) {
+      const box = await thread.boundingBox();
+      const cdp = await page.context().newCDPSession(page);
+      const x = Math.round(box.x + box.width / 2);
+      // Four short drags rather than one long one, which is how a person
+      // actually flicks through a thread, and which gives the page four
+      // separate chances to fight back.
+      for (let drag = 0; drag < 4; drag++) {
+        let y = Math.round(box.y + box.height * 0.25);
+        const end = Math.round(box.y + box.height * 0.85);
+        await cdp.send("Input.dispatchTouchEvent", {
+          type: "touchStart",
+          touchPoints: [{ x, y }],
+        });
+        while (y < end) {
+          y += 40;
+          await cdp.send("Input.dispatchTouchEvent", {
+            type: "touchMove",
+            touchPoints: [{ x, y: Math.min(y, end) }],
+          });
+          await page.waitForTimeout(12);
+        }
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+        await page.waitForTimeout(120);
+      }
+      await cdp.detach();
+    },
+  },
+];
+
 const { chromium } = await import("playwright");
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
-const context = await browser.newContext({
-  viewport: { width: 1280, height: 900 },
-  storageState: { cookies: [{ ...AUTH_COOKIE, domain: "127.0.0.1", path: "/" }], origins: [] },
-});
-const page = await context.newPage();
 
-// The reply, as the real route streams it: meta → deltas → done.
-let replyCounter = 0;
-await page.route("**/api/chat", async (route) => {
-  replyCounter++;
-  const lines = [
-    JSON.stringify({ type: "meta", conversationId: CONVO_ID, isNewConversation: false }),
-    ...Array.from({ length: 12 }, (_, i) =>
-      JSON.stringify({ type: "delta", text: `chunk ${replyCounter}.${i} of a streamed reply. ` })
-    ),
-    JSON.stringify({ type: "done", credits: 1 }),
-  ];
-  await route.fulfill({
-    status: 200,
-    contentType: "application/x-ndjson",
-    body: lines.join("\n") + "\n",
+for (const device of DEVICES) {
+  console.log(`\n################ ${device.label} ################`);
+  deviceLabel = device.label.split(" ")[0];
+  const context = await browser.newContext(device.context);
+  const page = await context.newPage();
+
+  // The reply, as the real route streams it: meta → deltas → done.
+  let replyCounter = 0;
+  await page.route("**/api/chat", async (route) => {
+    replyCounter++;
+    const lines = [
+      JSON.stringify({ type: "meta", conversationId: CONVO_ID, isNewConversation: false }),
+      ...Array.from({ length: 12 }, (_, i) =>
+        JSON.stringify({ type: "delta", text: `chunk ${replyCounter}.${i} of a streamed reply. ` })
+      ),
+      JSON.stringify({ type: "done", credits: 1 }),
+    ];
+    await route.fulfill({
+      status: 200,
+      contentType: "application/x-ndjson",
+      body: lines.join("\n") + "\n",
+    });
   });
-});
 
-const thread = () => page.locator('[data-testid="chat-thread"]');
-async function scrollState() {
-  return thread().evaluate((el) => ({
-    top: el.scrollTop,
-    height: el.scrollHeight,
-    client: el.clientHeight,
-    fromBottom: el.scrollHeight - el.scrollTop - el.clientHeight,
-  }));
-}
-
-try {
-  console.log("== 1. opening a conversation lands at the latest message ==");
-  await page.goto(`http://127.0.0.1:${PORT}/dashboard/chat?c=${CONVO_ID}`, {
-    waitUntil: "networkidle",
-    timeout: 60000,
-  });
-  await page.waitForSelector('[data-testid="chat-thread"]', { timeout: 15000 });
-  // The 40 seeded messages load client-side; wait for the last one.
-  await page.waitForSelector("text=Message 40.", { timeout: 15000 });
-  await page.waitForTimeout(400);
-  let s = await scrollState();
-  check(`the thread overflows (${s.height}px in ${s.client}px)`, s.height > s.client * 2);
-  check(`and starts at the bottom (${Math.round(s.fromBottom)}px from it)`, s.fromBottom < 120);
-
-  console.log("\n== 2. a reply arriving while AT the bottom follows ==");
-  await page.fill("textarea", "First question");
-  await page.keyboard.press("Enter");
-  await page.waitForSelector("text=chunk 1.11", { timeout: 15000 });
-  await page.waitForTimeout(400);
-  s = await scrollState();
-  check(`the view followed the reply (${Math.round(s.fromBottom)}px from bottom)`, s.fromBottom < 120);
-
-  console.log("\n== 3. scrolled up, a new reply MUST NOT drag the view down ==");
-  await thread().evaluate((el) => {
-    el.scrollTop = 0;
-  });
-  await page.waitForTimeout(300);
-  s = await scrollState();
-  check(`the reader is at the top (${Math.round(s.top)}px)`, s.top < 40);
-  await page.fill("textarea", "Second question, sent from the top");
-  await page.keyboard.press("Enter");
-  await page.waitForSelector("text=chunk 2.11", { timeout: 15000 });
-  await page.waitForTimeout(600);
-  s = await scrollState();
-  // THE reported bug. If this is red, the reader was dragged down again.
-  check(
-    `the view stayed up (scrollTop ${Math.round(s.top)}px, ${Math.round(s.fromBottom)}px from bottom)`,
-    s.fromBottom > 200
-  );
-
-  console.log("\n== 4. instead, a 'new message' affordance appears ==");
-  const jump = page.locator('[data-testid="chat-jump-to-latest"]');
-  check("the jump button is visible", await jump.isVisible());
-
-  console.log("\n== 5. pressing it returns to the bottom ==");
-  await jump.click();
-  await page.waitForTimeout(700);
-  s = await scrollState();
-  check(`the view is at the bottom again (${Math.round(s.fromBottom)}px)`, s.fromBottom < 120);
-  check("and the button is gone", !(await jump.isVisible()));
-
-  console.log("\n== 6. THE REPORTED CASE: scrolling WHILE the reply is arriving ==");
-  // Steps 1-5 scroll while IDLE and then send, so the scroll event has
-  // long been delivered before a chunk lands. The user's sentence is the
-  // other order — "the AI is writing AND it takes the screen down" — and
-  // that is a race between an asynchronously-dispatched scroll event and
-  // a re-render happening several times a second.
-  //
-  // route.fulfill() cannot express it: it hands over the whole body at
-  // once, so nothing arrives "during" anything. The page's own fetch is
-  // replaced here with one that emits the same NDJSON over roughly two
-  // seconds — a real stream through the real client path.
-  //
-  // WHAT THIS STEP DOES AND DOES NOT PROVE, because it was checked both
-  // ways rather than assumed: it exercises the mid-stream path that steps
-  // 1-5 never touch, and it is green. But reverting the fix in
-  // lib/chat/follow-decision.ts leaves it GREEN TOO — Playwright's
-  // mouse.wheel dispatches its scroll events promptly enough that the
-  // flag is current before the next chunk renders, so the race window
-  // never opens here.
-  //
-  // So this is a regression guard on the mid-stream path, NOT the proof
-  // that the race is what users hit. The proof that the OLD rule answers
-  // "scroll" where the new one answers "notify" is
-  // scripts/tests/chat-scroll-race.test.mjs, which runs the decision as
-  // five numbers and does not depend on browser event timing. Claiming
-  // this step catches the race would be claiming a green light means
-  // something it does not.
-  await page.evaluate((CONVO_ID_FOR_TEST) => {
-    const real = window.fetch;
-    window.fetch = async (input, init) => {
-      const url = typeof input === "string" ? input : (input && input.url) || "";
-      if (!url.includes("/api/chat")) return real(input, init);
-      const lines = [
-        JSON.stringify({ type: "meta", conversationId: CONVO_ID_FOR_TEST, isNewConversation: false }),
-        ...Array.from({ length: 25 }, (_, i) =>
-          JSON.stringify({ type: "delta", text: `slow chunk ${i} of a reply that arrives over time. ` })
-        ),
-        JSON.stringify({ type: "done", credits: 1 }),
-      ];
-      const encoder = new TextEncoder();
-      let i = 0;
-      const stream = new ReadableStream({
-        pull(controller) {
-          return new Promise((resolve) => {
-            setTimeout(() => {
-              if (i >= lines.length) controller.close();
-              else controller.enqueue(encoder.encode(lines[i++] + "\n"));
-              resolve();
-            }, 80);
-          });
-        },
-      });
-      return new Response(stream, {
-        status: 200,
-        headers: { "Content-Type": "application/x-ndjson" },
-      });
-    };
-  }, CONVO_ID);
-
-  await thread().evaluate((el) => {
-    el.scrollTop = el.scrollHeight;
-  });
-  await page.waitForTimeout(200);
-  await page.fill("textarea", "Third question, and I will scroll while you answer");
-  await page.keyboard.press("Enter");
-
-  // UNDER WAY, not finished. Then wheel the way a person does — several
-  // turns rather than one assignment, because a scripted scrollTop write
-  // dispatches its event promptly and a gesture does not.
-  await page.waitForSelector("text=slow chunk 3", { timeout: 20000 });
-  const box = await thread().boundingBox();
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  for (let i = 0; i < 12; i++) {
-    await page.mouse.wheel(0, -400);
-    await page.waitForTimeout(35);
+  const thread = () => page.locator('[data-testid="chat-thread"]');
+  async function scrollState() {
+    return thread().evaluate((el) => ({
+      top: el.scrollTop,
+      height: el.scrollHeight,
+      client: el.clientHeight,
+      fromBottom: el.scrollHeight - el.scrollTop - el.clientHeight,
+    }));
   }
-  s = await scrollState();
-  console.log(`        wheeled up mid-stream to scrollTop ${Math.round(s.top)}`);
-  check(
-    `the wheel actually moved the view (${Math.round(s.fromBottom)}px from bottom)`,
-    s.fromBottom > 300,
-    "the gesture did not move it, so the assertion below would pass on nothing"
-  );
 
-  // Now let the rest of the stream land. Every remaining chunk
-  // re-renders and calls follow(); this is the moment the bug happens.
-  await page.waitForSelector("text=slow chunk 24", { timeout: 25000 });
-  await page.waitForTimeout(700);
-  s = await scrollState();
-  check(
-    `the view stayed where the reader put it (${Math.round(s.fromBottom)}px from bottom)`,
-    s.fromBottom > 300,
-    `dragged back down to ${Math.round(s.fromBottom)}px — the reported bug, mid-stream`
-  );
-  check(
-    "and the new-message affordance is offered instead",
-    await page.locator('[data-testid="chat-jump-to-latest"]').isVisible()
-  );
-} catch (err) {
-  failures.push("unhandled error");
-  console.log(`  FAIL  unhandled error\n        ${err.stack ?? err.message}`);
-} finally {
-  await context.close();
-  await browser.close();
-  cleanup();
+  try {
+    console.log("== 1. opening a conversation lands at the latest message ==");
+    await page.goto(`http://127.0.0.1:${PORT}/dashboard/chat?c=${CONVO_ID}`, {
+      waitUntil: "networkidle",
+      timeout: 60000,
+    });
+    await page.waitForSelector('[data-testid="chat-thread"]', { timeout: 15000 });
+    // The 40 seeded messages load client-side; wait for the last one.
+    await page.waitForSelector("text=Message 40.", { timeout: 15000 });
+    await page.waitForTimeout(400);
+    let s = await scrollState();
+    check(`the thread overflows (${s.height}px in ${s.client}px)`, s.height > s.client * 2);
+    check(`and starts at the bottom (${Math.round(s.fromBottom)}px from it)`, s.fromBottom < 120);
+
+    console.log("\n== 2. a reply arriving while AT the bottom follows ==");
+    await page.fill("textarea", "First question");
+    await page.keyboard.press("Enter");
+    await page.waitForSelector("text=chunk 1.11", { timeout: 15000 });
+    await page.waitForTimeout(400);
+    s = await scrollState();
+    check(`the view followed the reply (${Math.round(s.fromBottom)}px from bottom)`, s.fromBottom < 120);
+
+    console.log("\n== 3. scrolled up, a new reply MUST NOT drag the view down ==");
+    await thread().evaluate((el) => {
+      el.scrollTop = 0;
+    });
+    await page.waitForTimeout(300);
+    s = await scrollState();
+    check(`the reader is at the top (${Math.round(s.top)}px)`, s.top < 40);
+    await page.fill("textarea", "Second question, sent from the top");
+    await page.keyboard.press("Enter");
+    await page.waitForSelector("text=chunk 2.11", { timeout: 15000 });
+    await page.waitForTimeout(600);
+    s = await scrollState();
+    // THE reported bug. If this is red, the reader was dragged down again.
+    check(
+      `the view stayed up (scrollTop ${Math.round(s.top)}px, ${Math.round(s.fromBottom)}px from bottom)`,
+      s.fromBottom > 200
+    );
+
+    console.log("\n== 4. instead, a 'new message' affordance appears ==");
+    const jump = page.locator('[data-testid="chat-jump-to-latest"]');
+    check("the jump button is visible", await jump.isVisible());
+
+    console.log("\n== 5. pressing it returns to the bottom ==");
+    await jump.click();
+    // WAITED OUT, NOT TIMED, and the trajectory printed.
+    //
+    // jumpToBottom uses behavior:"smooth", so the position lands over
+    // several frames — how many depends on the distance, the device and
+    // how busy the main thread is. A fixed 700ms read the desktop run at
+    // 122px on one run and 409px on the next while mobile read 0px on
+    // both: three different numbers for one behaviour, which is a fact
+    // about the wait rather than about the product.
+    //
+    // This polls until the number stops moving and says how long that
+    // took. It is STRICTER than the fixed wait, not looser: the 120px
+    // threshold is unchanged and now applies to where the view actually
+    // came to rest instead of to wherever the animation happened to be
+    // at 700ms. If the settled position is short of the bottom, that is
+    // the product and this will say so.
+    // "STOPPED" IS NOT "NEVER STARTED", and the first draft of this loop
+    // could not tell the difference. It returned on the first pair of
+    // equal readings, which on desktop were the two taken BEFORE the
+    // smooth scroll began — so it reported "settled after 100ms" at
+    // 4344px from the bottom, the position the view had never left. The
+    // mobile trail is what showed it up:
+    //   7222 -> 6817 -> 5780 -> 3907 -> 1921 -> 680 -> 32 -> 0 -> 0
+    // against a desktop trail of 4344 -> 4344.
+    //
+    // So settling now requires that the view MOVED first, and there is a
+    // floor of 800ms before "it never moved" is accepted as the answer —
+    // which is itself a finding worth printing rather than a reason to
+    // keep waiting.
+    const settle = await (async () => {
+      let previous = null;
+      let moved = false;
+      const trail = [];
+      for (let i = 0; i < 50; i++) {
+        const now = await scrollState();
+        trail.push(Math.round(now.fromBottom));
+        if (previous !== null && Math.abs(now.top - previous) >= 1) moved = true;
+        if (previous !== null && Math.abs(now.top - previous) < 1 && (moved || i >= 8)) {
+          return { s: now, ms: i * 100, moved, trail };
+        }
+        previous = now.top;
+        await page.waitForTimeout(100);
+      }
+      return { s: await scrollState(), ms: 5000, moved, trail };
+    })();
+    s = settle.s;
+    console.log(
+      `        ${settle.moved ? "settled" : "NEVER MOVED, gave up"} after ${settle.ms}ms — ` +
+        `from bottom: ${settle.trail.join(" -> ")}`
+    );
+    check(`the view is at the bottom again (${Math.round(s.fromBottom)}px)`, s.fromBottom < 120);
+    check("and the button is gone", !(await jump.isVisible()));
+
+    console.log("\n== 6. THE REPORTED CASE: scrolling WHILE the reply is arriving ==");
+    // Steps 1-5 scroll while IDLE and then send, so the scroll event has
+    // long been delivered before a chunk lands. The user's sentence is the
+    // other order — "the AI is writing AND it takes the screen down" — and
+    // that is a race between an asynchronously-dispatched scroll event and
+    // a re-render happening several times a second.
+    //
+    // route.fulfill() cannot express it: it hands over the whole body at
+    // once, so nothing arrives "during" anything. The page's own fetch is
+    // replaced here with one that emits the same NDJSON over roughly two
+    // seconds — a real stream through the real client path.
+    //
+    // WHAT THIS STEP PROVES ON WHICH DEVICE — measured by reverting the
+    // fix, not reasoned about.
+    //
+    // THE OLD NOTE HERE SAID this step could not catch the race at all:
+    // "reverting the fix in lib/chat/follow-decision.ts leaves it GREEN
+    // TOO — Playwright's mouse.wheel dispatches its scroll events
+    // promptly enough that the flag is current before the next chunk
+    // renders". That was true, and it was true because the file only
+    // ever ran with a mouse. It is no longer the whole story.
+    //
+    // Measured, with the `movedByHuman` branch deleted from decideFollow
+    // and both devices run:
+    //
+    //   desktop 1280x900, wheel  — ALL ELEVEN CHECKS STILL GREEN
+    //   mobile  390x844, touch   — "and the new-message affordance is
+    //                              offered instead" goes RED
+    //
+    // The race window a wheel never opens, a thumb does. That is
+    // consistent with where the report came from, and it is why this
+    // file runs twice.
+    //
+    // NOTE WHICH ASSERTION FAILS: not the position — the view ends at
+    // 585px from the bottom either way, because the flick's own momentum
+    // carries it back up after the last chunk lands — but the
+    // AFFORDANCE. Under the old rule the stale flag still reads "stuck",
+    // the decision is "scroll" instead of "notify", and the reader is
+    // left up the thread with a reply below and nothing saying so. A
+    // position-only assertion would have called that a pass.
+    //
+    // scripts/tests/chat-scroll-race.test.mjs remains the deterministic
+    // proof of the same rule as five numbers, and it is the one that
+    // cannot go flaky. This is the proof that those five numbers
+    // describe a real browser.
+    await page.evaluate((CONVO_ID_FOR_TEST) => {
+      const real = window.fetch;
+      window.fetch = async (input, init) => {
+        const url = typeof input === "string" ? input : (input && input.url) || "";
+        if (!url.includes("/api/chat")) return real(input, init);
+        const lines = [
+          JSON.stringify({ type: "meta", conversationId: CONVO_ID_FOR_TEST, isNewConversation: false }),
+          ...Array.from({ length: 25 }, (_, i) =>
+            JSON.stringify({ type: "delta", text: `slow chunk ${i} of a reply that arrives over time. ` })
+          ),
+          JSON.stringify({ type: "done", credits: 1 }),
+        ];
+        const encoder = new TextEncoder();
+        let i = 0;
+        const stream = new ReadableStream({
+          pull(controller) {
+            return new Promise((resolve) => {
+              setTimeout(() => {
+                if (i >= lines.length) controller.close();
+                else controller.enqueue(encoder.encode(lines[i++] + "\n"));
+                resolve();
+              }, 80);
+            });
+          },
+        });
+        return new Response(stream, {
+          status: 200,
+          headers: { "Content-Type": "application/x-ndjson" },
+        });
+      };
+    }, CONVO_ID);
+
+    await thread().evaluate((el) => {
+      el.scrollTop = el.scrollHeight;
+    });
+    await page.waitForTimeout(200);
+    await page.fill("textarea", "Third question, and I will scroll while you answer");
+    await page.keyboard.press("Enter");
+
+    // UNDER WAY, not finished. Then wheel the way a person does — several
+    // turns rather than one assignment, because a scripted scrollTop write
+    // dispatches its event promptly and a gesture does not.
+    await page.waitForSelector("text=slow chunk 3", { timeout: 20000 });
+    await device.scrollUp(page, thread());
+    s = await scrollState();
+    console.log(`        wheeled up mid-stream to scrollTop ${Math.round(s.top)}`);
+    check(
+      `the wheel actually moved the view (${Math.round(s.fromBottom)}px from bottom)`,
+      s.fromBottom > 300,
+      "the gesture did not move it, so the assertion below would pass on nothing"
+    );
+
+    // Now let the rest of the stream land. Every remaining chunk
+    // re-renders and calls follow(); this is the moment the bug happens.
+    await page.waitForSelector("text=slow chunk 24", { timeout: 25000 });
+    await page.waitForTimeout(700);
+    s = await scrollState();
+    check(
+      `the view stayed where the reader put it (${Math.round(s.fromBottom)}px from bottom)`,
+      s.fromBottom > 300,
+      `dragged back down to ${Math.round(s.fromBottom)}px — the reported bug, mid-stream`
+    );
+    check(
+      "and the new-message affordance is offered instead",
+      await page.locator('[data-testid="chat-jump-to-latest"]').isVisible()
+    );
+  } catch (err) {
+    failures.push("unhandled error");
+    console.log(`  FAIL  unhandled error\n        ${err.stack ?? err.message}`);
+  } finally {
+    await context.close();
+  }
+
 }
+
+await browser.close();
+cleanup();
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

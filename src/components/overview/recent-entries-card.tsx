@@ -16,8 +16,14 @@ export async function RecentEntriesCard({ entries }: { entries: RecentEntry[] })
   const locale = await getLocale();
   const tKey = await getTranslations();
 
+  // NO col-span HERE ANY MORE. `sm:col-span-2 lg:col-span-1` was left
+  // over from the three-column row this card used to sit in, which the
+  // Home rework removed. A span class on a card that its only caller now
+  // places in a two-column grid is not inert: spanning 2 inside a
+  // one-column grid makes CSS create an implicit second column, and the
+  // row silently doubles in width. The caller owns the layout.
   return (
-    <div className="rounded-2xl border border-border bg-panel p-5 sm:col-span-2 lg:col-span-1">
+    <div className="rounded-2xl border border-border bg-panel p-5">
       <div className="flex items-center gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
           <Clock className="h-5 w-5" aria-hidden="true" />

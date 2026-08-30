@@ -44,10 +44,13 @@ export const fetchCache = "force-no-store";
  * A health probe coupled to the newest migration reports "database down"
  * every time the schema is one step behind the code, which is the single
  * most common state a deploying project is ever in. It now reads
- * user_onboarding: present since 20260803000000_baseline_schema.sql and,
- * measured across every migration in the repository, referenced by
- * exactly none of them since. The probe should be the last thing in the
- * system to change.
+ * user_onboarding: present since 20260803000000_baseline_schema.sql, and
+ * measured across every migration in the repository, touched by exactly
+ * ONE since — 20260914000000_home_seen_at.sql, which only adds a column.
+ * That is the property that matters and it is what the gate now checks:
+ * this probe runs `select("user_id").limit(1)`, an added column cannot
+ * break it, and a drop, rename or type change can.
+ * scripts/tests/health-classify.test.mjs fails on any of those three.
  *
  * "db:false" WAS TRUE AND USELESS. 529ms of latency proves a round trip
  * HAPPENED — so DNS, TLS, the host and PostgREST were all alive — and

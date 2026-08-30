@@ -91,6 +91,15 @@ export function InsightList({
                 <p className="text-sm font-semibold leading-snug text-foreground">{insight.headline}</p>
                 <p className="text-xs leading-relaxed text-muted">{insight.detail}</p>
 
+                {/* THE TOUCH TARGETS, MEASURED. Both controls in this row
+                    were 17px tall — text links with no height of their
+                    own — and scripts/tests/layout-stress.prodtest.mjs
+                    counted them at 375px in both locales. `min-h-[44px]`
+                    with `-my-3` keeps the hit area at the 44px minimum
+                    without changing where the row sits: the negative
+                    margin gives back exactly the 27px the min-height
+                    adds, so the card's height is unchanged and only the
+                    pressable area grows. */}
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-0.5">
                   {/* Said on every card, never hidden behind a tooltip. */}
                   <span className="text-[11px] text-muted">
@@ -100,7 +109,7 @@ export function InsightList({
                   {route && (
                     <Link
                       href={route}
-                      className="inline-flex items-center gap-1 text-[11px] font-medium text-orange-400 transition-colors duration-150 hover:text-orange-300"
+                      className="-my-3 inline-flex min-h-[44px] items-center gap-1 text-[11px] font-medium text-orange-400 transition-colors duration-150 hover:text-orange-300"
                     >
                       {t("checkIt")}
                       <ArrowRight className="h-3 w-3" aria-hidden="true" />
@@ -110,7 +119,7 @@ export function InsightList({
                   <button
                     type="button"
                     onClick={() => setExpanded(isOpen ? null : key)}
-                    className="inline-flex items-center gap-1 text-[11px] font-medium text-muted transition-colors duration-150 hover:text-foreground"
+                    className="-my-3 inline-flex min-h-[44px] items-center gap-1 text-[11px] font-medium text-muted transition-colors duration-150 hover:text-foreground"
                     aria-expanded={isOpen}
                   >
                     <Info className="h-3 w-3" aria-hidden="true" />

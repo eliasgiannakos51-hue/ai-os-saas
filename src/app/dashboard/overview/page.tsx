@@ -15,6 +15,10 @@ import { AiCoachCard } from "@/components/overview/ai-coach-card";
 import { ActiveMissionCard } from "@/components/overview/active-mission-card";
 import { NextActionCard } from "@/components/overview/next-action-card";
 import { QuickStartButton } from "@/components/overview/quick-start-button";
+import { formatRelativeTime } from "@/lib/format-time";
+import { NextCard } from "@/components/overview/next-card";
+import { WhatChangedCard } from "@/components/overview/what-changed-card";
+import { HomeSeenStamp } from "@/components/overview/home-seen-stamp";
 import { ProgressCard } from "@/components/overview/progress-card";
 import { HomeStatCard } from "@/components/overview/home-stat-card";
 import { CreditsHomeStat } from "@/components/overview/credits-home-stat";
@@ -95,7 +99,9 @@ export default async function OverviewPage() {
   // means, and both Skip and Finish write it.
   const { data: onboardingState } = await supabase
     .from("user_onboarding")
-    .select("completed_at, skipped_at")
+    // home_seen_at rides along on a query this page already ran — "what
+    // changed since last time" costs no extra round trip.
+    .select("completed_at, skipped_at, home_seen_at")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -258,6 +264,29 @@ export default async function OverviewPage() {
       }
     }
   }
+
+  // WHAT CHANGED SINCE LAST TIME — V4.6 #10.
+  //
+  // Costs no extra query: home_seen_at rides on the onboarding row this
+  // page already reads, and last30DaysMs is already in hand for the
+  // sparkline. Null on a first visit, and the card renders nothing then —
+  // there is no "since last time" when there is no last time.
+  const homeSeenAtMs = onboardingState?.home_seen_at
+    ? new Date(String(onboardingState.home_seen_at)).getTime()
+    : null;
+  const entriesSinceLastVisit =
+    homeSeenAtMs === null
+      ? 0
+      : summaries.reduce(
+          (sum, sm) => sum + sm.last30DaysMs.filter((ms: number) => ms > homeSeenAtMs).length,
+          0
+        );
+  const insightsSinceLastVisit =
+    homeSeenAtMs === null
+      ? 0
+      : (activeInsights ?? []).filter(
+          (i) => new Date(String((i as { created_at?: unknown }).created_at ?? 0)).getTime() > homeSeenAtMs
+        ).length;
 
   const recentEntries: RecentEntry[] = summaries
     .flatMap((summary) =>
@@ -423,13 +452,72 @@ export default async function OverviewPage() {
 
   return (
     <main className="min-h-full">
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      {/* Stamps the visit AFTER the render, so the diff above was made
+          against the previous value and not against now. */}
+      <HomeSeenStamp />
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+        {/* ORDER: ACTION -> WHAT CHANGED -> PROGRESS -> NUMBERS -> HISTORY.
+            V4.6 #10. Measured before this reorder
+            (scripts/tests/home-audit.prodtest.mjs, 1440x900): the numbers
+            sat at y=302 and the thing to actually DO sat at y=1124, two
+            hundred pixels below the fold. The page opened with a summary
+            of the past and buried the present. */}
         <div className="relative flex flex-wrap items-start justify-between gap-3">
           <GlowOrb className="-left-10 -top-20 -z-10 h-56 w-56" />
           <GreetingHeader email={user.email ?? ""} />
-        <LowCreditsBanner />
+          <LowCreditsBanner />
           <QuickStartButton />
         </div>
+
+        {/* 1. ACTION — the input, first, because it is the answer to
+               "what do I do now" and it was below the fold. */}
+        <div className="mt-6">
+          <CreateChat showHeading={false} />
+        </div>
+
+        {/* ONE CARD WHERE THERE WERE THREE — V4.6 #10. "What's Next?",
+            "AI Coach" and "Active Mission" were three stacked full-width
+            cards saying similar things, 208px of vertical space, all of
+            it under the fold. */}
+        <NextCard
+          title={t("next.title")}
+          action={
+            nextAction && nextActionMessage
+              ? { message: nextActionMessage, href: nextAction.href, ctaLabel: t("nextAction.cta") }
+              : null
+          }
+          weekSummary={aiCoachSummary || null}
+          plan={
+            activeMission
+              ? {
+                  goal: activeMission.goal,
+                  progressPercent: missionProgressPercent(activeMission),
+                  stepsLabel: t("activeMission.stepsLabel", {
+                    completed: activeMissionSteps.filter((s) => s.status === "completed").length,
+                    total: activeMissionSteps.length,
+                  }),
+                  href: "/dashboard/mission",
+                  openLabel: t("activeMission.open"),
+                }
+              : null
+          }
+        />
+
+        {/* 2. WHAT CHANGED — the reason to come back tomorrow. Above the
+               fold, straight after the action, and absent entirely when
+               nothing changed or there is no last visit to compare with. */}
+        <WhatChangedCard
+          title={t("whatChanged.title")}
+          sinceLabel={
+            homeSeenAtMs === null
+              ? ""
+              : t("whatChanged.since", { when: formatRelativeTime(new Date(homeSeenAtMs).toISOString(), locale) })
+          }
+          changes={[
+            { label: t("whatChanged.entries"), count: entriesSinceLastVisit, href: "/dashboard/timeline" },
+            { label: t("whatChanged.insights"), count: insightsSinceLastVisit },
+          ]}
+        />
 
         {(activeInsights ?? []).length > 0 && (
           <section className="mt-6 space-y-2">
@@ -438,13 +526,45 @@ export default async function OverviewPage() {
           </section>
         )}
 
+        {/* 3. PROGRESS — one card, not two. The audit's inventory listed
+               the ring and the step list as separate blocks; they are two
+               COLUMNS of this one card, which the walker split. Nothing
+               was merged here because nothing needed merging.
+
+               NO VERDICT BEFORE THERE IS EVIDENCE — V4.6 #5. Measured
+               before that branch: a real build, an account with no rows,
+               and the ring read "Business Health Score: 0 / 100" under
+               "Just getting started". Zero out of a hundred is a
+               judgement, and the account had done nothing to be judged
+               for. */}
+        {hasEnoughDataForScore(totalEntries) ? (
+          <HealthScoreCard
+            title={t("healthScore.title")}
+            score={healthScore.score}
+            rangeLabel={healthScoreRangeLabel}
+            suggestion={healthScoreSuggestion}
+            trend={weeklySparkline}
+          />
+        ) : (
+          <SetupProgressCard
+            title={t("setupProgress.title")}
+            countLabel={t("setupProgress.count", {
+              done: setupSteps.filter((s) => s.done).length,
+              total: setupSteps.length,
+            })}
+            suggestion={t("setupProgress.suggestion", { count: HEALTH_SCORE_MIN_ENTRIES })}
+            steps={setupSteps}
+          />
+        )}
+
+        {/* 4. NUMBERS.
+            EVERY NUMBER CARRIES ITS OWN LINE, AND OPENS — V4.6 #7. The
+            destinations are not new: /dashboard/timeline has taken
+            ?range= and ?module= since it was built, so "click the number
+            to see the records behind it" is a href, not a feature.
+            `explain` is a REQUIRED prop precisely so the next card cannot
+            be added without one. */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {/* EVERY NUMBER CARRIES ITS OWN LINE, AND OPENS — V4.6 #7.
-              The destinations are not new: /dashboard/timeline has taken
-              ?range= and ?module= since it was built, so "click the
-              number to see the records behind it" is a href, not a
-              feature. `explain` is a REQUIRED prop precisely so the next
-              card cannot be added without one. */}
           <HomeStatCard
             icon={<Database className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.totalEntries")}
@@ -493,53 +613,39 @@ export default async function OverviewPage() {
           />
         </div>
 
-        {/* NO VERDICT BEFORE THERE IS EVIDENCE — V4.6 #5.
-            Measured before this branch existed: a real production build,
-            a real account with no rows, and the ring read "Business
-            Health Score: 0 / 100" under the words "Just getting started".
-            Zero out of a hundred is a judgement, and the account had not
-            done anything to be judged for.
-            HEALTH_SCORE_MIN_ENTRIES is five, and lib/health-score.ts
-            carries the table that picked it: the first entry alone moves
-            the score thirty points, and only from five does no single
-            entry move it more than six. */}
-        {hasEnoughDataForScore(totalEntries) ? (
-          <HealthScoreCard
-            title={t("healthScore.title")}
-            score={healthScore.score}
-            rangeLabel={healthScoreRangeLabel}
-            suggestion={healthScoreSuggestion}
-            trend={weeklySparkline}
-          />
-        ) : (
-          <SetupProgressCard
-            title={t("setupProgress.title")}
-            countLabel={t("setupProgress.count", {
-              done: setupSteps.filter((s) => s.done).length,
-              total: setupSteps.length,
-            })}
-            suggestion={t("setupProgress.suggestion", { count: HEALTH_SCORE_MIN_ENTRIES })}
-            steps={setupSteps}
-          />
-        )}
+        {/* 5. HISTORY, AND THE CHECK-IN BESIDE IT.
+               ProgressCard is gone: its three numbers (today / this week
+               / this month) are the same counts the stat row above
+               already shows, in the same units, four hundred pixels
+               apart. Removing it frees NO vertical space — it shared a
+               row with Recent Entries — so that was a clarity cut and not
+               a space one, and saying so is the point of having measured
+               the widths rather than only the heights.
+
+               WHICH IS ALSO WHY THIS IS A ROW. Measured at 1440x900
+               (scripts/tests/home-audit.prodtest.mjs): after the merge
+               and the two deletions the page was 1629px against 1632px
+               before — three pixels. The deleted blocks were either
+               side-by-side already or replaced by the card that merged
+               them, and stacking two full-width cards below the fold is
+               what the remaining height actually is. Putting the history
+               and the check-in in one row is the change that moves the
+               number; the widget's own `mt-6` is passed off for the same
+               reason.
+
+               THE CHECK-IN IS BELOW THE FOLD DELIBERATELY. It answers
+               none of the three questions the Home exists for; it is kept
+               because it feeds a real decision (lib/mission-energy.ts
+               picks the next plan step from it) and now says so on the
+               widget itself. */}
+        <div className="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
+          <RecentEntriesCard entries={recentEntries} />
+          <EnergyCheckinWidget initialCheckIn={latestEnergyCheckIn} className="" />
+        </div>
 
         {/* THE WAY OUT OF AN EMPTY ACCOUNT — V4.6 #6. Offered only while
-            there is nothing to look at and no sample already loaded: once
-            either is true the button is an invitation to duplicate work,
-            and the banner in the layout is what handles the sample from
-            then on. */}
+            there is nothing to look at and no sample already loaded. */}
         {totalEntries === 0 && !sampleLoaded && <LoadSampleButton className="mt-4" />}
-
-        <EnergyCheckinWidget initialCheckIn={latestEnergyCheckIn} />
-
-        {nextAction && nextActionMessage && (
-          <NextActionCard
-            title={t("nextAction.title")}
-            message={nextActionMessage}
-            href={nextAction.href}
-            ctaLabel={t("nextAction.cta")}
-          />
-        )}
 
         {showBetaExpiryBanner && betaDaysRemaining !== null && (
           <BetaExpiryBanner
@@ -555,51 +661,6 @@ export default async function OverviewPage() {
             feedbackUrl={betaFeedbackUrl}
           />
         )}
-
-        <AiCoachCard title={t("aiCoach.title")} summary={aiCoachSummary} />
-
-        {activeMission && (
-          <ActiveMissionCard
-            title={t("activeMission.title")}
-            goal={activeMission.goal}
-            progressPercent={missionProgressPercent(activeMission)}
-            stepsLabel={t("activeMission.stepsLabel", {
-              completed: activeMissionSteps.filter((s) => s.status === "completed").length,
-              total: activeMissionSteps.length,
-            })}
-            href="/dashboard/mission"
-          />
-        )}
-
-        <div className="mt-6">
-          <CreateChat showHeading={false} />
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {QUICK_ACTIONS.map((action) => (
-            <QuickActionCard
-              key={action.slug}
-              href={moduleHref(action.slug)}
-              icon={MODULE_ICONS[action.slug]}
-              label={t(`quickActions.${action.slug}.label`)}
-              description={t(`quickActions.${action.slug}.description`)}
-              tone={action.tone}
-            />
-          ))}
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <RecentEntriesCard entries={recentEntries} />
-
-          <ProgressCard
-            title={t("progress.title")}
-            stats={[
-              { label: t("progress.today"), value: totalToday },
-              { label: t("progress.thisWeek"), value: totalThisWeek },
-              { label: t("progress.thisMonth"), value: totalThisMonth },
-            ]}
-          />
-        </div>
       </div>
     </main>
   );

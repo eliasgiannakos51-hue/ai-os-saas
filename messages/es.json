@@ -896,7 +896,8 @@
       },
       "activeMission": {
         "title": "Plan activo",
-        "stepsLabel": "{completed}/{total} pasos completados"
+        "stepsLabel": "{completed}/{total} pasos completados",
+        "open": "Abrir el plan"
       },
       "nextAction": {
         "title": "¿Qué Sigue?",
@@ -957,6 +958,15 @@
           "secondModule": "Registra algo en una segunda área",
           "mission": "Define un objetivo"
         }
+      },
+      "next": {
+        "title": "Siguiente"
+      },
+      "whatChanged": {
+        "title": "Qué ha cambiado",
+        "since": "desde {when}",
+        "entries": "entradas nuevas",
+        "insights": "observaciones nuevas"
       }
     },
     "team": {
@@ -1240,10 +1250,13 @@
       "title": "Registro de Energía",
       "prompt": "¿Cómo está tu energía hoy?",
       "checkedInToday": "Energía de hoy: {level}/5.",
-      "logAgain": "Registrar de nuevo",
       "notePlaceholder": "Nota opcional...",
       "logged": "Energía registrada",
-      "levelLabel": "Nivel de energía {level}"
+      "levelLabel": "Nivel de energía {level}",
+      "scaleLow": "1 = agotado",
+      "scaleHigh": "5 = genial",
+      "whatItDoes": "Ionexa lo usa para elegir qué paso del plan sugerirte — trabajo ligero cuando estás bajo, exigente cuando no.",
+      "change": "Cambiar"
     },
     "websiteBuilder": {
       "title": "Crea un sitio",

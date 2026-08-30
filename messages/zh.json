@@ -896,7 +896,8 @@
       },
       "activeMission": {
         "title": "进行中的计划",
-        "stepsLabel": "已完成 {completed}/{total} 步"
+        "stepsLabel": "已完成 {completed}/{total} 步",
+        "open": "打开计划"
       },
       "nextAction": {
         "title": "接下来做什么?",
@@ -957,6 +958,15 @@
           "secondModule": "在第二个领域记录一些内容",
           "mission": "设定一个目标"
         }
+      },
+      "next": {
+        "title": "接下来"
+      },
+      "whatChanged": {
+        "title": "有什么变化",
+        "since": "自 {when} 起",
+        "entries": "条新记录",
+        "insights": "条新洞察"
       }
     },
     "team": {
@@ -1240,10 +1250,13 @@
       "title": "能量签到",
       "prompt": "你今天的能量如何?",
       "checkedInToday": "今天的能量:{level}/5。",
-      "logAgain": "再次记录",
       "notePlaceholder": "可选备注...",
       "logged": "能量已记录",
-      "levelLabel": "能量等级 {level}"
+      "levelLabel": "能量等级 {level}",
+      "scaleLow": "1 = 精疲力尽",
+      "scaleHigh": "5 = 状态很好",
+      "whatItDoes": "Ionexa 用它来挑选下一个建议的计划步骤——状态低时给轻松的，状态好时给有挑战的。",
+      "change": "更改"
     },
     "websiteBuilder": {
       "title": "做个网站",

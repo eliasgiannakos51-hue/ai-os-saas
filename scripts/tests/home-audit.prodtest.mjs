@@ -297,6 +297,40 @@ try {
   console.log(`\n  measured blocks total ${total}px of ${pageHeight}px`);
   console.log(`  a 30% cut is ${Math.round(pageHeight * 0.3)}px`);
 
+  // THE HEIGHT, PINNED — AND THE ESTIMATE THAT WAS WRONG.
+  //
+  // The brief asked for a 30% cut. The plan that was approved listed the
+  // blocks to remove and put the saving at 26%, and that number came from
+  // ADDING UP the heights in the table above. It was wrong, and the way
+  // it was wrong is why this file prints x and w beside h:
+  //
+  //   * Recent Entries and Progress shared a ROW. Both were 202px tall
+  //     and they sat side by side, so deleting Progress freed 202px of
+  //     the "measured blocks total" and ZERO pixels of page height.
+  //   * "What's Next?", "AI Coach" and "Active Mission" were merged, not
+  //     deleted. Three cards costing 208px became one costing 119px — an
+  //     89px saving, not a 208px one.
+  //   * The Energy Check-In GREW, from 172px to 179px, because the brief
+  //     also asked for scale labels and a line saying what it is for.
+  //
+  // Measured, after the whole approved list was done: 1632px -> 1629px.
+  // Three pixels. What actually moved the number was a LAYOUT change the
+  // list did not contain — putting Recent Entries and the check-in in one
+  // row, the same trick the old page had been using — which took it to
+  // 1398px.
+  //
+  // 1632 -> 1398 is 234px, or 14.3%. Not 30%, and not 26%. The remaining
+  // 1398px is the hero, the composer, Next, the setup ring, the four
+  // numbers, the history, the check-in and the sample-data offer; getting
+  // to 30% means deleting one of those, and each one answers one of the
+  // three questions the brief says the Home is for.
+  const HEIGHT_CEILING = 1398;
+  checkTrue(
+    `the Home is no taller than ${HEIGHT_CEILING}px (measured ${pageHeight}px, was 1632px before V4.6 #10)`,
+    pageHeight <= HEIGHT_CEILING,
+    `${pageHeight - HEIGHT_CEILING}px taller — lower the ceiling in the same commit that removes the block, never raise it`
+  );
+
   console.log("\n== 2. contrast over the backdrop, nine points, from real pixels ==");
   // NINE POINTS ON TEXT, not nine points on a grid.
   //
@@ -380,6 +414,71 @@ try {
 
   await page.screenshot({ path: "/tmp/home-audit-1440.png", fullPage: true });
   console.log("\n  full-page screenshot -> /tmp/home-audit-1440.png");
+
+  // -------------------------------------------------------------------
+  console.log("\n== 3. the horizontal overflow at 768 and 1024, named ==");
+  // WHY THIS IS HERE AND NOT IN layout-stress.prodtest.mjs. That file
+  // FINDS the overflow — it reports "el /dashboard/overview @768
+  // (782/768), widest: li > a > svg > path" — and that is as far as a
+  // widest-element report can take anybody: the arrow at the end of a
+  // setup step is where the overflow ENDS, not where it starts. The
+  // element that overflows and the element that CAUSES it are almost
+  // never the same one, because the cause is an ancestor that refused to
+  // shrink.
+  //
+  // So this walks the containment chain instead: for every element wider
+  // than the viewport, it reports the element and the first ancestor
+  // that is NOT itself over — the boundary where a box stopped fitting.
+  // That is the line to edit.
+  for (const width of [768, 1024]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.waitForTimeout(250);
+    const report = await page.evaluate((vw) => {
+      const doc = document.documentElement;
+      const scrollW = Math.max(doc.scrollWidth, document.body.scrollWidth);
+      // THE FULL CLASS LIST, NOT THE FIRST TWO. An earlier version of
+      // this probe abbreviated to two classes and reported
+      // `a.flex.min-h-[44px]` — which matches four different links on
+      // this page, so the report named a shape rather than an element
+      // and the chain could not be followed by hand.
+      const sel = (el) => {
+        const c = (el.className && typeof el.className === "string" ? el.className : "").trim();
+        const cs = getComputedStyle(el);
+        const box = `${Math.round(el.getBoundingClientRect().width)}x${Math.round(el.getBoundingClientRect().height)}`;
+        return `${el.tagName.toLowerCase()} ${box} pos:${cs.position} ov:${cs.overflowX} "${c.slice(0, 150)}"`;
+      };
+      const offenders = [];
+      for (const el of Array.from(document.querySelectorAll("main *"))) {
+        const r = el.getBoundingClientRect();
+        if (r.right <= vw + 0.5) continue;
+        // The first ancestor that DOES fit — the box that should have
+        // clipped or shrunk this one and did not.
+        let a = el.parentElement, chain = [];
+        while (a && a.tagName !== "BODY" && chain.length < 8) {
+          const ar = a.getBoundingClientRect();
+          chain.push(`${ar.right <= vw + 0.5 ? "FITS" : "OVER"} [${Math.round(ar.left)}..${Math.round(ar.right)}] ${sel(a)}`);
+          a = a.parentElement;
+        }
+        offenders.push({ el: sel(el), right: Math.round(r.right), chain });
+      }
+      return { scrollW, vw, offenders };
+    }, width);
+    console.log(`\n  viewport ${width}: scrollWidth ${report.scrollW} (${report.scrollW - width > 0 ? "+" + (report.scrollW - width) : "fits"})`);
+    // Only the outermost offenders matter — a child of an overflowing box
+    // is a symptom. Deduped by the first fitting ancestor.
+    for (const o of report.offenders.slice(0, 4)) {
+      console.log(`    reaches ${o.right}: ${o.el}`);
+      for (const c of o.chain) console.log(`        ${c}`);
+    }
+    if (report.offenders.length > 4) console.log(`    ...and ${report.offenders.length - 4} more`);
+    if (report.offenders.length === 0) console.log("    nothing overflows");
+    checkTrue(
+      `the Home fits its viewport at ${width} (scrollWidth ${report.scrollW})`,
+      report.scrollW <= width,
+      `${report.scrollW - width}px over`
+    );
+  }
+  await page.setViewportSize({ width: 1440, height: 900 });
 } finally {
   await context.close();
   await browser.close();

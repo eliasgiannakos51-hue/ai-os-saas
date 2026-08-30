@@ -115,8 +115,23 @@ export function HealthScoreCard({
         </div>
       </div>
 
+      {/* WHY THIS CARRIES A BASIS AND NOT JUST `flex-1`.
+          `flex-1` is `flex: 1 1 0%` — a basis of ZERO. Beside a sibling
+          whose basis is `auto`, that is not "share the row", it is "take
+          whatever is left over", and when the sibling's max-content is
+          wider than the row there is nothing left over. Measured on a
+          real build at 1024 (scripts/tests/home-audit.prodtest.mjs
+          section 3): the sibling list in setup-progress-card.tsx — the
+          card this one swaps places with — came out EIGHT PIXELS wide,
+          and its `shrink-0` arrow overflowed the page by 14px. This
+          sparkline has the same shape and the same sibling, so it
+          collapses the same way; it carries no `shrink-0` child, so it
+          vanishes silently instead of overflowing, which is the worse of
+          the two failures. A real basis makes both columns shrink in
+          proportion instead, so the deficit is shared and neither
+          collapses. */}
       {hasTrend && (
-        <div className="relative z-[1] h-16 min-w-0 flex-1" aria-hidden="true">
+        <div className="relative z-[1] h-16 min-w-0 flex-1 sm:basis-60" aria-hidden="true">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
               <defs>

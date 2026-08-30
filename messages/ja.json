@@ -896,7 +896,8 @@
       },
       "activeMission": {
         "title": "進行中のプラン",
-        "stepsLabel": "{completed}/{total} ステップ完了"
+        "stepsLabel": "{completed}/{total} ステップ完了",
+        "open": "プランを開く"
       },
       "nextAction": {
         "title": "次にすべきこと",
@@ -957,6 +958,15 @@
           "secondModule": "2 つ目の領域にも記録する",
           "mission": "目標を設定する"
         }
+      },
+      "next": {
+        "title": "次にやること"
+      },
+      "whatChanged": {
+        "title": "変わったこと",
+        "since": "{when}から",
+        "entries": "件の新しい記録",
+        "insights": "件の新しい発見"
       }
     },
     "team": {
@@ -1240,10 +1250,13 @@
       "title": "エネルギーチェックイン",
       "prompt": "今日のエネルギーはどうですか?",
       "checkedInToday": "今日のエネルギー: {level}/5。",
-      "logAgain": "もう一度記録",
       "notePlaceholder": "任意のメモ...",
       "logged": "エネルギーを記録しました",
-      "levelLabel": "エネルギーレベル {level}"
+      "levelLabel": "エネルギーレベル {level}",
+      "scaleLow": "1 = 疲れきっている",
+      "scaleHigh": "5 = 絶好調",
+      "whatItDoes": "Ionexa はこれをもとに次に提案するプランのステップを選びます。調子が低いときは軽い作業、そうでなければ手応えのある作業を。",
+      "change": "変更"
     },
     "websiteBuilder": {
       "title": "サイトをつくる",

@@ -896,7 +896,8 @@
       },
       "activeMission": {
         "title": "خطة نشطة",
-        "stepsLabel": "اكتمل {completed}/{total} خطوات"
+        "stepsLabel": "اكتمل {completed}/{total} خطوات",
+        "open": "افتح الخطة"
       },
       "nextAction": {
         "title": "ما التالي؟",
@@ -957,6 +958,15 @@
           "secondModule": "سجّل شيئًا في مجال ثانٍ",
           "mission": "حدّد هدفًا"
         }
+      },
+      "next": {
+        "title": "التالي"
+      },
+      "whatChanged": {
+        "title": "ما الذي تغيّر",
+        "since": "منذ {when}",
+        "entries": "إدخالات جديدة",
+        "insights": "ملاحظات جديدة"
       }
     },
     "team": {
@@ -1240,10 +1250,13 @@
       "title": "تسجيل الطاقة",
       "prompt": "كيف هي طاقتك اليوم؟",
       "checkedInToday": "طاقة اليوم: {level}/5.",
-      "logAgain": "سجّل مرة أخرى",
       "notePlaceholder": "ملاحظة اختيارية...",
       "logged": "تم تسجيل الطاقة",
-      "levelLabel": "مستوى الطاقة {level}"
+      "levelLabel": "مستوى الطاقة {level}",
+      "scaleLow": "١ = منهك",
+      "scaleHigh": "٥ = ممتاز",
+      "whatItDoes": "يستخدم Ionexa هذا لاختيار خطوة الخطة التالية المقترحة — عمل خفيف عندما تكون طاقتك منخفضة، وعمل يتطلب جهدًا عندما لا تكون كذلك.",
+      "change": "تغيير"
     },
     "websiteBuilder": {
       "title": "أنشئ موقعًا",

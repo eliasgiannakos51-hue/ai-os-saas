@@ -896,7 +896,8 @@
       },
       "activeMission": {
         "title": "Aktiver Plan",
-        "stepsLabel": "{completed}/{total} Schritte abgeschlossen"
+        "stepsLabel": "{completed}/{total} Schritte abgeschlossen",
+        "open": "Plan öffnen"
       },
       "nextAction": {
         "title": "Was Kommt Als Nächstes?",
@@ -957,6 +958,15 @@
           "secondModule": "Erfasse etwas in einem zweiten Bereich",
           "mission": "Setze ein Ziel"
         }
+      },
+      "next": {
+        "title": "Als Nächstes"
+      },
+      "whatChanged": {
+        "title": "Was sich geändert hat",
+        "since": "seit {when}",
+        "entries": "neue Einträge",
+        "insights": "neue Erkenntnisse"
       }
     },
     "team": {
@@ -1240,10 +1250,13 @@
       "title": "Energie-Check",
       "prompt": "Wie ist deine Energie heute?",
       "checkedInToday": "Heutige Energie: {level}/5.",
-      "logAgain": "Erneut eintragen",
       "notePlaceholder": "Optionale Notiz...",
       "logged": "Energie erfasst",
-      "levelLabel": "Energielevel {level}"
+      "levelLabel": "Energielevel {level}",
+      "scaleLow": "1 = erschöpft",
+      "scaleHigh": "5 = bestens",
+      "whatItDoes": "Ionexa wählt damit den nächsten Planschritt aus — leichte Arbeit, wenn du unten bist, fordernde, wenn nicht.",
+      "change": "Ändern"
     },
     "websiteBuilder": {
       "title": "Website bauen",

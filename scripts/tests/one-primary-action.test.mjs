@@ -241,18 +241,27 @@ console.log("\n== 2. no page gains a filled accent control ==");
 // page, not something a test can do — so this holds the line where it is
 // and every number in it may only ever go DOWN. Lower one in the same
 // commit that removes the button; never raise one.
+//
+// TWO WENT DOWN, and this is the record of why: create and mission were
+// both 4 and are both 3, because credits/out-of-credits-notice.tsx's
+// "buy credits" Link stopped being `bg-orange-500` and became an accent
+// OUTLINE. That component is rendered inside create-chat, create-studio,
+// mission-form, problem-notice and deep-research, so its fill competed
+// with whatever primary action the host screen already had — on the
+// dashboard Home, literally: 2 measured against a baseline of 1. The
+// notice keeps its orange rule, wash and icon badge; only the fill went.
 const BASELINE = {
   "dashboard/[module]/page.tsx": 4,
   "dashboard/agents/page.tsx": 4,
   "dashboard/apps/page.tsx": 4,
   "dashboard/campaigns/page.tsx": 4,
   "dashboard/chat/page.tsx": 2,
-  "dashboard/create/page.tsx": 4,
+  "dashboard/create/page.tsx": 3,
   "dashboard/deep-research/page.tsx": 1,
   "dashboard/images/page.tsx": 4,
   "dashboard/integrations/page.tsx": 2,
   "dashboard/memory/page.tsx": 1,
-  "dashboard/mission/page.tsx": 4,
+  "dashboard/mission/page.tsx": 3,
   "dashboard/overview/page.tsx": 1,
   "dashboard/page.tsx": 3,
   "dashboard/presentations/page.tsx": 4,

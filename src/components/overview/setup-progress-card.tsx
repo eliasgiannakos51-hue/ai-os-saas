@@ -100,7 +100,21 @@ export function SetupProgressCard({
         </div>
       </div>
 
-      <ul className="relative z-[1] min-w-0 flex-1 space-y-1.5 sm:pl-2">
+
+      {/* WHY THIS CARRIES A BASIS AND NOT JUST `flex-1`.
+          `flex-1` is `flex: 1 1 0%` — a basis of ZERO. Beside a sibling
+          whose basis is `auto`, that is not "share the row", it is "take
+          whatever is left over", and when the sibling's max-content is
+          wider than the row there is nothing left over. Measured on a
+          real build at 1024 (scripts/tests/home-audit.prodtest.mjs
+          section 3): this list came out EIGHT PIXELS wide, each <li> was
+          0px, and the `shrink-0` arrow at the end of the next step sat at
+          x=1038 in a 1024 viewport — a 14px horizontal overflow of the
+          whole page, which layout-stress.prodtest.mjs had been reporting
+          as "widest: li > a > svg > path" without being able to say why.
+          A real basis makes both columns shrink in proportion instead,
+          so the deficit is shared and neither collapses. */}
+      <ul className="relative z-[1] min-w-0 flex-1 space-y-1.5 sm:basis-60 sm:pl-2">
         {steps.map((step) => (
           <li key={step.id}>
             <Link

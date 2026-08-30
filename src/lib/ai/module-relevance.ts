@@ -113,12 +113,27 @@ export function scoreTerms(
   foldedQuestion: string,
   terms: readonly string[]
 ): number {
+  // EACH DISTINCT WORD COUNTS ONCE. The vocabulary is built from a
+  // module's title AND its field labels, and those overlap: Sales carries
+  // both "sales" (the slug) and "Sales" (the title), which fold to the
+  // same word. Counting both gave Sales a 2 for a question containing the
+  // word once, and "compare my sales and my finance numbers" — a question
+  // about two modules, scoring one hit each — came out as a clear 2-1
+  // winner for Sales. A tie broken by a duplicate is not a tie broken by
+  // evidence.
+  const counted = new Set<string>();
   let score = 0;
   for (const term of terms) {
     const folded = foldForMatch(term);
     if (folded.length < 3) continue;
-    if (words.has(folded)) score += 1;
-    else if (folded.includes(" ") && foldedQuestion.includes(folded)) score += 1;
+    if (counted.has(folded)) continue;
+    if (words.has(folded)) {
+      counted.add(folded);
+      score += 1;
+    } else if (folded.includes(" ") && foldedQuestion.includes(folded)) {
+      counted.add(folded);
+      score += 1;
+    }
   }
   return score;
 }
@@ -237,6 +252,36 @@ export function selectRelevantModules<T extends { slug: string; lastActivityMs?:
  * name. "How much did I charge for that?" is about Finance because of
  * "amount", not because of the word "finance".
  */
+/**
+ * Words that appear in field labels and mean nothing about which module a
+ * question is about. They are dropped even when only one module uses
+ * them, because "next" is not evidence about Sales however few other
+ * modules happen to have a "Next Steps" field.
+ */
+const GENERIC_LABEL_WORDS = new Set(
+  [
+    "next", "steps", "step", "follow", "email", "name", "type", "date", "status",
+    "notes", "note", "score", "value", "link", "url", "title", "other", "more",
+    "size", "first", "last", "description", "summary", "category", "priority",
+    "details", "detail", "text", "content", "list", "item", "items",
+    "επομενα", "βηματα", "βημα", "ονομα", "ειδος", "τυπος", "ημερομηνια",
+    "κατασταση", "σημειωσεις", "βαθμολογια", "αξια", "πρωτο", "τελευταιο",
+    "περιγραφη", "συνοψη", "κατηγορια", "προτεραιοτητα", "λεπτομερειες",
+    "κειμενο", "συνδεσμος", "παρακολουθησης",
+    // THE PEOPLE WORDS. Competitors has a "Customers" field, so "πελάτες"
+    // was a subject-weight term for Competitors and "Τι σχόλια έχω πάρει
+    // από πελάτες;" — a question plainly about feedback — was read as a
+    // question about competitors. A word that is true of Sales, Feedback,
+    // Competitors and Products at once claims none of them. It survives
+    // as an ASSOCIATED word for Sales (lib/ai/module-synonyms.ts), at
+    // half weight, which is what it is actually worth.
+    "customer", "customers", "client", "clients", "user", "users", "people",
+    "πελατης", "πελατες", "πελατων", "πελατη", "χρηστης", "χρηστες", "ατομα",
+    // Same shape: several modules have a "Company"/"Market" field.
+    "company", "companies", "market", "εταιρεια", "εταιρειες", "αγορα",
+  ].map((w) => foldForMatch(w))
+);
+
 export function buildModuleVocabulary(
   modules: { slug: string; titleKey: string; fields?: { labelKey: string }[] }[],
   catalogues: Record<string, unknown>[]
@@ -250,16 +295,62 @@ export function buildModuleVocabulary(
     return typeof node === "string" ? node : "";
   };
 
-  return modules.map((m) => {
-    const terms = new Set<string>([m.slug]);
+  // TWO KINDS OF TERM, and they are not equally good evidence.
+  //
+  // STRONG: the module's slug and the words of its title. "finance",
+  // "Οικονομικά" — a question containing one is about that module.
+  //
+  // WEAK: the words of its field labels. Free, plentiful, and where the
+  // false matches come from, because a label is split into words and the
+  // words are ordinary. Measured, before the two rules below existed:
+  //   - Content's fields include a label containing "ideas", so "what
+  //     ideas have I logged" scored Ideas 1 and Content 1 and the two
+  //     tied — the question could not reach the module it names.
+  //   - Sales has a "Next Steps" field, so "what should I do next?"
+  //     scored Sales 1 and nothing else, and read the Sales module
+  //     deeply for a question that is not about sales at all.
+  // FOLDED FOR COMPARING, RAW FOR EMITTING. The collision rules below have
+  // to compare "Πωλήσεις" with "πωλησεισ", so they work on folded forms —
+  // but the terms this returns stay the words as the catalogue spells
+  // them. Emitting the folded ones instead made every term unfindable in
+  // the catalogue it came from, and the gate that checks no term is
+  // invented went red on all thirteen modules. It was right to.
+  const strong = new Map<string, Map<string, string>>();
+  const weak = new Map<string, Map<string, string>>();
+  for (const m of modules) {
+    const st = new Map<string, string>([[foldForMatch(m.slug), m.slug]]);
+    const wk = new Map<string, string>();
     for (const catalogue of catalogues) {
       const title = lookup(catalogue, m.titleKey);
-      if (title) for (const word of title.split(/[^\p{L}\p{N}]+/u)) if (word.length >= 3) terms.add(word);
+      if (title) for (const w of title.split(/[^\p{L}\p{N}]+/u)) if (w.length >= 3) st.set(foldForMatch(w), w);
       for (const field of m.fields ?? []) {
         const label = lookup(catalogue, field.labelKey);
-        if (label) for (const word of label.split(/[^\p{L}\p{N}]+/u)) if (word.length >= 3) terms.add(word);
+        if (label) for (const w of label.split(/[^\p{L}\p{N}]+/u)) if (w.length >= 3) wk.set(foldForMatch(w), w);
       }
     }
-    return { slug: m.slug, terms: [...terms] };
+    strong.set(m.slug, st);
+    weak.set(m.slug, wk);
+  }
+
+  // How many modules claim each weak word. A word two modules' fields
+  // both use is evidence for neither.
+  const weakClaims = new Map<string, number>();
+  for (const wk of weak.values()) for (const folded of wk.keys()) weakClaims.set(folded, (weakClaims.get(folded) ?? 0) + 1);
+
+  return modules.map((m) => {
+    const st = strong.get(m.slug) ?? new Map<string, string>();
+    const kept = new Map<string, string>(st);
+    for (const [folded, raw] of weak.get(m.slug) ?? []) {
+      if (st.has(folded)) continue;
+      // Another module's own NAME. It belongs to that module, not to
+      // whichever one happens to mention it in a field label.
+      if ([...strong].some(([slug, other]) => slug !== m.slug && other.has(folded))) continue;
+      // Claimed by more than one module's fields.
+      if ((weakClaims.get(folded) ?? 0) > 1) continue;
+      // Generic regardless of who claims it.
+      if (GENERIC_LABEL_WORDS.has(folded)) continue;
+      kept.set(folded, raw);
+    }
+    return { slug: m.slug, terms: [...kept.values()] };
   });
 }

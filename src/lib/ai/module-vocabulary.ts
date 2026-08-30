@@ -3,6 +3,7 @@ import en from "../../../messages/en.json";
 import el from "../../../messages/el.json";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { buildModuleVocabulary, type ModuleVocabulary } from "@/lib/ai/module-relevance";
+import { synonymsFor } from "@/lib/ai/module-synonyms";
 
 /**
  * The module vocabulary, built once per process.
@@ -21,10 +22,14 @@ let cached: ModuleVocabulary[] | null = null;
 
 export function moduleVocabulary(): ModuleVocabulary[] {
   if (!cached) {
-    cached = buildModuleVocabulary(
+    const built = buildModuleVocabulary(
       CLASSIFIER_MODULES as unknown as { slug: string; titleKey: string; fields?: { labelKey: string }[] }[],
       [en as unknown as Record<string, unknown>, el as unknown as Record<string, unknown>]
     );
+    // THE EVERYDAY WORDS, ADDED — see lib/ai/module-synonyms.ts for why
+    // titles and field labels alone are not a vocabulary. Appended rather
+    // than replacing, so nothing that matched before stops matching.
+    cached = built.map((v) => ({ ...v, terms: [...v.terms, ...synonymsFor(v.slug)] }));
   }
   return cached;
 }

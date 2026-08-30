@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { loadDeepDive } from "@/lib/ai/deep-dive-load";
 import {
   summariseProvenance,
   provenanceBriefing,
@@ -431,6 +432,28 @@ export async function POST(request: Request) {
       ? await loadMentorContext(supabase, user.id)
       : { prompt: "", modules: [] };
     const mentorContext = mentor.prompt;
+
+    // THE ONE MODULE THIS QUESTION IS ABOUT, READ PROPERLY — V4.6 #1.
+    //
+    // Five headlines per module is why "how were sales this week" comes
+    // back without a number in it. This adds up to twenty-five dated rows
+    // WITH their amounts, for the single module the question points at,
+    // and adds nothing at all when it points at none — see
+    // lib/ai/deep-dive.ts for why a best guess is worse than silence.
+    //
+    // It goes in the per-message suffix, never in systemPerUser: that
+    // block is cached, and a block that changes with the question breaks
+    // the cache on every turn. Measured, in
+    // scripts/measure-context.mjs: doing this the "clever" way — one
+    // budget redistributed per question inside the cached block — sends
+    // fewer characters and costs four times more.
+    const deepDive = await loadDeepDive(supabase, user.id, message, "el");
+    if (deepDive.slug) {
+      diagLog(
+        `[deep-dive] ${deepDive.slug}: ${deepDive.shown} rows, ${deepDive.chars} chars` +
+          (deepDive.omitted > 0 ? `, ${deepDive.omitted} not sent` : "")
+      );
+    }
     // Trading Workflow's "Trading Mentor" preset (see
     // trading-mentor-button.tsx) — only loaded when the client explicitly
     // opted into it via mentorPreset, on top of Mentor Mode already being
@@ -496,6 +519,12 @@ export async function POST(request: Request) {
           // an answer built on both and crediting one is the version of
           // this line that is quietly wrong.
           ...mentor.modules,
+          // The deep read is the biggest single contribution to an answer
+          // when it fires; leaving it out of the count would understate
+          // the line under the answer by twenty-five entries.
+          ...(deepDive.slug
+            ? [{ slug: deepDive.slug, title: deepDive.title, rows: deepDive.rows }]
+            : []),
           ...selection.keep.map((m) => ({ slug: m.slug, title: m.title, rows: m.rows })),
           ...fullContext.emptyModules.map((m) => ({ ...m, rows: [] })),
           ...fullContext.moduleSummaries
@@ -617,7 +646,8 @@ export async function POST(request: Request) {
     // paying ~1,246 full-price tokens a message to save at most 177.
     // scripts/tests/context-optimization.test.mjs caught it, which is
     // exactly what that gate is for.
-    const systemDynamicSuffix = buildEntityMentionPromptAddition(mentionedEntities) + codingContext;
+    const systemDynamicSuffix =
+      buildEntityMentionPromptAddition(mentionedEntities) + codingContext + deepDive.prompt;
     // Kept as the concatenation of the two halves, unchanged, because
     // every cost estimate below sizes the request with
     // `systemPrompt.length`. The split changes where the block boundary

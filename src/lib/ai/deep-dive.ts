@@ -33,6 +33,7 @@
  *
  * Pure and react-free so the gate can load it.
  */
+import { CJK_PATTERN } from "@/lib/text/unicode-patterns";
 
 /** Rows are capped by CHARACTERS, not by count. A row count caps the
  *  wrong thing: twenty-five short leads and twenty-five long research
@@ -74,12 +75,11 @@ export const DEEP_DIVE_MIN_QUESTION_CHARS = 15;
  */
 export const DEEP_DIVE_MIN_QUESTION_CHARS_CJK = 6;
 
-const CJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
 
 /** How long a question must be to be worth placing, for the script it is
  *  written in. */
 export function minQuestionChars(question: string): number {
-  return CJK.test(question) ? DEEP_DIVE_MIN_QUESTION_CHARS_CJK : DEEP_DIVE_MIN_QUESTION_CHARS;
+  return CJK_PATTERN.test(question) ? DEEP_DIVE_MIN_QUESTION_CHARS_CJK : DEEP_DIVE_MIN_QUESTION_CHARS;
 }
 
 /**

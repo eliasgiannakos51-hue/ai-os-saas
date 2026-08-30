@@ -86,15 +86,21 @@ console.log("\n== 3. IT IS IN THE PATH — the part that gets skipped ==");
   // until the truncation notice arrived; the notice is part of the
   // finished document, so the citation check has to see the same string
   // the reader does, not the one before it was appended.
-  ok("...and calls it on the text that will be rendered",
-    /checkCitations\(reportMarkdown, sources\.length\)/.test(runner));
+  // AND WITH BOTH SOURCE COUNTS — V4.6. This pinned
+  // `checkCitations(reportMarkdown, sources.length)` and went red when
+  // the entry namespace arrived. Tightened rather than relaxed: the
+  // third argument is what makes an invented [E99] visible, and passing
+  // only two would leave every entry citation unchecked while this line
+  // stayed green. A two-argument call is now a failure.
+  ok("...and calls it on the text that will be rendered, with BOTH namespaces",
+    /checkCitations\(reportMarkdown, sources\.length, context\.entries\.length\)/.test(runner));
   ok("...which is the synthesis plus any truncation notice",
     /const reportMarkdown = synthesis\.truncated/.test(runner));
   ok("...before the document is rendered, not after",
     runner.indexOf("checkCitations(") < runner.indexOf("researchReportToDocumentHtml({"));
   ok("a failing check is logged, not swallowed", /stage: "citation_check"/.test(runner));
-  ok("and the rendered markdown is the annotated one",
-    /annotateDanglingCitations\(reportMarkdown, sources\.length\)/.test(runner));
+  ok("and the rendered markdown is the annotated one, for both namespaces",
+    /annotateDanglingCitations\(reportMarkdown, sources\.length, context\.entries\.length\)/.test(runner));
 }
 
 // =====================================================================

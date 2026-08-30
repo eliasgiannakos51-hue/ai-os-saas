@@ -13,6 +13,7 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
 import { researchReportToDocumentHtml } from "@/lib/research/report-to-html";
 import { checkCitations, annotateDanglingCitations } from "@/lib/verification/citations";
+import { loadResearchContext } from "@/lib/research/research-context";
 import { truncationNotice } from "@/lib/verification/truncation";
 import {
   functionBudgetMs,
@@ -336,11 +337,32 @@ export async function runResearchChunk(params: {
     .eq("id", reportId);
 
   const sources = collateSources(findings);
+
+  // THE ACCOUNT, BEFORE THE SYNTHESIS — V4.6. Pattern (C): the flat
+  // shape of every module (cheap, whatever the account size) plus ONE
+  // module read deeply when the topic points at one. See
+  // lib/research/research-context.ts for why neither "all of it" nor
+  // "none of it" is the answer.
+  //
+  // ADMIN CLIENT, SCOPED BY user_id. Both halves take the userId and use
+  // it as a filter — getUserFullContext and loadDeepDive each do —
+  // which is what scripts/tests/user-scoped-queries.test.mjs is for. The
+  // job runs without a session, so RLS is not available to lean on here
+  // and the filter is the only scope there is.
+  const context = await loadResearchContext(
+    admin,
+    report.user_id,
+    String(report.topic),
+    language === "el" ? "el" : "en"
+  );
+
   const synthesis = await synthesiseReport({
     anthropic,
     topic: String(report.topic),
     findings,
     sources,
+    entries: context.entries,
+    accountSummary: context.accountSummary,
     language,
     costs,
   });
@@ -417,7 +439,7 @@ export async function runResearchChunk(params: {
     });
   }
 
-  const citations = checkCitations(reportMarkdown, sources.length);
+  const citations = checkCitations(reportMarkdown, sources.length, context.entries.length);
   if (!citations.ok) {
     logApiError(
       "research:runChunk",
@@ -428,7 +450,9 @@ export async function runResearchChunk(params: {
         stage: "citation_check",
         reportId,
         markers: citations.markers.join(","),
-        sources: sources.length,
+        entryMarkers: citations.entryMarkers.join(","),
+        sources: String(sources.length),
+        entries: String(context.entries.length),
       }
     );
   }
@@ -436,8 +460,9 @@ export async function runResearchChunk(params: {
   const documentHtml = researchReportToDocumentHtml({
     markdown: citations.ok
       ? reportMarkdown
-      : annotateDanglingCitations(reportMarkdown, sources.length),
+      : annotateDanglingCitations(reportMarkdown, sources.length, context.entries.length),
     sources,
+    entries: context.entries,
     disclosure,
     sourcesHeading: "Sources",
   });

@@ -179,3 +179,31 @@ export function foldForMatch(input: string): string {
 export function isFolded(text: string): boolean {
   return foldForMatch(text) === text;
 }
+
+/**
+ * "Does this text contain a CJK character at all."
+ *
+ * ONE COPY, AND IT WAS THREE. lib/ai/deep-dive.ts, lib/text/
+ * resolve-language.ts and lib/text/script-length.ts each declared this
+ * exact regex as a module-private `const CJK`. Three identical
+ * constants is the duplicated-constant shape on its own, and it had a
+ * second cost that is worth writing down because it is not obvious:
+ *
+ *   scripts/tests/load-ts.mjs bundles a module and its local imports by
+ *   CONCATENATION. Two of those three files in one test therefore
+ *   produced "SyntaxError: Identifier 'CJK' has already been declared",
+ *   and a gate that wanted to measure both — the research cost test,
+ *   which needs deep-dive's row limit and script-length's ratios — could
+ *   not be written at all. The loader already documents two other
+ *   artefacts of concatenation (import hoisting, re-export dedup); this
+ *   is a third, and the honest fix is one declaration rather than a
+ *   third workaround in the bundler.
+ *
+ * INCLUDES KANA ON PURPOSE. The question these three callers ask is
+ * "does the per-character arithmetic I am about to do hold here", and it
+ * does not for Japanese any more than for Chinese: both are dense scripts
+ * where a character carries far more than a Latin letter. Distinguishing
+ * Japanese FROM Chinese is a different question and resolve-language.ts
+ * answers it separately, with the kana as the tell.
+ */
+export const CJK_PATTERN = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;

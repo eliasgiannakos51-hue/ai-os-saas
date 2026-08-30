@@ -32,11 +32,12 @@
  * HOW JAPANESE IS TOLD FROM CHINESE. They share the Han characters, so
  * they are treated as one script for the "is this text non-Latin at all"
  * question, then separated by kana: Japanese mixes kana with kanji,
- * Chinese uses none. See the CJK constant below for why a share contest
+ * Chinese uses none. See the CJK_PATTERN constant below for why a share contest
  * between the two gets this backwards.
  */
 
 import { SUPPORTED_LOCALES } from "@/i18n/constants";
+import { CJK_PATTERN } from "@/lib/text/unicode-patterns";
 
 /**
  * How much of the text has to be in a non-Latin script before it decides
@@ -76,16 +77,15 @@ type ScriptRule = { pattern: RegExp; locale: string };
  * kana at all. So the group competes on share, and the tell decides
  * which member of the group it is.
  */
-const CJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
 
 /**
  * Greek and Arabic are mutually exclusive with everything else, so their
- * order is arbitrary; CJK is one entry for the reason above.
+ * order is arbitrary; CJK_PATTERN is one entry for the reason above.
  */
 const SCRIPT_RULES: ScriptRule[] = [
   { pattern: GREEK, locale: "el" },
   { pattern: ARABIC, locale: "ar" },
-  { pattern: CJK, locale: "cjk" },
+  { pattern: CJK_PATTERN, locale: "cjk" },
 ];
 
 /**

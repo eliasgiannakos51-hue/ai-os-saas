@@ -30,6 +30,7 @@
  *
  * React-free and dependency-free so the gate can load it.
  */
+import { CJK_PATTERN } from "@/lib/text/unicode-patterns";
 
 /** Median characters per English character, measured (see above). */
 export const MEASURED_LENGTH_RATIO: Record<string, number> = {
@@ -59,11 +60,10 @@ export const DENSEST_RATIO = MEASURED_LENGTH_RATIO.zh;
  */
 export const LATIN_HEADROOM = MEASURED_LENGTH_RATIO.de;
 
-const CJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
 
 /** Is this text written in a script that says more per character? */
 export function isDenseScript(text: string): boolean {
-  return CJK.test(text);
+  return CJK_PATTERN.test(text);
 }
 
 /**

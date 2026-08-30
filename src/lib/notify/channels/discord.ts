@@ -1,6 +1,7 @@
 import "server-only";
 import { CONTROL_TIMEOUT_MS } from "@/lib/ai/providers/failover";
 import type { ChannelSend } from "@/lib/notify/channels/telegram";
+import { maxCharsFor } from "@/lib/text/script-length";
 
 /**
  * DISCORD, as a webhook post.
@@ -33,7 +34,9 @@ export type WebhookCheck = { ok: true; url: string } | { ok: false; reason: stri
 export function checkDiscordWebhook(raw: unknown): WebhookCheck {
   if (typeof raw !== "string" || !raw.trim()) return { ok: false, reason: "empty" };
   const value = raw.trim();
-  if (value.length > 400) return { ok: false, reason: "too long" };
+  // Same shape as lib/insights/narrate.ts: a refusal, not a truncation,
+  // on a ceiling chosen for English.
+  if (value.length > maxCharsFor(400)) return { ok: false, reason: "too long" };
 
   let url: URL;
   try {

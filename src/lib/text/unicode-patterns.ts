@@ -137,7 +137,18 @@ export function foldForMatch(input: string): string {
   for (const ch of src) {
     let folded = ch.toLowerCase();
     if (folded === "ς") folded = "σ";
-    const stripped = folded.normalize("NFD").replace(/\p{Diacritic}/gu, "").normalize("NFC");
+    // KANA VOICING MARKS ARE NOT ACCENTS. U+3099 and U+309A turn ハ into
+    // バ and パ — different consonants, different words. Unicode calls
+    // them Diacritic, so a blanket \p{Diacritic} strip folded バグ (bug)
+    // and ハグ (hug) to the same string, and ゴール (goal) and コール
+    // (call) likewise. Every Japanese match in the app ran on that: the
+    // deep dive, the injection filter, module narrowing, cross-module
+    // context. Greek accents and Latin diacritics still go, because there
+    // stripping them is the point.
+    const stripped = folded
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, (mark) => (mark === "\u3099" || mark === "\u309A" ? mark : ""))
+      .normalize("NFC");
     if (stripped.length === ch.length) folded = stripped;
     out += folded.length === ch.length ? folded : ch;
   }

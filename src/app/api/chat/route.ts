@@ -448,10 +448,15 @@ export async function POST(request: Request) {
     // budget redistributed per question inside the cached block — sends
     // fewer characters and costs four times more.
     const deepDive = await loadDeepDive(supabase, user.id, message, "el");
-    if (deepDive.slug) {
+    if (deepDive.mode !== "none" || deepDive.prompt) {
       diagLog(
-        `[deep-dive] ${deepDive.slug}: ${deepDive.shown} rows, ${deepDive.chars} chars` +
-          (deepDive.omitted > 0 ? `, ${deepDive.omitted} not sent` : "")
+        `[deep-dive] ${deepDive.mode}: ` +
+          (deepDive.reads.length > 0
+            ? deepDive.reads
+                .map((r) => `${r.slug} ${r.shown} rows${r.omitted > 0 ? ` (+${r.omitted} not sent)` : ""}`)
+                .join(", ")
+            : "nothing read, breadth notice only") +
+          `, ${deepDive.chars} chars`
       );
     }
     // Trading Workflow's "Trading Mentor" preset (see
@@ -522,9 +527,7 @@ export async function POST(request: Request) {
           // The deep read is the biggest single contribution to an answer
           // when it fires; leaving it out of the count would understate
           // the line under the answer by twenty-five entries.
-          ...(deepDive.slug
-            ? [{ slug: deepDive.slug, title: deepDive.title, rows: deepDive.rows }]
-            : []),
+          ...deepDive.reads.map((r) => ({ slug: r.slug, title: r.title, rows: r.rows })),
           ...selection.keep.map((m) => ({ slug: m.slug, title: m.title, rows: m.rows })),
           ...fullContext.emptyModules.map((m) => ({ ...m, rows: [] })),
           ...fullContext.moduleSummaries

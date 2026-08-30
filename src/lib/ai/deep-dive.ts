@@ -110,6 +110,30 @@ export type DeepDiveChoice = {
 };
 
 /**
+ * At most this many modules share a split read. Two is the whole of it:
+ * "compare X and Y" is a real question and "compare V, W, X and Y" is a
+ * request for a report, which a quarter of the rows in each of four
+ * modules would answer worse than saying so.
+ */
+export const DEEP_DIVE_MAX_SPLIT = 2;
+
+/**
+ * What to do about this question, including the two ways of doing
+ * nothing — which are not the same thing and must not look the same to
+ * the user.
+ *
+ * "none/no-match" is a question about nothing in particular; the flat
+ * five per module already cover it and there is nothing to explain.
+ * "none/too-many" is a question that named four areas, and a user who
+ * gets a shallow answer to THAT deserves to know why. That distinction
+ * is the whole reason this is a plan and not a nullable slug.
+ */
+export type DeepDivePlan =
+  | { kind: "one"; slug: string; score: number; runnerUp: number }
+  | { kind: "split"; slugs: string[]; score: number }
+  | { kind: "none"; reason: "short" | "no-match" | "too-many"; slugs: string[] };
+
+/**
  * Which single module to read deeply, or null.
  *
  * `score` and `words` come from lib/ai/module-relevance.ts — the same two
@@ -122,19 +146,38 @@ export type DeepDiveChoice = {
  * while implying it read all of it. Ties return null: the flat five per
  * module are still there, and the answer is no worse than it was.
  */
+export function planDeepDive(
+  question: string,
+  scored: readonly { slug: string; score: number }[],
+  minScore: number = DEEP_DIVE_MIN_SCORE
+): DeepDivePlan {
+  if (question.trim().length < minQuestionChars(question))
+    return { kind: "none", reason: "short", slugs: [] };
+  const ranked = [...scored].filter((s) => s.score >= minScore).sort((a, b) => b.score - a.score);
+  if (ranked.length === 0) return { kind: "none", reason: "no-match", slugs: [] };
+  const top = ranked[0];
+  const tied = ranked.filter((r) => r.score === top.score);
+  if (tied.length === 1) {
+    return { kind: "one", slug: top.slug, score: top.score, runnerUp: ranked[1]?.score ?? 0 };
+  }
+  // A TIE IS NOT AN ABSENCE OF EVIDENCE. It used to return null, and the
+  // user asking "compare my sales and my finance numbers" got a shallow
+  // answer with nothing to explain it. Two tied modules are read at half
+  // depth each; more than two are not read, and the answer says so.
+  if (tied.length <= DEEP_DIVE_MAX_SPLIT) {
+    return { kind: "split", slugs: tied.map((t) => t.slug), score: top.score };
+  }
+  return { kind: "none", reason: "too-many", slugs: tied.map((t) => t.slug) };
+}
+
+/** The single-module case, for callers that only handle that one. */
 export function pickDeepDiveModule(
   question: string,
   scored: readonly { slug: string; score: number }[],
   minScore: number = DEEP_DIVE_MIN_SCORE
 ): DeepDiveChoice | null {
-  if (question.trim().length < minQuestionChars(question)) return null;
-  if (scored.length === 0) return null;
-  const ranked = [...scored].sort((a, b) => b.score - a.score);
-  const top = ranked[0];
-  const runnerUp = ranked[1]?.score ?? 0;
-  if (top.score < minScore) return null;
-  if (top.score === runnerUp) return null;
-  return { slug: top.slug, score: top.score, runnerUp };
+  const plan = planDeepDive(question, scored, minScore);
+  return plan.kind === "one" ? { slug: plan.slug, score: plan.score, runnerUp: plan.runnerUp } : null;
 }
 
 export type DeepDiveRow = Record<string, unknown>;
@@ -191,6 +234,32 @@ export function formatDeepDive(
  * "the sales" and given twenty of two hundred will answer "your sales
  * total X" about a fifth of them, and the sentence will look right.
  */
+/**
+ * "I looked at both of these only briefly" — the sentence (β).
+ *
+ * It costs 44 tokens against the 431 a split read costs, and it is the
+ * part the user is actually missing: not depth, but knowing WHY the
+ * answer is shallow. A shallow answer with no explanation reads as the
+ * product being weak; the same answer with this line reads as a
+ * question that can be asked better.
+ */
+export function deepDiveBreadthNotice(
+  titles: readonly string[],
+  split: boolean,
+  language: "en" | "el"
+): string {
+  if (titles.length === 0) return "";
+  const list = titles.join(", ");
+  if (language === "el") {
+    return split
+      ? `\n\nΗ ερώτηση αφορά δύο ενότητες (${list}), οπότε διάβασες τις μισές γραμμές από κάθε μία. Αν χρειάζεται πιο βαθιά ανάλυση, πες στον χρήστη να ρωτήσει για μία ενότητα τη φορά.`
+      : `\n\nΗ ερώτηση αφορά πολλές ενότητες (${list}) και καμία δεν διαβάστηκε σε βάθος. Πες το ΡΗΤΑ και πρότεινε στον χρήστη να ρωτήσει για μία τη φορά.`;
+  }
+  return split
+    ? `\n\nThis question spans two modules (${list}), so you were given half the rows from each. If a deeper read would help, tell the user to ask about one at a time.`
+    : `\n\nThis question spans several modules (${list}) and none was read in depth. SAY SO, and suggest asking about one at a time.`;
+}
+
 export function deepDivePromptAddition(
   title: string,
   body: string,

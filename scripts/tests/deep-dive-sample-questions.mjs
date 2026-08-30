@@ -63,6 +63,7 @@ function place(question) {
     ),
   }));
   return {
+    plan: dd.planDeepDive(question, scored),
     choice: dd.pickDeepDiveModule(question, scored),
     top: [...scored].sort((a, b) => b.score - a.score).filter((x) => x.score > 0)
       .slice(0, 3).map((x) => `${x.slug}:${x.score}`).join(" ") || "none",
@@ -194,6 +195,32 @@ for (const [lang, list] of Object.entries(BY_LANGUAGE)) {
 }
 // Greek is covered by the five above; this asserts it is the same five.
 check("Greek was checked above", QUESTIONS.length === 5, String(QUESTIONS.length));
+
+console.log("\n== a question about two modules is answered, not refused ==");
+// It used to return null and the user got a shallow answer with nothing
+// to explain it. Two tied modules are now read at half depth each and the
+// prompt says so; more than two are not read and the prompt says THAT.
+{
+  const two = place("Compare my sales and my finance numbers");
+  check("two tied modules produce a split read", two.plan.kind === "split", `${two.plan.kind} (${two.top})`);
+  check(
+    "...naming both",
+    two.plan.kind === "split" && two.plan.slugs.length === 2,
+    two.plan.kind === "split" ? two.plan.slugs.join(", ") : "—"
+  );
+  // HALF EACH, NOT FULL EACH. A split that read both in full would double
+  // the cost of exactly the question shaped to need both.
+  const share = Math.floor(dd.DEEP_DIVE_ROW_LIMIT / 2);
+  check(`the share is half the single-module limit (${share})`, share * 2 <= dd.DEEP_DIVE_ROW_LIMIT);
+
+  const notice = dd.deepDiveBreadthNotice(["Sales", "Finances"], true, "en");
+  check("the split carries a sentence explaining the depth", /half the rows/.test(notice), notice.slice(0, 70));
+  check("...and it tells the user what to do instead", /one at a time/.test(notice), notice.slice(0, 90));
+  const wide = dd.deepDiveBreadthNotice(["A", "B", "C", "D"], false, "en");
+  check("a question spanning several modules says none was read deeply", /none was read in depth/.test(wide), wide.slice(0, 80));
+  check("...in Greek too", /καμία δεν διαβάστηκε σε βάθος/.test(dd.deepDiveBreadthNotice(["A", "B", "C"], false, "el")));
+  check("an empty list produces no sentence at all", dd.deepDiveBreadthNotice([], false, "en") === "");
+}
 
 console.log("\n== and a greeting still reaches nothing, in every script ==");
 // The length floor exists to stop "thanks" pulling a module. Lowering it

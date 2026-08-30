@@ -5,6 +5,7 @@ import { modelText } from "@/lib/verification/truncation";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { RESEARCH_MODEL } from "@/lib/files/file-models";
 import { wrapUntrusted } from "@/lib/agents/agent-config";
+import { minCharsFor } from "@/lib/text/script-length";
 import {
   MAX_TOPIC_CHARS,
   MIN_TOPIC_CHARS,
@@ -141,7 +142,8 @@ export async function planResearch(params: {
     for (const item of raw) {
       const question = typeof (item as ResearchQuestion)?.question === "string" ? (item as ResearchQuestion).question.trim() : "";
       const why = typeof (item as ResearchQuestion)?.why === "string" ? (item as ResearchQuestion).why.trim() : "";
-      if (question.length < 5) continue;
+      // Five characters is two Chinese words.
+    if (question.length < minCharsFor(question, 5)) continue;
       questions.push({ question: question.slice(0, 300), why: why.slice(0, 300) });
       if (questions.length >= RESEARCH_MAX_QUESTIONS) break;
     }

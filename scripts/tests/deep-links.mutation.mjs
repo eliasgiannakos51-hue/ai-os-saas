@@ -124,6 +124,28 @@ const MUTATIONS = [
       "void UNREAD_LINK;\n" +
       "export function NextCard({",
   },
+  // THE EMITTING HALF, added after create-destination.mutation.mjs
+  // reported "the automation result loses its href" as a SURVIVOR. Every
+  // other mutation in this file breaks a reader; these break a writer,
+  // and a census of links cannot miss what was never emitted.
+  {
+    name: "Create Studio stops sending you to the automation it just made",
+    file: "src/lib/create-studio/use-create-studio.ts",
+    from: "              href: data.automation?.id\n                ? `/dashboard/automation?automation=${encodeURIComponent(String(data.automation.id))}`\n                : \"/dashboard/automation\",",
+    to: '              href: "/dashboard/automation",',
+  },
+  {
+    name: "...or to the plan it just made",
+    file: "src/lib/create-studio/use-create-studio.ts",
+    from: "              href: planned.mission?.id\n                ? `/dashboard/mission?mission=${encodeURIComponent(planned.mission.id)}`\n                : \"/dashboard/mission\",",
+    to: '              href: "/dashboard/mission",',
+  },
+  {
+    name: "the create job throws the inserted row's id away again",
+    file: "src/lib/jobs/handlers/create.ts",
+    from: "      href:\n        typeof insertedId === \"string\" && insertedId\n          ? `${moduleHref(moduleConfig.slug)}?record=${encodeURIComponent(insertedId)}`\n          : moduleHref(moduleConfig.slug),",
+    to: "      href: moduleHref(moduleConfig.slug),",
+  },
   // THE INSTRUMENT'S OWN CLAUSES. A gate whose scanners are broken
   // reports "all pass" over an empty set, and three of these four have
   // been wrong here before.

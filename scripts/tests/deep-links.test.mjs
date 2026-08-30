@@ -364,6 +364,45 @@ check("a new automation is marked in the list (?automation=)", readsParamAt("/da
 check("a starred project still opens THAT project (?project=)", readsParamAt("/dashboard/website-builder", "project"));
 check("a starred conversation still opens THAT one (?c=)", readsParamAt("/dashboard/chat", "c"));
 
+// ---------------------------------------------------------------------
+console.log("\n== 3b. the links Create Studio must EMIT ==");
+// A READER WITH NOTHING TO READ IS NOT A WORKING LINK, and everything
+// above only checks the receiving half. Delete the href from Create
+// Studio's automation branch and every check in this file still passes:
+// there is simply one fewer link in the census, and a census cannot
+// miss what was never emitted.
+//
+// create-destination.mutation.mjs found this as a survivor — "the
+// automation result loses its href", the gate stayed green — so the
+// emitter is asserted here by name. Each of these four branches has an
+// id in hand at the point it builds the result, and each of them threw
+// it away before V4.6.
+const studio = stripComments(readFileSync("src/lib/create-studio/use-create-studio.ts", "utf8"));
+const EMITTED = [
+  // NOT `?record=` HERE, and the first draft of this list looked for it
+  // in the wrong file. A module entry's href is built by the JOB HANDLER
+  // (jobs/handlers/create.ts, asserted separately below) and the studio
+  // passes it through — so the property to hold HERE is that it passes
+  // it through rather than replacing it with a URL of its own.
+  ["a created module entry (the handler's href, passed through)", /href: data\.href \?\? null/],
+  ["a planned mission", /\/dashboard\/mission\?mission=\$\{/],
+  ["a scheduled automation", /\/dashboard\/automation\?automation=\$\{/],
+  ["a built agent", /\/dashboard\/agents\?agent=\$\{/],
+  ["a generated website", /\/dashboard\/website-builder\?project=\$\{/],
+];
+for (const [what, re] of EMITTED) {
+  check(`Create Studio sends you to ${what}, by id`, re.test(studio), `${re} not found`);
+}
+// AND THE MODULE ENTRY'S ID COMES FROM THE INSERTED ROW, not from
+// anywhere else — the job handler had it in hand and returned
+// moduleHref(slug) without it.
+const createHandler = stripComments(readFileSync("src/lib/jobs/handlers/create.ts", "utf8"));
+check(
+  "the create job returns the row's own id in the href",
+  /\?record=\$\{encodeURIComponent\(insertedId\)\}/.test(createHandler),
+  "jobs/handlers/create.ts is back to returning a bare module URL"
+);
+
 // AND THE CHECK CAN GO RED. A parameter nobody has ever written must not
 // resolve — otherwise every line above passes for the wrong reason.
 check(

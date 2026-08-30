@@ -54,8 +54,26 @@ export async function sendErrorAlertEmail(params: {
           </p>
         </div>`,
     });
-  } catch {
-    // Best-effort. An alert that fails must not become a second error.
+  } catch (err) {
+    // BEST-EFFORT, BUT NOT SILENT — and the distinction is the whole
+    // point of this catch.
+    //
+    // It stays empty of logApiError on purpose: this function runs INSIDE
+    // logApiError, so reporting the failure that way would re-enter the
+    // alert path and, on a persistent fault, do it repeatedly. That is
+    // why the block was written empty.
+    //
+    // Empty was the wrong conclusion from a right premise. On a
+    // deployment with no RESEND_API_KEY this is the alert that tells the
+    // owner something is wrong, and it was failing without a trace — the
+    // mail that would have reported the problem being part of the
+    // problem. console.error reaches the same Vercel runtime log as
+    // everything else and re-enters nothing, so the reason is recorded
+    // and the recursion is still impossible.
+    console.error(
+      "[error-alert] could not send the alert:",
+      err instanceof Error ? err.message : String(err)
+    );
   }
 }
 

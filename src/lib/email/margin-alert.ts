@@ -100,7 +100,21 @@ export async function sendMarginAlertEmail(params: {
           </p>
         </div>`,
     });
-  } catch {
-    // Best-effort. An alert that fails must not become a second error.
+  } catch (err) {
+    // BEST-EFFORT, NOT SILENT. This is the mail that says the product is
+    // selling AI below cost; it is sent from settlement
+    // (lib/billing/reservations.ts), and on a deployment with no
+    // RESEND_API_KEY it was failing without leaving a trace anywhere.
+    //
+    // console.error rather than logApiError, even though this one is NOT
+    // called from inside logApiError and could safely use it: routing a
+    // mail failure through the error alerter means the alerter tries to
+    // send mail about mail not sending, on every settlement, for as long
+    // as the key is missing. A runtime log line is the right weight for a
+    // failed alert, and it cannot cascade.
+    console.error(
+      "[margin-alert] could not send the alert:",
+      err instanceof Error ? err.message : String(err)
+    );
   }
 }

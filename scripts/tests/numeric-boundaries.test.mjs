@@ -61,6 +61,27 @@ check("formatBytes(0) is zero bytes, not a dash", files.formatBytes(0) === "0 B"
 check("formatBytes(1) is singular-safe", files.formatBytes(1) === "1 B");
 // A negative remaining quota is meaningful — website-builder shows it.
 check("formatBytes(-1) is rendered, not swallowed", files.formatBytes(-1) === "-1 B");
+// THE SIGN IS THE MESSAGE on an over-quota figure, and the function used
+// to lose it in two different ways: websites/storage-quota.ts had a
+// SECOND formatBytes that returned "0 MB" for every negative — and that
+// is the one website-builder-workspace.tsx actually imports — while this
+// one rendered "-524288000 B", because every negative is below 1024 and
+// fell into the bytes branch. There is one implementation now
+// (lib/format-bytes.ts) and it formats the magnitude and puts the sign
+// back.
+check("a large negative keeps its unit, not just its sign",
+  files.formatBytes(-524288000) === "-500.0 MB", files.formatBytes(-524288000));
+check("...and a negative gigabyte too",
+  files.formatBytes(-1073741824) === "-1.00 GB", files.formatBytes(-1073741824));
+{
+  const quota = await loadTs("src/lib/websites/storage-quota.ts");
+  const canon = await loadTs("src/lib/format-bytes.ts");
+  const disagree = [NaN, 0, 1, -1, 1023, 1024, 1048576, -524288000, 1073741824, Infinity]
+    .filter((v) => quota.formatBytes(v) !== canon.formatBytes(v))
+    .map((v) => `${v}: quota=${quota.formatBytes(v)} canonical=${canon.formatBytes(v)}`);
+  check("the storage meter and the files list format the same bytes the same way",
+    disagree.length === 0, disagree.join("\n        "));
+}
 
 // ---------------------------------------------------------------------
 console.log("\n== 2. percentile: a fraction, clamped, never undefined ==");

@@ -124,6 +124,21 @@ const supa = http.createServer((req, res) => {
         recordedErrors.push(body.slice(0, 200));
         return json(200, null);
       }
+      // TELEMETRY THE SHELL SENDS ON EVERY PAGE, answered truthfully
+      // rather than 500'd.
+      //
+      // These are not "extra calls this test should tolerate" — they are
+      // what the dashboard shell does on every route, and a mock that
+      // 500s them makes the app record a production error, which then
+      // trips the "nothing recorded a production error" check three
+      // lines later. One stale allowlist, three red checks, none of them
+      // about the feature under test.
+      //
+      // ANSWERING THEM MAKES THIS SUITE STRONGER, not weaker: after this,
+      // a recorded production error is a REAL one.
+      if (fn === "voice_usage_this_month") {
+        return json(200, [{ transcribe_seconds: 0, speak_seconds: 0 }]);
+      }
       unexpected.push(`RPC ${fn}`);
       return json(500, { message: `mock: unimplemented rpc ${fn}` });
     }
@@ -201,6 +216,13 @@ const supa = http.createServer((req, res) => {
         if (req.method === "GET" || req.method === "HEAD") return reply([]);
         // The shell upserts a credits row for an account that has none.
         if (req.method === "POST" && (table === "rate_limit_log" || table === "user_credits")) return json(201, []);
+      }
+      // Write-only telemetry: accepted, and counted so a test that cares
+      // can still assert on the volume.
+      const TELEMETRY_WRITE = ["nav_events", "pwa_client_stats"];
+      if (TELEMETRY_WRITE.includes(table)) {
+        if (req.method === "POST") return json(201, []);
+        if (req.method === "GET" || req.method === "HEAD") return reply([]);
       }
       unexpected.push(`${req.method} ${url.pathname}`);
       return json(500, { message: `mock: unimplemented ${req.method} ${table}` });

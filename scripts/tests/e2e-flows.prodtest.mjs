@@ -288,10 +288,32 @@ checkTrue("the composer is present", await composer.isVisible());
 // affordance was a native `title`. It rendered correctly and no user
 // found it. "Renders" is not the same claim as "is findable", so this
 // asserts a VISIBLE text label, not merely existence.
-const toggle = page.locator("[aria-expanded]").filter({ hasText: /.+/ }).first();
+// IDENTIFIED BY ITS OWN LABEL, not by position.
+//
+// The previous version built exactly the right locator on the line above
+// — every `[aria-expanded]` that has text, first one — and then MEASURED
+// `button[aria-expanded]` .last() instead. There are eight
+// aria-expanded buttons on the chat page (the help tip, the notification
+// bell, the language selector, the user menu, the sidebar groups); the
+// last of them is an icon-only "?" with no text, so this reported the
+// focus-mode toggle as unlabelled and the assertion below as unchanged,
+// on a toggle that is correctly labelled and does change. The locator
+// was right and unused: a check that inspects something other than what
+// it names.
+//
+// The label comes from messages/*.json rather than being spelled here,
+// for the reason lib/label.mjs exists: four other suites waited for a
+// button named "Design my agent" while the product said "Design your
+// agent", and every one of them had the string typed in by hand.
 const toggleCount = await page.locator("button[aria-expanded]").count();
 checkTrue(`a focus-mode toggle exists (${toggleCount} aria-expanded buttons)`, toggleCount >= 1);
-const focusBtn = page.locator("button[aria-expanded]").last();
+const focusBtn = page
+  .getByRole("button", { name: labelPattern("dashboard.chat.showConversations", ["en"]) })
+  .or(page.getByRole("button", { name: labelPattern("dashboard.chat.hideConversations", ["en"]) }))
+  .first();
+checkTrue("...and it is the one named after conversations, not whichever is last in the DOM",
+  (await focusBtn.count()) > 0,
+  `neither "${label("dashboard.chat.showConversations", "en")}" nor "${label("dashboard.chat.hideConversations", "en")}" is on the page`);
 const labelBefore = (await focusBtn.innerText()).trim();
 checkTrue(`it carries a visible text label ("${labelBefore}")`, labelBefore.length > 2);
 const expandedBefore = await focusBtn.getAttribute("aria-expanded");

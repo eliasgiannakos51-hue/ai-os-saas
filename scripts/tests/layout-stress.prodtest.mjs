@@ -88,7 +88,11 @@ const DASHBOARD_ROUTES = [
   "/dashboard/website-builder",
   "/dashboard/mission",
   "/dashboard/documents",
-  "/dashboard/favorites",
+  // NOT "/dashboard/favorites": V4.6 #3 merged the starred list into the
+  // timeline and left that path as a redirect, so measuring it measured
+  // the redirect target while calling it favorites. The list is still
+  // here — it is a tab now, and this is the URL it lives at.
+  "/dashboard/timeline?view=fav",
   "/dashboard/timeline",
   "/dashboard/memory",
   "/dashboard/marketplace",
@@ -386,12 +390,18 @@ async function sweep(context, route, locale) {
   // the app's busiest signed-in screen was actually taken of the
   // onboarding wizard, and nothing said so.
   const landedOn = new URL(page.url()).pathname;
-  if (landedOn !== route) {
+  // PATHNAME AGAINST PATHNAME. A route in the list may carry a query
+  // ("/dashboard/timeline?view=fav" is where the starred list lives now),
+  // and comparing that whole string to a bare pathname reports every such
+  // route as a redirect — a false alarm in the check whose whole purpose
+  // is to catch false measurements.
+  const wantedPath = route.split("?")[0];
+  if (landedOn !== wantedPath) {
     await page.close();
     checkTrue(
       `${locale} ${route}: measured the route it asked for`,
       false,
-      `redirected to ${landedOn} — whatever was measured, it was not ${route}`
+      `redirected to ${landedOn} — whatever was measured, it was not ${wantedPath}`
     );
     return;
   }

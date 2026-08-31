@@ -229,6 +229,34 @@ const supa = http.createServer((req, res) => {
     // ---- PostgREST ------------------------------------------------------
     if (url.pathname.startsWith("/rest/v1/")) {
       const table = url.pathname.slice("/rest/v1/".length);
+
+      // TELEMETRY THE SHELL SENDS ON EVERY PAGE, answered truthfully
+      // rather than 500'd.
+      //
+      // Measured: fifty unexpected calls on a files-workspace run, of
+      // which the distinct kinds were pwa_client_stats, nav_events,
+      // voice_usage_this_month and record_production_error. The last is
+      // not independent traffic — it is the app REPORTING that the other
+      // three came back 500. One stale allowlist, one red check, and a
+      // large number that looked like a product problem.
+      //
+      // ANSWERING THEM MAKES THIS SUITE STRONGER, not weaker: an
+      // unexpected call after this is a real one.
+      if (table === "rpc/voice_usage_this_month") {
+        return json(200, [{ transcribe_seconds: 0, speak_seconds: 0 }]);
+      }
+      if (table === "rpc/record_production_error") {
+        // Answered so the recorder cannot itself fail, and NOT allowed
+        // to pass silently: reaching this now means something really
+        // did go wrong.
+        unexpected.push(`production error recorded: ${body.toString().slice(0, 120)}`);
+        return json(200, null);
+      }
+      if (table === "nav_events" || table === "pwa_client_stats") {
+        if (req.method === "POST") return json(201, []);
+        return json(200, [], { "Content-Range": "0-0/0" });
+      }
+
       if (req.method === "POST" && table === "user_files") {
         let row;
         try {

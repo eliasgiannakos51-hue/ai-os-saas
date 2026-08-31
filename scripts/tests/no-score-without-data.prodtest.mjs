@@ -365,7 +365,16 @@ console.log("\n== 4. the zeros that remain are counted ones ==");
 //   analytics 1  "0 of 0" on the list-capped notice
 //   settings  4  credits used, total entries, things remembered, 0/23
 const ALLOWED_ZEROS = {
-  "/dashboard/overview": 5,
+  // 5 -> 2. Measured, not guessed: the Home page now shows two zeros
+  // where it showed five. The ratchet asked for this ("2 shown — lower
+  // the allowance to 2") and the numbers only ever go down.
+  //
+  // A FALL IS NOT AUTOMATICALLY AN IMPROVEMENT, which is why the check
+  // below this table now exists. Three of Home's widgets are wrapped in
+  // <WidgetBoundary>; a widget that throws renders a short alert instead
+  // of itself, and every zero it would have shown disappears with it.
+  // "Fewer zeros" and "the card is gone" look identical to a counter.
+  "/dashboard/overview": 2,
   "/dashboard": 0,
   "/dashboard/timeline": 0,
   "/dashboard/records": 0,
@@ -381,6 +390,22 @@ for (const url of PAGES) {
     seen[url].zeros.map((z) => `"${z.t}" <- ${JSON.stringify(z.ctx)}`).join("\n        ")
   );
 }
+// AND NOTHING FELL OFF THE PAGE INSTEAD OF BEING FIXED.
+//
+// The widget boundaries render role="alert" when a card throws. If one
+// has fired, the zero counts above are measuring a page with a hole in
+// it, and lowering an allowance to match would bake the hole in as the
+// new baseline.
+for (const url of PAGES) {
+  await page.goto(`http://127.0.0.1:${PORT}${url}`, { waitUntil: "networkidle" });
+  const alerts = await page.locator('[role="alert"]').allInnerTexts();
+  checkTrue(
+    `${url}: no widget fell back to its error boundary (${alerts.length})`,
+    alerts.length === 0,
+    alerts.join(" | ") + " — a zero count taken from a page with a crashed card is not a measurement"
+  );
+}
+
 // And no allowance outlives the zero it was written for.
 for (const url of PAGES) {
   const n = seen[url].zeros.length;

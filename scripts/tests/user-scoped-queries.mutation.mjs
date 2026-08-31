@@ -83,7 +83,14 @@ const MUTANTS = [
     name: "GATE: an argued admin caller loses its argument",
     file: GATE,
     from: '    "updateMissionPlanSteps@src/app/api/cron/scheduled-runs/route.ts":',
-    to: '    "updateMissionPlanSteps@src/app/api/cron/scheduled-runs/route-that-moved.ts":',
+    // POINTED AT A DIFFERENT REAL ROUTE, not an invented filename.
+    // scripts/tests/gate-import-paths.test.mjs requires every repository
+    // path named in a gate to exist, and it was right to: a mutation
+    // whose `to` invents a path leaves that path in the tree for the
+    // length of the run, and a gate naming a file that is not there is
+    // the stale-anchor failure one layer up. Re-aiming the entry at
+    // agent-runs un-argues the scheduled-runs call site just as well.
+    to: '    "updateMissionPlanSteps@src/app/api/cron/agent-runs/route.ts":',
     expect: "no unargued call site hands one of them a service-role client",
   },
   {

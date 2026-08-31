@@ -46,7 +46,7 @@ export default async function DashboardPage() {
   ]);
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader
           icon={MODULE_ICONS.ideas}
@@ -69,6 +69,6 @@ export default async function DashboardPage() {
           {error && <ErrorMessage message={tIdeas("loadError", { message: error.message })} />}
         </IdeasSection>
       </div>
-    </main>
+    </div>
   );
 }

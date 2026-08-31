@@ -433,9 +433,13 @@ const MUTANTS = [
   },
   {
     gate: CODE_GATE,
+    // RE-ANCHORED. The hand-rolled truncation became truncate() from
+    // lib/text/truncate.ts — one of seven copies of the same job, three of
+    // which gave different answers and six of which were wrong at a
+    // boundary. This mutation had been applying to nothing since.
     name: "the context stops being bounded, so a large account prices its own prompt",
     file: WORKSPACE,
-    from: "  return rendered.length > MAX_CONTEXT_CHARS ? `${rendered.slice(0, MAX_CONTEXT_CHARS - 1)}…` : rendered;",
+    from: "  return truncate(rendered, MAX_CONTEXT_CHARS);",
     to: "  return rendered;",
   },
   {

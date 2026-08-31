@@ -27,7 +27,7 @@ export function RouteSkeleton() {
   const t = useTranslations("common");
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6" role="status" aria-label={t("loadingContent")}>
         {/* The header row: icon tile, title, subtitle. */}
         <div className="mb-6 flex items-center gap-3">
@@ -62,6 +62,6 @@ export function RouteSkeleton() {
           ))}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

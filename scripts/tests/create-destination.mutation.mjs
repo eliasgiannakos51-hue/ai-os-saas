@@ -56,10 +56,19 @@ const MUTANTS = [
   },
   {
     // A name with nowhere to go is a sentence, not a link.
+    // RE-ANCHORED. The automation href stopped being a bare literal when
+    // it learned to deep-link to the row it just created
+    // (`?automation=<id>`), so this mutation applied to nothing.
     name: "the automation result loses its href",
     file: HOOK,
-    from: '              href: "/dashboard/automation",\n',
-    to: "",
+    // ASSEMBLED, not written out: the line contains a template literal,
+    // so a template literal here would interpolate it away.
+    from: [
+      '              href: data.automation?.id',
+      '                ? ' + "`" + '/dashboard/automation?automation=${encodeURIComponent(String(data.automation.id))}' + "`",
+      '                : "/dashboard/automation",',
+    ].join("\n"),
+    to: "              href: null,",
     expect: "and an href",
   },
   {

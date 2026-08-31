@@ -267,32 +267,52 @@ console.log("== 6. which routes can reach a provider call, and what bounds them 
   check("the exception list has no entries that no longer apply", stale.length === 0, `stale: ${stale.join(", ")}`);
 }
 
-console.log("== 7. the platform-wide counter does not see every call ==");
+console.log("== 7. the platform-wide counter now sees every call ==");
 {
-  // MEASURED, AND REPORTED AS THE GAP IT IS. checkDailyPlatformCap reads
-  // daily_ai_spend_tracking.total_calls, and only the modules that call
-  // recordAiCallForDailySpend put anything into it. These four make real
-  // provider calls and do not, so the platform breaker's single input
-  // under-counts by whatever Deep Research and background jobs spend.
+  // THE GAP THIS SECTION WAS WRITTEN FOR IS CLOSED, and what is checked
+  // is the mechanism that closed it rather than the absence of the old
+  // symptom. checkDailyPlatformCap reads daily_ai_spend_tracking
+  // .total_calls; four modules made real provider calls and never put
+  // anything into it, so the one number the platform breaker gates on was
+  // low by everything Deep Research and background jobs spend — and
+  // neither feature was blocked by it either.
   //
-  // This gate does not assert the gap away. It pins WHICH modules are
-  // outside the count, so that closing it is a visible change and
-  // widening it fails here.
-  const OUTSIDE = [
-    "src/lib/jobs/handlers/file-ask.ts",
-    "src/lib/jobs/handlers/create.ts",
-    "src/lib/research/research.ts",
-    "src/lib/research/run-research.ts",
-  ];
-  const stillOutside = OUTSIDE.filter((f) => !/recordAiCallForDailySpend/.test(read(f)));
-  const nowInside = OUTSIDE.filter((f) => /recordAiCallForDailySpend/.test(read(f)));
-  console.log(`  ....  ${stillOutside.length} of ${OUTSIDE.length} named modules still make uncounted provider calls`);
-  if (nowInside.length) console.log(`  ....  now counted: ${nowInside.join(", ")}`);
-  check("the list of uncounted modules has not grown", stillOutside.length <= OUTSIDE.length);
-  // The other direction: if somebody fixes one, this says so rather than
-  // leaving a comment claiming a gap that is closed.
-  check("...and this file still describes the real state",
-    stillOutside.length === OUTSIDE.length || nowInside.length > 0);
+  // Measured against a real Postgres in credit-flow.dbtest.mjs: a
+  // research chunk's eight calls now add eight, twenty concurrent callers
+  // of four each land eighty, and a negative count cannot lower the
+  // total.
+  // CLOSED. The four modules made real provider calls and never touched
+  // the counter; both runners now record this attempt's calls, once, as a
+  // DELTA against the restored accumulator — a job or a chunk resumes
+  // with every earlier call already in `costs`, so recording the total
+  // would re-count the first chunk on every continuation.
+  const RUNNERS = ["src/lib/jobs/run-job.ts", "src/lib/research/run-research.ts"];
+  for (const f of RUNNERS) {
+    const src = read(f);
+    check(`${f.split("/").pop()} records the platform counter`,
+      /recordAiCallForDailySpend\(/.test(src), "the breaker's only input");
+    check(`  ...as a delta, not the restored total`,
+      /callsBeforeThisAttempt|counted\.before/.test(src),
+      "the accumulator is restored from the row; the total counts earlier chunks again");
+  }
+  // The research runner's eleven exits are covered by a `finally`, not by
+  // a line before each return — which is how one of them ends up without.
+  {
+    const runner = read("src/lib/research/run-research.ts");
+    check("the research chunk counts on every exit, including a throw",
+      /\} finally \{/.test(runner) &&
+        /const made = \(counted\.accumulator\?\.callCount \?\? 0\) - counted\.before;/.test(runner),
+      "eleven returns; a line before each is a line somebody will miss");
+  }
+  // And the RPC can take a count at all.
+  const mig = read("supabase/migrations/20260921000000_daily_spend_call_count.sql");
+  check("the RPC accepts a call count", /p_calls integer default 1/.test(mig));
+  check("...clamped so a negative can never lower the day's total",
+    /greatest\(coalesce\(p_calls, 1\), 0\)/.test(mig),
+    "a way to decrease the counter is a way to hide spend from the breaker");
+  check("...and the two-argument version is dropped, not left beside it",
+    /drop function if exists public\.increment_daily_ai_spend\(numeric, date\);/.test(mig),
+    "two functions with one name is how one of them stops being the one that runs");
   check("checkDailyPlatformCap really does read only that one column",
     /from\("daily_ai_spend_tracking"\)[\s\S]{0,80}select\("total_calls"\)/.test(read("src/lib/ai-circuit-breaker.ts")),
     "if it gains a second input, the gap above is measured against the wrong thing");

@@ -111,15 +111,67 @@ jobs:
             exit 1
           fi
 
-  # THE BROWSER TESTS ARE NOT IN THE JOB ABOVE, and the reason is arithmetic
-  # rather than judgement: there are thirty-one *.prodtest.mjs files and
-  # each one runs its own `next build` before it opens a browser, so the
-  # set takes well over an hour. Blocking every push on that would teach
-  # people to skip CI, so they run nightly and on demand instead.
+      # THE FAMILY THAT WAS IN NO JOB AT ALL. scripts/tests/*.itest.mjs
+      # existed, package.json had a script for it, and this file never
+      # named either — so the integration suites had the same coverage as
+      # the browser tests, which is to say none. Found by
+      # scripts/tests/ci-coverage.test.mjs, which now asserts that every
+      # family of suite in scripts/tests/ is run by some job here.
+      #
+      # After the database step because several of them want its Postgres.
+      - name: integration suites
+        run: npm run test:integration
+
+  # ONE BROWSER TEST ON EVERY PUSH, and the rest nightly.
   #
-  # This means a browser-only regression can reach the default branch and
-  # be caught the following night rather than at the push. That is a real
-  # gap, written down rather than papered over.
+  # THE GAP THIS CLOSES, measured. The nightly job below has an `if:` that
+  # names `schedule` and `workflow_dispatch`, so on a push it is SKIPPED —
+  # and the run history for this repository contains thirty push runs and
+  # zero schedule runs. The browser tests had therefore never executed in
+  # CI at all. What that cost was found by running one by hand:
+  # routes-smoke.prodtest.mjs was CRASHING at its fifth section, and eight
+  # of its assertions still named sidebar groups and page titles from
+  # before the V4.6 #3 consolidation. A suite nothing runs stops being a
+  # suite and becomes a file.
+  #
+  # routes-smoke is the one that runs on every push because it has the
+  # broadest reach per build: eight public and thirty-one signed-in
+  # routes, each at four widths, checking status, console errors,
+  # unresolved i18n keys, horizontal overflow and touch targets — about
+  # five hundred assertions for a single `next build`.
+  prodtest-smoke:
+    name: browser smoke (every push)
+    runs-on: ubuntu-latest
+    # One `next build` plus thirty-nine routes at four widths. If it has
+    # not finished in twenty-five minutes something is wedged.
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: chromium
+        run: |
+          npx playwright install --with-deps chromium
+          echo "CHROMIUM_PATH=$(node -e 'console.log(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
+      # It stands up its own stand-in Supabase on 127.0.0.1 and builds
+      # against it, so no secret and no live project are involved.
+      - name: routes-smoke
+        run: node scripts/tests/routes-smoke.prodtest.mjs
+
+  # THE REST OF THE BROWSER TESTS ARE NIGHTLY, and the reason is
+  # arithmetic rather than judgement: each of the *.prodtest.mjs files
+  # runs its own `next build` before it opens a browser, so the whole set
+  # takes well over an hour. Blocking every push on all of them would
+  # teach people to skip CI.
+  #
+  # THE COUNT IS NOT WRITTEN HERE ON PURPOSE. It used to be spelled out in
+  # words in this comment, the number was wrong by six, and nothing
+  # noticed — a number in a comment is a number nothing checks.
+  # scripts/tests/ci-coverage.test.mjs asserts instead that every suite
+  # family in scripts/tests/ is named by some job in this file.
   prodtests:
     name: production browser tests (nightly)
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

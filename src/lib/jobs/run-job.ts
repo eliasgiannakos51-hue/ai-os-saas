@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { getSiteUrl } from "@/lib/site-url";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { settleReservation, releaseReservation } from "@/lib/billing/reservations";
 import { resolveEffectivePlan } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -227,6 +228,11 @@ export async function runJob(params: { jobId: string; apiKey: string }): Promise
     return { ran: false, reason: "no_handler" };
   }
   const costs = CostAccumulator.restore(Array.isArray(job.usage_entries) ? job.usage_entries : []);
+  // THE COUNT BEFORE THIS ATTEMPT, because the accumulator is RESTORED.
+  // A job that hands off to itself resumes with every earlier call
+  // already in `costs`, so recording costs.callCount at the end would
+  // count the first chunk again on every continuation.
+  const callsBeforeThisAttempt = costs.callCount;
   const attempts = (job.attempts ?? 0) + 1;
   await admin.from("ai_jobs").update({ attempts, step_total: stepCount(kind) }).eq("id", jobId);
 
@@ -249,6 +255,28 @@ export async function runJob(params: { jobId: string; apiKey: string }): Promise
 
   try {
     const handled = await handler(ctx);
+
+    // THE PLATFORM BREAKER'S COUNTER, which this path never touched.
+    //
+    // checkDailyPlatformCap() reads daily_ai_spend_tracking.total_calls,
+    // and lib/jobs/handlers/file-ask.ts and create.ts make real Anthropic
+    // calls without ever incrementing it — file-ask makes one per pass
+    // plus a synthesis. So the number the breaker gates the whole
+    // platform on was low by everything background jobs spend, and the
+    // two heaviest features were outside it in both directions: not
+    // counted, and not blocked.
+    //
+    // Recorded HERE, once, after the handler has finished and before any
+    // branch: every provider call this attempt was going to make has been
+    // made, so the delta is final and there is one place to find it
+    // rather than one per call site.
+    //
+    // COST 0, said plainly rather than left to be discovered: the euros
+    // are written to ai_cost_log by settleReservation below and that is
+    // the authoritative money record. What this fixes is the CALL COUNT,
+    // which is the column the breaker actually gates on.
+    void recordAiCallForDailySpend(0, costs.callCount - callsBeforeThisAttempt);
+
     const { plan, bypass } = await billingIdentity(job.user_id);
 
     if (handled.refund) {

@@ -138,7 +138,7 @@ export default async function MissionPage() {
   }
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.mission" helpArticle="create-mission" icon={MISSION_ICON} title={t("title")} description={t("description")} />
 
@@ -169,6 +169,6 @@ export default async function MissionPage() {
           />
         )}
       </div>
-    </main>
+    </div>
   );
 }

@@ -64,7 +64,7 @@ export default async function RecordsPage() {
   }));
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader
           helpKey="help.records"
@@ -74,6 +74,6 @@ export default async function RecordsPage() {
         />
         <RecordsDirectory groups={groups} />
       </div>
-    </main>
+    </div>
   );
 }

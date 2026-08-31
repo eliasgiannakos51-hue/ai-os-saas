@@ -217,7 +217,7 @@ export default async function SettingsPage() {
   );
 
   return (
-    <main className="min-h-full">
+    <div className="min-h-full">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.settings" helpArticle="export-data" icon={SettingsIcon} title={t("title")} />
 
@@ -372,6 +372,6 @@ export default async function SettingsPage() {
 
         <DangerZone email={user.email ?? ""} />
       </div>
-    </main>
+    </div>
   );
 }

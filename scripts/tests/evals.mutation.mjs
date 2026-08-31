@@ -107,11 +107,32 @@ const MUTANTS = [
     to: "      medianLatencyMs: latencies.length === 0 ? null : Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length),",
   },
   {
+    // RE-ANCHORED. `p` became `fraction` when percentile gained a clamp
+    // and a non-finite guard, and this mutation quietly stopped applying
+    // to anything — the runner reported STALE, which is the only reason
+    // anybody found out.
     name: "the percentile interpolates, reporting a latency nobody measured",
     file: SCORING,
     from: "  const rank = Math.ceil(p * sortedAscending.length);",
-    to: "  const rank = Math.round(p * sortedAscending.length + 0.5);",
+    to: "  const rank = Math.round(fraction * sortedAscending.length + 0.5);",
   },
+  // AND THE TWO GUARDS THAT MOVED IT, which is what the runner asks for:
+  // re-anchor, then add a mutation for whatever moved the line.
+  {
+    name: "a non-finite percentile returns undefined from a `number | null`",
+    file: SCORING,
+    from: "  if (!Number.isFinite(p)) return null;",
+    to: "",
+    expect: "Math.ceil(NaN) is NaN, and indexing an array with NaN gives undefined rather than throwing",
+  },
+  // THE CLAMP MUTATION IS GONE, and so is the clamp. It survived: removing
+  // `Math.min(1, Math.max(0, p))` changed no output, because the index
+  // clamp on the next line already covers every value p can take. A
+  // surviving mutation means the line is not load-bearing, and the right
+  // answer to that is to delete the line, not to write a test that cannot
+  // fail. The behaviour it claimed to protect — p = 90 gives the largest
+  // sample, p = -5 the smallest — is asserted in evals.test.mjs and still
+  // holds without it.
   {
     name: "an empty latency set reports 0ms instead of unknown",
     file: SCORING,

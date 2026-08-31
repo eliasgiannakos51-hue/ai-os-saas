@@ -288,11 +288,15 @@ export function percentile(sortedAscending: readonly number[], p: number): numbe
   // array with NaN gives undefined rather than throwing. A caller doing
   // arithmetic on the result got NaN two steps from where it started.
   if (!Number.isFinite(p)) return null;
-  // Clamped rather than trusted: p is a fraction, and a caller passing 90
-  // instead of 0.9 should get the top of the range, not an index past the
-  // end that reads as undefined.
-  const fraction = Math.min(1, Math.max(0, p));
-  const rank = Math.ceil(fraction * sortedAscending.length);
+  // NO CLAMP ON p, and that is now a measured statement rather than an
+  // oversight. One was added here — `Math.min(1, Math.max(0, p))` — and
+  // its own mutation SURVIVED: removing it changed no output at all,
+  // because the index clamp on the next line already handles every value
+  // p can take. p = 90 gives rank 360, clamped to the last index; p = -5
+  // gives rank -20, clamped to 0. Dead code that reads as a guard is
+  // worse than no code: it invites the next person to trust it for a case
+  // it does not actually cover.
+  const rank = Math.ceil(p * sortedAscending.length);
   return sortedAscending[Math.min(sortedAscending.length - 1, Math.max(0, rank - 1))];
 }
 

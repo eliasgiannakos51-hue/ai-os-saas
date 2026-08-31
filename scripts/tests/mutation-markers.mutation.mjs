@@ -116,8 +116,10 @@ const MUTANTS = [
   {
     name: "the check moves to after the unit suite and the compile",
     file: PKG,
-    from: "node scripts/apply-function-limits.mjs && node scripts/check-mutation-markers.mjs && node scripts/check-i18n.js && npm run test:unit && next build",
-    to: "node scripts/apply-function-limits.mjs && node scripts/check-i18n.js && npm run test:unit && node scripts/check-mutation-markers.mjs && next build",
+    // RE-ANCHORED: the build script gained check-mutation-tree.mjs
+    // between the marker check and the i18n check.
+    from: "node scripts/apply-function-limits.mjs && node scripts/check-mutation-markers.mjs && node scripts/check-mutation-tree.mjs && node scripts/check-i18n.js && npm run test:unit && next build",
+    to: "node scripts/apply-function-limits.mjs && node scripts/check-mutation-tree.mjs && node scripts/check-i18n.js && npm run test:unit && node scripts/check-mutation-markers.mjs && next build",
     expect: "before the build spends time on anything expensive",
   },
   {

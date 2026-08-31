@@ -67,7 +67,7 @@ export async function BuildModulePage({
   ) {
     const requiredPlan = getPlan(config.minPlanSlug);
     return (
-      <main className="min-h-full bg-dot-grid">
+      <div className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader icon={icon} title={title} helpKey="help.trackingModule" />
           <UpgradeRequired
@@ -75,7 +75,7 @@ export async function BuildModulePage({
             planName={requiredPlan?.name ?? config.minPlanSlug}
           />
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -93,7 +93,7 @@ export async function BuildModulePage({
   ]);
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader icon={icon} title={title} helpKey="help.trackingModule" />
 
@@ -109,6 +109,6 @@ export async function BuildModulePage({
           favoritedIds={favoritedIds}
         />
       </div>
-    </main>
+    </div>
   );
 }

@@ -66,12 +66,12 @@ export default async function MemoryPage() {
 
   if (!isAdmin && !planMeetsMinimum(planSlug, "starter")) {
     return (
-      <main className="min-h-full bg-dot-grid">
+      <div className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader helpKey="help.memory" helpArticle="chat-memory" icon={MEMORY_ICON} title={t("title")} />
           <UpgradeRequired featureName={t("title")} planName={getPlan("starter")?.name ?? "Starter"} />
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -108,7 +108,7 @@ export default async function MemoryPage() {
     .slice(0, MAX_MEMORY_RESULTS);
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader
           helpKey="help.memory"
@@ -120,6 +120,6 @@ export default async function MemoryPage() {
 
         <MemorySearch results={results} />
       </div>
-    </main>
+    </div>
   );
 }

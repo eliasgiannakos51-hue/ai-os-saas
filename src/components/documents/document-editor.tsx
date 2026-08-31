@@ -130,7 +130,7 @@ export function DocumentEditor({
   ];
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <div className="mb-4 flex items-center justify-between gap-3">
           <Link
@@ -209,6 +209,6 @@ export function DocumentEditor({
           className="document-editor-content min-h-[60vh] rounded-2xl border border-border bg-panel px-5 py-4 text-sm leading-relaxed text-foreground outline-none focus:border-orange-500/40"
         />
       </div>
-    </main>
+    </div>
   );
 }

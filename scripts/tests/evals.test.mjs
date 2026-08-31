@@ -139,6 +139,24 @@ eq("nearest-rank median", s.percentile([100, 200, 300], 0.5), 200);
 // would report a latency nobody measured.
 eq("p90 of four samples is the largest", s.percentile([1, 2, 3, 40], 0.9), 40);
 eq("an empty set has no percentile", s.percentile([], 0.5), null);
+// THE TWO ARGUMENTS NOBODY WAS PASSING, and the reason percentile's own
+// mutation went stale: the function grew a non-finite guard and a clamp,
+// which moved the line the mutation was anchored to. Asserting them here
+// rather than only in numeric-boundaries.test.mjs is what makes those
+// mutations killable — a mutation whose only gate lives in another file
+// is a mutation this suite cannot catch.
+//
+// A NON-FINITE p used to return `undefined` from a function typed
+// `number | null`, and TypeScript could not see it: Math.ceil(NaN) is
+// NaN, Math.max and Math.min pass NaN through, and indexing an array
+// with NaN gives undefined rather than throwing.
+eq("a NaN percentile is null, not undefined", s.percentile([1, 2, 3], NaN), null);
+eq("...and Infinity too", s.percentile([1, 2, 3], Infinity), null);
+// CLAMPED, not trusted: p is a fraction, and a caller passing 90 instead
+// of 0.9 should get the top of the range rather than an index past the
+// end that reads as undefined.
+eq("p above 1 is clamped to the largest sample", s.percentile([1, 2, 3, 40], 90), 40);
+eq("a negative p is clamped to the smallest", s.percentile([1, 2, 3, 40], -5), 1);
 {
   // One 40-second timeout must not drag the headline figure.
   //

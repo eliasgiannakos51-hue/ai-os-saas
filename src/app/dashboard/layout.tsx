@@ -148,9 +148,22 @@ export default async function DashboardLayout({
                 {/* Wraps only the page body, not the Sidebar/TopNav —
                     the chrome must stay visually fixed while the content
                     beneath it fades/slides in on each navigation. */}
-                <div className="flex-1">
+                {/* THE <main> LANDMARK, HERE AND ONLY HERE.
+                    The dashboard had none. Four components rendered one
+                    each — route-skeleton, build-module-page (twice) and
+                    document-editor — so a module page had a landmark and
+                    a bespoke page did not, and /dashboard/coding was
+                    measured with zero. A screen reader's "skip to main"
+                    had nothing to land on, and so did the page's own
+                    outline.
+                    Putting it in the layout is what makes it true for all
+                    39 pages instead of 8, and the four components below
+                    became plain <div>s in the same change: a <main>
+                    inside a <main> is invalid, and two landmarks are
+                    worse than one in the wrong place. */}
+                <main id="main-content" className="flex-1">
                   <PageTransition>{children}</PageTransition>
-                </div>
+                </main>
               </div>
             </div>
             <ToastContainer />

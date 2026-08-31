@@ -79,7 +79,7 @@ export default async function TeamPage({
   const activeMemberCount = members?.length ?? 0;
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.team" helpArticle="team-members"
           icon={Users}
@@ -113,6 +113,6 @@ export default async function TeamPage({
 
         <TeamMembersList members={(members as TeamMember[] | null) ?? []} />
       </div>
-    </main>
+    </div>
   );
 }

@@ -149,7 +149,7 @@ export default async function SystemHealthPage() {
   }
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <PageHeader
           icon={Activity}
@@ -197,7 +197,7 @@ export default async function SystemHealthPage() {
             value in a report; this does not give it the chance. */}
         <CapabilityStatus rows={capabilities} />
       </div>
-    </main>
+    </div>
   );
 }
 

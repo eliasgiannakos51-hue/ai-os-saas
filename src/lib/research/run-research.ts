@@ -5,6 +5,7 @@ import { logApiError } from "@/lib/log-error";
 import { diagLog } from "@/lib/diag";
 import { getSiteUrl } from "@/lib/site-url";
 import { CostAccumulator, type CostEntry } from "@/lib/billing/cost-accumulator";
+import { recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { settleReservation, releaseReservation } from "@/lib/billing/reservations";
 import { resolveEffectivePlan } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -154,11 +155,54 @@ async function handOff(reportId: string): Promise<boolean> {
  * update, so a concurrent handoff finds it true and returns without doing
  * anything.
  */
+/**
+ * THE PLATFORM BREAKER'S COUNTER, which this path never touched.
+ *
+ * checkDailyPlatformCap() reads daily_ai_spend_tracking.total_calls, and
+ * lib/research/research.ts makes real Anthropic calls without ever
+ * incrementing it — a report plans, then answers up to six questions,
+ * then synthesises. So the number the breaker gates the whole platform on
+ * was low by everything Deep Research spends, and the heaviest feature in
+ * the product was outside it in both directions: not counted, and not
+ * blocked.
+ *
+ * A WRAPPER, not a line before each return. The chunk has eleven exits —
+ * ceilings, hand-offs, failures, the ready path — and adding the record
+ * to each is how one of them ends up without it. `finally` runs on all
+ * eleven and on a throw.
+ *
+ * THE DELTA, not the total: the accumulator is RESTORED from the row, so
+ * a chunk resumes with every earlier chunk's calls already in it.
+ * Recording costs.callCount would re-count chunk one on every
+ * continuation, twelve times over for a report that runs to its ceiling.
+ *
+ * COST 0, said plainly rather than left to be discovered: the euros are
+ * written to ai_cost_log by settleReservation and that is the
+ * authoritative money record. What this fixes is the CALL COUNT, which is
+ * the column the breaker actually gates on.
+ */
 export async function runResearchChunk(params: {
   reportId: string;
   apiKey: string;
   startedAt: number;
 }): Promise<ChunkOutcome> {
+  const counted = { accumulator: null as CostAccumulator | null, before: 0 };
+  try {
+    return await runResearchChunkInner(params, counted);
+  } finally {
+    const made = (counted.accumulator?.callCount ?? 0) - counted.before;
+    if (made > 0) void recordAiCallForDailySpend(0, made);
+  }
+}
+
+async function runResearchChunkInner(
+  params: {
+    reportId: string;
+    apiKey: string;
+    startedAt: number;
+  },
+  counted: { accumulator: CostAccumulator | null; before: number }
+): Promise<ChunkOutcome> {
   const { reportId, apiKey, startedAt } = params;
   const admin = createAdminClient();
   const budgetMs = Math.min(functionBudgetMs(), RESEARCH_DEADLINE_MS);
@@ -215,6 +259,10 @@ export async function runResearchChunk(params: {
     ? report.partial_findings
     : [];
   const costs = CostAccumulator.restore(report.usage_entries);
+  // Handed to the wrapper so its `finally` can measure this chunk's own
+  // calls against the restored total.
+  counted.accumulator = costs;
+  counted.before = costs.callCount;
   const language = String(report.language ?? "en");
   const anthropic = new Anthropic({ apiKey });
 

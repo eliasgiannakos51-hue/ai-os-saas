@@ -639,14 +639,15 @@ const titleKeyMap = readFileSync("src/lib/search/module-title-keys.ts", "utf8");
 function navKeyOf(src) {
   const literal = src.match(/pageTitle\("(sidebar\.items\.[A-Za-z]+)"\)/);
   if (literal) return literal[1];
-  // pageTitle(CONFIG.titleKey) — the tracking pages. The slug comes from
-  // the CONFIG line above it; the key comes from the module config, which
-  // section 4 already checks is a sidebar key.
-  const fromConfig = src.match(/BUILD_MODULES\.find\(\(m\) => m\.slug === "([a-z-]+)"\)/);
-  if (fromConfig && /pageTitle\(CONFIG\.titleKey\)/.test(src)) {
-    const m = titleKeyMap.match(new RegExp(`"?${fromConfig[1]}"?: "(sidebar\\.items\\.[A-Za-z]+)"`));
-    if (m) return m[1];
-  }
+  // NO pageTitle(CONFIG.titleKey) BRANCH, and that is measured rather
+  // than assumed. One was written here for the tracking pages, and its
+  // own mutation SURVIVED: breaking it changed the count by nothing.
+  // Counted directly — 21 pages reach this scan by the literal form and
+  // 2 by MODULE_TITLE_KEYS; the CONFIG form contributes ZERO, because a
+  // tracking page renders BuildModulePage rather than its own
+  // <PageHeader title={t("title")}>, so it never names itself twice in
+  // the first place. A branch that matches nothing reads like coverage
+  // and is not.
   // pageTitle(MODULE_TITLE_KEYS.x) / MODULE_TITLE_KEYS["x"] — the two
   // bespoke pages that left BUILD_MODULES.
   const fromMap = src.match(/pageTitle\(MODULE_TITLE_KEYS(?:\.([A-Za-z]+)|\["([a-z-]+)"\])\)/);

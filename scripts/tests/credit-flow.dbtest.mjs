@@ -437,6 +437,70 @@ const costRows = (feature) =>
   eq("...and write one ledger row", ledgerRows("replay_probe"), 1);
 }
 
+console.log("\n== THE PLATFORM BREAKER'S COUNTER, and the actions that make several calls ==");
+// increment_daily_ai_spend added exactly 1, because every caller made
+// exactly one provider call. A background job and a Deep Research chunk
+// make several inside ONE settled action — and neither called it at all,
+// so the number checkDailyPlatformCap gates the whole platform on was low
+// by everything those two features spend.
+{
+  const today = sql(`select (now() at time zone 'utc')::date::text`);
+  const reset = () => sql(`delete from public.daily_ai_spend_tracking where date = '${today}'`);
+  const total = () =>
+    Number(sql(`select coalesce(total_calls, 0) from public.daily_ai_spend_tracking where date = '${today}'`) || 0);
+  const cost = () =>
+    Number(sql(`select coalesce(estimated_cost, 0) from public.daily_ai_spend_tracking where date = '${today}'`) || 0);
+
+  reset();
+  sql(`select increment_daily_ai_spend(0, '${today}'::date)`);
+  eq("a caller that omits the count still adds exactly one", total(), 1);
+
+  sql(`select increment_daily_ai_spend(0, '${today}'::date, 8)`);
+  eq("...and a research chunk's eight calls add eight", total(), 9);
+
+  eq("the row is created on the first call of the day, not assumed to exist", cost(), 0);
+  sql(`select increment_daily_ai_spend(2.5, '${today}'::date, 3)`);
+  eq("cost and count move together", total(), 12);
+  eq("...and the cost accumulated", cost(), 2.5);
+
+  // THE CLAMP. A negative count must never DECREASE the day's total —
+  // that would be a way to hide spend from the one breaker that exists
+  // to see it.
+  sql(`select increment_daily_ai_spend(0, '${today}'::date, -5)`);
+  eq("a negative count cannot lower the total", total(), 12);
+  sql(`select increment_daily_ai_spend(0, '${today}'::date, 0)`);
+  eq("a zero count adds nothing", total(), 12);
+  sql(`select increment_daily_ai_spend(0, '${today}'::date, null)`);
+  eq("a null count falls back to one, not to zero and not to null", total(), 13);
+
+  // ATOMIC UNDER CONCURRENCY, which is the whole reason this is an RPC
+  // and not a read-modify-write in Node. Twenty callers, four calls each.
+  reset();
+  execFileSync("sh", ["-c",
+    Array.from({ length: 20 }, () =>
+      `psql ${process.env.DATABASE_URL ? `-d "${process.env.DATABASE_URL}"` : ""} -v ON_ERROR_STOP=1 -tAc "select increment_daily_ai_spend(0, '${today}'::date, 4)" &`
+    ).join(" ") + " wait"], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  eq("twenty concurrent callers of four calls each land eighty", total(), 80);
+
+  // ONE FUNCTION, NOT TWO. The two-argument version is dropped by the
+  // migration: two functions with one name is how one of them stops being
+  // the one that runs.
+  eq(
+    "increment_daily_ai_spend is not overloaded",
+    sql(`select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+          where n.nspname='public' and p.proname='increment_daily_ai_spend'`),
+    "1"
+  );
+  eq(
+    "...and anon and authenticated cannot move the platform's own ledger",
+    sql(`select has_function_privilege('anon', 'public.increment_daily_ai_spend(numeric,date,integer)', 'execute')::text
+         || ':' || has_function_privilege('authenticated', 'public.increment_daily_ai_spend(numeric,date,integer)', 'execute')::text
+         || ':' || has_function_privilege('service_role', 'public.increment_daily_ai_spend(numeric,date,integer)', 'execute')::text`),
+    "false:false:true"
+  );
+  reset();
+}
+
 // Leave nothing behind — the next run asserts absolute numbers.
 sql(`delete from public.credit_reservations where user_id = '${USER}'`);
 sql(`delete from public.credit_transactions where user_id = '${USER}'`);

@@ -65,7 +65,7 @@ export default async function TimelinePage({
     const favorites = await loadAllFavorites(supabase, user.id);
     diagLog(`[timeline-diag ${reqId}] starred view -> favorites=${favorites.length}`);
     return (
-      <main className="min-h-full bg-dot-grid">
+      <div className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           {/* The STARRED tab answers a different question from the
               everything tab, so it carries the starred tip: "starring
@@ -81,7 +81,7 @@ export default async function TimelinePage({
           <TimelineTabs view="fav" />
           <FavoritesList groups={groupFavorites(favorites)} />
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -114,7 +114,7 @@ export default async function TimelinePage({
   diagLog(`[timeline-diag ${reqId}] render -> entriesPassedToComponent=${entries.length}`);
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.timeline" icon={TIMELINE_ICON} title={t("title")} />
         <TimelineTabs view="all" />
@@ -125,6 +125,6 @@ export default async function TimelinePage({
           <TimelineList entries={entries} favoritedKeys={favoritedKeys} />
         )}
       </div>
-    </main>
+    </div>
   );
 }

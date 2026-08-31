@@ -50,10 +50,28 @@ const MUTANTS = [
     expect: "el: the nav and the heading agree",
   },
   {
+    // RE-ANCHORED. The scan learned two more ways a page can name itself
+    // (pageTitle(CONFIG.titleKey) and pageTitle(MODULE_TITLE_KEYS.x)), so
+    // the literal form moved into navKeyOf() and `navKey` became
+    // `literal`. The mutation stopped applying to anything and the runner
+    // reported STALE, which is the only reason anybody found out.
     name: "the derivation stops recognising a page's nav key",
     file: GATE,
-    from: 'const navKey = src.match(/pageTitle\\("(sidebar\\.items\\.[A-Za-z]+)"\\)/);',
-    to: 'const navKey = src.match(/pageTitleXX\\("(sidebar\\.items\\.[A-Za-z]+)"\\)/);',
+    from: 'const literal = src.match(/pageTitle\\("(sidebar\\.items\\.[A-Za-z]+)"\\)/);',
+    to: 'const literal = src.match(/pageTitleXX\\("(sidebar\\.items\\.[A-Za-z]+)"\\)/);',
+    expect: "the scan found the pages that name themselves twice",
+  },
+  // THE TWO FORMS THAT MOVED IT, which is what run-mutations asks for:
+  // re-anchor, then add a mutation for whatever moved the line.
+  // The CONFIG-title mutation is gone with the branch it broke: it
+  // survived, the branch matched zero pages, and the answer to a
+  // surviving mutation is to delete the line rather than to keep a test
+  // that cannot fail.
+  {
+    name: "the scan stops recognising a bespoke page's MODULE_TITLE_KEYS title",
+    file: GATE,
+    from: 'const fromMap = src.match(/pageTitle\\(MODULE_TITLE_KEYS(?:\\.([A-Za-z]+)|\\["([a-z-]+)"\\])\\)/);',
+    to: 'const fromMap = src.match(/pageTitleXX\\(MODULE_TITLE_KEYS(?:\\.([A-Za-z]+)|\\["([a-z-]+)"\\])\\)/);',
     expect: "the scan found the pages that name themselves twice",
   },
   {

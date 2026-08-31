@@ -451,7 +451,7 @@ export default async function OverviewPage() {
   ];
 
   return (
-    <main className="min-h-full">
+    <div className="min-h-full">
       {/* Stamps the visit AFTER the render, so the diff above was made
           against the previous value and not against now. */}
       <HomeSeenStamp />
@@ -662,6 +662,6 @@ export default async function OverviewPage() {
           />
         )}
       </div>
-    </main>
+    </div>
   );
 }

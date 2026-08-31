@@ -70,6 +70,20 @@ check(
 );
 const withoutHref = results.filter((r) => !/href:/.test(r));
 check("...and an href", withoutHref.length === 0, String(withoutHref.length));
+// THE KEY IS NOT THE VALUE. This checked only that `href:` appears, so
+// `href: null` — a result with a destination the user cannot open — read
+// as a pass. Its own mutation proved it: replacing a real href with
+// `null` left the gate green.
+//
+// `href: data.href ?? null` stays legitimate: that is a value the server
+// supplies and may genuinely not have. What is forbidden is the literal
+// written into the result itself.
+const nullHref = results.filter((r) => /href:\s*null\s*,/.test(r));
+check(
+  "...and no result hard-codes href: null, which is a destination nobody can open",
+  nullHref.length === 0,
+  nullHref.map((r) => (r.match(/type: "(\w+)"/) ?? [])[1] ?? "?").join(", ")
+);
 // AND EVERY TYPE IS REPRESENTED among them, so "all results have one" is
 // not true of a set that happens to exclude a type.
 const typesWithResult = new Set(

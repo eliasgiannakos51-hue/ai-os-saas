@@ -138,7 +138,7 @@ export default async function TradingWorkflowPage() {
   ).entries.slice(0, MINI_TIMELINE_LIMIT);
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader
           icon={TRADING_WORKFLOW_ICON}
@@ -188,6 +188,6 @@ export default async function TradingWorkflowPage() {
           <GenericList module={tradingModule} cap={RECORD_CAP} records={tradeRows} linkedEntities={linkedEntities} favoritedIds={favoritedIds} />
         </div>
       </div>
-    </main>
+    </div>
   );
 }

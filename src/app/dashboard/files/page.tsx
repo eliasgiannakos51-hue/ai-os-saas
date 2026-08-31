@@ -70,7 +70,7 @@ export default async function FilesPage() {
   }));
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.files" helpArticle="upload-files" icon={FolderOpen} title={t("title")} description={t("description")} />
 
@@ -91,6 +91,6 @@ export default async function FilesPage() {
           }}
         />
       </div>
-    </main>
+    </div>
   );
 }

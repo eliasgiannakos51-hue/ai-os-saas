@@ -30,6 +30,19 @@ import { loadTs } from "./load-ts.mjs";
 let pass = 0;
 const failures = [];
 function check(name, cond, detail) {
+  // check() TAKES A BOOLEAN. `check(name, someArray, [])` reads perfectly
+  // and is always green — every array is truthy in JavaScript, including
+  // the empty one. Two conventions share this name across the gates:
+  // check(name, cond, detail) here, check(name, actual, expected)
+  // elsewhere, and a call copied between them passes forever while
+  // printing its own failure text. See db-inventory.test.mjs, where the
+  // same guard was added after the deleted-table regression did exactly
+  // that.
+  if (typeof cond !== "boolean") {
+    failures.push(name);
+    console.log(`  FAIL  ${name}\n        check() takes a BOOLEAN; got ${Array.isArray(cond) ? "an array" : typeof cond}`);
+    return;
+  }
   if (cond) pass++;
   else { failures.push(name); console.log(`  FAIL  ${name}${detail ? "\n        " + detail : ""}`); }
 }
@@ -140,7 +153,7 @@ console.log("== 5. the prefix list, the doc and this file agree ==");
   check(`...and has branches (${prefixes.length})`, prefixes.length >= 5);
   const covered = new Set(SHAPES.map(([k]) => k));
   const untested = prefixes.filter((p) => !covered.has(p));
-  check("every prefix branch has a case above", untested, [], `untested: ${untested.join(", ")}`);
+  check("every prefix branch has a case above", untested.length === 0, `untested: ${untested.join(", ")}`);
 }
 
 console.log("== 6. logApiError: the stderr sink ==");

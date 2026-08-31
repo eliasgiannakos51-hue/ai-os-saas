@@ -5,6 +5,7 @@ import { BarChart3 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { pageTitle } from "@/lib/page-title";
+import { MODULE_TITLE_KEYS } from "@/lib/search/module-title-keys";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { AnalysisWorkspace, type AnalysisSummary, type AskRecord } from "@/components/data-analysis/analysis-workspace";
 import { buildChart, type BuiltChart, type ChartSpec } from "@/lib/data-analysis/charts";
@@ -14,7 +15,8 @@ import type { AnalysisFindings } from "@/lib/data-analysis/analyse";
 export const dynamic = "force-dynamic";
 
 export function generateMetadata(): Promise<Metadata> {
-  return pageTitle("sidebar.items.dataAnalysis");
+  // See the note in coding/page.tsx: one home for the key.
+  return pageTitle(MODULE_TITLE_KEYS["data-analysis"]);
 }
 
 // THE CHART POINTS ARE COMPUTED HERE, on the server, from the stored

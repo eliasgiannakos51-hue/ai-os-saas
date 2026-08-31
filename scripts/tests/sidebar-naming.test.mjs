@@ -24,6 +24,19 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 let pass = 0;
 const failures = [];
 function check(name, cond, detail) {
+  // check() TAKES A BOOLEAN. `check(name, someArray, [])` reads perfectly
+  // and is always green — every array is truthy in JavaScript, including
+  // the empty one. Two conventions share this name across the gates:
+  // check(name, cond, detail) here, check(name, actual, expected)
+  // elsewhere, and a call copied between them passes forever while
+  // printing its own failure text. See db-inventory.test.mjs, where the
+  // same guard was added after the deleted-table regression did exactly
+  // that.
+  if (typeof cond !== "boolean") {
+    failures.push(name);
+    console.log(`  FAIL  ${name}\n        check() takes a BOOLEAN; got ${Array.isArray(cond) ? "an array" : typeof cond}`);
+    return;
+  }
   if (cond) {
     pass++;
     console.log(`  PASS  ${name}`);
@@ -546,7 +559,11 @@ check(`all ${allModules.length} modules declare a display name`, noTitleKey.leng
 // still BE a sidebar key, or "one display name per module" would be a
 // convention rather than a fact.
 const notSidebar = allModules.filter((m) => m.titleKey && !m.titleKey.startsWith("sidebar.items."));
-check("every display name is the sidebar's own key", notSidebar.map((m) => `${m.slug}->${m.titleKey}`), []);
+check(
+  "every display name is the sidebar's own key",
+  notSidebar.length === 0,
+  notSidebar.map((m) => `${m.slug}->${m.titleKey}`).join(", ")
+);
 const badKey = allModules.filter((m) => m.titleKey && LOCALES.some((l) => typeof lookup(messages[l], m.titleKey) !== "string"));
 check("and every one resolves in all 10 locales", badKey.length === 0, badKey.map((m) => `${m.slug}->${m.titleKey}`).join(", "));
 
@@ -609,14 +626,45 @@ console.log("\n== 4c-bis. the nav name and the page's own heading are one name =
 // is the same rule pointed the other way: a tool must not be filed under
 // a note-taking name. It is derived from the pages rather than listed,
 // so a page added next year is covered on the day it is written.
+// A PAGE NAMES ITSELF IN ONE OF THREE FORMS, and the scan has to read
+// all three or it silently stops covering the pages that changed.
+//
+// It used to read only the literal `pageTitle("sidebar.items.x")`. When
+// coding/ and data-analysis/ were moved onto MODULE_TITLE_KEYS — so that
+// their key had one home instead of two — this count fell from 23 to 21
+// and the gate went red. The floor was right to fire: the scan really had
+// stopped looking at two pages. The fix is for it to look, not for the
+// floor to come down.
+const titleKeyMap = readFileSync("src/lib/search/module-title-keys.ts", "utf8");
+function navKeyOf(src) {
+  const literal = src.match(/pageTitle\("(sidebar\.items\.[A-Za-z]+)"\)/);
+  if (literal) return literal[1];
+  // pageTitle(CONFIG.titleKey) — the tracking pages. The slug comes from
+  // the CONFIG line above it; the key comes from the module config, which
+  // section 4 already checks is a sidebar key.
+  const fromConfig = src.match(/BUILD_MODULES\.find\(\(m\) => m\.slug === "([a-z-]+)"\)/);
+  if (fromConfig && /pageTitle\(CONFIG\.titleKey\)/.test(src)) {
+    const m = titleKeyMap.match(new RegExp(`"?${fromConfig[1]}"?: "(sidebar\\.items\\.[A-Za-z]+)"`));
+    if (m) return m[1];
+  }
+  // pageTitle(MODULE_TITLE_KEYS.x) / MODULE_TITLE_KEYS["x"] — the two
+  // bespoke pages that left BUILD_MODULES.
+  const fromMap = src.match(/pageTitle\(MODULE_TITLE_KEYS(?:\.([A-Za-z]+)|\["([a-z-]+)"\])\)/);
+  if (fromMap) {
+    const slug = fromMap[1] ?? fromMap[2];
+    const m = titleKeyMap.match(new RegExp(`"?${slug}"?: "(sidebar\\.items\\.[A-Za-z]+)"`));
+    if (m) return m[1];
+  }
+  return null;
+}
 const namedPages = [];
 for (const file of walkPagesForNames("src/app/dashboard")) {
   const src = readFileSync(file, "utf8");
-  const navKey = src.match(/pageTitle\("(sidebar\.items\.[A-Za-z]+)"\)/);
+  const navKey = navKeyOf(src);
   const namespace = src.match(/const t = await getTranslations\("([\w.]+)"\)/);
   const rendersOwnTitle = /<PageHeader[\s\S]{0,220}?title=\{t\("title"\)\}/.test(src);
   if (navKey && namespace && rendersOwnTitle) {
-    namedPages.push({ file, navKey: navKey[1], titleKey: `${namespace[1]}.title` });
+    namedPages.push({ file, navKey, titleKey: `${namespace[1]}.title` });
   }
 }
 // A DERIVATION THAT FINDS NOTHING AGREES WITH ITSELF PERFECTLY.
@@ -692,11 +740,36 @@ check("it reads the locale per request, not once at module load", /getTranslatio
 check("and it is server-only, so a client import fails at build", /^import "server-only";/m.test(metadataHelper));
 // The module pages hand it the config's own key, so tab, heading and nav
 // are one string.
-const modulePages = ["apps", "campaigns", "coding", "data-analysis", "images", "presentations", "videos", "websites"];
+const modulePages = ["apps", "campaigns", "images", "presentations", "videos", "websites"];
 const notFromConfig = modulePages.filter(
   (slug) => !/pageTitle\(CONFIG\.titleKey\)/.test(readFileSync(`src/app/dashboard/${slug}/page.tsx`, "utf8"))
 );
-check("every tracking page's tab reads the config's key", notFromConfig, []);
+check("every tracking page's tab reads the config's key", notFromConfig.length === 0,
+  notFromConfig.join(", "));
+// THE TWO THAT ARE NOT TRACKING PAGES ANY MORE. `coding` and
+// `data-analysis` left BUILD_MODULES in V4 #19/#20 and became bespoke
+// tools, so there is no CONFIG for them to read — and both pages wrote
+// `pageTitle("sidebar.items.coding")` out as a literal instead. The
+// values happened to agree with the sidebar's; nothing made them.
+// MODULE_TITLE_KEYS already held both keys for the search filter chips,
+// so that is now the one place either key exists.
+//
+// This check used to be `check(name, someArray, [])` — always green,
+// because every array is truthy — so it had never once looked. It found
+// these two on the first run after the signature was fixed.
+const bespokePages = ["coding", "data-analysis"];
+const literalKey = bespokePages.filter((slug) => {
+  const src = readFileSync(`src/app/dashboard/${slug}/page.tsx`, "utf8");
+  return /pageTitle\("sidebar\./.test(src) || !/MODULE_TITLE_KEYS/.test(src);
+});
+check("neither bespoke page writes its own title key out by hand", literalKey.length === 0,
+  literalKey.join(", "));
+{
+  const keys = readFileSync("src/lib/search/module-title-keys.ts", "utf8");
+  check("...and the map they read still carries both",
+    /coding: "sidebar\.items\.coding"/.test(keys) && /"data-analysis": "sidebar\.items\.dataAnalysis"/.test(keys),
+    "if these leave the map, the pages lose their titles rather than falling back");
+}
 
 console.log("\n== 5. the approved renames landed everywhere the name is shown ==");
 // A name changed in the sidebar but not on the page it opens gives the

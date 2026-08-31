@@ -37,6 +37,19 @@ import { readFileSync } from "node:fs";
 let pass = 0;
 const failures = [];
 function check(name, cond, detail) {
+  // check() TAKES A BOOLEAN. `check(name, someArray, [])` reads perfectly
+  // and is always green — every array is truthy in JavaScript, including
+  // the empty one. Two conventions share this name across the gates:
+  // check(name, cond, detail) here, check(name, actual, expected)
+  // elsewhere, and a call copied between them passes forever while
+  // printing its own failure text. See db-inventory.test.mjs, where the
+  // same guard was added after the deleted-table regression did exactly
+  // that.
+  if (typeof cond !== "boolean") {
+    failures.push(name);
+    console.log(`  FAIL  ${name}\n        check() takes a BOOLEAN; got ${Array.isArray(cond) ? "an array" : typeof cond}`);
+    return;
+  }
   if (cond) {
     pass++;
     console.log(`  PASS  ${name}`);
@@ -232,7 +245,7 @@ const allSlugs = Object.keys(messages.en.moduleData.empty);
 const sharing = allSlugs.filter(
   (slug) => slug !== "presentations" && /generate slides/i.test(messages.en.moduleData.empty[slug].why)
 );
-check("and no other module borrowed its wording", sharing, []);
+check("and no other module borrowed its wording", sharing.length === 0, sharing.join(", "));
 
 console.log("\n== 7. the real generator is still promised where it belongs ==");
 // Renaming must not delete the intention. The roadmap entry is under

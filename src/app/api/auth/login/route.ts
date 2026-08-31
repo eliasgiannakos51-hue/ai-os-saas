@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { countRateLimitHits, recordRateLimitHit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-client-ip";
 import { logApiError } from "@/lib/log-error";
 
-// @service-role-justified pre-auth — there is no session yet; the admin
-// client only INSERTS into rate_limit_log and reads nothing across accounts.
+// @service-role-justified pre-auth — there is no session yet; the
+// rate_limit_log access in lib/rate-limit.ts uses the admin client, reads
+// and writes only that table, and reads nothing across accounts.
 
 export const dynamic = "force-dynamic";
 
@@ -39,21 +40,22 @@ export async function POST(request: Request) {
     }
 
     const ip = getClientIp(request);
-    const admin = createAdminClient();
-    const windowStart = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString();
 
-    const { count, error: countError } = await admin
-      .from("rate_limit_log")
-      .select("id", { count: "exact", head: true })
-      .eq("scope", LOGIN_FAILURE_SCOPE)
-      .eq("identifier", ip)
-      .gte("created_at", windowStart);
+    // ONE IMPLEMENTATION OF THE TABLE ACCESS, in lib/rate-limit.ts. This
+    // route used to carry its own — its own window arithmetic, its own
+    // fails-open branch — which is how two limiters drift into meaning
+    // different things. The SHAPE is still this route's own, because it
+    // counts failures rather than attempts: a busy legitimate user must
+    // not be blocked by their own successful logins.
+    const failures = await countRateLimitHits({
+      scope: LOGIN_FAILURE_SCOPE,
+      identifier: ip,
+      windowMinutes: WINDOW_MINUTES,
+    });
 
-    if (countError) {
-      // Fails open — same "a logging hiccup should never block a real
-      // user" tolerance as lib/rate-limit.ts's checkRateLimit.
-      logApiError("/api/auth/login", countError, { stage: "count_failures" });
-    } else if ((count ?? 0) >= MAX_FAILED_ATTEMPTS) {
+    // Fails open — same "a logging hiccup should never block a real user"
+    // tolerance as lib/rate-limit.ts's checkRateLimit.
+    if (failures.ok && failures.count >= MAX_FAILED_ATTEMPTS) {
       return NextResponse.json(
         { ok: false, error: "Too many failed login attempts. Please try again later." },
         { status: 429 }
@@ -64,13 +66,7 @@ export async function POST(request: Request) {
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (signInError) {
-      const { error: insertError } = await admin.from("rate_limit_log").insert({
-        scope: LOGIN_FAILURE_SCOPE,
-        identifier: ip,
-      });
-      if (insertError) {
-        logApiError("/api/auth/login", insertError, { stage: "record_failure" });
-      }
+      await recordRateLimitHit({ scope: LOGIN_FAILURE_SCOPE, identifier: ip });
       return NextResponse.json({ ok: false, error: signInError.message }, { status: 401 });
     }
 

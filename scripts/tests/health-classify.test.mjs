@@ -22,6 +22,19 @@ import { loadTs } from "./load-ts.mjs";
 let pass = 0;
 const failures = [];
 function check(name, cond, detail) {
+  // check() TAKES A BOOLEAN. `check(name, someArray, [])` reads perfectly
+  // and is always green — every array is truthy in JavaScript, including
+  // the empty one. Two conventions share this name across the gates:
+  // check(name, cond, detail) here, check(name, actual, expected)
+  // elsewhere, and a call copied between them passes forever while
+  // printing its own failure text. See db-inventory.test.mjs, where the
+  // same guard was added after the deleted-table regression did exactly
+  // that.
+  if (typeof cond !== "boolean") {
+    failures.push(name);
+    console.log(`  FAIL  ${name}\n        check() takes a BOOLEAN; got ${Array.isArray(cond) ? "an array" : typeof cond}`);
+    return;
+  }
   if (cond) pass++;
   else { failures.push(name); console.log(`  FAIL  ${name}${detail ? "\n        " + detail : ""}`); }
 }
@@ -142,7 +155,7 @@ check("verbose is gated by checkCronAuth, which fails closed",
     const fields = [...a.matchAll(/\b(code|message)\s*:\s*([^,}]+)/g)];
     return fields.some(([, , value]) => !/scrubSecrets\(/.test(value) && !/^\s*undefined\s*$/.test(value));
   });
-  check("every detail field goes through scrubSecrets", unscrubbed, [],
+  check("every detail field goes through scrubSecrets", unscrubbed.length === 0,
     "a message reaching a response without scrubbing is the whole risk");
 }
 // THE PROBE TABLE. The defect was probing the newest table in the schema.

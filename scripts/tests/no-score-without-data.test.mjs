@@ -142,16 +142,76 @@ check(
 // green on a page that no longer rendered it — substring matching, in the
 // gate written to catch a substring problem. A JSX tag ends in
 // whitespace, `/` or `>`, and requiring one of those is the difference.
+// A BOUNDARY MAY SIT BETWEEN THE BRANCH AND THE CARD, and now one does.
+//
+// Both cards are wrapped in a <WidgetBoundary> so that one of them
+// throwing does not take the whole Home screen — a React #310 was
+// observed on this page in a production build. That put one JSX element
+// between `? (` and `<HealthScoreCard`, and this check, which required
+// them to be adjacent, went red on a page whose behaviour had not
+// changed at all.
+//
+// The property is unchanged and is what is asserted: the score appears
+// only on the TRUE side and the setup card only on the FALSE side. What
+// is allowed between them is whitespace, parentheses and wrapper
+// elements — not another conditional, which is why the window is bounded
+// and `hasEnoughDataForScore` may not appear again inside it.
+// PARENS COUNTED, NOT MATCHED WITH A REGEX. The branches are JSX blocks
+// of unknown length containing their own parentheses; a regex terminator
+// guessed at their end and got it wrong the moment a wrapper element was
+// added. This walks the two arms.
+function ternaryArms(src, condition) {
+  const at = src.indexOf(condition);
+  if (at < 0) return null;
+  let i = src.indexOf("?", at + condition.length);
+  if (i < 0) return null;
+  const arm = () => {
+    while (i < src.length && /\s/.test(src[i])) i++;
+    if (src[i] !== "(") return null;
+    const from = ++i;
+    let depth = 1;
+    while (i < src.length && depth > 0) {
+      if (src[i] === "(") depth++;
+      else if (src[i] === ")") depth--;
+      i++;
+    }
+    return src.slice(from, i - 1);
+  };
+  i++; // past the ?
+  const yes = arm();
+  while (i < src.length && /\s/.test(src[i])) i++;
+  if (src[i] !== ":") return null;
+  i++;
+  const no = arm();
+  return yes !== null && no !== null ? { yes, no } : null;
+}
+const arms = ternaryArms(overview, "hasEnoughDataForScore(totalEntries)");
 check(
-  "...and shows setup progress when it says no",
-  /hasEnoughDataForScore\(totalEntries\)\s*\?[\s\S]{0,400}?<SetupProgressCard[\s/>]/.test(overview),
+  "the score is rendered from a ternary on hasEnoughDataForScore",
+  arms !== null,
+  "if this is null the three checks below are inspecting nothing"
+);
+check(
+  `...and both arms have content (${arms ? arms.yes.length : 0} / ${arms ? arms.no.length : 0} chars)`,
+  arms !== null && arms.yes.length > 40 && arms.no.length > 40,
+  "an empty arm agrees with any rule"
+);
+check(
+  "...and the score only in the TRUE arm",
+  arms !== null && /<HealthScoreCard[\s/>]/.test(arms.yes) && !/<HealthScoreCard[\s/>]/.test(arms.no),
+  "the score is not behind the check"
+);
+check(
+  "...and setup progress only in the FALSE arm",
+  arms !== null && /<SetupProgressCard[\s/>]/.test(arms.no) && !/<SetupProgressCard[\s/>]/.test(arms.yes),
   "the false branch does not render the card that stands in for the score"
 );
 check(
-  "...and the score only in the true branch",
-  /hasEnoughDataForScore\(totalEntries\)\s*\?\s*\(\s*<HealthScoreCard[\s/>]/.test(overview),
-  "the score is not behind the check"
+  "...with no second condition on the score's own arm",
+  arms !== null && !/hasEnoughDataForScore/.test(arms.yes),
+  "a wrapper element between the branch and the card is fine; another conditional is not"
 );
+
 // A COMPARISON WRITTEN OUT LONGHAND WOULD BYPASS ALL OF THE ABOVE — but
 // `totalEntries > 0` is not one. That is a PRESENCE test (the "log your
 // first entry" step is done or it is not), and the first version of this

@@ -8,6 +8,7 @@ import { GreetingHeader } from "@/components/overview/greeting-header";
 import { InsightList, type Insight } from "@/components/onboarding/insight-list";
 import { CreateChat } from "@/components/create/create-chat";
 import { QuickActionCard } from "@/components/overview/quick-action-card";
+import { WidgetBoundary } from "@/components/ui/widget-boundary";
 import { LowCreditsBanner } from "@/components/credits/low-credits-banner";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { RecentEntriesCard, type RecentEntry } from "@/components/overview/recent-entries-card";
@@ -79,6 +80,7 @@ export default async function OverviewPage() {
   const locale = await getLocale();
   const tSidebar = await getTranslations("sidebar.items");
   const tInsights = await getTranslations("dashboard.insights");
+  const tErr = await getTranslations("errors");
   // The config carries the sidebar key directly now, so this no longer
   // has to look an English string up in a table to find its own name.
   const tKey = await getTranslations();
@@ -450,6 +452,23 @@ export default async function OverviewPage() {
     },
   ];
 
+  // ONE CARD FAILING MUST NOT TAKE THE HOME SCREEN.
+  //
+  // A React error #310 ("rendered more hooks than during the previous
+  // render") was observed on this page in a production build, two runs in
+  // seven, thrown from a useMemo inside a vendor chunk. Without a boundary
+  // BELOW the route, that unmounts the whole page and the first screen a
+  // person sees after signing in is the generic dashboard error.
+  //
+  // components/ui/widget-boundary.tsx already existed for exactly this,
+  // reported to /api/client-error, and was used on no page at all. It is
+  // used here now, per card, so the failure is contained to the card that
+  // produced it and the crash still reaches production_errors.
+  //
+  // The strings are resolved HERE because the boundary is a class
+  // component and cannot call useTranslations.
+  const boundary = { title: tErr("boundary.section"), body: tErr("boundary.sectionBody") };
+
   return (
     <div className="min-h-full">
       {/* Stamps the visit AFTER the render, so the diff above was made
@@ -472,7 +491,9 @@ export default async function OverviewPage() {
         {/* 1. ACTION — the input, first, because it is the answer to
                "what do I do now" and it was below the fold. */}
         <div className="mt-6">
-          <CreateChat showHeading={false} />
+          <WidgetBoundary label="create-chat" {...boundary}>
+            <CreateChat showHeading={false} />
+          </WidgetBoundary>
         </div>
 
         {/* ONE CARD WHERE THERE WERE THREE — V4.6 #10. "What's Next?",
@@ -538,23 +559,27 @@ export default async function OverviewPage() {
                judgement, and the account had done nothing to be judged
                for. */}
         {hasEnoughDataForScore(totalEntries) ? (
-          <HealthScoreCard
-            title={t("healthScore.title")}
-            score={healthScore.score}
-            rangeLabel={healthScoreRangeLabel}
-            suggestion={healthScoreSuggestion}
-            trend={weeklySparkline}
-          />
+          <WidgetBoundary label="health-score-card" {...boundary}>
+            <HealthScoreCard
+              title={t("healthScore.title")}
+              score={healthScore.score}
+              rangeLabel={healthScoreRangeLabel}
+              suggestion={healthScoreSuggestion}
+              trend={weeklySparkline}
+            />
+          </WidgetBoundary>
         ) : (
-          <SetupProgressCard
-            title={t("setupProgress.title")}
-            countLabel={t("setupProgress.count", {
-              done: setupSteps.filter((s) => s.done).length,
-              total: setupSteps.length,
-            })}
-            suggestion={t("setupProgress.suggestion", { count: HEALTH_SCORE_MIN_ENTRIES })}
-            steps={setupSteps}
-          />
+          <WidgetBoundary label="setup-progress-card" {...boundary}>
+            <SetupProgressCard
+              title={t("setupProgress.title")}
+              countLabel={t("setupProgress.count", {
+                done: setupSteps.filter((s) => s.done).length,
+                total: setupSteps.length,
+              })}
+              suggestion={t("setupProgress.suggestion", { count: HEALTH_SCORE_MIN_ENTRIES })}
+              steps={setupSteps}
+            />
+          </WidgetBoundary>
         )}
 
         {/* 4. NUMBERS.

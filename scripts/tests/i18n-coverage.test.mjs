@@ -802,7 +802,6 @@ checkTrue(
 // stale entry cannot hide a regression somewhere else.
 const BARE_TEXT_BASELINE = {
     "src/app/cookies/page.tsx": 19,
-    "src/app/dashboard/error.tsx": 1,
     "src/app/dashboard/system-health/page.tsx": 5,
     "src/app/offline/page.tsx": 3,
     "src/app/privacy/page.tsx": 17,
@@ -862,7 +861,6 @@ const BARE_TEXT_BASELINE = {
     // wording in two places that could disagree.
     "src/components/system-health/capability-status.tsx": 3,
     "src/components/text-actions/text-actions-textarea.tsx": 2,
-    "src/components/ui/widget-boundary.tsx": 2,
   };
 // Derived, not typed. The printed total used to be a hand-written 162 in a
 // template string, which is a second number that can disagree with the

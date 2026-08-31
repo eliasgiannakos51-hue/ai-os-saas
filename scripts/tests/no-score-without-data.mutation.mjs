@@ -48,7 +48,7 @@ const MUTANTS = [
     file: PAGE,
     from: "          <SetupProgressCard",
     to: "          <div /> && (\n          <SetupProgressCardXX",
-    expect: "shows setup progress when it says no",
+    expect: "setup progress only in the FALSE arm",
   },
   {
     name: "the page re-decides with a literal threshold of its own",

@@ -3133,6 +3133,13 @@
         "what": "Questa operazione non è stata completata.",
         "next": "Riprova e contatta l'assistenza se succede di nuovo."
       }
+    },
+    "boundary": {
+      "title": "Questa parte della pagina non si è caricata",
+      "body": "Il resto della dashboard funziona e i tuoi dati sono intatti. Ricaricare di solito risolve; se continua, ci è già arrivata una segnalazione automatica.",
+      "reload": "Ricarica la pagina",
+      "section": "Questa sezione non è stata visualizzata.",
+      "sectionBody": "Il resto della pagina non è interessato. Ricaricare di solito risolve."
     }
   },
   "aiExamples": {

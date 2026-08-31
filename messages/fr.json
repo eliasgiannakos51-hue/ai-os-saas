@@ -3133,6 +3133,13 @@
         "what": "Cette action ne s'est pas terminée.",
         "next": "Réessayez et contactez le support si cela se reproduit."
       }
+    },
+    "boundary": {
+      "title": "Cette partie de la page ne s'est pas chargée",
+      "body": "Le reste de votre tableau de bord fonctionne et vos données sont intactes. Recharger suffit généralement ; si cela persiste, nous en avons été avertis automatiquement.",
+      "reload": "Recharger la page",
+      "section": "Cette section n'a pas pu être affichée.",
+      "sectionBody": "Le reste de la page n'est pas affecté. Recharger suffit généralement."
     }
   },
   "aiExamples": {

@@ -3133,6 +3133,13 @@
         "what": "Diese Aktion wurde nicht abgeschlossen.",
         "next": "Versuch es erneut und wende dich an den Support, wenn es zweimal passiert."
       }
+    },
+    "boundary": {
+      "title": "Dieser Teil der Seite wurde nicht geladen",
+      "body": "Der Rest Ihres Dashboards funktioniert, und Ihre Daten sind unverändert. Ein Neuladen behebt es meistens — falls nicht, wurde es uns automatisch gemeldet.",
+      "reload": "Seite neu laden",
+      "section": "Dieser Abschnitt konnte nicht angezeigt werden.",
+      "sectionBody": "Der Rest der Seite ist nicht betroffen. Ein Neuladen behebt es meistens."
     }
   },
   "aiExamples": {

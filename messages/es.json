@@ -3133,6 +3133,13 @@
         "what": "Esta acción no se ha completado.",
         "next": "Inténtalo de nuevo y contacta con soporte si vuelve a pasar."
       }
+    },
+    "boundary": {
+      "title": "Esta parte de la página no se cargó",
+      "body": "El resto de tu panel funciona y tus datos están intactos. Recargar suele solucionarlo; si continúa, ya nos ha llegado un aviso automático.",
+      "reload": "Recargar la página",
+      "section": "Esta sección no se pudo mostrar.",
+      "sectionBody": "El resto de la página no está afectada. Recargar suele solucionarlo."
     }
   },
   "aiExamples": {

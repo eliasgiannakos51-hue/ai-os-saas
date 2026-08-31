@@ -13,9 +13,21 @@ import { AlertTriangle } from "lucide-react";
  *
  * Must be a class component — React has no hook equivalent of
  * componentDidCatch.
+ *
+ * TRANSLATED, AND THAT IS WHY THE STRINGS ARE PROPS. Being a class it
+ * cannot call useTranslations. Its two
+ * sentences were hard-coded English in a product that ships in ten
+ * languages, and the one screen a person sees when something breaks was
+ * the one screen that was not translated. The caller resolves them (the
+ * dashboard pages are server components with getTranslations) and hands
+ * them down.
+ *
+ * They default to nothing rather than to English: a boundary rendered
+ * without them shows the icon and no claim, which is honest, instead of
+ * showing a language the reader did not choose.
  */
 export class WidgetBoundary extends Component<
-  { children: ReactNode; label?: string },
+  { children: ReactNode; label?: string; title?: string; body?: string },
   { failed: boolean }
 > {
   state = { failed: false };
@@ -53,9 +65,9 @@ export class WidgetBoundary extends Component<
       >
         <p className="flex items-center gap-2 font-medium text-red-300">
           <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-          This section could not be displayed.
+          {this.props.title}
         </p>
-        <p className="mt-1">The rest of the page is unaffected. Reloading usually fixes it.</p>
+        {this.props.body ? <p className="mt-1">{this.props.body}</p> : null}
       </div>
     );
   }

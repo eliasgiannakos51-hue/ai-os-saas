@@ -99,6 +99,28 @@ console.log("== 3. no count is written into the prose where nothing checks it ==
     `a number in a comment is a number nothing checks: ${claims.join(", ")}`);
 }
 
+console.log("== 3b. a red run tells somebody ==");
+{
+  // THE COST OF NOBODY FINDING OUT, measured on this repository: thirty
+  // push runs, thirteen failures, the same step failing in every one, for
+  // twenty commits before anybody read the history. GitHub emails the
+  // pusher, which on a branch pushed by automation is nobody.
+  const alertBlock = wf.slice(wf.indexOf("  alert:"));
+  check("there is a job that runs when CI goes red", /^\s{2}alert:/m.test(wf),
+    "a CI nobody looks at is the same as a CI that does not exist");
+  check("...gated on failure(), so it does not fire on green", /if: failure\(\)/.test(alertBlock));
+  check("...and it waits for the jobs it reports on",
+    /needs: \[verify, prodtest-smoke\]/.test(alertBlock),
+    "a job with no `needs` runs before the thing it is meant to report has finished");
+  check("...it opens an issue, which survives a closed tab",
+    /issues\.create\(/.test(alertBlock) && /issues: write/.test(wf));
+  check("...and de-duplicates rather than filing one per push",
+    /listForRepo/.test(alertBlock) && /createComment/.test(alertBlock),
+    "an issue per failing push turns the tracker into a log nobody reads");
+  check("...linking the run, the commit and the branch",
+    /actions\/runs\/\$\{context\.runId\}/.test(alertBlock) && /context\.sha/.test(alertBlock));
+}
+
 console.log("== 4. the build gate needs no secret ==");
 {
   // A build that needs env vars is a build a clean clone cannot do, and

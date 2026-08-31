@@ -3133,6 +3133,13 @@
         "what": "This action didn't complete.",
         "next": "Try again, and contact support if it happens twice."
       }
+    },
+    "boundary": {
+      "title": "This part of the page did not load",
+      "body": "The rest of your dashboard is fine and your data is untouched. Reloading usually fixes it — if it keeps happening, it has been reported to us automatically.",
+      "reload": "Reload the page",
+      "section": "This section could not be displayed.",
+      "sectionBody": "The rest of the page is unaffected. Reloading usually fixes it."
     }
   },
   "aiExamples": {

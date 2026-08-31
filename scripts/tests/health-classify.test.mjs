@@ -27,7 +27,7 @@ function check(name, cond, detail) {
 }
 const read = (p) => readFileSync(p, "utf8");
 const H = await loadTs("src/lib/health/classify.ts");
-const { classifyProbeError, isDatabaseReachable, scrubSecrets, HEALTH_REASONS, HEALTH_STAGES } = H;
+const { classifyProbeError, isDatabaseReachable, HEALTH_REASONS, HEALTH_STAGES } = H;
 
 console.log("== 1. the codes that actually occur are told apart ==");
 // EVERY code the classifier claims to map, checked against the reason its
@@ -78,42 +78,22 @@ check("ok: yes", isDatabaseReachable("ok") === true);
 check("isDatabaseReachable answers for EVERY reason in the vocabulary",
   HEALTH_REASONS.every((r) => typeof isDatabaseReachable(r) === "boolean"));
 
-console.log("== 3. NEVER A CREDENTIAL — the rule with no exception ==");
-// The one place a provider's message crosses from the log into an HTTP
-// response. "A Postgres error never contains a key" is a belief.
-// ASSEMBLED AT RUNTIME, NEVER WRITTEN OUT AS LITERALS.
+console.log("== 3. NEVER A CREDENTIAL — moved, because it was unreachable ==");
+// The scrubber used to be DEFINED in classify.ts and exercised here.
+// It now lives in src/lib/scrub-secrets.ts, and its behaviour — every
+// credential shape this product actually holds, run through the real
+// function — is asserted in scripts/tests/log-scrubbing.test.mjs.
 //
-// The first draft of this file spelled these fixtures in full and
-// GitHub's push protection rejected the push, naming line 86: the
-// invented Supabase token matched the real PAT format exactly, which is
-// precisely what made it a good fixture and exactly what makes it
-// unpushable. The tempting fix is the "allow this secret" link. That
-// link trains the habit of clicking past secret scanning, and the next
-// thing it is clicked for will not be invented.
-//
-// So each shape is built from parts. The regex under test sees the same
-// string it would see in production; the repository never contains one.
-// Anyone tidying these back into literals will find out the same way.
-const JWT = ["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9", "eyJyb2xlIjoiZXhhbXBsZSJ9", "c2lnbmF0dXJlX2hlcmU"].join(".");
-const SB_TOKEN = "sb" + "p_" + "0123456789abcdef".repeat(2) + "01234567";
-const RESEND = "r" + "e_" + "AbCdEfGhIjKlMnOpQrStUvWxYz012345";
-const OPAQUE = "abcdefghijklmnopqrstuvwxyz0123456789" + "ABCDEFGHIJ";
-const DB_URL = "postgres://admin:" + "hunter2" + "@db.example.com:5432/postgres";
-const SECRETS = [
-  [JWT, "a service-role-shaped JWT"],
-  [SB_TOKEN, "a Supabase-token-shaped string"],
-  [DB_URL, "credentials inside a URL"],
-  [RESEND, "a Resend-key-shaped string"],
-  [OPAQUE, "a 46-char opaque token"],
-];
-for (const [secret, what] of SECRETS) {
-  const out = scrubSecrets(`connection failed: ${secret} refused`);
-  check(`${what} is removed`, !out.includes(secret), `got: ${out}`);
-  check(`...and something is left to read (${what})`, out.includes("connection failed"), out);
-}
-check("an ordinary message survives untouched",
-  scrubSecrets("relation \"public.agent_templates\" does not exist") ===
-    "relation \"public.agent_templates\" does not exist");
+// It was moved because it was correct and applied in exactly one file
+// while logApiError(), which every API route calls, wrote provider
+// messages to stderr, to production_errors and to an alert email with no
+// scrubbing at all. What is left here is the property that belongs to
+// THIS file: classify.ts must not grow a second copy.
+check("classify.ts does not define a scrubber of its own",
+  !/function scrubSecrets/.test(read("src/lib/health/classify.ts")),
+  "two copies is how one of them stops being applied — see lib/scrub-secrets.ts");
+check("...and it still points at where the real one lives",
+  /lib\/scrub-secrets\.ts/.test(read("src/lib/health/classify.ts")));
 
 console.log("== 4. the ROUTE keeps the anonymous answer closed ==");
 const route = read("src/app/api/health/route.ts");

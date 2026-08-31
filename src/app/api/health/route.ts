@@ -5,10 +5,10 @@ import { checkCronAuth } from "@/lib/cron-auth";
 import {
   classifyProbeError,
   isDatabaseReachable,
-  scrubSecrets,
   type HealthReason,
   type HealthStage,
 } from "@/lib/health/classify";
+import { scrubSecrets } from "@/lib/scrub-secrets";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";

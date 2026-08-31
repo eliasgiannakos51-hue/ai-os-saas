@@ -1,4 +1,5 @@
 import "server-only";
+import { scrubMaybe } from "@/lib/scrub-secrets";
 
 type ErrorLogContext = Record<string, string | number | boolean | null | undefined>;
 
@@ -12,15 +13,18 @@ type ErrorLogContext = Record<string, string | number | boolean | null | undefin
 // reached the log. This pulls `message`/`code`/`details`/`hint` off
 // anything shaped like a Postgrest error, and JSON.stringifies any other
 // non-Error value instead of coercing it to a string.
-function describeError(error: unknown): {
+type ErrorFields = {
   name?: string;
   message: string;
   code?: string;
   details?: string;
   hint?: string;
-} {
+  stack?: string;
+};
+
+function readErrorFields(error: unknown): ErrorFields {
   if (error instanceof Error) {
-    return { name: error.name, message: error.message };
+    return { name: error.name, message: error.message, stack: error.stack ?? undefined };
   }
 
   if (error && typeof error === "object") {
@@ -43,6 +47,33 @@ function describeError(error: unknown): {
   return { message: String(error) };
 }
 
+/**
+ * NEVER A CREDENTIAL IN A LOG — enforced here, once, for every route.
+ *
+ * The three sinks below all read from this function's return value:
+ * stderr (Vercel Runtime Logs), the production_errors row that
+ * /dashboard/system-health renders as text, and the alert email sent to
+ * the owner. Before this, none of them scrubbed, and every API route in
+ * the product logs through here — so a provider message that carried a
+ * token (an SDK echoing the Authorization header it just sent, a
+ * Postgres error carrying a connection string, a fetch failure that
+ * includes the URL) reached a log, a database row, a web page and an
+ * inbox verbatim. Verified before the fix with a service-role-shaped JWT:
+ * it came back out of console.error unchanged.
+ *
+ * SCRUBBED BY ITERATION, NOT BY LIST. Every field of the returned object
+ * is passed through scrubMaybe, rather than each one being named. Naming
+ * them is how the next field added — the one somebody adds in a hurry
+ * while debugging — arrives unscrubbed while this comment still claims
+ * otherwise.
+ */
+export function describeError(error: unknown): ErrorFields {
+  const raw = readErrorFields(error);
+  const scrubbed: Record<string, string | undefined> = {};
+  for (const [key, value] of Object.entries(raw)) scrubbed[key] = scrubMaybe(value);
+  return scrubbed as unknown as ErrorFields;
+}
+
 // Structured, PII-free error log for API routes — written to stderr so it
 // shows up in Vercel's deployment/function logs (Functions tab → a given
 // invocation, or `vercel logs`). Callers must not pass request bodies,
@@ -53,7 +84,16 @@ export function logApiError(
   error: unknown,
   context?: ErrorLogContext
 ): void {
-  const { name, message, code, details, hint } = describeError(error);
+  const { name, message, code, details, hint, stack } = describeError(error);
+
+  // The context is documented as safe metadata, and it is scrubbed
+  // anyway. "Callers must not pass secrets" is a rule enforced by
+  // nobody across ~200 call sites; this line costs one pass over a
+  // handful of short values and removes the question.
+  const safeContext: ErrorLogContext = {};
+  if (context) {
+    for (const [key, value] of Object.entries(context)) safeContext[key] = scrubMaybe(value);
+  }
 
   console.error(
     JSON.stringify({
@@ -65,7 +105,7 @@ export function logApiError(
       code,
       details,
       hint,
-      ...context,
+      ...safeContext,
     })
   );
 
@@ -73,11 +113,15 @@ export function logApiError(
   // answers "is something broken right now". Fire-and-forget on purpose:
   // logging must never slow down or fail the request that is already
   // going wrong, and recordProductionError swallows its own failures.
+  // Both fields come from describeError, which is where the scrubbing
+  // happens. Reading error.stack directly here — which is what this
+  // line used to do — puts an unscrubbed string into a database row
+  // that a web page renders.
   void persistAndMaybeAlert({
     message,
-    stack: error instanceof Error ? error.stack ?? null : null,
+    stack: stack ?? null,
     route: endpoint,
-    userId: typeof context?.userId === "string" ? context.userId : null,
+    userId: typeof safeContext.userId === "string" ? safeContext.userId : null,
   });
 }
 

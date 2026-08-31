@@ -345,6 +345,98 @@ const overloaded = sql(`select coalesce(string_agg(proname || ' x' || n, ', '), 
      group by p.proname having count(*) > 1) s`);
 check(`no function in public is overloaded${overloaded ? " — found: " + overloaded : ""}`, overloaded === "");
 
+console.log("\n== A SETTLEMENT REPLAYED: charged once, or charged twice? ==");
+// THE DEFECT, AND BOTH HALVES OF THE QUESTION IT SITS BETWEEN.
+//
+// settle_reservation opened with what reads like a guard —
+// `... and status = 'active'` — and never read its row count. When the
+// reservation had already been settled the UPDATE matched nothing and the
+// function carried straight on to subtract the credits again. A retried
+// job, a replayed request or a second client nudge charged twice.
+//
+// And the naive fix is the other bug: returning early whenever the
+// compare-and-swap misses would refuse to charge a reservation that
+// EXPIRED mid-action and was swept — work that happened and is owed.
+// Both directions are asserted here.
+const settleCall = (id, credits) =>
+  sql(
+    `select settle_reservation('${USER}', ${id ? `'${id}'` : "null"}, ${credits}, 'replay_probe',
+       1000, 500, 0, 0, 0, 1, 0.01, 0.009, 4.0, 4.0, '{}'::jsonb, '{}'::jsonb)`
+  );
+const ledgerRows = (feature) =>
+  Number(sql(`select count(*) from public.credit_transactions
+               where user_id = '${USER}' and action_type = '${feature}'`));
+const costRows = (feature) =>
+  Number(sql(`select count(*) from public.ai_cost_log where user_id = '${USER}' and feature = '${feature}'`));
+
+{
+  reset(100);
+  const r = reserve(30);
+  settleCall(r.id, 12);
+  eq("first settlement charges 12", balance(), 88);
+  eq("...and writes one ledger row", ledgerRows("replay_probe"), 1);
+  eq("...and one cost-log row", costRows("replay_probe"), 1);
+
+  // THE REPLAY.
+  settleCall(r.id, 12);
+  eq("the SECOND settlement charges nothing", balance(), 88);
+  eq("...and writes no second ledger row", ledgerRows("replay_probe"), 1);
+  eq("...and no second cost-log row", costRows("replay_probe"), 1);
+
+  // A third, to be sure it is a property and not an off-by-one.
+  settleCall(r.id, 12);
+  eq("nor does a third", balance(), 88);
+}
+
+{
+  // THE OTHER HALF. The reservation expired and a sweep marked it, and
+  // then the action finished. The work happened; it is owed.
+  reset(100);
+  const r = reserve(30);
+  sql(`update public.credit_reservations set status = 'expired', resolved_at = now() where id = '${r.id}'`);
+  settleCall(r.id, 12);
+  eq("an EXPIRED reservation still charges — a missed charge is the other bug", balance(), 88);
+  eq("...and writes its ledger row", ledgerRows("replay_probe"), 1);
+}
+
+{
+  // A released reservation is a refund that already happened, but the
+  // action may still have run. Same reasoning as expired: charge.
+  reset(100);
+  const r = reserve(30);
+  sql(`select release_reservation('${USER}', '${r.id}')`);
+  settleCall(r.id, 12);
+  eq("a RELEASED reservation still charges", balance(), 88);
+}
+
+{
+  // No reservation at all — the bypass and the no-hold features. There is
+  // no row to compare against, so a replay DOES charge twice. Asserted as
+  // the real behaviour rather than left to be discovered: if this ever
+  // changes, the comment in the migration has to change with it.
+  reset(100);
+  settleCall(null, 12);
+  settleCall(null, 12);
+  eq("with NO reservation id, a replay charges twice — the documented limit", balance(), 76);
+}
+
+{
+  // Concurrency, not just sequence: two settlements of one reservation
+  // arriving together. The UPDATE takes a row lock, so the loser reads
+  // the winner's committed 'settled' and returns.
+  reset(100);
+  const r = reserve(30);
+  const both = `begin; select settle_reservation('${USER}', '${r.id}', 12, 'replay_probe',
+      1000, 500, 0, 0, 0, 1, 0.01, 0.009, 4.0, 4.0, '{}'::jsonb, '{}'::jsonb); commit;`;
+  execFileSync("sh", ["-c",
+    `psql ${process.env.DATABASE_URL ? `-d "${process.env.DATABASE_URL}"` : ""} -v ON_ERROR_STOP=1 -tAc "${both.replace(/\n/g, " ").replace(/"/g, '\\"')}" & ` +
+    `psql ${process.env.DATABASE_URL ? `-d "${process.env.DATABASE_URL}"` : ""} -v ON_ERROR_STOP=1 -tAc "${both.replace(/\n/g, " ").replace(/"/g, '\\"')}" & wait`],
+    { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }
+  );
+  eq("two simultaneous settlements charge once", balance(), 88);
+  eq("...and write one ledger row", ledgerRows("replay_probe"), 1);
+}
+
 // Leave nothing behind — the next run asserts absolute numbers.
 sql(`delete from public.credit_reservations where user_id = '${USER}'`);
 sql(`delete from public.credit_transactions where user_id = '${USER}'`);

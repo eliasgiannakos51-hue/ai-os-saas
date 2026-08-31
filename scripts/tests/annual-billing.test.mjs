@@ -253,8 +253,20 @@ function plansMonthKey(iso) {
 console.log("\n== 5. PRORATION: an upgrade changes the subscription, it does not sell a second one ==");
 const checkoutSrc = readFileSync("src/app/api/checkout/route.ts", "utf8");
 check(
+  // \s* rather than nothing between them: the call gained a second
+  // argument (a Stripe idempotency key) and Prettier moved the
+  // subscription id onto its own line, which turned this into a check
+  // about formatting. The property is which subscription is updated.
   "an existing subscription is updated in place",
-  /stripe\.subscriptions\.update\(existingSubscriptionId/.test(checkoutSrc)
+  /stripe\.subscriptions\.update\(\s*existingSubscriptionId/.test(checkoutSrc)
+);
+check(
+  // ADDED WHEN THE ABOVE WENT RED. `always_invoice` charges the card
+  // there and then, and this call had no replay protection at all while
+  // the affiliate transfer and the overage invoice item both did. What
+  // each guard is and why is in scripts/tests/money-races.test.mjs.
+  "…and a double-submit cannot charge the card twice",
+  /scope: "subscription_change"/.test(checkoutSrc) && /idempotencyKey: `sub_update:/.test(checkoutSrc)
 );
 check(
   "…with proration",

@@ -213,7 +213,43 @@ export async function POST(request: Request) {
               : (typeof planDefinition?.price === "number" ? planDefinition.price : 0);
           const isUpgrade = nextMonthly > currentMonthly;
 
-          await stripe.subscriptions.update(existingSubscriptionId, {
+          // TWO CLICKS MUST NOT BE TWO CHARGES.
+          //
+          // `always_invoice` on an upgrade does not schedule anything: it
+          // creates a prorated invoice and charges the card there and
+          // then. This call had no replay protection of any kind, while
+          // the two Stripe calls that were harder to get wrong — the
+          // affiliate transfer and the overage invoice item — both had
+          // it. A double-submit (two tabs, a retry after a timeout, a
+          // client that fires twice) sends two updates that both read the
+          // OLD price and both prorate from it.
+          //
+          // The route's own rate limit does not stop it: ten checkout
+          // attempts an hour is the right bound for "stop hammering
+          // Stripe" and far too loose for "charge this card once".
+          //
+          // THE PRIMARY GUARD IS OURS, not Stripe's. consume_rate_limit()
+          // is atomic — measured at exactly N of 30 concurrent callers
+          // allowed, in rate-limit-atomicity.dbtest.mjs — so one intent
+          // gets through and the other is refused, whatever the timing.
+          // Two minutes covers a double-submit and expires long before a
+          // customer could legitimately want the same change again.
+          const changeGuard = await checkRateLimit({
+            scope: "subscription_change",
+            identifier: `${user.id}:${plan}:${interval}`,
+            maxAttempts: 1,
+            windowMinutes: 2,
+          });
+          if (!changeGuard.allowed) {
+            // 409, not 429: this is not "too fast", it is "that change is
+            // already in flight". The first request is doing the work.
+            return NextResponse.json(
+              { ok: true, updated: true, alreadyInFlight: true, redirectPath: successPath },
+              { status: 409 }
+            );
+          }
+
+          const subscriptionUpdate = {
             items: [{ id: planItem.id, price: planPriceId, quantity: 1 }],
             proration_behavior: isUpgrade ? "always_invoice" : "create_prorations",
             // Stripe otherwise keeps the old anniversary when moving
@@ -221,6 +257,22 @@ export async function POST(request: Request) {
             // customer has no reason to expect.
             ...(current.interval !== interval ? { billing_cycle_anchor: "now" as const } : {}),
             metadata: { supabase_user_id: user.id, plan, interval },
+          };
+
+          // THE BACKSTOP, and its limitation stated rather than left to be
+          // discovered. A Stripe idempotency key lives for 24 hours, so a
+          // key derived only from (subscription, plan, interval) would
+          // silently no-op a customer who moved A -> B -> A -> B inside a
+          // day: Stripe would replay the first response and the plan would
+          // not change while the app reported success. The two-minute
+          // bucket keeps the replay window at the size of a double-click.
+          // A pair of clicks that straddles a bucket boundary is not
+          // deduped HERE — that is what the database guard above is for,
+          // and it has no buckets.
+          await stripe.subscriptions.update(existingSubscriptionId, subscriptionUpdate, {
+            idempotencyKey: `sub_update:${existingSubscriptionId}:${plan}:${interval}:${Math.floor(
+              Date.now() / 120000
+            )}`,
           });
 
           diagLog(

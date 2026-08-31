@@ -266,7 +266,13 @@ check(
   // the affiliate transfer and the overage invoice item both did. What
   // each guard is and why is in scripts/tests/money-races.test.mjs.
   "…and a double-submit cannot charge the card twice",
-  /scope: "subscription_change"/.test(checkoutSrc) && /idempotencyKey: `sub_update:/.test(checkoutSrc)
+  // A dot, not a literal backtick: an UNBALANCED backtick inside a regex
+  // literal is legal JavaScript and unreadable to any tokeniser built on
+  // regexes, including scripts/lib/test-export-drift.mjs's. Writing one
+  // here made that gate report this file as reading `pricing.$` from
+  // model-pricing.ts. Its blankStrings() paired my backtick with the next
+  // one in the file and blanked everything between.
+  /scope: "subscription_change"/.test(checkoutSrc) && /idempotencyKey: .sub_update:/.test(checkoutSrc)
 );
 check(
   "…with proration",

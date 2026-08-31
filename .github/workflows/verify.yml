@@ -215,7 +215,17 @@ jobs:
   # THE ALERT. Runs only when something above failed.
   alert:
     name: open an issue when CI goes red
-    needs: [verify, prodtest-smoke]
+    # EVERY job above, not the two I happened to remember. The nightly
+    # `prodtests` job was left out of this list when the alert was
+    # written, so a red nightly — the only job that runs the full browser
+    # suite — would have failed in silence. An alert with a hole in it is
+    # the thing it exists to prevent.
+    #
+    # `prodtests` is skipped on a push (it is schedule/dispatch only) and
+    # a skipped dependency does not stop this: `failure()` is true when
+    # ANY ancestor failed, and false when they are merely skipped.
+    # Enforced by scripts/tests/ci-coverage.test.mjs.
+    needs: [verify, prodtest-smoke, prodtests]
     if: failure()
     runs-on: ubuntu-latest
     permissions:

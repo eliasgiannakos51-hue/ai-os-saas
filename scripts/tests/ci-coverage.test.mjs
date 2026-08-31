@@ -109,9 +109,30 @@ console.log("== 3b. a red run tells somebody ==");
   check("there is a job that runs when CI goes red", /^\s{2}alert:/m.test(wf),
     "a CI nobody looks at is the same as a CI that does not exist");
   check("...gated on failure(), so it does not fire on green", /if: failure\(\)/.test(alertBlock));
-  check("...and it waits for the jobs it reports on",
-    /needs: \[verify, prodtest-smoke\]/.test(alertBlock),
-    "a job with no `needs` runs before the thing it is meant to report has finished");
+  // EVERY JOB, DERIVED — because the first version of this check named
+  // the two jobs the alert happened to list, and the workflow had three.
+  // The nightly `prodtests` job, the only one that runs the full browser
+  // suite, was outside the alert's `needs`, so a red nightly would have
+  // failed in silence — and this gate PINNED that hole in place by
+  // asserting the exact incomplete list. A gate that spells out the
+  // answer it is checking cannot notice when the answer is wrong.
+  // FROM INSIDE `jobs:` ONLY. `on:` has two-space children of its own
+  // (push, schedule, workflow_dispatch), and the first version of this
+  // counted them as jobs — reporting "3/7" and naming `push` as a job
+  // that can fail unwatched. A wrong denominator is a wrong finding.
+  const jobsBlock = wf.slice(wf.search(/^jobs:$/m));
+  const jobNames = [...jobsBlock.matchAll(/^ {2}([a-z][\w-]*):$/gm)].map((m) => m[1]);
+  check(`the workflow's jobs were parsed (${jobNames.join(", ")})`, jobNames.length >= 3, jobNames.join(","));
+  const needsLine = alertBlock.match(/needs:\s*\[([^\]]*)\]/);
+  const alertNeeds = needsLine ? needsLine[1].split(",").map((x) => x.trim()).filter(Boolean) : [];
+  const unwatched = jobNames.filter((j) => j !== "alert" && !alertNeeds.includes(j));
+  check(
+    `...and it waits for every job it reports on (${alertNeeds.length}/${jobNames.length - 1})`,
+    needsLine !== null && unwatched.length === 0,
+    unwatched.length
+      ? `${unwatched.join(", ")} can fail without opening an issue`
+      : "a job with no `needs` runs before the thing it is meant to report has finished"
+  );
   check("...it opens an issue, which survives a closed tab",
     /issues\.create\(/.test(alertBlock) && /issues: write/.test(wf));
   check("...and de-duplicates rather than filing one per push",

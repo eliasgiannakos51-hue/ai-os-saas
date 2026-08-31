@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { exportableTables, redactRow } from "@/lib/gdpr/user-data-registry";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,15 @@ export const maxDuration = 120; // @function-limit 120
 // function's memory and fail the whole export; when it bites, the export
 // says so IN the file rather than silently returning a prefix.
 const MAX_ROWS_PER_TABLE = 50_000;
+
+// FIVE AN HOUR. A right of access is a right, not a rate — but one
+// request here is ninety-two sequential queries and up to two minutes of
+// function time, and nothing bounded it. A signed-in account could hold
+// the connection pool open against everybody else on the instance for as
+// long as it liked, at no cost to itself. Five is far more than anybody
+// exercising Article 15 needs and far fewer than a loop.
+const EXPORT_MAX_PER_HOUR = 5;
+const EXPORT_WINDOW_MINUTES = 60;
 
 /**
  * GDPR Article 15 — the user's complete personal data, as JSON.
@@ -40,6 +50,25 @@ export async function GET() {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    // Per account, not per IP: the cost is in the queries this user's
+    // rows require, and an IP bucket would let one account spread the
+    // load across connections while blocking a household behind one NAT.
+    const { allowed } = await checkRateLimit({
+      scope: "account_export",
+      identifier: user.id,
+      maxAttempts: EXPORT_MAX_PER_HOUR,
+      windowMinutes: EXPORT_WINDOW_MINUTES,
+    });
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: `You can download a full export ${EXPORT_MAX_PER_HOUR} times an hour. Please try again shortly — your data is not going anywhere.`,
+        },
+        { status: 429 }
+      );
     }
 
     const tables = exportableTables();

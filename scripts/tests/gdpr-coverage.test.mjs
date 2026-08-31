@@ -329,5 +329,28 @@ if (existsSync(oldButton)) {
   );
 }
 
+console.log("\n== 6. the two GDPR routes are bounded ==");
+// A right of access is a right, not a rate — but one export is
+// ninety-two sequential queries and up to two minutes of function time,
+// and nothing bounded it. An account could hold the connection pool open
+// against everybody else on the instance for as long as it liked, for
+// free. The erasure route has been bounded since it was written; the
+// export was not, and the asymmetry is the tell.
+{
+  const exportSrc = readFileSync("src/app/api/account/export/route.ts", "utf8");
+  check('the export is rate limited per ACCOUNT', /scope: "account_export"/.test(exportSrc) &&
+    /identifier: user\.id/.test(exportSrc),
+    "an IP bucket would block a household behind one NAT and let one account spread its load");
+  check("...and says so with a 429 rather than an empty file",
+    /status: 429/.test(exportSrc) && /times an hour/.test(exportSrc));
+  const confirmSrc = readFileSync("src/app/api/delete-account/confirm/route.ts", "utf8");
+  check("the erasure confirmation is rate limited too", /checkRateLimit\(\{/.test(confirmSrc));
+  // The number itself, so a change to it is a change somebody sees.
+  const n = exportSrc.match(/const EXPORT_MAX_PER_HOUR = (\d+);/);
+  check(`the export ceiling is a named constant (${n ? n[1] : "none"})`,
+    Boolean(n) && Number(n[1]) >= 3 && Number(n[1]) <= 20,
+    "below 3 is a right made awkward; above 20 is not a bound");
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length) process.exit(1);

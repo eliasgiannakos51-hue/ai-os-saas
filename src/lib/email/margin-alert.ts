@@ -1,4 +1,5 @@
 import "server-only";
+import { escapeHtml } from "@/lib/html-escape";
 import { createResendClient } from "@/lib/resend";
 import { senderAddress } from "@/lib/email/resend-config";
 import { ADMIN_EMAILS } from "@/lib/auth/admin-emails";
@@ -23,13 +24,6 @@ import { ADMIN_EMAILS } from "@/lib/auth/admin-emails";
 const COOLDOWN_MS = 15 * 60 * 1000;
 let lastSentAt = 0;
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 /**
  * Emails the owner when a settlement lands under the guaranteed margin.

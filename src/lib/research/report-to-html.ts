@@ -1,3 +1,4 @@
+import { escapeHtml } from "@/lib/html-escape";
 // Turns a finished research report into the HTML the Documents editor
 // stores, safely.
 //
@@ -30,14 +31,6 @@
 
 export type ReportSource = { title: string; url: string };
 
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
 
 // Applied to text that is ALREADY escaped, so the only < > it can produce
 // are the ones written here.

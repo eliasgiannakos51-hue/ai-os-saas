@@ -1,4 +1,5 @@
 import "server-only";
+import { escapeHtml } from "@/lib/html-escape";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createResendClient } from "@/lib/resend";
 import { senderAddress } from "@/lib/email/resend-config";
@@ -44,13 +45,6 @@ export type DeliveryOutcome = {
   notified: boolean;
 };
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 /**
  * Claim the slot, then deliver. Never throws: this runs inside a cron

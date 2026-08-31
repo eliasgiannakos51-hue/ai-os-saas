@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { escapeHtml } from "@/lib/html-escape";
 import { useTranslations } from "next-intl";
 import { useCredits } from "@/components/credits/credits-context";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
@@ -487,11 +488,3 @@ function resolveTimeZone(): string {
   }
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}

@@ -1,4 +1,8 @@
 import { attr, decodeEntities, hasAttr } from "./html-text";
+// ONE ESCAPER — see lib/html-escape.ts. This file kept two of its own
+// (escapeAttr, escapeText), each covering fewer characters than the
+// shared one, and both writing into a PUBLISHED page's attributes.
+import { escapeHtml } from "@/lib/html-escape";
 
 /**
  * EVERY IMAGE ENDS UP WITH AN alt ATTRIBUTE.
@@ -70,7 +74,7 @@ export function enforceImageAltText(html: string): AltTextResult {
     // Inserted right after "<img" so it lands before src — where a
     // person reading the file expects it, and where it cannot end up
     // inside another attribute's value.
-    return tag.replace(/^<img\b/i, `<img alt="${escapeAttr(derived)}"`);
+    return tag.replace(/^<img\b/i, `<img alt="${escapeHtml(derived)}"`);
   });
 
   return { html: out, filled, markedDecorative, untouched };
@@ -119,5 +123,3 @@ function filenameWords(src: string | null): string {
   return useful.length >= 2 ? useful.join(" ") : "";
 }
 
-const escapeAttr = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

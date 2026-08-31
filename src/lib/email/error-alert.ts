@@ -1,4 +1,5 @@
 import "server-only";
+import { escapeHtml } from "@/lib/html-escape";
 import { createResendClient } from "@/lib/resend";
 import { senderAddress } from "@/lib/email/resend-config";
 import { ADMIN_EMAILS } from "@/lib/auth/admin-emails";
@@ -81,11 +82,3 @@ export async function sendErrorAlertEmail(params: {
   }
 }
 
-// The message comes from a thrown exception, which can contain anything.
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

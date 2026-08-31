@@ -1,4 +1,8 @@
 import "server-only";
+// TELEGRAM'S HTML PARSE MODE IS NOT HTML — see lib/html-escape.ts.
+// This file escaped the FEWEST characters of the eight escapers in src/,
+// which read as the worst drift and was the one deliberate case.
+import { escapeTelegramHtml } from "@/lib/html-escape";
 import { CONTROL_TIMEOUT_MS } from "@/lib/ai/providers/failover";
 
 /**
@@ -53,9 +57,9 @@ export async function sendTelegram(params: {
   // contain constantly, and a rejected message is a notification that
   // silently never arrives.
   const text =
-    `<b>${escapeHtml(params.title)}</b>` +
-    (params.body ? `\n${escapeHtml(params.body)}` : "") +
-    (params.url ? `\n\n${escapeHtml(params.url)}` : "");
+    `<b>${escapeTelegramHtml(params.title)}</b>` +
+    (params.body ? `\n${escapeTelegramHtml(params.body)}` : "") +
+    (params.url ? `\n\n${escapeTelegramHtml(params.url)}` : "");
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), CONTROL_TIMEOUT_MS);
@@ -91,6 +95,3 @@ export async function sendTelegram(params: {
   }
 }
 
-function escapeHtml(value: string): string {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}

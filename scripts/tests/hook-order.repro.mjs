@@ -286,9 +286,16 @@ const WIDTHS = [[375, 800], [768, 1024], [1024, 800], [1280, 900]];
 
 for (let pass = 0; pass < RUNS; pass++) {
   const page = await ctx.newPage();
-  page.on("console", (m) => { if (m.type() === "error") allErrors.push(`[pass ${pass + 1}] ${m.text()}`); });
-  page.on("pageerror", (e) => allErrors.push(`[pass ${pass + 1}] PAGEERROR ${e.message}\n${e.stack ?? ""}`));
+  // WHICH ROUTE. Without this the report says "6 reproduced" and not
+  // where, and six identical minified stacks are indistinguishable — I
+  // read one run's six as "deterministic on /dashboard/favorites" when
+  // three runs of the same harness gave 6, then 1, then 4. A count with
+  // no attribution cannot support a claim about a cause.
+  let visiting = "(before the first route)";
+  page.on("console", (m) => { if (m.type() === "error") allErrors.push(`[pass ${pass + 1} · ${visiting}] ${m.text()}`); });
+  page.on("pageerror", (e) => allErrors.push(`[pass ${pass + 1} · ${visiting}] PAGEERROR ${e.message}\n${e.stack ?? ""}`));
   for (const route of SEQUENCE) {
+    visiting = route;
     try {
       await page.goto(`http://127.0.0.1:${PORT}${route}`, { waitUntil: "domcontentloaded", timeout: 60000 });
       for (const [w, h] of WIDTHS) {
@@ -317,6 +324,20 @@ for (const e of [...new Set(real)].slice(0, 12)) console.log("\n" + e.slice(0, 1
 
 console.log("\n════════ HOOK-ORDER ERRORS ════════");
 console.log(found.length === 0 ? `none in ${RUNS * SEQUENCE.length} route loads` : `${found.length} reproduced`);
+// COUNTED PER ROUTE, because that is the question. An intermittent fault
+// spread over twenty-nine routes and one concentrated on a single route
+// are different bugs, and the totals are identical.
+if (found.length > 0) {
+  const byRoute = new Map();
+  for (const f of found) {
+    const route = f.match(/^\[pass \d+ · ([^\]]+)\]/)?.[1] ?? "(unattributed)";
+    byRoute.set(route, (byRoute.get(route) ?? 0) + 1);
+  }
+  console.log(`  across ${byRoute.size} route(s) of ${SEQUENCE.length}, ${RUNS} passes:`);
+  for (const [route, n] of [...byRoute].sort((a, b) => b[1] - a[1])) {
+    console.log(`    ${String(n).padStart(3)}x  ${route}`);
+  }
+}
 for (const f of [...new Set(found)]) console.log("\n" + f.slice(0, 4000));
 
 await browser.close();

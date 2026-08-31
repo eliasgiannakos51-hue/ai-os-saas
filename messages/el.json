@@ -808,7 +808,8 @@
           "help": "Επικόλλησε ένα webhook URL του Discord για το κανάλι που θέλεις.",
           "placeholder": "https://discord.com/api/webhooks/…"
         }
-      }
+      },
+      "emailNotConfigured": "Το email δεν έχει ρυθμιστεί ακόμα σε αυτή την εγκατάσταση, οπότε τίποτα δεν μπορεί να σταλεί στα εισερχόμενά σας."
     },
     "overage": {
       "title": "Υπέρβαση χρήσης",

@@ -459,3 +459,138 @@ export function reportEnvOnce(env: Record<string, string | undefined> = process.
   }
   return report;
 }
+
+// =====================================================================
+// THE PROBLEMS NO SINGLE VARIABLE HAS
+// =====================================================================
+//
+// Everything above is a question about ONE variable: is it set, and does
+// its value look sane. The worst configuration failures in this product
+// are not of that shape. They are PAIRS, where each half is individually
+// present and reasonable and the combination is broken — and a screen
+// built from a per-variable list shows two green rows and no problem.
+//
+// The one that made this necessary: RESEND_API_KEY set, RESEND_FROM_EMAIL
+// unset. Both rows read as fine (the second has a documented fallback).
+// The fallback is Resend's shared test address, which delivers ONLY to
+// the Resend account owner. So the operator's own mail arrives, every
+// customer's is refused one API call at a time, and the deployment looks
+// configured from the only seat that would have noticed.
+//
+// NOT A THROW AND NOT A BUILD FAILURE, for the same reason as everything
+// else in this file: environment validation that can break a deploy is
+// worse than the problem it solves. These are rendered, red, on
+// /dashboard/system-health.
+
+export type EnvWarning = {
+  /** Stable id, so a screen can key on it without matching prose. */
+  key: string;
+  /** critical: something the product does today is silently not working. */
+  severity: "critical" | "warning";
+  title: string;
+  detail: string;
+  /** The variables involved, so the reader knows what to go and set. */
+  variables: string[];
+};
+
+/** Set, and not just whitespace. */
+function has(env: NodeJS.ProcessEnv, name: string): boolean {
+  return typeof env[name] === "string" && (env[name] as string).trim().length > 0;
+}
+
+/** One of a pair without the other. */
+function halfPair(env: NodeJS.ProcessEnv, a: string, b: string): boolean {
+  return has(env, a) !== has(env, b);
+}
+
+export function environmentWarnings(env: NodeJS.ProcessEnv = process.env): EnvWarning[] {
+  const out: EnvWarning[] = [];
+
+  // THE WORST DEFAULT IN THE PRODUCT.
+  if (has(env, "RESEND_API_KEY")) {
+    const from = (env.RESEND_FROM_EMAIL ?? "").trim();
+    if (!from || /@resend\.dev>?$/.test(from)) {
+      out.push({
+        key: "email_test_sender",
+        severity: "critical",
+        title: "Email reaches nobody but you",
+        detail:
+          "RESEND_API_KEY is set and RESEND_FROM_EMAIL is not, so mail is sent from Resend's shared test address. Resend delivers that only to the Resend account owner and refuses every other recipient. Welcome emails, agent results, team invites and password-adjacent mail are all accepted by the API and reach no customer. Verify a domain in Resend, then set RESEND_FROM_EMAIL to an address on it.",
+        variables: ["RESEND_FROM_EMAIL", "RESEND_API_KEY"],
+      });
+    }
+  }
+
+  // EITHER HALF ALONE IS A CHECKOUT THAT TAKES MONEY AND GRANTS NOTHING.
+  if (halfPair(env, "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET")) {
+    out.push({
+      key: "stripe_half_configured",
+      severity: "critical",
+      title: "Stripe is half configured",
+      detail: has(env, "STRIPE_SECRET_KEY")
+        ? "Checkout can take a payment and the webhook that grants the plan is unverifiable, so every webhook is rejected: the customer pays, Stripe reports success, and nothing is granted."
+        : "The webhook secret is set but there is no secret key, so no Checkout session can be created at all.",
+      variables: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"],
+    });
+  }
+
+  // A KEY PAIR IS NOT A PAIR WITH ONE HALF.
+  if (halfPair(env, "NEXT_PUBLIC_VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY")) {
+    out.push({
+      key: "vapid_half_configured",
+      severity: "warning",
+      title: "Web Push has one half of its key pair",
+      detail:
+        "Both halves are required: the browser needs the public key to create a subscription at all, and the server needs the private key to sign the JWT every push service demands. With one, nothing is ever delivered.",
+      variables: ["NEXT_PUBLIC_VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY"],
+    });
+  }
+
+  for (const [a, b, what] of [
+    ["GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET", "Gmail and Google Drive"],
+    ["SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET", "Slack"],
+  ] as const) {
+    if (halfPair(env, a, b)) {
+      out.push({
+        key: `oauth_half_${a.toLowerCase()}`,
+        severity: "warning",
+        title: `${what} has one half of its OAuth credentials`,
+        detail: `The provider stays hidden from the integrations list until both are set, so this reads as "not built" rather than "not configured".`,
+        variables: [a, b],
+      });
+    }
+  }
+
+  // A PROVIDER OFFERED THAT CANNOT STORE ITS OWN TOKEN.
+  const anyOauth =
+    has(env, "GOOGLE_OAUTH_CLIENT_ID") || has(env, "SLACK_CLIENT_ID") || has(env, "TELEGRAM_BOT_TOKEN");
+  if (anyOauth && !has(env, "INTEGRATION_ENCRYPTION_KEY")) {
+    out.push({
+      key: "integrations_without_encryption_key",
+      severity: "warning",
+      title: "An integration is configured with nowhere safe to put its token",
+      detail:
+        "INTEGRATION_ENCRYPTION_KEY encrypts every stored third-party token. Without it the connect flow refuses rather than storing one in the clear — which is the right refusal, and it makes the provider look broken. Generate one with: openssl rand -hex 32",
+      variables: ["INTEGRATION_ENCRYPTION_KEY"],
+    });
+  }
+
+  // FAILOVER TURNED ON WITH NOBODY TO FAIL OVER TO.
+  if (
+    (env.AI_FAILOVER_ENABLED ?? "").trim().toLowerCase() === "true" &&
+    !has(env, "GOOGLE_API_KEY") &&
+    !has(env, "GROQ_API_KEY") &&
+    !has(env, "OPENAI_API_KEY")
+  ) {
+    out.push({
+      key: "failover_without_a_second_provider",
+      severity: "warning",
+      title: "Failover is on and there is only one provider",
+      detail:
+        "AI_FAILOVER_ENABLED is true but no key is set for any provider other than Anthropic, so the chain is one long. An Anthropic incident stops every AI feature rather than degrading it.",
+      variables: ["GOOGLE_API_KEY", "GROQ_API_KEY", "OPENAI_API_KEY"],
+    });
+  }
+
+  return out;
+}

@@ -1,8 +1,12 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend";
+import { senderAddress } from "@/lib/email/resend-config";
 import { ADMIN_EMAILS } from "@/lib/auth/admin-emails";
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
+// The From address, from ONE definition — see lib/email/resend-config.ts.
+// This was one of fourteen copies of the same line — the constant AND
+// its fallback, repeated per file. The fallback is the half that decides
+// whether mail reaches anybody, so it now has one definition.
 
 /**
  * Emails the owner when an error crosses an alert threshold.
@@ -33,7 +37,7 @@ export async function sendErrorAlertEmail(params: {
         : `${params.recentCount} occurrences in a short window`;
 
     await resend.emails.send({
-      from: FROM_ADDRESS,
+      from: senderAddress(),
       to: recipients,
       subject: `[Ionexa] ${params.route} is failing — ${reason}`,
       html: `

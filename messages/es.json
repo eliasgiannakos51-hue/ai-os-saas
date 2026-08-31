@@ -808,7 +808,8 @@
           "help": "Pega una URL de webhook de Discord para el canal que quieras.",
           "placeholder": "https://discord.com/api/webhooks/…"
         }
-      }
+      },
+      "emailNotConfigured": "El correo aún no está configurado en esta instalación, así que no se puede entregar nada en tu bandeja de entrada."
     },
     "overage": {
       "title": "Uso adicional",

@@ -808,7 +808,8 @@
           "help": "Collez une URL de webhook Discord pour le salon souhaité.",
           "placeholder": "https://discord.com/api/webhooks/…"
         }
-      }
+      },
+      "emailNotConfigured": "L'e-mail n'est pas encore configuré sur ce déploiement, donc rien ne peut être remis dans votre boîte de réception."
     },
     "overage": {
       "title": "Dépassement d'usage",

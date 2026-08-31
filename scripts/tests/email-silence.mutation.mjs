@@ -22,6 +22,11 @@ const CLIENT = "src/lib/resend.ts";
 const ERROR_ALERT = "src/lib/email/error-alert.ts";
 const MARGIN_ALERT = "src/lib/email/margin-alert.ts";
 const ENV = "src/lib/env-check.ts";
+const SHARED = "src/lib/email/shared-sender.ts";
+const DISPATCH = "src/lib/notify/dispatch.ts";
+const PAGE = "src/app/dashboard/system-health/page.tsx";
+const PANEL = "src/components/settings/notification-settings.tsx";
+const CHANNELS = "src/app/api/notifications/channels/route.ts";
 
 function gateIsGreen() {
   try {
@@ -119,6 +124,75 @@ const MUTATIONS = [
     file: ENV,
     from: '    name: "RESEND_API_KEY",',
     to: '    name: "RESEND_API_KEY_UNLISTED",',
+  },
+
+  // ---- the shared test sender ----
+  {
+    name: "the shared-sender predicate stops recognising it",
+    file: SHARED,
+    from: "  return SHARED_SENDER_PATTERN.test(fromAddress);",
+    to: "  return false;",
+    expect: "the From address falls back to the shared sender",
+  },
+  {
+    name: "the test sender is treated as a lesser version of ok",
+    file: CONFIG,
+    from: '  if (usesSharedTestSender(from)) return "test_sender";',
+    to: "  void usesSharedTestSender;",
+    expect: "a From address that IS the shared sender is the same case",
+  },
+  {
+    name: "an unset From address is called ok",
+    file: CONFIG,
+    from: '  if (!from) return "test_sender";',
+    to: '  if (!from) return "ok";',
+    expect: "a key and no From address is 'test_sender', not 'ok'",
+  },
+  {
+    name: "the dispatcher goes back to asking only whether a key exists",
+    file: DISPATCH,
+    from: "        const mail = senderStatus();",
+    to: '        const mail = resendIsConfigured() ? "ok" : "no_key";',
+    expect: "the dispatcher decides BEFORE the API call",
+  },
+  {
+    name: "the operator's screen stops being told about the pair",
+    file: ENV,
+    from: '        key: "email_test_sender",',
+    to: '        key: "email_test_sender_renamed",',
+    expect: "environmentWarnings flags a key with no From address",
+  },
+  {
+    // NOT `if (false && ...)`: scripts/check-mutation-markers.mjs fails on
+    // that literal, so the mutation would be "caught" by the marker gate
+    // without any behavioural check having looked at it. Comparing the
+    // variable to itself is a real edit that is always false.
+    name: "half a Stripe configuration stops being a warning",
+    file: ENV,
+    from: 'halfPair(env, "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET")',
+    to: 'halfPair(env, "STRIPE_SECRET_KEY", "STRIPE_SECRET_KEY")',
+    expect: "half a Stripe configuration is flagged",
+  },
+  {
+    name: "System Health stops rendering the warnings",
+    file: PAGE,
+    from: "        <EnvWarnings warnings={warnings} />",
+    to: "",
+    expect: "and renders them",
+  },
+  {
+    name: "the panel goes back to assuming email always works",
+    file: PANEL,
+    from: '      if (channel === "in_app") return true;',
+    to: '      if (channel === "in_app" || channel === "email") return true;',
+    expect: "the panel stops treating email as always available",
+  },
+  {
+    name: "the route stops telling the client whether email can be delivered",
+    file: CHANNELS,
+    from: "    emailAvailable: emailIsDeliverable(),",
+    to: "    emailAvailable: true,",
+    expect: "the channels route reports whether email can be delivered",
   },
 
   // ---- THE INSTRUMENT'S OWN CLAUSES ----

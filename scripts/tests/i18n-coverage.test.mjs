@@ -830,6 +830,18 @@ const BARE_TEXT_BASELINE = {
     // nobody can ever read, and the labels are operational terms
     // ("margin", "MRR") that are English in the code they describe.
     "src/components/costs/cost-dashboard.tsx": 12,
+    // The two panels added with the V4.6 final audit, on the same
+    // owner-only page and English for the same reason. What they say is
+    // operational and untranslatable in practice — "SECURITY DEFINER
+    // functions with no pinned search_path" is a PostgreSQL term, and a
+    // Greek rendering of it would be harder to act on, not easier.
+    //
+    // Their TERNARY branches are not on this list and never will be:
+    // English reached through a ternary is banned everywhere, owner-only
+    // or not, because it is how a string escapes every scanner that looks
+    // for a translated call. Both panels name the constant instead.
+    "src/components/system-health/db-exposure.tsx": 3,
+    "src/components/system-health/env-warnings.tsx": 1,
     "src/components/system-health/error-list.tsx": 2,
     // Owner-only diagnostics, English on purpose like the rest of the
     // system-health page it lives on.

@@ -170,6 +170,86 @@ const capability = readFileSync("src/components/system-health/capability-status.
 check("...and the capability screen is built from that same list",
   /ENV_REQUIREMENTS/.test(capability));
 
+// ---------------------------------------------------------------------
+console.log("\n== 5. the shared test sender, which is worse than no key ==");
+// A KEY AND NO FROM ADDRESS IS NOT A LESSER VERSION OF NO KEY.
+//
+// With no key, nothing is sent and every one of the thirteen senders now
+// says which variable is missing. With a key and no RESEND_FROM_EMAIL,
+// From is Resend's shared test address: the OPERATOR's own mail arrives,
+// because Resend allows the account owner, and every customer's is
+// refused one API call at a time. The deployment looks configured from
+// the only seat that would have noticed, and lib/notify/dispatch.ts
+// recorded `sent` for it.
+check("no key at all", cfg.senderStatus({}) === "no_key");
+check("a key and no From address is 'test_sender', not 'ok'",
+  cfg.senderStatus({ RESEND_API_KEY: "re_x" }) === "test_sender");
+check("a From address that IS the shared sender is the same case",
+  cfg.senderStatus({ RESEND_API_KEY: "re_x", RESEND_FROM_EMAIL: "Ionexa <onboarding@resend.dev>" }) === "test_sender");
+check("...whatever its capitalisation",
+  cfg.senderStatus({ RESEND_API_KEY: "re_x", RESEND_FROM_EMAIL: "Ionexa <Onboarding@Resend.dev>" }) === "test_sender");
+check("a real address on a real domain is ok",
+  cfg.senderStatus({ RESEND_API_KEY: "re_x", RESEND_FROM_EMAIL: "Ionexa <hello@ionexa.ai>" }) === "ok");
+check("and only that last case is deliverable",
+  cfg.emailIsDeliverable({ RESEND_API_KEY: "re_x", RESEND_FROM_EMAIL: "Ionexa <hello@ionexa.ai>" }) === true &&
+  cfg.emailIsDeliverable({ RESEND_API_KEY: "re_x" }) === false &&
+  cfg.emailIsDeliverable({}) === false);
+check("the From address falls back to the shared sender, which is why the above matters",
+  cfg.usesSharedTestSender(cfg.senderAddress({})));
+
+const dispatch = stripComments(readFileSync("src/lib/notify/dispatch.ts", "utf8"));
+check("the dispatcher decides BEFORE the API call", /const mail = senderStatus\(\);/.test(dispatch));
+check("...and records a reason code, not a provider sentence",
+  /reason = mail === "no_key" \? "RESEND_API_KEY is not set" : "test_sender"/.test(dispatch));
+check("...and does not reach record(\"sent\") on either", 
+  dispatch.indexOf('const mail = senderStatus()') < dispatch.indexOf('record("sent")'));
+
+// ---------------------------------------------------------------------
+console.log("\n== 6. and it is visible, to both people who could act on it ==");
+const envCheck = await loadTs("src/lib/env-check.ts");
+const warn = envCheck.environmentWarnings({ RESEND_API_KEY: "re_x" });
+check("environmentWarnings flags a key with no From address",
+  warn.some((w) => w.key === "email_test_sender"), JSON.stringify(warn.map((w) => w.key)));
+check("...as critical", warn.find((w) => w.key === "email_test_sender")?.severity === "critical");
+check("...and says nothing when both are set",
+  envCheck.environmentWarnings({ RESEND_API_KEY: "re_x", RESEND_FROM_EMAIL: "a <b@c.io>" })
+     .every((w) => w.key !== "email_test_sender"));
+// THE PAIRS A PER-VARIABLE LIST CANNOT SEE. Stripe half-configured is the
+// other one that costs money.
+check("half a Stripe configuration is flagged",
+  envCheck.environmentWarnings({ STRIPE_SECRET_KEY: "sk_x" }).some((w) => w.key === "stripe_half_configured"));
+check("...and a whole one is not",
+  envCheck.environmentWarnings({ STRIPE_SECRET_KEY: "sk_x", STRIPE_WEBHOOK_SECRET: "whsec_x" })
+     .every((w) => w.key !== "stripe_half_configured"));
+check("a full environment raises nothing",
+  envCheck.environmentWarnings({
+    RESEND_API_KEY: "re_x", RESEND_FROM_EMAIL: "a <b@c.io>",
+    STRIPE_SECRET_KEY: "sk_x", STRIPE_WEBHOOK_SECRET: "whsec_x",
+  }).length === 0);
+
+const page = readFileSync("src/app/dashboard/system-health/page.tsx", "utf8");
+check("System Health computes the warnings", /environmentWarnings\(\)/.test(page));
+check("...and renders them", /<EnvWarnings warnings=\{warnings\} \/>/.test(page));
+
+// AND THE USER, who cannot fix it but should not be left guessing why a
+// column is greyed out.
+const channels = stripComments(readFileSync("src/app/api/notifications/channels/route.ts", "utf8"));
+check("the channels route reports whether email can be delivered",
+  /emailAvailable: emailIsDeliverable\(\)/.test(channels));
+const panel = stripComments(readFileSync("src/components/settings/notification-settings.tsx", "utf8"));
+check("the panel stops treating email as always available",
+  !/channel === "in_app" \|\| channel === "email"/.test(panel) &&
+  /if \(channel === "email"\) return emailAvailable;/.test(panel));
+check("...and says so in a translated string, not English prose",
+  /t\("emailNotConfigured"\)/.test(panel));
+const el = JSON.parse(readFileSync("messages/el.json", "utf8"));
+const ar = JSON.parse(readFileSync("messages/ar.json", "utf8"));
+const zh = JSON.parse(readFileSync("messages/zh.json", "utf8"));
+check("...which exists in Greek, Arabic and Chinese",
+  Boolean(el.settings?.notifications?.emailNotConfigured) &&
+  Boolean(ar.settings?.notifications?.emailNotConfigured) &&
+  Boolean(zh.settings?.notifications?.emailNotConfigured));
+
 console.log("");
 if (failures.length > 0) {
   console.log(`${pass} passed, ${failures.length} FAILED:`);

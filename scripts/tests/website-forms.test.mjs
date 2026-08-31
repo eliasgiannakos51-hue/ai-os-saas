@@ -44,6 +44,9 @@ const ok = (name, cond, detail) => {
 
 const types = await loadTs("src/lib/websites/form-types.ts");
 const delivery = await loadTs("src/lib/websites/form-delivery.ts");
+// The sender logic itself, so the checks about it can be RUN rather than
+// matched against the text of a file it no longer lives in.
+const cfg = await loadTs("src/lib/email/resend-config.ts");
 const {
   FORM_TYPES,
   isFormType,
@@ -285,11 +288,81 @@ console.log("\n3. Email delivery classification");
     usesSharedTestSender("Ionexa AI <hello@ionexa.app>") === false,
   );
   ok("undefined is not", usesSharedTestSender(undefined) === false);
+  // THE PROPERTY, NOT THE FILE. This used to read
+  // `senderSrc.includes(SHARED_TEST_SENDER)` — true only while the
+  // default was written out in the sender file itself, which it no
+  // longer is: the same line lived in fourteen files, fallback and all,
+  // and now has one definition in lib/email/resend-config.ts.
+  //
+  // The claim was never about where the string is. It is: with
+  // RESEND_FROM_EMAIL unset, the address mail is actually sent from is
+  // the shared test sender — because if it stops being, the
+  // unverified-domain warning below is guarding nothing. That is a
+  // question about behaviour, and it is asked by running it.
   ok(
-    "the sender default in the sender file IS the shared address",
-    senderSrc.includes(SHARED_TEST_SENDER),
-    "if this ever stops being the default, the unverified-domain warning is guarding nothing",
+    "with no RESEND_FROM_EMAIL, the address mail is sent from IS the shared one",
+    delivery.usesSharedTestSender(cfg.senderAddress({})),
+    cfg.senderAddress({}),
   );
+  ok(
+    "...and with a real one set, it is not",
+    delivery.usesSharedTestSender(cfg.senderAddress({ RESEND_FROM_EMAIL: "Ionexa <hello@ionexa.ai>" })) === false,
+  );
+  // AND THERE IS ONE DEFINITION, not a second copy that agrees today.
+  // Two spellings of one address fail OPEN: the warning stops appearing
+  // while the mail keeps not arriving.
+  //
+  // NOT AN IDENTITY CHECK. `delivery.usesSharedTestSender ===
+  // cfg.usesSharedTestSender` was the first version of this and it went
+  // red on correct code: load-ts.mjs bundles by CONCATENATION, so each
+  // loadTs() call produces its own module instance and two loads of the
+  // same re-export are two function objects. In the real bundle they are
+  // one; in this harness they can never be. That was the instrument
+  // being wrong, and comparing them would have gone on being wrong
+  // whatever the source said.
+  //
+  // So: the source may not define its own, AND the two must agree on
+  // every case that matters.
+  const deliverySrc = readFileSync("src/lib/websites/form-delivery.ts", "utf8");
+  ok(
+    "form-delivery re-exports the predicate rather than owning one",
+    /export \{[^}]*usesSharedTestSender[^}]*\} from "@\/lib\/email\/shared-sender"/.test(deliverySrc),
+    deliverySrc.match(/export \{[^}]*usesSharedTestSender[^}]*\} from "[^"]+"/)?.[0],
+  );
+  // FROM THE PURE MODULE, AND THAT IS THE POINT. The predicate lived in
+  // lib/email/resend-config.ts for one commit and the BUILD refused it:
+  // that module carries `server-only`, and form-delivery is imported by
+  // components/websites/form-submissions-list.tsx, a client component
+  // that renders each submission's stored email_status. Re-exporting from
+  // a server-only module drags the marker into the browser bundle.
+  //
+  // The address and "is this the test sender" are pure string facts a
+  // browser may know. Whether THIS DEPLOYMENT is configured is a fact
+  // about process.env. They are about one subject and only one of them
+  // may travel.
+  ok(
+    "...and that module is the one a browser may load",
+    !readFileSync("src/lib/email/shared-sender.ts", "utf8").includes('import "server-only"'),
+  );
+  ok(
+    "...and defines no address of its own",
+    !/^\s*(export )?const SHARED_TEST_SENDER\s*=/m.test(deliverySrc),
+  );
+  const senderCases = [
+    "onboarding@resend.dev",
+    "Ionexa AI <onboarding@resend.dev>",
+    "Ionexa AI <Onboarding@Resend.dev>",
+    "Ionexa <hello@ionexa.ai>",
+    "",
+    undefined,
+    null,
+  ];
+  ok(
+    `the two agree on every case (${senderCases.length})`,
+    senderCases.every((c) => delivery.usesSharedTestSender(c) === cfg.usesSharedTestSender(c)),
+    senderCases.filter((c) => delivery.usesSharedTestSender(c) !== cfg.usesSharedTestSender(c)).join(", "),
+  );
+  ok("and the address is the same string", cfg.SHARED_TEST_SENDER === SHARED_TEST_SENDER);
 
   // Faults vs choices.
   for (const status of DELIVERY_FAULTS)
@@ -662,7 +735,7 @@ console.log("\n7. The email sender reports rather than swallows");
   );
   ok(
     "the shared test sender is reported, not called sent",
-    /usesSharedTestSender\(FROM_ADDRESS\)[\s\S]{0,400}status: "unverified_domain"/.test(
+    /usesSharedTestSender\(senderAddress\(\)\)[\s\S]{0,400}status: "unverified_domain"/.test(
       senderSrc,
     ),
   );

@@ -7,7 +7,9 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { CapabilityStatus, type CapabilityRow } from "@/components/system-health/capability-status";
-import { ENV_REQUIREMENTS } from "@/lib/env-check";
+import { ENV_REQUIREMENTS, environmentWarnings } from "@/lib/env-check";
+import { EnvWarnings } from "@/components/system-health/env-warnings";
+import { DbExposure, type ExposureRow } from "@/components/system-health/db-exposure";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { logApiError } from "@/lib/log-error";
 import { ErrorList, type ProductionErrorRow } from "@/components/system-health/error-list";
@@ -49,6 +51,34 @@ export default async function SystemHealthPage() {
     what: req.what,
     set: (process.env[req.name] ?? "").trim() !== "",
   }));
+
+  // THE PAIRS. A per-variable list cannot show a problem that belongs to
+  // two variables — see environmentWarnings' own comment for the one that
+  // made this necessary. Computed here, on the server; only prose and
+  // variable NAMES cross.
+  const warnings = environmentWarnings();
+
+  // WHAT THE DATABASE ITSELF SAYS IT EXPOSES. Read with the service-role
+  // client because db_exposure_report() is SECURITY DEFINER and revoked
+  // from every signed-in role: the counts are a map of where to attack
+  // this database.
+  let exposure: ExposureRow[] | null = null;
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin.rpc("db_exposure_report");
+    if (error) throw error;
+    exposure = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+      key: String(r.check_key ?? ""),
+      found: Number(r.found ?? 0),
+      expected: Number(r.expected ?? 0),
+      ok: Boolean(r.ok),
+      detail: String(r.detail ?? ""),
+    }));
+  } catch (err) {
+    // Not logApiError, for the same reason as the reads below it: this
+    // page must render even when a read it depends on cannot.
+    console.error("system-health: could not read db_exposure_report", err);
+  }
 
   let rows: ProductionErrorRow[] = [];
   let failed = false;
@@ -128,6 +158,12 @@ export default async function SystemHealthPage() {
           helpKey="help.systemHealth"
         />
 
+        {/* FIRST, ABOVE THE ERRORS. A half-configured pair is not an
+            error anybody will ever see in production_errors: nothing
+            throws, nothing is logged, and the thing that would have
+            reported it is the thing that is broken. */}
+        <EnvWarnings warnings={warnings} />
+
         {failed ? (
           <p className="rounded-xl border border-red-500/30 bg-red-500/[0.05] p-4 text-xs text-red-300">
             Could not load errors. Check that the production_errors table exists.
@@ -152,6 +188,8 @@ export default async function SystemHealthPage() {
         <PwaAdoption row={pwa} days={PWA_WINDOW_DAYS} />
 
         <StorageDiagnostics />
+
+        <DbExposure rows={exposure} />
 
         {/* WHAT IS SILENTLY OFF — V4.6. Every variable's status is
             computed here, on the server, and only its NAME and a boolean

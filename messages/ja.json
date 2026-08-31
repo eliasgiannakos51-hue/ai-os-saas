@@ -808,7 +808,8 @@
           "help": "使いたいチャンネルの Discord webhook URL を貼り付けてください。",
           "placeholder": "https://discord.com/api/webhooks/…"
         }
-      }
+      },
+      "emailNotConfigured": "このデプロイではメールがまだ設定されていないため、受信トレイには何も配信できません。"
     },
     "overage": {
       "title": "追加利用",

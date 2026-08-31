@@ -1,12 +1,16 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend";
+import { senderAddress } from "@/lib/email/resend-config";
 import { weeklyDigestEmailHtml } from "@/lib/email/templates";
 import { logApiError } from "@/lib/log-error";
 import { checkEmailAllowed, recordEmailSend } from "@/lib/email/email-gate";
 import { getSiteUrl } from "@/lib/site-url";
 import type { DigestContent } from "@/lib/notify/digest";
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
+// The From address, from ONE definition — see lib/email/resend-config.ts.
+// This was one of fourteen copies of the same line — the constant AND
+// its fallback, repeated per file. The fallback is the half that decides
+// whether mail reaches anybody, so it now has one definition.
 
 // Best-effort, same pattern as sendWelcomeEmail — never throws, just logs.
 //
@@ -41,7 +45,7 @@ export async function sendWeeklyDigestEmail({
 
     const resend = createResendClient();
     const { error } = await resend.emails.send({
-      from: FROM_ADDRESS,
+      from: senderAddress(),
       to: email,
       // The subject carries the week's first real fact, so the inbox line
       // is different every week instead of the same four words.

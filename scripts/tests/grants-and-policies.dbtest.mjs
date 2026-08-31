@@ -145,6 +145,50 @@ console.log("\n== 1b. and the extension functions, which ARE this product's prob
     bcrypt.filter((r) => r[1] === "t").map((r) => r[0]).join(", "));
 }
 
+console.log("\n== 1c. the exposure report, and whether it can go red ==");
+// A HEALTH CHECK THAT CANNOT FAIL IS A DECORATION.
+//
+// public.db_exposure_report() is what /dashboard/system-health asks on
+// every load, and it answers the question the extension migration's
+// header could only hand the reader as a query to run by hand. Eight
+// counts, each with a verdict. If every verdict were computed as `true`
+// the screen would say "all clear" forever and nobody would find out.
+//
+// So the last check here breaks something real, watches the report
+// notice, and puts it back.
+{
+  const fn = rows(`select p.prosecdef, coalesce(array_to_string(p.proconfig, ','), '')
+                     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+                    where n.nspname='public' and p.proname='db_exposure_report'`);
+  check("db_exposure_report exists exactly once", fn.length === 1, JSON.stringify(fn));
+  check("it is SECURITY DEFINER — it reads pg_class and pg_default_acl", fn[0]?.[0] === "t");
+  check("with a pinned search_path", /search_path=public/.test(fn[0]?.[1] ?? ""), fn[0]?.[1]);
+  for (const role of ["anon", "authenticated", "public"]) {
+    check(`${role} cannot execute it — the counts are a map of where to attack`,
+      sql(`select has_function_privilege('${role}', 'public.db_exposure_report()', 'execute')`) === "f");
+  }
+  check("service_role can",
+    sql(`select has_function_privilege('service_role', 'public.db_exposure_report()', 'execute')`) === "t");
+
+  const report = rows(`select check_key, found, expected, ok from public.db_exposure_report() order by 1`);
+  check(`it returns every check (${report.length})`, report.length === 8, report.map((r) => r[0]).join(", "));
+  const notOk = report.filter((r) => r[3] !== "t");
+  check("and this database passes all of them", notOk.length === 0,
+    notOk.map((r) => `${r[0]}: ${r[1]} (expected ${r[2]})`).join("; "));
+
+  // THE PART THAT MATTERS. Hand anon a table it should not have and
+  // require the report to say so.
+  const before = Number(rows(`select found from public.db_exposure_report() where check_key='anon_readable_relations'`)[0][0]);
+  sql(`grant select on public.nav_events to anon`);
+  const during = rows(`select found, ok from public.db_exposure_report() where check_key='anon_readable_relations'`)[0];
+  sql(`revoke select on public.nav_events from anon`);
+  const after = rows(`select found, ok from public.db_exposure_report() where check_key='anon_readable_relations'`)[0];
+  check("a table handed to anon moves the count", Number(during[0]) === before + 1, `${before} -> ${during[0]}`);
+  check("...and turns the verdict red", during[1] === "f", during[1]);
+  check("...and revoking it puts both back", Number(after[0]) === before && after[1] === "t",
+    `${after[0]}, ok=${after[1]}`);
+}
+
 console.log("\n== 5. the one that takes ANOTHER user's id, attacked ==");
 // voice_usage_this_month(p_user_id) is callable by any signed-in user and
 // takes an arbitrary id. That is only safe because it is SECURITY INVOKER

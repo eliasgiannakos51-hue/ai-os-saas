@@ -1,10 +1,14 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend";
+import { senderAddress } from "@/lib/email/resend-config";
 import { subscriptionCancelledEmailHtml } from "@/lib/email/templates";
 import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
+// The From address, from ONE definition — see lib/email/resend-config.ts.
+// This was one of fourteen copies of the same line — the constant AND
+// its fallback, repeated per file. The fallback is the half that decides
+// whether mail reaches anybody, so it now has one definition.
 
 /**
  * Best-effort, never throws — the same posture as every other email in
@@ -35,7 +39,7 @@ export async function sendSubscriptionCancelledEmail({
 
     const resend = createResendClient();
     const { error } = await resend.emails.send({
-      from: FROM_ADDRESS,
+      from: senderAddress(),
       to,
       subject: endsOn ? `your subscription ends on ${endsOn}` : "your subscription is set to end",
       html: subscriptionCancelledEmailHtml({

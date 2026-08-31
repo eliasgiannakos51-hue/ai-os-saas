@@ -808,7 +808,8 @@
           "help": "粘贴你想要的频道的 Discord webhook 地址。",
           "placeholder": "https://discord.com/api/webhooks/…"
         }
-      }
+      },
+      "emailNotConfigured": "此部署尚未配置电子邮件，因此无法向您的收件箱投递任何内容。"
     },
     "overage": {
       "title": "超额用量",

@@ -59,10 +59,16 @@ console.log("\n== 2. it is built from the list the boot check reads ==");
 // drifted by fifty-nine variables". A capability screen with its own
 // array would drift the same way and would look authoritative while
 // doing it.
+// THE IMPORT, NOT THE EXACT LINE. The first version of this pinned the
+// whole statement — `import { ENV_REQUIREMENTS } from "@/lib/env-check"`
+// — and went red the day a SECOND thing was imported from the same
+// module beside it. The claim is that the page gets its list from
+// env-check, and adding `environmentWarnings` to the same braces does not
+// weaken it.
 check(
-  "the page imports ENV_REQUIREMENTS",
-  /import \{ ENV_REQUIREMENTS \} from "@\/lib\/env-check"/.test(page),
-  ""
+  "the page imports ENV_REQUIREMENTS from env-check",
+  /import \{[^}]*\bENV_REQUIREMENTS\b[^}]*\} from "@\/lib\/env-check"/.test(page),
+  page.match(/import \{[^}]*\} from "@\/lib\/env-check";/)?.[0]
 );
 check(
   "...and maps over it rather than declaring its own list",

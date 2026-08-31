@@ -1,8 +1,12 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend";
+import { senderAddress } from "@/lib/email/resend-config";
 import { ADMIN_EMAILS } from "@/lib/auth/admin-emails";
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
+// The From address, from ONE definition — see lib/email/resend-config.ts.
+// This was one of fourteen copies of the same line — the constant AND
+// its fallback, repeated per file. The fallback is the half that decides
+// whether mail reaches anybody, so it now has one definition.
 
 // A margin shortfall is not an outage, so it does not belong in the
 // error-alert threshold machinery ("2+ users affected", "N in a window").
@@ -66,7 +70,7 @@ export async function sendMarginAlertEmail(params: {
         : `${params.achievedMargin.toFixed(3)}x`;
 
     await resend.emails.send({
-      from: FROM_ADDRESS,
+      from: senderAddress(),
       to: recipients,
       subject: `[Ionexa] Margin below ${params.targetMargin}x on ${params.feature} — ${marginText}`,
       html: `

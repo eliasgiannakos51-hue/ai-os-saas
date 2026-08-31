@@ -1,4 +1,4 @@
-import { startEphemeralPostgres, psqlArgs } from "/home/user/ai-os-saas/scripts/lib/ephemeral-postgres.mjs";
+import { startEphemeralPostgres, psqlArgs } from "../lib/ephemeral-postgres.mjs";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 const SP = process.cwd();
@@ -11,10 +11,10 @@ const show = (f) => execFileSync("psql", [...A, "-v","ON_ERROR_STOP=1","-f", f],
 let fails = 0;
 const ok = (n, c, d) => { console.log((c?"  PASS  ":"  FAIL  ")+n+(c?"":"\n        "+d)); if(!c) fails++; };
 try {
-  runFile("/home/user/ai-os-saas/scripts/db/bootstrap-supabase.sql");
+  runFile(`${SP}/scripts/db/bootstrap-supabase.sql`);
   // Deliberately WITHOUT the backfill migration, so this proves the SQL stands alone.
-  for (const f of fs.readdirSync("/home/user/ai-os-saas/supabase/migrations").filter(f=>f.endsWith(".sql")).sort())
-    if (f !== "20260918000000_scrub_existing_error_rows.sql") runFile("/home/user/ai-os-saas/supabase/migrations/"+f);
+  for (const f of fs.readdirSync(`${SP}/supabase/migrations`).filter(f=>f.endsWith(".sql")).sort())
+    if (f !== "20260918000000_scrub_existing_error_rows.sql") runFile(`${SP}/supabase/migrations/${f}`);
   ok("το σχήμα χτίστηκε ΧΩΡΙΣ το backfill migration",
      q(`select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='scrub_secret_text'`) === "0");
 

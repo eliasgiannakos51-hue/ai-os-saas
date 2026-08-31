@@ -1,4 +1,5 @@
 import { foldForMatch } from "@/lib/text/unicode-patterns";
+import { truncate } from "@/lib/text/truncate";
 import { questionWords, scoreTerms } from "@/lib/ai/module-relevance";
 
 /**
@@ -232,9 +233,11 @@ export function selectCrossContext(params: {
   };
 }
 
+// ONE TRUNCATOR — see lib/text/truncate.ts. This was one of seven, and
+// one of the four that returned the string almost UNTRUNCATED at max=0,
+// because slice(0, -1) counts from the end.
 function clamp(text: string, max: number): string {
-  const t = (text ?? "").trim();
-  return t.length > max ? `${t.slice(0, max - 1)}…` : t;
+  return truncate(text, max);
 }
 
 /**

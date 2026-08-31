@@ -1,3 +1,5 @@
+
+import { truncate } from "@/lib/text/truncate";
 /**
  * The one place that decides how long a conversation title may be.
  *
@@ -47,7 +49,8 @@ export function normaliseConversationTitle(raw: string): string {
 export const AUTO_TITLE_MAX_LENGTH = 40;
 
 export function autoTitleFromMessage(message: string): string {
-  const trimmed = message.trim().replace(/\s+/g, " ");
-  if (trimmed.length <= AUTO_TITLE_MAX_LENGTH) return trimmed;
-  return `${trimmed.slice(0, AUTO_TITLE_MAX_LENGTH).trimEnd()}…`;
+  // WAS max+1. The ellipsis was appended AFTER slicing to the full
+  // length, so every truncated title was one character over the limit
+  // this constant exists to state. See lib/text/truncate.ts.
+  return truncate(message, AUTO_TITLE_MAX_LENGTH, { collapseWhitespace: true });
 }

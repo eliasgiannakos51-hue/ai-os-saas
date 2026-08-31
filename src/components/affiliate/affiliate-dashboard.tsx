@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Copy, Check, Share2, Wallet, AlertTriangle } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -48,6 +48,10 @@ export function AffiliateDashboard({
   minPayoutCents: number;
 }) {
   const t = useTranslations("dashboard.affiliate");
+  // The figures on this screen are money a user is owed. formatCents
+  // went through Intl only once this locale reached it — see
+  // lib/affiliate/rules.ts.
+  const locale = useLocale();
   const router = useRouter();
   const { addToast } = useToast();
   const [busy, setBusy] = useState(false);
@@ -159,8 +163,8 @@ export function AffiliateDashboard({
         {[
           { key: "signups", value: String(stats?.referrals ?? 0) },
           { key: "paying", value: String(stats?.converted ?? 0) },
-          { key: "owed", value: formatCents(stats?.accruedCents ?? 0) },
-          { key: "paidOut", value: formatCents(stats?.paidCents ?? 0) },
+          { key: "owed", value: formatCents(stats?.accruedCents ?? 0, locale) },
+          { key: "paidOut", value: formatCents(stats?.paidCents ?? 0, locale) },
         ].map((stat) => (
           <div key={stat.key} className="rounded-2xl border border-border bg-panel p-4">
             <dt className="text-[11px] uppercase tracking-wide text-muted">{t(`stat.${stat.key}`)}</dt>
@@ -179,7 +183,7 @@ export function AffiliateDashboard({
         ) : payoutsEnabled ? (
           // The one thing people actually want to know, said plainly: when.
           <p className="text-xs leading-relaxed text-muted">
-            {t("payoutsReady", { minimum: formatCents(minPayoutCents) })}
+            {t("payoutsReady", { minimum: formatCents(minPayoutCents, locale) })}
           </p>
         ) : (
           <>

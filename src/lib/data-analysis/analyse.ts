@@ -1,4 +1,5 @@
 import { validateChartSpec, type ChartSpec } from "@/lib/data-analysis/charts";
+import { truncate } from "@/lib/text/truncate";
 import type { TableProfile } from "@/lib/data-analysis/profile";
 
 /**
@@ -57,10 +58,7 @@ const MAX_FINDINGS = 8;
 const MAX_CHARTS = 4;
 const MAX_QUESTIONS = 5;
 
-function truncate(value: string, max: number): string {
-  const t = value.trim();
-  return t.length > max ? `${t.slice(0, max - 1)}…` : t;
-}
+
 
 /**
  * The brief the model reads.

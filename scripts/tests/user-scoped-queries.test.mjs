@@ -152,6 +152,114 @@ check(
   [...ALLOWED.entries()].filter(([, w]) => w.length <= 60).map(([k]) => k).join(", ")
 );
 
+console.log("\n== the OTHER shape: functions scoped by the CALLER'S client ==");
+// THE GAP THIS SECTION CLOSES, and it is the same bug the header
+// describes rather than a new one.
+//
+// Everything above is about a function that TAKES a userId and must use
+// it. There is a second shape: a function that takes a SUPABASE CLIENT
+// and no userId, queries a user-owned table with no user_id filter, and
+// is correct only because the caller's client carries RLS. lib/user-
+// context.ts's own header records what happens when that stops being
+// true — "two job handlers began passing the SERVICE-ROLE client, for
+// which RLS does not apply at all, and every row of every user was in
+// scope."
+//
+// That was fixed for user-context.ts. It was not fixed as a CLASS: nine
+// query sites across seven functions still have this shape, and two of
+// them are called with the admin client today. Both are safe, for a
+// reason that was written nowhere and checked by nothing — which is the
+// definition of a partial fix.
+{
+  // Tables that carry a user_id, read from the migrations rather than
+  // listed here, so a new one is covered the day it exists.
+  const sql = readdirSync("supabase/migrations")
+    .filter((f) => f.endsWith(".sql"))
+    .map((f) => readFileSync(join("supabase/migrations", f), "utf8"))
+    .join("\n");
+  const owned = new Set();
+  for (const m of sql.matchAll(
+    /create table (?:if not exists )?(?:public\.)?([a-z_0-9]+)\s*\(((?:(?!create table)[\s\S])*?)\n\);/gi
+  )) {
+    if (/\buser_id\b/.test(m[2])) owned.add(m[1]);
+  }
+  check(`user-owned tables found in the schema (${owned.size})`, owned.size >= 50, String(owned.size));
+
+  // WHICH FUNCTIONS DEPEND ON THE CALLER'S CLIENT.
+  const dependents = new Map();
+  for (const file of files) {
+    const src = stripComments(readFileSync(file, "utf8"));
+    for (const m of src.matchAll(/export (?:async )?function (\w+)\(([\s\S]{0,400}?)\)[\s\S]{0,60}?\{/g)) {
+      const [, name, params] = m;
+      if (!/supabase|client/i.test(params)) continue;
+      // A userId parameter puts it under the rule above instead.
+      if (/userId|user_id|userID/.test(params)) continue;
+      const body = src.slice(m.index, m.index + 1400);
+      for (const t of body.matchAll(/\.from\(\s*["'`]([a-z_0-9]+)["'`]\s*\)([\s\S]{0,400}?);/g)) {
+        const [, table, tail] = t;
+        if (!owned.has(table)) continue;
+        if (/\.eq\(\s*["'`]user_id/.test(tail)) continue;
+        if (/^\s*\.(insert|upsert)\(/.test(tail) && /user_id\s*:/.test(tail)) continue;
+        dependents.set(name, { file, table });
+      }
+    }
+  }
+  // A FLOOR. "None of them is called with an admin client" is trivially
+  // true of a scan that found no functions.
+  check(
+    `functions scoped by the caller's client (${dependents.size})`,
+    dependents.size >= 5,
+    [...dependents.keys()].join(", ")
+  );
+
+  // PASSING THE ADMIN CLIENT TO ONE OF THEM IS A DECISION, and it has to
+  // be written down. Both of today's are addressed by an id that came
+  // from an RLS-scoped read — a capability, not a guess — which is the
+  // same argument the allowlist above uses and is just as invisible
+  // without being stated.
+  const ADMIN_CALLERS_ARGUED = {
+    "updateMissionPlanSteps@src/app/api/cron/scheduled-runs/route.ts":
+      "run.mission_id comes from a scheduled_agent_runs row, and api/mission/schedule-step creates those only after loading the mission through the USER'S client (RLS finds no stranger's id) and stamps user_id: user.id itself. The cron therefore addresses a mission its own owner scheduled.",
+    "trySubmitAsBatch@src/app/api/cron/agent-runs/route.ts":
+      "Takes the agent and the user it already loaded from user_agents, and writes agent_runs rows for that agent alone. The id is not attacker-supplied: this route reads no request body.",
+    "collectAgentBatches@src/app/api/cron/agent-batches/route.ts":
+      "Sweeps agent_runs in status 'queued' across all accounts on purpose — collecting Anthropic Batch results is a cross-account job by definition, and it settles each run against the account that owns it.",
+  };
+
+  const violations = [];
+  let callSites = 0;
+  for (const [name, where] of dependents) {
+    for (const file of files) {
+      const src = stripComments(readFileSync(file, "utf8"));
+      // The call, and its first argument — either positional or the
+      // property in an options object.
+      for (const c of src.matchAll(new RegExp("\\b" + name + "\\(\\s*\\{?\\s*([A-Za-z_$][\\w$.]*)", "g"))) {
+        if (file === where.file && /export (async )?function/.test(src.slice(Math.max(0, c.index - 40), c.index))) continue;
+        callSites++;
+        const arg = c[1];
+        if (!/^admin$|^adminClient$|createAdminClient/.test(arg)) continue;
+        const key = `${name}@${file}`;
+        if (!(key in ADMIN_CALLERS_ARGUED)) {
+          violations.push(`${key} passes ${arg} — a service-role client, for which RLS does not apply`);
+        }
+      }
+    }
+  }
+  check(`the call sites were found (${callSites})`, callSites >= 5, String(callSites));
+  check(
+    "no unargued call site hands one of them a service-role client",
+    violations.length === 0,
+    violations.join("\n        ")
+  );
+  // AND THE ALLOWLIST STAYS HONEST, same rule as the one above it.
+  const stale = Object.keys(ADMIN_CALLERS_ARGUED).filter((k) => !dependents.has(k.split("@")[0]));
+  check("no argued entry names a function that no longer has this shape", stale.length === 0, stale.join(", "));
+  check(
+    "every argued entry gives a reason, not an assurance",
+    Object.values(ADMIN_CALLERS_ARGUED).every((r) => r.length > 60 && !/^(safe|fine|ok)\b/i.test(r))
+  );
+}
+
 console.log("\n== the three that started this stay fixed ==");
 for (const f of [
   "src/lib/chat/mentor-context.ts",

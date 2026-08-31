@@ -23,7 +23,8 @@ const GATE = "scripts/tests/user-scoped-queries.test.mjs";
 const MENTOR = "src/lib/chat/mentor-context.ts";
 const DEEP = "src/lib/ai/deep-dive-load.ts";
 const NOTIFY = "src/lib/notify/tracking.ts";
-const TARGETS = [GATE, MENTOR, DEEP, NOTIFY];
+const CHAT_ROUTE = "src/app/api/chat/route.ts";
+const TARGETS = [GATE, MENTOR, DEEP, NOTIFY, CHAT_ROUTE];
 
 const MUTANTS = [
   {
@@ -65,6 +66,57 @@ const MUTANTS = [
     from: '"src/lib/jobs/run-job.ts::reapJob"',
     to: '"src/lib/jobs/run-job.ts::reapJobThatIsGone"',
     expect: "no allowlist entry names a function that is gone",
+  },
+  // ---- the OTHER shape: scoped by the CALLER'S client ----
+  {
+    // THE BUG THIS SECTION EXISTS FOR, re-introduced. lib/user-context.ts
+    // once had exactly this done to it: a caller swapped the user's
+    // client for the service-role one and every row of every user came
+    // into scope, with nothing anywhere going red.
+    name: "a caller hands a caller-scoped function the SERVICE-ROLE client",
+    file: CHAT_ROUTE,
+    from: "loadCodingContextForChat(supabase, message)",
+    to: "loadCodingContextForChat(admin, message)",
+    expect: "no unargued call site hands one of them a service-role client",
+  },
+  {
+    name: "GATE: an argued admin caller loses its argument",
+    file: GATE,
+    from: '    "updateMissionPlanSteps@src/app/api/cron/scheduled-runs/route.ts":',
+    to: '    "updateMissionPlanSteps@src/app/api/cron/scheduled-runs/route-that-moved.ts":',
+    expect: "no unargued call site hands one of them a service-role client",
+  },
+  {
+    name: "GATE: an argued entry outlives the function it argues for",
+    file: GATE,
+    from: '    "trySubmitAsBatch@src/app/api/cron/agent-runs/route.ts":',
+    to: '    "trySubmitAsBatchGone@src/app/api/cron/agent-runs/route.ts":',
+    expect: "no argued entry names a function that no longer has this shape",
+  },
+  {
+    name: "GATE: an argued entry gives an assurance instead of a reason",
+    file: GATE,
+    from: '      "Sweeps agent_runs in status \'queued\' across all accounts on purpose',
+    to: '      "safe. Sweeps agent_runs in status \'queued\' across all accounts on purpose',
+    expect: "every argued entry gives a reason, not an assurance",
+  },
+  {
+    // The floor on the second scan. "None of them is called with an
+    // admin client" is trivially true of a scan that found no functions.
+    name: "GATE: the caller-scoped scanner matches nothing",
+    file: GATE,
+    from: '      if (!/supabase|client/i.test(params)) continue;',
+    to: '      if (!/supabaseNope/i.test(params)) continue;',
+    expect: "functions scoped by the caller's client",
+  },
+  {
+    // And the other floor: the table set the whole section is measured
+    // against.
+    name: "GATE: no table is recognised as user-owned",
+    file: GATE,
+    from: '    if (/\\buser_id\\b/.test(m[2])) owned.add(m[1]);',
+    to: '    if (/\\buser_id_nope\\b/.test(m[2])) owned.add(m[1]);',
+    expect: "user-owned tables found in the schema",
   },
   {
     // The floor. A scanner that matches nothing reports a clean codebase.

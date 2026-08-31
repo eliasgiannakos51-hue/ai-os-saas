@@ -26,6 +26,7 @@
 // Run: node scripts/tests/navigation-latency.prodtest.mjs
 import http from "node:http";
 import { spawn } from "node:child_process";
+import { readFileSync } from "node:fs";
 
 let pass = 0;
 const failures = [];
@@ -527,10 +528,37 @@ for (const route of ROUTES) {
     `${shape.count} queries across ${shape.tables.length} tables`
   );
 }
+// A MISSING SIDEBAR LINK IS ONLY ACCEPTABLE IF THE CONFIG SAYS SO.
+//
+// V4.6 #3 marked twenty-nine rows `hidden: true` — present in the command
+// palette and on the hub, absent from the sidebar. Two of the routes
+// measured here are among them (/dashboard/documents, and /dashboard,
+// which is the Ideas module's href), so this check reported them as
+// unreachable and was right about the observation and wrong about the
+// verdict. This file's own comment still said "/dashboard ... is the
+// href the sidebar carries", which stopped being true and, being a
+// comment, went on being read.
+//
+// Read from lib/sidebar-nav.ts rather than listed here, so the next row
+// that is hidden or un-hidden does not need this file edited. Regex over
+// the config text because loadTs cannot import it (its icons come from
+// lucide-react), which is why the count is asserted too: a regex that
+// silently matches nothing would excuse every missing link.
+const navSrc = readFileSync("src/lib/sidebar-nav.ts", "utf8");
+const HIDDEN_HREFS = new Set(
+  [...navSrc.matchAll(/href:\s*"([^"]+)"[^}]*hidden:\s*true/g)].map((m) => m[1])
+);
+checkTrue(
+  `the sidebar config named its hidden rows (${HIDDEN_HREFS.size})`,
+  HIDDEN_HREFS.size >= 10,
+  `${HIDDEN_HREFS.size} — too few to be the real list, so every missing link below would be excused`
+);
+const unexplained = missingLinks.filter((m) => !HIDDEN_HREFS.has(m.split(" ")[0]));
+const explained = missingLinks.length - unexplained.length;
 check(
-  `every route was reachable from the sidebar (${ROUTES.length - 1 - missingLinks.length}/${ROUTES.length - 1})`,
-  missingLinks.length === 0,
-  missingLinks.join("\n        ")
+  `every route is reachable, or marked hidden (${ROUTES.length - 1 - unexplained.length}/${ROUTES.length - 1}, ${explained} hidden by config)`,
+  unexplained.length === 0,
+  unexplained.join("\n        ") + "\n        not in the sidebar and not marked hidden in lib/sidebar-nav.ts"
 );
 check(`the mock was never asked for something it does not implement (${unimplemented.length})`,
   unimplemented.length === 0, unimplemented.slice(0, 8).join("\n        "));

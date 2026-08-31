@@ -15,6 +15,9 @@
 // Run: node scripts/tests/owner-only-access.test.mjs
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
+// Comments are not code: a page that DISCUSSES isAdminEmail in a comment
+// is not a page that refuses anybody.
+const { stripComments } = await import("../check-mutation-markers.mjs");
 
 let pass = 0;
 const failures = [];
@@ -352,6 +355,94 @@ for (const page of [
   const withFavs = (src.match(/favoritedIds=\{favoritedIds\}/g) ?? []).length;
   check(`${page.split("/").slice(-2)[0]}: all ${lists} list(s) receive favoritedIds`, lists > 0 && withFavs === lists, `${withFavs} of ${lists}`);
   check(`${page.split("/").slice(-2)[0]}: and it is really loaded`, /loadFavoriteIds\(/.test(src));
+}
+
+console.log("\n== a page that refuses non-owners is not offered to them ==");
+// CORRECT TODAY BY ABSENCE, NOT BY RULE — which is the shape this whole
+// audit is about.
+//
+// Four dashboard pages call notFound() when the reader is not the owner:
+// business-health, costs, routing and system-health. Exactly one of them
+// is marked `ownerOnly` in lib/sidebar-nav.ts. The other three are safe
+// because they are not in the navigation config AT ALL, so neither the
+// sidebar nor ⌘K can offer them.
+//
+// That is not a rule, it is a coincidence of the current config. Add
+// "System Health" to the sidebar tomorrow without ownerOnly and every
+// user gets a link to a 404 — and the palette is the worse half, because
+// visibleGroups deliberately does NOT filter `hidden`, so hiding it from
+// the sidebar would leave it one keystroke away.
+{
+  const refusing = [];
+  for (const p of pages) {
+    const src = stripComments(readFileSync(p, "utf8"));
+    if (!/isAdminEmail/.test(src)) continue;
+    if (!/if \(!isAdminEmail\([^)]*\)\)\s*(notFound\(\)|redirect\()/.test(src)) continue;
+    const href = "/" + p.replace(/^src\/app\//, "").replace(/\/page\.tsx$/, "");
+    refusing.push({ p, href });
+  }
+  // A FLOOR, on the collection the emptiness is asserted over.
+  check(`pages that refuse a non-owner (${refusing.length})`, refusing.length >= 4,
+    refusing.map((r) => r.href).join(", "));
+
+  // THE CLASSIFIER, ASKED ABOUT A SAMPLE IT IS GIVEN.
+  //
+  // The census above is a FLOOR, and a floor cannot be broken by
+  // inflating it — so mutating the comment-stripping out of this scan
+  // left the gate green, twice. That is not evidence the stripping is
+  // pointless; it is evidence that the corpus does not currently contain
+  // the hazard. A page whose PROSE quotes the refusal would be counted as
+  // making it, and then measured against the navigation config — a false
+  // accusation in a check about who can reach what.
+  //
+  // Same remedy as chart-datakeys' global regex and email-silence's
+  // empty-catch pattern: hand the instrument the hazard instead of hoping
+  // to find one.
+  {
+    const commented = [
+      "// if (!isAdminEmail(user.email)) notFound();",
+      "export default function Page() { return null; }",
+    ].join("\n");
+    const real = "if (!isAdminEmail(user.email)) notFound();";
+    const looks = (src) =>
+      /isAdminEmail/.test(src) &&
+      /if \(!isAdminEmail\([^)]*\)\)\s*(notFound\(\)|redirect\()/.test(src);
+    check("a page that only QUOTES the refusal is not counted as making it",
+      looks(stripComments(commented)) === false);
+    check("...and one that makes it is", looks(stripComments(real)) === true);
+  }
+
+  const nav = readFileSync("src/lib/sidebar-nav.ts", "utf8");
+  const offered = [];
+  for (const { href } of refusing) {
+    // The item block for this href, up to the next href or the closing
+    // brace — whichever comes first.
+    const at = nav.indexOf(`href: "${href}"`);
+    if (at < 0) continue; // absent from the config: neither surface can offer it
+    const next = nav.indexOf('href: "', at + 10);
+    const block = nav.slice(at, next > 0 ? next : at + 400);
+    if (!/ownerOnly:\s*true/.test(block)) offered.push(href);
+  }
+  check(
+    "every one of them is either absent from the navigation or marked ownerOnly",
+    offered.length === 0,
+    offered.join(", ") + " — in the config without ownerOnly, so ⌘K offers a 404"
+  );
+
+  // AND THE MARK MEANS SOMETHING. Both surfaces have to reach it through
+  // the one function that knows what ownerOnly is; a filter in the
+  // sidebar alone moves a page one keystroke away rather than hiding it.
+  const vis = readFileSync("src/lib/sidebar-visibility.ts", "utf8");
+  check("sidebarGroups is built ON visibleGroups, not beside it",
+    /return visibleGroups\(groups, isOwner\)/.test(vis));
+  for (const [file, fn] of [
+    ["src/components/dashboard/sidebar.tsx", "sidebarGroups"],
+    ["src/components/dashboard/command-palette.tsx", "visibleGroups"],
+  ]) {
+    const src = stripComments(readFileSync(file, "utf8"));
+    check(`${file.split("/").pop()} filters through ${fn}(…, isOwner)`,
+      new RegExp(fn + "\\([^)]*isOwner").test(src));
+  }
 }
 
 console.log("\n== NO component shows a raw database error, anywhere ==");

@@ -371,7 +371,13 @@ for (const [tintVar, inkVar] of Object.entries(INK_FOR_TINT)) {
   if (!alphas.length) continue;
   const tint = c.parseColor(varOf(LIGHT, tintVar));
   const ink = varOf(LIGHT, inkVar);
-  for (const a of alphas.sort()) {
+  // A COMPARATOR, because these are NUMBERS. `.sort()` with none sorts by
+  // string: [0.2, 0.15, 1].sort() is ["0.15","0.2","1"], which happens to
+  // be numeric order here and would stop being it the moment an alpha
+  // reached 1.0 alongside a 0.x — "1" sorts before "0.5" only if you are
+  // lucky with the set. Nothing downstream depends on the order today,
+  // which is precisely why it would have gone unnoticed.
+  for (const a of alphas.sort((x, y) => x - y)) {
     for (const [surfaceName, surface] of Object.entries(surfaces.light)) {
       const base = c.parseColor(surface);
       const composited = {

@@ -14,7 +14,8 @@
  *
  * Run: node scripts/tests/context-optimization.mutation.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/context-optimization.test.mjs";

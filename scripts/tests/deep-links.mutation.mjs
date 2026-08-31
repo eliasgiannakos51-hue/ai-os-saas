@@ -24,7 +24,8 @@
 // proves nothing.
 //
 // Run: node scripts/tests/deep-links.mutation.mjs
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/deep-links.test.mjs";
@@ -38,28 +39,19 @@ function gateIsGreen() {
   }
 }
 
-// THE SIDECAR, and why this file has one.
+// THE SIDECAR IS SHARED NOW — scripts/tests/lib/sidecar-write.mjs.
 //
-// An earlier harness in this directory restored the tree in a `finally`.
-// It ran past a timeout, was moved to the background, was killed — and
-// `finally` never ran, leaving a mutant in src/lib/unsplash.ts. A restore
-// that only exists inside the running process is a restore that a kill
-// deletes. So the original text is written to disk BEFORE anything is
-// touched, and healed on startup.
-const SIDECAR = "scripts/tests/.deep-links-mutation-sidecar.json";
-function healFromSidecar() {
-  let saved;
-  try {
-    saved = JSON.parse(readFileSync(SIDECAR, "utf8"));
-  } catch {
-    return;
-  }
-  for (const [file, text] of Object.entries(saved)) writeFileSync(file, text);
-  execFileSync("rm", ["-f", SIDECAR]);
-  console.log(`healed ${Object.keys(saved).length} file(s) from a killed run\n`);
-}
-healFromSidecar();
-
+// This file used to carry its own: a SIDECAR path, a healFromSidecar()
+// and a writeFileSync(SIDECAR, ...) before every mutation. Five suites
+// had that, all copied from one another, and fifty-five did not — which
+// is how a killed run left `stripped.length === ch.length` deleted from
+// lib/text/unicode-patterns.ts, a guard five writing systems depend on.
+//
+// The mechanism has one implementation now, behind the writeFileSync
+// imported at the top of this file, and scripts/tests/mutation-sidecar.test.mjs
+// proves it by killing a process with SIGKILL mid-mutation and reading
+// the tree afterwards. Five copies of a safety net is five things to keep
+// in step; the copies are gone rather than kept in step.
 const MUTATIONS = [
   {
     name: "a starred module record goes back to linking at the list",
@@ -213,14 +205,12 @@ for (const m of MUTATIONS) {
     continue;
   }
   originals.set(m.file, before);
-  writeFileSync(SIDECAR, JSON.stringify(Object.fromEntries(originals)));
   writeFileSync(m.file, before.replace(m.from, m.to));
 
   const red = !gateIsGreen();
 
   writeFileSync(m.file, before);
   originals.delete(m.file);
-  execFileSync("rm", ["-f", SIDECAR]);
 
   if (red) {
     caught++;

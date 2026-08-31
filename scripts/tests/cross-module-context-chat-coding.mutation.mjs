@@ -15,7 +15,8 @@
  *
  * Run: node scripts/tests/cross-module-context.mutation.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 // THE TARGET WAS THE WRONG GATE BY ONE SUFFIX, AND THAT IS WHY THIS SUITE

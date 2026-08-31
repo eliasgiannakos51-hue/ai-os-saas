@@ -16,7 +16,8 @@
  *
  * Run: node scripts/tests/route-shadowing.mutation.mjs
  */
-import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from "node:fs";
+import { readFileSync, mkdirSync, rmSync, existsSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/route-shadowing.test.mjs";

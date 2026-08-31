@@ -29,7 +29,8 @@
  *
  * Run: node scripts/tests/tracking-to-tools.mutation.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const DATA_GATE = "scripts/tests/data-analysis.test.mjs";

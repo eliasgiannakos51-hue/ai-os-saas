@@ -10,7 +10,8 @@
 // Every mutation runs against a COPY. Nothing here edits the repository.
 //
 // Run: node scripts/tests/write-guards.mutation.mjs
-import { readFileSync, writeFileSync, mkdirSync, cpSync, rmSync, mkdtempSync } from "node:fs";
+import { readFileSync, mkdirSync, cpSync, rmSync, mkdtempSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import path from "node:path";

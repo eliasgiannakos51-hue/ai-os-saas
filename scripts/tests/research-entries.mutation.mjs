@@ -17,7 +17,8 @@
 // having looked at it.
 //
 // Run: node scripts/tests/research-entries.mutation.mjs
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/research-entries.test.mjs";
@@ -53,22 +54,19 @@ function gateIsGreen() {
   return runGate().green;
 }
 
-// THE SIDECAR. A restore that lives only in a `finally` is a restore a
-// kill deletes — this directory already lost one that way.
-const SIDECAR = "scripts/tests/.research-entries-mutation-sidecar.json";
-function healFromSidecar() {
-  let saved;
-  try {
-    saved = JSON.parse(readFileSync(SIDECAR, "utf8"));
-  } catch {
-    return;
-  }
-  for (const [file, text] of Object.entries(saved)) writeFileSync(file, text);
-  execFileSync("rm", ["-f", SIDECAR]);
-  console.log(`healed ${Object.keys(saved).length} file(s) from a killed run\n`);
-}
-healFromSidecar();
-
+// THE SIDECAR IS SHARED NOW — scripts/tests/lib/sidecar-write.mjs.
+//
+// This file used to carry its own: a SIDECAR path, a healFromSidecar()
+// and a writeFileSync(SIDECAR, ...) before every mutation. Five suites
+// had that, all copied from one another, and fifty-five did not — which
+// is how a killed run left `stripped.length === ch.length` deleted from
+// lib/text/unicode-patterns.ts, a guard five writing systems depend on.
+//
+// The mechanism has one implementation now, behind the writeFileSync
+// imported at the top of this file, and scripts/tests/mutation-sidecar.test.mjs
+// proves it by killing a process with SIGKILL mid-mutation and reading
+// the tree afterwards. Five copies of a safety net is five things to keep
+// in step; the copies are gone rather than kept in step.
 const MUTATIONS = [
   {
     name: "the entry regex is deleted — [E99] goes back to being INVISIBLE",
@@ -185,14 +183,12 @@ for (const m of MUTATIONS) {
     missed.push(`${m.name} — anchor appears more than once in ${m.file}, so the edit is ambiguous`);
     continue;
   }
-  writeFileSync(SIDECAR, JSON.stringify({ [m.file]: before }));
   writeFileSync(m.file, before.replace(m.from, m.to));
 
   const result = runGate();
   const red = !result.green;
 
   writeFileSync(m.file, before);
-  execFileSync("rm", ["-f", SIDECAR]);
 
   if (red) {
     caught++;

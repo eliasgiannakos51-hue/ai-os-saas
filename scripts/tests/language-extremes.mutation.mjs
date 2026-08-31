@@ -16,7 +16,8 @@
  *
  * Run: node scripts/tests/language-extremes.mutation.mjs
  */
-import { readFileSync, writeFileSync, unlinkSync, existsSync } from "node:fs";
+import { readFileSync, unlinkSync, existsSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/language-extremes.test.mjs";

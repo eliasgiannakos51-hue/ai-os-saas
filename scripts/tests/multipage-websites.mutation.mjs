@@ -10,7 +10,8 @@
  *
  * Run: node scripts/tests/multipage-websites.mutation.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/multipage-websites.test.mjs";

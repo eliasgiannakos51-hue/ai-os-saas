@@ -29,7 +29,8 @@
  *
  * Run: node scripts/tests/website-visual-variety.mutation.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const FP_GATE = "scripts/tests/site-fingerprint.test.mjs";

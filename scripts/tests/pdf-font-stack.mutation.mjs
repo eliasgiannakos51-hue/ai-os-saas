@@ -24,7 +24,8 @@
  *
  * Run: node scripts/tests/pdf-font-stack.mutation.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/pdf-font-stack.test.mjs";

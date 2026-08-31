@@ -207,6 +207,9 @@ const supa = http.createServer((req, res) => {
         "team_members", "user_agents", "user_websites", "user_files", "user_documents",
         "chat_conversations", "user_automations", "research_reports", "user_insights",
         "user_imports", "known_devices", "site_analytics", "production_errors",
+        // sitemap.xml reads this on the way in; empty is the truthful
+        // answer for an account with no published site.
+        "published_sites",
         // The 13 classifier modules the shell scans.
         "ai_jobs", "security_check_log", "website_versions", "credit_transactions",
         "ideas", "competitors", "research", "finance_entries", "learning_entries", "trades",

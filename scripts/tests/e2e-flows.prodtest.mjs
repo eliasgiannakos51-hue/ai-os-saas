@@ -18,6 +18,7 @@
 import http from "node:http";
 import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { label, labelPattern } from "./lib/label.mjs";
 
 let pass = 0,
   fail = 0;

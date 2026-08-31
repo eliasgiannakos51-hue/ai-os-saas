@@ -242,6 +242,21 @@ const supa = http.createServer((req, res) => {
       //
       // ANSWERING THEM MAKES THIS SUITE STRONGER, not weaker: an
       // unexpected call after this is a real one.
+      // consume_rate_limit is the ATOMIC rate-limit check that replaced a
+      // read-then-write pair this session. The mock knew the old shape (a
+      // POST to rate_limit_log) and not the new one, so every guarded
+      // action 500'd and reported itself. Allowed, at the limit the real
+      // function returns for a first call.
+      if (table === "rpc/consume_rate_limit") {
+        // A BARE BOOLEAN, because that is what the real function returns
+        // (20260919000000_atomic_rate_limit.sql: `returns boolean`) and
+        // lib/rate-limit.ts treats any other shape as a deployed-signature
+        // mismatch and falls back loudly. My first version answered
+        // `[{allowed:true,remaining:99,...}]` — a shape invented to look
+        // plausible, which would have made this suite pass against a
+        // fiction the database never produces.
+        return json(200, true);
+      }
       if (table === "rpc/voice_usage_this_month") {
         return json(200, [{ transcribe_seconds: 0, speak_seconds: 0 }]);
       }

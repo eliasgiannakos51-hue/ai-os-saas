@@ -59,8 +59,15 @@ export class WidgetBoundary extends Component<
   render() {
     if (!this.state.failed) return this.props.children;
     return (
+      /* data-widget-boundary IS A MARKER FOR TESTS, and it earns its
+         place. A check that asks "did a widget fall back?" by selecting
+         [role="alert"] gets an answer about the furniture: eight
+         components use that role, and the offline banner is on every
+         page — so it reported all five pages as broken. This attribute
+         names the one thing being asked about. */
       <div
         role="alert"
+        data-widget-boundary="failed"
         className="rounded-2xl border border-red-500/30 bg-red-500/[0.04] p-4 text-xs text-muted"
       >
         <p className="flex items-center gap-2 font-medium text-red-300">

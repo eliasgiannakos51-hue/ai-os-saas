@@ -398,7 +398,13 @@ for (const url of PAGES) {
 // new baseline.
 for (const url of PAGES) {
   await page.goto(`http://127.0.0.1:${PORT}${url}`, { waitUntil: "networkidle" });
-  const alerts = await page.locator('[role="alert"]').allInnerTexts();
+  // THE MARKER, NOT THE ROLE. The first version of this selected
+  // [role="alert"] and failed on all five pages, because eight components
+  // use that role and the offline banner is on every page. A check that
+  // reports every page as broken is not a strict check, it is a broken
+  // one — and it would have made the ratchet above unlowerable for the
+  // wrong reason.
+  const alerts = await page.locator("[data-widget-boundary='failed']").allInnerTexts();
   checkTrue(
     `${url}: no widget fell back to its error boundary (${alerts.length})`,
     alerts.length === 0,

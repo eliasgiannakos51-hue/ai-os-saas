@@ -282,7 +282,17 @@ export function summarise(outcomes: readonly CaseOutcome[], gradedIds: ReadonlyS
  *  one, and interpolating would invent a latency nobody measured. */
 export function percentile(sortedAscending: readonly number[], p: number): number | null {
   if (sortedAscending.length === 0) return null;
-  const rank = Math.ceil(p * sortedAscending.length);
+  // A NON-FINITE p RETURNED `undefined` FROM A FUNCTION TYPED
+  // `number | null`, and TypeScript could not see it: Math.ceil(NaN) is
+  // NaN, Math.max and Math.min both pass NaN through, and indexing an
+  // array with NaN gives undefined rather than throwing. A caller doing
+  // arithmetic on the result got NaN two steps from where it started.
+  if (!Number.isFinite(p)) return null;
+  // Clamped rather than trusted: p is a fraction, and a caller passing 90
+  // instead of 0.9 should get the top of the range, not an index past the
+  // end that reads as undefined.
+  const fraction = Math.min(1, Math.max(0, p));
+  const rank = Math.ceil(fraction * sortedAscending.length);
   return sortedAscending[Math.min(sortedAscending.length - 1, Math.max(0, rank - 1))];
 }
 

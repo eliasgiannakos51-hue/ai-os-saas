@@ -175,6 +175,20 @@ export function looksLikeText(bytes: Uint8Array): boolean {
 }
 
 export function formatBytes(n: number): string {
+  // A DASH BEATS A NUMBER NOBODY MEASURED, and this function was the one
+  // place in the product that broke that rule.
+  //
+  // Every comparison against NaN is false, so a non-finite input fell
+  // through all three branches to the last one and rendered
+  // `NaN.toFixed(2)` — the string "NaN GB", in the files list, for any
+  // row whose size_bytes column is null. formatCurrency and formatNumber
+  // in lib/format-number.ts both guard this; this did not, and nothing
+  // called it at a boundary to find out.
+  //
+  // NEGATIVES ARE LEFT ALONE deliberately: website-builder passes a
+  // remaining-quota figure that is meaningfully negative when an account
+  // is over cap, and "-500 MB" is the honest rendering of that.
+  if (!Number.isFinite(n)) return "—";
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
   if (n < 1024 * 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;

@@ -69,6 +69,19 @@ export function truncate(text: unknown, max: number, options: TruncateOptions = 
   const collapsed = options.collapseWhitespace ? raw.replace(/\s+/g, " ") : raw;
   const trimmed = collapsed.trim();
 
+  // INFINITY IS NOT NONSENSE, IT IS "NO LIMIT" — and the first version of
+  // this function returned "" for it, because `!Number.isFinite(max)`
+  // swept it in with NaN. That is silent data loss dressed as a guard,
+  // and it is the same class of accident as the slice(0, -1) this
+  // function was written to replace: a boundary whose behaviour fell out
+  // of an expression rather than being decided.
+  //
+  // Caught by scripts/tests/numeric-boundaries.test.mjs on its first run,
+  // against the function that gate exists because of.
+  if (max === Infinity) return trimmed;
+  // NaN, undefined and negatives are a limit that could not be computed.
+  // Empty is the safe direction: the promise is "never longer than max",
+  // and there is no length that satisfies it when max is not a number.
   if (!Number.isFinite(max) || max <= 0) return "";
   if (trimmed.length <= max) return trimmed;
   if (max === 1) return ELLIPSIS;

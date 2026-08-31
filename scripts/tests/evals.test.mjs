@@ -87,19 +87,63 @@ console.log("\n== 2. JSON THAT ARRIVED WRAPPED IN SOMETHING ==");
 // =====================================================================
 // Models fence their JSON and add a sentence. Scoring that as "not JSON"
 // would report a quality failure that is really a parsing failure.
-eq("a fenced object is extracted", JSON.parse(s.extractJson('```json\n{"a":1}\n```')), { a: 1 });
-eq("an unfenced object after prose is extracted", JSON.parse(s.extractJson('Sure! {"a":1}')), { a: 1 });
-eq("an array is extracted too", JSON.parse(s.extractJson("here: [1,2]")), [1, 2]);
+// PARSE THROUGH A HELPER, because JSON.parse throws and a throw here
+// ABORTS THE FILE. Under the mutation that restores the greedy regex,
+// this line raised SyntaxError and sections 3 onwards never ran at all —
+// the mutation was "caught" only in the sense that the process died. A
+// named failure that lets the rest of the suite run is the difference
+// between knowing one thing broke and knowing what else did.
+function parsed(raw) {
+  const slice = s.extractJson(raw);
+  if (typeof slice !== "string") return { __notAString: String(slice) };
+  try {
+    return JSON.parse(slice);
+  } catch (e) {
+    return { __unparseable: slice, __error: String(e.message).slice(0, 80) };
+  }
+}
+eq("a fenced object is extracted", parsed('```json\n{"a":1}\n```'), { a: 1 });
+eq("an unfenced object after prose is extracted", parsed('Sure! {"a":1}'), { a: 1 });
+eq("an array is extracted too", parsed("here: [1,2]"), [1, 2]);
+// AND AN ARRAY OF OBJECTS IS THE WHOLE ARRAY, not its first element.
+// The scanner that only looked for `{` found the brace INSIDE the array
+// and returned `{"a":1}` — a wrong answer shaped exactly like a right
+// one, which is why nothing noticed.
+eq("an array of objects is not truncated to its first element",
+  parsed('[{"a":1},{"a":2}]'), [{ a: 1 }, { a: 2 }]);
 // THE GREEDY-REGEX BUG THIS AVOIDS. `/\{[\s\S]*\}/` runs to the LAST
 // brace in the document, so one object followed by prose containing a
 // closing brace produces a string that never parses.
 eq("an object followed by prose with a brace still parses",
-  JSON.parse(s.extractJson('{"a":1}\n\nNote: use {} for empty.')), { a: 1 });
+  parsed('{"a":1}\n\nNote: use {} for empty.'), { a: 1 });
 eq("a nested object stops at its own end",
-  JSON.parse(s.extractJson('{"a":{"b":2}} trailing')), { a: { b: 2 } });
+  parsed('{"a":{"b":2}} trailing'), { a: { b: 2 } });
 // A brace inside a string must not close the object.
 eq("a brace inside a string does not end it",
-  JSON.parse(s.extractJson('{"a":"} not the end"} after')), { a: "} not the end" });
+  parsed('{"a":"} not the end"} after'), { a: "} not the end" });
+
+// A FENCE IN THE MIDDLE OF PROSE, which had no test at all — and the
+// first two tests written for it did not test it either.
+//
+// The mutation is `fence anywhere` -> `fence only at the ends`. Both of
+// these stayed green under it:
+//
+//   "Here you go:\n```json\n{"a":1}\n```\nHope that helps!"
+//   "Result:\n```json\n{"a":1}\n```\nUse {} to clear it."
+//
+// and they were right to. With the fence unstripped the scanner simply
+// finds the first `{` in the whole reply, which is still the one inside
+// the fence, and balances from there. The trailing `{}` is past the
+// balanced close and never reached. The fence rule was carrying nothing.
+//
+// It carries something in exactly one shape: THE PROSE BEFORE THE FENCE
+// CONTAINS A BRACE OF ITS OWN. Then the first `{` is in the sentence, not
+// in the fence, and the answer is a fragment of the explanation.
+eq("a fence wins over a brace in the prose before it",
+  parsed('Use {} to clear it. Here is the result:\n```json\n{"a":1}\n```'), { a: 1 });
+// The same, with an array in the preamble, since `[` opens a document too.
+eq("...and over a bracket in the prose before it",
+  parsed('Columns are [a, b]. Result:\n```json\n{"a":1}\n```'), { a: 1 });
 
 // =====================================================================
 console.log("\n== 3. AN ERROR IS NOT A FAILURE ==");

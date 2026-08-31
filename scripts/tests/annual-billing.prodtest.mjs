@@ -93,6 +93,7 @@ async function boot(label, extraEnv) {
   const server = spawn("npx", ["next", "start", "-p", String(port)], {
     env,
     stdio: ["ignore", "pipe", "pipe"],
+  detached: true,
   });
   let serverLog = "";
   server.stdout.on("data", (d) => (serverLog += d));
@@ -100,14 +101,16 @@ async function boot(label, extraEnv) {
   for (let i = 0; i < 120; i++) {
     try {
       const r = await fetch(`http://127.0.0.1:${port}/login`, { signal: AbortSignal.timeout(2000) });
-      if (r.ok) return { port, stop: () => server.kill("SIGKILL") };
+      if (r.ok) return { port, stop: () => { try { process.kill(-server.pid, "SIGKILL"); } catch { try { server.kill("SIGKILL"); } catch { /* gone */ } } } };
     } catch {
       /* not up yet */
     }
     await new Promise((r) => setTimeout(r, 500));
   }
   console.log(`  FAIL  server did not start (${label})\n` + serverLog.slice(-2000));
-  server.kill("SIGKILL");
+  // The GROUP: killing the npx handle orphans next-server. See
+  // scripts/tests/prodtest-hygiene.test.mjs.
+  try { process.kill(-server.pid, "SIGKILL"); } catch { try { server.kill("SIGKILL"); } catch { /* gone */ } }
   process.exit(1);
 }
 

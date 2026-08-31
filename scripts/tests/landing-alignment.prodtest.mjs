@@ -16,6 +16,7 @@
 // Run: node scripts/tests/landing-alignment.prodtest.mjs
 import { startProdHarness } from "../lib/prod-harness.mjs";
 import { chromium } from "playwright";
+import { chromiumPath } from "./lib/chromium.mjs";
 
 const WIDTHS = [375, 414, 768, 1280, 1920];
 // How far the left and right margins of a centred element may differ.
@@ -32,7 +33,7 @@ const check = (name, cond, detail = "") => {
 
 const harness = await startProdHarness({ tableRows: {}, supaPort: 54391 });
 const browser = await chromium.launch({
-  executablePath: process.env.CHROMIUM_PATH || undefined,
+  executablePath: chromiumPath(),
 });
 try {
   for (const width of WIDTHS) {

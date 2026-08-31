@@ -169,12 +169,13 @@ if ((await new Promise((r) => build.on("close", r))) !== 0) {
   process.exit(1);
 }
 
-const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"] });
+const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"], detached: true });
 let serverLog = "";
 server.stdout.on("data", (d) => (serverLog += d));
 server.stderr.on("data", (d) => (serverLog += d));
 function cleanup() {
-  try { server.kill("SIGKILL"); } catch { /* already gone */ }
+  // The GROUP, not the handle — see prodtest-hygiene.test.mjs.
+  try { process.kill(-server.pid, "SIGKILL"); } catch { try { server.kill("SIGKILL"); } catch { /* gone */ } }
   supa.close();
 }
 async function waitForServer() {
@@ -537,4 +538,7 @@ check(`the mock was never asked for something it does not implement (${unimpleme
 await browser.close();
 cleanup();
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
-if (failures.length) process.exit(1);
+// BOTH OUTCOMES EXIT. Leaving success to the event loop draining means
+// one retained handle turns a passing test into a hung one — which is
+// exactly what happened to health-probe. See prodtest-hygiene.test.mjs.
+process.exit(failures.length === 0 ? 0 : 1);

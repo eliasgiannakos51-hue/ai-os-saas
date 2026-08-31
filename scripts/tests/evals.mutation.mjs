@@ -29,6 +29,10 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/evals.test.mjs";
 const SCORING = "src/lib/evals/scoring.ts";
+// The balanced JSON scanner moved OUT of scoring.ts and analyse.ts, which
+// each had their own and disagreed. Both now call this one, so the
+// mutations that used to point at two copies point here.
+const JSON_TEXT = "src/lib/json-from-text.ts";
 const RUNNER = "scripts/evals/run.mjs";
 const CHAT = "scripts/evals/datasets/chat.jsonl";
 
@@ -74,15 +78,34 @@ const MUTANTS = [
   // ---- JSON that arrived wrapped -----------------------------------
   {
     name: "the greedy-regex JSON bug comes back, so prose after an object breaks parsing",
-    file: SCORING,
+    file: JSON_TEXT,
     from: "  const start = text.search(/[{[]/);",
     to: "  const m = text.match(/\\{[\\s\\S]*\\}/);\n  if (m) return m[0];\n  const start = text.search(/[{[]/);",
   },
   {
     name: "a brace inside a string ends the object",
-    file: SCORING,
+    file: JSON_TEXT,
     from: '    if (ch === \'"\') {\n      inString = !inString;\n      continue;\n    }',
     to: '    if (false) {\n      inString = !inString;\n      continue;\n    }',
+  },
+  // AND A MUTATION FOR WHAT MOVED THE OTHER TWO. Merging the two scanners
+  // was not a rename: analyse.ts's copy looked only for `{`, so given
+  // `[{"a":1}]` it found the brace INSIDE the array and returned the first
+  // element as though it were the whole answer — a wrong value shaped like
+  // a right one. The `[` is the fix, and nothing guarded it.
+  {
+    name: "arrays stop opening a document, so a JSON array yields its first element",
+    file: JSON_TEXT,
+    from: "  const start = text.search(/[{[]/);",
+    to: '  const start = text.search(/[{]/);',
+  },
+  // The fence is matched ANYWHERE rather than only at the ends, which is
+  // the other half of what differed between the two copies.
+  {
+    name: "a fence is only honoured at the very start and end of the reply",
+    file: JSON_TEXT,
+    from: "  const fenced = raw.match(/```(?:json)?\\s*([\\s\\S]*?)```/);",
+    to: "  const fenced = raw.match(/^```(?:json)?\\s*([\\s\\S]*?)```$/);",
   },
 
   // ---- an error counted as a failure -------------------------------

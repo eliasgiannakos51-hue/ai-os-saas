@@ -42,6 +42,10 @@ const XLSX = "src/lib/data-analysis/xlsx.ts";
 const PROFILE = "src/lib/data-analysis/profile.ts";
 const CHARTS = "src/lib/data-analysis/charts.ts";
 const ANALYSE = "src/lib/data-analysis/analyse.ts";
+// analyse.ts had its own balanced scanner and scoring.ts had another; they
+// disagreed about arrays and about where a fence may appear. Both now call
+// this one.
+const JSON_TEXT = "src/lib/json-from-text.ts";
 const QUERY = "src/lib/data-analysis/query.ts";
 const OPS = "src/lib/coding/operations.ts";
 const HL = "src/lib/coding/highlight.ts";
@@ -293,9 +297,9 @@ const MUTANTS = [
   {
     gate: DATA_GATE,
     name: "the JSON scan takes the last brace in the reply rather than the balanced one",
-    file: ANALYSE,
-    from: "      if (depth === 0) {",
-    to: "      if (depth === -99) {",
+    file: JSON_TEXT,
+    from: "      if (depth === 0) return text.slice(start, i + 1);",
+    to: "      if (depth === -99) return text.slice(start, i + 1);",
   },
   {
     gate: DATA_GATE,

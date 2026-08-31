@@ -173,3 +173,11 @@ if (failures.length > 0) {
   console.log(failures.map((f) => `  - ${f}`).join("\n"));
   process.exit(1);
 }
+// AND EXIT WHEN IT PASSES, which this did not.
+//
+// Measured: it printed "PASS — 20 checks passed, 0 failed" and then stayed
+// alive for another 671 seconds, holding whatever handle the harness left
+// open, until something outside killed it. The only path that reliably
+// terminated was the failing one, so a green run looked like a hang and,
+// under a CI step with a timeout, would be recorded as a failure.
+process.exit(0);

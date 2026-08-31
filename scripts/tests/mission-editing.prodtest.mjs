@@ -258,7 +258,7 @@ if ((await new Promise((r) => build.on("close", r))) !== 0) {
   process.exit(1);
 }
 
-const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"] });
+const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"], detached: true });
 let serverLog = "";
 server.stdout.on("data", (d) => (serverLog += d));
 server.stderr.on("data", (d) => (serverLog += d));
@@ -273,7 +273,8 @@ async function waitForServer() {
   return false;
 }
 function cleanup() {
-  try { server.kill("SIGKILL"); } catch { /* gone */ }
+  // The GROUP, not the handle — see prodtest-hygiene.test.mjs.
+  try { process.kill(-server.pid, "SIGKILL"); } catch { try { server.kill("SIGKILL"); } catch { /* gone */ } }
   supa.close();
 }
 if (!(await waitForServer())) {

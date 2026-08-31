@@ -21,6 +21,7 @@
 //
 // Run: node scripts/tests/agent-capability.prodtest.mjs
 import http from "node:http";
+import { label, labelPattern } from "./lib/label.mjs";
 import { spawn } from "node:child_process";
 
 let pass = 0,
@@ -201,6 +202,7 @@ if (buildCode !== 0) {
 const server = spawn("npx", ["next", "start", "-p", String(PORT)], {
   env,
   stdio: ["ignore", "pipe", "pipe"],
+  detached: true,
 });
 let serverLog = "";
 server.stdout.on("data", (d) => (serverLog += d));
@@ -220,7 +222,18 @@ async function waitForServer() {
 }
 function cleanup() {
   try {
-    server.kill("SIGKILL");
+    // KILL THE GROUP, NOT THE HANDLE. `npx next start` is npx -> sh ->
+    // next-server. SIGKILL to the npx handle leaves the grandchild alive,
+    // reparented to init, still holding its port and serving its build.
+    // Measured across one full survey of the suite: thirteen orphaned
+    // next-server processes, the oldest 41 minutes old. `detached: true`
+    // on the spawn puts the whole tree in its own group so this reaches
+    // all of it. Enforced by scripts/tests/prodtest-hygiene.test.mjs.
+    try {
+      process.kill(-server.pid, "SIGKILL");
+    } catch {
+      server.kill("SIGKILL");
+    }
   } catch {
     /* already gone */
   }
@@ -271,7 +284,7 @@ async function openCreate(page) {
 
 async function submit(page, text) {
   await page.locator("#agent-request").fill(text);
-  await page.getByRole("button", { name: /design my agent|Σχεδίασε τον πράκτορά μου/i }).click();
+  await page.getByRole("button", { name: labelPattern("dashboard.agents.designButton") }).click();
 }
 
 // Collected across every page this test opens, not just the first —

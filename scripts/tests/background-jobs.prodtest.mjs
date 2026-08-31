@@ -21,6 +21,7 @@
 //
 // Run: node scripts/tests/background-jobs.prodtest.mjs
 import http from "node:http";
+import { label } from "./lib/label.mjs";
 import { spawn } from "node:child_process";
 
 let pass = 0;
@@ -411,13 +412,24 @@ if ((await new Promise((r) => build.on("close", r))) !== 0) {
   process.exit(1);
 }
 
-const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"] });
+const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"], detached: true });
 let serverLog = "";
 server.stdout.on("data", (d) => (serverLog += d));
 server.stderr.on("data", (d) => (serverLog += d));
 function cleanup() {
   try {
-    server.kill("SIGKILL");
+    // KILL THE GROUP, NOT THE HANDLE. `npx next start` is npx -> sh ->
+    // next-server. SIGKILL to the npx handle leaves the grandchild alive,
+    // reparented to init, still holding its port and serving its build.
+    // Measured across one full survey of the suite: thirteen orphaned
+    // next-server processes, the oldest 41 minutes old. `detached: true`
+    // on the spawn puts the whole tree in its own group so this reaches
+    // all of it. Enforced by scripts/tests/prodtest-hygiene.test.mjs.
+    try {
+      process.kill(-server.pid, "SIGKILL");
+    } catch {
+      server.kill("SIGKILL");
+    }
   } catch {
     /* already gone */
   }
@@ -709,7 +721,7 @@ try {
     await pageA.getByRole("button", { name: "New agent" }).click();
     await pageA.locator("#agent-request").fill("Every morning, summarise the most important Nvidia news.");
     const jobsBefore = jobs.size;
-    await pageA.getByRole("button", { name: "Design my agent" }).click();
+    await pageA.getByRole("button", { name: label("dashboard.agents.designButton") }).click();
 
     // Wait for the ROW to exist rather than for a spinner: the row is what
     // the rest of this depends on, and a spinner can be a render away from
@@ -790,7 +802,7 @@ try {
     await pageQ.goto(AGENTS, { waitUntil: "networkidle", timeout: 60000 });
     await pageQ.getByRole("button", { name: "New agent" }).click();
     await pageQ.locator("#agent-request").fill("Keep me updated on my competitors");
-    await pageQ.getByRole("button", { name: "Design my agent" }).click();
+    await pageQ.getByRole("button", { name: label("dashboard.agents.designButton") }).click();
 
     const asked = await pageQ
       .waitForFunction(() => document.body.innerText.includes("How often should it run?"), { timeout: 40000 })

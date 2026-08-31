@@ -29,6 +29,7 @@
 // Run: node scripts/tests/settings-language.prodtest.mjs
 import { startProdHarness } from "../lib/prod-harness.mjs";
 import { chromium } from "playwright";
+import { chromiumPath } from "./lib/chromium.mjs";
 
 // Every language the app claims to have, in its own script. A reader who
 // has landed in the wrong language cannot read "Greek" but can read
@@ -77,7 +78,7 @@ const check = (name, cond, detail = "") => {
 
 const harness = await startProdHarness({ tableRows: {}, supaPort: 54393 });
 const browser = await chromium.launch({
-  executablePath: process.env.CHROMIUM_PATH || undefined,
+  executablePath: chromiumPath(),
 });
 
 try {

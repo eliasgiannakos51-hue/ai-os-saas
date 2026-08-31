@@ -193,6 +193,7 @@ console.log("build ok — starting `next start`");
 const server = spawn("npx", ["next", "start", "-p", String(PORT)], {
   env,
   stdio: ["ignore", "pipe", "pipe"],
+  detached: true,
 });
 let serverLog = "";
 server.stdout.on("data", (d) => (serverLog += d));
@@ -213,7 +214,18 @@ async function waitForServer() {
 
 function cleanup() {
   try {
-    server.kill("SIGKILL");
+    // KILL THE GROUP, NOT THE HANDLE. `npx next start` is npx -> sh ->
+    // next-server. SIGKILL to the npx handle leaves the grandchild alive,
+    // reparented to init, still holding its port and serving its build.
+    // Measured across one full survey of the suite: thirteen orphaned
+    // next-server processes, the oldest 41 minutes old. `detached: true`
+    // on the spawn puts the whole tree in its own group so this reaches
+    // all of it. Enforced by scripts/tests/prodtest-hygiene.test.mjs.
+    try {
+      process.kill(-server.pid, "SIGKILL");
+    } catch {
+      server.kill("SIGKILL");
+    }
   } catch {
     /* already gone */
   }
@@ -261,8 +273,20 @@ try {
   // Top-level children of <main>, in document order, with their measured
   // height and where they start. The fold is the viewport height.
   const blocks = await page.evaluate(() => {
-    const main = document.querySelector("main");
+    let main = document.querySelector("main");
     if (!main) return [];
+    // UNWRAP THE LANDMARK BEFORE MEASURING.
+    //
+    // The <main> landmark moved from the page into the dashboard layout,
+    // so `main` is now a container whose single child is <PageTransition>
+    // and whose single grandchild is the page. Its "blocks" were one
+    // block, and this suite reported the Home page as having nothing on
+    // it — a red test on a page that had not changed.
+    //
+    // The thing being measured is the page's own top-level rows, so walk
+    // down through any chain of single-child wrappers first. Bounded, so
+    // a page that genuinely is one deep column cannot loop.
+    for (let i = 0; i < 6 && main.children.length === 1; i++) main = main.children[0];
     const out = [];
     const walk = (node, depth) => {
       for (const el of Array.from(node.children)) {

@@ -22,6 +22,7 @@
  * branch with no API key.
  */
 import { foldForMatch } from "@/lib/text/unicode-patterns";
+import { jsonSliceOf } from "@/lib/json-from-text";
 
 export const CAPABILITIES = [
   "chat",
@@ -183,37 +184,11 @@ export function runCheck(output: string, check: Check): CheckResult {
  * JSON" about a perfectly good answer.
  */
 export function extractJson(output: string): string {
-  const fenced = output.match(/```(?:json)?\s*([\s\S]*?)```/);
-  const text = fenced ? fenced[1] : output;
-  const start = text.search(/[{[]/);
-  if (start === -1) return text.trim();
-  const open = text[start];
-  const close = open === "{" ? "}" : "]";
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-  for (let i = start; i < text.length; i++) {
-    const ch = text[i];
-    if (escaped) {
-      escaped = false;
-      continue;
-    }
-    if (ch === "\\") {
-      escaped = true;
-      continue;
-    }
-    if (ch === '"') {
-      inString = !inString;
-      continue;
-    }
-    if (inString) continue;
-    if (ch === open) depth++;
-    else if (ch === close) {
-      depth--;
-      if (depth === 0) return text.slice(start, i + 1);
-    }
-  }
-  return text.slice(start).trim();
+  // ONE SCANNER — see lib/json-from-text.ts. This one was the better of
+  // the two (it handled `[` as well as `{`); the contract on top of it is
+  // what differs, and it is kept: a checker wants TEXT to look at, so a
+  // reply with no JSON in it comes back as the reply rather than as null.
+  return jsonSliceOf(output) ?? output.trim();
 }
 
 /** Every check weighted equally. A case passes only when ALL of them do —

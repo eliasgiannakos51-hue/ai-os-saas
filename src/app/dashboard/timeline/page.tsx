@@ -8,14 +8,16 @@ import { getCurrentUserResult } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { TimelineFilters } from "@/components/timeline/timeline-filters";
+import { TimelineTabs } from "@/components/timeline/timeline-tabs";
+import { FavoritesList } from "@/components/favorites/favorites-list";
 import { TimelineList } from "@/components/timeline/timeline-list";
 import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
 import { TIMELINE_ICON } from "@/lib/module-icons";
 import { loadTimelineEntries, TIMELINE_RANGES, type TimelineRange } from "@/lib/timeline";
-import { loadFavoriteKeys } from "@/lib/favorites";
+import { groupFavorites, loadAllFavorites, loadFavoriteKeys } from "@/lib/favorites";
 
 export function generateMetadata(): Promise<Metadata> {
-  return pageTitle("sidebar.items.timeline");
+  return pageTitle("sidebar.items.mine");
 }
 
 // See dashboard/mission/page.tsx for why this is explicit — this page
@@ -30,7 +32,7 @@ function resolveRange(value: string | undefined): TimelineRange {
 export default async function TimelinePage({
   searchParams,
 }: {
-  searchParams: { module?: string; range?: string };
+  searchParams: { module?: string; range?: string; view?: string };
 }) {
   const t = await getTranslations("dashboard.timeline");
   const tMission = await getTranslations("dashboard.mission");
@@ -48,6 +50,39 @@ export default async function TimelinePage({
   if (!user) {
     diagLog(`[timeline-diag ${reqId}] no user, redirecting to /login`);
     redirect("/login");
+  }
+
+  // THE STARRED VIEW READS user_favorites, NOT A FILTERED TIMELINE.
+  //
+  // loadTimelineEntries scans 60 rows per module and keeps the newest
+  // 200, so post-filtering it to the starred ones would quietly return
+  // fewer favorites than the account has — and favorites also cover
+  // chats, published sites, missions and documents, which the timeline
+  // does not scan at all. Same reason the two used to be separate pages;
+  // merging the NAVIGATION is not a licence to merge the QUERIES.
+  const view = searchParams.view === "fav" ? "fav" : "all";
+  if (view === "fav") {
+    const favorites = await loadAllFavorites(supabase, user.id);
+    diagLog(`[timeline-diag ${reqId}] starred view -> favorites=${favorites.length}`);
+    return (
+      <div className="min-h-full bg-dot-grid">
+        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+          {/* The STARRED tab answers a different question from the
+              everything tab, so it carries the starred tip: "starring
+              does not copy or move anything". Ternary rather than two
+              headers because scripts/tests/help-tips.test.mjs requires
+              every <PageHeader> in a file to carry that file's tip key,
+              and this file legitimately has two tips. */}
+          <PageHeader
+            helpKey="help.favorites"
+            icon={TIMELINE_ICON}
+            title={t("title")}
+          />
+          <TimelineTabs view="fav" />
+          <FavoritesList groups={groupFavorites(favorites)} />
+        </div>
+      </div>
+    );
   }
 
   const moduleSlug = LINKABLE_MODULES.some((m) => m.slug === searchParams.module)
@@ -79,9 +114,10 @@ export default async function TimelinePage({
   diagLog(`[timeline-diag ${reqId}] render -> entriesPassedToComponent=${entries.length}`);
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.timeline" icon={TIMELINE_ICON} title={t("title")} />
+        <TimelineTabs view="all" />
         <TimelineFilters moduleSlug={moduleSlug} range={range} />
         {sessionDegraded ? (
           <ErrorMessage message={tMission("sessionExpired")} />
@@ -89,6 +125,6 @@ export default async function TimelinePage({
           <TimelineList entries={entries} favoritedKeys={favoritedKeys} />
         )}
       </div>
-    </main>
+    </div>
   );
 }

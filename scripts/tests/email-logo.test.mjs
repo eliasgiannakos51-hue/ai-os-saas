@@ -52,6 +52,18 @@ function loadTemplates(siteUrl) {
     'import { getSiteUrl } from "@/lib/site-url";',
     `export function getSiteUrl(){ return ${JSON.stringify(siteUrl)}; }`
   );
+  // THE REAL ESCAPER, INLINED — not a stand-in.
+  //
+  // This loader stubs imports by exact string, so a new one breaks it,
+  // which is what adding lib/html-escape.ts to templates.ts did. Writing
+  // a local `escapeHtml` here instead would make this file test its own
+  // four-line copy rather than the one templates.ts actually calls —
+  // which is the ELEVEN-copies problem that produced lib/html-escape.ts
+  // in the first place, reintroduced inside its own gate.
+  src = src.replace(
+    'import { escapeHtml } from "@/lib/html-escape";',
+    readFileSync("src/lib/html-escape.ts", "utf8")
+  );
   const js = ts.transpileModule(src, {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
   }).outputText;

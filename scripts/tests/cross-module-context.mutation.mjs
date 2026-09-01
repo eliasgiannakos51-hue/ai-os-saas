@@ -75,7 +75,8 @@
  *
  * Run: node scripts/tests/cross-module-context.mutation.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/cross-module-context.test.mjs";
@@ -97,10 +98,15 @@ const MUTANTS = [
     to: "export const MIN_SCORE = 1;",
   },
   {
+    // THIS ANCHOR WENT STALE when the CJK/Arabic substring rule landed:
+    // the whole-word branch grew a `counted` set and an explicit
+    // multi-word else, and the mutation's `from` still named the
+    // one-line version. Reported as STALE and exit 1 — a mutation that
+    // never applies proves nothing, and it must not read as a pass.
     name: "the matcher goes back to a substring test, so \"art\" matches \"start\"",
     file: RELEVANCE,
-    from: "    if (words.has(folded)) score += 1;",
-    to: "    if ([...words].some((w) => w.includes(folded))) score += 1;",
+    from: "    if (words.has(folded)) {\n      counted.add(folded);\n      score += 1;\n    } else if (folded.includes(\" \") && foldedQuestion.includes(folded)) {",
+    to: "    if ([...words].some((w) => w.includes(folded))) {\n      counted.add(folded);\n      score += 1;\n    } else if (folded.includes(\" \") && foldedQuestion.includes(folded)) {",
   },
   {
     name: "a two-word question is judged, so \"why?\" pulls in past sessions",
@@ -275,10 +281,12 @@ const MUTANTS = [
     to: "      integrationInstruction +\n      codingContext;",
   },
   {
+    // THIS ANCHOR WENT STALE when deepDive.prompt was appended to the
+    // suffix. Same lesson as the matcher above: STALE is not SURVIVED.
     name: "the coding block is dropped from the per-message suffix, so it never ships",
     file: CHAT_ROUTE,
-    from: "    const systemDynamicSuffix = buildEntityMentionPromptAddition(mentionedEntities) + codingContext;",
-    to: "    const systemDynamicSuffix = buildEntityMentionPromptAddition(mentionedEntities);",
+    from: "      buildEntityMentionPromptAddition(mentionedEntities) + codingContext + deepDive.prompt;",
+    to: "      buildEntityMentionPromptAddition(mentionedEntities) + deepDive.prompt;",
   },
   {
     name: "a coding-context failure is no longer caught, so it costs the message",

@@ -6,6 +6,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { saveChatTarget, type ChatKind } from "@/lib/notify/preferences";
 import { sendTelegram, telegramConfigured } from "@/lib/notify/channels/telegram";
 import { checkDiscordWebhook, sendDiscord } from "@/lib/notify/channels/discord";
+import { emailIsDeliverable } from "@/lib/email/resend-config";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,15 @@ export async function GET() {
     // connected: without TELEGRAM_BOT_TOKEN there is no bot to send with,
     // and the UI must say so rather than offering a field that cannot work.
     telegramAvailable: telegramConfigured(),
+    // AND EMAIL, WHICH USED TO BE ASSUMED. The panel treated email as
+    // always available — `if (channel === "in_app" || channel === "email")
+    // return true` — which is right about in_app and was wrong about
+    // email in the one case that matters: RESEND_API_KEY set and
+    // RESEND_FROM_EMAIL not. Resend then delivers only to the account
+    // owner and refuses every customer, so the user ticks a box, the
+    // dispatcher records a suppression nobody reads, and the inbox stays
+    // empty with nothing anywhere saying why.
+    emailAvailable: emailIsDeliverable(),
   });
 }
 

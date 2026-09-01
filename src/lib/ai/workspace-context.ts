@@ -1,4 +1,5 @@
 import "server-only";
+import { truncate } from "@/lib/text/truncate";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { enModuleTitle } from "@/lib/module-labels";
 import { logApiError } from "@/lib/log-error";
@@ -88,7 +89,7 @@ export async function loadWorkspaceContext(
       const items = (data ?? [])
         .map((row: Record<string, unknown>) => String(row[config.headlineKey] ?? "").trim())
         .filter((value: string) => value.length > 0)
-        .map((value: string) => (value.length > MAX_ITEM_CHARS ? `${value.slice(0, MAX_ITEM_CHARS - 1)}…` : value));
+        .map((value: string) => truncate(value, MAX_ITEM_CHARS));
 
       if (items.length > 0) facts.push({ module: enModuleTitle(config), items });
     } catch (err) {
@@ -130,5 +131,5 @@ export function renderWorkspaceContext(context: WorkspaceContext): string {
   }
 
   const rendered = lines.join("\n");
-  return rendered.length > MAX_CONTEXT_CHARS ? `${rendered.slice(0, MAX_CONTEXT_CHARS - 1)}…` : rendered;
+  return truncate(rendered, MAX_CONTEXT_CHARS);
 }

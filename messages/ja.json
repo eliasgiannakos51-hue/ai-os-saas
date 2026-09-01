@@ -3,7 +3,6 @@
     "search": "何でも検索...",
     "notifications": "通知",
     "noNotifications": "新しい通知はありません。",
-    "newProject": "新規プロジェクト",
     "jumpToPage": "モジュールやページに移動...",
     "noMatches": "'{query}' に一致する結果はありません",
     "createStudio": "何でもつくる",
@@ -86,7 +85,8 @@
       "myBusiness": "わたしのビジネス",
       "track": "記録する",
       "insights": "気づいたこと",
-      "tracking": "記録"
+      "tracking": "記録",
+      "daily": "毎日"
     },
     "items": {
       "home": "ホーム",
@@ -133,7 +133,9 @@
       "affiliate": "アフィリエイト",
       "formSubmissions": "フォーム送信",
       "routing": "モデルルーティング",
-      "businessHealth": "事業の健康状態"
+      "businessHealth": "事業の健康状態",
+      "mine": "自分のもの",
+      "records": "マイレコード"
     },
     "hints": {
       "chat": "何でも聞けます — どのモジュールにも紐づきません。",
@@ -180,7 +182,9 @@
       "help": "よくある質問への回答です。クレジットは消費しません。",
       "affiliate": "紹介リンク、これまでの報酬、受け取り方法。",
       "formSubmissions": "公開サイトのフォームから訪問者が送った内容のすべて",
-      "businessHealth": "MRR、粗利、解約、手元資金。オーナー専用。"
+      "businessHealth": "MRR、粗利、解約、手元資金。オーナー専用。",
+      "mine": "作成したものすべてを新しい順に。お気に入りだけのタブもあります",
+      "records": "すべての記録を一か所に。メニューを探さず種類で絞り込めます"
     },
     "closeMenu": "メニューを閉じる"
   },
@@ -227,7 +231,7 @@
     },
     "businessTitle": "ビジネス",
     "businessSubtitle": "チームで共に構築する",
-    "businessExplanation": "ベースプランとしてProfessionalまたはUltimateを選択してください — どちらもチームコラボレーションを利用できます。その後チームメンバーを招待しましょう。各メンバーはあなたのプランと同じ機能に完全アクセスでき、Professionalでは+{price}/メンバー/月、Ultimateでは無料で利用できます。",
+    "businessExplanation": "ベースプランとしてProfessionalまたはUltimateを選択してください — どちらもチームコラボレーションを含みます。その後チームメンバーを招待しましょう。各メンバーはあなたのプランと同じ機能に完全アクセスでき、Professionalでは+{price}/メンバー/月、Ultimateでは無料で利用できます。",
     "businessCardDescription": "どのプランでもチームのベースとして始められます。その後、メンバーを1人あたり+{price}/月で招待できます — 全員があなたのプランと同じレベルの完全アクセスを得られます。共同作業をするチームに最適です。",
     "businessFeatureBase": "ベースプランとしてProfessionalまたはUltimateを選択",
     "businessFeatureFullAccess": "各メンバーはあなたのプランと同じレベルの完全アクセスを取得",
@@ -413,7 +417,9 @@
       "signUp": "新規登録",
       "forgotPassword": "パスワードをお忘れですか？",
       "resetSuccess": "パスワードを更新しました — 新しいパスワードでログインしてください。",
-      "failed": "サインインできませんでした。メールアドレスとパスワードをご確認いただくか、不明な場合はパスワードを再設定してください。"
+      "failed": "サインインできませんでした。メールアドレスとパスワードをご確認いただくか、不明な場合はパスワードを再設定してください。",
+      "oauthFailed": "そのサインインは完了しませんでした。もう一度お試しいただくか、下のメールアドレスとパスワードをお使いください。",
+      "sharedSignInFirst": "共有した内容を保存するにはサインインしてください。"
     },
     "signup": {
       "chooseYourPlan": "プランを選択",
@@ -668,7 +674,11 @@
         "endingIn": "{days, plural, =0 {サブスクリプションは本日終了します。} other {サブスクリプションはあと # 日で終了します。}}"
       },
       "creditsSplit": "月次 {monthly} + 購入分 {purchased}（有効期限なし）",
-      "noSubscriptionToCancel": "解約する定期購入はありません。オーナー権限とベータ期間はそれぞれ自動的に終了します。"
+      "noSubscriptionToCancel": "解約する定期購入はありません。オーナー権限とベータ期間はそれぞれ自動的に終了します。",
+      "checkout": {
+        "success": "お支払いを受け取りました。Stripe の確認後、通常は数秒でこちらのプランが更新されます。",
+        "cancelled": "決済はキャンセルされました。請求は発生していません。"
+      }
     },
     "marginReport": {
       "title": "マージンレポート",
@@ -720,8 +730,8 @@
       "notConfigured": "このデプロイではプッシュ通知が設定されていません。",
       "agentResults": "エージェントの結果",
       "agentResultsHint": "スケジュールされたエージェントの実行が完了したとき",
-      "missionReminders": "ミッションのリマインダー",
-      "missionRemindersHint": "スケジュールされたミッションステップが実行されたとき",
+      "missionReminders": "プランのリマインダー",
+      "missionRemindersHint": "スケジュールされたプランのステップが実行されたとき",
       "lowCredits": "クレジット残量わずか",
       "lowCreditsHint": "残高が尽きて処理が停止したとき",
       "collaboration": "コラボレーション",
@@ -798,7 +808,8 @@
           "help": "使いたいチャンネルの Discord webhook URL を貼り付けてください。",
           "placeholder": "https://discord.com/api/webhooks/…"
         }
-      }
+      },
+      "emailNotConfigured": "このデプロイではメールがまだ設定されていないため、受信トレイには何も配信できません。"
     },
     "overage": {
       "title": "追加利用",
@@ -863,10 +874,19 @@
         "totalEntries": "合計エントリー数",
         "thisWeek": "今週",
         "mostActive": "最も活発",
-        "creditsRemaining": "残りクレジット"
+        "creditsRemaining": "残りクレジット",
+        "fillsAfter": "{count} 件記録すると表示されます",
+        "totalEntriesExplain": "これまでに全モジュールで記録したものすべて。",
+        "thisWeekExplain": "直近 7 日間の記録——今週どれだけ動いたか。",
+        "mostActiveExplain": "いちばん書いているモジュール。注意が向いている場所です。",
+        "creditsExplain": "今月の AI 利用枠の残りです。",
+        "ofTotal": "{count, plural, other {全 # 件中}}",
+        "fromEntries": "{count, plural, other {# 件の記録から}}",
+        "openEntries": "記録を見る →",
+        "openCredits": "明細を見る →"
       },
       "betaFeedback": {
-        "message": "Ionexa AI をお試しいただきありがとうございます！ぜひご意見をお聞かせください。",
+        "message": "Ionexa AI をお試しいただきありがとうございます。ご意見をお待ちしています。",
         "linkLabel": "フィードバックを送る"
       },
       "progress": {
@@ -882,12 +902,13 @@
         "mostActiveIn": "{module} で最もアクティブ"
       },
       "activeMission": {
-        "title": "進行中のミッション",
-        "stepsLabel": "{completed}/{total} ステップ完了"
+        "title": "進行中のプラン",
+        "stepsLabel": "{completed}/{total} ステップ完了",
+        "open": "プランを開く"
       },
       "nextAction": {
         "title": "次にすべきこと",
-        "continueMission": "続ける: \"{goal}\" ミッションの {step}",
+        "continueMission": "続ける: 「{goal}」プランの {step}",
         "revisitLink": "数日前に \"{source}\" を \"{target}\" にリンクしました — 見直す価値があるかも?",
         "startNew": "過去3日間新しい活動がありません — 何か新しいことを始めませんか?",
         "cta": "移動する →"
@@ -901,7 +922,7 @@
         "suggestion": {
           "recency": "しばらく記録がありません — 新しいエントリを追加して再開しましょう。",
           "coverage": "まだ使っていないモジュールを試してみましょう。",
-          "missionSteps": "ミッションのステップを完了して勢いを維持しましょう。",
+          "missionSteps": "プランのステップを完了して勢いを維持しましょう。",
           "consistency": "今週は毎日何かを記録してみましょう。"
         }
       },
@@ -933,7 +954,27 @@
       "quickStart": "クイックスタート",
       "templateFailed": "このテンプレートを適用できませんでした。少し待ってからお試しください — 何も追加されていません。",
       "quickStartBlurb": "サンプルをいくつか追加して、中身の入ったワークスペースがどう見えるか確かめてみてください。",
-      "quickStartAdd": "追加"
+      "quickStartAdd": "追加",
+      "setupProgress": {
+        "title": "セットアップの進捗",
+        "count": "{total} 件中 {done} 件",
+        "suggestion": "{count} 件記録すると活動スコアが表示されます。1 件で決まってしまわない程度の数です。",
+        "steps": {
+          "onboarding": "ようこそ質問に答える",
+          "firstEntry": "最初の記録をつける",
+          "secondModule": "2 つ目の領域にも記録する",
+          "mission": "目標を設定する"
+        }
+      },
+      "next": {
+        "title": "次にやること"
+      },
+      "whatChanged": {
+        "title": "変わったこと",
+        "since": "{when}から",
+        "entries": "件の新しい記録",
+        "insights": "件の新しい発見"
+      }
     },
     "team": {
       "title": "チーム",
@@ -953,7 +994,7 @@
       "removeTitle": "メンバーを削除",
       "descriptionIncluded": "{plan}プランでは、招待されたメンバーはこの階層に追加料金なしで完全アクセスできます。",
       "seatsUsed": "{used} / {total} 席使用中",
-      "setupSuccessTitle": "チームの準備ができました!",
+      "setupSuccessTitle": "チームの準備ができました",
       "setupSuccessBody": "以下から最初のチームメンバーを招待してください。",
       "roleLabel": "役割 / 職種",
       "rolePlaceholder": "この人は何をしますか?",
@@ -1030,7 +1071,18 @@
       "pinError": "ピン留めを保存できませんでした。もう一度お試しください。",
       "renameError": "新しい名前を保存できませんでした。前の名前のままです。",
       "renameLabel": "「{title}」の新しい名前",
-      "emptyHint": "何でも聞いてください — 一般的な知識、アイデア出し、文章の手伝い、ただの雑談も。"
+      "emptyHint": "何でも聞いてください — 一般的な知識、アイデア出し、文章の手伝い、ただの雑談も。",
+      "provenance": {
+        "plain": "{modules} 件のモジュールにある {count} 件の記録に基づいています",
+        "withPeriod": "{modules} 件のモジュールにある {count} 件の記録に基づいています（{period}）",
+        "capped": "各モジュールの最新 {cap} 件、計 {modules} モジュール — {count} 件の記録を読み込みました。すべてではありません",
+        "cappedWithPeriod": "各モジュールの最新 {cap} 件、計 {modules} モジュール — {count} 件の記録を読み込みました（{period}）。すべてではありません。",
+        "nothingIn": "次からは何も読み込んでいません：{modules}"
+      },
+      "dataScope": {
+        "title": "何が見えているか",
+        "body": "あなたの記録、目標、アップロードしたファイルを参照します。あなたが追加していないものは一切参照しません。頼まない限り、何も変更しません。"
+      }
     },
     "create": {
       "title": "何でも作成",
@@ -1044,7 +1096,7 @@
       "recordItAnyway": "それでも記録する"
     },
     "timeline": {
-      "title": "履歴",
+      "title": "自分のもの",
       "allModules": "すべてのモジュール",
       "showOnly": "表示: {module}のみ",
       "rangeToday": "今日",
@@ -1054,7 +1106,9 @@
       "empty": {
         "title": "あなたの仕事を、起きた順に",
         "why": "自動的に書かれていきます。どのモジュールで記録したものもここに一本の流れとして集まり、「先月は結局なにをしたか」に答えられます。"
-      }
+      },
+      "tabAll": "すべて",
+      "tabStarred": "お気に入り"
     },
     "favorites": {
       "title": "お気に入り",
@@ -1083,7 +1137,7 @@
       "scheduledForDate": "{date}に実行",
       "cancelScheduled": "キャンセル",
       "viewIn": "{module}で表示",
-      "reviewMission": "ミッションを評価",
+      "reviewMission": "プランを評価",
       "reviewing": "評価中...",
       "reviewerLabel": "Reviewer",
       "statusPlanning": "計画中",
@@ -1102,17 +1156,17 @@
       "retry": "再試行 ({attempts}/{max})",
       "stepFailedMax": "{max}回失敗しました — 自動的には再試行されません。ステップの言い方を変えるか、手動で作成してください。",
       "sessionExpired": "読み込み中にセッションが期限切れになりました。データは失われていません — ページを再読み込みしてください。",
-      "newMission": "新しいミッション",
+      "newMission": "新しいプラン",
       "tabSteps": "ステップ",
       "tabReview": "レビュー",
       "stepsProgress": "{total} 中 {done} ステップ",
       "statusFilterLabel": "ステータス",
       "nextStep": "次: {step}",
-      "noSteps": "このミッションにはまだ計画ステップがありません。",
+      "noSteps": "このプランにはまだステップがありません。",
       "reviewNotRunYet": "すべてのステップが完了しました。レビュアーを実行して要約を取得してください。",
       "reviewLocked": "レビュアーはすべてのステップ完了後に実行されます。",
       "stepMinutes": "約 {count} 分",
-      "updatedElsewhere": "このミッションは別の場所で更新されました — 最新の状態を表示するために再読み込みします。",
+      "updatedElsewhere": "このプランは別の場所で更新されました — 最新の状態を表示するために再読み込みします。",
       "energy": {
         "heading": {
           "light": "エネルギー低め — ここから始めましょう",
@@ -1121,18 +1175,18 @@
         },
         "heldBack": "負荷の高い {count} 件のステップは今は保留"
       },
-      "stillPlanning": "まだ計画中です。少し時間がかかっています。処理は続いており、完成すると計画がミッション一覧に表示されます。",
+      "stillPlanning": "まだ計画中です。少し時間がかかっています。処理は続いており、完成するとプラン一覧に表示されます。",
       "planStalled": "計画が予期せず停止しました。クレジットは請求されていません。もう一度お試しください。",
       "empty": {
         "title": "ひとつの目標を、手順に分ける",
         "why": "達成したいことを書けば、日付つきでチェックできる手順に変わります。願望リストではありません。",
         "example": "最初の有料顧客10人を獲得する"
       },
-      "deleteMission": "ミッションを削除",
-      "deleteConfirmMission": "ミッション「{goal}」を削除しますか？",
+      "deleteMission": "プランを削除",
+      "deleteConfirmMission": "プラン「{goal}」を削除しますか？",
       "deleteConfirmLoses": "ステップ {steps} 件（うち完了 {completed} 件）と予約実行 {scheduled} 件が削除されます。元に戻せません。",
-      "deletedMission": "ミッションを削除しました",
-      "deleteFailed": "ミッションを削除できませんでした。",
+      "deletedMission": "プランを削除しました",
+      "deleteFailed": "プランを削除できませんでした。",
       "deleteStep": "ステップを削除",
       "editStep": "ステップを編集",
       "saveStep": "保存",
@@ -1150,12 +1204,12 @@
       "generating": "生成中...",
       "entriesTitle": "新規エントリー(今週 / 先週)",
       "noModuleActivity": "過去2週間、どのモジュールにも活動がありません。",
-      "missionStepsLabel": "ミッションステップ {completed} 件完了、{pending} 件保留中",
+      "missionStepsLabel": "プランのステップ {completed} 件完了、{pending} 件保留中",
       "reflectionLabel": "振り返り"
     },
     "tradingWorkflow": {
       "title": "トレーディングワークフロー",
-      "description": "トレードの記録、ナレッジグラフのリンク、タイムライン、メンター、ミッション、週次振り返りをすべて一箇所に。",
+      "description": "トレードの記録、ナレッジグラフのリンク、タイムライン、メンター、プラン、週次振り返りをすべて一箇所に。",
       "insight": {
         "title": "トレーディングパターンインサイト",
         "noTrades": "トレードを記録すると、ここにパターンが表示され始めます。",
@@ -1170,7 +1224,7 @@
       "mentorButtonDescription": "直近20件のトレードをコンテキストとして読み込んだ状態で、Ionexa Chatをメンターモードで開きます。",
       "mentorChatPrefill": "最近のトレードを分析して、勝率を改善するためのフィードバックをください。",
       "missionButton": "トレーディング目標を開始",
-      "missionButtonDescription": "トレードを改善するためのAIミッションプラン(例:今月の勝率)を作成します。",
+      "missionButtonDescription": "トレードを改善するためのAIプラン(例:今月の勝率)を作成します。",
       "missionButtonCreating": "作成中...",
       "missionGoal": "今月のトレーディング勝率を改善する",
       "timelineTitle": "トレーディングタイムライン",
@@ -1180,7 +1234,7 @@
     },
     "productWorkflow": {
       "title": "プロダクトワークフロー",
-      "description": "製品の記録、ナレッジグラフのリンク、タイムライン、メンター、ミッション、週次振り返りをすべて一箇所に。",
+      "description": "製品の記録、ナレッジグラフのリンク、タイムライン、メンター、プラン、週次振り返りをすべて一箇所に。",
       "insight": {
         "title": "プロダクトパターンインサイト",
         "noProducts": "製品を追加すると、ここにパターンが表示され始めます。",
@@ -1191,7 +1245,7 @@
       "mentorButtonDescription": "直近20件の製品をコンテキストとして読み込んだ状態で、Ionexa Chatをメンターモードで開きます。",
       "mentorChatPrefill": "私の製品計画を確認して、ローンチ前に不足している点についてフィードバックをください。",
       "missionButton": "新製品をローンチ",
-      "missionButtonDescription": "新製品をローンチするためのAIミッションプラン(ターゲット層、価格設定、ランディングページなど)を作成します。",
+      "missionButtonDescription": "新製品をローンチするためのAIプラン(ターゲット層、価格設定、ランディングページなど)を作成します。",
       "missionButtonCreating": "作成中...",
       "missionGoal": "新製品をローンチする：ターゲット層を定義し、価格を設定し、ランディングページを作成する",
       "timelineTitle": "プロダクトタイムライン",
@@ -1203,10 +1257,13 @@
       "title": "エネルギーチェックイン",
       "prompt": "今日のエネルギーはどうですか?",
       "checkedInToday": "今日のエネルギー: {level}/5。",
-      "logAgain": "もう一度記録",
       "notePlaceholder": "任意のメモ...",
       "logged": "エネルギーを記録しました",
-      "levelLabel": "エネルギーレベル {level}"
+      "levelLabel": "エネルギーレベル {level}",
+      "scaleLow": "1 = 疲れきっている",
+      "scaleHigh": "5 = 絶好調",
+      "whatItDoes": "Ionexa はこれをもとに次に提案するプランのステップを選びます。調子が低いときは軽い作業、そうでなければ手応えのある作業を。",
+      "change": "変更"
     },
     "websiteBuilder": {
       "title": "サイトをつくる",
@@ -1422,7 +1479,7 @@
       "subtitle": "作りたいものを一文で書いてください。ツールを選ぶ必要はありません。スタジオが何かを判断し、理解した内容を先に見せてから作成します。",
       "inputLabel": "何を作りますか？",
       "inputPlaceholder": "例: コーチング事業向けの、温かく professional なランディングページ",
-      "noToolPickerHint": "ウェブサイト、ミッション、エントリー、自動化、ドキュメント — すべてここから始まります。",
+      "noToolPickerHint": "ウェブサイト、プラン、記録、自動化、ドキュメントはすべてここから始まります。",
       "continue": "続ける",
       "detecting": "リクエストを読み取っています…",
       "detectFailed": "このリクエストを読み取れませんでした。",
@@ -1438,7 +1495,7 @@
       "changeType": "種類を変更",
       "pickTypePrompt": "どの種類にするか選んでください:",
       "typeWebsite": "ウェブサイト",
-      "typeMission": "ミッション",
+      "typeMission": "プラン",
       "typeModuleEntry": "ワークスペースのエントリー",
       "typeModuleEntryNamed": "{module} のエントリー",
       "typeAutomation": "自動化",
@@ -1468,7 +1525,7 @@
       "progress": {
         "creatingProject": "プロジェクトを作成中",
         "generatingWebsite": "ウェブサイトを生成中",
-        "planningMission": "ミッションを計画中",
+        "planningMission": "プランを作成中",
         "routingEntry": "適切なモジュールへ振り分け中",
         "schedulingAutomation": "自動化をスケジュール中",
         "creatingDocument": "ドキュメントを作成中",
@@ -1489,7 +1546,8 @@
       "typeAgent": "AI エージェント",
       "agentDesignFailed": "そのエージェントを設計できませんでした。",
       "agentSaveFailed": "エージェントは設計されましたが、保存できませんでした。",
-      "unsupportedType": "Create Studio はまだそれを作成できません。"
+      "unsupportedType": "Create Studio はまだそれを作成できません。",
+      "madeItHere": "ここに作りました → {where}"
     },
     "agents": {
       "title": "AI エージェント",
@@ -1509,7 +1567,7 @@
       "clarificationSkip": "スキップして作成",
       "clarificationContinue": "続ける",
       "clarificationAnswerPlaceholder": "回答を入力...",
-      "previewTitle": "作成する内容",
+      "previewTitle": "このエージェントが行うこと",
       "previewName": "名前",
       "previewSchedule": "実行タイミング",
       "previewCostPerRun": "1回あたりの費用",
@@ -1717,7 +1775,9 @@
         "withdrawing": "取り下げています...",
         "withdrawn": "取り下げました。ライブラリにはもうありません。",
         "withdrawFailed": "取り下げられませんでした。まだ共有されています。"
-      }
+      },
+      "failingWarning": "直近 {failures} 回連続で実行に失敗しました。{max} 回でこのエージェントは自動的に停止します。",
+      "disabledReason": "最後の失敗: {reason}"
     },
     "publishing": {
       "title": "公開中のサイト",
@@ -1877,7 +1937,7 @@
       "saveSelection": "選択中の {count} 件を保存",
       "collectionCreated": "コレクション {name} を保存しました",
       "collectionError": "コレクションを保存できませんでした。",
-      "askTitle": "自分の書類に質問",
+      "askTitle": "あなたの文書に質問",
       "askNothingSelected": "回答の根拠にするファイルを選んでください。それ以外は使われません。",
       "askSelected": "{count} 件のファイルから回答: {names}",
       "tooManySelected": "一度に質問できるのは最大 {max} ファイルです。",
@@ -2128,13 +2188,13 @@
     "search": {
       "kinds": {
         "page": "ページ",
-        "module": "レコード",
+        "module": "記録",
         "file": "ファイル",
         "chat": "会話",
         "website": "ウェブサイト",
         "agent": "エージェント",
         "research": "リサーチ",
-        "mission": "ミッション",
+        "mission": "プラン",
         "help": "ヘルプ"
       },
       "filters": {
@@ -2292,6 +2352,14 @@
         "too_long": "ルールに必要な長さを超えています。",
         "unauthenticated": "サインアウトしています。サインインしてからお試しください。"
       }
+    },
+    "records": {
+      "title": "マイレコード",
+      "description": "すべての記録・ツール・設定を一か所に。メニューを探さず種類で絞り込めます。",
+      "searchLabel": "名前で検索",
+      "allTypes": "すべての種類",
+      "count": "{count, plural, other {# 件}}",
+      "noMatch": "その名前に一致するものはありません。短い語で試すか、絞り込みを解除してください。"
     }
   },
   "module": {
@@ -2361,13 +2429,14 @@
   "askAi": {
     "buttonLabel": "AI に質問",
     "title": "この{title}について AI に質問",
-    "subtitle": "AI はこのエントリーのデータを既に把握しています — そのまま質問してください。",
+    "subtitle": "AI はこの記録のデータを既に持っています。何でも質問してください。",
     "placeholder": "このエントリーについて何でも質問してください...",
     "emptyState": "このエントリーについて質問してください — 背景を説明する必要はありません。AI は既に把握しています。",
     "send": "送信",
     "close": "閉じる",
     "streamInterrupted": "応答が完了する前に接続が切断されました。",
-    "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。"
+    "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。",
+    "alsoRead": "この記録に関する過去のメッセージ {count} 件も読み込みました"
   },
   "entityLinks": {
     "buttonLabel": "リンク...",
@@ -2402,8 +2471,8 @@
       "description": "{module}に最初のエントリーを記録しましょう。"
     },
     "firstMission": {
-      "title": "ミッション達成",
-      "description": "最初のAIミッションを完了しましょう。"
+      "title": "最初のプラン達成",
+      "description": "最初のAIプランを完了しましょう。"
     },
     "streak": {
       "title": "継続チャンピオン",
@@ -2419,11 +2488,11 @@
     },
     "firstEntityLink": {
       "title": "コネクター",
-      "description": "ナレッジグラフで2つのレコードをリンクしよう。"
+      "description": "ナレッジグラフで2件の記録をリンクしよう。"
     },
     "tenEntityLinks": {
       "title": "ネットワークビルダー",
-      "description": "モジュール間で10件のレコードをリンクしよう。"
+      "description": "モジュール間で10件の記録をリンクしよう。"
     },
     "firstEnergyCheckin": {
       "title": "チェックイン",
@@ -2439,7 +2508,7 @@
     },
     "fiftyEntries": {
       "title": "パワーユーザー",
-      "description": "全モジュールで合計50件のエントリーを記録しよう。"
+      "description": "全モジュールで合計50件の記録を残そう。"
     }
   },
   "credits": {
@@ -2869,7 +2938,7 @@
     },
     "create": {
       "is": "一文を入れると、正しいものが出てきます。",
-      "does": "やりたいことを自分の言葉で書くと、モジュールの記録・ウェブサイト・ミッション・自動化・エージェント・ドキュメントのどれかを判断して作成します。",
+      "does": "やりたいことを自分の言葉で書くと、モジュールの記録・ウェブサイト・プラン・自動化・エージェント・ドキュメントのどれかを判断して作成します。",
       "doesNot": "黙って推測はしません。意図が分からないとき、または依頼されたものを作れないときは、近い別の種類を作るのではなく、その旨を伝えます — 以前エージェントで起きていたのがまさにそれでした。"
     },
     "costs": {
@@ -2914,12 +2983,12 @@
     },
     "productWorkflow": {
       "is": "製品にまつわるすべてを一画面に集めたものです。",
-      "does": "「製品」モジュールとまったく同じ項目に加えて、そのつながり、履歴、AI を使わずに算出した傾向、そしてメンターとミッションへのワンタップの入口を表示します。",
+      "does": "「製品」モジュールとまったく同じ項目に加えて、そのつながり、履歴、AI を使わずに算出した傾向、そしてメンターとプランへのワンタップの入口を表示します。",
       "doesNot": "製品を置く二つ目の場所ではありません。これは「製品」モジュールと同じ行です——ここで追加すればあちらにも現れます——そして傾向はあなたが書いた内容に対する算術であり、予測ではありません。"
     },
     "reflection": {
       "is": "今週実際に終わったことを、予定していたことと突き合わせます。",
-      "does": "今週と先週の各モジュールの新規項目を数え、完了したミッションの手順と残っている手順を数え、その差について短く正直な総括を求めます。",
+      "does": "今週と先週の各モジュールの新規項目を数え、完了したプランの手順と残っている手順を数え、その差について短く正直な総括を求めます。",
       "doesNot": "ここには何も保存されません。押すたびに最新のデータから計算し直すので過去の振り返りの履歴はありません。数えるのは記録したことであって、アプリの外でしたことではありません。"
     },
     "routing": {
@@ -2939,13 +3008,18 @@
     },
     "tradingWorkflow": {
       "is": "取引にまつわるすべてを一画面に集めたものです。",
-      "does": "「取引」モジュールと同じ記録に加えて、そのつながり、履歴、曜日・時間帯・銘柄・連敗ごとの傾向、そしてメンターとミッションへのワンタップの入口を表示します。",
+      "does": "「取引」モジュールと同じ記録に加えて、そのつながり、履歴、曜日・時間帯・銘柄・連敗ごとの傾向、そしてメンターとプランへのワンタップの入口を表示します。",
       "doesNot": "傾向はすでに行った取引の集計であって予測ではなく、投資助言でもありません。二つ目の取引記録でもありません。これは「取引」モジュールと同じ行です。"
     },
     "businessHealth": {
       "is": "事業そのものの数字——売上、粗利、解約、手元資金。オーナー専用です。",
       "does": "各指標を実際のサブスクリプション行とコスト行から計算し、データベースには知りようのない三つの数字——広告費、固定費、現金残高——をあなたに尋ねます。",
       "doesNot": "根拠を示せない数字は表示しません。入力が足りない指標は、ゼロで計算する代わりに何が必要かを述べます。過去にさかのぼって埋めることもしません——履歴は公開された日から始まります。"
+    },
+    "records": {
+      "is": "開けるすべての種類の記録・ツール・設定を並べた 1 ページです。",
+      "does": "サイドバーには同じ仕組みの記録が 19 個並んでいました。それらを種類で絞り込めるここにまとめたので、メニューを覚えるのではなく一覧を読んで探せます。",
+      "doesNot": "何も移動していませんし、統合もしていません。各ページは自分のアドレス・記録・フォームをそのまま持っています。ここは入口であって、データの新しい置き場ではありません。"
     }
   },
   "helpCentre": {
@@ -2964,7 +3038,7 @@
       "credits": "クレジット",
       "websites": "ウェブサイト",
       "agents": "AIエージェント",
-      "missions": "ミッション",
+      "missions": "プラン",
       "chat": "チャット",
       "files": "ファイル",
       "integrations": "連携",
@@ -3059,6 +3133,13 @@
         "what": "この操作は完了しませんでした。",
         "next": "もう一度お試しいただき、再発する場合はサポートにご連絡ください。"
       }
+    },
+    "boundary": {
+      "title": "このページの一部を読み込めませんでした",
+      "body": "ダッシュボードの他の部分は正常で、データはそのままです。多くの場合は再読み込みで解決します。続く場合は自動で報告されています。",
+      "reload": "ページを再読み込み",
+      "section": "このセクションを表示できませんでした。",
+      "sectionBody": "ページの他の部分に影響はありません。多くの場合は再読み込みで解決します。"
     }
   },
   "aiExamples": {
@@ -3417,5 +3498,16 @@
       "notEnough": "残高は{balance}クレジットで、{needed}必要です。",
       "remove": "バッジを非表示にする"
     }
+  },
+  "sampleData": {
+    "load": "サンプルデータで見る",
+    "loading": "読み込み中…",
+    "loadFree": "無料。何も生成されず、ワンクリックで削除できます",
+    "loadFailed": "うまくいきませんでした。もう一度お試しください。",
+    "banner": "サンプルデータ",
+    "bannerDetail": "これらはデモの記録です。小さなデザイン事務所の 3 か月分で、あなたのものではありません。",
+    "clear": "サンプルを削除",
+    "clearing": "削除中…",
+    "clearFailed": "うまくいきませんでした。"
   }
 }

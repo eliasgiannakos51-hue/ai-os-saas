@@ -96,9 +96,7 @@ export function canUpload(usage: StorageUsage, incomingBytes: number[]): UploadD
   return { ok: false, reason: "over_quota", neededBytes: needed, remainingBytes: usage.remainingBytes };
 }
 
-export function formatBytes(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes <= 0) return "0 MB";
-  if (bytes >= 1024 * MB) return `${(bytes / (1024 * MB)).toFixed(1)} GB`;
-  if (bytes >= MB) return `${Math.round(bytes / MB)} MB`;
-  return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-}
+// The second copy is gone. It returned "0 MB" for NaN and for every
+// negative — including the over-quota figure website-builder passes it,
+// which is the one case where the sign is the whole message.
+export { formatBytes } from "@/lib/format-bytes";

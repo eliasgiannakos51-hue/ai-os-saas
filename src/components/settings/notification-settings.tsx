@@ -48,6 +48,11 @@ export function NotificationSettings({ userId }: { userId: string }) {
   const [offset, setOffset] = useState(0);
   const [chats, setChats] = useState<ChatRow[]>([]);
   const [telegramAvailable, setTelegramAvailable] = useState(false);
+  // TRUE UNTIL THE SERVER SAYS OTHERWISE. The fetch below is the only
+  // thing that can set it false, and a panel that rendered "email is not
+  // set up" for the half-second before that answer arrived would be
+  // saying something false to every user on every load.
+  const [emailAvailable, setEmailAvailable] = useState(true);
   const [busy, setBusy] = useState(false);
   const [connectTarget, setConnectTarget] = useState<Record<string, string>>({});
   const [connecting, setConnecting] = useState<string | null>(null);
@@ -97,6 +102,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
       if (channelsResponse) {
         setChats((channelsResponse.channels ?? []) as ChatRow[]);
         setTelegramAvailable(Boolean(channelsResponse.telegramAvailable));
+        setEmailAvailable(channelsResponse.emailAvailable !== false);
       }
     })();
     return () => {
@@ -111,11 +117,13 @@ export function NotificationSettings({ userId }: { userId: string }) {
 
   const channelUsable = useCallback(
     (channel: NotificationChannel) => {
-      if (channel === "in_app" || channel === "email") return true;
+      if (channel === "in_app") return true;
+      // NOT ALWAYS TRUE. See the comment in api/notifications/channels.
+      if (channel === "email") return emailAvailable;
       if (channel === "telegram") return telegramAvailable && connected.has("telegram");
       return connected.has("discord");
     },
-    [connected, telegramAvailable]
+    [connected, telegramAvailable, emailAvailable]
   );
 
   const effective = useCallback(
@@ -243,6 +251,23 @@ export function NotificationSettings({ userId }: { userId: string }) {
           <Bell className="h-4 w-4 text-orange-400" /> {t("title")}
         </h2>
         <p className="mt-1 text-xs text-muted">{t("description")}</p>
+        {/* SAID ONCE, AT THE TOP, RATHER THAN PER ROW. The Email column
+            is greyed out by channelUsable for every type when this is
+            false; without a sentence saying why, a greyed column reads as
+            a plan limit or a bug. It is neither — it is the operator's
+            deployment, and the user cannot do anything about it, which is
+            precisely why they should not be left guessing.
+
+            Not an error tone: nothing the reader did is wrong, and
+            nothing they are owed has been lost yet. */}
+        {!emailAvailable && (
+          <p
+            role="status"
+            className="mt-3 rounded-xl border border-amber-800 bg-amber-950/20 px-3 py-2 text-xs text-amber-300"
+          >
+            {t("emailNotConfigured")}
+          </p>
+        )}
       </div>
 
       {/* The matrix. Scrolls inside itself on a phone rather than making

@@ -229,6 +229,49 @@ const supa = http.createServer((req, res) => {
     // ---- PostgREST ------------------------------------------------------
     if (url.pathname.startsWith("/rest/v1/")) {
       const table = url.pathname.slice("/rest/v1/".length);
+
+      // TELEMETRY THE SHELL SENDS ON EVERY PAGE, answered truthfully
+      // rather than 500'd.
+      //
+      // Measured: fifty unexpected calls on a files-workspace run, of
+      // which the distinct kinds were pwa_client_stats, nav_events,
+      // voice_usage_this_month and record_production_error. The last is
+      // not independent traffic — it is the app REPORTING that the other
+      // three came back 500. One stale allowlist, one red check, and a
+      // large number that looked like a product problem.
+      //
+      // ANSWERING THEM MAKES THIS SUITE STRONGER, not weaker: an
+      // unexpected call after this is a real one.
+      // consume_rate_limit is the ATOMIC rate-limit check that replaced a
+      // read-then-write pair this session. The mock knew the old shape (a
+      // POST to rate_limit_log) and not the new one, so every guarded
+      // action 500'd and reported itself. Allowed, at the limit the real
+      // function returns for a first call.
+      if (table === "rpc/consume_rate_limit") {
+        // A BARE BOOLEAN, because that is what the real function returns
+        // (20260919000000_atomic_rate_limit.sql: `returns boolean`) and
+        // lib/rate-limit.ts treats any other shape as a deployed-signature
+        // mismatch and falls back loudly. My first version answered
+        // `[{allowed:true,remaining:99,...}]` — a shape invented to look
+        // plausible, which would have made this suite pass against a
+        // fiction the database never produces.
+        return json(200, true);
+      }
+      if (table === "rpc/voice_usage_this_month") {
+        return json(200, [{ transcribe_seconds: 0, speak_seconds: 0 }]);
+      }
+      if (table === "rpc/record_production_error") {
+        // Answered so the recorder cannot itself fail, and NOT allowed
+        // to pass silently: reaching this now means something really
+        // did go wrong.
+        unexpected.push(`production error recorded: ${body.toString().slice(0, 120)}`);
+        return json(200, null);
+      }
+      if (table === "nav_events" || table === "pwa_client_stats") {
+        if (req.method === "POST") return json(201, []);
+        return json(200, [], { "Content-Range": "0-0/0" });
+      }
+
       if (req.method === "POST" && table === "user_files") {
         let row;
         try {
@@ -315,7 +358,7 @@ if ((await new Promise((r) => build.on("close", r))) !== 0) {
   process.exit(1);
 }
 
-const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"] });
+const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"], detached: true });
 let serverLog = "";
 server.stdout.on("data", (d) => (serverLog += d));
 server.stderr.on("data", (d) => (serverLog += d));
@@ -334,7 +377,18 @@ async function waitForServer() {
 }
 function cleanup() {
   try {
-    server.kill("SIGKILL");
+    // KILL THE GROUP, NOT THE HANDLE. `npx next start` is npx -> sh ->
+    // next-server. SIGKILL to the npx handle leaves the grandchild alive,
+    // reparented to init, still holding its port and serving its build.
+    // Measured across one full survey of the suite: thirteen orphaned
+    // next-server processes, the oldest 41 minutes old. `detached: true`
+    // on the spawn puts the whole tree in its own group so this reaches
+    // all of it. Enforced by scripts/tests/prodtest-hygiene.test.mjs.
+    try {
+      process.kill(-server.pid, "SIGKILL");
+    } catch {
+      server.kill("SIGKILL");
+    }
   } catch {
     /* already gone */
   }
@@ -348,7 +402,7 @@ if (!(await waitForServer())) {
 console.log(`production server up on :${PORT}\n`);
 
 const { chromium } = await import("playwright");
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 
 async function openFiles(width, height) {
   const context = await browser.newContext({

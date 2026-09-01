@@ -8,6 +8,7 @@ import { GreetingHeader } from "@/components/overview/greeting-header";
 import { InsightList, type Insight } from "@/components/onboarding/insight-list";
 import { CreateChat } from "@/components/create/create-chat";
 import { QuickActionCard } from "@/components/overview/quick-action-card";
+import { WidgetBoundary } from "@/components/ui/widget-boundary";
 import { LowCreditsBanner } from "@/components/credits/low-credits-banner";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { RecentEntriesCard, type RecentEntry } from "@/components/overview/recent-entries-card";
@@ -15,6 +16,10 @@ import { AiCoachCard } from "@/components/overview/ai-coach-card";
 import { ActiveMissionCard } from "@/components/overview/active-mission-card";
 import { NextActionCard } from "@/components/overview/next-action-card";
 import { QuickStartButton } from "@/components/overview/quick-start-button";
+import { formatRelativeTime } from "@/lib/format-time";
+import { NextCard } from "@/components/overview/next-card";
+import { WhatChangedCard } from "@/components/overview/what-changed-card";
+import { HomeSeenStamp } from "@/components/overview/home-seen-stamp";
 import { ProgressCard } from "@/components/overview/progress-card";
 import { HomeStatCard } from "@/components/overview/home-stat-card";
 import { CreditsHomeStat } from "@/components/overview/credits-home-stat";
@@ -27,8 +32,16 @@ import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
 import { logApiError } from "@/lib/log-error";
 import { isActiveMission, missionProgressPercent } from "@/lib/mission-progress";
 import { computeNextAction } from "@/lib/next-action";
-import { computeHealthScore } from "@/lib/health-score";
+import {
+  computeHealthScore,
+  hasEnoughDataForScore,
+  HEALTH_SCORE_MIN_ENTRIES,
+  CHART_MIN_ENTRIES,
+} from "@/lib/health-score";
 import { HealthScoreCard } from "@/components/overview/health-score-card";
+import { SetupProgressCard, type SetupStep } from "@/components/overview/setup-progress-card";
+import { LoadSampleButton } from "@/components/sample-data/load-sample-button";
+import { findSampleImport } from "@/lib/sample-data/apply";
 import { loadLatestEnergyCheckIn } from "@/lib/energy-checkins";
 import { EnergyCheckinWidget } from "@/components/overview/energy-checkin-widget";
 import { Database, TrendingUp, Layers } from "lucide-react";
@@ -67,6 +80,7 @@ export default async function OverviewPage() {
   const locale = await getLocale();
   const tSidebar = await getTranslations("sidebar.items");
   const tInsights = await getTranslations("dashboard.insights");
+  const tErr = await getTranslations("errors");
   // The config carries the sidebar key directly now, so this no longer
   // has to look an English string up in a table to find its own name.
   const tKey = await getTranslations();
@@ -87,7 +101,9 @@ export default async function OverviewPage() {
   // means, and both Skip and Finish write it.
   const { data: onboardingState } = await supabase
     .from("user_onboarding")
-    .select("completed_at, skipped_at")
+    // home_seen_at rides along on a query this page already ran — "what
+    // changed since last time" costs no extra round trip.
+    .select("completed_at, skipped_at, home_seen_at")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -251,6 +267,29 @@ export default async function OverviewPage() {
     }
   }
 
+  // WHAT CHANGED SINCE LAST TIME — V4.6 #10.
+  //
+  // Costs no extra query: home_seen_at rides on the onboarding row this
+  // page already reads, and last30DaysMs is already in hand for the
+  // sparkline. Null on a first visit, and the card renders nothing then —
+  // there is no "since last time" when there is no last time.
+  const homeSeenAtMs = onboardingState?.home_seen_at
+    ? new Date(String(onboardingState.home_seen_at)).getTime()
+    : null;
+  const entriesSinceLastVisit =
+    homeSeenAtMs === null
+      ? 0
+      : summaries.reduce(
+          (sum, sm) => sum + sm.last30DaysMs.filter((ms: number) => ms > homeSeenAtMs).length,
+          0
+        );
+  const insightsSinceLastVisit =
+    homeSeenAtMs === null
+      ? 0
+      : (activeInsights ?? []).filter(
+          (i) => new Date(String((i as { created_at?: unknown }).created_at ?? 0)).getTime() > homeSeenAtMs
+        ).length;
+
   const recentEntries: RecentEntry[] = summaries
     .flatMap((summary) =>
       summary.rows.map((row) => ({
@@ -380,15 +419,126 @@ export default async function OverviewPage() {
           t("aiCoach.mostActiveIn", { module: tKey(topModulesThisWeek[0].module.titleKey) }),
         ].join(". ");
 
+  // FOUR STEPS, NONE OF THEM A NEW QUERY. Onboarding state, the entry
+  // total, the per-module summaries and the active mission are all
+  // already read above — a setup checklist that cost its own round trip
+  // would be a worse trade than the number it replaces.
+  const sampleLoaded = Boolean(await findSampleImport(supabase, user.id));
+
+  const setupSteps: SetupStep[] = [
+    {
+      id: "onboarding",
+      label: t("setupProgress.steps.onboarding"),
+      done: Boolean(onboardingState?.completed_at || onboardingState?.skipped_at),
+      href: "/onboarding",
+    },
+    {
+      id: "firstEntry",
+      label: t("setupProgress.steps.firstEntry"),
+      done: totalEntries > 0,
+      href: "/dashboard/records",
+    },
+    {
+      id: "secondModule",
+      label: t("setupProgress.steps.secondModule"),
+      done: summaries.filter((s) => s.count > 0).length >= 2,
+      href: "/dashboard/records",
+    },
+    {
+      id: "mission",
+      label: t("setupProgress.steps.mission"),
+      done: Boolean(activeMission),
+      href: "/dashboard/mission",
+    },
+  ];
+
+  // ONE CARD FAILING MUST NOT TAKE THE HOME SCREEN.
+  //
+  // A React error #310 ("rendered more hooks than during the previous
+  // render") was observed on this page in a production build, two runs in
+  // seven, thrown from a useMemo inside a vendor chunk. Without a boundary
+  // BELOW the route, that unmounts the whole page and the first screen a
+  // person sees after signing in is the generic dashboard error.
+  //
+  // components/ui/widget-boundary.tsx already existed for exactly this,
+  // reported to /api/client-error, and was used on no page at all. It is
+  // used here now, per card, so the failure is contained to the card that
+  // produced it and the crash still reaches production_errors.
+  //
+  // The strings are resolved HERE because the boundary is a class
+  // component and cannot call useTranslations.
+  const boundary = { title: tErr("boundary.section"), body: tErr("boundary.sectionBody") };
+
   return (
-    <main className="min-h-full">
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+    <div className="min-h-full">
+      {/* Stamps the visit AFTER the render, so the diff above was made
+          against the previous value and not against now. */}
+      <HomeSeenStamp />
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+        {/* ORDER: ACTION -> WHAT CHANGED -> PROGRESS -> NUMBERS -> HISTORY.
+            V4.6 #10. Measured before this reorder
+            (scripts/tests/home-audit.prodtest.mjs, 1440x900): the numbers
+            sat at y=302 and the thing to actually DO sat at y=1124, two
+            hundred pixels below the fold. The page opened with a summary
+            of the past and buried the present. */}
         <div className="relative flex flex-wrap items-start justify-between gap-3">
           <GlowOrb className="-left-10 -top-20 -z-10 h-56 w-56" />
           <GreetingHeader email={user.email ?? ""} />
-        <LowCreditsBanner />
+          <LowCreditsBanner />
           <QuickStartButton />
         </div>
+
+        {/* 1. ACTION — the input, first, because it is the answer to
+               "what do I do now" and it was below the fold. */}
+        <div className="mt-6">
+          <WidgetBoundary label="create-chat" {...boundary}>
+            <CreateChat showHeading={false} />
+          </WidgetBoundary>
+        </div>
+
+        {/* ONE CARD WHERE THERE WERE THREE — V4.6 #10. "What's Next?",
+            "AI Coach" and "Active Mission" were three stacked full-width
+            cards saying similar things, 208px of vertical space, all of
+            it under the fold. */}
+        <NextCard
+          title={t("next.title")}
+          action={
+            nextAction && nextActionMessage
+              ? { message: nextActionMessage, href: nextAction.href, ctaLabel: t("nextAction.cta") }
+              : null
+          }
+          weekSummary={aiCoachSummary || null}
+          plan={
+            activeMission
+              ? {
+                  goal: activeMission.goal,
+                  progressPercent: missionProgressPercent(activeMission),
+                  stepsLabel: t("activeMission.stepsLabel", {
+                    completed: activeMissionSteps.filter((s) => s.status === "completed").length,
+                    total: activeMissionSteps.length,
+                  }),
+                  href: "/dashboard/mission",
+                  openLabel: t("activeMission.open"),
+                }
+              : null
+          }
+        />
+
+        {/* 2. WHAT CHANGED — the reason to come back tomorrow. Above the
+               fold, straight after the action, and absent entirely when
+               nothing changed or there is no last visit to compare with. */}
+        <WhatChangedCard
+          title={t("whatChanged.title")}
+          sinceLabel={
+            homeSeenAtMs === null
+              ? ""
+              : t("whatChanged.since", { when: formatRelativeTime(new Date(homeSeenAtMs).toISOString(), locale) })
+          }
+          changes={[
+            { label: t("whatChanged.entries"), count: entriesSinceLastVisit, href: "/dashboard/timeline" },
+            { label: t("whatChanged.insights"), count: insightsSinceLastVisit },
+          ]}
+        />
 
         {(activeInsights ?? []).length > 0 && (
           <section className="mt-6 space-y-2">
@@ -397,45 +547,130 @@ export default async function OverviewPage() {
           </section>
         )}
 
+        {/* 3. PROGRESS — one card, not two. The audit's inventory listed
+               the ring and the step list as separate blocks; they are two
+               COLUMNS of this one card, which the walker split. Nothing
+               was merged here because nothing needed merging.
+
+               NO VERDICT BEFORE THERE IS EVIDENCE — V4.6 #5. Measured
+               before that branch: a real build, an account with no rows,
+               and the ring read "Business Health Score: 0 / 100" under
+               "Just getting started". Zero out of a hundred is a
+               judgement, and the account had done nothing to be judged
+               for. */}
+        {hasEnoughDataForScore(totalEntries) ? (
+          <WidgetBoundary label="health-score-card" {...boundary}>
+            <HealthScoreCard
+              title={t("healthScore.title")}
+              score={healthScore.score}
+              rangeLabel={healthScoreRangeLabel}
+              suggestion={healthScoreSuggestion}
+              trend={weeklySparkline}
+            />
+          </WidgetBoundary>
+        ) : (
+          <WidgetBoundary label="setup-progress-card" {...boundary}>
+            <SetupProgressCard
+              title={t("setupProgress.title")}
+              countLabel={t("setupProgress.count", {
+                done: setupSteps.filter((s) => s.done).length,
+                total: setupSteps.length,
+              })}
+              suggestion={t("setupProgress.suggestion", { count: HEALTH_SCORE_MIN_ENTRIES })}
+              steps={setupSteps}
+            />
+          </WidgetBoundary>
+        )}
+
+        {/* 4. NUMBERS.
+            EVERY NUMBER CARRIES ITS OWN LINE, AND OPENS — V4.6 #7. The
+            destinations are not new: /dashboard/timeline has taken
+            ?range= and ?module= since it was built, so "click the number
+            to see the records behind it" is a href, not a feature.
+            `explain` is a REQUIRED prop precisely so the next card cannot
+            be added without one. */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <HomeStatCard
             icon={<Database className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.totalEntries")}
+            placeholderLabel={t("statRow.fillsAfter", { count: CHART_MIN_ENTRIES })}
             value={formatNumber(totalEntries, locale)}
             trend={weeklySparkline}
+            explain={t("statRow.totalEntriesExplain")}
+            href="/dashboard/timeline"
+            openLabel={t("statRow.openEntries")}
           />
           <HomeStatCard
             icon={<TrendingUp className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.thisWeek")}
+            placeholderLabel={t("statRow.fillsAfter", { count: CHART_MIN_ENTRIES })}
             value={formatNumber(totalThisWeek, locale)}
             trend={weeklySparkline}
+            explain={t("statRow.thisWeekExplain")}
+            // NOT a raw count as the basis — the denominator is what
+            // makes a numerator mean anything. "4" says nothing; "4, from
+            // 36 in total" says the week was quiet.
+            basis={totalEntries > 0 ? t("statRow.ofTotal", { count: totalEntries }) : undefined}
+            href="/dashboard/timeline?range=week"
+            openLabel={t("statRow.openEntries")}
           />
           <HomeStatCard
             icon={<Layers className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.mostActive")}
             value={mostActive && mostActive.count > 0 ? tKey(mostActive.module.titleKey) : "—"}
+            explain={t("statRow.mostActiveExplain")}
+            basis={
+              mostActive && mostActive.count > 0
+                ? t("statRow.fromEntries", { count: mostActive.count })
+                : undefined
+            }
+            href={
+              mostActive && mostActive.count > 0
+                ? `/dashboard/timeline?module=${mostActive.module.slug}`
+                : undefined
+            }
+            openLabel={t("statRow.openEntries")}
           />
-          <CreditsHomeStat label={t("statRow.creditsRemaining")} />
+          <CreditsHomeStat
+            label={t("statRow.creditsRemaining")}
+            explain={t("statRow.creditsExplain")}
+            openLabel={t("statRow.openCredits")}
+          />
         </div>
 
-        <HealthScoreCard
-          title={t("healthScore.title")}
-          score={healthScore.score}
-          rangeLabel={healthScoreRangeLabel}
-          suggestion={healthScoreSuggestion}
-          trend={weeklySparkline}
-        />
+        {/* 5. HISTORY, AND THE CHECK-IN BESIDE IT.
+               ProgressCard is gone: its three numbers (today / this week
+               / this month) are the same counts the stat row above
+               already shows, in the same units, four hundred pixels
+               apart. Removing it frees NO vertical space — it shared a
+               row with Recent Entries — so that was a clarity cut and not
+               a space one, and saying so is the point of having measured
+               the widths rather than only the heights.
 
-        <EnergyCheckinWidget initialCheckIn={latestEnergyCheckIn} />
+               WHICH IS ALSO WHY THIS IS A ROW. Measured at 1440x900
+               (scripts/tests/home-audit.prodtest.mjs): after the merge
+               and the two deletions the page was 1629px against 1632px
+               before — three pixels. The deleted blocks were either
+               side-by-side already or replaced by the card that merged
+               them, and stacking two full-width cards below the fold is
+               what the remaining height actually is. Putting the history
+               and the check-in in one row is the change that moves the
+               number; the widget's own `mt-6` is passed off for the same
+               reason.
 
-        {nextAction && nextActionMessage && (
-          <NextActionCard
-            title={t("nextAction.title")}
-            message={nextActionMessage}
-            href={nextAction.href}
-            ctaLabel={t("nextAction.cta")}
-          />
-        )}
+               THE CHECK-IN IS BELOW THE FOLD DELIBERATELY. It answers
+               none of the three questions the Home exists for; it is kept
+               because it feeds a real decision (lib/mission-energy.ts
+               picks the next plan step from it) and now says so on the
+               widget itself. */}
+        <div className="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
+          <RecentEntriesCard entries={recentEntries} />
+          <EnergyCheckinWidget initialCheckIn={latestEnergyCheckIn} className="" />
+        </div>
+
+        {/* THE WAY OUT OF AN EMPTY ACCOUNT — V4.6 #6. Offered only while
+            there is nothing to look at and no sample already loaded. */}
+        {totalEntries === 0 && !sampleLoaded && <LoadSampleButton className="mt-4" />}
 
         {showBetaExpiryBanner && betaDaysRemaining !== null && (
           <BetaExpiryBanner
@@ -451,52 +686,7 @@ export default async function OverviewPage() {
             feedbackUrl={betaFeedbackUrl}
           />
         )}
-
-        <AiCoachCard title={t("aiCoach.title")} summary={aiCoachSummary} />
-
-        {activeMission && (
-          <ActiveMissionCard
-            title={t("activeMission.title")}
-            goal={activeMission.goal}
-            progressPercent={missionProgressPercent(activeMission)}
-            stepsLabel={t("activeMission.stepsLabel", {
-              completed: activeMissionSteps.filter((s) => s.status === "completed").length,
-              total: activeMissionSteps.length,
-            })}
-            href="/dashboard/mission"
-          />
-        )}
-
-        <div className="mt-6">
-          <CreateChat showHeading={false} />
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {QUICK_ACTIONS.map((action) => (
-            <QuickActionCard
-              key={action.slug}
-              href={moduleHref(action.slug)}
-              icon={MODULE_ICONS[action.slug]}
-              label={t(`quickActions.${action.slug}.label`)}
-              description={t(`quickActions.${action.slug}.description`)}
-              tone={action.tone}
-            />
-          ))}
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <RecentEntriesCard entries={recentEntries} />
-
-          <ProgressCard
-            title={t("progress.title")}
-            stats={[
-              { label: t("progress.today"), value: totalToday },
-              { label: t("progress.thisWeek"), value: totalThisWeek },
-              { label: t("progress.thisMonth"), value: totalThisMonth },
-            ]}
-          />
-        </div>
       </div>
-    </main>
+    </div>
   );
 }

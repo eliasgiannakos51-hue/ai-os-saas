@@ -426,7 +426,12 @@
   color: rgb(var(--danger-text));
 }
 
-[data-theme="light"] .text-red-300\/80 {
+[data-theme="light"] .text-red-300\/80,
+/* /90 arrived with the agent failure notice: the "last failure: ..." line
+   under a disabled agent. Same ink as /80 — on white the alpha washes the
+   text toward the background instead of dimming it, which is exactly what
+   a reason line must not do. */
+[data-theme="light"] .text-red-200\/90 {
   color: rgb(var(--danger-text-soft));
 }
 
@@ -1991,5 +1996,76 @@ html[data-motion="reduce"] .voice-orb-ring {
     transform: none !important;
     transition: none !important;
     animation: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   THE CHAT MEASURE — V4.6 #12
+
+   "More extent, but 60-75 characters. A different max-width per
+   breakpoint. On mobile, the whole width."
+
+   Those three sentences are one rule if the cap is written in `ch`
+   rather than in pixels, because `ch` IS the character: it is the
+   advance width of "0" at the element's own font size. A pixel cap
+   holds a line length; a ch cap holds a line LENGTH IN CHARACTERS,
+   which is the thing that was asked for and the thing that stops
+   being true the moment somebody changes the font size.
+
+   So the line gets physically longer at every breakpoint — the "more
+   extent" — by raising the FONT, not by raising the character count.
+   The measure stays inside 60-75 the whole way up.
+
+   WHY THE FONT-SIZE LIVES HERE AND NOT ON THE TEXT. `ch` resolves
+   against the element it is written on. A container capped at 68ch
+   whose text is a fixed 14px caps 68 characters OF THE CONTAINER'S
+   font, not of the text's — a silent mismatch that grows with every
+   breakpoint. Both live on this one class so they cannot disagree, and
+   message-content.tsx takes its size by inheritance here.
+
+   MOBILE IS FULL WIDTH ON PURPOSE, not by omission. Below 640px a
+   66ch cap is wider than the viewport anyway, so writing one would be
+   a rule that never fires — and the padding the page already has is
+   what keeps the text off the edge.
+
+   AND `ch` IS NOT A CHARACTER, WHICH IS WHY THESE NUMBERS ARE NOT 60-75.
+   `ch` is the advance of "0", and a digit is one of the WIDEST glyphs in
+   a proportional font — every letter in this UI is narrower. Measured on
+   a real build with Greek text (scripts/tests/chat-measure.prodtest.mjs):
+   a 70ch cap held 82 characters, a 68ch cap held 80. That is a ratio of
+   1.17 characters per ch, stable across both.
+   So the caps below are the 60-75 band DIVIDED by that ratio:
+     56ch x 1.17 = 66 characters
+     58ch x 1.17 = 68 characters
+     60ch x 1.17 = 70 characters
+   Writing 66ch and calling it 66 characters would have been a number
+   that looks measured and is 21% wrong.
+
+   Measured characters per line, from real screenshots at each
+   breakpoint in Greek, Arabic and Chinese:
+   scripts/tests/chat-measure.prodtest.mjs. */
+.chat-measure {
+  width: 100%;
+  margin-inline: auto;
+  font-size: 15px;
+}
+
+@media (min-width: 640px) {
+  .chat-measure {
+    max-width: 56ch;
+  }
+}
+
+@media (min-width: 1024px) {
+  .chat-measure {
+    font-size: 16px;
+    max-width: 58ch;
+  }
+}
+
+@media (min-width: 1536px) {
+  .chat-measure {
+    font-size: 17px;
+    max-width: 60ch;
   }
 }

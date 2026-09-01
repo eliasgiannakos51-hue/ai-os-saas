@@ -18,6 +18,7 @@
 import http from "node:http";
 import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { label, labelPattern } from "./lib/label.mjs";
 
 let pass = 0,
   fail = 0;
@@ -178,6 +179,7 @@ console.log("build ok — starting `next start`");
 const server = spawn("npx", ["next", "start", "-p", String(PORT)], {
   env,
   stdio: ["ignore", "pipe", "pipe"],
+  detached: true,
 });
 let serverLog = "";
 server.stdout.on("data", (d) => (serverLog += d));
@@ -198,7 +200,18 @@ async function waitForServer() {
 
 function cleanup() {
   try {
-    server.kill("SIGKILL");
+    // KILL THE GROUP, NOT THE HANDLE. `npx next start` is npx -> sh ->
+    // next-server. SIGKILL to the npx handle leaves the grandchild alive,
+    // reparented to init, still holding its port and serving its build.
+    // Measured across one full survey of the suite: thirteen orphaned
+    // next-server processes, the oldest 41 minutes old. `detached: true`
+    // on the spawn puts the whole tree in its own group so this reaches
+    // all of it. Enforced by scripts/tests/prodtest-hygiene.test.mjs.
+    try {
+      process.kill(-server.pid, "SIGKILL");
+    } catch {
+      server.kill("SIGKILL");
+    }
   } catch {
     /* already gone */
   }
@@ -215,7 +228,7 @@ console.log(`production server up on :${PORT} (next start, NODE_ENV=production)`
 
 
 const { chromium } = await import("playwright");
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 await ctx.addCookies([
   { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
@@ -276,10 +289,32 @@ checkTrue("the composer is present", await composer.isVisible());
 // affordance was a native `title`. It rendered correctly and no user
 // found it. "Renders" is not the same claim as "is findable", so this
 // asserts a VISIBLE text label, not merely existence.
-const toggle = page.locator("[aria-expanded]").filter({ hasText: /.+/ }).first();
+// IDENTIFIED BY ITS OWN LABEL, not by position.
+//
+// The previous version built exactly the right locator on the line above
+// — every `[aria-expanded]` that has text, first one — and then MEASURED
+// `button[aria-expanded]` .last() instead. There are eight
+// aria-expanded buttons on the chat page (the help tip, the notification
+// bell, the language selector, the user menu, the sidebar groups); the
+// last of them is an icon-only "?" with no text, so this reported the
+// focus-mode toggle as unlabelled and the assertion below as unchanged,
+// on a toggle that is correctly labelled and does change. The locator
+// was right and unused: a check that inspects something other than what
+// it names.
+//
+// The label comes from messages/*.json rather than being spelled here,
+// for the reason lib/label.mjs exists: four other suites waited for a
+// button named "Design my agent" while the product said "Design your
+// agent", and every one of them had the string typed in by hand.
 const toggleCount = await page.locator("button[aria-expanded]").count();
 checkTrue(`a focus-mode toggle exists (${toggleCount} aria-expanded buttons)`, toggleCount >= 1);
-const focusBtn = page.locator("button[aria-expanded]").last();
+const focusBtn = page
+  .getByRole("button", { name: labelPattern("dashboard.chat.showConversations", ["en"]) })
+  .or(page.getByRole("button", { name: labelPattern("dashboard.chat.hideConversations", ["en"]) }))
+  .first();
+checkTrue("...and it is the one named after conversations, not whichever is last in the DOM",
+  (await focusBtn.count()) > 0,
+  `neither "${label("dashboard.chat.showConversations", "en")}" nor "${label("dashboard.chat.hideConversations", "en")}" is on the page`);
 const labelBefore = (await focusBtn.innerText()).trim();
 checkTrue(`it carries a visible text label ("${labelBefore}")`, labelBefore.length > 2);
 const expandedBefore = await focusBtn.getAttribute("aria-expanded");

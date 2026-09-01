@@ -19,12 +19,16 @@
  *
  * Run: node scripts/tests/gdpr-coverage.mutation.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/gdpr-coverage.test.mjs";
 const REGISTRY = "src/lib/gdpr/user-data-registry.ts";
-const TARGETS = [GATE, REGISTRY];
+// The export route joined the targets when section 6 was added: a
+// mutation whose file is not restored here would be left in the tree.
+const EXPORT_ROUTE = "src/app/api/account/export/route.ts";
+const TARGETS = [GATE, REGISTRY, EXPORT_ROUTE];
 
 const MUTANTS = [
   {
@@ -76,6 +80,36 @@ const MUTANTS = [
     from: '    else if (/\\.tsx?$/.test(entry.name)) srcFiles.push(full);',
     to: "    else if (false) srcFiles.push(full);",
     expect: "every ai_* table is named in the code or labelled",
+  },
+
+  // ---- section 6: the two GDPR routes are bounded ----
+  {
+    name: "the export loses its rate limit",
+    file: EXPORT_ROUTE,
+    from: '      scope: "account_export",',
+    to: '      scope: "checkout",',
+    expect: "the export is rate limited per ACCOUNT",
+  },
+  {
+    name: "the export is bucketed by IP instead of by account",
+    file: EXPORT_ROUTE,
+    from: "      identifier: user.id,",
+    to: '      identifier: "everyone",',
+    expect: "the export is rate limited per ACCOUNT",
+  },
+  {
+    name: "the export ceiling stops being a bound",
+    file: EXPORT_ROUTE,
+    from: "const EXPORT_MAX_PER_HOUR = 5;",
+    to: "const EXPORT_MAX_PER_HOUR = 5000;",
+    expect: "the export ceiling is a named constant",
+  },
+  {
+    name: "a refused export returns an empty file instead of a 429",
+    file: EXPORT_ROUTE,
+    from: "        { status: 429 }",
+    to: "        { status: 200 }",
+    expect: "says so with a 429 rather than an empty file",
   },
 ];
 

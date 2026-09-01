@@ -22,6 +22,7 @@
  * branch with no API key.
  */
 import { foldForMatch } from "@/lib/text/unicode-patterns";
+import { jsonSliceOf } from "@/lib/json-from-text";
 
 export const CAPABILITIES = [
   "chat",
@@ -183,37 +184,11 @@ export function runCheck(output: string, check: Check): CheckResult {
  * JSON" about a perfectly good answer.
  */
 export function extractJson(output: string): string {
-  const fenced = output.match(/```(?:json)?\s*([\s\S]*?)```/);
-  const text = fenced ? fenced[1] : output;
-  const start = text.search(/[{[]/);
-  if (start === -1) return text.trim();
-  const open = text[start];
-  const close = open === "{" ? "}" : "]";
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-  for (let i = start; i < text.length; i++) {
-    const ch = text[i];
-    if (escaped) {
-      escaped = false;
-      continue;
-    }
-    if (ch === "\\") {
-      escaped = true;
-      continue;
-    }
-    if (ch === '"') {
-      inString = !inString;
-      continue;
-    }
-    if (inString) continue;
-    if (ch === open) depth++;
-    else if (ch === close) {
-      depth--;
-      if (depth === 0) return text.slice(start, i + 1);
-    }
-  }
-  return text.slice(start).trim();
+  // ONE SCANNER — see lib/json-from-text.ts. This one was the better of
+  // the two (it handled `[` as well as `{`); the contract on top of it is
+  // what differs, and it is kept: a checker wants TEXT to look at, so a
+  // reply with no JSON in it comes back as the reply rather than as null.
+  return jsonSliceOf(output) ?? output.trim();
 }
 
 /** Every check weighted equally. A case passes only when ALL of them do —
@@ -282,6 +257,20 @@ export function summarise(outcomes: readonly CaseOutcome[], gradedIds: ReadonlyS
  *  one, and interpolating would invent a latency nobody measured. */
 export function percentile(sortedAscending: readonly number[], p: number): number | null {
   if (sortedAscending.length === 0) return null;
+  // A NON-FINITE p RETURNED `undefined` FROM A FUNCTION TYPED
+  // `number | null`, and TypeScript could not see it: Math.ceil(NaN) is
+  // NaN, Math.max and Math.min both pass NaN through, and indexing an
+  // array with NaN gives undefined rather than throwing. A caller doing
+  // arithmetic on the result got NaN two steps from where it started.
+  if (!Number.isFinite(p)) return null;
+  // NO CLAMP ON p, and that is now a measured statement rather than an
+  // oversight. One was added here — `Math.min(1, Math.max(0, p))` — and
+  // its own mutation SURVIVED: removing it changed no output at all,
+  // because the index clamp on the next line already handles every value
+  // p can take. p = 90 gives rank 360, clamped to the last index; p = -5
+  // gives rank -20, clamped to 0. Dead code that reads as a guard is
+  // worse than no code: it invites the next person to trust it for a case
+  // it does not actually cover.
   const rank = Math.ceil(p * sortedAscending.length);
   return sortedAscending[Math.min(sortedAscending.length - 1, Math.max(0, rank - 1))];
 }

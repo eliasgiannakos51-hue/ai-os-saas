@@ -38,10 +38,17 @@
 // Run: node scripts/tests/credit-function-privileges.itest.mjs
 import { execFile, execFileSync } from "node:child_process";
 import { promisify } from "node:util";
-import { startEphemeralPostgres, psqlArgs } from "/home/user/ai-os-saas/scripts/lib/ephemeral-postgres.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { startEphemeralPostgres, psqlArgs } from "../lib/ephemeral-postgres.mjs";
 
 const execFileAsync = promisify(execFile);
-const ROOT = "/home/user/ai-os-saas";
+// RELATIVE TO THIS FILE, not to one machine. Both of these were absolute
+// paths into one developer's sandbox directory, so this suite
+// could only ever run there. Nothing noticed for as long as the
+// integration suites were in no CI job at all; the first CI run that
+// included them died here in one second.
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const pg = startEphemeralPostgres();
 if (!pg.available) { console.log(`credit-function-privileges: SKIPPED\n  ${pg.reason}`); process.exit(0); }
 const ARGS = psqlArgs(pg.conn);

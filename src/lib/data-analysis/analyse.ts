@@ -1,4 +1,6 @@
 import { validateChartSpec, type ChartSpec } from "@/lib/data-analysis/charts";
+import { jsonSliceOf } from "@/lib/json-from-text";
+import { truncate } from "@/lib/text/truncate";
 import type { TableProfile } from "@/lib/data-analysis/profile";
 
 /**
@@ -57,10 +59,7 @@ const MAX_FINDINGS = 8;
 const MAX_CHARTS = 4;
 const MAX_QUESTIONS = 5;
 
-function truncate(value: string, max: number): string {
-  const t = value.trim();
-  return t.length > max ? `${t.slice(0, max - 1)}…` : t;
-}
+
 
 /**
  * The brief the model reads.
@@ -228,42 +227,20 @@ function asArray(value: unknown): unknown[] {
  * defeats the naive version in the other direction.
  */
 export function extractJson(raw: string): Record<string, unknown> | null {
-  const text = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "");
-  const start = text.indexOf("{");
-  if (start < 0) return null;
-
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-  for (let i = start; i < text.length; i++) {
-    const ch = text[i];
-    if (escaped) {
-      escaped = false;
-      continue;
-    }
-    if (ch === "\\" && inString) {
-      escaped = true;
-      continue;
-    }
-    if (ch === '"') {
-      inString = !inString;
-      continue;
-    }
-    if (inString) continue;
-    if (ch === "{") depth++;
-    else if (ch === "}") {
-      depth--;
-      if (depth === 0) {
-        try {
-          const parsed = JSON.parse(text.slice(start, i + 1));
-          return parsed && typeof parsed === "object" && !Array.isArray(parsed)
-            ? (parsed as Record<string, unknown>)
-            : null;
-        } catch {
-          return null;
-        }
-      }
-    }
+  // ONE SCANNER — see lib/json-from-text.ts. This function had its own,
+  // and its own looked only for `{`: given `[{"a":1}]` it found the brace
+  // INSIDE the array and returned the first element as if it were the
+  // whole answer. A wrong value that looks like a right one.
+  const slice = jsonSliceOf(raw);
+  if (slice === null) return null;
+  try {
+    const parsed = JSON.parse(slice);
+    // AN ARRAY IS NOT AN OBJECT, and this function promises an object.
+    // Refusing is the honest answer; the old code substituted an element.
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : null;
+  } catch {
+    return null;
   }
-  return null;
 }

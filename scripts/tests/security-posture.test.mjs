@@ -20,6 +20,12 @@
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { schemaSql } from "./lib/schema-sql.mjs";
+// Section 6 reads BOTH sources of truth about the environment: the names
+// the code actually reads (found two ways — see lib/env-usage.mjs), and
+// the list that knows which of them are secrets.
+import { envVarsReadByCode } from "../lib/env-usage.mjs";
+const { loadTs: loadTsForEnv } = await import("./load-ts.mjs");
+const { ENV_REQUIREMENTS } = await loadTsForEnv("src/lib/env-check.ts");
 
 let pass = 0,
   fail = 0;
@@ -364,6 +370,8 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/r/[code]/route.ts":
     "the affiliate share link. The visitor is a stranger by definition — requiring a session would defeat the only thing the URL is for. It touches NO database (so a million hits write nothing), never validates the code against the table (which would make it an oracle for enumerating real codes), and always redirects to /signup rather than anywhere the code asks for.",
   "src/app/api/weekly-digest/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
+  "src/app/api/cron/nav-retention/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED. It DELETES, which puts it in the same class as website-storage-cleanup rather than the read-only jobs — but the deciding is not done here: the route calls public.prune_nav_events(), a security-definer function whose day count is clamped so that a null, a zero or a negative becomes 90 rather than 1, and whose DELETE always carries a WHERE. It reads no request body and takes no parameter from the caller. scripts/tests/nav-events.dbtest.mjs measures the clamp against a real Postgres; nav-events.test.mjs holds the route to calling the function rather than issuing a DELETE of its own.",
   "src/app/api/cron/monthly-credits/route.ts":
     "authenticated by CRON_SECRET (lib/cron-auth.ts); grants every annual subscriber their monthly credit allowance, so it moves real entitlement across many accounts per call",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
@@ -535,6 +543,56 @@ for (const gate of namedGates) {
 // be quietly dropped while the file still looks complete.
 for (const heading of ["## α.", "## β.", "## γ.", "## δ.", "## ε.", "## στ.", "## ζ."]) {
   checkTrue(`SECURITY.md still has ${heading}`, securityDoc.includes(heading));
+}
+
+console.log("\n== 6. NEXT_PUBLIC_ is not a naming convention ==");
+// IT INLINES THE VALUE INTO THE JAVASCRIPT EVERY VISITOR DOWNLOADS.
+//
+// Next.js substitutes any NEXT_PUBLIC_* variable into the client bundle
+// at build time. So the prefix is not a label saying "this one is safe" —
+// it is the mechanism that MAKES it public, and a service-role key that
+// acquires it is not misnamed, it is published. There is no runtime
+// error, no warning, and no way to tell from the running app: the value
+// is simply sitting in a .js file on the CDN.
+//
+// docs/api-keys.md tells the reader this gate exists. It did not, until
+// the sentence was written and had to be made true.
+{
+  // envVarsReadByCode returns a Map of name -> the file that reads it,
+  // so the NAMES are its keys. Spreading the Map itself yields pairs.
+  const publicNames = [...envVarsReadByCode().keys()].filter((n) => n.startsWith("NEXT_PUBLIC_"));
+  checkTrue(`the scan found the public variables (${publicNames.length})`, publicNames.length >= 3, publicNames.join(", "));
+
+  // Shapes that mean "this value authenticates something".
+  const SECRET_SHAPE = /(SECRET|SERVICE_ROLE|PRIVATE|PASSWORD|_API_KEY$|_TOKEN$|ENCRYPTION)/;
+
+  // THE TWO THAT ARE PUBLIC ON PURPOSE, each with the reason. Adding to
+  // this list is a decision to publish a value to the internet.
+  //
+  //   the Supabase ANON key is designed to be in the browser — it is what
+  //   RLS is measured against, and 20260906000000_revoke_anon_grants is
+  //   the migration that made "anon holds nothing" true rather than
+  //   assumed;
+  //   the VAPID PUBLIC key is one half of a key pair, and the browser
+  //   cannot create a push subscription without it. Its private half is
+  //   VAPID_PRIVATE_KEY, which is checked below like everything else.
+  const PUBLIC_BY_DESIGN = ["NEXT_PUBLIC_SUPABASE_ANON_KEY", "NEXT_PUBLIC_VAPID_PUBLIC_KEY"];
+  const published = publicNames.filter((n) => SECRET_SHAPE.test(n) && !PUBLIC_BY_DESIGN.includes(n));
+  checkTrue("no secret-shaped name carries the NEXT_PUBLIC_ prefix", published.length === 0, published.join(", "));
+
+  // AND THE OTHER DIRECTION, from the list that knows which are secrets
+  // rather than from a regex over their names.
+  const secrets = ENV_REQUIREMENTS.filter((r) => r.secret).map((r) => r.name);
+  checkTrue(`env-check marks the secrets (${secrets.length})`, secrets.length >= 8, secrets.join(", "));
+  const leaked = secrets.filter((n) => n.startsWith("NEXT_PUBLIC_"));
+  checkTrue("...and not one of them is a NEXT_PUBLIC_ name", leaked.length === 0, leaked.join(", "));
+
+  // The regex has to be able to fire, or both checks above are green over
+  // a pattern that matches nothing.
+  checkTrue("the secret-shape pattern recognises a real one",
+    SECRET_SHAPE.test("NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY") &&
+    SECRET_SHAPE.test("NEXT_PUBLIC_STRIPE_SECRET_KEY") &&
+    !SECRET_SHAPE.test("NEXT_PUBLIC_SITE_URL"));
 }
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);

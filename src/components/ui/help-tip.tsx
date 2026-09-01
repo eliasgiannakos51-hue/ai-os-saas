@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { HelpCircle, X, Check, Ban, ArrowRight } from "lucide-react";
+import { HelpCircle, X, Check, Ban, Eye, ArrowRight } from "lucide-react";
 
 /**
  * The "?" beside a page title.
@@ -25,8 +25,16 @@ import { HelpCircle, X, Check, Ban, ArrowRight } from "lucide-react";
 export function HelpTip({
   helpKey,
   articleSlug,
+  scopeKey,
 }: {
   helpKey: string;
+  /**
+   * A "what it can see" paragraph, when the surface reads the user's own
+   * data (V4.6 #9). One key, so the chat's first screen and the chat's
+   * "?" say the same three sentences rather than two paraphrases that
+   * drift the first time one of them is edited.
+   */
+  scopeKey?: string;
   /**
    * The Help Centre article about this page, if there is one. An anchor
    * on /help, so it lands on the answer rather than on "the help page,
@@ -163,6 +171,17 @@ export function HelpTip({
             <Ban className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-400/80" aria-hidden="true" />
             <span>{t(`${helpKey}.doesNot`)}</span>
             </p>
+
+            {/* WHAT IT CAN SEE. Third, after what it does and does not do,
+                because the question it answers ("is it reading my
+                things?") is only asked once the reader believes the other
+                two. */}
+            {scopeKey && (
+              <p className="mt-2 flex gap-2 text-xs leading-relaxed text-muted">
+                <Eye className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-400/80" aria-hidden="true" />
+                <span>{t(`${scopeKey}.body`)}</span>
+              </p>
+            )}
 
             {/* An extra, never the answer. Three of the twelve pages have
                 no article and read exactly as well without one. */}

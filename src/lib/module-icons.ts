@@ -19,6 +19,7 @@ import {
   Image as ImageIcon,
   Inbox,
   Layout,
+  LayoutGrid,
   LifeBuoy,
   Lightbulb,
   LineChart,
@@ -152,3 +153,8 @@ const EXTRA_ICONS: Record<string, LucideIcon> = {
 export function iconForSlug(slug: string, fallback: LucideIcon = Sparkles): LucideIcon {
   return MODULE_ICONS[slug] ?? EXTRA_ICONS[slug] ?? fallback;
 }
+
+// The hub at /dashboard/business — one row in place of the nineteen log
+// modules the sidebar used to list, so the icon is the "many things,
+// one place" one rather than any single module's.
+export const MY_BUSINESS_ICON: LucideIcon = LayoutGrid;

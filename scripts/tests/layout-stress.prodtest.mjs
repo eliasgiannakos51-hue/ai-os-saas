@@ -88,7 +88,11 @@ const DASHBOARD_ROUTES = [
   "/dashboard/website-builder",
   "/dashboard/mission",
   "/dashboard/documents",
-  "/dashboard/favorites",
+  // NOT "/dashboard/favorites": V4.6 #3 merged the starred list into the
+  // timeline and left that path as a redirect, so measuring it measured
+  // the redirect target while calling it favorites. The list is still
+  // here — it is a tab now, and this is the URL it lives at.
+  "/dashboard/timeline?view=fav",
   "/dashboard/timeline",
   "/dashboard/memory",
   "/dashboard/marketplace",
@@ -353,7 +357,7 @@ const PROBE = () => {
 const fixture = await buildFixture();
 const harness = await startProdHarness({ tableRows: fixture, supaPort: 54331 });
 const { chromium } = await import("playwright");
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 
 // Census across everything measured, so the log carries the real numbers
 // even on a run where nothing regressed.
@@ -386,12 +390,18 @@ async function sweep(context, route, locale) {
   // the app's busiest signed-in screen was actually taken of the
   // onboarding wizard, and nothing said so.
   const landedOn = new URL(page.url()).pathname;
-  if (landedOn !== route) {
+  // PATHNAME AGAINST PATHNAME. A route in the list may carry a query
+  // ("/dashboard/timeline?view=fav" is where the starred list lives now),
+  // and comparing that whole string to a bare pathname reports every such
+  // route as a redirect — a false alarm in the check whose whole purpose
+  // is to catch false measurements.
+  const wantedPath = route.split("?")[0];
+  if (landedOn !== wantedPath) {
     await page.close();
     checkTrue(
       `${locale} ${route}: measured the route it asked for`,
       false,
-      `redirected to ${landedOn} — whatever was measured, it was not ${route}`
+      `redirected to ${landedOn} — whatever was measured, it was not ${wantedPath}`
     );
     return;
   }
@@ -615,29 +625,34 @@ console.log("\n== 4. the assertions ==");
 // that dies silently after printing something reassuring is worse than
 // no gate.
 
-// ONE KNOWN OVERFLOW, named rather than tolerated.
+// NO KNOWN OVERFLOW ANY MORE — and what it took to close the last one.
 //
-// /dashboard/overview is 800px wide inside a 768px viewport in Greek — 32
-// px, and only in Greek, which is the locale this fixture exists to catch
-// things in. It is real and it is open.
+// This list held `el /dashboard/overview @768 (800/768)` and the note
+// beside it said, honestly, that the diagnostic could not localize it:
+// "it names the widest in-flow element whose rect exceeds the viewport,
+// and on this page there isn't one". That was the right thing to write
+// and the wrong conclusion to stop at. There WAS such an element. The
+// report just could not say which, because naming the widest element
+// names where an overflow ENDS, never where it starts — the box that
+// causes an overflow is an ancestor that refused to shrink, and it fits
+// the viewport perfectly while its child does not.
 //
-// It is pinned by its exact route+width+locale string rather than by a
-// count, so this still fails the moment any OTHER route overflows, which
-// is what the check is for. Six of the seven that data exposed are fixed;
-// this is the one left.
+// scripts/tests/home-audit.prodtest.mjs section 3 walks the containment
+// chain instead of reporting one element, and the answer came out in one
+// run: setup-progress-card.tsx's step list is `flex-1`, which is
+// `flex: 1 1 0%` — a basis of ZERO — beside a sibling whose basis is
+// `auto`. That is not "share the row", it is "take what is left over",
+// and there was nothing left over: the list measured EIGHT PIXELS wide,
+// every <li> in it was 0px, and the `shrink-0` arrow on the next step
+// sat 14px past the right edge of the page. health-score-card.tsx, the
+// card this one swaps places with, had the identical shape.
 //
-// WHY IT IS NOT FIXED HERE: the diagnostic cannot localize it, and I would
-// rather say that than guess. It names the widest in-flow element whose
-// rect exceeds the viewport, and on this page there isn't one — meaning
-// the 32px comes from something a bounding rect does not show. The two
-// candidates are a right margin (getBoundingClientRect excludes margins)
-// and a container scrolling its own content. Finding it needs a different
-// instrument than this one, and inventing a fix for an element I have not
-// identified is how the "Publish bar is squeezed to the left" report got
-// the publish dialog rebuilt twice without touching the cause.
-const KNOWN_OVERFLOW = ["el /dashboard/overview @768 (800/768)"];
+// Both now carry `sm:basis-60`, and the census is EMPTY at every width in
+// both locales. The list stays here, pinned at empty, because the check
+// is worth more as "nothing overflows" than as "nothing new overflows".
+const KNOWN_OVERFLOW = [];
 check(
-  "no route overflows horizontally beyond the one known case",
+  "no route overflows horizontally, at any width, in either locale",
   census.overflow,
   KNOWN_OVERFLOW
 );

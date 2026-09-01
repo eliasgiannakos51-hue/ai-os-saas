@@ -247,6 +247,29 @@ check(
   drift.map((d) => `${d.testFile} -> ${d.modulePath}::${d.symbol} — ${d.reason}`).join("\n        ")
 );
 
+// NOT A SECTION HERE, AND WHY — because I wrote one and it was wrong.
+//
+// blankStrings() pairs backticks left to right, so a suite containing an
+// UNBALANCED backtick outside a string makes every pairing after it wrong
+// and template-literal contents get scanned as code. That is real: writing
+// `/idempotencyKey: \`sub_update:/` in annual-billing.test.mjs — an
+// unbalanced backtick inside a REGEX literal, which is perfectly legal
+// JavaScript — made this gate report that file as reading `pricing.$` from
+// model-pricing.ts. The finding was false and the tokeniser was the cause.
+//
+// The obvious check is "count backticks outside quoted strings; an odd
+// count means the pairing is unreliable". I wrote it. It flagged four more
+// suites, and I could not tell whether any of them was real, because
+// counting backticks "outside quoted strings" needs the very tokeniser
+// that is missing: a // inside a regex looks like a comment, a quote
+// inside a comment looks like a string, and the crude order-of-operations
+// gave a different number depending on which I stripped first.
+//
+// So it is not here. Shipping a detector I cannot trust, in the gate whose
+// whole subject is false positives from regex tokenising, would be the
+// same mistake one level up. What IS here is this note and the fixed call
+// site. Doing it properly means parsing rather than matching.
+
 console.log("\n== 7. the gate still reports a CRASH as a failure ==");
 // The other half of the incident. A suite that throws must fail the build,
 // not be skipped over — that is what made the difference between Vercel

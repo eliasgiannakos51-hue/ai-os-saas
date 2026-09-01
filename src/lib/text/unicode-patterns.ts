@@ -137,7 +137,36 @@ export function foldForMatch(input: string): string {
   for (const ch of src) {
     let folded = ch.toLowerCase();
     if (folded === "ς") folded = "σ";
-    const stripped = folded.normalize("NFD").replace(/\p{Diacritic}/gu, "").normalize("NFC");
+    // WHAT SURVIVES A STRIP, AND WHY — checked across every script in
+    // scripts/tests/host-and-word-boundaries.test.mjs, not reasoned about
+    // here. Korean jamo, Thai tone marks, Hebrew niqqud, Devanagari
+    // matras and Arabic harakat are all safe, and not by design: they are
+    // SEPARATE code points, so stripping them changes the length and the
+    // `stripped.length === ch.length` guard below rejects it. Kana was
+    // the exception because プ has a precomposed single-codepoint form.
+    //
+    // VIETNAMESE IS A KNOWN, DELIBERATE COLLISION. má and mà fold
+    // together, and its tones are phonemic exactly as kana voicing is.
+    // It is not fixable by inspecting the mark: the acute on á is the
+    // same code point in "café", where stripping it is the whole point.
+    // Distinguishing them needs the language, which this function does
+    // not have. French, Spanish and Portuguese are shipped locales and
+    // Vietnamese is not, so the trade is made in their favour — recorded
+    // here and asserted in the gate so it stays a decision rather than
+    // becoming a discovery.
+    //
+    // KANA VOICING MARKS ARE NOT ACCENTS. U+3099 and U+309A turn ハ into
+    // バ and パ — different consonants, different words. Unicode calls
+    // them Diacritic, so a blanket \p{Diacritic} strip folded バグ (bug)
+    // and ハグ (hug) to the same string, and ゴール (goal) and コール
+    // (call) likewise. Every Japanese match in the app ran on that: the
+    // deep dive, the injection filter, module narrowing, cross-module
+    // context. Greek accents and Latin diacritics still go, because there
+    // stripping them is the point.
+    const stripped = folded
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, (mark) => (mark === "\u3099" || mark === "\u309A" ? mark : ""))
+      .normalize("NFC");
     if (stripped.length === ch.length) folded = stripped;
     out += folded.length === ch.length ? folded : ch;
   }
@@ -150,3 +179,31 @@ export function foldForMatch(input: string): string {
 export function isFolded(text: string): boolean {
   return foldForMatch(text) === text;
 }
+
+/**
+ * "Does this text contain a CJK character at all."
+ *
+ * ONE COPY, AND IT WAS THREE. lib/ai/deep-dive.ts, lib/text/
+ * resolve-language.ts and lib/text/script-length.ts each declared this
+ * exact regex as a module-private `const CJK`. Three identical
+ * constants is the duplicated-constant shape on its own, and it had a
+ * second cost that is worth writing down because it is not obvious:
+ *
+ *   scripts/tests/load-ts.mjs bundles a module and its local imports by
+ *   CONCATENATION. Two of those three files in one test therefore
+ *   produced "SyntaxError: Identifier 'CJK' has already been declared",
+ *   and a gate that wanted to measure both — the research cost test,
+ *   which needs deep-dive's row limit and script-length's ratios — could
+ *   not be written at all. The loader already documents two other
+ *   artefacts of concatenation (import hoisting, re-export dedup); this
+ *   is a third, and the honest fix is one declaration rather than a
+ *   third workaround in the bundler.
+ *
+ * INCLUDES KANA ON PURPOSE. The question these three callers ask is
+ * "does the per-character arithmetic I am about to do hold here", and it
+ * does not for Japanese any more than for Chinese: both are dense scripts
+ * where a character carries far more than a Latin letter. Distinguishing
+ * Japanese FROM Chinese is a different question and resolve-language.ts
+ * answers it separately, with the kana as the tell.
+ */
+export const CJK_PATTERN = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;

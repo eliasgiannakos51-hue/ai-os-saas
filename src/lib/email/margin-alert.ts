@@ -1,8 +1,13 @@
 import "server-only";
+import { escapeHtml } from "@/lib/html-escape";
 import { createResendClient } from "@/lib/resend";
+import { senderAddress } from "@/lib/email/resend-config";
 import { ADMIN_EMAILS } from "@/lib/auth/admin-emails";
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
+// The From address, from ONE definition — see lib/email/resend-config.ts.
+// This was one of fourteen copies of the same line — the constant AND
+// its fallback, repeated per file. The fallback is the half that decides
+// whether mail reaches anybody, so it now has one definition.
 
 // A margin shortfall is not an outage, so it does not belong in the
 // error-alert threshold machinery ("2+ users affected", "N in a window").
@@ -19,13 +24,6 @@ const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@res
 const COOLDOWN_MS = 15 * 60 * 1000;
 let lastSentAt = 0;
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 /**
  * Emails the owner when a settlement lands under the guaranteed margin.
@@ -66,7 +64,7 @@ export async function sendMarginAlertEmail(params: {
         : `${params.achievedMargin.toFixed(3)}x`;
 
     await resend.emails.send({
-      from: FROM_ADDRESS,
+      from: senderAddress(),
       to: recipients,
       subject: `[Ionexa] Margin below ${params.targetMargin}x on ${params.feature} — ${marginText}`,
       html: `
@@ -100,7 +98,21 @@ export async function sendMarginAlertEmail(params: {
           </p>
         </div>`,
     });
-  } catch {
-    // Best-effort. An alert that fails must not become a second error.
+  } catch (err) {
+    // BEST-EFFORT, NOT SILENT. This is the mail that says the product is
+    // selling AI below cost; it is sent from settlement
+    // (lib/billing/reservations.ts), and on a deployment with no
+    // RESEND_API_KEY it was failing without leaving a trace anywhere.
+    //
+    // console.error rather than logApiError, even though this one is NOT
+    // called from inside logApiError and could safely use it: routing a
+    // mail failure through the error alerter means the alerter tries to
+    // send mail about mail not sending, on every settlement, for as long
+    // as the key is missing. A runtime log line is the right weight for a
+    // failed alert, and it cannot cascade.
+    console.error(
+      "[margin-alert] could not send the alert:",
+      err instanceof Error ? err.message : String(err)
+    );
   }
 }

@@ -5,6 +5,8 @@ import { modelText } from "@/lib/verification/truncation";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { RESEARCH_MODEL } from "@/lib/files/file-models";
 import { wrapUntrusted } from "@/lib/agents/agent-config";
+import { buildEntrySourceBlock, entryCitationRules, type EntrySource } from "@/lib/research/entry-sources";
+import { minCharsFor } from "@/lib/text/script-length";
 import {
   MAX_TOPIC_CHARS,
   MIN_TOPIC_CHARS,
@@ -141,7 +143,8 @@ export async function planResearch(params: {
     for (const item of raw) {
       const question = typeof (item as ResearchQuestion)?.question === "string" ? (item as ResearchQuestion).question.trim() : "";
       const why = typeof (item as ResearchQuestion)?.why === "string" ? (item as ResearchQuestion).why.trim() : "";
-      if (question.length < 5) continue;
+      // Five characters is two Chinese words.
+    if (question.length < minCharsFor(question, 5)) continue;
       questions.push({ question: question.slice(0, 300), why: why.slice(0, 300) });
       if (questions.length >= RESEARCH_MAX_QUESTIONS) break;
     }
@@ -254,7 +257,7 @@ export async function researchQuestion(params: {
 // Phase 3 — synthesis.
 // ---------------------------------------------------------------------
 
-export function synthesisSystemPrompt(language: string): string {
+export function synthesisSystemPrompt(language: string, entryCount = 0): string {
   return [
     "You write a research report from findings that were gathered for you.",
     "",
@@ -262,7 +265,11 @@ export function synthesisSystemPrompt(language: string): string {
     "",
     "Rules:",
     "- Use ONLY the findings supplied. Do not add facts from your own knowledge; if something important is missing, say it is missing.",
-    "- Cite sources inline as [n], using the numbered source list supplied. Every factual claim needs one.",
+    "- Cite web sources inline as [n], using the numbered source list supplied. Every factual claim needs one.",
+    // THE SECOND NAMESPACE — V4.6. Only stated when there is one, so a
+    // report with no entries is not told about a list it does not have
+    // and cannot invent markers into it.
+    ...entryCitationRules(entryCount),
     "- PARAPHRASE everything. At most one short quoted sentence in the entire report, and only if the exact wording matters.",
     "- Where findings disagree, present both and say which sources support each.",
     "- If a question returned nothing, list it under what could not be established. Do not quietly omit it.",
@@ -291,6 +298,12 @@ export function buildSynthesisInput(params: {
   topic: string;
   findings: ResearchFinding[];
   sources: ResearchSource[];
+  /** The user's own entries, already numbered [E1..En]. */
+  entries?: readonly EntrySource[];
+  /** The flat, cached shape of the account — pattern (C): every module's
+   *  counts and recency, which is cheap, plus ONE module read deeply,
+   *  which is not. */
+  accountSummary?: string;
 }): string {
   const numbered = params.sources.map((s, i) => `[${i + 1}] ${s.title} — ${s.url}`).join("\n");
 
@@ -302,12 +315,31 @@ export function buildSynthesisInput(params: {
     return `### Question: ${finding.question}\nSources: ${indexes.length ? indexes.map((n) => `[${n}]`).join(" ") : "none"}\n${body}`;
   });
 
+  const entries = params.entries ?? [];
+  const entryBlock = buildEntrySourceBlock(entries);
+
   return [
     `Topic: ${params.topic}`,
     "",
     "SOURCE LIST:",
     numbered || "(none)",
     "",
+    // THE ACCOUNT, FLAT AND CHEAP. Counts and recency for every module,
+    // from the same cached shape the chat uses. It is what lets the
+    // report say "you have not written anything about pricing since
+    // March" — a sentence no web search can produce — without paying for
+    // a deep read of twelve modules.
+    ...(params.accountSummary
+      ? ["THE USER'S ACCOUNT (their own data, not the web):", params.accountSummary, ""]
+      : []),
+    // AND THE ONE MODULE READ DEEPLY, as citable rows.
+    ...(entryBlock
+      ? [
+          "THE USER'S OWN ENTRIES — cite these as [E1], [E2], ... NOT as [1], [2]:",
+          entryBlock,
+          "",
+        ]
+      : []),
     "FINDINGS:",
     wrapUntrusted(blocks.join("\n\n")),
   ].join("\n");
@@ -318,6 +350,8 @@ export async function synthesiseReport(params: {
   topic: string;
   findings: ResearchFinding[];
   sources: ResearchSource[];
+  entries?: readonly EntrySource[];
+  accountSummary?: string;
   language: string;
   costs: CostAccumulator;
   // `truncated` is on the SUCCESS shape deliberately. A severed report is
@@ -330,7 +364,7 @@ export async function synthesiseReport(params: {
       {
         model: RESEARCH_MODEL,
         max_tokens: SYNTHESIS_MAX_TOKENS,
-        system: synthesisSystemPrompt(params.language),
+        system: synthesisSystemPrompt(params.language, params.entries?.length ?? 0),
         messages: [{ role: "user", content: buildSynthesisInput(params) }],
       },
       { timeout: RESEARCH_SYNTHESIS_TIMEOUT_MS }

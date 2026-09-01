@@ -44,7 +44,26 @@ function allSql() {
   return sql;
 }
 const SQL = allSql();
-const blocks = [...SQL.matchAll(/create table (?:if not exists )?(?:public\.)?([a-z_]+)\s*\(([\s\S]*?)\n\);/gi)];
+// A BODY MAY NOT CONTAIN ANOTHER `create table`, and this tempering is
+// not cosmetic. The lazy body runs to the next "\n);", and a
+// `create table` that has none — because it is inside a quoted string in
+// a DO block, like the throwaway probe in
+// 20260909000000_revoke_anon_default_privileges — swallows every file
+// after it until one turns up.
+//
+// Measured when nav_events was added: the probe's "body" was 30,272
+// characters long, ended halfway through nav_events' own definition, and
+// therefore (a) reported `zz_anon_default_probe` as a table carrying a
+// user_id, which it does not, and (b) hid nav_events from this check
+// entirely, so a new table full of one person's browsing history was
+// never asked for a GDPR classification at all. The gate was red, and it
+// was red about the wrong table — which is worse than being green,
+// because the name in the failure is the thing somebody goes and fixes.
+//
+// Tempering the body costs nothing on real definitions (the longest is
+// 3,064 characters) and changes exactly two entries in the result: the
+// phantom out, nav_events in.
+const blocks = [...SQL.matchAll(/create table (?:if not exists )?(?:public\.)?([a-z_]+)\s*\(((?:(?!create table)[\s\S])*?)\n\);/gi)];
 const tablesWithUserId = new Set();
 const cascadeByTable = new Map();
 for (const [, name, body] of blocks) {
@@ -308,6 +327,29 @@ if (existsSync(oldButton)) {
     !/CLASSIFIER_MODULES/.test(btn),
     "the old 13-table client-side export is still live"
   );
+}
+
+console.log("\n== 6. the two GDPR routes are bounded ==");
+// A right of access is a right, not a rate — but one export is
+// ninety-two sequential queries and up to two minutes of function time,
+// and nothing bounded it. An account could hold the connection pool open
+// against everybody else on the instance for as long as it liked, for
+// free. The erasure route has been bounded since it was written; the
+// export was not, and the asymmetry is the tell.
+{
+  const exportSrc = readFileSync("src/app/api/account/export/route.ts", "utf8");
+  check('the export is rate limited per ACCOUNT', /scope: "account_export"/.test(exportSrc) &&
+    /identifier: user\.id/.test(exportSrc),
+    "an IP bucket would block a household behind one NAT and let one account spread its load");
+  check("...and says so with a 429 rather than an empty file",
+    /status: 429/.test(exportSrc) && /times an hour/.test(exportSrc));
+  const confirmSrc = readFileSync("src/app/api/delete-account/confirm/route.ts", "utf8");
+  check("the erasure confirmation is rate limited too", /checkRateLimit\(\{/.test(confirmSrc));
+  // The number itself, so a change to it is a change somebody sees.
+  const n = exportSrc.match(/const EXPORT_MAX_PER_HOUR = (\d+);/);
+  check(`the export ceiling is a named constant (${n ? n[1] : "none"})`,
+    Boolean(n) && Number(n[1]) >= 3 && Number(n[1]) <= 20,
+    "below 3 is a right made awkward; above 20 is not a bound");
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);

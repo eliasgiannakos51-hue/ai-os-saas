@@ -23,6 +23,7 @@
 // money rule enforced in one place is enforced until the next code path.
 
 /** Recurring commission runs for a year from the conversion, not forever. */
+import { formatCurrency } from "@/lib/format-number";
 export const COMMISSION_MONTHS = 12;
 
 /**
@@ -228,7 +229,29 @@ export function payoutDecision(params: {
   return { pay: true, amountCents: params.accruedCents };
 }
 
-/** Cents -> "€12.34", for display only. */
-export function formatCents(cents: number): string {
-  return `€${(cents / 100).toFixed(2)}`;
+/**
+ * Cents -> a money string, for display only.
+ *
+ * THROUGH THE CANONICAL FORMATTER, and it was not. This returned
+ * `€${(cents / 100).toFixed(2)}` — no thousands separator, the symbol
+ * always in front, the minus sign in the wrong place, and the same
+ * output in every language. Measured against lib/format-number.ts's
+ * formatCurrency, which every other user-facing figure uses:
+ *
+ *     €1000000.00   this function
+ *     €1,000,000.00 en
+ *     1.000.000,00 € el, de
+ *     €-50.00       this function
+ *     -€50.00       en
+ *
+ * It renders on components/affiliate/affiliate-dashboard.tsx — a screen
+ * ANY user reaches, with translated prose around it. A Greek affiliate
+ * read `€1234.56` inside a Greek sentence.
+ *
+ * The locale is a parameter with the same default formatCurrency has, so
+ * server callers that have no locale behave exactly as before and the
+ * dashboard passes useLocale().
+ */
+export function formatCents(cents: number, locale?: string): string {
+  return formatCurrency(cents / 100, locale);
 }

@@ -1,43 +1,18 @@
-import { pageTitle } from "@/lib/page-title";
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import { Star } from "lucide-react";
-import { getCurrentUser } from "@/lib/auth/current-user";
-import { createClient } from "@/lib/supabase/server";
-import { PageHeader } from "@/components/dashboard/page-header";
-import { FavoritesList } from "@/components/favorites/favorites-list";
-import { groupFavorites, loadAllFavorites } from "@/lib/favorites";
 
-export function generateMetadata(): Promise<Metadata> {
-  return pageTitle("sidebar.items.favorites");
-}
-
-// Same reasoning as dashboard/timeline and dashboard/mission — reads
-// live, frequently-changing data (favorites toggled from any module),
-// so it must never serve a cached result.
-export const dynamic = "force-dynamic";
-export const fetchCache = "force-no-store";
-
-export default async function FavoritesPage() {
-  const t = await getTranslations("dashboard.favorites");
-  const supabase = createClient();
-
-  const user = await getCurrentUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const entries = await loadAllFavorites(supabase, user.id);
-  const groups = groupFavorites(entries);
-
-  return (
-    <main className="min-h-full bg-dot-grid">
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader helpKey="help.favorites" icon={Star} title={t("title")} description={t("description")} />
-        <FavoritesList groups={groups} />
-      </div>
-    </main>
-  );
+// MERGED INTO "Mine" — V4.6 #3.
+//
+// Favorites, History and "search my records" were three sidebar rows
+// answering one question. The starred list now lives as a tab on
+// /dashboard/timeline, rendered by the SAME FavoritesList component off
+// the SAME loadAllFavorites query, so nothing about the list changed —
+// only where you reach it.
+//
+// This route stays, as a redirect rather than a 404, because it is in
+// people's bookmarks and in the command palette's history. It is also
+// still an entry in lib/sidebar-nav.ts (hidden from the sidebar, present
+// in the palette and on /dashboard/records), so searching "favorites"
+// still finds it and still lands on the list.
+export default function FavoritesPage() {
+  redirect("/dashboard/timeline?view=fav");
 }

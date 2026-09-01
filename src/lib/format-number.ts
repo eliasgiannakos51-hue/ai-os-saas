@@ -67,6 +67,50 @@ export function formatNumber(value: number, locale: string = DEFAULT_LOCALE): st
 }
 
 /**
+ * Money, written the way the user's language writes money.
+ *
+ * WHAT THIS REPLACES: `€{value.toFixed(2)}` and, on the module record
+ * cards, nothing at all — the raw value went straight into a template
+ * string. Measured against the real sample account, in Greek:
+ *
+ *     stored 95.6      card printed "95.6"        should read "95,60 €"
+ *     stored 11920     header printed "€11920.00"  should read "11.920,00 €"
+ *
+ * Greek, Spanish, French, German and Italian all put the symbol AFTER the
+ * amount and use a comma for the decimal; Portuguese puts it before with
+ * a space; Arabic prefixes a RTL mark. A hardcoded "€" in front of
+ * toFixed(2) is correct in exactly one of the ten languages this app
+ * ships, and it is not the one most of its users read.
+ *
+ * IT ALSO ENDS THE FLOAT QUESTION. A binary-float sum renders raw through
+ * a template string — 0.1 + 0.2 becomes "0.30000000000000004" on screen —
+ * and no amount of care at the call site fixes every path. Intl always
+ * rounds to the currency's own fraction digits, so the same value comes
+ * out "0,30 €". That is why this is the formatter for money rather than
+ * formatNumber plus a symbol.
+ *
+ * `useGrouping: "always"` for the same reason formatNumber has it: Node
+ * and Chromium ship different CLDR vintages and disagree about when to
+ * group, so leaving it to the default makes the output a function of the
+ * runtime and hydration a coin flip. See scripts/tests/metric-clarity.test.mjs,
+ * which asserts the ten locales agree with themselves.
+ *
+ * EUR is fixed rather than a parameter, and that is a real limitation
+ * stated rather than hidden: every price in this product is in euros
+ * (lib/billing/*), and a currency argument nobody passes correctly is
+ * worse than one nobody can pass wrongly. The day a second currency
+ * exists, this signature is where it goes.
+ */
+export function formatCurrency(value: number, locale: string = DEFAULT_LOCALE): string {
+  if (!Number.isFinite(value)) return "—";
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "EUR",
+    useGrouping: "always",
+  }).format(value);
+}
+
+/**
  * An absolute date+time, for tooltips on relative timestamps.
  *
  * Still locale-dependent, and still rendered on both sides, so it takes

@@ -187,6 +187,7 @@ console.log("build ok — starting `next start`");
 const server = spawn("npx", ["next", "start", "-p", String(PORT)], {
   env,
   stdio: ["ignore", "pipe", "pipe"],
+  detached: true,
 });
 let serverLog = "";
 server.stdout.on("data", (d) => (serverLog += d));
@@ -207,7 +208,18 @@ async function waitForServer() {
 
 function cleanup() {
   try {
-    server.kill("SIGKILL");
+    // KILL THE GROUP, NOT THE HANDLE. `npx next start` is npx -> sh ->
+    // next-server. SIGKILL to the npx handle leaves the grandchild alive,
+    // reparented to init, still holding its port and serving its build.
+    // Measured across one full survey of the suite: thirteen orphaned
+    // next-server processes, the oldest 41 minutes old. `detached: true`
+    // on the spawn puts the whole tree in its own group so this reaches
+    // all of it. Enforced by scripts/tests/prodtest-hygiene.test.mjs.
+    try {
+      process.kill(-server.pid, "SIGKILL");
+    } catch {
+      server.kill("SIGKILL");
+    }
   } catch {
     /* already gone */
   }
@@ -223,7 +235,7 @@ if (!up || /EADDRINUSE|Failed to start server/.test(serverLog)) {
 console.log(`production server up on :${PORT} (next start, NODE_ENV=production)`);
 
 const { chromium } = await import("playwright");
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 await context.addCookies([
   { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
@@ -366,7 +378,35 @@ for (const button of groupButtons) {
   await hoverAllVisibleLinks();
 }
 check(`every reachable item shows a tooltip (${seen.size} hovered)`, misses, []);
-checkTrue(`and that is most of the sidebar, not a couple of rows (${seen.size})`, seen.size >= 30);
+// "MOST OF THE SIDEBAR" — ASKED OF THE SIDEBAR, not asserted as 30.
+//
+// That literal was written when the sidebar had thirty-odd visible rows.
+// V4.6 #3 marked twenty-nine of the thirty-nine entries `hidden: true`
+// (palette and hub, not the sidebar), leaving ten in the main groups —
+// so this demanded thirty from a sidebar that has ten, and went red on
+// a suite that had hovered every row there is.
+//
+// Naming the rows is stronger than counting them: a threshold cannot
+// tell "we only hovered a few" from "rows vanished", and it says nothing
+// about WHICH row was missed. This checks the visible rows in the config
+// were each actually hovered, and reports the ones that were not.
+const navSrc = readFileSync("src/lib/sidebar-nav.ts", "utf8");
+const configRows = [...navSrc.matchAll(/\{\s*href:\s*"([^"]+)"[^}]*\}/g)]
+  .map((m) => ({ href: m[1], hidden: /hidden:\s*true/.test(m[0]) }));
+const visibleHrefs = configRows.filter((r) => !r.hidden).map((r) => r.href);
+// THE PARSE ITSELF IS CHECKED. A regex that matched nothing would leave
+// an empty expectation that every run satisfies.
+checkTrue(
+  `the sidebar config was parsed (${configRows.length} rows, ${visibleHrefs.length} visible)`,
+  configRows.length >= 30 && visibleHrefs.length >= 5,
+  `${configRows.length}/${visibleHrefs.length} — too few to be the real config`
+);
+const neverHovered = visibleHrefs.filter((h) => !seen.has(h));
+check(
+  `every row the config shows was hovered (${visibleHrefs.length - neverHovered.length}/${visibleHrefs.length}, ${seen.size} hovered in all)`,
+  neverHovered,
+  []
+);
 
 console.log("\n== 4. keyboard users get it too ==");
 await page.mouse.move(0, 0);

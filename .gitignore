@@ -57,3 +57,8 @@ test-results/
 # scripts rather than carrying tens of megabytes of PNGs in history.
 /prod-audit/
 /variety-out/
+scripts/tests/.guard-sidecar/
+
+# The mutation suites record originals here before touching a source
+# file. A clean run deletes it; its presence means a run was killed.
+scripts/tests/.mutation-sidecar.json

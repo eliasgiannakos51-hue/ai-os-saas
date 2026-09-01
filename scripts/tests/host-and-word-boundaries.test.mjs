@@ -29,6 +29,7 @@
 //
 // Run: node scripts/tests/host-and-word-boundaries.test.mjs
 import { loadTs } from "./load-ts.mjs";
+const { foldForMatch: fold } = await loadTs("src/lib/text/unicode-patterns.ts");
 
 let pass = 0;
 let fail = 0;
@@ -196,6 +197,53 @@ check("two sentences are still two rules", kindsFor("Max 2% risk. Only London.")
 ]);
 check("a trailing full stop does not swallow the rule", kindsFor("max 2% risk."), ["max_risk_percent"]);
 check("semicolons still split", kindsFor("max 2% risk; only London"), ["max_risk_percent", "allowed_sessions"]);
+
+console.log("\n== 8. what folding removes, across every script ==");
+// foldForMatch stripped U+3099/U+309A, the kana voicing marks. Unicode
+// classes them Diacritic; they turn ハ into バ and パ. So バグ (bug) and
+// ハグ (hug) folded to the same string, and ゴール (goal) and コール
+// (call) likewise — in every Japanese match in the app.
+//
+// The question that found it applies to every script, so every script is
+// checked. Each pair MUST stay distinct unless marked otherwise: a
+// collision means a mark that carries meaning is being stripped as
+// though it were an accent.
+//
+// Korean, Thai, Hebrew, Devanagari and Arabic pass, and not by design —
+// their marks are separate code points, so stripping changes the length
+// and the guard in foldForMatch rejects it. This pins that, because the
+// guard could be relaxed by somebody who did not know it was load-bearing
+// for five scripts.
+const FOLD_PAIRS = [
+  ["Korean: 값 vs 갑", "값", "갑", "distinct"],
+  ["Korean: 밥 vs 바", "밥", "바", "distinct"],
+  ["Thai tone: ป่า vs ปา", "ป่า", "ปา", "distinct"],
+  ["Thai tone: ก่า vs ก้า", "ก่า", "ก้า", "distinct"],
+  ["Hebrew niqqud: שָׁלוֹם vs שלום", "שָׁלוֹם", "שלום", "distinct"],
+  ["Hebrew: בַּ vs בָ", "בַּ", "בָ", "distinct"],
+  ["Devanagari matra: कि vs की", "कि", "की", "distinct"],
+  ["Devanagari nukta: क़ vs क", "क़", "क", "distinct"],
+  ["Arabic harakat: بِ vs بَ", "بِ", "بَ", "distinct"],
+  ["Arabic hamza: أ vs ا", "أ", "ا", "distinct"],
+  ["Japanese dakuten: バグ vs ハグ", "バグ", "ハグ", "distinct"],
+  ["Japanese handakuten: パン vs ハン", "パン", "ハン", "distinct"],
+  // The two where collapsing them IS the feature.
+  ["Greek accent: καφές vs καφες", "καφές", "καφες", "collide"],
+  ["Latin accent: café vs cafe", "café", "cafe", "collide"],
+  // AND THE ONE KNOWN LOSS, asserted as a loss so it stays a decision.
+  // Vietnamese tones are phonemic like kana voicing, and unlike kana they
+  // cannot be told apart from a French acute by looking at the mark.
+  // French, Spanish and Portuguese ship; Vietnamese does not.
+  ["Vietnamese tone: má vs mà (KNOWN LOSS)", "má", "mà", "collide"],
+];
+for (const [name, a, b, expected] of FOLD_PAIRS) {
+  const collides = fold(a) === fold(b);
+  check(`${name} — ${expected}`, collides, expected === "collide");
+}
+// FOLDING MUST STILL BE INDEX-STABLE in every one of them, because the
+// match indices are used to splice the ORIGINAL text.
+const unstable = FOLD_PAIRS.flatMap(([, a, b]) => [a, b]).filter((t) => fold(t).length !== t.length);
+check(`folding stays index-stable in every script above (${unstable.join(", ") || "none unstable"})`, unstable.length, 0);
 
 console.log(`\n${fail === 0 ? "PASS" : "FAIL"}  ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

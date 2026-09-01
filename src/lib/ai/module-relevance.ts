@@ -108,17 +108,72 @@ export function questionWords(foldedQuestion: string): Set<string> {
  * exception and are matched against the folded question directly,
  * because "cash flow" cannot be found in a set of single words.
  */
+/**
+ * Scripts with no word separator (Han, Hiragana, Katakana) or with
+ * clitics glued to the word (Arabic). A term in one of these is matched
+ * as a substring; everything else is matched whole.
+ */
+const SUBSTRING_SCRIPTS = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Arabic}]/u;
+
+export function needsSubstringMatch(folded: string): boolean {
+  return SUBSTRING_SCRIPTS.test(folded);
+}
+
+/**
+ * Three characters is the right floor for a Latin or Greek word and the
+ * wrong one for Chinese, where 支出 (expenses) and 收入 (revenue) are two
+ * characters and carry more meaning than most English words of five. A
+ * flat three silently excluded the commonest terms in two languages.
+ */
+const MIN_TERM_LENGTH = (folded: string): number => (needsSubstringMatch(folded) ? 2 : 3);
+
 export function scoreTerms(
   words: ReadonlySet<string>,
   foldedQuestion: string,
   terms: readonly string[]
 ): number {
+  // EACH DISTINCT WORD COUNTS ONCE. The vocabulary is built from a
+  // module's title AND its field labels, and those overlap: Sales carries
+  // both "sales" (the slug) and "Sales" (the title), which fold to the
+  // same word. Counting both gave Sales a 2 for a question containing the
+  // word once, and "compare my sales and my finance numbers" — a question
+  // about two modules, scoring one hit each — came out as a clear 2-1
+  // winner for Sales. A tie broken by a duplicate is not a tie broken by
+  // evidence.
+  const counted = new Set<string>();
   let score = 0;
   for (const term of terms) {
     const folded = foldForMatch(term);
-    if (folded.length < 3) continue;
-    if (words.has(folded)) score += 1;
-    else if (folded.includes(" ") && foldedQuestion.includes(folded)) score += 1;
+    if (folded.length < MIN_TERM_LENGTH(folded)) continue;
+    if (counted.has(folded)) continue;
+    // WHOLE WORDS, EXCEPT WHERE THERE ARE NO WORDS.
+    //
+    // Measured, in every language this app ships: Chinese and Japanese
+    // scored 0 of 5 on questions that plainly name a module, because
+    // questionWords splits on non-letters and "我过去两个月的支出是多少"
+    // has no separator in it — the whole sentence is ONE token, so no
+    // term can ever equal it. Arabic scored 1 of 5 for a related reason:
+    // clitics attach, so "مصروفاتي" (my expenses) is never equal to
+    // "مصروفات".
+    //
+    // For those scripts a substring test is not the sloppy option, it is
+    // the only one that can work — and the danger it carries elsewhere
+    // ("art" inside "start") is a property of alphabetic scripts, where
+    // whole-word matching is still used.
+    if (needsSubstringMatch(folded)) {
+      if (foldedQuestion.includes(folded)) {
+        counted.add(folded);
+        score += 1;
+      }
+      continue;
+    }
+    if (words.has(folded)) {
+      counted.add(folded);
+      score += 1;
+    } else if (folded.includes(" ") && foldedQuestion.includes(folded)) {
+      counted.add(folded);
+      score += 1;
+    }
   }
   return score;
 }
@@ -237,6 +292,49 @@ export function selectRelevantModules<T extends { slug: string; lastActivityMs?:
  * name. "How much did I charge for that?" is about Finance because of
  * "amount", not because of the word "finance".
  */
+/**
+ * Words that appear in field labels and mean nothing about which module a
+ * question is about. They are dropped even when only one module uses
+ * them, because "next" is not evidence about Sales however few other
+ * modules happen to have a "Next Steps" field.
+ */
+const GENERIC_LABEL_WORDS = new Set(
+  [
+    "next", "steps", "step", "follow", "email", "name", "type", "date", "status",
+    "notes", "note", "score", "value", "link", "url", "title", "other", "more",
+    "size", "first", "last", "description", "summary", "category", "priority",
+    "details", "detail", "text", "content", "list", "item", "items",
+    "επομενα", "βηματα", "βημα", "ονομα", "ειδος", "τυπος", "ημερομηνια",
+    "κατασταση", "σημειωσεις", "βαθμολογια", "αξια", "πρωτο", "τελευταιο",
+    "περιγραφη", "συνοψη", "κατηγορια", "προτεραιοτητα", "λεπτομερειες",
+    "κειμενο", "συνδεσμος", "παρακολουθησης",
+    // THE PEOPLE WORDS. Competitors has a "Customers" field, so "πελάτες"
+    // was a subject-weight term for Competitors and "Τι σχόλια έχω πάρει
+    // από πελάτες;" — a question plainly about feedback — was read as a
+    // question about competitors. A word that is true of Sales, Feedback,
+    // Competitors and Products at once claims none of them. It survives
+    // as an ASSOCIATED word for Sales (lib/ai/module-synonyms.ts), at
+    // half weight, which is what it is actually worth.
+    "customer", "customers", "client", "clients", "user", "users", "people",
+    "πελατης", "πελατες", "πελατων", "πελατη", "χρηστης", "χρηστες", "ατομα",
+    // Same shape: several modules have a "Company"/"Market" field.
+    "company", "companies", "market", "εταιρεια", "εταιρειες", "αγορα",
+    // TEN LANGUAGES, because the fault is in every one of them. Competitors
+    // has a "Customers" field, so whatever that word is in Spanish it
+    // becomes a subject-weight term for Competitors — and "¿Qué
+    // comentarios he recibido de clientes?" was read as a question about
+    // competitors. Listing only the English and Greek forms fixed one
+    // language out of ten.
+    "clientes", "cliente", "clients", "kunden", "kunde", "kundschaft",
+    "clienti", "usuarios", "utilisateurs", "benutzer", "utenti",
+    "客户", "顾客", "用户", "顧客", "ユーザー",
+    "العملاء", "عملاء", "زبائن", "المستخدمين", "مستخدمين",
+    "empresa", "empresas", "entreprise", "entreprises", "unternehmen",
+    "azienda", "aziende", "mercado", "marche", "markt", "mercato",
+    "公司", "市场", "会社", "市場", "شركة", "شركات", "السوق", "سوق",
+  ].map((w) => foldForMatch(w))
+);
+
 export function buildModuleVocabulary(
   modules: { slug: string; titleKey: string; fields?: { labelKey: string }[] }[],
   catalogues: Record<string, unknown>[]
@@ -250,16 +348,62 @@ export function buildModuleVocabulary(
     return typeof node === "string" ? node : "";
   };
 
-  return modules.map((m) => {
-    const terms = new Set<string>([m.slug]);
+  // TWO KINDS OF TERM, and they are not equally good evidence.
+  //
+  // STRONG: the module's slug and the words of its title. "finance",
+  // "Οικονομικά" — a question containing one is about that module.
+  //
+  // WEAK: the words of its field labels. Free, plentiful, and where the
+  // false matches come from, because a label is split into words and the
+  // words are ordinary. Measured, before the two rules below existed:
+  //   - Content's fields include a label containing "ideas", so "what
+  //     ideas have I logged" scored Ideas 1 and Content 1 and the two
+  //     tied — the question could not reach the module it names.
+  //   - Sales has a "Next Steps" field, so "what should I do next?"
+  //     scored Sales 1 and nothing else, and read the Sales module
+  //     deeply for a question that is not about sales at all.
+  // FOLDED FOR COMPARING, RAW FOR EMITTING. The collision rules below have
+  // to compare "Πωλήσεις" with "πωλησεισ", so they work on folded forms —
+  // but the terms this returns stay the words as the catalogue spells
+  // them. Emitting the folded ones instead made every term unfindable in
+  // the catalogue it came from, and the gate that checks no term is
+  // invented went red on all thirteen modules. It was right to.
+  const strong = new Map<string, Map<string, string>>();
+  const weak = new Map<string, Map<string, string>>();
+  for (const m of modules) {
+    const st = new Map<string, string>([[foldForMatch(m.slug), m.slug]]);
+    const wk = new Map<string, string>();
     for (const catalogue of catalogues) {
       const title = lookup(catalogue, m.titleKey);
-      if (title) for (const word of title.split(/[^\p{L}\p{N}]+/u)) if (word.length >= 3) terms.add(word);
+      if (title) for (const w of title.split(/[^\p{L}\p{N}]+/u)) if (w.length >= 3) st.set(foldForMatch(w), w);
       for (const field of m.fields ?? []) {
         const label = lookup(catalogue, field.labelKey);
-        if (label) for (const word of label.split(/[^\p{L}\p{N}]+/u)) if (word.length >= 3) terms.add(word);
+        if (label) for (const w of label.split(/[^\p{L}\p{N}]+/u)) if (w.length >= 3) wk.set(foldForMatch(w), w);
       }
     }
-    return { slug: m.slug, terms: [...terms] };
+    strong.set(m.slug, st);
+    weak.set(m.slug, wk);
+  }
+
+  // How many modules claim each weak word. A word two modules' fields
+  // both use is evidence for neither.
+  const weakClaims = new Map<string, number>();
+  for (const wk of weak.values()) for (const folded of wk.keys()) weakClaims.set(folded, (weakClaims.get(folded) ?? 0) + 1);
+
+  return modules.map((m) => {
+    const st = strong.get(m.slug) ?? new Map<string, string>();
+    const kept = new Map<string, string>(st);
+    for (const [folded, raw] of weak.get(m.slug) ?? []) {
+      if (st.has(folded)) continue;
+      // Another module's own NAME. It belongs to that module, not to
+      // whichever one happens to mention it in a field label.
+      if ([...strong].some(([slug, other]) => slug !== m.slug && other.has(folded))) continue;
+      // Claimed by more than one module's fields.
+      if ((weakClaims.get(folded) ?? 0) > 1) continue;
+      // Generic regardless of who claims it.
+      if (GENERIC_LABEL_WORDS.has(folded)) continue;
+      kept.set(folded, raw);
+    }
+    return { slug: m.slug, terms: [...kept.values()] };
   });
 }

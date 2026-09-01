@@ -10,7 +10,8 @@
  *
  * Run: node scripts/tests/verification-layer.mutation.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/verification-layer.test.mjs";
@@ -26,7 +27,7 @@ const MUTANTS = [
   {
     name: "the check is computed and its result ignored (the classic dead verifier)",
     file: RUNNER,
-    from: "    markdown: citations.ok\n      ? reportMarkdown\n      : annotateDanglingCitations(reportMarkdown, sources.length),",
+    from: "    markdown: citations.ok\n      ? reportMarkdown\n      : annotateDanglingCitations(reportMarkdown, sources.length, context.entries.length),",
     to: "    markdown: reportMarkdown,",
   },
   {
@@ -38,7 +39,7 @@ const MUTANTS = [
   {
     name: "the check moves AFTER the document is rendered, so it cannot affect it",
     file: RUNNER,
-    from: "  const citations = checkCitations(reportMarkdown, sources.length);",
+    from: "  const citations = checkCitations(reportMarkdown, sources.length, context.entries.length);",
     to: "  const citations = { ok: true, markers: [], issues: [] };\n  void checkCitations;",
   },
   {
@@ -53,8 +54,8 @@ const MUTANTS = [
   {
     name: "a dangling marker stops being dangling (off-by-one the wrong way)",
     file: LIB,
-    from: "    if (marker > sourceCount) issues.push({ kind: \"dangling\", marker, sourceCount });",
-    to: "    if (marker > sourceCount + 5) issues.push({ kind: \"dangling\", marker, sourceCount });",
+    from: "    if (marker > sourceCount) {\n      issues.push({ kind: \"dangling\", namespace: \"web\", marker, sourceCount });\n    }",
+    to: "    if (marker > sourceCount + 5) {\n      issues.push({ kind: \"dangling\", namespace: \"web\", marker, sourceCount });\n    }",
   },
   {
     name: "an unused source is treated as a failure (crying wolf)",
@@ -71,7 +72,7 @@ const MUTANTS = [
   {
     name: "the annotation marks working citations too",
     file: LIB,
-    from: "    if (n < 1 || n <= sourceCount) return whole;",
+    from: "    if (n < 1 || n <= ceiling) return whole;",
     to: "    if (n < 1) return whole;",
   },
 ];

@@ -1,5 +1,6 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend";
+import { senderAddress } from "@/lib/email/resend-config";
 import {
   agentRunResultEmailHtml,
   agentDisabledEmailHtml,
@@ -10,7 +11,10 @@ import { logApiError } from "@/lib/log-error";
 import { checkEmailAllowed, recordEmailSend } from "@/lib/email/email-gate";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
+// The From address, from ONE definition — see lib/email/resend-config.ts.
+// This was one of fourteen copies of the same line — the constant AND
+// its fallback, repeated per file. The fallback is the half that decides
+// whether mail reaches anybody, so it now has one definition.
 
 // Delivery for Autonomous Agents. All three senders are best-effort and
 // never throw — the same contract every other transactional sender in this
@@ -37,7 +41,7 @@ export async function sendAgentRunResultEmail(params: {
 
     const resend = createResendClient();
     const { error } = await resend.emails.send({
-      from: FROM_ADDRESS,
+      from: senderAddress(),
       to: email,
       subject: `${agentName} — Ionexa AI`,
       html: agentRunResultEmailHtml({
@@ -75,7 +79,7 @@ export async function sendAgentDisabledEmail(params: {
 
     const resend = createResendClient();
     const { error } = await resend.emails.send({
-      from: FROM_ADDRESS,
+      from: senderAddress(),
       to: email,
       subject: `"${agentName}" has been switched off — Ionexa AI`,
       html: agentDisabledEmailHtml({
@@ -113,7 +117,7 @@ export async function sendAgentPausedNoCreditsEmail(params: {
 
     const resend = createResendClient();
     const { error } = await resend.emails.send({
-      from: FROM_ADDRESS,
+      from: senderAddress(),
       to: email,
       subject: `"${agentName}" is paused — Ionexa AI`,
       html: agentPausedNoCreditsEmailHtml({

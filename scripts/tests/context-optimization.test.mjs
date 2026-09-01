@@ -28,6 +28,7 @@ const ok = (name, cond, detail) => {
 
 const cached = await loadTs("src/lib/ai/cached-system.ts");
 const cr = await loadTs("src/lib/ai/module-relevance.ts");
+const fold = await loadTs("src/lib/text/unicode-patterns.ts");
 const uc = await loadTs("src/lib/user-context.ts");
 const cm = await loadTs("src/lib/classifier-modules.ts");
 const en = JSON.parse(readFileSync("messages/en.json", "utf8"));
@@ -205,8 +206,29 @@ console.log("\n== 3. narrowing is OFF, and every doubt sends everything ==");
       const v = vocabulary.find((x) => x.slug === m.slug);
       return (v?.terms ?? []).some((t) => t.length >= 3 && substringTrap.toLowerCase().includes(t.toLowerCase()));
     }).length;
-    ok("a substring test would have matched most modules",
-      matchedBySubstring >= 6, String(matchedBySubstring));
+    // THIS USED TO ASSERT >= 6, AND IT WAS RIGHT TO. Half the modules had
+    // a field called "Name" and several had "Notes", so the sentence above
+    // matched most of the app under a substring test — which is what made
+    // it a demonstration.
+    //
+    // V4.6 #1 removed the thing being demonstrated. buildModuleVocabulary
+    // now drops a field-label word that is generic ("name", "notes",
+    // "next") and one that two modules both claim, so those words are in
+    // NO vocabulary and the trap catches nothing. The check is kept
+    // because the old number is worth recording, and the invariant that
+    // replaced it is asserted below: it is stronger, since it holds for
+    // every word rather than for the two this sentence happened to use.
+    ok("the substring trap no longer has anything to trap",
+      matchedBySubstring <= 1, String(matchedBySubstring));
+    // NO WORD BELONGS TO TWO MODULES. This is what makes a single hit
+    // evidence: before it, "ideas" was a term for both Ideas and Content,
+    // and a question naming ideas scored them 1-1 and reached neither.
+    const claims = new Map();
+    for (const v of vocabulary)
+      for (const t of v.terms)
+        claims.set(t.toLowerCase(), (claims.get(t.toLowerCase()) ?? 0) + 1);
+    const shared = [...claims.entries()].filter(([, n]) => n > 1).map(([t]) => t);
+    ok("no term is claimed by two modules", shared.length === 0, shared.slice(0, 10).join(", "));
     // THE MODE IS THE SAME EITHER WAY — the floor fills the selection to
     // seven regardless — so the mode proves nothing. What differs is
     // WHICH seven, and that is what is pinned: under a substring test
@@ -217,12 +239,57 @@ console.log("\n== 3. narrowing is OFF, and every doubt sends everything ==");
       const words = new Set(substringTrap.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((w) => w.length >= 3));
       return terms.some((t) => words.has(t.toLowerCase()));
     }).length;
-    ok("...and whole-word matching matches far fewer",
-      wordMatched < matchedBySubstring, `${wordMatched} vs ${matchedBySubstring}`);
-    ok("...so the selection is the seven it is",
+    ok("...and whole-word matching matches no more",
+      wordMatched <= matchedBySubstring, `${wordMatched} vs ${matchedBySubstring}`);
+    // WITH NOTHING MATCHING, the floor fills the selection from the
+    // modules the user actually worked in most recently — which is the
+    // right answer to a question the vocabulary cannot place, and a
+    // different seven from the ones "names"/"notes" used to drag in.
+    ok("...so the selection is the seven the user actually works in",
       r.keep.map((k) => k.slug).join(",") ===
-        "trading,decisions,products,content,sales,feedback,analytics",
+        "ideas,finance,decisions,products,content,sales,feedback",
       r.keep.map((k) => k.slug).join(","));
+
+    // THE MATCHER ITSELF, ASKED DIRECTLY — and this is the clause the
+    // block above was missing.
+    //
+    // Everything before this line computes its OWN substring and
+    // whole-word counts from the vocabulary and never calls the matcher.
+    // So a matcher that started matching substrings changed none of those
+    // numbers, and none of these checks moved: with its anchors repaired,
+    // context-optimization.mutation.mjs reported BOTH of its matcher
+    // mutations as genuine survivors. A gate that re-implements the thing
+    // it is testing is testing its own re-implementation.
+    //
+    // Why this gate and not only cross-module-context's: the subject here
+    // is CONTEXT SIZE, and the sentence three comments up is the reason —
+    // "a matcher that matches everything narrows nothing while looking
+    // like it works". That is a context-size regression, so it is proved
+    // here as well as there.
+    {
+      const sentence = "please restart the cartography module and check the margins";
+      const folded = fold.foldForMatch(sentence);
+      const words = cr.questionWords(folded);
+      // "art" sits inside restart AND cartography; "margin" inside margins.
+      ok("a term that appears only INSIDE a longer word scores nothing",
+        cr.scoreTerms(words, folded, ["art"]) === 0,
+        String(cr.scoreTerms(words, folded, ["art"])));
+      ok("...and neither does one inside a plural",
+        cr.scoreTerms(words, folded, ["margin"]) === 0,
+        String(cr.scoreTerms(words, folded, ["margin"])));
+      ok("...nor two of them together",
+        cr.scoreTerms(words, folded, ["art", "margin"]) === 0);
+      // The other half of the same claim: whole words still count, so the
+      // check above is not passing because the matcher matches nothing.
+      const alone = fold.foldForMatch("art and margin, standing alone");
+      ok("the same two words, standing alone, DO score",
+        cr.scoreTerms(cr.questionWords(alone), alone, ["art", "margin"]) === 2,
+        String(cr.scoreTerms(cr.questionWords(alone), alone, ["art", "margin"])));
+      // And the multi-word fallback, which is the ONLY thing allowed to
+      // match against the raw question rather than against its words.
+      ok("a MULTI-WORD term is still matched against the whole question",
+        cr.scoreTerms(words, folded, ["cartography module"]) === 1);
+    }
   }
 
   // A module with no vocabulary is never dropped: "we have no words for
@@ -292,10 +359,28 @@ console.log("\n== 5. wired in, and wired in the right order ==");
   // that anything per-message is in this block and nothing per-message
   // is in the cached one, which is what the two checks below say
   // together.
-  ok("the per-message block is the entity mentions and the coding context",
-    /const systemDynamicSuffix = buildEntityMentionPromptAddition\(mentionedEntities\) \+ codingContext;/.test(route));
+  // THREE MEMBERS SINCE V4.6 #1: entity mentions, the coding context, and
+  // the deep dive — all three selected from the question. Each is named,
+  // rather than the block being matched as one exact string, so adding a
+  // fourth per-message input is a deliberate edit here and not a silent
+  // one.
+  const PER_MESSAGE = ["buildEntityMentionPromptAddition(mentionedEntities)", "codingContext", "deepDive.prompt"];
+  const suffix = route.slice(
+    route.indexOf("const systemDynamicSuffix ="),
+    route.indexOf(";", route.indexOf("const systemDynamicSuffix ="))
+  );
+  ok(
+    "the per-message block holds every question-dependent input",
+    PER_MESSAGE.every((m) => suffix.includes(m)),
+    PER_MESSAGE.filter((m) => !suffix.includes(m)).join(", ")
+  );
+  const perUserBlock = route.slice(
+    route.indexOf("const systemPerUser ="),
+    route.indexOf("const systemDynamicSuffix")
+  );
   ok("...and nothing question-dependent leaked into the cached per-user block",
-    !/const systemPerUser =[\s\S]{0,400}codingContext/.test(route));
+    PER_MESSAGE.every((m) => !perUserBlock.includes(m)),
+    PER_MESSAGE.filter((m) => perUserBlock.includes(m)).join(", "));
   ok("...and the per-user block carries the rest",
     /const systemPerUser =\s*\n\s*buildMemoryPromptAddition\(memories\) \+[\s\S]{0,220}userContext \+\s*\n\s*integrationInstruction;/.test(route));
   ok("the cost estimate still sizes the WHOLE prompt",

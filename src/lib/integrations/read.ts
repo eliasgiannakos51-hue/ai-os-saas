@@ -1,4 +1,5 @@
 import "server-only";
+import { truncate } from "@/lib/text/truncate";
 import { logApiError } from "@/lib/log-error";
 import { getUsableAccessToken, recordSync } from "@/lib/integrations/store";
 import type { ProviderId } from "@/lib/integrations/providers";
@@ -50,8 +51,8 @@ export type ReadResult =
   | { ok: false; reason: string };
 
 function clip(value: unknown, max = MAX_FIELD_CHARS): string {
-  const text = typeof value === "string" ? value : "";
-  return text.length > max ? `${text.slice(0, max)}…` : text;
+  // WAS max+1, for the same reason as conversation-title.ts.
+  return truncate(value, max);
 }
 
 /** Shared authenticated GET. Never returns a provider error body — those

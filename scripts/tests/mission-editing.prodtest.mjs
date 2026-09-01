@@ -124,6 +124,21 @@ const supa = http.createServer((req, res) => {
         recordedErrors.push(body.slice(0, 200));
         return json(200, null);
       }
+      // TELEMETRY THE SHELL SENDS ON EVERY PAGE, answered truthfully
+      // rather than 500'd.
+      //
+      // These are not "extra calls this test should tolerate" — they are
+      // what the dashboard shell does on every route, and a mock that
+      // 500s them makes the app record a production error, which then
+      // trips the "nothing recorded a production error" check three
+      // lines later. One stale allowlist, three red checks, none of them
+      // about the feature under test.
+      //
+      // ANSWERING THEM MAKES THIS SUITE STRONGER, not weaker: after this,
+      // a recorded production error is a REAL one.
+      if (fn === "voice_usage_this_month") {
+        return json(200, [{ transcribe_seconds: 0, speak_seconds: 0 }]);
+      }
       unexpected.push(`RPC ${fn}`);
       return json(500, { message: `mock: unimplemented rpc ${fn}` });
     }
@@ -192,6 +207,9 @@ const supa = http.createServer((req, res) => {
         "team_members", "user_agents", "user_websites", "user_files", "user_documents",
         "chat_conversations", "user_automations", "research_reports", "user_insights",
         "user_imports", "known_devices", "site_analytics", "production_errors",
+        // sitemap.xml reads this on the way in; empty is the truthful
+        // answer for an account with no published site.
+        "published_sites",
         // The 13 classifier modules the shell scans.
         "ai_jobs", "security_check_log", "website_versions", "credit_transactions",
         "ideas", "competitors", "research", "finance_entries", "learning_entries", "trades",
@@ -201,6 +219,13 @@ const supa = http.createServer((req, res) => {
         if (req.method === "GET" || req.method === "HEAD") return reply([]);
         // The shell upserts a credits row for an account that has none.
         if (req.method === "POST" && (table === "rate_limit_log" || table === "user_credits")) return json(201, []);
+      }
+      // Write-only telemetry: accepted, and counted so a test that cares
+      // can still assert on the volume.
+      const TELEMETRY_WRITE = ["nav_events", "pwa_client_stats"];
+      if (TELEMETRY_WRITE.includes(table)) {
+        if (req.method === "POST") return json(201, []);
+        if (req.method === "GET" || req.method === "HEAD") return reply([]);
       }
       unexpected.push(`${req.method} ${url.pathname}`);
       return json(500, { message: `mock: unimplemented ${req.method} ${table}` });
@@ -258,7 +283,7 @@ if ((await new Promise((r) => build.on("close", r))) !== 0) {
   process.exit(1);
 }
 
-const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"] });
+const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"], detached: true });
 let serverLog = "";
 server.stdout.on("data", (d) => (serverLog += d));
 server.stderr.on("data", (d) => (serverLog += d));
@@ -273,7 +298,8 @@ async function waitForServer() {
   return false;
 }
 function cleanup() {
-  try { server.kill("SIGKILL"); } catch { /* gone */ }
+  // The GROUP, not the handle — see prodtest-hygiene.test.mjs.
+  try { process.kill(-server.pid, "SIGKILL"); } catch { try { server.kill("SIGKILL"); } catch { /* gone */ } }
   supa.close();
 }
 if (!(await waitForServer())) {
@@ -284,7 +310,7 @@ if (!(await waitForServer())) {
 console.log(`production server up on :${PORT}\n`);
 
 const { chromium } = await import("playwright");
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 const context = await browser.newContext({
   viewport: { width: 1280, height: 900 },
   storageState: { cookies: [{ ...AUTH_COOKIE, domain: "127.0.0.1", path: "/" }], origins: [] },

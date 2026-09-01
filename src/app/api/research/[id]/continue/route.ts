@@ -117,10 +117,42 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ ok: true, alreadyRunning: true });
     }
 
-    await admin
+    // COUNTED FROM THE VALUE THAT IS TRUE UNDER THE CLAIM, not from the
+    // one read before it.
+    //
+    // This was `chunk_count: (Number(row.chunk_count) || 0) + 1` against a
+    // `row` fetched several statements earlier, with no compare-and-swap.
+    // Two nudges arriving together both read the same number, both write
+    // the same number, and one chunk vanishes from the count. That is not
+    // cosmetic: run-research.ts computes
+    // `chunkNumber = (report.chunk_count ?? 0) + 1` and refuses to
+    // continue at `chunkNumber >= MAX_RESEARCH_CHUNKS`, so a lost
+    // increment buys a research report one more chunk than its ceiling
+    // allows — and a chunk is a billed AI call.
+    //
+    // claimChunk above is a compare-and-swap on chunk_running, so exactly
+    // one worker is here at a time and a read taken now cannot be stale.
+    // The .eq() re-asserts it anyway: if it ever misses, the claim is not
+    // doing what this comment says, and that is worth a log rather than a
+    // silent undercount.
+    const { data: fresh } = await admin
       .from("research_reports")
-      .update({ chunk_count: (Number(row.chunk_count) || 0) + 1 })
-      .eq("id", reportId);
+      .select("chunk_count")
+      .eq("id", reportId)
+      .maybeSingle();
+    const seen = Number(fresh?.chunk_count ?? row.chunk_count ?? 0) || 0;
+    const { data: counted } = await admin
+      .from("research_reports")
+      .update({ chunk_count: seen + 1 })
+      .eq("id", reportId)
+      .eq("chunk_count", seen)
+      .select("id");
+    if (!counted || counted.length === 0) {
+      logApiError("/api/research/[id]/continue", "chunk_count moved while the chunk lock was held", {
+        reportId,
+        seen,
+      });
+    }
 
     const outcome = await runResearchChunk({ reportId, apiKey, startedAt });
     return NextResponse.json({ ok: true, outcome });

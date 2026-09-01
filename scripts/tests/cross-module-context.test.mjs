@@ -318,7 +318,12 @@ console.log("\n== 8. BOTH DIRECTIONS ARE ACTUALLY WIRED ==");
   // scripts/measure-context.mjs.
   const perUser = chat.slice(chat.indexOf("const systemPerUser ="), chat.indexOf("const systemDynamicSuffix"));
   ok("the coding block is NOT in the cached per-user block", !/codingContext/.test(perUser), perUser.slice(0, 200));
-  ok("…it is in the per-message suffix", /systemDynamicSuffix = buildEntityMentionPromptAddition\(mentionedEntities\) \+ codingContext/.test(chat));
+  // The suffix has three members since V4.6 #1 added the deep dive, which
+  // is chosen from the question and so belongs here for the same reason.
+  // What is pinned is that codingContext is IN it, not that it is the
+  // whole of it — the "nothing per-message in the cached block" check
+  // below is the half that must not be loosened.
+  ok("…it is in the per-message suffix", /systemDynamicSuffix =[\s\S]{0,200}\bcodingContext\b/.test(chat));
   // AND NOT IN THE STATIC PREFIX EITHER. That block is byte-identical
   // across every user in the app; a per-message string in it would break
   // the cache for EVERYONE, not merely for the one asking. Guarding only

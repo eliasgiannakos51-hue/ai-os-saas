@@ -1,4 +1,5 @@
 import "server-only";
+import { truncate } from "@/lib/text/truncate";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
 import { loadLinkedEntities } from "@/lib/entity-links";
@@ -181,8 +182,7 @@ export async function findMentionedEntities(
     );
     const excerptFor = new Map<string, string>();
     for (const m of chosen.selected) {
-      const trimmed =
-        m.body.length <= MAX_EXCERPT_CHARS ? m.body : `${m.body.slice(0, MAX_EXCERPT_CHARS - 1)}…`;
+      const trimmed = truncate(m.body, MAX_EXCERPT_CHARS);
       excerptFor.set(`${m.table}:${m.id}`, trimmed);
     }
 

@@ -1,4 +1,8 @@
 import { descriptionFor, extractSeoFacts, keywordsFor, type SeoFacts } from "./facts";
+// ONE ESCAPER — see lib/html-escape.ts. This file kept two of its own
+// (escapeAttr, escapeText), each covering fewer characters than the
+// shared one, and both writing into a PUBLISHED page's attributes.
+import { escapeHtml } from "@/lib/html-escape";
 import { buildStructuredData, serialiseJsonLd } from "./structured-data";
 import { truncateAtWord } from "./html-text";
 
@@ -82,7 +86,7 @@ export function enforceSeoHead(html: string, ctx: SeoContext = {}): SeoHeadResul
 
   const tags: string[] = [];
   if (title) {
-    tags.push(`<title>${escapeText(title)}</title>`);
+    tags.push(`<title>${escapeHtml(title)}</title>`);
     emitted.push("title");
   }
   if (description) {
@@ -127,7 +131,7 @@ export function enforceSeoHead(html: string, ctx: SeoContext = {}): SeoHeadResul
   }
 
   if (ctx.canonicalUrl) {
-    tags.push(`<link rel="canonical" href="${escapeAttr(ctx.canonicalUrl)}">`);
+    tags.push(`<link rel="canonical" href="${escapeHtml(ctx.canonicalUrl)}">`);
     emitted.push("canonical");
   }
 
@@ -235,7 +239,7 @@ function ensureLang(html: string, lang: string): string {
   const htmlTag = /<html\b[^>]*>/i.exec(html);
   if (!htmlTag) return html;
   if (/\blang\s*=/i.test(htmlTag[0])) return html;
-  return html.replace(/<html\b/i, `<html lang="${escapeAttr(lang)}"`);
+  return html.replace(/<html\b/i, `<html lang="${escapeHtml(lang)}"`);
 }
 
 function insertIntoHead(html: string, tags: string[]): string {
@@ -252,10 +256,6 @@ function insertIntoHead(html: string, tags: string[]): string {
 }
 
 const meta = (keyAttr: string, key: string, value: string) =>
-  `<meta ${keyAttr}="${escapeAttr(key)}" content="${escapeAttr(value)}">`;
+  `<meta ${keyAttr}="${escapeHtml(key)}" content="${escapeHtml(value)}">`;
 const metaProp = (key: string, value: string) => meta("property", key, value);
 
-const escapeAttr = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-const escapeText = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

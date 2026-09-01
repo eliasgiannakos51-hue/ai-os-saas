@@ -204,7 +204,7 @@ if ((await new Promise((r) => build.on("close", r))) !== 0) {
   process.exit(1);
 }
 
-const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"] });
+const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"], detached: true });
 let serverLog = "";
 server.stdout.on("data", (d) => (serverLog += d));
 server.stderr.on("data", (d) => (serverLog += d));
@@ -222,7 +222,18 @@ async function waitForServer() {
 }
 function cleanup() {
   try {
-    server.kill("SIGKILL");
+    // KILL THE GROUP, NOT THE HANDLE. `npx next start` is npx -> sh ->
+    // next-server. SIGKILL to the npx handle leaves the grandchild alive,
+    // reparented to init, still holding its port and serving its build.
+    // Measured across one full survey of the suite: thirteen orphaned
+    // next-server processes, the oldest 41 minutes old. `detached: true`
+    // on the spawn puts the whole tree in its own group so this reaches
+    // all of it. Enforced by scripts/tests/prodtest-hygiene.test.mjs.
+    try {
+      process.kill(-server.pid, "SIGKILL");
+    } catch {
+      server.kill("SIGKILL");
+    }
   } catch {
     /* already gone */
   }
@@ -236,7 +247,7 @@ if (!(await waitForServer())) {
 console.log(`production server up on :${PORT}\n`);
 
 const { chromium } = await import("playwright");
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 const context = await browser.newContext({
   viewport: { width: 1280, height: 900 },
   storageState: { cookies: [{ ...AUTH_COOKIE, domain: "127.0.0.1", path: "/" }], origins: [] },

@@ -39,12 +39,12 @@ export default async function IntegrationsPage() {
 
   if (!isAdmin && planCap <= 0) {
     return (
-      <main className="min-h-full bg-dot-grid">
+      <div className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader helpKey="help.integrations" helpArticle="connect-gmail" icon={Plug} title={t("title")} description={t("description")} />
           <UpgradeRequired featureName={t("title")} planName="Starter" />
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -57,7 +57,7 @@ export default async function IntegrationsPage() {
   const cap = isAdmin ? Number.POSITIVE_INFINITY : planCap;
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.integrations" helpArticle="connect-gmail" icon={Plug} title={t("title")} description={t("description")} />
 
@@ -80,6 +80,6 @@ export default async function IntegrationsPage() {
           />
         </Suspense>
       </div>
-    </main>
+    </div>
   );
 }

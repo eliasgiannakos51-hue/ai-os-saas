@@ -180,8 +180,9 @@ export function maxAgentRunsPerHour(env: Record<string, string | undefined> = pr
 // Failure handling.
 // ---------------------------------------------------------------------
 
-/** Attempts per scheduled execution: the first try plus two retries. */
-export const AGENT_MAX_ATTEMPTS = 3;
-
-/** Consecutive failed executions before the agent switches itself off. */
-export const AGENT_MAX_CONSECUTIVE_FAILURES = 5;
+// Both live in lib/agents/agent-failure-limits.ts, which imports nothing
+// — this file reaches lib/billing/plans.ts and, through it, a
+// `server-only` module, so a client component that needs one of these
+// numbers cannot import it from here. Re-exported so every existing
+// caller is unaffected.
+export { AGENT_MAX_ATTEMPTS, AGENT_MAX_CONSECUTIVE_FAILURES } from "@/lib/agents/agent-failure-limits";

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { scrubSecrets } from "@/lib/scrub-secrets";
 import { createClient } from "@/lib/supabase/server";
 import { generateWebsiteHtml, WEBSITE_MODEL, type ReferenceImage } from "@/lib/website-builder";
 import { pickVariation, variationDirective } from "@/lib/website-variation";
@@ -590,7 +591,14 @@ export async function POST(request: Request) {
       // deductCredits call was likewise never reached on this path. The
       // hold goes straight back to the balance.
       await releaseReservation(user.id, reservationId);
-      const errMessage = err instanceof Error ? err.message : "The website generation request failed.";
+      // SCRUBBED: this is the ONE place a provider's own error message
+      // reaches a column the browser renders (user_websites.error_message
+      // is shown on the website card). Every other error_message write in
+      // this route is a sentence we wrote. An SDK that echoes the request
+      // it just made would otherwise put a key on the page.
+      const errMessage = scrubSecrets(
+        err instanceof Error ? err.message : "The website generation request failed."
+      );
       await supabase
         .from("user_websites")
         .update({

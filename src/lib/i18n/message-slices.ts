@@ -86,8 +86,12 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     namespaces: [
       "achievements", "aiSteps", "askAi", "coding", "common", "credits",
       "dashboard", "dataAnalysis", "entityLinks", "errors", "favorites",
-      "finance", "language", "module", "publishing", "pwa", "security",
-      "settings", "sidebar", "voice",
+      "finance", "language", "module", "publishing", "pwa",
+      // The sample-account banner and its load button (V4.6 #6). The
+      // banner renders from dashboard/layout.tsx, so this namespace is
+      // reachable from every dashboard route rather than from one page.
+      "sampleData",
+      "security", "settings", "sidebar", "voice",
     ],
     // SIXTY-ONE, not the twenty I first wrote. Twenty call
     // useTranslations() with no namespace; the rest reach a key through a

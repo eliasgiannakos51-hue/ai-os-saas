@@ -229,8 +229,19 @@ export default async function PricingPage({
                         figure a reader compares against the monthly plan
                         and against a competitor. The real amount charged
                         is stated immediately underneath, never implied. */}
+                    {/* ROUNDED TO CENTS FOR DISPLAY. The value is
+                        deliberately unrounded (see plans.ts: rounding it
+                        would make 12x it disagree with the amount
+                        actually charged), but the SCREEN is not the
+                        place to show that: a €20 plan billed for ten
+                        months rendered as "€16.667" in English and
+                        "€16,667" in Greek — three decimals on a price,
+                        which no shop shows and which reads as a mistake.
+                        Rounded here, at the render, so the arithmetic
+                        keeps its precision and the customer sees money:
+                        €16.67 / 16,67 €. */}
                     {interval === "year" && annualMonthlyEquivalentEur(plan) !== null
-                      ? formatNumber(annualMonthlyEquivalentEur(plan)!, locale)
+                      ? formatNumber(Math.round(annualMonthlyEquivalentEur(plan)! * 100) / 100, locale)
                       : plan.price}
                     {plan.price > 0 && (
                       <span className="text-sm font-normal text-muted">{t("perMonth")}</span>

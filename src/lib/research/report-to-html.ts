@@ -1,3 +1,4 @@
+import { escapeHtml } from "@/lib/html-escape";
 // Turns a finished research report into the HTML the Documents editor
 // stores, safely.
 //
@@ -30,14 +31,6 @@
 
 export type ReportSource = { title: string; url: string };
 
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
 
 // Applied to text that is ALREADY escaped, so the only < > it can produce
 // are the ones written here.
@@ -65,8 +58,13 @@ function safeHref(url: string): string | null {
 export function researchReportToDocumentHtml(params: {
   markdown: string;
   sources: ReportSource[];
+  /** The user's own entries, cited as [E1..En]. Their links are internal
+   *  and relative, which is why they do not go through safeHref: that
+   *  function requires http(s) and would reject every one of them. */
+  entries?: readonly { title: string; headline: string; date: string; href: string }[];
   disclosure: string;
   sourcesHeading: string;
+  entriesHeading?: string;
 }): string {
   const out: string[] = [];
   let listItems: string[] = [];
@@ -115,6 +113,35 @@ export function researchReportToDocumentHtml(params: {
     out.push(`<p>${inlineMarkup(escapeHtml(line.trim()))}</p>`);
   }
   flushList();
+
+  // THE ENTRY LIST, ITS OWN SECTION AND ITS OWN NUMBERING.
+  //
+  // Kept separate from the web sources rather than appended to them: a
+  // merged list would make [7] mean a public page in one report and a
+  // private note in another, and a reader could not tell which without
+  // following it. The heading is what says which is which.
+  //
+  // EACH ONE IS A REAL LINK TO THE ROW, which is only true because
+  // `?record=<id>` has a reader — components/modules/generic-list.tsx —
+  // and scripts/tests/deep-links.test.mjs keeps it there. A citation
+  // that cannot be followed is precisely what checkCitations exists to
+  // catch, so emitting one deliberately would be worse than emitting
+  // none.
+  const entries = params.entries ?? [];
+  if (entries.length > 0) {
+    out.push(`<h2>${escapeHtml(params.entriesHeading ?? "Your entries")}</h2>`);
+    const items = entries.map((entry, i) => {
+      const label = escapeHtml(
+        `${entry.title}${entry.date ? ` (${entry.date})` : ""} — ${entry.headline}`.slice(0, 200)
+      );
+      // INTERNAL, RELATIVE, AND NOT target="_blank". These open inside
+      // the app, where the reader already is; a new tab for a link to
+      // the page next door is the browser's way of saying "this is
+      // somewhere else", and it is not.
+      return `<li>[E${i + 1}] <a href="${escapeHtml(entry.href)}">${label}</a></li>`;
+    });
+    out.push(`<ol>${items.join("")}</ol>`);
+  }
 
   if (params.sources.length > 0) {
     out.push(`<h2>${escapeHtml(params.sourcesHeading)}</h2>`);

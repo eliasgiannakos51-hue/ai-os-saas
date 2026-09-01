@@ -27,8 +27,8 @@ export default async function CreatePage() {
   }
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <CreateStudio />
-    </main>
+    </div>
   );
 }

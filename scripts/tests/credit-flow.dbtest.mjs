@@ -155,11 +155,14 @@ console.log("== 0. the database really is the one the migrations build ==");
 // 98 -> 99: V4 #34 + #35 added routing_decisions — every routing
 // decision and what came of it, which is what the router learns from.
 // 99 -> 100: badge removal with credits added site_badge_removals.
+// 100 -> 105 across the migrations up to 20260914.
+// 105 -> 106: 20260915's nav_events — the first table in this schema
+// that records what a user LOOKED AT rather than what they wrote.
 // MEASURED ON THE MERGED TREE, not added. Each branch counted against
 // its own migration set; summing two ratchets is arithmetic across two
-// different schemas. Built from bootstrap-supabase.sql plus all 43
-// migrations on a real Postgres 16: 105.
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 105);
+// different schemas. Built from bootstrap-supabase.sql plus every
+// migration in supabase/migrations on a real Postgres 16: 106.
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 106);
 eq(
   "the credit functions exist",
   Number(
@@ -341,6 +344,162 @@ const overloaded = sql(`select coalesce(string_agg(proname || ' x' || n, ', '), 
      where ns.nspname='public' and d.objid is null and p.prokind='f'
      group by p.proname having count(*) > 1) s`);
 check(`no function in public is overloaded${overloaded ? " — found: " + overloaded : ""}`, overloaded === "");
+
+console.log("\n== A SETTLEMENT REPLAYED: charged once, or charged twice? ==");
+// THE DEFECT, AND BOTH HALVES OF THE QUESTION IT SITS BETWEEN.
+//
+// settle_reservation opened with what reads like a guard —
+// `... and status = 'active'` — and never read its row count. When the
+// reservation had already been settled the UPDATE matched nothing and the
+// function carried straight on to subtract the credits again. A retried
+// job, a replayed request or a second client nudge charged twice.
+//
+// And the naive fix is the other bug: returning early whenever the
+// compare-and-swap misses would refuse to charge a reservation that
+// EXPIRED mid-action and was swept — work that happened and is owed.
+// Both directions are asserted here.
+const settleCall = (id, credits) =>
+  sql(
+    `select settle_reservation('${USER}', ${id ? `'${id}'` : "null"}, ${credits}, 'replay_probe',
+       1000, 500, 0, 0, 0, 1, 0.01, 0.009, 4.0, 4.0, '{}'::jsonb, '{}'::jsonb)`
+  );
+const ledgerRows = (feature) =>
+  Number(sql(`select count(*) from public.credit_transactions
+               where user_id = '${USER}' and action_type = '${feature}'`));
+const costRows = (feature) =>
+  Number(sql(`select count(*) from public.ai_cost_log where user_id = '${USER}' and feature = '${feature}'`));
+
+{
+  reset(100);
+  const r = reserve(30);
+  settleCall(r.id, 12);
+  eq("first settlement charges 12", balance(), 88);
+  eq("...and writes one ledger row", ledgerRows("replay_probe"), 1);
+  eq("...and one cost-log row", costRows("replay_probe"), 1);
+
+  // THE REPLAY.
+  settleCall(r.id, 12);
+  eq("the SECOND settlement charges nothing", balance(), 88);
+  eq("...and writes no second ledger row", ledgerRows("replay_probe"), 1);
+  eq("...and no second cost-log row", costRows("replay_probe"), 1);
+
+  // A third, to be sure it is a property and not an off-by-one.
+  settleCall(r.id, 12);
+  eq("nor does a third", balance(), 88);
+}
+
+{
+  // THE OTHER HALF. The reservation expired and a sweep marked it, and
+  // then the action finished. The work happened; it is owed.
+  reset(100);
+  const r = reserve(30);
+  sql(`update public.credit_reservations set status = 'expired', resolved_at = now() where id = '${r.id}'`);
+  settleCall(r.id, 12);
+  eq("an EXPIRED reservation still charges — a missed charge is the other bug", balance(), 88);
+  eq("...and writes its ledger row", ledgerRows("replay_probe"), 1);
+}
+
+{
+  // A released reservation is a refund that already happened, but the
+  // action may still have run. Same reasoning as expired: charge.
+  reset(100);
+  const r = reserve(30);
+  sql(`select release_reservation('${USER}', '${r.id}')`);
+  settleCall(r.id, 12);
+  eq("a RELEASED reservation still charges", balance(), 88);
+}
+
+{
+  // No reservation at all — the bypass and the no-hold features. There is
+  // no row to compare against, so a replay DOES charge twice. Asserted as
+  // the real behaviour rather than left to be discovered: if this ever
+  // changes, the comment in the migration has to change with it.
+  reset(100);
+  settleCall(null, 12);
+  settleCall(null, 12);
+  eq("with NO reservation id, a replay charges twice — the documented limit", balance(), 76);
+}
+
+{
+  // Concurrency, not just sequence: two settlements of one reservation
+  // arriving together. The UPDATE takes a row lock, so the loser reads
+  // the winner's committed 'settled' and returns.
+  reset(100);
+  const r = reserve(30);
+  const both = `begin; select settle_reservation('${USER}', '${r.id}', 12, 'replay_probe',
+      1000, 500, 0, 0, 0, 1, 0.01, 0.009, 4.0, 4.0, '{}'::jsonb, '{}'::jsonb); commit;`;
+  execFileSync("sh", ["-c",
+    `psql ${process.env.DATABASE_URL ? `-d "${process.env.DATABASE_URL}"` : ""} -v ON_ERROR_STOP=1 -tAc "${both.replace(/\n/g, " ").replace(/"/g, '\\"')}" & ` +
+    `psql ${process.env.DATABASE_URL ? `-d "${process.env.DATABASE_URL}"` : ""} -v ON_ERROR_STOP=1 -tAc "${both.replace(/\n/g, " ").replace(/"/g, '\\"')}" & wait`],
+    { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }
+  );
+  eq("two simultaneous settlements charge once", balance(), 88);
+  eq("...and write one ledger row", ledgerRows("replay_probe"), 1);
+}
+
+console.log("\n== THE PLATFORM BREAKER'S COUNTER, and the actions that make several calls ==");
+// increment_daily_ai_spend added exactly 1, because every caller made
+// exactly one provider call. A background job and a Deep Research chunk
+// make several inside ONE settled action — and neither called it at all,
+// so the number checkDailyPlatformCap gates the whole platform on was low
+// by everything those two features spend.
+{
+  const today = sql(`select (now() at time zone 'utc')::date::text`);
+  const reset = () => sql(`delete from public.daily_ai_spend_tracking where date = '${today}'`);
+  const total = () =>
+    Number(sql(`select coalesce(total_calls, 0) from public.daily_ai_spend_tracking where date = '${today}'`) || 0);
+  const cost = () =>
+    Number(sql(`select coalesce(estimated_cost, 0) from public.daily_ai_spend_tracking where date = '${today}'`) || 0);
+
+  reset();
+  sql(`select increment_daily_ai_spend(0, '${today}'::date)`);
+  eq("a caller that omits the count still adds exactly one", total(), 1);
+
+  sql(`select increment_daily_ai_spend(0, '${today}'::date, 8)`);
+  eq("...and a research chunk's eight calls add eight", total(), 9);
+
+  eq("the row is created on the first call of the day, not assumed to exist", cost(), 0);
+  sql(`select increment_daily_ai_spend(2.5, '${today}'::date, 3)`);
+  eq("cost and count move together", total(), 12);
+  eq("...and the cost accumulated", cost(), 2.5);
+
+  // THE CLAMP. A negative count must never DECREASE the day's total —
+  // that would be a way to hide spend from the one breaker that exists
+  // to see it.
+  sql(`select increment_daily_ai_spend(0, '${today}'::date, -5)`);
+  eq("a negative count cannot lower the total", total(), 12);
+  sql(`select increment_daily_ai_spend(0, '${today}'::date, 0)`);
+  eq("a zero count adds nothing", total(), 12);
+  sql(`select increment_daily_ai_spend(0, '${today}'::date, null)`);
+  eq("a null count falls back to one, not to zero and not to null", total(), 13);
+
+  // ATOMIC UNDER CONCURRENCY, which is the whole reason this is an RPC
+  // and not a read-modify-write in Node. Twenty callers, four calls each.
+  reset();
+  execFileSync("sh", ["-c",
+    Array.from({ length: 20 }, () =>
+      `psql ${process.env.DATABASE_URL ? `-d "${process.env.DATABASE_URL}"` : ""} -v ON_ERROR_STOP=1 -tAc "select increment_daily_ai_spend(0, '${today}'::date, 4)" &`
+    ).join(" ") + " wait"], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  eq("twenty concurrent callers of four calls each land eighty", total(), 80);
+
+  // ONE FUNCTION, NOT TWO. The two-argument version is dropped by the
+  // migration: two functions with one name is how one of them stops being
+  // the one that runs.
+  eq(
+    "increment_daily_ai_spend is not overloaded",
+    sql(`select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+          where n.nspname='public' and p.proname='increment_daily_ai_spend'`),
+    "1"
+  );
+  eq(
+    "...and anon and authenticated cannot move the platform's own ledger",
+    sql(`select has_function_privilege('anon', 'public.increment_daily_ai_spend(numeric,date,integer)', 'execute')::text
+         || ':' || has_function_privilege('authenticated', 'public.increment_daily_ai_spend(numeric,date,integer)', 'execute')::text
+         || ':' || has_function_privilege('service_role', 'public.increment_daily_ai_spend(numeric,date,integer)', 'execute')::text`),
+    "false:false:true"
+  );
+  reset();
+}
 
 // Leave nothing behind — the next run asserts absolute numbers.
 sql(`delete from public.credit_reservations where user_id = '${USER}'`);

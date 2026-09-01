@@ -24,8 +24,25 @@ export type FavoritableConfig = {
   /** Column holding the human-readable name. */
   headlineKey: string;
   /**
-   * Where a starred record links to. Some modules have a real per-record
-   * page; others only have a list, so the link goes there.
+   * Where a starred record links to — AT THE RECORD, not at the list it
+   * lives in.
+   *
+   * THIS COMMENT USED TO SAY the opposite: "some modules have a real
+   * per-record page; others only have a list, so the link goes there."
+   * That was true the day it was written and had stopped being true long
+   * before anybody noticed. `?record=<id>` grew a reader in
+   * components/modules/generic-list.tsx during the provenance work, and
+   * nothing came back here — so for all thirteen module tables, starring
+   * a row and pressing it opened a list of every row in that module,
+   * newest first, with nothing marking the one that had been starred.
+   * On an account with four entries that reads as working.
+   *
+   * The same shape had already been found and fixed ONCE, for Website
+   * Builder ("the workspace never read it, so following a favorite
+   * landed on whichever project happened to be newest"). It was fixed
+   * there and nowhere else. scripts/tests/deep-links.test.mjs now checks
+   * every entry in this file, and every deep link Create Studio emits,
+   * against the code that reads the parameter.
    */
   hrefFor: (recordId: string) => string;
 };
@@ -63,7 +80,11 @@ export const EXTRA_FAVORITABLE: FavoritableConfig[] = [
     slug: "missionControl",
     titleKey: "sidebar.items.missionControl",
     headlineKey: "goal",
-    hrefFor: () => "/dashboard/mission",
+    // `?mission=` is read by components/mission/mission-list.tsx, which
+    // opens the detail panel for it — the same mechanism generic-list
+    // uses for `?record=`. Before that reader existed this returned the
+    // bare list URL and the id was dropped on the floor.
+    hrefFor: (id) => `/dashboard/mission?mission=${encodeURIComponent(id)}`,
   },
   {
     table: "user_documents",
@@ -79,7 +100,11 @@ const LINKABLE_FAVORITABLE: FavoritableConfig[] = LINKABLE_MODULES.map((m) => ({
   slug: m.slug,
   titleKey: m.titleKey,
   headlineKey: m.headlineKey,
-  hrefFor: () => moduleHref(m.slug),
+  // All thirteen go through generic-list, which opens the detail panel
+  // for `?record=` when the id is in the loaded set (capped at
+  // RECORD_CAP, newest first). See the note on hrefFor above for what
+  // this returned before, and for how long.
+  hrefFor: (id) => `${moduleHref(m.slug)}?record=${encodeURIComponent(id)}`,
 }));
 
 export const FAVORITABLE: FavoritableConfig[] = [

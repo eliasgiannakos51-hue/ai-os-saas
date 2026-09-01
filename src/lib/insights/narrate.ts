@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { INSIGHT_MODEL } from "@/lib/insights/insight-models";
 import type { Finding } from "@/lib/insights/detectors";
+import { maxCharsFor } from "@/lib/text/script-length";
 
 /**
  * Turn findings into sentences, without letting the model add anything.
@@ -229,7 +230,14 @@ export async function narrateFindings(params: {
 
     const slot = result.find((r) => r.finding.detector === detector);
     if (!slot || !headline || !detail) continue;
-    if (headline.length > 140 || detail.length > 400) continue;
+    // A CEILING WRITTEN FOR ENGLISH DISCARDS GERMAN. `continue` here does
+    // not truncate — it drops the narration entirely and the user gets
+    // the un-narrated version with no sign anything was lost. German
+    // takes 14% more characters to say the same thing (measured, see
+    // lib/text/script-length.ts), and it is Latin script, so there is
+    // nothing to detect: the limit itself has to hold the longest
+    // language.
+    if (headline.length > maxCharsFor(140) || detail.length > maxCharsFor(400)) continue;
 
     const allowed = allowedNumbers(slot.finding);
     if (!numbersAreGrounded(headline, allowed) || !numbersAreGrounded(detail, allowed)) continue;

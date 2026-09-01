@@ -222,7 +222,7 @@ try {
   console.log("\n== 3. the service worker installs, activates and controls ==");
   // =====================================================================
   browser = await chromium.launch({
-    executablePath: "/opt/pw-browsers/chromium",
+    executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium",
     args: ["--no-sandbox"],
   });
   const context = await browser.newContext({

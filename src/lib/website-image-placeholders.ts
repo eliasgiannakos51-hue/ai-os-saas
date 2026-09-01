@@ -1,3 +1,4 @@
+import { escapeHtml } from "@/lib/html-escape";
 // Pure, dependency-free logic for resolving the "PLACEHOLDER:<slug>" image
 // convention the Website Builder generation/edit system prompts
 // (lib/website-builder.ts) instruct Claude to emit when a real photo is
@@ -108,20 +109,6 @@ export function withUnsplashUtm(url: string): string {
   return `${url}${url.includes("?") ? "&" : "?"}${UNSPLASH_UTM}`;
 }
 
-// The photographer's name arrives from a third-party API and is written
-// straight into a document we then publish on the customer's behalf.
-// Escaping is not politeness here: without it a display name containing
-// markup would be injected into every site that used that photo.
-// Same implementation as lib/research/report-to-html.ts, which escapes
-// third-party source titles for the same reason.
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
 
 export type ResolvedPhoto = {
   url: string;

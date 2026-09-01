@@ -3,7 +3,6 @@
     "search": "Alles durchsuchen...",
     "notifications": "Benachrichtigungen",
     "noNotifications": "Keine neuen Benachrichtigungen.",
-    "newProject": "Neues Projekt",
     "jumpToPage": "Zu einem Modul oder einer Seite springen...",
     "noMatches": "Keine Treffer für '{query}'",
     "createStudio": "Mach irgendwas",
@@ -86,7 +85,8 @@
       "myBusiness": "Mein Geschäft",
       "track": "Erfassen",
       "insights": "Was mir aufgefallen ist",
-      "tracking": "Erfassung"
+      "tracking": "Erfassung",
+      "daily": "Täglich"
     },
     "items": {
       "home": "Start",
@@ -133,7 +133,9 @@
       "affiliate": "Partnerprogramm",
       "formSubmissions": "Formulareingänge",
       "routing": "Modell-Routing",
-      "businessHealth": "Geschäftslage"
+      "businessHealth": "Geschäftslage",
+      "mine": "Meine Sachen",
+      "records": "Meine Einträge"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -180,7 +182,9 @@
       "help": "Antworten auf die häufigsten Fragen — ohne Credits zu verbrauchen.",
       "affiliate": "Dein Empfehlungslink, dein Verdienst und wie du ausgezahlt wirst.",
       "formSubmissions": "Alles, was Besucher über ein Formular auf Ihren veröffentlichten Seiten gesendet haben",
-      "businessHealth": "MRR, Marge, Abwanderung und Liquidität. Nur für den Inhaber."
+      "businessHealth": "MRR, Marge, Abwanderung und Liquidität. Nur für den Inhaber.",
+      "mine": "Alles, was du erstellt hast, neueste zuerst — mit einem Tab nur für Favoriten",
+      "records": "Alle Einträge an einem Ort — nach Typ filtern statt im Menü zu suchen"
     },
     "closeMenu": "Menü schließen"
   },
@@ -227,7 +231,7 @@
     },
     "businessTitle": "Business",
     "businessSubtitle": "Für Teams, die gemeinsam aufbauen",
-    "businessExplanation": "Wähle Professional oder Ultimate als Basisplan — beide schalten die Teamzusammenarbeit frei. Lade dann Teammitglieder ein: Jedes Mitglied erhält vollen Zugriff auf der Stufe deines Plans, für +{price}/Mitglied/Monat bei Professional, oder kostenlos inklusive bei Ultimate.",
+    "businessExplanation": "Wähle Professional oder Ultimate als Basisplan — beide enthalten die Teamzusammenarbeit. Lade dann Teammitglieder ein: Jedes Mitglied erhält vollen Zugriff auf der Stufe deines Plans, für +{price}/Mitglied/Monat bei Professional, oder kostenlos inklusive bei Ultimate.",
     "businessCardDescription": "Starte mit jedem beliebigen Plan als Basis für dein Team, lade dann Mitglieder für je +{price}/Monat ein — jeder erhält vollen Zugriff auf der Stufe deines Plans. Perfekt für Teams, die zusammenarbeiten.",
     "businessFeatureBase": "Wähle Professional oder Ultimate als Basisplan",
     "businessFeatureFullAccess": "Jedes Mitglied erhält vollen Zugriff auf der Stufe deines Plans",
@@ -413,7 +417,9 @@
       "signUp": "Registrieren",
       "forgotPassword": "Passwort vergessen?",
       "resetSuccess": "Passwort aktualisiert — melde dich mit deinem neuen Passwort an.",
-      "failed": "Wir konnten dich nicht anmelden. Prüfe E-Mail und Passwort, oder setze das Passwort zurück, wenn du unsicher bist."
+      "failed": "Wir konnten dich nicht anmelden. Prüfe E-Mail und Passwort, oder setze das Passwort zurück, wenn du unsicher bist.",
+      "oauthFailed": "Diese Anmeldung wurde nicht abgeschlossen. Versuche es erneut oder nutze unten E-Mail und Passwort.",
+      "sharedSignInFirst": "Melde dich an, um das Geteilte zu speichern."
     },
     "signup": {
       "chooseYourPlan": "Wähle deinen Plan",
@@ -477,7 +483,7 @@
       "missingToken": "Diesem Link fehlt das Bestätigungs-Token. Bitte verwenden Sie den Link aus Ihrer E-Mail genau so, wie er gesendet wurde.",
       "warning": "Dadurch werden Ihr Konto und alle von Ihnen erfassten Einträge dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
       "deleting": "Wird gelöscht…",
-      "confirmButton": "Mein Konto dauerhaft löschen",
+      "confirmButton": "Dein Konto dauerhaft löschen",
       "cancel": "Abbrechen und zurück",
       "confirmFailed": "Wir konnten die Löschung nicht abschließen. Dein Konto besteht weiterhin — versuch den Link erneut oder wende dich an den Support."
     }
@@ -668,7 +674,11 @@
         "endingIn": "{days, plural, =0 {Dein Abo endet heute.} one {Dein Abo endet in # Tag.} other {Dein Abo endet in # Tagen.}}"
       },
       "creditsSplit": "{monthly} monatlich + {purchased} gekauft (verfallen nie)",
-      "noSubscriptionToCancel": "Kein Abo zum Kündigen — Inhaberzugang und Beta-Zeitraum enden von selbst."
+      "noSubscriptionToCancel": "Kein Abo zum Kündigen — Inhaberzugang und Beta-Zeitraum enden von selbst.",
+      "checkout": {
+        "success": "Zahlung erhalten. Dein Tarif wird hier aktualisiert, sobald Stripe ihn bestätigt — meist innerhalb weniger Sekunden.",
+        "cancelled": "Der Bezahlvorgang wurde abgebrochen. Es wurde nichts berechnet."
+      }
     },
     "marginReport": {
       "title": "Margenbericht",
@@ -720,8 +730,8 @@
       "notConfigured": "Push-Benachrichtigungen sind in dieser Installation nicht konfiguriert.",
       "agentResults": "Agent-Ergebnisse",
       "agentResultsHint": "Wenn ein geplanter Agent einen Lauf beendet",
-      "missionReminders": "Missions-Erinnerungen",
-      "missionRemindersHint": "Wenn ein geplanter Missionsschritt ausgeführt wird",
+      "missionReminders": "Plan-Erinnerungen",
+      "missionRemindersHint": "Wenn ein geplanter Planschritt ausgeführt wird",
       "lowCredits": "Wenig Credits",
       "lowCreditsHint": "Wenn die Arbeit stoppt, weil das Guthaben aufgebraucht ist",
       "collaboration": "Zusammenarbeit",
@@ -798,7 +808,8 @@
           "help": "Füge eine Discord-Webhook-URL für den gewünschten Kanal ein.",
           "placeholder": "https://discord.com/api/webhooks/…"
         }
-      }
+      },
+      "emailNotConfigured": "E-Mail ist auf dieser Installation noch nicht eingerichtet, daher kann nichts in Ihrem Posteingang zugestellt werden."
     },
     "overage": {
       "title": "Zusatznutzung",
@@ -863,10 +874,19 @@
         "totalEntries": "Einträge insgesamt",
         "thisWeek": "Diese Woche",
         "mostActive": "Aktivstes",
-        "creditsRemaining": "Verbleibende Credits"
+        "creditsRemaining": "Verbleibende Credits",
+        "fillsAfter": "Füllt sich nach {count} Einträgen",
+        "totalEntriesExplain": "Alles, was du erfasst hast, in jedem Modul, seit dem Start.",
+        "thisWeekExplain": "In den letzten sieben Tagen erfasst — wie aktiv diese Woche war.",
+        "mostActiveExplain": "Das Modul, in dem du am meisten schreibst. Wohin deine Aufmerksamkeit geht.",
+        "creditsExplain": "Was von deinem Monatskontingent für KI-Arbeit übrig ist.",
+        "ofTotal": "{count, plural, one {von # insgesamt} other {von # insgesamt}}",
+        "fromEntries": "{count, plural, one {aus # Eintrag} other {aus # Einträgen}}",
+        "openEntries": "Einträge ansehen →",
+        "openCredits": "Verlauf ansehen →"
       },
       "betaFeedback": {
-        "message": "Danke, dass du Ionexa AI testest! Wir freuen uns über dein Feedback.",
+        "message": "Danke, dass du Ionexa AI testest. Dein Feedback ist willkommen.",
         "linkLabel": "Feedback geben"
       },
       "progress": {
@@ -882,12 +902,13 @@
         "mostActiveIn": "Am aktivsten in {module}"
       },
       "activeMission": {
-        "title": "Aktive Mission",
-        "stepsLabel": "{completed}/{total} Schritte abgeschlossen"
+        "title": "Aktiver Plan",
+        "stepsLabel": "{completed}/{total} Schritte abgeschlossen",
+        "open": "Plan öffnen"
       },
       "nextAction": {
         "title": "Was Kommt Als Nächstes?",
-        "continueMission": "Weiter: {step} aus deiner Mission \"{goal}\"",
+        "continueMission": "Weiter: {step} aus deinem Plan \"{goal}\"",
         "revisitLink": "Du hast \"{source}\" vor ein paar Tagen mit \"{target}\" verknüpft — lohnt sich ein erneuter Blick?",
         "startNew": "Keine neue Aktivität in den letzten 3 Tagen — bereit, etwas Neues zu starten?",
         "cta": "Los geht's →"
@@ -901,7 +922,7 @@
         "suggestion": {
           "recency": "Du hast schon eine Weile nichts mehr eingetragen — füge einen neuen Eintrag hinzu, um weiterzumachen.",
           "coverage": "Probiere ein Modul aus, das du noch nicht genutzt hast.",
-          "missionSteps": "Schließe einen Missionsschritt ab, um deinen Schwung zu halten.",
+          "missionSteps": "Schließe einen Planschritt ab, um deinen Schwung zu halten.",
           "consistency": "Versuche, diese Woche jeden Tag etwas einzutragen."
         }
       },
@@ -933,7 +954,27 @@
       "quickStart": "Schnellstart",
       "templateFailed": "Wir konnten diese Vorlage nicht anwenden. Versuch es gleich noch einmal — es wurde nichts hinzugefügt.",
       "quickStartBlurb": "Füge ein paar Beispieleinträge hinzu, um zu sehen, wie ein gefüllter Arbeitsbereich aussieht.",
-      "quickStartAdd": "Hinzufügen"
+      "quickStartAdd": "Hinzufügen",
+      "setupProgress": {
+        "title": "Einrichtungsfortschritt",
+        "count": "{done} von {total} Schritten",
+        "suggestion": "Dein Aktivitätswert erscheint, sobald du {count} Einträge erfasst hast — genug, dass kein einzelner ihn entscheidet.",
+        "steps": {
+          "onboarding": "Beantworte die Willkommensfragen",
+          "firstEntry": "Erfasse deinen ersten Eintrag",
+          "secondModule": "Erfasse etwas in einem zweiten Bereich",
+          "mission": "Setze ein Ziel"
+        }
+      },
+      "next": {
+        "title": "Als Nächstes"
+      },
+      "whatChanged": {
+        "title": "Was sich geändert hat",
+        "since": "seit {when}",
+        "entries": "neue Einträge",
+        "insights": "neue Erkenntnisse"
+      }
     },
     "team": {
       "title": "Team",
@@ -953,7 +994,7 @@
       "removeTitle": "Mitglied entfernen",
       "descriptionIncluded": "Im {plan}-Plan erhalten eingeladene Mitglieder vollen Zugriff auf dieser Stufe, ohne zusätzliche Kosten.",
       "seatsUsed": "{used} von {total} Plätzen belegt",
-      "setupSuccessTitle": "Dein Team ist bereit!",
+      "setupSuccessTitle": "Dein Team ist bereit",
       "setupSuccessBody": "Lade unten dein erstes Teammitglied ein.",
       "roleLabel": "Rolle / Position",
       "rolePlaceholder": "Was macht diese Person?",
@@ -1030,7 +1071,18 @@
       "pinError": "Das Anheften wurde nicht gespeichert. Versuch es noch einmal.",
       "renameError": "Der neue Name wurde nicht gespeichert — der alte bleibt.",
       "renameLabel": "Neuer Name für „{title}“",
-      "emptyHint": "Frag alles — Allgemeinwissen, Ideen, Hilfe beim Schreiben oder einfach ein Gespräch."
+      "emptyHint": "Frag alles — Allgemeinwissen, Ideen, Hilfe beim Schreiben oder einfach ein Gespräch.",
+      "provenance": {
+        "plain": "Auf Basis von {count, plural, one {# Eintrag} other {# Einträgen}} aus {modules, plural, one {# Modul} other {# Modulen}}",
+        "withPeriod": "Auf Basis von {count, plural, one {# Eintrag} other {# Einträgen}} aus {modules, plural, one {# Modul} other {# Modulen}}, {period}",
+        "capped": "Auf Basis der {cap} neuesten aus je {modules, plural, one {# Modul} other {# Modulen}} — {count, plural, one {# Eintrag} other {# Einträge}} gelesen, nicht alles, was du hast",
+        "cappedWithPeriod": "Auf Basis der {cap} neuesten aus je {modules, plural, one {# Modul} other {# Modulen}} — {count, plural, one {# Eintrag} other {# Einträge}} gelesen, {period}. Nicht alles, was du hast.",
+        "nothingIn": "Aus diesen wurde nichts gelesen: {modules}"
+      },
+      "dataScope": {
+        "title": "Was es sehen kann",
+        "body": "Es sieht deine Einträge, deine Ziele und die Dateien, die du hochgeladen hast. Es sieht nichts, was du nicht hinzugefügt hast. Es ändert nichts, ohne dass du darum bittest."
+      }
     },
     "create": {
       "title": "Alles Erstellen",
@@ -1044,7 +1096,7 @@
       "recordItAnyway": "Trotzdem ablegen"
     },
     "timeline": {
-      "title": "Verlauf",
+      "title": "Meine Sachen",
       "allModules": "Alle Module",
       "showOnly": "Nur anzeigen: {module}",
       "rangeToday": "Heute",
@@ -1054,7 +1106,9 @@
       "empty": {
         "title": "Deine Arbeit, in der Reihenfolge, in der sie passierte",
         "why": "Das schreibt sich von selbst. Alles, was du in irgendeinem Modul erfasst, landet hier in einem Strom — so beantwortest du \"was habe ich letzten Monat eigentlich getan\"."
-      }
+      },
+      "tabAll": "Alles",
+      "tabStarred": "Favoriten"
     },
     "favorites": {
       "title": "Favoriten",
@@ -1083,7 +1137,7 @@
       "scheduledForDate": "Läuft am {date}",
       "cancelScheduled": "Abbrechen",
       "viewIn": "In {module} anzeigen",
-      "reviewMission": "Mission Bewerten",
+      "reviewMission": "Plan bewerten",
       "reviewing": "Bewertung...",
       "reviewerLabel": "Reviewer",
       "statusPlanning": "Planung",
@@ -1102,17 +1156,17 @@
       "retry": "Wiederholen ({attempts}/{max})",
       "stepFailedMax": "{max}x fehlgeschlagen — wird nicht automatisch wiederholt. Formuliere den Schritt um oder erstelle ihn manuell.",
       "sessionExpired": "Deine Sitzung ist beim Laden abgelaufen. Nichts ging verloren — lade die Seite neu.",
-      "newMission": "Neue Mission",
+      "newMission": "Neuer Plan",
       "tabSteps": "Schritte",
       "tabReview": "Auswertung",
       "stepsProgress": "{done}/{total} Schritte",
       "statusFilterLabel": "Status",
       "nextStep": "Als Nächstes: {step}",
-      "noSteps": "Diese Mission hat noch keine Planschritte.",
+      "noSteps": "Dieser Plan hat noch keine Schritte.",
       "reviewNotRunYet": "Alle Schritte sind erledigt — starte den Reviewer für eine Zusammenfassung.",
       "reviewLocked": "Der Reviewer läuft, sobald alle Schritte abgeschlossen sind.",
       "stepMinutes": "~{count} Min.",
-      "updatedElsewhere": "Diese Mission wurde soeben anderswo aktualisiert — wird neu geladen, um den aktuellen Stand zu zeigen.",
+      "updatedElsewhere": "Dieser Plan wurde soeben anderswo aktualisiert — wird neu geladen, um den aktuellen Stand zu zeigen.",
       "energy": {
         "heading": {
           "light": "Wenig Energie — fang hier an",
@@ -1121,18 +1175,18 @@
         },
         "heldBack": "{count, plural, one {# anspruchsvollerer Schritt} other {# anspruchsvollere Schritte}} vorerst zurückgestellt"
       },
-      "stillPlanning": "Plant noch — das dauert etwas. Es läuft weiter, und der Plan steht in deiner Missionsliste, sobald er fertig ist.",
+      "stillPlanning": "Plant noch — das dauert etwas. Es läuft weiter, und der Plan steht in deiner Planliste, sobald er fertig ist.",
       "planStalled": "Der Plan wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
       "empty": {
         "title": "Ein Ziel, in Schritte zerlegt",
         "why": "Sag, was du erreichen willst — daraus wird ein Plan mit datierten Schritten zum Abhaken, keine Wunschliste.",
         "example": "Die ersten 10 zahlenden Kunden gewinnen"
       },
-      "deleteMission": "Mission löschen",
-      "deleteConfirmMission": "Mission „{goal}“ löschen?",
+      "deleteMission": "Plan löschen",
+      "deleteConfirmMission": "Plan „{goal}“ löschen?",
       "deleteConfirmLoses": "Damit {steps, plural, one {verschwindet # Schritt} other {verschwinden # Schritte}} — {completed} davon abgeschlossen — und {scheduled, plural, one {# geplante Ausführung} other {# geplante Ausführungen}}. Das lässt sich nicht rückgängig machen.",
-      "deletedMission": "Mission gelöscht",
-      "deleteFailed": "Die Mission konnte nicht gelöscht werden.",
+      "deletedMission": "Plan gelöscht",
+      "deleteFailed": "Der Plan konnte nicht gelöscht werden.",
       "deleteStep": "Schritt löschen",
       "editStep": "Schritt bearbeiten",
       "saveStep": "Speichern",
@@ -1150,12 +1204,12 @@
       "generating": "Erstellen...",
       "entriesTitle": "Neue Einträge (diese Woche / letzte Woche)",
       "noModuleActivity": "Keine Aktivität in einem Modul in den letzten zwei Wochen.",
-      "missionStepsLabel": "{completed, plural, one {# Missionsschritt abgeschlossen} other {# Missionsschritte abgeschlossen}}, {pending} noch offen",
+      "missionStepsLabel": "{completed, plural, one {# Planschritt abgeschlossen} other {# Planschritte abgeschlossen}}, {pending} noch offen",
       "reflectionLabel": "Reflexion"
     },
     "tradingWorkflow": {
       "title": "Trading-Workflow",
-      "description": "Alles rund ums Trading an einem Ort — deine Trades, Knowledge-Graph-Verknüpfungen, Timeline, Mentor, Missionen und wöchentliche Reflexion.",
+      "description": "Alles rund ums Trading an einem Ort — deine Trades, Knowledge-Graph-Verknüpfungen, Timeline, Mentor, Pläne und wöchentliche Reflexion.",
       "insight": {
         "title": "Trading-Muster-Insight",
         "noTrades": "Erfasse einen Trade, um hier Muster zu sehen.",
@@ -1170,7 +1224,7 @@
       "mentorButtonDescription": "Öffne Ionexa Chat im Mentor-Modus mit deinen letzten 20 Trades bereits als Kontext geladen.",
       "mentorChatPrefill": "Analysiere meine letzten Trades und gib mir Feedback, um meine Gewinnquote zu verbessern.",
       "missionButton": "Trading-Ziel Starten",
-      "missionButtonDescription": "Erstelle einen KI-Missionsplan, um dein Trading zu verbessern, z. B. die Gewinnquote diesen Monat.",
+      "missionButtonDescription": "Erstelle einen KI-Plan, um dein Trading zu verbessern, z. B. die Gewinnquote diesen Monat.",
       "missionButtonCreating": "Wird erstellt...",
       "missionGoal": "Meine Trading-Gewinnquote diesen Monat verbessern",
       "timelineTitle": "Trading-Timeline",
@@ -1180,7 +1234,7 @@
     },
     "productWorkflow": {
       "title": "Produkt-Workflow",
-      "description": "Alles rund um den Produktstart an einem Ort — deine Produkte, Knowledge-Graph-Verknüpfungen, Timeline, Mentor, Missionen und wöchentliche Reflexion.",
+      "description": "Alles rund um den Produktstart an einem Ort — deine Produkte, Knowledge-Graph-Verknüpfungen, Timeline, Mentor, Pläne und wöchentliche Reflexion.",
       "insight": {
         "title": "Produkt-Muster-Insight",
         "noProducts": "Füge ein Produkt hinzu, um hier Muster zu sehen.",
@@ -1191,7 +1245,7 @@
       "mentorButtonDescription": "Öffne Ionexa Chat im Mentor-Modus mit deinen letzten 20 Produkten bereits als Kontext geladen.",
       "mentorChatPrefill": "Überprüfe meine Produktpläne und gib mir Feedback, was vor dem Launch noch fehlt.",
       "missionButton": "Neues Produkt Starten",
-      "missionButtonDescription": "Erstelle einen KI-Missionsplan, um ein neues Produkt zu starten — Zielgruppe, Preisgestaltung, Landingpage und mehr.",
+      "missionButtonDescription": "Erstelle einen KI-Plan, um ein neues Produkt zu starten — Zielgruppe, Preisgestaltung, Landingpage und mehr.",
       "missionButtonCreating": "Wird erstellt...",
       "missionGoal": "Ein neues Produkt starten: Zielgruppe definieren, Preisgestaltung festlegen und eine Landingpage erstellen",
       "timelineTitle": "Produkt-Timeline",
@@ -1203,10 +1257,13 @@
       "title": "Energie-Check",
       "prompt": "Wie ist deine Energie heute?",
       "checkedInToday": "Heutige Energie: {level}/5.",
-      "logAgain": "Erneut eintragen",
       "notePlaceholder": "Optionale Notiz...",
       "logged": "Energie erfasst",
-      "levelLabel": "Energielevel {level}"
+      "levelLabel": "Energielevel {level}",
+      "scaleLow": "1 = erschöpft",
+      "scaleHigh": "5 = bestens",
+      "whatItDoes": "Ionexa wählt damit den nächsten Planschritt aus — leichte Arbeit, wenn du unten bist, fordernde, wenn nicht.",
+      "change": "Ändern"
     },
     "websiteBuilder": {
       "title": "Website bauen",
@@ -1422,7 +1479,7 @@
       "subtitle": "Beschreibe in einem Satz, was du willst. Kein Werkzeug zum Auswählen — das Studio erkennt, worum es geht, zeigt dir sein Verständnis und erstellt es erst danach.",
       "inputLabel": "Was möchtest du erstellen?",
       "inputPlaceholder": "z. B. Eine Landingpage für mein Coaching-Angebot, warm und professionell",
-      "noToolPickerHint": "Websites, Missionen, Einträge, Automatisierungen und Dokumente beginnen alle hier.",
+      "noToolPickerHint": "Websites, Pläne, Einträge, Automatisierungen und Dokumente beginnen alle hier.",
       "continue": "Weiter",
       "detecting": "Deine Anfrage wird gelesen…",
       "detectFailed": "Diese Anfrage konnte nicht gelesen werden.",
@@ -1438,7 +1495,7 @@
       "changeType": "Art ändern",
       "pickTypePrompt": "Wähle, was für eine Art Sache das sein soll:",
       "typeWebsite": "Website",
-      "typeMission": "Mission",
+      "typeMission": "Plan",
       "typeModuleEntry": "Arbeitsbereich-Eintrag",
       "typeModuleEntryNamed": "Eintrag in {module}",
       "typeAutomation": "Automatisierung",
@@ -1468,7 +1525,7 @@
       "progress": {
         "creatingProject": "Projekt wird angelegt",
         "generatingWebsite": "Website wird erzeugt",
-        "planningMission": "Mission wird geplant",
+        "planningMission": "Plan wird erstellt",
         "routingEntry": "Wird dem richtigen Modul zugeordnet",
         "schedulingAutomation": "Automatisierung wird eingeplant",
         "creatingDocument": "Dokument wird angelegt",
@@ -1489,7 +1546,8 @@
       "typeAgent": "KI-Agent",
       "agentDesignFailed": "Dieser Agent konnte nicht entworfen werden.",
       "agentSaveFailed": "Der Agent wurde entworfen, konnte aber nicht gespeichert werden.",
-      "unsupportedType": "Create Studio kann das noch nicht erstellen."
+      "unsupportedType": "Create Studio kann das noch nicht erstellen.",
+      "madeItHere": "Hier erstellt → {where}"
     },
     "agents": {
       "title": "KI-Agenten",
@@ -1509,7 +1567,7 @@
       "clarificationSkip": "Überspringen und trotzdem erstellen",
       "clarificationContinue": "Weiter",
       "clarificationAnswerPlaceholder": "Ihre Antwort...",
-      "previewTitle": "Das werde ich bauen",
+      "previewTitle": "Was dieser Agent tun wird",
       "previewName": "Name",
       "previewSchedule": "Läuft",
       "previewCostPerRun": "Kosten pro Lauf",
@@ -1717,7 +1775,9 @@
         "withdrawing": "Wird zurückgezogen...",
         "withdrawn": "Zurückgezogen. Nicht mehr in der Bibliothek.",
         "withdrawFailed": "Konnte nicht zurückgezogen werden. Es ist weiterhin geteilt."
-      }
+      },
+      "failingWarning": "{failures} der letzten {max} Läufe sind nacheinander fehlgeschlagen. Nach {max} schaltet sich dieser Agent selbst ab.",
+      "disabledReason": "Letzter Fehler: {reason}"
     },
     "publishing": {
       "title": "Live-Seiten",
@@ -1877,7 +1937,7 @@
       "saveSelection": "{count, plural, one {# ausgewählte speichern} other {# ausgewählte speichern}}",
       "collectionCreated": "Sammlung {name} gespeichert",
       "collectionError": "Die Sammlung konnte nicht gespeichert werden.",
-      "askTitle": "Meine Dokumente fragen",
+      "askTitle": "Deine Dokumente fragen",
       "askNothingSelected": "Wähle die Dateien aus, aus denen die Antwort stammen soll. Nichts anderes wird verwendet.",
       "askSelected": "Antwort aus {count, plural, one {# Datei} other {# Dateien}}: {names}",
       "tooManySelected": "Frage nach höchstens {max} Dateien auf einmal.",
@@ -2041,7 +2101,7 @@
       "noneTitle": "Noch nichts Belastbares",
       "noneNeedMore": "Hier ist noch zu wenig, um von einem Muster zu sprechen. Ein paar Dutzend Zeilen mit Datum sind meist der Punkt, ab dem sich etwas zeigt — und wir sagen lieber nichts, als etwas zu erfinden.",
       "noneYet": "Füge etwas mehr hinzu und starte das aus deinem Dashboard erneut.",
-      "goToDashboard": "Zu meinem Dashboard"
+      "goToDashboard": "Zu deinem Dashboard"
     },
     "insights": {
       "title": "Was mir aufgefallen ist",
@@ -2100,7 +2160,7 @@
       "description": "Teile Ionexa und verdiene an dem, was die Leute zahlen, die du bringst.",
       "pitch": "Verdiene {percent}% jeder Zahlung deiner Empfohlenen, jeden Monat, {months, plural, one {# Monat} other {# Monate}} lang.",
       "pitchTerms": "Du kannst dich nicht selbst empfehlen, und jede Person zählt nur einmal. Die Provision beginnt mit ihrer ersten Zahlung.",
-      "join": "Meinen Link holen",
+      "join": "Deinen Link holen",
       "joining": "Wird eingerichtet …",
       "joinError": "Hat nicht geklappt. Bitte erneut versuchen.",
       "yourLink": "Dein Link",
@@ -2134,7 +2194,7 @@
         "website": "Websites",
         "agent": "Agenten",
         "research": "Recherche",
-        "mission": "Missionen",
+        "mission": "Pläne",
         "help": "Hilfe"
       },
       "filters": {
@@ -2292,6 +2352,14 @@
         "too_long": "Das ist länger, als eine Regel sein muss.",
         "unauthenticated": "Du bist abgemeldet. Melde dich an und versuch es erneut."
       }
+    },
+    "records": {
+      "title": "Meine Einträge",
+      "description": "Jedes Protokoll, Werkzeug und jede Einstellung an einem Ort. Nach Typ filtern statt im Menü zu suchen.",
+      "searchLabel": "Nach Namen suchen",
+      "allTypes": "Alle Typen",
+      "count": "{count, plural, one {# Stelle} other {# Stellen}}",
+      "noMatch": "Nichts passt zu diesem Namen. Versuche ein kürzeres Wort oder entferne den Filter."
     }
   },
   "module": {
@@ -2361,13 +2429,14 @@
   "askAi": {
     "buttonLabel": "KI fragen",
     "title": "Frag die KI zu diesem {title}",
-    "subtitle": "Die KI kennt die Daten dieses Eintrags bereits — frag einfach.",
+    "subtitle": "Die KI hat die Daten dieses Eintrags bereits. Frag, was du willst.",
     "placeholder": "Frag irgendetwas zu diesem Eintrag...",
     "emptyState": "Stell eine Frage zu diesem Eintrag — du musst den Kontext nicht erklären, die KI hat ihn bereits.",
     "send": "Senden",
     "close": "Schließen",
     "streamInterrupted": "Die Verbindung wurde unterbrochen, bevor die Antwort fertig war.",
-    "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig."
+    "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig.",
+    "alsoRead": "Es hat außerdem {count, plural, one {# frühere Nachricht} other {# frühere Nachrichten}} zu diesem Eintrag gelesen"
   },
   "entityLinks": {
     "buttonLabel": "Verknüpfen mit...",
@@ -2402,8 +2471,8 @@
       "description": "Erfasse deinen ersten Eintrag in {module}."
     },
     "firstMission": {
-      "title": "Mission Erfüllt",
-      "description": "Schließe deine erste KI-Mission ab."
+      "title": "Erster Plan geschafft",
+      "description": "Schließe deinen ersten KI-Plan ab."
     },
     "streak": {
       "title": "Beständigkeits-Champion",
@@ -2419,7 +2488,7 @@
     },
     "firstEntityLink": {
       "title": "Verbinder",
-      "description": "Verknüpfe zwei Einträge im Knowledge Graph."
+      "description": "Verknüpfe zwei Einträge im Wissensgraph."
     },
     "tenEntityLinks": {
       "title": "Netzwerk-Baumeister",
@@ -2869,7 +2938,7 @@
     },
     "create": {
       "is": "Ein Satz hinein, das Richtige heraus.",
-      "does": "Sie beschreiben in eigenen Worten, was Sie wollen; das Studio erkennt, ob es ein Moduleintrag, eine Website, eine Mission, eine Automatisierung, ein Agent oder ein Dokument ist — und baut es.",
+      "does": "Sie beschreiben in eigenen Worten, was Sie wollen; das Studio erkennt, ob es ein Moduleintrag, eine Website, ein Plan, eine Automatisierung, ein Agent oder ein Dokument ist — und baut es.",
       "doesNot": "Es rät nicht stillschweigend. Wenn es Sie nicht versteht oder das Gewünschte nicht bauen kann, sagt es das, statt die nächstähnliche Art zu erzeugen — genau das tat es früher bei Agenten."
     },
     "costs": {
@@ -2914,12 +2983,12 @@
     },
     "productWorkflow": {
       "is": "Alles zu Ihren Produkten auf einem Bildschirm.",
-      "does": "Zeigt dieselben Produkteinträge wie das Modul Produkte, dazu ihre Verknüpfungen, ihre Historie, ein ohne KI errechnetes Muster und Direktzugänge zu Mentor und Mission.",
+      "does": "Zeigt dieselben Produkteinträge wie das Modul Produkte, dazu ihre Verknüpfungen, ihre Historie, ein ohne KI errechnetes Muster und Direktzugänge zu Mentor und Plan.",
       "doesNot": "Es ist kein zweiter Ort für Produkte. Es sind dieselben Zeilen wie im Modul Produkte — hier hinzugefügt, dort sichtbar — und das Muster ist Arithmetik über das, was Sie geschrieben haben, keine Prognose."
     },
     "reflection": {
       "is": "Was Sie diese Woche wirklich fertig gemacht haben, gegen das, was geplant war.",
-      "does": "Zählt neue Einträge in jedem Modul für diese und die letzte Woche, zählt erledigte und offene Missionsschritte und bittet um eine kurze, ehrliche Zusammenfassung der Lücke.",
+      "does": "Zählt neue Einträge in jedem Modul für diese und die letzte Woche, zählt erledigte und offene Planschritte und bittet um eine kurze, ehrliche Zusammenfassung der Lücke.",
       "doesNot": "Hier wird nichts gespeichert. Jeder Druck rechnet neu aus Ihren Live-Daten, es gibt also keine Historie früherer Rückblicke — und gezählt wird, was Sie erfasst haben, nicht was Sie außerhalb der App getan haben."
     },
     "routing": {
@@ -2939,13 +3008,18 @@
     },
     "tradingWorkflow": {
       "is": "Alles rund ums Trading auf einem Bildschirm.",
-      "does": "Dieselben Trade-Einträge wie das Modul Trading, dazu ihre Verknüpfungen, ihre Historie, Muster nach Tag, Stunde, Symbol und Verlustserie sowie Direktzugänge zu Mentor und Mission.",
+      "does": "Dieselben Trade-Einträge wie das Modul Trading, dazu ihre Verknüpfungen, ihre Historie, Muster nach Tag, Stunde, Symbol und Verlustserie sowie Direktzugänge zu Mentor und Plan.",
       "doesNot": "Die Muster sind Auszählungen bereits getätigter Trades, keine Vorhersagen, und sie sind keine Anlageberatung. Es ist auch kein zweiter Satz Trades: Es sind dieselben Zeilen wie im Modul Trading."
     },
     "businessHealth": {
       "is": "Die Zahlen des Unternehmens selbst — Umsatz, Marge, Abwanderung, Liquidität. Nur für den Inhaber.",
       "does": "Berechnet jede Kennzahl aus echten Abo- und Kostenzeilen und fragt Sie nach den drei Werten, die keine Datenbank kennen kann: Marketingausgaben, Fixkosten, Kassenbestand.",
       "doesNot": "Es zeigt keine Zahl, die es nicht begründen kann. Einer Kennzahl ohne Eingabe sagt, was ihr fehlt, statt aus einer Null zu rechnen, und nichts wird rückwirkend ergänzt — die Historie beginnt am Tag der Veröffentlichung."
+    },
+    "records": {
+      "is": "Eine Seite mit jeder Art von Eintrag, Werkzeug und Einstellung, die du öffnen kannst.",
+      "does": "In der Seitenleiste standen neunzehn Protokolle, die alle gleich funktionieren. Sie sind jetzt hier, mit einem Typfilter — suchen heißt eine Liste lesen statt ein Menü auswendig zu kennen.",
+      "doesNot": "Nichts wurde verschoben oder zusammengelegt. Jede Seite behält ihre Adresse, ihre Einträge und ihr Formular — das hier ist ein Zugang, kein neuer Ort für deine Daten."
     }
   },
   "helpCentre": {
@@ -2964,7 +3038,7 @@
       "credits": "Credits",
       "websites": "Websites",
       "agents": "KI-Agents",
-      "missions": "Missionen",
+      "missions": "Pläne",
       "chat": "Chat",
       "files": "Dateien",
       "integrations": "Verbindungen",
@@ -3059,6 +3133,13 @@
         "what": "Diese Aktion wurde nicht abgeschlossen.",
         "next": "Versuch es erneut und wende dich an den Support, wenn es zweimal passiert."
       }
+    },
+    "boundary": {
+      "title": "Dieser Teil der Seite wurde nicht geladen",
+      "body": "Der Rest Ihres Dashboards funktioniert, und Ihre Daten sind unverändert. Ein Neuladen behebt es meistens — falls nicht, wurde es uns automatisch gemeldet.",
+      "reload": "Seite neu laden",
+      "section": "Dieser Abschnitt konnte nicht angezeigt werden.",
+      "sectionBody": "Der Rest der Seite ist nicht betroffen. Ein Neuladen behebt es meistens."
     }
   },
   "aiExamples": {
@@ -3279,7 +3360,7 @@
     "copied": "Kopiert",
     "language": "Sprache",
     "targetLanguage": "Umwandeln in",
-    "useWorkspace": "Meine anderen Module als Kontext nutzen",
+    "useWorkspace": "Deine anderen Module als Kontext nutzen",
     "run": "Ausführen",
     "running": "Arbeite…",
     "result": "Ergebnis",
@@ -3417,5 +3498,16 @@
       "notEnough": "Sie haben {balance} Credits und benötigen {needed}.",
       "remove": "Badge entfernen"
     }
+  },
+  "sampleData": {
+    "load": "Mit Beispieldaten ansehen",
+    "loading": "Lädt…",
+    "loadFree": "Kostenlos — es wird nichts generiert, und du entfernst es mit einem Klick",
+    "loadFailed": "Das hat nicht geklappt. Versuch es nochmal.",
+    "banner": "Beispieldaten",
+    "bannerDetail": "Diese Einträge sind eine Demo — drei Monate eines kleinen Designstudios. Sie gehören nicht dir.",
+    "clear": "Beispiel entfernen",
+    "clearing": "Wird entfernt…",
+    "clearFailed": "Das hat nicht geklappt."
   }
 }

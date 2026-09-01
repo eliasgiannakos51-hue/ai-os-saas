@@ -15,6 +15,12 @@ import {
 } from "@/lib/integrations/providers";
 import { refreshAccessToken, revokeAtProvider, type TokenSet } from "@/lib/integrations/oauth";
 
+/** Far above any plan's integration allowance (the highest is
+ *  INTEGRATION_LIMIT_ULTIMATE), so nobody reaches it in practice — but a
+ *  list with no ceiling is a list that grows without one. Same reasoning
+ *  and same shape as RECORD_CAP. */
+const INTEGRATION_ROW_CAP = 200;
+
 // The only code that touches a decrypted token.
 //
 // Every caller above this line — chat, agents, the AI Life Context —
@@ -64,11 +70,25 @@ function summarise(row: IntegrationRow): IntegrationSummary {
 /** Everything the client is allowed to know. Never a token, never the raw row. */
 export async function listIntegrations(userId: string): Promise<IntegrationSummary[]> {
   const admin = createAdminClient();
+  // BOUNDED BY THE QUERY, not only by the product.
+  //
+  // This was scoped to one user and otherwise unbounded. In practice a
+  // plan caps integrations at INTEGRATION_LIMIT_ULTIMATE, so the row
+  // count is small — but "small because a product rule says so" is a
+  // property of a different file, and the day that rule changes or a
+  // migration leaves stale rows behind, this reads all of them.
+  //
+  // A LIMIT IS SAFE HERE AND WAS NOT SAFE IN lib/reflection.ts, and the
+  // difference is worth naming: this list is RENDERED, one row per
+  // connected account, so a cap truncates a list — visible, and above
+  // any real account's count. reflection.ts COUNTS over its rows, where
+  // a cap silently changes a total instead.
   const { data, error } = await admin
     .from("user_integrations")
     .select("*")
     .eq("user_id", userId)
-    .order("connected_at", { ascending: false });
+    .order("connected_at", { ascending: false })
+    .limit(INTEGRATION_ROW_CAP);
   if (error) {
     logApiError("integrations:list", error, { userId });
     return [];

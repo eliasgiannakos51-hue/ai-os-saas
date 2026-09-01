@@ -25,6 +25,7 @@
 // Run: node scripts/tests/mobile-input-zoom.prodtest.mjs
 import { startProdHarness } from "../lib/prod-harness.mjs";
 import { chromium } from "playwright";
+import { chromiumPath } from "./lib/chromium.mjs";
 
 // The threshold is Safari's, not ours. At exactly 16px it does not zoom.
 const MIN_MOBILE_FONT_PX = 16;
@@ -84,7 +85,7 @@ const PROBE = (excluded) => {
 
 const harness = await startProdHarness({ tableRows: {}, supaPort: 54395 });
 const browser = await chromium.launch({
-  executablePath: process.env.CHROMIUM_PATH || undefined,
+  executablePath: chromiumPath(),
 });
 
 const offenders = [];

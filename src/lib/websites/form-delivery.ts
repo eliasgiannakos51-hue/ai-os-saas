@@ -54,34 +54,21 @@ export function isDeliveryFault(status: unknown): boolean {
   return isFormEmailStatus(status) && (DELIVERY_FAULTS as readonly string[]).includes(status);
 }
 
-/**
- * Resend's shared test sender.
- *
- * It is the default in lib/email/*.ts's FROM_ADDRESS and it DOES send —
- * to exactly one address, the one that owns the Resend account. For every
- * other recipient it is a 403, which is why a deployment that has never
- * set RESEND_FROM_EMAIL looks configured and is not.
- */
-export const SHARED_TEST_SENDER = "onboarding@resend.dev";
-
-export function usesSharedTestSender(fromAddress: string | undefined | null): boolean {
-  if (!fromAddress) return false;
-  // A case-insensitive REGEX rather than toLowerCase().includes(): that
-  // shape is what scripts/tests/accent-search.test.mjs's section 4 bans
-  // across all of src, because it is the exact comparison that made
-  // "καφε" fail to match "Καφές" in nine components. This particular
-  // string is pure ASCII and could not have that bug — but a ban with an
-  // exception list is a ban that grows one, and the regex is no worse.
-  return SHARED_SENDER_PATTERN.test(fromAddress);
-}
-
-// BUILT FROM THE CONSTANT ABOVE, not retyped: two spellings of the same
-// address is a drift waiting to happen, and it would fail open — the
-// warning simply stops appearing while the emails keep not arriving.
-const SHARED_SENDER_PATTERN = new RegExp(
-  SHARED_TEST_SENDER.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-  "i"
-);
+// RESEND'S SHARED TEST SENDER — MOVED, AND RE-EXPORTED FROM HERE.
+//
+// It used to be defined in this file, which is about website form
+// submissions. Nothing about it is: it is a fact about email
+// configuration, and once lib/email/resend-config.ts needed the same
+// predicate there were two spellings of one address in the tree, which is
+// exactly the drift the old comment on the regex below warned about. It
+// would also have failed OPEN — the warning simply stops appearing while
+// the emails keep not arriving.
+//
+// The definition now lives with the rest of the sender logic. It is
+// re-exported here because this module's callers and
+// scripts/tests/website-forms.test.mjs both name it, and moving a symbol
+// is not a reason to make them wrong.
+export { SHARED_TEST_SENDER, usesSharedTestSender } from "@/lib/email/shared-sender";
 
 /**
  * Turn whatever Resend gave back into a status and a short detail.

@@ -1,4 +1,5 @@
 import "server-only";
+import { truncate } from "@/lib/text/truncate";
 import { logApiError } from "@/lib/log-error";
 import {
   MAX_ITEM_CHARS,
@@ -174,10 +175,12 @@ export async function loadChatContextForCoding(
   }
 }
 
+// ONE TRUNCATOR — see lib/text/truncate.ts. This copy was the ONLY one
+// of the seven that was right at every boundary, because somebody had
+// hit the max<=1 case here and guarded it in this file alone. That guard
+// is the shared contract now.
 function clampOneLine(text: string, max: number): string {
-  const t = (text ?? "").replace(/\s+/g, " ").trim();
-  if (max <= 1) return "";
-  return t.length > max ? `${t.slice(0, max - 1)}…` : t;
+  return truncate(text, max, { collapseWhitespace: true });
 }
 
 function dateOnly(ms: number): string {

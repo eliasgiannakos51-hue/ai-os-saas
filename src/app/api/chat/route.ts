@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { loadDeepDive } from "@/lib/ai/deep-dive-load";
+import {
+  summariseProvenance,
+  provenanceBriefing,
+  hasProvenance,
+  type Provenance,
+} from "@/lib/chat/provenance";
 import { autoTitleFromMessage } from "@/lib/chat/conversation-title";
 import { listIntegrations } from "@/lib/integrations/store";
 import {
@@ -421,7 +428,37 @@ export async function POST(request: Request) {
     // Mentor Mode's proactive cross-module summary (lib/chat/mentor-context.ts)
     // only loads when the toggle is on — the default chat pays nothing extra
     // for it, per the brief.
-    const mentorContext = mentorMode ? await loadMentorContext(supabase, user.id) : "";
+    const mentor = mentorMode
+      ? await loadMentorContext(supabase, user.id)
+      : { prompt: "", modules: [] };
+    const mentorContext = mentor.prompt;
+
+    // THE ONE MODULE THIS QUESTION IS ABOUT, READ PROPERLY — V4.6 #1.
+    //
+    // Five headlines per module is why "how were sales this week" comes
+    // back without a number in it. This adds up to twenty-five dated rows
+    // WITH their amounts, for the single module the question points at,
+    // and adds nothing at all when it points at none — see
+    // lib/ai/deep-dive.ts for why a best guess is worse than silence.
+    //
+    // It goes in the per-message suffix, never in systemPerUser: that
+    // block is cached, and a block that changes with the question breaks
+    // the cache on every turn. Measured, in
+    // scripts/measure-context.mjs: doing this the "clever" way — one
+    // budget redistributed per question inside the cached block — sends
+    // fewer characters and costs four times more.
+    const deepDive = await loadDeepDive(supabase, user.id, message, "el");
+    if (deepDive.mode !== "none" || deepDive.prompt) {
+      diagLog(
+        `[deep-dive] ${deepDive.mode}: ` +
+          (deepDive.reads.length > 0
+            ? deepDive.reads
+                .map((r) => `${r.slug} ${r.shown} rows${r.omitted > 0 ? ` (+${r.omitted} not sent)` : ""}`)
+                .join(", ")
+            : "nothing read, breadth notice only") +
+          `, ${deepDive.chars} chars`
+      );
+    }
     // Trading Workflow's "Trading Mentor" preset (see
     // trading-mentor-button.tsx) — only loaded when the client explicitly
     // opted into it via mentorPreset, on top of Mentor Mode already being
@@ -444,6 +481,7 @@ export async function POST(request: Request) {
     // Mode, per the brief. Best-effort: a failure here degrades to no
     // extra context rather than breaking the chat request.
     let userContext = "";
+    let provenance: Provenance | null = null;
     try {
       const fullContext = await getUserFullContext(supabase, user.id);
       // NARROWING IS OFF BY DEFAULT — see lib/ai/module-relevance.ts.
@@ -470,6 +508,39 @@ export async function POST(request: Request) {
         ...fullContext,
         moduleSummaries: selection.keep,
       });
+      // WHERE THE ANSWER WILL HAVE COME FROM — V4.6 #9.
+      //
+      // Computed from `selection.keep`, NOT from fullContext: the
+      // narrowing above decides what the model is shown, and a
+      // provenance line built on the full scan would credit modules the
+      // model never saw. The dropped ones join the empty ones, because
+      // from the answer's point of view they are the same thing — data
+      // that was not read.
+      provenance = summariseProvenance(
+        [
+          // MENTOR MODE READS MORE, so it must also account for more. Its
+          // scan is a separate one (lib/chat/mentor-context.ts, its own
+          // cap, its own module list) and it goes into the same prompt —
+          // an answer built on both and crediting one is the version of
+          // this line that is quietly wrong.
+          ...mentor.modules,
+          // The deep read is the biggest single contribution to an answer
+          // when it fires; leaving it out of the count would understate
+          // the line under the answer by twenty-five entries.
+          ...deepDive.reads.map((r) => ({ slug: r.slug, title: r.title, rows: r.rows })),
+          ...selection.keep.map((m) => ({ slug: m.slug, title: m.title, rows: m.rows })),
+          ...fullContext.emptyModules.map((m) => ({ ...m, rows: [] })),
+          ...fullContext.moduleSummaries
+            .filter((m) => !selection.keep.some((k) => k.slug === m.slug))
+            .map((m) => ({ slug: m.slug, title: m.title, rows: [] })),
+        ],
+        fullContext.perModuleCap
+      );
+      // The model is told what it was given so it can be honest about the
+      // boundary. It is NOT asked to cite: the citation under the answer
+      // is rendered from this same object, so there is nothing for it to
+      // fabricate.
+      userContext += `\n\n${provenanceBriefing(provenance, "el")}`;
     } catch (err) {
       logApiError("/api/chat", err, { stage: "user_full_context" });
     }
@@ -578,7 +649,8 @@ export async function POST(request: Request) {
     // paying ~1,246 full-price tokens a message to save at most 177.
     // scripts/tests/context-optimization.test.mjs caught it, which is
     // exactly what that gate is for.
-    const systemDynamicSuffix = buildEntityMentionPromptAddition(mentionedEntities) + codingContext;
+    const systemDynamicSuffix =
+      buildEntityMentionPromptAddition(mentionedEntities) + codingContext + deepDive.prompt;
     // Kept as the concatenation of the two halves, unchanged, because
     // every cost estimate below sizes the request with
     // `systemPrompt.length`. The split changes where the block boundary
@@ -794,6 +866,12 @@ export async function POST(request: Request) {
             conversationId: finalConversationId,
             isNewConversation,
             title: newConversationTitle,
+            // WHAT THIS ANSWER WAS BUILT FROM (V4.6 #9). Arithmetic on the
+            // rows that went into the prompt, not a claim the model made —
+            // so the line under the answer stays true even when the answer
+            // above it is wrong. Omitted entirely when nothing was read;
+            // an empty sources line is a fourth way of saying nothing.
+            provenance: hasProvenance(provenance) ? provenance : undefined,
             // So the composer can say how many free messages are left the
             // moment one is used, rather than on the next page load.
             freeMessage: isFreeMessage,

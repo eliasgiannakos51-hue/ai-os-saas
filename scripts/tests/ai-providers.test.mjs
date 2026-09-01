@@ -33,6 +33,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { loadTs } from "./load-ts.mjs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
 const failures = [];
@@ -522,7 +523,22 @@ ok("flattenSystem joins the blocks in order, losing nothing",
     .map((f) => join("src/components", f))
     .filter((f) => statSync(f).isFile());
   ok(`the componentFiles scan found ${componentFiles.length}`, componentFiles.length >= 200, "a filter of an empty list is empty, and every check below it would pass");
-  const leaking = componentFiles.filter((f) => /ai\/providers|ai\/batch/.test(readFileSync(f, "utf8")));
+  // COMMENTS ARE NOT IMPORTS, and this line read them as such. The check
+  // is about a component IMPORTING the provider layer — that is how a
+  // provider name would reach a rendered string — and it matched the raw
+  // file, so a component whose header PROSE explained where a number came
+  // from ("lib/ai/providers/registry.ts computes disabledReason...")
+  // failed a check about imports. Stripping first makes the assertion the
+  // one the sentence beside it claims.
+  //
+  // It is also strictly stronger in the direction that matters: the
+  // pattern now has to appear in code, so a comment can no longer satisfy
+  // it either — a file could previously have been "clean" of an import
+  // and dirty of a mention, and this could not tell the two apart in
+  // either direction.
+  const leaking = componentFiles.filter((f) =>
+    /ai\/providers|ai\/batch/.test(stripComments(readFileSync(f, "utf8")))
+  );
   ok("no component imports the provider layer — a provider name cannot reach the UI",
     leaking.length === 0, leaking.join(", "));
   const runner = src("src/lib/agents/agent-runner.ts");

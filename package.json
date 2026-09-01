@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/apply-function-limits.mjs && node scripts/check-mutation-markers.mjs && node scripts/check-i18n.js && npm run test:unit && next build",
+    "build": "node scripts/apply-function-limits.mjs && node scripts/check-mutation-markers.mjs && node scripts/check-mutation-tree.mjs && node scripts/check-i18n.js && npm run test:unit && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",

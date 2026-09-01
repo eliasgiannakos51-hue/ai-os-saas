@@ -14,6 +14,7 @@
 // Run: node scripts/tests/agent-credits.prodtest.mjs
 import { startProdHarness } from "../lib/prod-harness.mjs";
 import { chromium } from "playwright";
+import { chromiumPath } from "./lib/chromium.mjs";
 
 const AGENT_ID = "00000000-0000-4000-9000-000000000010";
 const USER_ID = "00000000-0000-4000-8000-000000000001";
@@ -91,7 +92,7 @@ const harness = await startProdHarness({
   supaPort: 54397,
 });
 const browser = await chromium.launch({
-  executablePath: process.env.CHROMIUM_PATH || undefined,
+  executablePath: chromiumPath(),
 });
 
 try {

@@ -72,7 +72,7 @@ export default async function ChatPage({
     searchParams.preset === "trading" ? "trading" : searchParams.preset === "product" ? "product" : undefined;
 
   return (
-    <main className="h-[calc(100vh-4rem)]">
+    <div className="h-[calc(100vh-4rem)]">
       <ChatWorkspace
         initialConversations={conversations}
         userInitial={userInitial}
@@ -87,6 +87,6 @@ export default async function ChatPage({
         }
         initialFreeChatRemaining={freeChat && freeChat.limit > 0 ? freeChat.remaining : undefined}
       />
-    </main>
+    </div>
   );
 }

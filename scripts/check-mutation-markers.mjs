@@ -94,6 +94,10 @@ export const EXEMPT = [
     match: /scripts\/tests\/mutation-markers\.test\.mjs$/,
     why: "it feeds every marker to the checker as a sample, which is the only way to prove the checker can go red",
   },
+  {
+    match: /scripts\/tests\/unguarded-guards\.mjs$/,
+    why: "same reason as *.mutation.mjs — it carries `if (false)` as the `to:` of a mutant. It is NOT named *.mutation.mjs on purpose: at ~100 seconds per guard it is a deliberate diagnostic, not part of the sweep",
+  },
 ];
 export const isExempt = (file) =>
   EXEMPT.some((e) => e.match.test(file.split("\\").join("/")));

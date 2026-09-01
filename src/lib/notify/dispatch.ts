@@ -4,6 +4,7 @@ import { logApiError } from "@/lib/log-error";
 import { getSiteUrl } from "@/lib/site-url";
 import { createNotification, safeNotificationUrl } from "@/lib/notifications/store";
 import { createResendClient } from "@/lib/resend";
+import { senderAddress, senderStatus } from "@/lib/email/resend-config";
 import { notificationEmailHtml } from "@/lib/email/templates";
 import { checkNotificationEmailAllowed, recordNotificationEmailSend } from "@/lib/email/email-gate";
 import {
@@ -42,7 +43,10 @@ import { sendDiscord } from "@/lib/notify/channels/discord";
  * the payment webhook or the publish that raised it.
  */
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
+// The From address, from ONE definition — see lib/email/resend-config.ts.
+// This was one of fourteen copies of the same line — the constant AND
+// its fallback, repeated per file. The fallback is the half that decides
+// whether mail reaches anybody, so it now has one definition.
 
 export type DispatchInput = {
   userId: string;
@@ -382,17 +386,37 @@ async function sendToChannels(params: {
           await record("suppressed", "no email address");
           continue;
         }
-        if (!process.env.RESEND_API_KEY) {
-          // NAMED, not guessed at. Without a key nothing leaves, and a
-          // silent no-op here is exactly the failure that makes a user
-          // think the feature is broken rather than unconfigured.
-          suppressed.push({ channel, reason: "RESEND_API_KEY is not set" });
-          await record("suppressed", "RESEND_API_KEY is not set");
+        // NAMED, not guessed at, and decided BEFORE the API call.
+        //
+        // Two ways this deployment cannot mail a customer, and the second
+        // one used to be recorded as `sent`:
+        //
+        //   no_key       nothing leaves at all. A silent no-op here is
+        //                what makes a user think the feature is broken
+        //                rather than unconfigured.
+        //   test_sender  RESEND_API_KEY is set and RESEND_FROM_EMAIL is
+        //                not, so From is Resend's shared test address.
+        //                Resend delivers that ONLY to the account
+        //                owner's own address and refuses everyone else —
+        //                which means the OPERATOR's mail arrives and
+        //                every customer's does not, one API call and one
+        //                provider sentence at a time, in a column nobody
+        //                aggregates. The deployment looks configured from
+        //                the only seat that would notice.
+        //
+        // Refusing here costs a doomed request per notification and turns
+        // fourteen different English strings from a third party into one
+        // reason code that a query can count.
+        const mail = senderStatus();
+        if (mail !== "ok") {
+          const reason = mail === "no_key" ? "RESEND_API_KEY is not set" : "test_sender";
+          suppressed.push({ channel, reason });
+          await record("suppressed", reason);
           continue;
         }
         const resend = createResendClient();
         const { error } = await resend.emails.send({
-          from: FROM_ADDRESS,
+          from: senderAddress(),
           to: address,
           subject: params.title.slice(0, 120),
           html: notificationEmailHtml({

@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { pageTitle } from "@/lib/page-title";
+import { MODULE_TITLE_KEYS } from "@/lib/search/module-title-keys";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { CodingWorkspace, type CodeSession } from "@/components/coding/coding-workspace";
@@ -11,7 +12,12 @@ import { CodingWorkspace, type CodeSession } from "@/components/coding/coding-wo
 export const dynamic = "force-dynamic";
 
 export function generateMetadata(): Promise<Metadata> {
-  return pageTitle("sidebar.items.coding");
+  // NOT the literal. `coding` and `data-analysis` left BUILD_MODULES in
+  // V4 #19/#20 — they are tools with bespoke pages now, so there is no
+  // CONFIG to read a titleKey off, and both pages wrote the key out by
+  // hand instead. MODULE_TITLE_KEYS is where their key already lives,
+  // for the search filter chips; this makes it the only place it lives.
+  return pageTitle(MODULE_TITLE_KEYS.coding);
 }
 
 // /dashboard/coding was a CRUD form for describing code the user would go

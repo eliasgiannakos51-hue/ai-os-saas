@@ -547,7 +547,27 @@ checkTrue("settlement sends the alert", /sendMarginAlertEmail\(\{/.test(res));
 checkTrue("it goes to the admins", /ADMIN_EMAILS/.test(alert));
 checkTrue("null is reported as its own diagnosis, not as missing data", /could not be computed \(null\)/.test(alert));
 checkTrue("it is rate limited so a systemic cause cannot flood", /COOLDOWN_MS/.test(alert));
-checkTrue("and never throws — it runs after the user was charged", /catch \{[\s\S]{0,120}\}/.test(alert));
+// THE SHAPE WAS `catch {` AND THE PROPERTY IS "IT CANNOT THROW".
+//
+// Those are not the same claim, and the difference showed up the moment
+// the catch bound its error to report it: `catch (err) {` is still a
+// catch, still cannot throw, and this check went red anyway. A gate that
+// fails on a fix is encoding a shape, not a property.
+//
+// So it is the property now, in three parts — a catch exists, it does not
+// re-throw, and it is not empty — read from the code rather than the
+// comments, because the prose inside that block discusses both throwing
+// and logging.
+const alertCode = alert.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+const CATCH = /catch\s*(?:\([^)]*\))?\s*\{/;
+checkTrue("and never throws — it runs after the user was charged",
+  CATCH.test(alertCode) && !/catch\s*(?:\([^)]*\))?\s*\{[^}]*\bthrow\b/.test(alertCode));
+// AND THE OTHER HALF, which the old shape check could not see: an empty
+// catch also never throws. The alert that says the product just sold AI
+// below cost is exactly the one whose failure nobody would notice, so it
+// has to leave a trace. See scripts/tests/email-silence.test.mjs.
+checkTrue("...and does not swallow its own failure — this is the alert nobody would miss",
+  /catch\s*\([^)]*\)\s*\{[\s\S]{0,300}?console\.error\(/.test(alertCode));
 
 console.log("\n== 14. the environment is reported at runtime, never at build ==");
 const envMod = await loadTs("src/lib/env-check.ts");

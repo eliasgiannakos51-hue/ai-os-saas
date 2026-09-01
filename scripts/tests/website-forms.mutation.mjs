@@ -24,12 +24,14 @@
  *
  * Run: node scripts/tests/website-forms.mutation.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/website-forms.test.mjs";
 
 const TYPES = "src/lib/websites/form-types.ts";
+const SHARED = "src/lib/email/shared-sender.ts";
 const DELIVERY = "src/lib/websites/form-delivery.ts";
 const SQL = "supabase/migrations/20260825000000_website_forms.sql";
 const ROUTE = "src/app/api/websites/[id]/submit-form/route.ts";
@@ -81,9 +83,21 @@ const MUTANTS = [
     from: "message.trim().slice(0, 500)",
     to: "message.trim()",
   },
+  // RE-ANCHORED. usesSharedTestSender moved out of form-delivery.ts into
+  // lib/email/shared-sender.ts, because form-delivery.ts is imported by a
+  // CLIENT component and the build refused its "server-only" marker.
+  // form-delivery.ts re-exports it, so every caller still works — and
+  // this mutation stopped applying to anything.
+  {
+    name: "form-delivery stops re-exporting the mover, so its callers lose it",
+    file: DELIVERY,
+    from: 'export { SHARED_TEST_SENDER, usesSharedTestSender } from "@/lib/email/shared-sender";',
+    to: "",
+    expect: "the shared test sender",
+  },
   {
     name: "the shared test sender is treated as a working sender",
-    file: DELIVERY,
+    file: SHARED,
     from: "  return SHARED_SENDER_PATTERN.test(fromAddress);",
     to: "  return false;",
   },
@@ -116,9 +130,11 @@ const MUTANTS = [
     to: "  if (false) {",
   },
   {
+    // RE-ANCHORED: FROM_ADDRESS was one of fourteen copies of the same
+    // constant-and-its-fallback and became senderAddress().
     name: "the shared sender reports success",
     file: SENDER,
-    from: "    if (usesSharedTestSender(FROM_ADDRESS)) {",
+    from: "    if (usesSharedTestSender(senderAddress())) {",
     to: "    if (false) {",
   },
   {

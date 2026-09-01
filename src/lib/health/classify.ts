@@ -20,8 +20,9 @@
  * here is derived from an environment VALUE. `hasUrl`/`hasKey` are
  * booleans computed by the caller; this function never sees a key, a
  * connection string or a host, so there is no path by which one could be
- * returned. scrubSecrets() below is the second line for the authenticated
- * verbose mode, where a real message is allowed through.
+ * returned. scrubSecrets() (lib/scrub-secrets.ts) is the second line for
+ * the authenticated verbose mode, where a real message is allowed
+ * through.
  *
  * Pure and dependency-free on purpose — no "server-only", no SDK — so the
  * mapping is unit-testable through scripts/tests/load-ts.mjs's strict
@@ -139,18 +140,12 @@ export function isDatabaseReachable(reason: HealthReason): boolean {
 }
 
 /**
- * Last line before a real message is shown to an AUTHENTICATED caller.
+ * The scrubber this file used to define now lives in lib/scrub-secrets.ts.
  *
- * A Postgres error should never contain a key. "Should never" is not a
- * guarantee, and this endpoint is the one place a message crosses from
- * the log into an HTTP response, so anything shaped like a credential is
- * removed on the way out. JWTs (three dot-separated base64url runs),
- * long opaque tokens, and basic-auth credentials inside a URL.
+ * It was moved because it was correct and unreachable: every API route in
+ * the product logs through logApiError(), and that path wrote provider
+ * messages to stderr, to production_errors and to an alert email without
+ * ever passing them through the function sitting in this file. A defence
+ * named after one feature is a defence the next caller will not find.
+ * /api/health still imports it — from its new home.
  */
-export function scrubSecrets(text: string): string {
-  return text
-    .replace(/eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g, "[redacted-jwt]")
-    .replace(/\b(sb|sbp|re|sk|pk)_[A-Za-z0-9_-]{12,}/g, "[redacted-token]")
-    .replace(/([a-z][a-z0-9+.-]*:\/\/)[^/@\s]+:[^/@\s]+@/gi, "$1[redacted-userinfo]@")
-    .replace(/\b[A-Za-z0-9_-]{40,}\b/g, "[redacted-opaque]");
-}

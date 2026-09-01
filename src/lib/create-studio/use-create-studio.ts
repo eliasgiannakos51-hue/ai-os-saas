@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { escapeHtml } from "@/lib/html-escape";
 import { useTranslations } from "next-intl";
 import { useCredits } from "@/components/credits/credits-context";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
@@ -29,6 +30,21 @@ export type StudioResult = {
   website: UserWebsite | null;
   /** Module entry only — the module it was routed into. */
   moduleTitle: string | null;
+  /**
+   * WHERE IT WENT, as the sidebar's own key for that place.
+   *
+   * V4.6 #11.3. The report was "I said something to the AI, it put the
+   * post somewhere else, I did not understand what it does there" — and
+   * the link that was there said "Open it", which names nothing. All six
+   * types shared that one string, so the only type that told you the
+   * destination was moduleEntry, and only through a separate line.
+   *
+   * The sidebar's key rather than a literal: the destination is a place
+   * in this app and it already has a translated name in ten languages.
+   * Writing a second one here is how "Goals & Plans" in the nav becomes
+   * "Mission Control" in a confirmation.
+   */
+  destinationKey: string | null;
   /** Anything the creating route said, shown verbatim. */
   message: string | null;
 };
@@ -145,6 +161,7 @@ export function useCreateStudio() {
               type: "website",
               title: record.name,
               href: `/dashboard/website-builder?project=${record.id}`,
+              destinationKey: "sidebar.items.websiteBuilder",
               website: record,
               moduleTitle: null,
               message: null,
@@ -188,6 +205,7 @@ export function useCreateStudio() {
                   type: "mission",
                   title: detection.title,
                   href: "/dashboard/mission",
+                  destinationKey: "sidebar.items.missionControl",
                   website: null,
                   moduleTitle: null,
                   message: null,
@@ -198,7 +216,16 @@ export function useCreateStudio() {
               setError(getErrorMessage(outcome.error, "Could not create a plan."));
               return;
             }
-            const planned = outcome.result as { planned?: boolean; message?: string; mission?: { goal?: string } };
+            const planned = outcome.result as {
+              planned?: boolean;
+              message?: string;
+              // `id` as well as `goal` — the job handler has always
+              // returned the whole inserted row (jobs/handlers/
+              // mission-plan.ts does `.select("*").single()`), and this
+              // cast was what narrowed it away. Without the id the
+              // confirmation could only offer the list.
+              mission?: { id?: string; goal?: string };
+            };
             if (!planned.planned) {
               finishStep("plan", "failed");
               setError(planned.message ?? "Could not create a plan.");
@@ -208,7 +235,16 @@ export function useCreateStudio() {
             setResult({
               type: "mission",
               title: planned.mission?.goal ?? detection.title,
-              href: "/dashboard/mission",
+              // AT THE PLAN, not at the list of plans — V4.6 #11.3.
+              // components/mission/mission-list.tsx reads `?mission=` and
+              // opens the detail panel for it. The still_running branch
+              // above keeps the bare list URL on purpose: there is no id
+              // yet, because this page stopped watching before the row
+              // came back.
+              href: planned.mission?.id
+                ? `/dashboard/mission?mission=${encodeURIComponent(planned.mission.id)}`
+                : "/dashboard/mission",
+              destinationKey: "sidebar.items.missionControl",
               website: null,
               moduleTitle: null,
               message: null,
@@ -235,6 +271,9 @@ export function useCreateStudio() {
               type: "moduleEntry",
               title: detection.title,
               href: data.href ?? null,
+              // The module's own name, already resolved by the route that
+              // classified it — so this is the same word the nav uses.
+              destinationKey: data.moduleTitleKey ?? null,
               website: null,
               moduleTitle: data.moduleTitle ?? null,
               message: data.message ?? null,
@@ -264,7 +303,18 @@ export function useCreateStudio() {
             setResult({
               type: "automation",
               title: detection.title,
-              href: "/dashboard/automation",
+              // AT THE AUTOMATION — V4.6 #11.3. /api/automations/create
+              // returns the inserted row (and the existing one on the
+              // duplicate-suppressed path, which is the right target
+              // too: the user asked for that automation and it is
+              // already there). components/automation/
+              // automation-active-list.tsx scrolls to `?automation=` and
+              // marks it; there is no detail view to open because an
+              // automation does not have one.
+              href: data.automation?.id
+                ? `/dashboard/automation?automation=${encodeURIComponent(String(data.automation.id))}`
+                : "/dashboard/automation",
+              destinationKey: "sidebar.items.automation",
               website: null,
               moduleTitle: null,
               message: data.message ?? null,
@@ -308,6 +358,7 @@ export function useCreateStudio() {
                   type: "agent",
                   title: detection.title,
                   href: "/dashboard/agents",
+                  destinationKey: "sidebar.items.agents",
                   website: null,
                   moduleTitle: null,
                   message: null,
@@ -353,6 +404,7 @@ export function useCreateStudio() {
               // list will show — not the detector's guess.
               title: typeof built.draft.name === "string" ? built.draft.name : detection.title,
               href: `/dashboard/agents?agent=${data.agent.id}`,
+              destinationKey: "sidebar.items.agents",
               website: null,
               moduleTitle: null,
               message: null,
@@ -386,6 +438,7 @@ export function useCreateStudio() {
               type: "document",
               title: detection.title,
               href: `/dashboard/documents/${data.id}`,
+              destinationKey: "sidebar.items.documents",
               website: null,
               moduleTitle: null,
               message: null,
@@ -435,11 +488,3 @@ function resolveTimeZone(): string {
   }
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}

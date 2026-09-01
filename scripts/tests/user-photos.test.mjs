@@ -232,9 +232,26 @@ console.log("\n== 5. storage: a limit per account, and what it does not do ==");
   ok("a nonsense size does not make the batch free",
     quota.canUpload(quota.summariseStorage(0, MB), [NaN, 2 * MB]).ok === false);
 
-  ok("bytes are formatted for a person", quota.formatBytes(50 * MB) === "50 MB");
-  ok("...and GB above a gigabyte", quota.formatBytes(2 * 1024 * MB) === "2.0 GB");
-  ok("...and never a negative", quota.formatBytes(-5) === "0 MB");
+  // ONE formatBytes NOW — lib/format-bytes.ts. storage-quota.ts had its
+  // own, and the two disagreed on exactly the inputs that matter: a
+  // non-finite size was "—" in the files list and "0 MB" here, and a
+  // NEGATIVE — which is what canUpload's remainingBytes IS when an
+  // account is over cap, and what website-builder-workspace.tsx renders —
+  // was flattened to "0 MB".
+  //
+  // The third assertion below used to read `formatBytes(-5) === "0 MB"`
+  // under the name "...and never a negative". That was not a property
+  // worth protecting; it was the defect, written down as a requirement.
+  // An account 500 MB over its cap was told "0 MB", which is both wrong
+  // and unactionable. The precision of the other two changed with the
+  // merge (one implementation, one set of thresholds) and is now the same
+  // as the files list.
+  ok("bytes are formatted for a person", quota.formatBytes(50 * MB) === "50.0 MB", quota.formatBytes(50 * MB));
+  ok("...and GB above a gigabyte", quota.formatBytes(2 * 1024 * MB) === "2.00 GB", quota.formatBytes(2 * 1024 * MB));
+  ok("...and an over-cap figure keeps its sign AND its unit",
+    quota.formatBytes(-500 * MB) === "-500.0 MB", quota.formatBytes(-500 * MB));
+  ok("...and a size nobody measured is a dash, not a zero",
+    quota.formatBytes(NaN) === "—", quota.formatBytes(NaN));
 
   // THE ENDPOINT PAGES. A user with more files than one page is exactly
   // the user this is for.

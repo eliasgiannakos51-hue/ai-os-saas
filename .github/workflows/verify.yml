@@ -1,0 +1,273 @@
+# WHAT RUNS WITHOUT SOMEBODY REMEMBERING TO RUN IT.
+#
+# Until this file existed, nothing did. There was no .github/workflows at
+# all, and the only automatic guard in the repository was a pre-commit
+# hook installed by `npm install` that checks for mutation markers and
+# nothing else. `npm run build` — the command Vercel runs — covers the
+# function limits, the marker check, the i18n check, the unit suite and
+# `next build`. It does NOT run the mutation suites, the integration
+# suites, the database suites or the production browser tests.
+#
+# THE COST OF THAT WAS MEASURED, not imagined. Commit d2c4d81 (2026-08-27)
+# correctly fixed a "NaN credits/month" bug by removing formatNumber()
+# from eight components — two of which were quoted verbatim as mutation
+# anchors in scripts/tests/voice.mutation.mjs. The anchors went stale, the
+# mutations stopped applying, and `npm run test:mutation` was red for two
+# days and twenty-seven commits before anybody ran it. Nobody was at
+# fault: the command that would have said so was not run by anything.
+name: verify
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+  # THE NIGHTLY TRIGGER FOR THE prodtests JOB BELOW. Without this line
+  # that job's `if:` names an event this workflow never receives, so it
+  # would have sat in the file looking like coverage and running never.
+  schedule:
+    - cron: "0 3 * * *"
+
+# WHO FINDS OUT WHEN IT GOES RED.
+#
+# THE COST OF NOBODY FINDING OUT, measured on this repository: thirty push
+# runs, thirteen failures, and the same step failing in every one of them
+# — `mutation suites` — for twenty commits before anyone read the history.
+# A CI nobody looks at is the same as a CI that does not exist, and GitHub
+# emails the person who pushed, which on a branch pushed by automation is
+# nobody.
+#
+# So a failure on the default branch, or on any branch, opens an ISSUE.
+# An issue is the one channel that is visible without a subscription,
+# survives the tab being closed, and can be assigned. The job below is
+# gated on failure() and de-duplicates: one open issue at a time, updated
+# with each new failure rather than a new issue per push.
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  # A second push to the same branch cancels the first: the answer that
+  # matters is the one about the current head.
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: typecheck · lint · build · mutations · database
+    runs-on: ubuntu-latest
+    # The mutation suites alone take roughly twenty minutes: forty-six
+    # files, each of which edits the working tree, runs a gate, and
+    # restores. The default six-hour cap is not a limit, it is an absence
+    # of one; this is set to something a stuck run will actually hit.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      # `npm ci`, not `npm install`: the lockfile is the input, and a
+      # resolution that drifts silently in CI is a build that does not
+      # describe the commit.
+      - name: install
+        run: npm ci
+
+      - name: typecheck
+        run: npx tsc --noEmit
+
+      - name: lint
+        run: npx eslint
+
+      # Covers the function limits, the mutation-MARKER check, the i18n
+      # check, the whole unit suite and a real `next build` — see the
+      # "build" script in package.json. NO env vars are supplied on
+      # purpose: the build must not need secrets to compile.
+      - name: build (no env vars — a clean-clone build must not need any)
+        run: npm run build
+
+      # THE ONE THIS FILE WAS WRITTEN FOR.
+      - name: mutation suites
+        run: npm run test:mutation
+
+      # A mutation suite that dies part-way leaves its edit in the working
+      # tree — it restores in a `finally`, but a hard kill has no finally.
+      # A green run that left the tree dirty is not a green run, and the
+      # next step would otherwise inherit somebody else's mutant.
+      - name: the mutation suites put the tree back
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::a mutation suite left the working tree modified"
+            git status --porcelain
+            git diff
+            exit 1
+          fi
+          echo "working tree clean"
+
+      # scripts/db/run-dbtests.mjs provisions a throwaway PostgreSQL with
+      # initdb, applies bootstrap-supabase.sql and every migration in
+      # order, and runs the suites against it — no secrets needed.
+      - name: postgres, for the database suites
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql
+          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
+
+      # ITS EXIT CODE CANNOT TELL YOU IT RAN. run-dbtests.mjs exits 0 when
+      # no Postgres is reachable — deliberately, and its own header says
+      # so in as many words: "nothing here distinguishes skipped from
+      # passed AT THE EXIT CODE". In CI that is the difference between a
+      # gate and a green tick, so the log is read for the skip it prints.
+      - name: database suites
+        run: |
+          set -o pipefail
+          npm run test:db 2>&1 | tee /tmp/dbtests.log
+          if grep -q "SKIPPED" /tmp/dbtests.log; then
+            echo "::error::test:db skipped — it exits 0 when no Postgres is reachable, so this would have been a false green"
+            exit 1
+          fi
+
+      # THE FAMILY THAT WAS IN NO JOB AT ALL. scripts/tests/*.itest.mjs
+      # existed, package.json had a script for it, and this file never
+      # named either — so the integration suites had the same coverage as
+      # the browser tests, which is to say none. Found by
+      # scripts/tests/ci-coverage.test.mjs, which now asserts that every
+      # family of suite in scripts/tests/ is run by some job here.
+      #
+      # After the database step because several of them want its Postgres.
+      - name: integration suites
+        run: npm run test:integration
+
+  # ONE BROWSER TEST ON EVERY PUSH, and the rest nightly.
+  #
+  # THE GAP THIS CLOSES, measured. The nightly job below has an `if:` that
+  # names `schedule` and `workflow_dispatch`, so on a push it is SKIPPED —
+  # and the run history for this repository contains thirty push runs and
+  # zero schedule runs. The browser tests had therefore never executed in
+  # CI at all. What that cost was found by running one by hand:
+  # routes-smoke.prodtest.mjs was CRASHING at its fifth section, and eight
+  # of its assertions still named sidebar groups and page titles from
+  # before the V4.6 #3 consolidation. A suite nothing runs stops being a
+  # suite and becomes a file.
+  #
+  # routes-smoke is the one that runs on every push because it has the
+  # broadest reach per build: eight public and thirty-one signed-in
+  # routes, each at four widths, checking status, console errors,
+  # unresolved i18n keys, horizontal overflow and touch targets — about
+  # five hundred assertions for a single `next build`.
+  prodtest-smoke:
+    name: browser smoke (every push)
+    runs-on: ubuntu-latest
+    # One `next build` plus thirty-nine routes at four widths. If it has
+    # not finished in twenty-five minutes something is wedged.
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: chromium
+        run: |
+          npx playwright install --with-deps chromium
+          echo "CHROMIUM_PATH=$(node -e 'console.log(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
+      # It stands up its own stand-in Supabase on 127.0.0.1 and builds
+      # against it, so no secret and no live project are involved.
+      - name: routes-smoke
+        run: node scripts/tests/routes-smoke.prodtest.mjs
+
+  # THE REST OF THE BROWSER TESTS ARE NIGHTLY, and the reason is
+  # arithmetic rather than judgement: each of the *.prodtest.mjs files
+  # runs its own `next build` before it opens a browser, so the whole set
+  # takes well over an hour. Blocking every push on all of them would
+  # teach people to skip CI.
+  #
+  # THE COUNT IS NOT WRITTEN HERE ON PURPOSE. It used to be spelled out in
+  # words in this comment, the number was wrong by six, and nothing
+  # noticed — a number in a comment is a number nothing checks.
+  # scripts/tests/ci-coverage.test.mjs asserts instead that every suite
+  # family in scripts/tests/ is named by some job in this file.
+  prodtests:
+    name: production browser tests (nightly)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      # Every prodtest reads CHROMIUM_PATH before falling back to the
+      # image-local path this repo's own sandbox uses.
+      - name: chromium
+        run: |
+          npx playwright install --with-deps chromium
+          echo "CHROMIUM_PATH=$(node -e 'console.log(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
+      - name: production browser tests
+        run: npm run test:prod
+
+  # ---------------------------------------------------------------------
+  # THE ALERT. Runs only when something above failed.
+  alert:
+    name: open an issue when CI goes red
+    # EVERY job above, not the two I happened to remember. The nightly
+    # `prodtests` job was left out of this list when the alert was
+    # written, so a red nightly — the only job that runs the full browser
+    # suite — would have failed in silence. An alert with a hole in it is
+    # the thing it exists to prevent.
+    #
+    # `prodtests` is skipped on a push (it is schedule/dispatch only) and
+    # a skipped dependency does not stop this: `failure()` is true when
+    # ANY ancestor failed, and false when they are merely skipped.
+    # Enforced by scripts/tests/ci-coverage.test.mjs.
+    needs: [verify, prodtest-smoke, prodtests]
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `CI red on ${context.ref.replace("refs/heads/", "")}`;
+            const body = [
+              `**${context.workflow}** failed.`,
+              ``,
+              `- run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              `- commit: \`${context.sha.slice(0, 7)}\``,
+              `- branch: \`${context.ref.replace("refs/heads/", "")}\``,
+              ``,
+              `Reported automatically. The first twenty commits of this branch went into a red CI because nothing said so.`,
+            ].join("\n");
+            // ONE OPEN ISSUE AT A TIME. A new issue per failing push turns
+            // the tracker into a log and teaches people to close them
+            // unread; the existing one gets a comment instead.
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: "ci-red",
+              per_page: 10,
+            });
+            const open = existing.data.find((i) => i.title === title);
+            if (open) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: open.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ["ci-red"],
+              });
+            }

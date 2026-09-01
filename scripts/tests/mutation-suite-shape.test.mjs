@@ -74,6 +74,40 @@ for (const file of suites) {
 }
 
 // ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+console.log("\n== 1b. a suite says WHICH check caught each mutation ==");
+// ---------------------------------------------------------------------
+// "CAUGHT" ON ITS OWN IS NOT ENOUGH. It says a mutation turned something
+// red; it does not say WHAT, and a mutation caught by the wrong assertion
+// is a mutation nobody has really tested — the classic case being an edit
+// that breaks the file's syntax, reddening every check at once and
+// looking like coverage.
+//
+// Measured across the directory: 57 of 58 suites already do this, in one
+// of two ways. The better one reads the gate's OWN first failing line
+// from its stdout (light-theme-contrast.mutation.mjs is the model); the
+// weaker one carries an `expect:` label naming the check the author
+// believes will fire. Both are accepted here — a predicted name is still
+// a name somebody can check — but the stdout form is what to copy,
+// because a label is a belief and the point of running the thing is to
+// stop believing.
+//
+// A RATCHET AT THE MEASURED NUMBER. It may only go DOWN.
+{
+  const silent = [];
+  for (const file of suites) {
+    const src = readFileSync(path.join(DIR, file), "utf8");
+    const namesIt = /includes\("FAIL"\)|-> by |\bexpect:|e\.stdout|\.stdout/.test(src);
+    if (!namesIt) silent.push(file);
+  }
+  const SILENT_CEILING = 0;
+  ok(
+    `every suite names which check caught the mutation (${suites.length - silent.length}/${suites.length})`,
+    silent.length <= SILENT_CEILING,
+    `${silent.join(", ")} — each prints CAUGHT without saying what went red`
+  );
+}
+
 console.log("\n== 2. a stale anchor is a failure, not a note ==");
 // ---------------------------------------------------------------------
 // Structural, because the behavioural version costs fifteen minutes: the

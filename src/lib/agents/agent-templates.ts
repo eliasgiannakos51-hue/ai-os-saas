@@ -1,6 +1,7 @@
 import { AGENT_LIMITS } from "@/lib/agents/agent-config";
 import { AGENT_DEPTHS, type AgentDepth } from "@/lib/agents/agent-depth";
 import { foldForMatch } from "@/lib/text/unicode-patterns";
+import { minCharsFor } from "@/lib/text/script-length";
 
 /**
  * READY-MADE AGENTS, and the rules for putting one in the library.
@@ -332,9 +333,10 @@ export function validateShareableTemplate(
   const description = typeof input.description === "string" ? input.description.trim() : "";
   const taskPattern = typeof input.taskPattern === "string" ? input.taskPattern.trim() : "";
 
-  if (title.length < 3) return { ok: false, reason: "A title is required." };
+  if (title.length < minCharsFor(title, 3)) return { ok: false, reason: "A title is required." };
   if (title.length > TEMPLATE_LIMITS.title) return { ok: false, reason: "That title is too long." };
-  if (description.length < 3) return { ok: false, reason: "A description is required." };
+  if (description.length < minCharsFor(description, 3))
+    return { ok: false, reason: "A description is required." };
   if (description.length > TEMPLATE_LIMITS.description)
     return { ok: false, reason: "That description is too long." };
   if (!taskPattern.includes(TEMPLATE_SLOT))

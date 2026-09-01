@@ -26,6 +26,7 @@
 // Run: node scripts/tests/landing-mobile.prodtest.mjs
 import { startProdHarness } from "../lib/prod-harness.mjs";
 import { chromium } from "playwright";
+import { chromiumPath } from "./lib/chromium.mjs";
 
 const LOCALES = ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // 667 is the iPhone SE/8 viewport height — the shortest still in use, and
@@ -148,7 +149,7 @@ const MEASURE = () => {
 
 const harness = await startProdHarness({ tableRows: {}, supaPort: 54399 });
 const browser = await chromium.launch({
-  executablePath: process.env.CHROMIUM_PATH || undefined,
+  executablePath: chromiumPath(),
 });
 
 // Collected across the whole cross-product and reported once, so a single

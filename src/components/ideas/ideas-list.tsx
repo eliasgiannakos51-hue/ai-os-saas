@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, SearchX, Download } from "lucide-react";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import type { Idea } from "@/types/ideas";
 import type { LinkedEntity } from "@/lib/entity-links";
 import { IdeaRow } from "@/components/ideas/idea-row";
 import { toCSV, downloadCSV, todayForFilename } from "@/lib/download/table-csv";
-import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
+import { PAGE_SIZE, useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";
 import { EmptyState } from "@/components/empty-state";
@@ -87,6 +87,40 @@ export function IdeasList({
   const { sortOrder, setSortOrder, page, setPage, totalPages, sorted, paginated, alphabetical } =
     useSortAndPaginate(filtered, query, (idea) => idea.name ?? "");
 
+  // DEEP LINK FOR ?record=<id> — V4.6 #11.2.
+  //
+  // Ideas are the one starrable surface that lives on /dashboard rather
+  // than on /dashboard/<slug> (lib/classifier-modules.ts's moduleHref
+  // special-cases it), so they do not go through generic-list.tsx and did
+  // not inherit its `?record=` reader. Starring an idea and pressing it
+  // landed on the dashboard with the idea nowhere in particular.
+  //
+  // AND THE PAGE MATTERS HERE, which is what makes this more than a
+  // scroll. The list paginates at PAGE_SIZE (20); a starred idea from
+  // three months ago is on page 4, and scrolling to an element that is
+  // not rendered scrolls to nothing. So the page is computed from the
+  // id's position in the SORTED set — the same array the pagination
+  // slices — and set before the scroll.
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const highlightRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("record");
+    if (requested && ideas.some((i) => i.id === requested)) setHighlightId(requested);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (!highlightId) return;
+    const index = sorted.findIndex((i) => i.id === highlightId);
+    if (index < 0) return;
+    const target = Math.floor(index / PAGE_SIZE) + 1;
+    if (target !== page) setPage(target);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlightId, sorted]);
+  useEffect(() => {
+    if (!highlightId) return;
+    highlightRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [highlightId, page]);
+
   function handleExport() {
     const csv = toCSV(CSV_HEADERS, sorted.map(toCSVRow));
     downloadCSV(`ideas_export_${todayForFilename()}.csv`, csv);
@@ -133,12 +167,24 @@ export function IdeasList({
         <>
           <div className="space-y-3">
             {paginated.map((idea) => (
-              <IdeaRow
+              /* The wrapper carries the ref and the mark rather than
+                 IdeaRow, so the row keeps its own markup and nothing
+                 about how an idea looks depends on how it was reached. */
+              <div
                 key={idea.id}
-                idea={idea}
-                linkedEntities={linkedEntities[idea.id]}
-                isFavorited={favoritedIds?.has(idea.id) ?? false}
-              />
+                ref={idea.id === highlightId ? highlightRef : undefined}
+                className={
+                  idea.id === highlightId
+                    ? "rounded-2xl ring-2 ring-orange-500 ring-offset-2 ring-offset-background"
+                    : undefined
+                }
+              >
+                <IdeaRow
+                  idea={idea}
+                  linkedEntities={linkedEntities[idea.id]}
+                  isFavorited={favoritedIds?.has(idea.id) ?? false}
+                />
+              </div>
             ))}
           </div>
           <PaginationControls page={page} totalPages={totalPages} onChange={setPage} />

@@ -25,6 +25,10 @@ import { StudioChat } from "@/components/create/studio-chat";
 import { useCredits } from "@/components/credits/credits-context";
 import { readSharedTextFromHash } from "@/lib/pwa/share-payload";
 import { useCreateStudio } from "@/lib/create-studio/use-create-studio";
+import {
+  DESTINATION_NAMESPACE,
+  destinationLabelKey,
+} from "@/lib/create-studio/destination";
 import { ResumedWorkNotice } from "@/components/jobs/resumed-work-notice";
 import { ExamplePrompts } from "@/components/ai/example-prompts";
 import {
@@ -77,6 +81,10 @@ type WorkspaceTab = "overview" | "progress" | "chat" | "files";
  */
 export function CreateStudio() {
   const t = useTranslations("dashboard.createStudio");
+  // The sidebar's own namespace, because destinationKey is a path into
+  // the nav's names ("sidebar.items.missionControl"). Declared statically
+  // so this component stays sliceable; destinationLabelKey does the split.
+  const tDestination = useTranslations(DESTINATION_NAMESPACE);
   const tCommon = useTranslations("common");
   const { accountCreditPriceEur, planSlug } = useCredits();
   const studio = useCreateStudio();
@@ -438,13 +446,27 @@ export function CreateStudio() {
         onTabChange={(key) => setTab(key as WorkspaceTab)}
         actions={
           <>
+            {/* "MADE IT HERE → Goals & Plans", not "Open it" — V4.6 #11.3.
+                The report was "it put the post somewhere else and I did
+                not understand what it does there", and the link said
+                nothing about where "there" was. All six types shared the
+                one generic string; only a module entry mentioned its
+                destination, and only on a separate line further down.
+                The destination is named with the SIDEBAR's own key, so it
+                is the same word the nav uses rather than a second name
+                invented for confirmations. */}
             {studio.result?.href && (
               <Link
                 href={studio.result.href}
+                data-testid="studio-destination-link"
                 className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
               >
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                {t("openCreated")}
+                {destinationLabelKey(studio.result.destinationKey)
+                  ? t("madeItHere", {
+                      where: tDestination(destinationLabelKey(studio.result.destinationKey)!),
+                    })
+                  : t("openCreated")}
               </Link>
             )}
             <button

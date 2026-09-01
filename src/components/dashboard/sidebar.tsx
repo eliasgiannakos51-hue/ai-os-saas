@@ -12,7 +12,7 @@ import {
   ALL_SIDEBAR_GROUPS,
   MAIN_SIDEBAR_GROUPS,
   SETTINGS_GROUP,
-  visibleGroups,
+  sidebarGroups,
   type SidebarGroupConfig,
   type SidebarItem,
 } from "@/lib/sidebar-nav";
@@ -34,36 +34,39 @@ function groupContainsActive(group: SidebarGroupConfig, pathname: string | null)
   return group.items.some((item) => isActive(pathname, item.href));
 }
 
-// Pure function of pathname alone (no localStorage read) so server and
-// client agree on which group is open before hydration's effect runs.
-function defaultOpenHeading(pathname: string | null): string | null {
+// THE GROUP HOLDING THE CURRENT PAGE, which is the one that must never
+// be left shut — landing on a page whose group is collapsed shows a nav
+// that does not say where you are.
+//
+// Reads ALL_SIDEBAR_GROUPS, not the filtered list, deliberately: the
+// thirty rows the sidebar no longer draws still belong to a group, and
+// arriving on one of them should still open it.
+function headingContaining(pathname: string | null): string | null {
   return (
     ALL_SIDEBAR_GROUPS.find((g) => g.collapsible && groupContainsActive(g, pathname))?.heading ??
     null
   );
 }
 
-function storageKey(heading: string) {
-  return `ionexa:sidebar-group:${heading}`;
-}
+const COLLAPSED_KEY = "ionexa:sidebar-collapsed";
 
-// One resting tint per sidebar section, so the nav reads as grouped at a
-// glance instead of as one long amber list. Active items ignore this and
-// go full amber — the current page should never be ambiguous.
-// Returns whole Tailwind class strings (not an interpolated color name)
-// so the JIT compiler can actually see them.
-function groupTone(heading: string): string {
-  switch (heading) {
-    case "Create":
-      return "text-purple-400/55";
-    case "My Business":
-      return "text-sky-400/55";
-    case "Insights":
-      return "text-amber-400/55";
-    default:
-      return "text-emerald-400/50";
-  }
-}
+// ONE COLOUR FOR EVERY RESTING ICON. Only the current page gets the
+// accent — V4.6 #3.
+//
+// What stood here was a `switch (heading)` returning purple, sky or amber
+// for "Create", "My Business" and "Insights", above a comment claiming
+// "one resting tint per sidebar section". Not one of those three headings
+// had existed in lib/sidebar-nav.ts since the rename that made it
+// Workspace / Build / Tracking / Business / Strategy / Operations, so
+// every group fell through to `default` and the whole nav was already a
+// single emerald. The comment described a behaviour the code could not
+// produce, and it read as deliberate, which is why it survived.
+//
+// The behaviour it accidentally had is the one the brief asks for, so it
+// is now stated as a constant rather than left to a dead branch: a
+// function of the heading could go back to disagreeing with the config,
+// a constant cannot.
+const RESTING_ICON = "text-emerald-400/50";
 
 export function Sidebar({
   email = "",
@@ -98,15 +101,24 @@ export function Sidebar({
     return key ? t(`items.${key}`) : label;
   }
 
-  // Accordion: at most ONE collapsible group open at a time (Workspace is
-  // always-open, excluded from this). undefined = "not yet decided on the
-  // client" — renderGroup falls back to defaultOpenHeading(pathname) in
-  // that case, a pure function of pathname alone, so server and client
-  // render identically on first paint. The effect below then layers in
-  // localStorage once we're on the client, and re-forces the active
-  // page's own group open on every navigation (overriding any manually
-  // collapsed state), matching the previous per-group behavior.
-  const [openGroup, setOpenGroup] = useState<string | null | undefined>(undefined);
+  // EVERYTHING OPEN BY DEFAULT — V4.6 #3.
+  //
+  // This was an accordion: at most one collapsible group open at a time.
+  // That was the right answer to eight groups and forty-five rows, where
+  // opening two of them at once pushed the rest off a 768px screen. It is
+  // the wrong answer to four groups and sixteen rows, which fit at both
+  // measured heights — and it was costing exactly what the brief asked
+  // to buy. Measured on the real page at 1920x1080 and 1366x768: seven of
+  // fifteen rows were painted on arrival, because two of the four groups
+  // were shut. The whole point of cutting the sidebar to fifteen rows is
+  // that fifteen rows can be seen at once.
+  //
+  // So the state is now the set of groups the user has DELIBERATELY shut,
+  // which is empty by default. Empty is also a constant, so the server
+  // and the first client paint agree without an effect having to run —
+  // the property the old `undefined` sentinel existed to preserve, kept
+  // for free.
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
 
   const router = useRouter();
   /** Routes already asked for, so a pointer sweeping down the sidebar
@@ -121,32 +133,41 @@ export function Sidebar({
     [router]
   );
 
+  // Restores what the user shut, then re-opens whichever group holds the
+  // page they are on — a group cannot stay collapsed over the current
+  // page, whatever was stored.
   useEffect(() => {
-    const activeHeading = defaultOpenHeading(pathname);
-    if (activeHeading) {
-      setOpenGroup(activeHeading);
-      return;
+    let stored: string[] = [];
+    try {
+      stored = JSON.parse(window.localStorage.getItem(COLLAPSED_KEY) ?? "[]");
+    } catch {
+      // A hand-edited or half-written value is not worth a broken nav.
+      stored = [];
     }
-    setOpenGroup((prev) => {
-      if (prev !== undefined) return prev;
-      const stored = window.localStorage.getItem(storageKey("__open__"));
-      return stored ? stored : null;
-    });
+    const next = new Set(Array.isArray(stored) ? stored.filter((h) => typeof h === "string") : []);
+    const active = headingContaining(pathname);
+    if (active) next.delete(active);
+    setCollapsed(next);
   }, [pathname]);
 
   function toggleGroup(group: SidebarGroupConfig) {
     if (!group.collapsible) return;
-    setOpenGroup((prev) => {
-      const currentlyOpen = prev ?? defaultOpenHeading(pathname);
-      const next = currentlyOpen === group.heading ? null : group.heading;
-      window.localStorage.setItem(storageKey("__open__"), next ?? "");
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(group.heading)) next.delete(group.heading);
+      else next.add(group.heading);
+      try {
+        window.localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...next]));
+      } catch {
+        // Private mode, or storage full. Losing the preference is fine;
+        // throwing inside a click handler is not.
+      }
       return next;
     });
   }
 
   function renderGroup(group: SidebarGroupConfig) {
-    const currentlyOpen = openGroup === undefined ? defaultOpenHeading(pathname) : openGroup;
-    const expanded = group.collapsible ? currentlyOpen === group.heading : true;
+    const expanded = group.collapsible ? !collapsed.has(group.heading) : true;
 
     return (
       <div key={group.heading}>
@@ -178,7 +199,7 @@ export function Sidebar({
         >
           <div className="min-h-0 overflow-hidden">
             <div className="space-y-0.5 pb-0.5">
-              {group.items.map((item) => renderItem(item, groupTone(group.heading)))}
+              {group.items.map((item) => renderItem(item))}
             </div>
           </div>
         </div>
@@ -186,10 +207,17 @@ export function Sidebar({
     );
   }
 
-  // One renderer for every nav row, pinned or grouped, so the two can
-  // never drift apart. `prominent` is what gives the three daily entry
-  // points their visual weight over the twenty-odd module links.
-  function renderItem(item: SidebarItem, tone: string, prominent = false) {
+  // One renderer for every nav row.
+  //
+  // It used to take a third argument, `prominent`, whose comment said it
+  // "gives the three daily entry points their visual weight over the
+  // twenty-odd module links" — and it had exactly one call site, which
+  // never passed it. There were no pinned rows and no prominent ones; the
+  // parameter defaulted to false forever, and the two style branches it
+  // guarded were unreachable. The five daily entry points now get their
+  // weight from being the first group and never collapsing, which is a
+  // property of the config rather than of a flag nobody sets.
+  function renderItem(item: SidebarItem) {
     const active = isActive(pathname, item.href);
     const Icon = item.icon;
     const hint = item.hintKey ? t(`hints.${item.hintKey}`) : undefined;
@@ -225,23 +253,17 @@ export function Sidebar({
                     // rail as pseudo-elements so both can animate; the
                     // look is unchanged, it just slides in now.
                     data-active={active}
-                    className={`nav-item group relative flex items-center gap-2.5 rounded-xl transition-colors duration-200 ${
-                      prominent
-                        ? "min-h-[44px] py-2.5 pl-2.5 pr-3 text-[15px] font-medium"
-                        : "min-h-[44px] py-2 pl-2.5 pr-3 text-sm"
-                    } ${
+                    className={`nav-item group relative flex min-h-[44px] items-center gap-2.5 rounded-xl py-2 pl-2.5 pr-3 text-sm transition-colors duration-200 ${
                       active
                         ? "font-semibold text-orange-200"
-                        : prominent
-                          ? "text-foreground/90 hover:bg-white/[0.045] hover:text-foreground hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.18)]"
-                          : "text-muted hover:bg-white/[0.045] hover:text-foreground hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.18)]"
+                        : "text-muted hover:bg-white/[0.045] hover:text-foreground hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.18)]"
                     }`}
                   >
                     <Icon
-                      className={`icon-bounce shrink-0 ${prominent ? "h-[18px] w-[18px]" : "h-4 w-4"} ${
+                      className={`icon-bounce h-4 w-4 shrink-0 ${
                         active
                           ? "text-orange-300 drop-shadow-[0_0_6px_rgba(249,115,22,0.8)]"
-                          : `${tone} group-hover:text-orange-300`
+                          : `${RESTING_ICON} group-hover:text-orange-300`
                       }`}
                       aria-hidden="true"
                     />
@@ -278,7 +300,13 @@ export function Sidebar({
       >
         <div className="relative flex items-center justify-center px-4 py-3">
           <Link href={OVERVIEW_NAV_ITEM.href} onClick={closeOnMobile} className="flex items-center">
-            <Logo className="h-auto w-[130px] max-w-full" />
+            {/* 72px, not 130px. The full logo's viewBox is 202x190 — very
+                nearly square — so 130px of width was 122px of height, and
+                the header block measured 146px in a 768px-tall viewport:
+                more than any group of links. Measured at 72px it is 92px,
+                which is 54px back, and 54px is 1.2 rows of nav. The mark
+                is unchanged; only its size is. */}
+            <Logo className="h-auto w-[72px] max-w-full" />
           </Link>
           <button
             type="button"
@@ -290,12 +318,12 @@ export function Sidebar({
           </button>
         </div>
 
-        <nav className="space-y-5 p-3">
-          {visibleGroups(MAIN_SIDEBAR_GROUPS, isOwner).map(renderGroup)}
+        <nav className="space-y-4 p-3">
+          {sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).map(renderGroup)}
         </nav>
 
         <div className="border-t border-white/[0.07] p-3">
-            {visibleGroups([SETTINGS_GROUP], isOwner).map(renderGroup)}
+            {sidebarGroups([SETTINGS_GROUP], isOwner).map(renderGroup)}
           </div>
 
         {/* Account card. Both values come from the already-loaded session

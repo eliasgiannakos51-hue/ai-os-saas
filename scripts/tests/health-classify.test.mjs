@@ -22,12 +22,25 @@ import { loadTs } from "./load-ts.mjs";
 let pass = 0;
 const failures = [];
 function check(name, cond, detail) {
+  // check() TAKES A BOOLEAN. `check(name, someArray, [])` reads perfectly
+  // and is always green — every array is truthy in JavaScript, including
+  // the empty one. Two conventions share this name across the gates:
+  // check(name, cond, detail) here, check(name, actual, expected)
+  // elsewhere, and a call copied between them passes forever while
+  // printing its own failure text. See db-inventory.test.mjs, where the
+  // same guard was added after the deleted-table regression did exactly
+  // that.
+  if (typeof cond !== "boolean") {
+    failures.push(name);
+    console.log(`  FAIL  ${name}\n        check() takes a BOOLEAN; got ${Array.isArray(cond) ? "an array" : typeof cond}`);
+    return;
+  }
   if (cond) pass++;
   else { failures.push(name); console.log(`  FAIL  ${name}${detail ? "\n        " + detail : ""}`); }
 }
 const read = (p) => readFileSync(p, "utf8");
 const H = await loadTs("src/lib/health/classify.ts");
-const { classifyProbeError, isDatabaseReachable, scrubSecrets, HEALTH_REASONS, HEALTH_STAGES } = H;
+const { classifyProbeError, isDatabaseReachable, HEALTH_REASONS, HEALTH_STAGES } = H;
 
 console.log("== 1. the codes that actually occur are told apart ==");
 // EVERY code the classifier claims to map, checked against the reason its
@@ -78,42 +91,22 @@ check("ok: yes", isDatabaseReachable("ok") === true);
 check("isDatabaseReachable answers for EVERY reason in the vocabulary",
   HEALTH_REASONS.every((r) => typeof isDatabaseReachable(r) === "boolean"));
 
-console.log("== 3. NEVER A CREDENTIAL — the rule with no exception ==");
-// The one place a provider's message crosses from the log into an HTTP
-// response. "A Postgres error never contains a key" is a belief.
-// ASSEMBLED AT RUNTIME, NEVER WRITTEN OUT AS LITERALS.
+console.log("== 3. NEVER A CREDENTIAL — moved, because it was unreachable ==");
+// The scrubber used to be DEFINED in classify.ts and exercised here.
+// It now lives in src/lib/scrub-secrets.ts, and its behaviour — every
+// credential shape this product actually holds, run through the real
+// function — is asserted in scripts/tests/log-scrubbing.test.mjs.
 //
-// The first draft of this file spelled these fixtures in full and
-// GitHub's push protection rejected the push, naming line 86: the
-// invented Supabase token matched the real PAT format exactly, which is
-// precisely what made it a good fixture and exactly what makes it
-// unpushable. The tempting fix is the "allow this secret" link. That
-// link trains the habit of clicking past secret scanning, and the next
-// thing it is clicked for will not be invented.
-//
-// So each shape is built from parts. The regex under test sees the same
-// string it would see in production; the repository never contains one.
-// Anyone tidying these back into literals will find out the same way.
-const JWT = ["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9", "eyJyb2xlIjoiZXhhbXBsZSJ9", "c2lnbmF0dXJlX2hlcmU"].join(".");
-const SB_TOKEN = "sb" + "p_" + "0123456789abcdef".repeat(2) + "01234567";
-const RESEND = "r" + "e_" + "AbCdEfGhIjKlMnOpQrStUvWxYz012345";
-const OPAQUE = "abcdefghijklmnopqrstuvwxyz0123456789" + "ABCDEFGHIJ";
-const DB_URL = "postgres://admin:" + "hunter2" + "@db.example.com:5432/postgres";
-const SECRETS = [
-  [JWT, "a service-role-shaped JWT"],
-  [SB_TOKEN, "a Supabase-token-shaped string"],
-  [DB_URL, "credentials inside a URL"],
-  [RESEND, "a Resend-key-shaped string"],
-  [OPAQUE, "a 46-char opaque token"],
-];
-for (const [secret, what] of SECRETS) {
-  const out = scrubSecrets(`connection failed: ${secret} refused`);
-  check(`${what} is removed`, !out.includes(secret), `got: ${out}`);
-  check(`...and something is left to read (${what})`, out.includes("connection failed"), out);
-}
-check("an ordinary message survives untouched",
-  scrubSecrets("relation \"public.agent_templates\" does not exist") ===
-    "relation \"public.agent_templates\" does not exist");
+// It was moved because it was correct and applied in exactly one file
+// while logApiError(), which every API route calls, wrote provider
+// messages to stderr, to production_errors and to an alert email with no
+// scrubbing at all. What is left here is the property that belongs to
+// THIS file: classify.ts must not grow a second copy.
+check("classify.ts does not define a scrubber of its own",
+  !/function scrubSecrets/.test(read("src/lib/health/classify.ts")),
+  "two copies is how one of them stops being applied — see lib/scrub-secrets.ts");
+check("...and it still points at where the real one lives",
+  /lib\/scrub-secrets\.ts/.test(read("src/lib/health/classify.ts")));
 
 console.log("== 4. the ROUTE keeps the anonymous answer closed ==");
 const route = read("src/app/api/health/route.ts");
@@ -162,7 +155,7 @@ check("verbose is gated by checkCronAuth, which fails closed",
     const fields = [...a.matchAll(/\b(code|message)\s*:\s*([^,}]+)/g)];
     return fields.some(([, , value]) => !/scrubSecrets\(/.test(value) && !/^\s*undefined\s*$/.test(value));
   });
-  check("every detail field goes through scrubSecrets", unscrubbed, [],
+  check("every detail field goes through scrubSecrets", unscrubbed.length === 0,
     "a message reaching a response without scrubbing is the whole risk");
 }
 // THE PROBE TABLE. The defect was probing the newest table in the schema.
@@ -188,9 +181,101 @@ const baseline = migs.find((f) => f.includes("baseline_schema"));
 check("the baseline migration exists", Boolean(baseline));
 check("user_onboarding is created in the baseline",
   /create table if not exists public\.user_onboarding/.test(read(`supabase/migrations/${baseline}`)));
+// A FLOOR ON THE SCAN. "No migration reshapes it" is trivially true of a
+// directory listing that came back empty.
+check(`the migrations were read (${migs.length})`, migs.length >= 5, String(migs.length));
 const touchers = migs.filter((f) => f !== baseline &&
   new RegExp("\\bpublic\\.user_onboarding\\b").test(read(`supabase/migrations/${f}`)));
-check(`no later migration touches it (found ${touchers.length})`, touchers.length === 0, touchers.join(", "));
+// THE PROPERTY, NOT THE PROXY. "Nothing touches it" was a stand-in for
+// what actually matters: the probe runs `select("user_id").limit(1)`, and
+// that must not break when the schema is one migration behind the code —
+// which is the single most common state a deploying project is in.
+//
+// An `add column if not exists` cannot break that select. A drop, a
+// rename, a type change or a table drop can, and one of those arriving
+// unnoticed is the fault this section exists to prevent. So the check is
+// now about the VERBS, which is stricter than counting files: a later
+// migration may add to the table and may not reshape it.
+//
+// V4.6 #10 added home_seen_at, which is why the distinction had to be
+// made rather than the count bumped.
+const DANGEROUS = /\b(drop\s+table|drop\s+column|rename\s+to|rename\s+column|alter\s+column\s+\w+\s+type|alter\s+column\s+\w+\s+set\s+not\s+null)\b/i;
+
+// THE WHOLE INSTRUMENT, NOT JUST ITS REGEX. An earlier draft asserted
+// DANGEROUS against four strings and ran the split/filter pipeline only
+// over the real tree, where exactly one migration touches the table and
+// it is additive. That is the vacuity shape: every clause of the
+// statement walk could have been broken — a split on the wrong
+// character, a filter that matched nothing — and reshapers would still
+// have come back empty and the section would still have been green.
+// Lifted into a function so the walk itself is fed inputs it must get
+// right, and reshapesProbeTable() is what both the samples and the tree
+// scan call.
+function reshapesProbeTable(sql) {
+  return sql
+    .split(";")
+    // Only the statements that name the probe table.
+    .filter((stmt) => /\bpublic\.user_onboarding\b/.test(stmt))
+    .some((stmt) => DANGEROUS.test(stmt));
+}
+
+// THE SAMPLES, each of which the instrument must classify correctly.
+// Written as whole migrations rather than as bare clauses, because the
+// statement split and the table filter are the parts that were unproven.
+const RESHAPE_SAMPLES = [
+  ["a drop column", "alter table public.user_onboarding drop column goal;", true],
+  ["a rename column", "alter table public.user_onboarding rename column goal to aim;", true],
+  ["a type change", "alter table public.user_onboarding alter column goal type text;", true],
+  ["a table rename", "alter table public.user_onboarding rename to public.onboarding;", true],
+  ["a table drop", "drop table public.user_onboarding;", true],
+  [
+    "an additive column",
+    "alter table public.user_onboarding add column if not exists home_seen_at timestamptz;",
+    false,
+  ],
+  // THE ONE THE STATEMENT SPLIT EXISTS FOR. A migration that drops a
+  // column from a DIFFERENT table and, separately, adds one to the probe
+  // table is safe — and a scan that tested the file as one blob would
+  // call it a reshape and this section would go red for no reason.
+  [
+    "a drop on another table beside an add on this one",
+    "alter table public.user_ideas drop column note;\n" +
+      "alter table public.user_onboarding add column if not exists home_seen_at timestamptz;",
+    false,
+  ],
+  // ...AND ITS MIRROR, which is the failure that actually costs
+  // something: a drop on the probe table hidden after a safe statement.
+  // A scan that only read the first statement would miss it.
+  [
+    "an add on another table beside a drop on this one",
+    "alter table public.user_ideas add column if not exists note text;\n" +
+      "alter table public.user_onboarding drop column user_id;",
+    true,
+  ],
+];
+for (const [name, sql, expected] of RESHAPE_SAMPLES) {
+  check(
+    `the reshape scan calls ${name} ${expected ? "dangerous" : "safe"}`,
+    reshapesProbeTable(sql) === expected,
+    `got ${reshapesProbeTable(sql)}`
+  );
+}
+
+const reshapers = touchers.filter((f) => reshapesProbeTable(read(`supabase/migrations/${f}`)));
+// A FLOOR ON THE TOUCHERS TOO. `reshapers.length === 0` is trivially
+// true when nothing was scanned, and the table-name filter inside
+// reshapesProbeTable is the thing that could silently make it so.
+// One migration touches user_onboarding today: 20260914000000_home_seen_at.sql.
+check(
+  `the probe table's later migrations were found (${touchers.length})`,
+  touchers.length >= 1,
+  `${touchers.length} — a reshape scan over zero files says nothing`
+);
+check(
+  `later migrations only ADD to the probe table (${touchers.length} touch it, ${reshapers.length} reshape it)`,
+  reshapers.length === 0,
+  `${reshapers.join(", ")} — the probe reads select("user_id"), which a drop/rename/type change breaks`
+);
 
 console.log(`\n${failures.length === 0 ? "PASS" : "FAIL"} — ${pass} checks passed, ${failures.length} failed`);
 if (failures.length > 0) { console.log(failures.map((f) => `  - ${f}`).join("\n")); process.exit(1); }

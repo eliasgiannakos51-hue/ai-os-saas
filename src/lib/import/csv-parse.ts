@@ -103,7 +103,34 @@ export function isFormulaCell(value: string): boolean {
  * line, which is the only line guaranteed to be well-formed.
  */
 export function detectDelimiter(sample: string): string {
-  const firstLine = sample.split(/\r?\n/, 1)[0] ?? "";
+  // THE HEADER LINE, NOT THE FIRST NEWLINE.
+  //
+  // This was `sample.split(/\r?\n/, 1)[0]`, which stops at the first line
+  // break even when that break is inside a quoted field — and parseCsv
+  // below explicitly supports newlines inside quoted fields, so the
+  // parser and its own delimiter detector disagreed about where the
+  // header ends. Measured against lib/data-analysis/csv.ts's detector,
+  // which does respect quotes: eleven inputs, one disagreement, and it is
+  // this one. A file whose first header cell contains a line break was
+  // detected as comma-delimited whatever its real delimiter was, and the
+  // import produced a single useless column — the exact failure the
+  // comment above says this function exists to prevent.
+  let firstLine = sample;
+  {
+    let inQuotes = false;
+    for (let i = 0; i < sample.length; i++) {
+      const ch = sample[i];
+      if (ch === '"') {
+        // A doubled quote inside a quoted field is an escaped quote, not
+        // the end of one.
+        if (inQuotes && sample[i + 1] === '"') i++;
+        else inQuotes = !inQuotes;
+      } else if (ch === "\n" && !inQuotes) {
+        firstLine = sample.slice(0, i);
+        break;
+      }
+    }
+  }
   const candidates = [",", ";", "\t", "|"];
 
   let best = ",";

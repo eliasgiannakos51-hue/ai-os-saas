@@ -1,4 +1,5 @@
 import "server-only";
+import { truncate } from "@/lib/text/truncate";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logApiError } from "@/lib/log-error";
 import { normalizeForSearch } from "@/lib/text/search-match";
@@ -87,8 +88,7 @@ export const EMPTY_RECORD_CONVERSATION: RecordConversationContext = {
 };
 
 function excerpt(content: string): string {
-  const flat = content.replace(/\s+/g, " ").trim();
-  return flat.length <= MAX_EXCERPT_CHARS ? flat : `${flat.slice(0, MAX_EXCERPT_CHARS - 1)}…`;
+  return truncate(content, MAX_EXCERPT_CHARS, { collapseWhitespace: true });
 }
 
 /**

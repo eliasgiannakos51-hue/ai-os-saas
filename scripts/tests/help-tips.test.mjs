@@ -24,6 +24,7 @@
 //
 // Run: node scripts/tests/help-tips.test.mjs
 import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
 const failures = [];
@@ -496,7 +497,13 @@ console.log("\n== 5. the pages render it ==");
 // the upgrade-wall bug above, one level up.
 for (const tip of HELP_TIPS) {
   for (const path of [tip.file, ...(tip.alsoIn ?? [])]) {
-    const src = readFileSync(path, "utf8");
+    // COMMENTS ARE NOT CODE, and this counted them as code. A source
+    // comment that mentions <PageHeader> — for instance one explaining
+    // why a file carries two tips — was counted as a third header, and
+    // the file then failed "on all 3 of its headers" for a header that
+    // does not exist. Prose about a thing is not the thing; same
+    // stripComments the GDPR and marker gates already use.
+    const src = stripComments(readFileSync(path, "utf8"));
     const headers = (src.match(/<PageHeader\b/g) ?? []).length;
     const withKey = (
       src.match(new RegExp(`helpKey="${tip.keyPrefix}"`, "g")) ?? []
@@ -515,10 +522,30 @@ for (const tip of HELP_TIPS) {
         `${withKey} occurrences, <HelpTip> ${/<HelpTip\b/.test(src) ? "present" : "ABSENT"} — ${path}`,
       );
     } else {
+      // PER FILE, NOT PER TIP — because a page may legitimately answer two
+      // different questions. V4.6 #3 merged Favorites into the timeline
+      // page as a tab, and the two views correct two different wrong
+      // beliefs: "you do not write here" and "starring does not copy or
+      // move anything". `withKey === headers` cannot express that: with
+      // two tips on one file it demands that BOTH keys appear on BOTH
+      // headers, which is not a thing a page can do, and the only way to
+      // make it pass would have been to delete one of the two answers.
+      //
+      // The claim that matters is unchanged and is still checked in both
+      // directions: every header on the page offers help (none is left
+      // bare), and this tip's own key is really mounted (checked just
+      // above, `withKey > 0`, so a tip cannot be registered and absent).
+      const keysForFile = HELP_TIPS.filter(
+        (t) => t.file === path || (t.alsoIn ?? []).includes(path),
+      ).map((t) => t.keyPrefix);
+      const covered = keysForFile.reduce(
+        (n, prefix) => n + (src.match(new RegExp(`helpKey="${prefix}"`, "g")) ?? []).length,
+        0,
+      );
       check(
-        `${tip.id}: on all ${headers} of its headers in ${path}`,
-        withKey === headers,
-        `${withKey} of ${headers} <PageHeader> carry it — ${path}`,
+        `${tip.id}: all ${headers} headers in ${path} carry one of its ${keysForFile.length} tips`,
+        covered === headers,
+        `${covered} of ${headers} <PageHeader> carry one of ${keysForFile.join(", ")} — ${path}`,
       );
     }
   }

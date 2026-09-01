@@ -3,7 +3,6 @@
     "search": "Search anything...",
     "notifications": "Notifications",
     "noNotifications": "No new notifications.",
-    "newProject": "New Project",
     "jumpToPage": "Jump to a module or page...",
     "noMatches": "No matches for '{query}'",
     "createStudio": "Make anything",
@@ -83,10 +82,11 @@
       "marketplace": "Marketplace",
       "settings": "Settings",
       "create": "Create",
-      "myBusiness": "My Business",
+      "myBusiness": "My business",
       "track": "Track",
       "insights": "What I noticed",
-      "tracking": "Tracking"
+      "tracking": "Tracking",
+      "daily": "Daily"
     },
     "items": {
       "home": "Home",
@@ -133,7 +133,9 @@
       "affiliate": "Affiliate",
       "formSubmissions": "Form submissions",
       "routing": "Model routing",
-      "businessHealth": "Business health"
+      "businessHealth": "Business health",
+      "mine": "Mine",
+      "records": "My records"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -180,7 +182,9 @@
       "help": "Answers to the questions people ask most — no credits used.",
       "affiliate": "Your referral link, what you've earned, and how you get paid.",
       "formSubmissions": "Everything visitors sent through a form on your published sites",
-      "businessHealth": "MRR, margin, churn and runway. Owner only."
+      "businessHealth": "MRR, margin, churn and runway. Owner only.",
+      "mine": "Everything you have made, newest first — with a starred-only tab",
+      "records": "Every log in one place — filter by type instead of hunting the menu"
     },
     "closeMenu": "Close menu"
   },
@@ -227,7 +231,7 @@
     },
     "businessTitle": "Business",
     "businessSubtitle": "For teams building together",
-    "businessExplanation": "Choose Professional or Ultimate as your base plan — both unlock team collaboration. Then invite team members: each one gets full access at your plan's tier, for +{price}/member/month on Professional, or included free on Ultimate.",
+    "businessExplanation": "Choose Professional or Ultimate as your base plan — both include team collaboration. Then invite team members: each one gets full access at your plan's tier, for +{price}/member/month on Professional, or included free on Ultimate.",
     "businessCardDescription": "Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.",
     "businessFeatureBase": "Choose Professional or Ultimate as your base plan",
     "businessFeatureFullAccess": "Every member gets full access at your plan's tier",
@@ -413,7 +417,9 @@
       "signUp": "Sign up",
       "forgotPassword": "Forgot password?",
       "resetSuccess": "Password updated — sign in with your new password.",
-      "failed": "We couldn't sign you in. Check the email and password, or reset your password if you're not sure."
+      "failed": "We couldn't sign you in. Check the email and password, or reset your password if you're not sure.",
+      "oauthFailed": "That sign-in didn't complete. Try again, or use your email and password below.",
+      "sharedSignInFirst": "Sign in to save what you shared."
     },
     "signup": {
       "chooseYourPlan": "Choose your plan",
@@ -477,7 +483,7 @@
       "missingToken": "This link is missing its confirmation token. Please use the link from your email exactly as sent.",
       "warning": "This will permanently delete your account and every record you've logged. This can't be undone.",
       "deleting": "Deleting…",
-      "confirmButton": "Permanently delete my account",
+      "confirmButton": "Permanently delete your account",
       "cancel": "Cancel and go back",
       "confirmFailed": "We couldn't complete the deletion. Your account is still here — try the link again, or contact support."
     }
@@ -668,7 +674,11 @@
         "endingIn": "{days, plural, =0 {Your subscription ends today.} one {Your subscription ends in # day.} other {Your subscription ends in # days.}}"
       },
       "creditsSplit": "{monthly} monthly + {purchased} purchased (never expire)",
-      "noSubscriptionToCancel": "No subscription to cancel — owner access and beta windows end on their own."
+      "noSubscriptionToCancel": "No subscription to cancel — owner access and beta windows end on their own.",
+      "checkout": {
+        "success": "Payment received. Your plan updates here as soon as Stripe confirms it — usually within a few seconds.",
+        "cancelled": "Checkout was cancelled. Nothing was charged."
+      }
     },
     "marginReport": {
       "title": "Margin Report",
@@ -720,8 +730,8 @@
       "notConfigured": "Push notifications are not configured on this deployment.",
       "agentResults": "Agent results",
       "agentResultsHint": "When a scheduled agent finishes a run",
-      "missionReminders": "Mission reminders",
-      "missionRemindersHint": "When a scheduled mission step runs",
+      "missionReminders": "Plan reminders",
+      "missionRemindersHint": "When a scheduled plan step runs",
       "lowCredits": "Low credits",
       "lowCreditsHint": "When work stops because the balance ran out",
       "collaboration": "Collaboration",
@@ -798,7 +808,8 @@
           "help": "Paste a Discord webhook URL for the channel you want.",
           "placeholder": "https://discord.com/api/webhooks/…"
         }
-      }
+      },
+      "emailNotConfigured": "Email isn't set up on this deployment yet, so nothing can be delivered to your inbox."
     },
     "overage": {
       "title": "Usage overage",
@@ -863,10 +874,19 @@
         "totalEntries": "Total Entries",
         "thisWeek": "This Week",
         "mostActive": "Most Active",
-        "creditsRemaining": "Credits Remaining"
+        "creditsRemaining": "Credits Remaining",
+        "fillsAfter": "Fills in after {count} entries",
+        "totalEntriesExplain": "Everything you have logged, in every module, since you started.",
+        "thisWeekExplain": "Logged in the last seven days — how active this week has been.",
+        "mostActiveExplain": "The module you have written in most. Where your attention has gone.",
+        "creditsExplain": "What is left of this month's allowance for AI work.",
+        "ofTotal": "{count, plural, one {of # in total} other {of # in total}}",
+        "fromEntries": "{count, plural, one {from # entry} other {from # entries}}",
+        "openEntries": "See the entries →",
+        "openCredits": "See the ledger →"
       },
       "betaFeedback": {
-        "message": "Thanks for testing Ionexa AI! I'd love your feedback.",
+        "message": "Thanks for testing Ionexa AI. Your feedback is welcome.",
         "linkLabel": "Share feedback"
       },
       "progress": {
@@ -882,12 +902,13 @@
         "mostActiveIn": "Most active in {module}"
       },
       "activeMission": {
-        "title": "Active Mission",
-        "stepsLabel": "{completed}/{total} steps completed"
+        "title": "Active plan",
+        "stepsLabel": "{completed}/{total} steps completed",
+        "open": "Open the plan"
       },
       "nextAction": {
         "title": "What's Next?",
-        "continueMission": "Continue: {step} from your \"{goal}\" mission",
+        "continueMission": "Continue: {step} from your \"{goal}\" plan",
         "revisitLink": "You linked \"{source}\" to \"{target}\" a few days ago — worth revisiting?",
         "startNew": "No new activity in the last 3 days — ready to start something new?",
         "cta": "Go there →"
@@ -901,7 +922,7 @@
         "suggestion": {
           "recency": "You haven't logged anything in a while — add a new entry to pick things back up.",
           "coverage": "Try exploring a module you haven't used yet.",
-          "missionSteps": "Complete a mission step to keep your momentum going.",
+          "missionSteps": "Complete a plan step to keep your momentum going.",
           "consistency": "Try logging something every day this week."
         }
       },
@@ -933,7 +954,27 @@
       "quickStart": "Quick Start",
       "templateFailed": "We couldn't apply that template. Try again in a moment — nothing was added.",
       "quickStartBlurb": "Add a few example entries so you can see what a filled-in workspace looks like.",
-      "quickStartAdd": "Add"
+      "quickStartAdd": "Add",
+      "setupProgress": {
+        "title": "Setup progress",
+        "count": "{done} of {total} steps",
+        "suggestion": "Your activity score appears once you have logged {count} entries — enough that no single one decides it.",
+        "steps": {
+          "onboarding": "Finish the welcome questions",
+          "firstEntry": "Log your first entry",
+          "secondModule": "Log something in a second area",
+          "mission": "Set a goal"
+        }
+      },
+      "next": {
+        "title": "Next"
+      },
+      "whatChanged": {
+        "title": "What changed",
+        "since": "since {when}",
+        "entries": "new entries",
+        "insights": "new insights"
+      }
     },
     "team": {
       "title": "Team",
@@ -953,7 +994,7 @@
       "removeTitle": "Remove member",
       "descriptionIncluded": "On the {plan} plan — invited members get full access at this tier, included at no extra charge.",
       "seatsUsed": "{used} of {total} seats used",
-      "setupSuccessTitle": "Your team is ready!",
+      "setupSuccessTitle": "Your team is ready",
       "setupSuccessBody": "Invite your first team member below.",
       "roleLabel": "Role / Position",
       "rolePlaceholder": "What does this person do?",
@@ -1030,7 +1071,18 @@
       "pinError": "The pin didn't save. Try again.",
       "renameError": "The new name didn't save — the old one is still there.",
       "renameLabel": "New name for \"{title}\"",
-      "emptyHint": "Ask anything — general knowledge, brainstorming, writing help, or just a conversation."
+      "emptyHint": "Ask anything — general knowledge, brainstorming, writing help, or just a conversation.",
+      "provenance": {
+        "plain": "Based on {count, plural, one {# entry} other {# entries}} across {modules, plural, one {# module} other {# modules}}",
+        "withPeriod": "Based on {count, plural, one {# entry} other {# entries}} across {modules, plural, one {# module} other {# modules}}, {period}",
+        "capped": "Based on the {cap} most recent in each of {modules, plural, one {# module} other {# modules}} — {count, plural, one {# entry} other {# entries}} read, not everything you have",
+        "cappedWithPeriod": "Based on the {cap} most recent in each of {modules, plural, one {# module} other {# modules}} — {count, plural, one {# entry} other {# entries}} read, {period}. Not everything you have.",
+        "nothingIn": "Nothing was read from: {modules}"
+      },
+      "dataScope": {
+        "title": "What it can see",
+        "body": "It sees your entries, your goals and the files you uploaded. It does not see anything you have not added. It does not change anything unless you ask."
+      }
     },
     "create": {
       "title": "Create Anything",
@@ -1044,7 +1096,7 @@
       "recordItAnyway": "Record it anyway"
     },
     "timeline": {
-      "title": "History",
+      "title": "Mine",
       "allModules": "All Modules",
       "showOnly": "Show only: {module}",
       "rangeToday": "Today",
@@ -1054,7 +1106,9 @@
       "empty": {
         "title": "Your work, in the order it happened",
         "why": "This writes itself. Everything you log in any module lands here in one stream, which is how you answer \"what did I actually do last month\"."
-      }
+      },
+      "tabAll": "Everything",
+      "tabStarred": "Starred"
     },
     "favorites": {
       "title": "Favorites",
@@ -1083,7 +1137,7 @@
       "scheduledForDate": "Runs {date}",
       "cancelScheduled": "Cancel",
       "viewIn": "View in {module}",
-      "reviewMission": "Review Mission",
+      "reviewMission": "Review plan",
       "reviewing": "Reviewing...",
       "reviewerLabel": "Reviewer",
       "statusPlanning": "Planning",
@@ -1102,17 +1156,17 @@
       "retry": "Retry ({attempts}/{max})",
       "stepFailedMax": "Failed {max}x — won't retry automatically. Try rephrasing the step or building it manually.",
       "sessionExpired": "Your session expired while loading. Nothing was lost — please reload the page.",
-      "newMission": "New Mission",
+      "newMission": "New plan",
       "tabSteps": "Steps",
       "tabReview": "Review",
       "stepsProgress": "{done}/{total} steps",
       "statusFilterLabel": "Status",
       "nextStep": "Next: {step}",
-      "noSteps": "This mission has no plan steps yet.",
+      "noSteps": "This plan has no steps yet.",
       "reviewNotRunYet": "Every step is done — run the Reviewer to get a summary.",
       "reviewLocked": "The Reviewer runs once every step is complete.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "This mission was updated elsewhere just now — refreshing to show the latest state.",
+      "updatedElsewhere": "This plan was updated elsewhere just now — refreshing to show the latest state.",
       "energy": {
         "heading": {
           "light": "Low energy — start here",
@@ -1121,18 +1175,18 @@
         },
         "heldBack": "{count, plural, one {# heavier step} other {# heavier steps}} held back for now"
       },
-      "stillPlanning": "Still planning — this is taking a while. It will keep going, and the plan will be on your missions list when it is ready.",
+      "stillPlanning": "Still planning — this is taking a while. It will keep going, and the plan will be on your plans list when it is ready.",
       "planStalled": "That plan stopped unexpectedly. No credits were charged — please try again.",
       "empty": {
         "title": "One goal, broken into steps",
         "why": "Say what you are trying to achieve and this turns it into a plan with dated steps you can tick off — not a wish list.",
         "example": "Get the first 10 paying customers"
       },
-      "deleteMission": "Delete mission",
-      "deleteConfirmMission": "Delete the mission “{goal}”?",
+      "deleteMission": "Delete plan",
+      "deleteConfirmMission": "Delete the plan “{goal}”?",
       "deleteConfirmLoses": "This removes {steps, plural, one {# step} other {# steps}} — {completed} already completed — and {scheduled, plural, one {# scheduled run} other {# scheduled runs}}. It cannot be undone.",
-      "deletedMission": "Mission deleted",
-      "deleteFailed": "Could not delete this mission.",
+      "deletedMission": "Plan deleted",
+      "deleteFailed": "Could not delete this plan.",
       "deleteStep": "Delete step",
       "editStep": "Edit step",
       "saveStep": "Save",
@@ -1150,12 +1204,12 @@
       "generating": "Generating...",
       "entriesTitle": "New entries (this week / last week)",
       "noModuleActivity": "No activity in any module in the last two weeks.",
-      "missionStepsLabel": "{completed, plural, one {# mission step completed} other {# mission steps completed}}, {pending} still pending",
+      "missionStepsLabel": "{completed, plural, one {# plan step completed} other {# plan steps completed}}, {pending} still pending",
       "reflectionLabel": "Reflection"
     },
     "tradingWorkflow": {
       "title": "Trading Workflow",
-      "description": "Everything trading in one place — your trades, Knowledge Graph links, Timeline, Mentor, Missions, and Reflection.",
+      "description": "Everything trading in one place — your trades, Knowledge Graph links, Timeline, Mentor, Plans, and Reflection.",
       "insight": {
         "title": "Trading Pattern Insight",
         "noTrades": "Log a trade to start seeing patterns here.",
@@ -1170,7 +1224,7 @@
       "mentorButtonDescription": "Open Ionexa Chat in Mentor Mode with your last 20 trades already loaded as context.",
       "mentorChatPrefill": "Analyze my recent trades and give me feedback to improve my win rate.",
       "missionButton": "Start a Trading Goal",
-      "missionButtonDescription": "Create an AI mission plan to improve your trading, e.g. this month's win rate.",
+      "missionButtonDescription": "Create an AI plan to improve your trading, e.g. this month's win rate.",
       "missionButtonCreating": "Creating...",
       "missionGoal": "Improve my trading win rate this month",
       "timelineTitle": "Trading Timeline",
@@ -1180,7 +1234,7 @@
     },
     "productWorkflow": {
       "title": "Product Workflow",
-      "description": "Everything product launch in one place — your products, Knowledge Graph links, Timeline, Mentor, Missions, and Reflection.",
+      "description": "Everything product launch in one place — your products, Knowledge Graph links, Timeline, Mentor, Plans, and Reflection.",
       "insight": {
         "title": "Product Pattern Insight",
         "noProducts": "Add a product to start seeing patterns here.",
@@ -1191,7 +1245,7 @@
       "mentorButtonDescription": "Open Ionexa Chat in Mentor Mode with your last 20 products already loaded as context.",
       "mentorChatPrefill": "Review my product plans and give me feedback on what's missing before launch.",
       "missionButton": "Launch a New Product",
-      "missionButtonDescription": "Create an AI mission plan to launch a new product — audience, pricing, landing page, and more.",
+      "missionButtonDescription": "Create an AI plan to launch a new product — audience, pricing, landing page, and more.",
       "missionButtonCreating": "Creating...",
       "missionGoal": "Launch a new product: define the target audience, set pricing, and create a landing page",
       "timelineTitle": "Product Timeline",
@@ -1203,10 +1257,13 @@
       "title": "Energy Check-In",
       "prompt": "How's your energy today?",
       "checkedInToday": "Today's energy: {level}/5.",
-      "logAgain": "Log again",
       "notePlaceholder": "Optional note...",
       "logged": "Energy logged",
-      "levelLabel": "Energy level {level}"
+      "levelLabel": "Energy level {level}",
+      "scaleLow": "1 = exhausted",
+      "scaleHigh": "5 = great",
+      "whatItDoes": "Ionexa uses this to pick which plan step to suggest next — lighter work when you're low, demanding work when you're not.",
+      "change": "Change"
     },
     "websiteBuilder": {
       "title": "Build a site",
@@ -1422,7 +1479,7 @@
       "subtitle": "Describe what you want in one sentence. No tool to pick — the studio works out what it is, shows you what it understood, and only then creates it.",
       "inputLabel": "What do you want to create?",
       "inputPlaceholder": "e.g. A landing page for my coaching business, warm and professional",
-      "noToolPickerHint": "Websites, missions, entries, automations and documents all start here.",
+      "noToolPickerHint": "Websites, plans, entries, automations and documents all start here.",
       "continue": "Continue",
       "detecting": "Reading your request…",
       "detectFailed": "Could not read that request.",
@@ -1438,7 +1495,7 @@
       "changeType": "Change type",
       "pickTypePrompt": "Pick the kind of thing this should be:",
       "typeWebsite": "Website",
-      "typeMission": "Mission",
+      "typeMission": "Plan",
       "typeModuleEntry": "Workspace entry",
       "typeModuleEntryNamed": "Entry in {module}",
       "typeAutomation": "Automation",
@@ -1468,7 +1525,7 @@
       "progress": {
         "creatingProject": "Creating the project",
         "generatingWebsite": "Generating the website",
-        "planningMission": "Planning the mission",
+        "planningMission": "Building the plan",
         "routingEntry": "Routing it to the right module",
         "schedulingAutomation": "Scheduling the automation",
         "creatingDocument": "Creating the document",
@@ -1489,7 +1546,8 @@
       "typeAgent": "AI Agent",
       "agentDesignFailed": "Could not design that agent.",
       "agentSaveFailed": "The agent was designed but could not be saved.",
-      "unsupportedType": "Create Studio cannot make that yet."
+      "unsupportedType": "Create Studio cannot make that yet.",
+      "madeItHere": "Made it here → {where}"
     },
     "agents": {
       "title": "AI Agents",
@@ -1502,14 +1560,14 @@
       "requestLabel": "What should this agent do for you?",
       "requestPlaceholder": "e.g. Every morning, send me the latest news about Nvidia",
       "deliveryNote": "Results are emailed to {email} — the address on your account.",
-      "designButton": "Design my agent",
+      "designButton": "Design your agent",
       "designing": "Designing...",
       "buildError": "Couldn't design that agent. Please try again.",
       "clarificationTitle": "A couple of quick questions first:",
       "clarificationSkip": "Skip, build it anyway",
       "clarificationContinue": "Continue",
       "clarificationAnswerPlaceholder": "Your answer...",
-      "previewTitle": "Here's what I'll build",
+      "previewTitle": "What this agent will do",
       "previewName": "Name",
       "previewSchedule": "Runs",
       "previewCostPerRun": "Cost per run",
@@ -1650,7 +1708,7 @@
         "noCharge": "You have not been charged — nothing ran.",
         "noChargeYet": "Nothing has been charged yet.",
         "tryInstead": "Try asking for research, monitoring or a summary instead — for example, \"every Monday, summarise what's new in my industry\".",
-        "rephrase": "Rewrite my request",
+        "rephrase": "Rewrite your request",
         "partialTitle": "Part of this can't be done",
         "partialWillDo": "The agent would do this instead: {parts}",
         "partialContinue": "Build the part that works",
@@ -1717,7 +1775,9 @@
         "withdrawing": "Withdrawing...",
         "withdrawn": "Withdrawn. It is no longer in the library.",
         "withdrawFailed": "That could not be withdrawn. It is still shared."
-      }
+      },
+      "failingWarning": "{failures} of the last {max} runs failed in a row. After {max}, this agent switches itself off.",
+      "disabledReason": "Last failure: {reason}"
     },
     "publishing": {
       "title": "Live sites",
@@ -1877,7 +1937,7 @@
       "saveSelection": "{count, plural, one {Save # selected} other {Save # selected}}",
       "collectionCreated": "Collection {name} saved",
       "collectionError": "The collection could not be saved.",
-      "askTitle": "Ask my documents",
+      "askTitle": "Ask your documents",
       "askNothingSelected": "Tick the files the answer should come from. Nothing else will be used.",
       "askSelected": "Answering from {count, plural, one {# file} other {# files}}: {names}",
       "tooManySelected": "Ask about up to {max} files at a time.",
@@ -2041,11 +2101,11 @@
       "noneTitle": "Nothing solid to report yet",
       "noneNeedMore": "There isn't enough here yet for anything to be worth calling a pattern. A few dozen rows with dates on them is usually the point where things start showing up — and we would rather say nothing than make something up.",
       "noneYet": "Add a bit more and run this again from your dashboard.",
-      "goToDashboard": "Go to my dashboard"
+      "goToDashboard": "Go to your dashboard"
     },
     "insights": {
       "title": "What I noticed",
-      "basedOn": "from {count, plural, one {# of your records} other {# of your records}}",
+      "basedOn": "from {count, plural, one {# of your entries} other {# of your entries}}",
       "checkIt": "Check it yourself",
       "showNumbers": "Show the numbers",
       "hideNumbers": "Hide the numbers",
@@ -2100,7 +2160,7 @@
       "description": "Share Ionexa, earn a share of what the people you send keep paying.",
       "pitch": "Earn {percent}% of every payment your referrals make, every month, for {months, plural, one {# month} other {# months}}.",
       "pitchTerms": "You can't refer yourself, and each person can only be referred once. Commission starts on their first payment.",
-      "join": "Get my link",
+      "join": "Get your link",
       "joining": "Setting up…",
       "joinError": "Could not set that up. Please try again.",
       "yourLink": "Your link",
@@ -2128,13 +2188,13 @@
     "search": {
       "kinds": {
         "page": "Pages",
-        "module": "Records",
+        "module": "Entries",
         "file": "Files",
         "chat": "Conversations",
         "website": "Websites",
         "agent": "Agents",
         "research": "Research",
-        "mission": "Missions",
+        "mission": "Plans",
         "help": "Help"
       },
       "filters": {
@@ -2292,6 +2352,14 @@
         "too_long": "That is longer than a rule needs to be.",
         "unauthenticated": "You are signed out. Sign in and try again."
       }
+    },
+    "records": {
+      "title": "My records",
+      "description": "Every log, tool and setting in one place. Filter by type instead of hunting the menu.",
+      "searchLabel": "Search by name",
+      "allTypes": "All types",
+      "count": "{count, plural, one {# place} other {# places}}",
+      "noMatch": "Nothing matches that name. Try a shorter word, or clear the filter."
     }
   },
   "module": {
@@ -2361,13 +2429,14 @@
   "askAi": {
     "buttonLabel": "Ask AI",
     "title": "Ask AI about this {title}",
-    "subtitle": "The AI already knows this entry's data — just ask.",
+    "subtitle": "The AI already has this entry's data. Ask anything about it.",
     "placeholder": "Ask anything about this entry...",
     "emptyState": "Ask a question about this entry — no need to explain the context, the AI already has it.",
     "send": "Send",
     "close": "Close",
     "streamInterrupted": "The connection dropped before the reply finished.",
-    "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete."
+    "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
+    "alsoRead": "It also read {count, plural, one {# past message} other {# past messages}} about this entry"
   },
   "entityLinks": {
     "buttonLabel": "Link to...",
@@ -2402,8 +2471,8 @@
       "description": "Log your first entry in {module}."
     },
     "firstMission": {
-      "title": "Mission Accomplished",
-      "description": "Complete your first AI mission."
+      "title": "First plan done",
+      "description": "Complete your first AI plan."
     },
     "streak": {
       "title": "Consistency Champion",
@@ -2419,11 +2488,11 @@
     },
     "firstEntityLink": {
       "title": "Connector",
-      "description": "Link two records together in the Knowledge Graph."
+      "description": "Link two entries together in the Knowledge Graph."
     },
     "tenEntityLinks": {
       "title": "Network Builder",
-      "description": "Link 10 records together across modules."
+      "description": "Link 10 entries together across modules."
     },
     "firstEnergyCheckin": {
       "title": "Check-In",
@@ -2869,7 +2938,7 @@
     },
     "create": {
       "is": "One sentence in, the right thing out.",
-      "does": "You describe what you want in your own words; the studio works out whether it is a module entry, a website, a mission, an automation, an agent or a document, and makes it.",
+      "does": "You describe what you want in your own words; the studio works out whether it is a module entry, a website, a plan, an automation, an agent or a document, and makes it.",
       "doesNot": "It does not silently guess. When it cannot tell what you meant, or cannot build the thing you asked for, it says so rather than producing the nearest other kind — which is what it used to do with agents."
     },
     "costs": {
@@ -2914,12 +2983,12 @@
     },
     "productWorkflow": {
       "is": "Everything about your products on one screen.",
-      "does": "Shows the same product entries as the Products module, plus their links, their history, a pattern worked out without AI, and one-press Mentor and Mission entry points.",
+      "does": "Shows the same product entries as the Products module, plus their links, their history, a pattern worked out without AI, and one-press Mentor and Plan entry points.",
       "doesNot": "It is not a second place to keep products. These are the same rows as the Products module — add one here and it appears there — and the pattern is arithmetic over what you wrote, not a forecast."
     },
     "reflection": {
       "is": "What you actually finished this week, against what you planned.",
-      "does": "Counts new entries in every module for this week and last, counts mission steps done and still pending, and asks for a short honest synthesis of the gap.",
+      "does": "Counts new entries in every module for this week and last, counts plan steps done and still pending, and asks for a short honest synthesis of the gap.",
       "doesNot": "Nothing here is stored. Every press recomputes from your live data, so there is no history of past reflections — and it counts what you logged, not what you did away from the app."
     },
     "routing": {
@@ -2939,13 +3008,18 @@
     },
     "tradingWorkflow": {
       "is": "Everything trading on one screen.",
-      "does": "The same trade entries as the Trading module, plus their links, their history, patterns by day, hour, symbol and losing streak, and one-press Mentor and Mission entry points.",
+      "does": "The same trade entries as the Trading module, plus their links, their history, patterns by day, hour, symbol and losing streak, and one-press Mentor and Plan entry points.",
       "doesNot": "The patterns are counts of trades you already made, not predictions, and they are not investment advice. Nor is this a second set of trades: these are the same rows as the Trading module."
     },
     "businessHealth": {
       "is": "The business's own numbers — revenue, margin, churn, runway. Owner only.",
       "does": "Computes each metric from real subscription and cost rows, and asks you for the three figures no database can know: marketing spend, fixed costs, cash balance.",
       "doesNot": "It does not show a number it cannot justify. A metric missing an input says what it needs instead of computing from a zero, and nothing is back-filled — the history starts the day this shipped."
+    },
+    "records": {
+      "is": "One page listing every kind of record, tool and setting you can open.",
+      "does": "The sidebar used to list nineteen logs that all work the same way. They are here instead, with a type filter, so finding one is reading a list rather than remembering a menu.",
+      "doesNot": "Nothing moved and nothing was merged. Every page still has its own address, its own entries and its own form — this is a way in, not a new place your data lives."
     }
   },
   "helpCentre": {
@@ -2964,7 +3038,7 @@
       "credits": "Credits",
       "websites": "Websites",
       "agents": "AI Agents",
-      "missions": "Missions",
+      "missions": "Plans",
       "chat": "Chat",
       "files": "Files",
       "integrations": "Integrations",
@@ -3059,6 +3133,13 @@
         "what": "This action didn't complete.",
         "next": "Try again, and contact support if it happens twice."
       }
+    },
+    "boundary": {
+      "title": "This part of the page did not load",
+      "body": "The rest of your dashboard is fine and your data is untouched. Reloading usually fixes it — if it keeps happening, it has been reported to us automatically.",
+      "reload": "Reload the page",
+      "section": "This section could not be displayed.",
+      "sectionBody": "The rest of the page is unaffected. Reloading usually fixes it."
     }
   },
   "aiExamples": {
@@ -3279,7 +3360,7 @@
     "copied": "Copied",
     "language": "Language",
     "targetLanguage": "Convert to",
-    "useWorkspace": "Use my other modules for context",
+    "useWorkspace": "Use your other modules for context",
     "run": "Run",
     "running": "Working…",
     "result": "Result",
@@ -3417,5 +3498,16 @@
       "notEnough": "You have {balance} credits and need {needed}.",
       "remove": "Remove the badge"
     }
+  },
+  "sampleData": {
+    "load": "See it with sample data",
+    "loading": "Loading…",
+    "loadFree": "Free — nothing is generated, and you can remove it in one click",
+    "loadFailed": "That did not work. Try again.",
+    "banner": "Sample data",
+    "bannerDetail": "These entries are a demo — a small design studio's last three months. They are not yours.",
+    "clear": "Remove the sample",
+    "clearing": "Removing…",
+    "clearFailed": "That did not work."
   }
 }

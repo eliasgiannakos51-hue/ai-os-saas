@@ -54,9 +54,24 @@ const markdownComponents: Components = {
 // every ALREADY-FINISHED message to re-parse its markdown — only the one
 // message whose `content` actually changed does. Pure performance win,
 // same rendered output either way.
-export const MessageContent = memo(function MessageContent({ content }: { content: string }) {
+export const MessageContent = memo(function MessageContent({
+  content,
+  // THE SIZE IS THE CALLER'S — V4.6 #12. It was hard-coded `text-sm`
+  // here, which is right for the four surfaces that render this inside a
+  // fixed-width panel (ask-ai-modal, mission-detail, studio-chat,
+  // reflection-generator) and wrong for the chat thread, whose whole
+  // width rule is expressed in `ch`. `ch` is the width of "0" AT THE
+  // ELEMENT'S OWN FONT SIZE, so a container capped at 68ch wrapping text
+  // fixed at 14px caps a different number of characters than it says it
+  // does. The chat passes no size and lets the measured container
+  // cascade; everybody else keeps exactly what they had.
+  className = "text-sm leading-relaxed",
+}: {
+  content: string;
+  className?: string;
+}) {
   return (
-    <div className="text-sm leading-relaxed">
+    <div className={className}>
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
         {content}
       </ReactMarkdown>

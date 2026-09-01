@@ -29,7 +29,8 @@
  *
  * Run: node scripts/tests/tracking-to-tools.mutation.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const DATA_GATE = "scripts/tests/data-analysis.test.mjs";
@@ -41,6 +42,10 @@ const XLSX = "src/lib/data-analysis/xlsx.ts";
 const PROFILE = "src/lib/data-analysis/profile.ts";
 const CHARTS = "src/lib/data-analysis/charts.ts";
 const ANALYSE = "src/lib/data-analysis/analyse.ts";
+// analyse.ts had its own balanced scanner and scoring.ts had another; they
+// disagreed about arrays and about where a fence may appear. Both now call
+// this one.
+const JSON_TEXT = "src/lib/json-from-text.ts";
 const QUERY = "src/lib/data-analysis/query.ts";
 const OPS = "src/lib/coding/operations.ts";
 const HL = "src/lib/coding/highlight.ts";
@@ -292,9 +297,9 @@ const MUTANTS = [
   {
     gate: DATA_GATE,
     name: "the JSON scan takes the last brace in the reply rather than the balanced one",
-    file: ANALYSE,
-    from: "      if (depth === 0) {",
-    to: "      if (depth === -99) {",
+    file: JSON_TEXT,
+    from: "      if (depth === 0) return text.slice(start, i + 1);",
+    to: "      if (depth === -99) return text.slice(start, i + 1);",
   },
   {
     gate: DATA_GATE,
@@ -432,9 +437,13 @@ const MUTANTS = [
   },
   {
     gate: CODE_GATE,
+    // RE-ANCHORED. The hand-rolled truncation became truncate() from
+    // lib/text/truncate.ts — one of seven copies of the same job, three of
+    // which gave different answers and six of which were wrong at a
+    // boundary. This mutation had been applying to nothing since.
     name: "the context stops being bounded, so a large account prices its own prompt",
     file: WORKSPACE,
-    from: "  return rendered.length > MAX_CONTEXT_CHARS ? `${rendered.slice(0, MAX_CONTEXT_CHARS - 1)}…` : rendered;",
+    from: "  return truncate(rendered, MAX_CONTEXT_CHARS);",
     to: "  return rendered;",
   },
   {

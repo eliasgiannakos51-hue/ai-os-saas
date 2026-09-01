@@ -69,7 +69,7 @@ export default async function MarketplacePage() {
   }));
 
   return (
-    <main className="min-h-full bg-dot-grid">
+    <div className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader
           helpKey="help.marketplace"
@@ -89,6 +89,6 @@ export default async function MarketplacePage() {
           <TemplateBrowser templates={templates} />
         )}
       </div>
-    </main>
+    </div>
   );
 }

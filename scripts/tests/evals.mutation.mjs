@@ -23,11 +23,16 @@
  *
  * Run: node scripts/tests/evals.mutation.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/evals.test.mjs";
 const SCORING = "src/lib/evals/scoring.ts";
+// The balanced JSON scanner moved OUT of scoring.ts and analyse.ts, which
+// each had their own and disagreed. Both now call this one, so the
+// mutations that used to point at two copies point here.
+const JSON_TEXT = "src/lib/json-from-text.ts";
 const RUNNER = "scripts/evals/run.mjs";
 const CHAT = "scripts/evals/datasets/chat.jsonl";
 
@@ -73,15 +78,34 @@ const MUTANTS = [
   // ---- JSON that arrived wrapped -----------------------------------
   {
     name: "the greedy-regex JSON bug comes back, so prose after an object breaks parsing",
-    file: SCORING,
+    file: JSON_TEXT,
     from: "  const start = text.search(/[{[]/);",
     to: "  const m = text.match(/\\{[\\s\\S]*\\}/);\n  if (m) return m[0];\n  const start = text.search(/[{[]/);",
   },
   {
     name: "a brace inside a string ends the object",
-    file: SCORING,
+    file: JSON_TEXT,
     from: '    if (ch === \'"\') {\n      inString = !inString;\n      continue;\n    }',
     to: '    if (false) {\n      inString = !inString;\n      continue;\n    }',
+  },
+  // AND A MUTATION FOR WHAT MOVED THE OTHER TWO. Merging the two scanners
+  // was not a rename: analyse.ts's copy looked only for `{`, so given
+  // `[{"a":1}]` it found the brace INSIDE the array and returned the first
+  // element as though it were the whole answer — a wrong value shaped like
+  // a right one. The `[` is the fix, and nothing guarded it.
+  {
+    name: "arrays stop opening a document, so a JSON array yields its first element",
+    file: JSON_TEXT,
+    from: "  const start = text.search(/[{[]/);",
+    to: '  const start = text.search(/[{]/);',
+  },
+  // The fence is matched ANYWHERE rather than only at the ends, which is
+  // the other half of what differed between the two copies.
+  {
+    name: "a fence is only honoured at the very start and end of the reply",
+    file: JSON_TEXT,
+    from: "  const fenced = raw.match(/```(?:json)?\\s*([\\s\\S]*?)```/);",
+    to: "  const fenced = raw.match(/^```(?:json)?\\s*([\\s\\S]*?)```$/);",
   },
 
   // ---- an error counted as a failure -------------------------------
@@ -106,11 +130,32 @@ const MUTANTS = [
     to: "      medianLatencyMs: latencies.length === 0 ? null : Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length),",
   },
   {
+    // RE-ANCHORED. `p` became `fraction` when percentile gained a clamp
+    // and a non-finite guard, and this mutation quietly stopped applying
+    // to anything — the runner reported STALE, which is the only reason
+    // anybody found out.
     name: "the percentile interpolates, reporting a latency nobody measured",
     file: SCORING,
     from: "  const rank = Math.ceil(p * sortedAscending.length);",
-    to: "  const rank = Math.round(p * sortedAscending.length + 0.5);",
+    to: "  const rank = Math.round(fraction * sortedAscending.length + 0.5);",
   },
+  // AND THE TWO GUARDS THAT MOVED IT, which is what the runner asks for:
+  // re-anchor, then add a mutation for whatever moved the line.
+  {
+    name: "a non-finite percentile returns undefined from a `number | null`",
+    file: SCORING,
+    from: "  if (!Number.isFinite(p)) return null;",
+    to: "",
+    expect: "Math.ceil(NaN) is NaN, and indexing an array with NaN gives undefined rather than throwing",
+  },
+  // THE CLAMP MUTATION IS GONE, and so is the clamp. It survived: removing
+  // `Math.min(1, Math.max(0, p))` changed no output, because the index
+  // clamp on the next line already covers every value p can take. A
+  // surviving mutation means the line is not load-bearing, and the right
+  // answer to that is to delete the line, not to write a test that cannot
+  // fail. The behaviour it claimed to protect — p = 90 gives the largest
+  // sample, p = -5 the smallest — is asserted in evals.test.mjs and still
+  // holds without it.
   {
     name: "an empty latency set reports 0ms instead of unknown",
     file: SCORING,

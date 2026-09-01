@@ -24,6 +24,19 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 let pass = 0;
 const failures = [];
 function check(name, cond, detail) {
+  // check() TAKES A BOOLEAN. `check(name, someArray, [])` reads perfectly
+  // and is always green — every array is truthy in JavaScript, including
+  // the empty one. Two conventions share this name across the gates:
+  // check(name, cond, detail) here, check(name, actual, expected)
+  // elsewhere, and a call copied between them passes forever while
+  // printing its own failure text. See db-inventory.test.mjs, where the
+  // same guard was added after the deleted-table regression did exactly
+  // that.
+  if (typeof cond !== "boolean") {
+    failures.push(name);
+    console.log(`  FAIL  ${name}\n        check() takes a BOOLEAN; got ${Array.isArray(cond) ? "an array" : typeof cond}`);
+    return;
+  }
   if (cond) {
     pass++;
     console.log(`  PASS  ${name}`);
@@ -45,7 +58,26 @@ const buildModules = readFileSync("src/lib/build-modules.ts", "utf8");
 
 /** Every heading the sidebar actually renders. */
 const headings = [...navSrc.matchAll(/heading: "([^"]+)"/g)].map((m) => m[1]);
-check(`the headings scan found ${headings.length}`, headings.length >= 8, "a filter of an empty list is empty, and every check below it would pass");
+// V4.6 #3 TOOK THIS FROM EIGHT HEADINGS TO FOUR, so the old `>= 8` floor
+// had to move. It is replaced by two assertions that are harder to
+// satisfy by accident than any number: the scan must find something, and
+// every heading it finds must be DISTINCT. A regex that stopped matching
+// yields zero and fails the first; a copy-paste that gives two groups the
+// same heading — which would silently merge them in the sidebar's
+// accordion state, keyed by heading — fails the second, and nothing
+// checked for that before.
+//
+// The real anti-vacuity guard is the PAIR further down: "all headings
+// have a message key" (vacuous on an empty list) together with "no
+// heading key points at a heading that does not exist" (fails loudly on
+// one, because all four keys become dead). Neither can pass on a broken
+// scan while the other does.
+check(`the headings scan found ${headings.length}`, headings.length >= 4, "a filter of an empty list is empty, and every check below it would pass");
+check(
+  "and every heading is distinct",
+  new Set(headings).size === headings.length,
+  headings.join(", ")
+);
 /** The heading -> message-key map, as the code really holds it. */
 const headingKeys = Object.fromEntries(
   keysSrc
@@ -81,8 +113,13 @@ for (const heading of headings) {
 }
 // The mirror fault: a key here that no heading uses is dead weight, and
 // dead entries are exactly what hid the four missing ones.
-check(`the heading key map was read (${Object.keys(headingKeys).length})`,
-  Object.keys(headingKeys).length >= 5,
+// SIZE-MATCHED TO THE SCAN, not floored at a number somebody has to
+// remember to lower. The map and the nav describe the same four groups,
+// so anything that reads one without the other — a broken regex, a map
+// entry left behind by a rename — shows up as a mismatch here before it
+// reaches the two direction checks below.
+check(`the heading key map was read (${Object.keys(headingKeys).length}) and matches the nav (${headings.length})`,
+  Object.keys(headingKeys).length === headings.length && headings.length > 0,
   "an empty key map makes the dead-key check below pass on nothing");
 const deadHeadingKeys = Object.keys(headingKeys).filter((h) => !headings.includes(h));
 check("no heading key points at a heading that does not exist", deadHeadingKeys.length === 0, deadHeadingKeys.join(", "));
@@ -135,8 +172,14 @@ const groupOf = (heading) => {
   return navSrc.slice(start, end === -1 ? undefined : end);
 };
 const buildGroup = groupOf("Build");
-const trackingGroup = groupOf("Tracking");
-check("a Tracking group exists", trackingGroup.length > 0);
+// V4.6 #3 FOLDED "Tracking" INTO "My business" along with the twelve
+// business modules and Ideas — nineteen logs that all render the same
+// GenericList, and that the sidebar listed as nineteen rows. The RULE is
+// unchanged and is what this section has always been for: a module that
+// generates nothing must not sit under the heading that promises
+// generation. Only the name of the group it must sit under moved.
+const trackingGroup = groupOf("My business");
+check("the group the logs live in exists", trackingGroup.length > 0);
 
 const offenders = trackingSlugs.filter((slug) => {
   const href = `/dashboard/${slug}`;
@@ -148,7 +191,19 @@ check(
   offenders.length ? `these produce nothing but sit under "Build": ${offenders.join(", ")}` : ""
 );
 const misfiled = trackingSlugs.filter((slug) => !trackingGroup.includes(`/dashboard/${slug}`));
-check("and every one of them IS under Tracking", misfiled.length === 0, misfiled.join(", "));
+check("and every one of them IS under My business", misfiled.length === 0, misfiled.join(", "));
+// AND NONE OF THEM WAS QUIETLY DROPPED. Consolidating a sidebar is one
+// keystroke away from deleting entries instead of grouping them, and a
+// deleted entry leaves the page live but unreachable from the nav AND
+// from the command palette, which is built from this same list. The
+// check above only says "not filed wrong"; an entry that is gone
+// altogether is filed nowhere and would pass it.
+const vanished = trackingSlugs.filter((slug) => !navSrc.includes(`"/dashboard/${slug}"`));
+check(
+  "and none of them was dropped from the nav config entirely",
+  vanished.length === 0,
+  vanished.length ? `no longer reachable from the sidebar or the palette: ${vanished.join(", ")}` : ""
+);
 
 // The other direction: what is left in Build must really build.
 const buildHrefs = [...buildGroup.matchAll(/href: "([^"]+)"/g)].map((m) => m[1]);
@@ -189,6 +244,12 @@ const BUILD_ALLOWED = {
   // this comment.
   "/dashboard/data-analysis": "parses, profiles and charts a real uploaded file",
   "/dashboard/coding": "five operations that really produce code",
+  // V4.6 #3. It was under "Workspace" next to Files and Documents, which
+  // reads as a place to store things; it is a job that goes and writes a
+  // report. /api/research/[id]/run reaches lib/research/research.ts,
+  // which awaits anthropic.messages.create three times — and section 3b
+  // below proves that from the imports rather than from this sentence.
+  "/dashboard/deep-research": "plans, runs and writes up a real research job",
 };
 const unexpected = buildHrefs.filter((href) => !(href in BUILD_ALLOWED));
 check(
@@ -285,7 +346,27 @@ console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
 
   /** The API routes a page (or its components) actually fetches. */
   const routesFetchedBy = (slug) => {
+    // THE COMPONENT FOLDER IS NOT ALWAYS THE SLUG, and guessing that it
+    // is made this a false NEGATIVE generator. /dashboard/deep-research
+    // renders components/research/*, so `src/components/deep-research`
+    // does not exist, the scan read the server page alone, found no
+    // fetch() at all, and reported a feature that runs a real multi-step
+    // research job as producing nothing. A check that says "this does not
+    // build" about something that does is the same class of untruth this
+    // whole file exists to catch — it just points the other way, and it
+    // is the direction that teaches somebody to loosen the rule.
+    //
+    // So the page's own imports are followed instead of its name being
+    // guessed from. The name guess is KEPT as well, because a page may
+    // reach components it does not import directly.
     const roots = [`src/app/dashboard/${slug}`, `src/components/${slug}`];
+    const pageFile = `src/app/dashboard/${slug}/page.tsx`;
+    if (existsSync(pageFile)) {
+      for (const m of readFileSync(pageFile, "utf8").matchAll(/from "@\/components\/([\w.-]+)/g)) {
+        const dir = `src/components/${m[1]}`;
+        if (existsSync(dir) && statSync(dir).isDirectory() && !roots.includes(dir)) roots.push(dir);
+      }
+    }
     const files = [];
     const walk = (path) => {
       let entries = [];
@@ -478,7 +559,11 @@ check(`all ${allModules.length} modules declare a display name`, noTitleKey.leng
 // still BE a sidebar key, or "one display name per module" would be a
 // convention rather than a fact.
 const notSidebar = allModules.filter((m) => m.titleKey && !m.titleKey.startsWith("sidebar.items."));
-check("every display name is the sidebar's own key", notSidebar.map((m) => `${m.slug}->${m.titleKey}`), []);
+check(
+  "every display name is the sidebar's own key",
+  notSidebar.length === 0,
+  notSidebar.map((m) => `${m.slug}->${m.titleKey}`).join(", ")
+);
 const badKey = allModules.filter((m) => m.titleKey && LOCALES.some((l) => typeof lookup(messages[l], m.titleKey) !== "string"));
 check("and every one resolves in all 10 locales", badKey.length === 0, badKey.map((m) => `${m.slug}->${m.titleKey}`).join(", "));
 
@@ -541,14 +626,46 @@ console.log("\n== 4c-bis. the nav name and the page's own heading are one name =
 // is the same rule pointed the other way: a tool must not be filed under
 // a note-taking name. It is derived from the pages rather than listed,
 // so a page added next year is covered on the day it is written.
+// A PAGE NAMES ITSELF IN ONE OF THREE FORMS, and the scan has to read
+// all three or it silently stops covering the pages that changed.
+//
+// It used to read only the literal `pageTitle("sidebar.items.x")`. When
+// coding/ and data-analysis/ were moved onto MODULE_TITLE_KEYS — so that
+// their key had one home instead of two — this count fell from 23 to 21
+// and the gate went red. The floor was right to fire: the scan really had
+// stopped looking at two pages. The fix is for it to look, not for the
+// floor to come down.
+const titleKeyMap = readFileSync("src/lib/search/module-title-keys.ts", "utf8");
+function navKeyOf(src) {
+  const literal = src.match(/pageTitle\("(sidebar\.items\.[A-Za-z]+)"\)/);
+  if (literal) return literal[1];
+  // NO pageTitle(CONFIG.titleKey) BRANCH, and that is measured rather
+  // than assumed. One was written here for the tracking pages, and its
+  // own mutation SURVIVED: breaking it changed the count by nothing.
+  // Counted directly — 21 pages reach this scan by the literal form and
+  // 2 by MODULE_TITLE_KEYS; the CONFIG form contributes ZERO, because a
+  // tracking page renders BuildModulePage rather than its own
+  // <PageHeader title={t("title")}>, so it never names itself twice in
+  // the first place. A branch that matches nothing reads like coverage
+  // and is not.
+  // pageTitle(MODULE_TITLE_KEYS.x) / MODULE_TITLE_KEYS["x"] — the two
+  // bespoke pages that left BUILD_MODULES.
+  const fromMap = src.match(/pageTitle\(MODULE_TITLE_KEYS(?:\.([A-Za-z]+)|\["([a-z-]+)"\])\)/);
+  if (fromMap) {
+    const slug = fromMap[1] ?? fromMap[2];
+    const m = titleKeyMap.match(new RegExp(`"?${slug}"?: "(sidebar\\.items\\.[A-Za-z]+)"`));
+    if (m) return m[1];
+  }
+  return null;
+}
 const namedPages = [];
 for (const file of walkPagesForNames("src/app/dashboard")) {
   const src = readFileSync(file, "utf8");
-  const navKey = src.match(/pageTitle\("(sidebar\.items\.[A-Za-z]+)"\)/);
+  const navKey = navKeyOf(src);
   const namespace = src.match(/const t = await getTranslations\("([\w.]+)"\)/);
   const rendersOwnTitle = /<PageHeader[\s\S]{0,220}?title=\{t\("title"\)\}/.test(src);
   if (navKey && namespace && rendersOwnTitle) {
-    namedPages.push({ file, navKey: navKey[1], titleKey: `${namespace[1]}.title` });
+    namedPages.push({ file, navKey, titleKey: `${namespace[1]}.title` });
   }
 }
 // A DERIVATION THAT FINDS NOTHING AGREES WITH ITSELF PERFECTLY.
@@ -624,11 +741,36 @@ check("it reads the locale per request, not once at module load", /getTranslatio
 check("and it is server-only, so a client import fails at build", /^import "server-only";/m.test(metadataHelper));
 // The module pages hand it the config's own key, so tab, heading and nav
 // are one string.
-const modulePages = ["apps", "campaigns", "coding", "data-analysis", "images", "presentations", "videos", "websites"];
+const modulePages = ["apps", "campaigns", "images", "presentations", "videos", "websites"];
 const notFromConfig = modulePages.filter(
   (slug) => !/pageTitle\(CONFIG\.titleKey\)/.test(readFileSync(`src/app/dashboard/${slug}/page.tsx`, "utf8"))
 );
-check("every tracking page's tab reads the config's key", notFromConfig, []);
+check("every tracking page's tab reads the config's key", notFromConfig.length === 0,
+  notFromConfig.join(", "));
+// THE TWO THAT ARE NOT TRACKING PAGES ANY MORE. `coding` and
+// `data-analysis` left BUILD_MODULES in V4 #19/#20 and became bespoke
+// tools, so there is no CONFIG for them to read — and both pages wrote
+// `pageTitle("sidebar.items.coding")` out as a literal instead. The
+// values happened to agree with the sidebar's; nothing made them.
+// MODULE_TITLE_KEYS already held both keys for the search filter chips,
+// so that is now the one place either key exists.
+//
+// This check used to be `check(name, someArray, [])` — always green,
+// because every array is truthy — so it had never once looked. It found
+// these two on the first run after the signature was fixed.
+const bespokePages = ["coding", "data-analysis"];
+const literalKey = bespokePages.filter((slug) => {
+  const src = readFileSync(`src/app/dashboard/${slug}/page.tsx`, "utf8");
+  return /pageTitle\("sidebar\./.test(src) || !/MODULE_TITLE_KEYS/.test(src);
+});
+check("neither bespoke page writes its own title key out by hand", literalKey.length === 0,
+  literalKey.join(", "));
+{
+  const keys = readFileSync("src/lib/search/module-title-keys.ts", "utf8");
+  check("...and the map they read still carries both",
+    /coding: "sidebar\.items\.coding"/.test(keys) && /"data-analysis": "sidebar\.items\.dataAnalysis"/.test(keys),
+    "if these leave the map, the pages lose their titles rather than falling back");
+}
 
 console.log("\n== 5. the approved renames landed everywhere the name is shown ==");
 // A name changed in the sidebar but not on the page it opens gives the
@@ -637,7 +779,12 @@ const RENAMED = [
   ["AI Memory", "sidebar.items.memory", "dashboard.memory.title"],
   ["Mission Control", "sidebar.items.missionControl", "dashboard.mission.title"],
   ["Create Studio", "common.createStudio", "dashboard.createStudio.title"],
-  ["Timeline", "sidebar.items.timeline", "dashboard.timeline.title"],
+  // V4.6 #3 renamed the row again — "History" became "Mine" when
+  // Favorites and History merged into one entry with two tabs — so the
+  // key it reads moved with it. Pointing this at the abandoned
+  // `sidebar.items.timeline` would have compared the page against a
+  // string nothing renders, and passed.
+  ["Timeline", "sidebar.items.mine", "dashboard.timeline.title"],
   ["Website Builder", "sidebar.items.websiteBuilder", "dashboard.websiteBuilder.title"],
   ["Published Sites", "sidebar.items.published", "dashboard.publishing.title"],
 ];
@@ -648,6 +795,123 @@ for (const [was, sidebarKey, titleKey] of RENAMED) {
   check(`...and from the page it opens`, titleValue !== was, String(titleValue));
   check(`...and the two agree ("${sidebarValue}")`, sidebarValue === titleValue, `${sidebarValue} vs ${titleValue}`);
 }
+console.log("\n== 5b. EVERY row against the page it opens, in ALL TEN languages ==");
+// V4.6 #8. Section 5 above checks six renamed rows in ENGLISH. That is
+// the language a reviewer reads, and it is the one language where a
+// divergence is least likely to survive — so checking only it is close to
+// checking nothing. This derives the pairing for every row instead, and
+// compares all ten.
+//
+// Three shapes count as agreement, and only the first two are checks:
+//   - the page renders the SAME KEY the sidebar does (t(config.titleKey),
+//     t("items.x") out of the sidebar namespace). Nothing to compare —
+//     one string cannot disagree with itself.
+//   - the page renders its own key, which is compared in all ten.
+//   - the page renders no heading at all (Home, Chat, Make anything, the
+//     help centre are full-bleed screens). Reported, not asserted.
+const labelKeysSrc = readFileSync("src/lib/sidebar-label-keys.ts", "utf8");
+const ITEM_KEYS = Object.fromEntries(
+  [...labelKeysSrc
+    .slice(labelKeysSrc.indexOf("ITEM_LABEL_KEYS"))
+    .matchAll(/^\s*"?([^":\n]+?)"?:\s*"(\w+)",/gm)].map((m) => [m[1].trim(), m[2]])
+);
+const NAV_CONSTS = Object.fromEntries(
+  [...modulesSrc.matchAll(/export const (\w+_NAV_ITEM)\s*=\s*\{\s*href:\s*"([^"]+)",\s*label:\s*"([^"]+)"/g)]
+    .map((m) => [m[1], { href: m[2], label: m[3] }])
+);
+const navRows = [...navSrc.matchAll(/\{[^{}]*?href:\s*([^,]+),\s*label:\s*([^,]+),/g)].map((m) => {
+  const [h, l] = [m[1].trim(), m[2].trim()];
+  return {
+    href: h.startsWith('"') ? h.slice(1, -1) : NAV_CONSTS[h.replace(/\.href$/, "")]?.href ?? null,
+    label: l.startsWith('"') ? l.slice(1, -1) : NAV_CONSTS[l.replace(/\.label$/, "")]?.label ?? null,
+  };
+});
+check(`the scan found the sidebar's rows (${navRows.length})`, navRows.length >= 40, String(navRows.length));
+
+const dynamicSrc = readFileSync("src/app/dashboard/[module]/page.tsx", "utf8");
+const DYNAMIC_USES_CONFIG_KEY = /title=\{t\(moduleConfig\.titleKey\)\}/.test(dynamicSrc);
+const buildPageSrc = existsSync("src/components/modules/build-module-page.tsx")
+  ? readFileSync("src/components/modules/build-module-page.tsx", "utf8")
+  : "";
+const BUILD_PAGE_USES_CONFIG_KEY =
+  /const title = t\(config\.titleKey\)/.test(buildPageSrc) && /title=\{title\}/.test(buildPageSrc);
+
+function headingKeyFor(src, labelKey) {
+  if (/<BuildModulePage\b/.test(src) && BUILD_PAGE_USES_CONFIG_KEY) return { same: true };
+  // No branch for an inline `title={t(moduleConfig.titleKey)}`: the twelve
+  // rows that shape belongs to have no page file of their own and are
+  // served by the [module] catch-all, so such a branch here would never
+  // run. A clause that cannot execute passes every mutation aimed at it
+  // and reports coverage it does not have. The catch-all is checked where
+  // it is actually reached, below.
+  const lit = src.match(/title=\{t\("items\.(\w+)"\)\}/);
+  if (lit && /(?:get|use)Translations\(\s*"sidebar"\s*\)/.test(src))
+    return lit[1] === labelKey ? { same: true } : { key: `sidebar.items.${lit[1]}` };
+  const ph = src.match(/<PageHeader[\s\S]{0,400}?title=\{(\w+)\("([\w.]+)"\)\}/);
+  if (ph) {
+    const ns = new RegExp(`const ${ph[1]} = (?:await )?(?:get|use)Translations\\(\\s*"([^"]+)"\\s*\\)`).exec(src);
+    return { key: ns ? `${ns[1]}.${ph[2]}` : ph[2] };
+  }
+  return { none: true };
+}
+
+const headless = [];
+const disagreements = [];
+let byConstruction = 0;
+let compared = 0;
+for (const row of navRows) {
+  const labelKey = row.label === "Create Studio" ? null : ITEM_KEYS[row.label];
+  // A row with no entry here renders raw English in all ten locales —
+  // already its own failure in section 3, so it is not re-reported.
+  if (!labelKey || !row.href) continue;
+  const sidebarKey = `sidebar.items.${labelKey}`;
+  if (typeof lookup(messages.en, sidebarKey) !== "string") continue;
+  const file = `src/app${row.href}/page.tsx`;
+  if (!existsSync(file)) {
+    if (DYNAMIC_USES_CONFIG_KEY) byConstruction++;
+    else headless.push(`${row.label} (no page file)`);
+    continue;
+  }
+  let src = readFileSync(file, "utf8");
+  // A redirect route is judged on the page the reader actually lands on.
+  const red = src.match(/redirect\("([^"?]+)[^"]*"\)/);
+  if (red && !/PageHeader/.test(src) && existsSync(`src/app${red[1]}/page.tsx`))
+    src = readFileSync(`src/app${red[1]}/page.tsx`, "utf8");
+  const verdict = headingKeyFor(src, labelKey);
+  if (verdict.same) {
+    byConstruction++;
+    continue;
+  }
+  if (verdict.none) {
+    headless.push(row.label);
+    continue;
+  }
+  compared++;
+  const differing = LOCALES.filter((l) => lookup(messages[l], sidebarKey) !== lookup(messages[l], verdict.key));
+  // Favorites is a deliberate alias: the row opens the "Mine" page, where
+  // the starred list is a tab. It is named in the exceptions rather than
+  // silently skipped.
+  if (labelKey === "favorites") continue;
+  if (differing.length > 0)
+    disagreements.push(
+      `${row.label}: ${sidebarKey} vs ${verdict.key} — ` +
+        differing.map((l) => `${l} "${lookup(messages[l], sidebarKey)}" != "${lookup(messages[l], verdict.key)}"`).join("; ")
+    );
+}
+check(
+  `rows whose page renders the sidebar's own key: ${byConstruction}`,
+  byConstruction >= 15,
+  "a drop here means the derivation stopped recognising a page shape, not that pages changed"
+);
+check(
+  `rows compared string-by-string in all 10 locales: ${compared}`,
+  compared >= 15,
+  "too few compared — the scan is not reaching the pages"
+);
+check("no row disagrees with its page in any language", disagreements.length === 0, disagreements.join("\n        "));
+// REPORTED, NOT ASSERTED: a full-bleed screen has no heading to compare.
+console.log(`        (${headless.length} rows open a screen with no page heading: ${headless.join(", ")})`);
+
 // EN/EL disagreement was its own bug: one module, two different products
 // depending on the language.
 for (const key of ["sidebar.items.research", "sidebar.items.finance"]) {

@@ -13,6 +13,7 @@ import {
 import { INJECTION_PATTERNS } from "@/lib/agents/injection-patterns";
 import { parseAgentDepth, type AgentDepth } from "@/lib/agents/agent-depth";
 import { foldForMatch } from "@/lib/text/unicode-patterns";
+import { minCharsFor } from "@/lib/text/script-length";
 
 // Shape, validation and prompt-injection defence for Autonomous Agents.
 //
@@ -488,6 +489,13 @@ export function validateAgentOutput(raw: unknown): OutputCheck {
 
   if (text.includes(UNTRUSTED_OPEN) || text.includes(UNTRUSTED_CLOSE))
     return { ok: false, reason: "leaked_instructions" };
-  if (text.length < 10) return { ok: false, reason: "empty" };
+  // TEN CHARACTERS IS A RULE ABOUT ENGLISH, and this floor does not
+  // merely reject: "empty" maps to a FAILED run, which increments
+  // consecutive_failures, which switches the agent off after five. A
+  // Chinese agent answering "销售上升8%" — seven characters, a complete
+  // and correct answer — was failed for it, five days running, and then
+  // disabled. Measured ratio for Chinese is 0.33 of English
+  // (lib/text/script-length.ts).
+  if (text.length < minCharsFor(text, 10)) return { ok: false, reason: "empty" };
   return { ok: true, output: text.slice(0, AGENT_LIMITS.output) };
 }

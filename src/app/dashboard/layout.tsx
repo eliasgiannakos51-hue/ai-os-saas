@@ -19,8 +19,11 @@ import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { logApiError } from "@/lib/log-error";
 import { AmbientDots } from "@/components/ui/ambient-dots";
+import { SampleDataBanner } from "@/components/sample-data/sample-data-banner";
+import { findSampleImport } from "@/lib/sample-data/apply";
 import { DashboardBackground } from "@/components/dashboard/dashboard-background";
 import { AchievementUnlockBridge } from "@/components/achievements/achievement-unlock-bridge";
+import { NavTracker } from "@/components/dashboard/nav-tracker";
 import { PageTransition } from "@/components/page-transition";
 
 export default async function DashboardLayout({
@@ -72,6 +75,14 @@ export default async function DashboardLayout({
     credits = { credits_remaining: 0, credits_total: 0, min_pack_credit_price_eur: null };
   }
   const packCreditPriceEur = packCreditPriceEurFromRow(credits);
+
+  // ON EVERY PAGE, NOT JUST HOME — V4.6 #6 asks for the marker to be
+  // visible continuously. The sample shows up in the finance charts, in
+  // the leads list and in what the chat answers with, and any of those is
+  // somewhere a person can land without passing Home. One indexed read
+  // (user_imports has user_created_idx) against a table with at most a
+  // handful of rows per account.
+  const sampleImport = await findSampleImport(supabase, user.id);
 
 
   return (
@@ -129,15 +140,42 @@ export default async function DashboardLayout({
               <Sidebar email={user.email ?? ""} planName={plan.name} isOwner={isAdmin} />
               <div className="flex min-w-0 flex-1 flex-col">
                 <TopNav email={user.email ?? ""} />
+                {/* Below the top bar and ABOVE the page transition, so it
+                    does not fade in and out on every navigation: a
+                    warning that flickers reads as a notification rather
+                    than as a standing fact about the account. */}
+                {sampleImport && <SampleDataBanner />}
                 {/* Wraps only the page body, not the Sidebar/TopNav —
                     the chrome must stay visually fixed while the content
                     beneath it fades/slides in on each navigation. */}
-                <div className="flex-1">
+                {/* THE <main> LANDMARK, HERE AND ONLY HERE.
+                    The dashboard had none. Four components rendered one
+                    each — route-skeleton, build-module-page (twice) and
+                    document-editor — so a module page had a landmark and
+                    a bespoke page did not, and /dashboard/coding was
+                    measured with zero. A screen reader's "skip to main"
+                    had nothing to land on, and so did the page's own
+                    outline.
+                    Putting it in the layout is what makes it true for all
+                    39 pages instead of 8, and the four components below
+                    became plain <div>s in the same change: a <main>
+                    inside a <main> is invalid, and two landmarks are
+                    worse than one in the wrong place. */}
+                <main id="main-content" className="flex-1">
                   <PageTransition>{children}</PageTransition>
-                </div>
+                </main>
               </div>
             </div>
             <ToastContainer />
+            {/* ONE ROW PER SCREEN CHANGE, for every dashboard page.
+                Mounted HERE and nowhere else: this layout is what
+                survives a client-side navigation, so usePathname()
+                inside it reports each change. A tracker inside a page
+                would fire on arrival and be destroyed before the
+                departure, which records half of every journey. Renders
+                nothing; the writing is app/api/nav/track and the
+                reading is the two views in the nav_events migration. */}
+            <NavTracker />
             <AchievementUnlockBridge />
             <CommandPalette isOwner={isAdmin} />
             </VoiceAvailabilityProvider>

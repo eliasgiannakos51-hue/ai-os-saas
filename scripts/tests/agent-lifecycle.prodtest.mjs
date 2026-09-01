@@ -26,6 +26,7 @@
 //
 // Run: node scripts/tests/agent-lifecycle.prodtest.mjs [--out DIR]
 import http from "node:http";
+import { label } from "./lib/label.mjs";
 import { spawn } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
@@ -353,7 +354,7 @@ if ((await new Promise((r) => build.on("close", r))) !== 0) {
   process.exit(1);
 }
 
-const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"] });
+const server = spawn("npx", ["next", "start", "-p", String(PORT)], { env, stdio: ["ignore", "pipe", "pipe"], detached: true });
 let serverLog = "";
 server.stdout.on("data", (d) => (serverLog += d));
 server.stderr.on("data", (d) => (serverLog += d));
@@ -371,7 +372,18 @@ async function waitForServer() {
 }
 function cleanup() {
   try {
-    server.kill("SIGKILL");
+    // KILL THE GROUP, NOT THE HANDLE. `npx next start` is npx -> sh ->
+    // next-server. SIGKILL to the npx handle leaves the grandchild alive,
+    // reparented to init, still holding its port and serving its build.
+    // Measured across one full survey of the suite: thirteen orphaned
+    // next-server processes, the oldest 41 minutes old. `detached: true`
+    // on the spawn puts the whole tree in its own group so this reaches
+    // all of it. Enforced by scripts/tests/prodtest-hygiene.test.mjs.
+    try {
+      process.kill(-server.pid, "SIGKILL");
+    } catch {
+      server.kill("SIGKILL");
+    }
   } catch {
     /* already gone */
   }
@@ -386,7 +398,7 @@ if (!(await waitForServer())) {
 console.log(`production server up on :${PORT}\n`);
 
 const { chromium } = await import("playwright");
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 const context = await browser.newContext({
   viewport: { width: 1280, height: 950 },
   storageState: { cookies: [{ ...AUTH_COOKIE, domain: "127.0.0.1", path: "/" }], origins: [] },
@@ -431,7 +443,7 @@ async function buildOnce(requestText) {
     };
     requestAnimationFrame(tick);
   });
-  await page.locator("button", { hasText: "Design my agent" }).first().click();
+  await page.locator("button", { hasText: label("dashboard.agents.designButton") }).first().click();
   // The moment a step is visibly on screen — photographed, not asserted
   // from state. Best-effort: a very fast build can outrun this.
   void page
@@ -548,7 +560,7 @@ try {
   jobsInvisibleToOwner = true;
   await page.locator("button", { hasText: "New agent" }).first().click();
   await page.fill("#agent-request", "Every day at nine, check my metrics");
-  await page.locator("button", { hasText: "Design my agent" }).first().click();
+  await page.locator("button", { hasText: label("dashboard.agents.designButton") }).first().click();
   const watchLost = await page
     .waitForSelector('[data-testid="ai-progress-watch-lost"]', { timeout: 30000 })
     .then(() => true)

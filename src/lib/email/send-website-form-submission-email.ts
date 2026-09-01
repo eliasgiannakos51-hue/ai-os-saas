@@ -1,4 +1,5 @@
 import "server-only";
+import { senderAddress } from "@/lib/email/resend-config";
 import { Resend } from "resend";
 import { websiteFormSubmissionEmailHtml } from "@/lib/email/templates";
 import { getSiteUrl } from "@/lib/site-url";
@@ -10,7 +11,10 @@ import {
   type FormEmailStatus,
 } from "@/lib/websites/form-delivery";
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
+// The From address, from ONE definition — see lib/email/resend-config.ts.
+// This was one of fourteen copies of the same line — the constant AND
+// its fallback, repeated per file. The fallback is the half that decides
+// whether mail reaches anybody, so it now has one definition.
 
 export type FormEmailResult = { status: FormEmailStatus; detail: string | null };
 
@@ -70,7 +74,7 @@ export async function sendWebsiteFormSubmissionEmail({
 
     const resend = new Resend(process.env.RESEND_API_KEY);
     const { error } = await resend.emails.send({
-      from: FROM_ADDRESS,
+      from: senderAddress(),
       to: email,
       subject: `New form submission on "${websiteName}" — Ionexa AI`,
       html: websiteFormSubmissionEmailHtml({
@@ -93,7 +97,7 @@ export async function sendWebsiteFormSubmissionEmail({
     // Resend account; for anyone else Resend usually refuses above, but
     // a deployment where it does NOT refuse is one where the owner is
     // the account holder and everybody else silently gets nothing.
-    if (usesSharedTestSender(FROM_ADDRESS)) {
+    if (usesSharedTestSender(senderAddress())) {
       await recordEmailSend(userId, "website_form_submission");
       return {
         status: "unverified_domain",

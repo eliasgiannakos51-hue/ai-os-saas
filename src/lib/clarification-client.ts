@@ -3,6 +3,7 @@
 // (that guard blocks any client-side import, even of code that has
 // nothing to do with the actual Anthropic call). lib/clarification.ts
 // re-exports everything here so server code has one place to import from.
+import { truncate } from "@/lib/text/truncate";
 export type ClarificationKind = "website" | "mission" | "automation" | "create" | "agent";
 
 export type ClarificationCheckResult =
@@ -49,7 +50,10 @@ function cleanText(value: unknown, maxLength: number): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   if (!trimmed) return null;
-  return trimmed.length > maxLength ? `${trimmed.slice(0, maxLength - 1).trimEnd()}…` : trimmed;
+  // The NULL is this function's own contract — "there was nothing here"
+  // is different from "here is an empty string". The CUT is shared: see
+  // lib/text/truncate.ts, and the seven copies that disagreed about it.
+  return truncate(trimmed, maxLength);
 }
 
 // Pure, deterministic interpretation of the tool_use input — separated

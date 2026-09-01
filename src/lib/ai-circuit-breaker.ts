@@ -140,7 +140,26 @@ export async function checkAiCallAllowed(
 // Still best-effort in the sense that a failure is logged and swallowed
 // rather than thrown: this runs after the decision to make the Claude
 // call, so failing here must not turn a successful request into an error.
-export async function recordAiCallForDailySpend(estimatedCreditCost: number): Promise<void> {
+export async function recordAiCallForDailySpend(
+  estimatedCreditCost: number,
+  /**
+   * HOW MANY PROVIDER CALLS THIS ACTION MADE. Defaults to 1, which is
+   * what every caller before this meant and still means.
+   *
+   * It exists because two families of work make SEVERAL calls inside one
+   * settled action — a background job and a Deep Research chunk, which
+   * plans, answers up to six questions and synthesises — and neither
+   * called this function at all. Counting them once each would swap one
+   * wrong number for another; the runners pass the accumulator's own
+   * callCount, which is how many provider responses were recorded.
+   */
+  calls = 1
+): Promise<void> {
+  // Nothing to record is not an error, and must not become a row that
+  // says one call happened. A settlement whose accumulator was never fed
+  // is already reported by lib/billing/reservations.ts.
+  if (!Number.isFinite(calls) || calls < 1) return;
+
   const admin = createAdminClient();
   // UTC date, matching checkDailyPlatformCap's reader above. Passed
   // explicitly rather than left to the function's default so the two can
@@ -150,6 +169,7 @@ export async function recordAiCallForDailySpend(estimatedCreditCost: number): Pr
   const { error } = await admin.rpc("increment_daily_ai_spend", {
     p_estimated_cost: estimatedCreditCost,
     p_date: today,
+    p_calls: Math.round(calls),
   });
 
   if (error) {

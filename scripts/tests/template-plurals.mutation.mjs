@@ -10,7 +10,8 @@
 // the repository.
 //
 // Run: node scripts/tests/template-plurals.mutation.mjs
-import { readFileSync, writeFileSync, mkdirSync, cpSync, rmSync } from "node:fs";
+import { readFileSync, mkdirSync, cpSync, rmSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";

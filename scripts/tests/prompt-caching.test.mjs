@@ -195,13 +195,32 @@ ok("chat route has a per-user tier", /perUserBlock: systemPerUser/.test(chatSrc)
 // same reason. The invariant is not the list — it is that nothing which
 // varies per message sits in front of the cache breakpoint, which is
 // what the second check states directly.
+// THREE MEMBERS SINCE V4.6 #1 added the deep dive, which is chosen from
+// the question for the same reason the other two are. Each is named
+// rather than the block being matched as one exact string, so a fourth
+// per-message input is a deliberate edit here and not a silent one.
+const PER_MESSAGE_INPUTS = [
+  "buildEntityMentionPromptAddition(mentionedEntities)",
+  "codingContext",
+  "deepDive.prompt",
+];
+const dynamicSuffix = chatSrc.slice(
+  chatSrc.indexOf("const systemDynamicSuffix ="),
+  chatSrc.indexOf(";", chatSrc.indexOf("const systemDynamicSuffix ="))
+);
 ok(
-  "…and the per-message tier carries the entity mentions and the coding context",
-  /const systemDynamicSuffix = buildEntityMentionPromptAddition\(mentionedEntities\) \+ codingContext;/.test(chatSrc)
+  "…and the per-message tier carries every question-selected input",
+  PER_MESSAGE_INPUTS.every((m) => dynamicSuffix.includes(m)),
+  PER_MESSAGE_INPUTS.filter((m) => !dynamicSuffix.includes(m)).join(", ")
+);
+const perUserTier = chatSrc.slice(
+  chatSrc.indexOf("const systemPerUser ="),
+  chatSrc.indexOf("const systemDynamicSuffix")
 );
 ok(
   "…and nothing per-message leaked into the cached per-user tier",
-  !/const systemPerUser =[\s\S]{0,400}codingContext/.test(chatSrc)
+  PER_MESSAGE_INPUTS.every((m) => !perUserTier.includes(m)),
+  PER_MESSAGE_INPUTS.filter((m) => perUserTier.includes(m)).join(", ")
 );
 // The conversation is the single biggest block a chat request sends and
 // is append-only, which is the shape a prefix cache wants.

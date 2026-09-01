@@ -19,7 +19,8 @@
  *
  * Run: node scripts/tests/marketing-messages.mutation.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/message-slices.test.mjs";
@@ -71,15 +72,15 @@ const MUTANTS = [
     // dashboard in it at all, so this mutation had nothing to fail.
     name: "a namespace is dropped from the dashboard's list",
     file: LIB,
-    from: '      "settings", "sidebar", "voice",',
-    to: '      "settings", "voice",',
+    from: '      "security", "settings", "sidebar", "voice",',
+    to: '      "security", "settings", "voice",',
     expect: "dashboard: every namespace used is declared",
   },
   {
     name: "a namespace nobody uses is added to the dashboard's list",
     file: LIB,
-    from: '      "settings", "sidebar", "voice",\n    ],',
-    to: '      "settings", "sidebar", "voice", "roadmap",\n    ],',
+    from: '      "security", "settings", "sidebar", "voice",\n    ],',
+    to: '      "security", "settings", "sidebar", "voice", "roadmap",\n    ],',
     expect: "dashboard: every declared namespace is used",
   },
   {

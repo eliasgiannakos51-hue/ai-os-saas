@@ -207,6 +207,27 @@ check("and scoped to the caller's own messages", /from\("chat_messages"\)[\s\S]{
 // Restoring has to give back the IDENTICAL string api/chat produced, not
 // a near-miss from a second implementation of the same truncation.
 check("both routes share one auto-title function", /const truncateTitle = autoTitleFromMessage;/.test(stripComments(readFileSync("src/app/api/chat/route.ts", "utf8"))));
+// AND WHAT IT PRODUCES, not only that it is called.
+//
+// Everything above this line is a WIRING check — is the function
+// imported, is it shared, is it read from the right message. None of
+// them can see a value. autoTitleFromMessage returned
+// AUTO_TITLE_MAX_LENGTH + 1 characters for every truncated title,
+// because the ellipsis was appended after slicing to the full length,
+// and this file passed the whole time. A constant that states a limit is
+// worth one assertion that the limit holds.
+{
+  const title = await loadTs("src/lib/chat/conversation-title.ts");
+  const MAX = title.AUTO_TITLE_MAX_LENGTH;
+  check(`the auto-title limit is a number (${MAX})`, Number.isInteger(MAX) && MAX > 10, String(MAX));
+  const long = "x".repeat(MAX * 3);
+  check("a long message is cut to the limit, not one over it",
+    title.autoTitleFromMessage(long).length === MAX,
+    `${title.autoTitleFromMessage(long).length} vs ${MAX}`);
+  check("...and a short one is untouched", title.autoTitleFromMessage("hello") === "hello");
+  check("...and whitespace is collapsed, as it always was",
+    title.autoTitleFromMessage("a   b\n\nc") === "a b c");
+}
 check("a conversation with nothing to restore from is still refused", /if \(!restored\) \{\s*return fail\("title_empty", 400\)/.test(routeCode));
 // No stored copy of the automatic name — a second source of truth for a
 // derived string goes stale the moment anything edits the message it

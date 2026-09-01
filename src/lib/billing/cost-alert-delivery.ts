@@ -1,6 +1,8 @@
 import "server-only";
+import { escapeHtml } from "@/lib/html-escape";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createResendClient } from "@/lib/resend";
+import { senderAddress } from "@/lib/email/resend-config";
 import { ADMIN_EMAILS, isAdminEmail } from "@/lib/auth/admin-emails";
 import { createNotification } from "@/lib/notifications/store";
 import { logApiError } from "@/lib/log-error";
@@ -27,7 +29,10 @@ import type { CostAlert } from "@/lib/billing/cost-alerts";
  * exactly that, visible on the owner's page.
  */
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
+// The From address, from ONE definition — see lib/email/resend-config.ts.
+// This was one of fourteen copies of the same line — the constant AND
+// its fallback, repeated per file. The fallback is the half that decides
+// whether mail reaches anybody, so it now has one definition.
 
 /** One hour, as the brief asks. */
 export const COST_ALERT_MIN_INTERVAL_SECONDS = 3600;
@@ -40,13 +45,6 @@ export type DeliveryOutcome = {
   notified: boolean;
 };
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 /**
  * Claim the slot, then deliver. Never throws: this runs inside a cron
@@ -104,7 +102,7 @@ async function emailOwners(alert: CostAlert): Promise<boolean> {
       )
       .join("");
     await resend.emails.send({
-      from: FROM_ADDRESS,
+      from: senderAddress(),
       to: ADMIN_EMAILS,
       subject: `[Ionexa cost alert] ${alert.title}`,
       html:

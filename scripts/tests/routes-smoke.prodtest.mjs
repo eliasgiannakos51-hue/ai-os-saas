@@ -69,6 +69,33 @@ const TABLE_ROWS = {
 
 const supaHits = [];
 const supa = http.createServer((req, res) => {
+  // CORS — the same headers scripts/lib/prod-harness.mjs sends, and for
+  // the same reason it wrote down after losing hours to it.
+  //
+  // This file has its OWN stand-in Supabase; it predates the shared
+  // harness and never got the lesson the shared one learned. The page and
+  // this server are on different ports, so any BROWSER-side Supabase call
+  // is cross-origin. /dashboard/settings and /dashboard/team read
+  // notification_settings and notification_preferences from the browser,
+  // Chromium blocked the preflight, and this file reported two console
+  // errors on two pages that were behaving perfectly — every run, for as
+  // long as nobody ran it. Real Supabase sends these headers; a stand-in
+  // that does not is not standing in for it.
+  res.setHeader("Access-Control-Allow-Origin", req.headers.origin ?? "*");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "authorization, x-client-info, apikey, content-type, x-supabase-api-version, prefer, accept-profile, content-profile, range"
+  );
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Expose-Headers", "content-range, x-supabase-api-version");
+  res.setHeader("Access-Control-Max-Age", "600");
+  if (req.method === "OPTIONS") {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
   let body = "";
   req.on("data", (c) => (body += c));
   req.on("end", () => {
@@ -201,6 +228,7 @@ console.log("build ok — starting `next start`");
 const server = spawn("npx", ["next", "start", "-p", String(PORT)], {
   env,
   stdio: ["ignore", "pipe", "pipe"],
+  detached: true,
 });
 let serverLog = "";
 server.stdout.on("data", (d) => (serverLog += d));
@@ -221,7 +249,18 @@ async function waitForServer() {
 
 function cleanup() {
   try {
-    server.kill("SIGKILL");
+    // KILL THE GROUP, NOT THE HANDLE. `npx next start` is npx -> sh ->
+    // next-server. SIGKILL to the npx handle leaves the grandchild alive,
+    // reparented to init, still holding its port and serving its build.
+    // Measured across one full survey of the suite: thirteen orphaned
+    // next-server processes, the oldest 41 minutes old. `detached: true`
+    // on the spawn puts the whole tree in its own group so this reaches
+    // all of it. Enforced by scripts/tests/prodtest-hygiene.test.mjs.
+    try {
+      process.kill(-server.pid, "SIGKILL");
+    } catch {
+      server.kill("SIGKILL");
+    }
   } catch {
     /* already gone */
   }
@@ -291,7 +330,7 @@ const TOUCH_ROUTES = [
 ];
 
 const { chromium } = await import("playwright");
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 
 // An unresolved next-intl key renders as its own dotted path. Matching
 // VISIBLE TEXT rather than raw HTML avoids flagging class names and
@@ -354,6 +393,21 @@ async function inspect(context, route) {
   const measure = async (width, height) => {
     await page.setViewportSize({ width, height });
     await page.waitForTimeout(250);
+    // A NAVIGATION UNDER THE MEASUREMENT IS NOT A REASON TO END THE RUN.
+    // page.evaluate throws "Execution context was destroyed" when the page
+    // navigates while it is evaluating — a redirect, a client-side push,
+    // a late router.replace. Uncaught, that killed the process here and
+    // at the touch-target loop, and every section after the crash never
+    // ran. Retried once against the settled page, then reported.
+    try {
+      return await measureOnce();
+    } catch (err) {
+      if (!/Execution context was destroyed|Target closed/.test(String(err?.message ?? err))) throw err;
+      await page.waitForLoadState("domcontentloaded").catch(() => {});
+      await page.waitForTimeout(400);
+      return measureOnce();
+    }
+    function measureOnce() {
     return page.evaluate(() => {
       const clientWidth = document.documentElement.clientWidth;
       const scrollWidth = document.documentElement.scrollWidth;
@@ -407,6 +461,7 @@ async function inspect(context, route) {
       }
       return { scrollWidth, clientWidth, offenders: offenders.slice(0, 4), small };
     });
+    }
   };
   const byWidth = {};
   for (const [width, height] of [[375, 800], [768, 1024], [1024, 800], [1280, 900]]) {
@@ -424,19 +479,55 @@ async function inspect(context, route) {
   // is the graceful path — a user never sees it. Filtered by that exact
   // signature rather than by "fetch", so a genuine failed request on the
   // page still fails the route.
+  // KNOWN, OPEN, AND EXCLUDED ON PURPOSE:
+  //
+  //   React #310, production-only, intermittent (6/1/4 σε τρεις ίδιες
+  //   εκτελέσεις). Frame D είναι στον app-router του Next, όχι δικός μας
+  //   κώδικας. 0 conditional hooks σε 835 modules. Το error boundary
+  //   πιάνει το crash.
+  //   ΑΦΑΙΡΕΣΕ ΤΟ EXCLUSION όταν διορθωθεί.
+  //
+  // Tracked in issue #61, which carries the stack, the chunk offset that
+  // identifies the frame as Next's app-router, the AST scan result, and
+  // the repro command.
+  //
+  // EXCLUDED BY SIGNATURE, NOT BY ROUTE. The instruction was to stop
+  // checking console errors on /dashboard/overview, and this does less
+  // than that on purpose: dropping every console error on the app's
+  // busiest signed-in page would hide the next, unrelated one for as long
+  // as this stays open. It also would not have worked — CI recorded the
+  // crash on /dashboard/favorites and the local repro on
+  // /dashboard/overview, because an intermittent error is attributed to
+  // whichever route is loading when it fires. Excluding the error itself
+  // covers both and costs one signature instead of a whole page.
+  //
+  // Counted and printed rather than silently dropped, so "it stopped
+  // happening" and "we stopped looking" do not look the same.
+  const HOOK_310 = /Minified React error #310|Rendered more hooks than during the previous render/;
+  const suppressed310 = errors.filter((e) => HOOK_310.test(e)).length;
+  if (suppressed310 > 0) {
+    console.log(`        (${route}: ${suppressed310} known React #310 suppressed — see the comment in this file)`);
+  }
   const real = errors.filter(
     (e) =>
       !/favicon|Failed to load resource|net::ERR_/i.test(e) &&
-      !/Failed to fetch RSC payload[\s\S]*Falling back to browser navigation/i.test(e)
+      !/Failed to fetch RSC payload[\s\S]*Falling back to browser navigation/i.test(e) &&
+      !HOOK_310.test(e)
   );
   await page.close();
-  return { status, errors: real, keys, overflow, overflowTablet, byWidth, landedOn };
+  return { status, errors: real, keys, overflow, overflowTablet, byWidth, landedOn, suppressed310 };
 }
+
+// Tallied across every route so the total is in the run summary. An
+// exclusion that nobody can see the size of is an exclusion that
+// outlives the bug it was written for.
+let total310 = 0;
 
 console.log("\n== 1. public routes (logged out) ==");
 const anon = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 for (const route of PUBLIC_ROUTES) {
   const r = await inspect(anon, route);
+  total310 += r.suppressed310 ?? 0;
   check(`${route}: 200`, r.status, 200);
   check(`${route}: no console errors`, r.errors, []);
   check(`${route}: no unresolved i18n keys`, r.keys, []);
@@ -470,6 +561,7 @@ await authed.addCookies([
 ]);
 for (const route of DASHBOARD_ROUTES) {
   const r = await inspect(authed, route);
+  total310 += r.suppressed310 ?? 0;
   check(`${route}: 200`, r.status, 200);
   // A silent redirect to /login is the failure mode that makes every
   // other assertion on this route pass while proving nothing.
@@ -707,48 +799,123 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   const foldedNav = fold(navText);
   await aside.screenshot({ path: "/tmp/ionexa-sidebar-el.png" });
 
-  // Every heading, by the Greek it must now be showing.
-  for (const [english, greekWord] of [
-    ["Workspace", "Χώρος εργασίας"],
-    ["Build", "Δημιουργία"],
-    ["Tracking", "Παρακολούθηση"],
-    ["Business", "Επιχείρηση"],
-    ["Strategy", "Στρατηγική"],
-  ]) {
-    checkTrue(`heading "${english}" renders as "${greekWord}"`, foldedNav.includes(fold(greekWord)), navText.slice(0, 300));
-    checkTrue(`...and the English word is gone`, !new RegExp(`\\b${english}\\b`).test(navText));
+  // DERIVED FROM THE CONFIG, NOT TYPED OUT — and it took a stale run to
+  // make that point.
+  //
+  // This block used to name eight group headings and nine item labels as
+  // literals: Workspace, Build, Tracking, Business, Strategy, Files,
+  // Deep Research, Integrations, Published Sites, plus four renames.
+  // V4.6 #3 consolidated the sidebar down to four groups, and the eight
+  // assertions went on failing against a sidebar that was perfectly
+  // correct — for as long as nobody ran the file. Nothing runs the
+  // prodtests automatically, so "for as long as nobody ran it" was the
+  // whole time.
+  //
+  // The property is unchanged and is the one worth having: a Greek user
+  // must see Greek, every label must resolve, and no English filing
+  // category may leak through. It is now read out of
+  // lib/sidebar-label-keys.ts and messages/el.json, so a rename moves
+  // both sides at once and this can only fail when the RENDER is wrong.
+  const { readFileSync: readSrc } = await import("node:fs");
+  const elMessages = JSON.parse(readSrc("messages/el.json", "utf8"));
+  const keySrc = readSrc("src/lib/sidebar-label-keys.ts", "utf8");
+  const mapOf = (name) => {
+    const body = keySrc.slice(keySrc.indexOf(`export const ${name}`));
+    const inner = body.slice(body.indexOf("{") + 1, body.indexOf("};"));
+    return [...inner.matchAll(/^\s*"?([A-Za-z][A-Za-z0-9 &'-]*)"?\s*:\s*"([\w.]+)"/gm)]
+      .map((m) => [m[1], m[2]]);
+  };
+  const headings = mapOf("GROUP_HEADING_KEYS");
+  const items = mapOf("ITEM_LABEL_KEYS");
+  // THE FLOORS FIRST. An empty map agrees with any sidebar at all.
+  checkTrue(`the heading map was parsed (${headings.length})`, headings.length >= 4, keySrc.slice(0, 200));
+  checkTrue(`the item map was parsed (${items.length})`, items.length >= 5, "");
+
+  // TWO NAMESPACES, and getting them the wrong way round is how the first
+  // version of this block reported four correct headings as missing:
+  // GROUP_HEADING_KEYS resolves under sidebar.groups, ITEM_LABEL_KEYS
+  // under sidebar.items.
+  const greekIn = (ns) => (key) =>
+    key.split(".").reduce((o, k) => (o == null ? undefined : o[k]), elMessages.sidebar?.[ns] ?? {});
+  const greekHeading = greekIn("groups");
+  const greekItem = greekIn("items");
+
+  for (const [english, key] of headings) {
+    const word = greekHeading(key);
+    checkTrue(`heading "${english}" has Greek in messages/el.json (${key})`, typeof word === "string" && word.length > 0, String(word));
+    if (typeof word !== "string") continue;
+    checkTrue(`heading "${english}" renders as "${word}"`, foldedNav.includes(fold(word)), navText.slice(0, 400));
+    // The English filing category must not survive beside it.
+    checkTrue(`...and "${english}" itself is gone from the nav`, !new RegExp(`\\b${english}\\b`).test(navText), navText.slice(0, 300));
   }
-  // The five item labels that had no key at all.
-  for (const [english, greekWord] of [
-    ["Files", "Αρχεία"],
-    ["Deep Research", "Βαθιά Έρευνα"],
-    ["Integrations", "Συνδέσεις"],
-    ["Published Sites", "Ζωντανά site"],
-  ]) {
-    checkTrue(`item "${english}" renders as "${greekWord}"`, foldedNav.includes(fold(greekWord)), navText.slice(-400));
+  for (const [english, key] of items) {
+    const word = greekItem(key);
+    if (typeof word !== "string" || !word) {
+      checkTrue(`item "${english}" has Greek in messages/el.json (${key})`, false, String(word));
+      continue;
+    }
+    // An item may legitimately be hidden for this account (owner-only,
+    // plan-gated). What may never happen is the ENGLISH showing instead.
+    // ONE assertion, not a branch with a `true` in it: scripts/tests/
+    // gate-vacuity.test.mjs caught that shape here — a check written so
+    // that it cannot go red is not a check.
+    const shown = foldedNav.includes(fold(word));
+    const english_leaked = new RegExp(`\\b${english}\\b`).test(navText);
+    checkTrue(
+      `item "${english}" is either "${word}" or absent — never English`,
+      shown || !english_leaked,
+      `shown=${shown} englishInNav=${english_leaked} :: ${navText.slice(-300)}`
+    );
   }
-  // The approved renames, as the user sees them.
-  for (const [was, now] of [
-    ["AI Memory", "Αναζήτηση"],
-    ["Mission Control", "Στόχοι & Σχέδια"],
-    ["Timeline", "Ιστορικό"],
-    ["Create Studio", "Φτιάξε κάτι"],
-  ]) {
-    checkTrue(`"${was}" now reads "${now}"`, foldedNav.includes(fold(now)), navText.slice(0, 400));
-  }
+  // And nothing unresolved anywhere in it.
+  checkTrue("no raw sidebar key leaks into the nav", !/sidebar\.items\./.test(navText), navText.slice(0, 300));
+
+  // THE MAIN LANDMARK, checked before anything is read out of it.
+  //
+  // This block used to open with `page.locator("main h1").first().innerText()`
+  // and that call THREW after a 30-second timeout, killing the process
+  // and taking every section below it with it. Not a flake: there is no
+  // <main> on this page. The dashboard layout does not provide one —
+  // only route-skeleton.tsx, build-module-page.tsx, chat-workspace.tsx
+  // and document-editor.tsx render one — so every bespoke dashboard page
+  // is missing the landmark a screen reader skips to and a "skip to
+  // content" link needs a target for.
+  //
+  // The check now NAMES that instead of dying of it, and reads the
+  // heading from the document rather than from a landmark that may not
+  // be there.
+  const mainCount = await page.locator("main").count();
+  checkTrue(
+    `/dashboard/coding has a <main> landmark (found ${mainCount})`,
+    mainCount >= 1,
+    "no <main> means no skip-to-content target and no landmark to navigate by"
+  );
 
   // THE HEADING AND THE SIDEBAR AGREE. This is the assertion that would
   // have caught renaming one and not the other.
-  const heading = (await page.locator("main h1").first().innerText()).trim();
-  checkTrue(`the page heading is Greek too ("${heading}")`, /Αιτήματα κώδικα/.test(heading), heading);
+  const heading = (await page.locator("h1").first().innerText()).trim();
+  // "Αιτήματα κώδικα" WAS the heading. /dashboard/coding stopped being a
+  // CRUD form for describing code somebody else would write and became a
+  // workspace that writes it — the label is "Κώδικας με AI" now, in the
+  // sidebar, the heading and the tab. Three assertions here still named
+  // the old one, and one of them asserted that the page says it "does not
+  // write code", which is the opposite of what the module now does. That
+  // sentence survives only as the empty state of the old tracking table
+  // (messages/el.json: emptyCoding).
+  //
+  // Read from messages/el.json rather than typed out, so the next rename
+  // moves both at once.
+  const codingLabel = elMessages.sidebar?.items?.coding;
+  checkTrue(`the sidebar names this page in Greek ("${codingLabel}")`, typeof codingLabel === "string" && codingLabel.length > 0, String(codingLabel));
+  checkTrue(`the page heading is Greek too ("${heading}")`, fold(heading) === fold(String(codingLabel)), `${heading} vs ${codingLabel}`);
   checkTrue("...and matches what the sidebar calls it", foldedNav.includes(fold(heading)), `${heading} not in nav`);
 
   // A tracking page states, on screen, that it produces nothing.
   await page.screenshot({ path: "/tmp/ionexa-coding-el.png" });
-  const main = await page.locator("main").innerText();
+  const main = await page.locator(mainCount >= 1 ? "main" : "body").innerText();
   checkTrue(
-    "the AI Coding page says it does not write code",
-    /δεν γράφει κώδικα/.test(main),
+    "the AI Coding page states what it does and does not do",
+    /Δεν εκτελεί κώδικα/.test(main) || /δεν κάνει/.test(main),
     main.replace(/\s+/g, " ").slice(0, 300)
   );
   checkTrue("no raw i18n key leaks into it", !/module\.empty/.test(main));
@@ -757,7 +924,7 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   // otherwise translated screen, and the piece that survives the page
   // being scrolled away or buried behind twenty other tabs.
   const tabTitle = await page.title();
-  checkTrue(`the tab title is Greek ("${tabTitle}")`, /Αιτήματα κώδικα/.test(tabTitle), tabTitle);
+  checkTrue(`the tab title is Greek ("${tabTitle}")`, fold(tabTitle).includes(fold(String(codingLabel))), tabTitle);
 
   // THE SWITCHES, LOOKED AT. Their hit area was grown from 24px to 44 by
   // padding the box and clipping the background back to the content
@@ -778,7 +945,33 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
     };
   });
   checkTrue(`a switch has a 44px hit area (${track?.hit})`, track?.hit === "44x44", JSON.stringify(track));
-  checkTrue("...with the visible track clipped back to its old size", track?.clip === "content-box", JSON.stringify(track));
+  // THE OUTCOME, NOT THE TECHNIQUE.
+  //
+  // This used to assert `background-clip: content-box`, which was how the
+  // 44px target was reached at the time: vertical padding to grow the hit
+  // area, the clip to keep the visible track small. It is now simply 44px
+  // tall (paddingY 0, clip border-box) and the assertion failed on a
+  // switch that meets the requirement perfectly — it was checking which
+  // CSS route was taken, not whether a thumb can hit it.
+  //
+  // What replaces it is broader than what it replaced: EVERY switch on
+  // the page, not the first one, and the requirement itself (WCAG 2.5.8)
+  // rather than one implementation of it.
+  const switches = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("button[role=switch], button.rounded-full[class*='w-11']"))
+      .map((el) => {
+        const b = el.getBoundingClientRect();
+        return { w: Math.round(b.width), h: Math.round(b.height), label: (el.getAttribute("aria-label") ?? el.textContent ?? "").trim().slice(0, 40) };
+      })
+      .filter((s) => s.w > 0 && s.h > 0)
+  );
+  checkTrue(`the page has switches to measure (${switches.length})`, switches.length >= 1, JSON.stringify(switches));
+  const smallSwitches = switches.filter((s) => s.h < 44 || s.w < 44);
+  checkTrue(
+    "every switch is at least 44x44, however that is achieved",
+    smallSwitches.length === 0,
+    JSON.stringify(smallSwitches)
+  );
 
   await page.close();
   await greek.close();
@@ -796,13 +989,21 @@ console.log("\n== 6. touch targets on a phone ==");
 // small" is not something anyone can act on.
 {
   const bySize = new Map();
+  const skippedRoutes = [];
   for (const route of TOUCH_ROUTES) {
     const page = await authed.newPage();
     try {
       await page.setViewportSize({ width: 375, height: 800 });
       await page.goto(`http://127.0.0.1:${PORT}${route}`, { waitUntil: "networkidle", timeout: 45000 });
       await page.waitForTimeout(250);
-      const small = await page.evaluate(() => {
+      // A PAGE THAT NAVIGATES MID-MEASUREMENT MUST NOT KILL THE RUN.
+      // page.evaluate throws "Execution context was destroyed" when the
+      // page navigates under it — a redirect, a client-side push. That
+      // threw here, uncaught, and took every section after this one with
+      // it. Reported as a skipped route instead.
+      let small;
+      try {
+        small = await page.evaluate(() => {
         const out = [];
         for (const el of Array.from(document.querySelectorAll("button, a[href], [role=button], select"))) {
           const rect = el.getBoundingClientRect();
@@ -815,12 +1016,26 @@ console.log("\n== 6. touch targets on a phone ==");
           out.push(`${el.tagName.toLowerCase()}${id}${testid ? `[${testid}]` : ""} "${label}" ${Math.round(rect.width)}x${Math.round(rect.height)}`);
         }
         return out;
-      });
+        });
+      } catch (err) {
+        skippedRoutes.push(`${route}: ${String(err.message ?? err).slice(0, 80)}`);
+        small = [];
+      }
       if (small.length) bySize.set(route, small);
     } finally {
       await page.close();
     }
   }
+  // A SKIPPED ROUTE IS NOT A PASSING ROUTE. If measuring stops working
+  // for most of the list, "0 targets under 32px" means nothing.
+  if (skippedRoutes.length) {
+    console.log(`        skipped ${skippedRoutes.length}: ${skippedRoutes.join(" | ")}`);
+  }
+  checkTrue(
+    `every route was actually measured (${TOUCH_ROUTES.length - skippedRoutes.length}/${TOUCH_ROUTES.length})`,
+    skippedRoutes.length === 0,
+    skippedRoutes.join("\n        ")
+  );
   const total = [...bySize.values()].reduce((n, list) => n + list.length, 0);
   console.log(`        ${total} targets under 44px tall across ${bySize.size}/${TOUCH_ROUTES.length} routes`);
   for (const [route, list] of bySize) {
@@ -1160,7 +1375,21 @@ console.log("\n== 8. the Ideas module is Greek end to end (A2) ==");
 
   check("the Ideas heading is Greek", await page.locator("main h1").first().innerText(), "Ιδέες");
   const closed = await page.locator("main").innerText();
-  checkTrue("the empty state is Greek", /Δεν έχεις ιδέες ακόμα/.test(closed));
+  // THE PROPERTY, NOT THE SENTENCE. This asserted "Δεν έχεις ιδέες ακόμα",
+  // a string that is no longer anywhere in messages/el.json — the empty
+  // state was rewritten. What matters is that whatever it says is Greek
+  // and resolved, which is what is checked now: no Latin sentence, no raw
+  // key. A snapshot of the copy goes stale on every rewrite; this does not.
+  checkTrue(
+    "the empty state carries no unresolved key",
+    !/moduleData\.|module\.empty|sidebar\.items\./.test(closed),
+    closed.slice(0, 200)
+  );
+  checkTrue(
+    "the empty state has no English sentence in it",
+    !/\b(You have no|Nothing here yet|Get started|No ideas)\b/i.test(closed),
+    closed.slice(0, 200)
+  );
   checkTrue("the search box is Greek", (await page.locator('main input[type="text"]').first().getAttribute("placeholder")) === "Αναζήτηση...");
   checkTrue("the CSV button is Greek", closed.includes("Εξαγωγή CSV"));
 
@@ -1248,7 +1477,6 @@ console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
   const chat = await textAndPlaceholders();
   for (const [what, needle] of [
     ["the empty-state heading", "Ionexa Συνομιλία"],
-    ["the empty-state body", "Ρώτησε ό,τι θέλεις"],
     ["the composer placeholder", "Γράψε στο Ionexa..."],
     ["the Mentor Mode toggle", "Λειτουργία μέντορα"],
     ["the new-chat button", "Νέα συνομιλία"],
@@ -1256,6 +1484,15 @@ console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
   ]) {
     checkTrue(`${what} is Greek`, chat.includes(needle));
   }
+  // The empty-state BODY was pinned to "Ρώτησε ό,τι θέλεις", which the
+  // copy no longer says. The five above are labels on controls and are
+  // stable; a body paragraph is prose and will be rewritten again. So the
+  // body is checked for the property instead of the sentence.
+  checkTrue(
+    "the chat empty state carries no unresolved key",
+    !/chat\.[a-z]+\.[a-z]/i.test(chat),
+    chat.slice(0, 200)
+  );
   await page.screenshot({ path: "/tmp/ionexa-a3-chat-el.png" });
 
   // ---- Memory ---------------------------------------------------------
@@ -1312,12 +1549,31 @@ console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
   const { readFileSync } = await import("node:fs");
   const { groupConversationsByDate } = await loadTs("src/lib/chat/group-conversations.ts");
   const el = JSON.parse(readFileSync("messages/el.json", "utf8"));
+  // CALENDAR DAYS, NOT HOUR OFFSETS — and the difference is a two-hour
+  // window every night in which this test failed.
+  //
+  // The fixture seeded "yesterday" as `now - 26h`. groupConversationsByDate
+  // buckets by CALENDAR DAY (startOfDay comparisons), so 26 hours ago is
+  // yesterday only when the clock has passed 02:00 — before that it lands
+  // on the day before yesterday and the "yesterday" group is empty, so the
+  // labels come back as [groupToday, groupOlder] and this goes red.
+  //
+  // Observed exactly that way: run 10f45ad at 23:42 UTC passed, run
+  // f973729 at 00:16 UTC failed, with no change to either the fixture or
+  // the grouping between them. A test that fails between midnight and 2am
+  // is not flaky in the sense of "sometimes" — it is wrong, on a schedule.
+  //
+  // Anchored to the day boundary so every hour of the day gives the same
+  // answer: midday yesterday is yesterday whatever time it is now.
   const now = Date.now();
-  const at = (hoursAgo) => new Date(now - hoursAgo * 3600e3).toISOString();
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+  const middayOf = (daysAgo) =>
+    new Date(startOfToday.getTime() - (daysAgo - 0.5) * 86400e3).toISOString();
   const labels = groupConversationsByDate([
-    { id: "a", title: "x", created_at: at(0), is_pinned: false },
-    { id: "b", title: "y", created_at: at(26), is_pinned: false },
-    { id: "c", title: "z", created_at: at(400), is_pinned: false },
+    { id: "a", title: "x", created_at: new Date(now).toISOString(), is_pinned: false },
+    { id: "b", title: "y", created_at: middayOf(1), is_pinned: false },
+    { id: "c", title: "z", created_at: middayOf(17), is_pinned: false },
   ]).map((g) => g.label);
   check("the date headers are keys, not English", labels, [
     "groupToday",
@@ -1370,21 +1626,44 @@ console.log("\n== 10. the generic modules are Greek (lib/modules.ts) ==");
   // Sales, Research, Content and Websites. One key each now, so the two
   // are the same string by construction; this reads both off the rendered
   // page rather than trusting that.
-  for (const [route, expected] of [
-    ["/dashboard/sales", "Πωλήσεις"],
-    ["/dashboard/research", "Έρευνα"],
-    ["/dashboard/content", "Περιεχόμενο"],
-    ["/dashboard/websites", "Ιστότοποι"],
-  ]) {
+  // THE EXPECTED NAME COMES FROM THE CONFIG, not from this file.
+  //
+  // These four were typed out as "Πωλήσεις", "Έρευνα", "Περιεχόμενο" and
+  // "Ιστότοποι". Three of the routes left the sidebar in the V4.6
+  // consolidation and websites was renamed to "Σχέδια ιστότοπων", so all
+  // four assertions failed against a product that is internally
+  // consistent — the page and the nav DO read the same key, which is the
+  // property this block exists to check. It was asserting a snapshot of
+  // the names instead.
+  const { readFileSync: readCfg } = await import("node:fs");
+  const elMsg = JSON.parse(readCfg("messages/el.json", "utf8"));
+  const cfgSrc = readCfg("src/lib/modules.ts", "utf8") + readCfg("src/lib/build-modules.ts", "utf8");
+  const modules = [...cfgSrc.matchAll(/slug:\s*"([a-z-]+)"[\s\S]{0,400}?titleKey:\s*"sidebar\.items\.(\w+)"/g)]
+    .map((m) => [`/dashboard/${m[1]}`, elMsg.sidebar?.items?.[m[2]]])
+    .filter(([, name]) => typeof name === "string" && name.length > 0);
+  // checkTrue, not check: this file has BOTH, and check() is
+  // (name, actual, expected). Passing it a boolean and a message
+  // compares `true` with a JSON string and fails on a parse that
+  // worked perfectly — 17 modules found, reported as a failure.
+  checkTrue(`the module config was parsed (${modules.length})`, modules.length >= 4, JSON.stringify(modules.slice(0, 3)));
+  for (const [route, expected] of modules.slice(0, 6)) {
     await page.goto(`http://127.0.0.1:${PORT}${route}`, { waitUntil: "networkidle", timeout: 45000 });
-    const heading = await page.locator("main h1").first().innerText();
+    const heading = (await page.locator("h1").first().innerText().catch(() => "(no h1)")).trim();
     check(`${route}: the page heading is Greek`, heading, expected);
+    // A module may legitimately have left the sidebar — three of these
+    // did. What may never happen is the nav and the page disagreeing.
     const navLink = await page
       .locator(`aside a[href="${route}"]`)
       .first()
       .innerText()
       .catch(() => "(not in sidebar)");
-    check(`${route}: the sidebar calls it the same thing`, navLink.trim(), expected);
+    // Same shape, same reason: one assertion that can fail, rather than a
+    // branch whose other arm asserts `true`.
+    checkTrue(
+      `${route}: the sidebar either calls it "${expected}" or does not list it`,
+      navLink === "(not in sidebar)" || navLink.trim() === expected,
+      `sidebar says ${JSON.stringify(navLink.trim())}, page says ${JSON.stringify(expected)}`
+    );
   }
 
   // One module opened end to end: labels, placeholders, select options.
@@ -1529,5 +1808,11 @@ console.log("\n== 11. cancelling is one click away, in the user's language ==");
 
 await browser.close();
 cleanup();
+console.log(
+  total310 === 0
+    ? "\nknown React #310 suppressions: none this run (the bug is intermittent — this is not evidence it is fixed)"
+    : `\nknown React #310 suppressions: ${total310} — still open, see the comment in inspect()`
+);
+
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

@@ -1,4 +1,5 @@
 import "server-only";
+import { escapeHtml } from "@/lib/html-escape";
 import { getSiteUrl } from "@/lib/site-url";
 
 // Plain, table-based HTML with inline styles only — no <style> blocks, no
@@ -375,19 +376,6 @@ export function weeklyDigestEmailHtml({
   });
 }
 
-// Basic escaping for stepText/detail below — unlike this file's other
-// templates (device labels, IP addresses, module titles — all inherently
-// bounded/parsed strings), a mission step's text and an AI-generated
-// result summary are genuinely freeform user/AI content, so this one
-// actually needs it before interpolating into HTML.
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
 
 export function scheduledRunCompleteEmailHtml({
   stepText,

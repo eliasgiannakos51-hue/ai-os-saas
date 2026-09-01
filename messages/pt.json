@@ -3,7 +3,6 @@
     "search": "Pesquisar qualquer coisa...",
     "notifications": "Notificações",
     "noNotifications": "Nenhuma notificação nova.",
-    "newProject": "Novo Projeto",
     "jumpToPage": "Ir para um módulo ou página...",
     "noMatches": "Nenhum resultado para '{query}'",
     "createStudio": "Cria qualquer coisa",
@@ -86,7 +85,8 @@
       "myBusiness": "O meu negócio",
       "track": "Registar",
       "insights": "O que reparei",
-      "tracking": "Acompanhamento"
+      "tracking": "Acompanhamento",
+      "daily": "No dia a dia"
     },
     "items": {
       "home": "Início",
@@ -133,7 +133,9 @@
       "affiliate": "Afiliados",
       "formSubmissions": "Envios de formulários",
       "routing": "Encaminhamento de modelos",
-      "businessHealth": "Saúde do negócio"
+      "businessHealth": "Saúde do negócio",
+      "mine": "As minhas coisas",
+      "records": "Os meus registos"
     },
     "hints": {
       "chat": "Pergunte qualquer coisa — sem ligação a nenhum módulo.",
@@ -180,7 +182,9 @@
       "help": "Respostas às perguntas mais frequentes, sem gastar créditos.",
       "affiliate": "O teu link de referência, o que ganhaste e como recebes.",
       "formSubmissions": "Tudo o que os visitantes enviaram por um formulário nos seus sites publicados",
-      "businessHealth": "MRR, margem, cancelamentos e tesouraria. Apenas o proprietário."
+      "businessHealth": "MRR, margem, cancelamentos e tesouraria. Apenas o proprietário.",
+      "mine": "Tudo o que criou, do mais recente, com um separador só de favoritos",
+      "records": "Todos os registos num só lugar — filtre por tipo em vez de procurar no menu"
     },
     "closeMenu": "Fechar o menu"
   },
@@ -227,7 +231,7 @@
     },
     "businessTitle": "Business",
     "businessSubtitle": "Para equipes que constroem juntas",
-    "businessExplanation": "Escolha Professional ou Ultimate como seu plano base — ambos desbloqueiam a colaboração em equipe. Depois convide membros da equipe: cada um recebe acesso completo ao nível do seu plano, por +{price}/membro/mês no Professional, ou incluído gratuitamente no Ultimate.",
+    "businessExplanation": "Escolha Professional ou Ultimate como seu plano base — ambos incluem a colaboração em equipe. Depois convide membros da equipe: cada um recebe acesso completo ao nível do seu plano, por +{price}/membro/mês no Professional, ou incluído gratuitamente no Ultimate.",
     "businessCardDescription": "Comece com qualquer plano como base da sua equipe, depois convide membros por +{price}/mês cada — todos obtêm acesso completo ao nível do seu plano. Perfeito para equipes que trabalham juntas.",
     "businessFeatureBase": "Escolha Professional ou Ultimate como seu plano base",
     "businessFeatureFullAccess": "Cada membro recebe acesso completo ao nível do seu plano",
@@ -413,7 +417,9 @@
       "signUp": "Cadastre-se",
       "forgotPassword": "Esqueceu a senha?",
       "resetSuccess": "Senha atualizada — entre com sua nova senha.",
-      "failed": "Não conseguimos iniciar a tua sessão. Verifica o email e a palavra-passe, ou repõe-na se não tiveres a certeza."
+      "failed": "Não conseguimos iniciar a tua sessão. Verifica o email e a palavra-passe, ou repõe-na se não tiveres a certeza.",
+      "oauthFailed": "Esse início de sessão não foi concluído. Tente novamente ou use o seu e-mail e palavra-passe abaixo.",
+      "sharedSignInFirst": "Inicie sessão para guardar o que partilhou."
     },
     "signup": {
       "chooseYourPlan": "Escolha seu plano",
@@ -477,7 +483,7 @@
       "missingToken": "Falta o token de confirmação neste link. Use o link do seu email exactamente como foi enviado.",
       "warning": "Isto eliminará permanentemente a sua conta e todos os registos que criou. Não pode ser anulado.",
       "deleting": "A eliminar…",
-      "confirmButton": "Eliminar permanentemente a minha conta",
+      "confirmButton": "Eliminar permanentemente a tua conta",
       "cancel": "Cancelar e voltar",
       "confirmFailed": "Não conseguimos concluir a eliminação. A tua conta continua a existir — tenta o link outra vez ou contacta o apoio."
     }
@@ -668,7 +674,11 @@
         "endingIn": "{days, plural, =0 {A sua subscrição termina hoje.} one {A sua subscrição termina daqui a # dia.} other {A sua subscrição termina daqui a # dias.}}"
       },
       "creditsSplit": "{monthly} mensais + {purchased} comprados (nunca expiram)",
-      "noSubscriptionToCancel": "Não há subscrição para cancelar — o acesso de proprietário e o período beta terminam sozinhos."
+      "noSubscriptionToCancel": "Não há subscrição para cancelar — o acesso de proprietário e o período beta terminam sozinhos.",
+      "checkout": {
+        "success": "Pagamento recebido. O seu plano é atualizado aqui assim que a Stripe confirmar — normalmente em poucos segundos.",
+        "cancelled": "O pagamento foi cancelado. Nada foi cobrado."
+      }
     },
     "marginReport": {
       "title": "Relatório de Margem",
@@ -720,8 +730,8 @@
       "notConfigured": "As notificações push não estão configuradas nesta instalação.",
       "agentResults": "Resultados de agente",
       "agentResultsHint": "Quando um agente agendado termina uma execução",
-      "missionReminders": "Lembretes de missão",
-      "missionRemindersHint": "Quando um passo de missão agendado é executado",
+      "missionReminders": "Lembretes de plano",
+      "missionRemindersHint": "Quando um passo de plano agendado é executado",
       "lowCredits": "Créditos baixos",
       "lowCreditsHint": "Quando o trabalho para porque o saldo acabou",
       "collaboration": "Colaboração",
@@ -798,7 +808,8 @@
           "help": "Cola um URL de webhook do Discord para o canal que quiseres.",
           "placeholder": "https://discord.com/api/webhooks/…"
         }
-      }
+      },
+      "emailNotConfigured": "O email ainda não está configurado nesta instalação, por isso nada pode ser entregue na sua caixa de entrada."
     },
     "overage": {
       "title": "Uso adicional",
@@ -863,10 +874,19 @@
         "totalEntries": "Total de Entradas",
         "thisWeek": "Esta Semana",
         "mostActive": "Mais Ativo",
-        "creditsRemaining": "Créditos Restantes"
+        "creditsRemaining": "Créditos Restantes",
+        "fillsAfter": "Preenche-se após {count} entradas",
+        "totalEntriesExplain": "Tudo o que registou, em cada módulo, desde o início.",
+        "thisWeekExplain": "Registado nos últimos sete dias — o quão ativa foi a semana.",
+        "mostActiveExplain": "O módulo onde mais escreve. Para onde vai a sua atenção.",
+        "creditsExplain": "O que resta da sua quota mensal para trabalho com IA.",
+        "ofTotal": "{count, plural, one {de # no total} other {de # no total}}",
+        "fromEntries": "{count, plural, one {a partir de # entrada} other {a partir de # entradas}}",
+        "openEntries": "Ver as entradas →",
+        "openCredits": "Ver o histórico →"
       },
       "betaFeedback": {
-        "message": "Obrigado por testar o Ionexa AI! Adoraríamos receber seu feedback.",
+        "message": "Obrigado por testar o Ionexa AI. O teu feedback é bem-vindo.",
         "linkLabel": "Enviar feedback"
       },
       "progress": {
@@ -882,12 +902,13 @@
         "mostActiveIn": "Mais ativo em {module}"
       },
       "activeMission": {
-        "title": "Missão Ativa",
-        "stepsLabel": "{completed}/{total} etapas concluídas"
+        "title": "Plano ativo",
+        "stepsLabel": "{completed}/{total} etapas concluídas",
+        "open": "Abrir o plano"
       },
       "nextAction": {
         "title": "O Que Vem a Seguir?",
-        "continueMission": "Continue: {step} da sua missão \"{goal}\"",
+        "continueMission": "Continue: {step} do teu plano \"{goal}\"",
         "revisitLink": "Você vinculou \"{source}\" a \"{target}\" há alguns dias — vale a pena revisitar?",
         "startNew": "Nenhuma atividade nova nos últimos 3 dias — pronto para começar algo novo?",
         "cta": "Ir até lá →"
@@ -901,7 +922,7 @@
         "suggestion": {
           "recency": "Você não registra nada há um tempo — adicione uma nova entrada para retomar.",
           "coverage": "Tente explorar um módulo que ainda não usou.",
-          "missionSteps": "Conclua uma etapa da missão para manter seu ritmo.",
+          "missionSteps": "Conclui uma etapa do plano para manteres o teu ritmo.",
           "consistency": "Tente registrar algo todos os dias desta semana."
         }
       },
@@ -933,7 +954,27 @@
       "quickStart": "Início rápido",
       "templateFailed": "Não conseguimos aplicar esse modelo. Tenta outra vez daqui a pouco — não foi adicionado nada.",
       "quickStartBlurb": "Adiciona algumas entradas de exemplo para veres como fica um espaço de trabalho preenchido.",
-      "quickStartAdd": "Adicionar"
+      "quickStartAdd": "Adicionar",
+      "setupProgress": {
+        "title": "Progresso da configuração",
+        "count": "{done} de {total} passos",
+        "suggestion": "A sua pontuação de atividade aparece assim que registar {count} entradas — suficientes para que nenhuma sozinha a decida.",
+        "steps": {
+          "onboarding": "Termine as perguntas de boas-vindas",
+          "firstEntry": "Registe a sua primeira entrada",
+          "secondModule": "Registe algo numa segunda área",
+          "mission": "Defina um objetivo"
+        }
+      },
+      "next": {
+        "title": "A seguir"
+      },
+      "whatChanged": {
+        "title": "O que mudou",
+        "since": "desde {when}",
+        "entries": "entradas novas",
+        "insights": "observações novas"
+      }
     },
     "team": {
       "title": "Equipe",
@@ -953,7 +994,7 @@
       "removeTitle": "Remover membro",
       "descriptionIncluded": "No plano {plan} — os membros convidados recebem acesso completo a este nível, incluído sem custo adicional.",
       "seatsUsed": "{used} de {total} vagas usadas",
-      "setupSuccessTitle": "Sua equipe está pronta!",
+      "setupSuccessTitle": "A tua equipa está pronta",
       "setupSuccessBody": "Convide seu primeiro membro de equipe abaixo.",
       "roleLabel": "Função / Cargo",
       "rolePlaceholder": "O que essa pessoa faz?",
@@ -1030,7 +1071,18 @@
       "pinError": "A fixação não foi guardada. Tente de novo.",
       "renameError": "O novo nome não foi guardado — fica o anterior.",
       "renameLabel": "Novo nome para «{title}»",
-      "emptyHint": "Pergunta o que quiseres — conhecimentos gerais, ideias, ajuda a escrever ou só conversar."
+      "emptyHint": "Pergunta o que quiseres — conhecimentos gerais, ideias, ajuda a escrever ou só conversar.",
+      "provenance": {
+        "plain": "Com base em {count, plural, one {# entrada} other {# entradas}} em {modules, plural, one {# módulo} other {# módulos}}",
+        "withPeriod": "Com base em {count, plural, one {# entrada} other {# entradas}} em {modules, plural, one {# módulo} other {# módulos}}, {period}",
+        "capped": "Com base nas {cap} mais recentes de cada um de {modules, plural, one {# módulo} other {# módulos}} — {count, plural, one {# entrada lida} other {# entradas lidas}}, não tudo o que tens",
+        "cappedWithPeriod": "Com base nas {cap} mais recentes de cada um de {modules, plural, one {# módulo} other {# módulos}} — {count, plural, one {# entrada lida} other {# entradas lidas}}, {period}. Não tudo o que tens.",
+        "nothingIn": "Nada foi lido de: {modules}"
+      },
+      "dataScope": {
+        "title": "O que consegue ver",
+        "body": "Vê as tuas entradas, os teus objetivos e os ficheiros que carregaste. Não vê nada que não tenhas adicionado. Não altera nada sem que peças."
+      }
     },
     "create": {
       "title": "Criar Qualquer Coisa",
@@ -1044,7 +1096,7 @@
       "recordItAnyway": "Registar mesmo assim"
     },
     "timeline": {
-      "title": "Histórico",
+      "title": "As minhas coisas",
       "allModules": "Todos os módulos",
       "showOnly": "Mostrar apenas: {module}",
       "rangeToday": "Hoje",
@@ -1054,7 +1106,9 @@
       "empty": {
         "title": "O seu trabalho, pela ordem em que aconteceu",
         "why": "Escreve-se sozinho. Tudo o que regista em qualquer módulo chega aqui num único fluxo, que é como se responde a «o que fiz eu no mês passado»."
-      }
+      },
+      "tabAll": "Tudo",
+      "tabStarred": "Favoritos"
     },
     "favorites": {
       "title": "Favoritos",
@@ -1083,7 +1137,7 @@
       "scheduledForDate": "Executa em {date}",
       "cancelScheduled": "Cancelar",
       "viewIn": "Ver em {module}",
-      "reviewMission": "Avaliar Missão",
+      "reviewMission": "Avaliar plano",
       "reviewing": "Avaliando...",
       "reviewerLabel": "Reviewer",
       "statusPlanning": "Planejando",
@@ -1102,17 +1156,17 @@
       "retry": "Tentar novamente ({attempts}/{max})",
       "stepFailedMax": "Falhou {max}x — não tentará novamente automaticamente. Tente reformular a etapa ou criá-la manualmente.",
       "sessionExpired": "A tua sessão expirou durante o carregamento. Nada se perdeu — recarrega a página.",
-      "newMission": "Nova missão",
+      "newMission": "Novo plano",
       "tabSteps": "Passos",
       "tabReview": "Revisão",
       "stepsProgress": "{done}/{total} passos",
       "statusFilterLabel": "Estado",
       "nextStep": "Seguinte: {step}",
-      "noSteps": "Esta missão ainda não tem passos de plano.",
+      "noSteps": "Este plano ainda não tem passos.",
       "reviewNotRunYet": "Todos os passos estão concluídos — execute o Revisor para obter um resumo.",
       "reviewLocked": "O Revisor corre assim que todos os passos estiverem concluídos.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "Esta missão foi atualizada noutro local agora mesmo — a recarregar para mostrar o estado mais recente.",
+      "updatedElsewhere": "Este plano foi atualizado noutro local agora mesmo — a recarregar para mostrar o estado mais recente.",
       "energy": {
         "heading": {
           "light": "Pouca energia — comece aqui",
@@ -1121,18 +1175,18 @@
         },
         "heldBack": "{count, plural, one {# passo mais pesado adiado} other {# passos mais pesados adiados}} por agora"
       },
-      "stillPlanning": "Ainda a planear — está a demorar. Vai continuar, e o plano estará na tua lista de missões quando estiver pronto.",
+      "stillPlanning": "Ainda a planear — está a demorar. Vai continuar, e o plano estará na tua lista de planos quando estiver pronto.",
       "planStalled": "O plano parou inesperadamente. Não foram cobrados créditos — tenta novamente.",
       "empty": {
         "title": "Um objetivo, dividido em passos",
         "why": "Diga o que quer alcançar e isto transforma-se num plano com passos datados para ir marcando, não numa lista de desejos.",
         "example": "Conseguir os primeiros 10 clientes pagantes"
       },
-      "deleteMission": "Eliminar missão",
-      "deleteConfirmMission": "Eliminar a missão «{goal}»?",
+      "deleteMission": "Eliminar plano",
+      "deleteConfirmMission": "Eliminar o plano «{goal}»?",
       "deleteConfirmLoses": "Isto remove {steps, plural, one {# passo} other {# passos}} — {completed} já concluídos — e {scheduled, plural, one {# execução agendada} other {# execuções agendadas}}. Não pode ser anulado.",
-      "deletedMission": "Missão eliminada",
-      "deleteFailed": "Não foi possível eliminar a missão.",
+      "deletedMission": "Plano eliminado",
+      "deleteFailed": "Não foi possível eliminar o plano.",
       "deleteStep": "Eliminar passo",
       "editStep": "Editar passo",
       "saveStep": "Guardar",
@@ -1150,12 +1204,12 @@
       "generating": "Gerando...",
       "entriesTitle": "Novas entradas (esta semana / semana passada)",
       "noModuleActivity": "Nenhuma atividade em nenhum módulo nas últimas duas semanas.",
-      "missionStepsLabel": "{completed, plural, one {# etapa de missão concluída} other {# etapas de missão concluídas}}, {pending, plural, one {# ainda pendente} other {# ainda pendentes}}",
+      "missionStepsLabel": "{completed, plural, one {# etapa do plano concluída} other {# etapas do plano concluídas}}, {pending, plural, one {# ainda pendente} other {# ainda pendentes}}",
       "reflectionLabel": "Reflexão"
     },
     "tradingWorkflow": {
       "title": "Fluxo de Trabalho de Trading",
-      "description": "Todo o trading em um só lugar — suas operações, links do Knowledge Graph, Timeline, Mentor, Missões e Reflexão Semanal.",
+      "description": "Todo o trading em um só lugar — suas operações, links do Knowledge Graph, Timeline, Mentor, Planos e Reflexão Semanal.",
       "insight": {
         "title": "Insight de Padrão de Trading",
         "noTrades": "Registre uma operação para começar a ver padrões aqui.",
@@ -1170,7 +1224,7 @@
       "mentorButtonDescription": "Abra o Ionexa Chat no Modo Mentor com suas últimas 20 operações já carregadas como contexto.",
       "mentorChatPrefill": "Analise minhas operações recentes e me dê um feedback para melhorar minha taxa de acerto.",
       "missionButton": "Iniciar uma Meta de Trading",
-      "missionButtonDescription": "Crie um plano de missão de IA para melhorar seu trading, por exemplo a taxa de acerto deste mês.",
+      "missionButtonDescription": "Crie um plano de IA para melhorar seu trading, por exemplo a taxa de acerto deste mês.",
       "missionButtonCreating": "Criando...",
       "missionGoal": "Melhorar minha taxa de acerto no trading este mês",
       "timelineTitle": "Timeline de Trading",
@@ -1180,7 +1234,7 @@
     },
     "productWorkflow": {
       "title": "Fluxo de Trabalho de Produto",
-      "description": "Todo o lançamento de produto em um só lugar — seus produtos, links do Knowledge Graph, Timeline, Mentor, Missões e Reflexão Semanal.",
+      "description": "Todo o lançamento de produto em um só lugar — seus produtos, links do Knowledge Graph, Timeline, Mentor, Planos e Reflexão Semanal.",
       "insight": {
         "title": "Insight de Padrão de Produto",
         "noProducts": "Adicione um produto para começar a ver padrões aqui.",
@@ -1191,7 +1245,7 @@
       "mentorButtonDescription": "Abra o Ionexa Chat no Modo Mentor com seus últimos 20 produtos já carregados como contexto.",
       "mentorChatPrefill": "Revise meus planos de produto e me dê feedback sobre o que falta antes do lançamento.",
       "missionButton": "Lançar um Novo Produto",
-      "missionButtonDescription": "Crie um plano de missão de IA para lançar um novo produto — público, preços, landing page e mais.",
+      "missionButtonDescription": "Crie um plano de IA para lançar um novo produto — público, preços, landing page e mais.",
       "missionButtonCreating": "Criando...",
       "missionGoal": "Lançar um novo produto: definir o público-alvo, definir o preço e criar uma landing page",
       "timelineTitle": "Timeline de Produto",
@@ -1203,10 +1257,13 @@
       "title": "Registo de Energia",
       "prompt": "Como está sua energia hoje?",
       "checkedInToday": "Energia de hoje: {level}/5.",
-      "logAgain": "Registrar novamente",
       "notePlaceholder": "Nota opcional...",
       "logged": "Energia registrada",
-      "levelLabel": "Nível de energia {level}"
+      "levelLabel": "Nível de energia {level}",
+      "scaleLow": "1 = exausto",
+      "scaleHigh": "5 = ótimo",
+      "whatItDoes": "O Ionexa usa isto para escolher que passo do plano te sugerir — trabalho leve quando estás em baixo, exigente quando não estás.",
+      "change": "Alterar"
     },
     "websiteBuilder": {
       "title": "Criar um site",
@@ -1422,7 +1479,7 @@
       "subtitle": "Descreva numa frase o que quer. Não há ferramenta a escolher — o estúdio percebe do que se trata, mostra-lhe o que entendeu e só depois cria.",
       "inputLabel": "O que quer criar?",
       "inputPlaceholder": "ex. Uma página de destino para o meu negócio de coaching, acolhedora e profissional",
-      "noToolPickerHint": "Sites, missões, entradas, automatizações e documentos começam todos aqui.",
+      "noToolPickerHint": "Sites, planos, entradas, automações e documentos começam todos aqui.",
       "continue": "Continuar",
       "detecting": "A ler o seu pedido…",
       "detectFailed": "Não foi possível interpretar esse pedido.",
@@ -1438,7 +1495,7 @@
       "changeType": "Mudar tipo",
       "pickTypePrompt": "Escolha que tipo de coisa isto deve ser:",
       "typeWebsite": "Site",
-      "typeMission": "Missão",
+      "typeMission": "Plano",
       "typeModuleEntry": "Entrada do espaço",
       "typeModuleEntryNamed": "Entrada em {module}",
       "typeAutomation": "Automatização",
@@ -1468,7 +1525,7 @@
       "progress": {
         "creatingProject": "A criar o projeto",
         "generatingWebsite": "A gerar o site",
-        "planningMission": "A planear a missão",
+        "planningMission": "A criar o plano",
         "routingEntry": "A encaminhar para o módulo certo",
         "schedulingAutomation": "A agendar a automatização",
         "creatingDocument": "A criar o documento",
@@ -1489,7 +1546,8 @@
       "typeAgent": "Agente de IA",
       "agentDesignFailed": "Não foi possível desenhar esse agente.",
       "agentSaveFailed": "O agente foi desenhado mas não foi possível guardá-lo.",
-      "unsupportedType": "O Create Studio ainda não consegue criar isso."
+      "unsupportedType": "O Create Studio ainda não consegue criar isso.",
+      "madeItHere": "Criei aqui → {where}"
     },
     "agents": {
       "title": "Agentes de IA",
@@ -1502,14 +1560,14 @@
       "requestLabel": "O que quer que este agente faça por si?",
       "requestPlaceholder": "ex. Todas as manhãs, envia-me as últimas notícias sobre a Nvidia",
       "deliveryNote": "Os resultados são enviados para {email}, o endereço da sua conta.",
-      "designButton": "Desenhar o meu agente",
+      "designButton": "Desenhar o teu agente",
       "designing": "A desenhar...",
       "buildError": "Não foi possível desenhar esse agente. Tente novamente.",
       "clarificationTitle": "Primeiro, duas perguntas rápidas:",
       "clarificationSkip": "Ignorar e criar mesmo assim",
       "clarificationContinue": "Continuar",
       "clarificationAnswerPlaceholder": "A sua resposta...",
-      "previewTitle": "É isto que vou construir",
+      "previewTitle": "O que este agente vai fazer",
       "previewName": "Nome",
       "previewSchedule": "Corre",
       "previewCostPerRun": "Custo por execução",
@@ -1650,7 +1708,7 @@
         "noCharge": "Não lhe foi cobrado nada — nada chegou a correr.",
         "noChargeYet": "Ainda não foi cobrado nada.",
         "tryInstead": "Experimente pedir pesquisa, acompanhamento ou um resumo — por exemplo, «todas as segundas, resume as novidades do meu setor».",
-        "rephrase": "Quero reescrever o pedido",
+        "rephrase": "Reescrever o teu pedido",
         "partialTitle": "Parte disto não é possível",
         "partialWillDo": "Em vez disso, o agente faria: {parts}",
         "partialContinue": "Criar apenas a parte viável",
@@ -1717,7 +1775,9 @@
         "withdrawing": "A retirar...",
         "withdrawn": "Retirado. Já não está na biblioteca.",
         "withdrawFailed": "Não foi possível retirar. Continua partilhado."
-      }
+      },
+      "failingWarning": "{failures} das últimas {max} execuções falharam seguidas. Após {max}, este agente desliga-se sozinho.",
+      "disabledReason": "Última falha: {reason}"
     },
     "publishing": {
       "title": "Sites no ar",
@@ -1877,7 +1937,7 @@
       "saveSelection": "{count, plural, one {Guardar # selecionado} other {Guardar # selecionados}}",
       "collectionCreated": "Coleção {name} guardada",
       "collectionError": "Não foi possível guardar a coleção.",
-      "askTitle": "Perguntar aos meus documentos",
+      "askTitle": "Perguntar aos teus documentos",
       "askNothingSelected": "Marca os ficheiros de onde deve vir a resposta. Nada mais será usado.",
       "askSelected": "A responder a partir de {count, plural, one {# ficheiro} other {# ficheiros}}: {names}",
       "tooManySelected": "Pergunta sobre até {max} ficheiros de cada vez.",
@@ -2041,11 +2101,11 @@
       "noneTitle": "Ainda nada de sólido",
       "noneNeedMore": "Ainda não há aqui o suficiente para falar de um padrão. Algumas dezenas de linhas com datas costuma ser o ponto em que as coisas começam a aparecer — e preferimos não dizer nada a inventar algo.",
       "noneYet": "Adiciona um pouco mais e corre isto outra vez a partir do teu painel.",
-      "goToDashboard": "Ir para o meu painel"
+      "goToDashboard": "Ir para o teu painel"
     },
     "insights": {
       "title": "O que reparei",
-      "basedOn": "de {count, plural, one {# dos teus registos} other {# dos teus registos}}",
+      "basedOn": "de {count, plural, one {# das tuas entradas} other {# das tuas entradas}}",
       "checkIt": "Vê tu mesmo",
       "showNumbers": "Ver os números",
       "hideNumbers": "Ocultar os números",
@@ -2100,7 +2160,7 @@
       "description": "Partilha o Ionexa e ganha parte do que continuam a pagar as pessoas que trazes.",
       "pitch": "Ganha {percent}% de cada pagamento dos teus referidos, todos os meses, durante {months, plural, one {# mês} other {# meses}}.",
       "pitchTerms": "Não podes referir-te a ti próprio, e cada pessoa conta uma só vez. A comissão começa no primeiro pagamento deles.",
-      "join": "Quero o meu link",
+      "join": "Obter o teu link",
       "joining": "A preparar…",
       "joinError": "Não resultou. Tenta outra vez.",
       "yourLink": "O teu link",
@@ -2128,13 +2188,13 @@
     "search": {
       "kinds": {
         "page": "Páginas",
-        "module": "Registros",
+        "module": "Entradas",
         "file": "Arquivos",
         "chat": "Conversas",
         "website": "Sites",
         "agent": "Agentes",
         "research": "Pesquisa",
-        "mission": "Missões",
+        "mission": "Planos",
         "help": "Ajuda"
       },
       "filters": {
@@ -2292,6 +2352,14 @@
         "too_long": "Isso é mais longo do que uma regra precisa.",
         "unauthenticated": "A tua sessão terminou. Inicia sessão e tenta de novo."
       }
+    },
+    "records": {
+      "title": "Os meus registos",
+      "description": "Cada registo, ferramenta e definição num só lugar. Filtre por tipo em vez de procurar no menu.",
+      "searchLabel": "Procurar por nome",
+      "allTypes": "Todos os tipos",
+      "count": "{count, plural, one {# local} other {# locais}}",
+      "noMatch": "Nada corresponde a esse nome. Experimente uma palavra mais curta ou limpe o filtro."
     }
   },
   "module": {
@@ -2361,13 +2429,14 @@
   "askAi": {
     "buttonLabel": "Perguntar à IA",
     "title": "Pergunte à IA sobre este {title}",
-    "subtitle": "A IA já conhece os dados desta entrada — é só perguntar.",
+    "subtitle": "A IA já tem os dados desta entrada. Pergunta o que quiseres.",
     "placeholder": "Pergunte qualquer coisa sobre esta entrada...",
     "emptyState": "Faça uma pergunta sobre esta entrada — não precisa explicar o contexto, a IA já o tem.",
     "send": "Enviar",
     "close": "Fechar",
     "streamInterrupted": "A ligação foi interrompida antes de a resposta terminar.",
-    "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta."
+    "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta.",
+    "alsoRead": "Também leu {count, plural, one {# mensagem anterior} other {# mensagens anteriores}} sobre esta entrada"
   },
   "entityLinks": {
     "buttonLabel": "Vincular a...",
@@ -2402,8 +2471,8 @@
       "description": "Registre sua primeira entrada em {module}."
     },
     "firstMission": {
-      "title": "Missão Cumprida",
-      "description": "Complete sua primeira missão de IA."
+      "title": "Primeiro plano concluído",
+      "description": "Conclui o teu primeiro plano de IA."
     },
     "streak": {
       "title": "Campeão da Consistência",
@@ -2419,11 +2488,11 @@
     },
     "firstEntityLink": {
       "title": "Conector",
-      "description": "Vincule dois registros no Knowledge Graph."
+      "description": "Vincule duas entradas no Grafo de Conhecimento."
     },
     "tenEntityLinks": {
       "title": "Construtor de Rede",
-      "description": "Vincule 10 registros entre módulos diferentes."
+      "description": "Vincule 10 entradas entre módulos diferentes."
     },
     "firstEnergyCheckin": {
       "title": "Check-In",
@@ -2869,7 +2938,7 @@
     },
     "create": {
       "is": "Uma frase à entrada, a coisa certa à saída.",
-      "does": "Descreves por palavras tuas o que queres; o estúdio percebe se é uma entrada de módulo, um site, uma missão, uma automação, um agente ou um documento, e cria-o.",
+      "does": "Descreves por palavras tuas o que queres; o estúdio percebe se é uma entrada de módulo, um site, um plano, uma automação, um agente ou um documento, e cria-o.",
       "doesNot": "Não adivinha em silêncio. Quando não percebe o que querias, ou não consegue construir o que pediste, di-lo em vez de produzir o tipo mais parecido — que era exatamente o que fazia antes com os agentes."
     },
     "costs": {
@@ -2914,12 +2983,12 @@
     },
     "productWorkflow": {
       "is": "Tudo sobre os seus produtos num só ecrã.",
-      "does": "Mostra as mesmas entradas de produto do módulo Produtos, mais as suas ligações, o seu histórico, um padrão calculado sem IA e atalhos para Mentor e Missão.",
+      "does": "Mostra as mesmas entradas de produto do módulo Produtos, mais as suas ligações, o seu histórico, um padrão calculado sem IA e atalhos para Mentor e Plano.",
       "doesNot": "Não é um segundo sítio para guardar produtos. São as mesmas linhas do módulo Produtos — adiciona uma aqui e ela aparece lá — e o padrão é aritmética sobre o que escreveu, não uma previsão."
     },
     "reflection": {
       "is": "O que realmente terminou esta semana, face ao que tinha planeado.",
-      "does": "Conta as entradas novas de cada módulo desta semana e da anterior, conta os passos de missão feitos e ainda pendentes, e pede uma síntese curta e honesta da diferença.",
+      "does": "Conta as entradas novas de cada módulo desta semana e da anterior, conta os passos de plano feitos e ainda pendentes, e pede uma síntese curta e honesta da diferença.",
       "doesNot": "Aqui não fica nada guardado. Cada toque recalcula a partir dos seus dados em direto, por isso não há histórico de reflexões anteriores — e conta o que registou, não o que fez fora da aplicação."
     },
     "routing": {
@@ -2939,13 +3008,18 @@
     },
     "tradingWorkflow": {
       "is": "Tudo o que toca ao trading num só ecrã.",
-      "does": "As mesmas operações do módulo Trading, mais as suas ligações, o seu histórico, padrões por dia, hora, símbolo e série de perdas, e atalhos para Mentor e Missão.",
+      "does": "As mesmas operações do módulo Trading, mais as suas ligações, o seu histórico, padrões por dia, hora, símbolo e série de perdas, e atalhos para Mentor e Plano.",
       "doesNot": "Os padrões são contagens de operações que já fez, não previsões, e não são aconselhamento de investimento. Nem é um segundo conjunto de operações: são as mesmas linhas do módulo Trading."
     },
     "businessHealth": {
       "is": "Os números do próprio negócio: receita, margem, cancelamentos, tesouraria. Apenas para o proprietário.",
       "does": "Calcula cada métrica a partir de linhas reais de subscrição e de custo, e pede-lhe os três valores que nenhuma base de dados pode saber: gasto em marketing, custos fixos e saldo de caixa.",
       "doesNot": "Não mostra um número que não consiga justificar. Uma métrica a que falta um dado diz o que precisa em vez de calcular a partir de zero, e nada é preenchido retroativamente: o histórico começa no dia em que isto entrou em funcionamento."
+    },
+    "records": {
+      "is": "Uma página com todos os tipos de registo, ferramenta e definição que pode abrir.",
+      "does": "A barra lateral listava dezanove registos que funcionam da mesma forma. Estão aqui, com um filtro por tipo, para encontrar lendo uma lista em vez de decorar um menu.",
+      "doesNot": "Nada foi movido nem fundido. Cada página mantém o seu endereço, as suas entradas e o seu formulário — isto é uma entrada, não um novo sítio onde os seus dados vivem."
     }
   },
   "helpCentre": {
@@ -2964,7 +3038,7 @@
       "credits": "Créditos",
       "websites": "Sites",
       "agents": "Agentes de IA",
-      "missions": "Missões",
+      "missions": "Planos",
       "chat": "Chat",
       "files": "Ficheiros",
       "integrations": "Ligações",
@@ -3059,6 +3133,13 @@
         "what": "Esta ação não foi concluída.",
         "next": "Tenta outra vez e contacta o apoio se acontecer de novo."
       }
+    },
+    "boundary": {
+      "title": "Esta parte da página não carregou",
+      "body": "O resto do seu painel funciona e os seus dados estão intactos. Recarregar costuma resolver; se continuar, já recebemos um aviso automático.",
+      "reload": "Recarregar a página",
+      "section": "Não foi possível mostrar esta secção.",
+      "sectionBody": "O resto da página não é afetado. Recarregar costuma resolver."
     }
   },
   "aiExamples": {
@@ -3279,7 +3360,7 @@
     "copied": "Copiado",
     "language": "Linguagem",
     "targetLanguage": "Converter para",
-    "useWorkspace": "Usar os meus outros módulos como contexto",
+    "useWorkspace": "Usar os teus outros módulos como contexto",
     "run": "Executar",
     "running": "A trabalhar…",
     "result": "Resultado",
@@ -3417,5 +3498,16 @@
       "notEnough": "Tem {balance} créditos e precisa de {needed}.",
       "remove": "Remover o emblema"
     }
+  },
+  "sampleData": {
+    "load": "Ver com dados de exemplo",
+    "loading": "A carregar…",
+    "loadFree": "Grátis — não é gerado nada, e remove com um clique",
+    "loadFailed": "Não resultou. Tente de novo.",
+    "banner": "Dados de exemplo",
+    "bannerDetail": "Estas entradas são uma demonstração — três meses de um pequeno estúdio de design. Não são suas.",
+    "clear": "Remover o exemplo",
+    "clearing": "A remover…",
+    "clearFailed": "Não resultou."
   }
 }

@@ -29,6 +29,7 @@
 // Run: node scripts/tests/message-slices.test.mjs
 import { readFileSync } from "node:fs";
 import { appEntries, reachableFrom, isClientComponent } from "../lib/route-graph.mjs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
 const failures = [];
@@ -77,7 +78,14 @@ for (const group of ROUTE_GROUPS) {
   const namespaces = new Map();
   const unbounded = [];
   for (const file of clientFiles) {
-    const src = readFileSync(file, "utf8");
+    // COMMENTS ARE NOT CODE. A file whose comment EXPLAINS the unbounded
+    // shapes — for instance one recording why its labels are resolved on
+    // the server so it does not use a template-literal key — was counted
+    // as having one, and a component that is bounded precisely because
+    // somebody thought about it got listed among the ones that are not.
+    // Prose about a rule is not a breach of it. Same stripComments the
+    // GDPR, marker and help-tip gates use.
+    const src = stripComments(readFileSync(file, "utf8"));
     for (const m of src.matchAll(/useTranslations\(\s*["\']([^"\']+)["\']\s*\)/g)) {
       const root = m[1].split(".")[0];
       if (!namespaces.has(root)) namespaces.set(root, new Set());

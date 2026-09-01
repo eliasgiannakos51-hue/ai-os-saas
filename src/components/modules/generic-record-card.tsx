@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Pencil } from "lucide-react";
 import { iconForSlug } from "@/lib/module-icons";
 import { EntityCard } from "@/components/ui/entity-card";
@@ -25,7 +25,8 @@ const LinkToModal = dynamic(
   { ssr: false },
 );
 import { DeleteButton } from "@/components/delete-button";
-import type { ModuleConfig } from "@/lib/modules";
+import type { ModuleConfig, FieldConfig } from "@/lib/modules";
+import { formatNumber, formatCurrency } from "@/lib/format-number";
 import type { ModuleRecord } from "@/types/module-record";
 import { deleteConfirmKey } from "@/lib/modules";
 import {
@@ -46,6 +47,33 @@ import {
  * moved behind the card's "..." menu as labelled rows rather than five
  * anonymous grey icons. Clicking the card body opens the detail panel.
  */
+/**
+ * One stored value, written the way this language writes that kind of
+ * value.
+ *
+ * WHAT THIS REPLACES: `${record[field.key]}` — the raw value, straight
+ * into a template string. Three things came out of that, all of them
+ * visible on the module cards:
+ *
+ *   - money with no currency and no locale ("95.6" where Greek writes
+ *     "95,60 €");
+ *   - counts with no grouping ("11920" rather than "11.920");
+ *   - and any binary-float sum rendered in full ("0.30000000000000004").
+ *
+ * Non-numbers are returned untouched: a status, a name or a date has
+ * already been through its own formatting and must not be second-guessed
+ * here.
+ */
+function displayValue(field: FieldConfig, value: unknown, locale: string): string {
+  if (value === null || value === undefined || value === "") return "—";
+  if (field.type !== "number") return String(value);
+  const n = typeof value === "number" ? value : Number(value);
+  // A number field holding something unparseable is data, not a number,
+  // and showing "NaN" would be worse than showing what is stored.
+  if (!Number.isFinite(n)) return String(value);
+  return field.money ? formatCurrency(n, locale) : formatNumber(n, locale);
+}
+
 export function GenericRecordCard({
   module,
   record,
@@ -73,6 +101,7 @@ export function GenericRecordCard({
   // Owned HERE, not by the menu items that open them — see the `onOpen`
   // note on AskAiButton. A modal rendered inside CardMenu's dropdown is
   // unmounted by the same click that opens it.
+  const locale = useLocale();
   const [askOpen, setAskOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
 
@@ -87,7 +116,7 @@ export function GenericRecordCard({
       description={descriptionFor(module, record)}
       tags={tagFieldsFor(module, record).map((field) => ({
         key: field.key,
-        label: `${tKey(field.labelKey)}: ${record[field.key]}`,
+        label: `${tKey(field.labelKey)}: ${displayValue(field, record[field.key], locale)}`,
       }))}
       status={
         statusValue && statusTone

@@ -6,6 +6,7 @@ import { Settings as SettingsIcon } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { CheckoutNotice } from "@/components/billing/checkout-notice";
 import { PasswordChangeForm } from "@/components/settings/password-change-form";
 import { ChatMemorySettings } from "@/components/settings/chat-memory-settings";
 import { AccessibilitySettings } from "@/components/settings/accessibility-settings";
@@ -216,7 +217,7 @@ export default async function SettingsPage() {
   );
 
   return (
-    <main className="min-h-full">
+    <div className="min-h-full">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.settings" helpArticle="export-data" icon={SettingsIcon} title={t("title")} />
 
@@ -250,6 +251,11 @@ export default async function SettingsPage() {
           <p className="text-xs text-muted">{t("signedInAs")}</p>
           <p className="mt-1 text-sm text-foreground">{user.email}</p>
         </div>
+
+        {/* Read BEFORE the summary, because it is about the thing that
+            just happened rather than about the account's steady state.
+            See the component for why it does not name the plan. */}
+        <CheckoutNotice />
 
         <BillingSummary
           tier={tier}
@@ -366,6 +372,6 @@ export default async function SettingsPage() {
 
         <DangerZone email={user.email ?? ""} />
       </div>
-    </main>
+    </div>
   );
 }

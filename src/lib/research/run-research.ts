@@ -5,6 +5,7 @@ import { logApiError } from "@/lib/log-error";
 import { diagLog } from "@/lib/diag";
 import { getSiteUrl } from "@/lib/site-url";
 import { CostAccumulator, type CostEntry } from "@/lib/billing/cost-accumulator";
+import { recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { settleReservation, releaseReservation } from "@/lib/billing/reservations";
 import { resolveEffectivePlan } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -13,6 +14,7 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
 import { researchReportToDocumentHtml } from "@/lib/research/report-to-html";
 import { checkCitations, annotateDanglingCitations } from "@/lib/verification/citations";
+import { loadResearchContext } from "@/lib/research/research-context";
 import { truncationNotice } from "@/lib/verification/truncation";
 import {
   functionBudgetMs,
@@ -153,11 +155,54 @@ async function handOff(reportId: string): Promise<boolean> {
  * update, so a concurrent handoff finds it true and returns without doing
  * anything.
  */
+/**
+ * THE PLATFORM BREAKER'S COUNTER, which this path never touched.
+ *
+ * checkDailyPlatformCap() reads daily_ai_spend_tracking.total_calls, and
+ * lib/research/research.ts makes real Anthropic calls without ever
+ * incrementing it — a report plans, then answers up to six questions,
+ * then synthesises. So the number the breaker gates the whole platform on
+ * was low by everything Deep Research spends, and the heaviest feature in
+ * the product was outside it in both directions: not counted, and not
+ * blocked.
+ *
+ * A WRAPPER, not a line before each return. The chunk has eleven exits —
+ * ceilings, hand-offs, failures, the ready path — and adding the record
+ * to each is how one of them ends up without it. `finally` runs on all
+ * eleven and on a throw.
+ *
+ * THE DELTA, not the total: the accumulator is RESTORED from the row, so
+ * a chunk resumes with every earlier chunk's calls already in it.
+ * Recording costs.callCount would re-count chunk one on every
+ * continuation, twelve times over for a report that runs to its ceiling.
+ *
+ * COST 0, said plainly rather than left to be discovered: the euros are
+ * written to ai_cost_log by settleReservation and that is the
+ * authoritative money record. What this fixes is the CALL COUNT, which is
+ * the column the breaker actually gates on.
+ */
 export async function runResearchChunk(params: {
   reportId: string;
   apiKey: string;
   startedAt: number;
 }): Promise<ChunkOutcome> {
+  const counted = { accumulator: null as CostAccumulator | null, before: 0 };
+  try {
+    return await runResearchChunkInner(params, counted);
+  } finally {
+    const made = (counted.accumulator?.callCount ?? 0) - counted.before;
+    if (made > 0) void recordAiCallForDailySpend(0, made);
+  }
+}
+
+async function runResearchChunkInner(
+  params: {
+    reportId: string;
+    apiKey: string;
+    startedAt: number;
+  },
+  counted: { accumulator: CostAccumulator | null; before: number }
+): Promise<ChunkOutcome> {
   const { reportId, apiKey, startedAt } = params;
   const admin = createAdminClient();
   const budgetMs = Math.min(functionBudgetMs(), RESEARCH_DEADLINE_MS);
@@ -214,6 +259,10 @@ export async function runResearchChunk(params: {
     ? report.partial_findings
     : [];
   const costs = CostAccumulator.restore(report.usage_entries);
+  // Handed to the wrapper so its `finally` can measure this chunk's own
+  // calls against the restored total.
+  counted.accumulator = costs;
+  counted.before = costs.callCount;
   const language = String(report.language ?? "en");
   const anthropic = new Anthropic({ apiKey });
 
@@ -336,11 +385,32 @@ export async function runResearchChunk(params: {
     .eq("id", reportId);
 
   const sources = collateSources(findings);
+
+  // THE ACCOUNT, BEFORE THE SYNTHESIS — V4.6. Pattern (C): the flat
+  // shape of every module (cheap, whatever the account size) plus ONE
+  // module read deeply when the topic points at one. See
+  // lib/research/research-context.ts for why neither "all of it" nor
+  // "none of it" is the answer.
+  //
+  // ADMIN CLIENT, SCOPED BY user_id. Both halves take the userId and use
+  // it as a filter — getUserFullContext and loadDeepDive each do —
+  // which is what scripts/tests/user-scoped-queries.test.mjs is for. The
+  // job runs without a session, so RLS is not available to lean on here
+  // and the filter is the only scope there is.
+  const context = await loadResearchContext(
+    admin,
+    report.user_id,
+    String(report.topic),
+    language === "el" ? "el" : "en"
+  );
+
   const synthesis = await synthesiseReport({
     anthropic,
     topic: String(report.topic),
     findings,
     sources,
+    entries: context.entries,
+    accountSummary: context.accountSummary,
     language,
     costs,
   });
@@ -417,7 +487,7 @@ export async function runResearchChunk(params: {
     });
   }
 
-  const citations = checkCitations(reportMarkdown, sources.length);
+  const citations = checkCitations(reportMarkdown, sources.length, context.entries.length);
   if (!citations.ok) {
     logApiError(
       "research:runChunk",
@@ -428,7 +498,9 @@ export async function runResearchChunk(params: {
         stage: "citation_check",
         reportId,
         markers: citations.markers.join(","),
-        sources: sources.length,
+        entryMarkers: citations.entryMarkers.join(","),
+        sources: String(sources.length),
+        entries: String(context.entries.length),
       }
     );
   }
@@ -436,8 +508,9 @@ export async function runResearchChunk(params: {
   const documentHtml = researchReportToDocumentHtml({
     markdown: citations.ok
       ? reportMarkdown
-      : annotateDanglingCitations(reportMarkdown, sources.length),
+      : annotateDanglingCitations(reportMarkdown, sources.length, context.entries.length),
     sources,
+    entries: context.entries,
     disclosure,
     sourcesHeading: "Sources",
   });

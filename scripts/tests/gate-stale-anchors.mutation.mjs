@@ -39,7 +39,8 @@
  *
  * Run: node scripts/tests/gate-stale-anchors.mutation.mjs
  */
-import { readFileSync, writeFileSync, unlinkSync, existsSync } from "node:fs";
+import { readFileSync, unlinkSync, existsSync } from "node:fs";
+import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/gate-stale-anchors.test.mjs";

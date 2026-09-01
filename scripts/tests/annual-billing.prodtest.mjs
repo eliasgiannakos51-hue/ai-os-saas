@@ -58,6 +58,16 @@ const ANNUAL_EXPECTATIONS = plans.PLANS.filter((p) => plans.annualPriceEur(p) !=
   saving: money(plans.annualSavingsEur(p)),
 }));
 const STARTER = ANNUAL_EXPECTATIONS.find((p) => /starter/i.test(p.name)) ?? ANNUAL_EXPECTATIONS[0];
+// THE MONTHLY PRICES TOO. Three assertions still had "€20" and "€200"
+// typed in after the annual figures were derived — the same shape as the
+// €192 that started this, left behind in the file that fixed it. €200 is
+// not Starter's annual price here: it is ULTIMATE'S MONTHLY price, and
+// the two being the same digits is exactly how a literal survives a
+// rename. Derived, so neither can drift and neither can be confused for
+// the other.
+const monthlyOf = (name) => money(plans.PLANS.find((p) => new RegExp(name, "i").test(p.name)).price);
+const STARTER_MONTHLY = monthlyOf("starter");
+const ULTIMATE_MONTHLY = monthlyOf("ultimate");
 const starterPlan = plans.PLANS.find((p) => p.name === STARTER.name);
 // AN EMPTY LIST WOULD MAKE THE LOOP BELOW ASSERT NOTHING.
 if (ANNUAL_EXPECTATIONS.length < 3) {
@@ -193,7 +203,7 @@ try {
     new RegExp(`Save ${DISCOUNT}% — two months free`).test(initial),
     initial.slice(0, 240)
   );
-  checkTrue("Starter shows €20 while monthly", /€20/.test(initial));
+  checkTrue(`Starter shows ${STARTER_MONTHLY} while monthly`, initial.includes(STARTER_MONTHLY));
   checkTrue(
     "…and no annual total is shown yet",
     !new RegExp(`Billed ${STARTER.total}`).test(initial),
@@ -319,7 +329,10 @@ try {
   );
   const bareText = await bare.locator("body").innerText();
   checkTrue("no saving is advertised", !/two months free/.test(bareText));
-  checkTrue("the monthly prices still render", /€20/.test(bareText) && /€200/.test(bareText));
+  checkTrue(
+    `the monthly prices still render (${STARTER_MONTHLY} … ${ULTIMATE_MONTHLY})`,
+    bareText.includes(STARTER_MONTHLY) && bareText.includes(ULTIMATE_MONTHLY)
+  );
   // And the URL cannot force it on.
   await bare.goto(`http://127.0.0.1:${noAnnual.port}/pricing?billing=annual`, {
     waitUntil: "networkidle",

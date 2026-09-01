@@ -63,12 +63,38 @@ console.log("== 1. the premise: the marker check really is blind to this ==");
   writeFileSync(GUARD_FILE, before.replace(GUARD, "    folded = stripped;"));
   const markers = run(MARKERS);
   const tree = run(CHECK, { CI: "1" });
+  const local = run(CHECK, { CI: "" });
   writeFileSync(GUARD_FILE, before);
   check("check-mutation-markers reports CLEAN with the mutant in the tree", markers.code === 0,
     `exit ${markers.code}`);
-  check("...and check-mutation-tree does not", tree.code === 1, `exit ${tree.code}`);
-  check("...naming the file", /unicode-patterns\.ts/.test(tree.out), tree.out.slice(0, 200));
+  // WHERE THIS IS ACTUALLY CAUGHT, stated honestly.
+  //
+  // This used to assert `tree.code === 1` with CI=1, and that assertion
+  // was describing a capability that never existed. Work it through:
+  //
+  //   - The deletion is NOT a declared mutation — nothing in any
+  //     *.mutation.mjs has it as a from/to pair (unguarded-guards.mjs
+  //     mutates by scanning, not by declaring), so check 2 is blind to it.
+  //   - Once COMMITTED, git status is clean, so check 3 is blind to it too.
+  //   - So the only way check 3 ever fired on this was an UNCOMMITTED
+  //     change — which is a developer's machine. In a fresh-clone CI an
+  //     uncommitted change can only have been made by the build itself.
+  //
+  // Which is exactly what happened: this check failing on CI=1 is the
+  // behaviour that broke every Vercel deploy of main, on `vercel.json`.
+  // The test was holding the checker to a rule whose only reachable
+  // outcome in CI was a false positive.
+  //
+  // So it is asserted where it is true — on a developer's machine, as a
+  // warning that names the file.
+  check("check-mutation-tree WARNS about it on a developer machine",
+    /WARNING \(advisory, not failing\)/.test(local.out), local.out.slice(0, 240));
+  check("...naming the file", /unicode-patterns\.ts/.test(local.out), local.out.slice(0, 240));
+  check("...and does not fail a fresh-clone build over it", tree.code === 0, `exit ${tree.code}`);
   check("the tree is back", readFileSync(GUARD_FILE, "utf8") === before);
+  // AND THE GAP IS NAMED RATHER THAN LEFT IMPLIED: a deleted guard that
+  // gets COMMITTED is caught by none of the three checks. Closing it needs
+  // unguarded-guards.mjs to run in CI, which it currently does not.
 }
 
 // ---------------------------------------------------------------------
@@ -113,23 +139,44 @@ console.log("\n== 3. a declared mutation, actually applied ==");
 }
 
 // ---------------------------------------------------------------------
-console.log("\n== 4. dirty, and the difference CI makes ==");
-// THE ONLY CHECK THAT CAN BE WRONG. A developer editing one of these
-// files has a dirty tree for an ordinary reason, so it fails where the
-// tree starts clean and prints loudly everywhere else. A rule with false
-// positives is a rule people learn to pass with --no-verify — that is
-// check-mutation-markers.mjs's own lesson and it applies here.
+console.log("\n== 4. dirty is ADVISORY, everywhere ==");
+// THIS BLOCK USED TO ASSERT THE BUG.
+//
+// It read: `check("in CI a dirty mutation target fails", ci.code === 1)`.
+// That is exactly what broke every Vercel deploy of main — the build
+// failed with "1 file(s) a mutation suite touches are uncommitted:
+// vercel.json" on a fresh clone, and this gate was here making sure it
+// kept doing it.
+//
+// The reasoning it encoded — "it fails where the tree starts clean" — is
+// self-defeating. A leftover is a mutant a killed run left on the machine
+// that ran it. In a fresh clone no mutation suite has run at build time,
+// so a leftover cannot exist BECAUSE the tree started clean. The premise
+// that made it fire is the premise that made it impossible to be right.
+//
+// The genuine case — a suite dying mid-run — is covered by the workflow
+// step "the mutation suites put the tree back", which runs git status
+// AFTER npm run test:mutation, which is the only moment it can be true.
+//
+// Environment coverage lives in mutation-tree-environments.test.mjs,
+// which runs the real checker in a throwaway repo with and without .git.
 {
   const F = "src/lib/nav/nav-path.ts";
   const before = readFileSync(F, "utf8");
   // A change that is NOT any declared mutation, so only check 3 can see it.
   writeFileSync(F, before + "\n// a developer was here\n");
   const ci = run(CHECK, { CI: "1" });
+  const vercel = run(CHECK, { CI: "1", VERCEL: "1" });
   const local = run(CHECK, { CI: "" });
   writeFileSync(F, before);
-  check("in CI a dirty mutation target fails", ci.code === 1, `exit ${ci.code}`);
-  check("outside CI it does not fail", local.code === 0, `exit ${local.code}`);
-  check("...but it says so, loudly", /WARNING \(not failing outside CI\)/.test(local.out), local.out.slice(0, 200));
+  check("a dirty mutation target does not fail in CI", ci.code === 0, `exit ${ci.code}`);
+  check("...nor on Vercel, which is the deploy this broke", vercel.code === 0, `exit ${vercel.code}`);
+  check("...nor on a developer machine", local.code === 0, `exit ${local.code}`);
+  // ADVISORY IS NOT SILENT. If it stopped saying anything, a real leftover
+  // on a laptop would pass unnoticed, which is the one place check 3 has
+  // value.
+  check("...but it still says so, loudly", /WARNING \(advisory, not failing\)/.test(local.out), local.out.slice(0, 240));
+  check("...and names the file", /nav-path\.ts/.test(local.out), local.out.slice(0, 240));
   check("the tree is back", readFileSync(F, "utf8") === before);
 }
 

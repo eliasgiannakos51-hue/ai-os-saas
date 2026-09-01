@@ -42,13 +42,34 @@
  *      contains the `from` but does contain the `to`, that mutation is
  *      applied. Exact, and it names which suite and which mutation.
  *
- *   3. A MUTATION TARGET IS DIRTY. The weakest of the three and the only
- *      one that can be wrong: a developer editing one of those files has
- *      a dirty tree for an ordinary reason. So it FAILS IN CI, where the
- *      tree starts clean and dirtiness can only be a leftover, and prints
- *      loudly everywhere else. A rule with false positives is a rule
- *      people learn to pass with --no-verify — that lesson is in
- *      check-mutation-markers.mjs's own header and it applies here.
+ *   3. A MUTATION TARGET IS DIRTY. The weakest of the three, ADVISORY
+ *      EVERYWHERE, and it took down every Vercel deploy before it was.
+ *
+ *      It used to fail when process.env.CI was set, on this reasoning:
+ *      "in CI the tree starts clean, so dirtiness can only be a
+ *      leftover". THAT INFERENCE IS SELF-DEFEATING. A leftover is a
+ *      mutant a killed run left behind on the machine that ran it. In a
+ *      fresh clone — Vercel, GitHub Actions, any CI — no mutation suite
+ *      has run yet at `npm run build` time, so a leftover cannot exist,
+ *      *because* the tree started clean. Anything dirty there was
+ *      dirtied by the build itself, which is not what this check is
+ *      about. The premise that made it fire was the same premise that
+ *      made it impossible for it to be right.
+ *
+ *      The genuine CI case — a suite dying mid-run — is already covered,
+ *      correctly and at the only moment it can be true, by the workflow
+ *      step "the mutation suites put the tree back", which runs
+ *      git status AFTER npm run test:mutation. Nothing is lost here.
+ *
+ *      Its real value is on a developer's machine, where a killed run
+ *      DOES leave a mutant and a warning is what you want. It prints
+ *      loudly and returns 0.
+ *
+ *      Observed: a Vercel deploy failed with "1 file(s) a mutation suite
+ *      touches are uncommitted: vercel.json" on a fresh clone of main.
+ *      Checks 1 and 2 read the filesystem and are unaffected; they are
+ *      the two that can be true in a fresh clone, and they still fail
+ *      the build.
  *
  * Run: node scripts/check-mutation-tree.mjs
  */
@@ -155,24 +176,49 @@ targets.add("src/lib/text/unicode-patterns.ts");
 notes.push(`${targets.size} file(s) are mutated by at least one suite`);
 
 let dirty = [];
+let dirtyTotal = 0;
+// NO GIT, NO QUESTION. A build that runs somewhere without a usable git
+// worktree is not a place where "is this file uncommitted" has an answer,
+// and asking anyway is how a checker invents a finding.
+let hasGit = false;
 try {
-  const out = execFileSync("git", ["status", "--porcelain", "--untracked-files=no"], { encoding: "utf8" });
-  dirty = out
-    .split("\n")
-    .map((l) => l.slice(3).trim())
-    .filter((p) => p && targets.has(p));
+  hasGit =
+    execFileSync("git", ["rev-parse", "--is-inside-work-tree"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim() === "true";
 } catch {
-  notes.push("git status could not be read — check 3 skipped");
+  hasGit = false;
 }
 
-const inCI = Boolean(process.env.CI);
+if (!hasGit) {
+  notes.push("no git worktree — check 3 skipped");
+} else {
+  try {
+    const out = execFileSync("git", ["status", "--porcelain", "--untracked-files=no"], { encoding: "utf8" });
+    const all = out.split("\n").map((l) => l.slice(3).trim()).filter(Boolean);
+    dirtyTotal = all.length;
+    dirty = all.filter((p) => targets.has(p));
+  } catch {
+    notes.push("git status could not be read — check 3 skipped");
+  }
+}
+
 if (dirty.length > 0) {
-  const message =
-    `${dirty.length} file(s) a mutation suite touches are uncommitted:\n      ` +
-    dirty.join("\n      ") +
-    `\n    In CI the tree starts clean, so this can only be a leftover.`;
-  if (inCI) problems.push(message);
-  else notes.push(`WARNING (not failing outside CI): ${message}`);
+  // ADVISORY, ALWAYS — see the header. This never fails a build, in CI or
+  // out of it, because the only environment where a dirty target means a
+  // leftover is a developer's machine, and there a warning is the right
+  // instrument.
+  //
+  // The TOTAL is printed alongside, because the list above is only the
+  // intersection with mutation targets: "1 file uncommitted" read very
+  // differently from "1 of 340 uncommitted files happens to be a mutation
+  // target", and the message that broke the deploy showed only the first.
+  notes.push(
+    `WARNING (advisory, not failing): ${dirty.length} of ${dirtyTotal} uncommitted file(s) ` +
+      `are mutation targets: ${dirty.join(", ")}. On a developer machine this may be a killed ` +
+      `mutation run — check \`git diff\` on them. In a fresh clone it is not, and cannot be.`
+  );
 }
 
 // ---------------------------------------------------------------------

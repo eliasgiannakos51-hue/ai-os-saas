@@ -99,7 +99,26 @@ export default async function OverviewPage() {
   // still an account that has decided, and sending them back through the
   // flow every visit would be nagging. Writing the row is what "decided"
   // means, and both Skip and Finish write it.
-  const { data: onboardingState } = await supabase
+  // AN ERROR IS NOT A STATE, AND READING IT AS ONE TOOK HOME DOWN.
+  //
+  // This destructured only `{ data }`. `home_seen_at` arrived in
+  // 20260914000000_home_seen_at.sql, and against a database where that
+  // migration has not been applied PostgREST answers 400 — "column
+  // user_onboarding.home_seen_at does not exist". `data` is then null,
+  // the error was discarded, and the next line read null as "this user
+  // has not onboarded" and sent them to /onboarding. Every visit, for
+  // every account, on the one route that selects the column.
+  //
+  // It presents as "Home does not open" rather than as a crash, which is
+  // also why the error boundary never fired: nothing threw. redirect()
+  // is ordinary control flow.
+  //
+  // So the error is read, and a FAILED READ IS NEVER TREATED AS A
+  // FINISHED ONBOARDING DECISION. The retry drops the newest column so a
+  // deploy that is ahead of its migration degrades to the behaviour it
+  // had before that column existed — home_seen_at is optional (null
+  // renders no "what changed" block, which is exactly a first visit).
+  let { data: onboardingState, error: onboardingError } = await supabase
     .from("user_onboarding")
     // home_seen_at rides along on a query this page already ran — "what
     // changed since last time" costs no extra round trip.
@@ -107,7 +126,25 @@ export default async function OverviewPage() {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (!onboardingState?.completed_at && !onboardingState?.skipped_at) {
+  if (onboardingError) {
+    logApiError("/dashboard/overview", onboardingError, {
+      stage: "user_onboarding_query",
+      note: "retrying without home_seen_at — a deploy ahead of its migration",
+    });
+    const fallback = await supabase
+      .from("user_onboarding")
+      .select("completed_at, skipped_at")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    onboardingState = fallback.data as typeof onboardingState;
+    onboardingError = fallback.error;
+  }
+
+  // ONLY A SUCCESSFUL READ MAY SEND SOMEBODY TO ONBOARDING. If the read
+  // itself failed we do not know what they decided, and guessing "not
+  // onboarded" is the guess that bounces an established user out of the
+  // product.
+  if (!onboardingError && !onboardingState?.completed_at && !onboardingState?.skipped_at) {
     redirect("/onboarding");
   }
 

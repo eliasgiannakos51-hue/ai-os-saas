@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Rocket } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { logApiError } from "@/lib/log-error";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { activationAvailable } from "@/lib/import/activation";
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
@@ -37,13 +38,27 @@ export default async function OnboardingPage() {
 
   // Already been through it — going round again would re-ask questions
   // they have answered.
-  const { data: state } = await supabase
+  // THE ERROR IS READ, for the reason /dashboard/overview went down: a
+  // discarded error makes `state` null, and null is then read as an
+  // answer about the user rather than as "the question could not be
+  // asked". Here the falsy direction is the SAFE one — a failed read
+  // leaves someone on onboarding rather than bouncing them out — but the
+  // two pages redirect at each other, so the same silence on both sides
+  // is what turns one broken read into a loop with no way through.
+  //
+  // Enforced by scripts/tests/error-is-not-a-state.test.mjs.
+  const { data: state, error: stateError } = await supabase
     .from("user_onboarding")
     .select("completed_at, skipped_at")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (state?.completed_at || state?.skipped_at) {
+  if (stateError) {
+    logApiError("/onboarding", stateError, { stage: "user_onboarding_query" });
+  }
+
+  // Only a successful read may move them.
+  if (!stateError && (state?.completed_at || state?.skipped_at)) {
     redirect("/dashboard/overview");
   }
 

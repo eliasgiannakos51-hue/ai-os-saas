@@ -48,9 +48,12 @@ const money = (n) => `€${fmt.formatNumber(n, "en")}`;
 const DISCOUNT = plans.ANNUAL_DISCOUNT_PERCENT;
 const ANNUAL_EXPECTATIONS = plans.PLANS.filter((p) => plans.annualPriceEur(p) !== null).map((p) => ({
   name: p.name,
-  // The headline is a division and the page does not round it, so this
-  // asks for the same string the page builds rather than a rounded guess.
-  perMonth: money(plans.annualMonthlyEquivalentEur(p)),
+  // ROUNDED TO CENTS, because the page now rounds at the render — it was
+  // printing "€16.667", three decimals on a price. The VALUE stays
+  // unrounded in plans.ts so 12x it still agrees with the amount charged;
+  // only the display rounds. This mirrors the page's own expression
+  // rather than restating it as a literal.
+  perMonth: money(Math.round(plans.annualMonthlyEquivalentEur(p) * 100) / 100),
   total: money(plans.annualPriceEur(p)),
   saving: money(plans.annualSavingsEur(p)),
 }));

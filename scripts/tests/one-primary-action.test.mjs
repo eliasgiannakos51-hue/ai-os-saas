@@ -262,7 +262,14 @@ const BASELINE = {
   "dashboard/integrations/page.tsx": 2,
   "dashboard/memory/page.tsx": 1,
   "dashboard/mission/page.tsx": 3,
-  "dashboard/overview/page.tsx": 1,
+  // 1 -> 0. The Home page's one filled accent control was the next-action
+  // card's "Go there →", and it is now an accent OUTLINE: the screen
+  // already carries a filled accent button from the layout chrome (the
+  // top bar's "Make anything", on all thirty-nine pages), so Home was the
+  // only screen of six with two — measured by accent-census on the real
+  // page, 150x44 and 129x44. V4.6 #4's rule is one primary action per
+  // SCREEN; it had been applied per CARD.
+  "dashboard/overview/page.tsx": 0,
   "dashboard/page.tsx": 3,
   "dashboard/presentations/page.tsx": 4,
   "dashboard/product-workflow/page.tsx": 4,

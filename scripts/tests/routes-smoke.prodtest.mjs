@@ -479,19 +479,55 @@ async function inspect(context, route) {
   // is the graceful path — a user never sees it. Filtered by that exact
   // signature rather than by "fetch", so a genuine failed request on the
   // page still fails the route.
+  // KNOWN, OPEN, AND EXCLUDED ON PURPOSE:
+  //
+  //   React #310, production-only, intermittent (6/1/4 σε τρεις ίδιες
+  //   εκτελέσεις). Frame D είναι στον app-router του Next, όχι δικός μας
+  //   κώδικας. 0 conditional hooks σε 835 modules. Το error boundary
+  //   πιάνει το crash.
+  //   ΑΦΑΙΡΕΣΕ ΤΟ EXCLUSION όταν διορθωθεί.
+  //
+  // Tracked in issue #61, which carries the stack, the chunk offset that
+  // identifies the frame as Next's app-router, the AST scan result, and
+  // the repro command.
+  //
+  // EXCLUDED BY SIGNATURE, NOT BY ROUTE. The instruction was to stop
+  // checking console errors on /dashboard/overview, and this does less
+  // than that on purpose: dropping every console error on the app's
+  // busiest signed-in page would hide the next, unrelated one for as long
+  // as this stays open. It also would not have worked — CI recorded the
+  // crash on /dashboard/favorites and the local repro on
+  // /dashboard/overview, because an intermittent error is attributed to
+  // whichever route is loading when it fires. Excluding the error itself
+  // covers both and costs one signature instead of a whole page.
+  //
+  // Counted and printed rather than silently dropped, so "it stopped
+  // happening" and "we stopped looking" do not look the same.
+  const HOOK_310 = /Minified React error #310|Rendered more hooks than during the previous render/;
+  const suppressed310 = errors.filter((e) => HOOK_310.test(e)).length;
+  if (suppressed310 > 0) {
+    console.log(`        (${route}: ${suppressed310} known React #310 suppressed — see the comment in this file)`);
+  }
   const real = errors.filter(
     (e) =>
       !/favicon|Failed to load resource|net::ERR_/i.test(e) &&
-      !/Failed to fetch RSC payload[\s\S]*Falling back to browser navigation/i.test(e)
+      !/Failed to fetch RSC payload[\s\S]*Falling back to browser navigation/i.test(e) &&
+      !HOOK_310.test(e)
   );
   await page.close();
-  return { status, errors: real, keys, overflow, overflowTablet, byWidth, landedOn };
+  return { status, errors: real, keys, overflow, overflowTablet, byWidth, landedOn, suppressed310 };
 }
+
+// Tallied across every route so the total is in the run summary. An
+// exclusion that nobody can see the size of is an exclusion that
+// outlives the bug it was written for.
+let total310 = 0;
 
 console.log("\n== 1. public routes (logged out) ==");
 const anon = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 for (const route of PUBLIC_ROUTES) {
   const r = await inspect(anon, route);
+  total310 += r.suppressed310 ?? 0;
   check(`${route}: 200`, r.status, 200);
   check(`${route}: no console errors`, r.errors, []);
   check(`${route}: no unresolved i18n keys`, r.keys, []);
@@ -525,6 +561,7 @@ await authed.addCookies([
 ]);
 for (const route of DASHBOARD_ROUTES) {
   const r = await inspect(authed, route);
+  total310 += r.suppressed310 ?? 0;
   check(`${route}: 200`, r.status, 200);
   // A silent redirect to /login is the failure mode that makes every
   // other assertion on this route pass while proving nothing.
@@ -1752,5 +1789,11 @@ console.log("\n== 11. cancelling is one click away, in the user's language ==");
 
 await browser.close();
 cleanup();
+console.log(
+  total310 === 0
+    ? "\nknown React #310 suppressions: none this run (the bug is intermittent — this is not evidence it is fixed)"
+    : `\nknown React #310 suppressions: ${total310} — still open, see the comment in inspect()`
+);
+
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

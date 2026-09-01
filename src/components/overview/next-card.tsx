@@ -44,12 +44,25 @@ export function NextCard({
       {action && (
         <div className="mt-3">
           <p className="text-sm leading-relaxed text-foreground/90">{action.message}</p>
-          {/* THE ONE FILLED BUTTON ON THIS CARD — V4.6 #4. The plan link
-              below is an outline, because two filled buttons in one card
-              is two primary actions. */}
+          {/* OUTLINE, NOT FILLED — and the reason is that V4.6 #4's rule
+              is ONE PRIMARY ACTION PER SCREEN, while this was read as one
+              per card.
+              Measured by accent-census.prodtest.mjs on the real page:
+              /dashboard/overview carried two filled accent buttons —
+              150x44 "Make anything" and 129x44 "Go there →" — and it was
+              the only screen of six that did. Every other page has one,
+              because the other one is the top bar's create button, which
+              is on all thirty-nine.
+              The top bar keeps the fill: it is the same affordance in the
+              same place on every page, and giving Home a second one that
+              outranks it locally is what makes a person hesitate. This
+              stays visually accented and obviously clickable — it is an
+              outline in the accent colour, the same treatment the plan
+              link below already uses — so nothing is hidden; there is
+              simply one filled button on the screen again. */}
           <Link
             href={action.href}
-            className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+            className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:border-orange-500 hover:bg-orange-500/10"
           >
             {action.ctaLabel}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />

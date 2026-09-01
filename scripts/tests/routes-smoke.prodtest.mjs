@@ -1549,12 +1549,31 @@ console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
   const { readFileSync } = await import("node:fs");
   const { groupConversationsByDate } = await loadTs("src/lib/chat/group-conversations.ts");
   const el = JSON.parse(readFileSync("messages/el.json", "utf8"));
+  // CALENDAR DAYS, NOT HOUR OFFSETS — and the difference is a two-hour
+  // window every night in which this test failed.
+  //
+  // The fixture seeded "yesterday" as `now - 26h`. groupConversationsByDate
+  // buckets by CALENDAR DAY (startOfDay comparisons), so 26 hours ago is
+  // yesterday only when the clock has passed 02:00 — before that it lands
+  // on the day before yesterday and the "yesterday" group is empty, so the
+  // labels come back as [groupToday, groupOlder] and this goes red.
+  //
+  // Observed exactly that way: run 10f45ad at 23:42 UTC passed, run
+  // f973729 at 00:16 UTC failed, with no change to either the fixture or
+  // the grouping between them. A test that fails between midnight and 2am
+  // is not flaky in the sense of "sometimes" — it is wrong, on a schedule.
+  //
+  // Anchored to the day boundary so every hour of the day gives the same
+  // answer: midday yesterday is yesterday whatever time it is now.
   const now = Date.now();
-  const at = (hoursAgo) => new Date(now - hoursAgo * 3600e3).toISOString();
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+  const middayOf = (daysAgo) =>
+    new Date(startOfToday.getTime() - (daysAgo - 0.5) * 86400e3).toISOString();
   const labels = groupConversationsByDate([
-    { id: "a", title: "x", created_at: at(0), is_pinned: false },
-    { id: "b", title: "y", created_at: at(26), is_pinned: false },
-    { id: "c", title: "z", created_at: at(400), is_pinned: false },
+    { id: "a", title: "x", created_at: new Date(now).toISOString(), is_pinned: false },
+    { id: "b", title: "y", created_at: middayOf(1), is_pinned: false },
+    { id: "c", title: "z", created_at: middayOf(17), is_pinned: false },
   ]).map((g) => g.label);
   check("the date headers are keys, not English", labels, [
     "groupToday",

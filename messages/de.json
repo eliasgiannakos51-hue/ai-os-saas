@@ -1691,7 +1691,8 @@
         "sendTest": "Test senden",
         "testSentTelegram": "Gesendet — sieh in deinem Telegram nach.",
         "testSentDiscord": "Gesendet — sieh in deinem Discord-Kanal nach.",
-        "testFailed": "Die Testnachricht konnte nicht gesendet werden."
+        "testFailed": "Die Testnachricht konnte nicht gesendet werden.",
+        "emailNotDeliverable": "Von dieser Installation kann keine E-Mail versendet werden, ein Agent-Ergebnis würde Sie also nicht erreichen. Daran ändern Ihre Einstellungen nichts — sagen Sie es der Person, die sie betreibt. Wählen Sie die Zustellung in der App, um weiterhin Ergebnisse zu erhalten."
       },
       "runCannotComplete": "Dieser Agent kann diese Aufgabe nicht erfüllen und wurde deshalb abgeschaltet. Es wurden keine Credits berechnet.",
       "capability": {

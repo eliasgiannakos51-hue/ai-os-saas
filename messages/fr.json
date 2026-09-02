@@ -1691,7 +1691,8 @@
         "sendTest": "Tester",
         "testSentTelegram": "Envoyé — regardez votre Telegram.",
         "testSentDiscord": "Envoyé — regardez votre salon Discord.",
-        "testFailed": "Le message de test n'a pas pu être envoyé."
+        "testFailed": "Le message de test n'a pas pu être envoyé.",
+        "emailNotDeliverable": "Aucun e-mail ne peut partir de ce déploiement : le résultat d'un agent ne vous parviendrait pas. Rien dans vos réglages ne peut y remédier — prévenez la personne qui l'administre. Choisissez la remise dans l'application pour continuer à recevoir les résultats."
       },
       "runCannotComplete": "Cet agent ne peut pas effectuer cette tâche, il a donc été désactivé. Aucun crédit n'a été débité.",
       "capability": {

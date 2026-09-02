@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { emailIsDeliverable } from "@/lib/email/resend-config";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -31,7 +32,26 @@ export async function GET() {
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
 
-    return NextResponse.json({ ok: true, channels: await listDeliveryChannels(user.id) });
+    return NextResponse.json({
+      ok: true,
+      channels: await listDeliveryChannels(user.id),
+      // WHETHER EMAIL CAN ACTUALLY LEAVE THIS DEPLOYMENT.
+      //
+      // Email is the DEFAULT delivery for an agent and the only channel
+      // that needs no setup by the user, so it is the one nobody checks.
+      // Without a verified RESEND_FROM_EMAIL every send goes out from
+      // Resend's shared test sender, which reaches the Resend account
+      // owner and refuses every other recipient — one API call at a
+      // time, silently.
+      //
+      // The agent still ran, and still charged. lib/agents/deliver.ts
+      // then reported "The result was not emailed (check your email
+      // settings)", sending the reader to look for a fault in settings
+      // they do not control and cannot fix. /api/notifications/channels
+      // has answered this question since the notification work; the
+      // agent path simply never asked it.
+      emailAvailable: emailIsDeliverable(),
+    });
   } catch (err) {
     logApiError("/api/delivery-channels", err);
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });

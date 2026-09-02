@@ -2,6 +2,7 @@ import "server-only";
 import { sendAgentRunResultEmail } from "@/lib/email/send-agent-emails";
 import { postToSlack } from "@/lib/integrations/read";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
+import type { AgentEmailFailure } from "@/lib/email/send-agent-emails";
 import { logApiError } from "@/lib/log-error";
 import { readDeliverySecret } from "@/lib/agents/delivery-store";
 import { createNotification } from "@/lib/notifications/store";
@@ -216,11 +217,35 @@ export async function deliverAgentResult(params: {
   return {
     delivered: sent.sent,
     via: "email",
-    // A blocked send is almost always the user's own preference or the
-    // daily cap, not a fault — so it is reported as a fact rather than an
-    // error, and the run is still a success.
-    ...(sent.sent ? {} : { reason: "The result was not emailed (check your email settings)." }),
+    // WHY, NOT JUST THAT.
+    //
+    // This used to be one sentence for every failure: "The result was not
+    // emailed (check your email settings)." For a preference or the daily
+    // cap that is right — the run still succeeded and the reader knows
+    // where to look.
+    //
+    // For a deployment with no verified RESEND_FROM_EMAIL it was wrong in
+    // the way that costs the most: it sent somebody to hunt through
+    // settings that contain nothing capable of fixing it, for a cause
+    // that is a missing environment variable, after a run that CHARGED
+    // THEM. Being charged for a delivery that could never happen and
+    // then being blamed for it is the whole shape this is fixing.
+    ...(sent.sent ? {} : { reason: emailFailureReason(sent.reason) }),
   };
+}
+
+/** The email codes, likewise — and one of them is not the reader's fault. */
+function emailFailureReason(reason: AgentEmailFailure | undefined): string {
+  switch (reason) {
+    case "not_configured":
+      return "The result could not be emailed: this deployment has no verified sender address, so no email can reach you. Nothing in your settings can change that — tell whoever runs it. Switch the agent to in-app delivery to keep receiving results in the meantime.";
+    case "no_address":
+      return "The result was not emailed because your account has no email address on file.";
+    case "blocked":
+      return "The result was not emailed (check your email settings).";
+    default:
+      return "The result could not be emailed. It is saved in the agent's run history.";
+  }
 }
 
 /** Slack's machine codes, turned into something a person can act on. */

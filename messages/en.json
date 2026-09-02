@@ -1691,7 +1691,8 @@
         "sendTest": "Send test",
         "testSentTelegram": "Sent — check your Telegram.",
         "testSentDiscord": "Sent — check your Discord channel.",
-        "testFailed": "The test message could not be sent."
+        "testFailed": "The test message could not be sent.",
+        "emailNotDeliverable": "Email cannot be sent from this deployment, so an agent result would not reach you. Nothing in your settings can change that — tell whoever runs it. Choose in-app delivery to keep receiving results."
       },
       "runCannotComplete": "This agent can't do that task, so it has been switched off. No credits were charged.",
       "capability": {

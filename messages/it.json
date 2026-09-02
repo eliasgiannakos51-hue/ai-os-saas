@@ -1691,7 +1691,8 @@
         "sendTest": "Invia test",
         "testSentTelegram": "Inviato: controlla il tuo Telegram.",
         "testSentDiscord": "Inviato: controlla il tuo canale Discord.",
-        "testFailed": "Impossibile inviare il messaggio di prova."
+        "testFailed": "Impossibile inviare il messaggio di prova.",
+        "emailNotDeliverable": "Da questa installazione non è possibile inviare email, quindi il risultato di un agente non ti arriverebbe. Nulla nelle tue impostazioni può cambiarlo: dillo a chi la gestisce. Scegli la consegna nell'app per continuare a ricevere i risultati."
       },
       "runCannotComplete": "Questo agente non può svolgere quel compito, quindi è stato disattivato. Non è stato addebitato alcun credito.",
       "capability": {

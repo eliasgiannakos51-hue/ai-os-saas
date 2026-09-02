@@ -1691,7 +1691,8 @@
         "sendTest": "发送测试",
         "testSentTelegram": "已发送——请查看你的 Telegram。",
         "testSentDiscord": "已发送——请查看你的 Discord 频道。",
-        "testFailed": "测试消息发送失败。"
+        "testFailed": "测试消息发送失败。",
+        "emailNotDeliverable": "本部署无法发送邮件，因此智能体的结果不会送达您。这不是您的设置能解决的问题，请告知运维人员。选择应用内推送以继续接收结果。"
       },
       "runCannotComplete": "该智能体无法完成这项任务，已被停用。未扣除任何积分。",
       "capability": {

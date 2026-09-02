@@ -62,13 +62,32 @@ export function DeliveryPicker({
   const [telegramChat, setTelegramChat] = useState("");
   const [discordUrl, setDiscordUrl] = useState("");
 
+  /**
+   * WHETHER EMAIL CAN LEAVE THIS DEPLOYMENT AT ALL.
+   *
+   * Email is an agent's DEFAULT delivery and the only channel needing no
+   * setup, which is exactly why nothing checked it. Without a verified
+   * RESEND_FROM_EMAIL every send goes from Resend's shared test sender,
+   * which reaches the Resend account owner and refuses everybody else —
+   * so this control promised "your result arrives at <address>" for an
+   * address it could not reach, and the run charged anyway.
+   */
+  const [emailAvailable, setEmailAvailable] = useState(true);
+
   useEffect(() => {
     let cancelled = false;
     void (async () => {
       try {
         const response = await fetch("/api/delivery-channels");
         const data = await response.json();
-        if (!cancelled && data.ok) setSaved(data.channels as SavedChannel[]);
+        if (!cancelled && data.ok) {
+          setSaved(data.channels as SavedChannel[]);
+          // Defaults to TRUE and is only lowered by an explicit false, so
+          // a route that has not been redeployed yet does not make every
+          // agent look broken. The failure this guards is silent
+          // non-delivery, not a missing field.
+          setEmailAvailable(data.emailAvailable !== false);
+        }
       } catch {
         // Nothing connected is the common answer, and a failed check is
         // not evidence of one. The picker still works for email and
@@ -220,7 +239,20 @@ export function DeliveryPicker({
       {/* WHAT EACH ONE ACTUALLY DOES, next to the choice rather than in a
           help article. "Telegram" is not self-explanatory when the
           question is where a briefing arrives at 8am. */}
-      {value === "email" && <p className="text-[11px] text-muted">{t("emailNote", { email: accountEmail })}</p>}
+      {value === "email" &&
+        (emailAvailable ? (
+          <p className="text-[11px] text-muted">{t("emailNote", { email: accountEmail })}</p>
+        ) : (
+          /* NOT the same sentence with a warning colour. The note it
+             replaces PROMISES delivery to an address, and on this
+             deployment that promise cannot be kept — so the promise goes
+             rather than being decorated. It also names in-app delivery,
+             because a reader who cannot use email needs somewhere to go,
+             not only bad news. */
+          <p className="text-[11px] leading-relaxed text-amber-400">
+            {t("emailNotDeliverable")}
+          </p>
+        ))}
       {value === "in_app" && <p className="text-[11px] text-muted">{t("inAppNote")}</p>}
 
       {value === "slack" && (

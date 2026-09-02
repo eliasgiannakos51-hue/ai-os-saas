@@ -1691,7 +1691,8 @@
         "sendTest": "Enviar teste",
         "testSentTelegram": "Enviado — vê o teu Telegram.",
         "testSentDiscord": "Enviado — vê o teu canal do Discord.",
-        "testFailed": "Não foi possível enviar a mensagem de teste."
+        "testFailed": "Não foi possível enviar a mensagem de teste.",
+        "emailNotDeliverable": "Não é possível enviar email a partir desta instalação, por isso o resultado de um agente não chegaria até si. Nada nas suas definições resolve isso — avise quem a administra. Escolha a entrega dentro da aplicação para continuar a receber resultados."
       },
       "runCannotComplete": "Este agente não consegue realizar essa tarefa, por isso foi desligado. Não foram cobrados créditos.",
       "capability": {

@@ -60,6 +60,7 @@ import {
   DEFAULT_SCHEDULE_PARTS,
   type ScheduleParts,
 } from "@/components/agents/schedule-editor";
+import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
 
 // The whole Autonomous Agents surface: the list, the one-sentence create
 // flow, and the per-agent detail with its run history.
@@ -123,6 +124,7 @@ export function AgentsWorkspace({
   depthFacts,
   templateCredits,
   buildCredits,
+  initialAgent,
 }: {
   agents: UserAgent[];
   runs: AgentRun[];
@@ -142,6 +144,24 @@ export function AgentsWorkspace({
    *  the two numbers that will actually be charged. */
   templateCredits: number;
   buildCredits: number;
+  /**
+   * A request to start on arrival, from the Home screen's "repeat"
+   * example (lib/overview/first-screen-examples).
+   *
+   * WHAT ARRIVING RUNS, AND WHAT IT DELIBERATELY DOES NOT. It opens the
+   * form with the request in it, which starts the ready-made template
+   * search below — real work, and what the user sees is a screen already
+   * offering agents that do this.
+   *
+   * It does NOT call build(). The template search is here precisely
+   * because it is the cheap route and it has to be offered BEFORE the
+   * expensive builder runs — "offering a cheaper route after the
+   * expensive one has been paid for is offering a refund", as the effect
+   * below says. Auto-charging the builder from one press on an example
+   * would step over that on purpose, for a user who has not yet been
+   * shown either price.
+   */
+  initialAgent?: string;
 }) {
   const t = useTranslations("dashboard.agents");
   const tModule = useTranslations("module");
@@ -169,6 +189,19 @@ export function AgentsWorkspace({
     input.focus();
     input.setSelectionRange(input.value.length, input.value.length);
   }, [creating]);
+  // STARTED ON ARRIVAL. The ref is the guard, not `creating`, which is
+  // false at mount and would let React's development double-invoke run
+  // this twice.
+  const startedAgentRef = useRef(false);
+  useEffect(() => {
+    if (!initialAgent || startedAgentRef.current) return;
+    startedAgentRef.current = true;
+    setRequestText(initialAgent);
+    focusRequestOnOpen.current = true;
+    setCreating(true);
+    forgetExampleParam("agent");
+  }, [initialAgent]);
+
   // A toast was the wrong container for all four of these: it disappears,
   // it cannot hold three lines, and the third line is about the user's
   // money. The notice stays under the button they pressed until they act.

@@ -70,7 +70,8 @@
       "failed": "Non è stato possibile creare il PDF",
       "notReady": "Non è ancora finito"
     },
-    "listCapped": "Sono mostrate le {count, number} più recenti. Le voci più vecchie restano salvate: usa Cerca nei miei dati per trovarle."
+    "listCapped": "Sono mostrate le {count, number} più recenti. Le voci più vecchie restano salvate: usa Cerca nei miei dati per trovarle.",
+    "newProject": "Nuovo Progetto"
   },
   "sidebar": {
     "groups": {
@@ -135,7 +136,9 @@
       "routing": "Instradamento dei modelli",
       "businessHealth": "Salute dell'attività",
       "mine": "Le mie cose",
-      "records": "I miei record"
+      "records": "I miei record",
+      "library": "Le mie cose",
+      "newEntry": "Nuova voce"
     },
     "hints": {
       "chat": "Chiedi qualsiasi cosa — non legato a nessun modulo.",
@@ -184,12 +187,13 @@
       "formSubmissions": "Tutto ciò che i visitatori hanno inviato tramite un modulo sui tuoi siti pubblicati",
       "businessHealth": "MRR, margine, abbandono e liquidità. Solo il proprietario.",
       "mine": "Tutto ciò che hai creato, dal più recente, con una scheda solo preferiti",
-      "records": "Tutti i record in un unico posto: filtra per tipo invece di cercare nel menu"
+      "records": "Tutti i record in un unico posto: filtra per tipo invece di cercare nel menu",
+      "library": "Preferiti, recenti e ricerca — tutto il tuo in un posto",
+      "newEntry": "Scrivi qualsiasi cosa — si archivia da sola"
     },
     "closeMenu": "Chiudi il menu"
   },
   "landing": {
-    "hero": "Il tuo business, organizzato — con un'IA che aiuta davvero.",
     "description": "Tieni traccia di idee, finanze, trading, ricerca, decisioni e altro — tutto in un unico posto, con un assistente IA che capisce i tuoi dati e ti aiuta a ragionarci sopra. Basta con note sparse, fogli di calcolo e finestre di chat.",
     "logIn": "Accedi",
     "signUp": "Registrati",
@@ -926,7 +930,6 @@
           "consistency": "Prova a registrare qualcosa ogni giorno questa settimana."
         }
       },
-      "heroQuestion": "Cosa vuoi creare oggi?",
       "recentEntries": {
         "title": "Voci Recenti",
         "empty": "Nessuna voce ancora."
@@ -2360,6 +2363,37 @@
       "allTypes": "Tutti i tipi",
       "count": "{count, plural, one {# posto} other {# posti}}",
       "noMatch": "Niente corrisponde a quel nome. Prova una parola più corta o togli il filtro."
+    },
+    "firstScreen": {
+      "label": "Premi uno — parte subito",
+      "cost": {
+        "free": "Gratis",
+        "freeAllowance": "Gratis fino al limite mensile",
+        "charged": "Consuma crediti"
+      },
+      "build": {
+        "verb": "Crea",
+        "example": "Crea un sito per il mio negozio"
+      },
+      "understand": {
+        "verb": "Capisci",
+        "example": "Cosa dicono i miei numeri questa settimana?"
+      },
+      "repeat": {
+        "verb": "Ripeti",
+        "example": "Ogni lunedì, un riepilogo delle mie vendite"
+      }
+    },
+    "library": {
+      "title": "Le mie cose",
+      "description": "Tutto quello che hai messo qui: recente, preferito o cercato.",
+      "tabs": {
+        "recent": "Recenti",
+        "starred": "Preferiti",
+        "search": "Cerca"
+      },
+      "searchPlaceholder": "Cerca in tutto ciò che hai scritto",
+      "searchNoResults": "Niente corrisponde a «{query}»."
     }
   },
   "module": {
@@ -3020,6 +3054,11 @@
       "is": "Una pagina con ogni tipo di record, strumento e impostazione che puoi aprire.",
       "does": "La barra laterale elencava diciannove registri che funzionano allo stesso modo. Ora sono qui, con un filtro per tipo: trovarne uno è leggere un elenco invece di ricordare un menu.",
       "doesNot": "Niente è stato spostato o unito. Ogni pagina mantiene il suo indirizzo, le sue voci e il suo modulo — questa è una via d'accesso, non un nuovo posto dove vivono i tuoi dati."
+    },
+    "library": {
+      "is": "Tutto quello che hai messo qui, in un posto solo.",
+      "does": "Mostra le voci recenti, quelle che hai contrassegnato e una ricerca su tutto ciò che hai scritto.",
+      "doesNot": "Non conserva una seconda copia di nulla. Sono gli stessi record che mostrano i moduli: se ne modifichi uno qui, cambia anche lì."
     }
   },
   "helpCentre": {
@@ -3509,5 +3548,8 @@
     "clear": "Rimuovi l'esempio",
     "clearing": "Rimozione…",
     "clearFailed": "Non ha funzionato."
+  },
+  "promise": {
+    "oneSentence": "L'IA che conosce già il tuo lavoro. Chiedile qualsiasi cosa."
   }
 }

@@ -70,7 +70,8 @@
       "failed": "Não foi possível criar o PDF",
       "notReady": "Ainda não está concluído"
     },
-    "listCapped": "A mostrar as {count, number} mais recentes. As entradas mais antigas continuam guardadas — use a pesquisa nos seus registos para as encontrar."
+    "listCapped": "A mostrar as {count, number} mais recentes. As entradas mais antigas continuam guardadas — use a pesquisa nos seus registos para as encontrar.",
+    "newProject": "Novo Projeto"
   },
   "sidebar": {
     "groups": {
@@ -135,7 +136,9 @@
       "routing": "Encaminhamento de modelos",
       "businessHealth": "Saúde do negócio",
       "mine": "As minhas coisas",
-      "records": "Os meus registos"
+      "records": "Os meus registos",
+      "library": "As minhas coisas",
+      "newEntry": "Nova entrada"
     },
     "hints": {
       "chat": "Pergunte qualquer coisa — sem ligação a nenhum módulo.",
@@ -184,12 +187,13 @@
       "formSubmissions": "Tudo o que os visitantes enviaram por um formulário nos seus sites publicados",
       "businessHealth": "MRR, margem, cancelamentos e tesouraria. Apenas o proprietário.",
       "mine": "Tudo o que criou, do mais recente, com um separador só de favoritos",
-      "records": "Todos os registos num só lugar — filtre por tipo em vez de procurar no menu"
+      "records": "Todos os registos num só lugar — filtre por tipo em vez de procurar no menu",
+      "library": "Favoritos, recentes e pesquisa — tudo o seu num só sítio",
+      "newEntry": "Escreva o que quiser — arruma-se sozinho"
     },
     "closeMenu": "Fechar o menu"
   },
   "landing": {
-    "hero": "Seu negócio, organizado — com uma IA que realmente ajuda.",
     "description": "Acompanhe ideias, finanças, trading, pesquisas, decisões e muito mais — tudo em um só lugar, com um assistente de IA que entende seus dados e ajuda você a pensar com clareza. Chega de notas espalhadas, planilhas e janelas de chat.",
     "logIn": "Entrar",
     "signUp": "Cadastre-se",
@@ -926,7 +930,6 @@
           "consistency": "Tente registrar algo todos os dias desta semana."
         }
       },
-      "heroQuestion": "O que queres construir hoje?",
       "recentEntries": {
         "title": "Entradas Recentes",
         "empty": "Ainda sem entradas."
@@ -2360,6 +2363,37 @@
       "allTypes": "Todos os tipos",
       "count": "{count, plural, one {# local} other {# locais}}",
       "noMatch": "Nada corresponde a esse nome. Experimente uma palavra mais curta ou limpe o filtro."
+    },
+    "firstScreen": {
+      "label": "Carregue num — corre logo",
+      "cost": {
+        "free": "Grátis",
+        "freeAllowance": "Grátis até ao limite mensal",
+        "charged": "Consome créditos"
+      },
+      "build": {
+        "verb": "Cria",
+        "example": "Cria um site para a minha loja"
+      },
+      "understand": {
+        "verb": "Entende",
+        "example": "O que dizem os meus números esta semana?"
+      },
+      "repeat": {
+        "verb": "Repete",
+        "example": "Todas as segundas, um resumo das minhas vendas"
+      }
+    },
+    "library": {
+      "title": "As minhas coisas",
+      "description": "Tudo o que pôs aqui: recente, favorito ou procurado.",
+      "tabs": {
+        "recent": "Recentes",
+        "starred": "Favoritos",
+        "search": "Procurar"
+      },
+      "searchPlaceholder": "Procure em tudo o que escreveu",
+      "searchNoResults": "Nada corresponde a «{query}»."
     }
   },
   "module": {
@@ -3020,6 +3054,11 @@
       "is": "Uma página com todos os tipos de registo, ferramenta e definição que pode abrir.",
       "does": "A barra lateral listava dezanove registos que funcionam da mesma forma. Estão aqui, com um filtro por tipo, para encontrar lendo uma lista em vez de decorar um menu.",
       "doesNot": "Nada foi movido nem fundido. Cada página mantém o seu endereço, as suas entradas e o seu formulário — isto é uma entrada, não um novo sítio onde os seus dados vivem."
+    },
+    "library": {
+      "is": "Tudo o que pôs aqui, num só sítio.",
+      "does": "Mostra as suas entradas recentes, as que marcou como favoritas e uma pesquisa em tudo o que escreveu.",
+      "doesNot": "Não guarda uma segunda cópia de nada. São os mesmos registos que os módulos mostram — edite um aqui e muda lá."
     }
   },
   "helpCentre": {
@@ -3509,5 +3548,8 @@
     "clear": "Remover o exemplo",
     "clearing": "A remover…",
     "clearFailed": "Não resultou."
+  },
+  "promise": {
+    "oneSentence": "A IA que já conhece o seu trabalho. Pergunte-lhe o que quiser."
   }
 }

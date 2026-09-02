@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { Tooltip } from "@/components/ui/tooltip";
 import { displayNameFromEmail } from "@/lib/greeting";
 import { ChevronRight, X } from "lucide-react";
-import { OVERVIEW_NAV_ITEM } from "@/lib/modules";
+import { OVERVIEW_NAV_ITEM, CREATE_NAV_ITEM } from "@/lib/modules";
 import {
   ALL_SIDEBAR_GROUPS,
   MAIN_SIDEBAR_GROUPS,
@@ -20,6 +20,7 @@ import { useSidebar } from "@/components/dashboard/sidebar-context";
 import { useToast } from "@/components/toast/toast-context";
 import { Logo } from "@/components/logo";
 import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
+import { CREATE_ICON } from "@/lib/module-icons";
 
 function isActive(pathname: string | null, href: string) {
   if (href === "/dashboard") return pathname === "/dashboard";

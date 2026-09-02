@@ -70,7 +70,8 @@
       "failed": "Das PDF konnte nicht erstellt werden",
       "notReady": "Das ist noch nicht fertig"
     },
-    "listCapped": "Die neuesten {count, number} werden angezeigt. Ältere Einträge sind weiterhin gespeichert — nutzen Sie die Suche in Ihren Einträgen, um sie zu finden."
+    "listCapped": "Die neuesten {count, number} werden angezeigt. Ältere Einträge sind weiterhin gespeichert — nutzen Sie die Suche in Ihren Einträgen, um sie zu finden.",
+    "newProject": "Neues Projekt"
   },
   "sidebar": {
     "groups": {
@@ -135,7 +136,9 @@
       "routing": "Modell-Routing",
       "businessHealth": "Geschäftslage",
       "mine": "Meine Sachen",
-      "records": "Meine Einträge"
+      "records": "Meine Einträge",
+      "library": "Meine Sachen",
+      "newEntry": "Neuer Eintrag"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -184,12 +187,13 @@
       "formSubmissions": "Alles, was Besucher über ein Formular auf Ihren veröffentlichten Seiten gesendet haben",
       "businessHealth": "MRR, Marge, Abwanderung und Liquidität. Nur für den Inhaber.",
       "mine": "Alles, was du erstellt hast, neueste zuerst — mit einem Tab nur für Favoriten",
-      "records": "Alle Einträge an einem Ort — nach Typ filtern statt im Menü zu suchen"
+      "records": "Alle Einträge an einem Ort — nach Typ filtern statt im Menü zu suchen",
+      "library": "Favoriten, Neuestes und Suche — alles Eigene an einem Ort",
+      "newEntry": "Schreiben Sie irgendetwas auf — es ordnet sich selbst ein"
     },
     "closeMenu": "Menü schließen"
   },
   "landing": {
-    "hero": "Dein Unternehmen, organisiert — mit KI, die wirklich hilft.",
     "description": "Behalte Ideen, Finanzen, Trading, Recherche, Entscheidungen und mehr im Blick — alles an einem Ort, mit einem KI-Assistenten, der deine Daten versteht und dir beim Durchdenken hilft. Schluss mit verstreuten Notizen, Tabellen und Chat-Fenstern.",
     "logIn": "Anmelden",
     "signUp": "Registrieren",
@@ -926,7 +930,6 @@
           "consistency": "Versuche, diese Woche jeden Tag etwas einzutragen."
         }
       },
-      "heroQuestion": "Was möchtest du heute bauen?",
       "recentEntries": {
         "title": "Letzte Einträge",
         "empty": "Noch keine Einträge."
@@ -2360,6 +2363,37 @@
       "allTypes": "Alle Typen",
       "count": "{count, plural, one {# Stelle} other {# Stellen}}",
       "noMatch": "Nichts passt zu diesem Namen. Versuche ein kürzeres Wort oder entferne den Filter."
+    },
+    "firstScreen": {
+      "label": "Eine antippen — sie läuft sofort",
+      "cost": {
+        "free": "Kostenlos",
+        "freeAllowance": "Kostenlos bis zu Ihrem Monatslimit",
+        "charged": "Verbraucht Credits"
+      },
+      "build": {
+        "verb": "Erstellen",
+        "example": "Erstelle eine Website für meinen Laden"
+      },
+      "understand": {
+        "verb": "Verstehen",
+        "example": "Was sagen meine Zahlen diese Woche?"
+      },
+      "repeat": {
+        "verb": "Wiederholen",
+        "example": "Jeden Montag eine Zusammenfassung meiner Verkäufe"
+      }
+    },
+    "library": {
+      "title": "Meine Sachen",
+      "description": "Alles, was Sie hier abgelegt haben: neu, markiert oder gesucht.",
+      "tabs": {
+        "recent": "Neuestes",
+        "starred": "Markiert",
+        "search": "Suchen"
+      },
+      "searchPlaceholder": "Alles durchsuchen, was Sie geschrieben haben",
+      "searchNoResults": "Nichts passt zu „{query}“."
     }
   },
   "module": {
@@ -3020,6 +3054,11 @@
       "is": "Eine Seite mit jeder Art von Eintrag, Werkzeug und Einstellung, die du öffnen kannst.",
       "does": "In der Seitenleiste standen neunzehn Protokolle, die alle gleich funktionieren. Sie sind jetzt hier, mit einem Typfilter — suchen heißt eine Liste lesen statt ein Menü auswendig zu kennen.",
       "doesNot": "Nichts wurde verschoben oder zusammengelegt. Jede Seite behält ihre Adresse, ihre Einträge und ihr Formular — das hier ist ein Zugang, kein neuer Ort für deine Daten."
+    },
+    "library": {
+      "is": "Alles, was Sie hier abgelegt haben, an einem Ort.",
+      "does": "Zeigt Ihre neuesten Einträge, die markierten und eine Suche über alles, was Sie geschrieben haben.",
+      "doesNot": "Es wird nichts doppelt gespeichert. Es sind dieselben Einträge, die die Module zeigen — ändern Sie einen hier, ändert er sich dort."
     }
   },
   "helpCentre": {
@@ -3509,5 +3548,8 @@
     "clear": "Beispiel entfernen",
     "clearing": "Wird entfernt…",
     "clearFailed": "Das hat nicht geklappt."
+  },
+  "promise": {
+    "oneSentence": "Die KI, die Ihre Arbeit schon kennt. Fragen Sie sie alles."
   }
 }

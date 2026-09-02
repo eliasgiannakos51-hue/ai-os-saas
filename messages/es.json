@@ -70,7 +70,8 @@
       "failed": "No se pudo crear el PDF",
       "notReady": "Todavía no ha terminado"
     },
-    "listCapped": "Se muestran las {count, number} más recientes. Las entradas más antiguas siguen guardadas: usa Buscar en mis registros para encontrarlas."
+    "listCapped": "Se muestran las {count, number} más recientes. Las entradas más antiguas siguen guardadas: usa Buscar en mis registros para encontrarlas.",
+    "newProject": "Nuevo Proyecto"
   },
   "sidebar": {
     "groups": {
@@ -135,7 +136,9 @@
       "routing": "Enrutado de modelos",
       "businessHealth": "Salud del negocio",
       "mine": "Lo mío",
-      "records": "Mis registros"
+      "records": "Mis registros",
+      "library": "Mis cosas",
+      "newEntry": "Nueva entrada"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -184,12 +187,13 @@
       "formSubmissions": "Todo lo que los visitantes enviaron por un formulario en tus sitios publicados",
       "businessHealth": "MRR, margen, bajas y liquidez. Solo el propietario.",
       "mine": "Todo lo que has creado, lo más reciente primero, con una pestaña de destacados",
-      "records": "Todos los registros en un solo lugar: filtra por tipo en vez de buscar en el menú"
+      "records": "Todos los registros en un solo lugar: filtra por tipo en vez de buscar en el menú",
+      "library": "Favoritos, recientes y búsqueda — todo lo tuyo en un sitio",
+      "newEntry": "Escribe cualquier cosa — se archiva sola"
     },
     "closeMenu": "Cerrar el menú"
   },
   "landing": {
-    "hero": "Tu negocio, organizado — con una IA que realmente ayuda.",
     "description": "Registra ideas, finanzas, trading, investigación, decisiones y más — todo en un solo lugar, con un asistente de IA que entiende tus datos y te ayuda a pensarlo con claridad. Se acabaron las notas dispersas, las hojas de cálculo y las ventanas de chat.",
     "logIn": "Iniciar sesión",
     "signUp": "Regístrate",
@@ -926,7 +930,6 @@
           "consistency": "Intenta registrar algo todos los días esta semana."
         }
       },
-      "heroQuestion": "¿Qué quieres construir hoy?",
       "recentEntries": {
         "title": "Entradas Recientes",
         "empty": "Aún no hay entradas."
@@ -2360,6 +2363,37 @@
       "allTypes": "Todos los tipos",
       "count": "{count, plural, one {# lugar} other {# lugares}}",
       "noMatch": "Nada coincide con ese nombre. Prueba una palabra más corta o quita el filtro."
+    },
+    "firstScreen": {
+      "label": "Pulsa uno — se ejecuta al instante",
+      "cost": {
+        "free": "Gratis",
+        "freeAllowance": "Gratis hasta tu límite mensual",
+        "charged": "Consume créditos"
+      },
+      "build": {
+        "verb": "Crea",
+        "example": "Crea una web para mi tienda"
+      },
+      "understand": {
+        "verb": "Entiende",
+        "example": "¿Qué dicen mis números esta semana?"
+      },
+      "repeat": {
+        "verb": "Repite",
+        "example": "Cada lunes, un resumen de mis ventas"
+      }
+    },
+    "library": {
+      "title": "Mis cosas",
+      "description": "Todo lo que has puesto aquí: reciente, favorito o buscado.",
+      "tabs": {
+        "recent": "Reciente",
+        "starred": "Favoritos",
+        "search": "Buscar"
+      },
+      "searchPlaceholder": "Busca en todo lo que has escrito",
+      "searchNoResults": "Nada coincide con «{query}»."
     }
   },
   "module": {
@@ -3020,6 +3054,11 @@
       "is": "Una página con todos los tipos de registro, herramienta y ajuste que puedes abrir.",
       "does": "La barra lateral listaba diecinueve registros que funcionan igual. Están aquí, con un filtro por tipo, así encontrar uno es leer una lista en vez de recordar un menú.",
       "doesNot": "Nada se movió ni se fusionó. Cada página conserva su dirección, sus entradas y su formulario: esto es una entrada, no un nuevo lugar donde viven tus datos."
+    },
+    "library": {
+      "is": "Todo lo que has puesto aquí, en un solo sitio.",
+      "does": "Muestra tus entradas recientes, las que marcaste como favoritas y una búsqueda en todo lo que has escrito.",
+      "doesNot": "No guarda una segunda copia de nada. Son los mismos registros que muestran los módulos: si editas uno aquí, cambia allí."
     }
   },
   "helpCentre": {
@@ -3509,5 +3548,8 @@
     "clear": "Quitar el ejemplo",
     "clearing": "Quitando…",
     "clearFailed": "No funcionó."
+  },
+  "promise": {
+    "oneSentence": "La IA que ya conoce tu trabajo. Pregúntale lo que sea."
   }
 }

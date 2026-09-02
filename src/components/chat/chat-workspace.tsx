@@ -25,6 +25,7 @@ import { useStickToBottom } from "@/hooks/use-stick-to-bottom";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
 import { ProvenanceLine } from "@/components/chat/provenance-line";
 import type { Provenance } from "@/lib/chat/provenance";
+import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
 
 // Remembered across visits, per the focus-mode toggle below.
 const CHAT_SIDEBAR_STORAGE_KEY = "chat-sidebar";
@@ -76,6 +77,7 @@ export function ChatWorkspace({
   initialMentorPreset,
   initialFreeChatRemaining,
   initialConversationId,
+  initialAsk,
 }: {
   initialConversations: ChatConversation[];
   userInitial: string;
@@ -93,6 +95,16 @@ export function ChatWorkspace({
   initialMentorPreset?: "trading" | "product";
   /** Free chat messages left this month; undefined when the feature is off. */
   initialFreeChatRemaining?: number;
+  /**
+   * A question to send the moment this page opens, from the Home
+   * screen's "understand" example (lib/overview/first-screen-examples).
+   *
+   * Two of seven testers never found the chat at all. This is a door
+   * into it that does not require knowing it is there — and the press
+   * that opened it is the consent for the message it sends, the same
+   * consent pressing Send would be.
+   */
+  initialAsk?: string;
 }) {
   const tTrading = useTranslations("dashboard.tradingWorkflow");
   const describe = useErrorText();
@@ -193,6 +205,24 @@ export function ChatWorkspace({
       return next;
     });
   }
+  // ASKED ON ARRIVAL. Runs once per mount and only for a brand-new
+  // thread: `sentAskRef` is what stops React's development double-invoke
+  // — and any later re-render — from sending the same question twice and
+  // charging for it twice. Deliberately not guarded on `sending`, which
+  // is false at mount; the ref is the guard.
+  const sentAskRef = useRef(false);
+  useEffect(() => {
+    if (!initialAsk || sentAskRef.current) return;
+    sentAskRef.current = true;
+    void handleSend(initialAsk);
+    forgetExampleParam("ask");
+    // handleSend is redeclared every render and reads its own state via
+    // setState callbacks; depending on it would re-run this effect
+    // constantly, which the ref would then swallow silently. The ref is
+    // the real guard, so the dependency list names only the input.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialAsk]);
+
   // Guards against a slow/stale loadMessages() response landing after the
   // user has already switched to a different conversation (or "New Chat")
   // — only the request whose token still matches gets to apply its result.

@@ -70,7 +70,8 @@
       "failed": "The PDF could not be created",
       "notReady": "This is not finished yet"
     },
-    "listCapped": "Showing the most recent {count, number}. Older entries are still saved — use Search my records to find them."
+    "listCapped": "Showing the most recent {count, number}. Older entries are still saved — use Search my records to find them.",
+    "newProject": "New Project"
   },
   "sidebar": {
     "groups": {
@@ -135,7 +136,9 @@
       "routing": "Model routing",
       "businessHealth": "Business health",
       "mine": "Mine",
-      "records": "My records"
+      "records": "My records",
+      "library": "My stuff",
+      "newEntry": "New entry"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -184,12 +187,13 @@
       "formSubmissions": "Everything visitors sent through a form on your published sites",
       "businessHealth": "MRR, margin, churn and runway. Owner only.",
       "mine": "Everything you have made, newest first — with a starred-only tab",
-      "records": "Every log in one place — filter by type instead of hunting the menu"
+      "records": "Every log in one place — filter by type instead of hunting the menu",
+      "library": "Starred, recent and search — all your own entries in one place",
+      "newEntry": "Write anything down — it files itself"
     },
     "closeMenu": "Close menu"
   },
   "landing": {
-    "hero": "Your business, organized — with AI that actually helps.",
     "description": "Track ideas, finance, trading, research, decisions and more — all in one place, with an AI assistant that understands your data and helps you think it through. No more scattered notes, spreadsheets, and chat windows.",
     "logIn": "Log In",
     "signUp": "Sign Up",
@@ -926,7 +930,6 @@
           "consistency": "Try logging something every day this week."
         }
       },
-      "heroQuestion": "What do you want to build today?",
       "recentEntries": {
         "title": "Recent Entries",
         "empty": "No entries yet."
@@ -2360,6 +2363,37 @@
       "allTypes": "All types",
       "count": "{count, plural, one {# place} other {# places}}",
       "noMatch": "Nothing matches that name. Try a shorter word, or clear the filter."
+    },
+    "firstScreen": {
+      "label": "Press one — it runs right away",
+      "cost": {
+        "free": "Free",
+        "freeAllowance": "Free up to your monthly limit",
+        "charged": "Uses credits"
+      },
+      "build": {
+        "verb": "Build",
+        "example": "Build a website for my shop"
+      },
+      "understand": {
+        "verb": "Understand",
+        "example": "What do my numbers say this week?"
+      },
+      "repeat": {
+        "verb": "Repeat",
+        "example": "Every Monday, a summary of my sales"
+      }
+    },
+    "library": {
+      "title": "My stuff",
+      "description": "Everything you have put in here: recent, starred, or searched.",
+      "tabs": {
+        "recent": "Recent",
+        "starred": "Starred",
+        "search": "Search"
+      },
+      "searchPlaceholder": "Search everything you have written",
+      "searchNoResults": "Nothing matches “{query}”."
     }
   },
   "module": {
@@ -3020,6 +3054,11 @@
       "is": "One page listing every kind of record, tool and setting you can open.",
       "does": "The sidebar used to list nineteen logs that all work the same way. They are here instead, with a type filter, so finding one is reading a list rather than remembering a menu.",
       "doesNot": "Nothing moved and nothing was merged. Every page still has its own address, its own entries and its own form — this is a way in, not a new place your data lives."
+    },
+    "library": {
+      "is": "Everything you have put in here, in one place.",
+      "does": "Shows your recent entries, the ones you starred, and a search across everything you have written.",
+      "doesNot": "It does not store a second copy of anything. These are the same records the modules show — edit one here and it changes there."
     }
   },
   "helpCentre": {
@@ -3509,5 +3548,8 @@
     "clear": "Remove the sample",
     "clearing": "Removing…",
     "clearFailed": "That did not work."
+  },
+  "promise": {
+    "oneSentence": "The AI that already knows your work. Ask it anything."
   }
 }

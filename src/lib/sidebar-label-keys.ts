@@ -63,12 +63,18 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   // as tabs, and /dashboard/favorites redirects into the starred one.
   Mine: "mine",
   Favorites: "favorites",
+  // The three that became one: starred, everything-in-order and search.
+  "My stuff": "library",
+  // The one row the nineteen log screens became.
+  "My records": "records",
+  // The pinned action above the groups.
+  "New entry": "newEntry",
   "Mission Control": "missionControl",
   "Weekly Reflection": "reflection",
   "AI Memory": "memory",
-  Settings: "settings",
   Team: "team",
   Affiliate: "affiliate",
+  Settings: "settings",
   "Help Centre": "help",
   "AI Agents": "agents",
   "Website Builder": "websiteBuilder",
@@ -76,7 +82,6 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Images: "images",
   Videos: "videos",
   "Business health": "businessHealth",
-  "My records": "records",
   "AI Coding": "coding",
   "Data Analysis": "dataAnalysis",
   Documents: "documents",

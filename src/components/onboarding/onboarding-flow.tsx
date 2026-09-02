@@ -64,6 +64,7 @@ const GOALS = ["trading", "freelance", "startup", "agency", "other"] as const;
  */
 export function OnboardingFlow({ activationFree }: { activationFree: boolean }) {
   const t = useTranslations("dashboard.onboarding");
+  const tPromise = useTranslations("promise");
   const locale = useLocale();
   const router = useRouter();
   const { addToast } = useToast();
@@ -247,6 +248,13 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
 
       {step === "goal" && (
         <section className="space-y-3">
+          {/* THE SAME SENTENCE THE LANDING PAGE AND THE HOME SCREEN SHOW.
+              One tester left during onboarding. Whatever else was wrong,
+              this screen never said what the product was — it went
+              straight to asking what their goal is, which is a question
+              you can only answer if you already know what you are being
+              offered. */}
+          <p className="mb-3 text-sm font-medium text-foreground">{tPromise("oneSentence")}</p>
           <h2 className="text-sm font-semibold text-foreground">{t("goalTitle")}</h2>
           <div className="grid gap-2 sm:grid-cols-2">
             {GOALS.map((value) => (

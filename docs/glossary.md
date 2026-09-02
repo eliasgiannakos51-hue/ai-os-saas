@@ -194,5 +194,8 @@ Removing one from the product is always allowed.
 | dashboard.memory.title | the page heading, which must match that nav row |
 | common.listCapped | points the reader at "Search my records" by its name |
 | help.businessModule.does | names "Search my records" by its name |
+| dashboard.firstScreen.build.example | an example prompt the reader would type |
+| dashboard.firstScreen.understand.example | an example prompt the reader would type |
+| dashboard.firstScreen.repeat.example | an example prompt the reader would type |
 <!-- USERVOICE:END -->
 

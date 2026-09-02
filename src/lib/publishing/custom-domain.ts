@@ -13,6 +13,31 @@
 // the host is configured to serve it. Keeping them apart is what lets the
 // first one be tested without a network.
 
+// ---------------------------------------------------------------------
+// NOTHING IN THE APP CALLS THIS YET, AND THAT IS THE POINT OF SAYING SO.
+// ---------------------------------------------------------------------
+//
+// This module and lib/publishing/domain-verification.ts are complete and
+// carry 104 passing checks between them. They are imported by their own
+// tests and by each other, and by NO route and NO component. There is no
+// settings field, no API route, no DNS instructions in any locale, and no
+// tier gate — measured on 2026-09-02, and a sibling comment in
+// domain-verification.ts pointed at "the custom-domain settings route",
+// which has never existed.
+//
+// A green gate over an unreachable library is the easiest thing in a
+// codebase to mistake for a shipped feature, so scripts/tests/
+// custom-domain.test.mjs asserts the wiring state explicitly and will go
+// red the day it changes — at which point this note is what has to be
+// updated.
+//
+// WHAT IS STILL NEEDED, beyond a form: an operator has to tell the HOST
+// about each customer domain so it will terminate TLS for it. On Vercel
+// that is an API call with a token, a project id and a team id, none of
+// which exist in lib/env-check.ts. Shipping the form without that half
+// produces a screen that accepts a domain, shows correct DNS records,
+// verifies ownership honestly — and then serves nothing over HTTPS.
+
 export const CUSTOM_DOMAIN_MAX_LENGTH = 253; // RFC 1035 total length
 const LABEL_MAX_LENGTH = 63;
 

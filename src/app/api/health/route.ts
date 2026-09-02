@@ -9,6 +9,7 @@ import {
   type HealthStage,
 } from "@/lib/health/classify";
 import { scrubSecrets } from "@/lib/scrub-secrets";
+import { SCHEMA_CANARIES } from "@/lib/health/schema-canaries";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -234,6 +235,77 @@ export async function GET(request: Request) {
     reason: probe.reason,
   };
   if (authorised && probe.detail) body.detail = probe.detail;
+
+  // DOES THE DATABASE HAVE WHAT THIS BUILD ASKS FOR?
+  //
+  // A SEPARATE QUESTION FROM `db`, and separate on purpose. An earlier
+  // probe read the newest table and cried "database down" whenever the
+  // schema was one migration behind — the most common state a deploying
+  // project is ever in — so `db` was deliberately pinned to a column that
+  // predates everything. That decision is why this endpoint said db:true
+  // while /dashboard/overview was redirecting every user to /onboarding
+  // over a column that did not exist.
+  //
+  // So the drift is reported, and it does not touch `ok` or the status
+  // code: an additive migration lagging is not an outage, and paging
+  // somebody for it is how the last version got its meaning drained. A
+  // monitor that cares should watch `schema.ok` as its own signal.
+  //
+  // Only when the probe reached the database at all — asking a database
+  // that did not answer produces a list of false absences.
+  if (probe.dbAnswered) {
+    // Its own client: the probe's is scoped to the probe, and this must
+    // not be able to disturb the measurement above — `ms` and `stage`
+    // describe that one query and nothing else.
+    let schemaClient: ReturnType<typeof createAdminClient> | null = null;
+    try {
+      schemaClient = createAdminClient();
+    } catch {
+      schemaClient = null;
+    }
+    const admin = schemaClient;
+    const missing: { object: string; migration: string; breaks: string }[] = [];
+    await Promise.all(
+      (admin ? SCHEMA_CANARIES : []).map(async (c) => {
+        if (!admin) return;
+        try {
+          if (c.kind === "function") {
+            // A missing function is 404 from PostgREST. A present one may
+            // reject the ARGUMENTS, which is a different error and not
+            // absence — so only "not found" counts.
+            const { error } = await admin.rpc(c.fn as string, {});
+            if (error && /(could not find|does not exist|not found)/i.test(`${error.message} ${error.code ?? ""}`)) {
+              missing.push({ object: `${c.fn}()`, migration: c.migration, breaks: c.breaks });
+            }
+          } else {
+            // limit(0) returns no rows: the question is whether the
+            // SELECT is accepted, not what is in the table.
+            const { error } = await admin
+              .from(c.table as string)
+              .select(c.kind === "column" ? (c.column as string) : "*")
+              .limit(0);
+            if (error) {
+              missing.push({
+                object: c.kind === "column" ? `${c.table}.${c.column}` : (c.table as string),
+                migration: c.migration,
+                breaks: c.breaks,
+              });
+            }
+          }
+        } catch {
+          // A probe that throws proves nothing about the object.
+        }
+      })
+    );
+    body.schema = admin === null ? { ok: null, checked: 0, missing: [] } : {
+      ok: missing.length === 0,
+      checked: SCHEMA_CANARIES.length,
+      // Named even unauthenticated: these are schema object names, not
+      // data, and the whole point is that the person looking at a broken
+      // page can see the cause without a secret.
+      missing,
+    };
+  }
 
   return NextResponse.json(body, {
     status: probe.ok ? 200 : 503,

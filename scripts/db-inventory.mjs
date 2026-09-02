@@ -226,6 +226,27 @@ function parseDdl(files, into) {
   for (const file of files) {
     const sql = stripSql(readFileSync(path.join(ROOT, file), "utf8"));
 
+    // NAMED CHECK CONSTRAINTS, added or replaced by a migration.
+    //
+    // This class was missing, and it is the same failure as a missing
+    // column: 20260913000000_sample_data_source.sql widens
+    // user_imports_source_check to allow 'sample', and
+    // lib/sample-data/apply.ts writes source: "sample". Against a database
+    // still holding the narrow constraint, loading the sample account
+    // fails on a constraint violation — and nothing here could say so,
+    // because tables, columns, functions and policies were all present.
+    //
+    // Only the NAME is checked, not the expression: a constraint that
+    // exists but was never widened is indistinguishable from the widened
+    // one by name alone, so the report says what it does and does not
+    // prove. Catching the narrow-vs-wide case needs the expression, and
+    // the query below reads it out for a human rather than judging it.
+    for (const m of sql.matchAll(
+      /alter\s+table\s+(?:only\s+)?(?:public\.)?"?([a-z0-9_]+)"?\s+add\s+constraint\s+"?([a-z0-9_]+)"?\s+check/gi
+    )) {
+      into.checks.set(`${m[1]}.${m[2]}`, { table: m[1], name: m[2] });
+    }
+
     // CREATE TABLE [IF NOT EXISTS] public.x ( ... )
     for (const m of sql.matchAll(
       /create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?"?([a-z0-9_]+)"?\s*\(/gi
@@ -393,6 +414,7 @@ const defined = {
   columns: new Map(),
   policies: new Map(),
   functions: new Map(),
+  checks: new Map(),
   tableDdl: new Map(),
   functionDdl: new Map(),
   columnDefs: new Map(),
@@ -415,6 +437,9 @@ for (const t of tables) for (const c of defined.columns.get(t) ?? []) columns.pu
 columns.sort((a, b) => a[0].localeCompare(b[0]) || a[1].localeCompare(b[1]));
 const functions = [...requiredFunctions].sort();
 const orphanFunctions = functions.filter((f) => !defined.functions.has(f));
+const checks = [...defined.checks.values()]
+  .filter((c) => tables.includes(c.table))
+  .sort((a, b) => a.table.localeCompare(b.table) || a.name.localeCompare(b.name));
 const policies = [...defined.policies.values()]
   .filter((p) => tables.includes(p.table))
   .sort((a, b) => a.table.localeCompare(b.table) || a.name.localeCompare(b.name));
@@ -658,6 +683,11 @@ expected_functions(function_name) as (
   values
     ${rows(functions, (f) => `(${q(f)})`)}
 ),
+expected_checks(table_name, constraint_name) as (
+  values
+${checks.length ? checks.map((c) => `    ('${c.table}', '${c.name}')`).join(",\n") : "    (null, null)"}
+),
+
 expected_policies(table_name, policy_name) as (
   values
     ${rows(policies, (p) => `(${q(p.table)}, ${q(p.name)})`)}
@@ -718,6 +748,31 @@ findings as (
     from actual_tables a
    where a.table_name in (select table_name from expected_tables)
      and not a.rls_enabled
+
+  union all
+  select 4, 'MISSING CHECK CONSTRAINT', e.table_name, e.constraint_name,
+         'a value the code writes may be rejected - see sample-data source = sample'
+    from expected_checks e
+   where e.table_name is not null
+     and exists (select 1 from actual_tables a where a.table_name = e.table_name)
+     and not exists (
+       select 1 from pg_constraint c
+        join pg_class t on t.oid = c.conrelid
+        join pg_namespace n on n.oid = t.relnamespace
+       where n.nspname = 'public' and t.relname = e.table_name
+         and c.conname = e.constraint_name and c.contype = 'c')
+
+  union all
+  -- NOT A VERDICT. A constraint present under the right name may still
+  -- hold the OLD expression, and no name comparison can tell. Printed so
+  -- a person can read it - that is the honest half of this check.
+  select 8, 'CHECK CONSTRAINT (read the expression)', t.relname, c.conname,
+         pg_get_constraintdef(c.oid)
+    from pg_constraint c
+    join pg_class t on t.oid = c.conrelid
+    join pg_namespace n on n.oid = t.relnamespace
+   where n.nspname = 'public' and c.contype = 'c'
+     and (t.relname, c.conname) in (select table_name, constraint_name from expected_checks)
 
   union all
   select 5, 'MISSING POLICY', e.table_name, e.policy_name,

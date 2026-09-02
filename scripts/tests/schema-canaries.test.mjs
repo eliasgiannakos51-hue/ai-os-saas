@@ -33,6 +33,34 @@ check(`migrations found (${files.length})`, files.length > 20, String(files.leng
 
 // What the newest migrations ADD. Additive only — a canary must be
 // something a database can be missing while everything else works.
+// THE WINDOW, AND WHAT IT CANNOT SEE — stated because I got it wrong.
+//
+// The production database was missing merge_user_metadata, added by
+// 20260910000000_merge_user_metadata.sql, which fell just outside a
+// twelve-migration window. This gate therefore did not require it as a
+// canary and /api/health would not have reported it. The window was a
+// guess about how far behind a database can be, and the user's database
+// answered: further than the guess.
+//
+// Widening it to 25 makes the rule demand 46 canaries. That is not a
+// better gate — it is 46 probes on every health request and 46 hand-
+// written "what breaks" sentences nobody will keep true, and a list
+// nobody maintains is the thing this whole file exists to prevent.
+//
+// So the honest arrangement, with the limit named rather than papered
+// over:
+//
+//   THIS LIST is the annotated, high-value subset — cheap enough to
+//   probe on every request, and each entry says what a user loses.
+//   Objects OLDER than the window can be missing and invisible here.
+//
+//   scripts/db-inventory.mjs is the COMPLETE answer: 106 tables, 36
+//   RPCs, 1023 columns, 213 policies, 20 check constraints, no window.
+//   It is the thing to run at deploy time, and running it is what would
+//   have caught all five of the objects that were actually missing.
+//
+// Objects proven missing in a real database are canaries regardless of
+// the window — see the explicit check below.
 const RECENT = 12;
 const recent = files.slice(-RECENT);
 const added = { columns: new Set(), tables: new Set(), functions: new Set() };
@@ -73,6 +101,19 @@ check(
   SCHEMA_CANARIES.some((c) => c.kind === "column" && c.table === "user_onboarding" && c.column === "home_seen_at"),
   "the one object that has actually taken a page down is not on the list"
 );
+
+console.log("\n== 2b. objects a real database was actually missing ==");
+// NOT DERIVED — OBSERVED. These five came back missing from the user's
+// production database on 2026-09-02. An object that has actually been
+// absent from a live database is a canary whatever the window says,
+// because it is the one class of evidence a heuristic cannot argue with.
+for (const name of ["nav_events", "consume_rate_limit", "db_exposure_report", "merge_user_metadata", "prune_nav_events"]) {
+  check(
+    `${name} is a canary (it was missing in production)`,
+    SCHEMA_CANARIES.some((c) => c.fn === name || c.table === name),
+    "observed absent from a live database — it must be probed"
+  );
+}
 
 console.log("\n== 3. the list has not fallen behind the migrations ==");
 // Not "every added object must be a canary" — most are harmless and a

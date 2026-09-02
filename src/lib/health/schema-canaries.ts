@@ -98,6 +98,15 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20260917000000_db_exposure_report.sql",
     breaks: "/dashboard/system-health cannot report what the database exposes",
   },
+  // OBSERVED MISSING IN PRODUCTION, 2026-09-02, and OLDER than the window
+  // the gate derives from. It is here because a live database was without
+  // it, which is evidence no heuristic can argue with.
+  {
+    kind: "function",
+    fn: "merge_user_metadata",
+    migration: "20260910000000_merge_user_metadata.sql",
+    breaks: "seven call sites — the Stripe webhook, /auth/callback, /api/checkout and four more — fall back to read-modify-write on user_metadata, so concurrent writes overwrite each other",
+  },
   {
     kind: "function",
     fn: "settle_reservation",

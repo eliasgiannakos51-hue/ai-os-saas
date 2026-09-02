@@ -264,6 +264,11 @@ console.log("\n== the wiring, stated rather than assumed ==");
     return out;
   };
   const appFiles = [...walk("src/app"), ...walk("src/components")];
+  // THE FLOOR ON THE SCAN, not on the result. `importers` being empty is
+  // the answer we want; `appFiles` being empty means the walk found no
+  // source at all and the check below proves nothing. Third time
+  // scripts/tests/gate-vacuity.test.mjs has caught me on exactly this.
+  ok(`the walk found the app's source (${appFiles.length} files)`, appFiles.length >= 200);
   const importers = appFiles.filter((f) =>
     /publishing\/(custom-domain|domain-verification)/.test(readFileSync(f, "utf8"))
   );

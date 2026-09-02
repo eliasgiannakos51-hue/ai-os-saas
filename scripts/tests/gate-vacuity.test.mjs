@@ -80,6 +80,14 @@ const ALLOWED = new Map([
   // Probed per migration file; a migration that touches no table yields an
   // empty list legitimately. The migration count is floored separately.
   ["health-classify.test.mjs", ["touchers"]],
+  // Probed per COMPONENT: `aiStates` is the set of states a given file's
+  // handlers set while awaiting a model, and almost every spinning
+  // component legitimately has none — that is the ordinary case, not a
+  // broken scan. The scan that CAN break is the sweep across all of
+  // them, and it is floored separately in that file at
+  // `withAiStates.length >= 1`, which goes red if the handler-splitting
+  // regex ever stops finding any.
+  ["globe-mark.test.mjs", ["aiStates"]],
   // The live half only runs with a database; without one the arrays are
   // never built and the file exits before these lines.
   ["security-posture.test.mjs", ["missing", "silentlyDenied"]],

@@ -418,6 +418,171 @@ const MECHANICAL = [
   checkList("and the list has no entries that stopped spinning", MECHANICAL.filter((f) => !spinning.includes(f)));
 }
 
+// ---------------------------------------------------------------------
+// THE ALLOWLIST ABOVE IS PER FILE. THE PROPERTY IS PER SPINNER.
+// ---------------------------------------------------------------------
+//
+// MECHANICAL says "this file may contain a spinner". It cannot say
+// "…and not over a model call", and that gap shipped:
+// onboarding-flow.tsx was on the list for its import button — which
+// genuinely writes rows and calls nothing — and the SAME `busy` boolean
+// also drove the two buttons that wait on /api/import/csv/analyse and
+// /api/import/paste. Both of those reserve credits and ask a model to
+// read what you just gave it. So a new account's FIRST wait on the AI in
+// this product showed the generic spinner every wrapper uses, the file
+// was correctly on the allowlist, and every check above passed.
+//
+// This asks the question the allowlist cannot: does any spinner render
+// under a state that a MODEL-CALLING handler sets?
+//
+// ------------------------------------------------------------------
+// WHY IT OVER-REPORTS ON PURPOSE
+// ------------------------------------------------------------------
+//
+// A route "reaches a model" here if its file, or anything it imports
+// transitively, contains a call site. That is deliberately loose —
+// importing a module that can call a model is not the same as calling
+// one — and the alternative was measured rather than assumed. A stricter
+// per-EXPORT version was written first: it resolved named imports and
+// read each symbol's body, and it silently dropped
+// /api/import/csv/analyse, which is the route this whole section exists
+// for. (The brace matcher took the `{` of `proposeMapping(params: {` as
+// the function body.) A gate that misses the bug it was written for is
+// worse than one that names two extra routes.
+//
+// So: over-report, and argue the exceptions in the open. The cost of a
+// false positive is one comment here; the cost of a false negative is a
+// spinner nobody questions.
+const MODEL_CALL = /\.messages\.create\(|\brunCompletion\(|\.messages\.stream\(/;
+
+// Routes that IMPORT their way to a call site but do not reach it on the
+// request path a button actually takes. Two, both read rather than
+// guessed.
+const NOT_ON_THE_REQUEST_PATH = new Map([
+  [
+    "/api/import/csv/apply",
+    // Imports `validateMapping` from lib/import/map-columns.ts, which is
+    // a pure function. The model call lives in `proposeMapping` in the
+    // same module, and this route never imports it. The route writes
+    // rows.
+    "imports only validateMapping; proposeMapping holds the call and is not imported here",
+  ],
+  [
+    "/api/agents/templates/adopt",
+    // needsFill = Boolean(apiKey) && !subjectOverride, and
+    // components/marketplace/template-browser.tsx refuses to submit an
+    // empty subject ("subjectRequired"), so subjectOverride is always
+    // set from that button and the fill branch is unreachable from it.
+    "needsFill is false whenever a subject is sent, and the only caller always sends one",
+  ],
+]);
+
+function resolveAlias(spec) {
+  if (!spec.startsWith("@/")) return null;
+  const base = "src/" + spec.slice(2);
+  for (const c of [base + ".ts", base + ".tsx", base + "/index.ts"]) {
+    try { if (statSync(c).isFile()) return c; } catch { /* not this one */ }
+  }
+  return null;
+}
+const reachCache = new Map();
+function reachesModel(file, seen = new Set()) {
+  if (reachCache.has(file)) return reachCache.get(file);
+  if (seen.has(file)) return false;
+  seen.add(file);
+  let src = "";
+  try { src = stripComments(readFileSync(file, "utf8")); } catch { return false; }
+  let hit = MODEL_CALL.test(src);
+  if (!hit) {
+    for (const m of src.matchAll(/from "(@\/[^"]+)"/g)) {
+      const dep = resolveAlias(m[1]);
+      if (dep && reachesModel(dep, seen)) { hit = true; break; }
+    }
+  }
+  reachCache.set(file, hit);
+  return hit;
+}
+
+const AI_ROUTES = new Set();
+function routeFiles(dir, out = []) {
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const q = `${dir}/${e.name}`;
+    if (e.isDirectory()) routeFiles(q, out);
+    else if (e.name === "route.ts") out.push(q);
+  }
+  return out;
+}
+for (const f of routeFiles("src/app")) {
+  if (!reachesModel(f)) continue;
+  const url = f.replace(/^src\/app/, "").replace(/\/route\.ts$/, "").replace(/\[[^\]]+\]/g, "*");
+  if (NOT_ON_THE_REQUEST_PATH.has(url)) continue;
+  AI_ROUTES.add(url);
+}
+// NOT VACUOUS. An empty or tiny set would make the sweep below pass by
+// finding nothing, which is the failure this whole section is about.
+check(`the model-calling routes were found (${AI_ROUTES.size})`, AI_ROUTES.size >= 20);
+checkList(
+  "every exempted route still reaches a model, so the list is not stale",
+  [...NOT_ON_THE_REQUEST_PATH.keys()].filter((url) => {
+    const f = "src/app" + url.replace(/\*/g, "[id]") + "/route.ts";
+    let exists = false;
+    try { exists = statSync(f).isFile(); } catch { /* renamed */ }
+    return !exists || !reachesModel(f);
+  })
+);
+
+{
+  const normUrl = (u) => u.split("?")[0].replace(/\$\{[^}]*\}/g, "*").replace(/\/$/, "");
+  const offenders = [];
+  // THE SWEEP'S OWN FLOOR. `offenders` being empty is the answer we want;
+  // `withAiStates` being empty means the scan found no spinning component
+  // that talks to a model AT ALL, which is not a clean tree — it is a
+  // broken handler-splitting regex reporting silence as success.
+  // scripts/tests/gate-vacuity.test.mjs named this, and it was right.
+  const withAiStates = [];
+  for (const f of allTsx) {
+    const src = stripComments(readFileSync(f, "utf8"));
+    if (!/animate-spin/.test(src)) continue;
+
+    // Each handler, and the states it sets while awaiting a model.
+    const heads = [...src.matchAll(/(?:async function (\w+)|const (\w+)\s*=\s*async)/g)];
+    const aiStates = [];
+    for (let i = 0; i < heads.length; i++) {
+      const body = src.slice(heads[i].index, i + 1 < heads.length ? heads[i + 1].index : src.length);
+      const urls = [...body.matchAll(/fetch\(\s*[`"']([^`"']+)/g)].map((m) => normUrl(m[1]));
+      if (!urls.some((u) => AI_ROUTES.has(u))) continue;
+      for (const m of body.matchAll(/\bset([A-Z]\w*)\(\s*(true|"([^"]*)")\s*\)/g)) {
+        const state = m[1][0].toLowerCase() + m[1].slice(1);
+        aiStates.push(m[2] === "true" ? { state, kind: "bool" } : { state, kind: "lit", value: m[3] });
+      }
+    }
+    if (aiStates.length === 0) continue;
+    withAiStates.push(f);
+
+    for (const spin of src.matchAll(/animate-spin/g)) {
+      const before = src.slice(Math.max(0, spin.index - 500), spin.index);
+      for (const t of aiStates) {
+        const guarded =
+          t.kind === "bool"
+            ? new RegExp(`\\{\\s*${t.state}\\s*(\\?|&&)`).test(before)
+            : new RegExp(`${t.state}\\s*===\\s*"${t.value}"`).test(before);
+        if (guarded) {
+          offenders.push(
+            `${f}: a spinner renders under \`${t.kind === "bool" ? t.state : `${t.state} === "${t.value}"`}\`, which a model-calling handler sets`
+          );
+          break;
+        }
+      }
+    }
+  }
+  check(
+    `the sweep found spinning components that call a model (${withAiStates.length})`,
+    withAiStates.length >= 1,
+    "with none, the check below passes by looking at nothing"
+  );
+  checkList("no spinner stands in for the globe over a model call", [...new Set(offenders)]);
+}
+
 checkList(
   "no component uses animate-bounce",
   allTsx.filter((f) => /animate-bounce/.test(stripComments(readFileSync(f, "utf8"))))

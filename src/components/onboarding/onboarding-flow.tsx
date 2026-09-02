@@ -71,7 +71,37 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
 
   const [step, setStep] = useState<Step>("goal");
   const [goal, setGoal] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  /**
+   * WHICH action is running, not merely THAT one is — and the whole
+   * point is the mark it chooses.
+   *
+   * This was a single boolean, and all three buttons rendered
+   * the same generic ring spinner from it. Two of those three
+   * buttons wait on a MODEL:
+   *
+   *   "reading"   -> /api/import/csv/analyse, which imports the Anthropic
+   *                  SDK, reserves credits and asks a model to read the
+   *                  columns of the file you just chose.
+   *   "pasting"   -> /api/import/paste, the same, over text you pasted.
+   *   "importing" -> /api/import/csv/apply, which writes rows. No model.
+   *
+   * So this screen — a new account's FIRST wait on the AI in this
+   * product — showed the generic spinner every wrapper uses, at the one
+   * moment the product's own mark is worth the most. The label beside it
+   * already said "reading", which is the model reading.
+   *
+   * A single boolean could not be fixed in place: `busy ? spinner :
+   * globe` has no way to know which of the three it is in. So the flag
+   * NAMES the action, and `busy` stays as a derived value, which leaves
+   * every `disabled=` below unchanged.
+   *
+   * scripts/tests/globe-mark.test.mjs enforces the general rule — a
+   * state that a model-calling handler sets may not render a spinner —
+   * so collapsing this back into one boolean fails the build instead of
+   * quietly restoring the spinner.
+   */
+  const [pending, setPending] = useState<null | "reading" | "importing" | "pasting">(null);
+  const busy = pending !== null;
 
   const [file, setFile] = useState<File | null>(null);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
@@ -122,7 +152,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
       addToast(t("tooLarge", { max: formatBytes(MAX_CSV_BYTES) }), "error");
       return;
     }
-    setBusy(true);
+    setPending("reading");
     setAnalysis(null);
     try {
       const body = new FormData();
@@ -141,13 +171,13 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
     } catch (err) {
       addToast(getErrorMessage(err, t("analyseError")), "error");
     } finally {
-      setBusy(false);
+      setPending(null);
     }
   }
 
   async function applyImport() {
     if (!file || !analysis) return;
-    setBusy(true);
+    setPending("importing");
     try {
       const body = new FormData();
       body.append("file", file);
@@ -167,14 +197,14 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
     } catch (err) {
       addToast(getErrorMessage(err, t("importError")), "error");
     } finally {
-      setBusy(false);
+      setPending(null);
     }
   }
 
   async function applyPaste() {
     const text = pasteText.trim();
     if (text.length < MIN_PASTE_CHARS) return;
-    setBusy(true);
+    setPending("pasting");
     try {
       const response = await fetch("/api/import/paste", {
         method: "POST",
@@ -198,7 +228,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
     } catch (err) {
       addToast(getErrorMessage(err, t("importError")), "error");
     } finally {
-      setBusy(false);
+      setPending(null);
     }
   }
 
@@ -345,11 +375,17 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                 disabled={busy}
                 className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
               >
-                {busy ? (
+                {pending === "reading" ? (
                   <>
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                    {/* THE GLOBE, not a spinner: this button waits on a
+                        model. `inherit` because the button ground IS the
+                        accent — an accent-toned mark here would be orange
+                        on orange and simply not there. */}
+                    <ThinkingIndicator size="sm" tone="inherit" />
                     {t("reading")}
                   </>
+                ) : busy ? (
+                  t("reading")
                 ) : (
                   t("chooseFile")
                 )}
@@ -476,11 +512,17 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                   disabled={busy || analysis.counts.readyRows === 0}
                   className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
                 >
-                  {busy ? (
+                  {/* THE ONE SPINNER THAT STAYS. /api/import/csv/apply
+                      writes rows and calls no model; spending the globe on
+                      a database write would make the mark read as "busy",
+                      which is the one thing it exists not to mean. */}
+                  {pending === "importing" ? (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
                       {t("importing")}
                     </>
+                  ) : busy ? (
+                    t("importing")
                   ) : (
                     <>
                       <Check className="h-3.5 w-3.5" aria-hidden="true" />
@@ -522,11 +564,14 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
             disabled={busy || pasteText.trim().length < MIN_PASTE_CHARS}
             className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
           >
-            {busy ? (
+            {pending === "pasting" ? (
               <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                {/* Also a model call — /api/import/paste. Same mark. */}
+                <ThinkingIndicator size="sm" tone="inherit" />
                 {t("reading")}
               </>
+            ) : busy ? (
+              t("reading")
             ) : (
               t("extract")
             )}

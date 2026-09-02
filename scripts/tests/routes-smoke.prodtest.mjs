@@ -791,7 +791,24 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   await page.goto(`http://127.0.0.1:${PORT}/dashboard/coding`, { waitUntil: "networkidle", timeout: 45000 });
 
   // Open every collapsed group so the whole nav is measurable at once.
+  //
+  // VISIBLE ONES ONLY, and that qualifier is not defensive coding — it
+  // is the fix for a real timeout. The sidebar gained a phone-only strip
+  // carrying the language selector and the theme toggle (`sm:hidden`,
+  // because on a phone there was otherwise no way to change the
+  // language at all). Its language button also carries
+  // aria-expanded="false", so at this 1280px viewport this loop found a
+  // fourth control, tried to click something with display:none, and
+  // spent thirty seconds in "element is not visible" before throwing —
+  // taking the whole prodtest down after 359 green checks.
+  //
+  // The intent here is "open the collapsed GROUPS so the whole nav can
+  // be read", and a control the reader cannot see is not part of the nav
+  // being read. Filtering on aria-label would have been narrower and
+  // more brittle: the next hidden disclosure added to the sidebar would
+  // break this again.
   for (const button of await page.locator("aside button[aria-expanded]").all()) {
+    if (!(await button.isVisible())) continue;
     if ((await button.getAttribute("aria-expanded")) === "false") {
       await button.click();
       await page.waitForTimeout(80);

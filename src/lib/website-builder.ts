@@ -396,6 +396,8 @@ why: <one sentence: what about THIS subject drove the choices above>
 
 Rules for it:
 - Decide from the SUBJECT, not from habit. A taverna, a tax accountant and a wedding photographer must not come out with the same archetype, the same hero, the same section order or the same palette.
+- EVERY PAIRING OF TEXT AND ITS BACKGROUND MUST BE READABLE, and this is a number, not a judgement. Body and small text: at least 4.5:1. Large text — 24px, or 19px when bold — and icons that carry meaning: at least 3:1. Check the pairs you are actually going to write, including text on buttons, on badges, on coloured chips, on image overlays, and on any gradient at its LIGHTEST point.
+- THE PAIRING THAT FAILS MOST OFTEN IS WHITE ON A MID-TONE ACCENT. A brand orange, terracotta, amber, mid-green or mid-blue is usually somewhere between 2:1 and 4:1 against white, so small white text on it is unreadable to a large number of people and fails WCAG AA. Measured on a real generated site: white on a mid-tone terracotta at 10.6pt scored 3.45:1, on five separate elements. Either darken the accent until the pair clears 4.5:1, or put dark text on it instead — do not reach for a lighter weight or a smaller size, which makes it worse.
 - The "sections" line must match the sections you actually build, in the order you build them. It is a commitment, not a summary written afterwards.
 - product-landing is a real answer for a real SaaS brief and the wrong answer for most others. If you choose it, "why" must say what makes this an actual product landing page.
 - Never copy an example from this prompt as your answer. There are no default values here.`;
@@ -459,7 +461,19 @@ BOOKING FORMS: do not build one. A form that takes a date and time without real 
 
 EVERY FORM, WITHOUT EXCEPTION:
 - Every input needs a real, meaningful name attribute (name="name", name="email", name="phone", name="message") — never an unnamed input. Use these English attribute names even when the visible labels are in another language, so the owner's dashboard can tell a name from an email.
-- Add one hidden honeypot input, exactly: <input type="text" name="_hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true">
+- Add one hidden honeypot input, exactly: <input type="text" name="_hp" tabindex="-1" autocomplete="off" style="position:absolute;width:1px;height:1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;opacity:0;" aria-hidden="true">
+  (THE HIDING TECHNIQUE IS NOT INTERCHANGEABLE. It used to be
+  position:absolute;left:-9999px, which is the classic trick and is safe
+  in a left-to-right page — the browser does not make overflow to the
+  LEFT of the origin scrollable. In a dir="rtl" page the scrollable
+  direction flips, so that same rule adds ~10,000px of horizontal scroll
+  to every page carrying a form. Measured on a real Arabic site
+  generated on 2026-09-02: 9,975px of sideways scroll into empty space
+  on a phone, on all three of its form pages. The replacement is the
+  standard visually-hidden clip: no offset, so nothing to scroll to, in
+  either direction. Do NOT substitute display:none or visibility:hidden
+  — a bot that skips hidden fields never fills it and the honeypot stops
+  working.)
 - A CONSENT CHECKBOX, required, unticked, immediately above the submit button: <input type="checkbox" name="_consent" required> with a short visible sentence in the site's language saying the data is sent to <the business name> so they can reply, and is not passed to anyone else. It must be genuinely unticked and genuinely required — a pre-ticked box is not consent.
 - Do not set a form action attribute. Never ask for anything you do not need: no date of birth, no ID number, no payment details.`;
 

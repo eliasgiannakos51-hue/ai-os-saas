@@ -29,6 +29,26 @@ const EDIT = "src/app/api/websites/edit/route.ts";
 const WORKSPACE = "src/components/website-builder/website-builder-workspace.tsx";
 
 const MUTANTS = [
+  {
+    // THE BUG THIS SECTION EXISTS FOR. Reverting to the unconditional
+    // drop throws away the home page on every generation where the model
+    // writes it before the first marker — which was three out of three
+    // real generations.
+    name: "a complete document before the first marker goes back to being 'preamble'",
+    file: "src/lib/website-multipage.ts",
+    from: "  const preambleIsHome = preamble.length > 0 && looksLikeCompleteHtmlDocument(preamble);",
+    to: "  const preambleIsHome = false;",
+    expect: "the unmarked first document IS the home page",
+  },
+  {
+    // The other direction: treating ANY preamble as the home page would
+    // serve a stray sentence as the front page.
+    name: "any preamble at all is treated as the home page",
+    file: "src/lib/website-multipage.ts",
+    from: "  const preambleIsHome = preamble.length > 0 && looksLikeCompleteHtmlDocument(preamble);",
+    to: "  const preambleIsHome = preamble.length > 0;",
+    expect: "a stray sentence is still dropped",
+  },
   // ------------------------------------------------------------------
   // A SUB-PAGE SKIPS A CHECK. Each of these renders perfectly.
   // ------------------------------------------------------------------

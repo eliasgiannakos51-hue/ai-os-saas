@@ -53,11 +53,46 @@ export function splitGeneratedPages(raw: string): SplitResult {
   const dropped: string[] = [];
   const segments: Array<{ slug: string; label: string; html: string }> = [];
 
-  // Anything before the first marker is preamble the model was told not
-  // to write. Dropped rather than prepended to the home page, where it
-  // would render as a stray sentence above the header.
+  // ------------------------------------------------------------------
+  // A COMPLETE DOCUMENT BEFORE THE FIRST MARKER IS THE HOME PAGE.
+  // ------------------------------------------------------------------
+  //
+  // This used to drop everything before the first marker unconditionally,
+  // on the reasoning that it was "preamble the model was told not to
+  // write" — a stray sentence that would render above the header.
+  //
+  // MEASURED AGAINST THREE REAL GENERATIONS on 2026-09-02 — Greek,
+  // English and Arabic, through the live model — that reasoning was
+  // wrong on ALL THREE. What sat before the first marker was not a
+  // sentence. It was the home page: 17,669 bytes on the first site, a
+  // complete document, `<title>Γιαννακόπουλος | Υδραυλικές Εγκαταστάσεις
+  // & Καυστήρες – Θεσσαλονίκη</title>`, with a nav linking to all five
+  // pages the brief asked for.
+  //
+  // The prompt is why, and it reads perfectly reasonably: "The FIRST
+  // document is the home page. Give it the marker slug='home'." The
+  // model treats the first sentence as the instruction — write the home
+  // page first — and the second as redundant labelling of something
+  // already identified by position. Three for three.
+  //
+  // What the reader got: the SERVICES page served at the site root, a
+  // nav one item short (link-safety correctly removed the link to
+  // `services`, which was no longer a served slug), no way to reach the
+  // real front page because it no longer existed, and four pages billed
+  // as five.
+  //
+  // So the test is what the content IS, not where the model put a
+  // comment. `looksLikeCompleteHtmlDocument` is the same predicate every
+  // other segment is already judged by; a stray sentence still fails it
+  // and is still dropped, which is the case the old comment was actually
+  // worried about.
+  //
+  // A marked segment that ALSO claims slug="home" is not a second front
+  // page: "home" is in RESERVED_SLUGS, so normalisePages rejects it and
+  // says so in `dropped` rather than serving two.
   const preamble = raw.slice(0, markers[0].index ?? 0).trim();
-  if (preamble) dropped.push(`preamble: ${preamble.slice(0, 60)}`);
+  const preambleIsHome = preamble.length > 0 && looksLikeCompleteHtmlDocument(preamble);
+  if (preamble && !preambleIsHome) dropped.push(`preamble: ${preamble.slice(0, 60)}`);
 
   for (let i = 0; i < markers.length; i += 1) {
     const start = (markers[i].index ?? 0) + markers[i][0].length;
@@ -72,8 +107,12 @@ export function splitGeneratedPages(raw: string): SplitResult {
   // THE FIRST DOCUMENT IS HOME, whatever slug it claims. The prompt asks
   // for it first; making the parser depend on the model getting the slug
   // right would turn a naming slip into a site with no front page.
-  const first = segments.shift();
-  const home = first?.html ?? "";
+  //
+  // Unless an unmarked complete document already came before it, in
+  // which case THAT is the front page and every marked segment is an
+  // ordinary page — see the note above.
+  const first = preambleIsHome ? undefined : segments.shift();
+  const home = preambleIsHome ? preamble : (first?.html ?? "");
 
   // EVERY PAGE IS CHECKED FOR COMPLETENESS SEPARATELY. The existing
   // truncation guard asks whether THE RESPONSE ended cleanly, which for a

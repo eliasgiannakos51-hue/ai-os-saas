@@ -169,5 +169,40 @@ check(
   (base + everything).length < 20000
 );
 
+console.log("\n== 10. the palette has to be READABLE, as a number ==");
+{
+  // THE PRODUCT HELD ITSELF TO A STANDARD IT NEVER ASKED OF THE SITES IT
+  // SELLS. globe-mark.test.mjs rejects an accent that "measures 2.62:1
+  // on the light page and cannot reach 3:1 at any opacity", and this
+  // app's own pages score 100 on Lighthouse accessibility. The website
+  // prompt said "contrast" three times and every one of them was about
+  // TYPE — weight contrast, size contrast. Nothing anywhere asked for a
+  // colour-contrast ratio.
+  //
+  // MEASURED, on a real Greek site generated through the live model on
+  // 2026-09-02: Lighthouse accessibility 86, five elements failing
+  // color-contrast, #ffffff on #c07a3a at 10.6pt = 3.45:1. After this
+  // rule went into the prompt the same brief regenerated at 100, with
+  // zero failing nodes.
+  const builder = readFileSync("src/lib/website-builder.ts", "utf8");
+  check("the prompt states the small-text floor as a ratio", /4\.5:1/.test(builder));
+  check("...and the large-text floor separately", /3:1/.test(builder));
+  check(
+    "...and names the pairing that actually fails",
+    /white on a mid-tone accent/i.test(builder),
+    "a bare 'ensure good contrast' is advice; naming the failing pair is a rule"
+  );
+  check(
+    "...and forbids the two 'fixes' that make it worse",
+    /do not reach for a lighter weight or a smaller size/i.test(builder)
+  );
+  // The rule has to reach the model, not merely exist in the file.
+  check(
+    "the rule is inside the prompt the model is sent",
+    builder.indexOf("4.5:1") > builder.indexOf("Rules for it:"),
+    "a contrast rule in a comment is not a contrast rule"
+  );
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

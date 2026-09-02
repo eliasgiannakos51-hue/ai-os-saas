@@ -81,6 +81,57 @@ console.log("\n== 3. a response with no markers is still a site ==");
   ok("and nothing reported as dropped", r.dropped.length === 0, r.dropped.join(" | "));
 }
 
+console.log("\n== 3b. THE HOME PAGE THE MODEL WROTE FIRST AND DID NOT MARK ==");
+{
+  // MEASURED, NOT IMAGINED. Three real generations on 2026-09-02 —
+  // Greek, English and Arabic, through the live model — ALL THREE put a
+  // complete home page before the first marker and marked only the
+  // pages after it. The parser called that "preamble the model was told
+  // not to write" and threw it away.
+  //
+  // On the Greek site that was 17,669 bytes titled "Γιαννακόπουλος |
+  // Υδραυλικές Εγκαταστάσεις & Καυστήρες – Θεσσαλονίκη". What the reader
+  // got instead was the SERVICES page at the site root, a nav one item
+  // short, and no way to reach a front page that no longer existed —
+  // four pages for a brief that asked for five, and billed for five.
+  //
+  // The prompt is why: "The FIRST document is the home page. Give it the
+  // marker slug='home'." The model reads the first sentence as the
+  // instruction and the second as redundant labelling of something
+  // already fixed by position. Three for three is not an edge case.
+  const home = doc("Real front page");
+  const raw = [
+    home,
+    `<!--IONEXA:PAGE slug="services" label="Services"-->`, doc("Services"),
+    `<!--IONEXA:PAGE slug="contact" label="Contact"-->`, doc("Contact"),
+  ].join("\n");
+  const r = multi.splitGeneratedPages(raw);
+  ok("the unmarked first document IS the home page", /Real front page/.test(r.home));
+  ok("...so the marked pages are all still pages", r.pages.map((p) => p.slug).join(",") === "services,contact",
+    r.pages.map((p) => p.slug).join(","));
+  ok("...and nothing is thrown away", r.dropped.length === 0, r.dropped.join(" | "));
+  ok("the site keeps every page the brief asked for (1 + 2)", 1 + r.pages.length === 3);
+
+  // THE CASE THE OLD COMMENT WAS ACTUALLY WORRIED ABOUT still behaves as
+  // it did: a stray sentence is not a document and is still dropped,
+  // rather than rendering above the header.
+  const chatty = ["Here is your site!", `<!--IONEXA:PAGE slug="home" label="Home"-->`, doc("Front"),
+    `<!--IONEXA:PAGE slug="about" label="About"-->`, doc("About")].join("\n");
+  const c = multi.splitGeneratedPages(chatty);
+  ok("a stray sentence is still dropped", c.dropped.some((d) => d.startsWith("preamble:")), c.dropped.join(" | "));
+  ok("...and the first MARKED document is then the home page", /Front/.test(c.home));
+  ok("...leaving the rest as pages", c.pages.map((p) => p.slug).join(",") === "about");
+
+  // A marked segment ALSO claiming slug="home" is not a second front
+  // page: "home" is reserved, so it is rejected and said out loud.
+  const twoHomes = [home, `<!--IONEXA:PAGE slug="home" label="Home"-->`, doc("Duplicate"),
+    `<!--IONEXA:PAGE slug="about" label="About"-->`, doc("About")].join("\n");
+  const t2 = multi.splitGeneratedPages(twoHomes);
+  ok("a duplicate front page is not served", !t2.pages.some((p) => p.slug === "home"),
+    t2.pages.map((p) => p.slug).join(","));
+  ok("...and the rejection is reported rather than silent", t2.dropped.length >= 1, t2.dropped.join(" | "));
+}
+
 console.log("\n== 4. EVERY page goes through EVERY check ==");
 // THE PART THAT SHIPS BROKEN AND LOOKS FINE. Each of these ran on one
 // document before; running on one document now means the home page is

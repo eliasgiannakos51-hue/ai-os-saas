@@ -695,6 +695,39 @@ console.log("\n6. The route, and the strings it shares with everything else");
     );
   }
   ok("the prompt names the honeypot input", builderSrc.includes('name="_hp"'));
+
+  // ------------------------------------------------------------------
+  // THE HIDING TECHNIQUE IS NOT INTERCHANGEABLE.
+  // ------------------------------------------------------------------
+  //
+  // It was `position:absolute;left:-9999px`, which is the classic trick
+  // and is genuinely safe in a left-to-right page: a browser does not
+  // make overflow to the LEFT of the origin scrollable. In a dir="rtl"
+  // page the scrollable direction flips and that same rule becomes
+  // ~10,000px of horizontal scroll.
+  //
+  // MEASURED, on a real Arabic site generated through the live model on
+  // 2026-09-02: 9,975px of sideways scroll into empty space at 375px,
+  // on its contact page. The two Latin-script sites generated in the
+  // same batch measured 0px from the IDENTICAL markup, which is exactly
+  // why nothing had caught it — the defect is invisible in every
+  // language the product was tested in.
+  const hpLine = (builderSrc.match(/Add one hidden honeypot input, exactly: (<input[^>]*>)/) ?? [])[1] ?? "";
+  ok("the honeypot markup is quoted in the prompt", hpLine.length > 40, hpLine);
+  ok(
+    "...and hides it WITHOUT a negative offset, which RTL turns into scroll",
+    !/left:\s*-|right:\s*-|margin-left:\s*-|inset[a-z-]*:\s*-/.test(hpLine),
+    hpLine
+  );
+  // A fix that reached for display:none would also remove the overflow —
+  // and the honeypot with it, because a bot that skips hidden fields
+  // never fills it.
+  ok(
+    "...and does not use display:none or visibility:hidden, which would disarm it",
+    !/display:\s*none|visibility:\s*hidden/.test(hpLine),
+    hpLine
+  );
+  ok("...it is clipped instead", /clip-path:\s*inset|clip:\s*rect/.test(hpLine), hpLine);
   ok(
     "the prompt names the consent input",
     builderSrc.includes('name="_consent"'),

@@ -3334,7 +3334,10 @@
       "speakLabel": "Ouvir a leitura",
       "title": "Voz",
       "transcribeLabel": "Falar com ele",
-      "used": "{used} de {limit} minutos usados este mês"
+      "used": "{used} de {limit} minutos usados este mês",
+      "directionNotConfigured": "Não está configurado nesta instalação",
+      "speakNotConfigured": "A leitura das respostas não está configurada nesta instalação, por isso os botões Ouvir não aparecem. Falar com ele funciona normalmente.",
+      "transcribeNotConfigured": "Falar com ele não está configurado nesta instalação, por isso os botões de microfone não aparecem. A leitura das respostas funciona normalmente."
     }
   },
   "dataAnalysis": {

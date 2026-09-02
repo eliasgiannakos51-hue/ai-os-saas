@@ -3334,7 +3334,10 @@
       "speakLabel": "Having it read to you",
       "title": "Voice",
       "transcribeLabel": "Speaking to it",
-      "used": "{used} of {limit} minutes used this month"
+      "used": "{used} of {limit} minutes used this month",
+      "directionNotConfigured": "Not set up on this deployment",
+      "speakNotConfigured": "Having answers read to you is not set up on this deployment, so the Listen buttons do not appear. Speaking to it works normally.",
+      "transcribeNotConfigured": "Speaking to it is not set up on this deployment, so the microphone buttons do not appear. Having answers read to you works normally."
     }
   },
   "dataAnalysis": {

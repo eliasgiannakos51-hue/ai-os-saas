@@ -3334,7 +3334,10 @@
       "speakLabel": "让它读给你听",
       "title": "语音",
       "transcribeLabel": "对它说",
-      "used": "本月已使用 {used} / {limit} 分钟"
+      "used": "本月已使用 {used} / {limit} 分钟",
+      "directionNotConfigured": "本部署未配置",
+      "speakNotConfigured": "本部署未配置朗读功能，因此“收听”按钮不会出现。语音输入可正常使用。",
+      "transcribeNotConfigured": "本部署未配置语音输入，因此麦克风按钮不会出现。朗读功能可正常使用。"
     }
   },
   "dataAnalysis": {

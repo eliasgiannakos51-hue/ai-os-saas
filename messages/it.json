@@ -3334,7 +3334,10 @@
       "speakLabel": "Farsi leggere",
       "title": "Voce",
       "transcribeLabel": "Parlargli",
-      "used": "{used} di {limit} minuti usati questo mese"
+      "used": "{used} di {limit} minuti usati questo mese",
+      "directionNotConfigured": "Non configurato su questa installazione",
+      "speakNotConfigured": "La lettura delle risposte non è configurata su questa installazione, quindi i pulsanti Ascolta non compaiono. Parlargli funziona normalmente.",
+      "transcribeNotConfigured": "Parlargli non è configurato su questa installazione, quindi i pulsanti del microfono non compaiono. La lettura delle risposte funziona normalmente."
     }
   },
   "dataAnalysis": {

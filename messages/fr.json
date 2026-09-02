@@ -3334,7 +3334,10 @@
       "speakLabel": "Se faire lire",
       "title": "Voix",
       "transcribeLabel": "Lui parler",
-      "used": "{used} minutes sur {limit} utilisées ce mois-ci"
+      "used": "{used} minutes sur {limit} utilisées ce mois-ci",
+      "directionNotConfigured": "Non configuré sur ce déploiement",
+      "speakNotConfigured": "La lecture des réponses n'est pas configurée sur ce déploiement : les boutons Écouter n'apparaissent pas. Lui parler fonctionne normalement.",
+      "transcribeNotConfigured": "Lui parler n'est pas configuré sur ce déploiement : les boutons de micro n'apparaissent pas. La lecture des réponses fonctionne normalement."
     }
   },
   "dataAnalysis": {

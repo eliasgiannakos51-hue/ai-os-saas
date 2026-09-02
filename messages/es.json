@@ -3334,7 +3334,10 @@
       "speakLabel": "Que te lea",
       "title": "Voz",
       "transcribeLabel": "Hablarle",
-      "used": "{used} de {limit} minutos usados este mes"
+      "used": "{used} de {limit} minutos usados este mes",
+      "directionNotConfigured": "No está configurado en esta instalación",
+      "speakNotConfigured": "La lectura de las respuestas no está configurada en esta instalación, así que los botones de Escuchar no aparecen. Hablarle funciona con normalidad.",
+      "transcribeNotConfigured": "Hablarle no está configurado en esta instalación, así que los botones de micrófono no aparecen. La lectura de las respuestas funciona con normalidad."
     }
   },
   "dataAnalysis": {

@@ -3334,7 +3334,10 @@
       "speakLabel": "読み上げてもらう",
       "title": "音声",
       "transcribeLabel": "話しかける",
-      "used": "今月は {limit} 分のうち {used} 分を使用"
+      "used": "今月は {limit} 分のうち {used} 分を使用",
+      "directionNotConfigured": "この環境では未設定です",
+      "speakNotConfigured": "この環境では読み上げが設定されていないため、「聴く」ボタンは表示されません。音声入力は通常どおり使えます。",
+      "transcribeNotConfigured": "この環境では音声入力が設定されていないため、マイクのボタンは表示されません。読み上げは通常どおり使えます。"
     }
   },
   "dataAnalysis": {

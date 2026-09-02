@@ -79,20 +79,60 @@ export function VoiceSettings() {
           {/* THE TWO PRICES, SIDE BY SIDE, because they are not close to
               each other and somebody who assumes they are will be
               surprised by a bill. */}
+          {/* A PRICE ONLY WHERE THERE IS SOMETHING TO BUY.
+              
+              The two keys are independent, and the half-configured state
+              is the likely one rather than an edge case: OPENAI_API_KEY
+              set and ELEVENLABS_API_KEY not means the microphone works
+              everywhere and every "Listen" button silently does not
+              render.
+              
+              This block used to print both prices whenever EITHER
+              provider was configured, because `configured` above is an
+              OR. So that deployment showed "Having it read to you — N
+              credits a minute" for something that could not read
+              anything, and the only other signal was the absence of a
+              button, which is not a signal. A quoted price for a dead
+              feature is worse than silence: silence is at least not a
+              claim. */}
           <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div className="rounded-xl border border-border bg-input px-3 py-2">
               <dt className="text-[11px] text-muted">{t("transcribeLabel")}</dt>
-              <dd className="text-sm text-foreground">
-                {t("perMinute", { credits: v.creditsPerMinute.transcribe })}
+              <dd
+                className={
+                  v.configured.transcribe ? "text-sm text-foreground" : "text-xs text-amber-400/90"
+                }
+              >
+                {v.configured.transcribe
+                  ? t("perMinute", { credits: v.creditsPerMinute.transcribe })
+                  : t("directionNotConfigured")}
               </dd>
             </div>
             <div className="rounded-xl border border-border bg-input px-3 py-2">
               <dt className="text-[11px] text-muted">{t("speakLabel")}</dt>
-              <dd className="text-sm text-foreground">
-                {t("perMinute", { credits: v.creditsPerMinute.speak })}
+              <dd
+                className={
+                  v.configured.speak ? "text-sm text-foreground" : "text-xs text-amber-400/90"
+                }
+              >
+                {v.configured.speak
+                  ? t("perMinute", { credits: v.creditsPerMinute.speak })
+                  : t("directionNotConfigured")}
               </dd>
             </div>
           </dl>
+
+          {/* And say what that costs the reader, in words, rather than
+              leaving them to infer it from a missing button. */}
+          {v.included && (!v.configured.transcribe || !v.configured.speak) ? (
+            <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs leading-relaxed text-amber-200">
+              {!v.configured.speak && !v.configured.transcribe
+                ? t("notConfigured")
+                : !v.configured.speak
+                  ? t("speakNotConfigured")
+                  : t("transcribeNotConfigured")}
+            </p>
+          ) : null}
 
           {/* The privacy sentence belongs where somebody goes looking for
               it, not only in a dialog they saw once. */}

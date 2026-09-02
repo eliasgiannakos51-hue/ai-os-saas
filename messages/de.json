@@ -3334,7 +3334,10 @@
       "speakLabel": "Vorlesen lassen",
       "title": "Sprache",
       "transcribeLabel": "Mit ihm sprechen",
-      "used": "{used} von {limit} Minuten diesen Monat genutzt"
+      "used": "{used} von {limit} Minuten diesen Monat genutzt",
+      "directionNotConfigured": "Auf dieser Installation nicht eingerichtet",
+      "speakNotConfigured": "Das Vorlesen von Antworten ist auf dieser Installation nicht eingerichtet, daher erscheinen die Vorlesen-Schaltflächen nicht. Das Sprechen funktioniert normal.",
+      "transcribeNotConfigured": "Das Sprechen ist auf dieser Installation nicht eingerichtet, daher erscheinen die Mikrofon-Schaltflächen nicht. Das Vorlesen von Antworten funktioniert normal."
     }
   },
   "dataAnalysis": {

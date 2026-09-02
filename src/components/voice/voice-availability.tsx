@@ -27,6 +27,27 @@ export type VoiceAvailability = {
   /** False when the plan does not include voice at all, which is a
    *  different sentence from "you have used this month's minutes". */
   included: boolean;
+  /**
+   * WHETHER THE DEPLOYMENT HAS EACH PROVIDER'S KEY, ON ITS OWN — not
+   * folded together with `included`.
+   *
+   * THE STATE THIS EXISTS FOR. OPENAI_API_KEY set, ELEVENLABS_API_KEY
+   * not: the microphone works everywhere and every "Listen" button
+   * silently does not render. Before this field there was no way to say
+   * so, because both `transcribeAvailable` and `speakAvailable` are
+   * `configured && included` and the settings screen only had one
+   * question to ask — "is ANY of this on?" — which answered yes. So the
+   * screen showed the usage bar and BOTH prices, quoting a per-minute
+   * rate for having answers read to you on a deployment where nothing
+   * can read anything. A price for a feature that cannot run is worse
+   * than silence: silence is at least not a claim.
+   *
+   * Kept separate from `included` because they call for different
+   * sentences. "Not on your plan" is something the reader can act on by
+   * upgrading; "not set up on this deployment" is not their doing at
+   * all.
+   */
+  configured: { transcribe: boolean; speak: boolean };
   hasMinutes: boolean;
   limitMinutes: number;
   usedSeconds: number;
@@ -40,6 +61,7 @@ const EMPTY: Omit<VoiceAvailability, "refresh"> = {
   transcribeAvailable: false,
   speakAvailable: false,
   included: false,
+  configured: { transcribe: false, speak: false },
   hasMinutes: false,
   limitMinutes: 0,
   usedSeconds: 0,
@@ -76,6 +98,10 @@ export function VoiceAvailabilityProvider({ children }: { children: React.ReactN
           transcribeAvailable: data.configured?.transcribe === true && included,
           speakAvailable: data.configured?.speak === true && included,
           included,
+          configured: {
+            transcribe: data.configured?.transcribe === true,
+            speak: data.configured?.speak === true,
+          },
           hasMinutes: included && remainingSeconds > 0,
           limitMinutes: Number(data.limitMinutes ?? 0),
           usedSeconds: Number(data.usedSeconds ?? 0),

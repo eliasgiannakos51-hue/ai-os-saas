@@ -186,8 +186,15 @@ const MUTANTS = [
   {
     name: "the app's robots.txt stops naming /s/",
     file: APP_ROBOTS,
-    from: 'allow: ["/", "/pricing", "/terms", "/privacy", "/s/"],',
-    to: 'allow: ["/", "/pricing", "/terms", "/privacy"],',
+    // Re-anchored when the public pages started coming from
+    // lib/footer-links.ts instead of a hand-kept literal — the literal
+    // had drifted and was missing /cookies and /roadmap. The MUTANT's
+    // point is unchanged and is the reason /s/ is named at all: it is
+    // covered by "/", so dropping it changes no crawler's behaviour
+    // today and would change every customer site's the day these rules
+    // are tightened.
+    from: 'allow: ["/", ...FOOTER_LINKS.map((l) => l.href), "/s/"],',
+    to: 'allow: ["/", ...FOOTER_LINKS.map((l) => l.href)],',
   },
   {
     name: "the app's sitemap lists sites that are not live",

@@ -222,6 +222,29 @@ for (const href of THE_THREE) {
 }
 
 // ---------------------------------------------------------------------
+console.log("\n== 2b. …and a crawler is told they exist ==");
+// ---------------------------------------------------------------------
+// MEASURED AGAINST PRODUCTION, not assumed. On 2026-09-02 the live
+// sitemap.xml listed five URLs — "", /pricing, /help, /terms, /privacy —
+// for an app with eight public pages. /cookies and /roadmap had been in
+// the landing footer for weeks and were in neither sitemap.ts nor
+// robots.ts, because both kept their own hand-written copy of "the
+// public pages". The three added here would have made it five missing.
+//
+// Both now map over FOOTER_LINKS, so this asserts the derivation is
+// still there rather than re-listing the routes a third time — a third
+// list is how there came to be two that disagreed.
+const sitemapSrc = readOrNull("src/app/sitemap.ts") ?? "";
+const robotsSrc = readOrNull("src/app/robots.ts") ?? "";
+check("the sitemap derives its own pages from the footer list", /FOOTER_LINKS\.map\(/.test(sitemapSrc));
+check("…and so does robots.txt", /FOOTER_LINKS\.map\(/.test(robotsSrc));
+check(
+  "the sitemap still carries the two public pages that are NOT in the footer",
+  /"",\s*"\/help"/.test(sitemapSrc),
+  "the home page and /help have no footer entry, so mapping the footer alone would drop them"
+);
+
+// ---------------------------------------------------------------------
 console.log("\n== 3. the pages are reachable from inside the app too ==");
 // ---------------------------------------------------------------------
 // The footer belongs to the landing page, which a signed-in user has no

@@ -26,6 +26,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { AgentsWorkspace } from "@/components/agents/agents-workspace";
 import { ListCappedNotice } from "@/components/ui/list-capped-notice";
 import { RECORD_CAP, isCapped } from "@/lib/record-cap";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 import type { AgentRun, UserAgent } from "@/lib/agents/agent-config";
 
 export const dynamic = "force-dynamic";
@@ -48,7 +49,14 @@ export function generateMetadata(): Promise<Metadata> {
 // query — one query, filtered client-side by agent.
 const RUN_HISTORY_LIMIT = 60;
 
-export default async function AgentsPage() {
+export default async function AgentsPage({
+  searchParams,
+}: {
+  // `agent` is the Home screen's "repeat" example (see
+  // lib/overview/first-screen-examples.ts). A runtime string on both
+  // sides, compared by first-screen.test.mjs.
+  searchParams: { agent?: string };
+}) {
   const supabase = createClient();
 
   const user = await getCurrentUser();
@@ -196,6 +204,9 @@ export default async function AgentsPage() {
           depthFacts={depthFacts}
           templateCredits={templateCredits}
           buildCredits={buildCredits}
+          // STARTED ON ARRIVAL. Clamped rather than trusted: this comes
+          // out of a URL anyone can edit.
+          initialAgent={readExampleParam(searchParams.agent)}
         />
       </div>
     </div>

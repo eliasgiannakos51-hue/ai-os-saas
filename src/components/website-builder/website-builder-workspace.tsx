@@ -69,6 +69,7 @@ import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 import { formatDateTime } from "@/lib/format-number";
 import { matchesSearch } from "@/lib/text/search-match";
+import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 20000;
@@ -196,10 +197,22 @@ function downloadHtml(website: UserWebsite) {
 export function WebsiteBuilderWorkspace({
   initialWebsites,
   favoritedWebsiteIds = [],
+  initialBrief,
 }: {
   initialWebsites: UserWebsite[];
   /** Starred project ids, resolved server-side in one batched query. */
   favoritedWebsiteIds?: string[];
+  /**
+   * A brief to start building the moment this page opens, from the Home
+   * screen's "build" example (lib/overview/first-screen-examples).
+   *
+   * It starts the flow, not the bill. Step 1 of submitGeneration is the
+   * cheap one — it runs the clarification classifier and, for a brief
+   * this vague, comes back with questions. So one press from Home shows
+   * the builder asking "what kind of shop? which pages?", and the
+   * expensive generation still waits for those answers.
+   */
+  initialBrief?: string;
 }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.websiteBuilder");
@@ -651,6 +664,28 @@ export function WebsiteBuilderWorkspace({
       setGenerating(false);
     }
   }
+
+  // STARTED ON ARRIVAL. The ref — not `generating`, which is false at
+  // mount — is what stops React's development double-invoke from firing
+  // two generations for one press.
+  const startedBriefRef = useRef(false);
+  useEffect(() => {
+    if (!initialBrief || startedBriefRef.current) return;
+    startedBriefRef.current = true;
+    const brief = initialBrief.slice(0, MAX_DESCRIPTION_LENGTH);
+    // The form is opened and filled as well as submitted: if the
+    // classifier comes back with questions, the user has to be looking
+    // at the form those questions belong to.
+    setShowForm(true);
+    setName(brief.slice(0, MAX_NAME_LENGTH));
+    setDescription(brief);
+    void submitGeneration(brief.slice(0, MAX_NAME_LENGTH), brief, [], false);
+    forgetExampleParam("brief");
+    // submitGeneration is redeclared every render; depending on it would
+    // re-run this effect constantly and the ref would swallow it
+    // silently. The ref is the guard, so this names only the input.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialBrief]);
 
   async function handleGenerate(e: FormEvent) {
     e.preventDefault();

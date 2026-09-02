@@ -86,23 +86,30 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     namespaces: [
       "achievements", "aiSteps", "askAi", "coding", "common", "credits",
       "dashboard", "dataAnalysis", "entityLinks", "errors", "favorites",
-      "finance", "language", "module", "publishing", "pwa",
+      "finance", "language", "module", "promise", "publishing", "pwa",
       // The sample-account banner and its load button (V4.6 #6). The
       // banner renders from dashboard/layout.tsx, so this namespace is
       // reachable from every dashboard route rather than from one page.
       "sampleData",
       "security", "settings", "sidebar", "voice",
     ],
-    // SIXTY-ONE, not the twenty I first wrote. Twenty call
+    // SIXTY-TWO — sixty-one before the first screen merged in, and
+    // overview/first-screen-examples.tsx is the sixty-second. Not the
+    // twenty I first wrote. Twenty call
     // useTranslations() with no namespace; the rest reach a key through a
     // template literal or a variable, which is just as unpredictable.
     // Counting only the first shape is how a number becomes comfortable.
-    unbounded: 61,
+    unbounded: 62,
   },
   {
     name: "onboarding",
     prefixes: ["/onboarding"],
-    namespaces: ["common", "dashboard"],
+    // "promise" is here because the one sentence (lib/i18n/one-sentence.ts)
+    // opens the first onboarding step as well as the first screen after
+    // signing in. It is one key, and it is still declared: a namespace
+    // that reaches a group without appearing here is exactly the drift
+    // that shipped a dashboard of raw keys.
+    namespaces: ["common", "dashboard", "promise"],
     unbounded: 3,
   },
   {

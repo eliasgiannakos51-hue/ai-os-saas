@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { GreetingHeader } from "@/components/overview/greeting-header";
 import { InsightList, type Insight } from "@/components/onboarding/insight-list";
 import { CreateChat } from "@/components/create/create-chat";
+import { FirstScreenExamples } from "@/components/overview/first-screen-examples";
 import { QuickActionCard } from "@/components/overview/quick-action-card";
 import { WidgetBoundary } from "@/components/ui/widget-boundary";
 import { LowCreditsBanner } from "@/components/credits/low-credits-banner";
@@ -531,6 +532,14 @@ export default async function OverviewPage() {
           <WidgetBoundary label="create-chat" {...boundary}>
             <CreateChat showHeading={false} />
           </WidgetBoundary>
+          {/* UNDER the input, not above it. Above, they read as the
+              screen's own suggestions and compete with the box; below,
+              they read as answers to "what could I type here?" — which
+              is the question nobody in the test could answer.
+              From V4.6-2 on claude/ten-test-issues-281zpo; the merge that
+              brought it in resolved this file to main's side and dropped
+              this line, which first-screen.test.mjs caught. */}
+          <FirstScreenExamples />
         </div>
 
         {/* ONE CARD WHERE THERE WERE THREE — V4.6 #10. "What's Next?",

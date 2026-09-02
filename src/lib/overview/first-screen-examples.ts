@@ -1,0 +1,204 @@
+/**
+ * THE FIRST SCREEN'S THREE EXAMPLES.
+ *
+ * Seven people were shown this product and gave six different answers to
+ * "what does it do". Nobody named a capability. The screen they were
+ * looking at led with "What do you want to build today?" — a question
+ * that tells a newcomer nothing about what the thing can do, and which
+ * they have to answer before anything happens.
+ *
+ * These three sentences answer it instead, and each one names a
+ * DIFFERENT capability: build something · understand something ·
+ * have something repeat.
+ *
+ * ONE CLICK RUNS IT. Not "writes the sentence into the box below and
+ * waits for you to find the send button" — that is the pattern this
+ * replaces. The click navigates into the capability carrying the text,
+ * and the work has already started by the time the page is on screen.
+ *
+ * WHY NOT "upload a file and tell me what it shows", which is the
+ * obvious third example and the one that was asked for: a file picker
+ * CANNOT be opened on arrival. `input.click()` on <input type="file">
+ * needs transient user activation, and the navigation spends it, so
+ * every browser would drop it silently — a button that visibly does
+ * nothing, which is worse than no button. The capability it stood for is
+ * shown instead by a question the AI answers FROM THE USER'S OWN DATA:
+ * the same thing five of seven testers gave as their reason for
+ * cancelling ChatGPT.
+ */
+
+export type FirstScreenCapability = "build" | "understand" | "repeat";
+
+/**
+ * What pressing an example costs.
+ *
+ * NOBODY LEARNS THEY PAID AFTER PAYING. Two of these three reach a route
+ * that spends credits, and a press with no warning is exactly the shape
+ * of "I clicked an example and my balance went down". The card carries
+ * the answer before the press.
+ *
+ *   free           nothing is charged, ever
+ *   freeAllowance  free while the account's monthly free messages last
+ *   charged        credits are spent on the first press
+ *
+ * NOT A NUMBER, and deliberately. The chat's cost depends on the length
+ * of the reply and the website precheck settles the measured cost of the
+ * call it makes; a figure printed here would be one somebody made up.
+ * What each card says is what the code can be checked against.
+ */
+export type FirstScreenCost = "free" | "freeAllowance" | "charged";
+
+export type FirstScreenExample = {
+  /** One per capability. Two examples of the same one teaches nothing. */
+  id: FirstScreenCapability;
+  /** `dashboard.firstScreen.<id>.verb` — the capability, in one word. */
+  verbKey: string;
+  /** `dashboard.firstScreen.<id>.example` — the concrete sentence. */
+  exampleKey: string;
+  /** The route the click lands on. */
+  path: string;
+  /**
+   * The query parameter carrying the example's text.
+   *
+   * A RUNTIME STRING ON BOTH SIDES, and that is the whole reason this
+   * field exists rather than the href being written inline. Nothing in
+   * the compiler connects `?ask=` in a link to `searchParams.ask` in a
+   * page: rename either one and the click still navigates, the page
+   * still renders, and the example silently stops running.
+   * scripts/tests/first-screen.test.mjs reads both sides and compares
+   * them.
+   */
+  param: string;
+  /** The page file that must read `param` out of its searchParams. */
+  page: string;
+  /** The client component that must act on it once it arrives. */
+  workspace: string;
+  /** What one press costs. Shown on the card. */
+  cost: FirstScreenCost;
+  /**
+   * The route whose billing decides `cost`.
+   *
+   * DERIVED, NOT DECLARED. first-screen.test.mjs opens this file and
+   * looks for the calls that actually spend credits, so a "free" label
+   * on a route that reserves or settles goes red. A cost claim nobody
+   * checks is a cost claim that drifts the first time a route grows a
+   * charge.
+   */
+  billedBy: string;
+};
+
+/**
+ * How long an example's text may be once it is in a URL.
+ *
+ * Every one of the three destinations reads this parameter out of a URL
+ * anyone can edit, so none of them may trust its length. Kept well under
+ * the ~2000-character ceiling browsers and proxies enforce on a whole
+ * URL, because these three are not the only thing in it.
+ */
+export const MAX_EXAMPLE_CHARS = 300;
+
+/**
+ * What a page is allowed to believe about the parameter it was handed.
+ *
+ * Returns undefined — not an empty string — for anything unusable, so a
+ * destination can write `if (!text) return;` and never start work on a
+ * blank request. Shared by all three pages so the clamping cannot drift
+ * between them.
+ */
+export function readExampleParam(raw: string | string[] | undefined): string | undefined {
+  if (typeof raw !== "string") return undefined;
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+  return trimmed.slice(0, MAX_EXAMPLE_CHARS);
+}
+
+export const FIRST_SCREEN_EXAMPLES: readonly FirstScreenExample[] = [
+  {
+    // BUILD. Lands in the website builder with the brief already
+    // submitted, so the builder's own questions ("what kind of shop?
+    // which pages?") are what the user sees — not an empty form. The
+    // expensive part still waits for those answers.
+    id: "build",
+    verbKey: "dashboard.firstScreen.build.verb",
+    exampleKey: "dashboard.firstScreen.build.example",
+    path: "/dashboard/website-builder",
+    param: "brief",
+    page: "src/app/dashboard/website-builder/page.tsx",
+    workspace: "src/components/website-builder/website-builder-workspace.tsx",
+    // The clarification pre-check is a real Anthropic call and
+    // settlePrechecks() settles its measured cost before the questions
+    // come back — so the press spends, even though the generation has
+    // not started.
+    cost: "charged",
+    billedBy: "src/app/api/websites/generate/route.ts",
+  },
+  {
+    // UNDERSTAND. Lands in the chat with the question already sent and
+    // the answer already streaming. Two of the seven testers never found
+    // the chat at all; this is a door into it that does not require
+    // knowing it exists.
+    id: "understand",
+    verbKey: "dashboard.firstScreen.understand.verb",
+    exampleKey: "dashboard.firstScreen.understand.example",
+    path: "/dashboard/chat",
+    param: "ask",
+    page: "src/app/dashboard/chat/page.tsx",
+    workspace: "src/components/chat/chat-workspace.tsx",
+    // Free while the account's monthly free messages last (15 on Free,
+    // 43 Starter, 107 Growth, 215 Professional, 430 Ultimate — see
+    // billing/free-chat.ts). After that the route reserves credits like
+    // any other message.
+    cost: "freeAllowance",
+    billedBy: "src/app/api/chat/route.ts",
+  },
+  {
+    // REPEAT. Lands in the agent builder with the request already
+    // building, so what the user sees is the product drafting a Monday
+    // job — the capability nobody in the test knew existed.
+    id: "repeat",
+    verbKey: "dashboard.firstScreen.repeat.verb",
+    exampleKey: "dashboard.firstScreen.repeat.example",
+    path: "/dashboard/agents",
+    param: "agent",
+    page: "src/app/dashboard/agents/page.tsx",
+    workspace: "src/components/agents/agents-workspace.tsx",
+    // Postgres full-text over the template library. No AI call, no
+    // reservation, no settlement — and the expensive builder is not
+    // called on arrival precisely so this stays true.
+    cost: "free",
+    billedBy: "src/app/api/agents/templates/route.ts",
+  },
+];
+
+/** The URL one click follows. */
+export function exampleHref(example: FirstScreenExample, text: string): string {
+  return `${example.path}?${example.param}=${encodeURIComponent(text.slice(0, MAX_EXAMPLE_CHARS))}`;
+}
+
+/**
+ * Take the example's parameter back out of the address bar.
+ *
+ * A RELOAD MUST NOT REPEAT IT. The text stays in the URL after the work
+ * starts, so refreshing the page — or restoring the tab tomorrow —
+ * mounts the destination again with the same parameter and starts the
+ * same work a second time. For the chat that is a second message and a
+ * second charge for one press.
+ *
+ * history.replaceState rather than router.replace: this is Next's
+ * supported way to change the query without a navigation, and a
+ * navigation here would remount the very component doing the work.
+ * Wrapped because a browser that refuses it must not take the page down
+ * — the worst case is the parameter staying put, which is where it
+ * already was.
+ */
+export function forgetExampleParam(param: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has(param)) return;
+    url.searchParams.delete(param);
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  } catch {
+    // Leaving the parameter in place is the status quo, not a new fault.
+  }
+}

@@ -219,12 +219,6 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that starring something copies or moves it",
   },
   {
-    id: "records",
-    file: "src/app/dashboard/records/page.tsx",
-    keyPrefix: "help.records",
-    corrects: "that this is a new place your entries live, rather than a way into the ones you already have",
-  },
-  {
     // ONE ENTRY, SIX PAGES. Apps, Images, Videos, Website plans, Campaigns
     // and Presentations all render through BuildModulePage, so the "?" is
     // attached there rather than six times. Their file is the one that
@@ -425,6 +419,16 @@ export const HELP_TIPS: HelpTip[] = [
     keyPrefix: "help.overview",
     corrects:
       "that the figures come from your bank, your CRM or your inbox rather than from what you logged",
+  },
+  {
+    // One row in the sidebar now stands for nineteen log screens, so the
+    // assumption to correct is that the nineteen went away.
+    id: "records",
+    file: "src/app/dashboard/records/page.tsx",
+    route: "src/app/dashboard/records/page.tsx",
+    keyPrefix: "help.records",
+    corrects:
+      "that these lists were removed or merged when the sidebar stopped listing them one by one",
   },
 ];
 

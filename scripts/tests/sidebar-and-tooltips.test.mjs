@@ -69,10 +69,28 @@ check("no coming-soon toast", /comingSoonToast/.test(sidebar), false);
 // The palette used to filter these out; it must not any more.
 check("the command palette no longer filters items out", /comingSoon/.test(palette), false);
 
-console.log("\n== 2. the pre-restructure grouping is back ==");
-// Three pinned items outside every group was the restructure being undone.
+console.log("\n== 2. the grouping, and the ONE row above it ==");
+// WHAT THIS SECTION USED TO PIN, AND WHY IT CHANGED.
+//
+// It held a revert: an earlier restructure had greyed five modules out
+// behind "Soon" badges and moved three items out of the groups as pinned
+// rows, and undoing it restored Workspace / Build / Business / Strategy
+// / Operations / Marketplace. The badges are the defect this file exists
+// for and they are still asserted gone, above.
+//
+// The eight groups are now four — Daily / Build / My business /
+// Settings — named for what somebody is doing rather than for how the
+// code is filed. And exactly ONE row sits outside them again: the record
+// action, deliberately, because renderItem's `prominent` branch had
+// existed since the sidebar was written with a comment about "the three
+// daily entry points" and NO call site ever passed it, so every row in
+// the menu had identical weight.
+//
+// This is not the old pinned block coming back by another name, and the
+// difference is asserted rather than asserted-about: ONE row, it is a
+// link, and it carries no coming-soon shape. A second pinned row is a
+// decision somebody has to write down here.
 check("PINNED_SIDEBAR_ITEMS is gone from the config", /PINNED_SIDEBAR_ITEMS/.test(nav), false);
-check("...and from the sidebar", /PINNED_SIDEBAR_ITEMS/.test(sidebar), false);
 check("...and from the command palette", /PINNED_SIDEBAR_ITEMS/.test(palette), false);
 // PINNED BY SHAPE, NOT BY NAME.
 //

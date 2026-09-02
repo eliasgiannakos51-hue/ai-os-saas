@@ -70,7 +70,8 @@
       "failed": "无法创建 PDF",
       "notReady": "尚未完成"
     },
-    "listCapped": "显示最近的 {count, number} 条。更早的记录仍然保存着——用「搜索我的记录」可以找到它们。"
+    "listCapped": "显示最近的 {count, number} 条。更早的记录仍然保存着——用「搜索我的记录」可以找到它们。",
+    "newProject": "新建项目"
   },
   "sidebar": {
     "groups": {
@@ -135,7 +136,9 @@
       "routing": "模型路由",
       "businessHealth": "经营健康度",
       "mine": "我的内容",
-      "records": "我的记录"
+      "records": "我的记录",
+      "library": "我的东西",
+      "newEntry": "新记录"
     },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",
@@ -184,12 +187,13 @@
       "formSubmissions": "访客通过已发布网站上的表单提交的全部内容",
       "businessHealth": "MRR、毛利、流失与现金。仅限所有者。",
       "mine": "你创建的全部内容，最新在前，并有仅收藏标签页",
-      "records": "所有记录集中在一处——按类型筛选，不必在菜单里找"
+      "records": "所有记录集中在一处——按类型筛选，不必在菜单里找",
+      "library": "收藏、最近和搜索 —— 你的东西都在这里",
+      "newEntry": "随便写点什么 —— 它会自己归位"
     },
     "closeMenu": "关闭菜单"
   },
   "landing": {
-    "hero": "你的业务，井井有条——配上真正有用的 AI。",
     "description": "在一个地方追踪创意、财务、交易、调研、决策等——配备理解你的数据并帮你理清思路的 AI 助手。告别散乱的笔记、表格和聊天窗口。",
     "logIn": "登录",
     "signUp": "注册",
@@ -926,7 +930,6 @@
           "consistency": "试着这周每天都记录一些内容。"
         }
       },
-      "heroQuestion": "你今天想构建什么？",
       "recentEntries": {
         "title": "最近条目",
         "empty": "还没有条目。"
@@ -2360,6 +2363,37 @@
       "allTypes": "全部类型",
       "count": "{count, plural, other {# 处}}",
       "noMatch": "没有匹配该名称的内容。试试更短的词，或清除筛选。"
+    },
+    "firstScreen": {
+      "label": "点一个 — 立刻运行",
+      "cost": {
+        "free": "免费",
+        "freeAllowance": "在每月额度内免费",
+        "charged": "消耗额度"
+      },
+      "build": {
+        "verb": "构建",
+        "example": "为我的店铺做一个网站"
+      },
+      "understand": {
+        "verb": "理解",
+        "example": "我这周的数据说明了什么？"
+      },
+      "repeat": {
+        "verb": "重复",
+        "example": "每周一，给我一份销售汇总"
+      }
+    },
+    "library": {
+      "title": "我的东西",
+      "description": "你放进来的一切：最近的、收藏的，或搜索到的。",
+      "tabs": {
+        "recent": "最近",
+        "starred": "收藏",
+        "search": "搜索"
+      },
+      "searchPlaceholder": "搜索你写过的一切",
+      "searchNoResults": "没有匹配「{query}」的内容。"
     }
   },
   "module": {
@@ -3020,6 +3054,11 @@
       "is": "一个页面，列出你可以打开的每一种记录、工具和设置。",
       "does": "侧边栏原本列着十九个用法相同的记录表。它们现在集中在这里，并带类型筛选——找东西是读一份清单，而不是靠记忆找菜单。",
       "doesNot": "没有任何东西被移动或合并。每个页面仍有自己的地址、自己的条目和自己的表单——这里只是入口，不是数据的新住处。"
+    },
+    "library": {
+      "is": "你放进来的一切，都在一个地方。",
+      "does": "显示你最近的记录、你收藏的内容，以及对你写过的一切的搜索。",
+      "doesNot": "它不会另存一份副本。这些就是各模块显示的同一批记录 —— 在这里改一条，那边也会变。"
     }
   },
   "helpCentre": {
@@ -3509,5 +3548,8 @@
     "clear": "移除示例",
     "clearing": "移除中…",
     "clearFailed": "没有成功。"
+  },
+  "promise": {
+    "oneSentence": "已经了解你工作的 AI。什么都可以问它。"
   }
 }

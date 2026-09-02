@@ -30,7 +30,7 @@
 // resolve in EVERY locale.
 //
 // Run: node scripts/tests/sidebar-hints-coverage.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 
 let pass = 0,
   fail = 0;
@@ -111,10 +111,39 @@ const PREVIOUSLY_MISSING = [
   '"/dashboard/trading-workflow"',
   '"/dashboard/product-workflow"',
 ];
+// AN ENTRY THAT LEFT THE SIDEBAR CANNOT CARRY A SIDEBAR HINT, and that
+// is not a loophole: it is named, and the destination has to still be
+// reachable. TIMELINE_NAV_ITEM is the first one — everything-in-order
+// moved inside the timeline's starred tab, together with favourites and
+// search, so the row is gone and the page is not. Anything else that
+// disappears from this list has to appear here with its own reason.
+//
+// RETARGETED IN THE MERGE. This named /dashboard/library, which was the
+// losing side of two independent implementations of the same brief —
+// main's consolidation kept /dashboard/timeline and /dashboard/records,
+// and the library page had nothing left importing or linking it. The
+// destination still has to be reachable, which is the property this
+// exemption exists to keep, so it points at the page that exists.
+const LEFT_THE_SIDEBAR = {
+  "TIMELINE_NAV_ITEM.href": {
+    file: "src/app/dashboard/timeline/page.tsx",
+    reason: "reachable from Mine; the starred tab carries favourites and search",
+  },
+};
 for (const href of PREVIOUSLY_MISSING) {
   const it = items.find((x) => x.href === href);
+  const departed = LEFT_THE_SIDEBAR[href];
+  if (!it && departed) {
+    checkTrue(
+      `${href} left the sidebar (${departed.reason}) and its destination still exists`,
+      existsSync(departed.file),
+    );
+    continue;
+  }
   checkTrue(`${href} has a hint`, Boolean(it?.hintKey));
 }
+// And the exemption list may not grow silently either: one today.
+check("only the recorded entries were allowed to leave", Object.keys(LEFT_THE_SIDEBAR).length, 1);
 // Items whose href/label are CONSTANTS are the ones a regex drops. If none
 // exist any more the guard above is testing nothing, so assert they do.
 const constantHref = items.filter((it) => !it.href.startsWith('"'));

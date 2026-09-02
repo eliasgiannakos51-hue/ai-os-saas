@@ -26,6 +26,35 @@
 //      stale-anchor probe redirect a dead constant and report the suite as
 //      the one liar of the thirty, which was a fact about the probe.
 //
+//   4. EVERY MUTATION SCORED AS "THE GATE WENT RED", WITHOUT SAYING
+//      WHICH CHECK. Thirty-five of the forty-five suites do this. A
+//      mutation that breaks something completely unrelated is then
+//      counted as caught — and, worse, you cannot see which assertions
+//      your mutations actually exercise, so a suite can probe one
+//      property from twenty angles and look thorough.
+//
+//      That is the sixth way a gate lies, and it cost a production
+//      outage. marketing-messages.mutation.mjs had eleven mutations, all
+//      caught, every instrument covered. All eleven asked "what do public
+//      pages need?" — none rendered a dashboard route, because the gate
+//      had no notion of one. The trim shipped and every dashboard page
+//      showed raw key names to every user.
+//
+//      SAID PLAINLY: COUNTING DISTINCT EXPECTED CHECKS WOULD NOT HAVE
+//      CAUGHT IT. That suite named eight distinct checks across eleven
+//      mutations — broad by every metric available here. What was narrow
+//      was the GATE's domain: it scanned 15 of the app's 56 entry points
+//      and asserted nothing about the other 41. No shape check on a suite
+//      can see that. Only asking "what does this change do to the paths
+//      it was not written for" can, and that is a written rule in TODO.md
+//      rather than a check, because it is a question, not a pattern.
+//
+//      What IS enforceable is the precondition: a mutation must name the
+//      check that catches it. Then narrowness is at least VISIBLE — you
+//      can count what your mutations touch. The ratchet in section 4
+//      tracks that, so the thirty-five are a debt with a number on it
+//      instead of a silent default.
+//
 // Run: node scripts/tests/mutation-suite-shape.test.mjs
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import path from "node:path";
@@ -157,6 +186,58 @@ for (const file of suites) {
     unused.map(([, id, p]) => `${id} = ${p}`).join(", ")
   );
 }
+
+// ---------------------------------------------------------------------
+console.log("\n== 4. a mutation names the check that must catch it ==");
+// ---------------------------------------------------------------------
+// A suite that only asks "did the gate go red" counts an unrelated
+// failure as a success, and hides which assertions its mutations really
+// exercise. Ten suites name the check and compare against it; the rest
+// predate the convention.
+//
+// A RISING FLOOR, NOT AN EQUALITY. Rewriting thirty-five suites means
+// running each mutation to learn which check truly catches it, and a
+// guessed name is worse than none — it would turn a real miss into a
+// WRONG, or worse, paper over one. So this records what holds today and
+// refuses to let it fall: the debt is tracked rather than paid in one
+// sitting, and every new suite is written the better way because the
+// number may only go up.
+const NAMES_ITS_CHECK = suites.filter((file) => {
+  const src = readFileSync(path.join(DIR, file), "utf8");
+  const declares = /expect:\s*"/.test(src) || /expectAny:/.test(src);
+  const compares =
+    /includes\(m\.expect\)/.test(src) ||
+    /wanted\.some/.test(src) ||
+    /f\.includes\(m\.expect/.test(src);
+  return declares && compares;
+});
+ok(
+  `suites that name the catching check (${NAMES_ITS_CHECK.length} of ${suites.length})`,
+  NAMES_ITS_CHECK.length >= 10,
+  `${NAMES_ITS_CHECK.length} — this floor rises as suites are rewritten, and never falls`,
+);
+// And the ones that do must not have gone hollow: a declared `expect`
+// that never reaches the OUTPUT is decoration. A suite that decides
+// caught-or-missed from it and then reports only "the gate stayed green"
+// leaves the reader unable to tell a narrow gate from a broken mutant,
+// which is the entire reason for naming the check.
+//
+// THIS WAS A NAME CHECK AND NOT A BEHAVIOUR CHECK. It matched the
+// identifier `onTarget`, which is a convention eleven suites happened to
+// share — so a twelfth suite that named its check, compared against it
+// and printed it, but called the variable something else, failed here
+// for using a different word. A stale anchor in an instrument. It now
+// asks what it means to ask: does the expected check appear in what a
+// miss prints.
+const hollow = NAMES_ITS_CHECK.filter((file) => {
+  const src = readFileSync(path.join(DIR, file), "utf8");
+  return !/\$\{m\.expect\}|\$\{JSON\.stringify\(wanted\)\}/.test(src);
+});
+ok(
+  "every suite that names a check actually reports on it",
+  hollow.length === 0,
+  hollow.join(", "),
+);
 
 console.log(
   failures.length === 0

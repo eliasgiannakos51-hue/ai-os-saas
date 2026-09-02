@@ -70,7 +70,8 @@
       "failed": "Le PDF n’a pas pu être créé",
       "notReady": "Ce n’est pas encore terminé"
     },
-    "listCapped": "Les {count, number} plus récentes sont affichées. Les entrées plus anciennes sont toujours enregistrées — utilisez la recherche dans vos enregistrements pour les retrouver."
+    "listCapped": "Les {count, number} plus récentes sont affichées. Les entrées plus anciennes sont toujours enregistrées — utilisez la recherche dans vos enregistrements pour les retrouver.",
+    "newProject": "Nouveau projet"
   },
   "sidebar": {
     "groups": {
@@ -135,7 +136,9 @@
       "routing": "Routage des modèles",
       "businessHealth": "Santé de l'entreprise",
       "mine": "Mes éléments",
-      "records": "Mes enregistrements"
+      "records": "Mes enregistrements",
+      "library": "Mes affaires",
+      "newEntry": "Nouvelle entrée"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -184,12 +187,13 @@
       "formSubmissions": "Tout ce que les visiteurs ont envoyé via un formulaire sur vos sites publiés",
       "businessHealth": "MRR, marge, attrition et trésorerie. Propriétaire uniquement.",
       "mine": "Tout ce que vous avez créé, du plus récent au plus ancien, avec un onglet favoris",
-      "records": "Tous vos enregistrements au même endroit : filtrez par type au lieu de fouiller le menu"
+      "records": "Tous vos enregistrements au même endroit : filtrez par type au lieu de fouiller le menu",
+      "library": "Favoris, récents et recherche — tout ce qui est à vous",
+      "newEntry": "Écrivez n’importe quoi — le classement se fait tout seul"
     },
     "closeMenu": "Fermer le menu"
   },
   "landing": {
-    "hero": "Votre entreprise, organisée — avec une IA qui aide vraiment.",
     "description": "Suivez vos idées, finances, trading, recherches, décisions et plus encore — le tout au même endroit, avec un assistant IA qui comprend vos données et vous aide à y voir clair. Fini les notes éparpillées, les tableurs et les fenêtres de chat.",
     "logIn": "Connexion",
     "signUp": "Inscription",
@@ -926,7 +930,6 @@
           "consistency": "Essayez d'enregistrer quelque chose chaque jour cette semaine."
         }
       },
-      "heroQuestion": "Que voulez-vous créer aujourd'hui ?",
       "recentEntries": {
         "title": "Entrées Récentes",
         "empty": "Aucune entrée pour l'instant."
@@ -2360,6 +2363,37 @@
       "allTypes": "Tous les types",
       "count": "{count, plural, one {# emplacement} other {# emplacements}}",
       "noMatch": "Rien ne correspond à ce nom. Essayez un mot plus court ou retirez le filtre."
+    },
+    "firstScreen": {
+      "label": "Cliquez sur l’un — il s’exécute aussitôt",
+      "cost": {
+        "free": "Gratuit",
+        "freeAllowance": "Gratuit jusqu’à votre limite mensuelle",
+        "charged": "Consomme des crédits"
+      },
+      "build": {
+        "verb": "Créez",
+        "example": "Créez un site pour ma boutique"
+      },
+      "understand": {
+        "verb": "Comprenez",
+        "example": "Que disent mes chiffres cette semaine ?"
+      },
+      "repeat": {
+        "verb": "Répétez",
+        "example": "Chaque lundi, un résumé de mes ventes"
+      }
+    },
+    "library": {
+      "title": "Mes affaires",
+      "description": "Tout ce que vous avez mis ici : récent, favori ou recherché.",
+      "tabs": {
+        "recent": "Récent",
+        "starred": "Favoris",
+        "search": "Rechercher"
+      },
+      "searchPlaceholder": "Cherchez dans tout ce que vous avez écrit",
+      "searchNoResults": "Rien ne correspond à « {query} »."
     }
   },
   "module": {
@@ -3020,6 +3054,11 @@
       "is": "Une page qui liste chaque type d'enregistrement, d'outil et de réglage que vous pouvez ouvrir.",
       "does": "Le menu latéral listait dix-neuf journaux qui fonctionnent tous pareil. Ils sont ici, avec un filtre par type : trouver revient à lire une liste plutôt qu'à se souvenir d'un menu.",
       "doesNot": "Rien n'a été déplacé ni fusionné. Chaque page garde son adresse, ses entrées et son formulaire — ceci est une porte d'entrée, pas un nouvel endroit où vivent vos données."
+    },
+    "library": {
+      "is": "Tout ce que vous avez mis ici, au même endroit.",
+      "does": "Affiche vos entrées récentes, celles que vous avez mises en favori, et une recherche dans tout ce que vous avez écrit.",
+      "doesNot": "Rien n’est stocké en double. Ce sont les mêmes fiches que les modules affichent : modifiez-en une ici et elle change là-bas."
     }
   },
   "helpCentre": {
@@ -3509,5 +3548,8 @@
     "clear": "Retirer l'exemple",
     "clearing": "Retrait…",
     "clearFailed": "Cela n'a pas marché."
+  },
+  "promise": {
+    "oneSentence": "L'IA qui connaît déjà votre travail. Demandez-lui n'importe quoi."
   }
 }

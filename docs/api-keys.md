@@ -197,7 +197,7 @@ works rather than filling a gap.
 ### α) Which are already in the code and missing?
 
 That question has a live answer rather than a written one:
-**`/dashboard/system-health`** lists all 44 variables grouped by level,
+**`/dashboard/system-health`** lists all 45 variables grouped by level,
 with the sentence for each, computed on the server and reduced to a
 boolean before it reaches the browser — no value ever crosses.
 `scripts/tests/capability-visibility.test.mjs` holds it to being built

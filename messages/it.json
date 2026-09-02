@@ -202,7 +202,10 @@
       "roadmap": "Roadmap",
       "terms": "Termini di servizio",
       "privacy": "Informativa sulla privacy",
-      "cookies": "Informativa sui cookie"
+      "cookies": "Informativa sui cookie",
+      "acceptableUse": "Uso accettabile",
+      "aiTransparency": "Trasparenza dell'IA",
+      "contact": "Contatti"
     }
   },
   "pricing": {
@@ -867,6 +870,10 @@
           "grants": "i tuoi lavori partono per primi"
         }
       }
+    },
+    "legalLinks": {
+      "title": "Note legali e assistenza",
+      "description": "Le regole che hai accettato, cosa succede ai tuoi dati, cosa fa l'IA e come parlare con una persona."
     }
   },
   "dashboard": {
@@ -3104,7 +3111,10 @@
     "privacyDescription": "Informativa sulla privacy di Ionexa AI.",
     "cookiesDescription": "Quali cookie imposta Ionexa AI, a cosa serve ciascuno e quanto dura.",
     "helpDescription": "Risposte alle domande più frequenti su Ionexa AI — prezzi, crediti, siti web, agent, privacy.",
-    "costs": "Costi"
+    "costs": "Costi",
+    "acceptableUseDescription": "Cosa puoi e cosa non puoi fare con Ionexa AI.",
+    "aiTransparencyDescription": "Quali modelli di IA usa Ionexa, cosa fanno e quali dati vedono.",
+    "contactDescription": "Contatta il team di Ionexa AI."
   },
   "errors": {
     "retry": "Riprova",
@@ -3551,5 +3561,43 @@
   },
   "promise": {
     "oneSentence": "L'IA che conosce già il tuo lavoro. Chiedile qualsiasi cosa."
+  },
+  "legal": {
+    "lastUpdated": "ultimo aggiornamento: {date}",
+    "draftNotice": "Questo è un testo provvisorio per lo sviluppo iniziale, non un testo legale revisionato. Sarà sostituito con quello definitivo prima che Ionexa AI venga offerto a utenti reali.",
+    "factualNotice": "Questa pagina descrive come funziona davvero il prodotto. Ogni affermazione è stata verificata rispetto al codice in esecuzione alla data indicata sopra.",
+    "backHome": "← torna a Ionexa AI"
+  },
+  "contact": {
+    "title": "Contattaci",
+    "intro": "Una domanda, un problema o qualcosa che non ha funzionato? Scrivici: leggerà una persona.",
+    "nameLabel": "Il tuo nome (facoltativo)",
+    "emailLabel": "La tua email",
+    "messageLabel": "Il tuo messaggio",
+    "send": "Invia messaggio",
+    "sending": "Invio…",
+    "sent": "Grazie — il tuo messaggio è in viaggio. Risponderemo all'indirizzo che ci hai indicato.",
+    "sentDegraded": "Il tuo messaggio è stato accettato per l'invio. Questa installazione non ha un indirizzo mittente verificato, quindi non possiamo confermarne la consegna: se non ricevi risposta, prova il centro assistenza.",
+    "errorGeneric": "Qualcosa è andato storto. Riprova.",
+    "privacyNote": "Usiamo il tuo indirizzo solo per risponderti. Nulla di ciò che scrivi qui viene conservato nel nostro database.",
+    "outage": {
+      "titleNoKey": "Il modulo di contatto non funziona",
+      "bodyNoKey": "Su questa installazione non è configurato alcun servizio email, quindi nulla di ciò che venisse scritto qui potrebbe partire. È una mancanza nostra, non qualcosa che hai fatto tu.",
+      "titleTestSender": "Il modulo di contatto non è configurato del tutto",
+      "bodyTestSender": "Questa installazione non ha un indirizzo mittente verificato, quindi la posta esce da un mittente di prova condiviso che può raggiungere solo il nostro account. Il tuo messaggio con ogni probabilità arriverà, ma non possiamo prometterlo.",
+      "emailInstead": "Puoi anche scriverci direttamente a",
+      "helpInstead": "Vai al centro assistenza",
+      "noFormExplanation": "Il modulo è nascosto invece che mostrato rotto. Prendere il tuo messaggio e scartarlo in silenzio sarebbe peggio che dire che non può essere inviato."
+    },
+    "errors": {
+      "rate_limited": "Troppi messaggi da qui nell'ultima ora. Riprova più tardi.",
+      "invalid_request": "Non è stato possibile leggere la richiesta. Riprova.",
+      "too_short": "Scrivi almeno 10 caratteri.",
+      "bad_email": "Questo indirizzo email non sembra corretto.",
+      "not_configured": "I messaggi non sono configurati su questa installazione, quindi non è stato inviato nulla.",
+      "not_delivered_test_sender": "Il tuo messaggio non è stato consegnato: questa installazione non ha un indirizzo mittente verificato.",
+      "send_failed": "Non è stato possibile inviare il tuo messaggio. Riprova.",
+      "unknown": "Qualcosa è andato storto. Riprova."
+    }
   }
 }

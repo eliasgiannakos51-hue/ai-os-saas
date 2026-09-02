@@ -202,7 +202,10 @@
       "roadmap": "Roadmap",
       "terms": "Nutzungsbedingungen",
       "privacy": "Datenschutzerklärung",
-      "cookies": "Cookie-Richtlinie"
+      "cookies": "Cookie-Richtlinie",
+      "acceptableUse": "Nutzungsrichtlinie",
+      "aiTransparency": "KI-Transparenz",
+      "contact": "Kontakt"
     }
   },
   "pricing": {
@@ -867,6 +870,10 @@
           "grants": "Ihre Aufträge laufen zuerst"
         }
       }
+    },
+    "legalLinks": {
+      "title": "Rechtliches & Support",
+      "description": "Die Regeln, denen Sie zugestimmt haben, was mit Ihren Daten geschieht, was die KI tut und wie Sie einen Menschen erreichen."
     }
   },
   "dashboard": {
@@ -3104,7 +3111,10 @@
     "privacyDescription": "Datenschutzerklärung von Ionexa AI.",
     "cookiesDescription": "Welche Cookies Ionexa AI setzt, was jedes einzelne tut und wie lange es gilt.",
     "helpDescription": "Antworten auf die häufigsten Fragen zu Ionexa AI — Preise, Credits, Websites, Agents, Datenschutz.",
-    "costs": "Kosten"
+    "costs": "Kosten",
+    "acceptableUseDescription": "Was Sie mit Ionexa AI dürfen und was nicht.",
+    "aiTransparencyDescription": "Welche KI-Modelle Ionexa nutzt, was sie tun und welche Daten sie sehen.",
+    "contactDescription": "Nehmen Sie Kontakt mit dem Ionexa-AI-Team auf."
   },
   "errors": {
     "retry": "Erneut versuchen",
@@ -3551,5 +3561,43 @@
   },
   "promise": {
     "oneSentence": "Die KI, die Ihre Arbeit schon kennt. Fragen Sie sie alles."
+  },
+  "legal": {
+    "lastUpdated": "zuletzt aktualisiert: {date}",
+    "draftNotice": "Dies ist ein Platzhaltertext für die frühe Entwicklung, kein geprüfter Rechtstext. Er wird durch den endgültigen ersetzt, bevor Ionexa AI echten Nutzern angeboten wird.",
+    "factualNotice": "Diese Seite beschreibt, wie das Produkt tatsächlich funktioniert. Jede Aussage darauf wurde am oben genannten Datum gegen den laufenden Code geprüft.",
+    "backHome": "← zurück zu Ionexa AI"
+  },
+  "contact": {
+    "title": "Kontakt aufnehmen",
+    "intro": "Eine Frage, ein Problem oder etwas ist schiefgegangen? Schreiben Sie uns — ein Mensch liest mit.",
+    "nameLabel": "Ihr Name (optional)",
+    "emailLabel": "Ihre E-Mail-Adresse",
+    "messageLabel": "Ihre Nachricht",
+    "send": "Nachricht senden",
+    "sending": "Wird gesendet…",
+    "sent": "Danke — Ihre Nachricht ist unterwegs. Wir antworten an die angegebene Adresse.",
+    "sentDegraded": "Ihre Nachricht wurde zum Versand angenommen. Diese Installation hat keine verifizierte Absenderadresse, daher können wir die Zustellung nicht bestätigen. Falls Sie nichts hören, versuchen Sie das Hilfecenter.",
+    "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+    "privacyNote": "Wir verwenden Ihre Adresse ausschließlich für die Antwort. Nichts von dem, was Sie hier schreiben, wird in unserer Datenbank gespeichert.",
+    "outage": {
+      "titleNoKey": "Das Kontaktformular funktioniert nicht",
+      "bodyNoKey": "Auf dieser Installation ist kein E-Mail-Dienst eingerichtet, es könnte also nichts versendet werden, was hier eingetippt wird. Das liegt an uns, nicht an Ihnen.",
+      "titleTestSender": "Das Kontaktformular ist nicht vollständig eingerichtet",
+      "bodyTestSender": "Diese Installation hat keine verifizierte Absenderadresse; Post geht über einen gemeinsamen Testabsender hinaus, der nur unser eigenes Konto erreichen kann. Ihre Nachricht kommt höchstwahrscheinlich an, versprechen können wir es aber nicht.",
+      "emailInstead": "Sie können uns auch direkt schreiben an",
+      "helpInstead": "Zum Hilfecenter",
+      "noFormExplanation": "Das Formular ist ausgeblendet statt kaputt angezeigt. Ihre Nachricht anzunehmen und stillschweigend zu verwerfen wäre schlimmer, als zu sagen, dass sie nicht versendet werden kann."
+    },
+    "errors": {
+      "rate_limited": "Zu viele Nachrichten von hier in der letzten Stunde. Bitte später erneut versuchen.",
+      "invalid_request": "Diese Anfrage konnte nicht gelesen werden. Bitte erneut versuchen.",
+      "too_short": "Bitte schreiben Sie mindestens 10 Zeichen.",
+      "bad_email": "Diese E-Mail-Adresse sieht nicht richtig aus.",
+      "not_configured": "Nachrichten sind auf dieser Installation nicht eingerichtet, es wurde nichts gesendet.",
+      "not_delivered_test_sender": "Ihre Nachricht konnte nicht zugestellt werden: Diese Installation hat keine verifizierte Absenderadresse.",
+      "send_failed": "Ihre Nachricht konnte nicht gesendet werden. Bitte erneut versuchen.",
+      "unknown": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    }
   }
 }

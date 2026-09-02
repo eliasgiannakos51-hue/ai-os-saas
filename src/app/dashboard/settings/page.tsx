@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -37,6 +38,7 @@ import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { loadSubscriptionState } from "@/lib/billing/subscription-state";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { BUILD_MODULES } from "@/lib/build-modules";
+import { LEGAL_AND_SUPPORT_LINKS } from "@/lib/footer-links";
 import { getPlan } from "@/lib/billing/plans";
 
 export function generateMetadata(): Promise<Metadata> {
@@ -368,6 +370,40 @@ export default async function SettingsPage() {
           <h2 className="text-sm font-semibold text-foreground">{t("exportData.title")}</h2>
           <p className="text-xs text-muted">{t("exportData.description")}</p>
           <ExportDataButton />
+        </div>
+
+        {/* THE LEGAL AND SUPPORT LINKS, INSIDE THE APP.
+            
+            They existed only in the landing footer, which a signed-in
+            user has no reason ever to visit again — so the answer to "how
+            do I reach a person" and "what does the AI actually do with my
+            data" lived one route behind a page you see once, before you
+            have an account, and never afterwards. /ai-transparency in
+            particular is an EU AI Act Article 50 disclosure; reachable
+            only from a marketing page is not reachable.
+
+            FROM lib/footer-links.ts, so this list and the landing
+            footer's are the same list. A second hand-kept copy is how the
+            footer gained a page the settings page did not have.
+
+            The labels come from the `landing` namespace because that is
+            where these five words are already translated — tKey is the
+            unscoped translator this file already holds for exactly this
+            kind of full dotted path. */}
+        <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
+          <h2 className="text-sm font-semibold text-foreground">{t("legalLinks.title")}</h2>
+          <p className="text-xs text-muted">{t("legalLinks.description")}</p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {LEGAL_AND_SUPPORT_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+              >
+                {tKey(`landing.${link.labelKey}`)}
+              </Link>
+            ))}
+          </div>
         </div>
 
         <DangerZone email={user.email ?? ""} />

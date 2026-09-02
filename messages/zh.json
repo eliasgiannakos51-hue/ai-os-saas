@@ -202,7 +202,10 @@
       "roadmap": "路线图",
       "terms": "服务条款",
       "privacy": "隐私政策",
-      "cookies": "Cookie 政策"
+      "cookies": "Cookie 政策",
+      "acceptableUse": "使用规范",
+      "aiTransparency": "AI 透明度",
+      "contact": "联系我们"
     }
   },
   "pricing": {
@@ -867,6 +870,10 @@
           "grants": "你的任务优先运行"
         }
       }
+    },
+    "legalLinks": {
+      "title": "法律与支持",
+      "description": "您已同意的规则、您的数据如何被处理、AI 做了什么，以及如何联系到真人。"
     }
   },
   "dashboard": {
@@ -3104,7 +3111,10 @@
     "privacyDescription": "Ionexa AI 隐私政策。",
     "cookiesDescription": "Ionexa AI 使用哪些 cookie、各自的用途以及保留多久。",
     "helpDescription": "关于 Ionexa AI 最常见问题的解答 — 价格、credits、网站、agents、隐私。",
-    "costs": "成本"
+    "costs": "成本",
+    "acceptableUseDescription": "使用 Ionexa AI 时哪些行为允许、哪些不允许。",
+    "aiTransparencyDescription": "Ionexa 使用哪些 AI 模型、它们做什么，以及它们能看到哪些数据。",
+    "contactDescription": "与 Ionexa AI 团队取得联系。"
   },
   "errors": {
     "retry": "重试",
@@ -3551,5 +3561,43 @@
   },
   "promise": {
     "oneSentence": "已经了解你工作的 AI。什么都可以问它。"
+  },
+  "legal": {
+    "lastUpdated": "最后更新：{date}",
+    "draftNotice": "这是早期开发阶段的占位文本，并非经过审核的法律文本。在 Ionexa AI 面向真实用户开放之前，它将被正式文本取代。",
+    "factualNotice": "本页描述产品的实际运作方式。页面上的每一条陈述都已在上述日期对照运行中的代码核实。",
+    "backHome": "← 返回 Ionexa AI"
+  },
+  "contact": {
+    "title": "联系我们",
+    "intro": "有疑问、遇到问题，或者哪里出错了？写信给我们，会有人亲自阅读。",
+    "nameLabel": "您的姓名（选填）",
+    "emailLabel": "您的邮箱",
+    "messageLabel": "您的留言",
+    "send": "发送留言",
+    "sending": "发送中…",
+    "sent": "谢谢——您的留言已发出。我们会回复到您填写的邮箱。",
+    "sentDegraded": "您的留言已被接收并尝试发送。本部署没有配置经过验证的发件地址，因此我们无法确认是否送达；如果没有收到回复，请前往帮助中心。",
+    "errorGeneric": "出了点问题，请再试一次。",
+    "privacyNote": "我们仅使用您的邮箱地址来回复。您在此处填写的内容不会存入我们的数据库。",
+    "outage": {
+      "titleNoKey": "联系表单当前不可用",
+      "bodyNoKey": "本部署未配置任何邮件服务，因此在此处输入的内容都无法发送。这是我们这边的配置缺失，与您无关。",
+      "titleTestSender": "联系表单尚未完全配置",
+      "bodyTestSender": "本部署没有经过验证的发件地址，邮件通过共享测试发件人发出，而它只能送达我们自己的账户。您的留言很可能会送达，但我们无法保证。",
+      "emailInstead": "您也可以直接发邮件给我们：",
+      "helpInstead": "浏览帮助中心",
+      "noFormExplanation": "表单被隐藏，而不是以损坏的状态显示。收下您的留言却悄悄丢弃，比直接说明无法发送更糟。"
+    },
+    "errors": {
+      "rate_limited": "过去一小时内从此处发送的消息过多，请稍后再试。",
+      "invalid_request": "无法读取该请求，请重试。",
+      "too_short": "请至少写 10 个字符。",
+      "bad_email": "该邮箱地址似乎不正确。",
+      "not_configured": "本部署未配置消息发送功能，因此没有发送任何内容。",
+      "not_delivered_test_sender": "您的留言未能送达：本部署没有经过验证的发件地址。",
+      "send_failed": "您的留言发送失败，请重试。",
+      "unknown": "出了点问题，请重试。"
+    }
   }
 }

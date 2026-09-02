@@ -359,6 +359,12 @@ checkList(
 const MECHANICAL = [
   "src/components/agents/delivery-picker.tsx",
   "src/components/auth/social-auth-buttons.tsx",
+  // The public contact form. Posting a support message is a round trip
+  // and an email send — a mechanical wait on a POST, with no model in it
+  // at all. The globe means "a model is working on this"; spending it
+  // here would make the mark read as "busy", which is the one thing it
+  // exists not to mean.
+  "src/components/contact/contact-form.tsx",
   "src/components/documents/document-editor.tsx",
   "src/components/documents/new-document-button.tsx",
   "src/components/files/files-workspace.tsx",

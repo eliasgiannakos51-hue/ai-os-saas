@@ -53,6 +53,16 @@ const LOCALE_ALLOWED = new Set([
   // does not, so it is declared. Checked against the nav name this
   // rename propagates from: es "Objetivos y planes".
   "es:dashboard.createStudio.typeMission",
+  // The footer's contact link. French for "contact" is "contact" — the
+  // noun is the same word, and "Nous contacter" is a verb phrase that
+  // reads as a call to action rather than a section name, which is what
+  // the other seven footer links are. The PAGE heading does say "Nous
+  // contacter" (contact.title in fr), so the two are not the same string
+  // by accident; only the link label coincides. Checked against the
+  // neighbouring fr labels, which all differ: "Tarifs", "Feuille de
+  // route", "Conditions d'utilisation", "Politique de confidentialité",
+  // "Politique de cookies", "Usage acceptable", "Transparence de l'IA".
+  "fr:landing.footer.contact",
   // Trading journal (V4 #14). Two classes, both checked by hand.
   //
   //   CITY NAMES. Sydney, Tokyo, London and New York are spelled the same

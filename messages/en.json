@@ -202,7 +202,10 @@
       "roadmap": "Roadmap",
       "terms": "Terms of Service",
       "privacy": "Privacy Policy",
-      "cookies": "Cookie Policy"
+      "cookies": "Cookie Policy",
+      "acceptableUse": "Acceptable Use",
+      "aiTransparency": "AI Transparency",
+      "contact": "Contact"
     }
   },
   "pricing": {
@@ -867,6 +870,10 @@
           "grants": "your jobs run first"
         }
       }
+    },
+    "legalLinks": {
+      "title": "Legal & support",
+      "description": "The rules you agreed to, what happens to your data, what the AI does, and how to reach a person."
     }
   },
   "dashboard": {
@@ -3104,7 +3111,10 @@
     "privacyDescription": "Privacy Policy for Ionexa AI.",
     "cookiesDescription": "Which cookies Ionexa AI sets, what each one does, and how long it lasts.",
     "helpDescription": "Answers to the questions people ask most about Ionexa AI — pricing, credits, websites, agents, privacy.",
-    "costs": "Costs"
+    "costs": "Costs",
+    "acceptableUseDescription": "What you may and may not do with Ionexa AI.",
+    "aiTransparencyDescription": "Which AI models Ionexa uses, what they do, and what data they see.",
+    "contactDescription": "Get in touch with the Ionexa AI team."
   },
   "errors": {
     "retry": "Try again",
@@ -3551,5 +3561,43 @@
   },
   "promise": {
     "oneSentence": "The AI that already knows your work. Ask it anything."
+  },
+  "legal": {
+    "lastUpdated": "last updated: {date}",
+    "draftNotice": "This is placeholder text for early development, not reviewed legal copy. It will be replaced with the real thing before Ionexa AI is offered to real users.",
+    "factualNotice": "This page describes how the product actually works. Every statement on it was checked against the running code on the date above.",
+    "backHome": "← back to Ionexa AI"
+  },
+  "contact": {
+    "title": "Contact us",
+    "intro": "A question, a problem, or something that went wrong? Write to us and a person will read it.",
+    "nameLabel": "Your name (optional)",
+    "emailLabel": "Your email",
+    "messageLabel": "Your message",
+    "send": "Send message",
+    "sending": "Sending…",
+    "sent": "Thanks — your message is on its way. We will reply to the address you gave.",
+    "sentDegraded": "Your message was accepted for sending. This deployment has no verified sender address, so we cannot confirm it was delivered — if you do not hear back, try the help centre.",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "privacyNote": "We use your address only to reply. Nothing you write here is stored in our database.",
+    "outage": {
+      "titleNoKey": "The contact form is not working",
+      "bodyNoKey": "This deployment has no email service configured, so nothing typed here could be sent. That is a gap on our side, not something you did.",
+      "titleTestSender": "The contact form is not fully configured",
+      "bodyTestSender": "This deployment has no verified sender address, so mail goes out through a shared test sender that can only reach our own account. Your message will most likely arrive, but we cannot promise it.",
+      "emailInstead": "You can also email us directly at",
+      "helpInstead": "Browse the help centre",
+      "noFormExplanation": "The form is hidden rather than shown broken. Taking your message and silently dropping it would be worse than saying it cannot be sent."
+    },
+    "errors": {
+      "rate_limited": "Too many messages from here in the last hour. Try again later.",
+      "invalid_request": "That request could not be read. Please try again.",
+      "too_short": "Please write at least 10 characters.",
+      "bad_email": "That email address does not look right.",
+      "not_configured": "Messages are not configured on this deployment, so nothing was sent.",
+      "not_delivered_test_sender": "Your message could not be delivered: this deployment has no verified sender address.",
+      "send_failed": "Your message could not be sent. Please try again.",
+      "unknown": "Something went wrong. Please try again."
+    }
   }
 }

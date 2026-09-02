@@ -202,7 +202,10 @@
       "roadmap": "Roteiro",
       "terms": "Termos de Serviço",
       "privacy": "Política de Privacidade",
-      "cookies": "Política de Cookies"
+      "cookies": "Política de Cookies",
+      "acceptableUse": "Uso aceitável",
+      "aiTransparency": "Transparência da IA",
+      "contact": "Contacto"
     }
   },
   "pricing": {
@@ -867,6 +870,10 @@
           "grants": "as suas tarefas correm primeiro"
         }
       }
+    },
+    "legalLinks": {
+      "title": "Legal e apoio",
+      "description": "As regras que aceitou, o que acontece aos seus dados, o que a IA faz e como falar com uma pessoa."
     }
   },
   "dashboard": {
@@ -3104,7 +3111,10 @@
     "privacyDescription": "Política de Privacidade do Ionexa AI.",
     "cookiesDescription": "Que cookies o Ionexa AI define, o que faz cada um e quanto tempo duram.",
     "helpDescription": "Respostas às perguntas mais frequentes sobre o Ionexa AI — preços, créditos, sites, agents, privacidade.",
-    "costs": "Custos"
+    "costs": "Custos",
+    "acceptableUseDescription": "O que pode e o que não pode fazer com o Ionexa AI.",
+    "aiTransparencyDescription": "Que modelos de IA o Ionexa usa, o que fazem e que dados veem.",
+    "contactDescription": "Fale com a equipa do Ionexa AI."
   },
   "errors": {
     "retry": "Tentar de novo",
@@ -3551,5 +3561,43 @@
   },
   "promise": {
     "oneSentence": "A IA que já conhece o seu trabalho. Pergunte-lhe o que quiser."
+  },
+  "legal": {
+    "lastUpdated": "última atualização: {date}",
+    "draftNotice": "Este é um texto provisório para o desenvolvimento inicial, não um texto jurídico revisto. Será substituído pelo definitivo antes de o Ionexa AI ser oferecido a utilizadores reais.",
+    "factualNotice": "Esta página descreve como o produto realmente funciona. Cada afirmação foi verificada contra o código em execução na data indicada acima.",
+    "backHome": "← voltar ao Ionexa AI"
+  },
+  "contact": {
+    "title": "Fale connosco",
+    "intro": "Uma dúvida, um problema ou algo que correu mal? Escreva-nos e uma pessoa vai ler.",
+    "nameLabel": "O seu nome (opcional)",
+    "emailLabel": "O seu email",
+    "messageLabel": "A sua mensagem",
+    "send": "Enviar mensagem",
+    "sending": "A enviar…",
+    "sent": "Obrigado — a sua mensagem seguiu. Vamos responder para o endereço que indicou.",
+    "sentDegraded": "A sua mensagem foi aceite para envio. Esta instalação não tem um endereço de remetente verificado, por isso não podemos confirmar a entrega — se não tiver resposta, experimente o centro de ajuda.",
+    "errorGeneric": "Algo correu mal. Tente novamente.",
+    "privacyNote": "Usamos o seu endereço apenas para responder. Nada do que escrever aqui fica guardado na nossa base de dados.",
+    "outage": {
+      "titleNoKey": "O formulário de contacto não está a funcionar",
+      "bodyNoKey": "Esta instalação não tem serviço de email configurado, por isso nada escrito aqui poderia ser enviado. É uma falha nossa, não algo que tenha feito.",
+      "titleTestSender": "O formulário de contacto não está totalmente configurado",
+      "bodyTestSender": "Esta instalação não tem um endereço de remetente verificado, por isso o correio sai por um remetente de teste partilhado que só chega à nossa própria conta. A sua mensagem muito provavelmente chegará, mas não o podemos prometer.",
+      "emailInstead": "Também nos pode escrever diretamente para",
+      "helpInstead": "Ver o centro de ajuda",
+      "noFormExplanation": "O formulário está escondido em vez de aparecer avariado. Aceitar a sua mensagem e deitá-la fora em silêncio seria pior do que dizer que não pode ser enviada."
+    },
+    "errors": {
+      "rate_limited": "Demasiadas mensagens daqui na última hora. Tente mais tarde.",
+      "invalid_request": "Não foi possível ler o pedido. Tente novamente.",
+      "too_short": "Escreva pelo menos 10 caracteres.",
+      "bad_email": "Esse endereço de email não parece correto.",
+      "not_configured": "As mensagens não estão configuradas nesta instalação, por isso nada foi enviado.",
+      "not_delivered_test_sender": "A sua mensagem não foi entregue: esta instalação não tem um endereço de remetente verificado.",
+      "send_failed": "Não foi possível enviar a sua mensagem. Tente novamente.",
+      "unknown": "Algo correu mal. Tente novamente."
+    }
   }
 }

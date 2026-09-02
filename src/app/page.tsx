@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -5,6 +6,7 @@ import { DeletedAccountBanner } from "@/components/landing/deleted-account-banne
 import { GlowOrb } from "@/components/ui/glow-orb";
 import { AppBackground } from "@/components/ui/app-background";
 import { Logo } from "@/components/logo";
+import { FOOTER_LINKS } from "@/lib/footer-links";
 
 // The landing page's title and description are the SAME sentences the
 // page itself renders (promise.oneSentence / landing.description) rather
@@ -47,6 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
   };
 }
+
 
 export default async function Home() {
   const t = await getTranslations("landing");
@@ -107,7 +110,7 @@ export default async function Home() {
           </Link>
         </div>
 
-        {/* TAPPABLE, not merely visible. These five links are 12px text,
+        {/* TAPPABLE, not merely visible. These links are 12px text,
             which renders 16px tall — a third of the 44px floor the rest of
             this codebase uses, stacked 8px apart on a phone. Nothing
             overflowed and nothing overlapped, so every layout gate passed
@@ -119,50 +122,38 @@ export default async function Home() {
             row back to text height: a 44px-tall inline footer on a laptop
             would be a band of empty space nobody asked for, and gap-2
             becomes gap-0 below sm because the padding now does the
-            separating. */}
+            separating.
+
+            FROM A LIST, NOT WRITTEN OUT. It was five hand-written blocks
+            with hand-written separators between them, and adding
+            /acceptable-use, /ai-transparency and /contact would have made
+            eight of each — sixteen blocks in which one wrong href or one
+            forgotten `hidden sm:inline` on a separator is invisible in
+            review. It also made the footer impossible to assert about:
+            scripts/tests/legal-pages.test.mjs now reads FOOTER_LINKS and
+            checks that every entry has a route on disk and a label in all
+            ten locales, which is a claim about the actual links rather
+            than about a regex over JSX.
+
+            The separator is `key`ed on the href and rendered BETWEEN
+            items rather than after each one, so the row never ends in a
+            dangling middot on desktop. */}
         <footer className="mt-16 flex flex-col items-center gap-0 border-t border-border pt-6 text-xs text-muted sm:flex-row sm:gap-4">
-          <Link
-            href="/pricing"
-            className="inline-flex min-h-[44px] items-center px-2 transition-colors duration-150 hover:text-orange-400 sm:min-h-0 sm:px-0"
-          >
-            {t("footer.pricing")}
-          </Link>
-          <span className="hidden sm:inline" aria-hidden="true">
-            ·
-          </span>
-          <Link
-            href="/roadmap"
-            className="inline-flex min-h-[44px] items-center px-2 transition-colors duration-150 hover:text-orange-400 sm:min-h-0 sm:px-0"
-          >
-            {t("footer.roadmap")}
-          </Link>
-          <span className="hidden sm:inline" aria-hidden="true">
-            ·
-          </span>
-          <Link
-            href="/terms"
-            className="inline-flex min-h-[44px] items-center px-2 transition-colors duration-150 hover:text-orange-400 sm:min-h-0 sm:px-0"
-          >
-            {t("footer.terms")}
-          </Link>
-          <span className="hidden sm:inline" aria-hidden="true">
-            ·
-          </span>
-          <Link
-            href="/privacy"
-            className="inline-flex min-h-[44px] items-center px-2 transition-colors duration-150 hover:text-orange-400 sm:min-h-0 sm:px-0"
-          >
-            {t("footer.privacy")}
-          </Link>
-          <span className="hidden sm:inline" aria-hidden="true">
-            ·
-          </span>
-          <Link
-            href="/cookies"
-            className="inline-flex min-h-[44px] items-center px-2 transition-colors duration-150 hover:text-orange-400 sm:min-h-0 sm:px-0"
-          >
-            {t("footer.cookies")}
-          </Link>
+          {FOOTER_LINKS.map(({ href, labelKey }, i) => (
+            <Fragment key={href}>
+              {i > 0 ? (
+                <span className="hidden sm:inline" aria-hidden="true">
+                  ·
+                </span>
+              ) : null}
+              <Link
+                href={href}
+                className="inline-flex min-h-[44px] items-center px-2 transition-colors duration-150 hover:text-orange-400 sm:min-h-0 sm:px-0"
+              >
+                {t(labelKey)}
+              </Link>
+            </Fragment>
+          ))}
         </footer>
       </div>
     </main>

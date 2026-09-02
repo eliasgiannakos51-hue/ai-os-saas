@@ -87,9 +87,17 @@ const MUTANTS = [
     // The count that decides whether a group may EVER be trimmed.
     name: "the dashboard under-reports its unbounded components",
     file: LIB,
-    from: "    unbounded: 61,",
-    to: "    unbounded: 0,",
-    expect: "dashboard: 61 unbounded component(s)",
+    // 61 -> 62 when the first screen merged in and
+    // overview/first-screen-examples.tsx became the sixty-second.
+    from: "    unbounded: 62,",
+    // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
+    // marketing group's real value three entries down — so once `from`
+    // went stale, check-mutation-tree saw the `to` present, the `from`
+    // absent, and reported this mutation as APPLIED in a clean tree.
+    // A `to` that can occur legitimately elsewhere in the same file
+    // cannot distinguish "mutated" from "normal".
+    to: "    unbounded: 1,",
+    expect: "dashboard: 62 unbounded component(s)",
   },
   {
     // With no prefix the dashboard stops claiming its own routes, they

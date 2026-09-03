@@ -81,6 +81,38 @@ function nonEmptyString(value: unknown): string | null {
  * response and assert this function reads it is the cheapest way to keep
  * that visible.
  */
+/**
+ * The same photo, asked for as WebP.
+ *
+ * `urls.regular` already carries Unsplash's dynamic image parameters —
+ * `w`, `q`, `fit`, and `fm=jpg`. Their CDN honours `fm=webp` on the same
+ * URL, so this is a format change, NOT a re-host: the bytes still come
+ * from images.unsplash.com and nothing here fetches them. The hotlink
+ * requirement at the top of this file is untouched, which is why the
+ * parameter is rewritten rather than the image proxied.
+ *
+ * WHY BOTHER. WebP is roughly 25-35% smaller than the JPEG at the same
+ * quality, and a generated site is mostly photographs — this is the
+ * cheapest weight this product can shed, on the pages a customer's own
+ * visitors load.
+ *
+ * SET, NOT APPENDED. `urls.regular` already contains `fm=jpg`; adding a
+ * second `fm` would leave the CDN to pick, and which one it picks is not
+ * something to find out from a bill or a bug report. A URL that does not
+ * parse is returned untouched — an unoptimised photo is a far better
+ * outcome than no photo.
+ */
+export function asWebp(url: string | null): string | null {
+  if (!url) return url;
+  try {
+    const u = new URL(url);
+    u.searchParams.set("fm", "webp");
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 export function photoFromSearchResult(first: unknown): UnsplashPhoto | null {
   const raw = first as
     | {
@@ -90,7 +122,7 @@ export function photoFromSearchResult(first: unknown): UnsplashPhoto | null {
       }
     | null
     | undefined;
-  const url = nonEmptyString(raw?.urls?.regular);
+  const url = asWebp(nonEmptyString(raw?.urls?.regular));
   const photographerName = nonEmptyString(raw?.user?.name);
   const photographerUrl = nonEmptyString(raw?.user?.links?.html);
   const downloadLocation = nonEmptyString(raw?.links?.download_location);

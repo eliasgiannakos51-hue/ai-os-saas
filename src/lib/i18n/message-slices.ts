@@ -39,6 +39,9 @@
 export const MARKETING_NAMESPACES = [
   "auth",
   "common",
+  // The public contact form, which is a client component on a public
+  // route — the one place somebody who cannot sign in reaches a person.
+  "contact",
   "cookies",
   "language",
   "pricing",
@@ -115,7 +118,11 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
   {
     name: "marketing",
     prefixes: [],
-    namespaces: ["auth", "common", "cookies", "language", "pricing"],
+    // "contact" is the public contact form (V3 Task 15, landed 2026-09-02).
+    // Its keys are all literal — see the switch in contact-form.tsx —
+    // which is what keeps `unbounded` at zero and this group the only
+    // trimmable one in the app.
+    namespaces: ["auth", "common", "contact", "cookies", "language", "pricing"],
     unbounded: 0,
   },
 ];

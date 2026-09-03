@@ -278,7 +278,19 @@ console.log(`production server up on :${PORT} (next start, NODE_ENV=production)`
 // /help is public on purpose: half the questions it answers ("what does it
 // cost", "is my data safe", "what is this") are asked before anyone signs
 // up, and an answer you need an account to read is not an answer.
-const PUBLIC_ROUTES = ["/", "/pricing", "/help", "/terms", "/privacy", "/login", "/signup", "/roadmap"];
+// THREE COPIES OF THIS LIST, AND ALL THREE WERE MISSING /cookies —
+// a page that has existed since 2026-08-08 and is linked from the
+// landing footer, checked by none of the three prodtests that check
+// "every public route". /acceptable-use, /ai-transparency and /contact
+// were missing for the better reason that they did not exist; they do
+// now, and lib/footer-links.ts is the list they come from.
+// scripts/tests/legal-pages.test.mjs asserts that every entry there has
+// a route on disk; this asserts that the route actually answers.
+const PUBLIC_ROUTES = [
+  "/", "/pricing", "/help", "/terms", "/privacy", "/cookies",
+  "/acceptable-use", "/ai-transparency", "/contact",
+  "/login", "/signup", "/roadmap",
+];
 // /onboarding is authenticated but lives OUTSIDE /dashboard on purpose —
 // it has no sidebar, because the one thing it is for is getting real
 // data in and one true sentence back out. Listed here so the smoke test
@@ -779,7 +791,24 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   await page.goto(`http://127.0.0.1:${PORT}/dashboard/coding`, { waitUntil: "networkidle", timeout: 45000 });
 
   // Open every collapsed group so the whole nav is measurable at once.
+  //
+  // VISIBLE ONES ONLY, and that qualifier is not defensive coding — it
+  // is the fix for a real timeout. The sidebar gained a phone-only strip
+  // carrying the language selector and the theme toggle (`sm:hidden`,
+  // because on a phone there was otherwise no way to change the
+  // language at all). Its language button also carries
+  // aria-expanded="false", so at this 1280px viewport this loop found a
+  // fourth control, tried to click something with display:none, and
+  // spent thirty seconds in "element is not visible" before throwing —
+  // taking the whole prodtest down after 359 green checks.
+  //
+  // The intent here is "open the collapsed GROUPS so the whole nav can
+  // be read", and a control the reader cannot see is not part of the nav
+  // being read. Filtering on aria-label would have been narrower and
+  // more brittle: the next hidden disclosure added to the sidebar would
+  // break this again.
   for (const button of await page.locator("aside button[aria-expanded]").all()) {
+    if (!(await button.isVisible())) continue;
     if ((await button.getAttribute("aria-expanded")) === "false") {
       await button.click();
       await page.waitForTimeout(80);

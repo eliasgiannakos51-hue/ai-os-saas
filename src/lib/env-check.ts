@@ -264,6 +264,19 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
   },
   { name: "ADMIN_EMAILS", level: "optional", what: "Extra admin accounts, comma-separated", fallback: "the hardcoded owner address" },
   {
+    // The address /contact offers when the mailer is not configured.
+    //
+    // OPTIONAL, AND DELIBERATELY NOT DEFAULTED TO ADMIN_EMAILS[0]. That
+    // value is a personal mailbox hardcoded in lib/auth/admin-emails.ts,
+    // and /contact is linked from the landing footer — defaulting would
+    // publish it to every scraper that reads the page, as a side effect
+    // of a variable nobody set.
+    name: "SUPPORT_EMAIL",
+    level: "optional",
+    what: "The address shown on /contact when the contact form cannot send",
+    fallback: "no address is shown; the page points at the help centre instead",
+  },
+  {
     name: "UNSPLASH_ACCESS_KEY",
     level: "optional",
     what: "Real photos in generated websites",

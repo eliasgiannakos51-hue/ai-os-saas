@@ -122,7 +122,8 @@ export type PointingResult =
  * Is the domain aimed at us yet?
  *
  * `expectedCname` and `expectedIps` come from the HOST, not from this
- * file — see the note in the custom-domain settings route. Hard-coding a
+ * file — they must come from whatever route eventually offers this, which
+ * DOES NOT EXIST YET (see the header of custom-domain.ts). Hard-coding a
  * provider's address here would put a value that only that provider can
  * change into a module that has no way to notice when it does.
  *

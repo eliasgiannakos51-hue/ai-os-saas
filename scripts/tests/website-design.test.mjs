@@ -169,5 +169,89 @@ check(
   (base + everything).length < 20000
 );
 
+console.log("\n== 10. the palette has to be READABLE, as a number ==");
+{
+  // THE PRODUCT HELD ITSELF TO A STANDARD IT NEVER ASKED OF THE SITES IT
+  // SELLS. globe-mark.test.mjs rejects an accent that "measures 2.62:1
+  // on the light page and cannot reach 3:1 at any opacity", and this
+  // app's own pages score 100 on Lighthouse accessibility. The website
+  // prompt said "contrast" three times and every one of them was about
+  // TYPE — weight contrast, size contrast. Nothing anywhere asked for a
+  // colour-contrast ratio.
+  //
+  // MEASURED, on a real Greek site generated through the live model on
+  // 2026-09-02: Lighthouse accessibility 86, five elements failing
+  // color-contrast, #ffffff on #c07a3a at 10.6pt = 3.45:1. After this
+  // rule went into the prompt the same brief regenerated at 100, with
+  // zero failing nodes.
+  const builder = readFileSync("src/lib/website-builder.ts", "utf8");
+  check("the prompt states the small-text floor as a ratio", /4\.5:1/.test(builder));
+  check("...and the large-text floor separately", /3:1/.test(builder));
+  check(
+    "...and names the pairing that actually fails",
+    /white on a mid-tone accent/i.test(builder),
+    "a bare 'ensure good contrast' is advice; naming the failing pair is a rule"
+  );
+  check(
+    "...and forbids the two 'fixes' that make it worse",
+    /do not reach for a lighter weight or a smaller size/i.test(builder)
+  );
+  // The rule has to reach the model, not merely exist in the file.
+  check(
+    "the rule is inside the prompt the model is sent",
+    builder.indexOf("4.5:1") > builder.indexOf("Rules for it:"),
+    "a contrast rule in a comment is not a contrast rule"
+  );
+}
+
+console.log("\n== 11. the prompt knows a page can be mirrored ==");
+{
+  // THE SWEEP THAT PROMPTED THIS. After the honeypot's left:-9999px was
+  // found to add ~10,000px of scroll to every RTL page with a form, the
+  // whole prompt was scanned for Latin assumptions: text-align: left,
+  // float, padding-left, translateX, "from the left". It contained NONE
+  // of them — and it also contained no direction guidance whatsoever.
+  //
+  // Silence is a Latin assumption wearing plain clothes. Measured across
+  // four real sites: the Arabic one built before this section wrote 0
+  // logical properties, 5 physical text-aligns and 15 translateX. The
+  // Arabic one built after wrote 30 logical properties and zero of
+  // either, and measured 0px of horizontal scroll on all four pages at
+  // both 375 and 768 — where its predecessor measured 9,975px.
+  const builder = readFileSync("src/lib/website-builder.ts", "utf8");
+  check("there is a writing-direction section", /WRITING DIRECTION/.test(builder));
+  check(
+    "...and it reaches the model rather than sitting in a comment",
+    /\$\{WRITING_DIRECTION_SECTION\}/.test(builder)
+  );
+  check("...it names the four right-to-left languages", /Arabic, Hebrew, Persian\/Farsi, Urdu/.test(builder));
+  check(
+    "...it asks for logical properties by name",
+    /margin-inline-start/.test(builder) && /text-align: start/.test(builder)
+  );
+  check(
+    "...and forbids the physical ones for layout",
+    /Do NOT use margin-left, padding-right/.test(builder)
+  );
+  check(
+    "...it forbids hiding with a negative offset, which is where this started",
+    /NEVER HIDE ANYTHING WITH A NEGATIVE OFFSET/.test(builder)
+  );
+  check(
+    "...it says motion has a direction too",
+    /MOTION HAS A DIRECTION TOO/.test(builder) && /translateY/.test(builder)
+  );
+  check("...and that pointing icons must turn around", /ICONS THAT POINT MUST TURN AROUND/.test(builder));
+  check(
+    "...while icons that do not point must NOT be flipped",
+    /must NOT be flipped/.test(builder),
+    "a blanket scaleX(-1) mirrors the telephone too"
+  );
+  check(
+    "...and it states the one measurable consequence",
+    /must not scroll sideways at 375px wide in EITHER direction/.test(builder)
+  );
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

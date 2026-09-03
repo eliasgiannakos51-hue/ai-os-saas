@@ -202,7 +202,10 @@
       "roadmap": "Feuille de route",
       "terms": "Conditions d'utilisation",
       "privacy": "Politique de confidentialité",
-      "cookies": "Politique de cookies"
+      "cookies": "Politique de cookies",
+      "acceptableUse": "Usage acceptable",
+      "aiTransparency": "Transparence de l'IA",
+      "contact": "Contact"
     }
   },
   "pricing": {
@@ -867,6 +870,10 @@
           "grants": "vos tâches passent en premier"
         }
       }
+    },
+    "legalLinks": {
+      "title": "Mentions légales et assistance",
+      "description": "Les règles que vous avez acceptées, ce qu'il advient de vos données, ce que fait l'IA, et comment joindre une personne."
     }
   },
   "dashboard": {
@@ -1684,7 +1691,8 @@
         "sendTest": "Tester",
         "testSentTelegram": "Envoyé — regardez votre Telegram.",
         "testSentDiscord": "Envoyé — regardez votre salon Discord.",
-        "testFailed": "Le message de test n'a pas pu être envoyé."
+        "testFailed": "Le message de test n'a pas pu être envoyé.",
+        "emailNotDeliverable": "Aucun e-mail ne peut partir de ce déploiement : le résultat d'un agent ne vous parviendrait pas. Rien dans vos réglages ne peut y remédier — prévenez la personne qui l'administre. Choisissez la remise dans l'application pour continuer à recevoir les résultats."
       },
       "runCannotComplete": "Cet agent ne peut pas effectuer cette tâche, il a donc été désactivé. Aucun crédit n'a été débité.",
       "capability": {
@@ -3104,7 +3112,10 @@
     "privacyDescription": "Politique de confidentialité d'Ionexa AI.",
     "cookiesDescription": "Quels cookies Ionexa AI dépose, à quoi sert chacun d'eux et combien de temps ils durent.",
     "helpDescription": "Réponses aux questions les plus fréquentes sur Ionexa AI — tarifs, crédits, sites web, agents, confidentialité.",
-    "costs": "Coûts"
+    "costs": "Coûts",
+    "acceptableUseDescription": "Ce que vous pouvez et ne pouvez pas faire avec Ionexa AI.",
+    "aiTransparencyDescription": "Quels modèles d'IA Ionexa utilise, ce qu'ils font et quelles données ils voient.",
+    "contactDescription": "Contactez l'équipe d'Ionexa AI."
   },
   "errors": {
     "retry": "Réessayer",
@@ -3324,7 +3335,10 @@
       "speakLabel": "Se faire lire",
       "title": "Voix",
       "transcribeLabel": "Lui parler",
-      "used": "{used} minutes sur {limit} utilisées ce mois-ci"
+      "used": "{used} minutes sur {limit} utilisées ce mois-ci",
+      "directionNotConfigured": "Non configuré sur ce déploiement",
+      "speakNotConfigured": "La lecture des réponses n'est pas configurée sur ce déploiement : les boutons Écouter n'apparaissent pas. Lui parler fonctionne normalement.",
+      "transcribeNotConfigured": "Lui parler n'est pas configuré sur ce déploiement : les boutons de micro n'apparaissent pas. La lecture des réponses fonctionne normalement."
     }
   },
   "dataAnalysis": {
@@ -3551,5 +3565,43 @@
   },
   "promise": {
     "oneSentence": "L'IA qui connaît déjà votre travail. Demandez-lui n'importe quoi."
+  },
+  "legal": {
+    "lastUpdated": "dernière mise à jour : {date}",
+    "draftNotice": "Ceci est un texte provisoire pour le développement initial, et non un texte juridique révisé. Il sera remplacé par le texte définitif avant qu'Ionexa AI ne soit proposé à de vrais utilisateurs.",
+    "factualNotice": "Cette page décrit le fonctionnement réel du produit. Chaque affirmation a été vérifiée par rapport au code en production à la date indiquée ci-dessus.",
+    "backHome": "← retour à Ionexa AI"
+  },
+  "contact": {
+    "title": "Nous contacter",
+    "intro": "Une question, un problème, ou quelque chose qui a mal tourné ? Écrivez-nous : une personne vous lira.",
+    "nameLabel": "Votre nom (facultatif)",
+    "emailLabel": "Votre e-mail",
+    "messageLabel": "Votre message",
+    "send": "Envoyer le message",
+    "sending": "Envoi…",
+    "sent": "Merci — votre message est parti. Nous répondrons à l'adresse indiquée.",
+    "sentDegraded": "Votre message a été accepté pour envoi. Ce déploiement n'a pas d'adresse d'expéditeur vérifiée, nous ne pouvons donc pas confirmer sa remise. Sans réponse de notre part, essayez le centre d'aide.",
+    "errorGeneric": "Une erreur s'est produite. Veuillez réessayer.",
+    "privacyNote": "Nous n'utilisons votre adresse que pour vous répondre. Rien de ce que vous écrivez ici n'est conservé dans notre base de données.",
+    "outage": {
+      "titleNoKey": "Le formulaire de contact ne fonctionne pas",
+      "bodyNoKey": "Aucun service d'e-mail n'est configuré sur ce déploiement : rien de ce qui serait saisi ici ne pourrait partir. C'est une lacune de notre côté, pas une erreur de la vôtre.",
+      "titleTestSender": "Le formulaire de contact n'est pas entièrement configuré",
+      "bodyTestSender": "Ce déploiement n'a pas d'adresse d'expéditeur vérifiée : le courrier part via un expéditeur de test partagé qui ne peut atteindre que notre propre compte. Votre message arrivera très probablement, mais nous ne pouvons pas le garantir.",
+      "emailInstead": "Vous pouvez aussi nous écrire directement à",
+      "helpInstead": "Consulter le centre d'aide",
+      "noFormExplanation": "Le formulaire est masqué plutôt qu'affiché cassé. Prendre votre message puis le perdre en silence serait pire que de dire qu'il ne peut pas être envoyé."
+    },
+    "errors": {
+      "rate_limited": "Trop de messages depuis cette adresse dans la dernière heure. Réessayez plus tard.",
+      "invalid_request": "Cette requête n'a pas pu être lue. Veuillez réessayer.",
+      "too_short": "Écrivez au moins 10 caractères.",
+      "bad_email": "Cette adresse e-mail ne semble pas valide.",
+      "not_configured": "Les messages ne sont pas configurés sur ce déploiement : rien n'a été envoyé.",
+      "not_delivered_test_sender": "Votre message n'a pas pu être remis : ce déploiement n'a pas d'adresse d'expéditeur vérifiée.",
+      "send_failed": "Votre message n'a pas pu être envoyé. Veuillez réessayer.",
+      "unknown": "Une erreur s'est produite. Veuillez réessayer."
+    }
   }
 }

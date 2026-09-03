@@ -22,7 +22,7 @@ export function generateMetadata(): Promise<Metadata> {
 // that point, not optional.
 export default function CookiePolicyPage() {
   return (
-    <LegalLayout title="cookie_policy" updated="2026-08-08">
+    <LegalLayout titleKey="landing.footer.cookies" updated="2026-08-08">
       <LegalSection title="1. The short version">
         <p>
           Ionexa AI sets no advertising cookies, no cross-site tracking

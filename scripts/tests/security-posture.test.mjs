@@ -361,6 +361,12 @@ checkTrue(`routes discovered (${routes.length})`, routes.length >= 40);
 const NO_SESSION_BY_DESIGN = {
   "src/app/api/auth/login/route.ts": "creates the session; rate-limited per IP",
   "src/app/api/signup/route.ts": "creates the account; rate-limited",
+  "src/app/api/contact/route.ts":
+    "the public contact form: somebody who cannot sign in is exactly who needs it. " +
+    "Rate-limited to 5/hour per IP through consume_rate_limit, honeypot-filtered, and " +
+    "the recipient is FIXED to ADMIN_EMAILS — the sender's address is only ever reply-to " +
+    "and never selects a destination, which is the difference between a contact form and " +
+    "an open relay. Nothing is stored.",
   "src/app/api/webhooks/stripe/route.ts": "authenticated by Stripe signature, not a cookie",
   "src/app/api/cron/reset-credits/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",

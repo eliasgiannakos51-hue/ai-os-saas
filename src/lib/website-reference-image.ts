@@ -4,7 +4,12 @@
 
 export const REFERENCE_IMAGE_BUCKET = "website-references";
 
-export const ACCEPTED_REFERENCE_IMAGE_TYPES = ["image/jpeg", "image/png"] as const;
+// WEBP IS ACCEPTED, and the reason it was not is that this list predates
+// checking. Anthropic's vision API takes image/webp alongside jpeg, png
+// and gif, so nothing downstream had to change — and webp is what a
+// phone screenshot or an exported design most often IS now, so refusing
+// it made the upload fail for a file the model could have read.
+export const ACCEPTED_REFERENCE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 
 export const MAX_REFERENCE_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
 

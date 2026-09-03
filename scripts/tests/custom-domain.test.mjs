@@ -14,7 +14,7 @@
 // the shape of what was typed.
 //
 // Run: node scripts/tests/custom-domain.test.mjs
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 
 let pass = 0,
@@ -243,6 +243,51 @@ ok(
   /new Resolver\(\{ timeout: DNS_TIMEOUT_MS, tries: DNS_TRIES \}\)/.test(dnsSrc),
   "an un-deadlined lookup inside a request hangs the request"
 );
+
+console.log("\n== the wiring, stated rather than assumed ==");
+{
+  // 104 GREEN CHECKS OVER A LIBRARY NOTHING CALLS is the easiest thing
+  // in a codebase to mistake for a shipped feature — and V4 re-audit #6
+  // asks about a settings field, DNS instructions per provider, four
+  // states in ten languages and a tier gate, none of which exist. The
+  // modules are complete; the FEATURE is not built.
+  //
+  // So the state is asserted rather than left to be inferred from a
+  // green run. When somebody wires it up, this goes red and the header
+  // note in custom-domain.ts is what has to be rewritten.
+  const walk = (dir, out = []) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const q = `${dir}/${e.name}`;
+      if (e.isDirectory()) walk(q, out);
+      else if (/\.tsx?$/.test(e.name)) out.push(q);
+    }
+    return out;
+  };
+  const appFiles = [...walk("src/app"), ...walk("src/components")];
+  // THE FLOOR ON THE SCAN, not on the result. `importers` being empty is
+  // the answer we want; `appFiles` being empty means the walk found no
+  // source at all and the check below proves nothing. Third time
+  // scripts/tests/gate-vacuity.test.mjs has caught me on exactly this.
+  ok(`the walk found the app's source (${appFiles.length} files)`, appFiles.length >= 200);
+  const importers = appFiles.filter((f) =>
+    /publishing\/(custom-domain|domain-verification)/.test(readFileSync(f, "utf8"))
+  );
+  ok(
+    `no route or component imports these modules yet (${importers.length})`,
+    importers.length === 0,
+    `${importers.join(", ")} — the feature is being wired up; rewrite the header note in custom-domain.ts, which currently tells the reader it is not`
+  );
+  ok(
+    "...and the header says so, so a green run is not read as 'shipped'",
+    /NOTHING IN THE APP CALLS THIS YET/.test(readFileSync("src/lib/publishing/custom-domain.ts", "utf8"))
+  );
+  ok(
+    "no comment points at a settings route that does not exist",
+    !/see the note in the custom-domain settings route/.test(
+      readFileSync("src/lib/publishing/domain-verification.ts", "utf8")
+    )
+  );
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

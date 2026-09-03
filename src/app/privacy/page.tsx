@@ -9,7 +9,7 @@ export function generateMetadata(): Promise<Metadata> {
 
 export default function PrivacyPage() {
   return (
-    <LegalLayout title="privacy_policy" updated="2026-07-30">
+    <LegalLayout titleKey="landing.footer.privacy" updated="2026-07-30">
       <LegalSection title="1. Data Collection">
         <p>
           We collect the email address you sign up with, the password you

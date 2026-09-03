@@ -5,6 +5,7 @@ import { logApiError } from "@/lib/log-error";
 import { publishedSiteUrl } from "@/lib/publishing/subdomain";
 import { normalisePages } from "@/lib/publishing/website-pages";
 import { MAX_SITEMAP_URLS } from "@/lib/seo/sitemap";
+import { FOOTER_LINKS } from "@/lib/footer-links";
 
 const BASE_URL = getSiteUrl();
 
@@ -23,10 +24,28 @@ export const revalidate = 3600;
 // The per-site /s/<subdomain>/sitemap.xml is for the owner to submit to
 // Search Console; this one is what does the discovery work today.
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // /help is public on purpose (see app/help/page.tsx): half the questions
-  // it answers are asked before anyone signs up, so it belongs in the
-  // index alongside /pricing.
-  const routes = ["", "/pricing", "/help", "/terms", "/privacy"];
+  // FROM THE FOOTER'S OWN LIST, not a second copy of it.
+  //
+  // This was `["", "/pricing", "/help", "/terms", "/privacy"]`, written
+  // by hand, and by hand it had gone stale: /cookies and /roadmap had
+  // been linked from the landing footer for weeks and were in neither
+  // this file nor robots.ts, so neither was in the index. Then
+  // /acceptable-use, /ai-transparency and /contact were added and made
+  // it five.
+  //
+  // Measured, not assumed: production's live sitemap.xml on 2026-09-02
+  // listed five URLs for an app with eight public pages.
+  //
+  // lib/footer-links.ts is now the one list of what this app makes
+  // public, so a page linked from the footer is in the index by
+  // construction. scripts/tests/legal-pages.test.mjs asserts the two
+  // agree.
+  //
+  // /help is not in the footer and is public on purpose (see
+  // app/help/page.tsx): half the questions it answers are asked before
+  // anyone signs up, so it is added explicitly alongside the home page,
+  // which has no footer entry either.
+  const routes = ["", "/help", ...FOOTER_LINKS.map((l) => l.href)];
   const lastModified = new Date();
 
   const own: MetadataRoute.Sitemap = routes.map((route) => ({

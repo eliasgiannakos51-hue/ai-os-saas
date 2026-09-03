@@ -163,7 +163,19 @@ export default async function HelpPage() {
           ))}
         </nav>
 
-        <div className="space-y-10">
+        {/* <main>, NOT <div>. Measured, not guessed: Lighthouse against
+            production on 2026-09-02 scored /help 98 on accessibility
+            where every other public page scored 100, and the single
+            failing audit was landmark-one-main — "Document does not have
+            a main landmark".
+
+            A screen-reader user navigating by landmark had no way to
+            skip the header and reach the answers; /pricing, /roadmap and
+            the legal pages all open with <main> and this one opened with
+            a <div>. It sits between the <header> and the <footer>, which
+            is what makes it exactly one main region rather than a second
+            one. */}
+        <main className="space-y-10">
           {ordered.map((category) => (
             <section key={category} id={`category-${category}`} className="scroll-mt-24 space-y-3">
               <h2 className="text-base font-semibold text-foreground">
@@ -179,7 +191,7 @@ export default async function HelpPage() {
               ))}
             </section>
           ))}
-        </div>
+        </main>
 
         <footer className="mt-12 rounded-2xl border border-border bg-panel/60 p-4">
           <h2 className="text-sm font-semibold text-foreground">{t("notFoundTitle")}</h2>

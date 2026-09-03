@@ -8,7 +8,6 @@ import { GreetingHeader } from "@/components/overview/greeting-header";
 import { InsightList, type Insight } from "@/components/onboarding/insight-list";
 import { CreateChat } from "@/components/create/create-chat";
 import { FirstScreenExamples } from "@/components/overview/first-screen-examples";
-import { QuickActionCard } from "@/components/overview/quick-action-card";
 import { WidgetBoundary } from "@/components/ui/widget-boundary";
 import { LowCreditsBanner } from "@/components/credits/low-credits-banner";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
@@ -16,7 +15,6 @@ import { RecentEntriesCard, type RecentEntry } from "@/components/overview/recen
 import { AiCoachCard } from "@/components/overview/ai-coach-card";
 import { ActiveMissionCard } from "@/components/overview/active-mission-card";
 import { NextActionCard } from "@/components/overview/next-action-card";
-import { QuickStartButton } from "@/components/overview/quick-start-button";
 import { formatRelativeTime } from "@/lib/format-time";
 import { NextCard } from "@/components/overview/next-card";
 import { WhatChangedCard } from "@/components/overview/what-changed-card";
@@ -67,15 +65,6 @@ export const fetchCache = "force-no-store";
 // own accent so the row scans as four distinct destinations.
 // Only the slug and the accent live here. Label and description are looked
 // up per render from dashboard.overview.quickActions.<slug>, because
-// literals in this array were rendered verbatim and stayed English in every
-// language — one of the reported i18n bugs.
-const QUICK_ACTIONS = [
-  { slug: "ideas", tone: "amber" },
-  { slug: "research", tone: "violet" },
-  { slug: "finance", tone: "sky" },
-  { slug: "trading", tone: "emerald" },
-] as const;
-
 export default async function OverviewPage() {
   const t = await getTranslations("dashboard.overview");
   const locale = await getLocale();
@@ -523,7 +512,6 @@ export default async function OverviewPage() {
           <GlowOrb className="-left-10 -top-20 -z-10 h-56 w-56" />
           <GreetingHeader email={user.email ?? ""} />
           <LowCreditsBanner />
-          <QuickStartButton />
         </div>
 
         {/* 1. ACTION — the input, first, because it is the answer to

@@ -702,7 +702,20 @@ const clientFallbacks = sources.flatMap((f) => [
 // counted against its own scanner and its own route set; adding 571 and
 // the multi-page number would be arithmetic across two different
 // counters, which is how a ratchet quietly gains slack.
-const SERVER_PROSE_BASELINE = 635;
+// 635 -> 640: api/contact, cherry-picked from a branch where it had sat
+// unmerged since 2026-08-08, adds five refusals in the same shape as the
+// 635 before them — and, like the voice and trading routes above, every
+// one of them also carries a stable `code`. components/contact/contact-form
+// looks the code up under contact.errors.* in all ten locales and falls
+// back to the server's sentence only for a code the build has no word
+// for, which today is none of them. The English is what a curl and a log
+// line get; it is not what a reader is shown. The regex cannot tell those
+// apart, so the number goes up and the reason is written down.
+//
+// MEASURED, not added: the scanner reported 640 against this same
+// baseline before it was raised, so this is the tree's number rather than
+// 635 plus a count taken by hand.
+const SERVER_PROSE_BASELINE = 640;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error
@@ -802,6 +815,29 @@ checkTrue(
 // stale entry cannot hide a regression somewhere else.
 const BARE_TEXT_BASELINE = {
     "src/app/cookies/page.tsx": 19,
+    // THE LEGAL SET, ENGLISH BY THE SAME CONVENTION as cookies, privacy
+    // and terms above — the three that have been baselined here since
+    // this check landed. A legal text translated by a model and reviewed
+    // by nobody is worse than an English one a reader can at least take
+    // to somebody who reads English: the wrong word in a liability
+    // clause is not a typo. What IS translated on these pages, in all
+    // ten locales, is everything a reader navigates by — the heading
+    // (LegalLayout's titleKey), the footer link, the "last updated"
+    // line, the notice box and the back link — which is the part that
+    // used to be English and is checked by
+    // scripts/tests/legal-pages.test.mjs.
+    //
+    // /ai-transparency is the one worth arguing about, because it is an
+    // EU AI Act Article 50 disclosure rather than contract prose, and
+    // its section 9 says on the page that it is published in English.
+    // The AI notices a person actually meets INSIDE the product are
+    // localised — including the agent-email disclosure, which is written
+    // in the language the agent replies in (lib/agents/ai-disclosure.ts,
+    // ten languages). Whether the body itself should be translated is a
+    // decision for whoever owns the legal text, not something to settle
+    // by quietly leaving it out of this table.
+    "src/app/acceptable-use/page.tsx": 19,
+    "src/app/ai-transparency/page.tsx": 58,
     "src/app/dashboard/system-health/page.tsx": 5,
     "src/app/offline/page.tsx": 3,
     "src/app/privacy/page.tsx": 17,
@@ -811,7 +847,12 @@ const BARE_TEXT_BASELINE = {
     "src/components/dashboard/command-palette.tsx": 3,
     "src/components/entity-links/link-to-modal.tsx": 1,
     "src/components/landing/deleted-account-banner.tsx": 1,
-    "src/components/legal/legal-layout.tsx": 3,
+    // (was 3) src/components/legal/legal-layout.tsx — "last updated:",
+    // the placeholder-copy notice and "← back to Ionexa AI" were English
+    // literals in the shared layout, so every legal page rendered them
+    // in English in all ten locales. They now come from the `legal`
+    // namespace. The entry is deleted rather than lowered, which is what
+    // the stale-baseline half of this check exists to force.
     "src/components/overview/beta-expiry-banner.tsx": 2,
     "src/components/pagination-controls.tsx": 3,
     // (was 4) src/components/pwa/pwa-provider.tsx — the install card's

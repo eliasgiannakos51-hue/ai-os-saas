@@ -17,6 +17,8 @@ import {
   type SidebarItem,
 } from "@/lib/sidebar-nav";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
+import { LanguageSelector } from "@/components/i18n/language-selector";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { useToast } from "@/components/toast/toast-context";
 import { Logo } from "@/components/logo";
 import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
@@ -326,6 +328,22 @@ export function Sidebar({
         <div className="border-t border-white/[0.07] p-3">
             {sidebarGroups([SETTINGS_GROUP], isOwner).map(renderGroup)}
           </div>
+
+        {/* LANGUAGE AND THEME, HERE BECAUSE ON A PHONE THEY WERE NOWHERE.
+            top-nav.tsx wraps them in `hidden sm:contents` and says they
+            "belong one tap deeper rather than the two that get to stay
+            small". They were not one tap deeper. The mobile button opens
+            THIS sidebar and nothing else, and this sidebar had no
+            language control — so below 640px, on every dashboard route,
+            there was no way to change the language at all. A setting
+            nobody can reach is the same as a setting that does not
+            exist, which is what a Greek-speaking user reported.
+            Shown only where the top bar hides them, so desktop keeps one
+            of each rather than two. */}
+        <div className="flex items-center gap-1 border-t border-white/[0.07] p-3 sm:hidden">
+          <LanguageSelector />
+          <ThemeToggle />
+        </div>
 
         {/* Account card. Both values come from the already-loaded session
             in dashboard/layout.tsx — no extra query, and nothing is

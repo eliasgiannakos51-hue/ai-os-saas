@@ -9,7 +9,7 @@ export function generateMetadata(): Promise<Metadata> {
 
 export default function TermsPage() {
   return (
-    <LegalLayout title="terms_of_service" updated="2026-07-29">
+    <LegalLayout titleKey="landing.footer.terms" updated="2026-07-29">
       <LegalSection title="1. Acceptance of Terms">
         <p>
           By creating an account or otherwise using Ionexa AI (&quot;the

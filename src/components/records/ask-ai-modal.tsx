@@ -9,6 +9,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { ArrowDown, ArrowUp, Sparkles, X } from "lucide-react";
+import { VoiceInput } from "@/components/voice/voice-input";
 import { useTranslations } from "next-intl";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { AiActivity } from "@/components/ui/ai-activity";
@@ -310,8 +311,29 @@ export function AskAiModal({
                 onKeyDown={handleTextareaKeyDown}
                 placeholder={t("placeholder")}
                 rows={1}
-                className="max-h-32 min-h-[48px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-background px-4 py-3 pr-12 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500/60"
+                // pr-24 rather than pr-12: two controls sit in the
+                // right gutter now, not one.
+                className="max-h-32 min-h-[48px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-background px-4 py-3 pr-24 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500/60"
               />
+              {/* ASKING YOUR OWN RECORDS A QUESTION, OUT LOUD.
+                  V4 re-audit #2. This box is a sentence somebody types to
+                  ask a question — the same shape as chat, Create,
+                  research and the six other inputs that already carry a
+                  microphone — and it did not have one. It sits LEFT of
+                  send, so the primary action stays where the thumb
+                  already expects it. VoiceInput renders nothing when the
+                  deployment has no transcription key, so the gutter is
+                  simply narrower there rather than holding a dead
+                  control. */}
+              <div className="absolute bottom-2 right-14">
+                <VoiceInput
+                  compact
+                  disabled={sending}
+                  onTranscript={(text) =>
+                    setInput((current) => (current.trim() ? `${current.trim()} ${text}` : text))
+                  }
+                />
+              </div>
               <button
                 type="submit"
                 disabled={sending || !input.trim()}

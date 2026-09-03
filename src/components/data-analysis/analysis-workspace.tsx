@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { VoiceInput } from "@/components/voice/voice-input";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Download, Loader2, Sparkles, Upload } from "lucide-react";
@@ -300,6 +301,16 @@ export function AnalysisWorkspace({
             )}
 
             <div className="mt-3 flex flex-wrap gap-2">
+              {/* A QUESTION IN WORDS, so it takes a voice.
+                  V4 re-audit #2 asks whether the microphone is on every
+                  input. It was on eight — chat, Create, research,
+                  agents, the site builder, files, the plan form and
+                  every module's add form — and not on this one, which is
+                  the same shape as all of them: a sentence somebody
+                  types to ask the data something. VoiceInput renders
+                  nothing at all when the deployment has no transcription
+                  key, so this is not a button that can appear and then
+                  fail. */}
               <input
                 type="text"
                 value={question}
@@ -307,6 +318,13 @@ export function AnalysisWorkspace({
                 placeholder={t("ask.placeholder")}
                 aria-label={t("ask.title")}
                 className="min-w-0 flex-1 rounded-lg border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+              />
+              <VoiceInput
+                compact
+                disabled={analysing}
+                onTranscript={(text) =>
+                  setQuestion((current) => (current.trim() ? `${current.trim()} ${text}` : text))
+                }
               />
               <button
                 type="button"

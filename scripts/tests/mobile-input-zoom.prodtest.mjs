@@ -43,7 +43,19 @@ const ZOOMING_TYPES_EXCLUDED = [
   "submit", "button", "reset", "image",
 ];
 
-const PUBLIC_ROUTES = ["/", "/pricing", "/help", "/terms", "/privacy", "/login", "/signup", "/roadmap"];
+// THREE COPIES OF THIS LIST, AND ALL THREE WERE MISSING /cookies —
+// a page that has existed since 2026-08-08 and is linked from the
+// landing footer, checked by none of the three prodtests that check
+// "every public route". /acceptable-use, /ai-transparency and /contact
+// were missing for the better reason that they did not exist; they do
+// now, and lib/footer-links.ts is the list they come from.
+// scripts/tests/legal-pages.test.mjs asserts that every entry there has
+// a route on disk; this asserts that the route actually answers.
+const PUBLIC_ROUTES = [
+  "/", "/pricing", "/help", "/terms", "/privacy", "/cookies",
+  "/acceptable-use", "/ai-transparency", "/contact",
+  "/login", "/signup", "/roadmap",
+];
 const DASHBOARD_ROUTES = [
   "/dashboard", "/dashboard/overview", "/dashboard/chat", "/dashboard/create",
   "/dashboard/website-builder", "/dashboard/mission", "/dashboard/documents",

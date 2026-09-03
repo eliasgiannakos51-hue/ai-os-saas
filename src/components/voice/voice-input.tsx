@@ -138,9 +138,12 @@ export function VoiceInput({
         title={reason}
         data-testid="voice-input-unavailable"
         className={
+          // 44px in both variants: an inert control is still a control the
+          // layout gate measures (scripts/tests/layout-stress.prodtest.mjs),
+          // and a 32px one grew its under-44px count by four.
           compact
-            ? "flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-lg text-muted/50"
-            : "flex h-11 w-11 cursor-not-allowed items-center justify-center rounded-full border border-dashed border-border text-muted/50"
+            ? "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-lg text-muted/50"
+            : "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-full border border-dashed border-border text-muted/50"
         }
       >
         <Mic className={compact ? "h-4 w-4" : "h-[18px] w-[18px]"} aria-hidden="true" />

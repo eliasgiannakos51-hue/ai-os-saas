@@ -874,6 +874,13 @@
     "legalLinks": {
       "title": "Legal & support",
       "description": "The rules you agreed to, what happens to your data, what the AI does, and how to reach a person."
+    },
+    "sampleData": {
+      "title": "Sample data",
+      "description": "Load a small demo — a design studio's last three months — to see the charts, the records and the chat with something in them. Nothing is generated and no credits are spent.",
+      "loaded": "The sample is loaded. It is marked on every page until you remove it.",
+      "notLoaded": "Not loaded.",
+      "open": "See it on Home"
     }
   },
   "dashboard": {
@@ -1051,7 +1058,24 @@
         "why": "Long-form writing that stays with your work — a brief, a draft, meeting notes — searchable next to everything else you have logged.",
         "example": "Notes from Monday's meeting"
       },
-      "createFailed": "We couldn't create the document. Try again in a moment — nothing was saved."
+      "createFailed": "We couldn't create the document. Try again in a moment — nothing was saved.",
+      "pdf": {
+        "title": "Download as PDF",
+        "inLanguage": "In the document's language ({language}) — free",
+        "translateTo": "Translated into",
+        "free": "Free — the document as it is written.",
+        "sameLanguage": "That is the language the document is written in — nothing to translate, free.",
+        "estimating": "Working out the price…",
+        "estimate": "Translation costs about {count, plural, one {# credit} other {# credits}}. Charged only when you press Download.",
+        "bypassFree": "Translation is free on this account.",
+        "estimateFailed": "The price could not be worked out. Try again.",
+        "tooLong": "This document is too long to translate ({chars} characters; the limit is {limit}).",
+        "download": "Download",
+        "failed": "The translation could not be made. No credits were charged.",
+        "insufficient": "Not enough credits for this translation. Nothing was charged.",
+        "charged": "Translated and downloaded — {count, plural, one {# credit} other {# credits}} charged.",
+        "chargedNothing": "Translated and downloaded — nothing charged."
+      }
     },
     "chat": {
       "title": "Ionexa Chat",
@@ -1092,7 +1116,9 @@
       "dataScope": {
         "title": "What it can see",
         "body": "It sees your entries, your goals and the files you uploaded. It does not see anything you have not added. It does not change anything unless you ask."
-      }
+      },
+      "stop": "Stop",
+      "stopped": "Stopped. What was written is kept, and only that part is charged."
     },
     "create": {
       "title": "Create Anything",
@@ -1406,7 +1432,27 @@
       "stockNoticeTitle": "{count, plural, one {# stock photograph} other {# stock photographs}} on this site",
       "stockNoticeBody": "Upload your own for a more authentic result — Unsplash has a business like yours, not yours.",
       "stockNoticeAction": "Upload photos",
-      "storageFull": "Not enough space for these images — {needed} needed, {free} free."
+      "storageFull": "Not enough space for these images — {needed} needed, {free} free.",
+      "notes": {
+        "title": "Done as you asked",
+        "removedFeature": "Removed {feature}, as you asked ({count, plural, one {# element} other {# elements}}).",
+        "removedPage": "Dropped the \"{slug}\" page: it was {feature}, which you asked not to have.",
+        "pageCap": "The AI started {started} pages; the limit is {cap}, so generation stopped there and you were charged only for what was written up to that point.",
+        "mapZoom": "{count, plural, one {The map was} other {# maps were}} set to building-level zoom with a marker on the address.",
+        "feature": {
+          "booking": "the online booking",
+          "contactForm": "the contact form",
+          "newsletter": "the newsletter signup",
+          "map": "the map",
+          "prices": "the price list",
+          "gallery": "the photo gallery",
+          "testimonials": "the testimonials",
+          "blog": "the blog section",
+          "social": "the social media links",
+          "chatWidget": "the chat widget"
+        },
+        "stopped": "Stopped by you. {count, plural, =0 {Nothing was charged} one {# credit was charged} other {# credits were charged}} for the part that was generated; the rest of the hold was released."
+      }
     },
     "marketplace": {
       "title": "Marketplace",
@@ -2877,7 +2923,10 @@
     "saving": "Saving",
     "delivering": "Sending it to you",
     "publishing": "Putting the site live",
-    "watchFailed": "Progress can't be shown right now — the work continues in the background."
+    "watchFailed": "Progress can't be shown right now — the work continues in the background.",
+    "stop": "Stop",
+    "stopping": "Stopping…",
+    "stopped": "Stopped. Only the work already done is charged."
   },
   "problem": {
     "out_of_credits": {
@@ -3518,7 +3567,8 @@
       "ruleOf40": "Rule of 40",
       "burnEur": "Monthly burn",
       "runwayMonths": "Runway"
-    }
+    },
+    "needsHistoryDays": "Needs {need} days of daily snapshots — we have {have}."
   },
   "routing": {
     "title": "Model routing",

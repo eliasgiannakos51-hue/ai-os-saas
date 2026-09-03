@@ -28,7 +28,39 @@ import { MAX_PDF_PAGES, MAX_UNZIPPED_BYTES } from "@/lib/files/file-types";
 
 export type PdfPage = { pageNumber: number; text: string };
 
+/**
+ * The producer named in the Info dictionary, or null. PDFKit-based
+ * writers (react-pdf) store text strings as UTF-16BE with a BOM, so both
+ * encodings are read; the value is used only to decide the RTL pass.
+ */
+export function pdfProducer(buf: Buffer): string | null {
+  const latin = buf.toString("latin1");
+  const readString = (raw: string): string => {
+    if (raw.startsWith("\u00fe\u00ff")) {
+      let out = "";
+      for (let i = 2; i + 1 < raw.length; i += 2) out += String.fromCharCode((raw.charCodeAt(i) << 8) | raw.charCodeAt(i + 1));
+      return out;
+    }
+    return raw;
+  };
+  const direct = /\/Producer\s*\(([^)]{0,200})\)/.exec(latin);
+  if (direct) return readString(direct[1]);
+  const ref = /\/Producer\s+(\d+)\s+0\s+R/.exec(latin);
+  if (ref) {
+    const obj = new RegExp(`(?:^|\\s)${ref[1]}\\s+0\\s+obj\\s*\\(([^)]{0,200})\\)`).exec(latin);
+    if (obj) return readString(obj[1]);
+  }
+  return null;
+}
+
+/** Producers that write shaped Arabic as base letters in paint order. */
+export function writesVisualOrderRtl(producer: string | null): boolean {
+  return producer !== null && /react-pdf|pdfkit/i.test(producer);
+}
+
 export type PdfExtraction = {
+  /** What wrote the file, when it says. */
+  producer: string | null;
   pages: PdfPage[];
   /** Pages in the document, which may exceed pages.length when the
    *  document is longer than MAX_PDF_PAGES. */
@@ -305,7 +337,14 @@ function parseToUnicode(cmap: string): FontMap {
     // <lo> <hi> [ <d1> <d2> ... ]
     for (const m of body.matchAll(/<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*\[([\s\S]*?)\]/g)) {
       const lo = parseInt(m[1], 16);
-      const items = [...m[3].matchAll(/<([0-9A-Fa-f]+)>/g)].map((x) => parseHexString(x[1]));
+      // AN EMPTY ENTRY IS AN ENTRY. fontkit writes `<>` for a glyph with
+      // no Unicode of its own — Arabic shaping glyphs, ligature parts —
+      // and a subset font's array is full of them: [<0000> <0635> <>
+      // <062e> ...]. Reading only the non-empty ones shifted every glyph
+      // after the first `<>` by one, so ملخص came out as neighbouring
+      // letters (V4.6: "the extractor reads Arabic as garbage"). The
+      // position in the array IS the code; an empty one maps to nothing.
+      const items = [...m[3].matchAll(/<([0-9A-Fa-f]*)>/g)].map((x) => (x[1] ? parseHexString(x[1]) : ""));
       for (let i = 0; i < items.length && i <= 65_535; i++) map.set(lo + i, items[i]);
     }
   }
@@ -640,7 +679,85 @@ function tidy(text: string): string {
     .trim();
 }
 
+/**
+ * RIGHT-TO-LEFT TEXT, BACK IN READING ORDER — V4.6.
+ *
+ * A PDF stores glyphs in the order they are PAINTED, left to right. A
+ * shaped Arabic word is painted last letter first, so what comes out of
+ * the content stream is the mirror of what was written: "ملخص" reads as
+ * "صخلم", and a sentence's words come out in reverse order too. Every
+ * PDF this app produces (lib/pdf, via fontkit) is written that way, and
+ * so is most Arabic and Hebrew from anywhere else.
+ *
+ * So each maximal run of right-to-left text — letters, marks, and the
+ * spaces, newlines and punctuation between them — is reversed back, and
+ * a left-to-right island inside it (a year, a Latin name) is reversed a
+ * second time so it keeps its own order. Not a full bidi algorithm: the
+ * cases a document actually contains, checked on the app's own PDF in
+ * scripts/tests/pdf-mixed-scripts.itest.mjs.
+ */
+const RTL_CHAR = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+const LTR_CHAR = /[A-Za-z0-9\u00C0-\u024F\u0370-\u03FF\u0400-\u04FF\u3040-\u30FF\u4E00-\u9FFF]/;
+
+export function logicalOrderRtl(text: string): string {
+  if (typeof text !== "string" || text.length === 0 || !RTL_CHAR.test(text)) return text ?? "";
+  const chars = [...text];
+  const out: string[] = [];
+  let i = 0;
+  while (i < chars.length) {
+    if (!RTL_CHAR.test(chars[i])) {
+      out.push(chars[i]);
+      i++;
+      continue;
+    }
+    // Extend the run over neutrals (space, newline, punctuation) as long as
+    // another RTL character follows them; the run ends at the last RTL one.
+    let end = i;
+    let j = i;
+    while (j < chars.length && !LTR_CHAR.test(chars[j])) {
+      if (RTL_CHAR.test(chars[j])) end = j;
+      j++;
+    }
+    // A Latin/digit island inside: keep extending if RTL text resumes after it.
+    let k = j;
+    while (k < chars.length) {
+      let m = k;
+      while (m < chars.length && !RTL_CHAR.test(chars[m])) m++;
+      if (m >= chars.length) break;
+      // RTL resumes at m only if what lies between is short (an island), not a new paragraph.
+      const between = chars.slice(end + 1, m).join("");
+      if (between.includes("\n\n") || between.length > 40) break;
+      end = m;
+      let n = m;
+      while (n < chars.length && !LTR_CHAR.test(chars[n])) {
+        if (RTL_CHAR.test(chars[n])) end = n;
+        n++;
+      }
+      k = n;
+    }
+    const run = chars.slice(i, end + 1).reverse();
+    // Islands were reversed with the run; reverse each back.
+    let a = 0;
+    while (a < run.length) {
+      if (!LTR_CHAR.test(run[a])) { a++; continue; }
+      let b = a;
+      while (b < run.length && !RTL_CHAR.test(run[b]) && !/[\n]/.test(run[b])) b++;
+      // trim trailing neutrals out of the island so a space stays a separator
+      let c = b;
+      while (c > a && !LTR_CHAR.test(run[c - 1])) c--;
+      const island = run.slice(a, c).reverse();
+      run.splice(a, c - a, ...island);
+      a = b;
+    }
+    out.push(...run);
+    i = end + 1;
+  }
+  return out.join("");
+}
+
 export function extractPdfText(buf: Buffer): PdfExtraction {
+  const producer = pdfProducer(buf);
+  const visualOrderRtl = writesVisualOrderRtl(producer);
   const head = buf.subarray(0, 1024).toString("latin1");
   if (!head.startsWith("%PDF-")) throw new PdfError("this file is not a PDF");
 
@@ -678,8 +795,15 @@ export function extractPdfText(buf: Buffer): PdfExtraction {
       text += textFromContent(decoded.toString("latin1"), fonts);
     }
 
-    pages.push({ pageNumber: index + 1, text: tidy(text) });
+    // Paint order is reading order for every producer this app has met
+    // except its own: react-pdf (PDFKit underneath) shapes Arabic and
+    // writes the glyphs left to right, as base letters. Chrome/Skia
+    // writes presentation forms in paint order, which extract.ts's
+    // repairRightToLeftText already recognises by the forms themselves —
+    // reversing here as well would undo that. So only the producer that
+    // is known to write base letters in paint order is reversed here.
+    pages.push({ pageNumber: index + 1, text: visualOrderRtl ? logicalOrderRtl(tidy(text)) : tidy(text) });
   }
 
-  return { pages, totalPages, truncated: totalPages > take.length };
+  return { producer, pages, totalPages, truncated: totalPages > take.length };
 }

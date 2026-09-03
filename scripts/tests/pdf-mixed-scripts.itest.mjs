@@ -169,5 +169,45 @@ const raster = spawnSync("python3", ["-c",
   "import fitz,sys\nd=fitz.open('/tmp/pdf-mixed-scripts.pdf')\np=d[0].get_pixmap(dpi=110)\np.save('/tmp/pdf-mixed-scripts.png')\nprint('ok')"], { encoding: "utf8" });
 console.log(raster.status === 0 ? "  ....  rasterised page one to /tmp/pdf-mixed-scripts.png" : "  ....  no PyMuPDF here — no PNG written (the checks above do not need it)");
 
+
+// ---------------------------------------------------------------------
+console.log("\n== 5. and the app's own extractor reads it back in reading order (V4.6) ==");
+// lib/files/pdf.ts is what "Ask my files" reads a PDF with. On this very
+// document it returned ملخص as صخلمي: the ToUnicode array parser skipped
+// fontkit's empty `<>` entries (every glyph after the first one shifted
+// to a neighbouring letter), and the glyphs of a shaped word arrive in
+// paint order, which for Arabic is the mirror of reading order.
+{
+  const pdfLib = await loadTs("src/lib/files/pdf.ts");
+  const extracted = pdfLib.extractPdfText(buffer);
+  // The pass is producer-aware: react-pdf writes base letters in paint
+  // order; Chrome/Skia writes presentation forms, which extract.ts's own
+  // repair handles — reversing those here too broke every browser-made
+  // fixture in pdf-real-files.test.mjs.
+  ok("the document names react-pdf as its producer, read from the Info dictionary", extracted.producer === "react-pdf" && pdfLib.pdfProducer(buffer) === "react-pdf", String(extracted.producer));
+  ok("...which is a paint-order writer; Skia is not", pdfLib.writesVisualOrderRtl("react-pdf") && pdfLib.writesVisualOrderRtl("PDFKit") && !pdfLib.writesVisualOrderRtl("Skia/PDF m141") && !pdfLib.writesVisualOrderRtl(null));
+  const text = extracted.pages.map((p) => p.text).join("\n");
+  ok("the title's Arabic word is read back exactly (ملخص)", text.includes("ملخص"), text.slice(0, 120));
+  const words = ["وسلّم", "المشروع", "في", "موعده"];
+  const positions = words.map((w) => text.indexOf(w));
+  ok("the sentence's words are all found", positions.every((p) => p !== -1), JSON.stringify(positions));
+  ok("...in READING order, not paint order", positions.every((p, i) => i === 0 || p > positions[i - 1]), JSON.stringify(positions));
+  ok("the Greek and the Chinese are untouched by the pass", text.includes(GREEK) && text.includes(CHINESE));
+  // KNOWN LIMIT, STATED: fontkit's ToUnicode gives a shaped skeleton glyph
+  // one letter, so letters that differ only by dots (ي/ت/ب/ث/ن) can come
+  // back as each other inside a word: الفريق may read الفرتق. That is the
+  // producer's map, not the reader's order.
+  ok("the team word is read with the right skeleton (الفر?ق), dots aside", /الفر[يتبثن]ق/.test(text), text.slice(0, 300));
+  // The helper on its own, at the edges.
+  const f = pdfLib.logicalOrderRtl;
+  ok("empty, undefined and null give ''", f("") === "" && f(undefined) === "" && f(null) === "");
+  ok("Latin passes through", f("hello world") === "hello world");
+  ok("a reversed word is restored", f("صخلم") === "ملخص");
+  ok("a reversed sentence is restored, words and letters", f("هدعوم يف عورشملا قيرفلا مّلسو") === "وسلّم الفريق المشروع في موعده");
+  ok("a number inside Arabic keeps its own order", f("ةديدج 2026 ةنس") === "سنة 2026 جديدة");
+  ok("Hebrew too", f("םולש") === "שלום");
+  ok("mixed scripts: only the Arabic run is reversed", f("Σύνοψη 项目 صخلم") === "Σύνοψη 项目 ملخص");
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

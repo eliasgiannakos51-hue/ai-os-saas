@@ -234,8 +234,13 @@ const MUTANTS = [
     name: "the hotlink is re-hosted through our own storage",
     suites: [COMPLIANCE],
     file: UNSPLASH,
-    from: "  const url = nonEmptyString(raw?.urls?.regular);",
-    to: '  const url = nonEmptyString(raw?.urls?.regular)?.replace("https://images.unsplash.com/", "https://our-cdn.example/") ?? null;',
+    // Re-anchored when the URL started being asked for as WebP. The
+    // mutant is unchanged in intent and is the most important one in
+    // this file: re-hosting the bytes is the thing Unsplash can
+    // withdraw the API key over, and it looks identical to a working
+    // site from every screenshot.
+    from: "  const url = asWebp(nonEmptyString(raw?.urls?.regular));",
+    to: '  const url = asWebp(nonEmptyString(raw?.urls?.regular))?.replace("https://images.unsplash.com/", "https://our-cdn.example/") ?? null;',
   },
   // ------------------------------------------------------------------
   // VISIBILITY. Every one of these was the live behaviour until it was

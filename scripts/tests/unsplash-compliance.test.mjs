@@ -121,7 +121,38 @@ const photo =
     ? uns.photoFromSearchResult(REAL_SEARCH_RESULT)
     : null) ?? NOT_BUILT;
 ok("a real search result yields a usable photo", photo !== NOT_BUILT);
-check("the hotlink URL is urls.regular", photo.url, REAL_SEARCH_RESULT.urls.regular);
+// THE HOTLINK IS urls.regular, WITH ONE PARAMETER REWRITTEN.
+//
+// This was `check(photo.url, urls.regular)` — exact equality. That is
+// the right SHAPE of assertion for a compliance rule and it became
+// wrong the moment the URL started asking Unsplash's CDN for WebP,
+// which is a format request on their own address rather than a
+// different image.
+//
+// Relaxing it to "contains the host" would have been weaker than what
+// it replaced, and the rule it guards is the one Unsplash can withdraw
+// the API key over. So it is decomposed instead, and every part of the
+// original equality is still asserted: same origin, same path, every
+// original parameter still present with its original value, and `fm`
+// the ONLY key that differs. An image proxied through our own domain,
+// resized to a different `w`, or stripped of `ixid`, all still fail.
+{
+  const wanted = new URL(REAL_SEARCH_RESULT.urls.regular);
+  const got = photo.url ? new URL(photo.url) : null;
+  ok("the hotlink URL was built at all", got !== null);
+  if (got) {
+    ok("...from Unsplash's own origin, unchanged", got.origin === wanted.origin, `${got.origin} vs ${wanted.origin}`);
+    ok("...the same photo path, unchanged", got.pathname === wanted.pathname, `${got.pathname} vs ${wanted.pathname}`);
+    const changed = [];
+    for (const [k, v] of wanted.searchParams) {
+      if (got.searchParams.get(k) !== v) changed.push(`${k}: ${v} -> ${got.searchParams.get(k)}`);
+    }
+    const added = [...got.searchParams.keys()].filter((k) => !wanted.searchParams.has(k));
+    ok("...with fm the only parameter altered", changed.every((c) => c.startsWith("fm:")), changed.join(", "));
+    ok("...and nothing added except fm", added.every((k) => k === "fm"), added.join(", "));
+    ok("...and it asks for webp", got.searchParams.get("fm") === "webp", String(got.searchParams.get("fm")));
+  }
+}
 ok("the URL points at Unsplash's own CDN", String(photo.url).startsWith("https://images.unsplash.com/"));
 
 // The compliance risk is someone "optimising" the photo into our storage.
@@ -329,6 +360,53 @@ check(
   null
 );
 check("an empty result set is unusable", readPhoto(undefined), null);
+
+console.log("\n== the photo is asked for as WebP, and it is still a hotlink ==");
+{
+  // WebP is 25-35% smaller than the JPEG at the same quality, and a
+  // generated site is mostly photographs — the cheapest weight this
+  // product can shed, on pages a customer's own visitors load.
+  //
+  // THE COMPLIANCE LINE IS THE POINT. Unsplash requires the image to be
+  // served from THEIR CDN, never re-hosted. Rewriting an existing query
+  // parameter on their own URL is a format request, not a copy: the
+  // bytes still come from images.unsplash.com and nothing here fetches
+  // them. Proxying the image to convert it would break the licence.
+  const u = await loadTs("src/lib/unsplash.ts");
+  ok("asWebp is exported", typeof u.asWebp === "function");
+  // urls.regular really does arrive carrying fm=jpg, which is why this
+  // SETS rather than appends — two fm parameters leaves the CDN to pick.
+  const real = "https://images.unsplash.com/photo-1?ixlib=rb-4.0&w=1080&q=80&fm=jpg&fit=max";
+  const got = u.asWebp(real);
+  ok("fm=jpg becomes fm=webp", /[?&]fm=webp(&|$)/.test(got), got);
+  ok("...and there is only ONE fm parameter", (got.match(/[?&]fm=/g) || []).length === 1, got);
+  ok("...on the same Unsplash host, not proxied", new URL(got).host === "images.unsplash.com", got);
+  ok("...with the other parameters untouched", /w=1080/.test(got) && /q=80/.test(got) && /fit=max/.test(got), got);
+  ok("a URL without fm gets one", /fm=webp/.test(u.asWebp("https://images.unsplash.com/photo-2?w=1080")));
+  // A photo is worth far more than an optimised photo.
+  ok("a value that will not parse is returned untouched", u.asWebp("not a url") === "not a url");
+  ok("...and empty stays empty", u.asWebp("") === "");
+  ok("null survives", u.asWebp(null) === null);
+  // It has to be APPLIED, not merely available.
+  const src = readFileSync("src/lib/unsplash.ts", "utf8");
+  ok("photoFromSearchResult applies it", /asWebp\(nonEmptyString\(raw\?\.urls\?\.regular\)\)/.test(src));
+}
+
+console.log("\n== webp uploads are accepted, because the model reads them ==");
+{
+  // Anthropic's vision API takes image/webp alongside jpeg, png and gif,
+  // so nothing downstream needed to change — and webp is what a phone
+  // screenshot or an exported design most often IS now. Refusing it made
+  // the upload fail for a file the model could have read perfectly well.
+  const ref = await loadTs("src/lib/website-reference-image.ts");
+  ok("the accept list carries webp", ref.ACCEPTED_REFERENCE_IMAGE_TYPES.includes("image/webp"),
+    String(ref.ACCEPTED_REFERENCE_IMAGE_TYPES));
+  ok("...and jpeg and png are still there",
+    ref.ACCEPTED_REFERENCE_IMAGE_TYPES.includes("image/jpeg") && ref.ACCEPTED_REFERENCE_IMAGE_TYPES.includes("image/png"));
+  const builder = readFileSync("src/lib/website-builder.ts", "utf8");
+  ok("the SERVER guard agrees with the client list", /contentType === "image\/webp"/.test(builder),
+    "the download path re-checks the stored type; a client-only change lets a webp upload fail after it has been stored");
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

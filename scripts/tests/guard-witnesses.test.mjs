@@ -112,7 +112,20 @@ const real = unsplash.photoFromSearchResult({
   user: { name: "A Photographer", links: { html: "https://example/u" } },
   links: { download_location: "https://api.example/d" },
 });
-check("...and a real one still is", real !== null && real.url === "https://images.example/p.jpg", JSON.stringify(real));
+// The witness is that a REAL photo survives where a whitespace one does
+// not. The url is now asked for as WebP on the way through (see
+// lib/unsplash.ts's asWebp and the compliance gate), so the assertion
+// pins the parts this witness is actually about — it is a photo, and it
+// is still THAT photo — rather than a byte-exact string that a format
+// parameter can move.
+check(
+  "...and a real one still is",
+  real !== null &&
+    real.url.startsWith("https://images.example/p.jpg") &&
+    real.photographerName === "A Photographer" &&
+    real.downloadLocation === "https://api.example/d",
+  JSON.stringify(real)
+);
 
 const tradingSrc = stripComments(readFileSync("src/lib/trading/load.ts", "utf8"));
 check(

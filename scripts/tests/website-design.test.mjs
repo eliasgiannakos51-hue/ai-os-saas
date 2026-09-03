@@ -204,5 +204,54 @@ console.log("\n== 10. the palette has to be READABLE, as a number ==");
   );
 }
 
+console.log("\n== 11. the prompt knows a page can be mirrored ==");
+{
+  // THE SWEEP THAT PROMPTED THIS. After the honeypot's left:-9999px was
+  // found to add ~10,000px of scroll to every RTL page with a form, the
+  // whole prompt was scanned for Latin assumptions: text-align: left,
+  // float, padding-left, translateX, "from the left". It contained NONE
+  // of them — and it also contained no direction guidance whatsoever.
+  //
+  // Silence is a Latin assumption wearing plain clothes. Measured across
+  // four real sites: the Arabic one built before this section wrote 0
+  // logical properties, 5 physical text-aligns and 15 translateX. The
+  // Arabic one built after wrote 30 logical properties and zero of
+  // either, and measured 0px of horizontal scroll on all four pages at
+  // both 375 and 768 — where its predecessor measured 9,975px.
+  const builder = readFileSync("src/lib/website-builder.ts", "utf8");
+  check("there is a writing-direction section", /WRITING DIRECTION/.test(builder));
+  check(
+    "...and it reaches the model rather than sitting in a comment",
+    /\$\{WRITING_DIRECTION_SECTION\}/.test(builder)
+  );
+  check("...it names the four right-to-left languages", /Arabic, Hebrew, Persian\/Farsi, Urdu/.test(builder));
+  check(
+    "...it asks for logical properties by name",
+    /margin-inline-start/.test(builder) && /text-align: start/.test(builder)
+  );
+  check(
+    "...and forbids the physical ones for layout",
+    /Do NOT use margin-left, padding-right/.test(builder)
+  );
+  check(
+    "...it forbids hiding with a negative offset, which is where this started",
+    /NEVER HIDE ANYTHING WITH A NEGATIVE OFFSET/.test(builder)
+  );
+  check(
+    "...it says motion has a direction too",
+    /MOTION HAS A DIRECTION TOO/.test(builder) && /translateY/.test(builder)
+  );
+  check("...and that pointing icons must turn around", /ICONS THAT POINT MUST TURN AROUND/.test(builder));
+  check(
+    "...while icons that do not point must NOT be flipped",
+    /must NOT be flipped/.test(builder),
+    "a blanket scaleX(-1) mirrors the telephone too"
+  );
+  check(
+    "...and it states the one measurable consequence",
+    /must not scroll sideways at 375px wide in EITHER direction/.test(builder)
+  );
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

@@ -599,6 +599,16 @@ DO NOT INVENT CRITICAL FACTS:
 - The ONE exception, and it is narrower than it looks: if the description explicitly says the user was asked and answered with something like "use whatever"/"I don't care"/"make it up" (look for this in any "Additional details: Q/A" section appended to the description), you may invent descriptive PROSE — the story of the place, the tone, the section copy. You may NOT invent a NUMBER or a CONTACT FACT under any circumstances, and "make it up" does not extend to one: no price, no phone number, no opening time, no street address, no email, no year of founding, no capacity, no distance, no rating, no review count. Those stay bracketed placeholders exactly as above, because a number is the one thing a reader will act on — somebody will ring it, turn up at it, or expect to pay it — and a wrong one is worse than a blank.
 - When you do invent prose under that exception you MUST mark it: wrap each invented passage in an HTML comment right before it, e.g. <!-- PLACEHOLDER: replace with your own words -->, AND add one small, visible banner just under the header reading "Sample content — edit before publishing" (subtle styling, not alarming). Only include this banner when placeholder content is actually present in the page.`;
 
+const WRITING_DIRECTION_SECTION = `WRITING DIRECTION
+This section exists because the prompt used to say nothing at all about direction, and "nothing" is a Latin assumption wearing plain clothes. A real Arabic site generated from this prompt got dir="rtl" right and then carried ~10,000px of horizontal scroll on every page with a form, from one hidden input positioned with a physical offset. The two Latin sites built alongside it measured zero. A defect that only appears in a script nobody tested in is a defect nobody finds.
+- If the site's language is written right to left — Arabic, Hebrew, Persian/Farsi, Urdu — put dir="rtl" on the <html> element alongside lang. If it is not, do not set dir at all.
+- LAY OUT WITH LOGICAL PROPERTIES, NOT PHYSICAL ONES. Use margin-inline-start / margin-inline-end, padding-inline-start / padding-inline-end, border-inline-start / border-inline-end, inset-inline-start / inset-inline-end, and text-align: start / end. Do NOT use margin-left, padding-right, border-left, left:, right:, text-align: left, text-align: right or float for layout: every one of them means "the same side whatever the language", which is exactly wrong in a mirrored page.
+- The physical properties are still correct for things that are genuinely physical and not mirrored — a drop shadow's offset, a background-position on a decorative texture, a transform on an element that has no reading order. Judge by whether it would look wrong reflected.
+- NEVER HIDE ANYTHING WITH A NEGATIVE OFFSET. left:-9999px is the classic way to hide a honeypot or a skip link and it is safe ONLY in a left-to-right page — the browser makes leftward overflow unreachable there and scrollable in rtl. Hide with the clip pattern instead: position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%).
+- MOTION HAS A DIRECTION TOO. A reveal that slides in from the physical left reads as backwards in a mirrored page. Prefer animating opacity and translateY, which mean the same thing in every script; if something must move horizontally, mirror the sign under [dir="rtl"].
+- ICONS THAT POINT MUST TURN AROUND. Arrows, chevrons and "next/back" glyphs point the wrong way in a mirrored page: add [dir="rtl"] .that-icon { transform: scaleX(-1); }. Icons that do not point — a phone, an envelope, a clock — must NOT be flipped.
+- The page must not scroll sideways at 375px wide in EITHER direction. That is the one measurable consequence of getting the rest of this wrong.`;
+
 const SYSTEM_PROMPT = `You generate complete, production-ready single-file websites from a plain-text description.
 
 CORE RULES:
@@ -610,6 +620,7 @@ CORE RULES:
 - Use placeholder text/content that fits the description where specific non-critical content wasn't given — never leave Lorem Ipsum, always write real-sounding copy relevant to the request. See DO NOT INVENT CRITICAL FACTS below for the difference between ordinary filler copy (fine) and specific real-world facts (not fine unless explicitly authorized).
 - Fill in a <title> tag that fits the description.
 ${SITE_SHAPE_SECTION}
+${WRITING_DIRECTION_SECTION}
 ${multipageInstruction()}
 ${FONTS_SECTION}
 ${ANIMATIONS_SECTION}
@@ -675,7 +686,7 @@ function assertCompleteHtmlResponse(
 // it can embed the image FOR REAL via <img src="url"> in the generated
 // HTML (see IMAGE_RULES_HEADER above), not just use it as style
 // inspiration.
-export type ReferenceImageMediaType = "image/jpeg" | "image/png";
+export type ReferenceImageMediaType = "image/jpeg" | "image/png" | "image/webp";
 export type ReferenceImage = { base64: string; mediaType: ReferenceImageMediaType; url?: string };
 
 // Validates a stored file's content-type is one of the two types the
@@ -683,7 +694,7 @@ export type ReferenceImage = { base64: string; mediaType: ReferenceImageMediaTyp
 // so a file that somehow bypassed the client-side check (or was uploaded
 // by another client entirely) never reaches the vision API mislabeled.
 export function isSupportedReferenceImageMediaType(contentType: string): contentType is ReferenceImageMediaType {
-  return contentType === "image/jpeg" || contentType === "image/png";
+  return contentType === "image/jpeg" || contentType === "image/png" || contentType === "image/webp";
 }
 
 // Builds the text block describing each reference image's real URL to the

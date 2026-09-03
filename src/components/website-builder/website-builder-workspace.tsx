@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import {
   AlertTriangle,
+  CheckCircle2,
   Download,
   Eye,
   History,
@@ -15,11 +16,13 @@ import {
   Trash2,
   Wand2,
   X,
+  Square,
 } from "lucide-react";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { VoiceInput } from "@/components/voice/voice-input";
 import { findUnfilledPlaceholders, type UnfilledPlaceholder } from "@/lib/website-placeholders";
 import { findInventedNumbers, type SuspectNumber } from "@/lib/website-invented-numbers";
+import { parseGenerationNotes, type GenerationNote } from "@/lib/website-generation-notes";
 import { useTranslations, useLocale } from "next-intl";
 import { normalisePages, type WebsitePage } from "@/lib/publishing/website-pages";
 import { censusSiteImages, shouldOfferOwnPhotos } from "@/lib/website-image-census";
@@ -220,6 +223,7 @@ export function WebsiteBuilderWorkspace({
   const describeStatus = useErrorTextForStatus();
   const locale = useLocale();
   const tCommon = useTranslations("common");
+  const tSteps = useTranslations("aiSteps");
   const tPublish = useTranslations("dashboard.publishing");
   const tModule = useTranslations("module");
   const supabase = createClient();
@@ -1027,6 +1031,33 @@ export function WebsiteBuilderWorkspace({
     return findInventedNumbers(displayedHtml, brief);
   }, [displayedHtml, displayedHtmlIsComplete, previewWebsite, activeVersions]);
 
+  // WHAT THE CODE DID AFTER THE MODEL WROTE — V4.6. A forbidden feature
+  // removed, the page cap applied, a map re-zoomed: facts on the row
+  // (lib/website-generation-notes.ts), said here in the owner's language.
+  // Only for the site as generated — a rolled-back version is a different
+  // document and these notes are not about it.
+  const generationNotes = useMemo<GenerationNote[]>(
+    () => (previewWebsite && !viewingVersion ? parseGenerationNotes(previewWebsite.generation_notes) : []),
+    [previewWebsite, viewingVersion]
+  );
+  const describeNote = (note: GenerationNote): string => {
+    switch (note.kind) {
+      case "removedFeature":
+        return t("notes.removedFeature", { feature: t(`notes.feature.${note.feature}`), count: note.count });
+      case "removedPage":
+        return t("notes.removedPage", { feature: t(`notes.feature.${note.feature}`), slug: note.slug });
+      case "pageCap":
+        return t("notes.pageCap", { cap: note.cap, started: note.started });
+      case "mapZoom":
+        return t("notes.mapZoom", { count: note.count });
+      case "stopped":
+        return t("notes.stopped", { count: note.credits });
+    }
+  };
+  // A run the owner stopped: the row is "failed" with an English sentence
+  // for the logs; the person sees their own language, with the number.
+  const stoppedNote = generationNotes.find((n) => n.kind === "stopped");
+
   // ONE PICKER, TWO TABS. The preview shows a page and the edit form
   // changes THAT page, so they must never disagree about which one is
   // selected — rendering the same element from the same state is the
@@ -1313,13 +1344,33 @@ export function WebsiteBuilderWorkspace({
                   <p className="text-xs text-orange-400/80" aria-live="polite">
                     {t(PROGRESS_MESSAGE_KEYS[progressMessageIndex])}
                   </p>
+                  {/* THE STOP BUTTON — V4.6. The generation runs in a request
+                      this tab is not attached to, so this sets a flag the
+                      worker polls (api/websites/[id]/cancel); the stream is
+                      aborted, the tokens produced are counted and charged,
+                      and the row comes back failed with a sentence saying
+                      exactly that. The poll above picks the new status up. */}
+                  <button
+                    type="button"
+                    data-testid="website-stop"
+                    onClick={() => {
+                      void fetch(`/api/websites/${previewWebsite.id}/cancel`, { method: "POST" }).then(
+                        (res) => addToast(res.ok ? tSteps("stopping") : t("generateFailed"), res.ok ? undefined : "error"),
+                        () => addToast(t("generateFailed"), "error")
+                      );
+                    }}
+                    className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 text-sm font-medium text-orange-300 transition-colors duration-150 hover:bg-orange-500/10"
+                  >
+                    <Square className="h-3 w-3 fill-current" aria-hidden="true" />
+                    {tSteps("stop")}
+                  </button>
                 </div>
               ) : !viewingVersion && previewWebsite.status === "failed" ? (
                 <div className="flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-red-800 bg-red-950/20 px-6 text-center">
                   <AlertTriangle className="h-8 w-8 text-red-400" aria-hidden="true" />
                   <p className="text-sm font-medium text-red-300">{t("generationFailedTitle")}</p>
                   <p className="max-w-md text-xs text-red-300/80">
-                    {previewWebsite.error_message ?? t("generateFailed")}
+                    {stoppedNote ? describeNote(stoppedNote) : previewWebsite.error_message ?? t("generateFailed")}
                   </p>
                 </div>
               ) : !viewingVersion && previewWebsite.status === "flagged" ? (
@@ -1403,6 +1454,24 @@ export function WebsiteBuilderWorkspace({
                           >
                             <span className="opacity-70">{t(`inventedKind.${item.kind}`)}</span>{" "}
                             {item.text}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {generationNotes.length > 0 && (
+                    <div
+                      data-testid="website-generation-notes"
+                      className="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] p-3"
+                    >
+                      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-emerald-300">
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        {t("notes.title")}
+                      </p>
+                      <ul className="space-y-1">
+                        {generationNotes.filter((note) => note.kind !== "stopped").map((note, i) => (
+                          <li key={`${note.kind}:${i}`} className="text-[11px] leading-relaxed text-emerald-200/90">
+                            {describeNote(note)}
                           </li>
                         ))}
                       </ul>

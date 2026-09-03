@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { scrubSecrets } from "@/lib/scrub-secrets";
 import { createClient } from "@/lib/supabase/server";
-import { generateWebsiteHtml, WEBSITE_MODEL, type ReferenceImage } from "@/lib/website-builder";
+import { GenerationStoppedError, generateWebsiteHtml, WEBSITE_MODEL, type ReferenceImage } from "@/lib/website-builder";
 import { pickVariation, variationDirective } from "@/lib/website-variation";
 import { MAX_REFERENCE_IMAGES, referenceImagePathBelongsToUser } from "@/lib/website-reference-image";
 import { downloadReferenceImage } from "@/lib/website-reference-image-server";
@@ -33,7 +33,18 @@ import { logSecurityCheck } from "@/lib/security-check-log";
 import { getSiteUrl, getSiteHostname } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
 import { diagLog } from "@/lib/diag";
+import { isStopRequested } from "@/lib/stop-requests";
 import { splitGeneratedPages } from "@/lib/website-multipage";
+import {
+  enforceNegativeInstructions,
+  featureOfPage,
+  forbiddenFeatures,
+  parseNegativeInstructions,
+  pruneDeadNavLinks,
+  type NegativeFeature,
+} from "@/lib/website-negative-instructions";
+import { normaliseMapEmbeds } from "@/lib/website-map-embeds";
+import type { GenerationNote } from "@/lib/website-generation-notes";
 import { parsePhotoSource } from "@/lib/website-design-brief";
 import { enforceSeoHead } from "@/lib/seo/head";
 import { enforceImageAltText } from "@/lib/seo/alt-text";
@@ -380,11 +391,31 @@ export async function POST(request: Request) {
     // STORED — which happens below, outside that block. See
     // registerUnsplashUses in lib/website-image-resolver.ts.
     let images: ImageResolution = { html: "", used: [], halted: null };
+    // WHAT THE CODE DID AFTER THE MODEL WROTE — V4.6. Every enforcement
+    // below that changes the site writes one fact here, and the row
+    // carries them to the workspace, which says them in the owner's
+    // language. See lib/website-generation-notes.ts.
+    const notes: GenerationNote[] = [];
     // WHERE THE PHOTOS COME FROM, read back off the description the
     // design controls compiled it into (lib/website-design-brief.ts).
     // Defaults to "stock" for every description written before the
     // choice existed, so nothing changes for them.
     const photoSource = parsePhotoSource(description);
+    // THE STOP BUTTON — V4.6. The browser is not connected to this
+    // request, so a stop is a column (cancel_requested_at, set by
+    // api/websites/[id]/cancel) polled every two seconds while the
+    // stream runs. `shouldStop` is what the generator asks between
+    // deltas; when it says yes the stream is aborted, the tokens produced
+    // so far are counted onto `costs`, and the catch below settles for
+    // exactly those.
+    let stopRequested = false;
+    const stopPoll = setInterval(() => {
+      if (stopRequested) return;
+      void isStopRequested(supabase, "user_websites", websiteId).then((yes: boolean) => {
+        if (yes) stopRequested = true;
+      });
+    }, 2000);
+    const shouldStop = () => stopRequested;
     try {
       void recordAiCallForDailySpend(
         estimateWebsiteGenerationCost({ descriptionLength: description.length, imageCount: referenceImages.length })
@@ -410,8 +441,11 @@ export async function POST(request: Request) {
         onDelta,
         formEndpointUrl,
         costs,
-        variation
+        variation,
+        shouldStop,
+        (cap, started) => notes.push({ kind: "pageCap", cap, started })
       );
+      clearInterval(stopPoll);
       // Real-photo placeholder resolution (Unsplash; unresolved
       // placeholders are removed, never substituted with random images) —
       // see lib/website-image-resolver.ts. A no-op when the model didn't
@@ -445,7 +479,32 @@ export async function POST(request: Request) {
           { websiteId, dropped: split.dropped.join(" | ").slice(0, 300) }
         );
       }
-      const documents: string[] = [split.home, ...split.pages.map((pg) => pg.html)];
+      // WHAT THE BRIEF FORBADE, REMOVED — V4.6. "Μη βάλεις online
+      // κράτηση" was asked of the model and the model built one. The
+      // prompt still asks (lib/website-builder.ts); this is what makes it
+      // true: the owner's own words are read for negatives, a page that
+      // IS the feature is dropped whole, and every element that is the
+      // feature is cut out of every remaining document. Each removal is a
+      // note the workspace shows: "Removed the online booking, as you
+      // asked." See lib/website-negative-instructions.ts.
+      const negatives = parseNegativeInstructions(description);
+      const forbidden = forbiddenFeatures(negatives);
+      const keptPages = split.pages.filter((pg) => {
+        const feature = featureOfPage(pg.slug, pg.label, forbidden);
+        if (!feature) return true;
+        notes.push({ kind: "removedPage", feature, slug: pg.slug });
+        return false;
+      });
+      const removedCounts = new Map<NegativeFeature, number>();
+      const documents: string[] = [split.home, ...keptPages.map((pg) => pg.html)].map((doc) => {
+        const enforced = enforceNegativeInstructions(doc, negatives);
+        for (const r of enforced.removed) removedCounts.set(r.feature, (removedCounts.get(r.feature) ?? 0) + r.count);
+        return enforced.html;
+      });
+      for (const feature of forbidden) {
+        const count = removedCounts.get(feature) ?? 0;
+        if (count > 0) notes.push({ kind: "removedFeature", feature, count });
+      }
 
       const inventedNumbers = documents.flatMap((doc) => findInventedNumbers(doc, description));
       if (inventedNumbers.length > 0) {
@@ -480,10 +539,25 @@ export async function POST(request: Request) {
       // and nothing linked to any of them. The links stay RELATIVE here:
       // the address is not known until publish, which is where they are
       // resolved to absolute paths.
-      const generatedSlugs = split.pages.map((pg) => pg.slug);
+      const generatedSlugs = keptPages.map((pg) => pg.slug);
       const cleaned = documents.map(
         (doc) => makeGeneratedLinksSafe(doc, { pageSlugs: generatedSlugs }).html
       );
+      // A NAV ENTRY TO A PAGE THAT IS NOT SERVED IS NOT A PAGE. Link-safety
+      // just rewrote every link to an unserved slug — a page past the cap,
+      // a page that was the forbidden feature — to "#"; a menu of seven
+      // with two dead entries is the "7 pages" the owner counted. Those
+      // entries go. And every Google Maps embed is set to a zoom that
+      // shows the building, with the marker on the address
+      // (lib/website-map-embeds.ts).
+      let mapsNormalised = 0;
+      for (let i = 0; i < cleaned.length; i += 1) {
+        const pruned = pruneDeadNavLinks(cleaned[i]);
+        const maps = normaliseMapEmbeds(pruned.html);
+        mapsNormalised += maps.normalised;
+        cleaned[i] = maps.html;
+      }
+      if (mapsNormalised > 0) notes.push({ kind: "mapZoom", count: mapsNormalised });
 
       // Every Unsplash photo in the document we are about to store
       // carries its photographer. Generation already emits the credit, so
@@ -548,7 +622,7 @@ export async function POST(request: Request) {
         return enforceSeoHead(withAlt.html).html;
       });
       htmlContent = optimised[0];
-      extraPages = split.pages.map((pg, i) => ({ ...pg, html: optimised[i + 1] }));
+      extraPages = keptPages.map((pg, i) => ({ ...pg, html: optimised[i + 1] }));
       const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined }));
       // ONE AI CALL FOR THE WHOLE SITE, not one per page. The review reads
       // content for what a deterministic scan cannot see, and content is
@@ -585,6 +659,54 @@ export async function POST(request: Request) {
         });
       }
     } catch (err) {
+      clearInterval(stopPoll);
+      if (err instanceof GenerationStoppedError) {
+        // STOPPED BY THE OWNER. The tokens produced up to the abort are
+        // already on `costs` (lib/website-builder.ts recorded the partial
+        // usage before throwing), so this settles for those and releases
+        // the rest of the hold. The row says it was stopped and what that
+        // cost, in the column the workspace already shows.
+        const settlement = await settleReservation({
+          userId: user.id,
+          reservationId,
+          feature: "website_generate",
+          costs,
+          plan,
+          bypassCharge: bypassCredits,
+          metadata: {
+            websiteId,
+            stopped: true,
+            descriptionLength: description.length,
+            imageCount: referenceImages.length,
+            outputHtmlLength: err.partialText.length,
+            estimatedCredits: estimate.estimatedCredits,
+            reservedCredits: bypassCredits ? 0 : estimate.reserveCredits,
+          },
+        });
+        await supabase
+          .from("user_websites")
+          .update({
+            status: "failed",
+            // The browser renders THIS, translated (dashboard.websiteBuilder
+            // .notes.stopped); the English sentence below is for logs and
+            // a curl. See lib/website-generation-notes.ts.
+            generation_notes: [...notes, { kind: "stopped", credits: settlement.creditsCharged }],
+            error_message:
+              settlement.creditsCharged > 0
+                ? `Stopped by you. ${settlement.creditsCharged} credits were charged for the part that was generated; the rest of the hold was released.`
+                : "Stopped by you. Nothing was charged.",
+          })
+          .eq("id", websiteId);
+        diagLog(
+          `[billing] website_generate STOPPED and settled: ${JSON.stringify({
+            userId: user.id,
+            websiteId,
+            partialChars: err.partialText.length,
+            creditsCharged: settlement.creditsCharged,
+          })}`
+        );
+        return NextResponse.json({ ok: true, stopped: true });
+      }
       logApiError("/api/websites/generate/process", err, { stage: "anthropic_call" });
       // Release, not settle: the route's user-facing promise on a failed
       // generation has always been "No credits were charged", and the old
@@ -624,6 +746,10 @@ export async function POST(request: Request) {
         // keeps an existing row indistinguishable from a new one, and an
         // empty array would read as "pages were asked for and none survived".
         pages: extraPages.length > 0 ? extraPages : null,
+        // Null, not [], when nothing was done: the column's absence keeps a
+        // site from before it existed indistinguishable from one where the
+        // code had nothing to say.
+        generation_notes: notes.length > 0 ? notes : null,
         // Still "processing" here on purpose. The client polls this row
         // and, the moment it stops being pending/processing, refreshes the
         // credits counter — but settlement runs BELOW this update, so

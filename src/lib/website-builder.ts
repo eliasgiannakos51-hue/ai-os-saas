@@ -9,7 +9,15 @@ import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import type { CostAccumulator, CostStage } from "@/lib/billing/cost-accumulator";
+import { estimateOutputTokensFromText, partialUsage } from "@/lib/chat/partial-usage";
 import { multipageInstruction } from "@/lib/website-multipage";
+import { MAX_PAGES_PER_SITE } from "@/lib/publishing/website-pages";
+import {
+  negativeInstructionBlock,
+  pageCapReached,
+  parseNegativeInstructions,
+  truncateAtPageCap,
+} from "@/lib/website-negative-instructions";
 import { QUOTE_FIELDS_BY_INDUSTRY } from "@/lib/websites/form-types";
 import { seoInstruction } from "@/lib/seo/prompt";
 
@@ -408,6 +416,7 @@ INTERNAL LINKS — ONLY TWO FORMS ARE VALID:
 - To ANOTHER PAGE of this site: the bare slug of a page you actually wrote under MULTIPLE PAGES, <a href="about">; home is <a href=".">. One document means no other pages, so every internal link is a fragment and "home" is href="#".
 - NEVER href="/about", href="/contact", href="about.html" or href="/". A published site is served from a sub-path, so a browser resolves a leading slash against the hosting domain and the visitor LEAVES the site — onto a sign-in page belonging to someone else. This has happened on a real customer site.
 - Absolute links to OTHER people's sites are fine and often wanted — a Google Maps pin, a Facebook page, a booking platform. Write those in full, starting with https://.
+- A map of the brief's address: <iframe src="https://www.google.com/maps?q=<address, URL-encoded>&z=17&output=embed">, never a maps/embed?pb= blob.
 - tel:, mailto: and sms: links are not navigation; use them exactly as described below.
 
 FUNCTIONAL CONTACT ELEMENTS (not decorative — these must actually work):
@@ -762,6 +771,23 @@ function buildUserBriefBlock(description: string): string {
 // text is appended verbatim (no per-round code-fence stripping — a
 // truncated round never has a closing fence to strip anyway); the fence
 // check runs once on the fully assembled text at the end, in the caller.
+/**
+ * Thrown by streamHtmlToCompletion when `shouldStop` said so mid-stream —
+ * V4.6. By the time it is thrown the tokens produced up to the abort are
+ * ALREADY on the accumulator (input side from message_start, output side
+ * counted from the text that arrived), so the caller settles for those
+ * and nothing else. `partialText` is what existed at the moment of the
+ * stop, for the record.
+ */
+const countPageMarkersOf = (text: string) => (text.match(/<!--\s*IONEXA:PAGE\s+slug="[^"]{1,60}"\s+label="[^"]{1,80}"\s*-->/gi) ?? []).length;
+
+export class GenerationStoppedError extends Error {
+  constructor(public readonly partialText: string) {
+    super("Stopped by the owner while generating.");
+    this.name = "GenerationStoppedError";
+  }
+}
+
 async function streamHtmlToCompletion(
   anthropic: Anthropic,
   system: Anthropic.TextBlockParam[],
@@ -773,7 +799,19 @@ async function streamHtmlToCompletion(
   // rounds it took, which is exactly the case where the cost is highest.
   costs?: CostAccumulator,
   stage: CostStage = "generation",
-  searchTool: Anthropic.WebSearchTool20250305 = WEB_SEARCH_TOOL
+  searchTool: Anthropic.WebSearchTool20250305 = WEB_SEARCH_TOOL,
+  // THE STOP BUTTON — V4.6. Polled once a second while a round streams;
+  // when it answers yes the stream is aborted and the partial usage is
+  // recorded before GenerationStoppedError is thrown.
+  shouldStop?: () => boolean,
+  // THE PAGE CAP, ENFORCED WHERE THE TOKENS ARE SPENT — V4.6. The prompt
+  // says "maximum N pages" and a model can write seven anyway; it did.
+  // With a cap here the stream is aborted the moment the marker of page
+  // cap+1 arrives, the usage produced so far is recorded, and the text
+  // is cut at that marker — so pages beyond the cap are neither served
+  // nor paid for. `onPageCap` tells the caller it happened.
+  pageCap?: number,
+  onPageCap?: (cap: number, started: number) => void
 ): Promise<{ rawText: string; stopReason: string | null }> {
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: initialUserContent }];
   const startedAt = Date.now();
@@ -790,6 +828,24 @@ async function streamHtmlToCompletion(
     });
 
     let roundText = "";
+    // The text of THIS round as it arrives, whether or not a live
+    // preview is listening: it is what a stop is charged for.
+    let arrived = "";
+    let capReached = false;
+    stream.on("text", (delta) => {
+      arrived += delta;
+      if (capReached || !pageCap) return;
+      // A marker is ~120 characters; if one was completed by this delta
+      // it ends inside this window, and only then is the whole text
+      // counted. Scanning everything on every delta would be quadratic.
+      const full = combined + arrived;
+      const tail = full.slice(-(delta.length + 200));
+      if (!/IONEXA:PAGE[^>]*-->/i.test(tail)) return;
+      if (pageCapReached(full, pageCap)) {
+        capReached = true;
+        stream.abort();
+      }
+    });
     if (onDelta) {
       stream.on("text", (delta) => {
         roundText += delta;
@@ -801,7 +857,49 @@ async function streamHtmlToCompletion(
       });
     }
 
-    const response = await stream.finalMessage();
+    let stoppedByOwner = false;
+    const stopWatch = shouldStop
+      ? setInterval(() => {
+          if (!stoppedByOwner && shouldStop()) {
+            stoppedByOwner = true;
+            stream.abort();
+          }
+        }, 1000)
+      : null;
+
+    let response: Anthropic.Message;
+    try {
+      response = await stream.finalMessage();
+    } catch (err) {
+      if (!stoppedByOwner && !capReached) throw err;
+      // STOPPED, OR CAPPED. What was produced is charged; what was not,
+      // is not. The input side is in the stream's snapshot
+      // (message_start); the output side is counted from the text that
+      // arrived, with the script-aware estimate as the fallback if the
+      // counter cannot be reached.
+      const snapshot = stream.currentMessage?.usage ?? null;
+      let outputTokens: number;
+      try {
+        const count = await anthropic.messages.countTokens({
+          model: MODEL,
+          messages: [{ role: "user", content: arrived || "." }],
+        });
+        outputTokens = arrived ? count.input_tokens : 0;
+      } catch {
+        outputTokens = estimateOutputTokensFromText(arrived);
+      }
+      costs?.record(round === 0 ? stage : "retry", partialUsage(snapshot, outputTokens), stream.currentMessage?.model || MODEL);
+      if (stoppedByOwner) throw new GenerationStoppedError(combined + arrived);
+      // The cap: the pages within it are complete documents, so the text
+      // is cut at the marker of the first page beyond it and returned as
+      // a finished run — no continuation round, nothing more spent.
+      const full = combined + arrived;
+      const cap = pageCap as number;
+      onPageCap?.(cap, Math.max(cap + 1, countPageMarkersOf(full)));
+      return { rawText: truncateAtPageCap(full, cap).trim(), stopReason: "page_cap" };
+    } finally {
+      if (stopWatch) clearInterval(stopWatch);
+    }
     costs?.record(round === 0 ? stage : "retry", response.usage, response.model || MODEL);
     if (!onDelta) {
       // EVERY text block, joined — not the first one.
@@ -887,17 +985,25 @@ export async function generateWebsiteHtml(
   // to text. In the USER message on purpose: the cached system prompt
   // must stay byte-identical, and the draw differs per site — that
   // difference IS the feature.
-  variationText?: string
+  variationText?: string,
+  /** THE STOP BUTTON — V4.6. See streamHtmlToCompletion. */
+  shouldStop?: () => boolean,
+  /** THE PAGE CAP was hit: `started` pages were begun, `cap` are kept. */
+  onPageCap?: (cap: number, started: number) => void
 ): Promise<string> {
   const anthropic = new Anthropic({ apiKey });
   const images = referenceImages?.slice(0, MAX_REFERENCE_IMAGES) ?? [];
 
-  // Reference-image metadata FIRST, then the variation draw, the user's
-  // brief LAST — see buildUserBriefBlock. The brief stays the final thing
-  // in context, so the person's own words still outrank the draw.
+  // Reference-image metadata FIRST, then the variation draw, then what
+  // the brief FORBIDS (read out of the owner's own words by
+  // lib/website-negative-instructions.ts — the belt; the worker removes
+  // whatever is built anyway — the braces), the user's brief LAST — see
+  // buildUserBriefBlock. The brief stays the final thing in context, so
+  // the person's own words still outrank the draw.
   const userText = [
     buildReferenceImageUrlList(images).trim(),
     variationText?.trim() ?? "",
+    negativeInstructionBlock(parseNegativeInstructions(description)),
     buildUserBriefBlock(description),
   ]
     .filter(Boolean)
@@ -928,7 +1034,11 @@ export async function generateWebsiteHtml(
     content,
     onDelta,
     costs,
-    "generation"
+    "generation",
+    WEB_SEARCH_TOOL,
+    shouldStop,
+    MAX_PAGES_PER_SITE,
+    onPageCap
   );
   if (!rawText) {
     throw new Error("The model did not return a website.");

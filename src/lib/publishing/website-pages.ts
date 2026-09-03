@@ -135,9 +135,19 @@ export function normalisePages(raw: unknown): { pages: WebsitePage[]; dropped: s
       typeof candidate.label === "string" && candidate.label.trim()
         ? candidate.label.trim().slice(0, 60)
         : check.slug;
+    // THE CAP IS RECORDED, NOT SILENT. This used to `break` at the cap,
+    // so a seven-page generation was stored as five with nothing anywhere
+    // saying two were thrown away — and their nav links, rewritten to
+    // "#" by link-safety, were the "7 pages" the owner counted (V4.6).
+    // The worker now stops the stream before page cap+1 is written
+    // (lib/website-builder.ts), so this is the second line of defence:
+    // a page that reaches here past the cap is dropped AND named.
+    if (pages.length >= MAX_PAGES_PER_SITE - 1) {
+      dropped.push(`${check.slug}: beyond the cap of ${MAX_PAGES_PER_SITE} pages`);
+      continue; // -1: home is not in here
+    }
     seen.add(check.slug);
     pages.push({ slug: check.slug, label, html });
-    if (pages.length >= MAX_PAGES_PER_SITE - 1) break; // -1: home is not in here
   }
   return { pages, dropped };
 }

@@ -30,6 +30,7 @@ import { DepthPicker, type DepthFacts } from "@/components/agents/depth-picker";
 import { TemplateMatches, type TemplateMatch } from "@/components/agents/template-matches";
 import { ShareTemplate } from "@/components/agents/share-template";
 import { parseAgentDepth, type AgentDepth } from "@/lib/agents/agent-depth";
+import { effectiveRunDepth, runRequestBody, type RunDepthOverride } from "@/lib/agents/run-depth";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { formatDateTimeInZone, formatNumber } from "@/lib/format-number";
 import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarification-client";
@@ -247,10 +248,15 @@ export function AgentsWorkspace({
   // returned so the user can change it before creating without the change
   // being lost by a re-render of the preview.
   const [previewDepth, setPreviewDepth] = useState<AgentDepth>("standard");
-  // ONE RUN, DEEPER — never written to the agent. Reset to the agent's own
-  // depth whenever the selection changes, so a deeper run of one agent
-  // cannot silently become the default for the next one you open.
-  const [runDepth, setRunDepth] = useState<AgentDepth>("standard");
+  // ONE RUN, DEEPER — never written to the agent, and KEYED BY THE AGENT
+  // IT WAS MADE FOR (V4.6). This was `useState<AgentDepth>("standard")`,
+  // reset to the agent's own tier only inside startEditing — so a Deep
+  // agent selected by its card and run from the card menu was sent
+  // `{ depth: "standard" }` as a deliberate override, and ran (and was
+  // charged) at Standard. An override that carries the agent's id cannot
+  // be read for any other agent, so there is nothing left to reset. See
+  // lib/agents/run-depth.ts.
+  const [runOverride, setRunOverride] = useState<RunDepthOverride>(null);
   const [matches, setMatches] = useState<TemplateMatch[]>([]);
   const [adopting, setAdopting] = useState(false);
 
@@ -723,7 +729,7 @@ export function AgentsWorkspace({
   // search-enabled run plus a retry plus an email is the slowest thing
   // this feature does, and awaiting it meant closing the tab aborted the
   // fetch while the run itself carried on unseen.
-  async function runNow(agent: UserAgent, depth?: AgentDepth) {
+  async function runNow(agent: UserAgent, depth: AgentDepth) {
     setLastRunOutput(null);
     setSelectedId(agent.id);
     try {
@@ -731,13 +737,13 @@ export function AgentsWorkspace({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         keepalive: true,
-        // SENT ONLY WHEN IT DIFFERS from the agent's own. An override
-        // equal to the stored depth is not an override; sending it
-        // anyway would put depthOverridden: true on a cost row for a run
-        // that was entirely ordinary.
-        body: JSON.stringify(
-          depth && depth !== parseAgentDepth(agent.config?.depth) ? { depth } : {}
-        ),
+        // SENT ONLY WHEN IT DIFFERS from the agent's own — decided by
+        // lib/agents/run-depth.ts, the same function that decides what
+        // the picker shows, so what is shown and what is sent cannot
+        // disagree. An override equal to the stored depth is not an
+        // override; sending it anyway would put depthOverridden: true
+        // on a cost row for a run that was entirely ordinary.
+        body: JSON.stringify(runRequestBody(agent, { agentId: agent.id, depth })),
       });
       const data = await response.json();
       if (!data.ok) {
@@ -763,9 +769,11 @@ export function AgentsWorkspace({
       deliveryMethod: isDeliveryChannel(agent.delivery_method) ? agent.delivery_method : "email",
       deliveryTarget: agent.delivery_target ?? "",
     });
-    // A per-run override belongs to the agent you are looking at, not to
-    // the session. Opening another agent resets it to that agent's own.
-    setRunDepth(parseAgentDepth(agent.config?.depth));
+    // No per-run reset here any more: the override carries the id of the
+    // agent it was made for (lib/agents/run-depth.ts), so opening another
+    // agent reads that agent's own tier without anything being reset —
+    // and, unlike the reset this replaced, it holds whether the agent was
+    // opened through Edit or selected by its card.
   }
 
   async function saveEdit(agent: UserAgent) {
@@ -1300,7 +1308,11 @@ export function AgentsWorkspace({
                       // Driven by the job row rather than a local flag, so a
                       // run started before a reload still reads as running.
                       disabled: busyId === agent.id || runningNow,
-                      onSelect: () => void runNow(agent, runDepth),
+                      // THE TIER THIS AGENT RUNS AT — its own, unless
+                      // the person set a one-off override for THIS
+                      // agent in the detail panel. Never a value left
+                      // over from another agent, or from nothing.
+                      onSelect: () => void runNow(agent, effectiveRunDepth(agent, runOverride)),
                     },
                     {
                       key: "toggle",
@@ -1525,8 +1537,8 @@ export function AgentsWorkspace({
                   })}
                 </p>
                 <DepthPicker
-                  value={runDepth}
-                  onChange={setRunDepth}
+                  value={effectiveRunDepth(selected, runOverride)}
+                  onChange={(depth) => setRunOverride({ agentId: selected.id, depth })}
                   facts={depthFacts}
                   disabled={runningNow || busyId === selected.id}
                   compact

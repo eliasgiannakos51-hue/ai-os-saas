@@ -109,6 +109,7 @@ console.log("\n== 1. the inventory is complete and nothing is unclassified ==");
 //                 a security verdict.
 const CLASSIFIED = {
   deliverable: [
+    "src/app/api/documents/[id]/pdf/route.ts",
     "src/lib/research/research.ts",
     "src/lib/agents/agent-runner.ts",
     "src/lib/jobs/handlers/file-ask.ts",

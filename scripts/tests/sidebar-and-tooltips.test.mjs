@@ -116,6 +116,30 @@ checkTrue(
 );
 const alwaysOpen = groupBlocks.filter((g) => !g.collapsible);
 check("exactly one group is always open", alwaysOpen.length, 1);
+// V4.6: the config carries items marked hidden — trackers reachable from
+// the records hub and ⌘K, kept out of the sidebar on purpose. The sidebar
+// must render through sidebarGroups() (which drops them), never through
+// visibleGroups() (which keeps them for the palette).
+const sidebarSrc = readFileSync("src/components/dashboard/sidebar.tsx", "utf8");
+checkTrue(
+  "the sidebar renders through sidebarGroups, so hidden items stay out of it",
+  /sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\)\.map\(renderGroup\)/.test(sidebarSrc) && !/visibleGroups\([^)]*\)\.map\(renderGroup\)/.test(sidebarSrc),
+  "the sidebar is rendering a group list that still carries hidden items",
+);
+// The other half of hidden: ⌘K must still find every hidden tracker, or
+// "hidden from the sidebar" becomes "gone from the product". The palette
+// flattens visibleGroups() and never filters on `hidden`.
+const paletteSrc = readFileSync("src/components/dashboard/command-palette.tsx", "utf8");
+checkTrue(
+  "the command palette searches hidden items too — it flattens visibleGroups and never filters on hidden",
+  /visibleGroups\(ALL_SIDEBAR_GROUPS, isOwner\)\.flatMap\(\(group\) => group\.items\);/.test(paletteSrc) && !/\.hidden\b/.test(paletteSrc),
+  "the palette is dropping hidden items, so a hidden page has no entry point at all",
+);
+checkTrue(
+  "Settings is rendered as its own group below the main ones",
+  /sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)\.map\(renderGroup\)/.test(sidebarSrc),
+  "the Settings group is no longer rendered by the sidebar",
+);
 checkTrue(
   `and it is the first one (${groupBlocks[0]?.heading})`,
   groupBlocks[0] && !groupBlocks[0].collapsible,

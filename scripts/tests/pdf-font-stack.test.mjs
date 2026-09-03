@@ -223,7 +223,12 @@ console.log("\n== 2b. every PDF route is reachable from the interface ==");
       urlPath
         .split(/\/\[[^\]]+\]/)
         .map(escape)
-        .join("/\\$\\{[^}]+\\}")
+        .join("/\\$\\{[^}]+\\}") +
+        // THE PATH ENDS HERE. Without this, a call to
+        // /api/documents/${id}/pdf-estimate satisfied the check for
+        // /api/documents/[id]/pdf — the mutation that points the dialog at
+        // a route that does not exist survived on exactly that.
+        "(?![\\w-])"
     );
     return !pattern.test(ui);
   });
@@ -232,7 +237,25 @@ console.log("\n== 2b. every PDF route is reachable from the interface ==");
     unreachable.length === 0,
     `${unreachable.join(", ")} — a route nothing calls is the same to the user as no route`
   );
-  const buttons = [...ui.matchAll(/<DownloadPdfButton\b/g)].length;
+  // V4.6: the documents route has its own button (DocumentPdfButton — it
+  // asks the language and prices a translation first), which downloads
+  // through the SAME savePdfResponse the shared button uses, so section
+  // 2c's download mechanics cover it. It counts as a button only while
+  // that import holds.
+  const dialogSrc = stripTs(readFileSync("src/components/documents/document-pdf-button.tsx", "utf8"));
+  const dialogShares = /savePdfResponse[\s\S]{0,200}?from "@\/components\/ui\/download-pdf-button"/.test(dialogSrc) && /savePdfResponse\(/.test(dialogSrc);
+  ok("the documents dialog downloads through the shared savePdfResponse", dialogShares);
+  // The documents route has TWO renders — the document's own language and
+  // a translation — and each must go through pdfResponse; one of them
+  // returning JSON is a route that "renders through pdfResponse" and
+  // still ships no PDF on that path.
+  const documentsRoute = stripTs(readFileSync("src/app/api/documents/[id]/pdf/route.ts", "utf8"));
+  ok("the documents route renders both its paths (own language, translation) through pdfResponse",
+    (documentsRoute.match(/pdfResponse\s*\(/g) ?? []).length >= 2);
+  ok("the document editor carries the PDF dialog", /<DocumentPdfButton\b/.test(stripTs(readFileSync("src/components/documents/document-editor.tsx", "utf8"))));
+  ok("...and so does the documents list", /<DocumentPdfButton\b/.test(stripTs(readFileSync("src/components/documents/documents-list.tsx", "utf8"))));
+  const buttons =
+    [...ui.matchAll(/<DownloadPdfButton\b/g)].length + (dialogShares ? [...ui.matchAll(/<DocumentPdfButton\b/g)].length : 0);
   ok(
     `the download button is used (${buttons})`,
     buttons >= pdfRoutes.length,

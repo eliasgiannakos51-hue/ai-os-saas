@@ -66,10 +66,17 @@ const MUTATIONS = [
     to: 'hrefFor: () => "/dashboard/mission",',
   },
   {
-    name: "the agents page stops reading ?agent=",
-    file: "src/components/agents/agents-workspace.tsx",
-    from: 'const requested = new URLSearchParams(window.location.search).get("agent");',
-    to: "const requested = null;",
+    // V4.6: ?agent= has TWO readers — the page's searchParams prop, which
+    // hands initialAgent to the workspace, and the workspace's own URL
+    // read. Removing either leaves the feature working, so "the page
+    // stops reading ?agent=" was an equivalent mutation and survived on
+    // every run. The defect that is real, and single-edit, is the LINK
+    // side: Create Studio sending people to the agent it built under a
+    // parameter nobody reads.
+    name: "Create Studio sends you to the agent it just made under a parameter nobody reads",
+    file: "src/lib/create-studio/use-create-studio.ts",
+    from: "              href: `/dashboard/agents?agent=${data.agent.id}`,",
+    to: "              href: `/dashboard/agents?built=${data.agent.id}`,",
   },
   {
     name: "the module list stops reading ?record=",

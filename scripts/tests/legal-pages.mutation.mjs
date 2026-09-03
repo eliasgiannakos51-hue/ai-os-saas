@@ -131,8 +131,8 @@ const MUTANTS = [
   {
     name: "one response stops carrying the sender state",
     file: ROUTE,
-    from: '        { ok: false, senderStatus: status, error: "Invalid request." },',
-    to: '        { ok: false, error: "Invalid request." },',
+    from: '        { ok: false, senderStatus: status, code: "invalid_request", error: "Invalid request." },',
+    to: '        { ok: false, code: "invalid_request", error: "Invalid request." },',
     expect: "every response carries senderStatus",
   },
   {

@@ -37,7 +37,8 @@ const ROUTE = "src/app/api/documents/[id]/pdf/route.ts";
 const EDITOR = "src/components/documents/document-editor.tsx";
 const BUTTON = "src/components/ui/download-pdf-button.tsx";
 
-const TARGETS = [GATE, FONTS, STACK_TS, DOCUMENT, RENDER, ROUTE, EDITOR, BUTTON];
+const DIALOG = "src/components/documents/document-pdf-button.tsx";
+const TARGETS = [GATE, FONTS, STACK_TS, DOCUMENT, RENDER, ROUTE, EDITOR, BUTTON, DIALOG];
 
 const MUTANTS = [
   // ---- the thing the owner asked for by name ------------------------
@@ -75,8 +76,8 @@ const MUTANTS = [
   {
     name: "a route stops rendering through pdfResponse",
     file: ROUTE,
-    from: "    return await pdfResponse(element, { filename: title, fallbackName: \"document\" });",
-    to: "    return NextResponse.json({ element: String(element) });",
+    from: "      return await pdfResponse(element, { filename: storedTitle, fallbackName: \"document\" });",
+    to: "      return NextResponse.json({ element: String(element) });",
   },
   {
     name: "pdfResponse stops registering the fonts",
@@ -162,14 +163,14 @@ const MUTANTS = [
   {
     name: "the documents editor loses its download button",
     file: EDITOR,
-    from: '            <DownloadPdfButton href={`/api/documents/${doc.id}/pdf`} fallbackName="document" />\n',
+    from: '            <DocumentPdfButton documentId={doc.id} />\n',
     to: "",
   },
   {
     name: "a button points at a route that does not exist",
-    file: EDITOR,
-    from: "<DownloadPdfButton href={`/api/documents/${doc.id}/pdf`}",
-    to: "<DownloadPdfButton href={`/api/documents/${doc.id}/export`}",
+    file: DIALOG,
+    from: "`/api/documents/${documentId}/pdf${lang ? ",
+    to: "`/api/documents/${documentId}/export${lang ? ",
   },
   {
     // The blob keeps application/pdf, so every browser renders it in its
@@ -178,8 +179,8 @@ const MUTANTS = [
     // paid for once.
     name: "the blob is not forced to octet-stream, so the PDF opens instead of downloading",
     file: BUTTON,
-    from: 'const blob = new Blob([raw], { type: "application/octet-stream" });',
-    to: "const blob = raw;",
+    from: 'const blob = new Blob([blobRaw], { type: "application/octet-stream" });',
+    to: "const blob = blobRaw;",
   },
   {
     name: "every file is excused as another renderer, not the one that uses one",

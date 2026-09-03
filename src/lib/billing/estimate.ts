@@ -346,6 +346,19 @@ export const ACTION_PROFILES = {
     baseOutputChars: 400,
     outputCharsPerInputChar: 2,
   },
+  // Downloading a document as a PDF in ANOTHER language
+  // (api/documents/[id]/pdf?lang=). The input is the whole document's
+  // HTML and the output is the same HTML translated, so output tracks
+  // input at about one-to-one — a Chinese translation of a Greek text is
+  // shorter in characters and longer in tokens, and 1.2 covers both. The
+  // dialog quotes THIS estimate before the download, which is the whole
+  // point: a translation charges, and it says the amount first.
+  documentTranslate: {
+    systemPromptTokens: 250,
+    auxiliaryCalls: [],
+    baseOutputChars: 200,
+    outputCharsPerInputChar: 1.2,
+  },
   // Weekly Reflection (api/reflection/generate). The input is a whole
   // week of the user's activity, assembled by the route, so like
   // recordAsk it is the context and not the prompt that sets the cost.

@@ -40,7 +40,21 @@ export type FooterLink = {
 
 export const FOOTER_LINKS: readonly FooterLink[] = [
   { href: "/pricing", labelKey: "footer.pricing" },
-  { href: "/roadmap", labelKey: "footer.roadmap" },
+  // /roadmap IS NOT HERE, ON PURPOSE — V4.6.
+  //
+  // Κρυμμένο μέχρι το V7.5. Χωρίς πραγματικούς χρήστες, ένα roadmap είναι
+  // υπόσχεση σε κανέναν.
+  //
+  // The page still exists at src/app/roadmap/page.tsx and still answers
+  // at /roadmap for anybody who has the URL. What is gone is every link
+  // to it: this footer, and — because sitemap.ts and robots.ts derive
+  // from this list — the crawler's copy too. It was never in the
+  // sidebar (lib/sidebar-nav.ts has no entry for it).
+  //
+  // scripts/tests/roadmap-hidden.test.mjs holds the pair: while the
+  // sentence above stands, no file under src/ may link to /roadmap; if
+  // the link is wanted back, the sentence is deleted with it. A link
+  // returned with the sentence still here fails the build.
   { href: "/terms", labelKey: "footer.terms" },
   { href: "/privacy", labelKey: "footer.privacy" },
   { href: "/cookies", labelKey: "footer.cookies" },

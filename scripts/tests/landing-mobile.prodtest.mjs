@@ -68,7 +68,8 @@ const MEASURE = () => {
   const signup = document.querySelector('a[href="/signup"]');
   // Found by href rather than by text, so this reads the same in all ten
   // locales.
-  const footerLinks = ["/pricing", "/roadmap", "/terms", "/privacy", "/cookies"]
+  // /roadmap is deliberately absent: hidden until V7.5 (lib/footer-links.ts).
+  const footerLinks = ["/pricing", "/terms", "/privacy", "/cookies"]
     .map((href) => document.querySelector(`footer a[href="${href}"]`))
     .filter(Boolean);
 

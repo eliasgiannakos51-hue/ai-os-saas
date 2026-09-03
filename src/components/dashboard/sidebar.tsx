@@ -17,7 +17,6 @@ import {
   type SidebarItem,
 } from "@/lib/sidebar-nav";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
-import { LanguageSelector } from "@/components/i18n/language-selector";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { useToast } from "@/components/toast/toast-context";
 import { Logo } from "@/components/logo";
@@ -329,19 +328,20 @@ export function Sidebar({
             {sidebarGroups([SETTINGS_GROUP], isOwner).map(renderGroup)}
           </div>
 
-        {/* LANGUAGE AND THEME, HERE BECAUSE ON A PHONE THEY WERE NOWHERE.
-            top-nav.tsx wraps them in `hidden sm:contents` and says they
-            "belong one tap deeper rather than the two that get to stay
-            small". They were not one tap deeper. The mobile button opens
-            THIS sidebar and nothing else, and this sidebar had no
-            language control — so below 640px, on every dashboard route,
-            there was no way to change the language at all. A setting
-            nobody can reach is the same as a setting that does not
-            exist, which is what a Greek-speaking user reported.
-            Shown only where the top bar hides them, so desktop keeps one
-            of each rather than two. */}
+        {/* THE THEME TOGGLE, HERE BECAUSE ON A PHONE IT IS NOWHERE ELSE.
+            top-nav.tsx wraps it in `hidden sm:contents`, so below 640px
+            this drawer is where it lives. Shown only where the top bar
+            hides it, so desktop keeps one rather than two.
+
+            THE LANGUAGE CONTROL WAS HERE TOO, AND IT WAS NOT FOUND. This
+            block sits under sixteen nav rows and the settings group,
+            which on a 390x844 phone is below the fold of the drawer: a
+            person opening the menu saw a list of pages and no globe, and
+            reported that the language control did not exist. Rendered
+            below the fold of a scrolling drawer is not reachable. It is
+            now in the top bar at every width (top-nav.tsx), which is
+            visible without a scroll and without opening anything. */}
         <div className="flex items-center gap-1 border-t border-white/[0.07] p-3 sm:hidden">
-          <LanguageSelector />
           <ThemeToggle />
         </div>
 

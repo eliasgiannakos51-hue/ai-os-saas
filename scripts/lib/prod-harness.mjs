@@ -278,9 +278,18 @@ export async function startProdHarness({
   }
   console.log("build ok — starting `next start`");
 
+  // DETACHED, AND KILLED AS A GROUP. `npx next start` is npx -> sh ->
+  // next-server; SIGKILL to the npx handle leaves the grandchild alive,
+  // reparented to init, holding its port and its build. prodtest-hygiene
+  // .test.mjs measured thirteen orphaned next-servers after one survey
+  // and requires every prodtest that spawns a server to detach it and
+  // kill the process group — but this harness, which spawns the server
+  // FOR ten of those tests, was not scanned by that gate and had the
+  // exact leak it forbids. Same shape, one level up.
   const server = spawn("npx", ["next", "start", "-p", String(PORT)], {
     env,
     stdio: ["ignore", "pipe", "pipe"],
+    detached: true,
   });
   let serverLog = "";
   server.stdout.on("data", (d) => (serverLog += d));
@@ -288,9 +297,13 @@ export async function startProdHarness({
 
   const cleanup = () => {
     try {
-      server.kill("SIGKILL");
+      process.kill(-server.pid, "SIGKILL");
     } catch {
-      /* already gone */
+      try {
+        server.kill("SIGKILL");
+      } catch {
+        /* already gone */
+      }
     }
     supa.close();
   };

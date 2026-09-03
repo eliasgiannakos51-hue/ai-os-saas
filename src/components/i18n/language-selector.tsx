@@ -17,7 +17,25 @@ import { persistLocalePreference } from "@/lib/locale-preference";
 // the cookie would have its choice reverted on the very next navigation —
 // the language would change and then change back. Both entry points write
 // the same two places or neither works.
-export function LanguageSelector({ className }: { className?: string }) {
+//
+// THE CODE BESIDE THE GLOBE — V4.6. "I cannot find the language control"
+// was reported on a laptop where the globe had been in the top bar the
+// whole time. An unlabelled icon among other unlabelled icons is only
+// findable by somebody who already knows it is there; "EL" next to it is
+// a word, and a word is what a person scans a toolbar for. `showCode` is
+// opt-in so the floating public-page cluster keeps its compact shape.
+export function LanguageSelector({
+  className,
+  showCode = false,
+  testId,
+}: {
+  className?: string;
+  /** Render the current locale code (EL, EN, …) beside the globe. */
+  showCode?: boolean;
+  /** A stable hook for the visibility gate — see
+   *  scripts/tests/language-visible.prodtest.mjs. */
+  testId?: string;
+}) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("language");
@@ -48,13 +66,22 @@ export function LanguageSelector({ className }: { className?: string }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label={t("label")}
+        title={t("label")}
         aria-expanded={open}
+        data-testid={testId}
         className={
           className ??
-          "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
+          (showCode
+            ? "flex h-11 min-w-[44px] shrink-0 items-center justify-center gap-1 rounded-lg px-2 text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
+            : "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground")
         }
       >
         <Globe className="h-[18px] w-[18px]" aria-hidden="true" />
+        {showCode && (
+          <span className="text-[11px] font-semibold uppercase tracking-wide" aria-hidden="true">
+            {locale}
+          </span>
+        )}
       </button>
 
       {open && (
@@ -81,7 +108,7 @@ export function LanguageSelector({ className }: { className?: string }) {
                   lang={lang.code}
                   onClick={() => selectLanguage(lang.code)}
                   aria-pressed={selected}
-                  className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-150 ${
+                  className={`flex min-h-[44px] w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-150 ${
                     selected
                       ? "bg-orange-500/10 text-orange-400"
                       : "text-foreground hover:bg-panel-hover"

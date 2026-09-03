@@ -122,9 +122,13 @@ check(
   caps.every((c) => Number.isFinite(c.ch)),
   caps.map((c) => `@${c.at}: ${c.ch}`).join(", ")
 );
+// NEVER DOWN. Equal is allowed at the widest step, where the FONT grows
+// instead (checked next): the line gets longer in pixels while the
+// character count stays put, because at 61ch the English count is
+// already at the brief's ceiling and one more ch would cross it.
 check(
-  "the caps ascend with the screen",
-  caps.every((c, i) => i === 0 || c.ch > caps[i - 1].ch),
+  "the caps never descend as the screen grows",
+  caps.every((c, i) => i === 0 || c.ch >= caps[i - 1].ch),
   caps.map((c) => `@${c.at}: ${c.ch}ch`).join(" -> ")
 );
 // THE FONT ASCENDS TOO, which is the whole mechanism: the line gets
@@ -139,21 +143,46 @@ check(
 // ---------------------------------------------------------------------
 console.log("\n== 3. the caps are inside the band the brief asked for ==");
 // 60-75 CHARACTERS, THROUGH THE MEASURED RATIO. `ch` is the advance of
-// "0" and a digit is one of the widest glyphs in a proportional font, so
-// a ch cap holds MORE characters than its number. Measured on a real
-// build with Greek text: a 70ch cap held 82 characters and a 68ch cap
-// held 80 — 1.17 characters per ch, stable across both.
+// "0"; what a line holds depends on the letters in it and on the font
+// size at that breakpoint, so the ratio is READ OFF THE PRODTEST, not
+// derived.
+//
+// THE INSTRUMENT WAS WRONG AND SAID SO ONLY WHEN RE-MEASURED. This
+// constant was 1.17, quoted from a 70ch/68ch measurement at an earlier
+// font size. On 2026-09-03 the prodtest read 60 characters from a 58ch
+// cap at 1440 and 63 from 60ch at 1920: 1.03-1.05. With 1.17 this check
+// was passing 56/58/60ch as "66/68/70 characters" while the screen held
+// 49/60/63 — a green line 10% off the truth in the direction that hides
+// a too-short measure. The larger measured value is used so the ≤75
+// half of the band is the conservative one.
 //
 // This is the check that would have caught the first draft, which wrote
-// 66/68/70ch believing those were the character counts and measured
-// 77/80/82 on screen.
-const CHARS_PER_CH = 1.17;
+// 66/68/70ch believing those were the character counts.
+//
+// TWO RATIOS, NOT ONE — the second time this instrument was wrong. The
+// 1.05 above was measured on GREEK, and a 64/66ch cap passed here as
+// "67/69 characters" while the prodtest read English at 77 and 80: Latin
+// letters are narrower than Greek ones, so the same cap holds more of
+// them, and the ≤75 half of the band is decided by ENGLISH. Measured on
+// 2026-09-03 (16px @1440, 17px @1920): English 77/64 = 1.20 and 80/66 =
+// 1.21 chars per ch; Greek 70/64 = 1.09 and 73/66 = 1.11. The wider
+// script sets the floor, the narrower sets the ceiling, each with its
+// own larger measured value so both halves are the conservative ones.
+const CHARS_PER_CH = { en: 1.22, el: 1.11 };
+// THE INSTRUMENT IS CALIBRATED AGAINST WHAT WAS MEASURED, not against
+// itself: a ratio below the prodtest's reading would pass a cap the
+// screen does not hold — which is exactly how 1.05 passed 64/66ch.
+check(
+  `the English ratio is at least the measured 1.20 (${CHARS_PER_CH.en}) and the Greek at least 1.09 (${CHARS_PER_CH.el})`,
+  CHARS_PER_CH.en >= 1.2 && CHARS_PER_CH.el >= 1.09
+);
 for (const c of caps) {
-  const chars = Math.round(c.ch * CHARS_PER_CH);
+  const en = Math.round(c.ch * CHARS_PER_CH.en);
+  const el = Math.round(c.ch * CHARS_PER_CH.el);
   check(
-    `@${c.at}px: ${c.ch}ch is ${chars} characters (60-75)`,
-    chars >= 60 && chars <= 75,
-    `${chars} — outside the band; the cap is ${c.ch}ch and the measured ratio is ${CHARS_PER_CH}`
+    `@${c.at}px: ${c.ch}ch is ~${en} English / ~${el} Greek characters (English ≤75, Greek ≥60)`,
+    en <= 75 && el >= 60,
+    `English ${en}, Greek ${el} — outside the band; the cap is ${c.ch}ch, ratios ${JSON.stringify(CHARS_PER_CH)}`
   );
 }
 

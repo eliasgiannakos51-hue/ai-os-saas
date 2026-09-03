@@ -19,14 +19,16 @@
 // their top edge, and a group is a line. That counts what is on the
 // screen.
 //
-// FIFTEEN COMBINATIONS, NOT A SAMPLE. Five widths x three languages —
-// Greek, Arabic and Chinese — because these are the three that break
-// different things: Greek is the longest Latin-adjacent script, Arabic
-// is right-to-left and joins, and Chinese has no spaces to break at and
-// twice the advance per character. Testing el and ja instead would miss
-// the CJK case entirely: kana give break opportunities that Han does not.
+// TWENTY COMBINATIONS, NOT A SAMPLE. Five widths x four languages —
+// Greek, Arabic, Chinese and English — because these are the ones that
+// break different things: Greek is the longest Latin-adjacent script,
+// Arabic is right-to-left and joins, Chinese has no spaces to break at
+// and twice the advance per character, and English is the narrowest, so
+// it is where a cap first runs past 75. Testing el and ja instead would
+// miss the CJK case entirely: kana give break opportunities that Han does
+// not.
 //
-// SCREENSHOTS of all fifteen go to /tmp/chat-measure-<locale>-<width>.png.
+// SCREENSHOTS of all twenty go to /tmp/chat-measure-<locale>-<width>.png.
 //
 // Run: node scripts/tests/chat-measure.prodtest.mjs
 import http from "node:http";
@@ -81,6 +83,7 @@ const BODIES = {
   el: "Η ανάλυση των εσόδων του τριμήνου δείχνει σταθερή άνοδο στις συνδρομές, με τη μεγαλύτερη συνεισφορά να προέρχεται από τους νέους λογαριασμούς του Μαρτίου και δευτερευόντως από τις ανανεώσεις. ",
   ar: "يُظهر تحليل إيرادات هذا الربع ارتفاعًا ثابتًا في الاشتراكات، وتأتي المساهمة الأكبر من الحسابات الجديدة في مارس، ثم من التجديدات في المرتبة الثانية. ",
   zh: "本季度的收入分析显示订阅收入稳步增长，其中贡献最大的是三月份新开通的账户，其次是续订带来的部分收入，整体趋势保持向上。",
+  en: "The revenue analysis for the quarter shows a steady rise in subscriptions, with the largest contribution coming from the new accounts opened in March and, second to that, from renewals. ",
 };
 const messagesFor = (locale) =>
   Array.from({ length: 40 }, (_, i) => ({
@@ -266,6 +269,11 @@ const LOCALES = [
   { code: "el", label: "Greek", dir: "ltr" },
   { code: "ar", label: "Arabic", dir: "rtl" },
   { code: "zh", label: "Chinese", dir: "ltr" },
+  // ENGLISH IS MEASURED TOO — V4.6, "raise the measure but never past 75
+  // characters a line on desktop". Latin letters are narrower than Greek
+  // ones, so the SAME cap holds more English than Greek; a band asserted
+  // on Greek alone would let English run past 75 unseen.
+  { code: "en", label: "English", dir: "ltr" },
 ];
 
 // WHAT "60-75 CHARACTERS" MEANS PER SCRIPT, and why one number will not do.
@@ -284,6 +292,7 @@ const LOCALES = [
 // two are reported and floored so they cannot silently collapse.
 const BANDS = {
   el: { min: 60, max: 75, why: "the brief's number, unmodified" },
+  en: { min: 60, max: 75, why: "the brief's number — the ≤75 half bites here first, Latin being the narrowest of the four" },
   ar: { min: 45, max: 95, why: "Arabic joins and its glyphs are narrower, so the same cap holds more characters" },
   zh: { min: 22, max: 48, why: "a Han character is about two '0's, so the same cap holds about half as many" },
 };
@@ -297,6 +306,12 @@ const BANDS = {
 // run can never be mistaken for a full one.
 const ONLY = process.env.CHAT_MEASURE_ONLY ?? "";
 if (ONLY) console.log(`FILTERED RUN: only ${ONLY} — this is not a full measurement\n`);
+// CHAT_GROUND_OPTIONS=1 also measures the three offered grounds
+// (globals.css .chat-ground-blur / -dim / -shadow) on every combination,
+// and writes /tmp/chat-ground-<variant>-<locale>-<width>.png for each.
+const GROUND_OPTIONS = process.env.CHAT_GROUND_OPTIONS === "1";
+const GROUND_VARIANTS = ["blur", "dim", "shadow"];
+const perOption = [];
 
 const { chromium } = await import("playwright");
 const sharp = (await import("sharp")).default;
@@ -544,145 +559,152 @@ try {
         // at the position where that leaf was actually visible, because a
         // pixel from one scroll offset says nothing about a layer drawn
         // at another.
-        const gather = async (fraction) => {
-          await page.evaluate((f) => {
-            const el = document.querySelector('[data-testid="chat-thread"]');
-            if (el) el.scrollTop = (el.scrollHeight - el.clientHeight) * f;
-          }, fraction);
-          await page.waitForTimeout(250);
-          const boxes = await page.evaluate(() => {
-          const thread = document.querySelector('[data-testid="chat-thread"]');
-          const out = [];
-          const walker = document.createTreeWalker(thread, NodeFilter.SHOW_ELEMENT);
-          while (walker.nextNode()) {
-            const el = walker.currentNode;
-            if (el.children.length > 0) continue;
-            const t = (el.textContent ?? "").trim();
-            if (t.length < 3) continue;
-            const r = el.getBoundingClientRect();
-            if (r.width < 24 || r.height < 8) continue;
-            // FULLY ON SCREEN. A box that starts above the fold has no
-            // pixels to read at its own top edge, and clamping it would
-            // sample a different rectangle than the one being named.
-            if (r.top < 0 || r.bottom > window.innerHeight) continue;
-            out.push({
-              x: Math.round(r.left), y: Math.round(r.top),
-              w: Math.round(r.width), h: Math.round(r.height),
-              text: t.slice(0, 24),
-            });
-          }
-          return out;
-          });
-          const png = await page.screenshot();
-          return { boxes, png };
-        };
-
-        const pools = [];
-        // WALK UNTIL NINE DISTINCT LEAVES EXIST, rather than a fixed
-        // number of stops. Five stops gave four leaves in Greek at 375px
-        // and nine at 1920; nine stops gave seven. The shortfall was
-        // never in how the nine were chosen — it was that a long Greek
-        // paragraph fills a phone screen, so consecutive stops keep
-        // landing on the same one. A fixed stop count is a guess about
-        // how tall a message is in a language nobody has read yet.
-        //
-        // Capped at 30 so a page with genuinely too little text fails
-        // rather than spinning.
-        const STOPS = [];
-        const distinct = new Set();
-        for (let i = 0; i <= 30 && distinct.size < 9; i++) {
-          const fraction = i / 30;
-          STOPS.push(fraction);
-          const pool = await gather(fraction);
-          pools.push(pool);
-          for (const b of pool.boxes) distinct.add(`${b.x}:${b.y}:${b.text}`);
-        }
-        const totalLeaves = pools.reduce((a, p) => a + p.boxes.length, 0);
-        check(
-          `there is text to sample across the thread (${totalLeaves} leaves over ${STOPS.length} scroll positions)`,
-          totalLeaves >= 9,
-          `${totalLeaves} — nine points cannot be taken from fewer than nine`
-        );
-
-        // ONE SCREENSHOT PER SCROLL POSITION, and each leaf read from
-        // the one it was visible in. Reading a leaf's coordinates from
-        // scroll position A against the pixels of position B measures a
-        // rectangle of the page that leaf was never in — which is how a
-        // contrast figure comes out reassuring and meaningless.
-        const rasters = [];
-        for (const pool of pools) {
-          rasters.push(await sharp(pool.png).raw().toBuffer({ resolveWithObject: true }));
-        }
-        const cssHeight = width <= 430 ? 844 : 900;
-
-        // NINE DISTINCT POINTS, spread over the whole thread. An earlier
-        // draft took `sorted[floor(i*(len-1)/8)]` over five boxes, which
-        // returns the same box more than once: the run then reported
-        // "all nine points clear 4.5:1 ... of 9 measured" from five
-        // measurements, one line under a FAILING "there is text on screen
-        // to sample (5 leaves)". Two lines of one report disagreeing is
-        // what a lying gate looks like.
-        const candidates = [];
-        pools.forEach((pool, pi) => {
-          for (const b of pool.boxes) candidates.push({ ...b, pool: pi });
-        });
-        const seen = new Set();
-        const picks = [];
-        for (let i = 0; i < candidates.length && picks.length < 9; i++) {
-          // Walk the pools in turn so the nine are spread down the
-          // thread rather than taken from whichever screenful had most.
-          const step = Math.max(1, Math.floor(candidates.length / 9));
-          const c = candidates[(i * step) % candidates.length];
-          const key = `${c.pool}:${c.x}:${c.y}:${c.text}`;
-          if (seen.has(key)) continue;
-          seen.add(key);
-          picks.push(c);
-        }
-
-        const measured = [];
-        for (const b of picks) {
-          const { data, info } = rasters[b.pool];
-          const at = (x, y) => {
-            const i = (y * info.width + x) * info.channels;
-            return [data[i], data[i + 1], data[i + 2]];
-          };
-          // GROUND IS WHAT THE BOX IS MOSTLY MADE OF; INK IS WHAT IS
-          // FURTHEST FROM IT. Taking the darkest pixel as the ink is a
-          // light-theme assumption, and this theme is dark — every
-          // reading came back 1.01:1 the first time that was tried.
-          const counts = new Map();
-          const pixels = [];
-          const sx = Math.max(0, Math.round((b.x * info.width) / width));
-          const sw = Math.round((b.w * info.width) / width);
-          const sy = Math.max(0, Math.round((b.y * info.height) / cssHeight));
-          const sh = Math.round((b.h * info.height) / cssHeight);
-          for (let y = sy; y < Math.min(info.height, sy + sh); y++) {
-            for (let x = sx; x < Math.min(info.width, sx + sw); x++) {
-              const px = at(x, y);
-              counts.set(px.join(","), (counts.get(px.join(",")) ?? 0) + 1);
-              pixels.push(px);
+        // THE NINE POINTS, AS A FUNCTION OF WHAT IS ON SCREEN RIGHT NOW —
+        // called once for the shipped ground and, with CHAT_GROUND_OPTIONS=1,
+        // once per offered ground (see globals.css .chat-ground-*).
+        const nineContrast = async (label) => {
+          const gather = async (fraction) => {
+            await page.evaluate((f) => {
+              const el = document.querySelector('[data-testid="chat-thread"]');
+              if (el) el.scrollTop = (el.scrollHeight - el.clientHeight) * f;
+            }, fraction);
+            await page.waitForTimeout(250);
+            const boxes = await page.evaluate(() => {
+            const thread = document.querySelector('[data-testid="chat-thread"]');
+            const out = [];
+            const walker = document.createTreeWalker(thread, NodeFilter.SHOW_ELEMENT);
+            while (walker.nextNode()) {
+              const el = walker.currentNode;
+              if (el.children.length > 0) continue;
+              const t = (el.textContent ?? "").trim();
+              if (t.length < 3) continue;
+              const r = el.getBoundingClientRect();
+              if (r.width < 24 || r.height < 8) continue;
+              // FULLY ON SCREEN. A box that starts above the fold has no
+              // pixels to read at its own top edge, and clamping it would
+              // sample a different rectangle than the one being named.
+              if (r.top < 0 || r.bottom > window.innerHeight) continue;
+              out.push({
+                x: Math.round(r.left), y: Math.round(r.top),
+                w: Math.round(r.width), h: Math.round(r.height),
+                text: t.slice(0, 24),
+              });
             }
+            return out;
+            });
+            const png = await page.screenshot();
+            return { boxes, png };
+          };
+
+          const pools = [];
+          // WALK UNTIL NINE DISTINCT LEAVES EXIST, rather than a fixed
+          // number of stops. Five stops gave four leaves in Greek at 375px
+          // and nine at 1920; nine stops gave seven. The shortfall was
+          // never in how the nine were chosen — it was that a long Greek
+          // paragraph fills a phone screen, so consecutive stops keep
+          // landing on the same one. A fixed stop count is a guess about
+          // how tall a message is in a language nobody has read yet.
+          //
+          // Capped at 30 so a page with genuinely too little text fails
+          // rather than spinning.
+          const STOPS = [];
+          const distinct = new Set();
+          for (let i = 0; i <= 30 && distinct.size < 9; i++) {
+            const fraction = i / 30;
+            STOPS.push(fraction);
+            const pool = await gather(fraction);
+            pools.push(pool);
+            for (const b of pool.boxes) distinct.add(`${b.x}:${b.y}:${b.text}`);
           }
-          if (pixels.length === 0) continue;
-          let ground = [0, 0, 0], best = 0;
-          for (const [k, n] of counts) if (n > best) { best = n; ground = k.split(",").map(Number); }
-          const gl = lum(...ground);
-          let ink = ground;
-          for (const px of pixels) if (Math.abs(lum(...px) - gl) > Math.abs(lum(...ink) - gl)) ink = px;
-          measured.push({ ...b, r: ratio(ink, ground), ink, ground });
-        }
-        for (const m of measured) {
-          console.log(
-            `        ${String(m.r).padStart(6)}:1  ink rgb(${m.ink})  ground rgb(${m.ground})  "${m.text}"`
+          const totalLeaves = pools.reduce((a, p) => a + p.boxes.length, 0);
+          check(
+            `${label}there is text to sample across the thread (${totalLeaves} leaves over ${STOPS.length} scroll positions)`,
+            totalLeaves >= 9,
+            `${totalLeaves} — nine points cannot be taken from fewer than nine`
           );
-        }
-        const below = measured.filter((m) => m.r < 4.5);
-        check(
-          `all nine DISTINCT points clear 4.5:1 (${below.length} below, of ${measured.length} measured)`,
-          measured.length >= 9 && below.length === 0,
-          below.map((m) => `"${m.text}" ${m.r}:1`).join("; ") ||
-            `only ${measured.length} distinct points could be sampled — nine were asked for`
-        );
+
+          // ONE SCREENSHOT PER SCROLL POSITION, and each leaf read from
+          // the one it was visible in. Reading a leaf's coordinates from
+          // scroll position A against the pixels of position B measures a
+          // rectangle of the page that leaf was never in — which is how a
+          // contrast figure comes out reassuring and meaningless.
+          const rasters = [];
+          for (const pool of pools) {
+            rasters.push(await sharp(pool.png).raw().toBuffer({ resolveWithObject: true }));
+          }
+          const cssHeight = width <= 430 ? 844 : 900;
+
+          // NINE DISTINCT POINTS, spread over the whole thread. An earlier
+          // draft took `sorted[floor(i*(len-1)/8)]` over five boxes, which
+          // returns the same box more than once: the run then reported
+          // "all nine points clear 4.5:1 ... of 9 measured" from five
+          // measurements, one line under a FAILING "there is text on screen
+          // to sample (5 leaves)". Two lines of one report disagreeing is
+          // what a lying gate looks like.
+          const candidates = [];
+          pools.forEach((pool, pi) => {
+            for (const b of pool.boxes) candidates.push({ ...b, pool: pi });
+          });
+          const seen = new Set();
+          const picks = [];
+          for (let i = 0; i < candidates.length && picks.length < 9; i++) {
+            // Walk the pools in turn so the nine are spread down the
+            // thread rather than taken from whichever screenful had most.
+            const step = Math.max(1, Math.floor(candidates.length / 9));
+            const c = candidates[(i * step) % candidates.length];
+            const key = `${c.pool}:${c.x}:${c.y}:${c.text}`;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            picks.push(c);
+          }
+
+          const measured = [];
+          for (const b of picks) {
+            const { data, info } = rasters[b.pool];
+            const at = (x, y) => {
+              const i = (y * info.width + x) * info.channels;
+              return [data[i], data[i + 1], data[i + 2]];
+            };
+            // GROUND IS WHAT THE BOX IS MOSTLY MADE OF; INK IS WHAT IS
+            // FURTHEST FROM IT. Taking the darkest pixel as the ink is a
+            // light-theme assumption, and this theme is dark — every
+            // reading came back 1.01:1 the first time that was tried.
+            const counts = new Map();
+            const pixels = [];
+            const sx = Math.max(0, Math.round((b.x * info.width) / width));
+            const sw = Math.round((b.w * info.width) / width);
+            const sy = Math.max(0, Math.round((b.y * info.height) / cssHeight));
+            const sh = Math.round((b.h * info.height) / cssHeight);
+            for (let y = sy; y < Math.min(info.height, sy + sh); y++) {
+              for (let x = sx; x < Math.min(info.width, sx + sw); x++) {
+                const px = at(x, y);
+                counts.set(px.join(","), (counts.get(px.join(",")) ?? 0) + 1);
+                pixels.push(px);
+              }
+            }
+            if (pixels.length === 0) continue;
+            let ground = [0, 0, 0], best = 0;
+            for (const [k, n] of counts) if (n > best) { best = n; ground = k.split(",").map(Number); }
+            const gl = lum(...ground);
+            let ink = ground;
+            for (const px of pixels) if (Math.abs(lum(...px) - gl) > Math.abs(lum(...ink) - gl)) ink = px;
+            measured.push({ ...b, r: ratio(ink, ground), ink, ground });
+          }
+          for (const m of measured) {
+            console.log(
+              `        ${String(m.r).padStart(6)}:1  ink rgb(${m.ink})  ground rgb(${m.ground})  "${m.text}"`
+            );
+          }
+          const below = measured.filter((m) => m.r < 4.5);
+          check(
+            `${label}all nine DISTINCT points clear 4.5:1 (${below.length} below, of ${measured.length} measured)`,
+            measured.length >= 9 && below.length === 0,
+            below.map((m) => `"${m.text}" ${m.r}:1`).join("; ") ||
+              `only ${measured.length} distinct points could be sampled — nine were asked for`
+          );
+          return measured;
+        };
+        const measured = await nineContrast("");
 
         await page.screenshot({ path: `/tmp/chat-measure-${locale.code}-${width}.png`, fullPage: false });
         perCombination.push({
@@ -691,6 +713,52 @@ try {
           chars: avg,
           worstContrast: measured.length ? Math.min(...measured.map((m) => m.r)) : null,
         });
+
+        // 5. THE THREE OFFERED GROUNDS — V4.6. Each class is put on every
+        //    answer block, the same nine-point reading is taken, a
+        //    screenshot is kept, and the class is removed again. They are
+        //    asserted to the same 4.5:1, because an option that fails it is
+        //    not an option; the choice between the ones that pass is the
+        //    owner's, from the screenshots.
+        if (GROUND_OPTIONS) {
+          for (const variant of GROUND_VARIANTS) {
+            const cls = `chat-ground-${variant}`;
+            await page.evaluate((c) => {
+              const thread = document.querySelector('[data-testid="chat-thread"]');
+              for (const el of thread?.querySelectorAll("div.min-w-0.flex-1") ?? []) el.classList.add(c);
+            }, cls);
+            await page.waitForTimeout(300);
+            const applied = await page.evaluate((c) => {
+              const el = document.querySelector(`[data-testid="chat-thread"] .${c}`);
+              if (!el) return null;
+              const cs = getComputedStyle(el);
+              return { bg: cs.backgroundColor, filter: cs.backdropFilter || cs.webkitBackdropFilter, shadow: cs.textShadow };
+            }, cls);
+            check(
+              `[${variant}] the ground class actually changed a computed style`,
+              applied !== null && (variant === "shadow" ? applied.shadow !== "none" : !/rgba\(0, 0, 0, 0\)/.test(applied.bg)),
+              JSON.stringify(applied)
+            );
+            const m = await nineContrast(`[${variant}] `);
+            await page.evaluate((el) => {
+              const thread = document.querySelector('[data-testid="chat-thread"]');
+              if (thread) thread.scrollTop = thread.scrollHeight;
+            });
+            await page.waitForTimeout(200);
+            await page.screenshot({ path: `/tmp/chat-ground-${variant}-${locale.code}-${width}.png`, fullPage: false });
+            await page.evaluate((c) => {
+              for (const el of document.querySelectorAll(`.${c}`)) el.classList.remove(c);
+            }, cls);
+            perOption.push({
+              variant,
+              locale: locale.code,
+              width,
+              worst: m.length ? Math.min(...m.map((x) => x.r)) : null,
+              median: m.length ? [...m.map((x) => x.r)].sort((a, b) => a - b)[Math.floor(m.length / 2)] : null,
+              points: m.length,
+            });
+          }
+        }
       } finally {
         await context.close();
       }
@@ -702,7 +770,7 @@ try {
 }
 
 ctx = "";
-console.log("\n== the fifteen, side by side ==");
+console.log("\n== the twenty, side by side ==");
 console.log("  locale  width   chars/line   worst contrast");
 for (const r of perCombination) {
   console.log(
@@ -710,11 +778,29 @@ for (const r of perCombination) {
       `${r.worstContrast === null ? "—" : r.worstContrast + ":1"}`
   );
 }
+if (GROUND_OPTIONS) {
+  console.log("\n== the three offered grounds: worst / median of nine, per combination ==");
+  console.log("  variant  locale  width   worst    median   points");
+  for (const r of perOption) {
+    console.log(
+      `  ${r.variant.padEnd(8)} ${r.locale.padEnd(7)} ${String(r.width).padStart(5)}   ${String(r.worst ?? "—").padStart(5)}:1  ${String(r.median ?? "—").padStart(5)}:1  ${r.points}`
+    );
+  }
+  for (const variant of GROUND_VARIANTS) {
+    const rows = perOption.filter((r) => r.variant === variant);
+    const worst = rows.length ? Math.min(...rows.map((r) => r.worst ?? 0)) : null;
+    console.log(`  ${variant}: worst of all ${rows.length} combinations = ${worst}:1`);
+  }
+  check(
+    `every offered ground was measured on every combination (${perOption.length} of ${GROUND_VARIANTS.length * WIDTHS.length * LOCALES.length})`,
+    perOption.length === GROUND_VARIANTS.length * WIDTHS.length * LOCALES.length && !ONLY
+  );
+}
 check(
-  `all fifteen combinations were measured (${perCombination.length})`,
-  perCombination.length === 15 && !ONLY,
+  `all ${WIDTHS.length * LOCALES.length} combinations were measured (${perCombination.length})`,
+  perCombination.length === WIDTHS.length * LOCALES.length && !ONLY,
   ONLY
-    ? `FILTERED to ${ONLY} — ${perCombination.length} of 15. This run proves nothing about the rest.`
+    ? `FILTERED to ${ONLY} — ${perCombination.length} of ${WIDTHS.length * LOCALES.length}. This run proves nothing about the rest.`
     : `${perCombination.length} — a cross-product with holes in it is a sample`
 );
 

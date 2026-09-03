@@ -55,31 +55,31 @@ const MUTATIONS = [
   {
     name: "the widest breakpoint's cap is removed",
     file: CSS,
-    from: "    font-size: 17px;\n    max-width: 60ch;",
+    from: "    font-size: 17px;\n    max-width: 61ch;",
     to: "    font-size: 17px;",
   },
   {
     name: "the caps stop ascending (the wide screen gets the shorter line)",
     file: CSS,
-    from: "    font-size: 16px;\n    max-width: 58ch;",
+    from: "    font-size: 16px;\n    max-width: 61ch;",
     to: "    font-size: 16px;\n    max-width: 50ch;",
   },
   {
     name: "the font stops growing, so a wider screen is only emptier",
     file: CSS,
-    from: "    font-size: 17px;\n    max-width: 60ch;",
-    to: "    max-width: 60ch;",
+    from: "    font-size: 17px;\n    max-width: 61ch;",
+    to: "    max-width: 61ch;",
   },
   {
     name: "a cap is pushed past 75 characters",
     file: CSS,
-    from: "    max-width: 56ch;",
+    from: "    max-width: 60ch;",
     to: "    max-width: 72ch;",
   },
   {
     name: "a cap is pulled under 60 characters",
     file: CSS,
-    from: "    max-width: 56ch;",
+    from: "    max-width: 60ch;",
     to: "    max-width: 40ch;",
   },
   {
@@ -145,8 +145,8 @@ const MUTATIONS = [
   {
     name: "the measured ch-to-character ratio is dropped back to 1",
     file: GATE,
-    from: "const CHARS_PER_CH = 1.17;",
-    to: "const CHARS_PER_CH = 1;",
+    from: "const CHARS_PER_CH = { en: 1.22, el: 1.11 };",
+    to: "const CHARS_PER_CH = { en: 1, el: 1 };",
   },
 ];
 

@@ -92,7 +92,7 @@ export function TemplateMatches({
       )}
 
       {/* ALWAYS RENDERED, ALWAYS ENABLED. Outside the branch above. */}
-      <button
+      <button data-testid="agent-design"
         type="button"
         disabled={busy}
         onClick={onBuildNew}

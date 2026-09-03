@@ -305,6 +305,11 @@ const BANDS = {
 // cross-product completeness check below fails when it is, so a filtered
 // run can never be mistaken for a full one.
 const ONLY = process.env.CHAT_MEASURE_ONLY ?? "";
+// CHAT_THEME=light runs the whole measurement in the light theme (dark is
+// the default). Screenshots carry the theme in their name.
+const THEME = process.env.CHAT_THEME === "light" ? "light" : "dark";
+const SHOT_TAG = THEME === "light" ? "-light" : "";
+if (THEME === "light") console.log("LIGHT THEME RUN\n");
 if (ONLY) console.log(`FILTERED RUN: only ${ONLY} — this is not a full measurement\n`);
 // CHAT_GROUND_OPTIONS=1 also measures the three offered grounds
 // (globals.css .chat-ground-blur / -dim / -shadow) on every combination,
@@ -350,6 +355,14 @@ try {
           origins: [],
         },
       });
+      // CHAT_THEME=light measures the light theme: the app reads the
+      // theme from localStorage before first paint (app/layout.tsx), so
+      // it is set before any script of the page runs.
+      if (THEME === "light") {
+        await context.addInitScript(() => {
+          try { localStorage.setItem("theme", "light"); } catch { /* storage blocked */ }
+        });
+      }
       const page = await context.newPage();
       try {
         await page.goto(`http://127.0.0.1:${PORT}/dashboard/chat?c=${CONVO_ID}`, {
@@ -706,7 +719,7 @@ try {
         };
         const measured = await nineContrast("");
 
-        await page.screenshot({ path: `/tmp/chat-measure-${locale.code}-${width}.png`, fullPage: false });
+        await page.screenshot({ path: `/tmp/chat-measure${SHOT_TAG}-${locale.code}-${width}.png`, fullPage: false });
         perCombination.push({
           locale: locale.code,
           width,
@@ -745,7 +758,7 @@ try {
               if (thread) thread.scrollTop = thread.scrollHeight;
             });
             await page.waitForTimeout(200);
-            await page.screenshot({ path: `/tmp/chat-ground-${variant}-${locale.code}-${width}.png`, fullPage: false });
+            await page.screenshot({ path: `/tmp/chat-ground${SHOT_TAG}-${variant}-${locale.code}-${width}.png`, fullPage: false });
             await page.evaluate((c) => {
               for (const el of document.querySelectorAll(`.${c}`)) el.classList.remove(c);
             }, cls);

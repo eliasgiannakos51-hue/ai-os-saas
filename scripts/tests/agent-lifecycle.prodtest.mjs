@@ -443,7 +443,7 @@ async function buildOnce(requestText) {
     };
     requestAnimationFrame(tick);
   });
-  await page.locator("button", { hasText: label("dashboard.agents.designButton") }).first().click();
+  await page.getByTestId("agent-design").first().click();
   // The moment a step is visibly on screen — photographed, not asserted
   // from state. Best-effort: a very fast build can outrun this.
   void page
@@ -501,7 +501,9 @@ try {
     tooFast.length === 0,
     `too fast to read: ${tooFast.map(([l, ms]) => `${l} ${ms}ms`).join(", ")}`
   );
-  check("the preview arrived", await page.locator("text=what I'll build").first().isVisible().catch(() => false));
+  // The heading's words come from the catalogue: this looked for "what
+  // I'll build" after the title had been reworded, and failed on main.
+  check("the preview arrived", await page.getByText(label("dashboard.agents.previewTitle"), { exact: false }).first().isVisible().catch(() => false));
   check(
     "the ThinkingIndicator rendered during the run",
     // The watcher can't grab a live screenshot of the moment, but the
@@ -560,7 +562,7 @@ try {
   jobsInvisibleToOwner = true;
   await page.locator("button", { hasText: "New agent" }).first().click();
   await page.fill("#agent-request", "Every day at nine, check my metrics");
-  await page.locator("button", { hasText: label("dashboard.agents.designButton") }).first().click();
+  await page.getByTestId("agent-design").first().click();
   const watchLost = await page
     .waitForSelector('[data-testid="ai-progress-watch-lost"]', { timeout: 30000 })
     .then(() => true)

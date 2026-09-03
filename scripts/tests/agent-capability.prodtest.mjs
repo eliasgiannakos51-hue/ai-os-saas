@@ -277,14 +277,15 @@ async function openCreate(page) {
     // Both locales this test drives. Matched on the real translated
     // labels rather than a test id: a button the user cannot find by its
     // name is a button they cannot find.
-    await page.getByRole("button", { name: /new agent|Νέος πράκτορας/i }).click();
+    await page.getByRole("button", { name: labelPattern("dashboard.agents.newAgent") }).click();
   }
   await page.locator("#agent-request").waitFor({ state: "visible", timeout: 10000 });
 }
 
 async function submit(page, text) {
   await page.locator("#agent-request").fill(text);
-  await page.getByRole("button", { name: labelPattern("dashboard.agents.designButton") }).click();
+  // The button is "Design your agent" while the box is empty and "Build new · N credits" once something is typed — one stable test id for both.
+  await page.getByTestId("agent-design").click();
 }
 
 // Collected across every page this test opens, not just the first —
@@ -362,7 +363,8 @@ try {
   console.log("\n== 3. a partial request gets a counter-offer, still free ==");
   // -------------------------------------------------------------------
   const beforePartial = { ...seen };
-  await page.getByRole("button", { name: /Rewrite my request/i }).click();
+  // Labels come from the catalogue, not from memory: this said "Rewrite my request" while the button says "Rewrite your request".
+  await page.getByRole("button", { name: labelPattern("dashboard.agents.capability.rephrase") }).click();
   await submit(
     page,
     "Κάθε πρωί στείλε μου τα νέα για τη Nvidia και φτιάξε μου ένα script που τα αποθηκεύει"
@@ -379,7 +381,7 @@ try {
   checkTrue("it says nothing has been charged yet", /Nothing has been charged yet/i.test(partialText));
   checkTrue(
     "there is a button to build the part that works",
-    (await page.getByRole("button", { name: /Build the part that works/i }).count()) === 1
+    (await page.getByRole("button", { name: labelPattern("dashboard.agents.capability.partialContinue") }).count()) === 1
   );
   checkTrue(
     "…and still nothing reserved while the question is on screen",
@@ -390,7 +392,7 @@ try {
   console.log("\n== 4. accepting the counter-offer DOES proceed ==");
   // -------------------------------------------------------------------
   const beforeAccept = { ...seen };
-  await page.getByRole("button", { name: /Build the part that works/i }).click();
+  await page.getByRole("button", { name: labelPattern("dashboard.agents.capability.partialContinue") }).click();
   // The job insert is the observable: the route got past the gate.
   for (let i = 0; i < 40 && seen.jobInserts === beforeAccept.jobInserts; i++) {
     await page.waitForTimeout(250);

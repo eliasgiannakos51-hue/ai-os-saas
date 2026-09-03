@@ -39,6 +39,11 @@ function check(name, cond, detail) {
     console.log(`  FAIL  ${name}${detail !== undefined ? "\n        " + detail : ""}`);
   }
 }
+// checkTrue was called once below and never defined, so this test crashed
+// with a ReferenceError on main from the day it was written.
+function checkTrue(name, cond, detail) {
+  check(name, Boolean(cond), detail);
+}
 
 const QUERY_DELAY_MS = Number(process.env.SUPABASE_DELAY_MS ?? 0);
 const USER_ID = "00000000-0000-4000-8000-000000000001";

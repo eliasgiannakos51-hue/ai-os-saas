@@ -19,6 +19,7 @@
 // Run: node scripts/tests/schema-canaries.test.mjs
 import { readFileSync, readdirSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
 const failures = [];
@@ -113,6 +114,23 @@ for (const name of ["nav_events", "consume_rate_limit", "db_exposure_report", "m
     SCHEMA_CANARIES.some((c) => c.fn === name || c.table === name),
     "observed absent from a live database — it must be probed"
   );
+}
+
+console.log("\n== 4. the function probe can tell 'absent' from 'present, called without its arguments' ==");
+// Six of the nine function canaries take a required argument, and the
+// probe calls every function with none — so PostgREST answers "Could not
+// find the function public.f without parameters in the schema cache"
+// for a function that is THERE. Production listed all six as missing
+// while every one of them was working. The tell is PostgREST's hint,
+// which names the function when it exists with other parameters.
+{
+  const route = stripComments(readFileSync("src/app/api/health/route.ts", "utf8"));
+  check("the probe reads the hint of a not-found answer", /\.hint/.test(route) && /presentWithOtherArgs/.test(route));
+  check("...matching the SAME function name followed by an argument list",
+    /new RegExp\(`function\\\\s\+\(\?:public\\\\\.\)\?\$\{c\.fn\}\\\\s\*\\\\\(`, "i"\)/.test(route));
+  check("...and only a hintless not-found is recorded as missing", /if \(!presentWithOtherArgs\) \{\s*missing\.push\(/.test(route));
+  const requiresArgs = SCHEMA_CANARIES.filter((c) => c.kind === "function").length;
+  check(`there are function canaries for this to matter (${requiresArgs})`, requiresArgs >= 6);
 }
 
 console.log("\n== 3. the list has not fallen behind the migrations ==");

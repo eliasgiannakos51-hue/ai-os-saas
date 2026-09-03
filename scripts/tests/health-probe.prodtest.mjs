@@ -73,14 +73,18 @@ try {
   // names: a test that greps for "version" passes the day somebody adds
   // "commit" or "tables". The allowed set is closed.
   const keys = Object.keys(b1).sort();
+  // `schema` joined the body on 2026-09-01 (66ae4c4): the canary sweep,
+  // which names missing objects on purpose so a broken page can be
+  // diagnosed without a secret. Everything else stays closed.
   check(
-    "the body has exactly {ok, db, ms, reason, stage} and nothing else",
-    JSON.stringify(keys) === JSON.stringify(["db", "ms", "ok", "reason", "stage"]),
+    "the body has exactly {ok, db, ms, reason, schema, stage} and nothing else",
+    JSON.stringify(keys) === JSON.stringify(["db", "ms", "ok", "reason", "schema", "stage"]),
     `keys were ${JSON.stringify(keys)}`
   );
+  check("the schema sweep says how many canaries it checked, and that all were found", b1.schema && b1.schema.ok === true && b1.schema.checked >= 10 && Array.isArray(b1.schema.missing) && b1.schema.missing.length === 0, JSON.stringify(b1.schema));
   check("a healthy answer says so in the vocabulary", b1.reason === "ok" && b1.stage === "query", JSON.stringify(b1));
   check("no detail reaches an anonymous caller on a healthy probe", !("detail" in b1));
-  const bodyText = JSON.stringify(b1);
+  const bodyText = JSON.stringify({ ...b1, schema: undefined });
   check(
     "no table name, no error text, no version string anywhere in the body",
     !/agent_templates|supabase|postgres|error|version|stack|[0-9]+\.[0-9]+\.[0-9]+/i.test(bodyText),
@@ -110,11 +114,49 @@ try {
   check("the reason names the schema, not the network", b2.reason === "schema_missing", JSON.stringify(b2));
   check("the stage names the step that failed", b2.stage === "query", JSON.stringify(b2));
   check(
-    "the failure body still discloses NOTHING an anonymous caller can map",
-    JSON.stringify(Object.keys(b2).sort()) === JSON.stringify(["db", "ms", "ok", "reason", "stage"]) &&
-      !/PGRST205|schema cache|user_onboarding|public\./i.test(JSON.stringify(b2)),
+    "the failure body still discloses NOTHING an anonymous caller can map — outside the canary names",
+    JSON.stringify(Object.keys(b2).sort()) === JSON.stringify(["db", "ms", "ok", "reason", "schema", "stage"]) &&
+      !/PGRST205|schema cache|public\./i.test(JSON.stringify({ ...b2, schema: undefined })),
     JSON.stringify(b2)
   );
+  check(
+    "the canary sweep names the missing column and its migration, and nothing that is not a name",
+    Array.isArray(b2.schema?.missing) && b2.schema.missing.some((m) => m.object === "user_onboarding.home_seen_at" && /\.sql$/.test(m.migration)) &&
+      !/PGRST|schema cache|error/i.test(JSON.stringify(b2.schema)),
+    JSON.stringify(b2.schema)
+  );
+
+  console.log("\n== 3b. a function that EXISTS but takes arguments is not 'missing' ==");
+  // PostgREST answers a no-argument call to a function with required
+  // parameters with the same words as absence — "Could not find the
+  // function ... in the schema cache" — plus a hint naming the function
+  // that does exist. Six canaries in production were listed as missing
+  // this way while all six were working. Absence is the hintless case.
+  harness.setTableFailing("rpc/search_all", true, {
+    status: 404,
+    body: {
+      code: "PGRST202",
+      message: "Could not find the function public.search_all without parameters in the schema cache",
+      hint: "Perhaps you meant to call the function public.search_all(p_query, p_kinds, p_module, p_since, p_limit)",
+      details: "Searched for the function public.search_all without parameters, but no matches were found in the schema cache.",
+    },
+  });
+  harness.setTableFailing("rpc/merge_user_metadata", true, {
+    status: 404,
+    body: {
+      code: "PGRST202",
+      message: "Could not find the function public.merge_user_metadata without parameters in the schema cache",
+      hint: null,
+      details: "Searched for the function public.merge_user_metadata without parameters, but no matches were found in the schema cache.",
+    },
+  });
+  await sleep(cacheMs + 500);
+  const bF = await (await fetch(url)).json();
+  const listed = (bF.schema?.missing ?? []).map((m) => m.object);
+  check("a present function called without its arguments is NOT listed", !listed.includes("search_all()"), JSON.stringify(listed));
+  check("a function that is really absent IS listed", listed.includes("merge_user_metadata()"), JSON.stringify(listed));
+  harness.setTableFailing("rpc/search_all", false);
+  harness.setTableFailing("rpc/merge_user_metadata", false);
   // ...and verbose without the secret changes nothing.
   const rV = await fetch(url + "?verbose=1");
   const bV = await rV.json();
@@ -148,9 +190,13 @@ try {
   // "fewer", and that is exactly the answer that looked fine here while
   // forty-five queries went out. The number that distinguishes a real
   // single-flight from a lucky race is 1.
+  // TWO, not one: the probe's own read and ONE canary sweep (the column
+  // canary user_onboarding.home_seen_at reads the same table). The sweep
+  // used to run on every request — 51 reads for this flood — and is now
+  // cached with the probe (api/health/route.ts, currentSchemaSweep).
   check(
-    `${FLOOD} simultaneous requests cost ${queries} database query, not ${FLOOD}`,
-    queries === 1,
+    `${FLOOD} simultaneous requests cost ${queries} database queries (the probe and one canary sweep), not ${FLOOD}`,
+    queries === 2,
     `${queries} queries — requests arriving before the first probe returns are each starting their own`
   );
   // The converse, so "cached" cannot be achieved by never querying at all:

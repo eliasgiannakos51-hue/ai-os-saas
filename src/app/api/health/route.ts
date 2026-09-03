@@ -254,6 +254,48 @@ export async function GET(request: Request) {
   // Only when the probe reached the database at all — asking a database
   // that did not answer produces a list of false absences.
   if (probe.dbAnswered) {
+    body.schema = await currentSchemaSweep();
+  }
+
+  return NextResponse.json(body, {
+    status: probe.ok ? 200 : 503,
+    // A CDN or proxy caching a 503 keeps reporting an outage that has
+    // already ended, and caching a 200 hides one that has started.
+    headers: { "Cache-Control": "no-store, max-age=0" },
+  });
+}
+
+type SchemaSweep = { ok: boolean | null; checked: number; missing: { object: string; migration: string; breaks: string }[] };
+
+// CACHED LIKE THE PROBE, FOR THE SAME REASON. The sweep is one query per
+// canary — sixteen today — and it ran on EVERY request: fifty anonymous
+// hits in a second were fifty probes' worth of canary queries against the
+// database this endpoint exists to protect (health-probe.prodtest.mjs
+// counted 51 reads of one table for a 50-request flood). One sweep per
+// PROBE_CACHE_MS window, coalesced while in flight.
+let schemaCached: { at: number; sweep: SchemaSweep } | null = null;
+let schemaInFlight: Promise<SchemaSweep> | null = null;
+
+function currentSchemaSweep(): Promise<SchemaSweep> {
+  if (schemaCached && Date.now() - schemaCached.at <= PROBE_CACHE_MS) return Promise.resolve(schemaCached.sweep);
+  if (!schemaInFlight) {
+    schemaInFlight = schemaSweep().then(
+      (sweep) => {
+        schemaCached = { at: Date.now(), sweep };
+        schemaInFlight = null;
+        return sweep;
+      },
+      (reason) => {
+        schemaInFlight = null;
+        throw reason;
+      }
+    );
+  }
+  return schemaInFlight;
+}
+
+async function schemaSweep(): Promise<SchemaSweep> {
+  {
     // Its own client: the probe's is scoped to the probe, and this must
     // not be able to disturb the measurement above — `ms` and `stage`
     // describe that one query and nothing else.
@@ -270,12 +312,25 @@ export async function GET(request: Request) {
         if (!admin) return;
         try {
           if (c.kind === "function") {
-            // A missing function is 404 from PostgREST. A present one may
-            // reject the ARGUMENTS, which is a different error and not
-            // absence — so only "not found" counts.
+            // A missing function is 404 from PostgREST. So is a PRESENT one
+            // called with the wrong arguments — and this probe calls every
+            // function with none. Six of the nine canaries take a required
+            // argument, and for each of them PostgREST answered "Could not
+            // find the function public.f without parameters in the schema
+            // cache": the same words as absence. Production's /api/health
+            // listed all six as missing while ⌘K, rate limiting and
+            // settlement were working. The difference is the HINT:
+            // PostgREST adds "Perhaps you meant to call the function
+            // public.f(p_a, p_b)" when a function of that name exists with
+            // other parameters, and no hint when nothing of that name
+            // exists. Only the hintless "not found" is absence.
             const { error } = await admin.rpc(c.fn as string, {});
             if (error && /(could not find|does not exist|not found)/i.test(`${error.message} ${error.code ?? ""}`)) {
-              missing.push({ object: `${c.fn}()`, migration: c.migration, breaks: c.breaks });
+              const sameName = new RegExp(`function\\s+(?:public\\.)?${c.fn}\\s*\\(`, "i");
+              const presentWithOtherArgs = sameName.test(String((error as { hint?: string | null }).hint ?? ""));
+              if (!presentWithOtherArgs) {
+                missing.push({ object: `${c.fn}()`, migration: c.migration, breaks: c.breaks });
+              }
             }
           } else {
             // limit(0) returns no rows: the question is whether the
@@ -297,7 +352,7 @@ export async function GET(request: Request) {
         }
       })
     );
-    body.schema = admin === null ? { ok: null, checked: 0, missing: [] } : {
+    return admin === null ? { ok: null, checked: 0, missing: [] } : {
       ok: missing.length === 0,
       checked: SCHEMA_CANARIES.length,
       // Named even unauthenticated: these are schema object names, not
@@ -306,11 +361,4 @@ export async function GET(request: Request) {
       missing,
     };
   }
-
-  return NextResponse.json(body, {
-    status: probe.ok ? 200 : 503,
-    // A CDN or proxy caching a 503 keeps reporting an outage that has
-    // already ended, and caching a 200 hides one that has started.
-    headers: { "Cache-Control": "no-store, max-age=0" },
-  });
 }

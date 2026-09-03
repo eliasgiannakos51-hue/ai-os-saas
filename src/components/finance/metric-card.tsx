@@ -52,6 +52,15 @@ export function MetricCard({ metric }: { metric: Metric }) {
             {t("needsHistory", { have: metric.haveMonths, need: metric.needMonths })}
           </p>
         </>
+      ) : metric.state === "needs_history_days" ? (
+        <>
+          <p className="mt-1 text-2xl font-semibold text-muted">—</p>
+          {/* Days, because the thing waited for is the daily snapshot
+              series — see the ruleOf40 note in lib/billing/metrics.ts. */}
+          <p className="mt-1 text-[11px] text-muted">
+            {t("needsHistoryDays", { have: metric.haveDays, need: metric.needDays })}
+          </p>
+        </>
       ) : (
         <>
           <p className="mt-1 text-2xl font-semibold text-muted">—</p>

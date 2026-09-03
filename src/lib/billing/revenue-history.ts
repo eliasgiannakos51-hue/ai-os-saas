@@ -156,6 +156,12 @@ async function writeSubscriberMonths(month: string, now: Date): Promise<number> 
   const rows: Record<string, unknown>[] = [];
   for (const user of data.users) {
     const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+    // PAYING MEANS A LIVE STRIPE SUBSCRIPTION, the same rule mrr_inputs()
+    // applies since 20260923000000_mrr_paid_only.sql. A tier in metadata
+    // alone is what a beta invite writes (api/signup: "ultimate", never
+    // reverted), and twelve of those read as twelve subscribers on a
+    // dashboard with no payments behind it.
+    if (typeof meta.stripe_subscription_id !== "string" || !meta.stripe_subscription_id) continue;
     const tier = String(meta.subscription_tier ?? "free");
     const plan = getPlan(tier);
     if (!plan || typeof plan.price !== "number" || plan.price <= 0) continue;
@@ -248,6 +254,7 @@ export async function loadMetricInputs(now = new Date()): Promise<MetricInputs> 
     cashBalanceEur: null,
     newCustomers: 0,
     previousMrrEur: null,
+    snapshotDays: 0,
   };
 
   try {
@@ -310,10 +317,16 @@ export async function loadMetricInputs(now = new Date()): Promise<MetricInputs> 
 
     // The snapshot from ~30 days ago, for growth.
     const snapshots = latest ?? [];
-    const previous = snapshots.find((row: Record<string, unknown>) => {
-      const age = (now.getTime() - new Date(String(row.day)).getTime()) / (24 * 60 * 60 * 1000);
-      return age >= 28;
-    });
+    const ageDays = (row: Record<string, unknown>) =>
+      (now.getTime() - new Date(String(row.day)).getTime()) / (24 * 60 * 60 * 1000);
+    const previous = snapshots.find((row: Record<string, unknown>) => ageDays(row) >= 28);
+    // How far back the daily series reaches — the oldest of the rows read
+    // (ordered newest first). This is the number the Rule of 40 card
+    // reports while `previous` is null, in the unit the condition above
+    // is actually written in. Bounded by the 40-row read, which is more
+    // than the 28 the condition needs.
+    const oldest = snapshots[snapshots.length - 1] as Record<string, unknown> | undefined;
+    const snapshotDays = oldest ? Math.max(0, ageDays(oldest)) : 0;
 
     return {
       mrrEur: round2(revenue.eur),
@@ -334,6 +347,7 @@ export async function loadMetricInputs(now = new Date()): Promise<MetricInputs> 
       cashBalanceEur: numberOrNull(inputs?.cash_balance_eur),
       newCustomers: newCustomers ?? 0,
       previousMrrEur: previous ? Number(previous.mrr_eur) || 0 : null,
+      snapshotDays,
     };
   } catch (err) {
     logApiError("billing:revenue-history", err, { stage: "metric_inputs" });

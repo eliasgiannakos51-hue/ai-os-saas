@@ -109,10 +109,44 @@ export function VoiceInput({
     if (draft !== null) draftRef.current?.focus();
   }, [draft]);
 
-  // NOT RENDERED AT ALL when the deployment has no transcription
-  // provider. A microphone that appears and then says "not configured"
-  // has already wasted somebody's breath.
-  if (!availability.transcribeAvailable) return null;
+  // RENDERED, BUT INERT, WHEN VOICE CANNOT WORK HERE — V4.6.
+  //
+  // This used to return null, on the reasoning that a microphone that
+  // appears and then says "not configured" has wasted somebody's breath.
+  // What that produced was the report "the microphone does not exist in
+  // the main chat" from the owner of a deployment with no OPENAI_API_KEY:
+  // a control that silently is not there cannot tell anybody WHY it is
+  // not there. So it is drawn, disabled, and its title says which of the
+  // three reasons applies — not set up on this deployment, not on this
+  // plan, or no minutes left — and it does not record, so no breath is
+  // wasted either. Before the availability call has answered it is still
+  // nothing: a button that flickers from "not set up" to live is worse
+  // than a moment of absence.
+  if (!availability.transcribeAvailable) {
+    if (!availability.loaded) return null;
+    const reason = !availability.configured.transcribe
+      ? t("settings.notConfigured")
+      : !availability.included
+        ? t("settings.notIncluded")
+        : t("outOfMinutes");
+    return (
+      <button
+        type="button"
+        disabled
+        aria-disabled="true"
+        aria-label={`${t("startListening")} — ${reason}`}
+        title={reason}
+        data-testid="voice-input-unavailable"
+        className={
+          compact
+            ? "flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-lg text-muted/50"
+            : "flex h-11 w-11 cursor-not-allowed items-center justify-center rounded-full border border-dashed border-border text-muted/50"
+        }
+      >
+        <Mic className={compact ? "h-4 w-4" : "h-[18px] w-[18px]"} aria-hidden="true" />
+      </button>
+    );
+  }
 
   function press() {
     if (recorder.recording) {

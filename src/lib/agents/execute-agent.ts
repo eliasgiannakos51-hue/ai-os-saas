@@ -81,6 +81,10 @@ export type ExecuteAgentResult =
         | "insufficient_credits"
         | "bypass_ceiling"
         | "run_failed"
+        /** The owner pressed Stop between two model calls (V4.6): the
+         *  passes that ran are charged, the agent is not counted as
+         *  failed, nothing is retried. */
+        | "stopped"
         /**
          * The agent cannot do this task, ever. Separate from "run_failed"
          * because the two need opposite words in the UI: a failed run
@@ -199,6 +203,9 @@ export async function executeAgent(params: {
    *  Validated by the route before it gets here; parseAgentDepth below
    *  is the second line, because this is what sizes the hold. */
   depthOverride?: AgentDepth;
+  /** THE STOP BUTTON — V4.6. Asked between model calls by the runner; a
+   *  scheduled run passes nothing. See lib/agents/agent-runner.ts. */
+  shouldStop?: () => Promise<boolean>;
 }): Promise<ExecuteAgentResult> {
   const { admin, user, agent, triggerSource, apiKey } = params;
   const userId = user.id;
@@ -325,7 +332,7 @@ export async function executeAgent(params: {
   //    failed the safety shape check, and retrying a safety failure until
   //    it passes is how a safety check becomes a formality.
   let attempts = 0;
-  let outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId });
+  let outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId, shouldStop: params.shouldStop });
   attempts = 1;
   while (
     !outcome.ok &&
@@ -333,7 +340,7 @@ export async function executeAgent(params: {
     attempts < AGENT_MAX_ATTEMPTS
   ) {
     attempts++;
-    outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId });
+    outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId, shouldStop: params.shouldStop });
   }
 
   // 8. Settle. Always — every attempt above spent real tokens, including
@@ -476,7 +483,7 @@ export async function executeAgent(params: {
 
     return {
       ok: false,
-      reason: cannotComplete ? "cannot_complete" : "run_failed",
+      reason: cannotComplete ? "cannot_complete" : outcome.failure.kind === "stopped" ? "stopped" : "run_failed",
       message: outcome.failure.message,
       runId,
     };

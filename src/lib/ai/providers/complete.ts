@@ -47,6 +47,11 @@ export type CompleteOptions = {
   userId?: string;
   /** Per-attempt budget. See failover.ts for why it is per attempt. */
   timeoutMs?: number;
+  /** THE STOP BUTTON — V4.6. The caller's request signal: when the person
+   *  aborts, the attempt in flight is aborted with it and NO failover is
+   *  tried — a stop is not a provider failure to route around. The
+   *  outcome is `kind: "aborted"` so the route can release the hold. */
+  signal?: AbortSignal;
 };
 
 export async function runCompletion(
@@ -143,8 +148,14 @@ export async function runCompletion(
       continue;
     }
 
+    if (options.signal?.aborted) {
+      void recordProviderAttempts({ userId: options.userId, purpose: request.purpose, attempts });
+      return { ok: false, kind: "aborted", detail: "stopped by the caller before the attempt", attempts };
+    }
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const onCallerAbort = () => controller.abort();
+    options.signal?.addEventListener("abort", onCallerAbort);
     const startedAt = Date.now();
     try {
       const response = await ADAPTERS[provider]({
@@ -175,6 +186,21 @@ export async function runCompletion(
         attempts,
       };
     } catch (err) {
+      if (options.signal?.aborted) {
+        // The person stopped it. Not a timeout, not a vendor fault, and
+        // not something to try on the next provider.
+        attempts.push({
+          provider,
+          model: model.id,
+          outcome: "timeout",
+          status: null,
+          latencyMs: Date.now() - startedAt,
+          reason: `${reason}; stopped by the caller`,
+          cacheKept: impact.keptCache,
+        });
+        void recordProviderAttempts({ userId: options.userId, purpose: request.purpose, attempts });
+        return { ok: false, kind: "aborted", detail: "stopped by the caller", attempts };
+      }
       const classified = classifyError(err);
       attempts.push({
         provider,
@@ -194,6 +220,7 @@ export async function runCompletion(
       lastFailure = { kind: "all_failed", detail: `${provider}/${classified.outcome} status=${classified.status}` };
     } finally {
       clearTimeout(timer);
+      options.signal?.removeEventListener("abort", onCallerAbort);
     }
   }
 

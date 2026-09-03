@@ -181,6 +181,9 @@ export type AiResult = {
 };
 
 export type AiFailureKind =
+  /** The caller's abort signal fired — the person pressed Stop (V4.6).
+   *  Not a provider fault and never failed over. */
+  | "aborted"
   /** No provider was configured for this purpose at all. */
   | "no_provider"
   /** Every configured provider was tried and none succeeded. */

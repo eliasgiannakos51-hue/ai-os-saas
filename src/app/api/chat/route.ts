@@ -31,6 +31,7 @@ import {
 } from "@/lib/billing/credits";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
+import { estimateOutputTokensFromText, partialUsage } from "@/lib/chat/partial-usage";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
@@ -858,7 +859,48 @@ export async function POST(request: Request) {
     const anthropic = new Anthropic({ apiKey });
     const finalConversationId = conversationId;
 
+    // THE STOP BUTTON — V4.6. The reader pressing ✕ aborts their fetch;
+    // that reaches here as the request's abort signal (Node fires it when
+    // the socket closes) and as cancel() on this stream. Both flip the
+    // flag and abort whichever Anthropic stream is in flight, and the
+    // loop below settles for what was produced up to that moment: the
+    // input side from message_start, the output side COUNTED from the
+    // text that arrived. A full price for a reply that was cut would be a
+    // charge without delivery.
+    const stopped = { value: false };
+    let activeStream: { abort: () => void } | null = null;
+    const requestStop = () => {
+      if (stopped.value) return;
+      stopped.value = true;
+      try {
+        activeStream?.abort();
+      } catch {
+        /* already finished */
+      }
+    };
+    request.signal?.addEventListener("abort", requestStop);
+    // The client is gone once stopped, so a write into the response is a
+    // write into a closed stream. Guarded, not skipped by hope.
+    const safeEnqueue = (controller: ReadableStreamDefaultController, chunk: Uint8Array) => {
+      if (stopped.value) return;
+      try {
+        controller.enqueue(chunk);
+      } catch {
+        /* the reader cancelled between the check and the write */
+      }
+    };
+    const safeClose = (controller: ReadableStreamDefaultController) => {
+      try {
+        controller.close();
+      } catch {
+        /* already closed by the cancel */
+      }
+    };
+
     const stream = new ReadableStream({
+      cancel() {
+        requestStop();
+      },
       async start(controller) {
         controller.enqueue(
           ndjsonLine({
@@ -987,13 +1029,78 @@ export async function POST(request: Request) {
               messages: conversation,
               tools: effectiveTools,
             });
+            activeStream = claudeStream;
+            // A stop that arrived while the previous round was being
+            // settled must still stop this one.
+            if (stopped.value) claudeStream.abort();
 
             claudeStream.on("text", (delta) => {
               assistantText += delta;
-              controller.enqueue(ndjsonLine({ type: "delta", text: delta }));
+              safeEnqueue(controller, ndjsonLine({ type: "delta", text: delta }));
             });
 
-            const finalResponse = await claudeStream.finalMessage();
+            let finalResponse: Anthropic.Message;
+            try {
+              finalResponse = await claudeStream.finalMessage();
+            } catch (err) {
+              if (!stopped.value) throw err;
+              // STOPPED. Charge what was produced and nothing else.
+              //
+              // message_start carried the input side (prompt, cache
+              // reads, cache writes) and it is in the stream's snapshot;
+              // the output side never arrived, so it is counted from
+              // the text that did. The counter is a free call; if it
+              // fails, the script-aware estimate stands in and says so
+              // on the cost row.
+              const snapshot = claudeStream.currentMessage?.usage ?? null;
+              let outputTokens: number;
+              let counted = true;
+              try {
+                const count = await anthropic.messages.countTokens({
+                  model: MODEL,
+                  messages: [{ role: "user", content: assistantText || "." }],
+                });
+                outputTokens = assistantText ? count.input_tokens : 0;
+              } catch {
+                counted = false;
+                outputTokens = estimateOutputTokensFromText(assistantText);
+              }
+              costs.record("generation", partialUsage(snapshot, outputTokens), claudeStream.currentMessage?.model || MODEL);
+              webSearchCount += snapshot?.server_tool_use?.web_search_requests ?? 0;
+
+              if (!assistantText.trim()) {
+                // Stopped before a single word: nothing delivered,
+                // nothing charged, and a free message is not used up.
+                await releaseReservation(user.id, reservationId);
+                if (isFreeMessage) await releaseFreeChatMessage(user.id);
+                safeClose(controller);
+                return;
+              }
+
+              // What was written is kept — in the thread and in the
+              // database — and settled for. In a helper below the
+              // handler, so the chat's ONE ordinary settlement stays the
+              // one that follows memory extraction (billing-coverage
+              // section 12 reads the order of the two calls).
+              await settleStoppedTurn({
+                supabase,
+                userId: user.id,
+                conversationId: finalConversationId!,
+                assistantText,
+                reservationId,
+                costs,
+                plan,
+                bypassCredits,
+                isFreeMessage,
+                outputTokens,
+                counted,
+                webSearchCount,
+                estimatedCredits: streamEstimate.estimatedCredits,
+                reservedCredits: bypassCredits || isFreeMessage ? 0 : streamEstimate.reserveCredits,
+              });
+              safeClose(controller);
+              return;
+            }
             // Every round is recorded. A turn that searched the user's mail
             // and then answered is two model calls, and both are settled
             // against the same reservation — a loop that recorded only its
@@ -1155,4 +1262,76 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * THE STOPPED TURN'S SETTLEMENT — V4.6.
+ *
+ * Called from the stream's abort branch once the partial usage is on the
+ * accumulator. Saves what was written (so it is still there after a
+ * reload), settles for exactly the measured partial usage, marks the cost
+ * row `stopped` with whether the output figure was counted or estimated,
+ * and touches the conversation so it sorts to the top. Nothing here runs
+ * memory extraction: a reply the reader cut short is not a turn to learn
+ * from, and the tokens it would cost would be charged to somebody who
+ * pressed Stop.
+ */
+async function settleStoppedTurn(params: {
+  supabase: ReturnType<typeof createClient>;
+  userId: string;
+  conversationId: string;
+  assistantText: string;
+  reservationId: string;
+  costs: CostAccumulator;
+  plan: Awaited<ReturnType<typeof resolveEffectivePlan>>;
+  bypassCredits: boolean;
+  isFreeMessage: boolean;
+  outputTokens: number;
+  counted: boolean;
+  webSearchCount: number;
+  estimatedCredits: number;
+  reservedCredits: number;
+}): Promise<void> {
+  const { supabase, userId, conversationId, assistantText, bypassCredits, isFreeMessage } = params;
+  const { error: partialSaveError } = await supabase.from("chat_messages").insert({
+    conversation_id: conversationId,
+    user_id: userId,
+    role: "assistant",
+    content: assistantText,
+  });
+  if (partialSaveError) {
+    logApiError("/api/chat", partialSaveError, { stage: "save_stopped_message" });
+  }
+  const settlement = await settleReservation({
+    userId,
+    reservationId: params.reservationId,
+    feature: isFreeMessage ? "chat_free" : "chat_message",
+    costs: params.costs,
+    plan: params.plan,
+    bypassCharge: bypassCredits || isFreeMessage,
+    metadata: {
+      conversationId,
+      stopped: true,
+      outputTokensCounted: params.counted,
+      webSearches: params.webSearchCount,
+      replyChars: assistantText.length,
+      estimatedCredits: params.estimatedCredits,
+      reservedCredits: params.reservedCredits,
+      freeMessage: params.isFreeMessage,
+    },
+  });
+  diagLog(
+    `[billing] chat_message STOPPED and settled: ${JSON.stringify({
+      userId,
+      conversationId,
+      replyChars: assistantText.length,
+      outputTokens: params.outputTokens,
+      counted: params.counted,
+      creditsCharged: settlement.creditsCharged,
+    })}`
+  );
+  await supabase
+    .from("chat_conversations")
+    .update({ updated_at: new Date().toISOString() })
+    .eq("id", conversationId);
 }

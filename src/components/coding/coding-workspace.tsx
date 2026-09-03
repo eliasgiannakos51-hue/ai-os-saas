@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Play } from "lucide-react";
+import { Play, Square } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { CodeBlock } from "@/components/coding/code-block";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
@@ -34,6 +34,7 @@ export type CodeSession = {
 
 export function CodingWorkspace({ sessions, folders }: { sessions: CodeSession[]; folders: string[] }) {
   const t = useTranslations("coding");
+  const tSteps = useTranslations("aiSteps");
   const router = useRouter();
   const { addToast } = useToast();
 
@@ -68,14 +69,25 @@ export function CodingWorkspace({ sessions, folders }: { sessions: CodeSession[]
     [sessions, folderFilter, search]
   );
 
+  // THE STOP BUTTON — V4.6. One controller per run; Stop aborts the fetch,
+  // the route aborts the provider call and releases the hold, nothing is
+  // charged and nothing is recorded as failed.
+  const abortRef = useRef<AbortController | null>(null);
+  function stopRun() {
+    abortRef.current?.abort();
+  }
+
   async function run() {
     if (!input.trim()) return;
     setRunning(true);
     setResult(null);
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
       const response = await fetch("/api/coding/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           operation,
           input,
@@ -101,7 +113,15 @@ export function CodingWorkspace({ sessions, folders }: { sessions: CodeSession[]
       }
       setResult({ output: String(body.output ?? ""), kind: body.outputKind === "prose" ? "prose" : "code" });
       router.refresh();
+    } catch (err) {
+      // An aborted fetch rejects; that is the stop button, not a fault.
+      if (!controller.signal.aborted) {
+        addToast(t("errors.failed"), "error");
+      } else {
+        addToast(tSteps("stopped"));
+      }
     } finally {
+      if (abortRef.current === controller) abortRef.current = null;
       setRunning(false);
     }
   }
@@ -213,6 +233,17 @@ export function CodingWorkspace({ sessions, folders }: { sessions: CodeSession[]
             />
             {t("useWorkspace")}
           </label>
+          {running && (
+            <button
+              type="button"
+              onClick={stopRun}
+              data-testid="coding-stop"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-3 text-sm font-medium text-orange-300 transition-colors duration-150 hover:bg-orange-500/10"
+            >
+              <Square className="h-3 w-3 fill-current" aria-hidden="true" />
+              {tSteps("stop")}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => void run()}

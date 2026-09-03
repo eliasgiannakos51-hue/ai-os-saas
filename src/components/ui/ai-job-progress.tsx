@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { Square } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { stepLabelKey } from "@/lib/jobs/step-labels";
 import type { AiJob } from "@/lib/jobs/use-ai-job";
@@ -23,8 +25,14 @@ export function AiJobProgress({
   job,
   watchLost = false,
   className = "",
+  stoppable = true,
 }: {
   job: AiJob | null;
+  /** THE STOP BUTTON — V4.6. Rendered beside the step while the job is
+   *  queued or running; one press POSTs the job's cancel route and the
+   *  worker stops at its next boundary, charging only the steps done. Off
+   *  only for a surface that renders its own. */
+  stoppable?: boolean;
   /** From useAiJob: the polls cannot SEE the job at all. On the broken
    *  deployment that was a missing ai_jobs RLS policy — builds succeeded
    *  while this component rendered null, forever. Saying so is the
@@ -33,6 +41,22 @@ export function AiJobProgress({
   className?: string;
 }) {
   const t = useTranslations();
+  const [stopping, setStopping] = useState<string | null>(null);
+
+  async function stop(id: string) {
+    setStopping(id);
+    try {
+      const res = await fetch(`/api/jobs/${id}/cancel`, { method: "POST" });
+      // A refusal (not found, could not record) is not a stop: the button
+      // comes back so it can be pressed again. The body's English is for
+      // logs, never shown.
+      if (!res.ok) setStopping(null);
+    } catch {
+      // The poll will show the truth either way; a failed request here
+      // leaves the button pressable again.
+      setStopping(null);
+    }
+  }
 
   if (watchLost && (!job || job.status === "queued" || job.status === "running")) {
     return (
@@ -73,6 +97,20 @@ export function AiJobProgress({
         <span className="text-[11px] tabular-nums text-muted">
           {job.step}/{job.stepTotal}
         </span>
+      )}
+      {stoppable && (
+        <button
+          type="button"
+          onClick={() => void stop(job.id)}
+          disabled={stopping === job.id}
+          aria-label={t("aiSteps.stop")}
+          title={t("aiSteps.stop")}
+          data-testid="ai-job-stop"
+          className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-border px-2.5 text-[11px] font-medium text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-300 disabled:opacity-50"
+        >
+          <Square className="h-2.5 w-2.5 fill-current" aria-hidden="true" />
+          {stopping === job.id ? t("aiSteps.stopping") : t("aiSteps.stop")}
+        </button>
       )}
     </span>
   );

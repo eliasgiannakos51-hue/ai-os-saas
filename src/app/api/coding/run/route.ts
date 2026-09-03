@@ -149,10 +149,22 @@ export async function POST(request: Request) {
         system: [{ type: "text", text: prompt.system }],
         messages: [{ role: "user", content: prompt.user }],
       },
-      { userId: user.id }
+      // THE STOP BUTTON — V4.6: the request's own abort signal. When the
+      // person stops, the provider call is aborted with it.
+      { userId: user.id, signal: request.signal }
     );
 
     const admin = createAdminClient();
+
+    if (!outcome.ok && outcome.kind === "aborted") {
+      // Stopped before a result existed. A non-streaming call has no
+      // partial output to charge for — the answer is produced whole or
+      // not at all — so nothing was delivered and nothing is charged: the
+      // hold goes back in full. No failed row either: the person did
+      // this, and a history entry saying "failed" would be the wrong word.
+      await releaseReservation(user.id, reservationId);
+      return NextResponse.json({ error: "stopped" }, { status: 499 });
+    }
 
     if (!outcome.ok) {
       // Nothing produced, nothing charged — the hold goes back whole.

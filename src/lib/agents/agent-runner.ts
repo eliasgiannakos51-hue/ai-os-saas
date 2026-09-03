@@ -12,6 +12,7 @@ import {
   type AgentOutputFormat,
 } from "@/lib/agents/agent-config";
 import { logApiError } from "@/lib/log-error";
+import { STOPPED_MESSAGE } from "@/lib/stop-requests";
 import { modelText, modelTextFrom } from "@/lib/verification/truncation";
 import { resolveAgentBudget, budgetStop, budgetStopNotice } from "@/lib/agents/agent-budget";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
@@ -126,6 +127,9 @@ export type AgentRunFailure =
    * every morning until the five-failure limit trips.
    */
   | { kind: "cannot_complete"; message: string }
+  /** The owner pressed Stop between two passes (V4.6). Never retried,
+   *  never counted against the agent, charged for the passes that ran. */
+  | { kind: "stopped"; message: string }
   | { kind: "api_error"; message: string };
 
 export type AgentRunOutcome =
@@ -209,6 +213,12 @@ export async function runAgentTask(params: {
    *  run can ask for a deeper pass once without changing the schedule
    *  (see api/agents/[id]/run). Omitted, the agent's own is used. */
   depth?: AgentDepth;
+  /** THE STOP BUTTON — V4.6. Asked before every model call: a research
+   *  pass or the write. A stop lands between calls, so the passes that
+   *  ran are kept and charged and the one that had not begun costs
+   *  nothing. A scheduled run passes nothing and can never be stopped
+   *  this way, which is right — nobody is watching it. */
+  shouldStop?: () => Promise<boolean>;
 }): Promise<AgentRunOutcome> {
   const { apiKey, prompt, costs } = params;
   // Never the raw column value: a row whose jsonb is `{}` would otherwise
@@ -234,6 +244,9 @@ export async function runAgentTask(params: {
     // first's findings and asked for the gaps; every other tier has one
     // round and this loop runs once, exactly as before.
     for (let round = 0; round < spec.researchRounds; round += 1) {
+      if (params.shouldStop && (await params.shouldStop())) {
+        return { ok: false, failure: { kind: "stopped", message: STOPPED_MESSAGE } };
+      }
       const result = await research(anthropic, safePrompt, costs, depth, round, findings);
       searchCount += result.searchCount;
       if (!result.findings) {
@@ -255,6 +268,12 @@ export async function runAgentTask(params: {
   // account has been charged for, so they are RETURNED with a note
   // saying where the run stopped — not discarded, and not presented as a
   // finished answer.
+  // The write is the expensive call, and the last boundary a stop can
+  // land on without wasting anything already paid for.
+  if (params.shouldStop && (await params.shouldStop())) {
+    return { ok: false, failure: { kind: "stopped", message: STOPPED_MESSAGE } };
+  }
+
   const budget = resolveAgentBudget();
   const spentSoFar = costs.totals();
   const verdict = budgetStop(

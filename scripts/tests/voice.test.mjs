@@ -770,9 +770,21 @@ ok(
 );
 
 const inputSrc = readFileSync("src/components/voice/voice-input.tsx", "utf8");
+// V4.6: it used to render NOTHING when transcription was unavailable, and
+// "the microphone does not exist in the main chat" was the report from a
+// deployment with no OPENAI_API_KEY. It now renders an INERT button that
+// says which of the three reasons applies — and still never records.
 ok(
-  "the mic button renders NOTHING when transcription is unavailable (rather than failing on press)",
-  /if \(!availability\.transcribeAvailable\) return null;/.test(inputSrc),
+  "the mic button is inert — disabled, with the reason in its title — when transcription is unavailable",
+  /if \(!availability\.transcribeAvailable\) \{[\s\S]{0,1500}?disabled\s[\s\S]{0,400}?title=\{reason\}[\s\S]{0,600}?data-testid="voice-input-unavailable"/.test(inputSrc),
+);
+ok(
+  "...names all three reasons: not configured, not on the plan, out of minutes",
+  /settings\.notConfigured/.test(inputSrc) && /settings\.notIncluded/.test(inputSrc) && /outOfMinutes/.test(inputSrc),
+);
+ok(
+  "...and draws nothing before the availability call has answered, so it never flickers from 'not set up' to live",
+  /if \(!availability\.loaded\) return null;/.test(inputSrc),
 );
 // THE PRESS HANDLER'S OWN GUARD. Asking whether setExplaining appears
 // before recorder.start() in the file is answered by the source order of
@@ -852,7 +864,11 @@ const settingsSrc = readFileSync(
 ok(
   "the settings panel distinguishes 'your plan does not include it' from 'this deployment has no keys'",
   settingsSrc.includes('t("notIncluded")') &&
-    settingsSrc.includes('t("notConfigured")'),
+    settingsSrc.includes('t("notConfigured")') &&
+    // ...and in the ORDER that distinguishes them: plan first, keys second.
+    // Both keys merely existing somewhere in the file let a mutation that
+    // showed "not on your plan" for a missing key pass unseen.
+    /!v\.included \? \([\s\S]{0,300}?t\("notIncluded"\)[\s\S]{0,200}?\) : !configured \? \([\s\S]{0,300}?t\("notConfigured"\)/.test(settingsSrc),
 );
 ok(
   "...and only hides itself while the status call is still in flight",

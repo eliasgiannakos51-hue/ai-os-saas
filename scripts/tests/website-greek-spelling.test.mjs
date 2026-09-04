@@ -31,6 +31,18 @@ function check(name, cond, detail) {
   }
 }
 
+// READ BEFORE LOADING, ON PURPOSE.
+//
+// loadTs cannot follow the Anthropic SDK, so a provider import in the pure
+// half does not fail a check — it throws on the import line and takes the
+// whole file down before one check has run. A gate that dies is not a gate
+// that says what is wrong. These two are text, so they run first and
+// report; the load below then has something to load.
+const pureSrc = readFileSync("src/lib/website-greek-spelling.ts", "utf8");
+console.log("== 0. the split that keeps the rules testable ==");
+check("the pure half imports no provider", !/providers\/complete/.test(pureSrc));
+check("...and folds with the shared fold, not a private one", /const fold = foldForMatch;/.test(pureSrc));
+
 const { greekWordsToCheck, keepOnlyAsked, parseWordList, SPELLING_WORD_CAP } = await loadTs(
   "src/lib/website-greek-spelling.ts"
 );
@@ -82,9 +94,24 @@ check(
 
 // ---------------------------------------------------------------------
 console.log("\n== 3. the list is bounded and has no repeats ==");
-const many = Array.from({ length: 200 }, (_, i) => `λεξηαριθμος${i}`).join(" ");
+// 200 DISTINCT GREEK WORDS, and the first draft of this fixture made
+// none. `λεξηαριθμος${i}` differs only in digits, and digits are not Greek
+// letters — the word matcher saw the same run 200 times and deduplication
+// left ONE word, so the cap could be deleted and this section stayed
+// green. Greek letters are what has to vary.
+const GREEK_ALPHABET = "αβγδεζηθικλμνξοπρστυφχψω";
+const many = Array.from({ length: 200 }, (_, i) => {
+  const a = GREEK_ALPHABET[i % 24];
+  const b = GREEK_ALPHABET[(i * 7 + 3) % 24];
+  const c = GREEK_ALPHABET[Math.floor(i / 24) % 24];
+  return `λεξη${a}${b}${c}`;
+}).join(" ");
 const capped = greekWordsToCheck(page(`<p>${many}</p>`), "");
-check(`at most ${SPELLING_WORD_CAP} words are sent (${capped.length})`, capped.length <= SPELLING_WORD_CAP && capped.length > 0);
+// The fixture must really contain more distinct words than the cap, or
+// "at most 60" is satisfied by a page that only had three.
+const distinctInFixture = new Set(many.split(" ")).size;
+check(`the fixture has more distinct words than the cap (${distinctInFixture} > ${SPELLING_WORD_CAP})`, distinctInFixture > SPELLING_WORD_CAP, String(distinctInFixture));
+check(`at most ${SPELLING_WORD_CAP} words are sent (${capped.length})`, capped.length === SPELLING_WORD_CAP, String(capped.length));
 check(
   "the same word twice is asked about once",
   greekWordsToCheck(page("<p>ρεμπα ρεμπα ρεμπα</p>"), "").filter((w) => w === "ρεμπα").length === 1
@@ -115,7 +142,6 @@ check("an empty reply yields an empty list", JSON.stringify(parseWordList("")) =
 // ---------------------------------------------------------------------
 console.log("\n== 5. it reports, and never rewrites ==");
 const src = readFileSync("src/lib/websites-greek-spelling-check.ts", "utf8");
-const pureSrc = readFileSync("src/lib/website-greek-spelling.ts", "utf8");
 // NOT "the word html never appears after a return" — visibleTextOf
 // legitimately does `return html.replace(...)` to get TEXT out of a page,
 // and a check that forbade that would be testing the wrong thing. What
@@ -125,15 +151,21 @@ const exportedReturns = [...src.matchAll(/export (?:async )?function \w+\([\s\S]
 check(`every exported function returns words, never a page (${exportedReturns.length})`,
   exportedReturns.length >= 4 && exportedReturns.every((r) => /string\[\]|unknown/.test(r)),
   exportedReturns.join(" | "));
-// THE RULES LIVE IN THE PURE FILE, WHICH IS THE POINT OF THE SPLIT.
-// Importing the provider chain into it dragged the Anthropic SDK behind
-// it and put "never flag the owner's own village" out of reach of this
-// test entirely.
-check("the pure half imports no provider", !/providers\/complete/.test(pureSrc));
-check("...and folds with the shared fold, not a private one", /const fold = foldForMatch;/.test(pureSrc));
 check("a failure is an empty list, never a thrown generation", /catch \(err\)[\s\S]{0,200}?return \[\];/.test(src));
 check("...and a refusal from the provider is too", /if \(!outcome\.ok\) return \[\];/.test(src));
 check("it is a classification call, the cheap route", /purpose: "classification"/.test(src));
+// THE TOKENS REACH AN ACCUMULATOR. billing-coverage.test.mjs refuses a
+// runCompletion whose usage goes nowhere; this file has to refuse it too,
+// or deleting that one line leaves this gate green and only the other one
+// red — and a reader of THIS file would think the call was free.
+check(
+  "the call records its usage on the caller's accumulator",
+  /costs\.record\("generation", outcome\.usage/.test(src)
+);
+check(
+  "...and the accumulator is required, so forgetting it is a type error",
+  /options: \{ costs: CostRecorder/.test(src)
+);
 check("...with a bounded reply", /maxTokens: 300/.test(src));
 const route = readFileSync("src/app/api/websites/generate/process/route.ts", "utf8");
 check("the route records the words as a note", /notes\.push\(\{ kind: "spelling", words: misspelled \}\)/.test(route));

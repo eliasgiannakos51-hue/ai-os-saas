@@ -858,7 +858,12 @@ const BARE_TEXT_BASELINE = {
     "src/app/terms/page.tsx": 10,
     "src/components/auth/generate-password-button.tsx": 1,
     "src/components/billing/upgrade-required.tsx": 3,
-    "src/components/dashboard/command-palette.tsx": 3,
+    // (was 3) src/components/dashboard/command-palette.tsx — the footer
+    // hints "↑↓ navigate", "↵ select" and "esc close" were literal JSX,
+    // so a Greek user pressing ⌘K read three English words under a Greek
+    // list. Reported on 2026-09-05 from a real screen and reproduced in a
+    // Greek browser before being believed. They come from `common` now,
+    // in all ten locales, so the entry is deleted rather than lowered.
     "src/components/entity-links/link-to-modal.tsx": 1,
     "src/components/landing/deleted-account-banner.tsx": 1,
     // (was 3) src/components/legal/legal-layout.tsx — "last updated:",
@@ -868,7 +873,12 @@ const BARE_TEXT_BASELINE = {
     // namespace. The entry is deleted rather than lowered, which is what
     // the stale-baseline half of this check exists to force.
     "src/components/overview/beta-expiry-banner.tsx": 2,
-    "src/components/pagination-controls.tsx": 3,
+    // (was 3) src/components/pagination-controls.tsx — "Prev", "Next" and
+    // "Page N / M" under every module list, the timeline, the agents and
+    // the missions. The two buttons' aria-labels were already translated,
+    // which is what makes this one worth naming: somebody localised the
+    // screen-reader text on the very same elements and left the visible
+    // words English. Also from `common` now.
     // (was 4) src/components/pwa/pwa-provider.tsx — the install card's
     // "Install Ionexa" / "Install" / "Not now" / "Add it to your home
     // screen" were English literals inside the provider. They now live in

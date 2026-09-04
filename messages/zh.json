@@ -4,7 +4,7 @@
     "notifications": "通知",
     "noNotifications": "没有新通知。",
     "jumpToPage": "跳转到模块或页面...",
-    "noMatches": "没有找到与 ''{query}'' 匹配的结果",
+    "noMatches": "没有找到与“{query}”匹配的结果",
     "createStudio": "创建任何东西",
     "cancel": "取消",
     "save": "保存",
@@ -71,7 +71,13 @@
       "notReady": "尚未完成"
     },
     "listCapped": "显示最近的 {count, number} 条。更早的记录仍然保存着——用「搜索我的记录」可以找到它们。",
-    "newProject": "新建项目"
+    "newProject": "新建项目",
+    "paletteNavigate": "导航",
+    "paletteSelect": "选择",
+    "paletteClose": "关闭",
+    "paginationPrev": "上一页",
+    "paginationNext": "下一页",
+    "paginationPage": "第 {page} / {total} 页"
   },
   "sidebar": {
     "groups": {
@@ -2462,7 +2468,7 @@
   "module": {
     "searchPlaceholder": "搜索...",
     "exportCsv": "导出 CSV",
-    "noMatches": "没有找到与 ''{query}'' 匹配的结果",
+    "noMatches": "没有找到与“{query}”匹配的结果",
     "selectPlaceholder": "请选择...",
     "save": "保存",
     "saving": "保存中...",

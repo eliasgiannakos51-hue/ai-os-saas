@@ -775,8 +775,32 @@ const inputSrc = readFileSync("src/components/voice/voice-input.tsx", "utf8");
 // deployment with no OPENAI_API_KEY. It now renders an INERT button that
 // says which of the three reasons applies — and still never records.
 ok(
-  "the mic button is inert — disabled, with the reason in its title — when transcription is unavailable",
-  /if \(!availability\.transcribeAvailable\) \{[\s\S]{0,1500}?disabled\s[\s\S]{0,400}?title=\{reason\}[\s\S]{0,600}?data-testid="voice-input-unavailable"/.test(inputSrc),
+  "the mic button is inert when transcription is unavailable — announced disabled, and never recording",
+  /if \(!availability\.transcribeAvailable\) \{[\s\S]{0,2600}?aria-disabled="true"[\s\S]{0,900}?data-testid="voice-input-unavailable"/.test(inputSrc),
+);
+// A `title` IS A HOVER, AND A PHONE CANNOT HOVER.
+//
+// This check used to require `disabled` plus `title={reason}` and called
+// that done. Measured on the live site at 390px with a real CDP touch on
+// 2026-09-05: the button is 44x44 and uncovered, the tap lands on it, and
+// nothing happens — `disabled` fires no event and `title` never renders.
+// The one control whose whole purpose is to say WHY voice is missing said
+// it only to a pointer that could hover over it.
+//
+// So the requirement is stronger now, not different: the reason has to be
+// reachable by TAP, and it has to end up in the page rather than in an
+// attribute.
+ok(
+  "...and the reason is reachable by a tap, not only by a hover",
+  /aria-disabled="true"[\s\S]{0,200}?onClick=\{\(\) => setReasonShown/.test(inputSrc),
+);
+ok(
+  "...which renders the reason IN THE PAGE, announced to a screen reader",
+  /reasonShown \? \([\s\S]{0,300}?role="status"[\s\S]{0,200}?\{reason\}/.test(inputSrc),
+);
+ok(
+  "...and it is not `disabled`, which would swallow the tap",
+  !/if \(!availability\.transcribeAvailable\) \{[\s\S]{0,2600}?\n\s+disabled\n/.test(inputSrc),
 );
 ok(
   "...names all three reasons: not configured, not on the plan, out of minutes",

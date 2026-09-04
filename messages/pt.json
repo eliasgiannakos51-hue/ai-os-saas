@@ -4,7 +4,7 @@
     "notifications": "Notificações",
     "noNotifications": "Nenhuma notificação nova.",
     "jumpToPage": "Ir para um módulo ou página...",
-    "noMatches": "Nenhum resultado para ''{query}''",
+    "noMatches": "Nenhum resultado para «{query}»",
     "createStudio": "Cria qualquer coisa",
     "cancel": "Cancelar",
     "save": "Salvar",
@@ -71,7 +71,13 @@
       "notReady": "Ainda não está concluído"
     },
     "listCapped": "A mostrar as {count, number} mais recentes. As entradas mais antigas continuam guardadas — use a pesquisa nos seus registos para as encontrar.",
-    "newProject": "Novo Projeto"
+    "newProject": "Novo Projeto",
+    "paletteNavigate": "navegar",
+    "paletteSelect": "selecionar",
+    "paletteClose": "fechar",
+    "paginationPrev": "Ant.",
+    "paginationNext": "Próx.",
+    "paginationPage": "Página {page} / {total}"
   },
   "sidebar": {
     "groups": {
@@ -2462,7 +2468,7 @@
   "module": {
     "searchPlaceholder": "Pesquisar...",
     "exportCsv": "Exportar CSV",
-    "noMatches": "Nenhum resultado para ''{query}''",
+    "noMatches": "Nenhum resultado para «{query}»",
     "selectPlaceholder": "selecionar...",
     "save": "Salvar",
     "saving": "Salvando...",

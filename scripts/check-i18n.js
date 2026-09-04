@@ -46,6 +46,13 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // The pagination line under every module list, the timeline, the agents
+  // and the missions. French for a page in a paginated list IS "page", and
+  // the rest of the string is two placeholders and a slash — there is
+  // nothing else in it to translate. Checked against the neighbouring
+  // keys, which do differ: fr paginationPrev "Préc.", paginationNext
+  // "Suiv.".
+  "fr:common.paginationPage",
   // V4.6 #8. "Mission" became "Plan" across all ten languages, and
   // Spanish for a plan is "plan" — same five letters as English. French
   // ("Plan") and German ("Plan") coincide too and pass only because

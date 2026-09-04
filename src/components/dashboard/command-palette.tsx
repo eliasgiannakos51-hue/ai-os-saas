@@ -546,9 +546,16 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
         </div>
 
         <div className="flex items-center justify-between border-t border-border px-4 py-2.5 text-[11px] text-muted">
-          <span>↑↓ navigate</span>
-          <span>↵ select</span>
-          <span>esc close</span>
+          {/* THREE WORDS THAT WERE ENGLISH ON EVERY SCREEN IN EVERY
+              LANGUAGE. They were literal JSX text, so check-i18n.js could
+              not see them — it compares messages/*.json against each other,
+              and a word that is in NO locale file cannot be missing from
+              one. Reported on 2026-09-05 by an owner whose Greek UI showed
+              them in English, and reproduced in a Greek browser before
+              being believed. */}
+          <span>↑↓ {tCommon("paletteNavigate")}</span>
+          <span>↵ {tCommon("paletteSelect")}</span>
+          <span>esc {tCommon("paletteClose")}</span>
         </div>
       </div>
     </div>

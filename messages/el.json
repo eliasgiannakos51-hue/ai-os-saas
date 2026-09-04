@@ -4,7 +4,7 @@
     "notifications": "Ειδοποιήσεις",
     "noNotifications": "Δεν υπάρχουν νέες ειδοποιήσεις.",
     "jumpToPage": "Μετάβαση σε module ή σελίδα...",
-    "noMatches": "Δεν βρέθηκαν αποτελέσματα για ''{query}''",
+    "noMatches": "Δεν βρέθηκαν αποτελέσματα για «{query}»",
     "createStudio": "Φτιάξε κάτι",
     "cancel": "Ακύρωση",
     "save": "Αποθήκευση",
@@ -71,7 +71,13 @@
       "notReady": "Δεν έχει ολοκληρωθεί ακόμα"
     },
     "listCapped": "Εμφανίζονται οι πιο πρόσφατες {count, number}. Οι παλαιότερες καταχωρήσεις είναι αποθηκευμένες — χρησιμοποίησε την Αναζήτηση στα αρχεία σου για να τις βρεις.",
-    "newProject": "Νέο Project"
+    "newProject": "Νέο Project",
+    "paletteNavigate": "πλοήγηση",
+    "paletteSelect": "επιλογή",
+    "paletteClose": "κλείσιμο",
+    "paginationPrev": "Προηγ.",
+    "paginationNext": "Επόμ.",
+    "paginationPage": "Σελίδα {page} / {total}"
   },
   "sidebar": {
     "groups": {
@@ -2462,7 +2468,7 @@
   "module": {
     "searchPlaceholder": "Αναζήτηση...",
     "exportCsv": "Εξαγωγή CSV",
-    "noMatches": "Δεν βρέθηκαν αποτελέσματα για ''{query}''",
+    "noMatches": "Δεν βρέθηκαν αποτελέσματα για «{query}»",
     "selectPlaceholder": "επίλεξε...",
     "save": "Αποθήκευση",
     "saving": "Αποθήκευση...",

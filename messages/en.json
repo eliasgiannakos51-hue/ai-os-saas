@@ -4,7 +4,7 @@
     "notifications": "Notifications",
     "noNotifications": "No new notifications.",
     "jumpToPage": "Jump to a module or page...",
-    "noMatches": "No matches for ''{query}''",
+    "noMatches": "No matches for “{query}”",
     "createStudio": "Make anything",
     "cancel": "Cancel",
     "save": "Save",
@@ -71,7 +71,13 @@
       "notReady": "This is not finished yet"
     },
     "listCapped": "Showing the most recent {count, number}. Older entries are still saved — use Search my records to find them.",
-    "newProject": "New Project"
+    "newProject": "New Project",
+    "paletteNavigate": "navigate",
+    "paletteSelect": "select",
+    "paletteClose": "close",
+    "paginationPrev": "Prev",
+    "paginationNext": "Next",
+    "paginationPage": "Page {page} / {total}"
   },
   "sidebar": {
     "groups": {
@@ -2462,7 +2468,7 @@
   "module": {
     "searchPlaceholder": "Search...",
     "exportCsv": "Export CSV",
-    "noMatches": "No matches for ''{query}''",
+    "noMatches": "No matches for “{query}”",
     "selectPlaceholder": "select...",
     "save": "Save",
     "saving": "Saving...",

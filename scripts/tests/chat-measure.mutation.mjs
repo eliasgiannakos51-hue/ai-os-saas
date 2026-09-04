@@ -98,14 +98,43 @@ const MUTATIONS = [
   {
     name: "the card comes back around the answer",
     file: WORKSPACE,
-    from: '<div className="min-w-0 flex-1 text-foreground">\n                      <MessageContent content={msg.content}',
-    to: '<div className="min-w-0 flex-1 rounded-2xl border border-border bg-panel px-4 py-2.5 text-foreground">\n                      <MessageContent content={msg.content}',
+    from: '<div className="chat-ground-dim min-w-0 flex-1 text-foreground">\n                      <MessageContent content={msg.content}',
+    to: '<div className="chat-ground-dim min-w-0 flex-1 rounded-2xl border border-border bg-panel px-4 py-2.5 text-foreground">\n                      <MessageContent content={msg.content}',
   },
   {
     name: "the answer's text is dimmed instead of the globe",
     file: WORKSPACE,
-    from: '<div className="min-w-0 flex-1 text-foreground">\n                      <MessageContent content={msg.content}',
-    to: '<div className="min-w-0 flex-1 text-foreground/90">\n                      <MessageContent content={msg.content}',
+    from: '<div className="chat-ground-dim min-w-0 flex-1 text-foreground">\n                      <MessageContent content={msg.content}',
+    to: '<div className="chat-ground-dim min-w-0 flex-1 text-foreground/90">\n                      <MessageContent content={msg.content}',
+  },
+  // --- the ground under the answer (decided 2026-09-04: dim) -----------
+  {
+    name: "the final answer loses its ground, so the globe runs under the letters again",
+    file: WORKSPACE,
+    from: '<div className="chat-ground-dim min-w-0 flex-1 text-foreground">\n                      <MessageContent content={msg.content}',
+    to: '<div className="min-w-0 flex-1 text-foreground">\n                      <MessageContent content={msg.content}',
+    expect: "the final answer wrapper carries the dim ground",
+  },
+  {
+    name: "the streaming answer loses its ground",
+    file: WORKSPACE,
+    from: '<div className="chat-ground-dim min-w-0 flex-1 text-foreground">\n                      <MessageContent content={streamingText}',
+    to: '<div className="min-w-0 flex-1 text-foreground">\n                      <MessageContent content={streamingText}',
+    expect: "the streaming answer wrapper carries the dim ground",
+  },
+  {
+    name: "the dim pane is thinned to 20%, which no screenshot was taken at",
+    file: CSS,
+    from: ".chat-ground-dim {\n  background: rgb(var(--background) / 0.62);",
+    to: ".chat-ground-dim {\n  background: rgb(var(--background) / 0.2);",
+    expect: "the dim ground keeps its 62% strength",
+  },
+  {
+    name: "blur is put back on the dim pane, so a phone pays for it",
+    file: CSS,
+    from: ".chat-ground-dim {\n  background: rgb(var(--background) / 0.62);",
+    to: ".chat-ground-dim {\n  backdrop-filter: blur(8px);\n  background: rgb(var(--background) / 0.62);",
+    expect: "...and no blur, which is the whole reason it was chosen",
   },
   {
     name: "the person's turn loses its ground, so a question looks like an answer",

@@ -2066,8 +2066,12 @@ html[data-motion="reduce"] .voice-orb-ring {
   font-size: 15px;
 }
 
-/* THREE GROUNDS FOR THE ANSWER OVER THE GLOBE — V4.6, offered for a
-   choice, none applied by default until one is chosen.
+/* THREE GROUNDS FOR THE ANSWER OVER THE GLOBE — V4.6. Offered for a
+   choice; `dim` was chosen from the screenshots on 2026-09-04 and ships
+   on the answer (the answer wrappers in chat-workspace.tsx carry it).
+   blur and shadow stay here so the prodtest keeps measuring all three
+   against the same 4.5:1, and so the choice can be revisited from
+   numbers rather than memory; nothing else applies them.
 
    "The text should sit ON the backdrop and read clearly over the globe."
    Each class goes on the assistant's text block (the `min-w-0 flex-1`

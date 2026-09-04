@@ -4,7 +4,7 @@
     "notifications": "Notifiche",
     "noNotifications": "Nessuna nuova notifica.",
     "jumpToPage": "Vai a un modulo o pagina...",
-    "noMatches": "Nessun risultato per '{query}'",
+    "noMatches": "Nessun risultato per ''{query}''",
     "createStudio": "Crea qualsiasi cosa",
     "cancel": "Annulla",
     "save": "Salva",
@@ -2453,7 +2453,7 @@
   "module": {
     "searchPlaceholder": "Cerca...",
     "exportCsv": "Esporta CSV",
-    "noMatches": "Nessun risultato per '{query}'",
+    "noMatches": "Nessun risultato per ''{query}''",
     "selectPlaceholder": "seleziona...",
     "save": "Salva",
     "saving": "Salvataggio...",

@@ -128,7 +128,20 @@ console.log("\n== 4. the function probe can tell 'absent' from 'present, called 
   check("the probe reads the hint of a not-found answer", /\.hint/.test(route) && /presentWithOtherArgs/.test(route));
   check("...matching the SAME function name followed by an argument list",
     /new RegExp\(`function\\\\s\+\(\?:public\\\\\.\)\?\$\{c\.fn\}\\\\s\*\\\\\(`, "i"\)/.test(route));
-  check("...and only a hintless not-found is recorded as missing", /if \(!presentWithOtherArgs\) \{\s*missing\.push\(/.test(route));
+  // The hintless case is LOGGED (what the API layer actually said, server
+  // side, where it cannot leak) and then recorded — in that order, inside
+  // the same branch, so nothing is recorded without its evidence.
+  check(
+    "...and only a hintless not-found is recorded as missing, and it is logged first",
+    /if \(!presentWithOtherArgs\) \{\s*logApiError\("\/api\/health", new Error\("schema_function_not_visible"\),[\s\S]{0,600}?\);\s*missing\.push\(/.test(route)
+  );
+  // A hintless not-found is ALSO what a stale PostgREST schema cache
+  // returns for a function that is there. The probe cannot tell the two
+  // apart, so the entry has to say both, and name the cure for the second.
+  check(
+    "...and a recorded function miss says both things it can mean, with the reload-schema cure",
+    /note:\s*"The database API cannot see this function: either its migration never ran on this database, or the API's cached view of the schema is stale\. Run NOTIFY pgrst, 'reload schema';/.test(route)
+  );
   const requiresArgs = SCHEMA_CANARIES.filter((c) => c.kind === "function").length;
   check(`there are function canaries for this to matter (${requiresArgs})`, requiresArgs >= 6);
 }

@@ -805,7 +805,16 @@ export function ChatWorkspace({
                 ) : (
                   <div key={msg.id} className="flex items-start gap-2.5">
                     <AssistantAvatar />
-                    <div className="min-w-0 flex-1 text-foreground">
+                    {/* THE GROUND UNDER THE ANSWER — V4.6, decided
+                        2026-09-04 from the screenshots: `dim`. A 62%
+                        page-colour pane over the answer's own rectangle,
+                        no blur (no GPU cost on a phone), the globe
+                        crisp around the text and quiet under it. Same
+                        measured contrast as `shadow` (worst 6.57:1 dark,
+                        7.73:1 light), cheaper. The other two classes
+                        stay in globals.css for the prodtest to keep
+                        measuring; nothing else ships them. */}
+                    <div className="chat-ground-dim min-w-0 flex-1 text-foreground">
                       <MessageContent content={msg.content} className="leading-relaxed" />
                       {/* "LISTEN" — on the finished answer only. Never on
                           the one still streaming: half a sentence read
@@ -832,7 +841,7 @@ export function ChatWorkspace({
                 <div className="flex items-start gap-2.5">
                   <AssistantAvatar />
                   {streamingText !== null ? (
-                    <div className="min-w-0 flex-1 text-foreground">
+                    <div className="chat-ground-dim min-w-0 flex-1 text-foreground">
                       <MessageContent content={streamingText} className="leading-relaxed" />
                       <AiGeneratedNotice />
                     </div>

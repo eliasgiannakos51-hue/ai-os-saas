@@ -4,7 +4,7 @@
     "notifications": "通知",
     "noNotifications": "新しい通知はありません。",
     "jumpToPage": "モジュールやページに移動...",
-    "noMatches": "'{query}' に一致する結果はありません",
+    "noMatches": "''{query}'' に一致する結果はありません",
     "createStudio": "何でもつくる",
     "cancel": "キャンセル",
     "save": "保存",
@@ -2453,7 +2453,7 @@
   "module": {
     "searchPlaceholder": "検索...",
     "exportCsv": "CSV をエクスポート",
-    "noMatches": "'{query}' に一致する結果はありません",
+    "noMatches": "''{query}'' に一致する結果はありません",
     "selectPlaceholder": "選択してください...",
     "save": "保存",
     "saving": "保存中...",

@@ -265,7 +265,11 @@ export async function GET(request: Request) {
   });
 }
 
-type SchemaSweep = { ok: boolean | null; checked: number; missing: { object: string; migration: string; breaks: string }[] };
+type SchemaSweep = {
+  ok: boolean | null;
+  checked: number;
+  missing: { object: string; migration: string; breaks: string; note?: string }[];
+};
 
 // CACHED LIKE THE PROBE, FOR THE SAME REASON. The sweep is one query per
 // canary — sixteen today — and it ran on EVERY request: fifty anonymous
@@ -306,7 +310,7 @@ async function schemaSweep(): Promise<SchemaSweep> {
       schemaClient = null;
     }
     const admin = schemaClient;
-    const missing: { object: string; migration: string; breaks: string }[] = [];
+    const missing: { object: string; migration: string; breaks: string; note?: string }[] = [];
     await Promise.all(
       (admin ? SCHEMA_CANARIES : []).map(async (c) => {
         if (!admin) return;
@@ -329,7 +333,38 @@ async function schemaSweep(): Promise<SchemaSweep> {
               const sameName = new RegExp(`function\\s+(?:public\\.)?${c.fn}\\s*\\(`, "i");
               const presentWithOtherArgs = sameName.test(String((error as { hint?: string | null }).hint ?? ""));
               if (!presentWithOtherArgs) {
-                missing.push({ object: `${c.fn}()`, migration: c.migration, breaks: c.breaks });
+                // TWO THINGS THIS CAN MEAN, and PostgREST cannot tell them
+                // apart: the migration never ran on THIS database, or it
+                // ran and PostgREST's schema cache has not been reloaded
+                // since. Production on 2026-09-04: all six functions in
+                // pg_proc from the SQL editor, all six "not found" here.
+                // The probe cannot say which, so the note says both, and
+                // the one-line cure for the second.
+                // WHAT POSTGREST ACTUALLY SAID, in the server log only —
+                // the one place it can be read without handing a function's
+                // parameter names to an anonymous caller. On 2026-09-04
+                // production listed six functions that ⌘K, rate limiting
+                // and settlement were visibly using, and the shape of the
+                // answer that made the probe say "missing" was the open
+                // question; this is how it gets answered next time.
+                logApiError("/api/health", new Error("schema_function_not_visible"), {
+                  fn: c.fn,
+                  code: error.code ?? null,
+                  message: error.message,
+                  hint: (error as { hint?: string | null }).hint ?? null,
+                  details: (error as { details?: string | null }).details ?? null,
+                });
+                missing.push({
+                  object: `${c.fn}()`,
+                  migration: c.migration,
+                  breaks: c.breaks,
+                  // Worded without the API layer's own error vocabulary:
+                  // the disclosure check in health-probe.prodtest.mjs
+                  // reads any "schema cache" in an anonymous body as a
+                  // leaked error, and this is a sentence, not a leak.
+                  note:
+                    "The database API cannot see this function: either its migration never ran on this database, or the API's cached view of the schema is stale. Run NOTIFY pgrst, 'reload schema'; in the SQL editor and check again.",
+                });
               }
             }
           } else {

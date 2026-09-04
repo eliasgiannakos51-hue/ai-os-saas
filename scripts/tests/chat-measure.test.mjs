@@ -230,5 +230,48 @@ check(
   "the filled orange bubble is back"
 );
 
+// ---------------------------------------------------------------------
+console.log("\n== 5. the ground under the answer is dim, and only under the answer ==");
+// DECIDED 2026-09-04 from the screenshots: dim. Read from the source the
+// way section 4 reads the wrapper: the div that opens right before each
+// <MessageContent> carries the class, the person's bubble does not, and
+// the class in globals.css is still the pane it was measured as (62% of
+// the page colour, no blur). The prodtest measures the contrast; this
+// says the decision is still wired.
+const streamingWrapper = (() => {
+  const at = workspace.indexOf("<MessageContent content={streamingText}");
+  if (at < 0) return null;
+  const before = workspace.slice(0, at);
+  const open = before.lastIndexOf("<div");
+  return open < 0 ? null : before.slice(open, at).trim();
+})();
+check(
+  "the final answer wrapper carries the dim ground",
+  Boolean(answerWrapper) && /\bchat-ground-dim\b/.test(answerWrapper),
+  answerWrapper ?? "NOT FOUND"
+);
+check(
+  "the streaming answer wrapper carries the dim ground",
+  Boolean(streamingWrapper) && /\bchat-ground-dim\b/.test(streamingWrapper),
+  streamingWrapper ?? "NOT FOUND"
+);
+const personBubble = workspace.match(/className="[^"]*border-orange-500\/30[^"]*"/)?.[0] ?? "";
+check(
+  "the person's bubble carries no ground class (a question keeps its own card)",
+  personBubble.length > 0 && !/chat-ground-/.test(personBubble),
+  personBubble || "the person's bubble was not found"
+);
+check("no other ground ships", !/chat-ground-(blur|shadow)/.test(workspace), "blur or shadow is applied in the workspace");
+const dimRule = (() => {
+  const at = css.indexOf(".chat-ground-dim {");
+  return at < 0 ? "" : css.slice(at, css.indexOf("}", at));
+})();
+check(
+  "the dim ground keeps its 62% strength",
+  /rgb\(var\(--background\) \/ 0\.62\)/.test(dimRule),
+  dimRule || ".chat-ground-dim not found in globals.css"
+);
+check("...and no blur, which is the whole reason it was chosen", dimRule.length > 0 && !/backdrop-filter/.test(dimRule), dimRule);
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

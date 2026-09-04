@@ -4,7 +4,7 @@
     "notifications": "通知",
     "noNotifications": "没有新通知。",
     "jumpToPage": "跳转到模块或页面...",
-    "noMatches": "没有找到与 '{query}' 匹配的结果",
+    "noMatches": "没有找到与 ''{query}'' 匹配的结果",
     "createStudio": "创建任何东西",
     "cancel": "取消",
     "save": "保存",
@@ -2453,7 +2453,7 @@
   "module": {
     "searchPlaceholder": "搜索...",
     "exportCsv": "导出 CSV",
-    "noMatches": "没有找到与 '{query}' 匹配的结果",
+    "noMatches": "没有找到与 ''{query}'' 匹配的结果",
     "selectPlaceholder": "请选择...",
     "save": "保存",
     "saving": "保存中...",

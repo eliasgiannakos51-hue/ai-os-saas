@@ -1466,7 +1466,8 @@
           "social": "die Social-Media-Links",
           "chatWidget": "das Chat-Widget"
         },
-        "stopped": "Von dir gestoppt. {count, plural, =0 {Nichts wurde berechnet} one {# Credit wurde berechnet} other {# Credits wurden berechnet}} für den erzeugten Teil; der Rest der Reservierung wurde freigegeben."
+        "stopped": "Von dir gestoppt. {count, plural, =0 {Nichts wurde berechnet} one {# Credit wurde berechnet} other {# Credits wurden berechnet}} für den erzeugten Teil; der Rest der Reservierung wurde freigegeben.",
+        "spelling": "{count, plural, one {Ein griechisches Wort ist möglicherweise falsch geschrieben} other {# griechische Wörter sind möglicherweise falsch geschrieben}}: {words}. Es wurde nichts geändert — prüfe sie, ein Name oder eine Marke ist kein Fehler."
       }
     },
     "marketplace": {

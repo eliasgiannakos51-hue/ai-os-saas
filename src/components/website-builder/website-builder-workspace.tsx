@@ -1052,6 +1052,11 @@ export function WebsiteBuilderWorkspace({
         return t("notes.mapZoom", { count: note.count });
       case "stopped":
         return t("notes.stopped", { count: note.credits });
+      case "spelling":
+        // The words themselves, joined — the owner is the only one who can
+        // say whether "ρεμπα" is a typo or a brand, and they can only say
+        // it if they can see the word.
+        return t("notes.spelling", { count: note.words.length, words: note.words.join(", ") });
     }
   };
   // A run the owner stopped: the row is "failed" with an English sentence

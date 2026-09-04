@@ -1466,7 +1466,8 @@
           "social": "the social media links",
           "chatWidget": "the chat widget"
         },
-        "stopped": "Stopped by you. {count, plural, =0 {Nothing was charged} one {# credit was charged} other {# credits were charged}} for the part that was generated; the rest of the hold was released."
+        "stopped": "Stopped by you. {count, plural, =0 {Nothing was charged} one {# credit was charged} other {# credits were charged}} for the part that was generated; the rest of the hold was released.",
+        "spelling": "{count, plural, one {One Greek word may be misspelled} other {# Greek words may be misspelled}}: {words}. Nothing was changed — check them, a name or a brand is not a mistake."
       }
     },
     "marketplace": {

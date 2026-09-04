@@ -1466,7 +1466,8 @@
           "social": "as ligações para redes sociais",
           "chatWidget": "o widget de chat"
         },
-        "stopped": "Paraste-o. {count, plural, =0 {Nada foi cobrado} one {Foi cobrado # crédito} other {Foram cobrados # créditos}} pela parte gerada; o resto da reserva foi libertado."
+        "stopped": "Paraste-o. {count, plural, =0 {Nada foi cobrado} one {Foi cobrado # crédito} other {Foram cobrados # créditos}} pela parte gerada; o resto da reserva foi libertado.",
+        "spelling": "{count, plural, one {Uma palavra grega pode estar mal escrita} other {# palavras gregas podem estar mal escritas}}: {words}. Nada foi alterado — verifica-as, um nome ou uma marca não é um erro."
       }
     },
     "marketplace": {

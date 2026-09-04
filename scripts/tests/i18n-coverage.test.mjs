@@ -804,132 +804,130 @@ checkTrue(
 // social crawlers that send no locale cookie — excluded by convention, not
 // by name. False-positive rate 0%.
 //
-// A RATCHET, NOT A ZERO.
+// ZERO FOR EVERY SCREEN A CUSTOMER CAN REACH, and a classified allowance
+// for the two sets that are English on purpose.
 //
-// 86 of these still ship — 162 when this landed, minus the 22 aria-label
-// attributes paid off in batch A1 (now held at zero by 1d above), the 25
-// in the Ideas module paid off in A2, the 19 in Chat, Memory and Create
-// paid off in A3, the two `title=` attributes that came with the eight
-// template-literal strings 1a and 1d turned up, and the seven across
-// not-found, error-message and the two Quick Start components that a
-// second branch had already translated — four entries deleted outright
-// rather than lowered, which is what the stale-baseline half of this
-// check exists to force — and one more on the upgrade wall, which stopped
-// naming the feature in English once the module heading became a key.
-// Failing the build on all of them would mean
-// this check could not land at all, and a check that cannot land protects
-// nothing. So the baseline below is per FILE: no file may get worse, and
-// the total may only go down. That is the same mechanism this file already
-// uses for server-side error prose a few sections down — the number is
-// asserted so it cannot quietly GROW, and the decision to pay the debt
-// stays a decision instead of an accident.
+// This started as an unclassified ratchet: one table of file -> number,
+// where "no file may get worse" was the whole rule. That was the right
+// instrument while 162 strings were outstanding, and it worked — the
+// aria-label batch, the Ideas module, Chat/Memory/Create, the palette
+// footer, the pagination line, the PWA install card and the legal layout
+// all came off it. What it could not do is stop the NEXT user-facing
+// string: a new entry with a small number looked exactly like a debt
+// somebody had decided to carry.
 //
-// Fixing a file? Lower its number here, or delete the entry when it hits
-// zero. The check fails if a baseline is HIGHER than reality too, so a
-// stale entry cannot hide a regression somewhere else.
-const BARE_TEXT_BASELINE = {
-    "src/app/cookies/page.tsx": 19,
-    // THE LEGAL SET, ENGLISH BY THE SAME CONVENTION as cookies, privacy
-    // and terms above — the three that have been baselined here since
-    // this check landed. A legal text translated by a model and reviewed
-    // by nobody is worse than an English one a reader can at least take
-    // to somebody who reads English: the wrong word in a liability
-    // clause is not a typo. What IS translated on these pages, in all
-    // ten locales, is everything a reader navigates by — the heading
-    // (LegalLayout's titleKey), the footer link, the "last updated"
-    // line, the notice box and the back link — which is the part that
-    // used to be English and is checked by
-    // scripts/tests/legal-pages.test.mjs.
-    //
-    // /ai-transparency is the one worth arguing about, because it is an
-    // EU AI Act Article 50 disclosure rather than contract prose, and
-    // its section 9 says on the page that it is published in English.
-    // The AI notices a person actually meets INSIDE the product are
-    // localised — including the agent-email disclosure, which is written
-    // in the language the agent replies in (lib/agents/ai-disclosure.ts,
-    // ten languages). Whether the body itself should be translated is a
-    // decision for whoever owns the legal text, not something to settle
-    // by quietly leaving it out of this table.
-    "src/app/acceptable-use/page.tsx": 19,
-    "src/app/ai-transparency/page.tsx": 58,
-    "src/app/dashboard/system-health/page.tsx": 5,
-    "src/app/offline/page.tsx": 3,
-    "src/app/privacy/page.tsx": 17,
-    "src/app/terms/page.tsx": 10,
-    "src/components/auth/generate-password-button.tsx": 1,
-    "src/components/billing/upgrade-required.tsx": 3,
-    // (was 3) src/components/dashboard/command-palette.tsx — the footer
-    // hints "↑↓ navigate", "↵ select" and "esc close" were literal JSX,
-    // so a Greek user pressing ⌘K read three English words under a Greek
-    // list. Reported on 2026-09-05 from a real screen and reproduced in a
-    // Greek browser before being believed. They come from `common` now,
-    // in all ten locales, so the entry is deleted rather than lowered.
-    "src/components/entity-links/link-to-modal.tsx": 1,
-    "src/components/landing/deleted-account-banner.tsx": 1,
-    // (was 3) src/components/legal/legal-layout.tsx — "last updated:",
-    // the placeholder-copy notice and "← back to Ionexa AI" were English
-    // literals in the shared layout, so every legal page rendered them
-    // in English in all ten locales. They now come from the `legal`
-    // namespace. The entry is deleted rather than lowered, which is what
-    // the stale-baseline half of this check exists to force.
-    "src/components/overview/beta-expiry-banner.tsx": 2,
-    // (was 3) src/components/pagination-controls.tsx — "Prev", "Next" and
-    // "Page N / M" under every module list, the timeline, the agents and
-    // the missions. The two buttons' aria-labels were already translated,
-    // which is what makes this one worth naming: somebody localised the
-    // screen-reader text on the very same elements and left the visible
-    // words English. Also from `common` now.
-    // (was 4) src/components/pwa/pwa-provider.tsx — the install card's
-    // "Install Ionexa" / "Install" / "Not now" / "Add it to your home
-    // screen" were English literals inside the provider. They now live in
-    // components/pwa/install-invitation.tsx behind the `pwa` namespace, in
-    // all ten locales, so the entry is deleted rather than lowered.
-    "src/components/settings/buy-credits.tsx": 2,
-    "src/components/settings/danger-zone.tsx": 1,
-    "src/components/settings/password-change-form.tsx": 1,
-    // Owner-only cost diagnostics, English for the same reason as
-    // system-health below: the audience is the hardcoded ADMIN_EMAILS
-    // list — one person — and the page is unreachable (notFound) for
-    // everybody else. Ten locale entries per label would be translation
-    // nobody can ever read, and the labels are operational terms
-    // ("margin", "MRR") that are English in the code they describe.
-    "src/components/costs/cost-dashboard.tsx": 12,
-    // The two panels added with the V4.6 final audit, on the same
-    // owner-only page and English for the same reason. What they say is
-    // operational and untranslatable in practice — "SECURITY DEFINER
-    // functions with no pinned search_path" is a PostgreSQL term, and a
-    // Greek rendering of it would be harder to act on, not easier.
-    //
-    // Their TERNARY branches are not on this list and never will be:
-    // English reached through a ternary is banned everywhere, owner-only
-    // or not, because it is how a string escapes every scanner that looks
-    // for a translated call. Both panels name the constant instead.
-    "src/components/system-health/db-exposure.tsx": 3,
-    "src/components/system-health/env-warnings.tsx": 1,
-    "src/components/system-health/error-list.tsx": 2,
-    // Owner-only diagnostics, English on purpose like the rest of the
-    // system-health page it lives on.
-    "src/components/system-health/storage-diagnostics.tsx": 3,
-    // Same page, same reason: the PWA adoption figures are read by the
-    // owner only, and the labels ("Push granted", "display-mode is not
-    // 'browser'") name browser concepts that would be less clear
-    // translated than left alone.
-    "src/components/system-health/pwa-adoption.tsx": 8,
-    // Same page, same audience, and one reason more: the SENTENCES this
-    // component renders are not its own. They come verbatim from
-    // ENV_REQUIREMENTS in lib/env-check.ts — "nothing is sent and nothing
-    // errors: welcome emails, agent results, ... all stop silently" —
-    // where they are the text the boot check writes to the server log.
-    // Translating the headings while the body stayed English would be
-    // worse than leaving both, and moving 42 operational sentences into
-    // ten locale files would put the log's wording and the screen's
-    // wording in two places that could disagree.
-    "src/components/system-health/capability-status.tsx": 3,
-    "src/components/text-actions/text-actions-textarea.tsx": 2,
-  };
-// Derived, not typed. The printed total used to be a hand-written 162 in a
-// template string, which is a second number that can disagree with the
-// first — and did, the moment the per-file entries came down.
+// So the allowance is now two named tables and nothing else may exist.
+// A file that is neither a legal page nor an owner-only diagnostic has no
+// place to be written down, which means the only way to add a hardcoded
+// English string to a customer's screen is to fail this build.
+//
+// Both categories are CHECKED, not asserted:
+//   - a legal entry must be a page under one of the routes
+//     scripts/tests/legal-pages.test.mjs already knows about;
+//   - an owner-only entry must be imported ONLY by pages that call
+//     isAdminEmail and notFound — the "the audience is one person" reason
+//     is a claim about access control, and access control is readable.
+//
+// Fixing a file? Lower its number, or delete the entry when it hits zero.
+// A baseline HIGHER than reality fails too, so a stale entry cannot hide a
+// regression somewhere else.
+
+// The legal texts. English by a deliberate decision, not by neglect: a
+// liability clause translated by a model and reviewed by nobody is worse
+// than an English one a reader can take to somebody who reads English —
+// the wrong word in an indemnity is not a typo. What IS translated on
+// these pages, in all ten locales, is everything a reader navigates by:
+// the heading (LegalLayout's titleKey), the footer link, the "last
+// updated" line, the notice box and the back link — checked by
+// scripts/tests/legal-pages.test.mjs.
+//
+// /ai-transparency is the one worth arguing about, because it is an EU AI
+// Act Article 50 disclosure rather than contract prose, and its section 9
+// says on the page that it is published in English. The AI notices a
+// person actually meets INSIDE the product are localised — including the
+// agent-email disclosure, written in the language the agent replies in
+// (lib/agents/ai-disclosure.ts, ten languages). Whether the body itself
+// should be translated is a decision for whoever owns the legal text, not
+// something to settle by quietly leaving it out of a table.
+const LEGAL_BASELINE = {
+  "src/app/acceptable-use/page.tsx": 19,
+  "src/app/ai-transparency/page.tsx": 58,
+  "src/app/cookies/page.tsx": 19,
+  "src/app/privacy/page.tsx": 17,
+  "src/app/terms/page.tsx": 10,
+};
+
+// The owner-only diagnostics. The audience is the hardcoded ADMIN_EMAILS
+// list — one person — and every page carrying these calls notFound() for
+// everybody else, which the check below verifies rather than trusts. Ten
+// locale entries per label would be translation nobody can ever read, and
+// the labels are operational terms that are English in the systems they
+// describe: "SECURITY DEFINER functions with no pinned search_path" is a
+// PostgreSQL phrase, "display-mode is not 'browser'" is a CSS media
+// feature, and a Greek rendering of either would be harder to act on.
+//
+// capability-status.tsx has one reason more: the SENTENCES it renders are
+// not its own. They come verbatim from ENV_REQUIREMENTS in lib/env-check.ts
+// — "nothing is sent and nothing errors: welcome emails, agent results,
+// ... all stop silently" — where they are the text the boot check writes
+// to the server log. Moving 42 operational sentences into ten locale files
+// would put the log's wording and the screen's wording in two places that
+// can disagree.
+//
+// TERNARY branches inside these files are NOT covered here and never will
+// be: English reached through a ternary is banned everywhere, owner-only or
+// not, because that is how a string escapes every scanner looking for a
+// translated call. Both system-health panels name a constant instead.
+const OWNER_ONLY_BASELINE = {
+  "src/app/dashboard/system-health/page.tsx": 5,
+  "src/components/costs/cost-dashboard.tsx": 12,
+  "src/components/system-health/capability-status.tsx": 3,
+  "src/components/system-health/db-exposure.tsx": 3,
+  "src/components/system-health/env-warnings.tsx": 1,
+  "src/components/system-health/error-list.tsx": 2,
+  "src/components/system-health/pwa-adoption.tsx": 8,
+  "src/components/system-health/storage-diagnostics.tsx": 3,
+};
+
+// PAID OFF, and named so that re-adding one is a visible decision rather
+// than a new line in a table:
+//
+//   command-palette.tsx (3)     "↑↓ navigate", "↵ select", "esc close" —
+//                               three English words under a Greek list,
+//                               reported from a real ⌘K screen.
+//   pagination-controls.tsx (3) "Prev", "Next", "Page N / M" under every
+//                               module list. Their aria-labels were
+//                               already translated on the same elements.
+//   legal-layout.tsx (3)        "last updated:", the placeholder notice
+//                               and "← back to Ionexa AI", in the shared
+//                               layout of every legal page.
+//   pwa-provider.tsx (4)        the install card, moved to
+//                               components/pwa/install-invitation.tsx.
+//   offline/page.tsx (3)        the last-resort page a phone meets with no
+//                               connection. It carried a comment saying
+//                               the locale "lives behind a request this
+//                               page exists precisely because it failed",
+//                               and offline-state.test.mjs asserted that
+//                               excuse stayed. Both were wrong: the page
+//                               is fetched ONCE, over the network, by the
+//                               service worker's install handler.
+//   text-actions-textarea.tsx (2 + 4)
+//                               Accept/Reject, plus the four toolbar
+//                               labels that section 1d could not see
+//                               because `aria-label={label}` is an
+//                               expression. 1d follows the identifier now.
+//   upgrade-required.tsx (3)    the paywall a customer meets when they hit
+//                               a plan limit, in English on every locale.
+//   beta-expiry-banner.tsx (2)  built from five fragments with an English
+//                               `days === 1 ? "" : "s"` plural; one ICU
+//                               sentence now.
+//   buy-credits.tsx (2)         the top-up paragraph and "Loading...".
+//   generate-password-button.tsx (1), deleted-account-banner.tsx (1),
+//   link-to-modal.tsx (1), danger-zone.tsx (1),
+//   password-change-form.tsx (1)
+//                               a button and four "error:" prefixes.
+const BARE_TEXT_BASELINE = { ...LEGAL_BASELINE, ...OWNER_ONLY_BASELINE };
+
 const BASELINE_TOTAL = Object.values(BARE_TEXT_BASELINE).reduce((a, b) => a + b, 0);
 
 {
@@ -964,6 +962,86 @@ const BASELINE_TOTAL = Object.values(BARE_TEXT_BASELINE).reduce((a, b) => a + b,
     console.log("        say why in scripts/jsx-text-report.mjs rather than raising the baseline.");
   }
   check("no baseline is stale (a fixed file must lower its number)", stale, []);
+}
+
+// ---------------------------------------------------------------------
+// 1c-ii. THE ALLOWANCE HAS TO EARN ITS TWO REASONS.
+//
+// A table of file -> number says nothing about WHY a file is on it. Both
+// reasons in this one are claims about the product — "this is a legal
+// text", "only the owner can reach this screen" — and both are readable
+// from the tree, so neither is left as prose.
+//
+// This is the half that makes the zero above hold. Without it, a hardcoded
+// English string on a customer's screen needs one line in a table and a
+// comment; with it, the line has to be a page that renders LegalLayout or
+// a component no non-owner can load.
+{
+  const legalFiles = Object.keys(LEGAL_BASELINE);
+  const notLegal = legalFiles.filter(
+    (f) => !/<LegalLayout/.test(readFileSync(f, "utf8"))
+  );
+  check("every legal-baselined file really renders LegalLayout", notLegal, []);
+
+  // Which pages can load an owner-only component? Every page that imports
+  // it, directly. One level is enough here because these components are
+  // leaves — the check below asserts that too, so a re-export could not
+  // quietly widen the audience without turning this red.
+  const APP_PAGES = sources.filter((f) => /^src\/app\/.*\/(page|layout)\.tsx$/.test(f));
+  const importersOf = (file) => {
+    const base = file.replace(/^src\//, "@/").replace(/\.tsx?$/, "");
+    return APP_PAGES.filter((p) => readFileSync(p, "utf8").includes(`from "${base}"`));
+  };
+  // THE GUARD, NOT THE TWO WORDS. The first version of this asked whether
+  // the file mentioned isAdminEmail and mentioned notFound(), and
+  // i18n-coverage.mutation.mjs killed it in one line: replacing
+  // `if (!isAdminEmail(user.email)) notFound();` with `void isAdminEmail;`
+  // leaves both words in the file, opens the cost dashboard to every
+  // customer, and kept this check green. A gate that reads the words of a
+  // defence rather than the defence is the shape that has cost this
+  // project more than any other.
+  const OWNER_GUARD = (src) =>
+    /if\s*\(\s*!\s*isAdminEmail\([^)]*\)\s*\)\s*\{?\s*notFound\(\)/.test(src);
+
+  const unguarded = [];
+  const orphaned = [];
+  for (const file of Object.keys(OWNER_ONLY_BASELINE)) {
+    if (/^src\/app\/.*\/page\.tsx$/.test(file)) {
+      // The page itself: it has to guard its own door.
+      if (!OWNER_GUARD(readFileSync(file, "utf8"))) unguarded.push(file);
+      continue;
+    }
+    const pages = importersOf(file);
+    if (pages.length === 0) {
+      // Not "fine because nothing uses it": a component nobody imports
+      // cannot be shown to an owner either, so the entry is stale.
+      orphaned.push(file);
+      continue;
+    }
+    for (const page of pages) {
+      if (!OWNER_GUARD(readFileSync(page, "utf8"))) unguarded.push(`${file} <- ${page}`);
+    }
+  }
+  check("every owner-only file is only reachable behind isAdminEmail + notFound", unguarded, []);
+  check("...and every one of them is actually imported by a page", orphaned, []);
+
+  // AND NOWHERE ELSE. A component may be baselined as owner-only and then
+  // dropped onto a customer's screen by a second page a year later; the
+  // check above would still pass if that page happened to guard, but this
+  // is the shape that catches the honest mistake — an owner-only panel
+  // imported by anything that is not the owner-only page it was written
+  // for.
+  const strayImports = [];
+  for (const file of Object.keys(OWNER_ONLY_BASELINE)) {
+    if (/^src\/app\//.test(file)) continue;
+    const base = file.replace(/^src\//, "@/").replace(/\.tsx?$/, "");
+    for (const other of sources) {
+      if (other === file) continue;
+      if (!readFileSync(other, "utf8").includes(`from "${base}"`)) continue;
+      if (!OWNER_GUARD(readFileSync(other, "utf8"))) strayImports.push(`${base} <- ${other}`);
+    }
+  }
+  check("no owner-only panel is imported from anywhere unguarded", strayImports, []);
 }
 
 // ---------------------------------------------------------------------
@@ -1019,11 +1097,33 @@ const BRAND_ARIA_LITERALS = new Set(["ionexa", "ionexa ai"]);
  * whole phrase: "(hex)" beside an interpolated label is a format hint, not
  * prose, and flagging it would be a false report.
  */
-function ariaLiteralText(init) {
+function ariaLiteralText(init, bound) {
   if (!init) return null;
   const node = ts.isJsxExpression(init) ? init.expression : init;
   if (!node) return null;
   if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
+  // AN IDENTIFIER IS A LITERAL WHEN THE FILE BINDS IT TO ONE, and until
+  // 2026-09-06 this function stopped one step short of finding that out.
+  //
+  // text-actions-textarea.tsx held its toolbar in a module-level array —
+  // `{ id: "rewrite", label: "Rewrite", icon: Wand2 }` — and rendered
+  // `aria-label={label}`. An expression, so this returned null, so the
+  // count below stayed at zero while four English words shipped on every
+  // Greek, Japanese and Arabic screen, on ICON-ONLY buttons where the
+  // aria-label is the entire button. A check reporting zero is worse than
+  // no check: it is the reason nobody looked.
+  //
+  // One level of indirection is enough for the shape that actually occurs:
+  // a name bound in the same file to a string, either by `const x = "…"`
+  // or as an object property (`{ label: "…" }`) that a `.map` destructures.
+  // A name bound to nothing — a prop, a t() result, a parameter — is not in
+  // the map and is not reported, which is what keeps this at the 0 false
+  // positives the whole-tree scan measured.
+  if (ts.isIdentifier(node) && bound) {
+    const values = [...(bound.get(node.text) ?? [])].filter((v) => /[A-Za-z]{3,}/.test(v));
+    if (values.length > 0) return values.join(" | ");
+    return null;
+  }
   if (ts.isTemplateExpression(node)) {
     const words = [node.head.text, ...node.templateSpans.map((sp) => sp.literal.text)]
       .join(" ")
@@ -1036,6 +1136,33 @@ function ariaLiteralText(init) {
   return null;
 }
 
+/** Every name this file binds to a string literal, by `const x = "…"` or
+ *  as an object property. See ariaLiteralText for why one level. */
+function stringBindings(sf) {
+  const bound = new Map();
+  const add = (name, value) => {
+    if (!bound.has(name)) bound.set(name, new Set());
+    bound.get(name).add(value);
+  };
+  const collect = (node) => {
+    const isStr = (n) =>
+      n && (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n));
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && isStr(node.initializer)) {
+      add(node.name.text, node.initializer.text);
+    }
+    if (
+      ts.isPropertyAssignment(node) &&
+      (ts.isIdentifier(node.name) || ts.isStringLiteral(node.name)) &&
+      isStr(node.initializer)
+    ) {
+      add(node.name.text, node.initializer.text);
+    }
+    ts.forEachChild(node, collect);
+  };
+  collect(sf);
+  return bound;
+}
+
 const literalAria = [];
 for (const file of sources) {
   if (!file.endsWith(".tsx")) continue;
@@ -1046,9 +1173,10 @@ for (const file of sources) {
     true,
     ts.ScriptKind.TSX
   );
+  const bound = stringBindings(sf);
   const visit = (node) => {
     if (ts.isJsxAttribute(node) && ARIA_TEXT_ATTRS.has(node.name.getText())) {
-      const text = ariaLiteralText(node.initializer);
+      const text = ariaLiteralText(node.initializer, bound);
       if (text !== null && !BRAND_ARIA_LITERALS.has(text.trim().toLowerCase())) {
         const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
         literalAria.push(`${file}:${line + 1} ${node.name.getText()}=${JSON.stringify(text)}`);

@@ -42,6 +42,33 @@ export type LocalePersistResult =
 
 export function writeLocaleCookie(code: string) {
   document.cookie = `${LOCALE_COOKIE}=${code}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE}; SameSite=Lax`;
+  refreshOfflineShell();
+}
+
+/**
+ * THE ONE CACHED PAGE THAT DOES NOT REFRESH ITSELF.
+ *
+ * app/offline/page.tsx is rendered in the reader's language, but the copy a
+ * phone actually sees is the one the service worker fetched at install
+ * time (public/sw.js, `cache.add("/offline")`). Every other page is
+ * network-first and re-caches itself on the next visit; that one is fetched
+ * exactly once. So a person who installs the app in English and then
+ * switches to Greek would keep meeting an English offline page — the ONLY
+ * screen still in the old language, and the one screen where nothing can be
+ * done about it, because by then there is no network.
+ *
+ * Both writes are wrapped: `serviceWorker` is undefined on http:// and in
+ * some embedded browsers, and `controller` is null on the very first load
+ * before a worker has taken control. Neither is a reason for a language
+ * change to fail, so a miss here is silent and the offline page simply
+ * stays as it was.
+ */
+function refreshOfflineShell() {
+  try {
+    navigator.serviceWorker?.controller?.postMessage({ type: "refresh-offline" });
+  } catch {
+    // No worker, no controller, or a browser that refuses — see above.
+  }
 }
 
 export async function persistLocalePreference(code: string): Promise<LocalePersistResult> {

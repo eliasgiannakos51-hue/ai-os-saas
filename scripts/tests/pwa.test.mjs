@@ -90,7 +90,22 @@ check("auth callbacks are never cached", /startsWith\("\/auth\/"\)/.test(sw));
 check("non-GET requests are ignored", /request\.method !== "GET"/.test(sw));
 check("cross-origin requests are left alone", /url\.origin !== self\.location\.origin/.test(sw));
 check("navigations are network-FIRST (personalised pages)", /request\.mode === "navigate"/.test(sw) && /await fetch\(request\)/.test(sw));
-check("with an offline fallback", /OFFLINE_URL/.test(sw) && /caches\.match\(OFFLINE_URL\)/.test(sw));
+// IGNOREVARY IS PART OF "THERE IS A FALLBACK", not a detail beside it.
+// /offline reads the NEXT_LOCALE cookie so it can be shown in the reader's
+// language; a response stored from a request that carried a cookie does
+// not match a synthetic `caches.match(OFFLINE_URL)` if it declares Vary,
+// and the failure mode is no offline page at all — silently, and only for
+// people who had changed language. This check used to pin the exact call
+// WITHOUT the option, so adding the option turned it red: a stale anchor
+// pointing at the shape of the code rather than at what it has to do.
+check(
+  "with an offline fallback",
+  /OFFLINE_URL/.test(sw) && /caches\.match\(OFFLINE_URL[,)]/.test(sw)
+);
+check(
+  "...that is still found when the cached response varies",
+  /caches\.match\(OFFLINE_URL, \{ ignoreVary: true \}\)/.test(sw)
+);
 check("static assets are cache-first", /isStaticAsset/.test(sw));
 check("old versions are purged on activate", /caches\.delete/.test(sw));
 check("install cannot be broken by one missing asset", /cache\.add\(url\)\.catch/.test(sw));

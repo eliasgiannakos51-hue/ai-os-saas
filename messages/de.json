@@ -58,7 +58,8 @@
       "showingCachedAge": "Hier aktualisiert sich nichts — geladen vor {minutes} Min.",
       "retry": "Erneut versuchen",
       "checking": "Prüfe…",
-      "stillOffline": "Immer noch keine Verbindung."
+      "stillOffline": "Immer noch keine Verbindung.",
+      "lastResortBody": "Ionexa braucht eine Verbindung, um neue Daten zu laden. Bereits geöffnete Seiten sind weiterhin aus dem Cache dieses Geräts verfügbar — und woran du gearbeitet hast, liegt sicher auf dem Server."
     },
     "creditsUnlimited": "Unbegrenzt",
     "whatIsThis": "Was ist das?",
@@ -77,7 +78,21 @@
     "paletteClose": "schließen",
     "paginationPrev": "Zurück",
     "paginationNext": "Weiter",
-    "paginationPage": "Seite {page} / {total}"
+    "paginationPage": "Seite {page} / {total}",
+    "errorWithMessage": "Fehler: {message}",
+    "upgradeRequired": {
+      "title": "Upgrade erforderlich",
+      "body": "{feature} erfordert den Tarif {plan} oder höher."
+    },
+    "textActions": {
+      "rewrite": "Umschreiben",
+      "translate": "Übersetzen",
+      "improve": "Verbessern",
+      "explain": "Erklären",
+      "accept": "Übernehmen",
+      "reject": "Verwerfen"
+    },
+    "betaExpiry": "Dein Beta-Zugang endet in {days, plural, one {# Tag} other {# Tagen}}. <link>Upgrade, um den vollen Zugang zu behalten</link>."
   },
   "sidebar": {
     "groups": {
@@ -221,7 +236,8 @@
       "acceptableUse": "Nutzungsrichtlinie",
       "aiTransparency": "KI-Transparenz",
       "contact": "Kontakt"
-    }
+    },
+    "accountDeleted": "Dein Konto und alle zugehörigen Daten wurden endgültig gelöscht."
   },
   "pricing": {
     "title": "Preise",
@@ -508,7 +524,8 @@
       "confirmButton": "Dein Konto dauerhaft löschen",
       "cancel": "Abbrechen und zurück",
       "confirmFailed": "Wir konnten die Löschung nicht abschließen. Dein Konto besteht weiterhin — versuch den Link erneut oder wende dich an den Support."
-    }
+    },
+    "generateStrongPassword": "Sicheres Passwort erzeugen"
   },
   "settings": {
     "title": "Einstellungen",
@@ -700,7 +717,9 @@
       "checkout": {
         "success": "Zahlung erhalten. Dein Tarif wird hier aktualisiert, sobald Stripe ihn bestätigt — meist innerhalb weniger Sekunden.",
         "cancelled": "Der Bezahlvorgang wurde abgebrochen. Es wurde nichts berechnet."
-      }
+      },
+      "buyCreditsDescription": "Diesen Monat mehr Credits nötig? Lade einmalig auf — ohne Änderung am Abo.",
+      "creditsAmount": "{count, plural, one {# Credit} other {# Credits}}"
     },
     "marginReport": {
       "title": "Margenbericht",

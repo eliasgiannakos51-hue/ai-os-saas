@@ -8,11 +8,22 @@ import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text
 import { useCredits } from "@/components/credits/credits-context";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 
+// THE LABEL IS A KEY, NOT A WORD, and for a long time it was a word.
+//
+// These four are icon-only buttons: the aria-label IS the button for
+// anybody using a screen reader, and the title is the only thing a mouse
+// user gets. Both read `aria-label={label}` — an EXPRESSION — so
+// i18n-coverage.test.mjs's 1d section, which holds literal aria attributes
+// at zero and had done since it landed, never saw them. Four English words
+// on every Greek, Japanese and Arabic screen, behind a check that reported
+// zero. 1d now follows an identifier to the string literal it is bound to,
+// which is what makes this file's fix hold rather than the fix being the
+// only thing standing between the words and the next component.
 const ACTIONS = [
-  { id: "rewrite", label: "Rewrite", icon: Wand2 },
-  { id: "translate", label: "Translate", icon: Languages },
-  { id: "improve", label: "Improve", icon: Sparkles },
-  { id: "explain", label: "Explain", icon: HelpCircle },
+  { id: "rewrite", labelKey: "textActions.rewrite", icon: Wand2 },
+  { id: "translate", labelKey: "textActions.translate", icon: Languages },
+  { id: "improve", labelKey: "textActions.improve", icon: Sparkles },
+  { id: "explain", labelKey: "textActions.explain", icon: HelpCircle },
 ] as const;
 
 type ActionId = (typeof ACTIONS)[number]["id"];
@@ -134,15 +145,15 @@ export function TextActionsTextarea({
 
       {selection && (
         <div className="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-lg border border-border bg-panel p-1 shadow-lg">
-          {ACTIONS.map(({ id, label, icon: Icon }) => (
+          {ACTIONS.map(({ id, labelKey, icon: Icon }) => (
             <button
               key={id}
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => runAction(id)}
               disabled={pendingAction !== null}
-              aria-label={label}
-              title={label}
+              aria-label={tCommon(labelKey)}
+              title={tCommon(labelKey)}
               className="flex h-7 w-7 items-center justify-center rounded-md text-muted transition-colors duration-150 hover:bg-orange-500/10 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {pendingAction === id ? (
@@ -171,7 +182,7 @@ export function TextActionsTextarea({
                   onClick={reject}
                   className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-muted transition-colors duration-150 hover:text-foreground"
                 >
-                  <X className="h-3 w-3" /> Reject
+                  <X className="h-3 w-3" /> {tCommon("textActions.reject")}
                 </button>
                 <button
                   type="button"
@@ -179,7 +190,7 @@ export function TextActionsTextarea({
                   onClick={accept}
                   className="inline-flex items-center gap-1 rounded-md bg-orange-500 px-2 py-1 font-medium text-black transition-colors duration-150 hover:opacity-90"
                 >
-                  <Check className="h-3 w-3" /> Accept
+                  <Check className="h-3 w-3" /> {tCommon("textActions.accept")}
                 </button>
               </div>
             </>

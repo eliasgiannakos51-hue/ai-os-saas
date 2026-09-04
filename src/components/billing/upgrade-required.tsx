@@ -9,9 +9,9 @@ export function UpgradeRequired({ featureName, planName }: { featureName: string
   return (
     <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-panel p-10 text-center">
       <Lock className="h-8 w-8 text-orange-400" aria-hidden="true" />
-      <h2 className="text-sm font-semibold text-foreground">Upgrade Required</h2>
+      <h2 className="text-sm font-semibold text-foreground">{t("upgradeRequired.title")}</h2>
       <p className="max-w-sm text-xs text-muted">
-        {featureName} requires the {planName} plan or higher.
+        {t("upgradeRequired.body", { feature: featureName, plan: planName })}
       </p>
       <Link
         href="/pricing"

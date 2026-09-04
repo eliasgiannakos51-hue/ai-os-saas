@@ -58,7 +58,8 @@
       "showingCachedAge": "لا شيء هنا يتحدّث — جرى تحميله قبل {minutes, plural, zero {أقل من دقيقة} one {دقيقة واحدة} two {دقيقتين} few {# دقائق} many {# دقيقة} other {# دقيقة}}.",
       "retry": "حاول مجددًا",
       "checking": "جارٍ التحقق…",
-      "stillOffline": "لا يزال بلا اتصال."
+      "stillOffline": "لا يزال بلا اتصال.",
+      "lastResortBody": "يحتاج Ionexa إلى اتصال لتحميل بيانات جديدة. الصفحات التي فتحتها من قبل ما زالت متاحة من ذاكرة هذا الجهاز — وما كنت تعمل عليه محفوظ بأمان على الخادم."
     },
     "creditsUnlimited": "غير محدودة",
     "whatIsThis": "ما هذا؟",
@@ -77,7 +78,21 @@
     "paletteClose": "إغلاق",
     "paginationPrev": "السابق",
     "paginationNext": "التالي",
-    "paginationPage": "صفحة {page} / {total}"
+    "paginationPage": "صفحة {page} / {total}",
+    "errorWithMessage": "خطأ: {message}",
+    "upgradeRequired": {
+      "title": "الترقية مطلوبة",
+      "body": "يتطلب {feature} خطة {plan} أو أعلى."
+    },
+    "textActions": {
+      "rewrite": "إعادة الصياغة",
+      "translate": "ترجمة",
+      "improve": "تحسين",
+      "explain": "شرح",
+      "accept": "قبول",
+      "reject": "رفض"
+    },
+    "betaExpiry": "ينتهي وصولك التجريبي خلال {days, plural, zero {# يوم} one {يوم واحد} two {يومين} few {# أيام} many {# يومًا} other {# يوم}}. <link>رقِّ خطتك للاحتفاظ بالوصول الكامل</link>."
   },
   "sidebar": {
     "groups": {
@@ -221,7 +236,8 @@
       "acceptableUse": "الاستخدام المقبول",
       "aiTransparency": "شفافية الذكاء الاصطناعي",
       "contact": "اتصل بنا"
-    }
+    },
+    "accountDeleted": "تم حذف حسابك وجميع بياناته نهائيًا."
   },
   "pricing": {
     "title": "الأسعار",
@@ -508,7 +524,8 @@
       "confirmButton": "حذف حسابك نهائيًا",
       "cancel": "إلغاء والعودة",
       "confirmFailed": "تعذّر إتمام الحذف. حسابك ما زال موجودًا — أعد المحاولة عبر الرابط أو تواصل مع الدعم."
-    }
+    },
+    "generateStrongPassword": "إنشاء كلمة مرور قوية"
   },
   "settings": {
     "title": "الإعدادات",
@@ -700,7 +717,9 @@
       "checkout": {
         "success": "تم استلام الدفع. ستُحدَّث خطتك هنا فور تأكيد Stripe، عادةً خلال ثوانٍ.",
         "cancelled": "تم إلغاء عملية الدفع. لم يُخصم أي مبلغ."
-      }
+      },
+      "buyCreditsDescription": "تحتاج رصيدًا إضافيًا هذا الشهر؟ اشترِ شحنة لمرة واحدة — دون تغيير الاشتراك.",
+      "creditsAmount": "{count, plural, zero {# رصيد} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}"
     },
     "marginReport": {
       "title": "تقرير الهامش",

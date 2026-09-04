@@ -58,7 +58,8 @@
       "showingCachedAge": "Nada aqui está a atualizar — carregado há {minutes} min.",
       "retry": "Tentar de novo",
       "checking": "A verificar…",
-      "stillOffline": "Continua sem ligação."
+      "stillOffline": "Continua sem ligação.",
+      "lastResortBody": "O Ionexa precisa de conexão para carregar dados novos. As páginas que você já abriu continuam disponíveis no cache deste dispositivo — e o que você estava fazendo está seguro no servidor."
     },
     "creditsUnlimited": "Ilimitados",
     "whatIsThis": "O que é isto?",
@@ -77,7 +78,21 @@
     "paletteClose": "fechar",
     "paginationPrev": "Ant.",
     "paginationNext": "Próx.",
-    "paginationPage": "Página {page} / {total}"
+    "paginationPage": "Página {page} / {total}",
+    "errorWithMessage": "erro: {message}",
+    "upgradeRequired": {
+      "title": "Precisa de um plano superior",
+      "body": "{feature} requer o plano {plan} ou superior."
+    },
+    "textActions": {
+      "rewrite": "Reescrever",
+      "translate": "Traduzir",
+      "improve": "Melhorar",
+      "explain": "Explicar",
+      "accept": "Aceitar",
+      "reject": "Descartar"
+    },
+    "betaExpiry": "Seu acesso beta expira em {days, plural, one {# dia} other {# dias}}. <link>Faça upgrade para manter o acesso completo</link>."
   },
   "sidebar": {
     "groups": {
@@ -221,7 +236,8 @@
       "acceptableUse": "Uso aceitável",
       "aiTransparency": "Transparência da IA",
       "contact": "Contacto"
-    }
+    },
+    "accountDeleted": "Sua conta e todos os seus dados foram excluídos permanentemente."
   },
   "pricing": {
     "title": "Preços",
@@ -508,7 +524,8 @@
       "confirmButton": "Eliminar permanentemente a tua conta",
       "cancel": "Cancelar e voltar",
       "confirmFailed": "Não conseguimos concluir a eliminação. A tua conta continua a existir — tenta o link outra vez ou contacta o apoio."
-    }
+    },
+    "generateStrongPassword": "Gerar senha forte"
   },
   "settings": {
     "title": "Configurações",
@@ -700,7 +717,9 @@
       "checkout": {
         "success": "Pagamento recebido. O seu plano é atualizado aqui assim que a Stripe confirmar — normalmente em poucos segundos.",
         "cancelled": "O pagamento foi cancelado. Nada foi cobrado."
-      }
+      },
+      "buyCreditsDescription": "Precisa de mais créditos este mês? Compre uma recarga avulsa — sem mudar a assinatura.",
+      "creditsAmount": "{count, plural, one {# crédito} other {# créditos}}"
     },
     "marginReport": {
       "title": "Relatório de Margem",

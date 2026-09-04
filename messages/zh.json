@@ -58,7 +58,8 @@
       "showingCachedAge": "这里的内容不会更新 —— 于 {minutes} 分钟前加载。",
       "retry": "重试",
       "checking": "检查中…",
-      "stillOffline": "仍然没有连接。"
+      "stillOffline": "仍然没有连接。",
+      "lastResortBody": "Ionexa 需要联网才能加载新数据。你已经打开过的页面仍可从本机缓存中查看，正在处理的内容也安全地保存在服务器上。"
     },
     "creditsUnlimited": "无限制",
     "whatIsThis": "这是什么？",
@@ -77,7 +78,21 @@
     "paletteClose": "关闭",
     "paginationPrev": "上一页",
     "paginationNext": "下一页",
-    "paginationPage": "第 {page} / {total} 页"
+    "paginationPage": "第 {page} / {total} 页",
+    "errorWithMessage": "错误：{message}",
+    "upgradeRequired": {
+      "title": "需要升级",
+      "body": "{feature} 需要 {plan} 或更高方案。"
+    },
+    "textActions": {
+      "rewrite": "重写",
+      "translate": "翻译",
+      "improve": "改进",
+      "explain": "解释",
+      "accept": "采用",
+      "reject": "放弃"
+    },
+    "betaExpiry": "你的 Beta 访问将在 {days, plural, other {#天}}后到期。<link>升级即可继续使用全部功能</link>。"
   },
   "sidebar": {
     "groups": {
@@ -221,7 +236,8 @@
       "acceptableUse": "使用规范",
       "aiTransparency": "AI 透明度",
       "contact": "联系我们"
-    }
+    },
+    "accountDeleted": "你的账户及其所有数据已被永久删除。"
   },
   "pricing": {
     "title": "定价",
@@ -508,7 +524,8 @@
       "confirmButton": "永久删除你的账户",
       "cancel": "取消并返回",
       "confirmFailed": "无法完成删除。你的账户仍然存在 — 请重新点击链接，或联系客服。"
-    }
+    },
+    "generateStrongPassword": "生成高强度密码"
   },
   "settings": {
     "title": "设置",
@@ -700,7 +717,9 @@
       "checkout": {
         "success": "已收到付款。Stripe 确认后，你的方案会在这里更新，通常只需几秒。",
         "cancelled": "结账已取消，未产生任何费用。"
-      }
+      },
+      "buyCreditsDescription": "这个月点数不够？可以单次充值，无需更改订阅。",
+      "creditsAmount": "{count, plural, other {# 点数}}"
     },
     "marginReport": {
       "title": "利润率报告",

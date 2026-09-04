@@ -58,7 +58,8 @@
       "showingCachedAge": "Τίποτα εδώ δεν ενημερώνεται — φορτώθηκε πριν από {minutes, plural, one {# λεπτό} other {# λεπτά}}.",
       "retry": "Δοκίμασε ξανά",
       "checking": "Ελέγχω…",
-      "stillOffline": "Ακόμα χωρίς σύνδεση."
+      "stillOffline": "Ακόμα χωρίς σύνδεση.",
+      "lastResortBody": "Το Ionexa χρειάζεται σύνδεση για να φέρει νέα δεδομένα. Οι σελίδες που άνοιξες ήδη είναι ακόμα διαθέσιμες από τη μνήμη αυτής της συσκευής — και ό,τι δούλευες είναι ασφαλές στον διακομιστή."
     },
     "creditsUnlimited": "Απεριόριστα",
     "whatIsThis": "Τι είναι αυτό;",
@@ -77,7 +78,21 @@
     "paletteClose": "κλείσιμο",
     "paginationPrev": "Προηγ.",
     "paginationNext": "Επόμ.",
-    "paginationPage": "Σελίδα {page} / {total}"
+    "paginationPage": "Σελίδα {page} / {total}",
+    "errorWithMessage": "σφάλμα: {message}",
+    "upgradeRequired": {
+      "title": "Χρειάζεται αναβάθμιση",
+      "body": "Το {feature} χρειάζεται το πλάνο {plan} ή ανώτερο."
+    },
+    "textActions": {
+      "rewrite": "Ξαναγράψ' το",
+      "translate": "Μετάφρασέ το",
+      "improve": "Βελτίωσέ το",
+      "explain": "Εξήγησέ το",
+      "accept": "Κράτησέ το",
+      "reject": "Άφησέ το"
+    },
+    "betaExpiry": "Η beta πρόσβασή σου λήγει σε {days, plural, one {# ημέρα} other {# ημέρες}}. <link>Αναβάθμισε για να κρατήσεις πλήρη πρόσβαση</link>."
   },
   "sidebar": {
     "groups": {
@@ -221,7 +236,8 @@
       "acceptableUse": "Αποδεκτή Χρήση",
       "aiTransparency": "Διαφάνεια AI",
       "contact": "Επικοινωνία"
-    }
+    },
+    "accountDeleted": "Ο λογαριασμός σου και όλα του τα δεδομένα διαγράφηκαν οριστικά."
   },
   "pricing": {
     "title": "Τιμολόγηση",
@@ -508,7 +524,8 @@
       "confirmButton": "Οριστική διαγραφή του λογαριασμού σου",
       "cancel": "Ακύρωση και επιστροφή",
       "confirmFailed": "Δεν μπορέσαμε να ολοκληρώσουμε τη διαγραφή. Ο λογαριασμός σου υπάρχει ακόμη — δοκίμασε ξανά τον σύνδεσμο ή επικοινώνησε με την υποστήριξη."
-    }
+    },
+    "generateStrongPassword": "Φτιάξε ισχυρό κωδικό"
   },
   "settings": {
     "title": "Ρυθμίσεις",
@@ -700,7 +717,9 @@
       "checkout": {
         "success": "Η πληρωμή ελήφθη. Το πλάνο σου ενημερώνεται εδώ μόλις το επιβεβαιώσει το Stripe — συνήθως μέσα σε λίγα δευτερόλεπτα.",
         "cancelled": "Η πληρωμή ακυρώθηκε. Δεν χρεώθηκε τίποτα."
-      }
+      },
+      "buyCreditsDescription": "Χρειάζεσαι κι άλλα credits αυτόν τον μήνα; Πάρε μια εφάπαξ ανανέωση — χωρίς αλλαγή στη συνδρομή.",
+      "creditsAmount": "{count, plural, one {# credit} other {# credits}}"
     },
     "marginReport": {
       "title": "Αναφορά Περιθωρίου",

@@ -336,12 +336,23 @@ console.log("\n== 4. every plural renders, at every number ==");
       // rather than as a silently short sentence.
       const variables = [...text.matchAll(/\{(\w+)[,}]/g)].map((m) => m[1]);
       const counted = new Set(blocks.map((b) => b.variable));
+      // A RICH TAG IS NOT A MISSING VARIABLE, and for one commit this check
+      // could not tell them apart. common.betaExpiry pluralises the day
+      // count AND wraps the upgrade offer in <link> so the sentence can put
+      // the link where each language puts it; rendered through t(), every
+      // locale of it failed with "the intl string context variable link was
+      // not provided" — a real error message about a message that was
+      // perfectly well formed. So the tags a message declares are collected
+      // and handed back their own chunks, through t.markup, which returns a
+      // string the three assertions below can still read.
+      const tags = [...new Set([...text.matchAll(/<([a-zA-Z][\w-]*)>/g)].map((m) => m[1]))];
       for (const [category, n] of REACH[locale]) {
         const values = {};
         for (const v of variables) values[v] = counted.has(v) ? n : "x";
+        for (const tag of tags) values[tag] = (chunks) => chunks;
         let out;
         try {
-          out = t(leaf, values);
+          out = tags.length > 0 ? t.markup(leaf, values) : t(leaf, values);
         } catch (e) {
           errors.push(String(e));
           out = "";

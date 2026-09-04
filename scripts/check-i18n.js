@@ -53,6 +53,15 @@ const LOCALE_ALLOWED = new Set([
   // keys, which do differ: fr paginationPrev "Préc.", paginationNext
   // "Suiv.".
   "fr:common.paginationPage",
+  // The "error: …" prefix above every inline failure box (billing top-up,
+  // entity links, danger zone, password change). Spanish for an error IS
+  // "error" — the same five letters — and the rest of the string is a
+  // colon and a placeholder. The other eight locales do differ: el
+  // "σφάλμα", de "Fehler", fr "erreur :", it "errore", pt "erro", ja
+  // "エラー", zh "错误：", ar "خطأ". Note that fr and zh change the colon
+  // itself, which is the reason this is a key at all rather than
+  // `{t("error")}: {message}` in the JSX.
+  "es:common.errorWithMessage",
   // V4.6 #8. "Mission" became "Plan" across all ten languages, and
   // Spanish for a plan is "plan" — same five letters as English. French
   // ("Plan") and German ("Plan") coincide too and pass only because
@@ -267,6 +276,8 @@ const LOCALE_ALLOWED = new Set([
   // "credits" is used verbatim in Greek — the same loanword the rest of the
   // Greek UI already uses ("Αγορά Credits", "Ιστορικό Credits").
   "el:credits.estimate.approx",
+  // The same loanword, on the four credit-pack buttons under Billing.
+  "el:settings.billing.creditsAmount",
   // Autonomous Agents (V3). Same loanword/cognate cases as everywhere else
   // in this list, verified one by one rather than waved through:
   // "credits" is the word the Greek UI already uses verbatim; "Name" is

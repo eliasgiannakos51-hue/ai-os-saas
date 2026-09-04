@@ -9,6 +9,7 @@
 //
 // Run: node scripts/tests/canned-answers.test.mjs
 import { loadTs } from "./load-ts.mjs";
+import { readFileSync } from "node:fs";
 
 let pass = 0;
 const failures = [];
@@ -232,6 +233,32 @@ console.log("\n== 6. accents and case do not matter ==");
 check("«ΠΟΣΟ ΚΟΣΤΙΖΕΙ» matches", matchCannedAnswer("ΠΟΣΟ ΚΟΣΤΙΖΕΙ;", ROWS.el)?.article.slug === "pricing-overview");
 check("«πόσο κοστίζει» matches", matchCannedAnswer("πόσο κοστίζει", ROWS.el)?.article.slug === "pricing-overview");
 check("normalize strips accents", normalize("Πόσο Κοστίζει;") === "ποσο κοστιζει");
+
+// GREEK FINAL SIGMA, which this file's own fold used to miss.
+//
+// toLowerCase() gives ΣΥΝΔΡΟΜΗΣ a final sigma — "συνδρομης" — while a
+// person typing the word, or any transliteration tool, produces a plain
+// σ. They are the same letter in different positions. Until the fold was
+// shared with lib/text/unicode-patterns.ts, a Greek user asking how to
+// cancel missed every canned answer whose trigger ends in ς, and the
+// question fell through to a paid model call.
+for (const [typed, written] of [
+  ["συνδρομησ", "συνδρομής"],
+  ["ακυρωσησ", "ακύρωσης"],
+  ["καφεσ", "καφές"],
+]) {
+  check(
+    `«${typed}» and «${written}» fold to the same word`,
+    normalize(typed) === normalize(written),
+    `${JSON.stringify(normalize(typed))} vs ${JSON.stringify(normalize(written))}`
+  );
+}
+// ...and the fold is the SHARED one, not a copy that will drift again.
+check(
+  "the knowledge base folds with lib/text/unicode-patterns, not its own regex",
+  /foldForMatch\(text\)/.test(readFileSync("src/lib/support/knowledge-base.ts", "utf8")),
+  "normalize() rolled its own fold again"
+);
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length) process.exit(1);

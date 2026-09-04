@@ -36,6 +36,8 @@
  * HelpArticle satisfies this structurally, so loadCannedArticles() rows
  * can be passed straight in with no adapter and no cast.
  */
+import { foldForMatch } from "@/lib/text/unicode-patterns";
+
 export type KnowledgeArticle = {
   slug: string;
   locale: string;
@@ -47,11 +49,33 @@ export type KnowledgeArticle = {
 };
 
 
+/**
+ * THE FOLD IS THE SHARED ONE, and it was not always.
+ *
+ * This file rolled its own: lower-case, NFD, strip the combining marks,
+ * punctuation to spaces. Everything except the one thing Greek needs.
+ * JavaScript's toLowerCase() gives ΣΥΝΔΡΟΜΗΣ a FINAL sigma — "συνδρομης"
+ * — while a person typing the word directly, or any transliteration tool,
+ * produces a plain σ. Those are the same letter in different positions,
+ * and this function said they were different words:
+ *
+ *     "συνδρομησ" vs "συνδρομής"   ->  "συνδρομησ" vs "συνδρομης"   no match
+ *     "ακυρωσησ"  vs "ακύρωσης"    ->  "ακυρωσησ"  vs "ακυρωσης"    no match
+ *
+ * So a Greek user asking how to cancel their subscription missed every
+ * canned answer whose trigger ends in ς, and the question fell through to
+ * a full model call — the exact cost this file exists to remove, and a
+ * worse answer, since a canned one cannot invent a price.
+ *
+ * lib/text/unicode-patterns.ts's foldForMatch already folds ς to σ, and
+ * lib/text/search-match.ts already explains why in its own header. This
+ * is the third place that needed it; sharing one fold is what keeps the
+ * chat's canned matching, the client search and the injection patterns
+ * from drifting apart. The punctuation-to-space step stays: it is this
+ * file's own rule, not part of folding.
+ */
 export function normalize(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+  return foldForMatch(text)
     .replace(/[^\p{L}\p{N}\s]/gu, " ")
     .replace(/\s+/g, " ")
     .trim();

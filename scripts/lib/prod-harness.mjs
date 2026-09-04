@@ -100,6 +100,9 @@ export async function startProdHarness({
   /** Every table PostgREST was asked for, in order. Lets a test MEASURE
    *  how many queries a route really makes instead of asserting it. */
   const tableReads = [];
+  // The function list /rest/v1/ hands out, or null for "the root is not
+  // available" — see the branch that serves it.
+  let apiFunctions = null;
 
   // --- the stand-in Supabase project ----------------------------------
   const supa = http.createServer((req, res) => {
@@ -162,6 +165,20 @@ export async function startProdHarness({
         return json(200, { user: currentUser(), session: null });
       if (url.pathname.startsWith("/rest/v1/")) {
         const table = url.pathname.slice("/rest/v1/".length);
+        // THE ROOT IS NOT A TABLE. PostgREST answers /rest/v1/ with an
+        // OpenAPI document whose `paths` carry one /rpc/<name> entry per
+        // function it can see — which is how api/health asks which
+        // functions exist, instead of calling each one and reading the
+        // wording of the failure. Served only when a test has said what
+        // the list is; otherwise 404, which is the "could not ask" case
+        // the route has to handle without calling anything missing.
+        if (table === "") {
+          if (apiFunctions === null) return json(404, { message: "not found" });
+          return json(200, {
+            openapi: "3.0.0",
+            paths: Object.fromEntries(apiFunctions.map((n) => [`/rpc/${n}`, { post: {} }])),
+          });
+        }
         tableReads.push(table);
         // A TABLE MADE TO FAIL ON PURPOSE.
         //
@@ -361,6 +378,12 @@ export async function startProdHarness({
     /** Every table read so far, in order. */
     tableReads,
     /** How many times one table has been read. */
+    /** What /rest/v1/ reports as the functions the API can see. An array
+     *  lists them; null makes the root answer 404, which is how a test
+     *  exercises the case where the question cannot be asked at all. */
+    setApiFunctions(names) {
+      apiFunctions = names === null ? null : [...names];
+    },
     readCount(table) {
       return tableReads.filter((t) => t === table).length;
     },

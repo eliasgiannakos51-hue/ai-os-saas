@@ -145,6 +145,12 @@ export function buildChart(
 
   const xIndex = headers.indexOf(xColumn.name);
   const yIndex = yColumn ? headers.indexOf(yColumn.name) : -1;
+  // THE PROFILE AND THE HEADERS CAN DISAGREE — a re-uploaded file, a
+  // renamed column, a profile stored before an edit. Without this,
+  // `row[-1]` is undefined, parseNumber("") is null, every point is
+  // skipped and the chart renders EMPTY: indistinguishable from a file
+  // that genuinely had no usable rows. Same outcome, said on purpose.
+  if (xIndex < 0 || (yColumn && yIndex < 0)) return { spec, points: [], truncated: false };
 
   if (spec.kind === "scatter" && yColumn) {
     const points: ChartPoint[] = [];

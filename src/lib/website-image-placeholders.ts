@@ -225,6 +225,37 @@ export function isLogoLikeQuery(query: string): boolean {
   return LOGO_QUERY.test(query);
 }
 
+/**
+ * A search phrase written in a script the photo library cannot search.
+ *
+ * THE PROMPT ASKS FOR ENGLISH, AND ASKING IS NOT ENFORCING. website-builder.ts
+ * tells the model the query must be "ALWAYS IN ENGLISH, even when the page
+ * itself is in another language — the photo library is searched in English,
+ * and a Greek or German query returns nothing". That is rule 23 of this
+ * project's own list: an instruction the model can ignore, with nothing
+ * downstream noticing.
+ *
+ * What it costs when it is ignored: up to four Unsplash requests per bad
+ * query out of a shared budget of twelve, and — the reason this is a check
+ * rather than a saving — LOGO_QUERY above is English too. `\b(logo)\b` does
+ * not match "λογότυπο", so a logo placeholder written in Greek is not
+ * recognised as one, goes to the photo library, and any photo it happens to
+ * return is published as somebody's brand mark. "A wrong logo is a wrong
+ * identity" is the reported bug that check exists for.
+ *
+ * NON-LATIN, NOT NON-ASCII. "café interior" and "Zürich rooftop" are English
+ * queries with accented letters and must survive; "καφετέρια" and "喫茶店"
+ * are not English at all. The test is whether any LETTER is outside the
+ * Latin script, which is the line between those two cases.
+ */
+export function isNonLatinQuery(query: string): boolean {
+  for (const ch of query) {
+    if (!/\p{L}/u.test(ch)) continue;
+    if (!/\p{Script=Latin}/u.test(ch)) return true;
+  }
+  return false;
+}
+
 /** Removes the ENTIRE <img> tag for the given placeholder slugs — used
  *  for logo-like placeholders (no stock photo is an acceptable identity)
  *  and for every placeholder Unsplash could not resolve, where a random

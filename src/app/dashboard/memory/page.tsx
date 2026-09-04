@@ -12,6 +12,7 @@ import { MemorySearch, type MemoryResult } from "@/components/memory/memory-sear
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
+import { truncate } from "@/lib/text/truncate";
 import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -40,9 +41,7 @@ function buildSnippet(config: ModuleConfig, record: ModuleRecord): string {
     .map((value) => String(value));
 
   const joined = parts.join(" · ");
-  return joined.length > SNIPPET_MAX_LENGTH
-    ? `${joined.slice(0, SNIPPET_MAX_LENGTH).trimEnd()}…`
-    : joined;
+  return truncate(joined, SNIPPET_MAX_LENGTH);
 }
 
 /** The same bounds lib/timeline.ts uses, for the same reason: this page

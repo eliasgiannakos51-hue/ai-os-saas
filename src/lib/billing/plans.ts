@@ -303,8 +303,40 @@ export const PLANS: Plan[] = [
 ];
 
 // Ordinal rank for "does this plan meet the minimum tier" checks (page
-// gating, feature gating) — index in this array, higher is better.
-const PLAN_RANK: PlanSlug[] = ["free", "starter", "growth", "professional", "ultimate", "enterprise"];
+// gating, feature gating) — higher is better.
+//
+// A RECORD, BECAUSE AN ARRAY COULD NOT BE KEPT COMPLETE. This was
+// `const PLAN_RANK: PlanSlug[] = [...]`, and that annotation checks that
+// every ENTRY is a plan — never that every plan is an entry. So a slug
+// added to PlanSlug and forgotten here would make
+// `PLAN_RANK.indexOf(minimum)` answer -1, and planMeetsMinimum read
+// `tierRank >= -1`, which is true for every plan there is: on the day a
+// plan was added, every paywall keyed to the new tier would open for free
+// accounts. Silently, with a green build — TypeScript had nothing to say
+// about it, and neither did any test, because the defect only exists
+// AFTER the union grows.
+//
+// Keyed by the union, TypeScript cannot let one be missing.
+const PLAN_RANK: Record<PlanSlug, number> = {
+  free: 0,
+  starter: 1,
+  growth: 2,
+  professional: 3,
+  ultimate: 4,
+  enterprise: 5,
+};
+
+/**
+ * The rank of a slug, or -1 for anything that is not a plan.
+ *
+ * hasOwnProperty rather than `PLAN_RANK[x] ?? -1`: "constructor",
+ * "toString" and "__proto__" are all truthy lookups on a plain object, and
+ * a tier read out of a database column is a string somebody could set.
+ */
+function planRank(slug: string | null | undefined): number {
+  const key = String(slug ?? "");
+  return Object.prototype.hasOwnProperty.call(PLAN_RANK, key) ? PLAN_RANK[key as PlanSlug] : -1;
+}
 
 /**
  * The better of two tiers.
@@ -319,9 +351,8 @@ const PLAN_RANK: PlanSlug[] = ["free", "starter", "growth", "professional", "ult
  * An unknown slug ranks below "free", so a corrupt value can never win.
  */
 export function higherPlanSlug(a: string | null | undefined, b: string | null | undefined): PlanSlug {
-  const rank = (slug: string | null | undefined) => PLAN_RANK.indexOf(String(slug ?? "") as PlanSlug);
-  const rankA = rank(a);
-  const rankB = rank(b);
+  const rankA = planRank(a);
+  const rankB = planRank(b);
   if (rankA < 0 && rankB < 0) return "free";
   return rankA >= rankB ? (a as PlanSlug) : (b as PlanSlug);
 }
@@ -335,9 +366,14 @@ export function isPaidPlanSlug(slug: string): slug is PaidPlanSlug {
 }
 
 export function planMeetsMinimum(tier: string, minimum: PlanSlug): boolean {
-  const tierRank = PLAN_RANK.indexOf(tier as PlanSlug);
-  const minRank = PLAN_RANK.indexOf(minimum);
-  return tierRank >= 0 && tierRank >= minRank;
+  const tierRank = planRank(tier);
+  const minRank = planRank(minimum);
+  // FAIL CLOSED ON BOTH SIDES. An unknown tier already returned false —
+  // that half was right, and it is the half a corrupt database column
+  // reaches. An unknown MINIMUM returned true for every plan, which is the
+  // direction that costs money, and it is reached by a caller rather than
+  // by data.
+  return tierRank >= 0 && minRank >= 0 && tierRank >= minRank;
 }
 
 // One-time credit packs (mode: "payment", not a subscription) — display

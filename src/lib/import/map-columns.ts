@@ -5,6 +5,13 @@ import { IMPORT_MAPPER_MODEL } from "@/lib/insights/insight-models";
 import { wrapUntrusted } from "@/lib/agents/agent-config";
 import { IMPORT_TARGETS, getImportField, getImportTarget, type ImportTarget } from "@/lib/import/targets";
 import type { ParsedCsv } from "@/lib/import/csv-parse";
+import { truncate } from "@/lib/text/truncate";
+
+/** How much of a sample cell the column mapper is shown. 60 was the bare
+ *  number in the expression this replaced, with 57 as its slice length so
+ *  the "…" fitted inside it — the shared truncator counts the ellipsis
+ *  against the cap itself. */
+const SAMPLE_CELL_CHARS = 60;
 
 /**
  * Work out what a spreadsheet is and which column is which.
@@ -104,7 +111,7 @@ export function buildMapperInput(parsed: ParsedCsv, sample: string[][]): string 
   const headers = parsed.headers.join(" | ");
   const rows = sample
     .slice(0, 12)
-    .map((row) => row.map((cell) => (cell.length > 60 ? `${cell.slice(0, 57)}…` : cell)).join(" | "))
+    .map((row) => row.map((cell) => truncate(cell, SAMPLE_CELL_CHARS)).join(" | "))
     .join("\n");
   return `Columns (${parsed.headers.length}): ${headers}\n\nSample rows:\n${rows}`;
 }

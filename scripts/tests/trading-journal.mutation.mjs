@@ -591,6 +591,34 @@ const MUTANTS = [
     from: "  description text,",
     to: "  description text,\n  counterparty_iban text,",
   },
+  // ------------------------------------------------------------------
+  // THE DAY SOMEBODY ADDS A MODEL TO THIS FEATURE.
+  //
+  // conduct.ts describes three layers; only the third — "the feature has
+  // no shape for advice" — is doing anything, because nothing in
+  // lib/trading or api/trading calls a model. These two mutants are that
+  // day arriving: a trading module that generates prose, once without
+  // scanning it and once scanning it in two languages while the product
+  // ships ten.
+  // ------------------------------------------------------------------
+  {
+    name: "a trading module starts generating prose and nobody scans it for advice",
+    file: STATS,
+    // NO PROVIDER IMPORT IN THE MUTANT, deliberately. loadTs cannot
+    // resolve the Anthropic SDK, so an import would kill the gate on its
+    // first line — and a gate that DIES counts as red by exit code while
+    // the check under test never ran. That is a mutation proving nothing.
+    // The call text is what the check reads, so the call text is what the
+    // mutant adds.
+    from: '} from "@/lib/trading/journal";',
+    to: '} from "@/lib/trading/journal";\n\nexport async function narrateStats(): Promise<string> {\n  const out = await runCompletion({}, {});\n  return String(out);\n}',
+  },
+  {
+    name: "...and it does scan, but only in the two languages the filter knows",
+    file: STATS,
+    from: '} from "@/lib/trading/journal";',
+    to: '} from "@/lib/trading/journal";\n\nexport async function narrateStats(): Promise<string> {\n  const out = await runCompletion({}, {});\n  if (findConductBreaches(String(out)).length > 0) return "";\n  return String(out);\n}',
+  },
 ];
 
 let caught = 0;

@@ -31,8 +31,43 @@ import { foldForMatch } from "@/lib/text/unicode-patterns";
  *      recommendation, no statistic is forward-looking, and the guardian
  *      only ever compares a trade against a rule the user wrote.
  *
+ * ============================================================
+ * WHICH OF THE THREE IS ACTUALLY LOAD-BEARING TODAY: THE THIRD
+ * ============================================================
+ *
+ * This paragraph exists because the list above was written in the present
+ * tense and read as a description of running code. It is not. NOTHING in
+ * the trading feature calls a model — no route under api/trading, no
+ * module under lib/trading, imports a provider — so layers 1 and 2 have
+ * nothing to constrain and nothing to scan. Every function here is
+ * complete, tested in both languages, and CALLED BY NO ONE but the gate.
+ *
+ * That is a safe state, not a hole: prose that is never generated cannot
+ * carry advice. It becomes a hole the day somebody adds a model call to
+ * this feature, reads the three layers above, and ships believing the
+ * scan is already in place. So the pairing is enforced rather than
+ * described — scripts/tests/trading-journal.test.mjs fails the build if a
+ * model call appears in the trading feature without findConductBreaches
+ * on its output, and fails it again if the covered languages are still
+ * two when the app ships ten.
+ *
+ * THE FILTER IS BILINGUAL, AND THE APP IS NOT BILINGUAL. Patterns exist
+ * for English and Greek. A model answering in German, Japanese or Arabic
+ * would pass every one of them — which is exactly the thing this file's
+ * own note below says is not a safety filter. COVERED_LOCALES is that
+ * fact, written where a check can read it.
+ *
  * Pure: no AI import, no network. The build gate reads it.
  */
+
+/**
+ * The languages findConductBreaches can actually see advice in.
+ *
+ * NOT a list of languages the product supports — it supports ten. This is
+ * the honest coverage of the patterns below, and the gate compares the
+ * two the moment the feature gains a model call.
+ */
+export const COVERED_LOCALES = ["en", "el"] as const;
 
 export const TRADING_DISCLAIMER_KEY = "dashboard.trading.disclaimer";
 

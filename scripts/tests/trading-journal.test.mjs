@@ -29,7 +29,7 @@
 //   ADVICE. Section 7, as a cross-product of phrasings in two languages.
 //
 // Run: node scripts/tests/trading-journal.test.mjs
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { loadTs } from "./load-ts.mjs";
 
@@ -64,6 +64,20 @@ const { scanForSecret, assertNoSecret, checkWalletAddress, WALLET_CHAINS, MAX_AD
 const { checkReadOnly, READ_ONLY_METHODS } = readOnly;
 const unicode = await loadTs("src/lib/text/unicode-patterns.ts");
 const { foldForMatch, isFolded } = unicode;
+
+const { SUPPORTED_LOCALES } = await loadTs("src/i18n/constants.ts");
+
+/** Every .ts/.tsx under a directory, or [] when it does not exist. */
+function walkFiles(dir) {
+  if (!existsSync(dir)) return [];
+  const out = [];
+  for (const entry of readdirSync(dir)) {
+    const p = join(dir, entry);
+    if (statSync(p).isDirectory()) out.push(...walkFiles(p));
+    else if (/\.tsx?$/.test(p)) out.push(p);
+  }
+  return out;
+}
 
 const src = (p) => readFileSync(p, "utf8");
 const stripTs = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
@@ -908,6 +922,58 @@ ok("a paragraph that both predicts AND recommends records both",
   findConductBreaches("EURUSD will rise. You should buy it.").sort().join(",") === "prediction,recommendation");
 ok("empty and non-string input is not a breach",
   findConductBreaches("").length === 0 && findConductBreaches(null).length === 0);
+
+// ===========================================================================
+// 7b. THE FILTER IS COMPLETE AND NOTHING CALLS IT — which is fine, and is
+//     only fine while nothing in the feature talks to a model.
+// ===========================================================================
+//
+// conduct.ts described three layers in the present tense: the prompt, the
+// output scan, and the feature having no shape for advice. Only the third
+// was running. No route under app/api/trading and no module under
+// lib/trading imports a provider, so there is no generated prose to
+// constrain and none to scan; findConductBreaches is called by this file
+// and by nothing else in the app.
+//
+// A SAFE STATE IS NOT A CHECKED ONE. It becomes a hole the day somebody
+// adds a model call here, reads those three layers, and ships believing
+// the scan is wired. So the two are pinned together: a model call in the
+// trading feature and no findConductBreaches on its output fails this
+// build, and so does a covered-language list that still says two when the
+// product says ten.
+{
+  const tradingFiles = [
+    ...walkFiles("src/lib/trading"),
+    ...walkFiles("src/app/api/trading"),
+  ];
+  ok(`the trading feature was walked (${tradingFiles.length} files)`, tradingFiles.length >= 6);
+
+  const PROVIDER = /from "@\/lib\/ai\/providers\/|from "@anthropic-ai\/sdk"|runCompletion\(/;
+  const callers = tradingFiles.filter((f) => PROVIDER.test(stripTs(src(f))));
+  const unguarded = callers.filter((f) => !/findConductBreaches|containsAdvice/.test(src(f)));
+
+  ok(
+    "every model call in the trading feature scans its own output for advice",
+    unguarded.length === 0,
+    unguarded.length
+      ? `${unguarded.join(", ")} — see the three layers in lib/trading/conduct.ts`
+      : `${callers.length} model callers, ${callers.length === 0 ? "which is why layer 3 is the one doing the work" : "all scanned"}`
+  );
+
+  // AND THE LANGUAGES. Patterns exist for English and Greek; the product
+  // ships ten. While nothing generates trading prose that is a recorded
+  // limitation. The moment something does, a German or Japanese answer
+  // would pass every pattern — the exact thing this file's own note calls
+  // "not a safety filter".
+  const covered = conduct.COVERED_LOCALES;
+  ok("the filter says which languages it can see advice in", Array.isArray(covered) && covered.length >= 2,
+    JSON.stringify(covered));
+  ok(
+    "...and it covers every language the product ships in, or nothing generates trading prose",
+    callers.length === 0 || SUPPORTED_LOCALES.every((l) => covered.includes(l)),
+    `covered ${JSON.stringify(covered)} vs shipped ${JSON.stringify(SUPPORTED_LOCALES)}`
+  );
+}
 
 // THE PROMPTS EXIST, IN BOTH LANGUAGES.
 for (const [name, text] of [["English", TRADING_CONDUCT_EN], ["Greek", TRADING_CONDUCT_EL]]) {

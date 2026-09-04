@@ -98,6 +98,33 @@ const stillPlaceholder = expected.filter((route) => {
 });
 check("no scheduled route describes itself as a placeholder", stillPlaceholder, []);
 
+// AND NEITHER DOES THE README, which is where a reader who is not opening
+// route files goes to find out what runs.
+//
+// The digest paragraph said "It's a placeholder: nothing in the app calls
+// it yet" long after the cron was added to vercel.json, and on 2026-09-04
+// that sentence was read back as a finding — a feature reported as dead
+// because the documentation, not the product, was out of date. A stale
+// comment in a route file and a stale paragraph in the README are the
+// same defect; only the second is the one people read.
+const readme = readFileSync(path.join(ROOT, "README.md"), "utf8");
+const readmeLies = expected.filter((route) => {
+  const at = readme.indexOf(route);
+  if (at < 0) return false;
+  // The paragraph the route is named in: to the next blank line twice over,
+  // which covers a bullet and its continuation lines.
+  const para = readme.slice(at, at + 700);
+  const upToNextBullet = para.split(/\n\s*\n\s*- \*\*/)[0];
+  return /\bplaceholder\b|nothing in the app calls it|not wired to any scheduler/i.test(upToNextBullet);
+});
+check("the README does not call a scheduled route a placeholder either", readmeLies, []);
+// ...and the check is not vacuous: the README really does name these routes.
+check(
+  "the README names at least one scheduled route",
+  expected.some((route) => readme.includes(route)),
+  true
+);
+
 // ---------------------------------------------------------------------
 console.log("\n== 4. the reset cannot double-grant paid accounts ==");
 // ---------------------------------------------------------------------

@@ -926,13 +926,22 @@ Transactional email is sent via [Resend](https://resend.com).
   the user can always log in even if the email didn't go out.
 - **Team invite email** — sent from `/api/team/invite` when a plan owner
   invites a teammate.
-- **Weekly digest** — `/api/weekly-digest` computes, per user, how many
-  entries were logged in each module over the last 7 days and emails a
-  summary. It's a placeholder: nothing in the app calls it yet. To go live,
-  point a scheduler (Vercel Cron, a GitHub Action, etc.) at it on a weekly
-  interval. If you set `CRON_SECRET`, the route only responds to requests
-  carrying `Authorization: Bearer <CRON_SECRET>` — set that before exposing
-  it in production, since an unauthenticated hit emails every user.
+- **Weekly digest** — `/api/weekly-digest`, **scheduled in `vercel.json`
+  at `0 8 * * 1`** (08:00 UTC every Monday). It reads what actually
+  happened in the last seven days (`lib/notify/digest-data.ts`) and
+  composes what is worth saying about it (`lib/notify/digest.ts`), and it
+  is silent on a quiet week: a digest with no lines is never sent. Each
+  user's `weekly_digest` preference and the daily cap are checked by
+  `lib/email/email-gate.ts` before anything goes out.
+
+  This paragraph, and the monthly credit reset below it, both described
+  routes as unscheduled for longer than that was true, and on 2026-09-04
+  one of those sentences was read back as a finding: a live feature
+  reported as dead because the documentation, not the product, was out of
+  date. `scripts/tests/cron-wiring.test.mjs` now fails the build when a
+  scheduled route is described that way here as well as in its own source.
+  The route still refuses to run without `CRON_SECRET` — an
+  unauthenticated hit would email every user.
 
 ## Website Builder photos
 
@@ -1143,11 +1152,10 @@ own rows, every write goes through the service-role client).
   re-synced by `/api/webhooks/stripe` on `checkout.session.completed`,
   `customer.subscription.updated/deleted`, and `invoice.paid` (the event
   that actually fires on a normal monthly renewal). `/api/cron/reset-credits`
-  is a placeholder, not yet wired to a scheduler (same pattern as
-  `/api/weekly-digest`) — point a monthly Vercel Cron/GitHub Action at it,
-  with `CRON_SECRET` set, as a safety net for accounts whose credits
-  didn't get reset by a Stripe event that cycle (Free accounts never touch
-  Stripe at all).
+  runs monthly from `vercel.json` (`0 3 1 * *`, 03:00 UTC on the 1st) with
+  `CRON_SECRET` set, as a safety net for accounts whose credits didn't get
+  reset by a Stripe event that cycle — Free accounts never touch Stripe at
+  all, so for them this IS the reset.
 - **Buying more credits** — Settings → Buy Credits sells 4 one-time packs
   (€10=500, €25=1500, €50=3500, €100=8000 credits) via `/api/credits/checkout`
   (Stripe Checkout, `mode: "payment"`, not a subscription); credits are

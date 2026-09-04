@@ -569,6 +569,29 @@ for (const loc of LOCALES) {
   }
 }
 
+// A PLACEHOLDER WRAPPED IN SINGLE QUOTES IS NOT A PLACEHOLDER. In ICU
+// MessageFormat the single quote is the escape character, so
+// "No matches for '{query}'" renders as the literal text
+// "No matches for {query}" in every language, whatever value is passed.
+// Found on production on 2026-09-04: the command palette, the module
+// lists, the agents search, the template browser and the file browser all
+// showed "{query}" to the person who typed one — two keys, ten locales,
+// nobody had seen it because the strings LOOK right. A quoted value is
+// written ''{query}'' (two quotes make one literal quote), or with
+// typographic quotes “{query}”, and this rule makes the escaped shape a
+// build failure. The lookbehind/lookahead exempt the doubled form.
+const ESCAPED_PLACEHOLDER = /(^|[^'])'\{[A-Za-z_]+\}'(?!')/;
+for (const loc of ["en", ...LOCALES]) {
+  const all = flatten(JSON.parse(fs.readFileSync(path.join(messagesDir, `${loc}.json`), "utf8")));
+  for (const [key, value] of Object.entries(all)) {
+    if (ESCAPED_PLACEHOLDER.test(value)) {
+      failures.push(
+        `${loc}: ESCAPED PLACEHOLDER ${key} = ${JSON.stringify(value)} — ICU single quotes escape the braces, so this renders the literal text; write ''{x}'' or “{x}”`
+      );
+    }
+  }
+}
+
 if (failures.length) {
   console.error(`i18n check FAILED (${failures.length} problems):\n`);
   for (const f of failures) console.error("  " + f);

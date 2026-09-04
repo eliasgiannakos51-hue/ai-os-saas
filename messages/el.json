@@ -4,7 +4,7 @@
     "notifications": "Ειδοποιήσεις",
     "noNotifications": "Δεν υπάρχουν νέες ειδοποιήσεις.",
     "jumpToPage": "Μετάβαση σε module ή σελίδα...",
-    "noMatches": "Δεν βρέθηκαν αποτελέσματα για '{query}'",
+    "noMatches": "Δεν βρέθηκαν αποτελέσματα για ''{query}''",
     "createStudio": "Φτιάξε κάτι",
     "cancel": "Ακύρωση",
     "save": "Αποθήκευση",
@@ -2453,7 +2453,7 @@
   "module": {
     "searchPlaceholder": "Αναζήτηση...",
     "exportCsv": "Εξαγωγή CSV",
-    "noMatches": "Δεν βρέθηκαν αποτελέσματα για '{query}'",
+    "noMatches": "Δεν βρέθηκαν αποτελέσματα για ''{query}''",
     "selectPlaceholder": "επίλεξε...",
     "save": "Αποθήκευση",
     "saving": "Αποθήκευση...",

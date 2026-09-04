@@ -17,7 +17,7 @@
  * picker handing back everything, and the path matcher treating
  * /dashboards-public as /dashboard.
  *
- * Run: node scripts/tests/marketing-messages.mutation.mjs
+ * Run: node scripts/tests/message-slices.mutation.mjs
  */
 import { readFileSync } from "node:fs";
 import { writeFileSync } from "./lib/sidecar-write.mjs";

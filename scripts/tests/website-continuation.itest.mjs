@@ -35,7 +35,7 @@
 // own code path is stubbed, because the last two rounds of this bug were
 // both "verified" by harnesses that supplied what the real path lacked.
 //
-// Run: node scripts/tests/website-continuation.test.mjs
+// Run: node scripts/tests/website-continuation.itest.mjs
 import http from "node:http";
 
 let pass = 0,

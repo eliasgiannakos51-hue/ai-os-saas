@@ -85,7 +85,7 @@ export const BADGE_REMOVAL_CREDITS_PER_MONTH = 200;
 export const BADGE_WARNING_DAYS = 7;
 
 /** Plans that carry the badge unless it has been bought off. Free only —
- *  kept in step with BADGE_PLANS in badge.ts by the build gate rather
+ *  kept in step with BADGED_PLANS in badge.ts by the build gate rather
  *  than by hoping. */
 export const BADGE_REMOVAL_APPLIES_TO = new Set(["free"]);
 

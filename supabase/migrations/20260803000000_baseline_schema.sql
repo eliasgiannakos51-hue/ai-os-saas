@@ -1315,7 +1315,7 @@ create policy "delete_own_scheduled_agent_runs" on public.scheduled_agent_runs
 
 -- ============================================================================
 -- Real Automations — "Make this real" on an Automation module idea (see
--- components/automation/automation-realize-panel.tsx), built on top of
+-- components/automation/automation-realize-list.tsx), built on top of
 -- Scheduled Agent Runs' infrastructure: the SAME daily cron
 -- (api/cron/scheduled-runs/route.ts) that executes scheduled mission steps
 -- also processes due rows here. Unlike a scheduled_agent_runs row (a
@@ -2139,7 +2139,7 @@ create policy "delete_own_site_versions" on public.site_versions
 -- data. No IP, no user agent, no cookie, no visitor id, no referrer, no
 -- path. A day and two counters. "unique_visitors" is derived from a
 -- rotating, salted, truncated hash held only in memory for the current day
--- (see lib/publishing/analytics.ts) — it is a COUNT, and nothing that
+-- (see lib/publishing/public-serving.ts) — it is a COUNT, and nothing that
 -- could identify a person is ever written here.
 -- ----------------------------------------------------------------------------
 create table if not exists public.site_analytics (

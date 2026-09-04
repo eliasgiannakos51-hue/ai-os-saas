@@ -31,7 +31,7 @@
 
 /**
  * The namespaces every client component reachable from a public route
- * asks for. Derived, not guessed: scripts/tests/marketing-messages.test.mjs
+ * asks for. Derived, not guessed: scripts/tests/message-slices.test.mjs
  * walks the import graph from all 15 public entry points, finds the 18
  * client components among the 79 files, and fails if any of them names a
  * namespace that is not here — or if one here is used by none of them.

@@ -29,7 +29,7 @@
  * the corpse, polled it, was told "stalled", and showed that — a false
  * report of failure for work that had actually succeeded. The finished
  * draft was never offered, and the only move left was to buy it again.
- * Measured, not supposed: see scripts/tests/job-resume.test.mjs, scenarios
+ * Measured, not supposed: see scripts/tests/background-jobs.test.mjs, scenarios
  * B and C.
  */
 import { isJobStale } from "@/lib/jobs/job-types";

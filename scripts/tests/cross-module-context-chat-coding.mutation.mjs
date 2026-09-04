@@ -13,7 +13,7 @@
  * behaviour as it was before the fix, or the plausible edit that would
  * undo it. The suite is required to go red for every one.
  *
- * Run: node scripts/tests/cross-module-context.mutation.mjs
+ * Run: node scripts/tests/cross-module-context-chat-coding.mutation.mjs
  */
 import { readFileSync } from "node:fs";
 import { writeFileSync } from "./lib/sidecar-write.mjs";

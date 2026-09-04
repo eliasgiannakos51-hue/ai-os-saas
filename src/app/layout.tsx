@@ -114,7 +114,7 @@ export default async function RootLayout({
   // per route group, each with its own provider — not a header.
   //
   // The measurement that motivated it stands: a Greek public page carries
-  // 93% of a catalogue it never reads. lib/i18n/marketing-messages.ts and
+  // 93% of a catalogue it never reads. lib/i18n/message-slices.ts and
   // its gate are kept as the record of what is safe to send, and the gate
   // now asserts THIS line — the full object — so the trimmed version
   // cannot come back without the layout split that makes it correct.

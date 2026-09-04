@@ -20,7 +20,7 @@
  * keyboard, who are also the least likely to be the ones filing the bug.
  *
  * So the arithmetic lives here once, with the not-found case as a real
- * branch rather than a coincidence, and scripts/tests/roving-index.test.mjs
+ * branch rather than a coincidence, and scripts/tests/not-found-index.test.mjs
  * puts 0, 1, -1, NaN, Infinity, undefined and the length itself through it.
  */
 

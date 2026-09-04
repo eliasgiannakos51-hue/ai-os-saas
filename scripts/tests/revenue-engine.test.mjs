@@ -52,7 +52,10 @@ const badge = await loadTs("src/lib/publishing/badge.ts");
 // NAMED badgeCredits, NOT credits. A local `const credits` further
 // down this file holds the SOURCE TEXT of billing/credits.ts, and two
 // bindings of one name in one suite is how an assertion silently reads
-// the wrong thing. scripts/tests/test-instruments.test.mjs caught it.
+// the wrong thing — here, a second `const credits` in the same scope,
+// which is a SyntaxError rather than a silent read and so was caught by
+// running the suite. No gate names this property; the naming convention
+// is what keeps it from arising.
 const badgeCredits = await loadTs("src/lib/publishing/badge-credits.ts");
 const metrics = await loadTs("src/lib/billing/metrics.ts");
 const subLog = await loadTs("src/lib/billing/subscription-kind.ts");

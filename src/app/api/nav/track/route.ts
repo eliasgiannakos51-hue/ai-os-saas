@@ -27,7 +27,7 @@ export const dynamic = "force-dynamic";
  * a page that rendered perfectly costs the reader's trust in the page.
  * The two cases that DO return non-200 are the ones a caller can act on:
  * no session (401) and a body that is not a dashboard path (400) — and
- * the second one is how scripts/tests/nav-events.itest.mjs can tell
+ * the second one is how scripts/tests/nav-events.dbtest.mjs can tell
  * "rejected" apart from "accepted and dropped".
  */
 export async function POST(request: Request) {

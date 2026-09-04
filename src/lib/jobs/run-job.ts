@@ -17,6 +17,7 @@ import {
   type JobStatus,
 } from "@/lib/jobs/job-types";
 import { JOB_HANDLERS } from "@/lib/jobs/handlers";
+import { StoppedByUserError, STOPPED_MESSAGE, isStopRequested } from "@/lib/stop-requests";
 
 // The worker that outlives the request.
 //
@@ -66,8 +67,13 @@ export type JobContext = {
   costs: CostAccumulator;
   apiKey: string;
   /** Advance the visible progress. Awaited, so a kill cannot lose the
-   *  step that just completed. */
+   *  step that just completed. THROWS StoppedByUserError when the owner
+   *  has pressed Stop and there is still work after this step — see the
+   *  note in runJob; a handler does not catch it. */
   progress: (step: number, label: string) => Promise<void>;
+  /** For a handler with its own long loop (an agent run's research
+   *  rounds): has the owner pressed Stop? Cheap, one read by key. */
+  shouldStop: () => Promise<boolean>;
 };
 
 export type JobHandlerResult = {
@@ -250,7 +256,18 @@ export async function runJob(params: { jobId: string; apiKey: string }): Promise
         .from("ai_jobs")
         .update({ step, step_label: label, usage_entries: costs.snapshot() })
         .eq("id", jobId);
+      // THE STOP BUTTON LANDS HERE — V4.6. A step boundary is the one
+      // place a job can stop without wasting what it has: the previous
+      // step is finished and paid for, the next has not begun. NOT at
+      // the last step: by then the expensive work is done and only the
+      // save remains, and stopping there would throw away a result the
+      // account has already paid for. (An agent run's own rounds ask
+      // shouldStop themselves, between research passes.)
+      if (step < stepCount(kind) && (await isStopRequested(admin, "ai_jobs", jobId))) {
+        throw new StoppedByUserError();
+      }
     },
+    shouldStop: () => isStopRequested(admin, "ai_jobs", jobId),
   };
 
   try {
@@ -372,6 +389,42 @@ export async function runJob(params: { jobId: string; apiKey: string }): Promise
 
     return { ran: true, status: "done", creditsCharged: settlement.creditsCharged };
   } catch (err) {
+    if (err instanceof StoppedByUserError) {
+      // STOPPED. Settle for the steps that ran, release the rest, and say
+      // so on the row. Not a retry — the person asked for this — and not
+      // failJob, which refunds everything: the calls before the boundary
+      // were real work, delivered as far as it got, and are charged.
+      const { plan, bypass } = await billingIdentity(job.user_id);
+      let creditsCharged = 0;
+      if (costs.callCount > 0) {
+        const settlement = await settleReservation({
+          userId: job.user_id,
+          reservationId: job.reservation_id ?? "",
+          feature: `${kind}_stopped`,
+          costs,
+          plan,
+          bypassCharge: bypass,
+          metadata: { jobId, kind, attempts, stopped: true },
+        });
+        creditsCharged = settlement.creditsCharged;
+      } else if (job.reservation_id) {
+        await releaseReservation(job.user_id, job.reservation_id);
+      }
+      await admin
+        .from("ai_jobs")
+        .update({
+          status: "failed",
+          running: false,
+          error: STOPPED_MESSAGE,
+          credits_charged: creditsCharged,
+          usage_entries: costs.snapshot(),
+          step_label: null,
+          finished_at: new Date().toISOString(),
+        })
+        .eq("id", jobId);
+      return { ran: true, status: "failed", creditsCharged };
+    }
+
     logApiError("jobs:run", err, { jobId, kind, attempts });
 
     // RETRY, BOUNDED. The failures worth retrying are transient — an

@@ -55,8 +55,8 @@ const MUTANTS = [
   {
     name: "the greeting climbs back above the promise",
     file: GREETING,
-    from: '      <p className="text-sm font-medium text-foreground sm:text-base">\n        {tPromise("oneSentence")}\n      </p>',
-    to: '      <p className="text-sm text-muted">{greeting.text}</p>',
+    from: '        <h1 className="hero-gradient-text text-3xl font-bold leading-[1.15] tracking-tight sm:text-4xl lg:text-5xl">\n          {tPromise("oneSentence")}\n        </h1>',
+    to: '        <h1 className="hero-gradient-text text-3xl font-bold leading-[1.15] tracking-tight sm:text-4xl lg:text-5xl">\n          {greeting}\n        </h1>',
     expect: "every declared surface renders the sentence",
   },
   {

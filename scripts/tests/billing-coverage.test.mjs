@@ -97,6 +97,11 @@ const DECLARED = {
     billing: "settled",
     note: "was a flat 1 credit whether rewriting a sentence or a document.",
   },
+  "src/app/api/documents/[id]/pdf/route.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V4.6. A PDF download translated into another language: ONE Sonnet call over the document's HTML, reserved against the same documentTranslate estimate the dialog quoted BEFORE the download (../pdf/estimate), settled as document_translate once the translated PDF is about to be sent. The untranslated download makes no call and touches nothing.",
+  },
   "src/lib/reflection-agent.ts": {
     calls: 1,
     billing: "settled",
@@ -961,6 +966,7 @@ console.log("\n== 23. planSlug is never null in a settled row ==");
 const ROUTES_THAT_SETTLE = [
   "src/app/api/records/ask/route.ts",
   "src/app/api/text-actions/route.ts",
+  "src/app/api/documents/[id]/pdf/route.ts",
   "src/app/api/reflection/generate/route.ts",
   "src/app/api/websites/generate/route.ts",
   "src/app/api/websites/generate/process/route.ts",

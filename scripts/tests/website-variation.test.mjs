@@ -97,12 +97,16 @@ check(
 );
 check(
   "and hands the directive to generateWebsiteHtml",
-  /variationDirective\(/.test(processRoute) && /generateWebsiteHtml\([\s\S]*?variation\s*\)/.test(processRoute)
+  // V4.6: the call grew two trailing arguments (shouldStop, onPageCap);
+  // the draw is still the argument right after the cost accumulator.
+  /variationDirective\(/.test(processRoute) && /generateWebsiteHtml\([\s\S]*?costs,\s*variation,\s*shouldStop,/.test(processRoute)
 );
 const builder = readFileSync("src/lib/website-builder.ts", "utf8");
 check(
   "the builder puts the draw in the USER message, brief still last",
-  /variationText\?\.trim\(\) \?\? "",\s*buildUserBriefBlock\(description\)/.test(builder)
+  // V4.6: what the brief FORBIDS sits between the draw and the brief —
+  // derived from the brief, so it may precede it; the brief stays last.
+  /variationText\?\.trim\(\) \?\? "",\s*negativeInstructionBlock\(parseNegativeInstructions\(description\)\),\s*buildUserBriefBlock\(description\),\s*\]/.test(builder)
 );
 // THE REAL PROPERTY, not a word search. The old check looked for the
 // string "variation" anywhere above SYSTEM_PROMPT, which a static

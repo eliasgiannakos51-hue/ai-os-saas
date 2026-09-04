@@ -64,6 +64,8 @@ export const agentRunHandler: JobHandler = async (ctx: JobContext): Promise<JobH
     agent,
     triggerSource: "manual",
     apiKey: ctx.apiKey,
+    // THE STOP BUTTON — V4.6: the runner asks between its model calls.
+    shouldStop: ctx.shouldStop,
     ...(isAgentDepth(rawDepth) ? { depthOverride: rawDepth } : {}),
   });
 

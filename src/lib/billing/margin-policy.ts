@@ -240,6 +240,10 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   agentTemplateFill: "agent_build",
   recordAsk: "ask_ai_record",
   textAction: "text_action",
+  // A PDF download translated into another language: its own feature so
+  // the cost log and the margin report can see it apart from the in-editor
+  // text actions, and CREDIT_MARGIN_DOCUMENT_TRANSLATE can govern it.
+  documentTranslate: "document_translate",
   weeklyReflection: "weekly_reflection",
   importMap: "import_map",
   importPaste: "import_paste",

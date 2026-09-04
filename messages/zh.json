@@ -874,6 +874,13 @@
     "legalLinks": {
       "title": "法律与支持",
       "description": "您已同意的规则、您的数据如何被处理、AI 做了什么，以及如何联系到真人。"
+    },
+    "sampleData": {
+      "title": "示例数据",
+      "description": "加载一个小型演示——某设计工作室最近三个月的数据——看看有内容时的图表、记录和聊天。不会生成任何内容，也不会消耗积分。",
+      "loaded": "示例已加载。在你移除之前，每个页面都会有标记。",
+      "notLoaded": "未加载。",
+      "open": "在首页查看"
     }
   },
   "dashboard": {
@@ -1051,7 +1058,24 @@
         "why": "长篇的东西，和你的工作放在一起——一份需求、一版草稿、会议记录——和其他记录一起可搜。",
         "example": "周一会议记录"
       },
-      "createFailed": "无法创建文档。请稍后重试 — 未保存任何内容。"
+      "createFailed": "无法创建文档。请稍后重试 — 未保存任何内容。",
+      "pdf": {
+        "title": "下载为 PDF",
+        "inLanguage": "使用文档原本的语言（{language}）— 免费",
+        "translateTo": "翻译成",
+        "free": "免费 — 文档按原样导出。",
+        "sameLanguage": "文档本来就是这种语言 — 无需翻译，免费。",
+        "estimating": "正在计算价格…",
+        "estimate": "翻译大约需要 {count} 积分。只有在你按下“下载”时才会扣费。",
+        "bypassFree": "此账户的翻译免费。",
+        "estimateFailed": "无法计算价格，请重试。",
+        "tooLong": "文档太长，无法翻译（{chars} 个字符；上限为 {limit}）。",
+        "download": "下载",
+        "failed": "翻译失败。未扣除任何积分。",
+        "insufficient": "积分不足，无法完成此翻译。未扣费。",
+        "charged": "已翻译并下载 — 扣除 {count} 积分。",
+        "chargedNothing": "已翻译并下载 — 未扣费。"
+      }
     },
     "chat": {
       "title": "Ionexa 聊天",
@@ -1092,7 +1116,9 @@
       "dataScope": {
         "title": "它能看到什么",
         "body": "它能看到你的记录、你的目标和你上传的文件。它看不到任何你没有添加的内容。除非你要求，否则它不会更改任何东西。"
-      }
+      },
+      "stop": "停止",
+      "stopped": "已停止。已写出的内容会保留，且只按这部分计费。"
     },
     "create": {
       "title": "创建任何内容",
@@ -1406,7 +1432,27 @@
       "stockNoticeTitle": "本站有 {count} 张图库照片",
       "stockNoticeBody": "上传你自己的照片会更真实 — Unsplash 有同类的店，但没有你的店。",
       "stockNoticeAction": "上传照片",
-      "storageFull": "这些图片空间不足 — 需要 {needed}，剩余 {free}。"
+      "storageFull": "这些图片空间不足 — 需要 {needed}，剩余 {free}。",
+      "notes": {
+        "title": "已按你的要求处理",
+        "removedFeature": "已按你的要求移除{feature}（{count, plural, other {# 个元素}}）。",
+        "removedPage": "已删除“{slug}”页面：它是{feature}，而你要求不要包含。",
+        "pageCap": "AI 开始生成了 {started} 个页面；上限是 {cap} 个，因此生成在此停止，只按截至该点已写出的内容计费。",
+        "mapZoom": "已将 {count, plural, other {# 张地图}} 设为建筑级缩放，并在地址处放置标记。",
+        "feature": {
+          "booking": "在线预订",
+          "contactForm": "联系表单",
+          "newsletter": "通讯订阅",
+          "map": "地图",
+          "prices": "价格表",
+          "gallery": "照片画廊",
+          "testimonials": "客户评价",
+          "blog": "博客栏目",
+          "social": "社交媒体链接",
+          "chatWidget": "聊天窗口"
+        },
+        "stopped": "已由你停止。{count, plural, =0 {未收取任何费用} other {已按生成的部分收取 # 个积分}}；其余预留额度已释放。"
+      }
     },
     "marketplace": {
       "title": "市场",
@@ -2877,7 +2923,10 @@
     "saving": "正在保存",
     "delivering": "正在发送给你",
     "publishing": "正在发布网站",
-    "watchFailed": "目前无法显示进度 — 任务仍在后台继续。"
+    "watchFailed": "目前无法显示进度 — 任务仍在后台继续。",
+    "stop": "停止",
+    "stopping": "正在停止…",
+    "stopped": "已停止。只按已完成的工作计费。"
   },
   "problem": {
     "out_of_credits": {
@@ -3518,7 +3567,8 @@
       "ruleOf40": "40 法则",
       "burnEur": "每月消耗",
       "runwayMonths": "资金可用月数"
-    }
+    },
+    "needsHistoryDays": "需要 {need} 天的每日快照——目前有 {have} 天。"
   },
   "routing": {
     "title": "模型路由",

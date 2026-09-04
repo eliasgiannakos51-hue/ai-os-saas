@@ -328,8 +328,8 @@ check("a labelled brief block is built", /function buildUserBriefBlock/.test(src
 // filtered. The ORDER is the property: images first, the brief LAST —
 // and the draw must sit between them, in the uncached user message.
 check(
-  "generation puts image metadata first and the brief last",
-  /const userText = \[\s*buildReferenceImageUrlList\(images\)\.trim\(\),\s*variationText\?\.trim\(\) \?\? "",\s*buildUserBriefBlock\(description\),\s*\]/.test(
+  "generation puts image metadata first, the draw and the brief's prohibitions between, and the brief last",
+  /const userText = \[\s*buildReferenceImageUrlList\(images\)\.trim\(\),\s*variationText\?\.trim\(\) \?\? "",\s*negativeInstructionBlock\(parseNegativeInstructions\(description\)\),\s*buildUserBriefBlock\(description\),\s*\]/.test(
     src
   )
 );

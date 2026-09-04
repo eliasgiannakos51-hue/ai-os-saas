@@ -120,7 +120,18 @@ function collect(file, seen, out, allowExternals = false) {
   }
 
   const js = ts.transpileModule(source, {
-    compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+    compilerOptions: {
+      module: ts.ModuleKind.ESNext,
+      target: ts.ScriptTarget.ES2022,
+      // A .tsx module is compiled to React.createElement calls, so a gate
+      // can render the app's real PdfDocument (lib/pdf/document.tsx)
+      // rather than a hand-built copy of it. Classic runtime on purpose:
+      // "react" is a bare import the caller allows through
+      // loadTsWithDeps, and the automatic runtime would add a second one
+      // (react/jsx-runtime) that the concatenation has no way to satisfy.
+      // Files that are not .tsx are unaffected.
+      ...(abs.endsWith(".tsx") ? { jsx: ts.JsxEmit.React } : {}),
+    },
     fileName: abs,
   }).outputText;
 

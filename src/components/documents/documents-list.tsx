@@ -11,6 +11,7 @@ import { PaginationControls } from "@/components/pagination-controls";
 import { NewDocumentButton, useCreateDocument } from "@/components/documents/new-document-button";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { DeleteButton } from "@/components/delete-button";
+import { DocumentPdfButton } from "@/components/documents/document-pdf-button";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import type { UserDocument } from "@/types/document";
@@ -122,14 +123,20 @@ export function DocumentsList({
                   }
                   menuLabel={tModule("actionsFor", { name: title })}
                   menuExtra={(close) => (
-                    <DeleteButton
-                      variant="menuItem"
-                      onActivate={close}
-                      table="user_documents"
-                      id={doc.id}
-                      label={t("deleteLabel")}
-                      itemName={title}
-                    />
+                    <>
+                      {/* THE DOWNLOAD, ON THE LIST — V4.6. It existed only
+                          inside the editor, and "there is no download on
+                          /dashboard/documents" was a true sentence. */}
+                      <DocumentPdfButton documentId={doc.id} variant="menuItem" onActivate={close} />
+                      <DeleteButton
+                        variant="menuItem"
+                        onActivate={close}
+                        table="user_documents"
+                        id={doc.id}
+                        label={t("deleteLabel")}
+                        itemName={title}
+                      />
+                    </>
                   )}
                 />
               );

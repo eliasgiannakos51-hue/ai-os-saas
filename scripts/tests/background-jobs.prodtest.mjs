@@ -721,7 +721,7 @@ try {
     await pageA.getByRole("button", { name: "New agent" }).click();
     await pageA.locator("#agent-request").fill("Every morning, summarise the most important Nvidia news.");
     const jobsBefore = jobs.size;
-    await pageA.getByRole("button", { name: label("dashboard.agents.designButton") }).click();
+    await pageA.getByTestId("agent-design").click();
 
     // Wait for the ROW to exist rather than for a spinner: the row is what
     // the rest of this depends on, and a spinner can be a render away from
@@ -747,7 +747,7 @@ try {
     // 3. BACK. This is the step that used to be impossible.
     await pageA.goto(AGENTS, { waitUntil: "networkidle", timeout: 60000 });
     const sawPreview = await pageA
-      .waitForFunction(() => document.body.innerText.includes("Here's what I'll build"), { timeout: 25000 })
+      .waitForFunction((title) => document.body.innerText.includes(title), label("dashboard.agents.previewTitle"), { timeout: 25000 })
       .then(() => true)
       .catch(() => false);
     check("3. COMING BACK, THE PREVIEW IS THERE", sawPreview, (await bodyText()).slice(0, 700));
@@ -802,7 +802,7 @@ try {
     await pageQ.goto(AGENTS, { waitUntil: "networkidle", timeout: 60000 });
     await pageQ.getByRole("button", { name: "New agent" }).click();
     await pageQ.locator("#agent-request").fill("Keep me updated on my competitors");
-    await pageQ.getByRole("button", { name: label("dashboard.agents.designButton") }).click();
+    await pageQ.getByTestId("agent-design").click();
 
     const asked = await pageQ
       .waitForFunction(() => document.body.innerText.includes("How often should it run?"), { timeout: 40000 })

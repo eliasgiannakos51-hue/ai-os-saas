@@ -396,7 +396,11 @@ console.log(`        accent box-shadows: ${glow} · gradient backgrounds: ${grad
 // a page imports, and the layout chain — which every dashboard screen
 // draws — carries four more. Same omission as the one that made the Home
 // page look like it had a single primary action.
-check(`accent box-shadows: ${glow}, ceiling 48`, glow <= 48, String(glow));
+// A RATCHET, NOT A ROUND NUMBER. 48 was two above what the tree held, so
+// one more glow anywhere passed unseen — the mutation suite proved it
+// ("a glow is added" survived). The ceiling is the count measured on
+// 2026-09-03; lowering it is free, raising it needs a reason here.
+check(`accent box-shadows: ${glow}, ceiling 46`, glow <= 46, String(glow));
 check(`gradient backgrounds: ${gradients}, ceiling 13`, gradients <= 13, String(gradients));
 // TWO PIECES OF GRADIENT TEXT, and the second is the one the brief was
 // about all along:

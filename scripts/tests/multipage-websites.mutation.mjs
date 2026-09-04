@@ -119,14 +119,14 @@ const MUTANTS = [
         to: "      // moved below the split",
       },
       {
-        from: "      const documents: string[] = [split.home, ...split.pages.map((pg) => pg.html)];",
+        from: "      const documents: string[] = [split.home, ...keptPages.map((pg) => pg.html)].map((doc) => {",
         to:
           "      const resolvedDocs: string[] = [];\n" +
-          "      for (const rawDoc of [split.home, ...split.pages.map((pg) => pg.html)]) {\n" +
+          "      for (const rawDoc of [split.home, ...keptPages.map((pg) => pg.html)]) {\n" +
           "        images = await resolveWebsiteImagePlaceholders(rawDoc, { photoSource });\n" +
           "        resolvedDocs.push(images.html);\n" +
           "      }\n" +
-          "      const documents: string[] = resolvedDocs;",
+          "      const documents: string[] = resolvedDocs.map((doc) => {",
       },
     ],
   },
@@ -238,7 +238,7 @@ const MUTANTS = [
   {
     name: "the generate path forgets the site's own pages",
     file: GEN,
-    from: "      const generatedSlugs = split.pages.map((pg) => pg.slug);",
+    from: "      const generatedSlugs = keptPages.map((pg) => pg.slug);",
     to: "      const generatedSlugs: string[] = [];",
   },
   // ------------------------------------------------------------------

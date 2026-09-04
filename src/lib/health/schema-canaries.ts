@@ -113,4 +113,47 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20260815_purchased_credits.sql",
     breaks: "credit reservations are never settled — users are charged and not credited",
   },
+  // V4.6 — the Stop button. Without the column the cancel routes 500 and
+  // the workers never see a stop; a person presses Stop and is charged
+  // for the whole run.
+  {
+    kind: "column",
+    table: "ai_jobs",
+    column: "cancel_requested_at",
+    migration: "20260924000000_stop_requests.sql",
+    breaks: "Stop on a background job (agents, files, analysis) fails; the job runs and charges to the end",
+  },
+  {
+    kind: "column",
+    table: "user_websites",
+    column: "cancel_requested_at",
+    migration: "20260924000000_stop_requests.sql",
+    breaks: "Stop on a website generation fails; the stream runs and charges to the end",
+  },
+  {
+    kind: "column",
+    table: "research_reports",
+    column: "cancel_requested_at",
+    migration: "20260924000000_stop_requests.sql",
+    breaks: "Stop on a research report fails; every question is answered and charged",
+  },
+  // V4.6 — what the code did to a generated site. Without the column the
+  // worker's final update is rejected by PostgREST and the site stays on
+  // 'processing' until the stale reaper fails it — after the charge.
+  {
+    kind: "column",
+    table: "user_websites",
+    column: "generation_notes",
+    migration: "20260925000000_website_generation_notes.sql",
+    breaks: "every website generation ends 'failed' after being charged: the row update carrying the notes is rejected",
+  },
+  // V4.6 — MRR from paid subscriptions only. The function exists since the
+  // revenue engine; this version is what stops a beta account with a tier
+  // and no Stripe subscription from counting as EUR 2000 of MRR.
+  {
+    kind: "function",
+    fn: "mrr_inputs",
+    migration: "20260923000000_mrr_paid_only.sql",
+    breaks: "Business Health shows no MRR/ARR at all, or — on the previous version — counts unpaid beta tiers as revenue",
+  },
 ];

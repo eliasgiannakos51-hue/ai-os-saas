@@ -13,6 +13,8 @@ import { ChatMemorySettings } from "@/components/settings/chat-memory-settings";
 import { AccessibilitySettings } from "@/components/settings/accessibility-settings";
 import { ThemeSettings } from "@/components/settings/theme-settings";
 import { LanguageSettings } from "@/components/settings/language-settings";
+import { SampleDataSettings } from "@/components/settings/sample-data-settings";
+import { findSampleImport } from "@/lib/sample-data/apply";
 import { LoginActivity, type KnownDevice } from "@/components/settings/login-activity";
 import { ExportDataButton } from "@/components/settings/export-data-button";
 import { DangerZone } from "@/components/settings/danger-zone";
@@ -68,6 +70,9 @@ export default async function SettingsPage() {
   }
 
   const isAdmin = isAdminEmail(user.email);
+  // Whether the sample account is loaded — the Sample data card below
+  // shows the button that applies. One indexed read on user_imports.
+  const sampleLoaded = Boolean(await findSampleImport(supabase, user.id));
   // Mutually exclusive with isAdmin by construction — an admin account is
   // never also flagged is_beta_tester (see lib/beta.ts), but this makes
   // that guarantee explicit here too rather than relying on the flag
@@ -231,6 +236,7 @@ export default async function SettingsPage() {
         <nav aria-label={t("jumpToSection")} className="mb-6 flex flex-wrap gap-2 text-xs">
           {[
             { href: "#language", label: t("language.title") },
+            { href: "#sample-data", label: t("sampleData.title") },
             { href: "#accessibility", label: t("accessibility.title") },
             { href: "#ai-usage", label: t("aiUsage.title") },
             { href: "#voice", label: tVoice("settings.title") },
@@ -334,6 +340,10 @@ export default async function SettingsPage() {
         {hasCustomAiPersona && <Reveal><AiPersonaSettings initialName={aiPersonaName} /></Reveal>}
 
         <Reveal><LanguageSettings /></Reveal>
+        {/* THE PERMANENT ADDRESS OF "SEE IT WITH SAMPLE DATA" — V4.6. Home
+            offers it only to an empty account; everybody else could not
+            find it and asked whether it had ever been built. */}
+        <Reveal><SampleDataSettings loaded={sampleLoaded} /></Reveal>
 
         <Reveal><ThemeSettings /></Reveal>
 

@@ -349,7 +349,9 @@ try {
   await page.waitForTimeout(300);
   const textarea = page.locator("#agent-request");
   check("the one-sentence input appears", await textarea.count(), 1);
-  const designButton = page.getByRole("button", { name: label("dashboard.agents.designButton") });
+  // One test id for both states of the button: "Design your agent" while
+  // the box is empty, "Build new · N credits" once something is typed.
+  const designButton = page.getByTestId("agent-design");
   check("the design button appears", await designButton.count(), 1);
   checkTrue("...and is disabled until something is typed", await designButton.isDisabled());
   await textarea.fill("Every morning, send me the latest news about Nvidia");

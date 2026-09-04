@@ -20,7 +20,13 @@ import { FlaskConical, X } from "lucide-react";
  * remember the answer to. The way to remove the notice is to remove the
  * data, which is the button.
  */
-export function SampleDataBanner() {
+/**
+ * The one button that removes the sample — used by the banner above and by
+ * the Sample data card on Settings, so both call the same DELETE and
+ * refresh the same way. A second copy is how one of them comes to leave
+ * the marker behind.
+ */
+export function SampleDataClearButton() {
   const t = useTranslations("sampleData");
   const router = useRouter();
   const [clearing, setClearing] = useState(false);
@@ -43,13 +49,7 @@ export function SampleDataBanner() {
   }
 
   return (
-    <div
-      role="status"
-      className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-amber-500/30 bg-amber-500/[0.07] px-4 py-2 text-sm sm:px-6"
-    >
-      <FlaskConical className="h-4 w-4 shrink-0 text-amber-300" aria-hidden="true" />
-      <span className="min-w-0 font-medium text-amber-200">{t("banner")}</span>
-      <span className="min-w-0 flex-1 text-xs text-muted">{t("bannerDetail")}</span>
+    <>
       {failed && <span className="text-xs text-red-300">{t("clearFailed")}</span>}
       <button
         type="button"
@@ -63,6 +63,22 @@ export function SampleDataBanner() {
         <X className="h-3.5 w-3.5" aria-hidden="true" />
         {clearing ? t("clearing") : t("clear")}
       </button>
+    </>
+  );
+}
+
+export function SampleDataBanner() {
+  const t = useTranslations("sampleData");
+
+  return (
+    <div
+      role="status"
+      className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-amber-500/30 bg-amber-500/[0.07] px-4 py-2 text-sm sm:px-6"
+    >
+      <FlaskConical className="h-4 w-4 shrink-0 text-amber-300" aria-hidden="true" />
+      <span className="min-w-0 font-medium text-amber-200">{t("banner")}</span>
+      <span className="min-w-0 flex-1 text-xs text-muted">{t("bannerDetail")}</span>
+      <SampleDataClearButton />
     </div>
   );
 }

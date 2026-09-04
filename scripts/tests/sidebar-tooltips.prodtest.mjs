@@ -345,6 +345,11 @@ async function hoverAllVisibleLinks() {
     if (seen.has(href)) continue;
     const bb = await link.boundingBox();
     if (!bb || bb.height < 8) continue; // clipped inside a collapsed group
+    // BELOW THE FOLD IS NOT UNREACHABLE. elementFromPoint answers null for
+    // a point outside the viewport, and at 900px the Settings group's
+    // rows (team, help) sit below it — three rows were reported as never
+    // hovered on main for exactly that. Scroll first, then ask.
+    await link.scrollIntoViewIfNeeded();
     // Is this row actually the thing under the pointer at its own centre?
     // A group mid-collapse still reports a height while its header sits
     // on top of it — a user could not hover it either, so neither does
@@ -392,8 +397,10 @@ check(`every reachable item shows a tooltip (${seen.size} hovered)`, misses, [])
 // were each actually hovered, and reports the ones that were not.
 const navSrc = readFileSync("src/lib/sidebar-nav.ts", "utf8");
 const configRows = [...navSrc.matchAll(/\{\s*href:\s*"([^"]+)"[^}]*\}/g)]
-  .map((m) => ({ href: m[1], hidden: /hidden:\s*true/.test(m[0]) }));
-const visibleHrefs = configRows.filter((r) => !r.hidden).map((r) => r.href);
+  .map((m) => ({ href: m[1], hidden: /hidden:\s*true/.test(m[0]), ownerOnly: /ownerOnly:\s*true/.test(m[0]) }));
+// The harness signs in an ordinary account: an ownerOnly row (business
+// health) is not rendered for it, so it is not a row "the config shows".
+const visibleHrefs = configRows.filter((r) => !r.hidden && !r.ownerOnly).map((r) => r.href);
 // THE PARSE ITSELF IS CHECKED. A regex that matched nothing would leave
 // an empty expectation that every run satisfies.
 checkTrue(

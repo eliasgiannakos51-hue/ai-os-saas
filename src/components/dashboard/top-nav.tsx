@@ -85,16 +85,31 @@ export function TopNav({ email }: { email: string }) {
           at `lg` (1024px) — the first width where there is genuinely room
           for them next to the sidebar — instead of at `sm` (640px). */}
       <div className="ml-auto flex min-w-0 items-center gap-1.5 lg:gap-3">
-        {/* HIDDEN ON PHONES, and moved into the account menu below.
-            Every control in this header is now a 44px tap target, which is
-            the size a finger actually needs — and five of them plus the
-            logo do not fit across 375px, which is why raising them pushed
-            the header 15px past the viewport on every dashboard route.
-            Language and theme are the two a person changes once and then
-            never again, so they are the two that belong one tap deeper
-            rather than the two that get to stay small. */}
+        {/* THE LANGUAGE CONTROL IS IN THIS BAR AT EVERY WIDTH — V4.6.
+
+            It was wrapped in `hidden sm:contents` with the theme toggle,
+            on the reasoning that language is "changed once and never
+            again" and could live one tap deeper on a phone. Below 640px it
+            then existed in two places nobody found: the account menu
+            behind the avatar, and the bottom of the sidebar drawer, below
+            the fold of every phone. Reported twice as "there is no
+            language control" — once on a laptop, where the bare globe was
+            in this bar all along and did not read as one.
+
+            So: always rendered, always here, with the locale code beside
+            the globe so it reads as a word. Measured at 375px the bar is
+            344px wide with it (menu 44 + logo 24 + globe 64 + bell 44 +
+            create 44 + avatar 44 + gaps and padding), inside the viewport.
+            scripts/tests/language-visible.prodtest.mjs puts a real
+            Chromium at 1920/1440/768/390/375 and asserts
+            document.elementFromPoint on the control's centre IS the
+            control — rendered is not the same as visible, and visible is
+            what was asked for.
+
+            The theme toggle keeps the old arrangement: hidden below sm,
+            in the account menu instead. */}
+        <LanguageSelector showCode testId="language-control" />
         <span className="hidden sm:contents">
-          <LanguageSelector />
           <ThemeToggle />
         </span>
 
@@ -153,12 +168,13 @@ export function TopNav({ email }: { email: string }) {
           {userMenuOpen && (
             <div className="absolute right-0 top-11 w-56 rounded-xl border border-border bg-panel p-3 shadow-lg">
               <p className="truncate text-xs text-muted">{email}</p>
-              {/* The phone-width home for the two controls the header no
-                  longer has room for. `sm:hidden` mirrors the `hidden
-                  sm:contents` above exactly, so they appear in one place
-                  and never in both. */}
+              {/* The phone-width home for the theme toggle. `sm:hidden`
+                  mirrors the `hidden sm:contents` above exactly, so it
+                  appears in one place and never in both. The language
+                  control is NOT here any more: it is in the bar itself at
+                  every width (see above), and a second copy behind the
+                  avatar was one of the two places it hid. */}
               <div className="mt-3 flex items-center gap-1 border-t border-border pt-3 sm:hidden">
-                <LanguageSelector />
                 <ThemeToggle />
               </div>
               <div className="mt-3">

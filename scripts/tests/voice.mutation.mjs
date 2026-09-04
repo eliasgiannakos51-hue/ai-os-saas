@@ -147,10 +147,13 @@ const MUTANTS = [
     to: "  useEffect(() => {\n    void start();\n    return () => {\n      cleanup();",
   },
   {
-    name: "the microphone button renders even with no transcription provider, so pressing it wastes somebody's breath",
+    // V4.6: the mic no longer vanishes — it is drawn inert, with the reason
+    // in its title. The defect is now a mic that is LIVE without a
+    // provider: pressing it would start a recording nothing can transcribe.
+    name: "the microphone button renders LIVE with no transcription provider, so pressing it wastes somebody's breath",
     file: INPUT,
-    from: "  if (!availability.transcribeAvailable) return null;",
-    to: "  if (false) return null;",
+    from: "        disabled\n        aria-disabled=\"true\"\n        aria-label={`${t(\"startListening\")} — ${reason}`}",
+    to: "        onClick={() => void start()}\n        aria-label={`${t(\"startListening\")} — ${reason}`}",
   },
   {
     name: "the explanation is skipped and the browser's bare permission prompt is the first thing seen",

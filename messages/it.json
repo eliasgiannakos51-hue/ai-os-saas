@@ -874,6 +874,13 @@
     "legalLinks": {
       "title": "Note legali e assistenza",
       "description": "Le regole che hai accettato, cosa succede ai tuoi dati, cosa fa l'IA e come parlare con una persona."
+    },
+    "sampleData": {
+      "title": "Dati di esempio",
+      "description": "Carica una piccola demo — gli ultimi tre mesi di uno studio di design — per vedere grafici, registrazioni e chat con dei contenuti. Non viene generato nulla e non si spendono crediti.",
+      "loaded": "L'esempio è caricato. Viene segnalato su ogni pagina finché non lo rimuovi.",
+      "notLoaded": "Non caricato.",
+      "open": "Vedilo nella Home"
     }
   },
   "dashboard": {
@@ -1051,7 +1058,24 @@
         "why": "Testi lunghi che restano insieme al tuo lavoro — un brief, una bozza, appunti di riunione — cercabili accanto a tutto il resto.",
         "example": "Appunti della riunione di lunedì"
       },
-      "createFailed": "Non siamo riusciti a creare il documento. Riprova tra poco — non è stato salvato nulla."
+      "createFailed": "Non siamo riusciti a creare il documento. Riprova tra poco — non è stato salvato nulla.",
+      "pdf": {
+        "title": "Scarica come PDF",
+        "inLanguage": "Nella lingua del documento ({language}) — gratis",
+        "translateTo": "Tradotto in",
+        "free": "Gratis — il documento così com'è scritto.",
+        "sameLanguage": "È la lingua in cui è scritto il documento — niente da tradurre, gratis.",
+        "estimating": "Calcolo del prezzo…",
+        "estimate": "La traduzione costa circa {count, plural, one {# credito} other {# crediti}}. Addebitata solo quando premi Scarica.",
+        "bypassFree": "La traduzione è gratuita su questo account.",
+        "estimateFailed": "Non è stato possibile calcolare il prezzo. Riprova.",
+        "tooLong": "Questo documento è troppo lungo per essere tradotto ({chars} caratteri; il limite è {limit}).",
+        "download": "Scarica",
+        "failed": "Non è stato possibile fare la traduzione. Nessun credito addebitato.",
+        "insufficient": "Crediti insufficienti per questa traduzione. Nulla è stato addebitato.",
+        "charged": "Tradotto e scaricato — {count, plural, one {# credito addebitato} other {# crediti addebitati}}.",
+        "chargedNothing": "Tradotto e scaricato — nessun addebito."
+      }
     },
     "chat": {
       "title": "Ionexa Chat",
@@ -1092,7 +1116,9 @@
       "dataScope": {
         "title": "Cosa può vedere",
         "body": "Vede le tue voci, i tuoi obiettivi e i file che hai caricato. Non vede nulla che tu non abbia aggiunto. Non cambia nulla se non lo chiedi."
-      }
+      },
+      "stop": "Ferma",
+      "stopped": "Fermato. Ciò che è stato scritto resta, e viene addebitata solo quella parte."
     },
     "create": {
       "title": "Crea Qualsiasi Cosa",
@@ -1406,7 +1432,27 @@
       "stockNoticeTitle": "{count, plural, one {# foto stock} other {# foto stock}} su questo sito",
       "stockNoticeBody": "Carica le tue per un risultato più autentico — Unsplash ha un'attività come la tua, non la tua.",
       "stockNoticeAction": "Carica foto",
-      "storageFull": "Spazio insufficiente per queste immagini — servono {needed}, liberi {free}."
+      "storageFull": "Spazio insufficiente per queste immagini — servono {needed}, liberi {free}.",
+      "notes": {
+        "title": "Fatto come richiesto",
+        "removedFeature": "Ho rimosso {feature}, come richiesto ({count, plural, one {# elemento} other {# elementi}}).",
+        "removedPage": "Ho eliminato la pagina «{slug}»: era {feature}, che hai chiesto di non includere.",
+        "pageCap": "L'IA ha iniziato {started} pagine; il limite è {cap}, quindi la generazione si è fermata lì e ti è stato addebitato solo ciò che era stato scritto fino a quel punto.",
+        "mapZoom": "{count, plural, one {La mappa è stata impostata} other {# mappe sono state impostate}} sullo zoom dell'edificio con un segnaposto sull'indirizzo.",
+        "feature": {
+          "booking": "la prenotazione online",
+          "contactForm": "il modulo di contatto",
+          "newsletter": "l'iscrizione alla newsletter",
+          "map": "la mappa",
+          "prices": "il listino prezzi",
+          "gallery": "la galleria fotografica",
+          "testimonials": "le recensioni",
+          "blog": "la sezione blog",
+          "social": "i link ai social",
+          "chatWidget": "il widget di chat"
+        },
+        "stopped": "L'hai fermato. {count, plural, =0 {Non è stato addebitato nulla} one {È stato addebitato # credito} other {Sono stati addebitati # crediti}} per la parte generata; il resto della prenotazione è stato liberato."
+      }
     },
     "marketplace": {
       "title": "Mercato",
@@ -2877,7 +2923,10 @@
     "saving": "Sto salvando",
     "delivering": "Te lo sto inviando",
     "publishing": "Sto pubblicando il sito",
-    "watchFailed": "Al momento non è possibile mostrare l'avanzamento — il lavoro continua in background."
+    "watchFailed": "Al momento non è possibile mostrare l'avanzamento — il lavoro continua in background.",
+    "stop": "Ferma",
+    "stopping": "Interruzione…",
+    "stopped": "Fermato. Viene addebitato solo il lavoro già svolto."
   },
   "problem": {
     "out_of_credits": {
@@ -3518,7 +3567,8 @@
       "ruleOf40": "Regola del 40",
       "burnEur": "Consumo mensile",
       "runwayMonths": "Autonomia"
-    }
+    },
+    "needsHistoryDays": "Servono {need} giorni di istantanee giornaliere — ne abbiamo {have}."
   },
   "routing": {
     "title": "Instradamento dei modelli",

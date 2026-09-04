@@ -316,9 +316,11 @@ check(
   "…even when triggered by a manual Run now",
   /if \(triggerSource === "schedule" \|\| cannotComplete\)/.test(executeSrc)
 );
+// V4.6: a run the owner STOPPED is a third distinct reason — neither a
+// capability refusal nor a failure — so the ternary grew a middle arm.
 check(
   "…and the caller gets a distinct reason, not a generic run_failed",
-  /reason: cannotComplete \? "cannot_complete" : "run_failed"/.test(executeSrc)
+  /reason: cannotComplete \? "cannot_complete" : outcome\.failure\.kind === "stopped" \? "stopped" : "run_failed"/.test(executeSrc)
 );
 
 console.log("\n   …and a refunded JOB still records what it cost us:");

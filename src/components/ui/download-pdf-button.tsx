@@ -30,6 +30,32 @@ import { useToast } from "@/components/toast/toast-context";
  * error object, not a document; downloading it would hand somebody a file
  * called "report.pdf" containing `{"error":"not_ready"}`.
  */
+/**
+ * Saves a PDF response as a file, the three-trap-safe way described above.
+ * Exported so the Documents dialog (components/documents/document-pdf-
+ * button.tsx), which has to ask a question before it fetches, saves the
+ * answer through the same code rather than a second copy of the traps.
+ */
+export function savePdfResponse(blobRaw: Blob, res: Response, fallbackName: string): void {
+  const blob = new Blob([blobRaw], { type: "application/octet-stream" });
+  const filename =
+    res.headers.get("Content-Disposition")?.match(/filename="([^"]+)"/)?.[1] ?? `${fallbackName}.pdf`;
+
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  // If `download` is ignored (an in-app browser, an old iOS), the
+  // fallback is a navigation, and it must not hand over the opener.
+  anchor.rel = "noopener";
+  document.body.appendChild(anchor);
+  anchor.click();
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+    anchor.remove();
+  }, 4000);
+}
+
 export function DownloadPdfButton({
   href,
   label,
@@ -62,26 +88,7 @@ export function DownloadPdfButton({
         return;
       }
 
-      const raw = await res.blob();
-      const blob = new Blob([raw], { type: "application/octet-stream" });
-      const filename =
-        res.headers
-          .get("Content-Disposition")
-          ?.match(/filename="([^"]+)"/)?.[1] ?? `${fallbackName}.pdf`;
-
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = filename;
-      // If `download` is ignored (an in-app browser, an old iOS), the
-      // fallback is a navigation, and it must not hand over the opener.
-      anchor.rel = "noopener";
-      document.body.appendChild(anchor);
-      anchor.click();
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-        anchor.remove();
-      }, 4000);
+      savePdfResponse(await res.blob(), res, fallbackName);
     } catch {
       addToast(t("failed"), "error");
     } finally {

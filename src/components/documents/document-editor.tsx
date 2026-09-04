@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { DownloadPdfButton } from "@/components/ui/download-pdf-button";
+import { DocumentPdfButton } from "@/components/documents/document-pdf-button";
 import { Bold, Italic, Heading1, Heading2, List, ChevronLeft, Check, Loader2 } from "lucide-react";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import type { UserDocument } from "@/types/document";
@@ -145,8 +145,10 @@ export function DocumentEditor({
             {/* A document that only exists inside its own editor is not a
                 document the user has. The PDF is rendered server-side from
                 the same `content.html` this editor saves, so what downloads
-                is what is stored — not what happens to be on screen. */}
-            <DownloadPdfButton href={`/api/documents/${doc.id}/pdf`} fallbackName="document" />
+                is what is stored — not what happens to be on screen. The
+                button asks which language first (V4.6) — the document's
+                own, free, or a translation, priced before it runs. */}
+            <DocumentPdfButton documentId={doc.id} />
             <span className="flex items-center gap-1.5 text-xs text-muted">
             {saveState === "saving" && (
               <>

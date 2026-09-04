@@ -52,6 +52,9 @@ export type Metric =
   /** The figure cannot be produced, and the reason names the fix. */
   | { key: MetricKey; unit: MetricUnit; state: "needs_input"; missing: MissingInput[] }
   | { key: MetricKey; unit: MetricUnit; state: "needs_history"; haveMonths: number; needMonths: number }
+  /** Like needs_history, but the history in question is the DAILY
+   *  snapshot series, so it is counted in days. See ruleOf40 below. */
+  | { key: MetricKey; unit: MetricUnit; state: "needs_history_days"; haveDays: number; needDays: number }
   /** Computable in principle, but the denominator is zero — no
    *  subscribers, no tasks. Different from "we cannot know": there is
    *  simply nothing yet. */
@@ -94,7 +97,15 @@ export type MetricInputs = {
   /** MRR one period ago, for growth and Rule of 40. Null when there is
    *  no earlier snapshot. */
   previousMrrEur: number | null;
+  /** How many days the daily revenue_snapshots series spans — the age of
+   *  the oldest snapshot, or 0 with none. THIS is what previousMrrEur
+   *  depends on, not historyMonths (which counts subscriber_months). */
+  snapshotDays: number;
 };
+
+/** Days of daily snapshots before "MRR one period ago" exists. Matches
+ *  the `age >= 28` read in lib/billing/revenue-history.ts. */
+export const MIN_SNAPSHOT_DAYS_FOR_GROWTH = 28;
 
 export type CohortInputs = {
   startAccounts: number;
@@ -262,8 +273,27 @@ export function computeMetrics(inputs: MetricInputs): Metric[] {
   // ---- Rule of 40: growth% + profit margin% -------------------------
   // Growth needs a previous period; profit needs the owner's fixed costs,
   // because a "profit" that ignores salaries is not one.
+  //
+  // "NEEDS 2 MONTHS OF HISTORY — WE HAVE 2." That sentence shipped, and it
+  // was a contradiction because the two numbers in it counted different
+  // things. The CONDITION is previousMrrEur, which comes from a daily
+  // revenue_snapshots row at least 28 days old; the NUMBER shown was
+  // historyMonths, which counts distinct months in subscriber_months — a
+  // table the same cron writes, but per month, so two months of it exist
+  // the moment one snapshot has been taken on each side of a month
+  // boundary. Two of one, none of the other, and the card named the
+  // wrong one. It now states the requirement it actually checks, in the
+  // unit it is checked in.
   if (inputs.previousMrrEur === null) {
-    out.push({ key: "ruleOf40", unit: "score", state: "needs_history", haveMonths: inputs.historyMonths, needMonths: 2 });
+    out.push({
+      key: "ruleOf40",
+      unit: "score",
+      state: "needs_history_days",
+      // Finite and non-negative, or zero: a NaN here would print "we have
+      // NaN" on the card, which is a third number that means nothing.
+      haveDays: Number.isFinite(inputs.snapshotDays) ? Math.max(0, Math.floor(inputs.snapshotDays)) : 0,
+      needDays: MIN_SNAPSHOT_DAYS_FOR_GROWTH,
+    });
   } else if (inputs.fixedCostsEur === null) {
     out.push({ key: "ruleOf40", unit: "score", state: "needs_input", missing: ["fixed_costs"] });
   } else if (inputs.previousMrrEur <= 0 || inputs.mrrEur <= 0) {

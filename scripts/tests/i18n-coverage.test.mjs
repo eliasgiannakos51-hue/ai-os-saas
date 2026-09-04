@@ -715,7 +715,21 @@ const clientFallbacks = sources.flatMap((f) => [
 // MEASURED, not added: the scanner reported 640 against this same
 // baseline before it was raised, so this is the tree's number rather than
 // 635 plus a count taken by hand.
-const SERVER_PROSE_BASELINE = 640;
+// 640 -> 655: V4.6's stop button adds three cancel routes (api/jobs,
+// api/websites, api/research — [id]/cancel), five refusals each in the
+// same shape as the 640 before them: "Not authenticated.", "Something went
+// wrong." (twice), "<thing> not found.", "Could not record the stop.".
+// NONE OF THEM IS SHOWN. Each caller is a Stop button that reads only
+// `res.ok` — a refusal shows the surface's own translated failure toast
+// (aiSteps / dashboard.*) and puts the button back; the body is what a
+// curl and a log line get. The sentence a stopped run itself carries
+// (lib/stop-message.ts) is likewise recognised by the browser and
+// replaced with aiSteps.stopped in the reader's locale. The regex cannot
+// tell those apart, so the number goes up and the reason is written down.
+//
+// MEASURED, not added: the scanner reported 655 against this baseline
+// before it was raised.
+const SERVER_PROSE_BASELINE = 655;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

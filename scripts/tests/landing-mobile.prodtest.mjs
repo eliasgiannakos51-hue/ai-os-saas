@@ -68,7 +68,8 @@ const MEASURE = () => {
   const signup = document.querySelector('a[href="/signup"]');
   // Found by href rather than by text, so this reads the same in all ten
   // locales.
-  const footerLinks = ["/pricing", "/roadmap", "/terms", "/privacy", "/cookies"]
+  // /roadmap is deliberately absent: hidden until V7.5 (lib/footer-links.ts).
+  const footerLinks = ["/pricing", "/terms", "/privacy", "/cookies"]
     .map((href) => document.querySelector(`footer a[href="${href}"]`))
     .filter(Boolean);
 
@@ -207,8 +208,9 @@ try {
       for (const a of m.footerLinks) {
         if (a.height < MIN_TAP_PX) smallTaps.push(`${where}: footer ${a.href} ${a.height}px`);
       }
-      if (m.footerLinks.length !== 5) {
-        smallTaps.push(`${where}: expected 5 footer links, found ${m.footerLinks.length}`);
+      // Four since V4.6: /roadmap left the footer (lib/footer-links.ts).
+      if (m.footerLinks.length !== 4) {
+        smallTaps.push(`${where}: expected 4 footer links, found ${m.footerLinks.length}`);
       }
 
       console.log(

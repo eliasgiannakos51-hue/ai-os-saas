@@ -552,11 +552,18 @@ console.log("\n== 10. THE NAVIGATION ACTUALLY GOES SOMEWHERE ==");
   // not the same as passing the right value: an empty array satisfies
   // every pattern above while flattening the nav exactly as before.
   const genSrc = readFileSync("src/app/api/websites/generate/process/route.ts", "utf8");
-  ok("generation derives the page slugs from the split it just made",
-    /const generatedSlugs = split\.pages\.map\(\(pg\) => pg\.slug\);/.test(genSrc),
+  // V4.6: the pages the worker keeps are the split's pages minus any
+  // page that IS a feature the brief forbade (website-negatives.test.mjs
+  // covers that filter); the slugs handed to link-safety and the pages
+  // stored must both come from that SAME kept list, or a dropped page's
+  // nav link would survive as "#" while its document was never served.
+  ok("generation derives the kept pages from the split it just made",
+    /const keptPages = split\.pages\.filter\(/.test(genSrc));
+  ok("...the page slugs come from the kept pages",
+    /const generatedSlugs = keptPages\.map\(\(pg\) => pg\.slug\);/.test(genSrc),
     genSrc.match(/[^\n]*generatedSlugs =[^\n]*/)?.[0]);
-  ok("...the same split the stored pages come from",
-    /extraPages = split\.pages\.map\(/.test(genSrc));
+  ok("...the same kept pages the stored pages come from",
+    /extraPages = keptPages\.map\(/.test(genSrc));
 
   const publish = readFileSync("src/app/api/websites/[id]/publish/route.ts", "utf8");
   ok("publishing knows the site's pages and its base path",

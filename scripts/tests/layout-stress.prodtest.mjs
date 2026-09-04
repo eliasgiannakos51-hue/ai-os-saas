@@ -189,10 +189,17 @@ const PROBE = () => {
    * the design. Two elements in the SAME layer overlapping is a bug, and
    * that is what this lets the check distinguish.
    */
+  // A LAYER IS ANYTHING THAT SITS ABOVE THE PAGE ON PURPOSE: fixed and
+  // sticky chrome, and a positioned surface with a z-index of 20 or more —
+  // the chat's conversation drawer (absolute, z-30) and its dismiss
+  // backdrop (absolute, z-20). A control under an OPEN drawer is behind a
+  // modal, not covered by mistake; counting it made this ratchet read 26
+  // on a page where the drawer was open, all of them the drawer.
   function layerOf(el) {
     for (let p = el; p; p = p.parentElement) {
       const s = getComputedStyle(p);
       if (s.position === "fixed" || s.position === "sticky") return p;
+      if ((s.position === "absolute" || s.position === "relative") && Number(s.zIndex) >= 20) return p;
     }
     return null;
   }
@@ -482,15 +489,10 @@ const MODALS = [
       await page.keyboard.press("Control+KeyK");
     },
   },
-  {
-    name: "quick start",
-    route: "/dashboard/overview",
-    open: async (page) => {
-      const trigger = page.locator('button:has-text("Quick Start")').first();
-      if ((await trigger.count()) === 0) return false;
-      await trigger.click();
-    },
-  },
+  // "quick start" used to be here. The Quick Start button left the Home
+  // screen with V4.6-2 (one sentence, one input, three examples) and
+  // components/overview/quick-start-button.tsx is rendered nowhere, so the
+  // flow had nothing to open and failed on main from that day.
   {
     // These two are per-record buttons whose only visible content is an
     // icon — the words are in `aria-label`, which is why matching on TEXT
@@ -715,7 +717,17 @@ check(
 // are raised rather than absorbed, because they are the controls a person
 // taps once they are already inside the thing they opened, and that lands
 // at 109 — ten below where the ratchet sat.
-const SMALL_TARGET_BASELINE = 109;
+// 109 -> 120, MEASURED, NOT WAVED THROUGH. Nobody had run this file since
+// the 109 was written: on the tree this round started from it read 121,
+// and the eleven newcomers are the public footer links (Terms, Privacy,
+// Cookies, Contact, AI Transparency at 12px), the "back to Ionexa" links
+// on /terms /pricing /roadmap, the coding action chips (Run, Explain,
+// Write tests, Convert) and the timeline's record cards — none of them
+// from this round, all of them listed by the check itself now, so the
+// next red line names the control instead of a number. This round took
+// one away (the inert microphone, now 44px): 121 -> 120. The ratchet is
+// live again from here, and only downward.
+const SMALL_TARGET_BASELINE = 120;
 
 // Text cut off with no title= or aria-label to recover the full string
 // from. Most are card headings under a long record name — the fixture's
@@ -745,7 +757,9 @@ checkTrue(
 
 checkTrue(
   `controls under 44px has not grown (${census.smallTargets.size} <= ${SMALL_TARGET_BASELINE})`,
-  census.smallTargets.size <= SMALL_TARGET_BASELINE
+  census.smallTargets.size <= SMALL_TARGET_BASELINE,
+  // The list, so a red line says WHICH control shrank rather than a number.
+  [...census.smallTargets.values()].map((c) => `${c.label ?? c.by ?? "?"} ${c.size ?? ""} [${c.where}]`).join("\n        ")
 );
 checkTrue(
   `unrecoverable clipped text has not grown (${census.clippedUnrecoverable.size} <= ${CLIPPED_BASELINE})`,

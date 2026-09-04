@@ -888,6 +888,33 @@ The instrument itself is unit-tested without an API key
 (`scripts/tests/site-fingerprint.test.mjs`), in both directions: two
 pages that should score alike and two that should not.
 
+### "Do two sites of the SAME kind look the same?"
+
+The harder question, and the one the templates work is judged by.
+`scripts/website-pairs-check.mjs` generates ten pairs — two different
+businesses of one kind each (two cafés, two law firms, …) — through the
+production generator and the production draw, seeded as two different
+users' first sites, which is the pair the product cannot tell apart by
+memory. Twenty billed generations (~$7.50), so again **not** in the
+build gate; `--pairs N` runs the first N.
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-... node scripts/website-pairs-check.mjs --out ./pairs-out
+node scripts/website-pairs-check.mjs --dry ./pairs-out     # re-score saved pages, no key, no calls
+```
+
+Per pair it prints the declared decisions (archetype / hero / section
+order) and whether the two collide, the structural score twice (the
+landmark sequence, and `src/lib/website-structural-similarity.ts` — the
+code the process route would use to enforce it), and the four visual
+axes; then the same thresholds as above (0.85 same skeleton, 0.7 same
+look) and exit 1 when any pair crosses one, so after the fix it is a
+gate. `--same-user` seeds one user's first and second site instead —
+what an exclusion of already-used orders would change. The scoring and
+the report are tested with pages on disk
+(`scripts/tests/website-pairs-check.test.mjs`) and that gate has its own
+mutation suite.
+
 ## Email
 
 Transactional email is sent via [Resend](https://resend.com).

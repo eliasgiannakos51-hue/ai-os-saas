@@ -2029,43 +2029,105 @@ html[data-motion="reduce"] .voice-orb-ring {
    what keeps the text off the edge.
 
    AND `ch` IS NOT A CHARACTER, WHICH IS WHY THESE NUMBERS ARE NOT 60-75.
-   `ch` is the advance of "0", and a digit is one of the WIDEST glyphs in
-   a proportional font — every letter in this UI is narrower. Measured on
-   a real build with Greek text (scripts/tests/chat-measure.prodtest.mjs):
-   a 70ch cap held 82 characters, a 68ch cap held 80. That is a ratio of
-   1.17 characters per ch, stable across both.
-   So the caps below are the 60-75 band DIVIDED by that ratio:
-     56ch x 1.17 = 66 characters
-     58ch x 1.17 = 68 characters
-     60ch x 1.17 = 70 characters
-   Writing 66ch and calling it 66 characters would have been a number
-   that looks measured and is 21% wrong.
+   `ch` is the advance of "0", and what a line actually holds depends on
+   the letters in it. The ONLY number that counts is the one read off a
+   real build (scripts/tests/chat-measure.prodtest.mjs counts characters
+   per line with Range rects, in Greek, Arabic, Chinese and English).
 
-   Measured characters per line, from real screenshots at each
-   breakpoint in Greek, Arabic and Chinese:
-   scripts/tests/chat-measure.prodtest.mjs. */
+   RAISED — V4.6, "it holds less than I would like; raise it, but never
+   past 75 characters a line on desktop". Measured BEFORE, in Greek:
+     58ch @1440 held 60 characters; 60ch @1920 held 63
+   — a ratio of 1.03-1.05 characters per ch at these font sizes. (An
+   earlier comment here quoted 1.17, measured at a different size on
+   70ch/68ch caps; the caps it justified were 56/58/60 and they were
+   holding 49/60/63, not the 66/68/70 the arithmetic promised.)
+
+   ENGLISH IS THE CEILING, GREEK IS THE FLOOR. A first raise to 64/66ch
+   measured Greek at 70/73 — and English at 77/80, past the 75 the brief
+   set, because Latin letters are narrower than Greek ones and the same
+   cap holds more of them. Measured on 2026-09-03 at 16px/17px:
+     English  1.20 chars per ch @1440, 1.21 @1920
+     Greek    1.09 chars per ch @1440, 1.11 @1920
+   So the desktop cap is what keeps ENGLISH at or under 75 (61 x 1.21 =
+   73.9), and Greek lands at 66-68 — up from 60/63, under 75 in both.
+   The 1536 step raises the FONT and keeps the cap: the line grows in
+   pixels, not in characters, because the characters are at the limit.
+   So the caps are now:
+     60ch  from 640px   (viewport-bound below ~900px anyway)
+     61ch  from 1024px  -> ~67 Greek / ~73 English characters at 1440
+     66ch  from 1536px  -> ~69 Greek characters at 1920
+   English is narrower than Greek and holds a few more; the prodtest
+   measures it too and fails above 75. The AFTER numbers are in that
+   test's own table, not here — a number in a comment is a number
+   nothing checks. */
 .chat-measure {
   width: 100%;
   margin-inline: auto;
   font-size: 15px;
 }
 
+/* THREE GROUNDS FOR THE ANSWER OVER THE GLOBE — V4.6, offered for a
+   choice, none applied by default until one is chosen.
+
+   "The text should sit ON the backdrop and read clearly over the globe."
+   Each class goes on the assistant's text block (the `min-w-0 flex-1`
+   div in chat-workspace.tsx), not on the thread, so the ground belongs
+   to the answer. All three keep the text at full --foreground: the rule
+   is that when contrast falls the GLOBE is dimmed, never the ink.
+
+     .chat-ground-blur    a light frosted pane: the globe is still there,
+                          softened, and a fifth of the page colour is
+                          laid over it. What is behind the letters stops
+                          having edges.
+     .chat-ground-dim     the globe is dimmed locally: ~60% of the page
+                          colour over the answer's own rectangle, no
+                          blur. The wireframe stays crisp around the
+                          text and quiet under it.
+     .chat-ground-shadow  no pane at all; the letters carry a tight
+                          halo in the page colour, so a wire crossing a
+                          stroke is separated from it by a hairline.
+
+   Every one is measured by scripts/tests/chat-measure.prodtest.mjs with
+   CHAT_GROUND_OPTIONS=1: nine text points per locale and width, 4.5:1
+   or the option is not offered. The negative inline margin is exactly
+   the flex gap to the avatar, so the pane reaches the avatar's edge and
+   the measured line length does not change. */
+.chat-ground-blur {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgb(var(--background) / 0.22);
+  border-radius: 0.875rem;
+  margin: -0.5rem -0.5rem;
+  padding: 0.5rem 0.5rem;
+}
+.chat-ground-dim {
+  background: rgb(var(--background) / 0.62);
+  border-radius: 0.875rem;
+  margin: -0.5rem -0.5rem;
+  padding: 0.5rem 0.5rem;
+}
+.chat-ground-shadow {
+  text-shadow:
+    0 1px 2px rgb(var(--background)),
+    0 0 12px rgb(var(--background) / 0.85);
+}
+
 @media (min-width: 640px) {
   .chat-measure {
-    max-width: 56ch;
+    max-width: 60ch;
   }
 }
 
 @media (min-width: 1024px) {
   .chat-measure {
     font-size: 16px;
-    max-width: 58ch;
+    max-width: 61ch;
   }
 }
 
 @media (min-width: 1536px) {
   .chat-measure {
     font-size: 17px;
-    max-width: 60ch;
+    max-width: 61ch;
   }
 }

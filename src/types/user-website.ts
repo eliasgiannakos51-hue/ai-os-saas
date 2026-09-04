@@ -22,6 +22,11 @@ export type UserWebsite = {
    *  single-page site since — the column's absence is what makes those
    *  two indistinguishable, which is why there was no backfill. */
   pages?: unknown;
+  /** What post-generation enforcement did to this site (V4.6): a
+   *  forbidden feature removed, the page cap applied, a map re-zoomed.
+   *  See lib/website-generation-notes.ts. Null when nothing was done and
+   *  on every site generated before the column existed. */
+  generation_notes?: unknown;
   status: UserWebsiteStatus;
   error_message: string | null;
   // Superseded by website_reference_images (below) — no longer written by

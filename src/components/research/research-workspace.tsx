@@ -1,5 +1,6 @@
 "use client";
 
+import { isStoppedMessage } from "@/lib/stop-message";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -12,6 +13,7 @@ import {
   ExternalLink,
   AlertTriangle,
   ListChecks,
+  Square,
 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
@@ -87,6 +89,7 @@ export function ResearchWorkspace({
 }) {
   const t = useTranslations("dashboard.deepResearch");
   const tModule = useTranslations("module");
+  const tSteps = useTranslations("aiSteps");
   const locale = useLocale();
   const router = useRouter();
   const { addToast } = useToast();
@@ -175,7 +178,7 @@ export function ResearchWorkspace({
           if (report.status === "ready" || report.status === "failed") {
             setRunning((current) => (current === id ? null : current));
             if (report.status === "ready") addToast(t("finished"));
-            else addToast(report.error ?? t("runError"), "error");
+            else addToast(isStoppedMessage(report.error) ? tSteps("stopped") : report.error ?? t("runError"), "error");
             router.refresh();
           }
         });
@@ -185,7 +188,7 @@ export function ResearchWorkspace({
       if (pollRef.current) clearInterval(pollRef.current);
       pollRef.current = null;
     };
-  }, [activeKey, refresh, addToast, t, router]);
+  }, [activeKey, refresh, addToast, t, tSteps, router]);
 
   // One immediate read on mount for anything already in flight, so a user
   // returning to the page does not stare at a stale status for a whole
@@ -455,7 +458,7 @@ export function ResearchWorkspace({
               {report.error && (
                 <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-amber-400/90">
                   <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
-                  {report.error}
+                  {isStoppedMessage(report.error) ? tSteps("stopped") : report.error}
                 </p>
               )}
               {/* Real progress, not a spinner.
@@ -468,6 +471,24 @@ export function ResearchWorkspace({
                   yet (migration not applied) rather than showing nothing. */}
               {(isRunning(report) || running === report.id) && (
                 <div className="space-y-1">
+                  {/* THE STOP BUTTON — V4.6. Sets the flag the runner reads
+                      before each question (api/research/[id]/cancel); the
+                      questions already answered are kept and charged, the
+                      rest never start. The poll shows the outcome. */}
+                  <button
+                    type="button"
+                    data-testid="research-stop"
+                    onClick={() => {
+                      void fetch(`/api/research/${report.id}/cancel`, { method: "POST" }).then(
+                        (res) => addToast(res.ok ? tSteps("stopping") : t("runError"), res.ok ? undefined : "error"),
+                        () => addToast(t("runError"), "error")
+                      );
+                    }}
+                    className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-border px-2.5 text-[11px] font-medium text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-300"
+                  >
+                    <Square className="h-2.5 w-2.5 fill-current" aria-hidden="true" />
+                    {tSteps("stop")}
+                  </button>
                   <p className="flex items-center gap-1.5 text-[11px] text-muted">
                     <ThinkingIndicator size="sm" />
                     {typeof report.questions_total === "number" && report.questions_total > 0

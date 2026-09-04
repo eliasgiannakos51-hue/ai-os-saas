@@ -2,6 +2,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
+import { STOPPED_MESSAGE, isStopRequested } from "@/lib/stop-requests";
 import { diagLog } from "@/lib/diag";
 import { getSiteUrl } from "@/lib/site-url";
 import { CostAccumulator, type CostEntry } from "@/lib/billing/cost-accumulator";
@@ -313,6 +314,34 @@ async function runResearchChunkInner(
   }
 
   while (answered < questions.length) {
+    // THE STOP BUTTON — V4.6. Read before each question, because a
+    // question is the unit of work here: the ones already answered are
+    // saved and paid for, the one about to start has cost nothing yet.
+    // Settled for exactly that, and the row says it was stopped rather
+    // than that it failed.
+    if (await isStopRequested(admin, "research_reports", reportId)) {
+      const settlement = await settleReservation({
+        userId: report.user_id,
+        reservationId: report.reservation_id ?? "",
+        feature: "deep_research",
+        costs,
+        plan: await planFor(report.user_id),
+        bypassCharge: await isBypass(report.user_id),
+        metadata: { reportId, outcome: "stopped", questionsDone: answered, questionsTotal: questions.length, chunks: (report.chunk_count ?? 0) + 1 },
+      });
+      await admin
+        .from("research_reports")
+        .update({
+          status: "failed" satisfies ResearchStatus,
+          error: STOPPED_MESSAGE,
+          partial_findings: findings,
+          credits_charged: settlement.creditsCharged,
+          completed_at: new Date().toISOString(),
+          chunk_running: false,
+        })
+        .eq("id", reportId);
+      return { done: true, status: "failed", reason: "stopped" };
+    }
     if (!questionFits(Date.now() - startedAt, budgetMs)) {
       // Out of room. Save, release the chunk lock, hand the rest on.
       await persist({ chunk_running: false });

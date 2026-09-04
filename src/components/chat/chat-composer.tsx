@@ -9,7 +9,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Square } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { VoiceInput } from "@/components/voice/voice-input";
@@ -44,21 +44,28 @@ export const ChatComposer = forwardRef<
   {
     sending: boolean;
     onSend: (text: string) => void;
+    /** THE STOP BUTTON — V4.6. While a reply streams, the send button
+     *  becomes this: one press aborts the request, keeps what has
+     *  arrived, and hands the box back at once. The server charges only
+     *  what was produced (api/chat/route.ts). */
+    onStop?: () => void;
     initialText?: string;
     /** Extra lines rendered inside the form, under the box (the free-
      *  message counter, the large-message price). They re-render on THEIR
      *  changes, which are rare, not on keystrokes. */
     children?: React.ReactNode;
   }
->(function ChatComposer({ sending, onSend, initialText = "", children }, ref) {
+>(function ChatComposer({ sending, onSend, onStop, initialText = "", children }, ref) {
   const t = useTranslations("dashboard.chat");
   const [input, setInput] = useState(initialText);
-  // Only to decide the box's right padding: on a deployment with no
-  // transcription provider VoiceInput renders nothing, and a gap the
-  // width of a button it never drew is a gap somebody notices. This
-  // context changes on load and after a transcription — never per
-  // keystroke, which is what this component exists to keep cheap.
-  const { transcribeAvailable } = useVoiceAvailability();
+  // Only to decide the box's right padding. VoiceInput now draws an
+  // inert microphone whenever the availability call has answered (V4.6:
+  // a control that silently is not there cannot say why), so the box
+  // makes room once `loaded` — not only when transcription works. Before
+  // the answer nothing is drawn and no gap is left. This context changes
+  // on load and after a transcription — never per keystroke, which is
+  // what this component exists to keep cheap.
+  const { loaded: voiceLoaded } = useVoiceAvailability();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   function resize(el: HTMLTextAreaElement) {
@@ -88,8 +95,15 @@ export const ChatComposer = forwardRef<
 
   function submit(e: FormEvent) {
     e.preventDefault();
+    // Enter while a reply streams is a stop, not a queued second send: the
+    // person wants the box back, and the fastest way to say so is the key
+    // they already have their hand on.
+    if (sending) {
+      onStop?.();
+      return;
+    }
     const text = input.trim();
-    if (!text || sending) return;
+    if (!text) return;
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     onSend(text);
@@ -117,7 +131,7 @@ export const ChatComposer = forwardRef<
           // viewport-relative cap grows with the screen instead of
           // pinning the composer to one small absolute size.
           className={`focus-glow max-h-[45vh] min-h-[60px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-panel px-4 py-3.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-orange-500/60 ${
-            transcribeAvailable ? "pr-[7.5rem]" : "pr-14"
+            voiceLoaded ? "pr-[7.5rem]" : "pr-14"
           }`}
           autoFocus
         />
@@ -143,18 +157,31 @@ export const ChatComposer = forwardRef<
             }}
           />
         </div>
-        <button
-          type="submit"
-          disabled={sending || !input.trim()}
-          aria-label={t("send")}
-          className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
-        >
-          {sending ? (
-            <ThinkingIndicator size="sm" tone="inherit" />
-          ) : (
-            <ArrowUp className="h-4 w-4" />
-          )}
-        </button>
+        {sending && onStop ? (
+          <button
+            type="button"
+            onClick={onStop}
+            aria-label={t("stop")}
+            title={t("stop")}
+            data-testid="chat-stop"
+            className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full border border-orange-500/60 bg-panel text-orange-300 transition-all duration-200 hover:bg-orange-500/15"
+          >
+            <Square className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+          </button>
+        ) : (
+          <button
+            type="submit"
+            disabled={sending || !input.trim()}
+            aria-label={t("send")}
+            className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+          >
+            {sending ? (
+              <ThinkingIndicator size="sm" tone="inherit" />
+            ) : (
+              <ArrowUp className="h-4 w-4" />
+            )}
+          </button>
+        )}
       </div>
       {children}
     </form>

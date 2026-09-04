@@ -874,6 +874,13 @@
     "legalLinks": {
       "title": "Legal e apoio",
       "description": "As regras que aceitou, o que acontece aos seus dados, o que a IA faz e como falar com uma pessoa."
+    },
+    "sampleData": {
+      "title": "Dados de exemplo",
+      "description": "Carregue uma pequena demo — os últimos três meses de um estúdio de design — para ver os gráficos, os registos e o chat com conteúdo. Nada é gerado e nenhum crédito é gasto.",
+      "loaded": "O exemplo está carregado. É assinalado em todas as páginas até o remover.",
+      "notLoaded": "Não carregado.",
+      "open": "Ver na página inicial"
     }
   },
   "dashboard": {
@@ -1051,7 +1058,24 @@
         "why": "Textos longos que ficam junto ao seu trabalho — um briefing, um rascunho, notas de reunião — pesquisáveis ao lado de tudo o resto.",
         "example": "Notas da reunião de segunda-feira"
       },
-      "createFailed": "Não conseguimos criar o documento. Tenta outra vez daqui a pouco — não foi guardado nada."
+      "createFailed": "Não conseguimos criar o documento. Tenta outra vez daqui a pouco — não foi guardado nada.",
+      "pdf": {
+        "title": "Descarregar como PDF",
+        "inLanguage": "No idioma do documento ({language}) — grátis",
+        "translateTo": "Traduzido para",
+        "free": "Grátis — o documento tal como está escrito.",
+        "sameLanguage": "Esse é o idioma em que o documento está escrito — nada a traduzir, grátis.",
+        "estimating": "A calcular o preço…",
+        "estimate": "A tradução custa cerca de {count, plural, one {# crédito} other {# créditos}}. Só é cobrada quando carregar em Descarregar.",
+        "bypassFree": "A tradução é gratuita nesta conta.",
+        "estimateFailed": "Não foi possível calcular o preço. Tente novamente.",
+        "tooLong": "Este documento é demasiado longo para traduzir ({chars} caracteres; o limite é {limit}).",
+        "download": "Descarregar",
+        "failed": "Não foi possível fazer a tradução. Nenhum crédito cobrado.",
+        "insufficient": "Créditos insuficientes para esta tradução. Nada foi cobrado.",
+        "charged": "Traduzido e descarregado — {count, plural, one {# crédito cobrado} other {# créditos cobrados}}.",
+        "chargedNothing": "Traduzido e descarregado — sem cobrança."
+      }
     },
     "chat": {
       "title": "Ionexa Conversa",
@@ -1092,7 +1116,9 @@
       "dataScope": {
         "title": "O que consegue ver",
         "body": "Vê as tuas entradas, os teus objetivos e os ficheiros que carregaste. Não vê nada que não tenhas adicionado. Não altera nada sem que peças."
-      }
+      },
+      "stop": "Parar",
+      "stopped": "Parado. O que foi escrito fica, e só essa parte é cobrada."
     },
     "create": {
       "title": "Criar Qualquer Coisa",
@@ -1406,7 +1432,27 @@
       "stockNoticeTitle": "{count, plural, one {# foto de stock} other {# fotos de stock}} neste site",
       "stockNoticeBody": "Envia as tuas para um resultado mais autêntico — o Unsplash tem um negócio como o teu, não o teu.",
       "stockNoticeAction": "Enviar fotos",
-      "storageFull": "Não há espaço para estas imagens — precisas de {needed}, livres {free}."
+      "storageFull": "Não há espaço para estas imagens — precisas de {needed}, livres {free}.",
+      "notes": {
+        "title": "Feito como pediste",
+        "removedFeature": "Removi {feature}, como pediste ({count, plural, one {# elemento} other {# elementos}}).",
+        "removedPage": "Eliminei a página «{slug}»: era {feature}, que pediste para não incluir.",
+        "pageCap": "A IA começou {started} páginas; o limite é {cap}, por isso a geração parou aí e só te foi cobrado o que foi escrito até esse ponto.",
+        "mapZoom": "{count, plural, one {O mapa foi ajustado} other {# mapas foram ajustados}} para zoom ao nível do edifício com um marcador na morada.",
+        "feature": {
+          "booking": "a reserva online",
+          "contactForm": "o formulário de contacto",
+          "newsletter": "a subscrição da newsletter",
+          "map": "o mapa",
+          "prices": "a lista de preços",
+          "gallery": "a galeria de fotos",
+          "testimonials": "os testemunhos",
+          "blog": "a secção de blog",
+          "social": "as ligações para redes sociais",
+          "chatWidget": "o widget de chat"
+        },
+        "stopped": "Paraste-o. {count, plural, =0 {Nada foi cobrado} one {Foi cobrado # crédito} other {Foram cobrados # créditos}} pela parte gerada; o resto da reserva foi libertado."
+      }
     },
     "marketplace": {
       "title": "Mercado",
@@ -2877,7 +2923,10 @@
     "saving": "A guardar",
     "delivering": "A enviar-te",
     "publishing": "A publicar o site",
-    "watchFailed": "O progresso não pode ser mostrado agora — o trabalho continua em segundo plano."
+    "watchFailed": "O progresso não pode ser mostrado agora — o trabalho continua em segundo plano.",
+    "stop": "Parar",
+    "stopping": "A parar…",
+    "stopped": "Parado. Só o trabalho já feito é cobrado."
   },
   "problem": {
     "out_of_credits": {
@@ -3518,7 +3567,8 @@
       "ruleOf40": "Regra dos 40",
       "burnEur": "Consumo mensal",
       "runwayMonths": "Autonomia"
-    }
+    },
+    "needsHistoryDays": "Precisa de {need} dias de instantâneos diários — temos {have}."
   },
   "routing": {
     "title": "Encaminhamento de modelos",

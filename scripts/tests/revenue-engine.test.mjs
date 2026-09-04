@@ -506,6 +506,29 @@ const by = (list, key) => list.find((m) => m.key === key);
   }
   eq("LTV refuses too, because it needs churn", by(out, "ltvEur").state, "needs_history");
 
+  // "NEEDS 2 MONTHS OF HISTORY — WE HAVE 2." Reported from the live
+  // dashboard, and a contradiction: the Rule of 40's condition is a daily
+  // snapshot at least 28 days old (previousMrrEur), while the number it
+  // printed was historyMonths, which counts subscriber_months. Two of one
+  // and none of the other is exactly the state a new deployment sits in
+  // for its first month. The card now reports the requirement it checks,
+  // in days.
+  const contradiction = metrics.computeMetrics({ ...BASE, historyMonths: 2, previousMrrEur: null, snapshotDays: 5 });
+  const r40 = by(contradiction, "ruleOf40");
+  eq("Rule of 40 with two subscriber-months and no 28-day-old snapshot refuses in DAYS", r40.state, "needs_history_days");
+  eq("…saying how many days of snapshots exist", r40.haveDays, 5);
+  eq("…and how many it needs", r40.needDays, metrics.MIN_SNAPSHOT_DAYS_FOR_GROWTH);
+  ok("…which is the 28 the loader reads (`age >= 28`), not a second number", metrics.MIN_SNAPSHOT_DAYS_FOR_GROWTH === 28);
+  ok("…and never a sentence whose two numbers are equal while refusing", r40.haveDays < r40.needDays);
+  const noSnapshots = by(metrics.computeMetrics({ ...BASE, historyMonths: 2, previousMrrEur: null, snapshotDays: 0 }), "ruleOf40");
+  eq("with no snapshots at all it says zero days", noSnapshots.haveDays, 0);
+  const fractional = by(metrics.computeMetrics({ ...BASE, previousMrrEur: null, snapshotDays: 27.9 }), "ruleOf40");
+  eq("a fraction of a day is floored, not rounded up to the threshold", fractional.haveDays, 27);
+  for (const [label, value] of [["NaN", NaN], ["-1", -1], ["undefined", undefined]]) {
+    const m = by(metrics.computeMetrics({ ...BASE, previousMrrEur: null, snapshotDays: value }), "ruleOf40");
+    ok(`snapshotDays of ${label} reports 0, never a negative or NaN day count`, m.haveDays === 0, String(m.haveDays));
+  }
+
   // TWO MONTHS, AS A NUMBER. Comparing needMonths against the constant
   // above is a tautology — it passes at any value, including zero. The
   // threshold itself is the claim: churn is a comparison BETWEEN two

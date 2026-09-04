@@ -17,6 +17,7 @@
     "test:mutation": "node scripts/tests/run-mutations.mjs",
     "limits": "node scripts/apply-function-limits.mjs",
     "test:db": "node scripts/db/run-dbtests.mjs",
+    "db:pending": "node scripts/db/pending-migrations.mjs",
     "prepare": "node scripts/install-hooks.mjs",
     "hooks:install": "node scripts/install-hooks.mjs",
     "check:markers": "node scripts/check-mutation-markers.mjs"

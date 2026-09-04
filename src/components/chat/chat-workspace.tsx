@@ -154,6 +154,16 @@ export function ChatWorkspace({
   const [mentorMode, setMentorMode] = useState(initialMentorPreset != null);
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState<string | null>(null);
+  // THE STOP BUTTON — V4.6. One controller per send; pressing ✕ aborts
+  // the fetch, which is what the server reads as "stop" (api/chat). The
+  // text already on screen is kept, the box is handed back at once, and
+  // the balance is refreshed a moment later, once the server has settled
+  // for the part that was produced.
+  const abortRef = useRef<AbortController | null>(null);
+  const [stoppedNote, setStoppedNote] = useState(false);
+  function stopGeneration() {
+    abortRef.current?.abort();
+  }
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRateLimitNotice, setIsRateLimitNotice] = useState(false);
@@ -431,11 +441,15 @@ export function ChatWorkspace({
     ]);
     setSending(true);
     setStreamingText(null);
+    setStoppedNote(false);
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           conversationId: sentFromId,
           message: text,
@@ -533,7 +547,13 @@ export function ChatWorkspace({
         }
       }
 
-      if (streamError) {
+      if (controller.signal.aborted) {
+        // Stopped by the reader, not by the network: not an error. The
+        // partial reply above is kept; the server settles for it and
+        // the balance is read back once it has.
+        setStoppedNote(true);
+        setTimeout(() => void refreshCredits(), 2500);
+      } else if (streamError) {
         setError(streamError);
       } else if (interrupted) {
         // The partial reply above has already been kept. Say what
@@ -551,12 +571,20 @@ export function ChatWorkspace({
       // carried no receipt.
       if (usageEvent) {
         void reportUsage(usageEvent);
-      } else {
+      } else if (!controller.signal.aborted) {
         void refreshCredits();
       }
     } catch {
-      setError(tCommon("networkError"));
+      // A fetch aborted before the headers arrived rejects here; that is
+      // the stop button, not a network fault.
+      if (controller.signal.aborted) {
+        setStoppedNote(true);
+        setTimeout(() => void refreshCredits(), 2500);
+      } else {
+        setError(tCommon("networkError"));
+      }
     } finally {
+      if (abortRef.current === controller) abortRef.current = null;
       setStreamingText(null);
       setSending(false);
     }
@@ -844,13 +872,33 @@ export function ChatWorkspace({
                   halves of voice are usable here — a hands-free loop that
                   can listen but not answer aloud is not the thing this
                   button promises. */}
-              {voiceAvailability.transcribeAvailable && voiceAvailability.speakAvailable && (
+              {/* DRAWN WHENEVER THE AVAILABILITY CALL HAS ANSWERED, and
+                  inert with the reason in its title when the loop cannot
+                  run here (V4.6) — the hands-free loop needs BOTH keys,
+                  transcription (OPENAI_API_KEY) and speech
+                  (ELEVENLABS_API_KEY), and "the button is not there" was
+                  reported as the feature not existing. */}
+              {voiceAvailability.loaded && (
                 <button
                   type="button"
                   onClick={() => setTalking(true)}
-                  disabled={sending || !voiceAvailability.hasMinutes}
-                  title={voiceAvailability.hasMinutes ? undefined : tVoice("outOfMinutes")}
-                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-orange-500/40 hover:text-foreground disabled:opacity-40"
+                  disabled={
+                    sending ||
+                    !voiceAvailability.transcribeAvailable ||
+                    !voiceAvailability.speakAvailable ||
+                    !voiceAvailability.hasMinutes
+                  }
+                  data-testid="voice-conversation-start"
+                  title={
+                    !voiceAvailability.configured.transcribe || !voiceAvailability.configured.speak
+                      ? tVoice("settings.notConfigured")
+                      : !voiceAvailability.included
+                        ? tVoice("settings.notIncluded")
+                        : voiceAvailability.hasMinutes
+                          ? undefined
+                          : tVoice("outOfMinutes")
+                  }
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-orange-500/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <AudioLines className="h-3.5 w-3.5" aria-hidden="true" />
                   {tVoice("conversation.start")}
@@ -882,10 +930,16 @@ export function ChatWorkspace({
                 {error}
               </p>
             )}
+            {stoppedNote && (
+              <p className="mb-3 text-[11px] text-muted" data-testid="chat-stopped-note">
+                {t("stopped")}
+              </p>
+            )}
             <ChatComposer
               ref={composerRef}
               sending={sending}
               onSend={(text) => void handleSend(text)}
+              onStop={stopGeneration}
               initialText={composerInitialText}
             >
               {largeMessageCredits !== null && (

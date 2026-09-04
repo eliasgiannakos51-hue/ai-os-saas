@@ -178,7 +178,12 @@ const buildGroup = groupOf("Build");
 // unchanged and is what this section has always been for: a module that
 // generates nothing must not sit under the heading that promises
 // generation. Only the name of the group it must sit under moved.
-const trackingGroup = groupOf("My business");
+// THE GROUP MOVED AGAIN on 2026-09-04: "My business" became "See", the
+// owner's verb for the place the numbers and the logs live. The RULE is
+// untouched — a module that generates nothing must not sit under the
+// heading that promises generation — and only the name of the group it
+// must sit under changed.
+const trackingGroup = groupOf("See");
 check("the group the logs live in exists", trackingGroup.length > 0);
 
 const offenders = trackingSlugs.filter((slug) => {
@@ -191,7 +196,7 @@ check(
   offenders.length ? `these produce nothing but sit under "Build": ${offenders.join(", ")}` : ""
 );
 const misfiled = trackingSlugs.filter((slug) => !trackingGroup.includes(`/dashboard/${slug}`));
-check("and every one of them IS under My business", misfiled.length === 0, misfiled.join(", "));
+check("and every one of them IS under See", misfiled.length === 0, misfiled.join(", "));
 // AND NONE OF THEM WAS QUIETLY DROPPED. Consolidating a sidebar is one
 // keystroke away from deleting entries instead of grouping them, and a
 // deleted entry leaves the page live but unreachable from the nav AND
@@ -242,14 +247,24 @@ const BUILD_ALLOWED = {
   // list, a conversion or tests. Neither is in build-modules.ts any more,
   // and section 3b below proves the claim from the CODE rather than from
   // this comment.
-  "/dashboard/data-analysis": "parses, profiles and charts a real uploaded file",
   "/dashboard/coding": "five operations that really produce code",
   // V4.6 #3. It was under "Workspace" next to Files and Documents, which
   // reads as a place to store things; it is a job that goes and writes a
   // report. /api/research/[id]/run reaches lib/research/research.ts,
   // which awaits anthropic.messages.create three times — and section 3b
   // below proves that from the imports rather than from this sentence.
-  "/dashboard/deep-research": "plans, runs and writes up a real research job",
+  // MOVED TO "See" on 2026-09-04, and off this list with them: the owner
+  // put Deep Research and Data Analysis under the group where a person
+  // goes to LOOK at what came back, rather than the one for making
+  // things. Both still really generate — section 3b proves that from the
+  // imports either way — so this is a filing decision, not a downgrade.
+  //
+  // ADDED, because the owner's structure puts them under Build:
+  "/dashboard/create": "Create Studio — the generator the whole product opens with",
+  "/dashboard/automation": "the automations a user builds and runs",
+  "/dashboard/marketplace": "where a built thing is published and taken",
+  "/dashboard/product-workflow": "a guided build, start to finish",
+  "/dashboard/trading-workflow": "a guided build, start to finish",
 };
 const unexpected = buildHrefs.filter((href) => !(href in BUILD_ALLOWED));
 check(

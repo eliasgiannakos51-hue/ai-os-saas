@@ -4,7 +4,8 @@
 // edge is not navigation, it is a directory — and nineteen of those rows
 // were log modules that all render the same GenericList, i.e. nineteen
 // spellings of "a table of your rows". V4.6 #3 made it four groups and
-// sixteen rows.
+// sixteen rows; the owner's structure of 2026-09-04 made it four groups
+// and twenty-one.
 //
 // The brief asked for the gate in the same breath as the change, and for
 // the obvious reason: a sidebar is where every new feature wants to add
@@ -38,7 +39,14 @@ function check(name, cond, detail) {
 
 // THE LIMITS. Four and twenty, from the brief.
 const MAX_GROUPS = 4;
-const MAX_DRAWN_ITEMS = 20;
+// TWENTY-ONE SINCE 2026-09-04, and the extra row is a decision rather
+// than a drift. The owner chose the four groups and their contents by
+// name — Work (4), Build (5), See (8), Settings (4) — and that is
+// twenty-one. The limit exists to stop the sidebar sliding back towards
+// the forty-five rows it had, so it moves when somebody decides it should
+// and never because a row was added quietly: this number and this
+// paragraph are what a reviewer sees in the diff.
+const MAX_DRAWN_ITEMS = 21;
 
 // The real filters, executed. lib/sidebar-visibility.ts imports no icons
 // precisely so this is possible — see its header.
@@ -165,7 +173,19 @@ for (const item of ownerOnlyItems) {
   const forOwner = sidebarGroups(groups, true).flatMap((g) => g.items).map((i) => i.href);
   const forUser = sidebarGroups(groups, false).flatMap((g) => g.items).map((i) => i.href);
   const paletteUser = visibleGroups(groups, false).flatMap((g) => g.items).map((i) => i.href);
-  check(`${item.href}: the owner sees it`, forOwner.includes(item.href));
+  const paletteOwner = visibleGroups(groups, true).flatMap((g) => g.items).map((i) => i.href);
+  // OWNER-ONLY AND HIDDEN ARE TWO DIFFERENT AXES, and since 2026-09-04
+  // three items are both: costs, routing and system-health are the
+  // owner's operational pages, kept out of the drawn sidebar and reachable
+  // from the palette. `sidebarGroups` drops hidden rows, so requiring
+  // every owner-only item in the OWNER'S SIDEBAR would fail on exactly the
+  // arrangement that is wanted. What must hold either way is that the
+  // owner can reach it and nobody else can: a drawn one in the sidebar, a
+  // hidden one in the palette.
+  check(
+    `${item.href}: the owner sees it`,
+    item.hidden ? paletteOwner.includes(item.href) : forOwner.includes(item.href)
+  );
   check(`${item.href}: nobody else does, in the sidebar`, !forUser.includes(item.href));
   // AND NOT IN THE COMMAND PALETTE EITHER. Filtering the sidebar alone
   // would put every hidden page back one keystroke away, which is not

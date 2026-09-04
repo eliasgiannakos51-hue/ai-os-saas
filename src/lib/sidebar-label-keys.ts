@@ -25,9 +25,13 @@ export const GROUP_HEADING_KEYS: Record<string, string> = {
   // of the four resolves in all ten locales, and a heading with no entry
   // here prints raw English in all ten, which is the fault this map was
   // written for and which sidebar-naming.test.mjs still fails on.
-  Daily: "daily",
+  // FOUR, and they are VERBS since 2026-09-04: the owner's structure
+  // replaced Daily / Build / My business / Settings with what a person is
+  // doing at each point of a working day. `work` and `see` are new keys in
+  // all ten locales; `build` and `settings` already existed.
+  Work: "work",
   Build: "build",
-  "My business": "myBusiness",
+  See: "see",
   Settings: "settings",
 };
 
@@ -51,6 +55,16 @@ export const GROUP_HEADING_KEYS: Record<string, string> = {
 // label sidebar-nav.ts renders without a key here.
 export const ITEM_LABEL_KEYS: Record<string, string> = {
   Home: "home",
+  // The four routes that were in no nav config at all until round 5, and
+  // the timeline row, which the owner's structure renames from "Mine".
+  // The row the owner's structure calls Timeline; the product has always
+  // displayed it as "Mine", and scripts/tests/sidebar-naming.test.mjs
+  // pairs this label with sidebar.items.mine and dashboard.timeline.title.
+  Timeline: "mine",
+  Costs: "costs",
+  Routing: "routing",
+  "System Health": "systemHealth",
+  "Trading Journal": "tradingJournal",
   Files: "files",
   "Deep Research": "deepResearch",
   "Published Sites": "published",

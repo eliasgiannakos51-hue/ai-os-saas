@@ -210,11 +210,14 @@ export const HELP_TIPS: HelpTip[] = [
     // merge that deleted one would have been a nav change quietly costing
     // a piece of the help.
     id: "favorites",
-    file: "src/app/dashboard/timeline/page.tsx",
-    // /dashboard/favorites is now a bare redirect into the starred tab.
-    // It renders no header, so it needs naming here or the "every page
-    // without a header is answered too" check counts it as unanswered.
-    route: "src/app/dashboard/favorites/page.tsx",
+    // THE STARRED VIEW HAS ITS OWN PAGE AGAIN since 2026-09-04: the star
+    // in the timeline's tab row lands on /dashboard/favorites instead of
+    // on a query string whose page then bounced back here. That file is
+    // the one that draws this header now, so it is the one the tip is
+    // attached to. The timeline still renders the same view for
+    // ?view=fav, which is why the route below still points at it.
+    file: "src/app/dashboard/favorites/page.tsx",
+    route: "src/app/dashboard/timeline/page.tsx",
     keyPrefix: "help.favorites",
     corrects: "that starring something copies or moves it",
   },

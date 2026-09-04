@@ -87,7 +87,9 @@
       "track": "Erfassen",
       "insights": "Was mir aufgefallen ist",
       "tracking": "Erfassung",
-      "daily": "Täglich"
+      "daily": "Täglich",
+      "work": "Arbeiten",
+      "see": "Ansehen"
     },
     "items": {
       "home": "Start",
@@ -138,7 +140,10 @@
       "mine": "Meine Sachen",
       "records": "Meine Einträge",
       "library": "Meine Sachen",
-      "newEntry": "Neuer Eintrag"
+      "newEntry": "Neuer Eintrag",
+      "costs": "Kosten",
+      "systemHealth": "Systemzustand",
+      "tradingJournal": "Trading-Journal"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -189,7 +194,11 @@
       "mine": "Alles, was du erstellt hast, neueste zuerst — mit einem Tab nur für Favoriten",
       "records": "Alle Einträge an einem Ort — nach Typ filtern statt im Menü zu suchen",
       "library": "Favoriten, Neuestes und Suche — alles Eigene an einem Ort",
-      "newEntry": "Schreiben Sie irgendetwas auf — es ordnet sich selbst ein"
+      "newEntry": "Schreiben Sie irgendetwas auf — es ordnet sich selbst ein",
+      "costs": "Was jeder KI-Aufruf gekostet hat, pro Modell und pro Tag.",
+      "routing": "An welches Modell jede Art von Anfrage geht.",
+      "systemHealth": "Ob Datenbank, Warteschlangen und Anbieter antworten.",
+      "tradingJournal": "Deine Trades, mit der Begründung, die du damals notiert hast."
     },
     "closeMenu": "Menü schließen"
   },

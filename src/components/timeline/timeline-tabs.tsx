@@ -23,7 +23,13 @@ export function TimelineTabs({ view }: { view: "all" | "fav" }) {
 
   const tabs = [
     { id: "all" as const, href: "/dashboard/timeline", label: t("tabAll"), Icon: History },
-    { id: "fav" as const, href: "/dashboard/timeline?view=fav", label: t("tabStarred"), Icon: Star },
+    // THE STAR GOES TO THE STARRED PAGE. It used to point at
+    // /dashboard/timeline?view=fav while /dashboard/favorites redirected
+    // here — so the page had an address nobody ever landed on, and the
+    // one people had bookmarked bounced. dashboard/favorites/page.tsx is
+    // now the page; the query string still renders the same view for
+    // anything already linking to it.
+    { id: "fav" as const, href: "/dashboard/favorites", label: t("tabStarred"), Icon: Star },
   ];
 
   return (

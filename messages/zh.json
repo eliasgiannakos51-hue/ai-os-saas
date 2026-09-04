@@ -87,7 +87,9 @@
       "track": "记录",
       "insights": "我注意到的",
       "tracking": "记录",
-      "daily": "日常"
+      "daily": "日常",
+      "work": "工作",
+      "see": "查看"
     },
     "items": {
       "home": "主页",
@@ -138,7 +140,10 @@
       "mine": "我的内容",
       "records": "我的记录",
       "library": "我的东西",
-      "newEntry": "新记录"
+      "newEntry": "新记录",
+      "costs": "成本",
+      "systemHealth": "系统健康",
+      "tradingJournal": "交易日志"
     },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",
@@ -189,7 +194,11 @@
       "mine": "你创建的全部内容，最新在前，并有仅收藏标签页",
       "records": "所有记录集中在一处——按类型筛选，不必在菜单里找",
       "library": "收藏、最近和搜索 —— 你的东西都在这里",
-      "newEntry": "随便写点什么 —— 它会自己归位"
+      "newEntry": "随便写点什么 —— 它会自己归位",
+      "costs": "每次 AI 调用的花费，按模型和日期列出。",
+      "routing": "每类请求会发送到哪个模型。",
+      "systemHealth": "数据库、队列和服务商是否在响应。",
+      "tradingJournal": "你的交易记录，以及当时写下的理由。"
     },
     "closeMenu": "关闭菜单"
   },

@@ -87,7 +87,9 @@
       "track": "Track",
       "insights": "What I noticed",
       "tracking": "Tracking",
-      "daily": "Daily"
+      "daily": "Daily",
+      "work": "Work",
+      "see": "See"
     },
     "items": {
       "home": "Home",
@@ -138,7 +140,10 @@
       "mine": "Mine",
       "records": "My records",
       "library": "My stuff",
-      "newEntry": "New entry"
+      "newEntry": "New entry",
+      "costs": "Costs",
+      "systemHealth": "System Health",
+      "tradingJournal": "Trading journal"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -189,7 +194,11 @@
       "mine": "Everything you have made, newest first — with a starred-only tab",
       "records": "Every log in one place — filter by type instead of hunting the menu",
       "library": "Starred, recent and search — all your own entries in one place",
-      "newEntry": "Write anything down — it files itself"
+      "newEntry": "Write anything down — it files itself",
+      "costs": "What every AI call has cost, per model and per day.",
+      "routing": "Which model each kind of request is sent to.",
+      "systemHealth": "Whether the database, the queues and the providers are answering.",
+      "tradingJournal": "Your trades, with the reasoning you wrote at the time."
     },
     "closeMenu": "Close menu"
   },

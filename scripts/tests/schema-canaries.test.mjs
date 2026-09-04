@@ -116,84 +116,47 @@ for (const name of ["nav_events", "consume_rate_limit", "db_exposure_report", "m
   );
 }
 
-console.log("\n== 4. the function probe can tell 'absent' from 'present, called without its arguments' ==");
-// Six of the nine function canaries take a required argument, and the
-// probe calls every function with none — so PostgREST answers "Could not
-// find the function public.f without parameters in the schema cache"
-// for a function that is THERE. Production listed all six as missing
-// while every one of them was working. The tell is PostgREST's hint,
-// which names the function when it exists with other parameters.
+console.log("\n== 4. the function check asks the API for its list, and says so when it cannot ==")
+// THREE STATES, AND ONLY ONE OF THEM IS AN ACCUSATION.
+//
+// Two versions of this probe called each function with no arguments and
+// read the failure. Six of the canaries take a required argument, so
+// PostgREST answered "Could not find the function public.f without
+// parameters in the schema cache" — the words it also uses for a function
+// that is genuinely absent. The second version tried to separate them by
+// the `hint`; production kept listing the same six, with the schema cache
+// already reloaded and ⌘K visibly returning rows through search_all.
+//
+// A probe that says "six missing" when nothing is missing is worse than
+// no probe: the four columns that WERE missing on 2026-09-04 arrived in
+// that noise. So the question is now asked directly — PostgREST's root is
+// an OpenAPI document listing one /rpc/<name> per function it can see —
+// and when it cannot be asked, the sweep says "unchecked" rather than
+// naming anything.
 {
   const route = stripComments(readFileSync("src/app/api/health/route.ts", "utf8"));
-  check("the probe reads the hint of a not-found answer", /\.hint/.test(route) && /presentWithOtherArgs/.test(route));
-  check("...matching the SAME function name followed by an argument list",
-    /new RegExp\(`function\\\\s\+\(\?:public\\\\\.\)\?\$\{c\.fn\}\\\\s\*\\\\\(`, "i"\)/.test(route));
-  // The hintless case is LOGGED (what the API layer actually said, server
-  // side, where it cannot leak) and then recorded — in that order, inside
-  // the same branch, so nothing is recorded without its evidence.
+  check("the function list comes from the API's own root document", /fetch\(`\$\{url\.replace\([^)]*\)\}\/rest\/v1\/`/.test(route));
+  check("...read as OpenAPI", /Accept: "application\/openapi\+json"/.test(route));
+  check("...and turned into the set of /rpc names it declares", /\/\^\\\/rpc\\\/\(\[A-Za-z0-9_\]\+\)\$\//.test(route));
   check(
-    "...and only a hintless not-found is recorded as missing, and it is logged first",
-    /if \(!presentWithOtherArgs\) \{\s*logApiError\("\/api\/health", new Error\("schema_function_not_visible"\),[\s\S]{0,600}?\);\s*missing\.push\(/.test(route)
+    "a canary is missing only when the list came back and does not name it",
+    /if \(!apiFunctions\) return;\s*if \(!apiFunctions\.has\(c\.fn as string\)\) \{/.test(route)
   );
-  // A hintless not-found is ALSO what a stale PostgREST schema cache
-  // returns for a function that is there. The probe cannot tell the two
-  // apart, so the entry has to say both, and name the cure for the second.
+  check("an unreachable or non-OK root is 'could not ask', not 'missing'", /if \(!res\.ok\) return null;/.test(route));
+  check("...as is an unparseable one", /if \(!paths \|\| typeof paths !== "object"\) return null;/.test(route));
+  check("...and so is a document that names no functions at all", /return names\.size > 0 \? names : null;/.test(route));
+  check("the sweep reports which of the two happened", /functions: functionsListed \? "listed" : "unchecked"/.test(route));
   check(
-    "...and a recorded function miss says both things it can mean, with the reload-schema cure",
-    /note:\s*"The database API cannot see this function: either its migration never ran on this database, or the API's cached view of the schema is stale\. Run NOTIFY pgrst, 'reload schema';/.test(route)
+    "...and counts only what it actually looked at",
+    /checked: functionsListed \? SCHEMA_CANARIES\.length : SCHEMA_CANARIES\.length - functionCanaries/.test(route)
   );
-  const requiresArgs = SCHEMA_CANARIES.filter((c) => c.kind === "function").length;
-  check(`there are function canaries for this to matter (${requiresArgs})`, requiresArgs >= 6);
-}
-
-console.log("\n== 3. the list has not fallen behind the migrations ==");
-// Not "every added object must be a canary" — most are harmless and a
-// list of everything is a list nobody reads. The rule is narrower and is
-// the one that failed: an object added by a recent migration AND read by
-// src/ is a canary, because that pair is what breaks a page.
-const src = readdirSync("src", { recursive: true })
-  .filter((f) => typeof f === "string" && /\.(ts|tsx)$/.test(f))
-  .map((f) => readFileSync(`src/${f}`, "utf8"))
-  .join("\n");
-const listed = new Set(
-  SCHEMA_CANARIES.map((c) => (c.kind === "column" ? `${c.table}.${c.column}` : c.kind === "table" ? c.table : c.fn))
-);
-const unlisted = [];
-for (const col of added.columns) {
-  const [, column] = col.split(".");
-  if (!listed.has(col) && new RegExp(`["'\`][^"'\`]*\\b${column}\\b`).test(src)) unlisted.push(`column ${col}`);
-}
-for (const fn of added.functions) {
-  if (!listed.has(fn) && src.includes(`rpc("${fn}"`)) unlisted.push(`function ${fn}()`);
-}
-for (const t of added.tables) {
-  if (!listed.has(t) && src.includes(`from("${t}")`)) unlisted.push(`table ${t}`);
-}
-check(
-  `every recently-added object that src/ reads is a canary (${unlisted.length} missing)`,
-  unlisted.length === 0,
-  unlisted.join("\n        ") + "\n        add it to lib/health/schema-canaries.ts, with what breaks without it"
-);
-
-console.log("\n== 4. /api/health reports it, separately from db ==");
-{
-  const route = readFileSync("src/app/api/health/route.ts", "utf8");
-  check("health imports the canaries", /SCHEMA_CANARIES/.test(route));
-  check("...and puts them in the body as `schema`", /body\.schema\s*=/.test(route));
-  // THE PART THAT MATTERS. Folding drift into `ok` is what drained the
-  // old probe's meaning; folding it into `db` would say "database down"
-  // for a lagging additive migration.
-  check(
-    "...without touching ok or db",
-    // ANCHORED TO THE END OF THE LINE. The first version tested
-    // /db:\s*probe\.dbAnswered/, which still matches
-    // `db: probe.dbAnswered && missingCount === 0` — the exact mutation
-    // it exists to reject, and it survived. A substring is not a value.
-    /^\s*ok:\s*probe\.ok,\s*$/m.test(route) && /^\s*db:\s*probe\.dbAnswered,\s*$/m.test(route),
-    "drift must be its own signal — an additive migration lagging is not an outage"
-  );
-  check("...and only when the database answered", /if \(probe\.dbAnswered\) \{/.test(route),
-    "asking a database that did not answer produces a list of false absences");
+  // The old probe called every function to find out whether it was there.
+  // settle_reservation is not something to poke to see if it exists.
+  check("no canary function is called to find out whether it exists", !/admin\.rpc\(c\.fn/.test(route));
+  check("...and the hint heuristic that was wrong twice is gone", !/presentWithOtherArgs/.test(route));
+  const fnCanaries = SCHEMA_CANARIES.filter((c) => c.kind === "function");
+  check(`there are function canaries for this to be about (${fnCanaries.length})`, fnCanaries.length >= 6);
+  check("every function canary names a function, not a table", fnCanaries.every((c) => typeof c.fn === "string" && c.fn.length > 0 && !c.table));
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);

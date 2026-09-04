@@ -49,6 +49,14 @@ const harness = await startProdHarness({
 const url = `${harness.origin}/api/health`;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// The function names the sweep asks the API about, read from the canary
+// list itself so this test cannot drift from it. The stand-in serves them
+// as its OpenAPI root from the start — a healthy database is one whose API
+// can name its functions, and section 3b takes that away again.
+const canarySource = readFileSync("src/lib/health/schema-canaries.ts", "utf8");
+const canaryFns = [...canarySource.matchAll(/\bfn:\s*"([a-z0-9_]+)"/gi)].map((m) => m[1]);
+harness.setApiFunctions(canaryFns);
+
 try {
   // -------------------------------------------------------------------
   console.log("\n== 1. it answers a stranger ==");
@@ -126,48 +134,52 @@ try {
     JSON.stringify(b2.schema)
   );
 
-  console.log("\n== 3b. a function that EXISTS but takes arguments is not 'missing' ==");
-  // PostgREST answers a no-argument call to a function with required
-  // parameters with the same words as absence — "Could not find the
-  // function ... in the schema cache" — plus a hint naming the function
-  // that does exist. Six canaries in production were listed as missing
-  // this way while all six were working. Absence is the hintless case.
-  harness.setTableFailing("rpc/search_all", true, {
-    status: 404,
-    body: {
-      code: "PGRST202",
-      message: "Could not find the function public.search_all without parameters in the schema cache",
-      hint: "Perhaps you meant to call the function public.search_all(p_query, p_kinds, p_module, p_since, p_limit)",
-      details: "Searched for the function public.search_all without parameters, but no matches were found in the schema cache.",
-    },
-  });
-  harness.setTableFailing("rpc/merge_user_metadata", true, {
-    status: 404,
-    body: {
-      code: "PGRST202",
-      message: "Could not find the function public.merge_user_metadata without parameters in the schema cache",
-      hint: null,
-      details: "Searched for the function public.merge_user_metadata without parameters, but no matches were found in the schema cache.",
-    },
-  });
+  console.log("\n== 3b. the function check: listed, absent, and could-not-ask ==");
+  // WHAT TWO EARLIER VERSIONS GOT WRONG. Both called each function with no
+  // arguments and read the failure; PostgREST answers a no-argument call
+  // to a function with required parameters with the same words as absence.
+  // Production listed all six function canaries as missing while ⌘K was
+  // visibly returning rows through search_all, with the schema cache
+  // already reloaded. The question is now asked directly: the API's root
+  // is an OpenAPI document naming one /rpc/<name> per function it can see.
+  //
+  check(`the canary list names functions to ask about (${canaryFns.length})`, canaryFns.length >= 6, canaryFns.join(", "));
+
+  // (a) THE LIST COMES BACK AND NAMES THEM ALL — nothing is missing, and
+  //     the sweep says it looked at the functions.
+  harness.setApiFunctions(canaryFns);
   await sleep(cacheMs + 500);
-  const bF = await (await fetch(url)).json();
-  const listed = (bF.schema?.missing ?? []).map((m) => m.object);
-  check("a present function called without its arguments is NOT listed", !listed.includes("search_all()"), JSON.stringify(listed));
-  check("a function that is really absent IS listed", listed.includes("merge_user_metadata()"), JSON.stringify(listed));
-  // A hintless not-found is also what a stale PostgREST schema cache says
-  // about a function that IS there (production, 2026-09-04: six in
-  // pg_proc, six "not found"). The entry has to say both, with the cure.
-  const absentEntry = (bF.schema?.missing ?? []).find((m) => m.object === "merge_user_metadata()");
+  const bList = await (await fetch(url)).json();
+  check("with every function named by the API, none is reported missing", (bList.schema?.missing ?? []).every((m) => !/\(\)$/.test(m.object)), JSON.stringify(bList.schema));
+  check("...and the sweep says the functions were listed", bList.schema?.functions === "listed", JSON.stringify(bList.schema));
+
+  // (b) ONE NAME IS GONE FROM THE LIST — that, and only that, is absence.
+  harness.setApiFunctions(canaryFns.filter((n) => n !== "merge_user_metadata"));
+  await sleep(cacheMs + 500);
+  const bGone = await (await fetch(url)).json();
+  const listed = (bGone.schema?.missing ?? []).map((m) => m.object);
+  check("a function the API does not name IS reported missing", listed.includes("merge_user_metadata()"), JSON.stringify(listed));
+  check("...and every other function is not", listed.filter((o) => /\(\)$/.test(o)).length === 1, JSON.stringify(listed));
+  check("...and it names the migration that adds it", (bGone.schema?.missing ?? []).some((m) => m.object === "merge_user_metadata()" && /\.sql$/.test(m.migration)));
+
+  // (c) THE ROOT IS NOT AVAILABLE — the case that produced the false six.
+  //     Nothing may be named, the sweep must say it could not ask, and the
+  //     count must shrink to what it really looked at.
+  harness.setApiFunctions(null);
+  await sleep(cacheMs + 500);
+  const bBlind = await (await fetch(url)).json();
+  const blindListed = (bBlind.schema?.missing ?? []).map((m) => m.object).filter((o) => /\(\)$/.test(o));
+  check("with no function list, NOT ONE function is called missing", blindListed.length === 0, JSON.stringify(blindListed));
+  check("...the sweep says so instead of staying silent", bBlind.schema?.functions === "unchecked", JSON.stringify(bBlind.schema));
   check(
-    "...and its entry says both things a not-found can mean, with the reload-schema cure",
-    typeof absentEntry?.note === "string" && /never ran on this database/.test(absentEntry.note) && /NOTIFY pgrst, 'reload schema'/.test(absentEntry.note),
-    JSON.stringify(absentEntry)
+    "...and it counts only the canaries it actually looked at",
+    typeof bBlind.schema?.checked === "number" && bBlind.schema.checked === bList.schema.checked - canaryFns.length,
+    `${bBlind.schema?.checked} vs ${bList.schema?.checked} - ${canaryFns.length}`
   );
   const columnEntries = (b2.schema?.missing ?? []).filter((m) => !/\(\)$/.test(m.object));
-  check("a missing COLUMN carries no such note (Postgres, not PostgREST, answered)", columnEntries.length > 0 && columnEntries.every((m) => m.note === undefined), JSON.stringify(columnEntries));
-  harness.setTableFailing("rpc/search_all", false);
-  harness.setTableFailing("rpc/merge_user_metadata", false);
+  check("a missing COLUMN is still found either way", columnEntries.length > 0, JSON.stringify(columnEntries));
+  harness.setApiFunctions(canaryFns);
+  await sleep(cacheMs + 500);
   // ...and verbose without the secret changes nothing.
   const rV = await fetch(url + "?verbose=1");
   const bV = await rV.json();

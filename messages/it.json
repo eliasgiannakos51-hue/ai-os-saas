@@ -87,7 +87,9 @@
       "track": "Registrare",
       "insights": "Cosa ho notato",
       "tracking": "Monitoraggio",
-      "daily": "Ogni giorno"
+      "daily": "Ogni giorno",
+      "work": "Lavora",
+      "see": "Vedi"
     },
     "items": {
       "home": "Home",
@@ -138,7 +140,10 @@
       "mine": "Le mie cose",
       "records": "I miei record",
       "library": "Le mie cose",
-      "newEntry": "Nuova voce"
+      "newEntry": "Nuova voce",
+      "costs": "Costi",
+      "systemHealth": "Stato del sistema",
+      "tradingJournal": "Diario di trading"
     },
     "hints": {
       "chat": "Chiedi qualsiasi cosa — non legato a nessun modulo.",
@@ -189,7 +194,11 @@
       "mine": "Tutto ciò che hai creato, dal più recente, con una scheda solo preferiti",
       "records": "Tutti i record in un unico posto: filtra per tipo invece di cercare nel menu",
       "library": "Preferiti, recenti e ricerca — tutto il tuo in un posto",
-      "newEntry": "Scrivi qualsiasi cosa — si archivia da sola"
+      "newEntry": "Scrivi qualsiasi cosa — si archivia da sola",
+      "costs": "Quanto è costata ogni chiamata AI, per modello e per giorno.",
+      "routing": "A quale modello viene inviato ogni tipo di richiesta.",
+      "systemHealth": "Se il database, le code e i fornitori rispondono.",
+      "tradingJournal": "Le tue operazioni, con il ragionamento che hai scritto allora."
     },
     "closeMenu": "Chiudi il menu"
   },

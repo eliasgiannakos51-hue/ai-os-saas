@@ -106,6 +106,11 @@ export const fetchCache = "force-no-store";
  */
 const PROBE_CACHE_MS = 5_000;
 
+/** How long the schema sweep waits for the API's function list before
+ *  giving up and reporting functions as unchecked. A health endpoint that
+ *  hangs on its own diagnosis is a health endpoint that fails a monitor. */
+const PROBE_TIMEOUT_MS = 4_000;
+
 /** Present since the baseline migration and untouched by every migration
  *  after it. See the header: the probe must be the most stable thing in
  *  the schema, not the newest. */
@@ -269,7 +274,78 @@ type SchemaSweep = {
   ok: boolean | null;
   checked: number;
   missing: { object: string; migration: string; breaks: string; note?: string }[];
+  /** Whether the function canaries could be answered at all. See
+   *  functionsVisibleToApi below: "unchecked" is not "fine", it is "this
+   *  sweep has nothing to say about functions". */
+  functions: "listed" | "unchecked";
 };
+
+/**
+ * WHICH FUNCTIONS THE DATABASE API CAN ACTUALLY SEE — asked, not inferred.
+ *
+ * THE BUG THIS REPLACES, TWICE OVER. The sweep used to call each function
+ * with no arguments and read the failure. Six of the canaries take a
+ * required argument, so PostgREST answered "Could not find the function
+ * public.f without parameters in the schema cache" for every one of them —
+ * the same words it uses for a function that genuinely is not there. That
+ * was the first version, and it reported six missing functions on a
+ * database that had all six.
+ *
+ * The second version kept the call and tried to tell the two apart by the
+ * `hint`: PostgREST is documented to add "Perhaps you meant to call the
+ * function public.f(p_a, p_b)" when a function of that name exists with
+ * other parameters. That shipped, and production went on listing the same
+ * six — with `NOTIFY pgrst, 'reload schema'` already run, and with ⌘K
+ * visibly returning rows through search_all. So the hint is not there to
+ * be read on that instance, and a heuristic built on it is a coin toss.
+ *
+ * A probe that says "six missing" when nothing is missing is worse than no
+ * probe: the next time something IS missing, it arrives as more of the
+ * same noise. The four columns that were genuinely absent on 2026-09-04
+ * were found in exactly that noise, by hand.
+ *
+ * So this asks the question directly. PostgREST's root endpoint is an
+ * OpenAPI document whose `paths` contain one `/rpc/<name>` entry per
+ * function it can see and call — the schema cache itself, enumerated,
+ * rather than guessed at from the wording of an error. One request for
+ * every function canary instead of one each, no call into any function
+ * (settle_reservation is not something to poke to see if it is there), and
+ * an answer that cannot be confused with a missing argument.
+ *
+ * NULL MEANS "COULD NOT ASK", AND THAT IS NOT "MISSING". If the root is
+ * disabled, unreachable, unparseable, or returns no rpc paths at all, this
+ * returns null and the sweep reports functions: "unchecked". Silence is
+ * the honest answer; a list of names is a claim, and this only makes the
+ * claim when it has been given one.
+ */
+async function functionsVisibleToApi(): Promise<Set<string> | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  try {
+    const res = await fetch(`${url.replace(/\/+$/, "")}/rest/v1/`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: "application/openapi+json" },
+      signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const doc: unknown = await res.json();
+    const paths = (doc as { paths?: unknown } | null)?.paths;
+    if (!paths || typeof paths !== "object") return null;
+    const names = new Set<string>();
+    for (const path of Object.keys(paths as Record<string, unknown>)) {
+      const m = /^\/rpc\/([A-Za-z0-9_]+)$/.exec(path);
+      if (m) names.add(m[1]);
+    }
+    // A document with no rpc paths at all is far more likely to be a
+    // different document than a database with no functions, and reading it
+    // as the second would report every function canary as missing — the
+    // very failure this replaces.
+    return names.size > 0 ? names : null;
+  } catch {
+    return null;
+  }
+}
 
 // CACHED LIKE THE PROBE, FOR THE SAME REASON. The sweep is one query per
 // canary — sixteen today — and it ran on EVERY request: fifty anonymous
@@ -311,63 +387,24 @@ async function schemaSweep(): Promise<SchemaSweep> {
     }
     const admin = schemaClient;
     const missing: { object: string; migration: string; breaks: string; note?: string }[] = [];
+    // ONE QUESTION FOR ALL OF THEM, ASKED FIRST. See functionsVisibleToApi:
+    // null is "could not ask", and every function canary is then reported
+    // as unchecked rather than as missing.
+    const hasFunctionCanaries = SCHEMA_CANARIES.some((c) => c.kind === "function");
+    const apiFunctions = admin && hasFunctionCanaries ? await functionsVisibleToApi() : null;
+    const functionsListed = apiFunctions !== null;
     await Promise.all(
       (admin ? SCHEMA_CANARIES : []).map(async (c) => {
         if (!admin) return;
         try {
           if (c.kind === "function") {
-            // A missing function is 404 from PostgREST. So is a PRESENT one
-            // called with the wrong arguments — and this probe calls every
-            // function with none. Six of the nine canaries take a required
-            // argument, and for each of them PostgREST answered "Could not
-            // find the function public.f without parameters in the schema
-            // cache": the same words as absence. Production's /api/health
-            // listed all six as missing while ⌘K, rate limiting and
-            // settlement were working. The difference is the HINT:
-            // PostgREST adds "Perhaps you meant to call the function
-            // public.f(p_a, p_b)" when a function of that name exists with
-            // other parameters, and no hint when nothing of that name
-            // exists. Only the hintless "not found" is absence.
-            const { error } = await admin.rpc(c.fn as string, {});
-            if (error && /(could not find|does not exist|not found)/i.test(`${error.message} ${error.code ?? ""}`)) {
-              const sameName = new RegExp(`function\\s+(?:public\\.)?${c.fn}\\s*\\(`, "i");
-              const presentWithOtherArgs = sameName.test(String((error as { hint?: string | null }).hint ?? ""));
-              if (!presentWithOtherArgs) {
-                // TWO THINGS THIS CAN MEAN, and PostgREST cannot tell them
-                // apart: the migration never ran on THIS database, or it
-                // ran and PostgREST's schema cache has not been reloaded
-                // since. Production on 2026-09-04: all six functions in
-                // pg_proc from the SQL editor, all six "not found" here.
-                // The probe cannot say which, so the note says both, and
-                // the one-line cure for the second.
-                // WHAT POSTGREST ACTUALLY SAID, in the server log only —
-                // the one place it can be read without handing a function's
-                // parameter names to an anonymous caller. On 2026-09-04
-                // production listed six functions that ⌘K, rate limiting
-                // and settlement were visibly using, and the shape of the
-                // answer that made the probe say "missing" was the open
-                // question; this is how it gets answered next time.
-                logApiError("/api/health", new Error("schema_function_not_visible"), {
-                  fn: c.fn,
-                  code: error.code ?? null,
-                  message: error.message,
-                  hint: (error as { hint?: string | null }).hint ?? null,
-                  details: (error as { details?: string | null }).details ?? null,
-                });
-                missing.push({
-                  object: `${c.fn}()`,
-                  migration: c.migration,
-                  breaks: c.breaks,
-                  // Worded without the API layer's own error vocabulary:
-                  // the disclosure check in health-probe.prodtest.mjs
-                  // reads any "schema cache" in an anonymous body as a
-                  // leaked error, and this is a sentence, not a leak.
-                  note:
-                    "The database API cannot see this function: either its migration never ran on this database, or the API's cached view of the schema is stale. Run NOTIFY pgrst, 'reload schema'; in the SQL editor and check again.",
-                });
-              }
+            if (!apiFunctions) return;
+            if (!apiFunctions.has(c.fn as string)) {
+              missing.push({ object: `${c.fn}()`, migration: c.migration, breaks: c.breaks });
             }
-          } else {
+            return;
+          }
+          {
             // limit(0) returns no rows: the question is whether the
             // SELECT is accepted, not what is in the table.
             const { error } = await admin
@@ -387,9 +424,14 @@ async function schemaSweep(): Promise<SchemaSweep> {
         }
       })
     );
-    return admin === null ? { ok: null, checked: 0, missing: [] } : {
+    // WHAT WAS ACTUALLY LOOKED AT. When the function list could not be
+    // fetched the function canaries were skipped, and counting them here
+    // would report a wider sweep than the one that ran.
+    const functionCanaries = SCHEMA_CANARIES.filter((c) => c.kind === "function").length;
+    return admin === null ? { ok: null, checked: 0, missing: [], functions: "unchecked" } : {
       ok: missing.length === 0,
-      checked: SCHEMA_CANARIES.length,
+      checked: functionsListed ? SCHEMA_CANARIES.length : SCHEMA_CANARIES.length - functionCanaries,
+      functions: functionsListed ? "listed" : "unchecked",
       // Named even unauthenticated: these are schema object names, not
       // data, and the whole point is that the person looking at a broken
       // page can see the cause without a secret.

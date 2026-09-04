@@ -87,7 +87,9 @@
       "track": "Registrar",
       "insights": "Lo que he notado",
       "tracking": "Seguimiento",
-      "daily": "A diario"
+      "daily": "A diario",
+      "work": "Trabajar",
+      "see": "Ver"
     },
     "items": {
       "home": "Inicio",
@@ -138,7 +140,10 @@
       "mine": "Lo mío",
       "records": "Mis registros",
       "library": "Mis cosas",
-      "newEntry": "Nueva entrada"
+      "newEntry": "Nueva entrada",
+      "costs": "Costes",
+      "systemHealth": "Estado del sistema",
+      "tradingJournal": "Diario de trading"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -189,7 +194,11 @@
       "mine": "Todo lo que has creado, lo más reciente primero, con una pestaña de destacados",
       "records": "Todos los registros en un solo lugar: filtra por tipo en vez de buscar en el menú",
       "library": "Favoritos, recientes y búsqueda — todo lo tuyo en un sitio",
-      "newEntry": "Escribe cualquier cosa — se archiva sola"
+      "newEntry": "Escribe cualquier cosa — se archiva sola",
+      "costs": "Lo que ha costado cada llamada de IA, por modelo y por día.",
+      "routing": "A qué modelo se envía cada tipo de solicitud.",
+      "systemHealth": "Si la base de datos, las colas y los proveedores responden.",
+      "tradingJournal": "Tus operaciones, con el razonamiento que escribiste entonces."
     },
     "closeMenu": "Cerrar el menú"
   },

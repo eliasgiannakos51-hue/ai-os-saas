@@ -99,7 +99,11 @@ check("no item is missing a hintKey", noHint, []);
 // rather than a count going up by one.
 const PREVIOUSLY_MISSING = [
   "OVERVIEW_NAV_ITEM.href",
-  "CREATE_NAV_ITEM.href",
+  // Written as a literal since 2026-09-04: Create Studio moved under
+  // Build, and scripts/tests/sidebar-naming.test.mjs reads that group as
+  // TEXT to check what may sit there — a constant is invisible to it. The
+  // item is the same item, and it still has to carry a hint.
+  '"/dashboard/create"',
   "CHAT_NAV_ITEM.href",
   "TIMELINE_NAV_ITEM.href",
   "MISSION_NAV_ITEM.href",

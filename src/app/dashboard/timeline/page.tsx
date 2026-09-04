@@ -9,12 +9,11 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { TimelineFilters } from "@/components/timeline/timeline-filters";
 import { TimelineTabs } from "@/components/timeline/timeline-tabs";
-import { FavoritesList } from "@/components/favorites/favorites-list";
 import { TimelineList } from "@/components/timeline/timeline-list";
 import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
 import { TIMELINE_ICON } from "@/lib/module-icons";
 import { loadTimelineEntries, TIMELINE_RANGES, type TimelineRange } from "@/lib/timeline";
-import { groupFavorites, loadAllFavorites, loadFavoriteKeys } from "@/lib/favorites";
+import { loadFavoriteKeys } from "@/lib/favorites";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.mine");
@@ -60,30 +59,18 @@ export default async function TimelinePage({
   // chats, published sites, missions and documents, which the timeline
   // does not scan at all. Same reason the two used to be separate pages;
   // merging the NAVIGATION is not a licence to merge the QUERIES.
-  const view = searchParams.view === "fav" ? "fav" : "all";
-  if (view === "fav") {
-    const favorites = await loadAllFavorites(supabase, user.id);
-    diagLog(`[timeline-diag ${reqId}] starred view -> favorites=${favorites.length}`);
-    return (
-      <div className="min-h-full bg-dot-grid">
-        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          {/* The STARRED tab answers a different question from the
-              everything tab, so it carries the starred tip: "starring
-              does not copy or move anything". Ternary rather than two
-              headers because scripts/tests/help-tips.test.mjs requires
-              every <PageHeader> in a file to carry that file's tip key,
-              and this file legitimately has two tips. */}
-          <PageHeader
-            helpKey="help.favorites"
-            icon={TIMELINE_ICON}
-            title={t("title")}
-          />
-          <TimelineTabs view="fav" />
-          <FavoritesList groups={groupFavorites(favorites)} />
-        </div>
-      </div>
-    );
-  }
+  // THE STARRED VIEW LIVES AT ITS OWN ADDRESS since 2026-09-04.
+  //
+  // It used to be rendered here, behind ?view=fav, while
+  // /dashboard/favorites redirected in — so the page people had
+  // bookmarked bounced, the star in the tab row below pointed at a query
+  // string, and the address bar never said "favorites". That is reversed:
+  // dashboard/favorites/page.tsx draws it, from the SAME loadAllFavorites
+  // query, and this redirect keeps every link that already exists working.
+  //
+  // One implementation, not two. Rendering it in both places is how the
+  // two would drift.
+  if (searchParams.view === "fav") redirect("/dashboard/favorites");
 
   const moduleSlug = LINKABLE_MODULES.some((m) => m.slug === searchParams.module)
     ? (searchParams.module as string)

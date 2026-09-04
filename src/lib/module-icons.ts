@@ -45,6 +45,10 @@ import {
   Users,
   Video,
   Zap,
+  Coins,
+  Split,
+  Activity,
+  NotebookPen,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -158,3 +162,15 @@ export function iconForSlug(slug: string, fallback: LucideIcon = Sparkles): Luci
 // modules the sidebar used to list, so the icon is the "many things,
 // one place" one rather than any single module's.
 export const MY_BUSINESS_ICON: LucideIcon = LayoutGrid;
+
+// THE FOUR ROUTES THAT WERE IN NO NAV CONFIG AT ALL — V4.6, round 5.
+//
+// /dashboard/costs, /dashboard/routing, /dashboard/system-health and
+// /dashboard/trading-journal each had a page on disk and no entry in
+// lib/sidebar-nav.ts, so they were in no sidebar, no command palette and
+// no hub: reachable only by typing the URL. Two of them (routing,
+// trading-journal) had no link anywhere in the product at all.
+export const COSTS_ICON: LucideIcon = Coins;
+export const ROUTING_ICON: LucideIcon = Split;
+export const SYSTEM_HEALTH_ICON: LucideIcon = Activity;
+export const TRADING_JOURNAL_ICON: LucideIcon = NotebookPen;

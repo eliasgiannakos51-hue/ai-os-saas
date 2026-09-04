@@ -155,6 +155,17 @@ try {
   const listed = (bF.schema?.missing ?? []).map((m) => m.object);
   check("a present function called without its arguments is NOT listed", !listed.includes("search_all()"), JSON.stringify(listed));
   check("a function that is really absent IS listed", listed.includes("merge_user_metadata()"), JSON.stringify(listed));
+  // A hintless not-found is also what a stale PostgREST schema cache says
+  // about a function that IS there (production, 2026-09-04: six in
+  // pg_proc, six "not found"). The entry has to say both, with the cure.
+  const absentEntry = (bF.schema?.missing ?? []).find((m) => m.object === "merge_user_metadata()");
+  check(
+    "...and its entry says both things a not-found can mean, with the reload-schema cure",
+    typeof absentEntry?.note === "string" && /never ran on this database/.test(absentEntry.note) && /NOTIFY pgrst, 'reload schema'/.test(absentEntry.note),
+    JSON.stringify(absentEntry)
+  );
+  const columnEntries = (b2.schema?.missing ?? []).filter((m) => !/\(\)$/.test(m.object));
+  check("a missing COLUMN carries no such note (Postgres, not PostgREST, answered)", columnEntries.length > 0 && columnEntries.every((m) => m.note === undefined), JSON.stringify(columnEntries));
   harness.setTableFailing("rpc/search_all", false);
   harness.setTableFailing("rpc/merge_user_metadata", false);
   // ...and verbose without the secret changes nothing.

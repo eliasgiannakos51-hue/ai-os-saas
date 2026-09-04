@@ -53,7 +53,7 @@ const MUTANTS = [
     file: VIS,
     from: ".map((group) => ({ ...group, items: group.items.filter((i) => !i.hidden) }))",
     to: ".map((group) => ({ ...group, items: group.items }))",
-    expect: "rows drawn, limit 20",
+    expect: "rows drawn, limit 21",
   },
   {
     // 3. THE ROLE FILTER — the one the brief said not to break. Composing
@@ -84,7 +84,11 @@ const MUTANTS = [
     // undrawn, it is unfindable.
     name: "a destination is deleted rather than hidden",
     file: NAV,
-    from: '      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON, hintKey: "marketplace", hidden: true },\n',
+    // Marketplace became a DRAWN row on 2026-09-04, so deleting it no
+    // longer tests what this mutation is for — a HIDDEN destination
+    // disappearing, which is the case where nothing on screen changes and
+    // the page simply stops existing. Campaigns is one of those.
+    from: '      { href: "/dashboard/campaigns", label: "Campaigns", icon: MODULE_ICONS.campaigns, hintKey: "campaigns", hidden: true },\n',
     to: "",
     expect: "destinations survived the consolidation",
   },

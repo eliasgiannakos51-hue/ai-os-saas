@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { useTranslations } from "next-intl";
 import { Palette } from "lucide-react";
 import {
@@ -48,6 +50,17 @@ export function DesignControls({
   function set<K extends keyof WebsiteDesignChoices>(key: K, next: WebsiteDesignChoices[K]) {
     onChange({ ...value, [key]: next, imageCount });
   }
+  // A `title` IS A HOVER, AND A PHONE CANNOT HOVER — the same shape as the
+  // voice button, found by scanning for it after that one was fixed rather
+  // than by waiting for a second report. Two chips here are disabled with
+  // their reason in `title`: "my own photo" and the uploaded logo, both of
+  // which need an image before they can mean anything. On a phone the tap
+  // fired nothing and the reason never rendered.
+  //
+  // One note for both groups: whichever disabled chip is tapped puts its
+  // reason here, and tapping it again clears it.
+  const [chipNote, setChipNote] = useState<string | null>(null);
+
 
   return (
     <div className="space-y-3 rounded-xl border border-border bg-input p-3">
@@ -123,9 +136,13 @@ export function DesignControls({
                 key={style}
                 type="button"
                 aria-pressed={selected}
-                disabled={unavailable}
+                aria-disabled={unavailable || undefined}
                 title={unavailable ? t("ownPhotoNeedsUpload") : undefined}
-                onClick={() => set("background", style as WebsiteBackgroundStyle)}
+                onClick={() =>
+                  unavailable
+                    ? setChipNote((n: string | null) => (n === t("ownPhotoNeedsUpload") ? null : t("ownPhotoNeedsUpload")))
+                    : set("background", style as WebsiteBackgroundStyle)
+                }
                 className={`min-h-[44px] rounded-full border px-3 py-1 text-[11px] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
                   selected
                     ? "border-orange-500/60 bg-orange-500/10 text-orange-300"
@@ -195,9 +212,13 @@ export function DesignControls({
                 key={choice}
                 type="button"
                 aria-pressed={selected}
-                disabled={unavailable}
+                aria-disabled={unavailable || undefined}
                 title={unavailable ? t("logoNeedsUpload") : undefined}
-                onClick={() => set("logo", choice as LogoChoice)}
+                onClick={() =>
+                  unavailable
+                    ? setChipNote((n: string | null) => (n === t("logoNeedsUpload") ? null : t("logoNeedsUpload")))
+                    : set("logo", choice as LogoChoice)
+                }
                 className={`min-h-[44px] rounded-full border px-3 py-1 text-[11px] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
                   selected
                     ? "border-orange-500/60 bg-orange-500/10 text-orange-300"
@@ -237,6 +258,15 @@ export function DesignControls({
           </div>
         </div>
       )}
+      {/* THE REASON, ON THE PAGE. A disabled chip above puts its own
+          sentence here when tapped — the information used to live only in
+          `title`, which a phone never shows. role="status" so it is
+          announced rather than only seen. */}
+      {chipNote ? (
+        <p role="status" className="text-[11px] leading-snug text-muted">
+          {chipNote}
+        </p>
+      ) : null}
     </div>
   );
 }

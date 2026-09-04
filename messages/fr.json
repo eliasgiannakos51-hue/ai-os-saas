@@ -1466,7 +1466,8 @@
           "social": "les liens vers les réseaux sociaux",
           "chatWidget": "le widget de chat"
         },
-        "stopped": "Vous l'avez arrêté. {count, plural, =0 {Rien n'a été facturé} one {# crédit a été facturé} other {# crédits ont été facturés}} pour la partie générée ; le reste de la réservation a été libéré."
+        "stopped": "Vous l'avez arrêté. {count, plural, =0 {Rien n'a été facturé} one {# crédit a été facturé} other {# crédits ont été facturés}} pour la partie générée ; le reste de la réservation a été libéré.",
+        "spelling": "{count, plural, one {Un mot grec est peut-être mal orthographié} other {# mots grecs sont peut-être mal orthographiés}} : {words}. Rien n'a été modifié — vérifiez-les, un nom ou une marque n'est pas une faute."
       }
     },
     "marketplace": {

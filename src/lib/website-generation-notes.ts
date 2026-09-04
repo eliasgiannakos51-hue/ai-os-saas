@@ -24,7 +24,12 @@ export type GenerationNote =
   /** Google Maps embeds rewritten to building zoom with a marker. */
   | { kind: "mapZoom"; count: number }
   /** The owner pressed Stop; `credits` is what the produced part cost them. */
-  | { kind: "stopped"; credits: number };
+  | { kind: "stopped"; credits: number }
+  /** Greek words on the page a spelling pass flagged. REPORTED, never
+   *  rewritten: one of these may be a brand, a village or a surname, and
+   *  silently "correcting" somebody's own business name is worse than the
+   *  typo. See lib/website-greek-spelling.ts. */
+  | { kind: "spelling"; words: string[] };
 
 const FEATURES: readonly NegativeFeature[] = [
   "booking", "contactForm", "newsletter", "map", "prices", "gallery", "testimonials", "blog", "social", "chatWidget",
@@ -50,6 +55,12 @@ export function parseGenerationNotes(raw: unknown): GenerationNote[] {
       out.push({ kind: "mapZoom", count: n.count });
     } else if (n.kind === "stopped" && isNonNegativeInt(n.credits)) {
       out.push({ kind: "stopped", credits: n.credits });
+    } else if (n.kind === "spelling" && Array.isArray(n.words)) {
+      // Read as defensively as every other note: only strings, only the
+      // ones with something in them, capped so a malformed row cannot
+      // render a wall of text beside the preview.
+      const words = n.words.filter((w): w is string => typeof w === "string" && w.trim().length > 0).slice(0, 20);
+      if (words.length > 0) out.push({ kind: "spelling", words });
     }
   }
   return out;

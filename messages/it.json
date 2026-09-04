@@ -1466,7 +1466,8 @@
           "social": "i link ai social",
           "chatWidget": "il widget di chat"
         },
-        "stopped": "L'hai fermato. {count, plural, =0 {Non è stato addebitato nulla} one {È stato addebitato # credito} other {Sono stati addebitati # crediti}} per la parte generata; il resto della prenotazione è stato liberato."
+        "stopped": "L'hai fermato. {count, plural, =0 {Non è stato addebitato nulla} one {È stato addebitato # credito} other {Sono stati addebitati # crediti}} per la parte generata; il resto della prenotazione è stato liberato.",
+        "spelling": "{count, plural, one {Una parola greca potrebbe essere scritta male} other {# parole greche potrebbero essere scritte male}}: {words}. Non è stato cambiato nulla — controllale, un nome o un marchio non è un errore."
       }
     },
     "marketplace": {

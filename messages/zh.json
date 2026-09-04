@@ -1466,7 +1466,8 @@
           "social": "社交媒体链接",
           "chatWidget": "聊天窗口"
         },
-        "stopped": "已由你停止。{count, plural, =0 {未收取任何费用} other {已按生成的部分收取 # 个积分}}；其余预留额度已释放。"
+        "stopped": "已由你停止。{count, plural, =0 {未收取任何费用} other {已按生成的部分收取 # 个积分}}；其余预留额度已释放。",
+        "spelling": "有 {count} 个希腊语单词可能拼写有误：{words}。未做任何修改 — 请检查，名称或品牌不算错误。"
       }
     },
     "marketplace": {

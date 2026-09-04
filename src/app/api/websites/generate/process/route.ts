@@ -18,6 +18,7 @@ import { reserveCredits, settleReservation, releaseReservation } from "@/lib/bil
 import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { MAX_GENERATION_ATTEMPTS } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
+import { findGreekMisspellings } from "@/lib/websites-greek-spelling-check";
 import { findInventedNumbers } from "@/lib/website-invented-numbers";
 import { resolveWebsiteImagePlaceholders, type ImageResolution } from "@/lib/website-image-resolver";
 import { enforceUnsplashAttribution } from "@/lib/website-image-placeholders";
@@ -505,6 +506,15 @@ export async function POST(request: Request) {
         const count = removedCounts.get(feature) ?? 0;
         if (count > 0) notes.push({ kind: "removedFeature", feature, count });
       }
+
+      // GREEK SPELLING — V4.6, round 7. Reported from a real site: "ρεμπα"
+      // where the word is "ρεύμα". The prompt says nothing about spelling
+      // (checked), and none of the enforcements above reads the words. One
+      // classification call, capped at 60 words, and REPORTED rather than
+      // rewritten: a flagged word may be a brand, a village or a surname.
+      // Never allowed to fail a generation — it returns [] on any error.
+      const misspelled = await findGreekMisspellings(htmlContent, description, { userId: user.id, costs });
+      if (misspelled.length > 0) notes.push({ kind: "spelling", words: misspelled });
 
       const inventedNumbers = documents.flatMap((doc) => findInventedNumbers(doc, description));
       if (inventedNumbers.length > 0) {

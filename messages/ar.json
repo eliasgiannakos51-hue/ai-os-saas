@@ -4,7 +4,7 @@
     "notifications": "الإشعارات",
     "noNotifications": "لا توجد إشعارات جديدة.",
     "jumpToPage": "الانتقال إلى وحدة أو صفحة...",
-    "noMatches": "لا توجد نتائج لـ ''{query}''",
+    "noMatches": "لا توجد نتائج لـ «{query}»",
     "createStudio": "أنشئ أي شيء",
     "cancel": "إلغاء",
     "save": "حفظ",
@@ -71,7 +71,13 @@
       "notReady": "لم ينتهِ بعد"
     },
     "listCapped": "تُعرض أحدث {count, number}. الإدخالات الأقدم ما زالت محفوظة — استخدم البحث في سجلاتي للعثور عليها.",
-    "newProject": "مشروع جديد"
+    "newProject": "مشروع جديد",
+    "paletteNavigate": "تنقّل",
+    "paletteSelect": "اختيار",
+    "paletteClose": "إغلاق",
+    "paginationPrev": "السابق",
+    "paginationNext": "التالي",
+    "paginationPage": "صفحة {page} / {total}"
   },
   "sidebar": {
     "groups": {
@@ -2462,7 +2468,7 @@
   "module": {
     "searchPlaceholder": "بحث...",
     "exportCsv": "تصدير CSV",
-    "noMatches": "لا توجد نتائج لـ ''{query}''",
+    "noMatches": "لا توجد نتائج لـ «{query}»",
     "selectPlaceholder": "اختر...",
     "save": "حفظ",
     "saving": "جارٍ الحفظ...",

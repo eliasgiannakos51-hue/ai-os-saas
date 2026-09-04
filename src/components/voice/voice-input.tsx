@@ -109,6 +109,10 @@ export function VoiceInput({
     if (draft !== null) draftRef.current?.focus();
   }, [draft]);
 
+  // Whether the "why is this off" note is showing. See the disabled branch
+  // below: a phone cannot hover, so the reason has to be tappable.
+  const [reasonShown, setReasonShown] = useState(false);
+
   // RENDERED, BUT INERT, WHEN VOICE CANNOT WORK HERE — V4.6.
   //
   // This used to return null, on the reasoning that a microphone that
@@ -129,25 +133,51 @@ export function VoiceInput({
       : !availability.included
         ? t("settings.notIncluded")
         : t("outOfMinutes");
+    // A `title` IS A HOVER, AND A PHONE CANNOT HOVER — V4.6, round 6.
+    //
+    // The previous version put the reason in `title` and set `disabled`.
+    // On a desktop that reads as a tooltip; on a phone it is nothing at
+    // all, and `disabled` means the tap fires no event either. Measured on
+    // the live site at 390px with a real CDP touch on 2026-09-05: the
+    // button is 44x44 and uncovered, the tap lands on it, and the screen
+    // does not change by one character. So the control that exists ONLY to
+    // explain why voice is missing explained nothing to the person most
+    // likely to be looking at it.
+    //
+    // `aria-disabled` without `disabled` keeps it inert and announced as
+    // unavailable while still receiving the tap, which is the accessible
+    // shape for exactly this: a control that must say why rather than one
+    // that must be silent. The reason is revealed IN THE PAGE, so it does
+    // not depend on a pointer that can hover.
     return (
-      <button
-        type="button"
-        disabled
-        aria-disabled="true"
-        aria-label={`${t("startListening")} — ${reason}`}
-        title={reason}
-        data-testid="voice-input-unavailable"
-        className={
-          // 44px in both variants: an inert control is still a control the
-          // layout gate measures (scripts/tests/layout-stress.prodtest.mjs),
-          // and a 32px one grew its under-44px count by four.
-          compact
-            ? "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-lg text-muted/50"
-            : "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-full border border-dashed border-border text-muted/50"
-        }
-      >
-        <Mic className={compact ? "h-4 w-4" : "h-[18px] w-[18px]"} aria-hidden="true" />
-      </button>
+      <span className="flex items-center gap-2">
+        <button
+          type="button"
+          aria-disabled="true"
+          onClick={() => setReasonShown((shown) => !shown)}
+          aria-label={`${t("startListening")} — ${reason}`}
+          title={reason}
+          data-testid="voice-input-unavailable"
+          className={
+            // 44px in both variants: an inert control is still a control the
+            // layout gate measures (scripts/tests/layout-stress.prodtest.mjs),
+            // and a 32px one grew its under-44px count by four.
+            compact
+              ? "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-lg text-muted/50"
+              : "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-full border border-dashed border-border text-muted/50"
+          }
+        >
+          <Mic className={compact ? "h-4 w-4" : "h-[18px] w-[18px]"} aria-hidden="true" />
+        </button>
+        {/* THE REASON, ON THE PAGE. role="status" so a screen reader
+            announces it when it appears, and it stays until the control
+            is tapped again — a phone has no hover to dismiss it with. */}
+        {reasonShown ? (
+          <span role="status" className="max-w-[18rem] text-xs leading-snug text-muted">
+            {reason}
+          </span>
+        ) : null}
+      </span>
     );
   }
 

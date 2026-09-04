@@ -25,11 +25,14 @@ export function PaginationControls({
         aria-label={t("previousPage")}
         className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-lg border border-border px-3 transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40 sm:py-1.5"
       >
-        <ChevronLeft className="h-4 w-4" /> Prev
+        <ChevronLeft className="h-4 w-4" /> {t("paginationPrev")}
       </button>
-      <span>
-        Page {page} / {totalPages}
-      </span>
+      {/* THE ARIA-LABELS WERE TRANSLATED AND THE VISIBLE WORDS WERE NOT.
+          Somebody wired t("previousPage") and t("nextPage") for screen
+          readers on these same two buttons and left "Prev", "Next" and
+          "Page N / M" as literal English between the icons — on every
+          module list, the timeline, the agents and the missions. */}
+      <span>{t("paginationPage", { page, total: totalPages })}</span>
       <button
         type="button"
         onClick={() => onChange(page + 1)}
@@ -37,7 +40,7 @@ export function PaginationControls({
         aria-label={t("nextPage")}
         className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-lg border border-border px-3 transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40 sm:py-1.5"
       >
-        Next <ChevronRight className="h-4 w-4" />
+        {t("paginationNext")} <ChevronRight className="h-4 w-4" />
       </button>
     </div>
   );

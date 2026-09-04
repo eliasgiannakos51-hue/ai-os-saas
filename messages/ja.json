@@ -4,7 +4,7 @@
     "notifications": "通知",
     "noNotifications": "新しい通知はありません。",
     "jumpToPage": "モジュールやページに移動...",
-    "noMatches": "''{query}'' に一致する結果はありません",
+    "noMatches": "「{query}」に一致する結果はありません",
     "createStudio": "何でもつくる",
     "cancel": "キャンセル",
     "save": "保存",
@@ -71,7 +71,13 @@
       "notReady": "まだ完了していません"
     },
     "listCapped": "最新の {count, number} 件を表示しています。それより古い記録も保存されています——「記録の検索」から見つけられます。",
-    "newProject": "新規プロジェクト"
+    "newProject": "新規プロジェクト",
+    "paletteNavigate": "移動",
+    "paletteSelect": "選択",
+    "paletteClose": "閉じる",
+    "paginationPrev": "前へ",
+    "paginationNext": "次へ",
+    "paginationPage": "{page} / {total} ページ"
   },
   "sidebar": {
     "groups": {
@@ -2462,7 +2468,7 @@
   "module": {
     "searchPlaceholder": "検索...",
     "exportCsv": "CSV をエクスポート",
-    "noMatches": "''{query}'' に一致する結果はありません",
+    "noMatches": "「{query}」に一致する結果はありません",
     "selectPlaceholder": "選択してください...",
     "save": "保存",
     "saving": "保存中...",

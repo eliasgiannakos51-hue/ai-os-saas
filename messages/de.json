@@ -110,7 +110,11 @@
       "tracking": "Erfassung",
       "daily": "Täglich",
       "work": "Arbeiten",
-      "see": "Ansehen"
+      "see": "Ansehen",
+      "make": "Erstellen",
+      "ask": "Fragen",
+      "run": "Ausführen",
+      "organise": "Organisieren"
     },
     "items": {
       "home": "Start",
@@ -164,7 +168,9 @@
       "newEntry": "Neuer Eintrag",
       "costs": "Kosten",
       "systemHealth": "Systemzustand",
-      "tradingJournal": "Trading-Journal"
+      "tradingJournal": "Trading-Journal",
+      "voice": "Stimme",
+      "predictions": "Muster"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -219,7 +225,9 @@
       "costs": "Was jeder KI-Aufruf gekostet hat, pro Modell und pro Tag.",
       "routing": "An welches Modell jede Art von Anfrage geht.",
       "systemHealth": "Ob Datenbank, Warteschlangen und Anbieter antworten.",
-      "tradingJournal": "Deine Trades, mit der Begründung, die du damals notiert hast."
+      "tradingJournal": "Deine Trades, mit der Begründung, die du damals notiert hast.",
+      "voice": "Text vorlesen lassen oder sprechen und mitschreiben lassen. Minuten werden gezählt, der Minutenpreis steht auf der Seite.",
+      "predictions": "Muster in deinen eigenen Einträgen, jeweils mit der Zahl der Einträge dahinter und einem Link darauf."
     },
     "closeMenu": "Menü schließen"
   },
@@ -2483,6 +2491,41 @@
       },
       "searchPlaceholder": "Alles durchsuchen, was Sie geschrieben haben",
       "searchNoResults": "Nichts passt zu „{query}“."
+    },
+    "voicePage": {
+      "title": "Stimme",
+      "description": "Etwas vorlesen lassen oder etwas sagen und mitschreiben lassen. Beides wird pro Minute abgerechnet.",
+      "speakTitle": "Das vorlesen",
+      "speakWhat": "Text einfügen oder tippen und anhören. Nützlich, um zu prüfen, wie eine Nachricht klingt, bevor du sie sendest.",
+      "speakLabel": "Vorzulesender Text",
+      "speakPlaceholder": "Füge den Text ein, der vorgelesen werden soll…",
+      "speakNotConfigured": "Vorlesen ist auf dieser Installation nicht eingerichtet, es gibt also nichts zu drücken. Alles hier lässt sich weiterhin am Bildschirm lesen.",
+      "speakNotAvailable": "Vorlesen ist in deinem Tarif gerade nicht verfügbar, oder die Minuten dieses Monats sind aufgebraucht.",
+      "transcribeTitle": "Mitschreiben, was ich sage",
+      "transcribeWhat": "Drücken, sprechen, und die Wörter erscheinen unten. Nichts wird irgendwohin gesendet, bis du es selbst kopierst.",
+      "transcribeLabel": "Was mitgeschrieben wurde",
+      "transcribeEmpty": "Noch nichts aufgenommen.",
+      "transcribeNotConfigured": "Transkription ist auf dieser Installation nicht eingerichtet, das Mikrofon erscheint daher nicht. Tippen ist nicht betroffen.",
+      "transcribeNotAvailable": "Transkription ist in deinem Tarif gerade nicht verfügbar, oder die Minuten dieses Monats sind aufgebraucht.",
+      "charCount": "{count} von {max} Zeichen",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "copyFailed": "Das konnte nicht kopiert werden.",
+      "usageTitle": "Minuten und Preise"
+    },
+    "predictions": {
+      "title": "Muster",
+      "description": "Muster in deinen eigenen Einträgen — von Code gefunden, gezählt und zurückverlinkt auf die Zeilen, aus denen sie stammen.",
+      "whatItDoes": "Jede Aussage hier wurde aus deinen eigenen Daten berechnet und nennt die Zahl der Einträge dahinter. Nichts wird geraten.",
+      "run": "Nochmal nachsehen",
+      "running": "Sehe nach…",
+      "error": "Das lief nicht durch. Es wurde nichts berechnet.",
+      "neverRun": "Es wurde noch nichts angesehen.",
+      "neverRunWhy": "Drücke „Nochmal nachsehen“, dann werden deine Einträge gelesen und auf Muster geprüft. Das kostet Credits, die Schätzung steht über dem Knopf.",
+      "foundNothing": "Diesmal ist nichts aufgefallen.",
+      "foundNothingWhy": "Das ist eine Antwort, kein Fehler: die Prüfungen liefen und fanden kein Muster, das stark genug wäre, es zu erwähnen.",
+      "needMoreData": "Noch nicht genug Einträge.",
+      "needMoreDataWhy": "Ein Muster in einer Handvoll Zeilen ist Zufall. Trag mehr ein und sieh nochmal nach."
     }
   },
   "module": {
@@ -3151,6 +3194,16 @@
       "is": "Alles, was Sie hier abgelegt haben, an einem Ort.",
       "does": "Zeigt Ihre neuesten Einträge, die markierten und eine Suche über alles, was Sie geschrieben haben.",
       "doesNot": "Es wird nichts doppelt gespeichert. Es sind dieselben Einträge, die die Module zeigen — ändern Sie einen hier, ändert er sich dort."
+    },
+    "voice": {
+      "is": "Zwei kostenpflichtige Anbieter, im Minutentakt abgerechnet: einer liest Text vor, einer schreibt mit, was du sagst.",
+      "does": "Liest jeden eingefügten Text vor, in der Stimme und Geschwindigkeit deiner Wahl. Nimmt dich auf und macht daraus Text, den du bearbeiten und kopieren kannst.",
+      "doesNot": "Es handelt nicht nach dem, was du sagst. Nichts hier verschickt eine Nachricht, legt einen Eintrag an oder startet einen Auftrag — die Wörter landen in einem Feld und bleiben dort, bis du sie bewegst. Es ist kein Telefonat mit der KI."
+    },
+    "predictions": {
+      "is": "Muster, die Code in deinen eigenen Einträgen findet — kein Modell, das rät.",
+      "does": "Zählt deine Zeilen, findet Muster oberhalb einer Schwelle und nennt jedes mit der Zahl der Einträge dahinter und einem Link darauf.",
+      "doesNot": "Es sagt die Zukunft nicht voraus und erfindet kein Muster, nur um etwas zu sagen. Bei weniger als einer Handvoll passender Zeilen sagt es, dass die Grundlage fehlt."
     }
   },
   "helpCentre": {

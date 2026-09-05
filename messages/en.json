@@ -110,7 +110,11 @@
       "tracking": "Tracking",
       "daily": "Daily",
       "work": "Work",
-      "see": "See"
+      "see": "See",
+      "make": "Make",
+      "ask": "Ask",
+      "run": "Run",
+      "organise": "Organise"
     },
     "items": {
       "home": "Home",
@@ -164,7 +168,9 @@
       "newEntry": "New entry",
       "costs": "Costs",
       "systemHealth": "System Health",
-      "tradingJournal": "Trading journal"
+      "tradingJournal": "Trading journal",
+      "voice": "Voice",
+      "predictions": "Predictions"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -219,7 +225,9 @@
       "costs": "What every AI call has cost, per model and per day.",
       "routing": "Which model each kind of request is sent to.",
       "systemHealth": "Whether the database, the queues and the providers are answering.",
-      "tradingJournal": "Your trades, with the reasoning you wrote at the time."
+      "tradingJournal": "Your trades, with the reasoning you wrote at the time.",
+      "voice": "Have text read out loud, or speak and have it written down. Minutes are metered and the price per minute is on the page.",
+      "predictions": "Patterns found in your own rows, each with the number of entries it rests on and a link to them."
     },
     "closeMenu": "Close menu"
   },
@@ -2483,6 +2491,41 @@
       },
       "searchPlaceholder": "Search everything you have written",
       "searchNoResults": "Nothing matches “{query}”."
+    },
+    "voicePage": {
+      "title": "Voice",
+      "description": "Read something out, or say something and get it written down. Both are metered by the minute.",
+      "speakTitle": "Read this out",
+      "speakWhat": "Paste or type anything and hear it. Useful for checking how a message sounds before you send it.",
+      "speakLabel": "Text to read out",
+      "speakPlaceholder": "Paste the text you want read out loud…",
+      "speakNotConfigured": "Reading out is not set up on this deployment, so there is nothing to press. Everything here can still be read on screen.",
+      "speakNotAvailable": "Reading out is not available on your plan right now, or this month's minutes are used up.",
+      "transcribeTitle": "Write down what I say",
+      "transcribeWhat": "Press, speak, and the words appear below. Nothing is sent anywhere until you copy them somewhere yourself.",
+      "transcribeLabel": "What was transcribed",
+      "transcribeEmpty": "Nothing recorded yet.",
+      "transcribeNotConfigured": "Transcription is not set up on this deployment, so the microphone does not appear. Typing is unaffected.",
+      "transcribeNotAvailable": "Transcription is not available on your plan right now, or this month's minutes are used up.",
+      "charCount": "{count} of {max} characters",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyFailed": "That could not be copied.",
+      "usageTitle": "Minutes and prices"
+    },
+    "predictions": {
+      "title": "Predictions",
+      "description": "Patterns in your own entries — found by code, counted, and linked back to the rows they came from.",
+      "whatItDoes": "Every claim here was computed from your own records and carries the number of entries behind it. Nothing is guessed.",
+      "run": "Look again",
+      "running": "Looking…",
+      "error": "That did not run. Nothing was charged.",
+      "neverRun": "Nothing has been looked at yet.",
+      "neverRunWhy": "Press “Look again” and your entries are read and checked for patterns. It costs credits and the estimate is shown above the button.",
+      "foundNothing": "Nothing stood out this time.",
+      "foundNothingWhy": "That is an answer, not a failure: the checks ran and found no pattern strong enough to be worth telling you about.",
+      "needMoreData": "Not enough entries yet.",
+      "needMoreDataWhy": "A pattern in a handful of rows is a coincidence. Add more entries and look again."
     }
   },
   "module": {
@@ -3151,6 +3194,16 @@
       "is": "Everything you have put in here, in one place.",
       "does": "Shows your recent entries, the ones you starred, and a search across everything you have written.",
       "doesNot": "It does not store a second copy of anything. These are the same records the modules show — edit one here and it changes there."
+    },
+    "voice": {
+      "is": "Two paid providers, metered by the minute: one reads text out, one writes down what you say.",
+      "does": "Reads any text you paste, in the voice you pick, at the speed you pick. Records you and turns it into text you can edit and copy.",
+      "doesNot": "It does not act on what you say. Nothing here sends a message, files a record or starts a job — the words land in a box and stay there until you move them. It is not a phone call with the AI."
+    },
+    "predictions": {
+      "is": "Patterns found in your own entries by code, not by a model guessing.",
+      "does": "Counts your rows, finds patterns that clear a threshold, and says each one with the number of entries behind it and a link to them.",
+      "doesNot": "It does not forecast the future, and it will not invent a pattern to have something to say. Fewer than a handful of matching rows and it tells you there is not enough to go on."
     }
   },
   "helpCentre": {

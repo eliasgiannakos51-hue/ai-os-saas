@@ -19,19 +19,25 @@
 // here is untranslated. Both are checked by
 // scripts/tests/sidebar-naming.test.mjs rather than by reading.
 export const GROUP_HEADING_KEYS: Record<string, string> = {
-  // FOUR, since V4.6 #3. The eight that were here — Workspace, Build,
-  // Tracking, Business, Strategy, Operations, Marketplace, Settings —
-  // were filing categories; these are what a person is doing. Every one
-  // of the four resolves in all ten locales, and a heading with no entry
-  // here prints raw English in all ten, which is the fault this map was
-  // written for and which sidebar-naming.test.mjs still fails on.
-  // FOUR, and they are VERBS since 2026-09-04: the owner's structure
-  // replaced Daily / Build / My business / Settings with what a person is
-  // doing at each point of a working day. `work` and `see` are new keys in
-  // all ten locales; `build` and `settings` already existed.
-  Work: "work",
-  Build: "build",
+  // SIX, since 2026-09-05, and every one of them is a verb. The eight
+  // that were here once — Workspace, Build, Tracking, Business, Strategy,
+  // Operations, Marketplace, Settings — were filing categories; the four
+  // that replaced them (Work, Build, See, Settings) mixed a verb with a
+  // posture. These six are the order of a working session: Make what you
+  // came to make, Ask what you do not know, Run what should go on without
+  // you, See what came back, Organise around it, and change how it
+  // behaves.
+  //
+  // A KEY HERE THAT NO HEADING USES IS DEAD, AND A HEADING WITH NO KEY
+  // HERE IS UNTRANSLATED — the second is the fault this map exists for: a
+  // heading that falls through prints raw English in all ten locales with
+  // a correct translation sitting unreachable beside it.
+  // scripts/tests/sidebar-naming.test.mjs checks both directions.
+  Make: "make",
+  Ask: "ask",
+  Run: "run",
   See: "see",
+  Organise: "organise",
   Settings: "settings",
 };
 
@@ -117,4 +123,9 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   "Product Workflow": "productWorkflow",
   Automation: "automation",
   Marketplace: "marketplace",
+  // The two rows the 2026-09-05 structure added. Both name a capability
+  // that already worked and had nowhere to stand — see each page's
+  // header for what was already there.
+  Voice: "voice",
+  Predictions: "predictions",
 };

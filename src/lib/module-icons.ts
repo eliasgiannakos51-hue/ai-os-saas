@@ -49,6 +49,8 @@ import {
   Split,
   Activity,
   NotebookPen,
+  AudioLines,
+  Sigma,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -174,3 +176,15 @@ export const COSTS_ICON: LucideIcon = Coins;
 export const ROUTING_ICON: LucideIcon = Split;
 export const SYSTEM_HEALTH_ICON: LucideIcon = Activity;
 export const TRADING_JOURNAL_ICON: LucideIcon = NotebookPen;
+
+// THE TWO ROWS THE 2026-09-05 STRUCTURE ADDED, and both point at a
+// feature that already existed with nowhere to stand.
+//
+// Voice was two API routes (speak, transcribe), a settings panel and a
+// microphone inside the chat composer — real, paid, metered, and
+// reachable only if you already knew it was there. Predictions were
+// computed by lib/insights/detectors.ts and rendered inside the overview
+// and the owner's business-health page, so a user could see one and had
+// no way back to it.
+export const VOICE_ICON: LucideIcon = AudioLines;
+export const PREDICTIONS_ICON: LucideIcon = Sigma;

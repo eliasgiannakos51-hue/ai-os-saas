@@ -298,6 +298,23 @@ export const HELP_TIPS: HelpTip[] = [
       "that commission is forever, starts at signup, and can be earned on yourself",
   },
   {
+    // 2026-09-05. Both pages are new and both describe a capability that
+    // already existed, so the wrong assumption each corrects is the one a
+    // person brings from elsewhere: that talking to a computer makes it
+    // DO something, and that anything called a prediction is about the
+    // future.
+    id: "voice",
+    file: "src/app/dashboard/voice/page.tsx",
+    keyPrefix: "help.voice",
+    corrects: "that speaking to it makes it act — nothing here sends, files or starts anything",
+  },
+  {
+    id: "predictions",
+    file: "src/app/dashboard/predictions/page.tsx",
+    keyPrefix: "help.predictions",
+    corrects: "that it forecasts the future, or that it will invent a pattern rather than say there is not enough data",
+  },
+  {
     id: "coding",
     file: "src/app/dashboard/coding/page.tsx",
     keyPrefix: "help.coding",

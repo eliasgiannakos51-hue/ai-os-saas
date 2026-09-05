@@ -171,7 +171,14 @@ const groupOf = (heading) => {
   const end = navSrc.indexOf("heading: \"", start + 10);
   return navSrc.slice(start, end === -1 ? undefined : end);
 };
-const buildGroup = groupOf("Build");
+// THE GROUP MOVED AGAIN on 2026-09-05: "Build" became "Make", and three
+// of its rows (agents, automation, marketplace) moved to a new group
+// called "Run" — things that go on without you watching are a different
+// answer to "what am I doing" than things you are making right now. The
+// RULE is untouched and is the only reason this section exists: a module
+// that generates nothing must not sit under the heading that promises
+// generation.
+const buildGroup = groupOf("Make");
 // V4.6 #3 FOLDED "Tracking" INTO "My business" along with the twelve
 // business modules and Ideas — nineteen logs that all render the same
 // GenericList, and that the sidebar listed as nineteen rows. The RULE is
@@ -191,9 +198,9 @@ const offenders = trackingSlugs.filter((slug) => {
   return buildGroup.includes(`"${href}"`);
 });
 check(
-  "no tracking-only module is filed under Build",
+  "no tracking-only module is filed under Make",
   offenders.length === 0,
-  offenders.length ? `these produce nothing but sit under "Build": ${offenders.join(", ")}` : ""
+  offenders.length ? `these produce nothing but sit under "Make": ${offenders.join(", ")}` : ""
 );
 const misfiled = trackingSlugs.filter((slug) => !trackingGroup.includes(`/dashboard/${slug}`));
 check("and every one of them IS under See", misfiled.length === 0, misfiled.join(", "));
@@ -210,29 +217,55 @@ check(
   vanished.length ? `no longer reachable from the sidebar or the palette: ${vanished.join(", ")}` : ""
 );
 
-// The other direction: what is left in Build must really build.
+// The other direction: what is left in Make must really make something.
 const buildHrefs = [...buildGroup.matchAll(/href: "([^"]+)"/g)].map((m) => m[1]);
-console.log(`        Build now holds: ${buildHrefs.join(", ")}`);
+console.log(`        Make now holds: ${buildHrefs.join(", ")}`);
 // Same reasoning, other direction: the three `buildHrefs.includes(...)`
 // checks below would each go red on an empty list, so those are safe — but
 // the allowlist check further down is `buildHrefs.filter(...)`, which is
 // not. Six today.
 check(
-  `the Build group scan found hrefs (${buildHrefs.length})`,
+  `the Make group scan found hrefs (${buildHrefs.length})`,
   buildHrefs.length >= 6,
-  `groupOf("Build") yielded ${buildHrefs.length} hrefs`
+  `groupOf("Make") yielded ${buildHrefs.length} hrefs`
 );
-check("Build still holds the agent builder", buildHrefs.includes("/dashboard/agents"));
-check("...the website builder", buildHrefs.includes("/dashboard/website-builder"));
-check("...and what it published", buildHrefs.includes("/dashboard/published"));
+check("Make still holds the website builder", buildHrefs.includes("/dashboard/website-builder"));
+check("...the code tool", buildHrefs.includes("/dashboard/coding"));
+check("...and what the builder published", buildHrefs.includes("/dashboard/published"));
+// AND THE THREE THAT LEFT ARE REALLY GONE FROM IT. Moving a row is one
+// keystroke from copying it, and a row in two groups renders twice.
+for (const moved of ["/dashboard/agents", "/dashboard/automation", "/dashboard/marketplace"]) {
+  check(`${moved} moved to Run and is not still under Make`, !buildHrefs.includes(moved));
+}
+const runGroup = groupOf("Run");
+const runHrefs = [...runGroup.matchAll(/href: "([^"]+)"/g)].map((m) => m[1]);
+check(
+  `...and Run really holds all three (${runHrefs.length} rows)`,
+  ["/dashboard/agents", "/dashboard/automation", "/dashboard/marketplace"].every((h) => runHrefs.includes(h)),
+  runHrefs.join(", ")
+);
 // AN ALLOWLIST, NOT A COUNT. This was `buildHrefs.length === 3`, which
 // passes just as happily if somebody swaps one entry for another — the
 // number is the same and the group now contains a tracker again, which
 // is the single thing this section exists to prevent. Naming them makes
 // a new entry a decision somebody has to write down.
 const BUILD_ALLOWED = {
-  "/dashboard/agents": "the agent builder — really builds agents",
   "/dashboard/website-builder": "the site builder — really builds sites",
+  // V4 #19 + #20. It was a tracker and stopped being one: five operations
+  // that return code, an explanation, a bug list, a conversion or tests.
+  // Not in build-modules.ts any more, and section 3b below proves the
+  // claim from the CODE rather than from this comment.
+  "/dashboard/coding": "five operations that really produce code",
+  // A document is written here and translated on its way out —
+  // api/documents/[id]/pdf calls the model before it renders, which is
+  // what section 3b finds.
+  "/dashboard/documents": "the text surface: written here, translated on the way to PDF",
+  // 2026-09-05. Two real providers behind it, both metered by the minute
+  // and both reserving credits like any other paid call. See the AI_CALL
+  // paragraph in section 3b for why "reaches a model" had to grow a
+  // second meaning to describe it honestly.
+  "/dashboard/voice": "speech out and speech in, through real paid providers",
+  "/dashboard/create": "Create Studio — the generator the whole product opened with",
   "/dashboard/published": "what the builder put live",
   // Not a generator itself, and here on purpose: these are what a
   // published site PRODUCED. Filing the leads a site brings in anywhere
@@ -240,35 +273,12 @@ const BUILD_ALLOWED = {
   // navigation question — which it already was, for as long as the table
   // had no screen at all.
   "/dashboard/form-submissions": "what the published sites produced",
-  // V4 #19 + #20. Both were trackers and both stopped being one: the
-  // analysis page parses a real uploaded spreadsheet, profiles every
-  // column in TypeScript and draws charts from the real rows; the coding
-  // page runs five operations that return code, an explanation, a bug
-  // list, a conversion or tests. Neither is in build-modules.ts any more,
-  // and section 3b below proves the claim from the CODE rather than from
-  // this comment.
-  "/dashboard/coding": "five operations that really produce code",
-  // V4.6 #3. It was under "Workspace" next to Files and Documents, which
-  // reads as a place to store things; it is a job that goes and writes a
-  // report. /api/research/[id]/run reaches lib/research/research.ts,
-  // which awaits anthropic.messages.create three times — and section 3b
-  // below proves that from the imports rather than from this sentence.
-  // MOVED TO "See" on 2026-09-04, and off this list with them: the owner
-  // put Deep Research and Data Analysis under the group where a person
-  // goes to LOOK at what came back, rather than the one for making
-  // things. Both still really generate — section 3b proves that from the
-  // imports either way — so this is a filing decision, not a downgrade.
-  //
-  // ADDED, because the owner's structure puts them under Build:
-  "/dashboard/create": "Create Studio — the generator the whole product opens with",
-  "/dashboard/automation": "the automations a user builds and runs",
-  "/dashboard/marketplace": "where a built thing is published and taken",
   "/dashboard/product-workflow": "a guided build, start to finish",
   "/dashboard/trading-workflow": "a guided build, start to finish",
 };
 const unexpected = buildHrefs.filter((href) => !(href in BUILD_ALLOWED));
 check(
-  "and nothing else — every remaining Build item is one somebody justified",
+  "and nothing else — every remaining Make item is one somebody justified",
   unexpected.length === 0,
   unexpected.length ? `not in the allowlist: ${unexpected.join(", ")}` : ""
 );
@@ -299,7 +309,24 @@ console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
   // it is the shape every real call site has: the function returns a
   // promise carrying the outcome, so nothing useful is done with it
   // unawaited.
-  const AI_CALL = /await\s+runCompletion\(|anthropic\.messages\.(create|stream)\(|\.messages\.(create|stream)\(/;
+  //
+  // AND "A MODEL" IS NOT ONLY A TEXT MODEL, since 2026-09-05. Voice is
+  // two paid providers — api/voice/speak reaches one to synthesise
+  // speech, api/voice/transcribe reaches another to read it back — and
+  // both reserve and settle credits exactly like a chat message. A rule
+  // that recognised only `anthropic.messages` would have said "this
+  // produces nothing" about a feature that bills by the minute, which is
+  // the same untruth this file exists to catch, pointing the other way.
+  // The two entry points are named rather than pattern-matched loosely,
+  // and awaited for the same reason as runCompletion above: the
+  // unawaited call does nothing with the result.
+  //
+  // THE BACKWARD CHECK IS WHAT KEEPS THIS HONEST. Widening the pattern
+  // widens BOTH directions — the last check in this block requires every
+  // tracking module to match NOTHING here, so a pattern loose enough to
+  // catch a notes form would fail the file rather than pass it.
+  const AI_CALL =
+    /await\s+runCompletion\(|anthropic\.messages\.(create|stream)\(|\.messages\.(create|stream)\(|await\s+synthesiseSpeech\(|await\s+transcribeAudio\(/;
 
   // Downstream of a producer rather than a producer: these two show what
   // something else made. Declared here, in the check, so adding a third
@@ -414,7 +441,21 @@ console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
       const routePath = route.replace("src/app/api/", "/api/").replace("/route.ts", "");
       return [...paths].some((p) => {
         const normalised = routePath.replace(/\[[^\]]+\]/g, "*");
-        const wanted = p.replace(/\$\{[^}]*\}/g, "*");
+        // A TRAILING, UNCLOSED `${` IS PART OF THE URL AND NOT PART OF THE
+        // PATH. The capture above stops at the first character a path
+        // cannot contain, so a template literal that ends in a
+        // conditional — `/api/documents/${id}/pdf${lang ? `?lang=…` : ""}`
+        // — arrives here as `/api/documents/${id}/pdf${lang`, whose
+        // second interpolation has no closing brace and therefore
+        // survives the replace. Matched against `/api/documents/*/pdf` it
+        // fails, and the gate reported that /dashboard/documents "produces
+        // nothing" while api/documents/[id]/pdf was calling
+        // anthropic.messages.create to translate the document on its way
+        // out. That is a FALSE NEGATIVE, which is the direction this
+        // file's own comment warns about two hundred lines above: a check
+        // that says "this does not build" about something that does is
+        // what teaches somebody to loosen the rule.
+        const wanted = p.replace(/\$\{[^}]*\}/g, "*").replace(/\$\{.*$/, "");
         return wanted === normalised || wanted.startsWith(`${normalised}/`);
       });
     });
@@ -686,7 +727,15 @@ for (const file of walkPagesForNames("src/app/dashboard")) {
 // A DERIVATION THAT FINDS NOTHING AGREES WITH ITSELF PERFECTLY.
 check(
   `the scan found the pages that name themselves twice (${namedPages.length})`,
-  namedPages.length >= 23,
+  // TWENTY-FIVE SINCE 2026-09-05: /dashboard/voice and
+  // /dashboard/predictions both name themselves in the nav and again in
+  // their own page heading, so both are compared string-by-string in all
+  // ten locales below. The floor moved with them because a floor that
+  // stays where it was IS the size of the old problem — at 23 with 25
+  // pages, breaking the MODULE_TITLE_KEYS reader dropped the count to
+  // exactly 23 and this check stayed green, which its own mutation suite
+  // reported as a MISSED mutant.
+  namedPages.length >= 25,
   `${namedPages.length} — this floor rises as pages are added, and never falls`,
 );
 for (const locale of LOCALES) {

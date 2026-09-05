@@ -110,7 +110,11 @@
       "tracking": "Seguimiento",
       "daily": "A diario",
       "work": "Trabajar",
-      "see": "Ver"
+      "see": "Ver",
+      "make": "Crear",
+      "ask": "Preguntar",
+      "run": "Ejecutar",
+      "organise": "Organizar"
     },
     "items": {
       "home": "Inicio",
@@ -164,7 +168,9 @@
       "newEntry": "Nueva entrada",
       "costs": "Costes",
       "systemHealth": "Estado del sistema",
-      "tradingJournal": "Diario de trading"
+      "tradingJournal": "Diario de trading",
+      "voice": "Voz",
+      "predictions": "Patrones"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -219,7 +225,9 @@
       "costs": "Lo que ha costado cada llamada de IA, por modelo y por día.",
       "routing": "A qué modelo se envía cada tipo de solicitud.",
       "systemHealth": "Si la base de datos, las colas y los proveedores responden.",
-      "tradingJournal": "Tus operaciones, con el razonamiento que escribiste entonces."
+      "tradingJournal": "Tus operaciones, con el razonamiento que escribiste entonces.",
+      "voice": "Escucha un texto en voz alta, o habla y se escribe. Los minutos se miden y el precio por minuto está en la página.",
+      "predictions": "Patrones en tus propias entradas, cada uno con el número de registros que lo sostiene y un enlace a ellos."
     },
     "closeMenu": "Cerrar el menú"
   },
@@ -2483,6 +2491,41 @@
       },
       "searchPlaceholder": "Busca en todo lo que has escrito",
       "searchNoResults": "Nada coincide con «{query}»."
+    },
+    "voicePage": {
+      "title": "Voz",
+      "description": "Escucha algo en voz alta, o di algo y queda escrito. Ambas cosas se cobran por minuto.",
+      "speakTitle": "Léelo en voz alta",
+      "speakWhat": "Pega o escribe cualquier cosa y escúchala. Útil para comprobar cómo suena un mensaje antes de enviarlo.",
+      "speakLabel": "Texto para leer",
+      "speakPlaceholder": "Pega el texto que quieres escuchar…",
+      "speakNotConfigured": "La lectura en voz alta no está configurada en esta instalación, así que no hay nada que pulsar. Todo aquí se sigue leyendo en pantalla.",
+      "speakNotAvailable": "La lectura en voz alta no está disponible en tu plan ahora mismo, o los minutos del mes se han agotado.",
+      "transcribeTitle": "Escribe lo que digo",
+      "transcribeWhat": "Pulsa, habla, y las palabras aparecen abajo. Nada se envía a ningún sitio hasta que tú lo copies.",
+      "transcribeLabel": "Lo transcrito",
+      "transcribeEmpty": "Todavía no se ha grabado nada.",
+      "transcribeNotConfigured": "La transcripción no está configurada en esta instalación, así que el micrófono no aparece. Escribir no se ve afectado.",
+      "transcribeNotAvailable": "La transcripción no está disponible en tu plan ahora mismo, o los minutos del mes se han agotado.",
+      "charCount": "{count} de {max} caracteres",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "copyFailed": "No se pudo copiar.",
+      "usageTitle": "Minutos y precios"
+    },
+    "predictions": {
+      "title": "Patrones",
+      "description": "Patrones en tus propias entradas: los encuentra el código, los cuenta, y te lleva de vuelta a las filas de las que salieron.",
+      "whatItDoes": "Cada afirmación aquí se calculó con tus propios registros y lleva el número de entradas que la sostiene. Nada se adivina.",
+      "run": "Mirar otra vez",
+      "running": "Mirando…",
+      "error": "No se ejecutó. No se cobró nada.",
+      "neverRun": "Todavía no se ha mirado nada.",
+      "neverRunWhy": "Pulsa «Mirar otra vez» y se leen tus entradas buscando patrones. Cuesta créditos y la estimación está encima del botón.",
+      "foundNothing": "Esta vez no destacó nada.",
+      "foundNothingWhy": "Eso es una respuesta, no un fallo: las comprobaciones se ejecutaron y no hallaron ningún patrón lo bastante fuerte como para contártelo.",
+      "needMoreData": "Aún no hay suficientes entradas.",
+      "needMoreDataWhy": "Un patrón en un puñado de filas es una coincidencia. Añade más entradas y mira otra vez."
     }
   },
   "module": {
@@ -3151,6 +3194,16 @@
       "is": "Todo lo que has puesto aquí, en un solo sitio.",
       "does": "Muestra tus entradas recientes, las que marcaste como favoritas y una búsqueda en todo lo que has escrito.",
       "doesNot": "No guarda una segunda copia de nada. Son los mismos registros que muestran los módulos: si editas uno aquí, cambia allí."
+    },
+    "voice": {
+      "is": "Dos proveedores de pago, medidos al minuto: uno lee texto en voz alta, otro escribe lo que dices.",
+      "does": "Lee cualquier texto que pegues, con la voz y la velocidad que elijas. Te graba y lo convierte en texto que puedes editar y copiar.",
+      "doesNot": "No actúa sobre lo que dices. Nada aquí envía un mensaje, crea un registro ni lanza un trabajo: las palabras caen en una caja y ahí se quedan hasta que las muevas tú. No es una llamada con la IA."
+    },
+    "predictions": {
+      "is": "Patrones que encuentra el código en tus propias entradas, no un modelo adivinando.",
+      "does": "Cuenta tus filas, encuentra patrones que superan un umbral, y dice cada uno con el número de entradas detrás y un enlace a ellas.",
+      "doesNot": "No predice el futuro ni inventará un patrón por tener algo que decir. Con menos de un puñado de filas coincidentes, te dice que no hay base suficiente."
     }
   },
   "helpCentre": {

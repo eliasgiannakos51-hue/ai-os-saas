@@ -2526,6 +2526,28 @@
       "foundNothingWhy": "That is an answer, not a failure: the checks ran and found no pattern strong enough to be worth telling you about.",
       "needMoreData": "Not enough entries yet.",
       "needMoreDataWhy": "A pattern in a handful of rows is a coincidence. Add more entries and look again."
+    },
+    "nextStep": {
+      "ideas": "Want to weigh this against alternatives in Decisions?",
+      "competitors": "Want to factor this into a Decision?",
+      "research": "Turn this into an Idea?",
+      "finance": "Want to track this trend in Analytics?",
+      "learning": "Got an idea from this? Log it in Ideas.",
+      "trading": "Want to see this trend in Analytics?",
+      "decisions": "Ready to turn this into a Product plan?",
+      "products": "Want to add a Content plan for this?",
+      "content": "Want to line up outreach in Sales?",
+      "sales": "Want new content to support this?",
+      "feedback": "Turn this feedback into an Idea?",
+      "analytics": "Want to make a Decision based on this?",
+      "automation": "Want to track the time this saves in Analytics?"
+    },
+    "transitions": {
+      "coding": "Open in Code",
+      "websiteBuilder": "Open the Website Builder",
+      "agents": "Build the agent",
+      "automation": "Open Automation",
+      "deepResearch": "Start Deep Research"
     }
   },
   "module": {

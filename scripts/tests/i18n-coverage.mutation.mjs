@@ -35,6 +35,36 @@ const COOKIES = "src/app/cookies/page.tsx";
 const UPGRADE = "src/components/billing/upgrade-required.tsx";
 
 const MUTANTS = [
+    {
+    // THE THIRTEEN SENTENCES COME BACK. lib/next-step-suggestions.ts held
+    // English questions where a message key belongs and the nudge
+    // rendered them raw, in all ten languages, invisible to every gate
+    // here: sections 1 and 3 read `.tsx` only, and the DATA_FILES list
+    // that reads `.ts` names three files by hand.
+    name: "a next-step suggestion carries a sentence instead of a message key",
+    file: "src/lib/next-step-suggestions.ts",
+    from: 'ideas: { targetSlug: "decisions", messageKey: "dashboard.nextStep.ideas" },',
+    to: 'ideas: { targetSlug: "decisions", messageKey: "Want to weigh this against alternatives in Decisions?" },',
+    expect: "every next-step message is a key, not a sentence",
+  },
+  {
+    // THE KEY IS PERFECT AND THE COMPONENT RENDERS IT RAW — the same bug
+    // with an extra step, and literally what shipped.
+    name: "the nudge renders the message key without translating it",
+    file: "src/components/create/next-step-suggestion.tsx",
+    from: "{tRoot(suggestion.messageKey)}",
+    to: "{suggestion.messageKey}",
+    expect: "renders the key through a translator",
+  },
+  {
+    // A KEY THAT RESOLVES NOWHERE. The shape check passes on any dotted
+    // string, so the ten-locale resolution is the half that catches a typo.
+    name: "a next-step key is misspelt, so it resolves in no locale",
+    file: "src/lib/next-step-suggestions.ts",
+    from: 'messageKey: "dashboard.nextStep.trading"',
+    to: 'messageKey: "dashboard.nextStep.tradng"',
+    expect: "resolves in all ten locales",
+  },
   {
     // 1. THE HOLE THIS ROUND FOUND. `aria-label={label}` is an EXPRESSION,
     // so section 1d — which holds literal aria attributes at zero and had

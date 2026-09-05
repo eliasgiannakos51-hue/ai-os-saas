@@ -2526,6 +2526,28 @@
       "foundNothingWhy": "C'est une réponse, pas un échec : les vérifications ont tourné et n'ont trouvé aucune tendance assez nette pour valoir la peine.",
       "needMoreData": "Pas encore assez d'entrées.",
       "needMoreDataWhy": "Une tendance sur une poignée de lignes est une coïncidence. Ajoutez des entrées et regardez à nouveau."
+    },
+    "nextStep": {
+      "ideas": "Le peser face aux alternatives dans Décisions ?",
+      "competitors": "En tenir compte dans une Décision ?",
+      "research": "En faire une Idée ?",
+      "finance": "Suivre cette tendance dans Analytique ?",
+      "learning": "Une idée vous vient ? Notez-la dans Idées.",
+      "trading": "Voir cette tendance dans Analytique ?",
+      "decisions": "Prêt à en faire un plan Produit ?",
+      "products": "Ajouter un plan de Contenu pour cela ?",
+      "content": "Préparer la prise de contact dans Ventes ?",
+      "sales": "Du contenu neuf pour l'appuyer ?",
+      "feedback": "Faire de ce retour une Idée ?",
+      "analytics": "Prendre une Décision à partir de cela ?",
+      "automation": "Suivre dans Analytique le temps gagné ?"
+    },
+    "transitions": {
+      "coding": "Ouvrir dans Code",
+      "websiteBuilder": "Ouvrir le créateur de site",
+      "agents": "Créer l'agent",
+      "automation": "Ouvrir Automatisation",
+      "deepResearch": "Lancer la recherche approfondie"
     }
   },
   "module": {

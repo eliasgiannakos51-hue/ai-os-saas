@@ -2526,6 +2526,28 @@
       "foundNothingWhy": "Eso es una respuesta, no un fallo: las comprobaciones se ejecutaron y no hallaron ningún patrón lo bastante fuerte como para contártelo.",
       "needMoreData": "Aún no hay suficientes entradas.",
       "needMoreDataWhy": "Un patrón en un puñado de filas es una coincidencia. Añade más entradas y mira otra vez."
+    },
+    "nextStep": {
+      "ideas": "¿Quieres sopesarlo frente a alternativas en Decisiones?",
+      "competitors": "¿Quieres tenerlo en cuenta en una Decisión?",
+      "research": "¿Convertirlo en una Idea?",
+      "finance": "¿Quieres seguir esta tendencia en Analítica?",
+      "learning": "¿Se te ocurre algo? Anótalo en Ideas.",
+      "trading": "¿Quieres ver esta tendencia en Analítica?",
+      "decisions": "¿Listo para convertirlo en un plan de Producto?",
+      "products": "¿Añadir un plan de Contenido para esto?",
+      "content": "¿Preparar el contacto en Ventas?",
+      "sales": "¿Contenido nuevo que lo respalde?",
+      "feedback": "¿Convertir este comentario en una Idea?",
+      "analytics": "¿Tomar una Decisión a partir de esto?",
+      "automation": "¿Seguir en Analítica el tiempo que ahorra?"
+    },
+    "transitions": {
+      "coding": "Abrir en Código",
+      "websiteBuilder": "Abrir el creador de sitios",
+      "agents": "Crear el agente",
+      "automation": "Abrir Automatización",
+      "deepResearch": "Iniciar Investigación profunda"
     }
   },
   "module": {

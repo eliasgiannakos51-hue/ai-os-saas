@@ -2526,6 +2526,28 @@
       "foundNothingWhy": "È una risposta, non un fallimento: i controlli sono stati eseguiti e non hanno trovato un andamento abbastanza netto da valere la pena.",
       "needMoreData": "Non ci sono ancora abbastanza voci.",
       "needMoreDataWhy": "Un andamento su poche righe è una coincidenza. Aggiungi voci e guarda di nuovo."
+    },
+    "nextStep": {
+      "ideas": "Vuoi confrontarlo con le alternative in Decisioni?",
+      "competitors": "Vuoi tenerne conto in una Decisione?",
+      "research": "Trasformarlo in un'Idea?",
+      "finance": "Vuoi seguire questo andamento in Analisi?",
+      "learning": "Ti è venuta un'idea? Annotala in Idee.",
+      "trading": "Vuoi vedere questo andamento in Analisi?",
+      "decisions": "Pronto a farne un piano di Prodotto?",
+      "products": "Vuoi aggiungere un piano di Contenuti?",
+      "content": "Vuoi preparare il contatto in Vendite?",
+      "sales": "Vuoi contenuti nuovi a supporto?",
+      "feedback": "Trasformare questo riscontro in un'Idea?",
+      "analytics": "Vuoi prendere una Decisione partendo da questo?",
+      "automation": "Vuoi seguire in Analisi il tempo risparmiato?"
+    },
+    "transitions": {
+      "coding": "Apri in Codice",
+      "websiteBuilder": "Apri il costruttore di siti",
+      "agents": "Crea l'agente",
+      "automation": "Apri Automazione",
+      "deepResearch": "Avvia la ricerca approfondita"
     }
   },
   "module": {

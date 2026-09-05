@@ -2526,6 +2526,28 @@
       "foundNothingWhy": "Das ist eine Antwort, kein Fehler: die Prüfungen liefen und fanden kein Muster, das stark genug wäre, es zu erwähnen.",
       "needMoreData": "Noch nicht genug Einträge.",
       "needMoreDataWhy": "Ein Muster in einer Handvoll Zeilen ist Zufall. Trag mehr ein und sieh nochmal nach."
+    },
+    "nextStep": {
+      "ideas": "Das in Entscheidungen gegen Alternativen abwägen?",
+      "competitors": "Das in eine Entscheidung einfließen lassen?",
+      "research": "Daraus eine Idee machen?",
+      "finance": "Diesen Trend in Analysen verfolgen?",
+      "learning": "Eine Idee daraus? Trag sie unter Ideen ein.",
+      "trading": "Diesen Trend in Analysen ansehen?",
+      "decisions": "Bereit, daraus einen Produktplan zu machen?",
+      "products": "Einen Inhaltsplan dazu anlegen?",
+      "content": "Die Ansprache im Vertrieb vorbereiten?",
+      "sales": "Neue Inhalte, die das stützen?",
+      "feedback": "Aus diesem Feedback eine Idee machen?",
+      "analytics": "Darauf basierend eine Entscheidung treffen?",
+      "automation": "Die gesparte Zeit in Analysen verfolgen?"
+    },
+    "transitions": {
+      "coding": "In Code öffnen",
+      "websiteBuilder": "Website-Builder öffnen",
+      "agents": "Agent erstellen",
+      "automation": "Automatisierung öffnen",
+      "deepResearch": "Tiefenrecherche starten"
     }
   },
   "module": {

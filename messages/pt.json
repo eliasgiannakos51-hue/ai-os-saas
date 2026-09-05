@@ -2526,6 +2526,28 @@
       "foundNothingWhy": "Isso é uma resposta, não uma falha: as verificações correram e não encontraram padrão suficientemente forte para valer a pena.",
       "needMoreData": "Ainda não há entradas suficientes.",
       "needMoreDataWhy": "Um padrão em meia dúzia de linhas é coincidência. Acrescente entradas e veja outra vez."
+    },
+    "nextStep": {
+      "ideas": "Quer pesá-lo face a alternativas em Decisões?",
+      "competitors": "Quer ter isto em conta numa Decisão?",
+      "research": "Transformar isto numa Ideia?",
+      "finance": "Quer acompanhar esta tendência em Análises?",
+      "learning": "Surgiu-lhe uma ideia? Registe-a em Ideias.",
+      "trading": "Quer ver esta tendência em Análises?",
+      "decisions": "Pronto para transformar isto num plano de Produto?",
+      "products": "Quer acrescentar um plano de Conteúdo?",
+      "content": "Quer preparar o contacto em Vendas?",
+      "sales": "Quer conteúdo novo que apoie isto?",
+      "feedback": "Transformar este comentário numa Ideia?",
+      "analytics": "Quer tomar uma Decisão a partir disto?",
+      "automation": "Quer acompanhar em Análises o tempo poupado?"
+    },
+    "transitions": {
+      "coding": "Abrir em Código",
+      "websiteBuilder": "Abrir o construtor de sites",
+      "agents": "Criar o agente",
+      "automation": "Abrir Automação",
+      "deepResearch": "Iniciar Pesquisa profunda"
     }
   },
   "module": {

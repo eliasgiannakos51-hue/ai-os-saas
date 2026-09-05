@@ -2526,6 +2526,28 @@
       "foundNothingWhy": "这是答案，不是失败：检查跑完了，没有找到强到值得告诉你的规律。",
       "needMoreData": "记录还不够多。",
       "needMoreDataWhy": "几行数据里的规律只是巧合。多记一些再看一次。"
+    },
+    "nextStep": {
+      "ideas": "要在「决策」里和其他方案比一比吗？",
+      "competitors": "要把这个纳入一次「决策」吗？",
+      "research": "把它变成一条「想法」？",
+      "finance": "要在「分析」里跟踪这个走势吗？",
+      "learning": "有想法了吗？记到「想法」里。",
+      "trading": "要在「分析」里看这个走势吗？",
+      "decisions": "准备把它变成「产品」计划了吗？",
+      "products": "要为它加一份「内容」计划吗？",
+      "content": "要在「销售」里安排对接吗？",
+      "sales": "要新的内容来支撑它吗？",
+      "feedback": "把这条反馈变成「想法」？",
+      "analytics": "要根据这个做一次「决策」吗？",
+      "automation": "要在「分析」里跟踪它省下的时间吗？"
+    },
+    "transitions": {
+      "coding": "在「代码」中打开",
+      "websiteBuilder": "打开网站生成器",
+      "agents": "创建这个智能体",
+      "automation": "打开「自动化」",
+      "deepResearch": "开始深度研究"
     }
   },
   "module": {

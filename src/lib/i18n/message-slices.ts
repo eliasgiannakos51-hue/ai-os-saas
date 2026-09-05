@@ -96,13 +96,21 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
       "sampleData",
       "security", "settings", "sidebar", "voice",
     ],
-    // SIXTY-TWO — sixty-one before the first screen merged in, and
-    // overview/first-screen-examples.tsx is the sixty-second. Not the
-    // twenty I first wrote. Twenty call
-    // useTranslations() with no namespace; the rest reach a key through a
-    // template literal or a variable, which is just as unpredictable.
+    // SIXTY-FOUR — sixty-one before the first screen merged in,
+    // overview/first-screen-examples.tsx was the sixty-second, and
+    // 2026-09-05 added two more: create/next-step-suggestion.tsx and
+    // transitions/transition-button.tsx, both of which take a full dotted
+    // key from a data file and therefore cannot declare a namespace.
+    // Not the twenty I first wrote. Twenty call useTranslations() with no
+    // namespace; the rest reach a key through a template literal or a
+    // variable, which is just as unpredictable.
     // Counting only the first shape is how a number becomes comfortable.
-    unbounded: 62,
+    //
+    // THIS IS A CENSUS, NOT A RATCHET: it records how many components the
+    // slicer cannot bound, and `canTrim` is false while it is above zero.
+    // A wrong number here does not loosen anything — it makes the gate
+    // disagree with the tree, which is what the check reports.
+    unbounded: 64,
   },
   {
     name: "onboarding",

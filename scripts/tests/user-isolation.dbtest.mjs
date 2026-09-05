@@ -764,6 +764,71 @@ check(
     .join(", ")
 );
 
+
+// ---------------------------------------------------------------------
+console.log("\n== 3b. the files themselves, not just the rows about them ==");
+// ---------------------------------------------------------------------
+// A DOCUMENT IS NOT A ROW. user_files holds the metadata and every check
+// above covers it; the PDF lives in storage.objects, whose ten policies
+// belong to a schema no check in this project reaches —
+// db_exposure_report's tables_without_rls filters `nspname = 'public'`.
+//
+// They were inert here for two reasons at once: `authenticated` had no
+// USAGE on the storage schema, and the table had no row level security,
+// which makes a policy decoration. bootstrap-supabase.sql now does both,
+// and this section is what says the policies work rather than merely
+// exist.
+const BUCKETS = ["user-files", "website-references", "create-attachments"];
+const storageRows = [];
+for (const bucket of BUCKETS) {
+  const out = dataLines(`
+    begin;
+    insert into storage.buckets (id, name) values ('${bucket}', '${bucket}')
+      on conflict (id) do nothing;
+    insert into storage.objects (bucket_id, name, owner) values
+      ('${bucket}', '${A}/a.bin', '${A}'), ('${bucket}', '${B}/b.bin', '${B}');
+    set local role authenticated;
+    set local request.jwt.claim.sub = '${A}';
+    select 'own='   || (select count(*) from storage.objects where bucket_id='${bucket}' and name like '${A}/%');
+    select 'other=' || (select count(*) from storage.objects where bucket_id='${bucket}' and name like '${B}/%');
+    savepoint d;
+    with d as (delete from storage.objects where bucket_id='${bucket}' and name like '${B}/%' returning 1)
+      select 'del=' || (select count(*) from d);
+    rollback to savepoint d;
+    delete from storage.objects where bucket_id='${bucket}';
+    reset role;
+    select 'bulkdel=' || (1 - (select count(*) from storage.objects
+      where bucket_id='${bucket}' and name like '${B}/%'));
+    rollback;
+  `);
+  const got = Object.fromEntries(
+    out.filter((l) => l.includes("=")).map((l) => l.trim().split("="))
+  );
+  storageRows.push({ bucket, ...got });
+}
+check(
+  `row level security is ON for storage.objects — without it the ten policies are decoration`,
+  psql("select relrowsecurity from pg_class where oid = 'storage.objects'::regclass") === "t"
+);
+check(
+  `A sees its own file in all ${BUCKETS.length} buckets — the control`,
+  storageRows.every((r) => r.own === "1"),
+  storageRows.map((r) => `${r.bucket}: own=${r.own}`).join(", ")
+);
+check(
+  `A cannot SEE B's file in any bucket (${BUCKETS.length})`,
+  storageRows.every((r) => r.other === "0"),
+  storageRows.filter((r) => r.other !== "0").map((r) => `${r.bucket}: ${r.other}`).join(", ")
+);
+check(
+  `A cannot DELETE B's file, by name or with no WHERE (${BUCKETS.length} buckets)`,
+  storageRows.every((r) => r.del === "0" && r.bulkdel === "0"),
+  storageRows
+    .filter((r) => r.del !== "0" || r.bulkdel !== "0")
+    .map((r) => `${r.bucket}: del=${r.del} bulkdel=${r.bulkdel}`)
+    .join(", ")
+);
+
 // ---------------------------------------------------------------------
 console.log("\n== 4. and the check can go red ==");
 // A FILE THAT CANNOT DEMONSTRATE ITS OWN FAILURE MODE is a file whose

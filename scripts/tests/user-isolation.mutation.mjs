@@ -35,11 +35,11 @@ const psql = (q) =>
   }).trim();
 
 /** Every policy on a table, as the SQL that would recreate it. */
-function policyDefs(table) {
+function policyDefs(table, schema = "public") {
   const raw = psql(`
     select policyname || '' || cmd || '' || roles::text || ''
         || coalesce(qual, 'true') || '' || coalesce(with_check, '')
-    from pg_policies where schemaname = 'public' and tablename = '${table}'
+    from pg_policies where schemaname = '${schema}' and tablename = '${table}'
   `);
   return raw
     .split("\n")
@@ -59,8 +59,8 @@ function policyDefs(table) {
           : `using (${qual || "true"})${withCheck ? ` with check (${withCheck})` : ""}`;
       return {
         name,
-        drop: `drop policy if exists "${name}" on public.${table};`,
-        create: `create policy "${name}" on public.${table} for ${forClause} to ${to} ${clauses};`,
+        drop: `drop policy if exists "${name}" on ${schema}.${table};`,
+        create: `create policy "${name}" on ${schema}.${table} for ${forClause} to ${to} ${clauses};`,
       };
     });
 }
@@ -179,6 +179,36 @@ const MUTANTS = [
     restore: (defs) => defs.map((d) => d.create).join("\n"),
     expect: ["the sealed set is exactly the 5 tables"],
   },
+  {
+    // 8. THE FILE, NOT THE ROW ABOUT IT. storage.objects carries ten
+    // policies in a schema no check in this project reaches, and they
+    // were inert here on two counts at once: no USAGE on the schema for
+    // `authenticated`, and no row level security, which makes a policy
+    // decoration. Measured before the stub was fixed: A read B's private
+    // file. This mutant is what says the fix is load-bearing.
+    name: "the user-files SELECT policy opens to everybody — B's documents are readable",
+    table: "objects",
+    schema: "storage",
+    apply: () =>
+      `drop policy if exists "select_own_user_files_objects" on storage.objects;
+       create policy "select_own_user_files_objects" on storage.objects for select
+         to public using (bucket_id = 'user-files');`,
+    restore: (defs) =>
+      `drop policy if exists "select_own_user_files_objects" on storage.objects;\n` +
+      defs.filter((d) => d.name === "select_own_user_files_objects").map((d) => d.create).join("\n"),
+    expect: ["A cannot SEE B's file in any bucket"],
+  },
+  {
+    // 9. AND ROW LEVEL SECURITY SWITCHED OFF ON IT, which is the state
+    // this stub was in until it was measured: ten correct policies and
+    // nothing enforcing any of them.
+    name: "row level security is switched off on storage.objects, making all ten policies decoration",
+    table: "objects",
+    schema: "storage",
+    apply: () => `alter table storage.objects disable row level security;`,
+    restore: () => `alter table storage.objects enable row level security;`,
+    expect: ["row level security is ON for storage.objects", "A cannot SEE B's file in any bucket"],
+  },
 ];
 
 function runGate() {
@@ -214,17 +244,20 @@ if (!base.green) {
 // baseline was red for a reason nothing in the output explained.
 //
 // A suite that edits a schema has to be able to say it put it back.
-function policyNames(table) {
+function policyNames(table, schema = "public") {
   return psql(
     `select coalesce(string_agg(policyname, ',' order by policyname), '') from pg_policies
-     where schemaname='public' and tablename='${table}'`
+     where schemaname='${schema}' and tablename='${table}'`
   );
 }
 
 for (const m of MUTANTS) {
-  const defs = policyDefs(m.table);
-  const before = policyNames(m.table);
-  const rlsBefore = psql(`select relrowsecurity from pg_class where relname='${m.table}'`);
+  const schema = m.schema ?? "public";
+  const defs = policyDefs(m.table, schema);
+  const before = policyNames(m.table, schema);
+  const rlsBefore = psql(
+    `select relrowsecurity from pg_class where oid = '${schema}.${m.table}'::regclass`
+  );
   const apply = m.apply(defs);
   const restore = m.restore(defs);
   psql(apply);
@@ -238,8 +271,10 @@ for (const m of MUTANTS) {
       console.log(`  RESTORE FAILED on ${m.table}: ${String(e.stderr || e.message).trim().slice(0, 160)}`);
     }
   }
-  const after = policyNames(m.table);
-  const rlsAfter = psql(`select relrowsecurity from pg_class where relname='${m.table}'`);
+  const after = policyNames(m.table, schema);
+  const rlsAfter = psql(
+    `select relrowsecurity from pg_class where oid = '${schema}.${m.table}'::regclass`
+  );
   if (after !== before || rlsAfter !== rlsBefore) {
     console.log(
       `\nSCHEMA NOT RESTORED on ${m.table}\n  policies before: ${before}\n  policies after:  ${after}` +

@@ -29,10 +29,19 @@
 // here distinguishes "skipped" from "passed" AT THE EXIT CODE — both are
 // 0. An earlier version of credit-flow.dbtest.mjs's own header claimed
 // "the suite gate reports it as skipped rather than passed", which no
-// gate anywhere in this repository does. That claim is removed rather
-// than made true, because making it true would mean parsing this
-// script's stdout for the word SKIPPED from the calling gate, which is
-// worse than just saying plainly: read the log.
+// gate anywhere in this repository did. That claim was removed rather
+// than made true, because making it true here would mean parsing this
+// script's stdout from the calling gate, which is worse than just
+// saying plainly: read the log.
+//
+// ONE GATE DOES DISTINGUISH THEM NOW, and the difference is worth
+// naming so this paragraph is not read as a rule. scripts/tests/
+// run-mutations.mjs reports green/skipped/red separately (via
+// scripts/tests/lib/mutation-outcome.mjs) because it ALREADY parses each
+// suite's stdout for MISSED and STALE, and because it prints a tally —
+// "89 suites · 89 green" with user-isolation.mutation.mjs never having
+// run is a false number, where one loud SKIPPED line above no tally at
+// all is not.
 import { startEphemeralPostgres, psqlArgs } from "../lib/ephemeral-postgres.mjs";
 import { execFileSync } from "node:child_process";
 import { readdirSync } from "node:fs";

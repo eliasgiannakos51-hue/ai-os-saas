@@ -43,7 +43,7 @@ and two more in `scripts/tests/icu-quoted-placeholders.mutation.mjs`
 pointed at a quoting form the catalogue had moved away from.
 
 *Caught by:* every suite reports `STALE` and exits non-zero;
-`scripts/check-mutation-tree.mjs` enumerates all 1,518 anchors;
+`scripts/check-mutation-tree.mjs` enumerates all 1,537 anchors;
 `scripts/tests/gate-stale-anchors.test.mjs` checks the shape of the check.
 
 ## Vacuous assertion
@@ -62,6 +62,38 @@ is the expected answer, and the leak became the pass.
 
 *Caught by:* `scripts/tests/gate-vacuity.test.mjs` — every emptiness
 assertion over a scanned collection needs a floor.
+
+## A suite that never ran, counted as a pass
+
+Not a check that cannot go red — a check that was never asked. The
+runner reads the exit code, the suite exits 0 because skipping cleanly is
+not an error, and the tally adds it to the green column.
+
+*Incident:* `scripts/tests/run-mutations.mjs` printed
+`OK   user-isolation                                0s`, then
+`89 suites · 89 green · 0 red`, then `ALL MUTATION SUITES GREEN`.
+`scripts/tests/user-isolation.mutation.mjs` mutates the database schema —
+it found no `DATABASE_URL`, said so in one line and exited 0, so nine
+mutants that stage real cross-account leaks were never applied. All nine
+could have been live and the summary line would have read the same. The
+tell was the timing column: `0s`, for a suite that cannot finish in zero
+seconds — measured with a database attached, the same suite takes **430
+seconds**.
+
+Sixteen files in `scripts/tests` can print such a line.
+
+*Caught by:* `scripts/tests/lib/mutation-outcome.mjs` answers
+green/skipped/red rather than ok/not-ok, and
+`scripts/tests/mutation-runner-honesty.test.mjs` holds both the
+classifier and the wiring — including that the summary no longer derives
+green by subtracting red from the total, which is the arithmetic that
+made a skip green no matter how it was classified.
+
+*Not the same thing as:* `scripts/db/run-dbtests.mjs`, which also skips
+on an unreachable Postgres and also exits 0. Its own header says why it
+does not do this: it prints one loud `SKIPPED:` line and no tally, and
+failing a build over infrastructure it does not control would be worse.
+The lie is the count, not the skip.
 
 ## A check that cannot go red
 
@@ -114,10 +146,12 @@ smaller. Nothing says the 7% still covers what the screens ask for.
 *Caught by:* `scripts/tests/message-slices.test.mjs` — every namespace a
 group can reach must be declared.
 
-## A gate whose fixture is safer than production
+## A fixture that is not production
 
-The check is correct, the assertion can go red, and the database it runs
-against is not the one that matters.
+The check is correct, the assertion can go red, and the thing it runs
+against is not the thing that matters. **It fails in both directions and
+the register has one of each**, which is why the name is about the
+fixture rather than about safety.
 
 *Incident:* `db_exposure_report()` has counted `grant_without_policy`
 since 20260917 and reported **zero**. It runs, in
@@ -141,14 +175,29 @@ Correcting the stub turned the check red at **89 (table, verb) pairs** —
 `user_credits`, `credit_transactions`, `ai_cost_log`, `affiliate_payouts`
 and `production_errors` among them.
 
-*Caught by:* nothing generic, and that is the honest state. What exists is
-the stub now modelling Supabase's documented defaults, so this class of
-check is measured against something closer to production, and
-`scripts/tests/user-isolation.dbtest.mjs`, which impersonates
-`authenticated` rather than running as the owning superuser — the thing
-that exposed it. A fixture cannot be proven equal to production from
-inside the repository; it can only be made to fail loudly, which is the
-direction this one now fails in.
+*And the same shape the other way round.* `storage.objects` is created by
+the stub without row level security, and `authenticated` was never
+granted USAGE on the storage schema. The ten policies the migrations put
+on that table were therefore inert on two counts at once — and a policy
+on a table without RLS does nothing at all. Measured before the fix, with
+two accounts and one file each: **account A read account B's private
+file**. The policies turned out to be correct; nothing here could have
+said so, and nothing would have noticed if one had said `using (true)`,
+because `db_exposure_report`'s `tables_without_rls` filters
+`nspname = 'public'` and the storage schema is outside every check this
+project owns.
+
+*Caught by:* `scripts/tests/stub-vs-production.test.mjs` — a register of
+what the stub must model, each entry carrying the incident that put it
+there, plus the divergences that remain with the direction each fails in;
+every entry is checked BOTH ways, so one that has stopped describing the
+stub is a failure rather than a note. 13 checks, 7 of 7 mutations.
+`scripts/tests/user-isolation.dbtest.mjs` now probes `storage.objects` in
+all three buckets, so the ten policies are exercised rather than counted.
+
+A fixture cannot be proven equal to production from inside the
+repository. It can only be made to fail loudly, and to carry a written
+list of the places it is still known to differ.
 
 ## A probe that changes what it measures
 

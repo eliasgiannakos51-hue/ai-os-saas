@@ -35,10 +35,24 @@
 //      per fifteen-minute run is not a gate anyone will run twice. All of
 //      them run, and the summary at the end is the answer.
 //
+// SHAPE: a suite that never ran, counted as a pass
+//
+//   3. A SUITE THAT PRINTS "SKIPPED" AND EXITS 0 IS NOT A PASS. Measured
+//      on 2026-09-05: this runner printed `OK   user-isolation  0s`, then
+//      `89 suites · 89 green · 0 red`, then `ALL MUTATION SUITES GREEN`,
+//      for a run in which user-isolation.mutation.mjs applied none of its
+//      nine schema mutants — it needs a real Postgres, found no
+//      DATABASE_URL, and said so in one line. Green is now green,
+//      skipped is skipped, and the closing line does not say "all green"
+//      when anything was skipped. scripts/tests/lib/mutation-outcome.mjs
+//      makes that call; scripts/tests/mutation-runner-honesty.test.mjs
+//      holds it.
+//
 // Run: node scripts/tests/run-mutations.mjs
 import { readdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
+import { classify } from "./lib/mutation-outcome.mjs";
 
 const DIR = "scripts/tests";
 const suites = readdirSync(DIR)
@@ -51,8 +65,13 @@ if (suites.length === 0) {
 }
 
 // A floor, for the same reason every gate in this directory has one: an
-// empty list satisfies "none of them failed". Thirty today.
-const FLOOR = 30;
+// empty list satisfies "none of them failed". It was 30 when there were
+// 30 suites, and stayed 30 while the directory grew to 90 \u2014 a floor set
+// to the size of the problem three times ago would not have noticed
+// sixty files disappearing. 85 today, deliberately under the real count
+// so deleting one suite on purpose does not need a build fix in the same
+// commit.
+const FLOOR = 85;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {
@@ -86,7 +105,6 @@ for (const file of suites) {
   });
   const seconds = Math.round((Date.now() - started) / 1000);
   const stdout = run.stdout ?? "";
-  const missed = [...stdout.matchAll(/^\s*MISSED\s+(.*)$/gm)].map((m) => m[1].trim());
 
   // STALE IS NOT THE SAME KIND OF RED AS MISSED, and reporting them in one
   // bucket is how a broken instrument reads as a coverage number.
@@ -100,13 +118,6 @@ for (const file of suites) {
   //
   // Four suites were in exactly that state and it took running all thirty
   // to notice. Named separately now.
-  const stale = [
-    ...stdout.matchAll(/^\s*STALE\s+(.*)$/gm),
-    ...stdout.matchAll(/^\s*ERROR\s+(.*?): target not found.*$/gm),
-  ].map((m) => m[1].trim());
-  const staleFromSummary = [...stdout.matchAll(/^\s*-\s*(.*)\n\s*the mutation target no longer exists.*$/gm)]
-    .map((m) => m[1].trim());
-  for (const s of staleFromSummary) if (!stale.includes(s)) stale.push(s);
 
   // The tree, before the next suite gets blamed for this one's leftovers.
   const after = trackedDirty();
@@ -115,9 +126,12 @@ for (const file of suites) {
     spawnSync("git", ["checkout", "--", ...leaked], { encoding: "utf8" });
   }
 
-  const ok = run.status === 0 && leaked.length === 0;
-  results.push({ name, ok, code: run.status, seconds, missed, stale, leaked, killed: Boolean(run.error) });
-  const flag = ok ? "OK " : "RED";
+  // green / skipped / red. Why "skipped" is a third answer here and not a
+  // shade of green: scripts/tests/lib/mutation-outcome.mjs.
+  const { outcome, missed, stale } = classify({ stdout, status: run.status, leaked });
+  const ok = outcome !== "red";
+  results.push({ name, ok, outcome, code: run.status, seconds, missed, stale, leaked, killed: Boolean(run.error) });
+  const flag = outcome === "green" ? "OK " : outcome === "skipped" ? "SKIP" : "RED";
   const note = leaked.length > 0 ? `LEFT ${leaked.length} FILE(S) MUTATED: ${leaked.join(", ")}` : "";
   console.log(
     `${flag}  ${name.padEnd(42)} ${String(seconds).padStart(4)}s  ${missed.length ? `missed=${missed.length}` : ""}${stale.length ? ` STALE=${stale.length}` : ""} ${note}`
@@ -126,12 +140,16 @@ for (const file of suites) {
   for (const m of stale) console.log(`         STALE   ${m}  <- the anchor is gone; this mutation applies to nothing`);
 }
 
-const red = results.filter((r) => !r.ok);
+const red = results.filter((r) => r.outcome === "red");
+const skippedSuites = results.filter((r) => r.outcome === "skipped");
+const green = results.filter((r) => r.outcome === "green");
 const leaky = results.filter((r) => r.leaked.length > 0);
 const stalest = results.filter((r) => r.stale.length > 0);
 
 console.log(`\n${"=".repeat(70)}`);
-console.log(`${results.length} suites · ${results.length - red.length} green · ${red.length} red`);
+console.log(
+  `${results.length} suites · ${green.length} green · ${skippedSuites.length} skipped · ${red.length} red`
+);
 if (red.length > 0) {
   console.log("\nRED:");
   for (const r of red) {
@@ -139,6 +157,11 @@ if (red.length > 0) {
       `  ${r.name}  (exit ${r.code}${r.killed ? ", killed" : ""}${r.missed.length ? `, ${r.missed.length} mutation(s) not caught` : ""})`
     );
   }
+}
+if (skippedSuites.length > 0) {
+  console.log("\nNOT RUN \u2014 these suites printed a skip line and killed nothing:");
+  for (const r of skippedSuites) console.log(`  ${r.name}`);
+  console.log("  They are NOT counted as green. A skipped suite is not evidence of anything.");
 }
 if (stalest.length > 0) {
   console.log("\nSTALE ANCHORS — these suites are broken, not the code they guard:");
@@ -160,5 +183,11 @@ if (results.length < FLOOR) {
   );
   fail++;
 }
-console.log(fail === 0 ? "\nALL MUTATION SUITES GREEN" : "");
+console.log(
+  fail !== 0
+    ? ""
+    : skippedSuites.length === 0
+      ? "\nALL MUTATION SUITES GREEN"
+      : `\nNO SUITE IS RED, but ${skippedSuites.length} of ${results.length} never ran \u2014 this is not "all green".`
+);
 process.exit(fail === 0 ? 0 : 1);

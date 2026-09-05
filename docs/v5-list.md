@@ -160,11 +160,44 @@ produce something that looks like it works.
 
 ## Tier 3 — the instruments
 
-### 9. The 111 gates with no mutation suite
+### 8b. The test database is not production, and five ways are named
+**~2 days, and the first day is free.**
+
+`scripts/tests/stub-vs-production.test.mjs` holds eight facts the stub
+must model and five divergences that remain. Two of the eight are there
+because their absence caused a real incident: no default privileges hid
+**89** grants, and no row level security on `storage.objects` left **ten**
+policies inert while account A read account B's private file.
+
+*The sharpest of the five, and the one worth closing first:* the grant
+checks name `anon` and `authenticated` explicitly, so a privilege held by
+`authenticator`, `dashboard_user` or `supabase_storage_admin` is invisible
+to them **both locally and in production**. Making those checks
+role-agnostic — "which roles hold this, and is each on a named list" —
+costs about a day and needs no production access.
+
+*The rest need one query against the real database,* which nobody has run:
+
+    select e.extname, n.nspname from pg_extension e
+      join pg_namespace n on n.oid = e.extnamespace;
+    select rolname from pg_roles order by 1;
+    select relname, relrowsecurity from pg_class
+      where relnamespace = 'storage'::regnamespace;
+
+*Done means:* the register's five entries each carry a measured answer
+from production rather than a direction-of-failure. *Proven by:* its own
+mutation suite, 7 of 7 today, plus the entries changing from "unknown" to
+a value.
+
+
+### 9. The 123 gates with no mutation suite
 **~3 weeks if done exhaustively. Do not do it exhaustively.**
 
-107 of 218 gates (49%) have been shown to go red on the defect they name.
-The other 111 have not. A gate without that proof might be entirely
+98 of 221 gates (44%) have been shown to go red on the defect they name.
+The other 123 have not. (This paragraph said *107 of 218 (49%)* until
+2026-09-05; that figure could not be re-derived under any measure and is
+corrected in §1 of the closing report. The command that produces the
+number above is printed there.) A gate without that proof might be entirely
 decorative — and V4 found that exact thing four times.
 
 *The order to do them in, and it is not alphabetical:*

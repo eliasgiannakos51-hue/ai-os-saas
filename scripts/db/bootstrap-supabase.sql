@@ -112,3 +112,34 @@ create table if not exists storage.objects (
 -- path segment as the owning user's id.
 create or replace function storage.foldername(name text) returns text[]
 language sql immutable as $$ select string_to_array(name, '/') $$;
+
+-- ============================================================
+-- AND THE TWO THINGS THAT MAKE THE STORAGE POLICIES REAL.
+-- ============================================================
+--
+-- The migrations create TEN policies on storage.objects -- three buckets
+-- times select/insert/delete, plus one update. Every one of them was
+-- INERT in this database, for two independent reasons, and neither was
+-- visible from anything the build runs:
+--
+--   1. `authenticated` had no USAGE on the storage schema, so it could
+--      not reach the table at all: "permission denied for schema
+--      storage". Real Supabase grants it -- that is how the storage API
+--      works at all.
+--   2. The table was created here without row level security, and a
+--      POLICY ON A TABLE WITHOUT RLS DOES NOTHING. Supabase ships
+--      storage.objects with RLS enabled.
+--
+-- Measured on this stub, with two accounts and one file each:
+--
+--     rls off, usage granted -> A sees B's file: 1
+--     rls on                 -> A sees B's file: 0, A sees own: 1
+--
+-- So the ten policies are correct. Nothing here knew that, and nothing
+-- here would have known if one of them had said `using (true)` --
+-- db_exposure_report's tables_without_rls filters `nspname = 'public'`,
+-- so the storage schema is outside every check this project owns.
+grant usage on schema storage to anon, authenticated, service_role;
+grant select, insert, update, delete on storage.objects to authenticated;
+grant select on storage.buckets to anon, authenticated;
+alter table storage.objects enable row level security;

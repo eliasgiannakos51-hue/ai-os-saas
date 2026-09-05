@@ -46,6 +46,33 @@ the thing to run before a deploy, not after a page breaks.
   Write `''{query}''` or `“{query}”`. `scripts/check-i18n.js` fails the
   build on the escaped shape now, English included.
 
+## Every statement about this repository is checkable, or it does not exist
+
+The comments here carry the reasoning: they name the file that does the
+other half, the gate that would have caught it, the route that reads the
+column. That is what makes them worth reading, and it is why a wrong one
+costs more here than elsewhere — a reader who follows a path to nothing
+stops trusting the ones that lead somewhere.
+
+Four of this project's own instruments have lied in exactly this shape.
+`app/offline/page.tsx` said the locale it needed lived behind a request
+that had already failed (it did not: the page is fetched once, over the
+network, at service-worker install) and a gate REQUIRED that excuse.
+`i18n-coverage` said "86 of these still ship" when 160 did.
+`trading/conduct.ts` listed three layers of defence in the present tense
+when only one was running. The README said two cron jobs were unscheduled
+while both sat in `vercel.json`.
+
+    npm run build            # runs scripts/tests/self-claims.test.mjs
+    node scripts/scan-self-claims.mjs
+
+Every path named in a comment or in the markdown must resolve — held at
+ZERO, with the exceptions in `scripts/tests/lib/absent-on-purpose.mjs`,
+each carrying a reason and checked BOTH ways so it cannot go stale. Every
+`Run:` header must name the file it is in; six did not. Symbol claims are
+measured and printed but NOT gated: precision was about 4%, and a check
+with that ratio gets its baseline set to the size of the problem.
+
 ## Gates
 
 `npm run build` runs the whole gate: function limits, mutation markers,

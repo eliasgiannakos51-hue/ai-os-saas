@@ -58,7 +58,8 @@
       "showingCachedAge": "Qui non si aggiorna nulla: caricato {minutes} min fa.",
       "retry": "Riprova",
       "checking": "Controllo…",
-      "stillOffline": "Ancora nessuna connessione."
+      "stillOffline": "Ancora nessuna connessione.",
+      "lastResortBody": "Ionexa ha bisogno di una connessione per caricare nuovi dati. Le pagine che hai già aperto restano disponibili dalla cache di questo dispositivo — e ciò a cui stavi lavorando è al sicuro sul server."
     },
     "creditsUnlimited": "Illimitati",
     "whatIsThis": "Che cos'è?",
@@ -77,7 +78,21 @@
     "paletteClose": "chiudi",
     "paginationPrev": "Prec.",
     "paginationNext": "Succ.",
-    "paginationPage": "Pagina {page} / {total}"
+    "paginationPage": "Pagina {page} / {total}",
+    "errorWithMessage": "errore: {message}",
+    "upgradeRequired": {
+      "title": "Serve un piano superiore",
+      "body": "{feature} richiede il piano {plan} o superiore."
+    },
+    "textActions": {
+      "rewrite": "Riscrivi",
+      "translate": "Traduci",
+      "improve": "Migliora",
+      "explain": "Spiega",
+      "accept": "Accetta",
+      "reject": "Rifiuta"
+    },
+    "betaExpiry": "Il tuo accesso beta scade tra {days, plural, one {# giorno} other {# giorni}}. <link>Passa a un piano superiore per mantenere l'accesso completo</link>."
   },
   "sidebar": {
     "groups": {
@@ -221,7 +236,8 @@
       "acceptableUse": "Uso accettabile",
       "aiTransparency": "Trasparenza dell'IA",
       "contact": "Contatti"
-    }
+    },
+    "accountDeleted": "Il tuo account e tutti i suoi dati sono stati eliminati definitivamente."
   },
   "pricing": {
     "title": "Prezzi",
@@ -508,7 +524,8 @@
       "confirmButton": "Elimina definitivamente il tuo account",
       "cancel": "Annulla e torna indietro",
       "confirmFailed": "Non siamo riusciti a completare l'eliminazione. Il tuo account esiste ancora — riprova il link o contatta l'assistenza."
-    }
+    },
+    "generateStrongPassword": "Genera una password sicura"
   },
   "settings": {
     "title": "Impostazioni",
@@ -700,7 +717,9 @@
       "checkout": {
         "success": "Pagamento ricevuto. Il tuo piano si aggiorna qui appena Stripe lo conferma, di solito in pochi secondi.",
         "cancelled": "Il pagamento è stato annullato. Non è stato addebitato nulla."
-      }
+      },
+      "buyCreditsDescription": "Ti servono più crediti questo mese? Acquista una ricarica una tantum — senza cambiare abbonamento.",
+      "creditsAmount": "{count, plural, one {# credito} other {# crediti}}"
     },
     "marginReport": {
       "title": "Rapporto Margine",

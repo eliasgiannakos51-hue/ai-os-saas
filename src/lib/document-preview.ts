@@ -1,4 +1,5 @@
 import type { DocumentContent } from "@/types/document";
+import { truncate } from "@/lib/text/truncate";
 
 const MAX_PREVIEW_CHARS = 200;
 
@@ -30,5 +31,5 @@ export function documentPreviewText(content: DocumentContent | null | undefined)
     .trim();
 
   if (text === "") return null;
-  return text.length > MAX_PREVIEW_CHARS ? `${text.slice(0, MAX_PREVIEW_CHARS)}…` : text;
+  return truncate(text, MAX_PREVIEW_CHARS);
 }

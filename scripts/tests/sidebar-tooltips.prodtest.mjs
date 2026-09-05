@@ -23,7 +23,7 @@
 // queries all run exactly as they do in production. Being logged in is
 // not "context the real app lacks" — it is the normal state of the page.
 //
-// Run: node scripts/tests/sidebar-tooltips-production.test.mjs
+// Run: node scripts/tests/sidebar-tooltips.prodtest.mjs
 import http from "node:http";
 import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";

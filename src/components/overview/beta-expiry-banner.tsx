@@ -49,15 +49,25 @@ export function BetaExpiryBanner({
     <div className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-orange-900/50 bg-orange-500/5 px-4 py-3 text-sm">
       <div className="flex min-w-0 items-center gap-2.5">
         <Clock className="h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
+        {/* ONE SENTENCE, NOT THREE FRAGMENTS. The English version was built
+            from "expires in", a number, a hand-made "day/days", a link and a
+            full stop — five pieces a translator never sees together, and the
+            plural was `daysRemaining === 1 ? "" : "s"`, which is a rule that
+            exists in English and nowhere else. As one ICU message the count
+            pluralises through Intl and each language puts the link where its
+            own grammar wants it. */}
         <p className="min-w-0 text-orange-200/90">
-          Your beta access expires in {daysRemaining} day{daysRemaining === 1 ? "" : "s"}.{" "}
-          <Link
-            href="/pricing"
-            className="font-medium text-orange-400 underline underline-offset-2 transition-colors duration-150 hover:text-orange-300"
-          >
-            Upgrade to keep full access
-          </Link>
-          .
+          {t.rich("betaExpiry", {
+            days: daysRemaining,
+            link: (chunks) => (
+              <Link
+                href="/pricing"
+                className="font-medium text-orange-400 underline underline-offset-2 transition-colors duration-150 hover:text-orange-300"
+              >
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
       </div>
       <button

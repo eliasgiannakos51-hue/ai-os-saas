@@ -152,8 +152,16 @@ const MUTANTS = [
     // provider: pressing it would start a recording nothing can transcribe.
     name: "the microphone button renders LIVE with no transcription provider, so pressing it wastes somebody's breath",
     file: INPUT,
-    from: "        disabled\n        aria-disabled=\"true\"\n        aria-label={`${t(\"startListening\")} — ${reason}`}",
-    to: "        onClick={() => void start()}\n        aria-label={`${t(\"startListening\")} — ${reason}`}",
+    // RE-ANCHORED 2026-09-06. This pinned `disabled` + `aria-disabled`
+    // together. `disabled` is GONE on purpose: a disabled button fires no
+    // event, so a phone — which cannot hover — had no way to be told WHY
+    // the microphone was off, and the reason lived only in `title`.
+    // aria-disabled keeps it inert and announced while the tap still
+    // reveals the reason in the page. The mutant is the same defect (the
+    // button becomes live with no provider behind it); only the line it
+    // replaces moved, and the suite reported STALE.
+    from: "          aria-disabled=\"true\"\n          onClick={() => setReasonShown((shown) => !shown)}",
+    to: "          onClick={() => void start()}",
   },
   {
     name: "the explanation is skipped and the browser's bare permission prompt is the first thing seen",

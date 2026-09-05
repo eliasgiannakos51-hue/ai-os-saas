@@ -31,7 +31,7 @@
 
 /**
  * The namespaces every client component reachable from a public route
- * asks for. Derived, not guessed: scripts/tests/marketing-messages.test.mjs
+ * asks for. Derived, not guessed: scripts/tests/message-slices.test.mjs
  * walks the import graph from all 15 public entry points, finds the 18
  * client components among the 79 files, and fails if any of them names a
  * namespace that is not here — or if one here is used by none of them.
@@ -122,7 +122,15 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // Its keys are all literal — see the switch in contact-form.tsx —
     // which is what keeps `unbounded` at zero and this group the only
     // trimmable one in the app.
-    namespaces: ["auth", "common", "contact", "cookies", "language", "pricing"],
+    // "landing" arrived with the deleted-account banner: the confirmation
+    // a person sees on the public landing page after their account is gone
+    // — one sentence, the last thing the product ever says to them, and it
+    // was English in all ten locales. This list is why that is a one-line
+    // addition rather than a raw key on the screen: the marketing group is
+    // the only trimmable one, so a namespace used and not declared here is
+    // not a missing translation, it is `landing.accountDeleted` rendered
+    // literally.
+    namespaces: ["auth", "common", "contact", "cookies", "landing", "language", "pricing"],
     unbounded: 0,
   },
 ];

@@ -6,6 +6,7 @@ import { loadLinkedEntities, type LinkedEntity } from "@/lib/entity-links";
 import { logApiError } from "@/lib/log-error";
 import type { ModuleTitleKey } from "@/lib/modules";
 import { DAY_MS } from "@/lib/time-constants";
+import { truncate } from "@/lib/text/truncate";
 
 export type TimelineRange = "today" | "week" | "month" | "all";
 
@@ -50,7 +51,10 @@ function excerptFor(module: ModuleConfig, row: Record<string, unknown>): string 
   );
   if (!field) return "";
   const raw = (row[field.key] as string).trim();
-  return raw.length > EXCERPT_LENGTH ? `${raw.slice(0, EXCERPT_LENGTH).trimEnd()}…` : raw;
+  // truncateWithEllipsis, not slice: a record title ending in an emoji
+  // at exactly this cut produced a lone UTF-16 surrogate — a "\uFFFD" box
+  // in somebody's own timeline. See lib/text/truncate.ts.
+  return truncate(raw, EXCERPT_LENGTH);
 }
 
 // Merges created_at-ordered records from every linkable module's table

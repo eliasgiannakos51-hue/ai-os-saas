@@ -14,6 +14,7 @@
  * contain those in practice, and the failure is a missed fact rather
  * than a wrong one.
  */
+import { cutGraphemes } from "@/lib/text/truncate";
 
 /** <script> and <style> bodies, which are not prose in any sense. */
 const NON_PROSE = /<(script|style|template)\b[^>]*>[\s\S]*?<\/\1\s*>/gi;
@@ -106,8 +107,15 @@ export function hasAttr(tag: string, name: string): boolean {
 export function truncateAtWord(text: string, max: number): string {
   const clean = text.replace(/\s+/g, " ").trim();
   if (clean.length <= max) return clean;
-  const cut = clean.slice(0, max);
+  // cutGraphemes: a meta description ending in an emoji at the cut put
+  // half a surrogate pair in a page's <head>, where it reaches search
+  // results and link previews rather than one screen.
+  const cut = cutGraphemes(clean, max);
   const lastSpace = cut.lastIndexOf(" ");
-  const base = (lastSpace > max * 0.5 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:–—-]+$/, "");
+  // cutGraphemes here too, though a space index is already a safe
+  // boundary: it keeps every cut in this file going through one function,
+  // so scripts/tests/truncate.test.mjs does not need an exception naming
+  // this line — and an exception list is where the next bare slice hides.
+  const base = (lastSpace > max * 0.5 ? cutGraphemes(cut, lastSpace) : cut).replace(/[\s,;:–—-]+$/, "");
   return `${base}…`;
 }

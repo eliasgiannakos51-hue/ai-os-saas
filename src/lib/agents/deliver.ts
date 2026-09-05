@@ -6,6 +6,7 @@ import type { AgentEmailFailure } from "@/lib/email/send-agent-emails";
 import { logApiError } from "@/lib/log-error";
 import { readDeliverySecret } from "@/lib/agents/delivery-store";
 import { createNotification } from "@/lib/notifications/store";
+import { cutGraphemes } from "@/lib/text/truncate";
 import {
   CHANNEL_TEXT_LIMITS,
   fitToChannel,
@@ -62,7 +63,11 @@ function composeMessage(params: {
   // instead would produce a shorter message that is no longer legal to
   // send.
   const room = CHANNEL_TEXT_LIMITS[params.channel] - `${params.agentName}\n\n\n\n— ${notice}`.length - 1;
-  const body = room > 0 ? fitToChannel(params.output, params.channel).slice(0, room) + "…" : "…";
+  // cutGraphemes, not slice: an agent answer ending in an emoji at
+  // exactly `room` left half a surrogate pair in a Slack message. The
+  // cut is never longer than the slice, so the channel limit above
+  // still holds.
+  const body = room > 0 ? cutGraphemes(fitToChannel(params.output, params.channel), room) + "…" : "…";
   return `${params.agentName}\n\n${body}\n\n— ${notice}`;
 }
 

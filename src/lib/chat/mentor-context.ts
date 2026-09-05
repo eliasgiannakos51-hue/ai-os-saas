@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
 import { logApiError } from "@/lib/log-error";
 import { enModuleTitle } from "@/lib/module-labels";
+import { truncate } from "@/lib/text/truncate";
 
 // Bounded per-module scan, same "simple, bounded" trade-off as
 // lib/chat/entity-mentions.ts — this only runs when Mentor Mode is on, so
@@ -71,7 +72,7 @@ export async function loadMentorContext(
             return {
               id: typeof row.id === "string" ? row.id : null,
               headline:
-                raw.length > MAX_HEADLINE_LENGTH ? `${raw.slice(0, MAX_HEADLINE_LENGTH).trimEnd()}…` : raw,
+                truncate(raw, MAX_HEADLINE_LENGTH),
               atMs: Number.isFinite(at) ? at : null,
               raw,
             };

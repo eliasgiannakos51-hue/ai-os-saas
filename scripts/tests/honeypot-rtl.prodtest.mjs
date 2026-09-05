@@ -46,7 +46,7 @@ if (!hp) { console.log(`\nFAILED: ${pass} passed, ${failures.length} failed`); p
 // line breaker with nothing to break on is exactly where a 1px clipped
 // box can behave differently from the Latin case. Arabic covers the
 // right-to-left axis; Chinese covers the no-spaces axis; English is the
-// control. scripts/tests/script-coverage.test.mjs requires the pair,
+// control. scripts/tests/language-extremes.test.mjs requires the pair,
 // and it was right to: this file shipped with Arabic alone.
 const CASES = [
   { id: "en", lang: "en", dir: "ltr", heading: "Form", label: "Name", send: "Send" },

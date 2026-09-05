@@ -23,7 +23,14 @@ const MUTANTS = [
     // 1. THE ORIGINAL DEFECT, in English. One doubled quote pair undone.
     name: "common.noMatches goes back to '{query}' in English",
     file: EN,
-    from: `"noMatches": "No matches for ''{query}''"`,
+    // RE-ANCHORED 2026-09-06. This pointed at the doubled-apostrophe form
+    // `''{query}''`; the catalogue uses typographic quotes, which is the
+    // OTHER correct answer and the one the product settled on. The anchor
+    // was left behind, so both of these mutants reported STALE — a
+    // mutation suite that had stopped testing the thing it names, in the
+    // gate whose whole subject is a string that silently means something
+    // else. Found by running every suite in the foreground.
+    from: `"noMatches": "No matches for \u201c{query}\u201d"`,
     to: `"noMatches": "No matches for '{query}'"`,
     expect: "en common.noMatches shows the query",
   },
@@ -32,7 +39,7 @@ const MUTANTS = [
     // the English source only.
     name: "common.noMatches goes back to '{query}' in Greek",
     file: EL,
-    from: `''{query}''`,
+    from: `\u00ab{query}\u00bb`,
     to: `'{query}'`,
     expect: "no locale wraps a placeholder in single quotes",
   },

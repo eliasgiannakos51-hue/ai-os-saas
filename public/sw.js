@@ -131,13 +131,40 @@ self.addEventListener("fetch", (event) => {
           // offline shell.
           const cached = await caches.match(request);
           if (cached) return cached;
-          const offline = await caches.match(OFFLINE_URL);
+          // ignoreVary, DELIBERATELY. /offline reads the NEXT_LOCALE
+          // cookie so it can be shown in the reader's language, and a
+          // response stored from a request that carried a cookie will not
+          // match this synthetic one if the response declares Vary. Vary
+          // matching here would mean NO offline page at all — the failure
+          // being silent, and only for people who had changed language.
+          // Nothing on that page is per-user, so ignoring Vary costs
+          // nothing.
+          const offline = await caches.match(OFFLINE_URL, { ignoreVary: true });
           if (offline) return offline;
           return new Response("Offline", { status: 503, headers: { "Content-Type": "text/plain" } });
         }
       })()
     );
   }
+});
+
+// THE LANGUAGE OF THE OFFLINE PAGE, after somebody changes it.
+//
+// /offline is fetched once, at install, and served from that copy for the
+// life of the service worker — so it is frozen in whatever language the
+// cookie held at install time. Somebody who installs in English and then
+// switches to Greek would keep reading the English one until the next
+// deploy. lib/locale-preference.ts posts this message after every
+// successful switch; re-fetching is one request and only happens when a
+// person actually changes language.
+self.addEventListener("message", (event) => {
+  if (event.data?.type !== "refresh-offline") return;
+  event.waitUntil(
+    caches
+      .open(SHELL_CACHE)
+      .then((cache) => cache.add(OFFLINE_URL))
+      .catch(() => undefined)
+  );
 });
 
 self.addEventListener("push", (event) => {

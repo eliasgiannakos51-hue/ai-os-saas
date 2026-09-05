@@ -261,6 +261,14 @@ export function substituteModel(
 ): CatalogModel | null {
   const order: CatalogModel["tier"][] = ["small", "mid", "large"];
   const wanted = order.indexOf(tier);
+  // FAIL CLOSED, not "anything will do". `tier` is typed, so -1 is
+  // unreachable today; the reason for the branch is what -1 would MEAN
+  // here — `order.indexOf(m.tier) >= -1` is true for every model, so the
+  // filter would stop filtering and the cheapest model in the catalogue
+  // would answer a request for a large one. A caller that asked for a
+  // capability and quietly got a smaller model is worse than one that got
+  // null and fell back.
+  if (wanted < 0) return null;
   const candidates = modelsForProvider(provider)
     .filter((m) => requires.every((c) => m.capabilities.includes(c)))
     .filter((m) => order.indexOf(m.tier) >= wanted)

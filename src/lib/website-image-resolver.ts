@@ -4,6 +4,7 @@ import {
   applyResolvedImageUrls,
   broadenImageQuery,
   isLogoLikeQuery,
+  isNonLatinQuery,
   stripPlaceholderImageTags,
 } from "@/lib/website-image-placeholders";
 import {
@@ -83,13 +84,22 @@ export async function resolveWebsiteImagePlaceholders(
   // The prompt already forbids emitting these; when one slips through,
   // the tag is removed entirely (the header still carries the text
   // wordmark the prompt requires).
-  const logoLike = all.filter((p) => isLogoLikeQuery(p.query));
-  const placeholders = all.filter((p) => !isLogoLikeQuery(p.query));
+  // A query in another script is treated exactly like a logo one: removed
+  // rather than searched. The prompt requires English (website-builder.ts),
+  // the library only searches English, and the logo test above is written
+  // in English too — so a Greek "λογότυπο" placeholder would otherwise slip
+  // past the logo guard and publish whatever the search happened to return
+  // as the business's own mark. See isNonLatinQuery.
+  const unsearchable = (p: { query: string }) => isLogoLikeQuery(p.query) || isNonLatinQuery(p.query);
+  const logoLike = all.filter(unsearchable);
+  const placeholders = all.filter((p) => !unsearchable(p));
   if (logoLike.length > 0) {
     html = stripPlaceholderImageTags(html, logoLike.map((p) => p.slug));
     logApiError(
       "website-image-resolver",
-      new Error(`stripped ${logoLike.length} logo-like placeholder(s) the prompt forbids`),
+      new Error(
+        `stripped ${logoLike.length} unsearchable placeholder(s): a logo-like query the prompt forbids, or one not written in Latin script`
+      ),
       { queries: logoLike.map((p) => p.query).join(" | ").slice(0, 200) }
     );
   }

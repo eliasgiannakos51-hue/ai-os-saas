@@ -6,6 +6,7 @@ import { loadLatestEnergyCheckIn, type EnergyCheckIn } from "@/lib/energy-checki
 import { logApiError } from "@/lib/log-error";
 import type { Mission } from "@/types/mission";
 import { enModuleTitle } from "@/lib/module-labels";
+import { truncate } from "@/lib/text/truncate";
 import { DAY_MS } from "@/lib/time-constants";
 
 const PER_MODULE_LIMIT = 5;
@@ -222,7 +223,7 @@ async function scanModule(
         const at = new Date(String(row.created_at)).getTime();
         return {
           id: typeof row.id === "string" ? row.id : null,
-          headline: raw.length > MAX_HEADLINE_LENGTH ? `${raw.slice(0, MAX_HEADLINE_LENGTH).trimEnd()}…` : raw,
+          headline: truncate(raw, MAX_HEADLINE_LENGTH),
           atMs: Number.isFinite(at) ? at : null,
           raw,
         };

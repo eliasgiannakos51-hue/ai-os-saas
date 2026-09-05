@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { MoreHorizontal } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { rovingIndex } from "@/lib/ui/roving-index";
 
 export type CardMenuAction = {
   /** Stable key — also used as the DOM id suffix for keyboard focus. */
@@ -71,12 +72,16 @@ export function CardMenu({
       if (!items || items.length === 0) return;
       e.preventDefault();
       const list = Array.from(items);
-      const current = list.indexOf(document.activeElement as HTMLElement);
-      const next =
-        e.key === "ArrowDown"
-          ? (current + 1) % list.length
-          : (current - 1 + list.length) % list.length;
-      list[next]?.focus();
+      // -1 IS NOT "BEFORE THE FIRST ITEM" — see lib/ui/roving-index.ts.
+      // Focus is still on the trigger the first time an arrow is pressed,
+      // so indexOf answers -1, and the old inline arithmetic sent ArrowUp
+      // to the second-to-last item instead of the last.
+      const next = rovingIndex(
+        list.indexOf(document.activeElement as HTMLElement),
+        list.length,
+        e.key === "ArrowDown" ? "next" : "previous"
+      );
+      if (next !== null) list[next]?.focus();
     }
 
     document.addEventListener("mousedown", onPointerDown);

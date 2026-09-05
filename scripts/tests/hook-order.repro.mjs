@@ -1,19 +1,26 @@
-// Every route, in a production build: does it load, is it clean, does it
-// fit on a phone?
+// DOES THE HOOK-ORDER CRASH REPRODUCE? A harness, not a gate.
 //
-// The three failures this catches are the ones that reach a user before
-// anyone notices. A 500 on a route nobody clicks in review. An
-// unresolved i18n key rendering its own dotted path as body text. A page
-// that scrolls sideways at 375px, which on a phone makes the layout feel
-// broken even when every element is present.
+// React throws "Rendered more hooks than during the previous render" when
+// a component's hook count changes between renders — and the report that
+// motivated this file was intermittent: it appeared while navigating
+// between dashboard routes, sometimes, at some widths. An intermittent
+// crash is not something a single assertion can settle, so this drives a
+// real browser through a SEQUENCE of routes at several widths, several
+// times, and counts what the console actually said.
 //
-// Deliberately NOT in the build gate. `next build` runs test:unit, and a
-// suite that needs a port, a browser and a writable node_modules is not a
-// gate — it is a coin flip. That mistake already cost one Vercel deploy.
-// This lives in `npm run test:prod` and runs after a build, not inside
-// one; billing-coverage.test.mjs asserts no *.test.mjs can bind a port.
+// IT IS DELIBERATELY NOT IN THE BUILD GATE. It needs a port, a browser and
+// a writable node_modules, and a suite that needs those is a coin flip
+// rather than a gate — a mistake that already cost one Vercel deploy.
+// Run it by hand when the crash is suspected.
 //
-// Run: node scripts/tests/routes-smoke.prodtest.mjs
+// THIS HEADER WAS ANOTHER SUITE'S. Until 2026-09-06 the twelve lines here
+// described routes-smoke.prodtest.mjs, down to its Run: line, because the
+// file was started by copying it — so a reader learned what a different
+// suite does and was told to run that one instead. Found by
+// scripts/tests/self-claims.test.mjs, which is why it now has a rule about
+// Run: lines.
+//
+// Run: node scripts/tests/hook-order.repro.mjs
 import http from "node:http";
 import { spawn } from "node:child_process";
 

@@ -71,7 +71,7 @@ export default async function AgentsPage({
   // resolveEffectivePlanSlug internally, so asking for both is a second
   // beta-bypass round trip for a value already in hand — and it is what
   // pushed this page over the four-sequential-awaits budget that
-  // scripts/tests/navigation-latency-static.test.mjs enforces.
+  // scripts/tests/navigation-latency.prodtest.mjs enforces.
   const [plan, packCreditPriceEur] = await Promise.all([
     resolveEffectivePlan(user),
     getPurchasedPackCreditPriceEur(user.id),

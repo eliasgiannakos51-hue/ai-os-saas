@@ -58,7 +58,8 @@
       "showingCachedAge": "Rien ici ne se met à jour — chargé il y a {minutes} min.",
       "retry": "Réessayer",
       "checking": "Vérification…",
-      "stillOffline": "Toujours pas de connexion."
+      "stillOffline": "Toujours pas de connexion.",
+      "lastResortBody": "Ionexa a besoin d'une connexion pour charger de nouvelles données. Les pages déjà ouvertes restent disponibles depuis le cache de cet appareil — et ce sur quoi vous travailliez est en sécurité sur le serveur."
     },
     "creditsUnlimited": "Illimités",
     "whatIsThis": "Qu'est-ce que c'est ?",
@@ -77,7 +78,21 @@
     "paletteClose": "fermer",
     "paginationPrev": "Préc.",
     "paginationNext": "Suiv.",
-    "paginationPage": "Page {page} / {total}"
+    "paginationPage": "Page {page} / {total}",
+    "errorWithMessage": "erreur : {message}",
+    "upgradeRequired": {
+      "title": "Mise à niveau requise",
+      "body": "{feature} nécessite le forfait {plan} ou supérieur."
+    },
+    "textActions": {
+      "rewrite": "Réécrire",
+      "translate": "Traduire",
+      "improve": "Améliorer",
+      "explain": "Expliquer",
+      "accept": "Accepter",
+      "reject": "Rejeter"
+    },
+    "betaExpiry": "Votre accès bêta expire dans {days, plural, one {# jour} other {# jours}}. <link>Passez à un forfait supérieur pour garder l'accès complet</link>."
   },
   "sidebar": {
     "groups": {
@@ -221,7 +236,8 @@
       "acceptableUse": "Usage acceptable",
       "aiTransparency": "Transparence de l'IA",
       "contact": "Contact"
-    }
+    },
+    "accountDeleted": "Votre compte et toutes ses données ont été définitivement supprimés."
   },
   "pricing": {
     "title": "Tarifs",
@@ -508,7 +524,8 @@
       "confirmButton": "Supprimer définitivement votre compte",
       "cancel": "Annuler et revenir",
       "confirmFailed": "Nous n'avons pas pu terminer la suppression. Votre compte existe toujours — réessayez le lien ou contactez le support."
-    }
+    },
+    "generateStrongPassword": "Générer un mot de passe fort"
   },
   "settings": {
     "title": "Paramètres",
@@ -700,7 +717,9 @@
       "checkout": {
         "success": "Paiement reçu. Votre offre se met à jour ici dès que Stripe la confirme, en général en quelques secondes.",
         "cancelled": "Le paiement a été annulé. Rien n'a été débité."
-      }
+      },
+      "buyCreditsDescription": "Besoin de plus de crédits ce mois-ci ? Achetez une recharge unique — sans changer d'abonnement.",
+      "creditsAmount": "{count, plural, one {# crédit} other {# crédits}}"
     },
     "marginReport": {
       "title": "Rapport de Marge",

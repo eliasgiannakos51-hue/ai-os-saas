@@ -34,7 +34,7 @@ const MAX_DESCRIPTION_LENGTH = 20000;
 // schedule, indefinitely, with no further approval per run.
 const MAX_ACTIVE_AUTOMATIONS = 10;
 
-// "Make this real" (see components/automation/automation-realize-form.tsx)
+// "Make this real" (see components/automation/automation-realize-list.tsx)
 // — turns an Automation module idea into an actually-scheduled, repeating
 // automation. No AI call and no credit charge for the automation ITSELF
 // here; this route only ever creates a 'pending-for-its-first-run' row —

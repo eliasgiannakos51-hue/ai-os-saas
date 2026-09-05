@@ -298,18 +298,74 @@ checkList(
       messages[l].common.offline.title === messages.en.common.offline.title,
   ),
 );
-// The static /offline page is the OTHER case — a navigation with nothing
-// cached — and it is deliberately English, because the locale it would
-// need comes from the request that just failed. Checked so the two are
-// not confused for each other.
+// ---------------------------------------------------------------------
+// THE LAST-RESORT PAGE — the OTHER case, a navigation with nothing cached.
+//
+// THESE TWO CHECKS USED TO PIN A BUG. They asserted that the page still
+// said "You&apos;re offline" in English and still carried a comment
+// explaining that "the locale it would need comes from the request that
+// just failed". Both passed for months. The excuse was false, and because
+// the gate required it, fixing the page meant turning this file red — the
+// exact shape of a check that protects a defect.
+//
+// The page is never RENDERED offline. It is fetched once, over the
+// network, by the service worker's install handler — `cache.add("/offline")`,
+// a same-origin request carrying the NEXT_LOCALE cookie like any other —
+// and what a phone shows offline is that already-rendered HTML. The locale
+// was available at the one moment the page is ever built.
+//
+// So the checks are now about the three things that have to be true for a
+// Greek reader to meet a Greek page with no connection:
+//   1. the page resolves its words through next-intl;
+//   2. the worker can still FIND the cached copy once the response varies;
+//   3. changing language re-fetches it, because the install-time copy is
+//      otherwise frozen for the life of the worker.
 const offlinePage = readFileSync("src/app/offline/page.tsx", "utf8");
+// THE COMPONENT, NOT THE METADATA. The first version of this asked
+// whether the file mentioned getTranslations anywhere, and
+// offline-locale.mutation.mjs killed it: generateMetadata calls it too, so
+// the page body could go back to `const t = (k) => k` — rendering raw key
+// paths at a reader — with this check still green. What has to resolve
+// through next-intl is the thing a person looks at.
 check(
-  "the last-resort page still exists",
-  /You&apos;re offline/.test(offlinePage),
+  "the last-resort page resolves its words through next-intl",
+  /export default async function OfflinePage\(\)[\s\S]{0,120}?getTranslations\("common"\)/.test(
+    offlinePage,
+  ),
+);
+checkList(
+  "...and carries no English sentence of its own",
+  [/You&apos;re offline/, /needs a connection to load/, /Try again</].filter((re) =>
+    re.test(offlinePage),
+  ).map(String),
+);
+checkList(
+  "...and its three keys exist in all ten languages",
+  LOCALES.flatMap((l) =>
+    ["title", "lastResortBody", "retry"]
+      .filter((k) => typeof messages[l].common.offline[k] !== "string")
+      .map((k) => `${l}.${k}`),
+  ),
 );
 check(
-  "and still explains why it is not translated",
-  /locale it would need|cannot use\s*\n?\s*\* translations/.test(offlinePage),
+  "...and it stays server-rendered, because its own JS chunk is not cached",
+  !/"use client"/.test(offlinePage),
+);
+
+const sw = readFileSync("public/sw.js", "utf8");
+check(
+  "the worker finds the offline shell even when the response varies",
+  /caches\.match\(OFFLINE_URL, \{ ignoreVary: true \}\)/.test(sw),
+);
+check(
+  "...and re-fetches it when somebody changes language",
+  /"refresh-offline"/.test(sw) && /cache\.add\(OFFLINE_URL\)/.test(sw),
+);
+const localePref = readFileSync("src/lib/locale-preference.ts", "utf8");
+check(
+  "...which is asked for on every language change, not only on sign-in",
+  /postMessage\(\{ type: "refresh-offline" \}\)/.test(localePref) &&
+    /refreshOfflineShell\(\);/.test(localePref),
 );
 
 console.log(

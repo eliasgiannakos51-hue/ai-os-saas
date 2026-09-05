@@ -448,7 +448,7 @@ FORMS: see the FORM INSTRUCTIONS block given after this system prompt — what k
 //
 // WHY THE WHOLE FORM SPEC LIVES HERE rather than in SYSTEM_PROMPT: the
 // static prompt is at 29.4k characters against a 30k ceiling
-// (scripts/tests/website-variety.test.ts's last section), and that
+// (scripts/tests/website-variety.test.mjs's last section), and that
 // ceiling exists because every character of general instruction competes
 // with the user's own brief for the model's attention. Forms are also
 // the one subject where the instruction and the per-website endpoint URL

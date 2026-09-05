@@ -4,6 +4,13 @@ import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { INSIGHT_MODEL } from "@/lib/insights/insight-models";
 import type { Finding } from "@/lib/insights/detectors";
 import { maxCharsFor } from "@/lib/text/script-length";
+import { truncate } from "@/lib/text/truncate";
+
+/** The fallback headline's length, chosen for English and widened for
+ *  German by maxCharsFor at the point of use — 90 was the bare number in
+ *  the expression this replaced, with 87 as its slice length so the "…"
+ *  fitted inside it. The ellipsis is outside the cap now. */
+const FALLBACK_HEADLINE_CHARS = 90;
 
 /**
  * Turn findings into sentences, without letting the model add anything.
@@ -170,7 +177,11 @@ export function fallbackNarration(finding: Finding): { headline: string; detail:
   const headline = sentences[0].replace(/\.$/, "");
   const detail = sentences.slice(1).join(" ") || finding.statement;
   return {
-    headline: headline.length > 90 ? `${headline.slice(0, 87)}…` : headline,
+    // maxCharsFor, so a German headline is not cut where an English one
+    // would not be (lib/text/script-length.ts); truncateWithEllipsis
+    // rather than slice, so a headline ending in an emoji at the cut is
+    // not a replacement box (lib/text/truncate.ts).
+    headline: truncate(headline, maxCharsFor(FALLBACK_HEADLINE_CHARS)),
     detail,
   };
 }

@@ -1,14 +1,12 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import { useState } from "react";
 import { CREDIT_PACKS, CURRENCY_SYMBOL } from "@/lib/billing/plans";
-import { formatNumber } from "@/lib/format-number";
 
 export function BuyCredits() {
   const t = useTranslations("settings.billing");
-  const locale = useLocale();
   const tCommon = useTranslations("common");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +42,7 @@ export function BuyCredits() {
     >
       <h2 className="text-sm font-semibold text-foreground">{t("buyCredits")}</h2>
       <p className="text-xs text-muted">
-        Need more credits this month? Buy a one-time top-up — no subscription change.
+        {t("buyCreditsDescription")}
       </p>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {CREDIT_PACKS.map((pack) => (
@@ -60,14 +58,16 @@ export function BuyCredits() {
               {pack.price}
             </span>
             <span className="text-[11px] text-muted">
-              {loadingId === pack.id ? "Loading..." : `${formatNumber(pack.credits, locale)} credits`}
+              {loadingId === pack.id
+                ? tCommon("loading")
+                : t("creditsAmount", { count: pack.credits })}
             </span>
           </button>
         ))}
       </div>
       {error && (
         <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
-          error: {error}
+          {tCommon("errorWithMessage", { message: error })}
         </p>
       )}
     </div>

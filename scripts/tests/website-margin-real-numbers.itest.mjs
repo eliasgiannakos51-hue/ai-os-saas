@@ -22,7 +22,7 @@
 // it can only come from a cost that never reached the formula. That is
 // what sections 3-5 test.
 //
-// Run: node scripts/tests/website-margin-real-numbers.test.mjs
+// Run: node scripts/tests/website-margin-real-numbers.itest.mjs
 import http from "node:http";
 
 let pass = 0,

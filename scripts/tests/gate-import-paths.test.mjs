@@ -29,6 +29,7 @@
 // Run: node scripts/tests/gate-import-paths.test.mjs
 import { readdirSync, readFileSync, existsSync } from "node:fs";
 import path from "node:path";
+import { ABSENT_ON_PURPOSE } from "./lib/absent-on-purpose.mjs";
 
 const DIR = "scripts/tests";
 let pass = 0;
@@ -91,6 +92,32 @@ const DELIBERATE = new Map([
   ]],
 ]);
 
+/**
+ * The paths this gate must not flag in `file`.
+ *
+ * THE ONE TABLE, NOT A SECOND COPY OF IT. self-claims.test.mjs holds
+ * comment path claims at zero and keeps its exceptions — paths this
+ * repository names on purpose that are NOT there — in
+ * lib/absent-on-purpose.mjs. It writes every one of them into itself, so
+ * this gate would flag them all. Reading the same module rather than
+ * repeating the list is what stops the two from disagreeing, which is the
+ * defect both of them exist to catch.
+ *
+ * Used by BOTH loops below. The first version of this was pasted into the
+ * @/-specifier loop only, so the repository-path loop stayed red and said
+ * so — which is the shape of an allowlist that looks applied and is not.
+ */
+function allowedFor(file) {
+  const fromSelfClaims =
+    file === "self-claims.test.mjs" || file === "self-claims.mutation.mjs"
+      ? Object.values(ABSENT_ON_PURPOSE).flatMap((e) => e.paths.flatMap((p) => [p, `src/${p}`]))
+      : [];
+  return [
+    ...fromSelfClaims,
+    ...(file === "gate-import-paths.test.mjs" ? [...DELIBERATE.values()].flat() : DELIBERATE.get(file) ?? []),
+  ];
+}
+
 function resolveAlias(spec) {
   const base = path.join("src", spec.slice("@/".length));
   for (const ext of [".ts", ".tsx", "/index.ts", "/index.tsx", ".json"]) {
@@ -129,10 +156,7 @@ for (const file of files) {
   const src = stripJs(readFileSync(path.join(DIR, file), "utf8"));
   // THIS FILE LISTS OTHER FILES' FIXTURES AS DATA, so scanning itself finds
   // every one of them. The allowlist covers its own listing.
-  const allowed =
-    file === "gate-import-paths.test.mjs"
-      ? [...DELIBERATE.values()].flat()
-      : DELIBERATE.get(file) ?? [];
+  const allowed = allowedFor(file);
   const specs = new Set(
     [...src.matchAll(SPEC)]
       .map((m) => m[0].replace(/\\\//g, "/"))
@@ -193,10 +217,7 @@ let repoChecked = 0;
 const repoBroken = [];
 for (const file of files) {
   const src = stripJs(readFileSync(path.join(DIR, file), "utf8"));
-  const allowed =
-    file === "gate-import-paths.test.mjs"
-      ? [...DELIBERATE.values()].flat()
-      : DELIBERATE.get(file) ?? [];
+  const allowed = allowedFor(file);
   const selfChecking = existsSyncArguments(src);
   for (const spec of new Set([...src.matchAll(REPO_PATH)].map((m) => m[0]))) {
     if (selfChecking.has(spec)) continue;

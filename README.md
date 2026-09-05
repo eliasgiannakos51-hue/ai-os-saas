@@ -795,7 +795,7 @@ afterwards.
    email on your own Resend account, so set it to a verified sending
    address before real users sign up. `ADMIN_EMAILS` is optional and
    additive to the founder account already hardcoded in
-   `src/lib/admin.ts` — see [Admin access](#admin-access) below.
+   `src/lib/auth/admin-emails.ts` — see [Admin access](#admin-access) below.
    `BETA_INVITE_CODE`/`BETA_FEEDBACK_URL` are optional — see
    [Beta testers](#beta-testers) below. `UNSPLASH_ACCESS_KEY` is optional —
    see [Website Builder photos](#website-builder-photos) below; without it,
@@ -1168,7 +1168,7 @@ own rows, every write goes through the service-role client).
 
 ## Admin access
 
-`src/lib/admin.ts` defines an `ADMIN_EMAILS` allowlist (the founder account
+`src/lib/auth/admin-emails.ts` defines an `ADMIN_EMAILS` allowlist (the founder account
 is hardcoded there; extend it via the `ADMIN_EMAILS` env var). Any signed-in
 user whose email is on that list is treated as Enterprise tier with
 unlimited credits and full plan capabilities everywhere the app would

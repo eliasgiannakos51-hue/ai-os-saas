@@ -3,6 +3,7 @@
 import { useRef, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { moduleAccent } from "@/lib/module-colors";
+import { rovingIndex } from "@/lib/ui/roving-index";
 
 export type DetailTab = {
   key: string;
@@ -56,12 +57,20 @@ export function DetailPanel({
   function handleTabKeyDown(e: React.KeyboardEvent) {
     if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
     e.preventDefault();
-    const current = tabs.findIndex((tab) => tab.key === activeTab);
-    const next =
-      e.key === "ArrowRight"
-        ? (current + 1) % tabs.length
-        : (current - 1 + tabs.length) % tabs.length;
-    onTabChange(tabs[next].key);
+    // The same shape as card-menu.tsx: an activeTab that is not in `tabs`
+    // — a panel re-rendered with a different tab set, which is what a
+    // module with configurable sections does — answers -1, and the old
+    // arithmetic then moved LEFT to the second-to-last tab. `tabs[next].key`
+    // was unguarded too: an empty list made `next` NaN and read `.key` off
+    // undefined, which is a crash rather than a key that does nothing.
+    const next = rovingIndex(
+      tabs.findIndex((tab) => tab.key === activeTab),
+      tabs.length,
+      e.key === "ArrowRight" ? "next" : "previous"
+    );
+    const target = next === null ? undefined : tabs[next];
+    if (!target || next === null) return;
+    onTabChange(target.key);
     tablistRef.current
       ?.querySelectorAll<HTMLElement>("[role='tab']")
       [next]?.focus();

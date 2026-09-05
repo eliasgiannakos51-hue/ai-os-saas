@@ -43,7 +43,7 @@ and two more in `scripts/tests/icu-quoted-placeholders.mutation.mjs`
 pointed at a quoting form the catalogue had moved away from.
 
 *Caught by:* every suite reports `STALE` and exits non-zero;
-`scripts/check-mutation-tree.mjs` enumerates all 1,537 anchors;
+`scripts/check-mutation-tree.mjs` enumerates all 1,540 anchors;
 `scripts/tests/gate-stale-anchors.test.mjs` checks the shape of the check.
 
 ## Vacuous assertion
@@ -181,17 +181,30 @@ granted USAGE on the storage schema. The ten policies the migrations put
 on that table were therefore inert on two counts at once — and a policy
 on a table without RLS does nothing at all. Measured before the fix, with
 two accounts and one file each: **account A read account B's private
-file**. The policies turned out to be correct; nothing here could have
-said so, and nothing would have noticed if one had said `using (true)`,
-because `db_exposure_report`'s `tables_without_rls` filters
-`nspname = 'public'` and the storage schema is outside every check this
-project owns.
+file**.
+
+**In the fixture.** The first version of this paragraph reported that as
+a hole and did not say where it was; asked on 2026-09-05, production
+answered `relrowsecurity = true` for `storage.objects`, so the ten
+policies were load-bearing there the whole time. What this divergence
+actually cost was not safety, it was **coverage**: on the only database
+any gate can reach, those ten policies could not be evaluated, so one of
+them saying `using (true)` would have gone unnoticed —
+`db_exposure_report`'s `tables_without_rls` filters `nspname = 'public'`
+and the storage schema is outside every check this project owns.
+
+That is the part of this shape worth remembering. A fixture that is
+*looser* than production does not hand you a false all-clear about
+production; it hands you an untested rule, which reads the same in a
+green log.
 
 *Caught by:* `scripts/tests/stub-vs-production.test.mjs` — a register of
 what the stub must model, each entry carrying the incident that put it
 there, plus the divergences that remain with the direction each fails in;
 every entry is checked BOTH ways, so one that has stopped describing the
-stub is a failure rather than a note. 13 checks, 7 of 7 mutations.
+stub is a failure rather than a note, plus the three answers production
+gave when it was asked by hand -- each stamped with the day it was true,
+because nothing re-asks them. 18 checks, 10 of 10 mutations.
 `scripts/tests/user-isolation.dbtest.mjs` now probes `storage.objects` in
 all three buckets, so the ten policies are exercised rather than counted.
 

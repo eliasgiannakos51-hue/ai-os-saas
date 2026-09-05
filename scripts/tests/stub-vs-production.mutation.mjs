@@ -33,7 +33,15 @@ const MUTANTS = [
     file: STUB,
     from: "alter table storage.objects enable row level security;",
     to: "",
-    expect: "the stub still models every one of them",
+    expect: [
+      "the stub still models every one of them",
+      // AND the second assertion on the same line. Production answered
+      // `relrowsecurity = true` on 2026-09-05, which is precisely the
+      // argument for deleting this from the stub — and deleting it makes
+      // the ten policies inert HERE again, which is what the divergence
+      // cost in the first place.
+      "none of them has been used as a reason to stop modelling it",
+    ],
   },
   {
     // 2. THE DEFAULT PRIVILEGES. Their absence is what hid 89 (table,
@@ -83,6 +91,37 @@ const MUTANTS = [
     from: "create extension if not exists unaccent;",
     to: "",
     expect: "every one of them still describes this stub",
+  },
+  {
+    // 8. A RECORDED ANSWER WITH NO DATE. Nothing re-asks these, so a fact
+    // without the day it was true is a present-tense claim nobody can
+    // date — the shape corrected three times in this project's own
+    // documents.
+    name: "a production fact loses the date it was true",
+    file: GATE,
+    from: '    asked: "2026-09-05",\n    query: "select relrowsecurity',
+    to: '    asked: "recently",\n    query: "select relrowsecurity',
+    expect: "stamped with the date it was true",
+  },
+  {
+    // 9. THE QUESTION BECOMES A PARAPHRASE. An answer whose query cannot
+    // be re-run as written is an unreproducible number, which is the one
+    // thing the closing rule of this project says may not exist here.
+    name: "a production fact keeps its answer but paraphrases the question",
+    file: GATE,
+    from: 'query: "select rolname, rolbypassrls from pg_roles order by 1"',
+    to: 'query: "checked the roles and their bypassrls flags"',
+    expect: "runnable as written",
+  },
+  {
+    // 10. AN ANSWER THAT BOUNDS NOTHING. A fact filed against a line this
+    // register does not carry reads as evidence for something that is not
+    // there — reassurance with no referent.
+    name: "a production fact is filed against a line the register does not carry",
+    file: GATE,
+    from: 'bounds: "row level security on storage.objects"',
+    to: 'bounds: "storage is fine"',
+    expect: "bounding a line of this register",
   },
   {
     // 7. THE READER STOPS READING. Nothing about the repository changes;
@@ -143,14 +182,24 @@ try {
       console.log(`  MISSED  ${m.name}`);
       continue;
     }
-    const onTarget = result.failed.filter((f) => f.includes(m.expect));
-    if (onTarget.length === 0) {
-      missed.push({ ...m, why: `red on "${result.failed.slice(0, 3).join('", "')}" — nothing matching "${m.expect}"` });
+    // `expect` MAY BE A LIST, and then every entry must go red. One
+    // mutation below removes a line the register asserts TWICE on
+    // purpose — once as a thing the stub must model, once as a thing a
+    // production answer may not be used to retire — and a single
+    // expectation would let either clause rot while the other carried it.
+    const wanted = Array.isArray(m.expect) ? m.expect : [m.expect];
+    const onTarget = wanted.filter((w) => result.failed.some((f) => f.includes(w)));
+    if (onTarget.length < wanted.length) {
+      const absent = wanted.filter((w) => !result.failed.some((f) => f.includes(w)));
+      missed.push({
+        ...m,
+        why: `red on "${result.failed.slice(0, 3).join('", "')}" — nothing matching ${absent.map((w) => `"${w}"`).join(" or ")}`,
+      });
       console.log(`  WRONG   ${m.name}\n          -> red on: ${result.failed.slice(0, 3).join(" | ")}`);
       continue;
     }
     caught++;
-    console.log(`  CAUGHT  ${m.name}\n          -> ${onTarget[0]}`);
+    console.log(`  CAUGHT  ${m.name}\n          -> ${onTarget.length} clause(s) red: ${onTarget.join(" | ")}`);
   }
 } finally {
   restoreAll();

@@ -139,6 +139,12 @@ language sql immutable as $$ select string_to_array(name, '/') $$;
 -- here would have known if one of them had said `using (true)` --
 -- db_exposure_report's tables_without_rls filters `nspname = 'public'`,
 -- so the storage schema is outside every check this project owns.
+--
+-- AND THE LEAK ABOVE WAS THIS FIXTURE'S, NOT PRODUCTION'S. Asked on
+-- 2026-09-05, `select relrowsecurity from pg_class where oid =
+-- 'storage.objects'::regclass` answered TRUE there. So this line does
+-- not close a production hole; it makes the ten policies testable at
+-- all, which is the thing that was actually missing.
 grant usage on schema storage to anon, authenticated, service_role;
 grant select, insert, update, delete on storage.objects to authenticated;
 grant select on storage.buckets to anon, authenticated;

@@ -773,11 +773,12 @@ console.log("\n== 3b. the files themselves, not just the rows about them ==");
 // belong to a schema no check in this project reaches —
 // db_exposure_report's tables_without_rls filters `nspname = 'public'`.
 //
-// They were inert here for two reasons at once: `authenticated` had no
+// They were inert HERE for two reasons at once: `authenticated` had no
 // USAGE on the storage schema, and the table had no row level security,
-// which makes a policy decoration. bootstrap-supabase.sql now does both,
-// and this section is what says the policies work rather than merely
-// exist.
+// which makes a policy decoration. That was the fixture's state, not
+// production's — asked on 2026-09-05, production's storage.objects has
+// relrowsecurity = true. bootstrap-supabase.sql now does both, and this
+// section is what says the policies work rather than merely exist.
 const BUCKETS = ["user-files", "website-references", "create-attachments"];
 const storageRows = [];
 for (const bucket of BUCKETS) {

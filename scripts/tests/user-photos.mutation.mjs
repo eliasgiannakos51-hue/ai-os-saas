@@ -59,8 +59,15 @@ const MUTANTS = [
         to: "",
       },
       {
-        from: "  const logoLike = all.filter((p) => isLogoLikeQuery(p.query));",
-        to: '  if (options.photoSource === "none") {\n    return { html: stripPlaceholderImageTags(html, all.map((p) => p.slug)), used: [], halted: null };\n  }\n  const logoLike = all.filter((p) => isLogoLikeQuery(p.query));',
+        // RE-ANCHORED 2026-09-06. The filter this moves the early return
+        // past used to be `all.filter((p) => isLogoLikeQuery(p.query))`;
+        // it is a named predicate now, because a query in a non-Latin
+        // script is unsearchable for the same reason a logo query is. The
+        // mutant is unchanged in what it does — move the "none" branch
+        // BELOW the searches so the quota is spent before the strip — but
+        // the line it anchors on moved, and the suite reported STALE.
+        from: "  const logoLike = all.filter(unsearchable);",
+        to: '  if (options.photoSource === "none") {\n    return { html: stripPlaceholderImageTags(html, all.map((p) => p.slug)), used: [], halted: null };\n  }\n  const logoLike = all.filter(unsearchable);',
       },
     ],
   },

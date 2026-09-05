@@ -13,21 +13,24 @@ before the feature it guards is a gate with nothing behind it.
 
 ## Tier 1 — cannot ship V5 without these
 
-### 1. The isolation test: two real accounts
-**~1 day.** Blocked on: two real accounts existing.
+### 1. The isolation test: two real accounts — HALF DONE
+**~half a day left.** Blocked on: two real accounts existing.
 
-Every RLS policy is verified against a database. None is verified against
-two people. This is the single largest named gap in V4 and it is a fixture
-problem, not a knowledge problem.
+**The database half is done.** `scripts/tests/user-isolation.dbtest.mjs`
+impersonates `authenticated` the way production does and probes all 96
+user-owned tables with two accounts — read, update, delete, and the
+unpredicated write a predicate cannot see. 18 checks, 7 of 7 schema
+mutations caught. It is what found the 89 grants no policy covered.
 
-*Done means:* two accounts with rows in the same tables; account A's
-session issues every read the app issues; not one of B's rows appears.
-Runs as a `.dbtest` against a real Postgres, and as a `.prodtest` against
-production once the accounts exist.
+*What is left, and it is the part that needs you:* the same questions
+through a **real session against production** — two accounts, real JWTs,
+PostgREST rather than psql. That additionally proves GoTrue issues the
+claim the policies read, and that the deployed schema is this one. It is a
+`.prodtest`, and it cannot be written against fixtures.
 
-*Proven by:* the test failing when a single `.eq("user_id", …)` is removed
-from any of the 91 scoped functions — a mutation suite over the real ones,
-not a fixture.
+*Proven by:* the dbtest going red when a policy is loosened — already
+demonstrated seven ways — plus, for the production half, the same suite
+returning zero of B's rows through the API.
 
 ### 2. The spelling check: built, never run against a real site
 **~half a day.** Blocked on: an Anthropic API key.

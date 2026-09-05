@@ -74,6 +74,25 @@ function ok(name, cond, detail = "") {
 
 const suites = readdirSync(DIR).filter((f) => f.endsWith(".mutation.mjs")).sort();
 
+/** Every gate a suite's source names, .test.mjs or .dbtest.mjs alike. */
+const targetsOf = (src) =>
+  [...src.matchAll(/"(scripts\/tests\/[a-z0-9-]+\.(?:db)?test\.mjs)"/g)].map((m) => m[1]);
+
+/**
+ * Does this suite edit a SCHEMA rather than a source file?
+ *
+ * It decides which gate a suite is allowed to pair with, and the two
+ * cannot be swapped: a suite that rewrites TypeScript cannot drive a gate
+ * that needs a live Postgres, and one that drops a policy has no file to
+ * rewrite. tracking-to-tools is why this is a question and not an
+ * assumption — tracking-to-tools.dbtest.mjs exists, but the suite of that
+ * name mutates src/lib/data-analysis and guards data-analysis.test.mjs.
+ * Demanding it point at the dbtest would be demanding a wrong thing.
+ */
+const mutatesSchemaOf = (src) =>
+  targetsOf(src).some((t) => t.endsWith(".dbtest.mjs")) &&
+  !/writeFileSync|sidecar-write/.test(src);
+
 console.log("mutation-suite-shape");
 // A floor, for the reason every gate here has one: "none of them is broken"
 // is trivially true of an empty list.
@@ -88,12 +107,17 @@ console.log("\n== 1. every suite targets its own gate, when one exists ==");
 // that would have caught the real bug: if a gate with the suite's own name
 // EXISTS, pointing somewhere else is a mistake, because the two names are
 // then one typo apart.
+// A GATE IS NOT ALWAYS A .test.mjs. user-isolation.mutation.mjs drives
+// user-isolation.dbtest.mjs, because the defect it reproduces — a policy
+// that says `using (true)`, or RLS switched off during an incident — is
+// not a line of source anybody could mutate. A suite pointed at a dbtest
+// is pointed at a gate.
 for (const file of suites) {
   const name = file.replace(/\.mutation\.mjs$/, "");
   const src = readFileSync(path.join(DIR, file), "utf8");
-  const targets = [...src.matchAll(/"(scripts\/tests\/[a-z0-9-]+\.test\.mjs)"/g)].map((m) => m[1]);
-  ok(`${name}: names at least one gate`, targets.length > 0, "no scripts/tests/*.test.mjs referenced");
-  const own = `${DIR}/${name}.test.mjs`;
+  const targets = [...src.matchAll(/"(scripts\/tests\/[a-z0-9-]+\.(?:db)?test\.mjs)"/g)].map((m) => m[1]);
+  ok(`${name}: names at least one gate`, targets.length > 0, "no scripts/tests/*.(db)test.mjs referenced");
+  const own = mutatesSchemaOf(src) ? `${DIR}/${name}.dbtest.mjs` : `${DIR}/${name}.test.mjs`;
   if (!existsSync(own)) continue; // a differently-named gate is deliberate
   ok(
     `${name}: targets its own gate, which exists`,
@@ -155,7 +179,21 @@ for (const file of suites) {
   // is that the presence of the anchor is TESTED and NEGATED, however the
   // source is reached.
   const checksPresence = /!\s*[\w.]+(?:\([^)]*\))?(?:\.\w+)*\.includes\(\s*[\w.]+\s*\)/.test(code);
-  ok(`${name}: checks whether the anchor is still in the file`, checksPresence);
+
+  // A SUITE THAT MUTATES A SCHEMA HAS NO ANCHOR TO GO STALE, and the same
+  // obligation reaches it in a different shape. Its edit is a DROP POLICY
+  // or an ALTER TABLE, so what can silently rot is not a `from` string
+  // that stopped matching — it is a restore that did not happen, leaving
+  // every later mutation measuring a database already broken. That is not
+  // hypothetical: user-isolation.mutation.mjs put an INSERT policy back
+  // with a USING clause, Postgres refused it, and the whole run afterwards
+  // was noise. So it must CAPTURE the state before and COMPARE it after.
+  if (mutatesSchemaOf(src)) {
+    const verifiesRestore = /!==\s*\w*[Bb]efore\b/.test(code) || /\w*[Bb]efore\s*!==/.test(code);
+    ok(`${name}: verifies the schema it edited was put back`, verifiesRestore);
+  } else {
+    ok(`${name}: checks whether the anchor is still in the file`, checksPresence);
+  }
 
   // The counter the exit code reads. Every suite here spells it `missed`,
   // either as an array it pushes to or a number it increments.
@@ -204,16 +242,28 @@ console.log("\n== 4. a mutation names the check that must catch it ==");
 // number may only go up.
 const NAMES_ITS_CHECK = suites.filter((file) => {
   const src = readFileSync(path.join(DIR, file), "utf8");
-  const declares = /expect:\s*"/.test(src) || /expectAny:/.test(src);
+  // `expect:` MAY BE A LIST. One substring was too weak in both
+  // directions — a mutant that reddened one unrelated clause counted as
+  // caught, and a mutant whose defect should redden five checks was
+  // satisfied by one — so user-isolation declares every check that must
+  // go red and requires all of them. Reading only the string form would
+  // have scored the stricter suite as the one that names nothing.
+  const declares = /expect:\s*["[]/.test(src) || /expectAny:/.test(src);
   const compares =
     /includes\(m\.expect\)/.test(src) ||
     /wanted\.some/.test(src) ||
+    /m\.expect\.filter\(/.test(src) ||
     /f\.includes\(m\.expect/.test(src);
   return declares && compares;
 });
+// THE FLOOR SAT AT 10 WHILE 44 HELD. Written when ten suites named their
+// check, never re-asked as thirty-four more were rewritten — the shape
+// where a statement was true once and nobody looked again, in the gate
+// that exists to stop exactly that. A ratchet four times below the
+// measurement lets four out of five suites regress in silence.
 ok(
   `suites that name the catching check (${NAMES_ITS_CHECK.length} of ${suites.length})`,
-  NAMES_ITS_CHECK.length >= 10,
+  NAMES_ITS_CHECK.length >= 44,
   `${NAMES_ITS_CHECK.length} — this floor rises as suites are rewritten, and never falls`,
 );
 // And the ones that do must not have gone hollow: a declared `expect`
@@ -231,7 +281,7 @@ ok(
 // miss prints.
 const hollow = NAMES_ITS_CHECK.filter((file) => {
   const src = readFileSync(path.join(DIR, file), "utf8");
-  return !/\$\{m\.expect\}|\$\{JSON\.stringify\(wanted\)\}/.test(src);
+  return !/\$\{m\.expect\}|\$\{JSON\.stringify\((?:wanted|m\.expect)\)\}/.test(src);
 });
 ok(
   "every suite that names a check actually reports on it",

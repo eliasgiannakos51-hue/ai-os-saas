@@ -29,7 +29,7 @@ specific things that cannot be closed from a keyboard.
 
 | Checked | How it was measured |
 | --- | --- |
-| RLS on **106 / 106** tables | Live, against an ephemeral Postgres built from all 63 migrations |
+| RLS on **106 / 106** tables | Live, against an ephemeral Postgres built from all 64 migrations |
 | Grants: no function executable by `anon` or `authenticated` unexpectedly | Live, same database |
 | `search_path` pinned on **46 / 46** `SECURITY DEFINER` functions | Migration scan |
 | **91 / 91** functions taking a `userId` use it as a filter or owner column | AST |
@@ -37,11 +37,33 @@ specific things that cannot be closed from a keyboard.
 | Owner-only components reachable only behind a real guard | The guard's *shape*, not the presence of two words |
 | Every column a Supabase call names exists on the table it names | Live, authoritative |
 
-**The 15% that is missing, named:** there is no live isolation test with
-**two real accounts**. The database is proven correct in isolation and the
-code is proven to scope its queries; that user A cannot see user B's rows
-**through a real session, in production** has never been executed. That is
-a different claim, and it is the one that matters most.
+| **96 / 96** user-owned tables probed with **two accounts** | Live, `scripts/tests/user-isolation.dbtest.mjs`, impersonating `authenticated` |
+
+**PART OF THE NAMED 15% IS NOW CLOSED, and it is worth being exact about
+which part.** `scripts/tests/user-isolation.dbtest.mjs` seeds two accounts
+into every one of the 96 user-owned tables and, inside a session that has
+done `set local role authenticated` and `set local request.jwt.claim.sub`
+— the mechanism production uses — asks four questions per table: can A see
+B's row, update it, delete it, and can an unpredicated write reach it. Not
+one of them can. It carries its own positive control (A sees A's own row
+in all 91 readable tables; nothing at all in the 5 sealed ones) and a live
+demonstration that it can go red, and 7 of 7 schema mutations turn it red.
+
+**What is still missing, named:** this is impersonation against a database
+built from the migrations. It is **not** two real accounts holding real
+sessions against production through PostgREST, which would additionally
+prove that GoTrue issues the claim the policies read and that the deployed
+schema equals this one. That remains untested, and it is a smaller gap
+than it was rather than no gap.
+
+**And it found something.** The stub these dbtests run against had no
+grants at all where Supabase grants everything, so `grant_without_policy`
+had been reporting zero against a database more locked down than
+production. Corrected, it reported **89 (table, verb) pairs** granted to
+`authenticated` with no policy covering them — `user_credits`,
+`credit_transactions`, `ai_cost_log`, `affiliate_payouts`,
+`production_errors` among them. See `docs/shapes.md`, *A gate whose
+fixture is safer than production*.
 
 ### Axis 2 — Money: 75%
 
@@ -60,17 +82,29 @@ is internally consistent about money it has never counted.
 
 ### Axis 3 — Structural verification: 80%
 
-- **218** unit suites; **18,429** passing assertions in `npm run build`
-- **87** mutation suites; **1,518** declared mutations across **380** files
-- **8 meta-gates that check the gates**: vacuity, stale anchors,
+- **219** unit suites; **18,462** passing assertions in `npm run build`
+- **89** mutation suites; **1,522** declared mutations across **383** files
+- **9 meta-gates that check the gates**: vacuity, stale anchors,
   state-vs-behaviour, suite shape, import paths, export drift,
-  self-claims, mutation markers/tree
+  self-claims, mutation markers/tree, and shape names
 
-**The 20% that is missing, named:** **107 of the 218 gates (49%) have a
-mutation suite.** The other 111 have never been shown to go red on the
-defect they describe. A gate without that proof is a gate whose clauses
-might all be decorative — which is precisely the failure this project
-found four times in its own instruments.
+**The 20% that is missing, named:** **96 of the 219 gates (44%) are named
+by a mutation suite.** The other 123 have never been shown to go red on
+the defect they describe. A gate without that proof is a gate whose
+clauses might all be decorative — which is precisely the failure this
+project found four times in its own instruments.
+
+> **CORRECTION.** The first version of this document said *107 of 218
+> (49%)*. That number cannot be re-derived: counting gates whose name has
+> a matching `.mutation.mjs` gives 83, and counting gates *named* by any
+> mutation suite — the looser and more generous reading, and the one the
+> sentence means — gives 96. Neither is 107. The figure above is the
+> second, and it is reproducible:
+>
+>     node --input-type=module -e 'import{readdirSync,readFileSync}from"node:fs";const D="scripts/tests";const t=new Set();for(const f of readdirSync(D).filter(f=>f.endsWith(".mutation.mjs")))for(const m of readFileSync(`${D}/${f}`,"utf8").matchAll(/"(scripts\/tests\/[a-z0-9-]+\.(?:db)?test\.mjs)"/g))t.add(m[1]);const u=readdirSync(D).filter(f=>f.endsWith(".test.mjs")).map(f=>`scripts/tests/${f}`);console.log(u.filter(f=>t.has(f)).length,"of",u.length)'
+>
+> A number in a document that nobody can reproduce is the shape this
+> document exists to name. It was in the row that names it.
 
 ### Axis 4 — Live verification: 60%
 
@@ -130,18 +164,18 @@ The working list ran to twenty-three shapes. What follows are the ones that
 can each be tied to a **real incident in this repository** — not a category
 somebody imagined, but a defect that shipped, and what now catches it.
 
-**A note on numbering, because it drifted.** The working list numbered
-these 1–23; two comments in the code number themselves differently
-(`language-extremes.test.mjs` calls the technically-true-comment shape "the
-NINTH shape" where the working list has it at sixteen;
-`gate-state-vs-behaviour.test.mjs` calls state-vs-behaviour "the
-seventeenth", which does match). A third — `gate-vacuity`'s "the fourth
-shape" — is numbering four shapes *within that file*, not the global list.
-Rather than assert a numbering I cannot reconcile, these are given by
-**name**. Shapes 1–7 of the working list have no incident recorded here
-that I can source, and are therefore not reproduced: writing them from
-memory is exactly the kind of unchecked claim this document exists to
-stop.
+**The numbering drifted, and it is now retired.** The working list
+numbered these 1–23; two comments in the code numbered themselves
+independently and disagreed with it, and nothing anywhere could tell a
+reader which was right. So the catalogue moved to `docs/shapes.md`, where
+the entries have **names and no numbers**, and a comment refers to one in a
+single spelling — `SHAPE: <name>` — that `scripts/tests/shape-names.test.mjs`
+resolves against that document's headings. The table below is the same
+catalogue in summary; `docs/shapes.md` is the copy that is kept current.
+
+Shapes 1–7 of the working list have no incident recorded here that can be
+sourced, and are therefore not reproduced: writing them from memory is
+exactly the kind of unchecked claim this document exists to stop.
 
 | Shape | The incident | What catches it now |
 | --- | --- | --- |
@@ -180,9 +214,9 @@ Numbers a reader can re-derive, not summarise:
 
 | | |
 | --- | --- |
-| `npm run build` | exit 0 — 218 suites, 18,429 assertions |
-| Mutation suites | 87 / 87 complete; 1,518 declared mutations over 380 files |
-| Gates with adversarial proof | **107 of 218 (49%)** |
+| `npm run build` | exit 0 — 219 suites, 18,462 assertions |
+| Mutation suites | 89 / 89 complete; 1,522 declared mutations over 383 files |
+| Gates with adversarial proof | **96 of 219 (44%)** — see the correction in §1 |
 | i18n | 2,868 keys × 9 locales, 0 untranslated |
 | Hardcoded English on a customer screen | **0** (160 remain: 123 legal texts, 37 owner-only diagnostics, both classified and checked) |
 | Path claims in comments and docs | 2,387 scanned, **0 unexplained**; 18 findings covered by 17 exception entries across 6 files, each with a reason and a staleness check in both directions |

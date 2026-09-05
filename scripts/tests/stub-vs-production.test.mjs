@@ -20,10 +20,17 @@
  *   THE STUB WAS LOOSER. storage.objects was created here without row
  *   level security and `authenticated` had no USAGE on the storage
  *   schema, so the ten policies the migrations create were inert on two
- *   counts. Measured before the fix: account A read account B's private
- *   file. The policies turned out to be correct -- but nothing here could
- *   have said so, and nothing would have noticed if one had said
- *   `using (true)`.
+ *   counts. Measured against the STUB before the fix: account A read
+ *   account B's private file.
+ *
+ *   THAT LEAK WAS THE FIXTURE'S, NOT PRODUCTION'S, and the first version
+ *   of this header did not say so. Asked on 2026-09-05 --
+ *   `select relrowsecurity from pg_class where oid =
+ *   'storage.objects'::regclass` -- production answered TRUE. The ten
+ *   policies were load-bearing there the whole time. What the divergence
+ *   actually cost was not a hole: it was that no gate could exercise
+ *   those policies at all, because on the fixture they were inert, so
+ *   one of them saying `using (true)` would have gone unnoticed.
  *
  * So this file is the register. Section 1 holds the stub to what it must
  * model, so a line nobody re-reads cannot quietly go missing. Section 2
@@ -85,7 +92,7 @@ const MUST_MODEL = [
   {
     needle: /alter table storage\.objects enable row level security/i,
     what: "row level security on storage.objects",
-    why: "a policy on a table without RLS does nothing. Measured with it off: account A read account B's private file, and the ten policies were decoration",
+    why: "a policy on a table without RLS does nothing. Measured with it off IN THIS FIXTURE: account A read account B's private file, and the ten policies were decoration. Production has it on (section 2b) -- so the line is here to make the policies testable, not to fix a production hole",
   },
   {
     needle: /create role anon/i,
@@ -162,7 +169,7 @@ const DIVERGENCES = [
   {
     name: "five roles exist here; a Supabase project has roughly twelve",
     direction: "safer",
-    lies: "the grant checks name `anon` and `authenticated` explicitly, so a grant held by authenticator, dashboard_user or supabase_storage_admin is invisible to them BOTH here and in production. Bounded by the fact that this repository cannot create one: a GRANT to a role the stub lacks fails here, which section 3 checks",
+    lies: "the grant checks name `anon` and `authenticated` explicitly, so a grant held by authenticator, dashboard_user or supabase_storage_admin is invisible to them BOTH here and in production. Bounded twice: this repository cannot create one (a GRANT to a role the stub lacks fails here, which section 3 checks), and production was asked once, on 2026-09-05, and answered with one object -- pg_stat_statements (section 2b). Once is not a gate",
     holds: () => /create role supabase_admin/i.test(stub),
   },
 ];
@@ -177,6 +184,90 @@ check(
   "...each saying which way it fails and whether a gate reads it",
   DIVERGENCES.every((d) => ["safer", "looser", "either"].includes(d.direction) && d.lies.length > 40),
   DIVERGENCES.filter((d) => d.lies.length <= 40).map((d) => d.name).join(", ")
+);
+
+// ---------------------------------------------------------------------
+console.log("\n== 2b. what production answered, once, by hand ==");
+// ---------------------------------------------------------------------
+// THREE THINGS THIS REPOSITORY CANNOT ASK. Nothing here can reach the
+// real database: no credentials, no network path, and deliberately so.
+// The owner ran these three by hand on the date each names and reported
+// the answers, which is the only reason anything below is known rather
+// than modelled.
+//
+// A FACT IN THIS LIST IS NOT A GATE, and the distinction is the whole
+// point of the file it lives in. Nothing re-runs these; production can
+// change the hour after they were asked and this suite will keep
+// passing. So each one is stamped with the date it was true and with
+// what it BOUNDS -- never with what it proves -- and every entry in
+// section 1 stays enforced regardless of what production answered. The
+// check at the end of this section is what holds that: a production
+// answer may not retire a line the stub must model.
+const PRODUCTION_FACTS = [
+  {
+    asked: "2026-09-05",
+    query: "select relrowsecurity from pg_class where oid = 'storage.objects'::regclass",
+    answer: "true",
+    bounds: "row level security on storage.objects",
+    means:
+      "the ten policies are load-bearing in production and always were. The leak measured in this repository was the FIXTURE's. The divergence was 'production is stricter', and what it cost was coverage, not safety",
+  },
+  {
+    asked: "2026-09-05",
+    query: "select rolname, rolbypassrls from pg_roles order by 1",
+    answer: "no role carries an unexpected rolbypassrls",
+    bounds: "five roles exist here; a Supabase project has roughly twelve",
+    means:
+      "the roles the stub does not model cannot read past a policy, which is the way the missing seven could have mattered most",
+  },
+  {
+    asked: "2026-09-05",
+    query:
+      "select grantee, table_schema, table_name, privilege_type from information_schema.role_table_grants where grantee not in ('anon','authenticated','service_role','postgres') order by 1,2,3",
+    answer: "one object: pg_stat_statements -- SELECT to PUBLIC, all privileges to dashboard_user. No table holding user data",
+    bounds: "five roles exist here; a Supabase project has roughly twelve",
+    means:
+      "the sharpest thing the grant checks cannot see -- a privilege held by a role they do not name -- was looked at once and held nothing. Supabase's own diagnostics, not this schema",
+  },
+];
+
+const factTargets = new Set([...MUST_MODEL.map((m) => m.what), ...DIVERGENCES.map((d) => d.name)]);
+check(`production answered ${PRODUCTION_FACTS.length} questions this repository cannot ask`, PRODUCTION_FACTS.length >= 3);
+const undated = PRODUCTION_FACTS.filter((f) => !/^\d{4}-\d{2}-\d{2}$/.test(f.asked));
+check(
+  "...each stamped with the date it was true, because none of them is re-asked",
+  undated.length === 0,
+  undated.map((f) => f.query).join("\n        ")
+);
+// THE QUERY IS QUOTED SO IT CAN BE RUN AGAIN. A recorded answer whose
+// question is a paraphrase cannot be reproduced, which is the same
+// unreproducible-number shape this project has corrected three times in
+// its own documents.
+const notReadable = PRODUCTION_FACTS.filter((f) => !/^select\s/i.test(f.query.trim()) || f.query.includes(";"));
+check(
+  "...each carrying the exact read-only query, runnable as written",
+  notReadable.length === 0,
+  notReadable.map((f) => f.query).join("\n        ")
+);
+const dangling = PRODUCTION_FACTS.filter((f) => !factTargets.has(f.bounds));
+check(
+  "...and each bounding a line of this register rather than floating free",
+  dangling.length === 0,
+  dangling.map((f) => `${f.bounds} — names nothing in section 1 or 2`).join("\n        ")
+);
+// A PRODUCTION ANSWER MAY NOT RETIRE A MODELLED LINE. `relrowsecurity =
+// true` in production is exactly the argument for deleting the stub's
+// `enable row level security` -- and deleting it would make the ten
+// policies untestable again, which is what the divergence cost in the
+// first place. So the needle it bounds is asserted here a second time,
+// on purpose.
+const retired = PRODUCTION_FACTS.map((f) => MUST_MODEL.find((m) => m.what === f.bounds)).filter(
+  (m) => m && !m.needle.test(stub)
+);
+check(
+  "...and none of them has been used as a reason to stop modelling it",
+  retired.length === 0,
+  retired.map((m) => m.what).join("\n        ")
 );
 
 // ---------------------------------------------------------------------

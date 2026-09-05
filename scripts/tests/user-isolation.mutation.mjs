@@ -182,10 +182,12 @@ const MUTANTS = [
   {
     // 8. THE FILE, NOT THE ROW ABOUT IT. storage.objects carries ten
     // policies in a schema no check in this project reaches, and they
-    // were inert here on two counts at once: no USAGE on the schema for
-    // `authenticated`, and no row level security, which makes a policy
-    // decoration. Measured before the stub was fixed: A read B's private
-    // file. This mutant is what says the fix is load-bearing.
+    // were inert IN THIS FIXTURE on two counts at once: no USAGE on the
+    // schema for `authenticated`, and no row level security, which makes
+    // a policy decoration. Measured before the stub was fixed: A read B's
+    // private file — in the stub. Production had RLS on all along
+    // (2026-09-05). So this mutant does not guard a hole that existed; it
+    // is what says the ten policies are exercised rather than counted.
     name: "the user-files SELECT policy opens to everybody — B's documents are readable",
     table: "objects",
     schema: "storage",

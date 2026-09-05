@@ -166,8 +166,12 @@ produce something that looks like it works.
 `scripts/tests/stub-vs-production.test.mjs` holds eight facts the stub
 must model and five divergences that remain. Two of the eight are there
 because their absence caused a real incident: no default privileges hid
-**89** grants, and no row level security on `storage.objects` left **ten**
-policies inert while account A read account B's private file.
+**89** grants that production really held, and no row level security on
+`storage.objects` left **ten** policies inert *in the fixture* — account A
+read account B's private file there. Production answered
+`relrowsecurity = true` on 2026-09-05, so that second one cost coverage,
+not safety: the ten policies could not be exercised at all, and one of
+them saying `using (true)` would have gone unnoticed.
 
 *The sharpest of the five, and the one worth closing first:* the grant
 checks name `anon` and `authenticated` explicitly, so a privilege held by
@@ -176,7 +180,14 @@ to them **both locally and in production**. Making those checks
 role-agnostic — "which roles hold this, and is each on a named list" —
 costs about a day and needs no production access.
 
-*The rest need one query against the real database,* which nobody has run:
+*Three of them were asked on 2026-09-05 and the answers are recorded in
+section 2b of that file:* `storage.objects` has RLS on; no role carries an
+unexpected `rolbypassrls`; and the only grant outside
+`anon`/`authenticated`/`service_role`/`postgres` is on `pg_stat_statements`
+(SELECT to PUBLIC, all to `dashboard_user`) — Supabase's own diagnostics,
+no table of user data. That bounds the sharpest divergence above; it does
+not close it, because nothing re-asks. *The rest still need a query
+against the real database:*
 
     select e.extname, n.nspname from pg_extension e
       join pg_namespace n on n.oid = e.extnamespace;

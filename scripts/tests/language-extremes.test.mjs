@@ -187,7 +187,8 @@ console.log("\n== the check can go red ==");
 }
 
 console.log("\n== a claim about language coverage names how many ==");
-// THE NINTH SHAPE: a comment technically true that reads as complete.
+// SHAPE: a technically-true comment that reads as complete
+// (docs/shapes.md).
 //
 // lib/agents/injection-patterns.ts said its patterns "now cover the
 // obvious cases in more than one language". True. It covered two of ten,

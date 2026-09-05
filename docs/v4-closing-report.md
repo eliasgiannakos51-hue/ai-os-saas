@@ -11,37 +11,127 @@ feature. It was an instrument reporting health it had not measured.
 
 ## 1. The verdict
 
-**75%.** Four axes, each computed as *(what is checked mechanically) ÷
-(what could be)*, with the remainder named rather than rounded away.
+**73%.** Four axes, each computed as *(what is checked mechanically) ÷
+(what could be)*, averaged, with the remainder named rather than rounded
+away.
 
 | Axis | Score | What the score rests on |
 | --- | --- | --- |
-| Security & data | **85%** | Schema and code proven; live multi-user isolation unproven |
+| Security & data | **78%** | Two-account isolation proven at the database; not through a production session, and the tested database is a model |
 | Money | **75%** | Every path instrumented; no real money has moved under test |
-| Structural verification | **80%** | 218 gates; 107 of them adversarially proven |
+| Structural verification | **80%** | 221 gates; 98 of them named by a mutation suite |
 | Live verification | **60%** | Production healthy; most of the surface needs an account to reach |
 
-The number is deliberately not higher. Every point above these came from
-something that could be re-derived on demand; the missing points are three
-specific things that cannot be closed from a keyboard.
+**IT WAS 75%, AND THE FALL IS NOT A REGRESSION.** Security genuinely
+improved this round — a real hole was found and closed in production, 96
+tables and 3 storage buckets are now proven, and ten storage policies went
+from decoration to load-bearing. On the denominator V4 was using, security
+is **92%** and the overall is **77%**.
 
-### Axis 1 — Security & data: 85%
+The published number is the other one, because the denominator was wrong.
+It never counted *whether the database being measured resembles
+production* — and that omission is exactly what hid 89 grants. A verdict
+that leaves out the thing which hid the defect is an instrument reporting
+health it has not measured, which is the failure this whole document is
+about. §Axis 1 shows the weights so they can be argued with separately
+from the arithmetic.
+
+The number is deliberately not higher. Every point above came from
+something that could be re-derived on demand; the missing points are named
+rather than rounded away.
+
+### Axis 1 — Security & data: 78%, and it went DOWN because the ruler changed
 
 | Checked | How it was measured |
 | --- | --- |
-| RLS on **106 / 106** tables | Live, against an ephemeral Postgres built from all 63 migrations |
+| RLS on **106 / 106** tables | Live, against an ephemeral Postgres built from all 64 migrations |
 | Grants: no function executable by `anon` or `authenticated` unexpectedly | Live, same database |
+| **96 / 96** user-owned tables probed with **two accounts** | Live, `user-isolation.dbtest.mjs`, impersonating `authenticated` |
+| **3 / 3** storage buckets probed with the same two accounts | Live, same suite — the file, not the row about it |
 | `search_path` pinned on **46 / 46** `SECURITY DEFINER` functions | Migration scan |
 | **91 / 91** functions taking a `userId` use it as a filter or owner column | AST |
 | **128 / 128** API routes scanned for service-role misuse | AST |
 | Owner-only components reachable only behind a real guard | The guard's *shape*, not the presence of two words |
 | Every column a Supabase call names exists on the table it names | Live, authoritative |
+| **8** facts the test database must model, **5** divergences that remain | `stub-vs-production.test.mjs` |
 
-**The 15% that is missing, named:** there is no live isolation test with
-**two real accounts**. The database is proven correct in isolation and the
-code is proven to scope its queries; that user A cannot see user B's rows
-**through a real session, in production** has never been executed. That is
-a different claim, and it is the one that matters most.
+**THE ISOLATION TEST EXISTS NOW.** Two accounts are seeded into every one
+of the 96 user-owned tables and, inside a session that has done
+`set local role authenticated` and `set local request.jwt.claim.sub`, four
+questions are asked per table: can A see B's row, update it, delete it,
+and can a write with **no WHERE** reach it. The last one is there because
+a predicate reads a column, so SELECT policies apply to it and B's row is
+already invisible to the WHERE — a targeted probe cannot see an unscoped
+UPDATE or DELETE policy at all. Not one question answers yes. Three
+storage buckets are probed the same way. The suite carries its own
+positive control and a live demonstration that it can go red, and **9 of 9
+schema mutations turn it red**.
+
+**AND IT FOUND TWO REAL THINGS**, in opposite directions, both because the
+database the gates run against is not the database that matters.
+
+- The stub set **no default privileges** where Supabase grants ALL on
+  every table to `anon`, `authenticated` and `service_role`. So
+  `db_exposure_report`'s `grant_without_policy` had been reporting **zero**
+  against a database more locked down than production. Corrected, it
+  reported **89 (table, verb) pairs** granted to `authenticated` with no
+  policy covering them — `user_credits`, `credit_transactions`,
+  `ai_cost_log`, `affiliate_payouts`, `production_errors` among them.
+  `20260926000000` revokes them; it has been applied to production.
+- `storage.objects` was created here **without row level security**, and
+  `authenticated` had no USAGE on the storage schema, so the **ten**
+  policies the migrations put on it were inert on two counts. Measured
+  before the fix: **account A read account B's private file.** The
+  policies were correct — but nothing here could have said so, and nothing
+  would have noticed if one had said `using (true)`.
+
+#### Why the number fell from 85 to 78
+
+Because the denominator was wrong, and this round is what showed it. The
+85% scored five components as four: it never counted *whether the database
+being measured resembles production*. Three of the rows above are live
+against that stub, and the stub has now been wrong twice, in both
+directions. A score that omits the thing which hid 89 grants is itself an
+instrument reporting health it has not measured.
+
+The weights are a judgement and are written down so they can be argued
+with separately from the arithmetic:
+
+| Component | Weight | Done | Contribution |
+| --- | --- | --- | --- |
+| Schema correctness — RLS, policies, grants | 30 | 0.90 | 27 |
+| Code scoping — 91 functions, 128 routes, guard shapes | 25 | 1.00 | 25 |
+| Two-account isolation, **at the database** | 20 | 1.00 | 20 |
+| Two-account isolation, **through a production session** | 15 | 0.00 | 0 |
+| Fixture fidelity — is the tested database production? | 10 | 0.60 | 6 |
+| | | | **78** |
+
+Schema correctness is 0.90 rather than 1.00 for the same reason fixture
+fidelity is not 1.00: it is measured against the model.
+
+**On the old denominator the number is 92%, and that is the number that
+answers "did security improve".** It did: a real hole was found and
+closed in production, 96 tables and 3 buckets are now proven, and the
+storage policies are load-bearing instead of decorative. What went down is
+not the product. It is my confidence in the measurement, and the reason it
+went down is that the measurement got a component it had been missing.
+
+**The 22% that is missing, named.**
+
+1. **Two real accounts through PostgREST, in production** (15). Everything
+   above impersonates. It proves RLS scopes correctly *given* `auth.uid()`;
+   it does not prove GoTrue issues the claim the policies read, nor that
+   the deployed schema is this one.
+2. **Fixture fidelity** (4 of 10). Five divergences remain, each named in
+   `stub-vs-production.test.mjs` with the direction it fails in. The
+   sharpest: the grant checks name `anon` and `authenticated` explicitly,
+   so a privilege held by `authenticator`, `dashboard_user` or
+   `supabase_storage_admin` is invisible to them **both here and in
+   production**. Bounded, because a GRANT to a role the stub lacks fails
+   against a fresh database — which that file checks — so this repository
+   cannot create one. It cannot see one Supabase created.
+3. **Schema correctness against the model** (3 of 30). The same caveat,
+   applied to the three rows that are live rather than AST.
 
 ### Axis 2 — Money: 75%
 
@@ -60,17 +150,30 @@ is internally consistent about money it has never counted.
 
 ### Axis 3 — Structural verification: 80%
 
-- **218** unit suites; **18,429** passing assertions in `npm run build`
-- **87** mutation suites; **1,518** declared mutations across **380** files
-- **8 meta-gates that check the gates**: vacuity, stale anchors,
+- **221** unit suites; **18,524** passing assertions in `npm run build`
+- **91** mutation suites; **1,537** declared mutations across **389** files
+- **11 meta-gates that check the gates**: vacuity, stale anchors,
   state-vs-behaviour, suite shape, import paths, export drift,
-  self-claims, mutation markers/tree
+  self-claims, mutation markers/tree, shape names, stub-vs-production,
+  and mutation-runner honesty
 
-**The 20% that is missing, named:** **107 of the 218 gates (49%) have a
-mutation suite.** The other 111 have never been shown to go red on the
-defect they describe. A gate without that proof is a gate whose clauses
-might all be decorative — which is precisely the failure this project
-found four times in its own instruments.
+**The 20% that is missing, named:** **98 of the 221 gates (44%) are named
+by a mutation suite.** The other 123 have never been shown to go red on
+the defect they describe. A gate without that proof is a gate whose
+clauses might all be decorative — which is precisely the failure this
+project found four times in its own instruments.
+
+> **CORRECTION.** The first version of this document said *107 of 218
+> (49%)*. That number cannot be re-derived: counting gates whose name has
+> a matching `.mutation.mjs` gives 85, and counting gates *named* by any
+> mutation suite — the looser and more generous reading, and the one the
+> sentence means — gives 98. Neither is 107. The figure above is the
+> second, and it is reproducible:
+>
+>     node --input-type=module -e 'import{readdirSync,readFileSync}from"node:fs";const D="scripts/tests";const t=new Set();for(const f of readdirSync(D).filter(f=>f.endsWith(".mutation.mjs")))for(const m of readFileSync(`${D}/${f}`,"utf8").matchAll(/"(scripts\/tests\/[a-z0-9-]+\.(?:db)?test\.mjs)"/g))t.add(m[1]);const u=readdirSync(D).filter(f=>f.endsWith(".test.mjs")).map(f=>`scripts/tests/${f}`);console.log(u.filter(f=>t.has(f)).length,"of",u.length)'
+>
+> A number in a document that nobody can reproduce is the shape this
+> document exists to name. It was in the row that names it.
 
 ### Axis 4 — Live verification: 60%
 
@@ -80,8 +183,16 @@ found four times in its own instruments.
 | `public-live.prodtest` | 171 / 171 against the real URL |
 | `health-probe.prodtest` | 32 / 32 |
 | `language-visible.prodtest` | 115 / 115 |
-| 23 dbtests + `db-migrations` | 283 checks, real Postgres from the migrations |
+| 24 dbtests + `db-migrations` | **1,137** checks across **25** suites, real Postgres from the migrations |
 | `/offline` in ten languages | Real build, real Chromium, real service-worker install, network actually cut |
+
+> **CORRECTION.** This row said *283 checks*. That was `db-migrations`'s
+> own summary line — the last suite `npm run test:db` runs — read as the
+> total for the run. The measured total is 1,137 across 25 suites:
+> `npm run test:db 2>&1 | grep -c '^  PASS  '`. The same mistake was made
+> out loud one round earlier, reporting "287 passed" as the whole database
+> run when it was one suite. A number copied off the last line of a log is
+> not a measurement.
 
 **The 40% that is missing, named:** **35 of the 41 prodtests require a
 signed-in account** and cannot run in an automated environment without
@@ -130,22 +241,22 @@ The working list ran to twenty-three shapes. What follows are the ones that
 can each be tied to a **real incident in this repository** — not a category
 somebody imagined, but a defect that shipped, and what now catches it.
 
-**A note on numbering, because it drifted.** The working list numbered
-these 1–23; two comments in the code number themselves differently
-(`language-extremes.test.mjs` calls the technically-true-comment shape "the
-NINTH shape" where the working list has it at sixteen;
-`gate-state-vs-behaviour.test.mjs` calls state-vs-behaviour "the
-seventeenth", which does match). A third — `gate-vacuity`'s "the fourth
-shape" — is numbering four shapes *within that file*, not the global list.
-Rather than assert a numbering I cannot reconcile, these are given by
-**name**. Shapes 1–7 of the working list have no incident recorded here
-that I can source, and are therefore not reproduced: writing them from
-memory is exactly the kind of unchecked claim this document exists to
-stop.
+**The numbering drifted, and it is now retired.** The working list
+numbered these 1–23; two comments in the code numbered themselves
+independently and disagreed with it, and nothing anywhere could tell a
+reader which was right. So the catalogue moved to `docs/shapes.md`, where
+the entries have **names and no numbers**, and a comment refers to one in a
+single spelling — `SHAPE: <name>` — that `scripts/tests/shape-names.test.mjs`
+resolves against that document's headings. The table below is the same
+catalogue in summary; `docs/shapes.md` is the copy that is kept current.
+
+Shapes 1–7 of the working list have no incident recorded here that can be
+sourced, and are therefore not reproduced: writing them from memory is
+exactly the kind of unchecked claim this document exists to stop.
 
 | Shape | The incident | What catches it now |
 | --- | --- | --- |
-| **Stale anchor** | A mutation's `from` string stops existing, so the suite silently tests nothing. Six occurrences, most recently two caused by V4.6's own changes and two in `icu-quoted-placeholders` pointing at a quoting form the catalogue had moved away from. | Every suite reports `STALE` and exits non-zero; `check-mutation-tree` enumerates all 1,518 anchors |
+| **Stale anchor** | A mutation's `from` string stops existing, so the suite silently tests nothing. Six occurrences, most recently two caused by V4.6's own changes and two in `icu-quoted-placeholders` pointing at a quoting form the catalogue had moved away from. | Every suite reports `STALE` and exits non-zero; `check-mutation-tree` enumerates all 1,537 anchors |
 | **Vacuous assertion** | `check("no X", found.length === 0)` over a scan that found no files at all — the check passes hardest when it is broken. Caught twice in V4.6, in gates written that same day. | `gate-vacuity.test.mjs` — every emptiness assertion over a scanned collection needs a floor |
 | **Runtime string in an import path** | A specifier assembled at runtime that no compiler resolves. | `gate-import-paths.test.mjs` — 75 `@/` specifiers and 2,101 repository paths across 386 gates |
 | **A check that cannot go red** | `check("applies twice cleanly", true, true)` — the truth asserted is that the line was reached. | `gate-vacuity.test.mjs`, tautology section |
@@ -153,6 +264,8 @@ stop.
 | **Many mutations in one dimension** | A suite with thirty mutants that all vary the same thing, reporting 30/30 while one axis goes untested. | `mutation-suite-shape.test.mjs`, 521 checks |
 | **A test that supplies its own arguments** | The fixture and the assertion agree because the same hand wrote both, and neither touches the product. | `mutation-suite-shape.test.mjs` |
 | **An optimisation that removes without proving what remains** | Trimming a message catalogue by 93% and asserting only that it got smaller. | `message-slices.test.mjs` — every namespace a group can reach must be declared |
+| **A fixture that is not production** | `scripts/db/bootstrap-supabase.sql` was *more locked down* than the real Supabase: no `usage` on `storage`, no default privileges, no roles. So `grants-and-policies.dbtest.mjs` reported zero unexpected grants while production carried **89**, and ten `storage.objects` policies were inert because nothing had switched RLS on there — account A could read account B's private file. | `stub-vs-production.test.mjs` — 8 facts the fixture must model and 5 divergences that remain, each with a direction and a predicate checked both ways; 7/7 mutations |
+| **A suite that never ran, counted as a pass** | `run-mutations.mjs` printed `OK   user-isolation  0s`, then `89 suites · 89 green`, then `ALL MUTATION SUITES GREEN`, for a run in which that suite skipped for want of a database and applied none of its nine schema mutants. Sixteen files in `scripts/tests` can print such a line. | `lib/mutation-outcome.mjs` answers green/skipped/red; `mutation-runner-honesty.test.mjs`, 33 checks, 8/8 mutations |
 | **A technically-true comment that reads as complete** | `injection-patterns.ts` said its patterns "cover the obvious cases in more than one language". True — two of ten. A Spanish override went through untouched. | `language-extremes.test.mjs` — a coverage claim must name how many |
 | **A gate measuring final STATE instead of BEHAVIOUR** | `chat-scroll.prodtest.mjs` asserted where the scrollbar ended up, not that the scroll happened. | `gate-state-vs-behaviour.test.mjs` |
 | **A wiring check that never sees a VALUE** | The owner-only check asked whether a page *mentions* `isAdminEmail` and *mentions* `notFound`. `void isAdminEmail;` keeps both words, opens the cost dashboard to every customer, and the check stayed green — killed by its own mutation suite the day it was written. | `i18n-coverage.test.mjs` reads the guard's shape; 5/5 mutations |
@@ -180,13 +293,31 @@ Numbers a reader can re-derive, not summarise:
 
 | | |
 | --- | --- |
-| `npm run build` | exit 0 — 218 suites, 18,429 assertions |
-| Mutation suites | 87 / 87 complete; 1,518 declared mutations over 380 files |
-| Gates with adversarial proof | **107 of 218 (49%)** |
+| `npm run build` | exit 0 — 221 suites, 18,524 assertions |
+| Mutation suites | 91 / 91 complete; 1,537 declared mutations over 389 files — see the correction below |
+| Gates with adversarial proof | **98 of 221 (44%)** — see the correction in §1 |
 | i18n | 2,868 keys × 9 locales, 0 untranslated |
 | Hardcoded English on a customer screen | **0** (160 remain: 123 legal texts, 37 owner-only diagnostics, both classified and checked) |
 | Path claims in comments and docs | 2,387 scanned, **0 unexplained**; 18 findings covered by 17 exception entries across 6 files, each with a reason and a staleness check in both directions |
 | Symbol claims in comments | 1,473 scanned, 24 unresolved, **1 genuinely wrong** — precision ≈ 4%, measured and **not** gated |
+
+> **CORRECTION.** The row above read *90 / 90 complete* on the strength
+> of a sweep whose log ended `89 suites · 89 green · 0 red` and `ALL
+> MUTATION SUITES GREEN`. One of those eighty-nine was
+> `user-isolation.mutation.mjs`, which mutates the database schema, found
+> no `DATABASE_URL`, printed one `SKIPPED:` line and exited 0 — so none
+> of its nine mutants were applied and the runner counted it green
+> anyway. Its `0s` in the timing column was the only tell: re-run with a
+> database attached, the same suite reports **430s**.
+>
+> The nine mutants ARE caught — measured separately, against a real
+> Postgres, twice this round. What was false was the sweep's arithmetic,
+> not the coverage. `scripts/tests/run-mutations.mjs` now answers
+> green / skipped / red, never derives green by subtraction, and will not
+> print “all green” when anything was skipped;
+> `scripts/tests/mutation-runner-honesty.test.mjs` holds that, with eight
+> mutations of its own. The number above was re-measured with a database
+> attached, so nothing in it is a skip.
 
 That last row is the shape of this whole document. A check with 4%
 precision gets its baseline set to the size of the problem, which is the

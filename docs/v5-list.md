@@ -13,21 +13,24 @@ before the feature it guards is a gate with nothing behind it.
 
 ## Tier 1 — cannot ship V5 without these
 
-### 1. The isolation test: two real accounts
-**~1 day.** Blocked on: two real accounts existing.
+### 1. The isolation test: two real accounts — HALF DONE
+**~half a day left.** Blocked on: two real accounts existing.
 
-Every RLS policy is verified against a database. None is verified against
-two people. This is the single largest named gap in V4 and it is a fixture
-problem, not a knowledge problem.
+**The database half is done.** `scripts/tests/user-isolation.dbtest.mjs`
+impersonates `authenticated` the way production does and probes all 96
+user-owned tables with two accounts — read, update, delete, and the
+unpredicated write a predicate cannot see. 18 checks, 7 of 7 schema
+mutations caught. It is what found the 89 grants no policy covered.
 
-*Done means:* two accounts with rows in the same tables; account A's
-session issues every read the app issues; not one of B's rows appears.
-Runs as a `.dbtest` against a real Postgres, and as a `.prodtest` against
-production once the accounts exist.
+*What is left, and it is the part that needs you:* the same questions
+through a **real session against production** — two accounts, real JWTs,
+PostgREST rather than psql. That additionally proves GoTrue issues the
+claim the policies read, and that the deployed schema is this one. It is a
+`.prodtest`, and it cannot be written against fixtures.
 
-*Proven by:* the test failing when a single `.eq("user_id", …)` is removed
-from any of the 91 scoped functions — a mutation suite over the real ones,
-not a fixture.
+*Proven by:* the dbtest going red when a policy is loosened — already
+demonstrated seven ways — plus, for the production half, the same suite
+returning zero of B's rows through the API.
 
 ### 2. The spelling check: built, never run against a real site
 **~half a day.** Blocked on: an Anthropic API key.
@@ -157,11 +160,44 @@ produce something that looks like it works.
 
 ## Tier 3 — the instruments
 
-### 9. The 111 gates with no mutation suite
+### 8b. The test database is not production, and five ways are named
+**~2 days, and the first day is free.**
+
+`scripts/tests/stub-vs-production.test.mjs` holds eight facts the stub
+must model and five divergences that remain. Two of the eight are there
+because their absence caused a real incident: no default privileges hid
+**89** grants, and no row level security on `storage.objects` left **ten**
+policies inert while account A read account B's private file.
+
+*The sharpest of the five, and the one worth closing first:* the grant
+checks name `anon` and `authenticated` explicitly, so a privilege held by
+`authenticator`, `dashboard_user` or `supabase_storage_admin` is invisible
+to them **both locally and in production**. Making those checks
+role-agnostic — "which roles hold this, and is each on a named list" —
+costs about a day and needs no production access.
+
+*The rest need one query against the real database,* which nobody has run:
+
+    select e.extname, n.nspname from pg_extension e
+      join pg_namespace n on n.oid = e.extnamespace;
+    select rolname from pg_roles order by 1;
+    select relname, relrowsecurity from pg_class
+      where relnamespace = 'storage'::regnamespace;
+
+*Done means:* the register's five entries each carry a measured answer
+from production rather than a direction-of-failure. *Proven by:* its own
+mutation suite, 7 of 7 today, plus the entries changing from "unknown" to
+a value.
+
+
+### 9. The 123 gates with no mutation suite
 **~3 weeks if done exhaustively. Do not do it exhaustively.**
 
-107 of 218 gates (49%) have been shown to go red on the defect they name.
-The other 111 have not. A gate without that proof might be entirely
+98 of 221 gates (44%) have been shown to go red on the defect they name.
+The other 123 have not. (This paragraph said *107 of 218 (49%)* until
+2026-09-05; that figure could not be re-derived under any measure and is
+corrected in §1 of the closing report. The command that produces the
+number above is printed there.) A gate without that proof might be entirely
 decorative — and V4 found that exact thing four times.
 
 *The order to do them in, and it is not alphabetical:*

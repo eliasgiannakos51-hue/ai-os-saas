@@ -1,6 +1,9 @@
 // A GATE THAT MEASURES WHERE THINGS ENDED UP, NOT WHAT WAS DECIDED.
 //
-// V4.6, the seventeenth shape. chat-scroll.prodtest.mjs asserted the
+// V4.6, and it is catalogued in docs/shapes.md as
+// SHAPE: a gate measuring final STATE instead of BEHAVIOUR
+//
+// chat-scroll.prodtest.mjs asserted the
 // view's final position: "the view stayed where the reader put it (585px
 // from bottom)". With the follow fix reverted the view ALSO ended at
 // 585px — the flick's own momentum carried it back up after the last
@@ -169,7 +172,7 @@ check(
 
 // ---------------------------------------------------------------------
 console.log("\n== the one this shape was found in ==");
-// chat-scroll is the file the seventeenth shape came from, so it is
+// chat-scroll is the file this shape came from, so it is
 // asserted by name rather than left to a count. It must assert a
 // DECISION — the affordance — and not only a position.
 const scroll = readFileSync(join(DIR, "chat-scroll.prodtest.mjs"), "utf8");

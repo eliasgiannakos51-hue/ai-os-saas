@@ -311,6 +311,42 @@ generation, in code.
 *Caught by:* `scripts/tests/ascii-boundaries.test.mjs` — a non-Latin query
 is stripped, not searched. See `src/lib/website-image-placeholders.ts`.
 
+## A detector blind to the CANCELLATION, not to the thing
+
+Every shape above is a probe that cannot see something *exists*. This one
+is a probe that cannot see something was **withdrawn**, and it is worse,
+because of which way the error runs.
+
+`scripts/db/pending-migrations.mjs` builds two lists: the objects a
+migration creates, and — in `dropsOf()` — the objects a later migration
+DROPS, which is what voids an earlier expectation. Its `drop policy`
+pattern required double quotes around the policy name. Quotes are
+optional in Postgres, and this repository writes both ways: on the DROP
+side **204 statements write the name bare against 147 that quote it**, so
+the *majority* form was the invisible one.
+
+A create-side blind spot under-reports: it stops asking about objects,
+and stays quiet. A cancellation-side blind spot over-reports, and it does
+so **for ever**: the tool keeps expecting a policy that a migration
+deliberately removed, on every run, and calls the migration PARTIAL. It
+is not a missed alarm. It is a false one that never stops.
+
+That is the direction that costs the most, because false positives teach
+the reader to ignore the instrument — and this instrument is the one
+CLAUDE.md names as the thing to run before a deploy. The four columns
+that were genuinely missing on 2026-09-04 arrived inside exactly that
+kind of noise from `/api/health`, and were found by hand.
+
+The rule this shape gives: when a probe has a list of things it expects
+and a list of things that VOID an expectation, the second list needs the
+harder review. Being wrong there is louder, more persistent, and teaches
+people to stop looking.
+
+*Caught by:* `scripts/tests/sql-spellings.test.mjs` — `dropPolicy` is its
+own family, checked by name against the corpus, and
+`scripts/tests/sql-spellings.mutation.mjs` puts the quote requirement back
+on the drop side specifically. See `scripts/db/pending-migrations.mjs`.
+
 ## `\b` is ASCII
 
 **This one has no gate, and saying so is the entry.** JavaScript's word

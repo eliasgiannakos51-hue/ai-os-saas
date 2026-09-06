@@ -58,8 +58,8 @@ const MUTANTS = [
     from: "|| textHasGreeklishTerm(folded, spellings)",
     to: "",
     also: [
-      { from: '|| textHasGreeklishTerm(folded, ["ρίσκο"])', to: "" },
-      { from: '|| textHasGreeklishTerm(folded, ["μόνο"])', to: "" },
+      { from: '|| textHasGreeklishTerm(folded, ["ρισκο"])', to: "" },
+      { from: '|| textHasGreeklishTerm(folded, ["μονο"])', to: "" },
     ],
     expect: WIRED,
   },

@@ -276,8 +276,11 @@ const MUTANTS = [
   {
     name: "the matcher matches everything, so search is not a filter",
     file: MATCHER,
-    from: "  return normalizeForSearch(haystack).includes(q);",
-    to: "  return true;",
+    // RE-ANCHORED when greeklish was wired in: matchesSearch has two
+    // returns now, and making the FIRST one true is what turns the filter
+    // into a pass-through.
+    from: "  if (normalizeForSearch(haystack).includes(q)) return true;",
+    to: "  if (true) return true;",
     expect: "unrelated word still does not match",
   },
 

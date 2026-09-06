@@ -87,6 +87,22 @@ check(
   "...and even when the page ends it in a final sigma and the brief does not",
   !greekWordsToCheck(page("<p>συνδρομής</p>"), "συνδρομησ πακέτα").includes("συνδρομής")
 );
+// THE THREE CASES ABOVE ALL USE A CAPITALISED NAME, AND SINCE SECTION 8
+// THAT MEANS TWO MECHANISMS PROTECT THEM: the exact-fold set AND the
+// proper-noun stems. Two of this suite's mutations went WRONG on that —
+// they removed one mechanism and the other kept the check green, so the
+// suite reported red on a neighbouring clause instead of the one it
+// aimed at. These two cases use lower-case common nouns, which the stems
+// deliberately never touch, so each isolates the mechanism it names.
+check(
+  "the exact-fold set alone protects a common noun from the brief",
+  !greekWordsToCheck(page("<p>παραδοσιακά</p>"), "εστιατόριο με παραδοσιακά πιάτα").includes("παραδοσιακά")
+);
+check(
+  "...and the shared fold alone protects it across an accent",
+  !greekWordsToCheck(page("<p>παραδοσιακα</p>"), "εστιατόριο με παραδοσιακά πιάτα").includes("παραδοσιακα"),
+  JSON.stringify(greekWordsToCheck(page("<p>παραδοσιακα</p>"), "εστιατόριο με παραδοσιακά πιάτα"))
+);
 check(
   "a word NOT in the brief is still asked about",
   greekWordsToCheck(page("<p>Η ταβέρνα Μαγκουφάνα έχει ρεμπα</p>"), "Ταβέρνα Μαγκουφάνα").includes("ρεμπα")
@@ -148,8 +164,15 @@ const src = readFileSync("src/lib/websites-greek-spelling-check.ts", "utf8");
 // must hold is that nothing this module EXPORTS hands back a page: every
 // exported signature returns words.
 const exportedReturns = [...src.matchAll(/export (?:async )?function \w+\([\s\S]*?\):\s*([^{]+)\{/g), ...pureSrc.matchAll(/export (?:async )?function \w+\([\s\S]*?\):\s*([^{]+)\{/g)].map((m) => m[1].trim());
-check(`every exported function returns words, never a page (${exportedReturns.length})`,
-  exportedReturns.length >= 4 && exportedReturns.every((r) => /string\[\]|unknown/.test(r)),
+// STATED AS THE RULE, NOT AS A LIST OF TODAY'S TYPES. This was an
+// allowlist — `/string\[\]|unknown/` — and it went red the day an
+// exported predicate returned `boolean`, which cannot be a page. An
+// allowlist has to be widened for every helper, and widening a check to
+// admit a new shape is how one eventually gets widened to admit the bad
+// one. The page shape is a bare `string`: that is what is forbidden.
+const pageShaped = exportedReturns.filter((r) => /^(?:Promise<)?string>?$/.test(r.replace(/\s/g, "")));
+check(`every exported function returns words, never a page (${exportedReturns.length} exports, ${pageShaped.length} page-shaped)`,
+  exportedReturns.length >= 4 && pageShaped.length === 0,
   exportedReturns.join(" | "));
 check("a failure is an empty list, never a thrown generation", /catch \(err\)[\s\S]{0,200}?return \[\];/.test(src));
 check("...and a refusal from the provider is too", /if \(!outcome\.ok\) return \[\];/.test(src));
@@ -195,6 +218,79 @@ for (const loc of locales) {
   check(`${loc}: the note has a sentence`, typeof v === "string" && v.length > 20, String(v));
   check(`${loc}: ...that carries both the count and the words`, typeof v === "string" && v.includes("{words}") && v.includes("{count"), String(v));
 }
+
+// ---------------------------------------------------------------------
+console.log("\n== 8. the owner's own name, in every case Greek puts it in ==");
+//
+// PROMISE 1 OF THIS FILE, AND IT WAS TRUE FOR ONE FORM ONLY. The
+// exclusion matched the FOLD of a brief word against the fold of a page
+// word — exact-form matching. Greek does not write the same noun twice
+// the same way: a brief saying "Ζαχαροπλαστείο στο Χαλάνδρι" produces a
+// page saying "στην καρδιά του Χαλανδρίου", and the second is not the
+// first.
+//
+// MEASURED ON A REAL GENERATED SITE, 2026-09-06: "Χαλανδρίου" was in the
+// list of words the model was asked to judge as misspellings. Six of six
+// constructed cases leaked the same way.
+const { ownNameStems, isOwnName } = await loadTs("src/lib/website-greek-spelling.ts");
+const withText = (b) => `<!doctype html><html><body><p>Καλώς ήρθατε, ${b} σήμερα εδώ.</p></body></html>`;
+
+const OWN = [
+  ["Ταβέρνα στο Χαλάνδρι.", "Χαλανδρίου"],
+  ["Φούρνος του Παπαδόπουλου.", "Παπαδόπουλος"],
+  ["Κατάστημα στη Θεσσαλονίκη.", "Θεσσαλονίκης"],
+  ["Ξενοδοχείο στο Ναύπλιο.", "Ναυπλίου"],
+  ["Καφενείο στα Ιωάννινα.", "Ιωαννίνων"],
+  ["Κάβα Παπαδόπουλος.", "Παπαδόπουλου"],
+];
+const leaked = OWN.filter(([brief, w]) => greekWordsToCheck(withText(w), brief).includes(w));
+check(
+  `no inflection of the owner's own name is put to the model (${OWN.length} cases, ${leaked.length} leaked)`,
+  OWN.length >= 6 && leaked.length === 0,
+  leaked.map(([b, w]) => `${w} (brief: ${b})`).join(" | ")
+);
+
+// THE OTHER DIRECTION, AND IT MATTERS MORE. Over-excluding is worse than
+// the bug: a checker that silences a real typo to protect a name has
+// stopped being a spelling checker. Two of these begin with the same
+// letters as the owner's name on purpose.
+const MUST_ASK = [
+  ["Ζαχαροπλαστείο στο Χαλάνδρι.", "ρεμπα", "the word from the original bug report"],
+  ["Ταβέρνα στο Χαλάνδρι.", "χαλαρός", "begins like Χαλάνδρι, different word"],
+  ["Ταβέρνα στο Χαλάνδρι.", "χάλασε", "same"],
+  ["Φούρνος του Παπαδόπουλου.", "παπαρούνα", "begins like the surname, unrelated"],
+  ["Ζαχαροπλαστείο στο Χαλάνδρι.", "ζαχαροπλαστιο", "a typo in a COMMON noun from the brief"],
+  ["Κατάστημα στη Θεσσαλονίκη.", "καταστιμα", "a typo in the sentence-initial word"],
+];
+const silenced = MUST_ASK.filter(([brief, w]) => !greekWordsToCheck(withText(w), brief).includes(w));
+check(
+  `no real misspelling is silenced to protect a name (${MUST_ASK.length} cases, ${silenced.length} silenced)`,
+  MUST_ASK.length >= 6 && silenced.length === 0,
+  silenced.map(([, w, why]) => `${w} — ${why}`).join(" | ")
+);
+
+// A SENTENCE-INITIAL CAPITAL IS A SENTENCE, NOT A NAME. Stemming it would
+// stop the checker asking about every word beginning "ζαχαροπλαστ",
+// including a real typo in one — which is why the two checks above can
+// both be green.
+check(
+  `only not-sentence-initial capitals become stems (${JSON.stringify(ownNameStems("Ζαχαροπλαστείο στο Χαλάνδρι."))})`,
+  ownNameStems("Ζαχαροπλαστείο στο Χαλάνδρι.").length === 1 &&
+    ownNameStems("Ζαχαροπλαστείο στο Χαλάνδρι.")[0].startsWith("χαλα"),
+  "the first word of a sentence is capitalised because it is first"
+);
+check(
+  "a brief with no proper noun yields no stems",
+  ownNameStems("Θέλω μια σελίδα για το κατάστημά μου.").length === 0
+);
+// AND THE CEILING IS THE REPOSITORY'S OWN. isOwnName accepts an ending up
+// to MAX_INFLECTION longer than the stem — the same constant stem() in
+// lib/text/unicode-patterns.ts uses — so a much longer word that merely
+// starts the same way is not swallowed.
+check(
+  "a far longer word that merely starts the same way is still asked about",
+  !isOwnName("χαλανδριουπολιτικοσυνδεσμος", ownNameStems("Ταβέρνα στο Χαλάνδρι."))
+);
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length > 0) process.exit(1);

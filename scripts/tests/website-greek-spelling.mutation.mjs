@@ -29,7 +29,7 @@ const MUTANTS = [
     file: PURE,
     from: "  const fromBrief = new Set((brief.match(GREEK_WORD) ?? []).map(fold));",
     to: "  const fromBrief = new Set<string>();",
-    expect: "a word from the brief is not asked about",
+    expect: "the exact-fold set alone protects a common noun from the brief",
   },
   {
     // 2. THE PRIVATE FOLD COMES BACK — the first draft's defect. An accent
@@ -39,7 +39,7 @@ const MUTANTS = [
     file: PURE,
     from: "  const fold = foldForMatch;",
     to: '  const fold = (s: string) => s.toLowerCase().replace(/\\u03c2/g, "\\u03c3");',
-    expect: "even when the brief accents it and the page does not",
+    expect: "the shared fold alone protects it across an accent",
   },
   {
     // 3. THE MODEL'S ANSWER IS TRUSTED WHOLE. Anything it says appears
@@ -83,9 +83,41 @@ const MUTANTS = [
     // rules out of reach of any test in the first place.
     name: "the provider chain is imported back into the pure half",
     file: PURE,
-    from: 'import { foldForMatch } from "@/lib/text/unicode-patterns";',
-    to: 'import { foldForMatch } from "@/lib/text/unicode-patterns";\nimport { runCompletion } from "@/lib/ai/providers/complete";\nvoid runCompletion;',
+    from: 'import { foldForMatch, MAX_INFLECTION } from "@/lib/text/unicode-patterns";',
+    to: 'import { foldForMatch, MAX_INFLECTION } from "@/lib/text/unicode-patterns";\nimport { runCompletion } from "@/lib/ai/providers/complete";\nvoid runCompletion;',
     expect: "the pure half imports no provider",
+  },
+  {
+    // THE DEFECT MEASURED ON THE FIRST REAL SITE THIS CODE EVER SAW:
+    // "Χαλάνδρι" in the brief, "Χαλανδρίου" on the page and in the list
+    // of words put to the model as candidate misspellings. Six of six
+    // constructed cases leaked. Exact-form matching in an inflected
+    // language protects one form and no other.
+    name: "the owner's own name is protected only in the exact form they typed",
+    file: PURE,
+    from: "if (fromBrief.has(key) || seen.has(key) || isOwnName(raw, ownStems)) continue;",
+    to: "if (fromBrief.has(key) || seen.has(key)) continue;",
+    expect: "no inflection of the owner's own name is put to the model",
+  },
+  {
+    // AND THE OVER-CORRECTION, which is worse: a checker that silences a
+    // real typo to protect a name has stopped being a spelling checker.
+    // Stemming the sentence-initial capital too would swallow every word
+    // beginning "ζαχαροπλαστ", the brief's own common noun.
+    name: "...and every capital becomes a name, including the one that starts the sentence",
+    file: PURE,
+    from: "    for (const w of words.slice(1)) {",
+    to: "    for (const w of words) {",
+    expect: "no real misspelling is silenced to protect a name",
+  },
+  {
+    // THE STEM GETS SHORT ENOUGH TO CATCH STRANGERS. "χαλα" also begins
+    // χαλαρός and χάλασε.
+    name: "the stem shortens until unrelated words are swallowed",
+    file: PURE,
+    from: "  const len = Math.max(OWN_STEM_MIN, Math.ceil(folded.length * 0.6));",
+    to: "  const len = Math.max(3, Math.ceil(folded.length * 0.3));",
+    expect: "no real misspelling is silenced to protect a name",
   },
 ];
 

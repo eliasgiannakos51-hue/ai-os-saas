@@ -207,3 +207,264 @@ export function isFolded(text: string): boolean {
  * answers it separately, with the kana as the tell.
  */
 export const CJK_PATTERN = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
+
+// ---------------------------------------------------------------------
+// GREEKLISH
+// ---------------------------------------------------------------------
+//
+// "thelo na ftiakso" is Greek. Until now this app saw noise: not Greek to
+// foldForMatch, not English to the classifier, matching no canned answer.
+// A Greek user on a phone with an English keyboard - which is most of
+// them, some of the time - fell through every match here.
+//
+// THE AMBIGUITY ONLY BITES IF YOU MUST PRODUCE ONE ANSWER. `x` is both
+// chi and xi; `h` is both eta and chi; `u` is both theta (it is the theta
+// key on a Greek layout) and upsilon. Transliterating greeklish INTO
+// Greek forces a choice and gets it wrong half the time. So nothing here
+// transliterates.
+//
+// Both sides are reduced to a SKELETON instead - one token per Greek
+// phoneme - and the Greek side is deterministic while only the Latin side
+// branches. All of thelo, 8elw, thelw and the Greek word itself reduce to
+// `8elo`. A Latin word with an ambiguous letter yields a small SET of
+// skeletons and matches if any of them is the Greek one. Ambiguity
+// becomes many-to-one, which is the direction that costs nothing.
+//
+// AND NOTHING IS EVER REWRITTEN. "email" does not become a Greek word,
+// because no function here returns Greek. They return skeletons, for
+// comparing. The only risk left is a false MATCH, and that is measured
+// against this app's own vocabulary in scripts/tests/greeklish.test.mjs
+// rather than argued about - an English word that happens to reduce to a
+// Greek word's skeleton is a collision, and the count of them is a
+// number.
+
+/** One token per Greek phoneme. Chosen so no two phonemes share one. */
+const GREEK_DIGRAPHS: ReadonlyArray<readonly [string, string]> = [
+  ["ου", "u"],
+  ["ει", "i"],
+  ["οι", "i"],
+  ["υι", "i"],
+  ["αι", "e"],
+  // alpha-upsilon and epsilon-upsilon are a consonant in disguise: they
+  // are pronounced av/af and ev/ef. Greeklish writes au/av/af and
+  // eu/ev/ef for them, so both sides are normalised to the voiced
+  // spelling and the three Latin forms collapse onto it below.
+  ["αυ", "av"],
+  ["ευ", "ev"],
+];
+
+const GREEK_LETTERS: Readonly<Record<string, string>> = {
+  "α": "a", "β": "v", "γ": "g", "δ": "d",
+  "ε": "e", "ζ": "z", "η": "i", "θ": "8",
+  "ι": "i", "κ": "k", "λ": "l", "μ": "m",
+  "ν": "n", "ξ": "3", "ο": "o", "π": "p",
+  "ρ": "r", "σ": "s", "τ": "t", "υ": "i",
+  "φ": "f", "χ": "x", "ψ": "y", "ω": "o",
+};
+
+/** The Latin sequences that mean one Greek phoneme, longest first. */
+const LATIN_DIGRAPHS: ReadonlyArray<readonly [string, readonly string[]]> = [
+  ["ou", ["u"]],
+  ["ei", ["i"]],
+  ["oi", ["i"]],
+  ["ai", ["e"]],
+  ["au", ["av"]],
+  ["av", ["av"]],
+  ["af", ["av"]],
+  ["eu", ["ev"]],
+  ["ev", ["ev"]],
+  ["ef", ["ev"]],
+  ["th", ["8"]],
+  ["ch", ["x"]],
+  ["ps", ["y"]],
+  ["ks", ["3"]],
+];
+
+/** A single Latin letter, and every Greek phoneme it can mean. */
+const LATIN_LETTERS: Readonly<Record<string, readonly string[]>> = {
+  a: ["a"], b: ["v"], c: ["k"], d: ["d"], e: ["e"], f: ["f"], g: ["g"],
+  // eta or chi. Both are real: "hmera" is a day, "hara" is joy.
+  h: ["i", "x"],
+  i: ["i"], j: ["3"], k: ["k"], l: ["l"], m: ["m"], n: ["n"], o: ["o"],
+  p: ["p"], q: ["k"], r: ["r"], s: ["s"], t: ["t"],
+  // theta on a Greek keyboard, or the vowel upsilon.
+  u: ["8", "i"],
+  v: ["v"],
+  // omega on a Greek keyboard.
+  w: ["o"],
+  // chi or xi. "xara" is joy, "xero" is I know.
+  x: ["x", "3"],
+  y: ["i"], z: ["z"],
+  // The digits people type for the letters they resemble.
+  "8": ["8"], "9": ["8"], "3": ["3"], "0": ["o"],
+};
+
+/** Beyond this many branches a word is not being read, it is being
+ *  guessed at. Sixteen covers four ambiguous letters in one word, which
+ *  no real word reaches. */
+const MAX_GREEKLISH_BRANCHES = 16;
+
+/**
+ * The skeleton of a GREEK string. Deterministic: one input, one output.
+ */
+export function greekSkeleton(input: string): string {
+  // THE MARKER IS NOT A SPACE, and it was for one draft. Digraphs are
+  // replaced by an already-Latin token, which then has to be protected
+  // from the single-letter pass — so the first version wrapped it in
+  // spaces and dropped every space afterwards. That destroyed the real
+  // word boundaries too: "ακύρωση συνδρομής" came out as one word, and
+  // the phrase triggers it exists to match could never be found. U+0000
+  // cannot occur in a fold, so it can mark without meaning anything.
+  const MARK = "\u0000";
+  let s = foldForMatch(String(input ?? ""));
+  for (const [from, to] of GREEK_DIGRAPHS) s = s.split(from).join(`${MARK}${to}${MARK}`);
+  let out = "";
+  let literal = false;
+  for (const ch of s) {
+    if (ch === MARK) {
+      literal = !literal;
+      continue;
+    }
+    out += literal ? ch : GREEK_LETTERS[ch] ?? ch;
+  }
+  return out;
+}
+
+/**
+ * Every skeleton a LATIN string could mean, at most
+ * MAX_GREEKLISH_BRANCHES of them.
+ */
+export function greeklishSkeletons(input: string): string[] {
+  const s = foldForMatch(String(input ?? ""));
+  let branches: string[] = [""];
+  let i = 0;
+  while (i < s.length) {
+    const two = s.slice(i, i + 2);
+    const digraph = LATIN_DIGRAPHS.find(([from]) => from === two);
+    const options = digraph ? digraph[1] : LATIN_LETTERS[s[i]] ?? [s[i]];
+    i += digraph ? 2 : 1;
+    if (branches.length * options.length > MAX_GREEKLISH_BRANCHES) {
+      // Too many readings: keep the first of each from here on. The word
+      // is still matched, just not in every spelling at once.
+      branches = branches.map((b) => b + options[0]);
+      continue;
+    }
+    const next: string[] = [];
+    for (const b of branches) for (const o of options) next.push(b + o);
+    branches = next;
+  }
+  return [...new Set(branches)];
+}
+
+/** Does this text contain a Greek letter at all? */
+export const GREEK_LETTER_PATTERN = /\p{Script=Greek}/u;
+
+/**
+ * Is `latin` a greeklish spelling of `greek`?
+ *
+ * TWO GUARDS, AND BOTH ARE ABOUT FALSE MATCHES RATHER THAN MISSES:
+ *
+ * A string that already contains Greek letters is not greeklish - it is
+ * Greek, and foldForMatch already handles it.
+ *
+ * And a floor of three characters, because two-letter skeletons collide
+ * with almost everything. The count of collisions above that floor is
+ * measured in the gate rather than assumed to be zero.
+ */
+export function isGreeklishOf(latin: string, greek: string): boolean {
+  const l = String(latin ?? "");
+  const g = String(greek ?? "");
+  if (GREEK_LETTER_PATTERN.test(l)) return false;
+  if (!GREEK_LETTER_PATTERN.test(g)) return false;
+  // THE FLOOR IS ON THE SKELETON, AND ONLY THERE. A first draft also
+  // checked the two inputs' lengths, and its own mutation proved that
+  // guard inert: nothing two characters long can produce a skeleton of
+  // three, so the check below already refused everything it did. A guard
+  // that protects nothing is worse than none — it reads like a defence
+  // and the next person keeps it.
+  const target = greekSkeleton(g);
+  if (target.length < 3) return false;
+  return greeklishSkeletons(l).includes(target);
+}
+
+/**
+ * Does `text` contain a greeklish spelling of any of `greekTerms`?
+ *
+ * THE SEAM, AND IT HAD TO BE MADE RATHER THAN FOUND. The six places that
+ * needed greeklish did not share one: four decide a match with
+ * `.includes()` on folded text (search-match, knowledge-base,
+ * module-relevance, trading/rules) and two test hand-written regex
+ * alternations (website-negative-instructions, and trading/rules again).
+ * There was no single function to teach, which is exactly how a feature
+ * ends up wired at the one place somebody needed it.
+ *
+ * So this is the one implementation, and every one of the six calls it.
+ * scripts/tests/greeklish.test.mjs names all six and goes red for any
+ * that stops.
+ *
+ * IT DOES NOTHING WHEN THE TEXT IS ALREADY GREEK. A user who typed Greek
+ * is served by foldForMatch, and running this as well would only add
+ * chances to be wrong.
+ */
+export function textHasGreeklishTerm(text: string, greekTerms: readonly string[]): boolean {
+  const t = String(text ?? "");
+  if (!t || GREEK_LETTER_PATTERN.test(t)) return false;
+  // A TERM CAN BE A PHRASE, and the first version of this could not see
+  // one. The canned-answer triggers include "ακύρωση συνδρομής"; a
+  // token-by-token comparison can never equal a two-word skeleton, so
+  // "akyrwsh sindromhs" matched nothing while the single-word trigger
+  // beside it matched. A phrase is satisfied when EVERY one of its words
+  // is found among the text's tokens — order is not required, because a
+  // user typing on the wrong keyboard is not also being asked to get the
+  // word order of a trigger right.
+  const targets: string[][] = [];
+  for (const term of greekTerms) {
+    if (!GREEK_LETTER_PATTERN.test(term)) continue;
+    const parts = greekSkeleton(term)
+      .split(/[^a-z0-9]+/)
+      .filter((w) => w.length >= 3);
+    if (parts.length > 0) targets.push(parts);
+  }
+  if (targets.length === 0) return false;
+
+  const seen = new Set<string>();
+  for (const token of foldForMatch(t).split(/[^a-z0-9]+/)) {
+    if (token.length < 3) continue;
+    for (const candidate of greeklishSkeletons(token)) seen.add(candidate);
+  }
+  if (seen.size === 0) return false;
+  return targets.some((parts) => parts.every((part) => seen.has(part)));
+}
+
+
+/**
+ * Like textHasGreeklishTerm, but the terms are STEMS.
+ *
+ * FEATURE_SPECS writes its Greek as stems on purpose — the booking
+ * pattern is a stem plus any letters, because Greek inflects the noun
+ * five ways. Comparing a stem to a whole token by equality therefore
+ * finds nothing: the stem for "booking" reduces to `kratis` and a user
+ * types `kratisi`. The allowance is MAX_INFLECTION, this repository's own
+ * answer to how much a Greek ending can add, so a stem cannot swallow a
+ * much longer unrelated word.
+ */
+export function textHasGreeklishStem(text: string, greekStems: readonly string[]): boolean {
+  const t = String(text ?? "");
+  if (!t || GREEK_LETTER_PATTERN.test(t)) return false;
+  const stems: string[] = [];
+  for (const term of greekStems) {
+    if (!GREEK_LETTER_PATTERN.test(term)) continue;
+    const skeleton = greekSkeleton(term).replace(/[^a-z0-9]/g, "");
+    if (skeleton.length >= 3) stems.push(skeleton);
+  }
+  if (stems.length === 0) return false;
+  for (const token of foldForMatch(t).split(/[^a-z0-9]+/)) {
+    if (token.length < 3) continue;
+    for (const candidate of greeklishSkeletons(token)) {
+      for (const stem of stems) {
+        if (candidate.startsWith(stem) && candidate.length <= stem.length + MAX_INFLECTION) return true;
+      }
+    }
+  }
+  return false;
+}

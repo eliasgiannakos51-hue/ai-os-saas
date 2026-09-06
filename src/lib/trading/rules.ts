@@ -1,5 +1,5 @@
 import { TRADING_SESSIONS, isTradingSession, normaliseInstrument, type TradingSession } from "@/lib/trading/journal";
-import { foldForMatch } from "@/lib/text/unicode-patterns";
+import { foldForMatch, textHasGreeklishTerm } from "@/lib/text/unicode-patterns";
 
 /**
  * THE RULES THE USER WROTE, IN A FORM A COMPUTER CAN COUNT.
@@ -214,7 +214,7 @@ export function parseRulesFromText(text: string): ParsedRule[] {
 
     // "max 2% risk", "ρίσκο max 2%", "risk no more than 2%"
     const percent = folded.match(/(\d+(?:[.,]\d+)?)\s*%/);
-    if (percent && /risk|ρισκ/.test(folded)) {
+    if (percent && (/risk|ρισκ/.test(folded) || textHasGreeklishTerm(folded, ["ρισκο"]))) {
       push(parseRuleParams("max_risk_percent", { percent: num(percent[1]) }), clause);
       continue;
     }
@@ -244,11 +244,14 @@ export function parseRulesFromText(text: string): ParsedRule[] {
     // silently made every Greek session rule unparseable while the
     // English one worked, which is the worst possible shape for a bug in
     // a product whose first language is Greek.
-    if (/\bonly\b/.test(folded) || folded.includes("μονο")) {
+    if (/\bonly\b/.test(folded) || folded.includes("μονο") || textHasGreeklishTerm(folded, ["μονο"])) {
       const sessions = TRADING_SESSIONS.filter((s) => {
         if (s === "other") return false;
         const spellings = SESSION_SPELLINGS[s];
-        return spellings.some((word) => folded.includes(word));
+        // GREEKLISH, from the one implementation in unicode-patterns.ts.
+        // A trader typing "mono london synedria" is naming a session as
+        // plainly as one typing it in Greek.
+        return spellings.some((word) => folded.includes(word)) || textHasGreeklishTerm(folded, spellings);
       });
       if (sessions.length > 0) {
         push(parseRuleParams("allowed_sessions", { sessions }), clause);

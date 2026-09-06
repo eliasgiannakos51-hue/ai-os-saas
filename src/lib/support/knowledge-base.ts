@@ -36,7 +36,7 @@
  * HelpArticle satisfies this structurally, so loadCannedArticles() rows
  * can be passed straight in with no adapter and no cast.
  */
-import { foldForMatch } from "@/lib/text/unicode-patterns";
+import { foldForMatch, textHasGreeklishTerm } from "@/lib/text/unicode-patterns";
 
 export type KnowledgeArticle = {
   slug: string;
@@ -169,7 +169,12 @@ export function matchCannedAnswer(
   for (const article of articles) {
     for (const trigger of article.triggers) {
       const t = normalize(trigger);
-      if (!t || !n.includes(t)) continue;
+      // GREEKLISH, same one implementation as the other five surfaces.
+      // "sindromi" has to reach the cancellation article the way
+      // "συνδρομή" does, or the canned answers are for keyboards rather
+      // than for people.
+      const hit = t && (n.includes(t) || textHasGreeklishTerm(n, [trigger]));
+      if (!hit) continue;
 
       // How much of what the user wrote is this trigger? A short question
       // that IS the trigger scores 1; a long one scores proportionally

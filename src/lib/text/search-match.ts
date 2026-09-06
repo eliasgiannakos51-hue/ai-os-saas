@@ -25,7 +25,7 @@
 //     the injection patterns from drifting apart.
 //
 // Client-safe (no `server-only`): these run in the browser.
-import { foldForMatch } from "@/lib/text/unicode-patterns";
+import { foldForMatch, textHasGreeklishTerm } from "@/lib/text/unicode-patterns";
 
 /** The comparable form of a piece of text: case-, accent- and sigma-folded. */
 export function normalizeForSearch(text: string | null | undefined): string {
@@ -41,7 +41,13 @@ export function normalizeForSearch(text: string | null | undefined): string {
 export function matchesSearch(haystack: string | null | undefined, query: string): boolean {
   const q = normalizeForSearch(query).trim();
   if (!q) return true;
-  return normalizeForSearch(haystack).includes(q);
+  if (normalizeForSearch(haystack).includes(q)) return true;
+  // GREEKLISH. A Greek user on an English keyboard types "esoda" for a
+  // row called "Έσοδα Ιουλίου" and, until this line, matched nothing.
+  // Only fires when the QUERY is Latin and the row is Greek — the one
+  // implementation lives in lib/text/unicode-patterns.ts and all six
+  // matching surfaces call it.
+  return textHasGreeklishTerm(q, String(haystack ?? "").split(/[^\p{L}\p{N}]+/u));
 }
 
 /**

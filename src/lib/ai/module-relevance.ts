@@ -1,4 +1,4 @@
-import { foldForMatch } from "@/lib/text/unicode-patterns";
+import { foldForMatch, textHasGreeklishTerm } from "@/lib/text/unicode-patterns";
 
 /**
  * SENDING LESS CONTEXT, WITHOUT LOSING THE THING THAT MAKES IT USEFUL.
@@ -171,6 +171,16 @@ export function scoreTerms(
       counted.add(folded);
       score += 1;
     } else if (folded.includes(" ") && foldedQuestion.includes(folded)) {
+      counted.add(folded);
+      score += 1;
+    } else if (textHasGreeklishTerm(foldedQuestion, [term])) {
+      // GREEKLISH, and it belongs here rather than one layer up: this is
+      // where a vocabulary word meets a question, and "thelo na dw ta
+      // esoda mou" is a question about Finance in every sense except the
+      // alphabet it was typed in. One implementation, in
+      // lib/text/unicode-patterns.ts, called from all six matching
+      // surfaces — the alternative is the shape this repository already
+      // has a name for, wired at the one place somebody needed it.
       counted.add(folded);
       score += 1;
     }

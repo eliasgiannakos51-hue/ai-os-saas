@@ -51,6 +51,17 @@ export const MODULE_SYNONYMS: Record<string, ModuleSynonyms> = {
     "invoice", "invoices", "profit", "cost", "costs", "cashflow", "budget",
     "έξοδα", "έξοδο", "εξόδων", "έσοδα", "έσοδο", "εσόδων", "τιμολόγιο",
     "τιμολόγια", "κέρδος", "κέρδη", "κόστος", "δαπάνες",
+    // THE VERBS, and they were missing while the English ones were not.
+    // The list carried spend/spending/spent and, in Greek, only the
+    // nouns — so "πόσο ξόδεψα" scored zero on Finance and so did its
+    // greeklish "poso ejodepsa". Measured 2026-09-06 when the greeklish
+    // fold was wired: the fold was working and the vocabulary was not.
+    // BOTH THE AUGMENTED AND THE BARE PAST. Greek writes this verb either
+    // way and a user picks one without thinking about it; "ejodepsa" is
+    // the augmented one, and adding only the bare form left the owner's
+    // own test case scoring zero.
+    "ξόδεψα", "εξόδεψα", "ξοδεύω", "ξόδεψε", "ξοδεύει", "πλήρωσα", "πληρώνω",
+    "εισέπραξα", "κοστίζει", "κόστισε",
     "gasto", "gastos", "ingreso", "ingresos", "factura", "facturas",
     "beneficio", "dépense", "dépenses", "revenu", "revenus", "facture",
     "factures", "bénéfice", "Ausgabe", "Ausgaben", "Einnahmen", "Einnahme",

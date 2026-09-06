@@ -1,4 +1,4 @@
-import { foldForMatch } from "@/lib/text/unicode-patterns";
+import { foldForMatch, MAX_INFLECTION } from "@/lib/text/unicode-patterns";
 
 /**
  * THE MODEL MISSPELLS GREEK, AND NOTHING WAS LOOKING.
@@ -60,6 +60,65 @@ function visibleTextOf(html: string): string {
  * set in capitals is a design choice, and capitals lose the accents that
  * make Greek spelling checkable in the first place.
  */
+/**
+ * THE OWNER'S OWN NAMES, IN EVERY CASE GREEK PUTS THEM IN.
+ *
+ * greekWordsToCheck excludes a page word when its FOLD matches a word in
+ * the brief. That is exact-form matching, and Greek does not write the
+ * same noun the same way twice: the brief says "Ζαχαροπλαστείο στο
+ * Χαλάνδρι", the page it produces says "στην καρδιά του Χαλανδρίου", and
+ * the second form is not the first.
+ *
+ * MEASURED, ON THE FIRST REAL SITE THIS CODE EVER SAW. 2026-09-06, a site
+ * generated from exactly that brief: "Χαλανδρίου" went into the list of
+ * words the model is asked to judge. Six of six constructed cases leaked
+ * the same way — Χαλανδρίου, Παπαδόπουλος, Θεσσαλονίκης, Ναυπλίου,
+ * Ιωαννίνων, Παπαδόπουλου.
+ *
+ * That is this file's FIRST stated promise — "IT NEVER ASKS ABOUT THE
+ * OWNER'S OWN WORDS. A village, a surname, a business name written in the
+ * brief is the owner's spelling of their own thing" — and it was true
+ * only for the one form the owner happened to type. The prompt does tell
+ * the model that a place or person's name is not a misspelling, but that
+ * is a request; this is the enforcement, and docs/shapes.md already
+ * carries "an instruction requested rather than enforced" as its own
+ * failure shape.
+ *
+ * ONLY PROPER NOUNS, AND ONLY NOT-SENTENCE-INITIAL ONES. A capital at the
+ * start of a sentence is a sentence, not a name — "Ζαχαροπλαστείο" in the
+ * brief above is a common noun, and stemming it would stop the checker
+ * asking about every word beginning "ζαχαροπλαστ", including a real typo
+ * in one. The word after the first in each sentence is where the village
+ * and the surname actually sit.
+ *
+ * THE STEM LENGTH IS max(5, 60% of the word). Shorter would catch
+ * unrelated words ("χαλα" also begins χαλαρός, χάλασε); longer would miss
+ * the genitive plural. MAX_INFLECTION is this repository's own answer to
+ * "how much can a Greek ending add", used by stem() in
+ * lib/text/unicode-patterns.ts, and it is the ceiling here too.
+ */
+const OWN_STEM_MIN = 5;
+export function ownNameStems(brief: string): string[] {
+  const stems: string[] = [];
+  for (const sentence of brief.split(/[.!?;·\n]+/)) {
+    const words = sentence.match(GREEK_WORD) ?? [];
+    for (const w of words.slice(1)) {
+      if (w[0] !== w[0].toUpperCase() || w === w.toUpperCase()) continue;
+      const folded = foldForMatch(w);
+      const len = Math.max(OWN_STEM_MIN, Math.ceil(folded.length * 0.6));
+      if (folded.length < OWN_STEM_MIN) continue;
+      stems.push(folded.slice(0, len));
+    }
+  }
+  return stems;
+}
+
+/** Is this page word an inflection of one of the owner's own names? */
+export function isOwnName(word: string, stems: string[]): boolean {
+  const folded = foldForMatch(word);
+  return stems.some((s) => folded.startsWith(s) && folded.length <= s.length + MAX_INFLECTION);
+}
+
 export function greekWordsToCheck(html: string, brief: string): string[] {
   const text = visibleTextOf(html);
   if (!GREEK_LETTER.test(text)) return [];
@@ -75,12 +134,13 @@ export function greekWordsToCheck(html: string, brief: string): string[] {
   // already uses.
   const fold = foldForMatch;
   const fromBrief = new Set((brief.match(GREEK_WORD) ?? []).map(fold));
+  const ownStems = ownNameStems(brief);
   const seen = new Set<string>();
   const out: string[] = [];
   for (const raw of text.match(GREEK_WORD) ?? []) {
     if (raw === raw.toUpperCase()) continue;
     const key = fold(raw);
-    if (fromBrief.has(key) || seen.has(key)) continue;
+    if (fromBrief.has(key) || seen.has(key) || isOwnName(raw, ownStems)) continue;
     seen.add(key);
     out.push(raw);
     if (out.length >= SPELLING_WORD_CAP) break;

@@ -84,8 +84,15 @@ const recent = files.slice(-RECENT);
 const added = { columns: new Set(), tables: new Set(), functions: new Set() };
 for (const f of recent) {
   const sql = readFileSync(`${DIR}/${f}`, "utf8").replace(/--[^\n]*/g, "");
-  for (const m of sql.matchAll(/alter\s+table\s+(?:public\.)?"?([a-z0-9_]+)"?\s+add\s+column\s+(?:if\s+not\s+exists\s+)?"?([a-z0-9_]+)"?/gi))
-    added.columns.add(`${m[1]}.${m[2]}`);
+  // EVERY add-column CLAUSE OF THE STATEMENT, not the first one. One
+  // `alter table t add column a …, add column b …, add column c …;`
+  // is three columns, and the pattern this replaces saw only `a` — so
+  // the canary list silently omitted the second and third column of any
+  // multi-column migration. That is precisely the object this file exists
+  // to notice going missing.
+  for (const stmt of sql.matchAll(/alter\s+table\s+(?:only\s+)?(?:if\s+exists\s+)?(?:public\.)?"?([a-z0-9_]+)"?([\s\S]*?);/gi))
+    for (const c of stmt[2].matchAll(/add\s+column\s+(?:if\s+not\s+exists\s+)?"?([a-z0-9_]+)"?/gi))
+      added.columns.add(`${stmt[1]}.${c[1]}`);
   for (const m of sql.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?"?([a-z0-9_]+)"?/gi))
     added.tables.add(m[1]);
   for (const m of sql.matchAll(/create\s+(?:or\s+replace\s+)?function\s+(?:public\.)?"?([a-z0-9_]+)"?/gi))

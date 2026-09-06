@@ -202,6 +202,39 @@ mutation suite, 10 of 10 today, plus the entries changing from "unknown"
 to a value.
 
 
+### 8c. The ten storage policies nothing compares
+**~1 day.**
+
+`storage.objects` is the one corner where the local stub and production
+were found to *disagree* (2026-09-05: RLS off in the fixture, on in
+production), and it is the corner **no instrument in this repository
+looks at**.
+
+Both schema tools filter their object lists to the public tables `src/`
+queries — `scripts/db-inventory.mjs` through
+`policies.filter((p) => tables.includes(p.table))`, and
+`scripts/db/pending-migrations.mjs` the same way. So the **ten** policies
+on `storage.objects`, the **three** functions and **three** tables in
+`auth.`/`storage.` are outside both by construction. That is a decision,
+not an accident — but until 2026-09-06 it was an *undeclared* one.
+
+What exists now is a count, not a comparison:
+`scripts/tests/sql-spellings.test.mjs` section 3 prints the excluded set
+and goes red if it reaches zero, so the exclusion is visible and cannot
+silently grow. What does not exist is anything that asks production
+whether those ten policies are the ten this repo defines, or whether one
+of them says `using (true)`.
+
+**What it needs:** the same two throwaway accounts as item 1, and a
+prodtest that uploads one object as A and tries to read it as B through
+the real storage API — the shape `user-isolation.dbtest.mjs` already uses
+for public tables, pointed at the one schema it cannot reach.
+
+**Why it is Tier 3 and not Tier 1:** production answered
+`relrowsecurity = true` on 2026-09-05, so the ten policies *are* being
+enforced today. What is missing is the ability to notice if that stops
+being true, or if a future migration adds an eleventh that is wrong.
+
 ### 9. The 123 gates with no mutation suite
 **~3 weeks if done exhaustively. Do not do it exhaustively.**
 

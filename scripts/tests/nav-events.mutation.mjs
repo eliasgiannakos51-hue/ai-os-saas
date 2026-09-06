@@ -170,10 +170,36 @@ const MUTATIONS = [
     to: "create or replace function public.prune_nav_events(p_days integer default 30)",
   },
   {
-    name: "the cron route hard-codes a number instead of reading the constant",
+    // SURVIVED UNTIL 2026-09-06, and the reason is worth keeping: the
+    // gate asked whether the route passed the constant ANYWHERE, which
+    // was true while there was one prune call. A second sweep arrived
+    // (prune_transition_suggestions) and String.replace still swaps only
+    // the first occurrence — so this pinned nav retention to a literal,
+    // left the other reading the constant, and the check stayed green.
+    name: "the FIRST prune call hard-codes a number instead of reading the constant",
     file: CRON,
-    from: "      p_days: NAV_RETENTION_DAYS,",
-    to: "      p_days: 90,",
+    from: "      p_days: NAV_RETENTION_DAYS,\n    });",
+    to: "      p_days: 90,\n    });",
+    expect: "passes the constant rather than a literal",
+  },
+  {
+    // AND THE SECOND, because a check written against call one is a
+    // check that cannot see call two drift.
+    name: "...or the second one does",
+    file: CRON,
+    from: '      { p_days: NAV_RETENTION_DAYS }',
+    to: '      { p_days: 30 }',
+    expect: "passes the constant rather than a literal",
+  },
+  {
+    // AND THE SWEEP THAT SIMPLY STOPS PASSING ONE, taking whatever
+    // default the function carries — which is the failure mode the
+    // migration's own clamp exists for.
+    name: "a sweep stops passing a retention window at all",
+    file: CRON,
+    from: '      { p_days: NAV_RETENTION_DAYS }',
+    to: '      {}',
+    expect: "every prune call has a p_days",
   },
   {
     name: "the sweep is unregistered, so retention never runs",

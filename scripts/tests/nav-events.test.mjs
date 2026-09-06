@@ -319,8 +319,27 @@ check("NAV_RETENTION_DAYS is 90", nav.NAV_RETENTION_DAYS === 90);
 check("the migration's default is the same number",
   new RegExp(`prune_nav_events\\(p_days integer default ${nav.NAV_RETENTION_DAYS}\\)`).test(migrationCode),
   migrationCode.match(/prune_nav_events\(p_days[^)]*\)/)?.[0]);
-check("the cron route passes it rather than a literal",
-  /p_days:\s*NAV_RETENTION_DAYS/.test(cronCode));
+// EVERY p_days IN THE ROUTE, NOT ONE OF THEM. This clause said
+// `/p_days:\s*NAV_RETENTION_DAYS/.test(cronCode)` — presence — and that
+// was sufficient exactly while the route made ONE prune call. When
+// transition_suggestions gave it a second, its own mutation survived:
+// String.replace swaps the first occurrence, so the nav sweep was pinned
+// to a literal 90 while the suggestion sweep still read the constant and
+// kept this check green. Two sweeps on "the same number" is the whole
+// point of section 7, and a check that any one of them reads the constant
+// cannot see them drift apart.
+const pDaysArgs = [...cronCode.matchAll(/p_days:\s*([A-Za-z_][A-Za-z0-9_]*|\d+)/g)].map((m) => m[1]);
+const pruneCalls = [...cronCode.matchAll(/rpc\(\s*"(prune_[a-z_]+)"/g)].map((m) => m[1]);
+check(
+  `every prune call has a p_days (${pruneCalls.length} calls: ${pruneCalls.join(", ")}; ${pDaysArgs.length} arguments)`,
+  pruneCalls.length >= 2 && pDaysArgs.length === pruneCalls.length,
+  "a sweep with no retention argument takes the function's own default, which nothing here pins"
+);
+check(
+  `...and every one of them passes the constant rather than a literal (${pDaysArgs.join(", ")})`,
+  pDaysArgs.length > 0 && pDaysArgs.every((a) => a === "NAV_RETENTION_DAYS"),
+  pDaysArgs.filter((a) => a !== "NAV_RETENTION_DAYS").join(", ")
+);
 check("it calls the function, not a DELETE of its own",
   /rpc\("prune_nav_events"/.test(cronCode) && !/\.delete\(\)/.test(cronCode));
 check("behind CRON_SECRET, fail-closed", /checkCronAuth\(request\)/.test(cronCode));

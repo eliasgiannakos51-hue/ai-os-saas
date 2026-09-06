@@ -1824,6 +1824,7 @@
       "depth": {
         "legend": "مدى العمق",
         "perRun": "لكل تشغيل",
+        "withoutSearch": "{credits} بدون بحث على الويب",
         "suggested": "مقترح",
         "facts": "{sources, plural, zero {لا مصادر} one {مصدر واحد} two {مصدران} few {# مصادر} many {# مصدرًا} other {# مصدر}} · {steps, plural, zero {لا خطوات} one {خطوة واحدة} two {خطوتان} few {# خطوات} many {# خطوة} other {# خطوة}} · نحو {seconds} ثانية",
         "runOnce": "تشغيل مرة واحدة بمستوى",

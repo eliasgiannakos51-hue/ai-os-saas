@@ -1824,6 +1824,7 @@
       "depth": {
         "legend": "Wie gründlich",
         "perRun": "pro Lauf",
+        "withoutSearch": "{credits} ohne Websuche",
         "suggested": "Vorgeschlagen",
         "facts": "{sources, plural, one {# Quelle} other {# Quellen}} · {steps, plural, one {# Schritt} other {# Schritte}} · etwa {seconds}s",
         "runOnce": "Einmal ausführen als",

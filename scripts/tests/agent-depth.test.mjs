@@ -607,5 +607,106 @@ console.log("\n12. The migration's own rules");
   }
 }
 
+console.log("\n== the picker shows what the search actually costs ==");
+//
+// THE TABLE USED TO SHOW ONE NUMBER PER TIER — the searching one — and a
+// reader shown only "6 · 22 · 67" cannot tell whether deep is dear
+// because Opus is dear or because it searches ten times instead of four.
+// It is mostly the second: measured from AGENT_DEPTH_SPECS on 2026-09-06,
+// the three tiers are 2 / 10 / 20 credits with nothing to look up and
+// 6 / 22 / 67 with their full search budget.
+//
+// That gap is a decision somebody can make — a task with nothing to
+// search costs a third of the advertised price — and it was invisible.
+{
+  const pageSrc = readFileSync("src/app/dashboard/agents/page.tsx", "utf8");
+  const pickerSrc = readFileSync("src/components/agents/depth-picker.tsx", "utf8");
+
+  // BOTH NUMBERS COME FROM THE SERVER'S OWN ESTIMATOR, and the check is
+  // that there are TWO calls differing only in needsWebSearch. A number
+  // computed in the browser would be a second implementation of the
+  // pricing, which is what the picker's own comment forbids.
+  const calls = [...pageSrc.matchAll(/agentRunEstimatesByDepth\(\{[\s\S]*?needsWebSearch:\s*(true|false)/g)].map((m) => m[1]);
+  ok(
+    `the page prices both cases through agentRunEstimatesByDepth (${calls.join(", ") || "none"})`,
+    calls.includes("true") && calls.includes("false"),
+    calls.join(", ")
+  );
+  ok(
+    "the picker renders the second number",
+    /creditsWithoutSearch/.test(pickerSrc) && /t\("withoutSearch"/.test(pickerSrc)
+  );
+  ok(
+    "...and neither number is computed in the browser",
+    !/estimateForAction|creditsForRealCost/.test(pickerSrc),
+    "the component renders what the server gives it"
+  );
+
+  // THE SUBSTANTIVE ONE. A second number that equals the first teaches
+  // nothing, and a second number that is larger is simply wrong.
+  //
+  // PRICED THROUGH estimateForAction, NOT THROUGH estimateAgentRun, and
+  // that is a limitation worth naming rather than hiding: estimateAgentRun
+  // lives in execute-agent.ts, which imports Supabase, and neither loadTs
+  // nor loadTsWithDeps can bundle it. So the wrapper's arguments are read
+  // out of its source and the same estimator is called with them — which
+  // is only sound while the wrapper stays a pass-through, so THAT is
+  // asserted first.
+  const executeForEstimate = readFileSync("src/lib/agents/execute-agent.ts", "utf8");
+  ok(
+    "estimateAgentRun is still a pass-through to estimateForAction with the tier's own model",
+    /const single = estimateForAction\(\s*DEPTH_PROFILE\[depth\],[\s\S]{0,400}?model: spec\.model,[\s\S]{0,300}?expectedWebSearches: params\.needsWebSearch \? spec\.maxSearches : 0,/.test(
+      executeForEstimate
+    ),
+    "if the wrapper starts doing arithmetic of its own, the numbers below stop being the product's"
+  );
+  const PROFILE = { simple: "agentRunSimple", standard: "agentRunStandard", deep: "agentRunDeep" };
+  ok(
+    `the profile names in this check match the ones in execute-agent.ts (${Object.values(PROFILE).join(", ")})`,
+    Object.values(PROFILE).every((name) => executeForEstimate.includes(`"${name}"`)),
+    "a renamed profile would price a different action and nobody would see it"
+  );
+
+  const cfg = pricing.resolvePricingConfig();
+  const priceOf = (d, searching) =>
+    estimate.estimateForAction(
+      PROFILE[d],
+      {
+        model: depth.AGENT_DEPTH_SPECS[d].model,
+        inputChars: 600,
+        expectedWebSearches: searching ? depth.AGENT_DEPTH_SPECS[d].maxSearches : 0,
+        planSlug: null,
+      },
+      cfg,
+      cfg.creditPriceEur
+    ).estimatedCredits;
+  const withSearch = Object.fromEntries(depth.AGENT_DEPTHS.map((d) => [d, priceOf(d, true)]));
+  const without = Object.fromEntries(depth.AGENT_DEPTHS.map((d) => [d, priceOf(d, false)]));
+  console.log(`        with search:    ${depth.AGENT_DEPTHS.map((d) => `${d} ${withSearch[d]}`).join(" · ")}`);
+  console.log(`        without search: ${depth.AGENT_DEPTHS.map((d) => `${d} ${without[d]}`).join(" · ")}`);
+  const notCheaper = depth.AGENT_DEPTHS.filter((d) => !(without[d] < withSearch[d]));
+  ok(
+    `searching costs more than not searching, in every tier (${notCheaper.length} exceptions)`,
+    depth.AGENT_DEPTHS.length >= 3 && notCheaper.length === 0,
+    notCheaper.map((d) => `${d}: ${without[d]} vs ${withSearch[d]}`).join(", ")
+  );
+  // AND THE TIERS REALLY DO SEPARATE once the search budget is in play —
+  // which is the correction this section exists to record. A round of this
+  // work reported "standard and deep cost the same" from a run made with
+  // --no-search, where most of what separates them was switched off.
+  ok(
+    `the three tiers are distinct when searching (${depth.AGENT_DEPTHS.map((d) => withSearch[d]).join(" · ")})`,
+    new Set(depth.AGENT_DEPTHS.map((d) => withSearch[d])).size === depth.AGENT_DEPTHS.length,
+    "if two tiers price the same with search, the picker is offering a choice that is not one"
+  );
+
+  for (const loc of ["en", "el", "de", "es", "fr", "it", "pt", "ja", "zh", "ar"]) {
+    const m = JSON.parse(readFileSync(`messages/${loc}.json`, "utf8"));
+    const v = m?.dashboard?.agents?.depth?.withoutSearch;
+    ok(`${loc}: the second number has a sentence carrying {credits}`,
+      typeof v === "string" && v.includes("{credits}") && v.length > 6, String(v));
+  }
+}
+
 console.log(`\n${pass} passed, ${failures.length} failed`);
 if (failures.length) { failures.forEach((f) => console.log("  - " + f)); process.exit(1); }

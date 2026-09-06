@@ -10,7 +10,15 @@ export type DepthFact = {
   steps: number;
   sources: number;
   seconds: [number, number];
+  /** With the search budget this tier is allowed. */
   credits: number;
+  /** THE SAME RUN WITH NOTHING TO LOOK UP, and the reason it is here:
+   *  the searching figure alone cannot tell a reader whether deep costs
+   *  three times standard because Opus is dearer or because it searches
+   *  ten times instead of four. It is mostly the second — 2/10/20 without
+   *  search against 6/22/67 with it — and that is a thing somebody can
+   *  decide about before they pick. */
+  creditsWithoutSearch?: number;
 };
 export type DepthFacts = Record<string, DepthFact>;
 
@@ -103,12 +111,19 @@ export function DepthPicker({
             </span>
             {/* THE NUMBER, on its own, right-aligned, in every state —
                 including the unselected ones, because the comparison is
-                the decision. */}
+                the decision. Two numbers now: the big one is what a run
+                that searches costs, the small one what the same run costs
+                with nothing to look up. */}
             <span className="shrink-0 text-right">
               <span className="block text-sm font-medium text-foreground">
                 {fact ? formatNumber(fact.credits, locale) : "—"}
               </span>
               <span className="block text-[10px] text-muted">{t("perRun")}</span>
+              {fact?.creditsWithoutSearch !== undefined && (
+                <span className="mt-0.5 block text-[10px] text-muted">
+                  {t("withoutSearch", { credits: formatNumber(fact.creditsWithoutSearch, locale) })}
+                </span>
+              )}
             </span>
           </button>
         );

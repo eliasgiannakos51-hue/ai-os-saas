@@ -1824,6 +1824,7 @@
       "depth": {
         "legend": "How hard it works",
         "perRun": "per run",
+        "withoutSearch": "{credits} with nothing to search",
         "suggested": "Suggested",
         "facts": "{sources, plural, one {# source} other {# sources}} · {steps, plural, one {# step} other {# steps}} · about {seconds}s",
         "runOnce": "Run once at",

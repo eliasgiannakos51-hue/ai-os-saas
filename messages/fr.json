@@ -1824,6 +1824,7 @@
       "depth": {
         "legend": "Profondeur du travail",
         "perRun": "par exécution",
+        "withoutSearch": "{credits} sans recherche web",
         "suggested": "Suggéré",
         "facts": "{sources, plural, one {# source} other {# sources}} · {steps, plural, one {# étape} other {# étapes}} · environ {seconds}s",
         "runOnce": "Exécuter une fois en",

@@ -1824,6 +1824,7 @@
       "depth": {
         "legend": "調査の深さ",
         "perRun": "1回あたり",
+        "withoutSearch": "検索なしなら{credits}",
         "suggested": "おすすめ",
         "facts": "{sources} 件の情報源 · {steps} ステップ · 約 {seconds} 秒",
         "runOnce": "今回だけ実行する深さ",

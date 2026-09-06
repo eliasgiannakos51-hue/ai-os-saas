@@ -24,6 +24,7 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/conduct-language.test.mjs";
 const CONDUCT = "src/lib/ai-conduct.ts";
+const CLARIFY = "src/lib/clarification.ts";
 
 const SILENT = "no block hands over a sentence without saying what language";
 const DETECTED = "the blocks that hand over a sentence are still detected";
@@ -72,6 +73,28 @@ const MUTANTS = [
     to: "    return /\"/.test(before) || ECHO_CUE.test(before);",
     expect: SILENT,
   },
+  {
+    // THE WIDER CASE THE SAME SWEEP FOUND: a prompt whose whole product
+    // is text a person reads, with nothing saying which language to write
+    // it in. clarification.ts had zero mentions and English example
+    // questions, and every question it produces is rendered to the owner.
+    // BOTH STATEMENTS, because the file carries two and the gate is
+    // satisfied by either — correctly: one instruction is enough for the
+    // model. Removing only the appended one left the sentence inside
+    // CRITICAL_FACTS_INSTRUCTION standing and the gate green, which is
+    // the gate being right and the mutation being half a mutation.
+    name: "the clarifying questions stop saying which language to ask in",
+    file: CLARIFY,
+    from: ", IN THE SAME LANGUAGE THE DESCRIPTION IS WRITTEN IN — these questions are shown to the person who wrote it. In English they would read",
+    to: " (e.g.",
+    also: [
+      {
+        from: '  "\\n\\nLANGUAGE: ask every question in the SAME LANGUAGE as the description below. These questions are shown to the person who wrote it.";',
+        to: '  "";',
+      },
+    ],
+    expect: "every prompt whose output a person reads names a language",
+  },
 ];
 
 function runGate() {
@@ -103,12 +126,15 @@ try {
   }
 
   for (const m of MUTANTS) {
-    if (!originals.get(m.file).includes(m.from)) {
+    const stale = [m.from, ...(m.also ?? []).map((e) => e.from)].filter((f) => !originals.get(m.file).includes(f));
+    if (stale.length > 0) {
       missed.push({ ...m, why: `the mutation target no longer exists in ${m.file}` });
       console.log(`  STALE   ${m.name}`);
       continue;
     }
-    writeFileSync(m.file, originals.get(m.file).replace(m.from, m.to));
+    let mutated = originals.get(m.file).replace(m.from, m.to);
+    for (const extra of m.also ?? []) mutated = mutated.replace(extra.from, extra.to);
+    writeFileSync(m.file, mutated);
     let result;
     try {
       result = runGate();

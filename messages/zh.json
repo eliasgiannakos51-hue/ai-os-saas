@@ -1824,6 +1824,7 @@
       "depth": {
         "legend": "工作深度",
         "perRun": "每次运行",
+        "withoutSearch": "无需搜索时 {credits}",
         "suggested": "推荐",
         "facts": "{sources} 个来源 · {steps} 步 · 约 {seconds} 秒",
         "runOnce": "仅这次运行使用",

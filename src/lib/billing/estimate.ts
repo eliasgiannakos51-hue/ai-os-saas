@@ -228,6 +228,26 @@ export const ACTION_PROFILES = {
   // the clarification step (the user sees it and can edit it before
   // anything is created), so the separate clarification pre-check the
   // other entry points run would be asking the same question twice.
+  // THE PAID TRANSITION DETECTOR, and it is smaller than createStudioDetect
+  // on purpose: it reads an answer the app has already produced and
+  // returns one id from a closed list of five plus a confidence. There is
+  // no title, no restatement, nothing to write — 128 output tokens is
+  // generous for a forced tool call whose whole payload is two fields.
+  //
+  // NO AUXILIARY CALL. The free reader (lib/transitions/destinations.ts)
+  // has already run and found nothing; that is the precondition for this
+  // route existing at all, and it costs nothing, so there is no
+  // pre-check to price here.
+  //
+  // `inputChars` IS THE ANSWER, NOT THE QUESTION. The call site passes
+  // the assistant's reply, which is the long thing — a 6,000-character
+  // answer is the case worth pricing, not the 40-character prompt.
+  transitionDetect: {
+    systemPromptTokens: 600,
+    auxiliaryCalls: [],
+    baseOutputChars: 120,
+    outputCharsPerInputChar: 0,
+  },
   createStudioDetect: {
     systemPromptTokens: 700,
     auxiliaryCalls: [],

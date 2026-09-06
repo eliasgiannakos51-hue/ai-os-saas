@@ -158,11 +158,17 @@ console.log("== 0. the database really is the one the migrations build ==");
 // 100 -> 105 across the migrations up to 20260914.
 // 105 -> 106: 20260915's nav_events — the first table in this schema
 // that records what a user LOOKED AT rather than what they wrote.
+// 106 -> 107: 20260927's transition_suggestions — the second append-only
+// log, and the one that turns "the transition button suggests the wrong
+// thing" from an argument into `count(*) filter (where outcome =
+// 'dismissed') / count(*)`. It is swept by the same cron as nav_events
+// (api/cron/nav-retention calls both prune functions) on the same ninety
+// days.
 // MEASURED ON THE MERGED TREE, not added. Each branch counted against
 // its own migration set; summing two ratchets is arithmetic across two
 // different schemas. Built from bootstrap-supabase.sql plus every
-// migration in supabase/migrations on a real Postgres 16: 106.
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 106);
+// migration in supabase/migrations on a real Postgres 16: 107.
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 107);
 eq(
   "the credit functions exist",
   Number(

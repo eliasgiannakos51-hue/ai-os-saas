@@ -48,8 +48,31 @@ export async function GET(request: Request) {
     });
     if (error) throw error;
 
+    // THE SECOND APPEND-ONLY LOG, SWEPT BY THE SAME JOB AND ON THE SAME
+    // WINDOW. transition_suggestions records what the product offered
+    // somebody and what they did about it (20260927000000); it is the
+    // same shape of data, kept for the same ninety days, and giving it a
+    // cron of its own would mean two schedules that can drift apart in
+    // vercel.json — and one of them silently not running is exactly how
+    // retention stops working without anybody noticing.
+    //
+    // COUNTED SEPARATELY. Two numbers in the body rather than a sum,
+    // because a total of zero cannot tell you which of the two functions
+    // was dropped.
+    const { data: suggestionsData, error: suggestionsError } = await admin.rpc(
+      "prune_transition_suggestions",
+      { p_days: NAV_RETENTION_DAYS }
+    );
+    if (suggestionsError) throw suggestionsError;
+
     const deleted = typeof data === "number" ? data : 0;
-    return NextResponse.json({ ok: true, deleted, retentionDays: NAV_RETENTION_DAYS });
+    const deletedSuggestions = typeof suggestionsData === "number" ? suggestionsData : 0;
+    return NextResponse.json({
+      ok: true,
+      deleted,
+      deletedSuggestions,
+      retentionDays: NAV_RETENTION_DAYS,
+    });
   } catch (err) {
     logApiError("/api/cron/nav-retention", err);
     // The reason is in logApiError above, where an operator reads it;

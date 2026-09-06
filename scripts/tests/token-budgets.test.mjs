@@ -122,6 +122,13 @@ const CLASSIFIED = {
     "src/lib/import/paste.ts",
     "src/lib/clarification.ts",
     "src/app/api/create-studio/detect/route.ts",
+    // 128 tokens for one forced tool call whose entire answer is an id
+    // from a five-item enum plus a boolean. A cut reply carries no
+    // COMPLETE tool_use block, so `raw` is {}, destinationById() gets
+    // undefined and the route returns `destination: null` — the same
+    // no-button outcome as a confident "none". Nobody is shown a severed
+    // sentence because nobody is shown a sentence.
+    "src/app/api/transitions/detect/route.ts",
   ],
   internal: [
     "src/lib/chat/memory.ts",

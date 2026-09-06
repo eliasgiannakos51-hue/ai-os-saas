@@ -1,4 +1,4 @@
-import { boundedPattern, foldForMatch, stem } from "@/lib/text/unicode-patterns";
+import { boundedPattern, foldForMatch, stem, CJK_PATTERN } from "@/lib/text/unicode-patterns";
 
 /**
  * "GO TO X TO DO Y" IS AN INSTRUCTION. A BUTTON IS NOT.
@@ -116,7 +116,12 @@ export function destinationById(id: string): TransitionDestination | null {
  * costs the trust that makes them press the next one.
  */
 const POINTING_STEMS = [
-  "you can", "you could", "you might", "try the", "use the", "open the", "head to", "go to", "over in", "in the",
+  // "in the" AND "over in" WERE HERE AND ARE NOT ANY MORE. Measured on a
+  // corpus of ordinary answers: "The research shows that most churn
+  // happens in the first 30 days" grew a Deep Research button, because
+  // "in the" is in almost every English sentence ever written. A pointing
+  // cue has to be a phrase that POINTS; a preposition is not one.
+  "you can", "you could", "you might", "try the", "use the", "open the", "head to", "go to",
   // WRITTEN FOLDED, and this one cost a measured failure: foldForMatch
   // turns a final ς into σ, so the cue "μπορεις" — spelled the way a
   // Greek speaker writes it — never matched "μπορείς" in a real sentence.
@@ -164,6 +169,78 @@ function pointsSomewhere(folded: string): boolean {
  * real limitation and it is written down rather than hidden behind a
  * scoring function nobody can predict.
  */
+/**
+ * SUGGESTION CUES — looser than the pointing phrases above, because this
+ * is the gate in front of the PAID detector and its job is the opposite
+ * one. `pointsSomewhere` has to be precise: a false hit there draws a
+ * button. A false hit HERE costs a fraction of a credit and buys the
+ * chance that a model places a suggestion the regex could not read, which
+ * is the entire reason the paid half exists.
+ *
+ * MEASURED, NOT GUESSED. With only the pointing phrases, four of the five
+ * paraphrased suggestions in the corpus never reached the model at all —
+ * "that sort of repeating job is better handled by something that runs on
+ * a schedule", "θα το έκανε καλύτερα κάτι που τρέχει μόνο του",
+ * "毎朝これを確認して知らせてくれる仕組みを用意できます". Every one of them is a
+ * suggestion; none of them contains a phrase from a pointing list. A gate
+ * that shuts out the cases a feature was approved for is a gate that
+ * makes the feature look unnecessary.
+ */
+const SUGGESTION_STEMS = [
+  "better", "should", "could", "would be", "instead", "rather than", "worth", "handled by",
+  "καλυτερ", "θα επρεπε", "αντι γι", "αξιζ",
+  "mejor", "deberia", "en vez", "vale la pena",
+  "mieux", "devriez", "plutot", "vaut",
+  "besser", "solltest", "statt", "lohnt",
+  "meglio", "dovresti", "invece",
+  "melhor", "deveria", "em vez",
+  "افضل", "بدلا", "يستحق",
+];
+const SUGGESTION_SUBSTRINGS = ["ほうがいい", "できます", "仕組み", "更好", "最好", "不如", "建议"];
+
+/**
+ * Does this text SUGGEST anything at all, whatever the destination?
+ *
+ * The gate in front of the paid detector. An answer with no suggestion
+ * cue of any kind has nothing for a model to find either — "revenue grew
+ * 12% last quarter" is a fact in every language — so paying to be told so
+ * on every message would be the expensive way to learn what a regex
+ * already knows.
+ *
+ * DELIBERATELY LOOSER THAN detectTransition, and now actually so: the
+ * first version of this function called pointsSomewhere() and nothing
+ * else, while its own comment claimed it was looser. A comment is not
+ * code, and that one was measurably false.
+ */
+export function hasActionCue(text: string): boolean {
+  if (!text || text.length < 8) return false;
+  const folded = foldForMatch(text);
+  if (pointsSomewhere(folded)) return true;
+  if (SUGGESTION_SUBSTRINGS.some((c) => folded.includes(c))) return true;
+  return boundedPattern(stem(...SUGGESTION_STEMS)).test(folded);
+}
+
+/**
+ * Is this answer worth asking a model about?
+ *
+ * ONE PLACE, TWO CALLERS. The component checks it before spending a
+ * request and api/transitions/detect checks it again before spending a
+ * credit; a floor that lived in both would be two floors that drift.
+ *
+ * AND IT IS NOT A CHARACTER COUNT, for the second time in this file. A
+ * flat forty characters is a short English sentence and a whole Japanese
+ * one: "毎朝これを確認して知らせてくれる仕組みを用意できます。" is 30 characters, is
+ * plainly a suggestion, and was thrown away by a flat floor — the same
+ * defect detectTransition's own floor had, one layer up, found by
+ * measuring the paid path rather than by reading it. A script that packs
+ * a clause into sixteen characters gets a sixteen-character floor.
+ */
+export function worthPaidDetection(text: string): boolean {
+  if (!text) return false;
+  const floor = CJK_PATTERN.test(text) ? 16 : 40;
+  return text.length >= floor;
+}
+
 export function detectTransition(text: string): TransitionDestination | null {
   // EIGHT, NOT TWENTY, AND THE REASON IS A MEASUREMENT. A floor of 20
   // characters threw away "你可以打开代码工具试试。" (12) and

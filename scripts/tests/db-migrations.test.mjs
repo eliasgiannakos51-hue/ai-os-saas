@@ -457,11 +457,19 @@ if (!DB) {
   // 100 -> 105 across the migrations up to 20260914.
   // 105 -> 106: 20260915's nav_events — the first table in this schema
   // that records what a user LOOKED AT rather than what they wrote.
+  // 106 -> 107: 20260927's transition_suggestions, the append-only log of
+  // what a transition button offered and what the reader did about it.
+  // AND A NOTE ABOUT WHICH GATE FOUND IT, because it was not this one:
+  // section 6 skips without a DATABASE_URL and `npm run build` supplies
+  // none, so credit-flow.dbtest.mjs — which cannot skip — went red first
+  // and this copy was raised alongside it. That is the same "two files,
+  // one number, only one of them measured" trap the comment above records
+  // from the affiliate merge, and the reason both are edited together.
   // MEASURED ON THE MERGED TREE, not added. Each branch counted against
   // its own migration set; summing two ratchets is arithmetic across two
   // different schemas. Built from bootstrap-supabase.sql plus every
-  // migration in supabase/migrations on a real Postgres 16: 106.
-  check(`106 tables`, tables === 106, `got ${tables}`);
+  // migration in supabase/migrations on a real Postgres 16: 107.
+  check(`107 tables`, tables === 107, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 

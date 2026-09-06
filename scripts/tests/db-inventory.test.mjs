@@ -116,6 +116,128 @@ check("the inventory is not empty", inv.tables.length > 40 && inv.functions.leng
   }
 }
 
+// NOR MAY A PATTERN QUIETLY SEE ONLY HALF THE POLICIES.
+//
+// THE REGRESSION THIS PINS, found on 2026-09-06. The extractor matched
+// `create policy "name" on …` and required the double quotes. They are
+// optional in Postgres for any identifier that needs no folding, and this
+// repo writes them both ways — so 70 of 206 literal policy statements, a
+// third of every RLS policy the migrations define, were absent from
+// expected_policies. The MISSING POLICY finding at the bottom of the
+// generated query therefore could not fire for any of them, and the file
+// still described itself as the COMPLETE answer.
+//
+// It was not a scatter of odd ones out: a migration writes all its
+// policies the same way, so whole features sat in the blind spot
+// together — the trading journal, the notification tables, data analysis
+// and coding, bank and crypto, nav_events.
+//
+// COUNTED FROM THE SQL INDEPENDENTLY OF THE GENERATOR, exactly as the
+// table check above is, so an extractor that loses policies cannot also
+// hide the evidence. The pattern here is deliberately the loose one: it
+// accepts BOTH shapes and is what the strict one has to match.
+{
+  const inPublic = new Set();
+  const onStorage = new Set();
+  const templated = new Set();
+  const sqlFiles = [
+    ...readdirSync("supabase/migrations")
+      .filter((f) => f.endsWith(".sql"))
+      .map((f) => path.join("supabase/migrations", f)),
+    "scripts/db/bootstrap-supabase.sql",
+  ];
+  let unquoted = 0;
+  for (const f of sqlFiles) {
+    const text = readFileSync(f, "utf8").replace(/--[^\n]*/g, "");
+    for (const m of text.matchAll(
+      /create\s+policy\s+(?:"([^"]+)"|([a-z0-9_%$]+))\s+on\s+([a-z0-9_]+)\.?"?([a-z0-9_]*)"?/gi
+    )) {
+      const name = m[1] ?? m[2];
+      // `create policy x on public.t` and `create policy x on t` both name
+      // the table t; `create policy x on storage.objects` names another
+      // schema entirely.
+      const schema = m[4] ? m[3] : "public";
+      const table = m[4] || m[3];
+      if (!m[1]) unquoted++;
+      if (/%\d*\$/.test(name)) templated.add(name);
+      else if (schema === "storage") onStorage.add(`${schema}.${table} ${name}`);
+      else inPublic.add(`${table} ${name}`);
+    }
+  }
+  // FLOORS, NOT THE MEASUREMENT ITSELF. Today this finds 188 distinct
+  // public-schema statements of which 70 are unquoted; pinning either
+  // number exactly would make every new policy a red build for no reason,
+  // and pinning it AT the measurement is the "baseline set to the size of
+  // the problem" shape. What must not happen is a pattern that quietly
+  // stops matching one of the two spellings — which shows up as a
+  // collapse, not as a drift of a few.
+  check(
+    `both spellings of CREATE POLICY were found in the SQL (${inPublic.size} on public tables, ${unquoted} of all written without quotes)`,
+    inPublic.size >= 150 && unquoted >= 50,
+    "if either number collapses this check is measuring nothing"
+  );
+
+  // NAMES, NOT A COUNT, and this is the second version of this clause.
+  //
+  // The first compared `inv.policies` (276) against a literal count (198)
+  // with `>=`. Those are not the same population — the derived total also
+  // carries the policies created by the module-table LOOP in
+  // db-inventory.mjs, thirteen tables at four each, which no `create
+  // policy` statement spells out — so the comparison carried 78 policies
+  // of slack, and its own mutation walked through it: a filter dropping
+  // every policy whose name ends in `_own` left the number above the
+  // floor and the gate green. Comparing the sizes of two different sets
+  // is not a containment check.
+  //
+  // So the pairs are read out of the generated query itself — the artifact
+  // the diagnostic actually runs — and every public-schema statement must
+  // appear among them by name.
+  const generated = run();
+  const pStart = generated.indexOf("expected_policies(");
+  const pEnd = generated.indexOf("expected_checks(", pStart);
+  const block = generated.slice(pStart, pEnd > pStart ? pEnd : generated.length);
+  const derived = new Set(
+    [...block.matchAll(/\('([a-z0-9_]+)',\s*'([a-zA-Z0-9_ -]+)'\)/g)].map((m) => `${m[1]} ${m[2]}`)
+  );
+  check(
+    `the generated query's expected_policies list was actually read (${derived.size} pairs)`,
+    derived.size >= 150,
+    "a parse that returns nothing would make the next check vacuous"
+  );
+  const invisible = [...inPublic].filter((k) => !derived.has(k)).sort();
+  check(
+    `every literal CREATE POLICY on a public table reaches expected_policies (${inPublic.size} statements, ${invisible.length} invisible)`,
+    invisible.length === 0,
+    invisible.slice(0, 8).join(" | ") + (invisible.length > 8 ? ` … and ${invisible.length - 8} more` : "")
+  );
+
+  // AND THE TWO POPULATIONS IT DELIBERATELY DOES NOT COVER, counted here
+  // rather than left as an unexplained gap between two numbers.
+  //
+  // THE STORAGE ONES MATTER MORE THAN THEIR COUNT SUGGESTS. `policies` is
+  // filtered by `tables.includes(p.table)` in db-inventory.mjs, and
+  // `tables` is the public tables src/ queries — so every policy on
+  // storage.objects is out of scope, silently. That is the same corner
+  // that produced the fixture-vs-production divergence on 2026-09-05:
+  // the local stub had storage.objects with RLS off while production had
+  // it on, and no instrument in this repo compared them. This does not
+  // fix that. It states it, and goes red if the number moves, so the next
+  // storage policy is a decision rather than a surprise.
+  check(
+    `the storage-schema policies are known and excluded, not lost (${onStorage.size})`,
+    onStorage.size >= 6 && [...onStorage].every((k) => !derived.has(k.split(".")[0] + " " + k.split(" ")[1])),
+    [...onStorage].sort().join(" | ")
+  );
+  // The `format('create policy select_own_%1$s on public.%1$I …')` inside
+  // the module-table loop: text, not a statement. The loop's own branch in
+  // db-inventory.mjs is what turns these into real expectations.
+  check(
+    `the loop's format() templates are recognised as templates (${templated.size})`,
+    templated.size >= 1 && [...templated].every((n) => /%\d*\$/.test(n)),
+    [...templated].sort().join(" | ")
+  );
+}
+
 console.log("\n== 1b. the output says which code it was measured against ==");
 // "Which branch did this run on?" was a real question about a real report,
 // and the artefact could not answer it.

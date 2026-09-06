@@ -332,15 +332,37 @@ function parseDdl(files, into) {
       if (cols.size) into.columns.set(table, cols);
     }
 
-    // CREATE POLICY "name" ON public.x
+    // CREATE POLICY "name" ON public.x — AND create policy name on x,
+    // WHICH IS THE SAME STATEMENT AND WAS INVISIBLE HERE UNTIL 2026-09-06.
+    //
+    // The old pattern required the double quotes. They are optional in
+    // Postgres for any identifier that needs no folding, and this repo
+    // writes them both ways: 136 policies quoted, 70 not. So a third of
+    // every RLS policy the migrations define was missing from
+    // expected_policies — which means the "MISSING POLICY" finding at the
+    // bottom of the generated query could not fire for any of them.
+    //
+    // WHAT THAT COST, precisely, so this is not filed as a near miss: the
+    // whole claim of this file is that it is the COMPLETE answer and the
+    // thing to run before a deploy, as against the annotated subset in
+    // schema-canaries.test.mjs. For 70 policies it was the same kind of
+    // silent nothing the health route's schema sweep used to return —
+    // "no findings" from a probe that never looked. Whole features'
+    // policies were in the blind spot together, because a migration
+    // writes them all one way: every policy on the trading journal (11),
+    // the notification tables (10), data analysis and coding (12), the
+    // bank and crypto tables (7), nav_events (2) and this branch's
+    // transition_suggestions (2).
     for (const m of sql.matchAll(
-      /create\s+policy\s+"([^"]+)"\s+on\s+(?:public\.)?"?([a-z0-9_]+)"?/gi
+      /create\s+policy\s+(?:"([^"]+)"|([a-z0-9_]+))\s+on\s+(?:public\.)?"?([a-z0-9_]+)"?/gi
     )) {
-      const key = `${m[2]} ${m[1]}`;
+      const name = m[1] ?? m[2];
+      const table = m[3];
+      const key = `${table} ${name}`;
       const pEnd = sql.indexOf(";", m.index);
       into.policies.set(key, {
-        table: m[2],
-        name: m[1],
+        table,
+        name,
         file,
         text: sql.slice(m.index, pEnd + 1).trim(),
       });

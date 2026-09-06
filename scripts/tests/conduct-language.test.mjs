@@ -165,5 +165,44 @@ check(
   "section 2 is what makes this safe; if it is red these are the routes that leak"
 );
 
+console.log("\n== 4. a surface whose OUTPUT is read by a person must name a language ==");
+//
+// SECTION 2 GUARDS A SENTENCE HANDED OVER TO BE ECHOED. This one guards
+// the wider case the same sweep found: a prompt whose entire product is
+// text a person reads, with no instruction about which language to write
+// it in.
+//
+// FOUND 2026-09-06 in src/lib/clarification.ts — the step that asks the
+// owner what their prices are before generating their site. Zero mentions
+// of language, English example questions, and every question rendered
+// straight into components/clarification/clarification-questions.tsx. It
+// runs on Sonnet 4.6, which infers the language from the description in
+// the same prompt and gets it right — which is exactly what hid the
+// English disclaimer until the cheapest tier met it.
+//
+// THE LIST IS EXPLICIT, not discovered, and that is the honest shape: a
+// scan cannot tell "this text is shown to a person" from "this text is a
+// rule for the model". Each entry is a file whose output was read and
+// found to be user-facing, so adding one is a decision somebody makes.
+const USER_FACING_PROMPTS = [
+  ["src/lib/clarification.ts", "the clarifying questions are rendered by components/clarification/clarification-questions.tsx"],
+  ["src/lib/agents/agent-runner.ts", "the agent's result is emailed and shown"],
+  ["src/lib/research/research.ts", "the research report is the deliverable"],
+  ["src/lib/files/ask.ts", "the answer about a file is shown in the workspace"],
+];
+const DECLARES = /LANGUAGE:|Reply in the (?:user's|same)|Write .{0,40}in the user's language|SAME LANGUAGE|ask every question in the SAME LANGUAGE/i;
+const silentSurfaces = [];
+for (const [file, why] of USER_FACING_PROMPTS) {
+  const src = readFileSync(path.join(ROOT, file), "utf8");
+  const ok = DECLARES.test(src);
+  console.log(`        ${ok ? "names a language" : "SILENT          "}  ${file} — ${why}`);
+  if (!ok) silentSurfaces.push(file);
+}
+check(
+  `every prompt whose output a person reads names a language (${USER_FACING_PROMPTS.length} listed, ${silentSurfaces.length} silent)`,
+  USER_FACING_PROMPTS.length >= 4 && silentSurfaces.length === 0,
+  silentSurfaces.join(", ")
+);
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length) process.exit(1);

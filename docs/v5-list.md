@@ -13,6 +13,19 @@ before the feature it guards is a gate with nothing behind it.
 
 ## Tier 1 — cannot ship V5 without these
 
+**Three things are blocked, and all three are blocked on the owner rather
+than on work.** Stated together here so the list does not have to be read
+to find out why it has not moved:
+
+| Blocker | What it stops | Why it is not a coding task |
+|---|---|---|
+| **Two real accounts** (email + password) | the isolation prodtest, item 1 | a JWT GoTrue actually issued is the point; a fixture cannot make one |
+| **An API balance on the key's own account** | the spelling note end to end (2), `website-pairs-check` (3) | $0.53 was spent, then "credit balance is too low" — three rounds running. The key is valid; its account has no credit, so the credit is landing on a different account or organization |
+| **The URL of an existing published site** | the free half of item 2 | `/s/<subdomain>`; there is no public index — the sitemap lists static pages only, and `/s` bare is a 404 |
+
+Nothing else in this tier is waiting on anything.
+
+
 ### 1. The isolation test: two real accounts — HALF DONE
 **~half a day left.** Blocked on: two real accounts existing.
 
@@ -33,31 +46,72 @@ claim the policies read, and that the deployed schema is this one. It is a
 demonstrated seven ways — plus, for the production half, the same suite
 returning zero of B's rows through the API.
 
-### 2. The spelling check: built, never run against a real site
-**~half a day.** Blocked on: an Anthropic API key.
+### 2. The spelling check — RUN AGAINST A REAL SITE, and it found a defect
+**~1 hour left.** Blocked on: an API balance, and the URL of an existing site.
 
-`findGreekMisspellings` ships with 61 unit checks and 7 mutations, and has
-**never seen a real generated page.** Every refusal it makes is proven
-against fixtures I wrote. The reported defect — "ρεμπα" where the word is
-"ρεύμα" — has never been put through it.
+**No longer "never run".** On 2026-09-06 a site was generated from a Greek
+brief and the checker's word extraction was run against the real page: 60
+words, capped at `SPELLING_WORD_CAP`. The model half — the one call that
+judges those words — never happened, because the API balance ran out
+first. So the note has still never been *produced*.
 
-*Done means:* generate three Greek sites; confirm the note appears, names
-words that are on the page, and names none the owner wrote in the brief.
-Cost: about 200 tokens per site.
+**But the extraction alone found the thing that mattered.** The brief said
+"Ζαχαροπλαστείο στο **Χαλάνδρι**"; the page it produced said "στην καρδιά
+του **Χαλανδρίου**"; and Χαλανδρίου went into the list of words the model
+is asked to judge as misspellings. That is this file's own FIRST promise —
+"IT NEVER ASKS ABOUT THE OWNER'S OWN WORDS. A village, a surname, a
+business name written in the brief is the owner's spelling of their own
+thing" — and it held for exactly the one form the owner happened to type.
+Greek inflects.
 
-*This is the honest state of every V4.6 AI feature that could not be run.*
-It is first in this tier because it is the cheapest to close and the most
-embarrassing to leave.
+Six of six constructed cases leaked (Χαλανδρίου, Παπαδόπουλος,
+Θεσσαλονίκης, Ναυπλίου, Ιωαννίνων, Παπαδόπουλου). After the fix, zero —
+with six controls proving no real misspelling is silenced to protect a
+name, ρεμπα among them. 10 of 10 mutations.
 
-### 3. The three measurements that never ran
-**~2 hours.** Blocked on: the same key. Budget: $15, of which $0.00 spent.
+*What is left:* one classification call, to see the note produced end to
+end. It needs a balance, and — for the free path the owner asked for
+first — the URL of a site that already exists.
 
-- `node scripts/website-pairs-check.mjs --out ./pairs-out` — ten
-  same-category pairs, structural similarity measured rather than argued
-- `node scripts/agent-tier-compare.mjs` — the three depth tiers on one task
-- one site generated from a brief full of negative instructions
+### 3. The three measurements — TWO OF THREE RAN
+**~2 hours left.** Blocked on: an API balance. Spent so far: **$0.53**,
+then the account ran dry mid-round.
 
-All three scripts exist and are tested. They have produced no numbers.
+**`agent-tier-compare.mjs` — RAN, twice, and found a live defect.** The
+first task was badly chosen by me: with `--no-search` and no account data
+all three tiers correctly refused, which measured nothing. The second was
+self-contained and produced the comparison:
+
+| tier | model | words | $ | credits | seconds |
+|---|---|---:|---:|---:|---:|
+| simple | Haiku 4.5 | 276 | 0.0069 | 2 | 13.4 |
+| standard | Sonnet 4.6 | 328 | 0.0244 | 5 | 27.3 |
+| deep | Opus 4.5 | 357 | 0.0258 | 5 | 30.9 |
+
+Haiku closed its **Greek** answer with *"I'm not an accountant — for your
+specific business situation, consult a professional."* Sonnet and Opus
+wrote it in Greek. `agent-runner.ts` says "write the entire result in
+Greek" and then appends a conduct block ending in a literal English
+sentence to close with. Fixed in both directions; before 1/5 English and
+1/5 with no disclaimer at all, after 0/5 and 5/5.
+
+**The negative-instruction site — RAN.** 45,818 chars, 255s, $0.4070. The
+model obeyed both prohibitions on its own and
+`enforceNegativeInstructions` removed nothing — so it was separately
+handed the markup it exists to remove (booking ×2, newsletter ×1 stripped,
+the products section untouched). The belt worked; the braces are proven
+live but were not exercised by the real run.
+
+**`website-pairs-check.mjs` — NEVER RAN.** It is the expensive one: ten
+pairs is twenty site generations. The owner asked to start at `--pairs 3`
+and stop for a cost report; the balance never arrived.
+
+*A caveat that outlived the run:* the tier comparison above was made with
+`--no-search`, which switches off most of what separates the tiers. At
+their declared capacities the estimator prices them 4/14/46 without search
+and 6/22/64 with. The picker now shows both figures, so a reader can see
+that the search budget is the difference — see `depth-picker.tsx`.
+
 
 ---
 

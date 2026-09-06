@@ -422,6 +422,129 @@ made — and saying so is worth more than a green tick would be.
 
 ---
 
+## 4b. What was found AFTER this report was closed
+
+The report was closed on 2026-09-06 and five defects were found the same
+week, four of them by *running* something rather than reading it. They are
+recorded here rather than in a new document because each one is evidence
+about the same claim §4 makes — that the instruments in this repository
+are worth trusting — and three of the five were instruments.
+
+### The cheap model pasted an English sentence into a Greek answer
+
+`scripts/agent-tier-compare.mjs`, run on one Greek task, produced three
+answers. Claude Haiku 4.5 closed its Greek answer with *"I'm not an
+accountant — for your specific business situation, consult a
+professional."* Sonnet 4.6 and Opus 4.5 wrote the same note in Greek.
+
+`agent-runner.ts` says "LANGUAGE: write the entire result in
+`${config.language}`" and then appends `AI_SAFETY_BOUNDARIES_EN`, which
+ended with a literal English sentence the model is told to ALWAYS close
+with. Two instructions, and the last one was a quoted English string.
+
+**It was not one route.** Four of the five surfaces using the English
+conduct block also set a language: agents, research (three prompts),
+files/ask (two), create-studio. And it mirrored — the Greek block hands a
+Greek sentence to chat, records/ask, mission-agents and reflection, all of
+which tell the model to answer in the user's language.
+
+Measured on the full runner prompt, five runs each: before, 1 English and
+1 with no disclaimer at all; after, 0 and 5 Greek. **The lesson is not the
+count.** It is that the strongest models resolved the contradiction and
+the cheapest did not, so every manual check by a person using the good
+model would have said the feature worked.
+
+*Gated by:* `scripts/tests/conduct-language.test.mjs`, 5 of 5 mutations.
+
+### The owner's own town, asked about as a possible typo
+
+The first real site the Greek spelling checker ever saw. Brief:
+"Ζαχαροπλαστείο στο **Χαλάνδρι**". Page: "στην καρδιά του
+**Χαλανδρίου**". Χαλανδρίου went into the list of words the model is asked
+to judge as misspellings.
+
+That is `website-greek-spelling.ts`'s own first promise — *"IT NEVER ASKS
+ABOUT THE OWNER'S OWN WORDS"* — and the exclusion compared folds, which is
+exact-form matching in a language that inflects everything. Six of six
+constructed cases leaked; after the fix, zero, with six controls proving
+no real misspelling is silenced to protect a name.
+
+The file's comment already celebrated fixing the ACCENT case of exactly
+this ("a brief saying Καλαμπάκα did not protect a page saying
+Καλαμπακα"). Inflection is the same class one step further, and it sat
+unfixed underneath a comment about the fix.
+
+*Gated by:* `website-greek-spelling.test.mjs` §8, 10 of 10 mutations.
+
+### 70 of 206 policies, invisible to two schema tools
+
+`scripts/db-inventory.mjs` matched `create policy "name" on …` and
+required the double quotes. They are optional in Postgres and this
+repository writes both ways — 136 quoted, 70 not — so a third of every RLS
+policy defined by the migrations was never in `expected_policies`, and the
+MISSING POLICY finding could not fire for any of them.
+
+It reported nothing, and nothing is what a healthy schema looks like: the
+same shape as the health route's function sweep, one instrument over. Nor
+was it a scatter — a migration writes all its policies one way, so whole
+features sat in the blind spot together: the trading journal (11), data
+analysis and coding (12), the notification tables (10), bank and crypto
+(7), `nav_events` (2).
+
+`scripts/db/pending-migrations.mjs` — **the tool this repository's
+CLAUDE.md names as the one to run before a deploy** — had the identical
+bug.
+
+### 204 of 351 `drop policy` statements, and this one is worse
+
+The same tool's `dropsOf()` required the quotes too. On the DROP side the
+bare form is the **majority**: 204 statements against 147.
+
+That list is what VOIDS an earlier expectation. A create-side blind spot
+under-reports and stays quiet; a cancellation-side blind spot
+**over**-reports, for ever — the tool keeps expecting a policy a migration
+deliberately removed and calls the file PARTIAL on every run. Not a missed
+alarm: a false one that never stops, and false alarms teach the reader to
+ignore the instrument. The four columns genuinely missing on 2026-09-04
+arrived inside exactly that kind of noise from `/api/health`.
+
+*Recorded as its own shape in `docs/shapes.md`: "a detector blind to the
+CANCELLATION, not to the thing."*
+
+### Three tools read the first `add column` of an ALTER and stopped
+
+`alter table t add column a …, add column b …, add column c …;` is one
+statement with three columns, and `pending-migrations`, `db-migrations`
+and `schema-canaries` each saw only `a`. Nine columns invisible, among
+them `user_integrations.consent_scopes` and `consent_withdrawn_at`.
+
+A migration adding three columns would be reported APPLIED the moment the
+first existed — which is this repository's opening story
+(`user_websites.generation_notes` missing, with nothing saying so)
+reachable through a tool that checks one column in three.
+
+**And this class cannot be found by reading patterns one at a time.** The
+defect lives in the COMPOSITION of an outer statement pattern and an inner
+clause pattern: read alone, the inner `add column …` regex matches all 108
+columns and looks perfect. Three mutations survived the first version of
+the suite for that reason.
+
+*Gated by:* `scripts/tests/sql-spellings.test.mjs` — a census of the seven
+dimensions this repo spells both ways, every general SQL pattern probed
+against the real corpus, `objectsOf`/`dropsOf` **called** rather than
+read, and one shape forbidden outright. 8 of 8 mutations.
+
+### What these five change about §1
+
+Nothing in the axis scores, and that is itself the finding. Every one of
+these passed a green build. Four were found by running the product or the
+tool; the fifth by reading a word list the product produced. §4's numbers
+measure whether the gates that exist are load-bearing — they are — and
+say nothing about whether the right gates exist. Three of the five defects
+were in instruments whose own comments described the correct behaviour.
+
+---
+
 ## 5. The rule V4 ends on
 
 > Every statement about this repository is checkable, or it does not

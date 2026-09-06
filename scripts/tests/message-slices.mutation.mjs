@@ -88,8 +88,14 @@ const MUTANTS = [
     name: "the dashboard under-reports its unbounded components",
     file: LIB,
     // 61 -> 62 when the first screen merged in and
-    // overview/first-screen-examples.tsx became the sixty-second.
-    from: "    unbounded: 62,",
+    // overview/first-screen-examples.tsx became the sixty-second; 62 -> 64
+    // on 2026-09-05 with create/next-step-suggestion.tsx and
+    // transitions/transition-button.tsx, both of which take a full dotted
+    // key from a data file and so cannot declare a namespace. The anchor
+    // moves with the number on purpose: pinned at 62 it went STALE and
+    // this whole mutant silently tested nothing, which the sweep reported
+    // and a single-suite run did not.
+    from: "    unbounded: 64,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`
@@ -97,7 +103,7 @@ const MUTANTS = [
     // A `to` that can occur legitimately elsewhere in the same file
     // cannot distinguish "mutated" from "normal".
     to: "    unbounded: 1,",
-    expect: "dashboard: 62 unbounded component(s)",
+    expect: "dashboard: 64 unbounded component(s)",
   },
   {
     // With no prefix the dashboard stops claiming its own routes, they

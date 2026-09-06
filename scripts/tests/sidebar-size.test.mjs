@@ -5,7 +5,9 @@
 // were log modules that all render the same GenericList, i.e. nineteen
 // spellings of "a table of your rows". V4.6 #3 made it four groups and
 // sixteen rows; the owner's structure of 2026-09-04 made it four groups
-// and twenty-one.
+// and twenty-one; the structure of 2026-09-05 made it six groups and
+// twenty-three, organised by what a person came to do rather than by
+// which table a thing lives in.
 //
 // The brief asked for the gate in the same breath as the change, and for
 // the obvious reason: a sidebar is where every new feature wants to add
@@ -37,16 +39,34 @@ function check(name, cond, detail) {
   }
 }
 
-// THE LIMITS. Four and twenty, from the brief.
-const MAX_GROUPS = 4;
-// TWENTY-ONE SINCE 2026-09-04, and the extra row is a decision rather
-// than a drift. The owner chose the four groups and their contents by
-// name — Work (4), Build (5), See (8), Settings (4) — and that is
-// twenty-one. The limit exists to stop the sidebar sliding back towards
-// the forty-five rows it had, so it moves when somebody decides it should
-// and never because a row was added quietly: this number and this
-// paragraph are what a reviewer sees in the diff.
-const MAX_DRAWN_ITEMS = 21;
+// THE LIMITS, AND WHAT EACH MOVE COST TO ARGUE FOR.
+//
+// SIX GROUPS SINCE 2026-09-05, up from four. The four were Work · Build ·
+// See · Settings, and two of those named a posture rather than an action.
+// The six — Make · Ask · Run · See · Organise · Settings — are all verbs,
+// and each one answers "what am I here to do". A group is cheap in rows
+// and expensive in scroll: six headings cost 264px of the drawer on a
+// phone before a single link is drawn, which is why this number moves by
+// argument and not by convenience.
+const MAX_GROUPS = 6;
+// TWENTY-THREE SINCE 2026-09-05, up from twenty-one, and the two extra
+// rows are named: /dashboard/voice and /dashboard/predictions, two
+// features that were complete and had nowhere to stand.
+//
+// THE STRUCTURE THAT WAS PROPOSED HELD THIRTY-FIVE. Twelve of those
+// twelve-over-twenty-three were rows for things this product does not do:
+// four tracking logs under a heading that promises generation (Images,
+// Videos, Presentations, Posts — see lib/build-modules.ts), three routes
+// that do not exist at all (a desktop agent, a public API, Projects), and
+// PDF, which is a download button inside a document rather than a place.
+// Every one of them was left out, and that is the difference between
+// twenty-three and thirty-five.
+//
+// The limit exists to stop the sidebar sliding back towards the
+// forty-five rows it had, so it moves when somebody decides it should and
+// never because a row was added quietly: this number and this paragraph
+// are what a reviewer sees in the diff.
+const MAX_DRAWN_ITEMS = 23;
 
 // The real filters, executed. lib/sidebar-visibility.ts imports no icons
 // precisely so this is possible — see its header.

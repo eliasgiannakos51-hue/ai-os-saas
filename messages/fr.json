@@ -110,7 +110,11 @@
       "tracking": "Suivi",
       "daily": "Au quotidien",
       "work": "Travailler",
-      "see": "Consulter"
+      "see": "Consulter",
+      "make": "Créer",
+      "ask": "Demander",
+      "run": "Lancer",
+      "organise": "Organiser"
     },
     "items": {
       "home": "Accueil",
@@ -164,7 +168,9 @@
       "newEntry": "Nouvelle entrée",
       "costs": "Coûts",
       "systemHealth": "État du système",
-      "tradingJournal": "Journal de trading"
+      "tradingJournal": "Journal de trading",
+      "voice": "Voix",
+      "predictions": "Tendances"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -219,7 +225,9 @@
       "costs": "Ce qu'a coûté chaque appel d'IA, par modèle et par jour.",
       "routing": "À quel modèle chaque type de requête est envoyé.",
       "systemHealth": "Si la base, les files d'attente et les fournisseurs répondent.",
-      "tradingJournal": "Vos transactions, avec le raisonnement noté sur le moment."
+      "tradingJournal": "Vos transactions, avec le raisonnement noté sur le moment.",
+      "voice": "Faites lire un texte à voix haute, ou parlez et il s'écrit. Les minutes sont comptées et le prix à la minute figure sur la page.",
+      "predictions": "Des tendances dans vos propres entrées, chacune avec le nombre d'enregistrements sur lequel elle repose et un lien vers eux."
     },
     "closeMenu": "Fermer le menu"
   },
@@ -2483,6 +2491,63 @@
       },
       "searchPlaceholder": "Cherchez dans tout ce que vous avez écrit",
       "searchNoResults": "Rien ne correspond à « {query} »."
+    },
+    "voicePage": {
+      "title": "Voix",
+      "description": "Faites lire quelque chose, ou dites quelque chose et faites-le écrire. Les deux sont facturés à la minute.",
+      "speakTitle": "Lis-le à voix haute",
+      "speakWhat": "Collez ou tapez n'importe quoi et écoutez-le. Pratique pour vérifier comment sonne un message avant de l'envoyer.",
+      "speakLabel": "Texte à lire",
+      "speakPlaceholder": "Collez le texte que vous voulez entendre…",
+      "speakNotConfigured": "La lecture à voix haute n'est pas configurée sur cette installation, il n'y a donc rien à presser. Tout ici se lit toujours à l'écran.",
+      "speakNotAvailable": "La lecture à voix haute n'est pas disponible sur votre offre pour le moment, ou les minutes du mois sont épuisées.",
+      "transcribeTitle": "Écris ce que je dis",
+      "transcribeWhat": "Appuyez, parlez, et les mots apparaissent ci-dessous. Rien n'est envoyé nulle part tant que vous ne le copiez pas vous-même.",
+      "transcribeLabel": "Ce qui a été transcrit",
+      "transcribeEmpty": "Rien d'enregistré pour l'instant.",
+      "transcribeNotConfigured": "La transcription n'est pas configurée sur cette installation, le micro n'apparaît donc pas. La saisie au clavier n'est pas affectée.",
+      "transcribeNotAvailable": "La transcription n'est pas disponible sur votre offre pour le moment, ou les minutes du mois sont épuisées.",
+      "charCount": "{count} sur {max} caractères",
+      "copy": "Copier",
+      "copied": "Copié",
+      "copyFailed": "La copie a échoué.",
+      "usageTitle": "Minutes et tarifs"
+    },
+    "predictions": {
+      "title": "Tendances",
+      "description": "Des tendances dans vos propres entrées — trouvées par du code, comptées, et reliées aux lignes dont elles viennent.",
+      "whatItDoes": "Chaque affirmation ici a été calculée à partir de vos propres enregistrements et porte le nombre d'entrées derrière elle. Rien n'est deviné.",
+      "run": "Regarder à nouveau",
+      "running": "Je regarde…",
+      "error": "Cela n'a pas fonctionné. Rien n'a été facturé.",
+      "neverRun": "Rien n'a encore été examiné.",
+      "neverRunWhy": "Appuyez sur « Regarder à nouveau » : vos entrées sont lues et examinées. Cela coûte des crédits et l'estimation est au-dessus du bouton.",
+      "foundNothing": "Rien ne s'est démarqué cette fois.",
+      "foundNothingWhy": "C'est une réponse, pas un échec : les vérifications ont tourné et n'ont trouvé aucune tendance assez nette pour valoir la peine.",
+      "needMoreData": "Pas encore assez d'entrées.",
+      "needMoreDataWhy": "Une tendance sur une poignée de lignes est une coïncidence. Ajoutez des entrées et regardez à nouveau."
+    },
+    "nextStep": {
+      "ideas": "Le peser face aux alternatives dans Décisions ?",
+      "competitors": "En tenir compte dans une Décision ?",
+      "research": "En faire une Idée ?",
+      "finance": "Suivre cette tendance dans Analytique ?",
+      "learning": "Une idée vous vient ? Notez-la dans Idées.",
+      "trading": "Voir cette tendance dans Analytique ?",
+      "decisions": "Prêt à en faire un plan Produit ?",
+      "products": "Ajouter un plan de Contenu pour cela ?",
+      "content": "Préparer la prise de contact dans Ventes ?",
+      "sales": "Du contenu neuf pour l'appuyer ?",
+      "feedback": "Faire de ce retour une Idée ?",
+      "analytics": "Prendre une Décision à partir de cela ?",
+      "automation": "Suivre dans Analytique le temps gagné ?"
+    },
+    "transitions": {
+      "coding": "Ouvrir dans Code",
+      "websiteBuilder": "Ouvrir le créateur de site",
+      "agents": "Créer l'agent",
+      "automation": "Ouvrir Automatisation",
+      "deepResearch": "Lancer la recherche approfondie"
     }
   },
   "module": {
@@ -3151,6 +3216,16 @@
       "is": "Tout ce que vous avez mis ici, au même endroit.",
       "does": "Affiche vos entrées récentes, celles que vous avez mises en favori, et une recherche dans tout ce que vous avez écrit.",
       "doesNot": "Rien n’est stocké en double. Ce sont les mêmes fiches que les modules affichent : modifiez-en une ici et elle change là-bas."
+    },
+    "voice": {
+      "is": "Deux fournisseurs payants, comptés à la minute : l'un lit un texte à voix haute, l'autre écrit ce que vous dites.",
+      "does": "Lit n'importe quel texte collé, avec la voix et la vitesse que vous choisissez. Vous enregistre et en fait un texte que vous pouvez modifier et copier.",
+      "doesNot": "Il n'agit pas sur ce que vous dites. Rien ici n'envoie de message, ne crée d'enregistrement ni ne lance de tâche — les mots arrivent dans un champ et y restent jusqu'à ce que vous les déplaciez. Ce n'est pas un appel téléphonique avec l'IA."
+    },
+    "predictions": {
+      "is": "Des tendances trouvées par du code dans vos propres entrées, pas un modèle qui devine.",
+      "does": "Compte vos lignes, trouve les tendances qui passent un seuil, et énonce chacune avec le nombre d'entrées derrière elle et un lien vers elles.",
+      "doesNot": "Il ne prédit pas l'avenir et n'inventera pas une tendance pour avoir quelque chose à dire. En dessous d'une poignée de lignes concordantes, il dit qu'il n'y a pas de quoi conclure."
     }
   },
   "helpCentre": {

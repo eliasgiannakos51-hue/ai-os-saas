@@ -34,26 +34,30 @@ const TARGETS = [GATE, NAV, VIS, HUB];
 
 const MUTANTS = [
   {
-    // 1. GROUP COUNT. The whole point of the brief: three or four groups,
-    // not eight. A fifth is added the way a real one would be.
-    name: "a fifth group is added to the sidebar",
+    // 1. GROUP COUNT. The whole point of the brief: a handful of groups,
+    // not eight. A seventh is added the way a real one would be — the
+    // limit was four until 2026-09-05 and is six now, and this mutant
+    // moves with it rather than pinning the old number, because a mutant
+    // that expects "limit 4" goes red for the wrong reason the moment
+    // somebody argues the limit up by one.
+    name: "a seventh group is added to the sidebar",
     file: NAV,
     from: "];\n\nexport const SETTINGS_GROUP",
     to:
       '  {\n    heading: "Extra",\n    collapsible: true,\n    items: [\n' +
       '      { href: "/help", label: "Help Centre", icon: HELP_ICON, hintKey: "help" },\n' +
       "    ],\n  },\n];\n\nexport const SETTINGS_GROUP",
-    expect: "groups, limit 4",
+    expect: "groups, limit 6",
   },
   {
-    // 2. THE `hidden` FILTER. Without it every one of the forty-six
+    // 2. THE `hidden` FILTER. Without it every one of the fifty-two
     // entries is drawn again and the sidebar is back to being a directory
     // — the exact state V4.6 #3 was written to end.
     name: "sidebarGroups stops dropping hidden rows",
     file: VIS,
     from: ".map((group) => ({ ...group, items: group.items.filter((i) => !i.hidden) }))",
     to: ".map((group) => ({ ...group, items: group.items }))",
-    expect: "rows drawn, limit 21",
+    expect: "rows drawn, limit 23",
   },
   {
     // 3. THE ROLE FILTER — the one the brief said not to break. Composing

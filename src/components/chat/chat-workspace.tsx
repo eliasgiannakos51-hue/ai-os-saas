@@ -24,6 +24,7 @@ import { useVoiceAvailability } from "@/components/voice/voice-availability";
 import { useStickToBottom } from "@/hooks/use-stick-to-bottom";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
 import { ProvenanceLine } from "@/components/chat/provenance-line";
+import { TransitionButton } from "@/components/transitions/transition-button";
 import type { Provenance } from "@/lib/chat/provenance";
 import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
 
@@ -828,6 +829,13 @@ export function ChatWorkspace({
                           database has no provenance, and inventing an
                           empty one would render a source line under an
                           answer whose sources nobody recorded. */}
+                      {/* WHERE THE ANSWER POINTS — a button, not an
+                          instruction. Free: lib/transitions/
+                          destinations.ts is a fold and a regex, so this
+                          costs nothing and adds no latency. On the
+                          finished answer only, for the same reason
+                          "Listen" is: half a sentence points nowhere. */}
+                      <TransitionButton text={msg.content} />
                       <ProvenanceLine provenance={msg.provenance} />
                       {/* EU AI Act art. 50 — on the reply itself, not in
                           metadata. */}

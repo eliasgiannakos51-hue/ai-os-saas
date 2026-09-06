@@ -13,6 +13,13 @@ import { getNextStepSuggestion, slugFromHref } from "@/lib/next-step-suggestions
 // wholesale on each new submission in create-chat.tsx).
 export function NextStepSuggestion({ sourceHref }: { sourceHref: string }) {
   const t = useTranslations("common");
+  // THE MESSAGE IS A KEY NOW, NOT A SENTENCE. This component used to
+  // render `{suggestion.message}` — thirteen English questions, shown to
+  // every user in all ten languages, invisible to every gate because the
+  // strings lived in a `.ts` data file. See lib/next-step-suggestions.ts
+  // for why nothing caught it and what stops it now. `useTranslations()`
+  // with no namespace takes a full dotted key.
+  const tRoot = useTranslations();
   const [dismissed, setDismissed] = useState(false);
   const suggestion = getNextStepSuggestion(slugFromHref(sourceHref));
 
@@ -24,7 +31,7 @@ export function NextStepSuggestion({ sourceHref }: { sourceHref: string }) {
         href={suggestion.href}
         className="flex min-w-0 items-center gap-1.5 transition-colors duration-150 hover:text-orange-400"
       >
-        <span className="truncate">{suggestion.message}</span>
+        <span className="truncate">{tRoot(suggestion.messageKey)}</span>
         <ArrowRight className="h-3 w-3 shrink-0" aria-hidden="true" />
       </Link>
       <button

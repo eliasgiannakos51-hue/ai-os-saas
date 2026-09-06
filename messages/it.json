@@ -110,7 +110,11 @@
       "tracking": "Monitoraggio",
       "daily": "Ogni giorno",
       "work": "Lavora",
-      "see": "Vedi"
+      "see": "Vedi",
+      "make": "Crea",
+      "ask": "Chiedi",
+      "run": "Esegui",
+      "organise": "Organizza"
     },
     "items": {
       "home": "Home",
@@ -164,7 +168,9 @@
       "newEntry": "Nuova voce",
       "costs": "Costi",
       "systemHealth": "Stato del sistema",
-      "tradingJournal": "Diario di trading"
+      "tradingJournal": "Diario di trading",
+      "voice": "Voce",
+      "predictions": "Andamenti"
     },
     "hints": {
       "chat": "Chiedi qualsiasi cosa — non legato a nessun modulo.",
@@ -219,7 +225,9 @@
       "costs": "Quanto è costata ogni chiamata AI, per modello e per giorno.",
       "routing": "A quale modello viene inviato ogni tipo di richiesta.",
       "systemHealth": "Se il database, le code e i fornitori rispondono.",
-      "tradingJournal": "Le tue operazioni, con il ragionamento che hai scritto allora."
+      "tradingJournal": "Le tue operazioni, con il ragionamento che hai scritto allora.",
+      "voice": "Fatti leggere un testo ad alta voce, oppure parla e viene scritto. I minuti sono contati e il prezzo al minuto è nella pagina.",
+      "predictions": "Andamenti nelle tue voci, ciascuno con il numero di registrazioni su cui si basa e un collegamento a esse."
     },
     "closeMenu": "Chiudi il menu"
   },
@@ -2483,6 +2491,63 @@
       },
       "searchPlaceholder": "Cerca in tutto ciò che hai scritto",
       "searchNoResults": "Niente corrisponde a «{query}»."
+    },
+    "voicePage": {
+      "title": "Voce",
+      "description": "Fatti leggere qualcosa, oppure dì qualcosa e falla scrivere. Entrambe si pagano al minuto.",
+      "speakTitle": "Leggilo ad alta voce",
+      "speakWhat": "Incolla o scrivi qualsiasi cosa e ascoltala. Utile per sentire come suona un messaggio prima di inviarlo.",
+      "speakLabel": "Testo da leggere",
+      "speakPlaceholder": "Incolla il testo che vuoi ascoltare…",
+      "speakNotConfigured": "La lettura ad alta voce non è configurata su questa installazione, quindi non c'è nulla da premere. Tutto qui si legge comunque a schermo.",
+      "speakNotAvailable": "La lettura ad alta voce non è disponibile sul tuo piano al momento, oppure i minuti del mese sono esauriti.",
+      "transcribeTitle": "Scrivi quello che dico",
+      "transcribeWhat": "Premi, parla, e le parole compaiono sotto. Nulla viene inviato da nessuna parte finché non lo copi tu.",
+      "transcribeLabel": "Cosa è stato trascritto",
+      "transcribeEmpty": "Ancora nulla di registrato.",
+      "transcribeNotConfigured": "La trascrizione non è configurata su questa installazione, quindi il microfono non compare. Scrivere non è toccato.",
+      "transcribeNotAvailable": "La trascrizione non è disponibile sul tuo piano al momento, oppure i minuti del mese sono esauriti.",
+      "charCount": "{count} di {max} caratteri",
+      "copy": "Copia",
+      "copied": "Copiato",
+      "copyFailed": "Non è stato possibile copiare.",
+      "usageTitle": "Minuti e prezzi"
+    },
+    "predictions": {
+      "title": "Andamenti",
+      "description": "Andamenti nelle tue voci — trovati dal codice, contati, e ricollegati alle righe da cui vengono.",
+      "whatItDoes": "Ogni affermazione qui è stata calcolata dai tuoi dati e porta con sé il numero di voci che la sostiene. Nulla è indovinato.",
+      "run": "Guarda di nuovo",
+      "running": "Sto guardando…",
+      "error": "Non è andata a buon fine. Non è stato addebitato nulla.",
+      "neverRun": "Non è stato ancora guardato nulla.",
+      "neverRunWhy": "Premi «Guarda di nuovo» e le tue voci vengono lette e controllate. Costa crediti e la stima è sopra il pulsante.",
+      "foundNothing": "Questa volta non è emerso nulla.",
+      "foundNothingWhy": "È una risposta, non un fallimento: i controlli sono stati eseguiti e non hanno trovato un andamento abbastanza netto da valere la pena.",
+      "needMoreData": "Non ci sono ancora abbastanza voci.",
+      "needMoreDataWhy": "Un andamento su poche righe è una coincidenza. Aggiungi voci e guarda di nuovo."
+    },
+    "nextStep": {
+      "ideas": "Vuoi confrontarlo con le alternative in Decisioni?",
+      "competitors": "Vuoi tenerne conto in una Decisione?",
+      "research": "Trasformarlo in un'Idea?",
+      "finance": "Vuoi seguire questo andamento in Analisi?",
+      "learning": "Ti è venuta un'idea? Annotala in Idee.",
+      "trading": "Vuoi vedere questo andamento in Analisi?",
+      "decisions": "Pronto a farne un piano di Prodotto?",
+      "products": "Vuoi aggiungere un piano di Contenuti?",
+      "content": "Vuoi preparare il contatto in Vendite?",
+      "sales": "Vuoi contenuti nuovi a supporto?",
+      "feedback": "Trasformare questo riscontro in un'Idea?",
+      "analytics": "Vuoi prendere una Decisione partendo da questo?",
+      "automation": "Vuoi seguire in Analisi il tempo risparmiato?"
+    },
+    "transitions": {
+      "coding": "Apri in Codice",
+      "websiteBuilder": "Apri il costruttore di siti",
+      "agents": "Crea l'agente",
+      "automation": "Apri Automazione",
+      "deepResearch": "Avvia la ricerca approfondita"
     }
   },
   "module": {
@@ -3151,6 +3216,16 @@
       "is": "Tutto quello che hai messo qui, in un posto solo.",
       "does": "Mostra le voci recenti, quelle che hai contrassegnato e una ricerca su tutto ciò che hai scritto.",
       "doesNot": "Non conserva una seconda copia di nulla. Sono gli stessi record che mostrano i moduli: se ne modifichi uno qui, cambia anche lì."
+    },
+    "voice": {
+      "is": "Due fornitori a pagamento, contati al minuto: uno legge il testo ad alta voce, l'altro scrive quello che dici.",
+      "does": "Legge qualsiasi testo incollato, con la voce e la velocità che scegli. Ti registra e lo trasforma in testo che puoi modificare e copiare.",
+      "doesNot": "Non agisce su quello che dici. Nulla qui invia un messaggio, crea una voce o avvia un lavoro: le parole finiscono in un riquadro e restano lì finché non le sposti tu. Non è una telefonata con l'IA."
+    },
+    "predictions": {
+      "is": "Andamenti trovati dal codice nelle tue voci, non un modello che indovina.",
+      "does": "Conta le tue righe, trova andamenti che superano una soglia, e riporta ciascuno con il numero di voci alle spalle e un collegamento a esse.",
+      "doesNot": "Non prevede il futuro e non inventerà un andamento per avere qualcosa da dire. Sotto una manciata di righe corrispondenti, dice che non ci sono elementi sufficienti."
     }
   },
   "helpCentre": {

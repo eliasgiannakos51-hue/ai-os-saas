@@ -19,7 +19,8 @@ before the feature it guards is a gate with nothing behind it.
 **The database half is done.** `scripts/tests/user-isolation.dbtest.mjs`
 impersonates `authenticated` the way production does and probes all 96
 user-owned tables with two accounts — read, update, delete, and the
-unpredicated write a predicate cannot see. 18 checks, 7 of 7 schema
+unpredicated write a predicate cannot see, plus the three storage buckets
+as files rather than as rows about files. 22 checks, 9 of 9 schema
 mutations caught. It is what found the 89 grants no policy covered.
 
 *What is left, and it is the part that needs you:* the same questions
@@ -197,8 +198,8 @@ against the real database:*
 
 *Done means:* the register's five entries each carry a measured answer
 from production rather than a direction-of-failure. *Proven by:* its own
-mutation suite, 7 of 7 today, plus the entries changing from "unknown" to
-a value.
+mutation suite, 10 of 10 today, plus the entries changing from "unknown"
+to a value.
 
 
 ### 9. The 123 gates with no mutation suite

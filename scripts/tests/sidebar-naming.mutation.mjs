@@ -115,6 +115,24 @@ const MUTANTS = [
     expect: "rows compared string-by-string in all 10 locales",
   },
   {
+    // THE URL READER THAT REPORTED A GENERATOR AS A NOTES PAGE. The
+    // capture in routesFetchedBy stops at the first character a path
+    // cannot hold, so `/api/documents/${id}/pdf${lang ? "?lang=..." : ""}`
+    // arrives as `/api/documents/${id}/pdf${lang` — the second
+    // interpolation has no closing brace and survives the `${...}`
+    // replace. Matched against `/api/documents/*/pdf` it failed, and
+    // section 3b announced that /dashboard/documents "produces nothing"
+    // while its PDF route was calling anthropic.messages.create to
+    // translate the document on its way out. A FALSE NEGATIVE, which is
+    // the direction that teaches somebody to loosen a rule instead of
+    // fixing a reader.
+    name: "the route reader drops a trailing unclosed template interpolation again",
+    file: GATE,
+    from: 'const wanted = p.replace(/\\$\\{[^}]*\\}/g, "*").replace(/\\$\\{.*$/, "");',
+    to: 'const wanted = p.replace(/\\$\\{[^}]*\\}/g, "*");',
+    expect: "/dashboard/documents really produces something",
+  },
+  {
     // The comparison itself. Inverted rather than defanged: a defanged
     // clause leaves a healthy tree green and proves nothing.
     name: "the comparison is read backwards",

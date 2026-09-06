@@ -110,7 +110,11 @@
       "tracking": "Acompanhamento",
       "daily": "No dia a dia",
       "work": "Trabalhar",
-      "see": "Ver"
+      "see": "Ver",
+      "make": "Criar",
+      "ask": "Perguntar",
+      "run": "Executar",
+      "organise": "Organizar"
     },
     "items": {
       "home": "Início",
@@ -164,7 +168,9 @@
       "newEntry": "Nova entrada",
       "costs": "Custos",
       "systemHealth": "Estado do sistema",
-      "tradingJournal": "Diário de trading"
+      "tradingJournal": "Diário de trading",
+      "voice": "Voz",
+      "predictions": "Padrões"
     },
     "hints": {
       "chat": "Pergunte qualquer coisa — sem ligação a nenhum módulo.",
@@ -219,7 +225,9 @@
       "costs": "Quanto custou cada chamada de IA, por modelo e por dia.",
       "routing": "Para que modelo vai cada tipo de pedido.",
       "systemHealth": "Se a base de dados, as filas e os fornecedores respondem.",
-      "tradingJournal": "As tuas operações, com o raciocínio que escreveste na altura."
+      "tradingJournal": "As tuas operações, com o raciocínio que escreveste na altura.",
+      "voice": "Ouça um texto lido em voz alta, ou fale e ele é escrito. Os minutos são contados e o preço por minuto está na página.",
+      "predictions": "Padrões nos seus próprios registos, cada um com o número de entradas em que assenta e uma ligação para elas."
     },
     "closeMenu": "Fechar o menu"
   },
@@ -2483,6 +2491,63 @@
       },
       "searchPlaceholder": "Procure em tudo o que escreveu",
       "searchNoResults": "Nada corresponde a «{query}»."
+    },
+    "voicePage": {
+      "title": "Voz",
+      "description": "Ouça algo lido em voz alta, ou diga algo e fique escrito. Ambos são cobrados ao minuto.",
+      "speakTitle": "Lê isto em voz alta",
+      "speakWhat": "Cole ou escreva qualquer coisa e ouça. Útil para perceber como soa uma mensagem antes de a enviar.",
+      "speakLabel": "Texto a ler",
+      "speakPlaceholder": "Cole o texto que quer ouvir…",
+      "speakNotConfigured": "A leitura em voz alta não está configurada nesta instalação, por isso não há nada para carregar. Tudo aqui continua a ler-se no ecrã.",
+      "speakNotAvailable": "A leitura em voz alta não está disponível no seu plano de momento, ou os minutos do mês acabaram.",
+      "transcribeTitle": "Escreve o que eu digo",
+      "transcribeWhat": "Carregue, fale, e as palavras aparecem abaixo. Nada é enviado para lado nenhum até o copiar você mesmo.",
+      "transcribeLabel": "O que foi transcrito",
+      "transcribeEmpty": "Ainda nada gravado.",
+      "transcribeNotConfigured": "A transcrição não está configurada nesta instalação, por isso o microfone não aparece. Escrever não é afetado.",
+      "transcribeNotAvailable": "A transcrição não está disponível no seu plano de momento, ou os minutos do mês acabaram.",
+      "charCount": "{count} de {max} caracteres",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "copyFailed": "Não foi possível copiar.",
+      "usageTitle": "Minutos e preços"
+    },
+    "predictions": {
+      "title": "Padrões",
+      "description": "Padrões nos seus próprios registos — encontrados por código, contados, e ligados de volta às linhas de onde vieram.",
+      "whatItDoes": "Cada afirmação aqui foi calculada a partir dos seus registos e traz o número de entradas por trás dela. Nada é adivinhado.",
+      "run": "Ver outra vez",
+      "running": "A ver…",
+      "error": "Não correu. Não foi cobrado nada.",
+      "neverRun": "Ainda não foi visto nada.",
+      "neverRunWhy": "Carregue em «Ver outra vez» e os seus registos são lidos à procura de padrões. Custa créditos e a estimativa está acima do botão.",
+      "foundNothing": "Desta vez não sobressaiu nada.",
+      "foundNothingWhy": "Isso é uma resposta, não uma falha: as verificações correram e não encontraram padrão suficientemente forte para valer a pena.",
+      "needMoreData": "Ainda não há entradas suficientes.",
+      "needMoreDataWhy": "Um padrão em meia dúzia de linhas é coincidência. Acrescente entradas e veja outra vez."
+    },
+    "nextStep": {
+      "ideas": "Quer pesá-lo face a alternativas em Decisões?",
+      "competitors": "Quer ter isto em conta numa Decisão?",
+      "research": "Transformar isto numa Ideia?",
+      "finance": "Quer acompanhar esta tendência em Análises?",
+      "learning": "Surgiu-lhe uma ideia? Registe-a em Ideias.",
+      "trading": "Quer ver esta tendência em Análises?",
+      "decisions": "Pronto para transformar isto num plano de Produto?",
+      "products": "Quer acrescentar um plano de Conteúdo?",
+      "content": "Quer preparar o contacto em Vendas?",
+      "sales": "Quer conteúdo novo que apoie isto?",
+      "feedback": "Transformar este comentário numa Ideia?",
+      "analytics": "Quer tomar uma Decisão a partir disto?",
+      "automation": "Quer acompanhar em Análises o tempo poupado?"
+    },
+    "transitions": {
+      "coding": "Abrir em Código",
+      "websiteBuilder": "Abrir o construtor de sites",
+      "agents": "Criar o agente",
+      "automation": "Abrir Automação",
+      "deepResearch": "Iniciar Pesquisa profunda"
     }
   },
   "module": {
@@ -3151,6 +3216,16 @@
       "is": "Tudo o que pôs aqui, num só sítio.",
       "does": "Mostra as suas entradas recentes, as que marcou como favoritas e uma pesquisa em tudo o que escreveu.",
       "doesNot": "Não guarda uma segunda cópia de nada. São os mesmos registos que os módulos mostram — edite um aqui e muda lá."
+    },
+    "voice": {
+      "is": "Dois fornecedores pagos, contados ao minuto: um lê texto em voz alta, outro escreve o que você diz.",
+      "does": "Lê qualquer texto colado, na voz e na velocidade que escolher. Grava-o e transforma em texto que pode editar e copiar.",
+      "doesNot": "Não age sobre o que você diz. Nada aqui envia mensagem, cria registo nem inicia tarefa — as palavras ficam numa caixa até você as mover. Não é uma chamada telefónica com a IA."
+    },
+    "predictions": {
+      "is": "Padrões encontrados por código nos seus próprios registos, não um modelo a adivinhar.",
+      "does": "Conta as suas linhas, encontra padrões acima de um limiar, e diz cada um com o número de entradas por trás e uma ligação para elas.",
+      "doesNot": "Não prevê o futuro nem inventa um padrão só para ter algo a dizer. Abaixo de meia dúzia de linhas correspondentes, diz que não há base suficiente."
     }
   },
   "helpCentre": {

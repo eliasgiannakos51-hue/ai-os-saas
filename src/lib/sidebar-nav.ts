@@ -36,6 +36,8 @@ import {
   ROUTING_ICON,
   SYSTEM_HEALTH_ICON,
   TRADING_JOURNAL_ICON,
+  VOICE_ICON,
+  PREDICTIONS_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -50,103 +52,79 @@ export type { SidebarItem, SidebarGroupConfig } from "@/lib/sidebar-visibility";
 export { visibleGroups, sidebarGroups } from "@/lib/sidebar-visibility";
 import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 
-// FOUR GROUPS, SIXTEEN VISIBLE ROWS — V4.6 #3.
+// SIX GROUPS, TWENTY-THREE VISIBLE ROWS — the structure of 2026-09-05.
 //
-// It was eight groups and forty-five rows. Counted, not estimated:
-// scripts/tests/sidebar-size.test.mjs prints both numbers and fails the
-// build if the groups pass four or the drawn rows pass twenty, and
-// scripts/tests/sidebar-density.prodtest.mjs counts the <a> elements a
-// real Chromium paints at 1920x1080 and 1366x768.
+// THE HISTORY, BECAUSE THE NUMBER ONLY MEANS SOMETHING NEXT TO IT: eight
+// groups and forty-five rows, then four and sixteen (V4.6 #3), then four
+// and twenty-one (2026-09-04), now six and twenty-three. Not 41 and not
+// 13 at any point — scripts/tests/sidebar-size.test.mjs's BEFORE_V46_3
+// list is forty-five entries long and the gate asserts that length.
 //
-// Nothing was deleted. Twenty-nine entries carry `hidden: true`: they
-// keep their translation, keep their owner-only flag, stay in the command
-// palette (which flattens `visibleGroups`, not `sidebarGroups`) and are
-// listed on the hub page at /dashboard/records. Deleting them would have
-// tidied the sidebar by making the pages unfindable, which is not the
-// same problem solved.
+// THE HEADINGS ARE WHAT A PERSON WANTS TO DO, NOT WHERE A THING IS
+// FILED. Make · Ask · Run · See · Organise · Settings. "Build" named an
+// activity but sat next to "See", which named a posture; the six here
+// are all verbs and they are the order of a working session.
 //
-// The headings are what a person does, not a filing category. "Workspace"
-// named a place; "Daily" names the four things somebody opens the app to
-// do. Nineteen of the removed rows are log modules that the [module]
-// catch-all already serves with one component — they were nineteen ways
-// of saying "a table of your rows", and they are now one row plus a type
-// filter.
-// FOUR GROUPS, TWENTY-ONE VISIBLE ROWS — the structure the owner chose on
-// 2026-09-04, replacing Daily / Build / My business / Settings.
+// THE RULE THAT DECIDED THE CONTENTS, and it is the whole reason this is
+// twenty-three rather than thirty-five: A ROW UNDER "MAKE" MUST MAKE
+// SOMETHING. The structure originally asked for Images, Videos,
+// Presentations and Posts under it. All four exist — as TRACKING LOGS,
+// tables of rows a person types by hand, declared as producing nothing
+// in lib/build-modules.ts and held to that by section 3b of
+// scripts/tests/sidebar-naming.test.mjs, which proves it from the
+// imports rather than from a list. A row that promises generation and
+// opens a notes form is not an unclear label, it is a broken promise,
+// and it reads exactly like a working feature in a green build. They
+// stay hidden until they generate.
 //
-// The headings are verbs, and the order is the order of a working day:
-// WORK the things you keep, BUILD the things you make, SEE the numbers
-// they produce, SETTINGS for the rest. It is not a filing system —
-// nothing here is grouped by which table it lives in.
+// THREE MORE WERE ASKED FOR AND ARE NOT HERE because nothing exists
+// behind them: a desktop agent, a public API and Projects have no route,
+// no component and no table. A sidebar row is not a placeholder.
 //
-// NOTHING WAS DELETED AND NOTHING IS UNREACHABLE. Every entry marked
-// `hidden: true` keeps its translation, its owner-only flag, its row in
-// the command palette (which flattens `visibleGroups`, not
-// `sidebarGroups`) and its place on the hub at /dashboard/records.
-// scripts/tests/entry-points.test.mjs now fails the build if ANY route
-// under /dashboard has no entry point at all — which is how the four
-// below were found.
+// TWO ROWS ARE NEW PAGES rather than a rename: /dashboard/voice and
+// /dashboard/predictions. Both features were complete and unreachable —
+// voice as a microphone inside the chat composer, predictions as cards
+// inside the overview and the owner-only business-health screen. See
+// each page's header for what was already there.
 //
-// THE FOUR THAT WERE IN NO CONFIG AT ALL: /dashboard/costs,
-// /dashboard/routing, /dashboard/system-health and
-// /dashboard/trading-journal each had a page and no entry anywhere, so
-// they were reachable only by typing the URL; routing and trading-journal
-// had no link in the entire product. They are hidden rows now, which puts
-// them in the palette and on the hub. The three operational ones are
-// owner-only, because that is who they are for.
+// NOTHING WAS DELETED. Twenty-nine entries carry `hidden: true`: each
+// keeps its translation, its owner-only flag, its row in the command
+// palette (which flattens `visibleGroups`, not `sidebarGroups`) and its
+// place on the hub at /dashboard/records.
 //
-// TWENTY-ONE, NOT TWENTY. scripts/tests/sidebar-size.test.mjs held the
-// drawn rows at twenty; the structure asked for is twenty-one and the
-// limit moved by one, deliberately, with this sentence as the reason.
+// SIX ROWS LEFT THE SIDEBAR AND NONE LEFT THE PRODUCT: Home, My records,
+// Create Studio, Data Analysis, Favorites and Analytics are hidden now.
+// Home is one click from every screen — the logo in this sidebar's own
+// header links to it — and the other five are in the palette and on the
+// hub. scripts/tests/entry-points.test.mjs fails the build if any route
+// under /dashboard has no entry point at all.
 export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
   {
-    // Never collapsed: the four things somebody opens the app to do have
-    // to be on screen the instant it paints, with no click and no scroll.
-    heading: "Work",
+    // NEVER COLLAPSED. Whatever else is shut, the four things this
+    // product makes have to be on screen the instant it paints — a group
+    // somebody has to open first is a group somebody does not know is
+    // there.
+    heading: "Make",
     collapsible: false,
     items: [
-      { href: OVERVIEW_NAV_ITEM.href, label: "Home", icon: OVERVIEW_ICON, hintKey: "home" },
-      { href: CHAT_NAV_ITEM.href, label: "Ionexa Chat", icon: CHAT_ICON, hintKey: "chat" },
-      { href: "/dashboard/records", label: "My records", icon: MY_BUSINESS_ICON, hintKey: "records" },
-      { href: TIMELINE_NAV_ITEM.href, label: "Timeline", icon: TIMELINE_ICON, hintKey: "mine" },
+      { href: "/dashboard/website-builder", label: "Website Builder", icon: WEBSITE_BUILDER_ICON, hintKey: "websiteBuilder" },
+      { href: "/dashboard/documents", label: "Documents", icon: MODULE_ICONS.documents, hintKey: "documents" },
+      { href: "/dashboard/coding", label: "AI Coding", icon: MODULE_ICONS.coding, hintKey: "coding" },
+      // NEW PAGE, OLD CAPABILITY. api/voice/speak and api/voice/transcribe
+      // have reached real providers, reserved credits and metered minutes
+      // for as long as they have existed; the only ways in were the
+      // microphone in the chat composer and a Listen button beside text
+      // the app had already written.
+      { href: "/dashboard/voice", label: "Voice", icon: VOICE_ICON, hintKey: "voice" },
 
       // --- in the palette and on the hub, not in the sidebar ---
-      { href: REFLECTION_NAV_ITEM.href, label: REFLECTION_NAV_ITEM.label, icon: REFLECTION_ICON, hintKey: "reflection", hidden: true },
-      { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON, hintKey: "memory", hidden: true },
-      { href: "/dashboard/documents", label: "Documents", icon: MODULE_ICONS.documents, hintKey: "documents", hidden: true },
-      { href: MISSION_NAV_ITEM.href, label: MISSION_NAV_ITEM.label, icon: MISSION_ICON, hintKey: "missionControl", hidden: true },
-    ],
-  },
-  {
-    // BUILD MEANS SOMETHING IS PRODUCED, and the gate proves it rather
-    // than trusting it: every visible href here must have an API route
-    // behind it that actually reaches a model, and every module in
-    // lib/build-modules.ts must NOT. See section 3b of
-    // scripts/tests/sidebar-naming.test.mjs, which walks the imports.
-    heading: "Build",
-    collapsible: true,
-    items: [
-      // The href is written out rather than taken from CREATE_NAV_ITEM
-      // because scripts/tests/sidebar-naming.test.mjs reads this group as
-      // TEXT to check what may sit under "Build" — a constant is invisible
-      // to it, and an item the gate cannot see is an item the gate cannot
-      // hold to the rule. The label still comes from the constant.
-      { href: "/dashboard/create", label: CREATE_NAV_ITEM.label, icon: CREATE_ICON, hintKey: "create" },
-      {
-        href: "/dashboard/website-builder",
-        label: "Website Builder",
-        icon: WEBSITE_BUILDER_ICON,
-        hintKey: "websiteBuilder",
-      },
-      { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents, hintKey: "agents" },
-      { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation" },
-      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON, hintKey: "marketplace" },
-
-      // --- in the palette and on the hub, not in the sidebar ---
-      { href: "/dashboard/coding", label: "AI Coding", icon: MODULE_ICONS.coding, hintKey: "coding", hidden: true },
+      // The generator the product used to open with. It still routes a
+      // free-text request to one of six kinds; it is not a row because
+      // every kind it produces now has its own, which is what "one thing
+      // per capability" means.
+      { href: "/dashboard/create", label: CREATE_NAV_ITEM.label, icon: CREATE_ICON, hintKey: "create", hidden: true },
       // What the builder PRODUCED rather than a way to build, and both one
-      // click from the builder's own page. They stay in this group so
-      // section 3b keeps checking them against its DOWNSTREAM rule.
+      // click from the builder's own page.
       { href: "/dashboard/published", label: "Published Sites", icon: PUBLISHED_SITES_ICON, hintKey: "published", hidden: true },
       {
         href: "/dashboard/form-submissions",
@@ -172,17 +150,57 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     ],
   },
   {
-    // WHAT THE WORK PRODUCED. Three of these eight are logs served by the
-    // [module] catch-all — Finance, Analytics and Sales are the ones a
-    // person actually opens to look at a number, so they are rows here
-    // rather than entries on the hub, and the rest of the logs stay
-    // hidden below.
+    // THE THREE WAYS TO PUT A QUESTION TO THIS SYSTEM, and they differ by
+    // what they read: chat reads the conversation, Deep Research reads the
+    // web, Predictions reads THIS ACCOUNT'S OWN ROWS.
+    heading: "Ask",
+    collapsible: true,
+    items: [
+      { href: CHAT_NAV_ITEM.href, label: "Ionexa Chat", icon: CHAT_ICON, hintKey: "chat" },
+      // NOT /dashboard/research: that route is the Knowledge log, a place
+      // to save links by hand. This is the autonomous job that goes and
+      // finds them. Sharing a route would make one of the two unreachable.
+      { href: "/dashboard/deep-research", label: "Deep Research", icon: DEEP_RESEARCH_ICON, hintKey: "deepResearch" },
+      // NEW PAGE, OLD CAPABILITY. lib/insights/detectors.ts finds the
+      // patterns in TypeScript with a sample size each; the cards were
+      // rendered inside the overview and inside the OWNER-ONLY
+      // business-health page, so an ordinary user who scrolled past one
+      // had no route back to it.
+      { href: "/dashboard/predictions", label: "Predictions", icon: PREDICTIONS_ICON, hintKey: "predictions" },
+    ],
+  },
+  {
+    // THINGS THAT GO ON WITHOUT YOU WATCHING. An agent runs on a
+    // schedule, an automation fires on a trigger, and the marketplace is
+    // where somebody else's runs and yours are traded.
+    heading: "Run",
+    collapsible: true,
+    items: [
+      { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents, hintKey: "agents" },
+      { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation" },
+      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON, hintKey: "marketplace" },
+    ],
+  },
+  {
+    // WHAT THE WORK PRODUCED, AND WHERE EVERY LOG LIVES. Seven rows are
+    // drawn; twenty more are here and hidden, and that asymmetry is the
+    // point — these are all "a table of your rows", and nineteen of them
+    // were once nineteen sidebar entries.
+    //
+    // EVERY TRACKING MODULE MUST BE IN THIS GROUP. lib/build-modules.ts
+    // defines them as producing nothing, and section 3 of
+    // scripts/tests/sidebar-naming.test.mjs fails the build if one of
+    // them appears under Make instead — which is the check that keeps
+    // Images and Videos out of the group whose heading is a promise.
     heading: "See",
     collapsible: true,
     items: [
+      { href: TIMELINE_NAV_ITEM.href, label: "Timeline", icon: TIMELINE_ICON, hintKey: "mine" },
+      { href: "/dashboard/files", label: "Files", icon: FILES_ICON, hintKey: "files" },
       { href: "/dashboard/finance", label: "Finance", icon: MODULE_ICONS.finance, hintKey: "finance" },
-      { href: "/dashboard/analytics", label: "Analytics", icon: MODULE_ICONS.analytics, hintKey: "analytics" },
       { href: "/dashboard/sales", label: "Sales", icon: MODULE_ICONS.sales, hintKey: "sales" },
+      { href: "/dashboard/trading", label: "Trading", icon: MODULE_ICONS.trading, hintKey: "trading" },
+      { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON, hintKey: "memory" },
       // The OWNER's dashboard, which is why the owner-only flag exists at
       // all — and why the ordering inside sidebarGroups() is load-bearing:
       // role first, hidden second.
@@ -193,26 +211,32 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         hintKey: "businessHealth",
         ownerOnly: true,
       },
-      // NOT /dashboard/research: that route is the Knowledge log, a place
-      // to save links by hand. This is the autonomous job that goes and
-      // finds them. Sharing a route would make one of the two unreachable.
-      { href: "/dashboard/deep-research", label: "Deep Research", icon: DEEP_RESEARCH_ICON, hintKey: "deepResearch" },
+
+      // --- in the palette and on the hub, not in the sidebar ---
+      // HOME IS HIDDEN AND IS NOT UNREACHABLE: the logo at the top of this
+      // sidebar links to it from every screen (components/dashboard/
+      // sidebar.tsx renders `<Link href={OVERVIEW_NAV_ITEM.href}>` around
+      // it), so it is the one destination in the product that never needs
+      // a row.
+      { href: OVERVIEW_NAV_ITEM.href, label: "Home", icon: OVERVIEW_ICON, hintKey: "home", hidden: true },
+      // The hub that lists every hidden entry. Hidden itself, and that is
+      // a real cost written down rather than glossed: the twenty rows
+      // below it are now reachable through the command palette and
+      // through this page, and this page is reachable through the
+      // command palette. Two keystrokes, not one.
+      { href: "/dashboard/records", label: "My records", icon: MY_BUSINESS_ICON, hintKey: "records", hidden: true },
+      { href: "/dashboard/favorites", label: "Favorites", icon: FAVORITES_ICON, hintKey: "favorites", hidden: true },
+      { href: "/dashboard/analytics", label: "Analytics", icon: MODULE_ICONS.analytics, hintKey: "analytics", hidden: true },
       {
         href: "/dashboard/data-analysis",
         label: "Data Analysis",
         icon: MODULE_ICONS["data-analysis"],
         hintKey: "dataAnalysis",
+        hidden: true,
       },
-      { href: "/dashboard/files", label: "Files", icon: FILES_ICON, hintKey: "files" },
-      // Its own page since round 5 — the star in the timeline's tab row
-      // lands here now, instead of on a query string whose page then
-      // bounced back. See app/dashboard/favorites/page.tsx.
-      { href: "/dashboard/favorites", label: "Favorites", icon: FAVORITES_ICON, hintKey: "favorites" },
-
-      // --- the logs: in the palette and on the hub, not in the sidebar ---
-      // Nineteen of these were sidebar rows once. Every one is a table of
-      // the user's own rows, served by the same GenericList component, and
-      // each still has its route, its translation and its palette entry.
+      // The logs. Every one is a table of the user's own rows, served by
+      // the same GenericList component, and each still has its route, its
+      // translation and its palette entry.
       { href: "/dashboard", label: "Ideas", icon: MODULE_ICONS.ideas, hintKey: "ideas", hidden: true },
       { href: "/dashboard/content", label: "Content", icon: MODULE_ICONS.content, hintKey: "content", hidden: true },
       { href: "/dashboard/products", label: "Products", icon: MODULE_ICONS.products, hintKey: "products", hidden: true },
@@ -221,7 +245,6 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: "/dashboard/competitors", label: "Competitors", icon: MODULE_ICONS.competitors, hintKey: "competitors", hidden: true },
       { href: "/dashboard/decisions", label: "Decisions", icon: MODULE_ICONS.decisions, hintKey: "decisions", hidden: true },
       { href: "/dashboard/feedback", label: "Feedback", icon: MODULE_ICONS.feedback, hintKey: "feedback", hidden: true },
-      { href: "/dashboard/trading", label: "Trading", icon: MODULE_ICONS.trading, hintKey: "trading", hidden: true },
       // The trading log's companion page, and one of the four that had no
       // entry point anywhere in the product before round 5.
       {
@@ -231,11 +254,16 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         hintKey: "tradingJournal",
         hidden: true,
       },
-      // The six tracking logs. lib/build-modules.ts says what they are in
-      // its own words — "no real AI generation happens yet" — and
-      // scripts/tests/sidebar-naming.test.mjs holds them to it: none may
-      // appear under Build, and each page must still say on screen what it
-      // will not do.
+      // THE SIX TRACKING LOGS, AND WHY THEY ARE NOT UNDER "MAKE".
+      // lib/build-modules.ts says what they are in its own words — "no
+      // real AI generation happens yet" — and the 2026-09-05 structure
+      // asked for four of them (Images, Videos, Presentations, Posts) as
+      // rows under the heading that promises generation. They open a form
+      // for typing notes into. A row that promises and does not deliver
+      // is not a labelling problem, it is a broken promise that reads
+      // identically to a working feature, and scripts/tests/
+      // sidebar-naming.test.mjs proves the difference from the imports.
+      // They become rows the day a route behind them reaches a model.
       { href: "/dashboard/websites", label: "Websites", icon: MODULE_ICONS.websites, hintKey: "websites", hidden: true },
       { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps, hintKey: "apps", hidden: true },
       { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images, hintKey: "images", hidden: true },
@@ -250,18 +278,28 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: "/dashboard/campaigns", label: "Campaigns", icon: MODULE_ICONS.campaigns, hintKey: "campaigns", hidden: true },
     ],
   },
+  {
+    // THE THINGS THAT ARE ABOUT THE WORK RATHER THAN THE WORK. A goal, a
+    // weekly look back at it, and the people it is shared with.
+    heading: "Organise",
+    collapsible: true,
+    items: [
+      { href: MISSION_NAV_ITEM.href, label: MISSION_NAV_ITEM.label, icon: MISSION_ICON, hintKey: "missionControl" },
+      { href: REFLECTION_NAV_ITEM.href, label: REFLECTION_NAV_ITEM.label, icon: REFLECTION_ICON, hintKey: "reflection" },
+      { href: "/dashboard/team", label: "Team", icon: TEAM_ICON, hintKey: "team" },
+    ],
+  },
 ];
 
 export const SETTINGS_GROUP: SidebarGroupConfig = {
   heading: "Settings",
   collapsible: true,
   items: [
-    { href: SETTINGS_NAV_ITEM.href, label: "Settings", icon: SETTINGS_ICON, hintKey: "settings" },
-    { href: "/dashboard/team", label: "Team", icon: TEAM_ICON, hintKey: "team" },
     // Connecting Gmail changes how the product works for you, which is a
     // setting rather than a daily action — and a visible row since round
     // 5, because a connection nobody can find is a connection nobody makes.
     { href: "/dashboard/integrations", label: "Integrations", icon: INTEGRATIONS_ICON, hintKey: "integrations" },
+    { href: SETTINGS_NAV_ITEM.href, label: "Settings", icon: SETTINGS_ICON, hintKey: "settings" },
     // The Help Centre (app/help/page.tsx) — the same answers the chat
     // replies with, as a page.
     { href: "/help", label: "Help Centre", icon: HELP_ICON, hintKey: "help" },

@@ -271,6 +271,14 @@ const BASELINE = {
   // SCREEN; it had been applied per CARD.
   "dashboard/overview/page.tsx": 0,
   "dashboard/page.tsx": 3,
+  // ONE, WHICH IS THE TARGET RATHER THAN A CONCESSION. Added 2026-09-05
+  // with the page. Its single filled control is "Look again", the only
+  // thing on the screen that spends anything; the credit estimate beside
+  // it is text, and the reason predictions-panel.tsx computes that
+  // estimate itself instead of importing components/credits/
+  // cost-estimate.tsx is this check — that module also exports
+  // LargeActionConfirm, whose modal button would have made the page two.
+  "dashboard/predictions/page.tsx": 1,
   "dashboard/presentations/page.tsx": 4,
   "dashboard/product-workflow/page.tsx": 4,
   "dashboard/published/page.tsx": 1,

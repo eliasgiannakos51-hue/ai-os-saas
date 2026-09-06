@@ -1481,5 +1481,101 @@ checkTrue(
   guard.includes("i18n-coverage.test.mjs")
 );
 
+// ---------------------------------------------------------------------
+console.log("\n== 6. a data file in src/lib may not ship a user-facing sentence ==");
+// ---------------------------------------------------------------------
+// THE HOLE THIS CLOSES, AND HOW WIDE IT REALLY IS.
+//
+// lib/next-step-suggestions.ts held thirteen English questions — "Want to
+// weigh this against alternatives in Decisions?" — and
+// components/create/next-step-suggestion.tsx rendered them raw. Every
+// user of /dashboard/create was asked a question in English, in all ten
+// languages, and no gate here saw it: sections 1 and 3 above both start
+// `if (!file.endsWith(".tsx")) continue;`, and the DATA_FILES list that
+// reads `.ts` names three files by hand and checks that message KEYS
+// resolve rather than looking for prose.
+//
+// TWO CHECKS, AND ONLY ONE OF THEM IS AN ASSERTION. That is deliberate.
+{
+  // (a) THE FILE THAT SHIPPED IT, HELD TO KEYS, BOTH WAYS. Narrow enough
+  // to be exact: every value must be a dotted message key, every key must
+  // resolve in every locale, there must be a floor so an emptied map
+  // cannot pass, and the component must put it through a translator. A
+  // sentence coming back here fails on the shape, not on a word list.
+  const suggestionsSrc = readFileSync("src/lib/next-step-suggestions.ts", "utf8");
+  const keys = [...suggestionsSrc.matchAll(/messageKey: "([^"]+)"/g)].map((m) => m[1]);
+  checkTrue(`the next-step map still has entries (${keys.length})`, keys.length >= 13);
+  const prose = keys.filter((k) => !/^[a-z][\w]*(\.[\w]+)+$/.test(k));
+  check("every next-step message is a key, not a sentence", prose, []);
+  const unresolved = [];
+  for (const locale of LOCALES) {
+    for (const key of keys) {
+      const value = key.split(".").reduce((o, part) => (o == null ? o : o[part]), messages[locale]);
+      if (typeof value !== "string" || value.length === 0) unresolved.push(`${locale}: ${key}`);
+    }
+  }
+  check("...and resolves in all ten locales", unresolved, []);
+  // AND THE COMPONENT MUST TRANSLATE IT. A perfect key rendered raw is
+  // the same bug with an extra step, and that is literally what shipped:
+  // the map's value went straight into JSX.
+  // COMMENTS ARE NOT CODE, and this check learned it the moment it was
+  // written: the component's own header explains the incident by quoting
+  // the banned form, so the "never raw" clause matched the sentence
+  // describing the bug rather than the bug. Three other gates in this
+  // directory had the same fault against the same stripper.
+  const nudge = stripComments(readFileSync("src/components/create/next-step-suggestion.tsx", "utf8"));
+  checkTrue(
+    "the nudge renders the key through a translator, never raw",
+    /\{\s*\w+\(\s*suggestion\.messageKey\s*\)\s*\}/.test(nudge) && !/\{suggestion\.message\}/.test(nudge)
+  );
+}
+{
+  // (b) THE WIDER SWEEP — MEASURED AND PRINTED, NOT ASSERTED, and saying
+  // so is worth more than a green tick would be.
+  //
+  // Scanning every `.ts` under src/lib for a `message`/`label`/`title`/
+  // `placeholder`/`heading` whose value is an English sentence finds 51.
+  // Every one of them is an API-layer error string returned to a client —
+  // already inside the 160 classified in the closing report — and none is
+  // a new finding. `description:` is excluded entirely because in this
+  // codebase it is overwhelmingly a tool-schema field sent TO a model,
+  // correctly in English.
+  //
+  // A baseline of 51 would be a baseline set to the size of the problem,
+  // which this project has twice refused to ship. So the number is
+  // printed, the ratchet is that it may not GROW, and the assertion that
+  // matters is (a) above.
+  const libFiles = [];
+  const walkLib = (dir) => {
+    for (const entry of readdirSync(dir)) {
+      const full = `${dir}/${entry}`;
+      if (statSync(full).isDirectory()) walkLib(full);
+      else if (full.endsWith(".ts")) libFiles.push(full);
+    }
+  };
+  walkLib("src/lib");
+  const FIELD = /\b(message|label|title|placeholder|heading)\s*:\s*"([^"]{12,})"/g;
+  const found = [];
+  for (const file of libFiles) {
+    const body = readFileSync(file, "utf8").split("\n").map((l) => l.replace(/^\s*\/\/.*$/, "")).join("\n");
+    for (const m of body.matchAll(FIELD)) {
+      const value = m[2];
+      if (!/^[A-Z][^"]*[.?!]$/.test(value) || value.split(/\s+/).length < 4) continue;
+      found.push(`${file}: ${m[1]}: ${value.slice(0, 70)}`);
+    }
+  }
+  console.log(`        ${found.length} English sentences in src/lib data positions (all API error strings today)`);
+  checkTrue(
+    `the sweep read src/lib (${libFiles.length} files) and found sentences to count (${found.length})`,
+    libFiles.length >= 100 && found.length > 0
+  );
+  // A RATCHET, NOT A TARGET. 51 today; it may fall and never rise.
+  checkTrue(
+    `no new English sentence entered a src/lib data position (${found.length}, ceiling 51)`,
+    found.length <= 51
+  );
+  if (found.length > 51) for (const f of found.slice(0, 8)) console.log(`        ${f}`);
+}
+
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

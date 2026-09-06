@@ -110,7 +110,11 @@
       "tracking": "记录",
       "daily": "日常",
       "work": "工作",
-      "see": "查看"
+      "see": "查看",
+      "make": "创建",
+      "ask": "提问",
+      "run": "运行",
+      "organise": "整理"
     },
     "items": {
       "home": "主页",
@@ -164,7 +168,9 @@
       "newEntry": "新记录",
       "costs": "成本",
       "systemHealth": "系统健康",
-      "tradingJournal": "交易日志"
+      "tradingJournal": "交易日志",
+      "voice": "语音",
+      "predictions": "规律"
     },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",
@@ -219,7 +225,9 @@
       "costs": "每次 AI 调用的花费，按模型和日期列出。",
       "routing": "每类请求会发送到哪个模型。",
       "systemHealth": "数据库、队列和服务商是否在响应。",
-      "tradingJournal": "你的交易记录，以及当时写下的理由。"
+      "tradingJournal": "你的交易记录，以及当时写下的理由。",
+      "voice": "把文字读出来，或者说话并转成文字。按分钟计量，每分钟价格显示在页面上。",
+      "predictions": "在你自己的记录里发现的规律，每条都标明依据的条数，并可点回原始记录。"
     },
     "closeMenu": "关闭菜单"
   },
@@ -2483,6 +2491,63 @@
       },
       "searchPlaceholder": "搜索你写过的一切",
       "searchNoResults": "没有匹配「{query}」的内容。"
+    },
+    "voicePage": {
+      "title": "语音",
+      "description": "把内容读出来，或者说一段话并转成文字。两者都按分钟计费。",
+      "speakTitle": "读出来",
+      "speakWhat": "粘贴或输入任何文字并听一遍。发送消息前确认语气很有用。",
+      "speakLabel": "要朗读的文字",
+      "speakPlaceholder": "粘贴你想听的文字…",
+      "speakNotConfigured": "本部署没有配置朗读，所以没有可点的按钮。页面上的内容照常可以阅读。",
+      "speakNotAvailable": "你当前的套餐暂时不能朗读，或者本月分钟数已用完。",
+      "transcribeTitle": "把我说的写下来",
+      "transcribeWhat": "按住说话，文字会出现在下方。在你自己复制之前，不会发送到任何地方。",
+      "transcribeLabel": "转写结果",
+      "transcribeEmpty": "还没有录音。",
+      "transcribeNotConfigured": "本部署没有配置转写，所以不显示麦克风。打字不受影响。",
+      "transcribeNotAvailable": "你当前的套餐暂时不能转写，或者本月分钟数已用完。",
+      "charCount": "{max} 个字符中的 {count} 个",
+      "copy": "复制",
+      "copied": "已复制",
+      "copyFailed": "复制失败。",
+      "usageTitle": "分钟数与价格"
+    },
+    "predictions": {
+      "title": "规律",
+      "description": "你自己记录里的规律——由代码找出、计数，并链接回它们来自的那些行。",
+      "whatItDoes": "这里的每一条都由你自己的记录算出，并标明背后的条数。没有一条是猜的。",
+      "run": "再看一次",
+      "running": "正在查看…",
+      "error": "没有跑起来。没有产生任何扣费。",
+      "neverRun": "还没有查看过。",
+      "neverRunWhy": "点「再看一次」，系统会读取你的记录并检查规律。这会消耗额度，估算显示在按钮上方。",
+      "foundNothing": "这次没有什么突出的。",
+      "foundNothingWhy": "这是答案，不是失败：检查跑完了，没有找到强到值得告诉你的规律。",
+      "needMoreData": "记录还不够多。",
+      "needMoreDataWhy": "几行数据里的规律只是巧合。多记一些再看一次。"
+    },
+    "nextStep": {
+      "ideas": "要在「决策」里和其他方案比一比吗？",
+      "competitors": "要把这个纳入一次「决策」吗？",
+      "research": "把它变成一条「想法」？",
+      "finance": "要在「分析」里跟踪这个走势吗？",
+      "learning": "有想法了吗？记到「想法」里。",
+      "trading": "要在「分析」里看这个走势吗？",
+      "decisions": "准备把它变成「产品」计划了吗？",
+      "products": "要为它加一份「内容」计划吗？",
+      "content": "要在「销售」里安排对接吗？",
+      "sales": "要新的内容来支撑它吗？",
+      "feedback": "把这条反馈变成「想法」？",
+      "analytics": "要根据这个做一次「决策」吗？",
+      "automation": "要在「分析」里跟踪它省下的时间吗？"
+    },
+    "transitions": {
+      "coding": "在「代码」中打开",
+      "websiteBuilder": "打开网站生成器",
+      "agents": "创建这个智能体",
+      "automation": "打开「自动化」",
+      "deepResearch": "开始深度研究"
     }
   },
   "module": {
@@ -3151,6 +3216,16 @@
       "is": "你放进来的一切，都在一个地方。",
       "does": "显示你最近的记录、你收藏的内容，以及对你写过的一切的搜索。",
       "doesNot": "它不会另存一份副本。这些就是各模块显示的同一批记录 —— 在这里改一条，那边也会变。"
+    },
+    "voice": {
+      "is": "两个按分钟计费的付费服务：一个把文字读出来，一个把你说的话写下来。",
+      "does": "用你选的声音和语速朗读任何粘贴的文字。录下你说的话，转成可以编辑和复制的文本。",
+      "doesNot": "它不会照你说的去做。这里不会发出消息、不会创建记录、不会启动任务——文字只是落在一个框里，等你自己搬走。这不是和 AI 通电话。"
+    },
+    "predictions": {
+      "is": "由代码在你自己的记录里找出的规律，不是模型在猜。",
+      "does": "统计你的记录条数，找出超过阈值的规律，并说明每条背后有多少条记录，以及指回那些记录的链接。",
+      "doesNot": "它不预测未来，也不会为了有话可说而编造规律。匹配的行少到只有几条时，它会告诉你依据不足。"
     }
   },
   "helpCentre": {

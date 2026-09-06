@@ -76,6 +76,7 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "memory",
   "mission",
   "overview",
+  "predictions",
   "presentations",
   "product-workflow",
   "published",
@@ -89,6 +90,7 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "trading-journal",
   "trading-workflow",
   "videos",
+  "voice",
   "website-builder",
   "websites",
 ];

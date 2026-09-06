@@ -231,6 +231,13 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // auth.users cascade, and by public.prune_nav_events() after 90 days
   // whether the account is deleted or not.
   { table: "nav_events", label: "navigation_history", scope: "account" },
+  // SAME REASONING, SAME ANSWER. transition_suggestions records what the
+  // product offered somebody and what they did about it — collected
+  // without their typing anything, which makes it more clearly a
+  // subject-access matter rather than less. Nothing in it is free text:
+  // the destination is an id from a closed list, and the other two
+  // columns are three-value enums, so there is nothing to redact.
+  { table: "transition_suggestions", label: "suggestion_history", scope: "account" },
 
   // --- Trading journal (V4 #14) ---
   //

@@ -220,6 +220,7 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   chatMessage: "chat_message",
   createAnything: "create_anything",
   missionPlan: "mission_plan",
+  transitionDetect: "transition_detect",
   createStudioDetect: "create_studio_detect",
   automationCreate: "automation_run",
   agentBuild: "agent_build",

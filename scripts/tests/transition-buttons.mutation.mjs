@@ -21,9 +21,104 @@ const GATE = "scripts/tests/transition-buttons.test.mjs";
 const LIB = "src/lib/transitions/destinations.ts";
 const BUTTON = "src/components/transitions/transition-button.tsx";
 const CHAT = "src/components/chat/chat-workspace.tsx";
+const ROUTE = "src/app/api/transitions/detect/route.ts";
+const RECORD = "src/app/api/transitions/record/route.ts";
 const EL = "messages/el.json";
 
 const MUTANTS = [
+    {
+    // THE PRECONDITION, REMOVED FROM THE CLIENT. Without it every answer
+    // the free reader cannot place becomes a paid request — which is the
+    // difference between a feature that costs a fraction of a credit
+    // occasionally and one that costs a credit on most messages.
+    name: "the client stops checking whether the free reader already placed the answer",
+    file: BUTTON,
+    from: "if (free || !worthPaidDetection(text) || !hasActionCue(text)) return;",
+    to: "if (!worthPaidDetection(text) || !hasActionCue(text)) return;",
+    expect: "does not ask when the free reader already placed",
+  },
+  {
+    // AND FROM THE SERVER, which is the half a hand-written POST meets.
+    name: "the route stops running the free reader before it charges",
+    file: ROUTE,
+    from: "    const free = detectTransition(answer);",
+    to: "    const free = null;",
+    expect: "runs the free reader itself and charges nothing",
+  },
+  {
+    // THE ACTION CUE, REMOVED. Every plain factual answer in the product
+    // then reaches a model — the corpus is what says so out loud.
+    name: "the paid detector fires on answers that point nowhere",
+    file: BUTTON,
+    from: "|| !hasActionCue(text)) return;",
+    to: ") return;",
+    expect: "answer that points nowhere at all",
+  },
+  {
+    // THE CUE LIST GOES BACK TO BEING A COPY OF THE POINTING LIST, which
+    // is what its own comment claimed it was not while it was. Four of
+    // the five paraphrased suggestions stopped reaching the model.
+    name: "hasActionCue becomes a copy of pointsSomewhere again",
+    file: LIB,
+    from: "  if (SUGGESTION_SUBSTRINGS.some((c) => folded.includes(c))) return true;\n  return boundedPattern(stem(...SUGGESTION_STEMS)).test(folded);",
+    to: "  return false;",
+    expect: "reaches the outcome it declares",
+  },
+  {
+    // "in the" COMES BACK. It is in almost every English sentence ever
+    // written, and it grew a Deep Research button on a plain fact.
+    name: "a preposition goes back into the pointing cues",
+    file: LIB,
+    from: '"head to", "go to",',
+    to: '"head to", "go to", "in the",',
+    expect: "reaches the outcome it declares",
+  },
+  {
+    // THE FLAT CHARACTER FLOOR. Forty is a short English sentence and a
+    // whole Japanese one.
+    name: "the paid floor stops being script-aware",
+    file: LIB,
+    from: "  const floor = CJK_PATTERN.test(text) ? 16 : 40;",
+    to: "  const floor = 40;",
+    expect: "reaches the outcome it declares",
+  },
+  {
+    // A HEDGED ANSWER DRAWS A BUTTON. A false button costs more than a
+    // missing one, and `confident` is the only thing enforcing that.
+    name: "the route accepts an unconfident answer",
+    file: ROUTE,
+    from: "      chosen = named && raw.confident === true ? named.id : null;",
+    to: "      chosen = named ? named.id : null;",
+    expect: "a hedged answer produces no button",
+  },
+  {
+    // THE MODEL'S ANSWER IS TRUSTED. The enum in a tool schema is a
+    // request, not a guarantee.
+    name: "the route trusts the model's destination string",
+    file: ROUTE,
+    from: "      const named = typeof raw.destination === \"string\" ? destinationById(raw.destination) : null;",
+    to: "      const named = typeof raw.destination === \"string\" ? { id: raw.destination } : null;",
+    expect: "put back through the closed list",
+  },
+  {
+    // NOTHING IS RESERVED. The call still happens and still costs real
+    // money; only the account stops paying for it.
+    name: "the paid call stops reserving credits",
+    file: ROUTE,
+    from: "      const reservation = await reserveCredits(user.id, estimate.reserveCredits, \"transition_detect\", {",
+    to: "      const reservation = await Promise.resolve({ ok: true, reservationId: \"\" }) as any; void ((\"transition_detect\") && {",
+    expect: "it reserves",
+  },
+  {
+    // THE PROMPT STOPS SAYING THE LANGUAGE DOES NOT MATTER. A classifier
+    // that quietly only worked on English answers would look identical in
+    // every log this app keeps.
+    name: "the prompt drops the sentence that makes it language-independent",
+    file: ROUTE,
+    from: "THE LANGUAGE OF THE ANSWER DOES NOT MATTER.",
+    to: "Answers are usually in English.",
+    expect: "tells the model the language does not matter",
+  },
   {
     // 1. A DESTINATION THE SIDEBAR HIDES. The button would work and would
     // teach nothing: the user could never find that page again alone.
@@ -126,8 +221,53 @@ const MUTANTS = [
     to: "<MessageContent content={streamingText} className=\"leading-relaxed\" />\n                      <TransitionButton text={streamingText} />",
     expect: "never on the one still streaming",
   },
+  {
+    // THE DEFECT THAT ACTUALLY SHIPPED IN THE FIRST DRAFT OF BOTH ROUTES,
+    // put back one string at a time. Six English sentences sat in bodies
+    // nothing renders, under comments that cited api/nav/track — which
+    // returns a bare status for this exact case and writes out why. The
+    // gate that found it was i18n-coverage's ratchet, one layer away and
+    // with the reason gone by the time it fired; this clause is the one
+    // that should find it.
+    name: "an English sentence goes back into a body nobody renders (record)",
+    file: RECORD,
+    from: 'reason: "unknown_destination" }, { status: 400 }',
+    to: 'error: "Unknown destination." }, { status: 400 }',
+    expect: "neither transition route answers with an English sentence",
+  },
+  {
+    // AND ON THE OTHER ROUTE, because a check written against one file
+    // and a list of two is a check that passes when the second file is
+    // the one that regresses.
+    name: "...and into the paid route's 401",
+    file: ROUTE,
+    from: 'reason: "unauthenticated" }, { status: 401 }',
+    to: 'error: "Not authenticated." }, { status: 401 }',
+    expect: "neither transition route answers with an English sentence",
+  },
+  {
+    // THE OTHER HALF OF THE FIX. Deleting the sentence is only right
+    // because a code took its place: without one, the two 400s on the
+    // record route become indistinguishable to a curl, and "it rejected
+    // my POST" stops being answerable.
+    name: "the sentences are deleted and nothing replaces them",
+    file: RECORD,
+    from: '{ ok: false, reason: "unknown_source_or_outcome" }',
+    to: '{ ok: false }',
+    expect: "none is a bare status",
+  },
+  {
+    // TWO REFUSALS, ONE WORD. A code that cannot tell the two 400s apart
+    // is exactly as useful to a curl as the bare status the first clause
+    // already forbids — so the distinctness is its own mutation rather
+    // than a property assumed to follow from the presence check.
+    name: "two different refusals answer with the same code",
+    file: RECORD,
+    from: 'reason: "unknown_source_or_outcome"',
+    to: 'reason: "unknown_destination"',
+    expect: "with a different code per refusal",
+  },
 ];
-
 function runGate() {
   try {
     execFileSync(process.execPath, [GATE], { encoding: "utf8", stdio: "pipe" });
@@ -202,4 +342,7 @@ if (missed.length > 0 || !after.green) {
   }
   process.exit(1);
 }
-console.log("A dead end, a noisy detector, three broken scripts and an unrendered button are each red.");
+console.log(
+  "A dead end, a noisy detector, three broken scripts, an unrendered button and an\n" +
+    "English sentence in a body nobody reads are each red."
+);

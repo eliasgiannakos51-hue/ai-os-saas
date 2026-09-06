@@ -85,6 +85,21 @@ const DECLARED = {
   // (nothing was saved).
   "src/lib/jobs/handlers/create.ts": { calls: 1, billing: "settled" },
   "src/app/api/create-studio/detect/route.ts": { calls: 1, billing: "settled" },
+  // SETTLED WHETHER OR NOT IT FOUND ANYTHING, which is the unusual part
+  // and the reason it is worth a note. The call happened and the tokens
+  // were spent even when the model answers "none"; charging only for the
+  // answers that produced a button would price this feature at zero for
+  // the case it exists to handle and hide its real cost from
+  // cost-alerts. Released only when the call itself fails.
+  //
+  // AND IT ONLY RUNS AFTER THE FREE READER FAILED — the route re-checks
+  // that itself (lib/transitions/destinations.ts) before reserving, so a
+  // caller cannot make it cost money the free path would have saved.
+  "src/app/api/transitions/detect/route.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "settles even when the answer is 'none'; the free reader runs first, inside the route, before any reservation.",
+  },
   "src/app/api/chat/route.ts": { calls: 1, billing: "settled" },
 
   "src/app/api/records/ask/route.ts": {
@@ -975,6 +990,7 @@ const ROUTES_THAT_SETTLE = [
   "src/app/api/chat/route.ts",
   "src/app/api/create/route.ts",
   "src/app/api/create-studio/detect/route.ts",
+  "src/app/api/transitions/detect/route.ts",
   "src/app/api/mission/plan/route.ts",
 ];
 for (const file of ROUTES_THAT_SETTLE) {

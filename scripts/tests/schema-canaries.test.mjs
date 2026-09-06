@@ -55,10 +55,27 @@ check(`migrations found (${files.length})`, files.length > 20, String(files.leng
 //   probe on every request, and each entry says what a user loses.
 //   Objects OLDER than the window can be missing and invisible here.
 //
-//   scripts/db-inventory.mjs is the COMPLETE answer: 106 tables, 36
-//   RPCs, 1023 columns, 213 policies, 20 check constraints, no window.
-//   It is the thing to run at deploy time, and running it is what would
-//   have caught all five of the objects that were actually missing.
+//   scripts/db-inventory.mjs is the COMPLETE answer for the PUBLIC
+//   schema: 107 tables, 37 RPCs, 1033 columns, 276 policies, 23 check
+//   constraints, no window. It is the thing to run at deploy time, and
+//   running it is what would have caught all five of the objects that
+//   were actually missing.
+//
+//   THESE FIVE NUMBERS ARE READ OUT OF `db-inventory.mjs --json`, not
+//   carried forward. Four of the five it replaces were wrong: the policy
+//   figure said 213 when the instrument derived 276, and the function,
+//   column and table figures had each been overtaken by a migration.
+//   db-inventory.test.mjs pins the property that matters (every literal
+//   CREATE POLICY on a public table reaches expected_policies); these
+//   are prose, and prose goes stale, so they are dated rather than
+//   trusted — measured 2026-09-06.
+//
+//   AND THE WORD "PUBLIC" IS LOAD-BEARING. The ten policies on
+//   storage.objects are outside what db-inventory.mjs reports, because
+//   its policy list is filtered to the public tables src/ queries. That
+//   is the same corner the local stub and production disagreed about on
+//   2026-09-05. db-inventory.test.mjs counts them so the exclusion is
+//   visible; nothing in this repo yet compares them against production.
 //
 // Objects proven missing in a real database are canaries regardless of
 // the window — see the explicit check below.

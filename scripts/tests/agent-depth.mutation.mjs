@@ -34,11 +34,11 @@ const EXECUTE = "src/lib/agents/execute-agent.ts";
 const BUILDER = "src/lib/agents/agent-builder.ts";
 const ESTIMATE = "src/lib/billing/estimate.ts";
 const POLICY = "src/lib/billing/margin-policy.ts";
+const PICKER = "src/components/agents/depth-picker.tsx";
 const SQL = "supabase/migrations/20260826000000_agent_templates.sql";
 const ADOPT = "src/app/api/agents/templates/adopt/route.ts";
 const SHARE = "src/app/api/agents/templates/share/route.ts";
 const RUN_ROUTE = "src/app/api/agents/[id]/run/route.ts";
-const PICKER = "src/components/agents/depth-picker.tsx";
 const MATCHES = "src/components/agents/template-matches.tsx";
 const PAGE = "src/app/dashboard/agents/page.tsx";
 
@@ -511,6 +511,53 @@ const MUTANTS = [
     file: PAGE,
     from: "  const depthPrices = agentRunEstimatesByDepth({",
     to: "  const depthPrices = ({} as Record<string, number>) && agentRunEstimatesByDepthX({",
+  },
+  {
+    // THE PICKER GOES BACK TO ONE NUMBER. It showed only the searching
+    // figure, and a reader shown "6 · 22 · 64" cannot tell whether deep
+    // is dear because Opus is dear or because it searches ten times
+    // instead of four. It is mostly the second.
+    name: "the page stops pricing the no-search case",
+    file: PAGE,
+    from: "    needsWebSearch: false,\n    accountCreditPriceEur: creditPriceEur,\n    planSlug,\n  });",
+    to: "    needsWebSearch: true,\n    accountCreditPriceEur: creditPriceEur,\n    planSlug,\n  });",
+    expect: "the page prices both cases",
+  },
+  {
+    name: "...or the picker stops rendering the second number",
+    file: PICKER,
+    from: '{t("withoutSearch", { credits: formatNumber(fact.creditsWithoutSearch, locale) })}',
+    to: "{null}",
+    expect: "the picker renders the second number",
+  },
+  {
+    // THE COMPONENT PRICES IT ITSELF, which is the thing the picker's own
+    // comment forbids: a number computed in the browser is a second
+    // implementation of the pricing, free to drift from the one that
+    // charges.
+    name: "the browser computes the price instead of rendering the server's",
+    file: PICKER,
+    from: "import { formatNumber } from \"@/lib/format-number\";",
+    to: "import { formatNumber } from \"@/lib/format-number\";\nimport { estimateForAction } from \"@/lib/billing/estimate\";\nvoid estimateForAction;",
+    expect: "neither number is computed in the browser",
+  },
+  {
+    // THE WRAPPER STOPS BEING A PASS-THROUGH, so the numbers this gate
+    // prints stop being the product's.
+    name: "estimateAgentRun starts pricing every tier against one model",
+    file: EXECUTE,
+    from: "      model: spec.model,\n      inputChars: params.promptChars,\n      expectedWebSearches: params.needsWebSearch ? spec.maxSearches : 0,",
+    to: "      model: AGENT_DEPTH_SPECS.standard.model,\n      inputChars: params.promptChars,\n      expectedWebSearches: params.needsWebSearch ? spec.maxSearches : 0,",
+    expect: "estimateAgentRun is still a pass-through",
+  },
+  {
+    // AND THE SEARCH STOPS COSTING ANYTHING, which would make the second
+    // number equal the first and teach nothing.
+    name: "a search budget of zero is priced the same as a full one",
+    file: EXECUTE,
+    from: "expectedWebSearches: params.needsWebSearch ? spec.maxSearches : 0,",
+    to: "expectedWebSearches: spec.maxSearches,",
+    expect: "estimateAgentRun is still a pass-through",
   },
 ];
 

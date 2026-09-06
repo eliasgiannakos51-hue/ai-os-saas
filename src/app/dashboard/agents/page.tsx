@@ -136,9 +136,28 @@ export default async function AgentsPage({
   const pricingConfig = resolvePricingConfig();
   const creditPriceEur = effectiveCreditPriceEurForAccount(plan, packCreditPriceEur, pricingConfig);
   const REPRESENTATIVE_TASK_CHARS = 600;
+  // BOTH NUMBERS, BECAUSE THE SEARCH IS THE DIFFERENCE.
+  //
+  // This table used to show one figure per tier — the searching one — and
+  // that hid what actually separates the options. Measured on 2026-09-06
+  // from AGENT_DEPTH_SPECS: without search the three tiers are 2, 10 and
+  // 20 credits; with search they are 6, 22 and 67. Most of the gap is the
+  // search budget (1, 4 and 10 queries at $0.01 each) and the second
+  // research pass deep runs.
+  //
+  // A reader shown only "6 · 22 · 67" cannot tell whether deep is
+  // expensive because Opus is expensive or because it searches ten times.
+  // It is mostly the second, and that is a thing they can decide about:
+  // a task with nothing to look up costs a third of the advertised price.
   const depthPrices = agentRunEstimatesByDepth({
     promptChars: REPRESENTATIVE_TASK_CHARS,
     needsWebSearch: true,
+    accountCreditPriceEur: creditPriceEur,
+    planSlug,
+  });
+  const depthPricesNoSearch = agentRunEstimatesByDepth({
+    promptChars: REPRESENTATIVE_TASK_CHARS,
+    needsWebSearch: false,
     accountCreditPriceEur: creditPriceEur,
     planSlug,
   });
@@ -172,6 +191,7 @@ export default async function AgentsPage({
         sources: AGENT_DEPTH_SPECS[depth].maxSearches,
         seconds: AGENT_DEPTH_SECONDS[depth],
         credits: depthPrices[depth],
+        creditsWithoutSearch: depthPricesNoSearch[depth],
       },
     ])
   );

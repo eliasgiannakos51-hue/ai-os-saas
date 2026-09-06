@@ -1824,6 +1824,7 @@
       "depth": {
         "legend": "Πόσο βαθιά δουλεύει",
         "perRun": "ανά εκτέλεση",
+        "withoutSearch": "{credits} χωρίς αναζήτηση",
         "suggested": "Προτεινόμενο",
         "facts": "{sources, plural, one {# πηγή} other {# πηγές}} · {steps, plural, one {# βήμα} other {# βήματα}} · περίπου {seconds}δ",
         "runOnce": "Μία εκτέλεση σε",

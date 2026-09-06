@@ -1824,6 +1824,7 @@
       "depth": {
         "legend": "Quanto trabalha",
         "perRun": "por execução",
+        "withoutSearch": "{credits} sem pesquisa web",
         "suggested": "Sugerido",
         "facts": "{sources, plural, one {# fonte} other {# fontes}} · {steps, plural, one {# passo} other {# passos}} · cerca de {seconds}s",
         "runOnce": "Executar uma vez como",

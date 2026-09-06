@@ -366,10 +366,17 @@ function tableColumnsFromMigrationText(sqlText) {
     }
   }
 
+  // ONE STATEMENT CAN ADD SEVERAL COLUMNS, and the pattern here used to
+  // take the first of them: `alter table t add column a …, add column b
+  // …;` registered `a` and lost `b`. Nine columns in this repo were
+  // invisible to it, among them user_integrations.consent_scopes.
   const alterRe =
-    /alter table (?:if exists )?(?:public\.)?"?([a-z_][a-z0-9_]*)"?\s+add column(?: if not exists)?\s+"?([a-z_][a-z0-9_]*)"?/gi;
+    /alter table (?:only )?(?:if exists )?(?:public\.)?"?([a-z_][a-z0-9_]*)"?([\s\S]*?);/gi;
   while ((m = alterRe.exec(sqlText))) {
-    ensure(m[1].toLowerCase()).add(m[2].toLowerCase());
+    const table = m[1].toLowerCase();
+    for (const c of m[2].matchAll(/add column(?: if not exists)?\s+"?([a-z_][a-z0-9_]*)"?/gi)) {
+      ensure(table).add(c[1].toLowerCase());
+    }
   }
   return byTable;
 }

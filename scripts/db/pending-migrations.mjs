@@ -74,7 +74,25 @@ export function objectsOf(sql) {
     out.push({ kind, name, extra });
   };
   for (const m of text.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) add("table", ident(m[2]));
-  for (const m of text.matchAll(/alter\s+table\s+(?:only\s+)?(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)\s+add\s+column\s+(?:if\s+not\s+exists\s+)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) add("column", ident(m[2]), ident(m[1]));
+  // EVERY add-column CLAUSE, NOT THE FIRST ONE OF EACH STATEMENT.
+  //
+  // `alter table t add column a …, add column b …, add column c …;` is one
+  // statement with three columns, and the pattern this replaces —
+  // `alter table <t> add column <c>` — matched only `a`. Nine columns in
+  // this repo were invisible that way, among them
+  // user_integrations.consent_scopes and consent_withdrawn_at.
+  //
+  // WHICH IS THE EXACT FAILURE THIS TOOL EXISTS TO PREVENT. A migration
+  // that adds three columns and was never pasted would be reported as
+  // APPLIED the moment the first column existed. CLAUDE.md's opening
+  // story is user_websites.generation_notes missing with nothing saying
+  // so; a tool that checks one column in three is how that happens again.
+  for (const stmt of text.matchAll(/alter\s+table\s+(?:only\s+)?(?:if\s+exists\s+)?(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)([\s\S]*?);/gi)) {
+    const table = ident(stmt[1]);
+    for (const c of stmt[2].matchAll(/add\s+column\s+(?:if\s+not\s+exists\s+)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) {
+      add("column", ident(c[1]), table);
+    }
+  }
   for (const m of text.matchAll(/create\s+(?:or\s+replace\s+)?function\s+(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)\s*\(/gi)) {
     const after = text.slice(m.index + m[0].length);
     add("function", ident(m[1]), String(countParams(after)));
@@ -82,9 +100,15 @@ export function objectsOf(sql) {
   // A policy carries its table's SCHEMA: storage.objects policies live in
   // storage, not public. A name with a format placeholder (%1$s) is built
   // by a DO block at run time and cannot be checked by name — skipped.
-  for (const m of text.matchAll(/create\s+policy\s+"([^"]+)"\s+on\s+(?:([A-Za-z_][A-Za-z0-9_]*)\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) {
-    if (m[1].includes("%")) continue;
-    add("policy", m[1], `${(m[2] ?? "public").toLowerCase()}.${ident(m[3])}`);
+  // THE QUOTES AROUND A POLICY NAME ARE OPTIONAL, and this repo uses both:
+  // 148 policies quoted, 70 not. Requiring them made a third of every RLS
+  // policy invisible to this tool — the same blind spot found in
+  // scripts/db-inventory.mjs on 2026-09-06, in a second file, and this is
+  // the one CLAUDE.md says to run before a deploy.
+  for (const m of text.matchAll(/create\s+policy\s+(?:"([^"]+)"|([A-Za-z_][A-Za-z0-9_]*))\s+on\s+(?:([A-Za-z_][A-Za-z0-9_]*)\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) {
+    const name = m[1] ?? m[2];
+    if (name.includes("%")) continue;
+    add("policy", name, `${(m[3] ?? "public").toLowerCase()}.${ident(m[4])}`);
   }
   for (const m of text.matchAll(/create\s+(?:unique\s+)?index\s+(?:concurrently\s+)?(?:if\s+not\s+exists\s+)?("?[A-Za-z_][A-Za-z0-9_]*"?)\s+on\s/gi)) add("index", ident(m[1]));
   for (const m of text.matchAll(/create\s+(?:or\s+replace\s+)?trigger\s+("?[A-Za-z_][A-Za-z0-9_]*"?)\s/gi)) add("trigger", ident(m[1]));
@@ -101,11 +125,28 @@ export function dropsOf(sql) {
     const after = text.slice(m.index + m[0].length);
     out.push({ kind: "function", name: ident(m[1]), extra: String(countParams(after)) });
   }
-  for (const m of text.matchAll(/drop\s+policy\s+(?:if\s+exists\s+)?"([^"]+)"\s+on\s+(?:([A-Za-z_][A-Za-z0-9_]*)\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) out.push({ kind: "policy", name: m[1], extra: `${(m[2] ?? "public").toLowerCase()}.${ident(m[3])}` });
+  // AND THE SAME ON THE DROP SIDE, WHERE IT WAS WORSE. 204 of the 351
+  // `drop policy` statements in this repo write the name bare and 147
+  // quote it — so the majority form was the invisible one, and this list
+  // is what VOIDS an earlier expectation. A drop nobody saw leaves the
+  // tool still expecting a policy that a later migration deliberately
+  // removed: a PENDING that is not pending. "A probe that names something
+  // missing when it is not is worse than no probe" is CLAUDE.md's rule
+  // about exactly this, written after the health route did it twice.
+  for (const m of text.matchAll(/drop\s+policy\s+(?:if\s+exists\s+)?(?:"([^"]+)"|([A-Za-z_][A-Za-z0-9_]*))\s+on\s+(?:([A-Za-z_][A-Za-z0-9_]*)\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) out.push({ kind: "policy", name: m[1] ?? m[2], extra: `${(m[3] ?? "public").toLowerCase()}.${ident(m[4])}` });
   for (const m of text.matchAll(/drop\s+index\s+(?:concurrently\s+)?(?:if\s+exists\s+)?(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) out.push({ kind: "index", name: ident(m[1]), extra: "" });
   for (const m of text.matchAll(/drop\s+table\s+(?:if\s+exists\s+)?(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) out.push({ kind: "table", name: ident(m[1]), extra: "" });
   for (const m of text.matchAll(/drop\s+trigger\s+(?:if\s+exists\s+)?("?[A-Za-z_][A-Za-z0-9_]*"?)\s+on/gi)) out.push({ kind: "trigger", name: ident(m[1]), extra: "" });
-  for (const m of text.matchAll(/alter\s+table\s+(?:only\s+)?(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)\s+drop\s+column\s+(?:if\s+exists\s+)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) out.push({ kind: "column", name: ident(m[2]), extra: ident(m[1]) });
+  // Every drop-column clause of a multi-action statement, for the reason
+  // objectsOf carries above. There are none in this repo today — which is
+  // why this one is symmetry rather than a fix, and why the gate that
+  // covers it says so instead of pretending to have measured something.
+  for (const stmt of text.matchAll(/alter\s+table\s+(?:only\s+)?(?:if\s+exists\s+)?(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)([\s\S]*?);/gi)) {
+    const table = ident(stmt[1]);
+    for (const c of stmt[2].matchAll(/drop\s+column\s+(?:if\s+exists\s+)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) {
+      out.push({ kind: "column", name: ident(c[1]), extra: table });
+    }
+  }
   return out;
 }
 

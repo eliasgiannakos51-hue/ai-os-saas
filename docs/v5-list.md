@@ -117,29 +117,78 @@ that the search budget is the difference — see `depth-picker.tsx`.
 
 ## Tier 2 — a user meets these
 
-### 4. `dir="rtl"` for Arabic
-**~2 days.**
+*Items 4, 7 and 7b are done. What remains in this tier is 5, 6 and 8.*
 
-`src/i18n/constants.ts` says, correctly, that Arabic ships text-only with
-no RTL layout: no `dir="rtl"`, no logical properties, no mirrored pass. The
-Arabic text renders right-to-left by Unicode's bidi algorithm; the nav,
-the icons and the alignment stay left-to-right. An Arabic reader gets a
-mirror-image of a layout that was never mirrored.
+### 4. `dir="rtl"` for Arabic — DONE (2026-09-07)
 
-**And nothing keeps that comment true.** It is accurate today by
-coincidence — if somebody added `dir` tomorrow the comment would be wrong
-and no gate would notice. That is the "statement nobody re-asked" shape,
-sitting in the file that documents it.
+Was ~2 days; took one round. Shipped on
+`claude/v4-6-sidebar-chat-issues-b2eixz`.
 
-*Done means:* `dir` on `<html>` from the locale; physical offsets replaced
-with logical properties; pointing icons mirrored under `[dir="rtl"]` and
-non-pointing ones left alone (the website generator's own prompt already
-says this — `lib/website-builder.ts` — so the app is asking of models
-what it does not do itself); and a gate that fails if `dir` and the
-comment disagree.
+**What it was.** `src/i18n/constants.ts` said, correctly and honestly, that
+Arabic shipped text-only with no RTL layout. Measured before the change
+with `scripts/tests/rtl-layout.prodtest.mjs` — a real Chromium, a real
+production build, six routes at 390 and 1440:
 
-*Proven by:* a screenshot pair at 390px, and `honeypot-rtl.prodtest.mjs`
-extended to the app rather than to generated sites.
+| | before | after |
+|---|---|---|
+| `dir` on `<html>` in Arabic | `null`, every route, both widths | `rtl`, every route, both widths |
+| horizontal scroll, both directions | 0px | 0px |
+| off-screen elements, `/dashboard` @ 1440 | 3 — the same 3 as English, because the layout WAS English | 3, matching English |
+| off-screen elements, `/dashboard` @ 390 | 113 — identical to English | 113, matching English |
+
+The identical censuses are the finding: nothing was mirrored, so Arabic and
+English measured the same. A defect invisible to every instrument that was
+not asked the question in the right language.
+
+**The critical constraint, and it was the owner's.**
+`lib/website-builder.ts` already carried a WRITING DIRECTION section
+imposing all of this on every model the product calls. The app asked of
+others what it did not do itself — now catalogued in `docs/shapes.md`. So
+there is one catalogue, not two: `scripts/tests/rtl.test.mjs` PARSES that
+section out of the prompt and checks the app against it, deriving even the
+four right-to-left languages from the prompt's own prose.
+
+**What shipped.**
+- `src/lib/text-direction.ts` — `RTL_LANGUAGES`, `directionOf`,
+  `dirAttribute`. Returns `undefined` rather than `"ltr"`, because the
+  prompt says "if it is not, do not set dir at all".
+- `src/app/layout.tsx` — `<html lang={locale} dir={dirAttribute(locale)}>`.
+- 219 physical utilities → logical (`ms-`/`me-`, `ps-`/`pe-`,
+  `start-`/`end-`, `border-s`/`border-e`, `text-start`/`text-end`). Every
+  one is a no-op in the nine left-to-right locales, which is what made the
+  sweep safe to do at that scale.
+- The mobile drawer, which was the honeypot's own shape inside the app:
+  `fixed inset-y-0 left-0` + `-translate-x-full`, unreachable in LTR and
+  256px of sideways scroll in RTL.
+- `GlowOrb`'s two call sites, whose parents lacked the `overflow-hidden`
+  the component's own doc requires, leaving a negative physical offset
+  that becomes reachable when mirrored.
+- 37 pointing icons mirrored by lucide class name; `trending-up`,
+  `phone`, `mail`, `clock`, `chevron-up`/`-down` and `external-link`
+  deliberately NOT, each with its reason in `globals.css`.
+- The active-nav rail and the row-collapse animation, both of which had to
+  move two halves rather than one.
+
+**Three defects the browser found that no source review did.**
+1. `rtl:translate-x-full` outranks `md:translate-x-0`, so fixing the phone
+   pushed the whole desktop sidebar off-screen at 1440 in Arabic — 114
+   elements out of view against 3 in English. Needed
+   `md:rtl:translate-x-0`.
+2. `left-1/2 -translate-x-1/2` is the CENTRING idiom, not a reading-order
+   offset. Converted to `start-1/2` it lands off-centre by the element's
+   own width in Arabic. Eight sites; all reverted to physical, which is
+   what the prompt's own carve-out prescribes.
+3. The gate's own icon check knew one of the two class names lucide emits
+   per icon (`lucide-undo2` AND `lucide-undo-2`), and its CSS parser read
+   an explanatory COMMENT as a rule.
+
+*Proven by:* `scripts/tests/rtl.test.mjs` (42 checks) ·
+`scripts/tests/rtl.mutation.mjs` (17/17) ·
+`scripts/tests/rtl-layout.prodtest.mjs` (90 checks green in Chromium at
+390 and 1440, both locales, six routes) · before/after screenshots.
+
+*Not done:* Hebrew, Persian and Urdu are named in `RTL_LANGUAGES` and have
+no message catalogue, so nothing renders in them. Only `ar` was measured.
 
 ### 5. Translations no native speaker has read
 **~1 week of somebody else's time.** Not a coding task.
@@ -179,21 +228,62 @@ that makes it a feature rather than an annoyance — a measured rate, so
 false-question rate reported in the settlement metadata the way `narrated`
 already is.
 
-### 7. Greeklish
-**~2 days.**
+### 7. Greeklish — DONE (2026-09-06)
 
-"thelo na ftiakso" is Greek. The app treats it as noise: it is not Greek to
-`foldForMatch`, not English to the classifier, and matches no canned
-answer. A Greek user typing on a phone with an English keyboard — which is
-most of them, some of the time — falls through every match this app has.
+Shipped. `greekSkeleton` / `greeklishSkeletons` / `textHasGreeklishTerm` /
+`textHasGreeklishStem` live in `src/lib/text/unicode-patterns.ts` where the
+rest of the matching lives, and five surfaces call the one implementation:
+⌘K search, the canned answers, the module vocabulary, the trading rule
+parser and the website negative instructions. The sixth on the owner's
+list, the classifier, is a model call with no pattern to teach — listed in
+the gate WITH that reason, so an unexplained absence cannot be mistaken for
+an oversight.
 
-*Done means:* transliteration folded into `lib/text/unicode-patterns.ts`
-where the rest of the matching lives, so search, canned answers, the
-classifier and the rule parser all get it at once — **not wired at the one
-place somebody needed it**, which is a named V4 shape.
+Nothing transliterates. Both sides reduce to a skeleton, one token per
+Greek phoneme, the Greek side deterministic and only the Latin side
+branching (capped at 16). `thelo`, `thelw`, `8elw` and `θέλω` all reduce to
+`8elo`, which is how the ambiguous letters — `x` is both χ and ξ, `h` is
+both η and χ — stop being a problem: nothing has to pick one.
 
-*Proven by:* the same test corpus as the accent fold, in both directions,
-including the ambiguous digraphs (θ/th, χ/ch/x, ψ/ps).
+*Proven by:* `greeklish.test.mjs` (25 checks) · `greeklish.mutation.mjs`
+(15/15) · a 90x186 collision measurement over 16,740 pairs finding exactly
+one (`idea ~ ιδέα`), allowed by name with a staleness check.
+
+### 7b. The vocabulary has no verbs — DONE (2026-09-07)
+
+**Found by the owner's own question**, which was the right one: "πόσο
+ξόδεψα" scored zero on Finance in Greek, in Greek letters, on the module
+whose whole subject is money — so was that one gap, or the shape of the
+list?
+
+It was the shape of the list. `src/lib/ai/module-vocabulary.ts` harvests
+each module's terms from its slug, its title in all ten catalogues and its
+field labels in all ten. Every one of those is a NOUN, because that is how
+an interface is named. Measured across the full cross-product — 13 modules
+x 10 languages, one verb-led question each, through the real scoring path:
+
+| | before | after |
+|---|---|---|
+| questions reaching their own module | **12 of 130** | **128 of 130** |
+| en | 2/13 | 12/13 |
+| el | 3/13 | 12/13 |
+| es · de · it · pt · ar | **0/13 each** | 13/13 each |
+| fr | 3/13 | 13/13 |
+| zh · ja | 2/13 each | 13/13 each |
+
+*What shipped:* a third field, `verbs`, on every module in all ten
+languages, scored at `primary` weight because "ξόδεψα" is exactly as strong
+a claim about Finance as "έξοδα".
+
+*The two that remain zero, and why they are not fixed:* `ideas/en` and
+`ideas/el`. The verb an English or Greek speaker reaches for is "think" /
+"σκέφτηκα", which is true of every module — "what do you think about my
+sales" is not a question about Ideas. Adding it would make everything
+score, which is a slower way of selecting nothing. Both are allowed BY NAME
+in the gate, with a staleness check, rather than hidden under a floor.
+
+*Proven by:* `scripts/tests/module-verbs.test.mjs` — the full 13x10
+cross-product, 13 checks, no sampling.
 
 ### 8. Learning from use
 **~1 week, and the riskiest item here.**
@@ -344,8 +434,9 @@ that is the most valuable finding V5 could produce.
 - **The five readers** — V7.5. Not a coding task and not a V5 blocker.
 - **Full RTL for the generated websites** — already handled: the website
   prompt covers `dir`, mirrored motion and icon flipping, and a real
-  Arabic site was measured. Item 4 is about the *app*, which does not do
-  what its own prompt requires of models.
+  Arabic site was measured. Item 4 was about the *app*, which did not do
+  what its own prompt required of models; as of 2026-09-07 it does, and
+  the gate now reads that prompt's rules rather than restating them.
 
 ---
 

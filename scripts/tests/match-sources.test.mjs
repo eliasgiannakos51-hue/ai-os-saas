@@ -65,11 +65,18 @@ console.log("\n== 2. canned answers match phrasings, not titles ==");
   // types". This checks that the sentence is still there AND that the
   // column is still per-locale, because either half alone can rot.
   const mig = readFileSync("supabase/migrations/20260816_help_articles.sql", "utf8");
+  // includes(), not a regex, and for a specific reason: a regex literal
+  // whose last word is followed by a slash and then a method call reads
+  // as a directory-and-file to scripts/scan-self-claims.mjs, which
+  // reported the tail of the pattern below as a comment naming a file
+  // that is not there. The scanner was right about the shape and wrong
+  // about the meaning, and the cheapest fix is to stop writing the shape
+  // — including in this comment, which said it once and went red again.
   ok("triggers are documented as the phrasings a user types",
-    /phrasings a user actually types/.test(mig),
+    mig.includes("phrasings a user actually types"),
     "if this sentence goes, the next author fills the column with titles");
   ok("...and are per-locale, so a French user is not matched on Greek",
-    /`triggers` is per-locale/.test(mig) && /triggers text\[\]/.test(mig));
+    mig.includes("`triggers` is per-locale") && mig.includes("triggers text[]"));
 
   // AND THE MATCHER STILL READS THEM. A column written for matching that
   // nothing matches on is the same defect from the other end.
@@ -169,6 +176,15 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     "src/lib/ai/module-relevance.ts",          // section 3
     "src/lib/ai/module-synonyms.ts",           // section 3
     "src/components/dashboard/command-palette.tsx", // section 1
+    // The free ambiguity detector. It matches a user's words against cue
+    // lists that ARE written for matching — phrasings a person types, in
+    // all ten languages — and the whole cross-product is measured by
+    // scripts/tests/ambiguity.test.mjs, which is a better answer to this
+    // file's question than a section here restating it would be.
+    //
+    // It arrived unaccounted for and this ratchet caught it on the build
+    // that introduced it, which is what the ratchet is for.
+    "src/lib/ai/ambiguity.ts",
   ]);
   const unaccounted = users.filter((f) => !ACCOUNTED.has(f));
 

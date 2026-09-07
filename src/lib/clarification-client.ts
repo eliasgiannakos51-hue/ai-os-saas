@@ -23,10 +23,28 @@ export type ClarificationCheckResult =
     }
   | { needsClarification: false };
 
-/** How many questions a user may be asked at once. Three, because a
- *  fourth stops reading like "one moment" and starts reading like a form
- *  — and the whole point is to be quicker than getting it wrong. */
-export const MAX_CLARIFICATION_QUESTIONS = 3;
+/**
+ * How many questions a user may be asked at once. ONE.
+ *
+ * It was three, and the comment defending three said "a fourth stops
+ * reading like 'one moment' and starts reading like a form". That
+ * reasoning is right and the number was wrong: three questions with
+ * suggested answers under each is already a form. The user came here to
+ * get something done and is being handed a questionnaire.
+ *
+ * ONE question is a conversation. It also forces the model to pick the
+ * detail that actually changes the outcome instead of listing everything
+ * it noticed, which is a better question than any of the three would have
+ * been on its own — the prompt already says to ask only about things that
+ * would materially change the result, and a budget of one is what makes
+ * that instruction bite.
+ *
+ * THIS CHANGES FOUR EXISTING SURFACES, not just chat: Website Builder,
+ * Mission Control, Automations and Create Anything all trimmed to three
+ * and now trim to one. That is the intended change and it is one number
+ * to revert if it turns out a website brief genuinely needs more.
+ */
+export const MAX_CLARIFICATION_QUESTIONS = 1;
 /** Suggestions per question. Enough to cover the common answers without
  *  turning a question into a menu the user has to read carefully. */
 const MAX_SUGGESTIONS_PER_QUESTION = 4;
@@ -59,10 +77,24 @@ function cleanText(value: unknown, maxLength: number): string | null {
 // Pure, deterministic interpretation of the tool_use input — separated
 // from the Anthropic call itself so it's unit-testable without a live API
 // call, same split as lib/website-builder.ts's parseWebsiteClassification.
-export function parseClarificationResult(input: {
-  needsClarification?: unknown;
-  questions?: unknown;
-}): ClarificationCheckResult {
+export function parseClarificationResult(
+  input: {
+    needsClarification?: unknown;
+    questions?: unknown;
+  },
+  /**
+   * How many questions to keep. Defaults to the product's cap.
+   *
+   * A PARAMETER, because parsing and policy are different jobs. This
+   * function's other work — accepting both question shapes, keeping
+   * suggestions aligned by index, dropping blanks, truncating — can only
+   * be demonstrated on more than one question, and with the cap hard-wired
+   * at one those behaviours became untestable the moment the cap changed.
+   * Wiring them together would have meant either a weaker parser test or a
+   * cap that is not the product's.
+   */
+  maxQuestions: number = MAX_CLARIFICATION_QUESTIONS
+): ClarificationCheckResult {
   if (input.needsClarification !== true) return { needsClarification: false };
 
   const raw: RawQuestion[] = Array.isArray(input.questions) ? (input.questions as RawQuestion[]) : [];
@@ -70,7 +102,7 @@ export function parseClarificationResult(input: {
   const suggestions: string[][] = [];
 
   for (const entry of raw) {
-    if (questions.length >= MAX_CLARIFICATION_QUESTIONS) break;
+    if (questions.length >= maxQuestions) break;
     const text = cleanText(typeof entry === "string" ? entry : entry?.question, MAX_QUESTION_LENGTH);
     if (!text) continue;
     const offered =

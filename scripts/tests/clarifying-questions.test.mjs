@@ -107,7 +107,10 @@ check("a request that already implies a cadence is not asked about it", /Do NOT 
 check("an already-complete request is still left alone", /already good enough — ask nothing/.test(agentPrompt));
 
 console.log("\n== 3. (γ) at most three, with answers to tap, and Skip always ==");
-eq("the ceiling is three", c.MAX_CLARIFICATION_QUESTIONS, 3);
+// ONE, since 2026-09-07. The comment defending three said a fourth
+// "starts reading like a form"; three questions with tappable answers
+// under each already is one. See lib/clarification-client.ts.
+eq("the ceiling is one", c.MAX_CLARIFICATION_QUESTIONS, 1);
 const four = c.parseClarificationResult({
   needsClarification: true,
   questions: [
@@ -117,8 +120,8 @@ const four = c.parseClarificationResult({
     { question: "Four?", suggestions: ["d"] },
   ],
 });
-eq("a fourth question is dropped", four.questions.length, 3);
-eq("and its suggestions with it", four.suggestions.length, 3);
+eq("a second question is dropped", four.questions.length, 1);
+eq("and its suggestions with it", four.suggestions.length, 1);
 check("the tool schema asks the model for suggestions", /suggestions: \{[\s\S]{0,400}2-4 SHORT/.test(lib));
 check("and requires them alongside the question", /required: \["question", "suggestions"\]/.test(lib));
 check("the UI renders them as buttons", /aria-pressed=\{chosen\}/.test(ui));
@@ -144,10 +147,17 @@ console.log("\n== 3b. the parser, over the shapes it can actually receive ==");
 const legacy = c.parseClarificationResult({ needsClarification: true, questions: ["Which market?"] });
 eq("a bare string question is still accepted", legacy.questions, ["Which market?"]);
 eq("with an empty suggestion slot, not a missing one", legacy.suggestions, [[]]);
+// AN EXPLICIT BUDGET, because these checks are about the PARSER and not
+// about the product's cap. Accepting both wire shapes, keeping
+// suggestions aligned by index and dropping blanks are all behaviours
+// that need more than one question to show at all — pinning them to
+// MAX_CLARIFICATION_QUESTIONS meant they silently stopped exercising
+// anything the day that number became 1.
+const PARSER_BUDGET = 4;
 const mixed = c.parseClarificationResult({
   needsClarification: true,
   questions: ["Plain?", { question: "Rich?", suggestions: ["daily", "weekly"] }],
-});
+}, PARSER_BUDGET);
 eq("the two shapes can be mixed", mixed.questions, ["Plain?", "Rich?"]);
 eq("and stay aligned by index", mixed.suggestions, [[], ["daily", "weekly"]]);
 const messy = c.parseClarificationResult({
@@ -157,7 +167,7 @@ const messy = c.parseClarificationResult({
     { question: "   ", suggestions: ["dropped"] },
     { question: "Kept?", suggestions: "not-an-array" },
   ],
-});
+}, PARSER_BUDGET);
 eq("blank questions are dropped", messy.questions, ["Padded?", "Kept?"]);
 eq(
   "suggestions are trimmed, de-duplicated, non-strings removed, capped at four",

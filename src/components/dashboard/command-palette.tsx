@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -19,6 +19,7 @@ import { ALL_SIDEBAR_GROUPS, visibleGroups, type SidebarItem } from "@/lib/sideb
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 import { normalizeForSearch } from "@/lib/text/search-match";
+import { filterAndRankCandidates } from "@/lib/command-palette-match";
 import { MODULE_TITLE_KEYS } from "@/lib/search/module-title-keys";
 import {
   DATE_RANGES,
@@ -86,44 +87,6 @@ function facetsOf(results: SearchResult[]): Facets {
   return { kinds, modules };
 }
 
-// Subsequence match — every character of the query appears in the target,
-// in order, not necessarily contiguous. A plain substring match is just a
-// contiguous special case of this, so "fin" matches "Finance" either way.
-function isFuzzyMatch(query: string, target: string): boolean {
-  let qi = 0;
-  for (let ti = 0; ti < target.length && qi < query.length; ti++) {
-    if (target[ti] === query[qi]) qi++;
-  }
-  return qi === query.length;
-}
-
-function filterAndRankItems(items: SidebarItem[], rawQuery: string): SidebarItem[] {
-  // normalizeForSearch, not toLowerCase(): the command palette is the
-  // main way to jump anywhere in the app, and toLowerCase() alone leaves
-  // accents untouched — a Greek user typing "καφε" got no match for a
-  // sidebar item titled "Καφές". Same fold as every list search (see
-  // lib/text/search-match.ts's header for why toLowerCase is not enough),
-  // applied here to both the substring pass and the fuzzy pass below, so
-  // neither reintroduces the gap the other one closed.
-  const query = normalizeForSearch(rawQuery).trim();
-  if (!query) return items;
-
-  const substringMatches: { item: SidebarItem; index: number }[] = [];
-  const fuzzyOnlyMatches: SidebarItem[] = [];
-
-  for (const item of items) {
-    const label = normalizeForSearch(item.label);
-    const index = label.indexOf(query);
-    if (index !== -1) {
-      substringMatches.push({ item, index });
-    } else if (isFuzzyMatch(query, label)) {
-      fuzzyOnlyMatches.push(item);
-    }
-  }
-
-  substringMatches.sort((a, b) => a.index - b.index);
-  return [...substringMatches.map((m) => m.item), ...fuzzyOnlyMatches];
-}
 
 // True when the keystroke landed somewhere the user is composing text, in
 // which case a printable shortcut like "/" must be left alone. Covers
@@ -156,20 +119,49 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTokenRef = useRef(0);
 
-  function translatedLabel(label: string): string {
-    if (label === "Create Studio") return tCommon("createStudio");
-    const key = ITEM_LABEL_KEYS[label];
-    return key ? tSidebar(`items.${key}`) : label;
-  }
+  // useCallback, so the memo below can name it as a dependency instead
+  // of suppressing the rule. next-intl's `t` is stable for a given
+  // locale, so this identity changes when the language changes — which
+  // is exactly when the candidate list has to be rebuilt.
+  const translatedLabel = useCallback(
+    (label: string): string => {
+      if (label === "Create Studio") return tCommon("createStudio");
+      const key = ITEM_LABEL_KEYS[label];
+      return key ? tSidebar(`items.${key}`) : label;
+    },
+    [tCommon, tSidebar],
+  );
 
   function moduleLabel(slug: string): string {
     const key = MODULE_TITLE_KEYS[slug];
     return key ? tKey(key) : slug;
   }
 
+  // MATCHED AGAINST WHAT THE USER CAN SEE, not against the registry's
+  // English key.
+  //
+  // This used to be `filterAndRankItems(paletteItems(isOwner), query)`,
+  // and that function compared the query with `item.label` — the English
+  // string lib/sidebar-nav.ts stores — while the row three hundred lines
+  // below RENDERED `translatedLabel(item.label)`. A Greek user saw
+  // «Οικονομικά», typed «οικο», and the matcher looked for it in
+  // "Finance". Measured over every item x every locale before the change:
+  // 168 of 490 pairs reachable, Greek 2 of 49, Arabic 0 of 49.
+  //
+  // BOTH names are candidates. Keeping English is not a hedge: somebody
+  // who learned the product in English, or who has an English keyboard in
+  // front of them, types "fin" — dropping it would swap one language's
+  // blindness for another's. See lib/command-palette-match.ts.
   const pageResults = useMemo(
-    () => filterAndRankItems(paletteItems(isOwner), query),
-    [query, isOwner],
+    () =>
+      filterAndRankCandidates(
+        paletteItems(isOwner).map((item) => ({
+          item,
+          candidates: [translatedLabel(item.label), item.label],
+        })),
+        query,
+      ),
+    [query, isOwner, translatedLabel],
   );
 
   // ONE REQUEST, debounced, cached, and last-one-wins.

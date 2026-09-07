@@ -117,7 +117,7 @@ that the search budget is the difference — see `depth-picker.tsx`.
 
 ## Tier 2 — a user meets these
 
-*Items 4, 7 and 7b are done. What remains in this tier is 5, 6 and 8.*
+*Items 4, 7 and 7b are done; 6 is two thirds done and 6b is new. What remains in this tier is 5, the measurement half of 6, 6b and 8.*
 
 ### 4. `dir="rtl"` for Arabic — DONE (2026-09-07)
 
@@ -215,21 +215,101 @@ person meets before they have decided anything. That set has not been
 counted; counting it is the first ten minutes of this item, not a number to
 put here in advance.
 
-### 6. Chat that asks instead of guessing
-**~3 days.**
+### 6. Chat that asks instead of guessing — TWO OF THREE DONE (2026-09-07)
 
-When a request is ambiguous the model picks an interpretation and commits.
-The user finds out by reading a wrong answer. A clarifying question costs
-one round trip and saves a whole generation.
+**The classifier and the one-question cap shipped. The measured rate needs
+API balance.**
 
-*Done means:* a classifier that decides "ambiguous" before spending;
-at most one question; the question in the user's language; and — the part
-that makes it a feature rather than an annoyance — a measured rate, so
-"asks too often" is a number and not an argument.
+**What the item asked, and what was already there.** `lib/clarification.ts`
+has decided ambiguity since V4 — and it is a **Sonnet call**. A paid model
+call, made in order to decide whether to make a paid model call. No amount
+of prompt tuning makes that "decides before spending", and it reaches none
+of the chat surfaces, which are exactly where somebody types three words
+and expects the product to guess.
 
-*Proven by:* a held-out set of requests labelled ambiguous/clear, and a
-false-question rate reported in the settlement metadata the way `narrated`
-already is.
+**□ → ☑ A classifier that decides before spending.** `src/lib/ai/ambiguity.ts`
+is free, synchronous and needs no key. It answers **three** ways, and that
+is the design rather than a detail:
+
+| | |
+|---|---|
+| `clear` | act now — no clarification call, paid or otherwise |
+| `vague` | ask now — the evidence is conclusive, paying a model to agree is waste |
+| `unsure` | the middle, and the **only** case that reaches the paid check |
+
+A binary detector needs a threshold, and every threshold on evidence this
+weak is wrong for somebody: strict enough to catch «κάν' το» is strict
+enough to interrogate a good one-line brief.
+
+Measured over a 50-item labelled corpus, ten languages, both classes:
+
+| | |
+|---|---|
+| clear requests wrongly called vague | **0 of 30** |
+| vague requests decided with no model call | **20 of 20** |
+| clear requests that pass merely by being long | 0 — every clear example is 3-6 words |
+
+The two errors are not equal and the gate treats them differently:
+interrogating somebody who was already clear is held at **zero**; deferring
+a vague request costs one small call, which is what the product does today
+on *every* request, so that is a ratchet rather than a zero.
+
+**□ → ☑ At most one question.** `MAX_CLARIFICATION_QUESTIONS` was 3. The
+comment defending three said a fourth "starts reading like a form" — right
+reasoning, wrong number: three questions with tappable answers under each
+already is one. **This changes four existing surfaces**, not just chat:
+Website Builder, Mission Control, Automations and Create Anything. One
+number to revert if a website brief turns out to need more.
+
+**□ The measured rate — BLOCKED, and this is what it needs.**
+
+1. **API balance on the key's own account.** The rate that matters is how
+   often the *paid* classifier asks when the free one said `unsure`, and
+   that is a number only real calls can produce.
+2. **A held-out set this repository does not own.** The 50 items above were
+   written alongside the detector, so they measure the detector against its
+   author. A real false-question rate needs requests nobody wrote for the
+   test — the honest source is the product's own logs once it has been
+   running, not another hand-made list.
+3. **Somewhere to report it.** `narrated` already rides in the settlement
+   metadata; `clarification_verdict` would go beside it, which is a code
+   change and not a migration.
+
+Roughly $2-4 of Sonnet calls for a first pass over a few hundred requests.
+Until then the free detector's own numbers are real and the paid one's are
+not measured — stated here rather than implied.
+
+*Still not wired into chat itself.* The short-circuit lives in
+`checkNeedsClarification`, so the five surfaces that already call it get
+the saving today. Chat does not call clarification at all, and giving it
+one means the streaming route has to be able to pause and ask — a
+different piece of work from the classifier, and the classifier was what
+was asked for.
+
+*Proven by:* `scripts/tests/ambiguity.test.mjs` (47 checks, the full 10 x 2
+cross-product) · `scripts/tests/ambiguity.mutation.mjs` (10/10, including
+both degenerate classifiers — always-unsure and always-vague).
+
+### 6b. Ten copies of every help article compete for the same query
+
+**Found 2026-09-07 while scanning which matchers draw on UI text.**
+
+`help_articles` is one row per (slug, locale) — deliberately, so a French
+user is not matched against Greek triggers. `search_index` carries **no
+locale column** and `search_all` does not filter on one, so all ten copies
+of every article are in the ⌘K index at once, competing for the same
+query, and a reader can be handed the Portuguese copy of the answer they
+asked for in Greek.
+
+*Done means:* a locale column on `search_index`, populated by the sync
+trigger, and a filter in `search_all` that prefers the reader's locale and
+falls back to English — the same fallback `loadCannedArticles` already
+uses.
+
+**This one needs a migration**, which is why it is a list item and not a
+fix in that round. `scripts/tests/match-sources.test.mjs` carries a check
+that goes RED the day a locale column appears, so the note above cannot
+outlive the fact it describes.
 
 ### 7. Greeklish — DONE (2026-09-06)
 

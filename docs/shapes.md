@@ -402,6 +402,36 @@ to anyone reviewing the list — every term in it is correct.
 cross-product through the real scoring path, with the two remaining zeros
 allowed by name and a staleness check on that allowance.
 
+## A classifier that spends in order to decide whether to spend
+
+`lib/clarification.ts` decides whether a request is too vague to act on,
+and it is a Sonnet call. Every request pays for it, including the ones
+whose answer is obvious from the text: "invoice Acme 4200 for March" names
+a company and a number, and "do it" is a verb and a pronoun. Neither
+needed a model.
+
+The shape is not that the call is expensive — it is small. It is that a
+gate placed in front of a cost IS a cost, so "decide before spending"
+cannot be satisfied by a component that spends, however well it is tuned.
+The fix is not a better prompt; it is a free answer for the confident
+cases and a **third verdict** for the rest, so the paid check is spent on
+the requests where cues genuinely cannot decide instead of on the ones
+where they can.
+
+A binary detector cannot do this. It has to pick a threshold, and every
+threshold on evidence this weak is wrong for somebody: strict enough to
+catch «κάν' το» is strict enough to interrogate a good one-line brief.
+Three answers — clear, vague, unsure — let the cheap thing be confident
+where it can be and defer where it cannot, which is the only honest use of
+a weak signal.
+
+*Caught by:* `scripts/tests/ambiguity.test.mjs` measures both errors
+separately and holds them to different standards — no clear request may
+ever be called vague (zero), while missing a vague one only costs the call
+the product already makes (a ratchet). `ambiguity.mutation.mjs` includes
+both degenerate classifiers, because "always unsure" and "always vague"
+each pass a check that looks at only one of the two.
+
 ## `\b` is ASCII
 
 **This one has no gate, and saying so is the entry.** JavaScript's word

@@ -432,6 +432,49 @@ the product already makes (a ratchet). `ambiguity.mutation.mjs` includes
 both degenerate classifiers, because "always unsure" and "always vague"
 each pass a check that looks at only one of the two.
 
+## A comment that describes a bug accurately, as if it were a design note
+
+The worst one in this document, because the comment PROTECTS the bug.
+
+`src/lib/sidebar-label-keys.ts` said, for months:
+
+> The underlying strings stay English (state keys, search matching) — only
+> the rendered label goes through messages/*.json.
+
+Every word of that is true. It is also a complete description of a defect:
+the command palette matched an English string it never showed anybody, so
+a Greek user saw «Οικονομικά», typed «οικο», and reached nothing. 168 of
+490 (item x locale) pairs were reachable by the name on the screen; Arabic
+was 0 of 49.
+
+**Why it survived.** A reviewer who sees no comment asks what happens in
+Greek. A reviewer who sees THIS comment reads a considered decision,
+concludes somebody already thought about it, and moves on. The comment
+does not hide the behaviour — it states it exactly — but it changes the
+reader's posture from *questioning* to *accepting*. An undocumented bug is
+found by the next person who looks. A documented one is not looked at.
+
+**The test.** Read the sentence as a QUESTION instead of a statement.
+"The strings stay English for search matching" becomes "should the strings
+stay English for search matching?" — and the answer is obviously no. Any
+comment whose declarative form is comfortable and whose interrogative form
+is alarming is describing something that needs fixing rather than
+explaining.
+
+The phrases that most often carry this: *stays English*, *for now*, *for
+the moment*, *by design* with no design given, *intentionally* with no
+intent given, *known limitation*, *acceptable for now*, *good enough*.
+None of them is wrong to write. Each of them is a place to re-ask the
+question, and the ones that name no reason are the ones nobody can
+re-check.
+
+*Caught by:* `scripts/tests/comment-claims.test.mjs` counts the
+declarative-limitation comments in the tree and holds the count at a
+ratchet, so a new one has to be looked at and either justified or fixed.
+It cannot decide whether any given sentence is a bug — no scan can — so it
+does the one thing a scan can do honestly: keep the list small enough that
+a person can read it.
+
 ## `\b` is ASCII
 
 **This one has no gate, and saying so is the entry.** JavaScript's word

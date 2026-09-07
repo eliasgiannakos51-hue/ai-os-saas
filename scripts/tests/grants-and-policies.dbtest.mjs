@@ -66,7 +66,13 @@ check("none is executable by anon — the signed-OUT public", anonCan.length ===
 // of the database exposed straight to the browser, and should have to be
 // argued for.
 const EXPECTED = {
-  search_all: "the unified search itself",
+  search_all: "the unified search itself — now a forwarder onto search_all_localized",
+  // SAME EXPOSURE AS search_all AND NO MORE. It is SECURITY INVOKER, so
+  // the RLS policy on search_index is still what scopes every row it can
+  // reach; the sixth argument only narrows which help-article
+  // translations come back. A caller who passes a locale sees strictly
+  // fewer rows than one who passes null, never different ones.
+  search_all_localized: "the same search, filtered to the reader's language (20260914)",
   search_query: "parses a search string; pure, no data",
   search_fold: "accent folding; pure, no data",
   search_headline: "renders the snippet; pure, no data",

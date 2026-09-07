@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { assessAmbiguity } from "@/lib/ai/ambiguity";
 import {
+  questionCapFor,
   parseClarificationResult,
   type ClarificationCheckResult,
   type ClarificationKind,
@@ -10,6 +11,8 @@ import {
 
 export type { ClarificationCheckResult, ClarificationKind } from "@/lib/clarification-client";
 export {
+  CLARIFICATION_QUESTION_CAP,
+  questionCapFor,
   parseClarificationResult,
   appendClarificationAnswers,
   alignSuggestions,
@@ -39,10 +42,25 @@ const CLARIFICATION_MAX_TOKENS = 500;
 // that already reads like a real brief (a specific business, a concrete
 // style direction, a real audience) should never trigger this, however
 // short it is.
-const CLARIFICATION_TOOL: Anthropic.Tool = {
+//
+// THE BUDGET REACHES THE MODEL, and it has to.
+//
+// This tool used to say "1-3 quick questions" to every surface while the
+// parser trimmed the result down to the surface's cap. That is worse than
+// it sounds: a model asked for three writes three of roughly equal weight
+// and we keep whichever came first, which is not the most important one —
+// it is the first one it thought of. Told it has ONE question, the model
+// has to decide which unknown actually changes the outcome, and that is a
+// better question than any of the three would have been. The tokens saved
+// are the smaller half of the gain.
+function clarificationTool(cap: number): Anthropic.Tool {
+  const budget =
+    cap === 1
+      ? "exactly ONE question — the single most important unknown"
+      : `at most ${cap} questions — only the most important unknowns`;
+  return {
   name: "evaluate_request_clarity",
-  description:
-    "Decide whether the given request is missing information important enough that asking 1-3 quick questions first would meaningfully improve the result.",
+  description: `Decide whether the given request is missing information important enough that asking ${budget} first would meaningfully improve the result.`,
   input_schema: {
     type: "object",
     properties: {
@@ -76,12 +94,15 @@ const CLARIFICATION_TOOL: Anthropic.Tool = {
           required: ["question", "suggestions"],
         },
         description:
-          "1-3 short, specific, high-value questions — only the ones that would actually change the result. Empty array if needsClarification is false.",
+          cap === 1
+            ? "EXACTLY ONE short, specific, high-value question — the single unknown that would most change the result, and nothing a sensible default already covers. Empty array if needsClarification is false."
+            : `AT MOST ${cap} short, specific, high-value questions — only the ones that would actually change the result, and nothing a sensible default already covers. Empty array if needsClarification is false.`,
       },
     },
     required: ["needsClarification", "questions"],
   },
-};
+  };
+}
 
 /**
  * What the app already knows about this user, folded into the check so it
@@ -216,13 +237,19 @@ export async function checkNeedsClarification(
   const assessment = assessAmbiguity(userText, { hasContext: Boolean(knownContext) });
   if (assessment.verdict === "clear") return { needsClarification: false };
 
+  // THE SURFACE'S OWN BUDGET, used twice: once to tell the model how many
+  // questions it may ask, and once to trim what comes back. Those have to
+  // be the same number — a model told it may ask three, trimmed to one,
+  // gives us its first question rather than its most important one.
+  const cap = questionCapFor(kind);
+
   const anthropic = new Anthropic({ apiKey });
   const response = await anthropic.messages.create({
     model: MODEL,
     max_tokens: CLARIFICATION_MAX_TOKENS,
     system: `${SYSTEM_PROMPTS[kind]}${knownContextSection(knownContext)}`,
     messages: [{ role: "user", content: userText }],
-    tools: [CLARIFICATION_TOOL],
+    tools: [clarificationTool(cap)],
     tool_choice: { type: "tool", name: "evaluate_request_clarity" },
   });
 
@@ -239,5 +266,11 @@ export async function checkNeedsClarification(
   // classifier in this app.
   if (!toolUse) return { needsClarification: false };
 
-  return parseClarificationResult(toolUse.input as { needsClarification?: unknown; questions?: unknown });
+  // THE CAP IS THE SURFACE'S, not a global one. A website brief may ask
+  // two; everything else asks one. See CLARIFICATION_QUESTION_CAP for the
+  // reason attached to each number.
+  return parseClarificationResult(
+    toolUse.input as { needsClarification?: unknown; questions?: unknown },
+    questionCapFor(kind)
+  );
 }

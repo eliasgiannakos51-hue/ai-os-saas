@@ -595,6 +595,13 @@ if (!DB) {
     "search_fold",
     "immutable_unaccent",
     "search_all",
+    // search_all_localized is search_all with a locale argument (20260914),
+    // and search_all is now a one-line forwarder onto it. Identical
+    // exposure: SECURITY INVOKER, so the search_index RLS policy is still
+    // what scopes every row, and the extra argument only NARROWS which
+    // help-article translations come back. A caller passing a locale sees
+    // strictly fewer rows than one passing null, never different ones.
+    "search_all_localized",
     "search_query",
     // match_agent_templates is how a signed-in browser finds a ready-made
     // agent. SECURITY INVOKER, so the agent_templates select policy is

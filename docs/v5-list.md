@@ -117,7 +117,9 @@ that the search budget is the difference — see `depth-picker.tsx`.
 
 ## Tier 2 — a user meets these
 
-*Items 4, 7 and 7b are done; 6 is two thirds done and 6b is new. What remains in this tier is 5, the measurement half of 6, 6b and 8.*
+*Done: 4, 6b, 7, 7b, and two of item 6's three parts.*
+*Left in this tier: **5** (translations nobody has read), the **measurement**
+half of **6** (needs API balance), and **8** (learning from use).*
 
 ### 4. `dir="rtl"` for Arabic — DONE (2026-09-07)
 
@@ -254,12 +256,23 @@ interrogating somebody who was already clear is held at **zero**; deferring
 a vague request costs one small call, which is what the product does today
 on *every* request, so that is a ratchet rather than a zero.
 
-**□ → ☑ At most one question.** `MAX_CLARIFICATION_QUESTIONS` was 3. The
-comment defending three said a fourth "starts reading like a form" — right
-reasoning, wrong number: three questions with tappable answers under each
-already is one. **This changes four existing surfaces**, not just chat:
-Website Builder, Mission Control, Automations and Create Anything. One
-number to revert if a website brief turns out to need more.
+**□ → ☑ At most one question — PER SURFACE, since 2026-09-07.** It was a
+single 3, and one number for five surfaces was wrong in both directions.
+
+| surface | cap | why |
+|---|---|---|
+| Website Builder | **2** | four unknowns no default covers — what the business is, which pages, whether it takes form submissions, whether there are photographs. Guessing produces a whole wrong site, not one wrong paragraph. |
+| chat · agents · automations · mission · create | **1** | one dominant unknown and a cheap failure: one artefact to redo. |
+| anything new | **1** | an unargued surface should have to argue for a second question, not inherit it. |
+
+Each number carries its reason in `CLARIFICATION_QUESTION_CAP`, and the
+gate checks the reasons are there — not only the numbers.
+
+**And the budget reaches the model.** The tool used to say "1-3 questions"
+to every surface while the parser trimmed afterwards. That is worse than it
+sounds: a model asked for three writes three of equal weight and we keep
+whichever came first, which is not the most important one. Told it has ONE,
+it has to decide which unknown changes the outcome.
 
 **□ The measured rate — BLOCKED, and this is what it needs.**
 
@@ -290,26 +303,56 @@ was asked for.
 cross-product) · `scripts/tests/ambiguity.mutation.mjs` (10/10, including
 both degenerate classifiers — always-unsure and always-vague).
 
-### 6b. Ten copies of every help article compete for the same query
+### 6b. Ten copies of every help article competed for the same query — DONE (2026-09-07)
 
-**Found 2026-09-07 while scanning which matchers draw on UI text.**
+**Was an active bug: a Greek user could be handed the Portuguese answer.**
 
-`help_articles` is one row per (slug, locale) — deliberately, so a French
-user is not matched against Greek triggers. `search_index` carries **no
-locale column** and `search_all` does not filter on one, so all ten copies
-of every article are in the ⌘K index at once, competing for the same
-query, and a reader can be handed the Portuguese copy of the answer they
-asked for in Greek.
+`help_articles` is one row per (slug, locale) — 27 articles x ten
+languages, and that decision was right: `triggers` are the phrasings a
+user types and a French user does not type Greek. What nobody joined up is
+that `search_index_sync()` indexes every one of those rows, `search_index`
+had no locale column, and `search_all` had nothing to filter on. All ten
+translations sat in the index ranked against each other by `ts_rank`.
 
-*Done means:* a locale column on `search_index`, populated by the sync
-trigger, and a filter in `search_all` that prefers the reader's locale and
-falls back to English — the same fallback `loadCannedArticles` already
-uses.
+**What shipped** — `20260914000000_search_index_locale.sql`:
+- `locale` and `group_key` on `search_index`, populated by the trigger
+  **generically** through `to_jsonb(NEW)`, so a table without those columns
+  yields null and needs no argument. Backfilled for rows already there.
+- `search_all_localized(..., p_locale)` filters three ways: a null locale
+  (the user's own rows) always passes, the reader's language passes, and
+  English passes **only when that article has no copy in the reader's
+  language** — scoped by `group_key`, so it fills a genuine gap rather than
+  shadowing a translation that exists.
+- The old five-argument `search_all` survives as a one-line forwarder.
 
-**This one needs a migration**, which is why it is a list item and not a
-fix in that round. `scripts/tests/match-sources.test.mjs` carries a check
-that goes RED the day a locale column appears, so the note above cannot
-outlive the fact it describes.
+**Three attempts, and the first two are worth recording.**
+1. *Add `p_locale` with a default and drop the old function.* Breaks a
+   property this repo already protects: `unified-search.dbtest.mjs`
+   RE-RUNS the 20260824 migration to prove a migration is safe to apply
+   twice, and that file re-creates the five-argument `search_all`. With a
+   defaulted sixth argument a five-argument call then matches both —
+   *"function is not unique"*, a search box that breaks the second time
+   somebody pastes an old file.
+2. *No default on `p_locale`.* Postgres refuses: "input parameters after
+   one with a default value must also have defaults".
+3. *A different name.* No signature overlaps, nothing can be ambiguous,
+   and re-running any old migration is safe forever.
+
+**And a finding about the process itself.** Re-running 20260824 also
+reverts `search_index_sync()` to the version that knows nothing about
+locale — everything indexed afterwards is written with null columns and
+the filter passes everything. That is not a test artefact: it is what
+happens the day somebody re-pastes an old file into the SQL editor, and
+this repo applies migrations by hand with no ledger. The property worth
+having is that re-applying the NEWER file repairs it, and section 11 of
+`unified-search.dbtest.mjs` proves exactly that.
+
+*Proven by:* 11 new checks in `unified-search.dbtest.mjs`, run against a
+real Postgres with every migration applied — a Greek reader gets the Greek
+copy and neither the Portuguese nor the English one; a French reader with
+no French copy falls back to English and still never sees Portuguese; an
+article with no translation stays reachable in every language; a user's own
+row returns identically whatever locale is passed.
 
 ### 7. Greeklish — DONE (2026-09-06)
 

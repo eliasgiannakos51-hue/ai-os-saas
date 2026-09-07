@@ -24,25 +24,52 @@ export type ClarificationCheckResult =
   | { needsClarification: false };
 
 /**
- * How many questions a user may be asked at once. ONE.
+ * How many questions a user may be asked at once, PER SURFACE.
  *
- * It was three, and the comment defending three said "a fourth stops
- * reading like 'one moment' and starts reading like a form". That
- * reasoning is right and the number was wrong: three questions with
- * suggested answers under each is already a form. The user came here to
- * get something done and is being handed a questionnaire.
+ * It was a single 3, defended by a comment saying a fourth "starts
+ * reading like a form". The reasoning was right and one number for five
+ * different surfaces was wrong in both directions: three is a form
+ * everywhere, and one is too few in exactly one place.
  *
- * ONE question is a conversation. It also forces the model to pick the
- * detail that actually changes the outcome instead of listing everything
- * it noticed, which is a better question than any of the three would have
- * been on its own — the prompt already says to ask only about things that
- * would materially change the result, and a budget of one is what makes
- * that instruction bite.
- *
- * THIS CHANGES FOUR EXISTING SURFACES, not just chat: Website Builder,
- * Mission Control, Automations and Create Anything all trimmed to three
- * and now trim to one. That is the intended change and it is one number
- * to revert if it turns out a website brief genuinely needs more.
+ * THE NUMBER IS THE COUNT OF UNKNOWNS THE SURFACE CANNOT DEFAULT.
+ * Everything a surface can pick a sensible default for is not a question,
+ * it is a default; what is left is what has to be asked. So each entry
+ * below carries the reason for its own number, and a surface that gains
+ * or loses an unknown changes its number here rather than acquiring an
+ * exception somewhere else.
+ */
+export const CLARIFICATION_QUESTION_CAP: Record<ClarificationKind, number> = {
+  // TWO. A website brief carries four unknowns that no default covers —
+  // what the business actually is, which pages it needs, whether it takes
+  // form submissions, and whether there are photographs to use. One
+  // question cannot reach two of those, and the result of guessing is a
+  // whole generated site that is wrong rather than one paragraph. Two is
+  // the point where the model has to pick the two that matter instead of
+  // listing what it noticed.
+  website: 2,
+  // ONE, everywhere else. Each of these has a single dominant unknown
+  // and a cheap failure: a plan, an automation, an agent or a chat answer
+  // that misses is one artefact to redo, not a site to rebuild. A second
+  // question here buys less than it costs in the reading of it.
+  mission: 1,
+  automation: 1,
+  create: 1,
+  agent: 1,
+};
+
+/**
+ * The cap for a surface. A kind with no entry gets the strictest number
+ * rather than the most generous one — a new surface should have to argue
+ * for a second question, not inherit it.
+ */
+export function questionCapFor(kind: ClarificationKind): number {
+  return CLARIFICATION_QUESTION_CAP[kind] ?? 1;
+}
+
+/**
+ * The default when no kind is known — the parser is callable without one
+ * (see parseClarificationResult), and the safe answer there is the
+ * strictest cap rather than the widest.
  */
 export const MAX_CLARIFICATION_QUESTIONS = 1;
 /** Suggestions per question. Enough to cover the common answers without

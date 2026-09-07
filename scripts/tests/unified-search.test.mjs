@@ -342,11 +342,18 @@ console.log("\n10. The RPC contract — strings on both sides");
   // The route names these parameters; PostgREST matches them BY NAME. A
   // rename on either side is a 404 from the database at runtime and a
   // clean typecheck.
-  const fnStart = sql.indexOf("create or replace function public.search_all");
-  ok("search_all is defined", fnStart !== -1);
-  const signature = sql.slice(fnStart, sql.indexOf(")\nreturns", fnStart));
-  for (const param of ["p_query", "p_kinds", "p_module", "p_since", "p_limit"]) {
-    ok(`search_all declares ${param}`, new RegExp(`\\b${param}\\b`).test(signature));
+  // THE FUNCTION THE ROUTE ACTUALLY CALLS, which since 20260914 is
+  // search_all_localized — search_all is still there as a five-argument
+  // forwarder for every other caller. This section checks the contract
+  // between the ROUTE and the SQL, so it has to read the definition the
+  // route names rather than the one that has the older, shorter name.
+  const LOCALE_MIGRATION = "supabase/migrations/20260914000000_search_index_locale.sql";
+  const localeSql = readFileSync(LOCALE_MIGRATION, "utf8");
+  const fnStart = localeSql.indexOf("create or replace function public.search_all_localized");
+  ok("search_all_localized is defined", fnStart !== -1);
+  const signature = localeSql.slice(fnStart, localeSql.indexOf(")\nreturns", fnStart));
+  for (const param of ["p_query", "p_kinds", "p_module", "p_since", "p_limit", "p_locale"]) {
+    ok(`search_all_localized declares ${param}`, new RegExp(`\\b${param}\\b`).test(signature));
     ok(`the route passes ${param}`, new RegExp(`\\b${param}:`).test(routeSrc));
   }
   const passed = [...routeSrc.matchAll(/\bp_[a-z_]+:/g)].map((m) => m[0].slice(0, -1));
@@ -354,14 +361,20 @@ console.log("\n10. The RPC contract — strings on both sides");
     ok(`route param ${param} exists in the signature`,
       new RegExp(`\\b${param}\\b`).test(signature));
   }
-  ok("the route calls search_all", /rpc\("search_all"/.test(routeSrc));
+  ok("the route calls search_all_localized", /rpc\("search_all_localized"/.test(routeSrc));
+  // AND THE OLD NAME IS STILL THERE for everything else — schema-canaries,
+  // the dbtests, the SQL editor. Dropping it would have been the change
+  // that breaks a database the second time somebody pastes an old file.
+  ok("the five-argument search_all survives as a forwarder",
+    /create or replace function public\.search_all\(/.test(localeSql) &&
+      /select \* from public\.search_all_localized\(/.test(localeSql));
   ok("ONE rpc call, not one per table", (routeSrc.match(/\.rpc\(/g) ?? []).length === 1);
 
   // The columns the route reads off each row.
-  const returnsStart = sql.indexOf("returns table", fnStart);
-  const returns = sql.slice(returnsStart, sql.indexOf(")", returnsStart));
+  const returnsStart = localeSql.indexOf("returns table", fnStart);
+  const returns = localeSql.slice(returnsStart, localeSql.indexOf(")", returnsStart));
   for (const col of ["kind", "module_slug", "source_table", "source_id", "title", "snippet", "href", "occurred_at", "rank"]) {
-    ok(`search_all returns ${col}`, new RegExp(`\\b${col}\\b`).test(returns));
+    ok(`search_all_localized returns ${col}`, new RegExp(`\\b${col}\\b`).test(returns));
     ok(`the route reads row.${col}`, new RegExp(`row\\.${col}\\b`).test(routeSrc));
   }
 }

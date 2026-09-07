@@ -264,22 +264,63 @@ console.log("\n== 7. the cues are written for matching, in every language ==");
 console.log("\n== 8. at most ONE question, and the paid check is skipped when it can be ==");
 {
   const client = await loadTs("src/lib/clarification-client.ts");
-  ok("the cap is one question", client.MAX_CLARIFICATION_QUESTIONS === 1,
+  ok("the default cap is one question", client.MAX_CLARIFICATION_QUESTIONS === 1,
     String(client.MAX_CLARIFICATION_QUESTIONS));
+
+  // PER SURFACE, and the numbers carry their reasons in the source.
+  // Website is two because a website brief has four unknowns no default
+  // covers — what the business is, which pages, whether it takes form
+  // submissions, whether there are photographs — and guessing produces a
+  // whole wrong site rather than one wrong paragraph.
+  ok("a website brief may ask two", client.questionCapFor("website") === 2,
+    String(client.questionCapFor("website")));
+  const ones = ["mission", "automation", "create", "agent"];
+  ok("...and every other surface asks one",
+    ones.every((k) => client.questionCapFor(k) === 1),
+    ones.map((k) => `${k}=${client.questionCapFor(k)}`).join(", "));
+  ok("an unknown surface gets the STRICTEST cap, not the widest",
+    client.questionCapFor("something-new") === 1,
+    "a new surface should have to argue for a second question");
+
+  // EVERY NUMBER HAS ITS REASON BESIDE IT. The owner asked for this in as
+  // many words, and it is the difference between a table somebody can
+  // change safely and a table of magic numbers.
+  const capSrc = readFileSync("src/lib/clarification-client.ts", "utf8");
+  const block = capSrc.slice(
+    capSrc.indexOf("CLARIFICATION_QUESTION_CAP"),
+    capSrc.indexOf("};", capSrc.indexOf("CLARIFICATION_QUESTION_CAP"))
+  );
+  ok("the website number carries its reason", /\/\/[^\n]*(TWO|four unknowns)/.test(block));
+  ok("the one-question numbers carry theirs", /\/\/[^\n]*ONE, everywhere else/.test(block));
+
+  // AND THE MODEL IS TOLD THE SAME NUMBER. A cap enforced only by
+  // trimming gets the model's FIRST question, not its most important one.
+  const clarSrc = readFileSync("src/lib/clarification.ts", "utf8");
+  ok("the tool description is built from the cap",
+    /function clarificationTool\(cap: number\)/.test(clarSrc) &&
+      /tools: \[clarificationTool\(cap\)\]/.test(clarSrc),
+    "the model is asked for a fixed 1-3 while the parser trims to the cap");
+  ok("...and the same cap trims the result",
+    /parseClarificationResult\(\s*toolUse\.input[\s\S]{0,120}questionCapFor\(kind\)/.test(clarSrc));
 
   // BEHAVIOUR, not the constant. A cap that is not applied is a number in
   // a file: parseClarificationResult must actually trim.
-  const trimmed = client.parseClarificationResult({
+  const three = {
     needsClarification: true,
     questions: [
       { question: "What is the business called?", suggestions: ["Acme"] },
       { question: "What colour scheme?", suggestions: ["dark"] },
       { question: "How many pages?", suggestions: ["three"] },
     ],
-  });
-  ok("...and three questions come back as one",
+  };
+  const trimmed = client.parseClarificationResult(three, client.questionCapFor("agent"));
+  ok("...and on a one-question surface three come back as one",
     trimmed.needsClarification === true && trimmed.questions.length === 1,
     `${trimmed.needsClarification ? trimmed.questions.length : "needsClarification=false"}`);
+  const web = client.parseClarificationResult(three, client.questionCapFor("website"));
+  ok("...and on the website surface, as two",
+    web.needsClarification === true && web.questions.length === 2,
+    `${web.needsClarification ? web.questions.length : "needsClarification=false"}`);
   ok("...keeping the first one with its suggestions",
     trimmed.needsClarification === true &&
       trimmed.questions[0].startsWith("What is the business") &&

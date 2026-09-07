@@ -94,7 +94,7 @@ export function EmptyState({
               // control on a phone — the same floor every other button in
               // this codebase uses. Measured at 375px by routes-smoke,
               // which reported it at 261x34.
-              className="mx-auto mt-5 inline-flex min-h-[44px] max-w-full items-center gap-2 rounded-full border border-orange-500/40 bg-orange-500/10 px-4 py-2 text-left text-xs font-medium text-orange-300 transition-colors duration-150 hover:border-orange-500 hover:bg-orange-500/20 hover:text-orange-200"
+              className="mx-auto mt-5 inline-flex min-h-[44px] max-w-full items-center gap-2 rounded-full border border-orange-500/40 bg-orange-500/10 px-4 py-2 text-start text-xs font-medium text-orange-300 transition-colors duration-150 hover:border-orange-500 hover:bg-orange-500/20 hover:text-orange-200"
             >
               <CornerDownRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <span className="truncate">&ldquo;{example}&rdquo;</span>

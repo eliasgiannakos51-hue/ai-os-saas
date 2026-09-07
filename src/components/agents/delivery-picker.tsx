@@ -316,7 +316,7 @@ export function DeliveryPicker({
               {/* Numbered, because "create a bot with @BotFather" is one
                   sentence describing seven actions, and somebody who has
                   never heard of BotFather cannot start. */}
-              <ol className="list-decimal space-y-0.5 pl-4 text-[11px] leading-relaxed text-muted">
+              <ol className="list-decimal space-y-0.5 ps-4 text-[11px] leading-relaxed text-muted">
                 {/* The keys are written out, not built with a template
                     literal: a key assembled at runtime is invisible to
                     the i18n scanner, so a missing translation would ship
@@ -393,7 +393,7 @@ export function DeliveryPicker({
               {/* Numbered, because "create a bot with @BotFather" is one
                   sentence describing seven actions, and somebody who has
                   never heard of BotFather cannot start. */}
-              <ol className="list-decimal space-y-0.5 pl-4 text-[11px] leading-relaxed text-muted">
+              <ol className="list-decimal space-y-0.5 ps-4 text-[11px] leading-relaxed text-muted">
                 {/* The keys are written out, not built with a template
                     literal: a key assembled at runtime is invisible to
                     the i18n scanner, so a missing translation would ship

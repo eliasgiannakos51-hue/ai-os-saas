@@ -397,7 +397,7 @@ export default async function PricingPage({
             <table className="w-full min-w-[720px] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border bg-panel">
-                  <th className="px-4 py-3 text-left font-semibold text-muted">{t("feature")}</th>
+                  <th className="px-4 py-3 text-start font-semibold text-muted">{t("feature")}</th>
                   {PLANS.map((plan) => (
                     <th
                       key={plan.slug}
@@ -418,7 +418,7 @@ export default async function PricingPage({
                       index % 2 === 1 ? "bg-panel/40" : ""
                     }`}
                   >
-                    <td className="px-4 py-3 text-left text-muted">{t(`rows.${row.labelKey}`)}</td>
+                    <td className="px-4 py-3 text-start text-muted">{t(`rows.${row.labelKey}`)}</td>
                     {PLANS.map((plan) => (
                       <td key={plan.slug} className="px-4 py-3 text-center">
                         <ComparisonCellContent cell={row.cell(plan, locale, cellWords)} />

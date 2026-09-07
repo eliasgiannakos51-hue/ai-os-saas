@@ -52,7 +52,7 @@ export function ListLayout({
       {hasSearch && (
         <div className="relative">
           <Search
-            className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+            className="pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
             aria-hidden="true"
           />
           <input
@@ -62,7 +62,7 @@ export function ListLayout({
             onChange={(e) => onSearchChange?.(e.target.value)}
             placeholder={searchPlaceholder}
             aria-label={searchPlaceholder}
-            className="input pl-10"
+            className="input ps-10"
           />
         </div>
       )}

@@ -69,7 +69,20 @@ export function AmbientDots({ className = "" }: { className?: string }) {
         />
       ))}
       {/* The breathing glow. One soft pool of light, well off-centre so it
-          reads as ambience rather than as a spotlight on the content. */}
+          reads as ambience rather than as a spotlight on the content.
+
+          THE TWO NEGATIVE OFFSETS BELOW STAY PHYSICAL, and that is a
+          decision rather than an oversight. website-builder.ts's WRITING
+          DIRECTION section forbids hiding anything with a negative offset
+          because leftward overflow is unreachable in a left-to-right page
+          and scrollable in a mirrored one — but it also carves out
+          "a background-position on a decorative texture", judged by
+          whether it would look wrong reflected. These two are decorative,
+          they would not, and the parent above carries overflow-hidden, so
+          neither orb is reachable in EITHER direction. GlowOrb's callers
+          were the ones that had to change: that component's parent is
+          only `relative`, so its offsets became inset-inline and now sit
+          past the start edge, which is the unreachable side in both. */}
       <div className="ambient-breathe absolute -right-24 top-1/4 h-72 w-72 rounded-full bg-orange-500/[0.07] blur-3xl" />
       <div
         className="ambient-breathe absolute -left-20 bottom-1/4 h-64 w-64 rounded-full bg-orange-500/[0.05] blur-3xl"

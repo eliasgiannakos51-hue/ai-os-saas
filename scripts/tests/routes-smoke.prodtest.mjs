@@ -1270,7 +1270,11 @@ console.log("\n== 7. every aria-label is translated in the browser (A1) ==");
     );
     // Opening the switcher is what mounts the full-screen dismiss button —
     // an element with no text, no size on screen and nothing but its label.
-    await page.locator("div.fixed.right-3.top-3 button").first().click();
+    // The control bar moved to logical offsets (end-3), so this selector had
+// to move with it. A live DOM selector pinned to a physical class is the
+// quietest way a browser test starts matching nothing and reporting it as
+// a product failure.
+    await page.locator("div.fixed.end-3.top-3 button").first().click();
     await page.waitForTimeout(200);
     check(
       "the language switcher's dismiss target is labelled in Greek",

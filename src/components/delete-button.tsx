@@ -130,7 +130,7 @@ export function DeleteButton({
         {variant !== "icon" && t("delete")}
       </button>
       {error && (
-        <p className={`text-xs text-red-400 ${menuItem ? "px-2.5 pb-1" : "max-w-[16rem] text-right"}`}>
+        <p className={`text-xs text-red-400 ${menuItem ? "px-2.5 pb-1" : "max-w-[16rem] text-end"}`}>
           {error}
         </p>
       )}

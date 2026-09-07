@@ -223,7 +223,7 @@ export function AnalysisWorkspace({
             </div>
 
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full min-w-[560px] text-left text-xs">
+              <table className="w-full min-w-[560px] text-start text-xs">
                 <thead className="text-muted">
                   <tr>
                     <th className="py-1 font-normal">{t("columns.name")}</th>
@@ -260,7 +260,7 @@ export function AnalysisWorkspace({
               ) : null}
               <ul className="mt-3 space-y-3">
                 {current.findings.findings.map((finding) => (
-                  <li key={finding.headline} className="border-l-2 border-orange-500 pl-3">
+                  <li key={finding.headline} className="border-s-2 border-orange-500 ps-3">
                     <p className="text-sm text-foreground">{finding.headline}</p>
                     <p className="mt-0.5 text-xs text-muted">{finding.detail}</p>
                   </li>
@@ -349,15 +349,15 @@ export function AnalysisWorkspace({
                           total: record.evidence.totalRows,
                         })}
                       </p>
-                      <table className="mt-1 w-full text-left text-xs">
+                      <table className="mt-1 w-full text-start text-xs">
                         <tbody>
                           {record.evidence.rows.map((row) => (
                             <tr key={row.group} className="border-t border-border">
                               <td className="py-1 text-muted">{row.group}</td>
-                              <td className="py-1 text-right text-foreground">
+                              <td className="py-1 text-end text-foreground">
                                 {Math.round(row.value * 100) / 100}
                               </td>
-                              <td className="py-1 pl-3 text-right text-[11px] text-muted">
+                              <td className="py-1 ps-3 text-end text-[11px] text-muted">
                                 {t("ask.rowCount", { count: row.rows })}
                               </td>
                             </tr>

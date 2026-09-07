@@ -255,7 +255,7 @@ export function PublishedSitesList({
                         href={site.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-foreground transition-colors duration-150 hover:bg-panel-hover"
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-xs text-foreground transition-colors duration-150 hover:bg-panel-hover"
                       >
                         <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                         {t("viewLive")}

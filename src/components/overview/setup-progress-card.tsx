@@ -114,7 +114,7 @@ export function SetupProgressCard({
           as "widest: li > a > svg > path" without being able to say why.
           A real basis makes both columns shrink in proportion instead,
           so the deficit is shared and neither collapses. */}
-      <ul className="relative z-[1] min-w-0 flex-1 space-y-1.5 sm:basis-60 sm:pl-2">
+      <ul className="relative z-[1] min-w-0 flex-1 space-y-1.5 sm:basis-60 sm:ps-2">
         {steps.map((step) => (
           <li key={step.id}>
             <Link
@@ -132,7 +132,7 @@ export function SetupProgressCard({
                 {step.label}
               </span>
               {step.id === next?.id && (
-                <ArrowRight className="ml-auto h-3.5 w-3.5 shrink-0 text-muted" aria-hidden="true" />
+                <ArrowRight className="ms-auto h-3.5 w-3.5 shrink-0 text-muted" aria-hidden="true" />
               )}
             </Link>
           </li>

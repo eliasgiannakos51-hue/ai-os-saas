@@ -597,7 +597,7 @@ export function ChatWorkspace({
           overlay drawer. See SIDEBAR_BREAKPOINT_PX for the arithmetic —
           and for why `md` was the wrong answer to the same question. */}
       <div
-        className={`absolute inset-y-0 left-0 z-30 xl:relative xl:z-auto ${
+        className={`absolute inset-y-0 start-0 z-30 xl:relative xl:z-auto ${
           sidebarOpen ? "flex" : "hidden"
         }`}
       >
@@ -689,7 +689,7 @@ export function ChatWorkspace({
               change it. Same component as the list, so the two cannot
               drift apart. */}
           {activeConversation && (
-            <div className="ml-3 flex min-w-0 flex-1 items-center">
+            <div className="ms-3 flex min-w-0 flex-1 items-center">
               <InlineTitle
                 testId="chat-header-title"
                 title={activeConversation.title}
@@ -702,7 +702,7 @@ export function ChatWorkspace({
           )}
 
           {activeConversation && (
-            <div className="ml-auto shrink-0">
+            <div className="ms-auto shrink-0">
               <FavoriteButton
                 key={`${activeConversation.id}:${activeConversation.is_favorited}`}
                 table="chat_conversations"
@@ -744,7 +744,7 @@ export function ChatWorkspace({
                   is the only moment the expectation is still being set.
                   The same three sentences are in the chat's help entry;
                   one wording, two places. */}
-              <div className="mt-5 w-full rounded-xl border border-border bg-panel/60 px-4 py-3 text-left">
+              <div className="mt-5 w-full rounded-xl border border-border bg-panel/60 px-4 py-3 text-start">
                 <p className="text-xs font-semibold text-foreground/80">{t("dataScope.title")}</p>
                 <p className="mt-1 text-xs leading-relaxed text-muted">{t("dataScope.body")}</p>
               </div>
@@ -756,7 +756,7 @@ export function ChatWorkspace({
               <ExamplePrompts
                 surface="chat"
                 onPick={(text) => composerRef.current?.setText(text)}
-                className="mt-5 w-full text-left"
+                className="mt-5 w-full text-start"
               />
             </div>
           ) : (

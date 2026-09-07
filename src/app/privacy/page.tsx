@@ -48,7 +48,7 @@ export default function PrivacyPage() {
           provide the Service and are contractually bound to protect your
           information.
         </p>
-        <ul className="list-disc space-y-1 pl-5">
+        <ul className="list-disc space-y-1 ps-5">
           <li>
             <span className="text-foreground/90">Supabase</span> — database
             hosting and authentication infrastructure.

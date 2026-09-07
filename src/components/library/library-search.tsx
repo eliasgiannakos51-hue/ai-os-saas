@@ -60,7 +60,7 @@ export function LibrarySearch() {
     <div>
       <div className="relative">
         <Search
-          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+          className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
           aria-hidden="true"
         />
         <input
@@ -72,7 +72,7 @@ export function LibrarySearch() {
           autoFocus
           // 16px base: anything smaller makes iOS Safari zoom the page on
           // focus, which is the bug mobile-input-zoom.prodtest.mjs holds.
-          className="min-h-[44px] w-full rounded-xl border border-border bg-input py-2 pl-9 pr-3 text-base text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500"
+          className="min-h-[44px] w-full rounded-xl border border-border bg-input py-2 ps-9 pe-3 text-base text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500"
         />
       </div>
 

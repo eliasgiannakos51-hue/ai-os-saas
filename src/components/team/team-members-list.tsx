@@ -85,7 +85,7 @@ export function TeamMembersList({ members: initialMembers }: { members: TeamMemb
             <p className="truncate text-sm font-medium text-foreground">
               {member.member_email}
               {member.role && (
-                <span className="ml-2 text-xs font-normal text-muted">— {member.role}</span>
+                <span className="ms-2 text-xs font-normal text-muted">— {member.role}</span>
               )}
             </p>
             <p

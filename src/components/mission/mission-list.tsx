@@ -125,7 +125,7 @@ export function MissionList({
                 onClick={() => setShowForm(false)}
                 aria-label={tCommon("cancel")}
                 title={tCommon("cancel")}
-                className="absolute right-3 top-3 z-[2] flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                className="absolute end-3 top-3 z-[2] flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </button>

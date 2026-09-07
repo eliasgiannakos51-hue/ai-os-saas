@@ -96,25 +96,25 @@ export function CostDashboard({ data, locale }: { data: CostDashboardData; local
         {data.features.length === 0 ? (
           <Empty>No settled usage in the last 30 days.</Empty>
         ) : (
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-start text-xs">
             <thead className="text-muted">
               <tr>
                 <th className="py-1 font-medium">Feature</th>
-                <th className="py-1 text-right font-medium">Cost</th>
-                <th className="py-1 text-right font-medium">Calls</th>
-                <th className="py-1 text-right font-medium">Charged</th>
-                <th className="py-1 text-right font-medium">Margin</th>
+                <th className="py-1 text-end font-medium">Cost</th>
+                <th className="py-1 text-end font-medium">Calls</th>
+                <th className="py-1 text-end font-medium">Charged</th>
+                <th className="py-1 text-end font-medium">Margin</th>
               </tr>
             </thead>
             <tbody>
               {data.features.map((f) => (
                 <tr key={f.feature} className="border-t border-border">
                   <td className="py-1.5 text-foreground">{f.feature}</td>
-                  <td className="py-1.5 text-right tabular-nums text-foreground">{eur(f.costEur)}</td>
-                  <td className="py-1.5 text-right tabular-nums text-muted">{f.calls}</td>
-                  <td className="py-1.5 text-right tabular-nums text-muted">{f.chargedCalls}</td>
+                  <td className="py-1.5 text-end tabular-nums text-foreground">{eur(f.costEur)}</td>
+                  <td className="py-1.5 text-end tabular-nums text-muted">{f.calls}</td>
+                  <td className="py-1.5 text-end tabular-nums text-muted">{f.chargedCalls}</td>
                   <td
-                    className={`py-1.5 text-right tabular-nums ${
+                    className={`py-1.5 text-end tabular-nums ${
                       f.margin === null
                         ? "text-muted"
                         : f.margin < data.marginTarget
@@ -138,22 +138,22 @@ export function CostDashboard({ data, locale }: { data: CostDashboardData; local
         {data.topUsers.length === 0 ? (
           <Empty>No settled usage in the last 30 days.</Empty>
         ) : (
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-start text-xs">
             <thead className="text-muted">
               <tr>
                 <th className="py-1 font-medium">Account</th>
-                <th className="py-1 text-right font-medium">Cost</th>
-                <th className="py-1 text-right font-medium">Calls</th>
-                <th className="py-1 text-right font-medium">Credits</th>
+                <th className="py-1 text-end font-medium">Cost</th>
+                <th className="py-1 text-end font-medium">Calls</th>
+                <th className="py-1 text-end font-medium">Credits</th>
               </tr>
             </thead>
             <tbody>
               {data.topUsers.map((u) => (
                 <tr key={u.userId} className="border-t border-border">
                   <td className="py-1.5 font-mono text-[11px] text-muted">{u.userId}</td>
-                  <td className="py-1.5 text-right tabular-nums text-foreground">{eur(u.costEur)}</td>
-                  <td className="py-1.5 text-right tabular-nums text-muted">{u.calls}</td>
-                  <td className="py-1.5 text-right tabular-nums text-muted">{u.creditsCharged}</td>
+                  <td className="py-1.5 text-end tabular-nums text-foreground">{eur(u.costEur)}</td>
+                  <td className="py-1.5 text-end tabular-nums text-muted">{u.calls}</td>
+                  <td className="py-1.5 text-end tabular-nums text-muted">{u.creditsCharged}</td>
                 </tr>
               ))}
             </tbody>

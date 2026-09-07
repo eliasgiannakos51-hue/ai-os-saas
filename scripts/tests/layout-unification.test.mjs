@@ -70,7 +70,10 @@ checkTrue("+ New comes first", newAt > 0 && newAt < searchAt);
 checkTrue("then search", searchAt > 0 && searchAt < filtersAt);
 checkTrue("then sort/filters", filtersAt > 0 && filtersAt < childrenAt);
 checkTrue("then the grid", childrenAt > filtersAt);
-checkTrue("search is full-width, not a cramped inline box", /className="input pl-10"/.test(LAYOUT));
+// ps-10, not pl-10: padding-inline-start leaves room for the search icon
+// on the LEADING edge, which is the left in nine locales and the right in
+// Arabic. Identical rendering in the nine; correct in the tenth.
+checkTrue("search is full-width, not a cramped inline box", /className="input ps-10"/.test(LAYOUT));
 checkTrue("and labelled for screen readers", /aria-label=\{searchPlaceholder\}/.test(LAYOUT));
 // Layout only. A generic filter predicate would hide each list's real
 // shape behind an indirection the caller cannot follow.

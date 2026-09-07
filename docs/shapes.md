@@ -347,6 +347,61 @@ own family, checked by name against the corpus, and
 `scripts/tests/sql-spellings.mutation.mjs` puts the quote requirement back
 on the drop side specifically. See `scripts/db/pending-migrations.mjs`.
 
+## The product demands of others what it does not do itself
+
+`src/lib/website-builder.ts` carries a WRITING DIRECTION section that this
+product sends to every model it asks for a website: put `dir="rtl"` on
+`<html>`, lay out with logical properties, never hide with a negative
+offset, mirror the icons that point and only those, do not scroll sideways
+in either direction. It was written after a real Arabic site came back
+carrying ~10,000px of horizontal scroll, and it is a good list.
+
+The application obeyed none of it. Measured on 2026-09-07 with a real
+browser: `dir=null` on every route in Arabic, at 390 and at 1440, and an
+off-screen element census IDENTICAL to English — which is what "never
+mirrored" looks like from the outside.
+
+This is not hypocrisy, it is a blind spot with a specific mechanism: the
+prompt is *content* and the layout is *code*, they live in different files,
+and nothing walks from one to the other. The rule was written by somebody
+thinking hard about right-to-left, for output. Nobody re-read it as a
+specification of the thing they were writing it in.
+
+**A rule the product imposes on its own output is a rule about the
+product.** Anywhere this repository tells a model how to behave, the same
+sentence is worth reading as a requirement on the application — and the
+gate should read the rule out of the prompt rather than restating it, so
+there is one catalogue and not two.
+
+*Caught by:* `scripts/tests/rtl.test.mjs` parses
+`WRITING_DIRECTION_SECTION` out of `website-builder.ts` and checks the app
+against it — including deriving the four right-to-left languages from the
+prompt's own prose and requiring `src/lib/text-direction.ts` to name
+exactly those. `scripts/tests/rtl-layout.prodtest.mjs` measures the
+behaviour in Chromium at 390 and 1440.
+
+## A vocabulary harvested from an interface has no verbs
+
+`src/lib/ai/module-vocabulary.ts` builds each module's terms from its slug,
+its title in all ten catalogues, and its field labels in all ten. That is a
+generous source and it is all nouns: every title and every label on every
+screen of this product is a noun, because that is how interfaces are named.
+
+Nobody asks a question in nouns. "Expenses" is not a question. Measured
+across all thirteen modules and all ten languages — 130 verb-led questions,
+one per pair — **12 reached the module they were plainly about**, and five
+languages (es, de, it, pt, ar) scored **0 of 13**. The owner found it with
+one query, "πόσο ξόδεψα", which scored zero on Finance in Greek, written in
+Greek letters, on the module whose whole subject is money.
+
+The shape is that a free, plentiful, obviously-relevant source can be
+systematically missing one grammatical category, and the gap is invisible
+to anyone reviewing the list — every term in it is correct.
+
+*Caught by:* `scripts/tests/module-verbs.test.mjs`, the full 13x10
+cross-product through the real scoring path, with the two remaining zeros
+allowed by name and a staleness check on that allowance.
+
 ## `\b` is ASCII
 
 **This one has no gate, and saying so is the entry.** JavaScript's word

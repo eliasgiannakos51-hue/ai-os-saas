@@ -17,7 +17,7 @@ export function GlobalControls() {
   }
 
   return (
-    <div className="fixed right-3 top-3 z-40 flex items-center gap-1 rounded-xl border border-border bg-panel/90 p-1 shadow-lg backdrop-blur-md sm:right-4 sm:top-4">
+    <div className="fixed end-3 top-3 z-40 flex items-center gap-1 rounded-xl border border-border bg-panel/90 p-1 shadow-lg backdrop-blur-md sm:end-4 sm:top-4">
       {/* The same testid as the dashboard bar's control, so one gate
           (scripts/tests/language-visible.prodtest.mjs, and its public
           half against the live site) can find "the language control" on

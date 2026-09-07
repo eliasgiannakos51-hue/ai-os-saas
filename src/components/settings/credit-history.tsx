@@ -116,10 +116,10 @@ export async function CreditHistory({
                 // The whole point of showing a bypass row: what it WOULD
                 // have cost. "Unlimited" on its own tells the owner
                 // nothing about whether pricing is working.
-                <span className="shrink-0 text-right font-semibold text-amber-300">
+                <span className="shrink-0 text-end font-semibold text-amber-300">
                   {t("unlimited")}
                   {row.wouldHave !== null && (
-                    <span className="ml-1 block font-normal text-[11px] text-muted">
+                    <span className="ms-1 block font-normal text-[11px] text-muted">
                       {t("wouldHaveCost", { count: formatNumber(row.wouldHave, locale) })}
                     </span>
                   )}

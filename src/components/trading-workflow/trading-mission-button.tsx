@@ -80,7 +80,7 @@ export function TradingMissionButton({
         type="button"
         onClick={handleClick}
         disabled={loading}
-        className="flex w-full items-center gap-3 text-left transition-opacity duration-150 disabled:opacity-60"
+        className="flex w-full items-center gap-3 text-start transition-opacity duration-150 disabled:opacity-60"
       >
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
           <Rocket className="h-4 w-4" aria-hidden="true" />

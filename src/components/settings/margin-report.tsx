@@ -148,7 +148,7 @@ function Margin({ value, projected = false }: { value: number | null; projected?
     <span
       className={value < MARGIN_TARGET ? "font-semibold text-red-400" : "text-emerald-400"}
     >
-      {value.toFixed(2)}x{projected && <span className="ml-0.5 font-normal text-muted">*</span>}
+      {value.toFixed(2)}x{projected && <span className="ms-0.5 font-normal text-muted">*</span>}
     </span>
   );
 }
@@ -287,16 +287,16 @@ export async function MarginReportView({
           )}
 
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-xs">
+            <table className="w-full min-w-[640px] text-start text-xs">
               <thead>
                 <tr className="border-b border-border text-muted">
-                  <th className="pb-2 pr-3 font-medium">{t("colFeature")}</th>
-                  <th className="pb-2 pr-3 text-right font-medium">{t("colCalls")}</th>
-                  <th className="pb-2 pr-3 text-right font-medium">{t("colCharged")}</th>
-                  <th className="pb-2 pr-3 text-right font-medium">{t("colBypass")}</th>
-                  <th className="pb-2 pr-3 text-right font-medium">{t("colMarginCharged")}</th>
-                  <th className="pb-2 pr-3 text-right font-medium">{t("colMarginWouldBe")}</th>
-                  <th className="pb-2 text-right font-medium">{t("colCost")}</th>
+                  <th className="pb-2 pe-3 font-medium">{t("colFeature")}</th>
+                  <th className="pb-2 pe-3 text-end font-medium">{t("colCalls")}</th>
+                  <th className="pb-2 pe-3 text-end font-medium">{t("colCharged")}</th>
+                  <th className="pb-2 pe-3 text-end font-medium">{t("colBypass")}</th>
+                  <th className="pb-2 pe-3 text-end font-medium">{t("colMarginCharged")}</th>
+                  <th className="pb-2 pe-3 text-end font-medium">{t("colMarginWouldBe")}</th>
+                  <th className="pb-2 text-end font-medium">{t("colCost")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -308,17 +308,17 @@ export async function MarginReportView({
                       key={row.feature}
                       className={`border-b border-border/50 last:border-0 ${flagged ? "bg-red-950/20" : ""}`}
                     >
-                      <td className="py-2 pr-3 text-foreground">{row.feature}</td>
-                      <td className="py-2 pr-3 text-right text-muted">{formatNumber(row.calls, locale)}</td>
-                      <td className="py-2 pr-3 text-right text-muted">{formatNumber(row.chargedCalls, locale)}</td>
-                      <td className="py-2 pr-3 text-right text-muted">{formatNumber(row.bypassCalls, locale)}</td>
-                      <td className="py-2 pr-3 text-right">
+                      <td className="py-2 pe-3 text-foreground">{row.feature}</td>
+                      <td className="py-2 pe-3 text-end text-muted">{formatNumber(row.calls, locale)}</td>
+                      <td className="py-2 pe-3 text-end text-muted">{formatNumber(row.chargedCalls, locale)}</td>
+                      <td className="py-2 pe-3 text-end text-muted">{formatNumber(row.bypassCalls, locale)}</td>
+                      <td className="py-2 pe-3 text-end">
                         <Margin value={row.chargedMargin} />
                       </td>
-                      <td className="py-2 pr-3 text-right">
+                      <td className="py-2 pe-3 text-end">
                         <Margin value={row.wouldBeMargin} projected />
                       </td>
-                      <td className="py-2 text-right text-muted">€{row.totalCostEur.toFixed(4)}</td>
+                      <td className="py-2 text-end text-muted">€{row.totalCostEur.toFixed(4)}</td>
                     </tr>
                   );
                 })}
@@ -378,14 +378,14 @@ export async function MarginReportView({
                 )}
 
                 <div className="mt-3 overflow-x-auto">
-                  <table className="w-full min-w-[520px] text-left text-xs">
+                  <table className="w-full min-w-[520px] text-start text-xs">
                     <thead>
                       <tr className="border-b border-border text-muted">
                         <th className="pb-2 font-medium">{t("colFeature")}</th>
-                        <th className="pb-2 pr-3 text-right font-medium">{t("cacheHitRate")}</th>
-                        <th className="pb-2 pr-3 text-right font-medium">{t("cacheColRead")}</th>
-                        <th className="pb-2 pr-3 text-right font-medium">{t("cacheColWrite")}</th>
-                        <th className="pb-2 text-right font-medium">{t("cacheColInput")}</th>
+                        <th className="pb-2 pe-3 text-end font-medium">{t("cacheHitRate")}</th>
+                        <th className="pb-2 pe-3 text-end font-medium">{t("cacheColRead")}</th>
+                        <th className="pb-2 pe-3 text-end font-medium">{t("cacheColWrite")}</th>
+                        <th className="pb-2 text-end font-medium">{t("cacheColInput")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -394,8 +394,8 @@ export async function MarginReportView({
                           key={row.feature}
                           className={`border-b border-border/50 last:border-0 ${row.writingWithoutReading ? "bg-red-950/20" : ""}`}
                         >
-                          <td className="py-2 pr-3 text-foreground">{row.feature}</td>
-                          <td className="py-2 pr-3 text-right">
+                          <td className="py-2 pe-3 text-foreground">{row.feature}</td>
+                          <td className="py-2 pe-3 text-end">
                             {row.hitRate === null ? (
                               <span className="text-muted">—</span>
                             ) : (
@@ -404,13 +404,13 @@ export async function MarginReportView({
                               </span>
                             )}
                           </td>
-                          <td className="py-2 pr-3 text-right text-muted">
+                          <td className="py-2 pe-3 text-end text-muted">
                             {formatNumber(row.cacheReadTokens, locale)}
                           </td>
-                          <td className="py-2 pr-3 text-right text-muted">
+                          <td className="py-2 pe-3 text-end text-muted">
                             {formatNumber(row.cacheWriteTokens, locale)}
                           </td>
-                          <td className="py-2 text-right text-muted">
+                          <td className="py-2 text-end text-muted">
                             {formatNumber(row.inputTokens, locale)}
                           </td>
                         </tr>

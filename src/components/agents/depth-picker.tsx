@@ -77,7 +77,7 @@ export function DepthPicker({
             aria-checked={selected}
             disabled={disabled}
             onClick={() => onChange(depth)}
-            className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors duration-150 disabled:opacity-50 ${
+            className={`flex w-full items-start gap-3 rounded-xl border p-3 text-start transition-colors duration-150 disabled:opacity-50 ${
               selected
                 ? "border-orange-500/50 bg-orange-500/10"
                 : "border-border hover:bg-panel-hover"
@@ -114,7 +114,7 @@ export function DepthPicker({
                 the decision. Two numbers now: the big one is what a run
                 that searches costs, the small one what the same run costs
                 with nothing to look up. */}
-            <span className="shrink-0 text-right">
+            <span className="shrink-0 text-end">
               <span className="block text-sm font-medium text-foreground">
                 {fact ? formatNumber(fact.credits, locale) : "—"}
               </span>

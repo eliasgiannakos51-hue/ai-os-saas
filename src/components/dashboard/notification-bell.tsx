@@ -94,14 +94,14 @@ export function NotificationBell({ locale }: { locale: string }) {
         {unread > 0 && (
           <span
             aria-hidden="true"
-            className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-orange-500 px-1 text-[10px] font-bold text-black"
+            className="absolute end-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-orange-500 px-1 text-[10px] font-bold text-black"
           >
             {unread > 9 ? "9+" : unread}
           </span>
         )}
       </button>
       {open && (
-        <div className="absolute right-0 top-11 max-h-96 w-72 overflow-y-auto rounded-xl border border-border bg-panel p-2 text-xs shadow-lg sm:w-80">
+        <div className="absolute end-0 top-11 max-h-96 w-72 overflow-y-auto rounded-xl border border-border bg-panel p-2 text-xs shadow-lg sm:w-80">
           {items.length === 0 ? (
             <p className="p-2 text-muted">{t("noNotifications")}</p>
           ) : (

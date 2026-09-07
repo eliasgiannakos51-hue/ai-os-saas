@@ -416,7 +416,7 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
         className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-panel shadow-[0_0_0_1px_rgba(249,115,22,0.05)]"
       >
         <div className="relative border-b border-border">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+          <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
           <input
             ref={inputRef}
             type="text"
@@ -424,14 +424,14 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleInputKeyDown}
             placeholder={tCommon("jumpToPage")}
-            className="w-full bg-transparent py-4 pl-11 pr-4 text-sm text-foreground outline-none placeholder:text-muted"
+            className="w-full bg-transparent py-4 ps-11 pe-4 text-sm text-foreground outline-none placeholder:text-muted"
           />
         </div>
 
         {showFilters && (
           <div className="space-y-1.5 border-b border-border px-3 py-2.5">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-0.5 text-[11px] text-muted">{tSearch("filters.type")}</span>
+              <span className="me-0.5 text-[11px] text-muted">{tSearch("filters.type")}</span>
               <button
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
@@ -469,7 +469,7 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
                 empty the list. */}
             {facets.modules.length > 0 && (kindFilter === "" || kindFilter === "module") && (
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="mr-0.5 text-[11px] text-muted">{tSearch("filters.module")}</span>
+                <span className="me-0.5 text-[11px] text-muted">{tSearch("filters.module")}</span>
                 <button
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
@@ -493,7 +493,7 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
             )}
 
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-0.5 text-[11px] text-muted">{tSearch("filters.date")}</span>
+              <span className="me-0.5 text-[11px] text-muted">{tSearch("filters.date")}</span>
               {DATE_RANGES.map((range) => (
                 <button
                   key={range}
@@ -528,7 +528,7 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
                     type="button"
                     onClick={() => goTo(entry.href)}
                     onMouseEnter={() => setActiveIndex(index)}
-                    className={`flex min-h-[44px] w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors duration-150 ${
+                    className={`flex min-h-[44px] w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-start text-sm transition-colors duration-150 ${
                       active
                         ? "bg-orange-500/10 text-orange-400"
                         : "text-foreground hover:bg-panel-hover"

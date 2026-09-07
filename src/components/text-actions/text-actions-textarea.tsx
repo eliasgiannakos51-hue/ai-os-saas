@@ -144,7 +144,7 @@ export function TextActionsTextarea({
       />
 
       {selection && (
-        <div className="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-lg border border-border bg-panel p-1 shadow-lg">
+        <div className="absolute end-2 top-2 z-10 flex items-center gap-0.5 rounded-lg border border-border bg-panel p-1 shadow-lg">
           {ACTIONS.map(({ id, labelKey, icon: Icon }) => (
             <button
               key={id}

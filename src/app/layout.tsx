@@ -14,6 +14,7 @@ import {
   REDUCE_MOTION_STORAGE_KEY,
 } from "@/lib/accessibility-prefs";
 import { getSiteUrl } from "@/lib/site-url";
+import { dirAttribute } from "@/lib/text-direction";
 
 const SITE_DESCRIPTION =
   "Create anything with AI. From ideas and research to trading, finance, product planning and business decisions — organized in one intelligent workspace.";
@@ -121,7 +122,11 @@ export default async function RootLayout({
   const clientMessages = messages;
 
   return (
-    <html lang={locale} className="h-full" suppressHydrationWarning>
+    // dir COMES FROM THE LOCALE, and it is omitted rather than set to
+    // "ltr" for the nine locales that read left to right — see
+    // lib/text-direction.ts, which obeys the same catalogue this app's
+    // own website-builder prompt hands to every model it calls.
+    <html lang={locale} dir={dirAttribute(locale)} className="h-full" suppressHydrationWarning>
       <head>
         {/* eslint-disable-next-line react/no-danger */}
         <script dangerouslySetInnerHTML={{ __html: INIT_SCRIPT }} />

@@ -264,14 +264,14 @@ export function SignupFlow() {
                       setWantsTeamSetup(false);
                     }}
                     aria-pressed={selected && !wantsTeamSetup}
-                    className={`relative flex flex-col items-start rounded-2xl border p-4 text-left transition-all duration-150 ${
+                    className={`relative flex flex-col items-start rounded-2xl border p-4 text-start transition-all duration-150 ${
                       selected && !wantsTeamSetup
                         ? "border-orange-500 bg-orange-500/[0.04] shadow-[0_0_16px_rgba(249,115,22,0.12)]"
                         : "border-border bg-panel hover:border-orange-500/40"
                     }`}
                   >
                     {p.highlighted && (
-                      <span className="absolute -top-2.5 right-3 inline-flex items-center rounded-full bg-orange-500 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-black">
+                      <span className="absolute -top-2.5 end-3 inline-flex items-center rounded-full bg-orange-500 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-black">
                         {t("mostPopular")}
                       </span>
                     )}
@@ -365,7 +365,7 @@ export function SignupFlow() {
                   setWantsTeamSetup(true);
                 }}
                 aria-pressed={wantsTeamSetup}
-                className={`relative flex flex-col items-start rounded-2xl border p-4 text-left transition-all duration-150 ${
+                className={`relative flex flex-col items-start rounded-2xl border p-4 text-start transition-all duration-150 ${
                   wantsTeamSetup
                     ? "border-orange-500 bg-orange-500/[0.04] shadow-[0_0_16px_rgba(249,115,22,0.12)]"
                     : "border-border bg-panel hover:border-orange-500/40"

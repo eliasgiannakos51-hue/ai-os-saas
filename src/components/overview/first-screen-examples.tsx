@@ -51,7 +51,7 @@ export function FirstScreenExamples() {
                 // min-h-[44px] is the tap floor the rest of the codebase
                 // uses; these are three of the first things a new account
                 // will ever press, on a phone.
-                className="flex min-h-[44px] w-full items-start gap-2.5 rounded-xl border border-border bg-panel/60 px-3 py-2.5 text-left transition-colors duration-150 hover:border-orange-500/60 hover:bg-panel"
+                className="flex min-h-[44px] w-full items-start gap-2.5 rounded-xl border border-border bg-panel/60 px-3 py-2.5 text-start transition-colors duration-150 hover:border-orange-500/60 hover:bg-panel"
               >
                 <Icon className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
                 <span className="min-w-0">

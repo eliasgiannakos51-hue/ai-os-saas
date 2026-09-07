@@ -219,7 +219,7 @@ export function CodingWorkspace({ sessions, folders }: { sessions: CodeSession[]
           aria-label={t(`operations.${operation}.label`)}
           className="mt-3 w-full rounded-xl border border-border bg-panel-hover px-3 py-2 font-mono text-xs text-foreground"
         />
-        <p className="mt-1 text-right text-[11px] text-muted">
+        <p className="mt-1 text-end text-[11px] text-muted">
           {input.length} / {MAX_INPUT_CHARS}
         </p>
 
@@ -315,7 +315,7 @@ export function CodingWorkspace({ sessions, folders }: { sessions: CodeSession[]
                 <details>
                   <summary className="cursor-pointer text-sm text-foreground">
                     {session.title}
-                    <span className="ml-2 text-[11px] text-muted">
+                    <span className="ms-2 text-[11px] text-muted">
                       {t(`operations.${session.operation}.label`)}
                       {session.folder ? ` · ${session.folder}` : ""}
                       {/* A ROW IMPORTED FROM THE OLD TRACKER SAYS SO. It

@@ -60,7 +60,7 @@ export function ConversationSidebar({
   }
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-border bg-panel">
+    <aside className="flex w-64 shrink-0 flex-col border-e border-border bg-panel">
       <div className="p-3">
         <button
           type="button"
@@ -101,7 +101,7 @@ export function ConversationSidebar({
                           if (isRenaming) return;
                           handleSelect(conversation.id);
                         }}
-                        className={`flex min-w-0 flex-1 items-center gap-1.5 rounded-lg py-2 pl-2.5 pr-1 text-left text-sm transition-colors duration-150 ${
+                        className={`flex min-w-0 flex-1 items-center gap-1.5 rounded-lg py-2 ps-2.5 pe-1 text-start text-sm transition-colors duration-150 ${
                           active
                             ? "bg-orange-500/10 font-medium text-orange-400"
                             : "text-muted hover:bg-panel-hover hover:text-foreground"
@@ -151,7 +151,7 @@ export function ConversationSidebar({
                         aria-label={tModule("actionsFor", { name: conversation.title })}
                         // 36px to match the star beside it — two adjacent
                         // controls at different sizes read as a mistake.
-                        className={`mr-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-muted opacity-0 transition-opacity duration-150 hover:bg-panel-hover hover:text-foreground group-hover/row:opacity-100 ${
+                        className={`me-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-muted opacity-0 transition-opacity duration-150 hover:bg-panel-hover hover:text-foreground group-hover/row:opacity-100 ${
                           menuOpenId === conversation.id ? "opacity-100" : ""
                         }`}
                       >
@@ -159,14 +159,14 @@ export function ConversationSidebar({
                       </button>
 
                       {menuOpenId === conversation.id && (
-                        <div className="absolute right-0 top-full z-10 mt-1 w-36 rounded-xl border border-border bg-panel p-1 shadow-lg">
+                        <div className="absolute end-0 top-full z-10 mt-1 w-36 rounded-xl border border-border bg-panel p-1 shadow-lg">
                           <button
                             type="button"
                             onClick={() => {
                               onTogglePin(conversation.id);
                               setMenuOpenId(null);
                             }}
-                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
                           >
                             <Pin className="h-3.5 w-3.5" aria-hidden="true" />
                             {conversation.is_pinned ? t("unpin") : t("pin")}
@@ -174,7 +174,7 @@ export function ConversationSidebar({
                           <button
                             type="button"
                             onClick={() => startRename(conversation)}
-                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
                           >
                             <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                             {t("rename")}
@@ -182,7 +182,7 @@ export function ConversationSidebar({
                           <button
                             type="button"
                             onClick={() => handleDelete(conversation)}
-                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs text-red-400 transition-colors duration-150 hover:bg-red-500/10"
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-xs text-red-400 transition-colors duration-150 hover:bg-red-500/10"
                           >
                             <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                             {tModule("delete")}

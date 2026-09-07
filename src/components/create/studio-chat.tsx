@@ -178,13 +178,13 @@ export function StudioChat({ context }: { context: string }) {
           onChange={(e) => setInput(e.target.value)}
           placeholder={t("chatPlaceholder")}
           aria-label={t("chatPlaceholder")}
-          className="input pr-12"
+          className="input pe-12"
         />
         <button
           type="submit"
           disabled={sending || !input.trim()}
           aria-label={t("chatSend")}
-          className="absolute bottom-1.5 right-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="absolute bottom-1.5 end-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ArrowUp className="h-4 w-4" aria-hidden="true" />
         </button>

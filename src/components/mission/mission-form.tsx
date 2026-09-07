@@ -145,7 +145,7 @@ export function MissionForm({
         onCancel={() => setPendingConfirm(false)}
       />
     )}
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-border bg-panel p-5 pr-14">
+    <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-border bg-panel p-5 pe-14">
       <label htmlFor="mission-goal" className="block text-sm font-semibold text-foreground">
         {t("goalLabel")}
       </label>

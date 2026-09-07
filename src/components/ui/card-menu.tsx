@@ -121,7 +121,7 @@ export function CardMenu({
           aria-label={label}
           // dropdown-in is the existing shared entrance animation (see
           // globals.css) — reduced-motion is already handled globally.
-          className="dropdown-in absolute right-0 top-11 z-[4] min-w-[11rem] overflow-hidden rounded-xl border border-border bg-panel p-1 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.7)]"
+          className="dropdown-in absolute end-0 top-11 z-[4] min-w-[11rem] overflow-hidden rounded-xl border border-border bg-panel p-1 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.7)]"
         >
           {actions.map((action) => {
             const Icon = action.icon;
@@ -136,7 +136,7 @@ export function CardMenu({
                   setOpen(false);
                   action.onSelect();
                 }}
-                className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
+                className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-start text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
                   action.destructive
                     ? "text-red-400 hover:bg-red-500/10"
                     : "text-foreground hover:bg-panel-hover hover:text-orange-400"

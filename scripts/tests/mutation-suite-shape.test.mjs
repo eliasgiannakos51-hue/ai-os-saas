@@ -112,11 +112,19 @@ console.log("\n== 1. every suite targets its own gate, when one exists ==");
 // that says `using (true)`, or RLS switched off during an incident — is
 // not a line of source anybody could mutate. A suite pointed at a dbtest
 // is pointed at a gate.
+//
+// AND NOT ALWAYS A .dbtest EITHER. isolation-probe-honesty.mutation.mjs
+// drives an .itest, for a reason with the same shape: the gate it guards
+// stands up a Supabase-shaped HTTP server, and billing-coverage.test.mjs
+// forbids a *.test.mjs from binding a port — those run inside `next
+// build`, and "a gate that needs a working network is not a gate, it is a
+// coin flip". The suite is no weaker for it; it is in the only file
+// extension it is allowed to be in.
 for (const file of suites) {
   const name = file.replace(/\.mutation\.mjs$/, "");
   const src = readFileSync(path.join(DIR, file), "utf8");
-  const targets = [...src.matchAll(/"(scripts\/tests\/[a-z0-9-]+\.(?:db)?test\.mjs)"/g)].map((m) => m[1]);
-  ok(`${name}: names at least one gate`, targets.length > 0, "no scripts/tests/*.(db)test.mjs referenced");
+  const targets = [...src.matchAll(/"(scripts\/tests\/[a-z0-9-]+\.(?:db|i)?test\.mjs)"/g)].map((m) => m[1]);
+  ok(`${name}: names at least one gate`, targets.length > 0, "no scripts/tests/*.(db|i)test.mjs referenced");
   const own = mutatesSchemaOf(src) ? `${DIR}/${name}.dbtest.mjs` : `${DIR}/${name}.test.mjs`;
   if (!existsSync(own)) continue; // a differently-named gate is deliberate
   ok(

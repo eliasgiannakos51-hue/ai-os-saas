@@ -76,11 +76,11 @@ export function CardMenu({
       // Focus is still on the trigger the first time an arrow is pressed,
       // so indexOf answers -1, and the old inline arithmetic sent ArrowUp
       // to the second-to-last item instead of the last.
-      const current = list.indexOf(document.activeElement as HTMLElement);
-      const next =
-        e.key === "ArrowDown"
-          ? (current + 1) % list.length
-          : (current - 1 + list.length) % list.length;
+      const next = rovingIndex(
+        list.indexOf(document.activeElement as HTMLElement),
+        list.length,
+        e.key === "ArrowDown" ? "next" : "previous"
+      );
       if (next !== null) list[next]?.focus();
     }
 

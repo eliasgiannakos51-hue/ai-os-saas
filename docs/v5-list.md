@@ -153,10 +153,13 @@ four right-to-left languages from the prompt's own prose.
   `dirAttribute`. Returns `undefined` rather than `"ltr"`, because the
   prompt says "if it is not, do not set dir at all".
 - `src/app/layout.tsx` — `<html lang={locale} dir={dirAttribute(locale)}>`.
-- 219 physical utilities → logical (`ms-`/`me-`, `ps-`/`pe-`,
-  `start-`/`end-`, `border-s`/`border-e`, `text-start`/`text-end`). Every
-  one is a no-op in the nine left-to-right locales, which is what made the
-  sweep safe to do at that scale.
+- Physical reading-order utilities in `src/**/*.tsx` went from **191 to
+  10** (`ms-`/`me-`, `ps-`/`pe-`, `start-`/`end-`, `border-s`/`border-e`,
+  `text-start`/`text-end`). Every conversion is a no-op in the nine
+  left-to-right locales, which is what made a sweep of that size safe.
+  The 10 survivors are the 8 centring pairs and `ambient-dots`' two
+  decorative orbs, both carved out by the prompt's own rule and both
+  excluded by name in the gate.
 - The mobile drawer, which was the honeypot's own shape inside the app:
   `fixed inset-y-0 left-0` + `-translate-x-full`, unreachable in LTR and
   256px of sideways scroll in RTL.

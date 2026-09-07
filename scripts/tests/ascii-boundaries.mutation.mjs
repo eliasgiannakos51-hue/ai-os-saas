@@ -48,8 +48,12 @@ const MUTANTS = [
     // whole scan is about: `\b` around Greek, matching nothing, silently.
     name: "the session rule goes back to an ASCII boundary alone",
     file: RULES,
-    from: 'if (/\\bonly\\b/.test(folded) || folded.includes("μονο")) {',
-    to: "if (/\\bonly\\b/.test(folded) || /\\bμονο\\b/.test(folded)) {",
+    // RE-ANCHORED when greeklish was wired into this line: the clause it
+    // targets now sits beside a textHasGreeklishTerm call, and the
+    // mutation must leave that standing or it stops being about the
+    // ASCII boundary.
+    from: 'folded.includes("μονο") || textHasGreeklishTerm(folded, ["μονο"])',
+    to: '/\\bμονο\\b/.test(folded) || textHasGreeklishTerm(folded, ["μονο"])',
     expect: "the session rule matches Greek without a boundary",
   },
   {

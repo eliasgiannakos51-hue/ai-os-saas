@@ -30,6 +30,7 @@
  */
 
 import { DESIGN_BRIEF_HEADER } from "@/lib/website-design-brief";
+import { GREEK_LETTER_PATTERN, textHasGreeklishStem, textHasGreeklishTerm } from "@/lib/text/unicode-patterns";
 
 export type NegativeFeature =
   | "booking"
@@ -186,6 +187,50 @@ export function ownWordsOf(description: string): string {
 }
 
 /** Every negative clause in the owner's words, with the features it names. */
+/**
+ * THE GREEKLISH PASS, and it is a second pass rather than more
+ * alternatives in NEGATION_CLAUSE.
+ *
+ * That pattern is built from Unicode-letter fragments in six languages;
+ * adding Latin spellings of the Greek ones would make it match English
+ * text too ("xoris" is harmless, but "oxi" sits inside "oxide" and "mi"
+ * inside almost everything). A brief written in greeklish is entirely
+ * Latin, so the safe question is not "does this look like a Greek
+ * negation" but "does this Latin text carry BOTH a greeklish negation cue
+ * AND a greeklish spelling of a feature this file knows".
+ *
+ * Both halves are required, which is what keeps an English brief out: "no
+ * online booking" has the feature but an English cue, and is already
+ * handled by the pass above.
+ */
+// WRITTEN FOLDED, like every other Greek literal in a matching position
+// here: unaccented and with no final sigma. greekSkeleton folds anyway,
+// so these would work with accents — but a literal that could never match
+// the folded text it is compared against is the shape
+// scripts/tests/*.test.mjs gates across the whole repository, and an
+// exception for the ones that happen to be harmless is how the rule stops
+// being checkable.
+const GREEKLISH_NEGATION_CUES = ["μην", "χωρισ", "οχι", "δεν"];
+
+/** The plain Greek words inside a feature's brief pattern, with the regex
+ *  syntax stripped. */
+function greekStemsOf(spec: FeatureSpec): string[] {
+  return [...new Set(spec.briefWords.source.match(/[Ͱ-Ͽἀ-῿]{3,}/g) ?? [])];
+}
+
+export function parseGreeklishNegatives(description: string): NegativeInstruction[] {
+  const text = ownWordsOf(description);
+  if (!text || GREEK_LETTER_PATTERN.test(text)) return [];
+  if (!textHasGreeklishTerm(text, GREEKLISH_NEGATION_CUES)) return [];
+  const features: NegativeFeature[] = [];
+  for (const [name, spec] of Object.entries(FEATURE_SPECS) as [NegativeFeature, FeatureSpec][]) {
+    const stems = greekStemsOf(spec);
+    if (stems.length > 0 && textHasGreeklishStem(text, stems)) features.push(name);
+  }
+  if (features.length === 0) return [];
+  return [{ phrase: text.slice(0, 120), features }];
+}
+
 export function parseNegativeInstructions(description: string): NegativeInstruction[] {
   const text = ownWordsOf(description);
   if (text.length === 0) return [];
@@ -206,6 +251,9 @@ export function parseNegativeInstructions(description: string): NegativeInstruct
     seen.add(key);
     out.push({ phrase, features });
   }
+  // AND THE SAME BRIEF WRITTEN ON AN ENGLISH KEYBOARD. Appended only when
+  // the normal pass found nothing, so a brief that matched is untouched.
+  if (out.length === 0) out.push(...parseGreeklishNegatives(description));
   return out;
 }
 

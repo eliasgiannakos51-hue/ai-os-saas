@@ -68,10 +68,11 @@ if (suites.length === 0) {
 // empty list satisfies "none of them failed". It was 30 when there were
 // 30 suites, and stayed 30 while the directory grew to 90 \u2014 a floor set
 // to the size of the problem three times ago would not have noticed
-// sixty files disappearing. 85 today, deliberately under the real count
-// so deleting one suite on purpose does not need a build fix in the same
-// commit.
-const FLOOR = 85;
+// sixty files disappearing. 90 today against a real 96, deliberately
+// under it so deleting one suite on purpose does not need a build fix in
+// the same commit — and raised with each batch of new ones, because the
+// point is that the gap stays small.
+const FLOOR = 90;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

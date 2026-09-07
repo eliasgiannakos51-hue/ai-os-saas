@@ -90,7 +90,7 @@ const MUTANTS = [
     // check" shape the floor exists to stop.
     name: "the suite floor drops back to a third of the real count",
     file: RUNNER,
-    from: "const FLOOR = 85;",
+    from: "const FLOOR = 90;",
     to: "const FLOOR = 30;",
     expect: "suite floor",
   },

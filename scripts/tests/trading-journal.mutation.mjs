@@ -203,8 +203,12 @@ const MUTANTS = [
   {
     name: "the Greek session rule goes back to an ASCII word boundary and matches nothing",
     file: RULES,
-    from: "    if (/\\bonly\\b/.test(folded) || folded.includes(\"μονο\")) {",
-    to: "    if (/\\bonly\\b/.test(folded) || /\\bμόνο\\b/.test(folded)) {",
+    // RE-ANCHORED when greeklish was wired into this line, for the same
+    // reason as ascii-boundaries: replacing the whole condition would
+    // remove the greeklish clause too, which is a different mutation
+    // from the one this name promises.
+    from: 'folded.includes("μονο") || textHasGreeklishTerm(folded, ["μονο"])',
+    to: '/\\bμόνο\\b/.test(folded) || textHasGreeklishTerm(folded, ["μονο"])',
   },
   {
     name: "the parser lower-cases instead of folding, so Greek in capitals stops parsing",

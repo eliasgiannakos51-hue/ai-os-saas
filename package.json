@@ -7,6 +7,7 @@
     "build": "node scripts/apply-function-limits.mjs && node scripts/check-mutation-markers.mjs && node scripts/check-mutation-tree.mjs && node scripts/check-i18n.js && npm run test:unit && next build",
     "start": "next start",
     "lint": "eslint",
+    "i18n:first-run": "node scripts/first-run-strings.mjs --out docs/first-run",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test --config playwright.e2e.config.ts",
     "verify": "npm run typecheck && npm run lint && npm run build && npm run test:mutation && npm run test:integration && npm run test:db && npm run test:prod && npm run test:e2e",

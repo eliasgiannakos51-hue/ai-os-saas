@@ -475,6 +475,44 @@ It cannot decide whether any given sentence is a bug — no scan can — so it
 does the one thing a scan can do honestly: keep the list small enough that
 a person can read it.
 
+## A file so long that nobody is the reviewer
+
+**Not one non-English string in this product had been read by somebody
+who speaks the language.** That is a true sentence about 26,397
+translations — 2,933 keys in nine languages — and it stayed true through
+every round that noticed it, because the answer was always "find a native
+speaker", and what a native speaker is actually offered is 2,933
+sentences. Nobody reads that. So nobody read any of it, and the count
+that made the problem look enormous is the same count that stopped it
+being worked on.
+
+**The fix was not more reviewers. It was a shorter list.** The strings a
+person meets between the signup form and the first thing the product says
+about their own data are 598 of the 2,933; the ones on those screens that
+are PROSE rather than labels are 44. Forty-four sentences is an hour, and
+an hour is a thing a real person will actually give you.
+
+**What it found, immediately.** Two sentences three lines apart on the
+signup screen addressed the reader differently in Greek — one εσύ, one
+εσείς. Both correct; together, a product that cannot decide whether it
+knows you. Measured across the whole file: 473 informal, 15 polite
+plural, 2 mixing both inside one sentence. Seventeen defects, all real on
+a hand read, none findable by any check that existed, and all of them
+sitting in a file too long for anybody to have read.
+
+**The test.** When a queue is too long to work, the useful question is
+not "how do we get through it" but "which tenth of it carries the
+damage". A backlog nobody starts has the same value as an empty one, and
+a number that makes work look impossible is doing harm even when it is
+accurate.
+
+*Caught by:* `scripts/tests/first-run-strings.test.mjs` regenerates
+`docs/first-run/` and compares it byte for byte, so the pack a reviewer
+is sent can never be last week's wording;
+`scripts/tests/address-register.test.mjs` holds Greek at zero
+polite-plural strings, which is the one thing about a translation a
+machine genuinely can check.
+
 ## A fair draw where a promise was wanted
 
 **The complaint was "two sites of the same kind feel like one template",

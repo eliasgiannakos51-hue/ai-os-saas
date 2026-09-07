@@ -265,12 +265,16 @@ four right-to-left languages from the prompt's own prose.
 *Not done:* Hebrew, Persian and Urdu are named in `RTL_LANGUAGES` and have
 no message catalogue, so nothing renders in them. Only `ar` was measured.
 
-### 5. Translations no native speaker has read
-**~1 week of somebody else's time.** Not a coding task.
+### 5. Translations no native speaker has read — THE FIRST STEP IS DONE, THE READING IS NOT (2026-09-07)
 
-2,868 keys × 9 locales, 0 untranslated — and **every non-English string in
-this app was written by a model.** The Greek has an owner who reads it.
-Japanese, Chinese and Arabic have nobody.
+**~1 week of somebody else's time, and it is now an hour of it per
+language.** Still not a coding task.
+
+**2,933** keys × 9 locales, 0 untranslated — and **every non-English
+string in this app was written by a model.** (This entry said 2,868 until
+2026-09-07; the counted figure is 2,933, and the smaller number was
+never sourced.) The Greek has an owner who reads it. Japanese, Chinese
+and Arabic have nobody.
 
 The gates check that a string *exists*, that it is *not identical to
 English*, that its plurals cover the locale's categories, and that its ICU
@@ -278,14 +282,39 @@ renders. **None of them can check that it is good Japanese.** That is a
 category no instrument reaches, and pretending otherwise is the thing this
 project keeps refusing to do.
 
-*Done means:* one reader per script — ja, zh, ar — through the screens a
-new user meets, not the whole catalogue. (How many that is has not been
-measured; do not carry a number here that nobody counted.)
+**THE SET IS COUNTED NOW, and it is the reason this was never started.**
+`scripts/first-run-strings.mjs` walks every component reachable from the
+signup form to the first thing the product says about a person's own
+data:
 
-*Cheapest first step:* the signup and first-run path only — the screens a
-person meets before they have decided anything. That set has not been
-counted; counting it is the first ten minutes of this item, not a number to
-put here in advance.
+| | |
+|---|---|
+| the whole product | 2,933 strings |
+| on the first-run path | **598** |
+| on the first screens AND prose rather than a label | **44** |
+
+Forty-four sentences is an hour. 2,933 is why nobody ever started: a
+backlog too long to begin has the same value as an empty one.
+
+`docs/first-run/first-run.<locale>.md` is one file per language, tiered,
+with the English beside every translation and a short note on what to look
+for. `scripts/tests/first-run-strings.test.mjs` regenerates the pack and
+compares it byte for byte, so what a reviewer is sent can never be last
+week's wording. Rebuild with `npm run i18n:first-run`.
+
+**AND THE FIRST 44 ALREADY FOUND SOMETHING.** Two sentences three lines
+apart on the signup screen addressed the Greek reader differently — one
+εσύ, one εσείς. Measured across the whole file: 473 informal, 15 polite
+plural, 2 mixing both inside one sentence. All 17 read by hand, all 17
+real, all 17 fixed, and `scripts/tests/address-register.test.mjs` holds
+the count at zero. That is the one thing about a translation a machine
+genuinely can check: not whether a sentence is good, but whether the file
+agrees with itself about who it is talking to.
+
+*Done means:* one reader per script — ja, zh, ar — through
+`docs/first-run/`, tier 1 first.
+
+*What is left, and it is not code:* three readers.
 
 ### 6. Chat that asks instead of guessing — TWO OF THREE DONE (2026-09-07)
 

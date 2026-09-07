@@ -36,6 +36,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { checkNeedsClarification, clarificationMetadata } from "@/lib/clarification";
 import {
   freeChatMaxCostEur,
   freeChatMessageEstimatedCostEur,
@@ -301,6 +302,7 @@ export async function POST(request: Request) {
     let conversationId: string | null;
     let mentorMode: boolean;
     let mentorPreset: string | null;
+    let skipClarification = false;
     try {
       const body = await request.json();
       message = typeof body?.message === "string" ? body.message.trim() : "";
@@ -310,6 +312,12 @@ export async function POST(request: Request) {
           : null;
       mentorMode = body?.mentorMode === true;
       mentorPreset = typeof body?.mentorPreset === "string" ? body.mentorPreset : null;
+      // "Answer it anyway." The same flag the other four surfaces send
+      // back after a clarifying question, and it exists for the one case
+      // the opening-message rule cannot cover: somebody who presses Skip
+      // sends the SAME text again on a conversation that still has no
+      // history, and would meet the identical question for ever.
+      skipClarification = body?.skipClarification === true;
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -937,6 +945,77 @@ export async function POST(request: Request) {
         // second concurrent message sees a balance that already excludes
         // this one.
         const costs = new CostAccumulator();
+        // Empty until the pre-check runs. An absent key is "not asked" —
+        // a follow-up message, or a free one — and must never be read as
+        // "clear", which is a decision somebody made.
+        let clarificationRecord: Record<string, unknown> = {};
+
+        // ================================================================
+        // STOP AND ASK, BEFORE ANYTHING IS HELD — V5 #6.
+        //
+        // The other four surfaces run this check before they build; chat
+        // did not run it at all, which meant the one place a person
+        // actually talks to the product was the one place it always
+        // guessed.
+        //
+        // WHERE IT SITS IS THE DESIGN. Above the reservation, so a
+        // message that turns into a question never takes a hold and never
+        // reaches the model at all; the person is asked instead of being
+        // answered at length about the wrong thing.
+        //
+        // ONLY ON THE OPENING MESSAGE, and this is the rule that keeps it
+        // from being unbearable. A chat is a conversation: someone who
+        // wanted to be asked would have asked, and interrupting the
+        // fourth message of a thread to request a detail the thread
+        // already contains is worse than a slightly generic answer. So a
+        // conversation with history is never interrupted — the free
+        // reader is not even consulted. One question, at the start, or
+        // none.
+        //
+        // WHAT IT COSTS. Nothing on a clear message: lib/ai/ambiguity.ts
+        // is free and synchronous, and it decides most of them. A message
+        // it cannot decide reaches one Sonnet call of a few hundred
+        // tokens — settled under its own feature, so a thread that ended
+        // in a question and one that ended in an answer are separate rows
+        // rather than an average of the two.
+        if (apiKey && history.length === 0 && !isFreeMessage && !skipClarification) {
+          try {
+            const decision = await checkNeedsClarification(apiKey, "chat", message, costs);
+            clarificationRecord = clarificationMetadata(decision);
+            if (decision.needsClarification) {
+              controller.enqueue(
+                ndjsonLine({
+                  type: "clarify",
+                  questions: decision.questions,
+                  questionSuggestions: decision.suggestions,
+                })
+              );
+              // The check itself really ran and really cost tokens. It is
+              // settled here whether or not an answer follows, for the
+              // same reason api/websites/generate settles its pre-check:
+              // an AI call that happened must be charged regardless of
+              // what happens next.
+              if (costs.callCount > 0) {
+                await settleReservation({
+                  userId: user.id,
+                  reservationId: "",
+                  feature: "chat_clarify",
+                  costs,
+                  plan,
+                  bypassCharge: bypassCredits,
+                  metadata: { conversationId: finalConversationId, ...clarificationRecord },
+                });
+              }
+              controller.close();
+              return;
+            }
+          } catch (err) {
+            // Best-effort, exactly like the other four surfaces: a hiccup
+            // in the pre-check must never be the reason a message goes
+            // unanswered. Falls through and answers.
+            logApiError("/api/chat", err, { stage: "clarification_check" });
+          }
+        }
 
         // A free message runs in a smaller envelope than a paid one: a
         // short history window, a shorter reply, and no web search. That
@@ -1197,6 +1276,7 @@ export async function POST(request: Request) {
             reservedCredits: bypassCredits || isFreeMessage ? 0 : streamEstimate.reserveCredits,
             freeMessage: isFreeMessage,
             freeRemaining: isFreeMessage && freeGrant?.granted ? freeGrant.remaining : undefined,
+            ...clarificationRecord,
           },
         });
         diagLog(

@@ -1160,7 +1160,11 @@
         "body": "Ve tus entradas, tus objetivos y los archivos que subiste. No ve nada que no hayas añadido. No cambia nada a menos que se lo pidas."
       },
       "stop": "Detener",
-      "stopped": "Detenido. Lo que se escribió se conserva, y solo se cobra esa parte."
+      "stopped": "Detenido. Lo que se escribió se conserva, y solo se cobra esa parte.",
+      "clarificationTitle": "Una pregunta rápida primero:",
+      "clarificationSkip": "Respóndelo igualmente",
+      "clarificationContinue": "Enviar",
+      "clarificationAnswerPlaceholder": "Tu respuesta..."
     },
     "create": {
       "title": "Crear Cualquier Cosa",

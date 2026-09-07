@@ -1160,7 +1160,11 @@
         "body": "Vede le tue voci, i tuoi obiettivi e i file che hai caricato. Non vede nulla che tu non abbia aggiunto. Non cambia nulla se non lo chiedi."
       },
       "stop": "Ferma",
-      "stopped": "Fermato. Ciò che è stato scritto resta, e viene addebitata solo quella parte."
+      "stopped": "Fermato. Ciò che è stato scritto resta, e viene addebitata solo quella parte.",
+      "clarificationTitle": "Prima una domanda veloce:",
+      "clarificationSkip": "Rispondi comunque",
+      "clarificationContinue": "Invia",
+      "clarificationAnswerPlaceholder": "La tua risposta..."
     },
     "create": {
       "title": "Crea Qualsiasi Cosa",

@@ -1160,7 +1160,11 @@
         "body": "Vê as tuas entradas, os teus objetivos e os ficheiros que carregaste. Não vê nada que não tenhas adicionado. Não altera nada sem que peças."
       },
       "stop": "Parar",
-      "stopped": "Parado. O que foi escrito fica, e só essa parte é cobrada."
+      "stopped": "Parado. O que foi escrito fica, e só essa parte é cobrada.",
+      "clarificationTitle": "Primeiro uma pergunta rápida:",
+      "clarificationSkip": "Responder mesmo assim",
+      "clarificationContinue": "Enviar",
+      "clarificationAnswerPlaceholder": "A sua resposta..."
     },
     "create": {
       "title": "Criar Qualquer Coisa",

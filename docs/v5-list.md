@@ -316,7 +316,7 @@ agrees with itself about who it is talking to.
 
 *What is left, and it is not code:* three readers.
 
-### 6. Chat that asks instead of guessing — TWO OF THREE DONE (2026-09-07)
+### 6. Chat that asks instead of guessing — WIRED AND MEASURABLE; the number needs traffic (2026-09-07)
 
 **The classifier and the one-question cap shipped. The measured rate needs
 API balance.**
@@ -402,6 +402,54 @@ was asked for.
 cross-product) · `scripts/tests/ambiguity.mutation.mjs` (10/10, including
 both degenerate classifiers — always-unsure and always-vague).
 
+
+**THE THIRD PART IS BUILT. WHAT IT NEEDS NOW IS DAYS, NOT CODE.**
+
+The reason the rate could not be measured was one line: `assessAmbiguity`
+was called inside `checkNeedsClarification`, its verdict decided whether
+to spend, and then it was thrown away. Every request that left a row in
+`ai_cost_log` was therefore one the free reader had FAILED to decide — so
+the only rate anybody could have computed was 100%.
+
+Every surface that runs the check now writes three keys into its
+settlement, through one builder (`clarificationMetadata`):
+
+| key | what it says |
+|---|---|
+| `clarification_verdict` | `clear` / `vague` / `unsure` — the free reader's answer |
+| `clarification_paid` | whether a model call was made to reach it |
+| `clarification_asked` | whether the person was actually asked something |
+
+`asked` is deliberately not the same as `paid`: a paid check that
+concluded "no question needed" is a call that cost money and interrupted
+nobody, and conflating them would report the product as ruder than it is.
+
+**The denominator needed one exception.** A `clear` verdict spends
+nothing, and `settlePrechecks` returns early on nothing spent — so the
+cheap path, which is the common one, left no trace at all.
+`api/websites/generate` now settles a zero-cost row when there is a
+verdict, under its own feature name (`clarification_free`), the way
+`ABSORBED_REFUSAL_FEATURE` does.
+
+`scripts/db/clarification-rate.mjs` is the per-day query — `--sql` prints
+it for the SQL editor. Proven against a real Postgres in
+`scripts/tests/clarification-rate.dbtest.mjs` (17 checks), including that
+a row from another feature is not counted and that an empty window
+returns null rather than 0%.
+
+**AND CHAT ASKS NOW.** It was the only surface that never ran the check —
+the one place a person actually talks to the product was the one place it
+always guessed. The check sits ABOVE the reservation, so a message that
+becomes a question never takes a hold; it runs only on the OPENING
+message of a conversation, because interrupting the fourth message of a
+thread is worse than a slightly generic answer; and a `clarify` frame
+carries the question to the same component the other four surfaces use.
+
+*What is left, and no code produces it:* **traffic.** The keys are
+written from this deploy onward, so the window has to start after it. A
+week of ordinary use answers "how often does it ask", and the query says
+so. What it still cannot say is whether the questions were the RIGHT
+ones — that needs the held-out set, and it is not built.
 ### 6b. Ten copies of every help article competed for the same query — DONE (2026-09-07)
 
 **Was an active bug: a Greek user could be handed the Portuguese answer.**

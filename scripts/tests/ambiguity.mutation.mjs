@@ -149,9 +149,16 @@ const MUTANTS = [
     // 9. THE SHORT-CIRCUIT IS REMOVED. Every request pays for the Sonnet
     // call again, and the whole "decides before spending" claim is false
     // while the free detector still sits there being unit-tested.
+    //
+    // RE-ANCHORED 2026-09-07: the condition moved into
+    // willSpendOnQuestion and the return grew the verdict it used to
+    // throw away, so the old two-line anchor named text that is no longer
+    // there. The defect it reintroduces is unchanged.
     name: "the paid check stops consulting the free assessment",
     file: CLAR,
-    from: '  if (assessment.verdict === "clear") return { needsClarification: false };',
+    from: `  if (!willSpendOnQuestion(assessment)) {
+    return { needsClarification: false, verdict: assessment.verdict, paidCheck: false };
+  }`,
     to: "",
     expect: "a clear verdict returns without calling the model",
   },

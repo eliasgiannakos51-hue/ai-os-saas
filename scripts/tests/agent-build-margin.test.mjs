@@ -291,7 +291,18 @@ check(
 );
 check(
   "and still records the job kind in metadata, so the rows can be found together",
-  /metadata: \{ jobId, kind, attempts \}/.test(runJob)
+  // THE THREE THAT MUST BE THERE, not the exact shape of the object.
+  // 2026-09-07 added a spread of handler-supplied keys after them (the
+  // clarification verdict — see scripts/tests/clarification-verdict
+  // .test.mjs), and an exact-literal match called a widened metadata
+  // object a lost one. What this clause is about is that the JOB KIND
+  // survives a feature override, and that is unchanged.
+  /jobId, kind, attempts \}/.test(runJob)
+);
+check(
+  "...and a handler's extra keys cannot overwrite them",
+  /metadata: \{ \.\.\.\(handled\.metadata \?\? \{\}\), jobId, kind, attempts \}/.test(runJob),
+  "spread LAST and a handler could replace jobId, which is how two rows of one interaction stop being findable"
 );
 check(
   "the create job's pre-check is split the same way",

@@ -475,6 +475,43 @@ It cannot decide whether any given sentence is a bug — no scan can — so it
 does the one thing a scan can do honestly: keep the list small enough that
 a person can read it.
 
+## Only the failures leave a trace
+
+**The feature was built to make most requests cost nothing, and that is
+exactly what made it unmeasurable.** V5 #6 put a free ambiguity reader in
+front of a paid clarifying-question call: a request it reads as `clear`
+never touches the API. Correct, cheap, and shipped.
+
+It also meant that the only requests which left a row in `ai_cost_log`
+were the ones the free reader had FAILED to decide. The cheap path spent
+nothing, and spending nothing is what the log records. So the question
+"how often does the free reader get it right?" had exactly one
+computable answer — 100% — and it was an artifact of where the rows came
+from, not a fact about the reader.
+
+**Nobody wrote a wrong number. The number simply could not be asked
+for.** The verdict was computed inside the function, used to decide
+whether to spend, and dropped on the floor; three surfaces recorded what
+the check COST and none recorded what it DECIDED.
+
+**The fix has two halves and the second is the one that is easy to miss.**
+Carrying the verdict out is obvious once seen. Writing a ZERO-COST ROW
+for the free path is not: it looks like logging work that never happened,
+and the existing guard said as much in a comment. But a decision is work,
+and a ratio whose denominator is only its own failures is not a ratio.
+
+**The test.** For anything whose success is "we did not have to act",
+ask where the successes are written down. A defence that logs its
+activations and not its quiet days will always report a hundred per cent
+hit rate, and so will a broken one.
+
+*Caught by:* `scripts/tests/clarification-verdict.test.mjs` requires every
+decision return to carry its verdict and every surface to record it
+through one builder; `clarification-verdict.mutation.mjs` drops the
+verdict on the free path and requires the gate to notice.
+`scripts/db/clarification-rate.mjs` is the per-day query, proven against
+a real Postgres.
+
 ## A file so long that nobody is the reviewer
 
 **Not one non-English string in this product had been read by somebody

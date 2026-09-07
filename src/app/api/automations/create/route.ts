@@ -15,7 +15,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
-import { checkNeedsClarification, CLARIFICATION_MODEL } from "@/lib/clarification";
+import { checkNeedsClarification, CLARIFICATION_MODEL, clarificationMetadata } from "@/lib/clarification";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logSecurityCheck } from "@/lib/security-check-log";
 import { logApiError } from "@/lib/log-error";
@@ -179,6 +179,11 @@ export async function POST(request: Request) {
                 source: "automation_create",
                 estimatedCredits: estimate.estimatedCredits,
                 reservedCredits: bypassCredits ? 0 : estimate.reserveCredits,
+                // WHAT THE FREE READER DECIDED, beside what the call cost.
+                // Without it the only answerable question about this
+                // feature is how much it spent; with it, how often it was
+                // right. See scripts/db/clarification-rate.mjs.
+                ...clarificationMetadata(clarification),
               },
             });
             if (clarification.needsClarification) {

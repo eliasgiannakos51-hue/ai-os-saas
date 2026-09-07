@@ -1160,7 +1160,11 @@
         "body": "あなたの記録、目標、アップロードしたファイルを参照します。あなたが追加していないものは一切参照しません。頼まない限り、何も変更しません。"
       },
       "stop": "停止",
-      "stopped": "停止しました。書かれた部分は残り、その分だけが課金されます。"
+      "stopped": "停止しました。書かれた部分は残り、その分だけが課金されます。",
+      "clarificationTitle": "先に一つだけ確認させてください:",
+      "clarificationSkip": "このまま答えて",
+      "clarificationContinue": "送信",
+      "clarificationAnswerPlaceholder": "あなたの答え..."
     },
     "create": {
       "title": "何でも作成",

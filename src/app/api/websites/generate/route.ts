@@ -18,7 +18,7 @@ import {
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { settleReservation } from "@/lib/billing/reservations";
-import { checkNeedsClarification } from "@/lib/clarification";
+import { checkNeedsClarification, clarificationMetadata } from "@/lib/clarification";
 import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
@@ -201,24 +201,42 @@ export async function POST(request: Request) {
     // admin and beta rows could not be checked against anything.
     const precheckPlan = await resolveEffectivePlan(user);
 
-    async function settlePrechecks() {
+    // Filled by the clarification block below when it runs; empty when
+    // the caller skipped the check entirely (skipClarification), which is
+    // itself the honest thing to record — an absent key is "not asked",
+    // not "clear".
+    let clarificationRecord: Record<string, unknown> = {};
+
+    async function settlePrechecks(extra: Record<string, unknown> = {}) {
       // Nothing measured (no call ran, or every call threw before
       // returning usage) — settling would write a zero-cost log row for
       // work that never happened.
-      if (costs.callCount === 0) return;
+      //
+      // A VERDICT IS NOT "WORK THAT NEVER HAPPENED", and that is the one
+      // exception. When the free reader in lib/ai/ambiguity.ts answers
+      // `clear`, no model is called and this route spends nothing — which
+      // is the entire point of it, and which made the cheap path
+      // invisible: every row in ai_cost_log came from a request the free
+      // reader could NOT decide, so the only measurable rate was 100%.
+      // A zero-cost row carrying the verdict is what gives the ratio a
+      // denominator. It lands under its own feature name, the way
+      // ABSORBED_REFUSAL_FEATURE does, so it is its own line in the
+      // margin report rather than a zero dragging another feature down.
+      const hasVerdict = typeof extra.clarification_verdict === "string";
+      if (costs.callCount === 0 && !hasVerdict) return;
       await settleReservation({
         userId: user!.id,
         // No hold to release: these calls are small, bounded and already
         // finished by the time this runs. settle_reservation treats an
         // empty reservation id as "charge only".
         reservationId: "",
-        feature: "website_generate_precheck",
+        feature: costs.callCount === 0 ? "clarification_free" : "website_generate_precheck",
         costs,
         plan: precheckPlan,
         // Admin/beta accounts are still LOGGED — their spend is real and
         // has to appear in the margin report — but charged nothing.
         bypassCharge: bypassCredits,
-        metadata: { route: "/api/websites/generate" },
+        metadata: { route: "/api/websites/generate", ...extra },
       });
     }
 
@@ -237,10 +255,14 @@ export async function POST(request: Request) {
       try {
         void recordAiCallForDailySpend(1);
         const clarification = await checkNeedsClarification(apiKey, "website", description, costs);
+        // RECORDED EITHER WAY, and the `clear` branch is the one that
+        // matters: it is the common case, it costs nothing, and until now
+        // it left no trace at all.
+        clarificationRecord = clarificationMetadata(clarification);
         if (clarification.needsClarification) {
           // Settle before returning: this call really ran and really cost
           // money, whether or not a website ends up being generated.
-          await settlePrechecks();
+          await settlePrechecks(clarificationRecord);
           return NextResponse.json({
             ok: true,
             generated: false,
@@ -268,7 +290,7 @@ export async function POST(request: Request) {
       if (!classification.isWebsiteRequest) {
         // Same reasoning as the clarification branch: the call ran and
         // cost money, so it is settled even though nothing gets generated.
-        await settlePrechecks();
+        await settlePrechecks(clarificationRecord);
         return NextResponse.json({ ok: true, generated: false, message: classification.message });
       }
     } catch (err) {
@@ -282,7 +304,7 @@ export async function POST(request: Request) {
     // as a separate request and may never start (the client can navigate
     // away between the two), and an AI call that already happened must be
     // charged regardless of what happens next.
-    await settlePrechecks();
+    await settlePrechecks(clarificationRecord);
 
     // Credits: a READ-ONLY check against a rough pre-generation estimate
     // (lib/website-generation-cost.ts) — rejects early, before creating

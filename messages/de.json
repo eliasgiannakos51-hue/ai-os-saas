@@ -1160,7 +1160,11 @@
         "body": "Es sieht deine Einträge, deine Ziele und die Dateien, die du hochgeladen hast. Es sieht nichts, was du nicht hinzugefügt hast. Es ändert nichts, ohne dass du darum bittest."
       },
       "stop": "Stopp",
-      "stopped": "Gestoppt. Was geschrieben wurde, bleibt — und nur dieser Teil wird berechnet."
+      "stopped": "Gestoppt. Was geschrieben wurde, bleibt — und nur dieser Teil wird berechnet.",
+      "clarificationTitle": "Zuerst eine kurze Frage:",
+      "clarificationSkip": "Trotzdem beantworten",
+      "clarificationContinue": "Senden",
+      "clarificationAnswerPlaceholder": "Deine Antwort..."
     },
     "create": {
       "title": "Alles Erstellen",

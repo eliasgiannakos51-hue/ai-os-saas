@@ -14,6 +14,8 @@ import { InlineTitle } from "@/components/chat/inline-title";
 import { HelpTip } from "@/components/ui/help-tip";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { MessageContent } from "@/components/chat/message-content";
+import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
+import { alignSuggestions, appendClarificationAnswers } from "@/lib/clarification-client";
 import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
 import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
@@ -423,8 +425,24 @@ export function ChatWorkspace({
     }
   }
 
-  async function handleSend(text: string) {
+  // THE QUESTION THE SERVER ASKED INSTEAD OF ANSWERING — V5 #6.
+  //
+  // A first message the free reader in lib/ai/ambiguity.ts could not read
+  // as a request arrives here as a `clarify` frame rather than a reply:
+  // nothing was reserved, nothing was charged for an answer, and the
+  // person is asked one question with tappable answers instead of being
+  // told something at length about the wrong thing. `text` is kept so
+  // "answer" can resend the original with the answers appended, and
+  // "skip" can resend it untouched with the check turned off.
+  const [clarify, setClarify] = useState<{
+    text: string;
+    questions: string[];
+    suggestions: string[][];
+  } | null>(null);
+
+  async function handleSend(text: string, options: { skipClarification?: boolean } = {}) {
     if (!text || sending) return;
+    setClarify(null);
 
     setError(null);
     setIsRateLimitNotice(false);
@@ -456,6 +474,7 @@ export function ChatWorkspace({
           message: text,
           mentorMode,
           ...(mentorPreset ? { mentorPreset } : {}),
+          ...(options.skipClarification ? { skipClarification: true } : {}),
         }),
       });
 
@@ -517,6 +536,21 @@ export function ChatWorkspace({
           if (typeof event.text === "string") {
             accumulatedText += event.text;
             setStreamingText(accumulatedText);
+          }
+        } else if (event.type === "clarify") {
+          // The optimistic user bubble stays: they DID send it, and the
+          // question is about that message. What does not happen is an
+          // assistant reply — there is none, and inventing an empty one
+          // would put a blank turn in the thread they can never remove.
+          const questions = Array.isArray(event.questions)
+            ? (event.questions as unknown[]).filter((q): q is string => typeof q === "string")
+            : [];
+          if (questions.length > 0) {
+            setClarify({
+              text,
+              questions,
+              suggestions: alignSuggestions(questions, event.questionSuggestions),
+            });
           }
         } else if (event.type === "error") {
           streamError = describeStatus(500).text;
@@ -856,6 +890,37 @@ export function ChatWorkspace({
                   ) : (
                     <AiActivity kind="chat" className="py-1" />
                   )}
+                </div>
+              )}
+
+              {/* THE QUESTION, WHERE THE ANSWER WOULD HAVE BEEN. Same
+                  component the website builder, agents and automations
+                  use, so a person meets one shape of question across the
+                  product rather than four. */}
+              {clarify && !sending && (
+                <div className="flex items-start gap-2.5" data-testid="chat-clarify">
+                  <AssistantAvatar />
+                  <div className="min-w-0 flex-1">
+                    <ClarificationQuestions
+                      questions={clarify.questions}
+                      suggestions={clarify.suggestions}
+                      submitting={sending}
+                      title={t("clarificationTitle")}
+                      skipLabel={t("clarificationSkip")}
+                      continueLabel={t("clarificationContinue")}
+                      answerPlaceholder={t("clarificationAnswerPlaceholder")}
+                      onAnswer={(answers) =>
+                        void handleSend(
+                          appendClarificationAnswers(clarify.text, clarify.questions, answers)
+                        )
+                      }
+                      // SKIP RESENDS THE SAME TEXT WITH THE CHECK OFF. It
+                      // has to carry the flag: the conversation still has
+                      // no history, so without it the identical message
+                      // meets the identical question for ever.
+                      onSkip={() => void handleSend(clarify.text, { skipClarification: true })}
+                    />
+                  </div>
                 </div>
               )}
 

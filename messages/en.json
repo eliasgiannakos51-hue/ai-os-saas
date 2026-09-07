@@ -1160,7 +1160,11 @@
         "body": "It sees your entries, your goals and the files you uploaded. It does not see anything you have not added. It does not change anything unless you ask."
       },
       "stop": "Stop",
-      "stopped": "Stopped. What was written is kept, and only that part is charged."
+      "stopped": "Stopped. What was written is kept, and only that part is charged.",
+      "clarificationTitle": "One quick question first:",
+      "clarificationSkip": "Answer it anyway",
+      "clarificationContinue": "Send",
+      "clarificationAnswerPlaceholder": "Your answer..."
     },
     "create": {
       "title": "Create Anything",

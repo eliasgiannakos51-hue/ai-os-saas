@@ -587,7 +587,19 @@ console.log("\n== 12. chat memory extraction is inside the chat settlement ==");
 // its tokens could not be billed even in principle — the accumulator was
 // already spent.
 const chat = readFileSync("src/app/api/chat/route.ts", "utf8");
-checkTrue("extraction runs BEFORE the settle", chat.indexOf("await extractAndStoreMemory({") < chat.indexOf("await settleReservation({"));
+// AGAINST THE SETTLEMENT THAT CHARGES THE MESSAGE, not the first one in
+// the file. 2026-09-07 added a settlement above this one — the
+// clarifying-question pre-check, on a path that returns before any answer
+// is generated (see scripts/tests/clarification-verdict.test.mjs) — and
+// `indexOf("await settleReservation({")` then pointed at that instead,
+// reporting a true property as broken. The property is unchanged: the
+// memory extraction's tokens must reach the accumulator before the
+// message's own settlement spends it.
+checkTrue(
+  "extraction runs BEFORE the settle that charges the message",
+  chat.indexOf("await extractAndStoreMemory({") <
+    chat.indexOf('feature: isFreeMessage ? "chat_free" : "chat_message"')
+);
 checkTrue("and shares the turn's accumulator", /extractAndStoreMemory\(\{[\s\S]{0,400}costs,/.test(chat));
 checkTrue("the extractor records its own usage", /costs\?\.record\("other", result\.usage, result\.model \|\| MEMORY_MODEL\)/.test(readFileSync("src/lib/chat/memory.ts", "utf8")));
 // If the hold does not cover the second call, every chat message is

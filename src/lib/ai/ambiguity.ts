@@ -298,11 +298,41 @@ export function assessAmbiguity(
 }
 
 /**
- * Should the caller pay for lib/clarification.ts's model call?
+ * THIS PAIR REPLACED ONE FUNCTION THAT SAID SOMETHING FALSE.
  *
- * Only for `unsure`. Both confident verdicts are already actionable, and
- * spending to confirm them is the cost this module exists to remove.
+ * `needsPaidClarityCheck` was exported here, documented as "should the
+ * caller pay for lib/clarification.ts's model call? Only for `unsure`",
+ * and asserted by three checks in scripts/tests/ambiguity.test.mjs. It
+ * was called by NOTHING in the product, and the sentence was not true of
+ * the product either: checkNeedsClarification short-circuits on `clear`
+ * and pays for BOTH `vague` and `unsure` — deliberately, because its
+ * contract is a question with suggested answers in the user's language
+ * and no free detector can write those.
+ *
+ * So the repository carried a stated spending policy, a gate asserting
+ * it, and shipped code doing something else. Found 2026-09-07 while
+ * wiring the verdict into settlement metadata. It is the shape
+ * docs/shapes.md calls a comment that describes a bug as though it were
+ * a design note, with the extra turn that a test was holding the wrong
+ * half in place.
+ *
+ * The two questions the old name ran together are separate, and both are
+ * wanted now — one decides the spend, the other is the measurement the
+ * owner asked for:
  */
-export function needsPaidClarityCheck(assessment: AmbiguityAssessment): boolean {
-  return assessment.verdict === "unsure";
+
+/** Does the caller reach for the paid model call? Every verdict except
+ *  `clear` does, because the paid call is what WRITES the question. This
+ *  is the policy, in one place; lib/clarification.ts calls it rather than
+ *  restating the condition. */
+export function willSpendOnQuestion(assessment: AmbiguityAssessment): boolean {
+  return assessment.verdict !== "clear";
+}
+
+/** Did the free reader reach a conclusion on its own? `unsure` is the
+ *  only verdict that did not. This is the number that says whether this
+ *  module is earning its place: a free reader that is `unsure` about
+ *  everything has moved the spend, not removed it. */
+export function freeReaderWasDecisive(assessment: AmbiguityAssessment): boolean {
+  return assessment.verdict !== "unsure";
 }

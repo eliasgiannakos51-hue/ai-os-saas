@@ -1160,7 +1160,11 @@
         "body": "Il voit vos entrées, vos objectifs et les fichiers que vous avez téléversés. Il ne voit rien que vous n'ayez pas ajouté. Il ne modifie rien sans que vous le demandiez."
       },
       "stop": "Arrêter",
-      "stopped": "Arrêté. Ce qui a été écrit est conservé, et seule cette partie est facturée."
+      "stopped": "Arrêté. Ce qui a été écrit est conservé, et seule cette partie est facturée.",
+      "clarificationTitle": "Une question rapide d’abord :",
+      "clarificationSkip": "Répondez quand même",
+      "clarificationContinue": "Envoyer",
+      "clarificationAnswerPlaceholder": "Votre réponse..."
     },
     "create": {
       "title": "Créer N'importe Quoi",

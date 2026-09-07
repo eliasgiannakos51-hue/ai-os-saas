@@ -4,7 +4,11 @@
 // nothing to do with the actual Anthropic call). lib/clarification.ts
 // re-exports everything here so server code has one place to import from.
 import { truncate } from "@/lib/text/truncate";
-export type ClarificationKind = "website" | "mission" | "automation" | "create" | "agent";
+export type ClarificationKind = "website" | "mission" | "automation" | "create" | "agent" | "chat";
+
+/** The free reader's answer, carried out of the check so it can be
+ *  recorded. See lib/ai/ambiguity.ts for what each one means. */
+export type ClarificationVerdict = "clear" | "vague" | "unsure";
 
 export type ClarificationCheckResult =
   | {
@@ -22,6 +26,47 @@ export type ClarificationCheckResult =
       suggestions: string[][];
     }
   | { needsClarification: false };
+
+/**
+ * The result WITH the verdict that produced it.
+ *
+ * WHY THE VERDICT LEAVES THE FUNCTION AT ALL. Until 2026-09-07 it did
+ * not: assessAmbiguity was called inside checkNeedsClarification, its
+ * answer decided whether to spend, and then it was dropped. So the one
+ * question nobody could answer about this feature was the only question
+ * worth asking — how often is it right? "Does it ask fewer questions" is
+ * unmeasurable without knowing what it decided and how often.
+ *
+ * `paidCheck` is the other half: a `clear` verdict costs nothing and a
+ * `vague` one costs a Sonnet call, so the two numbers together say what
+ * the free reader saved as well as what it decided.
+ */
+export type ClarificationDecision = ClarificationCheckResult & {
+  verdict: ClarificationVerdict;
+  /** Whether a paid model call was made to reach this result. */
+  paidCheck: boolean;
+};
+
+/**
+ * The three keys a settlement writes, so every caller records the same
+ * ones under the same names.
+ *
+ * ONE BUILDER RATHER THAN FIVE LITERALS. There are five surfaces that
+ * settle after a clarification check, and a per-day report that has to
+ * union `clarification_verdict` with `clarificationVerdict` because two
+ * of them were typed by hand is a report nobody trusts.
+ */
+export function clarificationMetadata(decision: ClarificationDecision): {
+  clarification_verdict: ClarificationVerdict;
+  clarification_paid: boolean;
+  clarification_asked: boolean;
+} {
+  return {
+    clarification_verdict: decision.verdict,
+    clarification_paid: decision.paidCheck,
+    clarification_asked: decision.needsClarification,
+  };
+}
 
 /**
  * How many questions a user may be asked at once, PER SURFACE.
@@ -55,6 +100,13 @@ export const CLARIFICATION_QUESTION_CAP: Record<ClarificationKind, number> = {
   automation: 1,
   create: 1,
   agent: 1,
+  // ONE, and chat is the surface where the number matters least and the
+  // TIMING matters most. A chat question costs the person one reply, not
+  // a rebuilt artefact — but it interrupts a conversation, which the
+  // other four surfaces do not. So the discipline here is not "how many"
+  // but "how rarely": the free reader decides, and only what it cannot
+  // decide reaches a question at all.
+  chat: 1,
 };
 
 /**

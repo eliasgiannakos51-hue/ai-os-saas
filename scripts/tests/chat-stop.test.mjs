@@ -95,8 +95,14 @@ console.log("\n== 2. the route stops, counts, and settles the part that arrived 
   check("...before it is settled", helper.indexOf('from("chat_messages").insert') < helper.indexOf("settleReservation("));
   check("the settlement is marked stopped, with whether the count was real", /stopped: true,\s*outputTokensCounted: params\.counted,/.test(helper));
   check("memory extraction does not run on a stopped turn", !/extractAndStoreMemory/.test(stoppedPath) && !/extractAndStoreMemory/.test(helper));
+  // THE ORDINARY SETTLEMENT, named by its feature rather than by being
+  // the first settleReservation in the file. 2026-09-07 put one above it
+  // — the clarifying-question pre-check, which returns before any answer
+  // exists — and a first-occurrence index then pointed at that one.
+  // Same correction as billing-coverage §12, same reason.
   check("...so the chat's ordinary settlement still follows memory extraction (billing-coverage §12)",
-    route.indexOf("await extractAndStoreMemory({") < route.indexOf("await settleReservation({"));
+    route.indexOf("await extractAndStoreMemory({") <
+      route.indexOf('feature: isFreeMessage ? "chat_free" : "chat_message"'));
 }
 
 console.log("\n== 3. the client: one press, the box comes back ==");

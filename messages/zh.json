@@ -1160,7 +1160,11 @@
         "body": "它能看到你的记录、你的目标和你上传的文件。它看不到任何你没有添加的内容。除非你要求，否则它不会更改任何东西。"
       },
       "stop": "停止",
-      "stopped": "已停止。已写出的内容会保留，且只按这部分计费。"
+      "stopped": "已停止。已写出的内容会保留，且只按这部分计费。",
+      "clarificationTitle": "先问一个小问题：",
+      "clarificationSkip": "直接回答就好",
+      "clarificationContinue": "发送",
+      "clarificationAnswerPlaceholder": "你的回答……"
     },
     "create": {
       "title": "创建任何内容",

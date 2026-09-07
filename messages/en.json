@@ -1494,7 +1494,8 @@
           "chatWidget": "the chat widget"
         },
         "stopped": "Stopped by you. {count, plural, =0 {Nothing was charged} one {# credit was charged} other {# credits were charged}} for the part that was generated; the rest of the hold was released.",
-        "spelling": "{count, plural, one {One Greek word may be misspelled} other {# Greek words may be misspelled}}: {words}. Nothing was changed — check them, a name or a brand is not a mistake."
+        "spelling": "{count, plural, one {One Greek word may be misspelled} other {# Greek words may be misspelled}}: {words}. Nothing was changed — check them, a name or a brand is not a mistake.",
+        "sameSkeleton": "This site has the same structure as {name} — {percent}% the same shape. Nothing was changed; two sites of one business are often meant to match, and only you can say whether these are."
       }
     },
     "marketplace": {

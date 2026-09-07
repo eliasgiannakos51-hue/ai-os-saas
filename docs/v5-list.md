@@ -102,7 +102,48 @@ end. It needs a balance, and — for the free path the owner asked for
 first — the URL of a site that already exists. Both arrived empty again
 on 2026-09-07, the fifth round running.
 
-### 3. The three measurements — TWO OF THREE RAN
+### 3. The three measurements — TWO OF THREE RAN, and the third turned out not to need a model
+
+**2026-09-07: the structural half of the pairs question was answered for
+$0.00.** `scripts/website-pairs-check.mjs` costs about $7.50 to generate
+twenty sites and score them, and about $2.30 for three pairs. What it
+estimates from three samples, the shipped draw computes exactly: the
+section order is chosen by `lib/website-variation.ts` before a single
+token is generated, so the probability that two people's sites of one
+kind share a skeleton is a property of that function.
+
+| | before | after |
+|---|---|---|
+| two strangers, same kind, first site each | 33.3% | **16.7%** |
+| one person's sites 2..N repeat one they had | 59.9% | **0** |
+| one person, five sites, all the same order | 1.0% | **0** |
+| expected structural similarity, two strangers | 0.660 | **0.590** |
+
+Measured over 20,000 pairs and 4,000 people in
+`scripts/tests/section-order-space.test.mjs`, which costs nothing and
+runs in the build.
+
+**All three steps are in.** Exclusion is a per-person CYCLE rather than a
+draw (`orderIndexFor`) — a fair draw could never have made the second row
+zero. Three orders became six, which is the ceiling: four of the seven
+archetypes have exactly three movable sections and 3! = 6. And the
+produced page is now COMPARED against the person's previous one after
+generation, with a `sameSkeleton` note in ten languages, because the
+order is an instruction and rule 23 says an instruction a model can
+ignore will be ignored.
+
+**Two things were found on the way.** The prompt had eighteen characters
+of headroom under its 30,000 ceiling, so six orders in prose did not fit
+— numbering each shape's sections once made room and left the prompt 330
+characters smaller than it started. And three shapes listed an order that
+contradicted their own FIRST line; the contradiction is resolved in the
+prompt now, in the direction that keeps the opening varying.
+
+*What is left, and it still needs the key:* whether the MODEL obeys the
+letter it is given, and what the pages look like. That is what
+`website-pairs-check.mjs --pairs 3` measures, and it has never run.
+
+### The original three measurements — TWO OF THREE RAN
 **~2 hours left.** Blocked on: an API balance. Spent so far: **$0.53**,
 then the account ran dry mid-round.
 

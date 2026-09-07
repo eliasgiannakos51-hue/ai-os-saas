@@ -27,6 +27,25 @@
  * number looks good.
  */
 
+/**
+ * THE TWO LINES, IN ONE PLACE.
+ *
+ * scripts/website-variety-check.mjs stated them in prose,
+ * scripts/website-pairs-check.mjs restated them as its own two constants
+ * "so the two scripts cannot drift apart silently" — which left THREE
+ * copies once the process route started using them too. They live here,
+ * beside the function that produces the number they judge, and the
+ * scripts read them from here.
+ *
+ * SAME_SKELETON is the line the generation note is raised on: above it,
+ * two pages are not similar, they are the same page in different words.
+ * SIMILAR_SKELETON is reported by the measurement scripts and is not
+ * acted on anywhere — a note on every merely-similar pair would be a note
+ * on most pairs, and a warning that fires constantly is furniture.
+ */
+export const SAME_SKELETON = 0.85;
+export const SIMILAR_SKELETON = 0.7;
+
 /** The landmarks a visitor actually meets, in document order. */
 const STRUCTURAL_TAGS = new Set([
   "header",

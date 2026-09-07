@@ -46,9 +46,20 @@ const MUTANTS = [
   {
     name: "'χωρίς' is no longer a negation",
     file: LIB,
-    from: "|χωρίς|όχι|να μην",
-    to: "|όχι|να μην",
+    from: "|χωρίς|όχι|απ[όέ]φυγε|να μην",
+    to: "|όχι|απ[όέ]φυγε|να μην",
     expect: "'χωρίς newsletter' alone is read",
+  },
+  {
+    // THE FIRST-PERSON REFUSAL GOES. This is the state the code shipped
+    // in until 2026-09-07: μην/χωρίς/όχι were read and "δεν θέλω" — the
+    // ordinary way a Greek person says it — was not, so nothing was
+    // forbidden and every enforcement below had nothing to enforce.
+    name: "'δεν θέλω' stops being a negation, as it was until 2026-09-07",
+    file: LIB,
+    from: "|δεν? (?:θέλω|θέλουμε|χρειάζομαι|χρειαζόμαστε|θα ήθελα|επιθυμώ)",
+    to: "",
+    expect: "'δεν θέλω φόρμα κράτησης' is read as a prohibition",
   },
   {
     name: "the adversative cut is dropped, so 'but keep the map' forbids the map",

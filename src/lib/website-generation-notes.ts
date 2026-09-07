@@ -29,7 +29,19 @@ export type GenerationNote =
    *  rewritten: one of these may be a brand, a village or a surname, and
    *  silently "correcting" somebody's own business name is worse than the
    *  typo. See lib/website-greek-spelling.ts. */
-  | { kind: "spelling"; words: string[] };
+  | { kind: "spelling"; words: string[] }
+  /** THE NEW SITE HAS THE SAME SKELETON AS ONE THE SAME PERSON ALREADY
+   *  HAS. `percent` is the structural similarity as a whole number, and
+   *  `against` names the older site so the comparison can be checked
+   *  rather than believed.
+   *
+   *  REPORTED, NEVER REGENERATED. A second site with the same structure
+   *  can be exactly right — two branches of one shop SHOULD match — and
+   *  spending the owner's credits again on a suspicion is worse than
+   *  saying what was measured and letting them decide. See
+   *  lib/website-structural-similarity.ts for what "structure" means
+   *  here, and what it cannot see. */
+  | { kind: "sameSkeleton"; percent: number; against: string };
 
 const FEATURES: readonly NegativeFeature[] = [
   "booking", "contactForm", "newsletter", "map", "prices", "gallery", "testimonials", "blog", "social", "chatWidget",
@@ -55,6 +67,15 @@ export function parseGenerationNotes(raw: unknown): GenerationNote[] {
       out.push({ kind: "mapZoom", count: n.count });
     } else if (n.kind === "stopped" && isNonNegativeInt(n.credits)) {
       out.push({ kind: "stopped", credits: n.credits });
+    } else if (
+      n.kind === "sameSkeleton" &&
+      isNonNegativeInt(n.percent) &&
+      n.percent > 0 &&
+      n.percent <= 100 &&
+      typeof n.against === "string" &&
+      n.against.trim().length > 0
+    ) {
+      out.push({ kind: "sameSkeleton", percent: n.percent, against: n.against.trim().slice(0, 80) });
     } else if (n.kind === "spelling" && Array.isArray(n.words)) {
       // Read as defensively as every other note: only strings, only the
       // ones with something in them, capped so a malformed row cannot

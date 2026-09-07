@@ -1052,6 +1052,11 @@ export function WebsiteBuilderWorkspace({
         return t("notes.mapZoom", { count: note.count });
       case "stopped":
         return t("notes.stopped", { count: note.credits });
+      case "sameSkeleton":
+        // THE OLDER SITE IS NAMED. "This looks like another of your sites"
+        // is unactionable; "87% the same structure as Καφέ Λιμάνι" can be
+        // opened in the other tab and disagreed with.
+        return t("notes.sameSkeleton", { percent: note.percent, name: note.against });
       case "spelling":
         // The words themselves, joined — the owner is the only one who can
         // say whether "ρεμπα" is a typo or a brand, and they can only say

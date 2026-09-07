@@ -475,6 +475,70 @@ It cannot decide whether any given sentence is a bug — no scan can — so it
 does the one thing a scan can do honestly: keep the list small enough that
 a person can read it.
 
+## A fair draw where a promise was wanted
+
+**The complaint was "two sites of the same kind feel like one template",
+and five rounds of answers were about the SIZE of the space.** The
+section order — the axis that decides the skeleton — was hashed per site
+into a list of three. Everything about that was fair, deterministic and
+well tested, and it produced these numbers, measured over 20,000
+constructed pairs and 4,000 constructed people:
+
+| | |
+|---|---|
+| two strangers, same kind, first site each | **33.3%** the same skeleton |
+| one person's own sites 2 to 5 | **59.9%** repeated a skeleton they had |
+| one person, five sites, all identical | **1.0%** |
+
+**None of that is a bug in the hash.** A three-sided die lands on the
+same face a third of the time; that is what dice do. The mistake was
+reaching for a die at all where the product could make a promise.
+
+**Two different questions, and only one of them needs randomness.** Two
+strangers' draws cannot see each other, so 1-in-N is a floor for them and
+the only lever is N. But *one person's own* sites are all known to the
+same account, and "your next site does not have your last site's
+skeleton" is something a cycle can guarantee and a draw never can. The
+order is now drawn once per person and stepped: their first N sites use
+every order exactly once, and the first repeat is site N+1.
+
+**The test.** For any "should be different" property, ask who is
+comparing. If the two things being compared are both visible to the same
+piece of code, a fair draw is the weaker answer — it gets you a
+probability where an ordering would have got you a guarantee. Randomness
+is for the case where coordination is impossible, not the case where it
+was not attempted.
+
+*Caught by:* `scripts/tests/section-order-space.test.mjs` measures both
+numbers from the shipped function — no model call, no cost — and asserts
+the repeat count is exactly zero rather than "low".
+`section-order-space.mutation.mjs` turns the cycle back into a draw and
+requires that clause to go red.
+
+## The ceiling with eighteen characters left
+
+**Found by breaking it.** Adding three more section orders to each of the
+seven archetypes pushed the cached system prompt from 29,982 characters
+to 32,188, against a gate that holds it under 30,000. The gate was right
+and the addition was not — but the useful part is the first number:
+**the prompt had 18 characters of headroom**, and nothing said so.
+
+Every prompt-sized addition anyone proposed would have failed that gate.
+There was no signal for it short of a red build: the check reports a
+total and a ceiling, and 29,982 against 30,000 reads exactly like 12,000
+against 30,000 to a person skimming a passing test.
+
+**What fixed it was not a bigger ceiling.** Each shape wrote its section
+names out once per order, three times over; numbering them once and
+referring to them by number in a single ORDERS line made room for twice
+as many orders and left the prompt 330 characters SMALLER than it started.
+A limit that looks like it needs raising is often a duplication that
+needs removing.
+
+**The test.** A budget check that prints only "under the limit" is a
+check whose most important state — nearly at it — is indistinguishable
+from its safest one. Print the headroom, not the total.
+
 ## A cost decided by a fallback nobody wrote down
 
 **Found 2026-09-07, and only because something else had to report it.**

@@ -93,7 +93,18 @@ console.log("\n== 6. wired into the generation, in the right place ==");
 const processRoute = readFileSync("src/app/api/websites/generate/process/route.ts", "utf8");
 check(
   "the process route draws per site (user id + site count + brief)",
-  /pickVariation\(\[user\.id, priorSites \?\? 0, description\]\)/.test(processRoute)
+  /pickVariation\(\[user\.id, priorSites \?\? 0, description\], \{/.test(processRoute)
+);
+// AND HANDS IT THE CYCLE. The order axis stopped being a hash on
+// 2026-09-07: a person's next site takes the NEXT section order instead
+// of an independently drawn one, which is what took "already had this
+// skeleton" from 59.9% to zero across their first six sites. The cycle is
+// an OPTIONAL argument, so the route passing it is the whole difference
+// between the guarantee holding and the fallback hash running in
+// production with every gate green. See orderIndexFor.
+check(
+  "...and hands it the cycle, so the exclusion is real in production",
+  /\{\s*userKey: user\.id,\s*priorSites: priorSites \?\? 0,\s*\}/.test(processRoute)
 );
 check(
   "and hands the directive to generateWebsiteHtml",

@@ -59,12 +59,17 @@ const outDir = path.resolve(opt("--out", dryDir ?? "pairs-out"));
 const pairLimit = Number(opt("--pairs", "10"));
 const sameUser = flag("--same-user");
 
-// The lines website-variety-check.mjs draws, restated here so the two
-// scripts cannot drift apart silently: a pair is the SAME SKELETON above
-// SAME_SKELETON, a SIMILAR one above SIMILAR_SKELETON; the SAME LOOK
-// above SAME_LOOK, and over the brief's target above LOOK_TARGET.
-const SAME_SKELETON = 0.85;
-const SIMILAR_SKELETON = 0.7;
+// THE TWO STRUCTURAL LINES ARE IMPORTED, NOT RESTATED — see below, after
+// the module load. This comment used to say they were "restated here so
+// the two scripts cannot drift apart silently", and restating a number in
+// a second file is how two files drift: the process route became a THIRD
+// place that needed them, at which point the copies had to go. They now
+// live in src/lib/website-structural-similarity.ts beside the function
+// that produces the number they judge.
+//
+// The two VISUAL lines stay here: they judge site-fingerprint.mjs's
+// visual score, which is a script-side measurement with no counterpart in
+// the product, so there is nowhere else for them to live.
 const SAME_LOOK = 0.7;
 const LOOK_TARGET = 0.3;
 
@@ -139,6 +144,7 @@ const { structureFingerprint, sequenceSimilarity, visualSimilarity, designDecisi
 );
 const { loadTsWithDeps } = await import("./tests/load-ts.mjs");
 const structural = await loadTsWithDeps("src/lib/website-structural-similarity.ts");
+const { SAME_SKELETON, SIMILAR_SKELETON } = structural;
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
@@ -206,8 +212,19 @@ if (!dryDir) {
     // product cannot separate by memory; --same-user seeds one user's
     // first and second site, which is the pair step 1 of the proposal
     // separates by exclusion.
-    const seed = sameUser ? ["pairs-check-a", side === "a" ? 0 : 1, brief] : [`pairs-check-${side}`, 0, brief];
-    const draw = variation.variationDirective(variation.pickVariation(seed));
+    const userKey = sameUser ? "pairs-check-a" : `pairs-check-${side}`;
+    const priorSites = sameUser && side === "b" ? 1 : 0;
+    const seed = [userKey, priorSites, brief];
+    // THE CYCLE IS PASSED, exactly as the process route passes it.
+    //
+    // Without it pickVariation falls back to hashing the order like every
+    // other axis, and --same-user would measure a code path production no
+    // longer runs: a hash gives one person's second site a 1-in-6 chance
+    // of the skeleton their first one had, and the cycle gives it zero.
+    // The script would have reported the product as worse than it is,
+    // which is the same defect as reporting it better — see
+    // docs/shapes.md, "A fixture that is not production".
+    const draw = variation.variationDirective(variation.pickVariation(seed, { userKey, priorSites }));
     const html = await wb.generateWebsiteHtml(apiKey, brief, undefined, () => {}, undefined, costs, draw);
     const totals = costs.totals();
     spentUsd += totals.usdCost;

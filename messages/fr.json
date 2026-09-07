@@ -1494,7 +1494,8 @@
           "chatWidget": "le widget de chat"
         },
         "stopped": "Vous l'avez arrêté. {count, plural, =0 {Rien n'a été facturé} one {# crédit a été facturé} other {# crédits ont été facturés}} pour la partie générée ; le reste de la réservation a été libéré.",
-        "spelling": "{count, plural, one {Un mot grec est peut-être mal orthographié} other {# mots grecs sont peut-être mal orthographiés}} : {words}. Rien n'a été modifié — vérifiez-les, un nom ou une marque n'est pas une faute."
+        "spelling": "{count, plural, one {Un mot grec est peut-être mal orthographié} other {# mots grecs sont peut-être mal orthographiés}} : {words}. Rien n'a été modifié — vérifiez-les, un nom ou une marque n'est pas une faute.",
+        "sameSkeleton": "Ce site a la même structure que {name} — {percent}% de forme commune. Rien n’a été modifié ; deux sites d’une même activité doivent souvent se ressembler, et vous seul pouvez dire si c’est le cas ici."
       }
     },
     "marketplace": {

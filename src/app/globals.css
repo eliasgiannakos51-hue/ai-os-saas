@@ -2135,3 +2135,166 @@ html[data-motion="reduce"] .voice-orb-ring {
     max-width: 61ch;
   }
 }
+
+/* ======================================================================
+   WRITING DIRECTION
+   ======================================================================
+
+   THE SAME CATALOGUE THIS APP HANDS TO MODELS. lib/website-builder.ts's
+   WRITING_DIRECTION_SECTION tells every model this product calls to lay
+   out with logical properties, never hide with a negative offset, mirror
+   the icons that point and only those, and not scroll sideways in either
+   direction. The application asked all of that of others while shipping
+   <html lang="ar"> with no dir at all. scripts/tests/rtl.test.mjs reads
+   that section out of the prompt and checks this block against it, so the
+   two cannot drift into two catalogues.
+
+   WHAT IS NOT HERE. Most of the layout is Tailwind, and Tailwind's own
+   logical utilities (ms-/me-, ps-/pe-, start-/end-, border-s/border-e,
+   text-start/text-end) are the right place for it — they compile to
+   margin-inline-start and friends, so a component that uses them needs
+   nothing in this file. This block is for the three things a utility
+   class cannot express: which icons turn around, which animations carry a
+   direction, and the handful of hand-written rules further up this file
+   that were pinned to a physical side.
+   ------------------------------------------------------------------- */
+
+/* ICONS THAT POINT MUST TURN AROUND — and ONLY those.
+ *
+ * THE HALF THAT IS EASY TO GET WRONG is the second one. `[dir="rtl"] svg
+ * { transform: scaleX(-1) }` is one line, mirrors the arrows, and also
+ * mirrors the phone, the envelope, the clock, the logo and every chart
+ * glyph in the product. The prompt says it in as many words: "Icons that
+ * do not point — a phone, an envelope, a clock — must NOT be flipped."
+ * So this is a NAMED LIST, and rtl.test.mjs fails on any pointing icon
+ * used in src/ that is missing from it.
+ *
+ * THE SELECTORS ARE LUCIDE'S OWN CLASS NAMES. lucide-react emits
+ * `lucide lucide-<kebab-name>` on every icon (verified against the
+ * installed build, not assumed — node_modules/lucide-react/dist/cjs
+ * builds it as `lucide-${toKebabCase(toPascalCase(iconName))}`), so no
+ * component needs editing to take part. rtl.test.mjs renders an icon and
+ * asserts the class is really there, so a lucide upgrade that renames
+ * them turns a gate red instead of silently un-mirroring every arrow.
+ *
+ * NOT MIRRORED, ON PURPOSE, and each for a stated reason:
+ *   .lucide-trending-up / -down   its meaning is the VERTICAL axis. "Up"
+ *                                 is up in every script, and the charts
+ *                                 these sit beside (recharts) are not
+ *                                 mirrored either, so a flipped glyph
+ *                                 would disagree with the line next to it.
+ *   .lucide-phone / -mail / -clock  the prompt's own three examples.
+ *   .lucide-chevron-up / -down    vertical; a dropdown opens downward in
+ *                                 Arabic too.
+ *   .lucide-external-link         a fixed real-world glyph, like a logo.
+ */
+[dir="rtl"] .lucide-arrow-right,
+[dir="rtl"] .lucide-arrow-left,
+[dir="rtl"] .lucide-arrow-up-right,
+[dir="rtl"] .lucide-arrow-down-right,
+[dir="rtl"] .lucide-arrow-up-left,
+[dir="rtl"] .lucide-arrow-down-left,
+[dir="rtl"] .lucide-arrow-big-right,
+[dir="rtl"] .lucide-arrow-big-left,
+[dir="rtl"] .lucide-chevron-right,
+[dir="rtl"] .lucide-chevron-left,
+[dir="rtl"] .lucide-chevrons-right,
+[dir="rtl"] .lucide-chevrons-left,
+[dir="rtl"] .lucide-corner-down-right,
+[dir="rtl"] .lucide-corner-down-left,
+[dir="rtl"] .lucide-corner-up-right,
+[dir="rtl"] .lucide-corner-up-left,
+[dir="rtl"] .lucide-move-right,
+[dir="rtl"] .lucide-move-left,
+[dir="rtl"] .lucide-undo,
+[dir="rtl"] .lucide-undo-2,
+[dir="rtl"] .lucide-redo,
+[dir="rtl"] .lucide-redo-2,
+[dir="rtl"] .lucide-reply,
+[dir="rtl"] .lucide-forward,
+[dir="rtl"] .lucide-skip-forward,
+[dir="rtl"] .lucide-skip-back,
+[dir="rtl"] .lucide-log-in,
+[dir="rtl"] .lucide-log-out,
+[dir="rtl"] .lucide-send,
+[dir="rtl"] .lucide-send-horizontal,
+[dir="rtl"] .lucide-panel-left,
+[dir="rtl"] .lucide-panel-right,
+[dir="rtl"] .lucide-panel-left-close,
+[dir="rtl"] .lucide-panel-left-open,
+[dir="rtl"] .lucide-indent-increase,
+[dir="rtl"] .lucide-indent-decrease,
+[dir="rtl"] .lucide-list-ordered {
+  transform: scaleX(-1);
+}
+
+/* THE ACTIVE-NAV RAIL, on the leading edge rather than the left one.
+ *
+ * The rule further up this file pins .nav-item::after to `left: 0` with
+ * `border-radius: 0 9999px 9999px 0` — a 3px bar rounded on its right
+ * side only, which reads as "attached to the left wall". In a mirrored
+ * page the wall is on the right and both halves have to move: the offset
+ * AND the two rounded corners. Getting one and not the other is a rail
+ * that floats off the edge it is supposed to be welded to.
+ *
+ * The base rule keeps its physical spelling so nothing about the nine
+ * left-to-right locales changes; this overrides only under [dir="rtl"].
+ */
+[dir="rtl"] .nav-item::after {
+  left: auto;
+  right: 0;
+  border-radius: 9999px 0 0 9999px;
+}
+
+/* PROSE INDENTATION follows the reading direction. `padding-left: 1.5em`
+ * on a list is not decoration — it is the indent that says "these items
+ * hang under that line", and in Arabic it hangs on the wrong side. The
+ * document editor is the one place in this app that renders user prose
+ * with hand-written CSS rather than Tailwind. */
+.document-editor-content ul,
+.document-editor-content ol {
+  padding-left: 0;
+  padding-inline-start: 1.5em;
+}
+
+/* MOTION HAS A DIRECTION TOO.
+ *
+ * The prompt's rule: prefer opacity and translateY, which mean the same
+ * thing in every script; if something must move horizontally, mirror the
+ * sign under [dir="rtl"]. Two animations in this file move horizontally
+ * and both are about a row LEAVING toward the start of the line, so both
+ * mirror rather than being rewritten on the Y axis — a row that slid
+ * upward as it deleted would collide with the collapse it is doing at the
+ * same time. */
+@keyframes row-collapse-out-rtl {
+  0% { opacity: 1; transform: none; max-height: var(--row-h, 200px); }
+  45% { opacity: 0; transform: translateX(8px); max-height: var(--row-h, 200px); }
+  100% {
+    opacity: 0;
+    transform: translateX(8px);
+    max-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+  }
+}
+[dir="rtl"] .row-collapse-out {
+  animation-name: row-collapse-out-rtl;
+}
+
+/* THE SKELETON SHIMMER IS DELIBERATELY NOT HERE, and the first draft of
+ * this block had it. Two reasons, and the second is the one that matters.
+ *
+ *   - It was written `[dir="rtl"] .skeleton-shimmer`. The class is
+ *     `.skeleton`; `skeleton-shimmer` is the KEYFRAMES name. A selector
+ *     that matches nothing looks exactly like one that works, which is
+ *     this repository's oldest recurring defect.
+ *   - Fixing the selector would still have been wrong. The prompt's own
+ *     carve-out is "a background-position on a decorative texture" stays
+ *     physical, and its test is "judge by whether it would look wrong
+ *     reflected". A loading sweep does not look wrong in either
+ *     direction. So the rule is absent because the catalogue says it
+ *     should be, not because it was forgotten.
+ */

@@ -97,7 +97,7 @@ export default async function RoutingPage() {
           <div className="mt-6 overflow-x-auto rounded-2xl border border-border bg-panel">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
-                <tr className="border-b border-border text-left text-xs text-muted">
+                <tr className="border-b border-border text-start text-xs text-muted">
                   <th className="p-3 font-medium">{t("model")}</th>
                   <th className="p-3 font-medium">{t("decisions")}</th>
                   <th className="p-3 font-medium">{t("charged")}</th>

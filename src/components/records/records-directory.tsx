@@ -87,7 +87,7 @@ export function RecordsDirectory({ groups }: { groups: DirectoryGroup[] }) {
   return (
     <div className="mt-6">
       <label className="relative flex min-w-0 items-center">
-        <Search className="pointer-events-none absolute left-3 h-4 w-4 text-muted" aria-hidden="true" />
+        <Search className="pointer-events-none absolute start-3 h-4 w-4 text-muted" aria-hidden="true" />
         <span className="sr-only">{t("searchLabel")}</span>
         <input
           type="search"
@@ -96,7 +96,7 @@ export function RecordsDirectory({ groups }: { groups: DirectoryGroup[] }) {
           placeholder={t("searchLabel")}
           // text-base, not text-sm: iOS Safari zooms the whole page in on
           // focus for any input under 16px.
-          className="min-h-[44px] w-full rounded-xl border border-border bg-panel py-2 pl-9 pr-3 text-base text-foreground placeholder:text-muted focus:border-orange-500/50 focus:outline-none"
+          className="min-h-[44px] w-full rounded-xl border border-border bg-panel py-2 ps-9 pe-3 text-base text-foreground placeholder:text-muted focus:border-orange-500/50 focus:outline-none"
         />
       </label>
 

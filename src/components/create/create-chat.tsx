@@ -212,7 +212,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             className={`relative z-[1] min-h-32 max-h-[60vh] w-full resize-y rounded-2xl border-0 bg-panel/85 px-4 py-4 text-base text-foreground outline-none backdrop-blur-sm transition-all duration-200 placeholder:text-muted ${
-              micHere ? "pr-[9.5rem]" : "pr-28"
+              micHere ? "pe-[9.5rem]" : "pe-28"
             }`}
             autoFocus
           />
@@ -220,7 +220,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
               textarea to be read and corrected — Create spends real
               credits on the first press of Send, so a mishearing that
               went straight through would cost money. */}
-          <div className="absolute bottom-3 right-[6.75rem] z-[2]">
+          <div className="absolute bottom-3 end-[6.75rem] z-[2]">
             <VoiceInput
               compact
               disabled={loading}
@@ -235,7 +235,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
               onClick={() => imageInputRef.current?.click()}
               aria-label={t("attachImage")}
               title={t("attachImage")}
-              className="absolute bottom-3 right-16 z-[2] flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              className="absolute bottom-3 end-16 z-[2] flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               <Paperclip className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -244,7 +244,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             type="submit"
             disabled={loading || !input.trim()}
             aria-label={t("send")}
-            className="absolute bottom-3 right-3 z-[2] flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fcd34d_0%,#f97316_60%,#dc4a04_100%)] text-black shadow-[0_4px_18px_-4px_rgba(249,115,22,0.7)] transition-all duration-200 hover:brightness-110 hover:shadow-[0_6px_26px_-4px_rgba(249,115,22,0.9)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+            className="absolute bottom-3 end-3 z-[2] flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fcd34d_0%,#f97316_60%,#dc4a04_100%)] text-black shadow-[0_4px_18px_-4px_rgba(249,115,22,0.7)] transition-all duration-200 hover:brightness-110 hover:shadow-[0_6px_26px_-4px_rgba(249,115,22,0.9)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
           >
             {loading ? (
               <ThinkingIndicator size="sm" tone="inherit" />

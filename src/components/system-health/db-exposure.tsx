@@ -76,7 +76,7 @@ export function DbExposure({ rows }: { rows: ExposureRow[] | null }) {
                   "0, expected 0" on eight green rows is noise that makes
                   the one red row harder to find. */}
               {!r.ok && <span className="text-muted"> (expected {r.expected})</span>}
-              {r.detail && <span className="ml-1 text-muted">— {r.detail}</span>}
+              {r.detail && <span className="ms-1 text-muted">— {r.detail}</span>}
             </span>
           </li>
         ))}

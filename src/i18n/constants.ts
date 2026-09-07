@@ -16,11 +16,18 @@ export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 // with lib/languages.ts's LANGUAGES list (the selector only ever shows
 // locales that are actually translated; see that file's comment for why).
 //
-// "ar" ships text-only Arabic translations with no RTL layout support yet
-// (no dir="rtl", no logical-property/mirrored-layout pass) — the Arabic
-// text itself still renders right-to-left per Unicode's bidi algorithm,
-// but surrounding UI (nav, icons, alignment) stays LTR. Known limitation,
-// tracked rather than silently shipped: full RTL layout is a follow-up.
+// "ar" is laid out right-to-left. app/layout.tsx sets dir="rtl" on <html>
+// from this locale via lib/text-direction.ts, the app's own half of the
+// catalogue lib/website-builder.ts already hands to every model it calls.
+//
+// THIS COMMENT USED TO SAY THE OPPOSITE — "no dir=\"rtl\", no
+// logical-property/mirrored-layout pass ... full RTL layout is a
+// follow-up" — and it was true and honest for as long as it stood. It is
+// also exactly the kind of sentence that outlives the fact it describes,
+// so scripts/tests/rtl.test.mjs reads this comment and app/layout.tsx
+// together and goes red if they disagree in EITHER direction: a comment
+// claiming RTL support the layout does not set, or a layout setting a dir
+// this comment still denies.
 export const SUPPORTED_LOCALES = [
   "en",
   "el",

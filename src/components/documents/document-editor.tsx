@@ -169,7 +169,7 @@ export function DocumentEditor({
 
         {/* The star pins to this block's top-right, next to the title, so
             the detail view puts the control where the card does. */}
-        <div className="relative mb-4 pr-12">
+        <div className="relative mb-4 pe-12">
           <input
             type="text"
             value={title}

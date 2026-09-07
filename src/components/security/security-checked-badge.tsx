@@ -101,7 +101,7 @@ export function SecurityCheckedBadge({
       {open && (
         <div
           ref={panelRef}
-          className="absolute left-0 top-full z-20 mt-1.5 w-72 rounded-xl border border-border bg-panel p-3 text-left shadow-xl"
+          className="absolute start-0 top-full z-20 mt-1.5 w-72 rounded-xl border border-border bg-panel p-3 text-start shadow-xl"
         >
           <div className="mb-2 flex items-center justify-between">
             <p className="text-xs font-semibold text-foreground">{t("title")}</p>

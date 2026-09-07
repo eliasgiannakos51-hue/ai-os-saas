@@ -295,7 +295,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                 // 343x42 measured — two pixels short of the size a finger
                 // reliably hits, on the screen that decides whether a new
                 // user gets past the first minute.
-                className={`flex min-h-[44px] items-center rounded-xl border p-3 text-left text-xs font-medium transition-colors duration-150 ${
+                className={`flex min-h-[44px] items-center rounded-xl border p-3 text-start text-xs font-medium transition-colors duration-150 ${
                   goal === value
                     ? "border-orange-500 bg-orange-500/[0.06] text-foreground"
                     : "border-border bg-panel/60 text-muted hover:text-foreground"
@@ -468,7 +468,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                 <div className="space-y-1.5">
                   <p className="text-[11px] font-medium text-muted">{t("previewTitle")}</p>
                   <div className="overflow-x-auto rounded-xl border border-border bg-panel/60">
-                    <table className="w-full text-left text-[11px]">
+                    <table className="w-full text-start text-[11px]">
                       <thead>
                         <tr className="border-b border-border">
                           <th className="p-2 font-medium text-muted">{t("previewSource")}</th>
@@ -649,7 +649,7 @@ function SourceCard({
     <button
       type="button"
       onClick={onSelect}
-      className="flex min-h-[44px] items-center rounded-xl border border-border bg-panel/60 p-3 text-left transition-colors duration-150 hover:border-orange-500/40"
+      className="flex min-h-[44px] items-center rounded-xl border border-border bg-panel/60 p-3 text-start transition-colors duration-150 hover:border-orange-500/40"
     >
       <Icon className="mb-1.5 h-4 w-4 text-orange-400" aria-hidden="true" />
       <p className="text-xs font-semibold text-foreground">{title}</p>

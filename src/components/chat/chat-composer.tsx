@@ -131,7 +131,7 @@ export const ChatComposer = forwardRef<
           // viewport-relative cap grows with the screen instead of
           // pinning the composer to one small absolute size.
           className={`focus-glow max-h-[45vh] min-h-[60px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-panel px-4 py-3.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-orange-500/60 ${
-            voiceLoaded ? "pr-[7.5rem]" : "pr-14"
+            voiceLoaded ? "pe-[7.5rem]" : "pe-14"
           }`}
           autoFocus
         />
@@ -140,7 +140,7 @@ export const ChatComposer = forwardRef<
             and fix — it does not send. Renders nothing at all when the
             deployment has no transcription provider or the plan does not
             include voice (components/voice/voice-input.tsx). */}
-        <div className="absolute bottom-2 right-14">
+        <div className="absolute bottom-2 end-14">
           <VoiceInput
             disabled={sending}
             onTranscript={(text) => {
@@ -164,7 +164,7 @@ export const ChatComposer = forwardRef<
             aria-label={t("stop")}
             title={t("stop")}
             data-testid="chat-stop"
-            className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full border border-orange-500/60 bg-panel text-orange-300 transition-all duration-200 hover:bg-orange-500/15"
+            className="absolute bottom-2 end-2 flex h-11 w-11 items-center justify-center rounded-full border border-orange-500/60 bg-panel text-orange-300 transition-all duration-200 hover:bg-orange-500/15"
           >
             <Square className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
           </button>
@@ -173,7 +173,7 @@ export const ChatComposer = forwardRef<
             type="submit"
             disabled={sending || !input.trim()}
             aria-label={t("send")}
-            className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+            className="absolute bottom-2 end-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
           >
             {sending ? (
               <ThinkingIndicator size="sm" tone="inherit" />

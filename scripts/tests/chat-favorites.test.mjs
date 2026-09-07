@@ -64,7 +64,13 @@ console.log("\n== 3. the star in the open conversation (β) ==");
 const ws = strip(readFileSync("src/components/chat/chat-workspace.tsx", "utf8"));
 check("the header renders it", /<FavoriteButton/.test(ws));
 check("...only once a conversation exists", /activeConversation && \(/.test(ws));
-check("...pinned to the right of the header bar", /ml-auto shrink-0/.test(ws));
+// TRAILING EDGE, NOT "RIGHT". ms-auto is margin-inline-start:auto, which
+// is identical to ml-auto in the nine left-to-right locales and is the
+// correct side in Arabic — see lib/text-direction.ts and
+// scripts/tests/rtl.test.mjs. The assertion is not weakened by the
+// rename: it still names one exact class pair, and it now names the one
+// that is right in all ten.
+check("...pinned to the trailing edge of the header bar", /ms-auto shrink-0/.test(ws));
 check("...and re-mounts when the sidebar copy toggles", /key=\{`\$\{activeConversation\.id\}:\$\{activeConversation\.is_favorited\}`\}/.test(ws));
 check("the two copies share ONE piece of state", /function toggleFavorite\(id: string, favorited: boolean\)/.test(ws));
 check("a brand-new conversation starts unstarred", /is_favorited: false/.test(ws));
@@ -105,7 +111,7 @@ check(
 check("resting ring when unstarred", /shadow-\[0_0_0_1px_rgba\(255,255,255,0\.09\)\]/.test(btn));
 check("filled amber with a glow when starred", /bg-orange-500\/20/.test(btn) && /0_0_16px_-2px_rgba\(249,115,22,0\.6\)/.test(btn));
 check("the star fills only when favourited", /fill=\{favorited \? "currentColor" : "none"\}/.test(btn));
-check("corner variant still pins at 12px", /absolute right-3 top-3/.test(btn));
+check("corner variant still pins at 12px from the trailing corner", /absolute end-3 top-3/.test(btn));
 // Both chat surfaces use the shared button rather than a copy.
 check("the chat surfaces import the shared component, not a fork",
   /from "@\/components\/favorites\/favorite-button"/.test(sidebar) &&

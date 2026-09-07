@@ -48,7 +48,7 @@ export function ThemeSettings() {
               type="button"
               onClick={() => selectTheme(option)}
               aria-pressed={selected}
-              className={`flex min-h-[44px] items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition-all duration-150 active:scale-[0.98] ${
+              className={`flex min-h-[44px] items-center gap-2 rounded-xl border px-3 py-2.5 text-start transition-all duration-150 active:scale-[0.98] ${
                 selected
                   ? "border-orange-500 bg-orange-500/[0.06]"
                   : "border-border hover:border-orange-500/40"
@@ -60,7 +60,7 @@ export function ThemeSettings() {
                 aria-hidden="true"
               >
                 <span
-                  className="absolute bottom-0 right-0 h-3 w-3 rounded-full border border-white/10"
+                  className="absolute bottom-0 end-0 h-3 w-3 rounded-full border border-white/10"
                   style={{ backgroundColor: swatch.accent }}
                 />
               </span>

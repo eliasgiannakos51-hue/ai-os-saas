@@ -501,13 +501,13 @@ export function ResearchWorkspace({
                         : t("inProgress")}
                   </p>
                   {report.current_question && report.status === "researching" && (
-                    <p className="line-clamp-2 pl-[18px] text-[11px] leading-relaxed text-muted/80">
+                    <p className="line-clamp-2 ps-[18px] text-[11px] leading-relaxed text-muted/80">
                       {report.current_question}
                     </p>
                   )}
                   {typeof report.questions_total === "number" && report.questions_total > 0 && (
                     <div
-                      className="ml-[18px] h-1 overflow-hidden rounded-full bg-border"
+                      className="ms-[18px] h-1 overflow-hidden rounded-full bg-border"
                       role="progressbar"
                       aria-valuemin={0}
                       aria-valuemax={report.questions_total}
@@ -521,7 +521,7 @@ export function ResearchWorkspace({
                       />
                     </div>
                   )}
-                  <p className="pl-[18px] text-[11px] text-muted/70">{t("keepsRunning")}</p>
+                  <p className="ps-[18px] text-[11px] text-muted/70">{t("keepsRunning")}</p>
                 </div>
               )}
             </EntityCard>

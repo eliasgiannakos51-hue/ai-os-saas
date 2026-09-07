@@ -1433,7 +1433,7 @@ export function WebsiteBuilderWorkspace({
                             className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-200"
                           >
                             {item.text}
-                            {item.count > 1 && <span className="ml-1 opacity-70">×{item.count}</span>}
+                            {item.count > 1 && <span className="ms-1 opacity-70">×{item.count}</span>}
                           </li>
                         ))}
                       </ul>
@@ -1543,7 +1543,7 @@ export function WebsiteBuilderWorkspace({
                           );
                           setDetailTab("preview");
                         }}
-                        className={`w-full rounded-lg border px-2.5 py-1.5 text-left text-xs transition-colors duration-150 ${
+                        className={`w-full rounded-lg border px-2.5 py-1.5 text-start text-xs transition-colors duration-150 ${
                           viewingVersion?.id === version.id
                             ? "border-orange-500/40 bg-orange-500/[0.03] text-foreground"
                             : "border-transparent text-muted hover:bg-panel-hover"
@@ -1555,7 +1555,7 @@ export function WebsiteBuilderWorkspace({
                         {" — "}
                         {version.change_description ?? t("versionOriginal")}
                         <span
-                          className="ml-1.5 text-muted"
+                          className="ms-1.5 text-muted"
                           title={formatDateTime(version.created_at, locale)}
                           suppressHydrationWarning
                         >

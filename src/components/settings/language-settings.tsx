@@ -74,7 +74,7 @@ export function LanguageSettings() {
               onClick={() => selectLanguage(lang.code)}
               disabled={pending}
               aria-pressed={isSelected}
-              className={`flex min-h-[44px] items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${
+              className={`flex min-h-[44px] items-center gap-2 rounded-xl border px-3 py-2.5 text-start transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${
                 isSelected
                   ? "border-orange-500 bg-orange-500/[0.06]"
                   : "border-border hover:border-orange-500/40"

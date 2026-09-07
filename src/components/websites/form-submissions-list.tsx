@@ -245,7 +245,7 @@ export function FormSubmissionsList({
                       if (!open) void markRead(row);
                     }}
                     aria-expanded={open}
-                    className="flex w-full items-start justify-between gap-3 text-left"
+                    className="flex w-full items-start justify-between gap-3 text-start"
                   >
                     <span className="min-w-0 flex-1">
                       <span className="flex flex-wrap items-center gap-2">

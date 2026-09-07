@@ -245,7 +245,7 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
               >
                 <span
                   className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${
-                    (prefs[type.key] ?? true) ? "left-[1.125rem]" : "left-0.5"
+                    (prefs[type.key] ?? true) ? "start-[1.125rem]" : "start-0.5"
                   }`}
                 />
               </button>

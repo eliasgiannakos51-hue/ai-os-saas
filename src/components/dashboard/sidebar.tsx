@@ -255,7 +255,7 @@ export function Sidebar({
                     // rail as pseudo-elements so both can animate; the
                     // look is unchanged, it just slides in now.
                     data-active={active}
-                    className={`nav-item group relative flex min-h-[44px] items-center gap-2.5 rounded-xl py-2 pl-2.5 pr-3 text-sm transition-colors duration-200 ${
+                    className={`nav-item group relative flex min-h-[44px] items-center gap-2.5 rounded-xl py-2 ps-2.5 pe-3 text-sm transition-colors duration-200 ${
                       active
                         ? "font-semibold text-orange-200"
                         : "text-muted hover:bg-white/[0.045] hover:text-foreground hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.18)]"
@@ -296,8 +296,8 @@ export function Sidebar({
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform overflow-y-auto border-r border-white/[0.07] bg-panel/80 backdrop-blur-xl transition-transform duration-200 ease-in-out md:sticky md:top-0 md:z-auto md:h-screen md:w-60 md:shrink-0 md:translate-x-0 ${
-          open ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 start-0 z-50 w-64 transform overflow-y-auto border-e border-white/[0.07] bg-panel/80 backdrop-blur-xl transition-transform duration-200 ease-in-out md:sticky md:top-0 md:z-auto md:h-screen md:w-60 md:shrink-0 md:translate-x-0 ${
+          open ? "translate-x-0" : "-translate-x-full rtl:translate-x-full md:rtl:translate-x-0"
         }`}
       >
         <div className="relative flex items-center justify-center px-4 py-3">
@@ -314,7 +314,7 @@ export function Sidebar({
             type="button"
             onClick={closeOnMobile}
             aria-label={t("closeMenu")}
-            className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground md:hidden"
+            className="absolute end-3 top-3 flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground md:hidden"
           >
             <X className="h-4 w-4" />
           </button>

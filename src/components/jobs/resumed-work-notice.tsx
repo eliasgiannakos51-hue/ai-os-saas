@@ -114,7 +114,7 @@ export function ResumedWorkNotice({ kind }: { kind: JobKind }) {
         type="button"
         onClick={() => setDismissed(true)}
         aria-label={t("dismiss")}
-        className="-mr-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:text-foreground"
+        className="-me-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:text-foreground"
       >
         <X className="h-3.5 w-3.5" aria-hidden="true" />
       </button>

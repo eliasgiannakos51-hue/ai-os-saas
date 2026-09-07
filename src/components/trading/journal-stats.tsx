@@ -157,25 +157,25 @@ function BucketTable({
     <section>
       <h3 className="mb-2 text-xs font-semibold text-foreground">{title}</h3>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[420px] text-left text-xs">
+        <table className="w-full min-w-[420px] text-start text-xs">
           <thead>
             <tr className="text-[10px] uppercase tracking-wide text-muted">
-              <th className="py-1 pr-3 font-medium">{t("table.key")}</th>
-              <th className="py-1 pr-3 font-medium">{t("stats.trades")}</th>
-              <th className="py-1 pr-3 font-medium">{t("stats.winRate")}</th>
+              <th className="py-1 pe-3 font-medium">{t("table.key")}</th>
+              <th className="py-1 pe-3 font-medium">{t("stats.trades")}</th>
+              <th className="py-1 pe-3 font-medium">{t("stats.winRate")}</th>
               <th className="py-1 font-medium">{t("stats.netPnl")}</th>
             </tr>
           </thead>
           <tbody>
             {buckets.map((bucket) => (
               <tr key={bucket.key} className="border-t border-border">
-                <td className="py-1.5 pr-3 text-foreground">
+                <td className="py-1.5 pe-3 text-foreground">
                   {translateKey ? t(`sessions.${bucket.key}`) : bucket.key}
                 </td>
-                <td className="py-1.5 pr-3 tabular-nums text-muted">
+                <td className="py-1.5 pe-3 tabular-nums text-muted">
                   {formatNumber(bucket.stats.counted, locale)}
                 </td>
-                <td className="py-1.5 pr-3 tabular-nums text-muted">
+                <td className="py-1.5 pe-3 tabular-nums text-muted">
                   {bucket.stats.winRatePercent === null
                     ? t("stats.notEnoughShort")
                     : `${formatNumber(Math.round(bucket.stats.winRatePercent), locale)}%`}

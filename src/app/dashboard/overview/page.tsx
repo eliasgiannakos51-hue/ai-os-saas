@@ -509,7 +509,7 @@ export default async function OverviewPage() {
             hundred pixels below the fold. The page opened with a summary
             of the past and buried the present. */}
         <div className="relative flex flex-wrap items-start justify-between gap-3">
-          <GlowOrb className="-left-10 -top-20 -z-10 h-56 w-56" />
+          <GlowOrb className="-start-10 -top-20 -z-10 h-56 w-56" />
           <GreetingHeader email={user.email ?? ""} />
           <LowCreditsBanner />
         </div>

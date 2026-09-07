@@ -590,7 +590,7 @@ export function MissionDetail({
                     )}
 
                     {step.substeps && step.substeps.length > 0 && (
-                      <ul className="mt-2 space-y-1 border-l border-border pl-3">
+                      <ul className="mt-2 space-y-1 border-s border-border ps-3">
                         {step.substeps.map((sub, subIndex) => {
                           const done = sub.status === "completed";
                           return (
@@ -600,7 +600,7 @@ export function MissionDetail({
                                 onClick={() => toggleSubstep(index, subIndex)}
                                 disabled={togglingSubstep !== null}
                                 aria-pressed={done}
-                                className="flex w-full items-start gap-2 rounded-md px-1 py-0.5 text-left transition-colors duration-150 hover:bg-panel-hover disabled:cursor-not-allowed disabled:opacity-60"
+                                className="flex w-full items-start gap-2 rounded-md px-1 py-0.5 text-start transition-colors duration-150 hover:bg-panel-hover disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 {done ? (
                                   <CheckCircle2
@@ -628,7 +628,7 @@ export function MissionDetail({
                   {step.status !== "completed" && (
                     <div className="flex shrink-0 flex-col items-end gap-1.5">
                       {stepAttemptsExhausted(step.attempts) ? (
-                        <p className="max-w-[160px] text-right text-[11px] text-red-400">
+                        <p className="max-w-[160px] text-end text-[11px] text-red-400">
                           {t("stepFailedMax", { max: MAX_STEP_ATTEMPTS })}
                         </p>
                       ) : (

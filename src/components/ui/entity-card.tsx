@@ -153,7 +153,7 @@ export function EntityCard({
             <button
               type="button"
               onClick={onSelect}
-              className="line-clamp-2 text-left outline-none after:absolute after:inset-0 after:rounded-2xl group-hover:text-orange-400 focus-visible:after:ring-2 focus-visible:after:ring-orange-500/60"
+              className="line-clamp-2 text-start outline-none after:absolute after:inset-0 after:rounded-2xl group-hover:text-orange-400 focus-visible:after:ring-2 focus-visible:after:ring-orange-500/60"
             >
               {title}
             </button>

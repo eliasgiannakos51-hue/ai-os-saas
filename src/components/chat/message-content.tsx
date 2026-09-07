@@ -11,9 +11,9 @@ import remarkGfm from "remark-gfm";
 // dependency, so it's left out.
 const markdownComponents: Components = {
   p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-  ul: ({ children }) => <ul className="mb-2 list-disc space-y-1 pl-5">{children}</ul>,
-  ol: ({ children }) => <ol className="mb-2 list-decimal space-y-1 pl-5">{children}</ol>,
-  li: ({ children }) => <li className="pl-0.5">{children}</li>,
+  ul: ({ children }) => <ul className="mb-2 list-disc space-y-1 ps-5">{children}</ul>,
+  ol: ({ children }) => <ol className="mb-2 list-decimal space-y-1 ps-5">{children}</ol>,
+  li: ({ children }) => <li className="ps-0.5">{children}</li>,
   a: ({ children, href }) => (
     <a
       href={href}
@@ -42,7 +42,7 @@ const markdownComponents: Components = {
     );
   },
   blockquote: ({ children }) => (
-    <blockquote className="mb-2 border-l-2 border-orange-500/40 pl-3 text-foreground/80 last:mb-0">
+    <blockquote className="mb-2 border-s-2 border-orange-500/40 ps-3 text-foreground/80 last:mb-0">
       {children}
     </blockquote>
   ),

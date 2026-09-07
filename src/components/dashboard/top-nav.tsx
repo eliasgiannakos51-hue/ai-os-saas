@@ -58,7 +58,7 @@ export function TopNav({ email }: { email: string }) {
         className="mx-auto hidden min-w-0 max-w-md flex-1 items-center gap-2 rounded-full border border-border bg-panel px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-foreground sm:flex"
       >
         <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
-        <span className="flex-1 text-left">{t("search")}</span>
+        <span className="flex-1 text-start">{t("search")}</span>
         <kbd className="rounded border border-border bg-input px-1.5 py-0.5 text-[10px] font-medium text-muted">
           ⌘K
         </kbd>
@@ -84,7 +84,7 @@ export function TopNav({ email }: { email: string }) {
           Now it may shrink, and the two widest optional items below reveal
           at `lg` (1024px) — the first width where there is genuinely room
           for them next to the sidebar — instead of at `sm` (640px). */}
-      <div className="ml-auto flex min-w-0 items-center gap-1.5 lg:gap-3">
+      <div className="ms-auto flex min-w-0 items-center gap-1.5 lg:gap-3">
         {/* THE LANGUAGE CONTROL IS IN THIS BAR AT EVERY WIDTH — V4.6.
 
             It was wrapped in `hidden sm:contents` with the theme toggle,
@@ -166,7 +166,7 @@ export function TopNav({ email }: { email: string }) {
             {initial}
           </button>
           {userMenuOpen && (
-            <div className="absolute right-0 top-11 w-56 rounded-xl border border-border bg-panel p-3 shadow-lg">
+            <div className="absolute end-0 top-11 w-56 rounded-xl border border-border bg-panel p-3 shadow-lg">
               <p className="truncate text-xs text-muted">{email}</p>
               {/* The phone-width home for the theme toggle. `sm:hidden`
                   mirrors the `hidden sm:contents` above exactly, so it

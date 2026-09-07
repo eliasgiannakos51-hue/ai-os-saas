@@ -311,9 +311,9 @@ export function AskAiModal({
                 onKeyDown={handleTextareaKeyDown}
                 placeholder={t("placeholder")}
                 rows={1}
-                // pr-24 rather than pr-12: two controls sit in the
+                // pe-24 rather than pe-12: two controls sit in the
                 // right gutter now, not one.
-                className="max-h-32 min-h-[48px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-background px-4 py-3 pr-24 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500/60"
+                className="max-h-32 min-h-[48px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-background px-4 py-3 pe-24 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500/60"
               />
               {/* ASKING YOUR OWN RECORDS A QUESTION, OUT LOUD.
                   V4 re-audit #2. This box is a sentence somebody types to
@@ -325,7 +325,7 @@ export function AskAiModal({
                   deployment has no transcription key, so the gutter is
                   simply narrower there rather than holding a dead
                   control. */}
-              <div className="absolute bottom-2 right-14">
+              <div className="absolute bottom-2 end-14">
                 <VoiceInput
                   compact
                   disabled={sending}
@@ -338,7 +338,7 @@ export function AskAiModal({
                 type="submit"
                 disabled={sending || !input.trim()}
                 aria-label={t("send")}
-                className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                className="absolute bottom-2 end-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
               >
                 {sending ? (
                   <ThinkingIndicator size="sm" tone="inherit" />

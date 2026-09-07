@@ -273,7 +273,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
       {/* The matrix. Scrolls inside itself on a phone rather than making
           the page scroll sideways. */}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[520px] border-collapse text-left">
+        <table className="w-full min-w-[520px] border-collapse text-start">
           <thead>
             <tr>
               <th className="pb-2 text-xs font-normal text-muted">&nbsp;</th>
@@ -292,12 +292,12 @@ export function NotificationSettings({ userId }: { userId: string }) {
               const active = effective(type);
               return (
                 <tr key={type} className="border-t border-border align-top">
-                  <td className="py-3 pr-4">
+                  <td className="py-3 pe-4">
                     <button
                       type="button"
                       onClick={() => toggleType(type)}
                       disabled={busy}
-                      className="text-left disabled:opacity-50"
+                      className="text-start disabled:opacity-50"
                     >
                       <span className={`block text-sm ${enabled ? "text-foreground" : "text-muted line-through"}`}>
                         {t(`types.${type}.label`)}

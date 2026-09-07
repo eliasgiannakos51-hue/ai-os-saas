@@ -193,7 +193,7 @@ export function LinkToModal({
                     key={m.slug}
                     type="button"
                     onClick={() => setSelectedModule(m)}
-                    className="flex min-h-[44px] items-center rounded-xl border border-border bg-input px-3 py-2.5 text-left text-sm text-foreground transition-colors duration-150 hover:border-orange-500/60 hover:text-orange-400"
+                    className="flex min-h-[44px] items-center rounded-xl border border-border bg-input px-3 py-2.5 text-start text-sm text-foreground transition-colors duration-150 hover:border-orange-500/60 hover:text-orange-400"
                   >
                     {tKey(m.titleKey)}
                   </button>
@@ -211,14 +211,14 @@ export function LinkToModal({
                 {tKey(selectedModule.titleKey)}
               </button>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+                <Search className="pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
                 <input
                   autoFocus
                   type="text"
                   value={query}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
                   placeholder={t("searchPlaceholder", { module: tKey(selectedModule.titleKey) })}
-                  className="input pl-10"
+                  className="input ps-10"
                 />
               </div>
 
@@ -233,7 +233,7 @@ export function LinkToModal({
                     type="button"
                     onClick={() => handleLink(r.id)}
                     disabled={linkingId === r.id}
-                    className="block w-full rounded-lg border border-border bg-input px-3 py-2 text-left text-sm text-foreground transition-colors duration-150 hover:border-orange-500/60 hover:text-orange-400 disabled:opacity-50"
+                    className="block w-full rounded-lg border border-border bg-input px-3 py-2 text-start text-sm text-foreground transition-colors duration-150 hover:border-orange-500/60 hover:text-orange-400 disabled:opacity-50"
                   >
                     {r.headline}
                   </button>

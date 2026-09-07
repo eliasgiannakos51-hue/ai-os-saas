@@ -27,7 +27,7 @@ const MUTANTS = [
     // surname, their brand all become "possible typos".
     name: "the brief no longer protects the words the owner wrote",
     file: PURE,
-    from: "  const fromBrief = new Set((brief.match(GREEK_WORD) ?? []).map(fold));",
+    from: "  const fromBrief = briefWordFolds(brief);",
     to: "  const fromBrief = new Set<string>();",
     expect: "the exact-fold set alone protects a common noun from the brief",
   },
@@ -35,11 +35,28 @@ const MUTANTS = [
     // 2. THE PRIVATE FOLD COMES BACK — the first draft's defect. An accent
     // in the brief and none on the page, and the protection silently stops
     // applying.
-    name: "the fold goes back to lower-casing, so accents defeat the protection",
+    //
+    // TWO MUTATIONS NOW, WHERE ONE USED TO DO, and the reason is a change
+    // made on 2026-09-07 rather than a preference. The brief side moved
+    // into an exported briefWordFolds() so scripts/check-site-spelling.mjs
+    // could reuse it instead of carrying a second copy of "what a Greek
+    // word is". That put the fold in TWO places, and a mutation that
+    // replaces one of them is measuring the other one's redundancy — the
+    // same thing that made this suite's role mutation go WRONG for the
+    // isolation probe. 2 breaks the BRIEF side; 2b breaks the PAGE side;
+    // each names the clause that isolates it.
+    name: "the brief side folds with lower-case only, so an accent defeats the protection",
+    file: PURE,
+    from: "  return new Set((brief.match(GREEK_WORD) ?? []).map(foldForMatch));",
+    to: '  return new Set((brief.match(GREEK_WORD) ?? []).map((s) => s.toLowerCase().replace(/\\u03c2/g, "\\u03c3")));',
+    expect: "the shared fold alone protects it across an accent",
+  },
+  {
+    name: "the page side folds with lower-case only",
     file: PURE,
     from: "  const fold = foldForMatch;",
     to: '  const fold = (s: string) => s.toLowerCase().replace(/\\u03c2/g, "\\u03c3");',
-    expect: "the shared fold alone protects it across an accent",
+    expect: "the exact-fold set alone protects a common noun from the brief",
   },
   {
     // 3. THE MODEL'S ANSWER IS TRUSTED WHOLE. Anything it says appears

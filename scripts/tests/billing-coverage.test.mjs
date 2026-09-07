@@ -246,6 +246,43 @@ console.log("\n== 1b. every runCompletion() caller pays for what it used ==");
     return !/costs\.(record|recordBatch|addBreakdown)\([^)]*outcome\.usage/s.test(text);
   });
   check("no runCompletion() call site drops its usage on the floor", silent, []);
+
+  // AND EVERY ONE OF THEM NAMES ITS MODEL, which is a different question
+  // with the same answer shape.
+  //
+  // FOUND 2026-09-07, by writing a runner that had to report which model
+  // the spelling checker uses and discovering there was nothing to read.
+  // lib/websites-greek-spelling-check.ts passed `purpose: "classification"`
+  // and no `model`. providers/complete.ts reads an absent model as
+  // `originTier = "mid"` and substituteModel then returns the cheapest
+  // anthropic model at mid tier OR ABOVE — claude-sonnet-4-6 at 3/15 per
+  // MTok, not the claude-haiku-4-5 at 1/5 that "one cheap classification
+  // call" reads like. Measured by calling substituteModel, not by reading
+  // complete.ts.
+  //
+  // It was the ONLY caller in the tree without a model, so it was the only
+  // one whose price was set by a fallback nobody had written down. The
+  // money is small — about eight hundredths of a cent per website — and
+  // that is not the point: a cost nobody chose is a cost nobody can
+  // review, and section 3's margin arithmetic is computed from the model
+  // that is actually served.
+  // READ NEAR THE CALL, NOT ACROSS THE FILE. A first draft counted
+  // `runCompletion(` against `model:` anywhere in the file, and that
+  // passes for a route with one unnamed call and an unrelated `model:` in
+  // some other object — which is most routes. The request object is the
+  // first few lines after the open paren, so that is where it looks.
+  const CALL_WINDOW = 600;
+  const unnamed = [];
+  for (const f of callers) {
+    const text = readFileSync(f, "utf8");
+    for (const m of text.matchAll(/\brunCompletion\(/g)) {
+      const window = text.slice(m.index, m.index + CALL_WINDOW);
+      if (!/^\s*model: /m.test(window)) {
+        unnamed.push(`${f}:${text.slice(0, m.index).split("\n").length}`);
+      }
+    }
+  }
+  check("no runCompletion() call site leaves its model to the default tier", unnamed, []);
 }
 
 console.log("\n== 2. the billing mode of each site ==");

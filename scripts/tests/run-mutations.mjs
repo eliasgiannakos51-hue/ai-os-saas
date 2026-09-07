@@ -68,11 +68,15 @@ if (suites.length === 0) {
 // empty list satisfies "none of them failed". It was 30 when there were
 // 30 suites, and stayed 30 while the directory grew to 90 \u2014 a floor set
 // to the size of the problem three times ago would not have noticed
-// sixty files disappearing. 90 today against a real 96, deliberately
+// sixty files disappearing. 100 today against a real 102, deliberately
 // under it so deleting one suite on purpose does not need a build fix in
 // the same commit — and raised with each batch of new ones, because the
 // point is that the gap stays small.
-const FLOOR = 90;
+// mutation-runner-honesty.test.mjs holds the gap at ten or less, which is
+// what made this a build failure rather than a number nobody revisited:
+// two new suites (check-site-spelling, billing-coverage) took the real
+// count to 102 against a floor last raised at 96.
+const FLOOR = 100;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

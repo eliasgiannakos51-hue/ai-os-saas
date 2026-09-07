@@ -27,6 +27,41 @@ const SYSTEM = [
 ].join(" ");
 
 /**
+ * THE MODEL WAS NEVER CHOSEN — IT WAS THE DEFAULT, and the default is not
+ * the cheap one.
+ *
+ * This call said `purpose: "classification"` and named no model. It reads
+ * like "one cheap classification call", and providers/complete.ts does
+ * something else with it: no model means `originTier = "mid"`, and
+ * substituteModel then returns the cheapest anthropic model at mid tier
+ * OR ABOVE — claude-sonnet-4-6 at 3/15 per MTok, not claude-haiku-4-5 at
+ * 1/5. Measured by calling substituteModel("anthropic", "mid", []), not
+ * by reading it.
+ *
+ * EVERY OTHER runCompletion CALLER IN THE TREE NAMES ITS MODEL. This one
+ * was the only one that did not, so it was the only one whose model was
+ * decided by a fallback nobody wrote down.
+ *
+ * NAMED HERE, AND THE BEHAVIOUR IS UNCHANGED. `claude-sonnet-4-6` is
+ * exactly what was being served; writing it down turns an accident into a
+ * decision without changing one request. The cheaper candidate is not
+ * taken on a hunch: a spelling note that flags correct Greek is worse
+ * than no note (see the comment at the top of
+ * lib/website-greek-spelling.ts), and whether haiku is as good at Greek
+ * orthography is a MEASUREMENT nobody here has made. It costs about two
+ * tenths of a cent to make:
+ *
+ *   node scripts/check-site-spelling.mjs --url <site> --brief "..." \
+ *     --model claude-haiku-4-5      # and again with claude-sonnet-4-6
+ *
+ * WHAT THE DIFFERENCE IS WORTH, so the number is not left to sound
+ * bigger than it is: about 250 tokens in and 30 out per generation, so
+ * $0.0012 on sonnet against $0.0004 on haiku — eight hundredths of a
+ * cent per website. It is worth naming, not worth guessing at.
+ */
+const MODEL = "claude-sonnet-4-6";
+
+/**
  * One classification call. Returns the misspelled words, or an empty list
  * on any failure — a spelling note is a courtesy, and a generation must
  * never fail because the courtesy did.
@@ -45,6 +80,7 @@ export async function findGreekMisspellings(
     const outcome = await runCompletion(
       {
         purpose: "classification",
+        model: MODEL,
         system: [{ type: "text", text: SYSTEM }],
         messages: [{ role: "user", content: JSON.stringify(words) }],
         maxTokens: 300,

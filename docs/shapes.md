@@ -475,6 +475,45 @@ It cannot decide whether any given sentence is a bug — no scan can — so it
 does the one thing a scan can do honestly: keep the list small enough that
 a person can read it.
 
+## A cost decided by a fallback nobody wrote down
+
+**Found 2026-09-07, and only because something else had to report it.**
+`lib/websites-greek-spelling-check.ts` called the provider layer with
+`purpose: "classification"` and no `model`. Every word of that reads
+"cheap". `lib/ai/providers/complete.ts` reads an absent model as
+`originTier = "mid"`, and `substituteModel` then returns the cheapest
+anthropic model at mid tier *or above* — `claude-sonnet-4-6` at 3/15 per
+MTok, not the `claude-haiku-4-5` at 1/5 the name suggests.
+
+**Nothing was wrong with the code.** The routing rule is deliberate and
+documented — *same tier or better, never worse* — and it does exactly what
+its comment says. What was wrong is that a price was set by that rule and
+no one had ever decided it. Every other `runCompletion` caller in the tree
+named its model; this one was the only place where the number came from a
+default, and the default is invisible at the call site.
+
+**Why it survived.** The module's own comment says what it costs: "one
+classification call with at most `SPELLING_WORD_CAP` words and a 300-token
+ceiling: about 200 tokens on a normal site". True, checked, and measured
+on the one axis that was small. The axis that was 3× is not mentioned,
+because the person writing it did not know there was one.
+
+**What it was worth.** About eight hundredths of a cent per website — and
+that is the entry, not a mitigation. A defect worth almost nothing in
+money is worth exactly as much as any other in *reviewability*: `charge >=
+4 × real cost` is computed from the model actually served, and a model
+nobody chose is a number nobody can check.
+
+**The test.** For any call that costs money, ask what sets each input —
+not what its value is. An input whose answer is "the default" has not been
+decided; it has been deferred to a rule written for a different question.
+
+*Caught by:* `scripts/tests/billing-coverage.test.mjs` §1c requires every
+`runCompletion` call site to name its model, mutated in
+`billing-coverage.mutation.mjs`. `scripts/check-site-spelling.mjs` reads
+that name out of the source and refuses to run if it is gone, rather than
+reporting a price for whatever the default lands on.
+
 ## `\b` is ASCII
 
 **This one has no gate, and saying so is the entry.** JavaScript's word

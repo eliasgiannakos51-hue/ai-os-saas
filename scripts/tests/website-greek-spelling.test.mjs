@@ -42,6 +42,24 @@ const pureSrc = readFileSync("src/lib/website-greek-spelling.ts", "utf8");
 console.log("== 0. the split that keeps the rules testable ==");
 check("the pure half imports no provider", !/providers\/complete/.test(pureSrc));
 check("...and folds with the shared fold, not a private one", /const fold = foldForMatch;/.test(pureSrc));
+// ONE DEFINITION OF "the words in the brief", not two.
+//
+// briefWordFolds and greekWordsOnPage were exported on 2026-09-07 so that
+// scripts/check-site-spelling.mjs could explain WHY a word was not asked
+// about — which of the five rules held it — without carrying its own idea
+// of what a Greek word is. That is only worth anything if the shipped
+// function uses them too: an exported helper the product does not call is
+// a second copy with a nicer name.
+check(
+  "the brief is read in exactly one place",
+  (pureSrc.match(/brief\.match\(GREEK_WORD\)/g) ?? []).length === 1,
+  `${(pureSrc.match(/brief\.match\(GREEK_WORD\)/g) ?? []).length} places`
+);
+check("...and greekWordsToCheck is one of the callers", /const fromBrief = briefWordFolds\(brief\);/.test(pureSrc));
+check(
+  "the page is read through visibleTextOf in both exports",
+  (pureSrc.match(/visibleTextOf\(html\)/g) ?? []).length === 2
+);
 
 const { greekWordsToCheck, keepOnlyAsked, parseWordList, SPELLING_WORD_CAP } = await loadTs(
   "src/lib/website-greek-spelling.ts"

@@ -46,7 +46,7 @@ claim the policies read, and that the deployed schema is this one. It is a
 demonstrated seven ways — plus, for the production half, the same suite
 returning zero of B's rows through the API.
 
-### 2. The spelling check — RUN AGAINST A REAL SITE, and it found a defect
+### 2. The spelling check — A RUNNER EXISTS; the model call has still never happened
 **~1 hour left.** Blocked on: an API balance, and the URL of an existing site.
 
 **No longer "never run".** On 2026-09-06 a site was generated from a Greek
@@ -69,9 +69,38 @@ Six of six constructed cases leaked (Χαλανδρίου, Παπαδόπουλ�
 with six controls proving no real misspelling is silenced to protect a
 name, ρεμπα among them. 10 of 10 mutations.
 
+**2026-09-07: there is now a runner, and writing it found a second
+defect.** `scripts/check-site-spelling.mjs` takes a URL (or a local file)
+and a brief, and reports what would be asked, what was held back and by
+which of the five rules, what the model answered, and the cost in dollars.
+`--dry-run` does the whole selection without calling anybody, which
+answers three of the owner's four questions for $0.00.
+
+It reads the system prompt and the model id **out of the shipped source**
+rather than carrying copies, and refuses to run if it cannot — and that
+refusal is what found the defect. There was no model to read:
+`findGreekMisspellings` passed `purpose: "classification"` and no `model`,
+so `providers/complete.ts` read it as tier `mid` and `substituteModel`
+returned **claude-sonnet-4-6 at 3/15 per MTok**, not the claude-haiku-4-5
+at 1/5 that "one cheap classification call" reads like. It was the only
+`runCompletion` caller in the tree without a model. About eight
+hundredths of a cent per website, and the point is that nobody chose it:
+the margin guarantee is computed from the model actually served.
+
+Named now (`const MODEL`), behaviour unchanged — whether haiku is as good
+at Greek orthography is a measurement nobody has made, and a spelling note
+that flags correct Greek is worse than no note. The runner makes that
+measurement cost about two tenths of a cent:
+`--model claude-haiku-4-5`, then again with sonnet, on the same word list.
+
+*Held by:* `scripts/tests/check-site-spelling.test.mjs` (48 checks, 8 of 8
+mutations) for the runner, and `billing-coverage.test.mjs` §1c (2 of 2
+mutations) for every other call site.
+
 *What is left:* one classification call, to see the note produced end to
 end. It needs a balance, and — for the free path the owner asked for
-first — the URL of a site that already exists.
+first — the URL of a site that already exists. Both arrived empty again
+on 2026-09-07, the fifth round running.
 
 ### 3. The three measurements — TWO OF THREE RAN
 **~2 hours left.** Blocked on: an API balance. Spent so far: **$0.53**,

@@ -85,12 +85,28 @@ const MUTANTS = [
   },
   {
     // 7. THE FLOOR SET TO THE SIZE OF THE PROBLEM. 30 was right when
-    // there were 30 suites. At 90 it would let sixty files vanish
+    // there were 30 suites. At 100 it would let seventy files vanish
     // without a word, which is the same "an empty list satisfies the
     // check" shape the floor exists to stop.
+    //
+    // RE-ANCHORED 2026-09-07, and the sweep is what caught it: the floor
+    // went 90 -> 100 when two suites were added, this mutation still
+    // named 90, and it reported STALE rather than passing quietly. That
+    // is the runner's stale-anchor report doing its job — a mutation
+    // pinned to an old constant tests nothing and says nothing.
+    //
+    // IT IS STILL PINNED TO THE LITERAL VALUE. A first version of this
+    // note claimed the anchor had been rewritten as a regex on the
+    // declaration so the next raise would re-anchor itself; it had not,
+    // and `from` here is a plain string matched with includes() like
+    // every other mutation in the directory. The sentence is corrected
+    // rather than deleted because it is the shape docs/shapes.md calls a
+    // comment that describes a bug as though it were a design note, and
+    // it was written into this file by the same hand that catalogued it.
+    // What actually protects the next raise is the STALE report above.
     name: "the suite floor drops back to a third of the real count",
     file: RUNNER,
-    from: "const FLOOR = 90;",
+    from: "const FLOOR = 100;",
     to: "const FLOOR = 30;",
     expect: "suite floor",
   },

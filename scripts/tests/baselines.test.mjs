@@ -118,6 +118,13 @@ export const BASELINES = [
     why: "Mutation suites whose lists are read the weaker way, without their edits. The reading that cannot see edits is the one that mis-reports a code change as prose.",
   },
   {
+    gate: "comment-claims",
+    name: "COMMENT_LIMITATION_CENSUS",
+    direction: "ceiling",
+    slack: 0,
+    why: "Comment blocks carrying a limitation phrase. Held not because the phrase is wrong but because the list has to stay short enough for a person to read in one sitting — that reading is the only reliable way to find a defect written as a design note.",
+  },
+  {
     gate: "deep-links",
     name: "DEEP_LINK_FLOOR",
     direction: "floor",

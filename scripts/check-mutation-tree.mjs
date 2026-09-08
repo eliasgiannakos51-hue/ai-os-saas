@@ -101,7 +101,28 @@ if (existsSync(SHARED_SIDECAR)) {
       `\n    Run any mutation suite, or \`node -e 'await import("./scripts/tests/lib/sidecar-write.mjs")'\`, to heal it.`
   );
 }
-if (existsSync(GUARD_SIDECAR_DIR) && readdirSync(GUARD_SIDECAR_DIR).length > 0) {
+// A SIDECAR MEANS A KILLED RUN — UNLESS THE RUN IS STILL GOING.
+//
+// unguarded-guards.mjs removes one guard, runs the WHOLE unit suite, and
+// restores. The sidecar exists for exactly the seconds that suite is
+// running, and this file is in that suite (through mutation-tree.test.mjs,
+// which runs the real checker against the real tree). So every guard that
+// experiment tested made this check fail, and the failure said nothing
+// about the guard.
+//
+// It was worse than noise. `npm run test:unit` stops at the FIRST failing
+// suite, so whichever unrelated gate reddened first decided the verdict:
+// a guard whose deleted line carried English prose tripped
+// baselines.test.mjs (alphabetically earlier) and was reported NOBODY; a
+// guard whose line carried none got here instead and was reported
+// WATCHED. `if (!isAdminEmail(user.email)) …` read as watched by an
+// owner-only test that is green when it is deleted.
+//
+// The environment variable is set by that script for the duration of one
+// child suite. It cannot hide a real killed run: nothing else sets it,
+// and the heal-on-startup path is unchanged.
+const GUARD_RUN_IN_PROGRESS = process.env.UNGUARDED_GUARDS_RUNNING === "1";
+if (!GUARD_RUN_IN_PROGRESS && existsSync(GUARD_SIDECAR_DIR) && readdirSync(GUARD_SIDECAR_DIR).length > 0) {
   problems.push(
     `scripts/tests/unguarded-guards.mjs was killed holding a guard removed:\n` +
       readdirSync(GUARD_SIDECAR_DIR).map((f) => `      ${f}`).join("\n") +

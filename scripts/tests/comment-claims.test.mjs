@@ -42,6 +42,7 @@
  * Run: node scripts/tests/comment-claims.test.mjs
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
+import { reportBaseline } from "./lib/baseline.mjs";
 import path from "node:path";
 
 let pass = 0;
@@ -212,13 +213,20 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // check whose baseline is a bad measurement is worse than no check —
   // this repository has shipped that twice and both are in docs/shapes.md.
   //
-  // What IS worth holding is the SIZE OF THE CENSUS. 65 comment blocks in
+  // What IS worth holding is the SIZE OF THE CENSUS. 66 comment blocks in
   // the tree carry a limitation phrase. That list is short enough for a
   // person to read in one sitting, which is the only reliable way to find
   // the shape this file is named for; if it grows to two hundred, nobody
   // will, and the next "stays English" will sit in it undisturbed.
-  const CENSUS_CEILING = 65;
+  // 65 UNTIL V5 #14, when route-refusals.test.mjs was written and its
+  // header explains why a look-back must reach the statement and why a
+  // write is not a read. Those are decisions, not defects — which is the
+  // question this ceiling exists to force somebody to ask. Registered in
+  // baselines.test.mjs at zero slack, so it cannot drift the way
+  // CLIENT_FALLBACK_BASELINE did.
+  const CENSUS_CEILING = 66;
   const census = withReason.length + withoutReason.length;
+  reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,
     census <= CENSUS_CEILING,
     `${census}. Read the new ones: is each explaining a decision, or describing a defect?`);

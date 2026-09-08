@@ -100,6 +100,11 @@ console.log("== 1. the premise: the marker check really is blind to this ==");
 // ---------------------------------------------------------------------
 console.log("\n== 2. a killed run's sidecar ==");
 {
+  // INHERITS the flag deliberately. This asks whether the REAL tree is
+  // clean, and during an unguarded-guards.mjs run it deliberately is not
+  // — one guard is removed and a sidecar holds the original. Clearing the
+  // flag here made that experiment's every verdict depend on whether this
+  // check happened to run before the guard was restored.
   const clean = run(CHECK);
   check("a clean tree passes", clean.code === 0, clean.out);
 
@@ -108,7 +113,14 @@ console.log("\n== 2. a killed run's sidecar ==");
   if (!existed) mkdirSync(DIR, { recursive: true });
   const probe = `${DIR}/.mutation-tree-probe.json`;
   writeFileSync(probe, JSON.stringify({ file: "x", text: "y" }));
-  const guard = run(CHECK);
+  // EXPLICITLY NOT A RUN IN PROGRESS. check-mutation-tree.mjs skips the
+  // sidecar complaint while UNGUARDED_GUARDS_RUNNING=1, because
+  // unguarded-guards.mjs legitimately holds a sidecar for the seconds its
+  // child suite is running — and this file is IN that suite, so without
+  // the exemption every guard that experiment tested reddened here for a
+  // reason that had nothing to do with the guard. This check is about the
+  // KILLED-run case, so it clears the flag rather than inheriting it.
+  const guard = run(CHECK, { UNGUARDED_GUARDS_RUNNING: "" });
   unlinkSync(probe);
   if (!existed) rmSync(DIR, { recursive: true, force: true });
   check("the guard scanner's sidecar fails it", guard.code === 1, `exit ${guard.code}`);

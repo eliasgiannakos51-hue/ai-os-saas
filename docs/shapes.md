@@ -920,3 +920,62 @@ see it" explaining why a guard exists.
 
 The count is printed by `count-claims.test.mjs` and not asserted, so the
 next person can re-measure instead of re-arguing.
+
+## The experiment that could not see the witness
+
+V5 #14 was asked to work through ~2,400 defensive guards on the strength
+of an earlier result: nine were tested by removing each and running the
+whole unit suite, and seven came back with nothing red. Extrapolated, that
+said roughly 1,800 guards had no witness.
+
+**The instrument was wrong three times over, and all three errors point the
+same way — inventing an absence of guards.**
+
+1. **ENOBUFS read as "nothing went red".** `execFileSync` defaults to a
+   one-megabyte stdout buffer; `npm run test:unit` prints 1,195,212 bytes.
+   Every call threw, the output was truncated at 1,037,423 bytes, zero
+   `FAIL` lines were parsed from the fragment, and an empty failure list is
+   exactly what the caller reads as *nobody is watching this guard*. The
+   output was already ~1.19 MB when the file was written, so no `NOBODY`
+   verdict it ever printed was evidence of anything.
+2. **Its own sidecar made unrelated gates red.** The runner holds a sidecar
+   for the seconds the suite is running, and `check-mutation-tree.mjs`
+   reports a populated sidecar as a killed run — through
+   `mutation-tree.test.mjs`, which is inside that suite. Combined with the
+   loop's early exit, the verdict was decided by *which unrelated gate
+   failed first*: a guard whose deleted line carried English prose tripped
+   `baselines.test.mjs` and read as unwatched; one whose line carried none
+   reached the tree check and read as watched. `if (!isAdminEmail(…))` was
+   reported WATCHED by an owner-only test that is green when it is deleted.
+3. **`test:unit` stops at the first failing suite.** Remove
+   `if (!user) return 401` and `baselines.test.mjs` reddens first — one
+   server-side English string went missing — the loop stops, and the suite
+   that would have caught the deletion never runs.
+
+The proof is one guard. `if (ownedIds.length !== requested.length)` in
+api/files/collections was the previous round's headline unwatched guard.
+With the instrument fixed it comes back **WATCHED**, by a check that names
+it: *"the count is compared … and the mismatch is a 404, not a shrug."*
+The gate had been there the whole time.
+
+**A witness that is a count is not a witness.** Once the buffer was fixed,
+deleting an authentication guard turned the build red on
+`SERVER_PROSE_BASELINE` — 655 English error strings became 654. True,
+useful, and completely silent about authentication: it fires identically
+for deleting a typo message. Counting it would have made every guard whose
+rejection carries prose read as watched. It is filtered with the
+mutation-marker gate, for the same reason.
+
+## The population was not what the sample said it was
+
+The nine guards first tested were picked because they looked odd — unicode
+folding, whitespace trimming, a date parse. The population is nothing like
+them. Of 2,252 guards that reject rather than compute, the ones touching
+money, auth and user data are **302 / 189 / 66** — and the auth 189 are
+only **32 distinct shapes**, of which one line accounts for 132:
+
+    if (!user) return NextResponse.json(…, { status: 401 });
+
+So the experiment is not "one guard at a time" but **one representative per
+shape**. Nine experiments covered 195 guard instances, which is what made
+it possible to answer the question at all rather than sample it.

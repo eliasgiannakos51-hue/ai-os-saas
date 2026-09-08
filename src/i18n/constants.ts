@@ -12,9 +12,11 @@ export const LOCALE_COOKIE = "NEXT_LOCALE";
 // into the edge bundle for one integer.
 export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
-// Every locale with a real messages/<locale>.json file — kept in sync
-// with lib/languages.ts's LANGUAGES list (the selector only ever shows
-// locales that are actually translated; see that file's comment for why).
+// Every locale with a real messages/<locale>.json file — all ten of them,
+// COUNT: 10 /\.json$/ in messages/
+// kept in sync with lib/languages.ts's LANGUAGES list (the selector only
+// ever shows locales that are actually translated; see that file's
+// comment for why).
 //
 // "ar" is laid out right-to-left. app/layout.tsx sets dir="rtl" on <html>
 // from this locale via lib/text-direction.ts, the app's own half of the

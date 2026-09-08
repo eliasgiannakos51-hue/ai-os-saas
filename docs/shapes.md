@@ -864,3 +864,59 @@ opposite of the obvious choice:
   would shrink the difference against the invoice, so the report would
   look better the less it knew — the shape `/api/health` and
   `i18n-coverage` are both in this document for.
+
+## The number that was right when it was typed
+
+A count in a comment is the easiest claim in a repository to be wrong
+about, and the hardest to notice. It was true, something was added, and
+nothing anywhere connects the sentence to the thing it counts. Three were
+wrong on 2026-09-08:
+
+- `api/create/top-modules` said "the 13 business modules + ideas".
+  `CLASSIFIER_MODULES` is thirteen INCLUDING ideas, so the sentence
+  counted it twice and described a universe of fourteen that has never
+  existed.
+- `dashboard/layout.tsx` said the layout's `<main>` makes the landmark
+  true for "all 39 pages". There are 41.
+- `i18n-coverage`'s client-fallback baseline stood at 31 against a
+  measured 28, with the comment beside it saying "31 new keys across ten
+  locales". Three fallbacks had been paid off and nobody lowered the
+  number, so three new ones could ship green.
+
+**The general scan does not work, and the number says why.** A regex over
+prose finds 844 sentences in `src/` and `scripts/` that read like a count
+claim, and almost all of them enumerate the paragraph rather than the
+repository: "the two halves", "the three things", "the four questions".
+Precision is well under a tenth, and a gate at that ratio gets its
+baseline set to the size of the problem — which is the same as deleting
+it.
+
+**So the claim declares its own check.** A count that matters carries a
+marker naming what to count and where, and
+`scripts/tests/count-claims.test.mjs` requires both the count AND that
+the number appears in the sentence the marker vouches for. A marker that
+agreed with the repository while the prose beside it said something else
+would be the same defect one level down.
+
+The first marker written was invisible: it went into a JSX comment, whose
+inner lines carry no `//` or `*`, and the reader only knew about prefixed
+ones. A marker nothing read, in the gate whose subject is claims nothing
+reads. Its own mutation suite found it.
+
+## A bug described as a design note, which does not survive being a gate
+
+This shape is real — a comment that states calmly, in the present tense,
+that something does not work, and reads as a decision — and V5 #13 was
+asked to make it enforceable. It could not be, and the measurement is
+worth more than the attempt.
+
+165 comment blocks in `src/` and `scripts/` match the strongest phrasing
+("is broken", "is wrong", "does not work", "has no effect"). 71 name a
+gate, a round or a plan. Twelve of the remaining 94 were read by hand,
+and **none was a live defect**. Every one was prose about behaviour: "what
+is broken now" as a page's subject, "a rule with no data did not pass, it
+did not run", "nothing throws, nothing is logged, and nobody will ever
+see it" explaining why a guard exists.
+
+The count is printed by `count-claims.test.mjs` and not asserted, so the
+next person can re-measure instead of re-arguing.

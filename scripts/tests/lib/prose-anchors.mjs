@@ -31,6 +31,17 @@ export const PROSE_ANCHORS = {
       "left out is the shape CLAUDE.md records for i18n-coverage.",
     anchors: [{ file: "scripts/measure-context.mjs", changed: "NOT MEASURED:" }],
   },
+  "count-claims.mutation.mjs": {
+    reason:
+      "A count claim IS prose — that is the whole problem it names — so a mutation restoring one " +
+      "can only be a comment edit. Both here are the sentences the gate was written for: 'the 13 " +
+      "business modules + ideas', which counted Ideas twice, and 'all 39 pages', which was true " +
+      "when it was typed and is not now.",
+    anchors: [
+      { file: "src/app/api/create/top-modules/route.ts", changed: "Scoped to CLASSIFIER_MODULES only" },
+      { file: "src/app/dashboard/layout.tsx", changed: "pages instead of 8, and the four components below" },
+    ],
+  },
   "help-tips.mutation.mjs": {
     reason:
       "The mutant inserts a COMMENTED-OUT <PageHeader /> as a cheap stand-in for a new page " +
@@ -74,7 +85,7 @@ export const PROSE_ANCHORS = {
       "outlived the comment it excused — so every anchor is prose by construction.",
     anchors: [
       { file: "src/lib/timeline.ts", changed: "truncateWithEllipsis, not slice" },
-      { file: "scripts/tests/truncate.test.mjs", changed: "Run: node scripts/tests/truncate.test.mjs" },
+      { file: "scripts/tests/truncate.test.mjs", changed: "node scripts/tests/truncate.test.mjs" },
       { file: "scripts/tests/gate-vacuity.test.mjs", changed: "lib/admin.ts" },
       { file: "src/lib/module-icons.ts", changed: "/dashboard/business" },
     ],
@@ -86,7 +97,7 @@ export const PROSE_ANCHORS = {
       "are claims written in prose.",
     anchors: [
       { file: "scripts/tests/language-extremes.test.mjs", changed: "SHAPE: a technically-true" },
-      { file: "src/lib/i18n/message-slices.ts", changed: "Counting only the first shape" },
+      { file: "src/lib/i18n/message-slices.ts", changed: "is how a number becomes comfortable" },
     ],
   },
   "untrusted-boundaries.mutation.mjs": {

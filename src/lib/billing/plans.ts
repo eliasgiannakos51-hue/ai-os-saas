@@ -1,5 +1,6 @@
-// Plan metadata for display (pricing page, Settings) and for the real
-// entitlement checks enforced server-side (credit costs in
+// Plan metadata for the six plans, for display (pricing page, Settings)
+// COUNT: 6 /^ {4}slug: "/ in src/lib/billing/plans.ts
+// and for the real entitlement checks enforced server-side (credit costs in
 // lib/billing/credits.ts, page/creation gating driven by `capabilities`
 // below). No Stripe price IDs here on purpose — this file is imported by
 // client components, and price IDs are a server-only concern (see

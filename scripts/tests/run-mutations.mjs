@@ -78,9 +78,9 @@ if (suites.length === 0) {
 // count to 102 against a floor last raised at 96. 105 was set against a
 // real 107 when role-grants joined them; 113 against a real 115 after the
 // seven V5 #10 suites; 114 against a real 116; 115 against a real 117
-// after anthropic-reconcile; 117 today against a real 119, with
-// mutation-anchors and baselines.
-const FLOOR = 117;
+// after anthropic-reconcile; 117 against a real 119 with mutation-anchors
+// and baselines; 118 today against a real 120, with count-claims.
+const FLOOR = 118;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

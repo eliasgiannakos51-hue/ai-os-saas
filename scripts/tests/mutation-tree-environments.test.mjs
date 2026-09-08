@@ -24,7 +24,7 @@
 //
 // Run: node scripts/tests/mutation-tree-environments.test.mjs
 import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync, rmSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
 import { tmpdir } from "node:os";
 import { execFileSync } from "node:child_process";
 
@@ -36,6 +36,13 @@ function check(name, cond, detail) {
 }
 
 const CHECKER = "scripts/check-mutation-tree.mjs";
+// THE CHECKER'S OWN DEPENDENCIES, copied with it. It reads the mutant
+// lists through scripts/tests/lib/mutant-list.mjs (V5 #13 moved the
+// parser there so three readers could not disagree about one list), and
+// a throwaway project without that file makes the checker die on import
+// — which this suite would report as "a clean project with no .git fails",
+// blaming the wrong thing entirely.
+const CHECKER_DEPS = ["scripts/tests/lib/mutant-list.mjs"];
 const TARGET_REL = "fixture/thing.ts";
 const GOOD = 'export const x = 1;\nif (guard === 0) run();\nexport const y = 2;\n';
 const MUTATED = 'export const x = 1;\nif (guard === -99) run();\nexport const y = 2;\n';
@@ -46,6 +53,10 @@ function makeProject({ git }) {
   mkdirSync(join(root, "scripts", "tests"), { recursive: true });
   mkdirSync(join(root, "fixture"), { recursive: true });
   copyFileSync(CHECKER, join(root, CHECKER));
+  for (const dep of CHECKER_DEPS) {
+    mkdirSync(join(root, dirname(dep)), { recursive: true });
+    copyFileSync(dep, join(root, dep));
+  }
   writeFileSync(join(root, TARGET_REL), GOOD);
   // A suite declaring one literal mutation, in the shape the checker parses.
   writeFileSync(

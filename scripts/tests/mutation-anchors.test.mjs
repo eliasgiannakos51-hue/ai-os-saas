@@ -77,14 +77,17 @@ export function tokenSpans(file, src) {
   const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, KIND[ext]);
   const spans = [];
   (function walk(node) {
-    const kids = node.getChildren(sf);
-    if (kids.length === 0) {
+    // getChildCount rather than getChildren().length: this is a recursion
+    // base case, not an assertion that a list is empty, and
+    // gate-vacuity.test.mjs cannot tell the two apart by shape — it read
+    // the leaf test as an unfloored emptiness check.
+    if (node.getChildCount(sf) === 0) {
       const a = node.getStart(sf);
       const b = node.getEnd();
       if (b > a) spans.push([a, b]);
       return;
     }
-    for (const k of kids) walk(k);
+    for (const k of node.getChildren(sf)) walk(k);
   })(sf);
   return spans;
 }

@@ -139,6 +139,99 @@ for (const m of migrations) {
   checkList(`${m.name}: no unqualified DELETE`, bareDeletes);
 }
 
+console.log("\n== 2b. and neither does any gate, to the database it is pointed at ==");
+// SECTION 2 GUARDS THE MIGRATIONS AND NOTHING ELSE, and the hole that
+// left was found the expensive way on 2026-09-07.
+//
+// clarification-rate.dbtest.mjs made room for its five fixture rows with
+//
+//     drop schema if exists public cascade; create schema public;
+//
+// Against the throwaway server `npm run test:db` provisions that reads as
+// housekeeping. It is not: scripts/db/run-dbtests.mjs's own header
+// documents an escape hatch — "if DATABASE_URL is ALREADY set, nothing
+// here is provisioned... that is what lets someone point this at a real
+// staging database instead of a throwaway one" — and against that
+// database those two lines delete the product.
+//
+// It was also already wrong on the throwaway one. Suites run in
+// alphabetical order; clarification-rate is fourth and cost-alert-once is
+// fifth, and the fifth died on `relation "public.cost_alert_log" does not
+// exist` — 107 tables down to 2. The round that shipped it had run
+// `npm run test:db -- clarification-rate`, and a filtered run has no
+// fifth suite.
+//
+// WHAT IS BANNED, AND WHAT IS NOT. A suite that builds its own scratch
+// table and drops it is doing the right thing — pack-rate-race.dbtest.mjs
+// has done exactly that since it was written, with the reason in its own
+// comment: "`truncate user_credits` on a shared database is other suites'
+// data". So the rule is not "no DROP". It is: nothing may drop or
+// truncate an object THE MIGRATIONS CREATE, and nothing may drop a schema
+// this project keeps, a database, or a role's objects.
+//
+// WHAT IT CANNOT SEE, said plainly rather than left to be discovered.
+// It reads source text, so a statement assembled at runtime
+// (`drop table ${name}`) is invisible to it, and so is one buried
+// mid-line after a semicolon — which is deliberate: nav-events.dbtest.mjs
+// carries "'; drop table nav_events; --" as an INJECTION PAYLOAD it feeds
+// the route on purpose, and a check that failed the build on a string a
+// test is attacking itself with would be read as noise and switched off.
+{
+  const gateFiles = [
+    ...readdirSync("scripts/tests").filter((f) => f.endsWith(".dbtest.mjs")).map((f) => `scripts/tests/${f}`),
+    ...readdirSync("scripts/db").filter((f) => f.endsWith(".mjs")).map((f) => `scripts/db/${f}`),
+  ].sort();
+  // A floor on the SOURCE of the scan, not on its result: "no gate is
+  // destructive" is trivially true of a list of no gates.
+  check(`the gates that talk to a database were found (${gateFiles.length})`, gateFiles.length >= 20);
+
+  // Every table any migration creates. A name outside this set is a
+  // scratch object the suite made itself.
+  const created = new Set(
+    [...commentFreeCode.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?"?([a-z0-9_]+)"?/gi)].map(
+      (m) => m[1].toLowerCase()
+    )
+  );
+  check(`the migrations' table names were parsed (${created.size})`, created.size >= 80, String(created.size));
+
+  const PROJECT_SCHEMAS = new Set(["public", "auth", "storage"]);
+  // A statement START: the beginning of a line, or straight after the
+  // backtick or quote that opens the SQL string. Not "anywhere the words
+  // appear" — see the injection payload above.
+  const DESTRUCTIVE =
+    /(?:(?:^|\n)[ \t]*|[`"'][ \t]*)(drop\s+table|drop\s+schema|drop\s+database|drop\s+owned|truncate(?:\s+table)?)\s+(?:if\s+exists\s+)?([a-z0-9_."${}]+)/gi;
+
+  const offenders = [];
+  let statements = 0;
+  for (const file of gateFiles) {
+    const src = readFileSync(file, "utf8")
+      .split("\n")
+      .filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l))
+      .join("\n");
+    for (const m of src.matchAll(DESTRUCTIVE)) {
+      statements++;
+      const verb = m[1].toLowerCase().replace(/\s+/g, " ");
+      const target = m[2].toLowerCase().replace(/"/g, "");
+      const bare = target.replace(/^[a-z0-9_${}]+\./, "");
+      if (verb === "drop database" || verb === "drop owned") {
+        offenders.push(`${file}: ${verb} ${target}`);
+      } else if (verb === "drop schema") {
+        if (PROJECT_SCHEMAS.has(target)) offenders.push(`${file}: ${verb} ${target}`);
+      } else if (created.has(bare)) {
+        offenders.push(`${file}: ${verb} ${target} — the migrations create that table`);
+      }
+    }
+  }
+  // The extractor matched SOMETHING, or "no offenders" is a fact about a
+  // regex that stopped matching rather than about the gates.
+  check(
+    `the scan reads real statements (${statements} drop/truncate found across the gates)`,
+    statements >= 3,
+    String(statements)
+  );
+  checkList("no gate drops or truncates what the migrations build", offenders);
+}
+
 console.log("\n== 3. every function is revoked from anon and authenticated ==");
 // The standing rule, which was being followed in one migration out of
 // fourteen. It is a loop over pg_proc now rather than a line somebody has

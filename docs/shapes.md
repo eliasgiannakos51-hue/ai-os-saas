@@ -669,3 +669,50 @@ catches a boundary next to a non-ASCII literal, but it cannot tell a
 correct `<img\b` from a Greek word without reading intent. Held by
 convention and one heuristic — which is a weaker sentence than every other
 entry in this file, and it is the true one.
+
+## A check that names its subject in advance
+
+`has_function_privilege('anon', …)`, `grantee = 'authenticated'`,
+`anon_readable_relations` — three real checks in this repository, and all
+three ask a yes/no question about a role somebody chose *before* running
+them. A Supabase project has about fifteen roles. A grant to
+`dashboard_user`, a membership handed to `authenticator`, `BYPASSRLS` set
+on anything, are not *denied* by those checks. They are invisible to them:
+the query never asks, so the answer never appears, and the report says all
+clear.
+
+Measured on 2026-09-07 by asking the other question — "list every grantee
+you hold, on every facet" — against a database with all 66 migrations
+applied: `authenticated` held TRUNCATE, TRIGGER and REFERENCES on 102
+relations and UPDATE on 2 sequences; `anon` held TRUNCATE on
+`help_articles`; and `truncate table public.chat_messages` **succeeded** as
+`authenticated`, with row level security on and its `user_id = auth.uid()`
+policies in place, because RLS does not scope TRUNCATE.
+
+The fix is not one more role name in the predicate — the next role would
+be missed the same way. It is a NAMED LIST of who may hold anything, with
+a reason on every line, and everything outside it red:
+`scripts/db/role-grants.mjs`, `scripts/tests/role-grants.test.mjs`,
+`scripts/tests/role-grants.dbtest.mjs`.
+
+## A gate that deletes what it measures
+
+`clarification-rate.dbtest.mjs` needed an empty `ai_cost_log` to count
+five fixture rows, and made one with `drop schema if exists public
+cascade; create schema public;`. Against the throwaway server
+`npm run test:db` provisions, that reads as housekeeping. Against the
+staging database `scripts/db/run-dbtests.mjs`'s own header invites
+somebody to point it at, it deletes the product.
+
+It was already wrong on the throwaway one, and nothing said so. Suites run
+alphabetically: the fourth left 2 tables where there had been 107, and the
+FIFTH failed — `relation "public.cost_alert_log" does not exist`, a
+message about a file with nothing wrong with it. The round that shipped it
+had run `npm run test:db -- clarification-rate`, and a filtered run has no
+fifth suite.
+
+`db-migrations.test.mjs` section 2b refuses any `*.dbtest.mjs` or
+`scripts/db/*.mjs` that drops a schema this project keeps, or drops or
+truncates a table the migrations create. A scratch object a suite made
+itself is fine — `pack-rate-race.dbtest.mjs` had that right from the day
+it was written, and said why in its own comment.

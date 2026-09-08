@@ -47,7 +47,31 @@ export const DEFAULT_DAYS = 30;
  * a query that has to be edited before it can be pasted is a query
  * nobody pastes.
  */
-export function buildQuery(days = DEFAULT_DAYS) {
+/**
+ * THE TABLE IS A PARAMETER, AND IT HAS EXACTLY ONE REASON TO BE.
+ *
+ * Everything that runs this for real — the CLI below, `--sql`, the pack a
+ * person pastes into the Supabase editor — takes the default and reads
+ * `public.ai_cost_log`. The parameter exists so the gate that proves this
+ * query is valid SQL can build its five fixture rows in a scratch schema
+ * instead of in the real one.
+ *
+ * IT WAS NOT A PARAMETER FOR ONE ROUND, and the cost of that is written
+ * down rather than quietly fixed. clarification-rate.dbtest.mjs made room
+ * for its fixture with
+ *
+ *     drop schema if exists public cascade; create schema public;
+ *
+ * which is correct against a throwaway database and catastrophic against
+ * the staging one scripts/db/run-dbtests.mjs's own header invites somebody
+ * to point it at. Measured on 2026-09-07: after that suite ran, the
+ * throwaway database had 2 tables where it had had 107, and the next
+ * suite in the alphabet failed with `relation "public.cost_alert_log" does
+ * not exist` — a message about the fifth suite, caused by the fourth.
+ * `npm run test:db -- clarification-rate` never showed it, because a
+ * filtered run has no fifth suite.
+ */
+export function buildQuery(days = DEFAULT_DAYS, table = "public.ai_cost_log") {
   const window = Math.max(1, Math.floor(Number(days) || DEFAULT_DAYS));
   return `
 select
@@ -57,7 +81,7 @@ select
   count(*) filter (where (metadata->>'clarification_paid')::boolean)   as paid_checks,
   count(*) filter (where (metadata->>'clarification_asked')::boolean)  as questions_asked,
   round(sum(coalesce(real_cost_eur, 0))::numeric, 4)                   as cost_eur
-from public.ai_cost_log
+from ${table}
 where created_at >= now() - interval '${window} days'
   and metadata ? 'clarification_verdict'
 group by 1, 2

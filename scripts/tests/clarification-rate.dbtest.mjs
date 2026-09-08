@@ -43,14 +43,38 @@ const psql = (args, query) =>
     stdio: ["ignore", "pipe", "pipe"],
   });
 
-// A table shaped like the real one. The migration that creates
-// public.ai_cost_log carries a dozen columns this query never reads; what
-// it needs is created_at, real_cost_eur and metadata, and building only
-// those keeps this file runnable against a bare database.
+// A table shaped like the real one, IN A SCRATCH SCHEMA OF ITS OWN. The
+// migration that creates public.ai_cost_log carries a dozen columns this
+// query never reads; what it needs is created_at, real_cost_eur and
+// metadata, and building only those keeps this file runnable against a
+// bare database.
+//
+// THE FIRST VERSION MADE ROOM BY DELETING THE DATABASE.
+//
+//     drop schema if exists public cascade; create schema public;
+//
+// Correct against the throwaway server `npm run test:db` provisions;
+// catastrophic against the staging one that script's own header invites
+// somebody to point it at, and quietly wrong even on the throwaway:
+// measured 2026-09-07, the database had 2 tables afterwards where it had
+// had 107, and cost-alert-once.dbtest.mjs — the next suite in the
+// alphabet — died on `relation "public.cost_alert_log" does not exist`.
+// A filtered run (`npm run test:db -- clarification-rate`) has no next
+// suite, which is why the round that shipped this saw nothing.
+//
+// pack-rate-race.dbtest.mjs had already written the answer down:
+// "`truncate user_credits` on a shared database is other suites' data",
+// and it builds zz_pack_rate_race_probe instead. This is the same answer,
+// one level up — a schema rather than a table, because the query names a
+// schema-qualified table and scripts/db/clarification-rate.mjs takes it as
+// a parameter for exactly this.
+//
+// db-migrations.test.mjs section 2b is what stops the next one.
+const PROBE = "zz_clarification_rate_probe";
 psql([], `
-  drop schema if exists public cascade;
-  create schema public;
-  create table public.ai_cost_log (
+  drop schema if exists ${PROBE} cascade;
+  create schema ${PROBE};
+  create table ${PROBE}.ai_cost_log (
     id bigserial primary key,
     created_at timestamptz not null default now(),
     real_cost_eur numeric,
@@ -60,7 +84,7 @@ psql([], `
 
 // Two days, all three verdicts, and the shapes that break a careless cast.
 psql([], `
-  insert into public.ai_cost_log (created_at, real_cost_eur, metadata) values
+  insert into ${PROBE}.ai_cost_log (created_at, real_cost_eur, metadata) values
     (now() - interval '1 day', 0,      '{"clarification_verdict":"clear","clarification_paid":false,"clarification_asked":false}'),
     (now() - interval '1 day', 0,      '{"clarification_verdict":"clear","clarification_paid":false,"clarification_asked":false}'),
     (now() - interval '1 day', 0.0021, '{"clarification_verdict":"vague","clarification_paid":true,"clarification_asked":true}'),
@@ -84,11 +108,26 @@ console.log("== 1. the query runs at all ==");
 let out = "";
 let error = null;
 try {
-  out = psql(["-At", "-F", "\t"], buildQuery(DEFAULT_DAYS));
+  out = psql(["-At", "-F", "\t"], buildQuery(DEFAULT_DAYS, `${PROBE}.ai_cost_log`));
 } catch (err) {
   error = String(err.stderr ?? err.message).slice(0, 300);
 }
 check("the query is valid SQL against a real server", error === null, error ?? "");
+// AND THE ONE THE PRODUCT ACTUALLY RUNS IS THE DEFAULT. The parameter
+// above exists so this suite can build five rows without touching the
+// real table; it would be worth nothing if the shipped call read
+// somewhere else. `--sql`, the CLI and the paste-into-Supabase pack all
+// take the default, so the default is what has to be gated.
+check(
+  "the default the CLI and --sql use is still public.ai_cost_log",
+  buildQuery(DEFAULT_DAYS).includes("from public.ai_cost_log"),
+  buildQuery(DEFAULT_DAYS)
+);
+check(
+  "...and the probe table is nowhere in it",
+  !buildQuery(DEFAULT_DAYS).includes(PROBE),
+  buildQuery(DEFAULT_DAYS)
+);
 
 const rows = parsePsql(out);
 console.log("\n== 2. what it counts, and what it leaves alone ==");
@@ -145,6 +184,16 @@ console.log("\n== 3. the two ratios the item is about ==");
   const empty = summarise([]);
   check("no data returns null rather than 0%", empty.askedShare === null && empty.freeShare === null);
 }
+
+// THE SCRATCH SCHEMA GOES AWAY. Left behind it would be a schema nobody
+// created on purpose in whatever database this was pointed at, and the
+// next run would find it and drop it — which is the same class of surprise
+// this file was fixed for, only smaller.
+psql([], `drop schema if exists ${PROBE} cascade;`);
+check(
+  "the scratch schema was removed",
+  psql(["-At"], `select count(*) from pg_namespace where nspname = '${PROBE}'`).trim() === "0"
+);
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length) {

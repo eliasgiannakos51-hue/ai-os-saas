@@ -89,8 +89,9 @@ const MUTANTS = [
     // without a word, which is the same "an empty list satisfies the
     // check" shape the floor exists to stop.
     //
-    // RE-ANCHORED 2026-09-07, and the sweep is what caught it: the floor
-    // went 90 -> 100 when two suites were added, this mutation still
+    // RE-ANCHORED TWICE, 2026-09-07 and 2026-09-08, and the sweep is what
+    // caught it both times: the floor went 90 -> 100 -> 105 as suites were
+    // added, this mutation still
     // named 90, and it reported STALE rather than passing quietly. That
     // is the runner's stale-anchor report doing its job — a mutation
     // pinned to an old constant tests nothing and says nothing.
@@ -106,7 +107,7 @@ const MUTANTS = [
     // What actually protects the next raise is the STALE report above.
     name: "the suite floor drops back to a third of the real count",
     file: RUNNER,
-    from: "const FLOOR = 100;",
+    from: "const FLOOR = 105;",
     to: "const FLOOR = 30;",
     expect: "suite floor",
   },

@@ -9,7 +9,39 @@ do $$ begin
   if not exists (select 1 from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
   if not exists (select 1 from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if;
   if not exists (select 1 from pg_roles where rolname = 'supabase_admin') then create role supabase_admin nologin; end if;
+  -- ==========================================================
+  -- THE OTHER ROLES A SUPABASE PROJECT HAS.
+  -- ==========================================================
+  --
+  -- WHY THEY ARE HERE WITH NO PRIVILEGES. scripts/db/role-grants.mjs asks
+  -- "which roles hold this?" and compares the answer against a named
+  -- list. Against a fixture where `authenticator`, `dashboard_user` and
+  -- `supabase_storage_admin` do not exist, that check cannot go red for
+  -- any of them — not because they hold nothing, but because there is
+  -- nothing to hold anything. A check whose subject is absent is the same
+  -- decoration as a check whose subject is empty, which is the shape
+  -- gate-vacuity.test.mjs exists for one level up.
+  --
+  -- WHAT IS AND IS NOT MODELLED, so nobody reads more into this than it
+  -- says. The NAMES and authenticator's membership are Supabase's
+  -- documented arrangement: PostgREST logs in as authenticator, which is
+  -- NOINHERIT and holds nothing of its own, and SET ROLEs to anon or
+  -- authenticated according to the JWT. What is NOT modelled is which
+  -- objects these roles own or are granted on a real project — this
+  -- fixture's auth and storage schemas are stubs owned by postgres, where
+  -- production's are owned by supabase_auth_admin and
+  -- supabase_storage_admin. So a green run here is not a statement about
+  -- production; `npm run db:grants -- --sql` is how production answers
+  -- for itself.
+  if not exists (select 1 from pg_roles where rolname = 'authenticator') then
+    create role authenticator noinherit nologin;
+  end if;
+  if not exists (select 1 from pg_roles where rolname = 'dashboard_user') then create role dashboard_user nologin; end if;
+  if not exists (select 1 from pg_roles where rolname = 'supabase_auth_admin') then create role supabase_auth_admin nologin; end if;
+  if not exists (select 1 from pg_roles where rolname = 'supabase_storage_admin') then create role supabase_storage_admin nologin; end if;
+  if not exists (select 1 from pg_roles where rolname = 'supabase_read_only_user') then create role supabase_read_only_user nologin; end if;
 end $$;
+grant anon, authenticated, service_role to authenticator;
 create schema if not exists auth;
 create schema if not exists storage;
 create table if not exists auth.users (
@@ -68,7 +100,35 @@ $$;
 grant usage on schema auth to authenticated, anon, service_role;
 grant execute on function auth.uid() to authenticated, anon, service_role;
 grant execute on function auth.role() to authenticated, anon, service_role;
-grant select on auth.users to authenticated, anon, service_role;
+-- SELECT ON auth.users GOES TO service_role ONLY, and it used to go to
+-- all three.
+--
+-- WHAT THAT MEANT HERE, measured on 2026-09-07 against this very fixture:
+--
+--     set role anon; select count(*), max(email) from auth.users;
+--     -> 2 | leak-probe@example.com
+--
+-- auth.users has no row level security in this stub (and none in
+-- production either — GoTrue relies on nobody being granted the table),
+-- so the grant was the only thing between the signed-OUT role and every
+-- registered address. No gate saw it: every privilege check this project
+-- had was scoped to schema `public`, and this table is in `auth`.
+--
+-- WHY REVOKING IS RIGHT RATHER THAN CONVENIENT. Nothing in this
+-- repository reads auth.users as anon or authenticated. The RLS policies
+-- call auth.uid(), which reads a GUC and needs EXECUTE on the function
+-- above, not SELECT on the table; the server-side readers all use
+-- createAdminClient(), which is service_role. Supabase's own arrangement
+-- is the same — the API roles are given the helper functions and not the
+-- table — so this line moves the fixture TOWARDS production rather than
+-- away from it.
+--
+-- AND IT IS THE SAFE DIRECTION IF THAT BELIEF IS WRONG. A stub more
+-- locked down than production makes anything that needs the grant fail
+-- loudly here; a stub more permissive makes a real hole invisible, which
+-- is what this line was doing. `npm run db:grants -- --sql` is how
+-- production says which of the two it is.
+grant select on auth.users to service_role;
 
 -- ============================================================
 -- THE PUBLIC SCHEMA'S DEFAULT PRIVILEGES, and why their absence was the

@@ -74,12 +74,23 @@ const MUTANTS = [
   },
   {
     // 5. A GRANT TO A ROLE PRODUCTION HAS AND THIS STUB DOES NOT.
-    // `authenticator` is the role PostgREST logs in as; granting to it
-    // works there and fails against a fresh database here.
-    name: "a migration grants to `authenticator`, a role the stub never creates",
+    // Granting to it works there and fails against a fresh database here.
+    //
+    // IT SAID `authenticator` UNTIL 2026-09-08, and the sweep reported it
+    // MISSED — correctly, and for the best possible reason: the stub
+    // creates authenticator now. scripts/db/bootstrap-supabase.sql added
+    // it, with dashboard_user and the two schema admins, so that
+    // role-grants.dbtest.mjs has a subject to refuse. A mutant that
+    // stages a divergence which no longer exists proves nothing, which is
+    // the same lesson user-isolation.mutation.mjs wrote down when a
+    // migration revoked the verb one of its leaks was staged on.
+    //
+    // supabase_replication_admin is a role a hosted project has and this
+    // stub still does not.
+    name: "a migration grants to a role production has and the stub never creates",
     file: MIGRATION,
     from: "do $$",
-    to: "grant select on public.ideas to authenticator;\ndo $$",
+    to: "grant select on public.ideas to supabase_replication_admin;\ndo $$",
     expect: "every one is a role the stub creates",
   },
   {

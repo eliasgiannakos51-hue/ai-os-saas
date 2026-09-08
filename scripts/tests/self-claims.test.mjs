@@ -28,10 +28,26 @@
 //
 // PATHS — held at ZERO. `node scripts/scan-self-claims.mjs` reads every
 // comment in src/, scripts/ and supabase/, plus the markdown, and resolves
-// every path it names. Around 2,370 claims; the 19 that remain are all in
-// the table below with a reason and a staleness check of its own. The
-// counts here are the shape of the answer, not the assertion — the
-// assertions read the scan live.
+// every path it names. The ones that remain are all in the table below
+// with a reason and a staleness check of its own.
+//
+// THIS PARAGRAPH USED TO CARRY THE COUNTS, and by V5 #13 all three were
+// wrong: "around 2,370 claims" against a measured 2,818, "the 19 that
+// remain" against 18, and, below, "~1,470 symbol claims, 24 unresolved"
+// against 1,579 and 25. Nothing was broken by them and that is the
+// point — a number typed into prose beside a gate that prints the live
+// one is a claim with no reader and no check, in the file whose whole
+// subject is claims with no check. They are gone rather than corrected:
+// every count this file states is now interpolated into a check name
+// from the scan it just ran.
+//
+// ROUTES — held at ZERO since V5 #13, and unchecked by anything before
+// it. PATH_RE requires a file extension so that a bare directory
+// reference is not read as a missing file; a route has none, so every
+// `/api/…` and `/dashboard/…` a comment named went unread. Two were
+// wrong, both calling /dashboard/business "the hub" when the hub is
+// /dashboard/records — one of them in lib/sidebar-nav.ts, forty-eight
+// lines above the same file naming it correctly.
 //
 // The first run found 55, of which 23 were wrong and are now fixed: two
 // README lines still pointing at an src/lib/admin.ts a rename removed,
@@ -43,7 +59,7 @@
 // under that name.
 //
 // SYMBOLS — measured, and NOT gated. The same scan reads constants and
-// calls named in comments: ~1,470 claims, 24 unresolved, of which exactly
+// calls named in comments; of the unresolved ones exactly
 // ONE was genuinely wrong (badge-credits.ts said BADGE_PLANS where
 // badge.ts declares BADGED_PLANS). Precision about 4%. The rest are
 // Chromium error codes, env keys the code BUILDS rather than writes
@@ -65,7 +81,8 @@
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
-import { ABSENT_ON_PURPOSE } from "./lib/absent-on-purpose.mjs";
+import { ABSENT_ON_PURPOSE, ROUTES_ABSENT_ON_PURPOSE } from "./lib/absent-on-purpose.mjs";
+import { resolveRoute, routeAbsenceSuppresses, hasChildRoute } from "../scan-self-claims.mjs";
 
 let pass = 0;
 const failures = [];
@@ -105,6 +122,116 @@ check(
   "no comment names a file that is not there",
   unexplained.length === 0,
   unexplained.map((f) => `${f.file}:${f.line}  ${f.claim}\n          ${f.text}`).join("\n        ")
+);
+
+console.log("\n== 1a. and every ROUTE a comment names is one the app router answers ==");
+// ROUTES WERE UNCHECKED UNTIL V5 #13, and the reason is worth keeping:
+// PATH_RE requires a file extension so that a bare directory reference is
+// not read as a missing file, and a route has none. 493 route claims sat
+// outside every gate in this repository. Two were wrong — both naming, as
+// "the hub", a page that has never existed: /dashboard/business. One of
+// the two survived an extra round inside the route scanner's own absence
+// rule, which read a past tense about something else in the same sentence
+// as a past tense about the route.
+check(
+  `...and route claims to resolve (${report.claims.routes} routes)`,
+  report.claims.routes >= 300,
+  String(report.claims.routes)
+);
+const unexplainedRoutes = report.findings.routes.filter(
+  (f) => !(ROUTES_ABSENT_ON_PURPOSE[f.file]?.routes ?? []).includes(f.claim)
+);
+check(
+  "no comment names a route the app router would not answer",
+  unexplainedRoutes.length === 0,
+  unexplainedRoutes.map((f) => `${f.file}:${f.line}  ${f.claim}\n          ${f.text}`).join("\n        ")
+);
+// BOTH WAYS, like the path table. A route that has started resolving is
+// an exception to delete, and an entry the scan no longer reports is a
+// comment somebody rewrote without cleaning up after it.
+const routesRevived = [];
+const routesOrphaned = [];
+for (const [file, entry] of Object.entries(ROUTES_ABSENT_ON_PURPOSE)) {
+  check(
+    `${file}: the route exception says why`,
+    typeof entry.reason === "string" && entry.reason.length > 40
+  );
+  for (const route of entry.routes) {
+    if (!report.findings.routes.some((f) => f.file === file && f.claim === route)) {
+      routesOrphaned.push(`${file} -> ${route}`);
+    }
+  }
+}
+check("no route exception has started resolving", routesRevived.length === 0, routesRevived.join(", "));
+check(
+  "no route exception describes a comment that is gone",
+  routesOrphaned.length === 0,
+  routesOrphaned.join(", ")
+);
+// THE POSITIVE CONTROL. Everything above is an assertion that a list is
+// empty, and the cheapest way to empty a list is to stop filling it: a
+// resolver that answers "yes" to everything passes every check in this
+// section. So the resolver is asked directly, about routes whose answers
+// are known, including the two shapes that made it hard to write.
+check(
+  "the route scan can still SEE a route that does not resolve",
+  report.findings.routes.length >= 3,
+  `${report.findings.routes.length} — a resolver that says yes to everything empties this section`
+);
+check("a real page resolves", Boolean(resolveRoute("/dashboard/settings")));
+check("a real API route resolves", Boolean(resolveRoute("/api/health")));
+// THE DYNAMIC SEGMENT, BOTH WAYS. src/app/dashboard/[module]/page.tsx
+// calls notFound() for a slug lib/modules.ts does not carry, so a
+// resolver that lets [module] swallow any segment would call the 404 a
+// page — which is exactly how a route that has never existed,
+// /dashboard/business, read as fine for three rounds.
+check("a dynamic segment resolves for a value the registry carries", Boolean(resolveRoute("/dashboard/finance")));
+check(
+  "...and does NOT resolve for one it does not",
+  resolveRoute("/dashboard/business") === null,
+  String(resolveRoute("/dashboard/business"))
+);
+// A PREFIX OF A REAL TREE IS A NAMESPACE, NOT A ROUTE. /api/cron serves
+// nothing itself and eight children; reporting it as missing would make
+// this scan a list of complaints about how people refer to families of
+// routes.
+check("a prefix of a real tree is a namespace", resolveRoute("/api/cron") === "namespace");
+check("a segment no directory answers is not a route", resolveRoute("/api/nothing-like-this") === null);
+// THE NAMESPACE TEST, ON REAL DIRECTORIES. Asking resolveRoute for a
+// namespace it should refuse is not possible: zero directories under
+// src/app lack a route beneath them, so the `: null` branch is
+// unreachable from that side. Exercised here instead, which is where it
+// can go red.
+check("a directory with routes below it is a namespace", hasChildRoute("src/app/api/cron") === true);
+// NOT src/lib, WHICH WAS THE FIRST FIXTURE AND WAS WRONG:
+// src/lib/ai/routing/route.ts is a module about provider routing, named
+// route.ts, and the helper matches on the filename because under src/app
+// that is what a route IS. The false fixture has to be a directory with
+// no file of that name anywhere beneath it, which src/types is and
+// src/lib is not — a reminder that this helper is only meaningful when
+// pointed inside the app router.
+check("a directory with none is not", hasChildRoute("src/types") === false);
+
+// THE FALSE NEGATIVE, PINNED TO THE SENTENCE THAT CAUSED IT. The first
+// version of this scan reported four wrong routes where there were five,
+// and the one it dropped was real: module-icons.ts wrote "The hub at
+// /dashboard/business — one row in place of the nineteen log modules the
+// sidebar used to list", and "used to list" governs the MODULES. Both
+// sentences below are verbatim from the tree as it stood.
+check(
+  "a past tense about something else in the sentence does not excuse a route",
+  !routeAbsenceSuppresses(
+    "The hub at /dashboard/business — one row in place of the nineteen log " +
+      "modules the sidebar used to list, so the icon is the many things one place one",
+    "/dashboard/business"
+  )
+);
+check(
+  "...while a marker written against the route does",
+  routeAbsenceSuppresses(
+    "Ideas is the dashboard root, NOT /dashboard/ideas: that path goes to",
+    "/dashboard/ideas"
+  )
 );
 
 console.log("\n== 1b. and no exception in the table has gone stale ==");

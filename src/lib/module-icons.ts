@@ -160,9 +160,15 @@ export function iconForSlug(slug: string, fallback: LucideIcon = Sparkles): Luci
   return MODULE_ICONS[slug] ?? EXTRA_ICONS[slug] ?? fallback;
 }
 
-// The hub at /dashboard/business — one row in place of the nineteen log
+// The hub at /dashboard/records — one row in place of the nineteen log
 // modules the sidebar used to list, so the icon is the "many things,
 // one place" one rather than any single module's.
+//
+// IT SAID /dashboard/business until V5 #13, the same wrong route
+// lib/sidebar-nav.ts carried. This one hid for an extra round inside the
+// route scanner's own absence rule: "used to list" sits in the same
+// comment and made the claim look like a past tense, though it governs
+// the nineteen modules rather than the URL. See ROUTE_ABSENCE_RADIUS.
 export const MY_BUSINESS_ICON: LucideIcon = LayoutGrid;
 
 // THE FOUR ROUTES THAT WERE IN NO NAV CONFIG AT ALL — V4.6, round 5.

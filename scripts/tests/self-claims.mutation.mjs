@@ -96,6 +96,70 @@ const MUTANTS = [
     to: "lib/auth/admin-emails.ts",
     expect: "no entry describes a claim the scan no longer sees",
   },
+  {
+    // 7. THE DYNAMIC SEGMENT SWALLOWS ANYTHING. This is the defect that
+    // let a route that has never existed, /dashboard/business, read as a
+    // page for three rounds while
+    // src/app/dashboard/[module]/page.tsx calls notFound() for it. With
+    // the registry ignored, every dashboard slug resolves and the zero
+    // above stays green on a scan that has stopped looking.
+    name: "a dynamic segment resolves for any value at all",
+    file: SCANNER,
+    from: "    const registry = DYNAMIC_VALUES[join(dir, dynamic)];",
+    to: "    const registry = null;",
+    expect: "does NOT resolve for one it does not",
+  },
+  {
+    // 8. THE NAMESPACE TEST STOPS FINDING ROUTES BENEATH A DIRECTORY.
+    //
+    // THIS MUTANT USED TO AIM AT THE TERNARY that calls hasChildRoute,
+    // and it was a hole: measured on 2026-09-08, zero of the directories
+    // under src/app lack a route somewhere beneath them, so `return
+    // "namespace"` and `return hasChildRoute(dir) ? "namespace" : null`
+    // give the same answer for every input resolveRoute can reach. A
+    // mutation nothing can catch is not evidence of a gap in the gate; it
+    // is a mutation aimed at unreachable code, and swapping it for one
+    // aimed at the helper is the fix rather than lowering the count.
+    name: "the namespace test stops recognising a route file",
+    file: SCANNER,
+    from: "      if (/^(route|page)\\.tsx?$/.test(e.name)) return true;",
+    to: "      if (/^(route|page)\\.tsx?$/.test(e.name)) continue;",
+    expect: "a directory with routes below it is a namespace",
+  },
+  {
+    // 9. THE ABSENCE WINDOW WIDENS BACK. Forty characters is what
+    // separates "used to list", written about the nineteen modules, from
+    // the route sixty characters earlier in the same sentence. At a
+    // hundred the scan suppresses the finding again — which is how the
+    // second of the two wrong comments survived a round.
+    name: "the route absence window grows wide enough to read another clause",
+    file: SCANNER,
+    from: "const ROUTE_ABSENCE_RADIUS = 40;",
+    to: "const ROUTE_ABSENCE_RADIUS = 100;",
+    expect: "a past tense about something else in the sentence does not excuse a route",
+  },
+  {
+    // 10. THE ROUTE MATCHER STOPS MATCHING. The cheapest way to hold a
+    // list at zero is to stop filling it, and dropping a root from the
+    // pattern is a one-word edit that looks like tidying.
+    name: "the route matcher forgets one of the roots the app serves",
+    file: SCANNER,
+    from: "((?:\\/api|\\/dashboard|\\/auth)\\/",
+    to: "((?:\\/auth)\\/",
+    expect: "route claims to resolve",
+  },
+  {
+    // 11. A ROUTE EXCEPTION THAT OUTLIVED ITS COMMENT — the same
+    // staleness the path table is checked for, on the table that was
+    // added beside it. If it were not checked, the four corrections
+    // recorded in V5 #13 could be deleted and their exemptions would
+    // stay, quietly excusing whatever came next.
+    name: "a route exception outlives the comment it was written for",
+    file: "src/lib/module-icons.ts",
+    from: "// IT SAID /dashboard/business until V5 #13, the same wrong route",
+    to: "// IT SAID the wrong thing until V5 #13, the same wrong route",
+    expect: "no route exception describes a comment that is gone",
+  },
 ];
 
 function runGate() {

@@ -42,7 +42,17 @@ import {
 
 // Single source of truth for every sidebar link — shared by the Sidebar
 // (grouped, collapsible), the command palette (flattened, searchable) and
-// the hub page at /dashboard/business, so the three never drift apart.
+// the hub page at /dashboard/records, so the three never drift apart.
+//
+// IT SAID /dashboard/business until V5 #13, and that page has never
+// existed: the only directory under src/app/dashboard beginning with
+// "business" is business-health, and no href anywhere points at
+// /dashboard/business. Forty-eight lines below, the same file already
+// named the hub correctly — "place on the hub at /dashboard/records" —
+// so this was a comment contradicting its own file. Found by the route
+// half of scripts/scan-self-claims.mjs, which did not exist until the
+// same round: PATH_RE requires a file extension, so no route named in
+// any comment in this repository had ever been checked.
 //
 // The SHAPES and both filters live in lib/sidebar-visibility.ts, which
 // imports no icons, so the gates can execute `visibleGroups` /

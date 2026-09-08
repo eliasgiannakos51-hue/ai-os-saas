@@ -107,8 +107,19 @@ const MUTANTS = [
     // What actually protects the next raise is the STALE report above.
     name: "the suite floor drops back to a third of the real count",
     file: RUNNER,
-    from: "const FLOOR = 105;",
-    to: "const FLOOR = 30;",
+    // ANCHORED ON THE DECLARATION, NOT ON THE NUMBER. This mutation went
+    // STALE three times — 90 -> 100, 100 -> 105, 105 -> 113 — once per
+    // batch of new suites, and each time the sweep reported the SUITE as
+    // broken rather than the runner. A `from` that names the value has to
+    // be re-edited every time the value is raised, which is the one thing
+    // this line is guaranteed to do.
+    //
+    // The prefix is stable and the replacement keeps the raised number in
+    // the expression, so the mutant means "the floor is 30 whatever it
+    // was raised to" at any future value. mutation-coverage.mutation.mjs
+    // uses the same form for its RATCHET, and for the same reason.
+    from: "const FLOOR = ",
+    to: "const FLOOR = 30 + 0 * ",
     expect: "suite floor",
   },
   {

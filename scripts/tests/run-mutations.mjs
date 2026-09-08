@@ -77,9 +77,10 @@ if (suites.length === 0) {
 // two new suites (check-site-spelling, billing-coverage) took the real
 // count to 102 against a floor last raised at 96. 105 was set against a
 // real 107 when role-grants joined them; 113 against a real 115 after the
-// seven V5 #10 suites; 114 against a real 116; 115 today against a real
-// 117, after anthropic-reconcile joined them.
-const FLOOR = 115;
+// seven V5 #10 suites; 114 against a real 116; 115 against a real 117
+// after anthropic-reconcile; 116 today against a real 118, with
+// mutation-anchors.
+const FLOOR = 116;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

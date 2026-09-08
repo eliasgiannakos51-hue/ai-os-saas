@@ -198,7 +198,13 @@ const MUTANTS = [
     restore: (defs) =>
       `drop policy if exists "select_own_user_files_objects" on storage.objects;\n` +
       defs.filter((d) => d.name === "select_own_user_files_objects").map((d) => d.create).join("\n"),
-    expect: ["A cannot SEE B's file in any bucket"],
+    // RE-ANCHORED 2026-09-08. The gate used to report one aggregate line,
+    // "A cannot SEE B's file in any bucket", for all three buckets and
+    // two of the four commands. It reports one line per policy now, so
+    // this mutant names the policy it breaks — which is the point: a
+    // mutant that reddens a line covering ten policies has not shown
+    // that any particular one of them is load-bearing.
+    expect: ["select_own_user_files_objects: A sees its own file"],
   },
   {
     // 9. AND ROW LEVEL SECURITY SWITCHED OFF ON IT, which is the state
@@ -209,7 +215,116 @@ const MUTANTS = [
     schema: "storage",
     apply: () => `alter table storage.objects disable row level security;`,
     restore: () => `alter table storage.objects enable row level security;`,
-    expect: ["row level security is ON for storage.objects", "A cannot SEE B's file in any bucket"],
+    expect: [
+      "row level security is ON for storage.objects",
+      "select_own_user_files_objects: A sees its own file",
+    ],
+  },
+  // ---------------------------------------------------------------------
+  // THE OTHER SEVEN, ONE AT A TIME — and the absence of an eighth.
+  // ---------------------------------------------------------------------
+  //
+  // WHY THESE EXIST. Until 2026-09-08 this suite carried exactly the two
+  // mutants above, both on the same policy, both reddening one aggregate
+  // line. Three INSERT policies and one UPDATE policy on storage.objects
+  // had no mutant and no check: `with check (true)` on any of the three
+  // would have let one account write a file into another's folder, and
+  // every line of every gate in this repository would have stayed green.
+  //
+  // ONE PER COMMAND AND ONE PER BUCKET, because the four verbs fail
+  // differently — an INSERT that violates WITH CHECK RAISES, where an
+  // UPDATE or DELETE outside your rows quietly affects none — and a
+  // mutant on the user-files bucket says nothing about the other two.
+  {
+    // 10. THE WRITE HALF, WHICH NOTHING TESTED. A file written into
+    // another account's folder is not a leak of what B has; it is A
+    // putting something into B's documents.
+    name: "the user-files INSERT policy accepts any path — A can write into B's folder",
+    table: "objects",
+    schema: "storage",
+    apply: () =>
+      `drop policy if exists "insert_own_user_files_objects" on storage.objects;
+       create policy "insert_own_user_files_objects" on storage.objects for insert
+         to public with check (bucket_id = 'user-files');`,
+    restore: (defs) =>
+      `drop policy if exists "insert_own_user_files_objects" on storage.objects;\n` +
+      defs.filter((d) => d.name === "insert_own_user_files_objects").map((d) => d.create).join("\n"),
+    expect: ["insert_own_user_files_objects: A may write under its own prefix, and is REFUSED under B's"],
+  },
+  {
+    // 11. THE ONE UPDATE POLICY IN THE SCHEMA. `using (true)` here lets A
+    // overwrite the metadata of every file in the bucket — including the
+    // owner column, which is what the storage API reads back.
+    name: "the user-files UPDATE policy says using (true) — A can rewrite B's file rows",
+    table: "objects",
+    schema: "storage",
+    apply: () =>
+      `drop policy if exists "update_own_user_files_objects" on storage.objects;
+       create policy "update_own_user_files_objects" on storage.objects for update
+         to public using (true) with check (true);`,
+    restore: (defs) =>
+      `drop policy if exists "update_own_user_files_objects" on storage.objects;\n` +
+      defs.filter((d) => d.name === "update_own_user_files_objects").map((d) => d.create).join("\n"),
+    expect: ["update_own_user_files_objects: A updates its own file"],
+  },
+  {
+    // 12. A SECOND BUCKET, ON A DIFFERENT VERB. website-references holds
+    // the images somebody uploaded for their own site.
+    name: "the website-references SELECT policy says using (true)",
+    table: "objects",
+    schema: "storage",
+    apply: () =>
+      `drop policy if exists "select_own_website_references" on storage.objects;
+       create policy "select_own_website_references" on storage.objects for select
+         to public using (true);`,
+    restore: (defs) =>
+      `drop policy if exists "select_own_website_references" on storage.objects;\n` +
+      defs.filter((d) => d.name === "select_own_website_references").map((d) => d.create).join("\n"),
+    expect: ["select_own_website_references: A sees its own file"],
+  },
+  {
+    // 13. THE THIRD BUCKET, ON THE MOST DESTRUCTIVE VERB. A delete leaves
+    // nothing behind to look wrong.
+    name: "the create-attachments DELETE policy says using (true) — A can erase B's attachments",
+    table: "objects",
+    schema: "storage",
+    apply: () =>
+      `drop policy if exists "delete_own_create_attachments" on storage.objects;
+       create policy "delete_own_create_attachments" on storage.objects for delete
+         to public using (true);`,
+    restore: (defs) =>
+      `drop policy if exists "delete_own_create_attachments" on storage.objects;\n` +
+      defs.filter((d) => d.name === "delete_own_create_attachments").map((d) => d.create).join("\n"),
+    expect: ["delete_own_create_attachments: A deletes its own file"],
+  },
+  {
+    // 14. AND THE ABSENCE, WHICH IS ALSO A DECISION. Two buckets have no
+    // UPDATE policy on purpose — nothing in this product edits a
+    // reference image in place — and the gate asserts that even the OWNER
+    // cannot update there. That line is what proves the per-command probe
+    // is doing anything at all, so an unscoped UPDATE policy appearing on
+    // a bucket that should have none has to redden it.
+    name: "an unscoped UPDATE policy appears on a bucket that is meant to have none",
+    table: "objects",
+    schema: "storage",
+    apply: () =>
+      `create policy "zz_leak_update_website_references" on storage.objects for update
+         to public using (bucket_id = 'website-references') with check (bucket_id = 'website-references');`,
+    restore: () => `drop policy if exists "zz_leak_update_website_references" on storage.objects;`,
+    expect: ["website-references has no UPDATE policy"],
+  },
+  {
+    // 15. A BUCKET QUIETLY BECOMES PUBLIC. No policy changes, no ACL
+    // changes, one boolean — and Supabase's storage service then serves
+    // every object in it at /storage/v1/object/public/... without
+    // consulting a policy at all. `user-files` is where uploaded
+    // documents live.
+    name: "the user-files bucket is flipped to public",
+    table: "buckets",
+    schema: "storage",
+    apply: () => `update storage.buckets set public = true where id = 'user-files';`,
+    restore: () => `update storage.buckets set public = false where id = 'user-files';`,
+    expect: ["exactly the argued-for bucket is public"],
   },
 ];
 

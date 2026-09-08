@@ -30,14 +30,49 @@ const INV = "scripts/db-inventory.mjs";
 
 const MUTANTS = [
   {
-    // THE DEFECT ITSELF, put back. The quotes are optional in Postgres
-    // and this repo writes them both ways, so requiring them loses every
-    // policy in fifteen migration files at once.
-    name: "the policy pattern requires the double quotes again",
+    // 1. THE SCHEMA IS ASSUMED TO BE public, which is what this file did
+    // until 2026-09-08: `on storage.objects` was read as a table called
+    // `storage`, which is in no expected-table list, so the ten policies
+    // on the table holding every uploaded document were dropped from the
+    // inventory without a word. RE-ANCHORED from the quoted/unquoted
+    // mutation this slot used to carry — that defect is covered by the
+    // two below, and the regex it named no longer exists.
+    name: "a policy's schema is assumed to be public again",
     file: INV,
-    from: '/create\\s+policy\\s+(?:"([^"]+)"|([a-z0-9_]+))\\s+on\\s+(?:public\\.)?"?([a-z0-9_]+)"?/gi',
-    to: '/create\\s+policy\\s+(?:"([^"]+)")\\s+on\\s+(?:public\\.)?"?([a-z0-9_]+)"?/gi',
-    expect: "reaches expected_policies",
+    from: '      const schema = (m[3] ?? "public").toLowerCase();',
+    to: '      const schema = "public";',
+    expect: "every policy on storage.objects reaches expected_policies",
+  },
+  {
+    // 2. THE FILTER GOES BACK TO PUBLIC-ONLY. The same blindness one
+    // layer down: the parse is right and the list throws the result away.
+    name: "the policy list is filtered back to the public tables src/ queries",
+    file: INV,
+    from: "      ? tables.includes(p.table)\n      : p.schema === \"storage\" && STORAGE_RELATIONS.has(p.table)",
+    to: "      ? tables.includes(p.table)\n      : false",
+    expect: "every policy on storage.objects reaches expected_policies",
+  },
+  {
+    // 3. THE QUERY STOPS LOOKING WHERE IT EXPECTS. Ten expected storage
+    // policies compared against an actual_policies restricted to public
+    // reports all ten MISSING, on every run, for ever — a probe that
+    // names something missing when it is not, which CLAUDE.md calls
+    // worse than no probe at all.
+    name: "actual_policies asks only the public schema again",
+    file: INV,
+    from: "   where schemaname in ('public', 'storage')",
+    to: "   where schemaname = 'public'",
+    expect: "the query asks pg_policies for the storage schema too",
+  },
+  {
+    // 4. AND THE RLS FINDING NARROWS UNTIL IT CANNOT FIRE. A policy on a
+    // table without row level security is decoration, and storage.objects
+    // sat in exactly that state in this project's own fixture.
+    name: "the storage RLS finding is narrowed until it can never fire",
+    file: INV,
+    from: "   where a.schema_name <> 'public'",
+    to: "   where a.schema_name = 'no_such_schema'",
+    expect: "reports a policy on a table without RLS as decoration",
   },
   {
     // THE MIRROR IMAGE, which would be just as blind and just as quiet:
@@ -46,7 +81,7 @@ const MUTANTS = [
     file: INV,
     from: "      const name = m[1] ?? m[2];",
     to: "      const name = m[1];",
-    expect: "reaches expected_policies",
+    expect: "every literal CREATE POLICY on a public table reaches expected_policies",
   },
   {
     // AND THE CHEAPEST WAY TO GO BLIND: stop reading the migrations at

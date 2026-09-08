@@ -106,7 +106,18 @@ for (const file of suites) {
   const started = Date.now();
   const run = spawnSync(process.execPath, [path.join(DIR, file)], {
     encoding: "utf8",
-    timeout: 10 * 60 * 1000,
+    // TWENTY-FIVE MINUTES, NOT TEN, and the number was measured rather
+    // than guessed. A timeout is here to stop a HUNG suite, not to cap a
+    // slow one — and a suite killed by it is reported as red, which is a
+    // fact about this runner rather than about the gate it drives.
+    //
+    // user-isolation.mutation.mjs is the one that reaches it. Its gate
+    // impersonates two accounts across 96 tables and, since 2026-09-08,
+    // probes each of the ten storage policies separately; one run takes
+    // 46s against a local throwaway Postgres, and the suite runs it once
+    // per mutant plus twice for the baselines — 14 mutants is about 12
+    // minutes. At ten it would have been killed mid-run and called red.
+    timeout: 25 * 60 * 1000,
     maxBuffer: 64 * 1024 * 1024,
   });
   const seconds = Math.round((Date.now() - started) / 1000);

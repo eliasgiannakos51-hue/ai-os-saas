@@ -67,13 +67,26 @@ export function objectsOf(sql) {
   const text = stripSqlComments(sql);
   const out = [];
   const seen = new Set();
-  const add = (kind, name, extra = "") => {
+  // `at` IS THE CHARACTER OFFSET OF THE STATEMENT, and it is the whole
+  // fix for the defect described above expectedObjects(). Without it,
+  // "this file also drops the object" cannot tell `drop … ; create …`
+  // (idempotent, the object exists afterwards) from `create … ; drop …`
+  // (a probe, it does not).
+  //
+  // ON A REPEAT, THE LATEST POSITION WINS. A file that creates X, drops
+  // it, and creates it again must be remembered by its LAST create, or
+  // the drop in the middle would look like it came afterwards.
+  const add = (kind, name, extra = "", at = 0) => {
     const key = `${kind}:${name}:${extra}`;
-    if (seen.has(key)) return;
+    if (seen.has(key)) {
+      const prev = out.find((o) => `${o.kind}:${o.name}:${o.extra}` === key);
+      if (prev && at > prev.at) prev.at = at;
+      return;
+    }
     seen.add(key);
-    out.push({ kind, name, extra });
+    out.push({ kind, name, extra, at });
   };
-  for (const m of text.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) add("table", ident(m[2]));
+  for (const m of text.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) add("table", ident(m[2]), "", m.index);
   // EVERY add-column CLAUSE, NOT THE FIRST ONE OF EACH STATEMENT.
   //
   // `alter table t add column a …, add column b …, add column c …;` is one
@@ -90,12 +103,12 @@ export function objectsOf(sql) {
   for (const stmt of text.matchAll(/alter\s+table\s+(?:only\s+)?(?:if\s+exists\s+)?(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)([\s\S]*?);/gi)) {
     const table = ident(stmt[1]);
     for (const c of stmt[2].matchAll(/add\s+column\s+(?:if\s+not\s+exists\s+)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) {
-      add("column", ident(c[1]), table);
+      add("column", ident(c[1]), table, stmt.index);
     }
   }
   for (const m of text.matchAll(/create\s+(?:or\s+replace\s+)?function\s+(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)\s*\(/gi)) {
     const after = text.slice(m.index + m[0].length);
-    add("function", ident(m[1]), String(countParams(after)));
+    add("function", ident(m[1]), String(countParams(after)), m.index);
   }
   // A policy carries its table's SCHEMA: storage.objects policies live in
   // storage, not public. A name with a format placeholder (%1$s) is built
@@ -108,12 +121,12 @@ export function objectsOf(sql) {
   for (const m of text.matchAll(/create\s+policy\s+(?:"([^"]+)"|([A-Za-z_][A-Za-z0-9_]*))\s+on\s+(?:([A-Za-z_][A-Za-z0-9_]*)\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) {
     const name = m[1] ?? m[2];
     if (name.includes("%")) continue;
-    add("policy", name, `${(m[3] ?? "public").toLowerCase()}.${ident(m[4])}`);
+    add("policy", name, `${(m[3] ?? "public").toLowerCase()}.${ident(m[4])}`, m.index);
   }
-  for (const m of text.matchAll(/create\s+(?:unique\s+)?index\s+(?:concurrently\s+)?(?:if\s+not\s+exists\s+)?("?[A-Za-z_][A-Za-z0-9_]*"?)\s+on\s/gi)) add("index", ident(m[1]));
-  for (const m of text.matchAll(/create\s+(?:or\s+replace\s+)?trigger\s+("?[A-Za-z_][A-Za-z0-9_]*"?)\s/gi)) add("trigger", ident(m[1]));
-  for (const m of text.matchAll(/create\s+type\s+(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)\s+as/gi)) add("type", ident(m[1]));
-  for (const m of text.matchAll(/create\s+(?:or\s+replace\s+)?(?:materialized\s+)?view\s+(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) add("view", ident(m[1]));
+  for (const m of text.matchAll(/create\s+(?:unique\s+)?index\s+(?:concurrently\s+)?(?:if\s+not\s+exists\s+)?("?[A-Za-z_][A-Za-z0-9_]*"?)\s+on\s/gi)) add("index", ident(m[1]), "", m.index);
+  for (const m of text.matchAll(/create\s+(?:or\s+replace\s+)?trigger\s+("?[A-Za-z_][A-Za-z0-9_]*"?)\s/gi)) add("trigger", ident(m[1]), "", m.index);
+  for (const m of text.matchAll(/create\s+type\s+(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)\s+as/gi)) add("type", ident(m[1]), "", m.index);
+  for (const m of text.matchAll(/create\s+(?:or\s+replace\s+)?(?:materialized\s+)?view\s+(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) add("view", ident(m[1]), "", m.index);
   return out;
 }
 
@@ -123,7 +136,7 @@ export function dropsOf(sql) {
   const out = [];
   for (const m of text.matchAll(/drop\s+function\s+(?:if\s+exists\s+)?(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)\s*\(/gi)) {
     const after = text.slice(m.index + m[0].length);
-    out.push({ kind: "function", name: ident(m[1]), extra: String(countParams(after)) });
+    out.push({ kind: "function", name: ident(m[1]), extra: String(countParams(after)), at: m.index });
   }
   // AND THE SAME ON THE DROP SIDE, WHERE IT WAS WORSE. 204 of the 351
   // `drop policy` statements in this repo write the name bare and 147
@@ -133,10 +146,10 @@ export function dropsOf(sql) {
   // removed: a PENDING that is not pending. "A probe that names something
   // missing when it is not is worse than no probe" is CLAUDE.md's rule
   // about exactly this, written after the health route did it twice.
-  for (const m of text.matchAll(/drop\s+policy\s+(?:if\s+exists\s+)?(?:"([^"]+)"|([A-Za-z_][A-Za-z0-9_]*))\s+on\s+(?:([A-Za-z_][A-Za-z0-9_]*)\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) out.push({ kind: "policy", name: m[1] ?? m[2], extra: `${(m[3] ?? "public").toLowerCase()}.${ident(m[4])}` });
-  for (const m of text.matchAll(/drop\s+index\s+(?:concurrently\s+)?(?:if\s+exists\s+)?(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) out.push({ kind: "index", name: ident(m[1]), extra: "" });
-  for (const m of text.matchAll(/drop\s+table\s+(?:if\s+exists\s+)?(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) out.push({ kind: "table", name: ident(m[1]), extra: "" });
-  for (const m of text.matchAll(/drop\s+trigger\s+(?:if\s+exists\s+)?("?[A-Za-z_][A-Za-z0-9_]*"?)\s+on/gi)) out.push({ kind: "trigger", name: ident(m[1]), extra: "" });
+  for (const m of text.matchAll(/drop\s+policy\s+(?:if\s+exists\s+)?(?:"([^"]+)"|([A-Za-z_][A-Za-z0-9_]*))\s+on\s+(?:([A-Za-z_][A-Za-z0-9_]*)\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) out.push({ kind: "policy", name: m[1] ?? m[2], extra: `${(m[3] ?? "public").toLowerCase()}.${ident(m[4])}`, at: m.index });
+  for (const m of text.matchAll(/drop\s+index\s+(?:concurrently\s+)?(?:if\s+exists\s+)?(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) out.push({ kind: "index", name: ident(m[1]), extra: "", at: m.index });
+  for (const m of text.matchAll(/drop\s+table\s+(?:if\s+exists\s+)?(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) out.push({ kind: "table", name: ident(m[1]), extra: "", at: m.index });
+  for (const m of text.matchAll(/drop\s+trigger\s+(?:if\s+exists\s+)?("?[A-Za-z_][A-Za-z0-9_]*"?)\s+on/gi)) out.push({ kind: "trigger", name: ident(m[1]), extra: "", at: m.index });
   // Every drop-column clause of a multi-action statement, for the reason
   // objectsOf carries above. There are none in this repo today — which is
   // why this one is symmetry rather than a fix, and why the gate that
@@ -144,7 +157,7 @@ export function dropsOf(sql) {
   for (const stmt of text.matchAll(/alter\s+table\s+(?:only\s+)?(?:if\s+exists\s+)?(?:public\.)?("?[A-Za-z_][A-Za-z0-9_]*"?)([\s\S]*?);/gi)) {
     const table = ident(stmt[1]);
     for (const c of stmt[2].matchAll(/drop\s+column\s+(?:if\s+exists\s+)?("?[A-Za-z_][A-Za-z0-9_]*"?)/gi)) {
-      out.push({ kind: "column", name: ident(c[1]), extra: table });
+      out.push({ kind: "column", name: ident(c[1]), extra: table, at: stmt.index });
     }
   }
   return out;
@@ -168,7 +181,28 @@ export function expectedObjects(dir = MIG_DIR) {
     const later = perFile[i];
     // A probe object created and dropped INSIDE one migration (20260909's
     // zz_anon_default_probe) is not expected to exist afterwards either.
-    later.objects = later.objects.filter((o) => !later.drops.some((d) => same(d, o)));
+    //
+    // ONLY WHEN THE DROP COMES AFTER THE CREATE, and the missing half of
+    // that sentence cost this tool almost everything it was written to
+    // check. Every idempotent policy in this repository is written
+    //
+    //     drop policy if exists "x" on t;
+    //     create policy "x" on t ...;
+    //
+    // which is the standard shape for "safe to paste twice" — and to a
+    // rule that only asked "does this file also drop it", it looked
+    // exactly like a probe. Measured on 2026-09-08: the migrations
+    // contain 218 CREATE POLICY statements and this tool expected 14.
+    // 204 policies — every one on the trading journal, the notification
+    // tables, data analysis, the bank and crypto tables, and all seven
+    // scoped storage policies — were objects it could not report missing,
+    // in the file CLAUDE.md names as the answer to "what else have I not
+    // run?".
+    //
+    // The positions come from objectsOf/dropsOf, which is why they carry
+    // `at`. Cross-file, below, position is meaningless and file order is
+    // the order — so that comparison is deliberately left alone.
+    later.objects = later.objects.filter((o) => !later.drops.some((d) => same(d, o) && d.at > o.at));
     for (let j = 0; j < i; j += 1) {
       const earlier = perFile[j];
       earlier.objects = earlier.objects.filter((o) => {

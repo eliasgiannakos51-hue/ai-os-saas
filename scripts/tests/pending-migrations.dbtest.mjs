@@ -48,14 +48,19 @@ console.log("== 1. the extractor reads real migration text ==");
     countParams(")") === 0 && countParams("p_a text)") === 1 && countParams("p_a numeric(10,2), p_b text)") === 2 && countParams("p_a jsonb default '{}'::jsonb, p_b text default coalesce('a','b'))") === 2);
   const all = expectedObjects();
   const total = all.reduce((n, m) => n + m.objects.length, 0);
-  check(`the real migrations yield hundreds of objects (${total} across ${all.length} files, floor 400)`, total >= 400 && all.length >= 60);
+  check(`the real migrations yield hundreds of objects (${total} across ${all.length} files, floor 600)`, total >= 600 && all.length >= 60);
+
+  // THE PURE CLAUSES ABOUT THE EXTRACTOR LIVE IN
+  // scripts/tests/pending-migrations.test.mjs, which needs no server and
+  // therefore runs on every push inside `npm run build`. What is left
+  // here is what only a database can answer.
 }
 
 console.log("\n== 2. on a database with every migration applied, nothing is pending ==");
 const query = missingObjectsQuery();
 const missing = psql(query);
 const expectedCount = (query.match(/^\('/gm) ?? []).length;
-check(`the query carries every expected object as a literal row (${expectedCount}, floor 400)`, expectedCount >= 400, String(expectedCount));
+check(`the query carries every expected object as a literal row (${expectedCount}, floor 600)`, expectedCount >= 600, String(expectedCount));
 check(`no expected object is reported missing (${missing ? missing.split("\n").length : 0})`, missing === "", missing);
 
 console.log("\n== 3. drop two things inside a transaction: exactly those two come back ==");

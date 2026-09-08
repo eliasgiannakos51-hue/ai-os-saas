@@ -716,3 +716,51 @@ fifth suite.
 truncates a table the migrations create. A scratch object a suite made
 itself is fine — `pack-rate-race.dbtest.mjs` had that right from the day
 it was written, and said why in its own comment.
+
+## An exception that ate the rule
+
+`pending-migrations.mjs` derives the objects each migration creates and
+asks the database whether they exist. One migration creates a probe table
+and drops it again in the same file, so the rule "an object this file also
+drops is not expected afterwards" was written — correctly, for that one
+case, with no notion of ORDER.
+
+Every idempotent policy in `supabase/migrations` is written
+
+    drop policy if exists "x" on t;
+    create policy "x" on t ...;
+
+because a migration here must be safe to paste twice. To a rule that only
+asked *does this file also drop it*, all 204 of them looked exactly like
+that probe. Measured 2026-09-08: **218 CREATE POLICY statements in the
+directory, fourteen expected.** Whole features at once — the trading
+journal, the notification tables, data analysis, bank and crypto, and
+every scoped policy on `storage.objects`. In the file CLAUDE.md names as
+the answer to "what else have I not run?".
+
+A count in front of it would not have helped, and did not: the floor was
+400 objects and green throughout, because 14 is a number too. What catches
+it is asserting the two shapes side by side —
+`scripts/tests/pending-migrations.test.mjs` runs the same two statements in
+both orders and requires opposite answers.
+
+## A probe the defence hides from
+
+`user-isolation.dbtest.mjs` asked whether account A could reach B's file
+with `update storage.objects … where name like 'B/%'`, and answered "0
+rows" for a reason that has nothing to do with the UPDATE policy: when an
+UPDATE or DELETE carries a WHERE that reads a column, PostgreSQL applies
+the SELECT policies to the rows it fetches BEFORE consulting the write
+policy. While reading is scoped, the WHERE matches nothing whatever the
+write policy says.
+
+So `using (true)` on `update_own_user_files_objects` and on
+`delete_own_create_attachments` both left every line of that gate green.
+Measured by its own mutation suite on 2026-09-08 — the gate could not see
+two of the ten policies it was written to cover.
+
+The probe that can is a write with **no name predicate**:
+`delete from storage.objects where bucket_id = '…'` must remove exactly
+one of the two rows in the bucket. The row-level half of the same file had
+already learned this two rounds earlier — "only a write with no WHERE can
+see this class at all" — and the storage half was written without it.

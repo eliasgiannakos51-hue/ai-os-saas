@@ -353,14 +353,25 @@ function parseDdl(files, into) {
     // the notification tables (10), data analysis and coding (12), the
     // bank and crypto tables (7), nav_events (2) and this branch's
     // transition_suggestions (2).
+    //
+    // AND THE SCHEMA, WHICH WAS BEING READ AS THE TABLE NAME. The old
+    // pattern was `on\s+(?:public\.)?"?([a-z0-9_]+)"?`, so
+    // `on storage.objects` captured the word `storage` as the table. The
+    // ten policies on storage.objects were therefore filed under a table
+    // called "storage", which is in no expected-table list, and dropped
+    // by the filter below without a word. That is the one corner where
+    // this fixture and production have disagreed, and neither of this
+    // project's two schema tools could see into it.
     for (const m of sql.matchAll(
-      /create\s+policy\s+(?:"([^"]+)"|([a-z0-9_]+))\s+on\s+(?:public\.)?"?([a-z0-9_]+)"?/gi
+      /create\s+policy\s+(?:"([^"]+)"|([a-z0-9_]+))\s+on\s+(?:([a-z0-9_]+)\.)?"?([a-z0-9_]+)"?/gi
     )) {
       const name = m[1] ?? m[2];
-      const table = m[3];
-      const key = `${table} ${name}`;
+      const schema = (m[3] ?? "public").toLowerCase();
+      const table = m[4];
+      const key = `${schema}.${table} ${name}`;
       const pEnd = sql.indexOf(";", m.index);
       into.policies.set(key, {
+        schema,
         table,
         name,
         file,
@@ -393,9 +404,10 @@ function parseDdl(files, into) {
         for (const table of loopTables) {
           const name = tpl[1].replace(/%1\$s/g, table);
           const rest = tpl[2].replace(/%1\$s/g, table).replace(/;\s*$/, "").trim();
-          const key = `${table} ${name}`;
+          const key = `public.${table} ${name}`;
           if (into.policies.has(key)) continue;
           into.policies.set(key, {
+            schema: "public",
             table,
             name,
             file,
@@ -462,9 +474,32 @@ const orphanFunctions = functions.filter((f) => !defined.functions.has(f));
 const checks = [...defined.checks.values()]
   .filter((c) => tables.includes(c.table))
   .sort((a, b) => a.table.localeCompare(b.table) || a.name.localeCompare(b.name));
+// STORAGE IS IN SCOPE, and it is the only schema besides public that is.
+// storage.objects is where every uploaded document actually lives —
+// user_files holds the row ABOUT the file — and its ten policies are the
+// only thing between one account's PDF and another's. `auth` is NOT here:
+// this project creates nothing in it, and GoTrue's own tables are not its
+// to repair.
+const STORAGE_RELATIONS = new Set(["objects", "buckets"]);
 const policies = [...defined.policies.values()]
-  .filter((p) => tables.includes(p.table))
-  .sort((a, b) => a.table.localeCompare(b.table) || a.name.localeCompare(b.name));
+  .filter((p) =>
+    (p.schema ?? "public") === "public"
+      ? tables.includes(p.table)
+      : p.schema === "storage" && STORAGE_RELATIONS.has(p.table)
+  )
+  // String() ON THE NAME, and it is not defensive noise. A policy whose
+  // NAME did not parse is exactly the defect this file's own gate is
+  // written about — and a comparator that throws on it turns a reportable
+  // finding into a stack trace, where the gate can say nothing about
+  // which policies went missing. Measured: the mutation that reads only
+  // the quoted half of the name alternation crashed the inventory here
+  // instead of reddening "every literal CREATE POLICY reaches
+  // expected_policies", and came back WRONG for that reason.
+  .sort(
+    (a, b) =>
+      `${a.schema}.${a.table}`.localeCompare(`${b.schema}.${b.table}`) ||
+      String(a.name).localeCompare(String(b.name))
+  );
 
 // ---------------------------------------------------------------------------
 // 3b. --repair: the DDL for named objects, and nothing else
@@ -605,22 +640,25 @@ if (repairIndex !== -1) {
   }
 
   const wantedPolicies = policies.filter((p) => p.text && (want(p.table) || want(p.name)));
-  const rlsTables = [...new Set(wantedPolicies.map((p) => p.table))];
+  // QUALIFIED, because storage.objects is in this list now and
+  // `alter table objects` would either fail or hit a table in public
+  // that happens to share the name.
+  const rlsTables = [...new Set(wantedPolicies.map((p) => `${p.schema ?? "public"}.${p.table}`))];
   for (const t of rlsTables) {
-    out.push(`alter table public.${t} enable row level security;`);
+    out.push(`alter table ${t} enable row level security;`);
   }
   if (rlsTables.length) out.push("");
   for (const p of wantedPolicies) {
     emitted++;
     const body = p.text.replace(/\s+/g, " ").replace(/;\s*$/, "");
-    out.push(`-- policy ${p.name} on ${p.table}  (from ${p.file})`);
+    out.push(`-- policy ${p.name} on ${p.schema ?? "public"}.${p.table}  (from ${p.file})`);
     out.push(
       [
         "do $repair$",
         "begin",
         "  if not exists (",
         "    select 1 from pg_policies",
-        `     where schemaname = 'public' and tablename = ${sqlQuote(p.table)}`,
+        `     where schemaname = ${sqlQuote(p.schema ?? "public")} and tablename = ${sqlQuote(p.table)}`,
         `       and policyname = ${sqlQuote(p.name)}`,
         "  ) then",
         `    ${body};`,
@@ -710,9 +748,9 @@ expected_checks(table_name, constraint_name) as (
 ${checks.length ? checks.map((c) => `    ('${c.table}', '${c.name}')`).join(",\n") : "    (null, null)"}
 ),
 
-expected_policies(table_name, policy_name) as (
+expected_policies(schema_name, table_name, policy_name) as (
   values
-    ${rows(policies, (p) => `(${q(p.table)}, ${q(p.name)})`)}
+    ${rows(policies, (p) => `(${q(p.schema ?? "public")}, ${q(p.table)}, ${q(p.name)})`)}
 ),
 
 -- What the database actually has. information_schema is used for tables
@@ -737,9 +775,21 @@ actual_functions as (
    where n.nspname = 'public'
 ),
 actual_policies as (
-  select tablename::text as table_name, policyname::text as policy_name
+  select schemaname::text as schema_name, tablename::text as table_name,
+         policyname::text as policy_name
     from pg_policies
-   where schemaname = 'public'
+   where schemaname in ('public', 'storage')
+),
+-- Relations in BOTH schemas this repository owns policies in, so a
+-- missing storage policy can be told apart from a storage table that is
+-- not there at all. actual_tables above stays public-only: every other
+-- finding is about a table src/ queries by name.
+actual_relations as (
+  select n.nspname::text as schema_name, c.relname::text as table_name,
+         c.relrowsecurity as rls_enabled
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+   where n.nspname in ('public', 'storage') and c.relkind in ('r', 'p')
 ),
 
 findings as (
@@ -797,13 +847,35 @@ findings as (
      and (t.relname, c.conname) in (select table_name, constraint_name from expected_checks)
 
   union all
-  select 5, 'MISSING POLICY', e.table_name, e.policy_name,
+  select 5, 'MISSING POLICY',
+         case when e.schema_name = 'public' then e.table_name
+              else e.schema_name || '.' || e.table_name end,
+         e.policy_name,
          'without it this table is either unreadable by its owner or open to everyone'
     from expected_policies e
-   where exists (select 1 from actual_tables a where a.table_name = e.table_name)
+   where exists (
+       select 1 from actual_relations a
+        where a.schema_name = e.schema_name and a.table_name = e.table_name)
      and not exists (
        select 1 from actual_policies a
-        where a.table_name = e.table_name and a.policy_name = e.policy_name)
+        where a.schema_name = e.schema_name and a.table_name = e.table_name
+          and a.policy_name = e.policy_name)
+
+  union all
+  -- A POLICY ON A TABLE WITHOUT ROW LEVEL SECURITY IS DECORATION, and
+  -- storage.objects sat in exactly that state in this project's own
+  -- fixture: ten correct policies, RLS off, nothing anywhere saying so.
+  -- Production was asked on 2026-09-05 and answered relrowsecurity =
+  -- true, so this is not a hole that existed there — it is the check
+  -- that would have named the one in the fixture.
+  select 4, 'RLS DISABLED', a.schema_name || '.' || a.table_name, '',
+         'alter table ' || a.schema_name || '.' || a.table_name ||
+         ' enable row level security;  -- its policies do nothing until then'
+    from actual_relations a
+   where a.schema_name <> 'public'
+     and not a.rls_enabled
+     and exists (select 1 from expected_policies e
+                  where e.schema_name = a.schema_name and e.table_name = a.table_name)
 
   union all
   -- Not a defect: a table the database has and this repo never asks for.

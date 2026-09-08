@@ -85,9 +85,15 @@ for (const [file, key, what] of CALLERS) {
 // Both signup paths must use the SAME key shape, or they don't dedupe
 // against each other at all — which is the entire point.
 checkTrue(
+  // A SUBSTRING IS NOT A NAMESPACE. `.includes("signup_grant:")` is
+  // satisfied by `oauth_signup_grant:`, which is a DIFFERENT namespace —
+  // so the one defect this check exists for, the two paths drifting
+  // apart, passed it. Measured 2026-09-08 by this file's own mutation
+  // suite. The backtick anchors the key to the start of the template
+  // literal it is built in.
   "both signup paths share one key namespace",
-  readFileSync("src/app/api/signup/route.ts", "utf8").includes("signup_grant:") &&
-    readFileSync("src/app/auth/callback/route.ts", "utf8").includes("signup_grant:")
+  /`signup_grant:\$\{/.test(readFileSync("src/app/api/signup/route.ts", "utf8")) &&
+    /`signup_grant:\$\{/.test(readFileSync("src/app/auth/callback/route.ts", "utf8"))
 );
 
 const credits = readFileSync("src/lib/billing/credits.ts", "utf8");

@@ -49,9 +49,13 @@ check(
 );
 
 console.log("\n== 2. one click to reach it, one confirmation ==");
+// RENDERED, NOT MERELY IMPORTED. `/CancelSubscription/` matched the
+// import line, so a panel that imports the component and renders
+// something else passed — measured 2026-09-08 by renaming the element and
+// watching this stay green. The `<` is the whole difference.
 check(
   "the button sits in the billing panel, not behind the Stripe portal",
-  /CancelSubscription/.test(summary) && /ManageBillingButton/.test(summary),
+  /<CancelSubscription[\s/>]/.test(summary) && /<ManageBillingButton[\s/>]/.test(summary),
   "it must be a sibling of Manage billing, not a link inside it"
 );
 // "Are you sure?" three times is the pattern. There is exactly one
@@ -86,10 +90,21 @@ check(
 );
 // Order matters: if the survey were written BEFORE the Stripe call, a
 // failed cancellation would still leave a "they left" row behind.
-check(
-  "the Stripe update happens before anything is recorded",
-  cancelRoute.indexOf("cancel_at_period_end") < cancelRoute.indexOf("subscription_cancellations")
-);
+// THE CALLS, NOT THE WORDS. This compared the first appearance of the
+// string "cancel_at_period_end" against the string
+// "subscription_cancellations" — so a COMMENT naming either one moved the
+// answer, and deleting the Stripe call entirely left it green (indexOf
+// returns -1, and -1 is less than everything). Measured 2026-09-08 by
+// this file's own mutation suite.
+{
+  const stripeAt = cancelRoute.indexOf("stripe.subscriptions.update(");
+  const recordAt = cancelRoute.indexOf('.from("subscription_cancellations")');
+  check(
+    "the Stripe update happens before anything is recorded",
+    stripeAt > -1 && recordAt > stripeAt,
+    `stripe.subscriptions.update at ${stripeAt}, the survey insert at ${recordAt}`
+  );
+}
 
 console.log("\n== 4. ownership is checked on both routes ==");
 for (const [name, src] of [["cancel", cancelRoute], ["resume", resumeRoute]]) {

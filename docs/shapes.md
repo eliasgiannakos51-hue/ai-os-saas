@@ -764,3 +764,39 @@ The probe that can is a write with **no name predicate**:
 one of the two rows in the bucket. The row-level half of the same file had
 already learned this two rounds earlier — "only a write with no WHERE can
 see this class at all" — and the storage half was written without it.
+
+## The import satisfies the check about the call
+
+A gate reads a file and asserts that a symbol is there:
+
+    check("the webhook imports the decision", /creditSyncDecision/.test(webhook));
+
+The import line contains that name. So does a file that imports the
+function and never calls it — which is the exact state the gate was
+written about, because a pure function nobody calls fixes nothing.
+
+Four gates in this repository had it, all found in one afternoon on
+2026-09-08, by mutation suites written for them rather than by reading:
+
+- `subscription-sync` — the webhook could import `creditSyncDecision` and
+  sync credits unconditionally; the money bug it guards, restored, left
+  the line green.
+- `subscription-cancel` — `/CancelSubscription/` matched the import, so
+  cancelling could move back behind the Stripe portal untouched.
+- `locale-resolution` — `indexOf("LOCALE_COOKIE")` found the import at the
+  top of the file, so the cookie "came before" Accept-Language whatever
+  the function did.
+- `credit-grants` — `.includes("signup_grant:")` is satisfied by
+  `oauth_signup_grant:`, a *different* namespace, which is the one defect
+  that check exists for.
+
+The fix is one character in three of the four: assert the CALL
+(`= creditSyncDecision(`), the ELEMENT (`<CancelSubscription`), the READ
+(`cookieStore.get(LOCALE_COOKIE)`) — and for the fourth, anchor the
+substring so it cannot be a suffix of something else.
+
+`scripts/tests/comment-claims.test.mjs` and `self-claims.test.mjs` check
+that a NAME in a comment resolves. Nothing checks that a name in an
+assertion is being used the way the assertion's sentence says, and a
+regex cannot: only a mutation that deletes the call and leaves the import
+tells you.

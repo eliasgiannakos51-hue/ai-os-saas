@@ -66,8 +66,17 @@ checkTrue(
 
 console.log("\n== 2. the history reads what the user DID, not only what they paid ==");
 checkTrue("it still reads the balance ledger", /from\("credit_transactions"\)/.test(page));
-checkTrue("and now also reads the AI activity log", /from\("ai_cost_log"\)/.test(page));
-checkTrue("scoped to this user", /\.eq\("user_id", user\.id\)/.test(page));
+// THE HISTORY QUERY, not any query. Both of these used to be asked of the
+// whole 400-line page: `/from\("ai_cost_log"\)/` was satisfied by the
+// SECOND ai_cost_log read further down (the bypass total), and
+// `/\.eq\("user_id", user\.id\)/` by any of the eight scoped queries on
+// the page. Measured 2026-09-08 by this file's own mutation suite:
+// redirecting the history query at another table, and unscoping it, both
+// left these two green. The window is anchored on the one clause that is
+// unique to this query.
+const historyQuery = (page.match(/\.from\("ai_cost_log"\)[\s\S]{0,300}?\.eq\("credits_charged", 0\)[\s\S]{0,200}?\.limit\(\d+\)/) ?? [""])[0];
+checkTrue("and now also reads the AI activity log", historyQuery.includes('.from("ai_cost_log")'));
+checkTrue("scoped to this user", /\.eq\("user_id", user\.id\)/.test(historyQuery));
 // Only zero-charge rows, or every real charge would appear twice — once
 // from the ledger and once from the cost log.
 checkTrue("taking ONLY the zero-charge rows, to avoid double-counting", /\.eq\("credits_charged", 0\)/.test(page));

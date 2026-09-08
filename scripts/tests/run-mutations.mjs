@@ -75,9 +75,10 @@ if (suites.length === 0) {
 // mutation-runner-honesty.test.mjs holds the gap at ten or less, which is
 // what made this a build failure rather than a number nobody revisited:
 // two new suites (check-site-spelling, billing-coverage) took the real
-// count to 102 against a floor last raised at 96. 105 today against a
-// real 107, after role-grants joined them.
-const FLOOR = 105;
+// count to 102 against a floor last raised at 96. 105 was set against a
+// real 107 when role-grants joined them; 113 today against a real 115,
+// after the seven V5 #10 suites — the money ones first.
+const FLOOR = 113;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

@@ -1,3 +1,14 @@
+// BOUNDARY-FORMAT: pdf
+//
+// the bytes come from a file somebody uploaded, and the patterns below
+// match PDF syntax — /Type /Page, an object reference `12 0 R`, a stream
+// keyword. Those tokens are ASCII by the PDF specification, and the
+// boundary is what stops /Page matching /Pages. The extracted text is
+// never matched with a boundary.
+//
+// Declared for scripts/tests/untrusted-boundaries.test.mjs, which forbids an
+// ASCII word boundary in any pattern applied to text a person or a model
+// wrote unless the file says which machine format it is parsing.
 import { inflateSync } from "node:zlib";
 import { MAX_PDF_PAGES, MAX_UNZIPPED_BYTES } from "@/lib/files/file-types";
 

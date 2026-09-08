@@ -484,7 +484,25 @@ export function validateAgentOutput(raw: unknown): OutputCheck {
   // switch itself off after five uneventful days, having worked correctly
   // every one of them. Order matters here; the floor exists to catch a
   // truncated or garbage response, not to adjudicate this token.
-  if (/^NO_RESULT\b/i.test(text) || text.toUpperCase() === "NO_RESULT")
+  // \b WAS ASCII HERE, AND THIS TEXT COMES FROM A MODEL.
+  //
+  // `/^NO_RESULT\b/i` answers differently depending on the SCRIPT of the
+  // character that follows, which is not a distinction anybody chose:
+  //
+  //     "NO_RESULTS"  -> no match   (S is an ASCII word character)
+  //     "NO_RESULTΣ"  -> MATCH      (Σ is not, so \b succeeds)
+  //
+  // So a model that appended a Greek, Cyrillic or Arabic letter to the
+  // token had its answer classified as the refusal marker, and one that
+  // appended a Latin letter did not. Not observed in a run — the models
+  // emit the token as instructed — but it is the shape, on the one string
+  // in this file that a model writes.
+  //
+  // The lookahead is Unicode-aware: a letter or digit in ANY script after
+  // the token means this is not the token. lib/text/unicode-patterns.ts
+  // carries the same expression as WORD_END and the reason it is a
+  // lookahead rather than a lookbehind.
+  if (/^NO_RESULT(?![\p{L}\p{N}])/iu.test(text) || text.toUpperCase() === "NO_RESULT")
     return { ok: false, reason: "refusal_marker" };
 
   if (text.includes(UNTRUSTED_OPEN) || text.includes(UNTRUSTED_CLOSE))

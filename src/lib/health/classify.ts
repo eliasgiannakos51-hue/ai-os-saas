@@ -125,7 +125,21 @@ export function classifyProbeError(error: ProbeError | null | undefined): Health
   if (/schema cache|does not exist/i.test(text)) return "schema_missing";
   if (/fetch failed|network/i.test(text)) return "unreachable";
   if (/timeout|timed out/i.test(text)) return "timeout";
-  if (/\bjwt\b|api key|unauthorized/i.test(text)) return "unauthorized";
+  // THE SAME ASCII BOUNDARY PROBLEM, on text this module does not write.
+  // `/\bjwt\b/` matches inside "jwtΤΟΚΕΝ" — because a Greek letter is not
+  // an ASCII word character, so the trailing \b succeeds — while refusing
+  // "jwtToken". A provider that answers in a non-Latin script therefore
+  // gets a different classification from one that answers in English, for
+  // a reason nobody chose.
+  //
+  // A LOOKBEHIND IS USED HERE and lib/text/unicode-patterns.ts refuses
+  // one, which is worth reconciling rather than leaving as an
+  // inconsistency: that module ships to the browser, where a regex
+  // literal with syntax an old Safari cannot parse throws at CONSTRUCTION
+  // and takes down the page. This file is imported only by
+  // app/api/health/route.ts and runs on the server, on Node, where the
+  // syntax has been available for years.
+  if (/(?<![\p{L}\p{N}])jwt(?![\p{L}\p{N}])|api key|unauthorized/iu.test(text)) return "unauthorized";
   return "query_failed";
 }
 

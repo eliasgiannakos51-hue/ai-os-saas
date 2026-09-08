@@ -1,3 +1,15 @@
+// BOUNDARY-FORMAT: html
+//
+// the one boundary in this file is in <nav\b, a tag name in model-
+// generated HTML — ASCII by the HTML specification, and the boundary is
+// what stops it matching <navigation. THE BRIEF IS THE OTHER HALF OF
+// THIS FILE and it is a person's own sentence in any of ten languages:
+// every pattern that reads it is built from lib/text/unicode-
+// patterns.ts, which has no ASCII boundary in it.
+//
+// Declared for scripts/tests/untrusted-boundaries.test.mjs, which forbids an
+// ASCII word boundary in any pattern applied to text a person or a model
+// wrote unless the file says which machine format it is parsing.
 /**
  * "DO NOT PUT X" — DETECTED IN THE BRIEF, ENFORCED ON THE OUTPUT.
  *

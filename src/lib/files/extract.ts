@@ -1,3 +1,14 @@
+// BOUNDARY-FORMAT: xml
+//
+// the bytes come from a file somebody uploaded, and the patterns below
+// match OOXML element names — <v>, <t>, <si>. Element and attribute
+// names are ASCII by the XML specification; the boundary is what stops
+// <t> matching <table>. The uploaded text INSIDE those elements is never
+// matched with a boundary.
+//
+// Declared for scripts/tests/untrusted-boundaries.test.mjs, which forbids an
+// ASCII word boundary in any pattern applied to text a person or a model
+// wrote unless the file says which machine format it is parsing.
 import "server-only";
 import { findZipEntry, readZipEntries, readZipEntryText, ZipError } from "@/lib/files/zip";
 import { extractPdfText, PdfError, readableRatio } from "@/lib/files/pdf";

@@ -655,20 +655,36 @@ reporting a price for whatever the default lands on.
 
 ## `\b` is ASCII
 
-**This one has no gate, and saying so is the entry.** JavaScript's word
-boundary is defined against `[A-Za-z0-9_]`, and the `u` flag does not
-change it — it is the *boundary* that is ASCII, not the pattern.
-`\bπροτείνω\b` matches nothing, silently, in one language. It has broken
-four features here.
+JavaScript's word boundary is defined against `[A-Za-z0-9_]`, and the `u`
+flag does not change it — it is the *boundary* that is ASCII, not the
+pattern. `\bπροτείνω\b` matches nothing, silently, in one language. It has
+broken four features here.
 
-128 occurrences are scanned and classified; 83 legitimately match a tag or
-attribute name and would be *wrong* without the boundary, 26 are genuinely
-ASCII domains, and the 19 touching human text were read one by one. Two
-live instances were fixed. `scripts/tests/ascii-boundaries.test.mjs`
-catches a boundary next to a non-ASCII literal, but it cannot tell a
-correct `<img\b` from a Greek word without reading intent. Held by
-convention and one heuristic — which is a weaker sentence than every other
-entry in this file, and it is the true one.
+**THIS ENTRY SAID "THIS ONE HAS NO GATE" UNTIL 2026-09-08**, and closed
+with "held by convention and one heuristic — which is a weaker sentence
+than every other entry in this file, and it is the true one." It was true
+then. What was missing was not effort but a rule narrow enough to enforce:
+`scripts/tests/ascii-boundaries.test.mjs` catches a boundary beside a
+non-ASCII *literal*, and cannot tell a correct `<img\b` from a wrong
+`\bonly\b`, because both patterns are pure ASCII. The difference is not in
+the pattern at all — it is in what the pattern is APPLIED TO.
+
+So the rule was narrowed until it bites, in
+`scripts/tests/untrusted-boundaries.test.mjs`: every regex applied to a
+value whose name says it holds text a person or a model wrote (162 of 379
+applications in `src/`) and whose pattern carries `\b` (27 of those) must
+sit in a file that DECLARES the machine format it parses — and the
+declaration is checked rather than taken. The pattern must carry no
+non-ASCII letter and must contain a token of that format: `<`, `>`, `=`,
+an escaped `/`, or `\d`. **A pattern matching a bare word cannot satisfy
+that, so a boundary on prose cannot be declared at all.**
+
+On the day it was written that admitted 27 — tag names, attribute names,
+PDF object headers, OOXML elements — and refused exactly the two that were
+wrong: `/^NO_RESULT\b/i` on model output, where `"NO_RESULTS"` did not
+match and `"NO_RESULTΣ"` did; and `/\bjwt\b/i` on a provider's error text,
+where `"jwtToken"` did not match and `"jwtΤΟΚΕΝ"` did. Both now use a
+Unicode-aware lookahead.
 
 ## A check that names its subject in advance
 

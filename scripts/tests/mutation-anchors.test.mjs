@@ -40,6 +40,7 @@
 //
 // Run: node scripts/tests/mutation-anchors.test.mjs
 import { readFileSync, existsSync } from "node:fs";
+import { reportBaseline } from "./lib/baseline.mjs";
 import ts from "typescript";
 import { readMutants } from "./lib/mutant-list.mjs";
 import { PROSE_ANCHORS } from "./lib/prose-anchors.mjs";
@@ -146,6 +147,7 @@ check(
 // suites do not evaluate; if a twentieth stops, the gate says so before
 // its `edits` go unread.
 const FALLBACK_CEILING = 19;
+reportBaseline("FALLBACK_CEILING", FALLBACK_CEILING, fellBack.length);
 check(
   `${fellBack.length} suites were read the weaker way, ceiling ${FALLBACK_CEILING}`,
   fellBack.length <= FALLBACK_CEILING,

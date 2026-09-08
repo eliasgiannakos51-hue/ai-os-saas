@@ -29,6 +29,7 @@
 //
 // Run: node scripts/tests/i18n-coverage.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
+import { reportBaseline } from "./lib/baseline.mjs";
 import { join } from "node:path";
 import ts from "typescript";
 import { execFileSync } from "node:child_process";
@@ -222,6 +223,7 @@ check(
 // this pass because closing them is 38 keys across ten locales, which is
 // a translation job, not a sweep; recording them is what stops a 39th.
 const INDIRECT_ENGLISH_BASELINE = 38;
+reportBaseline("INDIRECT_ENGLISH_BASELINE", INDIRECT_ENGLISH_BASELINE, indirect.length);
 checkTrue(
   `English reached through a ternary or ?? has not grown (${indirect.length} <= ${INDIRECT_ENGLISH_BASELINE})`,
   indirect.length <= INDIRECT_ENGLISH_BASELINE,
@@ -772,13 +774,23 @@ const SERVER_PROSE_BASELINE = 655;
 // "Could not rename conversation.", "Could not upload the reference
 // images." — that are specific and useful IN ENGLISH. They are better
 // than a generic message and worse than a translated one, and closing
-// them means 31 new keys across ten locales rather than a mechanical
+// them means 28 new keys across ten locales rather than a mechanical
 // sweep. Recorded rather than quietly tolerated.
-const CLIENT_FALLBACK_BASELINE = 31;
+//
+// IT STOOD AT 31 AGAINST A MEASURED 28 until V5 #13 — three fallbacks
+// were paid off and the number was not lowered, so three new ones could
+// have shipped without a check going red. Exactly the failure this
+// file's own header records for the old i18n baseline: "it knew about
+// three and stayed at three long after they were paid off". The gap is
+// a number somebody else reads now — see lib/baseline.mjs and
+// baselines.test.mjs.
+const CLIENT_FALLBACK_BASELINE = 28;
+reportBaseline("SERVER_PROSE_BASELINE", SERVER_PROSE_BASELINE, serverErrorProse.length);
 checkTrue(
   `server-side English error prose has not grown (${serverErrorProse.length} <= ${SERVER_PROSE_BASELINE})`,
   serverErrorProse.length <= SERVER_PROSE_BASELINE
 );
+reportBaseline("CLIENT_FALLBACK_BASELINE", CLIENT_FALLBACK_BASELINE, clientFallbacks.length);
 checkTrue(
   `client English fallbacks have not grown (${clientFallbacks.length} <= ${CLIENT_FALLBACK_BASELINE})`,
   clientFallbacks.length <= CLIENT_FALLBACK_BASELINE

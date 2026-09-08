@@ -34,6 +34,7 @@
 //
 // Run: node scripts/tests/empty-states.test.mjs
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { reportBaseline } from "./lib/baseline.mjs";
 
 let pass = 0;
 const failures = [];
@@ -86,6 +87,9 @@ console.log(`        ${generic.length} of ${ALL.length} modules have no empty st
 // one; if it fails downward, LOWER THE BASELINE — the number is here to
 // be beaten, not defended.
 const BASELINE = 0;
+// Named for the register rather than for the constant: baselines.test.mjs
+// keys by name across every gate, and "BASELINE" is not a name.
+reportBaseline("EMPTY_STATE_BASELINE", BASELINE, generic.length);
 check(
   `no module is left with a generic empty state (${generic.length} <= ${BASELINE})`,
   generic.length <= BASELINE,

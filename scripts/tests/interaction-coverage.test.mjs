@@ -24,6 +24,7 @@
 //
 // Run: node scripts/tests/interaction-coverage.test.mjs
 import { readdirSync, readFileSync } from "node:fs";
+import { reportBaseline } from "./lib/baseline.mjs";
 import { join } from "node:path";
 import { stripComments } from "../check-mutation-markers.mjs";
 
@@ -167,11 +168,13 @@ console.log(`        ...MOVES the page, mouse only: ${MOUSE_ONLY_MOTION.length} 
 const SINGLE_VIEWPORT_CEILING = 14;
 const MOUSE_ONLY_CEILING = 24;
 
+reportBaseline("SINGLE_VIEWPORT_CEILING", SINGLE_VIEWPORT_CEILING, SINGLE_VIEWPORT_DRIVERS.length);
 check(
   `single-viewport interaction tests: ${SINGLE_VIEWPORT_DRIVERS.length}, ceiling ${SINGLE_VIEWPORT_CEILING}`,
   SINGLE_VIEWPORT_DRIVERS.length <= SINGLE_VIEWPORT_CEILING,
   SINGLE_VIEWPORT_DRIVERS.join(", ")
 );
+reportBaseline("MOUSE_ONLY_CEILING", MOUSE_ONLY_CEILING, MOUSE_ONLY_DRIVERS.length);
 check(
   `mouse-only interaction tests: ${MOUSE_ONLY_DRIVERS.length}, ceiling ${MOUSE_ONLY_CEILING}`,
   MOUSE_ONLY_DRIVERS.length <= MOUSE_ONLY_CEILING,

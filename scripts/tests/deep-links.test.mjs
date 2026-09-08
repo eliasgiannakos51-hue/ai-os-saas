@@ -37,6 +37,7 @@
 //
 // Run: node scripts/tests/deep-links.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
+import { reportBaseline } from "./lib/baseline.mjs";
 import { join } from "node:path";
 import { reachableFrom } from "../lib/route-graph.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
@@ -227,6 +228,7 @@ for (const l of favLinks) {
 // the one failure a per-link check cannot report: it never asks about a
 // link it did not find.
 const DEEP_LINK_FLOOR = 50;
+reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,
   emitted.size >= DEEP_LINK_FLOOR && files.length >= 300,

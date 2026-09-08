@@ -27,6 +27,7 @@
 //
 // Run: node scripts/tests/mutation-runner-honesty.test.mjs
 import { readFileSync, readdirSync } from "node:fs";
+import { reportBaseline } from "./lib/baseline.mjs";
 import path from "node:path";
 import { classify } from "./lib/mutation-outcome.mjs";
 
@@ -163,6 +164,7 @@ console.log("\n== 4. the floor is not the size of the problem ==");
 
 const floor = Number(runner.match(/const FLOOR = (\d+);/)?.[1]);
 const suiteCount = readdirSync(DIR).filter((f) => f.endsWith(".mutation.mjs")).length;
+reportBaseline("MUTATION_SUITE_FLOOR", floor, suiteCount);
 check(`the suite floor (${floor}) is within ten of the real count (${suiteCount})`, floor >= suiteCount - 10 && floor <= suiteCount, "a floor far below the count would not notice most of the directory vanishing");
 
 console.log(`\n${failures.length === 0 ? "PASS" : "FAIL"}  ${pass} correct, ${failures.length} wrong`);

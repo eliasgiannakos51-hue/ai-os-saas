@@ -38,6 +38,7 @@
 //
 // Run: node scripts/tests/gate-state-vs-behaviour.test.mjs
 import { readdirSync, readFileSync } from "node:fs";
+import { reportBaseline } from "./lib/baseline.mjs";
 import { join } from "node:path";
 import { stripComments } from "../check-mutation-markers.mjs";
 
@@ -164,6 +165,7 @@ console.log("\n== the ratchet ==");
 // saying so is the difference between a measurement and a score.
 const STATE_ONLY_CEILING = 3;
 console.log(`        gates asserting only thresholds: ${stateOnly.length}`);
+reportBaseline("STATE_ONLY_CEILING", STATE_ONLY_CEILING, stateOnly.length);
 check(
   `state-only gates: ${stateOnly.length}, ceiling ${STATE_ONLY_CEILING}`,
   stateOnly.length <= STATE_ONLY_CEILING,

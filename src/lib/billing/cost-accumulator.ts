@@ -311,6 +311,86 @@ export class CostAccumulator {
     );
   }
 
+  /**
+   * PER-MODEL TOTALS — the column an Anthropic invoice is written in.
+   *
+   * ai_cost_log stores input/output/cache-write/cache-read tokens SUMMED
+   * ACROSS EVERY SUB-CALL of an action, and an action is routinely served
+   * by more than one model: the clarifying-questions pre-check and the
+   * off-topic classifier run on the cheap tier while the generation runs
+   * on the expensive one. So a row reading `input_tokens = 50000` is
+   * consistent with $0.05 of Haiku and with $0.50 of Fable, and nothing
+   * in the row says which.
+   *
+   * That did not matter while the only question asked of the table was
+   * "what margin did we achieve", because the margin is computed from
+   * `real_cost_usd`, which was priced per model BEFORE the summing. It
+   * matters the moment the question is "does this agree with the bill":
+   * an Anthropic invoice, and the console's usage report, are broken down
+   * BY MODEL. Without this map there is no row in the ledger that can be
+   * placed beside a line on the invoice — the totals can be compared, and
+   * nothing below the totals can.
+   *
+   * KEYED BY THE MODEL STRING AS RECORDED, prefix and all. `batch:` says
+   * this line was billed at half rate and `external:` says it will not be
+   * on an Anthropic invoice at all; dropping either prefix to make the
+   * keys tidy would silently move a non-Anthropic cost into the
+   * comparison, which is the one error this map exists to prevent.
+   *
+   * The bare id is normalized (see normalizeModelId) so a dated snapshot
+   * and its alias land on ONE key. The invoice groups them together too:
+   * "claude-sonnet-4-6-20260101" is not a line item, "Claude Sonnet 4.6"
+   * is.
+   *
+   * Stored in the cost-log row's `metadata.modelBreakdown` by
+   * settleReservation — metadata rather than columns for the same reason
+   * cacheWrite1hTokens lives there: it makes a row auditable against the
+   * pricing page without a schema migration, and migrations in this
+   * repository are applied by hand.
+   */
+  byModel(): Record<string, UsageBreakdown & { calls: number }> {
+    const out: Record<string, UsageBreakdown & { calls: number }> = {};
+    for (const e of this.entries) {
+      const key = isExternalModel(e.model)
+        ? e.model
+        : isBatchModel(e.model)
+          ? `batch:${normalizeModelId(bareModelId(e.model))}`
+          : normalizeModelId(e.model);
+      const row = out[key] ?? {
+        inputTokens: 0,
+        outputTokens: 0,
+        cacheWriteTokens: 0,
+        cacheWrite1hTokens: 0,
+        cacheReadTokens: 0,
+        webSearches: 0,
+        webFetches: 0,
+        usdCost: 0,
+        calls: 0,
+      };
+      row.inputTokens += e.usage.inputTokens;
+      row.outputTokens += e.usage.outputTokens;
+      row.cacheWriteTokens += e.usage.cacheWriteTokens;
+      // `?? 0` on both, for the same reason totals() carries it: a
+      // snapshot persisted by an earlier deploy has no cacheWrite1hTokens
+      // or webFetches key, and `+ undefined` is NaN — which serializes to
+      // null in jsonb and turns a reconciliation row into a blank.
+      row.cacheWrite1hTokens += e.usage.cacheWrite1hTokens ?? 0;
+      row.cacheReadTokens += e.usage.cacheReadTokens;
+      row.webSearches += e.usage.webSearches;
+      row.webFetches += e.usage.webFetches ?? 0;
+      row.usdCost += e.usage.usdCost;
+      row.calls += 1;
+      out[key] = row;
+    }
+    // Rounded once at the end, never per entry: rounding each sub-call
+    // would let many small ones each round to zero and vanish, which is
+    // the same trap breakdownByStage documents.
+    for (const k of Object.keys(out)) {
+      out[k].usdCost = Number(out[k].usdCost.toFixed(8));
+    }
+    return out;
+  }
+
   /** Per-stage USD, stored as jsonb so a margin problem can be traced to
    *  the sub-call responsible rather than just "the action was expensive". */
   breakdownByStage(): Record<string, { usdCost: number; calls: number }> {

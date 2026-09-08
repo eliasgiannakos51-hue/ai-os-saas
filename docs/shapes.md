@@ -816,3 +816,51 @@ that a NAME in a comment resolves. Nothing checks that a name in an
 assertion is being used the way the assertion's sentence says, and a
 regex cannot: only a mutation that deletes the call and leaves the import
 tells you.
+
+## A number internally consistent with everything except reality
+
+The credit machinery is arithmetic all the way down and, until 2026-09-08,
+was compared against nothing outside itself.
+
+`CREDIT_MARGIN_*` multiplies a cost that `src/lib/billing/model-pricing.ts`
+computed from its own rate table. The achieved margin stored beside it on
+the `ai_cost_log` row is measured against that same computed cost. So if
+the table is wrong, the charge is wrong, the stored margin is wrong, and
+the margin alert — which compares the stored margin to the target — still
+reads a healthy 4x, because both of its inputs moved together. That is not
+hypothetical: it is exactly the 2026-08 incident, where the table held one
+model and every call served by a pricier one was billed at a third of its
+cost with no line of output changing.
+
+The fix for that class is not a better internal check. It is one
+comparison against a number the system did not produce — here, the invoice.
+
+**And the comparison could not be made.** `ai_cost_log` records
+`input_tokens`, `output_tokens`, `cache_write_tokens` and
+`cache_read_tokens` **summed across every sub-call of an action**, and has
+no model column. An action is routinely served by two or three models —
+the clarifier and the classifier on the cheap tier, the generation on the
+expensive one — so a row reading `input_tokens = 50000` is equally
+consistent with $0.05 of Haiku and $0.50 of Fable. An Anthropic invoice is
+broken down BY MODEL. The monthly totals could be compared; nothing below
+them could.
+
+The absence was invisible because every question the table had ever been
+asked was answered before the summing: `real_cost_usd` was priced per
+model and then added up. The column that was missing only mattered for a
+question nobody had asked yet.
+
+`CostAccumulator.byModel()` records the split, `settleReservation` writes
+it into `metadata.modelBreakdown`, and
+`scripts/db/anthropic-reconcile.mjs` turns a month of it into invoice
+lines. Two properties of that tool are load-bearing, and both are the
+opposite of the obvious choice:
+
+- **Rows settled before the split existed get their own line, with their
+  own money on it.** Dropping them, or spreading them across models by
+  proportion, would make a report on 12% of a month look like a report on
+  the month.
+- **A model with no published rate prices to NULL, not to zero.** Zero
+  would shrink the difference against the invoice, so the report would
+  look better the less it knew — the shape `/api/health` and
+  `i18n-coverage` are both in this document for.

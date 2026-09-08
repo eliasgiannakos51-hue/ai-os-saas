@@ -149,7 +149,7 @@ console.log(
 // than under it, because unlike a floor over a derived list this number
 // is a count of files somebody wrote — it cannot drift on its own, and a
 // gate deleted along with its suite lowers both sides together.
-const RATCHET = 126;
+const RATCHET = 127;
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,
   reachCovered.length >= RATCHET,

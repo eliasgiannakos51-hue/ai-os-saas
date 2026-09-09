@@ -50,7 +50,7 @@ import {
   Activity,
   NotebookPen,
   AudioLines,
-  Sigma,
+  CloudSun,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -197,4 +197,18 @@ export const TRADING_JOURNAL_ICON: LucideIcon = NotebookPen;
 // and the owner's business-health page, so a user could see one and had
 // no way back to it.
 export const VOICE_ICON: LucideIcon = AudioLines;
-export const PREDICTIONS_ICON: LucideIcon = Sigma;
+// NOT A GREEK LETTER. lucide's `Sigma` icon draws the capital Greek
+// sigma, and this product ships in Greek: a Greek reader does not see an
+// abstract mark there, they see the letter, which in front of a number
+// means "sum" — the one thing this page does not do. Reported from the
+// running app as "the picture shows a capital sigma, wrong", and it was:
+// a glyph is not an icon in a language that uses that glyph.
+//
+// CloudSun rather than a trend arrow. A forecast is what this page shows
+// — lib/insights/detectors.ts computing what is likely next — and the
+// weather metaphor reads as forecast in all ten languages. The trend
+// family was rejected on purpose: TrendingUp is already trading and
+// LineChart is already the trading workflow, and the command palette
+// flattens every group into one list, so a fourth near-identical arrow
+// would be a different bug of the same kind.
+export const PREDICTIONS_ICON: LucideIcon = CloudSun;

@@ -153,7 +153,8 @@ console.log(
 // 131 -> 132: V5 #21 added presentations.mutation.mjs. Raised the day the
 // count rose, because a ratchet one below reality hands every mutation
 // that removes one suite a free pass — its own suite found exactly that.
-const RATCHET = 132;
+// 132 -> 133: V5 #22 added posts.mutation.mjs, raised the same day.
+const RATCHET = 133;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

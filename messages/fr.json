@@ -170,7 +170,8 @@
       "systemHealth": "État du système",
       "tradingJournal": "Journal de trading",
       "voice": "Voix",
-      "predictions": "Tendances"
+      "predictions": "Tendances",
+      "posts": "Publications"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -227,7 +228,8 @@
       "systemHealth": "Si la base, les files d'attente et les fournisseurs répondent.",
       "tradingJournal": "Vos transactions, avec le raisonnement noté sur le moment.",
       "voice": "Faites lire un texte à voix haute, ou parlez et il s'écrit. Les minutes sont comptées et le prix à la minute figure sur la page.",
-      "predictions": "Des tendances dans vos propres entrées, chacune avec le nombre d'enregistrements sur lequel elle repose et un lien vers eux."
+      "predictions": "Des tendances dans vos propres entrées, chacune avec le nombre d'enregistrements sur lequel elle repose et un lien vers eux.",
+      "posts": "Dites-le une fois et obtenez une publication par plateforme, à sa longueur et dans son ton. Rien n'est publié : vous copiez et vous publiez."
     },
     "closeMenu": "Fermer le menu"
   },
@@ -3225,6 +3227,11 @@
       "is": "Un générateur de diapositives : une description entre, une présentation sort.",
       "does": "Il écrit le titre, les points et les notes de l'orateur de chaque diapositive dans la langue de votre description, trouve une photo sur Unsplash ou place les vôtres, et exporte la présentation en PowerPoint (.pptx) ou en PDF.",
       "doesNot": "Il ne dessine ni graphique ni tableau, ne choisit pas de thème graphique et ne génère aucune image : les photos viennent d'Unsplash ou de vous. Les diapositives ne se modifient pas ici : téléchargez le .pptx et terminez-le dans PowerPoint ou Keynote."
+    },
+    "posts": {
+      "is": "Un rédacteur de publications : une description entre, une publication par plateforme sort.",
+      "does": "Rédige une publication LinkedIn, une publication pour X, une légende Instagram avec hashtags, une publication Facebook et une publication Threads à partir de la même description, chacune coupée à la longueur de sa plateforme et écrite dans son ton, dans la langue de votre description, avec un bouton copier sur chacune.",
+      "doesNot": "Il ne publie pas, ne programme rien et ne se connecte à aucun compte de réseau social, et il ne réutilise pas un même texte d'une plateforme à l'autre : cinq plateformes, cinq publications. Aucune image n'est créée ; la photo est la vôtre."
     }
   },
   "helpCentre": {
@@ -3696,6 +3703,47 @@
       "delete": "Supprimer",
       "deleteConfirm": "Supprimer cette présentation ? C'est irréversible.",
       "noteFromBefore": "note d'avant"
+    }
+  },
+  "posts": {
+    "title": "Publications",
+    "description": "Dites une fois ce que vous voulez dire ; obtenez une publication rédigée pour chaque plateforme, à sa longueur et dans son ton. Copiez-la et publiez-la vous-même.",
+    "limits": {
+      "title": "Ce que ça NE fait PAS",
+      "no_publish": "Rien n'est publié. Rien d'ici n'atteint LinkedIn, X, Instagram, Facebook ou Threads : vous copiez le texte et vous le publiez.",
+      "no_scheduling": "Rien n'est programmé et il n'y a pas de calendrier.",
+      "no_images": "Aucune image n'est créée. Du texte seulement ; la photo est la vôtre.",
+      "no_accounts": "Aucun compte de réseau social n'est connecté, et aucun n'est demandé."
+    },
+    "form": {
+      "description": "Que voulez-vous dire ?",
+      "descriptionPlaceholder": "Notre boulangerie livre désormais le petit-déjeuner aux bureaux du centre : commande avant 18 h pour le lendemain matin, dix personnes minimum, −10 % sur la première commande…",
+      "platforms": "Plateformes",
+      "upTo": "jusqu'à {max} caractères",
+      "generate": "Rédiger les publications",
+      "generating": "Rédaction…"
+    },
+    "result": {
+      "title": "Vos publications",
+      "charged": "{credits, plural, one {# crédit} other {# crédits}}",
+      "chars": "{count} / {max}",
+      "missing": "{platform} n'a pas été rédigé cette fois : relancez avec cette seule plateforme."
+    },
+    "errors": {
+      "tooShort": "Dites-en un peu plus d'abord.",
+      "tooLong": "Cela dépasse {limit} caractères. Dites de quoi parle la publication, pas toute l'histoire.",
+      "insufficient": "Pas assez de crédits pour ces publications.",
+      "rateLimited": "Trop de demandes : attendez une minute et réessayez.",
+      "unavailable": "Le service d'IA est injoignable. Rien n'a été facturé.",
+      "unusable": "Le modèle a renvoyé autre chose que des publications. Essayez de décrire autrement.",
+      "failed": "Ça n'a pas fonctionné : réessayez."
+    },
+    "history": {
+      "title": "Historique",
+      "empty": "Rien ici pour l'instant.",
+      "failed": "échec",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer ces publications ? C'est irréversible."
     }
   },
   "finance": {

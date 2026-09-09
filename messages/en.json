@@ -170,7 +170,8 @@
       "systemHealth": "System Health",
       "tradingJournal": "Trading journal",
       "voice": "Voice",
-      "predictions": "Predictions"
+      "predictions": "Predictions",
+      "posts": "Posts"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -227,7 +228,8 @@
       "systemHealth": "Whether the database, the queues and the providers are answering.",
       "tradingJournal": "Your trades, with the reasoning you wrote at the time.",
       "voice": "Have text read out loud, or speak and have it written down. Minutes are metered and the price per minute is on the page.",
-      "predictions": "Patterns found in your own rows, each with the number of entries it rests on and a link to them."
+      "predictions": "Patterns found in your own rows, each with the number of entries it rests on and a link to them.",
+      "posts": "Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post."
     },
     "closeMenu": "Close menu"
   },
@@ -3225,6 +3227,11 @@
       "is": "A slide generator: a brief in, a deck of slides out.",
       "does": "Writes the title, the bullets and the speaker notes for each slide in the language of your brief, finds a photo on Unsplash or places yours, and exports the deck as PowerPoint (.pptx) or PDF.",
       "doesNot": "It does not draw charts or tables, does not pick a design theme, and does not generate images — photos come from Unsplash or from you. The slides are not edited here: download the .pptx and finish in PowerPoint or Keynote."
+    },
+    "posts": {
+      "is": "A post writer: one brief in, one post per platform out.",
+      "does": "Writes a LinkedIn post, a post for X, an Instagram caption with hashtags, a Facebook post and a Threads post from the same brief — each cut to that platform's length and written in its register, in the language of your brief — with a copy button on each.",
+      "doesNot": "It does not publish, schedule or connect to any social account, and it does not reuse one text across platforms — five platforms, five posts. No images are made; the picture is yours."
     }
   },
   "helpCentre": {
@@ -3696,6 +3703,47 @@
       "delete": "Delete",
       "deleteConfirm": "Delete this presentation? This can't be undone.",
       "noteFromBefore": "note from before"
+    }
+  },
+  "posts": {
+    "title": "Posts",
+    "description": "Say what you want to say once; get a post written for each platform, at its length and in its register. Copy it and post it yourself.",
+    "limits": {
+      "title": "What this does NOT do",
+      "no_publish": "It publishes nothing. Nothing here reaches LinkedIn, X, Instagram, Facebook or Threads — you copy the text and post it.",
+      "no_scheduling": "It schedules nothing and has no calendar.",
+      "no_images": "It makes no images. Text only; the picture is yours.",
+      "no_accounts": "It is not connected to any social account, and does not ask for one."
+    },
+    "form": {
+      "description": "What do you want to say?",
+      "descriptionPlaceholder": "Our bakery now delivers breakfast to offices in the centre — order by 18:00 for the next morning, minimum ten people, first order 10% off…",
+      "platforms": "Platforms",
+      "upTo": "up to {max} characters",
+      "generate": "Write the posts",
+      "generating": "Writing…"
+    },
+    "result": {
+      "title": "Your posts",
+      "charged": "{credits, plural, one {# credit} other {# credits}}",
+      "chars": "{count} / {max}",
+      "missing": "{platform} was not written this time — run it again with only that platform."
+    },
+    "errors": {
+      "tooShort": "Say a little more first.",
+      "tooLong": "That's longer than {limit} characters. Say what the post is about, not the whole story.",
+      "insufficient": "Not enough credits for these posts.",
+      "rateLimited": "Too many requests — please wait a minute and try again.",
+      "unavailable": "The AI service couldn't be reached. Nothing was charged.",
+      "unusable": "The model returned something that wasn't a set of posts. Try describing it differently.",
+      "failed": "That didn't work — try again."
+    },
+    "history": {
+      "title": "History",
+      "empty": "Nothing here yet.",
+      "failed": "failed",
+      "delete": "Delete",
+      "deleteConfirm": "Delete these posts? This can't be undone."
     }
   },
   "finance": {

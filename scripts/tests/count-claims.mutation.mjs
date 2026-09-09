@@ -43,8 +43,8 @@ const MUTANTS = [
     // layout's <main>.
     name: "a page count is left at what it was two pages ago",
     file: DASH_LAYOUT,
-    from: "                    41 pages instead of 8, and the four components below",
-    to: "                    39 pages instead of 8, and the four components below",
+    from: "                    42 pages instead of 8, and the four components below",
+    to: "                    40 pages instead of 8, and the four components below",
     expect: "every marker's number is also written in the sentence it vouches for",
   },
   {

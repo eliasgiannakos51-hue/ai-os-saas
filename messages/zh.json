@@ -170,7 +170,8 @@
       "systemHealth": "系统健康",
       "tradingJournal": "交易日志",
       "voice": "语音",
-      "predictions": "规律"
+      "predictions": "规律",
+      "posts": "帖子"
     },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",
@@ -227,7 +228,8 @@
       "systemHealth": "数据库、队列和服务商是否在响应。",
       "tradingJournal": "你的交易记录，以及当时写下的理由。",
       "voice": "把文字读出来，或者说话并转成文字。按分钟计量，每分钟价格显示在页面上。",
-      "predictions": "在你自己的记录里发现的规律，每条都标明依据的条数，并可点回原始记录。"
+      "predictions": "在你自己的记录里发现的规律，每条都标明依据的条数，并可点回原始记录。",
+      "posts": "说一次，就能得到每个平台各一条、长度和语气各自贴合的帖子。它不发布任何内容——由你复制并发布。"
     },
     "closeMenu": "关闭菜单"
   },
@@ -3225,6 +3227,11 @@
       "is": "幻灯片生成器：输入一段描述，输出一份演示。",
       "does": "用你描述所用的语言为每张幻灯片撰写标题、要点和演讲者备注，从 Unsplash 找一张照片或放入你自己的照片，并把演示导出为 PowerPoint（.pptx）或 PDF。",
       "doesNot": "它不绘制图表或表格，不挑选设计主题，也不生成图片——照片来自 Unsplash 或你自己。幻灯片不在这里编辑：下载 .pptx，在 PowerPoint 或 Keynote 里完成。"
+    },
+    "posts": {
+      "is": "帖子撰写器：输入一段描述，输出每个平台各一条帖子。",
+      "does": "根据同一段描述，写出 LinkedIn 帖子、X 帖子、带话题标签的 Instagram 文案、Facebook 帖子和 Threads 帖子——每条都裁到该平台的长度、用该平台的语气，并使用你描述所用的语言——每条都有复制按钮。",
+      "doesNot": "它不发布、不排期、不连接任何社交账号，也不会把同一段文字套用到所有平台——五个平台，五条帖子。它不生成图片；配图由你来定。"
     }
   },
   "helpCentre": {
@@ -3696,6 +3703,47 @@
       "delete": "删除",
       "deleteConfirm": "删除这份演示？此操作无法撤销。",
       "noteFromBefore": "以前的笔记"
+    }
+  },
+  "posts": {
+    "title": "帖子",
+    "description": "把想说的话说一次，就能得到为每个平台各写一条的帖子，长度和语气各自贴合平台。复制后由你自己发布。",
+    "limits": {
+      "title": "它不做什么",
+      "no_publish": "它不发布任何内容。这里的内容不会到达 LinkedIn、X、Instagram、Facebook 或 Threads——你复制文字，自己去发。",
+      "no_scheduling": "它不做排期，也没有日历。",
+      "no_images": "它不生成图片。只有文字，配图由你来定。",
+      "no_accounts": "它没有连接任何社交账号，也不会索要账号。"
+    },
+    "form": {
+      "description": "你想说什么？",
+      "descriptionPlaceholder": "我们的面包店现在为市中心的办公室配送早餐——18:00 前下单，次日早晨送达，最少十人，首单九折……",
+      "platforms": "平台",
+      "upTo": "最多 {max} 个字符",
+      "generate": "生成帖子",
+      "generating": "撰写中……"
+    },
+    "result": {
+      "title": "你的帖子",
+      "charged": "{credits} 积分",
+      "chars": "{count} / {max}",
+      "missing": "这次没有为 {platform} 写出帖子——只选该平台再运行一次。"
+    },
+    "errors": {
+      "tooShort": "请先多说一点。",
+      "tooLong": "超过了 {limit} 个字符。说说帖子要讲什么，不必讲完整个故事。",
+      "insufficient": "积分不足，无法生成这些帖子。",
+      "rateLimited": "请求过多——请稍等一分钟再试。",
+      "unavailable": "无法连接 AI 服务。未产生任何扣费。",
+      "unusable": "模型返回的内容不是帖子。试着换一种方式描述。",
+      "failed": "没有成功——请再试一次。"
+    },
+    "history": {
+      "title": "历史记录",
+      "empty": "这里还没有内容。",
+      "failed": "失败",
+      "delete": "删除",
+      "deleteConfirm": "删除这些帖子？此操作无法撤销。"
     }
   },
   "finance": {

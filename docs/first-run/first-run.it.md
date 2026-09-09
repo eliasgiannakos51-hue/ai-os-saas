@@ -1,12 +1,12 @@
 # The first run — it
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **598 strings**. The whole product is 2985, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **600 strings**. The whole product is 3019, which is why this file exists.
 
-**Start with tier 1. It is 44 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 364 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 45 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 365 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (44)
+## Tier 1 — THE SENTENCES — read these (45)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -174,6 +174,12 @@ Preferiti, recenti e ricerca — tutto il tuo in un posto
 
 Condividi la forma di un agente come modello e parti da uno condiviso da qualcun altro.
 
+**`sidebar.hints.posts`**
+
+> EN — Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.
+
+Dillo una volta e ricevi un post per piattaforma, nella sua lunghezza e nel suo tono. Non pubblica nulla: copi e pubblichi tu.
+
 **`sidebar.hints.predictions`**
 
 > EN — Patterns found in your own rows, each with the number of entries it rests on and a link to them.
@@ -284,7 +290,7 @@ Ionexa lo usa per scegliere quale passo del piano proporti — lavoro leggero qu
 
 Gratis: non viene generato nulla e lo togli con un clic
 
-## Tier 2 — The labels — skim these (364)
+## Tier 2 — The labels — skim these (365)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1843,6 +1849,12 @@ Obiettivi e piani
 > EN — New entry
 
 Nuova voce
+
+**`sidebar.items.posts`**
+
+> EN — Posts
+
+Post
 
 **`sidebar.items.predictions`**
 

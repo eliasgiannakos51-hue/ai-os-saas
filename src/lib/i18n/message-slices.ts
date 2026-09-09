@@ -92,6 +92,8 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
       "finance", "language", "module",
       // V5 #21: the presentations workspace, under Make.
       "presentations",
+      // V5 #22: the post generator, under Make.
+      "posts",
       "promise", "publishing", "pwa",
       // The sample-account banner and its load button (V4.6 #6). The
       // banner renders from dashboard/layout.tsx, so this namespace is
@@ -111,12 +113,14 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // SIXTY-FIVE since V5 #21: presentations/presentations-workspace.tsx
     // reaches `limits.<id>` and `result.layout.<layout>` through template
     // literals, the same shape as the coding workspace.
+    // SIXTY-SIX since V5 #22: posts/posts-workspace.tsx reaches its four
+    // absences the same way.
     //
     // THIS IS A CENSUS, NOT A RATCHET: it records how many components the
     // slicer cannot bound, and `canTrim` is false while it is above zero.
     // A wrong number here does not loosen anything — it makes the gate
     // disagree with the tree, which is what the check reports.
-    unbounded: 65,
+    unbounded: 66,
   },
   {
     name: "onboarding",

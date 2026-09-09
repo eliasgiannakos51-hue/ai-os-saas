@@ -169,6 +169,10 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   },
   { table: "ai_images", label: "ai_images", scope: "user_content" },
   { table: "ai_presentations", label: "ai_presentations", scope: "user_content" },
+  // V5 #22: the brief and the posts written from it, one row per
+  // generation. The Content tracker (public.content) is listed above on
+  // its own; this table is what the generator writes.
+  { table: "generated_posts", label: "generated_posts", scope: "user_content" },
   { table: "ai_videos", label: "ai_videos", scope: "user_content" },
   { table: "ai_websites", label: "ai_website_entries", scope: "user_content" },
 

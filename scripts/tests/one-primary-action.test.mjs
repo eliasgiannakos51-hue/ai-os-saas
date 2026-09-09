@@ -282,6 +282,9 @@ const BASELINE = {
   // V5 #21: a generator with one filled button (Write the slides) instead
   // of the GenericList form the tracker drew.
   "dashboard/presentations/page.tsx": 2,
+  // V5 #22. The same two: the orange "Write the posts" button, and the
+  // one the estimate hint draws beside it.
+  "dashboard/posts/page.tsx": 2,
   "dashboard/product-workflow/page.tsx": 4,
   "dashboard/published/page.tsx": 1,
   "dashboard/reflection/page.tsx": 1,

@@ -78,6 +78,7 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "overview",
   "predictions",
   "presentations",
+  "posts",
   "product-workflow",
   "published",
   "records",

@@ -532,6 +532,21 @@ export const ACTION_PROFILES = {
     baseOutputChars: 400,
     outputCharsPerInputChar: 1,
   },
+  // One set of social posts (api/posts/generate) — V5 #22. The same
+  // shape as presentationGenerate: one forced-tool call, and the cost is
+  // set by WHICH platforms were asked for rather than by the brief, so
+  // the call site passes postsEstimateInputChars() — the brief plus each
+  // platform's own output allowance (lib/posts/platforms.ts) — and the
+  // ratio of 1 turns the allowance back into expected output. Over-stated
+  // on the input side by the same argument as the deck, in the same safe
+  // direction. The system prompt is measured: rules + conduct + checklist
+  // is ~6,000 characters.
+  postsGenerate: {
+    systemPromptTokens: 1500,
+    auxiliaryCalls: [],
+    baseOutputChars: 200,
+    outputCharsPerInputChar: 1,
+  },
 } as const;
 
 export type ActionProfileKey = keyof typeof ACTION_PROFILES;

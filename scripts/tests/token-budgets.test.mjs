@@ -137,6 +137,11 @@ const CLASSIFIED = {
     // otherwise read as a short deck, which is the severed deliverable
     // this file exists to stop, wearing a structured shape.
     "src/lib/presentations/generate.ts",
+    // V5 #22. 3,000 tokens for one forced tool call returning at most five
+    // short posts (~1,300 tokens at their ceilings). Same refusal by
+    // stop_reason as the deck: a cut set would parse as fewer platforms
+    // than were asked for.
+    "src/lib/posts/generate.ts",
   ],
   internal: [
     "src/lib/chat/memory.ts",

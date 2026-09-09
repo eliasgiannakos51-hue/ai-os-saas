@@ -280,6 +280,9 @@ const LOCALE_ALLOWED = new Set([
   // credits" under a generated presentation). Greek keeps "credits" as
   // the other seven allowances in this block do.
   "el:presentations.result.charged",
+  // V5 #22: the same loanword again, on the receipt line under a set of
+  // generated posts ("{n} credits"). Same block, same reason.
+  "el:posts.result.charged",
   // The same loanword, on the four credit-pack buttons under Billing.
   "el:settings.billing.creditsAmount",
   // Autonomous Agents (V3). Same loanword/cognate cases as everywhere else
@@ -512,6 +515,11 @@ const INTENTIONALLY_IDENTICAL = new Set([
   "finance.metrics.mrr",
   "finance.metrics.arr",
   "aiSteps.counter",
+  // V5 #22. The length readout under every generated post: "{count} /
+  // {max}" — two numbers and a slash. The isFormatOnly heuristic above
+  // does not see it as a format because the placeholder NAMES contain
+  // letters; the rendered string never does. Ten locales, one value.
+  "posts.result.chars",
   "landing.footer.roadmap",
   "roadmap.title",
   "roadmap.items.agentBuilder.title",

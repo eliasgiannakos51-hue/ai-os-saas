@@ -272,6 +272,10 @@ const BUILD_ALLOWED = {
   // call that returns the deck, and the .pptx and PDF routes lay it out.
   // Section 3b proves the claim from the code, not from this line.
   "/dashboard/presentations": "a brief in, a deck of slides out — exported as .pptx or PDF",
+  // V5 #22. One forced-tool call, one post per platform, copied out by
+  // hand — nothing published. Section 3b proves the model call from the
+  // code, and posts.test.mjs proves the "nothing published" half.
+  "/dashboard/posts": "a brief in, one post per platform out — copied, never published",
   "/dashboard/create": "Create Studio — the generator the whole product opened with",
   "/dashboard/published": "what the builder put live",
   // Not a generator itself, and here on purpose: these are what a
@@ -767,7 +771,8 @@ check(
   // reported as a MISSED mutant.
   // TWENTY-SIX SINCE V5 #21: /dashboard/presentations reaches this scan
   // through MODULE_TITLE_KEYS, the third page to do so.
-  namedPages.length >= 26,
+  // TWENTY-SEVEN SINCE V5 #22: /dashboard/posts, by the literal form.
+  namedPages.length >= 27,
   `${namedPages.length} — this floor rises as pages are added, and never falls`,
 );
 for (const locale of LOCALES) {

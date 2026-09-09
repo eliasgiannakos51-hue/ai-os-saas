@@ -24,6 +24,7 @@ import {
   TRADING_WORKFLOW_ICON,
   BUSINESS_HEALTH_ICON,
   WEBSITE_BUILDER_ICON,
+  POSTS_ICON,
   PRODUCT_WORKFLOW_ICON,
   PUBLISHED_SITES_ICON,
   FORM_SUBMISSIONS_ICON,
@@ -62,13 +63,14 @@ export type { SidebarItem, SidebarGroupConfig } from "@/lib/sidebar-visibility";
 export { visibleGroups, sidebarGroups } from "@/lib/sidebar-visibility";
 import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 
-// SIX GROUPS, TWENTY-FOUR VISIBLE ROWS — the structure of 2026-09-05,
-// plus the one row it asked for that could not be drawn until V5 #21.
+// SIX GROUPS, TWENTY-FIVE VISIBLE ROWS — the structure of 2026-09-05,
+// plus the two rows it asked for that could not be drawn until V5 #21
+// and V5 #22.
 //
 // THE HISTORY, BECAUSE THE NUMBER ONLY MEANS SOMETHING NEXT TO IT: eight
 // groups and forty-five rows, then four and sixteen (V4.6 #3), then four
 // and twenty-one (2026-09-04), then six and twenty-three (2026-09-05),
-// now twenty-four. Not 41 and not 13 at any point —
+// then twenty-four (V5 #21), now twenty-five. Not 41 and not 13 at any point —
 // scripts/tests/sidebar-size.test.mjs's BEFORE_V46_3 list is forty-five
 // entries long and the gate asserts that length.
 //
@@ -78,7 +80,7 @@ import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 // are all verbs and they are the order of a working session.
 //
 // THE RULE THAT DECIDED THE CONTENTS, and it is the whole reason this is
-// twenty-four rather than thirty-five: A ROW UNDER "MAKE" MUST MAKE
+// twenty-five rather than thirty-five: A ROW UNDER "MAKE" MUST MAKE
 // SOMETHING. The structure originally asked for Images, Videos,
 // Presentations and Posts under it. All four existed — as TRACKING LOGS,
 // tables of rows a person types by hand, declared as producing nothing
@@ -88,7 +90,9 @@ import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 // opens a notes form is not an unclear label, it is a broken promise,
 // and it reads exactly like a working feature in a green build. They
 // stay hidden until they generate — and Presentations generates since
-// V5 #21, which is the day its row was drawn and not a day before.
+// V5 #21, Posts since V5 #22, each drawn the day it did and not a day
+// before. (Posts never had a tracker page at all; the Content log is a
+// different thing and stays where it is.)
 //
 // THREE MORE WERE ASKED FOR AND ARE NOT HERE because nothing exists
 // behind them: a desktop agent, a public API and Projects have no route,
@@ -113,7 +117,7 @@ import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 // under /dashboard has no entry point at all.
 export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
   {
-    // NEVER COLLAPSED. Whatever else is shut, the five things this
+    // NEVER COLLAPSED. Whatever else is shut, the six things this
     // product makes have to be on screen the instant it paints — a group
     // somebody has to open first is a group somebody does not know is
     // there.
@@ -139,6 +143,10 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         icon: MODULE_ICONS.presentations,
         hintKey: "presentations",
       },
+      // V5 #22. The other row the 2026-09-05 structure asked for by name.
+      // api/posts/generate reaches a model and writes one post per
+      // platform; nothing is published, and the page says so first.
+      { href: "/dashboard/posts", label: "Posts", icon: POSTS_ICON, hintKey: "posts" },
 
       // --- in the palette and on the hub, not in the sidebar ---
       // The generator the product used to open with. It still routes a
@@ -288,7 +296,8 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // sidebar-naming.test.mjs proves the difference from the imports.
       // They become rows the day a route behind them reaches a model —
       // which is exactly what happened to Presentations in V5 #21: it is
-      // under Make above, and no longer in this list.
+      // under Make above, and no longer in this list. Posts (V5 #22) was
+      // never in it: there was no page to hide.
       { href: "/dashboard/websites", label: "Websites", icon: MODULE_ICONS.websites, hintKey: "websites", hidden: true },
       { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps, hintKey: "apps", hidden: true },
       { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images, hintKey: "images", hidden: true },

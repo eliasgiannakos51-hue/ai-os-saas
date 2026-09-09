@@ -170,7 +170,8 @@
       "systemHealth": "Stato del sistema",
       "tradingJournal": "Diario di trading",
       "voice": "Voce",
-      "predictions": "Andamenti"
+      "predictions": "Andamenti",
+      "posts": "Post"
     },
     "hints": {
       "chat": "Chiedi qualsiasi cosa — non legato a nessun modulo.",
@@ -227,7 +228,8 @@
       "systemHealth": "Se il database, le code e i fornitori rispondono.",
       "tradingJournal": "Le tue operazioni, con il ragionamento che hai scritto allora.",
       "voice": "Fatti leggere un testo ad alta voce, oppure parla e viene scritto. I minuti sono contati e il prezzo al minuto è nella pagina.",
-      "predictions": "Andamenti nelle tue voci, ciascuno con il numero di registrazioni su cui si basa e un collegamento a esse."
+      "predictions": "Andamenti nelle tue voci, ciascuno con il numero di registrazioni su cui si basa e un collegamento a esse.",
+      "posts": "Dillo una volta e ricevi un post per piattaforma, nella sua lunghezza e nel suo tono. Non pubblica nulla: copi e pubblichi tu."
     },
     "closeMenu": "Chiudi il menu"
   },
@@ -3225,6 +3227,11 @@
       "is": "Un generatore di slide: entra una descrizione, esce una presentazione.",
       "does": "Scrive titolo, punti e note per chi presenta di ogni slide nella lingua della tua descrizione, trova una foto su Unsplash o inserisce le tue, ed esporta la presentazione come PowerPoint (.pptx) o PDF.",
       "doesNot": "Non disegna grafici né tabelle, non sceglie un tema grafico e non genera immagini: le foto arrivano da Unsplash o da te. Le slide non si modificano qui: scarica il .pptx e finiscilo in PowerPoint o Keynote."
+    },
+    "posts": {
+      "is": "Un redattore di post: entra una descrizione, esce un post per piattaforma.",
+      "does": "Scrive dalla stessa descrizione un post per LinkedIn, uno per X, una didascalia Instagram con hashtag, un post Facebook e un post Threads, ciascuno tagliato alla lunghezza della sua piattaforma e scritto nel suo tono, nella lingua della tua descrizione, con un pulsante copia su ognuno.",
+      "doesNot": "Non pubblica, non programma e non si collega a nessun account social, e non riusa uno stesso testo su più piattaforme: cinque piattaforme, cinque post. Non crea immagini; la foto è tua."
     }
   },
   "helpCentre": {
@@ -3696,6 +3703,47 @@
       "delete": "Elimina",
       "deleteConfirm": "Eliminare questa presentazione? Non si può annullare.",
       "noteFromBefore": "nota di prima"
+    }
+  },
+  "posts": {
+    "title": "Post",
+    "description": "Di' una volta cosa vuoi dire; ricevi un post scritto per ogni piattaforma, nella sua lunghezza e nel suo tono. Copialo e pubblicalo tu.",
+    "limits": {
+      "title": "Cosa NON fa",
+      "no_publish": "Non pubblica nulla. Niente di qui arriva su LinkedIn, X, Instagram, Facebook o Threads: copi il testo e lo pubblichi tu.",
+      "no_scheduling": "Non programma nulla e non ha un calendario.",
+      "no_images": "Non crea immagini. Solo testo; la foto è tua.",
+      "no_accounts": "Non è collegato a nessun account social, e non ne chiede uno."
+    },
+    "form": {
+      "description": "Cosa vuoi dire?",
+      "descriptionPlaceholder": "La nostra panetteria ora consegna la colazione negli uffici del centro: ordine entro le 18 per la mattina dopo, minimo dieci persone, 10% di sconto sul primo ordine…",
+      "platforms": "Piattaforme",
+      "upTo": "fino a {max} caratteri",
+      "generate": "Scrivi i post",
+      "generating": "Sto scrivendo…"
+    },
+    "result": {
+      "title": "I tuoi post",
+      "charged": "{credits, plural, one {# credito} other {# crediti}}",
+      "chars": "{count} / {max}",
+      "missing": "{platform} non è stato scritto stavolta: rilancia solo con quella piattaforma."
+    },
+    "errors": {
+      "tooShort": "Prima racconta qualcosa in più.",
+      "tooLong": "Supera i {limit} caratteri. Di' di cosa parla il post, non tutta la storia.",
+      "insufficient": "Crediti insufficienti per questi post.",
+      "rateLimited": "Troppe richieste: aspetta un minuto e riprova.",
+      "unavailable": "Il servizio AI non era raggiungibile. Nessun addebito.",
+      "unusable": "Il modello ha restituito qualcosa che non erano post. Prova a descriverlo in modo diverso.",
+      "failed": "Non ha funzionato: riprova."
+    },
+    "history": {
+      "title": "Cronologia",
+      "empty": "Ancora niente qui.",
+      "failed": "non riuscita",
+      "delete": "Elimina",
+      "deleteConfirm": "Eliminare questi post? Non si può annullare."
     }
   },
   "finance": {

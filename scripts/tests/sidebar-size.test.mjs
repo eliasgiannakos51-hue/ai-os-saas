@@ -72,9 +72,14 @@ const MAX_GROUPS = 6;
 // because it opened a notes form, not because the owner did not ask for
 // it — the structure asked for it by name. The row is drawn now because
 // api/presentations/generate reaches a model and exports a deck, which
-// is the condition the paragraph above set. The other three (Images,
-// Videos, Posts) are still out, for the same reason they were.
-const MAX_DRAWN_ITEMS = 24;
+// is the condition the paragraph above set.
+//
+// TWENTY-FIVE SINCE V5 #22: Posts, the second of the four. There was no
+// page to hide — the Content log is a different thing — and the row is
+// drawn now because api/posts/generate reaches a model and writes one
+// post per platform. The other two (Images, Videos) are still out, for
+// the same reason they were.
+const MAX_DRAWN_ITEMS = 25;
 
 // The real filters, executed. lib/sidebar-visibility.ts imports no icons
 // precisely so this is possible — see its header.

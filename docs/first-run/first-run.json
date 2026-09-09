@@ -1,6 +1,6 @@
 {
-  "total": 2985,
-  "onPath": 598,
+  "total": 3019,
+  "onPath": 600,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -10,13 +10,13 @@
       "n": 1,
       "title": "THE SENTENCES — read these",
       "note": "On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that.",
-      "count": 44
+      "count": 45
     },
     {
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 364
+      "count": 365
     },
     {
       "n": 3,
@@ -1519,6 +1519,12 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.hints.posts",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "sidebar.hints.predictions",
           "depth": 1,
           "tier": 1,
@@ -1838,6 +1844,12 @@
         },
         {
           "key": "sidebar.items.newEntry",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.posts",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"

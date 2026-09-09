@@ -247,6 +247,16 @@ export const HELP_TIPS: HelpTip[] = [
       "that it designs a themed deck with charts, or that the slides are edited here rather than in PowerPoint",
   },
   {
+    // A page called Posts reads as a publisher. It writes them; the
+    // publishing step is the roadmap's "Social posting", still under
+    // "soon", and the tip says which side of that line this page is on.
+    id: "posts",
+    file: "src/app/dashboard/posts/page.tsx",
+    keyPrefix: "help.posts",
+    corrects:
+      "that it posts to LinkedIn, X or Instagram for you, or that one text is reused across the platforms",
+  },
+  {
     id: "costs",
     file: "src/app/dashboard/costs/page.tsx",
     keyPrefix: "help.costs",

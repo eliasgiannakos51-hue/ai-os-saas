@@ -106,6 +106,10 @@ export const BUSINESS_HEALTH_ICON: LucideIcon = Gauge;
 // generator (dashboard/website-builder), not the "Websites" Build
 // module's plain idea tracker.
 export const WEBSITE_BUILDER_ICON: LucideIcon = Layout;
+// V5 #22: the post generator (dashboard/posts). Distinct from
+// MODULE_ICONS.content (the hand-typed Content log) and from
+// MODULE_ICONS.campaigns (Megaphone), which sit in the same nav.
+export const POSTS_ICON: LucideIcon = Share2;
 // Distinct from MODULE_ICONS.products (Package) and MISSION_ICON (Rocket,
 // already used elsewhere in the same sidebar section) — this is the
 // unified Product Workflow page, not the raw Products module list.

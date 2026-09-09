@@ -286,7 +286,7 @@ const SEQUENCE = [
   "/dashboard/published", "/dashboard/integrations", "/dashboard/files",
   "/dashboard/deep-research", "/dashboard/apps", "/dashboard/images",
   "/dashboard/videos", "/dashboard/coding", "/dashboard/campaigns",
-  "/dashboard/data-analysis", "/dashboard/presentations", "/dashboard/websites",
+  "/dashboard/data-analysis", "/dashboard/presentations", "/dashboard/posts", "/dashboard/websites",
   "/dashboard/overview",
 ];
 const WIDTHS = [[375, 800], [768, 1024], [1024, 800], [1280, 900]];

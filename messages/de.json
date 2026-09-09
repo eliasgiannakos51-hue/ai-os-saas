@@ -170,7 +170,8 @@
       "systemHealth": "Systemzustand",
       "tradingJournal": "Trading-Journal",
       "voice": "Stimme",
-      "predictions": "Muster"
+      "predictions": "Muster",
+      "posts": "Beiträge"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -227,7 +228,8 @@
       "systemHealth": "Ob Datenbank, Warteschlangen und Anbieter antworten.",
       "tradingJournal": "Deine Trades, mit der Begründung, die du damals notiert hast.",
       "voice": "Text vorlesen lassen oder sprechen und mitschreiben lassen. Minuten werden gezählt, der Minutenpreis steht auf der Seite.",
-      "predictions": "Muster in deinen eigenen Einträgen, jeweils mit der Zahl der Einträge dahinter und einem Link darauf."
+      "predictions": "Muster in deinen eigenen Einträgen, jeweils mit der Zahl der Einträge dahinter und einem Link darauf.",
+      "posts": "Sag es einmal und erhalte pro Plattform einen Beitrag in ihrer Länge und ihrem Ton. Es veröffentlicht nichts – du kopierst und postest."
     },
     "closeMenu": "Menü schließen"
   },
@@ -3225,6 +3227,11 @@
       "is": "Ein Folien-Generator: eine Beschreibung rein, eine Präsentation raus.",
       "does": "Schreibt Titel, Stichpunkte und Sprechernotizen jeder Folie in der Sprache deiner Beschreibung, findet ein Foto auf Unsplash oder setzt deine eigenen ein und exportiert die Präsentation als PowerPoint (.pptx) oder PDF.",
       "doesNot": "Es zeichnet keine Diagramme oder Tabellen, wählt kein Design-Thema und erzeugt keine Bilder – Fotos kommen von Unsplash oder von dir. Die Folien werden hier nicht bearbeitet: lade die .pptx herunter und stelle sie in PowerPoint oder Keynote fertig."
+    },
+    "posts": {
+      "is": "Ein Beitragsschreiber: eine Beschreibung rein, ein Beitrag pro Plattform raus.",
+      "does": "Schreibt aus derselben Beschreibung einen LinkedIn-Beitrag, einen Beitrag für X, eine Instagram-Bildunterschrift mit Hashtags, einen Facebook-Beitrag und einen Threads-Beitrag – jeder auf die Länge seiner Plattform gekürzt und in ihrem Ton, in der Sprache deiner Beschreibung – mit einem Kopieren-Knopf an jedem.",
+      "doesNot": "Es veröffentlicht nichts, plant nichts ein und verbindet sich mit keinem Social-Media-Konto, und es verwendet keinen Text auf mehreren Plattformen wieder – fünf Plattformen, fünf Beiträge. Es erzeugt keine Bilder; das Foto ist deins."
     }
   },
   "helpCentre": {
@@ -3696,6 +3703,47 @@
       "delete": "Löschen",
       "deleteConfirm": "Diese Präsentation löschen? Das lässt sich nicht rückgängig machen.",
       "noteFromBefore": "Notiz von früher"
+    }
+  },
+  "posts": {
+    "title": "Beiträge",
+    "description": "Sag einmal, was du sagen willst; erhalte für jede Plattform einen Beitrag in ihrer Länge und ihrem Ton. Kopiere ihn und poste ihn selbst.",
+    "limits": {
+      "title": "Was es NICHT tut",
+      "no_publish": "Es veröffentlicht nichts. Nichts von hier erreicht LinkedIn, X, Instagram, Facebook oder Threads – du kopierst den Text und postest ihn.",
+      "no_scheduling": "Es plant nichts ein und hat keinen Kalender.",
+      "no_images": "Es erzeugt keine Bilder. Nur Text; das Foto ist deins.",
+      "no_accounts": "Es ist mit keinem Social-Media-Konto verbunden und fragt nach keinem."
+    },
+    "form": {
+      "description": "Was willst du sagen?",
+      "descriptionPlaceholder": "Unsere Bäckerei liefert jetzt Frühstück in Büros im Zentrum – Bestellung bis 18 Uhr für den nächsten Morgen, mindestens zehn Personen, 10 % Rabatt auf die erste Bestellung…",
+      "platforms": "Plattformen",
+      "upTo": "bis zu {max} Zeichen",
+      "generate": "Beiträge schreiben",
+      "generating": "Wird geschrieben…"
+    },
+    "result": {
+      "title": "Deine Beiträge",
+      "charged": "{credits, plural, one {# Credit} other {# Credits}}",
+      "chars": "{count} / {max}",
+      "missing": "{platform} wurde diesmal nicht geschrieben – starte es nur mit dieser Plattform noch einmal."
+    },
+    "errors": {
+      "tooShort": "Sag zuerst etwas mehr.",
+      "tooLong": "Das sind mehr als {limit} Zeichen. Sag, worum es im Beitrag geht, nicht die ganze Geschichte.",
+      "insufficient": "Nicht genug Credits für diese Beiträge.",
+      "rateLimited": "Zu viele Anfragen – warte eine Minute und versuche es erneut.",
+      "unavailable": "Der KI-Dienst war nicht erreichbar. Nichts wurde berechnet.",
+      "unusable": "Das Modell hat etwas zurückgegeben, das keine Beiträge waren. Beschreibe es anders.",
+      "failed": "Das hat nicht geklappt – versuche es erneut."
+    },
+    "history": {
+      "title": "Verlauf",
+      "empty": "Noch nichts hier.",
+      "failed": "fehlgeschlagen",
+      "delete": "Löschen",
+      "deleteConfirm": "Diese Beiträge löschen? Das lässt sich nicht rückgängig machen."
     }
   },
   "finance": {

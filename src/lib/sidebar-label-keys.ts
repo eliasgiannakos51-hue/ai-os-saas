@@ -124,6 +124,8 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   // started making them. The key is unchanged, so every locale's string
   // moved with it.
   Presentations: "presentations",
+  // V5 #22: the post generator under Make.
+  Posts: "posts",
   Campaigns: "campaigns",
   Analytics: "analytics",
   Finance: "finance",

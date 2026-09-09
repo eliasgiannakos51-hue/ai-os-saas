@@ -1,14 +1,14 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **598 strings**. The whole product is 2985, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **600 strings**. The whole product is 3019, which is why this file exists.
 
-**Start with tier 1. It is 44 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 364 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 45 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 365 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
 _This is the English original. It is here so a reader of another file can be sent both._
 
-## Tier 1 — THE SENTENCES — read these (44)
+## Tier 1 — THE SENTENCES — read these (45)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -150,6 +150,11 @@ Starred, recent and search — all your own entries in one place
 
 Share an agent's shape as a template, and start from one someone else shared.
 
+**`sidebar.hints.posts`**
+
+
+Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.
+
 **`sidebar.hints.predictions`**
 
 
@@ -242,7 +247,7 @@ Ionexa uses this to pick which plan step to suggest next — lighter work when y
 
 Free — nothing is generated, and you can remove it in one click
 
-## Tier 2 — The labels — skim these (364)
+## Tier 2 — The labels — skim these (365)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1543,6 +1548,11 @@ Goals & Plans
 
 
 New entry
+
+**`sidebar.items.posts`**
+
+
+Posts
 
 **`sidebar.items.predictions`**
 

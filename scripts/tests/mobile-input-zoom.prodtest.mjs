@@ -65,7 +65,7 @@ const DASHBOARD_ROUTES = [
   "/dashboard/integrations", "/dashboard/files", "/dashboard/deep-research",
   "/onboarding", "/dashboard/apps", "/dashboard/images", "/dashboard/videos",
   "/dashboard/coding", "/dashboard/campaigns", "/dashboard/data-analysis",
-  "/dashboard/presentations", "/dashboard/websites",
+  "/dashboard/presentations", "/dashboard/posts", "/dashboard/websites",
   "/dashboard/product-workflow", "/dashboard/trading-workflow",
 ];
 

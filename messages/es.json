@@ -170,7 +170,8 @@
       "systemHealth": "Estado del sistema",
       "tradingJournal": "Diario de trading",
       "voice": "Voz",
-      "predictions": "Patrones"
+      "predictions": "Patrones",
+      "posts": "Publicaciones"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -227,7 +228,8 @@
       "systemHealth": "Si la base de datos, las colas y los proveedores responden.",
       "tradingJournal": "Tus operaciones, con el razonamiento que escribiste entonces.",
       "voice": "Escucha un texto en voz alta, o habla y se escribe. Los minutos se miden y el precio por minuto está en la página.",
-      "predictions": "Patrones en tus propias entradas, cada uno con el número de registros que lo sostiene y un enlace a ellos."
+      "predictions": "Patrones en tus propias entradas, cada uno con el número de registros que lo sostiene y un enlace a ellos.",
+      "posts": "Dilo una vez y recibe una publicación por plataforma, con su longitud y su tono. No publica nada: copias y publicas tú."
     },
     "closeMenu": "Cerrar el menú"
   },
@@ -3225,6 +3227,11 @@
       "is": "Un generador de diapositivas: entra una descripción, sale una presentación.",
       "does": "Escribe el título, los puntos y las notas del orador de cada diapositiva en el idioma de tu descripción, busca una foto en Unsplash o coloca las tuyas, y exporta la presentación como PowerPoint (.pptx) o PDF.",
       "doesNot": "No dibuja gráficos ni tablas, no elige un tema de diseño y no genera imágenes: las fotos vienen de Unsplash o de ti. Las diapositivas no se editan aquí: descarga el .pptx y termínalo en PowerPoint o Keynote."
+    },
+    "posts": {
+      "is": "Un redactor de publicaciones: entra una descripción, sale una publicación por plataforma.",
+      "does": "Escribe una publicación para LinkedIn, otra para X, un pie de foto de Instagram con hashtags, una publicación de Facebook y una de Threads a partir de la misma descripción, cada una recortada a la longitud de su plataforma y escrita en su tono, en el idioma de tu descripción, con un botón de copiar en cada una.",
+      "doesNot": "No publica, no programa ni se conecta a ninguna cuenta de redes sociales, y no reutiliza un mismo texto en todas las plataformas: cinco plataformas, cinco publicaciones. No crea imágenes; la foto es tuya."
     }
   },
   "helpCentre": {
@@ -3696,6 +3703,47 @@
       "delete": "Eliminar",
       "deleteConfirm": "¿Eliminar esta presentación? No se puede deshacer.",
       "noteFromBefore": "nota de antes"
+    }
+  },
+  "posts": {
+    "title": "Publicaciones",
+    "description": "Di una vez lo que quieres decir; recibe una publicación escrita para cada plataforma, con su longitud y su tono. Cópiala y publícala tú.",
+    "limits": {
+      "title": "Lo que NO hace",
+      "no_publish": "No publica nada. Nada de aquí llega a LinkedIn, X, Instagram, Facebook ni Threads: copias el texto y lo publicas tú.",
+      "no_scheduling": "No programa nada y no tiene calendario.",
+      "no_images": "No crea imágenes. Solo texto; la foto es tuya.",
+      "no_accounts": "No está conectado a ninguna cuenta de redes sociales, y no pide ninguna."
+    },
+    "form": {
+      "description": "¿Qué quieres decir?",
+      "descriptionPlaceholder": "Nuestra panadería ya lleva desayunos a oficinas del centro: pedido hasta las 18:00 para la mañana siguiente, mínimo diez personas, 10 % de descuento en el primer pedido…",
+      "platforms": "Plataformas",
+      "upTo": "hasta {max} caracteres",
+      "generate": "Escribir las publicaciones",
+      "generating": "Escribiendo…"
+    },
+    "result": {
+      "title": "Tus publicaciones",
+      "charged": "{credits, plural, one {# crédito} other {# créditos}}",
+      "chars": "{count} / {max}",
+      "missing": "{platform} no se escribió esta vez: vuelve a ejecutarlo solo con esa plataforma."
+    },
+    "errors": {
+      "tooShort": "Cuenta un poco más primero.",
+      "tooLong": "Supera los {limit} caracteres. Di de qué trata la publicación, no toda la historia.",
+      "insufficient": "No hay créditos suficientes para estas publicaciones.",
+      "rateLimited": "Demasiadas solicitudes: espera un minuto y vuelve a intentarlo.",
+      "unavailable": "No se pudo contactar con el servicio de IA. No se cobró nada.",
+      "unusable": "El modelo devolvió algo que no eran publicaciones. Prueba a describirlo de otra forma.",
+      "failed": "No ha funcionado: inténtalo de nuevo."
+    },
+    "history": {
+      "title": "Historial",
+      "empty": "Aún no hay nada.",
+      "failed": "fallida",
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Eliminar estas publicaciones? No se puede deshacer."
     }
   },
   "finance": {

@@ -15,6 +15,7 @@
 import { AI_SAFETY_BOUNDARIES_EN, AI_CRISIS_CLASSIFIER_EN } from "@/lib/ai-conduct";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import { UNTRUSTED_OPEN, UNTRUSTED_CLOSE } from "@/lib/agents/agent-config";
+import { languageNameFor } from "@/lib/text/language-name";
 import {
   MAX_BULLETS,
   MAX_BULLET_CHARS,
@@ -32,23 +33,6 @@ export const PRESENTATION_MODEL = "claude-sonnet-4-6";
  * cut mid-slide; the parser drops anything beyond MAX_SLIDES anyway.
  */
 export const PRESENTATION_MAX_TOKENS = 8_000;
-
-const LANGUAGE_NAMES: Record<string, string> = {
-  en: "English",
-  el: "Greek",
-  es: "Spanish",
-  fr: "French",
-  de: "German",
-  it: "Italian",
-  pt: "Portuguese",
-  zh: "Simplified Chinese",
-  ja: "Japanese",
-  ar: "Arabic",
-};
-
-export function languageNameFor(locale: string): string {
-  return LANGUAGE_NAMES[locale] ?? LANGUAGE_NAMES.en;
-}
 
 /**
  * The static prefix — everything that does not change between requests,

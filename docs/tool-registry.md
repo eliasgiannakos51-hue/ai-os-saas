@@ -23,23 +23,24 @@ to find out what exists:
 
 | namespace | what it is | where | size |
 |---|---|---|---|
-| estimation profile key | how much to hold, in tokens | `ACTION_PROFILES` in `src/lib/billing/estimate.ts` | 27 keys |
-| reserve action string | what the hold is labelled | 3rd argument of `reserveCredits` in `src/lib/billing/reservations.ts` | 27 distinct |
-| settlement feature string | what the charge is labelled, and what the margin knob is named after | `feature` of `settleReservation` | 48 distinct |
-| route path | what the browser calls | `src/app/api/**/route.ts` | 133 routes |
+| estimation profile key | how much to hold, in tokens | `ACTION_PROFILES` in `src/lib/billing/estimate.ts` | 28 keys |
+| reserve action string | what the hold is labelled | 3rd argument of `reserveCredits` in `src/lib/billing/reservations.ts` | 28 distinct |
+| settlement feature string | what the charge is labelled, and what the margin knob is named after | `feature` of `settleReservation` | 49 distinct |
+| route path | what the browser calls | `src/app/api/**/route.ts` | 134 routes |
 
 Counted on 2026-09-08 (26 / 26 / 47 / 130) and moved by V5 #21, which added one
 profile (`presentationGenerate`), one reserve string and one feature
 (`presentation_generate`) and three routes (`api/presentations/generate`,
-`api/presentations/[id]/pptx`, `api/presentations/[id]/pdf`). Nothing else in
-this document was re-measured.
+`api/presentations/[id]/pptx`, `api/presentations/[id]/pdf`), then again by
+V5 #22 (`postsGenerate` / `posts_generate` / `api/posts/generate`). Nothing else
+in this document was re-measured.
 
 The four do not line up. `estimateForAction` is called at 37 sites — 34 of
 them naming one of 22 profile keys literally, 3 computing one.
 `settleReservation` is called at 36 sites — 29 naming one of 24 features
 literally, 7 computing one.
 
-**23 of the 48 settlement features exist only at runtime.** They are built
+**23 of the 49 settlement features exist only at runtime.** They are built
 by string concatenation and are invisible to any static list — a grep for
 `"create_stopped"` finds nothing, because the string is
 `` `${kind}_stopped` `` in `src/lib/jobs/run-job.ts`. The seven computing
@@ -99,7 +100,7 @@ way. Nothing anywhere states what a tool's input is.
 
 ### Returns — undeclared
 
-**Zero of the 133 route files export a type or interface**, and there is no
+**Zero of the 134 route files export a type or interface**, and there is no
 shared `ApiResponse` or `ToolResult` type in `src/lib` or `src/types`. Each
 route hand-builds a `NextResponse.json({...})` whose shape is known only to
 the component that calls it.

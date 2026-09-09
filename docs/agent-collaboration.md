@@ -113,9 +113,10 @@ breaker in `src/lib/ai-circuit-breaker.ts`, `IDENTICAL_CALL_MAX` 10 in a
 15-minute window. It catches a *repeated* request, not two agents
 independently deciding to do the same useful thing.
 
-For a panel, the second shape is the one that fits: **each agent claims a
-question before answering it**, with a stale window, so a worker that dies
-releases its claim and a worker that is merely slow does not lose it. The
+For a panel, the automation cron's `processing_started_at` claim is the one
+that fits: **each agent claims a question before answering it**, with a
+stale window, so a worker that dies releases its claim and a worker that is
+merely slow does not lose it. The
 duplicate-work problem for agents is the same problem the automation cron
 already solved, at the same granularity.
 

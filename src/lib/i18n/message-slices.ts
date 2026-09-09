@@ -89,7 +89,10 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     namespaces: [
       "achievements", "aiSteps", "askAi", "coding", "common", "credits",
       "dashboard", "dataAnalysis", "entityLinks", "errors", "favorites",
-      "finance", "language", "module", "promise", "publishing", "pwa",
+      "finance", "language", "module",
+      // V5 #21: the presentations workspace, under Make.
+      "presentations",
+      "promise", "publishing", "pwa",
       // The sample-account banner and its load button (V4.6 #6). The
       // banner renders from dashboard/layout.tsx, so this namespace is
       // reachable from every dashboard route rather than from one page.
@@ -105,12 +108,15 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // namespace; the rest reach a key through a template literal or a
     // variable, which is just as unpredictable.
     // Counting only the first shape is how a number becomes comfortable.
+    // SIXTY-FIVE since V5 #21: presentations/presentations-workspace.tsx
+    // reaches `limits.<id>` and `result.layout.<layout>` through template
+    // literals, the same shape as the coding workspace.
     //
     // THIS IS A CENSUS, NOT A RATCHET: it records how many components the
     // slicer cannot bound, and `canTrim` is false while it is above zero.
     // A wrong number here does not loosen anything — it makes the gate
     // disagree with the tree, which is what the check reports.
-    unbounded: 64,
+    unbounded: 65,
   },
   {
     name: "onboarding",

@@ -135,7 +135,7 @@
       "coding": "AI 编程",
       "dataAnalysis": "数据分析",
       "documents": "文档",
-      "presentations": "演示文稿笔记",
+      "presentations": "演示文稿",
       "campaigns": "营销记录",
       "analytics": "数据统计",
       "finance": "财务",
@@ -207,7 +207,7 @@
       "images": "记录你正在筹划或已经做好的图片。它不会生成图片。",
       "videos": "记录你正在筹划或已经做好的视频。它不会生成视频。",
       "coding": "编写、解释、修复、转换和测试代码片段。它不运行代码，也不访问代码仓库。",
-      "presentations": "记录你正在筹划或已经做好的演示文稿。它不会生成幻灯片。",
+      "presentations": "描述一份演示并获得幻灯片——PowerPoint 或 PDF，配图来自 Unsplash 或你自己的照片。它不绘制图表。",
       "home": "你的仪表板——活动、统计和快捷操作。",
       "settings": "账户、账单、语言和偏好设置。",
       "published": "你所有已上线的网站，含访问量与版本历史",
@@ -382,8 +382,8 @@
         "description": "用 AI 创建并剪辑视频。"
       },
       "presentations": {
-        "title": "AI 演示文稿与文档",
-        "description": "根据你的数据生成精美的演示文稿和文档。"
+        "title": "AI 演示文稿",
+        "description": "描述一份演示，获得可编辑的幻灯片——导出为 PowerPoint 或 PDF，配图来自 Unsplash 或你自己的照片。"
       },
       "marketingBuilder": {
         "title": "AI 营销活动构建器",
@@ -2798,7 +2798,6 @@
       "roadmap": "路线图",
       "score": "评分",
       "sentiment": "情绪",
-      "slideCount": "幻灯片数量",
       "status": "状态",
       "strengths": "优势",
       "suggestedResponse": "建议回复",
@@ -2808,7 +2807,6 @@
       "targetAudience": "目标受众",
       "taskName": "任务名称",
       "timeSaved": "节省的时间",
-      "title": "标题",
       "toolsNeeded": "所需工具",
       "topic": "主题",
       "twitterThread": "Twitter 长贴",
@@ -2827,13 +2825,10 @@
       "crossPlatform": "跨平台",
       "desktop": "桌面端",
       "done": "已完成",
-      "draft": "草稿",
       "email": "电子邮件",
       "event": "活动",
       "expense": "支出",
-      "final": "定稿",
       "inProgress": "进行中",
-      "inReview": "审阅中",
       "income": "收入",
       "ios": "iOS",
       "live": "已上线",
@@ -2868,7 +2863,6 @@
       "apps": "确定删除此应用？此操作无法撤销。",
       "images": "确定删除此图片？此操作无法撤销。",
       "videos": "确定删除此视频？此操作无法撤销。",
-      "presentations": "确定删除此演示记录？此操作无法撤销。",
       "campaigns": "确定删除此营销活动？此操作无法撤销。"
     },
     "empty": {
@@ -2952,11 +2946,6 @@
         "why": "每条视频的需求和进度，拍摄清单不该只存在脑子里。它不会生成视频。",
         "example": "30 秒的产品演示"
       },
-      "presentations": {
-        "title": "记录演示文稿的地方",
-        "why": "把你正在准备或已经讲过的演示记在这里——本页不会替你生成幻灯片。用上方的按钮添加一条。",
-        "example": "种子轮的投资人演示"
-      },
       "campaigns": {
         "title": "每一次投放，以及它的花费",
         "why": "渠道、预算和状态并排放着，下一次的预算决定就能靠数字，而不是靠感觉。它不会替你投放。",
@@ -2980,7 +2969,6 @@
       "apps": "新增应用",
       "images": "新增图片",
       "videos": "新增视频",
-      "presentations": "新增演示备注",
       "campaigns": "新增活动"
     }
   },
@@ -3232,6 +3220,11 @@
       "is": "由代码在你自己的记录里找出的规律，不是模型在猜。",
       "does": "统计你的记录条数，找出超过阈值的规律，并说明每条背后有多少条记录，以及指回那些记录的链接。",
       "doesNot": "它不预测未来，也不会为了有话可说而编造规律。匹配的行少到只有几条时，它会告诉你依据不足。"
+    },
+    "presentations": {
+      "is": "幻灯片生成器：输入一段描述，输出一份演示。",
+      "does": "用你描述所用的语言为每张幻灯片撰写标题、要点和演讲者备注，从 Unsplash 找一张照片或放入你自己的照片，并把演示导出为 PowerPoint（.pptx）或 PDF。",
+      "doesNot": "它不绘制图表或表格，不挑选设计主题，也不生成图片——照片来自 Unsplash 或你自己。幻灯片不在这里编辑：下载 .pptx，在 PowerPoint 或 Keynote 里完成。"
     }
   },
   "helpCentre": {
@@ -3632,6 +3625,77 @@
       "output": "输出",
       "importedNote": "以前的笔记",
       "failed": "失败"
+    }
+  },
+  "presentations": {
+    "title": "演示文稿",
+    "description": "描述这份演示，获得幻灯片——可编辑的 PowerPoint 或 PDF，配图来自 Unsplash 或你自己的照片。",
+    "limits": {
+      "title": "它不做什么",
+      "no_charts": "不绘制图表或表格。一张幻灯片就是标题、要点和演讲者备注。",
+      "no_themes": "不挑选设计主题。演示是素净的，样式由你来定。",
+      "no_editing": "幻灯片不在这里编辑。下载 .pptx，在 PowerPoint、Keynote 或 LibreOffice 里完成。",
+      "no_generated_images": "不生成图片。照片来自 Unsplash 或你上传的图片。"
+    },
+    "form": {
+      "description": "这份演示讲什么？",
+      "descriptionPlaceholder": "向三位酒店经理做一场十分钟的推介，介绍我们面包店的餐饮配送服务：我们是谁、提供什么、价格，以及需要他们做什么……",
+      "slideCount": "幻灯片数",
+      "slides": "{count} 张幻灯片",
+      "imageSource": "配图",
+      "sources": {
+        "unsplash": "来自 Unsplash",
+        "own": "我自己的照片",
+        "none": "不用照片",
+        "unsplashHint": "免费图库照片，为每张需要配图的幻灯片匹配一张，并注明摄影师。",
+        "ownHint": "最多 {max} 张 JPEG 或 PNG 照片，按顺序放到需要配图的幻灯片上。",
+        "noneHint": "仅文字。",
+        "unsplashUnavailable": "此部署未配置 Unsplash，因此只能使用你自己的照片。"
+      },
+      "addPhotos": "添加照片",
+      "photosSelected": "{count} / {max}",
+      "remove": "移除",
+      "generate": "生成幻灯片",
+      "generating": "正在撰写演示……"
+    },
+    "result": {
+      "title": "你的演示",
+      "slidesCount": "{count} 张幻灯片",
+      "charged": "{credits} 积分",
+      "preparing": "准备中……",
+      "exportPptx": "下载 PowerPoint",
+      "exportPdf": "下载为 PDF",
+      "notes": "演讲者备注",
+      "noPhotoFound": "没有照片与需要配图的幻灯片匹配——这份演示只有文字。",
+      "photoBy": "照片：<author>{name}</author>，来自 <unsplash>Unsplash</unsplash>",
+      "layout": {
+        "title": "标题",
+        "bullets": "要点",
+        "section": "章节",
+        "quote": "引言",
+        "image": "照片"
+      }
+    },
+    "errors": {
+      "tooShort": "请先多说一点这份演示的内容。",
+      "tooLong": "超过了 {limit} 个字符。请描述演示本身，而不是整场演讲。",
+      "insufficient": "积分不足，无法生成这份演示。",
+      "rateLimited": "请求过多——请稍等一分钟再试。",
+      "unavailable": "无法连接 AI 服务。未产生任何扣费。",
+      "unusable": "模型返回的内容不是一份演示。试着换一种方式描述。",
+      "failed": "没有成功——请再试一次。",
+      "imageRejected": "仅支持 5 MB 以下的 JPEG 或 PNG，最多 {max} 张照片。",
+      "uploadFailed": "有一张照片无法上传。",
+      "exportFailed": "无法创建文件。"
+    },
+    "history": {
+      "title": "历史记录",
+      "empty": "这里还没有内容。",
+      "slides": "{count} 张幻灯片",
+      "failed": "失败",
+      "delete": "删除",
+      "deleteConfirm": "删除这份演示？此操作无法撤销。",
+      "noteFromBefore": "以前的笔记"
     }
   },
   "finance": {

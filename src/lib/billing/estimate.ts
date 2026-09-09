@@ -504,6 +504,34 @@ export const ACTION_PROFILES = {
     baseOutputChars: 1500,
     outputCharsPerInputChar: 2,
   },
+  // One presentation deck (api/presentations/generate) — V5 #21. One
+  // forced-tool call that returns every slide; no auxiliary call, because
+  // the deck's own first slide restates the brief and the person sees the
+  // whole result before anything else is spent.
+  //
+  // THE INPUT IS NOT THE BRIEF. A deck's cost is set by how many slides
+  // were asked for, not by how long the description is: a two-line brief
+  // for twenty slides costs ten times a two-line brief for two, and an
+  // estimator that read the brief alone would hold the same amount for
+  // both. So the call site passes deckEstimateInputChars() from
+  // lib/presentations/deck.ts — the brief's own characters plus
+  // SLIDE_OUTPUT_CHARS (1,000) per slide asked for — and the ratio of 1
+  // turns each slide's allowance back into expected output.
+  //
+  // That prices the per-slide allowance on BOTH sides of the call: as
+  // output (correct — that is what a slide is) and once more as input
+  // (an over-statement, since the brief is the only real input). At
+  // Sonnet's 3:15 input:output rate the over-statement is a fifth of the
+  // output figure, and it is in the safe direction: the hold is released
+  // at settlement, and a hold that is short is the failure a hold exists
+  // to prevent. The system prompt is measured, not guessed: the rules +
+  // conduct + checklist block is ~7,100 characters.
+  presentationGenerate: {
+    systemPromptTokens: 1800,
+    auxiliaryCalls: [],
+    baseOutputChars: 400,
+    outputCharsPerInputChar: 1,
+  },
 } as const;
 
 export type ActionProfileKey = keyof typeof ACTION_PROFILES;

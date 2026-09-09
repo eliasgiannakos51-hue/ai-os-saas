@@ -276,6 +276,10 @@ const LOCALE_ALLOWED = new Set([
   // "credits" is used verbatim in Greek — the same loanword the rest of the
   // Greek UI already uses ("Αγορά Credits", "Ιστορικό Credits").
   "el:credits.estimate.approx",
+  // V5 #21: the same loanword, on the deck's own receipt line ("{n}
+  // credits" under a generated presentation). Greek keeps "credits" as
+  // the other seven allowances in this block do.
+  "el:presentations.result.charged",
   // The same loanword, on the four credit-pack buttons under Billing.
   "el:settings.billing.creditsAmount",
   // Autonomous Agents (V3). Same loanword/cognate cases as everywhere else

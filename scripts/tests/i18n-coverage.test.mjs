@@ -863,7 +863,9 @@ checkTrue(
 // something to settle by quietly leaving it out of a table.
 const LEGAL_BASELINE = {
   "src/app/acceptable-use/page.tsx": 19,
-  "src/app/ai-transparency/page.tsx": 58,
+  // 58 -> 57: V5 #21 rewrote the presentations paragraph as one paragraph
+  // rather than two, which is one text node fewer.
+  "src/app/ai-transparency/page.tsx": 57,
   "src/app/cookies/page.tsx": 19,
   "src/app/privacy/page.tsx": 17,
   "src/app/terms/page.tsx": 10,
@@ -938,7 +940,18 @@ const OWNER_ONLY_BASELINE = {
 //   link-to-modal.tsx (1), danger-zone.tsx (1),
 //   password-change-form.tsx (1)
 //                               a button and four "error:" prefixes.
-const BARE_TEXT_BASELINE = { ...LEGAL_BASELINE, ...OWNER_ONLY_BASELINE };
+// AN ATTRIBUTION IS A FORMULA, NOT PROSE. The slide PDF (lib/pdf/deck.tsx)
+// credits an Unsplash photo as "Photo by <name> on Unsplash" — the wording
+// Unsplash's API guidelines ask for, and the same English line the Website
+// Builder writes into every generated site whatever language the site is
+// in (lib/website-image-placeholders.ts). The document is a file the
+// reader keeps rather than the interface, and its own language already
+// decides its font order; the credit stays in the form the photographer
+// is credited in everywhere else. Two words, counted, reason recorded.
+const ATTRIBUTION_BASELINE = {
+  "src/lib/pdf/deck.tsx": 2,
+};
+const BARE_TEXT_BASELINE = { ...LEGAL_BASELINE, ...OWNER_ONLY_BASELINE, ...ATTRIBUTION_BASELINE };
 
 const BASELINE_TOTAL = Object.values(BARE_TEXT_BASELINE).reduce((a, b) => a + b, 0);
 

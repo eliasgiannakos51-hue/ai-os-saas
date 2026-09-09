@@ -135,7 +135,7 @@
       "coding": "AI Coding",
       "dataAnalysis": "Data Analysis",
       "documents": "Documents",
-      "presentations": "Presentation notes",
+      "presentations": "Presentations",
       "campaigns": "Campaign notes",
       "analytics": "Analytics",
       "finance": "Finances",
@@ -207,7 +207,7 @@
       "images": "Keep track of images you are planning or have already made. It does not generate them.",
       "videos": "Keep track of videos you are planning or have already made. It does not generate them.",
       "coding": "Write, explain, fix, convert and test snippets of code. It does not run code or open a repository.",
-      "presentations": "Keep track of decks you are planning or have already made. It does not create slides.",
+      "presentations": "Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.",
       "home": "Your dashboard — activity, stats and quick actions.",
       "settings": "Account, billing, language and preferences.",
       "published": "Every site you have live on the web, with its traffic and version history",
@@ -382,8 +382,8 @@
         "description": "Create and edit video with AI."
       },
       "presentations": {
-        "title": "AI Presentations & Documents",
-        "description": "Generate polished decks and documents from your data."
+        "title": "AI Presentations",
+        "description": "Describe a deck and get editable slides — exported as PowerPoint or PDF, with photos from Unsplash or your own."
       },
       "marketingBuilder": {
         "title": "AI Marketing Campaign Builder",
@@ -2798,7 +2798,6 @@
       "roadmap": "Roadmap",
       "score": "Score",
       "sentiment": "Sentiment",
-      "slideCount": "Slide Count",
       "status": "Status",
       "strengths": "Strengths",
       "suggestedResponse": "Suggested Response",
@@ -2808,7 +2807,6 @@
       "targetAudience": "Target Audience",
       "taskName": "Task Name",
       "timeSaved": "Time Saved",
-      "title": "Title",
       "toolsNeeded": "Tools Needed",
       "topic": "Topic",
       "twitterThread": "Twitter Thread",
@@ -2827,13 +2825,10 @@
       "crossPlatform": "cross-platform",
       "desktop": "desktop",
       "done": "done",
-      "draft": "draft",
       "email": "email",
       "event": "event",
       "expense": "expense",
-      "final": "final",
       "inProgress": "in progress",
-      "inReview": "in review",
       "income": "income",
       "ios": "ios",
       "live": "live",
@@ -2868,7 +2863,6 @@
       "apps": "Delete this app? This can't be undone.",
       "images": "Delete this image? This can't be undone.",
       "videos": "Delete this video? This can't be undone.",
-      "presentations": "Delete this presentation note? This can't be undone.",
       "campaigns": "Delete this campaign? This can't be undone."
     },
     "empty": {
@@ -2952,11 +2946,6 @@
         "why": "The brief for each video and how far it has got, so a shoot list is never something you keep in your head. It does not create videos.",
         "example": "A 30-second product demo"
       },
-      "presentations": {
-        "title": "A place to keep track of presentations",
-        "why": "Note the decks you are planning or have already given — this page does not generate slides for you. Use the button above to add one.",
-        "example": "Investor deck for the seed round"
-      },
       "campaigns": {
         "title": "Every campaign, and what it cost",
         "why": "Channel, budget and status side by side, so the next budget decision is made from numbers rather than from feel. It does not run campaigns.",
@@ -2980,7 +2969,6 @@
       "apps": "New app",
       "images": "New image",
       "videos": "New video",
-      "presentations": "New presentation note",
       "campaigns": "New campaign"
     }
   },
@@ -3232,6 +3220,11 @@
       "is": "Patterns found in your own entries by code, not by a model guessing.",
       "does": "Counts your rows, finds patterns that clear a threshold, and says each one with the number of entries behind it and a link to them.",
       "doesNot": "It does not forecast the future, and it will not invent a pattern to have something to say. Fewer than a handful of matching rows and it tells you there is not enough to go on."
+    },
+    "presentations": {
+      "is": "A slide generator: a brief in, a deck of slides out.",
+      "does": "Writes the title, the bullets and the speaker notes for each slide in the language of your brief, finds a photo on Unsplash or places yours, and exports the deck as PowerPoint (.pptx) or PDF.",
+      "doesNot": "It does not draw charts or tables, does not pick a design theme, and does not generate images — photos come from Unsplash or from you. The slides are not edited here: download the .pptx and finish in PowerPoint or Keynote."
     }
   },
   "helpCentre": {
@@ -3632,6 +3625,77 @@
       "output": "Output",
       "importedNote": "note from before",
       "failed": "failed"
+    }
+  },
+  "presentations": {
+    "title": "Presentations",
+    "description": "Describe the deck and get the slides — editable PowerPoint or PDF, with photos from Unsplash or your own.",
+    "limits": {
+      "title": "What this does NOT do",
+      "no_charts": "It draws no charts or tables. A slide is a title, bullets and speaker notes.",
+      "no_themes": "It picks no design theme. The deck is plain and yours to style.",
+      "no_editing": "The slides are not edited here. Download the .pptx and finish it in PowerPoint, Keynote or LibreOffice.",
+      "no_generated_images": "It generates no images. Photos come from Unsplash or from the ones you upload."
+    },
+    "form": {
+      "description": "What is the presentation about?",
+      "descriptionPlaceholder": "A ten-minute pitch of our bakery's catering service to three hotel managers: who we are, what we deliver, prices, and what we need from them…",
+      "slideCount": "Slides",
+      "slides": "{count, plural, one {# slide} other {# slides}}",
+      "imageSource": "Pictures",
+      "sources": {
+        "unsplash": "From Unsplash",
+        "own": "My own photos",
+        "none": "No photos",
+        "unsplashHint": "Free stock photos, matched to each slide that asks for one and credited to the photographer.",
+        "ownHint": "Up to {max} JPEG or PNG photos, placed in order on the slides that ask for one.",
+        "noneHint": "Text only.",
+        "unsplashUnavailable": "Unsplash is not configured on this deployment, so photos can only be your own."
+      },
+      "addPhotos": "Add photos",
+      "photosSelected": "{count} of {max}",
+      "remove": "Remove",
+      "generate": "Write the slides",
+      "generating": "Writing the deck…"
+    },
+    "result": {
+      "title": "Your deck",
+      "slidesCount": "{count, plural, one {# slide} other {# slides}}",
+      "charged": "{credits, plural, one {# credit} other {# credits}}",
+      "preparing": "Preparing…",
+      "exportPptx": "Download PowerPoint",
+      "exportPdf": "Download as PDF",
+      "notes": "Speaker notes",
+      "noPhotoFound": "No photo matched the slides that asked for one — the deck is text only.",
+      "photoBy": "Photo by <author>{name}</author> on <unsplash>Unsplash</unsplash>",
+      "layout": {
+        "title": "Title",
+        "bullets": "Points",
+        "section": "Section",
+        "quote": "Quote",
+        "image": "Photo"
+      }
+    },
+    "errors": {
+      "tooShort": "Say a little more about the presentation first.",
+      "tooLong": "That's longer than {limit} characters. Describe the deck, not the whole talk.",
+      "insufficient": "Not enough credits for this deck.",
+      "rateLimited": "Too many requests — please wait a minute and try again.",
+      "unavailable": "The AI service couldn't be reached. Nothing was charged.",
+      "unusable": "The model returned something that wasn't a deck. Try describing it differently.",
+      "failed": "That didn't work — try again.",
+      "imageRejected": "Only JPEG or PNG under 5 MB, and at most {max} photos.",
+      "uploadFailed": "A photo could not be uploaded.",
+      "exportFailed": "The file could not be created."
+    },
+    "history": {
+      "title": "History",
+      "empty": "Nothing here yet.",
+      "slides": "{count, plural, one {# slide} other {# slides}}",
+      "failed": "failed",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this presentation? This can't be undone.",
+      "noteFromBefore": "note from before"
     }
   },
   "finance": {

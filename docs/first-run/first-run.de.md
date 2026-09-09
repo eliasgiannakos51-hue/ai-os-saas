@@ -1,6 +1,6 @@
 # The first run — de
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **598 strings**. The whole product is 2937, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **598 strings**. The whole product is 2985, which is why this file exists.
 
 **Start with tier 1. It is 44 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 364 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -182,9 +182,9 @@ Muster in deinen eigenen Einträgen, jeweils mit der Zahl der Einträge dahinter
 
 **`sidebar.hints.presentations`**
 
-> EN — Keep track of decks you are planning or have already made. It does not create slides.
+> EN — Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.
 
-Behalten Sie geplante oder bereits erstellte Präsentationen im Blick. Erstellt keine Folien.
+Beschreibe eine Präsentation und erhalte die Folien – PowerPoint oder PDF, mit Fotos von Unsplash oder deinen eigenen. Es zeichnet keine Diagramme.
 
 **`sidebar.hints.published`**
 
@@ -1852,9 +1852,9 @@ Muster
 
 **`sidebar.items.presentations`**
 
-> EN — Presentation notes
+> EN — Presentations
 
-Präsentationsnotizen
+Präsentationen
 
 **`sidebar.items.products`**
 

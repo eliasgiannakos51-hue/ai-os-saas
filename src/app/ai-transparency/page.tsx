@@ -74,6 +74,11 @@ export function generateMetadata(): Promise<Metadata> {
  *      tell people the truth about the AI would have been the one place
  *      it did real damage.
  *
+ *      V5 #21 BUILT THE GENERATOR, and the paragraph below was rewritten
+ *      to what it actually does — one call writes the slides — rather
+ *      than back to the August sentence: it still does not research and
+ *      it still cites nothing.
+ *
  * Two features that did not exist in August are now here (AI Coding and
  * Data Analysis, both calling lib/ai/providers/complete.ts), and section
  * 7 is new: the checks that run on model output, which the August draft
@@ -197,10 +202,11 @@ export default function AiTransparencyPage() {
           states that an agent generated it.
         </p>
         <p>
-          <strong>Presentation notes, and the other note modules</strong>, use no AI at all.
-          They are tables you fill in yourself. The module was called
-          &quot;Presentations&quot; until it was renamed, because the old name promised a
-          slide generator that does not exist.
+          <strong>Presentations</strong>: one model call writes the slides from your brief —
+          titles, bullets and speaker notes — and says in the notes what it could not know.
+          It does not research and it cites nothing; photos come from Unsplash or from your
+          own uploads, none are generated. The note modules (Images, Videos, Apps, Website
+          plans, Campaigns) use no AI at all: they are tables you fill in yourself.
         </p>
       </LegalSection>
 

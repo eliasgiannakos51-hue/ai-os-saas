@@ -180,6 +180,11 @@ const DECLARED = {
     billing: "settled",
     note: "V4 #22 Template library. ONE forced-tool-use call on the smallest model (Haiku), reached from api/agents/templates/adopt. It fills a template's {subject} slot from the user's own sentence and names the agent in their language — it never writes the task, the schedule or the search flag, all of which come from the template. That is what makes adopting genuinely cheaper than building rather than a discount on the same work: the full builder is a Sonnet call deciding ten fields, this is a Haiku call deciding four, and the margin multiplier is identical (agent_build, via ACTION_TO_FEATURE). Settled by the adopt route AFTER the agent row exists, so a fill whose insert then failed charges nothing; a call that threw before any response records nothing on the accumulator and the reservation is released instead. NO call at all — and nothing charged — when the user typed the subject themselves or ANTHROPIC_API_KEY is absent, which is why the route creates the agent either way.",
   },
+  "src/lib/presentations/generate.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V5 #21 Presentations. ONE forced-tool-use call that returns the whole deck, reached from api/presentations/generate and reserved there against the presentationGenerate profile (sized per slide asked for, see estimate.ts). Recorded onto the route's accumulator BEFORE the deck is parsed, so a response that came back unusable still SETTLES — the tokens were spent — and only the Stop button and a provider failure release the hold. Unsplash searches and the image bytes an export embeds are not model calls and cost no credits.",
+  },
   "src/lib/lead-classification.ts": {
     calls: 1,
     billing: "settled",

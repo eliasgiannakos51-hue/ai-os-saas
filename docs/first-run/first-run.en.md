@@ -1,6 +1,6 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **598 strings**. The whole product is 2937, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **598 strings**. The whole product is 2985, which is why this file exists.
 
 **Start with tier 1. It is 44 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 364 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -158,7 +158,7 @@ Patterns found in your own rows, each with the number of entries it rests on and
 **`sidebar.hints.presentations`**
 
 
-Keep track of decks you are planning or have already made. It does not create slides.
+Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.
 
 **`sidebar.hints.published`**
 
@@ -1552,7 +1552,7 @@ Predictions
 **`sidebar.items.presentations`**
 
 
-Presentation notes
+Presentations
 
 **`sidebar.items.products`**
 

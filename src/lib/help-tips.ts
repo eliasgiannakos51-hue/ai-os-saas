@@ -51,7 +51,7 @@
  * So there are two shared module tips, both attached where the pages are
  * rendered rather than page by page:
  *
- *   trackingModule   the six BuildModulePage logs — no AI anywhere in them
+ *   trackingModule   the five BuildModulePage logs — no AI anywhere in them
  *   businessModule   the twelve business modules and Ideas — the AI reads
  *                    these, but it never writes them
  *
@@ -222,18 +222,29 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that starring something copies or moves it",
   },
   {
-    // ONE ENTRY, SIX PAGES. Apps, Images, Videos, Website plans, Campaigns
-    // and Presentations all render through BuildModulePage, so the "?" is
-    // attached there rather than six times. Their file is the one that
+    // ONE ENTRY, FIVE PAGES. Apps, Images, Videos, Website plans and
+    // Campaigns all render through BuildModulePage, so the "?" is
+    // attached there rather than five times. Their file is the one that
     // declares them logs: build-modules.ts says every entry in it "is a
     // LOG: a table of rows the user types by hand, with no AI call anywhere
     // in it" — and "Images" reads as a generator to everybody who has not
-    // read that file.
+    // read that file. Presentations was the sixth until V5 #21, when it
+    // became one and got the entry below.
     id: "trackingModule",
     file: "src/components/modules/build-module-page.tsx",
     keyPrefix: "help.trackingModule",
     corrects:
-      "that a page called Images, Videos or Presentations generates them",
+      "that a page called Images or Videos generates them",
+  },
+  {
+    // THE OPPOSITE MISTAKE TO trackingModule's, on the page that used to
+    // be one of them. A generator that writes slides reads as a designer
+    // that finishes decks; the tip says where the edge is.
+    id: "presentations",
+    file: "src/app/dashboard/presentations/page.tsx",
+    keyPrefix: "help.presentations",
+    corrects:
+      "that it designs a themed deck with charts, or that the slides are edited here rather than in PowerPoint",
   },
   {
     id: "costs",

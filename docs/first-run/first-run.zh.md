@@ -1,6 +1,6 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **598 strings**. The whole product is 2937, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **598 strings**. The whole product is 2985, which is why this file exists.
 
 **Start with tier 1. It is 44 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 364 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -182,9 +182,9 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 **`sidebar.hints.presentations`**
 
-> EN — Keep track of decks you are planning or have already made. It does not create slides.
+> EN — Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.
 
-记录你正在筹划或已经做好的演示文稿。它不会生成幻灯片。
+描述一份演示并获得幻灯片——PowerPoint 或 PDF，配图来自 Unsplash 或你自己的照片。它不绘制图表。
 
 **`sidebar.hints.published`**
 
@@ -1852,9 +1852,9 @@ AI 编程
 
 **`sidebar.items.presentations`**
 
-> EN — Presentation notes
+> EN — Presentations
 
-演示文稿笔记
+演示文稿
 
 **`sidebar.items.products`**
 

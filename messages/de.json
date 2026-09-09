@@ -135,7 +135,7 @@
       "coding": "Programmieren mit KI",
       "dataAnalysis": "Datenanalyse",
       "documents": "Dokumente",
-      "presentations": "Präsentationsnotizen",
+      "presentations": "Präsentationen",
       "campaigns": "Kampagnen-Notizen",
       "analytics": "Analytik",
       "finance": "Finanzen",
@@ -207,7 +207,7 @@
       "images": "Behalten Sie geplante oder bereits erstellte Bilder im Blick. Erzeugt sie nicht.",
       "videos": "Behalten Sie geplante oder bereits erstellte Videos im Blick. Erzeugt sie nicht.",
       "coding": "Codeausschnitte schreiben, erklären, korrigieren, umwandeln und testen. Führt keinen Code aus und öffnet kein Repository.",
-      "presentations": "Behalten Sie geplante oder bereits erstellte Präsentationen im Blick. Erstellt keine Folien.",
+      "presentations": "Beschreibe eine Präsentation und erhalte die Folien – PowerPoint oder PDF, mit Fotos von Unsplash oder deinen eigenen. Es zeichnet keine Diagramme.",
       "home": "Ihr Dashboard — Aktivität, Statistiken und Schnellaktionen.",
       "settings": "Konto, Abrechnung, Sprache und Einstellungen.",
       "published": "Alle Ihre Live-Seiten, mit Zugriffen und Versionsverlauf",
@@ -382,8 +382,8 @@
         "description": "Erstelle und bearbeite Videos mit KI."
       },
       "presentations": {
-        "title": "KI-Präsentationen & Dokumente",
-        "description": "Erzeuge ausgefeilte Präsentationen und Dokumente aus deinen Daten."
+        "title": "KI-Präsentationen",
+        "description": "Beschreibe eine Präsentation und erhalte bearbeitbare Folien – exportiert als PowerPoint oder PDF, mit Fotos von Unsplash oder deinen eigenen."
       },
       "marketingBuilder": {
         "title": "KI-Marketingkampagnen-Builder",
@@ -2798,7 +2798,6 @@
       "roadmap": "Fahrplan",
       "score": "Bewertung",
       "sentiment": "Stimmung",
-      "slideCount": "Anzahl der Folien",
       "status": "Status",
       "strengths": "Stärken",
       "suggestedResponse": "Vorgeschlagene Antwort",
@@ -2808,7 +2807,6 @@
       "targetAudience": "Zielgruppe",
       "taskName": "Name der Aufgabe",
       "timeSaved": "Gesparte Zeit",
-      "title": "Titel",
       "toolsNeeded": "Benötigte Werkzeuge",
       "topic": "Thema",
       "twitterThread": "Twitter-Thread",
@@ -2827,13 +2825,10 @@
       "crossPlatform": "plattformübergreifend",
       "desktop": "Desktop",
       "done": "fertig",
-      "draft": "Entwurf",
       "email": "E-Mail",
       "event": "Veranstaltung",
       "expense": "Ausgabe",
-      "final": "final",
       "inProgress": "in Arbeit",
-      "inReview": "in Prüfung",
       "income": "Einnahme",
       "ios": "iOS",
       "live": "live",
@@ -2868,7 +2863,6 @@
       "apps": "Diese App löschen? Das lässt sich nicht rückgängig machen.",
       "images": "Dieses Bild löschen? Das lässt sich nicht rückgängig machen.",
       "videos": "Dieses Video löschen? Das lässt sich nicht rückgängig machen.",
-      "presentations": "Diese Präsentationsnotiz löschen? Das lässt sich nicht rückgängig machen.",
       "campaigns": "Diese Kampagne löschen? Das lässt sich nicht rückgängig machen."
     },
     "empty": {
@@ -2952,11 +2946,6 @@
         "why": "Das Briefing je Video und wie weit es ist — damit eine Drehliste nie nur in deinem Kopf existiert. Erzeugt werden hier keine.",
         "example": "30-Sekunden-Produktdemo"
       },
-      "presentations": {
-        "title": "Ein Ort, um Präsentationen im Blick zu behalten",
-        "why": "Notiere die Decks, die du planst oder schon gehalten hast — diese Seite erstellt keine Folien für dich. Nutze den Button oben, um eines hinzuzufügen.",
-        "example": "Investoren-Deck für die Seed-Runde"
-      },
       "campaigns": {
         "title": "Jede Kampagne und was sie gekostet hat",
         "why": "Kanal, Budget und Status nebeneinander — damit die nächste Budgetentscheidung aus Zahlen entsteht und nicht aus Gefühl. Ausgeführt werden sie hier nicht.",
@@ -2980,7 +2969,6 @@
       "apps": "Neue App",
       "images": "Neues Bild",
       "videos": "Neues Video",
-      "presentations": "Neue Präsentationsnotiz",
       "campaigns": "Neue Kampagne"
     }
   },
@@ -3232,6 +3220,11 @@
       "is": "Muster, die Code in deinen eigenen Einträgen findet — kein Modell, das rät.",
       "does": "Zählt deine Zeilen, findet Muster oberhalb einer Schwelle und nennt jedes mit der Zahl der Einträge dahinter und einem Link darauf.",
       "doesNot": "Es sagt die Zukunft nicht voraus und erfindet kein Muster, nur um etwas zu sagen. Bei weniger als einer Handvoll passender Zeilen sagt es, dass die Grundlage fehlt."
+    },
+    "presentations": {
+      "is": "Ein Folien-Generator: eine Beschreibung rein, eine Präsentation raus.",
+      "does": "Schreibt Titel, Stichpunkte und Sprechernotizen jeder Folie in der Sprache deiner Beschreibung, findet ein Foto auf Unsplash oder setzt deine eigenen ein und exportiert die Präsentation als PowerPoint (.pptx) oder PDF.",
+      "doesNot": "Es zeichnet keine Diagramme oder Tabellen, wählt kein Design-Thema und erzeugt keine Bilder – Fotos kommen von Unsplash oder von dir. Die Folien werden hier nicht bearbeitet: lade die .pptx herunter und stelle sie in PowerPoint oder Keynote fertig."
     }
   },
   "helpCentre": {
@@ -3632,6 +3625,77 @@
       "output": "Ausgabe",
       "importedNote": "frühere Notiz",
       "failed": "fehlgeschlagen"
+    }
+  },
+  "presentations": {
+    "title": "Präsentationen",
+    "description": "Beschreibe die Präsentation und erhalte die Folien – bearbeitbar als PowerPoint oder PDF, mit Fotos von Unsplash oder deinen eigenen.",
+    "limits": {
+      "title": "Was es NICHT tut",
+      "no_charts": "Es zeichnet keine Diagramme oder Tabellen. Eine Folie ist ein Titel, Stichpunkte und Sprechernotizen.",
+      "no_themes": "Es wählt kein Design-Thema. Die Präsentation ist schlicht, das Styling ist deins.",
+      "no_editing": "Die Folien werden hier nicht bearbeitet. Lade die .pptx herunter und stelle sie in PowerPoint, Keynote oder LibreOffice fertig.",
+      "no_generated_images": "Es erzeugt keine Bilder. Fotos kommen von Unsplash oder aus deinen Uploads."
+    },
+    "form": {
+      "description": "Worum geht es in der Präsentation?",
+      "descriptionPlaceholder": "Ein zehnminütiger Pitch des Catering-Angebots unserer Bäckerei vor drei Hotelmanagern: wer wir sind, was wir liefern, Preise und was wir von ihnen brauchen…",
+      "slideCount": "Folien",
+      "slides": "{count, plural, one {# Folie} other {# Folien}}",
+      "imageSource": "Bilder",
+      "sources": {
+        "unsplash": "Von Unsplash",
+        "own": "Meine eigenen Fotos",
+        "none": "Keine Fotos",
+        "unsplashHint": "Kostenlose Stockfotos, passend zu jeder Folie, die eines verlangt, mit Nennung des Fotografen.",
+        "ownHint": "Bis zu {max} JPEG- oder PNG-Fotos, der Reihe nach auf die Folien gesetzt, die eines verlangen.",
+        "noneHint": "Nur Text.",
+        "unsplashUnavailable": "Unsplash ist auf dieser Installation nicht eingerichtet, Fotos können daher nur deine eigenen sein."
+      },
+      "addPhotos": "Fotos hinzufügen",
+      "photosSelected": "{count} von {max}",
+      "remove": "Entfernen",
+      "generate": "Folien schreiben",
+      "generating": "Präsentation wird geschrieben…"
+    },
+    "result": {
+      "title": "Deine Präsentation",
+      "slidesCount": "{count, plural, one {# Folie} other {# Folien}}",
+      "charged": "{credits, plural, one {# Credit} other {# Credits}}",
+      "preparing": "Wird vorbereitet…",
+      "exportPptx": "Als PowerPoint herunterladen",
+      "exportPdf": "Als PDF herunterladen",
+      "notes": "Sprechernotizen",
+      "noPhotoFound": "Kein Foto passte zu den Folien, die eines verlangten – die Präsentation ist nur Text.",
+      "photoBy": "Foto von <author>{name}</author> auf <unsplash>Unsplash</unsplash>",
+      "layout": {
+        "title": "Titel",
+        "bullets": "Stichpunkte",
+        "section": "Abschnitt",
+        "quote": "Zitat",
+        "image": "Foto"
+      }
+    },
+    "errors": {
+      "tooShort": "Sag zuerst etwas mehr über die Präsentation.",
+      "tooLong": "Das sind mehr als {limit} Zeichen. Beschreibe die Präsentation, nicht den ganzen Vortrag.",
+      "insufficient": "Nicht genug Credits für diese Präsentation.",
+      "rateLimited": "Zu viele Anfragen – warte eine Minute und versuche es erneut.",
+      "unavailable": "Der KI-Dienst war nicht erreichbar. Nichts wurde berechnet.",
+      "unusable": "Das Modell hat etwas zurückgegeben, das keine Präsentation war. Beschreibe sie anders.",
+      "failed": "Das hat nicht geklappt – versuche es erneut.",
+      "imageRejected": "Nur JPEG oder PNG unter 5 MB, und höchstens {max} Fotos.",
+      "uploadFailed": "Ein Foto konnte nicht hochgeladen werden.",
+      "exportFailed": "Die Datei konnte nicht erstellt werden."
+    },
+    "history": {
+      "title": "Verlauf",
+      "empty": "Noch nichts hier.",
+      "slides": "{count, plural, one {# Folie} other {# Folien}}",
+      "failed": "fehlgeschlagen",
+      "delete": "Löschen",
+      "deleteConfirm": "Diese Präsentation löschen? Das lässt sich nicht rückgängig machen.",
+      "noteFromBefore": "Notiz von früher"
     }
   },
   "finance": {

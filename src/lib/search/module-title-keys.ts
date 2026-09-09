@@ -29,6 +29,10 @@ export const MODULE_TITLE_KEYS: Record<string, string> = {
   // languages, which is the one thing this file exists to prevent.
   coding: "sidebar.items.coding",
   "data-analysis": "sidebar.items.dataAnalysis",
+  // THE THIRD, V5 #21. Presentations left BUILD_MODULES the same way and
+  // KEPT its table, so the search index's ai_presentations rows still
+  // carry this slug and still need a name for their filter chip.
+  presentations: "sidebar.items.presentations",
   ...Object.fromEntries(
     [...MODULES, ...BUILD_MODULES].map((module) => [module.slug, module.titleKey])
   ),

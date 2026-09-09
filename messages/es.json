@@ -135,7 +135,7 @@
       "coding": "Programación con IA",
       "dataAnalysis": "Análisis de datos",
       "documents": "Documentos",
-      "presentations": "Notas de presentación",
+      "presentations": "Presentaciones",
       "campaigns": "Notas de campañas",
       "analytics": "Analítica",
       "finance": "Finanzas",
@@ -207,7 +207,7 @@
       "images": "Lleva el control de las imágenes que planeas o ya has hecho. No las genera.",
       "videos": "Lleva el control de los vídeos que planeas o ya has hecho. No los genera.",
       "coding": "Escribe, explica, corrige, convierte y prueba fragmentos de código. No ejecuta código ni abre un repositorio.",
-      "presentations": "Lleva el control de las presentaciones que planeas o ya has hecho. No crea diapositivas.",
+      "presentations": "Describe una presentación y obtén las diapositivas: PowerPoint o PDF, con fotos de Unsplash o tuyas. No dibuja gráficos.",
       "home": "Tu panel: actividad, estadísticas y acciones rápidas.",
       "settings": "Cuenta, facturación, idioma y preferencias.",
       "published": "Todos tus sitios en vivo, con su tráfico y su historial de versiones",
@@ -382,8 +382,8 @@
         "description": "Crea y edita video con IA."
       },
       "presentations": {
-        "title": "Presentaciones y documentos con IA",
-        "description": "Genera presentaciones y documentos pulidos a partir de tus datos."
+        "title": "Presentaciones con IA",
+        "description": "Describe una presentación y obtén diapositivas editables, exportadas como PowerPoint o PDF, con fotos de Unsplash o tuyas."
       },
       "marketingBuilder": {
         "title": "Creador de campañas de marketing con IA",
@@ -2798,7 +2798,6 @@
       "roadmap": "Hoja de ruta",
       "score": "Puntuación",
       "sentiment": "Sentimiento",
-      "slideCount": "Número de diapositivas",
       "status": "Estado",
       "strengths": "Fortalezas",
       "suggestedResponse": "Respuesta sugerida",
@@ -2808,7 +2807,6 @@
       "targetAudience": "Público objetivo",
       "taskName": "Nombre de la tarea",
       "timeSaved": "Tiempo ahorrado",
-      "title": "Título",
       "toolsNeeded": "Herramientas necesarias",
       "topic": "Tema",
       "twitterThread": "Hilo de Twitter",
@@ -2827,13 +2825,10 @@
       "crossPlatform": "multiplataforma",
       "desktop": "escritorio",
       "done": "hecho",
-      "draft": "borrador",
       "email": "correo",
       "event": "evento",
       "expense": "gasto",
-      "final": "final",
       "inProgress": "en curso",
-      "inReview": "en revisión",
       "income": "ingreso",
       "ios": "iOS",
       "live": "publicado",
@@ -2868,7 +2863,6 @@
       "apps": "¿Eliminar esta aplicación? No se puede deshacer.",
       "images": "¿Eliminar esta imagen? No se puede deshacer.",
       "videos": "¿Eliminar este vídeo? No se puede deshacer.",
-      "presentations": "¿Eliminar esta nota de presentación? No se puede deshacer.",
       "campaigns": "¿Eliminar esta campaña? No se puede deshacer."
     },
     "empty": {
@@ -2952,11 +2946,6 @@
         "why": "El resumen de cada vídeo y hasta dónde ha llegado, para que el plan de rodaje nunca esté solo en su cabeza. No crea vídeos.",
         "example": "Demo del producto de 30 segundos"
       },
-      "presentations": {
-        "title": "Un sitio para llevar el control de sus presentaciones",
-        "why": "Anote las presentaciones que prepara o que ya ha dado: esta página no genera diapositivas por usted. Use el botón de arriba para añadir una.",
-        "example": "Presentación para inversores de la ronda semilla"
-      },
       "campaigns": {
         "title": "Cada campaña y lo que costó",
         "why": "Canal, presupuesto y estado uno al lado del otro, para que la próxima decisión de presupuesto salga de números y no de intuición. No ejecuta campañas.",
@@ -2980,7 +2969,6 @@
       "apps": "Nueva aplicación",
       "images": "Nueva imagen",
       "videos": "Nuevo vídeo",
-      "presentations": "Nueva nota de presentación",
       "campaigns": "Nueva campaña"
     }
   },
@@ -3232,6 +3220,11 @@
       "is": "Patrones que encuentra el código en tus propias entradas, no un modelo adivinando.",
       "does": "Cuenta tus filas, encuentra patrones que superan un umbral, y dice cada uno con el número de entradas detrás y un enlace a ellas.",
       "doesNot": "No predice el futuro ni inventará un patrón por tener algo que decir. Con menos de un puñado de filas coincidentes, te dice que no hay base suficiente."
+    },
+    "presentations": {
+      "is": "Un generador de diapositivas: entra una descripción, sale una presentación.",
+      "does": "Escribe el título, los puntos y las notas del orador de cada diapositiva en el idioma de tu descripción, busca una foto en Unsplash o coloca las tuyas, y exporta la presentación como PowerPoint (.pptx) o PDF.",
+      "doesNot": "No dibuja gráficos ni tablas, no elige un tema de diseño y no genera imágenes: las fotos vienen de Unsplash o de ti. Las diapositivas no se editan aquí: descarga el .pptx y termínalo en PowerPoint o Keynote."
     }
   },
   "helpCentre": {
@@ -3632,6 +3625,77 @@
       "output": "Salida",
       "importedNote": "nota anterior",
       "failed": "falló"
+    }
+  },
+  "presentations": {
+    "title": "Presentaciones",
+    "description": "Describe la presentación y obtén las diapositivas: PowerPoint o PDF editable, con fotos de Unsplash o tuyas.",
+    "limits": {
+      "title": "Lo que NO hace",
+      "no_charts": "No dibuja gráficos ni tablas. Una diapositiva es un título, puntos y notas del orador.",
+      "no_themes": "No elige un tema de diseño. La presentación es sencilla y el estilo lo pones tú.",
+      "no_editing": "Las diapositivas no se editan aquí. Descarga el .pptx y termínalo en PowerPoint, Keynote o LibreOffice.",
+      "no_generated_images": "No genera imágenes. Las fotos vienen de Unsplash o de las que subes."
+    },
+    "form": {
+      "description": "¿De qué trata la presentación?",
+      "descriptionPlaceholder": "Una presentación de diez minutos del servicio de catering de nuestra panadería a tres directores de hotel: quiénes somos, qué entregamos, precios y qué necesitamos de ellos…",
+      "slideCount": "Diapositivas",
+      "slides": "{count, plural, one {# diapositiva} other {# diapositivas}}",
+      "imageSource": "Imágenes",
+      "sources": {
+        "unsplash": "De Unsplash",
+        "own": "Mis propias fotos",
+        "none": "Sin fotos",
+        "unsplashHint": "Fotos de stock gratuitas, elegidas para cada diapositiva que pide una y con crédito al fotógrafo.",
+        "ownHint": "Hasta {max} fotos JPEG o PNG, colocadas en orden en las diapositivas que piden una.",
+        "noneHint": "Solo texto.",
+        "unsplashUnavailable": "Unsplash no está configurado en esta instalación, así que las fotos solo pueden ser tuyas."
+      },
+      "addPhotos": "Añadir fotos",
+      "photosSelected": "{count} de {max}",
+      "remove": "Quitar",
+      "generate": "Escribir las diapositivas",
+      "generating": "Escribiendo la presentación…"
+    },
+    "result": {
+      "title": "Tu presentación",
+      "slidesCount": "{count, plural, one {# diapositiva} other {# diapositivas}}",
+      "charged": "{credits, plural, one {# crédito} other {# créditos}}",
+      "preparing": "Preparando…",
+      "exportPptx": "Descargar PowerPoint",
+      "exportPdf": "Descargar como PDF",
+      "notes": "Notas del orador",
+      "noPhotoFound": "Ninguna foto coincidió con las diapositivas que pedían una: la presentación es solo texto.",
+      "photoBy": "Foto de <author>{name}</author> en <unsplash>Unsplash</unsplash>",
+      "layout": {
+        "title": "Título",
+        "bullets": "Puntos",
+        "section": "Sección",
+        "quote": "Cita",
+        "image": "Foto"
+      }
+    },
+    "errors": {
+      "tooShort": "Cuenta un poco más sobre la presentación primero.",
+      "tooLong": "Supera los {limit} caracteres. Describe la presentación, no toda la charla.",
+      "insufficient": "No hay créditos suficientes para esta presentación.",
+      "rateLimited": "Demasiadas solicitudes: espera un minuto y vuelve a intentarlo.",
+      "unavailable": "No se pudo contactar con el servicio de IA. No se cobró nada.",
+      "unusable": "El modelo devolvió algo que no era una presentación. Prueba a describirla de otra forma.",
+      "failed": "No ha funcionado: inténtalo de nuevo.",
+      "imageRejected": "Solo JPEG o PNG de menos de 5 MB, y como máximo {max} fotos.",
+      "uploadFailed": "No se pudo subir una foto.",
+      "exportFailed": "No se pudo crear el archivo."
+    },
+    "history": {
+      "title": "Historial",
+      "empty": "Aún no hay nada.",
+      "slides": "{count, plural, one {# diapositiva} other {# diapositivas}}",
+      "failed": "fallida",
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Eliminar esta presentación? No se puede deshacer.",
+      "noteFromBefore": "nota de antes"
     }
   },
   "finance": {

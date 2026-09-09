@@ -277,6 +277,7 @@ const FEATURES = [
   "agent_run", "scheduled_agent_run", "ask_ai_record", "text_action",
   "weekly_reflection", "import_map", "import_paste", "insight_narrate",
   "file_ask", "deep_research", "research_plan", "lead_classification",
+  "code_assist", "presentation_generate",
 ];
 // Sizes from a two-word message to a 1M-token monster context.
 const SIZES = [

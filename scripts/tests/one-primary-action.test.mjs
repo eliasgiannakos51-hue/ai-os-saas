@@ -279,7 +279,9 @@ const BASELINE = {
   // cost-estimate.tsx is this check — that module also exports
   // LargeActionConfirm, whose modal button would have made the page two.
   "dashboard/predictions/page.tsx": 1,
-  "dashboard/presentations/page.tsx": 4,
+  // V5 #21: a generator with one filled button (Write the slides) instead
+  // of the GenericList form the tracker drew.
+  "dashboard/presentations/page.tsx": 2,
   "dashboard/product-workflow/page.tsx": 4,
   "dashboard/published/page.tsx": 1,
   "dashboard/reflection/page.tsx": 1,

@@ -129,6 +129,14 @@ const CLASSIFIED = {
     // no-button outcome as a confident "none". Nobody is shown a severed
     // sentence because nobody is shown a sentence.
     "src/app/api/transitions/detect/route.ts",
+    // V5 #21. 8,000 tokens for one forced tool call whose answer is the
+    // whole deck (~5,000 at the twenty-slide ceiling). A cut reply is
+    // refused BY NAME: generate.ts reads stop_reason and returns
+    // "unusable" on max_tokens rather than parsing whatever partial
+    // tool_use input survived — a deck missing its last slides would
+    // otherwise read as a short deck, which is the severed deliverable
+    // this file exists to stop, wearing a structured shape.
+    "src/lib/presentations/generate.ts",
   ],
   internal: [
     "src/lib/chat/memory.ts",

@@ -87,6 +87,20 @@ export const EXTRA_FAVORITABLE: FavoritableConfig[] = [
     hrefFor: (id) => `/dashboard/mission?mission=${encodeURIComponent(id)}`,
   },
   {
+    // V5 #21. Presentations left build-modules.ts — and therefore
+    // LINKABLE_MODULES, which the thirteen entries above are derived from
+    // — the day it became a generator. Its table did not move: a starred
+    // note from the old form and a starred deck from the new one are both
+    // rows of ai_presentations, and both still have to open ON that row.
+    // `?record=` is read by app/dashboard/presentations/page.tsx, which
+    // selects the deck or lists the note first.
+    table: "ai_presentations",
+    slug: "presentations",
+    titleKey: "sidebar.items.presentations",
+    headlineKey: "title",
+    hrefFor: (id) => `/dashboard/presentations?record=${encodeURIComponent(id)}`,
+  },
+  {
     table: "user_documents",
     slug: "documents",
     titleKey: "sidebar.items.documents",

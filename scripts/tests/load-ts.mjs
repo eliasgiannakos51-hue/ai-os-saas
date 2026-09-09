@@ -303,6 +303,42 @@ export async function loadTs(entry) {
  * substituted: only `server-only`, a marker package with no runtime API,
  * is dropped.
  */
+/**
+ * Externals kept, NOTHING WRITTEN.
+ *
+ * loadTsWithDeps above writes its bundle into node_modules/ so that bare
+ * specifiers resolve — and scripts/tests/billing-coverage.test.mjs (§10)
+ * bans it from every *.test.mjs, because a suite that writes into
+ * node_modules ran inside `next build` once and the deploy broke. The
+ * intent of that rule is "no writes, no network inside the build", and
+ * this loader honours it rather than the wording: each bare specifier
+ * the bundle still carries is rewritten to the file: URL Node itself
+ * resolves it to (`import.meta.resolve`), and the result is loaded from
+ * a data: URL exactly as loadTs does. Nothing touches the disk.
+ *
+ * WHAT IT IS FOR. A gate that has to run the REAL exporter — pptxgenjs
+ * writing a real .pptx, @react-pdf laying out a real page — cannot do
+ * that through loadTs (which refuses the external import) and may not do
+ * it through loadTsWithDeps (which writes). presentations.test.mjs is the
+ * first caller; pdf-font-stack.test.mjs did the same job by importing
+ * the renderer directly and re-registering the fonts in the gate, which
+ * proves the engine but not the app's own file.
+ */
+export async function loadTsLinked(entry) {
+  const key = `linked:${path.resolve(entry)}`;
+  if (cache.has(key)) return cache.get(key);
+  const linked = bundleOf(entry, true).replace(
+    /^(import\s+(?:[^"'\n]*?\s+from\s+)?)["']([^"'./\n][^"'\n]*)["'](;?)$/gm,
+    (whole, head, spec, semi) => {
+      if (spec.startsWith("node:")) return whole;
+      return `${head}"${import.meta.resolve(spec)}"${semi}`;
+    }
+  );
+  const mod = await import("data:text/javascript;base64," + Buffer.from(linked).toString("base64"));
+  cache.set(key, mod);
+  return mod;
+}
+
 export async function loadTsWithDeps(entry) {
   const key = `deps:${path.resolve(entry)}`;
   if (cache.has(key)) return cache.get(key);

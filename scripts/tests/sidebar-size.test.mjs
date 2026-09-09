@@ -66,7 +66,15 @@ const MAX_GROUPS = 6;
 // forty-five rows it had, so it moves when somebody decides it should and
 // never because a row was added quietly: this number and this paragraph
 // are what a reviewer sees in the diff.
-const MAX_DRAWN_ITEMS = 23;
+//
+// TWENTY-FOUR SINCE V5 #21, and the extra row is one of the four named
+// above: Presentations. It was left out of the 2026-09-05 structure
+// because it opened a notes form, not because the owner did not ask for
+// it — the structure asked for it by name. The row is drawn now because
+// api/presentations/generate reaches a model and exports a deck, which
+// is the condition the paragraph above set. The other three (Images,
+// Videos, Posts) are still out, for the same reason they were.
+const MAX_DRAWN_ITEMS = 24;
 
 // The real filters, executed. lib/sidebar-visibility.ts imports no icons
 // precisely so this is possible — see its header.

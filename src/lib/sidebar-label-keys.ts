@@ -120,7 +120,10 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   "AI Coding": "coding",
   "Data Analysis": "dataAnalysis",
   Documents: "documents",
-  "Presentation notes": "presentations",
+  // V5 #21: "Presentation notes" became "Presentations" the day the page
+  // started making them. The key is unchanged, so every locale's string
+  // moved with it.
+  Presentations: "presentations",
   Campaigns: "campaigns",
   Analytics: "analytics",
   Finance: "finance",

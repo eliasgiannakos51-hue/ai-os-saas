@@ -135,7 +135,7 @@
       "coding": "Programar com IA",
       "dataAnalysis": "Análise de dados",
       "documents": "Documentos",
-      "presentations": "Notas de apresentação",
+      "presentations": "Apresentações",
       "campaigns": "Notas de campanhas",
       "analytics": "Análises",
       "finance": "Finanças",
@@ -207,7 +207,7 @@
       "images": "Acompanhe as imagens que está a planear ou já fez. Não as gera.",
       "videos": "Acompanhe os vídeos que está a planear ou já fez. Não os gera.",
       "coding": "Escreva, explique, corrija, converta e teste excertos de código. Não executa código nem abre um repositório.",
-      "presentations": "Acompanhe as apresentações que está a planear ou já fez. Não cria diapositivos.",
+      "presentations": "Descreve uma apresentação e recebe os diapositivos: PowerPoint ou PDF, com fotos do Unsplash ou tuas. Não desenha gráficos.",
       "home": "O teu painel — atividade, estatísticas e ações rápidas.",
       "settings": "Conta, faturação, idioma e preferências.",
       "published": "Todos os seus sites no ar, com o tráfego e o histórico de versões",
@@ -382,8 +382,8 @@
         "description": "Crie e edite vídeos com IA."
       },
       "presentations": {
-        "title": "Apresentações e documentos com IA",
-        "description": "Gere apresentações e documentos refinados a partir dos seus dados."
+        "title": "Apresentações com IA",
+        "description": "Descreve uma apresentação e recebe diapositivos editáveis, exportados como PowerPoint ou PDF, com fotos do Unsplash ou tuas."
       },
       "marketingBuilder": {
         "title": "Criador de campanhas de marketing com IA",
@@ -2798,7 +2798,6 @@
       "roadmap": "Plano de evolução",
       "score": "Pontuação",
       "sentiment": "Sentimento",
-      "slideCount": "Número de diapositivos",
       "status": "Estado",
       "strengths": "Pontos fortes",
       "suggestedResponse": "Resposta sugerida",
@@ -2808,7 +2807,6 @@
       "targetAudience": "Público-alvo",
       "taskName": "Nome da tarefa",
       "timeSaved": "Tempo poupado",
-      "title": "Título",
       "toolsNeeded": "Ferramentas necessárias",
       "topic": "Tema",
       "twitterThread": "Tópico no Twitter",
@@ -2827,13 +2825,10 @@
       "crossPlatform": "multiplataforma",
       "desktop": "computador",
       "done": "concluído",
-      "draft": "rascunho",
       "email": "e-mail",
       "event": "evento",
       "expense": "despesa",
-      "final": "final",
       "inProgress": "em curso",
-      "inReview": "em revisão",
       "income": "receita",
       "ios": "iOS",
       "live": "publicado",
@@ -2868,7 +2863,6 @@
       "apps": "Eliminar esta aplicação? Não é possível anular.",
       "images": "Eliminar esta imagem? Não é possível anular.",
       "videos": "Eliminar este vídeo? Não é possível anular.",
-      "presentations": "Eliminar esta nota de apresentação? Não é possível anular.",
       "campaigns": "Eliminar esta campanha? Não é possível anular."
     },
     "empty": {
@@ -2952,11 +2946,6 @@
         "why": "O briefing de cada vídeo e até onde chegou, para que o plano de gravações nunca fique só na sua cabeça. Não gera vídeos.",
         "example": "Demo do produto de 30 segundos"
       },
-      "presentations": {
-        "title": "Um sítio para acompanhar as suas apresentações",
-        "why": "Anote as apresentações que está a preparar ou que já fez — esta página não gera diapositivos por si. Use o botão acima para adicionar uma.",
-        "example": "Apresentação para investidores da ronda seed"
-      },
       "campaigns": {
         "title": "Cada campanha e o que custou",
         "why": "Canal, orçamento e estado lado a lado, para que a próxima decisão de orçamento venha de números e não de intuição. Não as executa.",
@@ -2980,7 +2969,6 @@
       "apps": "Nova aplicação",
       "images": "Nova imagem",
       "videos": "Novo vídeo",
-      "presentations": "Nova nota de apresentação",
       "campaigns": "Nova campanha"
     }
   },
@@ -3232,6 +3220,11 @@
       "is": "Padrões encontrados por código nos seus próprios registos, não um modelo a adivinhar.",
       "does": "Conta as suas linhas, encontra padrões acima de um limiar, e diz cada um com o número de entradas por trás e uma ligação para elas.",
       "doesNot": "Não prevê o futuro nem inventa um padrão só para ter algo a dizer. Abaixo de meia dúzia de linhas correspondentes, diz que não há base suficiente."
+    },
+    "presentations": {
+      "is": "Um gerador de diapositivos: entra uma descrição, sai uma apresentação.",
+      "does": "Escreve o título, os tópicos e as notas do orador de cada diapositivo na língua da tua descrição, encontra uma foto no Unsplash ou coloca as tuas, e exporta a apresentação como PowerPoint (.pptx) ou PDF.",
+      "doesNot": "Não desenha gráficos nem tabelas, não escolhe um tema de design e não gera imagens: as fotos vêm do Unsplash ou de ti. Os diapositivos não se editam aqui: descarrega o .pptx e termina-o no PowerPoint ou Keynote."
     }
   },
   "helpCentre": {
@@ -3632,6 +3625,77 @@
       "output": "Saída",
       "importedNote": "nota anterior",
       "failed": "falhou"
+    }
+  },
+  "presentations": {
+    "title": "Apresentações",
+    "description": "Descreve a apresentação e recebe os diapositivos: PowerPoint ou PDF editável, com fotos do Unsplash ou tuas.",
+    "limits": {
+      "title": "O que NÃO faz",
+      "no_charts": "Não desenha gráficos nem tabelas. Um diapositivo é um título, tópicos e notas do orador.",
+      "no_themes": "Não escolhe um tema de design. A apresentação é simples e o estilo é teu.",
+      "no_editing": "Os diapositivos não se editam aqui. Descarrega o .pptx e termina-o no PowerPoint, Keynote ou LibreOffice.",
+      "no_generated_images": "Não gera imagens. As fotos vêm do Unsplash ou das que carregas."
+    },
+    "form": {
+      "description": "Sobre o que é a apresentação?",
+      "descriptionPlaceholder": "Um pitch de dez minutos do serviço de catering da nossa padaria a três gerentes de hotel: quem somos, o que entregamos, preços e o que precisamos deles…",
+      "slideCount": "Diapositivos",
+      "slides": "{count, plural, one {# diapositivo} other {# diapositivos}}",
+      "imageSource": "Imagens",
+      "sources": {
+        "unsplash": "Do Unsplash",
+        "own": "As minhas fotos",
+        "none": "Sem fotos",
+        "unsplashHint": "Fotos gratuitas, escolhidas para cada diapositivo que pede uma, com crédito ao fotógrafo.",
+        "ownHint": "Até {max} fotos JPEG ou PNG, colocadas por ordem nos diapositivos que pedem uma.",
+        "noneHint": "Só texto.",
+        "unsplashUnavailable": "O Unsplash não está configurado nesta instalação, por isso as fotos só podem ser tuas."
+      },
+      "addPhotos": "Adicionar fotos",
+      "photosSelected": "{count} de {max}",
+      "remove": "Remover",
+      "generate": "Escrever os diapositivos",
+      "generating": "A escrever a apresentação…"
+    },
+    "result": {
+      "title": "A tua apresentação",
+      "slidesCount": "{count, plural, one {# diapositivo} other {# diapositivos}}",
+      "charged": "{credits, plural, one {# crédito} other {# créditos}}",
+      "preparing": "A preparar…",
+      "exportPptx": "Descarregar PowerPoint",
+      "exportPdf": "Descarregar como PDF",
+      "notes": "Notas do orador",
+      "noPhotoFound": "Nenhuma foto correspondeu aos diapositivos que pediam uma: a apresentação é só texto.",
+      "photoBy": "Foto de <author>{name}</author> no <unsplash>Unsplash</unsplash>",
+      "layout": {
+        "title": "Título",
+        "bullets": "Tópicos",
+        "section": "Secção",
+        "quote": "Citação",
+        "image": "Foto"
+      }
+    },
+    "errors": {
+      "tooShort": "Conta um pouco mais sobre a apresentação primeiro.",
+      "tooLong": "Ultrapassa os {limit} caracteres. Descreve a apresentação, não a palestra inteira.",
+      "insufficient": "Créditos insuficientes para esta apresentação.",
+      "rateLimited": "Demasiados pedidos: espera um minuto e tenta de novo.",
+      "unavailable": "Não foi possível contactar o serviço de IA. Nada foi cobrado.",
+      "unusable": "O modelo devolveu algo que não era uma apresentação. Tenta descrevê-la de outra forma.",
+      "failed": "Não funcionou: tenta de novo.",
+      "imageRejected": "Só JPEG ou PNG com menos de 5 MB, e no máximo {max} fotos.",
+      "uploadFailed": "Não foi possível carregar uma foto.",
+      "exportFailed": "Não foi possível criar o ficheiro."
+    },
+    "history": {
+      "title": "Histórico",
+      "empty": "Ainda não há nada aqui.",
+      "slides": "{count, plural, one {# diapositivo} other {# diapositivos}}",
+      "failed": "falhou",
+      "delete": "Eliminar",
+      "deleteConfirm": "Eliminar esta apresentação? Não é possível anular.",
+      "noteFromBefore": "nota de antes"
     }
   },
   "finance": {

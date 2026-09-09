@@ -62,13 +62,15 @@ export type { SidebarItem, SidebarGroupConfig } from "@/lib/sidebar-visibility";
 export { visibleGroups, sidebarGroups } from "@/lib/sidebar-visibility";
 import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 
-// SIX GROUPS, TWENTY-THREE VISIBLE ROWS — the structure of 2026-09-05.
+// SIX GROUPS, TWENTY-FOUR VISIBLE ROWS — the structure of 2026-09-05,
+// plus the one row it asked for that could not be drawn until V5 #21.
 //
 // THE HISTORY, BECAUSE THE NUMBER ONLY MEANS SOMETHING NEXT TO IT: eight
 // groups and forty-five rows, then four and sixteen (V4.6 #3), then four
-// and twenty-one (2026-09-04), now six and twenty-three. Not 41 and not
-// 13 at any point — scripts/tests/sidebar-size.test.mjs's BEFORE_V46_3
-// list is forty-five entries long and the gate asserts that length.
+// and twenty-one (2026-09-04), then six and twenty-three (2026-09-05),
+// now twenty-four. Not 41 and not 13 at any point —
+// scripts/tests/sidebar-size.test.mjs's BEFORE_V46_3 list is forty-five
+// entries long and the gate asserts that length.
 //
 // THE HEADINGS ARE WHAT A PERSON WANTS TO DO, NOT WHERE A THING IS
 // FILED. Make · Ask · Run · See · Organise · Settings. "Build" named an
@@ -76,16 +78,17 @@ import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 // are all verbs and they are the order of a working session.
 //
 // THE RULE THAT DECIDED THE CONTENTS, and it is the whole reason this is
-// twenty-three rather than thirty-five: A ROW UNDER "MAKE" MUST MAKE
+// twenty-four rather than thirty-five: A ROW UNDER "MAKE" MUST MAKE
 // SOMETHING. The structure originally asked for Images, Videos,
-// Presentations and Posts under it. All four exist — as TRACKING LOGS,
+// Presentations and Posts under it. All four existed — as TRACKING LOGS,
 // tables of rows a person types by hand, declared as producing nothing
 // in lib/build-modules.ts and held to that by section 3b of
 // scripts/tests/sidebar-naming.test.mjs, which proves it from the
 // imports rather than from a list. A row that promises generation and
 // opens a notes form is not an unclear label, it is a broken promise,
 // and it reads exactly like a working feature in a green build. They
-// stay hidden until they generate.
+// stay hidden until they generate — and Presentations generates since
+// V5 #21, which is the day its row was drawn and not a day before.
 //
 // THREE MORE WERE ASKED FOR AND ARE NOT HERE because nothing exists
 // behind them: a desktop agent, a public API and Projects have no route,
@@ -110,7 +113,7 @@ import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 // under /dashboard has no entry point at all.
 export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
   {
-    // NEVER COLLAPSED. Whatever else is shut, the four things this
+    // NEVER COLLAPSED. Whatever else is shut, the five things this
     // product makes have to be on screen the instant it paints — a group
     // somebody has to open first is a group somebody does not know is
     // there.
@@ -126,6 +129,16 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // microphone in the chat composer and a Listen button beside text
       // the app had already written.
       { href: "/dashboard/voice", label: "Voice", icon: VOICE_ICON, hintKey: "voice" },
+      // V5 #21. The row the 2026-09-05 structure asked for and could not
+      // have: it opened a notes form then. api/presentations/generate
+      // reaches a model now, section 3b of sidebar-naming proves it from
+      // the imports, and lib/build-modules.ts no longer lists the slug.
+      {
+        href: "/dashboard/presentations",
+        label: "Presentations",
+        icon: MODULE_ICONS.presentations,
+        hintKey: "presentations",
+      },
 
       // --- in the palette and on the hub, not in the sidebar ---
       // The generator the product used to open with. It still routes a
@@ -264,7 +277,7 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         hintKey: "tradingJournal",
         hidden: true,
       },
-      // THE SIX TRACKING LOGS, AND WHY THEY ARE NOT UNDER "MAKE".
+      // THE FIVE TRACKING LOGS, AND WHY THEY ARE NOT UNDER "MAKE".
       // lib/build-modules.ts says what they are in its own words — "no
       // real AI generation happens yet" — and the 2026-09-05 structure
       // asked for four of them (Images, Videos, Presentations, Posts) as
@@ -273,18 +286,13 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // is not a labelling problem, it is a broken promise that reads
       // identically to a working feature, and scripts/tests/
       // sidebar-naming.test.mjs proves the difference from the imports.
-      // They become rows the day a route behind them reaches a model.
+      // They become rows the day a route behind them reaches a model —
+      // which is exactly what happened to Presentations in V5 #21: it is
+      // under Make above, and no longer in this list.
       { href: "/dashboard/websites", label: "Websites", icon: MODULE_ICONS.websites, hintKey: "websites", hidden: true },
       { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps, hintKey: "apps", hidden: true },
       { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images, hintKey: "images", hidden: true },
       { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos, hintKey: "videos", hidden: true },
-      {
-        href: "/dashboard/presentations",
-        label: "Presentation notes",
-        icon: MODULE_ICONS.presentations,
-        hintKey: "presentations",
-        hidden: true,
-      },
       { href: "/dashboard/campaigns", label: "Campaigns", icon: MODULE_ICONS.campaigns, hintKey: "campaigns", hidden: true },
     ],
   },

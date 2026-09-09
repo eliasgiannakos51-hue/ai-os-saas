@@ -135,7 +135,7 @@
       "coding": "AI コーディング",
       "dataAnalysis": "データ分析",
       "documents": "ドキュメント",
-      "presentations": "プレゼン用メモ",
+      "presentations": "プレゼンテーション",
       "campaigns": "キャンペーンメモ",
       "analytics": "アナリティクス",
       "finance": "財務",
@@ -207,7 +207,7 @@
       "images": "作成予定または作成済みの画像を記録します。画像は生成しません。",
       "videos": "作成予定または作成済みの動画を記録します。動画は生成しません。",
       "coding": "コードの断片を書く・説明する・修正する・変換する・テストする。コードの実行やリポジトリの参照はしません。",
-      "presentations": "作成予定または作成済みのプレゼンを記録します。スライドは生成しません。",
+      "presentations": "プレゼンの内容を説明するとスライドができます。PowerPoint か PDF で、写真は Unsplash か自分のものから。グラフは描きません。",
       "home": "ダッシュボード — アクティビティ、統計、クイック操作。",
       "settings": "アカウント、請求、言語、設定。",
       "published": "公開中のすべてのサイトと、その閲覧数・バージョン履歴",
@@ -382,8 +382,8 @@
         "description": "AI で動画を作成・編集。"
       },
       "presentations": {
-        "title": "AI プレゼンテーション＆ドキュメント",
-        "description": "データから洗練されたプレゼンテーションやドキュメントを生成。"
+        "title": "AI プレゼンテーション",
+        "description": "プレゼンの内容を説明すると、編集できるスライドができます。PowerPoint か PDF で書き出し、写真は Unsplash か自分のものから。"
       },
       "marketingBuilder": {
         "title": "AI マーケティングキャンペーンビルダー",
@@ -2798,7 +2798,6 @@
       "roadmap": "ロードマップ",
       "score": "スコア",
       "sentiment": "感情",
-      "slideCount": "スライド枚数",
       "status": "ステータス",
       "strengths": "強み",
       "suggestedResponse": "返信案",
@@ -2808,7 +2807,6 @@
       "targetAudience": "対象ユーザー",
       "taskName": "タスク名",
       "timeSaved": "短縮できる時間",
-      "title": "タイトル",
       "toolsNeeded": "必要なツール",
       "topic": "トピック",
       "twitterThread": "Twitter スレッド",
@@ -2827,13 +2825,10 @@
       "crossPlatform": "クロスプラットフォーム",
       "desktop": "デスクトップ",
       "done": "完了",
-      "draft": "下書き",
       "email": "メール",
       "event": "イベント",
       "expense": "支出",
-      "final": "最終",
       "inProgress": "進行中",
-      "inReview": "レビュー中",
       "income": "収入",
       "ios": "iOS",
       "live": "公開中",
@@ -2868,7 +2863,6 @@
       "apps": "このアプリを削除しますか？元に戻せません。",
       "images": "この画像を削除しますか？元に戻せません。",
       "videos": "この動画を削除しますか？元に戻せません。",
-      "presentations": "このプレゼンのメモを削除しますか？元に戻せません。",
       "campaigns": "このキャンペーンを削除しますか？元に戻せません。"
     },
     "empty": {
@@ -2952,11 +2946,6 @@
         "why": "動画ごとの企画と進み具合。撮影リストを頭の中だけに置かないために。動画を生成するわけではありません。",
         "example": "30秒の製品デモ"
       },
-      "presentations": {
-        "title": "プレゼンを記録しておく場所",
-        "why": "これから準備するプレゼンや、すでに行ったプレゼンを書き留める場所です。このページがスライドを作るわけではありません。上のボタンから追加してください。",
-        "example": "シードラウンドの投資家向け資料"
-      },
       "campaigns": {
         "title": "すべての施策と、そのコスト",
         "why": "チャネル・予算・状況を並べておく。次の予算判断が、感覚ではなく数字から出せるように。配信を行うわけではありません。",
@@ -2980,7 +2969,6 @@
       "apps": "アプリを追加",
       "images": "画像を追加",
       "videos": "動画を追加",
-      "presentations": "発表メモを追加",
       "campaigns": "キャンペーンを追加"
     }
   },
@@ -3232,6 +3220,11 @@
       "is": "あなた自身の記録からコードが見つけた傾向です。モデルの当て推量ではありません。",
       "does": "記録の件数を数え、基準を超えた傾向を見つけ、根拠となった件数と元の記録へのリンクとともに示します。",
       "doesNot": "未来を予測はしませんし、話題づくりのために傾向をでっち上げることもありません。該当する行がごくわずかなら、判断材料が足りないと伝えます。"
+    },
+    "presentations": {
+      "is": "スライド生成ツール：説明を入れると、プレゼンが出てきます。",
+      "does": "各スライドのタイトル、箇条書き、発表者ノートを、あなたの説明の言語で書き、Unsplash から写真を探すか自分の写真を配置し、プレゼンを PowerPoint（.pptx）か PDF で書き出します。",
+      "doesNot": "グラフや表は描かず、デザインテーマも選ばず、画像も生成しません。写真は Unsplash かあなたのものです。スライドはここでは編集しません。.pptx をダウンロードして PowerPoint か Keynote で仕上げてください。"
     }
   },
   "helpCentre": {
@@ -3632,6 +3625,77 @@
       "output": "出力",
       "importedNote": "以前のメモ",
       "failed": "失敗"
+    }
+  },
+  "presentations": {
+    "title": "プレゼンテーション",
+    "description": "プレゼンの内容を説明すると、スライドができます。編集できる PowerPoint か PDF で、写真は Unsplash か自分のものから。",
+    "limits": {
+      "title": "できないこと",
+      "no_charts": "グラフや表は描きません。スライドはタイトル、箇条書き、発表者ノートです。",
+      "no_themes": "デザインテーマは選びません。プレゼンはシンプルで、見た目はあなたが整えます。",
+      "no_editing": "スライドはここでは編集しません。.pptx をダウンロードして、PowerPoint、Keynote、LibreOffice で仕上げてください。",
+      "no_generated_images": "画像は生成しません。写真は Unsplash か、あなたがアップロードしたものです。"
+    },
+    "form": {
+      "description": "どんなプレゼンですか？",
+      "descriptionPlaceholder": "ホテルの支配人3人に向けた、当店（パン屋）のケータリングサービスの10分間の売り込み：私たちは誰か、何を届けるか、価格、先方にお願いしたいこと…",
+      "slideCount": "スライド数",
+      "slides": "{count} 枚",
+      "imageSource": "写真",
+      "sources": {
+        "unsplash": "Unsplash から",
+        "own": "自分の写真",
+        "none": "写真なし",
+        "unsplashHint": "無料のストック写真。写真を求めるスライドごとに1枚選び、撮影者のクレジットを付けます。",
+        "ownHint": "JPEG または PNG を最大 {max} 枚。写真を求めるスライドに順番に配置します。",
+        "noneHint": "テキストのみ。",
+        "unsplashUnavailable": "この環境では Unsplash が設定されていないため、写真は自分のものだけ使えます。"
+      },
+      "addPhotos": "写真を追加",
+      "photosSelected": "{count} / {max}",
+      "remove": "取り除く",
+      "generate": "スライドを書く",
+      "generating": "プレゼンを作成中…"
+    },
+    "result": {
+      "title": "あなたのプレゼン",
+      "slidesCount": "{count} 枚のスライド",
+      "charged": "{credits} クレジット",
+      "preparing": "準備中…",
+      "exportPptx": "PowerPoint をダウンロード",
+      "exportPdf": "PDF でダウンロード",
+      "notes": "発表者ノート",
+      "noPhotoFound": "写真を求めたスライドに合う写真がありませんでした。このプレゼンはテキストのみです。",
+      "photoBy": "写真: <author>{name}</author>（<unsplash>Unsplash</unsplash>）",
+      "layout": {
+        "title": "タイトル",
+        "bullets": "箇条書き",
+        "section": "セクション",
+        "quote": "引用",
+        "image": "写真"
+      }
+    },
+    "errors": {
+      "tooShort": "まずプレゼンについてもう少し教えてください。",
+      "tooLong": "{limit} 文字を超えています。講演の全文ではなく、プレゼンの内容を説明してください。",
+      "insufficient": "このプレゼンを作るにはクレジットが足りません。",
+      "rateLimited": "リクエストが多すぎます。1分ほど待ってからもう一度お試しください。",
+      "unavailable": "AI サービスに接続できませんでした。課金はされていません。",
+      "unusable": "モデルの返答がプレゼンになっていませんでした。別の言い方で説明してみてください。",
+      "failed": "うまくいきませんでした。もう一度お試しください。",
+      "imageRejected": "5 MB 未満の JPEG または PNG のみ、最大 {max} 枚です。",
+      "uploadFailed": "写真をアップロードできませんでした。",
+      "exportFailed": "ファイルを作成できませんでした。"
+    },
+    "history": {
+      "title": "履歴",
+      "empty": "まだ何もありません。",
+      "slides": "{count} 枚のスライド",
+      "failed": "失敗",
+      "delete": "削除",
+      "deleteConfirm": "このプレゼンを削除しますか？元に戻せません。",
+      "noteFromBefore": "以前のメモ"
     }
   },
   "finance": {

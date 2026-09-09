@@ -156,14 +156,16 @@ console.log(`        tracking tables (no AI generation): ${trackingSlugs.join(",
 // quotes, would take this file from 120 assertions to about 90 and print
 // ALL PASS while checking none of the thing it exists for.
 //
-// Six today: websites, apps, images, videos, presentations, campaigns.
-// If a tracking module legitimately leaves — because it grew a generator
-// and moved under Build, which section 3 is watching for — lower this
-// number in the same commit that moves it. That is the point: the move
-// should be visible, not silent.
+// Five since V5 #21: websites, apps, images, videos, campaigns. It was
+// six — presentations grew a generator (lib/presentations/generate.ts,
+// reached from api/presentations/generate) and moved under Make, and the
+// floor came down by one IN THE SAME COMMIT that moved it. That is the
+// point: the move should be visible, not silent. If another tracking
+// module legitimately leaves, lower this number in the commit that moves
+// it.
 check(
   `the tracking-module scan found modules (${trackingSlugs.length})`,
-  trackingSlugs.length >= 6,
+  trackingSlugs.length >= 5,
   `build-modules.ts yielded ${trackingSlugs.length} slugs — the four checks below all pass vacuously on an empty list`
 );
 const groupOf = (heading) => {
@@ -265,6 +267,11 @@ const BUILD_ALLOWED = {
   // paragraph in section 3b for why "reaches a model" had to grow a
   // second meaning to describe it honestly.
   "/dashboard/voice": "speech out and speech in, through real paid providers",
+  // V5 #21. It was the sixth tracker: a notes form under a name that
+  // promised slides. api/presentations/generate makes ONE forced-tool
+  // call that returns the deck, and the .pptx and PDF routes lay it out.
+  // Section 3b proves the claim from the code, not from this line.
+  "/dashboard/presentations": "a brief in, a deck of slides out — exported as .pptx or PDF",
   "/dashboard/create": "Create Studio — the generator the whole product opened with",
   "/dashboard/published": "what the builder put live",
   // Not a generator itself, and here on purpose: these are what a
@@ -510,9 +517,11 @@ console.log("\n== 4. each tracking page says, on screen, that it produces nothin
 // A comment in a source file is not a disclosure. The person who needed
 // this sentence is the one who opened the page.
 // Read per MODULE BLOCK, not by assuming emptyKey is the line after
-// slug. Presentations has an eight-line comment between the two — the
-// adjacency version reported it as having no empty state at all, which
-// was a fact about the regex rather than about the file.
+// slug. Presentations had an eight-line comment between the two while it
+// was a tracker — the adjacency version reported it as having no empty
+// state at all, which was a fact about the regex rather than about the
+// file. It has left this file (V5 #21); the per-block read stays, because
+// the next long comment will land in the same place.
 //
 // THE KEY IS A FULL DOTTED PATH TO A GROUP, not a bare leaf under
 // `module.*`. It was `emptyKey: "emptyApps"` -> one sentence; it is now
@@ -560,8 +569,19 @@ const NEGATIONS = {
   images: /does not create images/i,
   videos: /does not create videos/i,
   campaigns: /does not run campaigns/i,
-  presentations: /does not generate slides/i,
 };
+// NO `presentations` ENTRY ANY MORE, and that is checked rather than left
+// as an absence: the empty state that said "does not generate slides" is
+// gone from every locale, because the page generates them (V5 #21). A
+// key that survived would be a lie shown to a first-time visitor, in the
+// place this section exists to keep honest.
+for (const locale of LOCALES) {
+  check(
+    `${locale}: the "does not generate slides" empty state is gone`,
+    lookup(messages[locale], "moduleData.empty.presentations") === undefined,
+    "presentations generates slides now — this copy contradicts the page it would be shown on"
+  );
+}
 for (const [slug, pattern] of Object.entries(NEGATIONS)) {
   const key = emptyKeys[slug];
   const text = key ? lookup(messages.en, `${key}.why`) : "";
@@ -646,11 +666,21 @@ check(
   'no tracker is still called "AI" anything',
   !Object.keys(TRACKER_NAMES).some((k) => /\bAI\b/.test(String(lookup(messages.en, `sidebar.items.${k}`))))
 );
-// Presentation notes was already honest and must not have been churned.
-// Only its capital N went, to match the other five logs in the same nav
-// — "App notes", "Image notes", "Video notes", "Campaign notes",
-// "Website plans". The noun is what was load-bearing, and it is intact.
-check("Presentation notes is unchanged apart from its capital", lookup(messages.en, "sidebar.items.presentations") === "Presentation notes");
+// "Presentation notes" WAS honest and is honest no longer, because the
+// page changed under it (V5 #21): a name that says "notes" over a page
+// that writes the deck is the same untruth as "Presentations" over a
+// notes form, pointing the other way. A tool MAY promise what it does,
+// and must — the same rule coding and dataAnalysis are held to in 4c-bis.
+check(
+  'presentations is a tool now and is named as one ("Presentations")',
+  lookup(messages.en, "sidebar.items.presentations") === "Presentations",
+  String(lookup(messages.en, "sidebar.items.presentations"))
+);
+check(
+  "...and its hint no longer disclaims the generator",
+  !/does not create slides/i.test(String(lookup(messages.en, "sidebar.hints.presentations"))),
+  String(lookup(messages.en, "sidebar.hints.presentations"))
+);
 
 function walkPagesForNames(dir) {
   const out = [];
@@ -735,7 +765,9 @@ check(
   // pages, breaking the MODULE_TITLE_KEYS reader dropped the count to
   // exactly 23 and this check stayed green, which its own mutation suite
   // reported as a MISSED mutant.
-  namedPages.length >= 25,
+  // TWENTY-SIX SINCE V5 #21: /dashboard/presentations reaches this scan
+  // through MODULE_TITLE_KEYS, the third page to do so.
+  namedPages.length >= 26,
   `${namedPages.length} — this floor rises as pages are added, and never falls`,
 );
 for (const locale of LOCALES) {
@@ -805,7 +837,7 @@ check("it reads the locale per request, not once at module load", /getTranslatio
 check("and it is server-only, so a client import fails at build", /^import "server-only";/m.test(metadataHelper));
 // The module pages hand it the config's own key, so tab, heading and nav
 // are one string.
-const modulePages = ["apps", "campaigns", "images", "presentations", "videos", "websites"];
+const modulePages = ["apps", "campaigns", "images", "videos", "websites"];
 const notFromConfig = modulePages.filter(
   (slug) => !/pageTitle\(CONFIG\.titleKey\)/.test(readFileSync(`src/app/dashboard/${slug}/page.tsx`, "utf8"))
 );
@@ -822,7 +854,8 @@ check("every tracking page's tab reads the config's key", notFromConfig.length =
 // This check used to be `check(name, someArray, [])` — always green,
 // because every array is truthy — so it had never once looked. It found
 // these two on the first run after the signature was fixed.
-const bespokePages = ["coding", "data-analysis"];
+// A THIRD BESPOKE PAGE SINCE V5 #21: presentations, through the same map.
+const bespokePages = ["coding", "data-analysis", "presentations"];
 const literalKey = bespokePages.filter((slug) => {
   const src = readFileSync(`src/app/dashboard/${slug}/page.tsx`, "utf8");
   return /pageTitle\("sidebar\./.test(src) || !/MODULE_TITLE_KEYS/.test(src);
@@ -831,8 +864,10 @@ check("neither bespoke page writes its own title key out by hand", literalKey.le
   literalKey.join(", "));
 {
   const keys = readFileSync("src/lib/search/module-title-keys.ts", "utf8");
-  check("...and the map they read still carries both",
-    /coding: "sidebar\.items\.coding"/.test(keys) && /"data-analysis": "sidebar\.items\.dataAnalysis"/.test(keys),
+  check("...and the map they read still carries all three",
+    /coding: "sidebar\.items\.coding"/.test(keys) &&
+      /"data-analysis": "sidebar\.items\.dataAnalysis"/.test(keys) &&
+      /presentations: "sidebar\.items\.presentations"/.test(keys),
     "if these leave the map, the pages lose their titles rather than falling back");
 }
 

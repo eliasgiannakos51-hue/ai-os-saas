@@ -95,7 +95,9 @@ const MUTANTS = [
     // moves with the number on purpose: pinned at 62 it went STALE and
     // this whole mutant silently tested nothing, which the sweep reported
     // and a single-suite run did not.
-    from: "    unbounded: 64,",
+    // 64 -> 65 in V5 #21: presentations-workspace.tsx reaches its four
+    // absences and five layout labels through template literals.
+    from: "    unbounded: 65,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`
@@ -103,7 +105,7 @@ const MUTANTS = [
     // A `to` that can occur legitimately elsewhere in the same file
     // cannot distinguish "mutated" from "normal".
     to: "    unbounded: 1,",
-    expect: "dashboard: 64 unbounded component(s)",
+    expect: "dashboard: 65 unbounded component(s)",
   },
   {
     // With no prefix the dashboard stops claiming its own routes, they

@@ -150,7 +150,10 @@ console.log(
 // than under it, because unlike a floor over a derived list this number
 // is a count of files somebody wrote — it cannot drift on its own, and a
 // gate deleted along with its suite lowers both sides together.
-const RATCHET = 131;
+// 131 -> 132: V5 #21 added presentations.mutation.mjs. Raised the day the
+// count rose, because a ratchet one below reality hands every mutation
+// that removes one suite a free pass — its own suite found exactly that.
+const RATCHET = 132;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

@@ -57,7 +57,8 @@ const MUTANTS = [
     file: VIS,
     from: ".map((group) => ({ ...group, items: group.items.filter((i) => !i.hidden) }))",
     to: ".map((group) => ({ ...group, items: group.items }))",
-    expect: "rows drawn, limit 23",
+    // 23 -> 24 in V5 #21, when the Presentations row was drawn.
+    expect: "rows drawn, limit 24",
   },
   {
     // 3. THE ROLE FILTER — the one the brief said not to break. Composing

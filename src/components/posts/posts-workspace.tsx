@@ -188,7 +188,7 @@ export function PostsWorkspace({
       {/* WHAT IT DOES NOT DO, ON THE SCREEN — first of all that it does
           not post anywhere. A page called Posts reads as a publisher to
           everybody who has not read the roadmap. */}
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <h2 className="text-sm font-semibold text-foreground">{t("limits.title")}</h2>
         <ul className="mt-2 space-y-1">
           {POST_LIMITS.map((limit) => (
@@ -199,7 +199,7 @@ export function PostsWorkspace({
         </ul>
       </div>
 
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <label htmlFor="post-description" className="text-sm font-semibold text-foreground">
           {t("form.description")}
         </label>
@@ -268,7 +268,7 @@ export function PostsWorkspace({
       </div>
 
       {selected && (
-        <section className="rounded-2xl border border-border bg-panel p-5" aria-label={t("result.title")}>
+        <section className="surface" aria-label={t("result.title")}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-foreground">{t("result.title")}</h2>
@@ -307,7 +307,7 @@ export function PostsWorkspace({
         </section>
       )}
 
-      <section className="rounded-2xl border border-border bg-panel p-5" aria-label={t("history.title")}>
+      <section className="surface" aria-label={t("history.title")}>
         <h2 className="text-sm font-semibold text-foreground">{t("history.title")}</h2>
         {history.length === 0 ? (
           <p className="mt-2 text-xs text-muted">{t("history.empty")}</p>

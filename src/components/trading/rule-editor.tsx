@@ -90,7 +90,7 @@ export function RuleEditor({
   const violationFor = (ruleText: string) => violations.find((v) => v.ruleText === ruleText);
 
   return (
-    <section className="space-y-4 rounded-2xl border border-border bg-panel/60 p-4">
+    <section className="space-y-4 surface-tight">
       <div>
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
           <ShieldCheck className="h-4 w-4 text-orange-400" aria-hidden="true" />

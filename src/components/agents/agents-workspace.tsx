@@ -845,7 +845,7 @@ export function AgentsWorkspace({
         }
       >
         {creating && (
-          <div className="mb-5 space-y-4 rounded-2xl border border-border bg-panel p-4">
+          <div className="mb-5 space-y-4 surface-tight">
             <div>
               <label htmlFor="agent-request" className="mb-1 block text-xs font-medium text-muted">
                 {t("requestLabel")}
@@ -1351,7 +1351,7 @@ export function AgentsWorkspace({
       </ListLayout>
 
       {selected && (
-        <section className="space-y-4 rounded-2xl border border-border bg-panel p-4">
+        <section className="space-y-4 surface-tight">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="truncate text-base font-semibold text-foreground">{selected.name}</h2>
@@ -1530,7 +1530,7 @@ export function AgentsWorkspace({
                   tier in its config, which is why the label says "this
                   run" and why the value resets to the agent's own every
                   time a different agent is opened. */}
-              <div className="space-y-2 rounded-xl border border-border p-3">
+              <div className="space-y-2 surface-tight">
                 <p className="text-xs font-medium text-foreground">{t("depth.runOnce")}</p>
                 <p className="text-[11px] leading-relaxed text-muted">
                   {t("depth.runOnceHint", {
@@ -1575,7 +1575,7 @@ export function AgentsWorkspace({
                 ) : (
                   <ul className="space-y-2">
                     {selectedRuns.map((run) => (
-                      <li key={run.id} className="rounded-xl border border-border p-3">
+                      <li key={run.id} className="surface-tight">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           {/* 'queued' IS ITS OWN STATE, not a flavour of
                               running (V4 #13). A run submitted to the

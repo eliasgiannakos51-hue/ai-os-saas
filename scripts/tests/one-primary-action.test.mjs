@@ -431,26 +431,45 @@ console.log(`        accent box-shadows: ${glow} · gradient backgrounds: ${grad
 // one more glow anywhere passed unseen — the mutation suite proved it
 // ("a glow is added" survived). The ceiling is the count measured on
 // 2026-09-03; lowering it is free, raising it needs a reason here.
-check(`accent box-shadows: ${glow}, ceiling 46`, glow <= 46, String(glow));
+// 46 -> 2, redesign phase 4. The brief said "κανένα glow", and 44 of
+// them went: the hover bloom under every filled button, .card-lift's
+// orange ring, .glass-card's, .prompt-glow entirely, and the 22px halo
+// outside the focus ring. THE TWO THAT REMAIN ARE NOT GLOW and this
+// number is the wrong instrument for them — both are
+// `0 0 0 1px rgba(accent)`, a one-pixel edge with no blur, on the
+// sidebar's active row and the favourite star. scripts/design-census.mjs
+// makes that distinction (a shadow counts as glow only when its third
+// length is non-zero) and reports ZERO; this pattern cannot, so the
+// ceiling is 2 rather than 0 and says why.
+check(`accent box-shadows: ${glow}, ceiling 2`, glow <= 2, String(glow));
 check(`gradient backgrounds: ${gradients}, ceiling 13`, gradients <= 13, String(gradients));
-// TWO PIECES OF GRADIENT TEXT, and the second is the one the brief was
-// about all along:
-//   1. the health score's range label — bg-clip-text, amber-300 to
-//      orange-400, in components/overview/health-score-card.tsx
-//   2. the Home page's H1 — .hero-gradient-text, white through amber into
-//      VIOLET (#a855f7), at 3.4rem, the largest thing on the page
-// Pinned at two rather than floored: a third is the thing the brief warns
-// about, and going to one means a decision was taken and should be
-// recorded here.
+// TWO, THEN ZERO. The decision this comment asked for was taken in
+// redesign phase 4 — "κανένα gradient σε τίτλο" — and both went:
+//   1. the health score's range label, bg-clip-text amber-300 to
+//      orange-400, now solid text-orange-300
+//   2. the Home page's H1, .hero-gradient-text, white through amber into
+//      VIOLET (#a855f7) at 3.4rem — the largest thing on the page, and
+//      the one the brief had been describing all along. The rule is
+//      deleted from globals.css, not merely unused.
+// FORBIDDEN NOW, NOT PINNED. A clipped fill has no colour a contrast
+// checker can read — the text is a mask over a picture — so every
+// contrast gate here had to skip it. Zero is the only number that keeps
+// them honest.
 check(
-  `gradient text: ${gradientText} (${gradientText - cssGradientTextUses} Tailwind, ${cssGradientTextUses} CSS), pinned at 2`,
-  gradientText === 2,
+  `gradient text: ${gradientText} (${gradientText - cssGradientTextUses} Tailwind, ${cssGradientTextUses} CSS), forbidden`,
+  gradientText === 0,
   String(gradientText)
 );
+// The companion check — "the CSS half of the scan found its classes" —
+// is gone with them. It existed because this census had once reported
+// the CSS gradient as absent when it was merely unread; with no such
+// class declared anywhere, an assertion that one exists would now be
+// asserting the defect back into place. What replaces it is the reverse:
+// no class may declare it again.
 check(
-  `the CSS gradient-text classes were found (${[...cssGradientClasses].join(", ") || "NONE"})`,
-  cssGradientClasses.size >= 1,
-  "a scan that finds no class counts no uses of it, and reports the CSS half as absent"
+  `no CSS class clips a background to text (${[...cssGradientClasses].join(", ") || "none"})`,
+  cssGradientClasses.size === 0,
+  "a new .foo { background-clip: text } would put an unmeasurable colour back on a heading"
 );
 
 // ---------------------------------------------------------------------

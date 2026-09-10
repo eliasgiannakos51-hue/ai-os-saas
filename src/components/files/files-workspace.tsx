@@ -992,7 +992,7 @@ export function FilesWorkspace({
 
       {/* Collections. Deliberately small: a collection is a shortcut for
           "these files again", not a filing system. */}
-      <section className="space-y-2 rounded-2xl border border-border bg-panel/60 p-4">
+      <section className="space-y-2 surface-tight">
         <h2 className="text-sm font-semibold text-foreground">{t("collections")}</h2>
         {collections.length > 0 && (
           <div className="flex flex-wrap gap-2">
@@ -1131,7 +1131,7 @@ export function FilesWorkspace({
         </div>
 
         {answer && (
-          <div className="space-y-2 rounded-xl border border-border bg-panel/60 p-3">
+          <div className="space-y-2 surface-tight">
             {/* On screen, therefore seen. Inside the answer rather than in
                 an effect beside it, so an answer can only be marked read
                 by actually being rendered. */}

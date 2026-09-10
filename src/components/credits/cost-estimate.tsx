@@ -57,7 +57,7 @@ export function LargeActionConfirm({
       role="dialog"
       aria-modal="true"
     >
-      <div className="panel-pop-in w-full max-w-sm rounded-2xl border border-border bg-panel p-5 shadow-2xl">
+      <div className="panel-pop-in w-full max-w-sm surface shadow-2xl">
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">
             <Zap className="h-4 w-4" aria-hidden="true" />

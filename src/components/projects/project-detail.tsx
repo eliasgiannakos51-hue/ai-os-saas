@@ -102,7 +102,7 @@ export function ProjectDetail({
   return (
     <div className="space-y-6">
       {/* GOAL + PROGRESS */}
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <h2 className="text-sm font-semibold text-foreground">{t("sections.goal")}</h2>
         <p className="mt-1 whitespace-pre-wrap text-sm text-muted">{project.goal || t("noGoal")}</p>
         <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted">
@@ -129,7 +129,7 @@ export function ProjectDetail({
 
       {/* TASKS · FILES · AGENTS · RESULTS · ACTIVITY */}
       {sections.map((section) => (
-        <section key={section.key} className="rounded-2xl border border-border bg-panel p-5" aria-label={t(`sections.${section.key}`)}>
+        <section key={section.key} className="surface" aria-label={t(`sections.${section.key}`)}>
           <h2 className="text-sm font-semibold text-foreground">{t(`sections.${section.key}`)}</h2>
           {section.rows.length === 0 ? (
             <p className="mt-2 text-xs text-muted">{t("sections.empty")}</p>
@@ -156,7 +156,7 @@ export function ProjectDetail({
         </section>
       ))}
 
-      <section className="rounded-2xl border border-border bg-panel p-5" aria-label={t("sections.activity")}>
+      <section className="surface" aria-label={t("sections.activity")}>
         <h2 className="text-sm font-semibold text-foreground">{t("sections.activity")}</h2>
         {members.length === 0 ? (
           <p className="mt-2 text-xs text-muted">{t("sections.empty")}</p>

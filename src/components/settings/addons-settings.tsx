@@ -99,7 +99,7 @@ export function AddonsSettings() {
   }
 
   return (
-    <div id="addons" className="mb-6 scroll-mt-20 space-y-3 rounded-2xl border border-border bg-panel p-5">
+    <div id="addons" className="mb-6 scroll-mt-20 space-y-3 surface">
       <div>
         <h2 className="text-sm font-semibold text-foreground">{t("title")}</h2>
         <p className="mt-1 text-xs text-muted">{t("description")}</p>

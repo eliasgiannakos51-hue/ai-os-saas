@@ -94,7 +94,7 @@ export function GoalQuestion({
   const tKey = useTranslations();
 
   return (
-    <div className="mb-3 rounded-2xl border border-border bg-panel p-4" role="status" aria-live="polite">
+    <div className="mb-3 surface-tight" role="status" aria-live="polite">
       <p className="text-sm text-foreground">{choices.length > 0 ? t("which") : t("vague")}</p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {choices.map((key) => (

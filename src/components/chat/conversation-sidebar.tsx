@@ -65,7 +65,7 @@ export function ConversationSidebar({
         <button
           type="button"
           onClick={onNewChat}
-          className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
+          className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
         >
           <Plus className="h-4 w-4" /> {t("newChat")}
         </button>

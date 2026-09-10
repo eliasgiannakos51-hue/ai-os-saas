@@ -33,7 +33,7 @@ export function VoiceSettings() {
   const percent = v.limitMinutes > 0 ? Math.min(100, Math.round((v.usedSeconds / (v.limitMinutes * 60)) * 100)) : 0;
 
   return (
-    <div id="voice" className="mb-6 scroll-mt-20 space-y-4 rounded-2xl border border-border bg-panel p-5">
+    <div id="voice" className="mb-6 scroll-mt-20 space-y-4 surface">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
         <AudioLines className="h-4 w-4 text-orange-400" aria-hidden="true" /> {t("title")}
       </h2>

@@ -277,7 +277,7 @@ export function DeliveryPicker({
       )}
 
       {value === "telegram" && !loading && (
-        <div className="space-y-2 rounded-xl border border-border p-3">
+        <div className="space-y-2 surface-tight">
           {connected("telegram") ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-[11px] text-muted">
@@ -357,7 +357,7 @@ export function DeliveryPicker({
       )}
 
       {value === "discord" && !loading && (
-        <div className="space-y-2 rounded-xl border border-border p-3">
+        <div className="space-y-2 surface-tight">
           {connected("discord") ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-[11px] text-muted">

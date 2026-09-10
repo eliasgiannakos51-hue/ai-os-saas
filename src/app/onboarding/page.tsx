@@ -69,7 +69,7 @@ export default async function OnboardingPage() {
 
         {/* Said before anything is uploaded, because this is the moment
             someone decides whether to hand over their books. */}
-        <p className="mb-5 rounded-xl border border-border bg-panel/60 p-3 text-[11px] leading-relaxed text-muted">
+        <p className="mb-5 surface-tight text-[11px] leading-relaxed text-muted">
           {t("privacyNotice")}
         </p>
 

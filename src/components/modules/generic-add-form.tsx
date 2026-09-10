@@ -217,7 +217,7 @@ export function GenericAddForm({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
         >
           {/* The module's own sentence, not "New " + the page title.
               The title is plural and the grammar around it changes with
@@ -227,7 +227,7 @@ export function GenericAddForm({
       ) : (
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 rounded-2xl border border-border bg-panel p-5"
+          className="space-y-4 surface"
         >
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">
@@ -331,7 +331,7 @@ export function GenericAddForm({
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:w-auto"
+            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-50 sm:w-auto"
           >
             {loading ? t("saving") : t("save")}
           </button>

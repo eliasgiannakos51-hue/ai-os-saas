@@ -258,7 +258,7 @@ export function PresentationsWorkspace({
           for the reverse mistake — a generator that reads as a designer —
           is the same: say the edges out loud where somebody about to rely
           on them reads them. */}
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <h2 className="text-sm font-semibold text-foreground">{t("limits.title")}</h2>
         <ul className="mt-2 space-y-1">
           {DECK_LIMITS.map((limit) => (
@@ -269,7 +269,7 @@ export function PresentationsWorkspace({
         </ul>
       </div>
 
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <label htmlFor="deck-description" className="text-sm font-semibold text-foreground">
           {t("form.description")}
         </label>
@@ -421,7 +421,7 @@ export function PresentationsWorkspace({
       </div>
 
       {selected && (
-        <section className="rounded-2xl border border-border bg-panel p-5" aria-label={t("result.title")}>
+        <section className="surface" aria-label={t("result.title")}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="truncate text-lg font-semibold text-foreground">{selected.deck.title}</h2>
@@ -507,7 +507,7 @@ export function PresentationsWorkspace({
         </section>
       )}
 
-      <section className="rounded-2xl border border-border bg-panel p-5" aria-label={t("history.title")}>
+      <section className="surface" aria-label={t("history.title")}>
         <h2 className="text-sm font-semibold text-foreground">{t("history.title")}</h2>
         {decks.length === 0 && notes.length === 0 ? (
           <p className="mt-2 text-xs text-muted">{t("history.empty")}</p>

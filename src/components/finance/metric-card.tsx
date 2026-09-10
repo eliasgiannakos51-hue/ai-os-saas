@@ -29,7 +29,7 @@ export function MetricCard({ metric }: { metric: Metric }) {
   const t = useTranslations("finance");
 
   return (
-    <div className="rounded-2xl border border-border bg-panel p-4">
+    <div className="surface-tight">
       <p className="text-[11px] uppercase tracking-wider text-muted">{t(`metrics.${metric.key}`)}</p>
 
       {metric.state === "computed" ? (

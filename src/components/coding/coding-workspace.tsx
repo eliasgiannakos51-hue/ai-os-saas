@@ -142,7 +142,7 @@ export function CodingWorkspace({
           the fix for that is not a better name, it is saying the four
           absences out loud where somebody about to rely on them reads
           them. */}
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <h2 className="text-sm font-semibold text-foreground">{t("limits.title")}</h2>
         <ul className="mt-2 space-y-1">
           {CODE_LIMITS.map((limit) => (
@@ -155,7 +155,7 @@ export function CodingWorkspace({
       </div>
 
       {/* ---- the five operations ---- */}
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <div className="flex flex-wrap gap-2">
           {CODE_OPERATIONS.map((candidate) => (
             <button
@@ -277,7 +277,7 @@ export function CodingWorkspace({
           {result.kind === "code" ? (
             <CodeBlock code={result.output} language={spec.needsTargetLanguage ? targetLanguage : language} />
           ) : (
-            <div className="whitespace-pre-wrap rounded-xl border border-border bg-panel p-4 text-sm text-muted">
+            <div className="whitespace-pre-wrap surface-tight text-sm text-muted">
               {result.output}
             </div>
           )}
@@ -285,7 +285,7 @@ export function CodingWorkspace({
       )}
 
       {/* ---- history ---- */}
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-sm font-semibold text-foreground">{t("history.title")}</h2>
           <div className="flex flex-wrap gap-2">

@@ -231,7 +231,7 @@ export function VoiceInput({
       {explaining && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setExplaining(false)} aria-hidden="true" />
-          <div role="dialog" aria-modal="true" aria-label={t("permission.title")} className="relative w-full max-w-sm rounded-2xl border border-border bg-panel p-5">
+          <div role="dialog" aria-modal="true" aria-label={t("permission.title")} className="relative w-full max-w-sm surface">
             <p className="text-sm font-semibold text-foreground">{t("permission.title")}</p>
             <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-muted">
               <li>• {t("permission.pressToStart")}</li>
@@ -292,7 +292,7 @@ export function VoiceInput({
       {draft !== null && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDraft(null)} aria-hidden="true" />
-          <div role="dialog" aria-modal="true" aria-label={t("draft.title")} className="relative w-full max-w-md rounded-2xl border border-border bg-panel p-4">
+          <div role="dialog" aria-modal="true" aria-label={t("draft.title")} className="relative w-full max-w-md surface-tight">
             <p className="mb-2 text-sm font-semibold text-foreground">{t("draft.title")}</p>
             <textarea
               ref={draftRef}

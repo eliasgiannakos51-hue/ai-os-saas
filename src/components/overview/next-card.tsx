@@ -33,7 +33,7 @@ export function NextCard({
 }) {
   if (!action && !weekSummary && !plan) return null;
   return (
-    <section className="mt-6 rounded-2xl border border-border bg-panel p-5">
+    <section className="mt-6 surface">
       <div className="flex items-center gap-2">
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400">
           <Compass className="h-4 w-4" aria-hidden="true" />

@@ -117,7 +117,7 @@ export default async function PublishedSitesPage() {
 
         {/* GDPR: what is and is not measured, said plainly on the page that
             shows the numbers rather than buried in a policy. */}
-        <p className="mb-4 rounded-xl border border-border bg-panel/60 p-3 text-[11px] leading-relaxed text-muted">
+        <p className="mb-4 surface-tight text-[11px] leading-relaxed text-muted">
           {t("analyticsNotice")}
         </p>
 

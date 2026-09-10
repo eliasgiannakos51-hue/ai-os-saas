@@ -75,7 +75,7 @@ export function TradingMissionButton({
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-panel p-4">
+    <div className="surface-tight">
       <button
         type="button"
         onClick={handleClick}

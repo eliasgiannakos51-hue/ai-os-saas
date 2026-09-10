@@ -70,7 +70,7 @@ export function TemplateMatches({
           </p>
           <ul className="space-y-2">
             {matches.map((match) => (
-              <li key={match.slug} className="rounded-lg border border-border bg-panel p-3">
+              <li key={match.slug} className="surface-tight">
                 <p className="text-sm font-medium text-foreground">{match.title}</p>
                 <p className="mt-0.5 text-[11px] leading-relaxed text-muted">{match.description}</p>
                 {/* THE ACTUAL TASK, with the slot still showing. */}

@@ -32,7 +32,7 @@ export function ThemeSettings() {
   }
 
   return (
-    <div id="theme" className="mb-6 scroll-mt-20 space-y-3 rounded-2xl border border-border bg-panel p-5">
+    <div id="theme" className="mb-6 scroll-mt-20 space-y-3 surface">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
         <Palette className="h-4 w-4 text-orange-400" /> {t("title")}
       </h2>

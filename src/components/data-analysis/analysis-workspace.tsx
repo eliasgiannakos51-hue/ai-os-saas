@@ -125,7 +125,7 @@ export function AnalysisWorkspace({
   return (
     <div className="space-y-6">
       {/* ---- upload ---- */}
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <h2 className="text-sm font-semibold text-foreground">{t("upload.title")}</h2>
         <p className="mt-1 text-xs text-muted">{t("upload.description")}</p>
         <input
@@ -174,7 +174,7 @@ export function AnalysisWorkspace({
       {current && (
         <>
           {/* ---- what the file actually is ---- */}
-          <div className="rounded-2xl border border-border bg-panel p-5">
+          <div className="surface">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold text-foreground">{current.title}</h2>
@@ -253,7 +253,7 @@ export function AnalysisWorkspace({
 
           {/* ---- what was found ---- */}
           {current.findings ? (
-            <div className="rounded-2xl border border-border bg-panel p-5">
+            <div className="surface">
               <h2 className="text-sm font-semibold text-foreground">{t("findings.title")}</h2>
               {current.findings.summary ? (
                 <p className="mt-2 text-sm text-muted">{current.findings.summary}</p>
@@ -281,7 +281,7 @@ export function AnalysisWorkspace({
           )}
 
           {/* ---- ask it something ---- */}
-          <div className="rounded-2xl border border-border bg-panel p-5">
+          <div className="surface">
             <h2 className="text-sm font-semibold text-foreground">{t("ask.title")}</h2>
             <p className="mt-1 text-xs text-muted">{t("ask.description")}</p>
 
@@ -338,7 +338,7 @@ export function AnalysisWorkspace({
 
             <ul className="mt-4 space-y-4">
               {current.questions.map((record) => (
-                <li key={record.id} className="rounded-xl border border-border p-3">
+                <li key={record.id} className="surface-tight">
                   <p className="text-sm text-foreground">{record.question}</p>
                   {record.answer ? <p className="mt-1 text-xs text-muted">{record.answer}</p> : null}
                   {record.evidence ? (
@@ -373,7 +373,7 @@ export function AnalysisWorkspace({
 
           {/* ---- the notes from the old tracker ---- */}
           {current.legacyNotes.length > 0 && (
-            <div className="rounded-2xl border border-border bg-panel p-5">
+            <div className="surface">
               <h2 className="text-sm font-semibold text-foreground">{t("legacy.title")}</h2>
               <p className="mt-1 text-xs text-muted">{t("legacy.description")}</p>
               <ul className="mt-3 space-y-2">

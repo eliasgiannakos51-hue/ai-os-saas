@@ -76,7 +76,7 @@ export function ProjectsWorkspace({ projects }: { projects: ProjectRow[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <label htmlFor="project-name" className="text-sm font-semibold text-foreground">
           {t("form.name")}
         </label>
@@ -111,7 +111,7 @@ export function ProjectsWorkspace({ projects }: { projects: ProjectRow[] }) {
         </div>
       </div>
 
-      <section className="rounded-2xl border border-border bg-panel p-5" aria-label={t("list.title")}>
+      <section className="surface" aria-label={t("list.title")}>
         <h2 className="text-sm font-semibold text-foreground">{t("list.title")}</h2>
         {projects.length === 0 ? (
           <p className="mt-2 text-xs text-muted">{t("list.empty")}</p>

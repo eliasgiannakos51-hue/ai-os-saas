@@ -197,7 +197,7 @@ export default async function RoadmapPage() {
                   {section.items.map((item) => (
                     <div
                       key={item.key}
-                      className="flex flex-col rounded-2xl border border-border bg-panel p-5"
+                      className="flex flex-col surface"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <span

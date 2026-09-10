@@ -82,7 +82,7 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
               <Link
                 key={result.id}
                 href={result.moduleHref}
-                className="group block rounded-2xl border border-border bg-panel p-4 transition-colors duration-150 hover:border-orange-500/30"
+                className="group block surface-tight transition-colors duration-150 hover:border-orange-500/30"
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <h3 className="text-base font-semibold text-foreground">

@@ -88,7 +88,7 @@ export async function CreditHistory({
   const rows = [...txRows, ...freeRows].sort((a, b) => b.at.localeCompare(a.at));
 
   return (
-    <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
+    <div className="mb-6 space-y-3 surface">
       <h2 className="text-sm font-semibold text-foreground">{t("creditHistory")}</h2>
       {rows.length === 0 ? (
         <p className="text-xs text-muted">{t("noCreditActivity")}</p>

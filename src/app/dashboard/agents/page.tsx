@@ -205,7 +205,7 @@ export default async function AgentsPage({
             an AI system and that everything it sends them is AI-generated.
             Stated once, on the surface where agents are created, in
             addition to the notice carried by every delivered email. */}
-        <p className="mb-4 rounded-xl border border-border bg-panel/60 p-3 text-[11px] leading-relaxed text-muted">
+        <p className="mb-4 surface-tight text-[11px] leading-relaxed text-muted">
           {t("aiDisclosure")}
         </p>
 

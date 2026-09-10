@@ -341,7 +341,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
           </div>
 
           {activationFree && (
-            <p className="rounded-xl border border-border bg-panel/60 p-3 text-[11px] leading-relaxed text-muted">
+            <p className="surface-tight text-[11px] leading-relaxed text-muted">
               {t("firstFree")}
             </p>
           )}
@@ -395,7 +395,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
 
           {analysis && (
             <div className="space-y-3">
-              <p className="rounded-xl border border-border bg-panel/60 p-3 text-xs leading-relaxed text-foreground">
+              <p className="surface-tight text-xs leading-relaxed text-foreground">
                 {t("looksLike", { label: analysis.targetLabel })}{" "}
                 <span className="text-muted">{analysis.proposal.summary}</span>
               </p>
@@ -606,7 +606,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
           ) : (
             // THE HONEST EMPTY STATE. No hedged sentence, no generic
             // advice — just what is missing and what would fix it.
-            <div className="space-y-1.5 rounded-2xl border border-border bg-panel/60 p-4">
+            <div className="space-y-1.5 surface-tight">
               <p className="text-sm font-medium text-foreground">{t("noneTitle")}</p>
               <p className="text-xs leading-relaxed text-muted">
                 {needMoreData ? t("noneNeedMore") : t("noneYet")}
@@ -649,7 +649,7 @@ function SourceCard({
     <button
       type="button"
       onClick={onSelect}
-      className="flex min-h-[44px] items-center rounded-xl border border-border bg-panel/60 p-3 text-start transition-colors duration-150 hover:border-orange-500/40"
+      className="flex min-h-[44px] items-center surface-tight text-start transition-colors duration-150 hover:border-orange-500/40"
     >
       <Icon className="mb-1.5 h-4 w-4 text-orange-400" aria-hidden="true" />
       <p className="text-xs font-semibold text-foreground">{title}</p>

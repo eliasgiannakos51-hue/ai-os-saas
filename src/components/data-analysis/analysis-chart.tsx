@@ -55,7 +55,7 @@ export function AnalysisChart({ chart }: { chart: BuiltChart }) {
     // this in your data", which is a different claim from "nothing could
     // be computed for it".
     return (
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <p className="text-sm font-semibold text-foreground">{spec.title}</p>
         <p className="mt-2 text-xs text-muted">{t("nothingToPlot")}</p>
       </div>
@@ -78,7 +78,7 @@ export function AnalysisChart({ chart }: { chart: BuiltChart }) {
   );
 
   return (
-    <div className="rounded-2xl border border-border bg-panel p-5">
+    <div className="surface">
       <p className="text-sm font-semibold text-foreground">{spec.title}</p>
       {spec.reason ? <p className="mt-1 text-xs text-muted">{spec.reason}</p> : null}
       {chart.truncated ? (

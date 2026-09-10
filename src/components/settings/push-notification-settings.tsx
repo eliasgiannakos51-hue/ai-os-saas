@@ -184,7 +184,7 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
 
   if (!supported) {
     return (
-      <div className="rounded-xl border border-border bg-panel p-5">
+      <div className="surface">
         <h2 className="flex items-center gap-2 text-sm font-semibold">
           <BellOff className="h-4 w-4 text-muted" aria-hidden="true" />
           {t("title")}
@@ -201,7 +201,7 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
   }
 
   return (
-    <div className="rounded-xl border border-border bg-panel p-5">
+    <div className="surface">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="flex items-center gap-2 text-sm font-semibold">

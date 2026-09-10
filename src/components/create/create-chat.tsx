@@ -346,7 +346,7 @@ export function CreateChat({
             type="submit"
             disabled={loading || !input.trim()}
             aria-label={t("send")}
-            className="absolute bottom-3 end-3 z-[2] flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fcd34d_0%,#f97316_60%,#dc4a04_100%)] text-black shadow-[0_4px_18px_-4px_rgba(249,115,22,0.7)] transition-all duration-200 hover:brightness-110 hover:shadow-[0_6px_26px_-4px_rgba(249,115,22,0.9)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+            className="absolute bottom-3 end-3 z-[2] flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fcd34d_0%,#f97316_60%,#dc4a04_100%)] text-black transition-all duration-200 hover:brightness-110 hover: disabled:cursor-not-allowed disabled:opacity-40"
           >
             {loading ? (
               <ThinkingIndicator size="sm" tone="inherit" />
@@ -404,7 +404,7 @@ export function CreateChat({
           {result.type === "answered" && (
             <div
               data-testid="create-answer"
-              className="flex items-start gap-3 rounded-2xl border border-border bg-panel p-4 text-sm"
+              className="flex items-start gap-3 surface-tight text-sm"
             >
               <MessageCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" aria-hidden="true" />
               <div className="min-w-0">

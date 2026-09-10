@@ -33,7 +33,7 @@ export function WhatChangedCard({
   const real = changes.filter((c) => c.count > 0);
   if (real.length === 0) return null;
   return (
-    <section className="mt-6 rounded-2xl border border-border bg-panel p-5">
+    <section className="mt-6 surface">
       <div className="flex flex-wrap items-center gap-2">
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400">
           <History className="h-4 w-4" aria-hidden="true" />

@@ -287,7 +287,7 @@ export function ResearchWorkspace({
 
   return (
     <div className="space-y-5">
-      <section className="space-y-3 rounded-2xl border border-border bg-panel/60 p-4">
+      <section className="space-y-3 surface-tight">
         <label htmlFor="research-topic" className="text-sm font-semibold text-foreground">
           {t("topicLabel")}
         </label>
@@ -533,7 +533,7 @@ export function ResearchWorkspace({
       )}
 
       {open?.status === "ready" && (
-        <section className="space-y-4 rounded-2xl border border-border bg-panel/60 p-4">
+        <section className="space-y-4 surface-tight">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h2 className="text-sm font-semibold text-foreground">{open.topic}</h2>
             <button

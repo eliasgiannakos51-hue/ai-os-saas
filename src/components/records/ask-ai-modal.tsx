@@ -193,7 +193,7 @@ export function AskAiModal({
         role="dialog"
         aria-modal="true"
         aria-label={t("title", { title: moduleTitle })}
-        className="relative flex h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-panel shadow-[0_0_0_1px_rgba(249,115,22,0.05)] sm:h-[640px]"
+        className="relative flex h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-panel sm:h-[640px]"
       >
         <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div className="flex min-w-0 items-start gap-3">
@@ -338,7 +338,7 @@ export function AskAiModal({
                 type="submit"
                 disabled={sending || !input.trim()}
                 aria-label={t("send")}
-                className="absolute bottom-2 end-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                className="absolute bottom-2 end-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {sending ? (
                   <ThinkingIndicator size="sm" tone="inherit" />

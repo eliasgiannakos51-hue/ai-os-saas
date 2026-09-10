@@ -192,7 +192,7 @@ export function CostDashboard({ data, locale }: { data: CostDashboardData; local
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mb-6 rounded-2xl border border-border bg-panel p-5">
+    <section className="mb-6 surface">
       <h2 className="mb-3 text-sm font-semibold text-foreground">{title}</h2>
       {children}
     </section>
@@ -215,7 +215,7 @@ function Stat({
   tone?: "good" | "bad";
 }) {
   return (
-    <div className="rounded-xl border border-border bg-panel p-3">
+    <div className="surface-tight">
       <p className="text-[11px] text-muted">{label}</p>
       <p
         className={`mt-0.5 text-lg font-semibold tabular-nums ${

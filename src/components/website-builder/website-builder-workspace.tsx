@@ -1255,7 +1255,7 @@ export function WebsiteBuilderWorkspace({
                 type="submit"
                 form={EDIT_FORM_ID}
                 disabled={editing || !editText.trim() || previewWebsite.status !== "completed"}
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {editing ? (
                   <ThinkingIndicator size="sm" tone="inherit" />
@@ -1665,7 +1665,7 @@ export function WebsiteBuilderWorkspace({
           showForm ? (
             <form
               onSubmit={handleGenerate}
-              className="panel-pop-in space-y-3 rounded-2xl border border-border bg-panel p-5"
+              className="panel-pop-in space-y-3 surface"
             >
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-foreground">{t("newProject")}</h2>
@@ -1831,7 +1831,7 @@ export function WebsiteBuilderWorkspace({
                 <button
                   type="submit"
                   disabled={generating || !name.trim() || !description.trim()}
-                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {generating ? (
                     <ThinkingIndicator size="sm" tone="inherit" />
@@ -1849,7 +1849,7 @@ export function WebsiteBuilderWorkspace({
                 resetGenerationForm();
                 setShowForm(true);
               }}
-              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
             >
               <Plus className="h-4 w-4" aria-hidden="true" /> {t("newProject")}
             </button>

@@ -82,7 +82,7 @@ export default async function DeepResearchPage({
         {/* The two things a person should know before spending credits on
             this: it takes minutes, and it paraphrases rather than
             reprinting what it finds. */}
-        <p className="mb-4 rounded-xl border border-border bg-panel/60 p-3 text-[11px] leading-relaxed text-muted">
+        <p className="mb-4 surface-tight text-[11px] leading-relaxed text-muted">
           {t("intro")}
         </p>
 

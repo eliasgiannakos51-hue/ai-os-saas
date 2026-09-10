@@ -128,7 +128,7 @@ export function IdeaRow({
     return (
       <form
         onSubmit={handleSave}
-        className="space-y-4 rounded-2xl border border-border bg-panel p-4"
+        className="space-y-4 surface-tight"
       >
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">{t("edit")}</h2>
@@ -229,7 +229,7 @@ export function IdeaRow({
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:w-auto"
+          className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-50 sm:w-auto"
         >
           {loading ? tModule("saving") : tModule("save")}
         </button>

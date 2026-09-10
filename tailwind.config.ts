@@ -240,6 +240,44 @@ const config: Config = {
       borderRadius: {
         card: "14px",
       },
+      /*
+       * THE TYPE SCALE, REDESIGN PHASE 4.
+       *
+       * WHY THIS IS A TOKEN CHANGE AND NOT A SWEEP OF THE COMPONENTS.
+       * scripts/design-census.mjs counted 1,570 sized elements and 1,499
+       * of them — NINETY-FIVE PER CENT — at the two smallest sizes: 913
+       * `text-xs` and 586 `text-sm`. A product written almost entirely at
+       * 12px and 14px has no hierarchy to improve; it has one size. Fixing
+       * that by editing 1,499 class names would be 1,499 chances to get a
+       * different one wrong. Redefining what the two names MEAN moves all
+       * of them at once, and moves them consistently.
+       *
+       * IN rem, NEVER px. globals.css sets `html { font-size:
+       * var(--app-font-size) }` and Settings offers small/medium/large/xl
+       * (14/16/18/20px) — the whole accessibility control is that root
+       * size, and a scale in px would silently switch it off. Every value
+       * below is relative to a 16px root.
+       *
+       * WHAT MOVED, AND WHAT DID NOT. The floor comes up (12->13, 14->15)
+       * so body text is readable, and the top opens up (24->26, 30->32,
+       * 36->40) so a heading reads as a heading. Line height rises with
+       * the small sizes — the old 12/16 is 1.33, which is tight for Greek
+       * and unreadable for Arabic diacritics — and tightens on the big
+       * ones, where the default is loose. Negative tracking only above
+       * 24px, where it is a correction rather than a style.
+       */
+      fontSize: {
+        xs: ["0.8125rem", { lineHeight: "1.125rem" }],
+        sm: ["0.9375rem", { lineHeight: "1.375rem" }],
+        base: ["1rem", { lineHeight: "1.5625rem" }],
+        lg: ["1.125rem", { lineHeight: "1.625rem" }],
+        xl: ["1.3125rem", { lineHeight: "1.75rem" }],
+        "2xl": ["1.625rem", { lineHeight: "2rem", letterSpacing: "-0.01em" }],
+        "3xl": ["2rem", { lineHeight: "2.375rem", letterSpacing: "-0.015em" }],
+        "4xl": ["2.5rem", { lineHeight: "2.75rem", letterSpacing: "-0.02em" }],
+        "5xl": ["3.125rem", { lineHeight: "3.25rem", letterSpacing: "-0.02em" }],
+        "6xl": ["3.875rem", { lineHeight: "4rem", letterSpacing: "-0.025em" }],
+      },
       keyframes: {
         "fade-in": {
           "0%": { opacity: "0", transform: "translateY(4px)" },

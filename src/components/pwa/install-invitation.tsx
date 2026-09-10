@@ -44,7 +44,7 @@ export function InstallInvitation({
       aria-label={t("installTitle")}
       data-testid="install-invitation"
       data-surface={surface}
-      className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-sm rounded-xl border border-border bg-panel p-4 shadow-lg md:left-auto md:end-4 md:mx-0"
+      className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-sm surface-tight shadow-lg md:left-auto md:end-4 md:mx-0"
     >
       <div className="flex items-start gap-3">
         <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400">

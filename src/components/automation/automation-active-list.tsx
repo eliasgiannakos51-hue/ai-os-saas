@@ -80,7 +80,7 @@ export function AutomationActiveList({ automations }: { automations: UserAutomat
   }
 
   return (
-    <div className="mb-6 rounded-2xl border border-border bg-panel p-4">
+    <div className="mb-6 surface-tight">
       <div className="mb-3 flex items-center gap-2">
         <Repeat className="h-4 w-4 text-orange-400" aria-hidden="true" />
         <p className="text-sm font-semibold text-foreground">{t("activeSectionTitle")}</p>

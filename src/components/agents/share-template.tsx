@@ -131,7 +131,7 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
   }
 
   return (
-    <div className="space-y-2 rounded-xl border border-border p-3">
+    <div className="space-y-2 surface-tight">
       <p className="flex items-center gap-2 text-xs font-medium text-foreground">
         <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
         {t("title")}

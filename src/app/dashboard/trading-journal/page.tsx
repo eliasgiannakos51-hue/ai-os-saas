@@ -85,7 +85,7 @@ export default async function TradingJournalPage({
       <TradingDisclaimer variant="block" />
 
       {trades.length === 0 ? (
-        <p className="rounded-2xl border border-border bg-panel/60 p-5 text-sm text-muted">
+        <p className="surface text-sm text-muted">
           {t("empty")}{" "}
           <Link href="/dashboard/trading" className="text-orange-400 underline">
             {t("emptyCta")}

@@ -112,7 +112,7 @@ export function OverageSettings() {
   return (
     <div
       id="overage"
-      className="mb-6 scroll-mt-20 space-y-4 rounded-2xl border border-border bg-panel p-5"
+      className="mb-6 scroll-mt-20 space-y-4 surface"
     >
       <div>
         <h2 className="text-sm font-semibold text-foreground">{t("title")}</h2>

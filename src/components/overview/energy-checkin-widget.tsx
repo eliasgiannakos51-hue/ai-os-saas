@@ -72,7 +72,7 @@ export function EnergyCheckinWidget({
   }
 
   return (
-    <div className={`rounded-2xl border border-border bg-panel p-4 ${className}`}>
+    <div className={`surface-tight ${className}`}>
       <div className="flex items-center gap-3">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
           <Zap className="h-4 w-4" aria-hidden="true" />

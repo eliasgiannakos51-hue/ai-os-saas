@@ -21,7 +21,7 @@ export function ActiveMissionCard({
   return (
     <Link
       href={href}
-      className="mt-6 flex items-center gap-3 rounded-2xl border border-border bg-panel p-4 transition-all duration-200 hover:border-orange-500/40"
+      className="mt-6 flex items-center gap-3 surface-tight transition-all duration-200 hover:border-orange-500/40"
     >
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
         <Rocket className="h-4 w-4" aria-hidden="true" />

@@ -255,7 +255,7 @@ export default async function SettingsPage() {
           ))}
         </nav>
 
-        <div className="mb-6 rounded-2xl border border-border bg-panel p-5">
+        <div className="mb-6 surface">
           <p className="text-xs text-muted">{t("signedInAs")}</p>
           <p className="mt-1 text-sm text-foreground">{user.email}</p>
         </div>
@@ -376,7 +376,7 @@ export default async function SettingsPage() {
 
         <AchievementsSection unlocked={unlockedAchievements} />
 
-        <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
+        <div className="mb-6 space-y-3 surface">
           <h2 className="text-sm font-semibold text-foreground">{t("exportData.title")}</h2>
           <p className="text-xs text-muted">{t("exportData.description")}</p>
           <ExportDataButton />
@@ -400,7 +400,7 @@ export default async function SettingsPage() {
             where these five words are already translated — tKey is the
             unscoped translator this file already holds for exactly this
             kind of full dotted path. */}
-        <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
+        <div className="mb-6 space-y-3 surface">
           <h2 className="text-sm font-semibold text-foreground">{t("legalLinks.title")}</h2>
           <p className="text-xs text-muted">{t("legalLinks.description")}</p>
           <div className="flex flex-wrap gap-2 pt-1">

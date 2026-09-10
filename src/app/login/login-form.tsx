@@ -141,7 +141,7 @@ export function LoginForm() {
           </p>
         )}
 
-        <div className="rounded-2xl border border-border bg-panel p-6 shadow-[0_0_0_1px_rgba(249,115,22,0.05)]">
+        <div className="surface">
           <SocialAuthButtons />
 
           <form onSubmit={handleSubmit} className="space-y-4">

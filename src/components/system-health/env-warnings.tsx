@@ -26,7 +26,7 @@ const QUIET_SUMMARY = "Nothing is broken, but a feature is dark for a reason wor
 export function EnvWarnings({ warnings }: { warnings: EnvWarning[] }) {
   if (warnings.length === 0) {
     return (
-      <section className="mb-6 rounded-2xl border border-border bg-panel p-4">
+      <section className="mb-6 surface-tight">
         <h2 className="text-sm font-semibold text-fg">Configuration</h2>
         <p className="mt-1 text-xs text-muted">
           No half-configured pairs. Every variable that needs a partner has one.

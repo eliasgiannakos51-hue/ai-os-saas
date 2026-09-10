@@ -77,7 +77,7 @@ export function LibrarySearch() {
       </div>
 
       {results !== null && results.length === 0 && !busy && (
-        <p className="mt-4 rounded-xl border border-border bg-panel/60 p-6 text-center text-sm text-muted">
+        <p className="mt-4 surface text-center text-sm text-muted">
           {t("searchNoResults", { query: query.trim() })}
         </p>
       )}

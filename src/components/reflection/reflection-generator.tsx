@@ -100,7 +100,7 @@ export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" }
         type="button"
         onClick={handleGenerate}
         disabled={loading}
-        className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Sparkles className="h-4 w-4" aria-hidden="true" />
         {loading ? t("generating") : t("generateButton")}
@@ -113,7 +113,7 @@ export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" }
       )}
 
       {stats && (
-        <div className="rounded-2xl border border-border bg-panel p-5">
+        <div className="surface">
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-semibold text-foreground">{t("entriesTitle")}</p>
             {/* COLOUR ONLY WHEN THERE IS SOMETHING TO SAY — V4.6 #7.

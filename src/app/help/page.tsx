@@ -79,7 +79,7 @@ function Article({
   return (
     // id, so every answer has its own link. Support replies point at a
     // specific answer, not at "the help page, scroll down".
-    <article id={article.slug} className="scroll-mt-24 rounded-2xl border border-border bg-panel/60 p-4">
+    <article id={article.slug} className="scroll-mt-24 surface-tight">
       {/* THE FALLBACK IS SAID OUT LOUD. A reader who asked for Spanish and
           got English is told so, and the text carries lang="en" so a screen
           reader switches voice rather than reading English words with
@@ -193,7 +193,7 @@ export default async function HelpPage() {
           ))}
         </main>
 
-        <footer className="mt-12 rounded-2xl border border-border bg-panel/60 p-4">
+        <footer className="mt-12 surface-tight">
           <h2 className="text-sm font-semibold text-foreground">{t("notFoundTitle")}</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted">
             {t("notFoundBody")}

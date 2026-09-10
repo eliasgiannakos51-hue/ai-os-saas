@@ -273,8 +273,10 @@ const MUTANTS = [
     dimension: "F. hierarchy",
     name: "the examples move above the input",
     file: OVERVIEW,
-    from: "          <CreateChat showHeading={false} />",
-    to: "          <FirstScreenExamples />\n          <CreateChat showHeading={false} />",
+    // `hero` since redesign phase 1 — the field is 46vh on Home now, and
+    // this anchor moved with it.
+    from: "          <CreateChat showHeading={false} hero />",
+    to: "          <FirstScreenExamples />\n          <CreateChat showHeading={false} hero />",
     expect: "below the input, not above it",
   },
   {

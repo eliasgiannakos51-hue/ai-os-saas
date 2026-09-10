@@ -55,8 +55,13 @@ const MUTANTS = [
   {
     name: "the greeting climbs back above the promise",
     file: GREETING,
-    from: '        <h1 className="hero-gradient-text text-3xl font-bold leading-[1.15] tracking-tight sm:text-4xl lg:text-5xl">\n          {tPromise("oneSentence")}\n        </h1>',
-    to: '        <h1 className="hero-gradient-text text-3xl font-bold leading-[1.15] tracking-tight sm:text-4xl lg:text-5xl">\n          {greeting}\n        </h1>',
+    // Re-anchored by redesign phase 4: the heading no longer carries
+    // hero-gradient-text (a title has no gradient now), so the anchor is
+    // the CONTENT rather than the class list — which is what this mutant
+    // is about anyway, and does not go stale the next time the heading is
+    // restyled.
+    from: '          {tPromise("oneSentence")}\n        </h1>',
+    to: '          {greeting}\n        </h1>',
     expect: "every declared surface renders the sentence",
   },
   {

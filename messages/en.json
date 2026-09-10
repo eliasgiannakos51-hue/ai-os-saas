@@ -1179,6 +1179,16 @@
       "answerItInstead": "Answer it",
       "recordItAnyway": "Record it anyway"
     },
+    "goal": {
+      "willOpen": "This goes to {destination}, with what you wrote.",
+      "costsThere": "{credits, plural, one {# credit} other {# credits}} when you press the button there. Nothing is charged now.",
+      "freeThere": "Nothing is charged now, and nothing is charged on arrival.",
+      "confirm": "Yes, do it",
+      "change": "Change something",
+      "which": "Which one do you mean?",
+      "vague": "Say a little more, so this goes to the right place.",
+      "dismiss": "Never mind"
+    },
     "timeline": {
       "title": "Mine",
       "allModules": "All Modules",

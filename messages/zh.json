@@ -1179,6 +1179,16 @@
       "answerItInstead": "回答它",
       "recordItAnyway": "仍然记录"
     },
+    "goal": {
+      "willOpen": "这会带着你写的内容前往{destination}。",
+      "costsThere": "在那里按下按钮时会用掉 {credits} 积分。现在不收取任何费用。",
+      "freeThere": "现在不收费，到达时也不收费。",
+      "confirm": "好，去吧",
+      "change": "改一下",
+      "which": "你指的是哪一个？",
+      "vague": "再多说一点，这样才能送到正确的地方。",
+      "dismiss": "算了"
+    },
     "timeline": {
       "title": "我的内容",
       "allModules": "所有模块",

@@ -1179,6 +1179,16 @@
       "answerItInstead": "Rispondi",
       "recordItAnyway": "Registrala comunque"
     },
+    "goal": {
+      "willOpen": "Questo va a {destination}, con quello che hai scritto.",
+      "costsThere": "{credits, plural, one {# credito} other {# crediti}} quando premerai il pulsante lì. Ora non viene addebitato nulla.",
+      "freeThere": "Ora non viene addebitato nulla, e nemmeno all'arrivo.",
+      "confirm": "Sì, fallo",
+      "change": "Cambia qualcosa",
+      "which": "Quale intendi?",
+      "vague": "Dimmi qualcosa in più, così va nel posto giusto.",
+      "dismiss": "Lascia stare"
+    },
     "timeline": {
       "title": "Le mie cose",
       "allModules": "Tutti i moduli",

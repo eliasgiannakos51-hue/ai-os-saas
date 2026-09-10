@@ -1,6 +1,6 @@
 # The first run — fr
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **600 strings**. The whole product is 3019, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **608 strings**. The whole product is 3027, which is why this file exists.
 
 **Start with tier 1. It is 45 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 365 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2494,7 +2494,7 @@ Cela n'a pas marché. Réessayez.
 
 Chargement…
 
-## Tier 3 — Further in — only if you have time (190)
+## Tier 3 — Further in — only if you have time (198)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2761,6 +2761,54 @@ Vous n'avez plus de crédits
 > EN — Upgrade plan
 
 Changer de forfait
+
+**`dashboard.goal.change`**
+
+> EN — Change something
+
+Modifier quelque chose
+
+**`dashboard.goal.confirm`**
+
+> EN — Yes, do it
+
+Oui, allez-y
+
+**`dashboard.goal.costsThere`**
+
+> EN — {credits, plural, one {# credit} other {# credits}} when you press the button there. Nothing is charged now.
+
+{credits, plural, one {# crédit} other {# crédits}} quand vous appuierez sur le bouton là-bas. Rien n'est facturé maintenant.
+
+**`dashboard.goal.dismiss`**
+
+> EN — Never mind
+
+Laissez tomber
+
+**`dashboard.goal.freeThere`**
+
+> EN — Nothing is charged now, and nothing is charged on arrival.
+
+Rien n'est facturé maintenant, ni à l'arrivée.
+
+**`dashboard.goal.vague`**
+
+> EN — Say a little more, so this goes to the right place.
+
+Dites-en un peu plus, pour que cela arrive au bon endroit.
+
+**`dashboard.goal.which`**
+
+> EN — Which one do you mean?
+
+Lequel voulez-vous dire ?
+
+**`dashboard.goal.willOpen`**
+
+> EN — This goes to {destination}, with what you wrote.
+
+Ceci part vers {destination}, avec ce que vous avez écrit.
 
 **`dashboard.ideas.competitorsLabel`**
 

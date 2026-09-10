@@ -79,10 +79,13 @@ function isRunning(report: ResearchReport): boolean {
  * nothing is charged for the expensive half until Run is pressed.
  */
 export function ResearchWorkspace({
+  initialTopic,
   initialReports,
   monthlyCap,
   usedThisMonth,
 }: {
+  /** The question Home routed here, already in the box, never auto-run. */
+  initialTopic?: string;
   initialReports: ResearchReport[];
   monthlyCap: number | null;
   usedThisMonth: number;
@@ -95,7 +98,7 @@ export function ResearchWorkspace({
   const { addToast } = useToast();
 
   const [reports, setReports] = useState(initialReports);
-  const [topic, setTopic] = useState("");
+  const [topic, setTopic] = useState(initialTopic ?? "");
   const topicRef = useRef<HTMLTextAreaElement | null>(null);
   const [planning, setPlanning] = useState(false);
   const [draft, setDraft] = useState<{ report: ResearchReport; credits: number } | null>(null);

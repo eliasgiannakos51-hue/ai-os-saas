@@ -270,10 +270,22 @@ const LATIN_DIGRAPHS: ReadonlyArray<readonly [string, readonly string[]]> = [
   ["ai", ["e"]],
   ["au", ["av"]],
   ["av", ["av"]],
-  ["af", ["av"]],
+  // BOTH READINGS, AND THE SECOND ONE WAS MISSING. "af" is αυ before a
+  // voiceless consonant ("afto" -> αυτό), and it is ALSO a plain alpha
+  // followed by a phi — "diafanies" is δια-φάνειες, "grafeio" is γραφείο,
+  // "kafe" is καφές. With only the αυ reading, every Greek word with a
+  // phi after an alpha became unreachable from an English keyboard:
+  // greeklishSkeletons("diafanies") returned "diavanies" alone while
+  // greekSkeleton("διαφάνειες") is "diafanies", so the two could never
+  // meet. Found on 2026-09-10 by scripts/tests/producer-routes.test.mjs,
+  // which measured 28 of 30 phrases and named both misses; six surfaces
+  // share this table, so the same hole was in all of them.
+  ["af", ["av", "af"]],
   ["eu", ["ev"]],
   ["ev", ["ev"]],
-  ["ef", ["ev"]],
+  // The same, for epsilon: "efxaristo" is ευχαριστώ and "efimerida" is
+  // εφημερίδα, and one rule cannot serve both without branching.
+  ["ef", ["ev", "ef"]],
   ["th", ["8"]],
   ["ch", ["x"]],
   ["ps", ["y"]],

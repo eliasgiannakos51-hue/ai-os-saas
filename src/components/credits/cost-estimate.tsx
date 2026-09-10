@@ -2,11 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { Zap } from "lucide-react";
-import { estimateForAction, type ActionProfileKey } from "@/lib/billing/estimate";
-import { needsLargeActionConfirmation } from "@/lib/billing/credit-formula";
-import { DEFAULTS } from "@/lib/billing/pricing-config";
-import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
-import { useCredits } from "@/components/credits/credits-context";
 import { useRipple } from "@/hooks/use-ripple";
 
 /**
@@ -19,27 +14,11 @@ import { useRipple } from "@/hooks/use-ripple";
  * with the list price — which is what the Website Builder did — showed
  * Ultimate users less than half the real number.
  */
-export function useCostEstimate(
-  action: ActionProfileKey,
-  params: { inputChars: number; imageCount?: number }
-) {
-  const { accountCreditPriceEur, planSlug } = useCredits();
-  const estimate = estimateForAction(
-    action,
-    {
-      model: WEBSITE_BUILDER_MODEL,
-      inputChars: params.inputChars,
-      imageCount: params.imageCount,
-      planSlug,
-    },
-    DEFAULTS,
-    accountCreditPriceEur ?? undefined
-  );
-  return {
-    credits: estimate.estimatedCredits,
-    needsConfirmation: needsLargeActionConfirmation(estimate.estimatedCredits, DEFAULTS),
-  };
-}
+// The hook now lives in ./use-cost-estimate, so a caller that wants
+// only the number does not drag this file's dialog into its page — see
+// the note there. Re-exported here because every existing import points
+// at this path.
+export { useCostEstimate } from "@/components/credits/use-cost-estimate";
 
 /** Small "~N credits" hint, meant to sit directly under a submit button. */
 export function CostEstimateHint({ credits }: { credits: number }) {

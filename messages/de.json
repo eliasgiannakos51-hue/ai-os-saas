@@ -1179,6 +1179,16 @@
       "answerItInstead": "Beantworten",
       "recordItAnyway": "Trotzdem ablegen"
     },
+    "goal": {
+      "willOpen": "Das geht zu {destination}, mit dem, was du geschrieben hast.",
+      "costsThere": "{credits, plural, one {# Credit} other {# Credits}}, wenn du dort auf die Schaltfläche drückst. Jetzt wird nichts berechnet.",
+      "freeThere": "Jetzt wird nichts berechnet, und bei der Ankunft auch nicht.",
+      "confirm": "Ja, mach das",
+      "change": "Etwas ändern",
+      "which": "Welches meinst du?",
+      "vague": "Sag ein bisschen mehr, damit es an die richtige Stelle geht.",
+      "dismiss": "Lass gut sein"
+    },
     "timeline": {
       "title": "Meine Sachen",
       "allModules": "Alle Module",

@@ -78,7 +78,16 @@ function CopyButton({ text, className }: { text: string; className?: string }) {
   );
 }
 
-export function PostsWorkspace({ history }: { history: PostRow[] }) {
+export function PostsWorkspace({
+  history,
+  initialDescription,
+}: {
+  history: PostRow[];
+  /** The brief Home routed here, already in the box — see
+   *  lib/create-studio/producer-routes.ts. Seeded, never auto-sent: the
+   *  person still presses the button and still sees the estimate first. */
+  initialDescription?: string;
+}) {
   const t = useTranslations("posts");
   const tSteps = useTranslations("aiSteps");
   const locale = useLocale();
@@ -86,7 +95,7 @@ export function PostsWorkspace({ history }: { history: PostRow[] }) {
   const { addToast } = useToast();
   const supabase = useMemo(() => createClient(), []);
 
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(initialDescription ?? "");
   const [platforms, setPlatforms] = useState<PostPlatform[]>([...POST_PLATFORMS]);
   const [running, setRunning] = useState(false);
   const [selected, setSelected] = useState<Selected | null>(() => {

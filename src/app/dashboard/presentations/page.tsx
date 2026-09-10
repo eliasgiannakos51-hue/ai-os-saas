@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { pageTitle } from "@/lib/page-title";
 import { MODULE_TITLE_KEYS } from "@/lib/search/module-title-keys";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { CREATE_ATTACHMENT_BUCKET } from "@/lib/create-attachment-image";
 import { isUnsplashConfigured } from "@/lib/unsplash";
@@ -42,7 +43,7 @@ const OWN_IMAGE_URL_TTL_SECONDS = 60 * 60;
 export default async function PresentationsPage({
   searchParams,
 }: {
-  searchParams?: { record?: string };
+  searchParams?: { record?: string; brief?: string };
 }) {
   const t = await getTranslations("presentations");
   const requestedRecord = typeof searchParams?.record === "string" ? searchParams.record : null;
@@ -109,6 +110,7 @@ export default async function PresentationsPage({
         helpKey="help.presentations"
       />
       <PresentationsWorkspace
+        initialDescription={readExampleParam(searchParams?.brief)}
         decks={decks}
         notes={notes}
         ownImageUrls={ownImageUrls}

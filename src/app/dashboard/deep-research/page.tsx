@@ -11,6 +11,7 @@ import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { maxResearchRunsForPlan } from "@/lib/files/limits";
 import { ResearchWorkspace, type ResearchReport } from "@/components/research/research-workspace";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,16 @@ export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.deepResearch");
 }
 
-export default async function DeepResearchPage() {
+// THE BRIEF ARRIVES IN THE URL. Home's field routes a research request
+// here with the question the person already typed; readExampleParam is
+// the same clamp the first-screen examples use, and
+// scripts/tests/producer-routes.test.mjs compares this parameter's name
+// against the one lib/create-studio/producer-routes.ts emits.
+export default async function DeepResearchPage({
+  searchParams,
+}: {
+  searchParams: { brief?: string };
+}) {
   const supabase = createClient();
 
   const user = await getCurrentUser();
@@ -77,6 +87,7 @@ export default async function DeepResearchPage() {
         </p>
 
         <ResearchWorkspace
+        initialTopic={readExampleParam(searchParams.brief)}
           initialReports={(reports ?? []) as unknown as ResearchReport[]}
           monthlyCap={isAdmin ? null : cap}
           usedThisMonth={count ?? 0}

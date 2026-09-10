@@ -160,7 +160,13 @@ console.log(
 // Set AT the measurement rather than one under it, for the reason V5 #22
 // found the hard way: a ratchet one below reality hands the next mutation
 // that deletes a suite a free pass, and its own suite is what caught that.
-const RATCHET = 135;
+// 135 -> 136, redesign phase 1: producer-routes.mutation.mjs. It was set
+// to 137 for one run on the theory that the round's other new gate
+// counted too — home-first-screen.prodtest.mjs — and it does not: a
+// prodtest is out of the sweep's reach and this ratchet counts gates the
+// sweep can drive. Read the number off the run rather than reasoning
+// about it, which is the same lesson as every other entry here.
+const RATCHET = 136;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

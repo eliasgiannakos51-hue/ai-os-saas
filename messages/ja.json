@@ -1179,6 +1179,16 @@
       "answerItInstead": "答える",
       "recordItAnyway": "それでも記録する"
     },
+    "goal": {
+      "willOpen": "入力された内容を持って{destination}へ移動します。",
+      "costsThere": "向こうでボタンを押すと {credits} クレジットかかります。今は何も請求されません。",
+      "freeThere": "今は何も請求されませんし、移動しても請求されません。",
+      "confirm": "はい、実行",
+      "change": "少し変える",
+      "which": "どちらのことですか？",
+      "vague": "もう少し詳しく書いてください。正しい場所に送るためです。",
+      "dismiss": "やめておく"
+    },
     "timeline": {
       "title": "自分のもの",
       "allModules": "すべてのモジュール",

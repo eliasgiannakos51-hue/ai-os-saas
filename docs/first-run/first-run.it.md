@@ -1,6 +1,6 @@
 # The first run — it
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **600 strings**. The whole product is 3019, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **608 strings**. The whole product is 3027, which is why this file exists.
 
 **Start with tier 1. It is 45 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 365 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2494,7 +2494,7 @@ Non ha funzionato. Riprova.
 
 Caricamento…
 
-## Tier 3 — Further in — only if you have time (190)
+## Tier 3 — Further in — only if you have time (198)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2761,6 +2761,54 @@ Hai esaurito i crediti
 > EN — Upgrade plan
 
 Cambia piano
+
+**`dashboard.goal.change`**
+
+> EN — Change something
+
+Cambia qualcosa
+
+**`dashboard.goal.confirm`**
+
+> EN — Yes, do it
+
+Sì, fallo
+
+**`dashboard.goal.costsThere`**
+
+> EN — {credits, plural, one {# credit} other {# credits}} when you press the button there. Nothing is charged now.
+
+{credits, plural, one {# credito} other {# crediti}} quando premerai il pulsante lì. Ora non viene addebitato nulla.
+
+**`dashboard.goal.dismiss`**
+
+> EN — Never mind
+
+Lascia stare
+
+**`dashboard.goal.freeThere`**
+
+> EN — Nothing is charged now, and nothing is charged on arrival.
+
+Ora non viene addebitato nulla, e nemmeno all'arrivo.
+
+**`dashboard.goal.vague`**
+
+> EN — Say a little more, so this goes to the right place.
+
+Dimmi qualcosa in più, così va nel posto giusto.
+
+**`dashboard.goal.which`**
+
+> EN — Which one do you mean?
+
+Quale intendi?
+
+**`dashboard.goal.willOpen`**
+
+> EN — This goes to {destination}, with what you wrote.
+
+Questo va a {destination}, con quello che hai scritto.
 
 **`dashboard.ideas.competitorsLabel`**
 

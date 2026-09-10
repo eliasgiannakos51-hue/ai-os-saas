@@ -1,6 +1,6 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **600 strings**. The whole product is 3019, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **608 strings**. The whole product is 3027, which is why this file exists.
 
 **Start with tier 1. It is 45 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 365 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2086,7 +2086,7 @@ That did not work. Try again.
 
 Loading…
 
-## Tier 3 — Further in — only if you have time (190)
+## Tier 3 — Further in — only if you have time (198)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2310,6 +2310,46 @@ You're out of credits
 
 
 Upgrade plan
+
+**`dashboard.goal.change`**
+
+
+Change something
+
+**`dashboard.goal.confirm`**
+
+
+Yes, do it
+
+**`dashboard.goal.costsThere`**
+
+
+{credits, plural, one {# credit} other {# credits}} when you press the button there. Nothing is charged now.
+
+**`dashboard.goal.dismiss`**
+
+
+Never mind
+
+**`dashboard.goal.freeThere`**
+
+
+Nothing is charged now, and nothing is charged on arrival.
+
+**`dashboard.goal.vague`**
+
+
+Say a little more, so this goes to the right place.
+
+**`dashboard.goal.which`**
+
+
+Which one do you mean?
+
+**`dashboard.goal.willOpen`**
+
+
+This goes to {destination}, with what you wrote.
 
 **`dashboard.ideas.competitorsLabel`**
 

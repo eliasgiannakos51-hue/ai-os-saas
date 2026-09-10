@@ -269,7 +269,20 @@ const BASELINE = {
   // only screen of six with two — measured by accent-census on the real
   // page, 150x44 and 129x44. V4.6 #4's rule is one primary action per
   // SCREEN; it had been applied per CARD.
-  "dashboard/overview/page.tsx": 0,
+  // 0 -> 1, redesign phase 1, AND THE ONE IS THE TARGET RATHER THAN A
+  // CONCESSION. Home now answers a typed request with a preview card —
+  // "I'll open X, it costs ~N there" — whose confirm button IS the
+  // screen's primary action for as long as the card is up. Before the
+  // card there is no filled accent control on Home at all, and the card
+  // draws exactly one.
+  //
+  // It was briefly TWO, and the second was a lie the census told
+  // honestly: importing useCostEstimate pulled cost-estimate.tsx's
+  // confirmation DIALOG into Home's import graph, and its orange button
+  // was counted although it can never be on screen beside the card that
+  // pulled it in. The hook moved to components/credits/use-cost-estimate.ts
+  // instead of this number moving to 2.
+  "dashboard/overview/page.tsx": 1,
   "dashboard/page.tsx": 3,
   // ONE, WHICH IS THE TARGET RATHER THAN A CONCESSION. Added 2026-09-05
   // with the page. Its single filled control is "Look again", the only

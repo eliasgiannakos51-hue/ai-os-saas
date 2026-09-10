@@ -1,6 +1,6 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **600 strings**. The whole product is 3019, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **608 strings**. The whole product is 3027, which is why this file exists.
 
 **Start with tier 1. It is 45 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 365 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2494,7 +2494,7 @@ credits の履歴を見る
 
 読み込み中…
 
-## Tier 3 — Further in — only if you have time (190)
+## Tier 3 — Further in — only if you have time (198)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2761,6 +2761,54 @@ Ionexa をホーム画面に追加
 > EN — Upgrade plan
 
 プランをアップグレード
+
+**`dashboard.goal.change`**
+
+> EN — Change something
+
+少し変える
+
+**`dashboard.goal.confirm`**
+
+> EN — Yes, do it
+
+はい、実行
+
+**`dashboard.goal.costsThere`**
+
+> EN — {credits, plural, one {# credit} other {# credits}} when you press the button there. Nothing is charged now.
+
+向こうでボタンを押すと {credits} クレジットかかります。今は何も請求されません。
+
+**`dashboard.goal.dismiss`**
+
+> EN — Never mind
+
+やめておく
+
+**`dashboard.goal.freeThere`**
+
+> EN — Nothing is charged now, and nothing is charged on arrival.
+
+今は何も請求されませんし、移動しても請求されません。
+
+**`dashboard.goal.vague`**
+
+> EN — Say a little more, so this goes to the right place.
+
+もう少し詳しく書いてください。正しい場所に送るためです。
+
+**`dashboard.goal.which`**
+
+> EN — Which one do you mean?
+
+どちらのことですか？
+
+**`dashboard.goal.willOpen`**
+
+> EN — This goes to {destination}, with what you wrote.
+
+入力された内容を持って{destination}へ移動します。
 
 **`dashboard.ideas.competitorsLabel`**
 

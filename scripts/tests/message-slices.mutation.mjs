@@ -99,7 +99,10 @@ const MUTANTS = [
     // absences and five layout labels through template literals.
     // 65 -> 66 in V5 #22: posts-workspace.tsx does the same for its own
     // four absences, `t(`limits.${limit}`)` over POST_LIMITS.
-    from: "    unbounded: 66,",
+    // 66 -> 67 in redesign phase 1: create/goal-preview.tsx names the
+    // destination through the SIDEBAR's key, which is a full dotted path
+    // from a data file and so cannot declare a namespace.
+    from: "    unbounded: 67,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`
@@ -107,7 +110,7 @@ const MUTANTS = [
     // A `to` that can occur legitimately elsewhere in the same file
     // cannot distinguish "mutated" from "normal".
     to: "    unbounded: 1,",
-    expect: "dashboard: 66 unbounded component(s)",
+    expect: "dashboard: 67 unbounded component(s)",
   },
   {
     // With no prefix the dashboard stops claiming its own routes, they

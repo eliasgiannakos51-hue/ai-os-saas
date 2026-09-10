@@ -1,6 +1,6 @@
 {
-  "total": 3019,
-  "onPath": 600,
+  "total": 3027,
+  "onPath": 608,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -22,7 +22,7 @@
       "n": 3,
       "title": "Further in — only if you have time",
       "note": "Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour.",
-      "count": 190
+      "count": 198
     }
   ],
   "screens": [
@@ -2771,6 +2771,54 @@
           "depth": 2,
           "tier": 3,
           "file": "src/components/credits/out-of-credits-notice.tsx"
+        },
+        {
+          "key": "dashboard.goal.change",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.confirm",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.costsThere",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.dismiss",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.freeThere",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.vague",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.which",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.willOpen",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
         },
         {
           "key": "dashboard.ideas.competitorsLabel",

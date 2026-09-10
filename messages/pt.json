@@ -1179,6 +1179,16 @@
       "answerItInstead": "Responder",
       "recordItAnyway": "Registar mesmo assim"
     },
+    "goal": {
+      "willOpen": "Isto vai para {destination}, com o que escreveste.",
+      "costsThere": "{credits, plural, one {# crédito} other {# créditos}} quando carregares no botão lá. Agora não é cobrado nada.",
+      "freeThere": "Agora não é cobrado nada, nem à chegada.",
+      "confirm": "Sim, faz isso",
+      "change": "Mudar alguma coisa",
+      "which": "Qual deles queres dizer?",
+      "vague": "Diz um pouco mais, para isto ir ao sítio certo.",
+      "dismiss": "Deixa estar"
+    },
     "timeline": {
       "title": "As minhas coisas",
       "allModules": "Todos os módulos",

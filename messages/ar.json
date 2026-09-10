@@ -1179,6 +1179,16 @@
       "answerItInstead": "أجب عنه",
       "recordItAnyway": "سجّله على أي حال"
     },
+    "goal": {
+      "willOpen": "ينتقل هذا إلى {destination} بما كتبته.",
+      "costsThere": "{credits, plural, zero {بدون رصيد} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}} عند الضغط على الزر هناك. لا يُخصم شيء الآن.",
+      "freeThere": "لا يُخصم شيء الآن، ولا عند الوصول.",
+      "confirm": "نعم، نفّذ",
+      "change": "غيّر شيئًا",
+      "which": "أيّهما تقصد؟",
+      "vague": "قل المزيد قليلًا، حتى يصل هذا إلى المكان الصحيح.",
+      "dismiss": "لا يهم"
+    },
     "timeline": {
       "title": "ما أنشأته",
       "allModules": "جميع الوحدات",

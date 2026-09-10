@@ -1,6 +1,6 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **600 strings**. The whole product is 3019, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **608 strings**. The whole product is 3027, which is why this file exists.
 
 **Start with tier 1. It is 45 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 365 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2494,7 +2494,7 @@ AI 编程
 
 加载中…
 
-## Tier 3 — Further in — only if you have time (190)
+## Tier 3 — Further in — only if you have time (198)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2761,6 +2761,54 @@ Safari 从不会主动提示，三步即可完成。
 > EN — Upgrade plan
 
 升级方案
+
+**`dashboard.goal.change`**
+
+> EN — Change something
+
+改一下
+
+**`dashboard.goal.confirm`**
+
+> EN — Yes, do it
+
+好，去吧
+
+**`dashboard.goal.costsThere`**
+
+> EN — {credits, plural, one {# credit} other {# credits}} when you press the button there. Nothing is charged now.
+
+在那里按下按钮时会用掉 {credits} 积分。现在不收取任何费用。
+
+**`dashboard.goal.dismiss`**
+
+> EN — Never mind
+
+算了
+
+**`dashboard.goal.freeThere`**
+
+> EN — Nothing is charged now, and nothing is charged on arrival.
+
+现在不收费，到达时也不收费。
+
+**`dashboard.goal.vague`**
+
+> EN — Say a little more, so this goes to the right place.
+
+再多说一点，这样才能送到正确的地方。
+
+**`dashboard.goal.which`**
+
+> EN — Which one do you mean?
+
+你指的是哪一个？
+
+**`dashboard.goal.willOpen`**
+
+> EN — This goes to {destination}, with what you wrote.
+
+这会带着你写的内容前往{destination}。
 
 **`dashboard.ideas.competitorsLabel`**
 

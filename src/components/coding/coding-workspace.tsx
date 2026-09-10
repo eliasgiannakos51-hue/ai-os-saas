@@ -32,14 +32,23 @@ export type CodeSession = {
   createdAt: string;
 };
 
-export function CodingWorkspace({ sessions, folders }: { sessions: CodeSession[]; folders: string[] }) {
+export function CodingWorkspace({
+  sessions,
+  folders,
+  initialTask,
+}: {
+  sessions: CodeSession[];
+  folders: string[];
+  /** The brief Home routed here, already in the box, never auto-run. */
+  initialTask?: string;
+}) {
   const t = useTranslations("coding");
   const tSteps = useTranslations("aiSteps");
   const router = useRouter();
   const { addToast } = useToast();
 
   const [operation, setOperation] = useState<CodeOperation>("generate");
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(initialTask ?? "");
   const [language, setLanguage] = useState<string>("typescript");
   const [targetLanguage, setTargetLanguage] = useState<string>("python");
   const [useWorkspace, setUseWorkspace] = useState(true);

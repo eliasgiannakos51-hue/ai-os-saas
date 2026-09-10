@@ -120,7 +120,7 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // slicer cannot bound, and `canTrim` is false while it is above zero.
     // A wrong number here does not loosen anything — it makes the gate
     // disagree with the tree, which is what the check reports.
-    unbounded: 66,
+    unbounded: 67,
   },
   {
     name: "onboarding",

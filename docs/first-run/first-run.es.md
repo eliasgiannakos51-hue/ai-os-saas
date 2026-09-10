@@ -1,6 +1,6 @@
 # The first run — es
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **600 strings**. The whole product is 3019, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **608 strings**. The whole product is 3027, which is why this file exists.
 
 **Start with tier 1. It is 45 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 365 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2494,7 +2494,7 @@ No funcionó. Inténtalo otra vez.
 
 Cargando…
 
-## Tier 3 — Further in — only if you have time (190)
+## Tier 3 — Further in — only if you have time (198)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2761,6 +2761,54 @@ Te has quedado sin créditos
 > EN — Upgrade plan
 
 Mejorar plan
+
+**`dashboard.goal.change`**
+
+> EN — Change something
+
+Cambiar algo
+
+**`dashboard.goal.confirm`**
+
+> EN — Yes, do it
+
+Sí, hazlo
+
+**`dashboard.goal.costsThere`**
+
+> EN — {credits, plural, one {# credit} other {# credits}} when you press the button there. Nothing is charged now.
+
+{credits, plural, one {# crédito} other {# créditos}} cuando pulses el botón allí. Ahora no se cobra nada.
+
+**`dashboard.goal.dismiss`**
+
+> EN — Never mind
+
+Déjalo
+
+**`dashboard.goal.freeThere`**
+
+> EN — Nothing is charged now, and nothing is charged on arrival.
+
+No se cobra nada ahora, ni al llegar.
+
+**`dashboard.goal.vague`**
+
+> EN — Say a little more, so this goes to the right place.
+
+Cuéntame un poco más, para que vaya al sitio correcto.
+
+**`dashboard.goal.which`**
+
+> EN — Which one do you mean?
+
+¿A cuál te refieres?
+
+**`dashboard.goal.willOpen`**
+
+> EN — This goes to {destination}, with what you wrote.
+
+Esto va a {destination}, con lo que escribiste.
 
 **`dashboard.ideas.competitorsLabel`**
 

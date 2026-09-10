@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { POSTS_ICON } from "@/lib/module-icons";
 import { normalisePlatforms, parseStoredPostSet } from "@/lib/posts/platforms";
 import { PostsWorkspace, type PostRow } from "@/components/posts/posts-workspace";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,14 @@ export function generateMetadata(): Promise<Metadata> {
  * does not take. What it will not do is stated on the screen by
  * PostsWorkspace rather than left to the name.
  */
-export default async function PostsPage() {
+// THE BRIEF ARRIVES IN THE URL when Home's field routed a post request
+// here. Read through the shared clamp, and the parameter's name is
+// compared against the emitter by scripts/tests/producer-routes.test.mjs.
+export default async function PostsPage({
+  searchParams,
+}: {
+  searchParams: { brief?: string };
+}) {
   const t = await getTranslations("posts");
   const supabase = createClient();
   const user = await getCurrentUser();
@@ -49,7 +57,7 @@ export default async function PostsPage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
       <PageHeader icon={POSTS_ICON} title={t("title")} description={t("description")} helpKey="help.posts" />
-      <PostsWorkspace history={history} />
+      <PostsWorkspace history={history} initialDescription={readExampleParam(searchParams.brief)} />
     </div>
   );
 }

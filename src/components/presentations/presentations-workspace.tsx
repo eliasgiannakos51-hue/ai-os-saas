@@ -57,12 +57,16 @@ export const DECK_LIMITS = ["no_charts", "no_themes", "no_editing", "no_generate
 type Selected = { id: string | null; deck: Deck; creditsCharged: number };
 
 export function PresentationsWorkspace({
+  initialDescription,
   decks,
   notes,
   ownImageUrls,
   unsplashConfigured,
   requestedRecord = null,
 }: {
+  /** The brief Home routed here, already in the box — seeded, never
+   *  auto-sent: the estimate is still shown and the button still pressed. */
+  initialDescription?: string;
   decks: DeckRow[];
   notes: NoteRow[];
   ownImageUrls: Record<string, string>;
@@ -77,7 +81,7 @@ export function PresentationsWorkspace({
   const { addToast } = useToast();
   const supabase = useMemo(() => createClient(), []);
 
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(initialDescription ?? "");
   const [slideCount, setSlideCount] = useState<number>(DEFAULT_SLIDES);
   const [imageSource, setImageSource] = useState<ImageSource>(unsplashConfigured ? "unsplash" : "none");
   const [ownFiles, setOwnFiles] = useState<{ file: File; preview: string }[]>([]);

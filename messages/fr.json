@@ -1179,6 +1179,16 @@
       "answerItInstead": "Y répondre",
       "recordItAnyway": "L'enregistrer quand même"
     },
+    "goal": {
+      "willOpen": "Ceci part vers {destination}, avec ce que vous avez écrit.",
+      "costsThere": "{credits, plural, one {# crédit} other {# crédits}} quand vous appuierez sur le bouton là-bas. Rien n'est facturé maintenant.",
+      "freeThere": "Rien n'est facturé maintenant, ni à l'arrivée.",
+      "confirm": "Oui, allez-y",
+      "change": "Modifier quelque chose",
+      "which": "Lequel voulez-vous dire ?",
+      "vague": "Dites-en un peu plus, pour que cela arrive au bon endroit.",
+      "dismiss": "Laissez tomber"
+    },
     "timeline": {
       "title": "Mes éléments",
       "allModules": "Tous les modules",

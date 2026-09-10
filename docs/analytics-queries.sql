@@ -132,6 +132,38 @@ order by events desc;
 -- about what to cut was a guess. nav_events is that answer. It is also
 -- EMPTY until the deploy — see the header.
 
+-- 29.0  IS THERE ENOUGH DATA TO READ 29.1 AT ALL?
+-- ───────────────────────────────────────────────────────────────────
+-- RUN THIS FIRST, AND BELIEVE IT. Every screen looks unused on an empty
+-- table, and an empty table is exactly what this one is until the
+-- migration has been pasted AND people have navigated for a while. The
+-- redesign asks for TWO WEEKS before anything is hidden on the strength
+-- of these numbers, so that is the bar this row prints a verdict
+-- against. `days_covered` counts DISTINCT DAYS THAT HAVE ROWS, not the
+-- span: a table that was written on day 1 and day 14 and nothing in
+-- between spans a fortnight and knows nothing about it.
+--
+-- A zero row count here has two completely different causes and this
+-- query cannot tell them apart: nobody navigated, or the migration was
+-- never applied and every insert has been failing. api/nav/track FAILS
+-- QUIET on purpose (an error toast on a page that rendered is worse than
+-- a lost row), so nothing anywhere reports the second one. If this
+-- returns "relation does not exist", that is the answer.
+select count(*)                                            as rows_total,
+       count(distinct user_id)                             as distinct_users,
+       count(distinct date_trunc('day', created_at))       as days_covered,
+       min(created_at)::date                               as first_row,
+       max(created_at)::date                               as last_row,
+       case
+         when count(*) = 0 then 'EMPTY — nothing to read'
+         when count(distinct date_trunc('day', created_at)) < 14
+           then 'TOO EARLY — ' || count(distinct date_trunc('day', created_at)) || ' of 14 days'
+         when count(distinct user_id) < 5
+           then 'TOO FEW PEOPLE — ' || count(distinct user_id) || ' accounts'
+         else 'READABLE'
+       end                                                 as verdict
+from public.nav_events;
+
 -- 29.1  WHICH SCREENS ARE OPENED, HOW OFTEN, BY HOW MANY PEOPLE.
 -- The view does the work; this is just how to read it.
 select path,
@@ -253,6 +285,58 @@ limit 40;
 --      BOTH directions                  -> those two screens are one
 --        screen. Merge them or put the second one's content in a panel on
 --        the first.
+
+
+-- 29.5  THE ROWS THE SIDEBAR DRAWS, AGAINST WHAT THEY ARE WORTH.
+-- ───────────────────────────────────────────────────────────────────
+-- WHAT THIS IS FOR: before a redesign hides rows, this says which of the
+-- ones about to go are among the most-opened screens in the product. The
+-- href list below is the sidebar's DRAWN rows — paste the current one
+-- from src/lib/sidebar-nav.ts, which is the only place it is declared.
+--
+-- WHAT THIS QUERY CANNOT TELL YOU, and it matters here more than
+-- anywhere else in this file: nav_events records WHICH SCREEN WAS
+-- OPENED, not WHICH CONTROL WAS CLICKED. There is no click-source
+-- column — deliberately, see the migration's header. A visit from the
+-- sidebar, from the command palette, from a link on another page and
+-- from a bookmark are the same row. So "opens" is the demand for the
+-- DESTINATION, which is the right number for "may this be hidden" (a
+-- hidden page stays reachable) and the wrong number for "was this row
+-- clicked". 29.4's `came_from` is the nearest thing to the difference:
+-- a screen whose inbound rows are all '(direct)' was not being reached
+-- through the sidebar anyway.
+with drawn(href) as (values
+  ('/dashboard/website-builder'), ('/dashboard/documents'), ('/dashboard/coding'),
+  ('/dashboard/voice'), ('/dashboard/presentations'), ('/dashboard/posts'),
+  ('/dashboard/chat'), ('/dashboard/deep-research'), ('/dashboard/predictions'),
+  ('/dashboard/agents'), ('/dashboard/automation'), ('/dashboard/marketplace'),
+  ('/dashboard/timeline'), ('/dashboard/files'), ('/dashboard/finance'),
+  ('/dashboard/sales'), ('/dashboard/trading'), ('/dashboard/memory'),
+  ('/dashboard/business-health'), ('/dashboard/projects'), ('/dashboard/mission'),
+  ('/dashboard/reflection'), ('/dashboard/team'), ('/dashboard/integrations'),
+  ('/dashboard/settings'), ('/help')
+),
+usage as (
+  select path, count(*) as opens, count(distinct user_id) as users
+  from public.nav_events
+  where created_at > now() - interval '30 days'
+  group by path
+)
+select d.href,
+       coalesce(u.opens, 0) as opens,
+       coalesce(u.users, 0) as users,
+       rank() over (order by coalesce(u.opens, 0) desc) as rank_among_drawn
+from drawn d
+left join usage u on u.path = d.href
+order by opens desc, d.href;
+
+--   A ROW WITH ZERO OPENS is a row nobody has needed in thirty days.
+--   A ROW IN THE TOP TEN is one to think twice about hiding, whatever
+--     the redesign says — and the thinking is about where its entry
+--     point goes, not about whether to keep the sidebar row.
+--   THE COMPLEMENT MATTERS TOO: run 29.1 and look for paths that are
+--     NOT in the list above. A screen with real traffic and no sidebar
+--     row is already being found some other way.
 
 
 -- ───────────────────────────────────────────────────────────────────

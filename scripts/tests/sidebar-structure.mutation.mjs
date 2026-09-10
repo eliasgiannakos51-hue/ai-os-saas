@@ -37,7 +37,7 @@ const HINTS = "scripts/tests/sidebar-hints-coverage.test.mjs";
 const NAV = "src/lib/sidebar-nav.ts";
 const VISIBILITY = "src/lib/sidebar-visibility.ts";
 
-const TARGETS = [STRUCTURE, SIZE, NAMING, HINTS, NAV, VISIBILITY];
+const TARGETS = [STRUCTURE, SIZE, NAMING, HINTS, NAV, VISIBILITY, "docs/analytics-queries.sql"];
 
 const MUTANTS = [
   // ---- the order, the names, the count ------------------------------
@@ -152,6 +152,25 @@ const MUTANTS = [
     from: 'const buildGroup = groupOf("Make");',
     to: 'const buildGroup = "";',
     expect: "the Make group scan found hrefs",
+  },
+  {
+    // THE QUERY THAT DECIDES WHAT IS CUT, gone stale. A row drawn in the
+    // sidebar and absent from §29.5 reports as unused for ever, because
+    // the join has nothing to match it against.
+    name: "a drawn row is missing from the analytics query",
+    gate: STRUCTURE,
+    file: "docs/analytics-queries.sql",
+    from: "('/dashboard/projects'), ",
+    to: "",
+    expect: "it is exactly the drawn rows",
+  },
+  {
+    name: "the analytics query lists nothing at all",
+    gate: STRUCTURE,
+    file: "docs/analytics-queries.sql",
+    from: "with drawn(href) as (values",
+    to: "with drawn(href) as (select null::text where false), unused_drawn(href) as (values",
+    expect: "§29.5 lists rows at all",
   },
   {
     name: "sidebar-hints: the parsed item list is emptied",

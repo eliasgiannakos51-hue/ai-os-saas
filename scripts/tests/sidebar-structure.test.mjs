@@ -231,5 +231,27 @@ ok(`every declared heading has a message key (${Object.keys(headingKeys).length}
   Object.keys(headingKeys).length >= DECLARED.length && unmapped.length === 0,
   unmapped.length ? `no key for: ${unmapped.join(", ")}` : "GROUP_HEADING_KEYS was not found in lib/sidebar-label-keys.ts");
 
+console.log("\n== 6. the analytics query names the rows the sidebar draws ==");
+{
+  // WHY A GATE ON A .sql FILE. docs/analytics-queries.sql §29.5 asks the
+  // database which of the DRAWN rows are worth keeping, and it does that
+  // by listing them — a list nothing kept honest. A row added to the
+  // sidebar and not to that query is a row the redesign decision is
+  // silently blind to, which is the worst possible direction for this
+  // particular instrument to be wrong in: it under-reports demand for
+  // exactly the newest rows.
+  const sql = readFileSync("docs/analytics-queries.sql", "utf8");
+  const block = sql.slice(sql.indexOf("with drawn(href) as (values"), sql.indexOf("),\nusage as ("));
+  const inSql = [...block.matchAll(/\('([^']+)'\)/g)].map((m) => m[1]);
+  const drawnHrefs = drawn.flatMap((g) => g.hrefs);
+  ok(`§29.5 lists rows at all (${inSql.length})`, inSql.length > 0,
+    "an empty VALUES list joins to nothing and reports every row as unused");
+  const missing = drawnHrefs.filter((h) => !inSql.includes(h));
+  const extra = inSql.filter((h) => !drawnHrefs.includes(h));
+  ok(`...and it is exactly the drawn rows (${drawnHrefs.length})`,
+    missing.length === 0 && extra.length === 0,
+    `missing from the query: ${missing.join(", ") || "none"} · not drawn: ${extra.join(", ") || "none"}`);
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

@@ -167,7 +167,17 @@ check(
   "derived separately, a blank headline drops from one and the source list credits an entry the model never saw"
 );
 check("the empty modules survive the filter", /const emptyModules = perModule/.test(ctxSrc));
-check("the cap is published rather than re-guessed downstream", /perModuleCap: PER_MODULE_LIMIT/.test(ctxSrc));
+// THE CAP IS WHATEVER THIS READ ACTUALLY USED, not a constant.
+// Redesign phase 2 gave a project-scoped chat a deeper per-module read
+// (lib/projects/project.ts), so `PER_MODULE_LIMIT` is the answer only
+// when there is no project — and the line under the answer says "up to N
+// rows per module", which would be a false N for every project message.
+// Both branches are named here so neither can be dropped.
+check(
+  "the cap is published rather than re-guessed downstream",
+  /perModuleCap: scopedSummaries\.length > 0 \? scope!\.rowsPerModule : PER_MODULE_LIMIT/.test(ctxSrc),
+  "the provenance line prints this number verbatim"
+);
 
 const routeSrc = stripComments(readFileSync("src/app/api/chat/route.ts", "utf8"));
 check("the route summarises what it sent", /summariseProvenance\(/.test(routeSrc));

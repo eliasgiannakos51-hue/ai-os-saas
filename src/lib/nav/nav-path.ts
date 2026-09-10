@@ -79,6 +79,7 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "predictions",
   "presentations",
   "posts",
+  "projects",
   "product-workflow",
   "published",
   "records",
@@ -102,7 +103,11 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
  * (/dashboard/documents/[id]); the gate fails if a second appears and is
  * not named here, rather than silently filing it under :unknown.
  */
-export const NAV_NESTED_DYNAMIC: readonly string[] = ["documents"];
+export const NAV_NESTED_DYNAMIC: readonly string[] = [
+  "documents",
+  // /dashboard/projects/[id] — the project itself (redesign phase 2).
+  "projects",
+];
 
 /** The twelve records modules, read from the config the app itself uses. */
 export function navModuleSegments(): string[] {

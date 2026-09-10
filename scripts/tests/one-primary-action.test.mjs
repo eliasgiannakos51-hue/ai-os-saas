@@ -298,6 +298,11 @@ const BASELINE = {
   // V5 #22. The same two: the orange "Write the posts" button, and the
   // one the estimate hint draws beside it.
   "dashboard/posts/page.tsx": 2,
+  // Redesign phase 2. One each, and each is the screen's own primary
+  // action: "Create project" on the list, "Start a chat in this project"
+  // on the project. Neither page has a second filled accent control.
+  "dashboard/projects/page.tsx": 1,
+  "dashboard/projects/[id]/page.tsx": 1,
   "dashboard/product-workflow/page.tsx": 4,
   "dashboard/published/page.tsx": 1,
   "dashboard/reflection/page.tsx": 1,

@@ -77,6 +77,14 @@ check(`the dashboard routes were found (${allRoutes.length})`, allRoutes.length 
 // EXCEPTIONS, each with the reason it needs no entry point of its own.
 // ---------------------------------------------------------------------
 const EXEMPT = {
+  // Reached by pressing a project on /dashboard/projects, which IS a
+  // drawn sidebar row. The link is written as a template literal
+  // (`/dashboard/projects/${project.id}`) and this scan matches literal
+  // hrefs, so it cannot see it — the same reason the documents detail
+  // page is listed below rather than the same reason a page is
+  // unreachable.
+  "/dashboard/projects/[id]": "opened from the project list, one row above it in the sidebar",
+
   // A catch-all, not a page: it serves the module slugs, and every slug it
   // serves is a nav entry in its own right. There is no URL "/dashboard/
   // [module]" for anyone to reach.

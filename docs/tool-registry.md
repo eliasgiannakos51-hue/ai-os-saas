@@ -26,14 +26,17 @@ to find out what exists:
 | estimation profile key | how much to hold, in tokens | `ACTION_PROFILES` in `src/lib/billing/estimate.ts` | 28 keys |
 | reserve action string | what the hold is labelled | 3rd argument of `reserveCredits` in `src/lib/billing/reservations.ts` | 28 distinct |
 | settlement feature string | what the charge is labelled, and what the margin knob is named after | `feature` of `settleReservation` | 49 distinct |
-| route path | what the browser calls | `src/app/api/**/route.ts` | 134 routes |
+| route path | what the browser calls | `src/app/api/**/route.ts` | 136 routes |
 
 Counted on 2026-09-08 (26 / 26 / 47 / 130) and moved by V5 #21, which added one
 profile (`presentationGenerate`), one reserve string and one feature
 (`presentation_generate`) and three routes (`api/presentations/generate`,
 `api/presentations/[id]/pptx`, `api/presentations/[id]/pdf`), then again by
-V5 #22 (`postsGenerate` / `posts_generate` / `api/posts/generate`). Nothing else
-in this document was re-measured.
+V5 #22 (`postsGenerate` / `posts_generate` / `api/posts/generate`), and again
+by redesign phase 2, which added two routes (`api/projects`,
+`api/projects/[id]/members`) and NO profile, reserve string or feature:
+a project is a folder, and folders do not call a model. Nothing else in
+this document was re-measured.
 
 The four do not line up. `estimateForAction` is called at 37 sites — 34 of
 them naming one of 22 profile keys literally, 3 computing one.

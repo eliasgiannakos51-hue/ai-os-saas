@@ -250,6 +250,25 @@ export const HELP_TIPS: HelpTip[] = [
     // A page called Posts reads as a publisher. It writes them; the
     // publishing step is the roadmap's "Social posting", still under
     // "soon", and the tip says which side of that line this page is on.
+    // TWO SCREENS, TWO PREFIXES. Both draw a PageHeader and
+    // help-tips.test.mjs asks every header for a tip — and it also
+    // refuses two entries that share a prefix or a sentence, which is
+    // right: the list answers "what is a project" and this answers "what
+    // am I looking at inside one", and one text cannot be both.
+    id: "projectDetail",
+    file: "src/app/dashboard/projects/[id]/page.tsx",
+    keyPrefix: "help.projectDetail",
+    corrects:
+      "that a project pulls things in by itself — that a plan brings its steps, or a website its form submissions, or that deleting the project deletes what was in it",
+  },
+  {
+    id: "projects",
+    file: "src/app/dashboard/projects/page.tsx",
+    keyPrefix: "help.projects",
+    corrects:
+      "that a project pulls things in by itself — that a plan brings its steps, or a website its form submissions, or that deleting the project deletes what was in it",
+  },
+  {
     id: "posts",
     file: "src/app/dashboard/posts/page.tsx",
     keyPrefix: "help.posts",

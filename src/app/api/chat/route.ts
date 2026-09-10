@@ -59,6 +59,11 @@ import { loadMentorContext } from "@/lib/chat/mentor-context";
 import { loadTradingMentorContext } from "@/lib/chat/trading-mentor-context";
 import { loadProductMentorContext } from "@/lib/chat/product-mentor-context";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
+import {
+  linkConversationToProject,
+  ownedProjectId,
+  projectOfConversation,
+} from "@/lib/projects/conversation-scope";
 import { selectRelevantModules, resolveSelectionConfig } from "@/lib/ai/module-relevance";
 import { loadCodingContextForChat } from "@/lib/ai/cross-module-store";
 import { moduleVocabulary } from "@/lib/ai/module-vocabulary";
@@ -300,6 +305,7 @@ export async function POST(request: Request) {
 
     let message: string;
     let conversationId: string | null;
+    let requestedProjectId: string | null;
     let mentorMode: boolean;
     let mentorPreset: string | null;
     let skipClarification = false;
@@ -310,6 +316,13 @@ export async function POST(request: Request) {
         typeof body?.conversationId === "string" && body.conversationId
           ? body.conversationId
           : null;
+      // ONLY READ WHEN THE CONVERSATION IS BEING CREATED — see
+      // lib/projects/conversation-scope.ts. On any later message the
+      // project comes from the conversation's own edge and this is
+      // ignored, so a client that starts sending a different one cannot
+      // move a conversation between projects.
+      requestedProjectId =
+        typeof body?.projectId === "string" && body.projectId ? body.projectId : null;
       mentorMode = body?.mentorMode === true;
       mentorPreset = typeof body?.mentorPreset === "string" ? body.mentorPreset : null;
       // "Answer it anyway." The same flag the other four surfaces send
@@ -483,6 +496,20 @@ export async function POST(request: Request) {
       mentorMode && mentorPreset === "product"
         ? await loadProductMentorContext(supabase, user.id)
         : "";
+    // THE PROJECT, DECIDED HERE AND NOWHERE ELSE.
+    //
+    // On the message that CREATES a conversation, the client's chosen
+    // project is honoured — after a read that proves it is this person's.
+    // On every message after that the conversation's own edge is what is
+    // read and `requestedProjectId` is ignored entirely, which is what
+    // makes "chosen when the conversation starts, never switched" a
+    // property of the server rather than a promise the UI makes. It is
+    // resolved HERE, before the context is built, because the project is
+    // what the context — and therefore what the message — costs.
+    const activeProjectId = conversationId
+      ? await projectOfConversation(supabase, user.id, conversationId)
+      : await ownedProjectId(supabase, requestedProjectId);
+
     // "AI Life Context" — a consolidated view of the user (recent entries
     // across every module, active missions, latest energy check-in,
     // Business Health Score, Knowledge Graph link counts — see
@@ -492,7 +519,7 @@ export async function POST(request: Request) {
     let userContext = "";
     let provenance: Provenance | null = null;
     try {
-      const fullContext = await getUserFullContext(supabase, user.id);
+      const fullContext = await getUserFullContext(supabase, user.id, activeProjectId);
       // NARROWING IS OFF BY DEFAULT — see lib/ai/module-relevance.ts.
       //
       // With CONTEXT_RELEVANCE unset (which is every deployment until
@@ -822,6 +849,12 @@ export async function POST(request: Request) {
       }
       conversationId = newConversation.id;
       isNewConversation = true;
+    }
+
+    // The conversation exists now, so the membership edge can be written.
+    // Only on the message that created it — see above.
+    if (isNewConversation && activeProjectId) {
+      await linkConversationToProject(supabase, user.id, conversationId!, activeProjectId);
     }
 
     // Prior turns for context (oldest first) — empty for a brand-new

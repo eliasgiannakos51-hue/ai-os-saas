@@ -57,8 +57,13 @@ const MUTANTS = [
     file: VIS,
     from: ".map((group) => ({ ...group, items: group.items.filter((i) => !i.hidden) }))",
     to: ".map((group) => ({ ...group, items: group.items }))",
-    // 23 -> 24 in V5 #21, when the Presentations row was drawn.
-    expect: "rows drawn, limit 25",
+    // THE NUMBER IS DELIBERATELY NOT IN THIS ANCHOR. It was "limit 23",
+    // then "limit 24" in V5 #21 and "limit 25" in #22, and redesign phase
+    // 2 moved it again — an anchor that goes stale every time a row is
+    // drawn is an anchor that reports a hole where there is none. The
+    // clause is named by its words; MAX_DRAWN_ITEMS is checked against
+    // the count by the gate itself.
+    expect: "rows drawn, limit",
   },
   {
     // 3. THE ROLE FILTER — the one the brief said not to break. Composing

@@ -47,6 +47,8 @@ const GATE = "scripts/tests/gate-stale-anchors.test.mjs";
 const STALE = "scripts/tests/.anchor-fixture-stale.test.mjs";
 const LIVE = "scripts/tests/.anchor-fixture-live.test.mjs";
 const SHADOW = "scripts/tests/.anchor-fixture-shadow.test.mjs";
+const WRAPPED = "scripts/tests/.anchor-fixture-wrapped.test.mjs";
+const DIRJOIN = "scripts/tests/.anchor-fixture-dirjoin.test.mjs";
 // A file whose CONTENTS carry both comment markers, so the needles that
 // exercise the string-aware stripper are really present in what is read.
 // Written here rather than pointed at a real stylesheet so that the fixture
@@ -116,10 +118,38 @@ for (const f of FILES) {
 }
 `;
 
+// THE SAME SHADOWING, THROUGH A WRAPPER. `stripComments(readFileSync(f))`
+// is how half the gates in this directory read a file, and a binding the
+// analysis cannot see shadows nothing: the outer package.json binding
+// stayed in force and the absent needle inside the loop was reported
+// against a file it was never about. Nothing here may be reported.
+const WRAPPED_BODY = `${HEADER}
+const FILES = ["package.json"];
+const pkg = readFileSync("package.json", "utf8");
+check("the outer binding is real", pkg.length > 0);
+for (const f of FILES) {
+  const pkg = stripComments(readFileSync(f, "utf8"));
+  check("scripts comes after the missing key", pkg.indexOf("${ABSENT}") < pkg.indexOf("scripts"));
+}
+`;
+
+// A DIRECTORY CONST, WHICH IS NOT THE REPOSITORY ROOT. Dropping the
+// leading name resolves this to a bare filename that exists nowhere, and
+// the file is reported as deleted when it is sitting where it always was.
+const DIRJOIN_BODY = `${HEADER}
+import path from "node:path";
+const ROOT = process.cwd();
+const DIR = path.join(ROOT, "scripts", "tests");
+const loader = stripComments(readFileSync(path.join(DIR, "load-ts.mjs"), "utf8"));
+check("the loader caches before it resolves", loader.indexOf("MARKER_ONLY_PACKAGES") < loader.indexOf("resolveSpecifier"));
+`;
+
 const FIXTURES = [
   [STALE, STALE_BODY],
   [LIVE, LIVE_BODY],
   [SHADOW, SHADOW_BODY],
+  [WRAPPED, WRAPPED_BODY],
+  [DIRJOIN, DIRJOIN_BODY],
   [MARKERS, MARKERS_BODY],
 ];
 
@@ -138,12 +168,14 @@ function probe() {
     staleReported: named(STALE),
     liveReported: named(LIVE),
     shadowReported: named(SHADOW),
+    wrappedReported: named(WRAPPED),
+    dirjoinReported: named(DIRJOIN),
     bindingFloorGreen: !out.includes(`FAIL  ${BINDING_FLOOR}`),
     anchorFloorGreen: !out.includes(`FAIL  ${ANCHOR_FLOOR}`),
   };
 }
 
-const KEYS = ["staleReported", "liveReported", "shadowReported", "bindingFloorGreen", "anchorFloorGreen"];
+const KEYS = ["staleReported", "liveReported", "shadowReported", "wrappedReported", "dirjoinReported", "bindingFloorGreen", "anchorFloorGreen"];
 const render = (o) => KEYS.map((k) => `${k}=${o[k]}`).join("  ");
 
 const MUTANTS = [
@@ -188,6 +220,16 @@ const MUTANTS = [
     to: "      if (needle === null) continue;",
   },
   {
+    name: "a binding through a wrapper is invisible, so it shadows nothing",
+    from: "  for (const m of code.matchAll(/(?:const|let)\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*(?:[A-Za-z_$][\\w$]*\\(\\s*)?readFileSync\\(",
+    to: "  for (const m of code.matchAll(/(?:const|let)\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*readFileSync\\(",
+  },
+  {
+    name: "a directory const is treated as the repository root",
+    from: "      const dir = dirConsts.get(join[1]);\n      return dir ? `${dir}/${rest}` : rest;",
+    to: "      return rest;",
+  },
+  {
     name: "the findings are collected but never asserted on",
     from: "    stale.push(`${file}:${line}  ${JSON.stringify(needle)}\\n            not in ${binding.repoPath}`);",
     to: "    void needle;",
@@ -200,6 +242,7 @@ const original = readFileSync(GATE, "utf8");
 for (const [name, body] of FIXTURES) writeFileSync(name, body);
 
 let caught = 0;
+let baselineWrong = [];
 const missed = [];
 try {
   const base = probe();
@@ -208,16 +251,19 @@ try {
     staleReported: (n) => n >= 1,
     liveReported: (n) => n === 0,
     shadowReported: (n) => n === 0,
+    wrappedReported: (n) => n === 0,
+    dirjoinReported: (n) => n === 0,
     bindingFloorGreen: (v) => v === true,
     anchorFloorGreen: (v) => v === true,
   };
   const wrong = KEYS.filter((k) => !wanted[k](base[k]));
-  if (wrong.length > 0) {
-    console.log(`\nBASELINE IS WRONG (${wrong.join(", ")}) — no mutation result below would mean anything.`);
-    process.exit(1);
-  }
+  // NOT process.exit HERE. It skips the `finally` below, which is what
+  // deletes the fixtures — so a wrong baseline left .anchor-fixture-*
+  // files in scripts/tests and the next `npm run build` reported a killed
+  // mutation run. The flag is read after the cleanup instead.
+  baselineWrong = wrong;
 
-  for (const m of MUTANTS) {
+  for (const m of baselineWrong.length > 0 ? [] : MUTANTS) {
     if (!original.includes(m.from)) {
       missed.push({ ...m, why: "the mutation target no longer exists in the gate" });
       console.log(`  STALE   ${m.name}`);
@@ -248,6 +294,11 @@ try {
 } finally {
   writeFileSync(GATE, original);
   for (const [name] of FIXTURES) if (existsSync(name)) unlinkSync(name);
+}
+
+if (baselineWrong.length > 0) {
+  console.log(`\nBASELINE IS WRONG (${baselineWrong.join(", ")}) — no mutation result would have meant anything.`);
+  process.exit(1);
 }
 
 let restored = true;

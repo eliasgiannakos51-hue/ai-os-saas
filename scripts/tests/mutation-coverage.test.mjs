@@ -166,7 +166,10 @@ console.log(
 // prodtest is out of the sweep's reach and this ratchet counts gates the
 // sweep can drive. Read the number off the run rather than reasoning
 // about it, which is the same lesson as every other entry here.
-const RATCHET = 136;
+// 136 -> 137, redesign phase 2: projects.mutation.mjs, driving
+// projects.test.mjs. Read off the run (measured=137) before it was
+// written here, per the entry above.
+const RATCHET = 137;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

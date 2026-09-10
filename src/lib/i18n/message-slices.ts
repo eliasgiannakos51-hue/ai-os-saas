@@ -94,6 +94,7 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
       "presentations",
       // V5 #22: the post generator, under Make.
       "posts",
+      "projects",
       "promise", "publishing", "pwa",
       // The sample-account banner and its load button (V4.6 #6). The
       // banner renders from dashboard/layout.tsx, so this namespace is
@@ -120,7 +121,7 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // slicer cannot bound, and `canTrim` is false while it is above zero.
     // A wrong number here does not loosen anything — it makes the gate
     // disagree with the tree, which is what the check reports.
-    unbounded: 67,
+    unbounded: 70,
   },
   {
     name: "onboarding",

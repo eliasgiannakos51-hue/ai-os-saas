@@ -1,4 +1,5 @@
 import { LINKABLE_MODULES, moduleHref } from "@/lib/knowledge-graph";
+import { LINK_ONLY_MODULES } from "@/lib/projects/linkable-extras";
 import type { ModuleTitleKey } from "@/lib/modules";
 
 /**
@@ -109,7 +110,22 @@ export const EXTRA_FAVORITABLE: FavoritableConfig[] = [
   },
 ];
 
-const LINKABLE_FAVORITABLE: FavoritableConfig[] = LINKABLE_MODULES.map((m) => ({
+// THE TRACKERS ONLY, NOT EVERY LINKABLE TABLE. Redesign phase 2 added
+// five link-only entries — files, conversations, missions, presentations,
+// posts — and every one of them arrived here as a `?record=` emitter
+// pointing at a page that reads no such parameter. scripts/tests/
+// deep-links.test.mjs caught both of the ones whose page exists
+// (/dashboard/files and /dashboard/posts) on the build that introduced
+// them, which is exactly the defect that gate was written for: a link
+// that navigates, renders, and drops the id.
+//
+// Favouriting is not the same question as linking. A conversation can be
+// a member of a project without there being a star on it that opens it,
+// and inventing the star first would be inventing the destination too.
+const LINK_ONLY_TABLES = new Set(LINK_ONLY_MODULES.map((m) => m.table));
+const TRACKER_MODULES = LINKABLE_MODULES.filter((m) => !LINK_ONLY_TABLES.has(m.table));
+
+const LINKABLE_FAVORITABLE: FavoritableConfig[] = TRACKER_MODULES.map((m) => ({
   table: m.table,
   slug: m.slug,
   titleKey: m.titleKey,

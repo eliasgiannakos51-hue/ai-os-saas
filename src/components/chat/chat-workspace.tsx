@@ -81,6 +81,7 @@ export function ChatWorkspace({
   initialFreeChatRemaining,
   initialConversationId,
   initialAsk,
+  initialProjectId,
 }: {
   initialConversations: ChatConversation[];
   userInitial: string;
@@ -108,6 +109,15 @@ export function ChatWorkspace({
    * consent pressing Send would be.
    */
   initialAsk?: string;
+  /**
+   * The project a conversation STARTED here belongs to, for the whole of
+   * its life. Chosen on arrival (/dashboard/projects/[id] links here with
+   * it) and never switched: lib/projects/project.ts's budget is only
+   * worth anything while the context prefix is stable enough to be
+   * cached, and a mid-conversation toggle would rewrite that prefix on
+   * the message that flipped it. There is deliberately no setter.
+   */
+  initialProjectId?: string;
 }) {
   const tTrading = useTranslations("dashboard.tradingWorkflow");
   const describe = useErrorText();
@@ -473,6 +483,11 @@ export function ChatWorkspace({
           conversationId: sentFromId,
           message: text,
           mentorMode,
+          // ONLY WHEN THE CONVERSATION IS NEW. A conversation that
+          // already exists carries whatever project it was started in,
+          // and re-sending one here on a later message is exactly the
+          // mid-conversation switch that would rewrite the cached prefix.
+          ...(initialProjectId && !sentFromId ? { projectId: initialProjectId } : {}),
           ...(mentorPreset ? { mentorPreset } : {}),
           ...(options.skipClarification ? { skipClarification: true } : {}),
         }),

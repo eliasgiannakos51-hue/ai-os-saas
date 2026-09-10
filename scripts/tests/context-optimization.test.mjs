@@ -409,8 +409,20 @@ console.log("\n== 6. the module summaries carry what selection needs ==");
   const src = readFileSync("src/lib/user-context.ts", "utf8");
   ok("a summary carries its slug", /moduleSummaries: \{\s*\n\s*slug: string;/.test(src));
   ok("...and when the module was last written in", /lastActivityMs: number \| null;/.test(src));
-  ok("...both populated from the scan",
-    /slug: m\.slug,[\s\S]{0,120}lastActivityMs: m\.lastActivityMs,/.test(src));
+  // EVERY MAPPING, NOT THE FIRST ONE FOUND. Redesign phase 2 gave
+  // lib/user-context.ts a SECOND place that builds these summaries — the
+  // project-scoped read — and a regex that only had to match somewhere
+  // stayed green with the unscoped one gutted. The two counts are
+  // compared, so a third mapping cannot arrive without carrying them
+  // either.
+  // Counted on `headlines: m.headlines,` — the line only a moduleSummaries
+  // mapping has. The emptyModules mapping also writes `slug: m.slug` and
+  // carries no timestamp on purpose, so counting slugs would demand one
+  // where none belongs.
+  const summaryMaps = (src.match(/headlines: m\.headlines,/g) ?? []).length;
+  const bothMaps = (src.match(/slug: m\.slug,[\s\S]{0,120}lastActivityMs: m\.lastActivityMs,/g) ?? []).length;
+  ok(`...both populated from the scan, in every mapping (${bothMaps} of ${summaryMaps})`,
+    summaryMaps > 0 && bothMaps === summaryMaps);
   // The formatter must not print them — they are for the selector, not
   // for the model.
   const formatted = uc.buildUserContextPromptAdditionEnglish({

@@ -24,7 +24,7 @@ export default async function ChatPage({
   // lib/overview/first-screen-examples.ts). The name is a runtime string
   // on both sides — nothing here would stop compiling if the link sent
   // `?question=` instead — so first-screen.test.mjs compares the two.
-  searchParams: { preset?: string; c?: string; ask?: string };
+  searchParams: { preset?: string; c?: string; ask?: string; project?: string };
 }) {
   const supabase = createClient();
 
@@ -64,6 +64,12 @@ export default async function ChatPage({
     is_favorited: favoritedIds.has(c.id),
   }));
 
+  // THE PROJECTS THIS PERSON OWNS, read only to validate `?project=`.
+  // RLS scopes it, and the ids are compared rather than the parameter
+  // trusted, for the same reason `?c=` is validated above.
+  const { data: projectRows } = await supabase.from("projects").select("id").limit(200);
+  const ownProjectIds = new Set((projectRows ?? []).map((row) => String((row as { id?: unknown }).id ?? "")));
+
   // Same entitlements the route honours, so the counter the user sees and
   // the allowance the server enforces cannot disagree for a grandfathered
   // account.
@@ -95,6 +101,21 @@ export default async function ChatPage({
         // comes out of a URL anyone can edit, and the send path charges
         // credits.
         initialAsk={readExampleParam(searchParams.ask)}
+        // THE PROJECT A NEW CONVERSATION STARTS IN, and the only moment
+        // it can be chosen. It is validated against the person's OWN
+        // projects rather than trusted, exactly as `?c=` is above: an id
+        // in a URL must not be able to make the workspace ask for
+        // somebody else's folder.
+        //
+        // FIXED FOR THE CONVERSATION'S LIFE. The whole value of a project
+        // is that the context prefix is stable enough to be cached, and a
+        // mid-conversation switch would rewrite that prefix on the
+        // message that flipped it — the same money for a broken cache.
+        // So this is read on arrival and there is no control anywhere
+        // that moves an existing conversation.
+        initialProjectId={
+          searchParams.project && ownProjectIds.has(searchParams.project) ? searchParams.project : undefined
+        }
       />
     </div>
   );

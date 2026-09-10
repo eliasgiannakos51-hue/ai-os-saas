@@ -206,10 +206,30 @@ create table if not exists public.entity_links (
 There is **no CHECK constraining the table names**, so it can already carry
 a link between any two user-owned rows — a file to a mission, a
 conversation to a product. `relationship_type` already exists and already
-defaults to `'related'`. `LINKABLE_MODULES` in
-`src/lib/knowledge-graph.ts` currently lists **19** tables, six more than
-the thirteen classifier modules — websites, apps, images, videos,
-presentations, campaigns.
+defaults to `'related'`.
+
+> **CORRECTION (redesign phase 2).** This section claimed
+> `LINKABLE_MODULES` in `src/lib/knowledge-graph.ts` listed **19** tables,
+> and that presentations was one of the extras beyond the thirteen
+> classifiers. Both halves were wrong. It listed eighteen, and the five
+> beyond the classifiers were:
+>
+> - build modules (`src/lib/build-modules.ts`): websites, apps, images, videos, campaigns
+>
+> Presentations left that file in V5 #21, when they stopped being a
+> tracker somebody types rows into and became something generated
+> (`src/lib/presentations/`); this document was written afterwards and
+> never caught up.
+>
+> It now lists **24** — the thirteen classifiers, those five, and six more
+> that redesign phase 2 added in `src/lib/projects/linkable-extras.ts` so
+> a project can hold the work the person actually came to do:
+>
+> - link-only (`src/lib/projects/linkable-extras.ts`): files, conversations, missions, agents, presentations, posts
+>
+> Every number and both lists above are read off the registries by
+> `scripts/tests/projects.test.mjs`, which goes red if any of the three
+> moves without this paragraph.
 
 So the edge shape is: one new `projects` table, and membership as rows in
 `entity_links` with a `relationship_type` of its own. **No existing table
@@ -245,15 +265,20 @@ type system those three features are built on.
 
 The relationship the app already models is the right one, and it is the
 edge, not the folder: `entity_links` says *these two records are related*,
-across nineteen tables, without either of them changing type. A project is
-that same statement with a name on it and a membership test.
+across every table in `LINKABLE_MODULES` (eighteen when this was written,
+twenty-four since phase 2), without either of them changing type. A
+project is that same statement with a name on it and a membership test.
 
 Two things a project adds that neither modules nor links give today:
 
 1. **A scope for things that have no module** — files (`user_files`),
    conversations (`chat_conversations`), missions (`ai_missions`). None of
-   the three is in `LINKABLE_MODULES` today, and all three are what the
-   brief asks a project to hold.
+   the three was in `LINKABLE_MODULES` when this was written, and all
+   three are what the brief asks a project to hold. Phase 2 added them,
+   with agents, presentations and posts, as `LINK_ONLY_MODULES` in
+   `src/lib/projects/linkable-extras.ts` — enough for `entity_links` to
+   resolve a headline, and no `fields`, because none of them is a table
+   somebody types rows into.
 2. **A stable cache key**, per §3. A module is not one, because a chat is
    not "in" a module. A project can be.
 

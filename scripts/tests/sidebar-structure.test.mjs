@@ -74,7 +74,7 @@ const DECLARED = [
     "/dashboard/business-health",
   ] },
   { heading: "Organise", hrefs: [
-    "/dashboard/mission", "/dashboard/reflection", "/dashboard/team",
+    "/dashboard/projects", "/dashboard/mission", "/dashboard/reflection", "/dashboard/team",
   ] },
   // Rendered in its own block at the foot of the sidebar, from
   // SETTINGS_GROUP rather than MAIN_SIDEBAR_GROUPS — section 3 holds
@@ -90,7 +90,7 @@ const DECLARED = [
 // emptied sidebar perfectly and this whole file would pass.
 const DECLARED_ROWS = DECLARED.reduce((n, g) => n + g.hrefs.length, 0);
 ok(`the declaration is not empty (${DECLARED.length} groups, ${DECLARED_ROWS} rows)`,
-  DECLARED.length >= 6 && DECLARED_ROWS >= 25 && DECLARED.every((g) => g.hrefs.length >= 1),
+  DECLARED.length >= 6 && DECLARED_ROWS >= 26 && DECLARED.every((g) => g.hrefs.length >= 1),
   "a comparison against an empty declaration passes for the wrong reason");
 
 // ---------------------------------------------------------------------

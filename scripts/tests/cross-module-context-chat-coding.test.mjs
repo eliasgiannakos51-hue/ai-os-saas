@@ -25,6 +25,7 @@
 // labels, and before that fix nothing downstream of it could be loaded at
 // all, in either mode.
 import { loadTs } from "./load-ts.mjs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0,
   fail = 0;
@@ -132,6 +133,20 @@ for (const config of LINKABLE) {
     }
   }
   if (b.includes("HEADLINE_VALUE")) bodyFailures.push(`${config.slug}: body repeats the headline`);
+  // A MODULE WITH NO FIELDS HAS NO BODY, AND THAT IS A CLAIM, NOT A SKIP.
+  //
+  // The six link-only entries in lib/projects/linkable-extras.ts declare
+  // `fields: []` on purpose — a conversation is not a table somebody
+  // types rows into — so bodyOf returns "". The label scan below read
+  // that empty string as one line with an empty label and reported six
+  // modules as "raw key as label ()", which is the checker describing its
+  // own split, not a defect. The empty body is asserted here instead, so
+  // a bodyOf that started inventing text for a fieldless module still
+  // goes red.
+  if (config.fields.length === 0) {
+    if (b !== "") bodyFailures.push(`${config.slug}: no fields, but a body (${b.slice(0, 40)})`);
+    continue;
+  }
   // The labels are the shared helper's, not a second copy: every line is
   // "Label: value", and the label is not the raw key.
   for (const line of b.split(" · ")) {
@@ -268,12 +283,18 @@ console.log("\n== Tenancy ==");
     ["src/lib/chat/record-conversation-context.ts", "loadRecordConversationContext"],
     ["src/lib/user-context.ts", "scanModule"],
   ]) {
-    const src = readFileSync(file, "utf8");
+    // COMMENTS STRIPPED FIRST, AND THE COUNTS COMPARED RATHER THAN BOTH
+    // BEING NON-ZERO. `scoped > 0` was true of a file where four of five
+    // reads were pinned, and lib/user-context.ts names `.from(table)`
+    // inside a comment, so the printed ratio was 4/5 for a file whose
+    // every real read was scoped — a number that is wrong in both
+    // directions at once. EVERY read, and only real ones.
+    const src = stripComments(readFileSync(file, "utf8"));
     const selects = (src.match(/\.from\(/g) || []).length;
     const scoped = (src.match(/\.eq\("user_id", userId\)/g) || []).length;
     ok(
       `${fn} scopes every table read to the user explicitly (${scoped}/${selects} .from() calls)`,
-      selects > 0 && scoped > 0,
+      selects > 0 && scoped === selects,
       `${file} reads ${selects} table(s) and pins user_id ${scoped} time(s)`
     );
   }

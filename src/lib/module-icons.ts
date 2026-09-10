@@ -51,6 +51,7 @@ import {
   NotebookPen,
   AudioLines,
   Compass,
+  FolderKanban,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -216,3 +217,8 @@ export const VOICE_ICON: LucideIcon = AudioLines;
 // lib/insights/detectors.ts computes, and it is not a letter in any
 // alphabet this app ships in.
 export const PREDICTIONS_ICON: LucideIcon = Compass;
+
+// Redesign phase 2. A board of columns rather than a plain folder: a
+// project here is a grouping WITH A GOAL and a state, not a directory,
+// and FolderOpen is already the records hub.
+export const PROJECTS_ICON: LucideIcon = FolderKanban;

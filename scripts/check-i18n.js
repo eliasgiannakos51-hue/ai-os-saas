@@ -289,6 +289,24 @@ const LOCALE_ALLOWED = new Set([
   // in this list, verified one by one rather than waved through:
   // "credits" is the word the Greek UI already uses verbatim; "Name" is
   // the German word, spelled identically; "Description" is French.
+  // Redesign phase 2. "Name" is the German word for a name, spelled
+  // identically, and "Agents" is the loanword German uses for these —
+  // the same two cases this block already allows for the agents screen
+  // two lines down. Checked against the neighbouring keys, which do
+  // differ: de projects.form.goal "Ziel", projects.sections.tasks
+  // "Aufgaben", projects.sections.files "Dateien".
+  // "Project" is the word Greek business actually uses — the same
+  // loanword this block already allows for "credits" and "Trading", and
+  // the nav name and the page heading must be the SAME string
+  // (sidebar-naming §5b), so allowing one without the other would be
+  // incoherent. "Agents" is the loanword in Greek and French too, beside
+  // the German entry below.
+  "el:sidebar.items.projects",
+  "el:projects.title",
+  "el:projects.sections.agents",
+  "fr:projects.sections.agents",
+  "de:projects.form.name",
+  "de:projects.sections.agents",
   "el:dashboard.agents.creditsPerRun",
   "el:dashboard.agents.runCredits",
   "de:dashboard.agents.previewName",

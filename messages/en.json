@@ -171,7 +171,8 @@
       "tradingJournal": "Trading journal",
       "voice": "Voice",
       "predictions": "Predictions",
-      "posts": "Posts"
+      "posts": "Posts",
+      "projects": "Projects"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -229,7 +230,8 @@
       "tradingJournal": "Your trades, with the reasoning you wrote at the time.",
       "voice": "Have text read out loud, or speak and have it written down. Minutes are metered and the price per minute is on the page.",
       "predictions": "Patterns found in your own rows, each with the number of entries it rests on and a link to them.",
-      "posts": "Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post."
+      "posts": "Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.",
+      "projects": "A folder with a goal. What you put in is what is in it — nothing is dragged in with it."
     },
     "closeMenu": "Close menu"
   },
@@ -3242,6 +3244,16 @@
       "is": "A post writer: one brief in, one post per platform out.",
       "does": "Writes a LinkedIn post, a post for X, an Instagram caption with hashtags, a Facebook post and a Threads post from the same brief — each cut to that platform's length and written in its register, in the language of your brief — with a copy button on each.",
       "doesNot": "It does not publish, schedule or connect to any social account, and it does not reuse one text across platforms — five platforms, five posts. No images are made; the picture is yours."
+    },
+    "projects": {
+      "is": "A folder with a goal, holding exactly what you put in it.",
+      "does": "Groups your own rows — files, conversations, plans, agents, decks, posts and any tracker record — under one name and one goal, and lets a chat start inside it so it reads more rows from fewer modules.",
+      "doesNot": "It does not pull things in by itself: a plan in a project does not bring its steps, and a website does not bring its form submissions. Deleting a project deletes the folder, never the contents."
+    },
+    "projectDetail": {
+      "is": "One project: its goal, what you put in it, and a chat that starts inside it.",
+      "does": "Groups the members as tasks, files, agents and results, shows when each joined, lets you take any of them out, and starts a conversation that belongs to this project for its whole life.",
+      "doesNot": "Taking something out does not delete it, and the project adds nothing by itself: a plan here does not bring its steps, a website does not bring its form submissions."
     }
   },
   "helpCentre": {
@@ -3754,6 +3766,52 @@
       "failed": "failed",
       "delete": "Delete",
       "deleteConfirm": "Delete these posts? This can't be undone."
+    }
+  },
+  "projects": {
+    "title": "Projects",
+    "description": "A folder with a goal. Put things in it explicitly; nothing is dragged in with them.",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Launch the autumn shop",
+      "goal": "Goal",
+      "goalPlaceholder": "What are you trying to achieve?",
+      "create": "Create project"
+    },
+    "list": {
+      "title": "Your projects",
+      "empty": "No projects yet.",
+      "members": "{count, plural, one {# thing} other {# things}}"
+    },
+    "status": {
+      "active": "Active",
+      "done": "Done",
+      "archived": "Archived"
+    },
+    "sections": {
+      "goal": "Goal",
+      "tasks": "Tasks",
+      "files": "Files",
+      "agents": "Agents",
+      "results": "Results",
+      "activity": "Activity",
+      "other": "Everything else",
+      "empty": "Nothing here yet."
+    },
+    "progress": {
+      "rowsPerModule": "{count, plural, one {# row per module in chat} other {# rows per module in chat}}"
+    },
+    "startChat": "Start a chat in this project",
+    "chatFixed": "A conversation belongs to the project it was started in, for its whole life.",
+    "noGoal": "No goal written yet.",
+    "untitled": "Untitled",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this project? The things in it stay where they are.",
+    "removeMember": "Take out of the project",
+    "errors": {
+      "tooShort": "Give it a name first.",
+      "tooLong": "That name is longer than {limit} characters.",
+      "failed": "That didn't work — try again."
     }
   },
   "finance": {

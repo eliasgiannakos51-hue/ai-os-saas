@@ -1,6 +1,15 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
+import {
+  IN_PROJECT,
+  isUuid,
+  projectEdgeFilter,
+  projectMembers,
+  projectContextModules,
+  rowsPerModuleInProject,
+  MAX_MEMBERS,
+} from "@/lib/projects/project";
 import { computeHealthScore, CONSISTENCY_WINDOW_DAYS, type HealthScoreResult } from "@/lib/health-score";
 import { loadLatestEnergyCheckIn, type EnergyCheckIn } from "@/lib/energy-checkins";
 import { logApiError } from "@/lib/log-error";
@@ -85,10 +94,24 @@ type ModuleScan = {
 // whatever client is handed in.
 export async function getUserFullContext(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
+  projectId?: string | null
 ): Promise<UserFullContext> {
   const now = Date.now();
   const weekAgoIso = new Date(now - CONSISTENCY_WINDOW_DAYS * DAY_MS).toISOString();
+
+  // THE SAME BUDGET, SPENT ON FEWER MODULES — lib/projects/project.ts.
+  //
+  // The thirteen-module pass below still runs and is still what the
+  // Business Health Score, the active-days count and the empty-module
+  // list are computed from: those are statements about the BUSINESS, and
+  // a project must not quietly change what they mean. What a project
+  // changes is the part that costs money — the headlines that go into the
+  // prompt. Inside one, they are replaced by a deeper read of the
+  // project's own rows, and `perModuleCap` (which the provenance line
+  // under every answer prints) becomes the deeper number, so the screen
+  // says how far the answer actually looked.
+  const scope = await loadProjectScope(supabase, userId, projectId);
 
   const [perModule, missionsResult, latestEnergyCheckIn, totalLinksResult, recentLinksResult] =
     await Promise.all([
@@ -149,7 +172,7 @@ export async function getUserFullContext(
     activeDaysThisWeek: activeDays.size,
   });
 
-  const moduleSummaries = perModule
+  const unscopedSummaries = perModule
     .filter((m) => m.headlines.length > 0)
     .map((m) => ({
       slug: m.slug,
@@ -158,6 +181,14 @@ export async function getUserFullContext(
       rows: m.rows,
       lastActivityMs: m.lastActivityMs,
     }));
+
+  // Inside a project, the prompt's headlines are the project's own rows,
+  // read deeper. A scope that came back with nothing readable (every
+  // member is a file, or the deeper read failed) leaves the unscoped
+  // summaries in place: no worse than no project, which is the promise
+  // rowsPerModuleInProject makes at the other end.
+  const scopedSummaries = scope ? await scanProjectModules(supabase, userId, scope, now) : [];
+  const moduleSummaries = scopedSummaries.length > 0 ? scopedSummaries : unscopedSummaries;
 
   // THE EMPTY ONES, KEPT. The filter above is right for the prompt — a
   // module with nothing in it contributes no headlines — but it is what
@@ -171,7 +202,7 @@ export async function getUserFullContext(
   return {
     moduleSummaries,
     emptyModules,
-    perModuleCap: PER_MODULE_LIMIT,
+    perModuleCap: scopedSummaries.length > 0 ? scope!.rowsPerModule : PER_MODULE_LIMIT,
     activeMissions,
     latestEnergyCheckIn,
     healthScore,
@@ -180,11 +211,90 @@ export async function getUserFullContext(
   };
 }
 
+type ProjectScope = {
+  /** How many rows per module the project's budget buys — project.ts. */
+  rowsPerModule: number;
+  /** Member ids, per classifier table. Only the tables the scan walks. */
+  idsByTable: Map<string, string[]>;
+};
+
+/**
+ * The project's own rows, or null.
+ *
+ * NULL FOR EVERY REASON, DELIBERATELY: no project asked for, an id that
+ * is not one, a read that failed, a project of nothing but files. The
+ * caller treats all of them the same way — it keeps the unscoped context
+ * — because a chat that silently loses its context is a worse failure
+ * than one that is merely not narrowed.
+ */
+async function loadProjectScope(
+  supabase: SupabaseClient,
+  userId: string,
+  projectId: string | null | undefined
+): Promise<ProjectScope | null> {
+  if (!isUuid(projectId)) return null;
+  try {
+    const { data, error } = await supabase
+      .from("entity_links")
+      .select("source_table, source_id, target_table, target_id, relationship_type")
+      // EXPLICIT, not left to RLS — the same reason as scanModule below:
+      // two job handlers call this with the service-role client.
+      .eq("user_id", userId)
+      .eq("relationship_type", IN_PROJECT)
+      .or(projectEdgeFilter(projectId))
+      .limit(MAX_MEMBERS * 2);
+    if (error || !data) {
+      if (error) logApiError("user-context:loadProjectScope", error, { projectId });
+      return null;
+    }
+    const members = projectMembers(data, projectId);
+    const readable = new Set(projectContextModules(members));
+    const idsByTable = new Map<string, string[]>();
+    for (const member of members) {
+      if (!readable.has(member.table)) continue;
+      idsByTable.set(member.table, [...(idsByTable.get(member.table) ?? []), member.id]);
+    }
+    if (idsByTable.size === 0) return null;
+    return { rowsPerModule: rowsPerModuleInProject(idsByTable.size), idsByTable };
+  } catch (err) {
+    logApiError("user-context:loadProjectScope", err, { projectId });
+    return null;
+  }
+}
+
+/** The same scan as below, restricted to a project's members and given its deeper limit. */
+async function scanProjectModules(
+  supabase: SupabaseClient,
+  userId: string,
+  scope: ProjectScope,
+  now: number
+): Promise<UserFullContext["moduleSummaries"]> {
+  const configs = CLASSIFIER_MODULES.filter((c) => scope.idsByTable.has(c.table));
+  const scans = await Promise.all(
+    configs.map((config) =>
+      scanModule(supabase, config, now, userId, {
+        ids: scope.idsByTable.get(config.table) ?? [],
+        limit: scope.rowsPerModule,
+      })
+    )
+  );
+  return scans
+    .filter((m) => m.headlines.length > 0)
+    .map((m) => ({
+      slug: m.slug,
+      title: m.title,
+      headlines: m.headlines,
+      rows: m.rows,
+      lastActivityMs: m.lastActivityMs,
+    }));
+}
+
 async function scanModule(
   supabase: SupabaseClient,
   config: (typeof CLASSIFIER_MODULES)[number],
   now: number,
-  userId: string
+  userId: string,
+  scope?: { ids: string[]; limit: number }
 ): Promise<ModuleScan> {
   const empty: ModuleScan = {
     slug: config.slug,
@@ -197,15 +307,19 @@ async function scanModule(
   };
 
   try {
-    const { data, error } = await supabase
+    const base = supabase
       .from(config.table)
       .select("*")
       // EXPLICIT, not left to RLS. See the note on getUserFullContext:
       // this same query runs under the service-role client in two job
       // handlers, where RLS does not apply at all.
-      .eq("user_id", userId)
+      .eq("user_id", userId);
+    // Inside a project the rows are named, not merely filtered: `.in`
+    // over the member ids, so a row that was never added to the project
+    // cannot arrive in its context by being recent.
+    const { data, error } = await (scope ? base.in("id", scope.ids) : base)
       .order("created_at", { ascending: false })
-      .limit(PER_MODULE_LIMIT);
+      .limit(scope ? scope.limit : PER_MODULE_LIMIT);
 
     if (error || !data) {
       if (error) logApiError("user-context:scanModule", error, { table: config.table });

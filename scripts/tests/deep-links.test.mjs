@@ -227,7 +227,9 @@ for (const l of favLinks) {
 // the link. A drop means the scanner stopped seeing something, which is
 // the one failure a per-link check cannot report: it never asks about a
 // link it did not find.
-const DEEP_LINK_FLOOR = 50;
+// 50 -> 52, redesign phase 2: the project page links a member row to its
+// record and the chat to the project it starts in.
+const DEEP_LINK_FLOOR = 52;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

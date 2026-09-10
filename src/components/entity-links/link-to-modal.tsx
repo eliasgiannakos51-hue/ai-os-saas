@@ -7,7 +7,7 @@ import { ApiError } from "@/lib/errors/api-error";
 import { useErrorText } from "@/lib/errors/use-error-text";
 import { ChevronLeft, Link2, Search, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
+import { LINKABLE_MODULES, type LinkableModule } from "@/lib/knowledge-graph";
 import { useToast } from "@/components/toast/toast-context";
 import type { ModuleConfig } from "@/lib/modules";
 
@@ -48,7 +48,7 @@ export function LinkToModal({
   const router = useRouter();
   const supabase = createClient();
   const { addToast } = useToast();
-  const [selectedModule, setSelectedModule] = useState<ModuleConfig | null>(null);
+  const [selectedModule, setSelectedModule] = useState<LinkableModule | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResultRow[]>([]);
   const [searching, setSearching] = useState(false);

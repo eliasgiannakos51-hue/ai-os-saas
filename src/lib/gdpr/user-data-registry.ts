@@ -173,6 +173,12 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // generation. The Content tracker (public.content) is listed above on
   // its own; this table is what the generator writes.
   { table: "generated_posts", label: "generated_posts", scope: "user_content" },
+  // Redesign phase 2: the folder and its goal, both written by the person.
+  // The MEMBERSHIP rows are entity_links, already listed elsewhere in this
+  // registry, so an export carries the project and the edges that say what
+  // was in it; an erasure takes the project row and the delete trigger in
+  // 20261001000000_projects.sql takes those edges with it.
+  { table: "projects", label: "projects", scope: "user_content" },
   { table: "ai_videos", label: "ai_videos", scope: "user_content" },
   { table: "ai_websites", label: "ai_website_entries", scope: "user_content" },
 

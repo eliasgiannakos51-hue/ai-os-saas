@@ -772,7 +772,8 @@ check(
   // TWENTY-SIX SINCE V5 #21: /dashboard/presentations reaches this scan
   // through MODULE_TITLE_KEYS, the third page to do so.
   // TWENTY-SEVEN SINCE V5 #22: /dashboard/posts, by the literal form.
-  namedPages.length >= 27,
+  // TWENTY-EIGHT SINCE REDESIGN PHASE 2: /dashboard/projects.
+  namedPages.length >= 28,
   `${namedPages.length} — this floor rises as pages are added, and never falls`,
 );
 for (const locale of LOCALES) {

@@ -1,12 +1,12 @@
 # The first run — de
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **608 strings**. The whole product is 3027, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **610 strings**. The whole product is 3067, which is why this file exists.
 
-**Start with tier 1. It is 45 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 365 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 366 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (45)
+## Tier 1 — THE SENTENCES — read these (46)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -192,6 +192,12 @@ Muster in deinen eigenen Einträgen, jeweils mit der Zahl der Einträge dahinter
 
 Beschreibe eine Präsentation und erhalte die Folien – PowerPoint oder PDF, mit Fotos von Unsplash oder deinen eigenen. Es zeichnet keine Diagramme.
 
+**`sidebar.hints.projects`**
+
+> EN — A folder with a goal. What you put in is what is in it — nothing is dragged in with it.
+
+Ein Ordner mit einem Ziel. Was du hineinlegst, ist drin — nichts kommt von selbst.
+
 **`sidebar.hints.published`**
 
 > EN — Every site you have live on the web, with its traffic and version history
@@ -290,7 +296,7 @@ Ionexa wählt damit den nächsten Planschritt aus — leichte Arbeit, wenn du un
 
 Kostenlos — es wird nichts generiert, und du entfernst es mit einem Klick
 
-## Tier 2 — The labels — skim these (365)
+## Tier 2 — The labels — skim these (366)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1879,6 +1885,12 @@ Produkte
 > EN — Product Workflow
 
 Produkt-Workflow
+
+**`sidebar.items.projects`**
+
+> EN — Projects
+
+Projekte
 
 **`sidebar.items.published`**
 

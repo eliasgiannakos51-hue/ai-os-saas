@@ -96,7 +96,7 @@ const MIN_DRAWN_ITEMS = 15;
 // drawn now because api/posts/generate reaches a model and writes one
 // post per platform. The other two (Images, Videos) are still out, for
 // the same reason they were.
-const MAX_DRAWN_ITEMS = 25;
+const MAX_DRAWN_ITEMS = 26;
 
 // The real filters, executed. lib/sidebar-visibility.ts imports no icons
 // precisely so this is possible — see its header.

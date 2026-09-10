@@ -39,6 +39,7 @@ import {
   TRADING_JOURNAL_ICON,
   VOICE_ICON,
   PREDICTIONS_ICON,
+  PROJECTS_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -63,14 +64,14 @@ export type { SidebarItem, SidebarGroupConfig } from "@/lib/sidebar-visibility";
 export { visibleGroups, sidebarGroups } from "@/lib/sidebar-visibility";
 import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 
-// SIX GROUPS, TWENTY-FIVE VISIBLE ROWS — the structure of 2026-09-05,
+// SIX GROUPS, TWENTY-SIX VISIBLE ROWS — the structure of 2026-09-05,
 // plus the two rows it asked for that could not be drawn until V5 #21
 // and V5 #22.
 //
 // THE HISTORY, BECAUSE THE NUMBER ONLY MEANS SOMETHING NEXT TO IT: eight
 // groups and forty-five rows, then four and sixteen (V4.6 #3), then four
 // and twenty-one (2026-09-04), then six and twenty-three (2026-09-05),
-// then twenty-four (V5 #21), now twenty-five. Not 41 and not 13 at any point —
+// then twenty-four (V5 #21), then twenty-five (V5 #22), now twenty-six. Not 41 and not 13 at any point —
 // scripts/tests/sidebar-size.test.mjs's BEFORE_V46_3 list is forty-five
 // entries long and the gate asserts that length.
 //
@@ -311,6 +312,11 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     heading: "Organise",
     collapsible: true,
     items: [
+      // Redesign phase 2. A folder with a goal, holding exactly what was
+      // put in it — api/projects and api/projects/[id]/members write the
+      // membership as entity_links edges, and nothing expands them. It
+      // is drawn the day it exists, like every row under Make.
+      { href: "/dashboard/projects", label: "Projects", icon: PROJECTS_ICON, hintKey: "projects" },
       { href: MISSION_NAV_ITEM.href, label: MISSION_NAV_ITEM.label, icon: MISSION_ICON, hintKey: "missionControl" },
       { href: REFLECTION_NAV_ITEM.href, label: REFLECTION_NAV_ITEM.label, icon: REFLECTION_ICON, hintKey: "reflection" },
       { href: "/dashboard/team", label: "Team", icon: TEAM_ICON, hintKey: "team" },

@@ -171,7 +171,8 @@
       "tradingJournal": "Trading-Journal",
       "voice": "Stimme",
       "predictions": "Muster",
-      "posts": "Beiträge"
+      "posts": "Beiträge",
+      "projects": "Projekte"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -229,7 +230,8 @@
       "tradingJournal": "Deine Trades, mit der Begründung, die du damals notiert hast.",
       "voice": "Text vorlesen lassen oder sprechen und mitschreiben lassen. Minuten werden gezählt, der Minutenpreis steht auf der Seite.",
       "predictions": "Muster in deinen eigenen Einträgen, jeweils mit der Zahl der Einträge dahinter und einem Link darauf.",
-      "posts": "Sag es einmal und erhalte pro Plattform einen Beitrag in ihrer Länge und ihrem Ton. Es veröffentlicht nichts – du kopierst und postest."
+      "posts": "Sag es einmal und erhalte pro Plattform einen Beitrag in ihrer Länge und ihrem Ton. Es veröffentlicht nichts – du kopierst und postest.",
+      "projects": "Ein Ordner mit einem Ziel. Was du hineinlegst, ist drin — nichts kommt von selbst."
     },
     "closeMenu": "Menü schließen"
   },
@@ -3242,6 +3244,16 @@
       "is": "Ein Beitragsschreiber: eine Beschreibung rein, ein Beitrag pro Plattform raus.",
       "does": "Schreibt aus derselben Beschreibung einen LinkedIn-Beitrag, einen Beitrag für X, eine Instagram-Bildunterschrift mit Hashtags, einen Facebook-Beitrag und einen Threads-Beitrag – jeder auf die Länge seiner Plattform gekürzt und in ihrem Ton, in der Sprache deiner Beschreibung – mit einem Kopieren-Knopf an jedem.",
       "doesNot": "Es veröffentlicht nichts, plant nichts ein und verbindet sich mit keinem Social-Media-Konto, und es verwendet keinen Text auf mehreren Plattformen wieder – fünf Plattformen, fünf Beiträge. Es erzeugt keine Bilder; das Foto ist deins."
+    },
+    "projects": {
+      "is": "Ein Ordner mit einem Ziel, der genau das enthält, was du hineingelegt hast.",
+      "does": "Gruppiert deine eigenen Zeilen — Dateien, Unterhaltungen, Pläne, Agents, Präsentationen, Beiträge und jeden Tracker-Eintrag — unter einem Namen und einem Ziel, und lässt einen Chat darin starten, der mehr Zeilen aus weniger Modulen liest.",
+      "doesNot": "Es zieht nichts von selbst hinein: ein Plan bringt seine Schritte nicht mit, eine Website ihre Formulare nicht. Ein gelöschtes Projekt löscht den Ordner, nie den Inhalt."
+    },
+    "projectDetail": {
+      "is": "Ein Projekt: sein Ziel, was du hineingelegt hast, und ein Chat, der darin beginnt.",
+      "does": "Gruppiert den Inhalt in Aufgaben, Dateien, Agents und Ergebnisse, zeigt wann was dazukam, lässt dich einzelne herausnehmen und startet eine Unterhaltung, die ihr Leben lang zu diesem Projekt gehört.",
+      "doesNot": "Etwas herauszunehmen löscht es nicht, und das Projekt fügt von selbst nichts hinzu: ein Plan bringt hier seine Schritte nicht mit, eine Website ihre Formulare nicht."
     }
   },
   "helpCentre": {
@@ -3754,6 +3766,52 @@
       "failed": "fehlgeschlagen",
       "delete": "Löschen",
       "deleteConfirm": "Diese Beiträge löschen? Das lässt sich nicht rückgängig machen."
+    }
+  },
+  "projects": {
+    "title": "Projekte",
+    "description": "Ein Ordner mit einem Ziel. Du legst Dinge ausdrücklich hinein; nichts kommt mit.",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Herbstshop starten",
+      "goal": "Ziel",
+      "goalPlaceholder": "Was willst du erreichen?",
+      "create": "Projekt erstellen"
+    },
+    "list": {
+      "title": "Deine Projekte",
+      "empty": "Noch keine Projekte.",
+      "members": "{count, plural, one {# Sache} other {# Sachen}}"
+    },
+    "status": {
+      "active": "Aktiv",
+      "done": "Fertig",
+      "archived": "Archiviert"
+    },
+    "sections": {
+      "goal": "Ziel",
+      "tasks": "Aufgaben",
+      "files": "Dateien",
+      "agents": "Agents",
+      "results": "Ergebnisse",
+      "activity": "Aktivität",
+      "other": "Alles Übrige",
+      "empty": "Hier ist noch nichts."
+    },
+    "progress": {
+      "rowsPerModule": "{count, plural, one {# Zeile pro Modul im Chat} other {# Zeilen pro Modul im Chat}}"
+    },
+    "startChat": "Chat in diesem Projekt starten",
+    "chatFixed": "Eine Unterhaltung gehört zu dem Projekt, in dem sie begonnen hat — ihr Leben lang.",
+    "noGoal": "Noch kein Ziel geschrieben.",
+    "untitled": "Ohne Titel",
+    "delete": "Löschen",
+    "deleteConfirm": "Dieses Projekt löschen? Was darin liegt, bleibt, wo es ist.",
+    "removeMember": "Aus dem Projekt nehmen",
+    "errors": {
+      "tooShort": "Gib ihm zuerst einen Namen.",
+      "tooLong": "Der Name ist länger als {limit} Zeichen.",
+      "failed": "Das hat nicht geklappt — versuch es nochmal."
     }
   },
   "finance": {

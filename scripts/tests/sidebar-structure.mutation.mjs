@@ -81,7 +81,10 @@ const MUTANTS = [
     file: NAV,
     from: '{ href: "/dashboard/posts", label: "Posts", icon: POSTS_ICON, hintKey: "posts" }',
     to: '{ href: "/dashboard/posts", label: "Posts", icon: POSTS_ICON, hintKey: "posts", hidden: true }',
-    expect: "rows drawn, 25 declared",
+    // NO NUMBER IN THE ANCHOR — see the note in sidebar-size.mutation.mjs.
+    // The count moves whenever a row is added (26 after redesign phase 2
+    // drew Projects), and an anchor carrying it reports a hole every time.
+    expect: "rows drawn,",
   },
   {
     name: "Settings stops being its own block",

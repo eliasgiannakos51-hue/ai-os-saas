@@ -1,7 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ModuleConfig } from "@/lib/modules";
-import { LINKABLE_MODULES, getLinkableModuleByTable, moduleHref } from "@/lib/knowledge-graph";
+import { LINKABLE_MODULES, type LinkableModule, getLinkableModuleByTable, moduleHref } from "@/lib/knowledge-graph";
 import { logApiError } from "@/lib/log-error";
 import { normalizeForSearch } from "@/lib/text/search-match";
 import type { ModuleTitleKey } from "@/lib/modules";
@@ -59,13 +59,13 @@ export type EntityLinkSuggestion = {
   href: string;
 };
 
-function bodyFieldFor(module: ModuleConfig) {
+function bodyFieldFor(module: LinkableModule) {
   return module.fields.find(
     (f) => f.key !== module.headlineKey && (f.type === "text" || f.type === "textarea")
   );
 }
 
-function textFor(module: ModuleConfig, row: Record<string, unknown>): string {
+function textFor(module: LinkableModule, row: Record<string, unknown>): string {
   const headline = String(row[module.headlineKey] ?? "");
   const bodyField = bodyFieldFor(module);
   const body = bodyField ? String(row[bodyField.key] ?? "") : "";

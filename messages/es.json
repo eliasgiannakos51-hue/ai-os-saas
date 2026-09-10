@@ -171,7 +171,8 @@
       "tradingJournal": "Diario de trading",
       "voice": "Voz",
       "predictions": "Patrones",
-      "posts": "Publicaciones"
+      "posts": "Publicaciones",
+      "projects": "Proyectos"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -229,7 +230,8 @@
       "tradingJournal": "Tus operaciones, con el razonamiento que escribiste entonces.",
       "voice": "Escucha un texto en voz alta, o habla y se escribe. Los minutos se miden y el precio por minuto está en la página.",
       "predictions": "Patrones en tus propias entradas, cada uno con el número de registros que lo sostiene y un enlace a ellos.",
-      "posts": "Dilo una vez y recibe una publicación por plataforma, con su longitud y su tono. No publica nada: copias y publicas tú."
+      "posts": "Dilo una vez y recibe una publicación por plataforma, con su longitud y su tono. No publica nada: copias y publicas tú.",
+      "projects": "Una carpeta con un objetivo. Lo que metes es lo que hay — nada entra solo."
     },
     "closeMenu": "Cerrar el menú"
   },
@@ -3242,6 +3244,16 @@
       "is": "Un redactor de publicaciones: entra una descripción, sale una publicación por plataforma.",
       "does": "Escribe una publicación para LinkedIn, otra para X, un pie de foto de Instagram con hashtags, una publicación de Facebook y una de Threads a partir de la misma descripción, cada una recortada a la longitud de su plataforma y escrita en su tono, en el idioma de tu descripción, con un botón de copiar en cada una.",
       "doesNot": "No publica, no programa ni se conecta a ninguna cuenta de redes sociales, y no reutiliza un mismo texto en todas las plataformas: cinco plataformas, cinco publicaciones. No crea imágenes; la foto es tuya."
+    },
+    "projects": {
+      "is": "Una carpeta con un objetivo, que contiene exactamente lo que metiste.",
+      "does": "Agrupa tus propias filas — archivos, conversaciones, planes, agentes, presentaciones, publicaciones y cualquier registro — bajo un nombre y un objetivo, y permite que un chat empiece dentro para leer más filas de menos módulos.",
+      "doesNot": "No arrastra cosas por su cuenta: un plan en un proyecto no trae sus pasos, y un sitio web no trae sus formularios. Eliminar un proyecto elimina la carpeta, nunca el contenido."
+    },
+    "projectDetail": {
+      "is": "Un proyecto: su objetivo, lo que metiste y un chat que empieza dentro.",
+      "does": "Agrupa el contenido en tareas, archivos, agentes y resultados, muestra cuándo entró cada cosa, te deja sacar cualquiera y empieza una conversación que pertenece a este proyecto toda su vida.",
+      "doesNot": "Sacar algo no lo elimina, y el proyecto no añade nada por su cuenta: un plan aquí no trae sus pasos, un sitio no trae sus formularios."
     }
   },
   "helpCentre": {
@@ -3754,6 +3766,52 @@
       "failed": "fallida",
       "delete": "Eliminar",
       "deleteConfirm": "¿Eliminar estas publicaciones? No se puede deshacer."
+    }
+  },
+  "projects": {
+    "title": "Proyectos",
+    "description": "Una carpeta con un objetivo. Metes cosas explícitamente; nada entra con ellas.",
+    "form": {
+      "name": "Nombre",
+      "namePlaceholder": "Lanzar la tienda de otoño",
+      "goal": "Objetivo",
+      "goalPlaceholder": "¿Qué quieres conseguir?",
+      "create": "Crear proyecto"
+    },
+    "list": {
+      "title": "Tus proyectos",
+      "empty": "Aún no hay proyectos.",
+      "members": "{count, plural, one {# cosa} other {# cosas}}"
+    },
+    "status": {
+      "active": "Activo",
+      "done": "Hecho",
+      "archived": "Archivado"
+    },
+    "sections": {
+      "goal": "Objetivo",
+      "tasks": "Tareas",
+      "files": "Archivos",
+      "agents": "Agentes",
+      "results": "Resultados",
+      "activity": "Actividad",
+      "other": "Todo lo demás",
+      "empty": "Aquí no hay nada todavía."
+    },
+    "progress": {
+      "rowsPerModule": "{count, plural, one {# fila por módulo en el chat} other {# filas por módulo en el chat}}"
+    },
+    "startChat": "Iniciar un chat en este proyecto",
+    "chatFixed": "Una conversación pertenece al proyecto donde empezó, durante toda su vida.",
+    "noGoal": "Aún no hay objetivo escrito.",
+    "untitled": "Sin título",
+    "delete": "Eliminar",
+    "deleteConfirm": "¿Eliminar este proyecto? Las cosas que contiene se quedan donde están.",
+    "removeMember": "Sacar del proyecto",
+    "errors": {
+      "tooShort": "Ponle un nombre primero.",
+      "tooLong": "Ese nombre supera los {limit} caracteres.",
+      "failed": "No funcionó — inténtalo de nuevo."
     }
   },
   "finance": {

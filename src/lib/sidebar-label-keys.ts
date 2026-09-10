@@ -126,6 +126,7 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Presentations: "presentations",
   // V5 #22: the post generator under Make.
   Posts: "posts",
+  Projects: "projects",
   Campaigns: "campaigns",
   Analytics: "analytics",
   Finance: "finance",

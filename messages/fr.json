@@ -171,7 +171,8 @@
       "tradingJournal": "Journal de trading",
       "voice": "Voix",
       "predictions": "Tendances",
-      "posts": "Publications"
+      "posts": "Publications",
+      "projects": "Projets"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -229,7 +230,8 @@
       "tradingJournal": "Vos transactions, avec le raisonnement noté sur le moment.",
       "voice": "Faites lire un texte à voix haute, ou parlez et il s'écrit. Les minutes sont comptées et le prix à la minute figure sur la page.",
       "predictions": "Des tendances dans vos propres entrées, chacune avec le nombre d'enregistrements sur lequel elle repose et un lien vers eux.",
-      "posts": "Dites-le une fois et obtenez une publication par plateforme, à sa longueur et dans son ton. Rien n'est publié : vous copiez et vous publiez."
+      "posts": "Dites-le une fois et obtenez une publication par plateforme, à sa longueur et dans son ton. Rien n'est publié : vous copiez et vous publiez.",
+      "projects": "Un dossier avec un objectif. Ce que vous mettez est ce qu'il contient — rien n'entre seul."
     },
     "closeMenu": "Fermer le menu"
   },
@@ -3242,6 +3244,16 @@
       "is": "Un rédacteur de publications : une description entre, une publication par plateforme sort.",
       "does": "Rédige une publication LinkedIn, une publication pour X, une légende Instagram avec hashtags, une publication Facebook et une publication Threads à partir de la même description, chacune coupée à la longueur de sa plateforme et écrite dans son ton, dans la langue de votre description, avec un bouton copier sur chacune.",
       "doesNot": "Il ne publie pas, ne programme rien et ne se connecte à aucun compte de réseau social, et il ne réutilise pas un même texte d'une plateforme à l'autre : cinq plateformes, cinq publications. Aucune image n'est créée ; la photo est la vôtre."
+    },
+    "projects": {
+      "is": "Un dossier avec un objectif, contenant exactement ce que vous y avez mis.",
+      "does": "Regroupe vos propres lignes — fichiers, conversations, plans, agents, présentations, publications et tout enregistrement — sous un nom et un objectif, et permet à une conversation de démarrer dedans pour lire plus de lignes dans moins de modules.",
+      "doesNot": "Il n'attire rien tout seul : un plan dans un projet n'amène pas ses étapes, et un site n'amène pas ses formulaires. Supprimer un projet supprime le dossier, jamais le contenu."
+    },
+    "projectDetail": {
+      "is": "Un projet : son objectif, ce que vous y avez mis, et une conversation qui démarre dedans.",
+      "does": "Regroupe le contenu en tâches, fichiers, agents et résultats, montre quand chaque élément est entré, vous laisse en retirer, et démarre une conversation qui appartient à ce projet toute sa durée.",
+      "doesNot": "Retirer un élément ne le supprime pas, et le projet n'ajoute rien tout seul : un plan ici n'amène pas ses étapes, un site n'amène pas ses formulaires."
     }
   },
   "helpCentre": {
@@ -3754,6 +3766,52 @@
       "failed": "échec",
       "delete": "Supprimer",
       "deleteConfirm": "Supprimer ces publications ? C'est irréversible."
+    }
+  },
+  "projects": {
+    "title": "Projets",
+    "description": "Un dossier avec un objectif. Vous y mettez des choses explicitement ; rien n'entre avec elles.",
+    "form": {
+      "name": "Nom",
+      "namePlaceholder": "Lancer la boutique d'automne",
+      "goal": "Objectif",
+      "goalPlaceholder": "Que cherchez-vous à accomplir ?",
+      "create": "Créer un projet"
+    },
+    "list": {
+      "title": "Vos projets",
+      "empty": "Aucun projet pour l'instant.",
+      "members": "{count, plural, one {# élément} other {# éléments}}"
+    },
+    "status": {
+      "active": "Actif",
+      "done": "Terminé",
+      "archived": "Archivé"
+    },
+    "sections": {
+      "goal": "Objectif",
+      "tasks": "Tâches",
+      "files": "Fichiers",
+      "agents": "Agents",
+      "results": "Résultats",
+      "activity": "Activité",
+      "other": "Tout le reste",
+      "empty": "Rien ici pour l'instant."
+    },
+    "progress": {
+      "rowsPerModule": "{count, plural, one {# ligne par module dans le chat} other {# lignes par module dans le chat}}"
+    },
+    "startChat": "Démarrer une conversation dans ce projet",
+    "chatFixed": "Une conversation appartient au projet où elle a commencé, pour toute sa durée.",
+    "noGoal": "Aucun objectif écrit pour l'instant.",
+    "untitled": "Sans titre",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer ce projet ? Ce qu'il contient reste où c'est.",
+    "removeMember": "Retirer du projet",
+    "errors": {
+      "tooShort": "Donnez-lui d'abord un nom.",
+      "tooLong": "Ce nom dépasse {limit} caractères.",
+      "failed": "Ça n'a pas marché — réessayez."
     }
   },
   "finance": {

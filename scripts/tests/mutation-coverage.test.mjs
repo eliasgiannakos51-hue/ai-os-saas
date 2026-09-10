@@ -154,7 +154,13 @@ console.log(
 // count rose, because a ratchet one below reality hands every mutation
 // that removes one suite a free pass — its own suite found exactly that.
 // 132 -> 133: V5 #22 added posts.mutation.mjs, raised the same day.
-const RATCHET = 133;
+// 133 -> 135, redesign phase 0, and it rises by TWO for one new suite.
+// sidebar-structure.mutation.mjs drives four gates, and one of them —
+// sidebar-hints-coverage.test.mjs — had no suite of its own until now.
+// Set AT the measurement rather than one under it, for the reason V5 #22
+// found the hard way: a ratchet one below reality hands the next mutation
+// that deletes a suite a free pass, and its own suite is what caught that.
+const RATCHET = 135;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

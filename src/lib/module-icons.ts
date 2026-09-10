@@ -50,7 +50,7 @@ import {
   Activity,
   NotebookPen,
   AudioLines,
-  CloudSun,
+  Compass,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -204,11 +204,15 @@ export const VOICE_ICON: LucideIcon = AudioLines;
 // running app as "the picture shows a capital sigma, wrong", and it was:
 // a glyph is not an icon in a language that uses that glyph.
 //
-// CloudSun rather than a trend arrow. A forecast is what this page shows
-// — lib/insights/detectors.ts computing what is likely next — and the
-// weather metaphor reads as forecast in all ten languages. The trend
-// family was rejected on purpose: TrendingUp is already trading and
-// LineChart is already the trading workflow, and the command palette
-// flattens every group into one list, so a fourth near-identical arrow
-// would be a different bug of the same kind.
-export const PREDICTIONS_ICON: LucideIcon = CloudSun;
+// CloudSun WAS the first replacement and it was also wrong, reported the
+// same way: it reads "weather", not "forecast". A metaphor that needs the
+// label to disambiguate it is doing no work — the label was always there.
+//
+// Compass, of the three proposed. Sparkles is already Create Studio and
+// Telescope is already Deep Research, so those two would have moved the
+// collision rather than removed it; the command palette flattens every
+// group into one list, where a duplicated mark is a duplicated mark. A
+// compass answers "which way is this heading", which is what
+// lib/insights/detectors.ts computes, and it is not a letter in any
+// alphabet this app ships in.
+export const PREDICTIONS_ICON: LucideIcon = Compass;

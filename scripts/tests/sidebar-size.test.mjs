@@ -49,6 +49,23 @@ function check(name, cond, detail) {
 // phone before a single link is drawn, which is why this number moves by
 // argument and not by convenience.
 const MAX_GROUPS = 6;
+// A CEILING WITH NO FLOOR IS SATISFIED BY ZERO. Both limits in this file
+// are "at most", and at most six groups is true of no groups at all — so
+// a config that collapsed, or a parse that stopped matching, would read
+// as a tidier sidebar rather than as a broken one. The two floors below
+// are the "did it collapse" guard.
+//
+// THEY ARE DELIBERATELY NOT THE AGREED NUMBERS. Six groups and
+// twenty-five rows are pinned by name, position and count in
+// scripts/tests/sidebar-structure.test.mjs, which is the file to edit
+// when the structure changes. Repeating those numbers here would mean
+// two files to update for every added row and one of them going stale —
+// this repository has been bitten by exactly that twice, both times by a
+// number restated instead of derived. These sit below the agreed values
+// on purpose: far enough under that ordinary movement never touches
+// them, far enough over zero that an emptied config cannot pass.
+const MIN_GROUPS = 4;
+const MIN_DRAWN_ITEMS = 15;
 // TWENTY-THREE SINCE 2026-09-05, up from twenty-one, and the two extra
 // rows are named: /dashboard/voice and /dashboard/predictions, two
 // features that were complete and had nowhere to stand.
@@ -160,6 +177,11 @@ check(
   groups.length <= MAX_GROUPS,
   `${groups.length} groups: ${groups.map((g) => g.heading).join(", ")}`
 );
+check(
+  `...and at least ${MIN_GROUPS}, so an emptied config cannot pass a ceiling`,
+  groups.length >= MIN_GROUPS,
+  `${groups.length} groups — the sidebar collapsed, or the parse stopped matching`
+);
 
 // ---------------------------------------------------------------------
 console.log(`\n== 3. at most ${MAX_DRAWN_ITEMS} rows are actually DRAWN ==`);
@@ -180,6 +202,11 @@ for (const isOwner of [true, false]) {
     `${isOwner ? "owner" : "non-owner"}: ${rows.length} rows drawn, limit ${MAX_DRAWN_ITEMS}`,
     rows.length <= MAX_DRAWN_ITEMS,
     `${rows.length} rows`
+  );
+  check(
+    `${isOwner ? "owner" : "non-owner"}: ...and at least ${MIN_DRAWN_ITEMS} rows drawn`,
+    rows.length >= MIN_DRAWN_ITEMS,
+    `${rows.length} rows — a sidebar this small is a collapse, not a tidy-up`
   );
   check(
     `${isOwner ? "owner" : "non-owner"}: ${drawn.length} groups drawn, limit ${MAX_GROUPS}`,

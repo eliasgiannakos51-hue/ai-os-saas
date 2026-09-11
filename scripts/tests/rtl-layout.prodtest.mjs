@@ -130,33 +130,97 @@ const PROBE = () => {
   // collapsed accordion keeps a full-size rect (getBoundingClientRect
   // does not know about overflow:hidden), and counting those produced 90
   // phantom findings the first time layout-stress.prodtest.mjs ran.
+  //
+  // THE RECT IS CLIPPED BEFORE IT IS JUDGED, and 2026-09-11 is why.
+  //
+  // /pricing carries a plan-comparison table, `min-w-[720px]` inside
+  // `overflow-x-auto`. On a 390px phone it is wider than the screen in
+  // BOTH languages and it is meant to be: the container scrolls. English
+  // starts that scroll at the left end, Arabic at the right end, because
+  // that is what rtl means — so the raw box reads 0..720 in English and
+  // -347..373 in Arabic. Same table, same container, same reachability,
+  // and a left-edge test on the raw box calls only the second one an
+  // escape. It reported ar=33 against en=32, and the one element of
+  // difference was a `<th>`: whichever cell happens to straddle the
+  // clipped edge when a table is scrolled to the opposite end.
+  //
+  // That is a finding about scroll position, not about layout, and a
+  // gate that reports it will be re-run, re-read and eventually ignored.
+  //
+  // So each box is INTERSECTED with every ancestor that clips it before
+  // being compared to the viewport. What is left is the part a reader can
+  // see without scrolling anything — which is what "off-screen" was
+  // always supposed to mean.
+  //
+  // THIS DOES NOT WEAKEN THE CHECK, and the reason is structural: every
+  // clipping container is ITSELF an element in this same sweep. Content
+  // that is reachable inside an on-screen scroll box stops being
+  // reported; a scroll box that is itself off the edge is reported exactly
+  // as before, and so is anything with no clipping ancestor at all — the
+  // mobile drawer at `-translate-x-full`, which is the shape this whole
+  // file was written for. The section at the end of this file drives all three
+  // cases through this function and requires the last two to be found.
+  //
+  // AN ANCESTOR ONLY CLIPS WHAT IT IS A CONTAINING BLOCK FOR, and getting
+  // this wrong would have hidden the defect this file was written for.
+  //
+  // The mobile drawer is `fixed inset-y-0 left-0` + `-translate-x-full`.
+  // `position: fixed` is laid out against the VIEWPORT, so an ancestor
+  // with `overflow: hidden` does not clip it — only an ancestor that
+  // establishes a containing block does, which means a transform, a
+  // filter, or a perspective. A rule that clipped every fixed element
+  // against every overflow-hidden ancestor would have quietly excused the
+  // exact element the 114-vs-3 measurement found in Arabic at 1440.
+  //
+  // Absolutely-positioned elements are clipped only by ancestors that are
+  // themselves positioned (or transformed). Everything in normal flow is
+  // clipped by any clipping ancestor.
+  const clipsDescendant = (ps, position) => {
+    const establishes =
+      ps.transform !== "none" || ps.filter !== "none" || ps.perspective !== "none";
+    if (position === "fixed") return establishes;
+    if (position === "absolute") return establishes || ps.position !== "static";
+    return true;
+  };
+
+  const clippedRect = (el) => {
+    const r = el.getBoundingClientRect();
+    const position = getComputedStyle(el).position;
+    let left = r.left, right = r.right, top = r.top, bottom = r.bottom;
+    for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+      const ps = getComputedStyle(p);
+      if (ps.overflow === "visible" && ps.overflowX === "visible" && ps.overflowY === "visible")
+        continue;
+      if (!clipsDescendant(ps, position)) continue;
+      const pr = p.getBoundingClientRect();
+      if (ps.overflowX !== "visible") { left = Math.max(left, pr.left); right = Math.min(right, pr.right); }
+      if (ps.overflowY !== "visible") { top = Math.max(top, pr.top); bottom = Math.min(bottom, pr.bottom); }
+    }
+    return { left, right, top, bottom };
+  };
+
   const isRendered = (el) => {
     const s = getComputedStyle(el);
     if (s.display === "none" || s.visibility === "hidden") return false;
     if (Number(s.opacity) === 0) return false;
     const r = el.getBoundingClientRect();
     if (r.width <= 0 || r.height <= 0) return false;
-    for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
-      const ps = getComputedStyle(p);
-      if (ps.overflow === "visible" && ps.overflowX === "visible" && ps.overflowY === "visible")
-        continue;
-      const pr = p.getBoundingClientRect();
-      if (r.right <= pr.left || r.left >= pr.right) return false;
-      if (r.bottom <= pr.top || r.top >= pr.bottom) return false;
-    }
-    return true;
+    // Fully outside one of its clipping ancestors — the collapsed
+    // accordion. An empty clipped box is nothing a reader can see.
+    const c = clippedRect(el);
+    return c.right > c.left && c.bottom > c.top;
   };
 
   const escapes = [];
   for (const el of document.querySelectorAll("body *")) {
     if (!isRendered(el)) continue;
-    const r = el.getBoundingClientRect();
-    if (r.left < -1 || r.right > vw + 1) {
+    const c = clippedRect(el);
+    if (c.left < -1 || c.right > vw + 1) {
       escapes.push({
         tag: el.tagName.toLowerCase(),
         cls: String(el.className ?? "").slice(0, 70),
-        left: Math.round(r.left),
-        right: Math.round(r.right),
+        left: Math.round(c.left),
+        right: Math.round(c.right),
       });
     }
   }
@@ -370,6 +434,92 @@ try {
   if (trendPresent) {
     check("trending-up is NOT mirrored in Arabic", noneEn("trendingUp", "mirrored") && !anyAr("trendingUp", "mirrored"));
   }
+
+  // -------------------------------------------------------------------
+  // THE PROBE, DRIVEN AGAINST A PAGE BUILT TO BREAK IT.
+  //
+  // Section 2's off-screen check was loosened on 2026-09-11 — the box is
+  // clipped by its ancestors before it is judged — and a loosened check
+  // is worth exactly as much as the proof that it still fails. Every
+  // number above is measured on the real app, where a green result is
+  // also what a check that stopped checking would produce.
+  //
+  // So the same PROBE runs here against three cases with known answers.
+  // The first is the false positive that caused the change; the other two
+  // are the real defects the file exists for, and they must still be
+  // found.
+  // -------------------------------------------------------------------
+  console.log("\n  the probe, against a page with known answers:");
+  const proofPage = await (await browser.newContext({ viewport: { width: 390, height: 800 }, locale: "ar" })).newPage();
+  await proofPage.setContent(`<!doctype html><html dir="rtl"><head><style>
+      body { margin: 0; }
+      /* 1. REACHABLE: wider than the screen, inside a box that scrolls.
+            This is /pricing's plan table, which the old check reported in
+            Arabic and not in English purely because rtl starts the scroll
+            at the other end. */
+      .scrollbox { overflow-x: auto; width: 100%; }
+      .wide { min-width: 720px; height: 40px; background: #eee; }
+      .cell { display: inline-block; width: 180px; height: 40px; }
+      /* 2. UNREACHABLE: the honeypot's own shape — fixed to the inline
+            edge and translated fully out, with nothing clipping it. */
+      .drawer { position: fixed; top: 0; left: 0; width: 256px; height: 100px;
+                transform: translateX(-100%); background: #ccc; }
+      /* 3. UNREACHABLE: a scroll box that is itself off the edge. Its
+            CONTENT is reachable relative to the box, so a check that
+            trusted the container blindly would miss this one. */
+      .lostbox { position: absolute; left: -400px; top: 200px; width: 300px;
+                 height: 50px; overflow-x: auto; background: #ddd; }
+      .lostinner { width: 280px; height: 50px; }
+      /* 4. THE ONE THAT NEARLY GOT AWAY. The same drawer, nested inside an
+            overflow-hidden ancestor. A fixed element is laid out against
+            the viewport, so that ancestor does NOT clip it — and a rule
+            that assumed it did would excuse the shape this whole file
+            exists for. */
+      .hider { overflow: hidden; width: 100%; height: 10px; }
+      .nested-drawer { position: fixed; top: 300px; left: 0; width: 256px; height: 100px;
+                       transform: translateX(-100%); background: #bbb; }
+    </style></head><body>
+      <div class="scrollbox"><div class="wide" id="wide"><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span></div></div>
+      <div class="drawer" id="drawer"></div>
+      <div class="lostbox" id="lostbox"><div class="lostinner" id="lostinner"></div></div>
+      <div class="hider"><div class="nested-drawer" id="nested"></div></div>
+    </body></html>`);
+  const proof = await proofPage.evaluate(PROBE);
+  const reported = new Set(proof.escapes.map((e) => e.cls.split(" ")[0]));
+  const anyReported = (cls) => proof.escapes.some((e) => e.cls.includes(cls));
+
+  check(
+    "a 720px table inside overflow-x-auto is NOT an escape — the false positive the change removed",
+    !anyReported("wide") && !anyReported("cell"),
+    `reported: ${[...reported].join(", ") || "(nothing)"}`
+  );
+  check(
+    "a drawer translated fully off the inline edge IS still an escape",
+    anyReported("drawer"),
+    "THE CHECK IS NOW DECORATION. This is the exact shape rtl-layout was written for —\n" +
+      "        `fixed left-0` + `-translate-x-full`, unreachable in LTR and 256px of sideways\n" +
+      "        scroll in RTL — and clipping the rect must not hide it."
+  );
+  check(
+    "a scroll container that is itself off the edge IS still an escape",
+    anyReported("lostbox"),
+    "Clipping a box against its ancestors must not excuse the box itself."
+  );
+  check(
+    "...and so is the content inside that off-edge container",
+    anyReported("lostinner"),
+    "The inner box is reachable RELATIVE TO ITS CONTAINER, which is the case a naive\n" +
+      "        'has a scrolling ancestor, therefore fine' rule would wave through."
+  );
+  check(
+    "a FIXED drawer inside an overflow-hidden ancestor IS still an escape",
+    anyReported("nested-drawer"),
+    "position: fixed is laid out against the viewport, so an overflow-hidden ancestor does not\n" +
+      "        clip it. Clipping it anyway is how this check would have excused the mobile drawer —\n" +
+      "        the element the 114-against-3 Arabic measurement at 1440 was about."
+  );
+  await proofPage.close();
+
 } finally {
   await browser.close();
   await harness.cleanup();

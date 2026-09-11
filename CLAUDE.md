@@ -73,6 +73,49 @@ each carrying a reason and checked BOTH ways so it cannot go stale. Every
 measured and printed but NOT gated: precision was about 4%, and a check
 with that ratio gets its baseline set to the size of the problem.
 
+## The plan is updated in the SAME commit as the work, never in a later round
+
+`docs/v5-list.md` was wrong in four places on 2026-09-11, and every one of
+them was wrong in the same direction: **work that had been done, described
+as still to do.**
+
+| item | the doc said | the tree said | stale for |
+|---|---|---|---|
+| 10, the `\b` rule | "~1 day", "done means: a narrower rule" | `untrusted-boundaries.test.mjs`, 32 checks, IS that rule | 3 days |
+| 9, mutation coverage | "98 of 221 (44%)", instrument outstanding | `mutation-coverage.test.mjs` prints it on every build | 3 days |
+| 1, the isolation test | "~half a day", the prodtest reads as unwritten | `user-isolation-live.prodtest.mjs`, 426 lines, 25 checks | 4 days |
+| 8b / 8c / 11 | "~1 day of code", "no instrument looks at it" | `role-grants`, the storage schema, `db:invoice` all shipped | 3 days |
+
+The mechanism was the same every time. The file's last commit is 9dd8c25,
+2026-09-07. The work landed on 2026-09-08. Nobody came back.
+
+**This costs more than a tidy document.** An item that reads as unstarted
+does not get scheduled, so the owner was told three separate times that a
+day of coding stood between him and a measurement that was already
+waiting on fifteen minutes of his own. Item 1 was the expensive one: "two
+accounts and half a day of work" and "two accounts and one run" are
+different decisions, and he was making the first one.
+
+So:
+
+**A round that changes what an item's entry says is true must change the
+entry, in the same commit as the code.** Not in the closing report, not in
+the next round's sweep, not "I will note it when the feature lands". The
+commit that makes a sentence false is the commit that fixes it.
+
+### This one cannot be gated, and that is why it is written here
+
+`scan-self-claims.mjs` holds every path named in a comment or in the
+markdown at zero unresolved, and it would not have caught any of the four.
+Each one named files that exist and numbers that parse. They were true
+sentences that became false, and no parser can see the difference between
+"98 of 221" and "143 of 273" without being told which is this week's.
+
+The nearest mechanical help is the habit the numbers already have: every
+figure in the list that CAN be re-derived says the command that derives it,
+so the next reader can re-run it rather than trust it. Extend that when you
+add a number — and when you finish something, open the entry.
+
 ## The build that matters is the one in CI, not the one on this machine
 
 On 2026-09-11 merge commit `aec56a2` went red on Vercel with a single

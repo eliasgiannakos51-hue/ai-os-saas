@@ -29,7 +29,8 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/schema-canaries.test.mjs";
 const ROUTE = "src/app/api/health/route.ts";
-const TARGETS = [GATE, ROUTE];
+const CANARIES = "src/lib/health/schema-canaries.ts";
+const TARGETS = [GATE, ROUTE, CANARIES];
 
 const MUTANTS = [
   {
@@ -96,6 +97,39 @@ const MUTANTS = [
     from: 'const route = stripComments(readFileSync("src/app/api/health/route.ts", "utf8"));',
     to: 'const route = stripComments(readFileSync("package.json", "utf8"));',
     expect: "the function list comes from the API's own root document",
+  },
+  {
+    // 8. THE DEFECT OF 2026-09-11, PUT BACK. `projects` is the newest
+    // migration in the tree and the owner found the screen broken by
+    // hand while /api/health reported schema ok, missing: []. Section 3
+    // is the direction that was missing; this is the mutant that proves
+    // it is load-bearing rather than decorative.
+    name: "a migration in the window loses its canary — the state all three new screens were in",
+    file: CANARIES,
+    from: '    migration: "20261001000000_projects.sql",',
+    to: '    migration: "20260803000000_baseline_schema.sql",',
+    expect: "20261001000000_projects.sql",
+  },
+  {
+    // 9. The excuse used as a shortcut. NOT_PROBEABLE exists for files
+    // that add nothing a probe can see; pointed at a file that DOES add
+    // something, it is a way to make section 3 green by declaring the
+    // question uninteresting.
+    name: "a migration that really does add a table is excused as unprobeable",
+    file: GATE,
+    from: 'const NOT_PROBEABLE = {',
+    to: 'const NOT_PROBEABLE = {\n  "20261001000000_projects.sql": "excused by a mutation, with a reason long enough to clear the length check",',
+    expect: "it really adds nothing canaried",
+  },
+  {
+    // 10. And the same list going stale the other way: an excuse for a
+    // file that has since slid out of the window, left behind to be
+    // read as coverage.
+    name: "an exemption outlives the window it was written for",
+    file: GATE,
+    from: 'const NOT_PROBEABLE = {',
+    to: 'const NOT_PROBEABLE = {\n  "20260803000000_baseline_schema.sql": "a stale excuse for a file that left the window long ago, long enough to clear the length check",',
+    expect: "is still in the window",
   },
 ];
 
@@ -178,4 +212,4 @@ if (missed.length > 0 || !after.green) {
   }
   process.exit(1);
 }
-console.log("Every clause in schema-canaries.test.mjs section 4 is load-bearing.");
+console.log("Every clause in schema-canaries.test.mjs sections 3 and 4 is load-bearing.");

@@ -149,6 +149,71 @@ for (const name of ["nav_events", "consume_rate_limit", "db_exposure_report", "m
   );
 }
 
+// ---------------------------------------------------------------------
+// THE DIRECTION THAT WAS MISSING UNTIL 2026-09-11, and what it cost.
+//
+// This file's own header says it "derives what the newest migrations add
+// and requires the list to match". Half of that was true. Section 1 checks
+// every canary against its migration — that a canary is REAL. Nothing
+// checked the other way: that a migration in the window HAS one.
+//
+// The derivation above even printed the answer on every run — "newest 12
+// migrations add: 10 column(s), 3 table(s), 7 function(s)" — and then
+// asserted nothing about it. A number measured and not judged is the shape
+// this repository keeps finding in its own instruments; it was in the line
+// directly above the first check.
+//
+// What it cost: presentation_decks (20260929), generated_posts (20260930)
+// and projects (20261001) all landed inside the window with no canary, and
+// /api/health reported schema ok with missing: [] while the owner found
+// all three screens broken by hand.
+//
+// ONE CANARY PER MIGRATION, NOT PER OBJECT. The question a canary answers
+// is "was this file ever pasted into the SQL editor", and one object
+// answers it for the whole file — 20260924 adds cancel_requested_at to
+// three tables and three canaries would be three ways to learn one fact.
+// Requiring one per object would make the list long enough to stop being
+// read, which is the failure mode named at the top of schema-canaries.ts.
+// ---------------------------------------------------------------------
+console.log("\n== 3. every migration in the window has a canary, or says why it cannot ==");
+
+// Migrations that ADD no probeable object. A canary asks "does this
+// object exist"; a file that only revokes, grants, or replaces the body of
+// a function that already existed cannot be seen that way, by anybody.
+const NOT_PROBEABLE = {
+  "20260926000000_revoke_authenticated_grants_without_policy.sql":
+    "revokes grants; it removes rather than adds, and an object that is still THERE is what a canary detects",
+  "20260928000000_privileges_rls_cannot_scope.sql":
+    "revokes and re-grants privileges; nothing new exists afterwards to probe for",
+  "20261002000000_search_index_locale_translations_only.sql":
+    "`create or replace` on search_index_sync, which existed before it. The function is present whether or not this file ran, so its existence proves nothing — the property it changes is behavioural and only unified-search.dbtest.mjs can see it",
+};
+
+const canariedMigrations = new Set(SCHEMA_CANARIES.map((c) => c.migration));
+for (const f of recent) {
+  const excused = Object.prototype.hasOwnProperty.call(NOT_PROBEABLE, f);
+  check(
+    `${f}`,
+    canariedMigrations.has(f) || excused,
+    `${f} is one of the newest ${RECENT} migrations and no canary names it, so /api/health\n` +
+      `        cannot tell you whether it was ever applied. Add a canary for one object it creates\n` +
+      `        — one is enough for the whole file — or add it to NOT_PROBEABLE with the reason it\n` +
+      `        adds nothing a probe can see.`
+  );
+  if (excused) {
+    check(`  …and its exemption carries a reason`, NOT_PROBEABLE[f].length > 40);
+    check(`  …and it really adds nothing canaried`, !canariedMigrations.has(f),
+      `${f} is in NOT_PROBEABLE and ALSO has a canary — one of the two is wrong.`);
+  }
+}
+
+// Both ways: an exemption for a file that has left the window, or that
+// has since grown something probeable, is a stale excuse.
+for (const f of Object.keys(NOT_PROBEABLE)) {
+  check(`${f} is still in the window`, recent.includes(f),
+    `NOT_PROBEABLE excuses ${f}, which is no longer among the newest ${RECENT} migrations — drop it.`);
+}
+
 console.log("\n== 4. the function check asks the API for its list, and says so when it cannot ==")
 // THREE STATES, AND ONLY ONE OF THEM IS AN ACCUSATION.
 //

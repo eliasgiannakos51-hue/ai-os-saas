@@ -26,25 +26,44 @@ to find out why it has not moved:
 Nothing else in this tier is waiting on anything.
 
 
-### 1. The isolation test: two real accounts — HALF DONE
-**~half a day left.** Blocked on: two real accounts existing.
+### 1. The isolation test: two real accounts — BOTH HALVES WRITTEN; neither has met a real account
+**~15 minutes of running.** Blocked on: two real accounts existing.
 
-**The database half is done.** `scripts/tests/user-isolation.dbtest.mjs`
+**This entry said "~half a day left" and described the prodtest as
+something still to be written, until 2026-09-11. It was written on
+2026-09-07** — `scripts/tests/user-isolation-live.prodtest.mjs`, commit
+0445cef at 15:50, six hours before this file's own last commit that day.
+Nothing here named it. The estimate was wrong by most of a day in the
+owner's favour, which is the more expensive direction: work that looks
+unstarted does not get scheduled.
+
+**The database half.** `scripts/tests/user-isolation.dbtest.mjs`
 impersonates `authenticated` the way production does and probes all 96
 user-owned tables with two accounts — read, update, delete, and the
 unpredicated write a predicate cannot see, plus the three storage buckets
-as files rather than as rows about files. 22 checks, 9 of 9 schema
-mutations caught. It is what found the 89 grants no policy covered.
+as files rather than as rows about files. It is what found the 89 grants
+no policy covered.
 
-*What is left, and it is the part that needs you:* the same questions
-through a **real session against production** — two accounts, real JWTs,
-PostgREST rather than psql. That additionally proves GoTrue issues the
-claim the policies read, and that the deployed schema is this one. It is a
-`.prodtest`, and it cannot be written against fixtures.
+**The production half, and what it needs.**
+`user-isolation-live.prodtest.mjs` (426 lines, 25 checks) asks the same
+questions through a real session: the GoTrue password grant, the PostgREST
+OpenAPI root, `/rest/v1/*` and `/storage/v1/object/*`, with a RUN_TAG
+cleanup. Run without its six environment variables it prints what is
+missing and checks nothing — which is the state it has been in every time
+anybody has run it.
 
-*Proven by:* the dbtest going red when a policy is loosened — already
-demonstrated seven ways — plus, for the production half, the same suite
-returning zero of B's rows through the API.
+*What is left, and it is not code:* two throwaway accounts, six env vars
+(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+`ISOLATION_EMAIL_A`/`PASSWORD_A`, `ISOLATION_EMAIL_B`/`PASSWORD_B` — none
+of which are in `.env.local.example` yet), and one run.
+
+*Proven by:* the dbtest going red when a policy is loosened —
+`user-isolation.mutation.mjs` stages 15 named schema mutations — plus, for
+the production half, the same suite returning zero of B's rows through the
+API. **That second half has never run against anything but a stub**
+(`isolation-probe-honesty.itest.mjs` stands up a fake GoTrue/PostgREST and
+spawns the prodtest at it: 17 checks, and it proves the instrument, not the
+database).
 
 ### 2. The spelling check — A RUNNER EXISTS; the model call has still never happened
 **~1 hour left.** Blocked on: an API balance, and the URL of an existing site.
@@ -578,8 +597,20 @@ produce something that looks like it works.
 
 ## Tier 3 — the instruments
 
-### 8b. The test database is not production, and five ways are named
-**~2 days, and the first day is free.**
+### 8b. The test database is not production — THE DAY OF CODE IS SPENT; the queries are not asked
+**~15 minutes of the owner's time.** The "~2 days, and the first day is
+free" this entry carried was right when written and wrong by 2026-09-11.
+
+**The day of code below was spent on 2026-09-08 and this entry never said
+so.** The "sharpest of the five" divergence — grant checks naming `anon`
+and `authenticated` explicitly, so a privilege held by `authenticator`,
+`dashboard_user` or `supabase_storage_admin` is invisible — is what
+`scripts/db/role-grants.mjs` fixed, with `role-grants.test.mjs` (93
+checks), `role-grants.dbtest.mjs`, a mutation suite, and migration
+20260928000000. The register records the correction as divergence #5.
+This file names none of them. Two of the three queries it lists below as
+"still need a query against the real database" (`pg_roles` rolname,
+storage `relrowsecurity`) are already answered in §2b.
 
 `scripts/tests/stub-vs-production.test.mjs` holds eight facts the stub
 must model and five divergences that remain. Two of the eight are there
@@ -619,8 +650,23 @@ mutation suite, 10 of 10 today, plus the entries changing from "unknown"
 to a value.
 
 
-### 8c. The ten storage policies nothing compares
-**~1 day.**
+### 8c. The ten storage policies — THE INSTRUMENTS LOOK AT THEM NOW; production has still not been asked
+**~10 minutes of the owner's time**, plus half a day if the definition
+comparison below is wanted.
+
+**Most of this entry describes the tree as it stood before 2026-09-08.**
+"the corner no instrument in this repository looks at" and "both schema
+tools filter their object lists to the public tables" are both false now:
+`db-inventory.mjs` and `db/pending-migrations.mjs` carry the storage schema
+(commit 30445b9), `user-isolation.dbtest.mjs` compares the ten against
+`pg_policies`, and the prodtest this entry asks for — "uploads one object
+as A and tries to read it as B through the real storage API" — is written,
+at `user-isolation-live.prodtest.mjs:306-367`.
+
+**What survives intact, and it is the narrower claim:** nothing has asked
+PRODUCTION, and nothing compares the policy BODIES. A production policy
+rewritten to `using (true)` under a correct name is still invisible to
+every instrument here, because nothing reads `pg_policies.qual`.
 
 `storage.objects` is the one corner where the local stub and production
 were found to *disagree* (2026-09-05: RLS off in the fixture, on in
@@ -652,15 +698,37 @@ for public tables, pointed at the one schema it cannot reach.
 enforced today. What is missing is the ability to notice if that stops
 being true, or if a future migration adds an eleventh that is wrong.
 
-### 9. The 123 gates with no mutation suite
+### 9. The gates with no mutation suite — THE INSTRUMENT SHIPPED; the sweep did not
 **~3 weeks if done exhaustively. Do not do it exhaustively.**
 
-98 of 221 gates (44%) have been shown to go red on the defect they name.
-The other 123 have not. (This paragraph said *107 of 218 (49%)* until
-2026-09-05; that figure could not be re-derived under any measure and is
-corrected in §1 of the closing report. The command that produces the
-number above is printed there.) A gate without that proof might be entirely
-decorative — and V4 found that exact thing four times.
+**"Done means" below was already met on 2026-09-08 and this entry did not
+say so until 2026-09-11.** `scripts/tests/mutation-coverage.test.mjs`
+prints the ratio on every `npm run build`, ratcheted, with its own 6 of 6
+mutation suite. The number that was asked for is a number that moves now,
+which is the thing this item wanted.
+
+**143 of 273 gates the sweep can drive = 52.4%** (measured 2026-09-11).
+The headline this entry carried — *98 of 221 (44%)* — was the 2026-09-05
+figure and it is stale in BOTH directions: the covered count rose by 45,
+and the gate population rose from 221 to 273, so 130 are bare rather than
+123. (It said *107 of 218 (49%)* until 2026-09-05; that figure could not be
+re-derived under any measure and is corrected in §1 of the closing report.)
+
+The rise was not a sweep of the bare list. It came from suites written for
+other V5 items — presentations, posts, sidebar-structure, producer-routes,
+projects, nav-freshness, step-flow, env-independence, and on 2026-09-11
+search-index-locale and rpc-canaries. So the ratio moved as a side effect
+of doing the work, which is the healthy way for it to move and not
+evidence that item 9 itself was worked on.
+
+A gate without that proof might be entirely decorative — and V4 found that
+exact thing four times.
+
+**What the ratio still cannot say.** 73 of the 273 are `.dbtest.mjs` (29)
+and `.prodtest.mjs` (44): no sweep on a developer machine can mutate them,
+because they need a provisioned Postgres or a deployed site. They are
+counted in the denominator and named in the output rather than quietly
+dropped.
 
 *The order to do them in, and it is not alphabetical:*
 
@@ -672,27 +740,64 @@ decorative — and V4 found that exact thing four times.
    enough that a mutation suite would be longer than the gate. Say so in
    the file rather than writing a ceremonial one.
 
-*Done means:* the ratio published in `npm run build` output, so it is a
-number that moves rather than a number in a document.
+*Done means:* ~~the ratio published in `npm run build` output~~ — DONE
+2026-09-08. What remains of this item is the sweep itself, and its first
+target is the 7 bare money/access gates the instrument names on every run
+(`pricing-truth`, `pricing-margin-bug`, `margin-report`,
+`credit-function-privileges.itest`, and three `purchased-credits*.itest`).
 
-### 10. The `\b` convention has no gate
-**~1 day.**
+### 10. The `\b` convention has no gate — DONE (2026-09-08)
+
+**This entry said "~1 day" and described the rule as future work until
+2026-09-11. The work had been done three days earlier and nothing here
+said so** — the file's last commit was 9dd8c25 on 2026-09-07, one day
+before `untrusted-boundaries.test.mjs` shipped in b785a50, and no round
+since came back to it. That is the failure this list is supposed to be
+the cure for, so it is recorded rather than quietly overwritten.
 
 128 uses; 83 are legitimately matching a tag or attribute name (and would
 be *wrong* without the boundary), 26 are genuinely ASCII domains, and the
 19 that touch human text were read one by one. `ascii-boundaries.test.mjs`
-now catches a boundary next to a non-ASCII literal — but it cannot tell a
+catches a boundary next to a non-ASCII literal — but it cannot tell a
 correct `<img\b` from a Greek word without reading intent.
 
-*Done means:* a narrower rule that is enforceable — for example, every
-regex applied to a value that reached the app from a user or a model must
-be declared, and boundaries in that set are banned outright.
+**The narrower rule this entry asked for is what shipped.**
+`scripts/tests/untrusted-boundaries.test.mjs` (32 checks) is exactly the
+"done means" below: a regex applied to a value that reached the app from a
+user or a model must be declared, and word boundaries in that set are
+banned outright. `docs/shapes.md:663-689` describes the built rule and is
+current.
 
-### 11. The margin table has never met an invoice
+*What is left, and it is residue rather than work:* the "untrusted"
+classification is a variable-NAME heuristic, so a regex applied to a value
+called `s` is invisible to it. The gate prints its own precision (163 of
+382) so the miss is visible, but nothing bounds it. That is a known
+limit, stated here rather than discovered later.
+
+### 11. The margin table has never met an invoice — THE QUERIES ARE WRITTEN; the invoice is not
 **~half a day, once there is an invoice.**
 
-`CREDIT_MARGIN_*` is internally consistent and reconciled against nothing.
-`cost-alerts` compares the app's own numbers with the app's own numbers.
+The headline is still true: no invoice has ever been put beside
+`ai_cost_log`. The body was stale from 2026-09-08 until 2026-09-11.
+
+**"Reconciled against nothing" describes a pre-4e85779 tree.**
+`scripts/db/anthropic-reconcile.mjs` (`npm run db:invoice`) lays one month
+out in the shape of the bill and prints all three queries with `--sql` for
+the SQL editor. It also closed the hole that made the question
+unaskable: `ai_cost_log` has no model column and an action is routinely
+served by two or three models, so nothing below the monthly total could be
+placed beside an invoice broken down BY MODEL. `settleReservation` now
+writes `metadata.modelBreakdown` on every settlement
+(`billing/reservations.ts:516`), and query 3 reports coverage first so a
+month that is largely unattributable cannot be silently reconciled on its
+remainder.
+
+**The cost of that fix arriving when it did:** rows settled before
+2026-09-08 carry no breakdown and are unattributable for ever. The first
+reconcilable month is the first complete month after it.
+
+`CREDIT_MARGIN_*` is internally consistent. `cost-alerts` still compares
+the app's own numbers with the app's own numbers.
 
 *Done means:* one month of a real provider invoice next to
 `ai_cost_log` for the same month, and the difference explained. If they

@@ -93,7 +93,13 @@ const MUTANTS = [
     file: COV,
     from: "const KIND = /\\.(test|dbtest|itest|prodtest)\\.mjs$/;",
     to: "const KIND = /\\.(test|dbtest|itest)\\.mjs$/;",
-    expect: "the gates were found",
+    // RE-AIMED at the clause that fires FIRST and says more. Narrowing
+    // KIND does lower the denominator, but before that shows up in the
+    // percentage it makes every suite that drives a prodtest point at a
+    // gate the reader can no longer see — and "every gate a suite names
+    // exists" says exactly which. A symptom that names the file beats a
+    // number that moved.
+    expect: "every gate a suite names exists",
   },
 ];
 

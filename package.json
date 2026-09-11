@@ -23,7 +23,9 @@
     "db:invoice": "node scripts/db/anthropic-reconcile.mjs",
     "prepare": "node scripts/install-hooks.mjs",
     "hooks:install": "node scripts/install-hooks.mjs",
-    "check:markers": "node scripts/check-mutation-markers.mjs"
+    "check:markers": "node scripts/check-mutation-markers.mjs",
+    "test:env": "node scripts/env-sensitivity.mjs",
+    "build:ci": "node scripts/ci-build.mjs"
   },
   "engines": {
     "node": "22.x"

@@ -29,6 +29,7 @@
  */
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { cleanEnv } from "./lib/clean-env.mjs";
 import { loadTs } from "./load-ts.mjs";
 import {
   systemPromptFromSource,
@@ -222,33 +223,55 @@ console.log("\n== 4. every word on the page is accounted for ==");
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. what it refuses to do ==");
-function run(args) {
+// THE ENVIRONMENT IS CHOSEN, NOT INHERITED — and this file is the one
+// that taught the repository why.
+//
+// It used to spawn the runner with no `env`, so the child saw whatever
+// the machine had. The check below that asserts the runner NAMES the
+// missing key was therefore green on a machine without one and RED on
+// Vercel, where ANTHROPIC_API_KEY is set because the application needs
+// it. Merge commit aec56a2 is where that cost a red deploy, on code that
+// had passed locally minutes earlier.
+//
+// `key` is now an argument of the test rather than a property of the
+// machine, so both answers are asserted and neither depends on where it
+// runs. See scripts/tests/lib/clean-env.mjs.
+function run(args, { key } = {}) {
+  const env = cleanEnv({ set: { ANTHROPIC_API_KEY: key ?? undefined } });
   try {
-    return { code: 0, out: execFileSync(process.execPath, [RUNNER, ...args], { encoding: "utf8", stdio: "pipe", timeout: 120_000 }) };
+    return { code: 0, out: execFileSync(process.execPath, [RUNNER, ...args], { encoding: "utf8", stdio: "pipe", timeout: 120_000, env }) };
   } catch (e) {
     return { code: e.status ?? 1, out: String(e.stdout ?? "") + String(e.stderr ?? "") };
   }
 }
 {
-  const none = run([]);
+  const none = run([], { key: undefined });
   check("with nothing given it skips rather than half-running", none.code === 2);
   check("...and names the URL", /MISSING.*--url/.test(none.out));
   // THE BRIEF IS THE PROTECTION. A run without it would put the owner's
   // own surname in a list headed "possibly misspelled", so it is a
   // missing input rather than a default.
   check("...and names the brief", /MISSING.*--brief/.test(none.out));
-  check("...and names the key", /MISSING.*ANTHROPIC_API_KEY/.test(none.out));
+  check("...and names the key, when there is no key", /MISSING.*ANTHROPIC_API_KEY/.test(none.out), none.out.slice(0, 400));
+  // THE OTHER ANSWER, which is the half that was never asserted and the
+  // half CI was giving. With a key present the runner must NOT call it
+  // missing — and must still name the two arguments that are.
+  const keyed = run([], { key: "sk-ant-not-a-real-key-for-this-test" });
+  check("...and does NOT name it when there is one", !/MISSING.*ANTHROPIC_API_KEY/.test(keyed.out), keyed.out.slice(0, 400));
+  check("...while still naming the arguments that are missing",
+    /MISSING.*--url/.test(keyed.out) && /MISSING.*--brief/.test(keyed.out), keyed.out.slice(0, 400));
+  check("...and skips either way, rather than half-running", none.code === 2 && keyed.code === 2);
   check("...and says the dry run needs no key", /--dry-run needs no key/.test(none.out));
 
-  const cheap = run(["--html", "/dev/null", "--brief", "x", "--dry-run"]);
+  const cheap = run(["--html", "/dev/null", "--brief", "x", "--dry-run"], { key: undefined });
   check("an empty page costs nothing and says so", cheap.code === 0 && /Cost: \$0\.0000/.test(cheap.out), cheap.out.slice(0, 300));
 
   // THE CEILING IS CHECKED BEFORE ANYTHING IS SENT, not after.
-  const capped = run(["--html", "scripts/tests/fixtures/greek-site.html", "--brief", "x", "--dry-run", "--max-cost", "0.000001"]);
+  const capped = run(["--html", "scripts/tests/fixtures/greek-site.html", "--brief", "x", "--dry-run", "--max-cost", "0.000001"], { key: undefined });
   check("a worst case over the ceiling is refused with nothing sent",
     capped.code === 3 && /Nothing was sent, \$0\.00 spent/.test(capped.out), capped.out.slice(-300));
 
-  const dry = run(["--html", "scripts/tests/fixtures/greek-site.html", "--brief", BRIEF, "--dry-run"]);
+  const dry = run(["--html", "scripts/tests/fixtures/greek-site.html", "--brief", BRIEF, "--dry-run"], { key: undefined });
   check("a dry run completes and spends nothing", dry.code === 0 && /DRY RUN — nothing was sent/.test(dry.out));
   check("...and shows the owner what the brief protected", /AN INFLECTION OF A NAME/.test(dry.out));
   check("...and reports no verdict, because nothing was asked", !/what the owner would be shown/.test(dry.out));

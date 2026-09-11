@@ -170,7 +170,17 @@ console.log("\n== 4. the fixture is a real one ==");
 {
   const root = project({ git: false });
   check("the checker actually ran and parsed the fake suite",
-    execFileSync("node", [CHECKER], { cwd: root, encoding: "utf8" }).includes("1 literal mutation(s) declared"),
+    // THE SAME ENVIRONMENT THE OTHER EIGHT SPAWNS IN THIS FILE GIVE.
+    // This one was written without it, so it read the machine's —
+    // including UNGUARDED_GUARDS_RUNNING, which the mutation harness
+    // sets on itself and which this checker branches on. Found by
+    // scripts/tests/env-independence.test.mjs, after that gate learnt
+    // to resolve a path held in a const.
+    execFileSync("node", [CHECKER], {
+      cwd: root,
+      env: { ...process.env, CI: "", VERCEL: "", GITHUB_ACTIONS: "", UNGUARDED_GUARDS_RUNNING: "" },
+      encoding: "utf8",
+    }).includes("1 literal mutation(s) declared"),
     "the fixture's suite was not parsed, so checks 1-3 proved nothing");
   check("the target file exists in the fixture", existsSync(join(root, TARGET_REL)));
 }

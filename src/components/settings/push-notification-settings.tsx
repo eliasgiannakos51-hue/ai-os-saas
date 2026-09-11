@@ -240,12 +240,12 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
                 aria-label={t(type.stem)}
                 onClick={() => toggleType(type.key)}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition ${
-                  (prefs[type.key] ?? true) ? "bg-orange-500" : "bg-border"
+                  (prefs[type.key] ?? true) ? "bg-foreground" : "bg-border"
                 }`}
               >
                 <span
-                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${
-                    (prefs[type.key] ?? true) ? "start-[1.125rem]" : "start-0.5"
+                  className={`absolute top-0.5 h-4 w-4 rounded-full transition-all ${
+                    (prefs[type.key] ?? true) ? "start-[1.125rem] bg-panel" : "start-0.5 bg-white"
                   }`}
                 />
               </button>

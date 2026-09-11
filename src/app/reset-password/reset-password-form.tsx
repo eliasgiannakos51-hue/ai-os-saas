@@ -213,7 +213,7 @@ export function ResetPasswordForm() {
               <p className="text-sm text-red-400">{invalidReason}</p>
               <Link
                 href="/forgot-password"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
               >
                 {t("requestNewLink")}
               </Link>

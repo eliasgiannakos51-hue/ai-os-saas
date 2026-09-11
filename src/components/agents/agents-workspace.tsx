@@ -991,7 +991,7 @@ export function AgentsWorkspace({
                       setCapability(null);
                       void build(requestText, true, true);
                     }}
-                    className="min-h-[36px] rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-black transition-opacity hover:opacity-90"
+                    className="min-h-[36px] rounded-lg border border-orange-500/60 px-3 py-1.5 text-xs font-semibold text-orange-300 transition-opacity hover:bg-orange-500/10"
                   >
                     {t("capability.partialContinue")}
                   </button>
@@ -1168,7 +1168,7 @@ export function AgentsWorkspace({
                     type="button"
                     onClick={createAgent}
                     disabled={savingAgent}
-                    className="inline-flex min-h-[44px] items-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex min-h-[44px] items-center rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {savingAgent ? t("creating") : t("createButton")}
                   </button>
@@ -1212,7 +1212,7 @@ export function AgentsWorkspace({
                 type="button"
                 disabled
                 data-testid="agent-design"
-                className="inline-flex min-h-[44px] cursor-not-allowed items-center rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black opacity-50"
+                className="hover:bg-orange-500/10 inline-flex min-h-[44px] cursor-not-allowed items-center rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 opacity-50"
               >
                 {t("designButton")}
               </button>
@@ -1503,7 +1503,7 @@ export function AgentsWorkspace({
                   type="button"
                   onClick={() => void saveEdit(selected)}
                   disabled={busyId === selected.id}
-                  className="inline-flex min-h-[44px] items-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-50"
                 >
                   {busyId === selected.id ? t("saving") : t("saveButton")}
                 </button>

@@ -882,7 +882,7 @@ export function FilesWorkspace({
                 type="button"
                 data-testid="files-empty-upload"
                 onClick={() => inputRef.current?.click()}
-                className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+                className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-5 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
               >
                 <Upload className="h-4 w-4" aria-hidden="true" />
                 {t("choose")}
@@ -1109,12 +1109,12 @@ export function FilesWorkspace({
             data-testid="files-ask-button"
             onClick={() => void ask()}
             disabled={asking || Boolean(askDisabledReason)}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-6 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-orange-500/60 px-6 py-2.5 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {asking ? (
               // tone="inherit" because this button's background IS the
               // accent — an accent-coloured indicator here is invisible.
-              <ThinkingIndicator size="sm" tone="inherit" />
+              <ThinkingIndicator size="sm" />
             ) : (
               <Sparkles className="h-4 w-4" aria-hidden="true" />
             )}
@@ -1301,7 +1301,7 @@ export function FilesWorkspace({
                   350
                 );
               }}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-orange-500/60 px-5 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
             >
               <Sparkles className="h-4 w-4" aria-hidden="true" />
               {t("goToAsk")}

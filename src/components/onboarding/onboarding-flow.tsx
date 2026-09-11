@@ -510,7 +510,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                   type="button"
                   onClick={() => void applyImport()}
                   disabled={busy || analysis.counts.readyRows === 0}
-                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-60"
                 >
                   {/* THE ONE SPINNER THAT STAYS. /api/import/csv/apply
                       writes rows and calls no model; spending the globe on
@@ -562,12 +562,12 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
             type="button"
             onClick={() => void applyPaste()}
             disabled={busy || pasteText.trim().length < MIN_PASTE_CHARS}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-60"
           >
             {pending === "pasting" ? (
               <>
                 {/* Also a model call — /api/import/paste. Same mark. */}
-                <ThinkingIndicator size="sm" tone="inherit" />
+                <ThinkingIndicator size="sm" />
                 {t("reading")}
               </>
             ) : busy ? (
@@ -617,7 +617,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
           <button
             type="button"
             onClick={() => void finish()}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
           >
             {t("goToDashboard")}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

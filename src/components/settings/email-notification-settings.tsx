@@ -85,12 +85,12 @@ export function EmailNotificationSettings({
                 onClick={() => handleToggle(type)}
                 disabled={savingType !== null}
                 className={`relative -my-2.5 inline-flex h-11 w-11 shrink-0 items-center rounded-full bg-clip-content py-2.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
-                  enabled ? "bg-orange-500" : "bg-panel-hover"
+                  enabled ? "bg-foreground" : "bg-panel-hover"
                 }`}
               >
                 <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 ${
-                    enabled ? "translate-x-[22px]" : "translate-x-0.5"
+                  className={`inline-block h-5 w-5 transform rounded-full transition-transform duration-200 ${
+                    enabled ? "translate-x-[22px] bg-panel" : "translate-x-0.5 bg-white"
                   }`}
                 />
               </button>

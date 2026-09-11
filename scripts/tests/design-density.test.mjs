@@ -41,12 +41,25 @@ ok(`sized text found (${type})`, type >= 800);
 console.log("\n== 2. the lines ==");
 // 683 the day phase 4 started (677 border utilities + 6 divide), 544
 // after 140 card frames became .surface — see globals.css. The rest are
-// NOT card noise and the breakdown is why this is 560 and not 342: 54
-// are inputs, ~144 are outline buttons and chips (which phase 4 asked
-// for MORE of, not fewer), ~50 are status callouts whose border carries
-// the meaning, and 13 are cards on the page colour that have no other
+// NOT card noise and the breakdown is why this is not 342: 54 are
+// inputs, ~144 are outline buttons and chips (which phase 4 asked for
+// MORE of, not fewer), ~50 are status callouts whose border carries the
+// meaning, and 13 are cards on the page colour that have no other
 // separation.
-ok(`border utilities (${r.counts.borders}), ceiling 560`, r.counts.borders <= 560);
+//
+// 560 -> 583, AND IT IS THE ONE DIRECTION THIS NUMBER IS NOT SUPPOSED TO
+// MOVE, so the reason is here rather than in a commit message. Phase
+// 4's other half — one filled accent control per screen — demoted 45
+// buttons from a filled accent to an accent OUTLINE, and an outline is
+// a border. It is the same 45 lines the clause above already names as
+// the kind phase 4 asked for more of: every one of them REPLACED a
+// filled orange rectangle rather than being added beside one, so the
+// screens got quieter while this count went up. scripts/tests/
+// one-primary-action.test.mjs is where that trade is measured from the
+// other side; the number there went from 138 filled controls across the
+// pages to 46, and then to 39 once the surfaces were told apart.
+// No slack: 583 is the measured count, not a round number above it.
+ok(`border utilities (${r.counts.borders}), ceiling 583`, r.counts.borders <= 583);
 ok(`divide rules (${r.counts.divides}), ceiling 6`, r.counts.divides <= 6);
 
 console.log("\n== 3. the glow and the gradient titles ==");

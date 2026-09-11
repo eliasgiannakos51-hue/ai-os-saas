@@ -208,7 +208,7 @@ export function OverageSettings() {
             type="button"
             onClick={enable}
             disabled={busy || !capValid}
-            className="inline-flex min-h-[40px] items-center gap-2 rounded-xl bg-orange-500 px-4 text-sm font-semibold text-white transition-colors duration-150 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="hover:bg-orange-500/10 inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-orange-500/60 px-4 text-sm font-semibold text-orange-300 transition-colors duration-150 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
             {t("agree")}

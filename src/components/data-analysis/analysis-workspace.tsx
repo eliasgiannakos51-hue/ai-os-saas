@@ -209,14 +209,14 @@ export function AnalysisWorkspace({
                   type="button"
                   onClick={() => void handleAnalyse()}
                   disabled={analysing}
-                  className="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black disabled:opacity-50"
+                  className="hover:bg-orange-500/10 inline-flex items-center gap-2 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 disabled:opacity-50"
                 >
                   {/* THE GLOBE for the analysis, because that wait is
                       the model thinking. The ring above it stays on the
                       UPLOAD button, which is a file read and a network
                       round trip — mechanical, and marking it with the
                       signature would spend the signature on a POST. */}
-                  {analysing ? <ThinkingIndicator size="sm" tone="inherit" /> : <Sparkles className="h-4 w-4" />}
+                  {analysing ? <ThinkingIndicator size="sm" /> : <Sparkles className="h-4 w-4" />}
                   {analysing ? t("analyse.working") : t("analyse.button")}
                 </button>
               </div>
@@ -330,7 +330,7 @@ export function AnalysisWorkspace({
                 type="button"
                 onClick={() => void handleAsk()}
                 disabled={asking || !question.trim()}
-                className="rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black disabled:opacity-50"
+                className="hover:bg-orange-500/10 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 disabled:opacity-50"
               >
                 {asking ? t("ask.working") : t("ask.button")}
               </button>

@@ -66,34 +66,25 @@ export function InstallInvitation({
           {surface === "ios" && showSteps && <IosInstallSteps />}
 
           <div className="mt-3 flex gap-2">
-            {surface === "native" ? (
-              <button
-                type="button"
-                onClick={onInstall}
-                data-testid="install-accept"
-                className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-black transition hover:bg-orange-400"
-              >
-                {t("install")}
-              </button>
-            ) : showSteps ? (
-              <button
-                type="button"
-                onClick={onDismiss}
-                data-testid="install-accept"
-                className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-black transition hover:bg-orange-400"
-              >
-                {t("iosGotIt")}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowSteps(true)}
-                data-testid="install-show-how"
-                className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-black transition hover:bg-orange-400"
-              >
-                {t("showHow")}
-              </button>
-            )}
+            {/* ONE BUTTON, THREE JOBS — and it was three buttons until
+                redesign phase 4. They were identical but for their label,
+                their handler and their test id, and writing them out three
+                times cost more than the duplication: a census that counts
+                filled accent controls by reading the source counted THREE
+                on a card that has never drawn more than one, and every
+                dashboard page paid for all three. The invitation is a
+                single control whose job depends on the surface; saying so
+                once is both less code and a countable claim. The test ids
+                are unchanged, so scripts/tests/pwa-*.mjs still aim at the
+                same targets. */}
+            <button
+              type="button"
+              onClick={surface === "native" ? onInstall : showSteps ? onDismiss : () => setShowSteps(true)}
+              data-testid={surface === "native" || showSteps ? "install-accept" : "install-show-how"}
+              className="rounded-lg border border-orange-500/60 px-3 py-1.5 text-xs font-semibold text-orange-300 transition hover:bg-orange-500/10"
+            >
+              {surface === "native" ? t("install") : showSteps ? t("iosGotIt") : t("showHow")}
+            </button>
             <button
               type="button"
               onClick={onDismiss}

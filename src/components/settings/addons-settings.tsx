@@ -143,7 +143,7 @@ export function AddonsSettings() {
                 type="button"
                 onClick={() => buy(addon.slug)}
                 disabled={busy !== null || !addon.canBuy}
-                className="inline-flex min-h-[36px] items-center gap-2 rounded-xl bg-orange-500 px-3 text-xs font-semibold text-white transition-colors duration-150 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                className="hover:bg-orange-500/10 inline-flex min-h-[36px] items-center gap-2 rounded-xl border border-orange-500/60 px-3 text-xs font-semibold text-orange-300 transition-colors duration-150 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {busy === addon.slug ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : null}
                 {addon.billing === "one_off" ? t("buy") : t("subscribe")}

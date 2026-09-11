@@ -374,10 +374,10 @@ export function CreateStudio() {
               type="button"
               onClick={() => studio.create(detection, description.trim())}
               disabled={studio.running}
-              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {studio.running ? (
-                <ThinkingIndicator size="sm" tone="inherit" />
+                <ThinkingIndicator size="sm" />
               ) : (
                 <Sparkles className="h-4 w-4" aria-hidden="true" />
               )}
@@ -459,7 +459,7 @@ export function CreateStudio() {
               <Link
                 href={studio.result.href}
                 data-testid="studio-destination-link"
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
               >
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                 {destinationLabelKey(studio.result.destinationKey)

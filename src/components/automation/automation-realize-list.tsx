@@ -245,7 +245,7 @@ function RealizeForm({
           type="button"
           onClick={handleSubmit}
           disabled={submitting || !isComplete}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? t("realizing") : t("confirmMakeReal")}
         </button>

@@ -101,7 +101,7 @@ export function InstallSection() {
             type="button"
             onClick={install}
             data-testid="settings-install"
-            className="mt-3 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-black transition hover:bg-orange-400"
+            className="mt-3 rounded-lg border border-orange-500/60 px-3 py-1.5 text-xs font-semibold text-orange-300 transition hover:bg-orange-500/10"
           >
             {t("install")}
           </button>

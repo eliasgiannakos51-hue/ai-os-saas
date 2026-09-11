@@ -190,7 +190,7 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
           type="button"
           onClick={() => void share()}
           disabled={busy || !preview.ok || title.trim().length < 3 || description.trim().length < 3}
-          className="min-h-[36px] rounded-lg bg-orange-500 px-3 text-xs font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="min-h-[36px] rounded-lg border border-orange-500/60 px-3 text-xs font-semibold text-orange-300 transition-opacity hover:bg-orange-500/10 disabled:opacity-50"
         >
           {busy ? t("sharing") : t("shareButton")}
         </button>

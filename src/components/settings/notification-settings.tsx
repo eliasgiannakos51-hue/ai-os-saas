@@ -434,7 +434,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
                       type="button"
                       onClick={() => void connectChat(kind)}
                       disabled={connecting !== null || !(connectTarget[kind] ?? "").trim()}
-                      className="rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black disabled:opacity-50"
+                      className="hover:bg-orange-500/10 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 disabled:opacity-50"
                     >
                       {connecting === kind ? t("chat.connecting") : t("chat.connect")}
                     </button>

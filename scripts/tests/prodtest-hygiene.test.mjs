@@ -67,9 +67,29 @@ check(
 const helper = "scripts/tests/lib/chromium.mjs";
 check("the shared resolver exists", existsSync(helper));
 const { chromiumPath } = await import("./lib/chromium.mjs");
+
+// THE VARIABLE IS THIS TEST'S INPUT, NOT THE MACHINE'S.
+//
+// It used to call chromiumPath() with whatever CHROMIUM_PATH the machine
+// had and then assert the answer names a file that exists. On a machine
+// that sets CHROMIUM_PATH to anything not present — a CI image, a
+// container with a different browser layout — the resolver correctly
+// returns that path, the file is not there, and the gate goes red for a
+// reason that has nothing to do with the repository.
+//
+// That is the same shape as the check that turned merge commit aec56a2
+// red on Vercel: a gate asserting what a program says under a condition
+// the machine happened to supply. Found by scripts/env-sensitivity.mjs,
+// which runs every gate twice and had to learn about tooling variables
+// first — .env.local.example does not document CHROMIUM_PATH, because
+// nobody configures it on a deployment.
+//
+// Both answers are asserted now, each with the variable set by this file.
+const priorChromiumPath = process.env.CHROMIUM_PATH;
+delete process.env.CHROMIUM_PATH;
 const resolved = chromiumPath();
 check(
-  `it resolves to something usable here (${resolved ?? "undefined — Playwright's own"})`,
+  `with no CHROMIUM_PATH it resolves to something usable here (${resolved ?? "undefined — Playwright's own"})`,
   resolved === undefined || existsSync(resolved),
   "it named a path that is not there, which is worse than naming nothing"
 );
@@ -82,6 +102,10 @@ check(
 );
 delete process.env.CHROMIUM_PATH;
 check("...and removing it falls back again", chromiumPath() === resolved, String(chromiumPath()));
+// PUT BACK WHATEVER THE MACHINE HAD. This process goes on to do other
+// things, and a gate that edits the environment and walks away has moved
+// the problem rather than fixed it.
+if (priorChromiumPath !== undefined) process.env.CHROMIUM_PATH = priorChromiumPath;
 
 // ---------------------------------------------------------------------
 console.log("\n== 2. every prodtest ends ==");

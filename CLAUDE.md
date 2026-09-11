@@ -73,6 +73,33 @@ each carrying a reason and checked BOTH ways so it cannot go stale. Every
 measured and printed but NOT gated: precision was about 4%, and a check
 with that ratio gets its baseline set to the size of the problem.
 
+## The build that matters is the one in CI, not the one on this machine
+
+On 2026-09-11 merge commit `aec56a2` went red on Vercel with a single
+failing line, minutes after a green local build of the same bytes:
+
+    scripts/tests/check-site-spelling.test.mjs
+      FAIL  ...and names the key
+
+The gate spawned a runner **without giving it an environment**, then
+asserted the runner prints `MISSING ANTHROPIC_API_KEY`. That line only
+appears when the key is absent — absent here, present on Vercel, because
+the application needs it there.
+
+The direction is the part worth remembering, because the natural guess is
+backwards: it passed locally because the variable was **missing**, and
+failed in CI because it was **set**.
+
+**Before a push, run the build the way the builder will:**
+
+    npm run build:ci     # the real build, under a deployed environment
+    npm run test:env     # every gate twice, and which one disagrees (~25 min)
+
+`npm run build` runs `scripts/tests/env-independence.test.mjs`, which is
+the cheap structural half: no gate may hand an env-reading program the
+machine's environment. It resolves a path held in a `const`, because the
+gate that broke the build spawns `[RUNNER, ...args]`.
+
 ## Gates
 
 `npm run build` runs the whole gate: function limits, mutation markers,

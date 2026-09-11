@@ -172,7 +172,11 @@ console.log(
 // 137 -> 138: nav-freshness.mutation.mjs, driving the probe that exists
 // because api/nav/track fails quiet and nobody found out for four days.
 // Read off the run before it was written here.
-const RATCHET = 138;
+// 138 -> 141, in one round: step-flow.mutation.mjs (the four flows),
+// env-independence.mutation.mjs (the gate that would have caught the
+// red Vercel build), and one-primary-action gaining its second target.
+// Read off the run (measured=141) before it was written here.
+const RATCHET = 141;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

@@ -339,6 +339,60 @@ order by opens desc, d.href;
 --     row is already being found some other way.
 
 
+-- 29.6  DID THE TRACKER STOP, OR DID THE PEOPLE?
+-- ───────────────────────────────────────────────────────────────────
+-- THE QUESTION THIS ANSWERS, and why it needs more than one table.
+-- api/nav/track FAILS QUIET on purpose — an error toast on a page that
+-- rendered correctly costs more than a lost row — so a day with no
+-- nav_events rows has two completely different causes and neither of
+-- them raises anything:
+--
+--     nobody opened the dashboard          (nothing is wrong)
+--     every insert was rejected            (the measurement is dead)
+--
+-- One table cannot tell them apart. Two can. Every column below is
+-- written by ORDINARY USE and none of them goes through api/nav/track,
+-- so a day with chat messages, spend or rate-limit rows and ZERO
+-- navigation rows is a day the tracker was broken.
+--
+-- READ IT LIKE THIS:
+--   nav > 0 anywhere                     -> the tracker works
+--   nav = 0 and everything else = 0      -> nobody came. Wait.
+--   nav = 0 and anything else > 0        -> THE TRACKER IS BROKEN.
+--                                           Do not wait for fourteen
+--                                           days that will never arrive.
+with days as (
+  select generate_series(
+           (current_date - interval '13 days')::date,
+           current_date,
+           interval '1 day'
+         )::date as day
+)
+select d.day,
+       (select count(*) from public.nav_events            e where e.created_at::date = d.day) as nav_rows,
+       (select count(distinct e.user_id) from public.nav_events e where e.created_at::date = d.day) as nav_users,
+       (select count(*) from public.chat_messages         m where m.created_at::date = d.day) as chat_messages,
+       (select count(*) from public.chat_conversations    c where c.created_at::date = d.day) as conversations_started,
+       (select count(*) from public.ai_cost_log           l where l.created_at::date = d.day) as model_calls,
+       (select count(*) from public.credit_transactions   t where t.created_at::date = d.day) as credit_rows,
+       (select count(*) from public.rate_limit_log        r where r.created_at::date = d.day) as rate_limit_rows
+from days d
+order by d.day;
+
+--   rate_limit_log IS THE MOST SENSITIVE COLUMN HERE. It is written on
+--   requests that never reach a model and never cost anything, so it
+--   registers a visit that chat_messages and ai_cost_log would both
+--   miss. A day whose only non-zero column is that one is still a day
+--   somebody was using the product.
+--
+--   AND THE ONE READING THIS QUERY CANNOT GIVE YOU: whether the insert
+--   was refused by the DATABASE (a policy, a grant, a constraint) or
+--   never sent by the BROWSER. Both look identical from here. If this
+--   query says the tracker is broken, the next step is
+--   /api/health — see lib/health/schema-canaries.ts, which now reports
+--   how old the newest nav_events row is.
+
+
 -- ───────────────────────────────────────────────────────────────────
 -- #30  ONBOARDING
 -- ───────────────────────────────────────────────────────────────────

@@ -71,14 +71,35 @@ const MEASURE = () => {
     return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
   };
   const over = (f, b) => ({ r: f.r * f.a + b.r * (1 - f.a), g: f.g * f.a + b.g * (1 - f.a), b: f.b * f.a + b.b * (1 - f.a), a: 1 });
+  // A GRADIENT IS A GROUND, AND WALKING PAST IT INVENTS A RATIO.
+  //
+  // This looked only at background-COLOR. The landing page's sign-up
+  // button paints with background-IMAGE — linear-gradient(135deg,
+  // #fcd34d, #fbbf24, #f97316, …) — and its background-color is
+  // transparent, so the walk went straight past the button and landed on
+  // the page: black text measured against rgb(10,10,10), reported as
+  // 1.06:1, a button that is in fact black on orange and perfectly
+  // readable. That number was carried into two reports as a real defect
+  // in the product.
+  //
+  // Now the stops are read. A gradient has more than one colour under
+  // the text, so the WORST of them is the answer — the honest reading of
+  // "does this text stay legible across the whole button".
+  const stopsOf = (image) => {
+    if (!image || image === "none") return [];
+    return [...image.matchAll(/rgba?\([^)]+\)/g)].map(parse).filter((c) => c && c.a > 0.92);
+  };
   const groundOf = (el) => {
     let n = el;
     while (n && n !== document.documentElement) {
-      const c = parse(getComputedStyle(n).backgroundColor);
-      if (c && c.a > 0.92) return c;
+      const cs = getComputedStyle(n);
+      const stops = stopsOf(cs.backgroundImage);
+      if (stops.length) return stops;
+      const c = parse(cs.backgroundColor);
+      if (c && c.a > 0.92) return [c];
       n = n.parentElement;
     }
-    return { r: 10, g: 10, b: 10, a: 1 };
+    return [{ r: 10, g: 10, b: 10, a: 1 }];
   };
   const ratio = (a, b) => { const L1 = lum(a.r, a.g, a.b), L2 = lum(b.r, b.g, b.b); const hi = Math.max(L1, L2), lo = Math.min(L1, L2); return (hi + 0.05) / (lo + 0.05); };
 
@@ -143,8 +164,9 @@ const MEASURE = () => {
   const contrasts = texts.map(({ el }) => {
     const cs = getComputedStyle(el);
     const fg = parse(cs.color); if (!fg) return null;
-    const bg = groundOf(el);
-    return Math.round(ratio(over(fg, bg), bg) * 100) / 100;
+    const grounds = groundOf(el);
+    // The worst stop under the text, not the first.
+    return Math.round(Math.min(...grounds.map((bg) => ratio(over(fg, bg), bg))) * 100) / 100;
   }).filter((x) => x !== null);
 
   return {

@@ -169,7 +169,10 @@ console.log(
 // 136 -> 137, redesign phase 2: projects.mutation.mjs, driving
 // projects.test.mjs. Read off the run (measured=137) before it was
 // written here, per the entry above.
-const RATCHET = 137;
+// 137 -> 138: nav-freshness.mutation.mjs, driving the probe that exists
+// because api/nav/track fails quiet and nobody found out for four days.
+// Read off the run before it was written here.
+const RATCHET = 138;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

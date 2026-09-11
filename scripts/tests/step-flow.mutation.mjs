@@ -17,7 +17,9 @@
  *      is proved on samples rather than on the tree
  *   6. the indicator grows a filled accent chip, which is a second
  *      primary action on four screens at once
- *   7. coding's flow claims a step that page does not have
+ *   7. the current step's digit goes back to the accent that measured
+ *      4.44:1 in the light theme
+ *   8. coding's flow claims a step that page does not have
  *
  * Run: node scripts/tests/step-flow.mutation.mjs
  */
@@ -77,9 +79,21 @@ const MUTANTS = [
   {
     name: "the indicator grows a filled accent chip",
     file: SHAPE,
-    from: 'here ? "bg-orange-500/15 text-orange-300" : "bg-panel-hover text-muted"',
+    // Re-anchored when the digit's colour moved from orange-300 to
+    // orange-500 — the contrast measurement above — and the runner's
+    // STALE line is what said the old anchor had stopped applying.
+    from: 'here ? "bg-orange-500/15 text-orange-500" : "bg-panel-hover text-muted"',
     to: 'here ? "bg-orange-500 text-black" : "bg-panel-hover text-muted"',
     expect: "no filled accent anywhere in the step flow",
+  },
+  {
+    // THE COLOUR A STATIC READER CANNOT JUDGE, pinned to the measurement.
+    // 4.44:1 is what shipped until scripts/step-flow-contrast.mjs was run.
+    name: "the current step's digit goes back to the 4.44:1 accent",
+    file: SHAPE,
+    from: 'here ? "bg-orange-500/15 text-orange-500"',
+    to: 'here ? "bg-orange-500/15 text-orange-300"',
+    expect: "the current step's digit uses the accent text that measured above 4.5:1",
   },
   {
     name: "coding's flow claims a step that page does not have",

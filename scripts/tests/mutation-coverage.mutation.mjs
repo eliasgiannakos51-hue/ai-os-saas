@@ -39,7 +39,13 @@ const MUTANTS = [
     from: '/"scripts\\/tests\\/([a-z0-9-]+\\.(?:db|i|prod)?test\\.mjs)"/g',
     to: '/"scripts\\/tests\\/([a-z0-9-]+\\.test\\.mjs)"/g',
     all: true,
-    expect: "mutation coverage is",
+    // RE-AIMED, and at a STRONGER clause than it had. It expected the
+    // headline ratio to move, and the ratio did move — but the gate's own
+    // samples go red first and NAME what broke ("an .itest.mjs target is
+    // read"), so the run reported WRONG: red on three clauses, none of
+    // them the one named here. A mutant aimed at the number when a
+    // sample says the reason is aimed at the weaker of the two.
+    expect: "an .itest.mjs target is read",
   },
   {
     // 2. THE RATCHET IS LEFT BEHIND — the "baseline set to the size of

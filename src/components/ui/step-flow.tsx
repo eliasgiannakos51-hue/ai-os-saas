@@ -37,8 +37,16 @@ export function StepFlow({ flow, current }: { flow: FlowName; current: number })
             <li key={step} className="flex items-center gap-1.5" aria-current={here ? "step" : undefined}>
               {i > 0 && <span className="me-1 h-px w-3 bg-border" aria-hidden="true" />}
               <span
+                // text-orange-500, NOT text-orange-300, AND THE NUMBER IS
+                // WHY. Measured with scripts/step-flow-contrast.mjs, in the
+                // light theme, on .surface, with an 11px digit:
+                // orange-300 on the 15% wash reads 4.44:1 — under AA for
+                // small text, by six hundredths. orange-400 reads the same
+                // 4.44 (the two collapse to one token in light).
+                // orange-500 reads 6.27:1 light and 5.35:1 dark. It was
+                // shipped at 4.44 for as long as it took to measure it.
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
-                  here ? "bg-orange-500/15 text-orange-300" : "bg-panel-hover text-muted"
+                  here ? "bg-orange-500/15 text-orange-500" : "bg-panel-hover text-muted"
                 }`}
                 aria-hidden="true"
               >

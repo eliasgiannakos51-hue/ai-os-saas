@@ -1,8 +1,8 @@
 # The first run — ar
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **610 strings**. The whole product is 3067, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **597 strings**. The whole product is 3054, which is why this file exists.
 
-**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 366 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 353 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -296,7 +296,7 @@ CSV أو مفصول بعلامات جدولة، حتى {max}. نقرؤه ونع�
 
 مجانًا — لا يُولَّد شيء، ويمكنك إزالته بنقرة واحدة
 
-## Tier 2 — The labels — skim these (366)
+## Tier 2 — The labels — skim these (353)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1310,59 +1310,11 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 اسأل
 
-**`sidebar.groups.build`**
-
-> EN — Build
-
-أنشئ
-
-**`sidebar.groups.business`**
-
-> EN — Business
-
-الأعمال
-
-**`sidebar.groups.create`**
-
-> EN — Create
-
-إنشاء
-
-**`sidebar.groups.daily`**
-
-> EN — Daily
-
-يوميًا
-
-**`sidebar.groups.insights`**
-
-> EN — What I noticed
-
-ما لاحظته
-
 **`sidebar.groups.make`**
 
 > EN — Make
 
 أنشئ
-
-**`sidebar.groups.marketplace`**
-
-> EN — Marketplace
-
-السوق
-
-**`sidebar.groups.myBusiness`**
-
-> EN — My business
-
-أعمالي
-
-**`sidebar.groups.operations`**
-
-> EN — Operations
-
-العمليات
 
 **`sidebar.groups.organise`**
 
@@ -1387,36 +1339,6 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 > EN — Settings
 
 الإعدادات
-
-**`sidebar.groups.strategy`**
-
-> EN — Strategy
-
-الاستراتيجية
-
-**`sidebar.groups.track`**
-
-> EN — Track
-
-تسجيل
-
-**`sidebar.groups.tracking`**
-
-> EN — Tracking
-
-المتابعة
-
-**`sidebar.groups.work`**
-
-> EN — Work
-
-اعمل
-
-**`sidebar.groups.workspace`**
-
-> EN — Workspace
-
-مساحة العمل
 
 **`sidebar.hints.affiliate`**
 
@@ -1666,9 +1588,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`sidebar.items.agents`**
 
-> EN — AI Agents
+> EN — AI that works for you
 
-وكلاء الذكاء الاصطناعي
+ذكاء اصطناعي يعمل من أجلك
 
 **`sidebar.items.analytics`**
 
@@ -1678,9 +1600,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`sidebar.items.apps`**
 
-> EN — App notes
+> EN — App ideas
 
-ملاحظات التطبيقات
+أفكار تطبيقات
 
 **`sidebar.items.automation`**
 
@@ -1690,21 +1612,21 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`sidebar.items.businessHealth`**
 
-> EN — Business health
+> EN — How the business is doing
 
-صحة النشاط التجاري
+كيف تسير الأعمال
 
 **`sidebar.items.campaigns`**
 
-> EN — Campaign notes
+> EN — Campaign ideas
 
-ملاحظات الحملات
+أفكار حملات
 
 **`sidebar.items.chat`**
 
-> EN — Ionexa Chat
+> EN — Ask me
 
-محادثة Ionexa
+اسألني
 
 **`sidebar.items.coding`**
 
@@ -1732,9 +1654,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`sidebar.items.dataAnalysis`**
 
-> EN — Data Analysis
+> EN — See what the numbers say
 
-تحليل البيانات
+انظر ماذا تقول الأرقام
 
 **`sidebar.items.decisions`**
 
@@ -1744,9 +1666,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`sidebar.items.deepResearch`**
 
-> EN — Deep Research
+> EN — Look into it properly
 
-بحث معمّق
+ابحث فيها جيدًا
 
 **`sidebar.items.documents`**
 
@@ -1804,9 +1726,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`sidebar.items.images`**
 
-> EN — Image notes
+> EN — Image ideas
 
-ملاحظات الصور
+أفكار صور
 
 **`sidebar.items.integrations`**
 
@@ -1828,9 +1750,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`sidebar.items.marketplace`**
 
-> EN — Marketplace
+> EN — Ready-made helpers
 
-السوق
+مساعدون جاهزون
 
 **`sidebar.items.memory`**
 
@@ -1906,9 +1828,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`sidebar.items.reflection`**
 
-> EN — Weekly Reflection
+> EN — Your week
 
-التأمل الأسبوعي
+أسبوعك
 
 **`sidebar.items.research`**
 
@@ -1918,9 +1840,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`sidebar.items.routing`**
 
-> EN — Model routing
+> EN — Which AI is used
 
-توجيه النماذج
+أي ذكاء اصطناعي يُستخدم
 
 **`sidebar.items.sales`**
 
@@ -1972,9 +1894,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`sidebar.items.videos`**
 
-> EN — Video notes
+> EN — Video ideas
 
-ملاحظات الفيديو
+أفكار فيديو
 
 **`sidebar.items.voice`**
 

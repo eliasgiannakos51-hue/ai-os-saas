@@ -1,8 +1,8 @@
 # The first run — el
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **610 strings**. The whole product is 3067, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **597 strings**. The whole product is 3054, which is why this file exists.
 
-**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 366 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 353 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -296,7 +296,7 @@ CSV ή tab-separated, έως {max}. Το διαβάζουμε και σου δε
 
 Δωρεάν — δεν παράγεται τίποτα, και το σβήνεις με ένα κλικ
 
-## Tier 2 — The labels — skim these (366)
+## Tier 2 — The labels — skim these (353)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1310,59 +1310,11 @@ Email
 
 Ρώτα
 
-**`sidebar.groups.build`**
-
-> EN — Build
-
-Φτιάξε
-
-**`sidebar.groups.business`**
-
-> EN — Business
-
-Επιχείρηση
-
-**`sidebar.groups.create`**
-
-> EN — Create
-
-Δημιουργία
-
-**`sidebar.groups.daily`**
-
-> EN — Daily
-
-Καθημερινά
-
-**`sidebar.groups.insights`**
-
-> EN — What I noticed
-
-Τι πρόσεξα
-
 **`sidebar.groups.make`**
 
 > EN — Make
 
 Φτιάξε
-
-**`sidebar.groups.marketplace`**
-
-> EN — Marketplace
-
-Αγορά
-
-**`sidebar.groups.myBusiness`**
-
-> EN — My business
-
-Η επιχείρησή μου
-
-**`sidebar.groups.operations`**
-
-> EN — Operations
-
-Λειτουργίες
 
 **`sidebar.groups.organise`**
 
@@ -1387,36 +1339,6 @@ Email
 > EN — Settings
 
 Ρυθμίσεις
-
-**`sidebar.groups.strategy`**
-
-> EN — Strategy
-
-Στρατηγική
-
-**`sidebar.groups.track`**
-
-> EN — Track
-
-Καταγραφή
-
-**`sidebar.groups.tracking`**
-
-> EN — Tracking
-
-Παρακολούθηση
-
-**`sidebar.groups.work`**
-
-> EN — Work
-
-Δούλεψε
-
-**`sidebar.groups.workspace`**
-
-> EN — Workspace
-
-Χώρος εργασίας
 
 **`sidebar.hints.affiliate`**
 
@@ -1666,9 +1588,9 @@ Leads, επικοινωνία και επόμενα βήματα.
 
 **`sidebar.items.agents`**
 
-> EN — AI Agents
+> EN — AI that works for you
 
-AI Πράκτορες
+AI που δουλεύει για σένα
 
 **`sidebar.items.analytics`**
 
@@ -1678,9 +1600,9 @@ AI Πράκτορες
 
 **`sidebar.items.apps`**
 
-> EN — App notes
+> EN — App ideas
 
-Σημειώσεις εφαρμογών
+Ιδέες για εφαρμογές
 
 **`sidebar.items.automation`**
 
@@ -1690,21 +1612,21 @@ AI Πράκτορες
 
 **`sidebar.items.businessHealth`**
 
-> EN — Business health
+> EN — How the business is doing
 
-Υγεία της επιχείρησης
+Πώς πάει η δουλειά
 
 **`sidebar.items.campaigns`**
 
-> EN — Campaign notes
+> EN — Campaign ideas
 
-Σημειώσεις καμπανιών
+Ιδέες για καμπάνιες
 
 **`sidebar.items.chat`**
 
-> EN — Ionexa Chat
+> EN — Ask me
 
-Ionexa Συνομιλία
+Ρώτα με
 
 **`sidebar.items.coding`**
 
@@ -1732,9 +1654,9 @@ Ionexa Συνομιλία
 
 **`sidebar.items.dataAnalysis`**
 
-> EN — Data Analysis
+> EN — See what the numbers say
 
-Ανάλυση δεδομένων
+Δες τι λένε τα νούμερα
 
 **`sidebar.items.decisions`**
 
@@ -1744,9 +1666,9 @@ Ionexa Συνομιλία
 
 **`sidebar.items.deepResearch`**
 
-> EN — Deep Research
+> EN — Look into it properly
 
-Βαθιά Έρευνα
+Ψάξ' το καλά
 
 **`sidebar.items.documents`**
 
@@ -1804,9 +1726,9 @@ Ionexa Συνομιλία
 
 **`sidebar.items.images`**
 
-> EN — Image notes
+> EN — Image ideas
 
-Σημειώσεις εικόνων
+Ιδέες για εικόνες
 
 **`sidebar.items.integrations`**
 
@@ -1828,9 +1750,9 @@ Ionexa Συνομιλία
 
 **`sidebar.items.marketplace`**
 
-> EN — Marketplace
+> EN — Ready-made helpers
 
-Αγορά
+Έτοιμοι βοηθοί
 
 **`sidebar.items.memory`**
 
@@ -1906,9 +1828,9 @@ Projects
 
 **`sidebar.items.reflection`**
 
-> EN — Weekly Reflection
+> EN — Your week
 
-Εβδομαδιαία Αναστοχασμός
+Η εβδομάδα σου
 
 **`sidebar.items.research`**
 
@@ -1918,9 +1840,9 @@ Projects
 
 **`sidebar.items.routing`**
 
-> EN — Model routing
+> EN — Which AI is used
 
-Δρομολόγηση μοντέλων
+Ποιο AI χρησιμοποιείται
 
 **`sidebar.items.sales`**
 
@@ -1972,9 +1894,9 @@ Projects
 
 **`sidebar.items.videos`**
 
-> EN — Video notes
+> EN — Video ideas
 
-Σημειώσεις βίντεο
+Ιδέες για βίντεο
 
 **`sidebar.items.voice`**
 

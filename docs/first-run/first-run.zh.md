@@ -1,8 +1,8 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **610 strings**. The whole product is 3067, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **597 strings**. The whole product is 3054, which is why this file exists.
 
-**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 366 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 353 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -296,7 +296,7 @@ Ionexa 用它来挑选下一个建议的计划步骤——状态低时给轻松�
 
 免费——不生成任何内容，一键即可移除
 
-## Tier 2 — The labels — skim these (366)
+## Tier 2 — The labels — skim these (353)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1310,59 +1310,11 @@ AI 记忆
 
 提问
 
-**`sidebar.groups.build`**
-
-> EN — Build
-
-创建
-
-**`sidebar.groups.business`**
-
-> EN — Business
-
-业务
-
-**`sidebar.groups.create`**
-
-> EN — Create
-
-创建
-
-**`sidebar.groups.daily`**
-
-> EN — Daily
-
-日常
-
-**`sidebar.groups.insights`**
-
-> EN — What I noticed
-
-我注意到的
-
 **`sidebar.groups.make`**
 
 > EN — Make
 
 创建
-
-**`sidebar.groups.marketplace`**
-
-> EN — Marketplace
-
-市场
-
-**`sidebar.groups.myBusiness`**
-
-> EN — My business
-
-我的业务
-
-**`sidebar.groups.operations`**
-
-> EN — Operations
-
-运营
 
 **`sidebar.groups.organise`**
 
@@ -1387,36 +1339,6 @@ AI 记忆
 > EN — Settings
 
 设置
-
-**`sidebar.groups.strategy`**
-
-> EN — Strategy
-
-策略
-
-**`sidebar.groups.track`**
-
-> EN — Track
-
-记录
-
-**`sidebar.groups.tracking`**
-
-> EN — Tracking
-
-记录
-
-**`sidebar.groups.work`**
-
-> EN — Work
-
-工作
-
-**`sidebar.groups.workspace`**
-
-> EN — Workspace
-
-工作区
 
 **`sidebar.hints.affiliate`**
 
@@ -1666,9 +1588,9 @@ AI 记住的关于你的事。
 
 **`sidebar.items.agents`**
 
-> EN — AI Agents
+> EN — AI that works for you
 
-AI 智能体
+为你干活的 AI
 
 **`sidebar.items.analytics`**
 
@@ -1678,9 +1600,9 @@ AI 智能体
 
 **`sidebar.items.apps`**
 
-> EN — App notes
+> EN — App ideas
 
-应用记录
+应用点子
 
 **`sidebar.items.automation`**
 
@@ -1690,21 +1612,21 @@ AI 智能体
 
 **`sidebar.items.businessHealth`**
 
-> EN — Business health
+> EN — How the business is doing
 
-经营健康度
+生意怎么样
 
 **`sidebar.items.campaigns`**
 
-> EN — Campaign notes
+> EN — Campaign ideas
 
-营销记录
+营销点子
 
 **`sidebar.items.chat`**
 
-> EN — Ionexa Chat
+> EN — Ask me
 
-Ionexa 聊天
+问我
 
 **`sidebar.items.coding`**
 
@@ -1732,9 +1654,9 @@ AI 编程
 
 **`sidebar.items.dataAnalysis`**
 
-> EN — Data Analysis
+> EN — See what the numbers say
 
-数据分析
+看看数字怎么说
 
 **`sidebar.items.decisions`**
 
@@ -1744,9 +1666,9 @@ AI 编程
 
 **`sidebar.items.deepResearch`**
 
-> EN — Deep Research
+> EN — Look into it properly
 
-深度研究
+好好查一下
 
 **`sidebar.items.documents`**
 
@@ -1804,9 +1726,9 @@ AI 编程
 
 **`sidebar.items.images`**
 
-> EN — Image notes
+> EN — Image ideas
 
-图片记录
+图片点子
 
 **`sidebar.items.integrations`**
 
@@ -1828,9 +1750,9 @@ AI 编程
 
 **`sidebar.items.marketplace`**
 
-> EN — Marketplace
+> EN — Ready-made helpers
 
-市场
+现成的助手
 
 **`sidebar.items.memory`**
 
@@ -1906,9 +1828,9 @@ AI 编程
 
 **`sidebar.items.reflection`**
 
-> EN — Weekly Reflection
+> EN — Your week
 
-每周回顾
+你的一周
 
 **`sidebar.items.research`**
 
@@ -1918,9 +1840,9 @@ AI 编程
 
 **`sidebar.items.routing`**
 
-> EN — Model routing
+> EN — Which AI is used
 
-模型路由
+用的是哪个 AI
 
 **`sidebar.items.sales`**
 
@@ -1972,9 +1894,9 @@ AI 编程
 
 **`sidebar.items.videos`**
 
-> EN — Video notes
+> EN — Video ideas
 
-视频记录
+视频点子
 
 **`sidebar.items.voice`**
 

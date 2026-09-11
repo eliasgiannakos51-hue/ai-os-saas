@@ -654,13 +654,36 @@ console.log("\n== 4c. the eight trackers no longer promise generation ==");
 // because they are not trackers any more — they are tools, they sit under
 // Build, and section 3b proves it from the code. Their names are checked
 // below under their own rule: a tool MAY promise what it does, and must.
+// "notes" -> "ideas" ON FOUR OF THE FIVE, approved by the owner in the
+// redesign's language pass. THE RULE DID NOT MOVE, only the word: what
+// this section forbids is a tracker PROMISING GENERATION, and "App
+// ideas" promises nothing — it names what is inside the table (ideas the
+// person typed) exactly as "App notes" did, in a word somebody who has
+// never used an AI product reads without translating. "Website plans"
+// keeps its own noun: a plan is a more specific thing than an idea and
+// that page holds plans.
+//
+// The generation check below is what actually guards the property, and
+// it is unchanged. If one of these is ever renamed to something that
+// says the product makes the thing, THAT is what has to go red.
 const TRACKER_NAMES = {
-  images: ["Image notes", "Σημειώσεις εικόνων"],
-  videos: ["Video notes", "Σημειώσεις βίντεο"],
-  apps: ["App notes", "Σημειώσεις εφαρμογών"],
-  campaigns: ["Campaign notes", "Σημειώσεις καμπανιών"],
+  images: ["Image ideas", "Ιδέες για εικόνες"],
+  videos: ["Video ideas", "Ιδέες για βίντεο"],
+  apps: ["App ideas", "Ιδέες για εφαρμογές"],
+  campaigns: ["Campaign ideas", "Ιδέες για καμπάνιες"],
   websites: ["Website plans", "Σχέδια ιστότοπων"],
 };
+// AND THE PROPERTY ITSELF, held independently of the exact strings
+// above: no tracker name may be a verb of creation. A future rename to
+// "Make an app" passes the table (it would be updated to match) and
+// fails here, which is the order those two checks have to be in.
+const CREATION_VERBS = /\b(make|create|generate|build|write|design|produce|draft)\b/i;
+for (const key of Object.keys(TRACKER_NAMES)) {
+  const name = String(lookup(messages.en, `sidebar.items.${key}`));
+  check(`${key}: the name does not promise to make the thing ("${name}")`,
+    !CREATION_VERBS.test(name),
+    "a tracker is a table of rows somebody types; a name that says the product makes them is the untruth this section exists for");
+}
 for (const [key, [en, el]] of Object.entries(TRACKER_NAMES)) {
   check(`${key}: EN is "${en}"`, lookup(messages.en, `sidebar.items.${key}`) === en, String(lookup(messages.en, `sidebar.items.${key}`)));
   check(`${key}: EL is "${el}"`, lookup(messages.el, `sidebar.items.${key}`) === el, String(lookup(messages.el, `sidebar.items.${key}`)));

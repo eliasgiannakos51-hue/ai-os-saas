@@ -96,20 +96,7 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "Workspace",
-      "build": "Build",
-      "business": "Business",
-      "strategy": "Strategy",
-      "operations": "Operations",
-      "marketplace": "Marketplace",
       "settings": "Settings",
-      "create": "Create",
-      "myBusiness": "My business",
-      "track": "Track",
-      "insights": "What I noticed",
-      "tracking": "Tracking",
-      "daily": "Daily",
-      "work": "Work",
       "see": "See",
       "make": "Make",
       "ask": "Ask",
@@ -118,25 +105,25 @@
     },
     "items": {
       "home": "Home",
-      "chat": "Ionexa Chat",
+      "chat": "Ask me",
       "memory": "Search my records",
       "timeline": "History",
       "favorites": "Favorites",
       "missionControl": "Goals & Plans",
-      "reflection": "Weekly Reflection",
+      "reflection": "Your week",
       "settings": "Settings",
       "team": "Team",
-      "agents": "AI Agents",
+      "agents": "AI that works for you",
       "websites": "Website plans",
       "websiteBuilder": "Build a site",
-      "apps": "App notes",
-      "images": "Image notes",
-      "videos": "Video notes",
+      "apps": "App ideas",
+      "images": "Image ideas",
+      "videos": "Video ideas",
       "coding": "AI Coding",
-      "dataAnalysis": "Data Analysis",
+      "dataAnalysis": "See what the numbers say",
       "documents": "Documents",
       "presentations": "Presentations",
-      "campaigns": "Campaign notes",
+      "campaigns": "Campaign ideas",
       "analytics": "Analytics",
       "finance": "Finances",
       "content": "Content",
@@ -152,16 +139,16 @@
       "tradingWorkflow": "Trading Workflow",
       "productWorkflow": "Product Workflow",
       "automation": "Automation",
-      "marketplace": "Marketplace",
+      "marketplace": "Ready-made helpers",
       "published": "Live sites",
       "integrations": "Integrations",
       "files": "Files",
-      "deepResearch": "Deep Research",
+      "deepResearch": "Look into it properly",
       "help": "Help Centre",
       "affiliate": "Affiliate",
       "formSubmissions": "Form submissions",
-      "routing": "Model routing",
-      "businessHealth": "Business health",
+      "routing": "Which AI is used",
+      "businessHealth": "How the business is doing",
       "mine": "Mine",
       "records": "My records",
       "library": "My stuff",
@@ -1294,7 +1281,7 @@
       "stepChangeFailed": "Could not change that step."
     },
     "reflection": {
-      "title": "Weekly Reflection",
+      "title": "Your week",
       "description": "See what you actually finished this week vs what you planned — real data, no spin.",
       "generateButton": "Generate Weekly Reflection",
       "generating": "Generating...",
@@ -1517,7 +1504,7 @@
       }
     },
     "marketplace": {
-      "title": "Marketplace",
+      "title": "Ready-made helpers",
       "description": "Agent templates people have built and shared. Free — nothing is bought or sold here.",
       "empty": {
         "title": "No templates yet",
@@ -1668,7 +1655,7 @@
       "madeItHere": "Made it here → {where}"
     },
     "agents": {
-      "title": "AI Agents",
+      "title": "AI that works for you",
       "description": "Agents that run on a schedule and email you the result.",
       "aiDisclosure": "Agents are AI systems. Everything they produce is AI-generated and can contain mistakes — check anything important before you act on it.",
       "newAgent": "New agent",
@@ -2113,7 +2100,7 @@
       "openedFromDevice": "{count, plural, one {# file} other {# files}} opened from your device."
     },
     "deepResearch": {
-      "title": "Deep Research",
+      "title": "Look into it properly",
       "description": "Give it a topic; it searches, cross-checks and writes a sourced report.",
       "intro": "A report takes several minutes and is the most expensive thing here, so you always see the plan and the price before anything runs. Findings are paraphrased and attributed, never reprinted.",
       "topicLabel": "What should it research?",
@@ -3529,7 +3516,7 @@
     }
   },
   "dataAnalysis": {
-    "title": "Data Analysis",
+    "title": "See what the numbers say",
     "description": "Upload a spreadsheet. Every statistic is computed from the whole file — never guessed.",
     "upload": {
       "title": "Upload a file",
@@ -3815,7 +3802,7 @@
     }
   },
   "finance": {
-    "title": "Business health",
+    "title": "How the business is doing",
     "description": "Every figure is computed from real rows, or says why it cannot be.",
     "needsInput": "Needs: {fields}",
     "needsHistory": "Needs {need} months of history — we have {have}.",
@@ -3867,7 +3854,7 @@
     "needsHistoryDays": "Needs {need} days of daily snapshots — we have {have}."
   },
   "routing": {
-    "title": "Model routing",
+    "title": "Which AI is used",
     "description": "Which model served which request over the last 30 days, what it cost, and what routing saved.",
     "empty": "No routing decisions have been recorded yet. This table fills in once requests start flowing through the router — it is not showing zeros, it is showing nothing.",
     "decisions": "Decisions",

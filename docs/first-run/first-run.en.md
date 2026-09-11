@@ -1,8 +1,8 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **610 strings**. The whole product is 3067, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **597 strings**. The whole product is 3054, which is why this file exists.
 
-**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 366 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 353 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -252,7 +252,7 @@ Ionexa uses this to pick which plan step to suggest next — lighter work when y
 
 Free — nothing is generated, and you can remove it in one click
 
-## Tier 2 — The labels — skim these (366)
+## Tier 2 — The labels — skim these (353)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1099,50 +1099,10 @@ Close menu
 
 Ask
 
-**`sidebar.groups.build`**
-
-
-Build
-
-**`sidebar.groups.business`**
-
-
-Business
-
-**`sidebar.groups.create`**
-
-
-Create
-
-**`sidebar.groups.daily`**
-
-
-Daily
-
-**`sidebar.groups.insights`**
-
-
-What I noticed
-
 **`sidebar.groups.make`**
 
 
 Make
-
-**`sidebar.groups.marketplace`**
-
-
-Marketplace
-
-**`sidebar.groups.myBusiness`**
-
-
-My business
-
-**`sidebar.groups.operations`**
-
-
-Operations
 
 **`sidebar.groups.organise`**
 
@@ -1163,31 +1123,6 @@ See
 
 
 Settings
-
-**`sidebar.groups.strategy`**
-
-
-Strategy
-
-**`sidebar.groups.track`**
-
-
-Track
-
-**`sidebar.groups.tracking`**
-
-
-Tracking
-
-**`sidebar.groups.work`**
-
-
-Work
-
-**`sidebar.groups.workspace`**
-
-
-Workspace
 
 **`sidebar.hints.affiliate`**
 
@@ -1397,7 +1332,7 @@ Affiliate
 **`sidebar.items.agents`**
 
 
-AI Agents
+AI that works for you
 
 **`sidebar.items.analytics`**
 
@@ -1407,7 +1342,7 @@ Analytics
 **`sidebar.items.apps`**
 
 
-App notes
+App ideas
 
 **`sidebar.items.automation`**
 
@@ -1417,17 +1352,17 @@ Automation
 **`sidebar.items.businessHealth`**
 
 
-Business health
+How the business is doing
 
 **`sidebar.items.campaigns`**
 
 
-Campaign notes
+Campaign ideas
 
 **`sidebar.items.chat`**
 
 
-Ionexa Chat
+Ask me
 
 **`sidebar.items.coding`**
 
@@ -1452,7 +1387,7 @@ Costs
 **`sidebar.items.dataAnalysis`**
 
 
-Data Analysis
+See what the numbers say
 
 **`sidebar.items.decisions`**
 
@@ -1462,7 +1397,7 @@ Decisions
 **`sidebar.items.deepResearch`**
 
 
-Deep Research
+Look into it properly
 
 **`sidebar.items.documents`**
 
@@ -1512,7 +1447,7 @@ Ideas
 **`sidebar.items.images`**
 
 
-Image notes
+Image ideas
 
 **`sidebar.items.integrations`**
 
@@ -1532,7 +1467,7 @@ My stuff
 **`sidebar.items.marketplace`**
 
 
-Marketplace
+Ready-made helpers
 
 **`sidebar.items.memory`**
 
@@ -1597,7 +1532,7 @@ My records
 **`sidebar.items.reflection`**
 
 
-Weekly Reflection
+Your week
 
 **`sidebar.items.research`**
 
@@ -1607,7 +1542,7 @@ Research
 **`sidebar.items.routing`**
 
 
-Model routing
+Which AI is used
 
 **`sidebar.items.sales`**
 
@@ -1652,7 +1587,7 @@ Trading Workflow
 **`sidebar.items.videos`**
 
 
-Video notes
+Video ideas
 
 **`sidebar.items.voice`**
 

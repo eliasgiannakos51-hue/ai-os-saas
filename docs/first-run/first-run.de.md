@@ -1,8 +1,8 @@
 # The first run — de
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **610 strings**. The whole product is 3067, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **597 strings**. The whole product is 3054, which is why this file exists.
 
-**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 366 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 353 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -296,7 +296,7 @@ Ionexa wählt damit den nächsten Planschritt aus — leichte Arbeit, wenn du un
 
 Kostenlos — es wird nichts generiert, und du entfernst es mit einem Klick
 
-## Tier 2 — The labels — skim these (366)
+## Tier 2 — The labels — skim these (353)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1310,59 +1310,11 @@ Menü schließen
 
 Fragen
 
-**`sidebar.groups.build`**
-
-> EN — Build
-
-Erstellen
-
-**`sidebar.groups.business`**
-
-> EN — Business
-
-Business
-
-**`sidebar.groups.create`**
-
-> EN — Create
-
-Erstellen
-
-**`sidebar.groups.daily`**
-
-> EN — Daily
-
-Täglich
-
-**`sidebar.groups.insights`**
-
-> EN — What I noticed
-
-Was mir aufgefallen ist
-
 **`sidebar.groups.make`**
 
 > EN — Make
 
 Erstellen
-
-**`sidebar.groups.marketplace`**
-
-> EN — Marketplace
-
-Marktplatz
-
-**`sidebar.groups.myBusiness`**
-
-> EN — My business
-
-Mein Geschäft
-
-**`sidebar.groups.operations`**
-
-> EN — Operations
-
-Abläufe
 
 **`sidebar.groups.organise`**
 
@@ -1387,36 +1339,6 @@ Ansehen
 > EN — Settings
 
 Einstellungen
-
-**`sidebar.groups.strategy`**
-
-> EN — Strategy
-
-Strategie
-
-**`sidebar.groups.track`**
-
-> EN — Track
-
-Erfassen
-
-**`sidebar.groups.tracking`**
-
-> EN — Tracking
-
-Erfassung
-
-**`sidebar.groups.work`**
-
-> EN — Work
-
-Arbeiten
-
-**`sidebar.groups.workspace`**
-
-> EN — Workspace
-
-Arbeitsbereich
 
 **`sidebar.hints.affiliate`**
 
@@ -1666,9 +1588,9 @@ Partnerprogramm
 
 **`sidebar.items.agents`**
 
-> EN — AI Agents
+> EN — AI that works for you
 
-KI-Agenten
+KI, die für dich arbeitet
 
 **`sidebar.items.analytics`**
 
@@ -1678,9 +1600,9 @@ Analytik
 
 **`sidebar.items.apps`**
 
-> EN — App notes
+> EN — App ideas
 
-App-Notizen
+App-Ideen
 
 **`sidebar.items.automation`**
 
@@ -1690,21 +1612,21 @@ Automatisierung
 
 **`sidebar.items.businessHealth`**
 
-> EN — Business health
+> EN — How the business is doing
 
-Geschäftslage
+Wie das Geschäft läuft
 
 **`sidebar.items.campaigns`**
 
-> EN — Campaign notes
+> EN — Campaign ideas
 
-Kampagnen-Notizen
+Kampagnen-Ideen
 
 **`sidebar.items.chat`**
 
-> EN — Ionexa Chat
+> EN — Ask me
 
-Ionexa Chat
+Frag mich
 
 **`sidebar.items.coding`**
 
@@ -1732,9 +1654,9 @@ Kosten
 
 **`sidebar.items.dataAnalysis`**
 
-> EN — Data Analysis
+> EN — See what the numbers say
 
-Datenanalyse
+Sieh, was die Zahlen sagen
 
 **`sidebar.items.decisions`**
 
@@ -1744,9 +1666,9 @@ Entscheidungen
 
 **`sidebar.items.deepResearch`**
 
-> EN — Deep Research
+> EN — Look into it properly
 
-Tiefenrecherche
+Gründlich nachsehen
 
 **`sidebar.items.documents`**
 
@@ -1804,9 +1726,9 @@ Ideen
 
 **`sidebar.items.images`**
 
-> EN — Image notes
+> EN — Image ideas
 
-Bild-Notizen
+Bild-Ideen
 
 **`sidebar.items.integrations`**
 
@@ -1828,9 +1750,9 @@ Meine Sachen
 
 **`sidebar.items.marketplace`**
 
-> EN — Marketplace
+> EN — Ready-made helpers
 
-Marktplatz
+Fertige Helfer
 
 **`sidebar.items.memory`**
 
@@ -1906,9 +1828,9 @@ Meine Einträge
 
 **`sidebar.items.reflection`**
 
-> EN — Weekly Reflection
+> EN — Your week
 
-Wöchentliche Reflexion
+Deine Woche
 
 **`sidebar.items.research`**
 
@@ -1918,9 +1840,9 @@ Recherche
 
 **`sidebar.items.routing`**
 
-> EN — Model routing
+> EN — Which AI is used
 
-Modell-Routing
+Welche KI verwendet wird
 
 **`sidebar.items.sales`**
 
@@ -1972,9 +1894,9 @@ Trading-Workflow
 
 **`sidebar.items.videos`**
 
-> EN — Video notes
+> EN — Video ideas
 
-Video-Notizen
+Video-Ideen
 
 **`sidebar.items.voice`**
 

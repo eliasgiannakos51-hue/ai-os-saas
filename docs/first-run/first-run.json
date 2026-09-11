@@ -1,6 +1,6 @@
 {
-  "total": 3067,
-  "onPath": 610,
+  "total": 3054,
+  "onPath": 597,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -16,7 +16,7 @@
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 366
+      "count": 353
     },
     {
       "n": 3,
@@ -1207,55 +1207,7 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
-          "key": "sidebar.groups.build",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.business",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.create",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.daily",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.insights",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
           "key": "sidebar.groups.make",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.marketplace",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.myBusiness",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.operations",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"
@@ -1280,36 +1232,6 @@
         },
         {
           "key": "sidebar.groups.settings",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.strategy",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.track",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.tracking",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.work",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.workspace",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"

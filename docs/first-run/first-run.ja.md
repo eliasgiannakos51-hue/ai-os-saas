@@ -1,8 +1,8 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **610 strings**. The whole product is 3067, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **597 strings**. The whole product is 3054, which is why this file exists.
 
-**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 366 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 353 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -296,7 +296,7 @@ Ionexa はこれをもとに次に提案するプランのステップを選び�
 
 無料。何も生成されず、ワンクリックで削除できます
 
-## Tier 2 — The labels — skim these (366)
+## Tier 2 — The labels — skim these (353)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1310,59 +1310,11 @@ Gmail や Drive を接続
 
 きく
 
-**`sidebar.groups.build`**
-
-> EN — Build
-
-つくる
-
-**`sidebar.groups.business`**
-
-> EN — Business
-
-ビジネス
-
-**`sidebar.groups.create`**
-
-> EN — Create
-
-つくる
-
-**`sidebar.groups.daily`**
-
-> EN — Daily
-
-毎日
-
-**`sidebar.groups.insights`**
-
-> EN — What I noticed
-
-気づいたこと
-
 **`sidebar.groups.make`**
 
 > EN — Make
 
 つくる
-
-**`sidebar.groups.marketplace`**
-
-> EN — Marketplace
-
-マーケットプレイス
-
-**`sidebar.groups.myBusiness`**
-
-> EN — My business
-
-わたしのビジネス
-
-**`sidebar.groups.operations`**
-
-> EN — Operations
-
-運用
 
 **`sidebar.groups.organise`**
 
@@ -1387,36 +1339,6 @@ Gmail や Drive を接続
 > EN — Settings
 
 設定
-
-**`sidebar.groups.strategy`**
-
-> EN — Strategy
-
-戦略
-
-**`sidebar.groups.track`**
-
-> EN — Track
-
-記録する
-
-**`sidebar.groups.tracking`**
-
-> EN — Tracking
-
-記録
-
-**`sidebar.groups.work`**
-
-> EN — Work
-
-作業
-
-**`sidebar.groups.workspace`**
-
-> EN — Workspace
-
-ワークスペース
 
 **`sidebar.hints.affiliate`**
 
@@ -1666,9 +1588,9 @@ AI があなたについて覚えていること。
 
 **`sidebar.items.agents`**
 
-> EN — AI Agents
+> EN — AI that works for you
 
-AI エージェント
+あなたの代わりに働く AI
 
 **`sidebar.items.analytics`**
 
@@ -1678,9 +1600,9 @@ AI エージェント
 
 **`sidebar.items.apps`**
 
-> EN — App notes
+> EN — App ideas
 
-アプリメモ
+アプリのアイデア
 
 **`sidebar.items.automation`**
 
@@ -1690,21 +1612,21 @@ AI エージェント
 
 **`sidebar.items.businessHealth`**
 
-> EN — Business health
+> EN — How the business is doing
 
-事業の健康状態
+事業の調子
 
 **`sidebar.items.campaigns`**
 
-> EN — Campaign notes
+> EN — Campaign ideas
 
-キャンペーンメモ
+キャンペーンのアイデア
 
 **`sidebar.items.chat`**
 
-> EN — Ionexa Chat
+> EN — Ask me
 
-Ionexa チャット
+聞いてみる
 
 **`sidebar.items.coding`**
 
@@ -1732,9 +1654,9 @@ AI コーディング
 
 **`sidebar.items.dataAnalysis`**
 
-> EN — Data Analysis
+> EN — See what the numbers say
 
-データ分析
+数字が語ることを見る
 
 **`sidebar.items.decisions`**
 
@@ -1744,9 +1666,9 @@ AI コーディング
 
 **`sidebar.items.deepResearch`**
 
-> EN — Deep Research
+> EN — Look into it properly
 
-ディープリサーチ
+じっくり調べる
 
 **`sidebar.items.documents`**
 
@@ -1804,9 +1726,9 @@ AI コーディング
 
 **`sidebar.items.images`**
 
-> EN — Image notes
+> EN — Image ideas
 
-画像メモ
+画像のアイデア
 
 **`sidebar.items.integrations`**
 
@@ -1828,9 +1750,9 @@ AI コーディング
 
 **`sidebar.items.marketplace`**
 
-> EN — Marketplace
+> EN — Ready-made helpers
 
-マーケットプレイス
+すぐ使える助っ人
 
 **`sidebar.items.memory`**
 
@@ -1906,9 +1828,9 @@ AI コーディング
 
 **`sidebar.items.reflection`**
 
-> EN — Weekly Reflection
+> EN — Your week
 
-週次振り返り
+あなたの一週間
 
 **`sidebar.items.research`**
 
@@ -1918,9 +1840,9 @@ AI コーディング
 
 **`sidebar.items.routing`**
 
-> EN — Model routing
+> EN — Which AI is used
 
-モデルルーティング
+どの AI を使うか
 
 **`sidebar.items.sales`**
 
@@ -1972,9 +1894,9 @@ AI コーディング
 
 **`sidebar.items.videos`**
 
-> EN — Video notes
+> EN — Video ideas
 
-動画メモ
+動画のアイデア
 
 **`sidebar.items.voice`**
 

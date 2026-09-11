@@ -96,20 +96,7 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "工作区",
-      "build": "创建",
-      "business": "业务",
-      "strategy": "策略",
-      "operations": "运营",
-      "marketplace": "市场",
       "settings": "设置",
-      "create": "创建",
-      "myBusiness": "我的业务",
-      "track": "记录",
-      "insights": "我注意到的",
-      "tracking": "记录",
-      "daily": "日常",
-      "work": "工作",
       "see": "查看",
       "make": "创建",
       "ask": "提问",
@@ -118,25 +105,25 @@
     },
     "items": {
       "home": "主页",
-      "chat": "Ionexa 聊天",
+      "chat": "问我",
       "memory": "搜索我的记录",
       "timeline": "历史",
       "favorites": "收藏",
       "missionControl": "目标与计划",
-      "reflection": "每周回顾",
+      "reflection": "你的一周",
       "settings": "设置",
       "team": "团队",
-      "agents": "AI 智能体",
+      "agents": "为你干活的 AI",
       "websites": "网站计划",
       "websiteBuilder": "做个网站",
-      "apps": "应用记录",
-      "images": "图片记录",
-      "videos": "视频记录",
+      "apps": "应用点子",
+      "images": "图片点子",
+      "videos": "视频点子",
       "coding": "AI 编程",
-      "dataAnalysis": "数据分析",
+      "dataAnalysis": "看看数字怎么说",
       "documents": "文档",
       "presentations": "演示文稿",
-      "campaigns": "营销记录",
+      "campaigns": "营销点子",
       "analytics": "数据统计",
       "finance": "财务",
       "content": "内容",
@@ -152,16 +139,16 @@
       "tradingWorkflow": "交易工作流",
       "productWorkflow": "产品工作流",
       "automation": "自动化",
-      "marketplace": "市场",
+      "marketplace": "现成的助手",
       "published": "已上线网站",
       "integrations": "集成",
       "files": "文件",
-      "deepResearch": "深度研究",
+      "deepResearch": "好好查一下",
       "help": "帮助中心",
       "affiliate": "推广合作",
       "formSubmissions": "表单提交",
-      "routing": "模型路由",
-      "businessHealth": "经营健康度",
+      "routing": "用的是哪个 AI",
+      "businessHealth": "生意怎么样",
       "mine": "我的内容",
       "records": "我的记录",
       "library": "我的东西",
@@ -1294,7 +1281,7 @@
       "stepChangeFailed": "无法修改该步骤。"
     },
     "reflection": {
-      "title": "每周回顾",
+      "title": "你的一周",
       "description": "查看你本周实际完成的内容与计划的对比 — 真实数据,没有粉饰。",
       "generateButton": "生成每周回顾",
       "generating": "生成中...",
@@ -1517,7 +1504,7 @@
       }
     },
     "marketplace": {
-      "title": "市场",
+      "title": "现成的助手",
       "description": "其他人构建并分享的智能体模板。免费——这里不买卖任何东西。",
       "empty": {
         "title": "还没有模板",
@@ -1668,7 +1655,7 @@
       "madeItHere": "已创建在 → {where}"
     },
     "agents": {
-      "title": "AI 智能体",
+      "title": "为你干活的 AI",
       "description": "按计划自动运行并把结果发到你邮箱的智能体。",
       "aiDisclosure": "智能体是 AI 系统。它们产出的内容均由 AI 生成，可能有误——重要信息请先核实再据此行动。",
       "newAgent": "新建智能体",
@@ -2113,7 +2100,7 @@
       "openedFromDevice": "已从你的设备打开 {count} 个文件。"
     },
     "deepResearch": {
-      "title": "深度研究",
+      "title": "好好查一下",
       "description": "给一个主题，它会搜索、交叉核对并写出带来源的报告。",
       "intro": "一份报告需要几分钟，也是这里最昂贵的操作，因此在任何执行之前你都会先看到计划和价格。研究结果均以改写并注明出处的方式呈现，绝不原文照搬。",
       "topicLabel": "要研究什么？",
@@ -3529,7 +3516,7 @@
     }
   },
   "dataAnalysis": {
-    "title": "数据分析",
+    "title": "看看数字怎么说",
     "description": "上传一份表格。每一项统计都基于整份文件计算得出，绝不猜测。",
     "upload": {
       "title": "上传文件",
@@ -3815,7 +3802,7 @@
     }
   },
   "finance": {
-    "title": "经营健康度",
+    "title": "生意怎么样",
     "description": "每个数字都由真实数据算出，算不出来的会说明原因。",
     "needsInput": "还需要：{fields}",
     "needsHistory": "需要 {need} 个月的历史数据——目前有 {have} 个月。",
@@ -3867,7 +3854,7 @@
     "needsHistoryDays": "需要 {need} 天的每日快照——目前有 {have} 天。"
   },
   "routing": {
-    "title": "模型路由",
+    "title": "用的是哪个 AI",
     "description": "过去 30 天内哪个模型处理了哪些请求、花费多少，以及路由节省了多少。",
     "empty": "尚未记录任何路由决策。当请求开始经过路由器时，此表会自动填充——它显示的不是零，而是空。",
     "decisions": "决策数",

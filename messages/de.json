@@ -96,20 +96,7 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "Arbeitsbereich",
-      "build": "Erstellen",
-      "business": "Business",
-      "strategy": "Strategie",
-      "operations": "Abläufe",
-      "marketplace": "Marktplatz",
       "settings": "Einstellungen",
-      "create": "Erstellen",
-      "myBusiness": "Mein Geschäft",
-      "track": "Erfassen",
-      "insights": "Was mir aufgefallen ist",
-      "tracking": "Erfassung",
-      "daily": "Täglich",
-      "work": "Arbeiten",
       "see": "Ansehen",
       "make": "Erstellen",
       "ask": "Fragen",
@@ -118,25 +105,25 @@
     },
     "items": {
       "home": "Start",
-      "chat": "Ionexa Chat",
+      "chat": "Frag mich",
       "memory": "Meine Einträge durchsuchen",
       "timeline": "Verlauf",
       "favorites": "Favoriten",
       "missionControl": "Ziele & Pläne",
-      "reflection": "Wöchentliche Reflexion",
+      "reflection": "Deine Woche",
       "settings": "Einstellungen",
       "team": "Team",
-      "agents": "KI-Agenten",
+      "agents": "KI, die für dich arbeitet",
       "websites": "Website-Pläne",
       "websiteBuilder": "Website bauen",
-      "apps": "App-Notizen",
-      "images": "Bild-Notizen",
-      "videos": "Video-Notizen",
+      "apps": "App-Ideen",
+      "images": "Bild-Ideen",
+      "videos": "Video-Ideen",
       "coding": "Programmieren mit KI",
-      "dataAnalysis": "Datenanalyse",
+      "dataAnalysis": "Sieh, was die Zahlen sagen",
       "documents": "Dokumente",
       "presentations": "Präsentationen",
-      "campaigns": "Kampagnen-Notizen",
+      "campaigns": "Kampagnen-Ideen",
       "analytics": "Analytik",
       "finance": "Finanzen",
       "content": "Inhalte",
@@ -152,16 +139,16 @@
       "tradingWorkflow": "Trading-Workflow",
       "productWorkflow": "Produkt-Workflow",
       "automation": "Automatisierung",
-      "marketplace": "Marktplatz",
+      "marketplace": "Fertige Helfer",
       "published": "Live-Seiten",
       "integrations": "Integrationen",
       "files": "Dateien",
-      "deepResearch": "Tiefenrecherche",
+      "deepResearch": "Gründlich nachsehen",
       "help": "Hilfe-Center",
       "affiliate": "Partnerprogramm",
       "formSubmissions": "Formulareingänge",
-      "routing": "Modell-Routing",
-      "businessHealth": "Geschäftslage",
+      "routing": "Welche KI verwendet wird",
+      "businessHealth": "Wie das Geschäft läuft",
       "mine": "Meine Sachen",
       "records": "Meine Einträge",
       "library": "Meine Sachen",
@@ -1294,7 +1281,7 @@
       "stepChangeFailed": "Der Schritt konnte nicht geändert werden."
     },
     "reflection": {
-      "title": "Wöchentliche Reflexion",
+      "title": "Deine Woche",
       "description": "Sieh, was du diese Woche wirklich erledigt hast im Vergleich zu dem, was geplant war — echte Daten, ohne Schönfärberei.",
       "generateButton": "Wöchentliche Reflexion Erstellen",
       "generating": "Erstellen...",
@@ -1517,7 +1504,7 @@
       }
     },
     "marketplace": {
-      "title": "Marktplatz",
+      "title": "Fertige Helfer",
       "description": "Agentenvorlagen, die andere gebaut und geteilt haben. Kostenlos — hier wird nichts gekauft oder verkauft.",
       "empty": {
         "title": "Noch keine Vorlagen",
@@ -1668,7 +1655,7 @@
       "madeItHere": "Hier erstellt → {where}"
     },
     "agents": {
-      "title": "KI-Agenten",
+      "title": "KI, die für dich arbeitet",
       "description": "Agenten, die nach Zeitplan laufen und Ihnen das Ergebnis per E-Mail schicken.",
       "aiDisclosure": "Agenten sind KI-Systeme. Alles, was sie erzeugen, ist KI-generiert und kann Fehler enthalten — prüfen Sie Wichtiges, bevor Sie danach handeln.",
       "newAgent": "Neuer Agent",
@@ -2113,7 +2100,7 @@
       "openedFromDevice": "{count, plural, one {# Datei} other {# Dateien}} von Ihrem Gerät geöffnet."
     },
     "deepResearch": {
-      "title": "Tiefenrecherche",
+      "title": "Gründlich nachsehen",
       "description": "Gib ein Thema an; es recherchiert, gleicht ab und schreibt einen belegten Bericht.",
       "intro": "Ein Bericht dauert mehrere Minuten und ist das Teuerste hier, deshalb siehst du immer Plan und Preis, bevor etwas läuft. Ergebnisse werden mit Quellenangabe paraphrasiert, nie nachgedruckt.",
       "topicLabel": "Was soll recherchiert werden?",
@@ -3529,7 +3516,7 @@
     }
   },
   "dataAnalysis": {
-    "title": "Datenanalyse",
+    "title": "Sieh, was die Zahlen sagen",
     "description": "Lade eine Tabelle hoch. Jede Kennzahl wird aus der GANZEN Datei berechnet — nie geraten.",
     "upload": {
       "title": "Datei hochladen",
@@ -3815,7 +3802,7 @@
     }
   },
   "finance": {
-    "title": "Geschäftslage",
+    "title": "Wie das Geschäft läuft",
     "description": "Jede Zahl wird aus echten Zeilen berechnet — oder sagt, warum sie es nicht kann.",
     "needsInput": "Fehlt: {fields}",
     "needsHistory": "Braucht {need} Monate Historie — wir haben {have}.",
@@ -3867,7 +3854,7 @@
     "needsHistoryDays": "Braucht {need} Tage tägliche Momentaufnahmen — wir haben {have}."
   },
   "routing": {
-    "title": "Modell-Routing",
+    "title": "Welche KI verwendet wird",
     "description": "Welches Modell welche Anfrage in den letzten 30 Tagen bedient hat, was es gekostet und was das Routing gespart hat.",
     "empty": "Es wurden noch keine Routing-Entscheidungen erfasst. Diese Tabelle füllt sich, sobald Anfragen durch den Router laufen — sie zeigt keine Nullen, sie zeigt nichts.",
     "decisions": "Entscheidungen",

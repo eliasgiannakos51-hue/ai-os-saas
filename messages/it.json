@@ -96,20 +96,7 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "Area di lavoro",
-      "build": "Crea",
-      "business": "Business",
-      "strategy": "Strategia",
-      "operations": "Operazioni",
-      "marketplace": "Mercato",
       "settings": "Impostazioni",
-      "create": "Creare",
-      "myBusiness": "La mia attività",
-      "track": "Registrare",
-      "insights": "Cosa ho notato",
-      "tracking": "Monitoraggio",
-      "daily": "Ogni giorno",
-      "work": "Lavora",
       "see": "Vedi",
       "make": "Crea",
       "ask": "Chiedi",
@@ -118,25 +105,25 @@
     },
     "items": {
       "home": "Home",
-      "chat": "Ionexa Chat",
+      "chat": "Chiedimi",
       "memory": "Cerca nei miei dati",
       "timeline": "Cronologia",
       "favorites": "Preferiti",
       "missionControl": "Obiettivi e piani",
-      "reflection": "Riflessione Settimanale",
+      "reflection": "La tua settimana",
       "settings": "Impostazioni",
       "team": "Team",
-      "agents": "Agenti IA",
+      "agents": "IA che lavora per te",
       "websites": "Progetti di siti",
       "websiteBuilder": "Crea un sito",
-      "apps": "Note sulle app",
-      "images": "Note sulle immagini",
-      "videos": "Note sui video",
+      "apps": "Idee per app",
+      "images": "Idee per immagini",
+      "videos": "Idee per video",
       "coding": "Codice con l'IA",
-      "dataAnalysis": "Analisi dei dati",
+      "dataAnalysis": "Guarda cosa dicono i numeri",
       "documents": "Documenti",
       "presentations": "Presentazioni",
-      "campaigns": "Note sulle campagne",
+      "campaigns": "Idee per campagne",
       "analytics": "Analytics",
       "finance": "Finanze",
       "content": "Contenuti",
@@ -152,16 +139,16 @@
       "tradingWorkflow": "Flusso di Lavoro Trading",
       "productWorkflow": "Flusso di Lavoro Prodotto",
       "automation": "Automazione",
-      "marketplace": "Mercato",
+      "marketplace": "Aiutanti pronti",
       "published": "Siti online",
       "integrations": "Integrazioni",
       "files": "File",
-      "deepResearch": "Ricerca approfondita",
+      "deepResearch": "Cercalo a fondo",
       "help": "Centro assistenza",
       "affiliate": "Affiliazione",
       "formSubmissions": "Invii dei moduli",
-      "routing": "Instradamento dei modelli",
-      "businessHealth": "Salute dell'attività",
+      "routing": "Quale IA viene usata",
+      "businessHealth": "Come va l’attività",
       "mine": "Le mie cose",
       "records": "I miei record",
       "library": "Le mie cose",
@@ -1294,7 +1281,7 @@
       "stepChangeFailed": "Impossibile modificare quel passaggio."
     },
     "reflection": {
-      "title": "Riflessione Settimanale",
+      "title": "La tua settimana",
       "description": "Scopri cosa hai davvero completato questa settimana rispetto a quanto pianificato — dati reali, senza abbellimenti.",
       "generateButton": "Genera Riflessione Settimanale",
       "generating": "Generazione...",
@@ -1517,7 +1504,7 @@
       }
     },
     "marketplace": {
-      "title": "Mercato",
+      "title": "Aiutanti pronti",
       "description": "Modelli di agenti creati e condivisi da altri. Gratis — qui non si compra né si vende nulla.",
       "empty": {
         "title": "Ancora nessun modello",
@@ -1668,7 +1655,7 @@
       "madeItHere": "Creato qui → {where}"
     },
     "agents": {
-      "title": "Agenti IA",
+      "title": "IA che lavora per te",
       "description": "Agenti che si eseguono secondo una pianificazione e ti inviano il risultato via email.",
       "aiDisclosure": "Gli agenti sono sistemi di IA. Tutto ciò che producono è generato dall'IA e può contenere errori — verifica ciò che è importante prima di agire.",
       "newAgent": "Nuovo agente",
@@ -2113,7 +2100,7 @@
       "openedFromDevice": "{count, plural, one {# file aperto} other {# file aperti}} dal tuo dispositivo."
     },
     "deepResearch": {
-      "title": "Ricerca approfondita",
+      "title": "Cercalo a fondo",
       "description": "Dai un argomento: cerca, verifica e scrive un report con le fonti.",
       "intro": "Un report richiede diversi minuti ed è la cosa più costosa qui, perciò vedi sempre il piano e il prezzo prima che parta qualcosa. I risultati sono parafrasati e attribuiti, mai riprodotti.",
       "topicLabel": "Cosa deve ricercare?",
@@ -3529,7 +3516,7 @@
     }
   },
   "dataAnalysis": {
-    "title": "Analisi dei dati",
+    "title": "Guarda cosa dicono i numeri",
     "description": "Carica un foglio di calcolo. Ogni statistica è calcolata sull'intero file, mai indovinata.",
     "upload": {
       "title": "Carica un file",
@@ -3815,7 +3802,7 @@
     }
   },
   "finance": {
-    "title": "Salute dell'attività",
+    "title": "Come va l’attività",
     "description": "Ogni cifra è calcolata da righe reali, o dice perché non può esserlo.",
     "needsInput": "Serve: {fields}",
     "needsHistory": "Servono {need} mesi di storico — ne abbiamo {have}.",
@@ -3867,7 +3854,7 @@
     "needsHistoryDays": "Servono {need} giorni di istantanee giornaliere — ne abbiamo {have}."
   },
   "routing": {
-    "title": "Instradamento dei modelli",
+    "title": "Quale IA viene usata",
     "description": "Quale modello ha servito quale richiesta negli ultimi 30 giorni, quanto è costato e quanto ha risparmiato l'instradamento.",
     "empty": "Non è ancora stata registrata alcuna decisione di instradamento. Questa tabella si riempie quando le richieste iniziano a passare dal router: non mostra zeri, non mostra nulla.",
     "decisions": "Decisioni",

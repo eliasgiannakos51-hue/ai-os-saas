@@ -96,20 +96,7 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "Espacio de trabajo",
-      "build": "Crear",
-      "business": "Negocio",
-      "strategy": "Estrategia",
-      "operations": "Operaciones",
-      "marketplace": "Mercado",
       "settings": "Configuración",
-      "create": "Crear",
-      "myBusiness": "Mi negocio",
-      "track": "Registrar",
-      "insights": "Lo que he notado",
-      "tracking": "Seguimiento",
-      "daily": "A diario",
-      "work": "Trabajar",
       "see": "Ver",
       "make": "Crear",
       "ask": "Preguntar",
@@ -118,25 +105,25 @@
     },
     "items": {
       "home": "Inicio",
-      "chat": "Ionexa Chat",
+      "chat": "Pregúntame",
       "memory": "Buscar en mis registros",
       "timeline": "Historial",
       "favorites": "Favoritos",
       "missionControl": "Objetivos y planes",
-      "reflection": "Reflexión Semanal",
+      "reflection": "Tu semana",
       "settings": "Configuración",
       "team": "Equipo",
-      "agents": "Agentes IA",
+      "agents": "IA que trabaja para ti",
       "websites": "Planes de webs",
       "websiteBuilder": "Crea un sitio",
-      "apps": "Notas de apps",
-      "images": "Notas de imágenes",
-      "videos": "Notas de vídeos",
+      "apps": "Ideas de apps",
+      "images": "Ideas de imágenes",
+      "videos": "Ideas de vídeos",
       "coding": "Programación con IA",
-      "dataAnalysis": "Análisis de datos",
+      "dataAnalysis": "Mira qué dicen los números",
       "documents": "Documentos",
       "presentations": "Presentaciones",
-      "campaigns": "Notas de campañas",
+      "campaigns": "Ideas de campañas",
       "analytics": "Analítica",
       "finance": "Finanzas",
       "content": "Contenido",
@@ -152,16 +139,16 @@
       "tradingWorkflow": "Flujo de Trabajo de Trading",
       "productWorkflow": "Flujo de Trabajo de Producto",
       "automation": "Automatización",
-      "marketplace": "Mercado",
+      "marketplace": "Ayudantes listos",
       "published": "Sitios en vivo",
       "integrations": "Integraciones",
       "files": "Archivos",
-      "deepResearch": "Investigación profunda",
+      "deepResearch": "Investígalo a fondo",
       "help": "Centro de ayuda",
       "affiliate": "Afiliados",
       "formSubmissions": "Envíos de formularios",
-      "routing": "Enrutado de modelos",
-      "businessHealth": "Salud del negocio",
+      "routing": "Qué IA se usa",
+      "businessHealth": "Cómo va el negocio",
       "mine": "Lo mío",
       "records": "Mis registros",
       "library": "Mis cosas",
@@ -1294,7 +1281,7 @@
       "stepChangeFailed": "No se pudo cambiar ese paso."
     },
     "reflection": {
-      "title": "Reflexión Semanal",
+      "title": "Tu semana",
       "description": "Mira lo que realmente completaste esta semana frente a lo que planeaste — datos reales, sin adornos.",
       "generateButton": "Generar Reflexión Semanal",
       "generating": "Generando...",
@@ -1517,7 +1504,7 @@
       }
     },
     "marketplace": {
-      "title": "Mercado",
+      "title": "Ayudantes listos",
       "description": "Plantillas de agentes creadas y compartidas por otras personas. Gratis: aquí no se compra ni se vende nada.",
       "empty": {
         "title": "Todavía no hay plantillas",
@@ -1668,7 +1655,7 @@
       "madeItHere": "Lo creé aquí → {where}"
     },
     "agents": {
-      "title": "Agentes IA",
+      "title": "IA que trabaja para ti",
       "description": "Agentes que se ejecutan según un horario y te envían el resultado por correo.",
       "aiDisclosure": "Los agentes son sistemas de IA. Todo lo que producen está generado por IA y puede contener errores: verifica lo importante antes de actuar.",
       "newAgent": "Nuevo agente",
@@ -2113,7 +2100,7 @@
       "openedFromDevice": "{count, plural, one {# archivo abierto} other {# archivos abiertos}} desde tu dispositivo."
     },
     "deepResearch": {
-      "title": "Investigación profunda",
+      "title": "Investígalo a fondo",
       "description": "Dale un tema: busca, contrasta y escribe un informe con fuentes.",
       "intro": "Un informe tarda varios minutos y es lo más caro de aquí, por eso siempre ves el plan y el precio antes de que se ejecute nada. Los hallazgos se parafrasean y se atribuyen, nunca se reproducen.",
       "topicLabel": "¿Qué debe investigar?",
@@ -3529,7 +3516,7 @@
     }
   },
   "dataAnalysis": {
-    "title": "Análisis de datos",
+    "title": "Mira qué dicen los números",
     "description": "Sube una hoja de cálculo. Cada estadística se calcula sobre el archivo completo, nunca se adivina.",
     "upload": {
       "title": "Subir un archivo",
@@ -3815,7 +3802,7 @@
     }
   },
   "finance": {
-    "title": "Salud del negocio",
+    "title": "Cómo va el negocio",
     "description": "Cada cifra se calcula de filas reales, o dice por qué no puede.",
     "needsInput": "Necesita: {fields}",
     "needsHistory": "Necesita {need} meses de historial — tenemos {have}.",
@@ -3867,7 +3854,7 @@
     "needsHistoryDays": "Necesita {need} días de instantáneas diarias — tenemos {have}."
   },
   "routing": {
-    "title": "Enrutado de modelos",
+    "title": "Qué IA se usa",
     "description": "Qué modelo atendió cada solicitud en los últimos 30 días, cuánto costó y cuánto ahorró el enrutado.",
     "empty": "Aún no se ha registrado ninguna decisión de enrutado. Esta tabla se llena cuando las solicitudes empiecen a pasar por el enrutador: no muestra ceros, no muestra nada.",
     "decisions": "Decisiones",

@@ -96,20 +96,7 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "ワークスペース",
-      "build": "つくる",
-      "business": "ビジネス",
-      "strategy": "戦略",
-      "operations": "運用",
-      "marketplace": "マーケットプレイス",
       "settings": "設定",
-      "create": "つくる",
-      "myBusiness": "わたしのビジネス",
-      "track": "記録する",
-      "insights": "気づいたこと",
-      "tracking": "記録",
-      "daily": "毎日",
-      "work": "作業",
       "see": "見る",
       "make": "つくる",
       "ask": "きく",
@@ -118,25 +105,25 @@
     },
     "items": {
       "home": "ホーム",
-      "chat": "Ionexa チャット",
+      "chat": "聞いてみる",
       "memory": "自分の記録を検索",
       "timeline": "履歴",
       "favorites": "お気に入り",
       "missionControl": "目標とプラン",
-      "reflection": "週次振り返り",
+      "reflection": "あなたの一週間",
       "settings": "設定",
       "team": "チーム",
-      "agents": "AI エージェント",
+      "agents": "あなたの代わりに働く AI",
       "websites": "サイト計画",
       "websiteBuilder": "サイトをつくる",
-      "apps": "アプリメモ",
-      "images": "画像メモ",
-      "videos": "動画メモ",
+      "apps": "アプリのアイデア",
+      "images": "画像のアイデア",
+      "videos": "動画のアイデア",
       "coding": "AI コーディング",
-      "dataAnalysis": "データ分析",
+      "dataAnalysis": "数字が語ることを見る",
       "documents": "ドキュメント",
       "presentations": "プレゼンテーション",
-      "campaigns": "キャンペーンメモ",
+      "campaigns": "キャンペーンのアイデア",
       "analytics": "アナリティクス",
       "finance": "財務",
       "content": "コンテンツ",
@@ -152,16 +139,16 @@
       "tradingWorkflow": "トレーディングワークフロー",
       "productWorkflow": "プロダクトワークフロー",
       "automation": "自動化",
-      "marketplace": "マーケットプレイス",
+      "marketplace": "すぐ使える助っ人",
       "published": "公開中のサイト",
       "integrations": "連携",
       "files": "ファイル",
-      "deepResearch": "ディープリサーチ",
+      "deepResearch": "じっくり調べる",
       "help": "ヘルプセンター",
       "affiliate": "アフィリエイト",
       "formSubmissions": "フォーム送信",
-      "routing": "モデルルーティング",
-      "businessHealth": "事業の健康状態",
+      "routing": "どの AI を使うか",
+      "businessHealth": "事業の調子",
       "mine": "自分のもの",
       "records": "マイレコード",
       "library": "わたしのもの",
@@ -1294,7 +1281,7 @@
       "stepChangeFailed": "そのステップを変更できませんでした。"
     },
     "reflection": {
-      "title": "週次振り返り",
+      "title": "あなたの一週間",
       "description": "今週実際に完了したことと計画していたことを比較 — 実データのみ、誇張なし。",
       "generateButton": "週次振り返りを生成",
       "generating": "生成中...",
@@ -1517,7 +1504,7 @@
       }
     },
     "marketplace": {
-      "title": "マーケットプレイス",
+      "title": "すぐ使える助っ人",
       "description": "ほかの人が作って共有したエージェントのテンプレートです。無料で、ここでは何も売買しません。",
       "empty": {
         "title": "まだテンプレートがありません",
@@ -1668,7 +1655,7 @@
       "madeItHere": "ここに作りました → {where}"
     },
     "agents": {
-      "title": "AI エージェント",
+      "title": "あなたの代わりに働く AI",
       "description": "スケジュールに従って実行し、結果をメールで届けるエージェント。",
       "aiDisclosure": "エージェントは AI システムです。生成される内容はすべて AI によるもので、誤りを含む場合があります。重要な情報は行動する前にご確認ください。",
       "newAgent": "新しいエージェント",
@@ -2113,7 +2100,7 @@
       "openedFromDevice": "端末から {count} 件のファイルを開きました。"
     },
     "deepResearch": {
-      "title": "ディープリサーチ",
+      "title": "じっくり調べる",
       "description": "トピックを渡すと、検索・照合して出典付きのレポートを書きます。",
       "intro": "レポート作成には数分かかり、ここで最も費用がかかる処理です。そのため実行前に必ず計画と料金を確認できます。調査結果は出典を示して要約し、そのまま転載しません。",
       "topicLabel": "何を調べますか？",
@@ -3529,7 +3516,7 @@
     }
   },
   "dataAnalysis": {
-    "title": "データ分析",
+    "title": "数字が語ることを見る",
     "description": "表計算ファイルをアップロードしてください。統計はすべてファイル全体から計算します。推測はしません。",
     "upload": {
       "title": "ファイルをアップロード",
@@ -3815,7 +3802,7 @@
     }
   },
   "finance": {
-    "title": "事業の健康状態",
+    "title": "事業の調子",
     "description": "すべての数字は実際の行から計算します。計算できないものは、その理由を書きます。",
     "needsInput": "不足：{fields}",
     "needsHistory": "{need} か月分の履歴が必要です。現在 {have} か月分あります。",
@@ -3867,7 +3854,7 @@
     "needsHistoryDays": "{need} 日分の日次スナップショットが必要です — 現在 {have} 日分。"
   },
   "routing": {
-    "title": "モデルルーティング",
+    "title": "どの AI を使うか",
     "description": "直近30日間でどのモデルがどのリクエストを処理し、いくらかかり、ルーティングでいくら節約できたか。",
     "empty": "ルーティングの判断はまだ記録されていません。リクエストがルーターを通り始めるとこの表が埋まります。ゼロを表示しているのではなく、何も表示していません。",
     "decisions": "判断回数",

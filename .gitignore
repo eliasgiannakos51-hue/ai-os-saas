@@ -47,6 +47,18 @@ next-env.d.ts
 # screenshot artefacts written by the *.prodtest.mjs suites
 /files-shots/
 /publish-dialog-shots/
+/agent-shots/
+/rtl-shots/
+
+# Default --out directories of the two billed measurement runners —
+# scripts/agent-tier-compare.mjs and scripts/website-pairs-check.mjs.
+# A run writes generated sites and answers there (megabytes of HTML and
+# markdown); website-pairs-check re-scores them later with --dry, so they
+# are worth keeping on disk and never worth committing. Listed here BEFORE
+# the first run rather than after somebody commits one: the sibling
+# entries above were all added the same way round.
+/pairs-out/
+/tiers-out/
 
 # Playwright E2E output — traces and screenshots from a failed run.
 e2e-report/

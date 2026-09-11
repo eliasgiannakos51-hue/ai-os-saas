@@ -271,7 +271,7 @@ export function PublishedSitesList({
       </ListLayout>
 
       {selected && (
-        <section className="space-y-3 rounded-2xl border border-border bg-panel p-4">
+        <section className="space-y-3 surface-tight">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="truncate text-base font-semibold text-foreground">
@@ -305,7 +305,7 @@ export function PublishedSitesList({
               {selectedVersions.map((version, index) => (
                 <li
                   key={version.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-3"
+                  className="flex flex-wrap items-center justify-between gap-2 surface-tight"
                 >
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-foreground">

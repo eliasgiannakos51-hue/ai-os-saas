@@ -238,7 +238,13 @@ function walk(dir) {
 const renderers = walk("src")
   .filter((f) => !f.endsWith("clarification-questions.tsx"))
   .filter((f) => readFileSync(f, "utf8").includes("<ClarificationQuestions"));
-check(`all ${renderers.length} screens render the shared component`, renderers.length === 4, renderers.join(", "));
+// FIVE SINCE 2026-09-07: chat joined the four build surfaces. It is the
+// one where the question interrupts a conversation rather than a form,
+// which is why it asks only on the opening message — but a person who
+// meets a question in chat must meet the SAME question, with the same
+// tappable answers, as everywhere else. Four shapes of one interaction is
+// how a product starts feeling like four products.
+check(`all ${renderers.length} screens render the shared component`, renderers.length === 5, renderers.join(", "));
 for (const file of renderers) {
   const src = readFileSync(file, "utf8");
   check(`${file.split("/").pop()} passes the tappable answers`, /suggestions=\{/.test(src));

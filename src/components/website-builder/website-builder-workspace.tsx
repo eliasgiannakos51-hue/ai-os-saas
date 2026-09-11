@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { VoiceInput } from "@/components/voice/voice-input";
+import { StepFlow } from "@/components/ui/step-flow";
 import { findUnfilledPlaceholders, type UnfilledPlaceholder } from "@/lib/website-placeholders";
 import { findInventedNumbers, type SuspectNumber } from "@/lib/website-invented-numbers";
 import { parseGenerationNotes, type GenerationNote } from "@/lib/website-generation-notes";
@@ -380,6 +381,10 @@ export function WebsiteBuilderWorkspace({
   // the row and hands back the original description/image paths; this
   // fires the exact same two-request flow (process + poll) a fresh
   // generation uses.
+  // Whether the site currently in the preview panel is live, as reported
+  // by PublishControl, which is the only thing that knows. Feeds the last
+  // step of the flow above.
+  const [livePreview, setLivePreview] = useState(false);
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
   async function handleRegenerateFlagged(id: string) {
     setRegeneratingId(id);
@@ -1052,6 +1057,11 @@ export function WebsiteBuilderWorkspace({
         return t("notes.mapZoom", { count: note.count });
       case "stopped":
         return t("notes.stopped", { count: note.credits });
+      case "sameSkeleton":
+        // THE OLDER SITE IS NAMED. "This looks like another of your sites"
+        // is unactionable; "87% the same structure as Καφέ Λιμάνι" can be
+        // opened in the other tab and disagreed with.
+        return t("notes.sameSkeleton", { percent: note.percent, name: note.against });
       case "spelling":
         // The words themselves, joined — the owner is the only one who can
         // say whether "ρεμπα" is a typo or a brand, and they can only say
@@ -1203,8 +1213,24 @@ export function WebsiteBuilderWorkspace({
     },
   ];
 
+  // FIVE STEPS, derived from what the page is actually showing. The
+  // detail panel's tab is what separates edit from preview — they are
+  // the same website, seen two ways, and the tab is the only thing that
+  // says which. Published last, and only when the site really is: the
+  // step list is state, not a plan.
+  const websiteStep = !previewWebsite
+    ? generating
+      ? 1
+      : 0
+    : livePreview
+      ? 4
+      : detailTab === "edit"
+        ? 2
+        : 3;
+
   return (
     <div className="space-y-6">
+      <StepFlow flow="website" current={websiteStep} />
       {previewWebsite && (
         <DetailPanel
           icon={WEBSITE_BUILDER_ICON}
@@ -1250,10 +1276,10 @@ export function WebsiteBuilderWorkspace({
                 type="submit"
                 form={EDIT_FORM_ID}
                 disabled={editing || !editText.trim() || previewWebsite.status !== "completed"}
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {editing ? (
-                  <ThinkingIndicator size="sm" tone="inherit" />
+                  <ThinkingIndicator size="sm" />
                 ) : (
                   <Wand2 className="h-3.5 w-3.5" aria-hidden="true" />
                 )}
@@ -1267,6 +1293,7 @@ export function WebsiteBuilderWorkspace({
                 <PublishControl
                   websiteId={previewWebsite.id}
                   websiteName={previewWebsite.name}
+                  onLiveChange={setLivePreview}
                   disabled={previewWebsite.status !== "completed"}
                   // Three different reasons this is off, and they used to
                   // look identical: a grey button that does nothing. The
@@ -1395,10 +1422,10 @@ export function WebsiteBuilderWorkspace({
                       type="button"
                       onClick={() => handleRegenerateFlagged(previewWebsite.id)}
                       disabled={regeneratingId === previewWebsite.id}
-                      className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg bg-amber-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {regeneratingId === previewWebsite.id ? (
-                        <ThinkingIndicator size="sm" tone="inherit" />
+                        <ThinkingIndicator size="sm" />
                       ) : (
                         <Wand2 className="h-3.5 w-3.5" aria-hidden="true" />
                       )}
@@ -1660,7 +1687,7 @@ export function WebsiteBuilderWorkspace({
           showForm ? (
             <form
               onSubmit={handleGenerate}
-              className="panel-pop-in space-y-3 rounded-2xl border border-border bg-panel p-5"
+              className="panel-pop-in space-y-3 surface"
             >
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-foreground">{t("newProject")}</h2>
@@ -1826,10 +1853,10 @@ export function WebsiteBuilderWorkspace({
                 <button
                   type="submit"
                   disabled={generating || !name.trim() || !description.trim()}
-                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {generating ? (
-                    <ThinkingIndicator size="sm" tone="inherit" />
+                    <ThinkingIndicator size="sm" />
                   ) : (
                     <Sparkles className="h-4 w-4" aria-hidden="true" />
                   )}
@@ -1844,7 +1871,7 @@ export function WebsiteBuilderWorkspace({
                 resetGenerationForm();
                 setShowForm(true);
               }}
-              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
             >
               <Plus className="h-4 w-4" aria-hidden="true" /> {t("newProject")}
             </button>

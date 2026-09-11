@@ -37,7 +37,7 @@ export function AchievementsSection({ unlocked }: { unlocked: UnlockedAchievemen
   const unlockedCount = displays.filter((d) => unlockedByKey.has(d.key)).length;
 
   return (
-    <div id="achievements" className="mb-6 rounded-2xl border border-border bg-panel p-5">
+    <div id="achievements" className="mb-6 surface">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-sm font-semibold text-foreground">{t("title")}</h2>
         <span className="shrink-0 text-xs text-muted">

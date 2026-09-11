@@ -266,7 +266,7 @@ export function SignupFlow() {
                     aria-pressed={selected && !wantsTeamSetup}
                     className={`relative flex flex-col items-start rounded-2xl border p-4 text-start transition-all duration-150 ${
                       selected && !wantsTeamSetup
-                        ? "border-orange-500 bg-orange-500/[0.04] shadow-[0_0_16px_rgba(249,115,22,0.12)]"
+                        ? "border-orange-500 bg-orange-500/[0.04]"
                         : "border-border bg-panel hover:border-orange-500/40"
                     }`}
                   >
@@ -367,7 +367,7 @@ export function SignupFlow() {
                 aria-pressed={wantsTeamSetup}
                 className={`relative flex flex-col items-start rounded-2xl border p-4 text-start transition-all duration-150 ${
                   wantsTeamSetup
-                    ? "border-orange-500 bg-orange-500/[0.04] shadow-[0_0_16px_rgba(249,115,22,0.12)]"
+                    ? "border-orange-500 bg-orange-500/[0.04]"
                     : "border-border bg-panel hover:border-orange-500/40"
                 }`}
               >
@@ -429,7 +429,7 @@ export function SignupFlow() {
         )}
 
         {step === 2 && (
-          <div className="rounded-2xl border border-border bg-panel p-6 shadow-[0_0_0_1px_rgba(249,115,22,0.05)]">
+          <div className="surface">
             <button
               type="button"
               onClick={() => setStep(1)}

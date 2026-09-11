@@ -2,11 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { Zap } from "lucide-react";
-import { estimateForAction, type ActionProfileKey } from "@/lib/billing/estimate";
-import { needsLargeActionConfirmation } from "@/lib/billing/credit-formula";
-import { DEFAULTS } from "@/lib/billing/pricing-config";
-import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
-import { useCredits } from "@/components/credits/credits-context";
 import { useRipple } from "@/hooks/use-ripple";
 
 /**
@@ -19,27 +14,11 @@ import { useRipple } from "@/hooks/use-ripple";
  * with the list price — which is what the Website Builder did — showed
  * Ultimate users less than half the real number.
  */
-export function useCostEstimate(
-  action: ActionProfileKey,
-  params: { inputChars: number; imageCount?: number }
-) {
-  const { accountCreditPriceEur, planSlug } = useCredits();
-  const estimate = estimateForAction(
-    action,
-    {
-      model: WEBSITE_BUILDER_MODEL,
-      inputChars: params.inputChars,
-      imageCount: params.imageCount,
-      planSlug,
-    },
-    DEFAULTS,
-    accountCreditPriceEur ?? undefined
-  );
-  return {
-    credits: estimate.estimatedCredits,
-    needsConfirmation: needsLargeActionConfirmation(estimate.estimatedCredits, DEFAULTS),
-  };
-}
+// The hook now lives in ./use-cost-estimate, so a caller that wants
+// only the number does not drag this file's dialog into its page — see
+// the note there. Re-exported here because every existing import points
+// at this path.
+export { useCostEstimate } from "@/components/credits/use-cost-estimate";
 
 /** Small "~N credits" hint, meant to sit directly under a submit button. */
 export function CostEstimateHint({ credits }: { credits: number }) {
@@ -78,7 +57,7 @@ export function LargeActionConfirm({
       role="dialog"
       aria-modal="true"
     >
-      <div className="panel-pop-in w-full max-w-sm rounded-2xl border border-border bg-panel p-5 shadow-2xl">
+      <div className="panel-pop-in w-full max-w-sm surface shadow-2xl">
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">
             <Zap className="h-4 w-4" aria-hidden="true" />

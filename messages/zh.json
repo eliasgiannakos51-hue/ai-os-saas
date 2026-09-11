@@ -96,20 +96,7 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "工作区",
-      "build": "创建",
-      "business": "业务",
-      "strategy": "策略",
-      "operations": "运营",
-      "marketplace": "市场",
       "settings": "设置",
-      "create": "创建",
-      "myBusiness": "我的业务",
-      "track": "记录",
-      "insights": "我注意到的",
-      "tracking": "记录",
-      "daily": "日常",
-      "work": "工作",
       "see": "查看",
       "make": "创建",
       "ask": "提问",
@@ -118,25 +105,25 @@
     },
     "items": {
       "home": "主页",
-      "chat": "Ionexa 聊天",
+      "chat": "问我",
       "memory": "搜索我的记录",
       "timeline": "历史",
       "favorites": "收藏",
       "missionControl": "目标与计划",
-      "reflection": "每周回顾",
+      "reflection": "你的一周",
       "settings": "设置",
       "team": "团队",
-      "agents": "AI 智能体",
+      "agents": "为你干活的 AI",
       "websites": "网站计划",
       "websiteBuilder": "做个网站",
-      "apps": "应用记录",
-      "images": "图片记录",
-      "videos": "视频记录",
+      "apps": "应用点子",
+      "images": "图片点子",
+      "videos": "视频点子",
       "coding": "AI 编程",
-      "dataAnalysis": "数据分析",
+      "dataAnalysis": "看看数字怎么说",
       "documents": "文档",
-      "presentations": "演示文稿笔记",
-      "campaigns": "营销记录",
+      "presentations": "演示文稿",
+      "campaigns": "营销点子",
       "analytics": "数据统计",
       "finance": "财务",
       "content": "内容",
@@ -152,16 +139,16 @@
       "tradingWorkflow": "交易工作流",
       "productWorkflow": "产品工作流",
       "automation": "自动化",
-      "marketplace": "市场",
+      "marketplace": "现成的助手",
       "published": "已上线网站",
       "integrations": "集成",
       "files": "文件",
-      "deepResearch": "深度研究",
+      "deepResearch": "好好查一下",
       "help": "帮助中心",
       "affiliate": "推广合作",
       "formSubmissions": "表单提交",
-      "routing": "模型路由",
-      "businessHealth": "经营健康度",
+      "routing": "用的是哪个 AI",
+      "businessHealth": "生意怎么样",
       "mine": "我的内容",
       "records": "我的记录",
       "library": "我的东西",
@@ -170,7 +157,9 @@
       "systemHealth": "系统健康",
       "tradingJournal": "交易日志",
       "voice": "语音",
-      "predictions": "规律"
+      "predictions": "规律",
+      "posts": "帖子",
+      "projects": "项目"
     },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",
@@ -207,7 +196,7 @@
       "images": "记录你正在筹划或已经做好的图片。它不会生成图片。",
       "videos": "记录你正在筹划或已经做好的视频。它不会生成视频。",
       "coding": "编写、解释、修复、转换和测试代码片段。它不运行代码，也不访问代码仓库。",
-      "presentations": "记录你正在筹划或已经做好的演示文稿。它不会生成幻灯片。",
+      "presentations": "描述一份演示并获得幻灯片——PowerPoint 或 PDF，配图来自 Unsplash 或你自己的照片。它不绘制图表。",
       "home": "你的仪表板——活动、统计和快捷操作。",
       "settings": "账户、账单、语言和偏好设置。",
       "published": "你所有已上线的网站，含访问量与版本历史",
@@ -227,7 +216,9 @@
       "systemHealth": "数据库、队列和服务商是否在响应。",
       "tradingJournal": "你的交易记录，以及当时写下的理由。",
       "voice": "把文字读出来，或者说话并转成文字。按分钟计量，每分钟价格显示在页面上。",
-      "predictions": "在你自己的记录里发现的规律，每条都标明依据的条数，并可点回原始记录。"
+      "predictions": "在你自己的记录里发现的规律，每条都标明依据的条数，并可点回原始记录。",
+      "posts": "说一次，就能得到每个平台各一条、长度和语气各自贴合的帖子。它不发布任何内容——由你复制并发布。",
+      "projects": "有目标的文件夹。你放什么就有什么——不会自己进来。"
     },
     "closeMenu": "关闭菜单"
   },
@@ -382,8 +373,8 @@
         "description": "用 AI 创建并剪辑视频。"
       },
       "presentations": {
-        "title": "AI 演示文稿与文档",
-        "description": "根据你的数据生成精美的演示文稿和文档。"
+        "title": "AI 演示文稿",
+        "description": "描述一份演示，获得可编辑的幻灯片——导出为 PowerPoint 或 PDF，配图来自 Unsplash 或你自己的照片。"
       },
       "marketingBuilder": {
         "title": "AI 营销活动构建器",
@@ -1160,7 +1151,11 @@
         "body": "它能看到你的记录、你的目标和你上传的文件。它看不到任何你没有添加的内容。除非你要求，否则它不会更改任何东西。"
       },
       "stop": "停止",
-      "stopped": "已停止。已写出的内容会保留，且只按这部分计费。"
+      "stopped": "已停止。已写出的内容会保留，且只按这部分计费。",
+      "clarificationTitle": "先问一个小问题：",
+      "clarificationSkip": "直接回答就好",
+      "clarificationContinue": "发送",
+      "clarificationAnswerPlaceholder": "你的回答……"
     },
     "create": {
       "title": "创建任何内容",
@@ -1172,6 +1167,16 @@
       "looksLikeQuestion": "这看起来像一个问题。要回答它，还是记录它？",
       "answerItInstead": "回答它",
       "recordItAnyway": "仍然记录"
+    },
+    "goal": {
+      "willOpen": "这会带着你写的内容前往{destination}。",
+      "costsThere": "在那里按下按钮时会用掉 {credits} 积分。现在不收取任何费用。",
+      "freeThere": "现在不收费，到达时也不收费。",
+      "confirm": "好，去吧",
+      "change": "改一下",
+      "which": "你指的是哪一个？",
+      "vague": "再多说一点，这样才能送到正确的地方。",
+      "dismiss": "算了"
     },
     "timeline": {
       "title": "我的内容",
@@ -1276,7 +1281,7 @@
       "stepChangeFailed": "无法修改该步骤。"
     },
     "reflection": {
-      "title": "每周回顾",
+      "title": "你的一周",
       "description": "查看你本周实际完成的内容与计划的对比 — 真实数据,没有粉饰。",
       "generateButton": "生成每周回顾",
       "generating": "生成中...",
@@ -1494,11 +1499,12 @@
           "chatWidget": "聊天窗口"
         },
         "stopped": "已由你停止。{count, plural, =0 {未收取任何费用} other {已按生成的部分收取 # 个积分}}；其余预留额度已释放。",
-        "spelling": "有 {count} 个希腊语单词可能拼写有误：{words}。未做任何修改 — 请检查，名称或品牌不算错误。"
+        "spelling": "有 {count} 个希腊语单词可能拼写有误：{words}。未做任何修改 — 请检查，名称或品牌不算错误。",
+        "sameSkeleton": "此站点与 {name} 结构相同——形状相同度 {percent}%。未作任何更改；同一家企业的两个站点本就常常应当相似，只有你能判断这里是否如此。"
       }
     },
     "marketplace": {
-      "title": "市场",
+      "title": "现成的助手",
       "description": "其他人构建并分享的智能体模板。免费——这里不买卖任何东西。",
       "empty": {
         "title": "还没有模板",
@@ -1649,7 +1655,7 @@
       "madeItHere": "已创建在 → {where}"
     },
     "agents": {
-      "title": "AI 智能体",
+      "title": "为你干活的 AI",
       "description": "按计划自动运行并把结果发到你邮箱的智能体。",
       "aiDisclosure": "智能体是 AI 系统。它们产出的内容均由 AI 生成，可能有误——重要信息请先核实再据此行动。",
       "newAgent": "新建智能体",
@@ -2054,13 +2060,6 @@
       "truncatedWarning": "即使分成几部分阅读，所选文档仍超出一个问题能覆盖的范围，答案可能不完整。请一次针对更少的文件提问。",
       "skippedFiles": "已跳过（无可读文本）：{names}",
       "creditsCharged": "{credits} 积分",
-      "stepsLabel": "本页使用方法",
-      "step1Title": "1. 上传文件",
-      "step1Hint": "PDF、Word、Excel、CSV 或文本。",
-      "step2Title": "2. 选择要提问的文件",
-      "step2Hint": "勾选一个或多个文件——回答只来自你勾选的内容。",
-      "step3Title": "3. 提出你的问题",
-      "step3Hint": "AI 只依据你勾选的文件作答。",
       "selectedOfTotal": "已选择 {count} / {total}",
       "selectAll": "全选",
       "maxPerQuestion": "每个问题最多 {max} 个文件。",
@@ -2094,7 +2093,7 @@
       "openedFromDevice": "已从你的设备打开 {count} 个文件。"
     },
     "deepResearch": {
-      "title": "深度研究",
+      "title": "好好查一下",
       "description": "给一个主题，它会搜索、交叉核对并写出带来源的报告。",
       "intro": "一份报告需要几分钟，也是这里最昂贵的操作，因此在任何执行之前你都会先看到计划和价格。研究结果均以改写并注明出处的方式呈现，绝不原文照搬。",
       "topicLabel": "要研究什么？",
@@ -2793,7 +2792,6 @@
       "roadmap": "路线图",
       "score": "评分",
       "sentiment": "情绪",
-      "slideCount": "幻灯片数量",
       "status": "状态",
       "strengths": "优势",
       "suggestedResponse": "建议回复",
@@ -2803,7 +2801,6 @@
       "targetAudience": "目标受众",
       "taskName": "任务名称",
       "timeSaved": "节省的时间",
-      "title": "标题",
       "toolsNeeded": "所需工具",
       "topic": "主题",
       "twitterThread": "Twitter 长贴",
@@ -2822,13 +2819,10 @@
       "crossPlatform": "跨平台",
       "desktop": "桌面端",
       "done": "已完成",
-      "draft": "草稿",
       "email": "电子邮件",
       "event": "活动",
       "expense": "支出",
-      "final": "定稿",
       "inProgress": "进行中",
-      "inReview": "审阅中",
       "income": "收入",
       "ios": "iOS",
       "live": "已上线",
@@ -2863,7 +2857,6 @@
       "apps": "确定删除此应用？此操作无法撤销。",
       "images": "确定删除此图片？此操作无法撤销。",
       "videos": "确定删除此视频？此操作无法撤销。",
-      "presentations": "确定删除此演示记录？此操作无法撤销。",
       "campaigns": "确定删除此营销活动？此操作无法撤销。"
     },
     "empty": {
@@ -2947,11 +2940,6 @@
         "why": "每条视频的需求和进度，拍摄清单不该只存在脑子里。它不会生成视频。",
         "example": "30 秒的产品演示"
       },
-      "presentations": {
-        "title": "记录演示文稿的地方",
-        "why": "把你正在准备或已经讲过的演示记在这里——本页不会替你生成幻灯片。用上方的按钮添加一条。",
-        "example": "种子轮的投资人演示"
-      },
       "campaigns": {
         "title": "每一次投放，以及它的花费",
         "why": "渠道、预算和状态并排放着，下一次的预算决定就能靠数字，而不是靠感觉。它不会替你投放。",
@@ -2975,7 +2963,6 @@
       "apps": "新增应用",
       "images": "新增图片",
       "videos": "新增视频",
-      "presentations": "新增演示备注",
       "campaigns": "新增活动"
     }
   },
@@ -3227,6 +3214,26 @@
       "is": "由代码在你自己的记录里找出的规律，不是模型在猜。",
       "does": "统计你的记录条数，找出超过阈值的规律，并说明每条背后有多少条记录，以及指回那些记录的链接。",
       "doesNot": "它不预测未来，也不会为了有话可说而编造规律。匹配的行少到只有几条时，它会告诉你依据不足。"
+    },
+    "presentations": {
+      "is": "幻灯片生成器：输入一段描述，输出一份演示。",
+      "does": "用你描述所用的语言为每张幻灯片撰写标题、要点和演讲者备注，从 Unsplash 找一张照片或放入你自己的照片，并把演示导出为 PowerPoint（.pptx）或 PDF。",
+      "doesNot": "它不绘制图表或表格，不挑选设计主题，也不生成图片——照片来自 Unsplash 或你自己。幻灯片不在这里编辑：下载 .pptx，在 PowerPoint 或 Keynote 里完成。"
+    },
+    "posts": {
+      "is": "帖子撰写器：输入一段描述，输出每个平台各一条帖子。",
+      "does": "根据同一段描述，写出 LinkedIn 帖子、X 帖子、带话题标签的 Instagram 文案、Facebook 帖子和 Threads 帖子——每条都裁到该平台的长度、用该平台的语气，并使用你描述所用的语言——每条都有复制按钮。",
+      "doesNot": "它不发布、不排期、不连接任何社交账号，也不会把同一段文字套用到所有平台——五个平台，五条帖子。它不生成图片；配图由你来定。"
+    },
+    "projects": {
+      "is": "一个有目标的文件夹，里面正好是你放进去的东西。",
+      "does": "把你自己的记录——文件、对话、计划、智能体、演示、帖子以及任何跟踪记录——归到一个名称和一个目标之下，并让聊天在其中开始，从更少的模块中读取更多行。",
+      "doesNot": "它不会自己拉入内容：项目里的计划不会带上它的步骤，网站不会带上它的表单。删除项目只删文件夹，绝不删内容。"
+    },
+    "projectDetail": {
+      "is": "一个项目：它的目标、你放进去的东西，以及在其中开始的聊天。",
+      "does": "把内容分成任务、文件、智能体和成果，显示每一项何时加入，允许你移出任意一项，并开始一段终生属于该项目的对话。",
+      "doesNot": "移出并不会删除，项目也不会自己添加：这里的计划不会带上它的步骤，网站不会带上它的表单。"
     }
   },
   "helpCentre": {
@@ -3502,7 +3509,7 @@
     }
   },
   "dataAnalysis": {
-    "title": "数据分析",
+    "title": "看看数字怎么说",
     "description": "上传一份表格。每一项统计都基于整份文件计算得出，绝不猜测。",
     "upload": {
       "title": "上传文件",
@@ -3629,8 +3636,166 @@
       "failed": "失败"
     }
   },
+  "presentations": {
+    "title": "演示文稿",
+    "description": "描述这份演示，获得幻灯片——可编辑的 PowerPoint 或 PDF，配图来自 Unsplash 或你自己的照片。",
+    "limits": {
+      "title": "它不做什么",
+      "no_charts": "不绘制图表或表格。一张幻灯片就是标题、要点和演讲者备注。",
+      "no_themes": "不挑选设计主题。演示是素净的，样式由你来定。",
+      "no_editing": "幻灯片不在这里编辑。下载 .pptx，在 PowerPoint、Keynote 或 LibreOffice 里完成。",
+      "no_generated_images": "不生成图片。照片来自 Unsplash 或你上传的图片。"
+    },
+    "form": {
+      "description": "这份演示讲什么？",
+      "descriptionPlaceholder": "向三位酒店经理做一场十分钟的推介，介绍我们面包店的餐饮配送服务：我们是谁、提供什么、价格，以及需要他们做什么……",
+      "slideCount": "幻灯片数",
+      "slides": "{count} 张幻灯片",
+      "imageSource": "配图",
+      "sources": {
+        "unsplash": "来自 Unsplash",
+        "own": "我自己的照片",
+        "none": "不用照片",
+        "unsplashHint": "免费图库照片，为每张需要配图的幻灯片匹配一张，并注明摄影师。",
+        "ownHint": "最多 {max} 张 JPEG 或 PNG 照片，按顺序放到需要配图的幻灯片上。",
+        "noneHint": "仅文字。",
+        "unsplashUnavailable": "此部署未配置 Unsplash，因此只能使用你自己的照片。"
+      },
+      "addPhotos": "添加照片",
+      "photosSelected": "{count} / {max}",
+      "remove": "移除",
+      "generate": "生成幻灯片",
+      "generating": "正在撰写演示……"
+    },
+    "result": {
+      "title": "你的演示",
+      "slidesCount": "{count} 张幻灯片",
+      "charged": "{credits} 积分",
+      "preparing": "准备中……",
+      "exportPptx": "下载 PowerPoint",
+      "exportPdf": "下载为 PDF",
+      "notes": "演讲者备注",
+      "noPhotoFound": "没有照片与需要配图的幻灯片匹配——这份演示只有文字。",
+      "photoBy": "照片：<author>{name}</author>，来自 <unsplash>Unsplash</unsplash>",
+      "layout": {
+        "title": "标题",
+        "bullets": "要点",
+        "section": "章节",
+        "quote": "引言",
+        "image": "照片"
+      }
+    },
+    "errors": {
+      "tooShort": "请先多说一点这份演示的内容。",
+      "tooLong": "超过了 {limit} 个字符。请描述演示本身，而不是整场演讲。",
+      "insufficient": "积分不足，无法生成这份演示。",
+      "rateLimited": "请求过多——请稍等一分钟再试。",
+      "unavailable": "无法连接 AI 服务。未产生任何扣费。",
+      "unusable": "模型返回的内容不是一份演示。试着换一种方式描述。",
+      "failed": "没有成功——请再试一次。",
+      "imageRejected": "仅支持 5 MB 以下的 JPEG 或 PNG，最多 {max} 张照片。",
+      "uploadFailed": "有一张照片无法上传。",
+      "exportFailed": "无法创建文件。"
+    },
+    "history": {
+      "title": "历史记录",
+      "empty": "这里还没有内容。",
+      "slides": "{count} 张幻灯片",
+      "failed": "失败",
+      "delete": "删除",
+      "deleteConfirm": "删除这份演示？此操作无法撤销。",
+      "noteFromBefore": "以前的笔记"
+    }
+  },
+  "posts": {
+    "title": "帖子",
+    "description": "把想说的话说一次，就能得到为每个平台各写一条的帖子，长度和语气各自贴合平台。复制后由你自己发布。",
+    "limits": {
+      "title": "它不做什么",
+      "no_publish": "它不发布任何内容。这里的内容不会到达 LinkedIn、X、Instagram、Facebook 或 Threads——你复制文字，自己去发。",
+      "no_scheduling": "它不做排期，也没有日历。",
+      "no_images": "它不生成图片。只有文字，配图由你来定。",
+      "no_accounts": "它没有连接任何社交账号，也不会索要账号。"
+    },
+    "form": {
+      "description": "你想说什么？",
+      "descriptionPlaceholder": "我们的面包店现在为市中心的办公室配送早餐——18:00 前下单，次日早晨送达，最少十人，首单九折……",
+      "platforms": "平台",
+      "upTo": "最多 {max} 个字符",
+      "generate": "生成帖子",
+      "generating": "撰写中……"
+    },
+    "result": {
+      "title": "你的帖子",
+      "charged": "{credits} 积分",
+      "chars": "{count} / {max}",
+      "missing": "这次没有为 {platform} 写出帖子——只选该平台再运行一次。"
+    },
+    "errors": {
+      "tooShort": "请先多说一点。",
+      "tooLong": "超过了 {limit} 个字符。说说帖子要讲什么，不必讲完整个故事。",
+      "insufficient": "积分不足，无法生成这些帖子。",
+      "rateLimited": "请求过多——请稍等一分钟再试。",
+      "unavailable": "无法连接 AI 服务。未产生任何扣费。",
+      "unusable": "模型返回的内容不是帖子。试着换一种方式描述。",
+      "failed": "没有成功——请再试一次。"
+    },
+    "history": {
+      "title": "历史记录",
+      "empty": "这里还没有内容。",
+      "failed": "失败",
+      "delete": "删除",
+      "deleteConfirm": "删除这些帖子？此操作无法撤销。"
+    }
+  },
+  "projects": {
+    "title": "项目",
+    "description": "有目标的文件夹。你明确放进去；不会连带把别的拉进来。",
+    "form": {
+      "name": "名称",
+      "namePlaceholder": "上线秋季店铺",
+      "goal": "目标",
+      "goalPlaceholder": "你想达成什么？",
+      "create": "创建项目"
+    },
+    "list": {
+      "title": "你的项目",
+      "empty": "还没有项目。",
+      "members": "{count} 项"
+    },
+    "status": {
+      "active": "进行中",
+      "done": "已完成",
+      "archived": "已归档"
+    },
+    "sections": {
+      "goal": "目标",
+      "tasks": "任务",
+      "files": "文件",
+      "agents": "智能体",
+      "results": "成果",
+      "activity": "动态",
+      "other": "其他全部",
+      "empty": "这里还没有内容。"
+    },
+    "progress": {
+      "rowsPerModule": "聊天中每个模块 {count} 行"
+    },
+    "startChat": "在此项目中开始聊天",
+    "chatFixed": "一次对话属于它开始时所在的项目，终其一生不变。",
+    "noGoal": "还没有写目标。",
+    "untitled": "无标题",
+    "delete": "删除",
+    "deleteConfirm": "删除这个项目？里面的内容会留在原处。",
+    "removeMember": "移出项目",
+    "errors": {
+      "tooShort": "先给它起个名字。",
+      "tooLong": "名称超过 {limit} 个字符。",
+      "failed": "没成功——再试一次。"
+    }
+  },
   "finance": {
-    "title": "经营健康度",
+    "title": "生意怎么样",
     "description": "每个数字都由真实数据算出，算不出来的会说明原因。",
     "needsInput": "还需要：{fields}",
     "needsHistory": "需要 {need} 个月的历史数据——目前有 {have} 个月。",
@@ -3682,7 +3847,7 @@
     "needsHistoryDays": "需要 {need} 天的每日快照——目前有 {have} 天。"
   },
   "routing": {
-    "title": "模型路由",
+    "title": "用的是哪个 AI",
     "description": "过去 30 天内哪个模型处理了哪些请求、花费多少，以及路由节省了多少。",
     "empty": "尚未记录任何路由决策。当请求开始经过路由器时，此表会自动填充——它显示的不是零，而是空。",
     "decisions": "决策数",
@@ -3763,6 +3928,37 @@
       "not_delivered_test_sender": "您的留言未能送达：本部署没有经过验证的发件地址。",
       "send_failed": "您的留言发送失败，请重试。",
       "unknown": "出了点问题，请重试。"
+    }
+  },
+  "stepFlow": {
+    "label": "步骤",
+    "steps": {
+      "describe": "描述",
+      "generate": "生成",
+      "edit": "编辑",
+      "preview": "预览",
+      "publish": "发布",
+      "question": "问题",
+      "research": "研究",
+      "sources": "来源",
+      "answer": "回答",
+      "upload": "上传",
+      "ask": "提问",
+      "review": "检查"
+    },
+    "hints": {
+      "describe": "用你自己的话说出你要什么。",
+      "generate": "它写出第一版。会消耗额度。",
+      "edit": "告诉它改什么。想改多少次都行。",
+      "preview": "在别人看到之前先看一遍。",
+      "publish": "上线，拥有自己的网址。",
+      "question": "一个要深入的主题，不是搜索词。",
+      "research": "它读网页并做笔记。",
+      "sources": "每条结论都保留它的出处页面。",
+      "answer": "答案，附带它的来源。",
+      "upload": "PDF、Word、文本、表格。",
+      "ask": "勾选一个或多个文件——回答只来自你勾选的内容。",
+      "review": "使用前先读一遍。这里不运行任何代码。"
     }
   }
 }

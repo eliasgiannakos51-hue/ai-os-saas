@@ -29,12 +29,12 @@ function ToggleSwitch({
       aria-label={label}
       onClick={onChange}
       className={`relative -my-2.5 inline-flex h-11 w-11 shrink-0 items-center rounded-full bg-clip-content py-2.5 transition-colors duration-200 ${
-        checked ? "bg-orange-500" : "bg-panel-hover"
+        checked ? "bg-foreground" : "bg-panel-hover"
       }`}
     >
       <span
-        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 ${
-          checked ? "translate-x-[22px]" : "translate-x-0.5"
+        className={`inline-block h-5 w-5 transform rounded-full transition-transform duration-200 ${
+          checked ? "translate-x-[22px] bg-panel" : "translate-x-0.5 bg-white"
         }`}
       />
     </button>
@@ -99,7 +99,7 @@ export function AccessibilitySettings() {
   }
 
   return (
-    <div id="accessibility" className="mb-6 scroll-mt-20 space-y-4 rounded-2xl border border-border bg-panel p-5">
+    <div id="accessibility" className="mb-6 scroll-mt-20 space-y-4 surface">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
         <Eye className="h-4 w-4 text-orange-400" /> {t("title")}
       </h2>
@@ -116,7 +116,7 @@ export function AccessibilitySettings() {
               aria-pressed={fontSize === size}
               className={`min-h-[44px] rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors duration-150 ${
                 fontSize === size
-                  ? "bg-orange-500 text-black"
+                  ? "bg-foreground text-background"
                   : "text-muted hover:text-foreground"
               }`}
             >

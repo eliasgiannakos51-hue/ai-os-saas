@@ -67,3 +67,59 @@ export const ABSENT_ON_PURPOSE = {
     paths: ["lib/page-metadata.ts"],
   },
 };
+
+// ---------------------------------------------------------------------
+// The ROUTES a comment names on purpose that the app router will not
+// answer.
+//
+// SEPARATE FROM THE PATHS ABOVE because the staleness check is a
+// different question. A path is stale when the FILE comes back; a route
+// is stale when the app router starts answering it — which can happen
+// without any file the entry names ever existing, because a directory
+// three levels up gaining a page.tsx is enough.
+//
+// EVERY ENTRY HERE IS A CORRECTION QUOTING WHAT IT CORRECTS. That is the
+// only reason this table has members: V5 #13 found a route that has
+// never existed, /dashboard/business, named as "the hub" in two shipped
+// files, and the comments that record the fix have to say the wrong
+// route out loud or the next reader cannot tell what changed. Checked
+// both ways by self-claims.test.mjs.
+export const ROUTES_ABSENT_ON_PURPOSE = {
+  "src/lib/sidebar-nav.ts": {
+    reason:
+      "The corrected comment names the route it corrected. /dashboard/business was written " +
+      "as the hub for three rounds; the hub is /dashboard/records, the only page that renders " +
+      "sidebarGroups. Deleting the wrong name would leave a reader unable to see what moved.",
+    routes: ["/dashboard/business"],
+  },
+  "src/lib/module-icons.ts": {
+    reason:
+      "The same correction at the second site. This one additionally records that the route " +
+      "scanner's own absence rule hid it for a round, so the radius that fixed it has a " +
+      "worked example beside it rather than only a number.",
+    routes: ["/dashboard/business"],
+  },
+  "scripts/scan-self-claims.mjs": {
+    reason:
+      "The scanner's own header quotes the defect it was written for, verbatim and including " +
+      "the surrounding sentence, because the sentence is what made the absence rule fire " +
+      "wrongly. Rewriting the quote to satisfy the scan would falsify the evidence.",
+    routes: ["/dashboard/business"],
+  },
+  "scripts/tests/self-claims.mutation.mjs": {
+    reason:
+      "The mutant reintroduces the defect and has to name it. /api/nothing-like-this was in " +
+      "this entry for one revision and is not any more, which is the both-ways check working: " +
+      "the mutant that quoted it was replaced by one aimed at reachable code, the comment went " +
+      "with it, and the gate reported the exemption as describing a comment that is gone.",
+    routes: ["/dashboard/business"],
+  },
+  "scripts/tests/self-claims.test.mjs": {
+    reason:
+      "The gate pins the false negative to the sentence that caused it, and the check below " +
+      "that comment feeds the same sentence to routeAbsenceSuppresses and requires the answer " +
+      "to be no. Paraphrasing the quote until the scan is happy would delete the regression " +
+      "test: the sentence IS the fixture.",
+    routes: ["/dashboard/business"],
+  },
+};

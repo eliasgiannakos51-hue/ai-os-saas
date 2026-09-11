@@ -138,7 +138,7 @@ export function TopNav({ email }: { email: string }) {
           // Below `lg` this is the icon alone, which `px-3 py-2` sized at
           // 40x40 — the one control in the header that stayed under 44px
           // after everything else was raised.
-          className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] lg:px-3.5"
+          className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 lg:px-3.5"
         >
           <Plus className="h-4 w-4" />
           {/* THE BUTTON AND THE PAGE IT OPENS SAY THE SAME WORD.
@@ -166,7 +166,7 @@ export function TopNav({ email }: { email: string }) {
             {initial}
           </button>
           {userMenuOpen && (
-            <div className="absolute end-0 top-11 w-56 rounded-xl border border-border bg-panel p-3 shadow-lg">
+            <div className="absolute end-0 top-11 w-56 surface-tight shadow-lg">
               <p className="truncate text-xs text-muted">{email}</p>
               {/* The phone-width home for the theme toggle. `sm:hidden`
                   mirrors the `hidden sm:contents` above exactly, so it

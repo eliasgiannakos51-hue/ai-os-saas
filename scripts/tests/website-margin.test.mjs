@@ -176,9 +176,22 @@ for (const [stage, file] of STAGES) {
 }
 // The two start-route stages must be settled by the start route, and the
 // worker's by the worker — no stage may be orphaned between them.
+// THE FEATURE NAME IS NOW A TERNARY, and both arms are its own name.
+//
+// 2026-09-07: a `clear` verdict from the free ambiguity reader spends
+// nothing, so the row it writes is a zero-cost one and lands under
+// "clarification_free" rather than "website_generate_precheck" — its own
+// line in the margin report instead of a zero dragging the pre-check's
+// average down, the same arrangement ABSORBED_REFUSAL_FEATURE has. What
+// this clause is about is that the start route does not settle under the
+// WORKER's name, and that is unchanged.
 checkTrue(
   "the start route settles under its own feature name",
-  /settleReservation\(\{[\s\S]{0,400}feature: "website_generate_precheck"/.test(startSrc)
+  /settleReservation\(\{[\s\S]{0,400}feature: [^\n]*"website_generate_precheck"/.test(startSrc)
+);
+checkTrue(
+  "...and a costless verdict under its own, so it is not a zero in that average",
+  /feature: costs\.callCount === 0 \? "clarification_free" : "website_generate_precheck"/.test(startSrc)
 );
 checkTrue(
   "the worker settles under its own",

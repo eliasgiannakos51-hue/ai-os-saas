@@ -33,7 +33,7 @@ export function TrendChart({
       : String(Math.round(n));
 
   return (
-    <div className="rounded-2xl border border-border bg-panel p-5">
+    <div className="surface">
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-sm font-semibold text-foreground">{title}</p>
         {changePercent === null ? (

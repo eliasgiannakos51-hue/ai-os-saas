@@ -34,7 +34,7 @@ export function SampleDataSettings({ loaded }: { loaded: boolean }) {
   return (
     <div
       id="sample-data"
-      className="mb-6 scroll-mt-20 space-y-3 rounded-2xl border border-border bg-panel p-5"
+      className="mb-6 scroll-mt-20 space-y-3 surface"
     >
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
         <FlaskConical className="h-4 w-4 text-emerald-400/80" aria-hidden="true" /> {t("title")}

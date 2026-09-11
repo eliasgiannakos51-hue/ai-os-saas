@@ -103,6 +103,31 @@ const MUTANTS = [
     to: "",
   },
   {
+    // THE CONTRADICTION COMES BACK. Each shape's FIRST line says how it
+    // usually opens; ORDER C of local-place deliberately opens with the
+    // menu instead. Both were in the prompt with nothing saying which
+    // won, on the one axis the whole "same template" complaint is about.
+    //
+    // A first attempt at V5 #4 resolved it by rewriting the odd orders to
+    // match the FIRST line — which made every letter open identically,
+    // and website-variety.test.mjs correctly called that decoration. The
+    // sentence below is the resolution that keeps both.
+    gate: VARIETY_GATE,
+    name: "the prompt stops saying whether the FIRST line or the ORDER wins",
+    file: BUILDER,
+    from: "WHERE THE FIRST LINE AND YOUR ORDER DISAGREE, THE ORDER WINS.",
+    to: "",
+  },
+  {
+    // AND THE OPENING STOPS VARYING. Six letters that all open the same
+    // way are six ways to build one page.
+    gate: VARIETY_GATE,
+    name: "every local-place order opens with the photo",
+    file: BUILDER,
+    from: "C 2>1>4>3>5",
+    to: "C 1>2>4>3>5",
+  },
+  {
     gate: VARIETY_GATE,
     name: "the prompt stops deferring to the drawn type pairing",
     file: BUILDER,

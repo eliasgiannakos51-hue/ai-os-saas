@@ -153,9 +153,17 @@ const EVIDENCE = new Map([
     "videoGeneration",
     { produces: null, why: "/dashboard/videos is a tracking log" },
   ],
+  // V5 #21. Was `produces: null, why: "/dashboard/presentations is a
+  // tracking log"` — and the tracking claim below checked that the slug
+  // was still in build-modules.ts. It is not: the page writes a deck.
   [
     "presentations",
-    { produces: null, why: "/dashboard/presentations is a tracking log" },
+    {
+      produces: [
+        "src/lib/presentations/generate.ts",
+        "src/app/api/presentations/generate/route.ts",
+      ],
+    },
   ],
   [
     "marketingBuilder",
@@ -266,17 +274,28 @@ console.log("\n== 2. the evidence is real ==");
   const trackingSlugs = [...buildModules.matchAll(/slug: "([^"]+)"/g)].map(
     (m) => m[1],
   );
+  // FIVE SINCE V5 #21 — presentations left the registry when it grew a
+  // generator, and this floor came down with it in the same commit.
   ok(
     `the tracking registry was read (${trackingSlugs.length})`,
-    trackingSlugs.length >= 6,
+    trackingSlugs.length >= 5,
     trackingSlugs.join(", "),
   );
   const claimed = [
     ["imageGeneration", "images"],
     ["videoGeneration", "videos"],
-    ["presentations", "presentations"],
     ["marketingBuilder", "campaigns"],
   ];
+  // AND THE ONE THAT LEFT REALLY LEFT. An item excused as "only a
+  // tracker" while its slug is gone from build-modules.ts would be an
+  // excuse with nothing behind it; the reverse — a slug still in the
+  // registry while the roadmap sells it — is what the check above
+  // catches. Both directions, or the table can drift either way.
+  ok(
+    "presentations is no longer excused as a tracker",
+    !trackingSlugs.includes("presentations") && !claimed.some(([k]) => k === "presentations"),
+    "it generates slides now; an excuse that says otherwise is stale",
+  );
   const wrong = claimed.filter(([, slug]) => !trackingSlugs.includes(slug));
   ok(
     `every "it is only a tracker" excuse is still true (${wrong.length} are not)`,

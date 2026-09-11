@@ -41,7 +41,7 @@ export function AiPersonaSettings({ initialName }: { initialName: string }) {
   }
 
   return (
-    <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
+    <div className="mb-6 space-y-3 surface">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
         <Sparkles className="h-4 w-4 text-orange-400" /> {t("title")}
         <span className="rounded-full border border-orange-500/40 bg-orange-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange-400">
@@ -63,7 +63,7 @@ export function AiPersonaSettings({ initialName }: { initialName: string }) {
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save"}
         </button>

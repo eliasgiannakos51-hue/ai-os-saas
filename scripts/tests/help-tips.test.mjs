@@ -10,8 +10,9 @@
 //
 // This codebase has already paid for that once: Presentation notes was
 // renamed because "Presentations" promised a slide generator the module
-// does not contain, and presentation-notes.test.mjs exists to keep the
-// promise gone. The "?" makes that lesson routine — `doesNot` is a
+// did not contain — and, since V5 #21, presentations.test.mjs holds the
+// opposite promise to the code now that it does. The "?" makes that
+// lesson routine — `doesNot` is a
 // required third part, not a nice-to-have, and every entry in
 // lib/help-tips.ts records the specific wrong assumption it corrects.
 //

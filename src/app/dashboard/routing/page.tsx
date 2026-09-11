@@ -73,7 +73,7 @@ export default async function RoutingPage() {
       {totalDecisions === 0 ? (
         // NOTHING RECORDED IS NOT ZERO SPEND. Saying so beats a table of
         // zeros that reads as "routing is running and saving nothing".
-        <p className="rounded-2xl border border-border bg-panel p-5 text-sm text-muted">
+        <p className="surface text-sm text-muted">
 {t("empty")}
         </p>
       ) : (
@@ -125,7 +125,7 @@ export default async function RoutingPage() {
         </>
       )}
 
-      <div className="mt-6 rounded-2xl border border-border bg-panel p-5">
+      <div className="mt-6 surface">
         <h2 className="text-sm font-semibold text-foreground">{t("learnedTitle")}</h2>
         <p className="mt-1 text-xs text-muted">
           {t("learnedIntro", {
@@ -171,7 +171,7 @@ function Card({
   alarming?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-panel p-4">
+    <div className="surface-tight">
       <p className="text-xs text-muted">{label}</p>
       <p className={`mt-1 text-lg font-semibold ${alarming ? "text-orange-400" : "text-foreground"}`}>{value}</p>
       {note ? <p className="mt-1 text-xs text-muted">{note}</p> : null}

@@ -79,7 +79,7 @@ export function ProblemNotice({
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="inline-flex min-h-[36px] items-center rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-black transition-opacity duration-150 hover:opacity-90"
+                  className="inline-flex min-h-[36px] items-center rounded-lg border border-orange-500/60 px-3 py-1.5 text-xs font-semibold text-orange-300 transition-opacity duration-150 hover:bg-orange-500/10"
                 >
                   {tCommon("retry")}
                 </button>

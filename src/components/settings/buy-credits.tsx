@@ -38,7 +38,7 @@ export function BuyCredits() {
   return (
     <div
       id="buy-credits"
-      className="mb-6 scroll-mt-20 space-y-3 rounded-2xl border border-border bg-panel p-5"
+      className="mb-6 scroll-mt-20 space-y-3 surface"
     >
       <h2 className="text-sm font-semibold text-foreground">{t("buyCredits")}</h2>
       <p className="text-xs text-muted">

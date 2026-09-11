@@ -76,6 +76,7 @@
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
+import { readMutants } from "./tests/lib/mutant-list.mjs";
 
 const DIR = "scripts/tests";
 const SHARED_SIDECAR = join(DIR, ".mutation-sidecar.json");
@@ -100,7 +101,28 @@ if (existsSync(SHARED_SIDECAR)) {
       `\n    Run any mutation suite, or \`node -e 'await import("./scripts/tests/lib/sidecar-write.mjs")'\`, to heal it.`
   );
 }
-if (existsSync(GUARD_SIDECAR_DIR) && readdirSync(GUARD_SIDECAR_DIR).length > 0) {
+// A SIDECAR MEANS A KILLED RUN — UNLESS THE RUN IS STILL GOING.
+//
+// unguarded-guards.mjs removes one guard, runs the WHOLE unit suite, and
+// restores. The sidecar exists for exactly the seconds that suite is
+// running, and this file is in that suite (through mutation-tree.test.mjs,
+// which runs the real checker against the real tree). So every guard that
+// experiment tested made this check fail, and the failure said nothing
+// about the guard.
+//
+// It was worse than noise. `npm run test:unit` stops at the FIRST failing
+// suite, so whichever unrelated gate reddened first decided the verdict:
+// a guard whose deleted line carried English prose tripped
+// baselines.test.mjs (alphabetically earlier) and was reported NOBODY; a
+// guard whose line carried none got here instead and was reported
+// WATCHED. `if (!isAdminEmail(user.email)) …` read as watched by an
+// owner-only test that is green when it is deleted.
+//
+// The environment variable is set by that script for the duration of one
+// child suite. It cannot hide a real killed run: nothing else sets it,
+// and the heal-on-startup path is unchanged.
+const GUARD_RUN_IN_PROGRESS = process.env.UNGUARDED_GUARDS_RUNNING === "1";
+if (!GUARD_RUN_IN_PROGRESS && existsSync(GUARD_SIDECAR_DIR) && readdirSync(GUARD_SIDECAR_DIR).length > 0) {
   problems.push(
     `scripts/tests/unguarded-guards.mjs was killed holding a guard removed:\n` +
       readdirSync(GUARD_SIDECAR_DIR).map((f) => `      ${f}`).join("\n") +
@@ -113,46 +135,42 @@ if (existsSync(GUARD_SIDECAR_DIR) && readdirSync(GUARD_SIDECAR_DIR).length > 0) 
 // ---------------------------------------------------------------------
 // Parsed from the source rather than by importing the suites: importing
 // one runs it, which would mutate the tree this is trying to inspect.
-const PAIR = /\bfile:\s*(?:"([^"]+)"|([A-Z_][A-Z_0-9]*))\s*,\s*\n\s*(?:\/\/[^\n]*\n\s*)*from:\s*("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')\s*,\s*\n\s*(?:\/\/[^\n]*\n\s*)*to:\s*("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g;
-
-function unquote(literal) {
-  try {
-    return JSON.parse(literal.startsWith("'") ? `"${literal.slice(1, -1).replace(/"/g, '\\"')}"` : literal);
-  } catch {
-    return null;
-  }
-}
+//
+// THE PARSER LIVES IN scripts/tests/lib/mutant-list.mjs. It was inline
+// here, twice — once for this section and once for the next — and V5 #13
+// needed a third reader for a different question. A third copy of a
+// parser is how two answers about one list start disagreeing, which is
+// the defect this whole file exists to stop. Reading the array instead of
+// regexing it also brings the `edits:` lists into view, so a mutation
+// left applied through one of those is now visible here too.
+const { mutants: declaredMutants, fellBack } = readMutants(DIR);
 
 let pairsSeen = 0;
 const applied = [];
-for (const suite of readdirSync(DIR).filter((f) => f.endsWith(".mutation.mjs"))) {
-  const src = readFileSync(join(DIR, suite), "utf8");
-  // The file constants a suite declares, so `file: GATE` resolves.
-  const consts = new Map();
-  for (const m of src.matchAll(/^const ([A-Z_][A-Z_0-9]*)\s*=\s*"([^"]+)";$/gm)) consts.set(m[1], m[2]);
-
-  for (const m of src.matchAll(PAIR)) {
-    const target = m[1] ?? consts.get(m[2]);
-    const from = unquote(m[3]);
-    const to = unquote(m[4]);
-    if (!target || from === null || to === null) continue;
+for (const m of declaredMutants) {
+  if (!existsSync(m.file)) continue;
+  let text;
+  try {
+    text = readFileSync(m.file, "utf8");
+  } catch {
+    continue;
+  }
+  for (const e of m.edits) {
     pairsSeen++;
     // A `to` that is empty or trivially short cannot be searched for
     // without false positives; those are covered by check 3.
-    if (to.trim().length < 12) continue;
-    if (!existsSync(target)) continue;
-    let text;
-    try {
-      text = readFileSync(target, "utf8");
-    } catch {
-      continue;
-    }
-    if (!text.includes(from) && text.includes(to)) {
-      applied.push(`${target}\n      applied by ${suite}: ${to.trim().slice(0, 70).replace(/\n/g, " ⏎ ")}`);
+    if (e.to.trim().length < 12) continue;
+    if (!text.includes(e.from) && text.includes(e.to)) {
+      applied.push(
+        `${m.file}\n      applied by ${m.suite}: ${e.to.trim().slice(0, 70).replace(/\n/g, " ⏎ ")}`
+      );
     }
   }
 }
-notes.push(`${pairsSeen} literal mutation(s) declared across the suites`);
+notes.push(
+  `${pairsSeen} literal mutation(s) declared across the suites` +
+    (fellBack.length > 0 ? `, ${fellBack.length} suite(s) read without their edits lists` : "")
+);
 if (applied.length > 0) {
   problems.push(`A declared mutation is APPLIED in the working tree:\n      ${applied.join("\n      ")}`);
 }
@@ -161,14 +179,8 @@ if (applied.length > 0) {
 // 3. A file any suite mutates is dirty.
 // ---------------------------------------------------------------------
 const targets = new Set();
-for (const suite of readdirSync(DIR).filter((f) => f.endsWith(".mutation.mjs"))) {
-  const src = readFileSync(join(DIR, suite), "utf8");
-  const consts = new Map();
-  for (const m of src.matchAll(/^const ([A-Z_][A-Z_0-9]*)\s*=\s*"([^"]+)";$/gm)) consts.set(m[1], m[2]);
-  for (const m of src.matchAll(/\bfile:\s*(?:"([^"]+)"|([A-Z_][A-Z_0-9]*))/g)) {
-    const t = m[1] ?? consts.get(m[2]);
-    if (t && existsSync(t) && statSync(t).isFile()) targets.add(t);
-  }
+for (const m of declaredMutants) {
+  if (existsSync(m.file) && statSync(m.file).isFile()) targets.add(m.file);
 }
 // unguarded-guards.mjs mutates every file it scans, and it names them by
 // scanning rather than by listing — so its whole corpus counts.

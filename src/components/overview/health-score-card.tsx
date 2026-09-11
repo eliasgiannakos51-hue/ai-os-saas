@@ -108,7 +108,7 @@ export function HealthScoreCard({
 
         <div className="min-w-0">
           <p className="text-sm font-semibold text-foreground">{title}</p>
-          <p className="mt-0.5 bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-lg font-bold text-transparent">
+          <p className="mt-0.5 text-lg font-bold text-orange-300">
             {rangeLabel}
           </p>
           <p className="mt-1 text-xs leading-relaxed text-muted">{suggestion}</p>

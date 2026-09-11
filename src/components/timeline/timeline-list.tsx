@@ -54,7 +54,7 @@ export function TimelineList({
           <div
             key={entry.key}
             style={{ "--i": i } as React.CSSProperties}
-            className="list-slide-in group relative flex items-start gap-3 rounded-2xl border border-border bg-panel p-4 pe-14 transition-all duration-200 hover:border-orange-500/40 hover:shadow-[0_14px_32px_-18px_rgba(249,115,22,0.3)]"
+            className="list-slide-in group relative flex items-start gap-3 surface-tight pe-14 transition-all duration-200 hover:border-orange-500/40 hover:"
           >
           <Link href={entry.href} className="flex min-w-0 flex-1 items-start gap-3">
             <span

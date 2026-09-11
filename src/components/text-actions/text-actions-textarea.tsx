@@ -188,7 +188,7 @@ export function TextActionsTextarea({
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={accept}
-                  className="inline-flex items-center gap-1 rounded-md bg-orange-500 px-2 py-1 font-medium text-black transition-colors duration-150 hover:opacity-90"
+                  className="inline-flex items-center gap-1 rounded-md border border-orange-500/60 px-2 py-1 font-medium text-orange-300 transition-colors duration-150 hover:bg-orange-500/10"
                 >
                   <Check className="h-3 w-3" /> {tCommon("textActions.accept")}
                 </button>

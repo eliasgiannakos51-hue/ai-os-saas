@@ -145,9 +145,16 @@
   );
 
   /* The primary CTA's glow — see the note at @keyframes cta-pulse. */
-  --cta-glow-rest: 0 4px 18px -4px rgba(249, 115, 22, 0.45);
-  --cta-glow-peak: 0 4px 30px 0 rgba(249, 115, 22, 0.75);
-  --cta-glow-hover: 0 6px 28px -4px rgba(249, 115, 22, 0.7);
+  /* NEUTRAL, NOT ORANGE — redesign phase 4, "κανένα glow". These three
+     were an 18px, a 30px and a 28px bloom of rgba(249,115,22) behind the
+     landing page's main call to action: the largest remaining glow in the
+     product, and the last one found, because it is reached through a
+     variable and every scan that matched `box-shadow:` against a literal
+     colour walked straight past it. The elevation stays, in black, which
+     is what the light theme below had already settled on. */
+  --cta-glow-rest: 0 4px 14px -6px rgba(0, 0, 0, 0.6);
+  --cta-glow-peak: 0 6px 22px -6px rgba(0, 0, 0, 0.7);
+  --cta-glow-hover: 0 6px 20px -6px rgba(0, 0, 0, 0.65);
 
   /* components/logo.tsx — the wordmark's ink. */
   --logo-ink: #f5f5f5;
@@ -768,6 +775,51 @@ body {
        twenty of the under-44px controls by itself. */
     @apply min-h-[44px] w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500;
   }
+
+  /* -------------------------------------------------------------------
+     THE CARD, DEFINED ONCE — redesign phase 4
+     -------------------------------------------------------------------
+     scripts/design-census.mjs counted 683 border utilities over 904 files
+     and 140 class strings that were letter-for-letter the same card:
+
+         rounded-2xl border border-border bg-panel p-5
+
+     Repeated markup cannot be redesigned; it can only be re-typed. These
+     two classes are that string, named, so "more space and fewer lines"
+     is one edit instead of a hundred and forty.
+
+     WHY THE BORDER IS GONE AND THE CARD IS STILL THERE. Every theme in
+     this file separates the two surfaces on its own:
+
+         dark      background 10,10,10   panel 20,20,20
+         light     background 247        panel 255
+         midnight  background 5,7,15     panel 13,18,32
+         grey      background 26,26,28   panel 35,35,38
+
+     so the panel reads as raised without a line around it. What a border
+     added was not definition but noise, 140 times over.
+
+     NESTING IS HANDLED HERE RATHER THAN AT EVERY CALL SITE. A borderless
+     panel inside a borderless panel is invisible — same colour, no line —
+     which is the one way this change could quietly lose a card. The
+     descendant rule lifts an inner surface to panel-hover, the next step
+     up in every theme above.
+
+     PADDING IS THE PHASE 4 NUMBER: 28px where the card was p-5 (20px) is
+     +40%, and 24px where it was p-4 (16px) is +50%. In rem, so the
+     Settings font-size control still scales the layout with it. */
+  .surface {
+    @apply rounded-2xl bg-panel p-[1.75rem];
+  }
+  .surface-tight {
+    @apply rounded-2xl bg-panel p-[1.5rem];
+  }
+  .surface .surface,
+  .surface .surface-tight,
+  .surface-tight .surface,
+  .surface-tight .surface-tight {
+    @apply bg-panel-hover;
+  }
 }
 /* ---------------------------------------------------------------------
    THE 16px FLOOR ON ANYTHING YOU CAN TYPE INTO
@@ -943,8 +995,7 @@ input:-webkit-autofill:focus {
   border-color: rgba(249, 115, 22, 0.85);
   /* 2px ring, not 1px — at 1px the amber edge disappears against the
      card border on a dark panel and the lift reads as motion only. */
-  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.55), 0 0 26px -2px rgba(249, 115, 22, 0.4),
-    0 18px 44px -12px rgba(249, 115, 22, 0.65);
+  box-shadow: 0 14px 34px -14px rgba(0, 0, 0, 0.55);
   will-change: transform;
 }
 /* Rows inside a dense list scale less — a full 1.02 on a full-width row
@@ -1157,7 +1208,7 @@ input:-webkit-autofill:focus {
   }
   35% {
     transform: scale(1.045);
-    box-shadow: 0 0 0 8px rgba(251, 191, 36, 0.35), 0 0 40px 4px rgba(249, 115, 22, 0.5);
+    box-shadow: 0 0 0 8px rgba(251, 191, 36, 0.28);
   }
   70% {
     transform: scale(0.995);
@@ -1180,21 +1231,14 @@ input:-webkit-autofill:focus {
    one family rather than two competing brands.
 --------------------------------------------------------------------- */
 
-/* Hero headline: white through amber into violet. background-clip:text
-   needs a transparent fill to show through, and -webkit- prefixes are
-   still required for Safari/iOS. */
-.hero-gradient-text {
-  background-image: linear-gradient(100deg, #ffffff 0%, #ffd9a0 28%, #f97316 58%, #a855f7 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-}
-/* Light theme needs a darker first stop or the left of the headline
-   disappears into the page. */
-[data-theme="light"] .hero-gradient-text {
-  background-image: linear-gradient(100deg, #18181b 0%, #b45309 32%, #ea580c 62%, #7e22ce 100%);
-}
+/* THE HERO HEADLINE IS SOLID NOW — redesign phase 4: "κανένα gradient σε
+   τίτλο". This was white through amber into violet, clipped to the text.
+   Two reasons it is gone rather than restyled. It put a THIRD hue
+   (violet) into a two-colour identity, and a clipped fill has no
+   contrast ratio a checker can read — the text has no colour, only a
+   picture behind a mask, so every one of this repository's contrast
+   gates had to skip it. A solid `text-foreground` is measurable, and
+   light-theme-contrast.test.mjs measures it. */
 
 /* Premium glass card. The gradient border is a ::before ring drawn with
    `mask` compositing rather than `border-image`: border-image can't do
@@ -1228,7 +1272,7 @@ input:-webkit-autofill:focus {
 }
 .glass-card:hover {
   transform: scale(1.02);
-  box-shadow: 0 18px 46px -18px rgba(249, 115, 22, 0.5), 0 0 30px -6px rgba(168, 85, 247, 0.22),
+  box-shadow: 0 18px 46px -18px rgba(0, 0, 0, 0.55),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
 }
 .glass-card:hover::before {
@@ -1284,7 +1328,7 @@ input:-webkit-autofill:focus {
   position: relative;
   border-radius: 1rem;
   transition: box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 0 22px -8px rgba(249, 115, 22, 0.5);
+  box-shadow: none;
 }
 .prompt-glow::before {
   content: "";
@@ -1304,7 +1348,7 @@ input:-webkit-autofill:focus {
   transition: opacity 300ms ease;
 }
 .prompt-glow[data-active="true"] {
-  box-shadow: 0 0 46px -6px rgba(249, 115, 22, 0.65), 0 0 70px -14px rgba(168, 85, 247, 0.45);
+  box-shadow: none;
 }
 .prompt-glow[data-active="true"]::before {
   opacity: 1;
@@ -1451,8 +1495,7 @@ input:-webkit-autofill:focus {
     rgba(249, 115, 22, 0.22) 0%,
     rgba(168, 85, 247, 0.13) 100%
   );
-  box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.45),
-    0 0 18px -6px rgba(249, 115, 22, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.45);
   transform: scaleY(0.6);
   opacity: 0;
   transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -1473,7 +1516,7 @@ input:-webkit-autofill:focus {
   width: 3px;
   border-radius: 0 9999px 9999px 0;
   background: linear-gradient(to bottom, rgb(252, 211, 77), rgb(249, 115, 22));
-  box-shadow: 0 0 10px rgba(249, 115, 22, 0.8);
+  box-shadow: none;
   transform: scaleY(0);
   transform-origin: top;
   transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -1542,8 +1585,12 @@ input:-webkit-autofill:focus {
    decoration sitting outside the ring that carries the meaning. */
 .focus-glow:focus,
 .focus-glow:focus-within {
-  box-shadow: 0 0 0 2px rgb(var(--accent-border)),
-    0 0 22px -4px rgba(249, 115, 22, 0.45);
+  /* THE RING STAYS, THE HALO GOES — redesign phase 4 asked for no glow,
+     and a focus ring is not one: it is the only thing telling a keyboard
+     user where they are, and WCAG 2.4.7 requires it. What was removed is
+     the 22px bloom that sat OUTSIDE the ring and carried no meaning, by
+     this file's own note above. */
+  box-shadow: 0 0 0 2px rgb(var(--accent-border));
 }
 
 /* --- 5. Loading -> loaded fade ------------------------------------------- */

@@ -77,7 +77,7 @@ export default async function FilesPage() {
         {/* Said once, at the top: this page is where somebody hands a
             contract to an AI, and the terms of that belong here rather
             than in a policy nobody opens. */}
-        <p className="mb-4 rounded-xl border border-border bg-panel/60 p-3 text-[11px] leading-relaxed text-muted">
+        <p className="mb-4 surface-tight text-[11px] leading-relaxed text-muted">
           {t("privacyNotice")}
         </p>
 

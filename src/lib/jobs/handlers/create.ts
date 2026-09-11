@@ -3,7 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildCachedSystem } from "@/lib/ai/cached-system";
 import { logApiError } from "@/lib/log-error";
-import { checkNeedsClarification } from "@/lib/clarification";
+import { checkNeedsClarification, clarificationMetadata } from "@/lib/clarification";
 import { getUserFullContext, buildUserContextPromptAdditionEnglish } from "@/lib/user-context";
 import { downloadAttachmentImages } from "@/lib/attachment-image-server";
 import {
@@ -61,9 +61,19 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
   // lands on the same accumulator, so a request that stops here is still
   // paid for, and stopping here is a SUCCESSFUL job carrying questions
   // rather than a failure.
+  // WHAT THE FREE READER DECIDED, carried to the settlement.
+  //
+  // The pre-check answers `clear` for most requests and spends nothing to
+  // do it — which is the point of it, and which is why the rate was
+  // unmeasurable: only the requests it could NOT decide left a row behind.
+  // Empty when the caller skipped the check, because an absent key is
+  // "not asked" and must not read as "clear".
+  let clarificationRecord: Record<string, unknown> = {};
+
   if (!skipClarification) {
     try {
       const clarification = await checkNeedsClarification(ctx.apiKey, "create", message, ctx.costs);
+      clarificationRecord = clarificationMetadata(clarification);
       if (clarification.needsClarification) {
         return {
           result: {
@@ -82,6 +92,7 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
           // makes one entry produce two rows. Averaged together they
           // describe neither.
           feature: "create_precheck",
+          metadata: clarificationRecord,
         };
       }
     } catch (err) {
@@ -240,6 +251,7 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
   // throwing the id away.
   const insertedId = (insertedRecord as { id?: unknown } | null)?.id;
   return {
+    metadata: clarificationRecord,
     result: {
       matched: true,
       module: moduleConfig.slug,

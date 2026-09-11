@@ -1152,8 +1152,22 @@ const GLOW = /(249,\s*115,\s*22|251,\s*191,\s*36|245,\s*158,\s*11)/;
 // whose colour sat on the second line — `.focus-glow:focus-within` hid
 // there exactly, so the first version of this scanner reported nine
 // glows where there were ten.
+// COMMENTS ARE NOT CSS, and this scanner read them as if they were.
+//
+// The joining rule below appends a line to the previous one whenever the
+// previous ends after a colon — which is true of ordinary English prose:
+// "…main call to action: the largest remaining glow in the". A comment
+// sentence written that way swallowed the DECLARATION on the next line,
+// so `--cta-glow-rest` was never recorded, `expand()` returned its own
+// argument, and every glow one hop from a variable went unseen. The
+// comment that exposed it was added the same day the glow it described
+// was removed.
+//
+// Blanked rather than deleted so the line count, and every join decision
+// that depends on it, is unchanged.
+const cssNoComments = css.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "));
 const lines = [];
-for (const raw of css.split("\n")) {
+for (const raw of cssNoComments.split("\n")) {
   const prev = lines[lines.length - 1];
   if (prev !== undefined && /:\s*[^;{}]*$/.test(prev) && !/[{}]/.test(raw)) {
     lines[lines.length - 1] = `${prev} ${raw.trim()}`;
@@ -1251,21 +1265,61 @@ for (const line of lines) {
   }
 }
 // The count is a floor on the SCANNER, not on the stylesheet: it fails
-// if the scanner stops seeing what it used to see. Ten is what globals.css
-// carried when this guard was written, and `.cta-amber` returning to the
-// list is what proves following variables works.
+// if the scanner stops seeing what it used to see. Ten was what
+// globals.css carried when this guard was written, and `.cta-amber`
+// returning to the list is what proves following variables works.
+//
+// 10 -> 4, REDESIGN PHASE 4, AND THE FLOOR HAD TO MOVE BECAUSE THE
+// STYLESHEET DID. "κανένα glow" removed six of the ten: .card-lift's
+// orange ring and its two blooms, .glass-card's, .prompt-glow resting
+// and active, and the 22px halo outside the focus ring. A floor of ten
+// over a stylesheet that holds four is not a check on the scanner any
+// more — it is a check that nobody removes a glow, which is the
+// opposite of what this round was for.
+//
+// WHAT STILL MAKES THIS A REAL CONTROL, rather than a number lowered to
+// fit: the assertion below it. `.cta-amber` paints its glow through
+// var(--cta-glow-rest), so it is only in this set if the scanner
+// followed a variable to find it — which is the one capability that
+// could silently break and the one this floor was written to protect.
+// 4 -> 3: neutralising --cta-glow-rest took `.cta-amber`'s resting state
+// out of the set as well. What remains is a celebration ring, a hover
+// state and a nav underline, none of them accent-coloured blooms.
+//
+// AND THIS FLOOR IS NO LONGER THE ONLY PROOF THE SCANNER WORKS. It was,
+// which is why it was written; the check below now exercises expand()
+// directly on a variable, so a resolver that stops resolving is caught
+// by an assertion that does not depend on the stylesheet still
+// containing a defect.
 check(
   "no light-theme rule paints a coloured glow of its own",
   [...lightGlowOffenders].sort(),
   []
 );
-ok("glow-bearing rules were actually found (the scanner works)", glowingSelectors.size >= 10,
+ok("glow-bearing rules were actually found (the scanner works)", glowingSelectors.size >= 3,
   `only found ${glowingSelectors.size}`);
-ok(
-  "and glows reached through a variable are seen (.cta-amber resolves through --cta-glow-rest)",
-  glowingSelectors.has(".cta-amber"),
-  "the scanner stopped following var(), so any glow can hide one hop away"
-);
+// A CONTROL THAT DOES NOT NEED THE PRODUCT TO KEEP A DEFECT.
+//
+// This asserted `.cta-amber` was in the glowing set, because it reaches
+// its glow through var(--cta-glow-rest) and so could only be found by a
+// scanner that follows variables. That worked until redesign phase 4
+// removed the glow — and then the control failed, not because the
+// scanner had broken but because the thing it was watching had been
+// fixed. A positive control whose fixture is a real defect goes red the
+// day somebody repairs it, which is the day it should be quietest.
+//
+// So the resolver is exercised directly instead, on a value that exists
+// only here. `expand` is the one capability that could silently break:
+// if it stops substituting, every glow one hop from its declaration
+// becomes invisible and this whole section reports nothing.
+{
+  const probe = expand("var(--cta-glow-rest)");
+  ok(
+    "the scanner still follows var() (a glow one hop away is not invisible)",
+    probe !== "var(--cta-glow-rest)" && /rgba?\(/.test(probe),
+    `expand() returned ${JSON.stringify(probe)} — it did not resolve the variable`
+  );
+}
 for (const sel of [...glowingSelectors].sort()) {
   // A keyframe body is overridden by re-pointing animation-name, so the
   // owning class counts as covered.

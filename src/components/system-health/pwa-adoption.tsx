@@ -60,7 +60,7 @@ function Figure({
 
 export function PwaAdoption({ row, days }: { row: PwaAdoptionRow | null; days: number }) {
   return (
-    <section className="mt-6 rounded-xl border border-border bg-panel p-5">
+    <section className="mt-6 surface">
       <h2 className="flex items-center gap-2 text-sm font-semibold">
         <Smartphone className="h-4 w-4 text-orange-400" aria-hidden="true" />
         PWA adoption — last {days} days

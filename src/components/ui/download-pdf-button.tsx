@@ -37,9 +37,20 @@ import { useToast } from "@/components/toast/toast-context";
  * answer through the same code rather than a second copy of the traps.
  */
 export function savePdfResponse(blobRaw: Blob, res: Response, fallbackName: string): void {
+  saveFileResponse(blobRaw, res, `${fallbackName}.pdf`);
+}
+
+/**
+ * The same three traps, for a file that is not a PDF. The .pptx export
+ * (components/presentations/presentations-workspace.tsx) downloads
+ * through this rather than through a second copy of the anchor dance —
+ * the traps are about blobs and browsers, not about PDFs, and a second
+ * copy is where one of them gets forgotten.
+ */
+export function saveFileResponse(blobRaw: Blob, res: Response, fallbackFilename: string): void {
   const blob = new Blob([blobRaw], { type: "application/octet-stream" });
   const filename =
-    res.headers.get("Content-Disposition")?.match(/filename="([^"]+)"/)?.[1] ?? `${fallbackName}.pdf`;
+    res.headers.get("Content-Disposition")?.match(/filename="([^"]+)"/)?.[1] ?? fallbackFilename;
 
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");

@@ -157,6 +157,17 @@ for (const file of files) {
     if (v !== null) consts.set(m[1], v);
   }
 
+  // Directory consts: `const X = path.join(<ident>, "a", "b")`. The
+  // leading identifier is the repository root — the only shape any gate
+  // uses — and the literal segments after it are the path.
+  const dirConsts = new Map();
+  for (const m of code.matchAll(
+    /(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*path\.join\(\s*[A-Za-z_$][\w$]*\s*,\s*((?:\s*["'][^"']*["']\s*,?)+)\)/g
+  )) {
+    const segs = [...m[2].matchAll(/["']([^"']*)["']/g)].map((x) => x[1]);
+    if (segs.length > 0) dirConsts.set(m[1], segs.join("/"));
+  }
+
   /** Resolve the first argument of a readFileSync call to a repo path. */
   const resolvePath = (expr) => {
     const e = expr.trim();
@@ -164,10 +175,24 @@ for (const file of files) {
     if (lit) return decode(lit[1], lit[2]);
     const ident = e.match(/^([A-Za-z_$][\w$]*)$/);
     if (ident) return consts.get(ident[1]) ?? null;
-    // path.join(ROOT, X) / path.join(ROOT, "literal") — the leading segment
-    // is the repository root in every gate that uses this form.
-    const join = e.match(/^path\.join\(\s*[A-Za-z_$][\w$]*\s*,\s*(.+)\)$/);
-    if (join) return resolvePath(join[1]);
+    // path.join(DIR, X) — the leading segment is either the repository
+    // root or a directory const built the same way.
+    //
+    // "IT IS ALWAYS ROOT" WAS TRUE UNTIL A WRAPPED BINDING BECAME
+    // VISIBLE. template-plurals.test.mjs writes
+    // `const MIGRATIONS = path.join(ROOT, "supabase", "migrations")` and
+    // then `stripSql(readFileSync(path.join(MIGRATIONS, FIX_FILE)))`;
+    // dropping the leading name resolved that to a bare filename and
+    // reported two migrations as deleted. Directory consts are resolved
+    // instead, and the root assumption is kept only for a name that is
+    // not one.
+    const join = e.match(/^path\.join\(\s*([A-Za-z_$][\w$]*)\s*,\s*(.+)\)$/);
+    if (join) {
+      const rest = resolvePath(join[2]);
+      if (rest === null) return null;
+      const dir = dirConsts.get(join[1]);
+      return dir ? `${dir}/${rest}` : rest;
+    }
     return null;
   };
 
@@ -182,7 +207,15 @@ for (const file of files) {
   // ONE ABOVE IT, which is also how the file reads.
   const bindings = []; // { name, line, repoPath, contents }
   const lineOfIndex = (idx) => code.slice(0, idx).split("\n").length;
-  for (const m of code.matchAll(/(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*readFileSync\(\s*([^;]*?),\s*["']utf-?8["']\s*\)/g)) {
+  // A BINDING THROUGH A WRAPPER IS STILL A BINDING. `const src =
+  // stripComments(readFileSync(file, "utf8"))` was invisible to this
+  // pattern, so it shadowed nothing: projects.test.mjs binds `src` to
+  // lib/projects/project.ts at the top and rebinds it, wrapped, inside a
+  // loop over two route files, and every anchor in that loop was reported
+  // as gone from a library it was never about. One optional call around
+  // the readFileSync is allowed, which both fixes the shadowing and binds
+  // the wrapped reads that resolve — strictly more anchors checked.
+  for (const m of code.matchAll(/(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:[A-Za-z_$][\w$]*\(\s*)?readFileSync\(\s*([^;]*?),\s*["']utf-?8["']\s*\)/g)) {
     const repoPath = resolvePath(m[2]);
     // AN UNRESOLVABLE BINDING SHADOWS THE ONE ABOVE IT. cron-auth.test.mjs
     // binds `const src = readFileSync("src/lib/cron-auth.ts")` at the top and

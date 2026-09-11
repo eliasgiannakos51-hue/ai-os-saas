@@ -22,10 +22,17 @@ const MUTANTS = [
   {
     // 1. THE LINE NOBODY CROSSES. A same-skeleton threshold above 1.0
     // reports every pair as its own shape, identical ones included.
+    //
+    // RE-ANCHORED 2026-09-07: the threshold stopped being a constant in
+    // this script and became an import from
+    // src/lib/website-structural-similarity.ts, because the process route
+    // became a third reader of the same 0.85 and three copies of a number
+    // is a bug waiting for one of them to be edited. The mutation now
+    // shadows the import rather than editing a literal.
     name: "the same-skeleton line moves above 1.0",
     file: SCRIPT,
-    from: "const SAME_SKELETON = 0.85;",
-    to: "const SAME_SKELETON = 1.01;",
+    from: "const { SAME_SKELETON, SIMILAR_SKELETON } = structural;",
+    to: "const { SIMILAR_SKELETON } = structural;\nconst SAME_SKELETON = 1.01;",
     expect: "an identical pair is reported as the same skeleton",
   },
   {
@@ -39,11 +46,26 @@ const MUTANTS = [
   {
     // 3. ONE USER, TWICE. Both sites seeded as the same user's first site
     // measures a pair the product never produces.
+    //
+    // RE-ANCHORED 2026-09-07 with the seed: the order axis became a
+    // per-person cycle, so the script now passes a userKey and a site
+    // count rather than a bare array.
     name: "both sites of a pair are drawn as the same user's first site",
     file: SCRIPT,
-    from: ": [`pairs-check-${side}`, 0, brief];",
-    to: ': ["pairs-check-a", 0, brief];',
+    from: 'const userKey = sameUser ? "pairs-check-a" : `pairs-check-${side}`;',
+    to: 'const userKey = "pairs-check-a";',
     expect: "the two sites of a pair are drawn as two different users",
+  },
+  {
+    // 5. THE CYCLE IS NOT PASSED, so --same-user measures the fallback
+    // hash instead of the product: a 1-in-6 repeat that production does
+    // not have. A measurement script that understates the product is the
+    // same defect as one that overstates it.
+    name: "the script stops passing the cycle, so --same-user measures the fallback",
+    file: SCRIPT,
+    from: "variation.pickVariation(seed, { userKey, priorSites })",
+    to: "variation.pickVariation(seed)",
+    expect: "the cycle the process route passes",
   },
   {
     // 4. SILENT DROPS. A pair with no pages disappears from the report

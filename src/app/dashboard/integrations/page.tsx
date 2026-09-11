@@ -64,7 +64,7 @@ export default async function IntegrationsPage() {
         {/* Said once, at the top, in the user's own language: this is the
             page where somebody decides whether an AI may read their mail,
             and the terms of that should not be somewhere else. */}
-        <p className="mb-4 rounded-xl border border-border bg-panel/60 p-3 text-[11px] leading-relaxed text-muted">
+        <p className="mb-4 surface-tight text-[11px] leading-relaxed text-muted">
           {t("privacyNotice")}
         </p>
 

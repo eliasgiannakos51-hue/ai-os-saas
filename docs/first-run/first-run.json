@@ -1,0 +1,3669 @@
+{
+  "total": 3072,
+  "onPath": 597,
+  "thresholds": {
+    "sentenceWords": 12,
+    "readDepth": 1
+  },
+  "tiers": [
+    {
+      "n": 1,
+      "title": "THE SENTENCES — read these",
+      "note": "On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that.",
+      "count": 46
+    },
+    {
+      "n": 2,
+      "title": "The labels — skim these",
+      "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
+      "count": 353
+    },
+    {
+      "n": 3,
+      "title": "Further in — only if you have time",
+      "note": "Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour.",
+      "count": 198
+    }
+  ],
+  "screens": [
+    {
+      "name": "signup",
+      "why": "the form itself, plus the plan names beside it — the first prose anyone reads",
+      "keys": [
+        {
+          "key": "auth.signup.agreeTerms",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.alreadyHaveAccount",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.and",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.change",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.chooseYourPlan",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.continue",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.continueToPayment",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.country",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.countryPlaceholder",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.createAccount",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.createYourAccount",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.discountCode",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.discountCodePlaceholder",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.email",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.failed",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.inviteCode",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.inviteCodePlaceholder",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.logIn",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.mostPopular",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.mustAgreeToTerms",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.password",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.passwordRequirementsNotMet",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.privacyPolicy",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.step",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.termsOfService",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.working",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.businessCardDescription",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.businessFeatureBase",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.businessFeatureFreeOnUltimate",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.businessFeatureFullAccess",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.businessFeatureManage",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.businessSubtitle",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.businessTitle",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.custom",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.aiMemory",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.basicAiChat",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.creditsPerMonth",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.customAiPersonaNameInIonexaChat",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.customCredits",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.everythingInGrowth",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.everythingInProfessional",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.everythingInStarter",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.everythingInUltimate",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.extendedChatMemoryRetention100Vs20RecentFact",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.teamCollaboration",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.unlimitedMembers",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.unlimitedTeamSeatsIncludedNoPerMemberCharge",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.upTo100AiAgents",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.upTo15AiAgentsTeams",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.upTo2AiAgents",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.upTo50AiAgents",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.upTo5AiAgents",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.features.websiteAutomationBuilderAccess",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.perMonth",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.generateStrongPassword",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/auth/generate-password-button.tsx"
+        },
+        {
+          "key": "auth.social.continueWithGoogle",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/auth/social-auth-buttons.tsx"
+        },
+        {
+          "key": "auth.social.genericError",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/auth/social-auth-buttons.tsx"
+        },
+        {
+          "key": "auth.social.orContinueWithEmail",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/auth/social-auth-buttons.tsx"
+        },
+        {
+          "key": "common.hidePassword",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/ui/password-input.tsx"
+        },
+        {
+          "key": "common.showPassword",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/ui/password-input.tsx"
+        }
+      ]
+    },
+    {
+      "name": "login",
+      "why": "a signup that already has an account lands here, and so does everyone on their second visit",
+      "keys": [
+        {
+          "key": "auth.login.email",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.failed",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.forgotPassword",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.logIn",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.noAccount",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.oauthFailed",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.password",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.resetSuccess",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.sharedSignInFirst",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.signUp",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.welcomeBack",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.working",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/login/login-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "onboarding",
+      "why": "the first two minutes: the upload, the privacy sentence said before anything is handed over, and the one sentence back",
+      "keys": [
+        {
+          "key": "dashboard.onboarding.description",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/onboarding/page.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.privacyNotice",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/onboarding/page.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.title",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/onboarding/page.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.analyseError",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.analysing",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.analysingHint",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.chooseAnother",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.chooseFile",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.counts",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.csvHint",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.csvTitle",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.dateAmbiguous",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.dateOrder.dmy",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.dateOrder.mdy",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.extract",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.firstFree",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.goals.agency",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.goals.freelance",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.goals.other",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.goals.startup",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.goals.trading",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.goalTitle",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.goToDashboard",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.ignoreColumn",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.imported",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.importedSummary",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.importError",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.importing",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.importRows",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.insightsError",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.insightsTitle",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.looksLike",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.mapColumn",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.mappingTitle",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.noneNeedMore",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.noneTitle",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.noneYet",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.nothingInText",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.pasteHint",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.pastePlaceholder",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.pasteTitle",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.previewSource",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.previewStored",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.previewTitle",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.reading",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.skip",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.skippedRows",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.sourceCsv",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.sourceCsvHint",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.sourceIntegrations",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.sourceIntegrationsHint",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.sourceIntro",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.sourceManual",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.sourceManualHint",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.sourcePaste",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.sourcePasteHint",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.sourceTitle",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.stepLabel",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.tooLarge",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "dashboard.onboarding.truncated",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "promise.oneSentence",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/onboarding-flow.tsx"
+        },
+        {
+          "key": "common.close",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ui/help-tip.tsx"
+        },
+        {
+          "key": "common.readMore",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ui/help-tip.tsx"
+        },
+        {
+          "key": "common.whatIsThisPage",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ui/help-tip.tsx"
+        },
+        {
+          "key": "dashboard.insights.basedOn",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/onboarding/insight-list.tsx"
+        },
+        {
+          "key": "dashboard.insights.checkIt",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/onboarding/insight-list.tsx"
+        },
+        {
+          "key": "dashboard.insights.dismiss",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/onboarding/insight-list.tsx"
+        },
+        {
+          "key": "dashboard.insights.dismissError",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/onboarding/insight-list.tsx"
+        },
+        {
+          "key": "dashboard.insights.hideNumbers",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/onboarding/insight-list.tsx"
+        },
+        {
+          "key": "dashboard.insights.showNumbers",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/onboarding/insight-list.tsx"
+        }
+      ]
+    },
+    {
+      "name": "dashboard chrome",
+      "why": "the sidebar, top nav and banners wrap every screen after onboarding, so they are read before anything inside them",
+      "keys": [
+        {
+          "key": "achievements.firstEntry.title",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/achievements/achievement-unlock-bridge.tsx"
+        },
+        {
+          "key": "achievements.unlockedToast",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/achievements/achievement-unlock-bridge.tsx"
+        },
+        {
+          "key": "common.accountMenu",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/top-nav.tsx"
+        },
+        {
+          "key": "common.commandPalette",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "common.createStudio",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "common.creditsTooltip",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/top-nav.tsx"
+        },
+        {
+          "key": "common.creditsUnlimited",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/top-nav.tsx"
+        },
+        {
+          "key": "common.dismissToastAria",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/toast/toast-container.tsx"
+        },
+        {
+          "key": "common.jumpToPage",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "common.loading",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "common.noMatches",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "common.offline.checking",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/network/offline-banner.tsx"
+        },
+        {
+          "key": "common.offline.retry",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/network/offline-banner.tsx"
+        },
+        {
+          "key": "common.offline.showingCached",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/network/offline-banner.tsx"
+        },
+        {
+          "key": "common.offline.showingCachedAge",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/network/offline-banner.tsx"
+        },
+        {
+          "key": "common.offline.stillOffline",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/network/offline-banner.tsx"
+        },
+        {
+          "key": "common.offline.title",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/network/offline-banner.tsx"
+        },
+        {
+          "key": "common.ownerAccessTooltip",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/top-nav.tsx"
+        },
+        {
+          "key": "common.paletteClose",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "common.paletteNavigate",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "common.paletteSelect",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "common.search",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/top-nav.tsx"
+        },
+        {
+          "key": "credits.freeMessage",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/credits/credits-context.tsx"
+        },
+        {
+          "key": "credits.unlimited",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/credits/credits-context.tsx"
+        },
+        {
+          "key": "credits.unlimitedWouldHaveCost",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/credits/credits-context.tsx"
+        },
+        {
+          "key": "credits.used",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/credits/credits-context.tsx"
+        },
+        {
+          "key": "credits.usedWithRemaining",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/credits/credits-context.tsx"
+        },
+        {
+          "key": "dashboard.search.dates.30d",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.dates.365d",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.dates.7d",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.dates.any",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.filters.all",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.filters.date",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.filters.module",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.filters.type",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.kinds.agent",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.kinds.chat",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.kinds.file",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.kinds.help",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.kinds.mission",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.kinds.module",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.kinds.page",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.kinds.research",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "dashboard.search.kinds.website",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/command-palette.tsx"
+        },
+        {
+          "key": "sampleData.banner",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/sample-data/sample-data-banner.tsx"
+        },
+        {
+          "key": "sampleData.bannerDetail",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/sample-data/sample-data-banner.tsx"
+        },
+        {
+          "key": "sampleData.clear",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/sample-data/sample-data-banner.tsx"
+        },
+        {
+          "key": "sampleData.clearFailed",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/sample-data/sample-data-banner.tsx"
+        },
+        {
+          "key": "sampleData.clearing",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/sample-data/sample-data-banner.tsx"
+        },
+        {
+          "key": "sidebar.closeMenu",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.groups.ask",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.groups.make",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.groups.organise",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.groups.run",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.groups.see",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.groups.settings",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.affiliate",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.agents",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.analytics",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.apps",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.automation",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.businessHealth",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.campaigns",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.chat",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.coding",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.competitors",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.content",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.costs",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.create",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.dataAnalysis",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.decisions",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.deepResearch",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.documents",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.favorites",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.feedback",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.files",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.finance",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.formSubmissions",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.help",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.home",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.ideas",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.images",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.integrations",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.learning",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.library",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.marketplace",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.memory",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.mine",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.missionControl",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.newEntry",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.posts",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.predictions",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.presentations",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.products",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.productWorkflow",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.projects",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.published",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.records",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.reflection",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.research",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.routing",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.sales",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.settings",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.systemHealth",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.team",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.timeline",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.trading",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.tradingJournal",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.tradingWorkflow",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.videos",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.voice",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.websiteBuilder",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.hints.websites",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.affiliate",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.agents",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.analytics",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.apps",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.automation",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.businessHealth",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.campaigns",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.chat",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.coding",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.competitors",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.content",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.costs",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.dataAnalysis",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.decisions",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.deepResearch",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.documents",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.favorites",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.feedback",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.files",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.finance",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.formSubmissions",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.help",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.home",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.ideas",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.images",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.integrations",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.learning",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.library",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.marketplace",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.memory",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.mine",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.missionControl",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.newEntry",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.posts",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.predictions",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.presentations",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.products",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.productWorkflow",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.projects",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.published",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.records",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.reflection",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.research",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.routing",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.sales",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.settings",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.systemHealth",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.team",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.timeline",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.trading",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.tradingJournal",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.tradingWorkflow",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.videos",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.voice",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.websiteBuilder",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.websites",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "common.dismiss",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/pwa/install-invitation.tsx"
+        },
+        {
+          "key": "common.noNotifications",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/notification-bell.tsx"
+        },
+        {
+          "key": "common.notifications",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/notification-bell.tsx"
+        },
+        {
+          "key": "common.switchToDarkMode",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/theme/theme-toggle.tsx"
+        },
+        {
+          "key": "common.switchToLightMode",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/theme/theme-toggle.tsx"
+        },
+        {
+          "key": "common.toggleMenu",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/menu-button.tsx"
+        },
+        {
+          "key": "credits.low.hint",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/credits/low-credits-banner.tsx"
+        },
+        {
+          "key": "credits.low.none",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/credits/low-credits-banner.tsx"
+        },
+        {
+          "key": "credits.low.remaining",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/credits/low-credits-banner.tsx"
+        },
+        {
+          "key": "credits.low.topUp",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/credits/low-credits-banner.tsx"
+        },
+        {
+          "key": "language.label",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/i18n/language-selector.tsx"
+        },
+        {
+          "key": "language.saveFailed",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/i18n/language-selector.tsx"
+        },
+        {
+          "key": "pwa.install",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/pwa/install-invitation.tsx"
+        },
+        {
+          "key": "pwa.installBody",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/pwa/install-invitation.tsx"
+        },
+        {
+          "key": "pwa.installTitle",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/pwa/install-invitation.tsx"
+        },
+        {
+          "key": "pwa.iosBody",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/pwa/install-invitation.tsx"
+        },
+        {
+          "key": "pwa.iosGotIt",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/pwa/install-invitation.tsx"
+        },
+        {
+          "key": "pwa.iosStep1",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/pwa/install-invitation.tsx"
+        },
+        {
+          "key": "pwa.iosStep2",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/pwa/install-invitation.tsx"
+        },
+        {
+          "key": "pwa.iosStep3",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/pwa/install-invitation.tsx"
+        },
+        {
+          "key": "pwa.iosTitle",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/pwa/install-invitation.tsx"
+        },
+        {
+          "key": "pwa.iosWhy",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/pwa/install-invitation.tsx"
+        },
+        {
+          "key": "pwa.notNow",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/pwa/install-invitation.tsx"
+        },
+        {
+          "key": "pwa.showHow",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/pwa/install-invitation.tsx"
+        }
+      ]
+    },
+    {
+      "name": "first result",
+      "why": "where onboarding sends them, and the first screen that is about their data rather than about the product",
+      "keys": [
+        {
+          "key": "dashboard.ideas.loadError",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/page.tsx"
+        },
+        {
+          "key": "dashboard.insights.title",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.activeMission.open",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.activeMission.stepsLabel",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.aiCoach.entryCount",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.aiCoach.mostActiveIn",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.aiCoach.noActivity",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.betaFeedback.linkLabel",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.betaFeedback.message",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.healthScore.buildingMomentum",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.healthScore.excellentConsistency",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.healthScore.justStarting",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.healthScore.strongProgress",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.healthScore.suggestion.consistency",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.healthScore.suggestion.coverage",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.healthScore.suggestion.missionSteps",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.healthScore.suggestion.recency",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.healthScore.title",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.next.title",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.nextAction.continueMission",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.nextAction.cta",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.nextAction.revisitLink",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.nextAction.startNew",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.setupProgress.count",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.setupProgress.steps.firstEntry",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.setupProgress.steps.mission",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.setupProgress.steps.onboarding",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.setupProgress.steps.secondModule",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.setupProgress.suggestion",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.setupProgress.title",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.statRow.creditsExplain",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.statRow.creditsRemaining",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.statRow.fillsAfter",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.statRow.fromEntries",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.statRow.mostActive",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.statRow.mostActiveExplain",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.statRow.ofTotal",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.statRow.openCredits",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.statRow.openEntries",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.statRow.thisWeek",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.statRow.thisWeekExplain",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.statRow.totalEntries",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.statRow.totalEntriesExplain",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.whatChanged.entries",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.whatChanged.insights",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.whatChanged.since",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "dashboard.overview.whatChanged.title",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "errors.boundary.section",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "errors.boundary.sectionBody",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/dashboard/overview/page.tsx"
+        },
+        {
+          "key": "common.betaExpiry",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/overview/beta-expiry-banner.tsx"
+        },
+        {
+          "key": "common.listCapped",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/ui/list-capped-notice.tsx"
+        },
+        {
+          "key": "dashboard.create.answeredNotFiled",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.create.answerItInstead",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.create.continueInChat",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.create.loggedTo",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.create.looksLikeQuestion",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.create.recordItAnyway",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.create.subtitle",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.create.title",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.create.viewModule",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.createAnything.attachImage",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.createAnything.clarifyAnswerPlaceholder",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.createAnything.clarifyContinue",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.createAnything.clarifySkip",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.createAnything.clarifyTitle",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.createAnything.describePlaceholder",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.createAnything.removeImage",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.createAnything.send",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.createAnything.uploadError",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
+          "key": "dashboard.energyCheckIn.change",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/energy-checkin-widget.tsx"
+        },
+        {
+          "key": "dashboard.energyCheckIn.checkedInToday",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/energy-checkin-widget.tsx"
+        },
+        {
+          "key": "dashboard.energyCheckIn.levelLabel",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/energy-checkin-widget.tsx"
+        },
+        {
+          "key": "dashboard.energyCheckIn.logged",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/energy-checkin-widget.tsx"
+        },
+        {
+          "key": "dashboard.energyCheckIn.notePlaceholder",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/energy-checkin-widget.tsx"
+        },
+        {
+          "key": "dashboard.energyCheckIn.prompt",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/energy-checkin-widget.tsx"
+        },
+        {
+          "key": "dashboard.energyCheckIn.scaleHigh",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/energy-checkin-widget.tsx"
+        },
+        {
+          "key": "dashboard.energyCheckIn.scaleLow",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/energy-checkin-widget.tsx"
+        },
+        {
+          "key": "dashboard.energyCheckIn.title",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/energy-checkin-widget.tsx"
+        },
+        {
+          "key": "dashboard.energyCheckIn.whatItDoes",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/overview/energy-checkin-widget.tsx"
+        },
+        {
+          "key": "dashboard.firstScreen.build.example",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/first-screen-examples.tsx"
+        },
+        {
+          "key": "dashboard.firstScreen.build.verb",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/first-screen-examples.tsx"
+        },
+        {
+          "key": "dashboard.firstScreen.cost.charged",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/first-screen-examples.tsx"
+        },
+        {
+          "key": "dashboard.firstScreen.cost.free",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/first-screen-examples.tsx"
+        },
+        {
+          "key": "dashboard.firstScreen.cost.freeAllowance",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/first-screen-examples.tsx"
+        },
+        {
+          "key": "dashboard.firstScreen.label",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/first-screen-examples.tsx"
+        },
+        {
+          "key": "dashboard.firstScreen.repeat.example",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/first-screen-examples.tsx"
+        },
+        {
+          "key": "dashboard.firstScreen.repeat.verb",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/first-screen-examples.tsx"
+        },
+        {
+          "key": "dashboard.firstScreen.understand.example",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/first-screen-examples.tsx"
+        },
+        {
+          "key": "dashboard.firstScreen.understand.verb",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/first-screen-examples.tsx"
+        },
+        {
+          "key": "dashboard.overview.recentEntries.empty",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/recent-entries-card.tsx"
+        },
+        {
+          "key": "dashboard.overview.recentEntries.title",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/recent-entries-card.tsx"
+        },
+        {
+          "key": "errors.creditHistory",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/error-message.tsx"
+        },
+        {
+          "key": "errors.retry",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/error-message.tsx"
+        },
+        {
+          "key": "sampleData.load",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/sample-data/load-sample-button.tsx"
+        },
+        {
+          "key": "sampleData.loadFailed",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/sample-data/load-sample-button.tsx"
+        },
+        {
+          "key": "sampleData.loadFree",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/sample-data/load-sample-button.tsx"
+        },
+        {
+          "key": "sampleData.loading",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/sample-data/load-sample-button.tsx"
+        },
+        {
+          "key": "common.cancel",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "common.created",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "common.dismissSuggestion",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/next-step-suggestion.tsx"
+        },
+        {
+          "key": "common.error",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "common.notAuthenticated",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "credits.outOfCredits.buyCredits",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/credits/out-of-credits-notice.tsx"
+        },
+        {
+          "key": "credits.outOfCredits.detail",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/credits/out-of-credits-notice.tsx"
+        },
+        {
+          "key": "credits.outOfCredits.detailWithNumbers",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/credits/out-of-credits-notice.tsx"
+        },
+        {
+          "key": "credits.outOfCredits.title",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/credits/out-of-credits-notice.tsx"
+        },
+        {
+          "key": "credits.outOfCredits.upgradePlan",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/credits/out-of-credits-notice.tsx"
+        },
+        {
+          "key": "dashboard.goal.change",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.confirm",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.costsThere",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.dismiss",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.freeThere",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.vague",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.which",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.willOpen",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.ideas.competitorsLabel",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.competitorsPlaceholder",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.customerLabel",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.customerPlaceholder",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.empty.example",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/ideas-list.tsx"
+        },
+        {
+          "key": "dashboard.ideas.empty.title",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/ideas-list.tsx"
+        },
+        {
+          "key": "dashboard.ideas.empty.why",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/ideas-list.tsx"
+        },
+        {
+          "key": "dashboard.ideas.marketSizeLabel",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.marketSizePlaceholder",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.mvpLabel",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.mvpPlaceholder",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.nameLabel",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.namePlaceholder",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.new",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.problemLabel",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.problemPlaceholder",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.scoreLabel",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.scorePlaceholder",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.verdictLabel",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "dashboard.ideas.verdictPlaceholder",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "errors.codes.conflict.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.conflict.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.fileTooLarge.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.fileTooLarge.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.forbidden.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.forbidden.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.insufficientCredits.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.insufficientCredits.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.invalidInput.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.invalidInput.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.notAuthenticated.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.notAuthenticated.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.notFound.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.notFound.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.offline.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.offline.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.planLimit.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.planLimit.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.rateLimited.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.rateLimited.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.serverError.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.serverError.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.unknown.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.unknown.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.unsupportedType.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.unsupportedType.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.upstreamUnavailable.next",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.codes.upstreamUnavailable.what",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.credits.charged",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.credits.notCharged",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.credits.refunded",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "errors.credits.unverified",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/lib/errors/use-error-text.ts"
+        },
+        {
+          "key": "module.exportCsv",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/ideas-list.tsx"
+        },
+        {
+          "key": "module.noMatches",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/ideas-list.tsx"
+        },
+        {
+          "key": "module.save",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "module.saving",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/add-idea-form.tsx"
+        },
+        {
+          "key": "module.searchPlaceholder",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/ideas/ideas-list.tsx"
+        },
+        {
+          "key": "voice.costPerMinute",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.draft.discard",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.draft.notSent",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.draft.title",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.draft.use",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.bad_request",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.capacity",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.denied",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.empty",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.failed",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.insufficient_credits",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.no_recording",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.no_speech",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.not_configured",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.not_included",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.out_of_minutes",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.provider_error",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.rate_limited",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.reserve_failed",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.too_large",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.unauthenticated",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.unsupported",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.unsupported_type",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.usage_unavailable",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.listening",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.listeningHint",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.outOfMinutes",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.permission.allow",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.permission.cancel",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.permission.cost",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.permission.editFirst",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.permission.notStored",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.permission.pressToStart",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.permission.title",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.settings.notConfigured",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.settings.notIncluded",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.startListening",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.stopListening",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "common.nextPage",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/pagination-controls.tsx"
+        },
+        {
+          "key": "common.paginationNext",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/pagination-controls.tsx"
+        },
+        {
+          "key": "common.paginationPage",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/pagination-controls.tsx"
+        },
+        {
+          "key": "common.paginationPrev",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/pagination-controls.tsx"
+        },
+        {
+          "key": "common.previousPage",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/pagination-controls.tsx"
+        },
+        {
+          "key": "common.updated",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/ideas/idea-row.tsx"
+        },
+        {
+          "key": "dashboard.ideas.cardCompetitors",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/ideas/idea-row.tsx"
+        },
+        {
+          "key": "dashboard.ideas.cardFor",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/ideas/idea-row.tsx"
+        },
+        {
+          "key": "dashboard.ideas.cardMarketSize",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/ideas/idea-row.tsx"
+        },
+        {
+          "key": "dashboard.ideas.cardMvp",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/ideas/idea-row.tsx"
+        },
+        {
+          "key": "dashboard.ideas.cardProblem",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/ideas/idea-row.tsx"
+        },
+        {
+          "key": "dashboard.ideas.cardScore",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/ideas/idea-row.tsx"
+        },
+        {
+          "key": "dashboard.ideas.deleteConfirm",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/ideas/idea-row.tsx"
+        },
+        {
+          "key": "dashboard.ideas.edit",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/ideas/idea-row.tsx"
+        },
+        {
+          "key": "dashboard.ideas.editAria",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/ideas/idea-row.tsx"
+        },
+        {
+          "key": "entityLinks.linked",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/entity-links/suggested-links-prompt.tsx"
+        },
+        {
+          "key": "entityLinks.mightBeRelated",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/entity-links/suggested-links-prompt.tsx"
+        },
+        {
+          "key": "entityLinks.no",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/entity-links/suggested-links-prompt.tsx"
+        },
+        {
+          "key": "entityLinks.yes",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/entity-links/suggested-links-prompt.tsx"
+        },
+        {
+          "key": "module.edit",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/ideas/idea-row.tsx"
+        },
+        {
+          "key": "module.loggedAt",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/ideas/idea-row.tsx"
+        },
+        {
+          "key": "module.sort.label",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/sort-toggle.tsx"
+        },
+        {
+          "key": "askAi.buttonLabel",
+          "depth": 4,
+          "tier": 3,
+          "file": "src/components/records/ask-ai-button.tsx"
+        },
+        {
+          "key": "common.networkError",
+          "depth": 4,
+          "tier": 3,
+          "file": "src/components/text-actions/text-actions-textarea.tsx"
+        },
+        {
+          "key": "common.textActions.accept",
+          "depth": 4,
+          "tier": 3,
+          "file": "src/components/text-actions/text-actions-textarea.tsx"
+        },
+        {
+          "key": "common.textActions.reject",
+          "depth": 4,
+          "tier": 3,
+          "file": "src/components/text-actions/text-actions-textarea.tsx"
+        },
+        {
+          "key": "entityLinks.buttonLabel",
+          "depth": 4,
+          "tier": 3,
+          "file": "src/components/entity-links/link-to-button.tsx"
+        },
+        {
+          "key": "entityLinks.linkedToLabel",
+          "depth": 4,
+          "tier": 3,
+          "file": "src/components/entity-links/linked-entities.tsx"
+        },
+        {
+          "key": "entityLinks.unlink",
+          "depth": 4,
+          "tier": 3,
+          "file": "src/components/entity-links/linked-entities.tsx"
+        },
+        {
+          "key": "entityLinks.unlinkAria",
+          "depth": 4,
+          "tier": 3,
+          "file": "src/components/entity-links/linked-entities.tsx"
+        },
+        {
+          "key": "favorites.add",
+          "depth": 4,
+          "tier": 3,
+          "file": "src/components/favorites/favorite-button.tsx"
+        },
+        {
+          "key": "favorites.remove",
+          "depth": 4,
+          "tier": 3,
+          "file": "src/components/favorites/favorite-button.tsx"
+        },
+        {
+          "key": "module.delete",
+          "depth": 4,
+          "tier": 3,
+          "file": "src/components/delete-button.tsx"
+        },
+        {
+          "key": "module.deleteConfirm",
+          "depth": 4,
+          "tier": 3,
+          "file": "src/components/delete-button.tsx"
+        },
+        {
+          "key": "module.deleted",
+          "depth": 4,
+          "tier": 3,
+          "file": "src/components/delete-button.tsx"
+        },
+        {
+          "key": "askAi.alsoRead",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/records/ask-ai-modal.tsx"
+        },
+        {
+          "key": "askAi.close",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/records/ask-ai-modal.tsx"
+        },
+        {
+          "key": "askAi.emptyState",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/records/ask-ai-modal.tsx"
+        },
+        {
+          "key": "askAi.placeholder",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/records/ask-ai-modal.tsx"
+        },
+        {
+          "key": "askAi.send",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/records/ask-ai-modal.tsx"
+        },
+        {
+          "key": "askAi.streamInterrupted",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/records/ask-ai-modal.tsx"
+        },
+        {
+          "key": "askAi.streamInterruptedPartial",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/records/ask-ai-modal.tsx"
+        },
+        {
+          "key": "askAi.title",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/records/ask-ai-modal.tsx"
+        },
+        {
+          "key": "common.errorWithMessage",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/entity-links/link-to-modal.tsx"
+        },
+        {
+          "key": "common.linked",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/entity-links/link-to-modal.tsx"
+        },
+        {
+          "key": "common.newMessagesBelow",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/records/ask-ai-modal.tsx"
+        },
+        {
+          "key": "entityLinks.modalTitle",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/entity-links/link-to-modal.tsx"
+        },
+        {
+          "key": "entityLinks.noMatches",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/entity-links/link-to-modal.tsx"
+        },
+        {
+          "key": "entityLinks.pickModulePrompt",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/entity-links/link-to-modal.tsx"
+        },
+        {
+          "key": "entityLinks.searching",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/entity-links/link-to-modal.tsx"
+        },
+        {
+          "key": "entityLinks.searchPlaceholder",
+          "depth": 5,
+          "tier": 3,
+          "file": "src/components/entity-links/link-to-modal.tsx"
+        },
+        {
+          "key": "aiSteps.counter",
+          "depth": 6,
+          "tier": 3,
+          "file": "src/components/ui/ai-activity.tsx"
+        }
+      ]
+    }
+  ],
+  "unexpandable": [
+    {
+      "file": "src/components/ui/help-tip.tsx",
+      "line": 158,
+      "expr": "${helpKey}.is",
+      "namespace": ""
+    },
+    {
+      "file": "src/components/ui/help-tip.tsx",
+      "line": 163,
+      "expr": "${helpKey}.does",
+      "namespace": ""
+    },
+    {
+      "file": "src/components/ui/help-tip.tsx",
+      "line": 172,
+      "expr": "${helpKey}.doesNot",
+      "namespace": ""
+    },
+    {
+      "file": "src/components/ui/help-tip.tsx",
+      "line": 182,
+      "expr": "${scopeKey}.body",
+      "namespace": ""
+    }
+  ],
+  "unresolved": []
+}

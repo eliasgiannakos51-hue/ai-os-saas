@@ -62,3 +62,7 @@ scripts/tests/.guard-sidecar/
 # The mutation suites record originals here before touching a source
 # file. A clean run deletes it; its presence means a run was killed.
 scripts/tests/.mutation-sidecar.json
+
+# Screenshot output from scripts/design-phase4-verify.mjs and the light-theme audit —
+# large binaries, regenerated on demand, never reviewed as source.
+prod-audit/

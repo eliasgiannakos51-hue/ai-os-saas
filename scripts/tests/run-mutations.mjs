@@ -68,11 +68,20 @@ if (suites.length === 0) {
 // empty list satisfies "none of them failed". It was 30 when there were
 // 30 suites, and stayed 30 while the directory grew to 90 \u2014 a floor set
 // to the size of the problem three times ago would not have noticed
-// sixty files disappearing. 90 today against a real 96, deliberately
+// sixty files disappearing. 100 today against a real 102, deliberately
 // under it so deleting one suite on purpose does not need a build fix in
 // the same commit — and raised with each batch of new ones, because the
 // point is that the gap stays small.
-const FLOOR = 90;
+// mutation-runner-honesty.test.mjs holds the gap at ten or less, which is
+// what made this a build failure rather than a number nobody revisited:
+// two new suites (check-site-spelling, billing-coverage) took the real
+// count to 102 against a floor last raised at 96. 105 was set against a
+// real 107 when role-grants joined them; 113 against a real 115 after the
+// seven V5 #10 suites; 114 against a real 116; 115 against a real 117
+// after anthropic-reconcile; 117 against a real 119 with mutation-anchors
+// and baselines; 118 against a real 120 with count-claims; 119 today
+// against a real 121, with route-refusals.
+const FLOOR = 119;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {
@@ -101,7 +110,18 @@ for (const file of suites) {
   const started = Date.now();
   const run = spawnSync(process.execPath, [path.join(DIR, file)], {
     encoding: "utf8",
-    timeout: 10 * 60 * 1000,
+    // TWENTY-FIVE MINUTES, NOT TEN, and the number was measured rather
+    // than guessed. A timeout is here to stop a HUNG suite, not to cap a
+    // slow one — and a suite killed by it is reported as red, which is a
+    // fact about this runner rather than about the gate it drives.
+    //
+    // user-isolation.mutation.mjs is the one that reaches it. Its gate
+    // impersonates two accounts across 96 tables and, since 2026-09-08,
+    // probes each of the ten storage policies separately; one run takes
+    // 46s against a local throwaway Postgres, and the suite runs it once
+    // per mutant plus twice for the baselines — 14 mutants is about 12
+    // minutes. At ten it would have been killed mid-run and called red.
+    timeout: 25 * 60 * 1000,
     maxBuffer: 64 * 1024 * 1024,
   });
   const seconds = Math.round((Date.now() - started) / 1000);

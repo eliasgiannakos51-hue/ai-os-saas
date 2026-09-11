@@ -36,6 +36,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { checkNeedsClarification, clarificationMetadata } from "@/lib/clarification";
 import {
   freeChatMaxCostEur,
   freeChatMessageEstimatedCostEur,
@@ -58,6 +59,11 @@ import { loadMentorContext } from "@/lib/chat/mentor-context";
 import { loadTradingMentorContext } from "@/lib/chat/trading-mentor-context";
 import { loadProductMentorContext } from "@/lib/chat/product-mentor-context";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
+import {
+  linkConversationToProject,
+  ownedProjectId,
+  projectOfConversation,
+} from "@/lib/projects/conversation-scope";
 import { selectRelevantModules, resolveSelectionConfig } from "@/lib/ai/module-relevance";
 import { loadCodingContextForChat } from "@/lib/ai/cross-module-store";
 import { moduleVocabulary } from "@/lib/ai/module-vocabulary";
@@ -299,8 +305,10 @@ export async function POST(request: Request) {
 
     let message: string;
     let conversationId: string | null;
+    let requestedProjectId: string | null;
     let mentorMode: boolean;
     let mentorPreset: string | null;
+    let skipClarification = false;
     try {
       const body = await request.json();
       message = typeof body?.message === "string" ? body.message.trim() : "";
@@ -308,8 +316,21 @@ export async function POST(request: Request) {
         typeof body?.conversationId === "string" && body.conversationId
           ? body.conversationId
           : null;
+      // ONLY READ WHEN THE CONVERSATION IS BEING CREATED — see
+      // lib/projects/conversation-scope.ts. On any later message the
+      // project comes from the conversation's own edge and this is
+      // ignored, so a client that starts sending a different one cannot
+      // move a conversation between projects.
+      requestedProjectId =
+        typeof body?.projectId === "string" && body.projectId ? body.projectId : null;
       mentorMode = body?.mentorMode === true;
       mentorPreset = typeof body?.mentorPreset === "string" ? body.mentorPreset : null;
+      // "Answer it anyway." The same flag the other four surfaces send
+      // back after a clarifying question, and it exists for the one case
+      // the opening-message rule cannot cover: somebody who presses Skip
+      // sends the SAME text again on a conversation that still has no
+      // history, and would meet the identical question for ever.
+      skipClarification = body?.skipClarification === true;
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -475,6 +496,20 @@ export async function POST(request: Request) {
       mentorMode && mentorPreset === "product"
         ? await loadProductMentorContext(supabase, user.id)
         : "";
+    // THE PROJECT, DECIDED HERE AND NOWHERE ELSE.
+    //
+    // On the message that CREATES a conversation, the client's chosen
+    // project is honoured — after a read that proves it is this person's.
+    // On every message after that the conversation's own edge is what is
+    // read and `requestedProjectId` is ignored entirely, which is what
+    // makes "chosen when the conversation starts, never switched" a
+    // property of the server rather than a promise the UI makes. It is
+    // resolved HERE, before the context is built, because the project is
+    // what the context — and therefore what the message — costs.
+    const activeProjectId = conversationId
+      ? await projectOfConversation(supabase, user.id, conversationId)
+      : await ownedProjectId(supabase, requestedProjectId);
+
     // "AI Life Context" — a consolidated view of the user (recent entries
     // across every module, active missions, latest energy check-in,
     // Business Health Score, Knowledge Graph link counts — see
@@ -484,7 +519,7 @@ export async function POST(request: Request) {
     let userContext = "";
     let provenance: Provenance | null = null;
     try {
-      const fullContext = await getUserFullContext(supabase, user.id);
+      const fullContext = await getUserFullContext(supabase, user.id, activeProjectId);
       // NARROWING IS OFF BY DEFAULT — see lib/ai/module-relevance.ts.
       //
       // With CONTEXT_RELEVANCE unset (which is every deployment until
@@ -816,6 +851,12 @@ export async function POST(request: Request) {
       isNewConversation = true;
     }
 
+    // The conversation exists now, so the membership edge can be written.
+    // Only on the message that created it — see above.
+    if (isNewConversation && activeProjectId) {
+      await linkConversationToProject(supabase, user.id, conversationId!, activeProjectId);
+    }
+
     // Prior turns for context (oldest first) — empty for a brand-new
     // conversation, since there's nothing to load yet.
     const { data: historyRows, error: historyError } = await supabase
@@ -937,6 +978,77 @@ export async function POST(request: Request) {
         // second concurrent message sees a balance that already excludes
         // this one.
         const costs = new CostAccumulator();
+        // Empty until the pre-check runs. An absent key is "not asked" —
+        // a follow-up message, or a free one — and must never be read as
+        // "clear", which is a decision somebody made.
+        let clarificationRecord: Record<string, unknown> = {};
+
+        // ================================================================
+        // STOP AND ASK, BEFORE ANYTHING IS HELD — V5 #6.
+        //
+        // The other four surfaces run this check before they build; chat
+        // did not run it at all, which meant the one place a person
+        // actually talks to the product was the one place it always
+        // guessed.
+        //
+        // WHERE IT SITS IS THE DESIGN. Above the reservation, so a
+        // message that turns into a question never takes a hold and never
+        // reaches the model at all; the person is asked instead of being
+        // answered at length about the wrong thing.
+        //
+        // ONLY ON THE OPENING MESSAGE, and this is the rule that keeps it
+        // from being unbearable. A chat is a conversation: someone who
+        // wanted to be asked would have asked, and interrupting the
+        // fourth message of a thread to request a detail the thread
+        // already contains is worse than a slightly generic answer. So a
+        // conversation with history is never interrupted — the free
+        // reader is not even consulted. One question, at the start, or
+        // none.
+        //
+        // WHAT IT COSTS. Nothing on a clear message: lib/ai/ambiguity.ts
+        // is free and synchronous, and it decides most of them. A message
+        // it cannot decide reaches one Sonnet call of a few hundred
+        // tokens — settled under its own feature, so a thread that ended
+        // in a question and one that ended in an answer are separate rows
+        // rather than an average of the two.
+        if (apiKey && history.length === 0 && !isFreeMessage && !skipClarification) {
+          try {
+            const decision = await checkNeedsClarification(apiKey, "chat", message, costs);
+            clarificationRecord = clarificationMetadata(decision);
+            if (decision.needsClarification) {
+              controller.enqueue(
+                ndjsonLine({
+                  type: "clarify",
+                  questions: decision.questions,
+                  questionSuggestions: decision.suggestions,
+                })
+              );
+              // The check itself really ran and really cost tokens. It is
+              // settled here whether or not an answer follows, for the
+              // same reason api/websites/generate settles its pre-check:
+              // an AI call that happened must be charged regardless of
+              // what happens next.
+              if (costs.callCount > 0) {
+                await settleReservation({
+                  userId: user.id,
+                  reservationId: "",
+                  feature: "chat_clarify",
+                  costs,
+                  plan,
+                  bypassCharge: bypassCredits,
+                  metadata: { conversationId: finalConversationId, ...clarificationRecord },
+                });
+              }
+              controller.close();
+              return;
+            }
+          } catch (err) {
+            // Best-effort, exactly like the other four surfaces: a hiccup
+            // in the pre-check must never be the reason a message goes
+            // unanswered. Falls through and answers.
+            logApiError("/api/chat", err, { stage: "clarification_check" });
+          }
+        }
 
         // A free message runs in a smaller envelope than a paid one: a
         // short history window, a shorter reply, and no web search. That
@@ -1197,6 +1309,7 @@ export async function POST(request: Request) {
             reservedCredits: bypassCredits || isFreeMessage ? 0 : streamEstimate.reserveCredits,
             freeMessage: isFreeMessage,
             freeRemaining: isFreeMessage && freeGrant?.granted ? freeGrant.remaining : undefined,
+            ...clarificationRecord,
           },
         });
         diagLog(

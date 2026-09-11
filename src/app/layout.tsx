@@ -98,8 +98,11 @@ export default async function RootLayout({
   // THE WHOLE CATALOGUE, ON EVERY PAGE, AND THIS IS A REVERT.
   //
   // It shipped trimmed for one deploy and broke every dashboard page:
-  // the sidebar rendered `sidebar.items.home`, `sidebar.groups.workspace`
-  // and eight more as raw keys.
+  // the sidebar rendered `sidebar.items.home`, `sidebar.groups.make` and
+  // eight more as raw keys. (The example used to name
+  // `sidebar.groups.workspace`, which was one of thirteen group names
+  // deleted in the redesign — a comment naming a key that no longer
+  // exists sends the next reader looking for it.)
   //
   // THE REASON IT CANNOT BE DONE HERE. This is the ROOT layout, and in
   // the App Router a shared layout is rendered once and REUSED across

@@ -184,7 +184,7 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
 
   if (!supported) {
     return (
-      <div className="rounded-xl border border-border bg-panel p-5">
+      <div className="surface">
         <h2 className="flex items-center gap-2 text-sm font-semibold">
           <BellOff className="h-4 w-4 text-muted" aria-hidden="true" />
           {t("title")}
@@ -201,7 +201,7 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
   }
 
   return (
-    <div className="rounded-xl border border-border bg-panel p-5">
+    <div className="surface">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="flex items-center gap-2 text-sm font-semibold">
@@ -240,12 +240,12 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
                 aria-label={t(type.stem)}
                 onClick={() => toggleType(type.key)}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition ${
-                  (prefs[type.key] ?? true) ? "bg-orange-500" : "bg-border"
+                  (prefs[type.key] ?? true) ? "bg-foreground" : "bg-border"
                 }`}
               >
                 <span
-                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${
-                    (prefs[type.key] ?? true) ? "start-[1.125rem]" : "start-0.5"
+                  className={`absolute top-0.5 h-4 w-4 rounded-full transition-all ${
+                    (prefs[type.key] ?? true) ? "start-[1.125rem] bg-panel" : "start-0.5 bg-white"
                   }`}
                 />
               </button>

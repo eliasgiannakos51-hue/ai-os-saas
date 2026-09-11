@@ -46,6 +46,20 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // REDESIGN PHASE 4, the four step flows. Three step names land on the
+  // same letters as English and the neighbours in the same block prove
+  // the block was translated rather than copied.
+  //
+  // Spanish "Describe" is the imperative of describir — the same seven
+  // letters. Beside it: es generate "Genera", edit "Edita", preview
+  // "Vista previa", publish "Publica", upload "Sube", ask "Consulta".
+  "es:stepFlow.steps.describe",
+  // French for the noun IS "question" and IS "sources"; "Interrogation"
+  // and "Références" would both be worse words for a progress step.
+  // Beside them: fr describe "Décris", generate "Génère", edit
+  // "Modifie", answer "Réponse", upload "Téléverse", review "Vérifie".
+  "fr:stepFlow.steps.question",
+  "fr:stepFlow.steps.sources",
   // The pagination line under every module list, the timeline, the agents
   // and the missions. French for a page in a paginated list IS "page", and
   // the rest of the string is two placeholders and a slash — there is
@@ -276,12 +290,37 @@ const LOCALE_ALLOWED = new Set([
   // "credits" is used verbatim in Greek — the same loanword the rest of the
   // Greek UI already uses ("Αγορά Credits", "Ιστορικό Credits").
   "el:credits.estimate.approx",
+  // V5 #21: the same loanword, on the deck's own receipt line ("{n}
+  // credits" under a generated presentation). Greek keeps "credits" as
+  // the other seven allowances in this block do.
+  "el:presentations.result.charged",
+  // V5 #22: the same loanword again, on the receipt line under a set of
+  // generated posts ("{n} credits"). Same block, same reason.
+  "el:posts.result.charged",
   // The same loanword, on the four credit-pack buttons under Billing.
   "el:settings.billing.creditsAmount",
   // Autonomous Agents (V3). Same loanword/cognate cases as everywhere else
   // in this list, verified one by one rather than waved through:
   // "credits" is the word the Greek UI already uses verbatim; "Name" is
   // the German word, spelled identically; "Description" is French.
+  // Redesign phase 2. "Name" is the German word for a name, spelled
+  // identically, and "Agents" is the loanword German uses for these —
+  // the same two cases this block already allows for the agents screen
+  // two lines down. Checked against the neighbouring keys, which do
+  // differ: de projects.form.goal "Ziel", projects.sections.tasks
+  // "Aufgaben", projects.sections.files "Dateien".
+  // "Project" is the word Greek business actually uses — the same
+  // loanword this block already allows for "credits" and "Trading", and
+  // the nav name and the page heading must be the SAME string
+  // (sidebar-naming §5b), so allowing one without the other would be
+  // incoherent. "Agents" is the loanword in Greek and French too, beside
+  // the German entry below.
+  "el:sidebar.items.projects",
+  "el:projects.title",
+  "el:projects.sections.agents",
+  "fr:projects.sections.agents",
+  "de:projects.form.name",
+  "de:projects.sections.agents",
   "el:dashboard.agents.creditsPerRun",
   "el:dashboard.agents.runCredits",
   "de:dashboard.agents.previewName",
@@ -508,6 +547,11 @@ const INTENTIONALLY_IDENTICAL = new Set([
   "finance.metrics.mrr",
   "finance.metrics.arr",
   "aiSteps.counter",
+  // V5 #22. The length readout under every generated post: "{count} /
+  // {max}" — two numbers and a slash. The isFormatOnly heuristic above
+  // does not see it as a format because the placeholder NAMES contain
+  // letters; the rendered string never does. Ten locales, one value.
+  "posts.result.chars",
   "landing.footer.roadmap",
   "roadmap.title",
   "roadmap.items.agentBuilder.title",

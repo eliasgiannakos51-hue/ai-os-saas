@@ -212,7 +212,7 @@ async function Stat({
 }) {
   const locale = await getLocale();
   return (
-    <div className="rounded-2xl border border-border bg-panel p-4">
+    <div className="surface-tight">
       <p className="text-[11px] uppercase tracking-wider text-muted">{label}</p>
       <p
         className={`mt-1 text-2xl font-bold ${

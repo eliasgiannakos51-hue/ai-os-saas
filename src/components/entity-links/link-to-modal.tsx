@@ -7,7 +7,7 @@ import { ApiError } from "@/lib/errors/api-error";
 import { useErrorText } from "@/lib/errors/use-error-text";
 import { ChevronLeft, Link2, Search, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
+import { LINKABLE_MODULES, type LinkableModule } from "@/lib/knowledge-graph";
 import { useToast } from "@/components/toast/toast-context";
 import type { ModuleConfig } from "@/lib/modules";
 
@@ -48,7 +48,7 @@ export function LinkToModal({
   const router = useRouter();
   const supabase = createClient();
   const { addToast } = useToast();
-  const [selectedModule, setSelectedModule] = useState<ModuleConfig | null>(null);
+  const [selectedModule, setSelectedModule] = useState<LinkableModule | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResultRow[]>([]);
   const [searching, setSearching] = useState(false);
@@ -158,7 +158,7 @@ export function LinkToModal({
         role="dialog"
         aria-modal="true"
         aria-label={`${t("modalTitle")}: ${sourceHeadline}`}
-        className="relative flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-border bg-panel shadow-[0_0_0_1px_rgba(249,115,22,0.05)]"
+        className="relative flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-border bg-panel"
       >
         <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div className="flex min-w-0 items-start gap-3">

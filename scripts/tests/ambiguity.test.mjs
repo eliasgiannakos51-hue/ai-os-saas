@@ -232,9 +232,30 @@ console.log("\n== 6. only the middle costs money ==");
   const clear = amb.assessAmbiguity("invoice Acme 4200 for March");
   const vague = amb.assessAmbiguity("do it");
   const unsure = amb.assessAmbiguity("write a plan");
-  ok("a clear verdict does not pay for the model check", !amb.needsPaidClarityCheck(clear));
-  ok("a vague verdict does not pay for it either", !amb.needsPaidClarityCheck(vague));
-  ok("only unsure does", unsure.verdict !== "unsure" || amb.needsPaidClarityCheck(unsure));
+  // THESE THREE CHECKS USED TO ASSERT A POLICY THE PRODUCT DID NOT
+  // FOLLOW, and they are the reason it survived.
+  //
+  // needsPaidClarityCheck said only `unsure` pays. checkNeedsClarification
+  // short-circuits on `clear` and pays for `vague` too — deliberately,
+  // because the paid call is what writes the question. Nothing in the
+  // product ever called the function; these three checks were its only
+  // callers, and a green gate on an unused function reads exactly like a
+  // green gate on a live one.
+  //
+  // Replaced by the two questions it ran together, each asserted against
+  // what the product actually does. See lib/ai/ambiguity.ts.
+  ok("a clear request does not reach the paid call", !amb.willSpendOnQuestion(clear));
+  ok("a vague one DOES — the paid call is what writes the question", amb.willSpendOnQuestion(vague));
+  ok("and so does an unsure one", unsure.verdict !== "unsure" || amb.willSpendOnQuestion(unsure));
+  ok("the free reader was decisive on the clear one", amb.freeReaderWasDecisive(clear));
+  ok("...and on the vague one", amb.freeReaderWasDecisive(vague));
+  ok("...and not on the unsure one", unsure.verdict !== "unsure" || !amb.freeReaderWasDecisive(unsure));
+  // THE POLICY LIVES IN ONE PLACE. A second copy of `verdict !== "clear"`
+  // inside checkNeedsClarification is how the two drift apart again.
+  ok(
+    "lib/clarification.ts asks the module rather than restating the condition",
+    /willSpendOnQuestion\(assessment\)/.test(readFileSync("src/lib/clarification.ts", "utf8"))
+  );
   ok("...and unsure is reachable at all", unsure.verdict === "unsure",
     `"write a plan" -> ${unsure.verdict}; if nothing is ever unsure the paid check is dead code`);
 }
@@ -264,22 +285,63 @@ console.log("\n== 7. the cues are written for matching, in every language ==");
 console.log("\n== 8. at most ONE question, and the paid check is skipped when it can be ==");
 {
   const client = await loadTs("src/lib/clarification-client.ts");
-  ok("the cap is one question", client.MAX_CLARIFICATION_QUESTIONS === 1,
+  ok("the default cap is one question", client.MAX_CLARIFICATION_QUESTIONS === 1,
     String(client.MAX_CLARIFICATION_QUESTIONS));
+
+  // PER SURFACE, and the numbers carry their reasons in the source.
+  // Website is two because a website brief has four unknowns no default
+  // covers — what the business is, which pages, whether it takes form
+  // submissions, whether there are photographs — and guessing produces a
+  // whole wrong site rather than one wrong paragraph.
+  ok("a website brief may ask two", client.questionCapFor("website") === 2,
+    String(client.questionCapFor("website")));
+  const ones = ["mission", "automation", "create", "agent"];
+  ok("...and every other surface asks one",
+    ones.every((k) => client.questionCapFor(k) === 1),
+    ones.map((k) => `${k}=${client.questionCapFor(k)}`).join(", "));
+  ok("an unknown surface gets the STRICTEST cap, not the widest",
+    client.questionCapFor("something-new") === 1,
+    "a new surface should have to argue for a second question");
+
+  // EVERY NUMBER HAS ITS REASON BESIDE IT. The owner asked for this in as
+  // many words, and it is the difference between a table somebody can
+  // change safely and a table of magic numbers.
+  const capSrc = readFileSync("src/lib/clarification-client.ts", "utf8");
+  const block = capSrc.slice(
+    capSrc.indexOf("CLARIFICATION_QUESTION_CAP"),
+    capSrc.indexOf("};", capSrc.indexOf("CLARIFICATION_QUESTION_CAP"))
+  );
+  ok("the website number carries its reason", /\/\/[^\n]*(TWO|four unknowns)/.test(block));
+  ok("the one-question numbers carry theirs", /\/\/[^\n]*ONE, everywhere else/.test(block));
+
+  // AND THE MODEL IS TOLD THE SAME NUMBER. A cap enforced only by
+  // trimming gets the model's FIRST question, not its most important one.
+  const clarSrc = readFileSync("src/lib/clarification.ts", "utf8");
+  ok("the tool description is built from the cap",
+    /function clarificationTool\(cap: number\)/.test(clarSrc) &&
+      /tools: \[clarificationTool\(cap\)\]/.test(clarSrc),
+    "the model is asked for a fixed 1-3 while the parser trims to the cap");
+  ok("...and the same cap trims the result",
+    /parseClarificationResult\(\s*toolUse\.input[\s\S]{0,120}questionCapFor\(kind\)/.test(clarSrc));
 
   // BEHAVIOUR, not the constant. A cap that is not applied is a number in
   // a file: parseClarificationResult must actually trim.
-  const trimmed = client.parseClarificationResult({
+  const three = {
     needsClarification: true,
     questions: [
       { question: "What is the business called?", suggestions: ["Acme"] },
       { question: "What colour scheme?", suggestions: ["dark"] },
       { question: "How many pages?", suggestions: ["three"] },
     ],
-  });
-  ok("...and three questions come back as one",
+  };
+  const trimmed = client.parseClarificationResult(three, client.questionCapFor("agent"));
+  ok("...and on a one-question surface three come back as one",
     trimmed.needsClarification === true && trimmed.questions.length === 1,
     `${trimmed.needsClarification ? trimmed.questions.length : "needsClarification=false"}`);
+  const web = client.parseClarificationResult(three, client.questionCapFor("website"));
+  ok("...and on the website surface, as two",
+    web.needsClarification === true && web.questions.length === 2,
+    `${web.needsClarification ? web.questions.length : "needsClarification=false"}`);
   ok("...keeping the first one with its suggestions",
     trimmed.needsClarification === true &&
       trimmed.questions[0].startsWith("What is the business") &&
@@ -294,8 +356,18 @@ console.log("\n== 8. at most ONE question, and the paid check is skipped when it
   ok("the free assessment runs before the API client is built",
     assessAt !== -1 && clientAt !== -1 && assessAt < clientAt,
     "the paid call is constructed first, so nothing is saved");
+  // RE-ANCHORED 2026-09-07. The condition moved into
+  // willSpendOnQuestion (one policy, one place — see the note above), and
+  // the return grew the verdict it used to throw away. What this clause
+  // is about is unchanged: the free path must RETURN, before the client
+  // is built, rather than falling through into the paid call.
   ok("...and a clear verdict returns without calling the model",
-    /assessment\.verdict === "clear"\)\s*return \{ needsClarification: false \}/.test(src));
+    /if \(!willSpendOnQuestion\(assessment\)\) \{[\s\S]{0,200}?return \{ needsClarification: false,/.test(src));
+  // AND IT CARRIES THE VERDICT OUT. Dropping it is what made the rate
+  // unmeasurable for a whole version: the only requests that left a row
+  // were the ones the free reader had failed on.
+  ok("...carrying the verdict, so the free path is countable",
+    /return \{ needsClarification: false, verdict: assessment\.verdict, paidCheck: false \};/.test(src));
 }
 
 console.log(`\n${failures.length === 0 ? "PASSED" : "FAILED"}: ${pass} passed, ${failures.length} failed`);

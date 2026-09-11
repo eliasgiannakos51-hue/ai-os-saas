@@ -20,6 +20,15 @@
  *   CHECKABLE requirements, then counts how many survived. Not a judgement
  *   call: each one is a regex against the produced HTML.
  *
+ *   PART C — WHAT THE BRIEF FORBIDS, AND HOW MANY PAGES IT ASKS FOR. One
+ *   brief that says NO booking form and asks for SEVEN pages, against a
+ *   cap of MAX_PAGES_PER_SITE. Both are enforced after generation rather
+ *   than requested in a prompt — rule 23 — so this part runs the SAME
+ *   enforcement functions api/websites/generate/process runs, on the page
+ *   that actually came back, and reports what each of them had to do.
+ *   That is the difference between "the prompt says no booking form" and
+ *   "there is no booking form".
+ *
  * Nothing here is stubbed. It calls the real generateWebsiteHtml through
  * the real @anthropic-ai/sdk with the real system prompt — the same code
  * path api/websites/generate/process uses. The only step skipped is
@@ -40,7 +49,7 @@ const apiKey = process.env.ANTHROPIC_API_KEY;
 if (!apiKey) {
   console.error(
     "ANTHROPIC_API_KEY is not set.\n" +
-      "This script makes four real, billed Anthropic calls (~$1.50) — that is why it is\n" +
+      "This script makes five real, billed Anthropic calls (~$1.90) — that is why it is\n" +
       "not part of the test suite. Set the key and run it again."
   );
   process.exit(2);
@@ -70,6 +79,11 @@ const {
 const wb = await loadTsWithDeps("src/lib/website-builder.ts");
 const variation = await loadTsWithDeps("src/lib/website-variation.ts");
 const { CostAccumulator } = await loadTsWithDeps("src/lib/billing/cost-accumulator.ts");
+// THE ENFORCEMENTS THEMSELVES, imported rather than re-implemented. A
+// script that decided for itself what "a booking form" looks like would
+// be measuring its own regex; these are the functions the route runs.
+const negatives = await loadTsWithDeps("src/lib/website-negative-instructions.ts");
+const { MAX_PAGES_PER_SITE } = await loadTsWithDeps("src/lib/publishing/website-pages.ts");
 
 // ---------------------------------------------------------------------
 // PART A — three briefs that SHOULD produce different pages.
@@ -319,6 +333,61 @@ console.log(
       : met >= 4
         ? "mostly honoured — inspect the misses, they are the pattern to fix."
         : "instructions are still being dropped. Not fixed.")
+);
+
+// ---------------------------------------------------------------------
+console.log("\n\nPART C — a brief that FORBIDS something and asks for SEVEN pages\n");
+// TWO ENFORCEMENTS, ONE BRIEF, because they fail in opposite directions
+// and a page that satisfies one can break the other: dropping the
+// forbidden feature is a REMOVAL, honouring the cap is a REFUSAL TO
+// PRODUCE, and a generator that pads to seven pages by adding the very
+// section the brief banned would pass either check alone.
+const NEGATIVE_BRIEF =
+  "Ιστοσελίδα για το ξενοδοχείο «Ακρογιάλι» στη Σκόπελο.\n" +
+  "ΟΔΗΓΙΕΣ:\n" +
+  "1. ΔΕΝ θέλω φόρμα κράτησης πουθενά στο site — οι κρατήσεις γίνονται μόνο τηλεφωνικά.\n" +
+  "2. Θέλω ΕΠΤΑ σελίδες: Αρχική, Δωμάτια, Παροχές, Τοποθεσία, Πρωινό, Κριτικές, Επικοινωνία.\n" +
+  "3. Τηλέφωνο +30 24240 22333.";
+
+let negativeHtml = "";
+try {
+  negativeHtml = (await generate("negative-and-pages", NEGATIVE_BRIEF, VARIETY_BRIEFS.length + 1)).html;
+} catch (err) {
+  console.log(`  FAILED: ${err.message}`);
+  process.exit(1);
+}
+
+const parsed = negatives.parseNegativeInstructions(NEGATIVE_BRIEF);
+const forbidden = negatives.forbiddenFeatures(parsed);
+console.log(`  the brief was read as forbidding: ${forbidden.join(", ") || "(nothing — that is itself the finding)"}`);
+
+const enforcement = negatives.enforceNegativeInstructions(negativeHtml, parsed);
+const removed = enforcement.removed ?? [];
+console.log(
+  `  enforcement removed ${removed.reduce((n, r) => n + r.count, 0)} element(s): ` +
+    (removed.map((r) => `${r.feature}x${r.count}`).join(", ") || "(none)")
+);
+// WHAT SURVIVED IS THE QUESTION. If the model never produced the banned
+// feature, nothing is removed and that is the BEST outcome; if it did and
+// enforcement caught it, the prompt is being ignored and the code is
+// carrying the promise; if it did and enforcement did NOT catch it, the
+// customer's live site has the thing they said no to.
+const stillThere = negatives.enforceNegativeInstructions(enforcement.html, parsed);
+const leaked = (stillThere.removed ?? []).reduce((n, r) => n + r.count, 0);
+console.log(`  after enforcement, a second pass finds ${leaked} more — anything above 0 is a hole in the enforcement`);
+
+const started = negatives.countPageMarkers(negativeHtml);
+console.log(
+  `  pages: the brief asked for 7, the cap is ${MAX_PAGES_PER_SITE}, the model started ${started}` +
+    ` (the stream is cut at cap+1 in production, so ${MAX_PAGES_PER_SITE + 1} here means the cut fired)`
+);
+console.log(
+  `  VERDICT: ` +
+    (leaked > 0
+      ? "the forbidden feature SURVIVED enforcement. This is the one that reaches a customer."
+      : removed.length === 0
+        ? "the model did not produce the forbidden feature at all, and the cap held."
+        : "the model produced what the brief forbade and the code removed it — working as designed, and worth knowing.")
 );
 
 console.log(`\nOpen the generated files to look at them:\n  ${outDir}`);

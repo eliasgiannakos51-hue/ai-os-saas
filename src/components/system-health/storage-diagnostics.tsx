@@ -33,7 +33,7 @@ export function StorageDiagnostics() {
   }
 
   return (
-    <section className="mt-8 rounded-2xl border border-border bg-panel p-4" data-testid="storage-diagnostics">
+    <section className="mt-8 surface-tight" data-testid="storage-diagnostics">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <HardDrive className="h-4 w-4 text-muted" aria-hidden />

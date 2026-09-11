@@ -1,7 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ModuleConfig } from "@/lib/modules";
-import { LINKABLE_MODULES, moduleHref } from "@/lib/knowledge-graph";
+import { LINKABLE_MODULES, moduleHref, type LinkableModule } from "@/lib/knowledge-graph";
 import { loadLinkedEntities, type LinkedEntity } from "@/lib/entity-links";
 import { logApiError } from "@/lib/log-error";
 import type { ModuleTitleKey } from "@/lib/modules";
@@ -41,7 +41,7 @@ function rangeCutoffIso(range: TimelineRange): string | null {
   return new Date(Date.now() - windowMs).toISOString();
 }
 
-function excerptFor(module: ModuleConfig, row: Record<string, unknown>): string {
+function excerptFor(module: LinkableModule, row: Record<string, unknown>): string {
   const field = module.fields.find(
     (f) =>
       f.key !== module.headlineKey &&

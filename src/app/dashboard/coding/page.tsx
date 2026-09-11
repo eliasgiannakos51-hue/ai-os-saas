@@ -8,6 +8,7 @@ import { MODULE_TITLE_KEYS } from "@/lib/search/module-title-keys";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { CodingWorkspace, type CodeSession } from "@/components/coding/coding-workspace";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,13 @@ export function generateMetadata(): Promise<Metadata> {
 // and write themselves. This is the version that writes it: five
 // operations, and four things it still does not do — stated on the screen
 // by CodingWorkspace rather than left to the name.
-export default async function CodingPage() {
+// The brief Home routed here, read through the shared clamp — see the
+// note in the deep-research page for why the name is checked by a gate.
+export default async function CodingPage({
+  searchParams,
+}: {
+  searchParams: { brief?: string };
+}) {
   const t = await getTranslations("coding");
   const supabase = createClient();
   const user = await getCurrentUser();
@@ -63,7 +70,7 @@ export default async function CodingPage() {
         description={t("description")}
         helpKey="help.coding"
       />
-      <CodingWorkspace sessions={sessions} folders={folders} />
+      <CodingWorkspace sessions={sessions} folders={folders} initialTask={readExampleParam(searchParams.brief)} />
     </div>
   );
 }

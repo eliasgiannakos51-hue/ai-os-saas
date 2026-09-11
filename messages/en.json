@@ -96,20 +96,7 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "Workspace",
-      "build": "Build",
-      "business": "Business",
-      "strategy": "Strategy",
-      "operations": "Operations",
-      "marketplace": "Marketplace",
       "settings": "Settings",
-      "create": "Create",
-      "myBusiness": "My business",
-      "track": "Track",
-      "insights": "What I noticed",
-      "tracking": "Tracking",
-      "daily": "Daily",
-      "work": "Work",
       "see": "See",
       "make": "Make",
       "ask": "Ask",
@@ -118,25 +105,25 @@
     },
     "items": {
       "home": "Home",
-      "chat": "Ionexa Chat",
+      "chat": "Ask me",
       "memory": "Search my records",
       "timeline": "History",
       "favorites": "Favorites",
       "missionControl": "Goals & Plans",
-      "reflection": "Weekly Reflection",
+      "reflection": "Your week",
       "settings": "Settings",
       "team": "Team",
-      "agents": "AI Agents",
+      "agents": "AI that works for you",
       "websites": "Website plans",
       "websiteBuilder": "Build a site",
-      "apps": "App notes",
-      "images": "Image notes",
-      "videos": "Video notes",
+      "apps": "App ideas",
+      "images": "Image ideas",
+      "videos": "Video ideas",
       "coding": "AI Coding",
-      "dataAnalysis": "Data Analysis",
+      "dataAnalysis": "See what the numbers say",
       "documents": "Documents",
-      "presentations": "Presentation notes",
-      "campaigns": "Campaign notes",
+      "presentations": "Presentations",
+      "campaigns": "Campaign ideas",
       "analytics": "Analytics",
       "finance": "Finances",
       "content": "Content",
@@ -152,16 +139,16 @@
       "tradingWorkflow": "Trading Workflow",
       "productWorkflow": "Product Workflow",
       "automation": "Automation",
-      "marketplace": "Marketplace",
+      "marketplace": "Ready-made helpers",
       "published": "Live sites",
       "integrations": "Integrations",
       "files": "Files",
-      "deepResearch": "Deep Research",
+      "deepResearch": "Look into it properly",
       "help": "Help Centre",
       "affiliate": "Affiliate",
       "formSubmissions": "Form submissions",
-      "routing": "Model routing",
-      "businessHealth": "Business health",
+      "routing": "Which AI is used",
+      "businessHealth": "How the business is doing",
       "mine": "Mine",
       "records": "My records",
       "library": "My stuff",
@@ -170,7 +157,9 @@
       "systemHealth": "System Health",
       "tradingJournal": "Trading journal",
       "voice": "Voice",
-      "predictions": "Predictions"
+      "predictions": "Predictions",
+      "posts": "Posts",
+      "projects": "Projects"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -207,7 +196,7 @@
       "images": "Keep track of images you are planning or have already made. It does not generate them.",
       "videos": "Keep track of videos you are planning or have already made. It does not generate them.",
       "coding": "Write, explain, fix, convert and test snippets of code. It does not run code or open a repository.",
-      "presentations": "Keep track of decks you are planning or have already made. It does not create slides.",
+      "presentations": "Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.",
       "home": "Your dashboard — activity, stats and quick actions.",
       "settings": "Account, billing, language and preferences.",
       "published": "Every site you have live on the web, with its traffic and version history",
@@ -227,7 +216,9 @@
       "systemHealth": "Whether the database, the queues and the providers are answering.",
       "tradingJournal": "Your trades, with the reasoning you wrote at the time.",
       "voice": "Have text read out loud, or speak and have it written down. Minutes are metered and the price per minute is on the page.",
-      "predictions": "Patterns found in your own rows, each with the number of entries it rests on and a link to them."
+      "predictions": "Patterns found in your own rows, each with the number of entries it rests on and a link to them.",
+      "posts": "Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.",
+      "projects": "A folder with a goal. What you put in is what is in it — nothing is dragged in with it."
     },
     "closeMenu": "Close menu"
   },
@@ -382,8 +373,8 @@
         "description": "Create and edit video with AI."
       },
       "presentations": {
-        "title": "AI Presentations & Documents",
-        "description": "Generate polished decks and documents from your data."
+        "title": "AI Presentations",
+        "description": "Describe a deck and get editable slides — exported as PowerPoint or PDF, with photos from Unsplash or your own."
       },
       "marketingBuilder": {
         "title": "AI Marketing Campaign Builder",
@@ -1160,7 +1151,11 @@
         "body": "It sees your entries, your goals and the files you uploaded. It does not see anything you have not added. It does not change anything unless you ask."
       },
       "stop": "Stop",
-      "stopped": "Stopped. What was written is kept, and only that part is charged."
+      "stopped": "Stopped. What was written is kept, and only that part is charged.",
+      "clarificationTitle": "One quick question first:",
+      "clarificationSkip": "Answer it anyway",
+      "clarificationContinue": "Send",
+      "clarificationAnswerPlaceholder": "Your answer..."
     },
     "create": {
       "title": "Create Anything",
@@ -1172,6 +1167,16 @@
       "looksLikeQuestion": "That looks like a question. Should I answer it, or record it?",
       "answerItInstead": "Answer it",
       "recordItAnyway": "Record it anyway"
+    },
+    "goal": {
+      "willOpen": "This goes to {destination}, with what you wrote.",
+      "costsThere": "{credits, plural, one {# credit} other {# credits}} when you press the button there. Nothing is charged now.",
+      "freeThere": "Nothing is charged now, and nothing is charged on arrival.",
+      "confirm": "Yes, do it",
+      "change": "Change something",
+      "which": "Which one do you mean?",
+      "vague": "Say a little more, so this goes to the right place.",
+      "dismiss": "Never mind"
     },
     "timeline": {
       "title": "Mine",
@@ -1276,7 +1281,7 @@
       "stepChangeFailed": "Could not change that step."
     },
     "reflection": {
-      "title": "Weekly Reflection",
+      "title": "Your week",
       "description": "See what you actually finished this week vs what you planned — real data, no spin.",
       "generateButton": "Generate Weekly Reflection",
       "generating": "Generating...",
@@ -1494,11 +1499,12 @@
           "chatWidget": "the chat widget"
         },
         "stopped": "Stopped by you. {count, plural, =0 {Nothing was charged} one {# credit was charged} other {# credits were charged}} for the part that was generated; the rest of the hold was released.",
-        "spelling": "{count, plural, one {One Greek word may be misspelled} other {# Greek words may be misspelled}}: {words}. Nothing was changed — check them, a name or a brand is not a mistake."
+        "spelling": "{count, plural, one {One Greek word may be misspelled} other {# Greek words may be misspelled}}: {words}. Nothing was changed — check them, a name or a brand is not a mistake.",
+        "sameSkeleton": "This site has the same structure as {name} — {percent}% the same shape. Nothing was changed; two sites of one business are often meant to match, and only you can say whether these are."
       }
     },
     "marketplace": {
-      "title": "Marketplace",
+      "title": "Ready-made helpers",
       "description": "Agent templates people have built and shared. Free — nothing is bought or sold here.",
       "empty": {
         "title": "No templates yet",
@@ -1649,7 +1655,7 @@
       "madeItHere": "Made it here → {where}"
     },
     "agents": {
-      "title": "AI Agents",
+      "title": "AI that works for you",
       "description": "Agents that run on a schedule and email you the result.",
       "aiDisclosure": "Agents are AI systems. Everything they produce is AI-generated and can contain mistakes — check anything important before you act on it.",
       "newAgent": "New agent",
@@ -2054,13 +2060,6 @@
       "truncatedWarning": "Even read in parts, the selection was larger than one question can cover, so the answer may be incomplete. Ask about fewer files at a time.",
       "skippedFiles": "Skipped (no readable text): {names}",
       "creditsCharged": "{credits, plural, one {# credit} other {# credits}}",
-      "stepsLabel": "How this page works",
-      "step1Title": "1. Upload files",
-      "step1Hint": "PDF, Word, Excel, CSV or text.",
-      "step2Title": "2. Choose which to ask about",
-      "step2Hint": "Tick one or more files — the answer comes only from what you tick.",
-      "step3Title": "3. Ask your question",
-      "step3Hint": "The AI answers only from the files you ticked.",
       "selectedOfTotal": "{count} of {total} selected",
       "selectAll": "Select all",
       "maxPerQuestion": "Up to {max} files per question.",
@@ -2094,7 +2093,7 @@
       "openedFromDevice": "{count, plural, one {# file} other {# files}} opened from your device."
     },
     "deepResearch": {
-      "title": "Deep Research",
+      "title": "Look into it properly",
       "description": "Give it a topic; it searches, cross-checks and writes a sourced report.",
       "intro": "A report takes several minutes and is the most expensive thing here, so you always see the plan and the price before anything runs. Findings are paraphrased and attributed, never reprinted.",
       "topicLabel": "What should it research?",
@@ -2793,7 +2792,6 @@
       "roadmap": "Roadmap",
       "score": "Score",
       "sentiment": "Sentiment",
-      "slideCount": "Slide Count",
       "status": "Status",
       "strengths": "Strengths",
       "suggestedResponse": "Suggested Response",
@@ -2803,7 +2801,6 @@
       "targetAudience": "Target Audience",
       "taskName": "Task Name",
       "timeSaved": "Time Saved",
-      "title": "Title",
       "toolsNeeded": "Tools Needed",
       "topic": "Topic",
       "twitterThread": "Twitter Thread",
@@ -2822,13 +2819,10 @@
       "crossPlatform": "cross-platform",
       "desktop": "desktop",
       "done": "done",
-      "draft": "draft",
       "email": "email",
       "event": "event",
       "expense": "expense",
-      "final": "final",
       "inProgress": "in progress",
-      "inReview": "in review",
       "income": "income",
       "ios": "ios",
       "live": "live",
@@ -2863,7 +2857,6 @@
       "apps": "Delete this app? This can't be undone.",
       "images": "Delete this image? This can't be undone.",
       "videos": "Delete this video? This can't be undone.",
-      "presentations": "Delete this presentation note? This can't be undone.",
       "campaigns": "Delete this campaign? This can't be undone."
     },
     "empty": {
@@ -2947,11 +2940,6 @@
         "why": "The brief for each video and how far it has got, so a shoot list is never something you keep in your head. It does not create videos.",
         "example": "A 30-second product demo"
       },
-      "presentations": {
-        "title": "A place to keep track of presentations",
-        "why": "Note the decks you are planning or have already given — this page does not generate slides for you. Use the button above to add one.",
-        "example": "Investor deck for the seed round"
-      },
       "campaigns": {
         "title": "Every campaign, and what it cost",
         "why": "Channel, budget and status side by side, so the next budget decision is made from numbers rather than from feel. It does not run campaigns.",
@@ -2975,7 +2963,6 @@
       "apps": "New app",
       "images": "New image",
       "videos": "New video",
-      "presentations": "New presentation note",
       "campaigns": "New campaign"
     }
   },
@@ -3227,6 +3214,26 @@
       "is": "Patterns found in your own entries by code, not by a model guessing.",
       "does": "Counts your rows, finds patterns that clear a threshold, and says each one with the number of entries behind it and a link to them.",
       "doesNot": "It does not forecast the future, and it will not invent a pattern to have something to say. Fewer than a handful of matching rows and it tells you there is not enough to go on."
+    },
+    "presentations": {
+      "is": "A slide generator: a brief in, a deck of slides out.",
+      "does": "Writes the title, the bullets and the speaker notes for each slide in the language of your brief, finds a photo on Unsplash or places yours, and exports the deck as PowerPoint (.pptx) or PDF.",
+      "doesNot": "It does not draw charts or tables, does not pick a design theme, and does not generate images — photos come from Unsplash or from you. The slides are not edited here: download the .pptx and finish in PowerPoint or Keynote."
+    },
+    "posts": {
+      "is": "A post writer: one brief in, one post per platform out.",
+      "does": "Writes a LinkedIn post, a post for X, an Instagram caption with hashtags, a Facebook post and a Threads post from the same brief — each cut to that platform's length and written in its register, in the language of your brief — with a copy button on each.",
+      "doesNot": "It does not publish, schedule or connect to any social account, and it does not reuse one text across platforms — five platforms, five posts. No images are made; the picture is yours."
+    },
+    "projects": {
+      "is": "A folder with a goal, holding exactly what you put in it.",
+      "does": "Groups your own rows — files, conversations, plans, agents, decks, posts and any tracker record — under one name and one goal, and lets a chat start inside it so it reads more rows from fewer modules.",
+      "doesNot": "It does not pull things in by itself: a plan in a project does not bring its steps, and a website does not bring its form submissions. Deleting a project deletes the folder, never the contents."
+    },
+    "projectDetail": {
+      "is": "One project: its goal, what you put in it, and a chat that starts inside it.",
+      "does": "Groups the members as tasks, files, agents and results, shows when each joined, lets you take any of them out, and starts a conversation that belongs to this project for its whole life.",
+      "doesNot": "Taking something out does not delete it, and the project adds nothing by itself: a plan here does not bring its steps, a website does not bring its form submissions."
     }
   },
   "helpCentre": {
@@ -3502,7 +3509,7 @@
     }
   },
   "dataAnalysis": {
-    "title": "Data Analysis",
+    "title": "See what the numbers say",
     "description": "Upload a spreadsheet. Every statistic is computed from the whole file — never guessed.",
     "upload": {
       "title": "Upload a file",
@@ -3629,8 +3636,166 @@
       "failed": "failed"
     }
   },
+  "presentations": {
+    "title": "Presentations",
+    "description": "Describe the deck and get the slides — editable PowerPoint or PDF, with photos from Unsplash or your own.",
+    "limits": {
+      "title": "What this does NOT do",
+      "no_charts": "It draws no charts or tables. A slide is a title, bullets and speaker notes.",
+      "no_themes": "It picks no design theme. The deck is plain and yours to style.",
+      "no_editing": "The slides are not edited here. Download the .pptx and finish it in PowerPoint, Keynote or LibreOffice.",
+      "no_generated_images": "It generates no images. Photos come from Unsplash or from the ones you upload."
+    },
+    "form": {
+      "description": "What is the presentation about?",
+      "descriptionPlaceholder": "A ten-minute pitch of our bakery's catering service to three hotel managers: who we are, what we deliver, prices, and what we need from them…",
+      "slideCount": "Slides",
+      "slides": "{count, plural, one {# slide} other {# slides}}",
+      "imageSource": "Pictures",
+      "sources": {
+        "unsplash": "From Unsplash",
+        "own": "My own photos",
+        "none": "No photos",
+        "unsplashHint": "Free stock photos, matched to each slide that asks for one and credited to the photographer.",
+        "ownHint": "Up to {max} JPEG or PNG photos, placed in order on the slides that ask for one.",
+        "noneHint": "Text only.",
+        "unsplashUnavailable": "Unsplash is not configured on this deployment, so photos can only be your own."
+      },
+      "addPhotos": "Add photos",
+      "photosSelected": "{count} of {max}",
+      "remove": "Remove",
+      "generate": "Write the slides",
+      "generating": "Writing the deck…"
+    },
+    "result": {
+      "title": "Your deck",
+      "slidesCount": "{count, plural, one {# slide} other {# slides}}",
+      "charged": "{credits, plural, one {# credit} other {# credits}}",
+      "preparing": "Preparing…",
+      "exportPptx": "Download PowerPoint",
+      "exportPdf": "Download as PDF",
+      "notes": "Speaker notes",
+      "noPhotoFound": "No photo matched the slides that asked for one — the deck is text only.",
+      "photoBy": "Photo by <author>{name}</author> on <unsplash>Unsplash</unsplash>",
+      "layout": {
+        "title": "Title",
+        "bullets": "Points",
+        "section": "Section",
+        "quote": "Quote",
+        "image": "Photo"
+      }
+    },
+    "errors": {
+      "tooShort": "Say a little more about the presentation first.",
+      "tooLong": "That's longer than {limit} characters. Describe the deck, not the whole talk.",
+      "insufficient": "Not enough credits for this deck.",
+      "rateLimited": "Too many requests — please wait a minute and try again.",
+      "unavailable": "The AI service couldn't be reached. Nothing was charged.",
+      "unusable": "The model returned something that wasn't a deck. Try describing it differently.",
+      "failed": "That didn't work — try again.",
+      "imageRejected": "Only JPEG or PNG under 5 MB, and at most {max} photos.",
+      "uploadFailed": "A photo could not be uploaded.",
+      "exportFailed": "The file could not be created."
+    },
+    "history": {
+      "title": "History",
+      "empty": "Nothing here yet.",
+      "slides": "{count, plural, one {# slide} other {# slides}}",
+      "failed": "failed",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this presentation? This can't be undone.",
+      "noteFromBefore": "note from before"
+    }
+  },
+  "posts": {
+    "title": "Posts",
+    "description": "Say what you want to say once; get a post written for each platform, at its length and in its register. Copy it and post it yourself.",
+    "limits": {
+      "title": "What this does NOT do",
+      "no_publish": "It publishes nothing. Nothing here reaches LinkedIn, X, Instagram, Facebook or Threads — you copy the text and post it.",
+      "no_scheduling": "It schedules nothing and has no calendar.",
+      "no_images": "It makes no images. Text only; the picture is yours.",
+      "no_accounts": "It is not connected to any social account, and does not ask for one."
+    },
+    "form": {
+      "description": "What do you want to say?",
+      "descriptionPlaceholder": "Our bakery now delivers breakfast to offices in the centre — order by 18:00 for the next morning, minimum ten people, first order 10% off…",
+      "platforms": "Platforms",
+      "upTo": "up to {max} characters",
+      "generate": "Write the posts",
+      "generating": "Writing…"
+    },
+    "result": {
+      "title": "Your posts",
+      "charged": "{credits, plural, one {# credit} other {# credits}}",
+      "chars": "{count} / {max}",
+      "missing": "{platform} was not written this time — run it again with only that platform."
+    },
+    "errors": {
+      "tooShort": "Say a little more first.",
+      "tooLong": "That's longer than {limit} characters. Say what the post is about, not the whole story.",
+      "insufficient": "Not enough credits for these posts.",
+      "rateLimited": "Too many requests — please wait a minute and try again.",
+      "unavailable": "The AI service couldn't be reached. Nothing was charged.",
+      "unusable": "The model returned something that wasn't a set of posts. Try describing it differently.",
+      "failed": "That didn't work — try again."
+    },
+    "history": {
+      "title": "History",
+      "empty": "Nothing here yet.",
+      "failed": "failed",
+      "delete": "Delete",
+      "deleteConfirm": "Delete these posts? This can't be undone."
+    }
+  },
+  "projects": {
+    "title": "Projects",
+    "description": "A folder with a goal. Put things in it explicitly; nothing is dragged in with them.",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Launch the autumn shop",
+      "goal": "Goal",
+      "goalPlaceholder": "What are you trying to achieve?",
+      "create": "Create project"
+    },
+    "list": {
+      "title": "Your projects",
+      "empty": "No projects yet.",
+      "members": "{count, plural, one {# thing} other {# things}}"
+    },
+    "status": {
+      "active": "Active",
+      "done": "Done",
+      "archived": "Archived"
+    },
+    "sections": {
+      "goal": "Goal",
+      "tasks": "Tasks",
+      "files": "Files",
+      "agents": "Agents",
+      "results": "Results",
+      "activity": "Activity",
+      "other": "Everything else",
+      "empty": "Nothing here yet."
+    },
+    "progress": {
+      "rowsPerModule": "{count, plural, one {# row per module in chat} other {# rows per module in chat}}"
+    },
+    "startChat": "Start a chat in this project",
+    "chatFixed": "A conversation belongs to the project it was started in, for its whole life.",
+    "noGoal": "No goal written yet.",
+    "untitled": "Untitled",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this project? The things in it stay where they are.",
+    "removeMember": "Take out of the project",
+    "errors": {
+      "tooShort": "Give it a name first.",
+      "tooLong": "That name is longer than {limit} characters.",
+      "failed": "That didn't work — try again."
+    }
+  },
   "finance": {
-    "title": "Business health",
+    "title": "How the business is doing",
     "description": "Every figure is computed from real rows, or says why it cannot be.",
     "needsInput": "Needs: {fields}",
     "needsHistory": "Needs {need} months of history — we have {have}.",
@@ -3682,7 +3847,7 @@
     "needsHistoryDays": "Needs {need} days of daily snapshots — we have {have}."
   },
   "routing": {
-    "title": "Model routing",
+    "title": "Which AI is used",
     "description": "Which model served which request over the last 30 days, what it cost, and what routing saved.",
     "empty": "No routing decisions have been recorded yet. This table fills in once requests start flowing through the router — it is not showing zeros, it is showing nothing.",
     "decisions": "Decisions",
@@ -3763,6 +3928,37 @@
       "not_delivered_test_sender": "Your message could not be delivered: this deployment has no verified sender address.",
       "send_failed": "Your message could not be sent. Please try again.",
       "unknown": "Something went wrong. Please try again."
+    }
+  },
+  "stepFlow": {
+    "label": "Steps",
+    "steps": {
+      "describe": "Describe",
+      "generate": "Generate",
+      "edit": "Edit",
+      "preview": "Preview",
+      "publish": "Publish",
+      "question": "Question",
+      "research": "Research",
+      "sources": "Sources",
+      "answer": "Answer",
+      "upload": "Upload",
+      "ask": "Ask",
+      "review": "Review"
+    },
+    "hints": {
+      "describe": "Say what you want, in your own words.",
+      "generate": "It writes the first version. This spends credits.",
+      "edit": "Tell it what to change. You can do this as often as you like.",
+      "preview": "Look at it before anyone else does.",
+      "publish": "Put it online, at its own address.",
+      "question": "A subject to look into, not a search box.",
+      "research": "It reads the web and takes notes.",
+      "sources": "Every claim keeps the page it came from.",
+      "answer": "The answer, with what it was taken from.",
+      "upload": "PDF, Word, text, spreadsheets.",
+      "ask": "Tick one or more files — the answer comes only from what you tick.",
+      "review": "Read it before you use it. Nothing is run here."
     }
   }
 }

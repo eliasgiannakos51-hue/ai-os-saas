@@ -514,11 +514,26 @@ export default async function OverviewPage() {
           <LowCreditsBanner />
         </div>
 
-        {/* 1. ACTION — the input, first, because it is the answer to
-               "what do I do now" and it was below the fold. */}
+        {/* 1. THE SENTENCE, THE FIELD, THE ANSWERS — redesign phase 1.
+               The field was already first among the cards, and it was
+               still the third thing on the screen and 128px tall. What
+               changed is proportion, not order: one sentence that says
+               what this is, then a box that takes at least 40% of the
+               first screen at 1440 AND at 390, measured by
+               scripts/tests/home-first-screen.prodtest.mjs rather than
+               asserted here. Everything that used to crowd it is below
+               it and unchanged.
+
+               A SECOND SENTENCE WAS ADDED HERE AND TAKEN BACK OUT. The
+               screenshot from the first run of
+               scripts/tests/home-first-screen.prodtest.mjs showed two
+               headlines saying the same thing forty pixels apart: the
+               hero line this page has drawn since V4.6 and a new one
+               under it. The requested sentence was already on the
+               screen; what was missing was the proportion below it. */}
         <div className="mt-6">
           <WidgetBoundary label="create-chat" {...boundary}>
-            <CreateChat showHeading={false} />
+            <CreateChat showHeading={false} hero />
           </WidgetBoundary>
           {/* UNDER the input, not above it. Above, they read as the
               screen's own suggestions and compete with the box; below,

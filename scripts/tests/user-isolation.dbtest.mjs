@@ -779,56 +779,240 @@ console.log("\n== 3b. the files themselves, not just the rows about them ==");
 // production's — asked on 2026-09-05, production's storage.objects has
 // relrowsecurity = true. bootstrap-supabase.sql now does both, and this
 // section is what says the policies work rather than merely exist.
+// TEN POLICIES, ONE AT A TIME.
+//
+// The first version of this section probed SELECT and DELETE across the
+// three buckets and reported four aggregate results. Six of the ten
+// policies were exercised by it; the three INSERT policies and the one
+// UPDATE policy were not touched at all, and a `with check (true)` on any
+// of them would have left every line green. "A cannot see B's file in
+// any bucket" is a true sentence about a check that never inserted
+// anything.
+//
+// So each policy gets its own pair — the OWN case, which must be allowed,
+// and the OTHER case, which must not be — and its own named line, because
+// a mutation has to be able to redden one policy and not the rest.
+//
+// AND THE TWO ABSENCES ARE CHECKED TOO. website-references and
+// create-attachments have no UPDATE policy, deliberately: nothing in the
+// product edits a reference image or an attachment in place. With row
+// level security on, no policy means the verb affects zero rows — so "A
+// cannot update its OWN file there" is the assertion that says the
+// per-command probe is real. Without it, a probe that silently did
+// nothing would pass every line above.
 const BUCKETS = ["user-files", "website-references", "create-attachments"];
-const storageRows = [];
-for (const bucket of BUCKETS) {
-  const out = dataLines(`
-    begin;
-    insert into storage.buckets (id, name) values ('${bucket}', '${bucket}')
-      on conflict (id) do nothing;
-    insert into storage.objects (bucket_id, name, owner) values
-      ('${bucket}', '${A}/a.bin', '${A}'), ('${bucket}', '${B}/b.bin', '${B}');
-    set local role authenticated;
-    set local request.jwt.claim.sub = '${A}';
-    select 'own='   || (select count(*) from storage.objects where bucket_id='${bucket}' and name like '${A}/%');
-    select 'other=' || (select count(*) from storage.objects where bucket_id='${bucket}' and name like '${B}/%');
-    savepoint d;
-    with d as (delete from storage.objects where bucket_id='${bucket}' and name like '${B}/%' returning 1)
-      select 'del=' || (select count(*) from d);
-    rollback to savepoint d;
-    delete from storage.objects where bucket_id='${bucket}';
-    reset role;
-    select 'bulkdel=' || (1 - (select count(*) from storage.objects
-      where bucket_id='${bucket}' and name like '${B}/%'));
-    rollback;
-  `);
-  const got = Object.fromEntries(
-    out.filter((l) => l.includes("=")).map((l) => l.trim().split("="))
-  );
-  storageRows.push({ bucket, ...got });
+
+/** The policies the migrations create, by bucket and command. */
+const STORAGE_POLICIES = [
+  { bucket: "user-files", cmd: "select", policy: "select_own_user_files_objects" },
+  { bucket: "user-files", cmd: "insert", policy: "insert_own_user_files_objects" },
+  { bucket: "user-files", cmd: "update", policy: "update_own_user_files_objects" },
+  { bucket: "user-files", cmd: "delete", policy: "delete_own_user_files_objects" },
+  { bucket: "website-references", cmd: "select", policy: "select_own_website_references" },
+  { bucket: "website-references", cmd: "insert", policy: "insert_own_website_references" },
+  { bucket: "website-references", cmd: "delete", policy: "delete_own_website_references" },
+  { bucket: "create-attachments", cmd: "select", policy: "select_own_create_attachments" },
+  { bucket: "create-attachments", cmd: "insert", policy: "insert_own_create_attachments" },
+  { bucket: "create-attachments", cmd: "delete", policy: "delete_own_create_attachments" },
+];
+/** (bucket, command) pairs with no policy — the verb must affect nothing. */
+const NO_POLICY = [
+  { bucket: "website-references", cmd: "update" },
+  { bucket: "create-attachments", cmd: "update" },
+];
+
+/**
+ * Two files, one per account, inside a transaction that is rolled back.
+ *
+ * THE TABLE IS EMPTIED FIRST, as the owner, so that "touched 1 of 2" is a
+ * real denominator: the unqualified probes below carry no WHERE at all —
+ * that is the whole point of them — so any row another suite happened to
+ * leave behind would be counted. Every statement here runs inside
+ * `begin … rollback`, and psql aborts the transaction on any error, so
+ * nothing this deletes outlives the probe.
+ */
+const storageSetup = (bucket) => `
+  insert into storage.buckets (id, name) values ('${bucket}', '${bucket}')
+    on conflict (id) do nothing;
+  delete from storage.objects;
+  insert into storage.objects (bucket_id, name, owner) values
+    ('${bucket}', '${A}/a.bin', '${A}'), ('${bucket}', '${B}/b.bin', '${B}');
+  set local role authenticated;
+  set local request.jwt.claim.sub = '${A}';`;
+
+/**
+ * One statement, as A, against a freshly built bucket. Returns how many
+ * rows it touched, or `refused` when row level security raised — which is
+ * what an INSERT outside your own prefix does, and the only shape in
+ * which a policy says no out loud.
+ */
+function asA(bucket, statement) {
+  const sql = `begin;${storageSetup(bucket)}\n${statement}\nrollback;`;
+  try {
+    const out = execFileSync("psql", ["-d", DB, "-v", "ON_ERROR_STOP=1", "-tAF|", "-c", sql], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    const tags = out.split("\n").map((l) => l.trim()).filter((l) => /^(INSERT|UPDATE|DELETE|SELECT) \d/.test(l));
+    const last = tags[tags.length - 1] ?? "";
+    const n = last.startsWith("INSERT") ? Number(last.split(/\s+/)[2]) : Number(last.split(/\s+/)[1]);
+    return { refused: false, rows: Number.isFinite(n) ? n : -1 };
+  } catch (err) {
+    const text = String(err.stderr ?? err.stdout ?? err.message);
+    return { refused: true, rows: 0, error: text.trim().split("\n")[0] };
+  }
 }
+
+/**
+ * A WRITE WITH NO WHERE AT ALL — and it is the only shape that can see an
+ * unscoped UPDATE or DELETE policy.
+ *
+ * MEASURED TWICE by this file's own mutation suite, on 2026-09-08.
+ * `update_own_user_files_objects` was rewritten to
+ * `using (true) with check (true)` and this section stayed GREEN; so did
+ * `delete_own_create_attachments` with `using (true)`.
+ *
+ * The reason is PostgreSQL's, not the schema's: when an UPDATE or DELETE
+ * carries a WHERE (or a RETURNING) that refers to the table's columns,
+ * the SELECT policies are applied to the rows it fetches BEFORE the write
+ * policy is consulted. So `where name like 'B/%'` matches nothing while
+ * reading is scoped, whatever the write policy says.
+ *
+ * AND `where bucket_id = '…'` IS STILL A WHERE. That was the second
+ * draft, and it failed the same way — measured, same two mutants, same
+ * green. The predicate has to be gone entirely.
+ *
+ * The row-level half of this file learned this two rounds ago — "only a
+ * write with no WHERE can see this class at all" — and the storage half
+ * was written without it.
+ */
+const unqualified = (cmd) =>
+  cmd === "update"
+    ? `update storage.objects set metadata = '{"probe":1}'::jsonb;`
+    : `delete from storage.objects;`;
+
+/** The statement for one (command, whose-prefix) pair. */
+function statementFor(bucket, cmd, owner) {
+  const prefix = `${owner}/`;
+  if (cmd === "select") return `select count(*) from storage.objects where bucket_id='${bucket}' and name like '${prefix}%';`;
+  if (cmd === "insert") return `insert into storage.objects (bucket_id, name, owner) values ('${bucket}', '${prefix}new.bin', '${A}');`;
+  if (cmd === "update") return `update storage.objects set metadata = '{"probe":1}'::jsonb where bucket_id='${bucket}' and name like '${prefix}%';`;
+  return `delete from storage.objects where bucket_id='${bucket}' and name like '${prefix}%';`;
+}
+
+/** A SELECT reports its answer in the row, not in the command tag. */
+function filesVisibleTo(bucket, owner) {
+  const out = dataLines(`begin;${storageSetup(bucket)}
+    select 'n=' || (select count(*) from storage.objects where bucket_id='${bucket}' and name like '${owner}/%');
+  rollback;`);
+  const line = out.find((l) => l.startsWith("n="));
+  return Number((line ?? "n=-1").slice(2));
+}
+
 check(
   `row level security is ON for storage.objects — without it the ten policies are decoration`,
   psql("select relrowsecurity from pg_class where oid = 'storage.objects'::regclass") === "t"
 );
-check(
-  `A sees its own file in all ${BUCKETS.length} buckets — the control`,
-  storageRows.every((r) => r.own === "1"),
-  storageRows.map((r) => `${r.bucket}: own=${r.own}`).join(", ")
-);
-check(
-  `A cannot SEE B's file in any bucket (${BUCKETS.length})`,
-  storageRows.every((r) => r.other === "0"),
-  storageRows.filter((r) => r.other !== "0").map((r) => `${r.bucket}: ${r.other}`).join(", ")
-);
-check(
-  `A cannot DELETE B's file, by name or with no WHERE (${BUCKETS.length} buckets)`,
-  storageRows.every((r) => r.del === "0" && r.bulkdel === "0"),
-  storageRows
-    .filter((r) => r.del !== "0" || r.bulkdel !== "0")
-    .map((r) => `${r.bucket}: del=${r.del} bulkdel=${r.bulkdel}`)
-    .join(", ")
-);
+{
+  // THE POLICIES THE DATABASE ACTUALLY HAS, compared against the ten this
+  // section probes. A probe list that has drifted from the schema tests
+  // ten policies that are not there.
+  const live = new Set(
+    psql("select policyname from pg_policies where schemaname='storage' and tablename='objects'")
+      .split("\n").map((l) => l.trim()).filter(Boolean)
+  );
+  const missing = STORAGE_POLICIES.filter((p) => !live.has(p.policy)).map((p) => p.policy);
+  check(
+    `the ten policies this section probes are the ten the database has (${live.size})`,
+    missing.length === 0 && live.size === STORAGE_POLICIES.length,
+    missing.length ? `not in the database: ${missing.join(", ")}` : `database has ${live.size}`
+  );
+}
+
+for (const { bucket, cmd, policy } of STORAGE_POLICIES) {
+  if (cmd === "select") {
+    const own = filesVisibleTo(bucket, A);
+    const other = filesVisibleTo(bucket, B);
+    check(`${policy}: A sees its own file (${own}) and not B's (${other})`, own === 1 && other === 0, `own=${own} other=${other}`);
+    continue;
+  }
+  const own = asA(bucket, statementFor(bucket, cmd, A));
+  const other = asA(bucket, statementFor(bucket, cmd, B));
+  if (cmd === "insert") {
+    // AN INSERT IS THE ONE VERB THAT SAYS NO OUT LOUD. A row that fails
+    // WITH CHECK raises 42501; there is no "0 rows" version of it, and a
+    // check that only counted rows would read the raise as a crash.
+    check(
+      `${policy}: A may write under its own prefix, and is REFUSED under B's`,
+      !own.refused && own.rows === 1 && other.refused,
+      `own=${own.refused ? `refused (${own.error})` : own.rows} other=${other.refused ? "refused" : `${other.rows} row(s) written`}`
+    );
+    continue;
+  }
+  // TWO ROWS EXIST, ONE PER ACCOUNT. An unqualified write must touch
+  // exactly one of them.
+  const wide = asA(bucket, unqualified(cmd));
+  check(
+    `${policy}: A ${cmd}s its own file (${own.rows}), reaches none of B's (${other.rows}), and an unqualified ${cmd} touches only its own (${wide.rows} of 2)`,
+    !own.refused && own.rows === 1 && !other.refused && other.rows === 0 && !wide.refused && wide.rows === 1,
+    `own=${own.refused ? "refused" : own.rows} other=${other.refused ? "refused" : other.rows} bucket-wide=${wide.refused ? "refused" : wide.rows}`
+  );
+}
+
+for (const { bucket, cmd } of NO_POLICY) {
+  const own = asA(bucket, statementFor(bucket, cmd, A));
+  const wide = asA(bucket, unqualified(cmd));
+  check(
+    `${bucket} has no ${cmd.toUpperCase()} policy, so even A's own file is untouchable (${own.rows}) and an unqualified ${cmd} touches nothing (${wide.rows} of 2)`,
+    !own.refused && own.rows === 0 && !wide.refused && wide.rows === 0,
+    own.refused ? `refused: ${own.error}` : `own=${own.rows} bucket-wide=${wide.rows} — a policy exists that should not`
+  );
+}
+
+// ---------------------------------------------------------------------
+// AND ONE OF THE THREE BUCKETS IS PUBLIC, which none of the ten policies
+// above says and which changes what "A cannot see B's file" means.
+// ---------------------------------------------------------------------
+//
+// 20260819000000_files_storage_repair.sql sets
+// `website-references` public = true, on purpose: the images somebody
+// uploads as references are embedded into the site that gets generated
+// from them, and a generated site is served to anybody.
+//
+// WHAT THAT COSTS, said plainly rather than left for somebody to
+// discover. A public bucket is served by Supabase's storage service at
+// /storage/v1/object/public/<bucket>/<path> WITHOUT consulting any
+// policy. select_own_website_references still scopes the API — LISTING
+// another account's references is refused, which is what the line above
+// measures — but a person who has the PATH can fetch the object without
+// signing in. The paths are `<uuid>/<filename>`, so this is unlisted
+// rather than open; it is not the same guarantee as the other two
+// buckets, and reading the SELECT line as if it were would be wrong.
+//
+// I DID NOT TEST THE HTTP PATH. This is a fact about the bucket flag
+// read from the catalog, not a fetch against a running storage service.
+const PUBLIC_BUCKETS = { "website-references": "reference images are embedded in the generated site" };
+{
+  const live = rows("select id, public from storage.buckets order by 1")
+    .filter(([id]) => BUCKETS.includes(id));
+  const publicOnes = live.filter(([, isPublic]) => isPublic === "t").map(([id]) => id);
+  check(
+    `the buckets were read (${live.length} of ${BUCKETS.length})`,
+    live.length === BUCKETS.length,
+    live.map(([id, p]) => `${id}=${p}`).join(", ")
+  );
+  check(
+    `exactly the argued-for bucket is public (${publicOnes.join(", ") || "none"})`,
+    publicOnes.length === Object.keys(PUBLIC_BUCKETS).length &&
+      publicOnes.every((b) => b in PUBLIC_BUCKETS),
+    `public: ${publicOnes.join(", ") || "none"} — expected ${Object.keys(PUBLIC_BUCKETS).join(", ")}`
+  );
+  check(
+    "...and the other two are private, so their SELECT policy is the whole story",
+    BUCKETS.filter((b) => !(b in PUBLIC_BUCKETS)).every((b) => !publicOnes.includes(b)),
+    publicOnes.join(", ")
+  );
+}
 
 // ---------------------------------------------------------------------
 console.log("\n== 4. and the check can go red ==");

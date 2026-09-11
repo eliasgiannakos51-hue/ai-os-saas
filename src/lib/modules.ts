@@ -133,6 +133,21 @@ export function emptyStateKey(module: ModuleConfig, part: EmptyStatePart): Modul
   return `${module.emptyKey}.${part}`;
 }
 
+/**
+ * What LINKING needs, which is less than what a TRACKER needs.
+ *
+ * ModuleConfig requires emptyKey and newKey — the strings a GenericList
+ * shows when a tracker is empty and the label on its "add one" button. A
+ * conversation has neither and never will. Declared HERE rather than in
+ * lib/knowledge-graph.ts so that lib/projects/linkable-extras.ts, whose
+ * entries the registry spreads, does not have to import the registry
+ * back: scripts/tests/load-ts.mjs concatenates a module graph into one
+ * scope, and that cycle failed there with "Cannot access
+ * LINK_ONLY_MODULES before initialization" before this moved.
+ */
+export type LinkableModule = Omit<ModuleConfig, "emptyKey" | "newKey"> &
+  Partial<Pick<ModuleConfig, "emptyKey" | "newKey">>;
+
 export type ModuleConfig = {
   slug: string;
   titleKey: ModuleTitleKey;

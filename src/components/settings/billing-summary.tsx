@@ -43,7 +43,7 @@ export async function BillingSummary({
   const plan = getPlan(tier) ?? getPlan("free")!;
 
   return (
-    <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
+    <div className="mb-6 space-y-3 surface">
       <h2 className="text-sm font-semibold text-foreground">{t("title")}</h2>
       {subscription?.cancelAtPeriodEnd && subscription.endsAt && (
         <SubscriptionEndingBanner daysLeft={daysUntil(subscription.endsAt)} />
@@ -117,7 +117,7 @@ export async function BillingSummary({
           ) : (
             <Link
               href="/pricing"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
             >
               {t("upgradePlan")}
             </Link>

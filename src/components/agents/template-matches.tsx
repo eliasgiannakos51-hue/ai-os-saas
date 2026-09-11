@@ -70,7 +70,7 @@ export function TemplateMatches({
           </p>
           <ul className="space-y-2">
             {matches.map((match) => (
-              <li key={match.slug} className="rounded-lg border border-border bg-panel p-3">
+              <li key={match.slug} className="surface-tight">
                 <p className="text-sm font-medium text-foreground">{match.title}</p>
                 <p className="mt-0.5 text-[11px] leading-relaxed text-muted">{match.description}</p>
                 {/* THE ACTUAL TASK, with the slot still showing. */}
@@ -81,7 +81,7 @@ export function TemplateMatches({
                   type="button"
                   disabled={busy}
                   onClick={() => onUse(match)}
-                  className="mt-2 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-orange-500/90 px-3 text-sm font-medium text-white transition-colors hover:bg-orange-500 disabled:opacity-50"
+                  className="hover:bg-orange-500/10 mt-2 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-orange-500/90 px-3 text-sm font-medium text-orange-300 transition-colors hover:border border-orange-500/60 disabled:opacity-50"
                 >
                   {t("use", { credits: templateCredits })}
                 </button>

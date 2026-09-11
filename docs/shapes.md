@@ -432,19 +432,550 @@ the product already makes (a ratchet). `ambiguity.mutation.mjs` includes
 both degenerate classifiers, because "always unsure" and "always vague"
 each pass a check that looks at only one of the two.
 
+## A comment that describes a bug accurately, as if it were a design note
+
+The worst one in this document, because the comment PROTECTS the bug.
+
+`src/lib/sidebar-label-keys.ts` said, for months:
+
+> The underlying strings stay English (state keys, search matching) — only
+> the rendered label goes through messages/*.json.
+
+Every word of that is true. It is also a complete description of a defect:
+the command palette matched an English string it never showed anybody, so
+a Greek user saw «Οικονομικά», typed «οικο», and reached nothing. 168 of
+490 (item x locale) pairs were reachable by the name on the screen; Arabic
+was 0 of 49.
+
+**Why it survived.** A reviewer who sees no comment asks what happens in
+Greek. A reviewer who sees THIS comment reads a considered decision,
+concludes somebody already thought about it, and moves on. The comment
+does not hide the behaviour — it states it exactly — but it changes the
+reader's posture from *questioning* to *accepting*. An undocumented bug is
+found by the next person who looks. A documented one is not looked at.
+
+**The test.** Read the sentence as a QUESTION instead of a statement.
+"The strings stay English for search matching" becomes "should the strings
+stay English for search matching?" — and the answer is obviously no. Any
+comment whose declarative form is comfortable and whose interrogative form
+is alarming is describing something that needs fixing rather than
+explaining.
+
+The phrases that most often carry this: *stays English*, *for now*, *for
+the moment*, *by design* with no design given, *intentionally* with no
+intent given, *known limitation*, *acceptable for now*, *good enough*.
+None of them is wrong to write. Each of them is a place to re-ask the
+question, and the ones that name no reason are the ones nobody can
+re-check.
+
+*Caught by:* `scripts/tests/comment-claims.test.mjs` counts the
+declarative-limitation comments in the tree and holds the count at a
+ratchet, so a new one has to be looked at and either justified or fixed.
+It cannot decide whether any given sentence is a bug — no scan can — so it
+does the one thing a scan can do honestly: keep the list small enough that
+a person can read it.
+
+## Only the failures leave a trace
+
+**The feature was built to make most requests cost nothing, and that is
+exactly what made it unmeasurable.** V5 #6 put a free ambiguity reader in
+front of a paid clarifying-question call: a request it reads as `clear`
+never touches the API. Correct, cheap, and shipped.
+
+It also meant that the only requests which left a row in `ai_cost_log`
+were the ones the free reader had FAILED to decide. The cheap path spent
+nothing, and spending nothing is what the log records. So the question
+"how often does the free reader get it right?" had exactly one
+computable answer — 100% — and it was an artifact of where the rows came
+from, not a fact about the reader.
+
+**Nobody wrote a wrong number. The number simply could not be asked
+for.** The verdict was computed inside the function, used to decide
+whether to spend, and dropped on the floor; three surfaces recorded what
+the check COST and none recorded what it DECIDED.
+
+**The fix has two halves and the second is the one that is easy to miss.**
+Carrying the verdict out is obvious once seen. Writing a ZERO-COST ROW
+for the free path is not: it looks like logging work that never happened,
+and the existing guard said as much in a comment. But a decision is work,
+and a ratio whose denominator is only its own failures is not a ratio.
+
+**The test.** For anything whose success is "we did not have to act",
+ask where the successes are written down. A defence that logs its
+activations and not its quiet days will always report a hundred per cent
+hit rate, and so will a broken one.
+
+*Caught by:* `scripts/tests/clarification-verdict.test.mjs` requires every
+decision return to carry its verdict and every surface to record it
+through one builder; `clarification-verdict.mutation.mjs` drops the
+verdict on the free path and requires the gate to notice.
+`scripts/db/clarification-rate.mjs` is the per-day query, proven against
+a real Postgres.
+
+## A file so long that nobody is the reviewer
+
+**Not one non-English string in this product had been read by somebody
+who speaks the language.** That is a true sentence about 26,397
+translations — 2,933 keys in nine languages — and it stayed true through
+every round that noticed it, because the answer was always "find a native
+speaker", and what a native speaker is actually offered is 2,933
+sentences. Nobody reads that. So nobody read any of it, and the count
+that made the problem look enormous is the same count that stopped it
+being worked on.
+
+**The fix was not more reviewers. It was a shorter list.** The strings a
+person meets between the signup form and the first thing the product says
+about their own data are 598 of the 2,933; the ones on those screens that
+are PROSE rather than labels are 44. Forty-four sentences is an hour, and
+an hour is a thing a real person will actually give you.
+
+**What it found, immediately.** Two sentences three lines apart on the
+signup screen addressed the reader differently in Greek — one εσύ, one
+εσείς. Both correct; together, a product that cannot decide whether it
+knows you. Measured across the whole file: 473 informal, 15 polite
+plural, 2 mixing both inside one sentence. Seventeen defects, all real on
+a hand read, none findable by any check that existed, and all of them
+sitting in a file too long for anybody to have read.
+
+**The test.** When a queue is too long to work, the useful question is
+not "how do we get through it" but "which tenth of it carries the
+damage". A backlog nobody starts has the same value as an empty one, and
+a number that makes work look impossible is doing harm even when it is
+accurate.
+
+*Caught by:* `scripts/tests/first-run-strings.test.mjs` regenerates
+`docs/first-run/` and compares it byte for byte, so the pack a reviewer
+is sent can never be last week's wording;
+`scripts/tests/address-register.test.mjs` holds Greek at zero
+polite-plural strings, which is the one thing about a translation a
+machine genuinely can check.
+
+## A fair draw where a promise was wanted
+
+**The complaint was "two sites of the same kind feel like one template",
+and five rounds of answers were about the SIZE of the space.** The
+section order — the axis that decides the skeleton — was hashed per site
+into a list of three. Everything about that was fair, deterministic and
+well tested, and it produced these numbers, measured over 20,000
+constructed pairs and 4,000 constructed people:
+
+| | |
+|---|---|
+| two strangers, same kind, first site each | **33.3%** the same skeleton |
+| one person's own sites 2 to 5 | **59.9%** repeated a skeleton they had |
+| one person, five sites, all identical | **1.0%** |
+
+**None of that is a bug in the hash.** A three-sided die lands on the
+same face a third of the time; that is what dice do. The mistake was
+reaching for a die at all where the product could make a promise.
+
+**Two different questions, and only one of them needs randomness.** Two
+strangers' draws cannot see each other, so 1-in-N is a floor for them and
+the only lever is N. But *one person's own* sites are all known to the
+same account, and "your next site does not have your last site's
+skeleton" is something a cycle can guarantee and a draw never can. The
+order is now drawn once per person and stepped: their first N sites use
+every order exactly once, and the first repeat is site N+1.
+
+**The test.** For any "should be different" property, ask who is
+comparing. If the two things being compared are both visible to the same
+piece of code, a fair draw is the weaker answer — it gets you a
+probability where an ordering would have got you a guarantee. Randomness
+is for the case where coordination is impossible, not the case where it
+was not attempted.
+
+*Caught by:* `scripts/tests/section-order-space.test.mjs` measures both
+numbers from the shipped function — no model call, no cost — and asserts
+the repeat count is exactly zero rather than "low".
+`section-order-space.mutation.mjs` turns the cycle back into a draw and
+requires that clause to go red.
+
+## The ceiling with eighteen characters left
+
+**Found by breaking it.** Adding three more section orders to each of the
+seven archetypes pushed the cached system prompt from 29,982 characters
+to 32,188, against a gate that holds it under 30,000. The gate was right
+and the addition was not — but the useful part is the first number:
+**the prompt had 18 characters of headroom**, and nothing said so.
+
+Every prompt-sized addition anyone proposed would have failed that gate.
+There was no signal for it short of a red build: the check reports a
+total and a ceiling, and 29,982 against 30,000 reads exactly like 12,000
+against 30,000 to a person skimming a passing test.
+
+**What fixed it was not a bigger ceiling.** Each shape wrote its section
+names out once per order, three times over; numbering them once and
+referring to them by number in a single ORDERS line made room for twice
+as many orders and left the prompt 330 characters SMALLER than it started.
+A limit that looks like it needs raising is often a duplication that
+needs removing.
+
+**The test.** A budget check that prints only "under the limit" is a
+check whose most important state — nearly at it — is indistinguishable
+from its safest one. Print the headroom, not the total.
+
+## A cost decided by a fallback nobody wrote down
+
+**Found 2026-09-07, and only because something else had to report it.**
+`lib/websites-greek-spelling-check.ts` called the provider layer with
+`purpose: "classification"` and no `model`. Every word of that reads
+"cheap". `lib/ai/providers/complete.ts` reads an absent model as
+`originTier = "mid"`, and `substituteModel` then returns the cheapest
+anthropic model at mid tier *or above* — `claude-sonnet-4-6` at 3/15 per
+MTok, not the `claude-haiku-4-5` at 1/5 the name suggests.
+
+**Nothing was wrong with the code.** The routing rule is deliberate and
+documented — *same tier or better, never worse* — and it does exactly what
+its comment says. What was wrong is that a price was set by that rule and
+no one had ever decided it. Every other `runCompletion` caller in the tree
+named its model; this one was the only place where the number came from a
+default, and the default is invisible at the call site.
+
+**Why it survived.** The module's own comment says what it costs: "one
+classification call with at most `SPELLING_WORD_CAP` words and a 300-token
+ceiling: about 200 tokens on a normal site". True, checked, and measured
+on the one axis that was small. The axis that was 3× is not mentioned,
+because the person writing it did not know there was one.
+
+**What it was worth.** About eight hundredths of a cent per website — and
+that is the entry, not a mitigation. A defect worth almost nothing in
+money is worth exactly as much as any other in *reviewability*: `charge >=
+4 × real cost` is computed from the model actually served, and a model
+nobody chose is a number nobody can check.
+
+**The test.** For any call that costs money, ask what sets each input —
+not what its value is. An input whose answer is "the default" has not been
+decided; it has been deferred to a rule written for a different question.
+
+*Caught by:* `scripts/tests/billing-coverage.test.mjs` §1c requires every
+`runCompletion` call site to name its model, mutated in
+`billing-coverage.mutation.mjs`. `scripts/check-site-spelling.mjs` reads
+that name out of the source and refuses to run if it is gone, rather than
+reporting a price for whatever the default lands on.
+
 ## `\b` is ASCII
 
-**This one has no gate, and saying so is the entry.** JavaScript's word
-boundary is defined against `[A-Za-z0-9_]`, and the `u` flag does not
-change it — it is the *boundary* that is ASCII, not the pattern.
-`\bπροτείνω\b` matches nothing, silently, in one language. It has broken
-four features here.
+JavaScript's word boundary is defined against `[A-Za-z0-9_]`, and the `u`
+flag does not change it — it is the *boundary* that is ASCII, not the
+pattern. `\bπροτείνω\b` matches nothing, silently, in one language. It has
+broken four features here.
 
-128 occurrences are scanned and classified; 83 legitimately match a tag or
-attribute name and would be *wrong* without the boundary, 26 are genuinely
-ASCII domains, and the 19 touching human text were read one by one. Two
-live instances were fixed. `scripts/tests/ascii-boundaries.test.mjs`
-catches a boundary next to a non-ASCII literal, but it cannot tell a
-correct `<img\b` from a Greek word without reading intent. Held by
-convention and one heuristic — which is a weaker sentence than every other
-entry in this file, and it is the true one.
+**THIS ENTRY SAID "THIS ONE HAS NO GATE" UNTIL 2026-09-08**, and closed
+with "held by convention and one heuristic — which is a weaker sentence
+than every other entry in this file, and it is the true one." It was true
+then. What was missing was not effort but a rule narrow enough to enforce:
+`scripts/tests/ascii-boundaries.test.mjs` catches a boundary beside a
+non-ASCII *literal*, and cannot tell a correct `<img\b` from a wrong
+`\bonly\b`, because both patterns are pure ASCII. The difference is not in
+the pattern at all — it is in what the pattern is APPLIED TO.
+
+So the rule was narrowed until it bites, in
+`scripts/tests/untrusted-boundaries.test.mjs`: every regex applied to a
+value whose name says it holds text a person or a model wrote (162 of 379
+applications in `src/`) and whose pattern carries `\b` (27 of those) must
+sit in a file that DECLARES the machine format it parses — and the
+declaration is checked rather than taken. The pattern must carry no
+non-ASCII letter and must contain a token of that format: `<`, `>`, `=`,
+an escaped `/`, or `\d`. **A pattern matching a bare word cannot satisfy
+that, so a boundary on prose cannot be declared at all.**
+
+On the day it was written that admitted 27 — tag names, attribute names,
+PDF object headers, OOXML elements — and refused exactly the two that were
+wrong: `/^NO_RESULT\b/i` on model output, where `"NO_RESULTS"` did not
+match and `"NO_RESULTΣ"` did; and `/\bjwt\b/i` on a provider's error text,
+where `"jwtToken"` did not match and `"jwtΤΟΚΕΝ"` did. Both now use a
+Unicode-aware lookahead.
+
+## A check that names its subject in advance
+
+`has_function_privilege('anon', …)`, `grantee = 'authenticated'`,
+`anon_readable_relations` — three real checks in this repository, and all
+three ask a yes/no question about a role somebody chose *before* running
+them. A Supabase project has about fifteen roles. A grant to
+`dashboard_user`, a membership handed to `authenticator`, `BYPASSRLS` set
+on anything, are not *denied* by those checks. They are invisible to them:
+the query never asks, so the answer never appears, and the report says all
+clear.
+
+Measured on 2026-09-07 by asking the other question — "list every grantee
+you hold, on every facet" — against a database with all 66 migrations
+applied: `authenticated` held TRUNCATE, TRIGGER and REFERENCES on 102
+relations and UPDATE on 2 sequences; `anon` held TRUNCATE on
+`help_articles`; and `truncate table public.chat_messages` **succeeded** as
+`authenticated`, with row level security on and its `user_id = auth.uid()`
+policies in place, because RLS does not scope TRUNCATE.
+
+The fix is not one more role name in the predicate — the next role would
+be missed the same way. It is a NAMED LIST of who may hold anything, with
+a reason on every line, and everything outside it red:
+`scripts/db/role-grants.mjs`, `scripts/tests/role-grants.test.mjs`,
+`scripts/tests/role-grants.dbtest.mjs`.
+
+## A gate that deletes what it measures
+
+`clarification-rate.dbtest.mjs` needed an empty `ai_cost_log` to count
+five fixture rows, and made one with `drop schema if exists public
+cascade; create schema public;`. Against the throwaway server
+`npm run test:db` provisions, that reads as housekeeping. Against the
+staging database `scripts/db/run-dbtests.mjs`'s own header invites
+somebody to point it at, it deletes the product.
+
+It was already wrong on the throwaway one, and nothing said so. Suites run
+alphabetically: the fourth left 2 tables where there had been 107, and the
+FIFTH failed — `relation "public.cost_alert_log" does not exist`, a
+message about a file with nothing wrong with it. The round that shipped it
+had run `npm run test:db -- clarification-rate`, and a filtered run has no
+fifth suite.
+
+`db-migrations.test.mjs` section 2b refuses any `*.dbtest.mjs` or
+`scripts/db/*.mjs` that drops a schema this project keeps, or drops or
+truncates a table the migrations create. A scratch object a suite made
+itself is fine — `pack-rate-race.dbtest.mjs` had that right from the day
+it was written, and said why in its own comment.
+
+## An exception that ate the rule
+
+`pending-migrations.mjs` derives the objects each migration creates and
+asks the database whether they exist. One migration creates a probe table
+and drops it again in the same file, so the rule "an object this file also
+drops is not expected afterwards" was written — correctly, for that one
+case, with no notion of ORDER.
+
+Every idempotent policy in `supabase/migrations` is written
+
+    drop policy if exists "x" on t;
+    create policy "x" on t ...;
+
+because a migration here must be safe to paste twice. To a rule that only
+asked *does this file also drop it*, all 204 of them looked exactly like
+that probe. Measured 2026-09-08: **218 CREATE POLICY statements in the
+directory, fourteen expected.** Whole features at once — the trading
+journal, the notification tables, data analysis, bank and crypto, and
+every scoped policy on `storage.objects`. In the file CLAUDE.md names as
+the answer to "what else have I not run?".
+
+A count in front of it would not have helped, and did not: the floor was
+400 objects and green throughout, because 14 is a number too. What catches
+it is asserting the two shapes side by side —
+`scripts/tests/pending-migrations.test.mjs` runs the same two statements in
+both orders and requires opposite answers.
+
+## A probe the defence hides from
+
+`user-isolation.dbtest.mjs` asked whether account A could reach B's file
+with `update storage.objects … where name like 'B/%'`, and answered "0
+rows" for a reason that has nothing to do with the UPDATE policy: when an
+UPDATE or DELETE carries a WHERE that reads a column, PostgreSQL applies
+the SELECT policies to the rows it fetches BEFORE consulting the write
+policy. While reading is scoped, the WHERE matches nothing whatever the
+write policy says.
+
+So `using (true)` on `update_own_user_files_objects` and on
+`delete_own_create_attachments` both left every line of that gate green.
+Measured by its own mutation suite on 2026-09-08 — the gate could not see
+two of the ten policies it was written to cover.
+
+The probe that can is a write with **no name predicate**:
+`delete from storage.objects where bucket_id = '…'` must remove exactly
+one of the two rows in the bucket. The row-level half of the same file had
+already learned this two rounds earlier — "only a write with no WHERE can
+see this class at all" — and the storage half was written without it.
+
+## The import satisfies the check about the call
+
+A gate reads a file and asserts that a symbol is there:
+
+    check("the webhook imports the decision", /creditSyncDecision/.test(webhook));
+
+The import line contains that name. So does a file that imports the
+function and never calls it — which is the exact state the gate was
+written about, because a pure function nobody calls fixes nothing.
+
+Four gates in this repository had it, all found in one afternoon on
+2026-09-08, by mutation suites written for them rather than by reading:
+
+- `subscription-sync` — the webhook could import `creditSyncDecision` and
+  sync credits unconditionally; the money bug it guards, restored, left
+  the line green.
+- `subscription-cancel` — `/CancelSubscription/` matched the import, so
+  cancelling could move back behind the Stripe portal untouched.
+- `locale-resolution` — `indexOf("LOCALE_COOKIE")` found the import at the
+  top of the file, so the cookie "came before" Accept-Language whatever
+  the function did.
+- `credit-grants` — `.includes("signup_grant:")` is satisfied by
+  `oauth_signup_grant:`, a *different* namespace, which is the one defect
+  that check exists for.
+
+The fix is one character in three of the four: assert the CALL
+(`= creditSyncDecision(`), the ELEMENT (`<CancelSubscription`), the READ
+(`cookieStore.get(LOCALE_COOKIE)`) — and for the fourth, anchor the
+substring so it cannot be a suffix of something else.
+
+`scripts/tests/comment-claims.test.mjs` and `self-claims.test.mjs` check
+that a NAME in a comment resolves. Nothing checks that a name in an
+assertion is being used the way the assertion's sentence says, and a
+regex cannot: only a mutation that deletes the call and leaves the import
+tells you.
+
+## A number internally consistent with everything except reality
+
+The credit machinery is arithmetic all the way down and, until 2026-09-08,
+was compared against nothing outside itself.
+
+`CREDIT_MARGIN_*` multiplies a cost that `src/lib/billing/model-pricing.ts`
+computed from its own rate table. The achieved margin stored beside it on
+the `ai_cost_log` row is measured against that same computed cost. So if
+the table is wrong, the charge is wrong, the stored margin is wrong, and
+the margin alert — which compares the stored margin to the target — still
+reads a healthy 4x, because both of its inputs moved together. That is not
+hypothetical: it is exactly the 2026-08 incident, where the table held one
+model and every call served by a pricier one was billed at a third of its
+cost with no line of output changing.
+
+The fix for that class is not a better internal check. It is one
+comparison against a number the system did not produce — here, the invoice.
+
+**And the comparison could not be made.** `ai_cost_log` records
+`input_tokens`, `output_tokens`, `cache_write_tokens` and
+`cache_read_tokens` **summed across every sub-call of an action**, and has
+no model column. An action is routinely served by two or three models —
+the clarifier and the classifier on the cheap tier, the generation on the
+expensive one — so a row reading `input_tokens = 50000` is equally
+consistent with $0.05 of Haiku and $0.50 of Fable. An Anthropic invoice is
+broken down BY MODEL. The monthly totals could be compared; nothing below
+them could.
+
+The absence was invisible because every question the table had ever been
+asked was answered before the summing: `real_cost_usd` was priced per
+model and then added up. The column that was missing only mattered for a
+question nobody had asked yet.
+
+`CostAccumulator.byModel()` records the split, `settleReservation` writes
+it into `metadata.modelBreakdown`, and
+`scripts/db/anthropic-reconcile.mjs` turns a month of it into invoice
+lines. Two properties of that tool are load-bearing, and both are the
+opposite of the obvious choice:
+
+- **Rows settled before the split existed get their own line, with their
+  own money on it.** Dropping them, or spreading them across models by
+  proportion, would make a report on 12% of a month look like a report on
+  the month.
+- **A model with no published rate prices to NULL, not to zero.** Zero
+  would shrink the difference against the invoice, so the report would
+  look better the less it knew — the shape `/api/health` and
+  `i18n-coverage` are both in this document for.
+
+## The number that was right when it was typed
+
+A count in a comment is the easiest claim in a repository to be wrong
+about, and the hardest to notice. It was true, something was added, and
+nothing anywhere connects the sentence to the thing it counts. Three were
+wrong on 2026-09-08:
+
+- `api/create/top-modules` said "the 13 business modules + ideas".
+  `CLASSIFIER_MODULES` is thirteen INCLUDING ideas, so the sentence
+  counted it twice and described a universe of fourteen that has never
+  existed.
+- `dashboard/layout.tsx` said the layout's `<main>` makes the landmark
+  true for "all 39 pages". There are 41.
+- `i18n-coverage`'s client-fallback baseline stood at 31 against a
+  measured 28, with the comment beside it saying "31 new keys across ten
+  locales". Three fallbacks had been paid off and nobody lowered the
+  number, so three new ones could ship green.
+
+**The general scan does not work, and the number says why.** A regex over
+prose finds 844 sentences in `src/` and `scripts/` that read like a count
+claim, and almost all of them enumerate the paragraph rather than the
+repository: "the two halves", "the three things", "the four questions".
+Precision is well under a tenth, and a gate at that ratio gets its
+baseline set to the size of the problem — which is the same as deleting
+it.
+
+**So the claim declares its own check.** A count that matters carries a
+marker naming what to count and where, and
+`scripts/tests/count-claims.test.mjs` requires both the count AND that
+the number appears in the sentence the marker vouches for. A marker that
+agreed with the repository while the prose beside it said something else
+would be the same defect one level down.
+
+The first marker written was invisible: it went into a JSX comment, whose
+inner lines carry no `//` or `*`, and the reader only knew about prefixed
+ones. A marker nothing read, in the gate whose subject is claims nothing
+reads. Its own mutation suite found it.
+
+## A bug described as a design note, which does not survive being a gate
+
+This shape is real — a comment that states calmly, in the present tense,
+that something does not work, and reads as a decision — and V5 #13 was
+asked to make it enforceable. It could not be, and the measurement is
+worth more than the attempt.
+
+165 comment blocks in `src/` and `scripts/` match the strongest phrasing
+("is broken", "is wrong", "does not work", "has no effect"). 71 name a
+gate, a round or a plan. Twelve of the remaining 94 were read by hand,
+and **none was a live defect**. Every one was prose about behaviour: "what
+is broken now" as a page's subject, "a rule with no data did not pass, it
+did not run", "nothing throws, nothing is logged, and nobody will ever
+see it" explaining why a guard exists.
+
+The count is printed by `count-claims.test.mjs` and not asserted, so the
+next person can re-measure instead of re-arguing.
+
+## The experiment that could not see the witness
+
+V5 #14 was asked to work through ~2,400 defensive guards on the strength
+of an earlier result: nine were tested by removing each and running the
+whole unit suite, and seven came back with nothing red. Extrapolated, that
+said roughly 1,800 guards had no witness.
+
+**The instrument was wrong three times over, and all three errors point the
+same way — inventing an absence of guards.**
+
+1. **ENOBUFS read as "nothing went red".** `execFileSync` defaults to a
+   one-megabyte stdout buffer; `npm run test:unit` prints 1,195,212 bytes.
+   Every call threw, the output was truncated at 1,037,423 bytes, zero
+   `FAIL` lines were parsed from the fragment, and an empty failure list is
+   exactly what the caller reads as *nobody is watching this guard*. The
+   output was already ~1.19 MB when the file was written, so no `NOBODY`
+   verdict it ever printed was evidence of anything.
+2. **Its own sidecar made unrelated gates red.** The runner holds a sidecar
+   for the seconds the suite is running, and `check-mutation-tree.mjs`
+   reports a populated sidecar as a killed run — through
+   `mutation-tree.test.mjs`, which is inside that suite. Combined with the
+   loop's early exit, the verdict was decided by *which unrelated gate
+   failed first*: a guard whose deleted line carried English prose tripped
+   `baselines.test.mjs` and read as unwatched; one whose line carried none
+   reached the tree check and read as watched. `if (!isAdminEmail(…))` was
+   reported WATCHED by an owner-only test that is green when it is deleted.
+3. **`test:unit` stops at the first failing suite.** Remove
+   `if (!user) return 401` and `baselines.test.mjs` reddens first — one
+   server-side English string went missing — the loop stops, and the suite
+   that would have caught the deletion never runs.
+
+The proof is one guard. `if (ownedIds.length !== requested.length)` in
+api/files/collections was the previous round's headline unwatched guard.
+With the instrument fixed it comes back **WATCHED**, by a check that names
+it: *"the count is compared … and the mismatch is a 404, not a shrug."*
+The gate had been there the whole time.
+
+**A witness that is a count is not a witness.** Once the buffer was fixed,
+deleting an authentication guard turned the build red on
+`SERVER_PROSE_BASELINE` — 655 English error strings became 654. True,
+useful, and completely silent about authentication: it fires identically
+for deleting a typo message. Counting it would have made every guard whose
+rejection carries prose read as watched. It is filtered with the
+mutation-marker gate, for the same reason.
+
+## The population was not what the sample said it was
+
+The nine guards first tested were picked because they looked odd — unicode
+folding, whitespace trimming, a date parse. The population is nothing like
+them. Of 2,252 guards that reject rather than compute, the ones touching
+money, auth and user data are **302 / 189 / 66** — and the auth 189 are
+only **32 distinct shapes**, of which one line accounts for 132:
+
+    if (!user) return NextResponse.json(…, { status: 401 });
+
+So the experiment is not "one guard at a time" but **one representative per
+shape**. Nine experiments covered 195 guard instances, which is what made
+it possible to answer the question at all rather than sample it.

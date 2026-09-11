@@ -196,37 +196,60 @@ check("the inventory is not empty", inv.tables.length > 40 && inv.functions.leng
   const pStart = generated.indexOf("expected_policies(");
   const pEnd = generated.indexOf("expected_checks(", pStart);
   const block = generated.slice(pStart, pEnd > pStart ? pEnd : generated.length);
+  // THE TUPLES ARE THREE WIDE NOW: (schema, table, policy). They were two
+  // until 2026-09-08, when `on storage.objects` stopped being read as a
+  // table called `storage` — which is how ten policies on the one table
+  // holding every uploaded document were filed under a name no expected
+  // list contains and dropped without a word.
   const derived = new Set(
-    [...block.matchAll(/\('([a-z0-9_]+)',\s*'([a-zA-Z0-9_ -]+)'\)/g)].map((m) => `${m[1]} ${m[2]}`)
+    [...block.matchAll(/\('([a-z0-9_]+)',\s*'([a-z0-9_]+)',\s*'([a-zA-Z0-9_ -]+)'\)/g)].map(
+      (m) => `${m[1]}.${m[2]} ${m[3]}`
+    )
   );
   check(
     `the generated query's expected_policies list was actually read (${derived.size} pairs)`,
     derived.size >= 150,
     "a parse that returns nothing would make the next check vacuous"
   );
-  const invisible = [...inPublic].filter((k) => !derived.has(k)).sort();
+  const invisible = [...inPublic].filter((k) => !derived.has(`public.${k}`)).sort();
   check(
     `every literal CREATE POLICY on a public table reaches expected_policies (${inPublic.size} statements, ${invisible.length} invisible)`,
     invisible.length === 0,
     invisible.slice(0, 8).join(" | ") + (invisible.length > 8 ? ` … and ${invisible.length - 8} more` : "")
   );
 
-  // AND THE TWO POPULATIONS IT DELIBERATELY DOES NOT COVER, counted here
-  // rather than left as an unexplained gap between two numbers.
+  // AND THE STORAGE ONES, WHICH THIS CLAUSE USED TO COUNT AS EXCLUDED.
   //
-  // THE STORAGE ONES MATTER MORE THAN THEIR COUNT SUGGESTS. `policies` is
-  // filtered by `tables.includes(p.table)` in db-inventory.mjs, and
-  // `tables` is the public tables src/ queries — so every policy on
-  // storage.objects is out of scope, silently. That is the same corner
-  // that produced the fixture-vs-production divergence on 2026-09-05:
-  // the local stub had storage.objects with RLS off while production had
-  // it on, and no instrument in this repo compared them. This does not
-  // fix that. It states it, and goes red if the number moves, so the next
-  // storage policy is a decision rather than a surprise.
+  // WHAT IT SAID UNTIL 2026-09-08, and it was true: "every policy on
+  // storage.objects is out of scope, silently... This does not fix that.
+  // It states it, and goes red if the number moves." Stating a hole is
+  // better than hiding one and worse than closing it, and it stayed
+  // stated through the one divergence this project has actually measured
+  // between its fixture and production — the local stub had
+  // storage.objects with RLS off while production had it on.
+  //
+  // IT IS CLOSED NOW, and the assertion is inverted rather than deleted:
+  // every storage policy must REACH expected_policies, by name. The
+  // count is a floor beneath the names, not the check.
+  const storageInvisible = [...onStorage].filter((k) => !derived.has(k)).sort();
   check(
-    `the storage-schema policies are known and excluded, not lost (${onStorage.size})`,
-    onStorage.size >= 6 && [...onStorage].every((k) => !derived.has(k.split(".")[0] + " " + k.split(" ")[1])),
-    [...onStorage].sort().join(" | ")
+    `every policy on storage.objects reaches expected_policies (${onStorage.size} found, ${storageInvisible.length} invisible)`,
+    onStorage.size >= 10 && storageInvisible.length === 0,
+    storageInvisible.join(" | ") || `only ${onStorage.size} storage statements were parsed`
+  );
+  // AND THE QUERY LOOKS THERE. A list of expected storage policies
+  // compared against an actual_policies restricted to `public` reports
+  // all ten as MISSING, for ever — which is the failure CLAUDE.md calls
+  // worse than no probe.
+  check(
+    "...and the query asks pg_policies for the storage schema too",
+    /schemaname in \('public', 'storage'\)/.test(generated),
+    "actual_policies is still public-only"
+  );
+  check(
+    "...and reports a policy on a table without RLS as decoration, not as present",
+    /RLS DISABLED[\s\S]{0,600}a\.schema_name <> 'public'/.test(generated),
+    "no storage RLS finding in the generated query"
   );
   // The `format('create policy select_own_%1$s on public.%1$I …')` inside
   // the module-table loop: text, not a statement. The loop's own branch in

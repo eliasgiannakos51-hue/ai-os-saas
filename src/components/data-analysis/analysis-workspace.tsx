@@ -125,7 +125,7 @@ export function AnalysisWorkspace({
   return (
     <div className="space-y-6">
       {/* ---- upload ---- */}
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <h2 className="text-sm font-semibold text-foreground">{t("upload.title")}</h2>
         <p className="mt-1 text-xs text-muted">{t("upload.description")}</p>
         <input
@@ -174,7 +174,7 @@ export function AnalysisWorkspace({
       {current && (
         <>
           {/* ---- what the file actually is ---- */}
-          <div className="rounded-2xl border border-border bg-panel p-5">
+          <div className="surface">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold text-foreground">{current.title}</h2>
@@ -209,14 +209,14 @@ export function AnalysisWorkspace({
                   type="button"
                   onClick={() => void handleAnalyse()}
                   disabled={analysing}
-                  className="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black disabled:opacity-50"
+                  className="hover:bg-orange-500/10 inline-flex items-center gap-2 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 disabled:opacity-50"
                 >
                   {/* THE GLOBE for the analysis, because that wait is
                       the model thinking. The ring above it stays on the
                       UPLOAD button, which is a file read and a network
                       round trip — mechanical, and marking it with the
                       signature would spend the signature on a POST. */}
-                  {analysing ? <ThinkingIndicator size="sm" tone="inherit" /> : <Sparkles className="h-4 w-4" />}
+                  {analysing ? <ThinkingIndicator size="sm" /> : <Sparkles className="h-4 w-4" />}
                   {analysing ? t("analyse.working") : t("analyse.button")}
                 </button>
               </div>
@@ -253,7 +253,7 @@ export function AnalysisWorkspace({
 
           {/* ---- what was found ---- */}
           {current.findings ? (
-            <div className="rounded-2xl border border-border bg-panel p-5">
+            <div className="surface">
               <h2 className="text-sm font-semibold text-foreground">{t("findings.title")}</h2>
               {current.findings.summary ? (
                 <p className="mt-2 text-sm text-muted">{current.findings.summary}</p>
@@ -281,7 +281,7 @@ export function AnalysisWorkspace({
           )}
 
           {/* ---- ask it something ---- */}
-          <div className="rounded-2xl border border-border bg-panel p-5">
+          <div className="surface">
             <h2 className="text-sm font-semibold text-foreground">{t("ask.title")}</h2>
             <p className="mt-1 text-xs text-muted">{t("ask.description")}</p>
 
@@ -330,7 +330,7 @@ export function AnalysisWorkspace({
                 type="button"
                 onClick={() => void handleAsk()}
                 disabled={asking || !question.trim()}
-                className="rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black disabled:opacity-50"
+                className="hover:bg-orange-500/10 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 disabled:opacity-50"
               >
                 {asking ? t("ask.working") : t("ask.button")}
               </button>
@@ -338,7 +338,7 @@ export function AnalysisWorkspace({
 
             <ul className="mt-4 space-y-4">
               {current.questions.map((record) => (
-                <li key={record.id} className="rounded-xl border border-border p-3">
+                <li key={record.id} className="surface-tight">
                   <p className="text-sm text-foreground">{record.question}</p>
                   {record.answer ? <p className="mt-1 text-xs text-muted">{record.answer}</p> : null}
                   {record.evidence ? (
@@ -373,7 +373,7 @@ export function AnalysisWorkspace({
 
           {/* ---- the notes from the old tracker ---- */}
           {current.legacyNotes.length > 0 && (
-            <div className="rounded-2xl border border-border bg-panel p-5">
+            <div className="surface">
               <h2 className="text-sm font-semibold text-foreground">{t("legacy.title")}</h2>
               <p className="mt-1 text-xs text-muted">{t("legacy.description")}</p>
               <ul className="mt-3 space-y-2">

@@ -40,9 +40,11 @@ export function GreetingHeader({ email }: { email: string }) {
           So the generic question is gone — deleted from all ten locales,
           not merely unused — and the one sentence has its size.
 
-          The heading keeps every one of its own classes:
-          hero-gradient-text clips a background to the text and would
-          stop working if it were merged into the flex container.
+          The heading keeps its own classes rather than being merged into
+          the flex container. It used to carry hero-gradient-text, which
+          clipped a gradient to the letters; redesign phase 4 removed
+          that rule from globals.css — a title has no gradient now, and a
+          solid colour is the one a contrast checker can read.
 
           THE "?" BESIDE THE PAGE'S ONE FOCAL POINT. This page renders no
           PageHeader on purpose — a shared header above a personal
@@ -53,7 +55,7 @@ export function GreetingHeader({ email }: { email: string }) {
           every breakpoint, so the row's height is the heading's and
           nothing below it moves. */}
       <div className="flex flex-wrap items-center justify-center gap-3">
-        <h1 className="hero-gradient-text text-3xl font-bold leading-[1.15] tracking-tight sm:text-4xl lg:text-5xl">
+        <h1 className="text-3xl font-bold leading-[1.15] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
           {tPromise("oneSentence")}
         </h1>
         <HelpTip helpKey="help.overview" />

@@ -180,6 +180,16 @@ const DECLARED = {
     billing: "settled",
     note: "V4 #22 Template library. ONE forced-tool-use call on the smallest model (Haiku), reached from api/agents/templates/adopt. It fills a template's {subject} slot from the user's own sentence and names the agent in their language — it never writes the task, the schedule or the search flag, all of which come from the template. That is what makes adopting genuinely cheaper than building rather than a discount on the same work: the full builder is a Sonnet call deciding ten fields, this is a Haiku call deciding four, and the margin multiplier is identical (agent_build, via ACTION_TO_FEATURE). Settled by the adopt route AFTER the agent row exists, so a fill whose insert then failed charges nothing; a call that threw before any response records nothing on the accumulator and the reservation is released instead. NO call at all — and nothing charged — when the user typed the subject themselves or ANTHROPIC_API_KEY is absent, which is why the route creates the agent either way.",
   },
+  "src/lib/presentations/generate.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V5 #21 Presentations. ONE forced-tool-use call that returns the whole deck, reached from api/presentations/generate and reserved there against the presentationGenerate profile (sized per slide asked for, see estimate.ts). Recorded onto the route's accumulator BEFORE the deck is parsed, so a response that came back unusable still SETTLES — the tokens were spent — and only the Stop button and a provider failure release the hold. Unsplash searches and the image bytes an export embeds are not model calls and cost no credits.",
+  },
+  "src/lib/posts/generate.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V5 #22 Posts. ONE forced-tool-use call that returns one post per requested platform, reached from api/posts/generate and reserved there against the postsGenerate profile (sized per platform asked for). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. Nothing is published anywhere — there is no social API in the call graph.",
+  },
   "src/lib/lead-classification.ts": {
     calls: 1,
     billing: "settled",
@@ -246,6 +256,43 @@ console.log("\n== 1b. every runCompletion() caller pays for what it used ==");
     return !/costs\.(record|recordBatch|addBreakdown)\([^)]*outcome\.usage/s.test(text);
   });
   check("no runCompletion() call site drops its usage on the floor", silent, []);
+
+  // AND EVERY ONE OF THEM NAMES ITS MODEL, which is a different question
+  // with the same answer shape.
+  //
+  // FOUND 2026-09-07, by writing a runner that had to report which model
+  // the spelling checker uses and discovering there was nothing to read.
+  // lib/websites-greek-spelling-check.ts passed `purpose: "classification"`
+  // and no `model`. providers/complete.ts reads an absent model as
+  // `originTier = "mid"` and substituteModel then returns the cheapest
+  // anthropic model at mid tier OR ABOVE — claude-sonnet-4-6 at 3/15 per
+  // MTok, not the claude-haiku-4-5 at 1/5 that "one cheap classification
+  // call" reads like. Measured by calling substituteModel, not by reading
+  // complete.ts.
+  //
+  // It was the ONLY caller in the tree without a model, so it was the only
+  // one whose price was set by a fallback nobody had written down. The
+  // money is small — about eight hundredths of a cent per website — and
+  // that is not the point: a cost nobody chose is a cost nobody can
+  // review, and section 3's margin arithmetic is computed from the model
+  // that is actually served.
+  // READ NEAR THE CALL, NOT ACROSS THE FILE. A first draft counted
+  // `runCompletion(` against `model:` anywhere in the file, and that
+  // passes for a route with one unnamed call and an unrelated `model:` in
+  // some other object — which is most routes. The request object is the
+  // first few lines after the open paren, so that is where it looks.
+  const CALL_WINDOW = 600;
+  const unnamed = [];
+  for (const f of callers) {
+    const text = readFileSync(f, "utf8");
+    for (const m of text.matchAll(/\brunCompletion\(/g)) {
+      const window = text.slice(m.index, m.index + CALL_WINDOW);
+      if (!/^\s*model: /m.test(window)) {
+        unnamed.push(`${f}:${text.slice(0, m.index).split("\n").length}`);
+      }
+    }
+  }
+  check("no runCompletion() call site leaves its model to the default tier", unnamed, []);
 }
 
 console.log("\n== 2. the billing mode of each site ==");
@@ -550,7 +597,19 @@ console.log("\n== 12. chat memory extraction is inside the chat settlement ==");
 // its tokens could not be billed even in principle — the accumulator was
 // already spent.
 const chat = readFileSync("src/app/api/chat/route.ts", "utf8");
-checkTrue("extraction runs BEFORE the settle", chat.indexOf("await extractAndStoreMemory({") < chat.indexOf("await settleReservation({"));
+// AGAINST THE SETTLEMENT THAT CHARGES THE MESSAGE, not the first one in
+// the file. 2026-09-07 added a settlement above this one — the
+// clarifying-question pre-check, on a path that returns before any answer
+// is generated (see scripts/tests/clarification-verdict.test.mjs) — and
+// `indexOf("await settleReservation({")` then pointed at that instead,
+// reporting a true property as broken. The property is unchanged: the
+// memory extraction's tokens must reach the accumulator before the
+// message's own settlement spends it.
+checkTrue(
+  "extraction runs BEFORE the settle that charges the message",
+  chat.indexOf("await extractAndStoreMemory({") <
+    chat.indexOf('feature: isFreeMessage ? "chat_free" : "chat_message"')
+);
 checkTrue("and shares the turn's accumulator", /extractAndStoreMemory\(\{[\s\S]{0,400}costs,/.test(chat));
 checkTrue("the extractor records its own usage", /costs\?\.record\("other", result\.usage, result\.model \|\| MEMORY_MODEL\)/.test(readFileSync("src/lib/chat/memory.ts", "utf8")));
 // If the hold does not cover the second call, every chat message is

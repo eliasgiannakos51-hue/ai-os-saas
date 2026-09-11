@@ -165,19 +165,46 @@ try {
   const sibling = readFileSync(SIBLING, "utf8");
   check(
     "the two sites of a pair are drawn as two different users",
-    /\[`pairs-check-\$\{side\}`, 0, brief\]/.test(src),
-    "the default seed must vary by side and keep the site count at 0"
+    /const userKey = sameUser \? "pairs-check-a" : `pairs-check-\$\{side\}`;/.test(src),
+    "the default seed must vary by side"
   );
-  check("--same-user seeds one user's first and second site", /sameUser \? \["pairs-check-a", side === "a" \? 0 : 1, brief\]/.test(src));
-  check("the production draw is used, not a bare brief", /variation\.variationDirective\(variation\.pickVariation\(seed\)\)/.test(src));
+  check(
+    "--same-user seeds one user's first and second site",
+    /const priorSites = sameUser && side === "b" \? 1 : 0;/.test(src)
+  );
+  check("the production draw is used, not a bare brief", /variation\.variationDirective\(variation\.pickVariation\(seed, \{ userKey, priorSites \}\)\)/.test(src));
+  // AND WITH THE CYCLE, which is what makes --same-user measure the
+  // product rather than a fallback. The order axis stopped being a hash
+  // on 2026-09-07: one person's next site takes the NEXT letter, so their
+  // second site cannot repeat their first. A script that omitted the
+  // cycle would report a 1-in-6 repeat that production does not have.
+  check("...and the cycle the process route passes", /\{ userKey, priorSites \}/.test(src));
   check("the production generator is used", /wb\.generateWebsiteHtml\(apiKey, brief/.test(src));
   check("the shipped structural score is measured with the shipped code", /structural\.compareStructure\(htmlA, htmlB\)/.test(src));
   check("every generated page is written to disk for --dry later", /writeFileSync\(file, html\)/.test(src));
+  // THE TWO STRUCTURAL LINES MOVED OUT OF THIS SCRIPT ON 2026-09-07, and
+  // the reason is that a third reader appeared.
+  //
+  // They were local constants here, carrying a comment about not drifting
+  // from website-variety-check.mjs — which is what two copies always say.
+  // Then api/websites/generate/process started needing the same 0.85 to
+  // decide whether to write a "same skeleton" note, and three copies of a
+  // number is not a convention, it is a bug waiting for one of them to be
+  // edited. They live in src/lib/website-structural-similarity.ts now,
+  // beside the function that produces the number they judge, and this
+  // check asks that the script READS them rather than that it states them.
+  //
+  // The two VISUAL lines stay local: they judge site-fingerprint.mjs's
+  // visual score, which has no counterpart in the product.
   check(
-    "the thresholds are the ones website-variety-check.mjs states",
-    /SAME_SKELETON = 0\.85;/.test(src) &&
-      /SIMILAR_SKELETON = 0\.7;/.test(src) &&
-      /SAME_LOOK = 0\.7;/.test(src) &&
+    "the structural thresholds are imported, not restated",
+    /const \{ SAME_SKELETON, SIMILAR_SKELETON \} = structural;/.test(src) &&
+      !/^const SAME_SKELETON = /m.test(src) &&
+      !/^const SIMILAR_SKELETON = /m.test(src)
+  );
+  check(
+    "the visual thresholds are the ones website-variety-check.mjs states",
+    /SAME_LOOK = 0\.7;/.test(src) &&
       /LOOK_TARGET = 0\.3;/.test(src) &&
       /worstStructure > 0\.85/.test(sibling) &&
       /worstVisual > 0\.7/.test(sibling) &&

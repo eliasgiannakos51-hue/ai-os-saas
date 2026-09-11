@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import { pdfFontFamily } from "@/lib/pdf/font-stack";
+import { isRtlLocale } from "@/lib/pdf/rtl";
 import { breakCjkRuns, cjkCharsPerLine } from "@/lib/pdf/cjk-wrap";
 import type { PdfBlock, PdfRun } from "@/lib/pdf/blocks";
 
@@ -153,16 +154,9 @@ function sheetFor(fontFamily: string[]) {
 
 type Sheet = ReturnType<typeof sheetFor>;
 
-/** Locales written right to left. Only Arabic, of the ten this app ships. */
-const RTL_LOCALES = new Set(["ar", "fa", "he", "ur"]);
-
-export function isRtlLocale(locale: string | null | undefined): boolean {
-  return RTL_LOCALES.has(
-    String(locale ?? "")
-      .slice(0, 2)
-      .toLowerCase(),
-  );
-}
+// isRtlLocale lives in rtl.ts since V5 #21 (see its header for why); it is
+// re-exported here so nothing that asked this file for it has to move.
+export { isRtlLocale };
 
 function runElements(
   runs: PdfRun[],

@@ -1,8 +1,23 @@
 // Shared translation-key lookup for lib/sidebar-nav.ts's English `heading`/
 // `label` strings, used by both Sidebar and CommandPalette so their
-// translated display never drifts apart. The underlying strings stay
-// English (state keys, search matching) — only the rendered label goes
-// through messages/*.json's sidebar.items.
+// translated display never drifts apart.
+//
+// THE UNDERLYING STRINGS ARE STATE KEYS, AND THAT IS ALL THEY ARE. They
+// identify an item across renders; they are not what anything matches a
+// user's typing against.
+//
+// This comment used to end "(state keys, search matching)" — and that was
+// an accurate description of a bug, written as a design note, which is the
+// worst shape in docs/shapes.md because the comment PROTECTS the defect: a
+// reviewer who reads it concludes somebody already thought about this and
+// stops asking. The command palette really did match the English label
+// while rendering the translated one, and 168 of 490 (item x locale) pairs
+// were reachable by the name on screen — Arabic 0 of 49.
+//
+// The palette now matches every name an item answers to; see
+// lib/command-palette-match.ts. If anything here ever goes back to
+// matching on these strings, scripts/tests/command-palette-language.test.mjs
+// goes red across nine languages before it reaches a user.
 // EVERY HEADING sidebar-nav.ts ACTUALLY RENDERS, and that is the whole
 // point of the list.
 //
@@ -105,7 +120,13 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   "AI Coding": "coding",
   "Data Analysis": "dataAnalysis",
   Documents: "documents",
-  "Presentation notes": "presentations",
+  // V5 #21: "Presentation notes" became "Presentations" the day the page
+  // started making them. The key is unchanged, so every locale's string
+  // moved with it.
+  Presentations: "presentations",
+  // V5 #22: the post generator under Make.
+  Posts: "posts",
+  Projects: "projects",
   Campaigns: "campaigns",
   Analytics: "analytics",
   Finance: "finance",

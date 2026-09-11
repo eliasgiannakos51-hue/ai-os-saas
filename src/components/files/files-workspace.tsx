@@ -20,6 +20,7 @@ import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/ent
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { VoiceInput } from "@/components/voice/voice-input";
 import { ListLayout } from "@/components/ui/list-layout";
+import { StepFlow } from "@/components/ui/step-flow";
 import { EmptyState } from "@/components/empty-state";
 import { CopyButton, writeToClipboard } from "@/components/ui/copy-button";
 import { stepLabelKey } from "@/lib/jobs/step-labels";
@@ -712,7 +713,11 @@ export function FilesWorkspace({
   // WHICH OF THE THREE STEPS THE USER IS ON, derived from the page's own
   // state rather than tracked separately — a wizard that can disagree with
   // the thing it describes is worse than no wizard.
-  const currentStep = files.length === 0 ? 1 : selected.length === 0 ? 2 : 3;
+  // AN INDEX INTO STEP_FLOWS.files, not a 1/2/3 of its own. The shape
+  // and the words come from components/ui/step-flow.tsx now, so this
+  // page and the website builder, research and coding all say "step 2"
+  // the same way.
+  const currentStep = files.length === 0 ? 0 : answer ? 2 : 1;
 
   // The two reasons Ask can be unavailable, as text rather than as a grey
   // button. Both are things the user can fix in one action, so saying
@@ -729,7 +734,7 @@ export function FilesWorkspace({
 
   return (
     <div className="space-y-5 pb-24">
-      {/* THE THREE STEPS.
+      {/* THE THREE STEPS, in the shape all four producing screens use.
 
           The report was "I do not understand how it works and I cannot ask
           a question". Every piece was already on the page — upload, a card
@@ -738,54 +743,14 @@ export function FilesWorkspace({
           entirely below the fold, so the feature's whole purpose was
           off-screen behind two things that looked like the point.
 
-          Stated once, at the top, with the current step marked. It is
-          derived state, so it cannot drift from what the page is doing. */}
-      <ol
-        data-testid="files-steps"
-        aria-label={t("stepsLabel")}
-        className="grid gap-2 rounded-2xl border border-border bg-panel/60 p-3 sm:grid-cols-3"
-      >
-        {[
-          { n: 1, title: t("step1Title"), hint: t("step1Hint") },
-          { n: 2, title: t("step2Title"), hint: t("step2Hint") },
-          { n: 3, title: t("step3Title"), hint: t("step3Hint") },
-        ].map((step) => {
-          const isCurrent = currentStep === step.n;
-          const isDone = currentStep > step.n;
-          return (
-            <li
-              key={step.n}
-              aria-current={isCurrent ? "step" : undefined}
-              className={`flex items-start gap-2.5 rounded-xl border px-3 py-2.5 transition-colors duration-200 ${
-                isCurrent
-                  ? "border-orange-500/50 bg-orange-500/[0.07]"
-                  : "border-transparent bg-transparent"
-              }`}
-            >
-              <span
-                aria-hidden="true"
-                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
-                  isCurrent
-                    ? "bg-orange-500 text-black"
-                    : isDone
-                      ? "bg-emerald-500/20 text-emerald-400"
-                      : "bg-input text-muted"
-                }`}
-              >
-                {isDone ? <Check className="h-3.5 w-3.5" /> : step.n}
-              </span>
-              <span className="min-w-0">
-                <span
-                  className={`block text-xs font-semibold ${isCurrent ? "text-foreground" : "text-muted"}`}
-                >
-                  {step.title}
-                </span>
-                <span className="mt-0.5 block text-[11px] leading-snug text-muted/80">{step.hint}</span>
-              </span>
-            </li>
-          );
-        })}
-      </ol>
+          This page had the answer first and kept it to itself: a numbered
+          list with a hint under each step, drawn here, in classes only
+          this file had. Redesign phase 4 moved the shape into
+          components/ui/step-flow.tsx and the words into stepFlow.* so the
+          website builder, deep research and coding get the same thing
+          rather than three more inventions of it. Still derived state, so
+          it cannot drift from what the page is doing. */}
+      <StepFlow flow="files" current={currentStep} />
 
       {/* Upload. A drop zone AND a button: dragging is faster for people
           who know it exists, and invisible to everyone else. */}
@@ -882,7 +847,7 @@ export function FilesWorkspace({
                 type="button"
                 data-testid="files-empty-upload"
                 onClick={() => inputRef.current?.click()}
-                className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+                className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-5 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
               >
                 <Upload className="h-4 w-4" aria-hidden="true" />
                 {t("choose")}
@@ -992,7 +957,7 @@ export function FilesWorkspace({
 
       {/* Collections. Deliberately small: a collection is a shortcut for
           "these files again", not a filing system. */}
-      <section className="space-y-2 rounded-2xl border border-border bg-panel/60 p-4">
+      <section className="space-y-2 surface-tight">
         <h2 className="text-sm font-semibold text-foreground">{t("collections")}</h2>
         {collections.length > 0 && (
           <div className="flex flex-wrap gap-2">
@@ -1109,12 +1074,12 @@ export function FilesWorkspace({
             data-testid="files-ask-button"
             onClick={() => void ask()}
             disabled={asking || Boolean(askDisabledReason)}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-6 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-orange-500/60 px-6 py-2.5 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {asking ? (
               // tone="inherit" because this button's background IS the
               // accent — an accent-coloured indicator here is invisible.
-              <ThinkingIndicator size="sm" tone="inherit" />
+              <ThinkingIndicator size="sm" />
             ) : (
               <Sparkles className="h-4 w-4" aria-hidden="true" />
             )}
@@ -1131,7 +1096,7 @@ export function FilesWorkspace({
         </div>
 
         {answer && (
-          <div className="space-y-2 rounded-xl border border-border bg-panel/60 p-3">
+          <div className="space-y-2 surface-tight">
             {/* On screen, therefore seen. Inside the answer rather than in
                 an effect beside it, so an answer can only be marked read
                 by actually being rendered. */}
@@ -1301,7 +1266,7 @@ export function FilesWorkspace({
                   350
                 );
               }}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-orange-500/60 px-5 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
             >
               <Sparkles className="h-4 w-4" aria-hidden="true" />
               {t("goToAsk")}

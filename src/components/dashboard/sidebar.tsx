@@ -264,7 +264,7 @@ export function Sidebar({
                     <Icon
                       className={`icon-bounce h-4 w-4 shrink-0 ${
                         active
-                          ? "text-orange-300 drop-shadow-[0_0_6px_rgba(249,115,22,0.8)]"
+                          ? "text-orange-300 drop-"
                           : `${RESTING_ICON} group-hover:text-orange-300`
                       }`}
                       aria-hidden="true"

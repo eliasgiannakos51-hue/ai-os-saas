@@ -145,7 +145,7 @@ export function MissionForm({
         onCancel={() => setPendingConfirm(false)}
       />
     )}
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-border bg-panel p-5 pe-14">
+    <form onSubmit={handleSubmit} className="space-y-3 surface pe-14">
       <label htmlFor="mission-goal" className="block text-sm font-semibold text-foreground">
         {t("goalLabel")}
       </label>
@@ -174,7 +174,7 @@ export function MissionForm({
         <button
           type="submit"
           disabled={loading || !goal.trim()}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 self-start rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 self-start rounded-xl border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

@@ -51,7 +51,7 @@
  * So there are two shared module tips, both attached where the pages are
  * rendered rather than page by page:
  *
- *   trackingModule   the six BuildModulePage logs — no AI anywhere in them
+ *   trackingModule   the five BuildModulePage logs — no AI anywhere in them
  *   businessModule   the twelve business modules and Ideas — the AI reads
  *                    these, but it never writes them
  *
@@ -222,18 +222,58 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that starring something copies or moves it",
   },
   {
-    // ONE ENTRY, SIX PAGES. Apps, Images, Videos, Website plans, Campaigns
-    // and Presentations all render through BuildModulePage, so the "?" is
-    // attached there rather than six times. Their file is the one that
+    // ONE ENTRY, FIVE PAGES. Apps, Images, Videos, Website plans and
+    // Campaigns all render through BuildModulePage, so the "?" is
+    // attached there rather than five times. Their file is the one that
     // declares them logs: build-modules.ts says every entry in it "is a
     // LOG: a table of rows the user types by hand, with no AI call anywhere
     // in it" — and "Images" reads as a generator to everybody who has not
-    // read that file.
+    // read that file. Presentations was the sixth until V5 #21, when it
+    // became one and got the entry below.
     id: "trackingModule",
     file: "src/components/modules/build-module-page.tsx",
     keyPrefix: "help.trackingModule",
     corrects:
-      "that a page called Images, Videos or Presentations generates them",
+      "that a page called Images or Videos generates them",
+  },
+  {
+    // THE OPPOSITE MISTAKE TO trackingModule's, on the page that used to
+    // be one of them. A generator that writes slides reads as a designer
+    // that finishes decks; the tip says where the edge is.
+    id: "presentations",
+    file: "src/app/dashboard/presentations/page.tsx",
+    keyPrefix: "help.presentations",
+    corrects:
+      "that it designs a themed deck with charts, or that the slides are edited here rather than in PowerPoint",
+  },
+  {
+    // A page called Posts reads as a publisher. It writes them; the
+    // publishing step is the roadmap's "Social posting", still under
+    // "soon", and the tip says which side of that line this page is on.
+    // TWO SCREENS, TWO PREFIXES. Both draw a PageHeader and
+    // help-tips.test.mjs asks every header for a tip — and it also
+    // refuses two entries that share a prefix or a sentence, which is
+    // right: the list answers "what is a project" and this answers "what
+    // am I looking at inside one", and one text cannot be both.
+    id: "projectDetail",
+    file: "src/app/dashboard/projects/[id]/page.tsx",
+    keyPrefix: "help.projectDetail",
+    corrects:
+      "that a project pulls things in by itself — that a plan brings its steps, or a website its form submissions, or that deleting the project deletes what was in it",
+  },
+  {
+    id: "projects",
+    file: "src/app/dashboard/projects/page.tsx",
+    keyPrefix: "help.projects",
+    corrects:
+      "that a project pulls things in by itself — that a plan brings its steps, or a website its form submissions, or that deleting the project deletes what was in it",
+  },
+  {
+    id: "posts",
+    file: "src/app/dashboard/posts/page.tsx",
+    keyPrefix: "help.posts",
+    corrects:
+      "that it posts to LinkedIn, X or Instagram for you, or that one text is reused across the platforms",
   },
   {
     id: "costs",

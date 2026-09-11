@@ -324,6 +324,7 @@ const DASHBOARD_ROUTES = [
   "/dashboard/campaigns",
   "/dashboard/data-analysis",
   "/dashboard/presentations",
+  "/dashboard/posts",
   "/dashboard/websites",
   "/dashboard/product-workflow",
   "/dashboard/trading-workflow",

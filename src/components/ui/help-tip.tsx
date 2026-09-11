@@ -140,7 +140,7 @@ export function HelpTip({
             // So below `sm` it is a centred sheet pinned to both edges,
             // which cannot overflow by construction; from `sm` up it goes
             // back to hanging under the button, where there is room.
-            className="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 rounded-2xl border border-border bg-panel p-4 text-start shadow-[0_12px_40px_rgba(0,0,0,0.45)] sm:absolute sm:inset-x-auto sm:left-1/2 sm:top-9 sm:z-40 sm:w-80 sm:-translate-x-1/2 sm:translate-y-0"
+            className="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 surface-tight text-start shadow-[0_12px_40px_rgba(0,0,0,0.45)] sm:absolute sm:inset-x-auto sm:left-1/2 sm:top-9 sm:z-40 sm:w-80 sm:-translate-x-1/2 sm:translate-y-0"
           >
           <button
             type="button"

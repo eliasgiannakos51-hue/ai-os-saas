@@ -112,7 +112,7 @@ export function JournalStats({
 
       {/* THE PATTERN. An observation with its baseline beside it — a win
           rate after a loss means nothing without the ordinary one. */}
-      <section className="rounded-2xl border border-border bg-panel/60 p-4">
+      <section className="surface-tight">
         <h3 className="text-xs font-semibold text-foreground">{t("pattern.title")}</h3>
         {pattern.afterLossWinRatePercent === null || pattern.baselineWinRatePercent === null ? (
           <p className="mt-1.5 text-[11px] leading-relaxed text-muted">{t("pattern.notEnough")}</p>
@@ -222,7 +222,7 @@ function EquityCurve({ points }: { points: EquityPoint[] }) {
   return (
     <section>
       <h3 className="mb-2 text-xs font-semibold text-foreground">{t("equity.title")}</h3>
-      <div className="overflow-x-auto rounded-xl border border-border bg-panel p-3">
+      <div className="overflow-x-auto surface-tight">
         <svg
           viewBox={`0 0 ${width} ${height}`}
           preserveAspectRatio="none"

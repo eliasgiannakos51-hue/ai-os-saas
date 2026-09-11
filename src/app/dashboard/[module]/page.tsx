@@ -18,6 +18,7 @@ import { AutomationActiveList } from "@/components/automation/automation-active-
 import type { UserAutomation } from "@/types/user-automation";
 
 // The 12 business modules share this one route, so they shared one
+// COUNT: 12 /^ {4}slug: "/ in src/lib/modules.ts
 // English title too: `moduleConfig.title` is the author's string, not the
 // reader's. `titleKey` is the config's own `sidebar.items.*` key — the
 // same one the sidebar link and the favorites grouping read — so

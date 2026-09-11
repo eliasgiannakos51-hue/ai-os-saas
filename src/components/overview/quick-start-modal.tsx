@@ -51,7 +51,7 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
         role="dialog"
         aria-modal="true"
         aria-label={tOverview("quickStartTemplates")}
-        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-panel shadow-[0_0_0_1px_rgba(249,115,22,0.05)]"
+        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-panel"
       >
         <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div className="flex items-start gap-3">
@@ -87,7 +87,7 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
                 type="button"
                 onClick={() => apply(template.id)}
                 disabled={applyingId !== null}
-                className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {applyingId === template.id ? (
                   <ThinkingIndicator size="sm" tone="inherit" />

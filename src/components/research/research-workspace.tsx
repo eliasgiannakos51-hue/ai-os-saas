@@ -16,6 +16,7 @@ import {
   Square,
 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
+import { StepFlow } from "@/components/ui/step-flow";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { DownloadPdfButton } from "@/components/ui/download-pdf-button";
 import { EmptyState } from "@/components/empty-state";
@@ -79,10 +80,13 @@ function isRunning(report: ResearchReport): boolean {
  * nothing is charged for the expensive half until Run is pressed.
  */
 export function ResearchWorkspace({
+  initialTopic,
   initialReports,
   monthlyCap,
   usedThisMonth,
 }: {
+  /** The question Home routed here, already in the box, never auto-run. */
+  initialTopic?: string;
   initialReports: ResearchReport[];
   monthlyCap: number | null;
   usedThisMonth: number;
@@ -95,7 +99,7 @@ export function ResearchWorkspace({
   const { addToast } = useToast();
 
   const [reports, setReports] = useState(initialReports);
-  const [topic, setTopic] = useState("");
+  const [topic, setTopic] = useState(initialTopic ?? "");
   const topicRef = useRef<HTMLTextAreaElement | null>(null);
   const [planning, setPlanning] = useState(false);
   const [draft, setDraft] = useState<{ report: ResearchReport; credits: number } | null>(null);
@@ -282,9 +286,16 @@ export function ResearchWorkspace({
 
   const capReached = monthlyCap !== null && usedThisMonth >= monthlyCap;
 
+  // THE FOUR STEPS, derived. `draft` is a plan waiting to be run, `open`
+  // a finished report — so the page is on "question" until there is a
+  // plan, on "research" while one is running or waiting, on "sources"
+  // once a report has them and on "answer" when it is being read.
+  const researchStep = open ? ((open.sources ?? []).length > 0 ? 3 : 2) : draft || running ? 1 : 0;
+
   return (
     <div className="space-y-5">
-      <section className="space-y-3 rounded-2xl border border-border bg-panel/60 p-4">
+      <StepFlow flow="research" current={researchStep} />
+      <section className="space-y-3 surface-tight">
         <label htmlFor="research-topic" className="text-sm font-semibold text-foreground">
           {t("topicLabel")}
         </label>
@@ -373,7 +384,7 @@ export function ResearchWorkspace({
             <button
               type="button"
               onClick={() => void run(draft.report.id)}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
             >
               <Play className="h-3.5 w-3.5" aria-hidden="true" />
               {t("start")}
@@ -530,7 +541,7 @@ export function ResearchWorkspace({
       )}
 
       {open?.status === "ready" && (
-        <section className="space-y-4 rounded-2xl border border-border bg-panel/60 p-4">
+        <section className="space-y-4 surface-tight">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h2 className="text-sm font-semibold text-foreground">{open.topic}</h2>
             <button

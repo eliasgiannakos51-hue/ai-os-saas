@@ -80,7 +80,7 @@ export function AutomationActiveList({ automations }: { automations: UserAutomat
   }
 
   return (
-    <div className="mb-6 rounded-2xl border border-border bg-panel p-4">
+    <div className="mb-6 surface-tight">
       <div className="mb-3 flex items-center gap-2">
         <Repeat className="h-4 w-4 text-orange-400" aria-hidden="true" />
         <p className="text-sm font-semibold text-foreground">{t("activeSectionTitle")}</p>
@@ -114,12 +114,12 @@ export function AutomationActiveList({ automations }: { automations: UserAutomat
               onClick={() => toggleActive(automation)}
               disabled={busyId === automation.id}
               className={`relative -my-2.5 inline-flex h-11 w-11 shrink-0 items-center rounded-full bg-clip-content py-2.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
-                automation.is_active ? "bg-orange-500" : "bg-panel-hover"
+                automation.is_active ? "bg-foreground" : "bg-panel-hover"
               }`}
             >
               <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 ${
-                  automation.is_active ? "translate-x-[22px]" : "translate-x-0.5"
+                className={`inline-block h-5 w-5 transform rounded-full transition-transform duration-200 ${
+                  automation.is_active ? "translate-x-[22px] bg-panel" : "translate-x-0.5 bg-white"
                 }`}
               />
             </button>

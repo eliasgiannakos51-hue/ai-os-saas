@@ -1,3 +1,15 @@
+// BOUNDARY-FORMAT: html
+//
+// the one boundary in this file is in <nav\b, a tag name in model-
+// generated HTML — ASCII by the HTML specification, and the boundary is
+// what stops it matching <navigation. THE BRIEF IS THE OTHER HALF OF
+// THIS FILE and it is a person's own sentence in any of ten languages:
+// every pattern that reads it is built from lib/text/unicode-
+// patterns.ts, which has no ASCII boundary in it.
+//
+// Declared for scripts/tests/untrusted-boundaries.test.mjs, which forbids an
+// ASCII word boundary in any pattern applied to text a person or a model
+// wrote unless the file says which machine format it is parsing.
 /**
  * "DO NOT PUT X" — DETECTED IN THE BRIEF, ENFORCED ON THE OUTPUT.
  *
@@ -152,7 +164,32 @@ const NEGATION_CLAUSE = new RegExp(
     // English
     NOT_AFTER_WORD + "(?:no|without|don'?t (?:add|put|include|want)|do not (?:add|put|include|want)|never (?:add|put|include)|not? need(?: for)?|skip)\\s+(?<en>[^.,;!\\n]{2,60})",
     // Greek
-    NOT_AFTER_WORD + "(?:μην? (?:βάλεις|βάλετε|προσθέσεις|προσθέσετε|έχει|υπάρχει|βάζεις)|χωρίς|όχι|να μην (?:έχει|υπάρχει|βάλεις))\\s+(?<el>[^.,;!\\n]{2,60})",
+    //
+    // "ΔΕΝ ΘΕΛΩ" WAS MISSING, and it is how a Greek speaker says this.
+    //
+    // MEASURED 2026-09-07 while writing the PART C brief for
+    // scripts/website-variety-check.mjs: "ΔΕΝ θέλω φόρμα κράτησης
+    // πουθενά στο site" parsed as NOTHING. So did "δε θέλω", "δεν
+    // χρειάζομαι" and every other first-person refusal. What worked was
+    // μην/χωρίς/όχι/να μην — imperatives and prepositions, the way an
+    // instruction is written TO somebody, not the way a person says what
+    // they want.
+    //
+    // Every sibling language on this list already had the first-person
+    // form: English "don't want" and "no need", Spanish "no quiero",
+    // Italian "non voglio", French "ne veux pas", German "kein". Greek
+    // was the only one without it, in the language this product's owner
+    // writes its briefs in.
+    //
+    // δε AND δεν, because the final nu drops before most consonants and
+    // "δε θέλω" is ordinary written Greek, not a typo.
+    //
+    // απόφυγε/απέφυγε is the Greek for the "skip" that was already on the
+    // English line. It is here for parity rather than because anyone
+    // reported it, and it is safe to add because no ordinary Greek word
+    // contains it — unlike the greeklish cues, which is why those needed
+    // a separate pass with two required halves.
+    NOT_AFTER_WORD + "(?:μην? (?:βάλεις|βάλετε|προσθέσεις|προσθέσετε|έχει|υπάρχει|βάζεις)|δεν? (?:θέλω|θέλουμε|χρειάζομαι|χρειαζόμαστε|θα ήθελα|επιθυμώ)|χωρίς|όχι|απ[όέ]φυγε|να μην (?:έχει|υπάρχει|βάλεις))\\s+(?<el>[^.,;!\\n]{2,60})",
     // Spanish / Portuguese
     NOT_AFTER_WORD + "(?:sin|sem|no (?:pongas|incluyas|añadas|quiero)|não (?:coloque|inclua|quero))\\s+(?<es>[^.,;!\\n]{2,60})",
     // French

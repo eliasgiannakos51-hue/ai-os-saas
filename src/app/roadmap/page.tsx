@@ -111,6 +111,11 @@ const SECTIONS: RoadmapSection[] = [
       { icon: LineChart, key: "dataAnalysis" },
       { icon: Shuffle, key: "router" },
       { icon: Store, key: "marketplace" },
+      // V5 #21. Was under "future" with the reason "/dashboard/presentations
+      // is a tracking log"; lib/presentations/generate.ts and
+      // api/presentations/generate are the evidence roadmap-truth now
+      // reads for it.
+      { icon: FileText, key: "presentations" },
     ],
   },
   {
@@ -143,7 +148,6 @@ const SECTIONS: RoadmapSection[] = [
       { icon: Smartphone, key: "mobileApps" },
       { icon: ImageIcon, key: "imageGeneration" },
       { icon: Video, key: "videoGeneration" },
-      { icon: FileText, key: "presentations" },
       { icon: Megaphone, key: "marketingBuilder" },
       { icon: UsersRound, key: "teamGenerator" },
       { icon: ClipboardList, key: "projectManager" },
@@ -193,7 +197,7 @@ export default async function RoadmapPage() {
                   {section.items.map((item) => (
                     <div
                       key={item.key}
-                      className="flex flex-col rounded-2xl border border-border bg-panel p-5"
+                      className="flex flex-col surface"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <span

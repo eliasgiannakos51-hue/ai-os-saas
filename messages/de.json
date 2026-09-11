@@ -96,20 +96,7 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "Arbeitsbereich",
-      "build": "Erstellen",
-      "business": "Business",
-      "strategy": "Strategie",
-      "operations": "Abläufe",
-      "marketplace": "Marktplatz",
       "settings": "Einstellungen",
-      "create": "Erstellen",
-      "myBusiness": "Mein Geschäft",
-      "track": "Erfassen",
-      "insights": "Was mir aufgefallen ist",
-      "tracking": "Erfassung",
-      "daily": "Täglich",
-      "work": "Arbeiten",
       "see": "Ansehen",
       "make": "Erstellen",
       "ask": "Fragen",
@@ -118,25 +105,25 @@
     },
     "items": {
       "home": "Start",
-      "chat": "Ionexa Chat",
+      "chat": "Frag mich",
       "memory": "Meine Einträge durchsuchen",
       "timeline": "Verlauf",
       "favorites": "Favoriten",
       "missionControl": "Ziele & Pläne",
-      "reflection": "Wöchentliche Reflexion",
+      "reflection": "Deine Woche",
       "settings": "Einstellungen",
       "team": "Team",
-      "agents": "KI-Agenten",
+      "agents": "KI, die für dich arbeitet",
       "websites": "Website-Pläne",
       "websiteBuilder": "Website bauen",
-      "apps": "App-Notizen",
-      "images": "Bild-Notizen",
-      "videos": "Video-Notizen",
+      "apps": "App-Ideen",
+      "images": "Bild-Ideen",
+      "videos": "Video-Ideen",
       "coding": "Programmieren mit KI",
-      "dataAnalysis": "Datenanalyse",
+      "dataAnalysis": "Sieh, was die Zahlen sagen",
       "documents": "Dokumente",
-      "presentations": "Präsentationsnotizen",
-      "campaigns": "Kampagnen-Notizen",
+      "presentations": "Präsentationen",
+      "campaigns": "Kampagnen-Ideen",
       "analytics": "Analytik",
       "finance": "Finanzen",
       "content": "Inhalte",
@@ -152,16 +139,16 @@
       "tradingWorkflow": "Trading-Workflow",
       "productWorkflow": "Produkt-Workflow",
       "automation": "Automatisierung",
-      "marketplace": "Marktplatz",
+      "marketplace": "Fertige Helfer",
       "published": "Live-Seiten",
       "integrations": "Integrationen",
       "files": "Dateien",
-      "deepResearch": "Tiefenrecherche",
+      "deepResearch": "Gründlich nachsehen",
       "help": "Hilfe-Center",
       "affiliate": "Partnerprogramm",
       "formSubmissions": "Formulareingänge",
-      "routing": "Modell-Routing",
-      "businessHealth": "Geschäftslage",
+      "routing": "Welche KI verwendet wird",
+      "businessHealth": "Wie das Geschäft läuft",
       "mine": "Meine Sachen",
       "records": "Meine Einträge",
       "library": "Meine Sachen",
@@ -170,7 +157,9 @@
       "systemHealth": "Systemzustand",
       "tradingJournal": "Trading-Journal",
       "voice": "Stimme",
-      "predictions": "Muster"
+      "predictions": "Muster",
+      "posts": "Beiträge",
+      "projects": "Projekte"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -207,7 +196,7 @@
       "images": "Behalten Sie geplante oder bereits erstellte Bilder im Blick. Erzeugt sie nicht.",
       "videos": "Behalten Sie geplante oder bereits erstellte Videos im Blick. Erzeugt sie nicht.",
       "coding": "Codeausschnitte schreiben, erklären, korrigieren, umwandeln und testen. Führt keinen Code aus und öffnet kein Repository.",
-      "presentations": "Behalten Sie geplante oder bereits erstellte Präsentationen im Blick. Erstellt keine Folien.",
+      "presentations": "Beschreibe eine Präsentation und erhalte die Folien – PowerPoint oder PDF, mit Fotos von Unsplash oder deinen eigenen. Es zeichnet keine Diagramme.",
       "home": "Ihr Dashboard — Aktivität, Statistiken und Schnellaktionen.",
       "settings": "Konto, Abrechnung, Sprache und Einstellungen.",
       "published": "Alle Ihre Live-Seiten, mit Zugriffen und Versionsverlauf",
@@ -227,7 +216,9 @@
       "systemHealth": "Ob Datenbank, Warteschlangen und Anbieter antworten.",
       "tradingJournal": "Deine Trades, mit der Begründung, die du damals notiert hast.",
       "voice": "Text vorlesen lassen oder sprechen und mitschreiben lassen. Minuten werden gezählt, der Minutenpreis steht auf der Seite.",
-      "predictions": "Muster in deinen eigenen Einträgen, jeweils mit der Zahl der Einträge dahinter und einem Link darauf."
+      "predictions": "Muster in deinen eigenen Einträgen, jeweils mit der Zahl der Einträge dahinter und einem Link darauf.",
+      "posts": "Sag es einmal und erhalte pro Plattform einen Beitrag in ihrer Länge und ihrem Ton. Es veröffentlicht nichts – du kopierst und postest.",
+      "projects": "Ein Ordner mit einem Ziel. Was du hineinlegst, ist drin — nichts kommt von selbst."
     },
     "closeMenu": "Menü schließen"
   },
@@ -382,8 +373,8 @@
         "description": "Erstelle und bearbeite Videos mit KI."
       },
       "presentations": {
-        "title": "KI-Präsentationen & Dokumente",
-        "description": "Erzeuge ausgefeilte Präsentationen und Dokumente aus deinen Daten."
+        "title": "KI-Präsentationen",
+        "description": "Beschreibe eine Präsentation und erhalte bearbeitbare Folien – exportiert als PowerPoint oder PDF, mit Fotos von Unsplash oder deinen eigenen."
       },
       "marketingBuilder": {
         "title": "KI-Marketingkampagnen-Builder",
@@ -1160,7 +1151,11 @@
         "body": "Es sieht deine Einträge, deine Ziele und die Dateien, die du hochgeladen hast. Es sieht nichts, was du nicht hinzugefügt hast. Es ändert nichts, ohne dass du darum bittest."
       },
       "stop": "Stopp",
-      "stopped": "Gestoppt. Was geschrieben wurde, bleibt — und nur dieser Teil wird berechnet."
+      "stopped": "Gestoppt. Was geschrieben wurde, bleibt — und nur dieser Teil wird berechnet.",
+      "clarificationTitle": "Zuerst eine kurze Frage:",
+      "clarificationSkip": "Trotzdem beantworten",
+      "clarificationContinue": "Senden",
+      "clarificationAnswerPlaceholder": "Deine Antwort..."
     },
     "create": {
       "title": "Alles Erstellen",
@@ -1172,6 +1167,16 @@
       "looksLikeQuestion": "Das sieht nach einer Frage aus. Soll ich sie beantworten oder ablegen?",
       "answerItInstead": "Beantworten",
       "recordItAnyway": "Trotzdem ablegen"
+    },
+    "goal": {
+      "willOpen": "Das geht zu {destination}, mit dem, was du geschrieben hast.",
+      "costsThere": "{credits, plural, one {# Credit} other {# Credits}}, wenn du dort auf die Schaltfläche drückst. Jetzt wird nichts berechnet.",
+      "freeThere": "Jetzt wird nichts berechnet, und bei der Ankunft auch nicht.",
+      "confirm": "Ja, mach das",
+      "change": "Etwas ändern",
+      "which": "Welches meinst du?",
+      "vague": "Sag ein bisschen mehr, damit es an die richtige Stelle geht.",
+      "dismiss": "Lass gut sein"
     },
     "timeline": {
       "title": "Meine Sachen",
@@ -1276,7 +1281,7 @@
       "stepChangeFailed": "Der Schritt konnte nicht geändert werden."
     },
     "reflection": {
-      "title": "Wöchentliche Reflexion",
+      "title": "Deine Woche",
       "description": "Sieh, was du diese Woche wirklich erledigt hast im Vergleich zu dem, was geplant war — echte Daten, ohne Schönfärberei.",
       "generateButton": "Wöchentliche Reflexion Erstellen",
       "generating": "Erstellen...",
@@ -1494,11 +1499,12 @@
           "chatWidget": "das Chat-Widget"
         },
         "stopped": "Von dir gestoppt. {count, plural, =0 {Nichts wurde berechnet} one {# Credit wurde berechnet} other {# Credits wurden berechnet}} für den erzeugten Teil; der Rest der Reservierung wurde freigegeben.",
-        "spelling": "{count, plural, one {Ein griechisches Wort ist möglicherweise falsch geschrieben} other {# griechische Wörter sind möglicherweise falsch geschrieben}}: {words}. Es wurde nichts geändert — prüfe sie, ein Name oder eine Marke ist kein Fehler."
+        "spelling": "{count, plural, one {Ein griechisches Wort ist möglicherweise falsch geschrieben} other {# griechische Wörter sind möglicherweise falsch geschrieben}}: {words}. Es wurde nichts geändert — prüfe sie, ein Name oder eine Marke ist kein Fehler.",
+        "sameSkeleton": "Diese Website hat dieselbe Struktur wie {name} — {percent}% gleiche Form. Es wurde nichts geändert; zwei Websites desselben Betriebs sollen sich oft ähneln, und nur Sie können sagen, ob das hier zutrifft."
       }
     },
     "marketplace": {
-      "title": "Marktplatz",
+      "title": "Fertige Helfer",
       "description": "Agentenvorlagen, die andere gebaut und geteilt haben. Kostenlos — hier wird nichts gekauft oder verkauft.",
       "empty": {
         "title": "Noch keine Vorlagen",
@@ -1649,7 +1655,7 @@
       "madeItHere": "Hier erstellt → {where}"
     },
     "agents": {
-      "title": "KI-Agenten",
+      "title": "KI, die für dich arbeitet",
       "description": "Agenten, die nach Zeitplan laufen und Ihnen das Ergebnis per E-Mail schicken.",
       "aiDisclosure": "Agenten sind KI-Systeme. Alles, was sie erzeugen, ist KI-generiert und kann Fehler enthalten — prüfen Sie Wichtiges, bevor Sie danach handeln.",
       "newAgent": "Neuer Agent",
@@ -2054,13 +2060,6 @@
       "truncatedWarning": "Auch in Teilen gelesen war die Auswahl größer, als eine Frage abdecken kann, die Antwort kann also unvollständig sein. Frag nach weniger Dateien auf einmal.",
       "skippedFiles": "Übersprungen (kein lesbarer Text): {names}",
       "creditsCharged": "{credits, plural, one {# Credit} other {# Credits}}",
-      "stepsLabel": "So funktioniert diese Seite",
-      "step1Title": "1. Dateien hochladen",
-      "step1Hint": "PDF, Word, Excel, CSV oder Text.",
-      "step2Title": "2. Auswählen, worüber gefragt wird",
-      "step2Hint": "Wähle eine oder mehrere Dateien — die Antwort stammt nur aus dem, was du auswählst.",
-      "step3Title": "3. Frage stellen",
-      "step3Hint": "Die KI antwortet nur aus den angehakten Dateien.",
       "selectedOfTotal": "{count} von {total} ausgewählt",
       "selectAll": "Alle auswählen",
       "maxPerQuestion": "Bis zu {max} Dateien pro Frage.",
@@ -2094,7 +2093,7 @@
       "openedFromDevice": "{count, plural, one {# Datei} other {# Dateien}} von Ihrem Gerät geöffnet."
     },
     "deepResearch": {
-      "title": "Tiefenrecherche",
+      "title": "Gründlich nachsehen",
       "description": "Gib ein Thema an; es recherchiert, gleicht ab und schreibt einen belegten Bericht.",
       "intro": "Ein Bericht dauert mehrere Minuten und ist das Teuerste hier, deshalb siehst du immer Plan und Preis, bevor etwas läuft. Ergebnisse werden mit Quellenangabe paraphrasiert, nie nachgedruckt.",
       "topicLabel": "Was soll recherchiert werden?",
@@ -2793,7 +2792,6 @@
       "roadmap": "Fahrplan",
       "score": "Bewertung",
       "sentiment": "Stimmung",
-      "slideCount": "Anzahl der Folien",
       "status": "Status",
       "strengths": "Stärken",
       "suggestedResponse": "Vorgeschlagene Antwort",
@@ -2803,7 +2801,6 @@
       "targetAudience": "Zielgruppe",
       "taskName": "Name der Aufgabe",
       "timeSaved": "Gesparte Zeit",
-      "title": "Titel",
       "toolsNeeded": "Benötigte Werkzeuge",
       "topic": "Thema",
       "twitterThread": "Twitter-Thread",
@@ -2822,13 +2819,10 @@
       "crossPlatform": "plattformübergreifend",
       "desktop": "Desktop",
       "done": "fertig",
-      "draft": "Entwurf",
       "email": "E-Mail",
       "event": "Veranstaltung",
       "expense": "Ausgabe",
-      "final": "final",
       "inProgress": "in Arbeit",
-      "inReview": "in Prüfung",
       "income": "Einnahme",
       "ios": "iOS",
       "live": "live",
@@ -2863,7 +2857,6 @@
       "apps": "Diese App löschen? Das lässt sich nicht rückgängig machen.",
       "images": "Dieses Bild löschen? Das lässt sich nicht rückgängig machen.",
       "videos": "Dieses Video löschen? Das lässt sich nicht rückgängig machen.",
-      "presentations": "Diese Präsentationsnotiz löschen? Das lässt sich nicht rückgängig machen.",
       "campaigns": "Diese Kampagne löschen? Das lässt sich nicht rückgängig machen."
     },
     "empty": {
@@ -2947,11 +2940,6 @@
         "why": "Das Briefing je Video und wie weit es ist — damit eine Drehliste nie nur in deinem Kopf existiert. Erzeugt werden hier keine.",
         "example": "30-Sekunden-Produktdemo"
       },
-      "presentations": {
-        "title": "Ein Ort, um Präsentationen im Blick zu behalten",
-        "why": "Notiere die Decks, die du planst oder schon gehalten hast — diese Seite erstellt keine Folien für dich. Nutze den Button oben, um eines hinzuzufügen.",
-        "example": "Investoren-Deck für die Seed-Runde"
-      },
       "campaigns": {
         "title": "Jede Kampagne und was sie gekostet hat",
         "why": "Kanal, Budget und Status nebeneinander — damit die nächste Budgetentscheidung aus Zahlen entsteht und nicht aus Gefühl. Ausgeführt werden sie hier nicht.",
@@ -2975,7 +2963,6 @@
       "apps": "Neue App",
       "images": "Neues Bild",
       "videos": "Neues Video",
-      "presentations": "Neue Präsentationsnotiz",
       "campaigns": "Neue Kampagne"
     }
   },
@@ -3227,6 +3214,26 @@
       "is": "Muster, die Code in deinen eigenen Einträgen findet — kein Modell, das rät.",
       "does": "Zählt deine Zeilen, findet Muster oberhalb einer Schwelle und nennt jedes mit der Zahl der Einträge dahinter und einem Link darauf.",
       "doesNot": "Es sagt die Zukunft nicht voraus und erfindet kein Muster, nur um etwas zu sagen. Bei weniger als einer Handvoll passender Zeilen sagt es, dass die Grundlage fehlt."
+    },
+    "presentations": {
+      "is": "Ein Folien-Generator: eine Beschreibung rein, eine Präsentation raus.",
+      "does": "Schreibt Titel, Stichpunkte und Sprechernotizen jeder Folie in der Sprache deiner Beschreibung, findet ein Foto auf Unsplash oder setzt deine eigenen ein und exportiert die Präsentation als PowerPoint (.pptx) oder PDF.",
+      "doesNot": "Es zeichnet keine Diagramme oder Tabellen, wählt kein Design-Thema und erzeugt keine Bilder – Fotos kommen von Unsplash oder von dir. Die Folien werden hier nicht bearbeitet: lade die .pptx herunter und stelle sie in PowerPoint oder Keynote fertig."
+    },
+    "posts": {
+      "is": "Ein Beitragsschreiber: eine Beschreibung rein, ein Beitrag pro Plattform raus.",
+      "does": "Schreibt aus derselben Beschreibung einen LinkedIn-Beitrag, einen Beitrag für X, eine Instagram-Bildunterschrift mit Hashtags, einen Facebook-Beitrag und einen Threads-Beitrag – jeder auf die Länge seiner Plattform gekürzt und in ihrem Ton, in der Sprache deiner Beschreibung – mit einem Kopieren-Knopf an jedem.",
+      "doesNot": "Es veröffentlicht nichts, plant nichts ein und verbindet sich mit keinem Social-Media-Konto, und es verwendet keinen Text auf mehreren Plattformen wieder – fünf Plattformen, fünf Beiträge. Es erzeugt keine Bilder; das Foto ist deins."
+    },
+    "projects": {
+      "is": "Ein Ordner mit einem Ziel, der genau das enthält, was du hineingelegt hast.",
+      "does": "Gruppiert deine eigenen Zeilen — Dateien, Unterhaltungen, Pläne, Agents, Präsentationen, Beiträge und jeden Tracker-Eintrag — unter einem Namen und einem Ziel, und lässt einen Chat darin starten, der mehr Zeilen aus weniger Modulen liest.",
+      "doesNot": "Es zieht nichts von selbst hinein: ein Plan bringt seine Schritte nicht mit, eine Website ihre Formulare nicht. Ein gelöschtes Projekt löscht den Ordner, nie den Inhalt."
+    },
+    "projectDetail": {
+      "is": "Ein Projekt: sein Ziel, was du hineingelegt hast, und ein Chat, der darin beginnt.",
+      "does": "Gruppiert den Inhalt in Aufgaben, Dateien, Agents und Ergebnisse, zeigt wann was dazukam, lässt dich einzelne herausnehmen und startet eine Unterhaltung, die ihr Leben lang zu diesem Projekt gehört.",
+      "doesNot": "Etwas herauszunehmen löscht es nicht, und das Projekt fügt von selbst nichts hinzu: ein Plan bringt hier seine Schritte nicht mit, eine Website ihre Formulare nicht."
     }
   },
   "helpCentre": {
@@ -3502,7 +3509,7 @@
     }
   },
   "dataAnalysis": {
-    "title": "Datenanalyse",
+    "title": "Sieh, was die Zahlen sagen",
     "description": "Lade eine Tabelle hoch. Jede Kennzahl wird aus der GANZEN Datei berechnet — nie geraten.",
     "upload": {
       "title": "Datei hochladen",
@@ -3629,8 +3636,166 @@
       "failed": "fehlgeschlagen"
     }
   },
+  "presentations": {
+    "title": "Präsentationen",
+    "description": "Beschreibe die Präsentation und erhalte die Folien – bearbeitbar als PowerPoint oder PDF, mit Fotos von Unsplash oder deinen eigenen.",
+    "limits": {
+      "title": "Was es NICHT tut",
+      "no_charts": "Es zeichnet keine Diagramme oder Tabellen. Eine Folie ist ein Titel, Stichpunkte und Sprechernotizen.",
+      "no_themes": "Es wählt kein Design-Thema. Die Präsentation ist schlicht, das Styling ist deins.",
+      "no_editing": "Die Folien werden hier nicht bearbeitet. Lade die .pptx herunter und stelle sie in PowerPoint, Keynote oder LibreOffice fertig.",
+      "no_generated_images": "Es erzeugt keine Bilder. Fotos kommen von Unsplash oder aus deinen Uploads."
+    },
+    "form": {
+      "description": "Worum geht es in der Präsentation?",
+      "descriptionPlaceholder": "Ein zehnminütiger Pitch des Catering-Angebots unserer Bäckerei vor drei Hotelmanagern: wer wir sind, was wir liefern, Preise und was wir von ihnen brauchen…",
+      "slideCount": "Folien",
+      "slides": "{count, plural, one {# Folie} other {# Folien}}",
+      "imageSource": "Bilder",
+      "sources": {
+        "unsplash": "Von Unsplash",
+        "own": "Meine eigenen Fotos",
+        "none": "Keine Fotos",
+        "unsplashHint": "Kostenlose Stockfotos, passend zu jeder Folie, die eines verlangt, mit Nennung des Fotografen.",
+        "ownHint": "Bis zu {max} JPEG- oder PNG-Fotos, der Reihe nach auf die Folien gesetzt, die eines verlangen.",
+        "noneHint": "Nur Text.",
+        "unsplashUnavailable": "Unsplash ist auf dieser Installation nicht eingerichtet, Fotos können daher nur deine eigenen sein."
+      },
+      "addPhotos": "Fotos hinzufügen",
+      "photosSelected": "{count} von {max}",
+      "remove": "Entfernen",
+      "generate": "Folien schreiben",
+      "generating": "Präsentation wird geschrieben…"
+    },
+    "result": {
+      "title": "Deine Präsentation",
+      "slidesCount": "{count, plural, one {# Folie} other {# Folien}}",
+      "charged": "{credits, plural, one {# Credit} other {# Credits}}",
+      "preparing": "Wird vorbereitet…",
+      "exportPptx": "Als PowerPoint herunterladen",
+      "exportPdf": "Als PDF herunterladen",
+      "notes": "Sprechernotizen",
+      "noPhotoFound": "Kein Foto passte zu den Folien, die eines verlangten – die Präsentation ist nur Text.",
+      "photoBy": "Foto von <author>{name}</author> auf <unsplash>Unsplash</unsplash>",
+      "layout": {
+        "title": "Titel",
+        "bullets": "Stichpunkte",
+        "section": "Abschnitt",
+        "quote": "Zitat",
+        "image": "Foto"
+      }
+    },
+    "errors": {
+      "tooShort": "Sag zuerst etwas mehr über die Präsentation.",
+      "tooLong": "Das sind mehr als {limit} Zeichen. Beschreibe die Präsentation, nicht den ganzen Vortrag.",
+      "insufficient": "Nicht genug Credits für diese Präsentation.",
+      "rateLimited": "Zu viele Anfragen – warte eine Minute und versuche es erneut.",
+      "unavailable": "Der KI-Dienst war nicht erreichbar. Nichts wurde berechnet.",
+      "unusable": "Das Modell hat etwas zurückgegeben, das keine Präsentation war. Beschreibe sie anders.",
+      "failed": "Das hat nicht geklappt – versuche es erneut.",
+      "imageRejected": "Nur JPEG oder PNG unter 5 MB, und höchstens {max} Fotos.",
+      "uploadFailed": "Ein Foto konnte nicht hochgeladen werden.",
+      "exportFailed": "Die Datei konnte nicht erstellt werden."
+    },
+    "history": {
+      "title": "Verlauf",
+      "empty": "Noch nichts hier.",
+      "slides": "{count, plural, one {# Folie} other {# Folien}}",
+      "failed": "fehlgeschlagen",
+      "delete": "Löschen",
+      "deleteConfirm": "Diese Präsentation löschen? Das lässt sich nicht rückgängig machen.",
+      "noteFromBefore": "Notiz von früher"
+    }
+  },
+  "posts": {
+    "title": "Beiträge",
+    "description": "Sag einmal, was du sagen willst; erhalte für jede Plattform einen Beitrag in ihrer Länge und ihrem Ton. Kopiere ihn und poste ihn selbst.",
+    "limits": {
+      "title": "Was es NICHT tut",
+      "no_publish": "Es veröffentlicht nichts. Nichts von hier erreicht LinkedIn, X, Instagram, Facebook oder Threads – du kopierst den Text und postest ihn.",
+      "no_scheduling": "Es plant nichts ein und hat keinen Kalender.",
+      "no_images": "Es erzeugt keine Bilder. Nur Text; das Foto ist deins.",
+      "no_accounts": "Es ist mit keinem Social-Media-Konto verbunden und fragt nach keinem."
+    },
+    "form": {
+      "description": "Was willst du sagen?",
+      "descriptionPlaceholder": "Unsere Bäckerei liefert jetzt Frühstück in Büros im Zentrum – Bestellung bis 18 Uhr für den nächsten Morgen, mindestens zehn Personen, 10 % Rabatt auf die erste Bestellung…",
+      "platforms": "Plattformen",
+      "upTo": "bis zu {max} Zeichen",
+      "generate": "Beiträge schreiben",
+      "generating": "Wird geschrieben…"
+    },
+    "result": {
+      "title": "Deine Beiträge",
+      "charged": "{credits, plural, one {# Credit} other {# Credits}}",
+      "chars": "{count} / {max}",
+      "missing": "{platform} wurde diesmal nicht geschrieben – starte es nur mit dieser Plattform noch einmal."
+    },
+    "errors": {
+      "tooShort": "Sag zuerst etwas mehr.",
+      "tooLong": "Das sind mehr als {limit} Zeichen. Sag, worum es im Beitrag geht, nicht die ganze Geschichte.",
+      "insufficient": "Nicht genug Credits für diese Beiträge.",
+      "rateLimited": "Zu viele Anfragen – warte eine Minute und versuche es erneut.",
+      "unavailable": "Der KI-Dienst war nicht erreichbar. Nichts wurde berechnet.",
+      "unusable": "Das Modell hat etwas zurückgegeben, das keine Beiträge waren. Beschreibe es anders.",
+      "failed": "Das hat nicht geklappt – versuche es erneut."
+    },
+    "history": {
+      "title": "Verlauf",
+      "empty": "Noch nichts hier.",
+      "failed": "fehlgeschlagen",
+      "delete": "Löschen",
+      "deleteConfirm": "Diese Beiträge löschen? Das lässt sich nicht rückgängig machen."
+    }
+  },
+  "projects": {
+    "title": "Projekte",
+    "description": "Ein Ordner mit einem Ziel. Du legst Dinge ausdrücklich hinein; nichts kommt mit.",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Herbstshop starten",
+      "goal": "Ziel",
+      "goalPlaceholder": "Was willst du erreichen?",
+      "create": "Projekt erstellen"
+    },
+    "list": {
+      "title": "Deine Projekte",
+      "empty": "Noch keine Projekte.",
+      "members": "{count, plural, one {# Sache} other {# Sachen}}"
+    },
+    "status": {
+      "active": "Aktiv",
+      "done": "Fertig",
+      "archived": "Archiviert"
+    },
+    "sections": {
+      "goal": "Ziel",
+      "tasks": "Aufgaben",
+      "files": "Dateien",
+      "agents": "Agents",
+      "results": "Ergebnisse",
+      "activity": "Aktivität",
+      "other": "Alles Übrige",
+      "empty": "Hier ist noch nichts."
+    },
+    "progress": {
+      "rowsPerModule": "{count, plural, one {# Zeile pro Modul im Chat} other {# Zeilen pro Modul im Chat}}"
+    },
+    "startChat": "Chat in diesem Projekt starten",
+    "chatFixed": "Eine Unterhaltung gehört zu dem Projekt, in dem sie begonnen hat — ihr Leben lang.",
+    "noGoal": "Noch kein Ziel geschrieben.",
+    "untitled": "Ohne Titel",
+    "delete": "Löschen",
+    "deleteConfirm": "Dieses Projekt löschen? Was darin liegt, bleibt, wo es ist.",
+    "removeMember": "Aus dem Projekt nehmen",
+    "errors": {
+      "tooShort": "Gib ihm zuerst einen Namen.",
+      "tooLong": "Der Name ist länger als {limit} Zeichen.",
+      "failed": "Das hat nicht geklappt — versuch es nochmal."
+    }
+  },
   "finance": {
-    "title": "Geschäftslage",
+    "title": "Wie das Geschäft läuft",
     "description": "Jede Zahl wird aus echten Zeilen berechnet — oder sagt, warum sie es nicht kann.",
     "needsInput": "Fehlt: {fields}",
     "needsHistory": "Braucht {need} Monate Historie — wir haben {have}.",
@@ -3682,7 +3847,7 @@
     "needsHistoryDays": "Braucht {need} Tage tägliche Momentaufnahmen — wir haben {have}."
   },
   "routing": {
-    "title": "Modell-Routing",
+    "title": "Welche KI verwendet wird",
     "description": "Welches Modell welche Anfrage in den letzten 30 Tagen bedient hat, was es gekostet und was das Routing gespart hat.",
     "empty": "Es wurden noch keine Routing-Entscheidungen erfasst. Diese Tabelle füllt sich, sobald Anfragen durch den Router laufen — sie zeigt keine Nullen, sie zeigt nichts.",
     "decisions": "Entscheidungen",
@@ -3763,6 +3928,37 @@
       "not_delivered_test_sender": "Ihre Nachricht konnte nicht zugestellt werden: Diese Installation hat keine verifizierte Absenderadresse.",
       "send_failed": "Ihre Nachricht konnte nicht gesendet werden. Bitte erneut versuchen.",
       "unknown": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    }
+  },
+  "stepFlow": {
+    "label": "Schritte",
+    "steps": {
+      "describe": "Beschreiben",
+      "generate": "Erzeugen",
+      "edit": "Bearbeiten",
+      "preview": "Vorschau",
+      "publish": "Veröffentlichen",
+      "question": "Frage",
+      "research": "Recherche",
+      "sources": "Quellen",
+      "answer": "Antwort",
+      "upload": "Hochladen",
+      "ask": "Fragen",
+      "review": "Prüfen"
+    },
+    "hints": {
+      "describe": "Sag mit eigenen Worten, was du willst.",
+      "generate": "Schreibt die erste Fassung. Kostet Credits.",
+      "edit": "Sag, was geändert werden soll. So oft du willst.",
+      "preview": "Sieh es dir an, bevor es jemand anderes tut.",
+      "publish": "Geht online, unter eigener Adresse.",
+      "question": "Ein Thema zum Nachgehen, keine Suchanfrage.",
+      "research": "Liest das Web und macht Notizen.",
+      "sources": "Jede Aussage behält die Seite, aus der sie stammt.",
+      "answer": "Die Antwort, mit ihrer Herkunft.",
+      "upload": "PDF, Word, Text, Tabellen.",
+      "ask": "Wähle eine oder mehrere Dateien — die Antwort stammt nur aus dem, was du auswählst.",
+      "review": "Lies es, bevor du es benutzt. Hier läuft nichts."
     }
   }
 }

@@ -712,7 +712,20 @@ check("the CSS records why orange-500 is not used in light", /2\.62:1/.test(cssB
 check("there is a tone for accent-coloured surfaces", /tone\?: "accent" \| "inherit"/.test(indicator));
 check("and it takes the parent's colour", /\.ionexa-globe\.is-inherit\s*\{\s*color: inherit/.test(cssBlock));
 check("with the glow dropped, since a halo in the parent's colour is a smudge", /is-inherit \.globe-node[\s\S]{0,80}filter: none/.test(cssCode));
-check("files uses it inside the orange button", /<ThinkingIndicator size="sm" tone="inherit"/.test(files));
+// THE ANCHOR MOVED, AND THAT IS THE POINT OF SECTION 4.
+//
+// This used to read files-workspace.tsx, whose "Ask" button was a filled
+// orange rectangle. Redesign phase 4 demoted it to an accent outline —
+// one filled control per screen — so the inherit tone became the WRONG
+// answer there and section 4's per-call-site check said so before this
+// line did. It is anchored on the chat composer's send button instead,
+// which is still a solid orange fill with black text and is the screen's
+// one primary action.
+const composer = stripComments(readFileSync("src/components/chat/chat-composer.tsx", "utf8"));
+check(
+  "the chat composer's send button, which is still a solid fill, uses it",
+  /bg-orange-500 text-black/.test(composer) && /<ThinkingIndicator size="sm" tone="inherit"/.test(composer)
+);
 
 // =====================================================================
 console.log("\n== 9. weight ==");

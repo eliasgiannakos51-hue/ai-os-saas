@@ -444,16 +444,16 @@ try {
 
     // -----------------------------------------------------------------
     console.log("\n== 1. the three steps are stated, and one is current ==");
-    const steps = page.locator('[data-testid="files-steps"]');
+    const steps = page.locator('[data-testid="step-flow-files"]');
     check("a step flow is on the page", (await steps.count()) > 0 && (await steps.isVisible()));
-    const stepItems = page.locator('[data-testid="files-steps"] li');
+    const stepItems = page.locator('[data-testid="step-flow-files"] li');
     check(`there are exactly three steps (${await stepItems.count()})`, (await stepItems.count()) === 3);
     const stepText = await steps.innerText();
     check("step 1 is about uploading", /upload/i.test(stepText), stepText);
     check("step 2 is about choosing which files", /choose|select/i.test(stepText), stepText);
     check("step 3 is about asking", /ask/i.test(stepText), stepText);
     // With files present but nothing ticked, the user is on step 2.
-    const current = page.locator('[data-testid="files-steps"] li[aria-current="step"]');
+    const current = page.locator('[data-testid="step-flow-files"] li[aria-current="step"]');
     check("exactly one step is marked current", (await current.count()) === 1);
     check(
       `and with files uploaded but none selected it is step 2 ("${(await current.innerText()).replace(/\n/g, " ")}")`,
@@ -478,7 +478,7 @@ try {
     await page.locator('input[type="checkbox"]:not([disabled])').nth(1).check();
     await page.waitForTimeout(250);
     check(`the counter follows the selection (${(await counter.innerText()).trim()})`, /2/.test(await counter.innerText()));
-    check("and the step marker has moved to step 3", /ask/i.test(await page.locator('[data-testid="files-steps"] li[aria-current="step"]').innerText()));
+    check("and the step marker has moved to step 3", /ask/i.test(await page.locator('[data-testid="step-flow-files"] li[aria-current="step"]').innerText()));
 
     console.log("\n== 3. the Ask control is findable ==");
     const askBtn = page.locator('[data-testid="files-ask-button"]');
@@ -575,14 +575,14 @@ try {
     // With nothing uploaded, step 1 is where the user is.
     check(
       "and step 1 is the current step",
-      /upload/i.test(await empty.locator('[data-testid="files-steps"] li[aria-current="step"]').innerText())
+      /upload/i.test(await empty.locator('[data-testid="step-flow-files"] li[aria-current="step"]').innerText())
     );
     await ec.close();
     serveEmpty = false;
 
     console.log("\n== 8. the same page at 375px ==");
     const { context: mc, page: mobile } = await openFiles(375, 812);
-    check("the steps are still on screen", await mobile.locator('[data-testid="files-steps"]').isVisible());
+    check("the steps are still on screen", await mobile.locator('[data-testid="step-flow-files"]').isVisible());
     check("so is the Ask button", await mobile.locator('[data-testid="files-ask-button"]').isVisible());
     const overflow = await mobile.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,

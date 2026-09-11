@@ -210,7 +210,7 @@ export default async function PricingPage({
               key={plan.slug}
               className={`relative flex flex-col rounded-2xl border p-6 ${
                 plan.highlighted
-                  ? "border-orange-500/60 bg-orange-500/[0.04] shadow-[0_0_24px_rgba(249,115,22,0.12)]"
+                  ? "border-orange-500/60 bg-orange-500/[0.04]"
                   : "border-border bg-panel"
               }`}
             >
@@ -328,7 +328,7 @@ export default async function PricingPage({
                     label={t("getPlan", { plan: plan.name })}
                     className={`inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
                       plan.highlighted
-                        ? "bg-orange-500 text-black hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
+                        ? "bg-orange-500 text-black hover:opacity-90"
                         : "border border-border text-foreground hover:border-orange-500 hover:text-orange-400"
                     }`}
                   />
@@ -342,7 +342,7 @@ export default async function PricingPage({
               unrelated footnote; measured before/after with Playwright.
               The grid is xl:grid-cols-7 so all seven cards share one row at
               full width without displacing Enterprise. */}
-          <div className="relative flex flex-col rounded-2xl border border-border bg-panel p-6">
+          <div className="relative flex flex-col surface">
             <h2 className="text-sm font-semibold text-orange-400">{t("businessTitle")}</h2>
             <p className="mt-3 text-lg font-bold text-foreground">{t("businessSubtitle")}</p>
             <p className="mt-3 text-xs leading-relaxed text-muted">
@@ -381,7 +381,7 @@ export default async function PricingPage({
             — remove this attribute once verified. */}
         <div
           data-deploy-check="deploy-check-a2ac56f"
-          className="mx-auto mt-8 max-w-3xl rounded-2xl border border-border bg-panel p-6 text-center"
+          className="mx-auto mt-8 max-w-3xl surface text-center"
         >
           <h2 className="text-sm font-semibold text-orange-400">{t("teamBannerTitle")}</h2>
           <p className="mt-2 text-sm text-muted">

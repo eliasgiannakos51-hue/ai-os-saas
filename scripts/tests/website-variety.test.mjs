@@ -35,6 +35,7 @@
 // Run: node scripts/tests/website-variety.test.mjs
 import { readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
+import { parseShapeOrders, sectionsOfShape } from "./lib/site-shape-orders.mjs";
 
 let pass = 0;
 const failures = [];
@@ -148,6 +149,8 @@ console.log("\n== 4. the three briefs in the report get different shapes ==");
 function shapeBlock(name) {
   return shape.split(/\n(?=- [a-z-]+:)/).find((b) => b.startsWith(`- ${name}:`)) ?? "";
 }
+const shapeOrders = parseShapeOrders(shape);
+const shapes = shape;
 const localPlace = shapeBlock("local-place");
 const professional = shapeBlock("professional-services");
 const galleryShape = shapeBlock("gallery");
@@ -155,20 +158,27 @@ const galleryShape = shapeBlock("gallery");
 // cafe -> menu and hours high, photo-led
 check("a cafe covers cafes", /caf|restaurant|taverna/i.test(localPlace));
 check("it leads with a photograph of the place", /FIRST:[^\n]*photograph/i.test(localPlace));
-// THREE orders per shape, not one. A single order per archetype is what
+// SIX orders per shape, not one. A single order per archetype is what
 // made two tavernas the same page — the shape decided the sections AND
 // their sequence, so every local-place site ever generated ran photo >
 // menu > hours > gallery > map. Each letter must exist, and no two of
 // them may be the same list.
-const localOrders = [...localPlace.matchAll(/ORDER ([ABC]):\s*(.+)/g)].map((m) => [m[1], m[2].trim()]);
-check(`local-place offers three orders (${localOrders.map(([l]) => l).join("")})`, localOrders.length === 3);
+//
+// THREE BECAME SIX ON 2026-09-07, and the arithmetic is the reason: the
+// order is hashed into this list, so two people's sites of one kind got
+// the same skeleton 1/3 of the time BY CONSTRUCTION. Measured over 20,000
+// pairs in scripts/tests/section-order-space.test.mjs. Six halves it, and
+// six is the ceiling — four of the seven shapes have exactly three
+// movable sections, and 3! is 6.
+const localOrders = shapeOrders.filter((o) => o.shape === "local-place").map((o) => [o.letter, o.sections.join(" > ")]);
+check(`local-place offers six orders (${localOrders.map(([l]) => l).join("")})`, localOrders.length === 6);
 check(
   "ORDER A still leads with the photo and then the menu",
   /^photo\s*>\s*menu/i.test(localOrders.find(([l]) => l === "A")?.[1] ?? "")
 );
 check(
-  "and the three are three different lists, not one list relabelled",
-  new Set(localOrders.map(([, list]) => list)).size === 3,
+  "and the six are six different lists, not one list relabelled",
+  new Set(localOrders.map(([, list]) => list)).size === 6,
   JSON.stringify(localOrders.map(([, l]) => l))
 );
 check(
@@ -176,6 +186,35 @@ check(
   localOrders.some(([, list]) => !/^photo/i.test(list)),
   "if every letter opens the same way, the letter is decoration"
 );
+// AND THE PROMPT SAYS WHICH ONE WINS WHEN THEY DISAGREE.
+//
+// The line above is the reason this clause exists. The shape's FIRST line
+// says a local-place page opens with a photograph "before any heading",
+// and ORDER C opens with the menu. Both were in the prompt, neither
+// mentioned the other, and the model was left to pick — on the one axis
+// the whole "same template" complaint is about.
+//
+// A first attempt at this round resolved it the other way, by rewriting
+// ORDER C to start with the photo like the rest. That made every letter
+// open identically, which is what the check above forbids and it is
+// right to: the opening is the most template-defining thing on a page,
+// so a letter that cannot change it is decoration. The contradiction is
+// resolved in the prompt instead.
+check(
+  "the prompt says the ORDER beats the shape's FIRST line",
+  /WHERE THE FIRST LINE AND YOUR ORDER DISAGREE, THE ORDER WINS/.test(shapes)
+);
+// EVERY ORDER NAMES EVERY SECTION. The orders are digit sequences now, so
+// a typo is a page with a section missing rather than a syntax error.
+for (const shape of [...new Set(shapeOrders.map((o) => o.shape))]) {
+  const declared = sectionsOfShape(shapes, shape);
+  const mine = shapeOrders.filter((o) => o.shape === shape);
+  check(
+    `${shape}: all six orders build all ${declared.length} of its sections`,
+    mine.length === 6 && mine.every((o) => o.sections.length === declared.length && new Set(o.sections).size === declared.length),
+    mine.map((o) => `${o.letter}=${o.sections.length}`).join(" ")
+  );
+}
 check("with hours, address and phone as primary content", /hours and address and phone/i.test(localPlace));
 check("and marketing prose above the menu is forbidden", /NEVER:[^\n]*marketing prose above the menu/i.test(localPlace));
 
@@ -412,8 +451,14 @@ for (const [name, text] of COMPOSED) {
   console.log(`        ${name.padEnd(30)} ${String(text.length).padStart(6)} chars`);
 }
 console.log(`        ${"TOTAL (sections only)".padEnd(30)} ${String(total).padStart(6)} chars ~ ${Math.round(total / 4)} tokens`);
+// THE HEADROOM, NOT THE TOTAL. On 2026-09-07 this check was passing at
+// 29,982 of 30,000 — eighteen characters of room — and nothing said so.
+// Every prompt-sized addition anyone might propose would have failed it,
+// and a person skimming a green build could not tell that state from
+// 12,000 of 30,000. A budget check whose most important state is
+// indistinguishable from its safest one is not reporting the budget.
 check(
-  `the prompt has not run away (${total} chars, ceiling 30000)`,
+  `the prompt has not run away (${total} chars, ${30000 - total} left under the 30000 ceiling)`,
   total < 30000,
   "if this fires, the brief is competing against even more text — trim before adding"
 );

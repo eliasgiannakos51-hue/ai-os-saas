@@ -123,15 +123,22 @@ check(
   "a new subscription starts from the plan's allotment",
   creditSyncDecision({
     eventType: "checkout.session.completed",
-    previousTier: "free",
+    previousTier: "growth",
     nextTier: "growth",
   }) === "reset"
 );
+// THE TIERS ARE THE SAME ON PURPOSE, and the first version of this check
+// had them differ — growth -> free — which is a plan CHANGE, so it
+// returned "reset" through the tier comparison whether or not the event
+// was in ALWAYS_RESET. Measured 2026-09-08: deleting
+// "customer.subscription.deleted" from that set left this line green.
+// A check satisfied by the branch it is not testing is a check about
+// nothing; free -> free can only reset because of the event.
 check(
   "a deleted subscription drops to Free's allotment",
   creditSyncDecision({
     eventType: "customer.subscription.deleted",
-    previousTier: "growth",
+    previousTier: "free",
     nextTier: "free",
   }) === "reset"
 );
@@ -148,7 +155,17 @@ console.log("\n== 4. the webhook actually consults it ==");
 // A pure function nobody calls fixes nothing. This is the half a unit
 // test of the function cannot see, and it is where the bug lived.
 const webhook = readFileSync("src/app/api/webhooks/stripe/route.ts", "utf8");
-check("the webhook imports the decision", /creditSyncDecision/.test(webhook));
+// IMPORTED **AND** CALLED. `/creditSyncDecision/` alone matches the
+// import line, so a webhook that imports the decision and then never
+// consults it passed — measured 2026-09-08 by renaming the call site and
+// watching this stay green. The import is the cheap half; the call is the
+// one the money depends on.
+check("the webhook imports the decision", /import\s*\{[^}]*creditSyncDecision/.test(webhook));
+check(
+  "...and calls it",
+  /=\s*creditSyncDecision\(/.test(webhook),
+  "imported and never consulted is the state this whole file was written about"
+);
 check(
   "syncCreditsForPlan is guarded by it, not called unconditionally",
   /creditSyncDecision\([\s\S]{0,400}?\)\s*===\s*"reset"/.test(webhook) ||

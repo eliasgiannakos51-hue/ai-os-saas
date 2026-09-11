@@ -171,6 +171,56 @@ observable failure. This is exactly how a $0.10 chat message once settled
 for 2 credits (0.17×) without a single alert — reproduced and pinned in
 `scripts/tests/pricing-margin-bug.test.mjs`.
 
+### Meeting an actual invoice (scripts/db/anthropic-reconcile.mjs)
+
+Everything above this line is arithmetic on `MODEL_PRICING_USD`. The
+charge comes from it, and the achieved margin stored on the row is
+measured against the same computed cost — so a wrong rate produces a
+wrong charge whose stored margin still reads a healthy 4×. Both inputs
+move together. The only check that does not share that blind spot is a
+comparison against a number this system did not produce.
+
+**That comparison needed a column the table did not have.** `ai_cost_log`
+sums its token counts across every sub-call of an action and records no
+model, while an action is routinely served by two or three (clarifier and
+classifier on the cheap tier, generation on the expensive one). An
+Anthropic invoice is broken down by model, so nothing below the monthly
+total could be placed beside it.
+
+`CostAccumulator.byModel()` now produces the per-model split and
+`settleReservation` writes it to `metadata.modelBreakdown` on every
+settlement — metadata rather than new columns, for the same reason
+`cacheWrite1hTokens` lives there: migrations here are pasted in by hand,
+and a change that needs none cannot silently not-run.
+
+    npm run db:invoice -- --sql --month 2026-08   # three queries to paste
+    DATABASE_URL=postgres://... npm run db:invoice -- --month 2026-08
+
+The three are **coverage** (how much of the month carries a split at all
+— read this one first, it is the denominator), **invoice shape** (one row
+per model × token kind, priced at Anthropic's published rate) and
+**reconciliation** (eleven lines walking from what the ledger booked to
+what Anthropic should bill, with every subtraction named). The script's
+`CONSOLE_STEPS` says which page of console.anthropic.com each one is to
+be read against.
+
+Four things about it are deliberate and easy to get backwards:
+
+- Rows settled before `modelBreakdown` existed get **their own line with
+  their own money on it**. They are never dropped and never spread across
+  models by proportion.
+- A model with no published rate prices to **NULL, not zero** — zero
+  would shrink the difference, making the report look better the less it
+  knew.
+- The published-rate table in that script is **not** `MODEL_PRICING_USD`.
+  Reconciling the ledger against the table that produced it would prove
+  only that arithmetic works. Where the two differ on purpose — Sonnet 5
+  is booked at the permanent $3/$15 rather than its $2/$10 introductory
+  rate — the difference is declared in `DIVERGENCES` with its reason, and
+  the gate requires that register to be exact in both directions.
+- `external:` (voice) and `batch:` lines are separated out, because
+  neither meets an Anthropic invoice at the standard rate.
+
 ## What a new AI feature must do
 
 1. Create a `CostAccumulator`.

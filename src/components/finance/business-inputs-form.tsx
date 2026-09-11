@@ -75,7 +75,7 @@ export function BusinessInputsForm({
   );
 
   return (
-    <div className="rounded-2xl border border-border bg-panel p-5">
+    <div className="surface">
       <h2 className="text-sm font-semibold text-foreground">{t("title", { month })}</h2>
       <p className="mt-1 text-xs text-muted">{t("description")}</p>
 

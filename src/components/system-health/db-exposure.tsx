@@ -41,7 +41,7 @@ const WANT_ATTENTION = "checks want attention.";
 export function DbExposure({ rows }: { rows: ExposureRow[] | null }) {
   if (rows === null) {
     return (
-      <section className="mb-6 rounded-2xl border border-border bg-panel p-4">
+      <section className="mb-6 surface-tight">
         <h2 className="text-sm font-semibold text-fg">Database exposure</h2>
         <p className="mt-1 text-xs text-muted">
           Could not read it. public.db_exposure_report() is added by migration
@@ -56,7 +56,7 @@ export function DbExposure({ rows }: { rows: ExposureRow[] | null }) {
   const summary =
     bad.length === 0 ? ALL_CLEAR : `${bad.length} of ${rows.length} ${WANT_ATTENTION}`;
   return (
-    <section className="mb-6 rounded-2xl border border-border bg-panel p-4">
+    <section className="mb-6 surface-tight">
       <h2 className="text-sm font-semibold text-fg">Database exposure</h2>
       <p className="mt-1 text-xs text-muted">{summary}</p>
       <ul className="mt-3 space-y-1.5">

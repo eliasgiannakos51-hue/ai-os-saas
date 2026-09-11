@@ -105,21 +105,60 @@ const MUTANTS = [
     expect: "vague requests are caught for free",
   },
   {
+    // 8b. THE WEBSITE CAP COLLAPSES to everything else's. One number, five
+    // surfaces, which is the arrangement this table replaced — and the
+    // surface it costs is the one where guessing produces a whole wrong
+    // site rather than one wrong paragraph.
+    name: "the website surface loses its second question",
+    file: CLIENT,
+    from: "  website: 2,",
+    to: "  website: 1,",
+    expect: "a website brief may ask two",
+  },
+  {
+    // 8c. A NEW SURFACE INHERITS THE WIDEST CAP instead of the strictest.
+    // The fallback is the whole safety property of questionCapFor: a kind
+    // nobody has argued about must not quietly get two questions.
+    name: "an unknown surface falls back to the widest cap",
+    file: CLIENT,
+    from: "  return CLARIFICATION_QUESTION_CAP[kind] ?? 1;",
+    to: "  return CLARIFICATION_QUESTION_CAP[kind] ?? 2;",
+    expect: "an unknown surface gets the STRICTEST cap",
+  },
+  {
+    // 8d. THE MODEL IS TOLD A DIFFERENT NUMBER FROM THE PARSER. The cap
+    // still holds — the result is trimmed — but the model wrote three
+    // questions of equal weight and we keep the FIRST, not the most
+    // important. A cap enforced only by trimming is half a cap.
+    name: "the tool description stops carrying the cap",
+    file: CLAR,
+    from: "    tools: [clarificationTool(cap)],",
+    to: "    tools: [clarificationTool(3)],",
+    expect: "the tool description is built from the cap",
+  },
+  {
     // 8. THE CAP GOES BACK TO THREE. The user is handed a form again,
     // and nothing about the code stops compiling.
     name: "the question cap returns to three",
     file: CLIENT,
     from: "export const MAX_CLARIFICATION_QUESTIONS = 1;",
     to: "export const MAX_CLARIFICATION_QUESTIONS = 3;",
-    expect: "the cap is one question",
+    expect: "the default cap is one question",
   },
   {
     // 9. THE SHORT-CIRCUIT IS REMOVED. Every request pays for the Sonnet
     // call again, and the whole "decides before spending" claim is false
     // while the free detector still sits there being unit-tested.
+    //
+    // RE-ANCHORED 2026-09-07: the condition moved into
+    // willSpendOnQuestion and the return grew the verdict it used to
+    // throw away, so the old two-line anchor named text that is no longer
+    // there. The defect it reintroduces is unchanged.
     name: "the paid check stops consulting the free assessment",
     file: CLAR,
-    from: '  if (assessment.verdict === "clear") return { needsClarification: false };',
+    from: `  if (!willSpendOnQuestion(assessment)) {
+    return { needsClarification: false, verdict: assessment.verdict, paidCheck: false };
+  }`,
     to: "",
     expect: "a clear verdict returns without calling the model",
   },

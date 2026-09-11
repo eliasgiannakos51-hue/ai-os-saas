@@ -97,7 +97,7 @@ export function StepControls({
               onEdit(draft.trim());
               setEditing(false);
             }}
-            className="inline-flex min-h-[32px] items-center gap-1 rounded-lg bg-orange-500 px-2.5 py-1 text-xs font-semibold text-black transition-opacity duration-150 hover:opacity-90 disabled:opacity-50"
+            className="inline-flex min-h-[32px] items-center gap-1 rounded-lg border border-orange-500/60 px-2.5 py-1 text-xs font-semibold text-orange-300 transition-opacity duration-150 hover:bg-orange-500/10 disabled:opacity-50"
           >
             <Check className="h-3 w-3" aria-hidden="true" />
             {t("saveStep")}

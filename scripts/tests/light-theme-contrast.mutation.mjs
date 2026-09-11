@@ -52,10 +52,16 @@ const MUTANTS = [
     to: "  box-shadow: 0 4px 18px -4px rgba(249, 115, 22, 0.45);",
   },
   {
-    name: "a selector-level light override is dropped (the eleventh glow ships unanswered)",
+    // RE-AIMED BY REDESIGN PHASE 4, and the reason is worth keeping: this
+    // pointed at `.card-lift:hover`, whose orange ring and two blooms are
+    // gone — it elevates in black now. A rule that does not glow needs no
+    // light answer, so dropping its override became a true no-op and this
+    // mutant reported a hole in the suite when the suite was right. Aimed
+    // at `.celebration-ring`, which is still in the glowing set.
+    name: "a selector-level light override is dropped (a glow ships unanswered)",
     file: CSS,
-    from: '[data-theme="light"] .card-lift:hover',
-    to: '[data-theme="light"] .card-lift-removed:hover',
+    from: '[data-theme="light"] .celebration-ring',
+    to: '[data-theme="light"] .celebration-ring-removed',
   },
   {
     name: "the .focus-glow ring goes back to a 45% orange (1.60:1 on white)",

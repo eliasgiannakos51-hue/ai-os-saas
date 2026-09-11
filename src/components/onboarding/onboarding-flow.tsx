@@ -341,7 +341,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
           </div>
 
           {activationFree && (
-            <p className="rounded-xl border border-border bg-panel/60 p-3 text-[11px] leading-relaxed text-muted">
+            <p className="surface-tight text-[11px] leading-relaxed text-muted">
               {t("firstFree")}
             </p>
           )}
@@ -395,7 +395,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
 
           {analysis && (
             <div className="space-y-3">
-              <p className="rounded-xl border border-border bg-panel/60 p-3 text-xs leading-relaxed text-foreground">
+              <p className="surface-tight text-xs leading-relaxed text-foreground">
                 {t("looksLike", { label: analysis.targetLabel })}{" "}
                 <span className="text-muted">{analysis.proposal.summary}</span>
               </p>
@@ -510,7 +510,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                   type="button"
                   onClick={() => void applyImport()}
                   disabled={busy || analysis.counts.readyRows === 0}
-                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-60"
                 >
                   {/* THE ONE SPINNER THAT STAYS. /api/import/csv/apply
                       writes rows and calls no model; spending the globe on
@@ -562,12 +562,12 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
             type="button"
             onClick={() => void applyPaste()}
             disabled={busy || pasteText.trim().length < MIN_PASTE_CHARS}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-60"
           >
             {pending === "pasting" ? (
               <>
                 {/* Also a model call — /api/import/paste. Same mark. */}
-                <ThinkingIndicator size="sm" tone="inherit" />
+                <ThinkingIndicator size="sm" />
                 {t("reading")}
               </>
             ) : busy ? (
@@ -606,7 +606,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
           ) : (
             // THE HONEST EMPTY STATE. No hedged sentence, no generic
             // advice — just what is missing and what would fix it.
-            <div className="space-y-1.5 rounded-2xl border border-border bg-panel/60 p-4">
+            <div className="space-y-1.5 surface-tight">
               <p className="text-sm font-medium text-foreground">{t("noneTitle")}</p>
               <p className="text-xs leading-relaxed text-muted">
                 {needMoreData ? t("noneNeedMore") : t("noneYet")}
@@ -617,7 +617,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
           <button
             type="button"
             onClick={() => void finish()}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
           >
             {t("goToDashboard")}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -649,7 +649,7 @@ function SourceCard({
     <button
       type="button"
       onClick={onSelect}
-      className="flex min-h-[44px] items-center rounded-xl border border-border bg-panel/60 p-3 text-start transition-colors duration-150 hover:border-orange-500/40"
+      className="flex min-h-[44px] items-center surface-tight text-start transition-colors duration-150 hover:border-orange-500/40"
     >
       <Icon className="mb-1.5 h-4 w-4 text-orange-400" aria-hidden="true" />
       <p className="text-xs font-semibold text-foreground">{title}</p>

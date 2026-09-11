@@ -55,7 +55,7 @@ export function ForgotPasswordForm() {
           </h1>
         </div>
 
-        <div className="rounded-2xl border border-border bg-panel p-6 shadow-[0_0_0_1px_rgba(249,115,22,0.05)]">
+        <div className="surface">
           {sent ? (
             <div className="space-y-4 text-center">
               <p className="text-sm text-foreground/90">
@@ -100,7 +100,7 @@ export function ForgotPasswordForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50"
+                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-50"
               >
                 {loading ? t("sending") : t("sendResetLink")}
               </button>

@@ -186,7 +186,7 @@ export async function MarginReportView({
   const cacheSummary: CacheSummary = summariseCacheReport(cacheRows);
 
   return (
-    <section id="margin-report" className="mb-6 rounded-2xl border border-border bg-panel p-5">
+    <section id="margin-report" className="mb-6 surface">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
         <TrendingUp className="h-4 w-4 text-orange-400" aria-hidden="true" />
         {t("title")}

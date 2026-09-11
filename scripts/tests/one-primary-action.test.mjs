@@ -10,8 +10,8 @@
 // the rule is about one control being louder than the rest, so a wash
 // that is quieter than everything cannot break it.
 //
-// THREE THINGS THIS FILE GOT WRONG BEFORE IT GOT THEM RIGHT, recorded
-// because each of them made the number too small and a too-small number
+// FIVE THINGS THIS FILE GOT WRONG BEFORE IT GOT THEM RIGHT, recorded
+// because four of them made the number too SMALL and a too-small number
 // is the kind that gets believed:
 //
 //   1. THE LAYOUT IS PART OF THE PAGE. reachableFrom(page) walks imports,
@@ -21,20 +21,38 @@
 //      both live above the page, and a person cannot tell the difference.
 //   2. COMMENTS ARE NOT CODE. Prose quoting a class name is not a use of
 //      it. Same stripComments four other gates in this directory needed.
-//   3. A COUNT IS AN UPPER BOUND, NOT A SCREENSHOT. Several of these are
-//      mutually exclusive at runtime — upgrade-required renders INSTEAD
-//      of the list, out-of-credits only when the balance is gone, the
-//      cookie banner only before consent. So "8" means "this page can
-//      show up to 8", not "8 are on screen together". It is still the
-//      right thing to hold down: a page that can be that loud has no
-//      single primary action, and the loudest combination is the one a
-//      brand-new account meets — cookie banner, install invitation and
-//      an empty balance all at once.
-//
+//   3. AN ARROW FUNCTION ENDED THE TAG. `<(button|a|Link)\b[^>]*?\/?>`
+//      stops at the first `>` in the file, and `onClick={() =>` has one.
+//      FORTY-SIX filled accent controls were invisible to this census
+//      for as long as it used that pattern, and they were not obscure
+//      ones: `+ New` on every module page, all three buttons of the
+//      voice recorder, four in Files, four in onboarding. The gate
+//      reported "4 filled accent controls" for pages that drew ten and
+//      "8" for one that drew thirteen. scripts/lib/jsx-scan.mjs ends a
+//      tag where JSX ends it — the first `>` outside brace depth and
+//      outside quotes — and section 0 feeds it the three shapes that
+//      broke the old one.
+//   4. A SCREEN IS A MOMENT, NOT A FILE. The voice recorder draws three
+//      full-screen overlays, one filled button each, and never two at
+//      once; the paywall is returned INSTEAD of the page body. Charging
+//      all of them to the page made every page that can record look
+//      three louder than it is. Section 2 splits a page into base,
+//      overlay and declared replacement surfaces, each with the same
+//      budget of one, and section 3 checks the overlays it found.
+//   5. A COUNT IS STILL AN UPPER BOUND WITHIN A SURFACE. Some controls
+//      on one surface are mutually exclusive states of the same flow —
+//      a list's "+ New" and the form's "Save", an empty-state upload and
+//      the toolbar's. No static reader can tell those apart, so where
+//      two of them were both filled, the second was demoted rather than
+//      excused. The one case where the duplication was pure — the PWA
+//      invitation's three identical buttons in one ternary — was fixed
+//      in the component instead: it is one button now.
+
 // Run: node scripts/tests/one-primary-action.test.mjs
 import { readFileSync } from "node:fs";
 import { appEntries, reachableFrom } from "../lib/route-graph.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
+import { openingTags, overlaySpans, inSpans } from "../lib/jsx-scan.mjs";
 
 let pass = 0;
 const failures = [];
@@ -75,11 +93,17 @@ function stripCode(src) {
 // that only ever sees real files is a checker nothing proves can say no.
 function controlsInSource(src, file = "<sample>") {
   const stripped = stripCode(src);
+  const spans = overlaySpans(stripped);
   const hits = [];
-  for (const m of stripped.matchAll(/<(button|a|Link)\b[^>]*?\/?>/gs)) {
-    if (FILLED.test(m[0])) {
-      hits.push({ file, tag: m[1], at: stripped.slice(0, m.index).split("\n").length });
-    }
+  for (const tag of openingTags(stripped)) {
+    if (!FILLED.test(tag.text)) continue;
+    const overlay = inSpans(spans, tag.start);
+    hits.push({
+      file,
+      tag: tag.tag,
+      at: stripped.slice(0, tag.start).split("\n").length,
+      surface: overlay ? `${file}#overlay@${overlay.line}` : "base",
+    });
   }
   return hits;
 }
@@ -146,6 +170,75 @@ check(
 check(
   "...nor one in a JSX comment explaining the rule",
   controlsInSource('{/* never write <button className="bg-orange-500"> twice */}').length === 0
+);
+
+// THE ARROW FUNCTION THAT HID FORTY-SIX BUTTONS.
+//
+// The tag matcher was `<(button|a|Link)\b[^>]*?\/?>` and `[^>]` stops at
+// the first `>` in the file — which, in JSX, is very often the one in
+// `() =>`. So a control whose handler was written before its class was
+// read as far as `onClick={() =` and its className was never seen. The
+// census said "4 filled accent controls" about pages that drew ten, and
+// the ones it could not see were not obscure: `+ New` on every module
+// page, all three buttons of the voice recorder, four in Files, four in
+// onboarding. scripts/lib/jsx-scan.mjs ends a tag at the first `>` that
+// is outside brace depth and outside quotes, which is where JSX ends it.
+check(
+  "a handler written before the class does not hide the class",
+  controlsInSource('<button onClick={() => setOpen(true)} className="bg-orange-500">go</button>').length === 1
+);
+check(
+  "...nor does a `>` inside a string attribute",
+  controlsInSource('<button title="a > b" className="bg-orange-500">go</button>').length === 1
+);
+check(
+  "...nor a nested object in a brace expression",
+  controlsInSource('<button style={{ width: 1 }} onClick={() => x({ a: () => 2 })} className="bg-orange-500">go</button>')
+    .length === 1
+);
+
+// A MODAL IS ITS OWN SCREEN, and the scanner has to say which one a
+// control is on. `fixed inset-0` covers the viewport: nothing behind it
+// is pressable in the same moment.
+const OVERLAY_SAMPLE = [
+  '<div className="page">',
+  '  <button className="bg-orange-500">page</button>',
+  '  <div className="fixed inset-0 z-50">',
+  '    <button className="bg-orange-500">modal</button>',
+  '  </div>',
+  '</div>',
+].join("\n");
+const sampleSurfaces = controlsInSource(OVERLAY_SAMPLE).map((h) => h.surface);
+check(
+  "the control outside the overlay is on the base surface",
+  sampleSurfaces.filter((s) => s === "base").length === 1,
+  JSON.stringify(sampleSurfaces)
+);
+check(
+  "and the one inside it is not",
+  sampleSurfaces.filter((s) => s !== "base").length === 1,
+  JSON.stringify(sampleSurfaces)
+);
+// THE OTHER DIRECTION, so "everything is an overlay" cannot pass: a
+// control AFTER the overlay closes is back on the page.
+const AFTER_SAMPLE = [
+  '<div className="page">',
+  '  <div className="fixed inset-0 z-50">',
+  '    <button className="bg-orange-500">modal</button>',
+  '  </div>',
+  '  <button className="bg-orange-500">page</button>',
+  '</div>',
+].join("\n");
+check(
+  "a control after the overlay closes is on the page again",
+  controlsInSource(AFTER_SAMPLE).filter((h) => h.surface === "base").length === 1,
+  JSON.stringify(controlsInSource(AFTER_SAMPLE).map((h) => h.surface))
+);
+// ...AND `fixed` ALONE IS NOT AN OVERLAY. A sticky toolbar is on the page.
+check(
+  "a fixed element that does not cover the viewport is not an overlay",
+  controlsInSource('<div className="fixed bottom-0">\n  <button className="bg-orange-500">x</button>\n</div>')
+    .every((h) => h.surface === "base")
 );
 
 // AN IMPORT LINE IS NOT A USE. Named here because the same mistake was
@@ -223,84 +316,150 @@ const chrome = [...reachableFrom(["src/app/layout.tsx", "src/app/dashboard/layou
   controlsIn
 );
 const chromeKeys = new Set(chrome.map((h) => `${h.file}:${h.at}`));
-// FOUR TODAY: the top bar's primary button, the two in the PWA install
-// invitation, and the cookie banner's accept. Pinned rather than floored
-// because this set is what every single dashboard page pays before it
-// draws anything of its own — it is the most expensive four controls in
-// the product, and it should be a decision to change the number.
+// TWO TODAY, and it was five when the scanner learnt to read a tag past
+// an arrow function. What went, and why, is the whole of the rule this
+// file states applied to the chrome itself:
+//
+//   - the PWA install invitation drew THREE — one per branch of a
+//     three-way ternary that has never rendered more than one at a time.
+//     They are one button with a computed label and handler now, and it
+//     is an accent OUTLINE: an unsolicited card that appears over
+//     somebody else's work does not get the loudest control on the
+//     screen. That is the "brand-new account" case this file's header
+//     named as the worst one, and it is the one that improved.
+//   - the cookie banner's accept stays filled and never meets a
+//     dashboard page: cookie-consent-banner.tsx returns null on any path
+//     under /dashboard.
+//
+// What remains on a dashboard screen is the top bar's "Make anything",
+// on all thirty-nine of them. Every per-page number below is measured
+// with the chrome SUBTRACTED, so "1" means one of the page's own — the
+// screen carries the global one as well, and that is the decision this
+// count records rather than hides.
 check(
-  `the layout chrome contributes ${chrome.length} filled controls to every dashboard page`,
-  chrome.length === 4,
+  `the layout chrome contributes ${chrome.length} filled controls, of which 1 reaches a dashboard page`,
+  chrome.length === 2,
   chrome.map((h) => `${h.file}:${h.at}`).join(", ")
 );
 
 // ---------------------------------------------------------------------
-console.log("\n== 2. no page gains a filled accent control ==");
-// A RATCHET, NOT THE TARGET. The target is one per screen. Twenty-seven
-// pages are above it today and getting there is a design decision per
-// page, not something a test can do — so this holds the line where it is
-// and every number in it may only ever go DOWN. Lower one in the same
-// commit that removes the button; never raise one.
+console.log("\n== 2. one filled accent control per surface ==");
+// THE RULE, AND THE THREE KINDS OF SURFACE IT IS MEASURED ON.
 //
-// TWO WENT DOWN, and this is the record of why: create and mission were
-// both 4 and are both 3, because credits/out-of-credits-notice.tsx's
-// "buy credits" Link stopped being `bg-orange-500` and became an accent
-// OUTLINE. That component is rendered inside create-chat, create-studio,
-// mission-form, problem-notice and deep-research, so its fill competed
-// with whatever primary action the host screen already had — on the
-// dashboard Home, literally: 2 measured against a baseline of 1. The
-// notice keeps its orange rule, wash and icon badge; only the fill went.
+// V4.6 #4 says one primary action per screen, and a screen is a moment,
+// not a file. Three kinds of moment exist in this product and each gets
+// its own budget of one:
+//
+//   base        what the page draws. Everything below, unless it is in
+//               one of the other two.
+//   overlay     anything inside a `fixed inset-0` element — a modal, a
+//               scrim, the voice recorder's full-screen orb. While one
+//               is up the page behind it is not pressable, so its
+//               filled control is not competing with the page's.
+//   replacement a component a page returns INSTEAD of its body. Only
+//               the paywall, declared below with the proof that it is
+//               one.
+//
+// This is the fourth thing this file got wrong, and the largest: until
+// redesign phase 4 every one of those moments was charged to the page,
+// so the voice recorder's three mutually exclusive overlays cost every
+// one of the eighteen pages that can record three filled controls each.
+//
+// THE NUMBERS BELOW ARE ONE, and they are the target rather than a
+// ratchet. Ninety-two controls were demoted to accent OUTLINE to get
+// here — every save, retry, connect, toggle, "use this" and second step
+// of a flow — leaving the one action that STARTS the screen's work
+// filled. What that cost is written per page where it is not obvious.
+const BASELINE_NOTE = "one per surface; lower to 0 is fine, raising needs a reason written here";
 const BASELINE = {
-  "dashboard/[module]/page.tsx": 4,
-  "dashboard/agents/page.tsx": 4,
-  "dashboard/apps/page.tsx": 4,
-  "dashboard/campaigns/page.tsx": 4,
-  "dashboard/chat/page.tsx": 2,
-  "dashboard/create/page.tsx": 3,
+  "dashboard/[module]/page.tsx": 1,
+  "dashboard/affiliate/page.tsx": 1,
+  "dashboard/agents/page.tsx": 1,
+  "dashboard/apps/page.tsx": 1,
+  "dashboard/business-health/page.tsx": 1,
+  "dashboard/campaigns/page.tsx": 1,
+  "dashboard/chat/page.tsx": 1,
+  "dashboard/coding/page.tsx": 1,
+  "dashboard/create/page.tsx": 1,
+  "dashboard/data-analysis/page.tsx": 1,
   "dashboard/deep-research/page.tsx": 1,
-  "dashboard/images/page.tsx": 4,
-  "dashboard/integrations/page.tsx": 2,
-  "dashboard/memory/page.tsx": 1,
-  "dashboard/mission/page.tsx": 3,
-  // 1 -> 0. The Home page's one filled accent control was the next-action
-  // card's "Go there →", and it is now an accent OUTLINE: the screen
-  // already carries a filled accent button from the layout chrome (the
-  // top bar's "Make anything", on all thirty-nine pages), so Home was the
-  // only screen of six with two — measured by accent-census on the real
-  // page, 150x44 and 129x44. V4.6 #4's rule is one primary action per
-  // SCREEN; it had been applied per CARD.
-  "dashboard/overview/page.tsx": 0,
-  "dashboard/page.tsx": 3,
-  // ONE, WHICH IS THE TARGET RATHER THAN A CONCESSION. Added 2026-09-05
-  // with the page. Its single filled control is "Look again", the only
-  // thing on the screen that spends anything; the credit estimate beside
-  // it is text, and the reason predictions-panel.tsx computes that
-  // estimate itself instead of importing components/credits/
-  // cost-estimate.tsx is this check — that module also exports
-  // LargeActionConfirm, whose modal button would have made the page two.
+  "dashboard/documents/page.tsx": 1,
+  "dashboard/files/page.tsx": 1,
+  "dashboard/images/page.tsx": 1,
+  "dashboard/integrations/page.tsx": 1,
+  // ZERO. /memory's one filled control was the paywall's "view plans",
+  // and the paywall is a declared replacement surface measured below —
+  // the page itself draws none. Nothing was demoted here; the number is
+  // what it always was once the surfaces were told apart.
+  "dashboard/memory/page.tsx": 0,
+  "dashboard/mission/page.tsx": 1,
+  "dashboard/overview/page.tsx": 1,
+  "dashboard/page.tsx": 1,
+  "dashboard/posts/page.tsx": 1,
   "dashboard/predictions/page.tsx": 1,
-  "dashboard/presentations/page.tsx": 4,
-  "dashboard/product-workflow/page.tsx": 4,
+  "dashboard/presentations/page.tsx": 1,
+  "dashboard/product-workflow/page.tsx": 1,
+  "dashboard/projects/page.tsx": 1,
+  "dashboard/projects/[id]/page.tsx": 1,
   "dashboard/published/page.tsx": 1,
-  "dashboard/reflection/page.tsx": 1,
-  "dashboard/settings/page.tsx": 8,
+  // ZERO, AND IT IS THE HONEST NUMBER RATHER THAN A WIN. /reflection
+  // renders one component, reflection-generator.tsx, whose "write it"
+  // button WAS the page's single filled control. The same component is
+  // also a panel on product-workflow and trading-workflow, where the
+  // page's own primary is the module list's "+ New" — so one component
+  // had to be either the loudest thing on one screen or the second
+  // loudest on two, and it cannot be both. It is an accent outline
+  // everywhere, and /reflection is a page whose only action is outlined.
+  // The alternative was a `tone` prop, which moves the class behind a
+  // variable and makes this count unreadable — the failure mode
+  // CLAUDE.md calls "runtime strings invisible to the compiler".
+  "dashboard/reflection/page.tsx": 0,
+  "dashboard/settings/page.tsx": 1,
   "dashboard/team/page.tsx": 1,
-  "dashboard/trading-workflow/page.tsx": 4,
-  "dashboard/videos/page.tsx": 4,
-  "dashboard/website-builder/page.tsx": 2,
-  "dashboard/websites/page.tsx": 4,
+  "dashboard/trading-journal/page.tsx": 1,
+  "dashboard/trading-workflow/page.tsx": 1,
+  "dashboard/videos/page.tsx": 1,
+  "dashboard/website-builder/page.tsx": 1,
+  "dashboard/websites/page.tsx": 1,
   "forgot-password/page.tsx": 1,
   "help/page.tsx": 1,
   "offline/page.tsx": 1,
-  "reset-password/page.tsx": 2,
+  "onboarding/page.tsx": 1,
+  "reset-password/page.tsx": 1,
 };
 
+// A PAYWALL IS NOT THE PAGE IT REPLACES, and unlike an overlay that is
+// not visible in the markup — it is a plain card, returned early. So it
+// is DECLARED, and the declaration carries the obligation that makes it
+// true: every place that renders it must do so from a `return` that
+// comes before the caller's last one. Render it inside the main body
+// instead and this check goes red, which is the only thing standing
+// between a declared exception and a licence.
+const REPLACEMENT_SURFACES = [
+  {
+    file: "src/components/billing/upgrade-required.tsx",
+    tag: "<UpgradeRequired",
+    budget: 1,
+    why: "the lock screen a module shows instead of its list; its 'view plans' link is the only control on it",
+  },
+];
+const replacementFiles = new Set(REPLACEMENT_SURFACES.map((r) => r.file));
+
 const measured = new Map();
+const overlays = new Map();
 for (const page of pages) {
   const hits = [...reachableFrom([page, ...layoutChain(page)])]
     .flatMap(controlsIn)
     .filter((h) => !chromeKeys.has(`${h.file}:${h.at}`));
-  measured.set(page.replace("src/app/", ""), hits);
+  for (const h of hits) {
+    if (h.surface === "base") continue;
+    if (!overlays.has(h.surface)) overlays.set(h.surface, []);
+    if (!overlays.get(h.surface).some((x) => x.at === h.at)) overlays.get(h.surface).push(h);
+  }
+  measured.set(
+    page.replace("src/app/", ""),
+    hits.filter((h) => h.surface === "base" && !replacementFiles.has(h.file))
+  );
 }
 
 const over = [];
@@ -314,7 +473,7 @@ for (const [page, hits] of measured) {
   }
 }
 check(
-  `no page is louder than its baseline (${measured.size} pages measured)`,
+  `no page is louder than its baseline (${measured.size} pages measured, ${BASELINE_NOTE})`,
   over.length === 0,
   over.join("\n        ")
 );
@@ -335,18 +494,70 @@ check(
 );
 
 // ---------------------------------------------------------------------
-console.log("\n== 3. the pages already at one may not grow to two ==");
-// The rule stated as a rule, on the pages that already keep it. This is
-// what the whole file is for; section 2 is the road to it.
-const AT_TARGET = Object.entries(BASELINE)
-  .filter(([, n]) => n <= 1)
-  .map(([p]) => p);
-check(`there are pages at the target to defend (${AT_TARGET.length})`, AT_TARGET.length >= 5);
-for (const page of AT_TARGET) {
-  const n = measured.get(page)?.length ?? 0;
-  check(`${page}: ${n} filled accent control`, n <= 1, String(n));
-}
+console.log("\n== 3. every overlay is a screen too ==");
+// The budget the base surface gets, the moments on top of it get as
+// well. A modal with two filled buttons is the same defect as a page
+// with two, and it was invisible for as long as overlays were charged to
+// the page — the page was already over, so the modal never showed up as
+// a separate number.
+// SIX, NAMED, so the floor is a measurement rather than a round number:
+// the Ask-AI modal, the voice recorder's three (permission, listening,
+// transcript), the cost-confirmation dialog and the publish dialog.
+check(
+  `the walk found overlays to check (${overlays.size})`,
+  overlays.size >= 6,
+  `${overlays.size} — a per-overlay rule checked against no overlays passes for the wrong reason`
+);
+const loudOverlays = [...overlays.entries()].filter(([, hits]) => hits.length > 1);
+check(
+  "no overlay draws more than one filled accent control",
+  loudOverlays.length === 0,
+  loudOverlays
+    .map(([s, hits]) => `${s}: ${hits.length} — ${hits.map((h) => `${h.file}:${h.at}`).join(", ")}`)
+    .join("\n        ")
+);
 
+// ---------------------------------------------------------------------
+console.log("\n== 3b. the declared replacement surfaces, and the proof ==");
+for (const r of REPLACEMENT_SURFACES) {
+  const own = controlsIn(r.file);
+  check(
+    `${r.file}: ${own.length} filled accent control, budget ${r.budget}`,
+    own.length <= r.budget,
+    own.map((h) => `${h.file}:${h.at}`).join(", ")
+  );
+  // THE OBLIGATION. Every caller renders it from an early return.
+  const callers = appEntries()
+    .concat(["src/components/modules/build-module-page.tsx"])
+    .filter((f) => {
+      try {
+        return stripComments(readFileSync(f, "utf8")).includes(r.tag);
+      } catch {
+        return false;
+      }
+    });
+  check(
+    `${r.tag} is rendered somewhere (${callers.length} callers)`,
+    callers.length >= 1,
+    "a declared replacement surface nothing renders is a dead exception"
+  );
+  const inline = callers.filter((f) => {
+    const src = stripComments(readFileSync(f, "utf8"));
+    const lastReturn = src.lastIndexOf("return (");
+    // EVERY occurrence, not the first. A caller that keeps its early
+    // return and ALSO draws the paywall in the page body is the exact
+    // shape this obligation exists to forbid, and indexOf() would find
+    // the innocent one and stop.
+    const positions = [];
+    for (let at = src.indexOf(r.tag); at !== -1; at = src.indexOf(r.tag, at + 1)) positions.push(at);
+    return positions.some((at) => lastReturn === -1 || at > lastReturn);
+  });
+  check(
+    `...and every caller returns it EARLY, instead of the page body`,
+    inline.length === 0,
+    inline.map((f) => `${f} renders ${r.tag} inside its last return — it is part of that page, not a replacement for it`).join("\n        ")
+  );
+}
 // ---------------------------------------------------------------------
 console.log("\n== 4. the glow and the gradients, counted ==");
 // Not a rule yet — a census, ratcheted so it cannot grow while the
@@ -408,26 +619,45 @@ console.log(`        accent box-shadows: ${glow} · gradient backgrounds: ${grad
 // one more glow anywhere passed unseen — the mutation suite proved it
 // ("a glow is added" survived). The ceiling is the count measured on
 // 2026-09-03; lowering it is free, raising it needs a reason here.
-check(`accent box-shadows: ${glow}, ceiling 46`, glow <= 46, String(glow));
+// 46 -> 2, redesign phase 4. The brief said "κανένα glow", and 44 of
+// them went: the hover bloom under every filled button, .card-lift's
+// orange ring, .glass-card's, .prompt-glow entirely, and the 22px halo
+// outside the focus ring. THE TWO THAT REMAIN ARE NOT GLOW and this
+// number is the wrong instrument for them — both are
+// `0 0 0 1px rgba(accent)`, a one-pixel edge with no blur, on the
+// sidebar's active row and the favourite star. scripts/design-census.mjs
+// makes that distinction (a shadow counts as glow only when its third
+// length is non-zero) and reports ZERO; this pattern cannot, so the
+// ceiling is 2 rather than 0 and says why.
+check(`accent box-shadows: ${glow}, ceiling 2`, glow <= 2, String(glow));
 check(`gradient backgrounds: ${gradients}, ceiling 13`, gradients <= 13, String(gradients));
-// TWO PIECES OF GRADIENT TEXT, and the second is the one the brief was
-// about all along:
-//   1. the health score's range label — bg-clip-text, amber-300 to
-//      orange-400, in components/overview/health-score-card.tsx
-//   2. the Home page's H1 — .hero-gradient-text, white through amber into
-//      VIOLET (#a855f7), at 3.4rem, the largest thing on the page
-// Pinned at two rather than floored: a third is the thing the brief warns
-// about, and going to one means a decision was taken and should be
-// recorded here.
+// TWO, THEN ZERO. The decision this comment asked for was taken in
+// redesign phase 4 — "κανένα gradient σε τίτλο" — and both went:
+//   1. the health score's range label, bg-clip-text amber-300 to
+//      orange-400, now solid text-orange-300
+//   2. the Home page's H1, .hero-gradient-text, white through amber into
+//      VIOLET (#a855f7) at 3.4rem — the largest thing on the page, and
+//      the one the brief had been describing all along. The rule is
+//      deleted from globals.css, not merely unused.
+// FORBIDDEN NOW, NOT PINNED. A clipped fill has no colour a contrast
+// checker can read — the text is a mask over a picture — so every
+// contrast gate here had to skip it. Zero is the only number that keeps
+// them honest.
 check(
-  `gradient text: ${gradientText} (${gradientText - cssGradientTextUses} Tailwind, ${cssGradientTextUses} CSS), pinned at 2`,
-  gradientText === 2,
+  `gradient text: ${gradientText} (${gradientText - cssGradientTextUses} Tailwind, ${cssGradientTextUses} CSS), forbidden`,
+  gradientText === 0,
   String(gradientText)
 );
+// The companion check — "the CSS half of the scan found its classes" —
+// is gone with them. It existed because this census had once reported
+// the CSS gradient as absent when it was merely unread; with no such
+// class declared anywhere, an assertion that one exists would now be
+// asserting the defect back into place. What replaces it is the reverse:
+// no class may declare it again.
 check(
-  `the CSS gradient-text classes were found (${[...cssGradientClasses].join(", ") || "NONE"})`,
-  cssGradientClasses.size >= 1,
-  "a scan that finds no class counts no uses of it, and reports the CSS half as absent"
+  `no CSS class clips a background to text (${[...cssGradientClasses].join(", ") || "none"})`,
+  cssGradientClasses.size === 0,
+  "a new .foo { background-clip: text } would put an unmeasurable colour back on a heading"
 );
 
 // ---------------------------------------------------------------------

@@ -259,4 +259,8 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   dataQuestion: "data_analysis",
   // V4 #20.
   codeAssist: "code_assist",
+  // V5 #21.
+  presentationGenerate: "presentation_generate",
+  // V5 #22.
+  postsGenerate: "posts_generate",
 };

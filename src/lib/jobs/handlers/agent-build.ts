@@ -1,6 +1,6 @@
 import "server-only";
 import { logApiError } from "@/lib/log-error";
-import { checkNeedsClarification } from "@/lib/clarification";
+import { checkNeedsClarification, clarificationMetadata } from "@/lib/clarification";
 import { buildAgentFromRequest } from "@/lib/agents/agent-builder";
 import { nextRuns } from "@/lib/agents/cron-expression";
 import { estimateAgentRun } from "@/lib/agents/execute-agent";
@@ -48,6 +48,15 @@ export const agentBuildHandler: JobHandler = async (ctx: JobContext): Promise<Jo
   // accumulator, so a build that stops here is still paid for — and
   // stopping here is a SUCCESSFUL job with questions in it, not a failure:
   // the user got exactly what the step is for.
+  // WHAT THE FREE READER DECIDED, carried to the settlement.
+  //
+  // The pre-check answers `clear` for most requests and spends nothing to
+  // do it — which is the point of it, and which is why the rate was
+  // unmeasurable: only the requests it could NOT decide left a row behind.
+  // Empty when the caller skipped the check, because an absent key is
+  // "not asked" and must not read as "clear".
+  let clarificationRecord: Record<string, unknown> = {};
+
   if (!skipClarification) {
     try {
       const clarification = await checkNeedsClarification(
@@ -63,6 +72,7 @@ export const agentBuildHandler: JobHandler = async (ctx: JobContext): Promise<Jo
         // people's missions into this user's prompt.
         typeof ctx.input.knownContext === "string" ? ctx.input.knownContext : null
       );
+      clarificationRecord = clarificationMetadata(clarification);
       if (clarification.needsClarification) {
         return {
           result: {
@@ -94,6 +104,7 @@ export const agentBuildHandler: JobHandler = async (ctx: JobContext): Promise<Jo
           // fix api/websites/generate already carries as
           // "website_generate_precheck".
           feature: "agent_build_precheck",
+          metadata: clarificationRecord,
         };
       }
     } catch (err) {
@@ -175,6 +186,7 @@ export const agentBuildHandler: JobHandler = async (ctx: JobContext): Promise<Jo
   await ctx.progress(4, steps[3]);
 
   return {
+    metadata: clarificationRecord,
     result: {
       built: true,
       draft,

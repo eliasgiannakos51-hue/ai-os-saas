@@ -10,6 +10,7 @@ import {
 } from "@/lib/health/classify";
 import { scrubSecrets } from "@/lib/scrub-secrets";
 import { SCHEMA_CANARIES } from "@/lib/health/schema-canaries";
+import { navFreshness } from "@/lib/health/nav-freshness";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -260,6 +261,26 @@ export async function GET(request: Request) {
   // that did not answer produces a list of false absences.
   if (probe.dbAnswered) {
     body.schema = await currentSchemaSweep();
+
+    // A PROBE THAT FAILS SILENTLY CANNOT REPORT ITS OWN FAILURE.
+    //
+    // api/nav/track swallows every error on purpose, so nav_events can
+    // stop filling and nothing anywhere says so. It did: on 2026-09-11
+    // the newest row was four days old and the only reason anybody knew
+    // was that the owner ran a query by hand.
+    //
+    // `nav.verdict` is the field to watch. STALE means the product was
+    // in use and navigation was NOT recorded — the failure. `quiet`
+    // means nobody came, which is not one. Deliberately outside `ok`
+    // and the status code, for the same reason `schema` is: a quiet
+    // weekend is not an outage.
+    // Its own client, for the reason currentSchemaSweep gives above:
+    // `ms` and `stage` describe the probe's one query and nothing else.
+    try {
+      body.nav = await navFreshness(createAdminClient());
+    } catch {
+      body.nav = { navAgeHours: null, activityAgeHours: null, verdict: "unchecked" };
+    }
   }
 
   return NextResponse.json(body, {

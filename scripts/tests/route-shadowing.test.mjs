@@ -107,10 +107,12 @@ checkList(
   "every exempt static route really is a build module's own page",
   wrongExemption,
 );
-// A scan that finds nothing proves nothing.
+// A scan that finds nothing proves nothing. FIVE build modules since
+// V5 #21 — presentations became a generator with a page of its own and
+// left build-modules.ts; the floor came down in the same commit.
 check(
   `the scan read the app directory (${staticDirs.length} segments, ${MODULES.length} modules, ${BUILD_MODULES.length} build modules)`,
-  staticDirs.length >= 30 && MODULES.length >= 12 && BUILD_MODULES.length >= 6,
+  staticDirs.length >= 30 && MODULES.length >= 12 && BUILD_MODULES.length >= 5,
   `${staticDirs.length}/${MODULES.length}/${BUILD_MODULES.length}`,
 );
 

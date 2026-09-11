@@ -96,20 +96,7 @@
   },
   "sidebar": {
     "groups": {
-      "workspace": "Espaço de trabalho",
-      "build": "Criar",
-      "business": "Negócio",
-      "strategy": "Estratégia",
-      "operations": "Operações",
-      "marketplace": "Mercado",
       "settings": "Configurações",
-      "create": "Criar",
-      "myBusiness": "O meu negócio",
-      "track": "Registar",
-      "insights": "O que reparei",
-      "tracking": "Acompanhamento",
-      "daily": "No dia a dia",
-      "work": "Trabalhar",
       "see": "Ver",
       "make": "Criar",
       "ask": "Perguntar",
@@ -118,25 +105,25 @@
     },
     "items": {
       "home": "Início",
-      "chat": "Ionexa Conversa",
+      "chat": "Pergunta-me",
       "memory": "Procurar nos meus registos",
       "timeline": "Histórico",
       "favorites": "Favoritos",
       "missionControl": "Objetivos e planos",
-      "reflection": "Reflexão Semanal",
+      "reflection": "A tua semana",
       "settings": "Configurações",
       "team": "Equipe",
-      "agents": "Agentes de IA",
+      "agents": "IA que trabalha para ti",
       "websites": "Planos de sites",
       "websiteBuilder": "Criar um site",
-      "apps": "Notas de apps",
-      "images": "Notas de imagens",
-      "videos": "Notas de vídeos",
+      "apps": "Ideias de apps",
+      "images": "Ideias de imagens",
+      "videos": "Ideias de vídeos",
       "coding": "Programar com IA",
-      "dataAnalysis": "Análise de dados",
+      "dataAnalysis": "Vê o que dizem os números",
       "documents": "Documentos",
-      "presentations": "Notas de apresentação",
-      "campaigns": "Notas de campanhas",
+      "presentations": "Apresentações",
+      "campaigns": "Ideias de campanhas",
       "analytics": "Análises",
       "finance": "Finanças",
       "content": "Conteúdo",
@@ -152,16 +139,16 @@
       "tradingWorkflow": "Fluxo de Trabalho de Trading",
       "productWorkflow": "Fluxo de Trabalho de Produto",
       "automation": "Automação",
-      "marketplace": "Mercado",
+      "marketplace": "Ajudantes prontos",
       "published": "Sites no ar",
       "integrations": "Integrações",
       "files": "Ficheiros",
-      "deepResearch": "Investigação profunda",
+      "deepResearch": "Procura a fundo",
       "help": "Centro de ajuda",
       "affiliate": "Afiliados",
       "formSubmissions": "Envios de formulários",
-      "routing": "Encaminhamento de modelos",
-      "businessHealth": "Saúde do negócio",
+      "routing": "Que IA é usada",
+      "businessHealth": "Como vai o negócio",
       "mine": "As minhas coisas",
       "records": "Os meus registos",
       "library": "As minhas coisas",
@@ -170,7 +157,9 @@
       "systemHealth": "Estado do sistema",
       "tradingJournal": "Diário de trading",
       "voice": "Voz",
-      "predictions": "Padrões"
+      "predictions": "Padrões",
+      "posts": "Publicações",
+      "projects": "Projetos"
     },
     "hints": {
       "chat": "Pergunte qualquer coisa — sem ligação a nenhum módulo.",
@@ -207,7 +196,7 @@
       "images": "Acompanhe as imagens que está a planear ou já fez. Não as gera.",
       "videos": "Acompanhe os vídeos que está a planear ou já fez. Não os gera.",
       "coding": "Escreva, explique, corrija, converta e teste excertos de código. Não executa código nem abre um repositório.",
-      "presentations": "Acompanhe as apresentações que está a planear ou já fez. Não cria diapositivos.",
+      "presentations": "Descreve uma apresentação e recebe os diapositivos: PowerPoint ou PDF, com fotos do Unsplash ou tuas. Não desenha gráficos.",
       "home": "O teu painel — atividade, estatísticas e ações rápidas.",
       "settings": "Conta, faturação, idioma e preferências.",
       "published": "Todos os seus sites no ar, com o tráfego e o histórico de versões",
@@ -227,7 +216,9 @@
       "systemHealth": "Se a base de dados, as filas e os fornecedores respondem.",
       "tradingJournal": "As tuas operações, com o raciocínio que escreveste na altura.",
       "voice": "Ouça um texto lido em voz alta, ou fale e ele é escrito. Os minutos são contados e o preço por minuto está na página.",
-      "predictions": "Padrões nos seus próprios registos, cada um com o número de entradas em que assenta e uma ligação para elas."
+      "predictions": "Padrões nos seus próprios registos, cada um com o número de entradas em que assenta e uma ligação para elas.",
+      "posts": "Diz uma vez e recebe uma publicação por plataforma, no seu tamanho e tom. Não publica nada: copias e publicas tu.",
+      "projects": "Uma pasta com um objetivo. O que colocas é o que lá está — nada entra sozinho."
     },
     "closeMenu": "Fechar o menu"
   },
@@ -382,8 +373,8 @@
         "description": "Crie e edite vídeos com IA."
       },
       "presentations": {
-        "title": "Apresentações e documentos com IA",
-        "description": "Gere apresentações e documentos refinados a partir dos seus dados."
+        "title": "Apresentações com IA",
+        "description": "Descreve uma apresentação e recebe diapositivos editáveis, exportados como PowerPoint ou PDF, com fotos do Unsplash ou tuas."
       },
       "marketingBuilder": {
         "title": "Criador de campanhas de marketing com IA",
@@ -1160,7 +1151,11 @@
         "body": "Vê as tuas entradas, os teus objetivos e os ficheiros que carregaste. Não vê nada que não tenhas adicionado. Não altera nada sem que peças."
       },
       "stop": "Parar",
-      "stopped": "Parado. O que foi escrito fica, e só essa parte é cobrada."
+      "stopped": "Parado. O que foi escrito fica, e só essa parte é cobrada.",
+      "clarificationTitle": "Primeiro uma pergunta rápida:",
+      "clarificationSkip": "Responder mesmo assim",
+      "clarificationContinue": "Enviar",
+      "clarificationAnswerPlaceholder": "A sua resposta..."
     },
     "create": {
       "title": "Criar Qualquer Coisa",
@@ -1172,6 +1167,16 @@
       "looksLikeQuestion": "Isso parece uma pergunta. Respondo ou registo?",
       "answerItInstead": "Responder",
       "recordItAnyway": "Registar mesmo assim"
+    },
+    "goal": {
+      "willOpen": "Isto vai para {destination}, com o que escreveste.",
+      "costsThere": "{credits, plural, one {# crédito} other {# créditos}} quando carregares no botão lá. Agora não é cobrado nada.",
+      "freeThere": "Agora não é cobrado nada, nem à chegada.",
+      "confirm": "Sim, faz isso",
+      "change": "Mudar alguma coisa",
+      "which": "Qual deles queres dizer?",
+      "vague": "Diz um pouco mais, para isto ir ao sítio certo.",
+      "dismiss": "Deixa estar"
     },
     "timeline": {
       "title": "As minhas coisas",
@@ -1276,7 +1281,7 @@
       "stepChangeFailed": "Não foi possível alterar esse passo."
     },
     "reflection": {
-      "title": "Reflexão Semanal",
+      "title": "A tua semana",
       "description": "Veja o que você realmente concluiu esta semana em comparação com o que planejou — dados reais, sem enfeites.",
       "generateButton": "Gerar Reflexão Semanal",
       "generating": "Gerando...",
@@ -1494,11 +1499,12 @@
           "chatWidget": "o widget de chat"
         },
         "stopped": "Paraste-o. {count, plural, =0 {Nada foi cobrado} one {Foi cobrado # crédito} other {Foram cobrados # créditos}} pela parte gerada; o resto da reserva foi libertado.",
-        "spelling": "{count, plural, one {Uma palavra grega pode estar mal escrita} other {# palavras gregas podem estar mal escritas}}: {words}. Nada foi alterado — verifica-as, um nome ou uma marca não é um erro."
+        "spelling": "{count, plural, one {Uma palavra grega pode estar mal escrita} other {# palavras gregas podem estar mal escritas}}: {words}. Nada foi alterado — verifica-as, um nome ou uma marca não é um erro.",
+        "sameSkeleton": "Este site tem a mesma estrutura de {name} — {percent}% da mesma forma. Nada foi alterado; dois sites do mesmo negócio muitas vezes devem parecer-se, e só você pode dizer se é o caso."
       }
     },
     "marketplace": {
-      "title": "Mercado",
+      "title": "Ajudantes prontos",
       "description": "Modelos de agentes criados e partilhados por outras pessoas. Grátis — aqui nada se compra nem se vende.",
       "empty": {
         "title": "Ainda sem modelos",
@@ -1649,7 +1655,7 @@
       "madeItHere": "Criei aqui → {where}"
     },
     "agents": {
-      "title": "Agentes de IA",
+      "title": "IA que trabalha para ti",
       "description": "Agentes que correm num horário e enviam-lhe o resultado por email.",
       "aiDisclosure": "Os agentes são sistemas de IA. Tudo o que produzem é gerado por IA e pode conter erros — confirme o que for importante antes de agir.",
       "newAgent": "Novo agente",
@@ -2054,13 +2060,6 @@
       "truncatedWarning": "Mesmo lida por partes, a seleção era maior do que uma pergunta consegue cobrir, por isso a resposta pode estar incompleta. Pergunte sobre menos ficheiros de cada vez.",
       "skippedFiles": "Ignorados (sem texto legível): {names}",
       "creditsCharged": "{credits, plural, one {# crédito} other {# créditos}}",
-      "stepsLabel": "Como funciona esta página",
-      "step1Title": "1. Carrega ficheiros",
-      "step1Hint": "PDF, Word, Excel, CSV ou texto.",
-      "step2Title": "2. Escolhe sobre quais perguntar",
-      "step2Hint": "Marca um ou mais ficheiros — a resposta vem apenas do que marcares.",
-      "step3Title": "3. Faz a tua pergunta",
-      "step3Hint": "A IA responde apenas a partir dos ficheiros marcados.",
       "selectedOfTotal": "{count} de {total} selecionados",
       "selectAll": "Selecionar tudo",
       "maxPerQuestion": "Até {max} ficheiros por pergunta.",
@@ -2094,7 +2093,7 @@
       "openedFromDevice": "{count, plural, one {# ficheiro aberto} other {# ficheiros abertos}} do seu dispositivo."
     },
     "deepResearch": {
-      "title": "Investigação profunda",
+      "title": "Procura a fundo",
       "description": "Dá um tema: pesquisa, cruza fontes e escreve um relatório com referências.",
       "intro": "Um relatório demora vários minutos e é o mais caro aqui, por isso vês sempre o plano e o preço antes de algo correr. Os achados são parafraseados e atribuídos, nunca reproduzidos.",
       "topicLabel": "O que deve investigar?",
@@ -2793,7 +2792,6 @@
       "roadmap": "Plano de evolução",
       "score": "Pontuação",
       "sentiment": "Sentimento",
-      "slideCount": "Número de diapositivos",
       "status": "Estado",
       "strengths": "Pontos fortes",
       "suggestedResponse": "Resposta sugerida",
@@ -2803,7 +2801,6 @@
       "targetAudience": "Público-alvo",
       "taskName": "Nome da tarefa",
       "timeSaved": "Tempo poupado",
-      "title": "Título",
       "toolsNeeded": "Ferramentas necessárias",
       "topic": "Tema",
       "twitterThread": "Tópico no Twitter",
@@ -2822,13 +2819,10 @@
       "crossPlatform": "multiplataforma",
       "desktop": "computador",
       "done": "concluído",
-      "draft": "rascunho",
       "email": "e-mail",
       "event": "evento",
       "expense": "despesa",
-      "final": "final",
       "inProgress": "em curso",
-      "inReview": "em revisão",
       "income": "receita",
       "ios": "iOS",
       "live": "publicado",
@@ -2863,7 +2857,6 @@
       "apps": "Eliminar esta aplicação? Não é possível anular.",
       "images": "Eliminar esta imagem? Não é possível anular.",
       "videos": "Eliminar este vídeo? Não é possível anular.",
-      "presentations": "Eliminar esta nota de apresentação? Não é possível anular.",
       "campaigns": "Eliminar esta campanha? Não é possível anular."
     },
     "empty": {
@@ -2947,11 +2940,6 @@
         "why": "O briefing de cada vídeo e até onde chegou, para que o plano de gravações nunca fique só na sua cabeça. Não gera vídeos.",
         "example": "Demo do produto de 30 segundos"
       },
-      "presentations": {
-        "title": "Um sítio para acompanhar as suas apresentações",
-        "why": "Anote as apresentações que está a preparar ou que já fez — esta página não gera diapositivos por si. Use o botão acima para adicionar uma.",
-        "example": "Apresentação para investidores da ronda seed"
-      },
       "campaigns": {
         "title": "Cada campanha e o que custou",
         "why": "Canal, orçamento e estado lado a lado, para que a próxima decisão de orçamento venha de números e não de intuição. Não as executa.",
@@ -2975,7 +2963,6 @@
       "apps": "Nova aplicação",
       "images": "Nova imagem",
       "videos": "Novo vídeo",
-      "presentations": "Nova nota de apresentação",
       "campaigns": "Nova campanha"
     }
   },
@@ -3227,6 +3214,26 @@
       "is": "Padrões encontrados por código nos seus próprios registos, não um modelo a adivinhar.",
       "does": "Conta as suas linhas, encontra padrões acima de um limiar, e diz cada um com o número de entradas por trás e uma ligação para elas.",
       "doesNot": "Não prevê o futuro nem inventa um padrão só para ter algo a dizer. Abaixo de meia dúzia de linhas correspondentes, diz que não há base suficiente."
+    },
+    "presentations": {
+      "is": "Um gerador de diapositivos: entra uma descrição, sai uma apresentação.",
+      "does": "Escreve o título, os tópicos e as notas do orador de cada diapositivo na língua da tua descrição, encontra uma foto no Unsplash ou coloca as tuas, e exporta a apresentação como PowerPoint (.pptx) ou PDF.",
+      "doesNot": "Não desenha gráficos nem tabelas, não escolhe um tema de design e não gera imagens: as fotos vêm do Unsplash ou de ti. Os diapositivos não se editam aqui: descarrega o .pptx e termina-o no PowerPoint ou Keynote."
+    },
+    "posts": {
+      "is": "Um redator de publicações: entra uma descrição, sai uma publicação por plataforma.",
+      "does": "Escreve, a partir da mesma descrição, uma publicação para o LinkedIn, uma para o X, uma legenda de Instagram com hashtags, uma publicação de Facebook e uma de Threads, cada uma cortada ao tamanho da sua plataforma e escrita no seu tom, na língua da tua descrição, com um botão de copiar em cada uma.",
+      "doesNot": "Não publica, não agenda nem se liga a nenhuma conta de redes sociais, e não reutiliza um mesmo texto em várias plataformas: cinco plataformas, cinco publicações. Não cria imagens; a foto é tua."
+    },
+    "projects": {
+      "is": "Uma pasta com um objetivo, que tem exatamente o que lá puseste.",
+      "does": "Agrupa as tuas linhas — ficheiros, conversas, planos, agentes, apresentações, publicações e qualquer registo — sob um nome e um objetivo, e deixa uma conversa começar lá dentro para ler mais linhas de menos módulos.",
+      "doesNot": "Não puxa nada sozinho: um plano não traz os seus passos e um site não traz os seus formulários. Eliminar um projeto elimina a pasta, nunca o conteúdo."
+    },
+    "projectDetail": {
+      "is": "Um projeto: o seu objetivo, o que lá puseste e uma conversa que começa lá dentro.",
+      "does": "Agrupa o conteúdo em tarefas, ficheiros, agentes e resultados, mostra quando cada um entrou, deixa-te tirar qualquer um, e começa uma conversa que pertence a este projeto durante toda a sua vida.",
+      "doesNot": "Tirar algo não o elimina, e o projeto não acrescenta nada sozinho: um plano aqui não traz os seus passos, um site não traz os seus formulários."
     }
   },
   "helpCentre": {
@@ -3502,7 +3509,7 @@
     }
   },
   "dataAnalysis": {
-    "title": "Análise de dados",
+    "title": "Vê o que dizem os números",
     "description": "Carrega uma folha de cálculo. Cada estatística é calculada sobre o ficheiro inteiro — nunca adivinhada.",
     "upload": {
       "title": "Carregar um ficheiro",
@@ -3629,8 +3636,166 @@
       "failed": "falhou"
     }
   },
+  "presentations": {
+    "title": "Apresentações",
+    "description": "Descreve a apresentação e recebe os diapositivos: PowerPoint ou PDF editável, com fotos do Unsplash ou tuas.",
+    "limits": {
+      "title": "O que NÃO faz",
+      "no_charts": "Não desenha gráficos nem tabelas. Um diapositivo é um título, tópicos e notas do orador.",
+      "no_themes": "Não escolhe um tema de design. A apresentação é simples e o estilo é teu.",
+      "no_editing": "Os diapositivos não se editam aqui. Descarrega o .pptx e termina-o no PowerPoint, Keynote ou LibreOffice.",
+      "no_generated_images": "Não gera imagens. As fotos vêm do Unsplash ou das que carregas."
+    },
+    "form": {
+      "description": "Sobre o que é a apresentação?",
+      "descriptionPlaceholder": "Um pitch de dez minutos do serviço de catering da nossa padaria a três gerentes de hotel: quem somos, o que entregamos, preços e o que precisamos deles…",
+      "slideCount": "Diapositivos",
+      "slides": "{count, plural, one {# diapositivo} other {# diapositivos}}",
+      "imageSource": "Imagens",
+      "sources": {
+        "unsplash": "Do Unsplash",
+        "own": "As minhas fotos",
+        "none": "Sem fotos",
+        "unsplashHint": "Fotos gratuitas, escolhidas para cada diapositivo que pede uma, com crédito ao fotógrafo.",
+        "ownHint": "Até {max} fotos JPEG ou PNG, colocadas por ordem nos diapositivos que pedem uma.",
+        "noneHint": "Só texto.",
+        "unsplashUnavailable": "O Unsplash não está configurado nesta instalação, por isso as fotos só podem ser tuas."
+      },
+      "addPhotos": "Adicionar fotos",
+      "photosSelected": "{count} de {max}",
+      "remove": "Remover",
+      "generate": "Escrever os diapositivos",
+      "generating": "A escrever a apresentação…"
+    },
+    "result": {
+      "title": "A tua apresentação",
+      "slidesCount": "{count, plural, one {# diapositivo} other {# diapositivos}}",
+      "charged": "{credits, plural, one {# crédito} other {# créditos}}",
+      "preparing": "A preparar…",
+      "exportPptx": "Descarregar PowerPoint",
+      "exportPdf": "Descarregar como PDF",
+      "notes": "Notas do orador",
+      "noPhotoFound": "Nenhuma foto correspondeu aos diapositivos que pediam uma: a apresentação é só texto.",
+      "photoBy": "Foto de <author>{name}</author> no <unsplash>Unsplash</unsplash>",
+      "layout": {
+        "title": "Título",
+        "bullets": "Tópicos",
+        "section": "Secção",
+        "quote": "Citação",
+        "image": "Foto"
+      }
+    },
+    "errors": {
+      "tooShort": "Conta um pouco mais sobre a apresentação primeiro.",
+      "tooLong": "Ultrapassa os {limit} caracteres. Descreve a apresentação, não a palestra inteira.",
+      "insufficient": "Créditos insuficientes para esta apresentação.",
+      "rateLimited": "Demasiados pedidos: espera um minuto e tenta de novo.",
+      "unavailable": "Não foi possível contactar o serviço de IA. Nada foi cobrado.",
+      "unusable": "O modelo devolveu algo que não era uma apresentação. Tenta descrevê-la de outra forma.",
+      "failed": "Não funcionou: tenta de novo.",
+      "imageRejected": "Só JPEG ou PNG com menos de 5 MB, e no máximo {max} fotos.",
+      "uploadFailed": "Não foi possível carregar uma foto.",
+      "exportFailed": "Não foi possível criar o ficheiro."
+    },
+    "history": {
+      "title": "Histórico",
+      "empty": "Ainda não há nada aqui.",
+      "slides": "{count, plural, one {# diapositivo} other {# diapositivos}}",
+      "failed": "falhou",
+      "delete": "Eliminar",
+      "deleteConfirm": "Eliminar esta apresentação? Não é possível anular.",
+      "noteFromBefore": "nota de antes"
+    }
+  },
+  "posts": {
+    "title": "Publicações",
+    "description": "Diz uma vez o que queres dizer; recebe uma publicação escrita para cada plataforma, no seu tamanho e no seu tom. Copia-a e publica-a tu.",
+    "limits": {
+      "title": "O que NÃO faz",
+      "no_publish": "Não publica nada. Nada daqui chega ao LinkedIn, X, Instagram, Facebook ou Threads: copias o texto e publicas tu.",
+      "no_scheduling": "Não agenda nada e não tem calendário.",
+      "no_images": "Não cria imagens. Só texto; a foto é tua.",
+      "no_accounts": "Não está ligado a nenhuma conta de redes sociais, e não pede nenhuma."
+    },
+    "form": {
+      "description": "O que queres dizer?",
+      "descriptionPlaceholder": "A nossa padaria agora entrega pequeno-almoço em escritórios no centro: encomenda até às 18:00 para a manhã seguinte, mínimo dez pessoas, 10% de desconto na primeira encomenda…",
+      "platforms": "Plataformas",
+      "upTo": "até {max} caracteres",
+      "generate": "Escrever as publicações",
+      "generating": "A escrever…"
+    },
+    "result": {
+      "title": "As tuas publicações",
+      "charged": "{credits, plural, one {# crédito} other {# créditos}}",
+      "chars": "{count} / {max}",
+      "missing": "{platform} não foi escrita desta vez: repete só com essa plataforma."
+    },
+    "errors": {
+      "tooShort": "Conta um pouco mais primeiro.",
+      "tooLong": "Ultrapassa os {limit} caracteres. Diz sobre o que é a publicação, não a história toda.",
+      "insufficient": "Créditos insuficientes para estas publicações.",
+      "rateLimited": "Demasiados pedidos: espera um minuto e tenta de novo.",
+      "unavailable": "Não foi possível contactar o serviço de IA. Nada foi cobrado.",
+      "unusable": "O modelo devolveu algo que não eram publicações. Tenta descrevê-lo de outra forma.",
+      "failed": "Não funcionou: tenta de novo."
+    },
+    "history": {
+      "title": "Histórico",
+      "empty": "Ainda não há nada aqui.",
+      "failed": "falhou",
+      "delete": "Eliminar",
+      "deleteConfirm": "Eliminar estas publicações? Não é possível anular."
+    }
+  },
+  "projects": {
+    "title": "Projetos",
+    "description": "Uma pasta com um objetivo. Colocas coisas explicitamente; nada entra com elas.",
+    "form": {
+      "name": "Nome",
+      "namePlaceholder": "Lançar a loja de outono",
+      "goal": "Objetivo",
+      "goalPlaceholder": "O que queres alcançar?",
+      "create": "Criar projeto"
+    },
+    "list": {
+      "title": "Os teus projetos",
+      "empty": "Ainda sem projetos.",
+      "members": "{count, plural, one {# coisa} other {# coisas}}"
+    },
+    "status": {
+      "active": "Ativo",
+      "done": "Concluído",
+      "archived": "Arquivado"
+    },
+    "sections": {
+      "goal": "Objetivo",
+      "tasks": "Tarefas",
+      "files": "Ficheiros",
+      "agents": "Agentes",
+      "results": "Resultados",
+      "activity": "Atividade",
+      "other": "Tudo o resto",
+      "empty": "Ainda não há nada aqui."
+    },
+    "progress": {
+      "rowsPerModule": "{count, plural, one {# linha por módulo no chat} other {# linhas por módulo no chat}}"
+    },
+    "startChat": "Iniciar uma conversa neste projeto",
+    "chatFixed": "Uma conversa pertence ao projeto onde começou, durante toda a sua vida.",
+    "noGoal": "Ainda sem objetivo escrito.",
+    "untitled": "Sem título",
+    "delete": "Eliminar",
+    "deleteConfirm": "Eliminar este projeto? As coisas lá dentro ficam onde estão.",
+    "removeMember": "Tirar do projeto",
+    "errors": {
+      "tooShort": "Dá-lhe primeiro um nome.",
+      "tooLong": "Esse nome passa dos {limit} caracteres.",
+      "failed": "Não resultou — tenta outra vez."
+    }
+  },
   "finance": {
-    "title": "Saúde do negócio",
+    "title": "Como vai o negócio",
     "description": "Cada número é calculado a partir de linhas reais, ou diz porque não pode ser.",
     "needsInput": "Falta: {fields}",
     "needsHistory": "Precisa de {need} meses de histórico — temos {have}.",
@@ -3682,7 +3847,7 @@
     "needsHistoryDays": "Precisa de {need} dias de instantâneos diários — temos {have}."
   },
   "routing": {
-    "title": "Encaminhamento de modelos",
+    "title": "Que IA é usada",
     "description": "Que modelo atendeu cada pedido nos últimos 30 dias, quanto custou e quanto o encaminhamento poupou.",
     "empty": "Ainda não foi registada nenhuma decisão de encaminhamento. Esta tabela preenche-se quando os pedidos começarem a passar pelo encaminhador — não mostra zeros, não mostra nada.",
     "decisions": "Decisões",
@@ -3763,6 +3928,37 @@
       "not_delivered_test_sender": "A sua mensagem não foi entregue: esta instalação não tem um endereço de remetente verificado.",
       "send_failed": "Não foi possível enviar a sua mensagem. Tente novamente.",
       "unknown": "Algo correu mal. Tente novamente."
+    }
+  },
+  "stepFlow": {
+    "label": "Passos",
+    "steps": {
+      "describe": "Descreva",
+      "generate": "Gere",
+      "edit": "Edite",
+      "preview": "Pré-visualização",
+      "publish": "Publique",
+      "question": "Pergunta",
+      "research": "Pesquisa",
+      "sources": "Fontes",
+      "answer": "Resposta",
+      "upload": "Carregue",
+      "ask": "Pergunte",
+      "review": "Reveja"
+    },
+    "hints": {
+      "describe": "Diz o que queres, por palavras tuas.",
+      "generate": "Escreve a primeira versão. Gasta créditos.",
+      "edit": "Diz-lhe o que mudar. As vezes que quiseres.",
+      "preview": "Vê antes de mais alguém.",
+      "publish": "Fica online, com endereço próprio.",
+      "question": "Um tema para investigar, não uma pesquisa.",
+      "research": "Lê a web e tira notas.",
+      "sources": "Cada afirmação guarda a página de onde veio.",
+      "answer": "A resposta, com a origem.",
+      "upload": "PDF, Word, texto, folhas de cálculo.",
+      "ask": "Marca um ou mais ficheiros — a resposta vem apenas do que marcares.",
+      "review": "Lê antes de usar. Aqui não corre nada."
     }
   }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { getLocale } from "next-intl/server";
 import {
   isSearchKind,
   MAX_QUERY_LENGTH,
@@ -55,12 +56,26 @@ export async function GET(request: Request) {
     const sinceRaw = (url.searchParams.get("since") ?? "").trim();
     const since = sinceRaw && !Number.isNaN(Date.parse(sinceRaw)) ? sinceRaw : null;
 
-    const { data, error } = await supabase.rpc("search_all", {
+    // THE READER'S LANGUAGE REACHES THE QUERY.
+    //
+    // help_articles is one row per (slug, locale) — 27 articles x ten
+    // languages — and until 20260914 the index had no locale column, so
+    // all ten translations competed for every query and a Greek user
+    // could be handed the Portuguese copy of the answer they asked for.
+    //
+    // Only help articles are affected: a row the user wrote has a null
+    // locale and is never filtered, because hiding somebody's own notes
+    // behind a language setting would be a far worse bug than the one
+    // this fixes.
+    const locale = await getLocale();
+
+    const { data, error } = await supabase.rpc("search_all_localized", {
       p_query: q,
       p_kinds: kinds.length > 0 ? kinds : null,
       p_module: moduleSlug,
       p_since: since,
       p_limit: MAX_RESULTS,
+      p_locale: locale,
     });
     if (error) throw error;
 

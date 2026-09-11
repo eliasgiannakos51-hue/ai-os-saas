@@ -119,6 +119,42 @@ export function isOwnName(word: string, stems: string[]): boolean {
   return stems.some((s) => folded.startsWith(s) && folded.length <= s.length + MAX_INFLECTION);
 }
 
+/**
+ * EVERY Greek word on the page, with nothing filtered out.
+ *
+ * This is the DENOMINATOR, and it exists so that a person can be told WHY
+ * a word was not asked about instead of simply not seeing it.
+ * greekWordsToCheck drops words for five different reasons — all-caps, a
+ * word the owner typed, an inflection of an owner's name, a duplicate
+ * fold, the cap — and a list that shows only what survived cannot
+ * distinguish "your village was protected" from "your village was never
+ * on the page".
+ *
+ * scripts/check-site-spelling.mjs subtracts one list from the other to
+ * print that split. It is exported rather than re-derived there because
+ * the regex for "a Greek word" is a RULE: a second copy in a script would
+ * agree with this one today and quietly disagree after the first edit,
+ * which is the shape docs/shapes.md calls a copy that passes forever.
+ */
+export function greekWordsOnPage(html: string): string[] {
+  const text = visibleTextOf(html);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of text.match(GREEK_WORD) ?? []) {
+    if (seen.has(raw)) continue;
+    seen.add(raw);
+    out.push(raw);
+  }
+  return out;
+}
+
+/** The words in the brief, folded — the owner's own spelling of their own
+ *  things, in the exact form they typed. Shared with the audit script for
+ *  the same reason greekWordsOnPage is. */
+export function briefWordFolds(brief: string): Set<string> {
+  return new Set((brief.match(GREEK_WORD) ?? []).map(foldForMatch));
+}
+
 export function greekWordsToCheck(html: string, brief: string): string[] {
   const text = visibleTextOf(html);
   if (!GREEK_LETTER.test(text)) return [];
@@ -133,7 +169,7 @@ export function greekWordsToCheck(html: string, brief: string): string[] {
   // accents, and is what every other matching surface in this codebase
   // already uses.
   const fold = foldForMatch;
-  const fromBrief = new Set((brief.match(GREEK_WORD) ?? []).map(fold));
+  const fromBrief = briefWordFolds(brief);
   const ownStems = ownNameStems(brief);
   const seen = new Set<string>();
   const out: string[] = [];

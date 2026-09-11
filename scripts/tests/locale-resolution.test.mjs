@@ -107,8 +107,19 @@ if (localeFromAcceptLanguage) {
 // what both selectors write and what middleware refreshes from the
 // account, so a header that outranked it would undo an explicit choice on
 // every request.
-check("the cookie is consulted before Accept-Language",
-  source.indexOf("LOCALE_COOKIE") < source.indexOf("accept-language"));
+// THE READS, NOT THE IMPORT. `indexOf("LOCALE_COOKIE")` found the import
+// at the top of the file, so the cookie "came first" no matter what the
+// function did — measured 2026-09-08 by pointing the read at a different
+// cookie and watching this stay green. Both positions are now the calls.
+{
+  const cookieAt = source.indexOf("cookieStore.get(LOCALE_COOKIE)");
+  const headerAt = source.indexOf("localeFromAcceptLanguage(headers()");
+  check(
+    "the cookie is consulted before Accept-Language",
+    cookieAt > -1 && headerAt > cookieAt,
+    `the cookie is read at ${cookieAt}, the header at ${headerAt}`
+  );
+}
 check("Accept-Language is only a fallback, not an override",
   /includes\(chosen \?\? ""\)/.test(source) && /localeFromAcceptLanguage\(headers\(\)/.test(source));
 check("English is the last resort",

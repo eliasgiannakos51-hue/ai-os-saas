@@ -99,7 +99,47 @@ export const SECTION_ORDERS = [
   "A — the archetype's ORDER A, exactly as listed for the shape you chose",
   "B — the archetype's ORDER B, exactly as listed for the shape you chose",
   "C — the archetype's ORDER C, exactly as listed for the shape you chose",
+  "D — the archetype's ORDER D, exactly as listed for the shape you chose",
+  "E — the archetype's ORDER E, exactly as listed for the shape you chose",
+  "F — the archetype's ORDER F, exactly as listed for the shape you chose",
 ] as const;
+
+/**
+ * THREE BECAME SIX, AND THE NUMBER IS THE WHOLE POINT.
+ *
+ * MEASURED, WITHOUT SPENDING ANYTHING. The order axis is a hash into this
+ * list, so the probability that two sites of the same kind by two
+ * different people get the same skeleton is exactly 1/length. At three it
+ * was 33.3% — measured over 20,000 constructed pairs in
+ * scripts/tests/section-order-space.test.mjs, which agrees with the
+ * arithmetic because it IS the arithmetic. One pair in three came out as
+ * the same skeleton BY CONSTRUCTION, and no amount of prompt wording
+ * could have changed that: it is a property of the draw, not of the
+ * model.
+ *
+ * That is the number scripts/website-pairs-check.mjs costs about $2.30 to
+ * estimate for three pairs, and it estimates it with three samples.
+ *
+ * WHY SIX AND NOT TWELVE. Every shape in website-builder.ts must offer
+ * every letter, and four of the seven (gallery, editorial, catalogue,
+ * event) have exactly three sections that can move — their first section
+ * is pinned by the shape's own FIRST line, and event's last is pinned
+ * too. Three movable sections give 3! = 6 orders and not one more. Twelve
+ * would mean either inventing sections those shapes do not have, or
+ * letting two letters name the same order, which is the defect with extra
+ * steps.
+ *
+ * A CONTRADICTION WAS FIXED ON THE WAY. Three shapes had an order that
+ * did not start with their own FIRST section — local-place's C began with
+ * the menu though the shape says a photograph comes "before any heading",
+ * gallery's B began with the statement though the shape says the work
+ * comes "before any headline at all", and catalogue's B began with the
+ * filters though the shape says the items come first. The model was being
+ * given two instructions that could not both be obeyed, and the sentence
+ * introducing the orders already said what was meant: they differ in what
+ * comes AFTER the opening.
+ */
+export const SECTION_ORDER_COUNT = SECTION_ORDERS.length;
 
 export const TYPE_SCALES = [
   "compact — modular ratio ~1.2, quiet headings, dense and businesslike",
@@ -246,12 +286,62 @@ function fnv1a(text: string): number {
 }
 
 /**
+ * THE ORDER AXIS IS A CYCLE, NOT A DRAW, and that is the difference
+ * between "probably different" and a promise.
+ *
+ * MEASURED BEFORE THE CHANGE, over 4,000 constructed users in
+ * scripts/tests/section-order-space.test.mjs: with the order hashed like
+ * every other axis, 59.9% of a person's second-to-fifth sites landed on a
+ * skeleton they had already been given, and 1.0% of people got the SAME
+ * order for all five. Hashing an independent value per site cannot avoid
+ * that — a fair die repeats.
+ *
+ * So the order is drawn ONCE per person and then stepped: their first
+ * site takes a hashed starting letter, their next takes the one after it,
+ * and so on. A person's first SECTION_ORDER_COUNT sites therefore use
+ * every letter exactly once, and the seventh is the first repeat rather
+ * than the second.
+ *
+ * WHAT IT DOES NOT DO. Two DIFFERENT people still collide at 1 in
+ * SECTION_ORDER_COUNT on their first sites, and nothing here can change
+ * that: their draws cannot see each other, and a scheme that made them
+ * would have to remember what every account was given.
+ *
+ * WHEN THE COUNT MOVES BACKWARDS. `priorSites` is a live count of the
+ * person's rows, so deleting a site steps the cycle back and the next
+ * generation reuses the letter that deleted site had. That is the correct
+ * behaviour rather than a hole: the site it would have collided with no
+ * longer exists.
+ */
+export function orderIndexFor(userKey: string, priorSites: number, count: number): number {
+  const base = fnv1a(`order::${userKey}`) % count;
+  // A NEGATIVE OR FRACTIONAL COUNT IS NOT A CYCLE. `priorSites` arrives
+  // from a database count that can be null; the caller passes 0, but a
+  // remainder of a negative number is negative in JavaScript and would
+  // index off the front of the list, so it is normalised here rather than
+  // trusted.
+  const step = Number.isFinite(priorSites) ? Math.max(0, Math.floor(priorSites)) : 0;
+  return (base + step) % count;
+}
+
+/**
  * One draw per axis. Each axis hashes with its own salt, and the hash
  * avalanches (see fnv1a above) so the salt actually separates them —
  * without BOTH, lists whose lengths share a factor correlate and two
  * axes become one.
+ *
+ * `cycle` is what turns the ORDER axis from a draw into the walk
+ * described above. It is optional because the two measurement scripts
+ * (website-pairs-check, website-variety-check) construct seeds that have
+ * no user behind them; production passes it, and
+ * scripts/tests/website-variation.test.mjs requires the route to, because
+ * an exclusion that is computed and not delivered is the shape this
+ * module's own header records having shipped once already.
  */
-export function pickVariation(seedParts: (string | number)[]): SiteVariation {
+export function pickVariation(
+  seedParts: (string | number)[],
+  cycle?: { userKey: string; priorSites: number }
+): SiteVariation {
   const seed = seedParts.join("::");
   const pick = <T,>(list: readonly T[], salt: string): T =>
     list[fnv1a(`${salt}::${seed}`) % list.length];
@@ -261,7 +351,9 @@ export function pickVariation(seedParts: (string | number)[]): SiteVariation {
     rhythm: pick(SECTION_RHYTHMS, "rhythm"),
     typeScale: pick(TYPE_SCALES, "type"),
     motion: pick(MOTION_VOCABULARIES, "motion"),
-    order: pick(SECTION_ORDERS, "order"),
+    order: cycle
+      ? SECTION_ORDERS[orderIndexFor(cycle.userKey, cycle.priorSites, SECTION_ORDERS.length)]
+      : pick(SECTION_ORDERS, "order"),
     palette: pick(PALETTE_STRATEGIES, "palette"),
     typeface: pick(TYPE_PAIRINGS, "typeface"),
     spacing: pick(SPACING_SCALES, "spacing"),

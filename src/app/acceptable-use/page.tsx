@@ -20,11 +20,13 @@ export function generateMetadata(): Promise<Metadata> {
  * merged. Checked against main on 2026-09-02:
  *
  *   "generated websites, presentations, documents, agents and emails"
- *   — PRESENTATIONS DO NOT GENERATE. lib/build-modules.ts renamed the
- *   module to "Presentation notes" precisely because the old name
- *   promised a generator that does not exist. Listing it as a thing
- *   this policy governs the output of would have been a promise made in
- *   the enforcement policy, which is a strange place to make one.
+ *   — PRESENTATIONS DID NOT GENERATE when this was checked.
+ *   lib/build-modules.ts had renamed the module to "Presentation notes"
+ *   precisely because the old name promised a generator that did not
+ *   exist, and listing it here would have been a promise made in the
+ *   enforcement policy. V5 #21 built the generator (a brief becomes a
+ *   deck of slides), so the sentence below names presentations again —
+ *   this time because there is an output to govern.
  *
  *   "subject to an automated safety review before going live; a page
  *   that fails review is not published" — TRUE, but it conflated two
@@ -53,7 +55,7 @@ export default function AcceptableUsePage() {
 
       <LegalSection title="2. Prohibited content and conduct">
         <p>
-          You may not use Ionexa — including generated websites, documents, research
+          You may not use Ionexa — including generated websites, presentations, documents, research
           reports, code, agents, and emails sent on your behalf — to: publish or distribute
           illegal content; harass, defame or threaten; generate deceptive content that
           impersonates real people or organisations; distribute malware or phishing pages;

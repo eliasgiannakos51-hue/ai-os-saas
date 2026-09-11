@@ -216,7 +216,7 @@ function DocumentPdfDialog({ documentId, onClose }: { documentId: string; onClos
         role="dialog"
         aria-modal="true"
         aria-labelledby="document-pdf-title"
-        className="relative w-full max-w-md rounded-2xl border border-border bg-panel p-5 shadow-xl"
+        className="relative w-full max-w-md surface shadow-xl"
       >
         <div className="flex items-start justify-between gap-3">
           <h2 id="document-pdf-title" className="flex items-center gap-2 text-sm font-semibold text-foreground">

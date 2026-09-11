@@ -23,6 +23,15 @@ import type { ModuleConfig } from "@/lib/modules";
 // the coding notes were imported into code_sessions, and the analysis
 // notes are listed on the new page. See the 20260902 migration.
 //
+// A THIRD LEFT IN V5 #21: `presentations`. /dashboard/presentations writes
+// a deck from a brief (lib/presentations/generate.ts, reached from
+// api/presentations/generate) and exports it as .pptx or PDF, so it is a
+// producer and sits under Make. Unlike the two above it KEPT its table:
+// the deck lives in new columns on ai_presentations (the 20260929
+// migration) and the hand-typed rows stay listed on the page as
+// `source = 'note'`. scripts/tests/presentations.test.mjs holds the
+// generator to what the page now promises.
+//
 // Same
 // RLS/CRUD/search/sort/export pattern as the 13 business modules
 // (lib/modules.ts), reusing the same generic list/form/row components, but
@@ -137,43 +146,6 @@ export const BUILD_MODULES: ModuleConfig[] = [
         type: "select",
         badge: true,
         options: ["requested", "in progress", "done"],
-      },
-    ],
-  },
-  {
-    slug: "presentations",
-    // The one empty state that has to say what this module is NOT. It was
-    // the first module to get its own (module.emptyPresentationNotes, now
-    // moved into the shared moduleData.empty.* table with the other
-    // twenty); presentation-notes.test.mjs still holds it to saying
-    // "does not generate slides" in all ten locales.
-    emptyKey: "moduleData.empty.presentations",
-    newKey: "moduleData.new.presentations",
-    // "Presentations" promised a generator this module does not contain.
-    //
-    // It is a CRUD tracker — a table of rows the user types by hand, with
-    // no AI call anywhere in it. A user clicking "Presentations" expects
-    // to describe a deck and get slides, and finds a form with a
-    // slide-count field. That gap is not a wording problem to soften; the
-    // name was simply not true.
-    //
-    // Renamed rather than built: the real generator is a separate piece of
-    // work (slides jsonb, themes, a viewer/editor, PDF export) and is on
-    // the roadmap under "AI Presentations & Documents", where the promise
-    // belongs until it is real.
-    titleKey: "sidebar.items.presentations",
-    table: "ai_presentations",
-    headlineKey: "title",
-    fields: [
-      { key: "title", labelKey: "moduleData.fields.title", type: "text", required: true },
-      { key: "description", labelKey: "moduleData.fields.description", type: "textarea", full: true },
-      { key: "slide_count", labelKey: "moduleData.fields.slideCount", type: "number", badge: true },
-      {
-        key: "status",
-        labelKey: "moduleData.fields.status",
-        type: "select",
-        badge: true,
-        options: ["draft", "in review", "final", "archived"],
       },
     ],
   },

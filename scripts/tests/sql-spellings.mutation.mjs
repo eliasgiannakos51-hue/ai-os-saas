@@ -86,10 +86,18 @@ const MUTANTS = [
   },
   {
     // THE ORIGINAL, in the file where it was found first.
+    //
+    // RE-ANCHORED 2026-09-08, and the sweep is what caught it: the
+    // pattern gained a schema group — `(?:([a-z0-9_]+)\\.)?` in place of
+    // `(?:public\\.)?` — when `on storage.objects` turned out to be read
+    // as a table called `storage`, which is in no expected-table list, so
+    // the ten policies on the table holding every uploaded document were
+    // dropped from the inventory without a word. The mutation is the same
+    // defect; only the line it lives on moved.
     name: "db-inventory requires the quotes around a policy name again",
     file: INVENTORY,
-    from: '      /create\\s+policy\\s+(?:"([^"]+)"|([a-z0-9_]+))\\s+on\\s+(?:public\\.)?"?([a-z0-9_]+)"?/gi',
-    to: '      /create\\s+policy\\s+(?:"([^"]+)"|())\\s+on\\s+(?:public\\.)?"?([a-z0-9_]+)"?/gi',
+    from: '      /create\\s+policy\\s+(?:"([^"]+)"|([a-z0-9_]+))\\s+on\\s+(?:([a-z0-9_]+)\\.)?"?([a-z0-9_]+)"?/gi',
+    to: '      /create\\s+policy\\s+(?:"([^"]+)"|())\\s+on\\s+(?:([a-z0-9_]+)\\.)?"?([a-z0-9_]+)"?/gi',
     expect: BLIND,
   },
   {

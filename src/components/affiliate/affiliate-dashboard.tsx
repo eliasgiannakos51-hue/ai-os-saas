@@ -108,7 +108,7 @@ export function AffiliateDashboard({
 
   if (!code) {
     return (
-      <div className="space-y-4 rounded-2xl border border-border bg-panel p-6 text-center">
+      <div className="space-y-4 surface text-center">
         <Share2 className="mx-auto h-6 w-6 text-orange-400" aria-hidden="true" />
         <p className="text-sm leading-relaxed text-foreground">
           {t("pitch", { percent: Math.round((rate ?? 0.25) * 100), months: commissionMonths })}
@@ -135,7 +135,7 @@ export function AffiliateDashboard({
         </p>
       )}
 
-      <div className="space-y-3 rounded-2xl border border-border bg-panel p-5">
+      <div className="space-y-3 surface">
         <h2 className="text-sm font-semibold text-foreground">{t("yourLink")}</h2>
         <div className="flex flex-wrap items-center gap-2">
           <code className="min-w-0 flex-1 break-all rounded-lg border border-border bg-input px-3 py-2 font-mono text-xs text-foreground">
@@ -166,14 +166,14 @@ export function AffiliateDashboard({
           { key: "owed", value: formatCents(stats?.accruedCents ?? 0, locale) },
           { key: "paidOut", value: formatCents(stats?.paidCents ?? 0, locale) },
         ].map((stat) => (
-          <div key={stat.key} className="rounded-2xl border border-border bg-panel p-4">
+          <div key={stat.key} className="surface-tight">
             <dt className="text-[11px] uppercase tracking-wide text-muted">{t(`stat.${stat.key}`)}</dt>
             <dd className="mt-1 text-xl font-bold tabular-nums text-foreground">{stat.value}</dd>
           </div>
         ))}
       </dl>
 
-      <div className="space-y-3 rounded-2xl border border-border bg-panel p-5">
+      <div className="space-y-3 surface">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Wallet className="h-4 w-4 text-orange-400" aria-hidden="true" /> {t("payouts")}
         </h2>

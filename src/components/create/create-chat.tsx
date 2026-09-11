@@ -22,10 +22,34 @@ import {
   MAX_ATTACHMENT_IMAGES,
 } from "@/lib/create-attachment-image";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
+import { assessAmbiguity } from "@/lib/ai/ambiguity";
+import { matchProducer, producerHref, PRODUCER_SPECS, type ProducerKey } from "@/lib/create-studio/producer-routes";
+import { GoalPreview, GoalQuestion } from "@/components/create/goal-preview";
+import { useCostEstimate } from "@/components/credits/use-cost-estimate";
+import { useRouter } from "next/navigation";
 import { VoiceInput } from "@/components/voice/voice-input";
 import { useVoiceAvailability } from "@/components/voice/voice-availability";
 
-export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
+export function CreateChat({
+  showHeading = true,
+  hero = false,
+}: {
+  showHeading?: boolean;
+  /**
+   * HOME'S FIELD, AND THE REASON IT IS A vh AND NOT A PIXEL COUNT.
+   *
+   * Redesign phase 1 asks the box to hold at least 40% of the first
+   * screen at 1440 AND at 390 — two viewports whose heights differ by
+   * sixty pixels and whose widths differ by a thousand. A fixed height
+   * that satisfies one is wrong for the other, and both would drift the
+   * next time the top bar grows a row. 46vh is the requirement itself,
+   * written as the rule instead of as a number that happens to satisfy
+   * it today: it clears 40% at every height, with room for the chrome
+   * above the page body. scripts/tests/home-first-screen.prodtest.mjs
+   * measures the rendered box rather than trusting this comment.
+   */
+  hero?: boolean;
+}) {
   const t = useTranslations("dashboard.createAnything");
   const tKey = useTranslations();
   const tCreate = useTranslations("dashboard.create");
@@ -39,6 +63,35 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
   const [result, setResult] = useState<CreateResult | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const suggestions = useSmartSuggestions(input);
+  const router = useRouter();
+
+  // THE FREE PRE-FLIGHT, IN THE ORDER THAT SPENDS NOTHING.
+  //
+  //   1. lib/ai/ambiguity.ts reads the text. "vague" asks, here, with no
+  //      model call at all — paying a classifier to agree that "κάν' το"
+  //      is thin would be waste, which is the whole argument that file
+  //      makes for having three answers instead of two.
+  //   2. lib/create-studio/producer-routes.ts looks for one of six
+  //      producers. Two named in one sentence is a question, not a coin
+  //      toss.
+  //   3. Only if neither fired does the paid classifier run, exactly as
+  //      it did before this round.
+  //
+  // AT MOST ONE QUESTION: step 1 returns before step 2 can ask, so the
+  // two can never stack.
+  const [goal, setGoal] = useState<
+    | { kind: "preview"; producer: ProducerKey; brief: string }
+    | { kind: "question"; choices: ProducerKey[]; brief: string }
+    | null
+  >(null);
+  // Hooks cannot be called conditionally, so the estimate is always
+  // computed and only ever SHOWN behind a preview. createAnything is the
+  // stand-in profile when there is nothing to preview; its number is
+  // never rendered.
+  const goalProfile = goal?.kind === "preview" ? PRODUCER_SPECS[goal.producer].profile : null;
+  const goalEstimate = useCostEstimate(goalProfile ?? "createAnything", {
+    inputChars: goal?.kind === "preview" ? goal.brief.length : 0,
+  });
   const supabase = createClient();
   const { addToast } = useToast();
 
@@ -126,6 +179,29 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
     if (!message) return;
 
     setResult(null);
+    setGoal(null);
+
+    // An attached image is evidence for the paid classifier ("log this
+    // photo as an idea") and says nothing about which producer is meant,
+    // so the free pre-flight is skipped whenever one is present rather
+    // than being allowed to route on the text alone and drop the picture.
+    if (imageFiles.length === 0) {
+      const assessment = assessAmbiguity(message, { hasContext: false });
+      if (assessment.verdict === "vague") {
+        setGoal({ kind: "question", choices: [], brief: message });
+        return;
+      }
+      const match = matchProducer(message);
+      if (match.kind === "ambiguous") {
+        setGoal({ kind: "question", choices: match.producers, brief: message });
+        return;
+      }
+      if (match.kind === "one") {
+        setGoal({ kind: "preview", producer: match.producer, brief: message });
+        return;
+      }
+    }
+
     setLastSubmitted(message);
     const imagePaths = await uploadAttachedImages();
     const outcome = await submit(message, false, imagePaths);
@@ -172,6 +248,32 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
         </div>
       )}
 
+      {goal?.kind === "preview" && (
+        <GoalPreview
+          producer={goal.producer}
+          credits={goalEstimate.credits}
+          onConfirm={() => {
+            const href = producerHref(goal.producer, goal.brief);
+            setGoal(null);
+            setInput("");
+            router.push(href);
+          }}
+          onChange={() => setGoal(null)}
+        />
+      )}
+      {goal?.kind === "question" && (
+        <GoalQuestion
+          choices={goal.choices}
+          onPick={(producer) => {
+            const href = producerHref(producer, goal.brief);
+            setGoal(null);
+            setInput("");
+            router.push(href);
+          }}
+          onDismiss={() => setGoal(null)}
+        />
+      )}
+
       <form onSubmit={handleSubmit}>
         {imageFiles.length > 0 && (
           <ul className="mb-2 flex flex-wrap gap-1.5">
@@ -211,7 +313,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             maxLength={20000}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            className={`relative z-[1] min-h-32 max-h-[60vh] w-full resize-y rounded-2xl border-0 bg-panel/85 px-4 py-4 text-base text-foreground outline-none backdrop-blur-sm transition-all duration-200 placeholder:text-muted ${
+            className={`relative z-[1] ${hero ? "min-h-[46vh]" : "min-h-32"} max-h-[60vh] w-full resize-y rounded-2xl border-0 bg-panel/85 px-4 py-4 text-base text-foreground outline-none backdrop-blur-sm transition-all duration-200 placeholder:text-muted ${
               micHere ? "pe-[9.5rem]" : "pe-28"
             }`}
             autoFocus
@@ -244,7 +346,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             type="submit"
             disabled={loading || !input.trim()}
             aria-label={t("send")}
-            className="absolute bottom-3 end-3 z-[2] flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fcd34d_0%,#f97316_60%,#dc4a04_100%)] text-black shadow-[0_4px_18px_-4px_rgba(249,115,22,0.7)] transition-all duration-200 hover:brightness-110 hover:shadow-[0_6px_26px_-4px_rgba(249,115,22,0.9)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+            className="absolute bottom-3 end-3 z-[2] flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fcd34d_0%,#f97316_60%,#dc4a04_100%)] text-black transition-all duration-200 hover:brightness-110 hover: disabled:cursor-not-allowed disabled:opacity-40"
           >
             {loading ? (
               <ThinkingIndicator size="sm" tone="inherit" />
@@ -302,7 +404,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
           {result.type === "answered" && (
             <div
               data-testid="create-answer"
-              className="flex items-start gap-3 rounded-2xl border border-border bg-panel p-4 text-sm"
+              className="flex items-start gap-3 surface-tight text-sm"
             >
               <MessageCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" aria-hidden="true" />
               <div className="min-w-0">

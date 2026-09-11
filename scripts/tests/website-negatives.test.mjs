@@ -75,6 +75,38 @@ console.log("== 1. reading the brief — ten languages, zh-Hans and ar included 
   check("el: 'Μη βάλεις online κράτηση' is read as a prohibition of booking (the \\b-on-Greek bug)",
     el.length === 1 && el[0].features.includes("booking") && el[0].phrase === "Μη βάλεις online κράτηση", JSON.stringify(el));
   check("el: 'χωρίς newsletter' alone is read", same(forbidden("χωρίς newsletter"), ["newsletter"]));
+  // "ΔΕΝ ΘΕΛΩ" — THE ONE A GREEK PERSON ACTUALLY WRITES, and it read as
+  // nothing until 2026-09-07.
+  //
+  // Found while writing a brief for scripts/website-variety-check.mjs
+  // PART C: "ΔΕΝ θέλω φόρμα κράτησης πουθενά στο site" parsed as an empty
+  // list, so nothing was forbidden, nothing went into the prompt's
+  // negative block, and the enforcement pass had nothing to enforce. The
+  // cues that DID work — μην, χωρίς, όχι, να μην — are imperatives and
+  // prepositions: the way an instruction is written TO somebody, not the
+  // way somebody says what they want.
+  //
+  // Every sibling language on the list already had its first-person form
+  // (don't want, no need, no quiero, non voglio, ne veux pas, kein).
+  // Greek was the only one without it, and Greek is the language this
+  // product's owner writes briefs in. Measured: 10 of 16 phrasings read
+  // before, 16 of 16 after.
+  for (const [phrase, expected] of [
+    ["δεν θέλω φόρμα κράτησης", ["booking"]],
+    ["Δεν θέλω φόρμα κράτησης στο site", ["booking"]],
+    ["δε θέλω φόρμα κράτησης", ["booking"]],
+    ["δεν θέλω newsletter", ["newsletter"]],
+    ["δεν χρειάζομαι φόρμα κράτησης", ["booking"]],
+    ["δεν θέλουμε blog", ["blog"]],
+    ["απόφυγε τη φόρμα κράτησης", ["booking"]],
+  ]) {
+    check(`el: '${phrase}' is read as a prohibition`, same(forbidden(phrase), expected), JSON.stringify(forbidden(phrase)));
+  }
+  // AND THE POSITIVE OF THE SAME VERB IS STILL A POSITIVE. "θέλω κράτηση"
+  // must not become a prohibition because "θέλω" now appears in the
+  // pattern — the negation word is what carries the meaning.
+  check("el: 'θέλω φόρμα κράτησης' forbids nothing", same(forbidden("Θέλω φόρμα κράτησης και χάρτη."), []));
+  check("el: 'Θέλουμε newsletter' forbids nothing", same(forbidden("Θέλουμε newsletter κάθε μήνα."), []));
   // One clause, two features.
   check("one clause can forbid two features: 'sin reservas y sin mapa'", same(forbidden("sin reservas online y sin mapa"), ["booking", "map"]));
   check("one clause can forbid two features: 'don't add a chat widget and skip the blog'", same(forbidden("don't add a chat widget and skip the blog"), ["blog", "chatWidget"]));

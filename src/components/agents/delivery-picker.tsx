@@ -277,7 +277,7 @@ export function DeliveryPicker({
       )}
 
       {value === "telegram" && !loading && (
-        <div className="space-y-2 rounded-xl border border-border p-3">
+        <div className="space-y-2 surface-tight">
           {connected("telegram") ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-[11px] text-muted">
@@ -346,7 +346,7 @@ export function DeliveryPicker({
                 type="button"
                 onClick={() => void connect("telegram")}
                 disabled={connecting === "telegram"}
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-50 sm:min-h-[36px]"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-50 sm:min-h-[36px]"
               >
                 {connecting === "telegram" && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
                 {t("connect")}
@@ -357,7 +357,7 @@ export function DeliveryPicker({
       )}
 
       {value === "discord" && !loading && (
-        <div className="space-y-2 rounded-xl border border-border p-3">
+        <div className="space-y-2 surface-tight">
           {connected("discord") ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-[11px] text-muted">
@@ -415,7 +415,7 @@ export function DeliveryPicker({
                 type="button"
                 onClick={() => void connect("discord")}
                 disabled={connecting === "discord"}
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-50 sm:min-h-[36px]"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-50 sm:min-h-[36px]"
               >
                 {connecting === "discord" && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
                 {t("connect")}

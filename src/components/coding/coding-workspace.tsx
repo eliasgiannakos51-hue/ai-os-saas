@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Play, Square } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
+import { StepFlow } from "@/components/ui/step-flow";
 import { CodeBlock } from "@/components/coding/code-block";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import {
@@ -32,14 +33,23 @@ export type CodeSession = {
   createdAt: string;
 };
 
-export function CodingWorkspace({ sessions, folders }: { sessions: CodeSession[]; folders: string[] }) {
+export function CodingWorkspace({
+  sessions,
+  folders,
+  initialTask,
+}: {
+  sessions: CodeSession[];
+  folders: string[];
+  /** The brief Home routed here, already in the box, never auto-run. */
+  initialTask?: string;
+}) {
   const t = useTranslations("coding");
   const tSteps = useTranslations("aiSteps");
   const router = useRouter();
   const { addToast } = useToast();
 
   const [operation, setOperation] = useState<CodeOperation>("generate");
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(initialTask ?? "");
   const [language, setLanguage] = useState<string>("typescript");
   const [targetLanguage, setTargetLanguage] = useState<string>("python");
   const [useWorkspace, setUseWorkspace] = useState(true);
@@ -126,14 +136,21 @@ export function CodingWorkspace({ sessions, folders }: { sessions: CodeSession[]
     }
   }
 
+  // THREE STEPS, AND THE BRIEF ASKED FOR FIVE. See lib/ui/step-flows.ts:
+  // Test, Fix and Deploy are not steps this page has, because it runs
+  // nothing and deploys nothing, and drawing them greyed-out would be
+  // the promise the rename of this page was meant to stop making.
+  const codingStep = result ? 2 : running ? 1 : 0;
+
   return (
     <div className="space-y-6">
+      <StepFlow flow="coding" current={codingStep} />
       {/* WHAT IT DOES NOT DO, ON THE SCREEN. The previous version of this
           page was a form that looked like a code generator and was not;
           the fix for that is not a better name, it is saying the four
           absences out loud where somebody about to rely on them reads
           them. */}
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <h2 className="text-sm font-semibold text-foreground">{t("limits.title")}</h2>
         <ul className="mt-2 space-y-1">
           {CODE_LIMITS.map((limit) => (
@@ -146,7 +163,7 @@ export function CodingWorkspace({ sessions, folders }: { sessions: CodeSession[]
       </div>
 
       {/* ---- the five operations ---- */}
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <div className="flex flex-wrap gap-2">
           {CODE_OPERATIONS.map((candidate) => (
             <button
@@ -268,7 +285,7 @@ export function CodingWorkspace({ sessions, folders }: { sessions: CodeSession[]
           {result.kind === "code" ? (
             <CodeBlock code={result.output} language={spec.needsTargetLanguage ? targetLanguage : language} />
           ) : (
-            <div className="whitespace-pre-wrap rounded-xl border border-border bg-panel p-4 text-sm text-muted">
+            <div className="whitespace-pre-wrap surface-tight text-sm text-muted">
               {result.output}
             </div>
           )}
@@ -276,7 +293,7 @@ export function CodingWorkspace({ sessions, folders }: { sessions: CodeSession[]
       )}
 
       {/* ---- history ---- */}
-      <div className="rounded-2xl border border-border bg-panel p-5">
+      <div className="surface">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-sm font-semibold text-foreground">{t("history.title")}</h2>
           <div className="flex flex-wrap gap-2">

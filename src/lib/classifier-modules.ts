@@ -1,5 +1,12 @@
 import { MODULES, type ModuleConfig } from "@/lib/modules";
 
+// THIRTEEN, AND THE THIRTEENTH IS IDEAS. CLASSIFIER_MODULES is the twelve
+// business modules plus Ideas, and the "+ ideas" is INSIDE the number,
+// not added to it — api/create/top-modules said "the 13 business modules
+// + ideas" until V5 #13 and described a universe of fourteen that has
+// never existed.
+// COUNT: 12 /^ {4}slug: "/ in src/lib/modules.ts
+//
 // The Ideas module's fields aren't exported from lib/modules.ts (Ideas has
 // its own hand-built page/components), so they're mirrored here for the
 // "Create Anything" classifier only. Keep in sync with supabase_schema.sql /

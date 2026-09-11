@@ -185,6 +185,14 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     // It arrived unaccounted for and this ratchet caught it on the build
     // that introduced it, which is what the ratchet is for.
     "src/lib/ai/ambiguity.ts",
+    // The free producer router (redesign phase 1). Same case as the line
+    // above and answered the same way: its cues are phrasings a person
+    // TYPES, in four scripts, and scripts/tests/producer-routes.test.mjs
+    // runs thirty of them and prints every result rather than asserting
+    // an accuracy. It also arrived unaccounted for and this ratchet
+    // caught it on the build that introduced it — twice now, which is
+    // the argument for keeping the ceiling at the measured value.
+    "src/lib/create-studio/producer-routes.ts",
   ]);
   const unaccounted = users.filter((f) => !ACCOUNTED.has(f));
 

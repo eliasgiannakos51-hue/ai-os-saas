@@ -114,6 +114,16 @@ export type JobHandlerResult = {
    * field is how a background job does the same thing.
    */
   feature?: string;
+  /**
+   * Extra keys for the settlement's metadata.
+   *
+   * Added 2026-09-07 for one thing and stated narrowly so it does not
+   * become a bag: the clarifying-questions pre-check decides FOR FREE on
+   * most requests, and until the verdict reached a row nobody could say
+   * how often. The handler knows the verdict; only this function settles.
+   * See lib/clarification-client.ts's clarificationMetadata.
+   */
+  metadata?: Record<string, unknown>;
 };
 
 export type JobHandler = (ctx: JobContext) => Promise<JobHandlerResult>;
@@ -370,7 +380,13 @@ export async function runJob(params: { jobId: string; apiKey: string }): Promise
       // `kind` is kept in metadata even when the feature is overridden, so
       // the two rows of one interaction can still be found together.
       bypassCharge: bypass,
-      metadata: { jobId, kind, attempts },
+      // THE JOB'S OWN IDENTITY WINS. The handler's keys are spread FIRST
+      // so jobId, kind and attempts cannot be overwritten by one: two
+      // rows of one interaction are found by jobId, and a handler that
+      // could replace it would make them unfindable. Nothing does that
+      // today — the only caller adds clarification_* keys — which is
+      // exactly when to fix the order, rather than after something does.
+      metadata: { ...(handled.metadata ?? {}), jobId, kind, attempts },
     });
 
     await admin

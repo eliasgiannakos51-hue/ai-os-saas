@@ -123,7 +123,7 @@ export function RecordsDirectory({ groups }: { groups: DirectoryGroup[] }) {
       <p className="mt-3 text-sm text-muted">{t("count", { count: total })}</p>
 
       {total === 0 ? (
-        <p className="mt-6 rounded-xl border border-border bg-panel p-6 text-sm text-muted">
+        <p className="mt-6 surface text-sm text-muted">
           {t("noMatch")}
         </p>
       ) : (
@@ -139,7 +139,7 @@ export function RecordsDirectory({ groups }: { groups: DirectoryGroup[] }) {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="flex min-h-[44px] items-start gap-3 rounded-xl border border-border bg-panel p-3 transition-colors duration-150 hover:border-orange-500/40 hover:bg-panel-hover"
+                      className="flex min-h-[44px] items-start gap-3 surface-tight transition-colors duration-150 hover:border-orange-500/40 hover:bg-panel-hover"
                     >
                       {Icon && (
                         <Icon className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400/50" aria-hidden="true" />

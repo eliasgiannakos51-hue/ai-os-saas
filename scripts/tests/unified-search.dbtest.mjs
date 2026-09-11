@@ -430,5 +430,109 @@ console.log("\n== 9. every stored href, and re-running the migration ==");
     Number(sql(`select count(*) from public.search_all('propos', null, null, null, 200)`)) === 200);
 }
 
+// =====================================================================
+console.log("\n== 11. a reader is not handed an answer in a language they do not read ==");
+// THE BUG THIS SECTION EXISTS FOR. help_articles is one row per
+// (slug, locale) — 27 articles x ten languages — and until 20260914 the
+// index had no locale column and search_all had nothing to filter on. All
+// ten translations sat in the index competing for every query, ranked
+// against each other by ts_rank, and the winner for a short query was
+// frequently not the language the reader speaks. A Greek user could be
+// handed the Portuguese copy.
+//
+// Everything below uses rows this file inserts, so it does not depend on
+// the seed being present or on any particular article surviving a rewrite.
+{
+  // FIRST, RE-APPLY 20260914 — and the reason is itself a finding.
+  //
+  // Section 10 above re-runs 20260824000000_unified_search.sql to prove a
+  // migration is safe to apply twice. It is; but that file also contains
+  // `create or replace function public.search_index_sync()`, so running it
+  // again REVERTS the trigger to the version that knows nothing about
+  // locale or group_key. Everything indexed afterwards is written with
+  // both columns null, and the language filter then passes every row
+  // because a null locale means "belongs to every language".
+  //
+  // That is not an artefact of this test. It is what happens in
+  // production the day somebody re-pastes an old file into the SQL editor
+  // — this repository applies migrations by hand, with no ledger, and
+  // CLAUDE.md exists because that has already gone wrong once. The
+  // property worth having is that re-applying the NEWER file repairs it,
+  // which is what this line proves.
+  const args = process.env.DATABASE_URL
+    ? ["-d", process.env.DATABASE_URL]
+    : ["-d", process.env.PGDATABASE];
+  execFileSync("psql", [...args, "-v", "ON_ERROR_STOP=1", "-q", "-f",
+    "supabase/migrations/20260914000000_search_index_locale.sql"],
+    { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+
+  const esc = (v) => `'${String(v).replace(/'/g, "''")}'`;
+  const article = (slug, locale, title) =>
+    `insert into public.help_articles (slug, locale, title, body, triggers, href, category)
+       values (${esc(slug)}, ${esc(locale)}, ${esc(title)}, ${esc(title)}, '{}', '/help', 'billing')
+       on conflict do nothing`;
+
+  // ONE SLUG WITH THREE TRANSLATIONS, and one with English only — the two
+  // cases the filter has to tell apart.
+  sql(article("zz-cancel", "en", "zzcancelword english"));
+  sql(article("zz-cancel", "el", "zzcancelword ellinika"));
+  sql(article("zz-cancel", "pt", "zzcancelword portugues"));
+  sql(article("zz-onlyen", "en", "zzonlyword english"));
+
+  const titles = (locale) =>
+    sql(`select coalesce(string_agg(title, '|' order by title), '') from public.search_all_localized(
+           'zzcancelword', null, null, null, 50, ${locale === null ? "null" : esc(locale)})`);
+
+  // THE FIX. A Greek reader gets the Greek copy and NOT the Portuguese one.
+  const el = titles("el");
+  ok("a Greek reader gets the Greek copy", el.includes("ellinika"), el);
+  ok("...and not the Portuguese one", !el.includes("portugues"), el);
+  ok("...and not the English one either, because Greek exists",
+    !el.includes("english"), el);
+
+  // THE FALLBACK. A language with no copy of this article still gets one.
+  const fr = titles("fr");
+  ok("a French reader, with no French copy, falls back to English",
+    fr.includes("english"), fr);
+  ok("...and still does not see Portuguese", !fr.includes("portugues"), fr);
+
+  // AND THE FALLBACK IS SCOPED BY ARTICLE, not global. zz-onlyen has no
+  // Greek copy, so a Greek reader must still find it — otherwise the
+  // filter has traded ten wrong answers for no answer at all.
+  const elOnly = sql(`select coalesce(string_agg(title, '|'), '') from public.search_all_localized(
+      'zzonlyword', null, null, null, 50, 'el')`);
+  ok("an article with no translation is still reachable in every language",
+    elOnly.includes("english"), elOnly);
+
+  // NULL MEANS NO PREFERENCE — the old behaviour, which the five-argument
+  // forwarder still gives every caller that has not been updated.
+  const none = titles(null);
+  ok("a null locale returns every translation, as before",
+    none.includes("ellinika") && none.includes("portugues") && none.includes("english"), none);
+  const viaForwarder = sql(`select coalesce(string_agg(title, '|'), '') from public.search_all(
+      'zzcancelword', null, null, null, 50)`);
+  ok("...and so does the five-argument forwarder",
+    viaForwarder.includes("ellinika") && viaForwarder.includes("portugues"), viaForwarder);
+
+  // THE USER'S OWN ROWS ARE NEVER FILTERED. This is the error that would
+  // be far worse than the one being fixed: somebody's own notes
+  // disappearing because of a language setting.
+  const mine = sql(`select count(*) from public.search_index where locale is null and user_id is not null`);
+  ok("user content carries no locale", Number(mine) > 0, `${mine} rows`);
+  const ideasEl = sql(`select count(*) from public.search_all_localized(
+      'Καφές', null, null, null, 50, 'el')`);
+  const ideasPt = sql(`select count(*) from public.search_all_localized(
+      'Καφές', null, null, null, 50, 'pt')`);
+  ok("...so a user's own row is found whatever language they are reading in",
+    ideasEl === ideasPt && Number(ideasEl) > 0, `el=${ideasEl} pt=${ideasPt}`);
+
+  // AND THE COLUMN IS POPULATED BY THE TRIGGER, not only by the backfill.
+  // The four articles above were inserted AFTER the migration ran, so if
+  // the trigger did not learn about locale they would all be null.
+  const synced = sql(`select coalesce(string_agg(locale, ',' order by locale), '')
+      from public.search_index where group_key = 'zz-cancel'`);
+  ok("the sync trigger populates locale on new rows", synced === "el,en,pt", synced);
+}
+
 console.log(`\n${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

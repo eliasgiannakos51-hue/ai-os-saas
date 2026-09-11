@@ -46,7 +46,7 @@ claim the policies read, and that the deployed schema is this one. It is a
 demonstrated seven ways — plus, for the production half, the same suite
 returning zero of B's rows through the API.
 
-### 2. The spelling check — RUN AGAINST A REAL SITE, and it found a defect
+### 2. The spelling check — A RUNNER EXISTS; the model call has still never happened
 **~1 hour left.** Blocked on: an API balance, and the URL of an existing site.
 
 **No longer "never run".** On 2026-09-06 a site was generated from a Greek
@@ -69,11 +69,81 @@ Six of six constructed cases leaked (Χαλανδρίου, Παπαδόπουλ�
 with six controls proving no real misspelling is silenced to protect a
 name, ρεμπα among them. 10 of 10 mutations.
 
+**2026-09-07: there is now a runner, and writing it found a second
+defect.** `scripts/check-site-spelling.mjs` takes a URL (or a local file)
+and a brief, and reports what would be asked, what was held back and by
+which of the five rules, what the model answered, and the cost in dollars.
+`--dry-run` does the whole selection without calling anybody, which
+answers three of the owner's four questions for $0.00.
+
+It reads the system prompt and the model id **out of the shipped source**
+rather than carrying copies, and refuses to run if it cannot — and that
+refusal is what found the defect. There was no model to read:
+`findGreekMisspellings` passed `purpose: "classification"` and no `model`,
+so `providers/complete.ts` read it as tier `mid` and `substituteModel`
+returned **claude-sonnet-4-6 at 3/15 per MTok**, not the claude-haiku-4-5
+at 1/5 that "one cheap classification call" reads like. It was the only
+`runCompletion` caller in the tree without a model. About eight
+hundredths of a cent per website, and the point is that nobody chose it:
+the margin guarantee is computed from the model actually served.
+
+Named now (`const MODEL`), behaviour unchanged — whether haiku is as good
+at Greek orthography is a measurement nobody has made, and a spelling note
+that flags correct Greek is worse than no note. The runner makes that
+measurement cost about two tenths of a cent:
+`--model claude-haiku-4-5`, then again with sonnet, on the same word list.
+
+*Held by:* `scripts/tests/check-site-spelling.test.mjs` (48 checks, 8 of 8
+mutations) for the runner, and `billing-coverage.test.mjs` §1c (2 of 2
+mutations) for every other call site.
+
 *What is left:* one classification call, to see the note produced end to
 end. It needs a balance, and — for the free path the owner asked for
-first — the URL of a site that already exists.
+first — the URL of a site that already exists. Both arrived empty again
+on 2026-09-07, the fifth round running.
 
-### 3. The three measurements — TWO OF THREE RAN
+### 3. The three measurements — TWO OF THREE RAN, and the third turned out not to need a model
+
+**2026-09-07: the structural half of the pairs question was answered for
+$0.00.** `scripts/website-pairs-check.mjs` costs about $7.50 to generate
+twenty sites and score them, and about $2.30 for three pairs. What it
+estimates from three samples, the shipped draw computes exactly: the
+section order is chosen by `lib/website-variation.ts` before a single
+token is generated, so the probability that two people's sites of one
+kind share a skeleton is a property of that function.
+
+| | before | after |
+|---|---|---|
+| two strangers, same kind, first site each | 33.3% | **16.7%** |
+| one person's sites 2..N repeat one they had | 59.9% | **0** |
+| one person, five sites, all the same order | 1.0% | **0** |
+| expected structural similarity, two strangers | 0.660 | **0.590** |
+
+Measured over 20,000 pairs and 4,000 people in
+`scripts/tests/section-order-space.test.mjs`, which costs nothing and
+runs in the build.
+
+**All three steps are in.** Exclusion is a per-person CYCLE rather than a
+draw (`orderIndexFor`) — a fair draw could never have made the second row
+zero. Three orders became six, which is the ceiling: four of the seven
+archetypes have exactly three movable sections and 3! = 6. And the
+produced page is now COMPARED against the person's previous one after
+generation, with a `sameSkeleton` note in ten languages, because the
+order is an instruction and rule 23 says an instruction a model can
+ignore will be ignored.
+
+**Two things were found on the way.** The prompt had eighteen characters
+of headroom under its 30,000 ceiling, so six orders in prose did not fit
+— numbering each shape's sections once made room and left the prompt 330
+characters smaller than it started. And three shapes listed an order that
+contradicted their own FIRST line; the contradiction is resolved in the
+prompt now, in the direction that keeps the opening varying.
+
+*What is left, and it still needs the key:* whether the MODEL obeys the
+letter it is given, and what the pages look like. That is what
+`website-pairs-check.mjs --pairs 3` measures, and it has never run.
+
+### The original three measurements — TWO OF THREE RAN
 **~2 hours left.** Blocked on: an API balance. Spent so far: **$0.53**,
 then the account ran dry mid-round.
 
@@ -117,7 +187,9 @@ that the search budget is the difference — see `depth-picker.tsx`.
 
 ## Tier 2 — a user meets these
 
-*Items 4, 7 and 7b are done; 6 is two thirds done and 6b is new. What remains in this tier is 5, the measurement half of 6, 6b and 8.*
+*Done: 4, 6b, 7, 7b, and two of item 6's three parts.*
+*Left in this tier: **5** (translations nobody has read), the **measurement**
+half of **6** (needs API balance), and **8** (learning from use).*
 
 ### 4. `dir="rtl"` for Arabic — DONE (2026-09-07)
 
@@ -193,12 +265,16 @@ four right-to-left languages from the prompt's own prose.
 *Not done:* Hebrew, Persian and Urdu are named in `RTL_LANGUAGES` and have
 no message catalogue, so nothing renders in them. Only `ar` was measured.
 
-### 5. Translations no native speaker has read
-**~1 week of somebody else's time.** Not a coding task.
+### 5. Translations no native speaker has read — THE FIRST STEP IS DONE, THE READING IS NOT (2026-09-07)
 
-2,868 keys × 9 locales, 0 untranslated — and **every non-English string in
-this app was written by a model.** The Greek has an owner who reads it.
-Japanese, Chinese and Arabic have nobody.
+**~1 week of somebody else's time, and it is now an hour of it per
+language.** Still not a coding task.
+
+**2,933** keys × 9 locales, 0 untranslated — and **every non-English
+string in this app was written by a model.** (This entry said 2,868 until
+2026-09-07; the counted figure is 2,933, and the smaller number was
+never sourced.) The Greek has an owner who reads it. Japanese, Chinese
+and Arabic have nobody.
 
 The gates check that a string *exists*, that it is *not identical to
 English*, that its plurals cover the locale's categories, and that its ICU
@@ -206,16 +282,41 @@ renders. **None of them can check that it is good Japanese.** That is a
 category no instrument reaches, and pretending otherwise is the thing this
 project keeps refusing to do.
 
-*Done means:* one reader per script — ja, zh, ar — through the screens a
-new user meets, not the whole catalogue. (How many that is has not been
-measured; do not carry a number here that nobody counted.)
+**THE SET IS COUNTED NOW, and it is the reason this was never started.**
+`scripts/first-run-strings.mjs` walks every component reachable from the
+signup form to the first thing the product says about a person's own
+data:
 
-*Cheapest first step:* the signup and first-run path only — the screens a
-person meets before they have decided anything. That set has not been
-counted; counting it is the first ten minutes of this item, not a number to
-put here in advance.
+| | |
+|---|---|
+| the whole product | 2,933 strings |
+| on the first-run path | **598** |
+| on the first screens AND prose rather than a label | **44** |
 
-### 6. Chat that asks instead of guessing — TWO OF THREE DONE (2026-09-07)
+Forty-four sentences is an hour. 2,933 is why nobody ever started: a
+backlog too long to begin has the same value as an empty one.
+
+`docs/first-run/first-run.<locale>.md` is one file per language, tiered,
+with the English beside every translation and a short note on what to look
+for. `scripts/tests/first-run-strings.test.mjs` regenerates the pack and
+compares it byte for byte, so what a reviewer is sent can never be last
+week's wording. Rebuild with `npm run i18n:first-run`.
+
+**AND THE FIRST 44 ALREADY FOUND SOMETHING.** Two sentences three lines
+apart on the signup screen addressed the Greek reader differently — one
+εσύ, one εσείς. Measured across the whole file: 473 informal, 15 polite
+plural, 2 mixing both inside one sentence. All 17 read by hand, all 17
+real, all 17 fixed, and `scripts/tests/address-register.test.mjs` holds
+the count at zero. That is the one thing about a translation a machine
+genuinely can check: not whether a sentence is good, but whether the file
+agrees with itself about who it is talking to.
+
+*Done means:* one reader per script — ja, zh, ar — through
+`docs/first-run/`, tier 1 first.
+
+*What is left, and it is not code:* three readers.
+
+### 6. Chat that asks instead of guessing — WIRED AND MEASURABLE; the number needs traffic (2026-09-07)
 
 **The classifier and the one-question cap shipped. The measured rate needs
 API balance.**
@@ -254,12 +355,23 @@ interrogating somebody who was already clear is held at **zero**; deferring
 a vague request costs one small call, which is what the product does today
 on *every* request, so that is a ratchet rather than a zero.
 
-**□ → ☑ At most one question.** `MAX_CLARIFICATION_QUESTIONS` was 3. The
-comment defending three said a fourth "starts reading like a form" — right
-reasoning, wrong number: three questions with tappable answers under each
-already is one. **This changes four existing surfaces**, not just chat:
-Website Builder, Mission Control, Automations and Create Anything. One
-number to revert if a website brief turns out to need more.
+**□ → ☑ At most one question — PER SURFACE, since 2026-09-07.** It was a
+single 3, and one number for five surfaces was wrong in both directions.
+
+| surface | cap | why |
+|---|---|---|
+| Website Builder | **2** | four unknowns no default covers — what the business is, which pages, whether it takes form submissions, whether there are photographs. Guessing produces a whole wrong site, not one wrong paragraph. |
+| chat · agents · automations · mission · create | **1** | one dominant unknown and a cheap failure: one artefact to redo. |
+| anything new | **1** | an unargued surface should have to argue for a second question, not inherit it. |
+
+Each number carries its reason in `CLARIFICATION_QUESTION_CAP`, and the
+gate checks the reasons are there — not only the numbers.
+
+**And the budget reaches the model.** The tool used to say "1-3 questions"
+to every surface while the parser trimmed afterwards. That is worse than it
+sounds: a model asked for three writes three of equal weight and we keep
+whichever came first, which is not the most important one. Told it has ONE,
+it has to decide which unknown changes the outcome.
 
 **□ The measured rate — BLOCKED, and this is what it needs.**
 
@@ -290,26 +402,104 @@ was asked for.
 cross-product) · `scripts/tests/ambiguity.mutation.mjs` (10/10, including
 both degenerate classifiers — always-unsure and always-vague).
 
-### 6b. Ten copies of every help article compete for the same query
 
-**Found 2026-09-07 while scanning which matchers draw on UI text.**
+**THE THIRD PART IS BUILT. WHAT IT NEEDS NOW IS DAYS, NOT CODE.**
 
-`help_articles` is one row per (slug, locale) — deliberately, so a French
-user is not matched against Greek triggers. `search_index` carries **no
-locale column** and `search_all` does not filter on one, so all ten copies
-of every article are in the ⌘K index at once, competing for the same
-query, and a reader can be handed the Portuguese copy of the answer they
-asked for in Greek.
+The reason the rate could not be measured was one line: `assessAmbiguity`
+was called inside `checkNeedsClarification`, its verdict decided whether
+to spend, and then it was thrown away. Every request that left a row in
+`ai_cost_log` was therefore one the free reader had FAILED to decide — so
+the only rate anybody could have computed was 100%.
 
-*Done means:* a locale column on `search_index`, populated by the sync
-trigger, and a filter in `search_all` that prefers the reader's locale and
-falls back to English — the same fallback `loadCannedArticles` already
-uses.
+Every surface that runs the check now writes three keys into its
+settlement, through one builder (`clarificationMetadata`):
 
-**This one needs a migration**, which is why it is a list item and not a
-fix in that round. `scripts/tests/match-sources.test.mjs` carries a check
-that goes RED the day a locale column appears, so the note above cannot
-outlive the fact it describes.
+| key | what it says |
+|---|---|
+| `clarification_verdict` | `clear` / `vague` / `unsure` — the free reader's answer |
+| `clarification_paid` | whether a model call was made to reach it |
+| `clarification_asked` | whether the person was actually asked something |
+
+`asked` is deliberately not the same as `paid`: a paid check that
+concluded "no question needed" is a call that cost money and interrupted
+nobody, and conflating them would report the product as ruder than it is.
+
+**The denominator needed one exception.** A `clear` verdict spends
+nothing, and `settlePrechecks` returns early on nothing spent — so the
+cheap path, which is the common one, left no trace at all.
+`api/websites/generate` now settles a zero-cost row when there is a
+verdict, under its own feature name (`clarification_free`), the way
+`ABSORBED_REFUSAL_FEATURE` does.
+
+`scripts/db/clarification-rate.mjs` is the per-day query — `--sql` prints
+it for the SQL editor. Proven against a real Postgres in
+`scripts/tests/clarification-rate.dbtest.mjs` (17 checks), including that
+a row from another feature is not counted and that an empty window
+returns null rather than 0%.
+
+**AND CHAT ASKS NOW.** It was the only surface that never ran the check —
+the one place a person actually talks to the product was the one place it
+always guessed. The check sits ABOVE the reservation, so a message that
+becomes a question never takes a hold; it runs only on the OPENING
+message of a conversation, because interrupting the fourth message of a
+thread is worse than a slightly generic answer; and a `clarify` frame
+carries the question to the same component the other four surfaces use.
+
+*What is left, and no code produces it:* **traffic.** The keys are
+written from this deploy onward, so the window has to start after it. A
+week of ordinary use answers "how often does it ask", and the query says
+so. What it still cannot say is whether the questions were the RIGHT
+ones — that needs the held-out set, and it is not built.
+### 6b. Ten copies of every help article competed for the same query — DONE (2026-09-07)
+
+**Was an active bug: a Greek user could be handed the Portuguese answer.**
+
+`help_articles` is one row per (slug, locale) — 27 articles x ten
+languages, and that decision was right: `triggers` are the phrasings a
+user types and a French user does not type Greek. What nobody joined up is
+that `search_index_sync()` indexes every one of those rows, `search_index`
+had no locale column, and `search_all` had nothing to filter on. All ten
+translations sat in the index ranked against each other by `ts_rank`.
+
+**What shipped** — `20260914000000_search_index_locale.sql`:
+- `locale` and `group_key` on `search_index`, populated by the trigger
+  **generically** through `to_jsonb(NEW)`, so a table without those columns
+  yields null and needs no argument. Backfilled for rows already there.
+- `search_all_localized(..., p_locale)` filters three ways: a null locale
+  (the user's own rows) always passes, the reader's language passes, and
+  English passes **only when that article has no copy in the reader's
+  language** — scoped by `group_key`, so it fills a genuine gap rather than
+  shadowing a translation that exists.
+- The old five-argument `search_all` survives as a one-line forwarder.
+
+**Three attempts, and the first two are worth recording.**
+1. *Add `p_locale` with a default and drop the old function.* Breaks a
+   property this repo already protects: `unified-search.dbtest.mjs`
+   RE-RUNS the 20260824 migration to prove a migration is safe to apply
+   twice, and that file re-creates the five-argument `search_all`. With a
+   defaulted sixth argument a five-argument call then matches both —
+   *"function is not unique"*, a search box that breaks the second time
+   somebody pastes an old file.
+2. *No default on `p_locale`.* Postgres refuses: "input parameters after
+   one with a default value must also have defaults".
+3. *A different name.* No signature overlaps, nothing can be ambiguous,
+   and re-running any old migration is safe forever.
+
+**And a finding about the process itself.** Re-running 20260824 also
+reverts `search_index_sync()` to the version that knows nothing about
+locale — everything indexed afterwards is written with null columns and
+the filter passes everything. That is not a test artefact: it is what
+happens the day somebody re-pastes an old file into the SQL editor, and
+this repo applies migrations by hand with no ledger. The property worth
+having is that re-applying the NEWER file repairs it, and section 11 of
+`unified-search.dbtest.mjs` proves exactly that.
+
+*Proven by:* 11 new checks in `unified-search.dbtest.mjs`, run against a
+real Postgres with every migration applied — a Greek reader gets the Greek
+copy and neither the Portuguese nor the English one; a French reader with
+no French copy falls back to English and still never sees Portuguese; an
+article with no translation stays reachable in every language; a user's own
+row returns identically whatever locale is passed.
 
 ### 7. Greeklish — DONE (2026-09-06)
 

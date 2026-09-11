@@ -24,6 +24,7 @@ import {
   TRADING_WORKFLOW_ICON,
   BUSINESS_HEALTH_ICON,
   WEBSITE_BUILDER_ICON,
+  POSTS_ICON,
   PRODUCT_WORKFLOW_ICON,
   PUBLISHED_SITES_ICON,
   FORM_SUBMISSIONS_ICON,
@@ -38,11 +39,22 @@ import {
   TRADING_JOURNAL_ICON,
   VOICE_ICON,
   PREDICTIONS_ICON,
+  PROJECTS_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
 // (grouped, collapsible), the command palette (flattened, searchable) and
-// the hub page at /dashboard/business, so the three never drift apart.
+// the hub page at /dashboard/records, so the three never drift apart.
+//
+// IT SAID /dashboard/business until V5 #13, and that page has never
+// existed: the only directory under src/app/dashboard beginning with
+// "business" is business-health, and no href anywhere points at
+// /dashboard/business. Forty-eight lines below, the same file already
+// named the hub correctly — "place on the hub at /dashboard/records" —
+// so this was a comment contradicting its own file. Found by the route
+// half of scripts/scan-self-claims.mjs, which did not exist until the
+// same round: PATH_RE requires a file extension, so no route named in
+// any comment in this repository had ever been checked.
 //
 // The SHAPES and both filters live in lib/sidebar-visibility.ts, which
 // imports no icons, so the gates can execute `visibleGroups` /
@@ -52,13 +64,16 @@ export type { SidebarItem, SidebarGroupConfig } from "@/lib/sidebar-visibility";
 export { visibleGroups, sidebarGroups } from "@/lib/sidebar-visibility";
 import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 
-// SIX GROUPS, TWENTY-THREE VISIBLE ROWS — the structure of 2026-09-05.
+// SIX GROUPS, TWENTY-SIX VISIBLE ROWS — the structure of 2026-09-05,
+// plus the two rows it asked for that could not be drawn until V5 #21
+// and V5 #22.
 //
 // THE HISTORY, BECAUSE THE NUMBER ONLY MEANS SOMETHING NEXT TO IT: eight
 // groups and forty-five rows, then four and sixteen (V4.6 #3), then four
-// and twenty-one (2026-09-04), now six and twenty-three. Not 41 and not
-// 13 at any point — scripts/tests/sidebar-size.test.mjs's BEFORE_V46_3
-// list is forty-five entries long and the gate asserts that length.
+// and twenty-one (2026-09-04), then six and twenty-three (2026-09-05),
+// then twenty-four (V5 #21), then twenty-five (V5 #22), now twenty-six. Not 41 and not 13 at any point —
+// scripts/tests/sidebar-size.test.mjs's BEFORE_V46_3 list is forty-five
+// entries long and the gate asserts that length.
 //
 // THE HEADINGS ARE WHAT A PERSON WANTS TO DO, NOT WHERE A THING IS
 // FILED. Make · Ask · Run · See · Organise · Settings. "Build" named an
@@ -66,16 +81,19 @@ import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 // are all verbs and they are the order of a working session.
 //
 // THE RULE THAT DECIDED THE CONTENTS, and it is the whole reason this is
-// twenty-three rather than thirty-five: A ROW UNDER "MAKE" MUST MAKE
+// twenty-five rather than thirty-five: A ROW UNDER "MAKE" MUST MAKE
 // SOMETHING. The structure originally asked for Images, Videos,
-// Presentations and Posts under it. All four exist — as TRACKING LOGS,
+// Presentations and Posts under it. All four existed — as TRACKING LOGS,
 // tables of rows a person types by hand, declared as producing nothing
 // in lib/build-modules.ts and held to that by section 3b of
 // scripts/tests/sidebar-naming.test.mjs, which proves it from the
 // imports rather than from a list. A row that promises generation and
 // opens a notes form is not an unclear label, it is a broken promise,
 // and it reads exactly like a working feature in a green build. They
-// stay hidden until they generate.
+// stay hidden until they generate — and Presentations generates since
+// V5 #21, Posts since V5 #22, each drawn the day it did and not a day
+// before. (Posts never had a tracker page at all; the Content log is a
+// different thing and stays where it is.)
 //
 // THREE MORE WERE ASKED FOR AND ARE NOT HERE because nothing exists
 // behind them: a desktop agent, a public API and Projects have no route,
@@ -100,7 +118,7 @@ import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 // under /dashboard has no entry point at all.
 export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
   {
-    // NEVER COLLAPSED. Whatever else is shut, the four things this
+    // NEVER COLLAPSED. Whatever else is shut, the six things this
     // product makes have to be on screen the instant it paints — a group
     // somebody has to open first is a group somebody does not know is
     // there.
@@ -116,6 +134,20 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // microphone in the chat composer and a Listen button beside text
       // the app had already written.
       { href: "/dashboard/voice", label: "Voice", icon: VOICE_ICON, hintKey: "voice" },
+      // V5 #21. The row the 2026-09-05 structure asked for and could not
+      // have: it opened a notes form then. api/presentations/generate
+      // reaches a model now, section 3b of sidebar-naming proves it from
+      // the imports, and lib/build-modules.ts no longer lists the slug.
+      {
+        href: "/dashboard/presentations",
+        label: "Presentations",
+        icon: MODULE_ICONS.presentations,
+        hintKey: "presentations",
+      },
+      // V5 #22. The other row the 2026-09-05 structure asked for by name.
+      // api/posts/generate reaches a model and writes one post per
+      // platform; nothing is published, and the page says so first.
+      { href: "/dashboard/posts", label: "Posts", icon: POSTS_ICON, hintKey: "posts" },
 
       // --- in the palette and on the hub, not in the sidebar ---
       // The generator the product used to open with. It still routes a
@@ -254,7 +286,7 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         hintKey: "tradingJournal",
         hidden: true,
       },
-      // THE SIX TRACKING LOGS, AND WHY THEY ARE NOT UNDER "MAKE".
+      // THE FIVE TRACKING LOGS, AND WHY THEY ARE NOT UNDER "MAKE".
       // lib/build-modules.ts says what they are in its own words — "no
       // real AI generation happens yet" — and the 2026-09-05 structure
       // asked for four of them (Images, Videos, Presentations, Posts) as
@@ -263,18 +295,14 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // is not a labelling problem, it is a broken promise that reads
       // identically to a working feature, and scripts/tests/
       // sidebar-naming.test.mjs proves the difference from the imports.
-      // They become rows the day a route behind them reaches a model.
+      // They become rows the day a route behind them reaches a model —
+      // which is exactly what happened to Presentations in V5 #21: it is
+      // under Make above, and no longer in this list. Posts (V5 #22) was
+      // never in it: there was no page to hide.
       { href: "/dashboard/websites", label: "Websites", icon: MODULE_ICONS.websites, hintKey: "websites", hidden: true },
       { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps, hintKey: "apps", hidden: true },
       { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images, hintKey: "images", hidden: true },
       { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos, hintKey: "videos", hidden: true },
-      {
-        href: "/dashboard/presentations",
-        label: "Presentation notes",
-        icon: MODULE_ICONS.presentations,
-        hintKey: "presentations",
-        hidden: true,
-      },
       { href: "/dashboard/campaigns", label: "Campaigns", icon: MODULE_ICONS.campaigns, hintKey: "campaigns", hidden: true },
     ],
   },
@@ -284,6 +312,11 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     heading: "Organise",
     collapsible: true,
     items: [
+      // Redesign phase 2. A folder with a goal, holding exactly what was
+      // put in it — api/projects and api/projects/[id]/members write the
+      // membership as entity_links edges, and nothing expands them. It
+      // is drawn the day it exists, like every row under Make.
+      { href: "/dashboard/projects", label: "Projects", icon: PROJECTS_ICON, hintKey: "projects" },
       { href: MISSION_NAV_ITEM.href, label: MISSION_NAV_ITEM.label, icon: MISSION_ICON, hintKey: "missionControl" },
       { href: REFLECTION_NAV_ITEM.href, label: REFLECTION_NAV_ITEM.label, icon: REFLECTION_ICON, hintKey: "reflection" },
       { href: "/dashboard/team", label: "Team", icon: TEAM_ICON, hintKey: "team" },

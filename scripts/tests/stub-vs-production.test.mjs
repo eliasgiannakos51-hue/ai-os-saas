@@ -167,10 +167,14 @@ const DIVERGENCES = [
     holds: () => /request\.jwt\.claim\.sub/.test(stub),
   },
   {
-    name: "five roles exist here; a Supabase project has roughly twelve",
-    direction: "safer",
-    lies: "the grant checks name `anon` and `authenticated` explicitly, so a grant held by authenticator, dashboard_user or supabase_storage_admin is invisible to them BOTH here and in production. Bounded twice: this repository cannot create one (a GRANT to a role the stub lacks fails here, which section 3 checks), and production was asked once, on 2026-09-05, and answered with one object -- pg_stat_statements (section 2b). Once is not a gate",
-    holds: () => /create role supabase_admin/i.test(stub),
+    name: "ten roles exist here; a Supabase project has roughly fifteen, and two of them OWN its auth and storage schemas",
+    direction: "either",
+    lies: "less than it did, and the correction is written out rather than made quietly. Until 2026-09-08 this entry read: `the grant checks name anon and authenticated explicitly, so a grant held by authenticator, dashboard_user or supabase_storage_admin is invisible to them BOTH here and in production`. That was true and it is not any more -- scripts/tests/role-grants.dbtest.mjs asks the inverted question (which roles hold anything at all, against a named list with a reason per entry) across grants, sequences, functions, schemas, default privileges, membership and role attributes, and this stub now creates authenticator, dashboard_user and the two schema admins so the refusal has a subject. WHAT REMAINS, and it is not small: this stub`s auth and storage schemas are owned by postgres where production`s are owned by supabase_auth_admin and supabase_storage_admin, so a green run HERE is not a statement about which objects those roles hold THERE. `npm run db:grants -- --sql` prints one read-only query whose empty result is the verdict; nobody has run it against production yet",
+    holds: () =>
+      /create role supabase_admin/i.test(stub) &&
+      /create role authenticator noinherit/i.test(stub) &&
+      /create role dashboard_user/i.test(stub) &&
+      migFiles.includes("20260928000000_privileges_rls_cannot_scope.sql"),
   },
 ];
 check(`the register names ${DIVERGENCES.length} remaining divergences`, DIVERGENCES.length >= 5);
@@ -216,7 +220,7 @@ const PRODUCTION_FACTS = [
     asked: "2026-09-05",
     query: "select rolname, rolbypassrls from pg_roles order by 1",
     answer: "no role carries an unexpected rolbypassrls",
-    bounds: "five roles exist here; a Supabase project has roughly twelve",
+    bounds: "ten roles exist here; a Supabase project has roughly fifteen, and two of them OWN its auth and storage schemas",
     means:
       "the roles the stub does not model cannot read past a policy, which is the way the missing seven could have mattered most",
   },
@@ -225,9 +229,9 @@ const PRODUCTION_FACTS = [
     query:
       "select grantee, table_schema, table_name, privilege_type from information_schema.role_table_grants where grantee not in ('anon','authenticated','service_role','postgres') order by 1,2,3",
     answer: "one object: pg_stat_statements -- SELECT to PUBLIC, all privileges to dashboard_user. No table holding user data",
-    bounds: "five roles exist here; a Supabase project has roughly twelve",
+    bounds: "ten roles exist here; a Supabase project has roughly fifteen, and two of them OWN its auth and storage schemas",
     means:
-      "the sharpest thing the grant checks cannot see -- a privilege held by a role they do not name -- was looked at once and held nothing. Supabase's own diagnostics, not this schema",
+      "the sharpest thing the grant checks could not see -- a privilege held by a role they do not name -- was looked at once and held nothing. Supabase's own diagnostics, not this schema. IT WAS TABLES ONLY: information_schema.role_table_grants says nothing about function EXECUTE (which defaults to PUBLIC), sequences, schema USAGE, ALTER DEFAULT PRIVILEGES, membership of the API roles, or BYPASSRLS. scripts/db/role-grants.mjs --sql asks all seven in one read-only query; until somebody runs it, this one answer from one facet on one day is what production has said",
   },
 ];
 

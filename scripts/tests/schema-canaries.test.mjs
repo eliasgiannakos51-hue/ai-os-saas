@@ -55,11 +55,11 @@ check(`migrations found (${files.length})`, files.length > 20, String(files.leng
 //   probe on every request, and each entry says what a user loses.
 //   Objects OLDER than the window can be missing and invisible here.
 //
-//   scripts/db-inventory.mjs is the COMPLETE answer for the PUBLIC
-//   schema: 107 tables, 37 RPCs, 1033 columns, 276 policies, 23 check
-//   constraints, no window. It is the thing to run at deploy time, and
-//   running it is what would have caught all five of the objects that
-//   were actually missing.
+//   scripts/db-inventory.mjs is the COMPLETE answer for the public
+//   schema AND for the ten policies on storage.objects: 107 tables, 37
+//   RPCs, 1035 columns, 286 policies, 23 check constraints, no window.
+//   It is the thing to run at deploy time, and running it is what would
+//   have caught all five of the objects that were actually missing.
 //
 //   THESE FIVE NUMBERS ARE READ OUT OF `db-inventory.mjs --json`, not
 //   carried forward. Four of the five it replaces were wrong: the policy
@@ -70,12 +70,21 @@ check(`migrations found (${files.length})`, files.length > 20, String(files.leng
 //   are prose, and prose goes stale, so they are dated rather than
 //   trusted — measured 2026-09-06.
 //
-//   AND THE WORD "PUBLIC" IS LOAD-BEARING. The ten policies on
-//   storage.objects are outside what db-inventory.mjs reports, because
-//   its policy list is filtered to the public tables src/ queries. That
-//   is the same corner the local stub and production disagreed about on
-//   2026-09-05. db-inventory.test.mjs counts them so the exclusion is
-//   visible; nothing in this repo yet compares them against production.
+//   THE WORD "PUBLIC" WAS LOAD-BEARING HERE UNTIL 2026-09-08, and the
+//   sentence it carried was: "the ten policies on storage.objects are
+//   outside what db-inventory.mjs reports, because its policy list is
+//   filtered to the public tables src/ queries... nothing in this repo
+//   yet compares them against production." It was true, and it is not
+//   any more. `on storage.objects` was being parsed as a table called
+//   `storage`, which is in no expected-table list, so the ten policies on
+//   the table where every uploaded document lives were dropped from the
+//   inventory without a word; the parse carries the schema now and the
+//   query asks pg_policies for both. db-inventory.dbtest.mjs drops one of
+//   them against a live server and requires the query to name it.
+//
+//   WHAT IS STILL TRUE: nothing here compares them against PRODUCTION.
+//   The one measurement anybody has is 2026-09-05, when production
+//   answered relrowsecurity = true for storage.objects.
 //
 // Objects proven missing in a real database are canaries regardless of
 // the window — see the explicit check below.

@@ -36,7 +36,12 @@ const MUTANTS = [
     // THE BUG ITSELF, put back exactly as it stood.
     name: "the nav files a real tool under a note-taking name again",
     file: EN,
-    from: '"coding": "AI Coding",\n      "dataAnalysis": "Data Analysis",',
+    // RE-ANCHORED. The pair used to read "AI Coding" / "Data Analysis";
+    // the approved plain-words pass renamed the second to "See what the
+    // numbers say", so the old anchor matched nothing and this mutation
+    // applied to nothing — the runner's STALE line is what said so.
+    // Copied from messages/en.json as it stands.
+    from: '"coding": "AI Coding",\n      "dataAnalysis": "See what the numbers say",',
     to: '"coding": "Coding notes",\n      "dataAnalysis": "Analysis notes",',
     expect: "en: the nav and the heading agree",
   },
@@ -88,7 +93,9 @@ const MUTANTS = [
     // Japanese reader gets two names.
     name: "a page heading drifts from its nav row in Japanese only",
     file: JA,
-    from: '"deepResearch": {\n      "title": "ディープリサーチ"',
+    // RE-ANCHORED for the same reason: the Japanese heading is "じっくり
+    // 調べる" now, matching the nav row the plain-words pass wrote.
+    from: '"deepResearch": {\n      "title": "じっくり調べる"',
     to: '"deepResearch": {\n      "title": "詳細リサーチ"',
     expect: "no row disagrees with its page in any language",
   },

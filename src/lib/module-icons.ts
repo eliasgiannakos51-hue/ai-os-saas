@@ -50,7 +50,8 @@ import {
   Activity,
   NotebookPen,
   AudioLines,
-  Sigma,
+  Compass,
+  FolderKanban,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -106,6 +107,10 @@ export const BUSINESS_HEALTH_ICON: LucideIcon = Gauge;
 // generator (dashboard/website-builder), not the "Websites" Build
 // module's plain idea tracker.
 export const WEBSITE_BUILDER_ICON: LucideIcon = Layout;
+// V5 #22: the post generator (dashboard/posts). Distinct from
+// MODULE_ICONS.content (the hand-typed Content log) and from
+// MODULE_ICONS.campaigns (Megaphone), which sit in the same nav.
+export const POSTS_ICON: LucideIcon = Share2;
 // Distinct from MODULE_ICONS.products (Package) and MISSION_ICON (Rocket,
 // already used elsewhere in the same sidebar section) — this is the
 // unified Product Workflow page, not the raw Products module list.
@@ -160,9 +165,15 @@ export function iconForSlug(slug: string, fallback: LucideIcon = Sparkles): Luci
   return MODULE_ICONS[slug] ?? EXTRA_ICONS[slug] ?? fallback;
 }
 
-// The hub at /dashboard/business — one row in place of the nineteen log
+// The hub at /dashboard/records — one row in place of the nineteen log
 // modules the sidebar used to list, so the icon is the "many things,
 // one place" one rather than any single module's.
+//
+// IT SAID /dashboard/business until V5 #13, the same wrong route
+// lib/sidebar-nav.ts carried. This one hid for an extra round inside the
+// route scanner's own absence rule: "used to list" sits in the same
+// comment and made the claim look like a past tense, though it governs
+// the nineteen modules rather than the URL. See ROUTE_ABSENCE_RADIUS.
 export const MY_BUSINESS_ICON: LucideIcon = LayoutGrid;
 
 // THE FOUR ROUTES THAT WERE IN NO NAV CONFIG AT ALL — V4.6, round 5.
@@ -187,4 +198,27 @@ export const TRADING_JOURNAL_ICON: LucideIcon = NotebookPen;
 // and the owner's business-health page, so a user could see one and had
 // no way back to it.
 export const VOICE_ICON: LucideIcon = AudioLines;
-export const PREDICTIONS_ICON: LucideIcon = Sigma;
+// NOT A GREEK LETTER. lucide's `Sigma` icon draws the capital Greek
+// sigma, and this product ships in Greek: a Greek reader does not see an
+// abstract mark there, they see the letter, which in front of a number
+// means "sum" — the one thing this page does not do. Reported from the
+// running app as "the picture shows a capital sigma, wrong", and it was:
+// a glyph is not an icon in a language that uses that glyph.
+//
+// CloudSun WAS the first replacement and it was also wrong, reported the
+// same way: it reads "weather", not "forecast". A metaphor that needs the
+// label to disambiguate it is doing no work — the label was always there.
+//
+// Compass, of the three proposed. Sparkles is already Create Studio and
+// Telescope is already Deep Research, so those two would have moved the
+// collision rather than removed it; the command palette flattens every
+// group into one list, where a duplicated mark is a duplicated mark. A
+// compass answers "which way is this heading", which is what
+// lib/insights/detectors.ts computes, and it is not a letter in any
+// alphabet this app ships in.
+export const PREDICTIONS_ICON: LucideIcon = Compass;
+
+// Redesign phase 2. A board of columns rather than a plain folder: a
+// project here is a grouping WITH A GOAL and a state, not a directory,
+// and FolderOpen is already the records hub.
+export const PROJECTS_ICON: LucideIcon = FolderKanban;

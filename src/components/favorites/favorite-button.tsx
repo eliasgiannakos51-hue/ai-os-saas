@@ -90,7 +90,7 @@ export function FavoriteButton({
         // "..." menu (components/ui/card-menu.tsx) and has to match it.
         corner ? "absolute end-3 top-3 h-11 w-11" : "h-11 w-11",
         favorited
-          ? "bg-orange-500/20 text-orange-300 shadow-[0_0_0_1px_rgba(249,115,22,0.55),0_0_16px_-2px_rgba(249,115,22,0.6)] hover:bg-orange-500/30"
+          ? "bg-orange-500/20 text-orange-300 hover:bg-orange-500/30"
           : // A resting ring, not bare grey: the control has to look
             // clickable before the pointer is anywhere near it.
             "bg-white/[0.04] text-muted shadow-[0_0_0_1px_rgba(255,255,255,0.09)] hover:bg-orange-500/15 hover:text-orange-300 hover:shadow-[0_0_0_1px_rgba(249,115,22,0.5)]",

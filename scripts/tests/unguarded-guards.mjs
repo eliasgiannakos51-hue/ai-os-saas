@@ -145,20 +145,203 @@ const GUARDS = [
     from: "  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;",
     to: "  return parsed;",
   },
+
+  // ---------------------------------------------------------------------
+  // V5 #14 — ONE REPRESENTATIVE PER SHAPE, in the owner's priority order:
+  // money, auth, user data.
+  //
+  // THE FIRST TEN ABOVE WERE NOT A SAMPLE OF ANYTHING. They were picked
+  // because they looked odd — unicode folding, whitespace trimming, a
+  // date parse — and seven of them turned out to be watched by nobody.
+  // Extrapolating that ratio to the whole codebase gave "~1,800
+  // unguarded", and the extrapolation does not hold: the population is
+  // dominated by a handful of shapes REPEATED across routes. 189 auth
+  // guards are 32 distinct shapes, and 132 of them are the same line.
+  //
+  // So these are chosen the other way round: one instance of each shape
+  // that recurs, because whatever the suite does about one it does about
+  // all of them. Nine experiments cover 195 guards.
+  {
+    category: "auth",
+    file: "src/app/api/account/export/route.ts",
+    what: "a route refuses an unauthenticated caller (the shape 132 routes repeat)",
+    from: "if (!user) {\n      return NextResponse.json({ ok: false, error: \"Not authenticated.\" }, { status: 401 });\n    }",
+    to: "",
+  },
+  {
+    category: "auth",
+    file: "src/app/api/agents/[id]/run/route.ts",
+    what: "a route refuses to run without a server API key (the shape 25 routes repeat)",
+    from: "if (!apiKey) {\n      return NextResponse.json(\n        { ok: false, error: \"The AI service is not configured on the server.\" },\n        { status: 500 }\n      );\n    }",
+    to: "",
+  },
+  {
+    category: "auth",
+    file: "src/app/api/system-health/files/route.ts",
+    what: "an owner-only route refuses a customer",
+    from: "if (!isAdminEmail(user.email)) return NextResponse.json({ ok: false }, { status: 404 });",
+    to: "",
+  },
+  {
+    category: "user data",
+    file: "src/app/api/published/[id]/rollback/route.ts",
+    what: "rolling back refuses a site that is not yours",
+    from: "if (!site) {\n      return NextResponse.json({ ok: false, error: \"Site not found.\" }, { status: 404 });\n    }",
+    to: "",
+  },
+  {
+    category: "money",
+    file: "src/app/api/agents/templates/adopt/route.ts",
+    what: "adopting a template refuses when the hold could not be taken (18 routes repeat it)",
+    from: "if (!reservation.ok) {\n        return NextResponse.json(\n          { ok: false, insufficientCredits: reservation.reason === \"insufficient\", error: \"Could not reserve credits.\" },\n          { status: 402 }\n        );\n      }",
+    to: "",
+  },
+  {
+    category: "money",
+    file: "src/app/api/agents/templates/adopt/route.ts",
+    what: "adopting a template refuses an account that cannot afford it (8 routes repeat it)",
+    from: "if (!affordable.ok) {\n        return NextResponse.json(\n          { ok: false, insufficientCredits: true, error: \"Not enough credits.\" },\n          { status: 402 }\n        );\n      }",
+    to: "",
+  },
+  {
+    category: "money",
+    file: "src/lib/billing/credit-formula.ts",
+    what: "a non-positive or unparseable real cost charges nothing (5 pricing functions repeat it)",
+    from: "export function creditsForRealCostEur(\n  realCostEur: number,\n  config?: PricingConfig,\n  marginMultiplier?: number\n): number {\n  const c = config ?? resolvePricingConfig();\n  if (!Number.isFinite(realCostEur) || realCostEur <= 0) return 0;",
+    to: "export function creditsForRealCostEur(\n  realCostEur: number,\n  config?: PricingConfig,\n  marginMultiplier?: number\n): number {\n  const c = config ?? resolvePricingConfig();",
+  },
+  {
+    category: "money",
+    file: "src/lib/billing/credit-formula.ts",
+    what: "a pack with an unparseable price or credit count is refused rather than priced",
+    from: "if (!Number.isFinite(source.price) || !Number.isFinite(source.credits)) return null;",
+    to: "",
+  },
+  {
+    category: "user data",
+    file: "src/app/api/files/collections/route.ts",
+    what: "creating a collection refuses a file id that is not yours (THE CONTROL: reported NOBODY by the broken instrument, WATCHED by the fixed one \u2014 its gate was there all along)",
+    from: "if (ownedIds.length !== requested.length) {\n        return NextResponse.json({ ok: false, error: \"One of those files does not exist.\" }, { status: 404 });\n      }",
+    to: "",
+  },
 ];
 
-function runUnitSuite() {
+/**
+ * THE UNIT SUITE, AND WHETHER IT ACTUALLY RAN.
+ *
+ * THREE OUTCOMES, NOT TWO, and the third is why this file's first
+ * results were void. `execFileSync` defaults to a ONE MEGABYTE stdout
+ * buffer. `npm run test:unit` prints 1,195,212 bytes. So every call threw
+ * ENOBUFS with the output truncated at 1,037,423 bytes — and the old
+ * version caught that, found no FAIL lines in the fragment, and returned
+ * `{green: false, failed: []}`.
+ *
+ * The caller reads an empty failure list as NOBODY IS WATCHING THIS
+ * GUARD. So a suite that never finished — that never reached the gate
+ * which would have caught the removal — was reported as proof that no
+ * gate cares. Measured 2026-09-08: the output was already ~1.19 MB when
+ * this file was written on 2026-09-07, so no "NOBODY" verdict it has ever
+ * printed was evidence of anything. The two WATCHED verdicts survive: a
+ * FAIL line in the first megabyte is still a FAIL line.
+ *
+ * That is the same shape as /api/health naming six functions missing that
+ * were not, and it is worse here, because the direction of the error is
+ * the reassuring one: it invents absence of a guard rather than presence.
+ *
+ * So the buffer is raised to something the suite cannot outgrow quietly,
+ * AND a run that ends without a verdict is INCONCLUSIVE — never counted
+ * as green, never counted as red, and loud.
+ */
+const MAX_BUFFER = 256 * 1024 * 1024;
+
+/** The line `npm run test:unit` prints last if it reached the end. Its
+ *  absence means the run stopped early, whatever the exit code says. */
+function completed(out) {
+  return /^--- scripts\/tests\/[a-z0-9-]+\.test\.mjs$/m.test(out) && /\bpassed\b/.test(out);
+}
+
+/**
+ * EVERY SUITE, NOT UP TO THE FIRST FAILURE.
+ *
+ * `npm run test:unit` is `for f in …; do node "$f" || exit 1; done`. That
+ * is right for a build and wrong for this experiment, and it was the
+ * third way this file reported absence it had not observed: remove
+ * `if (!user) return 401` from a route and baselines.test.mjs reddens
+ * first — because one English error string went missing — the loop stops,
+ * and route-refusals.test.mjs, the suite written to catch exactly that
+ * deletion, never runs. The verdict came back "nobody is watching".
+ *
+ * So the suites are run here, all of them, and every failure is
+ * collected. Slower on a mutated tree by design: the whole point is to
+ * find out who ELSE would have noticed.
+ */
+function runAllSuites() {
+  const files = readdirSync("scripts/tests")
+    .filter((f) => f.endsWith(".test.mjs"))
+    .sort()
+    .map((f) => join("scripts/tests", f));
+  const failed = [];
+  let ran = 0;
+  for (const file of files) {
+    try {
+      execFileSync(process.execPath, [file], {
+        encoding: "utf8",
+        stdio: "pipe",
+        timeout: 900_000,
+        maxBuffer: MAX_BUFFER,
+        env: { ...process.env, UNGUARDED_GUARDS_RUNNING: "1" },
+      });
+      ran++;
+    } catch (e) {
+      if (e.code === "ENOBUFS" || e.code === "ETIMEDOUT" || e.signal) {
+        return { inconclusive: `${file} did not finish: ${e.code ?? e.signal}` };
+      }
+      ran++;
+      const out = String(e.stdout ?? "") + String(e.stderr ?? "");
+      for (const m of out.matchAll(/^ {2}FAIL {2}(.+)$/gm)) failed.push(m[1].trim());
+    }
+  }
+  if (ran === 0) return { inconclusive: "no suite ran at all" };
+  return failed.length === 0 ? { green: true, failed: [] } : { green: false, failed: [...new Set(failed)] };
+}
+
+function runUnitSuiteViaNpm() {
   try {
-    execFileSync("npm", ["run", "test:unit"], { encoding: "utf8", stdio: "pipe", timeout: 600000 });
+    const out = execFileSync("npm", ["run", "test:unit"], {
+      encoding: "utf8",
+      stdio: "pipe",
+      timeout: 3_600_000,
+      maxBuffer: MAX_BUFFER,
+      // SAYS THE SIDECAR IS EXPECTED. Without it check-mutation-tree.mjs
+      // reports "unguarded-guards.mjs was killed holding a guard
+      // removed" — during the seconds unguarded-guards.mjs is legitimately
+      // holding a guard removed — and mutation-tree.test.mjs turns that
+      // into a red suite that has nothing to do with the guard.
+      env: { ...process.env, UNGUARDED_GUARDS_RUNNING: "1" },
+    });
+    if (!completed(out)) return { inconclusive: "the suite exited 0 without reporting any suite" };
     return { green: true, failed: [] };
   } catch (e) {
+    // A CRASH IS NOT A FAILING TEST. ENOBUFS, ETIMEDOUT, or a kill signal
+    // mean the experiment did not happen; reading them as "nothing went
+    // red" is how this file spent a round reporting absence it had not
+    // observed.
+    if (e.code === "ENOBUFS" || e.code === "ETIMEDOUT" || e.signal) {
+      return { inconclusive: `the suite did not finish: ${e.code ?? e.signal}` };
+    }
     const out = String(e.stdout ?? "") + String(e.stderr ?? "");
-    return {
-      green: false,
-      failed: [...new Set([...out.matchAll(/^ {2}FAIL {2}(.+)$/gm)].map((m) => m[1].trim()))],
-    };
+    const failed = [...new Set([...out.matchAll(/^ {2}FAIL {2}(.+)$/gm)].map((m) => m[1].trim()))];
+    if (failed.length === 0 && !completed(out)) {
+      return { inconclusive: "the suite exited non-zero with no FAIL line and no suite report" };
+    }
+    return { green: false, failed };
   }
 }
+
+/** The experiment uses runAllSuites; runUnitSuiteViaNpm is kept because
+ *  the npm script is what the BUILD runs, and a disagreement between the
+ *  two would be worth seeing. */
+const runUnitSuite = runAllSuites;
 
 const healed = healFromSidecar();
 if (healed.length > 0) console.log(`healed from a killed run: ${healed.join(", ")}\n`);
@@ -182,8 +365,14 @@ const restoreAll = () => {
 console.log(`unguarded-guards: guards ${FROM}..${FROM + slice.length - 1} of ${GUARDS.length}\n`);
 const watched = [];
 const unwatched = [];
+const inconclusive = [];
 try {
   const base = runUnitSuite();
+  if (base.inconclusive) {
+    console.log(`BASELINE INCONCLUSIVE — ${base.inconclusive}`);
+    console.log("Nothing below would mean anything, and an empty failure list is NOT an absence of guards.");
+    process.exit(1);
+  }
   console.log(`baseline: the unit suite is ${base.green ? "GREEN" : "RED"}`);
   if (!base.green) {
     console.log(`\nBASELINE IS RED — nothing below would mean anything.\n  ${base.failed.slice(0, 5).join("\n  ")}`);
@@ -214,7 +403,23 @@ try {
     // itself as "caught" without any test having looked at the
     // behaviour. The first run of this file counted that as a guard being
     // watched, which was exactly backwards.
-    const behavioural = result.failed.filter((f) => !/mutation marker/i.test(f));
+    if (result.inconclusive) {
+      inconclusive.push({ ...g, why: result.inconclusive });
+      console.log(`  UNKNOWN ${g.what}\n          ${result.inconclusive}`);
+      continue;
+    }
+    // AND baselines.test.mjs IS THE SAME CLASS, found the same way on the
+    // very first guard tested here. Deleting `if (!user) return
+    // NextResponse.json({ error: "Not authenticated." } …)` removes one
+    // server-side English string, SERVER_PROSE_BASELINE drops 655 -> 654,
+    // and the build goes red on "no baseline has more room than it is
+    // allowed". True, useful, and completely silent about
+    // authentication: it fires identically for deleting a typo message.
+    // Counting it as a witness would mean every guard whose rejection
+    // carries English prose reads as watched — which is most of the 189
+    // auth guards and most of the 66 ownership ones.
+    const SHAPE_ONLY = /mutation marker|no baseline has more room/i;
+    const behavioural = result.failed.filter((f) => !SHAPE_ONLY.test(f));
     if (result.green || behavioural.length === 0) {
       unwatched.push({
         ...g,
@@ -233,6 +438,13 @@ try {
 }
 
 console.log(`\n${watched.length} of ${slice.length} guards in this chunk are watched by a test.`);
+if (inconclusive.length > 0) {
+  // NOT "unwatched". The experiment did not run, and saying nothing
+  // watches a guard because the suite crashed is the defect this file
+  // shipped with.
+  console.log("\nINCONCLUSIVE — the suite did not finish, so these were not tested:");
+  for (const g of inconclusive) console.log(`  - ${g.file}\n    ${g.what}\n    ${g.why}`);
+}
 if (unwatched.length > 0) {
   console.log("\nNOT WATCHED — each is either redundant or load-bearing-and-unguarded:");
   for (const g of unwatched) console.log(`  - ${g.file}\n    ${g.what}\n    ${g.why}`);

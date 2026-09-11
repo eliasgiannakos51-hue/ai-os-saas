@@ -22,6 +22,7 @@
 // Run: node scripts/tests/website-structural-similarity.test.mjs
 import { readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
+import { parseShapeOrders } from "./lib/site-shape-orders.mjs";
 
 let pass = 0;
 const failures = [];
@@ -37,7 +38,7 @@ function check(name, cond, detail) {
 
 const { compareStructure, compareTokenSequences, structuralSignature, averagePairwiseSimilarity } =
   await loadTs("src/lib/website-structural-similarity.ts");
-const { pickVariation } = await loadTs("src/lib/website-variation.ts");
+const { pickVariation, SECTION_ORDERS } = await loadTs("src/lib/website-variation.ts");
 
 // ===========================================================================
 console.log("== PART A: the metric, against pages whose relationship is known ==\n");
@@ -192,34 +193,23 @@ check(
 );
 
 // ===========================================================================
-console.log("\n== PART B1: the 21 section plans the prompt can actually order ==\n");
+console.log("\n== PART B1: the 42 section plans the prompt can actually order ==\n");
 
 // Parsed out of the SHIPPED prompt, not retyped here — if someone deletes
-// an ORDER line, this measurement changes with it.
+// an ORDER, this measurement changes with it. The parser is shared with
+// website-variety.test.mjs; see scripts/tests/lib/site-shape-orders.mjs
+// for why the prompt numbers its sections instead of spelling each order
+// out in prose.
 const prompt = readFileSync("src/lib/website-builder.ts", "utf8");
-const plans = [];
-let shape = null;
-for (const line of prompt.split("\n")) {
-  const shapeMatch = line.match(/^- ([a-z][a-z-]+):/);
-  if (shapeMatch) {
-    shape = shapeMatch[1];
-    continue;
-  }
-  const orderMatch = line.trim().match(/^ORDER ([ABC]):\s*(.+?)\.?$/);
-  if (orderMatch && shape) {
-    plans.push({
-      shape,
-      letter: orderMatch[1],
-      sections: orderMatch[2].split(">").map((s) => s.trim()).filter(Boolean),
-    });
-  }
-}
+const plans = parseShapeOrders(prompt);
 const shapes = [...new Set(plans.map((p) => p.shape))];
-check(`21 plans found in the prompt (${plans.length})`, plans.length === 21, JSON.stringify(shapes));
+const LETTERS = ["A", "B", "C", "D", "E", "F"];
+check(`42 plans found in the prompt (${plans.length})`, plans.length === 42, JSON.stringify(shapes));
 check(`across 7 archetypes (${shapes.length})`, shapes.length === 7);
 check(
-  "every archetype offers all three letters",
-  shapes.every((s) => ["A", "B", "C"].every((l) => plans.some((p) => p.shape === s && p.letter === l)))
+  "every archetype offers all six letters",
+  shapes.every((s) => LETTERS.every((l) => plans.some((p) => p.shape === s && p.letter === l))),
+  shapes.filter((s) => !LETTERS.every((l) => plans.some((p) => p.shape === s && p.letter === l))).join(", ")
 );
 
 const sameShapePairs = [];
@@ -234,13 +224,37 @@ for (let i = 0; i < plans.length; i++) {
 }
 for (const s of shapes) {
   const mine = sameShapePairs.filter((p) => p.pair.startsWith(`${s} `));
-  console.log(`     ${s.padEnd(22)} ${mine.map((m) => `${m.pair.split(" ")[1]}=${m.score.toFixed(2)}`).join("  ")}`);
+  console.log(`     ${s.padEnd(22)} mean ${(mine.reduce((a, b) => a + b.score, 0) / mine.length).toFixed(2)} over ${mine.length} pairs`);
 }
 const scores = sameShapePairs.map((p) => p.score);
 const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
 const worst = sameShapePairs.reduce((a, b) => (b.score > a.score ? b : a));
+
+// THE NUMBER THAT ANSWERS THE COMPLAINT, and the mean above is not it.
+//
+// `mean` is the average over pairs of DIFFERENT letters. It leaves out
+// the case the whole round is about: two people drawing the SAME letter,
+// where the similarity is 1.000 by construction. Three orders made that
+// happen a third of the time; six make it a sixth. So the honest figure
+// is the expected similarity between two strangers' skeletons, collisions
+// included:
+//
+//   E = P(same letter) x 1.0 + P(different) x mean-over-different
+//
+// before (3 orders):  1/3 x 1.000 + 2/3 x 0.490 = 0.660
+// after  (6 orders):  1/6 x 1.000 + 5/6 x 0.509 = 0.591
+//
+// AND THIS IS WHY THE PER-PAIR MEAN WENT UP while the answer got better.
+// With three letters you can choose the three most distant permutations;
+// with six you must take the whole space, near neighbours included. A
+// gate on `mean` alone would have called using more of the space a
+// regression, which is the shape docs/shapes.md calls a gate measuring
+// the thing that is easy to measure.
+const collision = 1 / 6;
+const expected = collision * 1 + (1 - collision) * mean;
 console.log(
-  `\n     mean ${mean.toFixed(3)}  worst ${worst.score.toFixed(3)} (${worst.pair})  n=${scores.length}\n`
+  `\n     over different letters: mean ${mean.toFixed(3)}  worst ${worst.score.toFixed(3)} (${worst.pair})  n=${scores.length}` +
+    `\n     EXPECTED between two strangers, collisions included: ${expected.toFixed(3)}  (three orders gave 0.660)\n`
 );
 check(
   `no two orders of one archetype are the same plan (worst ${worst.score.toFixed(3)} < 1)`,
@@ -248,12 +262,12 @@ check(
   worst.pair
 );
 check(
-  `the three orders are genuinely different plans, on average (mean ${mean.toFixed(3)} ≤ 0.50)`,
-  mean <= 0.5,
-  "a rise here means the orders drifted back towards one another"
+  `two strangers' skeletons score ${expected.toFixed(3)} on average (<= 0.62)`,
+  expected <= 0.62,
+  "three orders gave 0.660; a rise here means the space shrank or the orders drifted together"
 );
 check(
-  `and no single pair is near-identical (worst ${worst.score.toFixed(3)} ≤ 0.65)`,
+  `and no single pair is near-identical (worst ${worst.score.toFixed(3)} <= 0.65)`,
   worst.score <= 0.65,
   worst.pair
 );
@@ -262,41 +276,52 @@ check(
 console.log("\n== PART B2: what the draw actually hands out ==\n");
 
 const letterOf = (v) => v.order.trim()[0];
+// THE PRODUCTION PATH, WHICH IS THE CYCLE. pickVariation still accepts a
+// bare seed — the two measurement scripts have no user behind them — but
+// the route passes `cycle`, so a test that omits it measures a code path
+// nobody is served by. Section B3 below checks that the route really
+// passes it.
+const forUser = (user, n, description) =>
+  pickVariation([user, n, description], { userKey: user, priorSites: n });
+
 for (const description of ["a taverna in Thessaloniki", "a law office", "a wedding photographer"]) {
-  const sequence = Array.from({ length: 30 }, (_, i) => letterOf(pickVariation(["user-1", i, description])));
+  const sequence = Array.from({ length: 30 }, (_, i) => letterOf(forUser("user-1", i, description)));
   const counts = sequence.reduce((acc, c) => ((acc[c] = (acc[c] ?? 0) + 1), acc), {});
-  const commonest = Math.max(...Object.values(counts));
   console.log(`     ${description.padEnd(28)} ${sequence.join("")}  ${JSON.stringify(counts)}`);
   check(
-    `${description}: all three orders appear over 30 sites`,
-    Object.keys(counts).length === 3,
+    `${description}: all six orders appear over 30 sites`,
+    Object.keys(counts).length === SECTION_ORDERS.length,
     JSON.stringify(counts)
   );
-  // WHAT 30 SITES PROVE, AND WHAT THEY DO NOT.
+  // THE PROMISE THE CYCLE MAKES, AND THE ONE A DRAW COULD NOT.
   //
-  // "All three appear over 30 sites" is a claim about a real person's
-  // experience and 30 is the right sample for it.
+  // This was a probabilistic check when the order was hashed like every
+  // other axis, and the numbers were bad: measured over 4,000 constructed
+  // people, 59.9% of their second-to-fifth sites repeated a skeleton they
+  // already had, and 1.0% got the same order five times running. A fair
+  // die repeats; that is what dice do.
   //
-  // "No order takes more than half of 30" was NOT such a claim. With
-  // three equally likely outcomes and n=30 the standard deviation is
-  // 2.36, so a PERFECTLY UNIFORM draw exceeds 15 about 4% of the time
-  // per description — near 1 in 8 across the three tested here. It fired
-  // the moment the hash was corrected (16/30 for the photographer) while
-  // the same draw measures 34.0% over 300 and 35.1% over 3,000. It was
-  // reporting noise, and it had passed for months against a hash whose
-  // axes were provably correlated.
-  //
-  // Balance is a claim about the DRAW, so it is now tested at a sample
-  // size where it means something — and the bar is TIGHTER than the old
-  // one in the only sense that matters: at n=600 a 40% share is far
-  // beyond sampling error, where 50% of 30 was inside it.
-  const large = Array.from({ length: 600 }, (_, i) => letterOf(pickVariation(["user-1", i, description])));
-  const largeCounts = large.reduce((acc, c) => ((acc[c] = (acc[c] ?? 0) + 1), acc), {});
-  const largestShare = Math.max(...Object.values(largeCounts)) / large.length;
-  const smallestShare = Math.min(...Object.values(largeCounts)) / large.length;
+  // The order is now drawn once per person and stepped. So this is an
+  // exact statement about a real person's first six sites, and it is
+  // asserted as one rather than as a percentage with slack in it.
+  const firstCycle = Array.from({ length: SECTION_ORDERS.length }, (_, i) =>
+    letterOf(forUser("user-1", i, description))
+  );
   check(
-    `${description}: the draw is balanced at n=600 (${(largestShare * 100).toFixed(1)}% / ${(smallestShare * 100).toFixed(1)}%)`,
-    largestShare <= 0.4 && smallestShare >= 0.26,
+    `${description}: one person's first ${SECTION_ORDERS.length} sites use every order exactly once`,
+    new Set(firstCycle).size === SECTION_ORDERS.length,
+    firstCycle.join("")
+  );
+  // ...AND THE BALANCE IS NOW EXACT, not "within sampling error". A cycle
+  // over 600 consecutive sites gives each letter exactly 100. The old
+  // check allowed a 40% share because a hash genuinely wanders; allowing
+  // that here would pass a draw that had silently gone back to hashing.
+  const large = Array.from({ length: 600 }, (_, i) => letterOf(forUser("user-1", i, description)));
+  const largeCounts = large.reduce((acc, c) => ((acc[c] = (acc[c] ?? 0) + 1), acc), {});
+  const shares = Object.values(largeCounts);
+  check(
+    `${description}: 600 sites split exactly evenly (${shares.join("/")})`,
+    shares.length === SECTION_ORDERS.length && shares.every((n) => n === 600 / SECTION_ORDERS.length),
     JSON.stringify(largeCounts)
   );
 }
@@ -305,7 +330,7 @@ for (const description of ["a taverna in Thessaloniki", "a law office", "a weddi
 // two sites of the same subject were built from the same single list, so
 // this number was 1.000 by construction. This is what it is now.
 const AXES = ["hero", "grid", "rhythm", "typeScale", "motion", "order"];
-const draws = Array.from({ length: 60 }, (_, i) => pickVariation([`user-${i}`, 0, "a taverna in Thessaloniki"]));
+const draws = Array.from({ length: 60 }, (_, i) => forUser(`user-${i}`, 0, "a taverna in Thessaloniki"));
 let identical = 0;
 let sameOrder = 0;
 let pairs = 0;
@@ -331,10 +356,17 @@ check(
   `two users with the same brief rarely draw the same site: ${((identical / pairs) * 100).toFixed(2)}% ≤ 1%`,
   identical / pairs <= 0.01
 );
+// THE NUMBER TWO DIFFERENT PEOPLE CANNOT ESCAPE, and it is stated as the
+// arithmetic it is: their draws cannot see each other, so the floor is
+// 1/SECTION_ORDER_COUNT and nothing in this repository can lower it
+// without remembering what every account was given. Three orders made
+// that floor 33.3%; six make it 16.7%. Measured over 20,000 constructed
+// pairs in scripts/tests/section-order-space.test.mjs, which is where the
+// before-and-after numbers live.
 check(
   `the structural axis is drawn, not fixed: same order in ${((sameOrder / pairs) * 100).toFixed(1)}% of pairs, not 100%`,
-  sameOrder / pairs < 0.45,
-  "1/3 is the floor for a three-way draw; 100% is what it was before the axis existed"
+  sameOrder / pairs < 0.28,
+  `1/${SECTION_ORDERS.length} = ${((100 / SECTION_ORDERS.length)).toFixed(1)}% is the floor for two strangers; 100% is what it was before the axis existed`
 );
 check(
   `on average two sites share ${(sharedTotal / pairs).toFixed(2)} of 6 axes (≤ 2.5)`,
@@ -344,11 +376,112 @@ check(
 // ===========================================================================
 console.log("\n== PART B3: the draw reaches the prompt ==\n");
 const variationSrc = readFileSync("src/lib/website-variation.ts", "utf8");
-check("the ORDER axis is part of the drawn variation", /order:\s*pick\(SECTION_ORDERS/.test(variationSrc));
+check(
+  "the ORDER axis walks a cycle rather than drawing independently",
+  /order: cycle\s*\?\s*SECTION_ORDERS\[orderIndexFor\(/.test(variationSrc)
+);
+// AN EXCLUSION THAT IS COMPUTED AND NOT DELIVERED IS NOT AN EXCLUSION.
+// lib/website-variation.ts's own header records this repository shipping
+// exactly that once — four visual axes were drawn and left out of the
+// directive, and every gate stayed green because every gate checked that
+// the axes EXISTED. The cycle is optional in the function signature, so
+// the only thing that makes it real is the route passing it.
+const routeSrc = readFileSync("src/app/api/websites/generate/process/route.ts", "utf8");
+check(
+  "the process route hands the cycle to the draw",
+  /pickVariation\(\[user\.id, priorSites \?\? 0, description\], \{\s*userKey: user\.id,\s*priorSites: priorSites \?\? 0,\s*\}\)/.test(routeSrc)
+);
 check(
   "and the prompt tells the model the letter is not negotiable",
   /not a suggestion and it is not a tie-break/.test(prompt)
 );
+
+// ===========================================================================
+console.log("\n== PART C: the produced page is measured, not trusted ==\n");
+// THE DIRECTIVE IS AN INSTRUCTION, AND RULE 23 OF THIS PROJECT'S WORKING
+// RULES IS THAT AN INSTRUCTION A MODEL CAN IGNORE WILL BE IGNORED.
+//
+// Everything above is about the space of orders the model is TOLD to
+// build. None of it is evidence that the page that came back has the
+// structure it was asked for — the same reason
+// lib/websites-greek-spelling-check.ts is a check and not a prompt line.
+// So the route compares the produced page against the person's previous
+// one and writes a note when they are the same skeleton.
+{
+  const similarity = await loadTs("src/lib/website-structural-similarity.ts");
+  const notes = await loadTs("src/lib/website-generation-notes.ts");
+
+  // ONE PLACE FOR THE THRESHOLD. It was a local constant in
+  // website-pairs-check.mjs carrying a comment about not drifting from
+  // website-variety-check.mjs, which is two copies; the route made three.
+  check("the same-skeleton line is exported from the module that measures it", similarity.SAME_SKELETON === 0.85);
+  check("...and the similar-skeleton line with it", similarity.SIMILAR_SKELETON === 0.7);
+  const pairsScript = readFileSync("scripts/website-pairs-check.mjs", "utf8");
+  check(
+    "the pairs script reads them instead of restating them",
+    /const \{ SAME_SKELETON, SIMILAR_SKELETON \} = structural;/.test(pairsScript) &&
+      !/^const SAME_SKELETON = /m.test(pairsScript)
+  );
+
+  check(
+    "the route compares the new page against the previous one",
+    /compareStructure\(htmlContent, previousHtml\)/.test(routeSrc)
+  );
+  check("...and raises the note above the shared threshold", /similarity >= SAME_SKELETON/.test(routeSrc));
+  check(
+    "...reading the previous site from the same owner only",
+    /\.eq\("user_id", user\.id\)[\s\S]{0,200}?\.neq\("id", websiteId\)/.test(routeSrc)
+  );
+  // NEVER FAILS THE GENERATION. The owner has already paid for the page;
+  // a courtesy note that throws would lose it.
+  check(
+    "...inside a try/catch that logs instead of throwing",
+    /stage: "sameSkeleton"/.test(routeSrc)
+  );
+  // AND NEVER REGENERATES. Two branches of one shop SHOULD match.
+  check(
+    "the route does not regenerate on a match",
+    !/sameSkeleton[\s\S]{0,400}generateWebsiteHtml/.test(routeSrc)
+  );
+
+  // THE COLUMN IS READ DEFENSIVELY, like every other note.
+  const good = notes.parseGenerationNotes([{ kind: "sameSkeleton", percent: 92, against: "Καφέ Λιμάνι" }]);
+  check("a well-formed note survives the parse", good.length === 1 && good[0].percent === 92);
+  for (const bad of [
+    { kind: "sameSkeleton", percent: 0, against: "x" },
+    { kind: "sameSkeleton", percent: 101, against: "x" },
+    { kind: "sameSkeleton", percent: 92.5, against: "x" },
+    { kind: "sameSkeleton", percent: 92, against: "   " },
+    { kind: "sameSkeleton", percent: "92", against: "x" },
+    { kind: "sameSkeleton", against: "x" },
+  ]) {
+    check(`malformed note dropped: ${JSON.stringify(bad)}`, notes.parseGenerationNotes([bad]).length === 0);
+  }
+  check(
+    "a very long name is cut rather than rendered whole",
+    notes.parseGenerationNotes([{ kind: "sameSkeleton", percent: 90, against: "x".repeat(500) }])[0].against.length === 80
+  );
+
+  // IT REACHES A PERSON, IN THEIR LANGUAGE. A note nothing renders is a
+  // column nobody reads.
+  const workspace = readFileSync("src/components/website-builder/website-builder-workspace.tsx", "utf8");
+  check('the workspace has a case for it', /case "sameSkeleton":/.test(workspace));
+  check("...and passes both values to the translation", /notes\.sameSkeleton", \{ percent: note\.percent, name: note\.against \}/.test(workspace));
+  for (const locale of ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"]) {
+    const text = JSON.parse(readFileSync(`messages/${locale}.json`, "utf8"))
+      .dashboard.websiteBuilder.notes.sameSkeleton;
+    check(
+      `${locale}: the note exists and carries both placeholders`,
+      typeof text === "string" && text.includes("{name}") && text.includes("{percent}"),
+      String(text).slice(0, 60)
+    );
+    // ICU: a single-quoted placeholder is LITERAL TEXT in every language
+    // — the mistake CLAUDE.md records shipping. scripts/check-i18n.js
+    // fails the build on it; checked here too because this key was added
+    // in ten languages at once.
+    check(`${locale}: the placeholders are not quote-escaped`, !/'\{(name|percent)\}'/.test(text));
+  }
+}
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length) process.exit(1);

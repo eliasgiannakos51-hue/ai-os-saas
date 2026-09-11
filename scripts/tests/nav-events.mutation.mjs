@@ -86,10 +86,14 @@ const MUTATIONS = [
     to: "  return MODULES.slice(1).map((m) => m.slug);",
   },
   {
+    // The list gained a second entry in redesign phase 2
+    // (/dashboard/projects/[id]), so the anchor is the declaration line
+    // rather than the whole literal: emptying it is what is under test,
+    // and what is in it is the gate's business, not this mutant's.
     name: "the nested dynamic route is forgotten, so /dashboard/documents/<id> becomes :unknown",
     file: NAV,
-    from: 'export const NAV_NESTED_DYNAMIC: readonly string[] = ["documents"];',
-    to: "export const NAV_NESTED_DYNAMIC: readonly string[] = [];",
+    from: "export const NAV_NESTED_DYNAMIC: readonly string[] = [",
+    to: "export const NAV_NESTED_DYNAMIC: readonly string[] = []; const NAV_NESTED_DYNAMIC_UNUSED: readonly string[] = [",
   },
 
   // ---- the normaliser stops normalising ----

@@ -27,6 +27,7 @@
 //
 // Run: node scripts/tests/prompt-shape-conflict.test.mjs
 import { readFileSync } from "node:fs";
+import { parseShapeOrders } from "./lib/site-shape-orders.mjs";
 
 let pass = 0;
 const failures = [];
@@ -53,6 +54,10 @@ function section(name) {
 }
 const ANIMATIONS = section("ANIMATIONS_SECTION");
 const SHAPE = section("SITE_SHAPE_SECTION");
+// The six orders each shape offers, expanded from its numbered SECTIONS
+// line. Parsed in one place — scripts/tests/lib/site-shape-orders.mjs —
+// because three gates read them and three parsers would be three formats.
+const shapeOrders = parseShapeOrders(SHAPE);
 
 // ---------------------------------------------------------------------
 console.log("== 1. the sections exist and are what we think they are ==");
@@ -142,7 +147,8 @@ for (const a of archetypes) {
 // than differently worded. Each definition must set all of them.
 const AXES = [
   ["FIRST", /FIRST:/],
-  ["ORDER", /ORDER [ABC]:/],
+  ["SECTIONS", /SECTIONS:/],
+  ["ORDERS", /ORDERS:/],
   ["TYPE", /TYPE:/],
   ["IMAGES", /IMAGES:/],
   ["NEVER", /NEVER:/],
@@ -159,15 +165,19 @@ for (const def of definitions) {
   for (const [axis, re] of AXES) {
     check(`${name}: states ${axis}`, re.test(def), def.slice(0, 160));
   }
-  // THREE orders, not one. One order per archetype is what made two
+  // SIX orders, not one. One order per archetype is what made two
   // tavernas the same page: the shape fixed the sections AND their
   // sequence, so the per-site draw had nothing structural left to vary.
-  const orders = [...def.matchAll(/ORDER ([ABC]):\s*([^\n]+)/g)].map((m) => [m[1], m[2].trim()]);
-  check(`${name}: offers all three orders (${orders.map(([l]) => l).join("") || "none"})`, orders.length === 3);
+  // Three was the first fix and it left a 1-in-3 collision between two
+  // strangers; six halves it, and six is the ceiling because four of the
+  // seven shapes have exactly three movable sections. The numbers are in
+  // scripts/tests/section-order-space.test.mjs.
+  const orders = shapeOrders.filter((o) => o.shape === name);
+  check(`${name}: offers all six orders (${orders.map((o) => o.letter).join("") || "none"})`, orders.length === 6);
   check(
-    `${name}: and its three orders are three different lists`,
-    orders.length === 3 && new Set(orders.map(([, list]) => list)).size === 3,
-    JSON.stringify(orders.map(([, l]) => l))
+    `${name}: and its six orders are six different lists`,
+    orders.length === 6 && new Set(orders.map((o) => o.digits)).size === 6,
+    JSON.stringify(orders.map((o) => o.digits))
   );
 }
 
@@ -176,13 +186,19 @@ console.log("\n== 5. the archetypes are actually different from each other ==");
 // thing in different words, which would produce six identical pages and
 // six confident declarations.
 function axisValue(def, axis) {
-  // ORDER is three lines per archetype now; the axis VALUE is all three
-  // taken together, so "distinct across archetypes" still means what it
-  // meant — no two archetypes propose the same set of page orders.
-  if (axis === "ORDER") {
-    return [...def.matchAll(/ORDER [ABC]:\s*([^\n]+)/g)]
-      .map((m) => m[1].toLowerCase().trim())
-      .join(" | ");
+  // ORDERS is one line of digit sequences per archetype now, and the
+  // SECTIONS line beside it is what those digits mean. Comparing the
+  // ORDERS line alone across archetypes would compare "A 1>2>3>4>5"
+  // with "A 1>2>3>4>5" and call two entirely different pages identical —
+  // the digits are only meaningful against their own shape's sections.
+  // So the value compared is the EXPANDED plans.
+  if (axis === "ORDERS") {
+    const name = def.match(/^- ([a-z-]+):/)?.[1] ?? "?";
+    return shapeOrders
+      .filter((o) => o.shape === name)
+      .map((o) => `${o.letter} ${o.sections.join(">")}`)
+      .join(" | ")
+      .toLowerCase();
   }
   return (def.match(new RegExp(`${axis}:\\s*([^\\n]+)`))?.[1] ?? "").toLowerCase().trim();
 }

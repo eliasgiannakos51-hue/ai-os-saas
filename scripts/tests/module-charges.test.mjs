@@ -81,8 +81,10 @@ for (const rel of registries) {
   }
 }
 // A floor, because "no module declares a price" is trivially true of a file
-// the regex stopped reading. Nineteen module literals today.
-check(`both registries were read (${slugCount} module definitions)`, slugCount >= 18, `found ${slugCount}`);
+// the regex stopped reading. Seventeen module literals since V5 #21 —
+// presentations left build-modules.ts when it grew a generator, and the
+// floor came down by one in the same commit.
+check(`both registries were read (${slugCount} module definitions)`, slugCount >= 17, `found ${slugCount}`);
 check(
   "no module charges credits for an insert",
   priced.length === 0,

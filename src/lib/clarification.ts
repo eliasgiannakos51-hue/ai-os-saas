@@ -1,19 +1,29 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
-import { assessAmbiguity } from "@/lib/ai/ambiguity";
+import { assessAmbiguity, willSpendOnQuestion } from "@/lib/ai/ambiguity";
 import {
+  questionCapFor,
   parseClarificationResult,
   type ClarificationCheckResult,
+  type ClarificationDecision,
   type ClarificationKind,
 } from "@/lib/clarification-client";
 
-export type { ClarificationCheckResult, ClarificationKind } from "@/lib/clarification-client";
+export type {
+  ClarificationCheckResult,
+  ClarificationDecision,
+  ClarificationKind,
+  ClarificationVerdict,
+} from "@/lib/clarification-client";
 export {
+  CLARIFICATION_QUESTION_CAP,
+  questionCapFor,
   parseClarificationResult,
   appendClarificationAnswers,
   alignSuggestions,
   MAX_CLARIFICATION_QUESTIONS,
+  clarificationMetadata,
 } from "@/lib/clarification-client";
 
 // Exported so routes that reserve/settle a clarification-only action can
@@ -39,10 +49,25 @@ const CLARIFICATION_MAX_TOKENS = 500;
 // that already reads like a real brief (a specific business, a concrete
 // style direction, a real audience) should never trigger this, however
 // short it is.
-const CLARIFICATION_TOOL: Anthropic.Tool = {
+//
+// THE BUDGET REACHES THE MODEL, and it has to.
+//
+// This tool used to say "1-3 quick questions" to every surface while the
+// parser trimmed the result down to the surface's cap. That is worse than
+// it sounds: a model asked for three writes three of roughly equal weight
+// and we keep whichever came first, which is not the most important one —
+// it is the first one it thought of. Told it has ONE question, the model
+// has to decide which unknown actually changes the outcome, and that is a
+// better question than any of the three would have been. The tokens saved
+// are the smaller half of the gain.
+function clarificationTool(cap: number): Anthropic.Tool {
+  const budget =
+    cap === 1
+      ? "exactly ONE question — the single most important unknown"
+      : `at most ${cap} questions — only the most important unknowns`;
+  return {
   name: "evaluate_request_clarity",
-  description:
-    "Decide whether the given request is missing information important enough that asking 1-3 quick questions first would meaningfully improve the result.",
+  description: `Decide whether the given request is missing information important enough that asking ${budget} first would meaningfully improve the result.`,
   input_schema: {
     type: "object",
     properties: {
@@ -76,12 +101,15 @@ const CLARIFICATION_TOOL: Anthropic.Tool = {
           required: ["question", "suggestions"],
         },
         description:
-          "1-3 short, specific, high-value questions — only the ones that would actually change the result. Empty array if needsClarification is false.",
+          cap === 1
+            ? "EXACTLY ONE short, specific, high-value question — the single unknown that would most change the result, and nothing a sensible default already covers. Empty array if needsClarification is false."
+            : `AT MOST ${cap} short, specific, high-value questions — only the ones that would actually change the result, and nothing a sensible default already covers. Empty array if needsClarification is false.`,
       },
     },
     required: ["needsClarification", "questions"],
   },
-};
+  };
+}
 
 /**
  * What the app already knows about this user, folded into the check so it
@@ -178,6 +206,19 @@ NEVER ask where the result is delivered: it always goes to the account's own ema
 A request that names a real subject, a real action and a real cadence ("every morning send me the news about Nvidia") is already good enough — ask nothing.
 
 SAFETY CHECK (this agent runs repeatedly, unsupervised, and emails the user its output): if the description is broad enough that it could plausibly produce something harmful or clearly unintended when run automatically and repeatedly with nobody reviewing each run, treat that the same as needing clarification and ask what exactly it should do and how it should be scoped.${CRITICAL_FACTS_INSTRUCTION}${ASK_IN_THE_USERS_LANGUAGE}`,
+  // CHAT IS THE SURFACE WITH A CONVERSATION BEHIND IT, and that changes
+  // what is worth asking. The other five review a request that will be
+  // BUILT INTO something; this one reviews a message in a thread where
+  // the person is already talking to us and can be answered rather than
+  // interrogated. So the bar is higher, not lower: a question here
+  // interrupts, and an interruption that was not needed is worse than a
+  // slightly generic answer.
+  //
+  // WHAT IT MUST NOT DO is ask for context the thread already holds. The
+  // free reader upstream is told hasContext when the conversation has
+  // history, and a bare "do it" with history is a follow-up rather than
+  // an ambiguity — that is decided before this prompt is ever reached.
+  chat: `You review a message someone has just sent in an ongoing chat with an AI assistant, before it is answered. Ask a clarifying question ONLY if the message is so ambiguous that answering it would mean guessing WHICH of two or more completely different things they meant — not because more detail would produce a better answer. Almost every message, including short ones and follow-ups, should be answered rather than questioned: this is a conversation, and a person who wanted to be asked would have asked. If the message names a subject and an action, answer it — do not ask anything.${CRITICAL_FACTS_INSTRUCTION}${ASK_IN_THE_USERS_LANGUAGE}`,
   create: `You review a free-text entry for "Create Anything" (an AI classifier that routes plain-text descriptions into the right business-tracking module — an idea, a trade, a decision, feedback, etc.), before it's classified and saved. Ask clarifying questions ONLY if the entry is so vague or ambiguous that it's genuinely unclear what it is or which module it belongs in. Most entries, even short ones, are already clear enough (e.g. a single trade, a one-line idea, a short note) — do not ask anything for those.${CRITICAL_FACTS_INSTRUCTION}${ASK_IN_THE_USERS_LANGUAGE}`,
 };
 
@@ -191,7 +232,7 @@ export async function checkNeedsClarification(
    *  without it, and a context lookup that failed must never be the
    *  reason a build does not happen. */
   knownContext?: string | null
-): Promise<ClarificationCheckResult> {
+): Promise<ClarificationDecision> {
   // DECIDED BEFORE ANYTHING IS SPENT, where it can be.
   //
   // Everything below this block is a Sonnet call — a paid model call made
@@ -214,7 +255,20 @@ export async function checkNeedsClarification(
   // skips the call entirely, which is where the money is — clear requests
   // are the common case.
   const assessment = assessAmbiguity(userText, { hasContext: Boolean(knownContext) });
-  if (assessment.verdict === "clear") return { needsClarification: false };
+  // THE POLICY IS ASKED FOR, NOT RESTATED. `verdict === "clear"` written
+  // here is a second copy of a rule that lives in lib/ai/ambiguity.ts,
+  // and the two drifting apart is exactly what produced the function this
+  // round deleted: an exported needsPaidClarityCheck saying only `unsure`
+  // pays, while this line paid for `vague` as well.
+  if (!willSpendOnQuestion(assessment)) {
+    return { needsClarification: false, verdict: assessment.verdict, paidCheck: false };
+  }
+
+  // THE SURFACE'S OWN BUDGET, used twice: once to tell the model how many
+  // questions it may ask, and once to trim what comes back. Those have to
+  // be the same number — a model told it may ask three, trimmed to one,
+  // gives us its first question rather than its most important one.
+  const cap = questionCapFor(kind);
 
   const anthropic = new Anthropic({ apiKey });
   const response = await anthropic.messages.create({
@@ -222,7 +276,7 @@ export async function checkNeedsClarification(
     max_tokens: CLARIFICATION_MAX_TOKENS,
     system: `${SYSTEM_PROMPTS[kind]}${knownContextSection(knownContext)}`,
     messages: [{ role: "user", content: userText }],
-    tools: [CLARIFICATION_TOOL],
+    tools: [clarificationTool(cap)],
     tool_choice: { type: "tool", name: "evaluate_request_clarity" },
   });
 
@@ -237,7 +291,17 @@ export async function checkNeedsClarification(
   // Fail open (treat as already clear) on a malformed response — same
   // "best-effort, don't block the real feature" tolerance as every other
   // classifier in this app.
-  if (!toolUse) return { needsClarification: false };
+  if (!toolUse) return { needsClarification: false, verdict: assessment.verdict, paidCheck: true };
 
-  return parseClarificationResult(toolUse.input as { needsClarification?: unknown; questions?: unknown });
+  // THE CAP IS THE SURFACE'S, not a global one. A website brief may ask
+  // two; everything else asks one. See CLARIFICATION_QUESTION_CAP for the
+  // reason attached to each number.
+  return {
+    ...parseClarificationResult(
+      toolUse.input as { needsClarification?: unknown; questions?: unknown },
+      questionCapFor(kind)
+    ),
+    verdict: assessment.verdict,
+    paidCheck: true,
+  };
 }

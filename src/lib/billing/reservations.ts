@@ -500,6 +500,20 @@ export async function settleReservation(params: {
         // scripts/ can re-derive a row's cost from its own columns.
         cacheWrite1hTokens: totals.cacheWrite1hTokens || undefined,
         webFetches: totals.webFetches || undefined,
+        // WHICH MODELS SPENT THE MONEY — the split ai_cost_log's columns
+        // do not have and an Anthropic invoice is written in. See
+        // CostAccumulator.byModel for why the row's own token columns
+        // cannot answer it, and scripts/db/anthropic-reconcile.mjs for
+        // the query that turns these into invoice-shaped lines.
+        //
+        // WRITTEN UNCONDITIONALLY, even when it is `{}`. Every other
+        // optional key here uses `|| undefined` to keep the row small,
+        // and that is exactly wrong for this one: the reconciliation
+        // query has to tell a row settled BEFORE this key existed (not
+        // attributable, and it must say so) from a row settled after it
+        // that recorded nothing (a bug — see the zeroCostSettlement
+        // check above). `undefined` would make those two identical.
+        modelBreakdown: costs.byModel(),
         // Why this row charged nothing, so 0 credits is never ambiguous.
         bypassCharge,
         wouldHaveChargedCredits: wouldHaveCharged,

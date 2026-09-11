@@ -2060,13 +2060,6 @@
       "truncatedWarning": "Even read in parts, the selection was larger than one question can cover, so the answer may be incomplete. Ask about fewer files at a time.",
       "skippedFiles": "Skipped (no readable text): {names}",
       "creditsCharged": "{credits, plural, one {# credit} other {# credits}}",
-      "stepsLabel": "How this page works",
-      "step1Title": "1. Upload files",
-      "step1Hint": "PDF, Word, Excel, CSV or text.",
-      "step2Title": "2. Choose which to ask about",
-      "step2Hint": "Tick one or more files — the answer comes only from what you tick.",
-      "step3Title": "3. Ask your question",
-      "step3Hint": "The AI answers only from the files you ticked.",
       "selectedOfTotal": "{count} of {total} selected",
       "selectAll": "Select all",
       "maxPerQuestion": "Up to {max} files per question.",
@@ -3935,6 +3928,37 @@
       "not_delivered_test_sender": "Your message could not be delivered: this deployment has no verified sender address.",
       "send_failed": "Your message could not be sent. Please try again.",
       "unknown": "Something went wrong. Please try again."
+    }
+  },
+  "stepFlow": {
+    "label": "Steps",
+    "steps": {
+      "describe": "Describe",
+      "generate": "Generate",
+      "edit": "Edit",
+      "preview": "Preview",
+      "publish": "Publish",
+      "question": "Question",
+      "research": "Research",
+      "sources": "Sources",
+      "answer": "Answer",
+      "upload": "Upload",
+      "ask": "Ask",
+      "review": "Review"
+    },
+    "hints": {
+      "describe": "Say what you want, in your own words.",
+      "generate": "It writes the first version. This spends credits.",
+      "edit": "Tell it what to change. You can do this as often as you like.",
+      "preview": "Look at it before anyone else does.",
+      "publish": "Put it online, at its own address.",
+      "question": "A subject to look into, not a search box.",
+      "research": "It reads the web and takes notes.",
+      "sources": "Every claim keeps the page it came from.",
+      "answer": "The answer, with what it was taken from.",
+      "upload": "PDF, Word, text, spreadsheets.",
+      "ask": "Tick one or more files — the answer comes only from what you tick.",
+      "review": "Read it before you use it. Nothing is run here."
     }
   }
 }

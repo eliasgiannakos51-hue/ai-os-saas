@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { VoiceInput } from "@/components/voice/voice-input";
+import { StepFlow } from "@/components/ui/step-flow";
 import { findUnfilledPlaceholders, type UnfilledPlaceholder } from "@/lib/website-placeholders";
 import { findInventedNumbers, type SuspectNumber } from "@/lib/website-invented-numbers";
 import { parseGenerationNotes, type GenerationNote } from "@/lib/website-generation-notes";
@@ -380,6 +381,10 @@ export function WebsiteBuilderWorkspace({
   // the row and hands back the original description/image paths; this
   // fires the exact same two-request flow (process + poll) a fresh
   // generation uses.
+  // Whether the site currently in the preview panel is live, as reported
+  // by PublishControl, which is the only thing that knows. Feeds the last
+  // step of the flow above.
+  const [livePreview, setLivePreview] = useState(false);
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
   async function handleRegenerateFlagged(id: string) {
     setRegeneratingId(id);
@@ -1208,8 +1213,24 @@ export function WebsiteBuilderWorkspace({
     },
   ];
 
+  // FIVE STEPS, derived from what the page is actually showing. The
+  // detail panel's tab is what separates edit from preview — they are
+  // the same website, seen two ways, and the tab is the only thing that
+  // says which. Published last, and only when the site really is: the
+  // step list is state, not a plan.
+  const websiteStep = !previewWebsite
+    ? generating
+      ? 1
+      : 0
+    : livePreview
+      ? 4
+      : detailTab === "edit"
+        ? 2
+        : 3;
+
   return (
     <div className="space-y-6">
+      <StepFlow flow="website" current={websiteStep} />
       {previewWebsite && (
         <DetailPanel
           icon={WEBSITE_BUILDER_ICON}
@@ -1272,6 +1293,7 @@ export function WebsiteBuilderWorkspace({
                 <PublishControl
                   websiteId={previewWebsite.id}
                   websiteName={previewWebsite.name}
+                  onLiveChange={setLivePreview}
                   disabled={previewWebsite.status !== "completed"}
                   // Three different reasons this is off, and they used to
                   // look identical: a grey button that does nothing. The

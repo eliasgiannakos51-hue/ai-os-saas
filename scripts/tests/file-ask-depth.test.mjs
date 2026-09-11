@@ -382,12 +382,21 @@ console.log("\n== 12. picking MORE THAN ONE file is stated, counted and bounded 
 // "I don't know if I can tick several" — the control worked, the UI never
 // said so. Every one of these is a sentence the user should not have had
 // to discover by experiment.
-check("the step says one OR MORE", /one or more files/i.test(messages.en.dashboard.files.step2Hint));
+// THE SENTENCE MOVED, AND THAT IS THE ONLY THING THAT MAY HAPPEN TO IT.
+// It lived in dashboard.files.step2Hint, under a step called "Choose
+// which to ask about" that this page drew itself. Redesign phase 4
+// replaced that hand-built list with the flow all four producing screens
+// share (lib/ui/step-flows.ts: upload -> ask -> answer), and the
+// choosing step went with it — so the sentence moved onto the `ask`
+// hint rather than being deleted with the key. It is the answer to a
+// real report ("I don't know if I can tick several") and this check is
+// what stops a tidy-up taking it away.
+check("the step says one OR MORE", /one or more files/i.test(messages.en.stepFlow.hints.ask));
 checkList(
   "in every locale (not the English sentence copied)",
   LOCALES.filter((l) => {
-    const hint = messages[l].dashboard.files.step2Hint;
-    return typeof hint !== "string" || hint.length < 10 || (l !== "en" && hint === messages.en.dashboard.files.step2Hint);
+    const hint = messages[l].stepFlow?.hints?.ask;
+    return typeof hint !== "string" || hint.length < 10 || (l !== "en" && hint === messages.en.stepFlow.hints.ask);
   })
 );
 check("the count is N of M, not a bare number", /\{count\}[\s\S]*\{total\}/.test(messages.en.dashboard.files.selectedOfTotal));

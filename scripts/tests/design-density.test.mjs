@@ -58,8 +58,11 @@ console.log("\n== 2. the lines ==");
 // one-primary-action.test.mjs is where that trade is measured from the
 // other side; the number there went from 138 filled controls across the
 // pages to 46, and then to 39 once the surfaces were told apart.
-// No slack: 583 is the measured count, not a round number above it.
-ok(`border utilities (${r.counts.borders}), ceiling 583`, r.counts.borders <= 583);
+// 583 -> 581 in the same round: the Files page's hand-built step list,
+// two bordered boxes of it, became components/ui/step-flow.tsx, which
+// draws none. No slack: 581 is the measured count, not a round number
+// above it.
+ok(`border utilities (${r.counts.borders}), ceiling 581`, r.counts.borders <= 581);
 ok(`divide rules (${r.counts.divides}), ceiling 6`, r.counts.divides <= 6);
 
 console.log("\n== 3. the glow and the gradient titles ==");

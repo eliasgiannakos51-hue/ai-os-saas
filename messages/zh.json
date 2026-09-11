@@ -2060,13 +2060,6 @@
       "truncatedWarning": "即使分成几部分阅读，所选文档仍超出一个问题能覆盖的范围，答案可能不完整。请一次针对更少的文件提问。",
       "skippedFiles": "已跳过（无可读文本）：{names}",
       "creditsCharged": "{credits} 积分",
-      "stepsLabel": "本页使用方法",
-      "step1Title": "1. 上传文件",
-      "step1Hint": "PDF、Word、Excel、CSV 或文本。",
-      "step2Title": "2. 选择要提问的文件",
-      "step2Hint": "勾选一个或多个文件——回答只来自你勾选的内容。",
-      "step3Title": "3. 提出你的问题",
-      "step3Hint": "AI 只依据你勾选的文件作答。",
       "selectedOfTotal": "已选择 {count} / {total}",
       "selectAll": "全选",
       "maxPerQuestion": "每个问题最多 {max} 个文件。",
@@ -3935,6 +3928,37 @@
       "not_delivered_test_sender": "您的留言未能送达：本部署没有经过验证的发件地址。",
       "send_failed": "您的留言发送失败，请重试。",
       "unknown": "出了点问题，请重试。"
+    }
+  },
+  "stepFlow": {
+    "label": "步骤",
+    "steps": {
+      "describe": "描述",
+      "generate": "生成",
+      "edit": "编辑",
+      "preview": "预览",
+      "publish": "发布",
+      "question": "问题",
+      "research": "研究",
+      "sources": "来源",
+      "answer": "回答",
+      "upload": "上传",
+      "ask": "提问",
+      "review": "检查"
+    },
+    "hints": {
+      "describe": "用你自己的话说出你要什么。",
+      "generate": "它写出第一版。会消耗额度。",
+      "edit": "告诉它改什么。想改多少次都行。",
+      "preview": "在别人看到之前先看一遍。",
+      "publish": "上线，拥有自己的网址。",
+      "question": "一个要深入的主题，不是搜索词。",
+      "research": "它读网页并做笔记。",
+      "sources": "每条结论都保留它的出处页面。",
+      "answer": "答案，附带它的来源。",
+      "upload": "PDF、Word、文本、表格。",
+      "ask": "勾选一个或多个文件——回答只来自你勾选的内容。",
+      "review": "使用前先读一遍。这里不运行任何代码。"
     }
   }
 }

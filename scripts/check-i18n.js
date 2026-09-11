@@ -46,6 +46,20 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // REDESIGN PHASE 4, the four step flows. Three step names land on the
+  // same letters as English and the neighbours in the same block prove
+  // the block was translated rather than copied.
+  //
+  // Spanish "Describe" is the imperative of describir — the same seven
+  // letters. Beside it: es generate "Genera", edit "Edita", preview
+  // "Vista previa", publish "Publica", upload "Sube", ask "Consulta".
+  "es:stepFlow.steps.describe",
+  // French for the noun IS "question" and IS "sources"; "Interrogation"
+  // and "Références" would both be worse words for a progress step.
+  // Beside them: fr describe "Décris", generate "Génère", edit
+  // "Modifie", answer "Réponse", upload "Téléverse", review "Vérifie".
+  "fr:stepFlow.steps.question",
+  "fr:stepFlow.steps.sources",
   // The pagination line under every module list, the timeline, the agents
   // and the missions. French for a page in a paginated list IS "page", and
   // the rest of the string is two placeholders and a slash — there is

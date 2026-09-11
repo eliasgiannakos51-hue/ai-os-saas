@@ -16,6 +16,7 @@ import {
   Square,
 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
+import { StepFlow } from "@/components/ui/step-flow";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { DownloadPdfButton } from "@/components/ui/download-pdf-button";
 import { EmptyState } from "@/components/empty-state";
@@ -285,8 +286,15 @@ export function ResearchWorkspace({
 
   const capReached = monthlyCap !== null && usedThisMonth >= monthlyCap;
 
+  // THE FOUR STEPS, derived. `draft` is a plan waiting to be run, `open`
+  // a finished report — so the page is on "question" until there is a
+  // plan, on "research" while one is running or waiting, on "sources"
+  // once a report has them and on "answer" when it is being read.
+  const researchStep = open ? ((open.sources ?? []).length > 0 ? 3 : 2) : draft || running ? 1 : 0;
+
   return (
     <div className="space-y-5">
+      <StepFlow flow="research" current={researchStep} />
       <section className="space-y-3 surface-tight">
         <label htmlFor="research-topic" className="text-sm font-semibold text-foreground">
           {t("topicLabel")}

@@ -38,10 +38,20 @@ export function PublishControl({
   websiteName,
   disabled = false,
   disabledReason,
+  onLiveChange,
 }: {
   websiteId: string;
   websiteName: string;
   disabled?: boolean;
+  /**
+   * Told whenever this control learns, or changes, whether the site is
+   * live. It owns that fact — it fetches it itself — and the website
+   * builder's step flow needs it to know whether the last step
+   * (Publish) is done. A callback rather than a second fetch upstairs:
+   * two places asking the same question get two answers the moment one
+   * of them publishes.
+   */
+  onLiveChange?: (live: boolean) => void;
   /**
    * Why the toggle is off, in the user's language — rendered as VISIBLE
    * text beside the button, not as a title attribute.
@@ -96,6 +106,16 @@ export function PublishControl({
     setOpen(false);
     void load();
   }, [load]);
+
+  // ONE PLACE DECIDES WHAT "LIVE" MEANS, and it is this component. The
+  // caller is told the answer rather than computing its own from the
+  // same row — `site.status === "live"` is the definition, and a second
+  // copy of it upstairs is a second thing to get wrong when publish or
+  // unpublish changes `site` here.
+  useEffect(() => {
+    onLiveChange?.(site?.status === "live");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [site?.status]);
 
   // Prefilled ONCE, when the dialog opens.
   //

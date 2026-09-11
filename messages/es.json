@@ -2060,13 +2060,6 @@
       "truncatedWarning": "Incluso leída por partes, la selección superaba lo que cubre una sola pregunta, así que la respuesta puede estar incompleta. Pregunta por menos archivos a la vez.",
       "skippedFiles": "Omitidos (sin texto legible): {names}",
       "creditsCharged": "{credits, plural, one {# crédito} other {# créditos}}",
-      "stepsLabel": "Cómo funciona esta página",
-      "step1Title": "1. Sube archivos",
-      "step1Hint": "PDF, Word, Excel, CSV o texto.",
-      "step2Title": "2. Elige sobre cuáles preguntar",
-      "step2Hint": "Marca uno o más archivos: la respuesta sale solo de lo que marques.",
-      "step3Title": "3. Haz tu pregunta",
-      "step3Hint": "La IA responde solo con los archivos que marcaste.",
       "selectedOfTotal": "{count} de {total} seleccionados",
       "selectAll": "Seleccionar todo",
       "maxPerQuestion": "Hasta {max} archivos por pregunta.",
@@ -3935,6 +3928,37 @@
       "not_delivered_test_sender": "Tu mensaje no se ha podido entregar: esta instalación no tiene una dirección de remitente verificada.",
       "send_failed": "No se ha podido enviar tu mensaje. Inténtalo de nuevo.",
       "unknown": "Algo ha ido mal. Inténtalo de nuevo."
+    }
+  },
+  "stepFlow": {
+    "label": "Pasos",
+    "steps": {
+      "describe": "Describe",
+      "generate": "Genera",
+      "edit": "Edita",
+      "preview": "Vista previa",
+      "publish": "Publica",
+      "question": "Pregunta",
+      "research": "Investiga",
+      "sources": "Fuentes",
+      "answer": "Respuesta",
+      "upload": "Sube",
+      "ask": "Consulta",
+      "review": "Revisa"
+    },
+    "hints": {
+      "describe": "Di lo que quieres, con tus palabras.",
+      "generate": "Escribe la primera versión. Gasta créditos.",
+      "edit": "Dile qué cambiar. Tantas veces como quieras.",
+      "preview": "Míralo antes que nadie.",
+      "publish": "Ponlo en línea, con su propia dirección.",
+      "question": "Un tema que investigar, no una búsqueda.",
+      "research": "Lee la web y toma notas.",
+      "sources": "Cada afirmación guarda la página de la que salió.",
+      "answer": "La respuesta, con su procedencia.",
+      "upload": "PDF, Word, texto, hojas de cálculo.",
+      "ask": "Marca uno o más archivos: la respuesta sale solo de lo que marques.",
+      "review": "Léelo antes de usarlo. Aquí no se ejecuta nada."
     }
   }
 }

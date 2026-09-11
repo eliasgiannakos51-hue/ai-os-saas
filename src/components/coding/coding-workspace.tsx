@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Play, Square } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
+import { StepFlow } from "@/components/ui/step-flow";
 import { CodeBlock } from "@/components/coding/code-block";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import {
@@ -135,8 +136,15 @@ export function CodingWorkspace({
     }
   }
 
+  // THREE STEPS, AND THE BRIEF ASKED FOR FIVE. See lib/ui/step-flows.ts:
+  // Test, Fix and Deploy are not steps this page has, because it runs
+  // nothing and deploys nothing, and drawing them greyed-out would be
+  // the promise the rename of this page was meant to stop making.
+  const codingStep = result ? 2 : running ? 1 : 0;
+
   return (
     <div className="space-y-6">
+      <StepFlow flow="coding" current={codingStep} />
       {/* WHAT IT DOES NOT DO, ON THE SCREEN. The previous version of this
           page was a form that looked like a code generator and was not;
           the fix for that is not a better name, it is saying the four

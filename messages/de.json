@@ -2060,13 +2060,6 @@
       "truncatedWarning": "Auch in Teilen gelesen war die Auswahl größer, als eine Frage abdecken kann, die Antwort kann also unvollständig sein. Frag nach weniger Dateien auf einmal.",
       "skippedFiles": "Übersprungen (kein lesbarer Text): {names}",
       "creditsCharged": "{credits, plural, one {# Credit} other {# Credits}}",
-      "stepsLabel": "So funktioniert diese Seite",
-      "step1Title": "1. Dateien hochladen",
-      "step1Hint": "PDF, Word, Excel, CSV oder Text.",
-      "step2Title": "2. Auswählen, worüber gefragt wird",
-      "step2Hint": "Wähle eine oder mehrere Dateien — die Antwort stammt nur aus dem, was du auswählst.",
-      "step3Title": "3. Frage stellen",
-      "step3Hint": "Die KI antwortet nur aus den angehakten Dateien.",
       "selectedOfTotal": "{count} von {total} ausgewählt",
       "selectAll": "Alle auswählen",
       "maxPerQuestion": "Bis zu {max} Dateien pro Frage.",
@@ -3935,6 +3928,37 @@
       "not_delivered_test_sender": "Ihre Nachricht konnte nicht zugestellt werden: Diese Installation hat keine verifizierte Absenderadresse.",
       "send_failed": "Ihre Nachricht konnte nicht gesendet werden. Bitte erneut versuchen.",
       "unknown": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    }
+  },
+  "stepFlow": {
+    "label": "Schritte",
+    "steps": {
+      "describe": "Beschreiben",
+      "generate": "Erzeugen",
+      "edit": "Bearbeiten",
+      "preview": "Vorschau",
+      "publish": "Veröffentlichen",
+      "question": "Frage",
+      "research": "Recherche",
+      "sources": "Quellen",
+      "answer": "Antwort",
+      "upload": "Hochladen",
+      "ask": "Fragen",
+      "review": "Prüfen"
+    },
+    "hints": {
+      "describe": "Sag mit eigenen Worten, was du willst.",
+      "generate": "Schreibt die erste Fassung. Kostet Credits.",
+      "edit": "Sag, was geändert werden soll. So oft du willst.",
+      "preview": "Sieh es dir an, bevor es jemand anderes tut.",
+      "publish": "Geht online, unter eigener Adresse.",
+      "question": "Ein Thema zum Nachgehen, keine Suchanfrage.",
+      "research": "Liest das Web und macht Notizen.",
+      "sources": "Jede Aussage behält die Seite, aus der sie stammt.",
+      "answer": "Die Antwort, mit ihrer Herkunft.",
+      "upload": "PDF, Word, Text, Tabellen.",
+      "ask": "Wähle eine oder mehrere Dateien — die Antwort stammt nur aus dem, was du auswählst.",
+      "review": "Lies es, bevor du es benutzt. Hier läuft nichts."
     }
   }
 }

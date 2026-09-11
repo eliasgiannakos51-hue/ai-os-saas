@@ -2060,13 +2060,6 @@
       "truncatedWarning": "Même lue par parties, la sélection dépassait ce qu'une seule question peut couvrir, donc la réponse peut être incomplète. Interrogez moins de fichiers à la fois.",
       "skippedFiles": "Ignorés (aucun texte lisible) : {names}",
       "creditsCharged": "{credits, plural, one {# crédit} other {# crédits}}",
-      "stepsLabel": "Comment fonctionne cette page",
-      "step1Title": "1. Importez des fichiers",
-      "step1Hint": "PDF, Word, Excel, CSV ou texte.",
-      "step2Title": "2. Choisissez lesquels interroger",
-      "step2Hint": "Cochez un ou plusieurs fichiers — la réponse provient uniquement de ce que vous cochez.",
-      "step3Title": "3. Posez votre question",
-      "step3Hint": "L'IA répond uniquement à partir des fichiers cochés.",
       "selectedOfTotal": "{count} sur {total} sélectionnés",
       "selectAll": "Tout sélectionner",
       "maxPerQuestion": "Jusqu'à {max} fichiers par question.",
@@ -3935,6 +3928,37 @@
       "not_delivered_test_sender": "Votre message n'a pas pu être remis : ce déploiement n'a pas d'adresse d'expéditeur vérifiée.",
       "send_failed": "Votre message n'a pas pu être envoyé. Veuillez réessayer.",
       "unknown": "Une erreur s'est produite. Veuillez réessayer."
+    }
+  },
+  "stepFlow": {
+    "label": "Étapes",
+    "steps": {
+      "describe": "Décris",
+      "generate": "Génère",
+      "edit": "Modifie",
+      "preview": "Aperçu",
+      "publish": "Publie",
+      "question": "Question",
+      "research": "Recherche",
+      "sources": "Sources",
+      "answer": "Réponse",
+      "upload": "Téléverse",
+      "ask": "Demande",
+      "review": "Vérifie"
+    },
+    "hints": {
+      "describe": "Dis ce que tu veux, avec tes mots.",
+      "generate": "Il écrit la première version. Cela coûte des crédits.",
+      "edit": "Dis-lui quoi changer. Autant de fois que tu veux.",
+      "preview": "Regarde-le avant tout le monde.",
+      "publish": "Mets-le en ligne, à sa propre adresse.",
+      "question": "Un sujet à creuser, pas une recherche.",
+      "research": "Il lit le web et prend des notes.",
+      "sources": "Chaque affirmation garde la page d'où elle vient.",
+      "answer": "La réponse, avec sa provenance.",
+      "upload": "PDF, Word, texte, tableurs.",
+      "ask": "Cochez un ou plusieurs fichiers — la réponse provient uniquement de ce que vous cochez.",
+      "review": "Lis-le avant de l'utiliser. Rien n'est exécuté ici."
     }
   }
 }

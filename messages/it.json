@@ -2060,13 +2060,6 @@
       "truncatedWarning": "Anche letta a parti, la selezione superava quanto può coprire una singola domanda, quindi la risposta può essere incompleta. Chiedi di meno file per volta.",
       "skippedFiles": "Saltati (nessun testo leggibile): {names}",
       "creditsCharged": "{credits, plural, one {# credito} other {# crediti}}",
-      "stepsLabel": "Come funziona questa pagina",
-      "step1Title": "1. Carica i file",
-      "step1Hint": "PDF, Word, Excel, CSV o testo.",
-      "step2Title": "2. Scegli su quali chiedere",
-      "step2Hint": "Seleziona uno o più file: la risposta viene solo da ciò che selezioni.",
-      "step3Title": "3. Fai la tua domanda",
-      "step3Hint": "L'IA risponde solo dai file che hai spuntato.",
       "selectedOfTotal": "{count} di {total} selezionati",
       "selectAll": "Seleziona tutto",
       "maxPerQuestion": "Fino a {max} file per domanda.",
@@ -3935,6 +3928,37 @@
       "not_delivered_test_sender": "Il tuo messaggio non è stato consegnato: questa installazione non ha un indirizzo mittente verificato.",
       "send_failed": "Non è stato possibile inviare il tuo messaggio. Riprova.",
       "unknown": "Qualcosa è andato storto. Riprova."
+    }
+  },
+  "stepFlow": {
+    "label": "Passaggi",
+    "steps": {
+      "describe": "Descrivi",
+      "generate": "Genera",
+      "edit": "Modifica",
+      "preview": "Anteprima",
+      "publish": "Pubblica",
+      "question": "Domanda",
+      "research": "Ricerca",
+      "sources": "Fonti",
+      "answer": "Risposta",
+      "upload": "Carica",
+      "ask": "Chiedi",
+      "review": "Controlla"
+    },
+    "hints": {
+      "describe": "Di' cosa vuoi, con parole tue.",
+      "generate": "Scrive la prima versione. Costa crediti.",
+      "edit": "Digli cosa cambiare. Tutte le volte che vuoi.",
+      "preview": "Guardalo prima di chiunque altro.",
+      "publish": "Va online, con un indirizzo suo.",
+      "question": "Un argomento da approfondire, non una ricerca.",
+      "research": "Legge il web e prende appunti.",
+      "sources": "Ogni affermazione conserva la pagina da cui viene.",
+      "answer": "La risposta, con la sua provenienza.",
+      "upload": "PDF, Word, testo, fogli di calcolo.",
+      "ask": "Seleziona uno o più file: la risposta viene solo da ciò che selezioni.",
+      "review": "Leggilo prima di usarlo. Qui non viene eseguito nulla."
     }
   }
 }

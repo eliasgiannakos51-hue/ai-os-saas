@@ -389,6 +389,30 @@ const createdFns = new Set(
 // Tables the app reads through a different schema or a view alias.
 const NOT_PROJECT_TABLES = new Set(["objects", "buckets", "users"]);
 console.log(`        code touches ${usedTables.size} tables and ${usedRpcs.size} RPCs`);
+// A FLOOR ON THE SOURCE, because everything below is a DIFFERENCE.
+//
+// The two checks under this line report what the code asks for that the
+// migrations do not build. An empty left-hand side produces an empty
+// offender list and a green line — so if either scraper above stopped
+// matching (a quoting style changes, `.from(` moves behind a helper),
+// this whole section would pass while measuring nothing, and it would
+// look exactly like today's output.
+//
+// That is not hypothetical: on 2026-09-11 both sets were replaced with
+// `new Set()` and this file still printed "ALL PASS: 307 passed, 0
+// failed", byte-identical to the real run. Same for staticColumns at
+// section 4b. The shape was found in schema-canaries.test.mjs first —
+// a number derived, printed, and never judged — and this file had three.
+//
+// The floors are well under the real figures (86 tables, 36 RPCs on
+// 2026-09-11) because they exist to catch a scraper returning NOTHING,
+// not to pin a count that legitimately moves with every feature.
+check(
+  `the source scan found call sites (${usedTables.size} tables, ${usedRpcs.size} RPCs)`,
+  usedTables.size >= 60 && usedRpcs.size >= 20,
+  "the two checks below are differences against this set — an empty one passes them both " +
+    "while testing nothing"
+);
 checkList(
   "every table the code reads has a migration that creates it",
   [...usedTables].filter((t) => !createdTables.has(t) && !NOT_PROJECT_TABLES.has(t)).sort()
@@ -482,6 +506,15 @@ for (const [file, content] of srcFilePairs) {
   }
 }
 console.log(`        ${staticColumns.size} tables' columns parsed from migration text`);
+// The same floor, for the same reason — see section 4's note. A table
+// that parses to an EMPTY column set fails loudly (every column the code
+// touches on it gets flagged), so only a wholesale parse failure is
+// silent, and a floor on the map size is what catches that.
+check(
+  `columns were parsed from the migration text (${staticColumns.size} tables)`,
+  staticColumns.size >= 80,
+  "columnIssuesIn finds nothing to report when it is given nothing to check against"
+);
 checkList(
   "every column a Supabase call touches exists on the table it names (static)",
   [...new Set(staticColumnIssues)].sort()

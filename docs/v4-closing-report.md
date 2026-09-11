@@ -217,10 +217,24 @@ is internally consistent about money it has never counted.
   and mutation-runner honesty
 
 **The 20% that is missing, named:** **98 of the 221 gates (44%) are named
-by a mutation suite.** The other 123 have never been shown to go red on
-the defect they describe. A gate without that proof is a gate whose
-clauses might all be decorative — which is precisely the failure this
-project found four times in its own instruments.
+by a mutation suite, measured 2026-09-05.** The other 123 had never been
+shown to go red on the defect they describe. A gate without that proof is
+a gate whose clauses might all be decorative — which is precisely the
+failure this project found four times in its own instruments.
+
+> **THE DATE IS PART OF THE NUMBER.** This is a closing report: a
+> measurement of one week, taken on one day, and it is left as it was
+> taken. It is not the current figure and was never meant to be read as
+> one — on 2026-09-11 the same command answered **143 of 273 (52.4%)**,
+> because the covered count rose by 45 and the gate population rose by 52.
+>
+> The figure that MOVES lives in `scripts/tests/mutation-coverage.test.mjs`
+> and prints on every `npm run build`, ratcheted. Read that one to know
+> where the project is; read this one to know where it was.
+>
+> Both halves of the rule that follows from this are in CLAUDE.md: a
+> number in a document either carries the date it was taken, or is
+> produced by the thing that prints it.
 
 > **CORRECTION.** The first version of this document said *107 of 218
 > (49%)*. That number cannot be re-derived: counting gates whose name has
@@ -391,7 +405,7 @@ Numbers a reader can re-derive, not summarise:
 | --- | --- |
 | `npm run build` | exit 0 — 221 suites, 18,529 assertions |
 | Mutation suites | 91 / 91 complete, 0 skipped; 1,540 declared mutations over 389 files — see the correction below |
-| Gates with adversarial proof | **98 of 221 (44%)** — see the correction in §1 |
+| Gates with adversarial proof | **98 of 221 (44%)**, measured 2026-09-05 — see the correction in §1. Current figure: `npm run build` prints it |
 | i18n | 2,868 keys × 9 locales, 0 untranslated |
 | Hardcoded English on a customer screen | **0** (160 remain: 123 legal texts, 37 owner-only diagnostics, both classified and checked) |
 | Path claims in comments and docs | 2,387 scanned, **0 unexplained**; 18 findings covered by 17 exception entries across 6 files, each with a reason and a staleness check in both directions |

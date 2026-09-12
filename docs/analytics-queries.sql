@@ -311,7 +311,8 @@ with drawn(href) as (values
   ('/dashboard/chat'), ('/dashboard/deep-research'), ('/dashboard/predictions'),
   ('/dashboard/agents'), ('/dashboard/automation'), ('/dashboard/marketplace'),
   ('/dashboard/timeline'), ('/dashboard/files'), ('/dashboard/finance'),
-  ('/dashboard/sales'), ('/dashboard/trading'), ('/dashboard/memory'),
+  ('/dashboard/sales'), ('/dashboard/trading'), ('/dashboard/search'),
+  ('/dashboard/ai-memory'),
   ('/dashboard/business-health'), ('/dashboard/projects'), ('/dashboard/mission'),
   ('/dashboard/reflection'), ('/dashboard/team'), ('/dashboard/integrations'),
   ('/dashboard/settings'), ('/help')

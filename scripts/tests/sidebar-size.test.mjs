@@ -23,7 +23,7 @@
 // its rules and then agreeing with itself.
 //
 // Run: node scripts/tests/sidebar-size.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
 
@@ -96,7 +96,17 @@ const MIN_DRAWN_ITEMS = 15;
 // drawn now because api/posts/generate reaches a model and writes one
 // post per platform. The other two (Images, Videos) are still out, for
 // the same reason they were.
-const MAX_DRAWN_ITEMS = 26;
+//
+// TWENTY-SEVEN SINCE UNIVERSAL MEMORY, and the extra row is a SPLIT rather
+// than an addition. One row said "AI Memory" and its own hint said "What
+// the AI remembers about you." in all ten languages; the page it opened
+// searched your module records and contained no reference to chat_memory
+// at all, while the help article for chat memory linked to it. Two things
+// wearing one name is what made that possible, so they are two rows now —
+// "Search my records" at /dashboard/search and "What it remembers" at
+// /dashboard/ai-memory — and ai-memory.test.mjs §5 holds them to different
+// names in every language.
+const MAX_DRAWN_ITEMS = 27;
 
 // The real filters, executed. lib/sidebar-visibility.ts imports no icons
 // precisely so this is possible — see its header.
@@ -305,7 +315,25 @@ for (const [name, expected] of Object.entries(CONSTANT_HREFS)) {
   check(`${name} still points at ${expected}`, actual === expected, String(actual));
 }
 const nowHrefs = new Set(parsedItems.map((i) => CONSTANT_HREFS[i.href] ?? i.href));
-const lost = BEFORE_V46_3.filter((href) => !nowHrefs.has(href));
+
+// A REDIRECT IS NOT A LOSS, and it is the one way an address may leave
+// this list. /dashboard/memory is the case that made this necessary: two
+// pages were called "Memory" — one searched your records, the other did
+// not exist — so the record search moved to /dashboard/search and what the
+// chat remembers took /dashboard/ai-memory. The old address still answers,
+// permanently, which is the whole point.
+//
+// READ FROM THE ROUTE, not from a list here. A second list would let this
+// pass over a redirect somebody deleted, which is exactly the failure the
+// section is about. The target has to be a destination the sidebar or the
+// palette can still reach, so a redirect into nowhere is still a loss.
+function redirectsToALiveDestination(href) {
+  const route = `src/app${href}/page.tsx`;
+  if (!existsSync(route)) return false;
+  const target = readFileSync(route, "utf8").match(/permanentRedirect\("([^"]+)"\)/)?.[1];
+  return Boolean(target) && nowHrefs.has(target);
+}
+const lost = BEFORE_V46_3.filter((href) => !nowHrefs.has(href) && !redirectsToALiveDestination(href));
 check(
   `all ${BEFORE_V46_3.length} destinations survived the consolidation`,
   lost.length === 0,

@@ -12,6 +12,17 @@
 -- unique index these UPSERTs conflict on.
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
+values ('cancel', 'el', 'Πώς ακυρώνω τη συνδρομή μου;', 'Ρυθμίσεις > Χρέωση > Ακύρωση συνδρομής. Δεν χάνεις αμέσως την πρόσβαση: το πλάνο σου συνεχίζει μέχρι το τέλος της περιόδου που έχεις ήδη πληρώσει και μετά ο λογαριασμός πέφτει στο δωρεάν πλάνο. Τα δεδομένα σου μένουν — δεν διαγράφεται τίποτα με την ακύρωση.', 'billing', 2, true, array['πως ακυρωνω', 'ακυρωση', 'να ακυρωσω', 'cancel', 'unsubscribe', 'διακοπη συνδρομης', 'σταματησω τη συνδρομη']::text[], '/dashboard/settings')
+on conflict (slug, locale) do update set
+  title = excluded.title,
+  body = excluded.body,
+  category = excluded.category,
+  "order" = excluded."order",
+  published = excluded.published,
+  triggers = excluded.triggers,
+  href = excluded.href;
+
+insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('invoices', 'el', 'Πού βρίσκω τις αποδείξεις μου;', 'Ρυθμίσεις > Χρέωση > Ιστορικό πληρωμών. Κάθε χρέωση έχει απόδειξη σε PDF που κατεβάζεις από εκεί. Οι πληρωμές γίνονται μέσω Stripe και δεν αποθηκεύουμε ποτέ τα στοιχεία της κάρτας σου.', 'billing', 3, true, array['αποδειξη', 'αποδειξεις', 'τιμολογιο', 'invoice', 'receipt', 'ιστορικο πληρωμων']::text[], '/dashboard/settings')
 on conflict (slug, locale) do update set
   title = excluded.title,
@@ -57,17 +68,6 @@ on conflict (slug, locale) do update set
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('credits-ran-out', 'el', 'Τελείωσαν τα credits μου — τι κάνω;', 'Δύο επιλογές: περιμένεις την επόμενη μηνιαία ανανέωση, ή αγοράζεις ένα πακέτο credits που προστίθεται αμέσως και δεν λήγει στο τέλος του μήνα. Και τα δύο γίνονται από τις Ρυθμίσεις > Χρέωση.', 'credits', 2, true, array['τελειωσαν τα credits', 'δεν εχω credits', 'εξαντληθηκαν', 'ran out of credits', 'πως αγοραζω credits', 'να παρω credits']::text[], '/dashboard/settings')
-on conflict (slug, locale) do update set
-  title = excluded.title,
-  body = excluded.body,
-  category = excluded.category,
-  "order" = excluded."order",
-  published = excluded.published,
-  triggers = excluded.triggers,
-  href = excluded.href;
-
-insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('credits-rollover', 'el', 'Μεταφέρονται τα credits στον επόμενο μήνα;', 'Τα μηνιαία credits του πλάνου ανανεώνονται κάθε μήνα και δεν συσσωρεύονται. Τα credits που αγοράζεις σε πακέτο είναι διαφορετικά: μένουν στον λογαριασμό σου μέχρι να τα χρησιμοποιήσεις.', 'credits', 3, true, array['μεταφερονται', 'rollover', 'χανονται τα credits', 'συσσωρευονται', 'expire credits']::text[], null)
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,

@@ -189,7 +189,12 @@ console.log(
 // help-articles (over both of its). Read off the run (measured=164). Both
 // named categories now print 0 bare; the 109 left are category 3, where
 // the exemption register below is the right answer for the small ones.
-const RATCHET = 164;
+// 164 -> 166: Universal Memory adds two gates and one suite over both —
+// ai-memory.test.mjs and chat-memory-store.itest.mjs, driven by
+// ai-memory.mutation.mjs. The denominator moves with them (273 -> 275), so
+// the percentage barely does; the point of the ratchet is the covered
+// count, not the ratio.
+const RATCHET = 166;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

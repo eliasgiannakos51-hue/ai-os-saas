@@ -106,7 +106,12 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   "New entry": "newEntry",
   "Mission Control": "missionControl",
   "Weekly Reflection": "reflection",
-  "AI Memory": "memory",
+  // "AI Memory" WAS ONE NAME FOR TWO PAGES. The key stays `memory` for
+  // the record search so its ten translations are not orphaned — only the
+  // English label and the strings themselves changed — and the page that
+  // shows what the chat remembered gets a key of its own.
+  "Search my records": "memory",
+  "What it remembers": "aiMemory",
   Team: "team",
   Affiliate: "affiliate",
   Settings: "settings",

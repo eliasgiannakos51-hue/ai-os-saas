@@ -160,9 +160,20 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that the answer arrives while you wait on the page",
   },
   {
+    // THE PAGE THE ARTICLE HAD BEEN PROMISING. Its own wrong assumption is
+    // the mirror image of the one below: people expect a memory screen to
+    // be a transcript, and it is not — it is a short list of distilled
+    // facts, most of which were never said in those words.
+    id: "aiMemory",
+    article: "chat-memory",
+    file: "src/app/dashboard/ai-memory/page.tsx",
+    keyPrefix: "help.aiMemory",
+    corrects: "that this is your chat history rather than a handful of facts drawn out of it",
+  },
+  {
     id: "memory",
     article: "chat-memory",
-    file: "src/app/dashboard/memory/page.tsx",
+    file: "src/app/dashboard/search/page.tsx",
     keyPrefix: "help.memory",
     // The name is the problem: "AI Memory" reads as "what the AI
     // remembers about me". It is a search across the module tables and

@@ -356,7 +356,14 @@ for (const locale of LOCALES) {
 console.log("\n== 8. the \"?\" links on, without depending on it ==");
 const { HELP_TIPS } = await loadTs("src/lib/help-tips.ts");
 const linked = HELP_TIPS.filter((t) => t.article);
-check(`${linked.length} of ${HELP_TIPS.length} tips link to an article`, linked.length === 9);
+// TEN SINCE UNIVERSAL MEMORY. /dashboard/ai-memory is the page the
+// chat-memory article had been describing for months — it said "you can
+// see everything it has kept, and delete it" while the link went to the
+// record search — so its tip links to that article, and the article now
+// links back. The number is an equality rather than a floor on purpose:
+// a tip acquiring a link is a decision, and this is where somebody has to
+// make it out loud.
+check(`${linked.length} of ${HELP_TIPS.length} tips link to an article`, linked.length === 10);
 checkList("every linked slug is a real article", linked.filter((t) => !enSlugs.has(t.article)).map((t) => t.article));
 const tip = readFileSync("src/components/ui/help-tip.tsx", "utf8");
 check("the link is an anchor on /help", /\/help#\$\{articleSlug\}/.test(tip));

@@ -68,10 +68,18 @@ const DECLARED = [
   { heading: "Run", hrefs: [
     "/dashboard/agents", "/dashboard/automation", "/dashboard/marketplace",
   ] },
+  // SEE GAINED A ROW BY SPLITTING ONE, not by adding a feature.
+  // /dashboard/memory was labelled "AI Memory" and its sidebar hint read
+  // "What the AI remembers about you." in all ten languages; the page
+  // searched your own records and contained no reference to chat_memory,
+  // while the help article for chat memory linked to it. So the record
+  // search is /dashboard/search and what the chat remembers is
+  // /dashboard/ai-memory, next to it. The old address permanently
+  // redirects.
   { heading: "See", hrefs: [
     "/dashboard/timeline", "/dashboard/files", "/dashboard/finance",
-    "/dashboard/sales", "/dashboard/trading", "/dashboard/memory",
-    "/dashboard/business-health",
+    "/dashboard/sales", "/dashboard/trading", "/dashboard/search",
+    "/dashboard/ai-memory", "/dashboard/business-health",
   ] },
   { heading: "Organise", hrefs: [
     "/dashboard/projects", "/dashboard/mission", "/dashboard/reflection", "/dashboard/team",

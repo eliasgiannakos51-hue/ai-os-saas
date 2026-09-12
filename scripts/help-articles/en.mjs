@@ -101,9 +101,9 @@ export const EN = [
     triggers: ["invite code", "beta code", "where do i put the code", "invitation", "promo code"],
   },
   {
-    slug: "chat-memory", href: "/dashboard/memory", category: "chat", order: 0,
+    slug: "chat-memory", href: "/dashboard/ai-memory", category: "chat", order: 0,
     title: "Does the chat remember earlier conversations?",
-    body: "Within one conversation it always remembers the earlier messages. Between conversations it keeps only lastingly useful details — your name, what you do, your preferences — and that is on the paid plans. You can see everything it has kept, and delete it, in Settings > Memory.",
+    body: "Within one conversation it always remembers the earlier messages. Between conversations it keeps only lastingly useful details — your name, what you do, your preferences — and that is on the paid plans. You can see everything it has kept, delete a single line or correct one, in What it remembers.",
     triggers: ["remember", "memory", "previous conversations", "does it forget", "chat history", "it does not remember"],
   },
   {

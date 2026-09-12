@@ -66,7 +66,13 @@ const EVIDENCE = {
   // --- plan bullets -------------------------------------------------
   basicAiChat: { file: "src/app/api/chat/route.ts", symbol: "export async function POST" },
   creditsPerMonth: { file: "src/lib/billing/credits.ts", symbol: "export async function grantCredits" },
-  aiMemory: { file: "src/app/dashboard/memory/page.tsx", symbol: "export default async function" },
+  // THE EVIDENCE NAMED THE WRONG PAGE, and the gate could not see it: the
+  // path resolved and the symbol was there. "AI Memory" on a plan bullet
+  // means the chat remembering you across conversations, and
+  // /dashboard/memory was the RECORD SEARCH — a page containing no
+  // reference to chat_memory at all. What plan-gates the capability is
+  // this predicate, so this is what vouches for it.
+  aiMemory: { file: "src/lib/chat/memory-policy.ts", symbol: "chatMemoryActive" },
   websiteAutomationBuilderAccess: { file: "src/lib/website-builder.ts", symbol: "export" },
   upTo2AiAgents: { file: "src/lib/agents/agent-limits.ts", symbol: "maxAgentsForPlan" },
   upTo5AiAgents: { file: "src/lib/agents/agent-limits.ts", symbol: "maxAgentsForPlan" },
@@ -113,7 +119,7 @@ const EVIDENCE = {
 
   // --- signup capability grid ---------------------------------------
   "Website & Automation Builder": { file: "src/lib/website-builder.ts", symbol: "export" },
-  "AI Memory": { file: "src/app/dashboard/memory/page.tsx", symbol: "export default async function" },
+  "AI Memory": { file: "src/app/dashboard/ai-memory/page.tsx", symbol: "export default async function" },
   "Team collaboration": { file: "src/app/api/team/invite/route.ts", symbol: "export async function POST" },
   "Team seats": { file: "src/lib/billing/plans.ts", symbol: "hasTeamSeats" },
   "Team seats included free": { file: "src/lib/billing/plans.ts", symbol: "teamSeatsIncluded" },

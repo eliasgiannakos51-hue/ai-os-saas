@@ -159,7 +159,8 @@
       "voice": "Voz",
       "predictions": "Patrones",
       "posts": "Publicaciones",
-      "projects": "Proyectos"
+      "projects": "Proyectos",
+      "aiMemory": "Lo que recuerda"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -188,7 +189,7 @@
       "productWorkflow": "Tus productos, patrones y mentor en una vista.",
       "timeline": "Todo lo que has hecho, en orden.",
       "reflection": "Un resumen semanal de tu progreso.",
-      "memory": "Lo que la IA recuerda de ti.",
+      "memory": "Busca en todo lo que has guardado.",
       "favorites": "Todo lo que has marcado.",
       "marketplace": "Comparte la forma de un agente como plantilla y empieza desde una que compartió otra persona.",
       "team": "Invita gente a tu espacio.",
@@ -218,7 +219,8 @@
       "voice": "Escucha un texto en voz alta, o habla y se escribe. Los minutos se miden y el precio por minuto está en la página.",
       "predictions": "Patrones en tus propias entradas, cada uno con el número de registros que lo sostiene y un enlace a ellos.",
       "posts": "Dilo una vez y recibe una publicación por plataforma, con su longitud y su tono. No publica nada: copias y publicas tú.",
-      "projects": "Una carpeta con un objetivo. Lo que metes es lo que hay — nada entra solo."
+      "projects": "Una carpeta con un objetivo. Lo que metes es lo que hay — nada entra solo.",
+      "aiMemory": "Lo que el chat ha guardado sobre ti, y cómo borrarlo."
     },
     "closeMenu": "Cerrar el menú"
   },
@@ -555,7 +557,8 @@
       "memoryDisabled": "✓ memoria de chat desactivada",
       "planExcludes": "Tu plan actual no incluye memoria de chat, así que no se guarda nada. Los planes desde Starter recuerdan entre conversaciones.",
       "switchedOff": "La memoria está desactivada, así que no se guarda nada de tus conversaciones.",
-      "nothingYet": "Todavía no se ha guardado nada. La memoria está activa: retiene cosas duraderas como tu nombre, tu trabajo o una preferencia, en cuanto una conversación menciona alguna."
+      "nothingYet": "Todavía no se ha guardado nada. La memoria está activa: retiene cosas duraderas como tu nombre, tu trabajo o una preferencia, en cuanto una conversación menciona alguna.",
+      "seeAll": "Ver lo que recuerda"
     },
     "loginActivity": {
       "title": "Actividad de inicio de sesión",
@@ -3234,6 +3237,11 @@
       "is": "Un proyecto: su objetivo, lo que metiste y un chat que empieza dentro.",
       "does": "Agrupa el contenido en tareas, archivos, agentes y resultados, muestra cuándo entró cada cosa, te deja sacar cualquiera y empieza una conversación que pertenece a este proyecto toda su vida.",
       "doesNot": "Sacar algo no lo elimina, y el proyecto no añade nada por su cuenta: un plan aquí no trae sus pasos, un sitio no trae sus formularios."
+    },
+    "aiMemory": {
+      "is": "Todo lo que el chat ha guardado sobre usted, y nada más.",
+      "does": "Cada línea salió de una conversación. Puede abrirla, borrar una línea o corregirla — y lo que se ha dicho más de una vez se marca como repetido, porque ese es el peso que le da el chat.",
+      "doesNot": "No guarda sus conversaciones ni sus registros. Para buscar lo que ha registrado, use Buscar en mis registros; para desactivarlo por completo, el interruptor está en Ajustes."
     }
   },
   "helpCentre": {
@@ -3960,5 +3968,35 @@
       "ask": "Marca uno o más archivos: la respuesta sale solo de lo que marques.",
       "review": "Léelo antes de usarlo. Aquí no se ejecuta nada."
     }
+  },
+  "aiMemory": {
+    "title": "Lo que recuerda",
+    "description": "Todo lo que Ionexa Chat ha guardado sobre ti entre conversaciones. Borra una línea, corrígela o bórralo todo.",
+    "emptyTitle": "Todavía no ha guardado nada",
+    "emptyActive": "Guarda una línea solo cuando una conversación contiene algo útil de forma duradera: tu nombre, a qué te dedicas, una preferencia. Nada todavía.",
+    "emptyInactive": "La memoria entre conversaciones está desactivada, así que no se guarda nada. El interruptor está en Ajustes.",
+    "summary": "{total} cosas guardadas · al chat se le dan las {window} más recientes",
+    "repeated": "se repite, {count} veces",
+    "once": "mencionado una vez",
+    "learned": "aprendido el {date}",
+    "lastSeen": "dicho por última vez el {date}",
+    "outsideWindow": "ahora mismo no se envía al chat",
+    "outsideWindowHelp": "Solo las líneas más recientes llegan al prompt. Dilo otra vez y vuelve a subir.",
+    "openConversation": "Abrir la conversación",
+    "conversationGone": "la conversación fue borrada",
+    "editLabel": "Corregir esto",
+    "deleteLabel": "Olvidar esto",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "saved": "Corregido.",
+    "deleted": "Olvidado.",
+    "couldNotDelete": "No se pudo borrar. Inténtalo de nuevo.",
+    "couldNotSave": "No se pudo guardar la corrección. Inténtalo de nuevo.",
+    "clearAll": "Olvidarlo todo",
+    "clearAllConfirm": "¿Borrar todo lo que el chat recuerda sobre ti? No se puede deshacer.",
+    "clearedAll": "Todo olvidado.",
+    "pruneButton": "Limpiar {count} sin usar",
+    "pruneConfirm": "¿Borrar {count} líneas dichas una sola vez y que no han vuelto a salir en seis meses? Todo lo repetido se conserva.",
+    "pruned": "{count} eliminadas."
   }
 }

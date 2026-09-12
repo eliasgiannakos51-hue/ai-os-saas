@@ -176,7 +176,7 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'en', 'Does the chat remember earlier conversations?', 'Within one conversation it always remembers the earlier messages. Between conversations it keeps only lastingly useful details — your name, what you do, your preferences — and that is on the paid plans. You can see everything it has kept, and delete it, in Settings > Memory.', 'chat', 0, true, array['remember', 'memory', 'previous conversations', 'does it forget', 'chat history', 'it does not remember']::text[], '/dashboard/memory')
+values ('chat-memory', 'en', 'Does the chat remember earlier conversations?', 'Within one conversation it always remembers the earlier messages. Between conversations it keeps only lastingly useful details — your name, what you do, your preferences — and that is on the paid plans. You can see everything it has kept, delete a single line or correct one, in What it remembers.', 'chat', 0, true, array['remember', 'memory', 'previous conversations', 'does it forget', 'chat history', 'it does not remember']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,
@@ -473,7 +473,7 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'el', 'Θυμάται το chat προηγούμενες συνομιλίες;', 'Μέσα στην ίδια συνομιλία θυμάται πάντα τα προηγούμενα μηνύματα. Ανάμεσα σε διαφορετικές συνομιλίες κρατά μόνο μόνιμα χρήσιμα στοιχεία — όνομα, επάγγελμα, προτιμήσεις — και αυτό υπάρχει στα επί πληρωμή πλάνα. Μπορείς να δεις ό,τι έχει κρατήσει, και να το σβήσεις, από τις Ρυθμίσεις > Μνήμη.', 'chat', 0, true, array['θυμαται', 'μνημη', 'memory', 'προηγουμενες συνομιλιες', 'ξεχναει', 'δεν θυμαται']::text[], '/dashboard/memory')
+values ('chat-memory', 'el', 'Θυμάται το chat προηγούμενες συνομιλίες;', 'Μέσα στην ίδια συνομιλία θυμάται πάντα τα προηγούμενα μηνύματα. Ανάμεσα σε διαφορετικές συνομιλίες κρατά μόνο μόνιμα χρήσιμα στοιχεία — όνομα, επάγγελμα, προτιμήσεις — και αυτό υπάρχει στα επί πληρωμή πλάνα. Μπορείς να δεις ό,τι έχει κρατήσει, να σβήσεις μία γραμμή ή να τη διορθώσεις, στο «Τι θυμάται».', 'chat', 0, true, array['θυμαται', 'μνημη', 'memory', 'προηγουμενες συνομιλιες', 'ξεχναει', 'δεν θυμαται']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,
@@ -759,7 +759,7 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'es', '¿El chat recuerda conversaciones anteriores?', 'Dentro de una misma conversación siempre recuerda los mensajes anteriores. Entre conversaciones distintas guarda solo lo que sigue siendo útil — su nombre, a qué se dedica, sus preferencias — y eso está en los planes de pago. Puede ver todo lo que ha guardado, y borrarlo, en Ajustes > Memoria.', 'chat', 0, true, array['recuerda', 'memoria', 'conversaciones anteriores', 'se olvida', 'no recuerda', 'historial del chat']::text[], '/dashboard/memory')
+values ('chat-memory', 'es', '¿El chat recuerda conversaciones anteriores?', 'Dentro de una misma conversación siempre recuerda los mensajes anteriores. Entre conversaciones distintas guarda solo lo que sigue siendo útil — su nombre, a qué se dedica, sus preferencias — y eso está en los planes de pago. Puede ver todo lo que ha guardado, borrar una línea o corregirla, en «Lo que recuerda».', 'chat', 0, true, array['recuerda', 'memoria', 'conversaciones anteriores', 'se olvida', 'no recuerda', 'historial del chat']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,
@@ -913,7 +913,7 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'fr', 'Le chat se souvient-il des conversations précédentes ?', 'À l''intérieur d''une même conversation, il se souvient toujours des messages précédents. D''une conversation à l''autre, il ne garde que ce qui reste durablement utile — votre nom, votre métier, vos préférences — et cela existe sur les formules payantes. Vous pouvez voir tout ce qu''il a gardé, et le supprimer, dans Paramètres > Mémoire.', 'chat', 0, true, array['se souvient', 'mémoire', 'conversations précédentes', 'il oublie', 'il ne se souvient pas', 'historique du chat']::text[], '/dashboard/memory')
+values ('chat-memory', 'fr', 'Le chat se souvient-il des conversations précédentes ?', 'À l''intérieur d''une même conversation, il se souvient toujours des messages précédents. D''une conversation à l''autre, il ne garde que ce qui reste durablement utile — votre nom, votre métier, vos préférences — et cela existe sur les formules payantes. Vous pouvez voir tout ce qu''il a gardé, supprimer une ligne ou la corriger, dans « Ce dont il se souvient ».', 'chat', 0, true, array['se souvient', 'mémoire', 'conversations précédentes', 'il oublie', 'il ne se souvient pas', 'historique du chat']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,
@@ -1067,7 +1067,7 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'de', 'Merkt sich der Chat frühere Unterhaltungen?', 'Innerhalb einer Unterhaltung merkt er sich die früheren Nachrichten immer. Zwischen verschiedenen Unterhaltungen behält er nur dauerhaft Nützliches — deinen Namen, was du machst, deine Vorlieben — und das gibt es in den bezahlten Tarifen. Was er behalten hat, kannst du unter Einstellungen > Erinnerung ansehen und löschen.', 'chat', 0, true, array['merkt sich', 'erinnert sich', 'gedächtnis', 'frühere unterhaltungen', 'vergisst', 'chatverlauf']::text[], '/dashboard/memory')
+values ('chat-memory', 'de', 'Merkt sich der Chat frühere Unterhaltungen?', 'Innerhalb einer Unterhaltung merkt er sich die früheren Nachrichten immer. Zwischen verschiedenen Unterhaltungen behält er nur dauerhaft Nützliches — deinen Namen, was du machst, deine Vorlieben — und das gibt es in den bezahlten Tarifen. Was er behalten hat, kannst du unter „Was es sich merkt“ ansehen, eine einzelne Zeile löschen oder korrigieren.', 'chat', 0, true, array['merkt sich', 'erinnert sich', 'gedächtnis', 'frühere unterhaltungen', 'vergisst', 'chatverlauf']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,
@@ -1221,7 +1221,7 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'it', 'La chat ricorda le conversazioni precedenti?', 'All''interno della stessa conversazione ricorda sempre i messaggi precedenti. Tra conversazioni diverse conserva solo ciò che resta utile a lungo — il suo nome, di cosa si occupa, le sue preferenze — e questo è disponibile nei piani a pagamento. Può vedere tutto ciò che ha conservato, ed eliminarlo, in Impostazioni > Memoria.', 'chat', 0, true, array['ricorda', 'memoria', 'conversazioni precedenti', 'dimentica', 'non ricorda', 'cronologia della chat']::text[], '/dashboard/memory')
+values ('chat-memory', 'it', 'La chat ricorda le conversazioni precedenti?', 'All''interno della stessa conversazione ricorda sempre i messaggi precedenti. Tra conversazioni diverse conserva solo ciò che resta utile a lungo — il suo nome, di cosa si occupa, le sue preferenze — e questo è disponibile nei piani a pagamento. Può vedere tutto ciò che ha conservato, cancellare una riga o correggerla, in «Cosa ricorda».', 'chat', 0, true, array['ricorda', 'memoria', 'conversazioni precedenti', 'dimentica', 'non ricorda', 'cronologia della chat']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,
@@ -1375,7 +1375,7 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'pt', 'O chat lembra-se de conversas anteriores?', 'Dentro da mesma conversa lembra-se sempre das mensagens anteriores. Entre conversas diferentes guarda apenas o que continua a ser útil — o seu nome, o que faz, as suas preferências — e isso existe nos planos pagos. Pode ver tudo o que guardou, e apagá-lo, em Definições > Memória.', 'chat', 0, true, array['lembra', 'memória', 'conversas anteriores', 'esquece', 'não se lembra', 'histórico do chat']::text[], '/dashboard/memory')
+values ('chat-memory', 'pt', 'O chat lembra-se de conversas anteriores?', 'Dentro da mesma conversa lembra-se sempre das mensagens anteriores. Entre conversas diferentes guarda apenas o que continua a ser útil — o seu nome, o que faz, as suas preferências — e isso existe nos planos pagos. Pode ver tudo o que guardou, apagar uma linha ou corrigi-la, em «O que se lembra».', 'chat', 0, true, array['lembra', 'memória', 'conversas anteriores', 'esquece', 'não se lembra', 'histórico do chat']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,
@@ -1529,7 +1529,7 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'zh', '聊天会记得之前的对话吗？', '在同一个对话里，它始终记得前面的消息。在不同对话之间，它只保留长期有用的信息——你的名字、你的工作、你的偏好——这项功能属于付费方案。它保留的全部内容都可以在「设置 > 记忆」里查看，也可以随时删除。', 'chat', 0, true, array['记得', '记忆', '之前的对话', '会忘记吗', '不记得', '聊天记录']::text[], '/dashboard/memory')
+values ('chat-memory', 'zh', '聊天会记得之前的对话吗？', '在同一个对话里，它始终记得前面的消息。在不同对话之间，它只保留长期有用的信息——你的名字、你的工作、你的偏好——这项功能属于付费方案。它保留的全部内容都可以在「它记得什么」里查看，删除某一条或更正它。', 'chat', 0, true, array['记得', '记忆', '之前的对话', '会忘记吗', '不记得', '聊天记录']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,
@@ -1683,7 +1683,7 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'ja', 'チャットは前の会話を覚えていますか？', '同じ会話の中では、前のメッセージを常に覚えています。別々の会話のあいだでは、長く役に立つことだけ——お名前、お仕事、好み——を保持します。これは有料プランの機能です。保持している内容は「設定 > メモリー」ですべて確認でき、削除もできます。', 'chat', 0, true, array['覚えている', '記憶', '前の会話', '忘れる', '覚えていない', 'チャット履歴']::text[], '/dashboard/memory')
+values ('chat-memory', 'ja', 'チャットは前の会話を覚えていますか？', '同じ会話の中では、前のメッセージを常に覚えています。別々の会話のあいだでは、長く役に立つことだけ——お名前、お仕事、好み——を保持します。これは有料プランの機能です。保持している内容は「覚えていること」ですべて確認でき、一行ずつ削除したり修正したりできます。', 'chat', 0, true, array['覚えている', '記憶', '前の会話', '忘れる', '覚えていない', 'チャット履歴']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,
@@ -1837,7 +1837,7 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'ar', 'هل تتذكر المحادثة ما دار سابقًا؟', 'داخل المحادثة الواحدة يتذكّر الرسائل السابقة دائمًا. أما بين محادثة وأخرى فيحتفظ فقط بما يظل مفيدًا — اسمك، وما تعمل به، وتفضيلاتك — وهذا متاح في الخطط المدفوعة. يمكنك رؤية كل ما احتفظ به، وحذفه، من الإعدادات > الذاكرة.', 'chat', 0, true, array['يتذكر', 'الذاكرة', 'المحادثات السابقة', 'ينسى', 'لا يتذكر', 'سجل المحادثة']::text[], '/dashboard/memory')
+values ('chat-memory', 'ar', 'هل تتذكر المحادثة ما دار سابقًا؟', 'داخل المحادثة الواحدة يتذكّر الرسائل السابقة دائمًا. أما بين محادثة وأخرى فيحتفظ فقط بما يظل مفيدًا — اسمك، وما تعمل به، وتفضيلاتك — وهذا متاح في الخطط المدفوعة. يمكنك رؤية كل ما احتفظ به، وحذف سطر واحد أو تصحيحه، من «ما الذي يتذكره».', 'chat', 0, true, array['يتذكر', 'الذاكرة', 'المحادثات السابقة', 'ينسى', 'لا يتذكر', 'سجل المحادثة']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,

@@ -159,7 +159,8 @@
       "voice": "Voice",
       "predictions": "Predictions",
       "posts": "Posts",
-      "projects": "Projects"
+      "projects": "Projects",
+      "aiMemory": "What it remembers"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -188,7 +189,7 @@
       "productWorkflow": "Your products, patterns and mentor in one view.",
       "timeline": "Everything you've done, in order.",
       "reflection": "A weekly summary of your progress.",
-      "memory": "What the AI remembers about you.",
+      "memory": "Search across everything you have saved.",
       "favorites": "Everything you've starred.",
       "marketplace": "Share an agent's shape as a template, and start from one someone else shared.",
       "team": "Invite people to your workspace.",
@@ -218,7 +219,8 @@
       "voice": "Have text read out loud, or speak and have it written down. Minutes are metered and the price per minute is on the page.",
       "predictions": "Patterns found in your own rows, each with the number of entries it rests on and a link to them.",
       "posts": "Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.",
-      "projects": "A folder with a goal. What you put in is what is in it — nothing is dragged in with it."
+      "projects": "A folder with a goal. What you put in is what is in it — nothing is dragged in with it.",
+      "aiMemory": "What the chat has kept about you, and how to remove it."
     },
     "closeMenu": "Close menu"
   },
@@ -555,7 +557,8 @@
       "memoryDisabled": "✓ chat memory disabled",
       "planExcludes": "Your current plan doesn’t include chat memory, so nothing is being saved. Plans from Starter up remember across conversations.",
       "switchedOff": "Memory is switched off, so nothing is being saved from your conversations.",
-      "nothingYet": "Nothing saved yet. Memory is on and working — it keeps durable things like your name, your work or a preference, once a conversation mentions one."
+      "nothingYet": "Nothing saved yet. Memory is on and working — it keeps durable things like your name, your work or a preference, once a conversation mentions one.",
+      "seeAll": "See what it remembers"
     },
     "loginActivity": {
       "title": "Login Activity",
@@ -3234,6 +3237,11 @@
       "is": "One project: its goal, what you put in it, and a chat that starts inside it.",
       "does": "Groups the members as tasks, files, agents and results, shows when each joined, lets you take any of them out, and starts a conversation that belongs to this project for its whole life.",
       "doesNot": "Taking something out does not delete it, and the project adds nothing by itself: a plan here does not bring its steps, a website does not bring its form submissions."
+    },
+    "aiMemory": {
+      "is": "Everything the chat has kept about you, and nothing else.",
+      "does": "Each line came out of one conversation. You can open that conversation, delete a line, or correct it — and a fact said more than once is marked as repeated, because that is how much weight the chat gives it.",
+      "doesNot": "It does not hold your conversations or your records. To search what you have logged, use the record search in the sidebar; to switch this off entirely, the toggle is in Settings."
     }
   },
   "helpCentre": {
@@ -3960,5 +3968,35 @@
       "ask": "Tick one or more files — the answer comes only from what you tick.",
       "review": "Read it before you use it. Nothing is run here."
     }
+  },
+  "aiMemory": {
+    "title": "What it remembers",
+    "description": "Everything Ionexa Chat has kept about you across conversations. Delete a line, correct one, or clear the lot.",
+    "emptyTitle": "Nothing kept yet",
+    "emptyActive": "It keeps a line only when a conversation contains something lastingly useful — your name, what you do, a preference. Nothing yet.",
+    "emptyInactive": "Cross-conversation memory is off, so nothing is being kept. The switch is in Settings.",
+    "summary": "{total} things kept · the chat is told the {window} most recent",
+    "repeated": "repeated, {count} times",
+    "once": "mentioned once",
+    "learned": "learned {date}",
+    "lastSeen": "last said {date}",
+    "outsideWindow": "not currently sent to the chat",
+    "outsideWindowHelp": "Only the most recent lines reach the prompt. Say it again and it moves back up.",
+    "openConversation": "Open the conversation",
+    "conversationGone": "the conversation was deleted",
+    "editLabel": "Correct this",
+    "deleteLabel": "Forget this",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saved": "Corrected.",
+    "deleted": "Forgotten.",
+    "couldNotDelete": "Could not delete that. Try again.",
+    "couldNotSave": "Could not save the correction. Try again.",
+    "clearAll": "Forget everything",
+    "clearAllConfirm": "Delete everything the chat remembers about you? This cannot be undone.",
+    "clearedAll": "Everything forgotten.",
+    "pruneButton": "Clean up {count} unused",
+    "pruneConfirm": "Delete {count} lines that were said once and have not come up in six months? Anything repeated is kept.",
+    "pruned": "{count} removed."
   }
 }

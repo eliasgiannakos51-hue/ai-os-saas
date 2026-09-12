@@ -57,6 +57,11 @@ export const NAV_RETENTION_DAYS = 90;
 export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "affiliate",
   "agents",
+  // Universal Memory. `ai-memory` is what the chat has kept about you;
+  // `search` is the record search, which used to be called `memory` and
+  // still answers there with a permanent redirect. Two segments because
+  // they are two screens, which was the whole finding.
+  "ai-memory",
   "apps",
   "business-health",
   "campaigns",
@@ -72,6 +77,7 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "form-submissions",
   "images",
   "integrations",
+  "search",
   "marketplace",
   "memory",
   "mission",

@@ -100,7 +100,10 @@ if (suites.length === 0) {
 // 151 today against a real 151, the same day, with the eight category-2
 // suites (accent-search, chat-memory, chat-favorites, locale-formatting,
 // language-reachable, layout-unification, navigation-cost, help-articles).
-const FLOOR = 151;
+//
+// 152 with ai-memory.mutation.mjs, which drives both of Universal
+// Memory's gates.
+const FLOOR = 152;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

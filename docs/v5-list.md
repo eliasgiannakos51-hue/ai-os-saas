@@ -845,6 +845,73 @@ the app's own numbers with the app's own numbers.
 agree to within a few percent, the whole money axis moves. If they do not,
 that is the most valuable finding V5 could produce.
 
+### 12. Universal Memory — DONE (2026-09-12)
+
+The feature was three holes, and none of them was "it does not work".
+
+**The person could not see what it remembered, and the help article said
+they could — in ten languages.** Settings had a count and a "delete
+everything" button. There was no way to read one line, remove one, or
+correct one, so the only answer to a wrong fact was to throw away every
+right one with it. `/dashboard/ai-memory` is that page: every row, when it
+was learned, which conversation it came from as a link that opens it, a ✕
+per row, and a correction button.
+
+**Correction is delete-then-insert, on purpose.** chat_memory has a select,
+an insert and a delete policy and NO update policy, so nothing a browser
+session does can rewrite a stored fact into something else. That property
+is worth keeping, so it is kept and the button hides the shape.
+
+**A bare `.insert()` meant five identical rows for one fact.** The read
+takes the newest N — 20 on most plans — so twenty repetitions of one fact
+filled the whole window and pushed out everything else the chat knew. The
+feature got worse the more consistently somebody talked about themselves.
+Rows are deduplicated on `memory_fold` now (the same `foldForMatch` the
+search box uses) through `chat_memory_record()`, which bumps `times_seen`
+and `last_seen_at` rather than inserting. A function rather than an upsert
+because incrementing a counter needs an UPDATE, and a counter is not a
+reason to give up the append/delete-only property.
+
+**"Prefers X" and "did X once" are different claims**, and until
+`times_seen` existed the prompt could not tell them apart. It says which it
+is holding now, and how old, so a passing remark is not stated as a
+standing preference.
+
+**Two things were called "Memory".** `/dashboard/memory` searched your own
+records; its sidebar hint read "What the AI remembers about you." in all
+ten languages; `grep -c chat_memory` on it returned 0; and the chat-memory
+help article linked to it. The record search is `/dashboard/search` now
+(the old address permanently redirects), what the chat remembers is
+`/dashboard/ai-memory`, and `ai-memory.test.mjs` §5 holds the two to
+different names and different hints in every language. The pricing
+evidence table had the same confusion — the "AI Memory" plan bullet was
+vouched for by that page — and now names `chatMemoryActive`.
+
+*The retention rule, and why it is not "older than N days".* nav_events is
+pruned at 90 days because a nav event is an EVENT. chat_memory holds
+PROPERTIES: "my name is Ilias" is as true in 2028 as when it was said. So
+`prune_chat_memory()` removes a row only when it is said once AND unseen
+for 180 days AND outside the window the prompt reads AND never confirmed —
+plus rows whose conversation the person deleted, restricted to
+`times_seen = 1` for the same reason. Nothing repeated is ever removed by
+age. It is not wired to a cron: the page shows what would go, and a person
+presses the button.
+
+*How big does the table get?* `node scripts/estimate-chat-memory-growth.mjs`
+prints it rather than this line carrying the figure. The shape of the
+answer: the growth is in REPETITIONS, not in facts, so deduplication turns
+an unbounded row count into one that saturates at a person's distinct
+facts. Retention is the tail that leaves behind, which is why the rule can
+afford to be as conservative as it is.
+
+*Proven by:* `scripts/tests/ai-memory.test.mjs` (51 checks) ·
+`scripts/tests/chat-memory-store.itest.mjs` (37 checks against a real
+PostgreSQL: A cannot see B, one delete is one row, a duplicate does not
+write a row, and the TypeScript fold agrees with the SQL one) ·
+`scripts/tests/ai-memory.mutation.mjs` (16 of 16 over both gates).
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261003000000_chat_memory_dedup_and_retention.sql**
+
 ---
 
 ## What is NOT on this list, and why

@@ -327,12 +327,20 @@ console.log("\n== a query that runs under the SERVICE-ROLE client scopes itself 
 }
 
 console.log("\n== a page that reads EVERY module table bounds itself ==");
-// dashboard/memory read 21 tables with select("*") and no limit, then
+// The record search read 21 tables with select("*") and no limit, then
 // serialised every row into the client as props. Fine on a demo account,
 // a page-load timeout on a real one. lib/timeline.ts had already solved
 // the same problem with the same shape.
+//
+// IT WAS /dashboard/memory WHEN THIS WAS WRITTEN. It is /dashboard/search
+// now: two different screens were called "Memory" — this one, which
+// searches your own records, and the one the chat-memory help article had
+// been describing for months and which did not exist. The old address
+// permanently redirects, and a redirect reads 21 tables no more than it
+// reads one, so the claim moves with the page rather than staying at the
+// address.
 {
-  const mem = readFileSync("src/app/dashboard/memory/page.tsx", "utf8");
+  const mem = readFileSync("src/app/dashboard/search/page.tsx", "utf8");
   check("the per-module read is limited", /\.order\("created_at", \{ ascending: false \}\)\s*\.limit\(PER_MODULE_LIMIT\)/.test(mem));
   check("and the combined list is capped", /\.slice\(0, MAX_MEMORY_RESULTS\)/.test(mem));
   const timeline = readFileSync("src/lib/timeline.ts", "utf8");

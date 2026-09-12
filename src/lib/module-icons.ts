@@ -90,6 +90,12 @@ export const CHAT_ICON: LucideIcon = MessageCircle;
 export const SETTINGS_ICON: LucideIcon = Settings;
 export const MARKETPLACE_ICON: LucideIcon = Store;
 export const TEAM_ICON: LucideIcon = Users;
+// TWO THINGS WERE CALLED "MEMORY" AND SHARED ONE ICON. RECORD_SEARCH_ICON
+// is the page that searches your own records (/dashboard/search);
+// MEMORY_ICON is what the chat has remembered about you
+// (/dashboard/ai-memory). A magnifying glass and a brain, so the sidebar
+// does not present them as two doors to the same room.
+export const RECORD_SEARCH_ICON: LucideIcon = Search;
 export const MEMORY_ICON: LucideIcon = Brain;
 export const TIMELINE_ICON: LucideIcon = History;
 export const FAVORITES_ICON: LucideIcon = Star;

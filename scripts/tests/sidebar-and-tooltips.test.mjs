@@ -23,6 +23,7 @@
 // Run:  node scripts/tests/sidebar-and-tooltips.test.mjs
 // Live: BASE_URL=http://localhost:3140 node scripts/tests/sidebar-and-tooltips.test.mjs
 import { readFileSync, existsSync } from "node:fs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0,
   fail = 0,
@@ -106,7 +107,11 @@ check("...and from the command palette", /PINNED_SIDEBAR_ITEMS/.test(palette), f
 // with two of them, or with a group that was empty. None of those pass
 // now. Which four headings exist, and that each is translated, is
 // checked from the config in scripts/tests/sidebar-naming.test.mjs.
-const groupBlocks = [...nav.matchAll(/heading: "([^"]+)",\s*\n\s*collapsible: (true|false)/g)].map(
+// A COMMENT MAY SIT BETWEEN THE HEADING AND ITS FLAG. Writing down why
+// "Make" became collapsible dropped the group from this parse entirely on
+// 2026-09-12, and only the count floor above showed it as anything other
+// than a smaller sidebar.
+const groupBlocks = [...nav.matchAll(/heading: "([^"]+)",\s*(?:\n\s*(?:\/\/[^\n]*)?)*?\n\s*collapsible: (true|false)/g)].map(
   (m) => ({ heading: m[1], collapsible: m[2] === "true" }),
 );
 checkTrue(
@@ -114,8 +119,42 @@ checkTrue(
   groupBlocks.length >= 2,
   "a scan that finds nothing agrees with every claim below it",
 );
+// NO GROUP IS PINNED OPEN ANY MORE, and that is a decision rather than an
+// omission. "Make" was the pinned one, as the group somebody opens the app
+// to use. With Images, Videos and Music declared it became the LARGEST
+// group at eight rows, so pinning it meant every phone carried the tallest
+// block whether the person was in it or not.
+//
+// What replaced it is stronger: the group holding the current page opens
+// by itself (components/dashboard/sidebar.tsx), so the group you are in is
+// always open — including Make, when you are in it — and it closes when
+// you leave. node scripts/measure-sidebar-height.mjs is where the numbers
+// that decided this are produced: everything open is 2,213px, 2.6 screens
+// on a 390x844 phone; one group open is 1,063px.
 const alwaysOpen = groupBlocks.filter((g) => !g.collapsible);
-check("exactly one group is always open", alwaysOpen.length, 1);
+check("no group is pinned open — the current one opens itself instead", alwaysOpen.length, 0);
+// AND THE COMPONENT REALLY DOES IT. Asserting only the absence above would
+// pass just as well on a sidebar where every group is shut for ever.
+const sidebarForOpen = readFileSync("src/components/dashboard/sidebar.tsx", "utf8");
+checkTrue(
+  "the group holding the current page is open by default",
+  /return headingContaining\(pathname\) === group\.heading;/.test(sidebarForOpen),
+  "nothing derives the open group from the URL, so arriving on a page shows a shut nav",
+);
+checkTrue(
+  "...and a group opened by hand wins over that",
+  /const chosen = touched\.get\(group\.heading\);[\s\S]{0,80}if \(chosen !== undefined\) return chosen;/.test(sidebarForOpen),
+  "the manual choice has to be checked BEFORE the pathname, or navigating undoes it",
+);
+checkTrue(
+  "...and nothing is remembered across a reload",
+  // STRIPPED, because the component EXPLAINS that it no longer stores
+  // anything — and a check reading the raw file found the word in that
+  // sentence and called it storage. Comments are not code; the same shape
+  // put a `--` in front of an RLS statement in security-posture.test.mjs.
+  !/localStorage/.test(stripComments(sidebarForOpen)),
+  "a sidebar that restores three open groups from yesterday is thirty-three rows again",
+);
 // V4.6: the config carries items marked hidden — trackers reachable from
 // the records hub and ⌘K, kept out of the sidebar on purpose. The sidebar
 // must render through sidebarGroups() (which drops them), never through
@@ -140,10 +179,29 @@ checkTrue(
   /sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)\.map\(renderGroup\)/.test(sidebarSrc),
   "the Settings group is no longer rendered by the sidebar",
 );
+// EVERY HEADING IS A CONTROL, not a caption. With no group pinned open,
+// a heading that is only text is a group nobody can reach — so the rule
+// that used to apply to five of six now applies to all six, and the
+// component has to render each as a real button.
 checkTrue(
-  `and it is the first one (${groupBlocks[0]?.heading})`,
-  groupBlocks[0] && !groupBlocks[0].collapsible,
-  groupBlocks.map((g) => `${g.heading}:${g.collapsible ? "collapsible" : "open"}`).join(", "),
+  `every group is collapsible (${groupBlocks.length})`,
+  groupBlocks.length >= 6 && groupBlocks.every((g) => g.collapsible),
+  groupBlocks.map((g) => `${g.heading}:${g.collapsible ? "collapsible" : "pinned"}`).join(", "),
+);
+checkTrue(
+  "...and the heading is a button, at the 44px tap target",
+  /<button[\s\S]{0,200}onClick=\{\(\) => toggleGroup\(group\)\}[\s\S]{0,120}min-h-\[44px\]/.test(sidebarForOpen),
+  "a heading that is a <p> cannot be tapped, and cannot be reached by keyboard at all",
+);
+checkTrue(
+  "...announcing whether it is open",
+  /aria-expanded=\{expanded\}/.test(sidebarForOpen),
+  "a screen reader is told there is a button and not what it does",
+);
+checkTrue(
+  "...with a marker that turns",
+  /rotate-90[\s\S]{0,40}rotate-0/.test(sidebarForOpen),
+  "nothing on screen says which way the group is",
 );
 // Every group must actually contain something: a heading with no items
 // is a row of chrome that opens onto nothing, and `visibleGroups` only

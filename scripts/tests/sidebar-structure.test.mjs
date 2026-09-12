@@ -57,16 +57,50 @@ const NAV = "src/lib/sidebar-nav.ts";
 // and the place the settings live — and the order is the order of a
 // working session: make something, ask about it, set it running, look at
 // what came back, put it in order, change how it all behaves.
-const DECLARED = [
+// THE FULL STRUCTURE, INCLUDING WHAT IS NOT BUILT YET.
+//
+// The problem this shape solves is an ordering one. Every feature that
+// arrived after the 2026-09-05 structure was written went to the bottom of
+// its group, because nobody had said where it went — and "wherever it
+// landed" is not a place a person reaches for. So the future rows are
+// declared HERE, in position, and the config has to agree.
+//
+// A row marked below is not drawn. Its POSITION is still locked, and that
+// is the whole mechanism: when Music generates, or Meetings ships, the
+// flag comes off in lib/sidebar-nav.ts and the row appears BETWEEN the two
+// rows named around it. Section 1b is what makes that a promise.
+//
+// TWO KINDS OF NOT-DRAWN, and they are not interchangeable:
+//
+//   hidden    the page EXISTS and is deliberately not a row. Images and
+//             Videos are tracking logs — lib/build-modules.ts says so in
+//             its own words — and sidebar-naming.test.mjs is what keeps a
+//             notes form out of a heading that promises production. They
+//             stay in the command palette and on the hub.
+//   notBuilt  there is no page. Music, Browser, Computer and Meetings have
+//             no route, no component and no table, so visibleGroups strips
+//             them and neither the palette nor the hub can offer a 404.
+//
+// Rows the config carries that are NOT named here are palette-only by
+// design (the Create studio, Published Sites, the two workflows, the
+// twelve trackers). Their order is not locked, because they are never
+// drawn in it — locking it would be noise that hides the real drift.
+const FUTURE = [
   { heading: "Make", hrefs: [
-    "/dashboard/website-builder", "/dashboard/documents", "/dashboard/coding",
-    "/dashboard/voice", "/dashboard/presentations", "/dashboard/posts",
+    "/dashboard/website-builder", "/dashboard/documents", "/dashboard/presentations",
+    "/dashboard/posts", "/dashboard/coding",
+    "/dashboard/images", "/dashboard/videos", "/dashboard/music",
   ] },
+  // VOICE MOVED HERE FROM MAKE. It produces audio, which is why it was
+  // filed under production — but what a person does on that page is put a
+  // question and be answered, which is this group's subject.
   { heading: "Ask", hrefs: [
     "/dashboard/chat", "/dashboard/deep-research", "/dashboard/predictions",
+    "/dashboard/voice",
   ] },
   { heading: "Run", hrefs: [
     "/dashboard/agents", "/dashboard/automation", "/dashboard/marketplace",
+    "/dashboard/browser", "/dashboard/computer",
   ] },
   // SEE GAINED A ROW BY SPLITTING ONE, not by adding a feature.
   // /dashboard/memory was labelled "AI Memory" and its sidebar hint read
@@ -82,7 +116,8 @@ const DECLARED = [
     "/dashboard/ai-memory", "/dashboard/business-health",
   ] },
   { heading: "Organise", hrefs: [
-    "/dashboard/projects", "/dashboard/mission", "/dashboard/reflection", "/dashboard/team",
+    "/dashboard/projects", "/dashboard/mission", "/dashboard/reflection",
+    "/dashboard/meetings", "/dashboard/team",
   ] },
   // Rendered in its own block at the foot of the sidebar, from
   // SETTINGS_GROUP rather than MAIN_SIDEBAR_GROUPS — section 3 holds
@@ -92,6 +127,23 @@ const DECLARED = [
     "/dashboard/integrations", "/dashboard/settings", "/help",
   ] },
 ];
+
+/** The rows whose position is locked and which are NOT drawn today. */
+const NOT_DRAWN_YET = new Map([
+  ["/dashboard/images", "hidden"],
+  ["/dashboard/videos", "hidden"],
+  ["/dashboard/music", "notBuilt"],
+  ["/dashboard/browser", "notBuilt"],
+  ["/dashboard/computer", "notBuilt"],
+  ["/dashboard/meetings", "notBuilt"],
+]);
+
+// WHAT IS DRAWN IS DERIVED, not typed a second time. Two hand-written
+// lists that must agree is the shape this whole file exists to catch.
+const DECLARED = FUTURE.map((g) => ({
+  heading: g.heading,
+  hrefs: g.hrefs.filter((h) => !NOT_DRAWN_YET.has(h)),
+}));
 
 // FLOORS ON THE DECLARATION ITSELF. Every comparison below is against
 // DECLARED, so a DECLARED that had been emptied would agree with an
@@ -112,8 +164,14 @@ const navSrc = readFileSync(NAV, "utf8");
 const modules = await loadTs("src/lib/modules.ts");
 const { sidebarGroups } = await loadTs("src/lib/sidebar-visibility.ts");
 
+// A COMMENT MAY SIT BETWEEN THE HEADING AND ITS FLAG, and the first
+// version of this required them to be adjacent lines. Writing down WHY
+// "Make" became collapsible — two paragraphs, between the two — dropped
+// the group from the parse entirely, and the count check below is the
+// only reason that showed up as anything other than a smaller sidebar.
+// So the scan skips comment lines rather than forbidding them.
 const marks = [];
-for (const m of navSrc.matchAll(/heading: "([^"]+)",\s*\n\s*collapsible: (true|false)/g)) {
+for (const m of navSrc.matchAll(/heading: "([^"]+)",\s*(?:\n\s*(?:\/\/[^\n]*)?)*?\n\s*collapsible: (true|false)/g)) {
   marks.push({ heading: m[1], at: m.index });
 }
 const parsed = marks.map((mark, i) => {
@@ -131,6 +189,7 @@ const parsed = marks.map((mark, i) => {
         // list of destinations, and NAV_ITEM.href is not one.
         href: literal ?? (constant ? modules[constant]?.href ?? constant : null),
         hidden: /hidden:\s*true/.test(head),
+        notBuilt: /notBuilt:\s*true/.test(head),
         ownerOnly: /ownerOnly:\s*true/.test(head),
         label: chunk.match(/label:\s*["'`]([^"'`]+)["'`]/)?.[1] ?? chunk.match(/label:\s*([A-Z_]+)\.label/)?.[1] ?? "?",
         icon: null,
@@ -164,6 +223,82 @@ ok(`${drawnRows} rows drawn, ${DECLARED_ROWS} declared`, drawnRows === DECLARED_
   `a row was added or removed without this file being told`);
 
 // ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+console.log("\n== 1b. the POSITION of a row that is not built yet is locked ==");
+// ---------------------------------------------------------------------
+// THE CHECK THAT MAKES A FUTURE POSITION WORTH DECLARING. Without it the
+// FUTURE list above is a comment: the config could put Music at the top of
+// Make, or Meetings after Team, and nothing would move.
+//
+// Rows the config carries that FUTURE does not name are skipped, not
+// failed — they are palette-only on purpose and are never drawn in any
+// order at all. What is compared is the sequence of the rows that ARE or
+// WILL BE drawn.
+{
+  const { visibleGroups } = await loadTs("src/lib/sidebar-visibility.ts");
+  const positionDrift = [];
+  for (const declared of FUTURE) {
+    const group = parsed.find((g) => g.heading === declared.heading);
+    if (!group) {
+      positionDrift.push(`${declared.heading}: the group is not in the config`);
+      continue;
+    }
+    const locked = new Set(declared.hrefs);
+    const inConfig = group.items.map((i) => i.href).filter((h) => locked.has(h));
+    if (inConfig.join(" ") !== declared.hrefs.join(" ")) {
+      positionDrift.push(
+        `${declared.heading}:\n          config   ${inConfig.join(" ")}\n          declared ${declared.hrefs.join(" ")}`
+      );
+    }
+  }
+  ok("every locked row is in its declared position", positionDrift.length === 0, positionDrift.join("\n        "));
+
+  // AND THE FLAG IS THE ONE THE DECLARATION SAYS. `hidden` and `notBuilt`
+  // are not interchangeable — one keeps a real page searchable, the other
+  // keeps a route that does not exist out of search — so a row switching
+  // from one to the other is a decision, not a detail.
+  const byHref = new Map(parsed.flatMap((g) => g.items).map((i) => [i.href, i]));
+  const wrongFlag = [];
+  for (const [href, expected] of NOT_DRAWN_YET) {
+    const item = byHref.get(href);
+    if (!item) { wrongFlag.push(`${href}: not in the config at all`); continue; }
+    const actual = item.notBuilt ? "notBuilt" : item.hidden ? "hidden" : "drawn";
+    if (actual !== expected) wrongFlag.push(`${href}: declared ${expected}, config says ${actual}`);
+  }
+  ok(`all ${NOT_DRAWN_YET.size} not-yet rows carry the flag they are declared with`,
+    wrongFlag.length === 0, wrongFlag.join("\n        "));
+
+  // The other direction: a row that IS drawn must not be flagged. This is
+  // what goes red the day the flag comes off — in the right direction,
+  // telling whoever removed it to move the row out of NOT_DRAWN_YET too.
+  const surprised = FUTURE.flatMap((g) => g.hrefs)
+    .filter((h) => !NOT_DRAWN_YET.has(h))
+    .filter((h) => byHref.get(h)?.hidden || byHref.get(h)?.notBuilt);
+  ok("no row that should be drawn is flagged", surprised.length === 0, surprised.join(", "));
+
+  // A notBuilt row has NO PAGE, so it must reach neither the command
+  // palette nor the hub — both are built on visibleGroups, and offering
+  // either would be offering a 404.
+  const searchable = new Set(
+    visibleGroups(parsed, true).flatMap((g) => g.items.map((i) => i.href))
+  );
+  ok("the palette scan found rows to check", searchable.size > 20, String(searchable.size));
+  const offered = [...NOT_DRAWN_YET]
+    .filter(([, flag]) => flag === "notBuilt")
+    .map(([href]) => href)
+    .filter((href) => searchable.has(href));
+  ok("no unbuilt row is offered in search or on the hub", offered.length === 0, offered.join(", "));
+
+  // …while a HIDDEN row still is, which is the difference stated from the
+  // other side. Asserting only the absence above would pass just as well
+  // if visibleGroups stripped everything.
+  const hiddenStillSearchable = [...NOT_DRAWN_YET]
+    .filter(([, flag]) => flag === "hidden")
+    .map(([href]) => href)
+    .filter((href) => !searchable.has(href));
+  ok("…and every hidden row still is", hiddenStillSearchable.length === 0, hiddenStillSearchable.join(", "));
+}
+
 console.log("\n== 2. the ORDER and the NAMES, position by position ==");
 const drift = [];
 for (let i = 0; i < Math.max(drawn.length, DECLARED.length); i++) {

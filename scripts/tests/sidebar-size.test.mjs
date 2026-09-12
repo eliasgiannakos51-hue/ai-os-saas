@@ -122,7 +122,11 @@ console.log("== 1. the config is read, and read completely ==");
 // that quietly stops matching cannot under-report the size and turn this
 // whole file green.
 const groups = [];
-const headingRe = /heading: "([^"]+)",\s*\n\s*collapsible: (true|false)/g;
+// A COMMENT MAY SIT BETWEEN THE HEADING AND ITS FLAG. Writing down why
+// "Make" became collapsible dropped the group from this parse entirely on
+// 2026-09-12, and only the count floor above showed it as anything other
+// than a smaller sidebar.
+const headingRe = /heading: "([^"]+)",\s*(?:\n\s*(?:\/\/[^\n]*)?)*?\n\s*collapsible: (true|false)/g;
 const marks = [];
 for (const m of navSrc.matchAll(headingRe)) {
   marks.push({ heading: m[1], collapsible: m[2] === "true", at: m.index });
@@ -143,6 +147,12 @@ for (let i = 0; i < marks.length; i++) {
         // `label:`, which every item has and which follows its href.
         ...(/hidden:\s*true/.test(upToNext.split(/\n\s*\{/)[0]) ? { hidden: true } : {}),
         ...(/ownerOnly:\s*true/.test(upToNext.split(/\n\s*\{/)[0]) ? { ownerOnly: true } : {}),
+        // A DECLARED POSITION IS NOT A ROW. Without this the four
+        // not-yet-built entries counted against the drawn limit and the
+        // gate reported thirty-one rows for a sidebar that draws
+        // twenty-seven — a ceiling failing on rows nobody can see, which
+        // is the way to teach somebody to raise a ceiling.
+        ...(/notBuilt:\s*true/.test(upToNext.split(/\n\s*\{/)[0]) ? { notBuilt: true } : {}),
         // icon is required by the type but irrelevant here.
         label:
           upToNext.match(/label:\s*["'`]([^"'`]+)["'`]/)?.[1] ??

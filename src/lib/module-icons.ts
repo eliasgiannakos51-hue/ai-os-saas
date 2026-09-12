@@ -52,6 +52,10 @@ import {
   AudioLines,
   Compass,
   FolderKanban,
+  Music,
+  Monitor,
+  Mic,
+  AppWindow,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -95,6 +99,16 @@ export const TEAM_ICON: LucideIcon = Users;
 // MEMORY_ICON is what the chat has remembered about you
 // (/dashboard/ai-memory). A magnifying glass and a brain, so the sidebar
 // does not present them as two doors to the same room.
+// THE FOUR THAT HOLD A POSITION BEFORE THEY HOLD A PAGE. Declared here
+// rather than at the moment each feature ships, because the sidebar's
+// `notBuilt` rows carry an icon like any other row — the position, the
+// name and the mark are the promise, and inventing the mark on the day
+// the feature lands is how a row ends up looking like an afterthought.
+export const MUSIC_ICON: LucideIcon = Music;
+export const BROWSER_ICON: LucideIcon = AppWindow;
+export const COMPUTER_ICON: LucideIcon = Monitor;
+export const MEETINGS_ICON: LucideIcon = Mic;
+
 export const RECORD_SEARCH_ICON: LucideIcon = Search;
 export const MEMORY_ICON: LucideIcon = Brain;
 export const TIMELINE_ICON: LucideIcon = History;

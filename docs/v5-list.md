@@ -912,6 +912,54 @@ write a row, and the TypeScript fold agrees with the SQL one) ·
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261003000000_chat_memory_dedup_and_retention.sql**
 
+### 13. The sidebar has to hold what is not built yet — DONE (2026-09-12)
+
+**The structure now has six groups and thirty-three declared rows**, six of
+which are not drawn. `node scripts/measure-sidebar-height.mjs` prints the
+consequence rather than this line carrying it — it computes from the
+component's own class names, so a class that changes moves the number
+instead of quietly making it wrong.
+
+**Every future row has a POSITION, and the position is enforced.** The
+failure this closes is not hypothetical: every feature that arrived after
+the 2026-09-05 structure went to the bottom of its group, because nobody
+had said where it went. Music, Browser agent, Computer agent and Meetings
+carry `notBuilt`; Images and Videos carry `hidden`. The difference is the
+point — a hidden row is a page that exists and is deliberately not drawn
+(it stays in the command palette and on the hub), a notBuilt row has no
+page, so `visibleGroups` strips it and neither surface can offer a 404.
+`sidebar-structure.test.mjs` §1b holds the order of both, and the day a
+flag comes off the row has to prove production (`sidebar-naming` §3b) and
+carry its ten translations, in the same commit.
+
+**Only the group you are in is open.** This REVERSES V4.6 #3, on the
+measurement that decision was made on: its argument was "the wrong answer
+to four groups and sixteen rows, which fit at both measured heights". Six
+groups and thirty-three rows do not fit. Everything open is 2,213px — 2.6
+screens on a 390x844 phone, with Settings three screens below the fold; one
+group open is 1,063px.
+
+*The cost, written down:* a row in another group is TWO clicks. It is
+accepted because ⌘K is one keystroke and reaches every row, hidden ones
+included. Three rules keep it from becoming the accordion it replaced: no
+decision is asked of anybody, a group opened by hand STAYS open (and does
+not shut the one before it), and nothing is remembered across a reload.
+
+*What the measurement also showed, and is worth someone's attention:* the
+CHROME is what makes the phone scroll, not the rows. Six headings cost
+300px before a single row is drawn, and the header and three footer blocks
+take another 291px — 591px of an 844px screen. One open group still lands
+at 1.3 screens because of it.
+
+**Voice moved from Make to Ask.** It produces audio, which is why it was
+filed under production; what a person does on that page is put a question
+and be answered.
+
+*Proven by:* `sidebar-structure.test.mjs` (30 checks, §1b is the position
+lock) · `sidebar-and-tooltips.test.mjs` (the collapse rule, read from the
+component) · `sidebar-structure.mutation.mjs` (22 of 22, over five gates) ·
+`sidebar-groups.mutation.mjs` (9 of 9).
+
 ---
 
 ## What is NOT on this list, and why

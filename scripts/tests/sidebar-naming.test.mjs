@@ -126,7 +126,30 @@ check("no heading key points at a heading that does not exist", deadHeadingKeys.
 
 console.log("\n== 2. every ITEM the sidebar renders can be translated ==");
 const labels = [...navSrc.matchAll(/label: "([^"]+)"/g)].map((m) => m[1]);
-const unmappedItems = labels.filter((l) => !itemKeys[l] && l !== "Create Studio");
+// EVERY ITEM THE SIDEBAR RENDERS — which a `notBuilt` row is not.
+//
+// Those four rows hold a declared position for a feature that has no page:
+// they are stripped by visibleGroups, so nothing renders them, nothing
+// searches them and no reader ever sees the string. Translating a name
+// into ten languages before the feature exists is how a product ships
+// "Computer agent" in Japanese for something that turned out to be called
+// something else — and the exemption cannot rot, because the day the flag
+// comes off the row joins this list and the build demands the ten strings
+// in the same commit.
+//
+// sidebar-hints-coverage.test.mjs asserts the OTHER direction: a notBuilt
+// row must not carry them yet either.
+const notBuiltLabels = new Set(
+  [...navSrc.matchAll(/label: "([^"]+)"[^\n]*notBuilt: true/g)].map((m) => m[1])
+);
+const unmappedItems = labels.filter(
+  (l) => !itemKeys[l] && l !== "Create Studio" && !notBuiltLabels.has(l)
+);
+check(
+  `the not-yet-built rows were found (${notBuiltLabels.size})`,
+  notBuiltLabels.size >= 1,
+  "the exemption below would be exempting nothing"
+);
 // `labels.filter(...).length === 0` is true of an empty list, so the floor
 // is what makes the line above a statement about the sidebar rather than
 // about the regex that reads it. Forty items today.
@@ -195,17 +218,37 @@ const buildGroup = groupOf("Make");
 const trackingGroup = groupOf("See");
 check("the group the logs live in exists", trackingGroup.length > 0);
 
-const offenders = trackingSlugs.filter((slug) => {
-  const href = `/dashboard/${slug}`;
-  return buildGroup.includes(`"${href}"`);
-});
+// DRAWN UNDER MAKE, NOT LISTED UNDER MAKE, and the difference arrived on
+// 2026-09-12 with the declared-position work. The rule is about what a
+// person SEES: a row promising generation that opens a notes form is a
+// broken promise. A `hidden` entry is not a row — it is a page kept in the
+// command palette and out of the nav — so where it sits in the config is
+// where it WILL be drawn, on the day it starts generating.
+//
+// Images and Videos are declared under Make for exactly that reason, and
+// are still hidden for exactly the old one. Reading membership rather than
+// visibility would have forced them to be declared in the group they must
+// LEAVE, which is a position that says nothing.
+const drawnUnderMake = (href) => {
+  const entry = buildGroup.split(`"${href}"`)[1];
+  if (entry === undefined) return false;
+  const head = entry.split(/\n\s*\{/)[0];
+  return !/hidden:\s*true/.test(head) && !/notBuilt:\s*true/.test(head);
+};
+const offenders = trackingSlugs.filter((slug) => drawnUnderMake(`/dashboard/${slug}`));
 check(
-  "no tracking-only module is filed under Make",
+  "no tracking-only module is DRAWN under Make",
   offenders.length === 0,
-  offenders.length ? `these produce nothing but sit under "Make": ${offenders.join(", ")}` : ""
+  offenders.length ? `these produce nothing but are rows under "Make": ${offenders.join(", ")}` : ""
 );
-const misfiled = trackingSlugs.filter((slug) => !trackingGroup.includes(`/dashboard/${slug}`));
-check("and every one of them IS under See", misfiled.length === 0, misfiled.join(", "));
+// AND THE HIDDEN ONES ARE STILL IN THE CONFIG SOMEWHERE — under See with
+// the other logs, or under Make holding the position they will be drawn
+// in. What may not happen is a tracker disappearing from both.
+const misfiled = trackingSlugs.filter(
+  (slug) => !trackingGroup.includes(`/dashboard/${slug}`) && !buildGroup.includes(`"/dashboard/${slug}"`)
+);
+check("and every one of them is under See, or holds a declared position under Make",
+  misfiled.length === 0, misfiled.join(", "));
 // AND NONE OF THEM WAS QUIETLY DROPPED. Consolidating a sidebar is one
 // keystroke away from deleting entries instead of grouping them, and a
 // deleted entry leaves the page live but unreachable from the nav AND
@@ -221,6 +264,10 @@ check(
 
 // The other direction: what is left in Make must really make something.
 const buildHrefs = [...buildGroup.matchAll(/href: "([^"]+)"/g)].map((m) => m[1]);
+// The allowlist below is about the rows a person is offered, so it reads
+// the DRAWN ones. The hidden and not-yet-built entries under Make are
+// positions, checked by sidebar-structure.test.mjs §1b instead.
+const drawnBuildHrefs = buildHrefs.filter((h) => drawnUnderMake(h));
 console.log(`        Make now holds: ${buildHrefs.join(", ")}`);
 // Same reasoning, other direction: the three `buildHrefs.includes(...)`
 // checks below would each go red on an empty list, so those are safe — but
@@ -266,7 +313,11 @@ const BUILD_ALLOWED = {
   // and both reserving credits like any other paid call. See the AI_CALL
   // paragraph in section 3b for why "reaches a model" had to grow a
   // second meaning to describe it honestly.
-  "/dashboard/voice": "speech out and speech in, through real paid providers",
+  // VOICE LEFT MAKE ON 2026-09-12, for Ask. It produces audio, which is
+  // why it was filed under production — but what a person does on that
+  // page is put a question and be answered. The entry stays out of this
+  // list rather than being kept "just in case": an allowlist that names a
+  // row the group no longer has is how the next reader learns to skim it.
   // V5 #21. It was the sixth tracker: a notes form under a name that
   // promised slides. api/presentations/generate makes ONE forced-tool
   // call that returns the deck, and the .pptx and PDF routes lay it out.
@@ -286,6 +337,15 @@ const BUILD_ALLOWED = {
   "/dashboard/form-submissions": "what the published sites produced",
   "/dashboard/product-workflow": "a guided build, start to finish",
   "/dashboard/trading-workflow": "a guided build, start to finish",
+  // THREE POSITIONS, NOT THREE ROWS. Images and Videos are tracking logs
+  // and Music has no page at all; none of them is drawn under Make and
+  // none may be until it generates, which is what the section above
+  // measures. They are in this list because they are IN the group, and a
+  // list of what the group may contain that omitted them would be a list
+  // that has to be edited on the day nothing changes.
+  "/dashboard/images": "a position held — a tracking log until a route behind it reaches a model",
+  "/dashboard/videos": "a position held — a tracking log until a route behind it reaches a model",
+  "/dashboard/music": "a position held — no page at all yet",
 };
 const unexpected = buildHrefs.filter((href) => !(href in BUILD_ALLOWED));
 check(
@@ -481,7 +541,14 @@ console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
     return sources.some((file) => callsModel(file));
   };
 
-  for (const href of buildHrefs) {
+  // THE DRAWN ROWS, and this is where the position mechanism gets its
+  // teeth. A row under Make must reach a model — that is the promise the
+  // heading makes — but a position held for a row that is NOT drawn cannot
+  // be held to it, or Images and Videos could never be declared where they
+  // will one day appear. What makes that safe rather than a loophole: the
+  // day the flag comes off in lib/sidebar-nav.ts, the href joins this loop
+  // and has to prove production in the same commit.
+  for (const href of drawnBuildHrefs) {
     const slug = href.replace("/dashboard/", "");
     if (href in DOWNSTREAM) {
       // AN EXEMPTION HAS TO EARN ITSELF. This was `check(name, true)` — a

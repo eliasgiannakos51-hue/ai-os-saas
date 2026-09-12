@@ -151,8 +151,14 @@ const MUTANTS = [
     dimension: "E. what spends money",
     name: "an entry names enforcement that is no longer there",
     file: CATALOG,
-    from: '    enforcedSymbol: "maxAgentsForPlan",',
-    to: '    enforcedSymbol: "maxAgentsForPlanXX",',
+    // RE-ANCHORED 2026-09-13: the agents row's evidence became
+    // `capabilities.maxAiAgents` when every capability was tagged with
+    // the PlanCapabilities field it publishes. The old anchor named
+    // `maxAgentsForPlan`, which is still in the file — as the accessor,
+    // not as the evidence — so the mutation stopped applying where it
+    // meant to.
+    from: '    enforcedSymbol: "capabilities.maxAiAgents",',
+    to: '    enforcedSymbol: "capabilities.maxAiAgentsXX",',
     expect: "every enforcement reference resolves",
   },
 ];

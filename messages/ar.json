@@ -298,7 +298,8 @@
       "siteEditsPerDay": "التعديلات المباشرة لكل موقع",
       "siteVersionsKept": "النسخ المحفوظة لكل موقع",
       "websiteImageStorage": "مساحة صور الموقع",
-      "voiceClipLength": "أطول تسجيل (بالدقائق)"
+      "voiceClipLength": "أطول تسجيل (بالدقائق)",
+      "teamMembers": "أعضاء الفريق"
     },
     "businessTitle": "الأعمال",
     "businessSubtitle": "للفرق التي تبني معًا",
@@ -3840,7 +3841,8 @@
     "errors": {
       "tooShort": "أعطه اسمًا أولًا.",
       "tooLong": "الاسم يتجاوز {limit} حرفًا.",
-      "failed": "لم ينجح — حاول مرة أخرى."
+      "failed": "لم ينجح — حاول مرة أخرى.",
+      "limitReached": "لقد استخدمت كل المشاريع الـ{limit} في خطتك. رقِّ خطتك لإضافة المزيد."
     }
   },
   "finance": {

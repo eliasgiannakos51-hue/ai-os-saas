@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { maxProjectsForPlan } from "@/lib/projects/project-limits";
+import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { checkProjectName, clampGoal, isProjectStatus } from "@/lib/projects/project";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +37,35 @@ export async function POST(request: Request) {
 
   const verdict = checkProjectName(body.name);
   if (!verdict.ok) return NextResponse.json({ error: verdict.reason, limit: verdict.limit }, { status: 400 });
+
+  // HOW MANY PROJECTS THIS PLAN ALLOWS, and until 2026-09-13 the answer
+  // was "as many as you like, on every plan including Free" — the only
+  // check here was on the NAME. Counted before the insert, with a HEAD
+  // count so nothing is read but the number.
+  //
+  // RLS scopes the count to this user's own rows; the explicit user_id
+  // filter is belt-and-braces and is also what makes the index usable.
+  const projectCap = maxProjectsForPlan(await resolveEffectivePlanSlug(user));
+  if (Number.isFinite(projectCap)) {
+    const { count, error: countError } = await supabase
+      .from("projects")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id);
+    // FAILS CLOSED on a count that did not come back. A ceiling that
+    // opens when the database hiccups is a ceiling an attacker reaches
+    // by making the database hiccup — and the cost of being wrong here
+    // is one refused project with a message, not a lost row.
+    if (countError) {
+      logApiError("/api/projects", countError, { stage: "count_projects" });
+      return NextResponse.json({ error: "limit_check_failed" }, { status: 503 });
+    }
+    if ((count ?? 0) >= projectCap) {
+      return NextResponse.json(
+        { error: "project_limit_reached", limit: projectCap },
+        { status: 402 }
+      );
+    }
+  }
 
   try {
     const { data, error } = await supabase

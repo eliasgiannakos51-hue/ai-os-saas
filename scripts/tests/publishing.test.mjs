@@ -132,7 +132,9 @@ console.log("\n== 2. fair use per plan ==");
 // ---------------------------------------------------------------------
 check("Free publishes nothing", limits.DEFAULT_PUBLISH_LIMITS.free, 0);
 check("Starter: 1", limits.DEFAULT_PUBLISH_LIMITS.starter, 1);
-check("Growth: 3", limits.DEFAULT_PUBLISH_LIMITS.growth, 3);
+// 3 -> 5 with the 2026-09-13 tiering: Growth is the plan that sells
+// "five sites", and the published number has to be the refused one.
+check("Growth: 5", limits.DEFAULT_PUBLISH_LIMITS.growth, 5);
 check("Professional: 10", limits.DEFAULT_PUBLISH_LIMITS.professional, 10);
 check("Ultimate: 30", limits.DEFAULT_PUBLISH_LIMITS.ultimate, 30);
 checkTrue("Enterprise is unlimited", limits.DEFAULT_PUBLISH_LIMITS.enterprise === Infinity);

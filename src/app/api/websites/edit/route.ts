@@ -17,12 +17,14 @@ import { logSecurityCheck } from "@/lib/security-check-log";
 import { getSiteUrl, getSiteHostname } from "@/lib/site-url";
 import { nextVersionNumber } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { accountHasCapability } from "@/lib/billing/capability-gate";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import {
   hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
+  resolveEffectivePlanSlug,
   getPurchasedPackCreditPriceEur,
 } from "@/lib/billing/credits";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
@@ -116,6 +118,23 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    // THE SAME PLAN GATE AS api/websites/generate, and it belongs here
+    // because this route calls the model and charges for it. Editing a
+    // site IS building a site; a gate on the create path and none on the
+    // edit path is a paywall with a second door.
+    //
+    // NOT on api/websites/[id]/regenerate, deliberately: that one only
+    // accepts a website already marked `flagged`, runs free, and exists
+    // to repair something the product itself produced badly. Refusing it
+    // would leave a downgraded account holding a broken page with no way
+    // to fix it, which is a worse outcome than a free repair.
+    if (!accountHasCapability(await resolveEffectivePlanSlug(user), "websiteBuilder", isAdminEmail(user.email))) {
+      return NextResponse.json(
+        { ok: false, code: "not_included", error: "The website builder is not included on this plan." },
+        { status: 403 }
+      );
     }
 
     // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts).

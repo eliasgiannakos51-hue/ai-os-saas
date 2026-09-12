@@ -14,7 +14,8 @@ import { upgradeWallProps } from "@/lib/billing/feature-catalog";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { truncate } from "@/lib/text/truncate";
-import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
+import { getPlan } from "@/lib/billing/plans";
+import { accountHasCapability } from "@/lib/billing/capability-gate";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 
@@ -64,7 +65,15 @@ export default async function MemoryPage() {
   const isAdmin = isAdminEmail(user.email);
   const planSlug = await resolveEffectivePlanSlug(user);
 
-  if (!isAdmin && !planMeetsMinimum(planSlug, "starter")) {
+  // THE FIELD, NOT A PARALLEL RULE. This was
+  // `planMeetsMinimum(planSlug, "starter")` — a correct refusal that
+  // never read `capabilities.aiMemory`, so the pricing page's tick and
+  // this lock agreed by coincidence. Moving AI Memory to Growth would
+  // have changed the ✓/✕ column and left the door open, in a green
+  // build, with `aiMemory` still declared. A capability enforced by a
+  // rule that does not mention it is a capability that is not enforced
+  // by its declaration — see lib/billing/capability-gate.ts.
+  if (!accountHasCapability(planSlug, "aiMemory", isAdmin)) {
     return (
       <div className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">

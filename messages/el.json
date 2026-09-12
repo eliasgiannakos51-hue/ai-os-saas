@@ -298,7 +298,8 @@
       "siteEditsPerDay": "Ζωντανές αλλαγές ανά ιστότοπο",
       "siteVersionsKept": "Εκδόσεις που κρατιούνται ανά ιστότοπο",
       "websiteImageStorage": "Χώρος για φωτογραφίες ιστότοπου",
-      "voiceClipLength": "Μέγιστη ηχογράφηση (λεπτά)"
+      "voiceClipLength": "Μέγιστη ηχογράφηση (λεπτά)",
+      "teamMembers": "Μέλη ομάδας"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Για ομάδες που χτίζουν μαζί",
@@ -3840,7 +3841,8 @@
     "errors": {
       "tooShort": "Δώσε του πρώτα ένα όνομα.",
       "tooLong": "Το όνομα ξεπερνά τους {limit} χαρακτήρες.",
-      "failed": "Δεν δούλεψε — δοκίμασε ξανά."
+      "failed": "Δεν δούλεψε — δοκίμασε ξανά.",
+      "limitReached": "Έχεις χρησιμοποιήσει και τα {limit} projects του πλάνου σου. Αναβάθμισε για περισσότερα."
     }
   },
   "finance": {

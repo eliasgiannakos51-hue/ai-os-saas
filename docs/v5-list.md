@@ -821,9 +821,9 @@ this paragraph:
 | pages under `/dashboard` | 44 |
 | …that are plan-aware | **8** |
 | rows on the comparison table before | 13 |
-| rows now | **43** |
-| …available on every plan including Free | **26** |
-| …gated behind a tier | **17** |
+| rows now | **44** |
+| …included on Free | **22** |
+| …gated behind a tier | **22** |
 
 V5 added Projects, Presentations, Posts, Voice, Predictions and
 Universal Memory. Not one of them was put in a plan, and nothing in the
@@ -876,6 +876,70 @@ video and music generation under Make, a browser and a computer agent
 under Run, meetings under Organise. They are not drawn, not searchable,
 and the gate fails if any of their routes starts resolving, which is
 what makes the flag come off on the day the page lands.
+
+---
+
+### 14. A capability can be declared and enforced by nothing — DONE (2026-09-13)
+
+**`capabilities.websiteBuilder` was such a field for as long as it had
+existed.** Declared on all six plans, false on Free, drawn as a ✕ on the
+pricing page and a ✕ on the signup grid, and read by **three** places in
+the entire product — all three of them drawing a tick. A Free account
+could open `/dashboard/website-builder` and generate a site.
+
+It survived because the paywall was one step later:
+`maxPublishedSitesForPlan` is 0 on Free and the publish route does
+refuse. So a Free account could generate and not publish, and anybody
+checking casually met a refusal and stopped. The model call — the
+expensive half — ran for nothing.
+
+**And the quieter one beside it.** `/dashboard/memory` refused with
+`planMeetsMinimum(planSlug, "starter")`: a correct refusal that never
+mentions `capabilities.aiMemory`. The field and the lock agreed by
+coincidence, and moving AI Memory to Growth would have moved the pricing
+column and left the door open.
+
+*Done means:* every capability check goes through
+`lib/billing/capability-gate.ts`, and `scripts/tests/
+plan-enforcement.test.mjs` requires every field of `PlanCapabilities`
+to be claimed by exactly one catalog row and to be read in a file that
+also refuses. A field that only draws a tick fails the build.
+*Proven by:* 17 checks and `plan-enforcement.mutation.mjs` — 13 of 13
+across six dimensions, including the original defect put back.
+
+**It also prints the tier coverage on every build** — re-derive with
+`node scripts/tests/plan-enforcement.test.mjs`:
+
+    free          22/44        starter       39/44
+    growth        40/44        professional  43/44
+    ultimate      44/44        enterprise    44/44
+    capabilities  13 declared, 4 held for unbuilt features, 9 enforced
+
+### 15. The approved tiering — DONE (2026-09-13)
+
+Starter gains Presentations, Posts and the website builder (Voice was
+already Starter). Growth gains Predictions and goes from three published
+sites to five. Professional gains a team ceiling of five people —
+separate from the paid-seat count, which is a different question and
+stays. Ultimate keeps unbounded, included seats. Projects gained a limit
+for the first time: 1 / 3 / 5 / unlimited from Professional.
+
+**Two of the four proposals were not built, and both by the owner's own
+decision.** Priority processing is not a row and not a field: there is
+no queue to prioritise, and saying otherwise is the same shape as
+`websiteBuilder` — it goes to V6 with the queue. The Deep Research tier
+stays available on every paid plan rather than becoming an Ultimate
+exclusive.
+
+**Four tiers are decided and withheld.** Custom domain (Growth), a
+public API (Professional), a private marketplace (Ultimate) and an SLA
+(Ultimate) are fields in `PlanCapabilities` with no row on the pricing
+page, because none of them exists — no `custom_domain` column, no
+`api_keys` table, no visibility flag on a listing, no support channel
+with a clock on it. `plan-enforcement.test.mjs` holds both halves: the
+row is not published, and **nothing may read the capability**. Enforce
+one and the build goes red until its row goes up, which is what makes
+the flag come off in the same commit.
 
 ---
 

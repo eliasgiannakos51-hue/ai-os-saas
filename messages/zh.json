@@ -298,7 +298,8 @@
       "siteEditsPerDay": "每个站点的实时修改次数",
       "siteVersionsKept": "每个站点保留的版本数",
       "websiteImageStorage": "网站图片的存储空间",
-      "voiceClipLength": "单次录音时长上限（分钟）"
+      "voiceClipLength": "单次录音时长上限（分钟）",
+      "teamMembers": "团队成员"
     },
     "businessTitle": "商业版",
     "businessSubtitle": "为共同打造的团队而生",
@@ -3840,7 +3841,8 @@
     "errors": {
       "tooShort": "先给它起个名字。",
       "tooLong": "名称超过 {limit} 个字符。",
-      "failed": "没成功——再试一次。"
+      "failed": "没成功——再试一次。",
+      "limitReached": "你已用完方案中的 {limit} 个项目。升级后可添加更多。"
     }
   },
   "finance": {

@@ -18,7 +18,10 @@ export const UNLIMITED_SITES = Number.POSITIVE_INFINITY;
 export const DEFAULT_PUBLISH_LIMITS: Record<PlanSlug, number> = {
   free: 0,
   starter: 1,
-  growth: 3,
+  // 3 -> 5 with the 2026-09-13 tiering: Growth is the plan that sells
+  // "five sites", and the number a buyer reads is the number the route
+  // refuses on.
+  growth: 5,
   professional: 10,
   ultimate: 30,
   enterprise: UNLIMITED_SITES,

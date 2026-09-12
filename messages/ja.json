@@ -298,7 +298,8 @@
       "siteEditsPerDay": "サイトごとの公開後の編集回数",
       "siteVersionsKept": "サイトごとに残る版数",
       "websiteImageStorage": "サイト写真の保存容量",
-      "voiceClipLength": "1回の録音の上限（分）"
+      "voiceClipLength": "1回の録音の上限（分）",
+      "teamMembers": "チームメンバー"
     },
     "businessTitle": "ビジネス",
     "businessSubtitle": "チームで共に構築する",
@@ -3840,7 +3841,8 @@
     "errors": {
       "tooShort": "まず名前を付けてください。",
       "tooLong": "その名前は {limit} 文字を超えています。",
-      "failed": "うまくいきませんでした — もう一度お試しください。"
+      "failed": "うまくいきませんでした — もう一度お試しください。",
+      "limitReached": "プランの {limit} 件のプロジェクトをすべて使いました。追加するにはアップグレードしてください。"
     }
   },
   "finance": {

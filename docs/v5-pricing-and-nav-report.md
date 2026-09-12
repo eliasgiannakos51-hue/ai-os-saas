@@ -1,6 +1,6 @@
 # The feature inventory, the pricing page, the sidebar — and the voice ceiling
 
-**One day's work, 2026-09-12.** Every number below is either dated at the
+**2026-09-12 and 2026-09-13.** Every number below is either dated at the
 point of use or names the command that reprints it. Nothing here is an
 estimate.
 
@@ -125,7 +125,10 @@ and a 402 — a named refusal, never a silent cut.
 ## 1. The inventory: what exists, who may use it, what bounds it
 
 `node scripts/tests/feature-catalog.test.mjs` prints and asserts all of
-these. Measured 2026-09-12.
+these. **Measured 2026-09-12, and sections 6 and 7 below changed several
+of them the next day** — this section is left as it was taken, because
+it is the record of what was found. Where a figure has moved, section 7
+carries the current one and the command that reprints it.
 
 - **136** API routes. **28** spend credits. **3** read a plan capability:
   `api/chat`, `api/modules/create`, `api/team/invite`.
@@ -147,9 +150,9 @@ decide WHAT you can do — it decides HOW MUCH.** Seventeen rows are
 gated; the rest differ by a number or not at all.
 
 Whether that is the right commercial answer is not a thing a test can
-hold, and this round did not change a single tier. What it changed is
-that the question is now answerable in one file, and unanswerable
-silently.
+hold, and **the 2026-09-12 round did not change a single tier** — it
+made the question answerable in one file, and unanswerable silently.
+The tiering itself was approved and applied on 2026-09-13; section 7.
 
 ### The limits that were invisible
 
@@ -290,3 +293,115 @@ anonymous ones: a top-level name declared in two modules of one bundle
 base64 URL naming no file), and an aliased local import, which the
 concatenation silently leaves undefined until the first line that reads
 it.
+
+---
+
+## 6. `maxFileMb`: the name does not exist, the shape does
+
+**Asked for by name, and it is worth being exact:** there is no
+`maxFileMb` anywhere in this repository and there never has been.
+`grep -rni 'maxfilemb\|max_file_mb\|filemb'` over the working tree
+returns nothing, and `git grep -i maxfilemb` over every reachable
+revision returns nothing. The nearest real thing, `MAX_FILE_BYTES`
+(20 MB, `lib/files/file-types.ts`), **is** enforced — in
+`lib/files/ingest.ts`, before a byte is written, on both upload paths.
+
+**But the shape was real, and it was worse than a file-size cap.**
+Scanning every field of `PlanCapabilities` for "declared and not
+enforced" found it:
+
+| Field | Read by | Refuses anything | Verdict |
+|---|---|---|---|
+| `maxAiAgents` | agent-limits → api/agents | yes | enforced |
+| **`websiteBuilder`** | **3 places, all drawing a ✓/✕** | **NO** | **the active lie** |
+| `aiMemory` | memory/page.tsx | yes — but by `planMeetsMinimum(…, "starter")`, which never names the field | enforced by a parallel rule |
+| `teamCollaboration` | api/team/invite | yes | enforced |
+| `chatMemoryLimit` | api/chat | bounds the load | enforced |
+| `customAiPersona` | api/chat | yes | enforced |
+| `hasTeamSeats` / `teamSeatsIncluded` | checkout, team/invite | yes | enforced |
+
+**`capabilities.websiteBuilder` was false on Free, drawn as a ✕ on the
+pricing page and on the signup grid, and read by nothing that refuses.**
+A Free account could open `/dashboard/website-builder` and generate a
+site. It survived because `maxPublishedSitesForPlan` is 0 on Free and
+the publish route does refuse — so the paywall people found was one step
+later than the one the page claimed, and the expensive half ran first.
+
+And the page's own comment was part of it: *"already has its own credit
+cost + plan gating"* — true of the tracker at `/dashboard/websites`, and
+read for months as true of the builder.
+
+**My own claim from 2026-09-12 was wrong too, and this corrects it
+explicitly.** `feature-catalog.ts` said the `websiteBuilder` row was
+enforced in `lib/build-modules.ts` by `minPlanSlug`. That file and that
+symbol both exist — they gate the hand-typed *tracker* — so the gate
+passed. It was the wrong feature, and the gate could not see the
+difference. `plan-enforcement.test.mjs` can: it requires the named file
+to read the capability **and** to contain a refusal.
+
+### What changed
+
+- `lib/billing/capability-gate.ts` — one way to ask "may this account".
+- `api/websites/generate`, `api/websites/edit` and the builder page now
+  refuse. Not `api/websites/[id]/regenerate`: it only accepts a site
+  already marked `flagged`, runs free, and exists to repair something
+  the product produced badly — refusing it would leave a downgraded
+  account holding a broken page with no way to fix it.
+- `/dashboard/memory` reads `aiMemory` instead of a plan rank.
+
+## 7. The approved tiering, and the two things deliberately not built
+
+| | gained | enforced in |
+|---|---|---|
+| **Starter** | website builder, Presentations, Posts (Voice was already Starter) | the three `generate` routes + their pages |
+| **Growth** | Predictions, 5 published sites (was 3), 5 projects | `api/insights/generate`, `publish-limits.ts`, `api/projects` |
+| **Professional** | up to 5 team members, unlimited projects | `api/team/invite`, `api/projects` |
+| **Ultimate** | unlimited team members, included | `api/team/invite` |
+
+**Projects had no limit at all on any plan** until this round — the
+create route validated the *name* and inserted. Now 1 / 3 / 5 /
+unlimited, refused with a translated message that names the number.
+
+**The team ceiling is a second, different check** from the paid-seat
+count already in `api/team/invite`. That one asks how many seats were
+bought; this one asks how many the plan allows. Without it a
+Professional account could buy twenty seats and have twenty members,
+which made Professional and Ultimate the same feature at two prices.
+
+**PRIORITY was not built, on the owner's instruction, and the reasoning
+is recorded because it is the same reasoning as the defect above:**
+there is no queue, so a "priority processing" row would be a promise
+with no mechanism — exactly `websiteBuilder`. It goes to V6 with the
+queue. **Deep Research stays on every paid plan** rather than becoming
+an Ultimate exclusive.
+
+**Four tiers are decided and withheld.** Custom domain (Growth), public
+API (Professional), private marketplace (Ultimate), SLA (Ultimate):
+fields in `PlanCapabilities`, no row on the pricing page, because none
+of them exists. The gate holds both halves — the row is not published,
+and nothing anywhere may read the capability. The day something
+enforces one, the build is red until its row goes up.
+
+### Tier coverage, printed on every build
+
+`node scripts/tests/plan-enforcement.test.mjs`:
+
+    free          22/44        starter       39/44
+    growth        40/44        professional  43/44
+    ultimate      44/44        enterprise    44/44
+    capabilities  13 declared, 4 held for unbuilt features, 9 enforced
+
+It is printed **and judged**: Free must stay under three quarters of the
+table, the top plan must exceed Free, and no plan may include less than
+the plan below it.
+
+**23 rows were available to everybody on 2026-09-12; 22 are now**, out
+of 44 — the free tier lost the website builder, Presentations, Posts and
+Predictions, and gained nothing. The answer to "why would an Ultimate
+pay 10×" is no longer "mostly credits".
+
+### Measured live again
+
+`next start` on the production build: **44 rows, 7 sections, no
+horizontal overflow and identical column positions across all seven
+sections**, in `en`, `el`, `ar` (RTL), `zh` at 390 and `ja` at 768.

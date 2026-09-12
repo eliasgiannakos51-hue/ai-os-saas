@@ -729,9 +729,35 @@ const clientFallbacks = sources.flatMap((f) => [
 // replaced with aiSteps.stopped in the reader's locale. The regex cannot
 // tell those apart, so the number goes up and the reason is written down.
 //
-// MEASURED, not added: the scanner reported 655 against this baseline
-// before it was raised.
-const SERVER_PROSE_BASELINE = 655;
+// 655 -> 661: the 2026-09-13 tiering adds six refusals across five
+// routes — api/websites/generate, api/websites/edit,
+// api/presentations/generate, api/posts/generate,
+// api/insights/generate ("<thing> is not included on this plan.") and
+// api/projects ("project_limit_reached" plus a seat refusal in
+// api/team/invite). SAME CONVENTION AS THE 655 BEFORE THEM, and worth
+// being exact about which half of it applies to each:
+//
+//   FIVE ARE DEFENCE IN DEPTH AND ARE NOT REACHED. Each of those five
+//   routes is behind a PAGE that renders <UpgradeRequired> instead of
+//   the workspace when the plan does not include the feature, in the
+//   reader's own language with the plan's name and price in it. The
+//   403 is what a curl gets, and what the browser gets if somebody
+//   POSTs past the UI.
+//
+//   THE SIXTH IS REACHED, AND IT IS TRANSLATED. A person at their
+//   project ceiling really does press "New project" — so the refusal
+//   carries `code: "project_limit_reached"` and `limit`, and
+//   components/projects/projects-workspace.tsx looks the code up under
+//   projects.errors.limitReached in all ten locales and prints the
+//   number. The English sentence in the body is the log line.
+//
+// The regex cannot tell a body that is displayed from one that is not,
+// so the number goes up and the reason is written down.
+//
+// MEASURED, not added: the scanner reported 661 against the old
+// baseline of 655, so this is the tree's own count rather than 655
+// plus six taken by hand.
+const SERVER_PROSE_BASELINE = 661;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

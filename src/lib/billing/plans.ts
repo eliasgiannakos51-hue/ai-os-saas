@@ -59,6 +59,52 @@ export type PlanCapabilities = {
   // Settings > AI Persona, wired into api/chat's system prompt) — one of
   // Ultimate's real differentiators vs Professional.
   customAiPersona: boolean;
+
+  // --- V5.1, the approved tiering ------------------------------------
+  //
+  // EVERY ONE OF THESE IS A BOOLEAN WITH A GATE, OR A BOOLEAN WITH A
+  // `notBuilt` ENTRY IN lib/billing/feature-catalog.ts. There is no
+  // third kind, and scripts/tests/plan-enforcement.test.mjs is what
+  // makes that true rather than intended: a field declared here that
+  // nothing reads to refuse, and that is not declared unbuilt, fails
+  // the build. That check exists because `websiteBuilder` was such a
+  // field for as long as it had existed.
+
+  /** A brief in, a deck out — api/presentations/generate. Starter+. */
+  presentations: boolean;
+  /** A brief in, one post per platform out — api/posts/generate. Starter+. */
+  posts: boolean;
+  /** The pattern detector over this account's own rows —
+   *  api/insights/generate. Growth+. */
+  predictions: boolean;
+
+  // --- DECLARED, NOT BUILT -------------------------------------------
+  //
+  // THE RULE, and it is the sidebar's rule one layer down: the FIELD
+  // goes in, so the tier is decided once and in the open; the ROW does
+  // NOT go on the pricing page until the thing works. A tier decided on
+  // the day a feature lands is a tier decided by whoever is thinking
+  // about the feature rather than about the price list.
+  //
+  // NOTHING MAY READ THESE. plan-enforcement.test.mjs fails if any file
+  // outside plans.ts and the catalog mentions one — because the moment
+  // something enforces it, it is real, and a real capability that is
+  // not on the pricing page is a thing customers pay for and cannot
+  // see. The flag comes off and the row goes on in the same commit.
+
+  /** A published site on the customer's own domain. No DNS, no
+   *  certificate issuance, no `custom_domain` column: nothing exists. */
+  customDomain: boolean;
+  /** A public, key-authenticated API. There is no api_keys table and no
+   *  route that authenticates by key. */
+  publicApi: boolean;
+  /** An account-private marketplace of its own agent templates. The
+   *  marketplace has shared templates; "private" has no column. */
+  privateMarketplace: boolean;
+  /** A contractual response time. There is no support channel with a
+   *  clock on it — pricing-truth.test.mjs keeps four invented support
+   *  tiers deleted, and this must not become the fifth. */
+  slaResponse: boolean;
 };
 
 export type Plan = {
@@ -186,6 +232,13 @@ export const PLANS: Plan[] = [
       teamCollaboration: false,
       chatMemoryLimit: 0,
       customAiPersona: false,
+      presentations: false,
+      posts: false,
+      predictions: false,
+      customDomain: false,
+      publicApi: false,
+      privateMarketplace: false,
+      slaResponse: false,
     },
     features: [
       { textKey: "basicAiChat" },
@@ -205,6 +258,13 @@ export const PLANS: Plan[] = [
       teamCollaboration: false,
       chatMemoryLimit: 20,
       customAiPersona: false,
+      presentations: true,
+      posts: true,
+      predictions: false,
+      customDomain: false,
+      publicApi: false,
+      privateMarketplace: false,
+      slaResponse: false,
     },
     features: [
       { textKey: "upTo2AiAgents" },
@@ -227,6 +287,13 @@ export const PLANS: Plan[] = [
       teamCollaboration: false,
       chatMemoryLimit: 20,
       customAiPersona: false,
+      presentations: true,
+      posts: true,
+      predictions: true,
+      customDomain: true,
+      publicApi: false,
+      privateMarketplace: false,
+      slaResponse: false,
     },
     features: [
       { textKey: "everythingInStarter" },
@@ -247,6 +314,13 @@ export const PLANS: Plan[] = [
       teamCollaboration: true,
       chatMemoryLimit: 20,
       customAiPersona: false,
+      presentations: true,
+      posts: true,
+      predictions: true,
+      customDomain: true,
+      publicApi: true,
+      privateMarketplace: false,
+      slaResponse: false,
     },
     features: [
       { textKey: "everythingInGrowth" },
@@ -269,6 +343,13 @@ export const PLANS: Plan[] = [
       teamCollaboration: true,
       chatMemoryLimit: 100,
       customAiPersona: true,
+      presentations: true,
+      posts: true,
+      predictions: true,
+      customDomain: true,
+      publicApi: true,
+      privateMarketplace: true,
+      slaResponse: true,
     },
     features: [
       { textKey: "everythingInProfessional" },
@@ -293,6 +374,13 @@ export const PLANS: Plan[] = [
       teamCollaboration: true,
       chatMemoryLimit: 100,
       customAiPersona: true,
+      presentations: true,
+      posts: true,
+      predictions: true,
+      customDomain: true,
+      publicApi: true,
+      privateMarketplace: true,
+      slaResponse: true,
     },
     features: [
       { textKey: "everythingInUltimate" },

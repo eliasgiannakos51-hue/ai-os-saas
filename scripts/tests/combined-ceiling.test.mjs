@@ -409,6 +409,18 @@ const CLASSIFIED_PLAN_TABLES = {
   // because it is shaped like the others and the scanner is right to
   // stop on anything shaped like a per-plan number.
   DEFAULT_PIN_LIMITS: { kind: "capacity", why: "how many conversations sit at the top of the sidebar — a usability floor, no cost at all" },
+  // V5.1 tiering. Both are pure CAPACITY and neither touches the credit
+  // ceiling: a project is a row plus its entity_links edges and makes no
+  // model call, and a team member is a seat — the work that member does
+  // is charged to the owner's credits exactly as the owner's own is.
+  DEFAULT_PROJECT_LIMITS: {
+    kind: "capacity",
+    why: "how many folders an account may own; nothing inside one is free",
+  },
+  DEFAULT_SEAT_LIMITS: {
+    kind: "capacity",
+    why: "how many people the PLAN allows — the paid-seat count is a separate check in api/team/invite, and every member spends the owner's credits",
+  },
   // Not a quota at all.
   PLAN_MARGIN_DEFAULTS: { kind: "policy", why: "the multiplier itself — the credit half of the ceiling" },
 };

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getPlan } from "@/lib/billing/plans";
+import { getPlan, type PlanSlug } from "@/lib/billing/plans";
+import { maxSeatsForPlan } from "@/lib/team/seat-limits";
 import { sendTeamInviteEmail } from "@/lib/email/send-team-invite-email";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -60,6 +61,42 @@ export async function POST(request: Request) {
         { ok: false, error: "Team invites require the Professional plan or higher." },
         { status: 403 }
       );
+    }
+
+    // WHAT THE PLAN ALLOWS, before what has been paid for.
+    //
+    // TWO CEILINGS, AND THEY ANSWER DIFFERENT QUESTIONS. This one is the
+    // plan's: Professional tops out at five people, Ultimate and
+    // Enterprise are unbounded. The one below is the invoice's: how many
+    // seats have actually been bought. They were one check until
+    // 2026-09-13, which meant a Professional account could buy twenty
+    // seats and have twenty members — so "Team" on Professional and
+    // "Team" on Ultimate were the same feature at two prices, and the
+    // pricing table had nothing true to say about the difference.
+    //
+    // The plan's ceiling first, because "your plan allows five" and "you
+    // have paid for three" need different sentences and a person who
+    // gets the wrong one buys a seat that will not help.
+    const seatCap = maxSeatsForPlan(tier as PlanSlug);
+    if (!isAdmin && Number.isFinite(seatCap)) {
+      const { count: planMemberCount, error: planCountError } = await supabase
+        .from("team_members")
+        .select("id", { count: "exact", head: true })
+        .eq("owner_id", user.id);
+      if (planCountError) {
+        logApiError("/api/team/invite", planCountError, { stage: "count_plan_seats" });
+        return NextResponse.json({ ok: false, error: "Could not verify seat availability." }, { status: 500 });
+      }
+      if ((planMemberCount ?? 0) >= seatCap) {
+        return NextResponse.json(
+          {
+            ok: false,
+            code: "seat_limit_reached",
+            error: `The ${plan.name} plan includes up to ${seatCap} team members. Upgrade to add more.`,
+          },
+          { status: 403 }
+        );
+      }
     }
 
     // Professional pays €20/member/month as a real Stripe subscription

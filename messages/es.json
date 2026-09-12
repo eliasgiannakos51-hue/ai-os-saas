@@ -298,7 +298,8 @@
       "siteEditsPerDay": "Ediciones en vivo por web",
       "siteVersionsKept": "Versiones guardadas por web",
       "websiteImageStorage": "Espacio para fotos de la web",
-      "voiceClipLength": "Grabación más larga (minutos)"
+      "voiceClipLength": "Grabación más larga (minutos)",
+      "teamMembers": "Miembros del equipo"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Para equipos que construyen juntos",
@@ -3840,7 +3841,8 @@
     "errors": {
       "tooShort": "Ponle un nombre primero.",
       "tooLong": "Ese nombre supera los {limit} caracteres.",
-      "failed": "No funcionó — inténtalo de nuevo."
+      "failed": "No funcionó — inténtalo de nuevo.",
+      "limitReached": "Has usado los {limit} proyectos de tu plan. Mejora tu plan para añadir más."
     }
   },
   "finance": {

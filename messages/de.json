@@ -298,7 +298,8 @@
       "siteEditsPerDay": "Live-Änderungen pro Website",
       "siteVersionsKept": "Aufbewahrte Versionen pro Website",
       "websiteImageStorage": "Speicher für Website-Fotos",
-      "voiceClipLength": "Längste Aufnahme (Minuten)"
+      "voiceClipLength": "Längste Aufnahme (Minuten)",
+      "teamMembers": "Teammitglieder"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Für Teams, die gemeinsam aufbauen",
@@ -3840,7 +3841,8 @@
     "errors": {
       "tooShort": "Gib ihm zuerst einen Namen.",
       "tooLong": "Der Name ist länger als {limit} Zeichen.",
-      "failed": "Das hat nicht geklappt — versuch es nochmal."
+      "failed": "Das hat nicht geklappt — versuch es nochmal.",
+      "limitReached": "Du hast alle {limit} Projekte deines Tarifs genutzt. Wechsle den Tarif, um mehr anzulegen."
     }
   },
   "finance": {

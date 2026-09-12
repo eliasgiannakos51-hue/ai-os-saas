@@ -22,6 +22,8 @@ import {
 import { pinLimitFor } from "@/lib/chat/pin-limits";
 import { voiceMinutesForPlan, MAX_CLIP_SECONDS } from "@/lib/voice/voice-pricing";
 import { RECORD_CAP } from "@/lib/record-cap";
+import { maxProjectsForPlan } from "@/lib/projects/project-limits";
+import { maxSeatsForPlan } from "@/lib/team/seat-limits";
 import { STORAGE_LIMIT_BYTES } from "@/lib/websites/storage-quota";
 
 /**
@@ -177,6 +179,31 @@ export type FeatureEntry = {
    * not sold, so a row for them would be a row no buyer can ever buy.
    */
   notSold?: string;
+  /**
+   * A TIER DECIDED FOR SOMETHING THAT DOES NOT EXIST YET.
+   *
+   * THE SIDEBAR'S RULE, ONE LAYER DOWN. `notBuilt` on a nav row holds a
+   * POSITION; `notBuilt` here holds a TIER. Both exist so the decision
+   * is made cold, in the open, rather than on the day somebody is
+   * thinking about the feature rather than about the nav or the price
+   * list — which is how "Images" ended up under a heading that promises
+   * generation while it opened a notes form.
+   *
+   * The row is not drawn on the pricing page. The capability it names
+   * must be read by NOTHING outside plans.ts and this file:
+   * scripts/tests/plan-enforcement.test.mjs fails the build the moment
+   * something enforces it, because a capability that is enforced is a
+   * capability customers are being refused for and cannot see the price
+   * of. The flag comes off and the row goes on in the same commit.
+   *
+   * The value is the reason it is not built, in words, checked for
+   * length so "todo" does not pass for one.
+   */
+  notBuilt?: string;
+  /** The PlanCapabilities field this entry is the published face of.
+   *  plan-enforcement.test.mjs walks the type and requires every field
+   *  to be claimed here exactly once. */
+  capability?: string;
 };
 
 // ---------------------------------------------------------------------
@@ -269,8 +296,18 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "websites/[id]/regenerate",
     ],
     charges: true,
-    enforcedIn: "src/lib/build-modules.ts",
-    enforcedSymbol: "minPlanSlug",
+    // WRONG UNTIL 2026-09-13, AND THIS FILE SAID SO CONFIDENTLY. It named
+    // lib/build-modules.ts / minPlanSlug — which gates /dashboard/websites,
+    // the hand-typed TRACKER, and has nothing to do with the builder. The
+    // gate passed because that symbol really is in that file; what it
+    // could not see is that the pair described a different feature. The
+    // builder was enforced NOWHERE, and the row drew a ✕ for Free
+    // regardless. scripts/tests/plan-enforcement.test.mjs is the check
+    // that could not have been fooled by it: it requires the named file
+    // to read the capability AND to refuse.
+    capability: "websiteBuilder",
+    enforcedIn: "src/app/api/websites/generate/route.ts",
+    enforcedSymbol: 'accountHasCapability(gatePlanSlug, "websiteBuilder"',
     cell: (p) => boolCell(p.capabilities.websiteBuilder),
   },
   {
@@ -326,26 +363,29 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
   {
     id: "presentations",
     group: "make",
-    minPlan: "free",
+    // FREE UNTIL 2026-09-13, like everything V5 shipped.
+    minPlan: "starter",
+    capability: "presentations",
     sidebar: ["/dashboard/presentations"],
     pages: ["presentations"],
     routes: ["presentations/generate", "presentations/[id]/pdf", "presentations/[id]/pptx"],
     charges: true,
     enforcedIn: "src/app/api/presentations/generate/route.ts",
-    enforcedSymbol: "reserveCredits",
-    cell: () => ({ type: "check" }),
+    enforcedSymbol: 'accountHasCapability(await resolveEffectivePlanSlug(user), "presentations"',
+    cell: (p) => boolCell(p.capabilities.presentations),
   },
   {
     id: "posts",
     group: "make",
-    minPlan: "free",
+    minPlan: "starter",
+    capability: "posts",
     sidebar: ["/dashboard/posts"],
     pages: ["posts"],
     routes: ["posts/generate"],
     charges: true,
     enforcedIn: "src/app/api/posts/generate/route.ts",
-    enforcedSymbol: "reserveCredits",
-    cell: () => ({ type: "check" }),
+    enforcedSymbol: 'accountHasCapability(await resolveEffectivePlanSlug(user), "posts"',
+    cell: (p) => boolCell(p.capabilities.posts),
   },
   {
     id: "voiceMinutes",
@@ -392,8 +432,9 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     group: "ask",
     minPlan: "free",
     charges: false,
-    enforcedIn: "src/lib/billing/plans.ts",
-    enforcedSymbol: "chatMemoryLimit",
+    capability: "chatMemoryLimit",
+    enforcedIn: "src/app/api/chat/route.ts",
+    enforcedSymbol: "plan.capabilities.chatMemoryLimit",
     cell: (p, locale) => countCell(p.capabilities.chatMemoryLimit, locale),
   },
   {
@@ -429,14 +470,15 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
   {
     id: "predictions",
     group: "ask",
-    minPlan: "free",
+    minPlan: "growth",
+    capability: "predictions",
     sidebar: ["/dashboard/predictions"],
     pages: ["predictions"],
     routes: ["insights", "insights/[id]", "insights/generate"],
     charges: true,
     enforcedIn: "src/app/api/insights/generate/route.ts",
-    enforcedSymbol: "reserveCredits",
-    cell: () => ({ type: "check" }),
+    enforcedSymbol: 'accountHasCapability(await resolveEffectivePlanSlug(user), "predictions"',
+    cell: (p) => boolCell(p.capabilities.predictions),
   },
   {
     id: "askYourData",
@@ -467,8 +509,9 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     group: "ask",
     minPlan: "ultimate",
     charges: false,
-    enforcedIn: "src/lib/billing/plans.ts",
-    enforcedSymbol: "customAiPersona",
+    capability: "customAiPersona",
+    enforcedIn: "src/app/api/chat/route.ts",
+    enforcedSymbol: "plan.capabilities.customAiPersona",
     cell: (p) => boolCell(p.capabilities.customAiPersona),
   },
 
@@ -492,8 +535,9 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "cron/scheduled-runs",
     ],
     charges: true,
+    capability: "maxAiAgents",
     enforcedIn: "src/lib/agents/agent-limits.ts",
-    enforcedSymbol: "maxAgentsForPlan",
+    enforcedSymbol: "capabilities.maxAiAgents",
     cell: (p, locale) => countCell(maxAgentsForPlan(p.slug), locale),
   },
   {
@@ -596,8 +640,9 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     sidebar: ["/dashboard/memory"],
     pages: ["memory"],
     charges: false,
+    capability: "aiMemory",
     enforcedIn: "src/app/dashboard/memory/page.tsx",
-    enforcedSymbol: "planMeetsMinimum",
+    enforcedSymbol: 'accountHasCapability(planSlug, "aiMemory"',
     cell: (p) => boolCell(p.capabilities.aiMemory),
   },
   {
@@ -660,8 +705,18 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     routes: ["projects", "projects/[id]/members"],
     charges: false,
     enforcedIn: "src/app/api/projects/route.ts",
-    enforcedSymbol: "export async function POST",
-    cell: () => ({ type: "check" }),
+    enforcedSymbol: "maxProjectsForPlan",
+    cell: (p, locale) => countCell(maxProjectsForPlan(p.slug), locale),
+    unlimitedProof: {
+      enforcedIn: "src/lib/projects/project-limits.ts",
+      // Professional up is genuinely unbounded: a project is a row and a
+      // set of entity_links edges, and nothing else in the product caps
+      // how many an account may own. The list PAGE stops at 500 rows and
+      // says so, which is `listRowsShown` — a display cap, not a
+      // ceiling on creation, so it is not named as a bound here.
+      alsoBoundedBy: [],
+      routes: ["src/app/api/projects/route.ts"],
+    },
   },
   {
     id: "missionControl",
@@ -692,9 +747,32 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     pages: ["team"],
     routes: ["team/invite", "team/remove"],
     charges: false,
+    capability: "teamCollaboration",
     enforcedIn: "src/app/api/team/invite/route.ts",
     enforcedSymbol: "capabilities.teamCollaboration",
     cell: (p) => boolCell(p.capabilities.teamCollaboration),
+  },
+  {
+    id: "teamMembers",
+    group: "organise",
+    minPlan: "professional",
+    charges: false,
+    enforcedIn: "src/app/api/team/invite/route.ts",
+    enforcedSymbol: "maxSeatsForPlan",
+    // THE PLAN'S CEILING, which did not exist until 2026-09-13: a
+    // Professional account could buy twenty seats and have twenty
+    // members, so Professional and Ultimate were the same feature at
+    // two prices. Five and unbounded now, refused in the route.
+    cell: (p, locale) => countCell(maxSeatsForPlan(p.slug), locale),
+    unlimitedProof: {
+      enforcedIn: "src/lib/team/seat-limits.ts",
+      // Ultimate and Enterprise are unbounded AND included — there is no
+      // second ceiling, because there is no per-seat charge to run out
+      // of. On Professional the paid seat count bounds it and that is
+      // the row below.
+      alsoBoundedBy: [],
+      routes: ["src/app/api/team/invite/route.ts"],
+    },
   },
   {
     id: "teamSeatsAddOn",
@@ -945,6 +1023,77 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     cell: () => ({ type: "check" }),
   },
 
+  // === DECLARED, NOT BUILT ===========================================
+  //
+  // A TIER DECIDED NOW, A ROW WITHHELD UNTIL IT WORKS. None of these
+  // four exists: there is no custom_domain column and no certificate
+  // issuance, no api_keys table and no key-authenticated route, no
+  // private listing flag on the marketplace, and no support channel
+  // with a clock on it. The tier is written down so that the day one
+  // lands the decision is already made and made cold.
+  //
+  // scripts/tests/plan-enforcement.test.mjs holds both halves: the row
+  // is not on the pricing page, and NOTHING may read the capability.
+  // The second half is what makes the flag come off — enforce it and
+  // the build goes red until the row is published.
+  {
+    id: "customDomain",
+    group: "make",
+    minPlan: "growth",
+    capability: "customDomain",
+    charges: false,
+    notBuilt:
+      "no custom_domain column, no DNS verification and no certificate issuance — " +
+      "a published site is only ever reachable at /s/<subdomain>",
+    enforcedIn: "src/lib/billing/plans.ts",
+    enforcedSymbol: "customDomain",
+    cell: (p) => boolCell(p.capabilities.customDomain),
+  },
+  {
+    id: "publicApi",
+    group: "run",
+    minPlan: "professional",
+    capability: "publicApi",
+    charges: false,
+    notBuilt:
+      "there is no api_keys table and no route that authenticates by key — every route " +
+      "in this product authenticates a browser session",
+    enforcedIn: "src/lib/billing/plans.ts",
+    enforcedSymbol: "publicApi",
+    cell: (p) => boolCell(p.capabilities.publicApi),
+  },
+  {
+    id: "privateMarketplace",
+    group: "run",
+    minPlan: "ultimate",
+    capability: "privateMarketplace",
+    charges: false,
+    notBuilt:
+      "the marketplace shares agent templates account-wide; there is no visibility " +
+      "column and nothing that could scope a listing to one account",
+    enforcedIn: "src/lib/billing/plans.ts",
+    enforcedSymbol: "privateMarketplace",
+    cell: (p) => boolCell(p.capabilities.privateMarketplace),
+  },
+  {
+    id: "slaResponse",
+    group: "support",
+    minPlan: "ultimate",
+    capability: "slaResponse",
+    charges: false,
+    // THE ONE MOST WORTH WITHHOLDING. pricing-truth.test.mjs keeps four
+    // invented support tiers deleted — "community support", "email
+    // support", "priority support", "dedicated support" — every one of
+    // which was sold with no support channel behind it. A response-time
+    // promise needs a channel with a clock on it before it is a row.
+    notBuilt:
+      "there is no support channel with a measured response time — the contact form " +
+      "goes to an inbox and nothing times it",
+    enforcedIn: "src/lib/billing/plans.ts",
+    enforcedSymbol: "slaResponse",
+    cell: (p) => boolCell(p.capabilities.slaResponse),
+  },
+
   // === NOT SOLD ======================================================
   // Owner-only operational screens. They are in the catalog because the
   // gate requires every page under /dashboard to be accounted for, and
@@ -978,14 +1127,14 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
 /** The entries the comparison table draws, in group order. */
 export function soldFeatures(): FeatureEntry[] {
   const order = new Map(FEATURE_GROUPS.map((g, i) => [g, i]));
-  return FEATURE_CATALOG.filter((f) => !f.notSold).sort(
+  return FEATURE_CATALOG.filter((f) => !f.notSold && !f.notBuilt).sort(
     (a, b) => (order.get(a.group) ?? 0) - (order.get(b.group) ?? 0)
   );
 }
 
 /** The sold entries of one group, in declaration order within it. */
 export function featuresInGroup(group: FeatureGroup): FeatureEntry[] {
-  return FEATURE_CATALOG.filter((f) => f.group === group && !f.notSold);
+  return FEATURE_CATALOG.filter((f) => f.group === group && !f.notSold && !f.notBuilt);
 }
 
 export function getFeature(id: string): FeatureEntry | undefined {

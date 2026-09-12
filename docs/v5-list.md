@@ -768,12 +768,20 @@ dropped.
 *Done means:* ~~the ratio published in `npm run build` output~~ — DONE
 2026-09-08. ~~the 7 bare money/access gates~~ — DONE 2026-09-12, and the
 instrument prints `money and access: 0` rather than this line claiming it.
-Category 2 is in progress, and the same output names what is left on every
-run rather than this line doing it from memory. It began at 10 bare gates a
-person meets; four landed on 2026-09-12 — `accent-search` (unit and itest,
-11 mutants over both), `chat-memory` (9), `chat-favorites` (10) and
-`locale-formatting` (6) — leaving 5: `help-articles` unit and itest,
-`language-reachable`, `layout-unification`, `navigation-cost`. Then 109 — where the instruction above about small gates applies, and
+~~Category 2~~ — DONE 2026-09-12, and the instrument prints `what a person
+meets: 0` rather than this line claiming it. Eight suites, 73 mutants, over
+all ten gates: `accent-search` (11, unit and itest), `help-articles` (11,
+unit and itest), `chat-favorites` (10), `chat-memory` (9),
+`language-reachable` (8), `layout-unification` (9), `navigation-cost` (9),
+`locale-formatting` (6).
+
+Fifteen of the 73 first ran amber. **Eleven were gates that could not see a
+real defect**, and each was fixed rather than the mutant softened; four were
+bad mutants, replaced with real ones with the reason recorded in the suite.
+Two more of my own mutants were caught by `mutation-anchors.test.mjs` for
+changing only prose — a space before a colon, and a word inside a comment
+the gate's `indexOf` was reading — which is the same gate, pointed the other
+way. Then 109 — where the instruction above about small gates applies, and
 the exemption register is the `EXEMPT` map in
 `scripts/tests/mutation-coverage.test.mjs`, checked BOTH ways in that
 file's §3 so an exemption cannot outlive its gate or sit on a gate that is

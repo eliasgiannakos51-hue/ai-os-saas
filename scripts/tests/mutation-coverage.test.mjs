@@ -183,7 +183,13 @@ console.log(
 // Read off the run (measured=154) before it was written here. The bare
 // count in category one is now 0; the 119 remaining are what a person
 // meets (10) and everything else (109).
-const RATCHET = 154;
+// 154 -> 164, same day, category 2 in full: accent-search (over both its
+// gates), chat-memory, chat-favorites, locale-formatting,
+// language-reachable, layout-unification, navigation-cost and
+// help-articles (over both of its). Read off the run (measured=164). Both
+// named categories now print 0 bare; the 109 left are category 3, where
+// the exemption register below is the right answer for the small ones.
+const RATCHET = 164;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

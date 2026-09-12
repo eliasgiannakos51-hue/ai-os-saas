@@ -141,7 +141,13 @@ check("no keyword detection list", !/(SUICIDE|CRISIS_KEYWORDS|distressKeywords)/
 // covers console.* as well, which the old pattern never looked at.
 {
   const LOG_CALLS = /(?:logApiError|logApiWarning|console\.(?:log|warn|error|info|debug))\s*\(([\s\S]*?)\);/g;
-  const leaks = [...memSrc.matchAll(LOG_CALLS)]
+  // THE FLOOR. `leaks` is asserted EMPTY, so a pattern that matches no
+  // logging call at all satisfies it while reading nothing — the shape
+  // gate-vacuity.test.mjs exists for. memory.ts does log, on the insert
+  // error path, and this says so.
+  const logCalls = [...memSrc.matchAll(LOG_CALLS)];
+  check(`the log-call scan found calls to check (${logCalls.length})`, logCalls.length >= 1);
+  const leaks = logCalls
     .filter((m) => /\bextracted\b|\bmemory_text\b|\bmemoryText\b/.test(m[1]))
     .map((m) => m[0].split("\n")[0].slice(0, 80));
   check("the extracted text is never logged", leaks.length === 0, leaks.join(" | "));

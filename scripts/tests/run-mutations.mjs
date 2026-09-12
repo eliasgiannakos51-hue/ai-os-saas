@@ -96,7 +96,11 @@ if (suites.length === 0) {
 // margin-report, plan-economics, pricing-truth, guard-witnesses,
 // security-posture). Read off the run, not reasoned about, per the
 // entries above.
-const FLOOR = 143;
+//
+// 151 today against a real 151, the same day, with the eight category-2
+// suites (accent-search, chat-memory, chat-favorites, locale-formatting,
+// language-reachable, layout-unification, navigation-cost, help-articles).
+const FLOOR = 151;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

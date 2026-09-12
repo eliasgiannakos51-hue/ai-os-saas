@@ -71,9 +71,10 @@ console.log("== 1. Row Level Security covers every user-data table ==");
 // block-comment opener in the 71 migrations was found and classified
 // (2026-09-12).
 //
-//   baseline_schema.sql:919      inside a `--` line, and it is a GLOB:
-//                                "src/components/entity-links/*)"
-//   help_articles.sql:25         the same, "messages/*.json"
+//   baseline_schema.sql:919      inside a `--` line, and it is a GLOB —
+//                                a slash-star wildcard at the end of the
+//                                path src/components/entity-links
+//   help_articles.sql:25         the same, a glob over the messages json
 //   data_analysis_and_coding.sql three real doc comments, all closed
 //
 // So there is no unterminated comment in this schema and no SQL that
@@ -87,16 +88,19 @@ console.log("== 1. Row Level Security covers every user-data table ==");
 // line-only rule missed. security-posture.mutation.mjs has one of each.
 //
 // What is still not handled, deliberately: a block comment OPENED after
-// code on the same line ("create table x; /* note"), which the line rule
-// cannot see. There is none today; if one appears, the count check below
-// moves and this comment is where to start.
+// code on the same line — a statement, a semicolon, then an opener —
+// which the line rule cannot see. There is none today; if one appears,
+// the count check below moves and this comment is where to start.
 //
-// (The two-character opener is spelled out nowhere above on purpose.
-// comment-claims.test.mjs scans this tree for block comments with the same
-// naive non-greedy regex, and an earlier draft of this paragraph quoted it
-// inside backticks — which opened a comment, as far as that scan was
-// concerned, and ran on for 6,297 characters into live code. The disease
-// this paragraph describes, caught in the paragraph describing it.)
+// (The two-character opener is spelled out nowhere above on purpose, and
+// it took three attempts. comment-claims.test.mjs scans this tree for
+// block comments with the same naive non-greedy regex. The first draft
+// quoted the opener inside backticks; the second quoted the two migration
+// globs verbatim, which contain it. Each time the paragraph opened a
+// comment as far as that scan was concerned and ran on into live code —
+// 6,297 characters the first time — and each time it was the census
+// baseline in baselines.test.mjs that noticed, not a reading. The disease
+// this paragraph describes, caught twice in the paragraph describing it.)
 const sqlLive = sql
   .replace(/^[ \t]*--[^\n]*$/gm, " ")
   .replace(/\/\*[\s\S]*?\*\//g, " ");

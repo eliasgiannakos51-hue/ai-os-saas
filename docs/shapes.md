@@ -979,3 +979,46 @@ only **32 distinct shapes**, of which one line accounts for 132:
 So the experiment is not "one guard at a time" but **one representative per
 shape**. Nine experiments covered 195 guard instances, which is what made
 it possible to answer the question at all rather than sample it.
+
+## The gate that dies instead of failing
+
+A gate is red when it prints
+
+      FAIL  the thing that is wrong
+
+and the mutation runner reads that line to decide which check caught which
+defect. A gate that THROWS is also red, and says nothing:
+
+    (exited non-zero with no FAIL line)
+
+Both are exit code 1, so a build gate cannot tell them apart and neither
+can a person reading CI. What is lost is the only part that was useful —
+which of the gate's forty checks noticed, and what it noticed.
+
+Six were found in this repository during V5 #9, all by mutation suites and
+none by reading, between 2026-09-11 and 2026-09-12:
+
+- `cron-auth` — `timingSafeEqual` raises on buffers of different lengths,
+  so a wrong secret of the wrong length killed the run.
+- `purchased-credits` and `margin-report` — the same shape, in a SQL
+  statement and in a numeric coercion.
+- `accent-search.itest` — `applyFile` throws, so a migration that will not
+  apply took the itest down before its first result.
+- `locale-formatting` — `Intl.DateTimeFormat` raises a RangeError on an
+  invalid Date, which is also the production symptom: an uncaught
+  RangeError in a Server Component is a 500, not an empty cell.
+- `help-articles` — the matcher is called directly, and it sits inside a
+  chat request, so a throw is a failed message rather than a fall-through
+  to the model.
+
+The fix is the same three lines every time — a wrapper that turns the
+throw into a value the check can compare:
+
+    const safe = (fn) => { try { return fn(); } catch (err) { return `THREW: ${err}`; } };
+
+The reason it keeps happening is that a gate is written against working
+code, where nothing throws. The defect it will one day face is the thing
+that makes it throw, and that is the run where it explains itself worst.
+`scripts/tests/mutation-runner-honesty.test.mjs` reports the runner's own
+version of this; nothing yet holds the population of gates that can die,
+because finding one costs a mutation that makes it die.

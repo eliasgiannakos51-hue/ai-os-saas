@@ -113,7 +113,20 @@ check("it no longer reads a global list", !/KNOWLEDGE_BASE/.test(kb));
 // An empty article set must match nothing rather than throw — that is
 // what a locale with no rows yet looks like, and it has to fall through
 // to the model quietly.
-check("a locale with no articles matches nothing", matchCannedAnswer("pricing", [], 0.5) === null);
+// A THROW IS A FAIL, NOT THE END OF THE RUN. This calls the matcher
+// directly, so an exception inside it took the whole gate down and the
+// mutation runner could only say "exited non-zero with no FAIL line" —
+// found 2026-09-12 by help-articles.mutation.mjs. It is also the
+// production symptom: this call sits inside a chat request, so a throw
+// here is a failed message rather than a fall-through to the model.
+const tryMatch = (msg, articles, threshold) => {
+  try {
+    return matchCannedAnswer(msg, articles, threshold);
+  } catch (err) {
+    return `THREW: ${String(err).slice(0, 60)}`;
+  }
+};
+check("a locale with no articles matches nothing", tryMatch("pricing", [], 0.5) === null);
 
 console.log("\n== 2. the seed is complete where it has to be ==");
 check(`en carries every article (${EN.length})`, EN.length === 27);

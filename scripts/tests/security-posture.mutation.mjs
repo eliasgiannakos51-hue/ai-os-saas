@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * SIX WAYS THIS APPLICATION COULD BE OPEN, AND WHETHER THE GATE SEES THEM.
+ * SEVEN WAYS THIS APPLICATION COULD BE OPEN, AND WHETHER THE GATE SEES THEM.
  *
  * security-posture.test.mjs is the broadest gate in the tree: RLS on every
  * user-data table, admin-only tables never reached with a user client,
@@ -14,7 +14,9 @@
  * goes red. Every mutant below is an exposure somebody could ship: a table
  * whose RLS is dropped, an admin table read with the caller's own client,
  * a cron route guarded inline again, a service-role key renamed into the
- * browser bundle.
+ * browser bundle. Seven mutants over the six subjects — RLS gets two,
+ * because a statement can be commented out two different ways and the
+ * gate saw neither until this suite was written.
  *
  * Run: node scripts/tests/security-posture.mutation.mjs
  */
@@ -38,6 +40,18 @@ const MUTANTS = [
     file: BASELINE_SQL,
     from: "alter table public.chat_messages enable row level security;",
     to: "-- alter table public.chat_messages enable row level security;",
+    expect: "RLS",
+  },
+  {
+    // THE SAME STATEMENT, COMMENTED OUT THE OTHER WAY. The line rule
+    // above cannot see this one, and until 2026-09-12 neither could the
+    // gate: block comments were left in on the theory that some migration
+    // had an unterminated one. None has — see the note in the gate — so
+    // both kinds are stripped now and both kinds are mutated here.
+    name: "row level security is wrapped in a block comment instead",
+    file: BASELINE_SQL,
+    from: "alter table public.chat_conversations enable row level security;",
+    to: "/* alter table public.chat_conversations enable row level security; */",
     expect: "RLS",
   },
   {

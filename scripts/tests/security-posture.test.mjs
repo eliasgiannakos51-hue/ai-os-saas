@@ -61,24 +61,45 @@ console.log("== 1. Row Level Security covers every user-data table ==");
 // Only the RLS parsing needs this. `created` anchors on `^create table`,
 // which a commented line cannot satisfy, and the justification lists below
 // are meant to read prose.
-// WHOLE-LINE COMMENTS ONLY, and the narrower rule is the measured one.
-// Stripping SQL block comments as well took the live statement count from
-// 86 to 28: somewhere across the 70 migrations there is an unpaired
-// block-comment opener — inside a dollar-quoted body, most likely — and a
-// non-greedy match from it swallows whole files. Stripping trailing `--`
-// carries the same hazard against any literal containing two dashes.
+// LINE COMMENTS FIRST, THEN BLOCK COMMENTS, and the order is the whole
+// finding rather than a style choice.
 //
-// That opener is spelled out nowhere in this paragraph on purpose.
+// Stripping block comments FIRST takes the live statement count from 86 to
+// 28 — 58 tables vanish — and the first version of this line therefore did
+// not strip them at all, on the guess that some migration had left a
+// comment open. That guess was wrong, and the truth is better: every
+// block-comment opener in the 71 migrations was found and classified
+// (2026-09-12).
+//
+//   baseline_schema.sql:919      inside a `--` line, and it is a GLOB:
+//                                "src/components/entity-links/*)"
+//   help_articles.sql:25         the same, "messages/*.json"
+//   data_analysis_and_coding.sql three real doc comments, all closed
+//
+// So there is no unterminated comment in this schema and no SQL that
+// Postgres silently skips — `--` runs to end of line, and the glob inside
+// one is text. What the naive strip did was start a non-greedy match at
+// that glob and end it at the first genuine closer 541,136 characters
+// later, in a migration written a month afterwards, eating everything
+// between. Removing the `--` lines first removes the fake opener with
+// them, and the three real comments then strip correctly: 86 either way
+// today, and a block-commented RLS statement is now caught too, which the
+// line-only rule missed. security-posture.mutation.mjs has one of each.
+//
+// What is still not handled, deliberately: a block comment OPENED after
+// code on the same line ("create table x; /* note"), which the line rule
+// cannot see. There is none today; if one appears, the count check below
+// moves and this comment is where to start.
+//
+// (The two-character opener is spelled out nowhere above on purpose.
 // comment-claims.test.mjs scans this tree for block comments with the same
-// naive non-greedy regex, and the first draft of these lines quoted the
-// two characters inside backticks — which opened a comment, as far as that
-// scan was concerned, and ran on for 6,297 characters into live code.
-//
-// A commented-out statement is a line that STARTS with `--`, which is what
-// this removes and all it removes. Measured 2026-09-12: 86 tables before
-// and after on the real schema, and the mutation suite red on a chat_messages
-// RLS line turned into a comment.
-const sqlLive = sql.replace(/^[ \t]*--[^\n]*$/gm, " ");
+// naive non-greedy regex, and an earlier draft of this paragraph quoted it
+// inside backticks — which opened a comment, as far as that scan was
+// concerned, and ran on for 6,297 characters into live code. The disease
+// this paragraph describes, caught in the paragraph describing it.)
+const sqlLive = sql
+  .replace(/^[ \t]*--[^\n]*$/gm, " ")
+  .replace(/\/\*[\s\S]*?\*\//g, " ");
 
 // Tables enabled by a literal statement.
 const literalRls = new Set(

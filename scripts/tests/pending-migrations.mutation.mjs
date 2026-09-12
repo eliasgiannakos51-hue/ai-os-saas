@@ -32,9 +32,24 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/pending-migrations.test.mjs";
 const SRC = "scripts/db/pending-migrations.mjs";
-const TARGETS = [SRC];
+const SQL_TEXT = "scripts/lib/sql-text.mjs";
+const TARGETS = [SRC, SQL_TEXT];
 
 const MUTANTS = [
+  {
+    // 0. THE TWO COMMENT PASSES, PUT BACK THE WAY ROUND THEY WERE. This
+    // is not a rewrite of the stripper, it is the exact code that shipped
+    // until 2026-09-12, and it looks equivalent. It is not: a `--` line
+    // containing the two characters that open a block comment (a glob,
+    // every time, in these migrations) is text to Postgres and an opener
+    // to a block pass that runs first, which then deletes everything up
+    // to the next real closer.
+    name: "the block-comment pass runs before the line-comment pass again",
+    file: SQL_TEXT,
+    from: 'return sql.replace(/--[^\\n]*/g, "").replace(/\\/\\*[\\s\\S]*?\\*\\//g, "");',
+    to: 'return sql.replace(/\\/\\*[\\s\\S]*?\\*\\//g, "").replace(/--[^\\n]*/g, "");',
+    expect: "changes nothing",
+  },
   {
     // 1. THE DEFECT ITSELF. Drop the position comparison and every
     // idempotent policy in the repository cancels itself again — the

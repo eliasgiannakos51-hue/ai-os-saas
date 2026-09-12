@@ -24,6 +24,7 @@
  * Run: node scripts/tests/rate-limits.test.mjs
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
+import { stripSqlComments } from "../lib/sql-text.mjs";
 import path from "node:path";
 import { loadTs } from "./load-ts.mjs";
 
@@ -102,7 +103,14 @@ console.log("== 2. the limiter is atomic, and the racy path is reachable only as
 
 console.log("== 3. the migration says what the fallback assumes ==");
 {
-  const mig = read("supabase/migrations/20260919000000_atomic_rate_limit.sql");
+  // STRIPPED, because a commented-out statement is not a statement. This
+  // file searches migration text for `create table`, `enable row level
+  // security` and `grant`, and until 2026-09-12 a `--` in front of any of
+  // them left every one of those checks green — proved by commenting the
+  // line out in the real migration and running this gate.
+  // scripts/lib/sql-text.mjs carries the measurement and why the two
+  // comment passes run in the order they do.
+  const mig = stripSqlComments(read("supabase/migrations/20260919000000_atomic_rate_limit.sql"));
   check("the count and the insert are in ONE function", /insert into public\.rate_limit_log/.test(mig) && /select count\(\*\) into v_count/.test(mig));
   check("serialised per (scope, identifier), not globally",
     /pg_advisory_xact_lock\(hashtextextended\(p_scope \|\| ':' \|\| p_identifier, 0\)\)/.test(mig),

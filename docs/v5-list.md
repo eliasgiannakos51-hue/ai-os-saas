@@ -768,11 +768,12 @@ dropped.
 *Done means:* ~~the ratio published in `npm run build` output~~ — DONE
 2026-09-08. ~~the 7 bare money/access gates~~ — DONE 2026-09-12, and the
 instrument prints `money and access: 0` rather than this line claiming it.
-What remains is category 2, which the same output names on every run: 10
-bare gates a person meets (`accent-search` unit and itest, `chat-favorites`,
-`chat-memory`, `help-articles` unit and itest, `language-reachable`,
-`layout-unification`, `locale-formatting`, `navigation-cost`), and then 109
-in category 3 — where the instruction above about small gates applies, and
+Category 2 is in progress, and the same output names what is left on every
+run rather than this line doing it from memory. It began at 10 bare gates a
+person meets; `accent-search` (unit and itest, 11 mutants over both) landed
+2026-09-12, leaving 8: `chat-favorites`, `chat-memory`, `help-articles` unit
+and itest, `language-reachable`, `layout-unification`, `locale-formatting`,
+`navigation-cost`. Then 109 — where the instruction above about small gates applies, and
 the exemption register is the `EXEMPT` map in
 `scripts/tests/mutation-coverage.test.mjs`, checked BOTH ways in that
 file's §3 so an exemption cannot outlive its gate or sit on a gate that is

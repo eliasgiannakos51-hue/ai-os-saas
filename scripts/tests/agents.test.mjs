@@ -19,6 +19,7 @@
 //
 // Run: node scripts/tests/agents.test.mjs
 import { readFileSync } from "node:fs";
+import { stripSqlComments } from "../lib/sql-text.mjs";
 
 let pass = 0,
   fail = 0;
@@ -797,7 +798,14 @@ console.log("\n== 14. the schema ==");
   // that nothing runs is a claim about the database rather than a
   // description of it. The assertions below are unchanged; only where they
   // read from is.
-  const sql = read("supabase/migrations/20260803000000_baseline_schema.sql");
+  // STRIPPED, because a commented-out statement is not a statement. This
+  // file searches migration text for `create table`, `enable row level
+  // security` and `grant`, and until 2026-09-12 a `--` in front of any of
+  // them left every one of those checks green — proved by commenting the
+  // line out in the real migration and running this gate.
+  // scripts/lib/sql-text.mjs carries the measurement and why the two
+  // comment passes run in the order they do.
+  const sql = stripSqlComments(read("supabase/migrations/20260803000000_baseline_schema.sql"));
 
   // THE COLUMN CHECKS USED TO READ `sql.includes(column)` — over the WHOLE
   // baseline, all seventy tables of it.

@@ -124,30 +124,38 @@ console.log("\n== 2. free chat is not free ==");
 const paid = rows.filter((r) => r.price > 0);
 for (const r of paid) {
   const share = (r.freeChatCost / r.price) * 100;
+  // 6%, against 4.3% measured on every paid plan (2026-09-12). The old
+  // ceiling was 15%, which left room to TRIPLE the top plan's allowance
+  // without this line noticing — plan-economics.mutation.mjs did exactly
+  // that and the gate stayed green.
   checkTrue(
-    `${r.slug}: free chat is ${share.toFixed(1)}% of price (<= 15%)`,
-    share <= 15,
+    `${r.slug}: free chat is ${share.toFixed(1)}% of price (<= 6%)`,
+    share <= 6,
     `${DEFAULT_FREE_CHAT_MESSAGES[r.slug]} messages x EUR ${DEFAULT_FREE_CHAT_MAX_COST_EUR}`
   );
 }
 
 console.log("\n== 3. the two together ==");
-// THE TARGET IS 0.25 AND THE PRODUCT IS AT 0.37.
+// THE TARGET IS 0.25 AND THE PRODUCT IS AT 0.243 — measured 2026-09-12.
 //
-// This is pinned at the measured value, not at the target, on purpose:
-// asserting 0.25 today fails the build on every commit for a PRICING
-// decision that is not mine to make, and a permanently red gate teaches
-// people to ignore gates. It is a ratchet — the number cannot get worse
-// without someone changing this line.
+// This comment said "the product is at 0.37" and the ceiling below was
+// 0.375 to match. Both were true when written and neither is now: the
+// worst-case month costs 24.3% of price on every paid plan, so the target
+// this file was written to chase has been MET and nothing said so.
 //
-// TO REACH >=4x BLENDED, one line of arithmetic: with credit margin M and
-// free chat at share F of price, worst case is 1/M + F, and >=4x needs
-// 1/M + F <= 0.25. The current F is 0.12, which needs M >= 7.7 — a near
-// doubling of every credit charge. The cheaper lever is F: at M = 5
-// everywhere (Starter's number today) and F = 0.05, the sum is exactly
-// 0.25. That is 50 free messages on Starter, 125 on Growth, 250 on
-// Professional, 500 on Ultimate — versus 120/300/600/1200 today.
-const WORST_CASE_SHARE_CEILING = 0.375;
+// A ratchet thirteen points above the measured value is not a ratchet. It
+// is a number that will absorb the next three regressions in silence, and
+// plan-economics.mutation.mjs proved it: cutting the entry plan's price
+// from EUR 20 to EUR 8, and separately quadrupling the credits it grants,
+// both left this gate green. So the ceiling is the target now, which the
+// product already clears.
+//
+// THE ARITHMETIC, kept because it is what makes the number movable: with
+// credit margin M and free chat at share F of price, the worst case is
+// 1/M + F, and >=4x blended needs 1/M + F <= 0.25. Today M is 5 and F is
+// 0.043, giving 0.243. The lever that moves it is F — the free-chat
+// allowance in free-chat.ts — not M.
+const WORST_CASE_SHARE_CEILING = 0.25;
 const TARGET_SHARE_CEILING = 0.25;
 
 for (const r of paid) {

@@ -176,7 +176,25 @@ console.log(
 // env-independence.mutation.mjs (the gate that would have caught the
 // red Vercel build), and one-primary-action gaining its second target.
 // Read off the run (measured=141) before it was written here.
-const RATCHET = 143;
+// 143 -> 154, V5 #9: eleven suites for the money-and-access gates, which
+// is where the list said to start. Eleven suites and eleven raised the
+// count by more than eleven because some drive two gates —
+// purchased-credits.mutation.mjs names both the unit gate and the itest.
+// Read off the run (measured=154) before it was written here. The bare
+// count in category one is now 0; the 119 remaining are what a person
+// meets (10) and everything else (109).
+// 154 -> 164, same day, category 2 in full: accent-search (over both its
+// gates), chat-memory, chat-favorites, locale-formatting,
+// language-reachable, layout-unification, navigation-cost and
+// help-articles (over both of its). Read off the run (measured=164). Both
+// named categories now print 0 bare; the 109 left are category 3, where
+// the exemption register below is the right answer for the small ones.
+// 164 -> 166: Universal Memory adds two gates and one suite over both —
+// ai-memory.test.mjs and chat-memory-store.itest.mjs, driven by
+// ai-memory.mutation.mjs. The denominator moves with them (273 -> 275), so
+// the percentage barely does; the point of the ratchet is the covered
+// count, not the ratio.
+const RATCHET = 166;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

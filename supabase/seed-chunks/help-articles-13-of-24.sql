@@ -12,7 +12,7 @@
 -- unique index these UPSERTs conflict on.
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'fr', 'Le chat se souvient-il des conversations précédentes ?', 'À l''intérieur d''une même conversation, il se souvient toujours des messages précédents. D''une conversation à l''autre, il ne garde que ce qui reste durablement utile — votre nom, votre métier, vos préférences — et cela existe sur les formules payantes. Vous pouvez voir tout ce qu''il a gardé, et le supprimer, dans Paramètres > Mémoire.', 'chat', 0, true, array['se souvient', 'mémoire', 'conversations précédentes', 'il oublie', 'il ne se souvient pas', 'historique du chat']::text[], '/dashboard/memory')
+values ('chat-memory', 'fr', 'Le chat se souvient-il des conversations précédentes ?', 'À l''intérieur d''une même conversation, il se souvient toujours des messages précédents. D''une conversation à l''autre, il ne garde que ce qui reste durablement utile — votre nom, votre métier, vos préférences — et cela existe sur les formules payantes. Vous pouvez voir tout ce qu''il a gardé, supprimer une ligne ou la corriger, dans « Ce dont il se souvient ».', 'chat', 0, true, array['se souvient', 'mémoire', 'conversations précédentes', 'il oublie', 'il ne se souvient pas', 'historique du chat']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,

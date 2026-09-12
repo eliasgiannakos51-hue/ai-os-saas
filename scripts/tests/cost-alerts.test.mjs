@@ -11,6 +11,7 @@
 //
 // Run: node scripts/tests/cost-alerts.test.mjs
 import { readFileSync } from "node:fs";
+import { stripSqlComments } from "../lib/sql-text.mjs";
 import { loadTs } from "./load-ts.mjs";
 
 let pass = 0;
@@ -452,7 +453,14 @@ console.log("\n== 9. the whole sweep, and its plumbing ==");
 
 console.log("\n== 10. the rate limit is a claim, not a check ==");
 {
-  const sql = readFileSync("supabase/migrations/20260823000000_cost_alerts.sql", "utf8");
+  // STRIPPED, because a commented-out statement is not a statement. This
+  // file searches migration text for `create table`, `enable row level
+  // security` and `grant`, and until 2026-09-12 a `--` in front of any of
+  // them left every one of those checks green — proved by commenting the
+  // line out in the real migration and running this gate.
+  // scripts/lib/sql-text.mjs carries the measurement and why the two
+  // comment passes run in the order they do.
+  const sql = stripSqlComments(readFileSync("supabase/migrations/20260823000000_cost_alerts.sql", "utf8"));
   ok("the slot is claimed in ONE statement",
     /insert into public\.cost_alert_log[\s\S]{0,400}where not exists \(/i.test(sql), "no INSERT ... WHERE NOT EXISTS");
   ok("…and reports whether the row landed", /return query select v_id is not null/.test(sql));

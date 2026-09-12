@@ -20,6 +20,7 @@
 //
 // Run: node scripts/tests/background-jobs.test.mjs
 import { readFileSync, readdirSync } from "node:fs";
+import { stripSqlComments } from "../lib/sql-text.mjs";
 
 let pass = 0;
 const failures = [];
@@ -45,7 +46,14 @@ const pollSrc = readFileSync("src/app/api/jobs/[id]/route.ts", "utf8");
 const continueSrc = readFileSync("src/app/api/jobs/[id]/continue/route.ts", "utf8");
 const listSrc = readFileSync("src/app/api/jobs/route.ts", "utf8");
 const hookSrc = readFileSync("src/lib/jobs/use-ai-job.ts", "utf8");
-const migration = readFileSync("supabase/migrations/20260812_background_jobs.sql", "utf8");
+// STRIPPED, because a commented-out statement is not a statement. This
+// file searches migration text for `create table`, `enable row level
+// security` and `grant`, and until 2026-09-12 a `--` in front of any of
+// them left every one of those checks green — proved by commenting the
+// line out in the real migration and running this gate.
+// scripts/lib/sql-text.mjs carries the measurement and why the two
+// comment passes run in the order they do.
+const migration = stripSqlComments(readFileSync("supabase/migrations/20260812_background_jobs.sql", "utf8"));
 
 // ---------------------------------------------------------------------
 console.log("== 1. the kinds, and which are actually converted ==");

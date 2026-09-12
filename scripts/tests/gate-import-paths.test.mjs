@@ -90,6 +90,15 @@ const DELIBERATE = new Map([
     // This file's own red-proof.
     "@/lib/zz-no-such-module",
   ]],
+  ["pricing-truth.mutation.mjs", [
+    // THE MUTANT IS A MOVED FILE, so the path has to be one that is not
+    // there. pricing-truth.test.mjs requires every pricing claim to name
+    // the file and symbol implementing it; the mutant edits one EVIDENCE
+    // entry to point at a path that does not resolve and requires the gate
+    // to notice. Writing a path that exists would prove nothing, and the
+    // suite restores the file either way.
+    "src/lib/chat/memory-moved.ts",
+  ]],
 ]);
 
 /**

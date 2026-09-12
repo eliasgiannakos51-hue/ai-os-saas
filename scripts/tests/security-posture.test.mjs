@@ -51,9 +51,63 @@ const sql = schemaSql();
 
 console.log("== 1. Row Level Security covers every user-data table ==");
 
+// A COMMENTED-OUT STATEMENT IS NOT A STATEMENT, and this search used to
+// count one. `sql` is the raw concatenation of every migration, comments
+// and all, so `-- alter table public.chat_messages enable row level
+// security;` matched exactly as well as the live line: commenting out the
+// RLS on a table full of chat history left this whole section green.
+// security-posture.mutation.mjs did precisely that and nothing moved.
+//
+// Only the RLS parsing needs this. `created` anchors on `^create table`,
+// which a commented line cannot satisfy, and the justification lists below
+// are meant to read prose.
+// LINE COMMENTS FIRST, THEN BLOCK COMMENTS, and the order is the whole
+// finding rather than a style choice.
+//
+// Stripping block comments FIRST takes the live statement count from 86 to
+// 28 — 58 tables vanish — and the first version of this line therefore did
+// not strip them at all, on the guess that some migration had left a
+// comment open. That guess was wrong, and the truth is better: every
+// block-comment opener in the 71 migrations was found and classified
+// (2026-09-12).
+//
+//   baseline_schema.sql:919      inside a `--` line, and it is a GLOB —
+//                                a slash-star wildcard at the end of the
+//                                path src/components/entity-links
+//   help_articles.sql:25         the same, a glob over the messages json
+//   data_analysis_and_coding.sql three real doc comments, all closed
+//
+// So there is no unterminated comment in this schema and no SQL that
+// Postgres silently skips — `--` runs to end of line, and the glob inside
+// one is text. What the naive strip did was start a non-greedy match at
+// that glob and end it at the first genuine closer 541,136 characters
+// later, in a migration written a month afterwards, eating everything
+// between. Removing the `--` lines first removes the fake opener with
+// them, and the three real comments then strip correctly: 86 either way
+// today, and a block-commented RLS statement is now caught too, which the
+// line-only rule missed. security-posture.mutation.mjs has one of each.
+//
+// What is still not handled, deliberately: a block comment OPENED after
+// code on the same line — a statement, a semicolon, then an opener —
+// which the line rule cannot see. There is none today; if one appears,
+// the count check below moves and this comment is where to start.
+//
+// (The two-character opener is spelled out nowhere above on purpose, and
+// it took three attempts. comment-claims.test.mjs scans this tree for
+// block comments with the same naive non-greedy regex. The first draft
+// quoted the opener inside backticks; the second quoted the two migration
+// globs verbatim, which contain it. Each time the paragraph opened a
+// comment as far as that scan was concerned and ran on into live code —
+// 6,297 characters the first time — and each time it was the census
+// baseline in baselines.test.mjs that noticed, not a reading. The disease
+// this paragraph describes, caught twice in the paragraph describing it.)
+const sqlLive = sql
+  .replace(/^[ \t]*--[^\n]*$/gm, " ")
+  .replace(/\/\*[\s\S]*?\*\//g, " ");
+
 // Tables enabled by a literal statement.
 const literalRls = new Set(
-  [...sql.matchAll(/alter table (?:only )?(?:public\.)?"?([a-z_0-9]+)"?\s+enable row level security/gi)].map(
+  [...sqlLive.matchAll(/alter table (?:only )?(?:public\.)?"?([a-z_0-9]+)"?\s+enable row level security/gi)].map(
     (m) => m[1]
   )
 );
@@ -62,7 +116,7 @@ const literalRls = new Set(
 // loop. Expanding these is the whole point — grepping alone under-reports
 // by 23 tables and turns a healthy schema into a fake emergency.
 const loopRls = new Set();
-for (const block of sql.matchAll(/for t in\s+select unnest\(array\[([\s\S]*?)\]\)([\s\S]*?)end \$\$;/gi)) {
+for (const block of sqlLive.matchAll(/for t in\s+select unnest\(array\[([\s\S]*?)\]\)([\s\S]*?)end \$\$;/gi)) {
   const [, arrayBody, loopBody] = block;
   if (!/enable row level security/i.test(loopBody)) continue;
   for (const m of arrayBody.matchAll(/'([a-z_0-9]+)'/gi)) loopRls.add(m[1]);

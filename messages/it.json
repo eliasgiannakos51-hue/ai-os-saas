@@ -159,7 +159,8 @@
       "voice": "Voce",
       "predictions": "Andamenti",
       "posts": "Post",
-      "projects": "Progetti"
+      "projects": "Progetti",
+      "aiMemory": "Cosa ricorda"
     },
     "hints": {
       "chat": "Chiedi qualsiasi cosa — non legato a nessun modulo.",
@@ -188,7 +189,7 @@
       "productWorkflow": "I tuoi prodotti, i pattern e il mentore in una vista.",
       "timeline": "Tutto quello che hai fatto, in ordine.",
       "reflection": "Un riepilogo settimanale dei tuoi progressi.",
-      "memory": "Cosa l'IA ricorda di te.",
+      "memory": "Cerca in tutto quello che hai salvato.",
       "favorites": "Tutto quello che hai messo tra i preferiti.",
       "marketplace": "Condividi la forma di un agente come modello e parti da uno condiviso da qualcun altro.",
       "team": "Invita persone nel tuo spazio.",
@@ -218,7 +219,8 @@
       "voice": "Fatti leggere un testo ad alta voce, oppure parla e viene scritto. I minuti sono contati e il prezzo al minuto è nella pagina.",
       "predictions": "Andamenti nelle tue voci, ciascuno con il numero di registrazioni su cui si basa e un collegamento a esse.",
       "posts": "Dillo una volta e ricevi un post per piattaforma, nella sua lunghezza e nel suo tono. Non pubblica nulla: copi e pubblichi tu.",
-      "projects": "Una cartella con un obiettivo. Ciò che metti è ciò che c'è — niente entra da solo."
+      "projects": "Una cartella con un obiettivo. Ciò che metti è ciò che c'è — niente entra da solo.",
+      "aiMemory": "Cosa la chat ha tenuto su di te, e come cancellarlo."
     },
     "closeMenu": "Chiudi il menu"
   },
@@ -555,7 +557,8 @@
       "memoryDisabled": "✓ memoria chat disattivata",
       "planExcludes": "Il tuo piano attuale non include la memoria delle chat, quindi non viene salvato nulla. Dai piani Starter in su si ricorda tra una conversazione e l’altra.",
       "switchedOff": "La memoria è disattivata, quindi non viene salvato nulla dalle tue conversazioni.",
-      "nothingYet": "Ancora nulla di salvato. La memoria è attiva: conserva elementi duraturi come il tuo nome, il tuo lavoro o una preferenza, non appena una conversazione ne cita uno."
+      "nothingYet": "Ancora nulla di salvato. La memoria è attiva: conserva elementi duraturi come il tuo nome, il tuo lavoro o una preferenza, non appena una conversazione ne cita uno.",
+      "seeAll": "Vedi cosa ricorda"
     },
     "loginActivity": {
       "title": "Attività di accesso",
@@ -3234,6 +3237,11 @@
       "is": "Un progetto: il suo obiettivo, ciò che ci hai messo e una chat che inizia dentro.",
       "does": "Raggruppa il contenuto in attività, file, agenti e risultati, mostra quando è entrato ciascuno, ti lascia toglierne, e avvia una conversazione che appartiene a questo progetto per tutta la sua vita.",
       "doesNot": "Togliere qualcosa non lo elimina, e il progetto non aggiunge nulla da solo: un piano qui non porta i suoi passi, un sito non porta i suoi moduli."
+    },
+    "aiMemory": {
+      "is": "Tutto quello che la chat ha tenuto su di lei, e nient’altro.",
+      "does": "Ogni riga viene da una conversazione. Può aprirla, cancellare una riga o correggerla — e ciò che è stato detto più di una volta è segnato come ripetuto, perché è il peso che la chat gli dà.",
+      "doesNot": "Non conserva le sue conversazioni né i suoi dati. Per cercare quello che ha registrato usi Cerca nei miei dati; per disattivarlo del tutto, l’interruttore è nelle Impostazioni."
     }
   },
   "helpCentre": {
@@ -3960,5 +3968,35 @@
       "ask": "Seleziona uno o più file: la risposta viene solo da ciò che selezioni.",
       "review": "Leggilo prima di usarlo. Qui non viene eseguito nulla."
     }
+  },
+  "aiMemory": {
+    "title": "Cosa ricorda",
+    "description": "Tutto quello che Ionexa Chat ha tenuto su di te fra una conversazione e l’altra. Cancella una riga, correggila, o svuota tutto.",
+    "emptyTitle": "Non ha ancora tenuto nulla",
+    "emptyActive": "Tiene una riga solo quando una conversazione contiene qualcosa di utile a lungo termine: il tuo nome, cosa fai, una preferenza. Ancora niente.",
+    "emptyInactive": "La memoria fra conversazioni è spenta, quindi non viene tenuto nulla. L’interruttore è nelle Impostazioni.",
+    "summary": "{total} cose tenute · alla chat vengono date le {window} più recenti",
+    "repeated": "si ripete, {count} volte",
+    "once": "detto una volta",
+    "learned": "imparato il {date}",
+    "lastSeen": "detto l’ultima volta il {date}",
+    "outsideWindow": "al momento non viene mandato alla chat",
+    "outsideWindowHelp": "Solo le righe più recenti arrivano al prompt. Dillo di nuovo e risale.",
+    "openConversation": "Apri la conversazione",
+    "conversationGone": "la conversazione è stata cancellata",
+    "editLabel": "Correggi",
+    "deleteLabel": "Dimentica",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "saved": "Corretto.",
+    "deleted": "Dimenticato.",
+    "couldNotDelete": "Non è stato possibile cancellare. Riprova.",
+    "couldNotSave": "Non è stato possibile salvare la correzione. Riprova.",
+    "clearAll": "Dimentica tutto",
+    "clearAllConfirm": "Cancellare tutto quello che la chat ricorda di te? Non si può annullare.",
+    "clearedAll": "Dimenticato tutto.",
+    "pruneButton": "Pulisci {count} inutilizzate",
+    "pruneConfirm": "Cancellare {count} righe dette una sola volta e mai più tornate in sei mesi? Tutto ciò che si ripete resta.",
+    "pruned": "{count} rimosse."
   }
 }

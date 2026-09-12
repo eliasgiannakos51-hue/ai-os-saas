@@ -17,6 +17,7 @@ import {
   MARKETPLACE_ICON,
   TEAM_ICON,
   MEMORY_ICON,
+  RECORD_SEARCH_ICON,
   TIMELINE_ICON,
   FAVORITES_ICON,
   MISSION_ICON,
@@ -232,7 +233,16 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: "/dashboard/finance", label: "Finance", icon: MODULE_ICONS.finance, hintKey: "finance" },
       { href: "/dashboard/sales", label: "Sales", icon: MODULE_ICONS.sales, hintKey: "sales" },
       { href: "/dashboard/trading", label: "Trading", icon: MODULE_ICONS.trading, hintKey: "trading" },
-      { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON, hintKey: "memory" },
+      // TWO ROWS, TWO NAMES, AND THEY USED TO BE ONE. This entry was
+      // `/dashboard/memory`, labelled "AI Memory", and its own sidebar
+      // description said "What the AI remembers about you" in all ten
+      // languages — which is not what it does: it searches YOUR RECORDS
+      // across the module tables and holds no conversation at all. The
+      // help article for chat memory linked to it. So the search page is
+      // /dashboard/search now (the old URL permanently redirects), and
+      // what the chat remembers has its own page below it.
+      { href: "/dashboard/search", label: "Search my records", icon: RECORD_SEARCH_ICON, hintKey: "memory" },
+      { href: "/dashboard/ai-memory", label: "What it remembers", icon: MEMORY_ICON, hintKey: "aiMemory" },
       // The OWNER's dashboard, which is why the owner-only flag exists at
       // all — and why the ordering inside sidebarGroups() is load-bearing:
       // role first, hidden second.

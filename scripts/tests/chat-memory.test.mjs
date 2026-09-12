@@ -44,6 +44,14 @@ check("user switched it off -> OFF even on a big plan", chatMemoryActive({ userE
 // A missing/garbage capability must not read as "unlimited".
 check("NaN limit -> OFF, not unlimited", chatMemoryActive({ userEnabled: true, planLimit: NaN }) === false);
 check("negative limit -> OFF", chatMemoryActive({ userEnabled: true, planLimit: -1 }) === false);
+// AND INFINITY, which is the one Number.isFinite is actually FOR. NaN and
+// -1 are both rejected by `> 0` on their own, so those two checks pass
+// whether the finite guard is there or not — a mutation removing it left
+// this section green until 2026-09-12. Infinity is the shape somebody
+// would plausibly write to mean "unlimited", and it is the one value that
+// reaches `.limit(Infinity)`, which PostgREST cannot send.
+check("Infinity limit -> OFF, because .limit(Infinity) is not a query",
+  chatMemoryActive({ userEnabled: true, planLimit: Infinity }) === false);
 check("memory defaults to on when the user never touched the setting", isChatMemoryEnabled({ user_metadata: {} }) === true);
 check("...and off only when explicitly false", isChatMemoryEnabled({ user_metadata: { chat_memory_enabled: false } }) === false);
 
@@ -123,7 +131,34 @@ console.log("\n== 7. still no crisis-to-logging wiring anywhere in memory ==");
 // The same guarantee 6ed1bc4 made: detection code, flags and alerts are
 // not how this is handled, and a later edit must not quietly add them.
 check("no keyword detection list", !/(SUICIDE|CRISIS_KEYWORDS|distressKeywords)/i.test(memSrc));
-check("the extracted text is never logged", !/logApiError\([^)]*extracted/.test(memSrc));
+// NOT `logApiError\([^)]*extracted`, WHICH IS WHAT THIS WAS. A character
+// class excluding `)` stops at the first one, so a log line with any call
+// in an earlier argument — `logApiError("x", new Error("debug"), {
+// extracted })` — walked straight through it. That exact line was added by
+// chat-memory.mutation.mjs on 2026-09-12 and this check stayed green.
+//
+// Reading each logging call up to its terminating `);` catches it, and
+// covers console.* as well, which the old pattern never looked at.
+{
+  const LOG_CALLS = /(?:logApiError|logApiWarning|console\.(?:log|warn|error|info|debug))\s*\(([\s\S]*?)\);/g;
+  // THE FLOOR. `leaks` is asserted EMPTY, so a pattern that matches no
+  // logging call at all satisfies it while reading nothing — the shape
+  // gate-vacuity.test.mjs exists for. memory.ts does log, on the insert
+  // error path, and this says so.
+  const logCalls = [...memSrc.matchAll(LOG_CALLS)];
+  check(`the log-call scan found calls to check (${logCalls.length})`, logCalls.length >= 1);
+  const leaks = logCalls
+    .filter((m) => /\bextracted\b|\bmemory_text\b|\bmemoryText\b/.test(m[1]))
+    .map((m) => m[0].split("\n")[0].slice(0, 80));
+  check("the extracted text is never logged", leaks.length === 0, leaks.join(" | "));
+
+  // And it can still go red, on the exact line that got past the old one.
+  const WOULD_LEAK = 'logApiError("chat:extractAndStoreMemory", new Error("debug"), { extracted });';
+  check(
+    "...and the check catches a log line with a call in an earlier argument",
+    [...WOULD_LEAK.matchAll(LOG_CALLS)].some((m) => /\bextracted\b/.test(m[1]))
+  );
+}
 check("no admin alert on extraction", !/notifyAdmin|sendAdminAlert/.test(memSrc));
 
 console.log("\n== 8. the schema file no longer empties chat_memory on a re-run ==");

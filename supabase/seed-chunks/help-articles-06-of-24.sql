@@ -1,4 +1,4 @@
--- Help Centre seed, part 6 of 24 — 5 statements.
+-- Help Centre seed, part 6 of 24 — 6 statements.
 --
 -- GENERATED from supabase/migrations/20260816_help_articles_seed.sql
 -- by scripts/split-help-seed.mjs. Do not edit either by hand.
@@ -10,6 +10,17 @@
 --
 -- Run 20260816_help_articles.sql first — it creates the table and the
 -- unique index these UPSERTs conflict on.
+
+insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
+values ('credits-rollover', 'el', 'Μεταφέρονται τα credits στον επόμενο μήνα;', 'Τα μηνιαία credits του πλάνου ανανεώνονται κάθε μήνα και δεν συσσωρεύονται. Τα credits που αγοράζεις σε πακέτο είναι διαφορετικά: μένουν στον λογαριασμό σου μέχρι να τα χρησιμοποιήσεις.', 'credits', 3, true, array['μεταφερονται', 'rollover', 'χανονται τα credits', 'συσσωρευονται', 'expire credits']::text[], null)
+on conflict (slug, locale) do update set
+  title = excluded.title,
+  body = excluded.body,
+  category = excluded.category,
+  "order" = excluded."order",
+  published = excluded.published,
+  triggers = excluded.triggers,
+  href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('create-website', 'el', 'Πώς φτιάχνω website;', 'Πήγαινε στο Website Builder από το πλαϊνό μενού, γράψε με απλά λόγια τι θέλεις (τι κάνει η επιχείρησή σου, σε ποιον απευθύνεται, τι ύφος θες) και πάτα δημιουργία. Μπορείς να ανεβάσεις και εικόνες αναφοράς — λογότυπο, φωτογραφίες προϊόντων — για να ακολουθήσει το στυλ σου. Όταν είναι έτοιμο, το δημοσιεύεις σε δική του διεύθυνση με ένα κλικ.', 'websites', 0, true, array['πως φτιαχνω website', 'πως φτιαχνω ιστοσελιδα', 'δημιουργια website', 'create website', 'θελω ενα site', 'website builder', 'ιστοσελιδα']::text[], '/dashboard/website-builder')

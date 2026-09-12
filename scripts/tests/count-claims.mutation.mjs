@@ -41,13 +41,16 @@ const MUTANTS = [
     // 2. THE SECOND, RESTORED. Two pages were added after the sentence
     // was written, and the sentence is what a reader trusts about the
     // layout's <main>. Re-anchored 42 -> 44 by redesign phase 2, which
-    // added /dashboard/projects and /dashboard/projects/[id]: this
-    // mutant's own text is a count claim and goes stale exactly when the
-    // one it guards does.
+    // added /dashboard/projects and /dashboard/projects/[id]; 44 -> 46 by
+    // Universal Memory, which added /dashboard/ai-memory and moved the
+    // record search to /dashboard/search while leaving a redirect at the
+    // old address. This mutant's own text is a count claim and goes stale
+    // exactly when the one it guards does — twice now, which is the
+    // argument for it existing.
     name: "a page count is left at what it was two pages ago",
     file: DASH_LAYOUT,
-    from: "                    44 pages instead of 8, and the four components below",
-    to: "                    42 pages instead of 8, and the four components below",
+    from: "                    46 pages instead of 8, and the four components below",
+    to: "                    44 pages instead of 8, and the four components below",
     expect: "every marker's number is also written in the sentence it vouches for",
   },
   {

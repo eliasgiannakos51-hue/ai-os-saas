@@ -159,7 +159,8 @@
       "voice": "Voix",
       "predictions": "Tendances",
       "posts": "Publications",
-      "projects": "Projets"
+      "projects": "Projets",
+      "aiMemory": "Ce dont il se souvient"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -188,7 +189,7 @@
       "productWorkflow": "Vos produits, vos schémas et votre mentor en une vue.",
       "timeline": "Tout ce que vous avez fait, dans l'ordre.",
       "reflection": "Un résumé hebdomadaire de vos progrès.",
-      "memory": "Ce que l'IA retient de vous.",
+      "memory": "Cherchez dans tout ce que vous avez enregistré.",
       "favorites": "Tout ce que vous avez mis en favori.",
       "marketplace": "Partagez la forme d'un agent comme modèle et partez de celui qu'une autre personne a partagé.",
       "team": "Invitez des personnes dans votre espace.",
@@ -218,7 +219,8 @@
       "voice": "Faites lire un texte à voix haute, ou parlez et il s'écrit. Les minutes sont comptées et le prix à la minute figure sur la page.",
       "predictions": "Des tendances dans vos propres entrées, chacune avec le nombre d'enregistrements sur lequel elle repose et un lien vers eux.",
       "posts": "Dites-le une fois et obtenez une publication par plateforme, à sa longueur et dans son ton. Rien n'est publié : vous copiez et vous publiez.",
-      "projects": "Un dossier avec un objectif. Ce que vous mettez est ce qu'il contient — rien n'entre seul."
+      "projects": "Un dossier avec un objectif. Ce que vous mettez est ce qu'il contient — rien n'entre seul.",
+      "aiMemory": "Ce que le chat a retenu sur vous, et comment le supprimer."
     },
     "closeMenu": "Fermer le menu"
   },
@@ -555,7 +557,8 @@
       "memoryDisabled": "✓ mémoire de conversation désactivée",
       "planExcludes": "Votre forfait actuel n’inclut pas la mémoire de conversation, rien n’est donc enregistré. À partir de Starter, la mémoire est conservée d’une conversation à l’autre.",
       "switchedOff": "La mémoire est désactivée, rien n’est donc enregistré depuis vos conversations.",
-      "nothingYet": "Rien d’enregistré pour l’instant. La mémoire est active — elle retient les éléments durables comme votre nom, votre métier ou une préférence, dès qu’une conversation en mentionne un."
+      "nothingYet": "Rien d’enregistré pour l’instant. La mémoire est active — elle retient les éléments durables comme votre nom, votre métier ou une préférence, dès qu’une conversation en mentionne un.",
+      "seeAll": "Voir ce dont il se souvient"
     },
     "loginActivity": {
       "title": "Activité de connexion",
@@ -3234,6 +3237,11 @@
       "is": "Un projet : son objectif, ce que vous y avez mis, et une conversation qui démarre dedans.",
       "does": "Regroupe le contenu en tâches, fichiers, agents et résultats, montre quand chaque élément est entré, vous laisse en retirer, et démarre une conversation qui appartient à ce projet toute sa durée.",
       "doesNot": "Retirer un élément ne le supprime pas, et le projet n'ajoute rien tout seul : un plan ici n'amène pas ses étapes, un site n'amène pas ses formulaires."
+    },
+    "aiMemory": {
+      "is": "Tout ce que le chat a retenu sur vous, et rien d’autre.",
+      "does": "Chaque ligne vient d’une conversation. Vous pouvez l’ouvrir, supprimer une ligne ou la corriger — et ce qui a été dit plus d’une fois est marqué comme répété, car c’est le poids que le chat lui donne.",
+      "doesNot": "Il ne conserve ni vos conversations ni vos données. Pour chercher ce que vous avez consigné, utilisez Chercher dans mes données ; pour tout désactiver, l’interrupteur est dans les Réglages."
     }
   },
   "helpCentre": {
@@ -3960,5 +3968,35 @@
       "ask": "Cochez un ou plusieurs fichiers — la réponse provient uniquement de ce que vous cochez.",
       "review": "Lis-le avant de l'utiliser. Rien n'est exécuté ici."
     }
+  },
+  "aiMemory": {
+    "title": "Ce dont il se souvient",
+    "description": "Tout ce que Ionexa Chat a retenu sur vous entre les conversations. Supprimez une ligne, corrigez-en une, ou effacez tout.",
+    "emptyTitle": "Rien de retenu pour le moment",
+    "emptyActive": "Une ligne est retenue seulement quand une conversation contient quelque chose de durablement utile : votre nom, votre métier, une préférence. Rien pour le moment.",
+    "emptyInactive": "La mémoire entre conversations est désactivée, donc rien n’est retenu. L’interrupteur est dans les Réglages.",
+    "summary": "{total} éléments retenus · les {window} plus récents sont donnés au chat",
+    "repeated": "se répète, {count} fois",
+    "once": "mentionné une fois",
+    "learned": "appris le {date}",
+    "lastSeen": "dit pour la dernière fois le {date}",
+    "outsideWindow": "pas envoyé au chat en ce moment",
+    "outsideWindowHelp": "Seules les lignes les plus récentes atteignent le prompt. Redites-le et il remonte.",
+    "openConversation": "Ouvrir la conversation",
+    "conversationGone": "la conversation a été supprimée",
+    "editLabel": "Corriger",
+    "deleteLabel": "Oublier",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "saved": "Corrigé.",
+    "deleted": "Oublié.",
+    "couldNotDelete": "Suppression impossible. Réessayez.",
+    "couldNotSave": "Enregistrement de la correction impossible. Réessayez.",
+    "clearAll": "Tout oublier",
+    "clearAllConfirm": "Supprimer tout ce que le chat retient sur vous ? Action irréversible.",
+    "clearedAll": "Tout a été oublié.",
+    "pruneButton": "Nettoyer {count} inutilisés",
+    "pruneConfirm": "Supprimer {count} lignes dites une seule fois et jamais revenues depuis six mois ? Tout ce qui se répète est conservé.",
+    "pruned": "{count} supprimées."
   }
 }

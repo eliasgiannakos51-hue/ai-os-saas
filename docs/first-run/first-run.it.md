@@ -1,12 +1,12 @@
 # The first run — it
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **597 strings**. The whole product is 3072, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **599 strings**. The whole product is 3106, which is why this file exists.
 
-**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 353 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 354 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (46)
+## Tier 1 — THE SENTENCES — read these (47)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -119,6 +119,12 @@ Un business plan, appunti, un elenco — ne estraiamo le parti strutturate.
 > EN — These entries are a demo — a small design studio's last three months. They are not yours.
 
 Queste voci sono una demo: tre mesi di un piccolo studio di design. Non sono tue.
+
+**`sidebar.hints.aiMemory`**
+
+> EN — What the chat has kept about you, and how to remove it.
+
+Cosa la chat ha tenuto su di te, e come cancellarlo.
 
 **`sidebar.hints.apps`**
 
@@ -296,7 +302,7 @@ Ionexa lo usa per scegliere quale passo del piano proporti — lavoro leggero qu
 
 Gratis: non viene generato nulla e lo togli con un clic
 
-## Tier 2 — The labels — skim these (353)
+## Tier 2 — The labels — skim these (354)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1468,9 +1474,9 @@ Segui cosa stai studiando.
 
 **`sidebar.hints.memory`**
 
-> EN — What the AI remembers about you.
+> EN — Search across everything you have saved.
 
-Cosa l'IA ricorda di te.
+Cerca in tutto quello che hai salvato.
 
 **`sidebar.hints.mine`**
 
@@ -1591,6 +1597,12 @@ Affiliazione
 > EN — AI that works for you
 
 IA che lavora per te
+
+**`sidebar.items.aiMemory`**
+
+> EN — What it remembers
+
+Cosa ricorda
 
 **`sidebar.items.analytics`**
 

@@ -707,19 +707,44 @@ prints the ratio on every `npm run build`, ratcheted, with its own 6 of 6
 mutation suite. The number that was asked for is a number that moves now,
 which is the thing this item wanted.
 
-**143 of 273 gates the sweep can drive = 52.4%** (measured 2026-09-11).
-The headline this entry carried — *98 of 221 (44%)* — was the 2026-09-05
-figure and it is stale in BOTH directions: the covered count rose by 45,
-and the gate population rose from 221 to 273, so 130 are bare rather than
-123. (It said *107 of 218 (49%)* until 2026-09-05; that figure could not be
-re-derived under any measure and is corrected in §1 of the closing report.)
+**154 of 273 gates the sweep can drive = 56.4%** (measured 2026-09-12; the
+figure is printed by `node scripts/tests/mutation-coverage.test.mjs`, so
+re-derive it rather than trusting this line). It read *143 of 273 (52.4%)*
+on 2026-09-11, and *98 of 221 (44%)* before that — the 2026-09-05 figure,
+stale in BOTH directions, because the covered count rose by 45 and the gate
+population rose from 221 to 273. (It said *107 of 218 (49%)* until
+2026-09-05; that figure could not be re-derived under any measure and is
+corrected in §1 of the closing report.)
 
-The rise was not a sweep of the bare list. It came from suites written for
-other V5 items — presentations, posts, sidebar-structure, producer-routes,
-projects, nav-freshness, step-flow, env-independence, and on 2026-09-11
-search-index-locale and rpc-canaries. So the ratio moved as a side effect
-of doing the work, which is the healthy way for it to move and not
-evidence that item 9 itself was worked on.
+**Category 1 is finished.** The instrument's own breakdown now prints
+`money and access: 0` — the 7 bare gates this entry named are all covered,
+and four more went with them. Eleven suites, 66 mutants, on 2026-09-12:
+`cron-auth` (9), `credit-function-privileges` (6), `purchased-credits` (6),
+`purchased-credits-marker` (5), `purchased-credits-upgrade` (5),
+`pricing-margin-bug` (6), `margin-report` (6), `plan-economics` (6),
+`pricing-truth` (5), `guard-witnesses` (6), `security-posture` (6).
+
+**Eleven of those 66 first ran AMBER, and the gate was fixed rather than
+the mutant weakened.** That is a fifth of them, which is the same ratio the
+previous pass found (9 in 46) and the reason this item is worth the time:
+the suites are not a formality over gates already known to work, they are
+how it was discovered that these ones did not. The biggest was
+`security-posture.test.mjs` §1, which parsed RLS out of the RAW
+concatenated schema — so `-- alter table public.chat_messages enable row
+level security;` matched as well as the live line, and commenting out RLS
+on the chat history left the section green. Others: `pricing-truth`
+matching an evidence symbol inside a comment; `plan-economics` carrying
+ceilings of 37.5% and 15% against a product at 24.3% and 4.3%, loose enough
+that cutting the entry plan's price by 60% stayed green; three gates
+crashing instead of printing FAIL, which the runner reads as an unhelpful
+"exited non-zero".
+
+The rise before that was not a sweep of the bare list. It came from suites
+written for other V5 items — presentations, posts, sidebar-structure,
+producer-routes, projects, nav-freshness, step-flow, env-independence, and
+on 2026-09-11 search-index-locale and rpc-canaries. So the ratio moved as a
+side effect of doing the work, which is the healthy way for it to move; the
+2026-09-12 rise is the first that was this item being worked on directly.
 
 A gate without that proof might be entirely decorative — and V4 found that
 exact thing four times.
@@ -741,10 +766,17 @@ dropped.
    the file rather than writing a ceremonial one.
 
 *Done means:* ~~the ratio published in `npm run build` output~~ — DONE
-2026-09-08. What remains of this item is the sweep itself, and its first
-target is the 7 bare money/access gates the instrument names on every run
-(`pricing-truth`, `pricing-margin-bug`, `margin-report`,
-`credit-function-privileges.itest`, and three `purchased-credits*.itest`).
+2026-09-08. ~~the 7 bare money/access gates~~ — DONE 2026-09-12, and the
+instrument prints `money and access: 0` rather than this line claiming it.
+What remains is category 2, which the same output names on every run: 10
+bare gates a person meets (`accent-search` unit and itest, `chat-favorites`,
+`chat-memory`, `help-articles` unit and itest, `language-reachable`,
+`layout-unification`, `locale-formatting`, `navigation-cost`), and then 109
+in category 3 — where the instruction above about small gates applies, and
+the exemption register is the `EXEMPT` map in
+`scripts/tests/mutation-coverage.test.mjs`, checked BOTH ways in that
+file's §3 so an exemption cannot outlive its gate or sit on a gate that is
+not small.
 
 ### 10. The `\b` convention has no gate — DONE (2026-09-08)
 

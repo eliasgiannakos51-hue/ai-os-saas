@@ -232,6 +232,62 @@ try {
     check(`service_role CAN execute the ${kind}`, svc === "t", `has_function_privilege = ${svc}`);
   }
 
+  console.log("\n== P0-5: the grant to service_role is load-bearing, under the posture where it has to be ==");
+  // WHY THIS SECTION EXISTS. Every `service_role CAN execute` check above
+  // passes whether or not the sweep grants anything, and
+  // credit-function-privileges.mutation.mjs is what showed it: delete
+  // `grant execute on routine %s to service_role` from the migration and
+  // the whole gate stayed green.
+  //
+  // The reason is line 99 of this file. It reproduces the real Supabase
+  // posture — `alter default privileges ... grant all on functions to
+  // anon, authenticated, service_role` — so every function is granted to
+  // service_role the moment it is created, and the sweep never revokes
+  // from service_role. The grant is therefore invisible against the
+  // default, and a check that cannot fail proves nothing.
+  //
+  // It is not redundant, though, and this is the posture that shows it: a
+  // project whose default privileges do NOT include service_role — a
+  // hardened one, or any future Supabase that tightens the default. There
+  // the sweep's grant is the only thing standing between the application
+  // and "permission denied for function" on every credit settlement.
+  //
+  // So the probe removes the default for service_role, creates a function
+  // under it, runs the sweep, and asks. Under the real migration the
+  // answer is `t`; with the grant line deleted it is `f`.
+  // THE POSTURE, AND THE TWO WRONG GUESSES IT TOOK TO FIND IT. Revoking
+  // the default from service_role alone left the probe reachable, because
+  // every function carries a built-in EXECUTE to PUBLIC; revoking PUBLIC
+  // in the DEFAULT did nothing either — the probe came back with
+  // proacl = NULL, so the default-ACL row never applied.
+  //
+  // The mechanism is neither. Line 99 grants an EXPLICIT default to
+  // service_role, and the sweep's `revoke all from public / anon /
+  // authenticated` does not touch a grant held by service_role. That
+  // explicit default is what was answering `t`, not the sweep.
+  //
+  // So the posture that makes the grant load-bearing is a default that
+  // does not name service_role. The sweep then revokes PUBLIC at the
+  // object level and the grant is the only thing left.
+  await sql(`alter default privileges in schema public revoke all on functions from service_role`);
+  await sql(`create function public.probe_hardened_fn() returns int language sql as $$ select 1 $$`);
+  file("supabase/migrations/20260818000000_function_grants.sql");
+  const anonHardened = await sql(`select has_function_privilege('anon', 'public.probe_hardened_fn()', 'execute')`);
+  check(
+    "the sweep revoked the built-in PUBLIC grant on the probe",
+    anonHardened === "f",
+    `has_function_privilege(anon) = ${anonHardened} — without this the next check passes for the wrong reason`
+  );
+  const svcHardened = await sql(`select has_function_privilege('service_role', 'public.probe_hardened_fn()', 'execute')`);
+  check(
+    "…and the sweep's own grant is the only thing service_role has left",
+    svcHardened === "t",
+    `has_function_privilege(service_role) = ${svcHardened}`
+  );
+  // Put the project posture back, so nothing after this reads a database
+  // configured differently from the one every section above measured.
+  await sql(`alter default privileges in schema public grant all on functions to service_role`);
+
   console.log(`\n${fails === 0 ? "ALL PASS" : `${fails} FAILED`}`);
   process.exit(fails === 0 ? 0 : 1);
 } finally {

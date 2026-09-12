@@ -176,7 +176,14 @@ console.log(
 // env-independence.mutation.mjs (the gate that would have caught the
 // red Vercel build), and one-primary-action gaining its second target.
 // Read off the run (measured=141) before it was written here.
-const RATCHET = 143;
+// 143 -> 154, V5 #9: eleven suites for the money-and-access gates, which
+// is where the list said to start. Eleven suites and eleven raised the
+// count by more than eleven because some drive two gates —
+// purchased-credits.mutation.mjs names both the unit gate and the itest.
+// Read off the run (measured=154) before it was written here. The bare
+// count in category one is now 0; the 119 remaining are what a person
+// meets (10) and everything else (109).
+const RATCHET = 154;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

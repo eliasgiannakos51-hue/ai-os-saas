@@ -51,9 +51,38 @@ const sql = schemaSql();
 
 console.log("== 1. Row Level Security covers every user-data table ==");
 
+// A COMMENTED-OUT STATEMENT IS NOT A STATEMENT, and this search used to
+// count one. `sql` is the raw concatenation of every migration, comments
+// and all, so `-- alter table public.chat_messages enable row level
+// security;` matched exactly as well as the live line: commenting out the
+// RLS on a table full of chat history left this whole section green.
+// security-posture.mutation.mjs did precisely that and nothing moved.
+//
+// Only the RLS parsing needs this. `created` anchors on `^create table`,
+// which a commented line cannot satisfy, and the justification lists below
+// are meant to read prose.
+// WHOLE-LINE COMMENTS ONLY, and the narrower rule is the measured one.
+// Stripping SQL block comments as well took the live statement count from
+// 86 to 28: somewhere across the 70 migrations there is an unpaired
+// block-comment opener — inside a dollar-quoted body, most likely — and a
+// non-greedy match from it swallows whole files. Stripping trailing `--`
+// carries the same hazard against any literal containing two dashes.
+//
+// That opener is spelled out nowhere in this paragraph on purpose.
+// comment-claims.test.mjs scans this tree for block comments with the same
+// naive non-greedy regex, and the first draft of these lines quoted the
+// two characters inside backticks — which opened a comment, as far as that
+// scan was concerned, and ran on for 6,297 characters into live code.
+//
+// A commented-out statement is a line that STARTS with `--`, which is what
+// this removes and all it removes. Measured 2026-09-12: 86 tables before
+// and after on the real schema, and the mutation suite red on a chat_messages
+// RLS line turned into a comment.
+const sqlLive = sql.replace(/^[ \t]*--[^\n]*$/gm, " ");
+
 // Tables enabled by a literal statement.
 const literalRls = new Set(
-  [...sql.matchAll(/alter table (?:only )?(?:public\.)?"?([a-z_0-9]+)"?\s+enable row level security/gi)].map(
+  [...sqlLive.matchAll(/alter table (?:only )?(?:public\.)?"?([a-z_0-9]+)"?\s+enable row level security/gi)].map(
     (m) => m[1]
   )
 );
@@ -62,7 +91,7 @@ const literalRls = new Set(
 // loop. Expanding these is the whole point — grepping alone under-reports
 // by 23 tables and turns a healthy schema into a fake emergency.
 const loopRls = new Set();
-for (const block of sql.matchAll(/for t in\s+select unnest\(array\[([\s\S]*?)\]\)([\s\S]*?)end \$\$;/gi)) {
+for (const block of sqlLive.matchAll(/for t in\s+select unnest\(array\[([\s\S]*?)\]\)([\s\S]*?)end \$\$;/gi)) {
   const [, arrayBody, loopBody] = block;
   if (!/enable row level security/i.test(loopBody)) continue;
   for (const m of arrayBody.matchAll(/'([a-z_0-9]+)'/gi)) loopRls.add(m[1]);

@@ -41,6 +41,7 @@
  */
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0,
   fail = 0;
@@ -158,7 +159,12 @@ for (const claim of allClaims) {
     missingCode.push(`${claim}: ${ev.file} does not exist`);
     continue;
   }
-  if (!readFileSync(ev.file, "utf8").includes(ev.symbol)) {
+  // COMMENTS DO NOT COUNT AS EVIDENCE. A substring search over the raw
+  // file keeps a claim alive on the strength of a line that says the
+  // symbol USED to be here — which is the state a deletion leaves behind
+  // more often than not, because the explaining comment is what survives
+  // a rename. stripComments is the same helper the mutation gates use.
+  if (!stripComments(readFileSync(ev.file, "utf8")).includes(ev.symbol)) {
     missingCode.push(`${claim}: ${ev.file} no longer contains \`${ev.symbol}\``);
   }
 }

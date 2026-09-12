@@ -79,9 +79,17 @@ if (suites.length === 0) {
 // real 107 when role-grants joined them; 113 against a real 115 after the
 // seven V5 #10 suites; 114 against a real 116; 115 against a real 117
 // after anthropic-reconcile; 117 against a real 119 with mutation-anchors
-// and baselines; 118 against a real 120 with count-claims; 119 today
-// against a real 121, with route-refusals.
-const FLOOR = 119;
+// and baselines; 118 against a real 120 with count-claims; 119 against a
+// real 121, with route-refusals.
+//
+// 131 today against a real 131, and the gap is the point: the floor sat at
+// 119 while the directory grew to 131, so it was ten behind before
+// search-index-locale and rpc-canaries took it over the allowed slack and
+// baselines.test.mjs failed the build. Twelve suites were added between
+// those two numbers without anybody coming back here, which is the same
+// habit docs/v5-list.md was four items stale from — see the CLAUDE.md rule
+// on updating the record in the commit that moves it.
+const FLOOR = 131;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

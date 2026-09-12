@@ -156,4 +156,157 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20260923000000_mrr_paid_only.sql",
     breaks: "Business Health shows no MRR/ARR at all, or — on the previous version — counts unpaid beta tiers as revenue",
   },
+  // ------------------------------------------------------------------
+  // 2026-09-11 — THE THREE SCREENS THE OWNER TRIED, none of which had a
+  // canary. Their migrations are the three newest in the tree and every
+  // one of them is applied by hand; /api/health answered
+  // {"schema":{"ok":true,"checked":16,"missing":[]}} while nothing in the
+  // list reached past 20260925.
+  //
+  // schema-canaries.test.mjs §3 now requires one canary per migration in
+  // the window, which is what would have said so.
+  // ------------------------------------------------------------------
+  {
+    kind: "column",
+    table: "ai_presentations",
+    column: "slides",
+    migration: "20260929000000_presentation_decks.sql",
+    breaks: "Presentations: every deck fails to save AFTER the model has run and the credits are spent — the row carrying the slides is rejected",
+  },
+  {
+    kind: "table",
+    table: "generated_posts",
+    migration: "20260930000000_generated_posts.sql",
+    breaks: "Posts: every generated post fails to save after the model has run; the person waits, is charged, and gets nothing",
+  },
+  {
+    kind: "table",
+    table: "projects",
+    migration: "20261001000000_projects.sql",
+    breaks: "Projects: the page can neither list nor create a project — every request is rejected",
+  },
+  // ------------------------------------------------------------------
+  // 2026-09-11 — THE RPCs src CALLS, after a sweep found 27 of them with
+  // no canary and one canary guarding a function nothing calls any more.
+  //
+  // `search_all` was the canary; api/search/route.ts moved to
+  // `search_all_localized` in 20260914 and the canary stayed behind. So
+  // the probe was watching a forwarder while the function every ⌘K query
+  // depends on went unwatched — the same shape as the six functions this
+  // endpoint once reported missing while all six existed, pointed the
+  // other way.
+  //
+  // rpc-canaries.test.mjs now derives this set from the `.rpc("…")` calls
+  // in src/ and requires each one to be either a canary here or a named
+  // exemption carrying a reason, so the list cannot fall behind the code
+  // again without a red build.
+  // ------------------------------------------------------------------
+  {
+    kind: "function",
+    fn: "search_all_localized",
+    migration: "20260914000000_search_index_locale.sql",
+    breaks: "every ⌘K search fails — api/search calls this and nothing else; search_all survives only as a forwarder nothing calls",
+  },
+  {
+    kind: "function",
+    fn: "deduct_credits_atomic",
+    migration: "20260815_purchased_credits.sql",
+    breaks: "every paid action refuses at the charge: credits are never deducted and no work is done",
+  },
+  {
+    kind: "function",
+    fn: "grant_credits_idempotent",
+    migration: "20260805_idempotent_credit_grants.sql",
+    breaks: "a completed Stripe payment never becomes credits",
+  },
+  {
+    kind: "function",
+    fn: "reset_monthly_credits",
+    migration: "20260815_purchased_credits.sql",
+    breaks: "a subscriber's monthly allowance never refills",
+  },
+  {
+    kind: "function",
+    fn: "reset_monthly_credits_for_unbilled",
+    migration: "20260813_monthly_credit_reset.sql",
+    breaks: "the monthly reset cron fails; unbilled accounts keep last month's balance indefinitely",
+  },
+  {
+    kind: "function",
+    fn: "claim_affiliate_commissions",
+    migration: "20260820000000_affiliate.sql",
+    breaks: "an affiliate's earned commissions can never be claimed",
+  },
+  {
+    kind: "function",
+    fn: "consume_voice_seconds",
+    migration: "20260827000000_voice_usage.sql",
+    breaks: "voice transcription and speech refuse every request",
+  },
+  {
+    kind: "function",
+    fn: "voice_usage_this_month",
+    migration: "20260827000000_voice_usage.sql",
+    breaks: "the voice quota cannot be read, so the monthly cap cannot be enforced",
+  },
+  {
+    kind: "function",
+    fn: "mark_cost_alert_delivered",
+    migration: "20260823000000_cost_alerts.sql",
+    breaks: "a delivered cost alert is never marked, so the same alert is sent again on every cron tick",
+  },
+  {
+    kind: "function",
+    fn: "pwa_adoption_summary",
+    migration: "20260823000000_pwa_client_stats.sql",
+    breaks: "/dashboard/system-health cannot report PWA adoption (the panel says so itself and names the migration)",
+  },
+  {
+    kind: "function",
+    fn: "record_template_use",
+    migration: "20260826000000_agent_templates.sql",
+    breaks: "adopting an agent template fails after the agent has already been created",
+  },
+  {
+    kind: "function",
+    fn: "forget_user_in_production_errors",
+    migration: "20260808_gdpr_erasure_gaps.sql",
+    breaks: "account deletion completes while the deleted user's id stays queryable in production_errors — an Article 17 erasure that did not erase",
+  },
+  {
+    kind: "function",
+    fn: "badge_removals_due",
+    migration: "20260905000000_badge_removal_credits.sql",
+    breaks: "the badge-removal cron fails, so a paid badge removal never takes effect",
+  },
+  {
+    kind: "function",
+    fn: "site_shows_badge",
+    migration: "20260905000000_badge_removal_credits.sql",
+    breaks: "every published site shows the badge — the decision fails towards the badge on purpose, including on sites that paid to remove it",
+  },
+  {
+    kind: "function",
+    fn: "routing_savings",
+    migration: "20260904000000_model_routing.sql",
+    breaks: "the routing panel cannot show what the cheaper models saved",
+  },
+  {
+    kind: "function",
+    fn: "routing_success_rates",
+    migration: "20260904000000_model_routing.sql",
+    breaks: "the router cannot read its own success rates, so it stops learning from outcomes",
+  },
+  {
+    kind: "function",
+    fn: "prune_transition_suggestions",
+    migration: "20260927000000_transition_suggestions.sql",
+    breaks: "the nav-retention cron fails, so transition_suggestions grows unbounded",
+  },
+  {
+    kind: "function",
+    fn: "subscription_cohort",
+    migration: "20260903000000_revenue_engine.sql",
+    breaks: "Business Health cannot show cohort retention",
+  },
 ];

@@ -176,7 +176,7 @@ console.log(
 // env-independence.mutation.mjs (the gate that would have caught the
 // red Vercel build), and one-primary-action gaining its second target.
 // Read off the run (measured=141) before it was written here.
-const RATCHET = 141;
+const RATCHET = 143;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

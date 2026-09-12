@@ -13,6 +13,10 @@ import {
   GitBranch,
   Gauge,
   Globe,
+  CalendarCheck,
+  Monitor,
+  MonitorSmartphone,
+  Music,
   GraduationCap,
   History,
   Home,
@@ -222,3 +226,17 @@ export const PREDICTIONS_ICON: LucideIcon = Compass;
 // project here is a grouping WITH A GOAL and a state, not a directory,
 // and FolderOpen is already the records hub.
 export const PROJECTS_ICON: LucideIcon = FolderKanban;
+
+// THE SIX THAT DO NOT EXIST YET, and the reason they have marks at all
+// is that lib/sidebar-nav.ts holds their POSITION — see `notBuilt` in
+// lib/sidebar-visibility.ts. Nothing draws them today. They are here so
+// that the day one of them is built, the row is already in the right
+// group, with a mark that is not a duplicate of a neighbour's.
+export const MUSIC_ICON: LucideIcon = Music;
+/** A browser the product drives, not a website the product wrote —
+ *  distinct from MODULE_ICONS.websites (Globe) for that reason. */
+export const BROWSER_AGENT_ICON: LucideIcon = MonitorSmartphone;
+export const COMPUTER_AGENT_ICON: LucideIcon = Monitor;
+/** A meeting is an appointment that HAPPENED and produced actions —
+ *  CalendarClock is the weekly reflection, which is a recurring one. */
+export const MEETINGS_ICON: LucideIcon = CalendarCheck;

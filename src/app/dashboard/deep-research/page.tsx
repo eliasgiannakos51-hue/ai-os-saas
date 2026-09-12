@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
+import { upgradeWallProps } from "@/lib/billing/feature-catalog";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { maxResearchRunsForPlan } from "@/lib/files/limits";
@@ -47,7 +48,7 @@ export default async function DeepResearchPage({
       <div className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader helpKey="help.deepResearch" icon={Telescope} title={t("title")} description={t("description")} />
-          <UpgradeRequired featureName={t("title")} planName="Starter" />
+          <UpgradeRequired {...upgradeWallProps("deepResearch", t("title"))!} />
         </div>
       </div>
     );

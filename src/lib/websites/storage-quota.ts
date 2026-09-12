@@ -27,7 +27,7 @@ import type { Plan } from "@/lib/billing/plans";
  * would mean the same logo counted five times.
  */
 
-const MB = 1024 * 1024;
+const MEGABYTE = 1024 * 1024;
 
 /**
  * Deliberately generous. This is not a revenue lever — it exists so one
@@ -36,12 +36,12 @@ const MB = 1024 * 1024;
  * (lib/website-reference-image-server.ts) has done its work.
  */
 export const STORAGE_LIMIT_BYTES: Record<string, number> = {
-  free: 50 * MB,
-  starter: 250 * MB,
-  growth: 1024 * MB,
-  professional: 5 * 1024 * MB,
-  ultimate: 20 * 1024 * MB,
-  enterprise: 100 * 1024 * MB,
+  free: 50 * MEGABYTE,
+  starter: 250 * MEGABYTE,
+  growth: 1024 * MEGABYTE,
+  professional: 5 * 1024 * MEGABYTE,
+  ultimate: 20 * 1024 * MEGABYTE,
+  enterprise: 100 * 1024 * MEGABYTE,
 };
 
 /** An unknown or absent plan gets the FREE allowance, not an unlimited

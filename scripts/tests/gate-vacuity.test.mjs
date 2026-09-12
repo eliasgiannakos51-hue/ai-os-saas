@@ -111,6 +111,12 @@ const ALLOWED = new Map([
   ["evals.test.mjs", ["badPatterns"]],
   //   `Object.keys(headingKeys).length >= 5` — an expression, not a name.
   ["sidebar-naming.test.mjs", ["deadHeadingKeys"]],
+  //   `controlHits.length >= 1` — the SAME regex run over a literal
+  //   holding one hand-written row, asserted non-empty one line above.
+  //   The floor cannot be on `handWritten` itself: the claim is that the
+  //   pricing page has no hand-written rows left, so zero is the answer
+  //   and the control is what proves the scanner could still find one.
+  ["feature-catalog.test.mjs", ["handWritten"]],
   //   `routes.length >= 116` — the offender list at line 136. The tracer
   //   picks up a DIFFERENT `offenders` further down the same file.
   ["owner-only-access.test.mjs", ["offenders"]],

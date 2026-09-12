@@ -49,15 +49,32 @@ const MUTANTS = [
   {
     name: "an emptied group is rendered as a bare heading",
     file: VISIBILITY,
-    from: "    .filter((group) => group.items.length > 0);",
-    to: "    .filter(() => true);",
+    // ANCHORED ON THE MAP ABOVE IT, not on the filter alone. V5 gave
+    // visibleGroups a second pass (the notBuilt drop), so
+    // `.filter((group) => group.items.length > 0);` now appears three
+    // times in the file and `String.replace` takes the FIRST — which
+    // defanged the wrong pass and left the gate green. A mutation that
+    // no longer applies where it means to is shapes.md #9, and it is
+    // the reason this pair is anchored on the line that identifies the
+    // pass.
+    from:
+      "    .map((group) => ({ ...group, items: group.items.filter((i) => !i.ownerOnly) }))\n" +
+      "    .filter((group) => group.items.length > 0);",
+    to:
+      "    .map((group) => ({ ...group, items: group.items.filter((i) => !i.ownerOnly) }))\n" +
+      "    .filter(() => true);",
     expect: "a group left empty is dropped",
   },
   {
     name: "the filter mutates the shared config",
     file: VISIBILITY,
-    from: "    .map((group) => ({ ...group, items: group.items.filter((i) => !i.ownerOnly) }))",
-    to: "    .map((group) => { group.items = group.items.filter((i) => !i.ownerOnly); return group; })",
+    // MOVED TO THE FIRST PASS, for the same reason and a sharper one:
+    // the ownerOnly map now runs over objects the notBuilt map ALREADY
+    // copied, so mutating there mutates a copy and is no longer a
+    // defect at all. The first pass is the one that receives the shared
+    // config, so that is where in-place mutation is a real bug.
+    from: "    .map((group) => ({ ...group, items: group.items.filter((i) => !i.notBuilt) }))",
+    to: "    .map((group) => { group.items = group.items.filter((i) => !i.notBuilt); return group; })",
     expect: "the config itself is never mutated",
   },
   {

@@ -8,6 +8,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
+import { upgradeWallProps } from "@/lib/billing/feature-catalog";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { listIntegrations } from "@/lib/integrations/store";
@@ -42,7 +43,7 @@ export default async function IntegrationsPage() {
       <div className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader helpKey="help.integrations" helpArticle="connect-gmail" icon={Plug} title={t("title")} description={t("description")} />
-          <UpgradeRequired featureName={t("title")} planName="Starter" />
+          <UpgradeRequired {...upgradeWallProps("integrations", t("title"))!} />
         </div>
       </div>
     );

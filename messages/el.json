@@ -82,7 +82,10 @@
     "errorWithMessage": "σφάλμα: {message}",
     "upgradeRequired": {
       "title": "Χρειάζεται αναβάθμιση",
-      "body": "Το {feature} χρειάζεται το πλάνο {plan} ή ανώτερο."
+      "body": "Το {feature} χρειάζεται το πλάνο {plan} ή ανώτερο.",
+      "price": "Το {plan} κοστίζει {amount} τον μήνα.",
+      "customPrice": "Η τιμή του {plan} συμφωνείται ξεχωριστά.",
+      "cta": "Δες το πλάνο {plan}"
     },
     "textActions": {
       "rewrite": "Ξαναγράψ' το",
@@ -264,7 +267,38 @@
       "files": "Αποθηκευμένα αρχεία",
       "storage": "Αποθηκευτικός χώρος",
       "integrations": "Συνδεδεμένες ενσωματώσεις",
-      "publishedSites": "Δημοσιευμένοι ιστότοποι"
+      "publishedSites": "Δημοσιευμένοι ιστότοποι",
+      "documents": "Έγγραφα",
+      "coding": "Κώδικας με AI",
+      "presentations": "Παρουσιάσεις",
+      "posts": "Αναρτήσεις",
+      "aiChat": "Ρώτα με",
+      "predictions": "Προβλέψεις",
+      "automation": "Αυτοματισμοί",
+      "businessLogs": "Οι καταχωρήσεις μου",
+      "projects": "Projects",
+      "missionControl": "Στόχοι & Σχέδια",
+      "helpCentre": "Κέντρο βοήθειας",
+      "createStudio": "Φτιάξε κάτι",
+      "voiceMinutes": "Λεπτά φωνής / μήνα",
+      "chatMemory": "Στοιχεία που θυμάται το chat",
+      "chatPins": "Καρφιτσωμένες συζητήσεις",
+      "askYourData": "Ρώτα τα δικά σου δεδομένα",
+      "customAiPersona": "Δικό σου όνομα βοηθού",
+      "backgroundJobs": "Εργασίες που τρέχουν στο παρασκήνιο",
+      "buildLogs": "Αρχεία καταγραφής για ιστότοπους, εφαρμογές, εικόνες και βίντεο",
+      "notifications": "Ειδοποιήσεις και υπενθυμίσεις",
+      "contactSupport": "Φόρμα επικοινωνίας",
+      "accountAndPrivacy": "Εξαγωγή ή διαγραφή λογαριασμού",
+      "listRowsShown": "Γραμμές ανά λίστα",
+      "agentRunsPerHour": "Εκτελέσεις agent",
+      "fileUploadsPerHour": "Ανεβάσματα αρχείων",
+      "fileQuestionsPerHour": "Ερωτήσεις πάνω σε αρχείο",
+      "integrationReadsPerHour": "Αναγνώσεις από συνδεδεμένο λογαριασμό",
+      "siteEditsPerDay": "Ζωντανές αλλαγές ανά ιστότοπο",
+      "siteVersionsKept": "Εκδόσεις που κρατιούνται ανά ιστότοπο",
+      "websiteImageStorage": "Χώρος για φωτογραφίες ιστότοπου",
+      "voiceClipLength": "Μέγιστη ηχογράφηση (λεπτά)"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Για ομάδες που χτίζουν μαζί",
@@ -300,7 +334,12 @@
       "unlimited": "Απεριόριστα",
       "included": "Περιλαμβάνεται",
       "custom": "Προσαρμοσμένο",
-      "perSeat": "+{currency}{price}/θέση"
+      "perSeat": "+{currency}{price}/θέση",
+      "perHour": "/ώρα",
+      "perDay": "/ημέρα",
+      "minutesPerMonth": "λεπτά/μήνα",
+      "yes": "Περιλαμβάνεται",
+      "no": "Δεν περιλαμβάνεται"
     },
     "seatNote": {
       "included": "Απεριόριστες θέσεις ομάδας — χωρίς χρέωση ανά μέλος",
@@ -312,7 +351,17 @@
     "billingIntervalLabel": "Περίοδος χρέωσης",
     "billingAnnualSaving": "Εξοικονόμηση {percent}% — δύο μήνες δώρο",
     "billedAnnually": "Χρέωση {total} μία φορά τον χρόνο — κερδίζεις {saving}",
-    "checkoutFailed": "Δεν ήταν δυνατή η έναρξη της πληρωμής. Δοκίμασε ξανά."
+    "checkoutFailed": "Δεν ήταν δυνατή η έναρξη της πληρωμής. Δοκίμασε ξανά.",
+    "groups": {
+      "make": "Φτιάξε",
+      "ask": "Ρώτα",
+      "run": "Τρέξε",
+      "see": "Δες",
+      "organise": "Οργάνωσε",
+      "limits": "Όρια",
+      "support": "Υποστήριξη"
+    },
+    "comparisonRowCount": "Δυνατότητες που συγκρίνονται: {count}"
   },
   "roadmap": {
     "title": "Roadmap",

@@ -806,6 +806,79 @@ that is the most valuable finding V5 could produce.
 
 ---
 
+### 12. Nothing was in a plan — DONE (2026-09-12), and the gate is what keeps it done
+
+**The state this found, counted rather than estimated.** Every figure
+below is printed by `node scripts/tests/feature-catalog.test.mjs`, which
+asserts each of them, so a reader re-derives them rather than trusting
+this paragraph:
+
+| | |
+|---|---|
+| API routes | 136 |
+| …that spend credits | 28 |
+| …that read a plan capability | **3** (`api/chat`, `api/modules/create`, `api/team/invite`) |
+| pages under `/dashboard` | 44 |
+| …that are plan-aware | **8** |
+| rows on the comparison table before | 13 |
+| rows now | **43** |
+| …available on every plan including Free | **26** |
+| …gated behind a tier | **17** |
+
+V5 added Projects, Presentations, Posts, Voice, Predictions and
+Universal Memory. Not one of them was put in a plan, and nothing in the
+build could say so.
+
+**Two per-plan ceilings were enforced and had never been published in
+any language.** Voice minutes (`lib/voice/voice-pricing.ts`: 0 / 30 / 90
+/ 300 / 900 / 2000 a month, refused by `api/voice/transcribe` with
+`not_included` or `out_of_minutes`) and pinned conversations
+(`lib/chat/pin-limits.ts`: 3 / 10 / 25 / 50 / 100, refused by
+`api/conversations/[id]`). A third, the website photo allowance
+(`lib/websites/storage-quota.ts`: 50 MB to 100 GB), was published for the
+first time in the same round — and its row says what it is, because the
+enforcement is a browser-side check the builder's own comment calls
+ADVISORY, with the nightly cleanup as the real bound.
+
+*Done means:* `src/lib/billing/feature-catalog.ts` is the single list,
+the pricing table is generated from it, and the build fails when a page,
+a route or a nav row is not in it. *Proven by:*
+`scripts/tests/feature-catalog.test.mjs` (36 checks) and
+`feature-catalog.mutation.mjs` — 13 of 13, across five dimensions,
+including the two the owner asked for by name: a feature added with no
+tier, and "unlimited" written over a real limit.
+
+*Measured live,* against `next start` on the production build at
+127.0.0.1, not against a dev server: 43 rows, 7 sections, in `en`, `el`,
+`ar` (RTL), `zh` and `ja`, at 1440, 768 and 390 — no horizontal overflow
+at any of them. Two defects were found by that measurement and by
+nothing else, and both are recorded in
+`docs/v5-pricing-and-nav-report.md`.
+
+### 13. The sidebar was thirty-two lines with every group open — DONE (2026-09-12)
+
+*Measured in a browser, both states, four viewports* (the numbers and
+the method are in `docs/v5-pricing-and-nav-report.md`): every group open
+is **1635px** of sidebar at 1440x900 and **1704px** at 390x844, of which
+15 of 21 rows fit. Only the current group open is **900px** and
+**858px** — and the page you are on is always one of the rows you can
+see.
+
+*Done means:* a load opens exactly the group holding the current page,
+opening a second leaves the first open, and nothing is stored between
+loads. *Proven by:* `scripts/tests/sidebar-collapse.test.mjs` (34
+checks, which EXECUTE the rules over every route in the product rather
+than matching the component as text) and
+`sidebar-collapse.mutation.mjs` — 15 of 15 across six dimensions.
+
+Six positions are declared for things that do not exist yet — image,
+video and music generation under Make, a browser and a computer agent
+under Run, meetings under Organise. They are not drawn, not searchable,
+and the gate fails if any of their routes starts resolving, which is
+what makes the flag come off on the day the page lands.
+
+---
+
 ## What is NOT on this list, and why
 
 - **Stripe end-to-end** — V8. Needs real money, deliberately deferred.

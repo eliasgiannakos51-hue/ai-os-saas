@@ -71,7 +71,14 @@ const lookup = (catalogue, path) => {
 // is checked below against ITEM_LABEL_KEYS, so a label this misses is a
 // label that shows up as an unmapped key rather than as a silent zero.
 const navSource = readFileSync("src/lib/sidebar-nav.ts", "utf8");
-const LABELS = [...navSource.matchAll(/label:\s*"([^"]+)"/g)].map((m) => m[1]);
+// V5: HELD POSITIONS ARE NOT IN THE PALETTE. `visibleGroups` — which is
+// what command-palette.tsx flattens — drops every `notBuilt` row, so a
+// row for something that is not built is not searchable and needs no
+// translation. That filter is the point: a palette entry whose route
+// does not exist is a search result with a 404 behind it.
+const LABELS = [...navSource.matchAll(/\{\s*href:[^}]*?label:\s*"([^"]+)"([^}]*)\}/g)]
+  .filter((m) => !/notBuilt:\s*true/.test(m[0]))
+  .map((m) => m[1]);
 
 console.log("== 1. the corpus is the real sidebar, and it is not empty ==");
 {

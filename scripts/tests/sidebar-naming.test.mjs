@@ -125,7 +125,15 @@ const deadHeadingKeys = Object.keys(headingKeys).filter((h) => !headings.include
 check("no heading key points at a heading that does not exist", deadHeadingKeys.length === 0, deadHeadingKeys.join(", "));
 
 console.log("\n== 2. every ITEM the sidebar renders can be translated ==");
-const labels = [...navSrc.matchAll(/label: "([^"]+)"/g)].map((m) => m[1]);
+// V5: HELD POSITIONS ARE NOT RENDERED, so they have no label to
+// translate. `sidebarGroups` and `visibleGroups` both drop `notBuilt`
+// rows (lib/sidebar-visibility.ts), so a translation for one would be a
+// string in ten languages that nothing can display — and the day the
+// flag comes off, this check goes red until it has one, which is when
+// the string is worth writing.
+const labels = [...navSrc.matchAll(/\{\s*href:[^}]*?label: "([^"]+)"([^}]*)\}/g)]
+  .filter((m) => !/notBuilt:\s*true/.test(m[0]))
+  .map((m) => m[1]);
 const unmappedItems = labels.filter((l) => !itemKeys[l] && l !== "Create Studio");
 // `labels.filter(...).length === 0` is true of an empty list, so the floor
 // is what makes the line above a statement about the sidebar rather than
@@ -220,7 +228,17 @@ check(
 );
 
 // The other direction: what is left in Make must really make something.
-const buildHrefs = [...buildGroup.matchAll(/href: "([^"]+)"/g)].map((m) => m[1]);
+// V5: the held positions are excluded HERE rather than allowlisted
+// below, and the difference matters. BUILD_ALLOWED is a list of items
+// somebody justified as really producing something; Image Generation,
+// Video Generation and Music produce nothing, because they do not
+// exist. Putting them in that list would be writing down the exact
+// false claim section 3b exists to catch — and 3b, which proves the
+// model call from the code, would then fail on all three. They are not
+// rendered, so they are not Make items yet.
+const buildHrefs = [...buildGroup.matchAll(/\{\s*href: "([^"]+)"([^}]*)\}|href: "([^"]+)"/g)]
+  .filter((m) => !/notBuilt:\s*true/.test(m[0]))
+  .map((m) => m[1] ?? m[3]);
 console.log(`        Make now holds: ${buildHrefs.join(", ")}`);
 // Same reasoning, other direction: the three `buildHrefs.includes(...)`
 // checks below would each go red on an empty list, so those are safe — but

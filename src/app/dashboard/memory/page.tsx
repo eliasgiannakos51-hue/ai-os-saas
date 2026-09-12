@@ -10,6 +10,7 @@ import { BUILD_MODULES } from "@/lib/build-modules";
 import { MEMORY_ICON } from "@/lib/module-icons";
 import { MemorySearch, type MemoryResult } from "@/components/memory/memory-search";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
+import { upgradeWallProps } from "@/lib/billing/feature-catalog";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { truncate } from "@/lib/text/truncate";
@@ -68,7 +69,7 @@ export default async function MemoryPage() {
       <div className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader helpKey="help.memory" helpArticle="chat-memory" icon={MEMORY_ICON} title={t("title")} />
-          <UpgradeRequired featureName={t("title")} planName={getPlan("starter")?.name ?? "Starter"} />
+          <UpgradeRequired {...upgradeWallProps("aiMemory", t("title"))!} />
         </div>
       </div>
     );

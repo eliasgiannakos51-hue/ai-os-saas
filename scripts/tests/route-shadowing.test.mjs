@@ -162,6 +162,13 @@ const sample = [
   { heading: "Business", collapsible: true, items: [{ href: "/a" }, { href: "/b", ownerOnly: true }] },
   { heading: "OwnerOnlyGroup", collapsible: true, items: [{ href: "/c", ownerOnly: true }] },
 ];
+// The exact arrays the fixture was built with, captured BEFORE the
+// filter runs. Comparing lengths afterwards is not enough: a filter that
+// writes `group.items = group.items.filter(...)` replaces the array with
+// a new one of the SAME length whenever nothing is removed, so a
+// length check passes over a config that has been rewritten in place.
+// Identity is what "never mutated" actually means.
+const sampleItems = sample.map((g) => g.items);
 const asUser = visibleGroups(sample, false);
 check(
   "a non-owner sees no owner-only item",
@@ -178,7 +185,10 @@ check(
 );
 check(
   "and the config itself is never mutated",
-  sample[0].items.length === 2 && sample[1].items.length === 1,
+  sample[0].items.length === 2 &&
+    sample[1].items.length === 1 &&
+    sample[0].items === sampleItems[0] &&
+    sample[1].items === sampleItems[1],
 );
 // THE PALETTE IS THE OTHER HALF. Hiding an item from the sidebar and
 // leaving it in the command palette moves it one keystroke away rather

@@ -40,6 +40,10 @@ import {
   VOICE_ICON,
   PREDICTIONS_ICON,
   PROJECTS_ICON,
+  MUSIC_ICON,
+  BROWSER_AGENT_ICON,
+  COMPUTER_AGENT_ICON,
+  MEETINGS_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -149,6 +153,28 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // platform; nothing is published, and the page says so first.
       { href: "/dashboard/posts", label: "Posts", icon: POSTS_ICON, hintKey: "posts" },
 
+      // --- POSITIONS HELD, NOTHING BEHIND THEM YET ---
+      // `notBuilt` rows are dropped by BOTH filters in
+      // lib/sidebar-visibility.ts, so they are not drawn, not in the
+      // command palette and not on the hub. What they fix is the thing
+      // that put "Images" under a heading that promises generation while
+      // it opened a notes form: the position is decided here, cold,
+      // rather than on the day somebody is thinking about the feature.
+      //
+      // THREE, IN THIS ORDER, and they go at the END of Make rather than
+      // beside Presentations, because the six above are the six that
+      // work and a list that alternates working and not-working rows is
+      // unreadable the day the flags start coming off.
+      //
+      // The image and video TRACKING LOGS are separate rows further
+      // down, hidden: /dashboard/images and /dashboard/videos exist and
+      // are tables of hand-typed notes. These are the generators, and
+      // they get their own routes so the day one lands it does not have
+      // to displace a page that already works.
+      { href: "/dashboard/image-generation", label: "Image Generation", icon: MODULE_ICONS.images, notBuilt: true },
+      { href: "/dashboard/video-generation", label: "Video Generation", icon: MODULE_ICONS.videos, notBuilt: true },
+      { href: "/dashboard/music", label: "Music", icon: MUSIC_ICON, notBuilt: true },
+
       // --- in the palette and on the hub, not in the sidebar ---
       // The generator the product used to open with. It still routes a
       // free-text request to one of six kinds; it is not a row because
@@ -211,6 +237,13 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents, hintKey: "agents" },
       { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation" },
       { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON, hintKey: "marketplace" },
+
+      // --- POSITIONS HELD --- two agents that act on a machine rather
+      // than on this account's rows. Under Run because what they are is
+      // "something that goes on without you watching", which is what
+      // this heading means.
+      { href: "/dashboard/browser", label: "Browser Agent", icon: BROWSER_AGENT_ICON, notBuilt: true },
+      { href: "/dashboard/computer", label: "Computer Agent", icon: COMPUTER_AGENT_ICON, notBuilt: true },
     ],
   },
   {
@@ -320,6 +353,18 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: MISSION_NAV_ITEM.href, label: MISSION_NAV_ITEM.label, icon: MISSION_ICON, hintKey: "missionControl" },
       { href: REFLECTION_NAV_ITEM.href, label: REFLECTION_NAV_ITEM.label, icon: REFLECTION_ICON, hintKey: "reflection" },
       { href: "/dashboard/team", label: "Team", icon: TEAM_ICON, hintKey: "team" },
+
+      // --- POSITION HELD --- a meeting recording turned into the
+      // decisions it produced. Under Organise rather than Make: the
+      // meeting already happened, this is where it goes afterwards.
+      //
+      // NOT BEHIND /dashboard/voice, which is the recorder and works
+      // today. What is missing is the long-form half — api/voice/
+      // transcribe accepts 120 seconds and 2 MB per clip
+      // (lib/voice/voice-pricing.ts MAX_CLIP_SECONDS,
+      // lib/voice/voice-config.ts MAX_AUDIO_BYTES), so an hour-long
+      // meeting has no path through this product at all today.
+      { href: "/dashboard/meetings", label: "Meetings", icon: MEETINGS_ICON, notBuilt: true },
     ],
   },
 ];

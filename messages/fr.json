@@ -82,7 +82,10 @@
     "errorWithMessage": "erreur : {message}",
     "upgradeRequired": {
       "title": "Mise à niveau requise",
-      "body": "{feature} nécessite le forfait {plan} ou supérieur."
+      "body": "{feature} nécessite le forfait {plan} ou supérieur.",
+      "price": "{plan} coûte {amount} par mois.",
+      "customPrice": "Le tarif de {plan} est négocié.",
+      "cta": "Voir le forfait {plan}"
     },
     "textActions": {
       "rewrite": "Réécrire",
@@ -264,7 +267,38 @@
       "files": "Fichiers stockés",
       "storage": "Stockage",
       "integrations": "Intégrations connectées",
-      "publishedSites": "Sites web publiés"
+      "publishedSites": "Sites web publiés",
+      "documents": "Documents",
+      "coding": "Code avec l'IA",
+      "presentations": "Présentations",
+      "posts": "Publications",
+      "aiChat": "Demande-moi",
+      "predictions": "Tendances",
+      "automation": "Automatisation",
+      "businessLogs": "Mes enregistrements",
+      "projects": "Projets",
+      "missionControl": "Objectifs et plans",
+      "helpCentre": "Centre d’aide",
+      "createStudio": "Créer n’importe quoi",
+      "voiceMinutes": "Minutes de voix / mois",
+      "chatMemory": "Éléments mémorisés par le chat",
+      "chatPins": "Conversations épinglées",
+      "askYourData": "Interroger tes propres données",
+      "customAiPersona": "Nom d’assistant personnalisé",
+      "backgroundJobs": "Traitements en arrière-plan",
+      "buildLogs": "Journaux de sites, applis, images et vidéos",
+      "notifications": "Notifications et rappels",
+      "contactSupport": "Formulaire de contact",
+      "accountAndPrivacy": "Exporter ou supprimer ton compte",
+      "listRowsShown": "Lignes affichées par liste",
+      "agentRunsPerHour": "Exécutions d’agents",
+      "fileUploadsPerHour": "Envois de fichiers",
+      "fileQuestionsPerHour": "Questions sur un fichier",
+      "integrationReadsPerHour": "Lectures d’un compte connecté",
+      "siteEditsPerDay": "Modifications en direct par site",
+      "siteVersionsKept": "Versions conservées par site",
+      "websiteImageStorage": "Espace pour les photos du site",
+      "voiceClipLength": "Enregistrement le plus long (minutes)"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Pour les équipes qui construisent ensemble",
@@ -300,7 +334,12 @@
       "unlimited": "Illimité",
       "included": "Inclus",
       "custom": "Sur mesure",
-      "perSeat": "+{currency}{price}/siège"
+      "perSeat": "+{currency}{price}/siège",
+      "perHour": "/heure",
+      "perDay": "/jour",
+      "minutesPerMonth": "min/mois",
+      "yes": "Inclus",
+      "no": "Non inclus"
     },
     "seatNote": {
       "included": "Sièges d'équipe illimités inclus — aucun frais par membre",
@@ -312,7 +351,17 @@
     "billingIntervalLabel": "Période de facturation",
     "billingAnnualSaving": "Économisez {percent} % — deux mois offerts",
     "billedAnnually": "Facturé {total} une fois par an — vous économisez {saving}",
-    "checkoutFailed": "Impossible de démarrer le paiement. Veuillez réessayer."
+    "checkoutFailed": "Impossible de démarrer le paiement. Veuillez réessayer.",
+    "groups": {
+      "make": "Créer",
+      "ask": "Demander",
+      "run": "Lancer",
+      "see": "Consulter",
+      "organise": "Organiser",
+      "limits": "Limites",
+      "support": "Assistance"
+    },
+    "comparisonRowCount": "Fonctionnalités comparées : {count}"
   },
   "roadmap": {
     "title": "Feuille de route",

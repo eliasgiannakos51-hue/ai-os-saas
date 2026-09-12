@@ -122,13 +122,13 @@ export function parsePricingConfig(env: Record<string, string | undefined>): {
   };
 }
 
-let cached: PricingConfig | null = null;
+let cachedPricingConfig: PricingConfig | null = null;
 
 // Reads process.env once per process. Warnings are logged on that first
 // read only — repeating them on every request would bury the logs, and
 // env vars cannot change within a running process.
 export function resolvePricingConfig(): PricingConfig {
-  if (cached) return cached;
+  if (cachedPricingConfig) return cachedPricingConfig;
   const { config, warnings } = parsePricingConfig(process.env);
   for (const w of warnings) {
     // eslint-disable-next-line no-console
@@ -136,12 +136,12 @@ export function resolvePricingConfig(): PricingConfig {
       `[pricing-config] ${w.variable}="${w.value}" ignored (${w.reason}) — using default.`
     );
   }
-  cached = config;
+  cachedPricingConfig = config;
   return config;
 }
 
 // Test seam: lets a reproduction harness swap the config without setting
 // real env vars. Never called from application code.
 export function __setPricingConfigForTest(config: PricingConfig | null): void {
-  cached = config;
+  cachedPricingConfig = config;
 }

@@ -16,6 +16,11 @@ import {
   type SidebarGroupConfig,
   type SidebarItem,
 } from "@/lib/sidebar-nav";
+import {
+  expandedAfterNavigation,
+  initialExpandedGroups,
+  isActiveHref,
+} from "@/lib/sidebar-visibility";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { useToast } from "@/components/toast/toast-context";
@@ -23,34 +28,12 @@ import { Logo } from "@/components/logo";
 import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { CREATE_ICON } from "@/lib/module-icons";
 
-function isActive(pathname: string | null, href: string) {
-  if (href === "/dashboard") return pathname === "/dashboard";
-  if (!pathname) return false;
-  // Segment-boundary match, not a raw prefix — otherwise "/dashboard/trading"
-  // would also light up on "/dashboard/trading-workflow" (and any other
-  // href that happens to be a string prefix of a sibling route).
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-function groupContainsActive(group: SidebarGroupConfig, pathname: string | null) {
-  return group.items.some((item) => isActive(pathname, item.href));
-}
-
-// THE GROUP HOLDING THE CURRENT PAGE, which is the one that must never
-// be left shut — landing on a page whose group is collapsed shows a nav
-// that does not say where you are.
-//
-// Reads ALL_SIDEBAR_GROUPS, not the filtered list, deliberately: the
-// thirty rows the sidebar no longer draws still belong to a group, and
-// arriving on one of them should still open it.
-function headingContaining(pathname: string | null): string | null {
-  return (
-    ALL_SIDEBAR_GROUPS.find((g) => g.collapsible && groupContainsActive(g, pathname))?.heading ??
-    null
-  );
-}
-
-const COLLAPSED_KEY = "ionexa:sidebar-collapsed";
+// THE THREE RULES THAT DECIDE WHAT IS OPEN live in
+// lib/sidebar-visibility.ts, which imports no icons and no React — so
+// scripts/tests/sidebar-collapse.test.mjs can RUN them against every
+// route in the product rather than matching this file as text. What is
+// left here is the wiring.
+const isActive = (pathname: string | null, href: string) => isActiveHref(pathname, href);
 
 // ONE COLOUR FOR EVERY RESTING ICON. Only the current page gets the
 // accent — V4.6 #3.
@@ -103,24 +86,39 @@ export function Sidebar({
     return key ? t(`items.${key}`) : label;
   }
 
-  // EVERYTHING OPEN BY DEFAULT — V4.6 #3.
+  // ONLY THE GROUP YOU ARE IN, AND THE STATE IS NOT REMEMBERED.
   //
-  // This was an accordion: at most one collapsible group open at a time.
-  // That was the right answer to eight groups and forty-five rows, where
-  // opening two of them at once pushed the rest off a 768px screen. It is
-  // the wrong answer to four groups and sixteen rows, which fit at both
-  // measured heights — and it was costing exactly what the brief asked
-  // to buy. Measured on the real page at 1920x1080 and 1366x768: seven of
-  // fifteen rows were painted on arrival, because two of the four groups
-  // were shut. The whole point of cutting the sidebar to fifteen rows is
-  // that fifteen rows can be seen at once.
+  // THE HISTORY, because this is the third answer and each one was right
+  // for a different sidebar. It was an accordion (at most one group
+  // open) when there were eight groups and forty-five rows. V4.6 #3 cut
+  // it to four groups and sixteen rows, which fit, so everything was
+  // opened by default and what the user SHUT was remembered in
+  // localStorage. It is six groups and twenty-six rows now, and
+  // everything-open is thirty-three lines — past the fold at every
+  // height this product is used at.
   //
-  // So the state is now the set of groups the user has DELIBERATELY shut,
-  // which is empty by default. Empty is also a constant, so the server
-  // and the first client paint agree without an effect having to run —
-  // the property the old `undefined` sentinel existed to preserve, kept
-  // for free.
-  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
+  // WHAT IS STORED: NOTHING. That is the part worth being exact about,
+  // because the obvious design is to remember what the user opened, and
+  // it is wrong here for a stated reason: a sidebar that restores three
+  // groups somebody opened yesterday is thirty-three lines again, and it
+  // is thirty-three lines on the one visit where the person has no idea
+  // why. Every load starts from the same place — the group holding the
+  // page you are on — and nothing carries over.
+  //
+  // WITHIN A SESSION IT IS ADDITIVE. Opening a second group does not
+  // shut the first: this is not an accordion, and a control that undoes
+  // your last action to perform the new one is a control people stop
+  // using. Navigating opens the group you land in, on top of whatever
+  // you already opened.
+  //
+  // COMPUTED IN THE INITIALISER, not in an effect, so the server render
+  // and the first client render agree — `usePathname()` returns the real
+  // path during SSR of a client component, so both sides compute the
+  // same set and there is no hydration flash of a nav in the wrong
+  // state.
+  const [expanded, setExpanded] = useState<Set<string>>(() =>
+    initialExpandedGroups(ALL_SIDEBAR_GROUPS, pathname)
+  );
 
   const router = useRouter();
   /** Routes already asked for, so a pointer sweeping down the sidebar
@@ -135,41 +133,36 @@ export function Sidebar({
     [router]
   );
 
-  // Restores what the user shut, then re-opens whichever group holds the
-  // page they are on — a group cannot stay collapsed over the current
-  // page, whatever was stored.
+  // NAVIGATING OPENS THE GROUP YOU LAND IN, and opens nothing else and
+  // closes nothing. A soft navigation is not a load — this is the same
+  // page — so what the user opened before pressing the link is still
+  // open after it.
+  //
+  // Returns `prev` UNCHANGED when the group is already open, rather than
+  // a new Set with the same contents: setState with a fresh object is a
+  // re-render, and this effect runs on every pathname change, which is
+  // every click in the nav.
   useEffect(() => {
-    let stored: string[] = [];
-    try {
-      stored = JSON.parse(window.localStorage.getItem(COLLAPSED_KEY) ?? "[]");
-    } catch {
-      // A hand-edited or half-written value is not worth a broken nav.
-      stored = [];
-    }
-    const next = new Set(Array.isArray(stored) ? stored.filter((h) => typeof h === "string") : []);
-    const active = headingContaining(pathname);
-    if (active) next.delete(active);
-    setCollapsed(next);
+    setExpanded((prev) => expandedAfterNavigation(ALL_SIDEBAR_GROUPS, pathname, prev));
   }, [pathname]);
 
   function toggleGroup(group: SidebarGroupConfig) {
     if (!group.collapsible) return;
-    setCollapsed((prev) => {
+    setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(group.heading)) next.delete(group.heading);
       else next.add(group.heading);
-      try {
-        window.localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...next]));
-      } catch {
-        // Private mode, or storage full. Losing the preference is fine;
-        // throwing inside a click handler is not.
-      }
       return next;
     });
   }
 
   function renderGroup(group: SidebarGroupConfig) {
-    const expanded = group.collapsible ? !collapsed.has(group.heading) : true;
+    const isOpen = group.collapsible ? expanded.has(group.heading) : true;
+
+    // The panel's id, so the heading can point at what it opens.
+    // Derived from the heading rather than generated, because it has to
+    // be the same string on the server and on the client.
+    const panelId = `sidebar-group-${group.heading.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
     return (
       <div key={group.heading}>
@@ -177,13 +170,14 @@ export function Sidebar({
           <button
             type="button"
             onClick={() => toggleGroup(group)}
-            aria-expanded={expanded}
-            className="flex min-h-[44px] w-full items-center justify-between rounded-lg px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted transition-colors duration-150 hover:text-foreground"
+            aria-expanded={isOpen}
+            aria-controls={panelId}
+            className="flex min-h-[44px] w-full items-center justify-between rounded-lg px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted transition-colors duration-150 hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-400"
           >
             <span>{translatedHeading(group.heading)}</span>
             <ChevronRight
               className={`h-3 w-3 shrink-0 transition-transform duration-200 ${
-                expanded ? "rotate-90" : "rotate-0"
+                isOpen ? "rotate-90" : "rotate-0"
               }`}
               aria-hidden="true"
             />
@@ -195,13 +189,34 @@ export function Sidebar({
         )}
 
         <div
+          id={panelId}
+          // A CLOSED GROUP IS CLOSED TO THE KEYBOARD TOO.
+          //
+          // The rows animate shut with grid-template-rows, so they are
+          // still in the DOM at zero height — and a link at zero height
+          // is still in the tab order and still read by a screen reader.
+          // Without this, tabbing past a shut "See" walked through seven
+          // invisible links, which is worse than not collapsing at all:
+          // the sighted user sees five headings and the keyboard user
+          // traverses twenty-six rows.
+          //
+          // aria-hidden takes the subtree out of the accessibility tree;
+          // tabIndex={-1} on each row (below) takes it out of the tab
+          // order. NOT the `inert` attribute, which would do both in one
+          // go: React 18 does not know it as a boolean property, so
+          // `inert={false}` renders the literal attribute `inert="false"`
+          // — and an inert attribute is inert whatever its value, so the
+          // OPEN groups would be the unreachable ones. That is a bug that
+          // looks like a fix in every review and only appears at the
+          // keyboard.
+          aria-hidden={!isOpen}
           className={`grid transition-[grid-template-rows] duration-200 ease-in-out ${
-            expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+            isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
           }`}
         >
           <div className="min-h-0 overflow-hidden">
             <div className="space-y-0.5 pb-0.5">
-              {group.items.map((item) => renderItem(item))}
+              {group.items.map((item) => renderItem(item, isOpen))}
             </div>
           </div>
         </div>
@@ -219,7 +234,7 @@ export function Sidebar({
   // guarded were unreachable. The five daily entry points now get their
   // weight from being the first group and never collapsing, which is a
   // property of the config rather than of a flag nobody sets.
-  function renderItem(item: SidebarItem) {
+  function renderItem(item: SidebarItem, reachable = true) {
     const active = isActive(pathname, item.href);
     const Icon = item.icon;
     const hint = item.hintKey ? t(`hints.${item.hintKey}`) : undefined;
@@ -229,6 +244,10 @@ export function Sidebar({
                   <Link
                     href={item.href}
                     onClick={closeOnMobile}
+                    // -1 while the group is shut: the row is still in the
+                    // DOM at zero height, and a zero-height link is still
+                    // a tab stop. See the aria-hidden note on the panel.
+                    tabIndex={reachable ? undefined : -1}
                     // WARM THE ROUTE THE POINTER IS HEADING FOR.
                     //
                     // Every dashboard route is force-dynamic, so Next's

@@ -82,6 +82,11 @@ function parseItems(text) {
       href: obj.match(/href:\s*([^,\n]+)/)?.[1]?.trim() ?? "?",
       label: obj.match(/label:\s*([^,\n]+)/)?.[1]?.trim() ?? "?",
       hintKey: obj.match(/hintKey:\s*"([^"]+)"/)?.[1] ?? null,
+      // V5: a held position for something that is not built. Nothing
+      // renders it, so there is no tooltip to have — see `notBuilt` in
+      // lib/sidebar-visibility.ts. Carried rather than dropped in the
+      // parser so the count above still measures the whole file.
+      notBuilt: /notBuilt:\s*true/.test(obj),
     });
     i = end + 1;
   }
@@ -92,7 +97,9 @@ const items = parseItems(src);
 
 console.log("== 1. every sidebar item carries a hint ==");
 checkTrue(`items parsed (${items.length})`, items.length >= 30);
-const noHint = items.filter((it) => !it.hintKey).map((it) => `${it.label} (${it.href})`);
+const noHint = items
+  .filter((it) => !it.notBuilt && !it.hintKey)
+  .map((it) => `${it.label} (${it.href})`);
 check("no item is missing a hintKey", noHint, []);
 
 // The specific twelve that were missing, named so a regression is obvious

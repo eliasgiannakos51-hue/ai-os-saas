@@ -8,6 +8,7 @@ import { listSlackChannels } from "@/lib/integrations/read";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
+import { upgradeWallProps } from "@/lib/billing/feature-catalog";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { maxAgentsForPlan, DEFAULT_AGENT_LIMITS } from "@/lib/agents/agent-limits";
@@ -84,7 +85,7 @@ export default async function AgentsPage({
       <div className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader helpKey="help.agents" helpArticle="create-agent" icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} />
-          <UpgradeRequired featureName={t("title")} planName="Starter" />
+          <UpgradeRequired {...upgradeWallProps("aiAgents", t("title"))!} />
         </div>
       </div>
     );

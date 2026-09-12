@@ -82,7 +82,10 @@
     "errorWithMessage": "エラー: {message}",
     "upgradeRequired": {
       "title": "アップグレードが必要です",
-      "body": "{feature} を使うには {plan} プラン以上が必要です。"
+      "body": "{feature} を使うには {plan} プラン以上が必要です。",
+      "price": "{plan} は月 {amount} です。",
+      "customPrice": "{plan} の料金は個別に相談します。",
+      "cta": "{plan} プランを見る"
     },
     "textActions": {
       "rewrite": "書き直す",
@@ -264,7 +267,38 @@
       "files": "保存ファイル数",
       "storage": "ストレージ",
       "integrations": "連携済み統合",
-      "publishedSites": "公開済みウェブサイト"
+      "publishedSites": "公開済みウェブサイト",
+      "documents": "ドキュメント",
+      "coding": "AI コーディング",
+      "presentations": "プレゼンテーション",
+      "posts": "投稿",
+      "aiChat": "聞いてみる",
+      "predictions": "傾向",
+      "automation": "自動化",
+      "businessLogs": "マイレコード",
+      "projects": "プロジェクト",
+      "missionControl": "目標とプラン",
+      "helpCentre": "ヘルプセンター",
+      "createStudio": "何でもつくる",
+      "voiceMinutes": "音声の分数 / 月",
+      "chatMemory": "チャットが覚える情報",
+      "chatPins": "固定した会話",
+      "askYourData": "自分の記録に質問する",
+      "customAiPersona": "アシスタント名の変更",
+      "backgroundJobs": "バックグラウンドで走る処理",
+      "buildLogs": "サイト・アプリ・画像・動画の記録",
+      "notifications": "通知とリマインダー",
+      "contactSupport": "問い合わせフォーム",
+      "accountAndPrivacy": "アカウントの書き出しと削除",
+      "listRowsShown": "一覧に表示される行数",
+      "agentRunsPerHour": "エージェントの実行回数",
+      "fileUploadsPerHour": "ファイルのアップロード回数",
+      "fileQuestionsPerHour": "ファイルへの質問",
+      "integrationReadsPerHour": "連携アカウントからの読み取り",
+      "siteEditsPerDay": "サイトごとの公開後の編集回数",
+      "siteVersionsKept": "サイトごとに残る版数",
+      "websiteImageStorage": "サイト写真の保存容量",
+      "voiceClipLength": "1回の録音の上限（分）"
     },
     "businessTitle": "ビジネス",
     "businessSubtitle": "チームで共に構築する",
@@ -300,7 +334,12 @@
       "unlimited": "無制限",
       "included": "込み",
       "custom": "カスタム",
-      "perSeat": "+{currency}{price}/席"
+      "perSeat": "+{currency}{price}/席",
+      "perHour": "/時間",
+      "perDay": "/日",
+      "minutesPerMonth": "分/月",
+      "yes": "含まれる",
+      "no": "含まれない"
     },
     "seatNote": {
       "included": "無制限のチームシートを含む — メンバーごとの追加料金なし",
@@ -312,7 +351,17 @@
     "billingIntervalLabel": "請求サイクル",
     "billingAnnualSaving": "{percent}% お得 — 2か月分無料",
     "billedAnnually": "年1回 {total} のご請求 — {saving} お得です",
-    "checkoutFailed": "決済を開始できませんでした。もう一度お試しください。"
+    "checkoutFailed": "決済を開始できませんでした。もう一度お試しください。",
+    "groups": {
+      "make": "つくる",
+      "ask": "きく",
+      "run": "うごかす",
+      "see": "見る",
+      "organise": "ととのえる",
+      "limits": "上限",
+      "support": "サポート"
+    },
+    "comparisonRowCount": "比較した機能: {count}"
   },
   "roadmap": {
     "title": "ロードマップ",

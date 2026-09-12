@@ -93,22 +93,19 @@ const EVIDENCE = {
   everythingInUltimate: { inherits: true },
 
   // --- comparison table rows ----------------------------------------
-  aiAgents: { file: "src/lib/agents/agent-limits.ts", symbol: "maxAgentsForPlan" },
-  websiteBuilder: { file: "src/lib/website-builder.ts", symbol: "export" },
-  teamSeatsAddOn: { file: "src/lib/billing/plans.ts", symbol: "TEAM_SEAT_PRICE" },
-  // The six quantitative rows. Each names the accessor the table READS and
-  // the route enforces — the pair is what makes the published number the
-  // same number the server refuses on, and combined-ceiling.test.mjs
-  // asserts the route side of it by name.
-  freeChatMessages: { file: "src/lib/billing/free-chat.ts", symbol: "freeChatAllowance" },
-  deepResearch: { file: "src/lib/files/limits.ts", symbol: "maxResearchRunsForPlan" },
-  files: { file: "src/lib/files/limits.ts", symbol: "maxFilesForPlan" },
-  storage: { file: "src/lib/files/limits.ts", symbol: "maxStorageBytesForPlan" },
-  integrations: { file: "src/lib/integrations/limits.ts", symbol: "maxIntegrationsForPlan" },
-  publishedSites: {
-    file: "src/lib/publishing/publish-limits.ts",
-    symbol: "maxPublishedSitesForPlan",
-  },
+  // NOT LISTED HERE ANY MORE, and the reason is that they moved somewhere
+  // that can hold more of them. The table used to be thirteen objects
+  // typed into app/pricing/page.tsx; it is now generated from
+  // lib/billing/feature-catalog.ts, where every row already carries
+  // `enforcedIn` and `enforcedSymbol` — the same pair this map holds.
+  // Copying them into a second list would be two sources of truth for
+  // the identical claim, and the copy is the one that goes stale.
+  //
+  // The guarantee is unchanged and is asserted below, under "every
+  // comparison row names its enforcement": each row is looked up in the
+  // catalog and its evidence checked exactly the way an entry here is.
+  // scripts/tests/feature-catalog.test.mjs holds the other direction —
+  // that the table IS the catalog rather than a hand-written copy of it.
 
   // --- signup capability grid ---------------------------------------
   "Website & Automation Builder": { file: "src/lib/website-builder.ts", symbol: "export" },
@@ -132,7 +129,9 @@ const { PLANS } = await loadTs("src/lib/billing/plans.ts");
 const bulletClaims = [...new Set(PLANS.flatMap((p) => p.features.map((f) => f.textKey)))];
 
 const pricingSrc = readFileSync("src/app/pricing/page.tsx", "utf8");
-const rowClaims = [...pricingSrc.matchAll(/labelKey: "([^"]+)"/g)].map((m) => m[1]);
+const { soldFeatures } = await loadTs("src/lib/billing/feature-catalog.ts");
+const comparisonRows = soldFeatures();
+const rowClaims = comparisonRows.map((f) => f.id);
 
 const signupSrc = readFileSync("src/app/signup/signup-flow.tsx", "utf8");
 const gridBlock = signupSrc.slice(
@@ -141,7 +140,17 @@ const gridBlock = signupSrc.slice(
 );
 const gridClaims = [...gridBlock.matchAll(/label: "([^"]+)"/g)].map((m) => m[1]);
 
-const allClaims = [...new Set([...bulletClaims, ...rowClaims, ...gridClaims])];
+// The catalog rows justify themselves (see the note in EVIDENCE) and are
+// checked in their own section below, so this map covers the bullets and
+// the signup grid only.
+//
+// NOT `.filter(c => !rowClaims.includes(c))`, which is what this was for
+// one run: three bullet textKeys — creditsPerMonth, aiMemory and
+// teamCollaboration — are ALSO catalog row ids, and filtering by id
+// removed them as claims while leaving their EVIDENCE entries behind.
+// The orphan check then reported the three entries as outliving claims
+// that were still being made on every plan card.
+const allClaims = [...new Set([...bulletClaims, ...gridClaims])];
 
 console.log(
   `== every pricing claim names its code (${bulletClaims.length} bullets, ${rowClaims.length} table rows, ${gridClaims.length} grid rows) ==`
@@ -169,6 +178,30 @@ check("every claim's evidence still exists in the codebase", missingCode, []);
 // lets the next person re-add the bullet and find it "already approved".
 const orphaned = Object.keys(EVIDENCE).filter((k) => !allClaims.includes(k));
 check("no evidence entry outlives the claim it justified", orphaned, []);
+
+// --- the comparison rows, justified by the catalog -----------------------
+console.log(
+  `\n== every comparison row names its enforcement (${comparisonRows.length} rows) ==`
+);
+// A FLOOR, so an empty catalog cannot produce an empty offender list and
+// a green line — the shape scripts/scan-unjudged-numbers.mjs exists for,
+// and the shape three scrapers in db-migrations.test.mjs actually had.
+check("the catalog produced rows to check", comparisonRows.length >= 20, true);
+const rowsWithoutEvidence = [];
+for (const row of comparisonRows) {
+  if (!row.enforcedIn) {
+    rowsWithoutEvidence.push(`${row.id}: names no enforcing module`);
+    continue;
+  }
+  if (!existsSync(row.enforcedIn)) {
+    rowsWithoutEvidence.push(`${row.id}: ${row.enforcedIn} does not exist`);
+    continue;
+  }
+  if (row.enforcedSymbol && !readFileSync(row.enforcedIn, "utf8").includes(row.enforcedSymbol)) {
+    rowsWithoutEvidence.push(`${row.id}: ${row.enforcedIn} no longer contains \`${row.enforcedSymbol}\``);
+  }
+}
+check("every comparison row's evidence still exists", rowsWithoutEvidence, []);
 
 // --- the seven, by name -------------------------------------------------
 // Pinned individually rather than trusting the generic check above: these

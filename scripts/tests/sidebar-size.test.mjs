@@ -133,6 +133,13 @@ for (let i = 0; i < marks.length; i++) {
         // `label:`, which every item has and which follows its href.
         ...(/hidden:\s*true/.test(upToNext.split(/\n\s*\{/)[0]) ? { hidden: true } : {}),
         ...(/ownerOnly:\s*true/.test(upToNext.split(/\n\s*\{/)[0]) ? { ownerOnly: true } : {}),
+        // V5. A POSITION HELD FOR SOMETHING THAT DOES NOT EXIST. Parsed
+        // here rather than ignored because `visibleGroups` and
+        // `sidebarGroups` both drop it, and a parse that did not carry
+        // the flag would hand the real filters six rows they then
+        // removed — making the counts below disagree with the filters
+        // for a reason neither side could name.
+        ...(/notBuilt:\s*true/.test(upToNext.split(/\n\s*\{/)[0]) ? { notBuilt: true } : {}),
         // icon is required by the type but irrelevant here.
         label:
           upToNext.match(/label:\s*["'`]([^"'`]+)["'`]/)?.[1] ??

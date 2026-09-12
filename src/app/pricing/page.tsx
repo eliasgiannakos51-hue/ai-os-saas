@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { pageTitleAndDescription } from "@/lib/page-title";
 import Link from "next/link";
 import { getTranslations, getLocale } from "next-intl/server";
-import { Check, X } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import {
   PLANS,
@@ -19,11 +19,13 @@ import {
 } from "@/lib/billing/plans";
 import { annualBillingAvailable } from "@/lib/billing/price-ids";
 import { BillingIntervalToggle } from "@/components/billing/billing-interval-toggle";
-import { freeChatAllowance } from "@/lib/billing/free-chat";
-import { maxAgentsForPlan } from "@/lib/agents/agent-limits";
-import { maxFilesForPlan, maxResearchRunsForPlan, maxStorageBytesForPlan } from "@/lib/files/limits";
-import { maxIntegrationsForPlan } from "@/lib/integrations/limits";
-import { maxPublishedSitesForPlan } from "@/lib/publishing/publish-limits";
+import {
+  FEATURE_GROUPS,
+  featuresInGroup,
+  soldFeatures,
+  type CellWords,
+  type FeatureCell,
+} from "@/lib/billing/feature-catalog";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
 import { AppBackground } from "@/components/ui/app-background";
 import { createClient } from "@/lib/supabase/server";
@@ -34,115 +36,46 @@ export function generateMetadata(): Promise<Metadata> {
   return pageTitleAndDescription("pricing.title", "pricing.metaDescription");
 }
 
-type ComparisonCell = { type: "value"; text: string } | { type: "check" } | { type: "cross" };
-
-// Words that appear INSIDE a cell rather than as a row label. They were
-// hardcoded English ("Unlimited", "Included", "Custom") on a page whose
-// whole point is that a non-English visitor sees it first — the same
-// defect the feature list was fixed for. Passed down as a lookup so the
-// cell builders stay pure.
-type CellWords = { unlimited: string; included: string; custom: string; perSeat: string };
-
-function formatStorage(bytes: number, locale: string): string {
-  const MB = 1024 * 1024;
-  const GB = 1024 * MB;
-  return bytes >= GB
-    ? `${formatNumber(Math.round(bytes / GB), locale)} GB`
-    : `${formatNumber(Math.round(bytes / MB), locale)} MB`;
-}
-
-function countOrUnlimited(n: number, locale: string, words: CellWords): ComparisonCell {
-  if (!Number.isFinite(n)) return { type: "value", text: words.unlimited };
-  if (n <= 0) return { type: "cross" };
-  return { type: "value", text: formatNumber(n, locale) };
-}
-
-// Every row here maps straight to a real, enforced capability or limit —
-// nothing pending/unbuilt is listed, and every number is READ FROM the
-// module that enforces it rather than typed here. That is the difference
-// between a pricing page and a promise: `maxResearchRunsForPlan` is the
-// same function api/research/route.ts refuses a run with.
-//
-// The six quantitative rows below were the gap this closes. Growth already
-// gave 5x the Deep Research, 5x the files, 4x the storage, 2.5x the
-// integrations and 3x the published sites of Starter — and the page said
-// "Everything in Starter", because none of those numbers appeared
-// anywhere. The differentiation existed; the copy did not mention it.
-//
-// labelKey looks up messages/*.json's pricing.rows.<key> for the row name.
-const COMPARISON_ROWS: {
-  labelKey: string;
-  cell: (plan: Plan, locale: string, words: CellWords) => ComparisonCell;
-}[] = [
-  {
-    labelKey: "creditsPerMonth",
-    cell: (p, locale, words) => ({
-      type: "value",
-      text: p.monthlyCredits === "custom" ? words.custom : formatNumber(p.monthlyCredits, locale),
-    }),
-  },
-  {
-    labelKey: "freeChatMessages",
-    // lib/billing/free-chat.ts, clamped to the share of the combined
-    // ceiling the quota registry allocates it.
-    cell: (p, locale, words) => countOrUnlimited(freeChatAllowance(p.slug), locale, words),
-  },
-  {
-    labelKey: "aiAgents",
-    // lib/agents/agent-limits.ts — enforced in api/agents.
-    cell: (p, locale, words) => countOrUnlimited(maxAgentsForPlan(p.slug), locale, words),
-  },
-  {
-    labelKey: "deepResearch",
-    // lib/files/limits.ts — enforced in api/research.
-    cell: (p, locale, words) => countOrUnlimited(maxResearchRunsForPlan(p.slug), locale, words),
-  },
-  {
-    labelKey: "files",
-    // lib/files/limits.ts — enforced in api/files/upload.
-    cell: (p, locale, words) => countOrUnlimited(maxFilesForPlan(p.slug), locale, words),
-  },
-  {
-    labelKey: "storage",
-    // lib/files/limits.ts — enforced in api/files/upload. Never
-    // "unlimited": storage is the one resource that bills every month
-    // whether anyone reads it or not.
-    cell: (p, locale) => ({ type: "value", text: formatStorage(maxStorageBytesForPlan(p.slug), locale) }),
-  },
-  {
-    labelKey: "integrations",
-    // lib/integrations/limits.ts — enforced in api/integrations/[provider]/connect.
-    cell: (p, locale, words) => countOrUnlimited(maxIntegrationsForPlan(p.slug), locale, words),
-  },
-  {
-    labelKey: "publishedSites",
-    // lib/publishing/publish-limits.ts — enforced in api/websites/[id]/publish.
-    cell: (p, locale, words) => countOrUnlimited(maxPublishedSitesForPlan(p.slug), locale, words),
-  },
-  { labelKey: "websiteBuilder", cell: (p) => (p.capabilities.websiteBuilder ? { type: "check" } : { type: "cross" }) },
-  { labelKey: "aiMemory", cell: (p) => (p.capabilities.aiMemory ? { type: "check" } : { type: "cross" }) },
-  { labelKey: "teamCollaboration", cell: (p) => (p.capabilities.teamCollaboration ? { type: "check" } : { type: "cross" }) },
-  {
-    labelKey: "teamSeatsAddOn",
-    cell: (p, locale, words) => {
-      if (!p.hasTeamSeats) return { type: "cross" };
-      if (p.teamSeatsIncluded) return { type: "value", text: words.included };
-      // "/seat" was the last English word left in the table — one word, so
-      // the sentence scanner in combined-ceiling.test.mjs could not see it,
-      // and it took a screenshot of the Greek page to find.
-      return { type: "value", text: words.perSeat };
-    },
-  },
-];
-
-function ComparisonCellContent({ cell }: { cell: ComparisonCell }) {
+/**
+ * ONE CELL.
+ *
+ * ✕ MEANS YOU DO NOT HAVE IT, and it is a different mark from a small
+ * number on purpose: "2" and "✕" were both rendered as a dash on the
+ * table this replaces, so "not included" and "included, twice" looked
+ * the same. The cross carries a screen-reader word for the same reason —
+ * a glyph with no text is a blank cell to anybody not looking at it.
+ *
+ * "Unlimited" is its own cell TYPE rather than a magic string, so
+ * feature-catalog.test.mjs can find every one of them by executing the
+ * cell and demand the proof that nothing else bounds it.
+ */
+function ComparisonCellContent({
+  cell,
+  words,
+}: {
+  cell: FeatureCell;
+  words: CellWords & { yes: string; no: string };
+}) {
   if (cell.type === "value") {
     return <span className="text-sm text-foreground">{cell.text}</span>;
   }
-  if (cell.type === "check") {
-    return <Check className="mx-auto h-4 w-4 text-emerald-400" aria-hidden="true" />;
+  if (cell.type === "unlimited") {
+    return <span className="text-sm text-foreground">{words.unlimited}</span>;
   }
-  return <X className="mx-auto h-4 w-4 text-muted/50" aria-hidden="true" />;
+  if (cell.type === "check") {
+    return (
+      <>
+        <Check className="mx-auto h-4 w-4 text-emerald-400" aria-hidden="true" />
+        <span className="sr-only">{words.yes}</span>
+      </>
+    );
+  }
+  return (
+    <>
+      <X className="mx-auto h-4 w-4 text-muted/50" aria-hidden="true" />
+      <span className="sr-only">{words.no}</span>
+    </>
+  );
 }
 
 export default async function PricingPage({
@@ -160,12 +93,21 @@ export default async function PricingPage({
     annualAvailable && searchParams?.billing === "annual" ? "year" : "month";
   const t = await getTranslations("pricing");
   const locale = await getLocale();
-  const cellWords: CellWords = {
+  const cellWords: CellWords & { yes: string; no: string } = {
     unlimited: t("values.unlimited"),
     included: t("values.included"),
     custom: t("values.custom"),
     perSeat: t("values.perSeat", { currency: CURRENCY_SYMBOL, price: TEAM_SEAT_PRICE }),
+    perHour: t("values.perHour"),
+    perDay: t("values.perDay"),
+    minutesPerMonth: t("values.minutesPerMonth"),
+    // Read only by a screen reader — the tick and the cross are
+    // aria-hidden glyphs, so without these the two most load-bearing
+    // cells in the table are silent.
+    yes: t("values.yes"),
+    no: t("values.no"),
   };
+  const rows = soldFeatures();
 
   // Determines whether "Set Up Team" below can skip straight to
   // /dashboard/team, or needs to route through checkout first — mirrors
@@ -208,7 +150,13 @@ export default async function PricingPage({
           {PLANS.map((plan) => (
             <div
               key={plan.slug}
-              className={`relative flex flex-col rounded-2xl border p-6 ${
+              // THE ANCHOR THE UPGRADE WALL LINKS AT. A locked feature
+              // names the plan and its price and then sends the reader
+              // to /pricing#plan-<slug>, so the card they were told
+              // about is the one on screen — see
+              // components/billing/upgrade-required.tsx.
+              id={`plan-${plan.slug}`}
+              className={`relative flex scroll-mt-8 flex-col rounded-2xl border p-6 ${
                 plan.highlighted
                   ? "border-orange-500/60 bg-orange-500/[0.04]"
                   : "border-border bg-panel"
@@ -393,42 +341,125 @@ export default async function PricingPage({
           <h2 className="mb-5 text-center text-xl font-bold text-foreground">
             {t("comparePlans")}
           </h2>
-          <div className="overflow-x-auto rounded-2xl border border-border">
-            <table className="w-full min-w-[720px] border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-border bg-panel">
-                  <th className="px-4 py-3 text-start font-semibold text-muted">{t("feature")}</th>
-                  {PLANS.map((plan) => (
-                    <th
-                      key={plan.slug}
-                      className={`px-4 py-3 text-center font-semibold ${
-                        plan.highlighted ? "text-orange-400" : "text-foreground"
-                      }`}
-                    >
-                      {plan.name}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON_ROWS.map((row, index) => (
-                  <tr
-                    key={row.labelKey}
-                    className={`border-b border-border last:border-b-0 ${
-                      index % 2 === 1 ? "bg-panel/40" : ""
-                    }`}
-                  >
-                    <td className="px-4 py-3 text-start text-muted">{t(`rows.${row.labelKey}`)}</td>
-                    {PLANS.map((plan) => (
-                      <td key={plan.slug} className="px-4 py-3 text-center">
-                        <ComparisonCellContent cell={row.cell(plan, locale, cellWords)} />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* FORTY-THREE ROWS, IN SEVEN SECTIONS, ALL OPEN.
+              Measured: soldFeatures() returns 43 (printed and asserted by
+              scripts/tests/feature-catalog.test.mjs, which also holds 45
+              as the ceiling). The table it replaces had 13, and the
+              thirty it did not have included two per-plan ceilings the
+              product enforces and had never named in any language.
+
+              WHY NOTHING IS COLLAPSED BY DEFAULT. Forty-three is past the
+              point where a wall of rows is read, so each section is a
+              <details> the reader can shut — but `open` by construction,
+              because the whole purpose of the page is that nothing about
+              what you get is hidden. The reader collapses what they have
+              finished with; the page never decides that for them. The
+              sections are also the sidebar's own headings, so somebody
+              who has used the product is navigating a shape they know. */}
+          <div className="space-y-3">
+            {FEATURE_GROUPS.map((group) => {
+              const groupRows = featuresInGroup(group);
+              if (groupRows.length === 0) return null;
+              // NO FRAME ROUND THE SECTION. Seven bordered boxes where
+              // there used to be one is seven new lines on a page whose
+              // design brief is "fewer borders, fewer cards" —
+              // scripts/tests/design-density.test.mjs counts them and the
+              // ceiling is 581, which this page was two over. The panel
+              // colour separates the section from the page and the header
+              // band separates it from its own rows, without drawing
+              // anything.
+              return (
+                <details key={group} open className="group/section overflow-hidden rounded-2xl bg-panel">
+                  <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold text-orange-400">
+                    <span>
+                      {t(`groups.${group}`)}
+                      <span className="ms-2 text-xs font-normal text-muted">
+                        {groupRows.length}
+                      </span>
+                    </span>
+                    <ChevronDown
+                      className="h-4 w-4 shrink-0 text-muted transition-transform duration-200 group-open/section:rotate-180"
+                      aria-hidden="true"
+                    />
+                  </summary>
+                  {/* `relative`, AND IT IS LOAD-BEARING. A scroll
+                      container inside a <details> does not stop its
+                      overflow reaching the document in Chromium 141: the
+                      wrapper clips correctly (clientWidth 358, scrollWidth
+                      746 at a 390px viewport) and documentElement.scrollWidth
+                      was still 708, so the whole PAGE scrolled sideways
+                      behind a table that was already scrolling on its own.
+                      Measured in a browser against the production build,
+                      not reasoned about — `position: relative` and
+                      `contain: paint` both fix it and `width: 100%`,
+                      `min-width: 0`, `overflow: clip` on the details and
+                      four other guesses do not. */}
+                  <div className="relative overflow-x-auto">
+                    {/* FIXED LAYOUT, so the seven sections line up.
+                        Each <table> sizes its own columns from its own
+                        content by default, and the seven of them
+                        disagreed: "Free" sat at x=445 in the ΦΤΙΑΞΕ
+                        section and at x=570 in ΡΩΤΑ, measured in a
+                        browser at 1440. A comparison table whose columns
+                        move between sections is one a reader has to
+                        re-find on every heading. */}
+                    <table className="w-full min-w-[720px] table-fixed border-collapse text-sm">
+                      <caption className="sr-only">{t(`groups.${group}`)}</caption>
+                      <thead>
+                        <tr className="border-b border-border bg-panel-hover">
+                          <th
+                            scope="col"
+                            className="w-[34%] px-4 py-3 text-start font-semibold text-muted"
+                          >
+                            {t("feature")}
+                          </th>
+                          {PLANS.map((plan) => (
+                            <th
+                              key={plan.slug}
+                              scope="col"
+                              className={`px-4 py-3 text-center font-semibold ${
+                                plan.highlighted ? "text-orange-400" : "text-foreground"
+                              }`}
+                            >
+                              {plan.name}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {groupRows.map((row, index) => (
+                          <tr
+                            key={row.id}
+                            className={`border-b border-border last:border-b-0 ${
+                              index % 2 === 1 ? "bg-panel-hover/40" : ""
+                            }`}
+                          >
+                            <th
+                              scope="row"
+                              className="px-4 py-3 text-start font-normal text-muted"
+                            >
+                              {t(`rows.${row.id}`)}
+                            </th>
+                            {PLANS.map((plan) => (
+                              <td key={plan.slug} className="px-4 py-3 text-center">
+                                <ComparisonCellContent
+                                  cell={row.cell(plan, locale, cellWords)}
+                                  words={cellWords}
+                                />
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </details>
+              );
+            })}
           </div>
+          <p className="mt-4 text-center text-xs text-muted">
+            {t("comparisonRowCount", { count: rows.length })}
+          </p>
         </div>
 
         <div className="mt-12 text-center">

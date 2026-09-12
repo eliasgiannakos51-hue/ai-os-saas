@@ -124,6 +124,13 @@ const parsed = marks.map((mark, i) => {
         href: literal ?? (constant ? modules[constant]?.href ?? constant : null),
         hidden: /hidden:\s*true/.test(head),
         ownerOnly: /ownerOnly:\s*true/.test(head),
+        // V5. A held position for something that does not exist yet.
+        // `sidebarGroups` drops it, so the parse has to carry it or the
+        // declared list below would have to name six rows nothing draws
+        // — see lib/sidebar-visibility.ts's `notBuilt`, and
+        // scripts/tests/sidebar-collapse.test.mjs, which is where the
+        // held positions are checked.
+        notBuilt: /notBuilt:\s*true/.test(head),
         label: chunk.match(/label:\s*["'`]([^"'`]+)["'`]/)?.[1] ?? chunk.match(/label:\s*([A-Z_]+)\.label/)?.[1] ?? "?",
         icon: null,
       };

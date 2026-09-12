@@ -65,8 +65,61 @@ function collectJson(file, stmt, seen, out) {
   out.push(`const ${localName} = ${JSON.stringify(data)};`);
 }
 
+/**
+ * THE BUNDLE IS ONE FLAT SCOPE, AND THAT IS WHERE THE NEXT PERSON LOSES
+ * AN HOUR.
+ *
+ * Two local modules that each declare a module-level `const MB` are both
+ * valid TypeScript and both fine in Next. Concatenated here they are
+ * `SyntaxError: Identifier 'MB' has already been declared`, pointing at a
+ * `data:text/javascript;base64,...` URL — sixty kilobytes of base64 with
+ * no file name in it. That error names neither module, and the first
+ * instinct is to suspect the module under test.
+ *
+ * hoistExternalImports below already fixes the same collision for
+ * EXTERNAL imports, for the same reason and with the same sentence in its
+ * header. This is the local half: it cannot merge the declarations (they
+ * are different values), so it names them instead. Found on 2026-09-12
+ * building lib/billing/feature-catalog.ts, which is the first module to
+ * import six per-plan limit modules at once; four pairs collided
+ * (`cached` x4, `UNLIMITED` x3, `MAX_SANE_LIMIT` x2, `MB` x2) and every
+ * one of them arrived as that same anonymous SyntaxError.
+ *
+ * SCOPED TO ONE BUNDLE, which is the whole subtlety: the map is created
+ * per `collect` root and threaded down, NOT held at module level. Two
+ * gates in the same process that each load a different module are two
+ * separate bundles and may freely share a name; a module-level map would
+ * have failed the second one for a collision that does not exist, in
+ * whichever of the 255 gates happened to run second.
+ */
+function recordTopLevelNames(sf, abs, declaredBy) {
+  for (const st of sf.statements) {
+    const names = [];
+    if (ts.isVariableStatement(st)) {
+      for (const d of st.declarationList.declarations) {
+        if (ts.isIdentifier(d.name)) names.push(d.name.text);
+      }
+    } else if ((ts.isFunctionDeclaration(st) || ts.isClassDeclaration(st)) && st.name) {
+      names.push(st.name.text);
+    }
+    for (const name of names) {
+      const owner = declaredBy.get(name);
+      if (owner && owner !== abs) {
+        throw new Error(
+          `load-ts: "${name}" is declared at the top level of BOTH ` +
+            `${path.relative(ROOT, owner)} and ${path.relative(ROOT, abs)}.\n` +
+            `        The bundle is one flat scope, so the two cannot be loaded together. ` +
+            `Rename one of them (the repository's convention is a resource suffix — ` +
+            `MAX_SANE_AGENT_LIMIT, cachedPublishLimits, UNLIMITED_FILES).`
+        );
+      }
+      declaredBy.set(name, abs);
+    }
+  }
+}
+
 /** Transpiles `file` and every local module it imports into one ES module. */
-function collect(file, seen, out, allowExternals = false) {
+function collect(file, seen, out, allowExternals = false, declaredBy = new Map()) {
   const abs = path.resolve(file);
   if (seen.has(abs)) return;
   seen.add(abs);
@@ -84,6 +137,7 @@ function collect(file, seen, out, allowExternals = false) {
   // transpile JSON — and the measuring script caught it and printed a
   // zero. Two bugs, and the zero was the worse one.
   const sf = ts.createSourceFile(abs, source, ts.ScriptTarget.ES2022, true);
+  recordTopLevelNames(sf, abs, declaredBy);
 
   // Depth-first: dependencies are emitted before the module that needs them,
   // so the concatenated bundle evaluates in a valid order.
@@ -115,7 +169,23 @@ function collect(file, seen, out, allowExternals = false) {
         collectJson(resolved, stmt, seen, out);
         continue;
       }
-      collect(resolved, seen, out, allowExternals);
+      // AN ALIASED LOCAL IMPORT HAS NOWHERE TO COME FROM. The bundle is a
+      // concatenation and this statement is about to be dropped, so
+      // `import { A as B } from "@/x"` leaves B undeclared and the module
+      // fails at its first USE of B — a ReferenceError pointing at the
+      // line that reads it, never at the import that was supposed to
+      // provide it. Named here instead, at the import.
+      const aliased = (stmt.importClause?.namedBindings?.elements ?? [])
+        .filter((el) => el.propertyName && !stmt.importClause.isTypeOnly && !el.isTypeOnly)
+        .map((el) => `${el.propertyName.text} as ${el.name.text}`);
+      if (aliased.length > 0) {
+        throw new Error(
+          `load-ts: ${path.relative(ROOT, abs)} imports ${aliased.join(", ")} from ` +
+            `"${stmt.moduleSpecifier.text}". The bundle is a concatenation, so a renamed ` +
+            `local import has no binding to land on — import the name unchanged.`
+        );
+      }
+      collect(resolved, seen, out, allowExternals, declaredBy);
     }
   }
 
@@ -275,7 +345,7 @@ function dedupeReExports(code) {
 
 function bundleOf(entry, allowExternals) {
   const out = [];
-  collect(path.resolve(entry), new Set(), out, allowExternals);
+  collect(path.resolve(entry), new Set(), out, allowExternals, new Map());
   // Hoisted in both modes: two concatenated modules that each import
   // `node:crypto` would otherwise redeclare a shared binding and fail to
   // parse.

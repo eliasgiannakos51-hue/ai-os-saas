@@ -15,6 +15,7 @@
 //
 // Run: node scripts/tests/agents-ui.prodtest.mjs
 import http from "node:http";
+import { uiTextStrict } from "./lib/ui-text.mjs";
 import { label } from "./lib/label.mjs";
 import { spawn } from "node:child_process";
 
@@ -309,7 +310,15 @@ try {
   checkTrue("the status is shown", body.includes("Active"));
   checkTrue("the plan allowance is shown", body.includes("1 of 5 agents"), body.slice(0, 600));
   checkTrue("the EU AI Act notice is on the page", /AI systems/i.test(body));
-  checkTrue("the upgrade wall is NOT shown", !body.includes("Upgrade Required"));
+  // RESOLVED FROM THE PAGE'S OWN LOCALE, not typed in English. As a
+  // NEGATIVE assertion this was the dangerous kind: under a Greek UI the
+  // English string is never present, so it passed while measuring
+  // nothing. uiTextStrict refuses a needle too short to assert on, so the
+  // vacuity cannot come back one level down.
+  checkTrue(
+    "the upgrade wall is NOT shown",
+    !body.includes(await uiTextStrict(page, "common.upgradeRequired.title"))
+  );
 
   // No unresolved i18n keys anywhere on the page.
   const keys = await page.evaluate(() => {
@@ -404,9 +413,16 @@ try {
   const freePage = await context.newPage();
   await freePage.goto(URL_AGENTS, { waitUntil: "networkidle", timeout: 30000 });
   const freeBody = await freePage.evaluate(() => document.body.innerText);
-  checkTrue("the upgrade wall is shown", freeBody.includes("Upgrade Required"), freeBody.slice(0, 500));
+  checkTrue(
+    "the upgrade wall is shown",
+    freeBody.includes(await uiTextStrict(page, "common.upgradeRequired.title")),
+    freeBody.slice(0, 500)
+  );
   checkTrue("...naming the plan that unlocks it", freeBody.includes("Starter"));
-  checkTrue("...and no create control is offered", !freeBody.includes("New agent"));
+  checkTrue(
+    "...and no create control is offered",
+    !freeBody.includes(await uiTextStrict(page, "dashboard.agents.newAgent"))
+  );
   await freePage.close();
 
   // -------------------------------------------------------------------

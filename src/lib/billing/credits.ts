@@ -574,10 +574,31 @@ export async function grantMonthlyPlanCredits(
  *   api/automations/create both call hasEnoughCredits against it before
  *   the clarifying-questions call.
  *
- *   chatMessage, textAction, weeklyReflection — NOT charges. Each route
- *   reserves and settles on measured usage and passes this number to
- *   recordAiCallForDailySpend, the daily-spend COUNTER. They size a
- *   telemetry tick, not a bill, and moving one moves a graph.
+ *   chatMessage, textAction, weeklyReflection — NOT charges, and as of
+ *   2026-09-13 not anything else either. Each route reserves and settles
+ *   on measured usage and passes this number to
+ *   recordAiCallForDailySpend, whose `estimatedCreditCost` argument lands
+ *   in daily_ai_spend_tracking.estimated_cost.
+ *
+ *   NOTHING READS THAT COLUMN. Not application code, not the owner's own
+ *   diagnostics (docs/sql/4-spend.sql and 5-undercount.sql both read
+ *   total_calls, and 4-spend says in its header that real spend comes
+ *   from ai_cost_log), not any dashboard. Every other mention in the repo
+ *   is a test asserting the RPC accumulates, or the drift report listing
+ *   the column as expected to exist.
+ *
+ *   SO THESE THREE ARE DEAD BY ONE MORE HOP than the eleven above, and
+ *   this comment said otherwise until today: it read "they size a
+ *   telemetry tick, not a bill, and moving one moves a graph." There is
+ *   no graph. That sentence was written in the same commit that deleted
+ *   eleven fields for being unread, which is the joke of it — the check
+ *   stopped one call short.
+ *
+ *   AND THEY ARE THE WRONG VALUE FOR THE ARGUMENT ANYWAY. Twenty-one of
+ *   the twenty-four callers of recordAiCallForDailySpend pass
+ *   `estimate.estimatedCredits`, a real per-request number. These three
+ *   pass a flat 1, 1 and 2. If that column ever gains a reader, it will
+ *   read three features as nearly free.
  */
 export const CREDIT_COSTS = {
   chatMessage: 1,

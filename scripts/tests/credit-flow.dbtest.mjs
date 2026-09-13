@@ -167,8 +167,18 @@ console.log("== 0. the database really is the one the migrations build ==");
 // MEASURED ON THE MERGED TREE, not added. Each branch counted against
 // its own migration set; summing two ratchets is arithmetic across two
 // different schemas. Built from bootstrap-supabase.sql plus every
-// migration in supabase/migrations on a real Postgres 16: 107.
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 107);
+// 107 -> 109, measured 2026-09-13 on a local Postgres 16 built from
+// bootstrap-supabase.sql plus all 72 migrations. Two tables, both from
+// the V5 tiering round:
+//   · 20260930's generated_posts — what the post generator produced, per
+//     account, so a post can be re-opened rather than re-generated.
+//   · 20261001's projects — the grouping WITH A GOAL that the sidebar's
+//     Organise section leads to; entity_links carries the membership and
+//     prune_project_links sweeps the edges when a project goes.
+// 20260929 (presentation decks) added COLUMNS to ai_presentations and no
+// table, which is why three migrations landed and the count moved by two.
+// migration in supabase/migrations on a real Postgres 16: 109.
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 109);
 eq(
   "the credit functions exist",
   Number(

@@ -311,11 +311,21 @@ function uniqueColumns(table) {
  * satisfy — it looks for an equality or an ANY(ARRAY[…]) and finds
  * neither. Each entry is a value read off the constraint in the schema,
  * and the constraint is quoted so a reader can see it is still the same
- * one. Two, out of 96 tables.
+ * one. Three, out of 98 tables.
  *
- * The alternative was leaving both tables unprobed, which is the choice
- * that costs something: affiliates holds a payout identity and nav_events
- * holds where somebody has been.
+ * The alternative was leaving those tables unprobed, which is the choice
+ * that costs something: affiliates holds a payout identity, nav_events
+ * holds where somebody has been, and transition_suggestions holds what
+ * the product is about to propose to a named account.
+ *
+ * THE THIRD ONE WAS FOUND BY RUNNING THIS FILE, on 2026-09-13, against a
+ * local Postgres built from bootstrap-supabase.sql and all 72 migrations.
+ * The run was ALL PASS — and its own closing section said
+ * `98 tables probed, 1 not reached`, naming transition_suggestions and
+ * the constraint that refused the seed. That line is the reason this file
+ * reports what it could not reach instead of only what it checked: a
+ * table missing from the population is indistinguishable from a table
+ * that passed, unless something says so out loud.
  */
 const REGEX_CHECK_VALUES = {
   // CHECK ((code ~ '^[A-HJ-NP-Z2-9]{8}$')) — a Crockford-style alphabet
@@ -327,6 +337,11 @@ const REGEX_CHECK_VALUES = {
     " from generate_series(1, 8))",
   // CHECK ((path ~ '^/dashboard(/:?[a-z0-9-]{1,30}){0,2}$'))
   "nav_events.path": "'/dashboard/overview'",
+  // CHECK ((destination ~ '^[a-z][a-zA-Z]{1,31}$')) — a camelCase route
+  // key, 2 to 32 characters, first letter lower. "websiteBuilder" is one
+  // the product actually emits, so the seeded row is the shape a real one
+  // has rather than a string chosen to satisfy a regex.
+  "transition_suggestions.destination": "'websiteBuilder'",
 };
 
 /** A value for a column, by type. `id` is the owner this row belongs to. */

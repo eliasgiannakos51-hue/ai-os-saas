@@ -1076,3 +1076,49 @@ The same shape at the pricing surface is
 `scripts/tests/pricing-truth.test.mjs`: a row on the comparison table must
 name code that exists, and — since 2026-09-13 — must not be a row for a
 capability the catalog itself declares unbuilt.
+
+
+## The one live use that makes the whole table look alive
+
+`CREDIT_COSTS` had fifteen entries. Eleven were read by nothing and were
+deleted on 2026-09-13. The remaining four were written up as the survivors
+— and three of them were dead too, one hop further out.
+
+They feed `recordAiCallForDailySpend(estimatedCreditCost)`, which writes
+`daily_ai_spend_tracking.estimated_cost`. Nothing reads that column.
+Application code reads `total_calls` and nothing else; the owner's own
+diagnostics (`docs/sql/4-spend.sql`, `docs/sql/5-undercount.sql`) read
+`total_calls` and say in their own header that real spend comes from
+`ai_cost_log`; every other mention in the repo is a test asserting the RPC
+accumulates, or the drift report listing the column as one that should
+exist.
+
+**The one use was also the most wrong.** Twenty-one of the twenty-four
+callers of that function pass `estimate.estimatedCredits` — a real
+per-request number. The three fed from `CREDIT_COSTS` pass a flat 1, 1 and
+2. So the single thing keeping those entries alive was also the single
+place feeding the number a fiction; if that column ever gains a reader, it
+will report chat, text actions and the weekly reflection as nearly free.
+
+**Why the first pass missed it.** The scan that found the eleven asked
+"does anything read this symbol", and for these three the answer was yes —
+a real function, called from a real route, on every request. The question
+that finds it is one hop further: *and does anything read what that
+does?* A reader that is itself unread is not a reader. `estimated_cost` is
+written by twenty-four call sites, which is exactly what a live field
+looks like from one step away.
+
+**This is why the correction is in the same file as the mistake.** The
+commit that deleted eleven unread fields also wrote, about these three,
+*"they size a telemetry tick, not a bill, and moving one moves a graph."*
+There is no graph. A sentence asserting a consumer that does not exist,
+written in the act of removing eleven fields for having no consumer — the
+check stopped one call short, and the prose filled the gap with something
+plausible.
+
+**What a gate for it would have to do.** `scan-declared-never-read.mjs`
+settles a symbol by renaming it and running `tsc`, which proves nothing
+about a value that crosses into SQL. Reaching `estimated_cost` needs the
+question asked of a database column: written by N call sites, read by how
+many? That is a different instrument, and until it exists the habit is the
+defence — when a field's only justification is "it feeds X", open X.

@@ -99,9 +99,14 @@ export const BATCH_WINDOW_HOURS = 24;
 /** Daily or slower. See (α) above for the pile-up this prevents. */
 export const MIN_INTERVAL_MINUTES_FOR_BATCH = BATCH_WINDOW_HOURS * 60;
 
-/** One synchronous re-run after a batch failure, and then the ordinary
- *  agent machinery owns it. */
-export const FALLBACK_ATTEMPTS_ALLOWED = 1;
+// THERE IS NO FALLBACK CEILING, AND THERE WAS NEVER ONE.
+// `FALLBACK_ATTEMPTS_ALLOWED = 1` stood here and docs/orchestrator.md §6
+// counted it among the loops that bound a spend. Nothing compared
+// anything to it: fallBack() in agent-batch.ts increments batch_fallbacks
+// and never reads the count back. Removed rather than wired, because the
+// number to enforce is a decision nobody has made — and a constant that
+// reads as a ceiling is worse than an absent one, which at least does not
+// answer "is this bounded?" with a yes.
 
 export const BATCH_ENABLED_ENV_VAR = "AI_BATCH_ENABLED";
 

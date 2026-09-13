@@ -58,12 +58,11 @@ export type ResearchContext = {
   chars: number;
 };
 
-export const NO_RESEARCH_CONTEXT: ResearchContext = {
-  accountSummary: "",
-  entries: [],
-  readModules: [],
-  chars: 0,
-};
+// NO SHARED EMPTY CONTEXT. `NO_RESEARCH_CONTEXT` was declared here as the
+// failure value; loadResearchContext catches each half's failure into a
+// local ("" for the summary, NO_DEEP_DIVE for the dive) and always returns
+// a freshly built literal, and no caller falls back to a named constant
+// either. It described a path through this module that does not exist.
 
 /**
  * The flat half, as prose.

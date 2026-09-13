@@ -384,24 +384,183 @@ enforces one, the build is red until its row goes up.
 
 ### Tier coverage, printed on every build
 
-`node scripts/tests/plan-enforcement.test.mjs`:
+Run it rather than reading the copy below — the figures moved between
+rounds 2 and 3, and this section is where they moved:
 
-    free          22/44        starter       39/44
-    growth        40/44        professional  43/44
-    ultimate      44/44        enterprise    44/44
-    capabilities  13 declared, 4 held for unbuilt features, 9 enforced
+    node scripts/tests/plan-enforcement.test.mjs
+
+On 2026-09-13 it prints:
+
+    free          22/45        starter       40/45
+    growth        41/45        professional  44/45
+    ultimate      45/45        enterprise    45/45
+    capabilities  14 declared, 4 held for unbuilt features, 10 enforced
 
 It is printed **and judged**: Free must stay under three quarters of the
 table, the top plan must exceed Free, and no plan may include less than
 the plan below it.
 
-**23 rows were available to everybody on 2026-09-12; 22 are now**, out
-of 44 — the free tier lost the website builder, Presentations, Posts and
-Predictions, and gained nothing. The answer to "why would an Ultimate
-pay 10×" is no longer "mostly credits".
+**23 rows were available to everybody on 2026-09-12; 22 are now**, out of
+45 — the free tier lost the website builder, Presentations, Posts and
+Predictions, and gained nothing. The answer to "why would an Ultimate pay
+10×" is no longer "mostly credits".
 
 ### Measured live again
 
-`next start` on the production build: **44 rows, 7 sections, no
+`next start` on the production build: **45 rows, 7 sections, no
 horizontal overflow and identical column positions across all seven
-sections**, in `en`, `el`, `ar` (RTL), `zh` at 390 and `ja` at 768.
+sections**, in `en`, `el`, `ar` (RTL), `zh` at 390 and `ja` at 768, and
+**no held row visible on any of them**.
+
+---
+
+## 8. Round 3: the scan — how many other fields are declared and never read
+
+The question, in the owner's words: *"Πόσα ΑΛΛΑ πεδία config δηλώνονται
+και δεν διαβάζονται πουθενά;"* — in PLANS (covered in §7), in other config
+objects, and in env vars.
+
+### The instrument, because the number has to be re-derivable
+
+    node scripts/scan-declared-never-read.mjs --object CREDIT_COSTS \
+         --file src/lib/billing/credits.ts
+
+It does not grep. It **renames one declaration, runs `tsc --noEmit`, and
+puts it back** — a reader anywhere in the TypeScript tree becomes a
+compile error — then greps `.mjs`/`.js` separately, because the gate suite
+is JavaScript and `tsc` cannot see it.
+
+That distinction is the whole finding, not a detail of method. Of the
+eleven dead prices below, **five would have survived a grep**, and they
+were the five with the largest numbers: `createAnything`,
+`automationCreate`, `missionPlan`, `websiteGenerate` and `websiteEdit`
+are all live keys of `ACTION_PROFILES` in `lib/billing/estimate.ts`, so
+`grep -w createAnything` returns fifteen confident-looking lines and not
+one of them reads this table.
+
+### What it found: `CREDIT_COSTS` is not a price list
+
+**11 of its 15 entries were read by nothing**, and of the four that
+remain only **one** decides a charge.
+
+| entry | what read it |
+|---|---|
+| `clarificationCheck` | a real charge — `hasEnoughCredits` in two routes |
+| `chatMessage` | `recordAiCallForDailySpend` — a telemetry counter |
+| `textAction` | the same counter |
+| `weeklyReflection` | the same counter |
+| `agentCreate` 40 · `automationCreate` 50 · `createAnything` 1 · `missionPlan` 2 · `missionReview` 2 · `mobileAppCreate` 300 · `saasProjectCreate` 700 · `webSearchPerQuery` 1 · `websiteCreate` 100 · `websiteEdit` 50 · `websiteGenerate` 100 | **nothing** |
+
+Every AI charge moved to reserve-then-settle on measured usage and the
+flat number each route used to charge stayed behind. `websiteCreate: 100`
+reads as "creating a site costs 100 credits" to anyone who opens the
+file, and had not been true for months. The eleven are gone; the header
+of `CREDIT_COSTS` now says what each of the four survivors is for, and
+that three of them size a graph rather than a bill.
+
+### Env vars: 17 candidates, **nothing dead**
+
+Every env-var candidate the scan raised turned out to be read. The four
+that reached a verdict only in this round were settled the same way:
+`COST_ALERT_BURST_RATIO` and `COST_ALERT_BURST_FLOOR_CALLS` are compared
+in `if (latest.calls < config.burstFloorCalls * config.burstRatio)`, and
+`ERROR_ALERT_WINDOW_MINUTES` / `ERROR_ALERT_COOLDOWN_MINUTES` reach
+`production-errors.ts:92-93` through their accessor functions. This is a
+negative result and it is worth as much as the positive one: the env
+surface is clean.
+
+### The rest, in the order the scan raised them
+
+Each was settled by the rename-and-typecheck above; none by reading.
+
+| what | where | what it claimed |
+|---|---|---|
+| `FALLBACK_ATTEMPTS_ALLOWED` | `lib/ai/batch/batch-policy.ts` | `docs/orchestrator.md` §6 counted it among "every one of these bounds a loop that spends money". `fallBack()` increments `batch_fallbacks` and never reads it back. |
+| `AGENT_LIMITS.deliveryTarget` | `lib/agents/agent-config.ts` | sat between four caps every one of which is applied with a `.slice()`, and read as the fifth. `resolveDeliveryTarget` decides by **ownership** and never looks at length. |
+| `AGENT_MAX_WEB_SEARCHES` | `lib/agents/agent-runner.ts` | its comment opened "every caller that still imports it is asking…". There were none. |
+| `STEP_NAMES` | `lib/ui/step-flows.ts` | "for the i18n gate to check against". `step-flow.test.mjs` builds the identical list itself and imports nothing. |
+| `describeSchedule` + `ScheduleDescription` | `lib/agents/cron-expression.ts` | a complete second cron-to-sentence implementation. The label a user reads comes from `useScheduleLabel()` in `schedule-editor.tsx` — and `agents-ui.prodtest.mjs` credited the dead one in a comment. |
+| `CONDUCT_REFUSAL_KEY` | `lib/trading/conduct.ts` | described the replace-the-whole-answer refusal in the present tense. Nothing renders it. The **message stays** — translated in ten locales, required by `trading-journal.test.mjs:1100`. |
+| `TRADING_DISCLAIMER_KEY` | `lib/trading/conduct.ts` | spelled out a path `trading-disclaimer.tsx` assembles from two separate literals. |
+| `MAX_CATEGORICAL_UNIQUE` | `lib/data-analysis/profile.ts` | "how many distinct values before a column stops being categorical". There is no categorical column type. |
+| `EvalCase.rubric` | `lib/evals/scoring.ts` | the input to a grader model. No case sets one, no grader exists, and `run.mjs` prints "no model grades any case in this run". |
+| `PUBLIC_RATE_LIMIT` | `lib/publishing/public-serving.ts` | an exported mirror of two module-private numbers, kept in step by nothing. |
+| `OVERAGE_STATE_OFF` | `lib/billing/overage-store.ts` | the fails-to-off sentinel; both places that need one spread `OVERAGE_OFF` inline. Changing it changed nothing. |
+| `NO_RESEARCH_CONTEXT` | `lib/research/research-context.ts` | the failure value; every failure path builds its own literal. |
+| `DELIVERY_PROVIDERS` | `lib/integrations/providers.ts` | "providers an agent can deliver to" — a **second** list, already disagreeing with `DELIVERY_CHANNELS`, which is the one that decides. |
+| `DATE_SORT_ORDERS`, `ALPHABETICAL_SORT_ORDERS` | `lib/use-sort-and-paginate.ts` | a third copy of values `sort-toggle.tsx` writes inline and `SortOrder` spells out by hand. |
+| `FULL_CHAT_WORST_CASE` | `lib/billing/free-chat.ts` | a dead alias; every caller and every gate uses the function. |
+| `HOUR_MS` | `lib/time-constants.ts` | see below — the interesting one. |
+
+### `time-constants.ts` was a consolidation that never finished
+
+The file exists because six modules had each declared their own `DAY_MS`
+and the duplicates made `load-ts.mjs` unable to load a whole module. Its
+comment describes that in the past tense. It was **not finished**: three
+holdouts were still writing the numbers themselves — `overview/page.tsx`
+and `energy-checkin-widget.tsx` each declared a local `DAY_MS`, and
+`lib/reflection.ts` imported `DAY_MS` from this very file and then
+declared its own `WEEK_MS = 7 * DAY_MS` one line down. All three now
+import. `HOUR_MS` had no importer at all and is gone; two routes still
+write `60 * 60 * 1000` inline, so it was a fourth spelling nobody was
+coming to collect.
+
+### What the scan did NOT settle, said plainly
+
+- **Type fields are a different question and mostly came back read.** Of
+  19 raised, two were dead outright and the rest error at their
+  **construction** site when renamed — written, not necessarily read.
+  `StorageUsage.usedBytes`/`limitBytes`, `DispatchOutcome.deferredUntil`/
+  `groupedInto`, `ResearchContext.readModules` and
+  `StructuralComparison.tokensA`/`tokensB` are written-and-never-read;
+  `AffiliateStats.lifetimeCents`, `CohortInputs.retained*` and
+  `RecordConversationContext.scanned`/`mentioning` are read by gates,
+  which is a real reader. None was removed.
+- **Two dead type fields were left in place on purpose.**
+  `UserWebsite.reference_image_url` says in its own comment that it is
+  kept because the column still exists on rows created before the change
+  — which is true, and is the reason not to delete it.
+  `AffiliateRow.suspended_reason` mirrors a real database column reached
+  through `select("*")`; deleting the TypeScript field would not delete
+  the column.
+- **The i18n and `package.json` candidates were not settled at all.** 13
+  of them — `common.whatIsThis`, `dashboard.library.*`,
+  `dashboard.overview.progress.*`, the `module.empty*` family, the
+  `check:i18n` and `check:markers` script aliases — reached no verdict,
+  because a `t()` call is resolved at runtime and neither `tsc` nor this
+  scan can see it. They are **candidates, not findings**, and nothing was
+  removed on their account.
+- **The scan that raised the candidates was itself incomplete.** It ran
+  115 agents; 36 died on an account session limit mid-verification. The
+  22 listed above were re-settled here by mutation and are solid; what
+  36 dead agents mean is that the candidate list is a floor, not a total.
+  There is no claim here that these are all of them.
+- **The full mutation sweep was NOT run to completion for this round.**
+  `npm run build` is green (0 failures across every gate) and
+  `npm run build:ci` passes under a deployed environment, but
+  `npm run test:mutation` was stopped partway. What WAS run, in full, is
+  every mutation suite covering a gate this round touched:
+  `pricing-truth` 12/12 · `sidebar-naming` 10/10 · `sidebar-groups` 9/9 ·
+  `sidebar-structure` 22/22 · `feature-catalog` 13/13 · `step-flow` 8/8 ·
+  `evals` 27/27 · `cron-firing` 12/12. The remaining suites are unrun for
+  this change, not passed.
+
+### Two things the sweep itself turned up
+
+**A killed sweep leaves a live defect in the working tree.** Stopping
+`test:mutation` partway left `messages/en.json` carrying an applied
+mutation — `"presentations"` rewritten to *"It does not create slides."* —
+which would have been committed by any `git add -A` that followed. The
+sidecar (`scripts/tests/lib/sidecar-write.mjs`) heals this on the NEXT
+mutation run, which is the right design and is no help at all to a commit
+that happens first. **Check `git status` for files you did not edit before
+committing after any interrupted sweep.**
+
+**`feature-catalog.mutation.mjs` had a stale mutant, and it read as
+healthy.** Its anchor was the Music row *without* the `hintKey` that row
+gained in the V5 sidebar merge, so `from` matched nothing: the runner
+printed `STALE` and `12 of 13`, one line among sixty. A mutant whose
+target has moved is a check that runs and tests nothing — the same shape
+as `db-migrations`' three empty scrapers. It is re-anchored on the
+trailing `notBuilt: true`, so the row can gain further fields without
+silencing it again, and the suite is 13 of 13.

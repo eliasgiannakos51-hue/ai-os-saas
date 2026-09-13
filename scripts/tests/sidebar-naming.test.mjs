@@ -20,6 +20,7 @@
 //
 // Run: node scripts/tests/sidebar-naming.test.mjs
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { AI_CALL, callsModel } from "./lib/reaches-a-model.mjs";
 
 let pass = 0;
 const failures = [];
@@ -396,8 +397,20 @@ console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
   // widens BOTH directions — the last check in this block requires every
   // tracking module to match NOTHING here, so a pattern loose enough to
   // catch a notes form would fail the file rather than pass it.
-  const AI_CALL =
-    /await\s+runCompletion\(|anthropic\.messages\.(create|stream)\(|\.messages\.(create|stream)\(|await\s+synthesiseSpeech\(|await\s+transcribeAudio\(/;
+  // THE PATTERN AND THE IMPORT-FOLLOWING LIVE IN
+  // scripts/tests/lib/reaches-a-model.mjs now, unchanged.
+  // pricing-truth.test.mjs asks the identical question of a row on the
+  // comparison table — "is there a model behind this promise" — and a
+  // second copy of a regex is a second copy that drifts. The reasoning
+  // that shaped it (await in front so a mere import does not count; the
+  // two voice entry points, because a feature billed by the minute
+  // produces something; the provider layer as a leaf and never a step)
+  // is in that file's header.
+  //
+  // THE BACKWARD CHECK BELOW IS WHY IT IS SAFE TO SHARE: this file also
+  // requires every tracking module to match NOTHING, so a pattern
+  // loosened enough to call a notes form a generator fails here rather
+  // than passing there.
 
   // Downstream of a producer rather than a producer: these two show what
   // something else made. Declared here, in the check, so adding a third
@@ -425,37 +438,6 @@ console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
     walk("src/app/api");
     return out;
   })();
-
-  /** Resolves a `@/lib/...` import to a file on disk. */
-  const resolveLib = (spec) => {
-    const base = `src/${spec.slice(2)}`;
-    for (const ext of [".ts", ".tsx", "/index.ts"]) if (existsSync(base + ext)) return base + ext;
-    return null;
-  };
-
-  /**
-   * Does this file, or anything it imports from @/lib (two levels), call a
-   * model? Two levels is what it takes to reach the real callers: the
-   * agent route calls lib/agents/agent-runner, and the website route calls
-   * lib/websites/*, neither of which has the SDK in the route file itself.
-   */
-  const callsModel = (file, depth = 0, seen = new Set()) => {
-    if (!file || seen.has(file) || depth > 2 || !existsSync(file)) return false;
-    seen.add(file);
-    const src = readFileSync(file, "utf8");
-    if (AI_CALL.test(src)) return true;
-    for (const m of src.matchAll(/from "(@\/lib\/[\w./[\]-]+)"/g)) {
-      // THE PROVIDER LAYER IS A LEAF, NEVER A STEP. Recursing into
-      // lib/ai/providers reaches the adapter that really calls the SDK —
-      // so every file that merely IMPORTED the entry point counted as
-      // producing, and a route that stopped calling it stayed green. A
-      // file produces only if IT (or an ordinary lib it uses) awaits the
-      // entry point itself.
-      if (m[1].startsWith("@/lib/ai/providers") || m[1].startsWith("@/lib/ai/batch")) continue;
-      if (callsModel(resolveLib(m[1]), depth + 1, seen)) return true;
-    }
-    return false;
-  };
 
   /** The API routes a page (or its components) actually fetches. */
   const routesFetchedBy = (slug) => {

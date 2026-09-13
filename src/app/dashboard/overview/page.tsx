@@ -47,6 +47,7 @@ import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
 import type { Mission } from "@/types/mission";
 import { formatNumber } from "@/lib/format-number";
+import { DAY_MS } from "@/lib/time-constants";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.home");
@@ -280,7 +281,6 @@ export default async function OverviewPage() {
   // calendar days, same reasoning as oneDayAgoMs/sevenDaysAgo above: no
   // reliable per-user timezone available server-side. No synthetic data —
   // a module with zero activity in a given bucket is just 0.
-  const DAY_MS = 24 * 60 * 60 * 1000;
   const SPARKLINE_DAYS = 7;
   const weeklySparkline: number[] = new Array(SPARKLINE_DAYS).fill(0);
   for (const summary of summaries) {

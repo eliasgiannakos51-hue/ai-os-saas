@@ -51,16 +51,13 @@ import {
 // data exfiltration, not lateral movement, not spend on someone else's
 // behalf.
 
-/**
- * The standard tier's search cap, kept under its original name.
- *
- * It was THE cap; it is now one tier's. Every caller that still imports
- * it is asking "how many searches does an ordinary agent run make", and
- * the answer is unchanged — but a run's real ceiling now comes from
- * AGENT_DEPTH_SPECS[depth].maxSearches, and nothing may size a hold
- * against this constant any more.
- */
-export const AGENT_MAX_WEB_SEARCHES = AGENT_DEPTH_SPECS.standard.maxSearches;
+// THE ORIGINAL NAME IS GONE, AND NOTHING WAS IMPORTING IT.
+// `AGENT_MAX_WEB_SEARCHES = AGENT_DEPTH_SPECS.standard.maxSearches` stood
+// here under a comment beginning "every caller that still imports it is
+// asking…". There were no callers and no importers: a run's ceiling comes
+// from AGENT_DEPTH_SPECS[depth].maxSearches, and the alias only offered a
+// second way to spell one tier's number. The comment's whole argument was
+// about readers it did not have.
 
 function researchSystemPrompt(searches: number, round: number): string {
   const followUp =

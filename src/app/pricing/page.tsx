@@ -341,14 +341,22 @@ export default async function PricingPage({
           <h2 className="mb-5 text-center text-xl font-bold text-foreground">
             {t("comparePlans")}
           </h2>
-          {/* FORTY-THREE ROWS, IN SEVEN SECTIONS, ALL OPEN.
-              Measured: soldFeatures() returns 43 (printed and asserted by
-              scripts/tests/feature-catalog.test.mjs, which also holds 45
-              as the ceiling). The table it replaces had 13, and the
-              thirty it did not have included two per-plan ceilings the
-              product enforces and had never named in any language.
+          {/* ROWS: 45, in seven sections, all open.
+              THE NUMBER IS HELD, NOT REMEMBERED. It said FORTY-THREE here
+              for two days after the table reached 45, because a count
+              written into a comment goes stale the moment somebody adds a
+              row and nothing tells them. It is now re-derived on every
+              build: scripts/tests/pricing-truth.test.mjs reads this
+              comment, parses the figure after "ROWS:" and requires it to
+              equal soldFeatures().length, so adding a row and leaving
+              this line alone fails the build with both numbers in the
+              message. feature-catalog.test.mjs holds 45 as the ceiling on
+              how long the table may get. The table this replaced had 13,
+              and the thirty-two it did not have included two per-plan
+              ceilings the product enforces and had never named in any
+              language.
 
-              WHY NOTHING IS COLLAPSED BY DEFAULT. Forty-three is past the
+              WHY NOTHING IS COLLAPSED BY DEFAULT. Forty-five is past the
               point where a wall of rows is read, so each section is a
               <details> the reader can shut — but `open` by construction,
               because the whole purpose of the page is that nothing about

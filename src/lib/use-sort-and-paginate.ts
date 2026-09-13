@@ -4,9 +4,6 @@ import { textComparator } from "@/lib/text/search-match";
 
 export type SortOrder = "newest" | "oldest" | "az" | "za";
 
-export const DATE_SORT_ORDERS = ["newest", "oldest"] as const;
-export const ALPHABETICAL_SORT_ORDERS = ["az", "za"] as const;
-
 export const PAGE_SIZE = 20;
 
 /**

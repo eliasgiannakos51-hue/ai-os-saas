@@ -69,7 +69,12 @@ import { foldForMatch } from "@/lib/text/unicode-patterns";
  */
 export const COVERED_LOCALES = ["en", "el"] as const;
 
-export const TRADING_DISCLAIMER_KEY = "dashboard.trading.disclaimer";
+// THE DISCLAIMER'S KEY IS NOT SPELLED OUT HERE ANY MORE.
+// `TRADING_DISCLAIMER_KEY = "dashboard.trading.disclaimer"` stood here and
+// nothing imported it: components/trading/trading-disclaimer.tsx opens the
+// "dashboard.trading" namespace and asks for t("disclaimer"), the two
+// halves as separate literals. A constant spelling out a path that no
+// renderer consults can only ever be the copy that goes stale.
 
 /**
  * Appended to every trading-related model call.
@@ -228,13 +233,17 @@ export function containsAdvice(text: string): boolean {
   return findConductBreaches(text).length > 0;
 }
 
-/**
- * What the user sees instead when a breach is found.
- *
- * REPLACED, NOT REDACTED. Blanking the offending sentence leaves the rest
- * of a paragraph that was written to lead up to it, and the reader fills
- * the gap themselves. The whole answer goes, and the refusal says why —
- * which is also the only way the user learns the product does not do this,
- * rather than assuming it failed.
- */
-export const CONDUCT_REFUSAL_KEY = "dashboard.trading.adviceRefused";
+// NOTHING RENDERS A REFUSAL, SO THE KEY IS NOT DECLARED AS IF SOMETHING
+// DID. `CONDUCT_REFUSAL_KEY = "dashboard.trading.adviceRefused"` stood
+// here under a comment in the present tense — "what the user sees instead
+// when a breach is found… REPLACED, NOT REDACTED" — and no route,
+// component or gate imported it. findConductBreaches above is real and
+// scripts/tests/trading-journal.test.mjs exercises it hard; what does not
+// exist is the caller that takes a breach and swaps the answer for a
+// refusal. The message itself is NOT dead and must not be deleted:
+// `dashboard.trading.adviceRefused` is translated in all ten locales and
+// trading-journal.test.mjs:1100 requires it in each, so it is ready for
+// the day a trading surface gains a model call. This file describing the
+// swap as something that happens was the fourth instrument in this repo
+// to state a defence in the present tense while nothing ran it — see the
+// note on this file in CLAUDE.md for the previous three.

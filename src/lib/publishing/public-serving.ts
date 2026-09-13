@@ -196,7 +196,9 @@ export function publicRequestAllowed(request: Request): boolean {
   return bucket.count <= MAX_REQUESTS_PER_WINDOW;
 }
 
-export const PUBLIC_RATE_LIMIT = {
-  windowMs: WINDOW_MS,
-  maxRequests: MAX_REQUESTS_PER_WINDOW,
-};
+// THE LIMIT IS NOT EXPORTED, AND NOTHING WANTED IT. `PUBLIC_RATE_LIMIT`
+// mirrored WINDOW_MS and MAX_REQUESTS_PER_WINDOW into a two-field object
+// "so a caller can report or reuse the limit"; no caller ever imported
+// it, and the limiter above reads the two module-private constants
+// directly. A mirror with no reader is a second copy of two numbers that
+// must agree, kept in step by nothing.

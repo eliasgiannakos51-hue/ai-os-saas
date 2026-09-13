@@ -31,7 +31,14 @@ export const AGENT_LIMITS = {
   prompt: 4000,
   /** What the user typed to create the agent. */
   request: 2000,
-  deliveryTarget: 254,
+  // NO deliveryTarget BOUND. `deliveryTarget: 254` sat here between
+  // `request` and `output`, among caps every one of which is applied with
+  // a .slice() or a length comparison, so it read as the fifth enforced
+  // one. Nothing applied it: resolveDeliveryTarget below decides the
+  // target by OWNERSHIP — the Slack channel is in your workspace, the
+  // Telegram chat is the one you connected, the email is your account's —
+  // and never looks at length. A number in this table that nothing
+  // enforces is a promise the reader has no way to check.
   /** Output kept per run — emailed, stored, and shown in the history. */
   output: 20000,
 } as const;

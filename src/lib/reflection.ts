@@ -4,9 +4,7 @@ import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
 import { logApiError } from "@/lib/log-error";
 import type { Mission } from "@/types/mission";
 import type { ModuleTitleKey } from "@/lib/modules";
-import { DAY_MS } from "@/lib/time-constants";
-
-const WEEK_MS = 7 * DAY_MS;
+import { DAY_MS, WEEK_MS } from "@/lib/time-constants";
 
 export type ModuleWeeklyStat = {
   moduleTitleKey: ModuleTitleKey;

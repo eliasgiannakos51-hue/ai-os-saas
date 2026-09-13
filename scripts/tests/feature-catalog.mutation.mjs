@@ -57,11 +57,21 @@ const MUTANTS = [
     expect: "every sidebar row is claimed",
   },
   {
+    // RE-ANCHORED 2026-09-13. This mutant carried the Music row WITHOUT
+    // its `hintKey`, which the row gained in the V5 sidebar merge — so
+    // `from` matched nothing and the runner reported STALE while every
+    // other line of this suite went on passing. A mutant whose target has
+    // moved is a check that runs and tests nothing, which is the whole
+    // reason the runner reports STALE separately from MISSED rather than
+    // folding it into the caught count.
+    //
+    // Anchored on the `notBuilt: true` at the END of the line, so the row
+    // can gain fields without silencing this again.
     dimension: "A. a feature with no tier",
     name: "a held position quietly becomes a real row, still with no plan",
     file: NAV,
-    from: '      { href: "/dashboard/music", label: "Music", icon: MUSIC_ICON, notBuilt: true },',
-    to: '      { href: "/dashboard/music", label: "Music", icon: MUSIC_ICON },',
+    from: 'icon: MUSIC_ICON, hintKey: "music", notBuilt: true },',
+    to: 'icon: MUSIC_ICON, hintKey: "music" },',
     expect: "every sidebar row is claimed",
   },
 

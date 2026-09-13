@@ -25,8 +25,12 @@ import {
  * to 3 web searches (each one both a $0.01 tool charge AND several
  * thousand tokens of results re-sent on every subsequent tool round) and
  * 2,048 output tokens. Worst case that is roughly €0.96 for ONE message —
- * see FULL_CHAT_WORST_CASE below. At 25% of a €20 plan that would buy
- * five free messages, which is not a feature.
+ * `fullChatWorstCaseCost()` below computes it, and the gate prints it. (A
+ * dead `FULL_CHAT_WORST_CASE` alias for that function stood at the bottom
+ * of this file until 2026-09-13; every caller and every gate used the
+ * function directly, so the alias was only a second name to keep in
+ * step.) At 25% of a €20 plan that would buy five free messages, which is
+ * not a feature.
  *
  * So free chat runs inside a deliberately smaller envelope (FREE_CHAT_LIMITS):
  * no web search, a short history window, a shorter input and a shorter
@@ -298,7 +302,6 @@ export function fullChatWorstCaseCost(
   };
 }
 
-export const FULL_CHAT_WORST_CASE = fullChatWorstCaseCost;
 
 // ---------------------------------------------------------------------------
 // Per-plan allowance

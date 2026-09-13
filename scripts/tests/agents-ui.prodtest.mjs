@@ -296,7 +296,11 @@ try {
   checkTrue("the agent's name is on screen", body.includes("Nvidia Daily News"), body.slice(0, 400));
   checkTrue("...with its description", body.includes("The most important Nvidia news"));
   // The schedule is stored as "0 8 * * *". A user must never be shown a
-  // cron expression — this is the whole point of describeSchedule.
+  // cron expression — this is the whole point of useScheduleLabel() in
+  // components/agents/schedule-editor.tsx. It said "describeSchedule"
+  // until 2026-09-13, naming a function in lib/agents/cron-expression.ts
+  // that nothing ever called; this check has always been passing because
+  // of the other one.
   checkTrue("the schedule reads as a sentence, not a cron string", body.includes("Every day at 08:00"));
   checkTrue("...and the raw expression is NOT shown", !body.includes("0 8 * * *"), body.slice(0, 600));
   // next_run_at is 06:00Z; the agent's zone is Europe/Athens (UTC+2 in

@@ -335,12 +335,37 @@ async function measureExpanded(width, height) {
   // measure the height the content WOULD need — the question is whether
   // the panel is big enough for its own contents, not whether the
   // accordion lets you ask for it.
+  // OPEN, THEN WAIT, THEN MEASURE — three statements, and it used to be
+  // one.
+  //
+  // THE NUMBER THIS PRINTED WAS AN ARTIFACT. The groups collapse with a
+  // `grid-template-rows: 0fr -> 1fr` TRANSITION, so setting the style and
+  // reading scrollHeight in the same evaluate() reads the height the
+  // sidebar had BEFORE the rows expanded. Measured 2026-09-13, on the
+  // same build, at the same two sizes:
+  //
+  //                 printed here      actually, once settled
+  //     390x844        925px                1771px
+  //     1440x900       900px                1702px
+  //
+  // The 1440 line is the one that did damage: 900px of content in 900px
+  // of panel read as "fits", and it was the panel's own height echoed
+  // back, because nothing had grown yet. The true answer is 1702px in
+  // 900px — the fully expanded nav needs nearly two screens. A gate that
+  // prints a number is only as good as the moment it reads it, and this
+  // one was reading before the thing it measures existed.
+  await page.evaluate(() => {
+    const aside = document.querySelector("aside");
+    if (!aside) return;
+    for (const el of aside.querySelectorAll("div.grid")) el.style.gridTemplateRows = "1fr";
+  });
+  // Longer than the transition the component declares, so this does not
+  // become a race that passes on a fast machine.
+  await page.waitForTimeout(900);
+
   return await page.evaluate(() => {
     const aside = document.querySelector("aside");
     if (!aside) return { error: "no <aside>" };
-    for (const el of aside.querySelectorAll("div.grid")) {
-      el.style.gridTemplateRows = "1fr";
-    }
     const links = aside.querySelectorAll("a.nav-item").length;
     return {
       rendered: links,
@@ -351,8 +376,15 @@ async function measureExpanded(width, height) {
   });
 }
 
+// THE PHONE AND THE LAPTOP WERE ADDED 2026-09-13, asked for by name.
+// 1080p and 768p answer "does the desktop nav fit"; 390 is the width at
+// which the sidebar is a drawer rather than a column, and 1440 is the
+// commonest real laptop. The four together are what "does this structure
+// survive" actually means.
 const VIEWPORTS = [
+  { name: "390w  (390x844)", width: 390, height: 844 },
   { name: "1080p (1920x1080)", width: 1920, height: 1080 },
+  { name: "1440w (1440x900)", width: 1440, height: 900 },
   { name: "768p  (1366x768)", width: 1366, height: 768 },
 ];
 
@@ -437,10 +469,41 @@ console.log("\n== 3. the rows a person can actually read on arrival ==");
 // What did change at 768p is how far the scroll goes: 1125px of content
 // instead of 1385px, so what is left below the fold is five rows rather
 // than thirty-three.
-const FLOOR = { "1080p (1920x1080)": 15, "768p  (1366x768)": 11 };
+// 1440 CARRIES THE SAME FLOOR AS 1080p, not one fitted to what it
+// currently scores. It is the same thing — a desktop column with the nav
+// always on screen — so it answers to the same number, and it fails
+// alongside 1080p rather than being quietly excused into a floor of 7.
+// Setting a floor to the value you just measured is how a check gets its
+// baseline set to the size of the problem.
+const FLOOR = { "1080p (1920x1080)": 15, "1440w (1440x900)": 15, "768p  (1366x768)": 11 };
+
+// A VIEWPORT IS FLOORED OR IT IS EXCLUDED BY NAME, never neither.
+//
+// `m.visible >= FLOOR[vp.name]` with no entry compares against undefined
+// and is always false, so a new viewport would fail for the wrong reason
+// and somebody would "fix" it by inventing a floor. Worse, a `continue`
+// for unknown names would make the whole section pass by measuring
+// nothing — the vacuity this repo has been bitten by. So: every viewport
+// must appear in exactly one of the two maps, and that is asserted.
+const NO_FLOOR = {
+  "390w  (390x844)":
+    "at 390 the sidebar is a DRAWER, not a column: it sits off-canvas until " +
+    "opened, so 'rows readable on arrival' is 0 by design and a floor over it " +
+    "would be a floor over nothing. Its height is still measured and printed.",
+};
+for (const vp of VIEWPORTS) {
+  const floored = Object.prototype.hasOwnProperty.call(FLOOR, vp.name);
+  const excused = Object.prototype.hasOwnProperty.call(NO_FLOOR, vp.name);
+  checkTrue(
+    `${vp.name}: has a row floor, or a written reason it has none`,
+    floored !== excused,
+    floored && excused ? "in BOTH maps" : "in NEITHER map — add a floor or a reason"
+  );
+}
 for (const vp of VIEWPORTS) {
   const m = results[vp.name];
   if (m.error) continue;
+  if (!Object.prototype.hasOwnProperty.call(FLOOR, vp.name)) continue;
   checkTrue(
     `${vp.name}: ${m.visible} rows readable without scrolling (floor ${FLOOR[vp.name]})`,
     m.visible >= FLOOR[vp.name],

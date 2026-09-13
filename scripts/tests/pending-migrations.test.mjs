@@ -151,6 +151,49 @@ console.log("\n== 4. the ten policies on storage.objects, by name ==");
   check("...and none of them is filed under public", publicNamed.length === 0, JSON.stringify(publicNamed.slice(0, 3)));
 }
 
+// ---------------------------------------------------------------------
+console.log("\n== a glob in a line comment does not eat the rest of the file ==");
+// ---------------------------------------------------------------------
+// THE ORDER OF THE TWO COMMENT PASSES IS LOAD-BEARING, and nothing here
+// said so until 2026-09-12. stripSqlComments removes `--` lines and then
+// block comments; putting the block pass first is a one-line edit that
+// looks equivalent and is not.
+//
+// A `--` line may contain the two characters that OPEN a block comment
+// without opening one, and in these migrations it always does, as a glob:
+// `src/components/entity-links/*)` in baseline_schema.sql:919 and
+// `messages/*.json` in help_articles.sql:25. Postgres reads both as text.
+// A block pass running first starts a non-greedy match at the glob and
+// ends it at the next real closer, deleting everything between.
+//
+// Today that match never completes inside baseline_schema.sql, because
+// the file has no block comment to close it — so the bug is dormant and a
+// check on the CURRENT numbers cannot see it. This section therefore adds
+// the closer itself and asserts the objects survive: one ordinary doc
+// comment below the glob, which any future migration edit might bring,
+// and the count must not move.
+{
+  const FILE = "supabase/migrations/20260803000000_baseline_schema.sql";
+  const raw = readFileSync(FILE, "utf8");
+  const today = objectsOf(raw).length;
+  check(`the baseline still derives its objects (${today})`, today > 200, `${today}`);
+
+  // The glob is what makes this file the right fixture. If it is ever
+  // edited away, this section is measuring nothing and says so rather
+  // than passing quietly.
+  check("...and it still contains the glob this is about", /^--.*\/\*/m.test(raw));
+
+  const lines = raw.split("\n");
+  const globLine = lines.findIndex((l) => /^--.*\/\*/.test(l));
+  lines.splice(globLine + 20, 0, "/** A note somebody adds later. */");
+  const withNote = objectsOf(lines.join("\n")).length;
+  check(
+    `a doc comment added below the glob changes nothing (${withNote})`,
+    withNote === today,
+    `${withNote} vs ${today}: the block-comment pass ran before the line pass and swallowed ${today - withNote} objects`
+  );
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length) {
   for (const f of failures) console.log(`  - ${f}`);

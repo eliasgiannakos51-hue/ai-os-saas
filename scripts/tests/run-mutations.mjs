@@ -89,7 +89,21 @@ if (suites.length === 0) {
 // those two numbers without anybody coming back here, which is the same
 // habit docs/v5-list.md was four items stale from — see the CLAUDE.md rule
 // on updating the record in the commit that moves it.
-const FLOOR = 131;
+//
+// 143 today against a real 143, raised in the same commit as the eleven
+// V5 #9 suites that took it there (cron-auth, credit-function-privileges,
+// purchased-credits and its marker and upgrade, pricing-margin-bug,
+// margin-report, plan-economics, pricing-truth, guard-witnesses,
+// security-posture). Read off the run, not reasoned about, per the
+// entries above.
+//
+// 151 today against a real 151, the same day, with the eight category-2
+// suites (accent-search, chat-memory, chat-favorites, locale-formatting,
+// language-reachable, layout-unification, navigation-cost, help-articles).
+//
+// 152 with ai-memory.mutation.mjs, which drives both of Universal
+// Memory's gates.
+const FLOOR = 152;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

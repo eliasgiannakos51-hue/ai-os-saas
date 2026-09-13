@@ -637,13 +637,36 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     id: "aiMemory",
     group: "see",
     minPlan: "starter",
-    sidebar: ["/dashboard/memory"],
-    pages: ["memory"],
+    // TWO PAGES, ONE OF THEM A GRAVESTONE. /dashboard/memory is now a
+    // permanent redirect — the name moved when the two features that
+    // shared it were split — and it is claimed here so the gate does not
+    // report an unclaimed page for a route that exists only to keep a
+    // bookmark working.
+    sidebar: ["/dashboard/ai-memory"],
+    pages: ["ai-memory", "memory"],
     charges: false,
     capability: "aiMemory",
-    enforcedIn: "src/app/dashboard/memory/page.tsx",
+    enforcedIn: "src/app/dashboard/ai-memory/page.tsx",
     enforcedSymbol: 'accountHasCapability(planSlug, "aiMemory"',
     cell: (p) => boolCell(p.capabilities.aiMemory),
+  },
+  {
+    id: "recordSearch",
+    group: "see",
+    minPlan: "starter",
+    capability: "recordSearch",
+    // SPLIT FROM aiMemory, and the split is why it needs its own row:
+    // this searches the account's OWN RECORDS across every module, and
+    // AI Memory is what the chat has remembered about the person. They
+    // shared a URL and a name until main separated them; sharing a
+    // capability afterwards would mean moving one tier silently moved
+    // the other.
+    sidebar: ["/dashboard/search"],
+    pages: ["search"],
+    charges: false,
+    enforcedIn: "src/app/dashboard/search/page.tsx",
+    enforcedSymbol: 'accountHasCapability(planSlug, "recordSearch"',
+    cell: (p) => boolCell(p.capabilities.recordSearch),
   },
   {
     id: "files",

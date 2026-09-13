@@ -77,6 +77,16 @@ export type PlanCapabilities = {
   /** The pattern detector over this account's own rows —
    *  api/insights/generate. Growth+. */
   predictions: boolean;
+  /**
+   * Search across every module's rows at once (/dashboard/search).
+   *
+   * ITS OWN FIELD, not `aiMemory`, because the two stopped being one
+   * feature: this searches YOUR OWN RECORDS, and AI Memory is what the
+   * chat has remembered ABOUT you. They shared a URL and a name until
+   * the split, and sharing a capability afterwards would have meant
+   * moving one tier silently moved the other.
+   */
+  recordSearch: boolean;
 
   // --- DECLARED, NOT BUILT -------------------------------------------
   //
@@ -235,6 +245,7 @@ export const PLANS: Plan[] = [
       presentations: false,
       posts: false,
       predictions: false,
+      recordSearch: false,
       customDomain: false,
       publicApi: false,
       privateMarketplace: false,
@@ -261,6 +272,7 @@ export const PLANS: Plan[] = [
       presentations: true,
       posts: true,
       predictions: false,
+      recordSearch: true,
       customDomain: false,
       publicApi: false,
       privateMarketplace: false,
@@ -290,6 +302,7 @@ export const PLANS: Plan[] = [
       presentations: true,
       posts: true,
       predictions: true,
+      recordSearch: true,
       customDomain: true,
       publicApi: false,
       privateMarketplace: false,
@@ -317,6 +330,7 @@ export const PLANS: Plan[] = [
       presentations: true,
       posts: true,
       predictions: true,
+      recordSearch: true,
       customDomain: true,
       publicApi: true,
       privateMarketplace: false,
@@ -346,6 +360,7 @@ export const PLANS: Plan[] = [
       presentations: true,
       posts: true,
       predictions: true,
+      recordSearch: true,
       customDomain: true,
       publicApi: true,
       privateMarketplace: true,
@@ -377,6 +392,7 @@ export const PLANS: Plan[] = [
       presentations: true,
       posts: true,
       predictions: true,
+      recordSearch: true,
       customDomain: true,
       publicApi: true,
       privateMarketplace: true,

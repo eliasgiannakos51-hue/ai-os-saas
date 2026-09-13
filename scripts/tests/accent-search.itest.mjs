@@ -72,7 +72,24 @@ try {
   await sql(`create table public.unprotected (id uuid primary key default gen_random_uuid(), user_id uuid, name text)`);
 
   const migration = path.join(ROOT, "supabase/migrations/20260813_accent_insensitive_search.sql");
-  applyFile(migration);
+  // A FAILED APPLY IS A FAILURE, NOT A CRASH. applyFile throws, and an
+  // uncaught throw here left the runner with "exited non-zero with no FAIL
+  // line" — which names nothing and is what a mutation suite reads as a
+  // hole rather than a catch. Found 2026-09-12 by a mutant that broke the
+  // migration's own DDL: the itest died before printing a single result.
+  let applyError = null;
+  try {
+    applyFile(migration);
+  } catch (err) {
+    applyError = err;
+  }
+  check("the migration applies at all", applyError === null, true);
+  if (applyError !== null) {
+    console.log(`        ${String(applyError.stderr ?? applyError.message).trim().split("\n").slice(-3).join("\n        ")}`);
+    console.log(`\n  ${pass} passed, ${fail} failed`);
+    pg.stop();
+    process.exit(1);
+  }
   let reapplyError = null;
   try {
     applyFile(migration); // must be idempotent

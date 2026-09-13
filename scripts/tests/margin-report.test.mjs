@@ -115,10 +115,16 @@ const bypassRow = {
   metadata: { bypassCharge: true, wouldHaveChargedCredits: 110, effectiveCreditPriceEur: 0.0166667 },
 };
 check("a bypass row still has no CHARGED margin", aggregateMarginRows([bypassRow])[0].chargedMargin, null);
+// A NULL IS THE ANSWER THIS FILE EXISTS TO CATCH, so reading it must not
+// kill the run. `projected.toFixed(3)` on a null throws, and a throw here
+// takes every check below it with it: margin-report.mutation.mjs broke the
+// string coercion — the dash-in-every-row bug, verbatim — and the suite
+// came back "exited non-zero with no FAIL line", which names nothing.
+const to3 = (v) => (typeof v === "number" && Number.isFinite(v) ? Number(v.toFixed(3)) : v);
 // (110 x 0.0166667) / 0.4048 = 4.529...
 const projected = hypotheticalMargin(bypassRow);
-check("but its would-be margin is computed", Number(projected.toFixed(3)), 4.529);
-check("and it appears in the table", Number(aggregateMarginRows([bypassRow])[0].wouldBeMargin.toFixed(3)), 4.529);
+check("but its would-be margin is computed", to3(projected), 4.529);
+check("and it appears in the table", to3(aggregateMarginRows([bypassRow])[0].wouldBeMargin), 4.529);
 check("the credits it would have taken are summed", aggregateMarginRows([bypassRow])[0].wouldBeCredits, 110);
 check("it is counted as bypass, not charged", aggregateMarginRows([bypassRow])[0].bypassCalls, 1);
 check("and contributes nothing to charged credits", aggregateMarginRows([bypassRow])[0].chargedCredits, 0);
@@ -150,6 +156,28 @@ check(
   }),
   null
 );
+
+// A ZERO COST IS ITS OWN AXIS. The loop above varies the METADATA and holds
+// real_cost_eur at "0.4", so no case in it reaches the `cost <= 0` guard —
+// margin-report.mutation.mjs deleted that guard and the whole gate stayed
+// green. A row costing nothing is ordinary (a cached turn, a refunded one),
+// and dividing by it gives Infinity, which renders as a spectacular margin.
+for (const [label, cost] of [
+  ["a zero real cost", "0"],
+  ["a negative real cost", "-0.2"],
+  ["a real cost that is not a number at all", "not-a-number"],
+]) {
+  check(
+    `${label} -> null, never Infinity`,
+    hypotheticalMargin({
+      feature: "x",
+      achieved_margin: null,
+      real_cost_eur: cost,
+      metadata: { wouldHaveChargedCredits: 110, effectiveCreditPriceEur: 0.02 },
+    }),
+    null
+  );
+}
 
 console.log("\n== 15. BOTH columns, from one mixed fixture ==");
 // The whole point of splitting them: a feature used by both a paying

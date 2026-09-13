@@ -69,6 +69,24 @@ async function withEnv(env, fn) {
 
 const req = (headers = {}) => new Request("https://ionexa.example/api/cron/reset-credits", { headers });
 
+// A GUARD THAT THROWS REPORTS NOTHING, and that is worse than a guard that
+// is wrong. timingSafeEqual throws when the two buffers differ in length,
+// and a throw inside a check() argument kills the whole run: every
+// assertion after it goes unreported and the log ends mid-section with a
+// stack trace instead of a FAIL line. cron-auth.mutation.mjs found this by
+// deleting the length guard — the suite came back "exited non-zero with no
+// FAIL line", which names nothing and points nowhere.
+//
+// So every call below goes through safe(), which turns a throw into a
+// value the checks can be red ABOUT.
+const safe = (fn) => {
+  try {
+    return fn();
+  } catch (e) {
+    return { ok: `THREW: ${e.message}`, status: "THREW", error: "" };
+  }
+};
+
 console.log("== 1. THE BUG: no CRON_SECRET must NOT mean open access ==");
 
 // The exact production shape: deployed to Vercel, nobody set the secret.
@@ -113,20 +131,36 @@ await withEnv({ VERCEL: "1" }, (checkCronAuth) => {
 
 console.log("\n== 3. with a secret configured, the check is a real check ==");
 await withEnv({ CRON_SECRET: "s3cret-value", VERCEL_ENV: "production", VERCEL: "1" }, (checkCronAuth) => {
-  check("correct Bearer token accepted", checkCronAuth(req({ authorization: "Bearer s3cret-value" })).ok, true);
-  check("x-cron-secret header accepted", checkCronAuth(req({ "x-cron-secret": "s3cret-value" })).ok, true);
+  check("correct Bearer token accepted", safe(() => checkCronAuth(req({ authorization: "Bearer s3cret-value" }))).ok, true);
+  check("x-cron-secret header accepted", safe(() => checkCronAuth(req({ "x-cron-secret": "s3cret-value" }))).ok, true);
 
-  const wrong = checkCronAuth(req({ authorization: "Bearer wrong-value" }));
+  const wrong = safe(() => checkCronAuth(req({ authorization: "Bearer wrong-value" })));
   check("wrong token rejected", wrong.ok, false);
   check("  ...with 401", wrong.status, 401);
 
-  check("missing header rejected", checkCronAuth(req()).ok, false);
-  check("raw secret without the Bearer prefix rejected", checkCronAuth(req({ authorization: "s3cret-value" })).ok, false);
+  check("missing header rejected", safe(() => checkCronAuth(req())).ok, false);
+  check("raw secret without the Bearer prefix rejected", safe(() => checkCronAuth(req({ authorization: "s3cret-value" }))).ok, false);
   // A prefix of the real secret must not pass — this is what a naive
   // startsWith comparison would let through.
-  check("a prefix of the secret rejected", checkCronAuth(req({ authorization: "Bearer s3cret" })).ok, false);
-  check("the secret plus a suffix rejected", checkCronAuth(req({ authorization: "Bearer s3cret-value-x" })).ok, false);
-  check("empty x-cron-secret rejected", checkCronAuth(req({ "x-cron-secret": "" })).ok, false);
+  check("a prefix of the secret rejected", safe(() => checkCronAuth(req({ authorization: "Bearer s3cret" }))).ok, false);
+  check("the secret plus a suffix rejected", safe(() => checkCronAuth(req({ authorization: "Bearer s3cret-value-x" }))).ok, false);
+  check("empty x-cron-secret rejected", safe(() => checkCronAuth(req({ "x-cron-secret": "" }))).ok, false);
+  // THE HEADER PATH, COMPARED. Until 2026-09-12 this section proved the
+  // x-cron-secret branch ACCEPTS the right value and rejects an empty one,
+  // and never once sent it a wrong one — so `if (headerSecret)` with the
+  // comparison dropped passed the whole gate. Both lengths are covered
+  // because the two failure modes are different code: a wrong length
+  // returns at the length guard, a right length reaches timingSafeEqual.
+  check(
+    "a wrong x-cron-secret is rejected",
+    safe(() => checkCronAuth(req({ "x-cron-secret": "wrong-value" }))).ok,
+    false
+  );
+  check(
+    "  ...including one of exactly the right length",
+    safe(() => checkCronAuth(req({ "x-cron-secret": "s3cret-valu3" }))).ok,
+    false
+  );
 });
 
 // timingSafeEqual throws when the two buffers differ in length; the guard

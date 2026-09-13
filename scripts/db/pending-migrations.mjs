@@ -38,10 +38,14 @@ import { execFileSync } from "node:child_process";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const MIG_DIR = path.join(ROOT, "supabase", "migrations");
 
-/** Strip -- and block comments so a sentence about a table is not a table. */
-export function stripSqlComments(sql) {
-  return sql.replace(/\/\*[\s\S]*?\*\//g, "").replace(/--[^\n]*/g, "");
-}
+// stripSqlComments LIVES IN scripts/lib/sql-text.mjs, not here. It is
+// re-exported so this module's callers keep working, and it moved because
+// the gates need it too: on 2026-09-12 four of five gates that searched
+// migration text for a statement were shown to accept a commented-out one.
+// The header of that file carries the measurement and the reason the two
+// passes run in the order they do.
+export { stripSqlComments } from "../lib/sql-text.mjs";
+import { stripSqlComments } from "../lib/sql-text.mjs";
 
 /** How many top-level parameters a function declares, from the text after "(". */
 export function countParams(afterParen) {

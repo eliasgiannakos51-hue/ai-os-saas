@@ -17,6 +17,7 @@ import {
   MARKETPLACE_ICON,
   TEAM_ICON,
   MEMORY_ICON,
+  RECORD_SEARCH_ICON,
   TIMELINE_ICON,
   FAVORITES_ICON,
   MISSION_ICON,
@@ -41,8 +42,8 @@ import {
   PREDICTIONS_ICON,
   PROJECTS_ICON,
   MUSIC_ICON,
-  BROWSER_AGENT_ICON,
-  COMPUTER_AGENT_ICON,
+  BROWSER_ICON,
+  COMPUTER_ICON,
   MEETINGS_ICON,
 } from "@/lib/module-icons";
 
@@ -65,7 +66,7 @@ import {
 // `sidebarGroups` instead of reading them as text. Re-exported here
 // because this is the file every consumer already imports.
 export type { SidebarItem, SidebarGroupConfig } from "@/lib/sidebar-visibility";
-export { visibleGroups, sidebarGroups } from "@/lib/sidebar-visibility";
+export { visibleGroups, sidebarGroups, declaredGroups } from "@/lib/sidebar-visibility";
 import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 
 // SIX GROUPS, TWENTY-SIX VISIBLE ROWS — the structure of 2026-09-05,
@@ -127,17 +128,16 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     // somebody has to open first is a group somebody does not know is
     // there.
     heading: "Make",
-    collapsible: false,
+    // COLLAPSIBLE NOW, AND IT WAS THE ONE THAT WAS NOT. "Make" was pinned
+    // open as the group somebody opens the app to use. With Images, Videos
+    // and Music declared it is the LARGEST group — nine rows — so pinning
+    // it open means the phone always carries the tallest block whether the
+    // person is in it or not. It opens by itself when they are, which is
+    // what the pin was for; components/dashboard/sidebar.tsx has the rest.
+    collapsible: true,
     items: [
       { href: "/dashboard/website-builder", label: "Website Builder", icon: WEBSITE_BUILDER_ICON, hintKey: "websiteBuilder" },
       { href: "/dashboard/documents", label: "Documents", icon: MODULE_ICONS.documents, hintKey: "documents" },
-      { href: "/dashboard/coding", label: "AI Coding", icon: MODULE_ICONS.coding, hintKey: "coding" },
-      // NEW PAGE, OLD CAPABILITY. api/voice/speak and api/voice/transcribe
-      // have reached real providers, reserved credits and metered minutes
-      // for as long as they have existed; the only ways in were the
-      // microphone in the chat composer and a Listen button beside text
-      // the app had already written.
-      { href: "/dashboard/voice", label: "Voice", icon: VOICE_ICON, hintKey: "voice" },
       // V5 #21. The row the 2026-09-05 structure asked for and could not
       // have: it opened a notes form then. api/presentations/generate
       // reaches a model now, section 3b of sidebar-naming proves it from
@@ -152,28 +152,24 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // api/posts/generate reaches a model and writes one post per
       // platform; nothing is published, and the page says so first.
       { href: "/dashboard/posts", label: "Posts", icon: POSTS_ICON, hintKey: "posts" },
+      { href: "/dashboard/coding", label: "AI Coding", icon: MODULE_ICONS.coding, hintKey: "coding" },
 
-      // --- POSITIONS HELD, NOTHING BEHIND THEM YET ---
-      // `notBuilt` rows are dropped by BOTH filters in
-      // lib/sidebar-visibility.ts, so they are not drawn, not in the
-      // command palette and not on the hub. What they fix is the thing
-      // that put "Images" under a heading that promises generation while
-      // it opened a notes form: the position is decided here, cold,
-      // rather than on the day somebody is thinking about the feature.
+      // --- THE POSITIONS HELD FOR WHAT MAKE WILL PRODUCE ---
       //
-      // THREE, IN THIS ORDER, and they go at the END of Make rather than
-      // beside Presentations, because the six above are the six that
-      // work and a list that alternates working and not-working rows is
-      // unreadable the day the flags start coming off.
-      //
-      // The image and video TRACKING LOGS are separate rows further
-      // down, hidden: /dashboard/images and /dashboard/videos exist and
-      // are tables of hand-typed notes. These are the generators, and
-      // they get their own routes so the day one lands it does not have
-      // to displace a page that already works.
-      { href: "/dashboard/image-generation", label: "Image Generation", icon: MODULE_ICONS.images, notBuilt: true },
-      { href: "/dashboard/video-generation", label: "Video Generation", icon: MODULE_ICONS.videos, notBuilt: true },
-      { href: "/dashboard/music", label: "Music", icon: MUSIC_ICON, notBuilt: true },
+      // Images and Videos are `hidden`, not `notBuilt`: both pages exist,
+      // as TRACKING LOGS — lib/build-modules.ts says in its own words that
+      // no real generation happens yet — so they stay searchable and stay
+      // on the hub, and sidebar-naming.test.mjs is what keeps them out of
+      // a heading that promises production. What is new is that their
+      // POSITION is now declared, here, between Coding and Music. The day
+      // a route behind one reaches a model, the flag comes off and the row
+      // appears where it belongs rather than at the bottom of the group.
+      { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images, hintKey: "images", hidden: true },
+      { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos, hintKey: "videos", hidden: true },
+      // Music has no page at all, which is the difference `notBuilt` names:
+      // visibleGroups strips it, so neither the palette nor the hub can
+      // offer a route that would 404.
+      { href: "/dashboard/music", label: "Music", icon: MUSIC_ICON, hintKey: "music", notBuilt: true },
 
       // --- in the palette and on the hub, not in the sidebar ---
       // The generator the product used to open with. It still routes a
@@ -225,6 +221,13 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // business-health page, so an ordinary user who scrolled past one
       // had no route back to it.
       { href: "/dashboard/predictions", label: "Predictions", icon: PREDICTIONS_ICON, hintKey: "predictions" },
+      // MOVED OUT OF MAKE. Voice was filed under the heading that promises
+      // production because it produces audio — but what a person does here
+      // is SPEAK a question and be answered, which is this group's whole
+      // subject. api/voice/speak and api/voice/transcribe have reached real
+      // providers and metered minutes for as long as they have existed; the
+      // move is about where somebody reaches for it, not about what it is.
+      { href: "/dashboard/voice", label: "Voice", icon: VOICE_ICON, hintKey: "voice" },
     ],
   },
   {
@@ -237,13 +240,12 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents, hintKey: "agents" },
       { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation" },
       { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON, hintKey: "marketplace" },
-
-      // --- POSITIONS HELD --- two agents that act on a machine rather
-      // than on this account's rows. Under Run because what they are is
-      // "something that goes on without you watching", which is what
-      // this heading means.
-      { href: "/dashboard/browser", label: "Browser Agent", icon: BROWSER_AGENT_ICON, notBuilt: true },
-      { href: "/dashboard/computer", label: "Computer Agent", icon: COMPUTER_AGENT_ICON, notBuilt: true },
+      // POSITIONS HELD. Both are things that go on without you watching,
+      // which is what this heading means — an agent that drives a browser
+      // and one that drives the machine. Neither has a route, a component
+      // or a table, so neither is drawn and neither is searchable.
+      { href: "/dashboard/browser", label: "Browser agent", icon: BROWSER_ICON, hintKey: "browserAgent", notBuilt: true },
+      { href: "/dashboard/computer", label: "Computer agent", icon: COMPUTER_ICON, hintKey: "computerAgent", notBuilt: true },
     ],
   },
   {
@@ -265,7 +267,16 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: "/dashboard/finance", label: "Finance", icon: MODULE_ICONS.finance, hintKey: "finance" },
       { href: "/dashboard/sales", label: "Sales", icon: MODULE_ICONS.sales, hintKey: "sales" },
       { href: "/dashboard/trading", label: "Trading", icon: MODULE_ICONS.trading, hintKey: "trading" },
-      { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON, hintKey: "memory" },
+      // TWO ROWS, TWO NAMES, AND THEY USED TO BE ONE. This entry was
+      // `/dashboard/memory`, labelled "AI Memory", and its own sidebar
+      // description said "What the AI remembers about you" in all ten
+      // languages — which is not what it does: it searches YOUR RECORDS
+      // across the module tables and holds no conversation at all. The
+      // help article for chat memory linked to it. So the search page is
+      // /dashboard/search now (the old URL permanently redirects), and
+      // what the chat remembers has its own page below it.
+      { href: "/dashboard/search", label: "Search my records", icon: RECORD_SEARCH_ICON, hintKey: "memory" },
+      { href: "/dashboard/ai-memory", label: "What it remembers", icon: MEMORY_ICON, hintKey: "aiMemory" },
       // The OWNER's dashboard, which is why the owner-only flag exists at
       // all — and why the ordering inside sidebarGroups() is load-bearing:
       // role first, hidden second.
@@ -334,8 +345,10 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // never in it: there was no page to hide.
       { href: "/dashboard/websites", label: "Websites", icon: MODULE_ICONS.websites, hintKey: "websites", hidden: true },
       { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps, hintKey: "apps", hidden: true },
-      { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images, hintKey: "images", hidden: true },
-      { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos, hintKey: "videos", hidden: true },
+      // Images and Videos WERE here, among the trackers. They are declared
+      // under Make now, still hidden and still for the same reason — the
+      // group they will be drawn in is the group their position belongs
+      // in, or the position says nothing.
       { href: "/dashboard/campaigns", label: "Campaigns", icon: MODULE_ICONS.campaigns, hintKey: "campaigns", hidden: true },
     ],
   },
@@ -352,19 +365,12 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: "/dashboard/projects", label: "Projects", icon: PROJECTS_ICON, hintKey: "projects" },
       { href: MISSION_NAV_ITEM.href, label: MISSION_NAV_ITEM.label, icon: MISSION_ICON, hintKey: "missionControl" },
       { href: REFLECTION_NAV_ITEM.href, label: REFLECTION_NAV_ITEM.label, icon: REFLECTION_ICON, hintKey: "reflection" },
+      // A POSITION HELD, AND THE ONE THAT WILL TEST THE MECHANISM FIRST.
+      // Meetings turns a recording into a summary and a list of SUGGESTED
+      // actions; it belongs beside the goals those actions become, not at
+      // the end of the group. When the flag comes off it appears here.
+      { href: "/dashboard/meetings", label: "Meetings", icon: MEETINGS_ICON, hintKey: "meetings", notBuilt: true },
       { href: "/dashboard/team", label: "Team", icon: TEAM_ICON, hintKey: "team" },
-
-      // --- POSITION HELD --- a meeting recording turned into the
-      // decisions it produced. Under Organise rather than Make: the
-      // meeting already happened, this is where it goes afterwards.
-      //
-      // NOT BEHIND /dashboard/voice, which is the recorder and works
-      // today. What is missing is the long-form half — api/voice/
-      // transcribe accepts 120 seconds and 2 MB per clip
-      // (lib/voice/voice-pricing.ts MAX_CLIP_SECONDS,
-      // lib/voice/voice-config.ts MAX_AUDIO_BYTES), so an hour-long
-      // meeting has no path through this product at all today.
-      { href: "/dashboard/meetings", label: "Meetings", icon: MEETINGS_ICON, notBuilt: true },
     ],
   },
 ];

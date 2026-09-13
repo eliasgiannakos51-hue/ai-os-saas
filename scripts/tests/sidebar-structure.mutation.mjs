@@ -36,10 +36,94 @@ const NAMING = "scripts/tests/sidebar-naming.test.mjs";
 const HINTS = "scripts/tests/sidebar-hints-coverage.test.mjs";
 const NAV = "src/lib/sidebar-nav.ts";
 const VISIBILITY = "src/lib/sidebar-visibility.ts";
+const TOOLTIPS = "scripts/tests/sidebar-and-tooltips.test.mjs";
+const SIDEBAR = "src/components/dashboard/sidebar.tsx";
 
-const TARGETS = [STRUCTURE, SIZE, NAMING, HINTS, NAV, VISIBILITY, "docs/analytics-queries.sql"];
+const TARGETS = [STRUCTURE, SIZE, NAMING, HINTS, NAV, VISIBILITY, SIDEBAR, "docs/analytics-queries.sql"];
 
 const MUTANTS = [
+  // ---- THE DECLARED POSITIONS, 2026-09-12 ---------------------------
+  //
+  // Six rows hold a place they are not drawn in. What makes that worth
+  // anything is that the place is enforced — otherwise FUTURE is a comment
+  // and the next feature lands at the bottom of its group like every one
+  // before it did.
+  {
+    gate: STRUCTURE,
+    // THE DEFECT, EXACTLY. Music at the end of Make is where it would go
+    // if nobody had said where it goes.
+    name: "a held position moves to the bottom of its group",
+    file: NAV,
+    from: '      { href: "/dashboard/music", label: "Music", icon: MUSIC_ICON, hintKey: "music", notBuilt: true },\n',
+    to: "",
+    expect: "every locked row is in its declared position",
+  },
+  {
+    gate: STRUCTURE,
+    // hidden and notBuilt are not interchangeable: one keeps a real page
+    // searchable, the other keeps a route that does not exist out of
+    // search. Swapping them is how a 404 gets into the command palette.
+    name: "a not-built row is marked hidden instead",
+    file: NAV,
+    from: '      { href: "/dashboard/meetings", label: "Meetings", icon: MEETINGS_ICON, hintKey: "meetings", notBuilt: true },',
+    to: '      { href: "/dashboard/meetings", label: "Meetings", icon: MEETINGS_ICON, hintKey: "meetings", hidden: true },',
+    expect: "carry the flag they are declared with",
+  },
+  {
+    gate: STRUCTURE,
+    // The filter that keeps a route with no page out of search and off the
+    // hub. Both surfaces are built on visibleGroups, so this one line is
+    // the whole guarantee.
+    name: "visibleGroups stops stripping the rows that have no page",
+    file: VISIBILITY,
+    from: "    .map((group) => ({ ...group, items: group.items.filter((i) => !i.notBuilt) }))",
+    to: "    .map((group) => ({ ...group, items: [...group.items] }))",
+    expect: "no unbuilt row is offered in search or on the hub",
+  },
+  {
+    gate: STRUCTURE,
+    // AND THE OTHER DIRECTION. A filter that strips everything would
+    // satisfy the check above while emptying the palette — the shape a
+    // one-sided assertion always has.
+    name: "visibleGroups strips the hidden rows too, emptying the palette",
+    file: VISIBILITY,
+    from: "    .map((group) => ({ ...group, items: group.items.filter((i) => !i.notBuilt) }))",
+    to: "    .map((group) => ({ ...group, items: group.items.filter((i) => !i.notBuilt && !i.hidden) }))",
+    expect: "every hidden row still is",
+  },
+
+  // ---- THE COLLAPSE RULE, 2026-09-12 --------------------------------
+  {
+    gate: TOOLTIPS,
+    // Without this the nav arrives shut on every page, which is the
+    // accordion's worst property and none of its benefit.
+    name: "the group holding the current page stops opening itself",
+    file: SIDEBAR,
+    from: "    return headingContaining(pathname) === group.heading;",
+    to: "    return false;",
+    expect: "open by default",
+  },
+  {
+    gate: TOOLTIPS,
+    // THE ACCORDION, REINTRODUCED. Reading the pathname BEFORE the manual
+    // choice means navigating undoes what the person just opened.
+    name: "the pathname wins over what the person opened by hand",
+    file: SIDEBAR,
+    from: "    const chosen = touched.get(group.heading);\n    if (chosen !== undefined) return chosen;\n    return headingContaining(pathname) === group.heading;",
+    to: "    if (headingContaining(pathname) === group.heading) return true;\n    const chosen = touched.get(group.heading);\n    return chosen ?? false;",
+    expect: "opened by hand wins",
+  },
+  {
+    gate: TOOLTIPS,
+    // A sidebar that restores three groups from yesterday is thirty-three
+    // rows again, which is the state the rule exists to leave.
+    name: "the open groups are remembered across a reload",
+    file: SIDEBAR,
+    from: "  function toggleGroup(group: SidebarGroupConfig) {",
+    to: "  function persistOpen(v: string) {\n    window.localStorage.setItem(\"ionexa:sidebar-open\", v);\n  }\n\n  function toggleGroup(group: SidebarGroupConfig) {",
+    expect: "nothing is remembered across a reload",
+  },
+
   // ---- the order, the names, the count ------------------------------
   {
     // A REAL SWAP, not a rename: Ask takes Organise's position and
@@ -74,7 +158,7 @@ const MUTANTS = [
       { file: NAV, from: '{ href: "/dashboard/coding", label: "AI Coding"', to: '{ href: "/dashboard/documents", label: "AI Coding"' },
       { file: NAV, from: '{ href: "/dashboard/ZZTEMP", label: "Documents"', to: '{ href: "/dashboard/coding", label: "Documents"' },
     ],
-    expect: "Make: 6 rows, in order",
+    expect: "Make: 5 rows, in order",
   },
   {
     name: "a drawn row is quietly hidden",
@@ -101,8 +185,12 @@ const MUTANTS = [
     // and the gate would pass while holding nothing.
     name: "sidebar-structure: the declaration is emptied",
     file: STRUCTURE,
-    from: "const DECLARED = [",
-    to: "const DECLARED = []; const DECLARED_UNUSED = [",
+    // FUTURE, not DECLARED: what is drawn is DERIVED from the full
+    // declaration since 2026-09-12, so emptying the derived list would
+    // just be editing an expression. Emptying the source is the defect,
+    // and it is the one this section's floor exists for.
+    from: "const FUTURE = [",
+    to: "const FUTURE = []; const FUTURE_UNUSED = [",
     expect: "the declaration is not empty",
   },
   {
@@ -125,16 +213,16 @@ const MUTANTS = [
     name: "sidebar-size: the parse finds one group and calls it the sidebar",
     gate: SIZE,
     file: SIZE,
-    from: 'const headingRe = /heading: "([^"]+)",\\s*\\n\\s*collapsible: (true|false)/g;',
-    to: 'const headingRe = /heading: "(Make)",\\s*\\n\\s*collapsible: (true|false)/g;',
+    from: 'const headingRe = /heading: "([^"]+)",\\s*(?:\\n\\s*(?:\\/\\/[^\\n]*)?)*?\\n\\s*collapsible: (true|false)/g;',
+    to: 'const headingRe = /heading: "(Make)",\\s*(?:\\n\\s*(?:\\/\\/[^\\n]*)?)*?\\n\\s*collapsible: (true|false)/g;',
     expect: "so an emptied config cannot pass a ceiling",
   },
   {
     name: "sidebar-size: the group parse stops matching",
     gate: SIZE,
     file: SIZE,
-    from: 'const headingRe = /heading: "([^"]+)",\\s*\\n\\s*collapsible: (true|false)/g;',
-    to: 'const headingRe = /heading: "(NOTHING_MATCHES_THIS)",\\s*\\n\\s*collapsible: (true|false)/g;',
+    from: 'const headingRe = /heading: "([^"]+)",\\s*(?:\\n\\s*(?:\\/\\/[^\\n]*)?)*?\\n\\s*collapsible: (true|false)/g;',
+    to: 'const headingRe = /heading: "(NOTHING_MATCHES_THIS)",\\s*(?:\\n\\s*(?:\\/\\/[^\\n]*)?)*?\\n\\s*collapsible: (true|false)/g;',
     expect: "the group scan found groups",
   },
   {
@@ -206,7 +294,7 @@ const restoreAll = () => {
 let caught = 0;
 const missed = [];
 try {
-  for (const gate of [STRUCTURE, SIZE, NAMING, HINTS]) {
+  for (const gate of [STRUCTURE, SIZE, NAMING, HINTS, TOOLTIPS]) {
     const base = runGate(gate);
     console.log(`baseline: ${gate.replace("scripts/tests/", "")} is ${base.green ? "GREEN" : "RED"}`);
     if (!base.green) {
@@ -269,10 +357,10 @@ try {
 }
 
 let allGreen = true;
-for (const gate of [STRUCTURE, SIZE, NAMING, HINTS]) {
+for (const gate of [STRUCTURE, SIZE, NAMING, HINTS, TOOLTIPS]) {
   if (!runGate(gate).green) { allGreen = false; console.log(`\nBASELINE IS RED — ${gate} was not restored. Check \`git diff\`.`); }
 }
-if (allGreen) console.log("\nbaseline: all four gates are green again on the restored tree");
+if (allGreen) console.log("\nbaseline: all five gates are green again on the restored tree");
 
 console.log(`\n${caught} of ${MUTANTS.length} mutations caught.`);
 if (missed.length > 0 || !allGreen) {

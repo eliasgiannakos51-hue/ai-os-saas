@@ -4,6 +4,8 @@ import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logApiError } from "@/lib/log-error";
 import { recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
+import { memoryFold } from "./memory-fold";
+import type { RememberedFact } from "./memory-prompt";
 
 const MEMORY_MODEL = "claude-sonnet-4-6";
 const MEMORY_MAX_TOKENS = 150;
@@ -101,13 +103,26 @@ export async function extractAndStoreMemory({
 
     if (!extracted || extracted.toUpperCase() === "NONE") return;
 
-    const { error } = await supabase.from("chat_memory").insert({
-      user_id: userId,
-      memory_text: extracted,
-      source_conversation_id: conversationId,
+    // NOT `.insert()`. That is what this was, and saying your name in five
+    // conversations produced five identical rows — which is worse than
+    // untidy, because the read side takes the newest N (20 on most plans)
+    // and twenty repetitions of one fact push everything else the model
+    // knew about the person out of the prompt. The feature got worse the
+    // more consistently somebody talked about themselves.
+    //
+    // chat_memory_record() inserts or bumps, keyed on the FOLD — the same
+    // foldForMatch() the search box uses, so "Με λένε Ηλία" and "με λενε
+    // ηλια" are one fact. It is a function rather than an upsert from here
+    // because chat_memory has no UPDATE policy on purpose: the table is
+    // append/delete-only for a browser session, and a counter is not a
+    // reason to give that up. See the migration's own note.
+    const { error } = await supabase.rpc("chat_memory_record", {
+      p_memory_text: extracted,
+      p_memory_fold: memoryFold(extracted),
+      p_conversation_id: conversationId,
     });
     if (error) {
-      logApiError("chat:extractAndStoreMemory", error, { stage: "insert", userId });
+      logApiError("chat:extractAndStoreMemory", error, { stage: "record", userId });
     }
   } catch (err) {
     logApiError("chat:extractAndStoreMemory", err, { stage: "unhandled", userId });
@@ -118,12 +133,16 @@ export async function loadRecentMemories(
   supabase: SupabaseClient,
   userId: string,
   limit: number = DEFAULT_MEMORY_LOAD_LIMIT
-): Promise<string[]> {
+): Promise<RememberedFact[]> {
   const { data, error } = await supabase
     .from("chat_memory")
-    .select("memory_text")
+    .select("memory_text, times_seen, last_seen_at")
     .eq("user_id", userId)
-    .order("created_at", { ascending: false })
+    // LAST SEEN, NOT CREATED. Ordering by created_at meant a fact learned
+    // two years ago and repeated yesterday sorted behind a one-off from
+    // last week — so the window filled with things said once while the
+    // things the person keeps saying fell out of it.
+    .order("last_seen_at", { ascending: false })
     .limit(limit);
 
   if (error) {
@@ -131,17 +150,21 @@ export async function loadRecentMemories(
     return [];
   }
 
-  return (data ?? []).map((row) => row.memory_text as string);
+  return (data ?? []).map((row) => ({
+    text: row.memory_text as string,
+    timesSeen: Number(row.times_seen ?? 1),
+    lastSeenAt: String(row.last_seen_at ?? ""),
+  }));
 }
 
-export function buildMemoryPromptAddition(memories: string[]): string {
-  if (memories.length === 0) return "";
-  const bulletList = memories.map((m) => `- ${m}`).join("\n");
-  return `\n\nΠράγματα που ήδη ξέρεις για αυτόν τον χρήστη από προηγούμενες συνομιλίες:\n${bulletList}`;
-}
-
-// The two pure predicates live in ./memory-policy so they can be executed
-// by a build-gate test — this module pulls in the Anthropic SDK on load,
-// which puts it out of reach of scripts/tests/load-ts.mjs. Re-exported
-// here so existing importers keep one obvious place to look.
 export { isChatMemoryEnabled, chatMemoryActive } from "./memory-policy";
+
+// buildMemoryPromptAddition lives in ./memory-prompt so a gate can RUN it.
+// The distinction it draws — repeated against mentioned once — is not
+// something a regex over this file could confirm.
+export { buildMemoryPromptAddition, type RememberedFact } from "./memory-prompt";
+
+// memoryFold lives in ./memory-fold so the browser can call it: the
+// correction flow on /dashboard/ai-memory writes a remembered line from a
+// client component and must compute the same fold this module does.
+export { memoryFold } from "./memory-fold";

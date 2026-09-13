@@ -53,33 +53,28 @@ export type SidebarItem = {
    */
   hidden?: true;
   /**
-   * DECLARED, AND DELIBERATELY NOT DRAWN.
+   * DECLARED, BUT NOT BUILT YET — a position held open.
    *
-   * A position held for something that does not exist yet: Images,
-   * Videos and Music under Make; a browser and a desktop agent under
-   * Run; Meetings under Organise. Six rows, each sitting exactly where
-   * it will appear the day it works.
+   * The problem this solves is an ordering one, and it is not
+   * hypothetical: every feature that arrived after this list was written
+   * got appended to the end of whichever group it belonged to, because
+   * nobody had said where it went. A row is where a person reaches for
+   * it, and "wherever it landed" is not a place.
    *
-   * WHY DECLARE A ROW THAT CANNOT BE CLICKED. Because the ALTERNATIVE
-   * is deciding the position on the day the feature lands, which is the
-   * day the person deciding is thinking about the feature rather than
-   * about the nav — and that is how "Images" ends up under Make next to
-   * five things that generate, while being a form for typing notes
-   * into. The position is a navigation decision and it is made here,
-   * once, in the open.
+   * So the future rows are here, in the order they will appear, with this
+   * flag. When Music generates, the flag comes off and the row appears
+   * BETWEEN Videos and nothing — not at the bottom of Make.
    *
-   * NOTHING RENDERS IT. `sidebarGroups()` drops it, and so does
-   * `visibleGroups()` — which is the part that matters, because
-   * `visibleGroups` feeds the command palette and the hub at
-   * /dashboard/records. A row that is searchable and not clickable is
-   * worse than no row: it is a promise with a 404 behind it. The
-   * `hidden` flag deliberately does NOT behave this way; the two mean
-   * different things and are filtered in different places.
+   * IT IS NOT `hidden`, AND THE DIFFERENCE IS THE POINT. A hidden row is a
+   * page that exists and is deliberately not drawn: it stays in the
+   * command palette, stays on the hub at /dashboard/records, and its href
+   * has to resolve. A notBuilt row has no page at all — offering it in
+   * search would be offering a 404 — so `visibleGroups` strips it and both
+   * surfaces built on that function never see it.
    *
-   * The route must not exist. scripts/tests/sidebar-collapse.test.mjs
-   * fails the build if a notBuilt row's href resolves to a real page —
-   * which is the check that makes the flag come OFF the day the page
-   * lands, rather than leaving a working feature invisible.
+   * `declaredGroups` is the one reader that keeps them: the structure gate
+   * checks ORDER against the full declaration, which is what makes the
+   * position a promise rather than a comment.
    */
   notBuilt?: true;
 };
@@ -108,17 +103,34 @@ export function visibleGroups(
   groups: SidebarGroupConfig[],
   isOwner: boolean,
 ): SidebarGroupConfig[] {
-  // NOT-BUILT ROWS ARE DROPPED HERE, BEFORE THE OWNER SHORT-CIRCUIT, and
-  // that order is the whole point: the owner is not exempt from a route
-  // that does not exist. Returning `groups` unchanged for an owner would
-  // have put six dead links in the owner's own command palette.
-  const real = groups
+  // NOT-BUILT ROWS ARE STRIPPED FIRST, for everybody including the owner.
+  // They have no page; the palette and the hub are both built on this
+  // function, and either of them offering one would be offering a 404.
+  const built = groups
     .map((group) => ({ ...group, items: group.items.filter((i) => !i.notBuilt) }))
     .filter((group) => group.items.length > 0);
-  if (isOwner) return real;
-  return real
+  if (isOwner) return built;
+  return built
     .map((group) => ({ ...group, items: group.items.filter((i) => !i.ownerOnly) }))
     .filter((group) => group.items.length > 0);
+}
+
+/**
+ * EVERY ROW, IN ORDER, INCLUDING THE ONES THAT DO NOT EXIST YET.
+ *
+ * The only reader is scripts/tests/sidebar-structure.test.mjs, and it is
+ * the reason the `notBuilt` positions are worth anything: the gate holds
+ * the DECLARED order, so a future feature cannot arrive at the bottom of
+ * its group, and collapsing a group cannot reorder one either. What is
+ * DRAWN is a different question, asked separately in the same file.
+ *
+ * Returns the config as declared. No filtering of any kind — that is what
+ * distinguishes it from the two functions above, and a version of this
+ * that filtered anything would make the gate agree with the sidebar by
+ * construction instead of by measurement.
+ */
+export function declaredGroups(groups: SidebarGroupConfig[]): SidebarGroupConfig[] {
+  return groups.map((group) => ({ ...group, items: [...group.items] }));
 }
 
 /**
@@ -141,72 +153,4 @@ export function sidebarGroups(
   return visibleGroups(groups, isOwner)
     .map((group) => ({ ...group, items: group.items.filter((i) => !i.hidden) }))
     .filter((group) => group.items.length > 0);
-}
-
-/**
- * IS THIS ROW THE PAGE WE ARE ON?
- *
- * Segment-boundary match, not a raw prefix — otherwise "/dashboard/
- * trading" also matches "/dashboard/trading-workflow", and two rows
- * light up at once.
- */
-export function isActiveHref(pathname: string | null, href: string): boolean {
-  if (href === "/dashboard") return pathname === "/dashboard";
-  if (!pathname) return false;
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-/**
- * The collapsible group holding `pathname`, or null.
- *
- * Reads the FULL config, not the filtered one, on purpose: the rows the
- * sidebar no longer draws still belong to a group, and arriving on one
- * of them should still open it.
- */
-export function headingContaining(
-  groups: SidebarGroupConfig[],
-  pathname: string | null,
-): string | null {
-  return (
-    groups.find(
-      (g) => g.collapsible && g.items.some((item) => isActiveHref(pathname, item.href)),
-    )?.heading ?? null
-  );
-}
-
-/**
- * WHICH GROUPS ARE OPEN ON A FRESH LOAD: exactly the one holding the
- * current page, and nothing else.
- *
- * PURE, AND HERE RATHER THAN INSIDE THE COMPONENT, so the rule can be
- * EXECUTED by a gate against every route in the product instead of being
- * matched as text in a .tsx a gate cannot import. A check that reads
- * `useState(() => new Set(...))` and calls that proof is measuring the
- * shape of the code, not the behaviour — the distinction shapes.md files
- * as #15.
- */
-export function initialExpandedGroups(
-  groups: SidebarGroupConfig[],
-  pathname: string | null,
-): Set<string> {
-  const active = headingContaining(groups, pathname);
-  return new Set(active ? [active] : []);
-}
-
-/**
- * WHAT A NAVIGATION DOES: opens the group you land in, and touches
- * nothing else.
- *
- * Returns the SAME Set when nothing changes. React state set to a new
- * object with identical contents is still a re-render, and this runs on
- * every path change — which is every click in the nav.
- */
-export function expandedAfterNavigation(
-  groups: SidebarGroupConfig[],
-  pathname: string | null,
-  current: Set<string>,
-): Set<string> {
-  const active = headingContaining(groups, pathname);
-  if (!active || current.has(active)) return current;
-  return new Set([...current, active]);
 }

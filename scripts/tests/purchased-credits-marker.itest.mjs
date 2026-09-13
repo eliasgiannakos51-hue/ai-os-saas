@@ -112,6 +112,7 @@ const U = {
   // credits_remaining is what keeps the CHECK constraint satisfied.
   spentPack: "44444444-4444-4444-4444-444444444444",
   // Nothing special. Must be marked considered and otherwise untouched.
+  preLedgerPack: "66666666-6666-6666-6666-666666666666",
   plain: "55555555-5555-5555-5555-555555555555",
 };
 const row = async (id) =>
@@ -148,13 +149,21 @@ try {
   apply("supabase/migrations/20260805_idempotent_credit_grants.sql");
 
   await sql(`insert into auth.users (id) values
-    ('${U.earlyPack}'), ('${U.latePack}'), ('${U.goodwill}'), ('${U.spentPack}'), ('${U.plain}')`);
+    ('${U.earlyPack}'), ('${U.latePack}'), ('${U.goodwill}'), ('${U.spentPack}'), ('${U.plain}'), ('${U.preLedgerPack}')`);
   await sql(`insert into public.user_credits (user_id, credits_remaining, credits_total, plan_tier) values
     ('${U.earlyPack}', 7400, 3000, 'growth'),
     ('${U.latePack}',  3000, 3000, 'growth'),
     ('${U.goodwill}',   100,  100, 'free'),
     ('${U.spentPack}', 3000, 3000, 'growth'),
-    ('${U.plain}',     2400, 3000, 'growth')`);
+    ('${U.plain}',     2400, 3000, 'growth'),
+    -- A PACK THE LEDGER ONLY PARTLY REMEMBERS. 5,000 above the plan
+    -- allotment, of which credit_transactions can prove 2,000 — the
+    -- rest was bought before the ledger existed. The reconciliation
+    -- must RAISE to the larger of the two, never settle on what it can
+    -- prove, or this customer loses 3,000 credits they paid for.
+    ('${U.preLedgerPack}', 6000, 1000, 'growth')`);
+  await sql(`insert into public.credit_transactions (user_id, amount, action_type, description, idempotency_key, created_at) values
+    ('${U.preLedgerPack}', 2000, 'purchase', 'pack', 'stripe_checkout:partial', now() - interval '10 days')`);
   // earlyPack's history: a 5,000 pack, 600 spent since.
   await sql(`insert into public.credit_transactions (user_id, amount, action_type, description, idempotency_key, created_at) values
     ('${U.earlyPack}',  5000, 'purchase', 'pack', 'stripe_checkout:early', now() - interval '30 days'),
@@ -216,6 +225,12 @@ try {
     "the real late pack was recovered from the ledger",
     (await row(U.latePack)) === "5000,2000",
     await row(U.latePack)
+  );
+  check(
+    "a pack the ledger only partly remembers is raised, not reduced to what it can prove",
+    (await row(U.preLedgerPack)) === "6000,5000",
+    `${await row(U.preLedgerPack)} — the balance says 5,000 and the ledger proves 2,000; ` +
+      `greatest() is the only thing standing between this customer and losing 3,000 credits`
   );
   check(
     "the early pack was not lowered",

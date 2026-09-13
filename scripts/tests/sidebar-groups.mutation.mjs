@@ -41,7 +41,7 @@ const MUTANTS = [
     file: NAV,
     from: '      { href: "/dashboard/campaigns", label: "Campaigns", icon: MODULE_ICONS.campaigns, hintKey: "campaigns", hidden: true },\n',
     to: "",
-    expect: "and every one of them IS under See",
+    expect: "is under See, or holds a declared position under Make",
   },
   {
     dimension: "A. reachability",
@@ -75,11 +75,18 @@ const MUTANTS = [
   {
     dimension: "B. build means build",
     gate: NAMING,
-    name: "a tracker is filed under Make",
+    // DRAWN under Make, which is what the rule became on 2026-09-12 with
+    // the declared-position work. Images is IN the Make group already, as
+    // a position held with `hidden: true`, and the defect is the flag
+    // coming off before the page generates anything. This mutant anchored
+    // on the Voice row until that day — Voice moved to Ask, so it was
+    // adding a tracker to a different group and the gate was right to
+    // stay green.
+    name: "a tracker is DRAWN under Make",
     file: NAV,
-    from: '      { href: "/dashboard/voice", label: "Voice", icon: VOICE_ICON, hintKey: "voice" },',
-    to: '      { href: "/dashboard/voice", label: "Voice", icon: VOICE_ICON, hintKey: "voice" },\n      { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images, hintKey: "images" },',
-    expect: "no tracking-only module is filed under Make",
+    from: '      { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images, hintKey: "images", hidden: true },',
+    to: '      { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images, hintKey: "images" },',
+    expect: "no tracking-only module is DRAWN under Make",
   },
 
   // ---- C. FOUR GROUPS, NAMED FOR WHAT SOMEBODY IS DOING -------------
@@ -95,11 +102,16 @@ const MUTANTS = [
   {
     dimension: "C. four groups",
     gate: TOOLTIPS,
-    name: "the always-open group is put behind a disclosure triangle",
+    // THE OTHER DIRECTION SINCE 2026-09-12. No group is pinned open any
+    // more — the group holding the current page opens itself — so there is
+    // no pinned group left to put behind a triangle. The defect in the
+    // same place is pinning one open again, which puts a block on every
+    // phone whether the person is in it or not.
+    name: "a group is pinned open again",
     file: NAV,
-    from: '    heading: "Make",\n    collapsible: false,',
-    to: '    heading: "Make",\n    collapsible: true,',
-    expect: "exactly one group is always open",
+    from: '    heading: "Ask",\n    collapsible: true,',
+    to: '    heading: "Ask",\n    collapsible: false,',
+    expect: "no group is pinned open",
   },
 
   // ---- D. ONE ACTION, NOT A PINNED BLOCK ----------------------------

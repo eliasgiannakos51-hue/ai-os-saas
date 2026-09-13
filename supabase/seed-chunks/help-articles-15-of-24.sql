@@ -12,7 +12,7 @@
 -- unique index these UPSERTs conflict on.
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'de', 'Merkt sich der Chat frühere Unterhaltungen?', 'Innerhalb einer Unterhaltung merkt er sich die früheren Nachrichten immer. Zwischen verschiedenen Unterhaltungen behält er nur dauerhaft Nützliches — deinen Namen, was du machst, deine Vorlieben — und das gibt es in den bezahlten Tarifen. Was er behalten hat, kannst du unter Einstellungen > Erinnerung ansehen und löschen.', 'chat', 0, true, array['merkt sich', 'erinnert sich', 'gedächtnis', 'frühere unterhaltungen', 'vergisst', 'chatverlauf']::text[], '/dashboard/memory')
+values ('chat-memory', 'de', 'Merkt sich der Chat frühere Unterhaltungen?', 'Innerhalb einer Unterhaltung merkt er sich die früheren Nachrichten immer. Zwischen verschiedenen Unterhaltungen behält er nur dauerhaft Nützliches — deinen Namen, was du machst, deine Vorlieben — und das gibt es in den bezahlten Tarifen. Was er behalten hat, kannst du unter „Was es sich merkt“ ansehen, eine einzelne Zeile löschen oder korrigieren.', 'chat', 0, true, array['merkt sich', 'erinnert sich', 'gedächtnis', 'frühere unterhaltungen', 'vergisst', 'chatverlauf']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,

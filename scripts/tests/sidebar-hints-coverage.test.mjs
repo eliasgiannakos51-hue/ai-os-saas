@@ -82,10 +82,6 @@ function parseItems(text) {
       href: obj.match(/href:\s*([^,\n]+)/)?.[1]?.trim() ?? "?",
       label: obj.match(/label:\s*([^,\n]+)/)?.[1]?.trim() ?? "?",
       hintKey: obj.match(/hintKey:\s*"([^"]+)"/)?.[1] ?? null,
-      // V5: a held position for something that is not built. Nothing
-      // renders it, so there is no tooltip to have — see `notBuilt` in
-      // lib/sidebar-visibility.ts. Carried rather than dropped in the
-      // parser so the count above still measures the whole file.
       notBuilt: /notBuilt:\s*true/.test(obj),
     });
     i = end + 1;
@@ -97,9 +93,7 @@ const items = parseItems(src);
 
 console.log("== 1. every sidebar item carries a hint ==");
 checkTrue(`items parsed (${items.length})`, items.length >= 30);
-const noHint = items
-  .filter((it) => !it.notBuilt && !it.hintKey)
-  .map((it) => `${it.label} (${it.href})`);
+const noHint = items.filter((it) => !it.hintKey).map((it) => `${it.label} (${it.href})`);
 check("no item is missing a hintKey", noHint, []);
 
 // The specific twelve that were missing, named so a regression is obvious
@@ -162,12 +156,32 @@ checkTrue(`config still contains constant-href items (${constantHref.length})`, 
 check("...and all of them have hints", constantHref.filter((it) => !it.hintKey).map((it) => it.href), []);
 
 console.log("\n== 2. every hint resolves, in every locale ==");
-const keys = [...new Set(items.map((it) => it.hintKey).filter(Boolean))];
+// THE ROWS THAT ARE RENDERED, which a `notBuilt` row is not: it holds a
+// declared position for a feature with no page, visibleGroups strips it,
+// and no reader ever sees the string. Ten translations of a name that may
+// still change is not coverage, it is stock.
+//
+// AND THE EXEMPTION IS CHECKED BOTH WAYS, below, so it cannot become a
+// hiding place: a not-yet row may not carry hints EITHER. The day the flag
+// comes off in lib/sidebar-nav.ts the row joins `keys` and the ten strings
+// are demanded in the same commit.
+const notBuiltItems = items.filter((it) => it.notBuilt);
+const keys = [...new Set(items.filter((it) => !it.notBuilt).map((it) => it.hintKey).filter(Boolean))];
 checkTrue(`distinct hint keys (${keys.length})`, keys.length >= 25);
+checkTrue(
+  `not-yet-built rows found, so the exemption is about something (${notBuiltItems.length})`,
+  notBuiltItems.length >= 1
+);
 for (const loc of LOCALES) {
   const hints = messages[loc]?.sidebar?.hints ?? {};
   const missing = keys.filter((k) => typeof hints[k] !== "string" || !hints[k].trim());
   check(`${loc}: all ${keys.length} hints present`, missing, []);
+  // The other direction. A hint written for a row nobody can see is a
+  // string that will be stale before it is read.
+  const premature = notBuiltItems
+    .map((it) => it.hintKey)
+    .filter((k) => k && typeof hints[k] === "string");
+  check(`${loc}: …and none for a row that is not built yet`, premature, []);
 }
 
 console.log("\n== 3. the chat focus-mode toggle is discoverable ==");

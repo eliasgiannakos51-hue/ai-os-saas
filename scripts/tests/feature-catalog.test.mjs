@@ -121,7 +121,10 @@ const declaredItems = [...navSrc.matchAll(/\{\s*href:\s*"([^"]+)"([^}]*)\}/g)].m
 const heldPositions = declaredItems.filter((i) => i.notBuilt).map((i) => i.href);
 check(
   `the nav holds positions for what is not built (${heldPositions.length})`,
-  heldPositions.length >= 6,
+  // FOUR: music, a browser agent, a computer agent and meetings. The
+  // floor exists so a parser that stopped seeing `notBuilt` would
+  // silently start demanding tiers for rows nobody has built.
+  heldPositions.length >= 4,
   "a parser that stopped seeing notBuilt would silently start demanding tiers for them"
 );
 const navHrefs = [

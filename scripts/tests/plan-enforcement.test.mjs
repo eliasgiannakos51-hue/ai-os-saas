@@ -181,10 +181,21 @@ check(
   "…and the page shows a wall rather than the workspace",
   /accountHasCapability\([^)]*"websiteBuilder"/.test(builderPage) && /<UpgradeRequired/.test(builderPage)
 );
-const memoryPage = codeOf("src/app/dashboard/memory/page.tsx");
+// THE PAGE MOVED. /dashboard/memory is a permanent redirect now — the
+// two features that shared that URL were separated, so AI Memory lives
+// at /dashboard/ai-memory and the record search at /dashboard/search.
+// BOTH are pinned, because both arrived carrying the parallel-rank
+// shape and both had to be converted; checking only the one that was
+// already fixed would be checking the easy half.
+const aiMemoryPage = codeOf("src/app/dashboard/ai-memory/page.tsx");
 check(
   "AI Memory is gated on its own field, not on a parallel plan rank",
-  /accountHasCapability\([^)]*"aiMemory"/.test(memoryPage) && !/planMeetsMinimum/.test(memoryPage)
+  /accountHasCapability\([^)]*"aiMemory"/.test(aiMemoryPage) && !/planMeetsMinimum/.test(aiMemoryPage)
+);
+const searchPage = codeOf("src/app/dashboard/search/page.tsx");
+check(
+  "…and so is the record search, on a field of its own",
+  /accountHasCapability\([^)]*"recordSearch"/.test(searchPage) && !/planMeetsMinimum/.test(searchPage)
 );
 
 // ---------------------------------------------------------------------

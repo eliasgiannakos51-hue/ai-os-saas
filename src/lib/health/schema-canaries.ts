@@ -309,4 +309,29 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20260903000000_revenue_engine.sql",
     breaks: "Business Health cannot show cohort retention",
   },
+  {
+    kind: "column",
+    table: "chat_memory",
+    column: "times_seen",
+    migration: "20261003000000_chat_memory_dedup_and_retention.sql",
+    breaks: "/dashboard/ai-memory 400s and every remembered fact is written again as a new row",
+  },
+  {
+    kind: "function",
+    fn: "chat_memory_record",
+    migration: "20261003000000_chat_memory_dedup_and_retention.sql",
+    breaks: "chat memory stops being written at all — the extractor calls this and nothing else",
+  },
+  {
+    kind: "function",
+    fn: "chat_memory_prunable",
+    migration: "20261003000000_chat_memory_dedup_and_retention.sql",
+    breaks: "/dashboard/ai-memory cannot show what retention would remove, so the page loads without its clean-up offer",
+  },
+  {
+    kind: "function",
+    fn: "prune_chat_memory",
+    migration: "20261003000000_chat_memory_dedup_and_retention.sql",
+    breaks: "the clean-up button on /dashboard/ai-memory fails",
+  },
 ];

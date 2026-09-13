@@ -128,6 +128,10 @@ const NO_HEADER_EXEMPT = new Map([
     "src/app/dashboard/documents/[id]/page.tsx",
     "one open document, not a feature: its name is whatever the person typed, and the Documents list that got them here carries the tip",
   ],
+  [
+    "src/app/dashboard/memory/page.tsx",
+    "not a page: a permanentRedirect to /dashboard/search, kept so a bookmark to the record search's old address does not 404. A header on it would render for nobody",
+  ],
 ]);
 const noHeader = dashboardPages.filter((f) => !withHeader.includes(f));
 const routed = new Set(HELP_TIPS.map((t) => t.route).filter(Boolean));
@@ -297,12 +301,16 @@ check(
   "an agent run really emails the result and costs credits",
   /it costs credits, emails the result/.test(agentRun),
 );
-// AI Memory: the page reads module tables, not conversations. This is the
-// claim that was wrong in the first version of the memory empty state, so
-// it is the one pinned hardest.
-const memoryPage = readFileSync("src/app/dashboard/memory/page.tsx", "utf8");
+// THE RECORD SEARCH reads module tables, not conversations. This is the
+// claim that was wrong in the first version of that page's empty state, so
+// it is the one pinned hardest — and the page has moved, because the name
+// was the other half of the same confusion: it was /dashboard/memory,
+// labelled "AI Memory", with a sidebar hint reading "What the AI remembers
+// about you." It is /dashboard/search now and what the chat remembers is
+// its own page at /dashboard/ai-memory, held apart by ai-memory.test.mjs.
+const memoryPage = readFileSync("src/app/dashboard/search/page.tsx", "utf8");
 check(
-  "AI Memory really reads the module tables",
+  "the record search really reads the module tables",
   /CLASSIFIER_MODULES/.test(memoryPage) && /BUILD_MODULES/.test(memoryPage),
 );
 // Scoped to the page's DATA ACCESS, not the whole file: the page now

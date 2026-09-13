@@ -32,6 +32,7 @@
 // Live: BASE_URL=http://localhost:3000 node scripts/tests/locale-formatting.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { loadTs } from "./load-ts.mjs";
 
 let pass = 0,
   fail = 0,
@@ -118,11 +119,52 @@ for (const fn of ["formatNumber", "formatDateTime", "formatDate"]) {
   checkTrue(`${fn} is exported`, new RegExp(`export function ${fn}\\(`).test(helper));
   checkTrue(`${fn} takes a locale`, new RegExp(`${fn}\\([\\s\\S]{0,120}locale: string`).test(helper));
 }
-// A formatter that silently swallows a bad value would hide the next bug.
-checkTrue("formatNumber rejects a non-finite value", /Number\.isFinite\(value\)/.test(helper));
-// The determinism fix must stay in the helper, not drift back out.
-checkTrue('formatNumber pins useGrouping so the runtime cannot decide', /useGrouping: "always"/.test(helper));
-checkTrue("the date formatters reject an invalid date", /Number\.isNaN\(date\.getTime\(\)\)/.test(helper));
+// RUN, NOT READ. These three were regexes over the helper's own SOURCE,
+// and all three were decorative — proved on 2026-09-12 by
+// locale-formatting.mutation.mjs, which removed each guard and watched
+// this section stay green. Two ways they failed, and both are ordinary:
+//
+//   `useGrouping: "always"` appears in the file's doc comment as well as
+//   in the code, so deleting it from formatNumber left the pattern
+//   matching prose. That is shape 29 of docs/shapes.md — comments are not
+//   code — which is also what put a `--` in front of an RLS statement in
+//   security-posture.test.mjs.
+//
+//   `Number.isFinite(value)` and `Number.isNaN(date.getTime())` each
+//   appear in more than one function (formatCurrency has the first, three
+//   date formatters have the second), so a regex over the whole file
+//   cannot tell which one it found. Removing the guard from formatNumber
+//   left formatCurrency's copy answering for it.
+//
+// The module is importable — it takes a locale as an argument and reaches
+// for nothing at load time — so the guards are executed instead. A
+// behavioural check cannot be satisfied by a sentence about the behaviour.
+{
+  const fmt = await loadTs("src/lib/format-number.ts");
+  // A THROW IS A FAIL, NOT THE END OF THE RUN. Without the guard the
+  // date formatters take the whole gate down when they are broken —
+  // Intl.DateTimeFormat raises a RangeError on an invalid Date — and the
+  // mutation runner reads that as "exited non-zero with no FAIL line",
+  // which names nothing. Which is also the production symptom: an
+  // uncaught RangeError inside a Server Component is a 500, not an empty
+  // cell, so the check has to survive it in order to say so.
+  const safe = (fn) => { try { return fn(); } catch (err) { return `THREW: ${String(err).slice(0, 60)}`; } };
+  // A formatter that silently swallows a bad value would hide the next bug.
+  check("formatNumber rejects a non-finite value", safe(() => fmt.formatNumber(NaN, "en")), "0");
+  check("...and an infinite one", safe(() => fmt.formatNumber(Infinity, "en")), "0");
+  // The determinism fix must stay in the helper, not drift back out. "it"
+  // is the locale the two runtimes disagree about at four digits.
+  checkTrue(
+    "formatNumber pins useGrouping so the runtime cannot decide",
+    safe(() => fmt.formatNumber(1000, "it")) !== "1000" &&
+      safe(() => fmt.formatNumber(1000, "it")) === safe(() => fmt.formatNumber(1000, "de"))
+  );
+  check("the date formatters reject an invalid date", safe(() => fmt.formatDateTime("not a date", "en")), "");
+  check("...formatDate too", safe(() => fmt.formatDate("not a date", "en")), "");
+  // And they still format a real one, or the two checks above are
+  // satisfied by a function that returns "" for everything.
+  checkTrue("...while a real date still formats", String(safe(() => fmt.formatDate("2026-09-12T00:00:00Z", "en"))).length > 0);
+}
 
 console.log("\n== 4. every call site actually passes one ==");
 const missingArg = [];

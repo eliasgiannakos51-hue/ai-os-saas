@@ -59,7 +59,31 @@ const U = {
   planOnly: "22222222-2222-2222-2222-222222222222",
   backfill: "33333333-3333-3333-3333-333333333333",
   freeWithPack: "44444444-4444-4444-4444-444444444444",
+  overspend: "55555555-5555-5555-5555-555555555555",
 };
+// A DATABASE ERROR IS A FAILED PROPERTY, NOT A CRASH.
+//
+// Every statement below runs with ON_ERROR_STOP, so a mutation that makes
+// a legitimate operation violate the CHECK constraint does not make this
+// file report a wrong number — it makes the process die, and the mutation
+// runner sees "exited non-zero with no FAIL line", which names nothing.
+// purchased-credits.mutation.mjs found this twice: breaking the monthly
+// reset and breaking the spend order both killed the run instead of
+// failing a check.
+//
+// A reset that cannot execute IS a broken reset, so that is what this
+// records: the operation is named, and its failure is a red line somebody
+// can read.
+async function attempt(what, statement) {
+  try {
+    return await sql(statement);
+  } catch (e) {
+    const why = String(e.stderr || e.message || e).split("\n").find((l) => /ERROR/.test(l)) ?? String(e).slice(0, 160);
+    check(`${what} succeeds against the real schema`, why.trim().slice(0, 150), "no error");
+    return null;
+  }
+}
+
 async function row(id) {
   const out = await sql(
     `select credits_remaining || ',' || purchased_credits || ',' || credits_total
@@ -120,7 +144,8 @@ try {
     ('${U.packHolder}', '{}'::jsonb),
     ('${U.planOnly}', '{}'::jsonb),
     ('${U.backfill}', '{}'::jsonb),
-    ('${U.freeWithPack}', '{}'::jsonb)`);
+    ('${U.freeWithPack}', '{}'::jsonb),
+    ('${U.overspend}', '{}'::jsonb)`);
 
   // The state BEFORE the migration: a Growth account that bought a
   // 5,000-credit pack. 3,000 monthly + 5,000 bought, 600 already spent.
@@ -212,7 +237,7 @@ try {
   console.log("\n== 4. spending eats the MONTHLY part first ==");
   // 8,000 total = 3,000 monthly + 5,000 purchased. Spend 2,000: it must
   // all come out of the monthly part, leaving purchased untouched.
-  await sql(`select public.deduct_credits_atomic('${U.packHolder}'::uuid, 2000, 0, 'growth')`);
+  await attempt("a 2,000-credit spend", `select public.deduct_credits_atomic('${U.packHolder}'::uuid, 2000, 0, 'growth')`);
   {
     const r = await row(U.packHolder);
     check("balance down by the spend", r.remaining, 6000);
@@ -221,7 +246,7 @@ try {
   }
   // Spend 2,000 more: only 1,000 of monthly is left, so 1,000 has to come
   // out of purchased — and exactly 1,000, not more.
-  await sql(`select public.deduct_credits_atomic('${U.packHolder}'::uuid, 2000, 0, 'growth')`);
+  await attempt("a 2,000-credit spend", `select public.deduct_credits_atomic('${U.packHolder}'::uuid, 2000, 0, 'growth')`);
   {
     const r = await row(U.packHolder);
     check("balance down again", r.remaining, 4000);
@@ -241,7 +266,7 @@ try {
   console.log("\n== 6. THE BUG: a monthly reset no longer destroys the pack ==");
   // This is the exact call syncCreditsForPlan makes on invoice.paid, on a
   // plan change, and at the end of a cancelled subscription.
-  await sql(`select public.reset_monthly_credits('${U.packHolder}'::uuid, 3000, 'growth')`);
+  await attempt("the monthly reset", `select public.reset_monthly_credits('${U.packHolder}'::uuid, 3000, 'growth')`);
   {
     const r = await row(U.packHolder);
     check("the monthly allotment is restored", r.monthly, 3000);
@@ -249,7 +274,7 @@ try {
     check("so the balance is the sum", r.remaining, 6500);
   }
   // Cancellation: the plan drops to Free's 100. The pack must not.
-  await sql(`select public.reset_monthly_credits('${U.packHolder}'::uuid, 100, 'free')`);
+  await attempt("the downgrade reset", `select public.reset_monthly_credits('${U.packHolder}'::uuid, 100, 'free')`);
   {
     const r = await row(U.packHolder);
     check("downgrade to Free resets only the monthly part", r.monthly, 100);
@@ -295,8 +320,32 @@ try {
     check("and nothing purchased", r.purchased, 0);
   }
 
+  console.log("\n== 8b. a settlement larger than the balance floors at zero ==");
+  // THE PATH SECTION 9 DOES NOT REACH. Every negative-balance check in this
+  // file drives deduct_credits_atomic; settle_reservation has its own
+  // arithmetic and its own greatest(..., 0), and until 2026-09-12 nothing
+  // here exercised it. purchased-credits.mutation.mjs deleted that
+  // greatest() and the whole gate stayed green.
+  //
+  // It is not a theoretical path: a settlement charges what a model
+  // actually cost, which is known only after the work, so a charge larger
+  // than the reservation — and larger than the balance — is the ordinary
+  // case for an expensive run against a nearly-empty account.
+  await sql(`select public.reset_monthly_credits('${U.overspend}'::uuid, 100, 'free')`);
+  await attempt(
+    "a settlement charging more than the balance holds",
+    `select public.settle_reservation('${U.overspend}'::uuid, null, 5000, 'chat',
+       0,0,0,0,0,1, 0, 0, 5, 5, '{}'::jsonb, '{}'::jsonb)`
+  );
+  {
+    const r = await row(U.overspend);
+    check("the balance floors at zero rather than going negative", r.remaining >= 0, true);
+    check("  ...and lands exactly on zero, not on a wrapped value", r.remaining, 0);
+    check("the sub-ledger cannot outlive the balance either", r.purchased <= r.remaining, true);
+  }
+
   console.log("\n== 9. concurrency: two spends cannot both take the same credits ==");
-  await sql(`select public.reset_monthly_credits('${U.packHolder}'::uuid, 100, 'free')`);
+  await attempt("the downgrade reset", `select public.reset_monthly_credits('${U.packHolder}'::uuid, 100, 'free')`);
   await sql(`select public.grant_credits_idempotent(
       '${U.packHolder}'::uuid, 100, 'purchase', 'pack', 'stripe_checkout:cs_2', null, null, null, true)`);
   // 200 total, 100 of it purchased. Ten concurrent 30-credit spends: six

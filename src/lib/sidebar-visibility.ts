@@ -52,6 +52,31 @@ export type SidebarItem = {
    * so search and the hub still see everything.
    */
   hidden?: true;
+  /**
+   * DECLARED, BUT NOT BUILT YET — a position held open.
+   *
+   * The problem this solves is an ordering one, and it is not
+   * hypothetical: every feature that arrived after this list was written
+   * got appended to the end of whichever group it belonged to, because
+   * nobody had said where it went. A row is where a person reaches for
+   * it, and "wherever it landed" is not a place.
+   *
+   * So the future rows are here, in the order they will appear, with this
+   * flag. When Music generates, the flag comes off and the row appears
+   * BETWEEN Videos and nothing — not at the bottom of Make.
+   *
+   * IT IS NOT `hidden`, AND THE DIFFERENCE IS THE POINT. A hidden row is a
+   * page that exists and is deliberately not drawn: it stays in the
+   * command palette, stays on the hub at /dashboard/records, and its href
+   * has to resolve. A notBuilt row has no page at all — offering it in
+   * search would be offering a 404 — so `visibleGroups` strips it and both
+   * surfaces built on that function never see it.
+   *
+   * `declaredGroups` is the one reader that keeps them: the structure gate
+   * checks ORDER against the full declaration, which is what makes the
+   * position a promise rather than a comment.
+   */
+  notBuilt?: true;
 };
 
 export type SidebarGroupConfig = {
@@ -78,10 +103,34 @@ export function visibleGroups(
   groups: SidebarGroupConfig[],
   isOwner: boolean,
 ): SidebarGroupConfig[] {
-  if (isOwner) return groups;
-  return groups
+  // NOT-BUILT ROWS ARE STRIPPED FIRST, for everybody including the owner.
+  // They have no page; the palette and the hub are both built on this
+  // function, and either of them offering one would be offering a 404.
+  const built = groups
+    .map((group) => ({ ...group, items: group.items.filter((i) => !i.notBuilt) }))
+    .filter((group) => group.items.length > 0);
+  if (isOwner) return built;
+  return built
     .map((group) => ({ ...group, items: group.items.filter((i) => !i.ownerOnly) }))
     .filter((group) => group.items.length > 0);
+}
+
+/**
+ * EVERY ROW, IN ORDER, INCLUDING THE ONES THAT DO NOT EXIST YET.
+ *
+ * The only reader is scripts/tests/sidebar-structure.test.mjs, and it is
+ * the reason the `notBuilt` positions are worth anything: the gate holds
+ * the DECLARED order, so a future feature cannot arrive at the bottom of
+ * its group, and collapsing a group cannot reorder one either. What is
+ * DRAWN is a different question, asked separately in the same file.
+ *
+ * Returns the config as declared. No filtering of any kind — that is what
+ * distinguishes it from the two functions above, and a version of this
+ * that filtered anything would make the gate agree with the sidebar by
+ * construction instead of by measurement.
+ */
+export function declaredGroups(groups: SidebarGroupConfig[]): SidebarGroupConfig[] {
+  return groups.map((group) => ({ ...group, items: [...group.items] }));
 }
 
 /**

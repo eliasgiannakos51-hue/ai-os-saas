@@ -78,7 +78,7 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'zh', '聊天会记得之前的对话吗？', '在同一个对话里，它始终记得前面的消息。在不同对话之间，它只保留长期有用的信息——你的名字、你的工作、你的偏好——这项功能属于付费方案。它保留的全部内容都可以在「设置 > 记忆」里查看，也可以随时删除。', 'chat', 0, true, array['记得', '记忆', '之前的对话', '会忘记吗', '不记得', '聊天记录']::text[], '/dashboard/memory')
+values ('chat-memory', 'zh', '聊天会记得之前的对话吗？', '在同一个对话里，它始终记得前面的消息。在不同对话之间，它只保留长期有用的信息——你的名字、你的工作、你的偏好——这项功能属于付费方案。它保留的全部内容都可以在「它记得什么」里查看，删除某一条或更正它。', 'chat', 0, true, array['记得', '记忆', '之前的对话', '会忘记吗', '不记得', '聊天记录']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,

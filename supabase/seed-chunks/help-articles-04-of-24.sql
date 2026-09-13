@@ -12,6 +12,17 @@
 -- unique index these UPSERTs conflict on.
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
+values ('notifications', 'en', 'How do I set up notifications?', 'Settings > Notifications. Separately for email and for phone notifications, and per type — agent results, reminders, low credits. Critical security notifications cannot be switched off.', 'account', 3, true, array['notifications', 'email notifications', 'push', 'stop emailing me', 'turn off notifications']::text[], '/dashboard/settings')
+on conflict (slug, locale) do update set
+  title = excluded.title,
+  body = excluded.body,
+  category = excluded.category,
+  "order" = excluded."order",
+  published = excluded.published,
+  triggers = excluded.triggers,
+  href = excluded.href;
+
+insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('mobile-app', 'en', 'Is there a mobile app?', 'There is no app in the stores, but Ionexa installs on your phone from the browser: open it, choose "Add to Home Screen", and it behaves like an app with its own icon and notifications. It works on the phone''s browser without installing anything too.', 'getting-started', 1, true, array['mobile app', 'app', 'android', 'iphone', 'ios', 'is there an app', 'on my phone']::text[], null)
 on conflict (slug, locale) do update set
   title = excluded.title,
@@ -57,17 +68,6 @@ on conflict (slug, locale) do update set
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('change-plan', 'el', 'Πώς αλλάζω πλάνο;', 'Από τις Ρυθμίσεις > Χρέωση. Επιλέγεις το πλάνο που θέλεις και η αλλαγή ισχύει αμέσως. Σε αναβάθμιση πληρώνεις μόνο τη διαφορά για το υπόλοιπο της περιόδου· σε υποβάθμιση κρατάς το τρέχον πλάνο μέχρι να τελειώσει η περίοδος που έχεις ήδη πληρώσει.', 'billing', 1, true, array['πως αλλαζω πλανο', 'αλλαγη πλανου', 'αναβαθμιση', 'upgrade', 'downgrade', 'υποβαθμιση', 'change plan', 'αλλαξω συνδρομη']::text[], '/dashboard/settings')
-on conflict (slug, locale) do update set
-  title = excluded.title,
-  body = excluded.body,
-  category = excluded.category,
-  "order" = excluded."order",
-  published = excluded.published,
-  triggers = excluded.triggers,
-  href = excluded.href;
-
-insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('cancel', 'el', 'Πώς ακυρώνω τη συνδρομή μου;', 'Ρυθμίσεις > Χρέωση > Ακύρωση συνδρομής. Δεν χάνεις αμέσως την πρόσβαση: το πλάνο σου συνεχίζει μέχρι το τέλος της περιόδου που έχεις ήδη πληρώσει και μετά ο λογαριασμός πέφτει στο δωρεάν πλάνο. Τα δεδομένα σου μένουν — δεν διαγράφεται τίποτα με την ακύρωση.', 'billing', 2, true, array['πως ακυρωνω', 'ακυρωση', 'να ακυρωσω', 'cancel', 'unsubscribe', 'διακοπη συνδρομης', 'σταματησω τη συνδρομη']::text[], '/dashboard/settings')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,

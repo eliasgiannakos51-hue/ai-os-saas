@@ -67,7 +67,7 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'ar', 'هل تتذكر المحادثة ما دار سابقًا؟', 'داخل المحادثة الواحدة يتذكّر الرسائل السابقة دائمًا. أما بين محادثة وأخرى فيحتفظ فقط بما يظل مفيدًا — اسمك، وما تعمل به، وتفضيلاتك — وهذا متاح في الخطط المدفوعة. يمكنك رؤية كل ما احتفظ به، وحذفه، من الإعدادات > الذاكرة.', 'chat', 0, true, array['يتذكر', 'الذاكرة', 'المحادثات السابقة', 'ينسى', 'لا يتذكر', 'سجل المحادثة']::text[], '/dashboard/memory')
+values ('chat-memory', 'ar', 'هل تتذكر المحادثة ما دار سابقًا؟', 'داخل المحادثة الواحدة يتذكّر الرسائل السابقة دائمًا. أما بين محادثة وأخرى فيحتفظ فقط بما يظل مفيدًا — اسمك، وما تعمل به، وتفضيلاتك — وهذا متاح في الخطط المدفوعة. يمكنك رؤية كل ما احتفظ به، وحذف سطر واحد أو تصحيحه، من «ما الذي يتذكره».', 'chat', 0, true, array['يتذكر', 'الذاكرة', 'المحادثات السابقة', 'ينسى', 'لا يتذكر', 'سجل المحادثة']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,

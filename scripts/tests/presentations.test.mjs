@@ -329,8 +329,16 @@ console.log("\n== 7. the page: what it says, in ten languages, and where it sits
   }
   const nav = stripComments(readFileSync("src/lib/sidebar-nav.ts", "utf8"));
   const make = nav.slice(nav.indexOf('heading: "Make"'), nav.indexOf('heading: "Ask"'));
-  const row = make.slice(make.indexOf('"/dashboard/presentations"'), make.indexOf('"/dashboard/create"'));
-  ok("the row is drawn under Make", row.length > 0 && !/hidden:\s*true/.test(row), "the row is hidden or filed elsewhere");
+  // ONE ENTRY, not everything up to the palette-only block. The slice ran
+  // to "/dashboard/create", which was the next entry until Coding, Images,
+  // Videos and Music were declared between them — and Images carries
+  // `hidden: true`, so this read another row's flag as this one's.
+  const row = make.slice(make.indexOf('"/dashboard/presentations"')).split(/\n\s*\{/)[0];
+  ok(
+    "the row is drawn under Make",
+    row.length > 0 && !/hidden:\s*true/.test(row) && !/notBuilt:\s*true/.test(row),
+    "the row is hidden or filed elsewhere"
+  );
   ok("build-modules.ts no longer lists the slug", !/slug: "presentations"/.test(readFileSync("src/lib/build-modules.ts", "utf8")));
   const roadmap = readFileSync("src/app/roadmap/page.tsx", "utf8");
   ok("the roadmap files presentations under available", /status: "available"[\s\S]*?key: "presentations"[\s\S]*?status: "soon"/.test(roadmap));

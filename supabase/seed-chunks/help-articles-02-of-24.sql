@@ -1,4 +1,4 @@
--- Help Centre seed, part 2 of 24 — 8 statements.
+-- Help Centre seed, part 2 of 24 — 7 statements.
 --
 -- GENERATED from supabase/migrations/20260816_help_articles_seed.sql
 -- by scripts/split-help-seed.mjs. Do not edit either by hand.
@@ -78,18 +78,7 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('chat-memory', 'en', 'Does the chat remember earlier conversations?', 'Within one conversation it always remembers the earlier messages. Between conversations it keeps only lastingly useful details — your name, what you do, your preferences — and that is on the paid plans. You can see everything it has kept, and delete it, in Settings > Memory.', 'chat', 0, true, array['remember', 'memory', 'previous conversations', 'does it forget', 'chat history', 'it does not remember']::text[], '/dashboard/memory')
-on conflict (slug, locale) do update set
-  title = excluded.title,
-  body = excluded.body,
-  category = excluded.category,
-  "order" = excluded."order",
-  published = excluded.published,
-  triggers = excluded.triggers,
-  href = excluded.href;
-
-insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('upload-files', 'en', 'Can I upload files?', 'Yes — PDF, Word, Excel, CSV, text and Markdown. You upload them in Files, Ionexa reads what is in them, and then you can ask questions about them. Your files are private: nobody else has access and every download uses a temporary link.', 'files', 0, true, array['upload a file', 'upload', 'pdf', 'files', 'documents', 'can i upload']::text[], '/dashboard/files')
+values ('chat-memory', 'en', 'Does the chat remember earlier conversations?', 'Within one conversation it always remembers the earlier messages. Between conversations it keeps only lastingly useful details — your name, what you do, your preferences — and that is on the paid plans. You can see everything it has kept, delete a single line or correct one, in What it remembers.', 'chat', 0, true, array['remember', 'memory', 'previous conversations', 'does it forget', 'chat history', 'it does not remember']::text[], '/dashboard/ai-memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,

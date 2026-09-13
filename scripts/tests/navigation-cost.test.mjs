@@ -57,7 +57,18 @@ check(
 const bridge = readFileSync("src/components/achievements/achievement-unlock-bridge.tsx", "utf8");
 check("…which the bridge calls", /fetch\("\/api\/achievements\/check", \{ method: "POST" \}\)/.test(bridge));
 check("…behind requestIdleCallback, so it never competes with hydration", /requestIdleCallback/.test(bridge));
-check("…and not on every page load", /RECHECK_AFTER_MS/.test(bridge) && /sessionStorage/.test(bridge));
+// THE COMPARISON, NOT THE CONSTANT. `/RECHECK_AFTER_MS/` was satisfied by
+// the `const RECHECK_AFTER_MS = ...` line on its own, so deleting the
+// guard that USES it left this green — proved 2026-09-12 by
+// navigation-cost.mutation.mjs. A declared-and-unused rate limit is a
+// request on every navigation, which is the thing being asserted against.
+check(
+  "…and not on every page load",
+  /RECHECK_AFTER_MS/.test(bridge) &&
+    /sessionStorage/.test(bridge) &&
+    /<\s*RECHECK_AFTER_MS\b/.test(bridge),
+  "the constant is declared but nothing compares against it"
+);
 
 check(
   "the layout reads user_credits once, not twice",
@@ -145,10 +156,32 @@ check(
   "the two per-module reads are independent and were awaited in sequence"
 );
 check("…and its independent reads share one Promise.all", /ONE WAVE, NOT A QUEUE/.test(overview));
-check(
-  "…while the onboarding check stays first, so a redirected account does no work",
-  overview.indexOf("user_onboarding") < overview.indexOf("ONE WAVE, NOT A QUEUE")
-);
+// THE QUERY, AND ONLY THE QUERY. `indexOf("user_onboarding")` found the
+// word in the long comment above the read — which explains the 400 that
+// column caused — so the read could be moved anywhere below the wave and
+// this stayed green. Proved 2026-09-12 by navigation-cost.mutation.mjs.
+// The `.from(...)` call is the thing whose position matters, and it is
+// looked for in the body rather than in the prose about it.
+{
+  const body = overview.slice(overview.indexOf("export default async function"));
+  // THE REDIRECT, not the read. The read being first is necessary and not
+  // sufficient: what makes a redirected account do no work is the
+  // redirect() that leaves the function before the wave starts. A page
+  // that reads onboarding first and redirects afterwards runs every query
+  // on the page for somebody who will never see it.
+  const readAt = body.indexOf('.from("user_onboarding")');
+  const redirectAt = body.indexOf('redirect("/onboarding")');
+  const waveAt = body.indexOf("ONE WAVE, NOT A QUEUE");
+  check(
+    "the onboarding read, its redirect and the wave were all found",
+    readAt >= 0 && redirectAt >= 0 && waveAt >= 0,
+    `read ${readAt} / redirect ${redirectAt} / wave ${waveAt}`
+  );
+  check(
+    "…while the onboarding check stays first, so a redirected account does no work",
+    readAt >= 0 && redirectAt >= 0 && waveAt >= 0 && readAt < redirectAt && redirectAt < waveAt
+  );
+}
 const settings = readFileSync("src/app/dashboard/settings/page.tsx", "utf8");
 check("Settings reads its eleven independent things together", /ONE WAVE\./.test(settings));
 check(
@@ -172,7 +205,14 @@ const loading = readFileSync("src/app/dashboard/loading.tsx", "utf8");
 check("the dashboard's Suspense fallback is a page-shaped skeleton", /RouteSkeleton/.test(loading));
 const skeleton = readFileSync("src/components/dashboard/route-skeleton.tsx", "utf8");
 check("…with the same width and padding as a real page", /max-w-5xl/.test(skeleton) && /px-4 py-8/.test(skeleton));
-check("…announced to a screen reader", /role="status"/.test(skeleton) && /aria-label/.test(skeleton));
+// AN ATTRIBUTE BOUNDARY, because `data-role="status"` contains
+// `role="status"` and is not a role. The same substring trap that
+// mutation suites in this tree have hit three times; here it was the GATE
+// that fell for it.
+check(
+  "…announced to a screen reader",
+  /(?:^|\s)role="status"/m.test(skeleton) && /(?:^|\s)aria-label=/m.test(skeleton)
+);
 check(
   "…and it claims nothing: no counts, no titles, no numbers",
   !/\{[a-zA-Z]+Count\}|\{t\("(?!.*loadingContent)/.test(skeleton)

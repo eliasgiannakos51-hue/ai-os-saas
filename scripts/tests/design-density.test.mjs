@@ -63,7 +63,15 @@ console.log("\n== 2. the lines ==");
 // draws none. No slack: 581 is the measured count, not a round number
 // above it.
 ok(`border utilities (${r.counts.borders}), ceiling 581`, r.counts.borders <= 581);
-ok(`divide rules (${r.counts.divides}), ceiling 6`, r.counts.divides <= 6);
+// 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
+// trade worth allowing. /dashboard/ai-memory is a list of remembered
+// facts, forty of them on a talkative account. Written the ordinary way —
+// `border border-border` on each row — it would have taken the border
+// count to 583 against a ceiling of 581 with no slack. One frame with
+// `divide-y` inside draws the same separation with one rule instead of
+// forty outlines, so the page costs exactly this: one divide, zero
+// borders. A round that raises BOTH numbers has not made this trade.
+ok(`divide rules (${r.counts.divides}), ceiling 7`, r.counts.divides <= 7);
 
 console.log("\n== 3. the glow and the gradient titles ==");
 // ZERO, and the definition is in design-census.mjs: a glow is a BLURRED

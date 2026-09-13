@@ -41,6 +41,7 @@
  */
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0,
   fail = 0;
@@ -65,7 +66,13 @@ const EVIDENCE = {
   // --- plan bullets -------------------------------------------------
   basicAiChat: { file: "src/app/api/chat/route.ts", symbol: "export async function POST" },
   creditsPerMonth: { file: "src/lib/billing/credits.ts", symbol: "export async function grantCredits" },
-  aiMemory: { file: "src/app/dashboard/memory/page.tsx", symbol: "export default async function" },
+  // THE EVIDENCE NAMED THE WRONG PAGE, and the gate could not see it: the
+  // path resolved and the symbol was there. "AI Memory" on a plan bullet
+  // means the chat remembering you across conversations, and
+  // /dashboard/memory was the RECORD SEARCH — a page containing no
+  // reference to chat_memory at all. What plan-gates the capability is
+  // this predicate, so this is what vouches for it.
+  aiMemory: { file: "src/lib/chat/memory-policy.ts", symbol: "chatMemoryActive" },
   websiteAutomationBuilderAccess: { file: "src/lib/website-builder.ts", symbol: "export" },
   upTo2AiAgents: { file: "src/lib/agents/agent-limits.ts", symbol: "maxAgentsForPlan" },
   upTo5AiAgents: { file: "src/lib/agents/agent-limits.ts", symbol: "maxAgentsForPlan" },
@@ -112,7 +119,7 @@ const EVIDENCE = {
 
   // --- signup capability grid ---------------------------------------
   "Website & Automation Builder": { file: "src/lib/website-builder.ts", symbol: "export" },
-  "AI Memory": { file: "src/app/dashboard/memory/page.tsx", symbol: "export default async function" },
+  "AI Memory": { file: "src/app/dashboard/ai-memory/page.tsx", symbol: "export default async function" },
   "Team collaboration": { file: "src/app/api/team/invite/route.ts", symbol: "export async function POST" },
   "Team seats": { file: "src/lib/billing/plans.ts", symbol: "hasTeamSeats" },
   "Team seats included free": { file: "src/lib/billing/plans.ts", symbol: "teamSeatsIncluded" },
@@ -158,7 +165,12 @@ for (const claim of allClaims) {
     missingCode.push(`${claim}: ${ev.file} does not exist`);
     continue;
   }
-  if (!readFileSync(ev.file, "utf8").includes(ev.symbol)) {
+  // COMMENTS DO NOT COUNT AS EVIDENCE. A substring search over the raw
+  // file keeps a claim alive on the strength of a line that says the
+  // symbol USED to be here — which is the state a deletion leaves behind
+  // more often than not, because the explaining comment is what survives
+  // a rename. stripComments is the same helper the mutation gates use.
+  if (!stripComments(readFileSync(ev.file, "utf8")).includes(ev.symbol)) {
     missingCode.push(`${claim}: ${ev.file} no longer contains \`${ev.symbol}\``);
   }
 }

@@ -25,6 +25,7 @@
  * Run: node scripts/tests/match-sources.test.mjs
  */
 import { readFileSync } from "node:fs";
+import { stripComments } from "../check-mutation-markers.mjs";
 import { loadTs } from "./load-ts.mjs";
 
 let pass = 0;
@@ -162,7 +163,18 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     "grep -rl 'normalizeForSearch\\|foldForMatch' src/lib src/components src/app --include=*.ts --include=*.tsx || true",
     { encoding: "utf8" }
   );
-  const users = out.split("\n").filter(Boolean);
+  // A COMMENT IS NOT A CALL. grep reads the raw file, so a module that
+  // merely EXPLAINS which fold it delegates to — lib/chat/memory.ts says
+  // "the same foldForMatch() the search box uses" in a sentence about the
+  // helper it calls — counted as a folding surface and pushed this ratchet
+  // over its ceiling. That is a false red on the one check meant to make a
+  // new matcher a decision: the noise is what teaches people to raise the
+  // number. Measured 2026-09-12: 29 files raw, 28 once the prose is gone,
+  // and the one that drops is exactly that comment.
+  const users = out
+    .split("\n")
+    .filter(Boolean)
+    .filter((f) => /normalizeForSearch|foldForMatch/.test(stripComments(readFileSync(f, "utf8"))));
 
   // The files that MATCH, as opposed to the ones that merely fold (the
   // fold is also used for de-duplication and for display normalisation).
@@ -193,6 +205,21 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     // caught it on the build that introduced it — twice now, which is
     // the argument for keeping the ceiling at the measured value.
     "src/lib/create-studio/producer-routes.ts",
+    // THE CHAT-MEMORY DEDUP KEY. It folds the extractor's own output, not
+    // a phrase list — "Με λένε Ηλία" and "με λενε ηλια" have to be one
+    // fact or the read window fills with repetitions of it. What makes it
+    // accounted for rather than merely present is that the SAME fold has
+    // to hold in two languages: the app writes with foldForMatch and the
+    // migration's backfill writes with SQL's public.search_fold(), and
+    // chat-memory-store.itest.mjs compares them against each other on a
+    // real server. A disagreement there is a failing gate rather than a
+    // duplicate row nobody notices.
+    // (The correction flow on /dashboard/ai-memory writes a remembered line
+    // from the browser and needs the same key. It is NOT listed here,
+    // because it calls the module above rather than folding its own way —
+    // which is the only reason it is safe, and an entry for it would be a
+    // name in a register that this scan never produces.)
+    "src/lib/chat/memory-fold.ts",
   ]);
   const unaccounted = users.filter((f) => !ACCOUNTED.has(f));
 

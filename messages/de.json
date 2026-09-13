@@ -159,7 +159,8 @@
       "voice": "Stimme",
       "predictions": "Muster",
       "posts": "Beiträge",
-      "projects": "Projekte"
+      "projects": "Projekte",
+      "aiMemory": "Was es sich merkt"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -188,7 +189,7 @@
       "productWorkflow": "Deine Produkte, Muster und dein Mentor in einer Ansicht.",
       "timeline": "Alles, was du getan hast, der Reihe nach.",
       "reflection": "Eine wöchentliche Zusammenfassung deines Fortschritts.",
-      "memory": "Was die KI sich über dich merkt.",
+      "memory": "Durchsuche alles, was du gespeichert hast.",
       "favorites": "Alles, was du markiert hast.",
       "marketplace": "Teilen Sie die Form eines Agenten als Vorlage und starten Sie mit einer, die jemand anders geteilt hat.",
       "team": "Lade Leute in deinen Arbeitsbereich ein.",
@@ -218,7 +219,8 @@
       "voice": "Text vorlesen lassen oder sprechen und mitschreiben lassen. Minuten werden gezählt, der Minutenpreis steht auf der Seite.",
       "predictions": "Muster in deinen eigenen Einträgen, jeweils mit der Zahl der Einträge dahinter und einem Link darauf.",
       "posts": "Sag es einmal und erhalte pro Plattform einen Beitrag in ihrer Länge und ihrem Ton. Es veröffentlicht nichts – du kopierst und postest.",
-      "projects": "Ein Ordner mit einem Ziel. Was du hineinlegst, ist drin — nichts kommt von selbst."
+      "projects": "Ein Ordner mit einem Ziel. Was du hineinlegst, ist drin — nichts kommt von selbst.",
+      "aiMemory": "Was der Chat über dich behalten hat und wie du es löschst."
     },
     "closeMenu": "Menü schließen"
   },
@@ -555,7 +557,8 @@
       "memoryDisabled": "✓ Chat-Speicher deaktiviert",
       "planExcludes": "Ihr aktueller Tarif enthält kein Chat-Gedächtnis, daher wird nichts gespeichert. Ab Starter wird über Unterhaltungen hinweg erinnert.",
       "switchedOff": "Das Gedächtnis ist ausgeschaltet, daher wird nichts aus Ihren Unterhaltungen gespeichert.",
-      "nothingYet": "Noch nichts gespeichert. Das Gedächtnis ist aktiv — es merkt sich Dauerhaftes wie Ihren Namen, Ihre Arbeit oder eine Vorliebe, sobald eine Unterhaltung so etwas enthält."
+      "nothingYet": "Noch nichts gespeichert. Das Gedächtnis ist aktiv — es merkt sich Dauerhaftes wie Ihren Namen, Ihre Arbeit oder eine Vorliebe, sobald eine Unterhaltung so etwas enthält.",
+      "seeAll": "Ansehen, was es sich merkt"
     },
     "loginActivity": {
       "title": "Anmeldeaktivität",
@@ -3234,6 +3237,11 @@
       "is": "Ein Projekt: sein Ziel, was du hineingelegt hast, und ein Chat, der darin beginnt.",
       "does": "Gruppiert den Inhalt in Aufgaben, Dateien, Agents und Ergebnisse, zeigt wann was dazukam, lässt dich einzelne herausnehmen und startet eine Unterhaltung, die ihr Leben lang zu diesem Projekt gehört.",
       "doesNot": "Etwas herauszunehmen löscht es nicht, und das Projekt fügt von selbst nichts hinzu: ein Plan bringt hier seine Schritte nicht mit, eine Website ihre Formulare nicht."
+    },
+    "aiMemory": {
+      "is": "Alles, was der Chat über Sie behalten hat, und sonst nichts.",
+      "does": "Jede Zeile stammt aus einer Unterhaltung. Sie können diese öffnen, eine Zeile löschen oder korrigieren — und was mehr als einmal gesagt wurde, ist als wiederholt gekennzeichnet, denn so viel Gewicht gibt der Chat ihm.",
+      "doesNot": "Es hält weder Ihre Unterhaltungen noch Ihre Einträge. Um Ihre Einträge zu durchsuchen, nutzen Sie Meine Einträge durchsuchen; zum Abschalten liegt der Schalter in den Einstellungen."
     }
   },
   "helpCentre": {
@@ -3960,5 +3968,35 @@
       "ask": "Wähle eine oder mehrere Dateien — die Antwort stammt nur aus dem, was du auswählst.",
       "review": "Lies es, bevor du es benutzt. Hier läuft nichts."
     }
+  },
+  "aiMemory": {
+    "title": "Was es sich merkt",
+    "description": "Alles, was Ionexa Chat über dich aus früheren Unterhaltungen behalten hat. Lösche eine Zeile, korrigiere eine, oder lösche alles.",
+    "emptyTitle": "Noch nichts behalten",
+    "emptyActive": "Eine Zeile wird nur behalten, wenn ein Gespräch etwas dauerhaft Nützliches enthält — deinen Namen, deinen Beruf, eine Vorliebe. Noch nichts.",
+    "emptyInactive": "Das Gedächtnis über Unterhaltungen hinweg ist aus, es wird also nichts behalten. Der Schalter ist in den Einstellungen.",
+    "summary": "{total} Dinge behalten · dem Chat werden die {window} neuesten mitgegeben",
+    "repeated": "wiederholt sich, {count}-mal",
+    "once": "einmal erwähnt",
+    "learned": "gelernt am {date}",
+    "lastSeen": "zuletzt gesagt am {date}",
+    "outsideWindow": "wird dem Chat gerade nicht mitgegeben",
+    "outsideWindowHelp": "Nur die neuesten Zeilen erreichen den Prompt. Sag es noch einmal, dann rückt es wieder auf.",
+    "openConversation": "Unterhaltung öffnen",
+    "conversationGone": "die Unterhaltung wurde gelöscht",
+    "editLabel": "Korrigieren",
+    "deleteLabel": "Vergessen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "saved": "Korrigiert.",
+    "deleted": "Vergessen.",
+    "couldNotDelete": "Konnte nicht gelöscht werden. Versuch es noch einmal.",
+    "couldNotSave": "Korrektur konnte nicht gespeichert werden. Versuch es noch einmal.",
+    "clearAll": "Alles vergessen",
+    "clearAllConfirm": "Alles löschen, was der Chat über dich behalten hat? Das lässt sich nicht rückgängig machen.",
+    "clearedAll": "Alles vergessen.",
+    "pruneButton": "{count} ungenutzte aufräumen",
+    "pruneConfirm": "{count} Zeilen löschen, die einmal gesagt und seit sechs Monaten nicht wieder aufgetaucht sind? Alles Wiederholte bleibt.",
+    "pruned": "{count} entfernt."
   }
 }

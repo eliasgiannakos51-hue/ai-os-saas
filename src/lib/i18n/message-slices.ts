@@ -87,7 +87,14 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // does. The gate caught both, which is the only reason they are right
     // here.
     namespaces: [
-      "achievements", "aiSteps", "askAi", "coding", "common", "credits",
+      "achievements",
+      // Universal Memory: /dashboard/ai-memory, the page that lists what
+      // the chat has kept about you. Its own namespace rather than a
+      // corner of `settings`, because the on/off switch is a setting and
+      // the content is not — which is the same distinction that gave it a
+      // page instead of a tab.
+      "aiMemory",
+      "aiSteps", "askAi", "coding", "common", "credits",
       "dashboard", "dataAnalysis", "entityLinks", "errors", "favorites",
       "finance", "language", "module",
       // V5 #21: the presentations workspace, under Make.

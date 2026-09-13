@@ -12,6 +12,17 @@
 -- unique index these UPSERTs conflict on.
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
+values ('upload-files', 'en', 'Can I upload files?', 'Yes — PDF, Word, Excel, CSV, text and Markdown. You upload them in Files, Ionexa reads what is in them, and then you can ask questions about them. Your files are private: nobody else has access and every download uses a temporary link.', 'files', 0, true, array['upload a file', 'upload', 'pdf', 'files', 'documents', 'can i upload']::text[], '/dashboard/files')
+on conflict (slug, locale) do update set
+  title = excluded.title,
+  body = excluded.body,
+  category = excluded.category,
+  "order" = excluded."order",
+  published = excluded.published,
+  triggers = excluded.triggers,
+  href = excluded.href;
+
+insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('connect-gmail', 'en', 'How do I connect Gmail or Google Drive?', 'Settings > Integrations. Pick the service and approve access in Google''s own window. You see exactly what it will read before you approve, and you can disconnect whenever you like — the access keys are deleted immediately when you do.', 'integrations', 0, true, array['gmail', 'google drive', 'connect', 'integration', 'slack', 'how do i connect', 'link my email']::text[], '/dashboard/integrations')
 on conflict (slug, locale) do update set
   title = excluded.title,
@@ -79,17 +90,6 @@ on conflict (slug, locale) do update set
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('team-members', 'en', 'Can I add people from my team?', 'Yes, on the plans that include a team. Settings > Team, invite by email and that person joins the same workspace. Which plans include it and how many seats they give is on /pricing.', 'account', 2, true, array['team', 'colleagues', 'invite a member', 'collaboration', 'add users', 'share my workspace']::text[], '/pricing')
-on conflict (slug, locale) do update set
-  title = excluded.title,
-  body = excluded.body,
-  category = excluded.category,
-  "order" = excluded."order",
-  published = excluded.published,
-  triggers = excluded.triggers,
-  href = excluded.href;
-
-insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
-values ('notifications', 'en', 'How do I set up notifications?', 'Settings > Notifications. Separately for email and for phone notifications, and per type — agent results, reminders, low credits. Critical security notifications cannot be switched off.', 'account', 3, true, array['notifications', 'email notifications', 'push', 'stop emailing me', 'turn off notifications']::text[], '/dashboard/settings')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,

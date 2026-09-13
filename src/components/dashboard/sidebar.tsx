@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -50,7 +50,6 @@ function headingContaining(pathname: string | null): string | null {
   );
 }
 
-const COLLAPSED_KEY = "ionexa:sidebar-collapsed";
 
 // ONE COLOUR FOR EVERY RESTING ICON. Only the current page gets the
 // accent — V4.6 #3.
@@ -103,24 +102,43 @@ export function Sidebar({
     return key ? t(`items.${key}`) : label;
   }
 
-  // EVERYTHING OPEN BY DEFAULT — V4.6 #3.
+  // ONLY THE GROUP YOU ARE IN IS OPEN, and this reverses V4.6 #3 on the
+  // measurement that decision was made on rather than on a preference.
   //
-  // This was an accordion: at most one collapsible group open at a time.
-  // That was the right answer to eight groups and forty-five rows, where
-  // opening two of them at once pushed the rest off a 768px screen. It is
-  // the wrong answer to four groups and sixteen rows, which fit at both
-  // measured heights — and it was costing exactly what the brief asked
-  // to buy. Measured on the real page at 1920x1080 and 1366x768: seven of
-  // fifteen rows were painted on arrival, because two of the four groups
-  // were shut. The whole point of cutting the sidebar to fifteen rows is
-  // that fifteen rows can be seen at once.
+  // V4.6 #3 opened everything, and its argument was explicit: "the wrong
+  // answer to FOUR groups and SIXTEEN rows, which fit at both measured
+  // heights". Six groups and thirty-three declared rows do not fit.
+  // node scripts/measure-sidebar-height.mjs, computed from this file's own
+  // classes: everything open is 2,213px, which is 2.6 screens of scroll on
+  // a 390x844 phone, and Settings is three screens below the fold. The
+  // current group open and the rest shut is 1,201px — 1.4 screens.
   //
-  // So the state is now the set of groups the user has DELIBERATELY shut,
-  // which is empty by default. Empty is also a constant, so the server
-  // and the first client paint agree without an effect having to run —
-  // the property the old `undefined` sentinel existed to preserve, kept
-  // for free.
-  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
+  // THE COST, WRITTEN DOWN. A row in another group is TWO clicks, not one.
+  // That is a real loss and it is accepted for one reason: the command
+  // palette is one keystroke and reaches every row, hidden ones included
+  // (it is built from visibleGroups, not from what the sidebar draws). A
+  // product where the second click had no alternative should not make
+  // this trade.
+  //
+  // THREE RULES, and the second and third are what stop it becoming an
+  // accordion again:
+  //
+  //   1. No decision is asked of anybody. The group holding the current
+  //      page is open on arrival; the usual journey stays one click.
+  //   2. A group the person opens by hand STAYS open, and opening a second
+  //      does not shut the first. The manual action wins over the
+  //      automatic one, always — an accordion is the version of this that
+  //      undoes what you just did.
+  //   3. Nothing is remembered across a reload. A sidebar that restores
+  //      three groups from yesterday is thirty-three rows again, which is
+  //      the state this exists to leave.
+  //
+  // `touched` is the groups the person has acted on, and the value is what
+  // they chose. Everything else follows the pathname. It starts empty on
+  // the server and on the first client paint, so there is nothing to
+  // reconcile — the property the old `undefined` sentinel existed to
+  // preserve, kept for free.
+  const [touched, setTouched] = useState<Map<string, boolean>>(() => new Map());
 
   const router = useRouter();
   /** Routes already asked for, so a pointer sweeping down the sidebar
@@ -135,41 +153,34 @@ export function Sidebar({
     [router]
   );
 
-  // Restores what the user shut, then re-opens whichever group holds the
-  // page they are on — a group cannot stay collapsed over the current
-  // page, whatever was stored.
-  useEffect(() => {
-    let stored: string[] = [];
-    try {
-      stored = JSON.parse(window.localStorage.getItem(COLLAPSED_KEY) ?? "[]");
-    } catch {
-      // A hand-edited or half-written value is not worth a broken nav.
-      stored = [];
-    }
-    const next = new Set(Array.isArray(stored) ? stored.filter((h) => typeof h === "string") : []);
-    const active = headingContaining(pathname);
-    if (active) next.delete(active);
-    setCollapsed(next);
-  }, [pathname]);
+  /**
+   * Is this group open right now?
+   *
+   * NO EFFECT AND NO STORAGE. The old version read localStorage in a
+   * useEffect and wrote it on every toggle; both are gone, because rule 3
+   * above means there is nothing to restore and rule 1 means the default
+   * is a pure function of the URL. A derived value cannot disagree with
+   * the server the way a stored one can.
+   */
+  function isExpanded(group: SidebarGroupConfig): boolean {
+    if (!group.collapsible) return true;
+    const chosen = touched.get(group.heading);
+    if (chosen !== undefined) return chosen;
+    return headingContaining(pathname) === group.heading;
+  }
 
   function toggleGroup(group: SidebarGroupConfig) {
     if (!group.collapsible) return;
-    setCollapsed((prev) => {
-      const next = new Set(prev);
-      if (next.has(group.heading)) next.delete(group.heading);
-      else next.add(group.heading);
-      try {
-        window.localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...next]));
-      } catch {
-        // Private mode, or storage full. Losing the preference is fine;
-        // throwing inside a click handler is not.
-      }
-      return next;
+    const next = !isExpanded(group);
+    setTouched((prev) => {
+      const map = new Map(prev);
+      map.set(group.heading, next);
+      return map;
     });
   }
 
   function renderGroup(group: SidebarGroupConfig) {
-    const expanded = group.collapsible ? !collapsed.has(group.heading) : true;
+    const expanded = isExpanded(group);
 
     return (
       <div key={group.heading}>

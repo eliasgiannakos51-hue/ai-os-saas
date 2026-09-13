@@ -113,7 +113,20 @@ check("it no longer reads a global list", !/KNOWLEDGE_BASE/.test(kb));
 // An empty article set must match nothing rather than throw — that is
 // what a locale with no rows yet looks like, and it has to fall through
 // to the model quietly.
-check("a locale with no articles matches nothing", matchCannedAnswer("pricing", [], 0.5) === null);
+// A THROW IS A FAIL, NOT THE END OF THE RUN. This calls the matcher
+// directly, so an exception inside it took the whole gate down and the
+// mutation runner could only say "exited non-zero with no FAIL line" —
+// found 2026-09-12 by help-articles.mutation.mjs. It is also the
+// production symptom: this call sits inside a chat request, so a throw
+// here is a failed message rather than a fall-through to the model.
+const tryMatch = (msg, articles, threshold) => {
+  try {
+    return matchCannedAnswer(msg, articles, threshold);
+  } catch (err) {
+    return `THREW: ${String(err).slice(0, 60)}`;
+  }
+};
+check("a locale with no articles matches nothing", tryMatch("pricing", [], 0.5) === null);
 
 console.log("\n== 2. the seed is complete where it has to be ==");
 check(`en carries every article (${EN.length})`, EN.length === 27);
@@ -343,7 +356,14 @@ for (const locale of LOCALES) {
 console.log("\n== 8. the \"?\" links on, without depending on it ==");
 const { HELP_TIPS } = await loadTs("src/lib/help-tips.ts");
 const linked = HELP_TIPS.filter((t) => t.article);
-check(`${linked.length} of ${HELP_TIPS.length} tips link to an article`, linked.length === 9);
+// TEN SINCE UNIVERSAL MEMORY. /dashboard/ai-memory is the page the
+// chat-memory article had been describing for months — it said "you can
+// see everything it has kept, and delete it" while the link went to the
+// record search — so its tip links to that article, and the article now
+// links back. The number is an equality rather than a floor on purpose:
+// a tip acquiring a link is a decision, and this is where somebody has to
+// make it out loud.
+check(`${linked.length} of ${HELP_TIPS.length} tips link to an article`, linked.length === 10);
 checkList("every linked slug is a real article", linked.filter((t) => !enSlugs.has(t.article)).map((t) => t.article));
 const tip = readFileSync("src/components/ui/help-tip.tsx", "utf8");
 check("the link is an anchor on /help", /\/help#\$\{articleSlug\}/.test(tip));

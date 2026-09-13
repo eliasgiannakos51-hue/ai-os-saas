@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Brain, Trash2, Info } from "lucide-react";
+import Link from "next/link";
+import { Brain, Trash2, Info, ListTree } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
 
@@ -153,14 +154,28 @@ export function ChatMemorySettings({
         <p className="text-xs text-muted">
           {t("thingsRemembered", { count })}
         </p>
-        <button
-          type="button"
-          onClick={handleClearAll}
-          disabled={clearing || count === 0}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-red-500 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <Trash2 className="h-3.5 w-3.5" /> {clearing ? t("clearing") : t("clearAll")}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* THE HALF OF THE HELP ARTICLE THAT WAS NOT TRUE. It has said,
+              in ten languages, that you can see everything the chat kept
+              and delete it. There was a count and a "delete everything"
+              button here and nothing else: no way to read one line, remove
+              one, or correct one. That page exists now, and this is the
+              way to it from the switch that turns the feature on. */}
+          <Link
+            href="/dashboard/ai-memory"
+            className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-orange-300 transition-colors duration-150 hover:bg-panel-hover"
+          >
+            <ListTree className="h-3.5 w-3.5" /> {t("seeAll")}
+          </Link>
+          <button
+            type="button"
+            onClick={handleClearAll}
+            disabled={clearing || count === 0}
+            className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-red-500 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> {clearing ? t("clearing") : t("clearAll")}
+          </button>
+        </div>
       </div>
     </div>
   );

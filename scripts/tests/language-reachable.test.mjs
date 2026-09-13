@@ -73,7 +73,18 @@ function insideHiddenWrapper(src, index) {
     }
     stack.push({ name, attrs });
   }
-  return stack.some((s) => /className="[^"]*(^|\s)hidden(\s|")/.test(s.attrs));
+  // `hidden` FIRST IN THE CLASS LIST IS THE COMMON CASE, and this missed
+  // it. The pattern was `[^"]*(^|\s)hidden`, and `^` without the `m` flag
+  // anchors to the start of the whole SOURCE FILE, not to the start of the
+  // attribute — so `className="hidden sm:contents"` did not match while
+  // `className="flex hidden"` did. That is the exact wrapper this file was
+  // written about: language-reachable.mutation.mjs put it back around the
+  // control on 2026-09-12 and this section stayed green.
+  //
+  // A non-capturing optional "anything then a space" is the same rule
+  // stated so it can also be satisfied by nothing. `sm:hidden` and
+  // `overhidden` still do not match, which is the point of the boundary.
+  return stack.some((s) => /className="(?:[^"]*\s)?hidden(?:\s|")/.test(s.attrs));
 }
 
 console.log("== 1. the top bar carries the control, unconditionally ==");
@@ -96,7 +107,11 @@ console.log("\n== 2. and Settings has the full card ==");
 check("the settings page imports LanguageSettings", /from "@\/components\/settings\/language-settings"/.test(settings));
 check("...and renders it", /<LanguageSettings\s*\/>/.test(settings));
 check('the card is addressable as #language', /id="language"/.test(card));
-check("...and writes the ACCOUNT, not only a cookie", /persistLocalePreference/.test(card));
+// THE CALL, NOT THE IMPORT. A bare `/persistLocalePreference/` was
+// satisfied by the import line alone, so a card that imported it and
+// never called it passed — which is precisely the "I set it and it did
+// not stick" shape this asserts against.
+check("...and writes the ACCOUNT, not only a cookie", /await persistLocalePreference\(/.test(card));
 
 console.log("\n== 3. public pages keep the floating cluster ==");
 check("global-controls renders the selector", selectorTags(global).length === 1);

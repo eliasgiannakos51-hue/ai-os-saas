@@ -1,12 +1,12 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **597 strings**. The whole product is 3072, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **599 strings**. The whole product is 3106, which is why this file exists.
 
-**Start with tier 1. It is 46 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 353 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 354 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (46)
+## Tier 1 — THE SENTENCES — read these (47)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -119,6 +119,12 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 > EN — These entries are a demo — a small design studio's last three months. They are not yours.
 
 这些条目是演示数据——一家小设计工作室最近三个月的记录，不是你的。
+
+**`sidebar.hints.aiMemory`**
+
+> EN — What the chat has kept about you, and how to remove it.
+
+对话记住了你的哪些事，以及如何删除。
 
 **`sidebar.hints.apps`**
 
@@ -296,7 +302,7 @@ Ionexa 用它来挑选下一个建议的计划步骤——状态低时给轻松�
 
 免费——不生成任何内容，一键即可移除
 
-## Tier 2 — The labels — skim these (353)
+## Tier 2 — The labels — skim these (354)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1468,9 +1474,9 @@ MRR、毛利、流失与现金。仅限所有者。
 
 **`sidebar.hints.memory`**
 
-> EN — What the AI remembers about you.
+> EN — Search across everything you have saved.
 
-AI 记住的关于你的事。
+搜索你保存过的一切。
 
 **`sidebar.hints.mine`**
 
@@ -1591,6 +1597,12 @@ AI 记住的关于你的事。
 > EN — AI that works for you
 
 为你干活的 AI
+
+**`sidebar.items.aiMemory`**
+
+> EN — What it remembers
+
+它记得什么
 
 **`sidebar.items.analytics`**
 

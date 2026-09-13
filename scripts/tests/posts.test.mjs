@@ -278,8 +278,21 @@ console.log("\n== 5. the page: four absences in ten languages, a copy button, an
   ok("en: the hint says it publishes nothing", /publishes nothing/i.test(lookup(messages.en, "sidebar.hints.posts")));
   const nav = stripComments(readFileSync(NAV, "utf8"));
   const make = nav.slice(nav.indexOf('heading: "Make"'), nav.indexOf('heading: "Ask"'));
-  const row = make.slice(make.indexOf('"/dashboard/posts"'), make.indexOf('"/dashboard/create"'));
-  ok("the row is drawn under Make", row.length > 0 && make.indexOf('"/dashboard/presentations"') < make.indexOf('"/dashboard/posts"') && !/hidden:\s*true/.test(row), "the row is hidden or filed elsewhere");
+  // THIS ROW, not everything between it and the palette-only block. The
+  // slice used to run from "/dashboard/posts" all the way to
+  // "/dashboard/create", which was the next entry until Coding, Images,
+  // Videos and Music were declared between them — and Images carries
+  // `hidden: true`, so the check read another row's flag as this one's.
+  // One entry ends where the next object literal begins.
+  const row = make.slice(make.indexOf('"/dashboard/posts"')).split(/\n\s*\{/)[0];
+  ok(
+    "the row is drawn under Make",
+    row.length > 0 &&
+      make.indexOf('"/dashboard/presentations"') < make.indexOf('"/dashboard/posts"') &&
+      !/hidden:\s*true/.test(row) &&
+      !/notBuilt:\s*true/.test(row),
+    "the row is hidden or filed elsewhere"
+  );
   ok("the label has its key", /Posts: "posts"/.test(readFileSync("src/lib/sidebar-label-keys.ts", "utf8")));
   const tips = await loadTs("src/lib/help-tips.ts");
   const tip = tips.HELP_TIPS.find((t) => t.id === "posts");

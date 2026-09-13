@@ -82,7 +82,10 @@
     "errorWithMessage": "错误：{message}",
     "upgradeRequired": {
       "title": "需要升级",
-      "body": "{feature} 需要 {plan} 或更高方案。"
+      "body": "{feature} 需要 {plan} 或更高方案。",
+      "price": "{plan} 每月 {amount}。",
+      "customPrice": "{plan} 的价格另行商定。",
+      "cta": "查看 {plan} 方案"
     },
     "textActions": {
       "rewrite": "重写",
@@ -266,7 +269,40 @@
       "files": "已存储文件",
       "storage": "存储空间",
       "integrations": "已连接的集成",
-      "publishedSites": "已发布网站"
+      "publishedSites": "已发布网站",
+      "documents": "文档",
+      "coding": "AI 编程",
+      "presentations": "演示文稿",
+      "posts": "帖子",
+      "aiChat": "问我",
+      "predictions": "规律",
+      "automation": "自动化",
+      "businessLogs": "我的记录",
+      "projects": "项目",
+      "missionControl": "目标与计划",
+      "helpCentre": "帮助中心",
+      "createStudio": "创建任何东西",
+      "voiceMinutes": "语音分钟数 / 月",
+      "chatMemory": "对话记住的信息",
+      "chatPins": "置顶的对话",
+      "askYourData": "向你自己的记录提问",
+      "customAiPersona": "自定义助手名称",
+      "backgroundJobs": "后台运行的任务",
+      "buildLogs": "网站、应用、图片和视频的记录",
+      "notifications": "通知与提醒",
+      "contactSupport": "联系表单",
+      "accountAndPrivacy": "导出或删除你的账户",
+      "listRowsShown": "每个列表显示的行数",
+      "agentRunsPerHour": "智能体运行次数",
+      "fileUploadsPerHour": "文件上传次数",
+      "fileQuestionsPerHour": "针对文件的提问",
+      "integrationReadsPerHour": "从已连接账户读取的次数",
+      "siteEditsPerDay": "每个站点的实时修改次数",
+      "siteVersionsKept": "每个站点保留的版本数",
+      "websiteImageStorage": "网站图片的存储空间",
+      "voiceClipLength": "单次录音时长上限（分钟）",
+      "teamMembers": "团队成员",
+      "recordSearch": "跨模块记录搜索"
     },
     "businessTitle": "商业版",
     "businessSubtitle": "为共同打造的团队而生",
@@ -302,7 +338,12 @@
       "unlimited": "无限",
       "included": "已包含",
       "custom": "定制",
-      "perSeat": "+{currency}{price}/席位"
+      "perSeat": "+{currency}{price}/席位",
+      "perHour": "/小时",
+      "perDay": "/天",
+      "minutesPerMonth": "分钟/月",
+      "yes": "包含",
+      "no": "不包含"
     },
     "seatNote": {
       "included": "包含无限团队席位 — 无需按成员付费",
@@ -314,7 +355,17 @@
     "billingIntervalLabel": "计费周期",
     "billingAnnualSaving": "立省 {percent}%——相当于免费两个月",
     "billedAnnually": "每年收取 {total}，为你节省 {saving}",
-    "checkoutFailed": "无法开始结账，请重试。"
+    "checkoutFailed": "无法开始结账，请重试。",
+    "groups": {
+      "make": "创建",
+      "ask": "提问",
+      "run": "运行",
+      "see": "查看",
+      "organise": "整理",
+      "limits": "限额",
+      "support": "支持"
+    },
+    "comparisonRowCount": "对比的功能项：{count}"
   },
   "roadmap": {
     "title": "路线图",
@@ -3799,7 +3850,8 @@
     "errors": {
       "tooShort": "先给它起个名字。",
       "tooLong": "名称超过 {limit} 个字符。",
-      "failed": "没成功——再试一次。"
+      "failed": "没成功——再试一次。",
+      "limitReached": "你已用完方案中的 {limit} 个项目。升级后可添加更多。"
     }
   },
   "finance": {

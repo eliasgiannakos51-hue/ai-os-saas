@@ -66,7 +66,14 @@ export const MIN_PAIRS_FOR_CORRELATION = 20;
 /** Only |r| at least this large is worth mentioning at all. */
 export const CORRELATION_THRESHOLD = 0.5;
 /** How many distinct values before a column stops being categorical. */
-export const MAX_CATEGORICAL_UNIQUE = 50;
+// THERE IS NO CATEGORICAL COLUMN TYPE. `MAX_CATEGORICAL_UNIQUE = 50`
+// stood here as "how many distinct values before a column stops being
+// categorical"; profileColumn below returns empty | boolean | date |
+// integer | number | text and nothing else, and the only uniqueness test
+// in this file is `counts.size <= 2` for booleans. The threshold governed
+// a branch nobody wrote. Removed rather than kept "ready", because the
+// number a real classifier wants is a decision that belongs with the
+// classifier.
 const TOP_VALUES = 8;
 const OUTLIER_SIGMAS = 3;
 

@@ -462,69 +462,22 @@ export function nextRuns(
 // Human-readable description.
 // ---------------------------------------------------------------------
 //
-// Returns an i18n KEY plus values rather than a sentence: this renders in
-// ten languages, and a formatted English string would be exactly the kind
-// of hardcoded prose scripts/tests/i18n-coverage.test.mjs exists to catch.
+// THERE IS ONE CRON-TO-SENTENCE IMPLEMENTATION AND IT IS NOT IN THIS FILE.
+//
+// `describeSchedule(expression): ScheduleDescription` lived here, with a
+// five-value key union and optional time/weekday/dayOfMonth, under a
+// comment explaining why it returns an i18n key rather than English
+// prose. Nothing called it. The label a user actually reads comes from
+// `useScheduleLabel()` in components/agents/schedule-editor.tsx, which
+// parses with its own `cronToParts` and resolves
+// dashboard.agents.schedule.* itself — and it is the one
+// scripts/tests/agents-ui.prodtest.mjs sees when it asserts the page says
+// "Every day at 08:00" and never "0 8 * * *".
+//
+// Two implementations of one rule is how the rule comes to have two
+// answers; the one nothing calls is the one that would have been wrong
+// without anybody finding out.
 
-export type ScheduleDescription = {
-  /** Key under dashboard.agents.schedule.<key>. */
-  key: "hourly" | "daily" | "weekly" | "monthly" | "custom";
-  /** "09:00" — already zero-padded, locale-independent. */
-  time?: string;
-  /** 0-6, Sunday-first. Only for `weekly`. */
-  weekday?: number;
-  /** 1-31. Only for `monthly`. */
-  dayOfMonth?: number;
-  /** The raw expression — always present, shown for `custom`. */
-  expression: string;
-};
-
-export function describeSchedule(expression: string): ScheduleDescription {
-  const parsed = parseCronExpression(expression);
-  if (!parsed.ok) return { key: "custom", expression };
-  const f = parsed.fields;
-
-  const single = (arr: number[]) => (arr.length === 1 ? arr[0] : null);
-  const minute = single(f.minute);
-  const hour = single(f.hour);
-  const everyHour = f.hour.length === 24;
-  const everyMonth = f.month.length === 12;
-
-  if (minute === null || !everyMonth) return { key: "custom", expression };
-
-  const pad = (n: number) => String(n).padStart(2, "0");
-
-  if (everyHour && !f.dayOfMonthRestricted && !f.dayOfWeekRestricted) {
-    return { key: "hourly", expression };
-  }
-  if (hour === null) return { key: "custom", expression };
-  const time = `${pad(hour)}:${pad(minute)}`;
-
-  if (!f.dayOfMonthRestricted && !f.dayOfWeekRestricted) {
-    return { key: "daily", time, expression };
-  }
-  if (f.dayOfWeekRestricted && !f.dayOfMonthRestricted && f.dayOfWeek.length === 1) {
-    return { key: "weekly", time, weekday: f.dayOfWeek[0], expression };
-  }
-  if (f.dayOfMonthRestricted && !f.dayOfWeekRestricted && f.dayOfMonth.length === 1) {
-    return { key: "monthly", time, dayOfMonth: f.dayOfMonth[0], expression };
-  }
-  return { key: "custom", expression };
-}
-
-/**
- * The viewer's own IANA timezone, for pre-filling a new agent's schedule.
- *
- * The explicit "en-US" is not decoration: a bare `new Intl.DateTimeFormat()`
- * is banned across this codebase (scripts/tests/locale-formatting.test.mjs)
- * because it makes output depend on whichever locale the runtime defaults
- * to. Zone RESOLUTION does not depend on the locale, so any fixed one
- * gives the same answer — passing one keeps the rule intact with no
- * exception carved out for this call.
- *
- * Falls back to UTC on a runtime that cannot resolve a zone, which is the
- * same default the database column has.
- */
 export function resolveBrowserTimeZone(): string {
   try {
     return new Intl.DateTimeFormat("en-US").resolvedOptions().timeZone || "UTC";

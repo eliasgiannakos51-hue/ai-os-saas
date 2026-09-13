@@ -82,7 +82,10 @@
     "errorWithMessage": "error: {message}",
     "upgradeRequired": {
       "title": "Necesitas mejorar el plan",
-      "body": "{feature} requiere el plan {plan} o superior."
+      "body": "{feature} requiere el plan {plan} o superior.",
+      "price": "{plan} cuesta {amount} al mes.",
+      "customPrice": "El precio de {plan} se acuerda aparte.",
+      "cta": "Ver el plan {plan}"
     },
     "textActions": {
       "rewrite": "Reescribir",
@@ -266,7 +269,40 @@
       "files": "Archivos almacenados",
       "storage": "Almacenamiento",
       "integrations": "Integraciones conectadas",
-      "publishedSites": "Sitios web publicados"
+      "publishedSites": "Sitios web publicados",
+      "documents": "Documentos",
+      "coding": "Programación con IA",
+      "presentations": "Presentaciones",
+      "posts": "Publicaciones",
+      "aiChat": "Pregúntame",
+      "predictions": "Patrones",
+      "automation": "Automatización",
+      "businessLogs": "Mis registros",
+      "projects": "Proyectos",
+      "missionControl": "Objetivos y planes",
+      "helpCentre": "Centro de ayuda",
+      "createStudio": "Crea lo que sea",
+      "voiceMinutes": "Minutos de voz / mes",
+      "chatMemory": "Datos que recuerda el chat",
+      "chatPins": "Conversaciones fijadas",
+      "askYourData": "Pregunta a tus propios datos",
+      "customAiPersona": "Nombre propio del asistente",
+      "backgroundJobs": "Trabajos en segundo plano",
+      "buildLogs": "Registros de webs, apps, imágenes y vídeos",
+      "notifications": "Avisos y recordatorios",
+      "contactSupport": "Formulario de contacto",
+      "accountAndPrivacy": "Exportar o borrar tu cuenta",
+      "listRowsShown": "Filas mostradas por lista",
+      "agentRunsPerHour": "Ejecuciones de agentes",
+      "fileUploadsPerHour": "Subidas de archivos",
+      "fileQuestionsPerHour": "Preguntas sobre un archivo",
+      "integrationReadsPerHour": "Lecturas de una cuenta conectada",
+      "siteEditsPerDay": "Ediciones en vivo por web",
+      "siteVersionsKept": "Versiones guardadas por web",
+      "websiteImageStorage": "Espacio para fotos de la web",
+      "voiceClipLength": "Grabación más larga (minutos)",
+      "teamMembers": "Miembros del equipo",
+      "recordSearch": "Búsqueda en todos los registros"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Para equipos que construyen juntos",
@@ -302,7 +338,12 @@
       "unlimited": "Ilimitado",
       "included": "Incluido",
       "custom": "Personalizado",
-      "perSeat": "+{currency}{price}/puesto"
+      "perSeat": "+{currency}{price}/puesto",
+      "perHour": "/hora",
+      "perDay": "/día",
+      "minutesPerMonth": "min/mes",
+      "yes": "Incluido",
+      "no": "No incluido"
     },
     "seatNote": {
       "included": "Puestos de equipo ilimitados incluidos: sin cargo por miembro",
@@ -314,7 +355,17 @@
     "billingIntervalLabel": "Periodo de facturación",
     "billingAnnualSaving": "Ahorra un {percent}%: dos meses gratis",
     "billedAnnually": "Se cobra {total} una vez al año: ahorras {saving}",
-    "checkoutFailed": "No se pudo iniciar el pago. Inténtalo de nuevo."
+    "checkoutFailed": "No se pudo iniciar el pago. Inténtalo de nuevo.",
+    "groups": {
+      "make": "Crear",
+      "ask": "Preguntar",
+      "run": "Ejecutar",
+      "see": "Ver",
+      "organise": "Organizar",
+      "limits": "Límites",
+      "support": "Soporte"
+    },
+    "comparisonRowCount": "Funciones comparadas: {count}"
   },
   "roadmap": {
     "title": "Hoja de ruta",
@@ -3799,7 +3850,8 @@
     "errors": {
       "tooShort": "Ponle un nombre primero.",
       "tooLong": "Ese nombre supera los {limit} caracteres.",
-      "failed": "No funcionó — inténtalo de nuevo."
+      "failed": "No funcionó — inténtalo de nuevo.",
+      "limitReached": "Has usado los {limit} proyectos de tu plan. Mejora tu plan para añadir más."
     }
   },
   "finance": {

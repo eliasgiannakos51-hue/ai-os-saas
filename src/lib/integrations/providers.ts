@@ -84,8 +84,15 @@ export function isProviderId(value: unknown): value is ProviderId {
   return typeof value === "string" && PROVIDERS.some((p) => p.id === value);
 }
 
-/** Providers an agent can deliver to. */
-export const DELIVERY_PROVIDERS: ProviderId[] = ["slack"];
+// WHERE AN AGENT CAN DELIVER IS DECIDED IN ONE PLACE, AND IT IS NOT HERE.
+// `DELIVERY_PROVIDERS: ProviderId[] = ["slack"]` stood here under the
+// comment "providers an agent can deliver to". The list that actually
+// decides is DELIVERY_CHANNELS in lib/agents/delivery-channels.ts, which
+// agent-config.ts re-exports as AGENT_DELIVERY_METHODS — and whose own
+// comment warns that "two lists of allowed destinations is how a channel
+// comes to be accepted by the create route and rejected by the edit
+// route." This was that second list, already disagreeing (slack only)
+// and read by nothing.
 
 export type IntegrationStatus = "connected" | "expired" | "revoked" | "error";
 

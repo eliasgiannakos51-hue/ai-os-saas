@@ -11,15 +11,15 @@ import type { PlanSlug } from "@/lib/billing/plans";
 // account is not proof of good intent, but it is a name, a card, and a
 // trail.
 
-export const UNLIMITED = Number.POSITIVE_INFINITY;
+export const UNLIMITED_INTEGRATIONS = Number.POSITIVE_INFINITY;
 
 export const DEFAULT_INTEGRATION_LIMITS: Record<PlanSlug, number> = {
   free: 0,
   starter: 2,
   growth: 5,
-  professional: UNLIMITED,
-  ultimate: UNLIMITED,
-  enterprise: UNLIMITED,
+  professional: UNLIMITED_INTEGRATIONS,
+  ultimate: UNLIMITED_INTEGRATIONS,
+  enterprise: UNLIMITED_INTEGRATIONS,
 };
 
 export const INTEGRATION_LIMIT_ENV_VARS: Record<PlanSlug, string> = {
@@ -31,7 +31,7 @@ export const INTEGRATION_LIMIT_ENV_VARS: Record<PlanSlug, string> = {
   enterprise: "INTEGRATION_LIMIT_ENTERPRISE",
 };
 
-const MAX_SANE_LIMIT = 100;
+const MAX_SANE_INTEGRATION_LIMIT = 100;
 
 export type IntegrationLimitWarning = { variable: string; value: string; reason: string };
 
@@ -48,7 +48,7 @@ export function parseIntegrationLimits(env: Record<string, string | undefined>):
     if (raw === undefined || raw.trim() === "") continue;
 
     if (raw.trim().toLowerCase() === "unlimited") {
-      limits[slug] = UNLIMITED;
+      limits[slug] = UNLIMITED_INTEGRATIONS;
       continue;
     }
     const parsed = Number(raw);
@@ -56,8 +56,8 @@ export function parseIntegrationLimits(env: Record<string, string | undefined>):
       warnings.push({ variable, value: raw, reason: 'not a whole number (or "unlimited")' });
       continue;
     }
-    if (parsed < 0 || parsed > MAX_SANE_LIMIT) {
-      warnings.push({ variable, value: raw, reason: `outside the allowed range 0-${MAX_SANE_LIMIT}` });
+    if (parsed < 0 || parsed > MAX_SANE_INTEGRATION_LIMIT) {
+      warnings.push({ variable, value: raw, reason: `outside the allowed range 0-${MAX_SANE_INTEGRATION_LIMIT}` });
       continue;
     }
     limits[slug] = parsed;
@@ -66,10 +66,10 @@ export function parseIntegrationLimits(env: Record<string, string | undefined>):
   return { limits, warnings };
 }
 
-let cached: Record<PlanSlug, number> | null = null;
+let cachedIntegrationLimits: Record<PlanSlug, number> | null = null;
 
 export function resolveIntegrationLimits(): Record<PlanSlug, number> {
-  if (cached) return cached;
+  if (cachedIntegrationLimits) return cachedIntegrationLimits;
   const { limits, warnings } = parseIntegrationLimits(
     typeof process === "undefined" ? {} : process.env
   );
@@ -77,7 +77,7 @@ export function resolveIntegrationLimits(): Record<PlanSlug, number> {
     // eslint-disable-next-line no-console
     console.warn(`[integration-limits] ${w.variable}="${w.value}" ignored (${w.reason}) — using default.`);
   }
-  cached = limits;
+  cachedIntegrationLimits = limits;
   return limits;
 }
 

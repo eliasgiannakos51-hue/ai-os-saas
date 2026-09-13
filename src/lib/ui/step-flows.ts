@@ -35,5 +35,10 @@ export const STEP_FLOWS = {
 
 export type FlowName = keyof typeof STEP_FLOWS;
 
-/** Every distinct step name, for the i18n gate to check against. */
-export const STEP_NAMES = [...new Set(Object.values(STEP_FLOWS).flat())].sort();
+// THE GATE DERIVES ITS OWN LIST. `STEP_NAMES` stood here under the
+// comment "every distinct step name, for the i18n gate to check against",
+// and scripts/tests/step-flow.test.mjs does not import it: it reads this
+// file as text, regex-parses STEP_FLOWS into its own object and builds
+// `[...new Set(Object.values(FLOWS).flat())]` itself — the same
+// expression, one file over. The export named a consumer that did not
+// exist, which is the only reason it looked load-bearing.

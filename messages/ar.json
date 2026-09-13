@@ -82,7 +82,10 @@
     "errorWithMessage": "خطأ: {message}",
     "upgradeRequired": {
       "title": "الترقية مطلوبة",
-      "body": "يتطلب {feature} خطة {plan} أو أعلى."
+      "body": "يتطلب {feature} خطة {plan} أو أعلى.",
+      "price": "{plan} بسعر {amount} شهريًا.",
+      "customPrice": "سعر {plan} يُتفق عليه على حدة.",
+      "cta": "اطّلع على خطة {plan}"
     },
     "textActions": {
       "rewrite": "إعادة الصياغة",
@@ -266,7 +269,40 @@
       "files": "الملفات المخزّنة",
       "storage": "مساحة التخزين",
       "integrations": "التكاملات المتصلة",
-      "publishedSites": "المواقع المنشورة"
+      "publishedSites": "المواقع المنشورة",
+      "documents": "المستندات",
+      "coding": "البرمجة بالذكاء الاصطناعي",
+      "presentations": "العروض التقديمية",
+      "posts": "المنشورات",
+      "aiChat": "اسألني",
+      "predictions": "الأنماط",
+      "automation": "الأتمتة",
+      "businessLogs": "سجلاتي",
+      "projects": "المشاريع",
+      "missionControl": "الأهداف والخطط",
+      "helpCentre": "مركز المساعدة",
+      "createStudio": "أنشئ أي شيء",
+      "voiceMinutes": "دقائق الصوت / شهريًا",
+      "chatMemory": "المعلومات التي تتذكرها المحادثة",
+      "chatPins": "المحادثات المثبّتة",
+      "askYourData": "اسأل سجلاتك الخاصة",
+      "customAiPersona": "اسم مخصص للمساعد",
+      "backgroundJobs": "مهام تعمل في الخلفية",
+      "buildLogs": "سجلات المواقع والتطبيقات والصور والفيديو",
+      "notifications": "الإشعارات والتذكيرات",
+      "contactSupport": "نموذج التواصل",
+      "accountAndPrivacy": "تصدير حسابك أو حذفه",
+      "listRowsShown": "الصفوف المعروضة في القائمة",
+      "agentRunsPerHour": "عمليات تشغيل الوكلاء",
+      "fileUploadsPerHour": "عمليات رفع الملفات",
+      "fileQuestionsPerHour": "أسئلة عن ملف",
+      "integrationReadsPerHour": "عمليات القراءة من حساب مرتبط",
+      "siteEditsPerDay": "التعديلات المباشرة لكل موقع",
+      "siteVersionsKept": "النسخ المحفوظة لكل موقع",
+      "websiteImageStorage": "مساحة صور الموقع",
+      "voiceClipLength": "أطول تسجيل (بالدقائق)",
+      "teamMembers": "أعضاء الفريق",
+      "recordSearch": "البحث في كل السجلات"
     },
     "businessTitle": "الأعمال",
     "businessSubtitle": "للفرق التي تبني معًا",
@@ -302,7 +338,12 @@
       "unlimited": "غير محدود",
       "included": "مشمول",
       "custom": "مخصّص",
-      "perSeat": "+{currency}{price}/مقعد"
+      "perSeat": "+{currency}{price}/مقعد",
+      "perHour": "/ساعة",
+      "perDay": "/يوم",
+      "minutesPerMonth": "دقيقة/شهر",
+      "yes": "مشمول",
+      "no": "غير مشمول"
     },
     "seatNote": {
       "included": "مقاعد فريق غير محدودة مشمولة — بدون رسوم لكل عضو",
@@ -314,7 +355,17 @@
     "billingIntervalLabel": "دورة الفوترة",
     "billingAnnualSaving": "وفّر {percent}% — شهران مجانًا",
     "billedAnnually": "تُحصَّل {total} مرة واحدة سنويًا — توفّر {saving}",
-    "checkoutFailed": "تعذّر بدء عملية الدفع. حاول مرة أخرى."
+    "checkoutFailed": "تعذّر بدء عملية الدفع. حاول مرة أخرى.",
+    "groups": {
+      "make": "أنشئ",
+      "ask": "اسأل",
+      "run": "شغّل",
+      "see": "اعرض",
+      "organise": "نظّم",
+      "limits": "الحدود",
+      "support": "الدعم"
+    },
+    "comparisonRowCount": "الميزات المقارَنة: {count}"
   },
   "roadmap": {
     "title": "خارطة الطريق",
@@ -3799,7 +3850,8 @@
     "errors": {
       "tooShort": "أعطه اسمًا أولًا.",
       "tooLong": "الاسم يتجاوز {limit} حرفًا.",
-      "failed": "لم ينجح — حاول مرة أخرى."
+      "failed": "لم ينجح — حاول مرة أخرى.",
+      "limitReached": "لقد استخدمت كل المشاريع الـ{limit} في خطتك. رقِّ خطتك لإضافة المزيد."
     }
   },
   "finance": {

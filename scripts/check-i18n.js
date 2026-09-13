@@ -316,6 +316,13 @@ const LOCALE_ALLOWED = new Set([
   // incoherent. "Agents" is the loanword in Greek and French too, beside
   // the German entry below.
   "el:sidebar.items.projects",
+  // THE SAME WORD, ONE SURFACE LATER. The comparison table's row name is
+  // COPIED from the nav label at build time (the row list is generated
+  // from lib/billing/feature-catalog.ts and the label is read out of
+  // sidebar.items), so allowing the nav name and refusing the pricing
+  // row would be refusing the identical string for being in a second
+  // place. Greek business says "Project".
+  "el:pricing.rows.projects",
   "el:projects.title",
   "el:projects.sections.agents",
   "fr:projects.sections.agents",
@@ -412,6 +419,11 @@ const LOCALE_ALLOWED = new Set([
   // not a translation that was skipped.
   "fr:settings.marginReport.colCalls",
   "fr:sidebar.items.documents",
+  // And the pricing row that copies it — same string, same reason: a
+  // cognate spelled identically, not a block somebody skipped. The
+  // neighbouring pricing rows in fr all differ ("Présentations",
+  // "Publications", "Fichiers", "Objectifs et plans").
+  "fr:pricing.rows.documents",
   "fr:sidebar.items.finance",
   "fr:sidebar.items.images",
   "it:auth.login.password",

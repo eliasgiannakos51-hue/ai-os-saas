@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
+import { accountHasCapability } from "@/lib/billing/capability-gate";
+import { upgradeWallProps } from "@/lib/billing/feature-catalog";
+import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import { createClient } from "@/lib/supabase/server";
 import { pageTitle } from "@/lib/page-title";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -36,6 +41,24 @@ export default async function PostsPage({
   const supabase = createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+
+  // THE WALL, BEFORE THE BUTTON. The route refuses too
+  // (api/posts/generate), and that is the line that actually protects
+  // the spend — this one exists so a person on the wrong plan reads a
+  // sentence naming the plan and its price instead of pressing a button
+  // that returns 403.
+  const isAdmin = isAdminEmail(user.email);
+  const planSlug = await resolveEffectivePlanSlug(user);
+  if (!accountHasCapability(planSlug, "posts", isAdmin)) {
+    return (
+      <div className="min-h-full bg-dot-grid">
+        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+          <PageHeader icon={POSTS_ICON} title={t("title")} helpKey="help.posts" />
+          <UpgradeRequired {...upgradeWallProps("posts", t("title"))!} />
+        </div>
+      </div>
+    );
+  }
 
   // RLS scopes this to the caller.
   const { data: rows } = await supabase

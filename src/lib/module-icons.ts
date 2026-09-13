@@ -242,3 +242,4 @@ export const PREDICTIONS_ICON: LucideIcon = Compass;
 // project here is a grouping WITH A GOAL and a state, not a directory,
 // and FolderOpen is already the records hub.
 export const PROJECTS_ICON: LucideIcon = FolderKanban;
+

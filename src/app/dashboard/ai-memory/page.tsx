@@ -22,6 +22,10 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { accountHasCapability } from "@/lib/billing/capability-gate";
+import { upgradeWallProps } from "@/lib/billing/feature-catalog";
+import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { MEMORY_ICON } from "@/lib/module-icons";
@@ -70,6 +74,26 @@ export default async function AiMemoryPage() {
   const prunableIds: string[] = ((prunableResult.data ?? []) as { id: string }[]).map((p) => String(p.id));
 
   const planSlug = await resolveEffectivePlanSlug(user);
+
+  // THE PLAN GATE, ON THE FIELD ITSELF.
+  //
+  // `capabilities.aiMemory` is false on Free and the pricing page draws a
+  // ✕ for it. The page this one replaced refused with
+  // `planMeetsMinimum(planSlug, "starter")` — a correct refusal that
+  // never mentions the capability, so the ✓/✕ column and the lock agreed
+  // by coincidence and moving AI Memory to Growth would have moved one
+  // and not the other. scripts/tests/plan-enforcement.test.mjs requires
+  // the field to be read where something is refused, which is here.
+  const isAdmin = isAdminEmail(user.email);
+  if (!accountHasCapability(planSlug, "aiMemory", isAdmin)) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+        <PageHeader title={t("title")} description={t("description")} helpKey="help.aiMemory" />
+        <UpgradeRequired {...upgradeWallProps("aiMemory", t("title"))!} />
+      </div>
+    );
+  }
+
   const planLimit = getPlan(planSlug)?.capabilities.chatMemoryLimit ?? 0;
   const active = chatMemoryActive({ userEnabled: isChatMemoryEnabled(user), planLimit });
 

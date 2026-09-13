@@ -85,6 +85,15 @@ export const ABSENT_ON_PURPOSE = {
 // route out loud or the next reader cannot tell what changed. Checked
 // both ways by self-claims.test.mjs.
 export const ROUTES_ABSENT_ON_PURPOSE = {
+  "docs/v5-pricing-and-nav-report.md": {
+    reason:
+      "The report names a route the sidebar deliberately holds a POSITION for and has not " +
+      "built: /dashboard/meetings carries notBuilt:true, which is exactly the claim being " +
+      "made about it. scripts/tests/sidebar-collapse.test.mjs fails the build if that route " +
+      "ever starts resolving while the flag is still on, so the day it exists this entry " +
+      "goes stale in the direction the both-ways check catches.",
+    routes: ["/dashboard/meetings"],
+  },
   "src/lib/sidebar-nav.ts": {
     reason:
       "The corrected comment names the route it corrected. /dashboard/business was written " +

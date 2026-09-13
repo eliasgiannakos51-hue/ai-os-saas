@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { accountHasCapability } from "@/lib/billing/capability-gate";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
@@ -10,6 +11,7 @@ import {
   hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
+  resolveEffectivePlanSlug,
 } from "@/lib/billing/credits";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { estimateForAction } from "@/lib/billing/estimate";
@@ -92,6 +94,19 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
+
+  // THE PLAN GATE, before anything that costs money. V5 shipped this
+  // feature and put it in no plan at all; the tiering of 2026-09-13
+  // puts it behind `capabilities.presentations`, and this is the line that
+  // makes the pricing page's column true rather than decorative.
+  // The owner is exempt; a beta credit bypass is NOT — a bypass waives
+  // the charge, not what the plan includes.
+  if (!accountHasCapability(await resolveEffectivePlanSlug(user), "presentations", isAdminEmail(user.email))) {
+    return NextResponse.json(
+      { ok: false, code: "not_included", error: "Presentations is not included on this plan." },
+      { status: 403 }
+    );
+  }
 
   // An own-photo path that is not under the person's own folder would be
   // refused by storage RLS at export time; refusing it here says why

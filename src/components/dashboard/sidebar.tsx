@@ -206,13 +206,30 @@ export function Sidebar({
         )}
 
         <div
+          // A SHUT GROUP IS SHUT TO THE KEYBOARD TOO.
+          //
+          // The rows animate to zero height with grid-template-rows and
+          // stay in the DOM, so without this a sighted user sees six
+          // headings while a keyboard user tabs through every row in the
+          // nav and a screen reader reads all of them. Collapsing that
+          // helps nobody is worse than not collapsing.
+          //
+          // aria-hidden takes the subtree out of the accessibility tree;
+          // tabIndex={-1} on each row takes it out of the tab order. NOT
+          // the `inert` attribute, which would do both at once: React 18
+          // does not know it as a boolean property, so `inert={false}`
+          // renders the literal attribute `inert="false"` — and an inert
+          // attribute is inert whatever its value, which would make the
+          // OPEN groups the unreachable ones. That bug looks like a fix
+          // in every review and only appears at the keyboard.
+          aria-hidden={!expanded}
           className={`grid transition-[grid-template-rows] duration-200 ease-in-out ${
             expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
           }`}
         >
           <div className="min-h-0 overflow-hidden">
             <div className="space-y-0.5 pb-0.5">
-              {group.items.map((item) => renderItem(item))}
+              {group.items.map((item) => renderItem(item, expanded))}
             </div>
           </div>
         </div>
@@ -230,7 +247,7 @@ export function Sidebar({
   // guarded were unreachable. The five daily entry points now get their
   // weight from being the first group and never collapsing, which is a
   // property of the config rather than of a flag nobody sets.
-  function renderItem(item: SidebarItem) {
+  function renderItem(item: SidebarItem, reachable = true) {
     const active = isActive(pathname, item.href);
     const Icon = item.icon;
     const hint = item.hintKey ? t(`hints.${item.hintKey}`) : undefined;
@@ -240,6 +257,10 @@ export function Sidebar({
                   <Link
                     href={item.href}
                     onClick={closeOnMobile}
+                    // -1 while the group is shut: the row is still in
+                    // the DOM at zero height, and a zero-height link is
+                    // still a tab stop. See the aria-hidden note above.
+                    tabIndex={reachable ? undefined : -1}
                     // WARM THE ROUTE THE POINTER IS HEADING FOR.
                     //
                     // Every dashboard route is force-dynamic, so Next's

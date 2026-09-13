@@ -7,9 +7,9 @@ import { Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
+import { DAY_MS } from "@/lib/time-constants";
 
 const LEVELS = [1, 2, 3, 4, 5] as const;
-const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_NOTE_LENGTH = 200;
 
 type CheckIn = { energyLevel: number; note: string | null; createdAt: string };

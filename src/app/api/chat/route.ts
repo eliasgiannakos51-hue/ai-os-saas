@@ -116,10 +116,16 @@ const WEB_SEARCH_INSTRUCTION = `
 // Anthropic's native server-side web search tool — the model decides
 // autonomously whether a given message actually needs a real search
 // (offering the tool costs nothing by itself; Anthropic only bills for
-// searches actually performed — see CREDIT_COSTS.webSearchPerQuery,
-// charged below only when response.usage.server_tool_use
-// .web_search_requests > 0). max_uses caps it at 3 real searches per
+// searches actually performed). max_uses caps it at 3 real searches per
 // single chat reply, so one message can't trigger unbounded search cost.
+//
+// THE SEARCH SURCHARGE IS MEASURED, NOT FLAT. This comment used to say
+// "see CREDIT_COSTS.webSearchPerQuery, charged below only when
+// response.usage.server_tool_use.web_search_requests > 0". No line below
+// read that constant: the searches are counted into webSearchCount and
+// priced with the rest of the reply's measured usage (see the settle call
+// at the end of the stream). The constant was deleted on 2026-09-13 with
+// the other ten prices nothing charged.
 const WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
   type: "web_search_20250305",
   name: "web_search",

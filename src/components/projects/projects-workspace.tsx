@@ -47,7 +47,22 @@ export function ProjectsWorkspace({ projects }: { projects: ProjectRow[] }) {
       const body = await res.json().catch(() => null);
       if (!res.ok || !body?.ok) {
         const code = String(body?.error ?? "");
-        addToast(code === "too_short" ? t("errors.tooShort") : code === "too_long" ? t("errors.tooLong", { limit: MAX_NAME_CHARS }) : t("errors.failed"), "error");
+        // TRANSLATED BY CODE, which is this product's convention for a
+        // route's refusal: the English sentence in the body is what a
+        // curl and a log line get, and the reader gets their own
+        // language. `limit` comes back with the refusal so the message
+        // can say the number rather than "you have reached your limit".
+        const limitReached = code === "project_limit_reached";
+        addToast(
+          limitReached
+            ? t("errors.limitReached", { limit: Number(body?.limit ?? 0) })
+            : code === "too_short"
+              ? t("errors.tooShort")
+              : code === "too_long"
+                ? t("errors.tooLong", { limit: MAX_NAME_CHARS })
+                : t("errors.failed"),
+          "error"
+        );
         return;
       }
       setName("");

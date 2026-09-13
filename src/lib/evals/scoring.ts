@@ -6,17 +6,26 @@
  * a numeric bound. Nothing about a mechanical check drifts between runs,
  * and a mechanical check can be argued with by reading it.
  *
- * WHERE A MODEL GRADES, IT IS SAID SO. Some qualities genuinely cannot be
- * regexed ("is this answer actually responsive to the question"), and for
- * those a rubric goes to a grader model. Those cases are tagged `graded`
- * and reported SEPARATELY in the table, because a suite that mixes them
- * silently reports a number that is part measurement and part opinion —
- * and only one of those halves is comparable between runs.
+ * NO MODEL GRADES ANYTHING, AND THE TYPE NO LONGER PRETENDS ONE MIGHT.
+ * EvalCase carried a `rubric?: string` field described as "only for what
+ * a regex genuinely cannot decide", and this header described where those
+ * rubrics went: "a rubric goes to a grader model", cases "tagged graded
+ * and reported SEPARATELY". No case in any dataset ever set one, no
+ * grader function exists in this module, and scripts/evals/run.mjs calls
+ * summarise(outcomes) with no graded ids and prints "graded by mechanical
+ * checks only — no model grades any case in this run". The field was the
+ * input to a path that was never built; it was removed on 2026-09-13 so
+ * that the type stops advertising one.
  *
- * AN UNGRADED CASE IS NOT A PASS. If the grader could not be reached, the
- * case is `error`, never `pass` and never `fail`. A missing grader that
- * scored zero would make a broken harness look like a quality regression;
- * one that scored full marks would hide one.
+ * summarise() still carries a `graded` count and the AN-UNGRADED-CASE-IS-
+ * NOT-A-PASS rule below still holds, because both are what a grader would
+ * have to plug into. What is gone is the field that made the plug look
+ * fitted.
+ *
+ * AN UNGRADED CASE IS NOT A PASS. If a grader is ever added and could not
+ * be reached, the case is `error`, never `pass` and never `fail`. A
+ * missing grader that scored zero would make a broken harness look like a
+ * quality regression; one that scored full marks would hide one.
  *
  * Pure — no SDK, no database, no clock — so the build gate exercises every
  * branch with no API key.
@@ -62,8 +71,6 @@ export type EvalCase = {
   /** Extra context the capability needs (a pasted CSV, a code snippet). */
   attachment?: string;
   checks: Check[];
-  /** Only for what a regex genuinely cannot decide. */
-  rubric?: string;
   /** Why this case is in the set — the failure it is here to catch. */
   why: string;
 };

@@ -23,6 +23,7 @@ const GATE = "scripts/tests/pricing-truth.test.mjs";
 const PLANS = "src/lib/billing/plans.ts";
 const PRICING_PAGE = "src/app/pricing/page.tsx";
 const MEMORY = "src/lib/chat/memory.ts";
+const CATALOG = "src/lib/billing/feature-catalog.ts";
 
 const MUTANTS = [
   {
@@ -37,11 +38,71 @@ const MUTANTS = [
   {
     // The same lie on the comparison table, which is the surface a
     // customer actually reads side by side before paying.
+    //
+    // RE-ANCHORED 2026-09-13: the table stopped being a list of
+    // `labelKey` objects in page.tsx and became rows generated from
+    // lib/billing/feature-catalog.ts, so the old anchor no longer
+    // existed and this mutation had been testing nothing. The lie now
+    // takes the shape of a catalog entry, which is where rows live.
     name: "the comparison table gains a row for a capability that does not exist",
-    file: PRICING_PAGE,
-    from: 'labelKey: "',
-    to: 'labelKey: "Unlimited team seats", hidden: false }, { labelKey: "',
-    expect: "no claim is made without declaring what implements it",
+    file: CATALOG,
+    from: '  // === DECLARED, NOT BUILT ===========================================',
+    to: '  {\n    id: "overnightRendering",\n    group: "make",\n    minPlan: "growth",\n    charges: false,\n    enforcedIn: "src/lib/billing/plans.ts",\n    enforcedSymbol: "PLANS",\n    cell: () => ({ type: "check" }),\n  },\n\n  // === DECLARED, NOT BUILT ===========================================',
+    expect: 'every row under MAKE really makes something',
+  },
+  {
+    // ---- the rule the owner stated: a row is a thing that WORKS ------
+    //
+    // A HELD TIER IS PUBLISHED. The placeholder loses its flag and
+    // appears on the page, which is the whole thing `notBuilt` exists to
+    // prevent — and the commonest way it would happen is somebody
+    // tidying up who reads the flag as clutter.
+    // MUTATE THE FILTER, NOT THE ENTRY, and the first draft of this
+    // mutant is why. Un-flagging one entry does not test the rule: with
+    // `notBuilt` gone the row is no longer HELD, so the clause about
+    // held rows cannot fire and a different clause caught it instead —
+    // which means that clause was a tautology (soldFeatures() strips
+    // notBuilt, so `sold.filter(r => r.notBuilt)` was empty by
+    // construction, forever). The real defect is the reader losing the
+    // filter, and that is what this mutates.
+    name: 'the row reader stops excluding tiers held for unbuilt features',
+    file: CATALOG,
+    from: 'FEATURE_CATALOG.filter((f) => !f.notSold && !f.notBuilt)',
+    to: 'FEATURE_CATALOG.filter((f) => !f.notSold)',
+    expect: 'no row on the table is a tier held for something unbuilt',
+  },
+  {
+    // THE FLAG DOES NOT CLEAR ITSELF. A held tier that has grown a real
+    // route stays flagged, so a feature customers are using has no price
+    // anywhere. Simulated by pointing the held entry at a route that
+    // does exist — the state the tree would be in the day somebody
+    // shipped it and forgot the row.
+    name: 'a held tier grows a real route and stays hidden',
+    file: CATALOG,
+    from: '    capability: "publicApi",\n    charges: false,',
+    to: '    capability: "publicApi",\n    charges: false,\n    routes: ["credits/balance"],',
+    expect: 'no held tier has a page or a route behind it already',
+  },
+  {
+    // A ROW UNDER "MAKE" THAT MAKES NOTHING. The heading promises
+    // production; the route behind it is a plain list. This is the
+    // pricing-page twin of the defect sidebar-naming section 3 exists
+    // for.
+    name: 'a MAKE row is pointed at a route that reaches no model',
+    file: CATALOG,
+    from: '    routes: ["posts/generate"],',
+    to: '    routes: ["projects"],',
+    expect: 'every row under MAKE really makes something',
+  },
+  {
+    // AND THE SCAN ITSELF. If the pattern stops matching, every row
+    // under MAKE "makes nothing" — and with the offender list inverted,
+    // nothing is ever reported. The positive control is what notices.
+    name: 'the producer pattern stops matching anything',
+    file: 'scripts/tests/lib/reaches-a-model.mjs',
+    from: 'export const AI_CALL =',
+    to: 'export const AI_CALL = /(?!)/; const UNUSED =',
+    expect: 'the producer scan recognises a real generator',
   },
   {
     // THE OTHER DIRECTION, and the one a green build hides best: the
@@ -78,6 +139,47 @@ const MUTANTS = [
     from: "const EVIDENCE = {",
     to: 'const EVIDENCE = {\n  "A claim nobody makes any more": { file: "src/lib/chat/memory.ts", symbol: "DEFAULT_MEMORY_LOAD_LIMIT" },',
     expect: "no evidence entry outlives the claim it justified",
+  },
+  {
+    // THE DEFECT THAT WAS SITTING THERE. The page opened its table with
+    // "FORTY-THREE ROWS" while the catalog rendered 45 — a count written
+    // down once and never re-derived. The whole class is invisible to
+    // every other check in this suite, because 43 is a perfectly valid
+    // number and the page renders correctly either way.
+    name: "the page's stated row count drifts from what it renders",
+    file: PRICING_PAGE,
+    from: "ROWS: 45",
+    to: "ROWS: 43",
+    expect: "the page says 43 rows and soldFeatures() returns 45",
+  },
+  {
+    // The same shape on the other half of the sentence. Seven sections is
+    // also a claim, and a reader counts neither.
+    name: "the page's stated section count drifts from what it renders",
+    file: PRICING_PAGE,
+    from: "in seven sections",
+    to: "in five sections",
+    expect: "the page says five sections and the catalog fills 7",
+  },
+  {
+    // THE EASY WAY OUT OF THE TWO ABOVE: delete the claim instead of
+    // correcting it, and the comparison has nothing to compare. A count
+    // this gate cannot find is not a page that stopped lying, it is a
+    // page that stopped saying — so the absence has to fail too, which is
+    // the floor rule gate-vacuity asks of every scanned collection.
+    //
+    // NOT MUTATED HERE: the gate's own comparison line. A suite cannot
+    // catch its own disabling — running the mutated gate asks the
+    // defective instrument whether it is defective. That job belongs to
+    // scripts/tests/mutation-suite-shape.test.mjs, which reads this file
+    // and requires every const in it to be used, and to
+    // scripts/scan-unjudged-numbers.mjs, which is what would find
+    // `pricingSrc` read and never judged if it happened again.
+    name: "the page stops stating a row count at all",
+    file: PRICING_PAGE,
+    from: "ROWS: 45",
+    to: "Rows, several of them",
+    expect: "the pricing page states its own row count in a form this gate can read",
   },
 ];
 

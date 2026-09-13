@@ -82,7 +82,10 @@
     "errorWithMessage": "error: {message}",
     "upgradeRequired": {
       "title": "Upgrade Required",
-      "body": "{feature} requires the {plan} plan or higher."
+      "body": "{feature} requires the {plan} plan or higher.",
+      "price": "{plan} is {amount} per month.",
+      "customPrice": "{plan} is priced per agreement.",
+      "cta": "See the {plan} plan"
     },
     "textActions": {
       "rewrite": "Rewrite",
@@ -266,7 +269,40 @@
       "files": "Files stored",
       "storage": "Storage",
       "integrations": "Connected integrations",
-      "publishedSites": "Published websites"
+      "publishedSites": "Published websites",
+      "documents": "Documents",
+      "coding": "AI Coding",
+      "presentations": "Presentations",
+      "posts": "Posts",
+      "aiChat": "Ask me",
+      "predictions": "Predictions",
+      "automation": "Automation",
+      "businessLogs": "My records",
+      "projects": "Projects",
+      "missionControl": "Goals & Plans",
+      "helpCentre": "Help Centre",
+      "createStudio": "Make anything",
+      "voiceMinutes": "Voice minutes / month",
+      "chatMemory": "Facts remembered in chat",
+      "chatPins": "Pinned conversations",
+      "askYourData": "Ask your own records",
+      "customAiPersona": "Custom assistant name",
+      "backgroundJobs": "Work that runs in the background",
+      "buildLogs": "Website, app, image and video logs",
+      "notifications": "Notifications and reminders",
+      "contactSupport": "Contact form",
+      "accountAndPrivacy": "Export or delete your account",
+      "listRowsShown": "Rows shown in one list",
+      "agentRunsPerHour": "Agent runs",
+      "fileUploadsPerHour": "File uploads",
+      "fileQuestionsPerHour": "Questions about a file",
+      "integrationReadsPerHour": "Reads from a connected account",
+      "siteEditsPerDay": "Live edits per site",
+      "siteVersionsKept": "Versions kept per site",
+      "websiteImageStorage": "Storage for website photos",
+      "voiceClipLength": "Longest recording (minutes)",
+      "teamMembers": "Team members",
+      "recordSearch": "Record search across modules"
     },
     "businessTitle": "Business",
     "businessSubtitle": "For teams building together",
@@ -302,7 +338,12 @@
       "unlimited": "Unlimited",
       "included": "Included",
       "custom": "Custom",
-      "perSeat": "+{currency}{price}/seat"
+      "perSeat": "+{currency}{price}/seat",
+      "perHour": "/hour",
+      "perDay": "/day",
+      "minutesPerMonth": "min/month",
+      "yes": "Included",
+      "no": "Not included"
     },
     "seatNote": {
       "included": "Unlimited team seats included — no per-member charge",
@@ -314,7 +355,17 @@
     "billingIntervalLabel": "Billing period",
     "billingAnnualSaving": "Save {percent}% — two months free",
     "billedAnnually": "Billed {total} once a year — you save {saving}",
-    "checkoutFailed": "Could not start checkout. Please try again."
+    "checkoutFailed": "Could not start checkout. Please try again.",
+    "groups": {
+      "make": "Make",
+      "ask": "Ask",
+      "run": "Run",
+      "see": "See",
+      "organise": "Organise",
+      "limits": "Limits",
+      "support": "Support"
+    },
+    "comparisonRowCount": "Features compared: {count}"
   },
   "roadmap": {
     "title": "Roadmap",
@@ -3799,7 +3850,8 @@
     "errors": {
       "tooShort": "Give it a name first.",
       "tooLong": "That name is longer than {limit} characters.",
-      "failed": "That didn't work — try again."
+      "failed": "That didn't work — try again.",
+      "limitReached": "You have used all {limit} projects on your plan. Upgrade to add more."
     }
   },
   "finance": {

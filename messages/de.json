@@ -82,7 +82,10 @@
     "errorWithMessage": "Fehler: {message}",
     "upgradeRequired": {
       "title": "Upgrade erforderlich",
-      "body": "{feature} erfordert den Tarif {plan} oder höher."
+      "body": "{feature} erfordert den Tarif {plan} oder höher.",
+      "price": "{plan} kostet {amount} pro Monat.",
+      "customPrice": "Der Preis für {plan} wird vereinbart.",
+      "cta": "Den Tarif {plan} ansehen"
     },
     "textActions": {
       "rewrite": "Umschreiben",
@@ -266,7 +269,40 @@
       "files": "Gespeicherte Dateien",
       "storage": "Speicherplatz",
       "integrations": "Verbundene Integrationen",
-      "publishedSites": "Veröffentlichte Websites"
+      "publishedSites": "Veröffentlichte Websites",
+      "documents": "Dokumente",
+      "coding": "Programmieren mit KI",
+      "presentations": "Präsentationen",
+      "posts": "Beiträge",
+      "aiChat": "Frag mich",
+      "predictions": "Muster",
+      "automation": "Automatisierung",
+      "businessLogs": "Meine Einträge",
+      "projects": "Projekte",
+      "missionControl": "Ziele & Pläne",
+      "helpCentre": "Hilfe-Center",
+      "createStudio": "Mach irgendwas",
+      "voiceMinutes": "Sprachminuten / Monat",
+      "chatMemory": "Fakten, die der Chat behält",
+      "chatPins": "Angeheftete Unterhaltungen",
+      "askYourData": "Deine eigenen Daten befragen",
+      "customAiPersona": "Eigener Assistentenname",
+      "backgroundJobs": "Aufgaben im Hintergrund",
+      "buildLogs": "Protokolle für Websites, Apps, Bilder und Videos",
+      "notifications": "Benachrichtigungen und Erinnerungen",
+      "contactSupport": "Kontaktformular",
+      "accountAndPrivacy": "Konto exportieren oder löschen",
+      "listRowsShown": "Zeilen pro Liste",
+      "agentRunsPerHour": "Agentenläufe",
+      "fileUploadsPerHour": "Datei-Uploads",
+      "fileQuestionsPerHour": "Fragen zu einer Datei",
+      "integrationReadsPerHour": "Abrufe aus einem verbundenen Konto",
+      "siteEditsPerDay": "Live-Änderungen pro Website",
+      "siteVersionsKept": "Aufbewahrte Versionen pro Website",
+      "websiteImageStorage": "Speicher für Website-Fotos",
+      "voiceClipLength": "Längste Aufnahme (Minuten)",
+      "teamMembers": "Teammitglieder",
+      "recordSearch": "Suche über alle Einträge"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Für Teams, die gemeinsam aufbauen",
@@ -302,7 +338,12 @@
       "unlimited": "Unbegrenzt",
       "included": "Inklusive",
       "custom": "Individuell",
-      "perSeat": "+{currency}{price}/Platz"
+      "perSeat": "+{currency}{price}/Platz",
+      "perHour": "/Stunde",
+      "perDay": "/Tag",
+      "minutesPerMonth": "Min./Monat",
+      "yes": "Enthalten",
+      "no": "Nicht enthalten"
     },
     "seatNote": {
       "included": "Unbegrenzte Team-Plätze inklusive — keine Gebühr pro Mitglied",
@@ -314,7 +355,17 @@
     "billingIntervalLabel": "Abrechnungszeitraum",
     "billingAnnualSaving": "{percent} % sparen — zwei Monate geschenkt",
     "billedAnnually": "{total} einmal im Jahr — Sie sparen {saving}",
-    "checkoutFailed": "Der Bezahlvorgang konnte nicht gestartet werden. Bitte erneut versuchen."
+    "checkoutFailed": "Der Bezahlvorgang konnte nicht gestartet werden. Bitte erneut versuchen.",
+    "groups": {
+      "make": "Erstellen",
+      "ask": "Fragen",
+      "run": "Ausführen",
+      "see": "Ansehen",
+      "organise": "Organisieren",
+      "limits": "Grenzen",
+      "support": "Unterstützung"
+    },
+    "comparisonRowCount": "Verglichene Funktionen: {count}"
   },
   "roadmap": {
     "title": "Roadmap",
@@ -3799,7 +3850,8 @@
     "errors": {
       "tooShort": "Gib ihm zuerst einen Namen.",
       "tooLong": "Der Name ist länger als {limit} Zeichen.",
-      "failed": "Das hat nicht geklappt — versuch es nochmal."
+      "failed": "Das hat nicht geklappt — versuch es nochmal.",
+      "limitReached": "Du hast alle {limit} Projekte deines Tarifs genutzt. Wechsle den Tarif, um mehr anzulegen."
     }
   },
   "finance": {

@@ -89,10 +89,10 @@ export function parseAgentLimits(env: Record<string, string | undefined>): {
   return { limits, warnings };
 }
 
-let cached: Record<PlanSlug, number> | null = null;
+let cachedAgentLimits: Record<PlanSlug, number> | null = null;
 
 export function resolveAgentLimits(): Record<PlanSlug, number> {
-  if (cached) return cached;
+  if (cachedAgentLimits) return cachedAgentLimits;
   const { limits, warnings } = parseAgentLimits(
     typeof process === "undefined" ? {} : process.env
   );
@@ -100,7 +100,7 @@ export function resolveAgentLimits(): Record<PlanSlug, number> {
     // eslint-disable-next-line no-console
     console.warn(`[agent-limits] ${w.variable}="${w.value}" ignored (${w.reason}) — using default.`);
   }
-  cached = limits;
+  cachedAgentLimits = limits;
   return limits;
 }
 

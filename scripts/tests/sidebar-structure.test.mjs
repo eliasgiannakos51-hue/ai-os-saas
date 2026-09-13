@@ -37,7 +37,8 @@
 // floored so that emptying the declaration reddens rather than passes.
 //
 // Run: node scripts/tests/sidebar-structure.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
+import { stripComments } from "../lib/test-export-drift.mjs";
 import { loadTs } from "./load-ts.mjs";
 
 let pass = 0;
@@ -48,6 +49,7 @@ const ok = (name, cond, detail) => {
 };
 
 const NAV = "src/lib/sidebar-nav.ts";
+const SIDEBAR = "src/components/dashboard/sidebar.tsx";
 
 // ---------------------------------------------------------------------
 // THE DECLARATION. This is the agreed structure, and changing the app
@@ -191,6 +193,12 @@ const parsed = marks.map((mark, i) => {
         hidden: /hidden:\s*true/.test(head),
         notBuilt: /notBuilt:\s*true/.test(head),
         ownerOnly: /ownerOnly:\s*true/.test(head),
+        // A held position for something that does not exist yet.
+        // `sidebarGroups` drops it, so the parse has to carry it or the
+        // declared list below would have to name rows nothing draws —
+        // see lib/sidebar-visibility.ts's `notBuilt`. Sections 1b and 1c
+        // below are where the held positions are checked.
+        notBuilt: /notBuilt:\s*true/.test(head),
         label: chunk.match(/label:\s*["'`]([^"'`]+)["'`]/)?.[1] ?? chunk.match(/label:\s*([A-Z_]+)\.label/)?.[1] ?? "?",
         icon: null,
       };
@@ -224,6 +232,57 @@ ok(`${drawnRows} rows drawn, ${DECLARED_ROWS} declared`, drawnRows === DECLARED_
 
 // ---------------------------------------------------------------------
 // ---------------------------------------------------------------------
+console.log("\n== 1c. the flag comes off, the state is not stored, and a shut group is shut ==");
+// ---------------------------------------------------------------------
+// THREE THINGS 1b CANNOT SEE, and each of them is a way this whole
+// structure quietly stops being true.
+//
+// Merged in from a parallel branch's gate rather than kept beside it:
+// two files asserting things about one sidebar is two places to update
+// and one of them goes stale. The checks are here; the file they came
+// from no longer exists.
+// ---------------------------------------------------------------------
+{
+  const componentSrc = stripComments(readFileSync(SIDEBAR, "utf8"));
+
+  // 1. THE FLAG HAS TO COME OFF. A notBuilt row whose page has LANDED is
+  //    a working feature nothing links to and nothing can search — the
+  //    defect entry-points.test.mjs exists for, arriving through a door
+  //    it does not watch. This is what makes `notBuilt` self-clearing
+  //    instead of a label somebody has to remember to remove.
+  const builtAnyway = [...NOT_DRAWN_YET]
+    .filter(([, flag]) => flag === "notBuilt")
+    .map(([href]) => href)
+    .filter((href) => existsSync(`src/app/${href.replace(/^\//, "")}/page.tsx`));
+  ok(
+    "no not-built row has a page on disk — remove the flag when it lands",
+    builtAnyway.length === 0,
+    builtAnyway.join(", ")
+  );
+
+  // 2. NOTHING IS STORED. The open/shut state is a pure function of the
+  //    URL plus what the user touched THIS visit. A sidebar that
+  //    restores three groups from yesterday is thirty-odd lines again,
+  //    on the one visit where the person has no idea why.
+  //    Comments stripped first: the component's header explains what it
+  //    used to store, in the words a scanner would match.
+  ok("the sidebar stores nothing", !/localStorage|sessionStorage|document\.cookie/.test(componentSrc));
+  ok("…and derives the default from the URL", /headingContaining\(pathname\)/.test(componentSrc));
+  ok(
+    "…with an override for what the user opened, so a second group stays open",
+    /touched/.test(componentSrc) && !/new Map\(\)\s*\)\s*;?\s*$/m.test(componentSrc.split("toggleGroup")[1] ?? "")
+  );
+
+  // 3. A SHUT GROUP IS SHUT TO THE KEYBOARD TOO. The rows animate to
+  //    zero height with grid-template-rows and stay in the DOM, so
+  //    without this a sighted user sees five headings while a keyboard
+  //    user tabs through every row in the nav.
+  ok("a shut group is out of the accessibility tree", /aria-hidden=\{!expanded\}/.test(componentSrc));
+  ok("a shut group's rows are out of the tab order", /tabIndex=\{(?:expanded \? undefined : -1|reachable \? undefined : -1)\}/.test(componentSrc));
+  ok("the heading says whether it is open", /aria-expanded=\{expanded\}/.test(componentSrc));
+  ok("the heading is a 44px target", /toggleGroup[\s\S]{0,400}?min-h-\[44px\]/.test(componentSrc));
+}
+
 console.log("\n== 1b. the POSITION of a row that is not built yet is locked ==");
 // ---------------------------------------------------------------------
 // THE CHECK THAT MAKES A FUTURE POSITION WORTH DECLARING. Without it the

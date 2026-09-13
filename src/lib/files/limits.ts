@@ -20,15 +20,15 @@ import type { PlanSlug } from "@/lib/billing/plans";
 // the most expensive single action in the product and it would be the
 // first thing a throwaway account is used for.
 
-export const UNLIMITED = Number.POSITIVE_INFINITY;
+export const UNLIMITED_FILES = Number.POSITIVE_INFINITY;
 
 export const DEFAULT_FILE_COUNT_LIMITS: Record<PlanSlug, number> = {
   free: 3,
   starter: 20,
   growth: 100,
   professional: 500,
-  ultimate: UNLIMITED,
-  enterprise: UNLIMITED,
+  ultimate: UNLIMITED_FILES,
+  enterprise: UNLIMITED_FILES,
 };
 
 const MB = 1024 * 1024;
@@ -117,7 +117,7 @@ function parseFamily(
         warnings.push({ variable, value: raw, reason: "unlimited is not allowed for this limit" });
         continue;
       }
-      limits[slug] = UNLIMITED;
+      limits[slug] = UNLIMITED_FILES;
       continue;
     }
     const parsed = Number(raw);

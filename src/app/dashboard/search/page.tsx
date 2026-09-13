@@ -13,9 +13,10 @@ import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { truncate } from "@/lib/text/truncate";
-import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { accountHasCapability } from "@/lib/billing/capability-gate";
+import { upgradeWallProps } from "@/lib/billing/feature-catalog";
 
 export function generateMetadata(): Promise<Metadata> {
   // The i18n key stays `memory` although the page is called Search now:
@@ -67,12 +68,16 @@ export default async function MemoryPage() {
   const isAdmin = isAdminEmail(user.email);
   const planSlug = await resolveEffectivePlanSlug(user);
 
-  if (!isAdmin && !planMeetsMinimum(planSlug, "starter")) {
+  // THE FIELD, NOT A PLAN RANK. `planMeetsMinimum(planSlug, "starter")`
+  // is a correct refusal that never names a capability, so the pricing
+  // page's column and this lock could only ever agree by coincidence —
+  // see lib/billing/capability-gate.ts for the case where they stopped.
+  if (!accountHasCapability(planSlug, "recordSearch", isAdmin)) {
     return (
       <div className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader helpKey="help.memory" helpArticle="chat-memory" icon={MEMORY_ICON} title={t("title")} />
-          <UpgradeRequired featureName={t("title")} planName={getPlan("starter")?.name ?? "Starter"} />
+          <UpgradeRequired {...upgradeWallProps("recordSearch", t("title"))!} />
         </div>
       </div>
     );

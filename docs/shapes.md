@@ -1022,3 +1022,57 @@ that makes it throw, and that is the run where it explains itself worst.
 `scripts/tests/mutation-runner-honesty.test.mjs` reports the runner's own
 version of this; nothing yet holds the population of gates that can die,
 because finding one costs a mutation that makes it die.
+
+## A field that costs nothing to add and looks like work
+
+A name is declared — a field on a config type, a flag on a plan, a
+constant — and **nothing reads it**. Adding it costs one line, it shows up
+in a diff as progress, and it is a promise with no mechanism behind it.
+The declaration is the whole feature.
+
+**The incident: `PlanCapabilities.websiteBuilder`, 2026-09-13.** It was
+declared on all six plans, `false` on Free, and rendered as a ✕ on the
+pricing page and a ✕ on the signup grid. It was read in exactly three
+places in the product and **all three were drawing a tick or a cross**. A
+Free account could open `/dashboard/website-builder` and generate a site.
+The field had never gated anything, from the day it was written.
+
+Two things kept it alive:
+
+- **The refusal was one step later.** `maxPublishedSitesForPlan` is 0 on
+  Free and `api/websites/[id]/publish` does refuse — so a Free account
+  could generate and not publish, and anybody who checked casually met a
+  real refusal and stopped looking. The expensive half, the model call,
+  had already run.
+- **A true sentence about the wrong thing.** The page's header said the
+  Websites module "already has its own credit cost + plan gating", which
+  is true of the hand-typed tracker at `/dashboard/websites` and was read
+  for months as true of the builder.
+
+**The variant that is quieter and just as real**: a capability enforced by
+a PARALLEL rule. `/dashboard/memory` refused with
+`planMeetsMinimum(planSlug, "starter")` — a correct refusal that never
+mentions `capabilities.aiMemory`. The field and the lock agreed by
+coincidence, so moving the feature to another tier would have moved the
+pricing column and left the door open, in a green build. Both pages that
+inherited that URL after the split carried the same shape.
+
+**Why a gate for this is not obvious.** The natural check is "does a file
+mention the field", and `websiteBuilder` passed that in three files. The
+check that works asks for two things at once: the named file must READ
+the capability **and** contain a refusal — a 4xx, an `UpgradeRequired`, a
+`notFound()`, a `redirect()`. A file that mentions it and returns nothing
+is a display, not a door.
+
+`scripts/tests/plan-enforcement.test.mjs` holds it for
+`PlanCapabilities`: every field is claimed by exactly one row of
+`lib/billing/feature-catalog.ts`, every built field is read where
+something is refused, and a field declared `notBuilt` must be read by
+**nothing** — so the day somebody enforces a placeholder tier, the build
+goes red until its row is published. `plan-enforcement.mutation.mjs`
+re-introduces the original defect and twelve of its neighbours.
+
+The same shape at the pricing surface is
+`scripts/tests/pricing-truth.test.mjs`: a row on the comparison table must
+name code that exists, and — since 2026-09-13 — must not be a row for a
+capability the catalog itself declares unbuilt.

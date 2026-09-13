@@ -5,6 +5,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { MAX_REFERENCE_IMAGES, referenceImagePathBelongsToUser } from "@/lib/website-reference-image";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { accountHasCapability } from "@/lib/billing/capability-gate";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import {
@@ -13,6 +14,7 @@ import {
   hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
+  resolveEffectivePlanSlug,
   getPurchasedPackCreditPriceEur,
 } from "@/lib/billing/credits";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
@@ -114,6 +116,34 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    // THE PLAN GATE, AND IT IS FIRST FOR A REASON.
+    //
+    // `capabilities.websiteBuilder` is false on Free and the pricing page
+    // draws a ✕ for it — and until 2026-09-13 nothing in this product
+    // read that field to refuse anything. A Free account could POST here
+    // and get a generated site. The paywall people found was
+    // maxPublishedSitesForPlan, one step later, which refuses the
+    // PUBLISH and not the generation: the expensive half ran, the model
+    // was paid, and the site simply could not go live.
+    //
+    // Before the fair-use count and before any read that costs money,
+    // because a refusal that happens after the spend is not a gate. The
+    // owner is exempt (isAdminEmail); a beta bypass is NOT — a bypass
+    // waives the CHARGE, and this is about what the plan includes.
+    {
+      const gatePlanSlug = await resolveEffectivePlanSlug(user);
+      if (!accountHasCapability(gatePlanSlug, "websiteBuilder", isAdminEmail(user.email))) {
+        return NextResponse.json(
+          {
+            ok: false,
+            code: "not_included",
+            error: "The website builder is not included on this plan.",
+          },
+          { status: 403 }
+        );
+      }
     }
 
     // Defence in depth: only paths inside this user's own storage folder.

@@ -70,9 +70,17 @@ export async function BuildModulePage({
       <div className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader icon={icon} title={title} helpKey="help.trackingModule" />
+          {/* THE PLAN COMES FROM THE GATE THAT JUST REFUSED, not from
+              the catalog: these four pages do not share one tier —
+              websites, images and videos are Starter and apps is Growth
+              (lib/build-modules.ts) — so `buildLogs.minPlan` would name
+              the wrong plan on one of the four. The price is read off
+              the same plan object. */}
           <UpgradeRequired
             featureName={title}
             planName={requiredPlan?.name ?? config.minPlanSlug}
+            planSlug={config.minPlanSlug}
+            priceEur={typeof requiredPlan?.price === "number" ? requiredPlan.price : null}
           />
         </div>
       </div>

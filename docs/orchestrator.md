@@ -266,7 +266,7 @@ what runs later.
 
 ---
 
-## 6. The ceilings, and why there are nine of them
+## 6. The ceilings, and why there are eight of them
 
 Every one of these bounds a loop that spends money. Every one lives alone:
 
@@ -279,7 +279,6 @@ Every one of these bounds a loop that spends money. Every one lives alone:
 | `MAX_CONTINUATION_ROUNDS` | 4 | `src/lib/website-builder.ts` |
 | `MAX_STEPS` | 8 | `src/lib/mission-agents.ts` |
 | `MAX_RESEARCH_CHUNKS` | 12 | `src/lib/research/research-limits.ts` |
-| `FALLBACK_ATTEMPTS_ALLOWED` | 1 | `src/lib/ai/batch/batch-policy.ts` |
 | `MAX_GENERATION_ATTEMPTS` | 3 | `src/lib/website-generation-limits.ts` |
 
 The two best-reasoned of them say the same thing in different words.
@@ -289,7 +288,17 @@ off to a chunk that hands off is a loop, and a loop that spends money on
 every pass needs a ceiling that does not depend on every hand-off being
 correct."*
 
-An orchestrator adds a tenth loop unless it inherits one of these.
+An orchestrator adds a ninth loop unless it inherits one of these.
+
+THERE WERE NINE ROWS HERE UNTIL 2026-09-13, and the ninth bounded
+nothing. `FALLBACK_ATTEMPTS_ALLOWED` was declared in
+`src/lib/ai/batch/batch-policy.ts` and listed under "every one of these
+bounds a loop that spends money"; the only fallback path increments
+`batch_fallbacks` and never compares it to anything. It was found by
+`node scripts/scan-declared-never-read.mjs`, which settles each candidate
+by renaming the declaration and running `tsc` — not by reading. The
+constant is gone; the other eight were not flagged by that scan, which is
+what "they are read somewhere" means here and not more than that.
 
 ---
 

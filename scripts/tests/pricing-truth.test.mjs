@@ -41,6 +41,7 @@
  */
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
+import { callsModel } from "./lib/reaches-a-model.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0,
@@ -100,22 +101,19 @@ const EVIDENCE = {
   everythingInUltimate: { inherits: true },
 
   // --- comparison table rows ----------------------------------------
-  aiAgents: { file: "src/lib/agents/agent-limits.ts", symbol: "maxAgentsForPlan" },
-  websiteBuilder: { file: "src/lib/website-builder.ts", symbol: "export" },
-  teamSeatsAddOn: { file: "src/lib/billing/plans.ts", symbol: "TEAM_SEAT_PRICE" },
-  // The six quantitative rows. Each names the accessor the table READS and
-  // the route enforces — the pair is what makes the published number the
-  // same number the server refuses on, and combined-ceiling.test.mjs
-  // asserts the route side of it by name.
-  freeChatMessages: { file: "src/lib/billing/free-chat.ts", symbol: "freeChatAllowance" },
-  deepResearch: { file: "src/lib/files/limits.ts", symbol: "maxResearchRunsForPlan" },
-  files: { file: "src/lib/files/limits.ts", symbol: "maxFilesForPlan" },
-  storage: { file: "src/lib/files/limits.ts", symbol: "maxStorageBytesForPlan" },
-  integrations: { file: "src/lib/integrations/limits.ts", symbol: "maxIntegrationsForPlan" },
-  publishedSites: {
-    file: "src/lib/publishing/publish-limits.ts",
-    symbol: "maxPublishedSitesForPlan",
-  },
+  // NOT LISTED HERE ANY MORE, and the reason is that they moved somewhere
+  // that can hold more of them. The table used to be thirteen objects
+  // typed into app/pricing/page.tsx; it is now generated from
+  // lib/billing/feature-catalog.ts, where every row already carries
+  // `enforcedIn` and `enforcedSymbol` — the same pair this map holds.
+  // Copying them into a second list would be two sources of truth for
+  // the identical claim, and the copy is the one that goes stale.
+  //
+  // The guarantee is unchanged and is asserted below, under "every
+  // comparison row names its enforcement": each row is looked up in the
+  // catalog and its evidence checked exactly the way an entry here is.
+  // scripts/tests/feature-catalog.test.mjs holds the other direction —
+  // that the table IS the catalog rather than a hand-written copy of it.
 
   // --- signup capability grid ---------------------------------------
   "Website & Automation Builder": { file: "src/lib/website-builder.ts", symbol: "export" },
@@ -139,7 +137,10 @@ const { PLANS } = await loadTs("src/lib/billing/plans.ts");
 const bulletClaims = [...new Set(PLANS.flatMap((p) => p.features.map((f) => f.textKey)))];
 
 const pricingSrc = readFileSync("src/app/pricing/page.tsx", "utf8");
-const rowClaims = [...pricingSrc.matchAll(/labelKey: "([^"]+)"/g)].map((m) => m[1]);
+const { soldFeatures } = await loadTs("src/lib/billing/feature-catalog.ts");
+const comparisonRows = soldFeatures();
+const { FEATURE_CATALOG: catalogEntries } = await loadTs("src/lib/billing/feature-catalog.ts");
+const rowClaims = comparisonRows.map((f) => f.id);
 
 const signupSrc = readFileSync("src/app/signup/signup-flow.tsx", "utf8");
 const gridBlock = signupSrc.slice(
@@ -148,7 +149,17 @@ const gridBlock = signupSrc.slice(
 );
 const gridClaims = [...gridBlock.matchAll(/label: "([^"]+)"/g)].map((m) => m[1]);
 
-const allClaims = [...new Set([...bulletClaims, ...rowClaims, ...gridClaims])];
+// The catalog rows justify themselves (see the note in EVIDENCE) and are
+// checked in their own section below, so this map covers the bullets and
+// the signup grid only.
+//
+// NOT `.filter(c => !rowClaims.includes(c))`, which is what this was for
+// one run: three bullet textKeys — creditsPerMonth, aiMemory and
+// teamCollaboration — are ALSO catalog row ids, and filtering by id
+// removed them as claims while leaving their EVIDENCE entries behind.
+// The orphan check then reported the three entries as outliving claims
+// that were still being made on every plan card.
+const allClaims = [...new Set([...bulletClaims, ...gridClaims])];
 
 console.log(
   `== every pricing claim names its code (${bulletClaims.length} bullets, ${rowClaims.length} table rows, ${gridClaims.length} grid rows) ==`
@@ -181,6 +192,148 @@ check("every claim's evidence still exists in the codebase", missingCode, []);
 // lets the next person re-add the bullet and find it "already approved".
 const orphaned = Object.keys(EVIDENCE).filter((k) => !allClaims.includes(k));
 check("no evidence entry outlives the claim it justified", orphaned, []);
+
+// --- the comparison rows, justified by the catalog -----------------------
+console.log(
+  `\n== every comparison row names its enforcement (${comparisonRows.length} rows) ==`
+);
+// A FLOOR, so an empty catalog cannot produce an empty offender list and
+// a green line — the shape scripts/scan-unjudged-numbers.mjs exists for,
+// and the shape three scrapers in db-migrations.test.mjs actually had.
+check("the catalog produced rows to check", comparisonRows.length >= 20, true);
+const rowsWithoutEvidence = [];
+for (const row of comparisonRows) {
+  if (!row.enforcedIn) {
+    rowsWithoutEvidence.push(`${row.id}: names no enforcing module`);
+    continue;
+  }
+  if (!existsSync(row.enforcedIn)) {
+    rowsWithoutEvidence.push(`${row.id}: ${row.enforcedIn} does not exist`);
+    continue;
+  }
+  if (row.enforcedSymbol && !readFileSync(row.enforcedIn, "utf8").includes(row.enforcedSymbol)) {
+    rowsWithoutEvidence.push(`${row.id}: ${row.enforcedIn} no longer contains \`${row.enforcedSymbol}\``);
+  }
+}
+check("every comparison row's evidence still exists", rowsWithoutEvidence, []);
+
+// --- a published row is a capability that EXISTS AND WORKS --------------
+console.log("\n== every row on the pricing page is a thing that works ==");
+// =======================================================================
+// THE RULE, in the owner's words: "μια γραμμή στη σελίδα τιμών ΠΡΕΠΕΙ να
+// αντιστοιχεί σε δυνατότητα που υπάρχει και δουλεύει."
+//
+// IT IS NOT THE SAME RULE AS THE ONE ABOVE, and the difference is the
+// whole reason this section exists. Above, a claim must NAME code that
+// exists — which `websiteBuilder` passed for as long as it had existed,
+// because lib/build-modules.ts really does contain `minPlanSlug`; it
+// just gates a different feature. Naming code is cheap. Doing something
+// is not.
+//
+// So a row is judged three ways:
+//
+//   1. it is not a tier held for something unbuilt — `notBuilt` entries
+//      are decided tiers, not products, and the page must not show one;
+//   2. the flag CLEARS ITSELF — a notBuilt entry whose page or route has
+//      landed fails, which is what stops a working feature sitting
+//      behind a placeholder nobody remembers to remove;
+//   3. a row under MAKE really makes something — at least one route it
+//      owns reaches a model, by the same standard sidebar-naming §3b
+//      applies to the nav. A heading that promises generation over a row
+//      that opens a notes form is the defect that rule was written for,
+//      arriving on the page where somebody is deciding what to pay for.
+{
+  const sold = comparisonRows;
+  const held = [];
+  for (const entry of catalogEntries) {
+    if (entry.notBuilt) held.push(entry);
+  }
+  checkTrue(
+    `some tiers are held for unbuilt features (${held.length})`,
+    held.length >= 1,
+    "with none held, the two checks below are about nothing"
+  );
+
+  // 1. No placeholder is published.
+  //
+  //    THIS READS `sold`, WHICH IS soldFeatures() — the same reader the
+  //    page renders from — rather than the catalog. That is the point:
+  //    the filter lives in soldFeatures(), so the defect this catches is
+  //    the reader LOSING it, not an entry losing its flag. An entry
+  //    without the flag is not a held tier at all, and the check above
+  //    would be a tautology if it asked the catalog directly.
+  const publishedPlaceholders = sold.filter((r) => r.notBuilt).map((r) => r.id);
+  check("no row on the table is a tier held for something unbuilt", publishedPlaceholders, []);
+
+  // 2. The flag clears itself. A held tier whose page or route now
+  //    exists is a feature customers are using and cannot see the price
+  //    of — the mirror of the sidebar's `notBuilt` rule, which fails when
+  //    a held row's route starts resolving.
+  const landed = [];
+  for (const entry of held) {
+    for (const page of entry.pages ?? []) {
+      if (existsSync(`src/app/dashboard/${page}/page.tsx`)) {
+        landed.push(`${entry.id}: src/app/dashboard/${page} exists — publish the row`);
+      }
+    }
+    for (const route of entry.routes ?? []) {
+      if (existsSync(`src/app/api/${route}/route.ts`)) {
+        landed.push(`${entry.id}: api/${route} exists — publish the row`);
+      }
+    }
+  }
+  check("no held tier has a page or a route behind it already", landed, []);
+
+  // 3. A row under MAKE really makes something.
+  //
+  //    THE SAME CHECK AS sidebar-naming §3b, from the same module
+  //    rather than a copy of its regex: scripts/tests/lib/
+  //    reaches-a-model.mjs. It follows `@/lib` imports two levels,
+  //    which is what it takes — api/posts/generate does not call the
+  //    SDK itself, it awaits a lib that does.
+  const AI_CALL =
+    /await\s+runCompletion\(|anthropic\.messages\.(create|stream)\(|\.messages\.(create|stream)\(|await\s+synthesiseSpeech\(|await\s+transcribeAudio\(/;
+  // Rows that show what something else MADE rather than making it.
+  // Declared here, in the check, so a third is a decision rather than a
+  // quiet exemption.
+  const DOWNSTREAM = {
+    publishedSites: "what the website builder put live — the builder is the producer",
+    voiceClipLength: "a ceiling on the recorder, not a producer of its own",
+    websiteImageStorage: "capacity for the photos a site is generated FROM",
+    siteEditsPerDay: "a ceiling on editing what the builder produced",
+    siteVersionsKept: "retention of what the builder produced",
+  };
+  const makeRows = sold.filter((r) => r.group === "make");
+  checkTrue(
+    `the MAKE section has rows to judge (${makeRows.length})`,
+    makeRows.length >= 5,
+    "an empty section passes every check below"
+  );
+  const promisesNothing = [];
+  for (const row of makeRows) {
+    if (DOWNSTREAM[row.id]) continue;
+    const reaches = (row.routes ?? []).some((route) =>
+      callsModel(`src/app/api/${route}/route.ts`)
+    );
+    if (!reaches) {
+      promisesNothing.push(`${row.id}: no route it owns reaches a model`);
+    }
+  }
+  check("every row under MAKE really makes something", promisesNothing, []);
+
+  // AND THE CHECK CAN FAIL. Everything above is "this list is empty",
+  // and the cheapest way to empty a list is to stop filling it. The
+  // pattern is run against a route that certainly does reach a model and
+  // one that certainly does not.
+  checkTrue(
+    "the producer scan recognises a real generator",
+    callsModel("src/app/api/posts/generate/route.ts")
+  );
+  checkTrue(
+    "...and does not recognise a plain list route",
+    !callsModel("src/app/api/projects/route.ts")
+  );
+}
 
 // --- the seven, by name -------------------------------------------------
 // Pinned individually rather than trusting the generic check above: these
@@ -283,6 +436,54 @@ console.log("\n== the annual badge and the annual price say the same thing ==");
     const msgs = JSON.parse(readFileSync(file, "utf8"));
     const line = msgs?.pricing?.billingAnnualSaving ?? "";
     checkTrue(`${file}: the annual badge is parameterised, not a frozen number`, line.includes("{percent}"), line);
+  }
+}
+
+// ---------------------------------------------------------------------
+// the page's own count of itself
+// ---------------------------------------------------------------------
+//
+// THE ONE NUMBER ON THIS PAGE NO GATE WAS HOLDING. pricing/page.tsx
+// opened its comparison table with "FORTY-THREE ROWS, IN SEVEN SECTIONS"
+// and "Measured: soldFeatures() returns 43". soldFeatures() returned 45:
+// the V5 tiering round added two rows and nobody came back to the
+// sentence, which is the exact mechanism docs/v5-list.md was wrong in
+// four places by. A reader has no way to tell a count that was true on
+// Tuesday from one that is true now.
+//
+// AND THIS FILE WAS READING THE PAGE AND ASSERTING NOTHING ABOUT IT.
+// `pricingSrc` was loaded at the top and never used again — the same
+// shape scripts/scan-unjudged-numbers.mjs exists to find, in the gate
+// that guards the pricing page. It is used here.
+{
+  const stated = /ROWS:\s*(\d+)/.exec(pricingSrc);
+  checkTrue(
+    "the pricing page states its own row count in a form this gate can read",
+    Boolean(stated),
+    'expected a comment matching /ROWS: (\\d+)/ in src/app/pricing/page.tsx'
+  );
+  if (stated) {
+    checkTrue(
+      `the page says ${stated[1]} rows and soldFeatures() returns ${comparisonRows.length}`,
+      Number(stated[1]) === comparisonRows.length,
+      `page.tsx says ${stated[1]}; the catalog renders ${comparisonRows.length}. Change the comment.`
+    );
+  }
+  // The sections claim is the same kind of promise, from the same block.
+  const groups = new Set(comparisonRows.map((f) => f.group));
+  const statedSections = /in (\w+) sections/.exec(pricingSrc);
+  const WORDS = { two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
+  checkTrue(
+    "the page states how many sections it has",
+    Boolean(statedSections) && statedSections[1].toLowerCase() in WORDS,
+    String(statedSections?.[1])
+  );
+  if (statedSections && statedSections[1].toLowerCase() in WORDS) {
+    checkTrue(
+      `the page says ${statedSections[1]} sections and the catalog fills ${groups.size}`,
+      WORDS[statedSections[1].toLowerCase()] === groups.size,
+      `page.tsx says ${statedSections[1]}; ${groups.size} groups have at least one sold row.`
+    );
   }
 }
 

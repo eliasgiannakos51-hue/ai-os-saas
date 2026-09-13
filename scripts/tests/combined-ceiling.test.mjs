@@ -409,6 +409,18 @@ const CLASSIFIED_PLAN_TABLES = {
   // because it is shaped like the others and the scanner is right to
   // stop on anything shaped like a per-plan number.
   DEFAULT_PIN_LIMITS: { kind: "capacity", why: "how many conversations sit at the top of the sidebar — a usability floor, no cost at all" },
+  // V5.1 tiering. Both are pure CAPACITY and neither touches the credit
+  // ceiling: a project is a row plus its entity_links edges and makes no
+  // model call, and a team member is a seat — the work that member does
+  // is charged to the owner's credits exactly as the owner's own is.
+  DEFAULT_PROJECT_LIMITS: {
+    kind: "capacity",
+    why: "how many folders an account may own; nothing inside one is free",
+  },
+  DEFAULT_SEAT_LIMITS: {
+    kind: "capacity",
+    why: "how many people the PLAN allows — the paid-seat count is a separate check in api/team/invite, and every member spends the owner's credits",
+  },
   // Not a quota at all.
   PLAN_MARGIN_DEFAULTS: { kind: "policy", why: "the multiplier itself — the credit half of the ceiling" },
 };
@@ -524,13 +536,28 @@ console.log("\n== 6. PRICING COPY: every published number is a number the server
 // that refuses the action, and the row's label must exist in all ten
 // locales.
 const pricingSrc = readFileSync("src/app/pricing/page.tsx", "utf8");
-const rowsBlock = pricingSrc.slice(
-  pricingSrc.indexOf("const COMPARISON_ROWS"),
-  pricingSrc.indexOf("function ComparisonCellContent")
+// THE ROWS MOVED, AND THE RULE DID NOT. They were thirteen objects in
+// app/pricing/page.tsx with a `labelKey` each; they are now
+// lib/billing/feature-catalog.ts, which the page renders and which
+// scripts/tests/feature-catalog.test.mjs holds to the product (every
+// page, every route and every nav row claimed, every tier declared).
+// This section still asks the question it always asked — does the
+// published number come from the module that enforces it — of whichever
+// file the cells live in.
+const catalogSrc = readFileSync("src/lib/billing/feature-catalog.ts", "utf8");
+// FROM THE CELL BUILDERS, not from the catalog array, because the unit
+// formatting lives in `unitCell` above it — slicing at FEATURE_CATALOG
+// put the one remaining `text:` template outside the block and the
+// scan below came back empty. Its floor caught that, which is what a
+// floor is for.
+const rowsBlock = catalogSrc.slice(
+  catalogSrc.indexOf("// Cell builders"),
+  catalogSrc.indexOf("// Readers")
 );
-const rowLabels = [...rowsBlock.matchAll(/labelKey:\s*"([^"]+)"/g)].map((m) => m[1]);
+const { soldFeatures } = await loadTs("src/lib/billing/feature-catalog.ts");
+const rowLabels = soldFeatures().map((f) => f.id);
 console.log(`        ${rowLabels.length} comparison rows: ${rowLabels.join(", ")}`);
-check("the pricing table still has rows", rowLabels.length >= 12, `${rowLabels.length}`);
+check("the pricing table still has rows", rowLabels.length >= 30, `${rowLabels.length}`);
 // 14 -> 12, and the two that went are a DELETION, not a regression.
 // `mobileSaasBuilder` and `imageVideo` were ticks for features that do not
 // exist — /dashboard/images and /videos are CRUD forms with no model call,
@@ -607,16 +634,47 @@ for (const [labelKey, { accessor, enforcedIn, enforcedBy }] of Object.entries(EN
 // may only ever be an expression.
 check(`the pricing rows block was found (${rowsBlock.length} chars)`, rowsBlock.length >= 500,
   "matchAll over an empty block yields no cells, and the check below passes on nothing");
-const literalCells = [
-  ...rowsBlock.matchAll(/text:\s*(?:"([^"]*)"|`([^`]*)`)/g),
-]
+const cellTexts = [...rowsBlock.matchAll(/text:\s*(?:"([^"]*)"|`([^`]*)`)/g)]
   .map((m) => m[1] ?? m[2])
   .filter((s) => s.trim() !== "");
+// A template literal WITH an interpolation is an expression — `${count}
+// ${words.perHour}` is two lookups and a space, which is the shape a
+// translated unit has to take. One WITHOUT is a literal wearing
+// backticks.
+// A FLOOR ON THE SCAN. Both checks below are "this list is empty", and
+// a matchAll that stopped matching produces two empty lists and two
+// green lines — the shape scripts/scan-unjudged-numbers.mjs exists for.
+// Six cells carry a quoted or backticked `text:` today.
+// A FLOOR ON THE SCAN. Both checks below are "this list is empty", and
+// a matchAll that stopped matching produces two empty lists and two
+// green lines — the shape scripts/scan-unjudged-numbers.mjs exists for.
+//
+// ONE, AND THAT IS THE HONEST NUMBER. It was six until the per-unit
+// formatting was pulled into `unitCell`; there is now a single place
+// where a number and a translated unit are joined, which is the point
+// of that helper. A floor of one still dies the moment the scan does.
+check(
+  `the cell-text scan found cells (${cellTexts.length})`,
+  cellTexts.length >= 1,
+  "an empty scan makes both checks below pass on nothing"
+);
+const literalCells = cellTexts.filter((s) => !s.includes("${"));
 check(
   "no comparison cell displays hardcoded text",
   literalCells.length === 0,
   literalCells.join(" | ")
 );
+// AND THE HALF THE OLD CHECK COULD NOT SEE, which is the half that
+// matters now that cells are templates: a typed-in NUMBER inside one.
+// `\`60 ${words.perHour}\`` passes the literal check above and is
+// exactly the promise nothing keeps — it was in the catalog's first
+// draft, for the integration read ceiling, and the real accessor is
+// maxIntegrationReadsPerHour().
+const typedInNumbers = cellTexts
+  .map((s) => ({ text: s, bare: s.replace(/\$\{[^}]*\}/g, "") }))
+  .filter((c) => /\d/.test(c.bare))
+  .map((c) => c.text);
+check("no comparison cell carries a typed-in number", typedInNumbers.length === 0, typedInNumbers.join(" | "));
 
 // NO ENGLISH SENTENCE LITERALS ANYWHERE ON THIS PAGE.
 //
@@ -641,10 +699,24 @@ check(
   const WORDS = /(?:^|[^A-Za-z])[a-z]{3,}(?:[ ,][a-z]{3,}){2,}/i;
   // ONE predicate, used by the scan AND by the self-test below, so the two
   // cannot drift into checking different things.
+  // A TEMPLATE'S INTERPOLATIONS ARE NOT ITS TEXT. `${plan.highlighted ?
+  // "a" : "b"}` inside a className is code, and leaving it in stopped
+  // the Tailwind-class exemption below from recognising the class list
+  // it was inside — so the page's own card className read as prose.
+  //
+  // IT HAD NEVER BEEN REACHED BEFORE. The quoted scan pairs backticks in
+  // order, and until an `id={`plan-${slug}`}` was added two lines above
+  // it, the className template was the CLOSING half of a pair that began
+  // at an earlier backtick — so the string this predicate saw was the
+  // gap between two templates, not the class list. Adding one balanced
+  // template realigned every pair after it and the className arrived
+  // here for the first time. Worth stating plainly: this check was
+  // partly blind to backtick strings, and nothing said so.
+  const withoutInterpolation = (s) => s.replace(/\$\{[\s\S]*?\}/g, " ");
   const isEnglishSentence = (s) =>
-    WORDS.test(s) &&
+    WORDS.test(withoutInterpolation(s)) &&
     // Tailwind class lists and other all-token strings.
-    !/^[\w:\-[\]. ]+$/.test(s) &&
+    !/^[\w:\-[\]./() ]+$/.test(withoutInterpolation(s).trim()) &&
     // Module specifiers and URLs — a path, not prose.
     !/^(?:[@.]?\/|https?:)/.test(s) &&
     // The page's own SEO description: metadata, not UI copy.

@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { accountHasCapability } from "@/lib/billing/capability-gate";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import {
   hasEnoughCredits,
   resolveEffectivePlan,
+  resolveEffectivePlanSlug,
   getPurchasedPackCreditPriceEur,
 } from "@/lib/billing/credits";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
@@ -67,6 +69,19 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    // THE PLAN GATE, before anything that costs money. V5 shipped this
+    // feature and put it in no plan at all; the tiering of 2026-09-13
+    // puts it behind `capabilities.predictions`, and this is the line that
+    // makes the pricing page's column true rather than decorative.
+    // The owner is exempt; a beta credit bypass is NOT — a bypass waives
+    // the charge, not what the plan includes.
+    if (!accountHasCapability(await resolveEffectivePlanSlug(user), "predictions", isAdminEmail(user.email))) {
+      return NextResponse.json(
+        { ok: false, code: "not_included", error: "Predictions is not included on this plan." },
+        { status: 403 }
+      );
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;

@@ -35,7 +35,11 @@ export type OverageState = OverageSettings & {
   month: string;
 };
 
-export const OVERAGE_STATE_OFF: OverageState = { ...OVERAGE_OFF, spentEur: 0, month: "" };
+// NO NAMED OFF-SENTINEL. `OVERAGE_STATE_OFF` sat here as the fails-to-off
+// value and both places that need one spread OVERAGE_OFF inline instead
+// (see the two returns in loadOverageState below, which differ in
+// spentEur and month anyway). Changing the named constant would have
+// changed nothing, which is the worst property a safety default can have.
 
 export async function loadOverageState(userId: string, now = new Date()): Promise<OverageState> {
   const month = billingMonth(now);

@@ -545,40 +545,44 @@ export async function grantMonthlyPlanCredits(
   return granted;
 }
 
+/**
+ * THE FOUR FLAT PRICES THAT ANYTHING STILL READS — and only ONE of them
+ * is a charge.
+ *
+ * This table had FIFTEEN entries on 2026-09-13 and eleven of them were
+ * read by nothing: agentCreate, automationCreate, createAnything,
+ * missionPlan, missionReview, mobileAppCreate, saasProjectCreate,
+ * webSearchPerQuery, websiteCreate, websiteEdit, websiteGenerate. Every
+ * AI charge in this product moved to reserve-then-settle on MEASURED
+ * usage (lib/billing/reservations.ts, lib/billing/estimate.ts), and the
+ * flat number each route used to charge stayed behind. A price nobody
+ * charges is worse than an absent one: `websiteCreate: 100` reads as
+ * "creating a site costs 100 credits" to everyone who opens this file,
+ * and it had not been true for months.
+ *
+ * FIVE OF THE ELEVEN SURVIVED A GREP because the same WORD is alive
+ * somewhere else — createAnything, automationCreate, missionPlan,
+ * websiteGenerate and websiteEdit are all live ACTION_PROFILES keys in
+ * lib/billing/estimate.ts. `grep -w createAnything` therefore returns
+ * plenty, and none of it reads this table. They were settled by renaming
+ * the key here and running `tsc`, which is what
+ * scripts/scan-declared-never-read.mjs does.
+ *
+ * WHAT EACH OF THE FOUR IS FOR, since three of them are not prices:
+ *
+ *   clarificationCheck — a REAL charge. api/websites/generate and
+ *   api/automations/create both call hasEnoughCredits against it before
+ *   the clarifying-questions call.
+ *
+ *   chatMessage, textAction, weeklyReflection — NOT charges. Each route
+ *   reserves and settles on measured usage and passes this number to
+ *   recordAiCallForDailySpend, the daily-spend COUNTER. They size a
+ *   telemetry tick, not a bill, and moving one moves a graph.
+ */
 export const CREDIT_COSTS = {
   chatMessage: 1,
-  createAnything: 1,
   textAction: 1,
-  agentCreate: 40,
-  automationCreate: 50,
-  websiteCreate: 100,
-  mobileAppCreate: 300,
-  // Not wired to any UI yet — no "SaaS Project" builder exists in the app.
-  // Defined so the cost is ready the moment that module ships.
-  saasProjectCreate: 700,
-  // Mission Control's Planner/Reviewer agents (api/mission/plan,
-  // api/mission/review) — each step's own "Create with AI" click is a
-  // separate, already-costed createAnything call, not covered by these.
-  missionPlan: 2,
-  missionReview: 2,
-  // Weekly Reflection (api/reflection/generate) — on-demand, so this is
-  // paid only when the user actually clicks "Generate Weekly Reflection".
   weeklyReflection: 2,
-  // Website Builder (api/websites/generate) — a real Claude HTML/CSS
-  // generation call, distinct from websiteCreate above (the existing
-  // "Websites" Build module's plain CRUD tracker, which never calls AI).
-  // No longer the actual charge: generation cost is now dynamic (see
-  // lib/website-generation-cost.ts, used by
-  // api/websites/generate/process/route.ts), based on description
-  // length, reference image count, and real generated HTML length. Kept
-  // here only as an approximate reference point for other code/docs.
-  websiteGenerate: 100,
-  // Website Builder post-generation editing (api/websites/edit). No
-  // longer the actual charge: edits are reserved and settled on MEASURED
-  // usage through lib/billing/reservations.ts, exactly like generation —
-  // a cheap find-replace patch and a full regeneration have wildly
-  // different real costs. Kept only as a reference point for docs.
-  websiteEdit: 50,
   // The "does this request need clarifying questions first?" check (see
   // lib/clarification.ts) — a small, cheap, forced-tool-use call that
   // runs before Website Builder, Mission Control, Automations, and
@@ -588,15 +592,6 @@ export const CREDIT_COSTS = {
   // for the same request — the resubmission after answering skips this
   // check entirely (see each route's skipClarification flag).
   clarificationCheck: 1,
-  // Anthropic's native web_search_20250305 server tool (api/chat/route.ts,
-  // api/records/ask/route.ts) — small extra cost ON TOP OF the normal
-  // chatMessage charge, added ONLY when the model actually performed at
-  // least one real search for that reply (response.usage.server_tool_use
-  // .web_search_requests > 0 — offering the tool costs nothing by itself,
-  // Anthropic only bills for searches actually executed). Charged once
-  // per search performed, not once per message, since a single reply can
-  // trigger multiple searches.
-  webSearchPerQuery: 1,
 } as const;
 
 // TEMPORARY diagnostic: shows the exact numbers deductCredits compared,

@@ -13,15 +13,18 @@ import type { PlanSlug } from "@/lib/billing/plans";
 // static page costs bandwidth, not per-request Anthropic money, and the
 // number is negotiated per deal.
 
-export const UNLIMITED = Number.POSITIVE_INFINITY;
+export const UNLIMITED_SITES = Number.POSITIVE_INFINITY;
 
 export const DEFAULT_PUBLISH_LIMITS: Record<PlanSlug, number> = {
   free: 0,
   starter: 1,
-  growth: 3,
+  // 3 -> 5 with the 2026-09-13 tiering: Growth is the plan that sells
+  // "five sites", and the number a buyer reads is the number the route
+  // refuses on.
+  growth: 5,
   professional: 10,
   ultimate: 30,
-  enterprise: UNLIMITED,
+  enterprise: UNLIMITED_SITES,
 };
 
 export const PUBLISH_LIMIT_ENV_VARS: Record<PlanSlug, string> = {
@@ -33,7 +36,7 @@ export const PUBLISH_LIMIT_ENV_VARS: Record<PlanSlug, string> = {
   enterprise: "PUBLISHED_SITE_LIMIT_ENTERPRISE",
 };
 
-const MAX_SANE_LIMIT = 10000;
+const MAX_SANE_PUBLISH_LIMIT = 10000;
 
 export type PublishLimitWarning = { variable: string; value: string; reason: string };
 
@@ -52,7 +55,7 @@ export function parsePublishLimits(env: Record<string, string | undefined>): {
     // "unlimited" spelled out, because Infinity is not something you can
     // type into a hosting dashboard's environment editor.
     if (raw.trim().toLowerCase() === "unlimited") {
-      limits[slug] = UNLIMITED;
+      limits[slug] = UNLIMITED_SITES;
       continue;
     }
 
@@ -61,8 +64,8 @@ export function parsePublishLimits(env: Record<string, string | undefined>): {
       warnings.push({ variable, value: raw, reason: 'not a whole number (or "unlimited")' });
       continue;
     }
-    if (parsed < 0 || parsed > MAX_SANE_LIMIT) {
-      warnings.push({ variable, value: raw, reason: `outside the allowed range 0-${MAX_SANE_LIMIT}` });
+    if (parsed < 0 || parsed > MAX_SANE_PUBLISH_LIMIT) {
+      warnings.push({ variable, value: raw, reason: `outside the allowed range 0-${MAX_SANE_PUBLISH_LIMIT}` });
       continue;
     }
     limits[slug] = parsed;
@@ -71,16 +74,16 @@ export function parsePublishLimits(env: Record<string, string | undefined>): {
   return { limits, warnings };
 }
 
-let cached: Record<PlanSlug, number> | null = null;
+let cachedPublishLimits: Record<PlanSlug, number> | null = null;
 
 export function resolvePublishLimits(): Record<PlanSlug, number> {
-  if (cached) return cached;
+  if (cachedPublishLimits) return cachedPublishLimits;
   const { limits, warnings } = parsePublishLimits(typeof process === "undefined" ? {} : process.env);
   for (const w of warnings) {
     // eslint-disable-next-line no-console
     console.warn(`[publish-limits] ${w.variable}="${w.value}" ignored (${w.reason}) — using default.`);
   }
-  cached = limits;
+  cachedPublishLimits = limits;
   return limits;
 }
 

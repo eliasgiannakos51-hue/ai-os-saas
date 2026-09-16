@@ -53,7 +53,6 @@ const BASELINE = "part of the baseline schema — a database without it fails th
 const RPC_NEEDS_NO_CANARY = {
   claim_activation_run: BASELINE,
   consume_free_chat: BASELINE,
-  delete_user_file_objects: BASELINE,
   prune_integration_sync_log: BASELINE,
   record_production_error: BASELINE,
   record_site_view: BASELINE,

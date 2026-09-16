@@ -9,7 +9,8 @@
 // schema will not stay in sync with the schema.
 //
 // Run: node scripts/tests/gdpr-coverage.test.mjs
-import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { loadTs } from "./load-ts.mjs";
 // The same comment stripper the pre-commit marker checker uses, rather
 // than a fifth copy of it: every legacy table below is discussed at
@@ -295,7 +296,64 @@ check(
   "...BEFORE deleteUser, so a failure stops the deletion",
   confirmSrc.indexOf("forget_user_in_production_errors") < confirmSrc.indexOf("deleteUser(")
 );
-check("...and storage objects are still deleted too", /delete_user_file_objects/.test(confirmSrc));
+check("...and storage objects are still deleted too", /delete_user_storage_objects/.test(confirmSrc));
+
+// EVERY BUCKET, NOT THE ONE THE FUNCTION WAS WRITTEN FOR.
+//
+// delete_user_file_objects() deleted from 'user-files' and nothing else,
+// and the check above — in its previous form — asserted only that it was
+// CALLED. Both were true for a year while 'create-attachments' and
+// 'website-references' survived every account deletion; the second of
+// those is a PUBLIC bucket, so a deleted account's photographs stayed
+// reachable by URL.
+//
+// Nothing here could have caught it, because the question it asked was
+// about the bucket that had joined. So this asks the other one: what is
+// the population of buckets, and is each member in the delete list?
+// docs/shapes.md, "The check covers the participants, not the ones who
+// stayed out".
+const BUCKET_CONST = /BUCKET[A-Z_]*\s*=\s*"([a-z][a-z-]+)"/g;
+const libFiles = [];
+(function collect(dir) {
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) collect(full);
+    else if (entry.endsWith(".ts")) libFiles.push(full);
+  }
+})("src/lib");
+const buckets = new Set();
+for (const file of libFiles) {
+  for (const m of readFileSync(file, "utf8").matchAll(BUCKET_CONST)) buckets.add(m[1]);
+}
+check(`the bucket constants were found (${[...buckets].sort().join(", ")})`, buckets.size >= 3);
+
+const eraseMigration = "supabase/migrations/20261005000000_delete_user_storage_objects_all_buckets.sql";
+check("the all-buckets erasure migration exists", existsSync(eraseMigration));
+if (existsSync(eraseMigration) && buckets.size >= 3) {
+  const body = readFileSync(eraseMigration, "utf8");
+  // The array the function actually deletes from — not the prose above it,
+  // which names all three too and would make this pass while the code
+  // named one. SHAPE: A line-level tool asserting a structural property.
+  const declared = /v_buckets text\[\] := array\[([^\]]+)\]/.exec(body);
+  check("the function declares its bucket list as one array", Boolean(declared));
+  const listed = declared ? [...declared[1].matchAll(/'([a-z][a-z-]+)'/g)].map((m) => m[1]) : [];
+  // check() here takes a CONDITION, not an actual/expected pair — and an
+  // array is truthy either way, so `check(name, missing, [])` passes with
+  // two buckets missing. Written that way first and caught by mutating the
+  // migration down to one bucket rather than by reading it back.
+  const missing = [...buckets].filter((b) => !listed.includes(b));
+  check(
+    `the array holds every bucket (${listed.join(", ") || "none"})`,
+    missing.length === 0,
+    `not deleted on account erasure: ${missing.join(", ")}`
+  );
+  // FLOOR. `listed` is scraped out of the migration, and an unparsed array
+  // yields [] — which makes the "no unknown bucket" line below green while
+  // the function deletes from nothing at all.
+  check(`the array parsed to bucket names (${listed.length})`, listed.length >= 3, `parsed: ${listed.join(", ") || "none"}`);
+  const extra = listed.filter((b) => !buckets.has(b));
+  check("...and no bucket the application does not use", extra.length === 0, `unknown bucket(s): ${extra.join(", ")}`);
+}
 // The migration that defines it has to be in the repo.
 const migration = "supabase/migrations/20260808_gdpr_erasure_gaps.sql";
 check("the erasure migration exists", existsSync(migration));

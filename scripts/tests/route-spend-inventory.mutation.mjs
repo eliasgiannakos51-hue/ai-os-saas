@@ -31,13 +31,9 @@ const PPTX = "src/app/api/presentations/[id]/pptx/route.ts";
 const MISSION = "src/app/api/mission/[id]/pdf/route.ts";
 const START_JOB = "src/lib/jobs/start-job.ts";
 
-const EXPORT_BLOCK = `    // Free on purpose — this was paid for when it was written — but not
-    // unbounded: see lib/export-guard.ts for why those are two questions.
-    if (!(await allowExport(user.id))) {
-      return NextResponse.json({ error: "too_many_exports" }, { status: 429 });
-    }
-
-`;
+// One line, for the reason in the shape note at the top of
+// scripts/tests/lib/mutation-runner.mjs.
+const EXPORT_BLOCK = ['    // Free on purpose — this was paid for when it was written — but not', '    // unbounded: see lib/export-guard.ts for why those are two questions.', '    if (!(await allowExport(user.id))) {', '      return NextResponse.json({ error: "too_many_exports" }, { status: 429 });', '    }', '', ''].join("\n");
 
 // Top-level declaration, under the name the reader looks for — see the
 // SHAPE note in scripts/tests/lib/mutation-runner.mjs.

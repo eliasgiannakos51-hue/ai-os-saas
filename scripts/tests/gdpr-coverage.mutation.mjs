@@ -28,9 +28,37 @@ const REGISTRY = "src/lib/gdpr/user-data-registry.ts";
 // The export route joined the targets when section 6 was added: a
 // mutation whose file is not restored here would be left in the tree.
 const EXPORT_ROUTE = "src/app/api/account/export/route.ts";
-const TARGETS = [GATE, REGISTRY, EXPORT_ROUTE];
+const ERASE_MIGRATION = "supabase/migrations/20261005000000_delete_user_storage_objects_all_buckets.sql";
+const DELETE_ROUTE = "src/app/api/delete-account/confirm/route.ts";
+const TARGETS = [GATE, REGISTRY, EXPORT_ROUTE, ERASE_MIGRATION, DELETE_ROUTE];
 
 const MUTANTS = [
+  {
+    // THE DEFECT THAT WAS REAL. delete_user_file_objects() deleted from
+    // 'user-files' alone for a year, while 'create-attachments' and the
+    // PUBLIC 'website-references' survived every account deletion. The
+    // check that existed asserted the CALL was made, which stayed true
+    // throughout.
+    name: "the erasure function goes back to one bucket of three",
+    file: ERASE_MIGRATION,
+    from: "array['user-files', 'create-attachments', 'website-references']",
+    to: "array['user-files']",
+    expect: "the array holds every bucket",
+  },
+  {
+    name: "the bucket list stops being one array the gate can read",
+    file: ERASE_MIGRATION,
+    from: "  v_buckets text[] := array['user-files', 'create-attachments', 'website-references'];",
+    to: "  v_buckets text[] := string_to_array('user-files,create-attachments,website-references', ',');",
+    expect: "declares its bucket list as one array",
+  },
+  {
+    name: "account deletion stops removing storage objects at all",
+    file: DELETE_ROUTE,
+    from: 'await admin.rpc("delete_user_storage_objects", {',
+    to: 'await admin.rpc("forget_user_in_production_errors", {',
+    expect: "storage objects are still deleted too",
+  },
   {
     name: "a legacy table is dropped from the registry, as instructed",
     file: REGISTRY,

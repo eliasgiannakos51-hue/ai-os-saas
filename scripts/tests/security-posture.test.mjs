@@ -568,13 +568,13 @@ const DELETE_ROUTE = "src/app/api/delete-account/confirm/route.ts";
 const deleteSrc = readFileSync(DELETE_ROUTE, "utf8");
 checkTrue(
   "account deletion clears the user's file objects",
-  /rpc\("delete_user_file_objects"/.test(deleteSrc)
+  /rpc\("delete_user_storage_objects"/.test(deleteSrc)
 );
 // ...and BEFORE the auth user is deleted, so a failure is still
 // attributable to an account that exists.
 checkTrue(
   "...before the auth user is deleted",
-  deleteSrc.indexOf('delete_user_file_objects') < deleteSrc.indexOf("admin.deleteUser")
+  deleteSrc.indexOf('delete_user_storage_objects') < deleteSrc.indexOf("admin.deleteUser")
 );
 
 // The route this cron actually runs on must be the one the scheduler

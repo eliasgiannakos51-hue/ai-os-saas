@@ -48,6 +48,17 @@
  * about the two-character block-comment opener, which is the same defect
  * one layer down: a parser looking for a marker cannot tell the marker
  * from a description of it.
+ *
+ * AND ANY CONST THE LIST REFERS TO MUST FIT ON ONE LINE. The prelude that
+ * reader evaluates the array under is built from the suite's own
+ * `const NAME = ...;` declarations, and only the single-line ones, so
+ * nothing with a side effect is dragged in. A shared block of replaced
+ * code written as a multi-line template literal is therefore not in scope
+ * when the array is evaluated, the evaluation throws on an undefined
+ * name, and the suite falls back exactly as an inlined list does — with
+ * no error anywhere, only FALLBACK_CEILING moving by one.
+ * route-spend-inventory.mutation.mjs did this on 2026-09-16; the fix was
+ * `[...].join("\n")` on one line, not a higher ceiling.
  */
 import { readFileSync } from "node:fs";
 import { writeFileSync } from "./sidecar-write.mjs";

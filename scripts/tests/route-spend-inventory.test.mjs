@@ -206,14 +206,14 @@ checkTrue(
 // THE INVENTORY. A route that spends and does NOT reserve is here, with
 // what bounds it instead and why that is the right answer.
 //
-//   "limited" — free by design, bounded by checkRateLimit. VERIFIED three
+//   "limited" — free on purpose, bounded by checkRateLimit. VERIFIED three
 //               ways: the limiter must be reachable within one hop, the
 //               SCOPE it names must be the one written here, and the route
 //               must answer 429 somewhere. The scope is checked because
 //               two routes sharing one scope share one budget without
 //               either of them saying so, and nothing else in the tree
 //               would notice.
-//   "none"    — free by design and deliberately unbounded, with the
+//   "none"    — free on purpose and unbounded on purpose, with the
 //               argument for why an unbounded loop of it costs nothing.
 //   "artefact"— does not spend at all. The kind came from a module in its
 //               import closure that some OTHER route uses to spend. These

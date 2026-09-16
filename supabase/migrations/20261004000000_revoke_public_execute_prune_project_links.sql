@@ -61,26 +61,42 @@ grant execute on function public.prune_project_links() to service_role;
 
 
 -- ----------------------------------------------------------------------
--- AND TWO MORE THE SAME GATE NAMED, from 20261003's chat-memory round
+-- AND A CORRECTION, IN THE SAME FILE THAT CARRIED THE MISTAKE
 -- ----------------------------------------------------------------------
 --
---     FAIL  only the 9 argued-for functions are callable by a signed-in
---           user (12)
---           unexpected: chat_memory_prunable, chat_memory_record,
---                       prune_chat_memory
+-- An earlier draft of THIS migration also contained:
 --
--- chat_memory_record STAYS granted to authenticated, and is added to that
--- gate's argued-for list instead. It is called with the USER'S OWN
--- client from lib/chat/memory.ts — deliberately, because chat_memory has
--- no UPDATE policy and the function is how a repeated fact bumps a
--- counter instead of inserting a sixth identical row. That is an exposure
--- with a reason, which is exactly what the list is for.
+--     revoke all on function public.chat_memory_prunable(integer, integer)
+--       from authenticated;
+--     revoke all on function public.prune_chat_memory(integer, integer)
+--       from authenticated;
 --
--- THE OTHER TWO HAVE NO SUCH CALLER. chat_memory_prunable and
--- prune_chat_memory are named only by src/lib/health/schema-canaries.ts,
--- read by /api/health — which builds its client with createAdminClient(),
--- i.e. the service role. Nothing reaches them from a browser, so the
--- authenticated grant is surface with no user behind it.
-
-revoke all on function public.chat_memory_prunable(integer, integer) from authenticated;
-revoke all on function public.prune_chat_memory(integer, integer) from authenticated;
+-- Both lines were WRONG and both are removed. The reasoning behind them
+-- was that grants-and-policies.dbtest.mjs listed the two as callable by a
+-- signed-in user without being argued for, and a grep appeared to show
+-- that only src/lib/health/schema-canaries.ts named them — read by
+-- /api/health, which uses createAdminClient(). The conclusion drawn was
+-- "surface with no user behind it". That conclusion was false.
+--
+-- BOTH ARE CALLED FROM THE BROWSER, with the user's own client:
+--
+--   src/components/memory/ai-memory-list.tsx:108
+--     supabase.rpc("prune_chat_memory")            <- the Forget button,
+--     behind a window.confirm, on a client built by @/lib/supabase/client
+--
+--   src/app/dashboard/ai-memory/page.tsx:58
+--     supabase.rpc("chat_memory_prunable")         <- the count shown
+--     BEFORE the button is pressed, on the user's server-side session
+--
+-- Revoking those grants would have broken the Forget control and the
+-- count beside it, for every user, the moment this file was pasted into
+-- the SQL editor. That is the whole hazard this repository's first
+-- working rule exists for: a migration is applied by hand, so a wrong one
+-- waits silently until somebody runs it.
+--
+-- prune_chat_memory is `security invoker` ON PURPOSE — it deletes as the
+-- caller, so RLS scopes it to that person's own rows — and its own
+-- migration says why it must never be swept by a cron: "nothing deletes a
+-- remembered fact without somebody pressing a button." Both functions
+-- keep their grants, and grants-and-policies.dbtest.mjs now argues for
+-- all three rather than revoking two of them.

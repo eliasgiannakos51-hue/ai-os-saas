@@ -1178,3 +1178,65 @@ scanned for.
 **It reports; it does not gate.** A prodtest signing in to an English
 account and asserting English is narrow, not wrong, and which to widen is
 a judgement about where the product is going.
+
+## A line-level tool asserting a structural property
+
+`security-posture.test.mjs` stripped block comments with a regex to count
+live SQL statements. A **glob** — `src/components/entity-links/*` — inside
+a `--` line was read as an opener, the non-greedy match closed at the first
+genuine `*/` **541,136 characters later** in a migration written a month
+afterwards, and the count read **28 instead of 86**. Fifty-eight tables
+vanished from a security census.
+
+Nothing was unterminated. The text said "here is an opener"; the structure
+said "this is inside a line comment, so it is prose". The tool could only
+read the first.
+
+**Four more in this repository, all the same shape:**
+
+| the tool | the text it read | the structure it meant |
+|---|---|---|
+| `mutant-list.mjs` finds each suite's mutant array by `indexOf` of a marker | a comment ABOVE the declaration that merely *named* the marker | the declaration, not a description of it |
+| `mutation-coverage` sorts gates into money / what-a-person-meets / everything-else with `^`-anchored name regexes | the first word of a filename | whether the gate guards something a person meets |
+| `combined-ceiling` paired backticks in order | the *n*th backtick | whether this backtick opens or closes |
+| `scan-english-anchored-gates`, first version | every string in the file | strings in *predicate position*, not in comments or failure messages |
+
+`mutation-coverage`'s is the quietest and the worst: `plural-forms`,
+`empty-states`, `landmarks` and `one-primary-action` are every one of them
+a thing a person meets, and every one lands in "everything else" — so the
+category prints **0** and reads as finished, because its membership test
+is a prefix where the category is a property.
+
+**Why it survives.** Text and structure agree almost always. The tool is
+right until the first file where they differ — and that file is usually
+the one in another alphabet, or the one whose author wrote a comment about
+the thing being searched for. It is the `\b`-is-ASCII shape with the
+alphabet replaced by syntax.
+
+**It cannot be scanned for, and the attempt is the best evidence of that.**
+Three versions were written on 2026-09-16:
+
+1. four signals (balance-counting, regex comment-stripping, marker lookup,
+   `^`-anchored classification) → **400 hits across 260 of 350 gates**
+2. narrowed to markers that also appear in a comment somewhere → **274**
+3. minus CLI flags and self-matches → **192**, still mostly `"insert
+   into"` in SQL prose and `"aria-hidden"` as an attribute
+
+**Precision approximately zero, all three times.** And the reason is the
+shape itself: deciding whether a hit is real needs two structural facts —
+which files that tool actually reads, and whether it strips comments
+first — and all three versions tried to establish them by matching text.
+The scanner reproduced the defect it was hunting, which is why it was
+deleted rather than committed.
+
+**What does help, and is already the convention here:** 126 of 258 gates
+strip comments before matching, and every one of the five instances above
+now carries its limitation in its own header. `comment-claims.test.mjs`
+ratchets the census of such notes at 67 precisely so the list stays short
+enough for a person to read — which is the only instrument that has ever
+found this shape.
+
+**The question to ask instead of running a scan:** *this check reads text
+— what would have to be true about the structure for the text to lie?* For
+a comment: could this token appear in prose? For a name: is the category a
+property or a prefix? For a pair: can one half be quoted?

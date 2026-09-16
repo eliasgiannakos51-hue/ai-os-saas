@@ -205,6 +205,22 @@ export function CreateChat({
     setLastSubmitted(message);
     const imagePaths = await uploadAttachedImages();
     const outcome = await submit(message, false, imagePaths);
+    // THE BYTES ARE UNDONE WHEN THE REQUEST THEY WERE FOR FAILS.
+    //
+    // The photographs go to create-attachments before /api/create is
+    // called, so a failed request leaves objects nothing points at.
+    // website-references has a sweeper for exactly this
+    // (/api/cron/website-storage-cleanup); this bucket has none, so the
+    // undo has to happen where the upload did. Only on `error`: a
+    // needsClarification outcome is a request still in flight and its
+    // images are about to be used.
+    if (outcome.type === "error" && imagePaths.length > 0) {
+      try {
+        await supabase.storage.from(CREATE_ATTACHMENT_BUCKET).remove(imagePaths);
+      } catch {
+        /* the request already failed; a second message about cleanup helps nobody */
+      }
+    }
     setResult(outcome);
     if (outcome.type === "needsClarification") {
       setPendingMessage(message);

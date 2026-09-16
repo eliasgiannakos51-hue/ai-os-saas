@@ -310,6 +310,30 @@ export function FilesWorkspace({
       body: JSON.stringify({ path, filename: file.name }),
     });
     const data = await parseJson(response);
+    const registered = Boolean(data?.ok);
+    // THE UPLOAD IS UNDONE IF THE REGISTRATION DOES NOT LAND.
+    //
+    // The bytes go to the bucket first and the row is written second, so
+    // a failure between them — a 500, a refused plan cap, a dropped
+    // connection — leaves an object with no row anywhere. Nothing would
+    // ever have found it: the quota is summed from user_files.size_bytes
+    // (lib/files/store.ts), so it does not show up as usage; the delete
+    // button works from the row, so the person cannot remove it; and the
+    // only sweeper this product has runs over website-references, not
+    // over this bucket.
+    //
+    // Deleted from the browser because that is where the acquisition
+    // happened, and the storage policy for user-files already allows a
+    // person to delete inside their own folder. A failure here is
+    // swallowed: the upload has already failed and telling them twice
+    // about a cleanup they did not ask for helps nobody.
+    if (!registered) {
+      try {
+        await createBrowserSupabase().storage.from(FILE_BUCKET).remove([path]);
+      } catch {
+        /* the object stays; the person still sees the upload error above */
+      }
+    }
     return { kind: "done", data: data ?? { ok: false, error: t("uploadError") } };
   }
 

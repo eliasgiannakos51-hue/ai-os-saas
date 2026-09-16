@@ -29,8 +29,27 @@ const BASELINE_SQL = "supabase/migrations/20260803000000_baseline_schema.sql";
 const RESET_CRON = "src/app/api/cron/reset-credits/route.ts";
 const SCHEDULED_CRON = "src/app/api/cron/scheduled-runs/route.ts";
 const ADMIN_CLIENT = "src/lib/supabase/admin.ts";
+const SITEMAP = "src/app/sitemap.ts";
 
 const MUTANTS = [
+  {
+    // THE POPULATION, not an assertion over it. sitemap.ts reads
+    // published_sites through the admin client with no session, and was
+    // outside this gate's scan for its whole life because the scan
+    // matched a FILENAME. Taking it back out must go red.
+    name: "the scan goes back to matching route.ts only",
+    file: GATE,
+    from: 'const ENDPOINT_FILES = /(^|\\/)(route\\.tsx?|sitemap\\.ts|robots\\.ts|manifest\\.ts|opengraph-image\\.tsx)$/;',
+    to: 'const ENDPOINT_FILES = /(^|\\/)route\\.tsx?$/;',
+    expect: "including src/app/sitemap.ts",
+  },
+  {
+    name: "the host sitemap starts listing sites that are not live",
+    file: SITEMAP,
+    from: '      .eq("status", "live")\n      .eq("is_active", true)',
+    to: '      .eq("is_active", true)',
+    expect: "only rows whose status is live",
+  },
   {
     // RLS DROPPED ON A USER-DATA TABLE. Without it every row of
     // chat_messages is readable by any signed-in account through

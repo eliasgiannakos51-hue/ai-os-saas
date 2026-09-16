@@ -412,8 +412,28 @@ console.log("\n== 3. every API route authenticates, or is justified ==");
 // site route added by V3 Task 2 lives at src/app/s/[subdomain]/route.ts and
 // would have been invisible to a scan of src/app/api alone — which is
 // precisely the kind of route that most needs to be on a justified list.
-const routes = walk("src/app").filter((f) => f.endsWith("route.ts"));
+//
+// AND NOT ONLY THE FILES CALLED route.ts. Widening by DIRECTORY, which is
+// what the paragraph above did, does not widen by KIND: Next.js turns five
+// filenames into a public HTTP response, and sitemap.ts is one of them.
+// src/app/sitemap.ts reads published_sites THROUGH THE ADMIN CLIENT and
+// establishes no session — correctly, it serves live sites' public URLs to
+// crawlers — and it sat outside this scan's population for its whole life
+// because of how it is named. Found on 2026-09-16 by listing what reads a
+// table under src/app rather than what matches a filename.
+const ENDPOINT_FILES = /(^|\/)(route\.tsx?|sitemap\.ts|robots\.ts|manifest\.ts|opengraph-image\.tsx)$/;
+const routes = walk("src/app").filter((f) => ENDPOINT_FILES.test(f.replace(/\\/g, "/")));
 checkTrue(`routes discovered (${routes.length})`, routes.length >= 40);
+// A FLOOR ON EACH KIND, because the population is the finding here. A
+// regex that stopped matching one of the four non-route names would take
+// those endpoints out of the scan and leave every line below green.
+for (const name of ["sitemap.ts", "robots.ts", "manifest.ts", "opengraph-image.tsx"]) {
+  checkTrue(
+    `...including src/app/${name}`,
+    routes.some((f) => f.replace(/\\/g, "/").endsWith(`/${name}`)),
+    `${name} produces a public response and is not in the population`
+  );
+}
 
 // Routes that legitimately have no logged-in user. Each is load-bearing
 // and was read line-by-line in the audit; the reason is recorded here so a
@@ -459,9 +479,44 @@ const NO_SESSION_BY_DESIGN = {
     "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED — with no secret configured the route refuses to run on any deployment. It reads aggregates across every account's spend and can send email, so it is in the same class as the other cron routes and not a lighter one.",
   "src/app/s/[subdomain]/sitemap.xml/route.ts":
     "the public site's own sitemap, for its owner to submit to Search Console. Same posture as the routes above — admin client, rate limit, subdomain validated before any lookup — and it selects only `pages, status, is_active, updated_at`: the page SLUGS and a timestamp, never html_content, so nothing about a site's contents is reachable here that /s/<subdomain>/<page> does not already serve publicly. A site that is not live is a 404 rather than an empty sitemap, so this cannot be used to learn that a withdrawn address once existed.",
+  "src/app/sitemap.ts":
+    "the host's own sitemap, which a crawler fetches without a session by definition. It reads published_sites through the ADMIN CLIENT and that is the part worth stating: it selects `subdomain, pages, updated_at` for rows that are already status='live' AND is_active, so every URL it emits is one an anonymous visitor can already open at /s/<subdomain>. No html_content, no owner, no draft, and no row that is not live — a withdrawn site vanishes from the file rather than appearing as a 404 somebody could count. It fails OPEN to the app's own pages on a database error, because an empty sitemap tells a crawler there is nothing here.",
+  "src/app/robots.ts": "a static two-line file; it reads no table and has nothing to authenticate",
+  "src/app/manifest.ts": "the PWA manifest, static; it reads no table",
+  "src/app/opengraph-image.tsx": "the share card for the landing page, rendered from constants; it reads no table",
   "src/app/s/[subdomain]/robots.txt/route.ts":
     "the same, for robots.txt. It reads only `status, is_active` and returns a fixed two-line file built from the address in the request — it discloses nothing that requesting the site itself does not. Worth stating plainly: a crawler reads robots.txt from the HOST ROOT, so while sites are served at /s/<subdomain> the file that actually governs them is the app's own /robots.txt; this one exists for Search Console and for the day a wildcard domain makes it the root file.",
 };
+
+// THE SITEMAP'S JUSTIFICATION, MADE CHECKABLE.
+//
+// Its entry above says every URL it emits is one an anonymous visitor can
+// already open, and that claim rests entirely on two filters. Written as
+// prose it was not load-bearing: dropping `.eq("status", "live")` left
+// this gate green while the host's public sitemap began advertising the
+// addresses of sites their owners had withdrawn. A justification a mutant
+// can falsify without anything going red is a sentence, not a check.
+{
+  const sitemapSrc = readFileSync("src/app/sitemap.ts", "utf8");
+  const queryAt = sitemapSrc.indexOf('.from("published_sites")');
+  checkTrue("the host sitemap reads published_sites", queryAt !== -1);
+  const query = queryAt === -1 ? "" : sitemapSrc.slice(queryAt, queryAt + 500);
+  checkTrue(
+    "...only rows whose status is live",
+    /\.eq\(\s*"status"\s*,\s*"live"\s*\)/.test(query),
+    "a withdrawn site would be listed for crawlers at the host's own /sitemap.xml"
+  );
+  checkTrue(
+    "...and only active ones",
+    /\.eq\(\s*"is_active"\s*,\s*true\s*\)/.test(query),
+    "a deactivated site would be listed"
+  );
+  checkTrue(
+    "...and it selects no page content",
+    !/html_content|user_id/.test(query),
+    "the sitemap selects more than the addresses it publishes"
+  );
+}
 
 // Routes a BROWSER navigates to, rather than fetches. Their rejection is a
 // redirect, not a status code — see the check below.

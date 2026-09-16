@@ -65,12 +65,38 @@ export async function GET(request: Request) {
     );
     if (suggestionsError) throw suggestionsError;
 
+    // THE THIRD SWEEP, AND THE ONE NOTHING WAS RUNNING.
+    //
+    // public.prune_orphan_project_links() was written in 20261001 as the
+    // safety net beside the AFTER DELETE trigger on public.projects: the
+    // trigger removes an in_project edge when a project goes, and this
+    // removes edges "written before this migration ran, or by any path
+    // that removed a project without going through the trigger". No
+    // application code ever called it — found on 2026-09-16 by listing
+    // every prune_* function against its callers, where it was the only
+    // one with none.
+    //
+    // NOT ITS OWN CRON, for the reason the paragraph above gives about
+    // transition_suggestions: two schedules drift, and one of them
+    // silently not running is how retention stops working without anybody
+    // noticing.
+    //
+    // IT TAKES NO DAY COUNT. The other two sweep by age; this one deletes
+    // only edges whose project is ALREADY GONE, so there is nothing to
+    // keep for ninety days — an orphan edge is wrong the moment it exists.
+    const { data: orphanData, error: orphanError } = await admin.rpc("prune_orphan_project_links");
+    if (orphanError) throw orphanError;
+
     const deleted = typeof data === "number" ? data : 0;
     const deletedSuggestions = typeof suggestionsData === "number" ? suggestionsData : 0;
+    // COUNTED SEPARATELY, like the other two: a total cannot tell you
+    // which of the three functions was dropped.
+    const deletedOrphanLinks = typeof orphanData === "number" ? orphanData : 0;
     return NextResponse.json({
       ok: true,
       deleted,
       deletedSuggestions,
+      deletedOrphanLinks,
       retentionDays: NAV_RETENTION_DAYS,
     });
   } catch (err) {

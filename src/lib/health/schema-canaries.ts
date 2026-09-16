@@ -93,6 +93,18 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "the nav-retention cron fails and nav_events grows unbounded",
   },
   {
+    // WIRED 2026-09-16, and a canary the same day, because the moment a
+    // function becomes one the app CALLS, /api/health has to be able to
+    // say whether it is there. It swept nothing for the two weeks it
+    // existed unwired; a missing one now takes the whole nav-retention
+    // job down with it, including the two sweeps that were working.
+    kind: "function",
+    fn: "prune_orphan_project_links",
+    migration: "20261001000000_projects.sql",
+    breaks:
+      "the nav-retention cron throws, so nav_events and transition_suggestions stop being swept too, and deleted projects leave their in_project edges behind",
+  },
+  {
     kind: "function",
     fn: "db_exposure_report",
     migration: "20260917000000_db_exposure_report.sql",

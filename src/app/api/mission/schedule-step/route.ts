@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isAgentRole, type AgentRole } from "@/lib/agent-roles";
 import { logApiError } from "@/lib/log-error";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { Mission } from "@/types/mission";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,22 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    // The only previous guard was "this step is already completed", which
+    // is a property of the STEP and not of the caller — the same
+    // incomplete step could be scheduled a thousand times, each row
+    // queueing work the daily cron will later look at. The cron caps what
+    // it RUNS per user per day and reserves credits for each, so the money
+    // was never unbounded; the rows were.
+    const limited = await checkRateLimit({
+      scope: "mission_schedule_step",
+      identifier: user.id,
+      maxAttempts: 60,
+      windowMinutes: 60,
+    });
+    if (!limited.allowed) {
+      return NextResponse.json({ ok: false, error: "too_many_scheduled" }, { status: 429 });
     }
 
     // RLS scopes this to the caller's own mission — a stranger's id simply

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { normaliseNavPath, normaliseNavReferrer } from "@/lib/nav/nav-path";
 
 export const dynamic = "force-dynamic";
@@ -52,6 +53,27 @@ export async function POST(request: Request) {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ ok: false }, { status: 401 });
+
+    // GENEROUS ON PURPOSE, AND THE NUMBER IS THE ARGUMENT. This is the
+    // highest-write path in the product: one row per navigation, and the
+    // limiter is itself a database round trip — the /api/health header
+    // records that cost as a reason NOT to limit a hot path. 600 an hour
+    // is about ten navigations a minute sustained for an hour, which no
+    // person reaches and a loop passes in seconds. What it buys is a
+    // ceiling: past it nothing is written to nav_events OR to
+    // rate_limit_log, and rate_limit_log is swept daily by
+    // /api/cron/scheduled-runs while an unbounded nav_events is only
+    // pruned at 90 days.
+    const limited = await checkRateLimit({
+      scope: "nav_track",
+      identifier: user.id,
+      maxAttempts: 600,
+      windowMinutes: 60,
+    });
+    if (!limited.allowed) {
+      return NextResponse.json({ ok: false }, { status: 429 });
+    }
+
 
     const { error } = await supabase
       .from("nav_events")

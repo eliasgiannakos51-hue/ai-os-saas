@@ -180,6 +180,48 @@ for (const f of files) {
 check("no file cuts prose with slice(0, n) and an ellipsis either", bareSlices.length === 0,
   bareSlices.join("\n        "));
 
+// ---------------------------------------------------------------------
+console.log("\n== the fallback nobody was running ==");
+// cutGraphemes HAS TWO PATHS and this file only ever exercised one.
+// Intl.Segmenter exists in every Node this repo runs on, so the code-unit
+// loop underneath it — the branch that handles an engine without it — was
+// never executed by any check here. truncate.mutation.mjs proved it on
+// 2026-09-16: widening that loop's budget to `max + 1` left the whole
+// file green.
+//
+// A fallback that is never run is not a fallback, it is untested code
+// that only appears on the machine least able to report it.
+{
+  const Segmenter = Intl.Segmenter;
+  try {
+    // @ts-expect-error — removing it is the whole point of the probe.
+    delete Intl.Segmenter;
+    check("without Intl.Segmenter the fallback still exists", typeof cutGraphemes === "function");
+    let overLong = [];
+    for (const text of ["hello world", "Καλημέρα κόσμε", "日本の太陽光発電市場", "a".repeat(50)]) {
+      for (const max of [0, 1, 2, 5, 12, 40]) {
+        const out = cutGraphemes(text, max);
+        if (out.length > max) overLong.push(`cutGraphemes(${JSON.stringify(text.slice(0, 12))}…, ${max}) = ${out.length}`);
+      }
+    }
+    check("...and never returns more code units than the budget", overLong.length === 0,
+      overLong.join("\n        "));
+    // AND truncate() ITSELF over the same missing Segmenter, because that
+    // is the call every caller in the product actually makes.
+    let bad = [];
+    for (const text of ["Καλημέρα κόσμε και καλή χρονιά", "The quick brown fox jumps"]) {
+      for (const max of [1, 2, 8, 20]) {
+        const out = truncate(text, max);
+        if (out.length > max) bad.push(`truncate(…, ${max}) = ${out.length}`);
+      }
+    }
+    check("...and truncate() still never exceeds max without it", bad.length === 0,
+      bad.join("\n        "));
+  } finally {
+    Intl.Segmenter = Segmenter;
+  }
+}
+
 console.log("");
 if (failures.length > 0) {
   console.log(`${pass} passed, ${failures.length} FAILED:`);

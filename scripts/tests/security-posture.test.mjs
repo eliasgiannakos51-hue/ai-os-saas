@@ -68,8 +68,14 @@ console.log("== 1. Row Level Security covers every user-data table ==");
 // 28 — 58 tables vanish — and the first version of this line therefore did
 // not strip them at all, on the guess that some migration had left a
 // comment open. That guess was wrong, and the truth is better: every
-// block-comment opener in the 71 migrations was found and classified
-// (2026-09-12).
+// block-comment opener in the migrations was found and classified
+// (2026-09-12, 71 files; re-run 2026-09-16 at 72 and unchanged — five
+// openers, three real doc comments all closed, two inside `--` lines,
+// none after code). To re-derive rather than trust this sentence:
+//
+//   grep -n '/''*' supabase/migrations/*.sql
+//
+// and check each hit for a `--` earlier on its own line.
 //
 //   baseline_schema.sql:919      inside a `--` line, and it is a GLOB —
 //                                a slash-star wildcard at the end of the

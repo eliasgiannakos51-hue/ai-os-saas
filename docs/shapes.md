@@ -1122,3 +1122,59 @@ about a value that crosses into SQL. Reaching `estimated_cost` needs the
 question asked of a database column: written by N call sites, read by how
 many? That is a different instrument, and until it exists the habit is the
 defence — when a field's only justification is "it feeds X", open X.
+
+## A check that passes because the sentence it forbids is in another language
+
+A gate asserted that a plan row reads `Unlimited`. It is a correct check
+in a product that ships in one language, and this one ships in ten.
+
+`node scripts/scan-english-anchored-gates.mjs` asks how many others there
+are. The test for "user-visible" is provable rather than guessed: the
+literal must appear as a VALUE in `messages/en.json`, which by definition
+is a string this product renders and by definition has nine other
+spellings. A table name, an HTTP verb, a CSS class and a route are English
+too, and none of them changes when the locale does.
+
+**26 hits in 11 files. Twenty-two of them go red; four go green.** That
+split is the shape:
+
+    body.includes("Run history")          → FAILS on a working product
+    !body.includes("Upgrade Required")    → PASSES, having looked at nothing
+
+The negative form is the dangerous one, and for a reason that has nothing
+to do with translation: **the needle is absent for the wrong reason.** The
+check means "no upgrade wall is on this page" and what it actually tests
+is "this page does not contain an English string it was never going to
+contain". A green line, in a green log, measuring nothing — the same
+failure as an empty scraper in `db-migrations`, arriving through the
+locale instead of through a filter.
+
+**The fix is not to translate the literal.** `scripts/tests/lib/ui-text.mjs`
+reads `<html lang>` off the page and resolves the expected text out of
+THAT locale's own messages file — the same file the renderer read. An
+English run still asserts the English string; a Greek run asserts the
+Greek one; neither has a sentence typed into the test. It also closes a
+second hole for free: a copy change in `en.json` used to break these
+checks silently, because the literal in the test stopped matching anything
+and the negative ones went green.
+
+**And the vacuity can come back one level down.** An empty needle makes
+`includes()` always true and its negation always false, so a key that
+resolves to nothing would restore exactly the defect being removed.
+`uiTextStrict` throws on a needle under three characters rather than
+returning one.
+
+**Its precision was measured, not claimed.** The first version of the scan
+took every string in the file and scored 2 real out of 7 hand-checked;
+every false positive was a literal in a comment, in a `console.log`
+heading, or in the third argument of `check(...)` — the message printed
+when the assertion fails. All three are English about English. After
+`stripComments` and a restriction to predicate position, 10 of 11 files
+were verified real by reading the assertion. This repository had already
+paid for that lesson once: `plan-enforcement.test.mjs` failed a file it
+had just fixed because the explanatory paragraph contained the symbol it
+scanned for.
+
+**It reports; it does not gate.** A prodtest signing in to an English
+account and asserting English is narrow, not wrong, and which to widen is
+a judgement about where the product is going.

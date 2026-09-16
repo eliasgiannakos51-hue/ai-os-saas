@@ -20,6 +20,7 @@
 //
 // Run: node scripts/tests/annual-billing.prodtest.mjs
 import http from "node:http";
+import { uiTextStrict } from "./lib/ui-text.mjs";
 import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
@@ -328,7 +329,14 @@ try {
     (await bare.getByRole("button", { name: /^Annual$/ }).count()) === 0
   );
   const bareText = await bare.locator("body").innerText();
-  checkTrue("no saving is advertised", !/two months free/.test(bareText));
+  // THE SAVING PHRASE COMES FROM messages, in the page's own language.
+  // As "/two months free/" this passed under any non-English UI without
+  // looking at anything — the negative-assertion half of the
+  // English-anchored shape (scan-english-anchored-gates.mjs).
+  {
+    const saving = await uiTextStrict(page, "pricing.billingAnnualSaving");
+    checkTrue(`no saving is advertised (${saving})`, !bareText.includes(saving));
+  }
   checkTrue(
     `the monthly prices still render (${STARTER_MONTHLY} … ${ULTIMATE_MONTHLY})`,
     bareText.includes(STARTER_MONTHLY) && bareText.includes(ULTIMATE_MONTHLY)

@@ -187,6 +187,8 @@ const NOT_PROBEABLE = {
     "revokes and re-grants privileges; nothing new exists afterwards to probe for",
   "20261002000000_search_index_locale_translations_only.sql":
     "`create or replace` on search_index_sync, which existed before it. The function is present whether or not this file ran, so its existence proves nothing — the property it changes is behavioural and only unified-search.dbtest.mjs can see it",
+  "20261004000000_revoke_public_execute_prune_project_links.sql":
+    "revokes EXECUTE from PUBLIC and from authenticated on three functions and grants nothing new. A canary asks whether an OBJECT exists; all three exist either way, and the property this file changes is a privilege, which /api/health cannot see at all — grants-and-policies.dbtest.mjs and role-grants.dbtest.mjs are what read it",
 };
 
 const canariedMigrations = new Set(SCHEMA_CANARIES.map((c) => c.migration));

@@ -17,7 +17,7 @@
 // quietly reintroduced its own inline `if (secret)` guard.
 //
 // Run: node scripts/tests/cron-auth.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import ts from "typescript";
 
 let pass = 0,
@@ -176,11 +176,46 @@ await withEnv({ CRON_SECRET: "abc", VERCEL: "1" }, (checkCronAuth) => {
 });
 
 console.log("\n== 4. every cron route actually uses the shared guard ==");
-const ROUTES = [
-  "src/app/api/cron/reset-credits/route.ts",
-  "src/app/api/cron/scheduled-runs/route.ts",
-  "src/app/api/weekly-digest/route.ts",
-];
+// THIS SECTION'S HEADING WAS THE CLAIM, AND THE LIST WAS THREE OF TEN.
+//
+// It named reset-credits, scheduled-runs and weekly-digest. Since then
+// the scheduler gained affiliate-payouts, agent-batches, agent-runs,
+// cost-alerts, monthly-credits, nav-retention and website-storage-cleanup
+// — seven routes, every one of them authenticated by CRON_SECRET alone,
+// every one of them able to move money or delete rows across every
+// account, and none of them in the population of the check that says
+// "every cron route". Measured 2026-09-16: all seven were healthy. They
+// were also unchecked, and the property most likely to drift is the one
+// about ORDER — a guard that runs after the admin client is built is
+// still a guard, and is no longer first.
+//
+// THE POPULATION IS NOW THE SCHEDULER'S OWN. vercel.json is what actually
+// fires these; a route under api/cron that nothing schedules is caught by
+// the difference below, and a scheduled path with no file is caught the
+// other way. Neither can be added without this section noticing.
+const scheduled = (JSON.parse(readFileSync("vercel.json", "utf8")).crons ?? []).map((c) => c.path);
+checkTrue(`vercel.json schedules some routes (${scheduled.length})`, scheduled.length >= 5);
+
+const onDisk = [];
+(function walk(dir) {
+  for (const entry of readdirSync(dir)) {
+    const full = `${dir}/${entry}`;
+    if (statSync(full).isDirectory()) walk(full);
+    else if (entry === "route.ts" && full.includes("/cron/")) onDisk.push(full);
+  }
+})("src/app/api");
+checkTrue(`cron route files on disk (${onDisk.length})`, onDisk.length >= 5);
+
+const fromSchedule = scheduled.map((p) => `src/app${p}/route.ts`);
+const ROUTES = [...new Set([...fromSchedule, ...onDisk])].sort();
+checkTrue(`the population is every scheduled path and every cron file (${ROUTES.length})`, ROUTES.length >= 9);
+
+// Both directions, so neither list can quietly drift from the other.
+const scheduledWithoutFile = fromSchedule.filter((f) => !existsSync(f));
+check("every scheduled path has a route file", scheduledWithoutFile, []);
+const fileWithoutSchedule = onDisk.filter((f) => !fromSchedule.includes(f));
+check("every cron route file is actually scheduled", fileWithoutSchedule, []);
+
 for (const file of ROUTES) {
   const src = readFileSync(file, "utf8");
   checkTrue(`${file}: imports checkCronAuth`, src.includes('from "@/lib/cron-auth"'));
@@ -198,9 +233,15 @@ for (const file of ROUTES) {
   const adminAt = src.indexOf("createAdminClient()", bodyStart);
   checkTrue(`${file}: guard runs before any admin/database work`, guardAt > 0 && (adminAt < 0 || guardAt < adminAt));
   // And it must RETURN on failure, not merely log.
+  // BOTH SPELLINGS OF THE SAME REFUSAL. Seven of these ten routes write
+  // it braceless — `if (!auth.ok) return NextResponse.json(...)` on one
+  // line — and the braced form was the only one this pattern knew,
+  // because the three routes it used to iterate all happened to use it.
+  // Widening the population is what surfaced that: the check had been
+  // sound about the spelling it had met.
   checkTrue(
     `${file}: a failed check returns immediately`,
-    /if \(!auth\.ok\) \{\s*return NextResponse\.json\(/.test(src)
+    /if \(!auth\.ok\)\s*(\{\s*)?return NextResponse\.json\(/.test(src)
   );
 }
 

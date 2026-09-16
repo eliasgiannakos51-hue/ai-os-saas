@@ -23,6 +23,30 @@ const RESET = "src/app/api/cron/reset-credits/route.ts";
 
 const MUTANTS = [
   {
+    // THE POPULATION. Section 4's heading says "every cron route" and its
+    // list held three of ten; these two mutants are the seven that were
+    // outside it. Neither would have gone red before 2026-09-16.
+    name: "a scheduled cron route stops guarding itself",
+    file: "src/app/api/cron/agent-runs/route.ts",
+    from: "  const auth = checkCronAuth(request);",
+    to: "  const auth = { ok: true } as ReturnType<typeof checkCronAuth>;",
+    expect: "calls it",
+  },
+  {
+    name: "a cron route builds its admin client before it checks the secret",
+    file: "src/app/api/cron/cost-alerts/route.ts",
+    from: "  const auth = checkCronAuth(request);",
+    to: "  createAdminClient();\n  const auth = checkCronAuth(request);",
+    expect: "guard runs before any admin/database work",
+  },
+  {
+    name: "a route is scheduled in vercel.json that does not exist",
+    file: "vercel.json",
+    from: '      "path": "/api/cron/cost-alerts",',
+    to: '      "path": "/api/cron/cost-alerts-renamed",',
+    expect: "every scheduled path has a route file",
+  },
+  {
     // THE ORIGINAL BUG, VERBATIM. No secret configured means open to
     // everyone — the state that would let a stranger rewrite every
     // account's balance.

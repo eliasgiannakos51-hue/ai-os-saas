@@ -70,6 +70,22 @@ sql(`insert into auth.users (id, email) values
 
 console.log("== 1. A POLICY WITHOUT A GRANT IS A LOCKED DOOR ==");
 {
+  // EMPTIED FIRST, AS THE OWNER, so that "1" is a real denominator.
+  //
+  // This asserted `count(*) === "1"` over an UNQUALIFIED read and passed
+  // for months — until 2026-09-13, when the whole dbtest suite was run
+  // against one database for the first time and this file was the only
+  // red one, with `2`. Alone on a fresh database it is green. The defect
+  // is order dependence: another suite leaves a data_analyses row behind
+  // and this count has no idea whose rows it is counting.
+  //
+  // The unqualified read is deliberate and must stay — it is half of the
+  // pair with "…and nobody else's" below, and a WHERE user_id = OWNER
+  // would make that pair prove nothing about RLS. So the fix is the same
+  // one user-isolation.dbtest.mjs already documents for exactly this
+  // shape: clear the table as the owner, then count.
+  tryAs("authenticated", OWNER, `delete from public.data_analyses;`);
+
   const insert = tryAs(
     "authenticated",
     OWNER,

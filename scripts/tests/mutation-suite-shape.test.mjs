@@ -56,7 +56,7 @@
 //      instead of a silent default.
 //
 // Run: node scripts/tests/mutation-suite-shape.test.mjs
-import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 const DIR = "scripts/tests";
@@ -178,7 +178,40 @@ console.log("\n== 2. a stale anchor is a failure, not a note ==");
 for (const file of suites) {
   const name = file.replace(/\.mutation\.mjs$/, "");
   const src = readFileSync(path.join(DIR, file), "utf8");
-  const code = src.replace(/\/\*[\s\S]*?\*\//g, "").split("\n").filter((l) => !/^\s*(\/\/|\*)/.test(l)).join("\n");
+  // AND THE RUNNER IT DELEGATES TO, IF IT IMPORTS ONE.
+  //
+  // The obligation is that a stale anchor reaches the exit code. WHERE
+  // that is spelled is not the question — the paragraph below already
+  // records the same correction once, for a suite that reached its source
+  // through a Map and was reported as never checking. A suite that hands
+  // its mutants to scripts/tests/lib/mutation-runner.mjs satisfies the
+  // rule through code that really runs, and reading only the suite file
+  // reports a fact about which file holds the loop.
+  //
+  // It is NOT weaker: the runner is read, so the check must exist in it,
+  // and a suite importing a runner WITHOUT one fails exactly as before.
+  // Only local ./lib/ imports are followed — never a package — so nothing
+  // outside this repository can satisfy the rule on a suite's behalf.
+  const strip = (text) =>
+    text
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .split("\n")
+      .filter((l) => !/^\s*(\/\/|\*)/.test(l))
+      .join("\n");
+  const own = strip(src);
+  // ONLY CONSULTED WHEN THE SUITE ITSELF HAS NONE, so following an import
+  // can add a verdict but never change one. The first version concatenated
+  // the runner unconditionally and turned five passing suites red: they
+  // import ./lib/ for other reasons, and the extra text reached checks
+  // further down this block that were never meant to read it. A widening
+  // that alters an answer it was not asked about is not a widening.
+  const delegatedCode = () =>
+    [...src.matchAll(/from "(\.\/lib\/[\w.-]+\.mjs)"/g)]
+      .map((m) => path.join(DIR, m[1]))
+      .filter((f) => existsSync(f))
+      .map((f) => strip(readFileSync(f, "utf8")))
+      .join("\n");
+  const code = own;
 
   // THE RECEIVER MAY BE AN EXPRESSION. This read `!identifier.includes(x)`
   // only, so a suite that holds its originals in a Map and writes
@@ -186,7 +219,8 @@ for (const file of suites) {
   // a fact about the spelling, not about the suite. What is being asserted
   // is that the presence of the anchor is TESTED and NEGATED, however the
   // source is reached.
-  const checksPresence = /!\s*[\w.]+(?:\([^)]*\))?(?:\.\w+)*\.includes\(\s*[\w.]+\s*\)/.test(code);
+  const PRESENCE = /!\s*[\w.]+(?:\([^)]*\))?(?:\.\w+)*\.includes\(\s*[\w.]+\s*\)/;
+  const checksPresence = PRESENCE.test(code) || PRESENCE.test(delegatedCode());
 
   // A SUITE THAT MUTATES A SCHEMA HAS NO ANCHOR TO GO STALE, and the same
   // obligation reaches it in a different shape. Its edit is a DROP POLICY
@@ -205,10 +239,22 @@ for (const file of suites) {
 
   // The counter the exit code reads. Every suite here spells it `missed`,
   // either as an array it pushes to or a number it increments.
-  const routesToExit = /missed\.push\(/.test(code) || /missed\s*\+\+/.test(code);
+  // Same additive rule as checksPresence above.
+  //
+  // AND IT IS EXACTLY AS STRONG AS IT WAS, which is not very: these three
+  // checks ask whether the WORDS appear, as the section header says
+  // outright. Deleting the stale-anchor push from a suite that has its
+  // own leaves this gate green too — verified by doing it, 2026-09-16 —
+  // because other pushes remain and the regex cannot tell them apart. So
+  // reading a delegated runner adds a verdict for suites that had none
+  // and changes nothing else; it does not make a structural check
+  // behavioural, and nothing here should be read as claiming it does.
+  const MISSED = /missed\.push\(|missed\s*\+\+/;
+  const routesToExit = MISSED.test(code) || MISSED.test(delegatedCode());
   ok(`${name}: a missing anchor counts against it`, routesToExit);
 
-  const exitsNonZero = /process\.exit\(1\)/.test(code) || /process\.exit\(\s*missed\s*===\s*0\s*\?\s*0\s*:\s*1\s*\)/.test(code);
+  const EXITS = /process\.exit\(1\)|process\.exit\(\s*missed\s*===\s*0\s*\?\s*0\s*:\s*1\s*\)/;
+  const exitsNonZero = EXITS.test(code) || EXITS.test(delegatedCode());
   ok(`${name}: and the run exits non-zero`, exitsNonZero);
 }
 

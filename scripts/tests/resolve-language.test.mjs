@@ -73,7 +73,24 @@ eq("mostly-kanji Japanese is still Japanese", resolveLanguage("日本の太陽�
 eq("one kana in a long kanji string still says Japanese",
   resolveLanguage("東京証券取引所の株価指数の推移", "en"), "ja");
 eq("kana-only is Japanese", resolveLanguage("ひらがなだけのぶんしょう", "en"), "ja");
+// KATAKANA IS THE HALF THAT WAS NOT CHECKED. Every kana sample above is
+// hiragana, so narrowing KANA to `\p{Script=Hiragana}` alone left this
+// file green — found by resolve-language.mutation.mjs, 2026-09-16.
+// Katakana is not an edge case in Japanese: it is how every loanword is
+// written, so a request about a product or a company is frequently
+// katakana-heavy and the mutation sends exactly those to Chinese.
+eq("katakana-only is Japanese", resolveLanguage("コンピューターのソフトウェア", "en"), "ja");
+eq("katakana with kanji and no hiragana is Japanese",
+  resolveLanguage("東京スカイツリー観光案内", "en"), "ja");
 eq("Han with no kana at all is Chinese", resolveLanguage("上海证券交易所股票指数", "en"), "zh");
+
+// AND THE TIE-BREAK, which the header promises is deterministic: "a text
+// with equal Greek and Arabic resolves to Greek every time, rather than
+// to whichever was inserted first". Nothing tested it, so changing the
+// comparison from `>` to `>=` — which hands ties to the LAST rule instead
+// of the first — left the file green.
+eq("equal Greek and Arabic resolves to Greek, not to whichever came last",
+  resolveLanguage("αβγδ ابجد", "en"), "el");
 
 console.log("\n== 3. Latin fragments inside non-Latin text do not flip it ==");
 // Brand names, tickers and model numbers live inside every real topic.
@@ -84,6 +101,17 @@ eq("Greek with a Latin brand name", resolveLanguage("Έρευνα για Nvidia 
 eq("Greek with a long Latin tail",
   resolveLanguage("Ανάλυση για Tesla Model Y Long Range Performance Edition", "en"), "el");
 eq("Japanese with a Latin brand", resolveLanguage("トヨタ の Prius", "en"), "ja");
+
+// AND THE OTHER DIRECTION, which the paragraph above calls asymmetric and
+// nothing checked. A stray non-Latin character inside an English sentence
+// — a μ in a unit, a π in a formula, an Ω — must NOT decide the language,
+// and that is the entire job of NON_LATIN_SHARE_THRESHOLD. Dropping the
+// threshold to 0 left this file green until 2026-09-16, which means the
+// share it exists to enforce was enforced by nothing.
+eq("a Latin topic with one Greek letter is still the UI language",
+  resolveLanguage("Measure the resistance in Ω across the bridge", "en"), "en");
+eq("a Latin topic with a Greek unit symbol stays in the UI language",
+  resolveLanguage("Convert 5 μm to nanometres for the spec sheet", "en"), "en");
 
 console.log("\n== 4. a stray non-Latin symbol is not a language ==");
 // A single Greek letter in an English sentence is a symbol (μ for micro,

@@ -224,7 +224,22 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // question this ceiling exists to force somebody to ask. Registered in
   // baselines.test.mjs at zero slack, so it cannot drift the way
   // CLIENT_FALLBACK_BASELINE did.
-  const CENSUS_CEILING = 66;
+  //
+  // 66 -> 67 ON 2026-09-16: scripts/tests/lib/mutation-runner.mjs, the
+  // runner the newer mutation suites share. Its limitation paragraph says
+  // two things a suite author has to know and cannot derive — declare the
+  // mutant list at top level under the name mutant-list.mjs searches for,
+  // and do NOT spell that name out in the comment above it, because the
+  // reader's indexOf then matches the prose and the bracket scan starts
+  // inside a sentence. Both are decisions about how the tooling reads
+  // code, and the second is a defect this file's own sibling
+  // (security-posture) already documents for the block-comment opener.
+  //
+  // IT IS ONE BLOCK RATHER THAN THREE on purpose: the first draft repeated
+  // it in each new suite, which would have moved this census by three for
+  // one idea — and the whole point of the ceiling is that the list stays
+  // short enough for a person to read in one sitting.
+  const CENSUS_CEILING = 67;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

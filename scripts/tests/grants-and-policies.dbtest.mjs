@@ -76,6 +76,19 @@ const EXPECTED = {
   search_query: "parses a search string; pure, no data",
   search_fold: "accent folding; pure, no data",
   search_headline: "renders the snippet; pure, no data",
+  // ARGUED FOR, 2026-09-13. Called with the USER'S OWN client from
+  // lib/chat/memory.ts, not from a server route on the service role, and
+  // that is deliberate: chat_memory has no UPDATE policy on purpose, so a
+  // fact repeated in a sixth conversation has to bump a counter through a
+  // function rather than through an upsert the browser is not allowed to
+  // make. It is SECURITY DEFINER and scoped to auth.uid() inside.
+  //
+  // Its two neighbours from the same migration are NOT here and are
+  // revoked from authenticated in 20261004: chat_memory_prunable and
+  // prune_chat_memory are named only by lib/health/schema-canaries.ts,
+  // read by /api/health, which uses createAdminClient() — the service
+  // role. They were surface with no user behind it.
+  chat_memory_record: "records or bumps one remembered fact for the signed-in user (20261003)",
   immutable_unaccent: "index support, wrapping unaccent()",
   immutable_join: "index support",
   match_agent_templates: "the ready-made agent library, which is public content",

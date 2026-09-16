@@ -132,9 +132,17 @@ console.log("\n== 3. and a flat price is not charged for variable work ==");
 // charge was for inserting a row the user had typed by hand. The branch
 // in api/modules/create still exists; nothing may reach it.
 const modules = readFileSync("src/lib/build-modules.ts", "utf8") + readFileSync("src/lib/modules.ts", "utf8");
-const stillCharging = [...stripComments(modules).matchAll(FLAT_PRICE)].map((m) => m[0]);
+// FLOORED BEFORE IT IS FILTERED, which gate-vacuity.test.mjs requires and
+// was right to: "no module charges" is trivially true of a read that
+// returned nothing. The line count is the evidence the corpus was
+// actually read; stillCharging derives from it, so the floor reaches the
+// emptiness assertion below through the chain.
+const moduleLines = stripComments(modules).split("\n");
+check(`the module definitions were read (${moduleLines.length} lines)`, moduleLines.length >= 50,
+  "an empty read makes the check below inspect nothing");
+const stillCharging = moduleLines.filter((line) => new RegExp(FLAT_PRICE.source).test(line));
 check("no module charges a flat price for a hand-typed row", stillCharging.length === 0,
-  stillCharging.join(", "));
+  stillCharging.join("\n        "));
 // THE SAME FLOOR: an empty match list agrees with any rule. The pattern
 // is run against a line that is known to carry a charge, so "none found"
 // cannot mean "stopped looking".

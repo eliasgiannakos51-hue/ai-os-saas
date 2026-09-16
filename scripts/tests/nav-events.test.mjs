@@ -61,6 +61,16 @@ const trackerCode = stripComments(tracker);
 const cronCode = stripComments(cronRoute);
 const layoutCode = stripComments(layout);
 const migrationCode = stripSql(migration);
+// EVERY migration, because the sweeps this route calls are declared in
+// several of them — nav_events in one, transition_suggestions in another,
+// the project-link sweep in a third. Section 7 needs to know how each
+// function was DECLARED, not just the one this file is named after.
+const migrationsAll = stripSql(
+  readdirSync("supabase/migrations")
+    .filter((f) => f.endsWith(".sql"))
+    .map((f) => readFileSync(`supabase/migrations/${f}`, "utf8"))
+    .join("\n")
+);
 
 // ---------------------------------------------------------------------
 console.log("== 1. the route list is the app's routes, in both directions ==");
@@ -328,8 +338,24 @@ check("the migration's default is the same number",
 // kept this check green. Two sweeps on "the same number" is the whole
 // point of section 7, and a check that any one of them reads the constant
 // cannot see them drift apart.
+//
+// AND NOT EVERY SWEEP HAS AN AGE. prune_orphan_project_links takes NO
+// arguments — it deletes in_project edges whose project is already gone,
+// and an orphan edge is wrong the moment it exists rather than after
+// ninety days. Requiring a p_days of it would be requiring a retention
+// window on something with no time dimension.
+//
+// THE EXEMPTION IS BY ARGUMENT COUNT, NOT BY NAME, so it cannot be used
+// to excuse a sweep that genuinely takes one: the migration is read, and
+// a function declared with parameters is held to the rule whatever it is
+// called. Adding `(p_days integer ...)` to this function tomorrow puts it
+// straight back under the check.
+const AGELESS = [...migrationsAll.matchAll(/create or replace function public\.(prune_[a-z_]+)\(\s*\)/g)].map((m) => m[1]);
 const pDaysArgs = [...cronCode.matchAll(/p_days:\s*([A-Za-z_][A-Za-z0-9_]*|\d+)/g)].map((m) => m[1]);
-const pruneCalls = [...cronCode.matchAll(/rpc\(\s*"(prune_[a-z_]+)"/g)].map((m) => m[1]);
+const allPruneCalls = [...cronCode.matchAll(/rpc\(\s*"(prune_[a-z_]+)"/g)].map((m) => m[1]);
+check(`the migrations were read for argument-less sweeps (${AGELESS.length})`, AGELESS.length >= 1,
+  "an empty read would excuse every sweep from the rule below");
+const pruneCalls = allPruneCalls.filter((fn) => !AGELESS.includes(fn));
 check(
   `every prune call has a p_days (${pruneCalls.length} calls: ${pruneCalls.join(", ")}; ${pDaysArgs.length} arguments)`,
   pruneCalls.length >= 2 && pDaysArgs.length === pruneCalls.length,

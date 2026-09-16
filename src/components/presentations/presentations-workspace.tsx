@@ -174,8 +174,29 @@ export function PresentationsWorkspace({
     setRunning(true);
     const controller = new AbortController();
     abortRef.current = controller;
+    // THE PHOTOGRAPHS ARE UNDONE IF NO DECK COMES BACK TO HOLD THEM.
+    //
+    // They are uploaded to create-attachments BEFORE the generate call,
+    // because the route reads them by path — so every exit that is not a
+    // saved deck (a refusal, a thrown fetch, the Stop button) leaves
+    // objects nothing points at. website-references has a sweeper for
+    // this shape; create-attachments has none, so the undo belongs at the
+    // place that did the upload. Declared out here so the failure paths
+    // below can reach it.
+    let uploaded: string[] = [];
+    const discardUploads = async () => {
+      if (uploaded.length === 0) return;
+      const paths = uploaded;
+      uploaded = [];
+      try {
+        await supabase.storage.from(CREATE_ATTACHMENT_BUCKET).remove(paths);
+      } catch {
+        /* the run has already failed; a cleanup message would be noise */
+      }
+    };
     try {
       const ownImagePaths = imageSource === "own" ? await uploadOwnFiles() : [];
+      uploaded = ownImagePaths;
       const response = await fetch("/api/presentations/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -200,8 +221,11 @@ export function PresentationsWorkspace({
                       ? t("errors.unusable")
                       : t("errors.failed");
         addToast(message, "error");
+        await discardUploads();
         return;
       }
+      // Kept: the saved deck refers to these paths by name.
+      uploaded = [];
       const deck = body?.deck as Deck;
       setSelected({ id: (body?.id as string | null) ?? null, deck, creditsCharged: Number(body?.creditsCharged ?? 0) });
       if (body?.images && body.images.wanted > 0 && body.images.found === 0 && imageSource !== "none") {
@@ -211,6 +235,7 @@ export function PresentationsWorkspace({
     } catch {
       if (!controller.signal.aborted) addToast(t("errors.failed"), "error");
       else addToast(tSteps("stopped"));
+      await discardUploads();
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
       setRunning(false);

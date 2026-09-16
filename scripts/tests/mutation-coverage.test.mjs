@@ -194,7 +194,13 @@ console.log(
 // ai-memory.mutation.mjs. The denominator moves with them (273 -> 275), so
 // the percentage barely does; the point of the ratchet is the covered
 // count, not the ratio.
-const RATCHET = 166;
+// 166 -> 172 ON 2026-09-16, from two rounds landing in one branch:
+// charge-sees-input, resolve-language, truncate, landmarks and
+// route-spend-inventory each drive a gate that had no suite, and
+// gdpr-coverage's suite gained the three bucket mutants. Read off the run
+// (measured=172), not estimated — a ratchet set from a guess is the
+// undated number this project has been bitten by.
+const RATCHET = 172;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

@@ -90,7 +90,13 @@ export async function POST(request: Request) {
     // account that exists. A failure here stops the deletion rather than
     // proceeding, because "we deleted your account" must not be said
     // while the files are still there.
-    const { error: objectsError } = await admin.rpc("delete_user_file_objects", {
+    // ALL THREE BUCKETS, not just user-files. delete_user_file_objects()
+    // deleted from 'user-files' alone, so photographs attached to a Create
+    // prompt or to a deck ('create-attachments') and reference images for
+    // a generated site ('website-references', a PUBLIC bucket) survived
+    // the account that uploaded them. See the migration
+    // 20261005000000_delete_user_storage_objects_all_buckets.sql.
+    const { error: objectsError } = await admin.rpc("delete_user_storage_objects", {
       target_user_id: claimed.user_id,
     });
     if (objectsError) {

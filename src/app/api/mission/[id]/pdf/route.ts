@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import React from "react";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { allowExport } from "@/lib/export-guard";
 import { text, type PdfBlock } from "@/lib/pdf/blocks";
 import { PdfDocument } from "@/lib/pdf/document";
 import { pdfResponse } from "@/lib/pdf/render";
@@ -40,6 +41,12 @@ export async function GET(_request: Request, { params }: { params: { id: string 
   if (!user) return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
 
   try {
+    // Free on purpose — this was paid for when it was written — but not
+    // unbounded: see lib/export-guard.ts for why those are two questions.
+    if (!(await allowExport(user.id))) {
+      return NextResponse.json({ error: "too_many_exports" }, { status: 429 });
+    }
+
     const { data: mission, error } = await supabase
       .from("ai_missions")
       .select("goal, status, plan_steps, created_at, updated_at")

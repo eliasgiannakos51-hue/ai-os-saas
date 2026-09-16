@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { allowExport } from "@/lib/export-guard";
 import { safeFilename } from "@/lib/pdf/blocks";
 import { parseStoredDeck } from "@/lib/presentations/deck";
 import { loadDeckImages } from "@/lib/presentations/images";
@@ -30,6 +31,12 @@ export async function GET(_request: Request, { params }: { params: { id: string 
   if (!user) return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
 
   try {
+    // Free on purpose — this was paid for when it was written — but not
+    // unbounded: see lib/export-guard.ts for why those are two questions.
+    if (!(await allowExport(user.id))) {
+      return NextResponse.json({ error: "too_many_exports" }, { status: 429 });
+    }
+
     const { data: row, error } = await supabase
       .from("ai_presentations")
       .select("title, slides")

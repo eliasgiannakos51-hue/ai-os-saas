@@ -93,6 +93,18 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "the nav-retention cron fails and nav_events grows unbounded",
   },
   {
+    // WIRED 2026-09-16, and a canary the same day, because the moment a
+    // function becomes one the app CALLS, /api/health has to be able to
+    // say whether it is there. It swept nothing for the two weeks it
+    // existed unwired; a missing one now takes the whole nav-retention
+    // job down with it, including the two sweeps that were working.
+    kind: "function",
+    fn: "prune_orphan_project_links",
+    migration: "20261001000000_projects.sql",
+    breaks:
+      "the nav-retention cron throws, so nav_events and transition_suggestions stop being swept too, and deleted projects leave their in_project edges behind",
+  },
+  {
     kind: "function",
     fn: "db_exposure_report",
     migration: "20260917000000_db_exposure_report.sql",
@@ -333,5 +345,12 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     fn: "prune_chat_memory",
     migration: "20261003000000_chat_memory_dedup_and_retention.sql",
     breaks: "the clean-up button on /dashboard/ai-memory fails",
+  },
+  {
+    kind: "function",
+    fn: "delete_user_storage_objects",
+    migration: "20261005000000_delete_user_storage_objects_all_buckets.sql",
+    breaks:
+      "account deletion stops at the storage step and refuses to proceed — which is the safe direction, but the person cannot delete their account at all until the migration is run",
   },
 ];

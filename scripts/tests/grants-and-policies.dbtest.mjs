@@ -76,19 +76,40 @@ const EXPECTED = {
   search_query: "parses a search string; pure, no data",
   search_fold: "accent folding; pure, no data",
   search_headline: "renders the snippet; pure, no data",
-  // ARGUED FOR, 2026-09-13. Called with the USER'S OWN client from
-  // lib/chat/memory.ts, not from a server route on the service role, and
-  // that is deliberate: chat_memory has no UPDATE policy on purpose, so a
-  // fact repeated in a sixth conversation has to bump a counter through a
-  // function rather than through an upsert the browser is not allowed to
-  // make. It is SECURITY DEFINER and scoped to auth.uid() inside.
+  // ALL THREE OF THE 20261003 CHAT-MEMORY FUNCTIONS ARE ARGUED FOR, and
+  // the second paragraph here is a correction to what this comment said
+  // on 2026-09-13.
   //
-  // Its two neighbours from the same migration are NOT here and are
-  // revoked from authenticated in 20261004: chat_memory_prunable and
-  // prune_chat_memory are named only by lib/health/schema-canaries.ts,
-  // read by /api/health, which uses createAdminClient() — the service
-  // role. They were surface with no user behind it.
+  // chat_memory_record is called with the USER'S OWN client from
+  // lib/chat/memory.ts. That is deliberate: chat_memory has no UPDATE
+  // policy on purpose, so a fact repeated in a sixth conversation bumps a
+  // counter through a function rather than through an upsert the browser
+  // is not allowed to make.
+  //
+  // THE OTHER TWO WERE WRONGLY CALLED SURFACE WITH NO USER BEHIND IT.
+  // This comment claimed they were named only by
+  // lib/health/schema-canaries.ts, read by /api/health on the service
+  // role — and a migration was written to revoke them from authenticated
+  // on the strength of it. Both are called from the browser:
+  //
+  //   components/memory/ai-memory-list.tsx:108  prune_chat_memory
+  //     — the Forget control, behind a window.confirm, on a client from
+  //       @/lib/supabase/client
+  //   app/dashboard/ai-memory/page.tsx:58       chat_memory_prunable
+  //     — the count shown BEFORE that button is pressed
+  //
+  // The revokes were removed before the migration was ever run. Had they
+  // not been, the Forget button and its count would have stopped working
+  // for every user the moment somebody pasted the file into the SQL
+  // editor.
+  //
+  // prune_chat_memory is `security invoker` so RLS scopes the delete to
+  // the caller's own rows, and its migration states why it must never be
+  // given a cron: "nothing deletes a remembered fact without somebody
+  // pressing a button."
   chat_memory_record: "records or bumps one remembered fact for the signed-in user (20261003)",
+  chat_memory_prunable: "how many remembered facts are old enough to forget — read before the Forget button is offered (20261003)",
+  prune_chat_memory: "the Forget button itself; security invoker, so it deletes only the caller's own rows (20261003)",
   immutable_unaccent: "index support, wrapping unaccent()",
   immutable_join: "index support",
   match_agent_templates: "the ready-made agent library, which is public content",

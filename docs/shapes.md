@@ -1240,3 +1240,68 @@ found this shape.
 — what would have to be true about the structure for the text to lie?* For
 a comment: could this token appear in prose? For a name: is the category a
 property or a prefix? For a pair: can one half be quoted?
+
+## The check covers the participants, not the ones who stayed out
+
+`billing-coverage.test.mjs` inventories every `messages.create` and
+`messages.stream` in the tree and fails the build on one that does not
+declare how it bills. It is a real gate: it brute-forces margin across
+plan × pack × cost, it has caught flat charges that could not clear 4× on
+Ultimate, and it runs on every build.
+
+It asks: **do you settle correctly?**
+
+A route that does not settle at all is never asked. It is not in the set
+the check iterates, so no assertion in the file has an opinion about it —
+and the file passes, every time, at full strength, while the thing it was
+written to prevent happens beside it.
+
+**How it showed up.** Five routes, found on 2026-09-16 by asking the
+inverted question — not *does this settle correctly* but *does this spend
+at all, and if so what bounds it*:
+
+| route | what it spends | what bounded it |
+|---|---|---|
+| `mission/[id]/pdf` | a server-side PDF render | nothing |
+| `research/[id]/pdf` | a server-side PDF render | nothing |
+| `presentations/[id]/pdf` | render + every slide photo downloaded | nothing |
+| `presentations/[id]/pptx` | `pptxgenjs` build + every slide photo | nothing |
+| `notifications/channels` POST | a message to a caller-supplied address | nothing |
+
+The last one is the sharpest. `/api/delivery-channels` does the same
+thing — sends a test message to an address the caller gives — and has
+been rate limited on scope `delivery_channel_test` since it was written.
+One directory away, the same action had no limit at all, and nothing in
+258 gates compared them, because the comparison nobody runs is between a
+member and a non-member.
+
+None of the five was reported by any instrument. They were found by
+listing the population first and subtracting the members.
+
+**Why "it does not charge" reads as an answer when it is half of one.**
+Each of the four export routes carried a correct comment: *"No model call,
+no charge: the deck was paid for when it was written."* That is true, and
+it is the right answer to *should this reserve credits?* It was silently
+also standing in as the answer to *what stops a thousand of these?* — a
+question nobody had asked, because the only instrument that looks at
+spending asks the first one.
+
+**The fix is not a better version of the same check.** It is the
+complement: enumerate the population FIRST — here, every route that spends
+anything, by any mechanism — and require each member to be either inside
+the system or explicitly outside it with a written reason.
+`route-spend-inventory.test.mjs` does that, and its first assertion is the
+one the old gate could not contain: *every route that spends either
+reserves credits or is declared below*.
+
+**It is the line-versus-structure shape one level up.** There, the unit of
+checking (the line) was not the unit of meaning (the structure). Here, the
+unit of checking (a call that settles) is not the unit of meaning (a call
+that costs). Both survive for the same reason: the check is sound about
+everything it looks at, and the thing that is wrong is never looked at, so
+there is no failing output anywhere to notice.
+
+**The question to ask of any check that iterates a set:** *what would an
+item look like if it never joined this set — and would anything at all go
+red?* If the answer is "it would look exactly like a route that does not
+exist", the set is the finding, not the assertions over it.

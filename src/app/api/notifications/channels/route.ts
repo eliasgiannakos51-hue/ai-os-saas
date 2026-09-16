@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { getSiteUrl } from "@/lib/site-url";
 import { saveChatTarget, type ChatKind } from "@/lib/notify/preferences";
 import { sendTelegram, telegramConfigured } from "@/lib/notify/channels/telegram";
@@ -89,6 +90,25 @@ export async function POST(request: Request) {
 
     const target = typeof body.target === "string" ? body.target.trim() : "";
     if (!target) return NextResponse.json({ error: "empty_target" }, { status: 400 });
+
+    // BOUNDED, because the next thing this route does is send a message to
+    // an address the CALLER chose. /api/delivery-channels does the same
+    // thing and has been rate limited on scope delivery_channel_test since
+    // it was written; this route was not, and the two were never compared
+    // because the only gate that looks at spending asks "do you settle
+    // correctly", which neither of them does. Same numbers as the sibling.
+    const limited = await checkRateLimit({
+      scope: "notification_channel_test",
+      identifier: user.id,
+      maxAttempts: 10,
+      windowMinutes: 60,
+    });
+    if (!limited.allowed) {
+      return NextResponse.json(
+        { error: "too_many_tests" },
+        { status: 429 }
+      );
+    }
 
     if (kind === "telegram" && !telegramConfigured()) {
       // NAMED, not a generic failure. This one is the operator's job, and

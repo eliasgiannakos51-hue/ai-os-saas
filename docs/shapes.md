@@ -1305,3 +1305,34 @@ there is no failing output anywhere to notice.
 item look like if it never joined this set — and would anything at all go
 red?* If the answer is "it would look exactly like a route that does not
 exist", the set is the finding, not the assertions over it.
+
+**Two more sightings the same day, in instruments written by different
+hands.**
+
+`delete_user_file_objects()` deletes storage objects under the deleted
+account's folder in `user-files`. The product has three buckets.
+`gdpr-coverage.test.mjs` asserted the RPC is CALLED and called BEFORE
+`deleteUser`; `security-posture.test.mjs` asserted the same two things.
+Both stayed true while `create-attachments` and the PUBLIC
+`website-references` survived every account deletion — so a deleted
+account's photographs stayed reachable by URL. The route's comment names
+Article 17 and covers a third of what it describes. The fix is one array
+in the migration and a gate that scrapes every `BUCKET` constant out of
+`src/lib` and checks membership.
+
+`security-posture.test.mjs` scans every endpoint under `src/app` for a
+session or a written reason, and its own comment records widening once,
+from `src/app/api` to all of `src/app`, *"which is precisely the kind of
+route that most needs to be on a justified list"*. It widened by
+DIRECTORY. Next.js makes a public response out of five filenames, and the
+scan's population is `f.endsWith("route.ts")` — so `src/app/sitemap.ts`,
+which reads `published_sites` through the admin client with no session,
+was never in it. The file is correct. Nothing had ever asked.
+
+**Three instruments, three populations, one shape.** The common cause is
+that a population is cheap to write as whatever was in front of you — the
+calls that settle, the bucket the feature used, the files named
+`route.ts` — and no assertion over it can see its own edge. So the
+population gets its own floor, and the floor is the check: *this set
+should have at least N members, and here are the specific ones it must
+contain.*

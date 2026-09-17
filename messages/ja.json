@@ -3516,7 +3516,9 @@
       "unauthenticated": "サインアウトしています。サインインしてからお試しください。",
       "unsupported": "このブラウザーは録音できません。入力はこれまでどおり使えます。",
       "unsupported_type": "その音声形式には対応していません。",
-      "usage_unavailable": "音声の残り時間を今は確認できませんでした。"
+      "usage_unavailable": "音声の残り時間を今は確認できませんでした。",
+      "streamInterrupted": "返信が終わる前に接続が切れました。",
+      "streamInterruptedPartial": "接続が切れました — 上の返信は途中までかもしれません。"
     },
     "permission": {
       "title": "マイクを開く前に",

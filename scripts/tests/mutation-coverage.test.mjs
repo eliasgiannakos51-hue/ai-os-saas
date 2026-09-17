@@ -200,7 +200,11 @@ console.log(
 // gdpr-coverage's suite gained the three bucket mutants. Read off the run
 // (measured=172), not estimated — a ratchet set from a guess is the
 // undated number this project has been bitten by.
-const RATCHET = 172;
+// 172 -> 178 ON 2026-09-17, read off the run: rls-coverage,
+// page-auth-boundary, route-write-bound, i18n-population and
+// ndjson-stream each drive a gate that had no suite, and credit-visibility
+// and cron-auth gained mutants for their newly derived populations.
+const RATCHET = 178;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

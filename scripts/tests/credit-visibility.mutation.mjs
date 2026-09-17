@@ -28,9 +28,38 @@ import { execFileSync } from "node:child_process";
 const GATE = "scripts/tests/credit-visibility.test.mjs";
 const PAGE = "src/app/dashboard/settings/page.tsx";
 const PANEL = "src/components/settings/credit-history.tsx";
-const TARGETS = [...new Set([PAGE, PANEL])];
+const TRANSITION = "src/components/transitions/transition-button.tsx";
+const VOICE = "src/components/voice/voice-input.tsx";
+// The gate itself is a target: one mutant removes a pair from its list,
+// which is how the DERIVED population proves it is doing the work.
+const TARGETS = [...new Set([PAGE, PANEL, GATE, TRANSITION, VOICE])];
 
 const MUTANTS = [
+  {
+    // THE POPULATION. Section 8's heading says "every AI route", and its
+    // list was six of ten; the four it missed each built a receipt their
+    // client discarded. Removing a pair now goes red against the derived
+    // set rather than silently shrinking the question.
+    name: "a receipt-building route drops out of the pairs list",
+    file: GATE,
+    from: '  ["transitions/detect", "src/app/api/transitions/detect/route.ts", "src/components/transitions/transition-button.tsx"],\n',
+    to: "",
+    expect: "paired with the client that reports it",
+  },
+  {
+    name: "the transition button goes back to discarding its receipt",
+    file: TRANSITION,
+    from: "        void reportUsage(data);",
+    to: "",
+    expect: "transitions/detect: client reports it",
+  },
+  {
+    name: "the voice transcriber goes back to a silent balance refresh",
+    file: VOICE,
+    from: "        void reportUsage(data);",
+    to: "        refreshCredits();",
+    expect: "voice/transcribe: client reports it",
+  },
   {
     // 1. THE SECOND SOURCE DISAPPEARS and the panel is a ledger again —
     // exactly the state the customer could not account for.

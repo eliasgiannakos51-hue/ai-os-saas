@@ -3516,7 +3516,9 @@
       "unauthenticated": "A tua sessão terminou. Inicia sessão e tenta de novo.",
       "unsupported": "Este navegador não consegue gravar áudio. Podes sempre escrever.",
       "unsupported_type": "Esse formato de áudio não é suportado.",
-      "usage_unavailable": "Não foi possível verificar os minutos de voz neste momento."
+      "usage_unavailable": "Não foi possível verificar os minutos de voz neste momento.",
+      "streamInterrupted": "A ligação caiu antes de a resposta terminar.",
+      "streamInterruptedPartial": "A ligação caiu — a resposta acima pode estar incompleta."
     },
     "permission": {
       "title": "Antes de o microfone abrir",

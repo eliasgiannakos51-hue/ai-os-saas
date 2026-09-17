@@ -52,7 +52,7 @@ export function VoiceInput({
   const t = useTranslations("voice");
   const locale = useLocale();
   const { addToast } = useToast();
-  const { refresh: refreshCredits } = useCredits();
+  const { refresh: refreshCredits, reportUsage } = useCredits();
   const availability = useVoiceAvailability();
   const voiceError = useVoiceErrorText();
 
@@ -80,7 +80,11 @@ export function VoiceInput({
           addToast(voiceError(data), "error");
           return;
         }
-        refreshCredits();
+        // The response carries what the transcription cost; reportUsage
+        // refreshes the balance AND says so, where refreshCredits only did
+        // the first half. /api/voice/transcribe has returned the receipt
+        // since it was written; nothing read it.
+        void reportUsage(data);
         availability.refresh();
         // INTO A DRAFT, not into the field and not into a send. The user
         // reads it, fixes it, and accepts it.
@@ -91,7 +95,7 @@ export function VoiceInput({
         setBusy(false);
       }
     },
-    [addToast, availability, locale, refreshCredits, t, voiceError]
+    [addToast, availability, locale, refreshCredits, reportUsage, t, voiceError]
   );
 
   const recorder = useRecorder({

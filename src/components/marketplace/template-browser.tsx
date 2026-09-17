@@ -10,6 +10,7 @@ import { ListLayout } from "@/components/ui/list-layout";
 import { matchesSearch } from "@/lib/text/search-match";
 import { useScheduleLabel } from "@/components/agents/schedule-editor";
 import { resolveBrowserTimeZone } from "@/lib/agents/cron-expression";
+import { useCredits } from "@/components/credits/credits-context";
 
 /**
  * BROWSING THE TEMPLATES THAT ALREADY EXISTED.
@@ -66,6 +67,7 @@ export function TemplateBrowser({
   const { addToast } = useToast();
   const router = useRouter();
   const scheduleLabel = useScheduleLabel();
+  const { reportUsage } = useCredits();
 
   const [query, setQuery] = useState("");
   const [openSlug, setOpenSlug] = useState<string | null>(null);
@@ -115,6 +117,11 @@ export function TemplateBrowser({
         addToast(data?.error ?? t("adoptError"), "error");
         return;
       }
+      // ADOPTING A TEMPLATE RUNS A MODEL CALL AND CHARGES FOR IT.
+      // /api/agents/templates/adopt has returned a usage receipt since it
+      // was written and this component discarded it — so the balance in
+      // the top bar moved and nothing said why.
+      void reportUsage(data);
       addToast(t("adopted", { subject: wanted }));
       setOpenSlug(null);
       setSubject("");

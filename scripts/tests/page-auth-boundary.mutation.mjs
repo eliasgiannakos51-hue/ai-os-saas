@@ -16,6 +16,13 @@
  *      round trip on every anonymous view of every customer's site.
  *   5. the onboarding page — the one page outside /dashboard that is
  *      neither public nor under a guarding layout — loses its redirect.
+ *   6. the middleware reads the user and lets the request through. The
+ *      first version of this gate asserted only that it RESOLVES, so this
+ *      edit left it green while the layer its own header calls
+ *      "independent of the first" was gone.
+ *   7. a page's only resolution is a string in a log line. Two pages
+ *      passed on exactly that for a day, because the detector read a
+ *      diagLog template as a call.
  *
  * Run: node scripts/tests/page-auth-boundary.mutation.mjs
  */
@@ -25,6 +32,7 @@ const GATE = "scripts/tests/page-auth-boundary.test.mjs";
 const LAYOUT = "src/app/dashboard/layout.tsx";
 const MIDDLEWARE = "src/middleware.ts";
 const ONBOARDING = "src/app/onboarding/page.tsx";
+const TIMELINE = "src/app/dashboard/timeline/page.tsx";
 
 const MUTANTS = [
   {
@@ -62,11 +70,25 @@ const MUTANTS = [
     to: "",
     expect: "every page is behind an auth boundary",
   },
+  {
+    name: "the middleware reads the user and lets the request through",
+    file: MIDDLEWARE,
+    from: "  if (!user && isDashboardRoute) {",
+    to: "  if (false && !user && isDashboardRoute) {",
+    expect: "refuses a dashboard request with no user",
+  },
+  {
+    name: "a page's only resolution is the string in its log line",
+    file: TIMELINE,
+    from: "  const { user, error: userError } = await getCurrentUserResult();",
+    to: "  const { user, error: userError } = { user: null, error: null } as Awaited<ReturnType<typeof getCurrentUserResult>>;",
+    expect: "every page is behind an auth boundary",
+  },
 ];
 
 runMutations({
   name: "page-auth-boundary",
   gate: GATE,
-  targets: [LAYOUT, MIDDLEWARE, ONBOARDING],
+  targets: [LAYOUT, MIDDLEWARE, ONBOARDING, TIMELINE],
   mutants: MUTANTS,
 });

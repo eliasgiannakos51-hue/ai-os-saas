@@ -3516,7 +3516,9 @@
       "unauthenticated": "Du bist abgemeldet. Melde dich an und versuch es erneut.",
       "unsupported": "Dieser Browser kann kein Audio aufnehmen. Tippen geht weiterhin.",
       "unsupported_type": "Dieses Audioformat wird nicht unterstützt.",
-      "usage_unavailable": "Die Sprachminuten konnten gerade nicht geprüft werden."
+      "usage_unavailable": "Die Sprachminuten konnten gerade nicht geprüft werden.",
+      "streamInterrupted": "Die Verbindung wurde vor dem Ende der Antwort unterbrochen.",
+      "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die Antwort oben ist möglicherweise unvollständig."
     },
     "permission": {
       "title": "Bevor das Mikrofon geöffnet wird",

@@ -198,6 +198,63 @@ for (const [file, entry] of Object.entries(DECLARED)) {
 check("every declared bound is still true of the tree", brokenDeclarations.length === 0, brokenDeclarations.join("\n        "));
 
 // ---------------------------------------------------------------------
+// A ROUTE THAT SENDS A MESSAGE OUTWARD NEEDS A RATE LIMIT SPECIFICALLY.
+//
+// A PLAN CAP IS A PRESENCE CHECK, AND A CEILING OF INFINITY IS NOT A
+// CEILING. /api/team/invite was cleared by the section above because
+// `seat_count` appears in it, and that seat check is real — on
+// Professional. lib/team/seat-limits.ts sets Ultimate and Enterprise to
+// POSITIVE_INFINITY and the route skips the seat branch entirely for
+// teamSeatsIncluded plans and for isAdmin, deliberately, because those
+// have no per-seat charge. So on exactly the accounts with no cap,
+// nothing bounded the route — and the next thing it does is send an
+// email to an address THE CALLER SUPPLIED, from this product's domain.
+//
+// security-posture.test.mjs already makes this argument about
+// /api/contact: "the recipient is FIXED to ADMIN_EMAILS ... which is the
+// difference between a contact form and an open relay". Nothing made it
+// about the route where the recipient is not fixed.
+//
+// So for these, a reservation or a plan cap is not enough. It is a rate
+// limit, a cron secret, or a written reason.
+// Built from parts rather than written whole: gate-import-paths.test.mjs
+// resolves every `@/…` literal a gate contains against the tree, and
+// `@/lib/email/send-` is a PREFIX, not a module — spelled out it reads as
+// a broken import.
+const EMAIL_SENDER_PREFIX = ["@/lib", "email", "send-"].join("/");
+const SENDS_OUTWARD = new RegExp(`from "${EMAIL_SENDER_PREFIX}|sendTelegram|sendDiscord|dispatchNotification`);
+const senders = routes.filter((f) => SENDS_OUTWARD.test(SOURCE.get(f)));
+check(`routes that send a message outward (${senders.length})`, senders.length >= 5, "the outbound detector matched almost nothing");
+
+const SENDS_WITHOUT_A_LIMIT = {
+  "src/app/auth/callback/route.ts":
+    "the OAuth landing. It sends the welcome email once, on the exchange of a single-use code the provider minted — a loop of this route exchanges nothing twice, so there is no second email to send.",
+  "src/app/api/billing/cancel/route.ts":
+    "the cancellation email. It is reached only with an ACTIVE subscription and the route refuses with 400 otherwise, so a second call finds nothing active and never reaches the send.",
+  "src/app/api/cron/scheduled-runs/route.ts": "cron, behind CRON_SECRET; the caller is Vercel and the recipients are rows it found.",
+  "src/app/api/weekly-digest/route.ts": "cron, behind CRON_SECRET; same posture as the job above.",
+};
+const unboundedSenders = senders.filter(
+  (f) => !boundsOf(f).includes("rate_limit") && !boundsOf(f).includes("cron_secret") && !SENDS_WITHOUT_A_LIMIT[f]
+);
+check(
+  "every route that sends outward is rate limited, or says what stops a loop",
+  unboundedSenders.length === 0,
+  unboundedSenders.length
+    ? `sends a message and has no limiter:\n        ${unboundedSenders.join("\n        ")}\n        ` +
+      "A plan cap does not count here: it can be Infinity, and on the plans where it is, the route is unbounded."
+    : ""
+);
+const staleSenders = Object.keys(SENDS_WITHOUT_A_LIMIT).filter(
+  (f) => !senders.includes(f) || boundsOf(f).includes("rate_limit")
+);
+check(
+  "no send-without-a-limit entry has gone stale",
+  staleSenders.length === 0,
+  staleSenders.map((f) => (senders.includes(f) ? `${f}: it is rate limited now — drop the entry` : `${f}: it sends nothing any more`)).join("\n        ")
+);
+
+// ---------------------------------------------------------------------
 // CONTROLS, driving boundsOf and the insert detector rather than
 // restating them.
 // ---------------------------------------------------------------------
@@ -228,6 +285,16 @@ check(
   "control: a refusal that is not a 429 still counts",
   matches(BOUNDS.rate_limit, 'const limited = await checkRateLimit({ scope: "x", identifier: user.id });\nif (!limited.allowed) return NextResponse.json({ ok: true, recorded: false });'),
   "/api/transitions/record refuses this way on purpose — a beacon must not raise an error in the browser"
+);
+check(
+  "control: the invite route is seen to send outward",
+  senders.includes("src/app/api/team/invite/route.ts"),
+  "the route that could send unbounded email to caller-chosen addresses is not in the outbound population"
+);
+check(
+  "control: ...and to be rate limited, not merely seat-capped",
+  boundsOf("src/app/api/team/invite/route.ts").includes("rate_limit"),
+  "the seat cap is Infinity on Ultimate and Enterprise, so it is not what bounds this"
 );
 check("control: the Stripe webhook is bounded by its signature, not a limiter", boundsOf(STRIPE).includes("stripe_signature") && !boundsOf(STRIPE).includes("rate_limit"), "if this route ever gains a rate limit the control is simply stale — say so here");
 

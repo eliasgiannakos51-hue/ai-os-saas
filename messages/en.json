@@ -3516,7 +3516,9 @@
       "unauthenticated": "You are signed out. Sign in and try again.",
       "unsupported": "This browser cannot record audio. You can still type.",
       "unsupported_type": "That audio format is not supported.",
-      "usage_unavailable": "Voice minutes could not be checked right now."
+      "usage_unavailable": "Voice minutes could not be checked right now.",
+      "streamInterrupted": "The connection dropped before the reply finished.",
+      "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete."
     },
     "permission": {
       "title": "Before the microphone opens",

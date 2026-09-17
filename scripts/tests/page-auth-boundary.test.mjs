@@ -1,6 +1,6 @@
 // SIXTY-THREE PAGES, ONE `redirect("/login")`, AND NOTHING READ IT.
 //
-// Every page under /dashboard is behind an auth check. For seven of the
+// Every page under /dashboard is behind an auth check. For six of the
 // forty-six it is not their own: they resolve no user and refuse nobody,
 // and what stands between them and a stranger is one line in
 // src/app/dashboard/layout.tsx:
@@ -22,10 +22,12 @@
 // is, the nav, and every page that reads through an admin client after
 // the layout has vouched for the caller.
 //
-// (Seven is measured, not remembered: this file prints the count on every
+// (Six is measured, not remembered: this file prints the count on every
 // run, from the same guards() the checks use. It was 30 in a first draft
 // of this comment, taken from `grep -L getUser` — which misses
-// getCurrentUser, the helper most of these pages actually call.)
+// getCurrentUser, the helper most of these pages actually call — and 7
+// on the day this gate shipped, because the detector below could not see
+// getCurrentUserResult and counted a log string as a call.)
 //
 // THE RULE. Every page.tsx under src/app is behind an auth boundary — its
 // own, or one in a layout.tsx above it on the path — or is DECLARED
@@ -69,12 +71,32 @@ check(`layouts found (${layouts.length})`, layouts.length >= 2, "no layout was f
 // boundary is reading it AND sending the caller somewhere when it is
 // absent. Both halves are required, which is what makes deleting the
 // `redirect` — the likelier edit of the two — go red here.
-const RESOLVES = /getCurrentUser\s*\(|auth\s*\.\s*getUser\s*\(/;
+const RESOLVES = /getCurrentUser(?:Result)?\s*\(|auth\s*\.\s*getUser\s*\(/;
 const REFUSES = /redirect\s*\(\s*["'`]\/(login|signup)|notFound\s*\(\s*\)/;
+
+// THE RESOLUTION IS LOOKED FOR IN CODE, WITH STRING CONTENTS BLANKED, and
+// both halves of that sentence were bought by being wrong first.
+//
+// src/app/dashboard/timeline/page.tsx and .../mission/page.tsx both log
+// `diagLog(\`[timeline-diag ${reqId}] auth.getUser() -> user=...\`)`. That
+// template literal was the ONLY text in either file matching RESOLVES —
+// the real call is getCurrentUserResult(), which the pattern did not
+// know. So the first version of this gate passed two pages for a string
+// in a log line, and failed a third, favorites/page.tsx, which resolves
+// and refuses on consecutive lines. It had a control for a guard named
+// only in a COMMENT and none for one named only in a STRING, which is
+// the same defect one spelling over.
+//
+// The refusal is NOT looked for in blanked code, because a refusal is
+// identified by where it sends the caller — `redirect("/login")` is the
+// string. Two views, for two different questions.
+const blankStrings = (t) =>
+  t.replace(/`(?:[^`\\]|\\.)*`|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, (m) => m[0] + m[0]);
+
 function guards(file) {
   if (!existsSync(file)) return false;
   const src = strip(readFileSync(file, "utf8"));
-  return RESOLVES.test(src) && REFUSES.test(src);
+  return RESOLVES.test(blankStrings(src)) && REFUSES.test(src);
 }
 
 /** Every layout.tsx from the page's own directory up to src/app. */
@@ -147,14 +169,43 @@ check("every public-page reason is an argument", shortReasons.length === 0, shor
 const DASHBOARD_LAYOUT = "src/app/dashboard/layout.tsx";
 check("the dashboard layout exists", existsSync(DASHBOARD_LAYOUT));
 const layoutSrc = existsSync(DASHBOARD_LAYOUT) ? strip(readFileSync(DASHBOARD_LAYOUT, "utf8")) : "";
-check("...it resolves the user", RESOLVES.test(layoutSrc), "nothing in the dashboard layout reads who is asking");
+check("...it resolves the user", RESOLVES.test(blankStrings(layoutSrc)), "nothing in the dashboard layout reads who is asking");
 check("...and refuses when there is none", REFUSES.test(layoutSrc), "it reads the user and renders anyway");
 const dashboardPages = pages.filter((p) => p.startsWith("src/app/dashboard/"));
 const relyOnLayout = dashboardPages.filter((p) => !guards(p));
+
+// NAMED, NOT COUNTED. A number printed and never judged is the thing
+// CLAUDE.md has a scanner for, and this one was exactly that: the first
+// version asserted `relyOnLayout.length >= 4` and printed the list, so a
+// page silently joining or leaving the set moved a figure nobody read.
+// It also meant the string-blanking above — which exists because two
+// pages were counted as self-guarding on the strength of a log line —
+// had nothing asserting it. Named both ways, a detector that regresses
+// moves a page between these buckets and says which one.
+const STANDS_ON_THE_LAYOUT = {
+  "src/app/dashboard/apps/page.tsx": "a BuildModulePage shell: it renders a config and reads no table on the server, so there is nothing an unauthenticated render could disclose.",
+  "src/app/dashboard/campaigns/page.tsx": "the same shell, the same config-only render.",
+  "src/app/dashboard/images/page.tsx": "the same shell.",
+  "src/app/dashboard/videos/page.tsx": "the same shell.",
+  "src/app/dashboard/websites/page.tsx": "the same shell.",
+  "src/app/dashboard/memory/page.tsx": "a 308 to /dashboard/search and nothing else — a kept address for old bookmarks. It has no body to protect, and the page it forwards to resolves and refuses.",
+};
+const undeclaredReliance = relyOnLayout.filter((p) => !STANDS_ON_THE_LAYOUT[p]);
 check(
-  `...which is the only boundary for ${relyOnLayout.length} of ${dashboardPages.length} dashboard pages`,
-  relyOnLayout.length >= 5,
-  "if this has dropped to nothing, either every page now guards itself (fine — say so here) or the guard detector has stopped working"
+  `...which is the only boundary for ${relyOnLayout.length} dashboard pages, and they are named`,
+  undeclaredReliance.length === 0,
+  undeclaredReliance.length
+    ? `standing on the layout alone and not declared:\n        ${undeclaredReliance.join("\n        ")}\n        ` +
+      "Either guard the page itself, or add it here with what an unauthenticated render of it would disclose."
+    : ""
+);
+const noLongerReliant = Object.keys(STANDS_ON_THE_LAYOUT).filter((p) => !relyOnLayout.includes(p));
+check(
+  "no page is listed as standing on the layout when it guards itself",
+  noLongerReliant.length === 0,
+  noLongerReliant
+    .map((p) => (!pages.includes(p) ? `${p}: no such page` : `${p}: it resolves and refuses on its own now — drop the entry`))
+    .join("\n        ")
 );
 
 // ---------------------------------------------------------------------
@@ -167,7 +218,19 @@ check(
 const MIDDLEWARE = "src/middleware.ts";
 check("the middleware exists", existsSync(MIDDLEWARE));
 const mw = existsSync(MIDDLEWARE) ? strip(readFileSync(MIDDLEWARE, "utf8")) : "";
-check("...and resolves the user itself", RESOLVES.test(mw), "the middleware no longer authenticates anything");
+check("...and resolves the user itself", RESOLVES.test(blankStrings(mw)), "the middleware no longer authenticates anything");
+// AND REFUSES. This file's own header calls the middleware "the second
+// layer, which is independent of the first", and makes exactly this
+// argument about the layout two checks above — that keeping
+// getCurrentUser and losing the redirect is the edit that matters. It
+// then did not make it here: RESOLVES was asserted and nothing was. The
+// middleware refuses in its own shape, building a URL rather than
+// calling redirect("/login"), so it needs its own pattern.
+check(
+  "...and refuses a dashboard request with no user",
+  /if\s*\(\s*!\s*user[^)]*\)\s*\{[\s\S]{0,300}?NextResponse\.redirect\(/.test(mw) && /pathname\s*=\s*"\/login"/.test(mw),
+  "the middleware resolves the user and lets the request through — the second layer is gone, and the build stays green because the layout still refuses"
+);
 const matcher = /matcher:\s*\[([\s\S]*?)\]/.exec(mw);
 check("...and declares a matcher", Boolean(matcher));
 const pattern = matcher ? matcher[1] : "";
@@ -188,6 +251,21 @@ check(
 check("control: reading the user without refusing is not a boundary", !(RESOLVES.test("const u = await getCurrentUser();") && REFUSES.test("const u = await getCurrentUser();")));
 check("control: refusing without reading is not a boundary either", !(RESOLVES.test('redirect("/login");') && REFUSES.test('redirect("/login");')));
 check("control: both together are", RESOLVES.test('const u = await getCurrentUser();\nif (!u) redirect("/login");') && REFUSES.test('const u = await getCurrentUser();\nif (!u) redirect("/login");'));
+check(
+  "control: a guard named only in a STRING does not count",
+  !guardsText(blankStrings('diagLog(`[diag] auth.getUser() -> user=${u}`);\nredirect("/login");')),
+  "two dashboard pages passed this gate on the strength of a log line for its whole first day"
+);
+check(
+  "control: getCurrentUserResult is a resolution",
+  RESOLVES.test("const { user } = await getCurrentUserResult();"),
+  "three pages call the Result form and none of them would be seen to resolve anything"
+);
+check(
+  "control: blanking keeps the refusal readable",
+  REFUSES.test('redirect("/login");'),
+  "the refusal is identified by where it sends the caller, so it is matched on the unblanked source"
+);
 check(
   "control: a guard named only in a comment does not count",
   !guardsText(strip('// this page is behind getCurrentUser() and redirects to /login\nexport default function P() { return null; }')),

@@ -20,7 +20,7 @@
 // that only records what you PAID.
 //
 // Run: node scripts/tests/credit-visibility.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { schemaSql } from "./lib/schema-sql.mjs";
 
 let pass = 0,
@@ -189,9 +189,32 @@ for (const key of ["used", "usedWithRemaining", "unlimited", "unlimitedWouldHave
 }
 
 console.log("\n== 8. every AI route returns a receipt, and its client reports it ==");
-// Chat was the precedent. These five follow it exactly: the route puts a
+// Chat was the precedent. These follow it exactly: the route puts a
 // buildUsageReceipt on its response, the client passes that response to
 // reportUsage instead of calling refresh and saying nothing.
+//
+// THE LIST WAS SIX AND THE TREE HAD TEN. This section's heading says
+// "every AI route returns a receipt, and its client reports it", and the
+// four it did not name — agents/templates/adopt, voice/transcribe,
+// transitions/detect and websites/edit — each built a receipt that its
+// client threw away, calling refreshCredits() or nothing. That is
+// verbatim the failure the sentence above forbids for the six, happening
+// beside them, on routes that charge. Found 2026-09-17 by deriving the
+// population instead of reading the list.
+//
+// So the population is derived now: every route under src/app/api that
+// calls buildUsageReceipt must appear below with its client, and the
+// difference is reported rather than assumed.
+const RECEIPT_ROUTES = [];
+(function walkApi(dir) {
+  for (const entry of readdirSync(dir)) {
+    const full = `${dir}/${entry}`;
+    if (statSync(full).isDirectory()) walkApi(full);
+    else if (entry === "route.ts" && /buildUsageReceipt\s*\(/.test(readFileSync(full, "utf8"))) RECEIPT_ROUTES.push(full);
+  }
+})("src/app/api");
+checkTrue(`routes that build a usage receipt (${RECEIPT_ROUTES.length})`, RECEIPT_ROUTES.length >= 8, "the receipt scraper found almost nothing, so the difference below is empty for the wrong reason");
+
 const PAIRS = [
   ["chat", "src/app/api/chat/route.ts", "src/components/chat/chat-workspace.tsx"],
   ["create-studio/detect", "src/app/api/create-studio/detect/route.ts", "src/components/create/studio-chat.tsx"],
@@ -199,7 +222,21 @@ const PAIRS = [
   ["text-actions", "src/app/api/text-actions/route.ts", "src/components/text-actions/text-actions-textarea.tsx"],
   ["reflection/generate", "src/app/api/reflection/generate/route.ts", "src/components/reflection/reflection-generator.tsx"],
   ["websites/status", "src/app/api/websites/status/route.ts", "src/components/website-builder/website-builder-workspace.tsx"],
+  ["agents/templates/adopt", "src/app/api/agents/templates/adopt/route.ts", "src/components/marketplace/template-browser.tsx"],
+  ["voice/transcribe", "src/app/api/voice/transcribe/route.ts", "src/components/voice/voice-input.tsx"],
+  ["transitions/detect", "src/app/api/transitions/detect/route.ts", "src/components/transitions/transition-button.tsx"],
+  ["websites/edit", "src/app/api/websites/edit/route.ts", "src/components/website-builder/website-builder-workspace.tsx"],
 ];
+const declaredRoutes = PAIRS.map(([, r]) => r);
+const undeclaredReceipts = RECEIPT_ROUTES.filter((r) => !declaredRoutes.includes(r));
+check(
+  "every route that builds a receipt is paired with the client that reports it",
+  undeclaredReceipts,
+  []
+);
+const staleRoutes = declaredRoutes.filter((r) => !RECEIPT_ROUTES.includes(r));
+check("no pair names a route that no longer builds one", staleRoutes, []);
+
 for (const [label, routeFile, clientFile] of PAIRS) {
   const route = readFileSync(routeFile, "utf8");
   const client = readFileSync(clientFile, "utf8");

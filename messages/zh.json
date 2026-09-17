@@ -3516,7 +3516,9 @@
       "unauthenticated": "你已退出登录。请重新登录后再试。",
       "unsupported": "此浏览器无法录音。你仍然可以打字。",
       "unsupported_type": "不支持这种音频格式。",
-      "usage_unavailable": "目前无法查询语音分钟数。"
+      "usage_unavailable": "目前无法查询语音分钟数。",
+      "streamInterrupted": "连接在回复完成前中断了。",
+      "streamInterruptedPartial": "连接中断了 — 上面的回复可能不完整。"
     },
     "permission": {
       "title": "在打开麦克风之前",

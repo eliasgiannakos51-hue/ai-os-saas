@@ -34,6 +34,36 @@ const TARGETS = [GATE, REGISTRY, EXPORT_ROUTE, ERASE_MIGRATION, DELETE_ROUTE];
 
 const MUTANTS = [
   {
+    // THE RELATION THAT IS NOT IN THE DATABASE. No foreign key, no
+    // cascade and no RLS policy reaches a Stripe subscription; without
+    // this call the card keeps being charged for an account that no
+    // longer exists and whose owner cannot log in to stop it.
+    name: "deleting an account stops cancelling the subscription",
+    file: DELETE_ROUTE,
+    from: "          await stripe.subscriptions.cancel(subscriptionId);",
+    to: "          void subscriptionId;",
+    expect: "cancels the Stripe subscription",
+  },
+  {
+    // ORDER. After deleteUser the metadata holding the subscription id is
+    // gone, so a cancellation moved below it silently cancels nothing.
+    name: "the cancellation moves after the account is deleted",
+    file: DELETE_ROUTE,
+    from: "    const { data: authUser } = await admin.auth.admin.getUserById(claimed.user_id);",
+    to: "    await admin.auth.admin.deleteUser(claimed.user_id);\n    const { data: authUser } = await admin.auth.admin.getUserById(claimed.user_id);",
+    expect: "BEFORE deleteUser",
+  },
+  {
+    // The single-use claim is what makes refusing safe. Without the
+    // release, a Stripe outage leaves somebody permanently unable to
+    // delete their account — a worse trap than the one being fixed.
+    name: "a refused deletion keeps the token spent",
+    file: DELETE_ROUTE,
+    from: "          .update({ used_at: null })",
+    to: "          .update({ used_at: new Date().toISOString() })",
+    expect: "releases the claim",
+  },
+  {
     // THE DEFECT THAT WAS REAL. delete_user_file_objects() deleted from
     // 'user-files' alone for a year, while 'create-attachments' and the
     // PUBLIC 'website-references' survived every account deletion. The

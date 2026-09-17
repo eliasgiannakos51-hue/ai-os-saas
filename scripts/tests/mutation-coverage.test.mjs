@@ -209,7 +209,13 @@ console.log(
 // that the row belongs to them. Read off the run.
 // 179 -> 180 ON 2026-09-17: charged-party.mutation.mjs, driving the gate
 // that asks WHO is billed rather than how much. Read off the run.
-const RATCHET = 180;
+// 180 -> 181 ON 2026-09-17: house-style.mutation.mjs, driving the gate
+// that asks which routes look unlike the tree at all rather than which
+// ones fail a particular check. Read off the run.
+// 181 -> 182 ON 2026-09-17: external-state-reversal.mutation.mjs, driving
+// the gate that asks what happens when the database and a third party
+// disagree. Read off the run.
+const RATCHET = 182;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

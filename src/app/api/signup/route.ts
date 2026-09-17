@@ -5,6 +5,7 @@ import { sendWelcomeEmail } from "@/lib/email/send-welcome-email";
 import { logApiError } from "@/lib/log-error";
 import { attributeReferral } from "@/lib/affiliate/store";
 import { REFERRAL_COOKIE } from "@/lib/affiliate/cookie";
+import { LOCALE_COOKIE, resolveSupportedLocale } from "@/i18n/constants";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { grantCredits } from "@/lib/billing/credits";
 import { getPlan } from "@/lib/billing/plans";
@@ -195,7 +196,21 @@ export async function POST(request: Request) {
     // .catch is not optional: an unawaited rejection is a process-level
     // unhandled rejection, and this promise is deliberately not awaited
     // for another few statements.
-    const welcomeEmail = sendWelcomeEmail(email).catch((err) => {
+    // THE LANGUAGE THEY SIGNED UP IN. The account exists as of a second
+    // ago and carries no preferred_locale yet, so lib/email/email-locale.ts
+    // has nothing to read — but the page they were looking at does know,
+    // in the same NEXT_LOCALE cookie i18n/request.ts resolves for every
+    // other server render. Passed explicitly rather than looked up.
+    const signupLocale = resolveSupportedLocale(
+      request.headers
+        .get("cookie")
+        ?.split(";")
+        .map((c) => c.trim())
+        .find((c) => c.startsWith(`${LOCALE_COOKIE}=`))
+        ?.slice(LOCALE_COOKIE.length + 1)
+    );
+
+    const welcomeEmail = sendWelcomeEmail(email, null, signupLocale).catch((err) => {
       logApiError("/api/signup", err, { stage: "welcome_email" });
     });
 

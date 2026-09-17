@@ -4,6 +4,7 @@ import { senderAddress } from "@/lib/email/resend-config";
 import { newDeviceLoginEmailHtml } from "@/lib/email/templates";
 import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
+import { emailLocaleFor } from "@/lib/email/email-locale";
 import { checkEmailAllowed, recordEmailSend } from "@/lib/email/email-gate";
 
 // The From address, from ONE definition — see lib/email/resend-config.ts.
@@ -24,6 +25,7 @@ export async function sendNewDeviceLoginEmail(
   }: { userId: string; deviceLabel: string; ipAddress: string; signedInAt: string }
 ): Promise<void> {
   try {
+    const locale = await emailLocaleFor(userId);
     const gate = await checkEmailAllowed(userId, "new_device_login");
     if (!gate.allowed) return;
 
@@ -39,6 +41,7 @@ export async function sendNewDeviceLoginEmail(
       to: email,
       subject: "New sign-in to your Ionexa AI account",
       html: newDeviceLoginEmailHtml({
+        locale,
         email,
         deviceLabel,
         ipAddress,

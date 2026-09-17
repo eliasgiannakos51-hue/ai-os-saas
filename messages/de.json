@@ -4052,5 +4052,59 @@
     "pruneButton": "{count} ungenutzte aufräumen",
     "pruneConfirm": "{count} Zeilen löschen, die einmal gesagt und seit sechs Monaten nicht wieder aufgetaucht sind? Alles Wiederholte bleibt.",
     "pruned": "{count} entfernt."
+  },
+  "email": {
+    "welcome": {
+      "label": "Registrierung",
+      "title": "willkommen bei Ionexa AI",
+      "body": "Dein Konto ist bereit — keine E-Mail-Bestätigung nötig, du kannst dich sofort anmelden. Ionexa AI besteht aus 13 Modulen für den Aufbau eines Start-ups, dazu ein freies Textfeld, das alles, was du schreibst, im richtigen Modul ablegt.",
+      "tip": "Tipp: Unter {path} kannst du einfach in eigenen Worten beschreiben, was passiert ist — es landet automatisch im richtigen Modul.",
+      "preheader": "Dein Ionexa-AI-Konto ist bereit."
+    },
+    "deletion": {
+      "label": "Kontolöschung",
+      "title": "Kontolöschung bestätigen",
+      "body": "Wir haben eine Anfrage erhalten, dein Ionexa-AI-Konto und alle Einträge aus sämtlichen Modulen dauerhaft zu löschen. Das lässt sich nicht rückgängig machen.",
+      "cta": "Löschung bestätigen",
+      "expiry": "Dieser Link läuft in 1 Stunde ab. Falls du das nicht angefordert hast, ignoriere diese E-Mail — dein Konto bleibt genau so, wie es ist.",
+      "preheader": "Bestätige die endgültige Löschung deines Ionexa-AI-Kontos."
+    },
+    "cancelled": {
+      "label": "Abonnement",
+      "title": "dein Abonnement läuft aus",
+      "untilDate": "Du behältst den vollen Zugriff bis zum {date}. Bis dahin ändert sich nichts — deine übrigen Credits bleiben nutzbar und keine deiner Daten wird gelöscht.",
+      "untilPeriodEnd": "Du behältst den vollen Zugriff bis zum Ende des bereits bezahlten Zeitraums. Bis dahin ändert sich nichts — deine übrigen Credits bleiben nutzbar und keine deiner Daten wird gelöscht.",
+      "afterwards": "Danach wechselt das Konto in den kostenlosen Tarif. Deine Einträge, Dateien und Unterhaltungen bleiben genau dort, wo sie sind.",
+      "cta": "Anders überlegt? Wieder aktivieren",
+      "noCharge": "Du kannst das Abonnement jederzeit vor dem Ende ohne Zusatzkosten wieder aktivieren — dieser Zeitraum ist bereits bezahlt.",
+      "preheaderDate": "Dein Ionexa-AI-Abonnement endet am {date}. Bis dahin behältst du den Zugriff.",
+      "preheader": "Dein Ionexa-AI-Abonnement läuft aus. Du behältst den Zugriff bis zum Ende des bezahlten Zeitraums."
+    },
+    "newDevice": {
+      "label": "Sicherheit",
+      "title": "neue Anmeldung bei deinem Konto",
+      "body": "Wir haben eine Anmeldung bei deinem Ionexa-AI-Konto von einem Gerät oder Browser bemerkt, den wir noch nie gesehen haben.",
+      "when": "Wann",
+      "device": "Gerät",
+      "ip": "IP-Adresse",
+      "ifYou": "Wenn du das warst, musst du nichts tun. Falls du diese Anmeldung nicht kennst, ändere bitte sofort dein Passwort.",
+      "cta": "Passwort ändern",
+      "preheader": "Neue Anmeldung bei deinem Ionexa-AI-Konto von {device}."
+    },
+    "blurbs": {
+      "ideas": "Neue Produkt- oder Geschäftsideen festhalten und bewerten.",
+      "competitors": "Konkurrenzprodukte, Preise und Positionierung verfolgen.",
+      "research": "Notizen und Zusammenfassungen zu allem, was du recherchierst.",
+      "finance": "Einnahmen und Ausgaben erfassen.",
+      "learning": "Themen, die du lernst, mit Materialien und Quizfragen.",
+      "trading": "Handelsjournal — Symbol, Richtung, Ergebnis, Gewinn und Verlust.",
+      "decisions": "Optionen abwägen und die Empfehlung festhalten.",
+      "products": "Produktpläne — Preise, Roadmap, Launch-Plan.",
+      "content": "Content-Ideen, Texte und Threads.",
+      "sales": "Leads, Kontakt-E-Mails und nächste Schritte.",
+      "feedback": "Nutzerrückmeldungen, nach Stimmung und Priorität sortiert.",
+      "analytics": "Jede Kennzahl, die sich über die Zeit zu verfolgen lohnt.",
+      "automation": "Abläufe, die sich zu automatisieren lohnen, und die gesparte Zeit."
+    }
   }
 }

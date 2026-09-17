@@ -4052,5 +4052,59 @@
     "pruneButton": "Nettoyer {count} inutilisés",
     "pruneConfirm": "Supprimer {count} lignes dites une seule fois et jamais revenues depuis six mois ? Tout ce qui se répète est conservé.",
     "pruned": "{count} supprimées."
+  },
+  "email": {
+    "welcome": {
+      "label": "inscription",
+      "title": "bienvenue sur Ionexa AI",
+      "body": "Votre compte est prêt — aucune confirmation par e-mail n'est nécessaire, vous pouvez vous connecter tout de suite. Ionexa AI, ce sont 13 modules pour piloter une startup, plus une zone de texte libre qui classe automatiquement ce que vous écrivez dans le bon module.",
+      "tip": "Astuce : sur {path}, décrivez simplement ce qui s'est passé et cela arrivera automatiquement dans le bon module.",
+      "preheader": "Votre compte Ionexa AI est prêt."
+    },
+    "deletion": {
+      "label": "suppression du compte",
+      "title": "confirmez la suppression du compte",
+      "body": "Nous avons reçu une demande de suppression définitive de votre compte Ionexa AI et de tous les enregistrements de tous les modules. C'est irréversible.",
+      "cta": "Confirmer la suppression",
+      "expiry": "Ce lien expire dans 1 heure. Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail : votre compte restera exactement tel quel.",
+      "preheader": "Confirmez la suppression définitive de votre compte Ionexa AI."
+    },
+    "cancelled": {
+      "label": "abonnement",
+      "title": "votre abonnement va prendre fin",
+      "untilDate": "Vous gardez un accès complet jusqu'au {date}. Rien ne change d'ici là : vos crédits restants restent utilisables et aucune de vos données n'est supprimée.",
+      "untilPeriodEnd": "Vous gardez un accès complet jusqu'à la fin de la période déjà payée. Rien ne change d'ici là : vos crédits restants restent utilisables et aucune de vos données n'est supprimée.",
+      "afterwards": "Ensuite, le compte passe à l'offre gratuite. Vos entrées, fichiers et conversations restent exactement où ils sont.",
+      "cta": "Vous avez changé d'avis ? Réactivez-le",
+      "noCharge": "Vous pouvez réactiver l'abonnement à tout moment avant son terme, sans frais supplémentaires : cette période est déjà payée.",
+      "preheaderDate": "Votre abonnement Ionexa AI prend fin le {date}. Vous gardez l'accès jusque-là.",
+      "preheader": "Votre abonnement Ionexa AI va prendre fin. Vous gardez l'accès jusqu'à la fin de la période payée."
+    },
+    "newDevice": {
+      "label": "sécurité",
+      "title": "nouvelle connexion à votre compte",
+      "body": "Nous avons remarqué une connexion à votre compte Ionexa AI depuis un appareil ou un navigateur que nous n'avions jamais vu.",
+      "when": "Quand",
+      "device": "Appareil",
+      "ip": "Adresse IP",
+      "ifYou": "Si c'était vous, aucune action n'est nécessaire. Si vous ne reconnaissez pas cette connexion, changez votre mot de passe immédiatement.",
+      "cta": "Changer le mot de passe",
+      "preheader": "Nouvelle connexion à votre compte Ionexa AI depuis {device}."
+    },
+    "blurbs": {
+      "ideas": "Notez et évaluez de nouvelles idées de produit ou d'entreprise.",
+      "competitors": "Suivez les produits concurrents, leurs prix et leur positionnement.",
+      "research": "Notes et résumés de tout ce que vous étudiez.",
+      "finance": "Enregistrez les revenus et les dépenses.",
+      "learning": "Sujets que vous apprenez, avec ressources et quiz.",
+      "trading": "Journal de trading — symbole, sens, résultat, gains et pertes.",
+      "decisions": "Pesez les options et consignez la recommandation.",
+      "products": "Plans produit — tarifs, feuille de route, plan de lancement.",
+      "content": "Idées de contenu, légendes et fils.",
+      "sales": "Prospects, e-mails de prise de contact et prochaines étapes.",
+      "feedback": "Retours des utilisateurs, triés par ton et par priorité.",
+      "analytics": "Toute mesure qui mérite d'être suivie dans le temps.",
+      "automation": "Les flux qui méritent d'être automatisés, et le temps gagné."
+    }
   }
 }

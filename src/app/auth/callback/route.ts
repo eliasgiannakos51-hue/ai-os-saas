@@ -122,7 +122,7 @@ export async function GET(request: Request) {
     }
 
     if (user.email) {
-      await sendWelcomeEmail(user.email);
+      await sendWelcomeEmail(user.email, user.id);
     }
   }
 

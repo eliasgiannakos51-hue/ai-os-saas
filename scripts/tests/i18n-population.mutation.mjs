@@ -25,11 +25,35 @@ const APPS = "src/app/dashboard/apps/page.tsx";
 
 const MUTANTS = [
   {
+    // A TEMPLATE THAT ACCEPTS A LOCALE NOBODY PASSES renders English for
+    // everybody and reads as converted. Three things have to line up —
+    // template, sender, call site — and this removes the last one.
+    name: "the signup route stops handing over the language it knows",
+    file: "src/app/api/signup/route.ts",
+    from: "sendWelcomeEmail(email, null, signupLocale)",
+    to: "sendWelcomeEmail(email)",
+    expect: "callers supply the account",
+  },
+  {
+    name: "a first-contact sender stops resolving a locale",
+    file: "src/lib/email/send-delete-account-confirmation-email.ts",
+    from: "    const locale = await emailLocaleFor(userId);",
+    to: '    const locale = "en";',
+    expect: "resolve a language",
+  },
+  {
+    name: "an email string is dropped from one of the ten catalogues",
+    file: "messages/el.json",
+    from: '"title": "επιβεβαίωση διαγραφής λογαριασμού"',
+    to: '"title": ""',
+    expect: "exists in all ten locales",
+  },
+  {
     // THE POPULATION THAT WALKS .tsx CANNOT SEE A .ts EMAIL. Twelve
     // senders, every one English, none of them in any list until today.
     name: "an email sender drops out of the register",
     file: GATE,
-    from: '  "src/lib/email/send-welcome-email.ts": EMAIL_REASON,\n',
+    from: '  "src/lib/email/send-weekly-digest-email.ts": EMAIL_REASON,\n',
     to: "",
     expect: "says why it is English",
   },
@@ -80,6 +104,6 @@ const MUTANTS = [
 runMutations({
   name: "i18n-population",
   gate: GATE,
-  targets: [LOGO, DECK, APPS, GATE, "src/lib/ai/module-vocabulary.ts"],
+  targets: [LOGO, DECK, APPS, GATE, "src/lib/ai/module-vocabulary.ts", "src/app/api/signup/route.ts", "src/lib/email/send-delete-account-confirmation-email.ts", "messages/el.json"],
   mutants: MUTANTS,
 });

@@ -92,7 +92,7 @@ export async function POST(request: Request) {
     // Best-effort, for the same reason: the confirmation is a courtesy, not
     // part of cancelling.
     try {
-      await sendSubscriptionCancelledEmail({ to: user.email ?? "", endsAt });
+      await sendSubscriptionCancelledEmail({ to: user.email ?? "", endsAt, userId: user.id });
     } catch (err) {
       logApiError("/api/billing/cancel", err, { stage: "send_email", userId: user.id });
     }

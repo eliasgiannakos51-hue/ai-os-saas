@@ -1,6 +1,7 @@
 import "server-only";
 import { escapeHtml } from "@/lib/html-escape";
 import { getSiteUrl } from "@/lib/site-url";
+import { emailTranslator, isRtlLocale } from "@/lib/email/email-locale";
 
 // Plain, table-based HTML with inline styles only — no <style> blocks, no
 // flexbox/grid, no CSS variables. Email clients (especially Outlook
@@ -52,9 +53,12 @@ const LOGO_HTML = LOGO_IS_REACHABLE
   ? `<img src="${LOGO_URL}" width="56" height="56" alt="Ionexa AI" style="display:block; border:0; outline:none; text-decoration:none; border-radius:12px; margin-bottom:10px; color:${ORANGE}; font-family:${MONO_STACK}; font-size:15px; font-weight:bold; line-height:56px;" />`
   : "";
 
-function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }) {
+// `dir` is threaded through because Arabic reads right to left and an
+// email client applies no locale of its own — the language is decided
+// where the message is built, not where it is opened.
+function layout({ preheader, bodyHtml, dir = "ltr" }: { preheader: string; bodyHtml: string; dir?: "ltr" | "rtl" }) {
   return `<!doctype html>
-<html>
+<html dir="${dir}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -92,52 +96,57 @@ function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }
 </html>`;
 }
 
-const MODULE_BLURBS: { title: string; blurb: string }[] = [
-  { title: "Ideas", blurb: "Capture and score new product/business ideas." },
-  { title: "Competitors", blurb: "Track rival products, pricing, and positioning." },
-  { title: "Research", blurb: "Notes and summaries from anything you're researching." },
-  { title: "Finance", blurb: "Log income and expenses." },
-  { title: "Learning", blurb: "Topics you're studying, with resources and quizzes." },
-  { title: "Trading", blurb: "Trade log — symbol, direction, result, P&L." },
-  { title: "Decisions", blurb: "Weigh options and record the recommendation." },
-  { title: "Products", blurb: "Product plans — pricing, roadmap, launch plan." },
-  { title: "Content", blurb: "Content ideas, captions, and threads." },
-  { title: "Sales", blurb: "Leads, outreach emails, and next steps." },
-  { title: "Feedback", blurb: "User feedback, triaged by sentiment and priority." },
-  { title: "Analytics", blurb: "Any metric worth tracking over time." },
-  { title: "Automation", blurb: "Workflows worth automating, and time saved." },
-];
+// THE THIRTEEN MODULES, BY KEY. Their NAMES are not repeated here: the
+// sidebar already carries every one of them in all ten languages
+// (messages/*.json, sidebar.items.*), and an email that called a module
+// something the app does not is worse than an untranslated one. Only the
+// one-line description is new, under email.blurbs.
+const MODULE_KEYS = [
+  "ideas",
+  "competitors",
+  "research",
+  "finance",
+  "learning",
+  "trading",
+  "decisions",
+  "products",
+  "content",
+  "sales",
+  "feedback",
+  "analytics",
+  "automation",
+] as const;
 
-export function welcomeEmailHtml({ email }: { email: string }): string {
-  const moduleRows = MODULE_BLURBS.map(
-    ({ title, blurb }) => `
+export function welcomeEmailHtml({ email, locale = "en" }: { email: string; locale?: string }): string {
+  const t = emailTranslator(locale);
+  const moduleRows = MODULE_KEYS.map(
+    (key) => `
               <tr>
                 <td style="padding:6px 0; border-bottom:1px solid ${BORDER};">
-                  <span style="color:${ORANGE}; font-size:13px;">${title}</span><br />
-                  <span style="color:${MUTED}; font-size:12px;">${blurb}</span>
+                  <span style="color:${ORANGE}; font-size:13px;">${escapeHtml(t(`sidebar.items.${key}`))}</span><br />
+                  <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t(`email.blurbs.${key}`))}</span>
                 </td>
               </tr>`
   ).join("");
 
   const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">signup · ${email}</span>
-    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">welcome to Ionexa AI</h1>
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.welcome.label"))} · ${escapeHtml(email)}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">${escapeHtml(t("email.welcome.title"))}</h1>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
-      Your account is ready — no email confirmation needed, you can log in right
-      away. Ionexa AI is 13 modules for running a startup, plus a free-text inbox
-      that files anything you type into the right one.
+      ${escapeHtml(t("email.welcome.body"))}
     </p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
       ${moduleRows}
     </table>
     <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:20px 0 0;">
-      Tip: on <span style="color:${ORANGE};">/dashboard/create</span> you can just
-      describe what happened in plain English and it'll land in the right module
-      automatically.
+      ${escapeHtml(t("email.welcome.tip", { path: "/dashboard/create" })).replace(
+        "/dashboard/create",
+        `<span style="color:${ORANGE};">/dashboard/create</span>`
+      )}
     </p>
   `;
 
-  return layout({ preheader: "Your Ionexa AI account is ready.", bodyHtml });
+  return layout({ preheader: escapeHtml(t("email.welcome.preheader")), bodyHtml, dir: isRtlLocale(locale) ? "rtl" : "ltr" });
 }
 
 export function teamInviteEmailHtml({
@@ -179,31 +188,33 @@ export function teamInviteEmailHtml({
 export function deleteAccountConfirmationEmailHtml({
   email,
   confirmUrl,
+  locale = "en",
 }: {
   email: string;
   confirmUrl: string;
+  locale?: string;
 }): string {
+  const t = emailTranslator(locale);
   const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">account deletion · ${email}</span>
-    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">confirm account deletion</h1>
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.deletion.label"))} · ${escapeHtml(email)}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">${escapeHtml(t("email.deletion.title"))}</h1>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
-      We received a request to permanently delete your Ionexa AI account and
-      every record logged across all modules. This can't be undone.
+      ${escapeHtml(t("email.deletion.body"))}
     </p>
     <p style="margin:0 0 20px;">
       <a href="${confirmUrl}" style="display:inline-block; background-color:#dc2626; color:#fff; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
-        Confirm deletion
+        ${escapeHtml(t("email.deletion.cta"))}
       </a>
     </p>
     <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:0;">
-      This link expires in 1 hour. If you didn't request this, ignore this
-      email and your account will stay exactly as it is.
+      ${escapeHtml(t("email.deletion.expiry"))}
     </p>
   `;
 
   return layout({
-    preheader: "Confirm permanent deletion of your Ionexa AI account.",
+    preheader: escapeHtml(t("email.deletion.preheader")),
     bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
   });
 }
 
@@ -211,46 +222,51 @@ export function subscriptionCancelledEmailHtml({
   email,
   endsOn,
   restoreUrl,
+  locale = "en",
 }: {
   email: string;
   /** Already formatted for a human, or null when Stripe gave us no date. */
   endsOn: string | null;
   restoreUrl: string;
+  locale?: string;
 }): string {
   // Confirms what was ASKED FOR, not what was taken away. Everything this
   // says is the state the account is actually in: still paid for, still
   // full of the user's data, still reversible. A cancellation email that
   // reads like a punishment is the same dark pattern as a hidden button.
+  const t = emailTranslator(locale);
   const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">subscription · ${email}</span>
-    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">your subscription is set to end</h1>
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.cancelled.label"))} · ${escapeHtml(email)}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">${escapeHtml(t("email.cancelled.title"))}</h1>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
       ${
         endsOn
-          ? `You'll keep full access until <strong style="color:${FOREGROUND};">${endsOn}</strong>. Nothing changes before then — your remaining credits stay usable, and none of your data is deleted.`
-          : `You'll keep full access until the end of the period you've already paid for. Nothing changes before then — your remaining credits stay usable, and none of your data is deleted.`
+          ? escapeHtml(t("email.cancelled.untilDate", { date: endsOn })).replace(
+              escapeHtml(endsOn),
+              `<strong style="color:${FOREGROUND};">${escapeHtml(endsOn)}</strong>`
+            )
+          : escapeHtml(t("email.cancelled.untilPeriodEnd"))
       }
     </p>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
-      After that the account moves to the free plan. Your entries, files and
-      conversations stay exactly where they are.
+      ${escapeHtml(t("email.cancelled.afterwards"))}
     </p>
     <p style="margin:0 0 20px;">
       <a href="${restoreUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
-        Changed your mind? Restore it
+        ${escapeHtml(t("email.cancelled.cta"))}
       </a>
     </p>
     <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:0;">
-      You can restore the subscription any time before it ends, at no extra
-      charge — you have already paid for this period.
+      ${escapeHtml(t("email.cancelled.noCharge"))}
     </p>
   `;
 
   return layout({
     preheader: endsOn
-      ? `Your Ionexa AI subscription ends on ${endsOn}. You keep access until then.`
-      : "Your Ionexa AI subscription is set to end. You keep access until the period you paid for runs out.",
+      ? escapeHtml(t("email.cancelled.preheaderDate", { date: endsOn }))
+      : escapeHtml(t("email.cancelled.preheader")),
     bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
   });
 }
 
@@ -260,48 +276,50 @@ export function newDeviceLoginEmailHtml({
   ipAddress,
   dateLabel,
   forgotPasswordUrl,
+  locale = "en",
 }: {
   email: string;
   deviceLabel: string;
   ipAddress: string;
   dateLabel: string;
   forgotPasswordUrl: string;
+  locale?: string;
 }): string {
+  const t = emailTranslator(locale);
   const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">security · ${email}</span>
-    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">new sign-in to your account</h1>
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.newDevice.label"))} · ${escapeHtml(email)}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">${escapeHtml(t("email.newDevice.title"))}</h1>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
-      We noticed a sign-in to your Ionexa AI account from a device or
-      browser we haven't seen before.
+      ${escapeHtml(t("email.newDevice.body"))}
     </p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
       <tr>
-        <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${MUTED}; font-size:12px;">When</td>
+        <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${MUTED}; font-size:12px;">${escapeHtml(t("email.newDevice.when"))}</td>
         <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${FOREGROUND}; font-size:12px; text-align:right;">${dateLabel}</td>
       </tr>
       <tr>
-        <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${MUTED}; font-size:12px;">Device</td>
+        <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${MUTED}; font-size:12px;">${escapeHtml(t("email.newDevice.device"))}</td>
         <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${FOREGROUND}; font-size:12px; text-align:right;">${deviceLabel}</td>
       </tr>
       <tr>
-        <td style="padding:6px 0; color:${MUTED}; font-size:12px;">IP address</td>
+        <td style="padding:6px 0; color:${MUTED}; font-size:12px;">${escapeHtml(t("email.newDevice.ip"))}</td>
         <td style="padding:6px 0; color:${FOREGROUND}; font-size:12px; text-align:right;">${ipAddress}</td>
       </tr>
     </table>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
-      If this was you, no action is needed. If you don't recognize this
-      sign-in, please reset your password immediately.
+      ${escapeHtml(t("email.newDevice.ifYou"))}
     </p>
     <p style="margin:0;">
       <a href="${forgotPasswordUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
-        Reset password
+        ${escapeHtml(t("email.newDevice.cta"))}
       </a>
     </p>
   `;
 
   return layout({
-    preheader: `New sign-in to your Ionexa AI account from ${deviceLabel}.`,
+    preheader: escapeHtml(t("email.newDevice.preheader", { device: deviceLabel })),
     bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
   });
 }
 

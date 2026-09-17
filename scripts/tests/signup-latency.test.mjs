@@ -52,7 +52,7 @@ const src = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 // exists to prevent — and it would leave this file's shape assertions
 // entirely happy.
 const BACKGROUND_JOBS = [
-  { name: "the welcome email", promise: "welcomeEmail", startedBy: "const welcomeEmail = sendWelcomeEmail(email)" },
+  { name: "the welcome email", promise: "welcomeEmail", startedBy: "const welcomeEmail = sendWelcomeEmail(email, null, signupLocale)" },
   {
     name: "the affiliate attribution",
     promise: "referralAttribution",
@@ -76,7 +76,10 @@ for (const job of BACKGROUND_JOBS) {
 }
 // Started-and-not-awaited-for-several-statements is exactly the shape that
 // takes a process down on an unexpected rejection.
-check("the welcome email cannot reject unhandled", /sendWelcomeEmail\(email\)\.catch\(/.test(src));
+// The argument list gained the signup locale when the welcome email
+// started being sent in the account's own language; the property this
+// asserts is the .catch, not the arity.
+check("the welcome email cannot reject unhandled", /sendWelcomeEmail\([^)]*\)\.catch\(/.test(src));
 check("nor can the attribution write", /attributeReferral\(\{[\s\S]*?\}\)\.catch\(/.test(src));
 
 console.log("\n== 2. the residual wait is a tail, not the whole send ==");

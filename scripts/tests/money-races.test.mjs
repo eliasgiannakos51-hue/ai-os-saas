@@ -117,6 +117,14 @@ console.log("== 2. every Stripe call that moves money, and what protects it ==")
     "stripe.checkout.sessions.create", "stripe.billingPortal.sessions.create",
     "stripe.accounts.create", "stripe.accountLinks.create",
     "stripe.subscriptionItems.del",
+    // STOPS a charge rather than making one, and is idempotent at
+    // Stripe's end: cancelling an already-cancelled subscription is not a
+    // second cancellation. Added 2026-09-17 with
+    // /api/delete-account/confirm, which cancels before deleteUser
+    // because after it the metadata holding the id is gone — the account
+    // deletion used to leave the subscription live and the card being
+    // charged for an account that no longer existed.
+    "stripe.subscriptions.cancel",
   ]);
   const found = new Set();
   for (const f of files) {

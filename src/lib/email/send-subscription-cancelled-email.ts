@@ -1,4 +1,5 @@
 import "server-only";
+import { emailLocaleFor } from "@/lib/email/email-locale";
 import { createResendClient } from "@/lib/resend";
 import { senderAddress } from "@/lib/email/resend-config";
 import { subscriptionCancelledEmailHtml } from "@/lib/email/templates";
@@ -24,29 +25,29 @@ import { logApiError } from "@/lib/log-error";
 export async function sendSubscriptionCancelledEmail({
   to,
   endsAt,
+  userId,
 }: {
   to: string;
   endsAt: string | null;
+  userId?: string | null;
 }): Promise<void> {
   if (!to) return;
   try {
-    // Formatted in en-GB, matching every other email in this folder — and
-    // the reason this comment used to give was not the true one. It said
+    const locale = await emailLocaleFor(userId);
+    // THE DATE IN THE ACCOUNT'S OWN LANGUAGE. This was hard-coded en-GB
+    // and the comment here explained it with a reason that was not true —
     // "the messages/*.json catalogue is not loaded outside a request's
-    // locale context", and lib/ai/module-vocabulary.ts imports
-    // messages/en.json and nine more at module scope, outside any
-    // request. The language is on the account too:
-    // lib/locale-preference.ts writes raw_user_meta_data.preferred_locale
-    // and middleware.ts reads it back.
+    // locale context". lib/ai/module-vocabulary.ts imports every
+    // catalogue at module scope, outside any request, and
+    // lib/email/email-locale.ts now does the same. What had actually been
+    // missing was the account: this function was handed an address.
     //
-    // What is actually missing is plumbing — this function is handed an
-    // ADDRESS, not an account, so there is no user here to look a locale
-    // up for. That is reversible in an afternoon; the old sentence read
-    // as a limit and this one reads as a to-do, which is the difference
-    // that matters. scripts/tests/i18n-population.test.mjs enumerates
-    // every sender and holds this reason to being true.
+    // toLocaleDateString takes the same bare code the catalogue does, and
+    // falls back to the runtime's own formatting for one it does not know
+    // rather than throwing — so a date is never the reason an email about
+    // somebody's subscription fails to arrive.
     const endsOn = endsAt
-      ? new Date(endsAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+      ? new Date(endsAt).toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" })
       : null;
 
     const resend = createResendClient();
@@ -55,6 +56,7 @@ export async function sendSubscriptionCancelledEmail({
       to,
       subject: endsOn ? `your subscription ends on ${endsOn}` : "your subscription is set to end",
       html: subscriptionCancelledEmailHtml({
+        locale,
         email: to,
         endsOn,
         restoreUrl: `${getSiteUrl()}/dashboard/settings#billing`,

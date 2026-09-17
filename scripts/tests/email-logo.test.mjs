@@ -64,6 +64,28 @@ function loadTemplates(siteUrl) {
     'import { escapeHtml } from "@/lib/html-escape";',
     readFileSync("src/lib/html-escape.ts", "utf8")
   );
+  // THE TRANSLATOR, WITH THE REAL CATALOGUE. lib/email/email-locale.ts
+  // cannot be inlined the way html-escape.ts is: it imports ten JSON
+  // catalogues AND the Supabase admin client, and the admin client is
+  // server-only and needs an environment this loader deliberately does
+  // not give it. So the RESOLUTION is stubbed and the STRINGS are not —
+  // messages/en.json is read off disk here, so a template that names a
+  // key nothing defines still renders the key and this gate still sees
+  // it. Stubbing the strings too would make this file test its own
+  // fixture, which is the mistake the escapeHtml note above records.
+  const catalogue = JSON.parse(readFileSync("messages/en.json", "utf8"));
+  src = src.replace(
+    'import { emailTranslator, isRtlLocale } from "@/lib/email/email-locale";',
+    `const CATALOGUE = ${JSON.stringify(catalogue)};
+     function emailTranslator() {
+       return (key, vars) => {
+         const raw = key.split(".").reduce((n, p) => (n == null ? n : n[p]), CATALOGUE);
+         const text = typeof raw === "string" ? raw : key;
+         return vars ? Object.entries(vars).reduce((t, [k, v]) => t.split("{" + k + "}").join(String(v)), text) : text;
+       };
+     }
+     function isRtlLocale(locale) { return locale === "ar"; }`
+  );
   const js = ts.transpileModule(src, {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
   }).outputText;

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { loadSampleData, clearSampleData, findSampleImport } from "@/lib/sample-data/apply";
 import { SAMPLE_ROW_COUNT } from "@/lib/sample-data/dataset";
@@ -27,23 +28,32 @@ export async function POST() {
   if (!user) return NextResponse.json({ ok: false }, { status: 401 });
 
   const limit = await checkRateLimit({
-    scope: "sample-data",
+    scope: "sample_data",
     identifier: user.id,
     maxAttempts: 5,
     windowMinutes: 60,
   });
   if (!limit.allowed) return NextResponse.json({ ok: false, reason: "rate_limited" }, { status: 429 });
 
-  // Date.now() is read HERE and passed in, so the dataset module stays
-  // pure and a test can materialise it at a fixed moment.
-  const result = await loadSampleData(supabase, user.id, Date.now());
-  if (!result.ok) {
-    return NextResponse.json(
-      { ok: false, reason: result.reason },
-      { status: result.reason === "already_loaded" ? 409 : 500 }
-    );
+  // WRAPPED, like every other route in this app. It was one of two of
+  // 143 with no try/catch and no logApiError — so an unexpected throw
+  // here became an unlogged 500 and production_errors never heard about
+  // it. The refusals above are deliberate answers and stay outside.
+  try {
+    // Date.now() is read HERE and passed in, so the dataset module stays
+    // pure and a test can materialise it at a fixed moment.
+    const result = await loadSampleData(supabase, user.id, Date.now());
+    if (!result.ok) {
+      return NextResponse.json(
+        { ok: false, reason: result.reason },
+        { status: result.reason === "already_loaded" ? 409 : 500 }
+      );
+    }
+    return NextResponse.json({ ok: true, inserted: result.inserted, expected: SAMPLE_ROW_COUNT });
+  } catch (err) {
+    logApiError("/api/sample-data", err, { stage: "load" });
+    return NextResponse.json({ ok: false, reason: "load_failed" }, { status: 500 });
   }
-  return NextResponse.json({ ok: true, inserted: result.inserted, expected: SAMPLE_ROW_COUNT });
 }
 
 export async function DELETE() {
@@ -54,15 +64,20 @@ export async function DELETE() {
   if (!user) return NextResponse.json({ ok: false }, { status: 401 });
 
   const limit = await checkRateLimit({
-    scope: "sample-data",
+    scope: "sample_data",
     identifier: user.id,
     maxAttempts: 5,
     windowMinutes: 60,
   });
   if (!limit.allowed) return NextResponse.json({ ok: false, reason: "rate_limited" }, { status: 429 });
 
-  const result = await clearSampleData(supabase, user.id);
-  return NextResponse.json({ ok: true, deleted: result.deleted });
+  try {
+    const result = await clearSampleData(supabase, user.id);
+    return NextResponse.json({ ok: true, deleted: result.deleted });
+  } catch (err) {
+    logApiError("/api/sample-data", err, { stage: "clear" });
+    return NextResponse.json({ ok: false, reason: "clear_failed" }, { status: 500 });
+  }
 }
 
 export async function GET() {
@@ -72,6 +87,11 @@ export async function GET() {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ ok: false }, { status: 401 });
 
-  const existing = await findSampleImport(supabase, user.id);
-  return NextResponse.json({ ok: true, loaded: Boolean(existing) });
+  try {
+    const existing = await findSampleImport(supabase, user.id);
+    return NextResponse.json({ ok: true, loaded: Boolean(existing) });
+  } catch (err) {
+    logApiError("/api/sample-data", err, { stage: "read" });
+    return NextResponse.json({ ok: false, reason: "read_failed" }, { status: 500 });
+  }
 }

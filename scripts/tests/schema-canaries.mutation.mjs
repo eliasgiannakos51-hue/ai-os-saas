@@ -99,16 +99,35 @@ const MUTANTS = [
     expect: "the function list comes from the API's own root document",
   },
   {
-    // 8. THE DEFECT OF 2026-09-11, PUT BACK. `projects` is the newest
-    // migration in the tree and the owner found the screen broken by
-    // hand while /api/health reported schema ok, missing: []. Section 3
-    // is the direction that was missing; this is the mutant that proves
-    // it is load-bearing rather than decorative.
+    // 8. THE DEFECT OF 2026-09-11, PUT BACK. Three migrations landed in
+    // the window with no canary and three screens went dark while
+    // /api/health reported schema ok, missing: []. Section 3 is the
+    // direction that was missing; this proves it is load-bearing.
+    //
+    // THE MUTATION IS A DELETION, and it used to be a re-pointing — the
+    // `projects` canary aimed at the baseline migration instead. That
+    // version went red, so it counted as caught, but on the WRONG LINE:
+    // a canary naming a migration that does not define its object trips
+    // the consistency clause in section 1 first, and section 3 was never
+    // reached. It was a mutant for one check wearing the name of
+    // another. A migration losing its canary is a DELETED entry, which
+    // is also how it really happened.
     name: "a migration in the window loses its canary — the state all three new screens were in",
+    file: CANARIES,
+    from: '  {\n    kind: "table",\n    table: "generated_posts",\n    migration: "20260930000000_generated_posts.sql",\n    breaks: "Posts: every generated post fails to save after the model has run; the person waits, is charged, and gets nothing",\n  },\n',
+    to: "",
+    expect: "20260930000000_generated_posts.sql",
+  },
+  {
+    // 8b. AND THE CLAUSE THE OLD MUTANT WAS ACTUALLY DRIVING, kept —
+    // because it is a real defect of its own. A canary pointed at a
+    // migration that does not define its object is a canary that will
+    // never fire for the file it claims to watch.
+    name: "a canary names a migration that does not define the object",
     file: CANARIES,
     from: '    migration: "20261001000000_projects.sql",',
     to: '    migration: "20260803000000_baseline_schema.sql",',
-    expect: "20261001000000_projects.sql",
+    expect: "defines function prune_orphan_project_links",
   },
   {
     // 9. The excuse used as a shortcut. NOT_PROBEABLE exists for files

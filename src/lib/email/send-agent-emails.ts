@@ -29,7 +29,12 @@ import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
 /**
  * Why an agent result did not reach an inbox. A machine code rather than
  * a sentence: the sentence a reader sees depends on their language, and
- * this module has no locale.
+ * this module is not handed the account to look one up for — it takes an
+ * address. ("This module has no locale" is what stood here, and it read
+ * as though none were available anywhere; the account carries
+ * preferred_locale and lib/ai/module-vocabulary.ts loads the catalogue
+ * outside a request, so a code rather than a sentence is still right and
+ * the reason is plumbing rather than impossibility.)
  */
 export type AgentEmailFailure =
   /** The account has no address on file. */

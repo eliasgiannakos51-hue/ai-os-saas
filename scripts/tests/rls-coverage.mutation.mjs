@@ -29,6 +29,27 @@ const TRANSITIONS = "supabase/migrations/20260927000000_transition_suggestions.s
 
 const MUTANTS = [
   {
+    // NOT A LINE OF TYPESCRIPT CHANGES, and fifty routes stop scoping.
+    // Those routes read through the caller's own client and let the
+    // policy decide whose rows they are; resource-ownership.test.mjs
+    // measures that at fifty and names this file as the other half.
+    name: "a loop policy stops scoping to the caller",
+    file: BASELINE,
+    from: "'create policy \"select_own_%1$s\" on public.%1$s for select using (auth.uid() = user_id);', t",
+    to: "'create policy \"select_own_%1$s\" on public.%1$s for select using (true);', t",
+    expect: "every policy scopes its rows to auth.uid()",
+  },
+  {
+    // A `using` clause scopes what is READ. Only the `with check` stops
+    // an insert carrying somebody else's user_id, and they are different
+    // clauses — so this leaves every select policy reading correctly.
+    name: "an insert policy stops binding the row to the caller",
+    file: BASELINE,
+    from: "'create policy \"insert_own_%1$s\" on public.%1$s for insert with check (auth.uid() = user_id);', t",
+    to: "'create policy \"insert_own_%1$s\" on public.%1$s for insert with check (user_id is not null);', t",
+    expect: "every insert policy binds the row to the caller",
+  },
+  {
     name: "a table granted to authenticated loses its row level security",
     file: TRANSITIONS,
     from: "alter table public.transition_suggestions enable row level security;",

@@ -224,6 +224,67 @@ const disabled = [...SQL.matchAll(/alter\s+table\s+(?:public\.)?([a-z_0-9]+)\s+d
 check("no migration disables row level security", disabled.length === 0, disabled.join(", "));
 
 // ---------------------------------------------------------------------
+// 4b. AND EVERY POLICY SCOPES TO auth.uid().
+//
+// RLS being ON is half the sentence. Sixty-six authenticated routes in
+// this app act on an id the request supplied, and fifty of them do NOT
+// filter by user_id in TypeScript at all — they read through the caller's
+// own Supabase client and let the policy do the scoping. That is the
+// right design and it is why `using (true)` on one table would be an
+// ownership hole in fifty routes at once, with every one of them still
+// calling auth.getUser() and looking correct.
+//
+// BOTH SPELLINGS. 193 policies are written literally; 12 more are created
+// inside the baseline's DO loops as `execute format('create policy
+// "select_own_%1$s" ... using (auth.uid() = user_id)')`, which is a
+// policy in a STRING. A scan that read only the literal form would pass
+// while the loops covering 23 tables said anything at all.
+// ---------------------------------------------------------------------
+const LITERAL_POLICY = /create\s+policy\s+"?([a-zA-Z_0-9 ]+)"?\s+on\s+public\.([a-z_0-9]+)([\s\S]{0,600}?);/gi;
+const literalPolicies = [...SQL.matchAll(LITERAL_POLICY)].map((m) => ({
+  name: m[1].trim(),
+  table: m[2],
+  body: m[3],
+}));
+const FORMATTED_POLICY = /execute\s+format\s*\(\s*\n?\s*'([^']*create policy[^']*)'/gi;
+const formattedPolicies = [...SQL.matchAll(FORMATTED_POLICY)].map((m) => ({
+  name: (/"([^"]+)"/.exec(m[1]) || [, "(unnamed)"])[1],
+  table: "(loop)",
+  body: m[1],
+}));
+check(`policies written literally (${literalPolicies.length})`, literalPolicies.length >= 150, "the literal policy parser found almost nothing");
+check(`policies created inside a loop (${formattedPolicies.length})`, formattedPolicies.length >= 8, "the execute-format parser found almost nothing, and the loops cover 23 tables");
+
+// Policies a stranger is SUPPOSED to satisfy. Each one is a row this
+// product publishes on purpose.
+const NOT_USER_SCOPED = {
+  help_articles_public_read_published:
+    "published help articles, readable by anon and authenticated alike: half the questions they answer are asked before anyone signs up, and app/help/page.tsx is public for the same reason. The predicate is `published = true`, so a draft is still nobody's business.",
+};
+const unscopedPolicies = [...literalPolicies, ...formattedPolicies]
+  .filter((p) => !/auth\.uid\(\)/.test(p.body))
+  .filter((p) => !NOT_USER_SCOPED[p.name]);
+check(
+  "every policy scopes its rows to auth.uid(), or says why it does not",
+  unscopedPolicies.length === 0,
+  unscopedPolicies
+    .map((p) => `${p.table}: ${p.name} — ${p.body.replace(/\s+/g, " ").slice(0, 110)}`)
+    .join("\n        ")
+);
+const stalePublic = Object.keys(NOT_USER_SCOPED).filter(
+  (name) => ![...literalPolicies, ...formattedPolicies].some((p) => p.name === name && !/auth\.uid\(\)/.test(p.body))
+);
+check("no public-policy entry has gone stale", stalePublic.length === 0, stalePublic.join(", "));
+
+// AND AN INSERT MAY NOT LET A CALLER WRITE SOMEBODY ELSE'S ROW. A `using`
+// clause scopes what is READ; the `with check` is what stops `insert
+// ... user_id = <someone else>`, and they are different clauses.
+const insertPolicies = [...SQL.matchAll(/create\s+policy\s+"?([a-zA-Z_0-9 ]+)"?\s+on\s+public\.([a-z_0-9]+)[\s\S]{0,300}?for\s+insert[\s\S]{0,200}?with\s+check\s*\(([^;]{0,200})/gi)];
+check(`insert policies with a with-check (${insertPolicies.length})`, insertPolicies.length >= 30, "the insert-policy parser found almost nothing");
+const openInserts = insertPolicies.filter((m) => !/auth\.uid\(\)/.test(m[3])).map((m) => `${m[2]}: ${m[1].trim()}`);
+check("every insert policy binds the row to the caller", openInserts.length === 0, openInserts.join("\n        "));
+
+// ---------------------------------------------------------------------
 // 5. CONTROLS. They drive the resolvers above on text of their own, so a
 //    resolver that has stopped working cannot be hidden by a tree that
 //    happens to be fine.

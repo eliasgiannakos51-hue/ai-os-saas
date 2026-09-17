@@ -354,6 +354,41 @@ if (existsSync(eraseMigration) && buckets.size >= 3) {
   const extra = listed.filter((b) => !buckets.has(b));
   check("...and no bucket the application does not use", extra.length === 0, `unknown bucket(s): ${extra.join(", ")}`);
 }
+// ---------------------------------------------------------------------
+// AND THE RELATIONS THAT ARE NOT IN THE DATABASE.
+//
+// A foreign key cleans rows. A cascade cleans more rows. Neither reaches
+// a third party, and this product creates state at two of them: a Stripe
+// subscription against a card, and OAuth grants at Google and Slack.
+//
+// Until 2026-09-17 the deletion path cleaned rows, storage objects and
+// the error log — and left the subscription LIVE. The card kept being
+// charged every month for an account that no longer existed and whose
+// owner could no longer log in to cancel it. Nothing in the schema could
+// have caught that: the relation was at Stripe.
+// ---------------------------------------------------------------------
+check("delete-account cancels the Stripe subscription", /stripe\.subscriptions\.cancel\s*\(/.test(confirmSrc));
+check(
+  "...BEFORE deleteUser, while the metadata that holds its id still exists",
+  confirmSrc.indexOf("stripe.subscriptions.cancel") < confirmSrc.indexOf("deleteUser(")
+);
+check(
+  "...immediately, not at period end — there is no account left to keep access for",
+  !/cancel_at_period_end/.test(confirmSrc)
+);
+check(
+  "...and it verifies the customer, so a tampered id cannot cancel somebody else's",
+  /stripe_customer_id/.test(confirmSrc)
+);
+// THE PART THAT MAKES REFUSING SAFE. The claim above is what makes the
+// token single-use; refusing a deletion without giving it back would
+// leave the person unable to delete at all.
+check(
+  "...and a failure releases the claim so the link still works",
+  /used_at: null/.test(confirmSrc),
+  "refusing the deletion without releasing the single-use token is a worse trap than the one being fixed"
+);
+
 // The migration that defines it has to be in the repo.
 const migration = "supabase/migrations/20260808_gdpr_erasure_gaps.sql";
 check("the erasure migration exists", existsSync(migration));

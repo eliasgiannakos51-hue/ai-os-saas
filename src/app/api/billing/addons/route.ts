@@ -193,6 +193,32 @@ export async function DELETE(request: Request) {
         await stripe.subscriptionItems.del(itemId);
       } catch (stripeError) {
         logApiError("/api/billing/addons", stripeError, { stage: "stripe_cancel", slug });
+        // A STRIPE FAILURE MUST NOT BE FOLLOWED BY A LOCAL CANCELLATION.
+        //
+        // This used to log and fall through to the update below, so the
+        // row said "cancelled" while the subscription item lived on: the
+        // product stopped delivering the add-on and the card went on
+        // paying for it every month. That is the wrong direction to fail
+        // in — the two states disagree, and the one that costs money is
+        // the one that kept running.
+        //
+        // The exception is an item Stripe says is already gone. A 404
+        // there means the thing this call exists to remove is removed,
+        // and refusing on it would leave a row stuck "active" forever
+        // with nothing behind it.
+        const code = (stripeError as { code?: string; statusCode?: number })?.code;
+        const status = (stripeError as { statusCode?: number })?.statusCode;
+        const alreadyGone = code === "resource_missing" || status === 404;
+        if (!alreadyGone) {
+          return NextResponse.json(
+            {
+              ok: false,
+              error:
+                "Could not stop the billing for this add-on, so it has been left active. Nothing has changed — please try again.",
+            },
+            { status: 502 }
+          );
+        }
       }
     }
 

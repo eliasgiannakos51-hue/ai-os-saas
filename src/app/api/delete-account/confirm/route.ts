@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createStripeClient } from "@/lib/stripe/server";
 import { hashDeleteAccountToken } from "@/lib/delete-account-token";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -129,6 +130,68 @@ export async function POST(request: Request) {
         { ok: false, error: "Could not delete the account. Please contact support." },
         { status: 500 }
       );
+    }
+
+    // THE SUBSCRIPTION, BEFORE THE ACCOUNT — because after deleteUser the
+    // metadata that holds its id is gone with it.
+    //
+    // WHAT THIS FIXES. Deleting an account cancelled nothing at Stripe.
+    // The rows cascaded, the files went, the auth user went — and the
+    // subscription stayed live, charging a card every month for a product
+    // the person no longer had and could no longer log in to cancel. The
+    // relation this deletion did not clean was not in the database at
+    // all; it was at a third party, which is why no foreign key and no
+    // RLS policy was ever going to reach it.
+    //
+    // IMMEDIATELY, NOT AT PERIOD END. /api/billing/cancel sets
+    // cancel_at_period_end because the account stays and the person keeps
+    // what they have paid for. Here there is no account left to keep
+    // anything for, so a paid-up period left running is one more invoice
+    // against somebody who has gone.
+    //
+    // A FAILURE REFUSES THE DELETION AND GIVES THE LINK BACK. "We deleted
+    // your account" must not be said while the card is still being
+    // charged — the same sentence this route already makes about the
+    // stored files. But the claim above is what makes the token
+    // single-use, so refusing without releasing it would leave the person
+    // unable to delete at all, which is a worse trap than the one being
+    // fixed. used_at goes back to null on this path and only this one.
+    const { data: authUser } = await admin.auth.admin.getUserById(claimed.user_id);
+    const subscriptionId = authUser?.user?.user_metadata?.stripe_subscription_id;
+    if (typeof subscriptionId === "string" && subscriptionId) {
+      try {
+        const stripe = createStripeClient();
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        const customerId =
+          typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
+        // The same ownership check /api/billing/cancel makes: a stale or
+        // tampered metadata value must not cancel somebody else's
+        // subscription. Not fatal here — the account still has to go —
+        // but it is recorded, because it means two accounts disagree
+        // about who owns one Stripe customer.
+        if (customerId !== authUser?.user?.user_metadata?.stripe_customer_id) {
+          logApiError("/api/delete-account/confirm", new Error("subscription/customer mismatch"), {
+            stage: "cancel_subscription",
+            subscriptionId,
+          });
+        } else if (subscription.status !== "canceled") {
+          await stripe.subscriptions.cancel(subscriptionId);
+        }
+      } catch (err) {
+        logApiError("/api/delete-account/confirm", err, { stage: "cancel_subscription", subscriptionId });
+        await admin
+          .from("account_deletion_requests")
+          .update({ used_at: null })
+          .eq("token_hash", tokenHash);
+        return NextResponse.json(
+          {
+            ok: false,
+            error:
+              "Could not cancel the subscription on this account, so nothing was deleted. Your link still works — please try again.",
+          },
+          { status: 500 }
+        );
+      }
     }
 
     const { error: deleteError } = await admin.auth.admin.deleteUser(claimed.user_id);

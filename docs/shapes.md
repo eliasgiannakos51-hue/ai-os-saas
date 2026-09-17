@@ -1336,3 +1336,45 @@ calls that settle, the bucket the feature used, the files named
 population gets its own floor, and the floor is the check: *this set
 should have at least N members, and here are the specific ones it must
 contain.*
+
+### Asked deliberately, of four other things, on 2026-09-17
+
+Not "does it do X wrongly" but "is it in the conversation at all". Six
+more, in gates written by different hands, on four dimensions:
+
+| what was asked | the population it had | the population there was |
+|---|---|---|
+| is RLS on? | one boolean over the corpus, plus `rlsStatements >= 40` | 110 tables |
+| is a cron guarded? | 3 named routes, under the heading *"every cron route"* | 10 the scheduler fires |
+| does this AI route's client report the receipt? | 6 declared pairs, under the heading *"every AI route"* | 10 routes build one |
+| does this stream consumer use the shared reader? | 3 named components | 4 read a stream |
+| is this page behind an auth boundary? | nothing anywhere | 63 pages |
+| what bounds this route? | the routes that already call `checkRateLimit` | 39 that insert rows |
+
+The two headings are the sharpest part. A section titled **"every cron
+route actually uses the shared guard"** iterated three of ten — and the
+seven outside it each move money or delete rows across every account.
+A section titled **"every AI route returns a receipt, and its client
+reports it"** iterated six of ten, and all four it missed were doing the
+precise thing that sentence forbids.
+
+**A ceiling of Infinity is not a ceiling.** `/api/team/invite` was
+cleared by a bound-detector because `seat_count` appears in it. That seat
+check is real on Professional; on Ultimate and Enterprise the plan
+ceiling is `POSITIVE_INFINITY` and the branch is skipped outright — so on
+exactly the accounts with no cap, nothing bounded a route that emails an
+address the caller supplies. A presence check for a bound is not a check
+that the bound binds, for every member.
+
+**Four of the six were correct all along, and that is the point.** 109 of
+110 tables have RLS; all ten crons are guarded; all 63 pages are behind a
+boundary; 13 English screens are each English for a good reason. Nothing
+recorded that any of it was a decision, so the day one of them stopped
+being true, nothing would have said so.
+
+**The precision is not the same in both directions.** Asking "which
+routes have no rate limit" of 143 returned 67, and most were right to
+lack one — this tree has eight kinds of bound. The question only became
+answerable when it was narrowed to a population where the absence
+matters: routes that INSERT. That is the difference between a scan worth
+committing and one worth deleting.

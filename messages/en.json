@@ -4105,6 +4105,102 @@
       "feedback": "User feedback, triaged by sentiment and priority.",
       "analytics": "Any metric worth tracking over time.",
       "automation": "Workflows worth automating, and time saved."
+    },
+    "footer": "You're receiving this because you have a Ionexa AI account.",
+    "scheduledRun": {
+      "label": "scheduled agent run",
+      "titleDone": "your scheduled task is done",
+      "titleFailed": "your scheduled task couldn't run",
+      "cta": "Open {name}",
+      "preheaderDone": "Your scheduled task “{step}” is done.",
+      "preheaderFailed": "Your scheduled task “{step}” couldn't run.",
+      "subjectDone": "Your scheduled task is done — Ionexa AI",
+      "subjectFailed": "Your scheduled task couldn't run — Ionexa AI",
+      "details": {
+        "noCreditsOnce": "Not enough credits — top up or upgrade your plan, then schedule it again.",
+        "noCreditsRecurring": "Not enough credits — top up or upgrade your plan. This automation will try again next cycle."
+      }
+    },
+    "stuck": {
+      "label": "website builder",
+      "title": "“{name}” seems stuck",
+      "body": "This generation has been running for over 24 hours without finishing — that's not normal, and it's likely stuck rather than still working. No credits were charged for it. Open it below to retry or delete it.",
+      "cta": "Open Website Builder",
+      "preheader": "“{name}” has been stuck generating for over 24 hours.",
+      "subject": "“{name}” seems stuck — Ionexa AI"
+    },
+    "formSubmission": {
+      "label": "new form submission",
+      "title": "Someone contacted you via “{name}”",
+      "cta": "View your websites",
+      "preheader": "New form submission on {name}",
+      "subject": "New form submission on “{name}” — Ionexa AI",
+      "badges": {
+        "genuine_interest": "Likely genuine lead",
+        "question": "General question",
+        "spam": "Possible spam",
+        "unclear": "Unclear"
+      }
+    },
+    "agent": {
+      "label": "your agent",
+      "resultCta": "Manage your agents",
+      "resultPreheader": "{name} — your scheduled result.",
+      "disabledTitle": "“{name}” has been switched off",
+      "disabledBody": "It failed {count} times in a row, so it has stopped running rather than keep failing and keep costing you credits.",
+      "disabledLastError": "Last error: {error}",
+      "disabledHint": "Open it below to check the task and turn it back on.",
+      "disabledCta": "Open your agents",
+      "disabledPreheader": "“{name}” stopped running after {count} failures.",
+      "disabledSubject": "“{name}” has been switched off — Ionexa AI",
+      "pausedTitle": "“{name}” is paused",
+      "pausedBody": "It couldn't run because your account is out of credits. Nothing was charged, and nothing has been lost — top up or upgrade and turn it back on, and it picks up its normal schedule again.",
+      "pausedCtaTopUp": "Top up credits",
+      "pausedCtaAgents": "Open your agents",
+      "pausedPreheader": "“{name}” is paused — your account is out of credits.",
+      "pausedSubject": "“{name}” is paused — Ionexa AI"
+    },
+    "digest": {
+      "label": "digest",
+      "title": "this week",
+      "noticed": "what I noticed",
+      "cta": "Open your dashboard",
+      "subject": "this week: {first}",
+      "subjectFallback": "your week on Ionexa AI",
+      "lines": {
+        "agents": {
+          "one": "{runs} agent run, {found} with a result",
+          "other": "{runs} agent runs, {found} with a result"
+        },
+        "records": {
+          "one": "{count} new entry",
+          "other": "{count} new entries"
+        },
+        "site": {
+          "one": "your site: {count} visit",
+          "other": "your site: {count} visits"
+        },
+        "credits": {
+          "one": "{count} credit spent",
+          "other": "{count} credits spent"
+        },
+        "creditsWithAverage": {
+          "one": "{count} credit spent (your average: {average})",
+          "other": "{count} credits spent (your average: {average})"
+        },
+        "leads": {
+          "one": "{count} lead with no follow-up recorded",
+          "other": "{count} leads with no follow-up recorded"
+        },
+        "agentFailures": {
+          "one": "{count} agent run failed",
+          "other": "{count} agent runs failed"
+        },
+        "spendUp": "spending is up {percent}% on your average",
+        "spendDown": "spending is down {percent}% on your average",
+        "trafficUp": "site traffic is up {percent}%",
+        "trafficDown": "site traffic is down {percent}%"
+      }
     }
   }
 }

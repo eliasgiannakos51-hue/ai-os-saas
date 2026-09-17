@@ -4105,6 +4105,102 @@
       "feedback": "Feedback degli utenti, ordinati per tono e priorità.",
       "analytics": "Qualsiasi metrica che valga la pena seguire nel tempo.",
       "automation": "Flussi che vale la pena automatizzare, e il tempo risparmiato."
+    },
+    "footer": "Ricevi questo messaggio perché hai un account Ionexa AI.",
+    "scheduledRun": {
+      "label": "esecuzione programmata dell’agente",
+      "titleDone": "la tua attività programmata è terminata",
+      "titleFailed": "la tua attività programmata non è riuscita a partire",
+      "cta": "Apri {name}",
+      "preheaderDone": "La tua attività programmata “{step}” è terminata.",
+      "preheaderFailed": "La tua attività programmata “{step}” non è riuscita a partire.",
+      "subjectDone": "La tua attività programmata è terminata — Ionexa AI",
+      "subjectFailed": "La tua attività programmata non è riuscita a partire — Ionexa AI",
+      "details": {
+        "noCreditsOnce": "Crediti insufficienti: ricarica o passa a un piano superiore, poi riprogrammala.",
+        "noCreditsRecurring": "Crediti insufficienti: ricarica o passa a un piano superiore. Questa automazione riproverà al prossimo ciclo."
+      }
+    },
+    "stuck": {
+      "label": "creatore di siti",
+      "title": "“{name}” sembra bloccato",
+      "body": "Questa generazione va avanti da più di 24 ore senza finire: non è normale, ed è probabile che sia bloccata invece che ancora al lavoro. Non è stato addebitato alcun credito. Aprila qui sotto per riprovare o eliminarla.",
+      "cta": "Apri il creatore di siti",
+      "preheader": "“{name}” è bloccato in generazione da più di 24 ore.",
+      "subject": "“{name}” sembra bloccato — Ionexa AI"
+    },
+    "formSubmission": {
+      "label": "nuovo invio dal modulo",
+      "title": "Qualcuno ti ha contattato tramite “{name}”",
+      "cta": "Guarda i tuoi siti",
+      "preheader": "Nuovo invio dal modulo su {name}",
+      "subject": "Nuovo invio dal modulo su “{name}” — Ionexa AI",
+      "badges": {
+        "genuine_interest": "Interesse probabilmente autentico",
+        "question": "Domanda generica",
+        "spam": "Possibile spam",
+        "unclear": "Poco chiaro"
+      }
+    },
+    "agent": {
+      "label": "il tuo agente",
+      "resultCta": "Gestisci i tuoi agenti",
+      "resultPreheader": "{name} — il tuo risultato programmato.",
+      "disabledTitle": "“{name}” è stato spento",
+      "disabledBody": "Ha fallito {count} volte di fila, quindi ha smesso di girare invece di continuare a fallire e a costarti crediti.",
+      "disabledLastError": "Ultimo errore: {error}",
+      "disabledHint": "Aprilo qui sotto per controllare l’attività e riaccenderlo.",
+      "disabledCta": "Apri i tuoi agenti",
+      "disabledPreheader": "“{name}” si è fermato dopo {count} fallimenti.",
+      "disabledSubject": "“{name}” è stato spento — Ionexa AI",
+      "pausedTitle": "“{name}” è in pausa",
+      "pausedBody": "Non è riuscito a girare perché il tuo account ha finito i crediti. Non è stato addebitato nulla e non è andato perso nulla: ricarica o passa a un piano superiore e riaccendilo, e riprende il suo ritmo abituale.",
+      "pausedCtaTopUp": "Ricarica crediti",
+      "pausedCtaAgents": "Apri i tuoi agenti",
+      "pausedPreheader": "“{name}” è in pausa: il tuo account ha finito i crediti.",
+      "pausedSubject": "“{name}” è in pausa — Ionexa AI"
+    },
+    "digest": {
+      "label": "riepilogo",
+      "title": "questa settimana",
+      "noticed": "cosa ho notato",
+      "cta": "Apri la tua dashboard",
+      "subject": "questa settimana: {first}",
+      "subjectFallback": "la tua settimana su Ionexa AI",
+      "lines": {
+        "agents": {
+          "one": "{runs} esecuzione dell’agente, {found} con un risultato",
+          "other": "{runs} esecuzioni degli agenti, {found} con un risultato"
+        },
+        "records": {
+          "one": "{count} nuova voce",
+          "other": "{count} nuove voci"
+        },
+        "site": {
+          "one": "il tuo sito: {count} visita",
+          "other": "il tuo sito: {count} visite"
+        },
+        "credits": {
+          "one": "{count} credito speso",
+          "other": "{count} crediti spesi"
+        },
+        "creditsWithAverage": {
+          "one": "{count} credito speso (la tua media: {average})",
+          "other": "{count} crediti spesi (la tua media: {average})"
+        },
+        "leads": {
+          "one": "{count} contatto senza seguito registrato",
+          "other": "{count} contatti senza seguito registrato"
+        },
+        "agentFailures": {
+          "one": "{count} esecuzione dell’agente è fallita",
+          "other": "{count} esecuzioni degli agenti sono fallite"
+        },
+        "spendUp": "la spesa è {percent}% sopra la tua media",
+        "spendDown": "la spesa è {percent}% sotto la tua media",
+        "trafficUp": "il traffico del sito è salito del {percent}%",
+        "trafficDown": "il traffico del sito è sceso del {percent}%"
+      }
     }
   }
 }

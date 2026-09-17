@@ -177,6 +177,7 @@ export async function GET(request: Request) {
               stepText: run.step_text,
               succeeded: false,
               detail: "Not enough credits — top up or upgrade your plan, then schedule it again.",
+              detailKey: "email.scheduledRun.details.noCreditsOnce",
             });
             continue;
           }
@@ -491,6 +492,7 @@ export async function GET(request: Request) {
               stepText: automation.description,
               succeeded: false,
               detail: "Not enough credits — top up or upgrade your plan. This automation will try again next cycle.",
+              detailKey: "email.scheduledRun.details.noCreditsRecurring",
             });
             continue;
           }

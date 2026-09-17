@@ -2,6 +2,8 @@ import "server-only";
 import { createResendClient } from "@/lib/resend";
 import { senderAddress } from "@/lib/email/resend-config";
 import { weeklyDigestEmailHtml } from "@/lib/email/templates";
+import { emailLocaleFor, emailTranslator } from "@/lib/email/email-locale";
+import { digestLineText } from "@/lib/notify/digest";
 import { logApiError } from "@/lib/log-error";
 import { checkEmailAllowed, recordEmailSend } from "@/lib/email/email-gate";
 import { getSiteUrl } from "@/lib/site-url";
@@ -43,18 +45,26 @@ export async function sendWeeklyDigestEmail({
       return false;
     }
 
+    const locale = await emailLocaleFor(userId);
+    const t = emailTranslator(locale);
+
     const resend = createResendClient();
     const { error } = await resend.emails.send({
       from: senderAddress(),
       to: email,
       // The subject carries the week's first real fact, so the inbox line
-      // is different every week instead of the same four words.
-      subject: digest.lines[0] ? `this week: ${digest.lines[0].text}` : "your week on Ionexa AI",
+      // is different every week instead of the same four words — and it is
+      // the same rendering the body uses, in the same language, rather
+      // than a second composition that could drift from it.
+      subject: digest.lines[0]
+        ? t("email.digest.subject", { first: digestLineText(digest.lines[0], t) })
+        : t("email.digest.subjectFallback"),
       html: weeklyDigestEmailHtml({
         lines: digest.lines,
         observations: digest.observations,
         periodLabel,
         dashboardUrl: `${getSiteUrl()}/dashboard`,
+        locale,
       }),
     });
 

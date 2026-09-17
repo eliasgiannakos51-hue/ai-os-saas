@@ -289,11 +289,16 @@ no message catalogue, so nothing renders in them. Only `ar` was measured.
 **~1 week of somebody else's time, and it is now an hour of it per
 language.** Still not a coding task.
 
-**2,933** keys × 9 locales, 0 untranslated — and **every non-English
-string in this app was written by a model.** (This entry said 2,868 until
-2026-09-07; the counted figure is 2,933, and the smaller number was
-never sourced.) The Greek has an owner who reads it. Japanese, Chinese
-and Arabic have nobody.
+**3,266** keys × 9 locales, 0 untranslated — and **every non-English
+string in this app was written by a model.** The Greek has an owner who
+reads it. Japanese, Chinese and Arabic have nobody.
+
+That number is the one `npm run i18n` prints on its last line, and the
+entry has now been wrong twice by carrying it instead: it said 2,868 until
+2026-09-07 and 2,933 until 2026-09-17, while the count moved with every
+round that added a screen. **Re-derive it rather than read it here:**
+
+    node scripts/check-i18n.js     # last line: N keys x 9 locales
 
 The gates check that a string *exists*, that it is *not identical to
 English*, that its plurals cover the locale's categories, and that its ICU
@@ -306,13 +311,17 @@ project keeps refusing to do.
 signup form to the first thing the product says about a person's own
 data:
 
+Measured 2026-09-17, and re-derived by `node scripts/first-run-strings.mjs`,
+which prints all three on the run — it is the same script the pack below
+is built with, so these cannot drift apart:
+
 | | |
 |---|---|
-| the whole product | 2,933 strings |
-| on the first-run path | **598** |
-| on the first screens AND prose rather than a label | **44** |
+| the whole product | 3,266 strings |
+| on the first-run path | **601** |
+| on the first screens AND prose rather than a label | **47** |
 
-Forty-four sentences is an hour. 2,933 is why nobody ever started: a
+Forty-seven sentences is an hour. 3,266 is why nobody ever started: a
 backlog too long to begin has the same value as an empty one.
 
 `docs/first-run/first-run.<locale>.md` is one file per language, tiered,
@@ -321,7 +330,9 @@ for. `scripts/tests/first-run-strings.test.mjs` regenerates the pack and
 compares it byte for byte, so what a reviewer is sent can never be last
 week's wording. Rebuild with `npm run i18n:first-run`.
 
-**AND THE FIRST 44 ALREADY FOUND SOMETHING.** Two sentences three lines
+**AND THE FIRST 44 ALREADY FOUND SOMETHING** — 44 being what tier 1 held
+when this was read, not what it holds now; the pack is regenerated from the
+catalogue, so the tier grows as the product does. Two sentences three lines
 apart on the signup screen addressed the Greek reader differently — one
 εσύ, one εσείς. Measured across the whole file: 473 informal, 15 polite
 plural, 2 mixing both inside one sentence. All 17 read by hand, all 17

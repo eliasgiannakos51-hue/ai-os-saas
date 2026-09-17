@@ -1379,6 +1379,46 @@ answerable when it was narrowed to a population where the absence
 matters: routes that INSERT. That is the difference between a scan worth
 committing and one worth deleting.
 
+### And the population of the instrument written to catch this, on 2026-09-17
+
+`i18n-population.test.mjs` was written five days earlier, about exactly
+this shape, and its own email population was **a folder name**:
+
+```js
+})("src/lib/email");
+```
+
+Fourteen modules in this tree call `resend.emails.send`. Twelve are under
+that path. The two that are not:
+
+- `src/lib/notify/dispatch.ts` — the email face of every notification, and
+  by volume the most-sent message the product has.
+- `src/lib/billing/cost-alert-delivery.ts` — an operator alert with an
+  English subject, outside every i18n instrument in the project.
+
+Both are correct. Neither was in the conversation, and the reason was not
+a judgement anybody made: it was that the walk started at the directory
+where the first twelve happened to live. Widening it to `src/lib` and
+filtering by *what the module does* rather than *where it sits* is a
+two-line change and it found both in one run.
+
+**The same file had a second one, one level in.** It asked whether each
+SENDER resolved a language, which is one of three things a translated
+email needs: the template has to take a locale, the sender has to resolve
+one, and the call site has to hand over the account. A template that
+accepts a `locale` nobody passes renders English for everybody **and reads
+in review as converted**. So the templates are their own population now,
+with the same rule: take a language, or be named with a reason.
+
+**And the last English sentence in a translated email was below the
+fold.** `layout()` carried "You're receiving this because you have a
+Ionexa AI account." as a literal. Four emails were converted to ten
+languages, reviewed, merged — and all four still closed in English,
+because the footer sits under the panel and every eye reading that diff
+was above it. It is a required argument with no default now, for the
+reason it survived four conversions: a default that renders correctly is
+the kind nobody notices is still there.
+
 ## A check that answers the adjacent question
 
 Not absent, and not wrong. Present, passing, and about something else.

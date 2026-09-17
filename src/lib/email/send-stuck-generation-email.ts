@@ -2,6 +2,7 @@ import "server-only";
 import { createResendClient } from "@/lib/resend";
 import { senderAddress } from "@/lib/email/resend-config";
 import { stuckGenerationEmailHtml } from "@/lib/email/templates";
+import { emailLocaleFor, emailTranslator } from "@/lib/email/email-locale";
 import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
 import { checkEmailAllowed, recordEmailSend } from "@/lib/email/email-gate";
@@ -29,14 +30,18 @@ export async function sendStuckGenerationEmail({
     const gate = await checkEmailAllowed(userId, "stuck_generation");
     if (!gate.allowed) return;
 
+    const locale = await emailLocaleFor(userId);
+    const t = emailTranslator(locale);
+
     const resend = createResendClient();
     const { error } = await resend.emails.send({
       from: senderAddress(),
       to: email,
-      subject: `"${websiteName}" seems stuck — Ionexa AI`,
+      subject: t("email.stuck.subject", { name: websiteName }),
       html: stuckGenerationEmailHtml({
         websiteName,
         dashboardUrl: `${getSiteUrl()}/dashboard/website-builder`,
+        locale,
       }),
     });
     if (error) {

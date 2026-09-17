@@ -2,6 +2,7 @@ import "server-only";
 import { escapeHtml } from "@/lib/html-escape";
 import { getSiteUrl } from "@/lib/site-url";
 import { emailTranslator, isRtlLocale } from "@/lib/email/email-locale";
+import { digestLineText, type DigestLine } from "@/lib/notify/digest";
 
 // Plain, table-based HTML with inline styles only — no <style> blocks, no
 // flexbox/grid, no CSS variables. Email clients (especially Outlook
@@ -56,7 +57,25 @@ const LOGO_HTML = LOGO_IS_REACHABLE
 // `dir` is threaded through because Arabic reads right to left and an
 // email client applies no locale of its own — the language is decided
 // where the message is built, not where it is opened.
-function layout({ preheader, bodyHtml, dir = "ltr" }: { preheader: string; bodyHtml: string; dir?: "ltr" | "rtl" }) {
+function layout({
+  preheader,
+  bodyHtml,
+  dir = "ltr",
+  footer,
+}: {
+  preheader: string;
+  bodyHtml: string;
+  dir?: "ltr" | "rtl";
+  /** The one line under the panel — email.footer in the catalogue.
+   *
+   *  Passed in rather than held here because it was the last English
+   *  sentence left inside a translated email: four templates had been
+   *  converted and all four still closed with the same literal about
+   *  having an account. Required, with no default, for the reason that
+   *  literal survived four conversions — a default that renders correctly
+   *  is exactly the kind nobody notices is still there. */
+  footer: string;
+}) {
   return `<!doctype html>
 <html dir="${dir}">
   <head>
@@ -84,7 +103,7 @@ function layout({ preheader, bodyHtml, dir = "ltr" }: { preheader: string; bodyH
             <tr>
               <td style="padding-top:24px;">
                 <span style="color:${MUTED}; font-size:11px;">
-                  You're receiving this because you have a Ionexa AI account.
+                  ${footer}
                 </span>
               </td>
             </tr>
@@ -146,7 +165,12 @@ export function welcomeEmailHtml({ email, locale = "en" }: { email: string; loca
     </p>
   `;
 
-  return layout({ preheader: escapeHtml(t("email.welcome.preheader")), bodyHtml, dir: isRtlLocale(locale) ? "rtl" : "ltr" });
+  return layout({
+    preheader: escapeHtml(t("email.welcome.preheader")),
+    bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
+  });
 }
 
 export function teamInviteEmailHtml({
@@ -182,6 +206,14 @@ export function teamInviteEmailHtml({
   return layout({
     preheader: `${inviterEmail} invited you to their Ionexa AI team.`,
     bodyHtml,
+    // ENGLISH, AND THE ONLY ONE. This message goes to an address that may
+    // have no account at all, so there is no stored preferred_locale to
+    // read — the reason recorded against this file in
+    // scripts/tests/i18n-population.test.mjs. The footer still comes out
+    // of the catalogue rather than being retyped here, so it moves with
+    // the other nine when somebody decides what an invite should do about
+    // the inviter's language.
+    footer: escapeHtml(emailTranslator("en")("email.footer")),
   });
 }
 
@@ -215,6 +247,7 @@ export function deleteAccountConfirmationEmailHtml({
     preheader: escapeHtml(t("email.deletion.preheader")),
     bodyHtml,
     dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
   });
 }
 
@@ -267,6 +300,7 @@ export function subscriptionCancelledEmailHtml({
       : escapeHtml(t("email.cancelled.preheader")),
     bodyHtml,
     dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
   });
 }
 
@@ -320,6 +354,7 @@ export function newDeviceLoginEmailHtml({
     preheader: escapeHtml(t("email.newDevice.preheader", { device: deviceLabel })),
     bodyHtml,
     dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
   });
 }
 
@@ -332,26 +367,35 @@ export function newDeviceLoginEmailHtml({
 // did, what was spent against what this account normally spends — plus a
 // short "what I noticed" list of things worth acting on.
 //
-// Lines and observations both arrive pre-composed from lib/notify/digest.ts
-// so that the decision about WHAT IS WORTH SAYING is made in one pure,
-// testable place rather than half here in string templates. A digest with
-// no lines is never rendered: the route does not call this.
+// Lines and observations arrive from lib/notify/digest.ts as a key, a
+// count and its numbers — NOT as sentences. That module used to compose
+// the English itself (`n === 1 ? "run" : "runs"`), which made the digest
+// the one email whose chrome could be translated and whose contents could
+// not. The decision about WHAT IS WORTH SAYING is still made in that one
+// pure, testable place; the words are looked up here, where the language
+// is known. A digest with no lines is never rendered: the route does not
+// call this.
 export function weeklyDigestEmailHtml({
   lines,
   observations,
   periodLabel,
   dashboardUrl,
+  locale = "en",
 }: {
-  lines: { key: string; text: string }[];
-  observations: { key: string; text: string }[];
+  lines: DigestLine[];
+  observations: DigestLine[];
   periodLabel: string;
   dashboardUrl: string;
+  locale?: string;
 }): string {
+  const t = emailTranslator(locale);
+  const say = (line: DigestLine) => escapeHtml(digestLineText(line, t));
+
   const rows = lines
     .map(
       (line) => `
               <tr>
-                <td style="padding:8px 0; border-bottom:1px solid ${BORDER}; color:${FOREGROUND}; font-size:14px;">${escapeHtml(line.text)}</td>
+                <td style="padding:8px 0; border-bottom:1px solid ${BORDER}; color:${FOREGROUND}; font-size:14px;">${say(line)}</td>
               </tr>`
     )
     .join("");
@@ -359,13 +403,13 @@ export function weeklyDigestEmailHtml({
   const noticed =
     observations.length > 0
       ? `
-    <p style="color:${MUTED}; font-size:12px; margin:24px 0 8px; text-transform:uppercase; letter-spacing:1px;">what I noticed</p>
+    <p style="color:${MUTED}; font-size:12px; margin:24px 0 8px; text-transform:uppercase; letter-spacing:1px;">${escapeHtml(t("email.digest.noticed"))}</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
       ${observations
         .map(
           (o) => `
               <tr>
-                <td style="padding:6px 0; color:${ORANGE}; font-size:13px;">${escapeHtml(o.text)}</td>
+                <td style="padding:6px 0; color:${ORANGE}; font-size:13px;">${say(o)}</td>
               </tr>`
         )
         .join("")}
@@ -373,15 +417,15 @@ export function weeklyDigestEmailHtml({
       : "";
 
   const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">digest · ${escapeHtml(periodLabel)}</span>
-    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">this week</h1>
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.digest.label"))} · ${escapeHtml(periodLabel)}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">${escapeHtml(t("email.digest.title"))}</h1>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
       ${rows}
     </table>
     ${noticed}
     <p style="margin:24px 0 0;">
       <a href="${dashboardUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
-        Open your dashboard
+        ${escapeHtml(t("email.digest.cta"))}
       </a>
     </p>
   `;
@@ -389,30 +433,60 @@ export function weeklyDigestEmailHtml({
   return layout({
     // The preheader is the first line of the digest itself, so the inbox
     // preview says what happened rather than "your weekly digest".
-    preheader: lines[0]?.text ?? periodLabel,
+    preheader: lines[0] ? escapeHtml(digestLineText(lines[0], t)) : escapeHtml(periodLabel),
     bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
   });
 }
-
 
 export function scheduledRunCompleteEmailHtml({
   stepText,
   succeeded,
   detail,
   missionUrl,
+  locale = "en",
 }: {
   stepText: string;
   succeeded: boolean;
   detail: string;
   missionUrl: string;
+  locale?: string;
 }): string {
+  const t = emailTranslator(locale);
+  // THE DESTINATION IS NAMED BY THE NAV, not by this file. The button used
+  // to read "View in Mission Control", and that feature was renamed to
+  // "Goals & Plans" across 28 strings in ten languages — docs/glossary.md
+  // forbids the old word outright now, and scripts/tests/glossary.test.mjs
+  // caught this button still using it. Reading sidebar.items.missionControl
+  // is the same choice welcomeEmailHtml makes about the thirteen module
+  // names: an email that calls a screen something the app does not is
+  // worse than an untranslated one.
   const safeStepText = escapeHtml(stepText);
+  // `detail` ARRIVES ALREADY IN WHATEVER LANGUAGE IT WILL BE READ IN, and
+  // the sender decides which that is — see send-scheduled-run-complete-
+  // email.ts's `detailKey`. Of the nine call sites in
+  // api/cron/scheduled-runs/route.ts:
+  //
+  //   two   are sentences this product wrote ("Not enough credits — …"),
+  //         and they pass a catalogue key, so they arrive translated.
+  //   four  are `result.error` / `result.message` / `result.outputSummary`
+  //         — the runner's or the model's own words, an open set with no
+  //         key that could hold them.
+  //   three are `breakerCheck.reason`, which IS a closed set of three
+  //         English sentences, in lib/ai-circuit-breaker.ts. They are not
+  //         translated here because the same string is written to
+  //         scheduled_runs.result and shown on screen, so the language
+  //         belongs to that module rather than to this email — doing it
+  //         here would translate one of its two readers.
+  //
+  // Either way it is escaped and shown as-is.
   const safeDetail = escapeHtml(detail);
 
   const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">scheduled agent run</span>
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.scheduledRun.label"))}</span>
     <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">
-      ${succeeded ? "your scheduled task is done" : "your scheduled task couldn't run"}
+      ${escapeHtml(t(succeeded ? "email.scheduledRun.titleDone" : "email.scheduledRun.titleFailed"))}
     </h1>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 12px;">
       "<span style="color:${FOREGROUND};">${safeStepText}</span>"
@@ -422,14 +496,18 @@ export function scheduledRunCompleteEmailHtml({
     </p>
     <p style="margin:0;">
       <a href="${missionUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
-        View in Mission Control
+        ${escapeHtml(t("email.scheduledRun.cta", { name: t("sidebar.items.missionControl") }))}
       </a>
     </p>
   `;
 
   return layout({
-    preheader: succeeded ? `Your scheduled task "${stepText}" is done.` : `Your scheduled task "${stepText}" couldn't run.`,
+    preheader: escapeHtml(
+      t(succeeded ? "email.scheduledRun.preheaderDone" : "email.scheduledRun.preheaderFailed", { step: stepText })
+    ),
     bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
   });
 }
 
@@ -437,11 +515,17 @@ export function scheduledRunCompleteEmailHtml({
 // email (see api/websites/[id]/submit-form/route.ts + lib/lead-classification.ts)
 // — null (classification unavailable/failed) renders no badge at all
 // rather than a misleading default.
-const LEAD_BADGES: Record<string, { emoji: string; label: string; color: string }> = {
-  genuine_interest: { emoji: "🟢", label: "Likely genuine lead", color: "#4ade80" },
-  question: { emoji: "🔵", label: "General question", color: "#60a5fa" },
-  spam: { emoji: "🔴", label: "Possible spam", color: "#f87171" },
-  unclear: { emoji: "⚪", label: "Unclear", color: "#a3a3a3" },
+//
+// THE EMOJI AND THE COLOUR STAY HERE; THE WORDS DO NOT. A colour is not a
+// language, and the four labels are now email.formSubmission.badges.* in
+// all ten catalogues. Keying the map by the same string the classifier
+// stores is what lets an unknown classification render nothing rather
+// than a wrong badge.
+const LEAD_BADGES: Record<string, { emoji: string; color: string }> = {
+  genuine_interest: { emoji: "🟢", color: "#4ade80" },
+  question: { emoji: "🔵", color: "#60a5fa" },
+  spam: { emoji: "🔴", color: "#f87171" },
+  unclear: { emoji: "⚪", color: "#a3a3a3" },
 };
 
 // "Stuck work" detection (api/cron/scheduled-runs's daily cron) — a
@@ -455,29 +539,33 @@ const LEAD_BADGES: Record<string, { emoji: string; label: string; color: string 
 export function stuckGenerationEmailHtml({
   websiteName,
   dashboardUrl,
+  locale = "en",
 }: {
   websiteName: string;
   dashboardUrl: string;
+  locale?: string;
 }): string {
-  const safeWebsiteName = escapeHtml(websiteName);
+  const t = emailTranslator(locale);
   const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">website builder</span>
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.stuck.label"))}</span>
     <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">
-      "${safeWebsiteName}" seems stuck
+      ${escapeHtml(t("email.stuck.title", { name: websiteName }))}
     </h1>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
-      This generation has been running for over 24 hours without finishing — that's not normal, and it's likely stuck rather than still working. No credits were charged for it. Open it below to retry or delete it.
+      ${escapeHtml(t("email.stuck.body"))}
     </p>
     <p style="margin:0;">
       <a href="${dashboardUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
-        Open Website Builder
+        ${escapeHtml(t("email.stuck.cta"))}
       </a>
     </p>
   `;
 
   return layout({
-    preheader: `"${websiteName}" has been stuck generating for over 24 hours.`,
+    preheader: escapeHtml(t("email.stuck.preheader", { name: websiteName })),
     bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
   });
 }
 
@@ -486,15 +574,22 @@ export function websiteFormSubmissionEmailHtml({
   fields,
   classification,
   dashboardUrl,
+  locale = "en",
 }: {
   websiteName: string;
   fields: Record<string, string>;
   classification: string | null;
   dashboardUrl: string;
+  locale?: string;
 }): string {
-  const safeWebsiteName = escapeHtml(websiteName);
+  const t = emailTranslator(locale);
   const badge = classification ? LEAD_BADGES[classification] : null;
 
+  // THE FIELD NAMES ARE THE VISITOR'S FORM, NOT OURS. "name", "email",
+  // "how did you hear about us" — whatever the site owner put on their own
+  // page, in whatever language they wrote it in. There is no catalogue
+  // that could hold them and no reason to want one: translating a label
+  // the owner chose would change what their form said.
   const fieldRows = Object.entries(fields)
     .filter(([key]) => key !== "_hp")
     .map(
@@ -507,13 +602,13 @@ export function websiteFormSubmissionEmailHtml({
     .join("");
 
   const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">new form submission</span>
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.formSubmission.label"))}</span>
     <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 8px;">
-      Someone contacted you via "${safeWebsiteName}"
+      ${escapeHtml(t("email.formSubmission.title", { name: websiteName }))}
     </h1>
     ${
       badge
-        ? `<p style="margin:0 0 16px;"><span style="display:inline-block; background-color:#1a1a1a; border:1px solid ${BORDER}; border-radius:999px; padding:4px 12px; font-size:12px; color:${badge.color};">${badge.emoji} ${badge.label}</span></p>`
+        ? `<p style="margin:0 0 16px;"><span style="display:inline-block; background-color:#1a1a1a; border:1px solid ${BORDER}; border-radius:999px; padding:4px 12px; font-size:12px; color:${badge.color};">${badge.emoji} ${escapeHtml(t(`email.formSubmission.badges.${classification}`))}</span></p>`
         : ""
     }
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${BORDER}; margin:8px 0 20px;">
@@ -521,14 +616,16 @@ export function websiteFormSubmissionEmailHtml({
     </table>
     <p style="margin:0;">
       <a href="${dashboardUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
-        View your websites
+        ${escapeHtml(t("email.formSubmission.cta"))}
       </a>
     </p>
   `;
 
   return layout({
-    preheader: `New form submission on ${websiteName}`,
+    preheader: escapeHtml(t("email.formSubmission.preheader", { name: websiteName })),
     bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
   });
 }
 
@@ -561,19 +658,26 @@ export function agentRunResultEmailHtml({
   output,
   agentsUrl,
   aiGeneratedNotice,
+  locale = "en",
 }: {
   agentName: string;
   output: string;
   agentsUrl: string;
   /** EU AI Act Article 50 — the recipient has to be able to tell that what
    *  they are reading was produced by an AI system. Passed in rather than
-   *  hardcoded so it can be sent in the agent's own language. */
+   *  hardcoded so it can be sent in the agent's own language, which is the
+   *  agent's `language` setting rather than the account's: the notice has
+   *  to be legible next to the output it is about, and that output is
+   *  written in whatever language the agent was told to work in. It is
+   *  therefore NOT `locale`, and the two can legitimately differ. */
   aiGeneratedNotice: string;
+  locale?: string;
 }): string {
+  const t = emailTranslator(locale);
   const safeAgentName = escapeHtml(agentName);
 
   const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">your agent</span>
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.agent.label"))}</span>
     <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">
       ${safeAgentName}
     </h1>
@@ -585,14 +689,16 @@ export function agentRunResultEmailHtml({
     </p>
     <p style="margin:0;">
       <a href="${agentsUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
-        Manage your agents
+        ${escapeHtml(t("email.agent.resultCta"))}
       </a>
     </p>
   `;
 
   return layout({
-    preheader: `${agentName} — your scheduled result.`,
+    preheader: escapeHtml(t("email.agent.resultPreheader", { name: agentName })),
     bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
   });
 }
 
@@ -600,41 +706,54 @@ export function agentRunResultEmailHtml({
 // failed runs. Critical mail: the user built this thing to receive
 // something on a schedule, and the single most damaging outcome is that it
 // stops silently and they only notice weeks later.
+//
+// `consecutiveFailures` reaches the catalogue as a plain substitution
+// rather than through a plural form, and that is safe rather than lazy:
+// lib/agents/agent-failure-limits.ts sets
+// AGENT_MAX_CONSECUTIVE_FAILURES = 5 and this email is sent only when the
+// counter has reached it, so the number is never 1 in any language. If
+// that constant ever drops to 1, this line needs `t.n` and the catalogue
+// needs a `one` form.
 export function agentDisabledEmailHtml({
   agentName,
   reason,
   consecutiveFailures,
   agentsUrl,
+  locale = "en",
 }: {
   agentName: string;
   reason: string;
   consecutiveFailures: number;
   agentsUrl: string;
+  locale?: string;
 }): string {
+  const t = emailTranslator(locale);
   const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">your agent</span>
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.agent.label"))}</span>
     <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">
-      "${escapeHtml(agentName)}" has been switched off
+      ${escapeHtml(t("email.agent.disabledTitle", { name: agentName }))}
     </h1>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 12px;">
-      It failed ${consecutiveFailures} times in a row, so it has stopped running rather than keep failing and keep costing you credits.
+      ${escapeHtml(t("email.agent.disabledBody", { count: consecutiveFailures }))}
     </p>
     <p style="color:#f87171; font-size:13px; line-height:1.6; margin:0 0 20px;">
-      Last error: ${escapeHtml(reason)}
+      ${escapeHtml(t("email.agent.disabledLastError", { error: reason }))}
     </p>
     <p style="color:${MUTED}; font-size:13px; line-height:1.6; margin:0 0 20px;">
-      Open it below to check the task and turn it back on.
+      ${escapeHtml(t("email.agent.disabledHint"))}
     </p>
     <p style="margin:0;">
       <a href="${agentsUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
-        Open your agents
+        ${escapeHtml(t("email.agent.disabledCta"))}
       </a>
     </p>
   `;
 
   return layout({
-    preheader: `"${agentName}" stopped running after ${consecutiveFailures} failures.`,
+    preheader: escapeHtml(t("email.agent.disabledPreheader", { name: agentName, count: consecutiveFailures })),
     bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
   });
 }
 
@@ -645,32 +764,37 @@ export function agentPausedNoCreditsEmailHtml({
   agentName,
   agentsUrl,
   billingUrl,
+  locale = "en",
 }: {
   agentName: string;
   agentsUrl: string;
   billingUrl: string;
+  locale?: string;
 }): string {
+  const t = emailTranslator(locale);
   const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">your agent</span>
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.agent.label"))}</span>
     <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">
-      "${escapeHtml(agentName)}" is paused
+      ${escapeHtml(t("email.agent.pausedTitle", { name: agentName }))}
     </h1>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
-      It couldn't run because your account is out of credits. Nothing was charged, and nothing has been lost — top up or upgrade and turn it back on, and it picks up its normal schedule again.
+      ${escapeHtml(t("email.agent.pausedBody"))}
     </p>
     <p style="margin:0 0 12px;">
       <a href="${billingUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
-        Top up credits
+        ${escapeHtml(t("email.agent.pausedCtaTopUp"))}
       </a>
     </p>
     <p style="margin:0;">
-      <a href="${agentsUrl}" style="color:${MUTED}; font-size:12px;">Open your agents</a>
+      <a href="${agentsUrl}" style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.agent.pausedCtaAgents"))}</a>
     </p>
   `;
 
   return layout({
-    preheader: `"${agentName}" is paused — your account is out of credits.`,
+    preheader: escapeHtml(t("email.agent.pausedPreheader", { name: agentName })),
     bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
   });
 }
 
@@ -679,6 +803,25 @@ export function agentPausedNoCreditsEmailHtml({
 // carried by the title, and a user who gets two different-looking emails
 // for "your agent finished" and "your research is ready" learns nothing
 // from the difference.
+//
+// THE ONLY EMAIL LEFT IN ENGLISH THAT A CUSTOMER READS, and it is left
+// there deliberately rather than missed. Everything a person sees in this
+// message except the three strings below — `title` and `body` — is
+// composed by the caller, in English, in code:
+// lib/publishing/badge-renewal.ts writes "Your site's badge returns in 3
+// days" and lib/billing/overage-store.ts writes "You are at 80% of your
+// EUR20 overage cap". Translating the button and the footer over those
+// two sentences would produce a Greek frame around an English notice —
+// the shape docs/shapes.md calls "a check that answers the adjacent
+// question", and worse for the reader than an honestly English email.
+//
+// The whole job is one job: dispatchNotification also sends those same
+// two strings to Telegram and Discord and stores them on
+// notification_events for the in-app bell, so the language has to be
+// decided where the notification is BUILT, not where it is mailed. That
+// is a larger change than this file, and it is recorded against
+// src/lib/notify/dispatch.ts in scripts/tests/i18n-population.test.mjs so
+// that it is a listed decision rather than a gap nothing looks at.
 //
 // The button is the ONLY link, and it points at the click-tracking
 // redirect (/api/n/<id>), which is what makes the click rate in
@@ -728,5 +871,12 @@ export function notificationEmailHtml({
     </p>
   `;
 
-  return layout({ preheader: title, bodyHtml });
+  return layout({
+    preheader: title,
+    bodyHtml,
+    // English, with the rest of this message — see the note above the
+    // function. Read from the catalogue rather than retyped so that the
+    // day dispatch.ts learns a locale, this line moves with one argument.
+    footer: escapeHtml(emailTranslator("en")("email.footer")),
+  });
 }

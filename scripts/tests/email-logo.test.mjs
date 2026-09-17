@@ -77,14 +77,39 @@ function loadTemplates(siteUrl) {
   src = src.replace(
     'import { emailTranslator, isRtlLocale } from "@/lib/email/email-locale";',
     `const CATALOGUE = ${JSON.stringify(catalogue)};
-     function emailTranslator() {
-       return (key, vars) => {
-         const raw = key.split(".").reduce((n, p) => (n == null ? n : n[p]), CATALOGUE);
+     function emailTranslator(locale) {
+       const read = (key) => key.split(".").reduce((n, p) => (n == null ? n : n[p]), CATALOGUE);
+       const t = (key, vars) => {
+         const raw = read(key);
          const text = typeof raw === "string" ? raw : key;
          return vars ? Object.entries(vars).reduce((t, [k, v]) => t.split("{" + k + "}").join(String(v)), text) : text;
        };
+       // THE PLURAL HALF, SELECTED THE SAME WAY THE REAL ONE SELECTS IT.
+       // Intl.PluralRules is in Node, so this is not a stand-in for the
+       // rule — only for the catalogue lookup around it.
+       t.n = (key, count, vars) => {
+         const form = new Intl.PluralRules(locale || "en").select(count);
+         const picked = typeof read(key + "." + form) === "string" ? key + "." + form : key + ".other";
+         return t(picked, { count, ...vars });
+       };
+       return t;
      }
      function isRtlLocale(locale) { return locale === "ar"; }`
+  );
+  // THE DIGEST LINE RENDERER, INLINED — the same reasoning as escapeHtml
+  // above. lib/notify/digest.ts is pure (no database, no clock, no
+  // server-only), so the real digestLineText runs here rather than a
+  // reimplementation of it; only its one import is stubbed, and that is a
+  // type-and-function pair the renderer never calls.
+  src = src.replace(
+    'import { digestLineText, type DigestLine } from "@/lib/notify/digest";',
+    readFileSync("src/lib/notify/digest.ts", "utf8").replace(
+      'import { isDigestWorthSending, type WorthVerdict } from "@/lib/notify/worth-sending";',
+      readFileSync("src/lib/notify/worth-sending.ts", "utf8").replace(
+        'import type { NotificationType } from "@/lib/notify/types";',
+        "type NotificationType = string;"
+      )
+    )
   );
   const js = ts.transpileModule(src, {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },

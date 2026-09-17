@@ -4105,6 +4105,102 @@
       "feedback": "Nutzerrückmeldungen, nach Stimmung und Priorität sortiert.",
       "analytics": "Jede Kennzahl, die sich über die Zeit zu verfolgen lohnt.",
       "automation": "Abläufe, die sich zu automatisieren lohnen, und die gesparte Zeit."
+    },
+    "footer": "Du erhältst diese Nachricht, weil du ein Ionexa-AI-Konto hast.",
+    "scheduledRun": {
+      "label": "geplanter Agentenlauf",
+      "titleDone": "deine geplante Aufgabe ist fertig",
+      "titleFailed": "deine geplante Aufgabe konnte nicht laufen",
+      "cta": "{name} öffnen",
+      "preheaderDone": "Deine geplante Aufgabe “{step}” ist fertig.",
+      "preheaderFailed": "Deine geplante Aufgabe “{step}” konnte nicht laufen.",
+      "subjectDone": "Deine geplante Aufgabe ist fertig — Ionexa AI",
+      "subjectFailed": "Deine geplante Aufgabe konnte nicht laufen — Ionexa AI",
+      "details": {
+        "noCreditsOnce": "Nicht genug Credits — lade auf oder wechsle den Tarif und plane die Aufgabe erneut.",
+        "noCreditsRecurring": "Nicht genug Credits — lade auf oder wechsle den Tarif. Diese Automatisierung versucht es im nächsten Zyklus erneut."
+      }
+    },
+    "stuck": {
+      "label": "Website-Baukasten",
+      "title": "“{name}” scheint zu hängen",
+      "body": "Diese Erstellung läuft seit über 24 Stunden, ohne fertig zu werden — das ist nicht normal, und sie hängt vermutlich, statt noch zu arbeiten. Dafür wurden keine Credits berechnet. Öffne sie unten, um sie erneut zu starten oder zu löschen.",
+      "cta": "Website-Baukasten öffnen",
+      "preheader": "“{name}” hängt seit über 24 Stunden in der Erstellung.",
+      "subject": "“{name}” scheint zu hängen — Ionexa AI"
+    },
+    "formSubmission": {
+      "label": "neue Formularübermittlung",
+      "title": "Jemand hat dich über “{name}” kontaktiert",
+      "cta": "Deine Websites ansehen",
+      "preheader": "Neue Formularübermittlung auf {name}",
+      "subject": "Neue Formularübermittlung auf “{name}” — Ionexa AI",
+      "badges": {
+        "genuine_interest": "Vermutlich echtes Interesse",
+        "question": "Allgemeine Frage",
+        "spam": "Möglicherweise Spam",
+        "unclear": "Unklar"
+      }
+    },
+    "agent": {
+      "label": "dein Agent",
+      "resultCta": "Deine Agenten verwalten",
+      "resultPreheader": "{name} — dein geplantes Ergebnis.",
+      "disabledTitle": "“{name}” wurde abgeschaltet",
+      "disabledBody": "Er ist {count} Mal hintereinander fehlgeschlagen und läuft deshalb nicht weiter, statt weiter fehlzuschlagen und dich Credits zu kosten.",
+      "disabledLastError": "Letzter Fehler: {error}",
+      "disabledHint": "Öffne ihn unten, um die Aufgabe zu prüfen und ihn wieder einzuschalten.",
+      "disabledCta": "Deine Agenten öffnen",
+      "disabledPreheader": "“{name}” hat nach {count} Fehlschlägen aufgehört zu laufen.",
+      "disabledSubject": "“{name}” wurde abgeschaltet — Ionexa AI",
+      "pausedTitle": "“{name}” pausiert",
+      "pausedBody": "Er konnte nicht laufen, weil dein Konto keine Credits mehr hat. Es wurde nichts berechnet und nichts ist verloren — lade auf oder wechsle den Tarif und schalte ihn wieder ein, dann nimmt er seinen normalen Zeitplan wieder auf.",
+      "pausedCtaTopUp": "Credits aufladen",
+      "pausedCtaAgents": "Deine Agenten öffnen",
+      "pausedPreheader": "“{name}” pausiert — dein Konto hat keine Credits mehr.",
+      "pausedSubject": "“{name}” pausiert — Ionexa AI"
+    },
+    "digest": {
+      "label": "Zusammenfassung",
+      "title": "diese Woche",
+      "noticed": "was mir aufgefallen ist",
+      "cta": "Dein Dashboard öffnen",
+      "subject": "diese Woche: {first}",
+      "subjectFallback": "deine Woche bei Ionexa AI",
+      "lines": {
+        "agents": {
+          "one": "{runs} Agentenlauf, {found} mit Ergebnis",
+          "other": "{runs} Agentenläufe, {found} mit Ergebnis"
+        },
+        "records": {
+          "one": "{count} neuer Eintrag",
+          "other": "{count} neue Einträge"
+        },
+        "site": {
+          "one": "deine Website: {count} Besuch",
+          "other": "deine Website: {count} Besuche"
+        },
+        "credits": {
+          "one": "{count} Credit ausgegeben",
+          "other": "{count} Credits ausgegeben"
+        },
+        "creditsWithAverage": {
+          "one": "{count} Credit ausgegeben (dein Schnitt: {average})",
+          "other": "{count} Credits ausgegeben (dein Schnitt: {average})"
+        },
+        "leads": {
+          "one": "{count} Kontakt ohne festgehaltene Nachfassung",
+          "other": "{count} Kontakte ohne festgehaltene Nachfassung"
+        },
+        "agentFailures": {
+          "one": "{count} Agentenlauf ist fehlgeschlagen",
+          "other": "{count} Agentenläufe sind fehlgeschlagen"
+        },
+        "spendUp": "die Ausgaben liegen {percent}% über deinem Schnitt",
+        "spendDown": "die Ausgaben liegen {percent}% unter deinem Schnitt",
+        "trafficUp": "der Website-Traffic ist um {percent}% gestiegen",
+        "trafficDown": "der Website-Traffic ist um {percent}% gesunken"
+      }
     }
   }
 }

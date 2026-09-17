@@ -113,8 +113,11 @@ const ALLOWED = new Map([
   //   these assertions: `FILES.length >= 50 && SQL.length > 100000`,
   //   `TABLES.size >= 90`, `doBlocks >= 40` and `rlsLoops >= 3 &&
   //   loopRls.size >= 20`. If the DO-block parser breaks, the gate goes red
-  //   on the parser rather than green on its output.
-  ["rls-coverage.test.mjs", ["unreadableLoops", "staleNotNeeded", "disabled"]],
+  //   on the parser rather than green on its output. `stalePublic` joined
+  //   them on 2026-09-17 for the same reason: it is the both-ways half of
+  //   the one policy that is deliberately not user-scoped, and both policy
+  //   scrapers under it are floored at 150 and 8.
+  ["rls-coverage.test.mjs", ["unreadableLoops", "staleNotNeeded", "disabled", "stalePublic"]],
   //   `rowsBlock.length >= 500` — literalCells is matchAll over that string.
   ["combined-ceiling.test.mjs", ["literalCells"]],
   //   `files.length >= 7` — badPatterns is filled by a recursive walk of

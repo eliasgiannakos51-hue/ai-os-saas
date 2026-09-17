@@ -204,7 +204,10 @@ console.log(
 // page-auth-boundary, route-write-bound, i18n-population and
 // ndjson-stream each drive a gate that had no suite, and credit-visibility
 // and cron-auth gained mutants for their newly derived populations.
-const RATCHET = 178;
+// 178 -> 179 ON 2026-09-17: resource-ownership.mutation.mjs, driving the
+// gate that asks whether a route which knows WHO is calling also checks
+// that the row belongs to them. Read off the run.
+const RATCHET = 179;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

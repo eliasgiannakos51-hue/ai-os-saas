@@ -255,6 +255,47 @@ check(
 );
 
 // ---------------------------------------------------------------------
+// A ROUTE THAT HANDS THE CALLER A FILE NEEDS A LIMIT TOO.
+//
+// The population that matters is "hands back a file", not "renders a
+// document". Four routes were bounded on 2026-09-16 because they render
+// a PDF or a .pptx; /api/data-analysis/[id]/export was not, because it
+// renders nothing — it serialises EVERY ROW of an uploaded spreadsheet
+// into CSV or JSON on each request, which is the same egress and the same
+// CPU without a renderer in the middle. Found by asking what leaves the
+// server rather than what is built on it.
+//
+// The header is set by lib/pdf/render.ts for the PDF routes and inline by
+// the others, so both spellings count.
+const HANDS_BACK_A_FILE = /Content-Disposition|pdfResponse\s*\(/;
+const fileServers = routes.filter((f) => HANDS_BACK_A_FILE.test(SOURCE.get(f)));
+check(`routes that hand back a file (${fileServers.length})`, fileServers.length >= 5, "the attachment detector matched almost nothing");
+
+const EXPORT_GUARD = /allowExport\s*\(/;
+// A RESERVATION COUNTS HERE AND DOES NOT COUNT IN THE SECTION ABOVE, and
+// the difference is the point. For an outbound message, a credit hold
+// bounds the money and not the number of emails. For a file, a route that
+// charges per call IS bounded by the balance: /api/documents/[id]/pdf
+// runs a model call and reserves against it, so a loop stops when the
+// account runs out. The four free export routes have no such floor, which
+// is why they carry a limiter instead.
+const unboundedFileServers = fileServers.filter(
+  (f) =>
+    !EXPORT_GUARD.test(SOURCE.get(f)) &&
+    !boundsOf(f).includes("rate_limit") &&
+    !boundsOf(f).includes("cron_secret") &&
+    !boundsOf(f).includes("reservation")
+);
+check(
+  "every route that hands back a file is bounded",
+  unboundedFileServers.length === 0,
+  unboundedFileServers.length
+    ? `no limiter and no export guard:\n        ${unboundedFileServers.join("\n        ")}\n        ` +
+      "Free because it was already paid for is the answer to a different question; see lib/export-guard.ts."
+    : ""
+);
+
+// ---------------------------------------------------------------------
 // CONTROLS, driving boundsOf and the insert detector rather than
 // restating them.
 // ---------------------------------------------------------------------
@@ -295,6 +336,16 @@ check(
   "control: ...and to be rate limited, not merely seat-capped",
   boundsOf("src/app/api/team/invite/route.ts").includes("rate_limit"),
   "the seat cap is Infinity on Ultimate and Enterprise, so it is not what bounds this"
+);
+check(
+  "control: the spreadsheet export is seen to hand back a file",
+  fileServers.includes("src/app/api/data-analysis/[id]/export/route.ts"),
+  "the route that serialises every row of an upload is not in the attachment population"
+);
+check(
+  "control: a PDF route counts even though it never writes the header itself",
+  fileServers.includes("src/app/api/mission/[id]/pdf/route.ts"),
+  "lib/pdf/render.ts sets Content-Disposition for these, so the helper has to count"
 );
 check("control: the Stripe webhook is bounded by its signature, not a limiter", boundsOf(STRIPE).includes("stripe_signature") && !boundsOf(STRIPE).includes("rate_limit"), "if this route ever gains a rate limit the control is simply stale — say so here");
 

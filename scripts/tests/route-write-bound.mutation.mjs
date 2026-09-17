@@ -19,8 +19,29 @@ const SCHEDULE = "src/app/api/mission/schedule-step/route.ts";
 const DEVICE = "src/app/api/auth/device-check/route.ts";
 const FAVOURITES = "supabase/migrations/20260804000001_baseline_gaps.sql";
 const INVITE = "src/app/api/team/invite/route.ts";
+const EXPORT = "src/app/api/data-analysis/[id]/export/route.ts";
+const DOC_PDF = "src/app/api/documents/[id]/pdf/route.ts";
 
 const MUTANTS = [
+  {
+    // THE ROUTE THE FIRST EXPORT SWEEP MISSED. It renders nothing, so
+    // "renders a document" did not find it; it serialises every row of an
+    // uploaded spreadsheet on each call, which is the same egress.
+    name: "the spreadsheet export goes back to unbounded",
+    file: EXPORT,
+    from: "  if (!(await allowExport(user.id))) {",
+    to: "  if (false) {",
+    expect: "hands back a file is bounded",
+  },
+  {
+    // The one file route that is bounded by the CHARGE rather than a
+    // limiter. Stop reserving and it becomes a free unbounded renderer.
+    name: "the document PDF stops reserving, so nothing bounds it at all",
+    file: DOC_PDF,
+    from: "      const reservation = await reserveCredits(",
+    to: "      const reservation = await notReserveCredits(",
+    expect: "hands back a file is bounded",
+  },
   {
     // THE ONE A PRESENCE CHECK MISSED. Removing the limiter leaves
     // `seat_count` in the file, so the eight-kinds check still calls this
@@ -73,6 +94,6 @@ const MUTANTS = [
 runMutations({
   name: "route-write-bound",
   gate: GATE,
-  targets: [NAV, UPLOAD, SCHEDULE, DEVICE, FAVOURITES, INVITE],
+  targets: [NAV, UPLOAD, SCHEDULE, DEVICE, FAVOURITES, INVITE, EXPORT, DOC_PDF],
   mutants: MUTANTS,
 });

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { allowExport } from "@/lib/export-guard";
 import { toCsv } from "@/lib/data-analysis/store";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +25,16 @@ export async function GET(request: Request, { params }: { params: { id: string }
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
+
+  // Free on purpose — the analysis was paid for when it ran — but not
+  // unbounded, for the reason in lib/export-guard.ts. This one serialises
+  // EVERY ROW of the uploaded spreadsheet on each request; it was missed
+  // when the four PDF routes were bounded because it renders nothing, and
+  // "hands the caller a file" turned out to be the population that
+  // matters rather than "renders a document".
+  if (!(await allowExport(user.id))) {
+    return NextResponse.json({ error: "too_many_exports" }, { status: 429 });
+  }
 
   try {
     const format = new URL(request.url).searchParams.get("format") === "json" ? "json" : "csv";

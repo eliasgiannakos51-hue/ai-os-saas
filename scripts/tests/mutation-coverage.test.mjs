@@ -207,7 +207,9 @@ console.log(
 // 178 -> 179 ON 2026-09-17: resource-ownership.mutation.mjs, driving the
 // gate that asks whether a route which knows WHO is calling also checks
 // that the row belongs to them. Read off the run.
-const RATCHET = 179;
+// 179 -> 180 ON 2026-09-17: charged-party.mutation.mjs, driving the gate
+// that asks WHO is billed rather than how much. Read off the run.
+const RATCHET = 180;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

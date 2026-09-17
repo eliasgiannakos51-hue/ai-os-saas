@@ -60,6 +60,11 @@ const strip = (t) =>
     .replace(/^\s*\/\/.*$/gm, "");
 const SOURCE = new Map(files.map((f) => [f, strip(readFileSync(f, "utf8"))]));
 
+// One sentence, repeated rather than paraphrased twelve times: a reason
+// worth giving once is worth giving identically.
+const EMAIL_REASON =
+  "English today, and that is a decision rather than a limit. The language IS on the account (lib/locale-preference.ts writes raw_user_meta_data.preferred_locale) and the catalogue DOES load outside a request (lib/ai/module-vocabulary.ts imports messages/*.json at module scope). What is missing is plumbing: this function takes an address, not an account, so the locale is not in scope where the subject is written.";
+
 const TRANSLATES = /useTranslations\s*\(|getTranslations\s*\(|\bt\(|useFormatter|<FormattedMessage/;
 
 // USER-VISIBLE means one of two things and deliberately not a third.
@@ -138,6 +143,85 @@ check(
 );
 const shortReasons = Object.entries(ENGLISH_ON_PURPOSE).filter(([, why]) => why.length < 50);
 check("every reason is an argument", shortReasons.length === 0, shortReasons.map(([f]) => f).join(", "));
+
+// ---------------------------------------------------------------------
+// AND THE TEXT THAT IS NOT IN A COMPONENT AT ALL.
+//
+// Everything above walks .tsx. Every outbound email in this product is a
+// .ts module under src/lib/email, so not one of them is in that
+// population — and every one of them is English, for an app whose
+// interface ships in ten languages. Fourteen subjects: "welcome to
+// Ionexa AI", "New sign-in to your Ionexa AI account", "confirm account
+// deletion", "your subscription is set to end", and the rest.
+//
+// TWO OF THEM EXPLAIN WHY, AND THE REASON IS NOT TRUE.
+// send-subscription-cancelled-email.ts says "the messages/*.json
+// catalogue is not loaded outside a request's locale context, and an
+// email is not rendered inside one"; send-agent-emails.ts says "this
+// module has no locale". But src/lib/ai/module-vocabulary.ts imports
+// messages/en.json, messages/el.json and the rest DIRECTLY, at module
+// scope, outside any request — so the catalogue plainly does load there.
+// And the language is on the ACCOUNT: src/lib/locale-preference.ts
+// writes raw_user_meta_data.preferred_locale and src/middleware.ts:81
+// reads it back.
+//
+// What is actually true is narrower and worth writing down instead: the
+// send functions take an ADDRESS, not an account, so the locale is not in
+// scope AT THE SEND SITE. That is a plumbing decision and a reversible
+// one, not a constraint — and the difference decides whether a
+// Greek-speaking customer gets a Greek email the day somebody wants to
+// spend an afternoon on it.
+// ---------------------------------------------------------------------
+const emailModules = [];
+(function walkEmail(dir) {
+  for (const entry of readdirSync(dir)) {
+    const full = path.join(dir, entry);
+    if (statSync(full).isDirectory()) walkEmail(full);
+    else if (entry.endsWith(".ts")) emailModules.push(full.replace(/\\/g, "/"));
+  }
+})("src/lib/email");
+const SENDS = /resend\.emails\.send\s*\(|\bsendEmail\s*\(/;
+const senders = emailModules.filter((f) => SENDS.test(strip(readFileSync(f, "utf8"))));
+check(`email modules that send (${senders.length})`, senders.length >= 8, "the email-send detector matched almost nothing");
+
+const EMAIL_ENGLISH_ON_PURPOSE = {
+  "src/lib/email/error-alert.ts": "an operator alert to ADMIN_EMAILS. The reader is the owner, and the subject carries a route name and a provider message that do not translate.",
+  "src/lib/email/margin-alert.ts": "the same: a margin figure and a feature name, sent to the owner and to nobody else.",
+  "src/lib/email/send-welcome-email.ts": EMAIL_REASON,
+  "src/lib/email/send-new-device-login-email.ts": EMAIL_REASON,
+  "src/lib/email/send-delete-account-confirmation-email.ts": EMAIL_REASON,
+  "src/lib/email/send-subscription-cancelled-email.ts": EMAIL_REASON,
+  "src/lib/email/send-team-invite-email.ts": EMAIL_REASON + " This one goes to somebody who may not have an account at all, so there is no stored locale to read even after the plumbing exists.",
+  "src/lib/email/send-agent-emails.ts": EMAIL_REASON,
+  "src/lib/email/send-scheduled-run-complete-email.ts": EMAIL_REASON,
+  "src/lib/email/send-stuck-generation-email.ts": EMAIL_REASON,
+  "src/lib/email/send-weekly-digest-email.ts": EMAIL_REASON,
+  "src/lib/email/send-website-form-submission-email.ts": EMAIL_REASON,
+};
+const untranslatedSenders = senders.filter((f) => !TRANSLATES.test(strip(readFileSync(f, "utf8"))) && !EMAIL_ENGLISH_ON_PURPOSE[f]);
+check(
+  "every email that sends is translated, or says why it is English",
+  untranslatedSenders.length === 0,
+  untranslatedSenders.join("\n        ") + "\n        An email is the one place this product speaks to somebody who is not looking at the interface."
+);
+const staleEmail = Object.keys(EMAIL_ENGLISH_ON_PURPOSE).filter((f) => !senders.includes(f));
+check("no email declaration outlives its module", staleEmail.length === 0, staleEmail.join(", "));
+
+// THE CORRECTED CLAIM IS ITSELF CHECKED, because the reason above rests
+// on it: if module-vocabulary stops importing the catalogue at module
+// scope, the old explanation becomes true again and this one becomes the
+// wrong sentence.
+const VOCAB = "src/lib/ai/module-vocabulary.ts";
+check(
+  "the catalogue is still loaded outside a request, which is what makes the reason above the true one",
+  /import\s+\w+\s+from\s+["'][^"']*messages\/en\.json["']/.test(readFileSync(VOCAB, "utf8")),
+  `${VOCAB} no longer imports messages/*.json at module scope — re-read the reason in EMAIL_ENGLISH_ON_PURPOSE before trusting it`
+);
+check(
+  "...and the account still stores a preferred locale",
+  /preferred_locale/.test(readFileSync("src/lib/locale-preference.ts", "utf8")),
+  "if the account stops carrying a language, English email stops being a plumbing decision and becomes a constraint"
+);
 
 // ---------------------------------------------------------------------
 // CONTROLS, driving visibleLiterals and TRANSLATES rather than restating.

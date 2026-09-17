@@ -335,6 +335,95 @@ const nowReserving = Object.keys(DECLARED).filter((name) => {
 check("no declared route has quietly started reserving (remove its entry)", nowReserving, []);
 
 // ---------------------------------------------------------------------
+// 3b. A ROUTE THAT REACHES A MODEL CALL AND DOES NOT ITSELF RESERVE.
+//
+// "Reserving within one hop" is what section 1 accepts, and for most
+// routes the hop is their own estimator. For five it is not: three job
+// readers, /api/jobs/[id]/continue and /api/research/[id]/continue reach
+// reserveCredits through the runner they share, and the hold those
+// routes rely on was taken by a DIFFERENT request — the one that started
+// the job. So the question "what stops a thousand calls to continue" is
+// not answered by the reservation at all.
+//
+// It is answered by an ATOMIC CLAIM: a conditional UPDATE that flips a
+// flag only if it was not already set (`.eq("running", false)` /
+// chunk_running), so of a thousand concurrent calls exactly one proceeds
+// and the rest find the job already claimed. That is a real bound and it
+// was the seventh kind in this tree; a census of bounds is only as honest
+// as its list of what counts as one.
+//
+// Measured 2026-09-17: zero routes reach a model call with nothing
+// bounding them.
+// ---------------------------------------------------------------------
+const CLAIMS = /claimJob\s*\(|claimChunk\s*\(|claim_activation_run|\.eq\(\s*"running"\s*,\s*false\s*\)/;
+// "What stops a loop", not "does it reserve". A cron behind CRON_SECRET
+// has no caller to loop it; a rate-limited route is bounded whether or
+// not it also holds credits. Both were in the first version of this list
+// as neither, which called five correct routes unbounded.
+const BOUNDS_ITSELF = /\breserveCredits\s*\(|\bstartJob\s*\(|checkRateLimit\s*\(|checkCronAuth\s*\(/;
+const modelRoutes = classified.filter((c) => c.kinds.includes("model"));
+checkTrue(`routes that reach a model call (${modelRoutes.length})`, modelRoutes.length >= 20, "the model detector matched almost nothing");
+
+const CONTINUES_SOMEBODY_ELSES_HOLD = {
+  "jobs/[id]/continue": {
+    bound: "job_claim",
+    why: "the hold was taken by the request that STARTED the job. This one verifies `user.id !== job.user_id`, refuses a job that is not active, and then claimJob does a conditional UPDATE on `running = false`, so concurrent calls resolve to exactly one runner.",
+  },
+  "research/[id]/continue": {
+    bound: "job_claim",
+    why: "the same shape one feature over: ownership by `.eq(\"user_id\", user.id)`, a status gate on researching/synthesising, and claimChunk as the compare-and-set. The reservation id is carried on the report row from the request that began it.",
+  },
+  "jobs/[id]": { bound: "reads_only", why: "a GET that returns one job's status to its owner; the model call is three hops away in the handler the job TYPE names, not in anything this route runs." },
+  jobs: { bound: "reads_only", why: "the list of the caller's own jobs; same closure artefact as the single-job read above." },
+  "websites/generate": {
+    bound: "affordability_then_process",
+    why: "it queues rather than generates: the model call and the hold both live in /api/websites/generate/process, against the SAME estimate this route computes. What stops a loop here is hasEnoughCredits — an account that cannot afford the generation is refused before the row is written, so the queue cannot outrun the balance.",
+  },
+  "voice/usage": { bound: "reads_only", why: "reads a usage counter; the provider URL is a constant in voice-providers, imported to say whether voice is configured at all." },
+};
+const unboundModel = modelRoutes
+  .filter((c) => !BOUNDS_ITSELF.test(SOURCE.get(c.route)))
+  .filter((c) => !CONTINUES_SOMEBODY_ELSES_HOLD[shortName(c.route)])
+  .map((c) => shortName(c.route));
+check(
+  "every route that reaches a model call either reserves, or says what else stops a loop",
+  unboundModel,
+  []
+);
+
+const claimBroken = [];
+for (const [name, entry] of Object.entries(CONTINUES_SOMEBODY_ELSES_HOLD)) {
+  const found = modelRoutes.find((c) => shortName(c.route) === name);
+  if (!found) {
+    claimBroken.push(`${name}: declared here but no longer reaches a model call`);
+    continue;
+  }
+  if (BOUNDS_ITSELF.test(SOURCE.get(found.route))) {
+    claimBroken.push(`${name}: it bounds itself now — drop the entry`);
+  }
+  if (entry.bound === "job_claim" && !CLAIMS.test(SOURCE.get(found.route))) {
+    claimBroken.push(`${name}: declared bounded by an atomic claim, and there is none`);
+  }
+  // THE REFUSAL, not the call. A mutant that replaced the call with a
+  // `{ ok: true }` literal left the NAME behind in its type annotation,
+  // and a presence check went on calling the route bounded. What has to
+  // be there is the branch that turns a negative answer into a refusal.
+  if (entry.bound === "affordability_then_process") {
+    const src = SOURCE.get(found.route);
+    // THE REFUSAL ON THE FULL ESTIMATE, paired with the call that made
+    // it. This route asks hasEnoughCredits TWICE — once for the tiny
+    // clarification precheck and once for the whole generation — so
+    // "contains a refusal branch" passed with the second one deleted.
+    // What bounds the queue is the second.
+    if (!/hasEnoughCredits\s*\(\s*user\.id\s*,\s*estimatedCost[\s\S]{0,120}?if\s*\(\s*!\s*[A-Za-z_$][\w$]*\.ok\s*\)/.test(src)) {
+      claimBroken.push(`${name}: declared bounded by an affordability refusal on the full estimate, and that pair is not there`);
+    }
+  }
+  if (!entry.why || entry.why.length < 60) claimBroken.push(`${name}: the reason is too short to be an argument`);
+}
+check("every claim-bounded route still holds its claim", claimBroken, []);
+
+// ---------------------------------------------------------------------
 // 4. POSITIVE CONTROLS — they drive classifyRoute, they do not describe it.
 //    A control that re-states the regex passes while the regex is wrong.
 // ---------------------------------------------------------------------

@@ -25,6 +25,26 @@ const APPS = "src/app/dashboard/apps/page.tsx";
 
 const MUTANTS = [
   {
+    // THE POPULATION THAT WALKS .tsx CANNOT SEE A .ts EMAIL. Twelve
+    // senders, every one English, none of them in any list until today.
+    name: "an email sender drops out of the register",
+    file: GATE,
+    from: '  "src/lib/email/send-welcome-email.ts": EMAIL_REASON,\n',
+    to: "",
+    expect: "says why it is English",
+  },
+  {
+    // The reason given for every English email rests on two facts about
+    // OTHER files. If either stops being true the reason is the wrong
+    // sentence, and a reason nobody re-checks is how a limitation note
+    // outlives its limitation.
+    name: "the catalogue stops loading outside a request, so the stated reason stops being true",
+    file: "src/lib/ai/module-vocabulary.ts",
+    from: 'import en from "../../../messages/en.json";',
+    to: "const en = {} as Record<string, unknown>;",
+    expect: "catalogue is still loaded outside a request",
+  },
+  {
     name: "a declared file starts translating, so its entry is now false",
     file: LOGO,
     from: "export function Logo",
@@ -60,6 +80,6 @@ const MUTANTS = [
 runMutations({
   name: "i18n-population",
   gate: GATE,
-  targets: [LOGO, DECK, APPS, GATE],
+  targets: [LOGO, DECK, APPS, GATE, "src/lib/ai/module-vocabulary.ts"],
   mutants: MUTANTS,
 });

@@ -4052,5 +4052,59 @@
     "pruneButton": "Limpar {count} sem uso",
     "pruneConfirm": "Apagar {count} linhas ditas uma vez e que não voltaram em seis meses? Tudo o que se repete fica.",
     "pruned": "{count} removidas."
+  },
+  "email": {
+    "welcome": {
+      "label": "inscrição",
+      "title": "bem-vindo ao Ionexa AI",
+      "body": "A tua conta está pronta — não é preciso confirmar o e-mail, podes entrar já. O Ionexa AI são 13 módulos para gerir uma startup, mais uma caixa de texto livre que arquiva o que escreveres no módulo certo.",
+      "tip": "Dica: em {path} podes simplesmente descrever o que aconteceu por palavras tuas e irá parar automaticamente ao módulo certo.",
+      "preheader": "A tua conta Ionexa AI está pronta."
+    },
+    "deletion": {
+      "label": "eliminação de conta",
+      "title": "confirma a eliminação da conta",
+      "body": "Recebemos um pedido para eliminar definitivamente a tua conta Ionexa AI e todos os registos em todos os módulos. Isto não pode ser desfeito.",
+      "cta": "Confirmar eliminação",
+      "expiry": "Este link expira dentro de 1 hora. Se não foste tu a pedir, ignora este e-mail e a tua conta ficará exatamente como está.",
+      "preheader": "Confirma a eliminação definitiva da tua conta Ionexa AI."
+    },
+    "cancelled": {
+      "label": "subscrição",
+      "title": "a tua subscrição vai terminar",
+      "untilDate": "Manténs o acesso completo até {date}. Até lá nada muda — os créditos que te restam continuam utilizáveis e nenhum dos teus dados é apagado.",
+      "untilPeriodEnd": "Manténs o acesso completo até ao fim do período que já pagaste. Até lá nada muda — os créditos que te restam continuam utilizáveis e nenhum dos teus dados é apagado.",
+      "afterwards": "Depois disso a conta passa para o plano gratuito. As tuas entradas, ficheiros e conversas ficam exatamente onde estão.",
+      "cta": "Mudaste de ideias? Repõe-na",
+      "noCharge": "Podes repor a subscrição a qualquer momento antes de terminar, sem custo adicional — já pagaste este período.",
+      "preheaderDate": "A tua subscrição Ionexa AI termina a {date}. Manténs o acesso até lá.",
+      "preheader": "A tua subscrição Ionexa AI vai terminar. Manténs o acesso até acabar o período que pagaste."
+    },
+    "newDevice": {
+      "label": "segurança",
+      "title": "novo início de sessão na tua conta",
+      "body": "Detetámos um início de sessão na tua conta Ionexa AI a partir de um dispositivo ou navegador que nunca tínhamos visto.",
+      "when": "Quando",
+      "device": "Dispositivo",
+      "ip": "Endereço IP",
+      "ifYou": "Se foste tu, não precisas de fazer nada. Se não reconheces este início de sessão, muda já a tua palavra-passe.",
+      "cta": "Mudar palavra-passe",
+      "preheader": "Novo início de sessão na tua conta Ionexa AI a partir de {device}."
+    },
+    "blurbs": {
+      "ideas": "Regista e pontua novas ideias de produto ou de negócio.",
+      "competitors": "Acompanha produtos rivais, preços e posicionamento.",
+      "research": "Notas e resumos de tudo o que andas a investigar.",
+      "finance": "Regista receitas e despesas.",
+      "learning": "Temas que estás a estudar, com recursos e questionários.",
+      "trading": "Registo de operações — símbolo, direção, resultado, lucro e prejuízo.",
+      "decisions": "Pesa as opções e regista a recomendação.",
+      "products": "Planos de produto — preços, roteiro, plano de lançamento.",
+      "content": "Ideias de conteúdo, legendas e sequências.",
+      "sales": "Contactos, e-mails de abordagem e próximos passos.",
+      "feedback": "Comentários de utilizadores, organizados por tom e prioridade.",
+      "analytics": "Qualquer métrica que valha a pena seguir ao longo do tempo.",
+      "automation": "Fluxos que vale a pena automatizar, e o tempo poupado."
+    }
   }
 }

@@ -4052,5 +4052,59 @@
     "pruneButton": "Clean up {count} unused",
     "pruneConfirm": "Delete {count} lines that were said once and have not come up in six months? Anything repeated is kept.",
     "pruned": "{count} removed."
+  },
+  "email": {
+    "welcome": {
+      "label": "signup",
+      "title": "welcome to Ionexa AI",
+      "body": "Your account is ready — no email confirmation needed, you can log in right away. Ionexa AI is 13 modules for running a startup, plus a free-text inbox that files anything you type into the right one.",
+      "tip": "Tip: on {path} you can just describe what happened in plain English and it'll land in the right module automatically.",
+      "preheader": "Your Ionexa AI account is ready."
+    },
+    "deletion": {
+      "label": "account deletion",
+      "title": "confirm account deletion",
+      "body": "We received a request to permanently delete your Ionexa AI account and every record logged across all modules. This can't be undone.",
+      "cta": "Confirm deletion",
+      "expiry": "This link expires in 1 hour. If you didn't request this, ignore this email and your account will stay exactly as it is.",
+      "preheader": "Confirm permanent deletion of your Ionexa AI account."
+    },
+    "cancelled": {
+      "label": "subscription",
+      "title": "your subscription is set to end",
+      "untilDate": "You'll keep full access until {date}. Nothing changes before then — your remaining credits stay usable, and none of your data is deleted.",
+      "untilPeriodEnd": "You'll keep full access until the end of the period you've already paid for. Nothing changes before then — your remaining credits stay usable, and none of your data is deleted.",
+      "afterwards": "After that the account moves to the free plan. Your entries, files and conversations stay exactly where they are.",
+      "cta": "Changed your mind? Restore it",
+      "noCharge": "You can restore the subscription any time before it ends, at no extra charge — you have already paid for this period.",
+      "preheaderDate": "Your Ionexa AI subscription ends on {date}. You keep access until then.",
+      "preheader": "Your Ionexa AI subscription is set to end. You keep access until the period you paid for runs out."
+    },
+    "newDevice": {
+      "label": "security",
+      "title": "new sign-in to your account",
+      "body": "We noticed a sign-in to your Ionexa AI account from a device or browser we haven't seen before.",
+      "when": "When",
+      "device": "Device",
+      "ip": "IP address",
+      "ifYou": "If this was you, no action is needed. If you don't recognize this sign-in, please reset your password immediately.",
+      "cta": "Reset password",
+      "preheader": "New sign-in to your Ionexa AI account from {device}."
+    },
+    "blurbs": {
+      "ideas": "Capture and score new product or business ideas.",
+      "competitors": "Track rival products, pricing, and positioning.",
+      "research": "Notes and summaries from anything you're researching.",
+      "finance": "Log income and expenses.",
+      "learning": "Topics you're studying, with resources and quizzes.",
+      "trading": "Trade log — symbol, direction, result, profit and loss.",
+      "decisions": "Weigh options and record the recommendation.",
+      "products": "Product plans — pricing, roadmap, launch plan.",
+      "content": "Content ideas, captions, and threads.",
+      "sales": "Leads, outreach emails, and next steps.",
+      "feedback": "User feedback, triaged by sentiment and priority.",
+      "analytics": "Any metric worth tracking over time.",
+      "automation": "Workflows worth automating, and time saved."
+    }
   }
 }

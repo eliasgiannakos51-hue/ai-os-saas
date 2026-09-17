@@ -3,6 +3,7 @@ import { createResendClient } from "@/lib/resend";
 import { senderAddress } from "@/lib/email/resend-config";
 import { deleteAccountConfirmationEmailHtml } from "@/lib/email/templates";
 import { logApiError } from "@/lib/log-error";
+import { emailLocaleFor } from "@/lib/email/email-locale";
 
 // The From address, from ONE definition — see lib/email/resend-config.ts.
 // This was one of fourteen copies of the same line — the constant AND
@@ -11,15 +12,17 @@ import { logApiError } from "@/lib/log-error";
 
 export async function sendDeleteAccountConfirmationEmail(
   email: string,
-  confirmUrl: string
+  confirmUrl: string,
+  userId?: string | null
 ): Promise<{ ok: boolean; error?: unknown }> {
   try {
+    const locale = await emailLocaleFor(userId);
     const resend = createResendClient();
     const { error } = await resend.emails.send({
       from: senderAddress(),
       to: email,
       subject: "confirm account deletion — Ionexa AI",
-      html: deleteAccountConfirmationEmailHtml({ email, confirmUrl }),
+      html: deleteAccountConfirmationEmailHtml({ email, confirmUrl, locale }),
     });
 
     if (error) {

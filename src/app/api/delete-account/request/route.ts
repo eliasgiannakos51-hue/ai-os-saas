@@ -89,7 +89,8 @@ export async function POST() {
 
     const { ok: emailOk, error: emailError } = await sendDeleteAccountConfirmationEmail(
       user.email,
-      confirmUrl
+      confirmUrl,
+      user.id
     );
     if (!emailOk) {
       // sendDeleteAccountConfirmationEmail already console.errors the

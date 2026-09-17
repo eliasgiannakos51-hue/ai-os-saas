@@ -187,10 +187,6 @@ check(`email modules that send (${senders.length})`, senders.length >= 8, "the e
 const EMAIL_ENGLISH_ON_PURPOSE = {
   "src/lib/email/error-alert.ts": "an operator alert to ADMIN_EMAILS. The reader is the owner, and the subject carries a route name and a provider message that do not translate.",
   "src/lib/email/margin-alert.ts": "the same: a margin figure and a feature name, sent to the owner and to nobody else.",
-  "src/lib/email/send-welcome-email.ts": EMAIL_REASON,
-  "src/lib/email/send-new-device-login-email.ts": EMAIL_REASON,
-  "src/lib/email/send-delete-account-confirmation-email.ts": EMAIL_REASON,
-  "src/lib/email/send-subscription-cancelled-email.ts": EMAIL_REASON,
   "src/lib/email/send-team-invite-email.ts": EMAIL_REASON + " This one goes to somebody who may not have an account at all, so there is no stored locale to read even after the plumbing exists.",
   "src/lib/email/send-agent-emails.ts": EMAIL_REASON,
   "src/lib/email/send-scheduled-run-complete-email.ts": EMAIL_REASON,
@@ -198,12 +194,73 @@ const EMAIL_ENGLISH_ON_PURPOSE = {
   "src/lib/email/send-weekly-digest-email.ts": EMAIL_REASON,
   "src/lib/email/send-website-form-submission-email.ts": EMAIL_REASON,
 };
-const untranslatedSenders = senders.filter((f) => !TRANSLATES.test(strip(readFileSync(f, "utf8"))) && !EMAIL_ENGLISH_ON_PURPOSE[f]);
+// A SENDER COUNTS AS TRANSLATED WHEN IT RESOLVES A LOCALE. The .tsx rule
+// above looks for useTranslations/getTranslations, which are React hooks
+// an email module has no business calling — it reads the catalogue
+// directly through lib/email/email-locale.ts. Same question, different
+// mechanism, and using the component test here would report four
+// translated emails as English.
+const RESOLVES_A_LOCALE = /emailLocaleFor\s*\(|emailTranslator\s*\(/;
+const untranslatedSenders = senders.filter(
+  (f) => !RESOLVES_A_LOCALE.test(strip(readFileSync(f, "utf8"))) && !EMAIL_ENGLISH_ON_PURPOSE[f]
+);
 check(
   "every email that sends is translated, or says why it is English",
   untranslatedSenders.length === 0,
   untranslatedSenders.join("\n        ") + "\n        An email is the one place this product speaks to somebody who is not looking at the interface."
 );
+// THE FOUR A PERSON MEETS FIRST, and they are no longer on the list
+// above. Signup, a sign-in from a new device, cancelling a subscription
+// and deleting an account: the four moments where somebody who chose
+// Greek in the interface was read English by the product.
+//
+// Each is held to three things, because a translated email is not one
+// change but three: the template must take a locale, the SENDER must
+// resolve one, and the call site must hand over the account — a template
+// that accepts a locale nobody passes renders English for everybody and
+// looks converted.
+const TRANSLATED_EMAILS = {
+  "src/lib/email/send-welcome-email.ts": "src/app/api/signup/route.ts",
+  "src/lib/email/send-new-device-login-email.ts": "src/app/api/auth/device-check/route.ts",
+  "src/lib/email/send-delete-account-confirmation-email.ts": "src/app/api/delete-account/request/route.ts",
+  "src/lib/email/send-subscription-cancelled-email.ts": "src/app/api/billing/cancel/route.ts",
+};
+const brokenTranslations = [];
+for (const [sender, callSite] of Object.entries(TRANSLATED_EMAILS)) {
+  const src = strip(readFileSync(sender, "utf8"));
+  if (!/emailLocaleFor\s*\(|knownLocale/.test(src)) brokenTranslations.push(`${sender}: resolves no locale`);
+  if (!/\blocale\b/.test(src)) brokenTranslations.push(`${sender}: never passes a locale to its template`);
+  // THE CALL EXPRESSION, not the file. Every one of these routes mentions
+  // user.id somewhere — that is what a route does — so "the file contains
+  // user.id" was true with the argument removed, and a mutant that took
+  // the language back out of the signup call stayed green.
+  const caller = strip(readFileSync(callSite, "utf8"));
+  const fnName = /export async function (\w+)/.exec(strip(readFileSync(sender, "utf8")))?.[1] ?? "";
+  const callAt = caller.indexOf(`${fnName}(`);
+  const callExpr = callAt === -1 ? "" : caller.slice(callAt, callAt + 300);
+  if (callAt === -1) {
+    brokenTranslations.push(`${callSite}: does not call ${fnName} any more`);
+  } else if (!/user\.id|userId|signupLocale|Locale/.test(callExpr)) {
+    brokenTranslations.push(`${callSite}: calls ${fnName} without handing over the account or the locale`);
+  }
+}
+check(
+  "the four first-contact emails resolve a language, and their callers supply the account",
+  brokenTranslations.length === 0,
+  brokenTranslations.join("\n        ")
+);
+// And the strings really exist in every locale, not just in English.
+const EMAIL_KEYS = ["welcome.title", "deletion.title", "cancelled.title", "newDevice.title", "blurbs.ideas"];
+const missingEmailStrings = [];
+for (const loc of ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"]) {
+  const cat = JSON.parse(readFileSync(`messages/${loc}.json`, "utf8"));
+  for (const key of EMAIL_KEYS) {
+    const value = key.split(".").reduce((node, part) => (node ? node[part] : undefined), cat.email);
+    if (typeof value !== "string" || value.length < 2) missingEmailStrings.push(`${loc}: email.${key}`);
+  }
+}
+check("every email string exists in all ten locales", missingEmailStrings.length === 0, missingEmailStrings.join(", "));
+
 const staleEmail = Object.keys(EMAIL_ENGLISH_ON_PURPOSE).filter((f) => !senders.includes(f));
 check("no email declaration outlives its module", staleEmail.length === 0, staleEmail.join(", "));
 

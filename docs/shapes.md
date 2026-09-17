@@ -1378,3 +1378,53 @@ lack one — this tree has eight kinds of bound. The question only became
 answerable when it was narrowed to a population where the absence
 matters: routes that INSERT. That is the difference between a scan worth
 committing and one worth deleting.
+
+## A check that answers the adjacent question
+
+Not absent, and not wrong. Present, passing, and about something else.
+
+`security-posture.test.mjs` asks of every endpoint in this app: does it
+know WHO is calling? Every one passes — 147 routes, each authenticating
+or carrying a written reason it does not need to. It is a thorough gate
+and its answer is true.
+
+The question it does not ask is the one that decides whether a row is
+yours. A route that resolves the caller and then reads
+`.eq("id", params.id)` and nothing else has a complete, correct,
+load-bearing auth check, and serves somebody else's record. Nothing about
+it is missing. Nothing about it is a mistake. It is scoped to the row
+that was asked for rather than to the person asking, and no gate written
+for "is there a check" can tell the two apart, because there is one.
+
+**Why this is not the participants shape.** There, the item was outside
+the set the check iterates, so nothing had an opinion about it. Here the
+item is inside the set and passes — the coverage is complete and the
+question is adjacent. The first is a hole in a population; this is a hole
+between two questions that sound like one.
+
+**What the measurement found, 2026-09-17.** 120 authenticated routes; 66
+act on an identifier the request supplied; 16 of those reach past RLS
+with the admin client. Zero defects — and that is only worth knowing
+alongside how the other 50 are safe, which is *not* in their own source
+at all. They read through the caller's own client and let a database
+policy do the scoping. `using (true)` on one table is an ownership hole
+in fifty routes at once, with every one of them still calling
+`auth.getUser()` and still reading correctly.
+
+So the two halves were joined rather than each asserted alone:
+`rls-coverage.test.mjs` proves 204 of 205 policies scope to `auth.uid()`
+— in both spellings, because 12 of them are created inside a DO loop as
+`execute format('create policy … using (auth.uid() = user_id)')`, a
+policy in a *string* that a literal scan cannot see — and
+`resource-ownership.test.mjs` cites those assertions by their text, so
+removing either one turns the other red.
+
+**And one clause that reads like another.** A policy's `using` clause
+scopes what is READ. Only `with check` stops `insert … user_id =
+<somebody else>`. 43 insert policies had never been checked for it. All
+43 were correct; nothing had asked.
+
+**The question to ask of a check that passes:** *what is it scoped to,
+and is that the same thing I care about?* Scoped to the row, scoped to
+the caller; scoped to the read, scoped to the write; knows who is asking,
+knows whose it is. Each pair reads like one question and is two.

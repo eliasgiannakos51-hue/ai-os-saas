@@ -1,6 +1,6 @@
 # The first run — it
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **599 strings**. The whole product is 3156, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **601 strings**. The whole product is 3158, which is why this file exists.
 
 **Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 354 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2440,7 +2440,7 @@ Non ha funzionato. Riprova.
 
 Caricamento…
 
-## Tier 3 — Further in — only if you have time (198)
+## Tier 3 — Further in — only if you have time (200)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3211,6 +3211,18 @@ Troppe registrazioni nell'ultima ora. Riprova tra poco.
 > EN — Credits could not be held for this.
 
 Non è stato possibile riservare i crediti per questo.
+
+**`voice.errors.streamInterrupted`**
+
+> EN — The connection dropped before the reply finished.
+
+La connessione si è interrotta prima della fine della risposta.
+
+**`voice.errors.streamInterruptedPartial`**
+
+> EN — The connection dropped — the reply above may be incomplete.
+
+La connessione si è interrotta: la risposta qui sopra potrebbe essere incompleta.
 
 **`voice.errors.too_large`**
 

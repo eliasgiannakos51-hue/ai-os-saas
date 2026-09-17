@@ -565,6 +565,30 @@ for (const route of PUBLIC_ROUTES) {
     );
   }
 }
+// ---------------------------------------------------------------------
+// THE BOUNDARY, DRIVEN RATHER THAN READ.
+//
+// Section 2 below adds AUTH_COOKIE and asserts every dashboard route
+// answers 200 and does not bounce to /login. Nothing anywhere asserted
+// the other direction: that WITHOUT the cookie it does bounce. The whole
+// auth boundary — one redirect in src/app/dashboard/layout.tsx, one
+// matcher in src/middleware.ts — was verified by reading source, by
+// page-auth-boundary.test.mjs, which is a text scan however careful it
+// is. A regex cannot tell you that Next.js actually ran the layout.
+//
+// This is the same request a stranger makes: no cookie, real production
+// build, real middleware, real server components. A 200 here with the
+// dashboard rendered is the failure that matters, and it is the one no
+// static check can see.
+console.log("\n== 1b. dashboard routes WITHOUT a session ==");
+for (const route of DASHBOARD_ROUTES) {
+  const r = await inspect(anon, route);
+  checkTrue(
+    `${route}: a stranger lands on /login`,
+    r.landedOn === "/login",
+    `landed on ${r.landedOn} with status ${r.status} — this route served a dashboard page to a request carrying no session`
+  );
+}
 await anon.close();
 
 console.log("\n== 2. dashboard routes (logged in) ==");

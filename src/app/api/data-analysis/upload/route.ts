@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { MAX_UPLOAD_BYTES, readUpload } from "@/lib/data-analysis/store";
 import { suggestCharts } from "@/lib/data-analysis/charts";
 
@@ -25,6 +26,21 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
+
+    // MAX_UPLOAD_BYTES bounds ONE upload. Nothing bounded the number of
+    // them: each one parses a spreadsheet in this process, profiles every
+    // column and writes two rows. Thirty an hour is far more than anyone
+    // analysing their own data reaches.
+    const limited = await checkRateLimit({
+      scope: "data_analysis_upload",
+      identifier: user.id,
+      maxAttempts: 30,
+      windowMinutes: 60,
+    });
+    if (!limited.allowed) {
+      return NextResponse.json({ error: "too_many_uploads" }, { status: 429 });
+    }
+
 
   try {
     const form = await request.formData();

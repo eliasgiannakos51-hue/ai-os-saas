@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createHash } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { parseUserAgent } from "@/lib/parse-user-agent";
 import { sendNewDeviceLoginEmail } from "@/lib/email/send-new-device-login-email";
 import { getClientIp } from "@/lib/get-client-ip";
@@ -75,6 +76,22 @@ export async function POST(request: Request) {
 
     if (!user || !user.email) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    // ONE ROW PER FINGERPRINT THE CALLER SUPPLIES, and the fingerprint is
+    // built from the request. The lookup above it means an honest browser
+    // inserts once and updates thereafter; a caller varying its user agent
+    // inserts every time, and each new device also SENDS AN EMAIL. Twenty
+    // an hour is more devices than anybody signs in from and far fewer
+    // than a loop.
+    const limited = await checkRateLimit({
+      scope: "device_check",
+      identifier: user.id,
+      maxAttempts: 20,
+      windowMinutes: 60,
+    });
+    if (!limited.allowed) {
+      return NextResponse.json({ ok: false, error: "too_many_device_checks" }, { status: 429 });
     }
 
     const ipAddress = getClientIp(request);

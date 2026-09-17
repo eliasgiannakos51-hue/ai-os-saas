@@ -4,6 +4,7 @@ import { getPlan, type PlanSlug } from "@/lib/billing/plans";
 import { maxSeatsForPlan } from "@/lib/team/seat-limits";
 import { sendTeamInviteEmail } from "@/lib/email/send-team-invite-email";
 import { logApiError } from "@/lib/log-error";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 
 export const dynamic = "force-dynamic";
@@ -129,6 +130,39 @@ export async function POST(request: Request) {
           { status: 403 }
         );
       }
+    }
+
+    // A CEILING THAT IS INFINITY ON TWO PLANS IS NOT A CEILING THERE.
+    //
+    // The seat check above is a real billing check and it stays. It is
+    // also skipped entirely for teamSeatsIncluded plans (Ultimate,
+    // Enterprise) and for isAdmin — deliberately, because those have no
+    // per-seat charge — and lib/team/seat-limits.ts sets their plan
+    // ceiling to POSITIVE_INFINITY for the same reason. So on exactly the
+    // accounts with no cap, nothing bounded this route at all, and the
+    // next thing it does is send an email to an address THE CALLER
+    // SUPPLIED, from this product's domain.
+    //
+    // security-posture.test.mjs already makes this argument about
+    // /api/contact — "the recipient is FIXED to ADMIN_EMAILS ... which is
+    // the difference between a contact form and an open relay". Here the
+    // recipient is not fixed. The row is bounded by unique(owner_id,
+    // member_email), but the caller chooses member_email, so the rows and
+    // the emails are both as many as they care to ask for.
+    //
+    // Twenty an hour is more people than anyone invites to a team in a
+    // day and far fewer than a loop.
+    const limited = await checkRateLimit({
+      scope: "team_invite",
+      identifier: user.id,
+      maxAttempts: 20,
+      windowMinutes: 60,
+    });
+    if (!limited.allowed) {
+      return NextResponse.json(
+        { ok: false, error: "Too many invitations in the last hour. Try again shortly." },
+        { status: 429 }
+      );
     }
 
     if (email === user.email?.toLowerCase()) {

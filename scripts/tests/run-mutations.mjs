@@ -103,7 +103,14 @@ if (suites.length === 0) {
 //
 // 152 with ai-memory.mutation.mjs, which drives both of Universal
 // Memory's gates.
-const FLOOR = 152;
+//
+// 152 -> 163 on 2026-09-16, read off the directory rather than estimated:
+// eleven suites across three rounds — charge-sees-input, resolve-language,
+// truncate, landmarks, route-spend-inventory, upload-reversibility,
+// rls-coverage, page-auth-boundary, route-write-bound and the two the last
+// merge carried in. mutation-runner-honesty.test.mjs holds this within ten
+// of the real count in both directions, so it cannot drift far below.
+const FLOOR = 163;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { X, Mic } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { useCredits } from "@/components/credits/credits-context";
+import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { useRecorder } from "@/components/voice/use-recorder";
 import { useAudioLevel, type AudioLevelSource } from "@/components/voice/use-audio-level";
 import { VoiceOrb } from "@/components/voice/voice-orb";
@@ -59,7 +60,7 @@ export function VoiceConversation({
   const t = useTranslations("voice");
   const locale = useLocale();
   const { addToast } = useToast();
-  const { refresh: refreshCredits } = useCredits();
+  const { refresh: refreshCredits, reportUsage } = useCredits();
   const availability = useVoiceAvailability();
   const voiceError = useVoiceErrorText();
 
@@ -136,7 +137,9 @@ export function VoiceConversation({
         return;
       }
       setPartial(question);
-      refreshCredits();
+      // The transcription's own receipt, which this component was
+      // discarding in favour of a silent balance refresh.
+      void reportUsage(stt);
 
       // 2. THE ANSWER, streamed, so the text is on screen while the
       //    speech is still being synthesised.
@@ -150,37 +153,40 @@ export function VoiceConversation({
         setState("idle");
         return;
       }
-      const reader = chatResponse.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
+      // THE SHARED READER, not a fourth copy of the loop.
+      //
+      // This component inlined its own read loop and committed the
+      // answer only after that loop finished — which is the exact defect
+      // lib/ndjson-stream.ts was written for and which
+      // ndjson-stream.test.mjs forbids in the three consumers it names.
+      // A phone moving between cells mid-answer rejected the read, jumped
+      // past setTurns, and the spoken reply the user had already been
+      // charged for was replaced by a generic failure toast. It was a
+      // fourth consumer of the same stream and was in no gate's
+      // population.
       let answer = "";
-      for (;;) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-        for (const line of lines) {
-          if (!line.trim()) continue;
-          try {
-            const event = JSON.parse(line);
-            if (event.type === "meta" && typeof event.conversationId === "string") {
-              if (event.conversationId !== conversationIdRef.current) {
-                onConversationId?.(event.conversationId);
-              }
-              conversationIdRef.current = event.conversationId;
-            } else if (event.type === "delta" && typeof event.text === "string") {
-              answer += event.text;
-            } else if (event.type === "error" && typeof event.error === "string") {
-              addToast(event.error, "error");
-            }
-          } catch {
-            // A partial line at the edge of a chunk is normal; the next
-            // read completes it.
+      const { interrupted } = await readNdjsonStream(chatResponse.body, (event) => {
+        if (event.type === "meta" && typeof event.conversationId === "string") {
+          if (event.conversationId !== conversationIdRef.current) {
+            onConversationId?.(event.conversationId);
           }
+          conversationIdRef.current = event.conversationId;
+        } else if (event.type === "delta" && typeof event.text === "string") {
+          answer += event.text;
+        } else if (event.type === "error" && typeof event.error === "string") {
+          addToast(event.error, "error");
         }
-      }
+      });
       if (abandonedRef.current) return;
+      // An interruption is said out loud and KEEPS what arrived: the
+      // question was billed, and the part of the answer that reached the
+      // browser is the part the person paid for. Partial and empty are
+      // different sentences, as they are in the other three consumers —
+      // "this may be cut off" and "nothing came" ask for different things
+      // from the reader.
+      if (interrupted) {
+        addToast(answer ? t("errors.streamInterruptedPartial") : t("errors.streamInterrupted"), "error");
+      }
       refreshCredits();
       const turn = { question, answer: answer.trim() };
       setTurns((current) => [...current, turn]);

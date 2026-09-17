@@ -757,7 +757,13 @@ const clientFallbacks = sources.flatMap((f) => [
 // MEASURED, not added: the scanner reported 661 against the old
 // baseline of 655, so this is the tree's own count rather than 655
 // plus six taken by hand.
-const SERVER_PROSE_BASELINE = 661;
+// 661 -> 662 ON 2026-09-17: one refusal, in /api/team/invite — "Too many
+// invitations in the last hour. Try again shortly." Server-side English,
+// like the rest of this census, and the route it is in had no limiter at
+// all until today: on Ultimate and Enterprise both seat ceilings are
+// skipped and the next thing it does is email an address the caller
+// chose. Measured, not added.
+const SERVER_PROSE_BASELINE = 662;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

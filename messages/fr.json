@@ -3516,7 +3516,9 @@
       "unauthenticated": "Vous êtes déconnecté. Connectez-vous et réessayez.",
       "unsupported": "Ce navigateur ne peut pas enregistrer de son. Vous pouvez toujours écrire.",
       "unsupported_type": "Ce format audio n'est pas pris en charge.",
-      "usage_unavailable": "Impossible de vérifier les minutes de voix pour le moment."
+      "usage_unavailable": "Impossible de vérifier les minutes de voix pour le moment.",
+      "streamInterrupted": "La connexion a été interrompue avant la fin de la réponse.",
+      "streamInterruptedPartial": "La connexion a été interrompue — la réponse ci-dessus est peut-être incomplète."
     },
     "permission": {
       "title": "Avant l'ouverture du micro",

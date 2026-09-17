@@ -3516,7 +3516,9 @@
       "unauthenticated": "Hai effettuato la disconnessione. Accedi e riprova.",
       "unsupported": "Questo browser non può registrare audio. Puoi sempre scrivere.",
       "unsupported_type": "Quel formato audio non è supportato.",
-      "usage_unavailable": "Non è stato possibile controllare i minuti di voce in questo momento."
+      "usage_unavailable": "Non è stato possibile controllare i minuti di voce in questo momento.",
+      "streamInterrupted": "La connessione si è interrotta prima della fine della risposta.",
+      "streamInterruptedPartial": "La connessione si è interrotta: la risposta qui sopra potrebbe essere incompleta."
     },
     "permission": {
       "title": "Prima che si apra il microfono",

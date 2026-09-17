@@ -104,6 +104,17 @@ const ALLOWED = new Map([
   // checked by reading, and so removing it shows up here as a lie rather
   // than as silence.
   // ------------------------------------------------------------------
+  //   Three collections that must be EMPTY in a healthy tree and for which
+  //   a floor is therefore a contradiction: a DO block whose table list
+  //   cannot be read, a declaration that has outlived its table, and an
+  //   `alter table ... disable row level security`. Each one existing at all
+  //   is the defect. What CAN silently empty there is the scan underneath,
+  //   and that is floored three times in the same file, on the lines above
+  //   these assertions: `FILES.length >= 50 && SQL.length > 100000`,
+  //   `TABLES.size >= 90`, `doBlocks >= 40` and `rlsLoops >= 3 &&
+  //   loopRls.size >= 20`. If the DO-block parser breaks, the gate goes red
+  //   on the parser rather than green on its output.
+  ["rls-coverage.test.mjs", ["unreadableLoops", "staleNotNeeded", "disabled"]],
   //   `rowsBlock.length >= 500` — literalCells is matchAll over that string.
   ["combined-ceiling.test.mjs", ["literalCells"]],
   //   `files.length >= 7` — badPatterns is filled by a recursive walk of

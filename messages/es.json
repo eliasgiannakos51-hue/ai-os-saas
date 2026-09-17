@@ -3516,7 +3516,9 @@
       "unauthenticated": "Has cerrado la sesión. Inicia sesión y vuelve a intentarlo.",
       "unsupported": "Este navegador no puede grabar audio. Siempre puedes escribir.",
       "unsupported_type": "Ese formato de audio no está admitido.",
-      "usage_unavailable": "Ahora mismo no se han podido comprobar los minutos de voz."
+      "usage_unavailable": "Ahora mismo no se han podido comprobar los minutos de voz.",
+      "streamInterrupted": "La conexión se cortó antes de terminar la respuesta.",
+      "streamInterruptedPartial": "La conexión se cortó: la respuesta de arriba puede estar incompleta."
     },
     "permission": {
       "title": "Antes de abrir el micrófono",

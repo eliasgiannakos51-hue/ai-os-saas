@@ -10,6 +10,7 @@ import {
   hasActionCue,
   worthPaidDetection,
 } from "@/lib/transitions/destinations";
+import { useCredits } from "@/components/credits/credits-context";
 
 /**
  * "GO TO THE CODE TOOL" BECOMES A BUTTON THAT GOES THERE.
@@ -47,6 +48,7 @@ import {
 export function TransitionButton({ text }: { text: string }) {
   const t = useTranslations();
   const tCommon = useTranslations("common");
+  const { reportUsage } = useCredits();
   const [dismissed, setDismissed] = useState(false);
 
   const free = detectTransition(text);
@@ -79,7 +81,13 @@ export function TransitionButton({ text }: { text: string }) {
     })
       .then((r) => r.json())
       .then((data) => {
-        if (cancelled || !data?.destination) return;
+        if (cancelled) return;
+        // THE PAID DETECTOR CHARGES WHETHER OR NOT IT PLACES A BUTTON, so
+        // the receipt is reported before the destination is read — a run
+        // that finds nothing still cost something, and saying nothing
+        // about it is how a balance moves for no visible reason.
+        void reportUsage(data);
+        if (!data?.destination) return;
         // The closed list, on this side too. The route already validates,
         // and a component that trusted a response body would be one
         // change away from rendering a link the list never approved.
@@ -89,7 +97,7 @@ export function TransitionButton({ text }: { text: string }) {
     return () => {
       cancelled = true;
     };
-  }, [free, text]);
+  }, [free, text, reportUsage]);
 
   const destination = free ?? (paid ? destinationById(paid.id) : null);
   const source: "offline" | "model" = free ? "offline" : "model";

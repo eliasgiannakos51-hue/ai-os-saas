@@ -23,7 +23,7 @@
 // that fail in the real ways.
 //
 // Run: node scripts/tests/ndjson-stream.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import ts from "typescript";
 
 let pass = 0,
@@ -232,12 +232,53 @@ console.log("\n== 7. an empty stream is not an error ==");
 }
 
 console.log("\n== 8. every consumer actually uses it, and keeps partial text ==");
-const CONSUMERS = [
-  ["src/components/chat/chat-workspace.tsx", "accumulatedText"],
-  ["src/components/records/ask-ai-modal.tsx", "accumulatedText"],
-  ["src/components/create/studio-chat.tsx", "accumulated"],
-];
-for (const [file, varName] of CONSUMERS) {
+// THREE NAMED, AND THE TREE HAD FOUR.
+//
+// src/components/voice/voice-conversation.tsx read the same /api/chat
+// NDJSON stream with its own inlined `await reader.read()` loop and
+// committed the answer only after the loop finished — the exact defect
+// the header above describes, on a billed path, in a component no list
+// here mentioned. Found 2026-09-17 by deriving the population.
+//
+// DERIVED: anything under src/components that reads a streaming body.
+// A consumer added tomorrow is in scope without anybody remembering it,
+// and one that stops streaming drops out of COMMITS by the check below.
+const STREAM_READER = /getReader\s*\(\s*\)|readNdjsonStream\s*\(/;
+const streamers = [];
+(function walkComponents(dir) {
+  for (const entry of readdirSync(dir)) {
+    const full = `${dir}/${entry}`;
+    if (statSync(full).isDirectory()) walkComponents(full);
+    else if (entry.endsWith(".tsx") && STREAM_READER.test(readFileSync(full, "utf8"))) streamers.push(full);
+  }
+})("src/components");
+checkTrue(`components that read a stream (${streamers.length})`, streamers.length >= 4, "the stream detector found almost nothing, so the difference below is empty for the wrong reason");
+
+// The variable each one accumulates into, so the "commits unconditionally"
+// check can name it. A streamer with no entry is reported rather than
+// skipped — that is the whole point.
+// EACH ENTRY NAMES THE VARIABLE *AND* THE COMMIT, because the commit is
+// the thing that must survive and its shape differs per consumer. A
+// mutant that turned `if (accumulatedText) {` into `if (false) {` — the
+// original defect exactly, the reply never reaching the message list —
+// stayed green against every property-shaped rule tried here: the
+// variable is still branched on three lines later, for the interruption
+// toast. So the commit is named, per consumer, and checked literally.
+const COMMITS = {
+  "src/components/chat/chat-workspace.tsx": { varName: "accumulatedText", commit: "if (accumulatedText) {" },
+  "src/components/records/ask-ai-modal.tsx": { varName: "accumulatedText", commit: "if (accumulatedText) {" },
+  "src/components/create/studio-chat.tsx": { varName: "accumulated", commit: "if (accumulated) {" },
+  // Unconditional: setTurns runs straight after the read, which is
+  // stronger than a guard and is why this one is spelled differently.
+  "src/components/voice/voice-conversation.tsx": { varName: "answer", commit: "setTurns((current) => [...current, turn]);" },
+};
+const undeclaredStreamers = streamers.filter((f) => !COMMITS[f]);
+check("every streaming component is accounted for here", undeclaredStreamers, []);
+const staleStreamers = Object.keys(COMMITS).filter((f) => !streamers.includes(f));
+check("no entry names a component that no longer streams", staleStreamers, []);
+
+const CONSUMERS = streamers.map((f) => [f, COMMITS[f].varName, COMMITS[f].commit]);
+for (const [file, varName, commit] of CONSUMERS) {
   const src = readFileSync(file, "utf8");
   checkTrue(`${file}: imports readNdjsonStream`, src.includes('from "@/lib/ndjson-stream"'));
   checkTrue(`${file}: uses it`, src.includes("await readNdjsonStream("));
@@ -245,9 +286,43 @@ for (const [file, varName] of CONSUMERS) {
   check(`${file}: no inlined read loop`, /await reader\.read\(\)/.test(src), false);
   check(`${file}: no unguarded JSON.parse of a stream line`, /JSON\.parse\(line\)/.test(src), false);
   // The commit must NOT be reachable only on the happy path.
-  checkTrue(`${file}: commits ${varName} after reading, unconditionally`, src.includes(`if (${varName})`));
+  // THE PROPERTY IS "READ AFTER THE STREAM ENDS", NOT ONE SPELLING OF IT.
+  //
+  // This was `src.includes("if (" + varName + ")")`, which is how the
+  // three original consumers happen to be written. voice-conversation.tsx
+  // commits UNCONDITIONALLY — setTurns runs straight after the read — and
+  // branches on the accumulated text with a ternary to choose between the
+  // partial and the empty message. That is strictly stronger than an
+  // `if`, and the check called it a failure. What actually has to be true
+  // is that the variable is used after the reading finishes; combined
+  // with "no inlined read loop" above, there is no try/catch left for a
+  // commit to be trapped inside.
+  const readAt = src.indexOf("readNdjsonStream(");
+  // BRANCHED ON, not merely mentioned. "Appears after the read" let
+  // `if (accumulatedText)` become `if (false)` with the variable still
+  // named three lines down, which is the defect with the branch removed.
+  checkTrue(
+    `${file}: the commit is reached after the stream ends`,
+    readAt >= 0 && src.slice(readAt).includes(commit),
+    `expected to find ${JSON.stringify(commit)} after the read — the reply the user watched arrive is not being kept`
+  );
+  checkTrue(
+    `${file}: branches on ${varName} after the stream ends`,
+    readAt >= 0 &&
+      new RegExp(`if\\s*\\(\\s*!?${varName}\\b|\\b${varName}\\s*\\?|\\b${varName}\\s*&&`).test(src.slice(readAt + 20)),
+    "whatever arrived before an interruption is discarded"
+  );
   // And the interruption has to be surfaced, distinctly for partial vs none.
+  // AND ACTS ON IT. Destructuring `{ interrupted }` is not using it: a
+  // mutant that wrote `if (false && interrupted)` left this green, which
+  // is the same "consulted and thrown away" shape route-write-bound.test.mjs
+  // had to fix for its rate limiters on the same day.
   checkTrue(`${file}: reads the interrupted flag`, /\{ interrupted \}/.test(src));
+  checkTrue(
+    `${file}: branches on interrupted`,
+    /if\s*\(\s*interrupted\b|\binterrupted\s*\?|\binterrupted\s*&&\s*[A-Za-z_$]/.test(src),
+    "the interruption is read out of the result and never acted on"
+  );
   checkTrue(`${file}: distinguishes partial from empty`, src.includes("streamInterruptedPartial"));
   // A raw "undefined" must never be concatenated into a reply.
   checkTrue(`${file}: guards delta text type`, /typeof event\.text === "string"/.test(src));

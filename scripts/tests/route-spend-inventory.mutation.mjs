@@ -30,6 +30,8 @@ const NOTIFY = "src/app/api/notifications/channels/route.ts";
 const PPTX = "src/app/api/presentations/[id]/pptx/route.ts";
 const MISSION = "src/app/api/mission/[id]/pdf/route.ts";
 const START_JOB = "src/lib/jobs/start-job.ts";
+const JOB_CONTINUE = "src/app/api/jobs/[id]/continue/route.ts";
+const RESEARCH_CONTINUE = "src/app/api/research/[id]/continue/route.ts";
 
 // One line, for the reason in the shape note at the top of
 // scripts/tests/lib/mutation-runner.mjs.
@@ -38,6 +40,31 @@ const EXPORT_BLOCK = ['    // Free on purpose — this was paid for when it was 
 // Top-level declaration, under the name the reader looks for — see the
 // SHAPE note in scripts/tests/lib/mutation-runner.mjs.
 const MUTANTS = [
+  {
+    // THE SEVENTH KIND OF BOUND. These two routes reach a model call and
+    // take no hold of their own — the hold belongs to the request that
+    // STARTED the job. What stops a thousand calls is a conditional
+    // UPDATE that only one of them wins.
+    name: "continuing a job stops being an atomic claim",
+    file: JOB_CONTINUE,
+    from: "    if (!(await claimJob(jobId))) {",
+    to: "    if (false) {",
+    expect: "claim-bounded route still holds its claim",
+  },
+  {
+    name: "continuing a research chunk stops being one too",
+    file: RESEARCH_CONTINUE,
+    from: "    if (!(await claimChunk(reportId))) {",
+    to: "    if (false) {",
+    expect: "claim-bounded route still holds its claim",
+  },
+  {
+    name: "queueing a website stops refusing an account that cannot afford it",
+    file: "src/app/api/websites/generate/route.ts",
+    from: "      const check = await hasEnoughCredits(user.id, estimatedCost, plan);\n      if (!check.ok) {",
+    to: "      const check = await hasEnoughCredits(user.id, estimatedCost, plan);\n      if (false) {",
+    expect: "claim-bounded route still holds its claim",
+  },
   {
     name: "the four exports start eating the file-download budget instead of their own",
     file: GUARD,
@@ -90,6 +117,6 @@ const MUTANTS = [
 runMutations({
   name: "route-spend-inventory",
   gate: GATE,
-  targets: [GUARD, NOTIFY, PPTX, MISSION, START_JOB],
+  targets: [GUARD, NOTIFY, PPTX, MISSION, START_JOB, JOB_CONTINUE, RESEARCH_CONTINUE, "src/app/api/websites/generate/route.ts"],
   mutants: MUTANTS,
 });

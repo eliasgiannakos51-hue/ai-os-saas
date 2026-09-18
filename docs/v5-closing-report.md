@@ -212,6 +212,18 @@ rows, most of which are a number rather than a capability. Replaced with a
 per-row rule derived from the catalogue's own `minPlan`.
 `schema-canaries` had a mutant that went red on the wrong clause.
 
+**A mutant that could not fail, found by the sweep itself.**
+`baselines.mutation.mjs` flipped `MUTATION_SUITE_FLOOR` from a floor to a
+ceiling, expecting a breach to read as room. It never killed anything, and
+the reason is not a hole in the gate: `gap` is `measured - declared` for a
+floor and the reverse for a ceiling, and **all twelve baselines sit at
+exactly zero slack today**. Zero negated is zero. The `direction` field is
+unfalsifiable by any single-file mutation while that holds, which is a
+true and uncomfortable thing to know about a gate — it is right, and
+nothing proves it. Replaced with a mutant that raises a floor above what
+the tree can show, which is the edit a person actually makes, and the
+original's reasoning left in place where the mutant was.
+
 **The whole client bundle's environment.** 228 `"use client"` entries pull
 in 392 files; six read `process.env` for something a browser does not
 have, and **three of the six are invisible to any name scan** because they

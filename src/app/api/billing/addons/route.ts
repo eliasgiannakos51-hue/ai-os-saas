@@ -13,6 +13,7 @@ import {
   addonIsActive,
   checkPurchase,
   isAddonSlug,
+  type AddonSlug,
 } from "@/lib/billing/addons";
 import { loadAddons } from "@/lib/billing/addon-store";
 
@@ -179,8 +180,49 @@ export async function DELETE(request: Request) {
     let periodEnd: string | null = null;
 
     for (const row of rows) {
-      const itemId = row.stripe_subscription_item_id as string | null;
-      if (!itemId) continue;
+      let itemId = row.stripe_subscription_item_id as string | null;
+
+      // A NULL ITEM ID ON A RECURRING ADD-ON IS THE SAME DEFECT AS A
+      // STRIPE FAILURE, AND IT USED TO `continue`.
+      //
+      // The handler refuses one-off add-ons at the top, so by here the
+      // slug is always monthly — and the table's own comment says a
+      // recurring add-on HAS a subscription item and "cancelling it means
+      // removing that item in Stripe". So a null here is never "nothing
+      // to remove": it is the link being lost, and skipping it fell
+      // straight through to the update below, marking the row cancelled
+      // while the subscription item lived on. The product stops
+      // delivering and the card goes on paying — which is word for word
+      // the outcome the comment forty lines down was written to prevent,
+      // closed for one path and left open for the other, in the same loop.
+      //
+      // HOW IT GETS LOST: api/webhooks/stripe reads the item out of the
+      // session's subscription inside a try, and on failure logs and
+      // inserts the row anyway with null. That is the right call for the
+      // entitlement — the customer has paid — and it leaves this to
+      // recover, which it can: the same lookup usually succeeds now.
+      if (!itemId) {
+        itemId = await recoverSubscriptionItemId(stripe, user, slug);
+        if (!itemId) {
+          logApiError("/api/billing/addons", new Error("recurring add-on has no resolvable subscription item"), {
+            stage: "recover_item",
+            slug,
+            rowId: row.id,
+          });
+          return NextResponse.json(
+            {
+              ok: false,
+              error:
+                "Could not find the billing line for this add-on, so it has been left active rather than cancelled here and charged in Stripe. Nothing has changed — please contact support.",
+            },
+            { status: 502 }
+          );
+        }
+        // Write it back, so the next cancellation does not have to
+        // rediscover it and so the row stops lying about what it knows.
+        await admin.from("account_addons").update({ stripe_subscription_item_id: itemId }).eq("id", row.id);
+      }
+
       try {
         // Removed at PERIOD END rather than immediately, so the customer
         // keeps what they have paid for. Stripe's own proration is left
@@ -241,5 +283,39 @@ export async function DELETE(request: Request) {
   } catch (err) {
     logApiError("/api/billing/addons", err, { stage: "cancel" });
     return NextResponse.json({ error: "cancel_failed" }, { status: 500 });
+  }
+}
+
+/**
+ * The subscription item for a recurring add-on, found the way the webhook
+ * finds it: retrieve the account's subscription and match the line whose
+ * price is this add-on's.
+ *
+ * WHY IT IS HERE AND NOT ONLY IN THE WEBHOOK. The webhook does this once,
+ * inside a try, at the moment of purchase — and when that call fails the
+ * row is written with a null item. This is the same lookup run later,
+ * when it usually succeeds, so a transient Stripe error at purchase time
+ * does not become an add-on that can never be cancelled.
+ *
+ * Returns null rather than throwing: the caller's job is to REFUSE on
+ * null, and an exception here would land in the outer catch and be
+ * reported as `cancel_failed` — a 500 that reads like our bug rather than
+ * a 502 that tells the user their billing is untouched.
+ */
+async function recoverSubscriptionItemId(
+  stripe: ReturnType<typeof createStripeClient>,
+  user: { user_metadata?: Record<string, unknown> },
+  slug: AddonSlug
+): Promise<string | null> {
+  try {
+    const subscriptionId = user.user_metadata?.stripe_subscription_id;
+    if (typeof subscriptionId !== "string" || !subscriptionId) return null;
+    const priceId = process.env[ADDONS[slug].priceEnvVar];
+    if (!priceId) return null;
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    return subscription.items.data.find((i) => i.price.id === priceId)?.id ?? null;
+  } catch (err) {
+    logApiError("/api/billing/addons", err, { stage: "recover_item_lookup", slug });
+    return null;
   }
 }

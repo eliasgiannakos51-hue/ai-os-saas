@@ -10,6 +10,7 @@ import {
   describeSecurityScanIssue,
 } from "@/lib/website-html-security-scan";
 import { MAX_LIVE_EDITS_PER_SITE_PER_DAY } from "@/lib/publishing/publish-limits";
+import { normalisePages } from "@/lib/publishing/website-pages";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +79,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     const { data: version } = await supabase
       .from("site_versions")
-      .select("id, html_content, version_number")
+      .select("id, html_content, pages, version_number")
       .eq("id", versionId)
       .eq("published_site_id", publishedSiteId)
       .maybeSingle();
@@ -86,8 +87,38 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ ok: false, error: "That version doesn't exist." }, { status: 404 });
     }
 
+    // THE SUB-PAGES COME BACK TOO, AND FOR THREE YEARS OF THIS ROUTE'S
+    // LIFE THEY DID NOT.
+    //
+    // 20260822000000_website_pages.sql added `pages` to all three tables
+    // and its header states this exact case: "A rollback that restored
+    // html_content while leaving pages at the newer version would
+    // reinstate a home page whose navigation points at pages that no
+    // longer match it." It names site_versions as "what
+    // /api/published/[id]/rollback restores". The column was added, the
+    // route was not changed, and nothing compared the two.
+    //
+    // What it produced: roll a multi-page site back and the home page
+    // came from version N while /services and /about stayed at the live
+    // version. The nav on the restored home page was rewritten at ITS
+    // publish time for ITS page list, so a page dropped between the two
+    // versions is a link to a 404 on a site the owner has just "restored".
+    // Nothing throws, the site renders, and the damage is a broken menu.
+    const { pages: versionPages } = normalisePages(version.pages);
+
     const html = stripDisallowedExternalScripts(version.html_content);
-    const issues = scanWebsiteHtmlForSecurityIssues(html, { appHost: getSiteHostname() ?? undefined });
+    // SCANNED TOGETHER. Every document that is about to be served is
+    // scanned — the home page and each sub-page — because a sub-page
+    // restored without the scan is a page that skipped the check its own
+    // home page passed, which is the reasoning api/websites/[id]/publish
+    // gives for doing the same thing.
+    const restoredPages = versionPages.map((pg) => ({
+      ...pg,
+      html: stripDisallowedExternalScripts(pg.html),
+    }));
+    const issues = [html, ...restoredPages.map((pg) => pg.html)].flatMap((doc) =>
+      scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined })
+    );
     if (issues.length > 0) {
       const described = issues.map(describeSecurityScanIssue);
       void logSecurityCheck(supabase, {
@@ -110,7 +141,13 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const nowIso = new Date().toISOString();
     const { error: updateError } = await supabase
       .from("published_sites")
-      .update({ html_content: html, status: "live", is_active: true, updated_at: nowIso })
+      .update({
+        html_content: html,
+        pages: restoredPages.length > 0 ? restoredPages : null,
+        status: "live",
+        is_active: true,
+        updated_at: nowIso,
+      })
       .eq("id", publishedSiteId);
     if (updateError) {
       logApiError("/api/published/[id]/rollback", updateError, { stage: "update" });
@@ -125,10 +162,14 @@ export async function POST(request: Request, { params }: { params: { id: string 
       .limit(1)
       .maybeSingle();
 
+    // The new version records what was actually served, pages included —
+    // otherwise rolling back a rollback would hit the same defect one
+    // level down.
     const { error: versionError } = await supabase.from("site_versions").insert({
       published_site_id: publishedSiteId,
       user_id: user.id,
       html_content: html,
+      pages: restoredPages.length > 0 ? restoredPages : null,
       version_number: (latest?.version_number ?? 0) + 1,
       change_description: `Rolled back to version ${version.version_number}`,
       published_at: nowIso,

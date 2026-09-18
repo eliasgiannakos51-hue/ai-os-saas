@@ -32,8 +32,18 @@ const MUTANTS = [
   {
     name: "an add-on is cancelled locally after Stripe refused to stop billing it",
     file: ADDONS,
-    from: "            { status: 502 }",
-    to: "            { status: 200 }",
+    // ANCHORED ON THE REFUSAL'S OWN SENTENCE, not on `{ status: 502 }`.
+    //
+    // It was the bare status line until 2026-09-19, when that route grew
+    // a SECOND 502 — the refusal for a recurring add-on whose
+    // subscription item id could not be recovered. The new one is earlier
+    // in the file, so a first-occurrence replace silently moved to it and
+    // this mutant stopped reaching the clause it is named for: 5 of 6,
+    // with the gate staying green on the path it was written about.
+    // Two correct refusals in one handler is not a reason to have one
+    // ambiguous anchor.
+    from: '                "Could not stop the billing for this add-on, so it has been left active. Nothing has changed — please try again.",\n            },\n            { status: 502 }',
+    to: '                "Could not stop the billing for this add-on, so it has been left active. Nothing has changed — please try again.",\n            },\n            { status: 200 }',
     expect: "returns before the row is marked cancelled",
   },
   {

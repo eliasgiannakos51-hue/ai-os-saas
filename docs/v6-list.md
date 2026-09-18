@@ -177,28 +177,31 @@ against `MAX_DAILY_AI_CALLS`, which is **platform-wide**. A thousand
 ordinary users trip a ceiling written to contain one runaway. Worth
 deciding before there are a thousand users rather than during.
 
-## 11. The ~33 routes whose multi-write has no reversibility study — ~half a day for the instrument
+## 11. The 23 remaining multi-write routes — ~2 hours, and the rate so far is 3 in 10
 
-Measured 2026-09-18: **40 of 143** routes perform two or more distinct
-writes, so a failure between them leaves halves. Two classes are covered
-and gated already:
+**Ten were read by hand on 2026-09-19 — the ten touching money or
+publishing — and THREE were broken.** All three are fixed and held by
+`scripts/tests/multi-write-reversal.test.mjs` (27 checks) and its mutation
+suite (10 of 10).
 
-    scripts/tests/external-state-reversal.test.mjs   7 routes change Stripe
-                                                     state, all 7 declared
-                                                     with which way they fail
-    scripts/tests/upload-reversibility.test.mjs      a storage upload whose
-                                                     row write then fails
+| route | what it left behind |
+|---|---|
+| `api/cron/scheduled-runs` | a run whose AI call succeeded but matched no module was marked failed **without releasing the reservation** — four lines below a branch that releases one. Credits held until the daily sweep, for a run that produced nothing. |
+| `api/billing/addons` | a recurring add-on with a null subscription item id was **skipped** by the cancellation loop and then marked cancelled. Delivery stopped; the card kept paying. |
+| `api/published/[id]/rollback` | restored `html_content` and never `pages`, so a multi-page rollback served a home page from version N with sub-pages from the live version. |
 
-The remainder are database-only multi-writes, where a failure leaves an
-inconsistent pair of rows rather than a charge. That is a smaller loss than
-money and a larger one than nothing, and no instrument looks at it.
+**The seven that were right were right for reasons no regex could see:**
+Stripe first and the local record after; a compensating status write that
+marks the row `failed` so nothing picks it up half-configured; an
+entitlement preserved on purpose because the customer has paid; a
+`finally` that releases an edit lock however the block exits; a leaked
+hold that a scheduled sweep collects.
 
-**The shape to build is the one that worked twice already:** derive the
-population (routes with 2+ writes), require each member to be covered by a
-transaction, an RPC, or a compensating path — or declared with which state
-a failure leaves behind. `route-contract.test.mjs`'s register is the model:
-the scanner derives, the table only records, and a reason must name
-something checkable.
+**23 remain** — the multi-write routes that touch neither money nor
+publishing. `node scripts/tests/multi-write-reversal.test.mjs` prints the
+population on every run. At 3 in 10 the expected yield is around seven
+more, and they are cheaper per route than these were: no Stripe, no
+credits, no public HTML.
 
 ## 12. The per-feature margin override the estimate cannot see — a decision, not a bug
 

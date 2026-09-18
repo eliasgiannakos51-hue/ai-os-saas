@@ -290,6 +290,24 @@ export async function GET(request: Request) {
         }
 
         if (!result.matched) {
+          // RELEASED, LIKE THE PATH FOUR LINES ABOVE — and it was not.
+          //
+          // `!result.ok` released the hold; `!result.matched` marked the
+          // run failed and moved on, leaving the reservation in place. The
+          // AI call HAS happened here, so this is not a free path: the
+          // user watched their balance drop for a run that produced no
+          // record, and it came back only when the daily sweep
+          // (releaseExpiredReservations, below) got to it.
+          //
+          // The automations loop in section 2 of this same file decides
+          // it correctly, in one branch — `if (!result.ok ||
+          // !result.matched)` — and releases for both. Two loops, one
+          // decision, and only one of them was making it.
+          //
+          // RELEASE RATHER THAN SETTLE is this route's own standard,
+          // stated at the success path below: credits are deducted only
+          // after the durable save succeeded. Nothing was saved here.
+          await releaseReservation(userId, runReservationId);
           await admin
             .from("scheduled_agent_runs")
             .update({ status: "failed", result: result.message, executed_at: new Date().toISOString() })

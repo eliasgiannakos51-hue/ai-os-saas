@@ -144,7 +144,13 @@ Other security gates, all run today, all green: `security-posture` ·
 the dashboard and the overview segment. **Open, and not closable without
 production.**
 
-**2. Routes with no reversibility study — 40, not 66.** Measured today:
+**2. Routes with no reversibility study — 33, and ten of them have now
+been read.** *(Updated 2026-09-19. Three of the ten were broken; see
+`docs/v6-list.md` item 11 and `multi-write-reversal.test.mjs`.)*
+
+**The original entry, left as it was measured:**
+
+**Routes with no reversibility study — 40, not 66.** Measured today:
 40 of 143 routes perform two or more distinct writes, so a failure between
 them can leave halves. Two classes are now covered and gated —
 `external-state-reversal.test.mjs` (7 routes change Stripe state, all

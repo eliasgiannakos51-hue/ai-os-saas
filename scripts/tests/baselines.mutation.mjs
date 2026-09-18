@@ -46,8 +46,8 @@ const MUTANTS = [
     // Either way the declared number describes a tree that does not exist.
     name: "a floor is raised above what the tree can show",
     file: FLOORFILE,
-    from: "const FLOOR = 172;",
-    to: "const FLOOR = 182;",
+    from: "const FLOOR = 173;",
+    to: "const FLOOR = 183;",
     expect: "no baseline has more room than it is allowed",
   },
   // WHAT USED TO STAND HERE AND CANNOT, and the reason is worth more than

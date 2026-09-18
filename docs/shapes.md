@@ -1522,6 +1522,45 @@ limitation. A scanner naming its own subject, read by another scanner as a
 claim. Fourth time in this project. The pattern is now the record and the
 prose points at it.
 
+### Four times in six rounds, and the fourth was mine. 2026-09-18
+
+The dominant defect of V5's last six rounds was not in the product. Nine
+times out of ten it was a POPULATION — a scan asking a sound question of
+the wrong set — and by the final audit it had happened often enough to
+count:
+
+| the question | the vocabulary it had | what the tree had |
+|---|---|---|
+| which modules send mail? | files under `src/lib/email` | 14 modules calling `resend.emails.send`, two elsewhere |
+| who is asking? | session, cron secret, Stripe signature | + password, OAuth code, bearer token, new account |
+| whose row is this? | 5 mechanisms | + RPC under RLS, client handed on, helper given the id |
+| what bounds this route? | 8 kinds | + an in-memory sliding window, which is the whole public surface |
+
+Every one of them was **right about everything it looked at**. Every one
+of them reported correct code as a finding, or missed correct code
+entirely, purely on vocabulary.
+
+**The fourth was found by a claim of mine that was wrong.** Writing the V6
+list I asserted that only the root public-site route carried a limiter and
+the other three did not. `grep -c publicRequestAllowed` says all four do.
+The sentence was wrong; the reason it was wrong was that the scanner had
+told me the public surface had no bound, and it had told me that because
+`publicRequestAllowed` was not in its table. **I believed my own
+instrument's silence over a thirty-second grep.**
+
+**And the same audit produced the inverse.** Measuring 41 RPCs against 33
+canaries, I found nine unwatched — six of them the credit path — wrote
+canaries for all nine and a gate to hold them. The full sweep turned
+`rpc-canaries.test.mjs` red in one run: a gate written for exactly that
+question a week earlier, which asks it better, and which already registers
+the nine with a reason. Nine alarms for a state no user can reach, and a
+second gate that would have drifted from the first.
+
+**Both directions of the same mistake, in one session.** Trusting an
+instrument's silence, and not looking for the instrument. The habit that
+prevents both is the same one, and it is cheap: *before believing a gap,
+grep for the thing; before building a gate, grep for the gate.*
+
 ## A check that answers the adjacent question
 
 Not absent, and not wrong. Present, passing, and about something else.

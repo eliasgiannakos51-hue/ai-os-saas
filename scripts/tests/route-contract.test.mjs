@@ -213,24 +213,24 @@ const OUTSIDE_EVERY_POPULATION = {
       "the affiliate share link. No session, because a share link is followed by somebody with no account yet. It touches NO database at all — deliberately never validating the code against affiliate_codes, because a route that answered differently for a real code would enumerate them one guess at a time — and its whole body reads a path segment, sets the REFERRAL_COOKIE and redirects to /signup. Nothing to own, nothing inserted, no model called, and the attribution happens later in auth/callback where a real user exists.",
   },
   "src/app/s/[subdomain]/route.ts": {
-    has: [],
+    has: ["bound:in_memory_window"],
     why:
-      "serves a published customer site to the open internet, which is what publishing IS — a session here would mean nobody could read the page. It reads one published_sites row by subdomain and returns the stored html_content; it writes nothing, so there is no row to own and no insert to bound. Its traffic ceiling is upstream: maxPublishedSitesForPlan in api/websites/[id]/publish decides how many sites an account may have live at once.",
+      "serves a published customer site to the open internet, which is what publishing IS — a session here would mean nobody could read the page. It reads one published_sites row by subdomain and returns the stored html_content; it writes nothing, so there is no row to own and no insert to bound. It calls publicRequestAllowed before it touches the database — a per-instance sliding window, 240 requests a minute per hashed IP, in memory rather than in the database because a row-per-check limiter on every page view would turn a traffic spike into a write storm. That is a blunt instrument and its own header says so: it is not DDoS protection, which is the CDN's job. The number of sites there are to serve is bounded upstream by maxPublishedSitesForPlan.",
   },
   "src/app/s/[subdomain]/[page]/route.ts": {
-    has: [],
+    has: ["bound:in_memory_window"],
     why:
-      "a sub-page of the same published site, read out of the same published_sites snapshot row's pages array rather than from user_websites, and returned as stored html. Public by definition and read-only, with the same upstream ceiling: maxPublishedSitesForPlan bounds how many sites exist to be served.",
+      "a sub-page of the same published site, read out of the same published_sites snapshot row's pages array rather than from user_websites, and returned as stored html. Public by definition, read-only, behind the same publicRequestAllowed window as the site root, and with the same upstream ceiling: maxPublishedSitesForPlan bounds how many sites exist to be served.",
   },
   "src/app/s/[subdomain]/sitemap.xml/route.ts": {
-    has: [],
+    has: ["bound:in_memory_window"],
     why:
-      "the sitemap of a published site. A sitemap behind a login is a sitemap no crawler can fetch, which is the entire point of having one. It reads the same published_sites row and emits XML derived from its pages list; it writes nothing and calls nothing.",
+      "the sitemap of a published site. A sitemap behind a login is a sitemap no crawler can fetch, which is the entire point of having one. It reads the same published_sites row and emits XML derived from its pages list, behind publicRequestAllowed; it writes nothing.",
   },
   "src/app/s/[subdomain]/robots.txt/route.ts": {
-    has: [],
+    has: ["bound:in_memory_window"],
     why:
-      "the robots.txt of a published site — the one file on the internet defined by being fetchable without credentials. It reads the same published_sites row to decide whether the site is live and emits text; it writes nothing.",
+      "the robots.txt of a published site — the one file on the internet defined by being fetchable without credentials. It reads the same published_sites row to decide whether the site is live and emits text, behind publicRequestAllowed; it writes nothing.",
   },
 };
 

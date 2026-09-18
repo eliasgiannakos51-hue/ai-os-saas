@@ -121,6 +121,16 @@ export const BOUNDS = {
     /scope:\s*"[a-z_0-9]+"/.test(s) &&
     (/if\s*\(\s*!\s*[A-Za-z_$][\w$]*\.allowed\s*\)/.test(s) || /if\s*\(\s*!\s*allowed\s*\)/.test(s)),
   own_limiter: (s) => /countRateLimitHits\s*\(|recordRateLimitHit\s*\(/.test(s),
+  // THE NINTH KIND, found on 2026-09-18 by a claim of mine that was
+  // wrong. I wrote that only the root public-site route carried a
+  // limiter; all four do. publicRequestAllowed (lib/publishing/
+  // public-serving.ts) is a per-instance sliding window — 240 requests a
+  // minute per hashed IP, held in memory rather than in the database
+  // BECAUSE the row-per-check limiter would turn a traffic spike into a
+  // write storm. Its own header is honest that it is not DDoS protection.
+  // It was absent from this table, which is why the tree's entire public
+  // surface read as having no bound at all.
+  in_memory_window: (s) => /publicRequestAllowed\s*\(/.test(s),
   cron_secret: (s) => CRON.test(s),
   reservation: (s) => /\breserveCredits\s*\(|\bstartJob\s*\(/.test(s),
   plan_cap: (s) =>

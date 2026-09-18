@@ -1473,6 +1473,55 @@ the function, or `runs_in_browser`, which must state what the browser
 gets instead and is checked the other way, so an entry cannot rot into
 alarming prose about code that has become fine.
 
+### The route that is in no conversation at all. 2026-09-18
+
+The four narrow gates each derive their own population and each is sound
+about it: 39 routes that insert, 66 that act on an id from the request, 36
+that reach a model, every endpoint for a session. The question left over is
+whether any route is in **none** of them — asked of nothing, by anyone,
+because it happened not to insert, not to take an id, not to call a model
+and not to be noticed.
+
+Six are, and the answer is a good one in all six cases: an affiliate share
+link that touches no database, and five routes that serve published
+customer sites to the open internet, where a session would mean nobody
+could read the page.
+
+**The scan was wrong on its first run, in the way it was written to
+catch.** It reported eleven, and five of those were login, signup, the
+OAuth callback, the account-deletion confirmation and the contact form —
+reported as answering nothing about who is asking. Four of the five verify
+an identity. They just do not verify a *session*, because they are the
+routes that CREATE one. A login's answer to "who is asking" is the
+password; the callback's is a one-time code from the provider; the
+deletion link's is 256 bits of randomness that the route's own header
+calls "the proof". The population was not the tree, it was the
+**vocabulary** — three mechanisms where there were seven.
+
+**And the register was built to two conditions, because a table that can
+decide is not evidence.**
+
+*The scanner guarantees, not the table.* Each entry names the mechanisms
+its route has, and they are compared against what the scanner derives from
+the route's own source. Take the rate limit out of `/api/contact` and its
+entry stops matching in the same run that removes it. The register cannot
+add a mechanism, cannot hide one, and cannot excuse a route that a
+question actually asked and got nothing from — that is a gap, and it
+belongs in the narrow gate.
+
+*A reason is an argument, not an assurance.* Refused by shape as well as by
+length: an entry has to name a file, a function, a table or a status code
+that a reader can go and check. The mutation that makes a reason long,
+fluent and entirely unfalsifiable is the one a person writes in good
+faith, and it is the one this had to fail on.
+
+**A footnote the census earned.** Writing that rule put the refused words
+into a comment, and `comment-claims.test.mjs` — which censuses comment
+blocks containing exactly those words — counted two new confessions of
+limitation. A scanner naming its own subject, read by another scanner as a
+claim. Fourth time in this project. The pattern is now the record and the
+prose points at it.
+
 ## A check that answers the adjacent question
 
 Not absent, and not wrong. Present, passing, and about something else.

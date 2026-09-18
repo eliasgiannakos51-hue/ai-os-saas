@@ -473,5 +473,80 @@ checkTrue(
   /disabled=\{previewWebsite\.status !== "completed"\}/.test(workspace)
 );
 
+// ---------------------------------------------------------------------
+console.log("\n== 7. the ceiling, and the answer to a clash ==");
+// ---------------------------------------------------------------------
+// TWO DEFECTS FOUND BY READING THE WHOLE ROUTE, 2026-09-18, and neither
+// was visible to a gate that reads one clause.
+// COMMENTS STRIPPED, for the same reason section 5 strips them: this
+// route's own comments quote the shapes below — including the sentence
+// about `!existing` being the gap — so a scan of the raw text would find
+// the fix inside the note explaining it.
+const stripSrc = (text) => text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+const publishSource = stripSrc(read("src/app/api/websites/[id]/publish/route.ts"));
+
+// THE CEILING WAS ASKED ONCE, ON FIRST PUBLISH. `if (!isAdmin &&
+// !existing)` meant the plan check never ran again — and nothing in this
+// tree unpublishes anything when a subscription ends, so an account that
+// published on a paid plan and moved to Free kept its sites live AND kept
+// pushing new content to them, through a route whose own refusal reads
+// "Publishing is available on paid plans."
+checkTrue(
+  "the plan ceiling is asked on every publish, not only the first",
+  /if\s*\(\s*!isAdmin\s*\)\s*\{/.test(publishSource),
+  "the guard is conditional on `existing` again, so a downgraded account can publish for ever"
+);
+// STATED AS AN ABSENCE TOO, because the presence of one guard does not
+// rule out the old one surviving on another path — and because this is
+// the clause the comment stripper above is load-bearing for: the route's
+// own note QUOTES `if (!isAdmin && !existing)` while explaining why it is
+// gone, so an unstripped scan reads the explanation as the defect.
+checkTrue(
+  "no publish path still conditions the ceiling on the site already existing",
+  !/!isAdmin\s*&&\s*!existing/.test(publishSource),
+  "the old guard is back somewhere in this route"
+);
+checkTrue(
+  "...and cap <= 0 refuses with upgradeRequired",
+  /cap <= 0[\s\S]{0,200}upgradeRequired: true/.test(publishSource)
+);
+// AND THE COUNT EXCLUDES THE SITE BEING REPUBLISHED, or an account
+// sitting exactly at its cap could never edit anything it already has.
+checkTrue(
+  "the live count excludes the site being republished",
+  /if \(existing\) countQuery = countQuery\.neq\("id", existing\.id\)/.test(publishSource),
+  "without this the ceiling refuses every edit at exactly the cap, which is a worse bug than the one it fixes"
+);
+
+// THE SAME CLASH, TWO ANSWERS. subdomainTaken() runs under the caller's
+// own client, so RLS lets it see only the caller's rows — deliberately,
+// because a check that saw every row would enumerate the platform's
+// addresses. The unique index is the real arbiter. The INSERT path read
+// it and answered 409 "taken"; the UPDATE path did not, so renaming a
+// site to somebody else's address returned 500 and the dialog, which
+// switches on `reason: "taken"`, lost the typed address and said the
+// server broke.
+const updateBlock = publishSource.slice(
+  publishSource.indexOf("update_published") - 900,
+  publishSource.indexOf("update_published") + 200
+);
+checkTrue(
+  "a duplicate address on re-publish is a 409, not a 500",
+  /duplicate key\|unique/.test(updateBlock) && /status: 409/.test(updateBlock),
+  "the update path reports a unique-index violation as a server error"
+);
+checkTrue(
+  "...and it carries reason 'taken', which is what the dialog switches on",
+  /reason: "taken"[\s\S]{0,200}status: 409/.test(updateBlock)
+);
+// BOTH PATHS, BY SHAPE RATHER THAN BY COUNT. The first version of this
+// asserted `reason: "taken"` appeared three times and the answer was
+// four — a magic number guessed rather than derived, which is the shape
+// docs/shapes.md calls a number printed and never judged, one line after
+// judging one. What matters is that EACH error handler reads the unique
+// index, so neither path can be the only one that answers properly.
+const duplicateHandlers = (publishSource.match(/duplicate key\|unique/g) ?? []).length;
+check("each write path reads the unique index for itself", duplicateHandlers, 2);
+
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

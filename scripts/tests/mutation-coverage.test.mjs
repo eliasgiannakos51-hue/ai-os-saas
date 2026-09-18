@@ -215,7 +215,7 @@ console.log(
 // 181 -> 182 ON 2026-09-17: external-state-reversal.mutation.mjs, driving
 // the gate that asks what happens when the database and a third party
 // disagree. Read off the run.
-const RATCHET = 183;
+const RATCHET = 185;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

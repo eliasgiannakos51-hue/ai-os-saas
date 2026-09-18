@@ -763,7 +763,16 @@ const clientFallbacks = sources.flatMap((f) => [
 // all until today: on Ultimate and Enterprise both seat ceilings are
 // skipped and the next thing it does is email an address the caller
 // chose. Measured, not added.
-const SERVER_PROSE_BASELINE = 662;
+// 662 -> 663 ON 2026-09-18: one refusal, in api/websites/[id]/publish —
+// "That address was just taken." on the RE-PUBLISH path, which until
+// today reported a unique-index violation as a 500. The identical
+// sentence was already in this census from the first-publish path, so the
+// new string is a duplicate of one the scanner already counts rather than
+// a new thing to say; the pair is what makes the two paths answer a clash
+// the same way. And the client does not depend on the English: the
+// response carries `reason: "taken"` and the publish dialog renders its
+// own translated message from that. Measured, not added.
+const SERVER_PROSE_BASELINE = 663;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

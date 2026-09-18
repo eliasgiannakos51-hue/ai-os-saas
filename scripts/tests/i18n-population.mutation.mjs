@@ -13,6 +13,14 @@
  *      sentence that is no longer true.
  *   4. the Unsplash credit is "translated", which breaks the API term
  *      that lets the product use the photographs at all.
+ *   5. the sender walk narrows back to one folder, which is how two
+ *      modules that send real mail were outside every i18n instrument.
+ *   6. a template stops taking the locale its sender resolves — the shape
+ *      that looks converted and renders English for everybody.
+ *   7. the footer comes back as a literal, which is how it survived four
+ *      conversions.
+ *   8. a catalogue loses a plural form, or copies its plural into its
+ *      singular, or drops the second number out of a sentence.
  *
  * Run: node scripts/tests/i18n-population.mutation.mjs
  */
@@ -22,6 +30,8 @@ const GATE = "scripts/tests/i18n-population.test.mjs";
 const LOGO = "src/components/logo.tsx";
 const DECK = "src/lib/pdf/deck.tsx";
 const APPS = "src/app/dashboard/apps/page.tsx";
+const TEMPLATES = "src/lib/email/templates.ts";
+const DIGEST = "src/lib/notify/digest.ts";
 
 const MUTANTS = [
   {
@@ -32,14 +42,14 @@ const MUTANTS = [
     file: "src/app/api/signup/route.ts",
     from: "sendWelcomeEmail(email, null, signupLocale)",
     to: "sendWelcomeEmail(email)",
-    expect: "callers supply the account",
+    expect: "caller supplies the account",
   },
   {
     name: "a first-contact sender stops resolving a locale",
     file: "src/lib/email/send-delete-account-confirmation-email.ts",
     from: "    const locale = await emailLocaleFor(userId);",
     to: '    const locale = "en";',
-    expect: "resolve a language",
+    expect: "resolves a language",
   },
   {
     name: "an email string is dropped from one of the ten catalogues",
@@ -49,13 +59,74 @@ const MUTANTS = [
     expect: "exists in all ten locales",
   },
   {
-    // THE POPULATION THAT WALKS .tsx CANNOT SEE A .ts EMAIL. Twelve
-    // senders, every one English, none of them in any list until today.
+    // THE POPULATION THAT WALKS .tsx CANNOT SEE A .ts EMAIL. Fourteen
+    // senders, every one English, none of them in any list until this
+    // file existed.
     name: "an email sender drops out of the register",
     file: GATE,
-    from: '  "src/lib/email/send-weekly-digest-email.ts": EMAIL_REASON,\n',
+    from: '  "src/lib/email/error-alert.ts": "an operator alert to ADMIN_EMAILS. The reader is the owner, and the subject carries a route name and a provider message that do not translate.",\n',
     to: "",
     expect: "says why it is English",
+  },
+  {
+    // THE WALK THAT NARROWS BACK TO ONE FOLDER. This is how
+    // notify/dispatch.ts and billing/cost-alert-delivery.ts were outside
+    // every i18n instrument in the project: not by anybody deciding, but
+    // by a directory name in a scan.
+    name: "the sender walk goes back to src/lib/email only",
+    file: GATE,
+    from: '})("src/lib");',
+    to: '})("src/lib/email");',
+    expect: "reaches outside src/lib/email",
+  },
+  {
+    // A TEMPLATE THAT TAKES NO LOCALE while its sender resolves one. The
+    // sender passes, the call site passes, and every word is English.
+    name: "a template stops accepting the language its sender resolved",
+    file: TEMPLATES,
+    from: "  billingUrl,\n  locale = \"en\",\n}: {\n  agentName: string;\n  agentsUrl: string;\n  billingUrl: string;\n  locale?: string;\n}",
+    to: "  billingUrl,\n}: {\n  agentName: string;\n  agentsUrl: string;\n  billingUrl: string;\n}",
+    expect: "takes a language",
+  },
+  {
+    // THE FOOTER, WHICH SURVIVED FOUR CONVERSIONS AS A LITERAL because it
+    // sits below the panel and every eye reading a diff is above it.
+    name: "the footer sentence comes back into layout() as English",
+    file: TEMPLATES,
+    from: "                  ${footer}",
+    to: "                  You're receiving this because you have a Ionexa AI account.",
+    expect: "no footer sentence of its own",
+  },
+  {
+    // A CATALOGUE THAT LOSES A PLURAL FORM. Arabic's `many` covers 11-99
+    // and 340; falling back to `other` is the designed behaviour, but
+    // falling back to nothing is a raw key in somebody's inbox.
+    name: "a locale loses the plural form a real week would ask for",
+    file: "messages/ar.json",
+    from: '          "many": "{count} \u0639\u0645\u064a\u0644\u064b\u0627 \u0645\u062d\u062a\u0645\u0644\u064b\u0627 \u062f\u0648\u0646 \u0645\u062a\u0627\u0628\u0639\u0629 \u0645\u0633\u062c\u0651\u0644\u0629",\n          "other": "{count} \u0639\u0645\u064a\u0644 \u0645\u062d\u062a\u0645\u0644 \u062f\u0648\u0646 \u0645\u062a\u0627\u0628\u0639\u0629 \u0645\u0633\u062c\u0651\u0644\u0629"',
+    to: '          "many": "{count} \u0639\u0645\u064a\u0644\u064b\u0627 \u0645\u062d\u062a\u0645\u0644\u064b\u0627 \u062f\u0648\u0646 \u0645\u062a\u0627\u0628\u0639\u0629 \u0645\u0633\u062c\u0651\u0644\u0629",\n          "other": ""',
+    expect: "renders at every count",
+  },
+  {
+    // COPYING `other` INTO `one` is how a language gets "1 new records" —
+    // the exact sentence the old `n === 1 ? ... : ...` prevented,
+    // reintroduced one catalogue at a time where no compiler looks.
+    name: "a language's singular is replaced by its plural",
+    file: "messages/el.json",
+    from: '          "one": "{count} \u03b5\u03c0\u03b1\u03c6\u03ae \u03c7\u03c9\u03c1\u03af\u03c2 \u03ba\u03b1\u03c4\u03b1\u03b3\u03b5\u03b3\u03c1\u03b1\u03bc\u03bc\u03ad\u03bd\u03b7 \u03c3\u03c5\u03bd\u03ad\u03c7\u03b5\u03b9\u03b1",',
+    to: '          "one": "{count} \u03b5\u03c0\u03b1\u03c6\u03ad\u03c2 \u03c7\u03c9\u03c1\u03af\u03c2 \u03ba\u03b1\u03c4\u03b1\u03b3\u03b5\u03b3\u03c1\u03b1\u03bc\u03bc\u03ad\u03bd\u03b7 \u03c3\u03c5\u03bd\u03ad\u03c7\u03b5\u03b9\u03b1",',
+    expect: "actually uses one",
+  },
+  {
+    // THE SECOND NUMBER IN A LINE is not what the plural form was chosen
+    // from, so no category licenses dropping it — and a line that loses it
+    // still reads as a sentence, which is why a human proof-read would
+    // pass it.
+    name: "a plural form drops the second number in its sentence",
+    file: "messages/fr.json",
+    from: '"other": "{runs} ex\u00e9cutions d\u2019agents, {found} avec un r\u00e9sultat"',
+    to: '"other": "{runs} ex\u00e9cutions d\u2019agents"',
+    expect: "renders at every count",
   },
   {
     // The reason given for every English email rests on two facts about
@@ -104,6 +175,19 @@ const MUTANTS = [
 runMutations({
   name: "i18n-population",
   gate: GATE,
-  targets: [LOGO, DECK, APPS, GATE, "src/lib/ai/module-vocabulary.ts", "src/app/api/signup/route.ts", "src/lib/email/send-delete-account-confirmation-email.ts", "messages/el.json"],
+  targets: [
+    LOGO,
+    DECK,
+    APPS,
+    GATE,
+    TEMPLATES,
+    DIGEST,
+    "src/lib/ai/module-vocabulary.ts",
+    "src/app/api/signup/route.ts",
+    "src/lib/email/send-delete-account-confirmation-email.ts",
+    "messages/el.json",
+    "messages/ar.json",
+    "messages/fr.json",
+  ],
   mutants: MUTANTS,
 });

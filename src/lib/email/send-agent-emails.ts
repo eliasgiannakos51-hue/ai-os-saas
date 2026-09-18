@@ -10,6 +10,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
 import { checkEmailAllowed, recordEmailSend } from "@/lib/email/email-gate";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
+import { emailLocaleFor, emailTranslator } from "@/lib/email/email-locale";
 
 // The From address, from ONE definition — see lib/email/resend-config.ts.
 // This was one of fourteen copies of the same line — the constant AND
@@ -28,13 +29,18 @@ import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
 
 /**
  * Why an agent result did not reach an inbox. A machine code rather than
- * a sentence: the sentence a reader sees depends on their language, and
- * this module is not handed the account to look one up for — it takes an
- * address. ("This module has no locale" is what stood here, and it read
- * as though none were available anywhere; the account carries
- * preferred_locale and lib/ai/module-vocabulary.ts loads the catalogue
- * outside a request, so a code rather than a sentence is still right and
- * the reason is plumbing rather than impossibility.)
+ * a sentence, and the reason is now the only one that was ever the real
+ * one: THE CALLER DECIDES WHAT TO SAY. These values are returned into
+ * lib/agents/agent-runner.ts, written onto the run row and shown on a
+ * screen that has next-intl; a sentence composed here would be a second
+ * place the same four cases are worded, in whatever language this
+ * function happened to resolve.
+ *
+ * The earlier reason — "this module is not handed the account" — was
+ * true when it was written and stopped being true in the same commit as
+ * this comment: every function below takes `userId` and resolves the
+ * account's language through emailLocaleFor, which is what the emails
+ * themselves are now written in.
  */
 export type AgentEmailFailure =
   /** The account has no address on file. */
@@ -71,6 +77,14 @@ export async function sendAgentRunResultEmail(params: {
     const gate = await checkEmailAllowed(userId, "agent_run_result");
     if (!gate.allowed) return { sent: false, reason: "blocked" };
 
+    // TWO LANGUAGES, ON PURPOSE. `locale` is the account's — the words
+    // this product says. `language` is the agent's own setting, which is
+    // what its OUTPUT is written in, and the AI-generated notice has to
+    // be legible next to that output rather than next to the buttons. A
+    // person whose interface is Greek can run an agent that reports in
+    // English, and both halves should read as intended.
+    const locale = await emailLocaleFor(userId);
+
     const resend = createResendClient();
     const { error } = await resend.emails.send({
       from: senderAddress(),
@@ -81,6 +95,7 @@ export async function sendAgentRunResultEmail(params: {
         output,
         agentsUrl: `${getSiteUrl()}/dashboard/agents`,
         aiGeneratedNotice: aiGeneratedNotice(language),
+        locale,
       }),
     });
 
@@ -109,16 +124,20 @@ export async function sendAgentDisabledEmail(params: {
     const gate = await checkEmailAllowed(userId, "agent_disabled");
     if (!gate.allowed) return;
 
+    const locale = await emailLocaleFor(userId);
+    const t = emailTranslator(locale);
+
     const resend = createResendClient();
     const { error } = await resend.emails.send({
       from: senderAddress(),
       to: email,
-      subject: `"${agentName}" has been switched off — Ionexa AI`,
+      subject: t("email.agent.disabledSubject", { name: agentName }),
       html: agentDisabledEmailHtml({
         agentName,
         reason,
         consecutiveFailures,
         agentsUrl: `${getSiteUrl()}/dashboard/agents`,
+        locale,
       }),
     });
 
@@ -147,15 +166,19 @@ export async function sendAgentPausedNoCreditsEmail(params: {
     const gate = await checkEmailAllowed(userId, "agent_run_result");
     if (!gate.allowed) return;
 
+    const locale = await emailLocaleFor(userId);
+    const t = emailTranslator(locale);
+
     const resend = createResendClient();
     const { error } = await resend.emails.send({
       from: senderAddress(),
       to: email,
-      subject: `"${agentName}" is paused — Ionexa AI`,
+      subject: t("email.agent.pausedSubject", { name: agentName }),
       html: agentPausedNoCreditsEmailHtml({
         agentName,
         agentsUrl: `${getSiteUrl()}/dashboard/agents`,
         billingUrl: `${getSiteUrl()}/dashboard/settings`,
+        locale,
       }),
     });
 

@@ -4105,6 +4105,102 @@
       "feedback": "用户反馈，按情绪和优先级分类。",
       "analytics": "任何值得长期跟踪的指标。",
       "automation": "值得自动化的流程，以及省下的时间。"
+    },
+    "footer": "你收到这封邮件，是因为你拥有 Ionexa AI 账户。",
+    "scheduledRun": {
+      "label": "计划中的智能体运行",
+      "titleDone": "你的计划任务已完成",
+      "titleFailed": "你的计划任务未能运行",
+      "cta": "打开{name}",
+      "preheaderDone": "你的计划任务“{step}”已完成。",
+      "preheaderFailed": "你的计划任务“{step}”未能运行。",
+      "subjectDone": "你的计划任务已完成 — Ionexa AI",
+      "subjectFailed": "你的计划任务未能运行 — Ionexa AI",
+      "details": {
+        "noCreditsOnce": "积分不足——请充值或升级套餐，然后重新安排这项任务。",
+        "noCreditsRecurring": "积分不足——请充值或升级套餐。该自动化将在下个周期再次尝试。"
+      }
+    },
+    "stuck": {
+      "label": "网站生成器",
+      "title": "“{name}”似乎卡住了",
+      "body": "这次生成已经运行超过 24 小时仍未完成——这并不正常，很可能是卡住了，而不是还在工作。这次没有扣除任何积分。点击下方打开它，重试或删除。",
+      "cta": "打开网站生成器",
+      "preheader": "“{name}”已经卡在生成中超过 24 小时。",
+      "subject": "“{name}”似乎卡住了 — Ionexa AI"
+    },
+    "formSubmission": {
+      "label": "新的表单提交",
+      "title": "有人通过“{name}”联系了你",
+      "cta": "查看你的网站",
+      "preheader": "{name} 上有新的表单提交",
+      "subject": "“{name}”上有新的表单提交 — Ionexa AI",
+      "badges": {
+        "genuine_interest": "可能是真实客户",
+        "question": "一般咨询",
+        "spam": "可能是垃圾信息",
+        "unclear": "无法判断"
+      }
+    },
+    "agent": {
+      "label": "你的智能体",
+      "resultCta": "管理你的智能体",
+      "resultPreheader": "{name} — 你的计划结果。",
+      "disabledTitle": "“{name}”已被关闭",
+      "disabledBody": "它连续失败了 {count} 次，因此已停止运行，以免继续失败并继续消耗你的积分。",
+      "disabledLastError": "最后一次错误：{error}",
+      "disabledHint": "点击下方打开它，检查任务后重新开启。",
+      "disabledCta": "打开你的智能体",
+      "disabledPreheader": "“{name}”在 {count} 次失败后停止运行。",
+      "disabledSubject": "“{name}”已被关闭 — Ionexa AI",
+      "pausedTitle": "“{name}”已暂停",
+      "pausedBody": "它无法运行，因为你的账户积分已用完。没有产生任何费用，也没有丢失任何东西——充值或升级后重新开启，它会恢复原本的计划。",
+      "pausedCtaTopUp": "充值积分",
+      "pausedCtaAgents": "打开你的智能体",
+      "pausedPreheader": "“{name}”已暂停——你的账户积分已用完。",
+      "pausedSubject": "“{name}”已暂停 — Ionexa AI"
+    },
+    "digest": {
+      "label": "周报",
+      "title": "本周",
+      "noticed": "我注意到的",
+      "cta": "打开你的仪表盘",
+      "subject": "本周：{first}",
+      "subjectFallback": "你在 Ionexa AI 的一周",
+      "lines": {
+        "agents": {
+          "other": "{runs} 次智能体运行，其中 {found} 次有结果",
+          "one": "{runs} 次智能体运行，其中 {found} 次有结果"
+        },
+        "records": {
+          "other": "{count} 条新记录",
+          "one": "{count} 条新记录"
+        },
+        "site": {
+          "other": "你的网站：{count} 次访问",
+          "one": "你的网站：{count} 次访问"
+        },
+        "credits": {
+          "other": "花费 {count} 积分",
+          "one": "花费 {count} 积分"
+        },
+        "creditsWithAverage": {
+          "other": "花费 {count} 积分（你的平均值：{average}）",
+          "one": "花费 {count} 积分（你的平均值：{average}）"
+        },
+        "leads": {
+          "other": "{count} 个客户线索没有记录后续跟进",
+          "one": "{count} 个客户线索没有记录后续跟进"
+        },
+        "agentFailures": {
+          "other": "{count} 次智能体运行失败",
+          "one": "{count} 次智能体运行失败"
+        },
+        "spendUp": "支出比你的平均值高 {percent}%",
+        "spendDown": "支出比你的平均值低 {percent}%",
+        "trafficUp": "网站访问量上升了 {percent}%",
+        "trafficDown": "网站访问量下降了 {percent}%"
+      }
     }
   }
 }

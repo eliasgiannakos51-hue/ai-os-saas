@@ -4,12 +4,14 @@ import { isDigestWorthSending, type WorthVerdict } from "@/lib/notify/worth-send
  * THE WEEKLY DIGEST, FROM REAL DATA — NEVER GENERIC.
  *
  * The brief is specific about what it should read like, and every line in
- * it is a number this database can answer:
+ * it is a number this database can answer. In English, which is one of the
+ * ten languages it is sent in (messages/*.json, email.digest.lines):
  *
- *   "3 agents ran, 2 found something"     agent_runs
+ *   "3 agent runs, 2 with a result"       agent_runs
  *   "12 new records"                      the classifier module tables
  *   "your site: 45 visits"                site_analytics
- *   "you spent 340 credits (average 280)" ai_cost_log, vs the user's OWN
+ *   "340 credits spent (your average:
+ *    280)"                                ai_cost_log, vs the user's OWN
  *                                         previous weeks
  *   "what I noticed: 5 leads with no
  *    follow-up / spend up 20%"            leads, ai_cost_log
@@ -20,7 +22,7 @@ import { isDigestWorthSending, type WorthVerdict } from "@/lib/notify/worth-send
  * observation against hand-built numbers, including the ones that must
  * NOT appear.
  *
- * THE AVERAGE IS THE USER'S OWN. "You spent 340 credits (average: 280)"
+ * THE AVERAGE IS THE USER'S OWN. "340 credits spent (your average: 280)"
  * is only useful if 280 is what THIS account normally spends. A
  * cross-account average would tell a heavy user they are fine and a light
  * one they are extravagant, and neither would be about them.
@@ -47,7 +49,53 @@ export type DigestFacts = {
   agentRunsFailed: number;
 };
 
-export type DigestLine = { key: string; text: string };
+/**
+ * ONE LINE OF THE DIGEST, WITHOUT ITS WORDS.
+ *
+ * It used to carry `text`, composed here, in English, with `n === 1 ?
+ * "run" : "runs"` baked into a template literal. That is the English
+ * plural rule spelled as though it were arithmetic: Arabic has six
+ * categories, Japanese and Chinese have one, and Greek's two do not split
+ * where English's do. A digest whose chrome was translated and whose
+ * lines were not would have been a Greek heading over English sentences —
+ * worse than an honest English email, and the shape docs/shapes.md calls
+ * "the check covers the participants".
+ *
+ * So the decision about WHAT IS WORTH SAYING stays here, and the words
+ * are looked up where the language is known. `digestLineText` below does
+ * that, and it takes the translator as an argument so this module stays
+ * pure — no catalogue, no request, no server-only import.
+ */
+export type DigestLine = {
+  /** Stable identity: what the line IS, unchanged by any wording. The
+   *  build gate asserts on this, so a rephrasing cannot move it. */
+  key: string;
+  /** The key under `email.digest.lines` that says it, in whatever
+   *  language. Two lines can share an identity and differ here — spend
+   *  with and without an average, traffic up and traffic down. */
+  message: string;
+  /** The number the plural form is selected from, or null for a line
+   *  that has none (a percentage does not inflect its noun). */
+  count: number | null;
+  /** Everything else the sentence substitutes. `count` is supplied by the
+   *  translator itself and is not repeated here. */
+  vars: Record<string, number>;
+};
+
+/** What a translator has to be able to do for a digest line. Structural
+ *  on purpose: lib/email/email-locale.ts satisfies it, and so does a
+ *  three-line stub in a test, which is what keeps this module loadable
+ *  without the catalogue. */
+export type DigestTranslator = {
+  (key: string, vars?: Record<string, string | number>): string;
+  n(key: string, count: number, vars?: Record<string, string | number>): string;
+};
+
+/** The line, in the reader's language. */
+export function digestLineText(line: DigestLine, t: DigestTranslator): string {
+  const key = `email.digest.lines.${line.message}`;
+  return line.count === null ? t(key, line.vars) : t.n(key, line.count, line.vars);
+}
 
 export type DigestContent = {
   lines: DigestLine[];
@@ -90,34 +138,42 @@ export function buildDigest(facts: DigestFacts): DigestContent {
     lines.push({
       key: "agents",
       // BOTH NUMBERS, always. "3 agents ran" alone invites the reader to
-      // assume three results; "3 ran, 2 found something" is the fact, and
+      // assume three results; "3 ran, 2 with a result" is the fact, and
       // the gap between them is the interesting part.
-      text: `${facts.agentRuns} agent ${facts.agentRuns === 1 ? "run" : "runs"}, ${facts.agentRunsWithFindings} found something`,
+      //
+      // The second clause is a noun phrase rather than a verb ("2 found
+      // something") because the verb is the one word that would have to
+      // agree with a SECOND count: English "found" does not inflect,
+      // Greek "βρήκε/βρήκαν" does, and one sentence cannot carry two
+      // plural forms through a catalogue keyed on one.
+      message: "agents",
+      count: facts.agentRuns,
+      vars: { runs: facts.agentRuns, found: facts.agentRunsWithFindings },
     });
   }
 
   if (facts.newRecords > 0) {
-    lines.push({
-      key: "records",
-      text: `${facts.newRecords} new ${facts.newRecords === 1 ? "record" : "records"}`,
-    });
+    lines.push({ key: "records", message: "records", count: facts.newRecords, vars: {} });
   }
 
   // null means no published site. A user without one must not be told
   // "your site: 0 visits" — they do not have a site.
   if (facts.siteViews !== null) {
-    lines.push({
-      key: "site",
-      text: `your site: ${facts.siteViews} ${facts.siteViews === 1 ? "visit" : "visits"}`,
-    });
+    lines.push({ key: "site", message: "site", count: facts.siteViews, vars: {} });
   }
 
   if (facts.creditsSpent > 0) {
-    const average =
-      facts.creditsAveragePerWeek !== null && facts.creditsAveragePerWeek > 0
-        ? ` (your average: ${Math.round(facts.creditsAveragePerWeek)})`
-        : "";
-    lines.push({ key: "credits", text: `${facts.creditsSpent} credits spent${average}` });
+    // THE SAME LINE WITH AND WITHOUT THE COMPARISON IS TWO SENTENCES, not
+    // one sentence plus an appended fragment. A parenthesis glued on in
+    // code is an English word order; where the average goes is the
+    // catalogue's decision.
+    const hasAverage = facts.creditsAveragePerWeek !== null && facts.creditsAveragePerWeek > 0;
+    lines.push({
+      key: "credits",
+      message: hasAverage ? "creditsWithAverage" : "credits",
+      count: facts.creditsSpent,
+      vars: hasAverage ? { average: Math.round(facts.creditsAveragePerWeek as number) } : {},
+    });
   }
 
   // ---- WHAT I NOTICED -------------------------------------------------
@@ -125,12 +181,7 @@ export function buildDigest(facts: DigestFacts): DigestContent {
   // place to go, because an observation with no action is a complaint.
 
   if (facts.leadsWithoutFollowUp > 0) {
-    observations.push({
-      key: "leads",
-      text: `${facts.leadsWithoutFollowUp} ${
-        facts.leadsWithoutFollowUp === 1 ? "lead has" : "leads have"
-      } no follow-up recorded`,
-    });
+    observations.push({ key: "leads", message: "leads", count: facts.leadsWithoutFollowUp, vars: {} });
   }
 
   if (facts.creditsAveragePerWeek !== null) {
@@ -138,7 +189,9 @@ export function buildDigest(facts: DigestFacts): DigestContent {
     if (change !== null && Math.abs(change) >= SPEND_CHANGE_THRESHOLD_PERCENT) {
       observations.push({
         key: "spend_change",
-        text: `spending is ${change > 0 ? "up" : "down"} ${Math.abs(change)}% on your average`,
+        message: change > 0 ? "spendUp" : "spendDown",
+        count: null,
+        vars: { percent: Math.abs(change) },
       });
     }
   }
@@ -146,7 +199,9 @@ export function buildDigest(facts: DigestFacts): DigestContent {
   if (facts.agentRunsFailed > 0) {
     observations.push({
       key: "agent_failures",
-      text: `${facts.agentRunsFailed} agent ${facts.agentRunsFailed === 1 ? "run" : "runs"} failed`,
+      message: "agentFailures",
+      count: facts.agentRunsFailed,
+      vars: {},
     });
   }
 
@@ -155,7 +210,9 @@ export function buildDigest(facts: DigestFacts): DigestContent {
     if (change !== null && Math.abs(change) >= SPEND_CHANGE_THRESHOLD_PERCENT) {
       observations.push({
         key: "traffic_change",
-        text: `site traffic is ${change > 0 ? "up" : "down"} ${Math.abs(change)}%`,
+        message: change > 0 ? "trafficUp" : "trafficDown",
+        count: null,
+        vars: { percent: Math.abs(change) },
       });
     }
   }

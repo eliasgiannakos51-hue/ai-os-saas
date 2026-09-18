@@ -29,7 +29,14 @@ const PLANS = "src/lib/billing/plans.ts";
 const CATALOG = "src/lib/billing/feature-catalog.ts";
 const GENERATE = "src/app/api/websites/generate/route.ts";
 const BUILDER_PAGE = "src/app/dashboard/website-builder/page.tsx";
-const MEMORY_PAGE = "src/app/dashboard/memory/page.tsx";
+// THE PAGE MOVED AND THESE MUTANTS DID NOT. /dashboard/memory is a
+// permanent redirect now — the catalogue's own comment calls it a
+// gravestone — and the page that gates AI Memory is /dashboard/ai-memory.
+// Three mutants here went on editing the old path, so they matched
+// nothing and killed nothing: the suite reported 13 mutants and was
+// exercising 10. A stale anchor is a gate that has stopped guarding
+// without going red.
+const MEMORY_PAGE = "src/app/dashboard/ai-memory/page.tsx";
 const TARGETS = [PLANS, CATALOG, GENERATE, BUILDER_PAGE, MEMORY_PAGE, GATE];
 
 const MUTANTS = [
@@ -79,7 +86,7 @@ const MUTANTS = [
     dimension: "B. enforced by something other than the field",
     name: "a capability's enforcement is re-pointed at a file that only displays it",
     file: CATALOG,
-    from: '    enforcedIn: "src/app/dashboard/memory/page.tsx",\n    enforcedSymbol: \'accountHasCapability(planSlug, "aiMemory"\',',
+    from: '    enforcedIn: "src/app/dashboard/ai-memory/page.tsx",\n    enforcedSymbol: \'accountHasCapability(planSlug, "aiMemory"\',',
     to: '    enforcedIn: "src/app/roadmap/page.tsx",\n    enforcedSymbol: "aiMemory",',
     expect: "every built capability is read where something is refused",
   },
@@ -133,14 +140,50 @@ const MUTANTS = [
     // really happen, as one careless copy of a richer plan's block.
     from: '      maxAiAgents: 0,\n      websiteBuilder: false,\n      aiMemory: false,\n      teamCollaboration: false,\n      chatMemoryLimit: 0,\n      customAiPersona: false,\n      presentations: false,\n      posts: false,\n      predictions: false,',
     to: '      maxAiAgents: 50,\n      websiteBuilder: true,\n      aiMemory: true,\n      teamCollaboration: true,\n      chatMemoryLimit: 100,\n      customAiPersona: true,\n      presentations: true,\n      posts: true,\n      predictions: true,',
-    expect: "Free is not the whole product",
+    // NOT "Free is not the whole product" ANY MORE, and that is the
+    // finding this mutant produced rather than confirmed. Nine of the
+    // fourteen capabilities flipped to true and the 75% ratio stayed
+    // green: 45 sold rows are not 45 capabilities, most of them are a
+    // number, and Free carries a number for nearly all of them. The
+    // ratio is kept as a smoke alarm; what kills this now is the
+    // per-row rule, which needs no denominator.
+    expect: "no row Free may not use is open on Free",
+  },
+  {
+    dimension: "E. the coverage itself",
+    // ONE ROW, which is the case the ratio could never reach. Moving a
+    // single door open on Free is what actually happens — a copied line,
+    // a flag flipped while testing — and nine at once is not.
+    name: "one paid capability is opened on Free",
+    file: PLANS,
+    from: "      maxAiAgents: 0,\n      websiteBuilder: false,\n      aiMemory: false,",
+    to: "      maxAiAgents: 0,\n      websiteBuilder: true,\n      aiMemory: false,",
+    expect: "no row Free may not use is open on Free",
+  },
+  {
+    dimension: "F. the gate's own scrapers",
+    // AND THE FLOOR UNDER THE PER-ROW RULE. An empty population passes
+    // every assertion over it — this file's own subject, one level in.
+    // The mutation is the predicate that BUILDS the population rather
+    // than a row of the catalogue, because that is where an emptiness
+    // actually comes from: a field renamed, a comparison inverted, an
+    // order array that no longer holds the slugs it is searched for.
+    name: "the paid-row predicate goes blind, so the per-row rule iterates nothing",
+    file: GATE,
+    from: "const paidRows = sold.filter((f) => planOrder.indexOf(f.minPlan) > 0);",
+    to: "const paidRows = sold.filter(() => false);",
+    expect: "there are paid rows to ask about",
   },
   {
     dimension: "E. the coverage itself",
     name: "a plan fills in fewer capabilities than the type declares",
     file: PLANS,
-    from: "      presentations: true,\n      posts: true,\n      predictions: true,\n      customDomain: true,\n      publicApi: false,\n      privateMarketplace: false,\n      slaResponse: false,\n    },\n    features: [\n      { textKey: \"everythingInStarter\" },",
-    to: "      posts: true,\n      predictions: true,\n      customDomain: true,\n      publicApi: false,\n      privateMarketplace: false,\n      slaResponse: false,\n    },\n    features: [\n      { textKey: \"everythingInStarter\" },",
+    // Growth's block, anchored on the whole run down to its feature
+    // list so it cannot match another plan. It lost `recordSearch`
+    // from its old spelling when that capability was added, and the
+    // mutant went on matching nothing.
+    from: "      presentations: true,\n      posts: true,\n      predictions: true,\n      recordSearch: true,\n      customDomain: true,\n      publicApi: false,\n      privateMarketplace: false,\n      slaResponse: false,\n    },\n    features: [\n      { textKey: \"everythingInStarter\" },",
+    to: "      posts: true,\n      predictions: true,\n      recordSearch: true,\n      customDomain: true,\n      publicApi: false,\n      privateMarketplace: false,\n      slaResponse: false,\n    },\n    features: [\n      { textKey: \"everythingInStarter\" },",
     expect: "every plan fills in every declared capability",
   },
 

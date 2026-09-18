@@ -223,10 +223,15 @@ const MUTANTS = [
     to: "  if (true) {",
   },
   {
-    name: "the digest reports agent runs without saying how many found something",
+    // THE SECOND NUMBER, which is the interesting one. It is a var now
+    // rather than a template literal — buildDigest returns a key and its
+    // numbers, and lib/email/email-locale.ts composes the sentence — so
+    // dropping it is dropping a key from an object, which reads like
+    // tidying rather than like losing a fact.
+    name: "the digest reports agent runs without saying how many had a result",
     file: DIGEST,
-    from: '      text: `${facts.agentRuns} agent ${facts.agentRuns === 1 ? "run" : "runs"}, ${facts.agentRunsWithFindings} found something`,',
-    to: '      text: `${facts.agentRuns} agent ${facts.agentRuns === 1 ? "run" : "runs"}`,',
+    from: "      vars: { runs: facts.agentRuns, found: facts.agentRunsWithFindings },",
+    to: "      vars: { runs: facts.agentRuns, found: 0 },",
   },
   {
     name: "ordinary week-to-week noise is reported as a trend",
@@ -235,10 +240,14 @@ const MUTANTS = [
     to: "export const SPEND_CHANGE_THRESHOLD_PERCENT = 1;",
   },
   {
-    name: "plurals stop agreeing, so one record reads '1 new records'",
+    // PLURALS STOP AGREEING, so one entry reads "1 new entries". The
+    // English `n === 1 ? ... : ...` is gone; the count that Intl.PluralRules
+    // selects from is `count`, and a line that hard-codes it always picks
+    // the same form in all ten languages.
+    name: "the plural form stops depending on the number",
     file: DIGEST,
-    from: '      text: `${facts.newRecords} new ${facts.newRecords === 1 ? "record" : "records"}`,',
-    to: "      text: `${facts.newRecords} new records`,",
+    from: '    lines.push({ key: "records", message: "records", count: facts.newRecords, vars: {} });',
+    to: '    lines.push({ key: "records", message: "records", count: 99, vars: { count: facts.newRecords } });',
   },
 
   // ------------------------------------------------------------------

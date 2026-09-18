@@ -392,6 +392,41 @@ const noWeek = {
   leadsWithoutFollowUp: 0,
 };
 
+// THE LINES NO LONGER CARRY THEIR WORDS, so this section renders them the
+// way an email does before it reads them. buildDigest returns a key, a
+// count and its numbers; lib/email/email-locale.ts turns that into a
+// sentence, and it cannot be imported here — it is `server-only` and pulls
+// in the Supabase admin client. So the two things it does are rebuilt
+// from the catalogue on disk: look the key up, pick the plural form with
+// Intl.PluralRules, substitute.
+//
+// That is not a paraphrase of the real translator, it is the same two
+// steps against the same file — which is what makes an assertion below
+// about "3 agent runs" an assertion about what messages/en.json says
+// rather than about a string this test wrote down.
+const CATALOGUE = JSON.parse(readFileSync("messages/en.json", "utf8"));
+function catalogueLeaf(loc, key) {
+  let node = loc;
+  for (const part of key.split(".")) {
+    if (!node || typeof node !== "object") return null;
+    node = node[part];
+  }
+  return typeof node === "string" ? node : null;
+}
+function makeT(locale, catalogue) {
+  const sub = (raw, vars) =>
+    Object.entries(vars ?? {}).reduce((text, [k, v]) => text.split(`{${k}}`).join(String(v)), raw);
+  const t = (key, vars) => sub(catalogueLeaf(catalogue, key) ?? key, vars);
+  t.n = (key, count, vars) => {
+    const form = new Intl.PluralRules(locale).select(count);
+    const picked = catalogueLeaf(catalogue, `${key}.${form}`) !== null ? `${key}.${form}` : `${key}.other`;
+    return t(picked, { count, ...vars });
+  };
+  return t;
+}
+const tEn = makeT("en", CATALOGUE);
+const say = (line) => digest.digestLineText(line, tEn);
+
 {
   const quietWeek = digest.buildDigest(noWeek);
   ok("a week where nothing happened is not sent", quietWeek.worth.worth === false, JSON.stringify(quietWeek.worth));
@@ -411,14 +446,17 @@ const noWeek = {
     creditsAveragePerWeek: 280,
     leadsWithoutFollowUp: 5,
   });
-  const text = week.lines.map((l) => l.text).join(" | ");
-  ok("it says how many agents ran AND how many found something", /3 agent runs, 2 found something/.test(text), text);
-  ok("it counts the new records", /12 new records/.test(text), text);
+  const text = week.lines.map(say).join(" | ");
+  ok("it says how many agents ran AND how many had a result", /3 agent runs, 2 with a result/.test(text), text);
+  // "entries", not "records": docs/glossary.md fixes one counted noun per
+  // concept per language and scripts/tests/glossary.test.mjs enforces it —
+  // this line said "12 new records" until that gate read the catalogue.
+  ok("it counts the new entries", /12 new entries/.test(text), text);
   ok("it reports the site's real visits", /your site: 45 visits/.test(text), text);
   ok("it reports spend against the user's OWN average", /340 credits spent \(your average: 280\)/.test(text), text);
 
-  const noticed = week.observations.map((o) => o.text).join(" | ");
-  ok("it notices leads with no follow-up", /5 leads have no follow-up recorded/.test(noticed), noticed);
+  const noticed = week.observations.map(say).join(" | ");
+  ok("it notices leads with no follow-up", /5 leads with no follow-up recorded/.test(noticed), noticed);
   ok("it notices spending up 21% on the average", /spending is up 21%/.test(noticed), noticed);
 }
 
@@ -437,7 +475,7 @@ const noWeek = {
   const firstWeek = digest.buildDigest({ ...noWeek, creditsSpent: 340, creditsAveragePerWeek: null });
   ok(
     "spend is reported without an average when there is no baseline",
-    firstWeek.lines.some((l) => /340 credits spent$/.test(l.text)),
+    firstWeek.lines.some((l) => /^340 credits spent$/.test(say(l))),
     JSON.stringify(firstWeek.lines)
   );
   ok("…and no percentage change is claimed", !firstWeek.observations.some((o) => o.key === "spend_change"));
@@ -459,12 +497,12 @@ const noWeek = {
   // SINGULARS. "1 agent runs, 1 found something" is the kind of sentence
   // that tells a reader a machine wrote it and nobody read it.
   const one = digest.buildDigest({ ...noWeek, agentRuns: 1, agentRunsWithFindings: 1, newRecords: 1, siteViews: 1 });
-  const text = one.lines.map((l) => l.text).join(" | ");
+  const text = one.lines.map(say).join(" | ");
   ok("one run reads as 'run', not 'runs'", /1 agent run,/.test(text), text);
-  ok("one record reads as 'record'", /1 new record\b/.test(text), text);
+  ok("one entry reads as 'entry'", /1 new entry\b/.test(text), text);
   ok("one visit reads as 'visit'", /1 visit\b/.test(text), text);
   const oneLead = digest.buildDigest({ ...noWeek, newRecords: 1, leadsWithoutFollowUp: 1 });
-  ok("one lead reads as 'lead has'", /1 lead has no follow-up/.test(oneLead.observations.map((o) => o.text).join(" ")), JSON.stringify(oneLead.observations));
+  ok("one lead reads as 'lead with'", /1 lead with no follow-up/.test(oneLead.observations.map(say).join(" ")), JSON.stringify(oneLead.observations));
 }
 
 // =====================================================================

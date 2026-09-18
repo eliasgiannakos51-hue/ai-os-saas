@@ -73,14 +73,50 @@ function leaf(catalogue: unknown, key: string): string | null {
  * English inside an otherwise translated message, rather than throwing
  * the whole email away or printing a raw key at somebody.
  *
- * `{name}` placeholders are substituted here rather than through ICU:
- * these strings carry no plurals and no dates, and scripts/check-i18n.js
- * already fails the build on the `'{query}'` escaping trap that makes ICU
- * ship literal braces in every language.
+ * `{name}` placeholders are substituted here rather than through ICU.
+ * That is a deliberate narrowing, not an absence: ICU's own escaping rule
+ * is what shipped the literal text `{query}` in nine languages
+ * (scripts/check-i18n.js fails the build on that shape now), and an email
+ * is rendered outside any request, where next-intl's formatter is not
+ * available anyway. What ICU would otherwise be needed for is plurals,
+ * and `t.n` below does that part with Intl.PluralRules.
  */
-export function emailTranslator(locale: string): (key: string, vars?: Record<string, string | number>) => string {
+export type EmailTranslator = ((key: string, vars?: Record<string, string | number>) => string) & {
+  /**
+   * The count-dependent form of `key`.
+   *
+   * `t.n("email.digest.lines.records", 1)` reads
+   * `email.digest.lines.records.one`; with 12 it reads `.other`. Which
+   * suffix is asked for is Intl.PluralRules' decision, not a `=== 1`
+   * ternary, because `=== 1` is the English rule wearing a locale's
+   * clothes: Arabic distinguishes six categories, Japanese and Chinese
+   * one, and Greek's two do not split where English's do for zero.
+   *
+   * A form a catalogue does not carry falls back to `.other` in the same
+   * language before it falls back to English — an Arabic digest missing
+   * its `few` reads Arabic, not English.
+   */
+  n: (key: string, count: number, vars?: Record<string, string | number>) => string;
+};
+
+/**
+ * Which plural form a language wants for this number.
+ *
+ * Never throws: an unknown locale tag would otherwise take down a digest
+ * from inside Intl, and the English rule is a survivable wrong answer
+ * where no rendered line at all is not.
+ */
+export function pluralForm(locale: string, count: number): string {
+  try {
+    return new Intl.PluralRules(locale).select(count);
+  } catch {
+    return new Intl.PluralRules("en").select(count);
+  }
+}
+
+export function emailTranslator(locale: string): EmailTranslator {
   const catalogue = CATALOGUES[locale] ?? en;
-  return (key, vars) => {
+  const t = (key: string, vars?: Record<string, string | number>): string => {
     const raw = leaf(catalogue, key) ?? leaf(en, key);
     if (raw === null) {
       // A key that is in NO catalogue is a bug in the caller, not a
@@ -96,6 +132,19 @@ export function emailTranslator(locale: string): (key: string, vars?: Record<str
       raw
     );
   };
+
+  const n = (key: string, count: number, vars?: Record<string, string | number>): string => {
+    const form = pluralForm(locale, count);
+    // THE LOCALE'S OWN `other` BEFORE ENGLISH ANYTHING. leaf() is asked
+    // twice against `catalogue` before t() is allowed to reach for en,
+    // because a missing form is a gap in ONE string and falling to
+    // English for it would put an English sentence inside a translated
+    // list — the exact shape this whole file exists to remove.
+    const key2 = leaf(catalogue, `${key}.${form}`) !== null ? `${key}.${form}` : `${key}.other`;
+    return t(key2, { count, ...vars });
+  };
+
+  return Object.assign(t, { n });
 }
 
 /** Right-to-left languages need `dir="rtl"` on the email's root element. */

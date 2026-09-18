@@ -4105,6 +4105,102 @@
       "feedback": "Comentários de utilizadores, organizados por tom e prioridade.",
       "analytics": "Qualquer métrica que valha a pena seguir ao longo do tempo.",
       "automation": "Fluxos que vale a pena automatizar, e o tempo poupado."
+    },
+    "footer": "Recebes esta mensagem porque tens uma conta Ionexa AI.",
+    "scheduledRun": {
+      "label": "execução agendada do agente",
+      "titleDone": "a tua tarefa agendada terminou",
+      "titleFailed": "a tua tarefa agendada não conseguiu correr",
+      "cta": "Abrir {name}",
+      "preheaderDone": "A tua tarefa agendada “{step}” terminou.",
+      "preheaderFailed": "A tua tarefa agendada “{step}” não conseguiu correr.",
+      "subjectDone": "A tua tarefa agendada terminou — Ionexa AI",
+      "subjectFailed": "A tua tarefa agendada não conseguiu correr — Ionexa AI",
+      "details": {
+        "noCreditsOnce": "Créditos insuficientes: carrega ou muda de plano e agenda-a de novo.",
+        "noCreditsRecurring": "Créditos insuficientes: carrega ou muda de plano. Esta automação tentará de novo no próximo ciclo."
+      }
+    },
+    "stuck": {
+      "label": "construtor de sites",
+      "title": "“{name}” parece encravado",
+      "body": "Esta geração já corre há mais de 24 horas sem terminar: não é normal, e é provável que esteja encravada em vez de ainda a trabalhar. Não foram cobrados créditos por ela. Abre-a abaixo para tentar de novo ou apagá-la.",
+      "cta": "Abrir o construtor de sites",
+      "preheader": "“{name}” está encravado a gerar há mais de 24 horas.",
+      "subject": "“{name}” parece encravado — Ionexa AI"
+    },
+    "formSubmission": {
+      "label": "novo envio de formulário",
+      "title": "Alguém te contactou através de “{name}”",
+      "cta": "Ver os teus sites",
+      "preheader": "Novo envio de formulário em {name}",
+      "subject": "Novo envio de formulário em “{name}” — Ionexa AI",
+      "badges": {
+        "genuine_interest": "Interesse provavelmente genuíno",
+        "question": "Pergunta geral",
+        "spam": "Possível spam",
+        "unclear": "Pouco claro"
+      }
+    },
+    "agent": {
+      "label": "o teu agente",
+      "resultCta": "Gerir os teus agentes",
+      "resultPreheader": "{name} — o teu resultado agendado.",
+      "disabledTitle": "“{name}” foi desligado",
+      "disabledBody": "Falhou {count} vezes seguidas, por isso parou de correr em vez de continuar a falhar e a custar-te créditos.",
+      "disabledLastError": "Último erro: {error}",
+      "disabledHint": "Abre-o abaixo para rever a tarefa e voltar a ligá-lo.",
+      "disabledCta": "Abrir os teus agentes",
+      "disabledPreheader": "“{name}” parou de correr após {count} falhas.",
+      "disabledSubject": "“{name}” foi desligado — Ionexa AI",
+      "pausedTitle": "“{name}” está em pausa",
+      "pausedBody": "Não conseguiu correr porque a tua conta ficou sem créditos. Nada foi cobrado e nada se perdeu: carrega ou muda de plano e volta a ligá-lo, e retoma o horário habitual.",
+      "pausedCtaTopUp": "Carregar créditos",
+      "pausedCtaAgents": "Abrir os teus agentes",
+      "pausedPreheader": "“{name}” está em pausa: a tua conta ficou sem créditos.",
+      "pausedSubject": "“{name}” está em pausa — Ionexa AI"
+    },
+    "digest": {
+      "label": "resumo",
+      "title": "esta semana",
+      "noticed": "o que reparei",
+      "cta": "Abrir o teu painel",
+      "subject": "esta semana: {first}",
+      "subjectFallback": "a tua semana na Ionexa AI",
+      "lines": {
+        "agents": {
+          "one": "{runs} execução de agente, {found} com resultado",
+          "other": "{runs} execuções de agentes, {found} com resultado"
+        },
+        "records": {
+          "one": "{count} entrada nova",
+          "other": "{count} entradas novas"
+        },
+        "site": {
+          "one": "o teu site: {count} visita",
+          "other": "o teu site: {count} visitas"
+        },
+        "credits": {
+          "one": "{count} crédito gasto",
+          "other": "{count} créditos gastos"
+        },
+        "creditsWithAverage": {
+          "one": "{count} crédito gasto (a tua média: {average})",
+          "other": "{count} créditos gastos (a tua média: {average})"
+        },
+        "leads": {
+          "one": "{count} contacto sem seguimento registado",
+          "other": "{count} contactos sem seguimento registado"
+        },
+        "agentFailures": {
+          "one": "{count} execução de agente falhou",
+          "other": "{count} execuções de agentes falharam"
+        },
+        "spendUp": "os gastos estão {percent}% acima da tua média",
+        "spendDown": "os gastos estão {percent}% abaixo da tua média",
+        "trafficUp": "o tráfego do site subiu {percent}%",
+        "trafficDown": "o tráfego do site desceu {percent}%"
+      }
     }
   }
 }

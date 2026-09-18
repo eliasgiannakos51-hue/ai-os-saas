@@ -2,6 +2,7 @@ import "server-only";
 import { senderAddress } from "@/lib/email/resend-config";
 import { Resend } from "resend";
 import { websiteFormSubmissionEmailHtml } from "@/lib/email/templates";
+import { emailLocaleFor, emailTranslator } from "@/lib/email/email-locale";
 import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
 import { checkEmailAllowed, recordEmailSend } from "@/lib/email/email-gate";
@@ -72,16 +73,24 @@ export async function sendWebsiteFormSubmissionEmail({
       };
     }
 
+    // THE SITE OWNER'S LANGUAGE, NOT THE VISITOR'S. This message is read
+    // by the person whose website it is, and `userId` is that person; the
+    // visitor who filled the form never sees it. Their words are carried
+    // through verbatim in `fields`.
+    const locale = await emailLocaleFor(userId);
+    const t = emailTranslator(locale);
+
     const resend = new Resend(process.env.RESEND_API_KEY);
     const { error } = await resend.emails.send({
       from: senderAddress(),
       to: email,
-      subject: `New form submission on "${websiteName}" — Ionexa AI`,
+      subject: t("email.formSubmission.subject", { name: websiteName }),
       html: websiteFormSubmissionEmailHtml({
         websiteName,
         fields,
         classification,
         dashboardUrl: `${getSiteUrl()}/dashboard/form-submissions`,
+        locale,
       }),
     });
 

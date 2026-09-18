@@ -297,6 +297,52 @@ check(
   free.included < sold.length * 0.75,
   "every row on Free means five plans that differ only in credits"
 );
+
+// THE RATIO ABOVE IS A SMOKE ALARM, AND IT IS NOT THE RULE.
+//
+// Measured 2026-09-17 by the mutation suite: setting NINE of the Free
+// plan's fourteen capabilities to true — websiteBuilder, aiMemory,
+// teamCollaboration, customAiPersona, presentations, posts, predictions,
+// 50 agents, 100 chat memories — left this gate GREEN. 45 sold rows are
+// not 45 capabilities; most of them are a number, and Free carries a
+// number for nearly all of them, so nine doors opening moves the ratio
+// by less than the slack in 75%. A threshold over a mixed population is
+// a threshold over the wrong denominator.
+//
+// THE RULE IS PER ROW, and the catalogue already carries it: every entry
+// declares `minPlan`, the lowest plan that may use it at all. So a row
+// whose minPlan is above free must draw a CROSS on Free — one capability
+// flipped is one red line that names itself, with no ratio in the way.
+const planOrder = PLANS.map((p) => p.slug);
+const freePlan = PLANS.find((p) => p.slug === "free");
+const WORDS = {
+  unlimited: "Unlimited", included: "Included", custom: "Custom", perSeat: "/seat",
+  perHour: "/hour", perDay: "/day", minutesPerMonth: "min/month",
+};
+// ONE COLLECTION, BOTH CHECKS. The floor below counted the paid rows
+// with a SECOND copy of the same filter, and a mutant that blinded the
+// first one left the second one counting happily — the floor was beside
+// the assignment chain rather than on it, which is the exact failure
+// gate-vacuity.test.mjs exists for, written inside the check meant to
+// prevent it.
+const paidRows = sold.filter((f) => planOrder.indexOf(f.minPlan) > 0);
+const givenAway = paidRows
+  .filter((f) => f.cell(freePlan, "en", WORDS).type !== "cross")
+  .map((f) => `${f.id} (minPlan ${f.minPlan}) is not a cross on Free`);
+// AND THE POPULATION HAS ITS FLOOR FIRST. If every entry were minPlan
+// "free" — or the predicate that finds them went blind — the check below
+// would iterate nothing and pass, which is the shape this whole file was
+// written about reappearing inside its own newest assertion.
+check(
+  `there are paid rows to ask about (${paidRows.length})`,
+  paidRows.length >= 5,
+  "every sold row reads minPlan 'free', so the check below is asking nothing"
+);
+check(
+  `no row Free may not use is open on Free (${paidRows.length} paid rows)`,
+  givenAway.length === 0,
+  givenAway.join("\n        ")
+);
 check(
   `the top plan includes more than Free (${top.included} vs ${free.included})`,
   top.included > free.included

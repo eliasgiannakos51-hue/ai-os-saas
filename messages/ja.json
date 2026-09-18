@@ -4105,6 +4105,102 @@
       "feedback": "ユーザーの声を、トーンと優先度で仕分けします。",
       "analytics": "時系列で追う価値のあるあらゆる指標。",
       "automation": "自動化する価値のある流れと、節約できた時間。"
+    },
+    "footer": "このメールは、Ionexa AI のアカウントをお持ちの方にお送りしています。",
+    "scheduledRun": {
+      "label": "予約されたエージェント実行",
+      "titleDone": "予約したタスクが完了しました",
+      "titleFailed": "予約したタスクを実行できませんでした",
+      "cta": "{name} を開く",
+      "preheaderDone": "予約したタスク「{step}」が完了しました。",
+      "preheaderFailed": "予約したタスク「{step}」を実行できませんでした。",
+      "subjectDone": "予約したタスクが完了しました — Ionexa AI",
+      "subjectFailed": "予約したタスクを実行できませんでした — Ionexa AI",
+      "details": {
+        "noCreditsOnce": "クレジットが足りません。チャージするかプランをアップグレードしてから、もう一度予約してください。",
+        "noCreditsRecurring": "クレジットが足りません。チャージするかプランをアップグレードしてください。この自動処理は次のサイクルで再試行します。"
+      }
+    },
+    "stuck": {
+      "label": "ウェブサイトビルダー",
+      "title": "「{name}」が止まっているようです",
+      "body": "この生成は24時間以上終わらずに動き続けています。通常ではなく、作業中というより止まっている可能性が高い状態です。この生成でクレジットは消費されていません。下から開いて、やり直すか削除してください。",
+      "cta": "ウェブサイトビルダーを開く",
+      "preheader": "「{name}」の生成が24時間以上止まっています。",
+      "subject": "「{name}」が止まっているようです — Ionexa AI"
+    },
+    "formSubmission": {
+      "label": "新しいフォーム送信",
+      "title": "「{name}」から連絡がありました",
+      "cta": "自分のサイトを見る",
+      "preheader": "{name} に新しいフォーム送信があります",
+      "subject": "「{name}」に新しいフォーム送信 — Ionexa AI",
+      "badges": {
+        "genuine_interest": "本物の見込み客の可能性",
+        "question": "一般的な質問",
+        "spam": "迷惑メールの可能性",
+        "unclear": "判断できません"
+      }
+    },
+    "agent": {
+      "label": "あなたのエージェント",
+      "resultCta": "エージェントを管理する",
+      "resultPreheader": "{name} — 予約していた結果です。",
+      "disabledTitle": "「{name}」を停止しました",
+      "disabledBody": "{count} 回連続で失敗したため、失敗を繰り返してクレジットを消費し続けないよう、実行を止めました。",
+      "disabledLastError": "最後のエラー: {error}",
+      "disabledHint": "下から開いてタスクを確認し、もう一度オンにしてください。",
+      "disabledCta": "エージェントを開く",
+      "disabledPreheader": "「{name}」は {count} 回の失敗のあと停止しました。",
+      "disabledSubject": "「{name}」を停止しました — Ionexa AI",
+      "pausedTitle": "「{name}」は一時停止中です",
+      "pausedBody": "アカウントのクレジットが尽きたため実行できませんでした。課金は発生しておらず、失われたものもありません。チャージまたはアップグレードしてからもう一度オンにすれば、いつもの予定どおりに再開します。",
+      "pausedCtaTopUp": "クレジットをチャージ",
+      "pausedCtaAgents": "エージェントを開く",
+      "pausedPreheader": "「{name}」は一時停止中です — アカウントのクレジットが尽きました。",
+      "pausedSubject": "「{name}」は一時停止中です — Ionexa AI"
+    },
+    "digest": {
+      "label": "まとめ",
+      "title": "今週",
+      "noticed": "気づいたこと",
+      "cta": "ダッシュボードを開く",
+      "subject": "今週: {first}",
+      "subjectFallback": "Ionexa AI でのあなたの一週間",
+      "lines": {
+        "agents": {
+          "one": "エージェント実行 {runs} 回、うち {found} 回に結果あり",
+          "other": "エージェント実行 {runs} 回、うち {found} 回に結果あり"
+        },
+        "records": {
+          "one": "新しい記録 {count} 件",
+          "other": "新しい記録 {count} 件"
+        },
+        "site": {
+          "one": "あなたのサイト: {count} 件の訪問",
+          "other": "あなたのサイト: {count} 件の訪問"
+        },
+        "credits": {
+          "one": "{count} クレジットを使用",
+          "other": "{count} クレジットを使用"
+        },
+        "creditsWithAverage": {
+          "one": "{count} クレジットを使用（平均: {average}）",
+          "other": "{count} クレジットを使用（平均: {average}）"
+        },
+        "leads": {
+          "one": "フォローアップが記録されていない見込み客 {count} 件",
+          "other": "フォローアップが記録されていない見込み客 {count} 件"
+        },
+        "agentFailures": {
+          "one": "エージェント実行 {count} 回が失敗",
+          "other": "エージェント実行 {count} 回が失敗"
+        },
+        "spendUp": "支出は平均より {percent}% 多くなっています",
+        "spendDown": "支出は平均より {percent}% 少なくなっています",
+        "trafficUp": "サイトの訪問数が {percent}% 増えました",
+        "trafficDown": "サイトの訪問数が {percent}% 減りました"
+      }
     }
   }
 }

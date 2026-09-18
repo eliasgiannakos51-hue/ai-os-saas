@@ -199,7 +199,30 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const planSlug = await resolveEffectivePlanSlug(user);
     const cap = maxPublishedSitesForPlan(planSlug);
 
-    if (!isAdmin && !existing) {
+    // ON EVERY PUBLISH, NOT ONLY THE FIRST.
+    //
+    // This was `if (!isAdmin && !existing)`, and the `!existing` was the
+    // whole gap: the ceiling was asked once, when a site first went live,
+    // and never again. Nothing in this tree unpublishes anything when a
+    // subscription ends — `grep -rn 'status: "unpublished"' src` finds
+    // exactly one writer, the DELETE handler below, which only a person
+    // pressing Unpublish reaches. So an account that published on a paid
+    // plan and then moved to Free kept its live sites AND kept pushing new
+    // content to them, indefinitely, through a route whose own refusal
+    // says "Publishing is available on paid plans."
+    //
+    // WHAT THIS DOES AND DOES NOT DO. It refuses the WRITE. It does not
+    // take anything down: a site that is live stays live and keeps
+    // serving, which is the reversible direction — nobody's page goes dark
+    // because a card expired, and one payment restores editing. Whether a
+    // downgrade should eventually unpublish is a product decision about
+    // somebody else's customers and is not made here.
+    //
+    // THE COUNT EXCLUDES THIS SITE. Re-publishing a site that is already
+    // live adds no site, so counting it against the ceiling would refuse
+    // every edit for an account sitting exactly at its cap — the check
+    // asks "would this leave me over?", not "am I at?".
+    if (!isAdmin) {
       if (cap <= 0) {
         return NextResponse.json(
           { ok: false, upgradeRequired: true, error: "Publishing is available on paid plans." },
@@ -210,11 +233,13 @@ export async function POST(request: Request, { params }: { params: { id: string 
         // Counts LIVE sites only: an unpublished one is not costing us a
         // served request, and holding a slot for it would make "unpublish"
         // pointless.
-        const { count, error: countError } = await supabase
+        let countQuery = supabase
           .from("published_sites")
           .select("id", { count: "exact", head: true })
           .eq("user_id", user.id)
           .eq("status", "live");
+        if (existing) countQuery = countQuery.neq("id", existing.id);
+        const { count, error: countError } = await countQuery;
         if (countError) {
           logApiError("/api/websites/[id]/publish", countError, { stage: "count_published" });
           return NextResponse.json({ ok: false, error: "Could not check your publishing limit." }, { status: 500 });
@@ -387,6 +412,25 @@ export async function POST(request: Request, { params }: { params: { id: string 
         })
         .eq("id", existing.id);
       if (updateError) {
+        // THE SAME CLASH THE INSERT PATH BELOW ALREADY ANSWERS PROPERLY.
+        //
+        // subdomainTaken() runs under the caller's own client, so RLS lets
+        // it see only the caller's rows — deliberately, because a check
+        // that saw every row would enumerate the platform's addresses one
+        // guess at a time. The unique index published_sites_subdomain_key
+        // is therefore the real arbiter, and on THIS path nothing was
+        // reading it: renaming your site to an address somebody else owns
+        // returned 500 "Could not publish that change."
+        //
+        // That is a lie about whose fault it is, and it costs the user
+        // their typed address: the dialog switches on `reason: "taken"` to
+        // keep the field and say the word, and a 500 gives it neither.
+        if (/duplicate key|unique/i.test(updateError.message)) {
+          return NextResponse.json(
+            { ok: false, reason: "taken", error: "That address was just taken." },
+            { status: 409 }
+          );
+        }
         logApiError("/api/websites/[id]/publish", updateError, { stage: "update_published" });
         return NextResponse.json({ ok: false, error: "Could not publish that change." }, { status: 500 });
       }

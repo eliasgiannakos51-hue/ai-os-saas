@@ -88,7 +88,7 @@ const MUTANTS = [
     // 6. CONDITION TWO, by length: a reason too short to contain one.
     name: "a reason is shortened until it argues nothing",
     file: GATE,
-    from: '      "the robots.txt of a published site — the one file on the internet defined by being fetchable without credentials. It reads the same published_sites row to decide whether the site is live and emits text; it writes nothing.",',
+    from: '      "the robots.txt of a published site — the one file on the internet defined by being fetchable without credentials. It reads the same published_sites row to decide whether the site is live and emits text, behind publicRequestAllowed; it writes nothing.",',
     to: '      "robots.txt is public.",',
     expect: "argument rather than an assurance",
   },
@@ -98,7 +98,7 @@ const MUTANTS = [
     // writes in good faith.
     name: "a reason is long but names nothing checkable",
     file: GATE,
-    from: '      "the sitemap of a published site. A sitemap behind a login is a sitemap no crawler can fetch, which is the entire point of having one. It reads the same published_sites row and emits XML derived from its pages list; it writes nothing and calls nothing.",',
+    from: '      "the sitemap of a published site. A sitemap behind a login is a sitemap no crawler can fetch, which is the entire point of having one. It reads the same published_sites row and emits XML derived from its pages list, behind publicRequestAllowed; it writes nothing.",',
     to: '      "there is really no need for any of that here, and there never has been, so we do not do it and we do not plan to start doing it at any point later on either.",',
     expect: "argument rather than an assurance",
   },

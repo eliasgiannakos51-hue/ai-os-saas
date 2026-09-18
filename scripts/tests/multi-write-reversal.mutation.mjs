@@ -29,8 +29,13 @@ const MUTANTS = [
   {
     name: "a scheduled run that matched nothing keeps its hold again",
     file: CRON,
-    from: "          await releaseReservation(userId, runReservationId);\n          await admin\n            .from(\"scheduled_agent_runs\")\n            .update({ status: \"failed\", result: result.message, executed_at: new Date().toISOString() })",
-    to: "          await admin\n            .from(\"scheduled_agent_runs\")\n            .update({ status: \"failed\", result: result.message, executed_at: new Date().toISOString() })",
+    // RE-ANCHORED 2026-09-18. The write beside the release moved into
+    // closeRun() when the eight terminal-status writes in this route
+    // were found to be unchecked (scripts/tests/reservation-lifecycle.test.mjs
+    // §6). The DEFECT this mutant restores is unchanged — the hold that
+    // is not released — so only the surrounding line is new.
+    from: '          await releaseReservation(userId, runReservationId);\n          if (!(await closeRun(admin, run.id, { status: "failed", result: result.message, executed_at: new Date().toISOString() }, "close_run_unmatched"))) unclosed++;',
+    to: '          if (!(await closeRun(admin, run.id, { status: "failed", result: result.message, executed_at: new Date().toISOString() }, "close_run_unmatched"))) unclosed++;',
     expect: "matched nothing releases its hold",
   },
   {

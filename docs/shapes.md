@@ -1706,3 +1706,46 @@ notifier was the one place the same author wrote it the other way round.
 silently did not happen, would anything else notice?* When the answer is
 "nothing, that is what the column is", the write is not bookkeeping. It
 is the feature, and it needs a claim, an error check, or both.
+
+## A mutant whose anchor moved does not fail — it stops existing
+
+A mutation suite proves a gate is load-bearing by putting a real defect
+back and requiring the gate to name it. The mechanism is a string
+replace: find `from` in the file, write `to`, run the gate, expect red.
+
+**When `from` is no longer in the file, nothing goes red.** The edit is
+not applied, so the defect is never reintroduced, so the gate is not
+asked the question. The suite reports one fewer mutation and prints the
+same cheerful last line it always prints. The clause that mutant was the
+only evidence for is now unguarded, and the only trace is a count that
+went down.
+
+**On 2026-09-18 two of these survived a green `npm run build`, a green
+`npm run build:ci` and a push.** Both were created by the same round's
+own work: a `FLOOR` raised from 173 to 174 when a mutation suite was
+added, and a write that moved into a helper when eight unchecked writes
+were fixed. Neither was a mistake in the fix. They were the fix's
+shadow, in a file the fix did not open.
+
+**What found them was a 25-minute full sweep** — `run-mutations.mjs`
+reports STALE ANCHORS separately, which is the one place in the tree
+that knew. What did NOT find them: thirteen mutation suites run by hand,
+chosen by grepping for the files the round had changed. That method
+cannot work, and the reason is the shape itself: the suite that breaks
+is not the suite that mentions your file, it is the suite that mentioned
+*the line*.
+
+**And the check was already there, printing.** `mutation-anchors.test.mjs`
+counted them — *"2093 mutations analysed · 299 target a non-JavaScript
+file · 2 anchor not found in the tree"* — and asserted nothing about the
+third number, one line above a section full of assertions. The general
+case of that is its own entry in this catalogue and its own scanner
+(`scripts/scan-unjudged-numbers.mjs`); this is the instance that cost
+something. It is gated at zero now, because an anchor that does not
+resolve is never a judgement call: the suite is broken, not the code it
+guards.
+
+**The question to ask:** *when my change moves a line, what else was
+pointing at that line?* A gate's assertions are visible in the gate. A
+mutant's anchors live in a different file, are matched by exact text,
+and fail silently by definition.

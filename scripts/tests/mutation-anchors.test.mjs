@@ -160,7 +160,7 @@ check(
 console.log("\n== 2. every mutation changes code, or says why it does not ==");
 let analysed = 0;
 let nonJs = 0;
-let unlocatable = 0;
+const unlocatable = [];
 const proseOnly = [];
 for (const m of mutants) {
   const ext = m.file.slice(m.file.lastIndexOf("."));
@@ -188,7 +188,7 @@ for (const m of mutants) {
     }
   }
   if (!sawEdit) {
-    unlocatable++;
+    unlocatable.push(m);
     continue;
   }
   analysed++;
@@ -196,7 +196,37 @@ for (const m of mutants) {
 }
 console.log(
   `        ${analysed} mutations analysed · ${nonJs} target a non-JavaScript file · ` +
-    `${unlocatable} anchor not found in the tree`
+    `${unlocatable.length} anchor not found in the tree`
+);
+
+// A NUMBER THAT WAS PRINTED AND NEVER JUDGED — for how long is not
+// recoverable, but what it cost on 2026-09-18 is.
+//
+// It stood at 2 through a green `npm run build`, a green `npm run
+// build:ci` and a push. Both were anchors this round's own work had
+// moved: a FLOOR raised from 173 to 174 when a mutation suite was added,
+// and a write that moved into a helper when eight unchecked writes in
+// api/cron/scheduled-runs were fixed. A mutant whose anchor is not in
+// the tree does not fail — it does not RUN. The suite reports one fewer
+// mutation and stays green, so the clause it was the only evidence for
+// becomes unguarded silently.
+//
+// Nothing in `npm run build` said so. It took a 25-minute full sweep,
+// whose runner reports STALE ANCHORS separately, to find them — and the
+// round that created them had run thirteen mutation suites by hand,
+// chosen by which files they mention, and neither of the two was among
+// them. Choosing suites by name is the method that failed; this check is
+// the cheap half of the sweep, and it is a string search.
+//
+// ZERO, not a ratchet. An anchor that does not resolve is never a
+// judgement call: the suite is broken, not the code it guards. The fix
+// is to re-anchor on the line as it now stands and add a mutation for
+// whatever moved it — which is what scripts/tests/lib/mutation-runner.mjs
+// prints when it finds one.
+check(
+  "every mutation's anchor is still in the tree",
+  unlocatable.length === 0,
+  unlocatable.map((m) => `${m.suite} -> ${m.file}  ${JSON.stringify(m.edits[0]?.from?.slice(0, 60) ?? "")}`).join("\n        ")
 );
 const declaredForAnchor = (m, a) =>
   a.file === m.file && m.edits.some((e) => e.from.includes(a.changed) || e.to.includes(a.changed));

@@ -273,8 +273,8 @@ unchecked write changing at all.
 ## Δ. The patterns
 
 **There are far more shapes in `docs/shapes.md` than the 29 the brief
-named** — 49 at the close of 2026-09-18, two of them added by the
-multi-write sweep of that day. `node scripts/tests/shape-names.test.mjs`
+named** — 50 at the close of 2026-09-18, three of them added by the
+multi-write and unread-write sweeps of that day. `node scripts/tests/shape-names.test.mjs`
 prints the live count and resolves every `SHAPE:` reference against the
 catalogue. Read the command's number, not this sentence's.
 
@@ -390,7 +390,7 @@ The four axes:
 
 | axis | in code | in proof |
 |---|---|---|
-| **Truth** — does the product say true things? | strong: pricing page, PLANS and catalog gated both directions; a per-row rule, not a ratio. Four instruments corrected in the last two rounds for claiming more than they could — a reaper that said a charge was structurally impossible, two gates matching a log tag as prose, a register entry that outlived its file | good: gates ran; the pricing page rendered live locally. `scan-self-claims` holds every path named in a comment at zero unresolved |
+| **Truth** — does the product say true things? | strong: pricing page, PLANS and catalog gated both directions; a per-row rule, not a ratio. **Five instruments** corrected in the last two rounds for claiming more than they could — a reaper that said a charge was structurally impossible, two gates matching a log tag as prose, a register entry that outlived its file, and `mutation-anchors` printing its count of dead anchors without judging it | good: gates ran; the pricing page rendered live locally. `scan-self-claims` holds every path named in a comment at zero unresolved, and an anchor that no longer resolves is now gated at zero too |
 | **Security** — is one account sealed from another? | strong: **109 of 110** tables with RLS (86 literal, 23 through a resolved loop, 10 deny-all); **120** authenticated routes — 66 acting on a request id, 16 reaching past RLS, 50 delegating to it; 33 function canaries | **weak, unchanged: the one test that demonstrates it has still never run.** §Η item 1, for the fifth report |
 | **Money** — is what is charged what is shown? | **the axis that moved.** `settleReservation` releases rather than settling a zero when no call completed — one change covering forty call sites, closing a cost-log row, two error rows and an owner email per failed request during an AI outage. 7 multi-write defects fixed across 33 routes; 6 unread-write defects across 14 | weak: nothing measures estimate against settlement, and the per-feature override is invisible to the estimate by design (V6 §3, §12) |
 | **Endurance** — does it survive scale and a second language? | improved: emails in ten languages with plural forms from `Intl.PluralRules`; three cron loops that could repeat work indefinitely now count their own failures into their output | weak: 105 bare gates; the platform-wide daily cap; 1,108 email strings no reader of those languages has seen |
@@ -413,7 +413,7 @@ the verdict most is still not a number I can produce.
 `docs/v6-list.md` carries what this report leaves open — fourteen items,
 of which §11 closed on the day this report was written and §14 is what
 that closure left behind. `docs/shapes.md` is the pattern catalogue;
-`node scripts/tests/shape-names.test.mjs` prints how many it defines (49
+`node scripts/tests/shape-names.test.mjs` prints how many it defines (50
 at the close of 2026-09-18) and resolves every `SHAPE:` reference in the
 tree against it. `node scripts/scan-unread-write-errors.mjs` prints
 §14's population.

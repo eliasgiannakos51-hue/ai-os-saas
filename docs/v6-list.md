@@ -103,7 +103,7 @@ that passes vacuously is a lie in a green log.
 
 ## 6. ~~Finish a full mutation sweep~~ — DONE 2026-09-17
 
-    npm run test:mutation      # 169 suites · 168 green · 1 skipped · 0 red
+    npm run test:mutation      # 172 suites · 171 green · 1 skipped · 0 red
 
 Closed. Two suites that had been red on `main` were repaired in the same
 week: `plan-enforcement`, which declared 13 mutants and exercised 10, and

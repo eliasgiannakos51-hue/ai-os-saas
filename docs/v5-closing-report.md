@@ -335,8 +335,11 @@ ceiling is how many sites an account may publish. Third, the sidebar at
 
 **In code: 100%.** All **271** `*.test.mjs` gates pass. `npm run build`
 exits 0 with zero failures; `npm run build:ci` passes under a deployed
-environment. The full mutation sweep completed on 2026-09-17: 169 suites,
-168 green, 1 skipped, 0 red.
+environment. The full mutation sweep completed after this audit's changes:
+**172 suites, 171 green, 1 skipped, 0 red** — and the runner's own last
+line is the honest one, *"NO SUITE IS RED, but 1 of 172 never ran — this
+is not all green."* The one is `user-isolation`, which is section Η item 1
+and has been for four reports.
 
 **In proof: 75%.** **271 of the 363** gates in the tree executed here. The
 other 92 — 29 dbtests, 44 prodtests, 19 itests — need a database or

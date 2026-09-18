@@ -160,12 +160,14 @@ const REGISTER = {
     reason:
       "planResearch records usage before deciding the plan is unusable, so 'no_plan' is a real charge; the throw path is the helper's case.",
   },
-  "src/app/api/research/[id]/run/route.ts": {
-    mechanism: "handed_on",
-    owner: "src/lib/research/run-research.ts",
-    reason:
-      "The id is written onto research_reports.reservation_id and handed to the chunked runner, which outlives this request — a release here would end a hold the run still needs.",
-  },
+  // api/research/[id]/run WAS registered here as handed_on, on 2026-09-18.
+  // It released nothing of its own because the chunked runner owns the
+  // hold — which was true until the write that hands the id over turned
+  // out to be unchecked. It now releases when that write fails (the run
+  // has not started, so there is nothing to hand on), which takes it out
+  // of the population this register is for. The both-ways check turned
+  // this file red on the stale entry the same run, which is the only
+  // reason it was deleted rather than left reading true.
 };
 
 check(
@@ -303,6 +305,154 @@ check(
 );
 
 // ---------------------------------------------------------------------
+// 6. THE TEN WRITES READ BY HAND ON 2026-09-18, second sitting.
+//
+// The population is "a write whose error nobody reads" — 36 of 139 route
+// writes at the start of this pass. Ten were taken by priority (state the
+// user sees, then credits), four more came with them because they cannot
+// be judged apart, and six were broken. Each is held below by the
+// mechanism that made it a defect, not by the shape of the code.
+//
+// Five were read and found CORRECT, and they are here too, because the
+// reason each is safe is a fact about somewhere else that can change:
+// api/cron/agent-runs' claim fails closed, api/billing/addons' write-back
+// is re-derivable, and three rows are rescued by api/websites/status.
+// ---------------------------------------------------------------------
+const SCHEDULED = "src/app/api/cron/scheduled-runs/route.ts";
+const scheduled = SRC.get(SCHEDULED) ?? "";
+
+check(
+  `${SCHEDULED.replace("src/app/api/", "")}: every terminal status goes through one checked helper`,
+  /async function closeRun\(/.test(scheduled) &&
+    /const \{ error \} = await admin\.from\("scheduled_agent_runs"\)\.update\(patch\)\.eq\("id", runId\);[\s\S]{0,120}if \(error\) \{[\s\S]{0,200}logApiError[\s\S]{0,120}return false;/.test(
+      scheduled
+    ),
+  "eight sites wrote a terminal status and none read the result"
+);
+check(
+  "…and no bare scheduled_agent_runs write is left beside it",
+  (scheduled.match(/\.from\("scheduled_agent_runs"\)\s*\n?\s*\.update\(/g) ?? []).length === 1,
+  "a second, unchecked path to the same column is how the helper stops covering the case it exists for"
+);
+check(
+  "…and a run that did not close is counted into the response",
+  /unclosed\+\+/.test(scheduled) && /\n\s*unclosed,/.test(scheduled),
+  "the due query is `status = pending` and there is NO claim column here, so a run that did not close is picked up again tomorrow — on the two post-AI failure branches that is a second reservation and a second charge"
+);
+// The premise the paragraph above rests on. If a claim column appears,
+// the reasoning changes and this section has to be re-derived.
+check(
+  "…and the premise still holds: due runs are selected by status alone",
+  /\.from\("scheduled_agent_runs"\)\s*\n\s*\.select\("\*"\)\s*\n\s*\.eq\("status", "pending"\)/.test(scheduled) &&
+    !/processing_started_at/.test(scheduled.slice(0, scheduled.indexOf("closeRun"))),
+  "if this route grew a claim, an unclosed run would no longer be a rerun and the severity above is overstated"
+);
+// BY POSITION, over the whole loop, not by one regex window. The first
+// version matched "mark, then send" anywhere in the file and stayed
+// green when a SECOND send was added ahead of the mark — which is the
+// realistic regression, because nobody deletes the marker, they add an
+// earlier notification path.
+const stuckLoopAt = scheduled.indexOf("for (const website of stuckWebsites");
+const stuckLoop = stuckLoopAt === -1 ? "" : scheduled.slice(stuckLoopAt, stuckLoopAt + 2000);
+const markAt = stuckLoop.indexOf("stuck_notified_at: new Date()");
+const sendsAt = [...stuckLoop.matchAll(/sendStuckGenerationEmail/g)].map((m) => m.index);
+check(
+  "the stuck-generation loop was located",
+  stuckLoopAt !== -1 && markAt !== -1 && sendsAt.length > 0,
+  "re-anchor before trusting the two below"
+);
+check(
+  "the stuck-generation marker is claimed BEFORE every send in the loop",
+  markAt !== -1 && sendsAt.length > 0 && sendsAt.every((at) => at > markAt),
+  "the query filters on `stuck_notified_at is null`, so this column is the only thing between one notification and one every day forever — any send that runs before the marker lands is a repeat waiting to happen"
+);
+check(
+  "…and a marker that did not land skips the send instead of continuing",
+  /if \(markError\) \{[\s\S]{0,300}continue;/.test(stuckLoop),
+  "marking and emailing anyway is the same defect with an extra log line"
+);
+
+const PROCESS_SRC = SRC.get(PROCESS) ?? "";
+check(
+  "the stopped-generation status write is checked, with the amount charged",
+  /const \{ error: stoppedError \} = await supabase[\s\S]{0,900}if \(stoppedError\) \{[\s\S]{0,300}creditsCharged: settlement\.creditsCharged/.test(
+    PROCESS_SRC
+  ),
+  "this is the only path here that settles BEFORE writing a terminal status, so a lost write leaves a charged row for api/websites/status to stamp 'No credits were charged'"
+);
+// And the route that stamps it. The two have to keep agreeing.
+const STATUS = "src/app/api/websites/status/route.ts";
+const statusSrc = readFileSync(STATUS, "utf8");
+check(
+  `${STATUS.replace("src/app/api/", "")} still force-fails stale rows`,
+  /No credits were charged/.test(statusSrc) && /isGenerationJobStale\(/.test(statusSrc),
+  "the reaper is what rescues three of the five writes cleared in this pass; without it they are stuck rows, not safe ones"
+);
+check(
+  "…and its comment no longer claims a charge is structurally impossible",
+  /save_stopped_status/.test(statusSrc),
+  "its reasoning — 'a row that never left pending/processing cannot have been charged' — is false for the stopped path alone, and a comment that overstates is how the next reader stops checking"
+);
+
+const DELETE_CONFIRM = "src/app/api/delete-account/confirm/route.ts";
+const deleteConfirm = SRC.get(DELETE_CONFIRM) ?? "";
+check(
+  `${DELETE_CONFIRM.replace("src/app/api/", "")}: the token give-back is checked`,
+  /const \{ error: giveBackError \} = await admin[\s\S]{0,200}\.update\(\{ used_at: null \}\)/.test(deleteConfirm),
+  "'Your link still works' is a promise about this exact write"
+);
+// BY ABSENCE, over the branch's own body. Asserting the replacement
+// sentence would tie this to one wording; what has to hold is that the
+// reassurance is NOT in the branch where its premise failed. The route
+// reuses its standard dead-end message there, so the positive half is
+// just that the branch returns at all.
+const giveBackAt = deleteConfirm.indexOf("if (giveBackError) {");
+// BOUNDED BY THE BRANCH'S OWN CLOSING BRACE, not by a character count.
+// A fixed window ran past the `}` and into the reassuring return that
+// follows it — which is the sentence this check exists to keep OUT, so
+// the window was reading the very thing it forbids.
+const giveBackEnd = giveBackAt === -1 ? -1 : deleteConfirm.indexOf("\n        }", giveBackAt);
+const giveBackBranch =
+  giveBackAt === -1 || giveBackEnd === -1
+    ? "Your link still works"
+    : deleteConfirm.slice(giveBackAt, giveBackEnd);
+check(
+  "…and a give-back that failed does not say the link still works",
+  giveBackAt !== -1 &&
+    !/link still works/.test(giveBackBranch) &&
+    /return NextResponse\.json\([\s\S]{0,300}status: 500/.test(giveBackBranch),
+  "the claim above it consumed the single-use token, so the reassuring sentence with no give-back behind it sends somebody back to a link that can never work again — on the erasure path"
+);
+
+const RUN = "src/app/api/research/[id]/run/route.ts";
+const runSrc = SRC.get(RUN) ?? "";
+check(
+  `${RUN.replace("src/app/api/", "")}: the reservation hand-off is checked`,
+  /const \{ error: holdError \} = await admin[\s\S]{0,200}reservation_id: reservationId \|\| null/.test(runSrc),
+  "nothing else remembers the id — the chunked runner reads it back off this row"
+);
+check(
+  "…and a hand-off that failed releases rather than stranding the hold",
+  /if \(holdError\) \{[\s\S]{0,400}releaseReservation\(user\.id, reservationId\)/.test(runSrc),
+  "the run has not started, so releasing costs nothing; leaving it strands the credits until the daily sweep and gives failChunk nothing to give back"
+);
+
+// THE FIVE CLEARED, each by the fact that makes it safe.
+const AGENT_CLAIM = /\.update\(\{ processing_started_at: new Date\(\)\.toISOString\(\) \}\)[\s\S]{0,400}if \(!claimed \|\| claimed\.length === 0\) \{[\s\S]{0,60}skipped\+\+/;
+check(
+  "cleared: cron/agent-runs' claim reads no error because it fails CLOSED",
+  AGENT_CLAIM.test(agentCron),
+  "if the claim ever stops treating a null result as 'somebody else has it', an errored claim becomes a double run and a double charge — which is what makes the missing error binding safe today and not tomorrow"
+);
+const ADDONS_SRC = SRC.get("src/app/api/billing/addons/route.ts") ?? "";
+check(
+  "cleared: billing/addons' item-id write-back is re-derivable, so losing it costs a lookup",
+  /recoverSubscriptionItemId\(/.test(ADDONS_SRC) &&
+    /\.update\(\{ stripe_subscription_item_id: itemId \}\)/.test(ADDONS_SRC),
+  "the write-back is a cache of something the recovery re-derives; delete the recovery and this becomes a real unchecked write"
+);
+
+// ---------------------------------------------------------------------
 // CONTROLS — driving the detectors rather than restating them.
 // ---------------------------------------------------------------------
 check("control: the assurance filter rejects reassurance", ASSURANCE.test("this one is safe by design"));
@@ -314,6 +464,14 @@ check("control: the comment stripper runs", strip('// await releaseReservation(a
 
 console.log(
   `\n        ${reserves.length} files take a credit hold · ${withoutRelease.length} never release in their own source · ${Object.keys(REGISTER).length} registered`
+);
+// The wider population this file's §6 is a sample of. Printed, never
+// asserted: it is 18% of route writes and most of them are legitimately
+// best-effort, so a number here would be a ratchet on a judgement
+// nobody has made yet. `node scripts/scan-unread-write-errors.mjs`
+// prints the list.
+console.log(
+  "        wider population: node scripts/scan-unread-write-errors.mjs — writes whose error is never read"
 );
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

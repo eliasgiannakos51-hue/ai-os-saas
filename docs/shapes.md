@@ -1661,3 +1661,48 @@ comment.
 enforces it, and what happens in the ones that do not?* A doc comment
 that says "distinct from X" is a claim about something else's behaviour,
 and it is the one kind of claim the file it sits in cannot make true.
+
+## The column whose only job is the filter one line above it
+
+    .is("stuck_notified_at", null)      // the query
+    ...
+    await admin.from("user_websites")
+      .update({ stuck_notified_at: ... })   // the write, unchecked
+
+`stuck_notified_at` does nothing else. It is not displayed, not reported,
+not read by any other query. It exists so that a user whose website
+generation has been stuck for 24 hours gets **one** email instead of one
+every day — and the entire mechanism is that the daily query filters on
+it being null, and this write sets it.
+
+The write ran after the email, and its result was discarded.
+
+**So the single failure the column was created to prevent was the single
+failure nothing checked.** Every other outcome is fine: the email sends
+and the mark lands (correct), the email fails and the mark lands (one
+lost courtesy). Only "mark did not land" matters, and it produced the
+unbounded daily repeat, silently, to the user least able to act on it.
+
+**The shape is a guard whose own failure is the thing it guards
+against.** It is not the same as an unchecked write in general — most
+unchecked writes degrade something. This one *inverts*: the write
+failing does not weaken the protection, it removes it entirely and
+replaces it with the harm. Three more in the same sweep had it: a
+`next_run_at` that stops an agent resubmitting, a terminal `status` that
+stops a cron rerunning its own AI call, a `used_at: null` that makes the
+sentence "your link still works" true.
+
+**The tell is the ORDER, and it is visible without reading the write.**
+Act-then-mark is the wrong order whenever the mark is what prevents the
+act repeating: the window between them is a window in which the act has
+happened and nothing records it. Mark-then-act can lose one action;
+act-then-mark can lose all bounds on it. A claim before the work is the
+standard answer and this codebase already uses it four routes over
+(`processing_started_at` in `api/cron/agent-runs`, `used_at` in
+`api/delete-account/confirm`, `claimChunk` in research) — the stuck
+notifier was the one place the same author wrote it the other way round.
+
+**The question to ask:** *what is this column FOR — and if this write
+silently did not happen, would anything else notice?* When the answer is
+"nothing, that is what the column is", the write is not bookkeeping. It
+is the feature, and it needs a claim, an error check, or both.

@@ -750,7 +750,22 @@ export async function POST(request: Request) {
             reservedCredits: bypassCredits ? 0 : estimate.reserveCredits,
           },
         });
-        await supabase
+        // CHECKED, BECAUSE THE STALE REAPER CONTRADICTS THIS ROW.
+        //
+        // This is the ONE path in the whole route that settles and THEN
+        // writes a terminal status. api/websites/status force-fails any
+        // row still pending/processing past its window and stamps it
+        // "No credits were charged" — its comment reasons that a row
+        // which never left processing structurally cannot have been
+        // charged, which is true of every other path here and false of
+        // this one. So a lost write does not merely leave a spinner: it
+        // hands the user a sentence saying they were not charged, for a
+        // partial generation they were charged for.
+        //
+        // Nothing can be done about it from here except make it
+        // findable, so the failure is logged WITH the amount, which is
+        // what a refund needs.
+        const { error: stoppedError } = await supabase
           .from("user_websites")
           .update({
             status: "failed",
@@ -764,6 +779,14 @@ export async function POST(request: Request) {
                 : "Stopped by you. Nothing was charged.",
           })
           .eq("id", websiteId);
+        if (stoppedError) {
+          logApiError("/api/websites/generate/process", stoppedError, {
+            stage: "save_stopped_status",
+            websiteId,
+            creditsCharged: settlement.creditsCharged,
+            hint: "this row will be force-failed by api/websites/status with 'No credits were charged' — the figure here is what was actually charged",
+          });
+        }
         diagLog(
           `[billing] website_generate STOPPED and settled: ${JSON.stringify({
             userId: user.id,

@@ -78,6 +78,16 @@ export const PROSE_ANCHORS = {
       "state it described is the exact defect this repository keeps finding.",
     anchors: [{ file: "src/i18n/constants.ts", changed: "ships text-only Arabic" }],
   },
+  "reservation-lifecycle.mutation.mjs": {
+    reason:
+      "api/websites/status force-fails a stale row and stamps it 'No credits were charged'. Its " +
+      "comment used to argue that a charged row cannot reach that state, which is true of every " +
+      "path into it but one — the STOPPED generation settles before writing its status. The gate " +
+      "requires the comment to name the exception, so the mutation that removes the exception " +
+      "can only be a comment edit: the correction IS a sentence, because the thing that was " +
+      "wrong was a sentence.",
+    anchors: [{ file: "src/app/api/websites/status/route.ts", changed: "save_stopped_status" }],
+  },
   "self-claims.mutation.mjs": {
     reason:
       "Comments ARE this gate's subject. Every mutant here breaks a claim a comment makes — a " +

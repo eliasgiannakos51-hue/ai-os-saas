@@ -54,6 +54,41 @@ export const dynamic = "force-dynamic";
 // for tomorrow's run, never lost, never executed twice.
 const MAX_RUNS_PER_USER_PER_DAY = 5;
 
+/**
+ * CLOSE A SCHEDULED RUN, AND SAY SO IF IT DOES NOT CLOSE.
+ *
+ * Eight sites wrote a terminal status onto scheduled_agent_runs and none
+ * of them looked at the result. That matters because the due query at the
+ * top of this route is `status = 'pending'` and there is NO claim column
+ * here — unlike api/cron/agent-runs, nothing marks a row as being worked
+ * on. A terminal write that does not land leaves the row pending, and
+ * tomorrow's invocation picks it up again.
+ *
+ * On the two POST-AI failure branches (`!result.ok`, `!result.matched`)
+ * that is a repeat charge: the mission step is not `completed` on those
+ * paths, so the guard further up does not catch the rerun, and
+ * runMissionStepForUser is called again with a fresh reservation. Once a
+ * day, quietly, until the write happens to succeed.
+ *
+ * There is no compensating write worth attempting — a second update fails
+ * for the same reason the first did. What this adds is that the failure is
+ * logged with the run id and COUNTED into the response, so a loop is
+ * visible from the cron's own output rather than from an Anthropic bill.
+ */
+async function closeRun(
+  admin: ReturnType<typeof createAdminClient>,
+  runId: string,
+  patch: Record<string, unknown>,
+  stage: string
+): Promise<boolean> {
+  const { error } = await admin.from("scheduled_agent_runs").update(patch).eq("id", runId);
+  if (error) {
+    logApiError("/api/cron/scheduled-runs", error, { stage, runId });
+    return false;
+  }
+  return true;
+}
+
 // Scheduled Agent Runs — executes whatever the user explicitly approved
 // via "Schedule for tomorrow" (mission-card.tsx / api/mission/schedule-step)
 // once its scheduled day has arrived. This is NOT an autonomous agent
@@ -108,6 +143,11 @@ export async function GET(request: Request) {
     let completed = 0;
     let failed = 0;
     let deferred = 0;
+    // A run whose terminal status did not land, so it is still 'pending'
+    // and tomorrow's invocation will pick it up again. Reported
+    // separately from failed, which is a normal outcome — this one is a
+    // repeat charge waiting to happen (see closeRun).
+    let unclosed = 0;
 
     for (const [userId, allDueForUser] of runsByUser) {
       // The safety cap: only the first MAX_RUNS_PER_USER_PER_DAY (oldest
@@ -166,10 +206,7 @@ export async function GET(request: Request) {
         if (!bypassCredits && plan) {
           const check = await hasEnoughCredits(userId, stepEstimate(run.step_text).reserveCredits, plan);
           if (!check.ok) {
-            await admin
-              .from("scheduled_agent_runs")
-              .update({ status: "failed", result: "insufficient_credits", executed_at: new Date().toISOString() })
-              .eq("id", run.id);
+            if (!(await closeRun(admin, run.id, { status: "failed", result: "insufficient_credits", executed_at: new Date().toISOString() }, "close_insufficient_credits"))) unclosed++;
             failed++;
             void sendScheduledRunCompleteEmail({
               userId: user.id,
@@ -190,10 +227,7 @@ export async function GET(request: Request) {
           .maybeSingle();
 
         if (missionError || !mission) {
-          await admin
-            .from("scheduled_agent_runs")
-            .update({ status: "failed", result: "Mission no longer exists.", executed_at: new Date().toISOString() })
-            .eq("id", run.id);
+          if (!(await closeRun(admin, run.id, { status: "failed", result: "Mission no longer exists.", executed_at: new Date().toISOString() }, "close_mission_gone"))) unclosed++;
           failed++;
           continue;
         }
@@ -206,10 +240,7 @@ export async function GET(request: Request) {
         // no-op, not a re-run, same idempotency-guard spirit as
         // api/websites/generate/process's status check.
         if (!step || step.status === "completed") {
-          await admin
-            .from("scheduled_agent_runs")
-            .update({ status: "completed", result: "Already completed.", executed_at: new Date().toISOString() })
-            .eq("id", run.id);
+          if (!(await closeRun(admin, run.id, { status: "completed", result: "Already completed.", executed_at: new Date().toISOString() }, "close_already_done"))) unclosed++;
           completed++;
           continue;
         }
@@ -223,10 +254,7 @@ export async function GET(request: Request) {
           fingerprintRequest(run.mission_id, run.step_index, run.step_text)
         );
         if (!breakerCheck.allowed) {
-          await admin
-            .from("scheduled_agent_runs")
-            .update({ status: "failed", result: breakerCheck.reason, executed_at: new Date().toISOString() })
-            .eq("id", run.id);
+          if (!(await closeRun(admin, run.id, { status: "failed", result: breakerCheck.reason, executed_at: new Date().toISOString() }, "close_circuit_breaker"))) unclosed++;
           failed++;
           void sendScheduledRunCompleteEmail({
             userId: user.id,
@@ -248,14 +276,19 @@ export async function GET(request: Request) {
             estimatedCredits: runEstimate.estimatedCredits,
           });
           if (!reservation.ok) {
-            await admin
-              .from("scheduled_agent_runs")
-              .update({
-                status: "failed",
-                result: "Not enough credits for this scheduled run. No credits were charged.",
-                executed_at: new Date().toISOString(),
-              })
-              .eq("id", run.id);
+            if (
+              !(await closeRun(
+                admin,
+                run.id,
+                {
+                  status: "failed",
+                  result: "Not enough credits for this scheduled run. No credits were charged.",
+                  executed_at: new Date().toISOString(),
+                },
+                "close_reserve_failed"
+              ))
+            )
+              unclosed++;
             failed++;
             continue;
           }
@@ -274,10 +307,7 @@ export async function GET(request: Request) {
 
         if (!result.ok) {
           await releaseReservation(userId, runReservationId);
-          await admin
-            .from("scheduled_agent_runs")
-            .update({ status: "failed", result: result.error, executed_at: new Date().toISOString() })
-            .eq("id", run.id);
+          if (!(await closeRun(admin, run.id, { status: "failed", result: result.error, executed_at: new Date().toISOString() }, "close_run_failed"))) unclosed++;
           failed++;
           void sendScheduledRunCompleteEmail({
             userId: user.id,
@@ -308,10 +338,7 @@ export async function GET(request: Request) {
           // stated at the success path below: credits are deducted only
           // after the durable save succeeded. Nothing was saved here.
           await releaseReservation(userId, runReservationId);
-          await admin
-            .from("scheduled_agent_runs")
-            .update({ status: "failed", result: result.message, executed_at: new Date().toISOString() })
-            .eq("id", run.id);
+          if (!(await closeRun(admin, run.id, { status: "failed", result: result.message, executed_at: new Date().toISOString() }, "close_run_unmatched"))) unclosed++;
           failed++;
           void sendScheduledRunCompleteEmail({
             userId: user.id,
@@ -374,10 +401,7 @@ export async function GET(request: Request) {
           })}`
         );
 
-        await admin
-          .from("scheduled_agent_runs")
-          .update({ status: "completed", result: result.outputSummary, executed_at: new Date().toISOString() })
-          .eq("id", run.id);
+        if (!(await closeRun(admin, run.id, { status: "completed", result: result.outputSummary, executed_at: new Date().toISOString() }, "close_run_completed"))) unclosed++;
         completed++;
         void sendScheduledRunCompleteEmail({
           userId: user.id,
@@ -663,15 +687,39 @@ export async function GET(request: Request) {
       logApiError("/api/cron/scheduled-runs", stuckWebsitesError, { stage: "load_stuck_websites" });
     } else {
       for (const website of stuckWebsites ?? []) {
+        // THE MARKER IS CLAIMED BEFORE THE EMAIL IS SENT, and a marker
+        // that does not land skips the email entirely.
+        //
+        // stuck_notified_at exists for exactly one purpose — the query
+        // above filters on `is null`, so this column is the only thing
+        // between one notification and one every single day. The write
+        // used to run AFTER the send and its result was never read, so
+        // the one failure mode the column was created to prevent was the
+        // one nothing checked: a user whose generation is stuck gets the
+        // same email daily, forever, and the more of them arrive the less
+        // any of them is read.
+        //
+        // Claiming first can lose a notification (marked, then the send
+        // fails). That is the better direction: sendStuckGenerationEmail
+        // is itself best-effort and logs its own failures, and one
+        // missed courtesy email beats an unbounded daily repeat.
+        const { error: markError } = await admin
+          .from("user_websites")
+          .update({ stuck_notified_at: new Date().toISOString() })
+          .eq("id", website.id)
+          .is("stuck_notified_at", null);
+        if (markError) {
+          logApiError("/api/cron/scheduled-runs", markError, {
+            stage: "mark_stuck_notified",
+            websiteId: website.id,
+          });
+          continue;
+        }
         const { data: ownerAuth } = await admin.auth.admin.getUserById(website.user_id);
         const ownerEmail = ownerAuth?.user?.email;
         if (ownerEmail) {
           void sendStuckGenerationEmail({ email: ownerEmail, userId: website.user_id, websiteName: website.name });
         }
-        await admin
-          .from("user_websites")
-          .update({ stuck_notified_at: new Date().toISOString() })
-          .eq("id", website.id);
         stuckNotified++;
       }
     }
@@ -750,6 +798,7 @@ export async function GET(request: Request) {
       completed,
       failed,
       deferred,
+      unclosed,
       automationsCompleted,
       automationsFailed,
       stuckNotified,

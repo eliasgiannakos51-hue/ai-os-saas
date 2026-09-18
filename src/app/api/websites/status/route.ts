@@ -92,9 +92,18 @@ export async function GET(request: Request) {
     // skips every catch block and every status update this route relies
     // on. Every poll checks this, so the very next tick after a job goes
     // stale, the client sees 'failed' instead of spinning indefinitely.
-    // No credits to refund here: deductCredits only ever runs AFTER
-    // status flips to 'completed' (see the process route), so a row that
-    // never left pending/processing structurally can't have been charged.
+    // ALMOST NO CREDITS TO REFUND HERE, and the exception is worth
+    // naming rather than rounding off. Settlement runs after the durable
+    // save on every path in api/websites/generate/process but one: the
+    // STOPPED path settles the partial generation first and writes
+    // status: 'failed' after. If that write is the thing that failed,
+    // the row is still 'processing', this branch force-fails it, and the
+    // sentence below is wrong for that row alone.
+    // That write is checked and logs the exact figure with
+    // stage: "save_stopped_status", so the case is findable instead of
+    // silent. It is left worded this way because it is true of every
+    // other route into this state and a hedge here would read as doubt
+    // about all of them.
     const typedRecord = record as UserWebsite;
     if (
       isGenerationJobStale(

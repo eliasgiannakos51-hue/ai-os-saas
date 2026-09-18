@@ -5,10 +5,10 @@ item names what it costs to CHECK, which is usually far less than what it
 costs to fix, and several of these turn out to need fifteen minutes of the
 owner's time rather than a day of coding.
 
-**Measured 2026-09-18, commit `13885c7b`, with item 11 re-measured the
-same day after the multi-write sweep finished.** Numbers that can be
-re-derived name the command. This replaces the 2026-09-13 edition: two of
-its ten items are closed, one shrank, and three are new.
+**Measured 2026-09-18.** Numbers that can be re-derived name the command
+that derives them; read the command's number, not the sentence. This
+replaces the 2026-09-13 edition: item 11 closed the same day the
+multi-write sweep finished, item 14 is what that sweep left behind.
 
 ---
 
@@ -178,73 +178,42 @@ against `MAX_DAILY_AI_CALLS`, which is **platform-wide**. A thousand
 ordinary users trip a ceiling written to contain one runaway. Worth
 deciding before there are a thousand users rather than during.
 
-## 11. ~~The 33 multi-write routes~~ — SWEPT 2026-09-18, 7 of 33 were broken
+## 11. ~~The 33 multi-write routes~~ — SWEPT, 7 of 33 were broken (2026-09-18)
 
-**All thirty-three have now been read by hand**, in two passes, and the
-population is printed on every run by
-`node scripts/tests/multi-write-reversal.test.mjs`.
+All thirty-three read by hand, in two sittings. The population is printed
+on every run by `node scripts/tests/multi-write-reversal.test.mjs`.
 
-| pass | read | broken | rate |
+| sitting | read | broken | rate |
 |---|---|---|---|
-| money and publishing (2026-09-17) | 10 | 3 | 30% |
-| everything else (2026-09-18) | 23 | 4 | 17% |
+| money and publishing | 10 | 3 | 30% |
+| everything else | 23 | 4 | 17% |
 | **total** | **33** | **7** | **21%** |
 
-The first three are held by `multi-write-reversal.test.mjs` (27 checks,
-10 of 10 mutants). The four found in the second pass are held by
-`scripts/tests/reservation-lifecycle.test.mjs` (44 checks, 13 of 13
-mutants):
-
-| route | what it left behind |
-|---|---|
-| `lib/billing/reservations.ts` (reached by `api/import/paste`, `api/import/csv/analyse`, `api/research`) | a settlement whose AI call THREW settled a zero instead of releasing: a cost-log row for an action that never ran, a `billing:zeroCostSettlement` row, a `billing:marginBelowTarget` row and a margin-alert **email to the owner** — per failed request, during an outage, across every account. |
-| `api/data-analysis/[id]/analyse` | settled, then wrote the findings and only LOGGED a failed write. The findings were in the response, so the screen looked right; a refresh showed an unanalysed file on an account that had just paid. |
-| `api/cron/agent-runs` | two `next_run_at` writes with no error check, each beside a comment naming the loop they prevent. The batch branch has already submitted and charged by then, so an agent left due resubmits and recharges every fifteen minutes. |
-| `api/import/csv/apply`, `api/import/paste` | the `user_imports` summary (`rows_imported`, `rows_rejected`, `modules`) written with no error check — the copy that outlives the response body and that the GDPR export reads. |
-
-**The rate fell below the owner's 30% stop line in the second pass, and
-the sweep finished anyway** because 23 was the whole remainder, not a
-sample of a larger set. There is no further population to stop scanning.
-
-**What the second pass cost and what it bought:** three hours, four
-defects, one of which (the zero settlement) was emailing the owner during
-every AI outage and was invisible in every other gate.
+Held by `multi-write-reversal.test.mjs` (27 checks, 10/10 mutants) and
+`reservation-lifecycle.test.mjs` (56 checks, 23/23 mutants).
 
 ### The enforcement question, answered
 
-Asked: can *"the state the user sees must be the LAST write"* be enforced
-rather than scanned?
-
-**As stated, no**, and the tree says why in its own comments.
-`api/websites/generate/process` writes `status: "processing"` FIRST on
-purpose and its FINAL status write comes deliberately AFTER settlement,
-so the polling client cannot read a balance the charge has not reached
-yet. Seventeen files write durably after settling; most are right. A gate
+*"The state the user sees must be the LAST write"* — **as stated, no.**
+`api/websites/generate/process` writes `status: "processing"` first on
+purpose and its final status write comes deliberately after settlement,
+so a polling client cannot read a balance the charge has not reached.
+Seventeen files write durably after settling and most are right; a gate
 on the stated rule would flag the tree and be turned off.
 
-**Two narrower forms are true, and both are now enforced:**
+**Two narrower forms are true and both are enforced:**
 
-1. **A helper that does the right thing by default.** `settleReservation`
-   is the one function all forty call sites reach, so the case "no AI
-   call completed" is decided there: it releases the hold and writes no
-   row. Nothing at the call sites changed, and the forty-first will not
-   need to change either. This is the fix for the first row above.
-2. **A register with a written reason, checked both ways.** Every file
-   that takes a credit hold and never releases one in its own source is
-   listed in `reservation-lifecycle.test.mjs` with the mechanism that
-   ends its holds — `settles_unconditionally` (verified: no `return
-   NextResponse` between taking the hold and settling it) or `handed_on`
-   (verified: the named module releases). Five entries today; an
-   unregistered offender and a stale entry both turn it red.
-
-**The general form — "every write's error is read" — is NOT enforced,
-and the number is why:** 40 of 146 route writes destructure no error, or
-destructure one nothing reads (`node scripts/tests/reservation-lifecycle.test.mjs`
-does not measure this; the figure is from a one-off scan on 2026-09-18).
-Most are legitimately best-effort — a `status: failed` write on a path
-that is already answering an error. Turning that into a zero-offender
-register means forty written reasons, which is a round of its own and
-belongs in V6 proper.
+1. **The helper decides.** `settleReservation` is the one function all
+   forty call sites reach, so "no AI call completed" is handled there —
+   it releases and writes no cost-log row. Nothing at the call sites
+   changed; the forty-first will not need to either.
+2. **A register with a verified mechanism.** Every file that takes a hold
+   and never releases one is listed with how its holds end —
+   `settles_unconditionally` (checked: no `return NextResponse` between
+   the hold and the settle) or `handed_on` (checked: the named module
+   releases). Four entries; an unregistered offender and a stale entry
+   both turn it red. One entry was deleted the day it was written,
+   because the run route started releasing and the both-ways check said so.
 
 ## 12. The per-feature margin override the estimate cannot see — a decision, not a bug
 
@@ -291,3 +260,46 @@ front of production is configured to be the thing this is explicitly not.
 
 `/r/<code>` has no limiter and needs none: it touches no database at all,
 reads a path segment, sets a cookie and redirects.
+
+## 14. The writes whose error nobody reads — 25 left, and a decision first
+
+    node scripts/scan-unread-write-errors.mjs
+
+**25 of 139 route writes (18%), measured by that command, not by this
+sentence.** supabase-js returns database errors in `.error` rather than
+throwing, so an unread result is a write that cannot fail as far as the
+surrounding code knows.
+
+This is the population six of the seven multi-write defects came from.
+**Ten were taken by priority on 2026-09-18** — state the user sees, then
+credits — and four more came with them because they cannot be judged
+apart:
+
+| # | write | verdict |
+|---|---|---|
+| 1 | `cron/scheduled-runs` ×8 terminal status | **BROKEN** — the due query is `status = pending` with no claim column, so a status that did not land is picked up tomorrow; on the two post-AI failure branches the mission step is not `completed`, the guard does not catch it, and the AI runs again on a fresh reservation |
+| 2 | `cron/scheduled-runs` `stuck_notified_at` | **BROKEN** — the column's only job is the `is null` filter one line above it; sending first and marking after, unchecked, is the one order in which it does nothing, and the stuck-generation email arrives daily forever |
+| 3 | `websites/generate/process` stopped-status | **BROKEN** — the only path here that settles before writing status; a lost write leaves a charged row for `api/websites/status` to stamp *"No credits were charged"* |
+| 4 | `delete-account/confirm` token give-back | **BROKEN** — *"Your link still works"* is a promise about that write; unchecked, the reassurance shipped without the fact, on the erasure path |
+| 5 | `research/[id]/run` reservation hand-off | **BROKEN** — nothing else remembers the id; the chunked runner reads it off the row, and `failChunk` had nothing to give back |
+| 6 | `cron/scheduled-runs` success status | minor — the mission-step guard prevents the recharge; the run row is stuck `pending` while the completion email has gone |
+| 7 | `cron/scheduled-runs` insufficient-credits | minor — pre-AI, so the rerun is free |
+| 8 | `research/[id]/run` insufficient-credits | minor — report stuck `processing`, nothing charged |
+| 9 | `cron/agent-runs` claim | **correct** — fails CLOSED: a null result is treated as "somebody else has it" |
+| 10 | `billing/addons` item-id write-back | **correct** — a cache of something `recoverSubscriptionItemId` re-derives |
+| 11 | `websites/generate/process` fallback status | **correct** — it IS the fallback inside the error handler; there is nothing below it |
+| 12 | `websites/generate/process` failed-status | **correct** — rescued by the stale reaper, whose message (*"No credits were charged"*) is true on that path |
+| 13 | `websites/generate` reference-image mark | **correct** — same reaper, same true message; the 500 stops the browser starting the worker |
+| 14 | `cron/scheduled-runs` mission-gone | minor — pre-AI |
+
+**6 of 14 broken (43%), all six fixed.** Five of the fourteen were
+correct and are held in the gate too, because the reason each is safe is
+a fact about somewhere else — the claim failing closed, the recovery
+being re-derivable, the reaper existing.
+
+**What is left is a decision, not a sweep.** Most of the 25 are
+legitimately best-effort: a `status: "failed"` write on a path already
+answering an error, where reading the result changes nothing the route
+does. A zero-offender register means ~25 written reasons, which is a
+round of work. The alternative is to leave the scan reporting and re-run
+it after each round.

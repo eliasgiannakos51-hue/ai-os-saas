@@ -26,6 +26,7 @@ const GATE = "scripts/tests/baselines.test.mjs";
 const I18N = "scripts/tests/i18n-coverage.test.mjs";
 const HELPER = "scripts/tests/lib/baseline.mjs";
 const ANCHORS = "scripts/tests/mutation-anchors.test.mjs";
+const FLOORFILE = "scripts/tests/run-mutations.mjs";
 
 const MUTANTS = [
   {
@@ -39,15 +40,39 @@ const MUTANTS = [
     expect: "no baseline has more room than it is allowed",
   },
   {
-    // 2. A CEILING BELOW REALITY is the other direction, and it must not
-    // be reported as healthy slack: it means the count has already grown
-    // past the number.
-    name: "a floor is registered as a ceiling, so a breach reads as room",
-    file: GATE,
-    from: '    name: "MUTATION_SUITE_FLOOR",\n    direction: "floor",',
-    to: '    name: "MUTATION_SUITE_FLOOR",\n    direction: "ceiling",',
+    // 2. A BASELINE RAISED PAST WHAT IT MEASURES — the other direction,
+    // and the one a person actually does: bumping a floor optimistically
+    // while adding suites, or raising a ceiling to make a red build green.
+    // Either way the declared number describes a tree that does not exist.
+    name: "a floor is raised above what the tree can show",
+    file: FLOORFILE,
+    from: "const FLOOR = 172;",
+    to: "const FLOOR = 182;",
     expect: "no baseline has more room than it is allowed",
   },
+  // WHAT USED TO STAND HERE AND CANNOT, and the reason is worth more than
+  // the mutant was. It flipped MUTATION_SUITE_FLOOR's `direction` from
+  // "floor" to "ceiling", expecting a breach to read as room. It never
+  // killed anything, and the full sweep on 2026-09-18 said so.
+  //
+  // The cause is not a hole in the gate. `gap` is `measured - declared`
+  // for a floor and `declared - measured` for a ceiling, so flipping the
+  // direction only changes the SIGN of a gap — and today every one of the
+  // twelve baselines sits at exactly zero:
+  //
+  //     INDIRECT_ENGLISH_BASELINE  declared 38  measured 38  slack 0 of 0
+  //     MUTATION_SUITE_FLOOR       declared 172 measured 172 slack 0 of 10
+  //     …and ten more, all 0
+  //
+  // Zero negated is zero. The `direction` field is unfalsifiable by any
+  // single-file mutation while that holds, and it would take a two-file
+  // edit — the number in one file, the direction in another — which this
+  // runner deliberately does not do.
+  //
+  // That is a true and slightly uncomfortable thing to know about this
+  // gate: `direction` is right, and nothing here proves it. It becomes
+  // drivable the moment any baseline carries real slack, which is exactly
+  // when it would start to matter.
   {
     // 3. THE NUMBERS STOP BEING PUBLISHED. Nothing to compare, nothing to
     // report, and a gate that reads an empty list is a gate that always

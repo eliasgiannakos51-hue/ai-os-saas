@@ -1,6 +1,6 @@
 # V5 — closing report
 
-**Every number here was measured on 2026-09-13, on commit `7eeee62a`, by
+**Every number here was measured on 2026-09-18, on commit `13885c7b`, by
 running the thing that produces it.** Where a number could not be
 measured, the row says so instead of carrying a figure. The commands are
 named so the next reader re-runs rather than trusts.
@@ -8,7 +8,11 @@ named so the next reader re-runs rather than trusts.
     npm run build            # every gate, then next build
     npm run build:ci         # the same under a deployed environment
     npm run test:prod        # the 44 prodtests — needs production
-    npm run test:mutation    # the 154 mutation suites
+    npm run test:mutation    # the 172 mutation suites
+
+**This supersedes the 2026-09-13 edition.** Five days and six rounds of
+work sit between them; the figures below replace the ones that were true
+then. Where a section is unchanged it says so rather than being retyped.
 
 ---
 
@@ -32,72 +36,100 @@ product, and the two have disagreed in this repository before
 | Presentations | WORKS in code | `presentations.test.mjs` — 115/115 | NO |
 | Posts | WORKS in code | `posts.test.mjs` — 96/96 | NO |
 | Universal Memory | WORKS in code | `ai-memory.test.mjs` — 51/51 | NO |
-| **Meeting → actions** | **NOT BUILT** | `sidebar-nav.ts:372` carries `notBuilt: true`; there is no `src/app/dashboard/meetings` | — |
+| **Meeting → actions** | **NOT BUILT** | `sidebar-nav.ts` carries `notBuilt: true`; there is no `src/app/dashboard/meetings` | — |
 | Sidebar (structure) | WORKS in code | `sidebar-structure` 38/38, `sidebar-naming` 154/154, `sidebar-size` 37/37 | NO |
-| Sidebar (density) | **BROKEN gate** | `sidebar-density.prodtest.mjs` — 17 passed, 23 failed. See Γ. | NO |
 | Step flow | WORKS in code | `step-flow.test.mjs` — 47/47 | NO |
 | Design | WORKS in code | `design-density.test.mjs` — 14/14 | NO |
-| The 89 grants | WORKS in code | `role-grants.test.mjs` — 93/93. **A V4 item, not V5**: `docs/v4-closing-report.md`. 50 `revoke … from authenticated` statements in migrations, which `shapes.md` counts as 89 (table, verb) pairs. | NO — `role-grants.dbtest.mjs` needs a database |
-| **Isolation** | **UNTESTED here** | `user-isolation.dbtest.mjs` requires `DATABASE_URL`, which is unset in this environment. It did not run. | NO |
-| The pricing page | WORKS in code | `pricing-truth.test.mjs` 51/51, `feature-catalog.test.mjs` 36/36 — 45 rows, 7 sections | NO |
-| The 7 lies of PLANS | WORKS in code | `plan-enforcement.test.mjs` — 18/18. 14 capabilities declared, 10 enforced, 4 held for unbuilt features | NO |
+| The 89 grants | WORKS in code | `role-grants.test.mjs` — 93/93. A V4 item — see `docs/v4-closing-report.md` | NO — `role-grants.dbtest.mjs` needs a database |
+| **Isolation** | **UNTESTED here** | `user-isolation.dbtest.mjs` needs `DATABASE_URL`, unset here. Did not run. | NO |
+| The pricing page | WORKS in code | `pricing-truth.test.mjs` 51/51, `feature-catalog.test.mjs` 36/36 | NO |
+| The capabilities of PLANS | WORKS in code | `plan-enforcement.test.mjs` — 20/20 | NO |
+| **Publishing** | WORKS in code | `publishing.test.mjs` — 155/155, incl. the ceiling and the clash | NO |
+| **Emails in ten languages** | WORKS in code | `i18n-population.test.mjs` 30/30, `email-logo.test.mjs` 25/25 | NO |
+| **The client bundle's environment** | WORKS in code | `client-env-reach.test.mjs` — 30/30 | NO |
+| **The route contract** | WORKS in code | `route-contract.test.mjs` — 34/34 | NO |
 
-`npm run build` — **EXIT=0, 0 failures**. `npm run build:ci` — **EXIT=0**,
-"The build passes in a deployed environment as well as in this one."
+`npm run build` — **EXIT=0, 0 failures** across all 271 `*.test.mjs`.
+`npm run build:ci` — **EXIT=0**, "The build passes in a deployed
+environment as well as in this one."
+
+### The five findings this brief named, measured
+
+The brief named five sets by number. Three of the five numbers are not
+ones I produced, and the honest answer is the measurement rather than
+agreement.
+
+| what the brief called it | what the tree says today | command |
+|---|---|---|
+| "the 7 free routes" | **0 remain.** 36 routes reach a model call; every one reserves credits or is declared with what else stops a loop. | `route-spend-inventory.test.mjs` — 23/23 |
+| "the 5 without ownership" | **8 were reported on 2026-09-18, and all 8 were scoped.** The vocabulary was three mechanisms short, not the tree. All **66** routes acting on a request id now show a mechanism. | `resource-ownership.test.mjs` — 23/23 |
+| "the 51 without rate limit" | **94 of 143 call no `checkRateLimit`; 53 have no bound of any of the eight kinds.** Both are correct: this tree bounds by eight mechanisms, and a route that reads and returns needs none. What matters is the narrowed question — **0 of the 39 inserting routes are unbounded.** | `route-write-bound.test.mjs` — 30/30 |
+| "the 231 translations" | **1,108 email strings across ten locales**, on top of 3,266 interface keys × 9. I could never source 231. | `node scripts/check-i18n.js` |
+| "the publish with 3 defects" | **2 real, both fixed. The third was never there.** Ownership is RLS through the caller's own client, and two controls in `resource-ownership.test.mjs` already named that route. | `publishing.test.mjs` — 155/155 |
 
 ---
 
 ## Β. Security
 
-Counted out of `supabase/migrations/*.sql` (72 files) on 2026-09-13:
+Counted out of `supabase/migrations/*.sql` on 2026-09-18:
 
 | | count |
 |---|---|
-| `enable row level security` statements | 92 |
-| `create policy` statements | 225 |
-| `grant … on …` statements | 80 |
-| `revoke … from authenticated` statements | 50 |
+| tables created in `public` | 110 |
+| of them with RLS | **109** (86 literal, 23 through a `DO` loop) |
+| RLS on, no policy — deny-all on purpose | 10, each with a written reason |
+| without RLS | **1**, `zz_anon_default_probe`, created and dropped inside one `DO` block |
 
-**RLS on the new tables — yes, each one.** `generated_posts`,
-`transition_suggestions`, `nav_events` and `projects` each carry
-`enable row level security` and policies in their own migration.
-`ai_presentations` (the table the presentations migration extends) grants
-the four verbs to `authenticated` and issues `revoke all … from anon` in
-the same file.
+**RLS on the new tables — yes, each one.** `projects`, `generated_posts`,
+`transition_suggestions` and `nav_events` each carry
+`enable row level security` and policies in their own migration;
+`ai_presentations` is one of the 23 protected through a loop, which
+`rls-coverage.test.mjs` resolves and asserts by name.
 
-**GRANT and POLICY together — held by a gate, not by hand.**
-`20260926000000_revoke_authenticated_grants_without_policy.sql` exists for
-exactly this, and the presentations migration restates the rule in its own
-header: *"A POLICY WITHOUT A GRANT IS A LOCKED DOOR."*
-
-**No anon — one documented exception.** The only `grant … to anon` on a
-table is `grant select on public.help_articles to anon, authenticated`
-(public help content). `grant usage on schema public to anon` remains, and
-`20260906000000_revoke_anon_grants.sql` explains the policy: nothing
-inherits, everything anon may read says so in its own migration.
-
-**Does the isolation test cover the new tables? Yes — by construction, and
-it did not run here.** `user-isolation.dbtest.mjs` derives its population
-from "has a `user_id` or `owner_id` column", deliberately NOT filtered by
-`relrowsecurity`. Its own header records why: the first version filtered on
-RLS being on, and the mutation suite turned RLS **off** on `user_credits`
-— the table holding people's money — and the suite went green, because the
-table dropped out of the population along with its protection. So a new
-table is covered the moment it has an owner column. **But `DATABASE_URL`
-is unset here and the file did not execute.** This is the V4 closing
-report's largest gap, and this session did not close it.
+**Does the isolation test cover the new tables? Yes — by construction,
+and it did not run here.** `user-isolation-live.prodtest.mjs` asks
+PostgREST for its own OpenAPI document and takes every exposed table with
+a `user_id` or `owner_id` property. There is no list for anybody to
+forget to update: a new table is in the population the moment it has an
+owner column. `user-isolation.dbtest.mjs` does the same against
+`pg_class`. **Neither ran: `DATABASE_URL` is unset and no two accounts
+were supplied.** This is the largest single gap in this report and the
+fourth report in a row to say so.
 
 **RPC canaries — all of them, or a written reason.**
-`rpc-canaries.test.mjs` — 106/106. It reads 40 distinct database functions
-called from `src/` across 916 files, checks them against 31 canaries, and
-for every RPC without one asserts that its exemption carries a reason
-**and** that it is not also a canary.
+`rpc-canaries.test.mjs` — 106/106, both directions: an RPC with no canary
+and no exemption is red, an exemption for an RPC nothing calls is red, and
+a canary for a function `src/` never calls is red.
 
-Other security gates, all run today, all green: `security-posture`
-403/403 · `owner-only-access` 68/68 · `gdpr-coverage` 64/64 ·
-`untrusted-boundaries` 32/32 · `user-scoped-queries` 15/15 ·
-`injection-patterns` 85 · `log-scrubbing` 92 · `write-guards` 21 ·
-`rpc-signatures` 12.
+**And a finding about this report's own method.** During this audit I
+measured 41 RPCs called from `src/` against 33 function canaries, found
+nine unwatched — six of them the credit path — and wrote canaries for all
+nine plus a gate to hold them. The full sweep turned `rpc-canaries` red in
+one run: that gate already **registers** the nine, with the reason that
+they are baseline-schema functions, and a database missing the baseline
+fails the health probe's own read first, so `db` goes false and a canary
+there reports a state no user can reach. Nine alarms for an unreachable
+state, and a second gate that would have drifted from the first. All
+reverted. The lesson is section Δ's: I searched the tree for the gap
+before searching it for the gate.
+
+**How many routes are outside the registry? Six, all declared.**
+`route-contract.test.mjs` asks the question the four narrow gates cannot —
+is any route in *no* population — and the register that answers it is held
+to two conditions: the scanner derives every mechanism and the table only
+records them, and a reason must name a file, a function, a table or a
+status code rather than reassure.
+
+    identity   asked of 143 · answered by 136
+    ownership  asked of  66 · answered by  66
+    bound      asked of  39 · answered by  37
+    spend      asked of   6 · answered by   6
+               6 routes in no population, all declared
+
+Other security gates, all run today, all green: `security-posture` ·
+`owner-only-access` · `gdpr-coverage` · `untrusted-boundaries` ·
+`user-scoped-queries` · `injection-patterns` · `log-scrubbing` ·
+`write-guards` · `rpc-signatures` · `page-auth-boundary` 23/23.
 
 ---
 
@@ -105,175 +137,195 @@ Other security gates, all run today, all green: `security-posture`
 
 ### The six already known, checked one by one
 
-**1. React #310 — real, documented, not reproduced here.** Five places in
-the tree name it: `src/app/dashboard/error.tsx`,
-`src/app/dashboard/overview/error.tsx`,
-`src/app/dashboard/overview/page.tsx:484`, and
-`routes-smoke.prodtest.mjs:497`, which records it as *"production-only,
-intermittent (6/1/4 in three identical runs)"*. Error boundaries are in
-place at both the dashboard and the overview segment. It cannot be
-reproduced without production. **Open.**
+**1. React #310 — real, documented, not reproduced here.** Named in
+`src/app/dashboard/error.tsx`, `src/app/dashboard/overview/error.tsx` and
+`scripts/tests/routes-smoke.prodtest.mjs`, which records it as
+*"production-only, intermittent"*. Error boundaries are in place at both
+the dashboard and the overview segment. **Open, and not closable without
+production.**
 
-**2. The unpaired block comment — I could not find it, and I am not going
-to pretend otherwise.** The build compiles and `tsc --noEmit` is clean, so
-it is not an unterminated comment in any TypeScript the compiler reads.
-Counting `/*` against `*/` across `src/` and `scripts/` reports 107
-unbalanced files, and that count is worthless: it cannot tell a comment
-from `"*/"` inside a string or a regex. **Precision of that method is
-approximately zero and I am reporting it as zero.** Point me at the file
-and it is a five-minute fix.
+**2. Routes with no reversibility study — 40, not 66.** Measured today:
+40 of 143 routes perform two or more distinct writes, so a failure between
+them can leave halves. Two classes are now covered and gated —
+`external-state-reversal.test.mjs` (7 routes change Stripe state, all
+seven declared with which way they fail) and `upload-reversibility.test.mjs`
+(a storage upload whose row write fails). **The remaining ~33 are
+database-only multi-writes, where a failure leaves an inconsistent pair of
+rows rather than a charge. Open, and the cheapest next instrument.**
 
-**3. Gates without a mutation suite — 109, and the build prints it.**
-`mutation-coverage.test.mjs`:
+**3. Translations with no native speaker — and now a second population
+that no reader can reach at all.** Ten locales ship and every non-English
+string was written by a model. `docs/first-run/first-run.<locale>.md` is
+the review pack for the interface: 601 strings on the first-run path,
+tier 1 being 47 sentences. The emails are **not in it** —
+`grep -c '"email\.' docs/first-run/first-run.en.md` returns 0, because the
+pack walks components and an email is not a component. **1,108 email
+strings, ten languages, no reviewer and no pack. Open.**
 
-    test      160/258  62.0%   itest    8/19   42.1%
-    dbtest      2/29    6.9%   prodtest 3/44    6.8%
-    MUTATION COVERAGE: 168 of 277 drivable gates = 60.6%  (0 exempt, 109 bare)
+**4. The measurements that did not run — three classes, not three
+measurements.** 29 dbtests (need `DATABASE_URL`), 44 prodtests (need
+production), 19 itests. **92 of the 363 gates in the tree.** The full
+`npm run test:mutation` sweep DID complete on 2026-09-17: 169 suites, 168
+green, 1 skipped, 0 red — and the skipped one is `user-isolation`, which
+the runner correctly refuses to count as green.
 
-The 109 are categorised by what they protect, and the categories are the
-reassuring part:
+**5. Sidebar height in production.** Measured locally against a real
+production build with a stand-in Supabase; not against production.
+`node scripts/measure-sidebar-height.mjs` prints it. **Open.**
 
-    money and access:     0
-    what a person meets:  0
-    everything else:    109
-
-**4. The measurements that did not run.** Three classes, not three
-measurements: **29 dbtests** (need `DATABASE_URL`), **44 prodtests**
-(need production), and the **full `npm run test:mutation` sweep**, which
-was started twice this week and stopped both times. A stopped sweep is not
-free: the second stop left an applied mutation in `messages/en.json`
-(`"presentations"` rewritten to *"It does not create slides."*) which
-would have been committed by the next `git add -A`. **Open.**
-
-**5. Translations with no native speaker.** Ten locales ship. Nothing in
-this repository can establish that a Greek, Arabic, Japanese or Chinese
-sentence reads naturally to somebody who speaks it — `check-i18n.js` and
-`i18n-coverage` hold structure, placeholders and coverage, which is a
-different claim. **Open, and not closable by any instrument here.**
-
-**6. Sidebar height in production.** Measured locally against a real
-production build with a stand-in Supabase; **not** measured against
-production. The owner will supply a test account. **Open — see Η.**
+**6. Isolation of the new tables.** Covered by construction (Β), never
+executed. **Open — and it is 15 minutes of the owner's time, not a day of
+mine. See Η.**
 
 ### Found in this round, and fixed
 
-**`sidebar-density.prodtest.mjs` was reading before the thing it measures
-existed.** `measureExpanded()` set `grid-template-rows: 1fr` and read
-`scrollHeight` in the same `evaluate()`, before the collapse transition
-ran. It printed `1440x900: 900px of content in 900px — fits`, which is the
-panel's own height echoed back. The truth is **1702px in 900px — SCROLLS**.
-Fixed: open, wait, then measure.
+**The plan ceiling on publishing was asked once.**
+`if (!isAdmin && !existing)` ran the plan check on first publish only, and
+nothing in this tree unpublishes anything when a subscription ends. An
+account that published on a paid plan and moved to Free kept its sites
+live **and kept pushing new content to them**, through a route whose own
+refusal reads "Publishing is available on paid plans."
+`plan-enforcement.test.mjs` stayed green throughout — correctly, because
+the capability is read and does refuse, on the path that gate looks at.
 
-**That prodtest is red — 17 passed, 23 failed — and was red before this
-round.** It is not run by `npm run build`, only by `npm run test:prod`,
-which is why nobody saw. Every failure traces to one fact:
+**The same clash, two answers.** Renaming a site to an address somebody
+else owns returned 500 from the update path and 409 from the insert path.
+`subdomainTaken()` runs under the caller's own client and can only see
+their own rows — deliberately — so the unique index is the arbiter, and
+one of the two paths was not reading it.
 
-| V4.6 target | V5 reality |
-|---|---|
-| ≤ 4 groups | **6** |
-| ≤ 20 rows | **26** |
-| ≥ 15 readable @1080p | **7** |
-| ≤ 1100px of content | **1702px** |
+**Eight routes reported as establishing no ownership, all eight scoped.**
+Three mechanisms were missing from the vocabulary: an RPC through the
+caller's client where the function is `SECURITY INVOKER` (read out of the
+migrations, because `.rpc("x")` looks identical for a `DEFINER` function
+that bypasses every policy), the caller's client handed into a helper, and
+a helper given `user.id`. The predicates had **two copies** — one in
+`resource-ownership`, one in `route-contract` — so the widening would have
+landed in one and left the other disagreeing. They are one definition now,
+in `scripts/tests/lib/route-mechanisms.mjs`.
 
-Those targets were written before the accordion existed, and the accordion
-— one group open at a time — is what makes 7 readable rows correct rather
-than a regression. **Nothing here was relaxed to make it pass**: 1440
-carries the same floor as 1080p (15) so it fails honestly beside it, and a
-new invariant requires every viewport to appear in exactly one of `FLOOR`
-or `NO_FLOOR`, so a future viewport can be neither floored nor silently
-skipped. Re-baselining is the owner's decision.
+**Two mutation suites were reporting more mutants than they were
+running.** `plan-enforcement` declared 13 and exercised 10 (three anchored
+on a page that had moved), and its coverage check let **nine of fourteen**
+Free capabilities flip to true while staying green — a ratio over 45 sold
+rows, most of which are a number rather than a capability. Replaced with a
+per-row rule derived from the catalogue's own `minPlan`.
+`schema-canaries` had a mutant that went red on the wrong clause.
 
-**`estimated_cost` is written by 24 call sites and read by nothing.** Not
-application code, not `docs/sql/4-spend.sql` or `5-undercount.sql` (both
-read `total_calls`, and 4-spend says in its own header that real spend
-comes from `ai_cost_log`), not any dashboard. Twenty-one of the
-twenty-four callers pass a real `estimate.estimatedCredits`; three pass a
-flat 1, 1 and 2 out of `CREDIT_COSTS`. **Open — the fix is the owner's
-choice** between rewiring three routes and dropping the column, which
-needs a migration applied by hand.
+**A mutant that could not fail, found by the sweep itself.**
+`baselines.mutation.mjs` flipped `MUTATION_SUITE_FLOOR` from a floor to a
+ceiling, expecting a breach to read as room. It never killed anything, and
+the reason is not a hole in the gate: `gap` is `measured - declared` for a
+floor and the reverse for a ceiling, and **all twelve baselines sit at
+exactly zero slack today**. Zero negated is zero. The `direction` field is
+unfalsifiable by any single-file mutation while that holds, which is a
+true and uncomfortable thing to know about a gate — it is right, and
+nothing proves it. Replaced with a mutant that raises a floor above what
+the tree can show, which is the edit a person actually makes, and the
+original's reasoning left in place where the mutant was.
+
+**The whole client bundle's environment.** 228 `"use client"` entries pull
+in 392 files; six read `process.env` for something a browser does not
+have, and **three of the six are invisible to any name scan** because they
+pass the object wholesale or take it as a default parameter. Measured by
+building with unique markers: nothing leaks, and two of the five do run in
+a browser. `margin-policy.ts`'s own header claimed the quoted and charged
+multipliers "cannot drift apart"; they can, in exactly one way, and it now
+says which.
 
 ---
 
 ## Δ. The patterns
 
-**There are 44 shapes in `docs/shapes.md`, not 26.** The brief that asked
-for this report said 26; the file has 44, the last two added this week.
-That is shape 38 — *the number that was right when it was typed* —
-happening to the request for the audit.
+**There are 47 shapes in `docs/shapes.md`, not 29.** `node
+scripts/tests/shape-names.test.mjs` counts them and resolves every
+`SHAPE:` reference against the catalogue. The brief that asked for this
+report said 29; that is the catalogue's own shape *the number that was
+right when it was typed*, happening to the request for the audit — for the
+third report running.
 
-**A per-shape "found / real / fixed" table cannot be produced honestly.**
-The document records instances in prose, not in a machine-readable field,
-and most sections name one defect rather than a population. Inventing
-three numbers for each of 44 rows would be the exact thing rule 47
-forbids. What the document DOES carry, where it carries it:
+**A per-shape "found / real / fixed" table still cannot be produced
+honestly.** The document records instances in prose, not in a
+machine-readable field, and most sections name one defect rather than a
+population. What it does carry, where it carries it:
 
 | Shape | found | real | fixed |
 |---|---|---|---|
-| `\b` is ASCII (31) | 32 checks in `untrusted-boundaries.test.mjs` | — | yes, that gate IS the rule |
-| The gate that dies instead of failing (42) | 3 ways, named in `prodtest-hygiene` | 3 | yes |
-| A field that costs nothing to add (43) | 22 declarations | 22 | yes — removed, with each naming comment |
-| The one live use (44) | 3 of the 4 CREDIT_COSTS survivors | 3 | comment fixed; the wiring is open |
-| Unjudged numbers (`scan-unjudged-numbers`) | 19 | **1** | yes |
-| English-anchored gates (new) | 26 hits in 11 files | 10 of 11 files verified | **no — open** |
+| `\b` is ASCII | 32 checks in `untrusted-boundaries.test.mjs` | — | yes, that gate IS the rule |
+| The gate that dies instead of failing | 3 ways, named in `prodtest-hygiene` | 3 | yes |
+| A field that costs nothing to add | 22 declarations | 22 | yes |
+| Unjudged numbers (`scan-unjudged-numbers.mjs`) | 19 | **1** | yes |
+| The check covers the participants | 6 dimensions asked deliberately | 4 of 6 correct all along | yes — each now has a population with a floor |
+| The variable that does not exist where the code runs | 6 reads in the client bundle | 0 leaks, 2 that run there | yes — `client-env-reach.test.mjs` |
+| The route in no conversation at all | 6 of 143 | 6 correct | yes — `route-contract.test.mjs` |
 
-The honest summary of the rest: they are recorded as narratives with a
-fix, and the count of instances was never kept.
+**The dominant pattern of the last six rounds is one shape, and it is not
+in the code.** Nine times out of ten the defect was a POPULATION: a scan
+asking a sound question of the wrong set.
+
+| the question | the vocabulary it had | what the tree had |
+|---|---|---|
+| which modules send mail? | files under `src/lib/email` | 14 calling `resend.emails.send`, two elsewhere |
+| who is asking? | session, cron secret, Stripe signature | + password, OAuth code, bearer token, new account |
+| whose row is this? | 5 mechanisms | + RPC under RLS, client handed on, helper given the id |
+| what bounds this route? | 8 kinds | + an in-memory window, which is the whole public surface |
+
+Each was right about everything it looked at. **The fourth was found by a
+sentence of mine that was wrong** — I wrote in the V6 list that only one
+of the four public site routes had a limiter, and `grep -c
+publicRequestAllowed` says all four do. I believed my own instrument's
+silence over a thirty-second grep. `docs/shapes.md` records it and its
+inverse, which happened in the same session.
 
 ---
 
 ## Ε. The seven questions
 
-**1. What broke silently in V5?** `sidebar-density.prodtest.mjs`. Red
-since the sidebar gained its accordion, invisible because prodtests are
-not part of `npm run build`. And inside it, a measurement that reported
-`fits` for something that needs twice the screen.
+**1. What broke silently in V5?** The publishing ceiling — asked on first
+publish and never again, while nothing unpublishes on downgrade. Revenue,
+silent, and green in every gate.
 
 **2. Which features did nobody touch?** Meetings, Music, Browser agent and
 Computer agent — four sidebar positions carrying `notBuilt: true`, held
 deliberately and correctly kept off the pricing page. Of built features,
-the `estimated_cost` column is the untouched surface: 24 writers, no
-reader, for long enough that three price constants survived a cull by
-feeding it.
+the `estimated_cost` column remains the untouched surface.
 
 **3. Which promise something they do not do?** Zero on the pricing page —
-that is what `pricing-truth.test.mjs` now holds, and a `notBuilt` row
-cannot be published. One remains in code: the `~N credits` estimate shown
-before submit is the same number used to size the hold, and a hold is
-deliberately biased high. The estimator returns 73–156 credits for a
-website generation where the one production row recorded in
-`website-margin-real-numbers.itest.mjs` charged **45**. The wording says
-"about", and nothing measures whether "about" is about.
+that is what `pricing-truth.test.mjs` holds, and a `notBuilt` row cannot
+be published. One remains in code: the `~N credits` estimate is the hold's
+number, deliberately biased high, and nothing measures whether "about" is
+about. A second, smaller one closed this week: an operator who sets a
+per-feature `CREDIT_MARGIN_*` override moves the charge and not the
+estimate, because the estimate runs in a browser where the variable does
+not exist — now written down in the function that does it.
 
-**4. Which were declared done and are not?** The V4.6 sidebar targets (4
-groups / 20 rows / 15 readable / 1100px) read as met and are not. The
-`time-constants.ts` consolidation described itself in the past tense with
-three holdouts still writing the numbers inline — fixed this week. And my
-own sentence *"moving one moves a graph"*, written in the commit that
-deleted eleven fields for being unread, about a column nothing reads.
+**4. Which were declared done and are not?** `docs/v5-list.md` §5 read as
+though the translation work needed a day of coding when the pack was
+already built. Fixed in the same commit as the work, per the standing
+rule. And this report's 2026-09-13 edition, which is why it has been
+rewritten rather than appended to.
 
-**5. The most dangerous security point?** That `user-isolation.dbtest.mjs`
-has not executed in this environment. Everything else in the security
-column is a statement about configuration — RLS is on, a policy exists, a
-grant has a policy behind it — and the V4 report already identified that
-those describe the machinery rather than demonstrate it keeps two real
-people apart. The file that demonstrates it needs a database, and did not
-run.
+**5. The most dangerous security point?** Unchanged, and it is the same
+answer as V4: `user-isolation` has still never executed. Everything else
+in the security column describes configuration — RLS is on, a policy
+exists, a grant has a policy behind it. The file that demonstrates two
+real people are kept apart needs two real accounts.
 
-**6. What would an attacker do first?** Ask whether `anon` can read
-anything: the answer is `help_articles` only, and the schema-usage grant.
-Then try the RPC surface, since 40 functions are callable by name and
-`SECURITY DEFINER` is where RLS stops applying — `rpc-signatures` and
-`rpc-canaries` are the gates standing there, and both are green. Then
-cross-account reads, which is question 5.
+**6. What would an attacker do first?** Ask what `anon` can read: the
+answer is `help_articles` and the schema-usage grant. Then the RPC
+surface, since 41 functions are callable by name and `SECURITY DEFINER` is
+where RLS stops applying — `rpc-signatures` and `rpc-canaries` stand
+there, both green. Then the five public routes under `/s/<subdomain>` and
+`/r/<code>`, which are the tree's entire unauthenticated surface and are
+the six entries in `route-contract`'s register.
 
-**7. What breaks at 1,000 users?** The daily platform breaker is the
-honest candidate: `checkDailyPlatformCap` reads `total_calls` against
-`MAX_DAILY_AI_CALLS`, a **platform-wide** ceiling, so a thousand ordinary
-users trip a limit written for a runaway. Second, the sidebar: 1702px of
-nav in a 900px viewport is a scroll on every page for every user, not a
-tail case. Third, any unbounded read — `/dashboard/search` reads 21 tables
-at 60 rows each, bounded deliberately, but that bound was added after a
-page-load timeout was found the same way.
+**7. What breaks at 1,000 users?** The daily platform breaker:
+`checkDailyPlatformCap` reads `total_calls` against `MAX_DAILY_AI_CALLS`,
+a **platform-wide** ceiling, so a thousand ordinary users trip a limit
+written for a runaway. Second, the five public site routes: they read the
+database on every view, have no limiter of their own, and their only
+ceiling is how many sites an account may publish. Third, the sidebar at
+1702px in a 900px viewport.
 
 ---
 
@@ -281,44 +333,66 @@ page-load timeout was found the same way.
 
 **Two percentages, and the gap between them is the report.**
 
-**In code: 100%.** All 258 `*.test.mjs` gates pass. `npm run build` exits
-0 with zero failures; `npm run build:ci` passes under a deployed
-environment.
+**In code: 100%.** All **271** `*.test.mjs` gates pass. `npm run build`
+exits 0 with zero failures; `npm run build:ci` passes under a deployed
+environment. The full mutation sweep completed after this audit's changes:
+**172 suites, 171 green, 1 skipped, 0 red** — and the runner's own last
+line is the honest one, *"NO SUITE IS RED, but 1 of 172 never ran — this
+is not all green."* The one is `user-isolation`, which is section Η item 1
+and has been for four reports.
 
-**In proof: 74%.** 258 of the 350 gates in the tree executed here. The
+**In proof: 75%.** **271 of the 363** gates in the tree executed here. The
 other 92 — 29 dbtests, 44 prodtests, 19 itests — need a database or
 production, and none of them ran. Mutation coverage over what the sweep
-can drive is **60.6%** (168 of 277), and the full sweep did not complete.
+can drive is **63.8%** (185 of 290), up from 60.6% five days ago.
 
 The four axes:
 
 | axis | in code | in proof |
 |---|---|---|
-| **Truth** — does the product say true things? | strong: pricing page, PLANS, catalog all gated both directions | good: gates ran; the pricing page rendered live locally |
-| **Security** — is one account sealed from another? | strong: 92 RLS, 225 policies, 106 canary checks | **weak: the one test that demonstrates it did not run** |
-| **Money** — is what is charged what is shown? | mixed: settlement is measured and gated; the shown estimate is the hold's number | weak: nothing measures estimate against settlement |
-| **Endurance** — does it survive scale and a second language? | mixed: bounded reads, atomic increments | weak: 11 gates anchored on English; 109 bare gates; platform-wide daily cap |
+| **Truth** — does the product say true things? | strong: pricing page, PLANS and catalog gated both directions; a per-row rule now, not a ratio | good: gates ran; the pricing page rendered live locally |
+| **Security** — is one account sealed from another? | strong: 109 of 110 tables with RLS, 106 canary checks, 66 of 66 routes showing an ownership mechanism | **weak: the one test that demonstrates it has still never run** |
+| **Money** — is what is charged what is shown? | improved: the publishing ceiling is asked on every write; 0 model-reaching routes outside the credit system | weak: nothing measures estimate against settlement, and the per-feature override is invisible to the estimate by design |
+| **Endurance** — does it survive scale and a second language? | improved: emails in ten languages with plural forms chosen by `Intl.PluralRules` | weak: 105 bare gates; platform-wide daily cap; 1,108 email strings no reader can reach |
+
+**The honest one-line summary.** The code is in better shape than the
+proof, the proof is in better shape than it was, and the single number
+that would move the verdict most is not a number I can produce.
 
 ---
 
 ## Ζ. Documents
 
 `docs/v6-list.md` carries what this report leaves open. `docs/shapes.md`
-gained shapes 43 and 44 this week.
+holds 47 shapes; three were added in the last six rounds.
 
 ---
 
 ## Η. The list for the owner — only what I could NOT verify
 
 Six things. Each says what to press, what you should see, what it means if
-you do not see it, and how long it takes. **If you have ten minutes, do
-number 1 and stop.**
+you do not see it, and how long it takes.
+
+> ### If you have ten minutes
+>
+> Do **number 1** and stop. It is the only measurement in this report that
+> puts two real people in the database and checks they cannot reach each
+> other, it takes fifteen minutes of which fourteen are you finding two
+> passwords, and it has never run in a session that produced a report —
+> four reports running. Everything else on this list can wait a week
+> without changing what is true.
 
 ### 1. The isolation test — 15 minutes, and it is the one that matters
 
 **What you press:**
 
     DATABASE_URL='postgres://…' node scripts/tests/user-isolation.dbtest.mjs
+
+or, against the live API rather than the database:
+
+    ISOLATION_EMAIL_A=… ISOLATION_PASSWORD_A=… \
+    ISOLATION_EMAIL_B=… ISOLATION_PASSWORD_B=… \
+    node scripts/tests/user-isolation-live.prodtest.mjs
 
 **What you should see:** a run that creates two users, seeds a row for
 each in every table with an owner column, and ends `ALL PASS`. Four
@@ -331,19 +405,18 @@ the seed failed or the grant is absent, and the green is empty. If a real
 failure appears, one account can read, update or delete another's rows.
 
 **Why this one first:** every other security number in this report
-describes configuration. This is the only one that puts two people in the
-database and checks they cannot reach each other. It has never run in a
-session that produced a report.
+describes configuration. The population is derived from PostgREST's own
+OpenAPI document, so the four tables added since V5 started are already in
+it and no list needs updating. What is missing is the run.
 
 ### 2. Sidebar targets — one decision, no keyboard
 
 **What you decide:** whether V4.6's 4 groups / 20 rows / 15 readable /
 1100px still bind, now that the accordion ships. Today: 6 / 26 / 7 /
-1702px.
+1702px. `node scripts/measure-sidebar-height.mjs` prints it.
 
 **What it means if you leave it:** `npm run test:prod` stays red at 23
-checks and the next person cannot tell the stale limits from real
-failures.
+checks and the next person cannot tell stale limits from real failures.
 
 **The one number worth keeping whatever you decide:** 1702px of nav in a
 900px viewport is a scroll on every page for every user.
@@ -362,28 +435,42 @@ to size the hold, and a hold is deliberately biased high. If the gap is
 real at scale, every customer is quoted more than they pay, in the
 direction that stops them clicking.
 
+**And one thing this round added to the same question:** if you have ever
+set a per-feature `CREDIT_MARGIN_<FEATURE>_<PLAN>` override, it moves the
+charge and **not** the estimate — the estimate runs in the browser, where
+that variable does not exist. Written down now in `margin-policy.ts` and
+in `client-env-reach.test.mjs`. Closing it needs a `NEXT_PUBLIC_` mirror,
+which is a decision about exposing pricing policy to the browser.
+
 ### 4. React #310 — needs your production
 
 **What you press:** load `/dashboard` and `/dashboard/overview` a few
 times.
 
 **What you should see:** never the error boundary.
-`routes-smoke.prodtest.mjs:497` records it as intermittent, 6/1/4 in three
-identical runs.
+`scripts/tests/routes-smoke.prodtest.mjs` records it as intermittent.
 
 **What it means if it appears:** hooks rendered conditionally somewhere on
 that segment. Boundaries are in place, so a user sees a recovery screen
 rather than a blank page — but they see it.
 
-### 5. The translations — one person per language
+### 5. The translations — and now there are two populations, not one
 
-**What you press:** nothing. No instrument in this repository can tell you
-whether a Greek, Arabic, Japanese or Chinese sentence reads naturally.
-`check-i18n.js` holds structure and placeholders, which is a different
-claim.
+**For the interface:** one reader per script — Japanese, Chinese, Arabic —
+through `docs/first-run/first-run.<locale>.md`, tier 1 first. That is 47
+sentences per language, roughly an hour each.
+
+**For the emails: there is no pack, and that is the new part.** 1,108
+strings across ten languages, every one written by a model, and
+`grep -c '"email\.' docs/first-run/first-run.en.md` returns **0** — the
+pack walks components and an email is not a component. These are the
+messages a customer reads when they are *not* looking at the product: a
+welcome, a sign-in warning, an agent that gave up, a week summarised. They
+are read with more attention than a button, not less.
 
 **What it means if it is wrong:** the product reads as machine-translated
-in nine of its ten languages and nothing goes red.
+in nine of its ten languages and nothing goes red. No instrument here can
+tell you otherwise.
 
 ### 6. The unpaired block comment — name the file
 
@@ -395,13 +482,18 @@ approximately zero and I am not going to dress it up.
 
 **What I need:** the file, or the round it was found in.
 
-### And a seventh, which is mine and not yours
+### And a seventh, which is mine and not yours — now closed
 
-The full `npm run test:mutation` sweep has not completed. If you run it:
-when it ends, or if you stop it, check `git status` for files you did not
-edit. A stopped sweep leaves its last mutation applied — the one on
-2026-09-13 left `"presentations"` rewritten to *"It does not create
-slides."* in `messages/en.json`, one `git add -A` away from shipping.
+The full `npm run test:mutation` sweep **completed on 2026-09-17**: 169
+suites, 168 green, 1 skipped, 0 red. Two suites that had been red on
+`main` were repaired in the same week.
+
+The hazard it leaves is still real and worth knowing: a **stopped** sweep
+leaves its last mutation applied. It happened twice in this session — once
+to `src/lib/coding/highlight.ts` — and `node scripts/check-mutation-tree.mjs`
+is what tells you, with `node -e 'await import("./scripts/tests/lib/sidecar-write.mjs")'`
+to heal it. Check `git status` for files you did not edit before any
+`git add -A` that follows a sweep.
 
 ---
 

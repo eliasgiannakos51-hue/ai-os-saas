@@ -5,8 +5,9 @@ item names what it costs to CHECK, which is usually far less than what it
 costs to fix, and several of these turn out to need fifteen minutes of the
 owner's time rather than a day of coding.
 
-**Measured 2026-09-13, commit `7eeee62a`.** Numbers that can be re-derived
-name the command.
+**Measured 2026-09-18, commit `13885c7b`.** Numbers that can be
+re-derived name the command. This replaces the 2026-09-13 edition: two of
+its ten items are closed, one shrank, and three are new.
 
 ---
 
@@ -78,37 +79,54 @@ alive.
   charge; or
 - **Remove** the column, which needs a migration applied by hand.
 
-## 5. The 11 English-anchored gates — ~2 hours, or 30 minutes for the worst 4
+## 5. The 10 English-anchored gates — ~2 hours, or 30 minutes for the worst 4
 
     node scripts/scan-english-anchored-gates.mjs
 
-11 files compare browser-rendered text against an English literal that is
-provably user-visible (it matches a value in `messages/en.json`). 22 hits
-go **red** against a Greek, Arabic or Chinese UI — visible, somebody fixes
-them. **4 hits go green while measuring nothing**, because they are
-negative assertions and the English string they forbid is never present:
+**Ten** files (it said 11 on 2026-09-13; re-measured today) compare
+browser-rendered text against an English literal that is provably
+user-visible — it matches a value in `messages/en.json`, which has nine
+other spellings. Those hits go **red** against a Greek, Arabic or Chinese
+UI: visible, and somebody fixes them. A further 37 files assert English
+against a source file or against `en.json` itself, which is legitimate and
+is not a finding.
+
+**The dangerous ones are the negative assertions**, which go green while
+measuring nothing because the English string they forbid is never present
+in any language:
 
     !body.includes("Upgrade Required")
     !/\b0 credits\b/i.test(text)
 
-**Take the 4 first.** A check that fails loudly is a nuisance; a check
+**Take those first.** A check that fails loudly is a nuisance; a check
 that passes vacuously is a lie in a green log.
 
-## 6. Finish a full mutation sweep — ~3 hours of wall clock, ~0 of attention
+## 6. ~~Finish a full mutation sweep~~ — DONE 2026-09-17
 
-`npm run test:mutation` has been started twice and stopped twice. 109 of
-277 drivable gates are bare (`mutation-coverage.test.mjs` prints it on
-every build), and the bare ones are categorised:
+    npm run test:mutation      # 172 suites · 171 green · 1 skipped · 0 red
+
+Closed. Two suites that had been red on `main` were repaired in the same
+week: `plan-enforcement`, which declared 13 mutants and exercised 10, and
+`schema-canaries`, whose mutant went red on the wrong clause.
+
+The skipped one is `user-isolation`, and the runner refuses to count it as
+green — *"NO SUITE IS RED, but 1 of 169 never ran — this is not all
+green."* That is item 1, not this one.
+
+**What is still open here is the coverage, not the run.** 105 of 290
+drivable gates are bare (`mutation-coverage.test.mjs` prints it on every
+build), and the bare ones are categorised:
 
     money and access:     0
     what a person meets:  0
-    everything else:    109
+    everything else:    105
 
-**A stopped sweep is not free.** The second stop left an applied mutation
-in `messages/en.json` — `"presentations"` rewritten to *"It does not
-create slides."* — which the next `git add -A` would have committed.
-Whoever runs it should check `git status` for files they did not edit
-before committing afterwards.
+**A stopped sweep is still not free.** It happened twice in one session on
+2026-09-17, leaving `src/lib/coding/highlight.ts` mutated both times.
+`node scripts/check-mutation-tree.mjs` reports it and
+`node -e 'await import("./scripts/tests/lib/sidecar-write.mjs")'` heals it.
+Check `git status` for files you did not edit before any `git add -A` that
+follows a sweep.
 
 ## 7. React #310 — needs production
 
@@ -117,12 +135,32 @@ Named in four source files and in `routes-smoke.prodtest.mjs:497` as
 boundaries exist at `/dashboard` and `/dashboard/overview`. Not
 reproducible without production.
 
-## 8. Translations nobody who speaks the language has read — unbounded
+## 8. Translations nobody who speaks the language has read — and one population with no pack at all
 
-Ten locales ship. `check-i18n.js` and `i18n-coverage.test.mjs` hold
-structure, placeholders and coverage. None of them can say whether a Greek
-or Japanese sentence reads naturally. **No instrument in this repository
-can close this.** It needs a person per language.
+Ten locales ship and every non-English string was written by a model.
+`check-i18n.js` and `i18n-coverage.test.mjs` hold structure, placeholders
+and coverage — a different claim from "reads naturally". **No instrument
+in this repository can close this.** It needs a person per language.
+
+**Two populations, and only one of them has a way to be read.**
+
+| | how many | who could review it |
+|---|---|---|
+| the interface, on the first-run path | 601 strings; tier 1 is 47 sentences | `docs/first-run/first-run.<locale>.md` — an hour per language |
+| the emails | **1,108 strings** across ten locales | **nobody, today** |
+
+    grep -c '"email\.' docs/first-run/first-run.en.md      # 0
+
+The pack walks components reachable from the signup form, and an email is
+not a component. These are the messages a customer reads when they are
+*not* looking at the product — a welcome, a sign-in warning, an agent that
+gave up, a week summarised — so they are read with more attention than a
+button, not less.
+
+**Extending `scripts/first-run-strings.mjs` to a second population is the
+smaller half.** The larger half is that it is three more readers, because
+a person who checks a dashboard label is not thereby checking a sentence
+about somebody's money.
 
 ## 9. The unpaired block comment — needs a pointer
 
@@ -138,3 +176,72 @@ it is a five-minute fix.**
 against `MAX_DAILY_AI_CALLS`, which is **platform-wide**. A thousand
 ordinary users trip a ceiling written to contain one runaway. Worth
 deciding before there are a thousand users rather than during.
+
+## 11. The ~33 routes whose multi-write has no reversibility study — ~half a day for the instrument
+
+Measured 2026-09-18: **40 of 143** routes perform two or more distinct
+writes, so a failure between them leaves halves. Two classes are covered
+and gated already:
+
+    scripts/tests/external-state-reversal.test.mjs   7 routes change Stripe
+                                                     state, all 7 declared
+                                                     with which way they fail
+    scripts/tests/upload-reversibility.test.mjs      a storage upload whose
+                                                     row write then fails
+
+The remainder are database-only multi-writes, where a failure leaves an
+inconsistent pair of rows rather than a charge. That is a smaller loss than
+money and a larger one than nothing, and no instrument looks at it.
+
+**The shape to build is the one that worked twice already:** derive the
+population (routes with 2+ writes), require each member to be covered by a
+transaction, an RPC, or a compensating path — or declared with which state
+a failure leaves behind. `route-contract.test.mjs`'s register is the model:
+the scanner derives, the table only records, and a reason must name
+something checkable.
+
+## 12. The per-feature margin override the estimate cannot see — a decision, not a bug
+
+`resolveMarginFor` reads `CREDIT_MARGIN_<FEATURE>_<PLAN>` through a
+default parameter, and estimation calls it **from the browser**, where
+`process.env` holds only the `NEXT_PUBLIC_` variables. So an operator who
+sets a per-feature override moves the charge and not the quote.
+
+Written down in `src/lib/billing/margin-policy.ts` and held by
+`scripts/tests/client-env-reach.test.mjs`, which records what the browser
+gets instead and checks that the function really does run there.
+
+**Closing it needs a `NEXT_PUBLIC_` mirror of the overrides**, which is a
+decision about exposing pricing policy to the browser rather than a fix.
+It belongs with item 3, which is the same question one level up.
+
+## 13. The public surface's limiter is per-instance, and that is worth a decision — ~1 hour
+
+`/s/<subdomain>`, `/s/<subdomain>/<page>`, its sitemap and robots.txt, and
+`/r/<code>` are the tree's entire unauthenticated surface.
+
+**I first wrote here that they had no limiter. That was wrong, and the way
+it was wrong is the finding.** All four `/s/` routes call
+`publicRequestAllowed` before they touch the database. It was absent from
+the eight-kind `BOUNDS` table, so the scanner reported the whole public
+surface as having nothing — a ninth mechanism missing from the
+vocabulary, for the fourth time in six rounds. It is in
+`scripts/tests/lib/route-mechanisms.mjs` now and the register in
+`route-contract.test.mjs` records it, which it caught itself needing in
+the same run.
+
+**What is actually open is what that limiter is.** From its own header:
+
+> a per-instance sliding window that blunts a single noisy source. What it
+> is NOT, and must not be mistaken for: DDoS protection. That is the CDN's
+> job, and it is stated here so nobody reads this and concludes the problem
+> is handled.
+
+240 requests a minute per hashed IP, held **in memory**, deliberately —
+the row-per-check limiter would turn a traffic spike into a write storm.
+On serverless that means the window is per warm instance, so N instances
+allow N × 240. The decision to make, alongside item 10: whether the CDN in
+front of production is configured to be the thing this is explicitly not.
+
+`/r/<code>` has no limiter and needs none: it touches no database at all,
+reads a path segment, sets a cookie and redirects.

@@ -243,9 +243,11 @@ says which.
 
 ## Δ. The patterns
 
-**There are 47 shapes in `docs/shapes.md`, not 29.** `node
-scripts/tests/shape-names.test.mjs` counts them and resolves every
-`SHAPE:` reference against the catalogue. The brief that asked for this
+**There are 47 shapes in `docs/shapes.md` as this report closes
+(2026-09-18), not 29.** `node scripts/tests/shape-names.test.mjs` prints
+the live count — 48 after the multi-write sweep added one the same day —
+and resolves every `SHAPE:` reference against the catalogue. Read the
+command's number, not this sentence's. The brief that asked for this
 report said 29; that is the catalogue's own shape *the number that was
 right when it was typed*, happening to the request for the audit — for the
 third report running.
@@ -370,7 +372,9 @@ that would move the verdict most is not a number I can produce.
 ## Ζ. Documents
 
 `docs/v6-list.md` carries what this report leaves open. `docs/shapes.md`
-holds 47 shapes; three were added in the last six rounds.
+held 47 shapes when this report closed and 48 after the multi-write
+sweep of the same day; `node scripts/tests/shape-names.test.mjs` prints
+the count on every run.
 
 ---
 

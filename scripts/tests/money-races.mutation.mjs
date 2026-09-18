@@ -147,7 +147,7 @@ const MUTATIONS = [
     file: RESERVATIONS,
     from: 'logApiError("billing:zeroCostSettlement"',
     to: 'logApiError("billing:settlement"',
-    expect: "credits_charged = 0 is indistinguishable from an admin bypass in the log",
+    expect: "a zero-cost settlement is logged as an error",
   },
 
   // ---- THE INSTRUMENT'S OWN CLAUSES ----

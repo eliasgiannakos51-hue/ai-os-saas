@@ -475,7 +475,10 @@ console.log("\n== 7. the settlement path really is plan-aware ==");
 const src = readFileSync("src/lib/billing/reservations.ts", "utf8");
 checkTrue("settlement divides by the ACCOUNT's rate", /creditsForRealCostOnAccount\(realCostEur, plan, packPriceEur, config, marginPolicy\.margin\)/.test(src));
 checkTrue("the plan is a required settlement input", /plan: Plan \| null;/.test(src));
-checkTrue("a shortfall is logged, not swallowed", /billing:marginBelowTarget/.test(src));
+// Same anchoring as the zero-cost check below: on the CALL, because the
+// tag now also appears in a comment explaining what a zero settlement
+// used to emit, and prose must not be able to satisfy this.
+checkTrue("a shortfall is logged, not swallowed", /logApiError\(\s*"billing:marginBelowTarget"/.test(src));
 const routeSrc = readFileSync("src/app/api/websites/generate/process/route.ts", "utf8");
 checkTrue("the generate route resolves the real plan", /resolveEffectivePlan\(user\)/.test(routeSrc));
 checkTrue("and hands it to settlement", /\n\s*plan,\n/.test(routeSrc));
@@ -770,7 +773,10 @@ checkTrue("the row records bypassCharge", /bypassCharge,\n/.test(res));
 checkTrue("the row records what a bypass would have cost", /wouldHaveChargedCredits: wouldHaveCharged/.test(res));
 checkTrue("the row records how many AI calls were measured", /p_ai_calls: costs\.callCount/.test(res));
 // And case 2 must be loud, not silent.
-checkTrue("a zero-cost settlement is logged as an error", /billing:zeroCostSettlement/.test(res));
+// Matched on the CALL, not the tag: the same string now appears in a
+// comment a few lines above, and a substring test would be satisfied by
+// the prose after the call itself was renamed away.
+checkTrue("a zero-cost settlement is logged as an error", /logApiError\(\s*"billing:zeroCostSettlement"/.test(res));
 checkTrue("with a diagnosis naming the likely cause", /the accumulator was never fed/.test(res));
 checkTrue("distinguishing an unfed accumulator from an unpriced model", /priced at zero/.test(res));
 
@@ -808,10 +814,22 @@ function returnObjectsOf(body) {
 const settleReturns = returnObjectsOf(res.slice(res.indexOf("export async function settleReservation")));
 const returnsWith = (needles) =>
   settleReturns.filter((r) => needles.every((needle) => r.includes(needle)));
-checkTrue("settleReservation has exactly three returns", settleReturns.length === 3, String(settleReturns.length));
+// FOUR SINCE 2026-09-18. The fourth is not a failure: when the cost
+// accumulator was never fed, no AI call completed, and settlement turns
+// itself into a RELEASE rather than writing a cost-log row for an action
+// that never ran — see scripts/tests/reservation-lifecycle.test.mjs for
+// what that was costing. It reports settled: false with
+// nothingMeasured: true, which is how a caller tells it from the two
+// genuine failures below.
+checkTrue("settleReservation has exactly four returns", settleReturns.length === 4, String(settleReturns.length));
 checkTrue(
-  "both failure returns say settled: false and charge nothing",
-  returnsWith(["creditsCharged: 0", "settled: false"]).length === 2
+  "three returns say settled: false and charge nothing",
+  returnsWith(["creditsCharged: 0", "settled: false"]).length === 3
+);
+checkTrue(
+  "…and exactly one of those three is the nothing-measured release, not an error",
+  returnsWith(["settled: false", "nothingMeasured: true"]).length === 1,
+  "an RPC failure and a call that never happened are different events; a caller that cannot tell them apart reports a billing outage as a quiet success, or the reverse"
 );
 checkTrue("so does an unhandled throw", (res.match(/settled: false/g) ?? []).length >= 2);
 checkTrue(
@@ -824,7 +842,7 @@ checkTrue(
 // what every agent run on an owner's account reported.
 checkTrue(
   "every settlement return says whether the account was charged at all",
-  returnsWith(["bypassCharge", "wouldHaveChargedCredits"]).length === 3
+  returnsWith(["bypassCharge", "wouldHaveChargedCredits"]).length === 4
 );
 // A stale RPC in the database is the failure that looks like nothing,
 // because PostgREST resolves overloads by argument NAME.

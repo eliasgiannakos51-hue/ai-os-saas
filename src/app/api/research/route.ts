@@ -222,8 +222,17 @@ export async function POST(request: Request) {
       costs,
     });
 
-    // Settled either way: the planning call spent tokens whether or not
-    // it produced a usable plan.
+    // Settled either way — but "either way" means the two outcomes of a
+    // call that RETURNED. planResearch records usage onto `costs` before
+    // it decides the answer is unusable, so an unusable plan is a real
+    // charge for real tokens.
+    //
+    // The third case is a call that never returned at all (Anthropic
+    // unreachable): the accumulator is then empty, and settleReservation
+    // turns that into a release rather than a cost-log row for an action
+    // that did not happen. That decision lives in lib/billing/reservations.ts,
+    // in the one function all forty call sites go through, which is
+    // why this one does not repeat it.
     await settleReservation({
       userId: user.id,
       reservationId,

@@ -162,6 +162,13 @@ export async function POST(request: Request) {
     const anthropic = new Anthropic({ apiKey });
     const outcome = await extractFromPaste({ anthropic, text, language, costs });
 
+    // Settled before the outcome is examined, on purpose: extractFromPaste
+    // records usage the moment the model answers, so `reason: "invalid"`
+    // is a completed call that cost money. `reason: "api_error"` is not —
+    // the call threw and the accumulator is empty — and settleReservation
+    // releases rather than settling in exactly that case
+    // (lib/billing/reservations.ts). So this route needs no release of its
+    // own, and there is no ordering here that can charge for an outage.
     const settlement = await settleReservation({
       userId: user.id,
       reservationId,
@@ -212,11 +219,17 @@ export async function POST(request: Request) {
       batches: [...grouped.entries()].map(([targetSlug, rows]) => ({ targetSlug, rows })),
     });
 
-    await supabase
+    // Same reasoning as api/import/csv/apply: the entries are in, so a
+    // failed summary is reported rather than turned into a refusal that
+    // would say nothing was imported.
+    const { error: summaryError } = await supabase
       .from("user_imports")
       .update({ rows_imported: result.inserted, modules: result.byTable })
       .eq("id", importRow.id)
       .eq("user_id", user.id);
+    if (summaryError) {
+      logApiError("/api/import/paste", summaryError, { stage: "update_summary" });
+    }
 
     return NextResponse.json({
       ok: true,
@@ -225,6 +238,7 @@ export async function POST(request: Request) {
       byTable: result.byTable,
       modules: [...grouped.keys()],
       creditsCharged: settlement.creditsCharged,
+      summaryRecorded: !summaryError,
     });
   } catch (err) {
     logApiError("/api/import/paste", err, {});

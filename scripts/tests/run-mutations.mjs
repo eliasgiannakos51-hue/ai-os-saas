@@ -110,7 +110,9 @@ if (suites.length === 0) {
 // rls-coverage, page-auth-boundary, route-write-bound and the two the last
 // merge carried in. mutation-runner-honesty.test.mjs holds this within ten
 // of the real count in both directions, so it cannot drift far below.
-const FLOOR = 173;
+// 173 -> 174 on 2026-09-18: reservation-lifecycle.mutation.mjs, from the
+// sweep of the remaining 23 multi-write routes.
+const FLOOR = 174;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

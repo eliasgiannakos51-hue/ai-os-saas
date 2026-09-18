@@ -43,6 +43,40 @@ const MAX_AGENTS_PER_USER_PER_INVOCATION = 5;
 // mechanism and same window as user_automations' processing_started_at.
 const STALE_CLAIM_MINUTES = 10;
 
+/**
+ * PUSH AN AGENT'S next_run_at FORWARD, AND SAY SO IF IT DOES NOT LAND.
+ *
+ * Both call sites below already carry a comment explaining what this
+ * write prevents — "the agent would sit permanently due and re-enter
+ * this branch on every single tick". Neither of them looked at whether
+ * the write succeeded, so the outcome those comments name was left
+ * entirely to the database always saying yes.
+ *
+ * It is not a cosmetic loop. The batch branch has ALREADY submitted the
+ * agent to Anthropic and charged for it by the time it reschedules, so
+ * an unnoticed failure there resubmits and recharges every fifteen
+ * minutes, on somebody's account, until a human looks at a bill.
+ *
+ * There is no compensating write to attempt — a second update would fail
+ * for the same reason the first did. What this adds is that the failure
+ * is logged with the agent's id and COUNTED into the response, so the
+ * loop is visible from the cron's own output instead of only from an
+ * invoice.
+ */
+async function rescheduleAgent(
+  admin: ReturnType<typeof createAdminClient>,
+  agent: UserAgent,
+  patch: Record<string, string | null>,
+  stage: string
+): Promise<boolean> {
+  const { error } = await admin.from("user_agents").update(patch).eq("id", agent.id);
+  if (error) {
+    logApiError("/api/cron/agent-runs", error, { stage, agentId: agent.id, userId: agent.user_id });
+    return false;
+  }
+  return true;
+}
+
 export async function GET(request: Request) {
   try {
     const auth = checkCronAuth(request);
@@ -91,6 +125,10 @@ export async function GET(request: Request) {
     let skipped = 0;
     let pausedForCredits = 0;
     let batched = 0;
+    // An agent left due because its reschedule did not land. Reported
+    // rather than counted into skipped: skipped is a normal outcome and
+    // this is a loop that costs money every tick it survives.
+    let rescheduleFailures = 0;
 
     for (const [userId, userAgents] of perUser) {
       const { data: authUser, error: authUserError } = await admin.auth.admin.getUserById(userId);
@@ -135,10 +173,13 @@ export async function GET(request: Request) {
               // batch happens to come back. Skipping it would leave the
               // agent permanently due and re-submitting on every tick.
               const next = nextRunAt(agent.schedule_cron, new Date(), agent.timezone);
-              await admin
-                .from("user_agents")
-                .update({ last_run_at: new Date().toISOString(), next_run_at: next?.toISOString() ?? null })
-                .eq("id", agent.id);
+              const moved = await rescheduleAgent(
+                admin,
+                agent,
+                { last_run_at: new Date().toISOString(), next_run_at: next?.toISOString() ?? null },
+                "reschedule_after_batch"
+              );
+              if (!moved) rescheduleFailures++;
               batched++;
               continue;
             }
@@ -172,10 +213,13 @@ export async function GET(request: Request) {
             // the agent does not sit permanently due and re-enter this
             // branch on every single tick.
             const next = nextRunAt(agent.schedule_cron, new Date(), agent.timezone);
-            await admin
-              .from("user_agents")
-              .update({ next_run_at: next?.toISOString() ?? null })
-              .eq("id", agent.id);
+            const moved = await rescheduleAgent(
+              admin,
+              agent,
+              { next_run_at: next?.toISOString() ?? null },
+              "reschedule_after_" + result.reason
+            );
+            if (!moved) rescheduleFailures++;
             skipped++;
             continue;
           }
@@ -249,6 +293,7 @@ export async function GET(request: Request) {
       skipped,
       pausedForCredits,
       batched,
+      rescheduleFailures,
       stuckRunsClosed: stuckCount ?? 0,
       deferredNotifications,
     });

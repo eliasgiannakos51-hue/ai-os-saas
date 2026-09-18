@@ -1610,3 +1610,54 @@ scopes what is READ. Only `with check` stops `insert … user_id =
 and is that the same thing I care about?* Scoped to the row, scoped to
 the caller; scoped to the read, scoped to the write; knows who is asking,
 knows whose it is. Each pair reads like one question and is two.
+
+## Two functions in one file, disagreeing about the rule one of them wrote down
+
+`releaseReservation`'s doc comment states the rule in a sentence:
+
+> Releases a hold without charging — for an action that failed before it
+> cost anything. **Distinct from settling with a zero cost so the cost log
+> doesn't fill with rows for actions that never ran.**
+
+Ten lines above it, in the same file, `settleReservation` filled the cost
+log with rows for actions that never ran. Not by oversight in a corner:
+it had a whole paragraph about the case, named it
+`billing:zeroCostSettlement`, called it *"never legitimate for a
+completed action"*, logged it as an error — and then went on and wrote
+the row anyway.
+
+**The shape is a rule stated in one place and enforced nowhere**, with
+the two halves close enough together that a reader of either one comes
+away believing it holds. The comment on the release function is a true
+sentence about what release is FOR. It is not a sentence about what
+settle DOES, and nothing made them agree.
+
+**What it cost, measured 2026-09-18.** Three routes settle immediately
+after their AI call and judge the outcome afterwards — which is right
+when the call returned, because all three record usage before deciding
+the answer is unusable. When the call THREW, the accumulator was empty
+and each failed request produced: a cost-log row claiming an action
+happened, a `billing:zeroCostSettlement` row, a
+`billing:marginBelowTarget` row (a null margin is not `< 4`, which is
+why that alert had already been widened to fire on null) and a
+margin-alert **email to the owner**. During an Anthropic outage, on every
+account at once, into the two instruments the owner actually reads.
+
+**Why no gate saw it.** Every gate asked the right question of the call
+sites: does this route reserve? does it settle? does it release when the
+call fails? All three routes answered yes-yes-n/a, correctly — the
+release they needed was inside the function they were calling, and no
+check looked there. The defect was one level below where every
+instrument was pointed.
+
+**The fix is the shape's own lesson.** It went into the function, not
+into the three routes: `settleReservation` now releases when
+`costs.callCount === 0`, before its RPC. Forty call sites were corrected
+by one branch, including the ones not written yet. A rule that lives in
+one function's behaviour cannot drift from a comment, because it is not a
+comment.
+
+**The question to ask:** *this file states a rule — which function
+enforces it, and what happens in the ones that do not?* A doc comment
+that says "distinct from X" is a claim about something else's behaviour,
+and it is the one kind of claim the file it sits in cannot make true.

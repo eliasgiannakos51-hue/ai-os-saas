@@ -209,8 +209,15 @@ console.log("== 3. read-modify-write: every counter written from a value read ea
 console.log("== 4. a settlement that measured nothing is reported, not silently free ==");
 {
   const s = read("src/lib/billing/reservations.ts");
+  // ANCHORED ON THE CALL, NOT THE STRING. money-races.mutation.mjs says
+  // this in prose already — it renames the tag rather than deleting the
+  // call, because the first version of that mutant left the string in a
+  // comment and survived. The bare regex made the prose false again on
+  // 2026-09-18, when reservations.ts grew a comment quoting the tag while
+  // explaining what a zero settlement used to cost: rename the call, and
+  // the comment alone kept this green.
   check("a zero-cost settlement is logged as an error",
-    /billing:zeroCostSettlement/.test(s),
+    /logApiError\(\s*"billing:zeroCostSettlement"/.test(s),
     "credits_charged = 0 looks identical to a legitimate admin bypass in the log");
   check("...and says which of the two causes it was",
     /callCount 0 means nothing was ever recorded/.test(s));

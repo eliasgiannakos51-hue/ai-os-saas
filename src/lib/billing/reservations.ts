@@ -264,6 +264,11 @@ export type SettlementResult = {
    *  exists, however healthy the other fields look. Callers that report a
    *  charge to the user must check this. */
   settled: boolean;
+  /** True when the accumulator was never fed, so this settlement was
+   *  turned into a RELEASE — see the block that sets it. Distinct from
+   *  `settled: false` caused by an RPC failure: here nothing SHOULD have
+   *  been charged, and the hold went back whole. */
+  nothingMeasured: boolean;
 };
 
 /**
@@ -326,9 +331,54 @@ export async function settleReservation(params: {
       // points at model-pricing.ts instead.
       diagnosis:
         costs.callCount === 0
-          ? "the accumulator was never fed — a call site is missing costs.record()"
+          ? "the accumulator was never fed — no AI call completed, so this settlement was turned into a release"
           : "usage was recorded but priced at zero — check MODEL_PRICING_USD covers this model",
     });
+  }
+
+  // NO CALL COMPLETED, SO THIS IS A RELEASE — and the caller does not
+  // have to know that.
+  //
+  // THE RULE, in the words releaseReservation's own doc comment already
+  // uses: settling a zero is how "the cost log fills with rows for
+  // actions that never ran". The two functions in this file disagreed
+  // about that, and the one that wrote the rows was the one every route
+  // called.
+  //
+  // WHAT IT COST. api/import/paste, api/import/csv/analyse and
+  // api/research all settle immediately after their AI call and decide
+  // afterwards whether it produced anything. When Anthropic is
+  // unreachable the call throws, the accumulator is never fed, and the
+  // settle below wrote: a cost-log row for an action that did not
+  // happen, a billing:zeroCostSettlement row, a billing:marginBelowTarget
+  // row (a null margin is not `< 4`, which is why that alert was widened
+  // to fire on null) and a margin-alert EMAIL to the owner. Per failed
+  // request, during an outage, on every account at once.
+  //
+  // WHY HERE RATHER THAN AT THE CALL SITES. There are forty of
+  // them and there will be more; a rule enforced in the one function
+  // they all go through is the only version that also covers the
+  // twenty-sixth. The call sites that already release on a failed call
+  // (api/websites/generate/process, api/websites/edit,
+  // api/cron/scheduled-runs, api/data-analysis/[id]/analyse) never reach
+  // this branch and are unchanged.
+  //
+  // NOT a behaviour change for the user's balance: settle_reservation
+  // with 0 credits already released the hold. What changes is that no
+  // row claims an action happened, and the owner stops being emailed
+  // about a margin on an action that never ran.
+  if (costs.callCount === 0) {
+    await releaseReservation(userId, reservationId);
+    return {
+      creditsCharged: 0,
+      realCostUsd,
+      realCostEur,
+      achievedMargin: null,
+      bypassCharge,
+      wouldHaveChargedCredits: null,
+      settled: false,
+      nothingMeasured: true,
+    };
   }
 
   // A one-time credit pack sells credits below both the list price AND the
@@ -544,6 +594,7 @@ export async function settleReservation(params: {
         bypassCharge,
         wouldHaveChargedCredits: wouldHaveCharged,
         settled: false,
+        nothingMeasured: false,
       };
     }
     diagLog(
@@ -574,6 +625,7 @@ export async function settleReservation(params: {
       bypassCharge,
       wouldHaveChargedCredits: wouldHaveCharged,
       settled: false,
+      nothingMeasured: false,
     };
   }
 
@@ -585,6 +637,7 @@ export async function settleReservation(params: {
     bypassCharge,
     wouldHaveChargedCredits: wouldHaveCharged,
     settled: true,
+    nothingMeasured: false,
   };
 }
 

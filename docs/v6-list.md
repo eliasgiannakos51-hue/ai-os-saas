@@ -5,7 +5,8 @@ item names what it costs to CHECK, which is usually far less than what it
 costs to fix, and several of these turn out to need fifteen minutes of the
 owner's time rather than a day of coding.
 
-**Measured 2026-09-18, commit `13885c7b`.** Numbers that can be
+**Measured 2026-09-18, commit `13885c7b`, with item 11 re-measured the
+same day after the multi-write sweep finished.** Numbers that can be
 re-derived name the command. This replaces the 2026-09-13 edition: two of
 its ten items are closed, one shrank, and three are new.
 
@@ -177,31 +178,73 @@ against `MAX_DAILY_AI_CALLS`, which is **platform-wide**. A thousand
 ordinary users trip a ceiling written to contain one runaway. Worth
 deciding before there are a thousand users rather than during.
 
-## 11. The 23 remaining multi-write routes — ~2 hours, and the rate so far is 3 in 10
+## 11. ~~The 33 multi-write routes~~ — SWEPT 2026-09-18, 7 of 33 were broken
 
-**Ten were read by hand on 2026-09-19 — the ten touching money or
-publishing — and THREE were broken.** All three are fixed and held by
-`scripts/tests/multi-write-reversal.test.mjs` (27 checks) and its mutation
-suite (10 of 10).
+**All thirty-three have now been read by hand**, in two passes, and the
+population is printed on every run by
+`node scripts/tests/multi-write-reversal.test.mjs`.
+
+| pass | read | broken | rate |
+|---|---|---|---|
+| money and publishing (2026-09-17) | 10 | 3 | 30% |
+| everything else (2026-09-18) | 23 | 4 | 17% |
+| **total** | **33** | **7** | **21%** |
+
+The first three are held by `multi-write-reversal.test.mjs` (27 checks,
+10 of 10 mutants). The four found in the second pass are held by
+`scripts/tests/reservation-lifecycle.test.mjs` (44 checks, 13 of 13
+mutants):
 
 | route | what it left behind |
 |---|---|
-| `api/cron/scheduled-runs` | a run whose AI call succeeded but matched no module was marked failed **without releasing the reservation** — four lines below a branch that releases one. Credits held until the daily sweep, for a run that produced nothing. |
-| `api/billing/addons` | a recurring add-on with a null subscription item id was **skipped** by the cancellation loop and then marked cancelled. Delivery stopped; the card kept paying. |
-| `api/published/[id]/rollback` | restored `html_content` and never `pages`, so a multi-page rollback served a home page from version N with sub-pages from the live version. |
+| `lib/billing/reservations.ts` (reached by `api/import/paste`, `api/import/csv/analyse`, `api/research`) | a settlement whose AI call THREW settled a zero instead of releasing: a cost-log row for an action that never ran, a `billing:zeroCostSettlement` row, a `billing:marginBelowTarget` row and a margin-alert **email to the owner** — per failed request, during an outage, across every account. |
+| `api/data-analysis/[id]/analyse` | settled, then wrote the findings and only LOGGED a failed write. The findings were in the response, so the screen looked right; a refresh showed an unanalysed file on an account that had just paid. |
+| `api/cron/agent-runs` | two `next_run_at` writes with no error check, each beside a comment naming the loop they prevent. The batch branch has already submitted and charged by then, so an agent left due resubmits and recharges every fifteen minutes. |
+| `api/import/csv/apply`, `api/import/paste` | the `user_imports` summary (`rows_imported`, `rows_rejected`, `modules`) written with no error check — the copy that outlives the response body and that the GDPR export reads. |
 
-**The seven that were right were right for reasons no regex could see:**
-Stripe first and the local record after; a compensating status write that
-marks the row `failed` so nothing picks it up half-configured; an
-entitlement preserved on purpose because the customer has paid; a
-`finally` that releases an edit lock however the block exits; a leaked
-hold that a scheduled sweep collects.
+**The rate fell below the owner's 30% stop line in the second pass, and
+the sweep finished anyway** because 23 was the whole remainder, not a
+sample of a larger set. There is no further population to stop scanning.
 
-**23 remain** — the multi-write routes that touch neither money nor
-publishing. `node scripts/tests/multi-write-reversal.test.mjs` prints the
-population on every run. At 3 in 10 the expected yield is around seven
-more, and they are cheaper per route than these were: no Stripe, no
-credits, no public HTML.
+**What the second pass cost and what it bought:** three hours, four
+defects, one of which (the zero settlement) was emailing the owner during
+every AI outage and was invisible in every other gate.
+
+### The enforcement question, answered
+
+Asked: can *"the state the user sees must be the LAST write"* be enforced
+rather than scanned?
+
+**As stated, no**, and the tree says why in its own comments.
+`api/websites/generate/process` writes `status: "processing"` FIRST on
+purpose and its FINAL status write comes deliberately AFTER settlement,
+so the polling client cannot read a balance the charge has not reached
+yet. Seventeen files write durably after settling; most are right. A gate
+on the stated rule would flag the tree and be turned off.
+
+**Two narrower forms are true, and both are now enforced:**
+
+1. **A helper that does the right thing by default.** `settleReservation`
+   is the one function all forty call sites reach, so the case "no AI
+   call completed" is decided there: it releases the hold and writes no
+   row. Nothing at the call sites changed, and the forty-first will not
+   need to change either. This is the fix for the first row above.
+2. **A register with a written reason, checked both ways.** Every file
+   that takes a credit hold and never releases one in its own source is
+   listed in `reservation-lifecycle.test.mjs` with the mechanism that
+   ends its holds — `settles_unconditionally` (verified: no `return
+   NextResponse` between taking the hold and settling it) or `handed_on`
+   (verified: the named module releases). Five entries today; an
+   unregistered offender and a stale entry both turn it red.
+
+**The general form — "every write's error is read" — is NOT enforced,
+and the number is why:** 40 of 146 route writes destructure no error, or
+destructure one nothing reads (`node scripts/tests/reservation-lifecycle.test.mjs`
+does not measure this; the figure is from a one-off scan on 2026-09-18).
+Most are legitimately best-effort — a `status: failed` write on a path
+that is already answering an error. Turning that into a zero-offender
+register means forty written reasons, which is a round of its own and
+belongs in V6 proper.
 
 ## 12. The per-feature margin override the estimate cannot see — a decision, not a bug
 

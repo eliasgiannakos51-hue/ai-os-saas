@@ -160,7 +160,19 @@ function isPlanSlug(slug: string): slug is PlanSlug {
 /**
  * The one place the combination rule lives. Settlement AND estimation both
  * call this, so the multiplier a user is quoted and the one they are
- * charged cannot drift apart.
+ * charged come out of one function rather than two formulas.
+ *
+ * THEY CAN STILL DIFFER, AND ONLY IN ONE WAY. This function reads
+ * `env` — the per-feature, per-plan CREDIT_MARGIN_* overrides — through a
+ * DEFAULT PARAMETER, and estimation calls it from the browser, where
+ * `process.env` holds only the NEXT_PUBLIC_ variables. So an operator who
+ * sets CREDIT_MARGIN_<FEATURE>_<PLAN> moves the charge and not the
+ * estimate. That is accepted: the estimate is an estimate, settlement
+ * charges the measured cost of every sub-call and releases the rest of
+ * the hold. It is written down rather than implied because the sentence
+ * above used to end "cannot drift apart", which was the stronger claim
+ * and the wrong one — scripts/tests/client-env-reach.test.mjs holds the
+ * accepted version, with what a browser reads instead.
  */
 export function resolveMarginFor(
   feature: string | null | undefined,

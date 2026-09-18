@@ -1419,6 +1419,60 @@ was above it. It is a required argument with no default now, for the
 reason it survived four conversions: a default that renders correctly is
 the kind nobody notices is still there.
 
+### The variable exists — somewhere else. 2026-09-18
+
+Asked of environment variables: `env-documented.test.mjs` holds all 143 of
+them written down, both ways, and has since V4. Its population is every
+variable the code reads. It never asks **where the reading code runs**.
+
+In a browser bundle `process.env` is not an environment. Next.js inlines
+`NEXT_PUBLIC_*` and NODE_ENV and eliminates the rest, so a module that
+ships to the browser and reads `CRON_SECRET` reads `undefined` there and
+something real on the server: one function, one input, two answers, and
+nothing thrown to notice. Six such reads exist, in five modules, and
+**not one is in `src/components`** — the population is not a folder, it
+is everything reachable by import from a `"use client"` file, stopping at
+`server-only`. 228 entries pull in 392 files.
+
+Three of the six are invisible to a name scan entirely, because no name
+is written:
+
+```ts
+env: Record<string, string | undefined> = process.env   // a default parameter
+parsePricingConfig(process.env)                          // the whole object
+```
+
+**One file already knew, and that is the part worth keeping.**
+`website-builder-workspace.tsx:1163` says *"DEFAULTS, not
+resolvePricingConfig(): this runs in the browser, where the server-only
+pricing env vars are not readable"*, and names the consequence — an
+operator who overrides `CREDIT_MARGIN_MULTIPLIER` moves the real charge
+and not the preview. A correct decision, made by hand, recorded in a
+comment, in one component. Meanwhile `margin-policy.ts`'s own header said
+the opposite about the same code path: *"the multiplier a user is quoted
+and the one they are charged cannot drift apart."* Two comments, one
+right, and nothing anywhere to say which.
+
+**The answer was measured rather than argued.** Build with a unique
+marker for the variable and grep the chunks:
+
+    CRON_SECRET / PUBLISHED_SITE_DOMAIN / VOICE_MINUTES_   dropped whole
+    resolvePricingConfig, resolveMarginFor                 shipped, and
+                                                           resolveMarginFor
+                                                           runs
+
+Nothing leaks — no non-public value reaches a chunk, and no
+`process.env.X` reference survives in one at all. Two of the five do run
+in a browser. So the clean bill three of them have is a property of
+**tree-shaking**, not of the code: it holds while nothing in the bundle
+calls them, which is one import away and which nothing recorded.
+
+That is why the register is per-entry and says which of two things is
+true — `unreachable`, checked by requiring no other bundled file to name
+the function, or `runs_in_browser`, which must state what the browser
+gets instead and is checked the other way, so an entry cannot rot into
+alarming prose about code that has become fine.
+
 ## A check that answers the adjacent question
 
 Not absent, and not wrong. Present, passing, and about something else.

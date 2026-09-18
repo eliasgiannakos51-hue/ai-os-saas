@@ -110,7 +110,7 @@ if (suites.length === 0) {
 // rls-coverage, page-auth-boundary, route-write-bound and the two the last
 // merge carried in. mutation-runner-honesty.test.mjs holds this within ten
 // of the real count in both directions, so it cannot drift far below.
-const FLOOR = 163;
+const FLOOR = 170;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

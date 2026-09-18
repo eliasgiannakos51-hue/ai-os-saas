@@ -41,6 +41,17 @@
 // Run: node scripts/tests/route-contract.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
+import {
+  AUTHENTICATES,
+  CRON,
+  STRIPE_SIG,
+  FROM_REQUEST,
+  BOUNDS,
+  identityOf,
+  matching,
+  ownershipTable,
+  securityInvokerFunctions,
+} from "./lib/route-mechanisms.mjs";
 
 let pass = 0,
   fail = 0;
@@ -80,77 +91,39 @@ check(`routes found (${routes.length})`, routes.length >= 100, "the walk found a
 // route-write-bound calls bounded is bounded here too, and the day one of
 // them learns a new idiom this file learns it in the same edit.
 // ---------------------------------------------------------------------
-const AUTHENTICATES = /auth\s*\.\s*getUser\s*\(|getCurrentUser(?:Result)?\s*\(/;
-const CRON = /checkCronAuth\s*\(/;
-const STRIPE_SIG = /constructEvent\s*\(/;
-const ADMIN_CLIENT = /createAdminClient\s*\(/;
-const FROM_REQUEST = /params\.[a-zA-Z_]+|body\??\.[a-zA-Z_]*[Ii]d\b|searchParams\.get\(/;
+// THE DETECTORS COME FROM ONE PLACE.
+//
+// This file used to carry a COPY of resource-ownership's five ownership
+// predicates and route-write-bound's eight bounds. Two copies of a rule
+// is two rules: the day one of them learned that `.rpc()` through the
+// caller's client is RLS — which happened on 2026-09-18 — the other went
+// on calling eight routes unowned, and nothing would have said which was
+// right. scripts/tests/lib/route-mechanisms.mjs is the single definition
+// and the controls at the bottom of BOTH files exercise it.
+const invokerFns = securityInvokerFunctions();
+const OWNERSHIP = ownershipTable(invokerFns);
 const INSERTS = /\.from\(\s*"[a-z_0-9]+"\s*\)\s*\n?\s*\.insert\s*\(/;
 const REACHES_MODEL = /\bmessages\s*\.\s*(create|stream)\s*\(|generativelanguage\.googleapis\.com|api\.groq\.com|api\.openai\.com|api\.elevenlabs\.io/;
-
-const RATE_LIMITED = (s) =>
-  /checkRateLimit\s*\(/.test(s) &&
-  /scope:\s*"[a-z_0-9]+"/.test(s) &&
-  (/if\s*\(\s*!\s*[A-Za-z_$][\w$]*\.allowed\s*\)/.test(s) || /if\s*\(\s*!\s*allowed\s*\)/.test(s));
-const BOUNDS = {
-  rate_limit: RATE_LIMITED,
-  own_limiter: (s) => /countRateLimitHits\s*\(|recordRateLimitHit\s*\(/.test(s),
-  cron_secret: (s) => CRON.test(s),
-  reservation: (s) => /\breserveCredits\s*\(|\bstartJob\s*\(/.test(s),
-  plan_cap: (s) =>
-    /maxProjectsForPlan|MAX_MEMBERS|maxAgentsForAccount|checkAgentActivationCap|seat_count|maxIntegrationsForPlan|storageLimitBytes|maxAgentTemplates|maxPublishedSitesForPlan/.test(s),
-  free_allowance: (s) => /consumeFreeChat/.test(s),
-  stripe_signature: (s) => STRIPE_SIG.test(s),
-  owner_only: (s) => /isAdminEmail\s*\(/.test(s),
-};
-const OWNERSHIP = {
-  read_under_rls: (s) => /createClient\s*\(\s*\)/.test(s) && /\.from\(/.test(s),
-  explicit_filter: (s) => /\.eq\(\s*"(user_id|owner_id|owner|created_by|shared_by)"/.test(s),
-  explicit_compare: (s) =>
-    /user\.id\s*!==?\s*[a-zA-Z_$][\w$]*\.(user_id|owner_id)/.test(s) ||
-    /[a-zA-Z_$][\w$]*\.(user_id|owner_id)\s*!==?\s*user\.id/.test(s),
-  helper: (s) => /resolveDeliveryOwnership|referenceImagePathBelongsToUser|isProjectMemberTable/.test(s),
-  owner_only: (s) => /isAdminEmail\s*\(/.test(s),
-};
+const RATE_LIMITED = BOUNDS.rate_limit;
 const SPEND = {
   reservation: (s) => /\breserveCredits\s*\(|\bstartJob\s*\(|\bsettleReservation\s*\(/.test(s),
   affordability: (s) => /hasEnoughCredits\s*\(/.test(s),
   free_allowance: (s) => /consumeFreeChat/.test(s),
 };
-const any = (table, src) => Object.entries(table).filter(([, t]) => t(src)).map(([k]) => k);
+const any = matching;
 
 const QUESTIONS = [
   {
     id: "identity",
     asks: () => true,
-    // SIX MECHANISMS, AND THE LAST THREE ARE WHY THIS FILE EXISTS.
-    //
-    // The first version knew `session`, `cron_secret` and
-    // `stripe_signature` — the three every other gate in this tree knows —
-    // and reported five routes as answering NOTHING: login, signup, the
-    // OAuth callback, the deletion confirmation and the contact form. Four
-    // of those five verify an identity; they just do not verify a session,
-    // because they are the routes that CREATE one. A login's answer to
-    // "who is asking" is the password. The callback's is a one-time code
-    // from the provider. The deletion link's is 256 bits of randomness
-    // that its own header calls "the proof".
-    //
-    // So the population was not the tree, it was the vocabulary — in a
-    // file written about exactly that, on its first run. Left here rather
-    // than tidied away, because a reader deciding whether to trust this
-    // scan should know it has already been wrong once in the way it
-    // warns about.
-    answers: (s) => {
-      const k = [];
-      if (AUTHENTICATES.test(s)) k.push("session");
-      if (CRON.test(s)) k.push("cron_secret");
-      if (STRIPE_SIG.test(s)) k.push("stripe_signature");
-      if (/signInWithPassword\s*\(/.test(s)) k.push("password");
-      if (/exchangeCodeForSession\s*\(/.test(s)) k.push("oauth_code");
-      if (/hashDeleteAccountToken\s*\(|hashResetToken\s*\(/.test(s)) k.push("bearer_token");
-      if (/admin\s*\.\s*auth\s*\.\s*admin\s*\.\s*createUser\s*\(|auth\s*\.\s*signUp\s*\(/.test(s)) k.push("new_account");
-      return k;
-    },
+    // SEVEN MECHANISMS, and the last four are why this file exists. The
+    // first version knew session, cron_secret and stripe_signature — the
+    // three every other gate knows — and reported login, signup, the OAuth
+    // callback and the deletion confirmation as answering NOTHING about
+    // who is asking. All four verify an identity; they just do not verify
+    // a SESSION, because they are the routes that create one. The list
+    // lives in lib/route-mechanisms.mjs with the rest.
+    answers: identityOf,
   },
   { id: "ownership", asks: (s) => AUTHENTICATES.test(s) && !CRON.test(s) && FROM_REQUEST.test(s), answers: (s) => any(OWNERSHIP, s) },
   { id: "bound", asks: (s) => INSERTS.test(s), answers: (s) => any(BOUNDS, s) },
@@ -387,6 +360,36 @@ check("control: a limiter nobody branches on is not either", !RATE_LIMITED('awai
 check("control: all three together are", RATE_LIMITED('const l = await checkRateLimit({ scope: "x", identifier: user.id }); if (!l.allowed) return x;'));
 check("control: a model call puts a route in the spend population", QUESTIONS[3].asks("const r = await anthropic.messages.create({});"));
 check("control: an ownership claim in a comment does not count", Object.values(OWNERSHIP).every((t) => !t(strip('// reads it with .eq("user_id", user.id)\nconst x = 1;'))));
+// THE THREE MECHANISMS THE SWEEP OF 2026-09-18 ADDED, each driven rather
+// than described — and the pair that separates an RPC scoped by RLS from
+// one that bypasses it, which is the whole reason the migrations are read.
+check(
+  "control: an RPC through the caller's client is ownership when the function is SECURITY INVOKER",
+  OWNERSHIP.rls_rpc('const supabase = createClient();\nawait supabase.rpc("search_all_localized", {});')
+);
+check(
+  "control: ...and is NOT when the function is SECURITY DEFINER",
+  !OWNERSHIP.rls_rpc('const supabase = createClient();\nawait supabase.rpc("chat_memory_record", {});'),
+  "a DEFINER function runs as its owner and bypasses every policy; counting it as ownership would clear a route that has none"
+);
+check(
+  "control: the invoker set is read from the migrations and is not empty",
+  invokerFns.has("search_all_localized") && invokerFns.size >= 3,
+  `${invokerFns.size} functions found — an empty set would make rls_rpc always false, which reads as 'stricter' and is just blind`
+);
+check(
+  "control: the caller's client handed to a helper is ownership",
+  OWNERSHIP.client_handed_on("const supabase = createClient();\nconst s = await suggestEntityLinks(supabase, t, id);")
+);
+check(
+  "control: a helper given user.id is ownership",
+  OWNERSHIP.scoped_helper("const rows = await listDeliveryChannels(user.id);")
+);
+check(
+  "control: ...and a rate limiter given the same id is not",
+  !OWNERSHIP.scoped_helper('const l = await checkRateLimit({ scope: "x", identifier: user.id });'),
+  "counting `identifier: user.id` as an ownership check would clear all 143 routes at once"
+);
 check("control: an assurance is refused", ASSURANCE.test("intentional — safe by design"));
 check("control: an argument naming a file is not", !ASSURANCE.test("it reads published_sites by subdomain and writes nothing; the ceiling is maxPublishedSitesForPlan"));
 check("control: a reason naming nothing checkable is caught", !NAMES_SOMETHING.test("it does not need one and never will, so there is nothing more to say here"));

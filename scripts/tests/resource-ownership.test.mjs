@@ -30,6 +30,7 @@
 //
 // Run: node scripts/tests/resource-ownership.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
+import { ownershipTable, securityInvokerFunctions } from "./lib/route-mechanisms.mjs";
 import path from "node:path";
 
 let pass = 0,
@@ -75,26 +76,33 @@ check(`...acting on an identifier from the request (${onRequestId.length})`, onR
 check(`...of those, reaching past RLS with the admin client (${reachesPastRls.length})`, reachesPastRls.length >= 8, "the admin-client detector matched almost nothing, so the rule below applies to nobody");
 
 // ---------------------------------------------------------------------
-// THE FOUR MECHANISMS. Each is a thing this tree does, not a shape a
-// linter would guess.
-// ---------------------------------------------------------------------
-const OWNERSHIP = {
-  // The row is read through the CALLER's client first, so RLS proved it
-  // is theirs before the admin client touches it by id.
-  read_under_rls: (src) => /createClient\s*\(\s*\)/.test(src) && /\.from\(/.test(src),
-  // An explicit filter on the owning column.
-  explicit_filter: (src) => /\.eq\(\s*"(user_id|owner_id|owner|created_by|shared_by)"/.test(src),
-  // An explicit comparison in TypeScript.
-  explicit_compare: (src) =>
-    /user\.id\s*!==?\s*[a-zA-Z_$][\w$]*\.(user_id|owner_id)/.test(src) ||
-    /[a-zA-Z_$][\w$]*\.(user_id|owner_id)\s*!==?\s*user\.id/.test(src),
-  // A named helper that answers the question for a resource this app has
-  // more than one way of owning.
-  helper: (src) => /resolveDeliveryOwnership|referenceImagePathBelongsToUser|isProjectMemberTable/.test(src),
-  // The route is owner-only, so the resource being somebody else's is the
-  // point of it.
-  owner_only: (src) => /isAdminEmail\s*\(/.test(src),
-};
+// THE MECHANISMS, FROM ONE DEFINITION.
+//
+// They used to live here and a COPY of them lived in
+// route-contract.test.mjs — five predicates, written twice, so the day
+// one learned an idiom the other went on calling the same route unowned.
+// They are in scripts/tests/lib/route-mechanisms.mjs now, imported by
+// both, and the floors below still hold each one to matching something.
+//
+// EIGHT, NOT FIVE, AS OF 2026-09-18. A sweep of the 66 routes that act on
+// a request id found eight establishing "no ownership" — and every one of
+// the eight was scoped. Three mechanisms were missing from the
+// vocabulary rather than from the tree:
+//
+//   rls_rpc            .rpc() through the caller's client, where the
+//                      function is SECURITY INVOKER in its migration.
+//                      That is RLS, spelled differently — and the
+//                      migration is read rather than assumed, because
+//                      .rpc("x") looks the same for a DEFINER function
+//                      that bypasses every policy.
+//   client_handed_on   the caller's client passed INTO a helper, which is
+//                      what api/entity-links/suggest does. The client is
+//                      the scope; where the query is written is not.
+//   scoped_helper      a helper given user.id as its first argument or
+//                      under the name userId. NOT "the file mentions
+//                      user.id" — checkRateLimit({ identifier: user.id })
+//                      is a limiter, and counting it would clear the tree.
+const OWNERSHIP = ownershipTable(securityInvokerFunctions());
 const ownershipOf = (f) =>
   Object.entries(OWNERSHIP)
     .filter(([, test]) => test(SOURCE.get(f)))
@@ -125,6 +133,21 @@ check(
 );
 const staleExemptions = Object.keys(NO_OWNERSHIP_NEEDED).filter((f) => !reachesPastRls.includes(f));
 check("no ownership exemption has gone stale", staleExemptions.length === 0, staleExemptions.join(", "));
+
+// AND THE WIDER CLAIM, which is the one the vocabulary sweep bought: not
+// only the sixteen that reach past RLS, but ALL SIXTY-SIX that act on an
+// id from the request show a mechanism. Held here rather than reported,
+// because it is now true and the day it stops being true is the day
+// somebody adds a route that takes an id and asks nothing.
+const noMechanism = onRequestId
+  .filter((f) => ownershipOf(f).length === 0)
+  .map((f) => `${f} (${ADMIN_CLIENT.test(SOURCE.get(f)) ? "admin client" : "caller's client"})`);
+check(
+  `every route acting on a request id shows a mechanism (${onRequestId.length})`,
+  noMechanism.length === 0,
+  noMechanism.join("\n        ") +
+    "\n        Eight stood here on 2026-09-18 and all eight were scoped — the vocabulary was short, not the tree. Check which it is before adding a mechanism."
+);
 
 // ---------------------------------------------------------------------
 // AND THE FIFTY THAT DELEGATE, which is the larger half and the one that

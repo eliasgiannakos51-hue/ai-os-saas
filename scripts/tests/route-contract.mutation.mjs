@@ -29,6 +29,9 @@ const GATE = "scripts/tests/route-contract.test.mjs";
 const CONTACT = "src/app/api/contact/route.ts";
 const SHARE = "src/app/r/[code]/route.ts";
 const PUBLISH = "src/app/api/websites/[id]/publish/route.ts";
+// The detectors moved to one shared definition on 2026-09-18; three
+// mutants below follow them there, which is the point of the move.
+const MECH = "scripts/tests/lib/route-mechanisms.mjs";
 
 const MUTANTS = [
   {
@@ -104,8 +107,8 @@ const MUTANTS = [
     // in itself on its first run. Take `password` back out and the login
     // route reports as answering nothing about who is asking.
     name: "the identity vocabulary forgets a credential it had learned",
-    file: GATE,
-    from: '      if (/signInWithPassword\\s*\\(/.test(s)) k.push("password");',
+    file: MECH,
+    from: '  if (/signInWithPassword\\s*\\(/.test(src)) k.push("password");',
     to: "",
     expect: "outside every population is declared",
   },
@@ -128,9 +131,9 @@ const MUTANTS = [
   },
   {
     name: "the answer detectors stop matching, so a real population answers nothing",
-    file: GATE,
-    from: "const any = (table, src) => Object.entries(table).filter(([, t]) => t(src)).map(([k]) => k);",
-    to: "const any = () => [];",
+    file: MECH,
+    from: "export const matching = (table, src) => Object.entries(table).filter(([, t]) => t(src)).map(([k]) => k);",
+    to: "export const matching = () => [];",
     expect: "most of it answers",
   },
   {
@@ -148,9 +151,9 @@ const MUTANTS = [
     // when its scope line has been deleted — measured once already in
     // route-write-bound.
     name: "a limiter with no scope counts as a bound again",
-    file: GATE,
-    from: "  /checkRateLimit\\s*\\(/.test(s) &&\n  /scope:\\s*\"[a-z_0-9]+\"/.test(s) &&",
-    to: "  /checkRateLimit\\s*\\(/.test(s) &&",
+    file: MECH,
+    from: "    /checkRateLimit\\s*\\(/.test(s) &&\n    /scope:\\s*\"[a-z_0-9]+\"/.test(s) &&",
+    to: "    /checkRateLimit\\s*\\(/.test(s) &&",
     expect: "control: a limiter with no scope is not a bound",
   },
 ];
@@ -158,6 +161,6 @@ const MUTANTS = [
 runMutations({
   name: "route-contract",
   gate: GATE,
-  targets: [GATE, CONTACT, SHARE, PUBLISH],
+  targets: [GATE, MECH, CONTACT, SHARE, PUBLISH],
   mutants: MUTANTS,
 });

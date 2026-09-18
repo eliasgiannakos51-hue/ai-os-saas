@@ -346,6 +346,43 @@ agrees with itself about who it is talking to.
 
 *What is left, and it is not code:* three readers.
 
+**AND 1,108 STRINGS THAT NO READER WOULD REACH, added 2026-09-17/18.**
+The twelve outbound emails were translated into ten languages that week.
+Every one of them was written by a model, like the rest, and unlike the
+rest **they are outside the review instrument**: `first-run-strings.mjs`
+walks components reachable from the signup form, an email is not a
+component, and the pack carries none of them. Both numbers re-derive:
+
+    grep -c '"email\.' docs/first-run/first-run.en.md        # 0
+    node -e 'const f=(o,p="")=>Object.entries(o).flatMap(([k,v])=>
+      v&&typeof v==="object"?f(v,p+k+"."):[p+k]);
+      const r=l=>f(JSON.parse(require("fs").readFileSync(`messages/${l}.json`)).email).length;
+      console.log(["en","el","es","fr","de","it","pt","zh","ja","ar"]
+        .reduce((n,l)=>n+r(l),0))'                            # 1108
+
+(108 keys in each locale, and 136 in Arabic, which carries the four extra
+plural categories its digest lines need.)
+
+So the honest statement of this item has two halves now, and the second
+one is new:
+
+| | who could review it | how |
+|---|---|---|
+| the interface, 601 strings on the first-run path | a reader per script | `docs/first-run/first-run.<locale>.md`, tier 1 first |
+| the emails, 1,108 strings | **nobody, today** | there is no pack, and a person cannot be sent 1,108 lines of JSON |
+
+The emails are the half a customer reads when they are NOT looking at the
+product — a welcome, a sign-in warning, an agent that gave up, a week
+summarised — so they are read with more attention than a button, not
+less. Extending the pack to a second population is the smaller half of the
+work; the larger half is that it is three more readers, not the same
+three, because a person who checks a dashboard label is not thereby
+checking a sentence about somebody's money.
+
+**For V6, not now.** Written here because a translation nobody can review
+reads exactly like one that has been reviewed, and the count above is the
+only thing that says otherwise.
+
 ### 6. Chat that asks instead of guessing — WIRED AND MEASURABLE; the number needs traffic (2026-09-07)
 
 **The classifier and the one-question cap shipped. The measured rate needs

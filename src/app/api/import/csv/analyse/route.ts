@@ -177,6 +177,11 @@ export async function POST(request: Request) {
     const anthropic = new Anthropic({ apiKey });
     const outcome = await proposeMapping({ anthropic, parsed, sample, costs });
 
+    // Same shape as api/import/paste: proposeMapping records usage before
+    // it judges the proposal, so `no_match` is a completed call worth
+    // charging for, while a call that threw leaves the accumulator empty
+    // and settleReservation releases the hold instead of writing a row
+    // for an action that never ran (lib/billing/reservations.ts).
     const settlement = await settleReservation({
       userId: user.id,
       reservationId,

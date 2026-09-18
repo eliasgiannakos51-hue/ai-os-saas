@@ -54,18 +54,26 @@ check("a charging run reads back as charged, not as bypass",
 // ---------------------------------------------------------------------
 // 2. settleReservation returns it on EVERY path.
 // ---------------------------------------------------------------------
-// Two of its three returns are failure paths. A caller that reads the
-// field would get undefined from either and render "unlimited" with no
-// figure at the exact moment billing went wrong — so every return is
-// counted, not just the happy one.
+// Three of its four returns are non-charging paths. A caller that reads
+// the field would get undefined from any of them and render "unlimited"
+// with no figure at the exact moment billing went wrong — so every
+// return is counted, not just the happy one.
+//
+// FOUR SINCE 2026-09-18: the fourth is the release the function performs
+// when the accumulator was never fed, so a thrown AI call no longer
+// settles a zero (see scripts/tests/reservation-lifecycle.test.mjs). It
+// returns wouldHaveChargedCredits: null rather than the computed figure,
+// which is the honest answer — there is no hypothetical charge for a
+// call that never happened.
 //
 // COUNTED BY MATCHING BRACES, not by a regex over lines. The first version
 // of this check counted the string `wouldHaveChargedCredits: wouldHaveCharged`
 // anywhere in the function, found four, and asserted "all four returns" —
-// but settleReservation has THREE returns. The fourth match was the
-// cost-log metadata object, which contains the same two field names in the
-// same order. The assertion was green and the sentence it printed was
-// false; a real return could have been missed behind it.
+// but settleReservation had three returns at the time (2026-09-15). The
+// fourth match was the cost-log metadata object, which contains the same
+// two field names in the same order. The assertion was green and the
+// sentence it printed was false; a real return could have been missed
+// behind it. The count above is the live one and moves with the function.
 const reservations = read("src/lib/billing/reservations.ts");
 const settleBody = reservations.slice(reservations.indexOf("export async function settleReservation"));
 
@@ -89,7 +97,7 @@ function returnObjects(body) {
 }
 
 const settleReturns = returnObjects(settleBody);
-check("settleReservation still has exactly three returns", settleReturns.length === 3,
+check("settleReservation still has exactly four returns", settleReturns.length === 4,
   `found ${settleReturns.length} — if a path was added, it needs the two fields too`);
 const returnsMissing = settleReturns.filter(
   (r) => !r.includes("bypassCharge") || !r.includes("wouldHaveChargedCredits")

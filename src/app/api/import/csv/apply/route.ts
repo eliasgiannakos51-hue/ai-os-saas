@@ -149,7 +149,18 @@ export async function POST(request: Request) {
       batches: [{ targetSlug: target.slug, rows: built.rows.slice(0, MAX_ROWS_PER_IMPORT) }],
     });
 
-    await supabase
+    // THE IMPORT RECORD IS WHAT MAKES THE ROWS UNDOABLE, so a summary
+    // that never landed is not cosmetic: the row above says an import
+    // happened and, without this, says nothing about how much of one.
+    // It is the copy that outlives the response body — the GDPR export
+    // reads this table (lib/gdpr/user-data-registry.ts), the response is
+    // gone as soon as the page navigates.
+    //
+    // NOT a refusal. The rows are in; answering 500 would tell the user
+    // their data was not imported when it was, which is the worse of the
+    // two wrong sentences. So: logged, and said out loud in the response
+    // rather than swallowed.
+    const { error: summaryError } = await supabase
       .from("user_imports")
       .update({
         rows_imported: result.inserted,
@@ -158,6 +169,9 @@ export async function POST(request: Request) {
       })
       .eq("id", importRow.id)
       .eq("user_id", user.id);
+    if (summaryError) {
+      logApiError("/api/import/csv/apply", summaryError, { stage: "update_summary" });
+    }
 
     return NextResponse.json({
       ok: true,
@@ -167,6 +181,7 @@ export async function POST(request: Request) {
       failed: Object.values(result.failed).reduce((a, b) => a + b, 0),
       moduleSlug: target.slug,
       byTable: result.byTable,
+      summaryRecorded: !summaryError,
     });
   } catch (err) {
     logApiError("/api/import/csv/apply", err, {});

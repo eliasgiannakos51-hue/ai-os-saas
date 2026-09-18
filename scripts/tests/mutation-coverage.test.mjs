@@ -215,7 +215,11 @@ console.log(
 // 181 -> 182 ON 2026-09-17: external-state-reversal.mutation.mjs, driving
 // the gate that asks what happens when the database and a third party
 // disagree. Read off the run.
-const RATCHET = 186;
+// 186 -> 187 ON 2026-09-18: reservation-lifecycle.mutation.mjs, driving
+// the gate that asks how a credit hold ENDS — the sweep of the remaining
+// 23 multi-write routes found settleReservation writing a zero where it
+// owed a release. Read off the run.
+const RATCHET = 187;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

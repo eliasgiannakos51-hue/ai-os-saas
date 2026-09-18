@@ -132,6 +132,35 @@ export async function POST(_request: Request, { params }: { params: { id: string
     costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
     const parsed = parseAnalysis(outcome.text, profile);
 
+    // THE SAVE COMES BEFORE THE CHARGE, and a save that fails refuses.
+    //
+    // This used to settle first and only LOG a failed save. The findings
+    // were in the response, so the screen looked right — and they were
+    // nowhere in the database, so a refresh showed an unanalysed file on
+    // an account that had just paid to analyse it. Nothing said so.
+    //
+    // The rule is the one api/websites/generate/process writes out at its
+    // own settlement: "the AI call succeeded AND the result is durably
+    // saved" is what makes an action worth charging for. That route
+    // releases the hold on a failed save and answers 500; so does this
+    // one. Releasing gives away real spend on a rare path, which is the
+    // cheaper of the two mistakes — the other one charges for something
+    // the user cannot get back.
+    const admin = createAdminClient();
+    const { error: saveError } = await admin
+      .from("data_analyses")
+      .update({ findings: parsed.findings, analysed_at: new Date().toISOString() })
+      .eq("id", params.id)
+      .eq("user_id", user.id);
+    if (saveError) {
+      logApiError("/api/data-analysis/analyse", saveError, { stage: "save_findings" });
+      await releaseReservation(user.id, reservationId);
+      return NextResponse.json(
+        { error: "save_failed", detail: "The analysis could not be saved, so nothing was charged. Please try again." },
+        { status: 500 }
+      );
+    }
+
     const settlement = await settleReservation({
       userId: user.id,
       reservationId,
@@ -141,14 +170,6 @@ export async function POST(_request: Request, { params }: { params: { id: string
       bypassCharge: bypass,
       metadata: { analysisId: params.id, rejected: parsed.rejected.length },
     });
-
-    const admin = createAdminClient();
-    const { error: saveError } = await admin
-      .from("data_analyses")
-      .update({ findings: parsed.findings, analysed_at: new Date().toISOString() })
-      .eq("id", params.id)
-      .eq("user_id", user.id);
-    if (saveError) logApiError("/api/data-analysis/analyse", saveError, { stage: "save_findings" });
 
     if (parsed.findings.charts.length > 0) {
       // Appended after whatever is already there, so the charts the

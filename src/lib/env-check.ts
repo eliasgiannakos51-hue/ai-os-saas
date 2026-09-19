@@ -280,7 +280,7 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
     name: "UNSPLASH_ACCESS_KEY",
     level: "optional",
     what: "Real photos in generated websites",
-    fallback: "photo placeholders are REMOVED — a site with fewer, relevant images rather than random ones",
+    fallback: "photo placeholders are REMOVED and the site SAYS SO — a generation note tells the owner how many pictures were asked for and that the photo library is not set up, rather than handing them a site that is quietly short of images",
   },
   {
     // Raising this on the free Demo tier does not buy more photos: it

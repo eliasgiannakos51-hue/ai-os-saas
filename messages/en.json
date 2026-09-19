@@ -1554,7 +1554,12 @@
         },
         "stopped": "Stopped by you. {count, plural, =0 {Nothing was charged} one {# credit was charged} other {# credits were charged}} for the part that was generated; the rest of the hold was released.",
         "spelling": "{count, plural, one {One Greek word may be misspelled} other {# Greek words may be misspelled}}: {words}. Nothing was changed — check them, a name or a brand is not a mistake.",
-        "sameSkeleton": "This site has the same structure as {name} — {percent}% the same shape. Nothing was changed; two sites of one business are often meant to match, and only you can say whether these are."
+        "sameSkeleton": "This site has the same structure as {name} — {percent}% the same shape. Nothing was changed; two sites of one business are often meant to match, and only you can say whether these are.",
+        "photosDropped": {
+          "notConfigured": "{count, plural, one {One picture was} other {# pictures were}} asked for and none could be added — the photo library is not set up on this deployment. Everything else on the page is as generated.",
+          "quota": "{count, plural, one {One picture} other {# pictures}} could not be added: the photo library refused more requests for now. Try again in an hour, or add your own images.",
+          "noMatch": "{count, plural, one {One picture was} other {# pictures were}} asked for and no photograph matched. Nothing unrelated was put in its place — describing the subject differently usually helps."
+        }
       }
     },
     "marketplace": {

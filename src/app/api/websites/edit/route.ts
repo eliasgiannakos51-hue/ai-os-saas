@@ -330,7 +330,7 @@ export async function POST(request: Request) {
     // Out here for the same reason as generation: the photos are
     // registered with Unsplash after the edit is SAVED, and a safety-
     // rejected edit returns below without ever saving.
-    let images: ImageResolution = { html: "", used: [], halted: null };
+    let images: ImageResolution = { html: "", used: [], halted: null, dropped: null };
     // THE CHOICE SURVIVES AN EDIT. Without this, an owner who asked for a
     // page with no photographs gets one the first time somebody asks for
     // any change — the edit prompt is not the generation prompt, and the

@@ -1554,7 +1554,12 @@
         },
         "stopped": "Lo detuviste. {count, plural, =0 {No se cobró nada} one {Se cobró # crédito} other {Se cobraron # créditos}} por la parte generada; el resto de la retención se liberó.",
         "spelling": "{count, plural, one {Una palabra griega puede estar mal escrita} other {# palabras griegas pueden estar mal escritas}}: {words}. No se cambió nada — revísalas, un nombre o una marca no es un error.",
-        "sameSkeleton": "Este sitio tiene la misma estructura que {name}: un {percent}% de la misma forma. No se cambió nada; dos sitios de un mismo negocio a menudo deben parecerse, y solo tú puedes decir si es el caso."
+        "sameSkeleton": "Este sitio tiene la misma estructura que {name}: un {percent}% de la misma forma. No se cambió nada; dos sitios de un mismo negocio a menudo deben parecerse, y solo tú puedes decir si es el caso.",
+        "photosDropped": {
+          "notConfigured": "{count, plural, one {Se pidió una imagen} other {Se pidieron # imágenes}} y no se pudo añadir ninguna — la biblioteca de fotos no está configurada en esta instalación. Todo lo demás de la página es tal como se generó.",
+          "quota": "{count, plural, one {Una imagen} other {# imágenes}} no se pudieron añadir: la biblioteca de fotos rechazó más peticiones por ahora. Inténtalo en una hora o añade tus propias imágenes.",
+          "noMatch": "{count, plural, one {Se pidió una imagen} other {Se pidieron # imágenes}} y ninguna fotografía coincidió. No se puso nada ajeno en su lugar — describir el tema de otra forma suele ayudar."
+        }
       }
     },
     "marketplace": {

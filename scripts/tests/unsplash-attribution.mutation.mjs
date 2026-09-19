@@ -195,8 +195,13 @@ const MUTANTS = [
     name: "registration fires for photos that never reached the page",
     suites: [REGISTRATION],
     file: RESOLVER,
-    from: "  return { html: result, used: [...resolved.values()], halted: budget.halted };",
-    to: "  return { html: result, used: [...resolved.values(), ...resolved.values()], halted: budget.halted };",
+    // RE-ANCHORED 2026-09-19: the return grew a `dropped` field when the
+    // resolver started reporting the placeholders it removes, so that a
+    // site generated without its pictures says so instead of arriving
+    // quietly short. The DEFECT this mutant restores is unchanged —
+    // every resolved photo registered twice — only the line moved.
+    from: "    used: [...resolved.values()],",
+    to: "    used: [...resolved.values(), ...resolved.values()],",
   },
   {
     name: "registration runs even when the edit was never saved",

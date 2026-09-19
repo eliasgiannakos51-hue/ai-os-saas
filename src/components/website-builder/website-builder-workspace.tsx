@@ -1062,6 +1062,13 @@ export function WebsiteBuilderWorkspace({
         // is unactionable; "87% the same structure as Καφέ Λιμάνι" can be
         // opened in the other tab and disagreed with.
         return t("notes.sameSkeleton", { percent: note.percent, name: note.against });
+      case "photosDropped":
+        // THE REASON IS PART OF THE SENTENCE, not a detail behind it.
+        // "No pictures were added" is not actionable; "the photo library
+        // is not set up on this deployment" tells the owner to go and
+        // set a key, and "no photographs matched" tells them to change
+        // the words.
+        return t(`notes.photosDropped.${note.reason}`, { count: note.count });
       case "spelling":
         // The words themselves, joined — the owner is the only one who can
         // say whether "ρεμπα" is a typo or a brand, and they can only say

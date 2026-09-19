@@ -1554,7 +1554,12 @@
         },
         "stopped": "L'hai fermato. {count, plural, =0 {Non è stato addebitato nulla} one {È stato addebitato # credito} other {Sono stati addebitati # crediti}} per la parte generata; il resto della prenotazione è stato liberato.",
         "spelling": "{count, plural, one {Una parola greca potrebbe essere scritta male} other {# parole greche potrebbero essere scritte male}}: {words}. Non è stato cambiato nulla — controllale, un nome o un marchio non è un errore.",
-        "sameSkeleton": "Questo sito ha la stessa struttura di {name} — {percent}% della stessa forma. Non è stato cambiato nulla; due siti della stessa attività spesso devono somigliarsi, e solo tu puoi dire se è questo il caso."
+        "sameSkeleton": "Questo sito ha la stessa struttura di {name} — {percent}% della stessa forma. Non è stato cambiato nulla; due siti della stessa attività spesso devono somigliarsi, e solo tu puoi dire se è questo il caso.",
+        "photosDropped": {
+          "notConfigured": "{count, plural, one {È stata richiesta una immagine} other {Sono state richieste # immagini}} e non è stato possibile aggiungerne nessuna — la libreria di foto non è configurata su questa installazione. Tutto il resto della pagina è come è stato generato.",
+          "quota": "{count, plural, one {Una immagine} other {# immagini}} non sono state aggiunte: la libreria di foto ha rifiutato altre richieste per ora. Riprova tra un'ora o aggiungi immagini tue.",
+          "noMatch": "{count, plural, one {È stata richiesta una immagine} other {Sono state richieste # immagini}} e nessuna fotografia corrispondeva. Non è stato messo nulla di estraneo al suo posto — descrivere il soggetto in modo diverso di solito aiuta."
+        }
       }
     },
     "marketplace": {

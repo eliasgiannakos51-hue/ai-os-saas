@@ -254,6 +254,13 @@ page.on("pageerror", (e) => consoleErrors.push(`pageerror: ${e.message}`));
 // because the sidebar is `overflow-y-auto` and a row 40px below the fold
 // is present in the DOM, hit-testable by a script, and invisible to a
 // person.
+// EVIDENCE ON DEMAND. `SIDEBAR_SHOTS=<dir> node scripts/tests/sidebar-density.prodtest.mjs`
+// writes one full-page PNG per viewport beside the numbers. Off by
+// default: a gate that writes files on every run is a gate that fills a
+// disk, and the numbers are the assertion — the image is for a person
+// who wants to see the thing the numbers describe.
+const SHOT_DIR = process.env.SIDEBAR_SHOTS || "";
+
 async function measure(width, height) {
   await page.setViewportSize({ width, height });
   const resp = await page.goto(`http://127.0.0.1:${PORT}/dashboard`, { waitUntil: "networkidle" });
@@ -263,6 +270,36 @@ async function measure(width, height) {
   // have settled, or the count is of a pre-hydration tree.
   await page.waitForSelector("aside nav a", { timeout: 15000 });
   await page.waitForTimeout(600);
+  if (SHOT_DIR) {
+    // The drawer is off-canvas at 390, so the sidebar has to be opened
+    // before a photograph of it means anything.
+    if (width < 768) {
+      // components/dashboard/menu-button.tsx, named by common.toggleMenu.
+      // Matched on the accessible name rather than on a class, so a
+      // restyle does not silently produce a photograph of a shut drawer.
+      const toggle = await page.$('button[aria-label="Toggle menu"]');
+      if (!toggle) throw new Error("SIDEBAR_SHOTS: no drawer toggle at 390 — the phone shot would be of a closed drawer");
+      // A REAL TAP THROUGH CDP, not page.click().
+      //
+      // Two reasons, and the second is the one that matters. A tap is
+      // what opens this drawer on the device the 390 column exists for,
+      // and a synthetic click is not that. And
+      // scripts/tests/interaction-coverage.test.mjs counts a prodtest
+      // that drives the page with a mouse and never with a touch —
+      // MOUSE_ONLY_CEILING, which "may only go DOWN". A `.click()` here
+      // would have pushed that census from 24 to 25 for a screenshot,
+      // which is a ratchet raised to pay for a convenience.
+      // Input.dispatchTouchEvent produces trusted input; dispatchEvent
+      // does not, and the browser ignores it.
+      const box = await toggle.boundingBox();
+      const cdp = await page.context().newCDPSession(page);
+      const point = { x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2) };
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [point] });
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      await page.waitForTimeout(500);
+    }
+    await page.screenshot({ path: `${SHOT_DIR}/sidebar-${width}x${height}.png`, fullPage: false });
+  }
 
   return await page.evaluate(() => {
     const aside = document.querySelector("aside");
@@ -309,10 +346,44 @@ async function measure(width, height) {
       });
     });
 
+    // EVERY HEADING, AND WHAT IS UNDER IT — read off the screen.
+    //
+    // This is the question no gate in this repository was asking, and it
+    // is the one that mattered: on 2026-09-19 the owner reported "the
+    // sidebar shows the heading Run and NO rows". Nothing had filtered
+    // those rows; the group was shut. Every structural gate was green,
+    // because all of them read lib/sidebar-nav.ts, where the three rows
+    // are declared and correct.
+    //
+    // A heading is paired with the rows that FOLLOW it in document order
+    // until the next heading — which is how a person reads it, and is
+    // independent of the markup nesting that changed twice while the
+    // collapse existed.
+    const headingEls = [...aside.querySelectorAll("button, p")].filter(
+      (el) => el.className.includes("uppercase") && el.className.includes("tracking-widest")
+    );
+    const walker = [...aside.querySelectorAll("button, p, a.nav-item")];
+    const perGroup = headingEls.map((h) => {
+      const start = walker.indexOf(h);
+      let rows = 0;
+      for (let i = start + 1; i < walker.length; i++) {
+        const el = walker[i];
+        if (headingEls.includes(el)) break;
+        if (!el.classList.contains("nav-item")) continue;
+        // PAINTED, not merely present. A collapsed group keeps its links
+        // in the DOM at zero height; that is exactly the state this
+        // check exists to refuse, so a zero-height row does not count.
+        const r = el.getBoundingClientRect();
+        if (r.height > 0 && r.width > 0) rows++;
+      }
+      return { heading: h.textContent.trim(), rows };
+    });
+
     return {
       rendered: links.length,
       visible: visible.length,
       headings,
+      perGroup,
       asideScrollHeight: aside.scrollHeight,
       asideClientHeight: aside.clientHeight,
       overflows: aside.scrollHeight > aside.clientHeight + 1,
@@ -321,20 +392,25 @@ async function measure(width, height) {
   });
 }
 
-// The same measurement with every collapsible group opened, which answers
-// a different and equally real question: if somebody expands the whole
-// nav, does it still fit? That is the number the eight-group sidebar
-// could not survive.
+// THE FULL HEIGHT OF THE NAV, which since 2026-09-19 is simply its
+// height: every group is open, so there is nothing left to expand and
+// this measures the same tree measure() does. It is kept separate
+// because the QUESTION is different — measure() asks what a person can
+// read on arrival, this asks how far the panel scrolls — and because the
+// forcing below costs nothing and keeps the file honest if a collapse
+// ever returns.
 async function measureExpanded(width, height) {
   await page.setViewportSize({ width, height });
   await page.goto(`http://127.0.0.1:${PORT}/dashboard`, { waitUntil: "networkidle" });
   await page.waitForSelector("aside nav a", { timeout: 15000 });
   await page.waitForTimeout(400);
-  // The accordion allows one open group at a time, so "expand everything"
-  // is not reachable by clicking. Force the containers open instead and
-  // measure the height the content WOULD need — the question is whether
-  // the panel is big enough for its own contents, not whether the
-  // accordion lets you ask for it.
+  // A NO-OP TODAY, DELIBERATELY KEPT. There is no `div.grid` collapse
+  // container in the component any more, so this loop matches nothing
+  // and the height read below is the height the page already had. It
+  // stays because the alternative — deleting it — would make this
+  // function silently stop measuring the expanded case on the day
+  // somebody reintroduces a collapse, which is the exact regression the
+  // paragraph below is about.
   // OPEN, THEN WAIT, THEN MEASURE — three statements, and it used to be
   // one.
   //
@@ -381,6 +457,14 @@ async function measureExpanded(width, height) {
 // which the sidebar is a drawer rather than a column, and 1440 is the
 // commonest real laptop. The four together are what "does this structure
 // survive" actually means.
+// HOW MANY GROUPS THE CONFIG DECLARES, read from the file rather than
+// typed: the hub's filter chips are one per group plus "All types", and
+// a hand-written constant for that went stale the day the sidebar grew
+// from four groups to six.
+const SIDEBAR_GROUP_COUNT = (
+  readFileSync("src/lib/sidebar-nav.ts", "utf8").match(/^\s*heading: "[^"]+",$/gm) ?? []
+).length;
+
 const VIEWPORTS = [
   { name: "390w  (390x844)", width: 390, height: 844 },
   { name: "1080p (1920x1080)", width: 1920, height: 1080 },
@@ -411,29 +495,75 @@ for (const vp of VIEWPORTS) {
   );
 }
 
-console.log("\n== 1. four groups, and that is what the browser paints ==");
-// Counted from the DOM, not from lib/sidebar-nav.ts. The config saying
-// four and the page painting more would be exactly the gap the brief is
-// about — and the Settings group renders outside <nav>, which is how the
-// first version of this file reported three.
+console.log("\n== 0. NO HEADING STANDS OVER NOTHING ==");
+// ---------------------------------------------------------------------
+// THE CHECK THIS FILE DID NOT HAVE, and the reason it is section 0.
+//
+// On 2026-09-19 production reported: "the sidebar shows the heading Run
+// and NO rows — did a filter remove Agents, Automation and Marketplace?"
+// Nothing had. The one-open-group rule of two days earlier had SHUT the
+// group, and shut looks exactly like filtered-away.
+//
+// Every structural gate was green, correctly: they all read
+// lib/sidebar-nav.ts, where all three rows are declared, visible, and in
+// the right order. sidebar-structure asserted the order. sidebar-size
+// asserted the counts. sidebar-and-tooltips asserted that the collapse
+// was well-built — a 44px target, aria-expanded, rows out of the tab
+// order when shut. All true. All about a screen showing seven of
+// twenty-six rows and six headings, five of them over empty space.
+//
+// A heading with no rows under it is the one thing a person can see and
+// no declaration can express, so it is asked here, of the screen, at
+// every viewport. Rows are paired with the heading that precedes them in
+// document order and counted only if they are actually painted.
 for (const vp of VIEWPORTS) {
   const m = results[vp.name];
   if (m.error) continue;
-  checkTrue(`${vp.name}: ${m.headings} group headings, limit 4`, m.headings <= 4, String(m.headings));
+  const groups = m.perGroup ?? [];
   checkTrue(
-    `${vp.name}: and all four were found, not just the ones inside <nav>`,
-    m.headings === 4,
-    `${m.headings} — the Settings group renders after </nav>`
+    `${vp.name}: the per-group scan read the screen (${groups.length} headings)`,
+    groups.length >= 5,
+    "a scan that finds no headings agrees with every claim below it"
+  );
+  const empty = groups.filter((g) => g.rows === 0);
+  checkTrue(
+    `${vp.name}: every heading has rows under it (${groups.map((g) => `${g.heading}:${g.rows}`).join(" ")})`,
+    empty.length === 0,
+    `${empty.map((g) => g.heading).join(", ")} — a heading over nothing reads as a nav whose contents were removed`
   );
 }
 
-console.log("\n== 2. at most twenty rows exist at all ==");
+console.log("\n== 1. six groups, and that is what the browser paints ==");
+// Counted from the DOM, not from lib/sidebar-nav.ts. The Settings group
+// renders outside <nav>, which is how the first version of this file
+// reported three.
+//
+// SIX SINCE 2026-09-05, and this said four until 2026-09-19 — a V4.6 #3
+// target that the six-group structure had superseded eleven days
+// earlier. It was red on every run in between and read as a sidebar
+// problem rather than as a stale number, which is why docs/v6-list.md §2
+// existed. The owner decided it on 2026-09-19: six groups, every one
+// open, scroll accepted.
 for (const vp of VIEWPORTS) {
   const m = results[vp.name];
   if (m.error) continue;
-  // Every .nav-item in the DOM, collapsed groups included: the count of
-  // rows the sidebar is WILLING to show, which is what the limit is about.
-  checkTrue(`${vp.name}: ${m.rendered} rows in the DOM, limit 20`, m.rendered <= 20, String(m.rendered));
+  checkTrue(`${vp.name}: ${m.headings} group headings, expected 6`, m.headings === 6, String(m.headings));
+}
+
+console.log("\n== 2. every declared row exists in the DOM ==");
+// THE CEILING IS GONE AND THE FLOOR REPLACED IT, which is the same
+// decision as section 1. "At most twenty rows" was V4.6 #3's answer to a
+// forty-five-row directory; the structure has been twenty-six rows and
+// six groups since 2026-09-05, and every one of them is a deliberate
+// entry the owner listed by name.
+//
+// What is worth holding is the opposite: no row may silently stop being
+// rendered. 26 is what sidebarGroups() yields for a non-owner today
+// (27 with the owner-only Business health row).
+for (const vp of VIEWPORTS) {
+  const m = results[vp.name];
+  if (m.error) continue;
+  checkTrue(`${vp.name}: ${m.rendered} rows in the DOM, floor 26`, m.rendered >= 26, String(m.rendered));
 }
 
 console.log("\n== 3. the rows a person can actually read on arrival ==");
@@ -475,7 +605,25 @@ console.log("\n== 3. the rows a person can actually read on arrival ==");
 // alongside 1080p rather than being quietly excused into a floor of 7.
 // Setting a floor to the value you just measured is how a check gets its
 // baseline set to the size of the problem.
-const FLOOR = { "1080p (1920x1080)": 15, "1440w (1440x900)": 15, "768p  (1366x768)": 11 };
+// 1440 DROPS FROM 15 TO 14, AND THAT IS A FITTED NUMBER — said plainly,
+// because the paragraph above forbids doing it silently. With every group
+// open the panel carries 26 rows and 6 headings, so what fits in 900px of
+// viewport is decided by arithmetic the layout cannot argue with: 1,564px
+// of content, 609px of visible nav once the 92px header and 199px footer
+// are out. 14 is what that yields and 15 is not reachable without taking
+// a row out or a tap target below 44px.
+//
+// THE NUMBER IT REPLACES WAS 7. That is what this same viewport painted
+// two days earlier, when only the group holding the current page was
+// open — and the floor said 15 and had been RED ever since, read as a
+// sidebar problem rather than as the collapse hiding two thirds of the
+// nav. Fitted or not, 14 is double what the check was actually getting.
+//
+// The un-fitted guard is MONOTONICITY, asserted below: a taller viewport
+// may never paint fewer readable rows than a shorter one. That cannot be
+// satisfied by choosing a number, and it is what catches a chrome
+// regression eating the panel at one size only.
+const FLOOR = { "1080p (1920x1080)": 15, "1440w (1440x900)": 14, "768p  (1366x768)": 11 };
 
 // A VIEWPORT IS FLOORED OR IT IS EXCLUDED BY NAME, never neither.
 //
@@ -519,17 +667,36 @@ for (const vp of VIEWPORTS) {
     `${m.visible} vs ${m.labels.length}`
   );
 }
-// AT 1080p, EVERY ROW. Stated separately from the floor because it is the
-// brief's actual request — "~15 items visible without scroll" — and a
-// floor of 15 would still pass if a sixteenth row were added and left
-// below the fold.
+// A TALLER VIEWPORT MAY NEVER PAINT FEWER ROWS THAN A SHORTER ONE.
+//
+// This replaces "at 1080p, every row is readable", which was the V4.6 #3
+// brief's request against a sixteen-row sidebar and is arithmetically
+// impossible against twenty-six: 1,564px of content does not fit in
+// 1,080px of viewport however it is arranged, and the owner accepted
+// that scroll on 2026-09-19.
+//
+// What survives the change is the invariant underneath it, and it is the
+// one number in this section nobody can choose: give the panel more
+// height and it must not show less. A chrome regression that eats the
+// viewport at one size, a heading that grows only when the label wraps,
+// a footer that reflows — each of those breaks this and none of them
+// breaks a per-viewport floor that was fitted to what the page scored.
 {
-  const m = results["1080p (1920x1080)"];
-  if (!m.error) {
+  const ordered = VIEWPORTS.filter(
+    (vp) => !results[vp.name]?.error && Object.prototype.hasOwnProperty.call(FLOOR, vp.name)
+  ).sort((a, b) => a.height - b.height);
+  checkTrue(
+    `there are at least two floored viewports to compare (${ordered.length})`,
+    ordered.length >= 2,
+    "with fewer than two, the monotonicity check below compares nothing and passes"
+  );
+  for (let i = 1; i < ordered.length; i++) {
+    const shorter = results[ordered[i - 1].name];
+    const taller = results[ordered[i].name];
     checkTrue(
-      `1080p: every one of the ${m.rendered} rows is readable, not just ${FLOOR["1080p (1920x1080)"]}`,
-      m.visible === m.rendered,
-      `${m.visible} of ${m.rendered}`
+      `${ordered[i].name} (${taller.visible}) paints at least as many rows as ${ordered[i - 1].name} (${shorter.visible})`,
+      taller.visible >= shorter.visible,
+      `${taller.visible} < ${shorter.visible} — more viewport, fewer rows`
     );
   }
 }
@@ -544,18 +711,30 @@ console.log("\n== 4. the nav is shorter than it was, and stays shorter ==");
 // much as a row — so the thing that actually decides whether somebody
 // scrolls is measured here, in pixels, from the rendered page.
 //
-// 1100 rather than 1071 exactly: a font fallback or a locale with longer
-// labels moves this by a few pixels, and a gate that fails on a font is
-// a gate people learn to ignore. It is 314px below where it started,
-// which is what it is here to defend. The number only ever comes down.
-const HEIGHT_CEILING = 1100;
+// THE CEILING IS NOW IN SCREENS, NOT PIXELS, and it is the owner's own
+// threshold rather than a ratchet.
+//
+// 1,100px was V4.6 #3's answer to a 1,385px eight-group nav that nothing
+// could scroll comfortably. Every group is open since 2026-09-19 and the
+// panel is deliberately taller than the viewport — the trade the owner
+// made in writing: "the scroll is acceptable", with one condition
+// attached, "if it is more than 3 screens on mobile, tell me and we
+// discuss it again".
+//
+// So that is the check: the nav may scroll, and it may not exceed three
+// phone screens. Measured 2026-09-19 at 390x844 — 1,633px, 1.9 screens.
+// A pixel ratchet would now be a ratchet on a number the owner chose to
+// let go up, which is a gate arguing with a decision instead of holding
+// the condition the decision came with.
+const MAX_SCREENS = 3;
 for (const vp of VIEWPORTS) {
   const e = expanded[vp.name];
   if (!e || e.error) continue;
+  const screens = e.asideScrollHeight / vp.height;
   checkTrue(
-    `${vp.name}: ${e.asideScrollHeight}px of nav content, ceiling ${HEIGHT_CEILING}px (was 1385px)`,
-    e.asideScrollHeight <= HEIGHT_CEILING,
-    `${e.asideScrollHeight}px`
+    `${vp.name}: ${e.asideScrollHeight}px of nav content = ${screens.toFixed(1)} screens, ceiling ${MAX_SCREENS}`,
+    screens <= MAX_SCREENS,
+    `${screens.toFixed(1)} screens — the owner asked to be told if the phone passes 3`
   );
 }
 
@@ -587,14 +766,32 @@ await page.setViewportSize({ width: 1366, height: 900 });
   // the config the DOM was built from.
   const MUST_BE_LISTED = [
     "/dashboard/analytics", "/dashboard/sales", "/dashboard/images", "/dashboard/campaigns",
-    "/dashboard/memory", "/dashboard/documents", "/dashboard/published",
+    // NOT /dashboard/memory. That URL was renamed to /dashboard/search on
+    // 2026-09-05 — the page searches the user's own records and held no
+    // conversation, while its label and its ten translations all said
+    // "what the AI remembers about you" — and the old path is now a
+    // permanent redirect. A hub that listed it would be offering a
+    // 308 as a destination. It stayed in this list for a fortnight and
+    // the line was red the whole time, read as a missing page rather
+    // than as a stale expectation.
+    "/dashboard/search", "/dashboard/documents", "/dashboard/published",
     "/dashboard/marketplace", "/dashboard/integrations", "/dashboard/affiliate",
     "/dashboard/trading-workflow", "/dashboard/reflection", "/dashboard/favorites",
   ];
   const absent = MUST_BE_LISTED.filter((h) => !hub.hrefs.includes(h));
   checkTrue(`the hub lists ${hub.cards} destinations`, hub.cards >= 40, String(hub.cards));
   checkTrue("and every hidden row is one of them", absent.length === 0, absent.join(", "));
-  checkTrue(`it has a type filter (${hub.chips} chips)`, hub.chips === 5, `${hub.chips} — expected All types + 4 groups`);
+  // ONE CHIP PER GROUP, PLUS "All types" — derived from the config rather
+  // than typed, because the constant was 5 and stayed 5 while the sidebar
+  // went from four groups to six on 2026-09-05. A number that has to be
+  // edited by hand whenever the structure changes is a number that will
+  // be wrong the next time it changes.
+  const expectedChips = SIDEBAR_GROUP_COUNT + 1;
+  checkTrue(
+    `it has a type filter (${hub.chips} chips)`,
+    hub.chips === expectedChips,
+    `${hub.chips} — expected All types + ${SIDEBAR_GROUP_COUNT} groups`
+  );
   checkTrue("and a search box", hub.hasSearch);
   // The owner-only page must NOT be in a non-owner's payload at all —
   // not hidden by CSS, not present and unclicked: absent.
@@ -611,9 +808,20 @@ await page.setViewportSize({ width: 1366, height: 900 });
   const r = await page.goto(`http://127.0.0.1:${PORT}/dashboard/favorites`, { waitUntil: "networkidle" });
   const landed = new URL(page.url()).pathname + new URL(page.url()).search;
   checkTrue(`/dashboard/favorites still resolves (HTTP ${r?.status()})`, r?.status() === 200, String(r?.status()));
+  // IT USED TO REQUIRE A REDIRECT to /dashboard/timeline?view=fav, and
+  // that was the V4.6 implementation. src/app/dashboard/favorites/page.tsx
+  // says in its own header that the route "spent V4.6 as a redirect" and
+  // is the canonical starred page now — bookmarks and the palette land
+  // here rather than bouncing. So the check asserted a mechanism the
+  // product had deliberately replaced, and stayed red while the two
+  // checks below it proved the page was working.
+  //
+  // What matters is where the person ends up, which is asserted as: it
+  // does not bounce somewhere else, and the starred tab is the selected
+  // one (below).
   checkTrue(
-    `...and lands on the starred tab (${landed})`,
-    landed === "/dashboard/timeline?view=fav",
+    `...and stays there rather than bouncing (${landed})`,
+    landed === "/dashboard/favorites",
     landed
   );
   const tabs = await page.evaluate(() => {

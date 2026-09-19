@@ -43,9 +43,18 @@ function need(re, what) {
 // A row: min-h-[44px], in a list with space-y-0.5 between them.
 const ROW = Number(need(/nav-item group relative flex min-h-\[(\d+)px\]/, "the row height")[1]);
 const ROW_GAP = spacing(need(/<div className="space-y-([\d.]+) pb-[\d.]+">/, "the gap between rows")[1]);
-// A heading: min-h-[44px] with pb-1.5 under it.
-const HEAD = Number(need(/flex min-h-\[(\d+)px\] w-full items-center justify-between rounded-lg px-3 pb-/, "the heading height")[1]);
-const HEAD_PAD = spacing(need(/rounded-lg px-3 pb-([\d.]+) text-\[10px\]/, "the padding under a heading")[1]);
+// A heading: a <p> at text-[10px] with pb-1.5 under it.
+//
+// IT WAS A 44px BUTTON UNTIL 2026-09-19. Every group was collapsible, so
+// the heading was a tap target and carried min-h-[44px]; with nothing
+// left to toggle it is a caption, and a caption is its own line box. At
+// text-[10px] Tailwind's line-height is 1rem = 16px — which is most of
+// why the measured nav fell from 1,702px to 1,564px while GAINING
+// nineteen visible rows. Six headings went from 300px to 132px.
+const HEAD_TEXT = Number(need(/px-3 pb-[\d.]+ text-\[(\d+)px\] font-semibold uppercase tracking-widest/, "the heading font size")[1]);
+// Tailwind pairs text-[10px] with the default line-height of 1rem.
+const HEAD = Math.max(16, HEAD_TEXT);
+const HEAD_PAD = spacing(need(/px-3 pb-([\d.]+) text-\[10px\]/, "the padding under a heading")[1]);
 const LIST_PAD = spacing(need(/space-y-[\d.]+ pb-([\d.]+)">/, "the padding under a group's list")[1]);
 const GROUP_GAP = spacing(need(/<nav className="space-y-(\d+) p-\d+">/, "the gap between groups")[1]);
 const NAV_PAD = spacing(need(/<nav className="space-y-\d+ p-(\d+)">/, "the nav's own padding")[1]);
@@ -66,12 +75,9 @@ const FOOT_PAD = spacing(3);
 const FOOTER = 3 * (1 + 2 * FOOT_PAD) + 44 + 44 + 36;
 
 const groupHeight = (rows) => HEAD + HEAD_PAD + rows * ROW + (rows - 1) * ROW_GAP + LIST_PAD;
-const collapsedHeight = () => HEAD + HEAD_PAD;
 
-function total(groups, openSet) {
-  const bodies = groups.map((g) =>
-    openSet.has(g.name) ? groupHeight(g.rows) : collapsedHeight()
-  );
+function total(groups) {
+  const bodies = groups.map((g) => groupHeight(g.rows));
   const chrome = HEADER_PAD * 2 + LOGO_H + NAV_PAD * 2 + FOOTER;
   return chrome + bodies.reduce((a, b) => a + b, 0) + (groups.length - 1) * GROUP_GAP;
 }
@@ -106,25 +112,27 @@ console.log("sidebar height, computed from the component's own classes\n");
 console.log(`  row ${ROW}px + ${ROW_GAP}px gap · heading ${HEAD}+${HEAD_PAD}px · group gap ${GROUP_GAP}px`);
 console.log(`  chrome: header ${HEADER_PAD * 2 + LOGO_H}px (logo ${LOGO_W}x${LOGO_H} from its viewBox) + footer ${FOOTER}px\n`);
 
-// ONE OPEN GROUP IS THE SHIPPED BEHAVIOUR since 2026-09-12: the group
-// holding the current page opens by itself, anything opened by hand stays
-// open, and nothing is remembered across a reload. The rows below are the
-// cases that decide whether that was the right call.
+// EVERY GROUP IS OPEN since 2026-09-19, so there is one case per
+// STRUCTURE rather than one per open-set. The collapse cases that stood
+// here — "only the group you are in", "Make plus one opened by hand",
+// "all collapsed" — described a sidebar on which five of six headings
+// stood over nothing, which is what production reported.
+//
+// THIS IS ARITHMETIC, NOT A MEASUREMENT. Section 4 of
+// scripts/tests/sidebar-density.prodtest.mjs measures the same thing in
+// a real browser against a real build; where the two disagree, believe
+// the browser. Measured there on 2026-09-19: 1,633px at 390x844 and
+// 1,564px at 1440x900.
 const CASES = [
-  ["today · every group open (the old behaviour)", TODAY, new Set(TODAY.map((g) => g.name))],
-  ["today · only the group you are in (See, 8 rows)", TODAY, new Set(["See"])],
-  ["today · only the group you are in (Make, 5 rows)", TODAY, new Set(["Make"])],
-  ["all planned rows · every group open (the worst case)", FUTURE, new Set(FUTURE.map((g) => g.name))],
-  ["all planned rows · only Make, the largest at 8", FUTURE, new Set(["Make"])],
-  ["all planned rows · Make plus one opened by hand", FUTURE, new Set(["Make", "Run"])],
-  ["all planned rows · all collapsed", FUTURE, new Set()],
+  ["today · every group open", TODAY],
+  ["all planned rows · every group open (the worst case)", FUTURE],
 ];
 
 const pad = (n, w) => String(n).padStart(w);
 console.log("  case                                                    rows   height   390x844   1440x900");
-for (const [label, groups, open] of CASES) {
-  const px = total(groups, open);
-  const drawn = groups.filter((g) => open.has(g.name)).reduce((a, b) => a + b.rows, 0);
+for (const [label, groups] of CASES) {
+  const px = total(groups);
+  const drawn = rowsOf(groups);
   const s390 = (px / VIEWPORTS["390x844"]).toFixed(1);
   const s1440 = (px / VIEWPORTS["1440x900"]).toFixed(1);
   console.log(
@@ -138,5 +146,9 @@ console.log(`
   ${VIEWPORTS["1440x900"] - chrome}px on the laptop, once the header and the three footer blocks are
   taken out. Six headings cost ${6 * (HEAD + HEAD_PAD)}px of that before a single row is drawn,
   which leaves room for ${Math.floor((VIEWPORTS["390x844"] - chrome - 6 * (HEAD + HEAD_PAD) - 5 * GROUP_GAP) / (ROW + ROW_GAP))} rows on the phone and ${Math.floor((VIEWPORTS["1440x900"] - chrome - 6 * (HEAD + HEAD_PAD) - 5 * GROUP_GAP) / (ROW + ROW_GAP))} on the laptop.
-  That is the number the one-open-group rule has to stay under, and the
-  largest group is ${Math.max(...FUTURE.map((g) => g.rows))} rows.`);
+
+  The rest is scroll, and that is the trade the owner took on 2026-09-19:
+  every group open, every row one scroll away, with the condition that
+  the phone stays under three screens. Section 4 of
+  scripts/tests/sidebar-density.prodtest.mjs holds that condition against
+  a browser rather than against this arithmetic.`);

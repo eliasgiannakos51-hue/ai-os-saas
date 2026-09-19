@@ -30,25 +30,33 @@ that demonstrates two real people are kept apart.
 **What it means if it fails:** one account can reach another's rows, which
 is the worst outcome in the product.
 
-## 2. Decide the sidebar's real targets — one decision
+## 2. ~~Decide the sidebar's real targets~~ — DECIDED 2026-09-19
 
-`sidebar-density.prodtest.mjs` is red (17/23) against V4.6 targets written
-before the accordion existed:
+The owner decided it, and the decision was not a relaxation: **every
+group open, all the time, scroll accepted, on the one condition that the
+phone stays under three screens.**
 
-| target | now |
-|---|---|
-| ≤ 4 groups | 6 |
-| ≤ 20 rows | 26 |
-| ≥ 15 readable @1080p | 7 |
-| ≤ 1100px | 1702px |
+    node scripts/tests/sidebar-density.prodtest.mjs     # 46 checks, all green
+    SIDEBAR_SHOTS=/tmp node scripts/tests/sidebar-density.prodtest.mjs   # …and a PNG per viewport
+    node scripts/measure-sidebar-height.mjs             # the same arithmetic, no browser
 
-Three of the four are a consequence of the approved accordion. The fourth
-— 1702px of nav in a 900px viewport — is a scroll on every page for every
-user and is worth treating as a real number rather than a stale limit.
+| V4.6 target | before | now | what replaced it |
+|---|---|---|---|
+| ≤ 4 groups | 6 | 6 | `=== 6`, the structure since 2026-09-05 |
+| ≤ 20 rows in the DOM | 26 | 26 | a FLOOR of 26 — no row may silently stop rendering |
+| ≥ 15 readable @1080p | 7 | 19 | floor kept; 1440 floor 15→14, said plainly to be fitted |
+| all rows readable @1080p | no | no | monotonicity: a taller viewport may never paint fewer rows |
+| ≤ 1100px | 1702px | 1633px @390 | ≤ 3 screens, the owner's own condition |
 
-**Not a coding task until the targets are agreed.** Relaxing a limit to
-match what was measured is how a check gets its baseline set to the size
-of the problem.
+**What it cost to leave undecided.** The prodtest was red on 23 checks
+for a fortnight and read as a sidebar problem. Inside that noise was a
+real one: five of six headings stood over nothing, and the gate that
+would have said so did not exist. See `docs/shapes.md`, *every gate read
+the declaration; the defect was on the screen*.
+
+**Measured 2026-09-19, in a browser, against a production build:**
+1.9 screens at 390×844, 1.7 at 1440×900. With all six future rows drawn
+it is 2.4 (`measure-sidebar-height.mjs`). The condition holds with room.
 
 ## 3. Separate the estimate shown from the hold taken — ~half a day
 

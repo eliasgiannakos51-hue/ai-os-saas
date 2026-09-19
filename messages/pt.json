@@ -3550,7 +3550,14 @@
       "tapToSpeak": "Carrega em qualquer sítio e fala. Deixa de ouvir sozinho quando paras.",
       "tapToInterrupt": "Carrega em qualquer sítio para interromper e voltar a falar.",
       "hint": "Fala normalmente — a vez termina quando paras.",
-      "empty": "Tudo o que é dito aparece aqui também como texto."
+      "empty": "Tudo o que é dito aparece aqui também como texto.",
+      "blocked": {
+        "notConfigured": "Falar em modo mãos-livres precisa de dois fornecedores de voz e esta instalação não tem nenhuma chave, por isso o botão não consegue iniciar uma conversa.",
+        "notConfiguredTranscribe": "Falar em modo mãos-livres precisa de uma chave de voz para texto e esta instalação não tem nenhuma, por isso o botão não consegue iniciar uma conversa.",
+        "notConfiguredSpeak": "Falar em modo mãos-livres precisa de uma chave de texto para voz e esta instalação não tem nenhuma, por isso o botão não consegue iniciar uma conversa.",
+        "notIncluded": "Falar em modo mãos-livres não está incluído no seu plano. Pode continuar a escrever aqui e a ler todas as respostas.",
+        "outOfMinutes": "Não restam minutos de voz este mês, por isso a conversa em modo mãos-livres não pode começar. Escrever aqui continua a funcionar."
+      }
     },
     "settings": {
       "description": "Fala em vez de escrever e ouve as respostas. Escrever e ler nunca são retirados — cada controlo de voz fica ao lado do texto, não no lugar dele.",

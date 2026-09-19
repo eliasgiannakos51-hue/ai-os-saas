@@ -3550,7 +3550,14 @@
       "tapToSpeak": "Press anywhere and speak. It stops listening by itself when you stop.",
       "tapToInterrupt": "Press anywhere to interrupt and speak again.",
       "hint": "Speak normally — the turn ends when you stop.",
-      "empty": "Everything said appears here as text as well."
+      "empty": "Everything said appears here as text as well.",
+      "blocked": {
+        "notConfigured": "Hands-free talking needs two speech providers and this deployment has neither key set, so the button cannot start a conversation.",
+        "notConfiguredTranscribe": "Hands-free talking needs a speech-to-text key, and this deployment has none set, so the button cannot start a conversation.",
+        "notConfiguredSpeak": "Hands-free talking needs a text-to-speech key, and this deployment has none set, so the button cannot start a conversation.",
+        "notIncluded": "Hands-free talking is not included on your plan. You can still type here, and read every answer.",
+        "outOfMinutes": "No voice minutes left this month, so hands-free talking cannot start. Typing here still works."
+      }
     },
     "settings": {
       "description": "Speak instead of typing, and have answers read back. Typing and reading are never taken away — every voice control sits beside the text one.",

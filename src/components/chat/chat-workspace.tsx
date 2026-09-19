@@ -186,6 +186,33 @@ export function ChatWorkspace({
   // that closing it leaves a normal, readable conversation behind.
   const [talking, setTalking] = useState(false);
   const voiceAvailability = useVoiceAvailability();
+  /**
+   * WHY THE HANDS-FREE LOOP CANNOT START, or null when it can.
+   *
+   * Null is the ONLY value that enables the Talk button, so there is no
+   * way to disable it without producing a sentence — which is the whole
+   * point. The previous version derived `disabled` from four booleans
+   * and the explanation from a separate ternary in a `title`, and the
+   * two could not be kept in step by anything but care.
+   *
+   * THE TWO KEYS ARE NAMED SEPARATELY because they fail separately and
+   * an operator fixes them separately: OPENAI_API_KEY transcribes,
+   * ELEVENLABS_API_KEY speaks, and a deployment with one of the two is
+   * the state lib/voice/voice-providers.ts already distinguishes.
+   * `voice.settings.notConfigured` says "the buttons do not appear",
+   * which is no longer true of THIS button, so these are their own
+   * strings rather than that one reused.
+   */
+  const talkBlockedReason: string | null = (() => {
+    if (!voiceAvailability.loaded) return null;
+    const { configured, included, hasMinutes } = voiceAvailability;
+    if (!configured.transcribe && !configured.speak) return tVoice("conversation.blocked.notConfigured");
+    if (!configured.transcribe) return tVoice("conversation.blocked.notConfiguredTranscribe");
+    if (!configured.speak) return tVoice("conversation.blocked.notConfiguredSpeak");
+    if (!included) return tVoice("conversation.blocked.notIncluded");
+    if (!hasMinutes) return tVoice("conversation.blocked.outOfMinutes");
+    return null;
+  })();
 
   // Focus mode: hides the conversation list so the thread gets the full
   // width, the way ChatGPT and Claude do it.
@@ -965,36 +992,36 @@ export function ChatWorkspace({
               drifted apart at every breakpoint. One class, one rule. */}
           <div className="chat-measure">
             <div className="mb-2 flex flex-wrap justify-end gap-2">
-              {/* PRESS ONCE, THEN TALK (#2). Hidden entirely unless both
-                  halves of voice are usable here — a hands-free loop that
-                  can listen but not answer aloud is not the thing this
-                  button promises. */}
-              {/* DRAWN WHENEVER THE AVAILABILITY CALL HAS ANSWERED, and
-                  inert with the reason in its title when the loop cannot
-                  run here (V4.6) — the hands-free loop needs BOTH keys,
-                  transcription (OPENAI_API_KEY) and speech
-                  (ELEVENLABS_API_KEY), and "the button is not there" was
-                  reported as the feature not existing. */}
+              {/* PRESS ONCE, THEN TALK (#2). DRAWN WHENEVER THE
+                  AVAILABILITY CALL HAS ANSWERED — the hands-free loop
+                  needs BOTH keys, transcription (OPENAI_API_KEY) and
+                  speech (ELEVENLABS_API_KEY), and "the button is not
+                  there" was once reported as the feature not existing.
+                  So it is here, inert, and it SAYS WHY. */}
               {voiceAvailability.loaded && (
                 <button
                   type="button"
                   onClick={() => setTalking(true)}
-                  disabled={
-                    sending ||
-                    !voiceAvailability.transcribeAvailable ||
-                    !voiceAvailability.speakAvailable ||
-                    !voiceAvailability.hasMinutes
-                  }
+                  disabled={sending || talkBlockedReason !== null}
                   data-testid="voice-conversation-start"
-                  title={
-                    !voiceAvailability.configured.transcribe || !voiceAvailability.configured.speak
-                      ? tVoice("settings.notConfigured")
-                      : !voiceAvailability.included
-                        ? tVoice("settings.notIncluded")
-                        : voiceAvailability.hasMinutes
-                          ? undefined
-                          : tVoice("outOfMinutes")
-                  }
+                  // NO `title`. THIS IS THE DEFECT, REPORTED FROM
+                  // PRODUCTION ON 2026-09-19: "I press Talk, nothing
+                  // happens, no explanation."
+                  //
+                  // The reason WAS here, in a title attribute, which
+                  // needs a mouse to hover and a second of patience. On
+                  // a phone there is no hover at all, so the button was
+                  // a control that did nothing and said nothing — which
+                  // is worse than a button that is absent, because
+                  // absent at least does not promise.
+                  //
+                  // components/publishing/publish-control.tsx already
+                  // had the right shape and the argument for it, in its
+                  // own words: the reason is "rendered as VISIBLE text".
+                  // This is the same, below, wired with
+                  // aria-describedby so a screen reader gets it with the
+                  // button rather than as a separate paragraph.
+                  aria-describedby={talkBlockedReason ? "talk-blocked-reason" : undefined}
                   className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-orange-500/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <AudioLines className="h-3.5 w-3.5" aria-hidden="true" />
@@ -1016,6 +1043,14 @@ export function ChatWorkspace({
                 {t("mentorMode")}
               </button>
             </div>
+            {/* WHY TALK CANNOT START, ON SCREEN. See the button above for
+                what this replaces. Rendered only when there is a reason,
+                so a working deployment carries no extra line. */}
+            {voiceAvailability.loaded && talkBlockedReason && (
+              <p id="talk-blocked-reason" className="mb-2 text-end text-[11px] leading-relaxed text-muted">
+                {talkBlockedReason}
+              </p>
+            )}
             {error && (
               <p
                 className={`mb-3 rounded-xl border px-3 py-2 text-xs ${

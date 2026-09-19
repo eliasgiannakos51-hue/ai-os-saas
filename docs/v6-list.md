@@ -311,3 +311,37 @@ answering an error, where reading the result changes nothing the route
 does. A zero-offender register means ~25 written reasons, which is a
 round of work. The alternative is to leave the scan reporting and re-run
 it after each round.
+
+## 15. Why the answer is hard to read while it is being written — one measurement short
+
+**Contrast is not the cause, and that is now measured rather than
+assumed.**
+
+    CHAT_SHOTS=/tmp node scripts/tests/chat-streaming-contrast.prodtest.mjs
+
+Nine text points on the STREAMING block — the one inside
+`sending && streamingText !== null`, identified by having no "Listen"
+button — read **15.71:1 at 1440×900 and 15.68:1 at 390×844** on
+2026-09-19. `chat-ground-dim` is on both the finished and the streaming
+answer; the source always said so, and no gate had ever photographed the
+second one. `chat-measure.prodtest.mjs` seeds `chat_messages`, so every
+figure behind the 2026-09-04 choice of `dim` was taken on a finished
+message.
+
+**What is left is MOVEMENT, and this harness cannot measure it.**
+`route.fulfill` hands Playwright the whole NDJSON body at once, so the
+component receives every delta in one burst: the streaming state it
+samples is a frozen snapshot of a finished stream. A version of the file
+did measure travel and printed 0px in one second — a number that meant
+nothing, and was removed rather than reported.
+
+The remaining hypothesis is `hooks/use-stick-to-bottom.ts`: the thread
+sticks to the bottom as tokens arrive, so a line someone has started
+reading is somewhere else by the time they finish it.
+
+**What would settle it:** point `ANTHROPIC_BASE_URL` at a local server
+emitting `content_block_delta` events with real gaps, so the app's own
+streaming path runs at a real pace. That also needs the Supabase
+stand-in to answer the reserve and settle RPCs, which it currently does
+not. Roughly half a day.
+

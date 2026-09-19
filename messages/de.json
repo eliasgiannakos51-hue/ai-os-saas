@@ -3550,7 +3550,14 @@
       "tapToSpeak": "Drücke irgendwo und sprich. Das Zuhören endet von selbst, wenn du aufhörst.",
       "tapToInterrupt": "Drücke irgendwo, um zu unterbrechen und wieder zu sprechen.",
       "hint": "Sprich normal — der Zug endet, wenn du aufhörst.",
-      "empty": "Alles Gesagte erscheint hier auch als Text."
+      "empty": "Alles Gesagte erscheint hier auch als Text.",
+      "blocked": {
+        "notConfigured": "Freihändiges Sprechen benötigt zwei Sprachanbieter, und in dieser Installation ist kein Schlüssel hinterlegt — die Schaltfläche kann kein Gespräch starten.",
+        "notConfiguredTranscribe": "Freihändiges Sprechen benötigt einen Schlüssel für Spracherkennung, und in dieser Installation ist keiner hinterlegt — die Schaltfläche kann kein Gespräch starten.",
+        "notConfiguredSpeak": "Freihändiges Sprechen benötigt einen Schlüssel für Sprachausgabe, und in dieser Installation ist keiner hinterlegt — die Schaltfläche kann kein Gespräch starten.",
+        "notIncluded": "Freihändiges Sprechen ist in Ihrem Tarif nicht enthalten. Sie können hier weiterhin tippen und jede Antwort lesen.",
+        "outOfMinutes": "Diesen Monat sind keine Sprachminuten mehr übrig, deshalb kann kein freihändiges Gespräch starten. Tippen funktioniert weiterhin."
+      }
     },
     "settings": {
       "description": "Sprich statt zu tippen und lass dir Antworten vorlesen. Tippen und Lesen werden nie ersetzt — jedes Sprachelement steht neben dem Text, nicht an seiner Stelle.",

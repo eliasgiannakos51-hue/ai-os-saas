@@ -3550,7 +3550,14 @@
       "tapToSpeak": "Premi ovunque e parla. Smette di ascoltare da solo quando ti fermi.",
       "tapToInterrupt": "Premi ovunque per interrompere e riprendere a parlare.",
       "hint": "Parla normalmente: il turno finisce quando ti fermi.",
-      "empty": "Tutto ciò che viene detto appare anche qui come testo."
+      "empty": "Tutto ciò che viene detto appare anche qui come testo.",
+      "blocked": {
+        "notConfigured": "Parlare a mani libere richiede due fornitori vocali e questa installazione non ha alcuna chiave, quindi il pulsante non può avviare una conversazione.",
+        "notConfiguredTranscribe": "Parlare a mani libere richiede una chiave per la trascrizione vocale e questa installazione non ne ha, quindi il pulsante non può avviare una conversazione.",
+        "notConfiguredSpeak": "Parlare a mani libere richiede una chiave per la sintesi vocale e questa installazione non ne ha, quindi il pulsante non può avviare una conversazione.",
+        "notIncluded": "Parlare a mani libere non è incluso nel tuo piano. Qui puoi comunque scrivere e leggere ogni risposta.",
+        "outOfMinutes": "Questo mese non restano minuti vocali, quindi la conversazione a mani libere non può iniziare. Scrivere qui funziona ancora."
+      }
     },
     "settings": {
       "description": "Parla invece di scrivere e fatti leggere le risposte. Scrivere e leggere non vengono mai tolti: ogni comando vocale sta accanto al testo, non al suo posto.",

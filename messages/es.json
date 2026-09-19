@@ -3550,7 +3550,14 @@
       "tapToSpeak": "Pulsa en cualquier sitio y habla. Deja de escuchar solo cuando paras.",
       "tapToInterrupt": "Pulsa en cualquier sitio para interrumpir y volver a hablar.",
       "hint": "Habla con normalidad: el turno termina cuando paras.",
-      "empty": "Todo lo dicho aparece aquí también como texto."
+      "empty": "Todo lo dicho aparece aquí también como texto.",
+      "blocked": {
+        "notConfigured": "Hablar con manos libres necesita dos proveedores de voz y esta instalación no tiene ninguna clave, así que el botón no puede iniciar una conversación.",
+        "notConfiguredTranscribe": "Hablar con manos libres necesita una clave de voz a texto y esta instalación no tiene ninguna, así que el botón no puede iniciar una conversación.",
+        "notConfiguredSpeak": "Hablar con manos libres necesita una clave de texto a voz y esta instalación no tiene ninguna, así que el botón no puede iniciar una conversación.",
+        "notIncluded": "Hablar con manos libres no está incluido en tu plan. Aquí puedes seguir escribiendo y leer cada respuesta.",
+        "outOfMinutes": "No quedan minutos de voz este mes, así que no puede iniciarse una conversación con manos libres. Escribir aquí sigue funcionando."
+      }
     },
     "settings": {
       "description": "Habla en lugar de escribir y escucha las respuestas. Escribir y leer nunca se quitan: cada control de voz está junto al texto, no en su lugar.",

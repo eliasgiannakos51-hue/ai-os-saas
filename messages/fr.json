@@ -3550,7 +3550,14 @@
       "tapToSpeak": "Appuyez n'importe où et parlez. L'écoute s'arrête d'elle-même quand vous vous arrêtez.",
       "tapToInterrupt": "Appuyez n'importe où pour interrompre et reprendre la parole.",
       "hint": "Parlez normalement : le tour se termine quand vous vous arrêtez.",
-      "empty": "Tout ce qui est dit apparaît aussi ici sous forme de texte."
+      "empty": "Tout ce qui est dit apparaît aussi ici sous forme de texte.",
+      "blocked": {
+        "notConfigured": "Parler mains libres nécessite deux fournisseurs vocaux et ce déploiement n'a aucune clé, donc le bouton ne peut pas démarrer de conversation.",
+        "notConfiguredTranscribe": "Parler mains libres nécessite une clé de reconnaissance vocale et ce déploiement n'en a aucune, donc le bouton ne peut pas démarrer de conversation.",
+        "notConfiguredSpeak": "Parler mains libres nécessite une clé de synthèse vocale et ce déploiement n'en a aucune, donc le bouton ne peut pas démarrer de conversation.",
+        "notIncluded": "Parler mains libres n'est pas inclus dans votre formule. Vous pouvez toujours écrire ici et lire chaque réponse.",
+        "outOfMinutes": "Il ne reste plus de minutes vocales ce mois-ci, donc la conversation mains libres ne peut pas démarrer. La saisie fonctionne toujours."
+      }
     },
     "settings": {
       "description": "Parlez au lieu d'écrire, et faites-vous lire les réponses. Écrire et lire ne disparaissent jamais : chaque commande vocale est à côté du texte, pas à sa place.",

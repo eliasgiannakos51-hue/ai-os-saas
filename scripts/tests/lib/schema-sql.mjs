@@ -59,3 +59,38 @@ export function enablesRls(sql, table) {
     sql
   );
 }
+
+/**
+ * Every table the migrations give a column named `column`, whether in a
+ * `create table` body or a later `alter table … add column`.
+ *
+ * WHY THIS EXISTS. user-photos.test.mjs asserted "every table that
+ * carries HTML is read" by the storage cleanup, and its evidence was
+ * four table names WRITTEN IN THE GATE. The rule is about a population;
+ * the check was about four examples of it. Adding a fifth table with an
+ * `html_content` column to a migration on 2026-09-19 left the gate
+ * green — and the consequence is stated in that gate's own comment two
+ * lines above: a table the cleanup does not read contributes no
+ * references, so every photograph reachable only from it is an orphan
+ * and is deleted.
+ *
+ * The migrations are the population. Derive from them, do not list.
+ */
+export function tablesWithColumn(sql, column) {
+  const found = new Set();
+  const col = column.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  for (const m of sql.matchAll(
+    /create table (?:if not exists )?(?:public\.)?"?([a-z_][a-z0-9_]*)"?\s*\(([\s\S]*?)\n\s*\)\s*;/gi
+  )) {
+    if (new RegExp(`^\\s*"?${col}"?\\s`, "im").test(m[2])) found.add(m[1]);
+  }
+  for (const m of sql.matchAll(
+    new RegExp(
+      `alter table (?:if exists )?(?:only )?(?:public\\.)?"?([a-z_][a-z0-9_]*)"?\\s+add column (?:if not exists )?"?${col}"?\\b`,
+      "gi"
+    )
+  )) {
+    found.add(m[1]);
+  }
+  return [...found].sort();
+}

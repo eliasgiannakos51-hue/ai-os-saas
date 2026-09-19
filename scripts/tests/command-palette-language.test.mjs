@@ -158,6 +158,26 @@ for (const l of LOCALES) {
   const b = byLocale.get(l);
   console.log(`  ${l.padEnd(8)} ${String(b.hit).padStart(10)}                  ${b.total}`);
 }
+// THE RATIO NEEDS A NEGATIVE CONTROL IN THE SAME LOOP THAT PRODUCES IT.
+// On 2026-09-19 this section printed 520 of 520 with the matcher
+// replaced by `return entries.map((e) => e.item)` — every item is
+// reachable by its own name when every item is reachable by anything.
+// The number moved correctly for the defect it was written for (163 of
+// 520 with the translated label dropped) and not at all for an
+// over-matching matcher, which is the half it could not see.
+const overMatching = LOCALES.filter(
+  (locale) =>
+    match.filterAndRankCandidates(
+      ITEMS.map((i) => ({ item: i, candidates: candidatesFor(i, locale) })),
+      "qzxvwkjhgf"
+    ).length > 0
+);
+ok(
+  "a query nothing is named after reaches nothing, in every locale",
+  overMatching.length === 0,
+  `these locales matched nonsense: ${overMatching.join(", ")} — the ratio above is then meaningless`
+);
+
 const misses = results.filter((r) => !r.found);
 console.log(
   `\n  ${results.length - misses.length} of ${results.length} (item x locale) pairs are reachable by their own displayed name.`

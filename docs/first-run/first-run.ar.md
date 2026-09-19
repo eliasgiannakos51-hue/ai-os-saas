@@ -1,8 +1,8 @@
 # The first run — ar
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **601 strings**. The whole product is 3274, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **638 strings**. The whole product is 3274, which is why this file exists.
 
-**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 354 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 391 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -302,7 +302,7 @@ CSV أو مفصول بعلامات جدولة، حتى {max}. نقرؤه ونع�
 
 مجانًا — لا يُولَّد شيء، ويمكنك إزالته بنقرة واحدة
 
-## Tier 2 — The labels — skim these (354)
+## Tier 2 — The labels — skim these (391)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -494,29 +494,11 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 مخصص
 
-**`pricing.features.aiMemory`**
-
-> EN — AI Memory
-
-ذاكرة الذكاء الاصطناعي
-
-**`pricing.features.basicAiChat`**
-
-> EN — Basic AI chat
-
-محادثة ذكاء اصطناعي أساسية
-
 **`pricing.features.creditsPerMonth`**
 
 > EN — {count, plural, one {# credit} other {# credits}}/month
 
 {count, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}/شهر
-
-**`pricing.features.customAiPersonaNameInIonexaChat`**
-
-> EN — Custom AI persona name in Ionexa Chat
-
-اسم مخصص للمساعد في Ionexa Chat
 
 **`pricing.features.customCredits`**
 
@@ -524,95 +506,335 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 أرصدة مخصصة
 
-**`pricing.features.everythingInGrowth`**
-
-> EN — Everything in Growth
-
-كل ما في باقة Growth
-
-**`pricing.features.everythingInProfessional`**
-
-> EN — Everything in Professional
-
-كل ما في باقة Professional
-
-**`pricing.features.everythingInStarter`**
-
-> EN — Everything in Starter
-
-كل ما في باقة Starter
-
-**`pricing.features.everythingInUltimate`**
-
-> EN — Everything in Ultimate
-
-كل ما في باقة Ultimate
-
-**`pricing.features.extendedChatMemoryRetention100Vs20RecentFact`**
-
-> EN — Extended chat memory retention (100 vs 20 recent facts)
-
-احتفاظ موسّع بذاكرة المحادثة (100 مقابل 20 معلومة حديثة)
-
-**`pricing.features.teamCollaboration`**
-
-> EN — Team collaboration
-
-تعاون الفريق
-
-**`pricing.features.unlimitedMembers`**
-
-> EN — Unlimited members
-
-أعضاء غير محدودين
-
-**`pricing.features.unlimitedTeamSeatsIncludedNoPerMemberCharge`**
-
-> EN — Unlimited team seats included — no per-member charge
-
-مقاعد فريق غير محدودة مشمولة — دون رسوم لكل عضو
-
-**`pricing.features.upTo100AiAgents`**
-
-> EN — Up to 100 AI agents
-
-حتى 100 وكيل ذكي
-
-**`pricing.features.upTo15AiAgentsTeams`**
-
-> EN — Up to 15 AI agents & teams
-
-حتى 15 وكيلاً ذكياً وفرق
-
-**`pricing.features.upTo2AiAgents`**
-
-> EN — Up to 2 AI agents
-
-حتى وكيلين ذكيين
-
-**`pricing.features.upTo50AiAgents`**
-
-> EN — Up to 50 AI agents
-
-حتى 50 وكيلاً ذكياً
-
-**`pricing.features.upTo5AiAgents`**
-
-> EN — Up to 5 AI agents
-
-حتى 5 وكلاء أذكياء
-
-**`pricing.features.websiteAutomationBuilderAccess`**
-
-> EN — Website & Automation Builder access
-
-الوصول إلى منشئ المواقع والأتمتة
-
 **`pricing.perMonth`**
 
 > EN — /month
 
 /شهريًا
+
+**`pricing.rows.accountAndPrivacy`**
+
+> EN — Export or delete your account
+
+تصدير حسابك أو حذفه
+
+**`pricing.rows.agentRunsPerHour`**
+
+> EN — Agent runs
+
+عمليات تشغيل الوكلاء
+
+**`pricing.rows.aiAgents`**
+
+> EN — AI agents
+
+وكلاء الذكاء الاصطناعي
+
+**`pricing.rows.aiChat`**
+
+> EN — Ask me
+
+اسألني
+
+**`pricing.rows.aiMemory`**
+
+> EN — AI Memory
+
+ذاكرة الذكاء الاصطناعي
+
+**`pricing.rows.askYourData`**
+
+> EN — Ask your own records
+
+اسأل سجلاتك الخاصة
+
+**`pricing.rows.automation`**
+
+> EN — Automation
+
+الأتمتة
+
+**`pricing.rows.backgroundJobs`**
+
+> EN — Work that runs in the background
+
+مهام تعمل في الخلفية
+
+**`pricing.rows.buildLogs`**
+
+> EN — Website, app, image and video logs
+
+سجلات المواقع والتطبيقات والصور والفيديو
+
+**`pricing.rows.businessLogs`**
+
+> EN — My records
+
+سجلاتي
+
+**`pricing.rows.chatMemory`**
+
+> EN — Facts remembered in chat
+
+المعلومات التي تتذكرها المحادثة
+
+**`pricing.rows.chatPins`**
+
+> EN — Pinned conversations
+
+المحادثات المثبّتة
+
+**`pricing.rows.coding`**
+
+> EN — AI Coding
+
+البرمجة بالذكاء الاصطناعي
+
+**`pricing.rows.contactSupport`**
+
+> EN — Contact form
+
+نموذج التواصل
+
+**`pricing.rows.createStudio`**
+
+> EN — Make anything
+
+أنشئ أي شيء
+
+**`pricing.rows.creditsPerMonth`**
+
+> EN — Credits / month
+
+الرصيد / شهريًا
+
+**`pricing.rows.customAiPersona`**
+
+> EN — Custom assistant name
+
+اسم مخصص للمساعد
+
+**`pricing.rows.deepResearch`**
+
+> EN — Deep Research runs / month
+
+عمليات البحث المعمّق / شهريًا
+
+**`pricing.rows.documents`**
+
+> EN — Documents
+
+المستندات
+
+**`pricing.rows.fileQuestionsPerHour`**
+
+> EN — Questions about a file
+
+أسئلة عن ملف
+
+**`pricing.rows.files`**
+
+> EN — Files stored
+
+الملفات المخزّنة
+
+**`pricing.rows.fileUploadsPerHour`**
+
+> EN — File uploads
+
+عمليات رفع الملفات
+
+**`pricing.rows.freeChatMessages`**
+
+> EN — Free chat messages / month
+
+رسائل محادثة مجانية / شهريًا
+
+**`pricing.rows.helpCentre`**
+
+> EN — Help Centre
+
+مركز المساعدة
+
+**`pricing.rows.integrationReadsPerHour`**
+
+> EN — Reads from a connected account
+
+عمليات القراءة من حساب مرتبط
+
+**`pricing.rows.integrations`**
+
+> EN — Connected integrations
+
+التكاملات المتصلة
+
+**`pricing.rows.listRowsShown`**
+
+> EN — Rows shown in one list
+
+الصفوف المعروضة في القائمة
+
+**`pricing.rows.missionControl`**
+
+> EN — Goals & Plans
+
+الأهداف والخطط
+
+**`pricing.rows.notifications`**
+
+> EN — Notifications and reminders
+
+الإشعارات والتذكيرات
+
+**`pricing.rows.posts`**
+
+> EN — Posts
+
+المنشورات
+
+**`pricing.rows.predictions`**
+
+> EN — Predictions
+
+الأنماط
+
+**`pricing.rows.presentations`**
+
+> EN — Presentations
+
+العروض التقديمية
+
+**`pricing.rows.projects`**
+
+> EN — Projects
+
+المشاريع
+
+**`pricing.rows.publishedSites`**
+
+> EN — Published websites
+
+المواقع المنشورة
+
+**`pricing.rows.recordSearch`**
+
+> EN — Record search across modules
+
+البحث في كل السجلات
+
+**`pricing.rows.siteEditsPerDay`**
+
+> EN — Live edits per site
+
+التعديلات المباشرة لكل موقع
+
+**`pricing.rows.siteVersionsKept`**
+
+> EN — Versions kept per site
+
+النسخ المحفوظة لكل موقع
+
+**`pricing.rows.storage`**
+
+> EN — Storage
+
+مساحة التخزين
+
+**`pricing.rows.teamCollaboration`**
+
+> EN — Team collaboration
+
+تعاون الفريق
+
+**`pricing.rows.teamMembers`**
+
+> EN — Team members
+
+أعضاء الفريق
+
+**`pricing.rows.teamSeatsAddOn`**
+
+> EN — Team seats
+
+مقاعد الفريق
+
+**`pricing.rows.voiceClipLength`**
+
+> EN — Longest recording (minutes)
+
+أطول تسجيل (بالدقائق)
+
+**`pricing.rows.voiceMinutes`**
+
+> EN — Voice minutes / month
+
+دقائق الصوت / شهريًا
+
+**`pricing.rows.websiteBuilder`**
+
+> EN — Website & Automation Builder
+
+منشئ المواقع والأتمتة
+
+**`pricing.rows.websiteImageStorage`**
+
+> EN — Storage for website photos
+
+مساحة صور الموقع
+
+**`pricing.values.custom`**
+
+> EN — Custom
+
+مخصّص
+
+**`pricing.values.included`**
+
+> EN — Included
+
+مشمول
+
+**`pricing.values.minutesPerMonth`**
+
+> EN — min/month
+
+دقيقة/شهر
+
+**`pricing.values.no`**
+
+> EN — Not included
+
+غير مشمول
+
+**`pricing.values.perDay`**
+
+> EN — /day
+
+/يوم
+
+**`pricing.values.perHour`**
+
+> EN — /hour
+
+/ساعة
+
+**`pricing.values.perSeat`**
+
+> EN — +{currency}{price}/seat
+
++{currency}{price}/مقعد
+
+**`pricing.values.unlimited`**
+
+> EN — Unlimited
+
+غير محدود
+
+**`pricing.values.yes`**
+
+> EN — Included
+
+مشمول
 
 **`auth.generateStrongPassword`**
 

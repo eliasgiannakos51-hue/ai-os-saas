@@ -36,18 +36,13 @@ type Step = 1 | 2;
 // lib/billing/plans.ts's PlanCapabilities comment) — things like chat
 // memory and data export aren't plan-gated anywhere in the app, so they're
 // deliberately not listed as a differentiator here either.
-const CAPABILITY_ROWS: { label: string; included: (p: Plan) => boolean }[] = [
-  { label: "Website & Automation Builder", included: (p) => p.capabilities.websiteBuilder },
-  { label: "AI Memory", included: (p) => p.capabilities.aiMemory },
-  { label: "Team collaboration", included: (p) => p.capabilities.teamCollaboration },
-  {
-    label: "Team seats",
-    included: (p) => p.hasTeamSeats,
-  },
-  { label: "Team seats included free", included: (p) => Boolean(p.teamSeatsIncluded) },
-  { label: "Extended chat memory retention", included: (p) => p.capabilities.chatMemoryLimit > 20 },
-  { label: "Custom AI persona name", included: (p) => p.capabilities.customAiPersona },
-];
+// THE ROWS ARE DERIVED, NOT LISTED. What stood here was seven entries
+// written beside the code that rendered them, as English string
+// literals, and the owner read the result off production on 2026-09-19:
+// "every plan shows THE SAME list of 7 features… Free says it has Team
+// collaboration. IT DOES NOT." The data was right and the ✕ saying so
+// was `text-muted/50` — 2.25:1 on this panel, measured — so seven rows
+// read as seven ticks. See lib/billing/plan-capability-rows.ts.
 
 // New accounts start on plan selection instead of being asked to upgrade
 // afterward. A ?plan=<slug> query param (used by pricing page's per-plan
@@ -55,7 +50,15 @@ const CAPABILITY_ROWS: { label: string; included: (p: Plan) => boolean }[] = [
 // straight to step 2 with that plan pre-selected — read from
 // window.location instead of useSearchParams() so this page doesn't need a
 // Suspense boundary, same pattern as login-form.tsx's ?mode= handling.
-export function SignupFlow() {
+/** What one plan card shows: a catalog row id and the cell for this
+ *  plan. Built on the server — see page.tsx for why it cannot be built
+ *  here. */
+export type PlanCapabilityRows = Record<
+  string,
+  { id: string; cell: { type: "check" | "cross" | "unlimited" } | { type: "value"; text: string } }[]
+>;
+
+export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityRows }) {
   const router = useRouter();
   const t = useTranslations("auth.signup");
   const locale = useLocale();
@@ -291,47 +294,57 @@ export function SignupFlow() {
                         : tPricing("features.creditsPerMonth", { count: p.monthlyCredits })}
                     </p>
 
+                    {/* ONE LIST, generated from the plans. It used to be
+                        two: seven hand-written rows with a ✓/✕, then the
+                        plan's own marketing features underneath, which
+                        repeated part of the first list in different words
+                        ("Website & Automation Builder" above, "Website &
+                        Automation Builder access" below). */}
                     <ul className="mt-3 w-full space-y-1.5 border-t border-border pt-3">
-                      {CAPABILITY_ROWS.map((row) => {
-                        const included = row.included(p);
+                      {(capabilityRows[p.slug] ?? []).map((row) => {
+                        const included = row.cell.type !== "cross";
                         return (
                           <li
-                            key={row.label}
-                            className={`flex items-center gap-1.5 text-[11px] ${
-                              included ? "text-foreground/80" : "text-muted/60"
+                            key={row.id}
+                            // ITEMS-START AND WRAPPING, not truncate. Two
+                            // of these labels are a full sentence
+                            // ("Αρχεία καταγραφής για ιστότοπους,
+                            // εφαρμογές, εικόνες και βίντεο") and at
+                            // 390px a truncated row tells the reader
+                            // nothing at all — which is the same failure
+                            // as the invisible ✕, one step along.
+                            className={`flex items-start gap-1.5 text-[11px] leading-snug ${
+                              included ? "text-foreground/80" : "text-muted"
                             }`}
                           >
                             {included ? (
-                              <Check className="h-3 w-3 shrink-0 text-emerald-400" aria-hidden="true" />
+                              <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" aria-hidden="true" />
                             ) : (
-                              <X className="h-3 w-3 shrink-0 text-muted/50" aria-hidden="true" />
+                              /* NOT text-muted/50. At half opacity this
+                                 glyph is 2.25:1 against the panel in dark
+                                 and 2.35:1 in light — below the 3:1 WCAG
+                                 asks of a non-text graphic, and against a
+                                 tick at 9.58:1. Full muted is 5.34:1 and
+                                 7.73:1. */
+                              <X className="mt-0.5 h-3 w-3 shrink-0 text-muted" aria-hidden="true" />
                             )}
-                            {row.label}
+                            <span className="min-w-0 flex-1">{tPricing(`rows.${row.id}`)}</span>
+                            {row.cell.type === "value" && (
+                              <span className="shrink-0 font-semibold text-foreground">{row.cell.text}</span>
+                            )}
+                            {row.cell.type === "unlimited" && (
+                              <span className="shrink-0 font-semibold text-foreground">
+                                {tPricing("values.unlimited")}
+                              </span>
+                            )}
+                            <span className="sr-only">
+                              {included ? tPricing("values.yes") : tPricing("values.no")}
+                            </span>
                           </li>
                         );
                       })}
                     </ul>
 
-                    <ul className="mt-3 w-full space-y-1.5 border-t border-border pt-3">
-                      {p.features.map((feature) => (
-                        <li
-                          key={feature.textKey}
-                          className="flex items-start gap-1.5 text-[11px] text-foreground/80"
-                        >
-                          <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" aria-hidden="true" />
-                          <span>
-                            {/* A NUMBER, NOT A FORMATTED STRING — see the same
-                                note on the pricing page. creditsPerMonth is an
-                                ICU plural, and a plural selects its category by
-                                calling Number() on what it is given: "1,000"
-                                becomes NaN and the plan reads "NaN credits/month". */}
-                            {tPricing(`features.${feature.textKey}`, {
-                              count: p.monthlyCredits === "custom" ? 0 : p.monthlyCredits,
-                            })}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
                   </button>
                 );
               })}

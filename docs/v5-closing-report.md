@@ -20,6 +20,77 @@ figures, and every figure in them names the command that derives it.
 
 ---
 
+## Α′. RE-VERIFIED 2026-09-19, one day and three rounds later
+
+    node scripts/verify-closing-report.mjs
+
+Every `<gate> — N/N` in this report is parsed out of it, the gate is
+run, and the result is printed as AGREES, MOVED or RED. **24 of 24
+gates agree**; nothing moved, nothing red, nothing gone. The counts
+below this line are therefore still the counts, one day on — which is
+a statement about today, not a promise about next week, and the
+command above is how the next reader finds out for themselves.
+
+The figures the parser cannot reach have moved, and all in one
+direction — the tree grew:
+
+| what | 2026-09-18 | 2026-09-19 | command |
+|---|---|---|---|
+| `*.test.mjs` in the build | 271, then 273 | **276** | `ls scripts/tests/*.test.mjs \| wc -l` |
+| prodtests | 44 | **45** | `ls scripts/tests/*.prodtest.mjs \| wc -l` |
+| dbtests | 29 | 29 | `ls scripts/tests/*.dbtest.mjs \| wc -l` |
+| itests | 19 | 19 | `ls scripts/tests/*.itest.mjs \| wc -l` |
+| gates in the tree | 363, then 365 | **369** | the four above, summed |
+| mutation suites | — | **176** | `ls scripts/tests/*.mutation.mjs \| wc -l` |
+
+**In proof, re-derived: 276 of 369 = 74.8%.** The 93 that did not run
+are the same 93: 29 dbtests, 45 prodtests, 19 itests. §ΣΤ's "75%" is
+unchanged to one decimal place, which is the honest reading — the
+denominator grew and so did the numerator.
+
+**And a second measurement of the same gap, from a different
+direction.** `scripts/scan-gate-independence.mjs` asks what each suite
+holds the code up against, and reports the strongest of NETWORK · DOM ·
+DB · DISK · EXECUTION · CROSS-KIND · LITERAL · NONE. Of the build's
+gates, **four reach the network, seven the DOM, three the database.**
+Everything else is the filesystem and executing the code. That is the
+28% below, restated as what the 74.8% can and cannot see: the build
+proves things about the code, and almost nothing about a running
+system. Four build gates reach NONE; all four were settled by mutation
+on 2026-09-19 and all four held — `gate-independence.test.mjs` carries
+each one's real reference and the mutation that settled it.
+
+**The mutation sweep, run in full on 2026-09-19** — all 176 suites,
+about ninety minutes, sequentially. **2,399 of 2,400 declared mutations
+caught, one hole, now zero.** The hole was not a gate letting a defect
+through; it was a mutation that had stopped testing anything:
+`user-photos.mutation.mjs` anchored on the `photoSource === "none"`
+early return in `website-image-resolver.ts`, which gained a
+`dropped: null` field when the resolver learned to report what it had
+dropped. STALE, exit 1, the suite behaving exactly as designed.
+
+**And the gap that let it sit there for a day.** `npm run build` does
+not run the mutation suites — `npm run test:mutation` is a separate
+ninety-minute command — so a stale anchor is invisible until somebody
+runs it. `mutation-suite-shape.test.mjs` §5 now looks up every `from:`
+in every declared mutant in the file it names: **2,418 anchors, 0.15
+seconds, inside the build.** It cannot tell an equivalent mutant from a
+real one, but a needle that is not in its haystack is decidable, and it
+is now decidable an hour and a half earlier.
+
+**What was found since this report was written**, all fixed and all in
+the tree it was re-verified against:
+
+| found | where |
+|---|---|
+| `stripComments` truncated any line holding `//` inside a string — 68 lines, 9,862 characters, including the open-redirect guard, across the 99 files that import it | `docs/shapes.md`, *the instrument deleted the code before it looked* |
+| eleven checks anchored on a comment rather than the code, two of which were green on defects added one line away | *the gate found the sentence about the code* |
+| "every table that carries HTML is read" named four tables; a fifth left it green, and an unread table makes every photograph reachable only from it an orphan | *the rule targets the shape, the check anchors on the example* |
+| a file proved gitignored by searching `.gitignore` for its name, which a `!` line below leaves untouched | `mutation-sidecar.test.mjs` |
+| one mutation of 2,400 had stopped testing anything, and only a ninety-minute command could say so | `mutation-suite-shape.test.mjs` §5, now in the build |
+
+---
+
 ## Α. What works
 
 **"Live?" means: seen running against production.** It is NO on every row

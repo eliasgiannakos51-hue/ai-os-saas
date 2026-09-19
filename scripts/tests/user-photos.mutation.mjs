@@ -51,11 +51,11 @@ const MUTANTS = [
     // defect: the quota is spent on photographs about to be deleted.
     name: "the strip happens after the searches, so the quota is spent anyway",
     file: RESOLVER,
-    from: '  if (options.photoSource === "none") {\n    return {\n      html: stripPlaceholderImageTags(html, all.map((p) => p.slug)),\n      used: [],\n      halted: null,\n    };\n  }',
+    from: '  if (options.photoSource === "none") {\n    return {\n      html: stripPlaceholderImageTags(html, all.map((p) => p.slug)),\n      used: [],\n      halted: null,\n      dropped: null,\n    };\n  }',
     to: "",
     edits: [
       {
-        from: '  if (options.photoSource === "none") {\n    return {\n      html: stripPlaceholderImageTags(html, all.map((p) => p.slug)),\n      used: [],\n      halted: null,\n    };\n  }',
+        from: '  if (options.photoSource === "none") {\n    return {\n      html: stripPlaceholderImageTags(html, all.map((p) => p.slug)),\n      used: [],\n      halted: null,\n      dropped: null,\n    };\n  }',
         to: "",
       },
       {

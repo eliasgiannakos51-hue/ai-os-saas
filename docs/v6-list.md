@@ -411,3 +411,184 @@ prose fails the build and the failure says what to do.
 `prose-anchored-checks.mutation.mjs` puts two of the six defects back
 and empties the scan in four places — 6 of 6 caught.
 
+
+## 17. What every gate has to disagree with — swept 2026-09-19
+
+    node scripts/scan-gate-independence.mjs
+    node scripts/tests/gate-independence.test.mjs
+    node scripts/tests/gate-independence.mutation.mjs
+
+**The question, widened:** item 16 answered "which gates are satisfied
+by a comment" for one narrow mechanism. This asks the general form —
+what does each suite hold the code up against, and would it go red if
+the source were wrong?
+
+**Answered as a ladder, not a verdict,** because the verdict version
+scored 0 real of 8. Every suite is reported at its strongest rung:
+NETWORK · DOM · DB · DISK · EXECUTION · CROSS-KIND · LITERAL · NONE.
+The counts are produced by the scan on every run — do not read them
+from here.
+
+**The distribution is the finding.** Of the build's gates, four reach
+the network, seven the DOM and three the database; everything else is
+DISK and EXECUTION. The four independent sources the owner named live
+almost entirely in the 93 prodtests, dbtests and itests that do NOT run
+in the build and mostly cannot run here at all — which is the same
+28% held open in `docs/v5-closing-report.md`, arriving from a different
+direction.
+
+**Four build gates reach NONE and all four HELD under mutation** —
+`address-register` (a corpus of 546 Greek strings), `design-density`
+(a census with ratchets), `language-reachable` (a relation between six
+files), `write-guards` (a shape over the writes it finds). Each carries
+its real reference and the mutation that settled it in
+`gate-independence.test.mjs`. A fifth gate arriving at NONE fails the
+build.
+
+**One real defect, from the sibling shape** (`docs/shapes.md`, *the
+rule targets the shape, the check anchors on the example*):
+`user-photos`' "every table that carries HTML is read" named four
+tables. A fifth table with an `html_content` column left it green — and
+a table the storage cleanup does not read makes every photograph
+reachable only from it an orphan, deleted on a schedule. It derives the
+list from the migrations now, via `tablesWithColumn()`.
+
+**Three detectors were wrong before one was right.** The first LITERAL
+detector counted `.length > 0`, which every gate's footer satisfies:
+264 of 275 matched and NONE could never happen. `BASE_URL` without a
+leading `\b` matches inside `DATABASE_URL`, filing every database suite
+one rung too high. And the scan twice had the blind spot this repo has
+now recorded four times — a path in a `const`, built with `path.join`,
+or read through a wrapper. All three are pinned by fixtures in the gate.
+
+**What is NOT closed:** the ladder reads text. A gate that enumerates a
+directory and ignores the answer still counts as DISK. Only mutation
+settles that, and only the bottom rung has been settled that way.
+
+## 18. The final V5 check, re-run 2026-09-19
+
+    node scripts/verify-closing-report.mjs     # every N/N in the report, re-derived
+    npm run test:mutation                      # all 176 suites, ~90 minutes
+
+**The counted claims.** `verify-closing-report.mjs` parses every
+`` `<gate>.test.mjs` — N/N `` out of `docs/v5-closing-report.md`, runs
+that gate and prints AGREES, MOVED or RED. **24 of 24 agree**, nothing
+moved, nothing red, nothing gone. It refuses to report on fewer than
+ten claims, because a parser that finds nothing prints
+"0 agree · 0 moved · 0 red" and exits clean — which reads exactly like
+a verified document. Settled three ways by mutation: an aged number
+(MOVED), a named gate made to fail (RED, exit 1), and an emptied parser
+(the floor, exit 1).
+
+**The uncounted claims have moved, all in one direction — the tree
+grew.** 276 build gates (was 271, then 273), 45 prodtests, 29 dbtests,
+19 itests; 369 in the tree; 74.8% run here, which is §ΣΤ's 75% to one
+decimal. The re-verification is its own dated section at the top of the
+report rather than an edit to the 2026-09-18 record.
+
+**The mutation sweep: 2,399 of 2,400 caught, one hole, now zero.** The
+hole was a mutation that had stopped testing anything —
+`user-photos.mutation.mjs` anchored on an early return that gained a
+`dropped: null` field. The suite reported STALE and exited 1, exactly
+as designed; nothing in the build runs the suites, so nobody saw it for
+a day.
+
+**Closed in the same round:** `mutation-suite-shape.test.mjs` §5 looks
+up every `from:` in every declared mutant in the file it names — 2,418
+anchors in 0.15 seconds, in the build. Proved both ways: the real
+defect put back (RED) and the mutant reader emptied (RED on the floor).
+
+**What is still not verified** is what it was: a `DATABASE_URL`, an
+Anthropic balance and a published site. See
+`docs/v5-closing-report.md`, "the 28% that is still open".
+
+## 19. ⌘K found nothing, and the pricing claim on signup — 2026-09-19
+
+Both reported from production, both reproduced, both fixed.
+
+### ⌘K
+
+    node scripts/tests/palette-aliases.test.mjs
+    npm run db:search-rows -- --sql        # the one query for the index
+
+**«οικο» always worked.** Run against the real catalogue, the matcher
+returns Οικονομικά first — the translated-label fix of 2026-09-07 is
+real and is in `main`. **«θέλω να δω τα έσοδά μου» never could**, and
+neither could «έσοδα»: every tier of the matcher compared the WHOLE
+query with a candidate, and nothing is called that. The module is
+«Οικονομικά» and its fields are Ποσό, Περιγραφή, Τύπος.
+
+Worse than one word: a third of the sidebar is a phrase rather than a
+noun — «Δες τι λένε τα νούμερα», «AI που δουλεύει για σένα», «Ψάξ' το
+καλά» — so the label is the word a person is least likely to type.
+
+**Fixed two ways.** `lib/palette-aliases.ts` holds the words people
+actually use, **English and Greek only**, hand-written and dated, with
+coverage printed per locale on every run so the absence of the other
+eight is visible rather than assumed. And the matcher falls back to the
+query's own words, longest first, bounded at eight — so a sentence
+naming three things reaches three pages and a sentence naming none
+reaches none.
+
+**What the 520/520 number could not see.** The existing gate forms its
+query from the first word of the label it is testing, so an
+everything-matcher printed 520 of 520 unchanged. It has a negative
+control in the same loop now. The new gate's queries come from the
+alias table instead — not from the labels — which is the whole point.
+
+**Not answered here:** whether `search_index` has rows. That needs
+`DATABASE_URL`. It is also not the explanation for either reported
+query: both are page navigation and never reach that table.
+
+### The pricing claim
+
+    node scripts/tests/plan-claims.test.mjs
+
+Not `/pricing` — that page was rendered against production at 390×844
+in Greek and English and every card showed only its own features. It
+was **`/signup`**, where seven English string literals were listed
+under every plan with a ✕ at `text-muted/50` — 2.25:1, measured —
+above a second list of the plan's real features. See `docs/shapes.md`,
+*the data was right and the screen said otherwise*.
+
+One list now, derived from the catalogue, labelled from
+`pricing.rows.<id>` in ten languages, with a cross at 5.34:1 / 7.73:1.
+Built on the SERVER: `client-env-reach.test.mjs` caught the first
+version importing the catalogue into the browser, where the seven limit
+modules it reaches read `process.env` and get `undefined`.
+
+## 20. Derived data checked as code, never as content — 2026-09-19
+
+    node scripts/scan-derived-data.mjs
+    node scripts/tests/derived-data-health.test.mjs
+    node scripts/db/emit-search-backfill.mjs          # the backfill, generated
+
+**The incident.** ⌘K found no content for an account with 88 records.
+Every check about `search_index` passed and the table was empty. The
+counts are produced by the scan; do not read them from here.
+
+**The backfill.** `supabase/migrations/20260919000000_search_index_backfill.sql`
+re-runs it on its own, reports a line per table and a total, and ends by
+selecting what the index holds. Generated from the spec array of
+`20260824000000_unified_search.sql` — a second hand-written list is
+exactly what that migration's own comment warns about — and
+`search-backfill.test.mjs` holds the two in step both ways.
+
+**Verified in a real PostgreSQL 16**, not reasoned about: reproduced the
+reported state (88 source rows, 0 indexed, no triggers), ran the
+backfill (88 indexed, per-table notices), ran it again (0 added), wrote
+a new source row (self-indexed through the re-attached trigger) and
+searched `search_fold('εσοδα')||':*'` (50 hits).
+
+**The probe.** `/api/health` reports `derived.verdict` now — `EMPTY`
+means the index holds nothing while the product has accounts. Same shape
+and same reason as `nav.verdict`.
+
+**The general case, measured.** 4.2% of the build's checks prove that
+somebody wrote a call, inside a gate that reaches no network, browser or
+database and does not run the code. Printed, not gated.
+
+**What is NOT closed:** the scan reads SQL text. A table filled by
+application code in a shape it does not model is not listed, and only
+`search_index` has a live row count — the other eight are counted by
+suites, most of which need a `DATABASE_URL`.

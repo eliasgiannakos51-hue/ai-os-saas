@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Search,
   MessageCircle,
@@ -20,6 +20,7 @@ import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 import { normalizeForSearch } from "@/lib/text/search-match";
 import { filterAndRankCandidates } from "@/lib/command-palette-match";
+import { aliasesFor } from "@/lib/palette-aliases";
 import { MODULE_TITLE_KEYS } from "@/lib/search/module-title-keys";
 import {
   DATE_RANGES,
@@ -117,6 +118,7 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
   const [facets, setFacets] = useState<Facets>(NO_FACETS);
   const searchCacheRef = useRef(new Map<string, SearchResult[]>());
   const inputRef = useRef<HTMLInputElement>(null);
+  const locale = useLocale();
   const searchTokenRef = useRef(0);
 
   // useCallback, so the memo below can name it as a dependency instead
@@ -152,16 +154,28 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
   // who learned the product in English, or who has an English keyboard in
   // front of them, types "fin" — dropping it would swap one language's
   // blindness for another's. See lib/command-palette-match.ts.
+  // AND THE WORDS PEOPLE ACTUALLY TYPE, which are not the words on the
+  // button. Reported from production on 2026-09-19: «οικο» reaches
+  // «Οικονομικά» and always did, but «έσοδα» reached nothing — no page
+  // is called that. A third of this sidebar is a friendly phrase rather
+  // than a noun («Δες τι λένε τα νούμερα» for analytics), so the label
+  // is the one word a user is least likely to have in mind.
+  // lib/palette-aliases.ts holds the extra names, English and Greek
+  // only, and says so.
   const pageResults = useMemo(
     () =>
       filterAndRankCandidates(
         paletteItems(isOwner).map((item) => ({
           item,
-          candidates: [translatedLabel(item.label), item.label],
+          candidates: [
+            translatedLabel(item.label),
+            item.label,
+            ...aliasesFor(ITEM_LABEL_KEYS[item.label] ?? "", locale),
+          ],
         })),
         query,
       ),
-    [query, isOwner, translatedLabel],
+    [query, isOwner, translatedLabel, locale],
   );
 
   // ONE REQUEST, debounced, cached, and last-one-wins.

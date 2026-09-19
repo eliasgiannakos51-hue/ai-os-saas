@@ -1948,3 +1948,266 @@ anchored on prose fails the build and the failure says what to do —
 mutate it, re-anchor it, or name it a documentation check and add it to
 the list. `prose-anchored-checks.mutation.mjs` puts two of the six
 defects back and empties the scan in four different places; 6 of 6.
+
+## A gate that reads the same artefact as the code
+
+The owner's sentence, after the sidebar shipped a heading over nothing
+while every sidebar gate was green:
+
+> Ένα gate που διαβάζει το ίδιο αρχείο με το feature δεν ελέγχει
+> τίποτα — επιβεβαιώνει ότι το αρχείο ισούται με τον εαυτό του.
+
+The first attempt at answering it generally was a binary flag —
+*is this gate self-confirming?* — and it scored **0 real of 8
+candidates**, while missing the one gate that was. The verdict was the
+mistake, not the question. "Self-confirming" is not a property a parser
+can decide; what a parser can decide is **what the gate is holding the
+code up against**, and that is a ladder:
+
+| rung | what disagrees with the code |
+|---|---|
+| NETWORK | what production actually answers |
+| DOM | what actually reaches the screen |
+| DB | what the database actually has |
+| DISK | which files actually exist — an *enumeration*, so a file appearing changes the answer |
+| EXECUTION | the code RUN rather than read |
+| CROSS-KIND | two artefacts a human must keep in step — migrations against TypeScript, messages against components |
+| LITERAL | an expectation written in the gate. Real, but written by the same hand on the same day, so it rots *with* the code |
+| NONE | nothing |
+
+`scripts/scan-gate-independence.mjs` reports every suite at its
+strongest rung. The distribution is the finding, and it is not
+flattering: **of the build's gates, four reach the network, seven the
+DOM, three the database.** Everything else is DISK and EXECUTION. The
+four sources the owner named live almost entirely in the prodtests,
+dbtests and itests — suites that do not run in the build and mostly
+cannot run here at all, for want of a `DATABASE_URL`, an Anthropic
+balance and a published site.
+
+**Four build gates reach NONE, and all four HELD under mutation.** Each
+has a real reference the scan cannot name, which is worth as much as
+the scan:
+
+| gate | what it really holds the code up against |
+|---|---|
+| `address-register` | a CORPUS — 546 real Greek strings. Added one in the polite plural: RED |
+| `design-density` | a CENSUS with ratchets — 918 files, 581 borders, ceiling 581. Added one border (582) and one blurred shadow: RED both |
+| `language-reachable` | a RELATION between six files — rendered once here, not there. Removed it, hid it behind a breakpoint, dropped `showCode`: RED each time |
+| `write-guards` | a SHAPE over the writes it finds — every update re-asserts what it read. Removed the guard, and moved the comparison back into TypeScript: RED both |
+
+**Three detectors were wrong before one was right,** and the way they
+were wrong is the lesson. The first LITERAL detector counted
+`.length > 0` — which every gate's own pass/fail footer satisfies, so
+264 of 275 matched and NONE could never happen. A detector that says
+yes to everything sorts nothing, and it looks exactly like a working
+one from its output. `BASE_URL` without a leading `\b` matches inside
+`DATABASE_URL`, so every database suite was filed one rung too high;
+the gate's own fixtures caught that while it was being written.
+
+And the scan had, twice, the blind spot this repository has now
+recorded four times: a path held in a `const`, built with `path.join`,
+or read through a one-line wrapper. `stop-everywhere` reads a
+migration, ten message files and app source and was reported as holding
+nothing. `website-variation` does `const v = await loadTs(...)` and
+then `const { pickVariation } = v` — one step removed, and it is among
+the few gates in the build that actually run the code.
+
+**The question to ask:** *what would have to be true for this gate to
+go red?* If the answer is "somebody would have to edit the file it
+reads", it is a rung too low, and the rung above is usually available:
+enumerate instead of naming, derive instead of listing, run instead of
+reading.
+
+## The rule targets the shape, the check anchors on the example
+
+    ok("...and every table that carries HTML is read",
+       ["user_websites", "published_sites", "website_versions", "site_versions"]
+         .every((t) => route.includes(`"${t}"`)));
+
+The rule is about a **population** — every table that carries HTML. The
+evidence is **four examples of it**, written in the gate on the day the
+first four existed.
+
+On 2026-09-19 a fifth table with an `html_content` column was added to
+a migration. The gate stayed green. The consequence is written two
+lines above the check, in that gate's own comment: the storage cleanup
+collects references from the tables it reads, and a photograph with no
+references is an orphan and is deleted. A table the cleanup does not
+read contributes no references, so every photograph reachable only from
+it is deleted — permanently, on a schedule, with nothing to look at
+afterwards.
+
+The population was available the whole time. `supabase/migrations/`
+names every table with an `html_content` column; `tablesWithColumn()`
+derives them, and the check now asks which of *those* the route fails
+to read. A fifth table reddens it until the cleanup reads it too.
+
+**This is the same shape as the check that was green on the number its
+own fix removed.** `example-prompts.test.mjs` demanded `min-h-[36px]`
+— the rejected value, surviving only in the comment recording the
+rejection — when the rule was "a chip is a real touch target on a
+phone" and the component had been `min-h-[44px]` for weeks. Rule about
+a class; check pinned to one number from the day it was written.
+
+**Why it survives review.** The check is *correct* when it is written —
+four tables, four names, all four read. It becomes false by addition,
+not by edit, and nothing in a diff that adds a table touches the gate
+that should have noticed.
+
+**Measured, because a scan with no precision is the disease one level
+up.** `kindWideClaims()` in `scan-gate-independence.mjs` finds checks
+whose NAME quantifies over a kind — *every table*, *no route*, *each
+page* — while the evidence is a regex over one hardcoded file of a kind
+the tree has many of. **1 real of 3 on 2026-09-19.** The two others
+quantify inside a single file (`each card` over a `.map` in
+`pricing/page.tsx`) or over behaviour rather than files. Loosening it
+to any universal word found 45 across 20 gates and almost none were
+real; loosening it to any gate naming one file of a many-instance kind
+found 80 of 275, which sorts nothing.
+
+**The question to ask:** *does the check range over the same set the
+rule names?* If the rule says "every X" and the check names three Xs,
+the population exists somewhere — a directory, a migration, an export —
+and derivation costs less than the incident does.
+
+## The data was right and the screen said otherwise
+
+> Κάθε πλάνο δείχνει ΤΗΝ ΙΔΙΑ λίστα 7 features … Το FREE λέει ότι έχει
+> Team collaboration. ΔΕΝ το έχει.
+
+Reported from production, 2026-09-19. Reproduced exactly: live
+`/signup`, 390×844, Greek — the Free card really did list Website &
+Automation Builder, AI Memory, Team collaboration, Team seats, Team
+seats included free, Extended chat memory retention, Custom AI persona
+name, and then the plan's real features underneath.
+
+**`capabilities.teamCollaboration` is `false` for Free, and always
+was.** The card rendered a ✕ beside every one of those seven rows. The
+✕ was `text-muted/50`: **2.25:1 against the panel in dark, 2.35:1 in
+light**, beside a ✓ at 9.58:1. WCAG asks 3:1 of a graphic that carries
+meaning. At a quarter of the tick's contrast, on an 11px line with a
+12px glyph, the cross is not a mark — it is a slightly dirtier patch of
+background.
+
+So the list read as seven features every plan has, and the person who
+**built the product** read it that way. A customer comparing plans would
+have had no chance.
+
+**Three defects wearing one report.** Only the third is the one the
+words describe:
+
+| what was reported | what it was |
+|---|---|
+| "Free says it has Team collaboration" | the ✕ was invisible — a legibility defect, not a data one |
+| "the same 7 under every plan" | correct and deliberate: a ✓/✕ list must show the same rows or the plans cannot be compared |
+| "a second list underneath" | real duplication — "Website & Automation Builder" above, "Website & Automation Builder access" below |
+
+And a fourth nobody reported, found on the way: the seven rows were
+English string literals inside the component, so nine languages read
+them in English on the page a new customer meets first. Neither i18n
+gate reads a JSX text node built from an array of literals — the same
+blind spot the pricing page's seat note sat in, recorded in that file's
+own comment.
+
+**The fix is the rule, not the seven.** The rows are derived from the
+feature catalogue: every entry whose cell is a tick for some plan and a
+cross for another — which is the definition of "what separates the
+plans" — labelled from `pricing.rows.<id>`, already translated ten ways.
+A row added to the catalogue now appears; a capability removed from a
+plan now disappears. This is the same correction as *the rule targets
+the shape, the check anchors on the example*, applied to a UI instead of
+a gate.
+
+**And the gate written for it was self-confirming on its first draft.**
+It compared the catalogue's cell against `plan.capabilities.<x>` — and
+the cell IS `boolCell(p.capabilities.teamCollaboration)`. Flipping the
+flag moved both sides together and the check stayed green. One object,
+read twice, an hour after that shape was written into this file. The
+second statement was sitting in the same entry: `minPlan`, declared
+separately from the cell, which a human has to keep in step. A tick now
+has to agree with the minimum plan beside it.
+
+**The question to ask:** *would I have seen this if I had only read the
+code?* The data was correct at every layer. Only a rendered pixel was
+wrong, and only a measurement of the rendered pixel finds it.
+
+## The index was checked as code and never as content
+
+> Το sync καλούνταν σε 23 σημεία και το ευρετήριο ήταν άδειο.
+
+⌘K found no content for an account with 88 records. Everything about
+the search index passed:
+
+| what was checked | and it was true |
+|---|---|
+| the triggers are declared, 29 of them | yes |
+| the sync function reads the right columns | yes |
+| `search_all_localized` exists | yes, the schema canary said so |
+| `/api/search` calls it | yes, on every keystroke |
+| the RPC's grants and RLS are right | yes |
+
+**The table held nothing.** Not one of those asked the only question
+that mattered — *does it have rows?* — because no gate that runs in the
+build can ask a database anything, and the one suite that does count
+them (`unified-search.dbtest.mjs`) counts rows **it inserted itself**,
+in a database it seeds, and does not run without a `DATABASE_URL`.
+
+**Why derived data fails this way and ordinary data does not.** A row in
+`finance_entries` exists because somebody typed it. A row in
+`search_index` exists only because something else was **copied into
+it** — by a trigger on the next edit, or by a backfill that runs once,
+inside the migration that attaches the triggers. So:
+
+- being correctly wired is a statement about **the future**;
+- being backfilled is a statement about **one moment** that may never
+  have happened.
+
+Between those two, an empty index and a healthy one are **identical from
+the code**. Reproduced in a real PostgreSQL 16: 88 source rows, a
+correct schema, a correct sync function, zero indexed rows, and no
+error anywhere.
+
+**The census.** `scripts/scan-derived-data.mjs` lists every table the
+database writes to from inside a function or a migration's `do` block —
+nine of them — and whether any suite asks how many rows it holds. All
+nine are counted somewhere, and **six of the nine only by suites the
+build never runs**: a dbtest, an itest, a prodtest. A row count nothing
+executes is not a row count.
+
+Its own detector was wrong twice before it was right, in opposite
+directions, because it matched the word `count` near the table's NAME.
+It read the sentence *"Counts search_index across every account"* out of
+an exception's reason string in `user-scoped-queries.test.mjs` and
+reported that suite as counting the rows — a scan for checks that only
+read text, reading text. The table must be ADDRESSED now: `from("x")`,
+or `from public.x`.
+
+The distinction that matters is not "is it counted" but **"is a row here
+a copy of a row that exists somewhere else"**. For those, and only
+those, empty is indistinguishable from correct.
+
+**The fix is a row count from the live database**, which is why it went
+where `navFreshness` already lives: `/api/health` now reports
+`derived.verdict`, and `EMPTY` means the index holds nothing while the
+product has accounts. `api/nav/track` swallowed every error and
+`nav_events` stopped filling with nothing anywhere saying so; this is
+the same probe for the same reason.
+
+### And the general case: 355 checks that read a call site
+
+**4.2% of this build — 355 of 8,528 checks, in 75 of 279 gates — prove
+that somebody WROTE a call**, inside a gate that reaches no network, no
+browser, no database and does not run the code. `unified-search.test.mjs`
+is on that list with ten of them.
+
+That is not a defect list. For most of them the result is checked
+somewhere else, and a structural check is often the only affordable one.
+It is printed so the ratio is visible: `scan-derived-data.mjs` reports
+it, `derived-data-health.test.mjs` holds the scan honest in both
+directions, and nobody has to guess how much of the evidence is about
+what the code says rather than what it does.
+
+**The question to ask:** *if this pipeline had never run once, what
+would go red?* If the answer is "nothing, until somebody uses the
+feature and finds it empty", the check you need is a count, and it has
+to come from the live database.

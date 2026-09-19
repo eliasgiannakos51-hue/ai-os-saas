@@ -1,6 +1,6 @@
 {
   "total": 3274,
-  "onPath": 601,
+  "onPath": 638,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -16,7 +16,7 @@
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 354
+      "count": 391
     },
     {
       "n": 3,
@@ -235,25 +235,7 @@
           "file": "src/app/signup/signup-flow.tsx"
         },
         {
-          "key": "pricing.features.aiMemory",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.basicAiChat",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
           "key": "pricing.features.creditsPerMonth",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.customAiPersonaNameInIonexaChat",
           "depth": 0,
           "tier": 2,
           "file": "src/app/signup/signup-flow.tsx"
@@ -265,91 +247,331 @@
           "file": "src/app/signup/signup-flow.tsx"
         },
         {
-          "key": "pricing.features.everythingInGrowth",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.everythingInProfessional",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.everythingInStarter",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.everythingInUltimate",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.extendedChatMemoryRetention100Vs20RecentFact",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.teamCollaboration",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.unlimitedMembers",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.unlimitedTeamSeatsIncludedNoPerMemberCharge",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.upTo100AiAgents",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.upTo15AiAgentsTeams",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.upTo2AiAgents",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.upTo50AiAgents",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.upTo5AiAgents",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
-          "key": "pricing.features.websiteAutomationBuilderAccess",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/signup/signup-flow.tsx"
-        },
-        {
           "key": "pricing.perMonth",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.accountAndPrivacy",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.agentRunsPerHour",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.aiAgents",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.aiChat",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.aiMemory",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.askYourData",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.automation",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.backgroundJobs",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.buildLogs",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.businessLogs",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.chatMemory",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.chatPins",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.coding",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.contactSupport",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.createStudio",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.creditsPerMonth",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.customAiPersona",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.deepResearch",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.documents",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.fileQuestionsPerHour",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.files",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.fileUploadsPerHour",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.freeChatMessages",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.helpCentre",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.integrationReadsPerHour",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.integrations",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.listRowsShown",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.missionControl",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.notifications",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.posts",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.predictions",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.presentations",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.projects",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.publishedSites",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.recordSearch",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.siteEditsPerDay",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.siteVersionsKept",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.storage",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.teamCollaboration",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.teamMembers",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.teamSeatsAddOn",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.voiceClipLength",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.voiceMinutes",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.websiteBuilder",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.rows.websiteImageStorage",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.values.custom",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/page.tsx"
+        },
+        {
+          "key": "pricing.values.included",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/page.tsx"
+        },
+        {
+          "key": "pricing.values.minutesPerMonth",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/page.tsx"
+        },
+        {
+          "key": "pricing.values.no",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "pricing.values.perDay",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/page.tsx"
+        },
+        {
+          "key": "pricing.values.perHour",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/page.tsx"
+        },
+        {
+          "key": "pricing.values.perSeat",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/page.tsx"
+        },
+        {
+          "key": "pricing.values.unlimited",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/page.tsx"
+        },
+        {
+          "key": "pricing.values.yes",
           "depth": 0,
           "tier": 2,
           "file": "src/app/signup/signup-flow.tsx"

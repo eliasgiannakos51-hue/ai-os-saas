@@ -25,6 +25,7 @@
 //
 // Run: node scripts/tests/navigation-cost.test.mjs
 import { readFileSync, readdirSync } from "node:fs";
+import { stripComments } from "../check-mutation-markers.mjs";
 import { join } from "node:path";
 
 let pass = 0;
@@ -39,7 +40,7 @@ function check(name, cond, detail) {
   }
 }
 
-const layout = readFileSync("src/app/dashboard/layout.tsx", "utf8");
+const layout = stripComments(readFileSync("src/app/dashboard/layout.tsx", "utf8"));
 
 console.log("== 1. the shared layout is not where slow work goes ==");
 // A layout wraps EVERY route under it, so a query added here is a query
@@ -52,9 +53,24 @@ check(
 );
 check(
   "…it moved to an endpoint the client calls after paint",
-  /export async function POST/.test(readFileSync("src/app/api/achievements/check/route.ts", "utf8"))
+  /export async function POST/.test(stripComments(readFileSync("src/app/api/achievements/check/route.ts", "utf8")))
 );
-const bridge = readFileSync("src/components/achievements/achievement-unlock-bridge.tsx", "utf8");
+// COMMENTS STRIPPED, and this file is the reason the rule exists twice.
+//
+// Two lines below, a check named "…behind requestIdleCallback, so it
+// never competes with hydration" was `/requestIdleCallback/.test(bridge)`
+// over the RAW file. The component's own header explains the decision in
+// prose — "the call moved here, behind requestIdleCallback" — so the
+// word was in the file whether or not the code called it. Proved on
+// 2026-09-19 by replacing the two real uses with setTimeout: the gate
+// stayed green.
+//
+// The file already knew. Fifteen lines down, a paragraph records the
+// same defect being caught once before — `/RECHECK_AFTER_MS/` satisfied
+// by the `const` declaration alone — and the fix was applied to that one
+// check. Its neighbour kept the weakness for another week, which is what
+// a one-line fix to a file-wide problem looks like.
+const bridge = stripComments(readFileSync("src/components/achievements/achievement-unlock-bridge.tsx", "utf8"));
 check("…which the bridge calls", /fetch\("\/api\/achievements\/check", \{ method: "POST" \}\)/.test(bridge));
 check("…behind requestIdleCallback, so it never competes with hydration", /requestIdleCallback/.test(bridge));
 // THE COMPARISON, NOT THE CONSTANT. `/RECHECK_AFTER_MS/` was satisfied by
@@ -107,7 +123,7 @@ check(`there are dashboard pages to check (${pages.length})`, pages.length >= 25
 const SERIAL_AWAIT_CEILING = 4;
 const overBudget = [];
 for (const file of pages) {
-  const source = readFileSync(file, "utf8");
+  const source = stripComments(readFileSync(file, "utf8"));
   const start = source.indexOf("export default async function");
   if (start < 0) continue;
   const body = source.slice(start);
@@ -149,13 +165,25 @@ check(
 );
 
 console.log("\n== 3. the two pages the measurement singled out ==");
-const overview = readFileSync("src/app/dashboard/overview/page.tsx", "utf8");
+const overview = stripComments(readFileSync("src/app/dashboard/overview/page.tsx", "utf8"));
 check(
   "Home fans its fourteen modules out in one wave, not two per module",
   /Promise\.allSettled\(\[/.test(overview),
   "the two per-module reads are independent and were awaited in sequence"
 );
-check("…and its independent reads share one Promise.all", /ONE WAVE, NOT A QUEUE/.test(overview));
+// THE CONSTRUCT, NOT THE SENTENCE ABOVE IT. This was
+// `/ONE WAVE, NOT A QUEUE/.test(overview)` — a capitalised sentence a
+// human wrote in a comment. Deleting the Promise.all and leaving the
+// paragraph kept it green; deleting the paragraph and keeping the code
+// turned it red. Both directions wrong, and the file already carried a
+// note about the same shape being caught once before, twelve lines
+// down, fixed on one anchor and left on this one.
+const waveOpen = "] = await Promise.all([";
+check(
+  `…and its independent reads share one awaited Promise.all`,
+  overview.includes(waveOpen),
+  "the destructured wave is gone — every read on Home is sequential again"
+);
 // THE QUERY, AND ONLY THE QUERY. `indexOf("user_onboarding")` found the
 // word in the long comment above the read — which explains the 400 that
 // column caused — so the read could be moved anywhere below the wave and
@@ -171,7 +199,12 @@ check("…and its independent reads share one Promise.all", /ONE WAVE, NOT A QUE
   // on the page for somebody who will never see it.
   const readAt = body.indexOf('.from("user_onboarding")');
   const redirectAt = body.indexOf('redirect("/onboarding")');
-  const waveAt = body.indexOf("ONE WAVE, NOT A QUEUE");
+  // THE WAVE IS WHERE Promise.all IS, not where the sentence about it
+  // is. With the sentence as the anchor the read could be moved
+  // anywhere below the comment and the ordering check below stayed
+  // green — the identical defect this block's own header records being
+  // fixed on `readAt`, left in place on this line.
+  const waveAt = body.indexOf(waveOpen);
   check(
     "the onboarding read, its redirect and the wave were all found",
     readAt >= 0 && redirectAt >= 0 && waveAt >= 0,
@@ -182,8 +215,12 @@ check("…and its independent reads share one Promise.all", /ONE WAVE, NOT A QUE
     readAt >= 0 && redirectAt >= 0 && waveAt >= 0 && readAt < redirectAt && redirectAt < waveAt
   );
 }
-const settings = readFileSync("src/app/dashboard/settings/page.tsx", "utf8");
-check("Settings reads its eleven independent things together", /ONE WAVE\./.test(settings));
+const settings = stripComments(readFileSync("src/app/dashboard/settings/page.tsx", "utf8"));
+check(
+  "Settings reads its eleven independent things together",
+  settings.includes(waveOpen),
+  "`/ONE WAVE\\./` matched the comment, not the code"
+);
 check(
   "…and still defers the bypass ledger, which depends on the beta window",
   settings.indexOf("const isBeta =") < settings.indexOf('.from("ai_cost_log")\n      .select("metadata")')
@@ -201,9 +238,9 @@ const rise = Number(css.match(/@keyframes page-enter \{[\s\S]*?translateY\((\d+)
 check(`…rising ${rise}px, not a long slide (≤ 12px)`, rise > 0 && rise <= 12);
 
 console.log("\n== 5. what a route shows while it is arriving ==");
-const loading = readFileSync("src/app/dashboard/loading.tsx", "utf8");
+const loading = stripComments(readFileSync("src/app/dashboard/loading.tsx", "utf8"));
 check("the dashboard's Suspense fallback is a page-shaped skeleton", /RouteSkeleton/.test(loading));
-const skeleton = readFileSync("src/components/dashboard/route-skeleton.tsx", "utf8");
+const skeleton = stripComments(readFileSync("src/components/dashboard/route-skeleton.tsx", "utf8"));
 check("…with the same width and padding as a real page", /max-w-5xl/.test(skeleton) && /px-4 py-8/.test(skeleton));
 // AN ATTRIBUTE BOUNDARY, because `data-role="status"` contains
 // `role="status"` and is not a role. The same substring trap that

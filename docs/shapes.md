@@ -1810,3 +1810,106 @@ consumes, or the picture the person sees?* When those can differ — a
 renderer, a filter, a media query, an animation — the declaration will
 keep agreeing with itself long after the screen has stopped agreeing
 with either.
+
+## The instrument deleted the code before it looked
+
+`stripComments` is the tree's most-used instrument — 99 files import it,
+because the rule "comments are not code, strip first" has cost this
+repository real defects. Its line-comment branch was one regex:
+
+    line.replace(/\/\/.*$/, "")
+
+which truncates a line at its first `//` **wherever that appears**.
+Inside a string literal, `//` is not a comment. Measured 2026-09-19:
+**68 lines under `src/` lost everything from their `//` onward**, and
+the fix recovered **9,862 non-whitespace characters across 44 files**
+that every one of those 99 callers had been reading as if it were the
+whole source.
+
+What was on the truncated lines is the point:
+
+```
+app/auth/callback/route.ts:37
+  rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/dashboard"
+components/jobs/resumed-work-notice.tsx:131
+  href.startsWith("/") && !href.startsWith("//") ? href : null
+api/push/subscribe/route.ts:33
+  if (!endpoint.startsWith("https://") || ...) return null;
+```
+
+The first two are the **open-redirect guard** — the check that stops
+`//evil.com` being treated as a local path — and the instrument deleted
+it, plus the remainder of the line, before any gate saw the file.
+
+**Why nothing went red.** The two directions are not symmetrical. A gate
+asserting a guard is PRESENT would have failed loudly and been fixed
+within the hour; that is why none of these was in a presence check. The
+silent direction is the absence check — *nothing in this tree does X* —
+which now scans a shorter file and passes on less evidence than it
+believes it has. Fixing the stripper changed no verdict in the suite,
+which is the correct outcome and not a reason to shrug: the exposure was
+latent, in 44 files, in the one function written to make scanning safe.
+
+**The shape is an instrument that damages its input in a way that only
+ever makes checks PASS.** A broken scraper that returns nothing is
+loud — half this catalogue is about catching those. A scraper that
+returns *slightly less* is not: every count still looks plausible,
+every gate still runs, and the missing part is exactly the part nobody
+reads because the tool was supposed to have read it.
+
+**The question to ask:** *what does my instrument throw away, and would
+I notice?* Not "does it work" — it worked on 917 of 918 files. Feed it
+the ugly cases on purpose: a URL in a string, a regex containing the
+delimiter, a quote inside a comment inside a template literal. The
+tests for this function now do, including the open-redirect guard by
+name, because the case that bit was the one nobody thought to type.
+
+## The gate found the sentence about the code, not the code
+
+    check("…behind requestIdleCallback, so it never competes with hydration",
+          /requestIdleCallback/.test(bridge));
+
+`bridge` is the component's raw source. The component's own header
+explains the decision in prose — *"the call moved here, behind
+requestIdleCallback"* — so the word is in the file whether or not
+anything calls it. Proved on 2026-09-19 by replacing both real calls
+with `setTimeout`: the gate stayed green.
+
+Three more in the same file, each anchored on a capitalised sentence a
+human wrote:
+
+| the check | its anchor | what it claimed |
+|---|---|---|
+| Home's reads share one `Promise.all` | `ONE WAVE, NOT A QUEUE` | a structural property |
+| the onboarding redirect comes before the wave | the same sentence, as a POSITION | an ordering |
+| Settings reads eleven things together | `ONE WAVE.` | a structural property |
+
+Delete the paragraph and a correct page turns the gate red. Delete the
+`Promise.all` and it stays green. Both directions wrong, from a comment
+used as a landmark.
+
+**The file already knew.** Twelve lines from the worst of them sits a
+paragraph recording the identical defect being caught once before —
+`/RECHECK_AFTER_MS/` satisfied by the `const` declaration on its own —
+with the fix applied to that one check. Its neighbours kept the
+weakness. A one-line fix to a file-wide problem is how a defect gets
+documented and survives.
+
+**And one where the gate was green on the number the fix removed.**
+`example-prompts.test.mjs` checked `min-h-[36px]` for "chips are a real
+touch target on a phone". The component is `min-h-[44px]` and has been
+since the fix; the only `36px` left in the file is the comment recording
+the value that was *rejected*. So the check passed on prose, would have
+kept passing if somebody put 36px back, and would have failed if
+somebody tidied the comment away.
+
+**Why prose is such a good landmark, and why that is the trap.** A
+capitalised sentence is stable, unique and grep-friendly — everything an
+anchor should be except *load-bearing*. The code can change underneath
+it without disturbing it, which is the one property an anchor must not
+have.
+
+**The question to ask:** *if I deleted every comment in the target,
+would this check still pass?* If not, it is anchored on prose. Strip
+first — and then, because stripping is not enough on its own, mutate the
+code the check names and require it to go red.

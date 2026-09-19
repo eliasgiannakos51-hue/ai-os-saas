@@ -345,3 +345,35 @@ streaming path runs at a real pace. That also needs the Supabase
 stand-in to answer the reserve and settle RPCs, which it currently does
 not. Roughly half a day.
 
+## 16. The gates that read the same artefact as the code — swept 2026-09-19
+
+    node scripts/scan-self-confirming-gates.mjs
+
+**The question:** a gate that reads the same file as the feature checks
+nothing — it confirms the file equals itself. How many others do that?
+
+**Section 1 answers the census and admits it cannot do more.** Of 274
+gates: 250 read at least one artefact, 102 read ONLY app source, and 79
+of those also EXECUTE or RUN it rather than reading its text. 126 hold
+a second KIND of artefact — migrations against TypeScript, translations
+against components — which is the strongest thing short of a browser.
+Its binary "self-confirming" flag scored **0 of 8 candidates real and
+missed the one gate that was**, and says so in its own output.
+
+**Section 2 is exact and is where the findings came from:** a regex
+whose ONLY match in its target is inside a comment is being satisfied by
+prose today. 1,344 `/regex/.test(fileVariable)` pairs resolve to a real
+target; 38 match only inside a comment; 9 of those look like code.
+
+**Five were real and are fixed** (`docs/shapes.md`, *the gate found the
+sentence about the code, not the code*): four in
+`navigation-cost.test.mjs` anchored on `ONE WAVE, NOT A QUEUE` and
+`requestIdleCallback`, and one in `example-prompts.test.mjs` that was
+green on `min-h-[36px]` — the value its own fix had removed, surviving
+only in the comment that records the rejection.
+
+**What is left:** the remaining candidates in section 2, several of
+which deliberately anchor across a comment AND the code under it, which
+is legitimate. They are listed on every run and settled one at a time by
+mutating the source — never by reading the gate.
+

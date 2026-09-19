@@ -20,6 +20,7 @@
 //
 // Run: node scripts/tests/example-prompts.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
 const failures = [];
@@ -234,7 +235,28 @@ console.log("\n== 5. the component itself ==");
 check("chips are buttons, not decorations", /<button/.test(component) && /onClick=\{\(\) => onPick\(example\)\}/.test(component));
 check("the limits line always renders with them", /data-testid="ai-limits"/.test(component));
 check("...and is not behind a condition", !/\{limits &&/.test(component));
-check("chips are a real touch target on a phone", /min-h-\[36px\]/.test(component));
+// 44, NOT 36, AND READ FROM THE CODE.
+//
+// This checked for `min-h-[36px]`, and passed. The component is
+// `min-h-[44px]` at every width and has been since the fix — the only
+// `36px` left in the file is the comment recording the value that was
+// REJECTED: "This was `sm:min-h-[36px]`, which is the pattern
+// layout-stress's ratchet was written to stop."
+//
+// So the check was green on the number the fix removed, satisfied by
+// prose, and would have stayed green if somebody put 36px back. It
+// would also have gone RED if somebody tidied the comment away, on a
+// component that was correct. Both directions wrong from one line.
+//
+// MIN_TAP is 44 in scripts/tests/layout-stress.prodtest.mjs, which
+// enforces it against the rendered page; this is the cheap half.
+{
+  const chip = stripComments(component);
+  check("chips are a real touch target on a phone", /min-h-\[44px\]/.test(chip),
+    "the first thing a new user is invited to press must clear 44px");
+  check("...at every width, not only below sm", !/sm:min-h-\[\d+px\]/.test(chip),
+    "a tablet is a touch screen too — this is the exact shape the fix removed");
+}
 check("the component reaches for no input of its own", !/document\.querySelector/.test(component));
 
 console.log("\n== 6. Files kept its behaviour when it moved ==");

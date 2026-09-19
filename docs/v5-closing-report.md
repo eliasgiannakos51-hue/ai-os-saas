@@ -381,6 +381,36 @@ production, and none of them ran. That ratio has not moved in three
 reports and it will not move on this machine: it is a statement about
 what a checkout can execute, not about effort.
 
+### THE 28% THAT IS STILL OPEN — held here deliberately
+
+**The owner is bringing `DATABASE_URL`, an Anthropic balance and a
+published site.** Until those arrive this section stays in the report
+rather than being closed with a number that sounds better than it is.
+What each unlocks, and what is unprovable without it:
+
+| what is missing | what cannot run | what stays unproven |
+|---|---|---|
+| `DATABASE_URL` | 29 dbtests, chief among them `user-isolation.dbtest.mjs` — 426 lines, 25 checks, two real accounts | **that one account cannot reach another's rows.** Everything else in the security column describes configuration: RLS is on, a policy exists, a grant has a policy behind it. This is the only thing that demonstrates two people are kept apart |
+| a published site + an Anthropic balance | 44 prodtests | every claim about the live product: React #310, the published-site surface, the credit receipts a real generation writes |
+| neither — this is a checkout limit | 19 itests | the integration seams |
+
+**Two things this round showed about the 273 that DO run**, and they are
+the argument for not treating 75% as 75% of the truth:
+
+- `stripComments`, which 99 of them import, was deleting 9,862
+  non-whitespace characters across 44 files — including the
+  open-redirect guard — before any of them looked. No verdict changed
+  when it was fixed, which is the good outcome and also the point: the
+  exposure was silent and would have stayed silent.
+- Four checks in `navigation-cost.test.mjs` and one in
+  `example-prompts.test.mjs` were anchored on comment text, so they
+  measured prose rather than code. One of them was green on the exact
+  value its own fix had removed.
+
+A gate that runs is not the same as a gate that is looking at the thing
+it names. `node scripts/scan-self-confirming-gates.mjs` is what asks
+that question now, and its own section 1 says how weak it is.
+
 Mutation coverage over what the sweep CAN drive is **64.0%**, 187 of 292
 (`node scripts/tests/mutation-coverage.test.mjs`), against 60.6% five
 days ago. 105 gates are bare; none is in the money or access categories,

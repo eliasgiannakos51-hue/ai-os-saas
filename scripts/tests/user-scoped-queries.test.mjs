@@ -224,6 +224,8 @@ console.log("\n== the OTHER shape: functions scoped by the CALLER'S client ==");
       "Takes the agent and the user it already loaded from user_agents, and writes agent_runs rows for that agent alone. The id is not attacker-supplied: this route reads no request body.",
     "collectAgentBatches@src/app/api/cron/agent-batches/route.ts":
       "Sweeps agent_runs in status 'queued' across all accounts on purpose — collecting Anthropic Batch results is a cross-account job by definition, and it settles each run against the account that owns it.",
+    "derivedDataHealth@src/app/api/health/route.ts":
+      "Counts search_index across every account on purpose: the question it exists to answer is whether the index has ANY rows at all, and a caller-scoped client would answer it about one person. Nothing identifying leaves the function — it returns three integers and a verdict, never a user_id, a title or an href — and it sits beside navFreshness, which reads nav_events the same way for the same reason.",
   };
 
   const violations = [];

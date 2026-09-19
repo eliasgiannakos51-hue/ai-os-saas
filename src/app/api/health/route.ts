@@ -11,6 +11,7 @@ import {
 import { scrubSecrets } from "@/lib/scrub-secrets";
 import { SCHEMA_CANARIES } from "@/lib/health/schema-canaries";
 import { navFreshness } from "@/lib/health/nav-freshness";
+import { derivedDataHealth } from "@/lib/health/derived-data";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -280,6 +281,29 @@ export async function GET(request: Request) {
       body.nav = await navFreshness(createAdminClient());
     } catch {
       body.nav = { navAgeHours: null, activityAgeHours: null, verdict: "unchecked" };
+    }
+
+    // AND WHETHER THE DERIVED TABLES HAVE ROWS AT ALL.
+    //
+    // 2026-09-19: ⌘K found no content for an account with 88 records.
+    // Every check about the search index passed — triggers declared,
+    // sync function right, RPC present, route calling it, canary green
+    // — and the table was empty. A row count from the live database is
+    // the only thing that tells an empty index from a healthy one, and
+    // nothing anywhere was asking for it.
+    //
+    // Outside `ok` and the status code, like `schema` and `nav`: an
+    // empty index is not an outage, it is a migration that has not been
+    // run. `derived.verdict` is the field to watch.
+    try {
+      body.derived = await derivedDataHealth(createAdminClient());
+    } catch {
+      body.derived = {
+        searchIndexRows: null,
+        searchIndexAccounts: null,
+        searchIndexSources: null,
+        verdict: "unchecked",
+      };
     }
   }
 

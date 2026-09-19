@@ -556,3 +556,39 @@ One list now, derived from the catalogue, labelled from
 Built on the SERVER: `client-env-reach.test.mjs` caught the first
 version importing the catalogue into the browser, where the seven limit
 modules it reaches read `process.env` and get `undefined`.
+
+## 20. Derived data checked as code, never as content — 2026-09-19
+
+    node scripts/scan-derived-data.mjs
+    node scripts/tests/derived-data-health.test.mjs
+    node scripts/db/emit-search-backfill.mjs          # the backfill, generated
+
+**The incident.** ⌘K found no content for an account with 88 records.
+Every check about `search_index` passed and the table was empty. The
+counts are produced by the scan; do not read them from here.
+
+**The backfill.** `supabase/migrations/20260919000000_search_index_backfill.sql`
+re-runs it on its own, reports a line per table and a total, and ends by
+selecting what the index holds. Generated from the spec array of
+`20260824000000_unified_search.sql` — a second hand-written list is
+exactly what that migration's own comment warns about — and
+`search-backfill.test.mjs` holds the two in step both ways.
+
+**Verified in a real PostgreSQL 16**, not reasoned about: reproduced the
+reported state (88 source rows, 0 indexed, no triggers), ran the
+backfill (88 indexed, per-table notices), ran it again (0 added), wrote
+a new source row (self-indexed through the re-attached trigger) and
+searched `search_fold('εσοδα')||':*'` (50 hits).
+
+**The probe.** `/api/health` reports `derived.verdict` now — `EMPTY`
+means the index holds nothing while the product has accounts. Same shape
+and same reason as `nav.verdict`.
+
+**The general case, measured.** 4.2% of the build's checks prove that
+somebody wrote a call, inside a gate that reaches no network, browser or
+database and does not run the code. Printed, not gated.
+
+**What is NOT closed:** the scan reads SQL text. A table filled by
+application code in a shape it does not model is not listed, and only
+`search_index` has a live row count — the other eight are counted by
+suites, most of which need a `DATABASE_URL`.

@@ -2130,3 +2130,84 @@ has to agree with the minimum plan beside it.
 **The question to ask:** *would I have seen this if I had only read the
 code?* The data was correct at every layer. Only a rendered pixel was
 wrong, and only a measurement of the rendered pixel finds it.
+
+## The index was checked as code and never as content
+
+> Το sync καλούνταν σε 23 σημεία και το ευρετήριο ήταν άδειο.
+
+⌘K found no content for an account with 88 records. Everything about
+the search index passed:
+
+| what was checked | and it was true |
+|---|---|
+| the triggers are declared, 29 of them | yes |
+| the sync function reads the right columns | yes |
+| `search_all_localized` exists | yes, the schema canary said so |
+| `/api/search` calls it | yes, on every keystroke |
+| the RPC's grants and RLS are right | yes |
+
+**The table held nothing.** Not one of those asked the only question
+that mattered — *does it have rows?* — because no gate that runs in the
+build can ask a database anything, and the one suite that does count
+them (`unified-search.dbtest.mjs`) counts rows **it inserted itself**,
+in a database it seeds, and does not run without a `DATABASE_URL`.
+
+**Why derived data fails this way and ordinary data does not.** A row in
+`finance_entries` exists because somebody typed it. A row in
+`search_index` exists only because something else was **copied into
+it** — by a trigger on the next edit, or by a backfill that runs once,
+inside the migration that attaches the triggers. So:
+
+- being correctly wired is a statement about **the future**;
+- being backfilled is a statement about **one moment** that may never
+  have happened.
+
+Between those two, an empty index and a healthy one are **identical from
+the code**. Reproduced in a real PostgreSQL 16: 88 source rows, a
+correct schema, a correct sync function, zero indexed rows, and no
+error anywhere.
+
+**The census.** `scripts/scan-derived-data.mjs` lists every table the
+database writes to from inside a function or a migration's `do` block —
+nine of them — and whether any suite asks how many rows it holds. All
+nine are counted somewhere, and **six of the nine only by suites the
+build never runs**: a dbtest, an itest, a prodtest. A row count nothing
+executes is not a row count.
+
+Its own detector was wrong twice before it was right, in opposite
+directions, because it matched the word `count` near the table's NAME.
+It read the sentence *"Counts search_index across every account"* out of
+an exception's reason string in `user-scoped-queries.test.mjs` and
+reported that suite as counting the rows — a scan for checks that only
+read text, reading text. The table must be ADDRESSED now: `from("x")`,
+or `from public.x`.
+
+The distinction that matters is not "is it counted" but **"is a row here
+a copy of a row that exists somewhere else"**. For those, and only
+those, empty is indistinguishable from correct.
+
+**The fix is a row count from the live database**, which is why it went
+where `navFreshness` already lives: `/api/health` now reports
+`derived.verdict`, and `EMPTY` means the index holds nothing while the
+product has accounts. `api/nav/track` swallowed every error and
+`nav_events` stopped filling with nothing anywhere saying so; this is
+the same probe for the same reason.
+
+### And the general case: 355 checks that read a call site
+
+**4.2% of this build — 355 of 8,528 checks, in 75 of 279 gates — prove
+that somebody WROTE a call**, inside a gate that reaches no network, no
+browser, no database and does not run the code. `unified-search.test.mjs`
+is on that list with ten of them.
+
+That is not a defect list. For most of them the result is checked
+somewhere else, and a structural check is often the only affordable one.
+It is printed so the ratio is visible: `scan-derived-data.mjs` reports
+it, `derived-data-health.test.mjs` holds the scan honest in both
+directions, and nobody has to guess how much of the evidence is about
+what the code says rather than what it does.
+
+**The question to ask:** *if this pipeline had never run once, what
+would go red?* If the answer is "nothing, until somebody uses the
+feature and finds it empty", the check you need is a count, and it has
+to come from the live database.

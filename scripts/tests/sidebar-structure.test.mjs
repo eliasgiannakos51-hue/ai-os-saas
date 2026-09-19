@@ -40,6 +40,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { stripComments } from "../lib/test-export-drift.mjs";
 import { loadTs } from "./load-ts.mjs";
+import { groupBlocks } from "./lib/sidebar-source.mjs";
 
 let pass = 0;
 const failures = [];
@@ -166,18 +167,11 @@ const navSrc = readFileSync(NAV, "utf8");
 const modules = await loadTs("src/lib/modules.ts");
 const { sidebarGroups } = await loadTs("src/lib/sidebar-visibility.ts");
 
-// A COMMENT MAY SIT BETWEEN THE HEADING AND ITS FLAG, and the first
-// version of this required them to be adjacent lines. Writing down WHY
-// "Make" became collapsible — two paragraphs, between the two — dropped
-// the group from the parse entirely, and the count check below is the
-// only reason that showed up as anything other than a smaller sidebar.
-// So the scan skips comment lines rather than forbidding them.
-const marks = [];
-for (const m of navSrc.matchAll(/heading: "([^"]+)",\s*(?:\n\s*(?:\/\/[^\n]*)?)*?\n\s*collapsible: (true|false)/g)) {
-  marks.push({ heading: m[1], at: m.index });
-}
-const parsed = marks.map((mark, i) => {
-  const body = navSrc.slice(mark.at, i + 1 < marks.length ? marks[i + 1].at : navSrc.length);
+// THE GROUP BOUNDARY IS DEFINED ONCE, in lib/sidebar-source.mjs — see
+// that file for why three gates lost their anchor on the same day.
+const marks = groupBlocks(navSrc);
+const parsed = marks.map((mark) => {
+  const body = mark.body;
   const chunks = body.split(/href:\s*/).slice(1);
   return {
     heading: mark.heading,
@@ -267,20 +261,34 @@ console.log("\n== 1c. the flag comes off, the state is not stored, and a shut gr
   //    Comments stripped first: the component's header explains what it
   //    used to store, in the words a scanner would match.
   ok("the sidebar stores nothing", !/localStorage|sessionStorage|document\.cookie/.test(componentSrc));
-  ok("…and derives the default from the URL", /headingContaining\(pathname\)/.test(componentSrc));
+  // 3. THERE IS NO SHUT GROUP ANY MORE, and the four checks that used to
+  //    stand here were the most carefully-written wrong thing in this
+  //    file. They asserted that a collapsed group leaves the
+  //    accessibility tree, leaves the tab order, reports aria-expanded
+  //    and has a 44px target — all true, all green, and all about a
+  //    state that meant five of six headings stood over nothing on every
+  //    screen. Reported from production as "the sidebar shows Run and NO
+  //    rows"; measured before the change as 7 of 26 rows painted.
+  //
+  //    What replaces them is the property that mattered and was never
+  //    asked: NO HEADING WITHOUT ROWS. Here from the component, and from
+  //    the screen in section 0 of scripts/tests/sidebar-density.prodtest.mjs,
+  //    which is the half that would have caught the collapse.
   ok(
-    "…with an override for what the user opened, so a second group stays open",
-    /touched/.test(componentSrc) && !/new Map\(\)\s*\)\s*;?\s*$/m.test(componentSrc.split("toggleGroup")[1] ?? "")
+    "no group renders a heading with nothing under it",
+    /if \(group\.items\.length === 0\) return null;/.test(componentSrc),
+    "sidebarGroups() drops empty groups, so this is unreachable on the declared config — which is exactly what was true of the collapse"
   );
-
-  // 3. A SHUT GROUP IS SHUT TO THE KEYBOARD TOO. The rows animate to
-  //    zero height with grid-template-rows and stay in the DOM, so
-  //    without this a sighted user sees five headings while a keyboard
-  //    user tabs through every row in the nav.
-  ok("a shut group is out of the accessibility tree", /aria-hidden=\{!expanded\}/.test(componentSrc));
-  ok("a shut group's rows are out of the tab order", /tabIndex=\{(?:expanded \? undefined : -1|reachable \? undefined : -1)\}/.test(componentSrc));
-  ok("the heading says whether it is open", /aria-expanded=\{expanded\}/.test(componentSrc));
-  ok("the heading is a 44px target", /toggleGroup[\s\S]{0,400}?min-h-\[44px\]/.test(componentSrc));
+  ok(
+    "…and the collapse machinery is gone, not merely defaulted to open",
+    !/isExpanded|toggleGroup|aria-expanded|grid-rows-\[0fr\]|collapsible/.test(componentSrc),
+    "a flag that is false for every group is the dead `prominent` parameter this component already deleted once"
+  );
+  ok(
+    "…and every row is in the tab order, because none is at zero height",
+    !/tabIndex=\{/.test(componentSrc),
+    "tabIndex={-1} existed only to take a shut group's rows out of the tab order; with nothing shut it can only remove a reachable row"
+  );
 }
 
 console.log("\n== 1b. the POSITION of a row that is not built yet is locked ==");

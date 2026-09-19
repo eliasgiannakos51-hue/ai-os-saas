@@ -48,8 +48,29 @@ import {
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
-// (grouped, collapsible), the command palette (flattened, searchable) and
-// the hub page at /dashboard/records, so the three never drift apart.
+// (grouped, all groups open), the command palette (flattened, searchable)
+// and the hub page at /dashboard/records, so the three never drift apart.
+//
+// THERE IS NO `collapsible` FLAG ANY MORE, and the reason is a production
+// report: "the sidebar shows the heading Run and NO rows underneath".
+// Nothing had filtered those rows. The group was SHUT — the one-open-group
+// rule of 2026-09-17 opened only the group holding the current page, so
+// five of the six headings stood over nothing on every screen. Measured in
+// a browser on the unchanged build: 7 of 26 rows painted, all seven from
+// See, six headings.
+//
+// A HEADING OVER NOTHING IS INDISTINGUISHABLE FROM A BROKEN NAV, and that
+// is not a wording problem — the owner went looking for Agents, Automation
+// and Marketplace, found a heading and no rows, and concluded a filter had
+// removed them. Every structural gate was green throughout, because all of
+// them read this declaration and the declaration was right.
+//
+// So: every group is open, always. The cost is scroll, measured rather
+// than assumed — `node scripts/measure-sidebar-height.mjs` and section 4
+// of scripts/tests/sidebar-density.prodtest.mjs both print it.
+// Section 0 of scripts/tests/sidebar-density.prodtest.mjs is the check
+// that reads the SCREEN rather than this file: no heading may stand over
+// zero painted rows, at every viewport it measures.
 //
 // IT SAID /dashboard/business until V5 #13, and that page has never
 // existed: the only directory under src/app/dashboard beginning with
@@ -123,18 +144,7 @@ import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 // under /dashboard has no entry point at all.
 export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
   {
-    // NEVER COLLAPSED. Whatever else is shut, the six things this
-    // product makes have to be on screen the instant it paints — a group
-    // somebody has to open first is a group somebody does not know is
-    // there.
     heading: "Make",
-    // COLLAPSIBLE NOW, AND IT WAS THE ONE THAT WAS NOT. "Make" was pinned
-    // open as the group somebody opens the app to use. With Images, Videos
-    // and Music declared it is the LARGEST group — nine rows — so pinning
-    // it open means the phone always carries the tallest block whether the
-    // person is in it or not. It opens by itself when they are, which is
-    // what the pin was for; components/dashboard/sidebar.tsx has the rest.
-    collapsible: true,
     items: [
       { href: "/dashboard/website-builder", label: "Website Builder", icon: WEBSITE_BUILDER_ICON, hintKey: "websiteBuilder" },
       { href: "/dashboard/documents", label: "Documents", icon: MODULE_ICONS.documents, hintKey: "documents" },
@@ -208,7 +218,6 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     // what they read: chat reads the conversation, Deep Research reads the
     // web, Predictions reads THIS ACCOUNT'S OWN ROWS.
     heading: "Ask",
-    collapsible: true,
     items: [
       { href: CHAT_NAV_ITEM.href, label: "Ionexa Chat", icon: CHAT_ICON, hintKey: "chat" },
       // NOT /dashboard/research: that route is the Knowledge log, a place
@@ -235,7 +244,6 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     // schedule, an automation fires on a trigger, and the marketplace is
     // where somebody else's runs and yours are traded.
     heading: "Run",
-    collapsible: true,
     items: [
       { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents, hintKey: "agents" },
       { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation" },
@@ -260,7 +268,6 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     // them appears under Make instead — which is the check that keeps
     // Images and Videos out of the group whose heading is a promise.
     heading: "See",
-    collapsible: true,
     items: [
       { href: TIMELINE_NAV_ITEM.href, label: "Timeline", icon: TIMELINE_ICON, hintKey: "mine" },
       { href: "/dashboard/files", label: "Files", icon: FILES_ICON, hintKey: "files" },
@@ -356,7 +363,6 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     // THE THINGS THAT ARE ABOUT THE WORK RATHER THAN THE WORK. A goal, a
     // weekly look back at it, and the people it is shared with.
     heading: "Organise",
-    collapsible: true,
     items: [
       // Redesign phase 2. A folder with a goal, holding exactly what was
       // put in it — api/projects and api/projects/[id]/members write the
@@ -377,7 +383,6 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
 
 export const SETTINGS_GROUP: SidebarGroupConfig = {
   heading: "Settings",
-  collapsible: true,
   items: [
     // Connecting Gmail changes how the product works for you, which is a
     // setting rather than a daily action — and a visible row since round

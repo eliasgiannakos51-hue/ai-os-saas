@@ -22,6 +22,7 @@
 // Run: node scripts/tests/user-photos.test.mjs
 import { readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
 const failures = [];
@@ -112,7 +113,14 @@ console.log("== 1. the choice survives the round trip, over every value ==");
 
 console.log("\n== 2. 'no photographs' is ENFORCED, not asked for ==");
 {
-  const resolver = readFileSync("src/lib/website-image-resolver.ts", "utf8");
+  // COMMENTS STRIPPED, because the two checks below are about STRUCTURE
+  // — what sits between the placeholders being found and the choice
+  // being honoured — and a paragraph is not something that can spend a
+  // quota. Both went red on 2026-09-19 for a comment explaining why the
+  // branch reports nothing as dropped, which is the shape CLAUDE.md
+  // records: the same mistake put a `--` in front of an RLS statement in
+  // security-posture.test.mjs and read it as a live policy.
+  const resolver = stripComments(readFileSync("src/lib/website-image-resolver.ts", "utf8"));
   ok("the resolver takes the choice", /photoSource\?: "own" \| "stock" \| "none"/.test(resolver));
   ok("...and strips every placeholder without a single request",
     /if \(options\.photoSource === "none"\) \{[\s\S]{0,220}stripPlaceholderImageTags\(html, all\.map/.test(resolver));

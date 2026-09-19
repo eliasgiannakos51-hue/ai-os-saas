@@ -82,9 +82,6 @@ export type SidebarItem = {
 export type SidebarGroupConfig = {
   heading: string;
   items: SidebarItem[];
-  // "Daily" holds the five things somebody opens the app to do and is
-  // never collapsed — every other group can be toggled.
-  collapsible: boolean;
 };
 
 /**

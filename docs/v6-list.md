@@ -30,25 +30,33 @@ that demonstrates two real people are kept apart.
 **What it means if it fails:** one account can reach another's rows, which
 is the worst outcome in the product.
 
-## 2. Decide the sidebar's real targets — one decision
+## 2. ~~Decide the sidebar's real targets~~ — DECIDED 2026-09-19
 
-`sidebar-density.prodtest.mjs` is red (17/23) against V4.6 targets written
-before the accordion existed:
+The owner decided it, and the decision was not a relaxation: **every
+group open, all the time, scroll accepted, on the one condition that the
+phone stays under three screens.**
 
-| target | now |
-|---|---|
-| ≤ 4 groups | 6 |
-| ≤ 20 rows | 26 |
-| ≥ 15 readable @1080p | 7 |
-| ≤ 1100px | 1702px |
+    node scripts/tests/sidebar-density.prodtest.mjs     # 46 checks, all green
+    SIDEBAR_SHOTS=/tmp node scripts/tests/sidebar-density.prodtest.mjs   # …and a PNG per viewport
+    node scripts/measure-sidebar-height.mjs             # the same arithmetic, no browser
 
-Three of the four are a consequence of the approved accordion. The fourth
-— 1702px of nav in a 900px viewport — is a scroll on every page for every
-user and is worth treating as a real number rather than a stale limit.
+| V4.6 target | before | now | what replaced it |
+|---|---|---|---|
+| ≤ 4 groups | 6 | 6 | `=== 6`, the structure since 2026-09-05 |
+| ≤ 20 rows in the DOM | 26 | 26 | a FLOOR of 26 — no row may silently stop rendering |
+| ≥ 15 readable @1080p | 7 | 19 | floor kept; 1440 floor 15→14, said plainly to be fitted |
+| all rows readable @1080p | no | no | monotonicity: a taller viewport may never paint fewer rows |
+| ≤ 1100px | 1702px | 1633px @390 | ≤ 3 screens, the owner's own condition |
 
-**Not a coding task until the targets are agreed.** Relaxing a limit to
-match what was measured is how a check gets its baseline set to the size
-of the problem.
+**What it cost to leave undecided.** The prodtest was red on 23 checks
+for a fortnight and read as a sidebar problem. Inside that noise was a
+real one: five of six headings stood over nothing, and the gate that
+would have said so did not exist. See `docs/shapes.md`, *every gate read
+the declaration; the defect was on the screen*.
+
+**Measured 2026-09-19, in a browser, against a production build:**
+1.9 screens at 390×844, 1.7 at 1440×900. With all six future rows drawn
+it is 2.4 (`measure-sidebar-height.mjs`). The condition holds with room.
 
 ## 3. Separate the estimate shown from the hold taken — ~half a day
 
@@ -303,3 +311,37 @@ answering an error, where reading the result changes nothing the route
 does. A zero-offender register means ~25 written reasons, which is a
 round of work. The alternative is to leave the scan reporting and re-run
 it after each round.
+
+## 15. Why the answer is hard to read while it is being written — one measurement short
+
+**Contrast is not the cause, and that is now measured rather than
+assumed.**
+
+    CHAT_SHOTS=/tmp node scripts/tests/chat-streaming-contrast.prodtest.mjs
+
+Nine text points on the STREAMING block — the one inside
+`sending && streamingText !== null`, identified by having no "Listen"
+button — read **15.71:1 at 1440×900 and 15.68:1 at 390×844** on
+2026-09-19. `chat-ground-dim` is on both the finished and the streaming
+answer; the source always said so, and no gate had ever photographed the
+second one. `chat-measure.prodtest.mjs` seeds `chat_messages`, so every
+figure behind the 2026-09-04 choice of `dim` was taken on a finished
+message.
+
+**What is left is MOVEMENT, and this harness cannot measure it.**
+`route.fulfill` hands Playwright the whole NDJSON body at once, so the
+component receives every delta in one burst: the streaming state it
+samples is a frozen snapshot of a finished stream. A version of the file
+did measure travel and printed 0px in one second — a number that meant
+nothing, and was removed rather than reported.
+
+The remaining hypothesis is `hooks/use-stick-to-bottom.ts`: the thread
+sticks to the bottom as tokens arrive, so a line someone has started
+reading is somewhere else by the time they finish it.
+
+**What would settle it:** point `ANTHROPIC_BASE_URL` at a local server
+emitting `content_block_delta` events with real gaps, so the app's own
+streaming path runs at a real pace. That also needs the Supabase
+stand-in to answer the reserve and settle RPCs, which it currently does
+not. Roughly half a day.
+

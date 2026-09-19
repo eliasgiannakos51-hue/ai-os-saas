@@ -44,7 +44,7 @@ const MUTANTS = [
     file: NAV,
     from: "];\n\nexport const SETTINGS_GROUP",
     to:
-      '  {\n    heading: "Extra",\n    collapsible: true,\n    items: [\n' +
+      '  {\n    heading: "Extra",\n    items: [\n' +
       '      { href: "/help", label: "Help Centre", icon: HELP_ICON, hintKey: "help" },\n' +
       "    ],\n  },\n];\n\nexport const SETTINGS_GROUP",
     expect: "groups, limit 6",

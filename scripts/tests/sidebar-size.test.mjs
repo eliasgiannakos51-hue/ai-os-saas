@@ -25,6 +25,7 @@
 // Run: node scripts/tests/sidebar-size.test.mjs
 import { readFileSync, existsSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
+import { groupBlocks } from "./lib/sidebar-source.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
@@ -122,23 +123,19 @@ console.log("== 1. the config is read, and read completely ==");
 // that quietly stops matching cannot under-report the size and turn this
 // whole file green.
 const groups = [];
-// A COMMENT MAY SIT BETWEEN THE HEADING AND ITS FLAG. Writing down why
-// "Make" became collapsible dropped the group from this parse entirely on
-// 2026-09-12, and only the count floor above showed it as anything other
-// than a smaller sidebar.
-const headingRe = /heading: "([^"]+)",\s*(?:\n\s*(?:\/\/[^\n]*)?)*?\n\s*collapsible: (true|false)/g;
-const marks = [];
-for (const m of navSrc.matchAll(headingRe)) {
-  marks.push({ heading: m[1], collapsible: m[2] === "true", at: m.index });
-}
+// THE GROUP BOUNDARY IS DEFINED ONCE, in lib/sidebar-source.mjs. Three
+// gates carried their own copy of this regex and the same paragraph about
+// comments being allowed inside it; all three went red together on
+// 2026-09-19 when `collapsible` — which every copy used as its anchor —
+// was removed along with the collapse itself.
+const marks = groupBlocks(navSrc);
 for (let i = 0; i < marks.length; i++) {
-  const body = navSrc.slice(marks[i].at, i + 1 < marks.length ? marks[i + 1].at : navSrc.length);
+  const body = marks[i].body;
   // Each item runs from its own `href:` to the next one, so multi-line and
   // one-line object literals both fall out without a parser.
   const chunks = body.split(/href:\s*/).slice(1);
   groups.push({
     heading: marks[i].heading,
-    collapsible: marks[i].collapsible,
     items: chunks.map((chunk) => {
       const upToNext = chunk;
       return {

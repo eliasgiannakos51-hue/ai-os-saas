@@ -24,6 +24,8 @@
 // Live: BASE_URL=http://localhost:3140 node scripts/tests/sidebar-and-tooltips.test.mjs
 import { readFileSync, existsSync } from "node:fs";
 import { stripComments } from "../check-mutation-markers.mjs";
+import { groupBlocks as readGroups, itemChunks } from "./lib/sidebar-source.mjs";
+import { loadTs } from "./load-ts.mjs";
 
 let pass = 0,
   fail = 0,
@@ -107,53 +109,80 @@ check("...and from the command palette", /PINNED_SIDEBAR_ITEMS/.test(palette), f
 // with two of them, or with a group that was empty. None of those pass
 // now. Which four headings exist, and that each is translated, is
 // checked from the config in scripts/tests/sidebar-naming.test.mjs.
-// A COMMENT MAY SIT BETWEEN THE HEADING AND ITS FLAG. Writing down why
-// "Make" became collapsible dropped the group from this parse entirely on
-// 2026-09-12, and only the count floor above showed it as anything other
-// than a smaller sidebar.
-const groupBlocks = [...nav.matchAll(/heading: "([^"]+)",\s*(?:\n\s*(?:\/\/[^\n]*)?)*?\n\s*collapsible: (true|false)/g)].map(
-  (m) => ({ heading: m[1], collapsible: m[2] === "true" }),
-);
+// THE GROUP BOUNDARY IS DEFINED ONCE, in lib/sidebar-source.mjs.
+const groupBlocks = readGroups(nav);
 checkTrue(
   `the group scan read the config (${groupBlocks.length} groups)`,
   groupBlocks.length >= 2,
   "a scan that finds nothing agrees with every claim below it",
 );
-// NO GROUP IS PINNED OPEN ANY MORE, and that is a decision rather than an
-// omission. "Make" was the pinned one, as the group somebody opens the app
-// to use. With Images, Videos and Music declared it became the LARGEST
-// group at eight rows, so pinning it meant every phone carried the tallest
-// block whether the person was in it or not.
+// EVERY GROUP IS OPEN, ALWAYS — 2026-09-19, and the checks that stood
+// here asserted the opposite with care.
 //
-// What replaced it is stronger: the group holding the current page opens
-// by itself (components/dashboard/sidebar.tsx), so the group you are in is
-// always open — including Make, when you are in it — and it closes when
-// you leave. node scripts/measure-sidebar-height.mjs is where the numbers
-// that decided this are produced: everything open is 2,213px, 2.6 screens
-// on a 390x844 phone; one group open is 1,063px.
-const alwaysOpen = groupBlocks.filter((g) => !g.collapsible);
-check("no group is pinned open — the current one opens itself instead", alwaysOpen.length, 0);
-// AND THE COMPONENT REALLY DOES IT. Asserting only the absence above would
-// pass just as well on a sidebar where every group is shut for ever.
-const sidebarForOpen = readFileSync("src/components/dashboard/sidebar.tsx", "utf8");
+// They required every heading to be a <button>, to carry aria-expanded,
+// to be a 44px tap target, and they required the group holding the
+// current page to open itself while a hand-opened one stayed open. All
+// green. All describing a sidebar on which five of six headings stood
+// over nothing: measured in the browser before the change, 7 of 26 rows
+// painted at 1440x900, every one of them from See.
+//
+// The report from production was "the sidebar shows the heading Run and
+// NO rows — did a filter remove Agents, Automation and Marketplace?".
+// Nothing had. This file could not tell the difference, because it was
+// asking whether the collapse was well-built rather than whether the
+// screen showed anything.
+//
+// node scripts/measure-sidebar-height.mjs is where the cost is produced:
+// everything open is 1,937px on today's 27 rows, 2.3 screens on a
+// 390x844 phone and 2.2 on a 1440x900 laptop. That is the trade, taken
+// deliberately, and the command palette is still one keystroke.
 checkTrue(
-  "the group holding the current page is open by default",
-  /return headingContaining\(pathname\) === group\.heading;/.test(sidebarForOpen),
-  "nothing derives the open group from the URL, so arriving on a page shows a shut nav",
+  `every group was read (${groupBlocks.length})`,
+  groupBlocks.length >= 6,
+  "a scan that finds nothing agrees with every claim below it",
+);
+const sidebarForOpen = readFileSync("src/components/dashboard/sidebar.tsx", "utf8");
+// COUNTED, NOT GREPPED. A word search for isExpanded / aria-expanded /
+// collapsible is a substring test on something that has structure, and
+// the mutation that proves it takes four lines: `const expanded = true;
+// ... if (!expanded) return <p/>;` reintroduces the whole defect without
+// using any of those words.
+//
+// What renderGroup must be is simple enough to state: ONE guard and ONE
+// render. A third exit is a condition deciding whether rows appear, and
+// that is the collapse whatever it is called.
+const renderGroupBody = stripComments(sidebarForOpen).slice(
+  stripComments(sidebarForOpen).indexOf("function renderGroup("),
+  stripComments(sidebarForOpen).indexOf("function renderItem(")
 );
 checkTrue(
-  "...and a group opened by hand wins over that",
-  /const chosen = touched\.get\(group\.heading\);[\s\S]{0,80}if \(chosen !== undefined\) return chosen;/.test(sidebarForOpen),
-  "the manual choice has to be checked BEFORE the pathname, or navigating undoes it",
+  "renderGroup was located",
+  renderGroupBody.length > 200,
+  "the two checks below measure nothing without it",
+);
+checkTrue(
+  `no group can be collapsed — renderGroup has one guard and one render (${(renderGroupBody.match(/\breturn\b/g) ?? []).length} returns)`,
+  (renderGroupBody.match(/\breturn\b/g) ?? []).length === 2,
+  "a third exit from renderGroup is a condition deciding whether rows appear — a collapse under another name",
+);
+checkTrue(
+  "...and the names the old collapse used are gone too",
+  !/isExpanded|toggleGroup|aria-expanded|collapsible|grid-rows-\[0fr\]/.test(stripComments(sidebarForOpen)),
+  "the cheap half of the check above, kept because it names what was removed",
+);
+checkTrue(
+  "...and a heading with no rows under it is not drawn at all",
+  /if \(group\.items\.length === 0\) return null;/.test(sidebarForOpen),
+  "the whole defect was a heading over nothing; sidebarGroups() prevents one cause and this prevents the rest",
 );
 checkTrue(
   "...and nothing is remembered across a reload",
-  // STRIPPED, because the component EXPLAINS that it no longer stores
-  // anything — and a check reading the raw file found the word in that
-  // sentence and called it storage. Comments are not code; the same shape
-  // put a `--` in front of an RLS statement in security-posture.test.mjs.
-  !/localStorage/.test(stripComments(sidebarForOpen)),
-  "a sidebar that restores three open groups from yesterday is thirty-three rows again",
+  // STRIPPED, because the component EXPLAINS what it no longer stores —
+  // and a check reading the raw file found the word in that sentence and
+  // called it storage. Comments are not code; the same shape put a `--`
+  // in front of an RLS statement in security-posture.test.mjs.
+  !/localStorage|sessionStorage/.test(stripComments(sidebarForOpen)),
+  "there is no open/shut state left to store, so storing anything is a regression by itself",
 );
 // V4.6: the config carries items marked hidden — trackers reachable from
 // the records hub and ⌘K, kept out of the sidebar on purpose. The sidebar
@@ -179,40 +208,107 @@ checkTrue(
   /sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)\.map\(renderGroup\)/.test(sidebarSrc),
   "the Settings group is no longer rendered by the sidebar",
 );
-// EVERY HEADING IS A CONTROL, not a caption. With no group pinned open,
-// a heading that is only text is a group nobody can reach — so the rule
-// that used to apply to five of six now applies to all six, and the
-// component has to render each as a real button.
+// EVERY HEADING IS A CAPTION NOW, not a control — there is nothing to
+// toggle. It is a <p>, which is what a label with no behaviour should be:
+// a <button> that does nothing is worse for a screen reader than no
+// button at all.
 checkTrue(
-  `every group is collapsible (${groupBlocks.length})`,
-  groupBlocks.length >= 6 && groupBlocks.every((g) => g.collapsible),
-  groupBlocks.map((g) => `${g.heading}:${g.collapsible ? "collapsible" : "pinned"}`).join(", "),
+  "the heading is a caption, not a button that does nothing",
+  /<p className="px-3 pb-1\.5 text-\[10px\] font-semibold uppercase tracking-widest text-muted">/.test(sidebarForOpen) &&
+    !/<button[\s\S]{0,200}translatedHeading/.test(sidebarForOpen),
+  "a control that cannot change anything is announced to a screen reader as something to press",
+);
+// AND NO CHEVRON BESIDE IT. The turning marker was the affordance that
+// said "this opens" — on a heading that opens nothing it is a promise
+// the nav cannot keep. Checked inside the group renderer only: the
+// account link in the footer has its own chevron and always did.
+const groupRenderer = sidebarForOpen.slice(
+  sidebarForOpen.indexOf("function renderGroup("),
+  sidebarForOpen.indexOf("function renderItem(")
 );
 checkTrue(
-  "...and the heading is a button, at the 44px tap target",
-  /<button[\s\S]{0,200}onClick=\{\(\) => toggleGroup\(group\)\}[\s\S]{0,120}min-h-\[44px\]/.test(sidebarForOpen),
-  "a heading that is a <p> cannot be tapped, and cannot be reached by keyboard at all",
+  "...with no marker suggesting it turns",
+  groupRenderer.length > 100 && !/ChevronRight|rotate-90/.test(groupRenderer),
+  "a chevron on a heading that cannot be pressed is the same broken promise as the heading with no rows",
 );
-checkTrue(
-  "...announcing whether it is open",
-  /aria-expanded=\{expanded\}/.test(sidebarForOpen),
-  "a screen reader is told there is a button and not what it does",
-);
-checkTrue(
-  "...with a marker that turns",
-  /rotate-90[\s\S]{0,40}rotate-0/.test(sidebarForOpen),
-  "nothing on screen says which way the group is",
-);
-// Every group must actually contain something: a heading with no items
-// is a row of chrome that opens onto nothing, and `visibleGroups` only
-// drops groups emptied by the ROLE filter, not ones that shipped empty.
-const emptyGroups = groupBlocks.filter((g) => {
-  const start = nav.indexOf(`heading: "${g.heading}"`);
-  const next = nav.indexOf('heading: "', start + 10);
-  const block = nav.slice(start, next === -1 ? undefined : next);
-  return !/href:/.test(block);
-});
-checkTrue("no group is empty", emptyGroups.length === 0, emptyGroups.map((g) => g.heading).join(", "));
+// EVERY DECLARED GROUP STILL HAS ROWS AFTER THE FILTERS RUN — and that
+// is a different question from the one this used to ask.
+//
+// It asked whether the block of config under a heading contained the
+// text `href:`. Run contains five of them; three are the rows the owner
+// went looking for, two are `notBuilt` positions. Mark all three real
+// rows `hidden` and the group draws nothing at all, while this check
+// stays green because five `href:` lines are still there. That is the
+// declaration being read in place of the screen, in the one check whose
+// name promised otherwise.
+//
+// So the real filters are EXECUTED — lib/sidebar-visibility.ts imports
+// no icons precisely so a gate can do this — and every heading the
+// config declares must survive both of them, for an owner and for
+// anybody else. `sidebarGroups` silently DROPS an emptied group, so the
+// comparison is against the declared headings rather than against its
+// own output; otherwise a vanished group reads as a shorter list and
+// nothing says which one went.
+{
+  // THE CONFIG IS PARSED, NOT IMPORTED, and only because it cannot be:
+  // lib/sidebar-nav.ts imports fifty icons from lucide-react and
+  // scripts/tests refuse external node_modules imports. The FILTERS are
+  // the real ones — lib/sidebar-visibility.ts was split out of that file
+  // for exactly this, so the rule about who sees what is executed rather
+  // than described. Same approach as sidebar-structure.test.mjs.
+  const { sidebarGroups } = await loadTs("src/lib/sidebar-visibility.ts");
+  const all = readGroups(nav).map((g) => ({
+    heading: g.heading,
+    items: itemChunks(g.body).map((i) => ({
+      href: i.literalHref ?? i.constantHref ?? "?",
+      label: "?",
+      ...(i.hidden ? { hidden: true } : {}),
+      ...(i.notBuilt ? { notBuilt: true } : {}),
+      ...(i.ownerOnly ? { ownerOnly: true } : {}),
+    })),
+  }));
+  const declared = all.map((g) => g.heading);
+  checkTrue(
+    `the config was executed (${declared.length} groups declared)`,
+    declared.length >= 6,
+    "a scan that loads nothing agrees with every claim below it",
+  );
+  // AND THE TWO ROLES ARE THE WHOLE CROSS-PRODUCT, which is only true
+  // because nothing else can empty a group. Asked directly on
+  // 2026-09-19 — "how many groups can end up empty depending on plan,
+  // role or a flag?" — and the answer is that there are exactly three
+  // mechanisms and no plan among them: `ownerOnly` (role), `hidden` and
+  // `notBuilt` (flags, both static in the config). The component
+  // receives `planName` and renders it in the footer; it never filters
+  // on it.
+  //
+  // A FOURTH MECHANISM WOULD MAKE THE LOOP BELOW A SAMPLE INSTEAD OF A
+  // PROOF, and it would not announce itself — so the shape of
+  // SidebarItem is held here. A plan-gated row added tomorrow turns
+  // this red rather than quietly reducing the cross-product to half of
+  // itself.
+  const visibilitySrc = stripComments(readFileSync("src/lib/sidebar-visibility.ts", "utf8"));
+  const optionalFlags = [...visibilitySrc.matchAll(/^\s{2}([a-zA-Z]+)\?:/gm)].map((m) => m[1]).sort();
+  checkTrue(
+    `SidebarItem has exactly the three filters this loop covers, plus hintKey (${optionalFlags.join(", ")})`,
+    optionalFlags.join(",") === "hidden,hintKey,notBuilt,ownerOnly",
+    "a new optional field on SidebarItem may be a fourth way to empty a group, and the two-role loop below would not reach it",
+  );
+  checkTrue(
+    "...and nothing in the visibility filters reads a plan or a tier",
+    !/\bplan\b|\btier\b|minPlan/i.test(visibilitySrc),
+    "a plan-gated row means the owner/non-owner pair is no longer the whole cross-product",
+  );
+  for (const isOwner of [true, false]) {
+    const drawn = new Set(sidebarGroups(all, isOwner).map((g) => g.heading));
+    const gone = declared.filter((h) => !drawn.has(h));
+    checkTrue(
+      `${isOwner ? "owner" : "non-owner"}: every declared group still draws rows (${drawn.size} of ${declared.length})`,
+      gone.length === 0,
+      `${gone.join(", ")} — declared, and nothing under it survives the filters`,
+    );
+  }
+}
 
 console.log("\n== 3. tooltips are a real component, not a title attribute ==");
 checkTrue("a Tooltip component exists", existsSync("src/components/ui/tooltip.tsx"));

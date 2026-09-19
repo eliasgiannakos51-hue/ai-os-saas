@@ -33,13 +33,14 @@ import { execFileSync } from "node:child_process";
 const STRUCTURE = "scripts/tests/sidebar-structure.test.mjs";
 const SIZE = "scripts/tests/sidebar-size.test.mjs";
 const NAMING = "scripts/tests/sidebar-naming.test.mjs";
+const SOURCE = "scripts/tests/lib/sidebar-source.mjs";
 const HINTS = "scripts/tests/sidebar-hints-coverage.test.mjs";
 const NAV = "src/lib/sidebar-nav.ts";
 const VISIBILITY = "src/lib/sidebar-visibility.ts";
 const TOOLTIPS = "scripts/tests/sidebar-and-tooltips.test.mjs";
 const SIDEBAR = "src/components/dashboard/sidebar.tsx";
 
-const TARGETS = [STRUCTURE, SIZE, NAMING, HINTS, NAV, VISIBILITY, SIDEBAR, "docs/analytics-queries.sql"];
+const TARGETS = [STRUCTURE, SIZE, NAMING, HINTS, NAV, VISIBILITY, SIDEBAR, SOURCE, "docs/analytics-queries.sql"];
 
 const MUTANTS = [
   // ---- THE DECLARED POSITIONS, 2026-09-12 ---------------------------
@@ -92,35 +93,51 @@ const MUTANTS = [
     expect: "every hidden row still is",
   },
 
-  // ---- THE COLLAPSE RULE, 2026-09-12 --------------------------------
+  // ---- EVERY GROUP OPEN, 2026-09-19 ---------------------------------
+  //
+  // THREE MUTANTS STOOD HERE AND ALL THREE WENT STALE ON THE SAME DAY.
+  // They broke the collapse in its three interesting ways — the current
+  // group stops opening itself, the pathname beats the manual choice,
+  // the open set is persisted — and each was a careful test of a
+  // behaviour that turned out to be the defect: five of six headings
+  // over nothing, reported from production as "the sidebar shows Run and
+  // NO rows".
+  //
+  // A mutant whose anchor is gone does not fail, it does not RUN, so all
+  // three would have sat here reporting nothing. scripts/tests/
+  // mutation-anchors.test.mjs caught them in `npm run build` the day
+  // after it started gating that, which is the only reason they were
+  // replaced rather than left.
   {
     gate: TOOLTIPS,
-    // Without this the nav arrives shut on every page, which is the
-    // accordion's worst property and none of its benefit.
-    name: "the group holding the current page stops opening itself",
+    // A heading over nothing, put back the crude way.
+    name: "a group with no rows is drawn anyway",
     file: SIDEBAR,
-    from: "    return headingContaining(pathname) === group.heading;",
-    to: "    return false;",
-    expect: "open by default",
+    from: "    if (group.items.length === 0) return null;",
+    to: "    if (group.items.length === 0) return <p key={group.heading}>{translatedHeading(group.heading)}</p>;",
+    expect: "a heading with no rows under it is not drawn at all",
   },
   {
     gate: TOOLTIPS,
-    // THE ACCORDION, REINTRODUCED. Reading the pathname BEFORE the manual
-    // choice means navigating undoes what the person just opened.
-    name: "the pathname wins over what the person opened by hand",
+    // THE COLLAPSE, REINTRODUCED WITHOUT ITS VOCABULARY. No isExpanded,
+    // no aria-expanded, no `collapsible` — a word search for any of them
+    // stays green, which is why the check it trips counts renderGroup's
+    // exits instead.
+    name: "a collapse comes back under another name",
     file: SIDEBAR,
-    from: "    const chosen = touched.get(group.heading);\n    if (chosen !== undefined) return chosen;\n    return headingContaining(pathname) === group.heading;",
-    to: "    if (headingContaining(pathname) === group.heading) return true;\n    const chosen = touched.get(group.heading);\n    return chosen ?? false;",
-    expect: "opened by hand wins",
+    from: "    if (group.items.length === 0) return null;",
+    to: "    const shown = group.heading === \"Make\";\n    if (group.items.length === 0) return null;\n    if (!shown) return <p key={group.heading}>{translatedHeading(group.heading)}</p>;",
+    expect: "renderGroup has one guard and one render",
   },
   {
     gate: TOOLTIPS,
-    // A sidebar that restores three groups from yesterday is thirty-three
-    // rows again, which is the state the rule exists to leave.
-    name: "the open groups are remembered across a reload",
+    // Nothing is left to remember, so storing anything is a regression on
+    // its own — and the check reads the source with comments STRIPPED,
+    // because the component explains what it used to store.
+    name: "the sidebar starts storing something again",
     file: SIDEBAR,
-    from: "  function toggleGroup(group: SidebarGroupConfig) {",
-    to: "  function persistOpen(v: string) {\n    window.localStorage.setItem(\"ionexa:sidebar-open\", v);\n  }\n\n  function toggleGroup(group: SidebarGroupConfig) {",
+    from: "  function renderGroup(group: SidebarGroupConfig) {",
+    to: "  function persistOpen(v: string) {\n    window.localStorage.setItem(\"ionexa:sidebar-open\", v);\n  }\n\n  function renderGroup(group: SidebarGroupConfig) {\n    void persistOpen;",
     expect: "nothing is remembered across a reload",
   },
 
@@ -148,8 +165,8 @@ const MUTANTS = [
     name: "a seventh group appears",
     file: NAV,
     from: '    heading: "Organise",',
-    to: '    heading: "Extra",\n    collapsible: true,\n    items: [{ href: "/dashboard/team", label: "Extra", icon: TEAM_ICON, hintKey: "team" }],\n  },\n  {\n    heading: "Organise",',
-    expect: "groups drawn, 6 declared",
+    to: '    heading: "Extra",\n    items: [{ href: "/dashboard/team", label: "Extra", icon: TEAM_ICON, hintKey: "team" }],\n  },\n  {\n    heading: "Organise",',
+    expect: "rows drawn, 27 declared",
   },
   {
     name: "two rows change places inside a group",
@@ -210,19 +227,25 @@ const MUTANTS = [
     // rows floor catches it — which is a true result about the wrong
     // clause. One group parsed clears `groups.length > 0` and fails
     // `>= MIN_GROUPS`, which is the line under test.
+    // RE-AIMED AT THE SHARED PARSER, 2026-09-19. The regex these two
+    // broke lived in sidebar-size.test.mjs, in a copy each of three
+    // gates carried; it anchored on `collapsible:`, which went with the
+    // collapse. One definition now, in lib/sidebar-source.mjs — so
+    // blinding it blinds every gate that parses the config, which is a
+    // strictly larger blast radius and the right thing to mutate.
     name: "sidebar-size: the parse finds one group and calls it the sidebar",
     gate: SIZE,
-    file: SIZE,
-    from: 'const headingRe = /heading: "([^"]+)",\\s*(?:\\n\\s*(?:\\/\\/[^\\n]*)?)*?\\n\\s*collapsible: (true|false)/g;',
-    to: 'const headingRe = /heading: "(Make)",\\s*(?:\\n\\s*(?:\\/\\/[^\\n]*)?)*?\\n\\s*collapsible: (true|false)/g;',
+    file: SOURCE,
+    from: 'const GROUP_RE = /heading: "([^"]+)",\\s*(?:\\n\\s*(?:\\/\\/[^\\n]*)?)*?\\n\\s*items: \\[/g;',
+    to: 'const GROUP_RE = /heading: "(Make)",\\s*(?:\\n\\s*(?:\\/\\/[^\\n]*)?)*?\\n\\s*items: \\[/g;',
     expect: "so an emptied config cannot pass a ceiling",
   },
   {
     name: "sidebar-size: the group parse stops matching",
     gate: SIZE,
-    file: SIZE,
-    from: 'const headingRe = /heading: "([^"]+)",\\s*(?:\\n\\s*(?:\\/\\/[^\\n]*)?)*?\\n\\s*collapsible: (true|false)/g;',
-    to: 'const headingRe = /heading: "(NOTHING_MATCHES_THIS)",\\s*(?:\\n\\s*(?:\\/\\/[^\\n]*)?)*?\\n\\s*collapsible: (true|false)/g;',
+    file: SOURCE,
+    from: 'const GROUP_RE = /heading: "([^"]+)",\\s*(?:\\n\\s*(?:\\/\\/[^\\n]*)?)*?\\n\\s*items: \\[/g;',
+    to: 'const GROUP_RE = /heading: "(NOTHING_MATCHES_THIS)",\\s*(?:\\n\\s*(?:\\/\\/[^\\n]*)?)*?\\n\\s*items: \\[/g;',
     expect: "the group scan found groups",
   },
   {

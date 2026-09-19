@@ -49,6 +49,23 @@ export type ImageResolution = {
   /** Set only if UNSPLASH refused (403/429/401). Passed on so the caller
    *  does not fire registrations that would be refused too. */
   halted: UnsplashHaltReason | null;
+  /**
+   * PLACEHOLDERS THAT WERE REMOVED RATHER THAN FILLED, and why — null
+   * when nothing was dropped.
+   *
+   * Removing is the right behaviour and it was invisible. Every path
+   * below that strips a placeholder logged to production_errors, which
+   * only the owner reads, and returned a result indistinguishable from
+   * "the model asked for no photographs". A person who described a
+   * business with pictures got a site without them and no sentence
+   * anywhere — the shape docs/shapes.md calls silent loss that looks
+   * like a result.
+   *
+   * `photoSource: "none"` is deliberately NOT reported: the owner asked
+   * for a page with no photographs and got one, which is a promise kept
+   * rather than something lost.
+   */
+  dropped: { count: number; reason: "notConfigured" | "quota" | "noMatch" } | null;
 };
 
 export async function resolveWebsiteImagePlaceholders(
@@ -69,13 +86,24 @@ export async function resolveWebsiteImagePlaceholders(
   } = {}
 ): Promise<ImageResolution> {
   const all = findImagePlaceholders(html);
-  if (all.length === 0) return { html, used: [], halted: null };
+  if (all.length === 0) return { html, used: [], halted: null, dropped: null };
 
+  // `dropped: null` BELOW IS NOT AN OVERSIGHT. The owner asked for a page
+  // with no photographs and got one; reporting "3 pictures were removed"
+  // about a request to remove them would be noise dressed as honesty.
+  //
+  // The comment is HERE rather than inside the branch because
+  // scripts/tests/user-photos.test.mjs requires the strip to follow this
+  // guard within 220 characters — deliberately tight, so that nothing
+  // can slip between the choice and the removal and spend a quota on the
+  // way. A paragraph in that gap is the same thing as code in it, as far
+  // as a window measured in characters is concerned.
   if (options.photoSource === "none") {
     return {
       html: stripPlaceholderImageTags(html, all.map((p) => p.slug)),
       used: [],
       halted: null,
+      dropped: null,
     };
   }
 
@@ -103,7 +131,10 @@ export async function resolveWebsiteImagePlaceholders(
       { queries: logoLike.map((p) => p.query).join(" | ").slice(0, 200) }
     );
   }
-  if (placeholders.length === 0) return { html, used: [], halted: null };
+  // The logo-like and non-Latin ones are stripped above and are NOT
+  // reported to the user: the prompt forbids them, so their presence is
+  // a model slip rather than something the person asked for and lost.
+  if (placeholders.length === 0) return { html, used: [], halted: null, dropped: null };
 
   // Without a key there is nothing to search with, and no reason to
   // pretend otherwise: every placeholder is removed and the log says why.
@@ -115,7 +146,12 @@ export async function resolveWebsiteImagePlaceholders(
       ),
       { placeholders: placeholders.length }
     );
-    return { html: stripPlaceholderImageTags(html, placeholders.map((p) => p.slug)), used: [], halted: null };
+    return {
+      html: stripPlaceholderImageTags(html, placeholders.map((p) => p.slug)),
+      used: [],
+      halted: null,
+      dropped: { count: placeholders.length, reason: "notConfigured" },
+    };
   }
 
   // ONE budget for the whole document, not one per photo.
@@ -185,7 +221,21 @@ export async function resolveWebsiteImagePlaceholders(
   if (unresolved.length > 0) {
     result = stripPlaceholderImageTags(result, unresolved.map((p) => p.slug));
   }
-  return { html: result, used: [...resolved.values()], halted: budget.halted };
+  // WHICH OF THE THREE REASONS, decided by what actually happened
+  // rather than by which log line ran: a halted budget means Unsplash
+  // refused (403/429/401) and the rest of the searches never happened,
+  // otherwise the searches ran and found nothing. Both remove the tag;
+  // only one of them fixes itself within the hour, which is why the
+  // person is told which.
+  return {
+    html: result,
+    used: [...resolved.values()],
+    halted: budget.halted,
+    dropped:
+      unresolved.length > 0
+        ? { count: unresolved.length, reason: budget.halted ? "quota" : "noMatch" }
+        : null,
+  };
 }
 
 /**

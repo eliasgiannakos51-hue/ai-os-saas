@@ -1554,7 +1554,12 @@
         },
         "stopped": "Von dir gestoppt. {count, plural, =0 {Nichts wurde berechnet} one {# Credit wurde berechnet} other {# Credits wurden berechnet}} für den erzeugten Teil; der Rest der Reservierung wurde freigegeben.",
         "spelling": "{count, plural, one {Ein griechisches Wort ist möglicherweise falsch geschrieben} other {# griechische Wörter sind möglicherweise falsch geschrieben}}: {words}. Es wurde nichts geändert — prüfe sie, ein Name oder eine Marke ist kein Fehler.",
-        "sameSkeleton": "Diese Website hat dieselbe Struktur wie {name} — {percent}% gleiche Form. Es wurde nichts geändert; zwei Websites desselben Betriebs sollen sich oft ähneln, und nur Sie können sagen, ob das hier zutrifft."
+        "sameSkeleton": "Diese Website hat dieselbe Struktur wie {name} — {percent}% gleiche Form. Es wurde nichts geändert; zwei Websites desselben Betriebs sollen sich oft ähneln, und nur Sie können sagen, ob das hier zutrifft.",
+        "photosDropped": {
+          "notConfigured": "{count, plural, one {Ein Bild wurde} other {# Bilder wurden}} angefordert und keines konnte eingefügt werden — die Fotobibliothek ist in dieser Installation nicht eingerichtet. Alles andere auf der Seite ist wie erzeugt.",
+          "quota": "{count, plural, one {Ein Bild} other {# Bilder}} konnten nicht eingefügt werden: die Fotobibliothek hat weitere Anfragen vorerst abgelehnt. Versuchen Sie es in einer Stunde erneut oder fügen Sie eigene Bilder hinzu.",
+          "noMatch": "{count, plural, one {Ein Bild wurde} other {# Bilder wurden}} angefordert und kein Foto passte. Nichts Unpassendes wurde eingesetzt — eine andere Beschreibung des Motivs hilft meist."
+        }
       }
     },
     "marketplace": {
@@ -3550,7 +3555,14 @@
       "tapToSpeak": "Drücke irgendwo und sprich. Das Zuhören endet von selbst, wenn du aufhörst.",
       "tapToInterrupt": "Drücke irgendwo, um zu unterbrechen und wieder zu sprechen.",
       "hint": "Sprich normal — der Zug endet, wenn du aufhörst.",
-      "empty": "Alles Gesagte erscheint hier auch als Text."
+      "empty": "Alles Gesagte erscheint hier auch als Text.",
+      "blocked": {
+        "notConfigured": "Freihändiges Sprechen benötigt zwei Sprachanbieter, und in dieser Installation ist kein Schlüssel hinterlegt — die Schaltfläche kann kein Gespräch starten.",
+        "notConfiguredTranscribe": "Freihändiges Sprechen benötigt einen Schlüssel für Spracherkennung, und in dieser Installation ist keiner hinterlegt — die Schaltfläche kann kein Gespräch starten.",
+        "notConfiguredSpeak": "Freihändiges Sprechen benötigt einen Schlüssel für Sprachausgabe, und in dieser Installation ist keiner hinterlegt — die Schaltfläche kann kein Gespräch starten.",
+        "notIncluded": "Freihändiges Sprechen ist in Ihrem Tarif nicht enthalten. Sie können hier weiterhin tippen und jede Antwort lesen.",
+        "outOfMinutes": "Diesen Monat sind keine Sprachminuten mehr übrig, deshalb kann kein freihändiges Gespräch starten. Tippen funktioniert weiterhin."
+      }
     },
     "settings": {
       "description": "Sprich statt zu tippen und lass dir Antworten vorlesen. Tippen und Lesen werden nie ersetzt — jedes Sprachelement steht neben dem Text, nicht an seiner Stelle.",

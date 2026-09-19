@@ -41,7 +41,23 @@ export type GenerationNote =
    *  saying what was measured and letting them decide. See
    *  lib/website-structural-similarity.ts for what "structure" means
    *  here, and what it cannot see. */
-  | { kind: "sameSkeleton"; percent: number; against: string };
+  | { kind: "sameSkeleton"; percent: number; against: string }
+  /** PHOTOS THE PAGE ASKED FOR AND DID NOT GET, and why.
+   *
+   *  lib/website-image-resolver.ts removes a placeholder it cannot fill
+   *  rather than substituting an unrelated photograph — the right call,
+   *  and until 2026-09-19 an entirely silent one. Without
+   *  UNSPLASH_ACCESS_KEY every placeholder in every generated site was
+   *  stripped, the removal was written to production_errors where only
+   *  the owner reads it, and the person who asked for a site with
+   *  pictures received one without and no sentence anywhere.
+   *
+   *  `reason` is what an operator can act on, kept apart from the count
+   *  because they are three different problems: no key at all is a
+   *  deployment that was never finished, an exhausted quota fixes itself
+   *  within the hour, and searches that all came back empty is a brief
+   *  nobody can match. */
+  | { kind: "photosDropped"; count: number; reason: "notConfigured" | "quota" | "noMatch" };
 
 const FEATURES: readonly NegativeFeature[] = [
   "booking", "contactForm", "newsletter", "map", "prices", "gallery", "testimonials", "blog", "social", "chatWidget",
@@ -76,6 +92,13 @@ export function parseGenerationNotes(raw: unknown): GenerationNote[] {
       n.against.trim().length > 0
     ) {
       out.push({ kind: "sameSkeleton", percent: n.percent, against: n.against.trim().slice(0, 80) });
+    } else if (
+      n.kind === "photosDropped" &&
+      isNonNegativeInt(n.count) &&
+      n.count > 0 &&
+      (n.reason === "notConfigured" || n.reason === "quota" || n.reason === "noMatch")
+    ) {
+      out.push({ kind: "photosDropped", count: n.count, reason: n.reason });
     } else if (n.kind === "spelling" && Array.isArray(n.words)) {
       // Read as defensively as every other note: only strings, only the
       // ones with something in them, capped so a malformed row cannot

@@ -392,7 +392,7 @@ export async function POST(request: Request) {
     // photos are registered with Unsplash only once this document is
     // STORED — which happens below, outside that block. See
     // registerUnsplashUses in lib/website-image-resolver.ts.
-    let images: ImageResolution = { html: "", used: [], halted: null };
+    let images: ImageResolution = { html: "", used: [], halted: null, dropped: null };
     // WHAT THE CODE DID AFTER THE MODEL WROTE — V4.6. Every enforcement
     // below that changes the site writes one fact here, and the row
     // carries them to the workspace, which says them in the owner's
@@ -466,6 +466,19 @@ export async function POST(request: Request) {
       // a description that didn't ask for real photos.
       images = await resolveWebsiteImagePlaceholders(htmlContent, { photoSource });
       htmlContent = images.html;
+      // PICTURES THE PAGE ASKED FOR AND DID NOT GET.
+      //
+      // The resolver removes a placeholder it cannot fill rather than
+      // substituting an unrelated photograph — right, and silent until
+      // 2026-09-19: the removal went to production_errors, which only
+      // the owner reads, and the person who described a business with
+      // pictures got a site without them and no sentence anywhere.
+      // Every other thing this worker does to the site after the model
+      // has written it already lands in `notes`; this is the one that
+      // did not.
+      if (images.dropped) {
+        notes.push({ kind: "photosDropped", count: images.dropped.count, reason: images.dropped.reason });
+      }
 
       // NUMBERS THE USER NEVER GAVE. The prompt forbids inventing a price,
       // a phone number, an opening time or an address, and a prompt is a

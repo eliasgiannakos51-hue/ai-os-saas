@@ -1749,3 +1749,64 @@ guards.
 pointing at that line?* A gate's assertions are visible in the gate. A
 mutant's anchors live in a different file, are matched by exact text,
 and fail silently by definition.
+
+## Every gate read the declaration; the defect was on the screen
+
+Production, 2026-09-19: *"the sidebar shows the heading Run and NO rows.
+Agents, Automation and Marketplace all exist as pages. Did a filter
+remove them — tier, notBuilt, plan, role?"*
+
+None had. `lib/sidebar-nav.ts` declares all three under Run, visible, in
+order, with no flag on any of them. Every gate agreed, and every gate
+was right:
+
+| gate | what it asked | answer |
+|---|---|---|
+| `sidebar-structure` | are the rows in the declared order? | yes |
+| `sidebar-size` | are there 26 rows and 6 groups? | yes |
+| `sidebar-naming` | is each row under a heading that fits it? | yes |
+| `sidebar-and-tooltips` | is the collapse well built — 44px target, `aria-expanded`, rows out of the tab order when shut? | yes |
+
+The group was **shut**. Two days earlier a rule had been added opening
+only the group holding the current page, so five of six headings stood
+over nothing on every screen. Measured in a browser on that build: **7
+of 26 rows painted at 1440×900**, all seven from `See`.
+
+**A shut group and a filtered-away group are the same picture.** The
+reader cannot tell them apart, and "a filter removed my rows" is the
+explanation they reach for, because a heading is a promise that
+something is under it.
+
+**The fourth gate is the instructive one.** It was not absent, lazy or
+vacuous. It asked a careful question about the collapse and answered it
+correctly in four clauses — one of which asserted that a shut group
+leaves the tab order, which is *good behaviour for the state that was
+the bug*. A gate can be thorough, correct, and pointed one level below
+the thing that matters.
+
+**What the shape is not.** It is not "the check covers the participants,
+not the ones who stayed out" — Run was inside every population and
+passed. It is not vacuity — every assertion had real subjects. The
+config was the wrong ARTEFACT: declaration and render are two documents,
+and only one of them is what a person sees.
+
+**The fix is a question no declaration can answer**, so it is asked of
+the browser: *does every heading have at least one painted row under
+it?* Section 0 of `scripts/tests/sidebar-density.prodtest.mjs`, at four
+viewports, pairing each heading with the rows that follow it in document
+order and counting only those with a non-zero box. A row present at zero
+height — which is exactly what a collapsed group leaves in the DOM —
+does not count.
+
+**And the cheap half runs in the build**, because a prodtest does not:
+`renderGroup` must have exactly two exits, one guard and one render. A
+third exit is a condition deciding whether rows appear, whatever it is
+named. That clause exists because the first version of it was a word
+search for `isExpanded|aria-expanded|collapsible`, and a four-line
+mutant reintroduced the whole defect without using any of those words.
+
+**The question to ask:** *is my gate reading the file the machine
+consumes, or the picture the person sees?* When those can differ — a
+renderer, a filter, a media query, an animation — the declaration will
+keep agreeing with itself long after the screen has stopped agreeing
+with either.

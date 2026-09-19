@@ -102,16 +102,38 @@ const MUTANTS = [
   {
     dimension: "C. four groups",
     gate: TOOLTIPS,
-    // THE OTHER DIRECTION SINCE 2026-09-12. No group is pinned open any
-    // more — the group holding the current page opens itself — so there is
-    // no pinned group left to put behind a triangle. The defect in the
-    // same place is pinning one open again, which puts a block on every
-    // phone whether the person is in it or not.
-    name: "a group is pinned open again",
+    // THE DEFECT MOVED TWICE IN A WEEK, and this is the third version of
+    // the same slot. It was "a group loses its triangle"; then, when the
+    // pin was removed on 2026-09-12, "a group is pinned open again"; and
+    // on 2026-09-19 the collapse itself went, because pinning nothing
+    // open meant five of six headings stood over nothing on every screen.
+    //
+    // What is left to break is the collapse coming BACK — which reads in
+    // review as a small convenience and is the exact state production
+    // reported as "the sidebar shows Run and NO rows".
+    name: "the collapse returns, defaulted to open",
+    file: SIDEBAR,
+    from: "    if (group.items.length === 0) return null;",
+    to: "    const expanded = true;\n    void expanded;\n    if (group.items.length === 0) return null;\n    if (!expanded) return <p key={group.heading} />;",
+    expect: "renderGroup has one guard and one render",
+  },
+  {
+    dimension: "C. four groups",
+    gate: TOOLTIPS,
+    // THE OWNER ASKED FOR THIS ONE BY NAME: "Mutation: empty a group ->
+    // red". It empties Run in the config — the group whose emptiness was
+    // reported from production — and requires a gate to say so.
+    //
+    // sidebarGroups() drops a group with no items, so the SCREEN recovers
+    // and shows five headings instead of six. That is why the check it
+    // trips is the group COUNT rather than an emptiness check: a group
+    // that vanishes entirely is the other way this defect presents, and
+    // it is just as invisible in a declaration that still lists it.
+    name: "the Run group is emptied",
     file: NAV,
-    from: '    heading: "Ask",\n    collapsible: true,',
-    to: '    heading: "Ask",\n    collapsible: false,',
-    expect: "no group is pinned open",
+    from: '      { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents, hintKey: "agents" },\n      { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation" },\n      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON, hintKey: "marketplace" },',
+    to: '      { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents, hintKey: "agents", hidden: true },\n      { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation", hidden: true },\n      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON, hintKey: "marketplace", hidden: true },',
+    expect: "every declared group still draws rows",
   },
 
   // ---- D. ONE ACTION, NOT A PINNED BLOCK ----------------------------

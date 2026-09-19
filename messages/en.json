@@ -1554,7 +1554,12 @@
         },
         "stopped": "Stopped by you. {count, plural, =0 {Nothing was charged} one {# credit was charged} other {# credits were charged}} for the part that was generated; the rest of the hold was released.",
         "spelling": "{count, plural, one {One Greek word may be misspelled} other {# Greek words may be misspelled}}: {words}. Nothing was changed — check them, a name or a brand is not a mistake.",
-        "sameSkeleton": "This site has the same structure as {name} — {percent}% the same shape. Nothing was changed; two sites of one business are often meant to match, and only you can say whether these are."
+        "sameSkeleton": "This site has the same structure as {name} — {percent}% the same shape. Nothing was changed; two sites of one business are often meant to match, and only you can say whether these are.",
+        "photosDropped": {
+          "notConfigured": "{count, plural, one {One picture was} other {# pictures were}} asked for and none could be added — the photo library is not set up on this deployment. Everything else on the page is as generated.",
+          "quota": "{count, plural, one {One picture} other {# pictures}} could not be added: the photo library refused more requests for now. Try again in an hour, or add your own images.",
+          "noMatch": "{count, plural, one {One picture was} other {# pictures were}} asked for and no photograph matched. Nothing unrelated was put in its place — describing the subject differently usually helps."
+        }
       }
     },
     "marketplace": {
@@ -3550,7 +3555,14 @@
       "tapToSpeak": "Press anywhere and speak. It stops listening by itself when you stop.",
       "tapToInterrupt": "Press anywhere to interrupt and speak again.",
       "hint": "Speak normally — the turn ends when you stop.",
-      "empty": "Everything said appears here as text as well."
+      "empty": "Everything said appears here as text as well.",
+      "blocked": {
+        "notConfigured": "Hands-free talking needs two speech providers and this deployment has neither key set, so the button cannot start a conversation.",
+        "notConfiguredTranscribe": "Hands-free talking needs a speech-to-text key, and this deployment has none set, so the button cannot start a conversation.",
+        "notConfiguredSpeak": "Hands-free talking needs a text-to-speech key, and this deployment has none set, so the button cannot start a conversation.",
+        "notIncluded": "Hands-free talking is not included on your plan. You can still type here, and read every answer.",
+        "outOfMinutes": "No voice minutes left this month, so hands-free talking cannot start. Typing here still works."
+      }
     },
     "settings": {
       "description": "Speak instead of typing, and have answers read back. Typing and reading are never taken away — every voice control sits beside the text one.",

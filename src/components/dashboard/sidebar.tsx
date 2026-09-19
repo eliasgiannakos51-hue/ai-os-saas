@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -31,25 +31,6 @@ function isActive(pathname: string | null, href: string) {
   // href that happens to be a string prefix of a sibling route).
   return pathname === href || pathname.startsWith(`${href}/`);
 }
-
-function groupContainsActive(group: SidebarGroupConfig, pathname: string | null) {
-  return group.items.some((item) => isActive(pathname, item.href));
-}
-
-// THE GROUP HOLDING THE CURRENT PAGE, which is the one that must never
-// be left shut — landing on a page whose group is collapsed shows a nav
-// that does not say where you are.
-//
-// Reads ALL_SIDEBAR_GROUPS, not the filtered list, deliberately: the
-// thirty rows the sidebar no longer draws still belong to a group, and
-// arriving on one of them should still open it.
-function headingContaining(pathname: string | null): string | null {
-  return (
-    ALL_SIDEBAR_GROUPS.find((g) => g.collapsible && groupContainsActive(g, pathname))?.heading ??
-    null
-  );
-}
-
 
 // ONE COLOUR FOR EVERY RESTING ICON. Only the current page gets the
 // accent — V4.6 #3.
@@ -102,43 +83,36 @@ export function Sidebar({
     return key ? t(`items.${key}`) : label;
   }
 
-  // ONLY THE GROUP YOU ARE IN IS OPEN, and this reverses V4.6 #3 on the
-  // measurement that decision was made on rather than on a preference.
+  // EVERY GROUP IS OPEN, ALWAYS — and this reverses the one-open-group
+  // rule of 2026-09-17 on a production report rather than a preference.
   //
-  // V4.6 #3 opened everything, and its argument was explicit: "the wrong
-  // answer to FOUR groups and SIXTEEN rows, which fit at both measured
-  // heights". Six groups and thirty-three declared rows do not fit.
-  // node scripts/measure-sidebar-height.mjs, computed from this file's own
-  // classes: everything open is 2,213px, which is 2.6 screens of scroll on
-  // a 390x844 phone, and Settings is three screens below the fold. The
-  // current group open and the rest shut is 1,201px — 1.4 screens.
+  // WHAT THAT RULE DID TO THE SCREEN. It opened only the group holding
+  // the current page, so five of the six headings stood over nothing.
+  // Measured in a browser on the build before this change:
   //
-  // THE COST, WRITTEN DOWN. A row in another group is TWO clicks, not one.
-  // That is a real loss and it is accepted for one reason: the command
-  // palette is one keystroke and reaches every row, hidden ones included
-  // (it is built from visibleGroups, not from what the sidebar draws). A
-  // product where the second click had no alternative should not make
-  // this trade.
+  //     1440x900: 7 of 26 rows painted, 6 group headings
+  //               Mine · Files · Finances · Sales · Trading ·
+  //               Search my records · What it remembers
   //
-  // THREE RULES, and the second and third are what stop it becoming an
-  // accordion again:
+  // All seven are the See group. Make, Ask, Run, Organise and Settings
+  // were a heading and a chevron over empty space. The report that came
+  // back was "the sidebar shows Run and NO rows — did a filter remove
+  // Agents, Automation and Marketplace?" Nothing had. A shut group and a
+  // group whose contents were filtered away look identical, and the
+  // second is the one a reader assumes.
   //
-  //   1. No decision is asked of anybody. The group holding the current
-  //      page is open on arrival; the usual journey stays one click.
-  //   2. A group the person opens by hand STAYS open, and opening a second
-  //      does not shut the first. The manual action wins over the
-  //      automatic one, always — an accordion is the version of this that
-  //      undoes what you just did.
-  //   3. Nothing is remembered across a reload. A sidebar that restores
-  //      three groups from yesterday is thirty-three rows again, which is
-  //      the state this exists to leave.
+  // WHAT IT COSTS TO OPEN THEM, measured rather than feared. `node
+  // scripts/measure-sidebar-height.mjs`, computed from this file's own
+  // classes, and section 4 of sidebar-density.prodtest.mjs, measured in
+  // the browser. Both are printed on every run, so neither number needs
+  // to be trusted from here.
   //
-  // `touched` is the groups the person has acted on, and the value is what
-  // they chose. Everything else follows the pathname. It starts empty on
-  // the server and on the first client paint, so there is nothing to
-  // reconcile — the property the old `undefined` sentinel existed to
-  // preserve, kept for free.
-  const [touched, setTouched] = useState<Map<string, boolean>>(() => new Map());
+  // WHAT REPLACED THE MACHINERY. `touched`, `isExpanded`, `toggleGroup`,
+  // `headingContaining`, `groupContainsActive`, the chevron, the
+  // grid-template-rows animation and the aria-hidden / tabIndex pair are
+  // all gone, along with `collapsible` on SidebarGroupConfig. None of
+  // them had a second purpose: a flag that is false for every group is
+  // the `prominent` parameter this file already deleted once.
 
   const router = useRouter();
   /** Routes already asked for, so a pointer sweeping down the sidebar
@@ -153,85 +127,30 @@ export function Sidebar({
     [router]
   );
 
-  /**
-   * Is this group open right now?
-   *
-   * NO EFFECT AND NO STORAGE. The old version read localStorage in a
-   * useEffect and wrote it on every toggle; both are gone, because rule 3
-   * above means there is nothing to restore and rule 1 means the default
-   * is a pure function of the URL. A derived value cannot disagree with
-   * the server the way a stored one can.
-   */
-  function isExpanded(group: SidebarGroupConfig): boolean {
-    if (!group.collapsible) return true;
-    const chosen = touched.get(group.heading);
-    if (chosen !== undefined) return chosen;
-    return headingContaining(pathname) === group.heading;
-  }
-
-  function toggleGroup(group: SidebarGroupConfig) {
-    if (!group.collapsible) return;
-    const next = !isExpanded(group);
-    setTouched((prev) => {
-      const map = new Map(prev);
-      map.set(group.heading, next);
-      return map;
-    });
-  }
-
   function renderGroup(group: SidebarGroupConfig) {
-    const expanded = isExpanded(group);
+    // A HEADING IS ONLY DRAWN WHEN SOMETHING IS UNDER IT.
+    //
+    // sidebarGroups() already drops a group whose items all filter away,
+    // so on the declared config this is unreachable — and it is here
+    // because "unreachable today" was exactly the state of affairs while
+    // five headings stood over nothing. The filter that emptied them was
+    // not a filter at all, it was the collapse, and no amount of
+    // correctness in sidebarGroups() could have caught it.
+    //
+    // This is the last line of defence and the only one inside the
+    // renderer. Section 0 of scripts/tests/sidebar-density.prodtest.mjs
+    // asks the same question of the SCREEN, which is the version that
+    // would have caught the real thing.
+    if (group.items.length === 0) return null;
 
     return (
       <div key={group.heading}>
-        {group.collapsible ? (
-          <button
-            type="button"
-            onClick={() => toggleGroup(group)}
-            aria-expanded={expanded}
-            className="flex min-h-[44px] w-full items-center justify-between rounded-lg px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted transition-colors duration-150 hover:text-foreground"
-          >
-            <span>{translatedHeading(group.heading)}</span>
-            <ChevronRight
-              className={`h-3 w-3 shrink-0 transition-transform duration-200 ${
-                expanded ? "rotate-90" : "rotate-0"
-              }`}
-              aria-hidden="true"
-            />
-          </button>
-        ) : (
-          <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
-            {translatedHeading(group.heading)}
-          </p>
-        )}
+        <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
+          {translatedHeading(group.heading)}
+        </p>
 
-        <div
-          // A SHUT GROUP IS SHUT TO THE KEYBOARD TOO.
-          //
-          // The rows animate to zero height with grid-template-rows and
-          // stay in the DOM, so without this a sighted user sees six
-          // headings while a keyboard user tabs through every row in the
-          // nav and a screen reader reads all of them. Collapsing that
-          // helps nobody is worse than not collapsing.
-          //
-          // aria-hidden takes the subtree out of the accessibility tree;
-          // tabIndex={-1} on each row takes it out of the tab order. NOT
-          // the `inert` attribute, which would do both at once: React 18
-          // does not know it as a boolean property, so `inert={false}`
-          // renders the literal attribute `inert="false"` — and an inert
-          // attribute is inert whatever its value, which would make the
-          // OPEN groups the unreachable ones. That bug looks like a fix
-          // in every review and only appears at the keyboard.
-          aria-hidden={!expanded}
-          className={`grid transition-[grid-template-rows] duration-200 ease-in-out ${
-            expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-          }`}
-        >
-          <div className="min-h-0 overflow-hidden">
-            <div className="space-y-0.5 pb-0.5">
-              {group.items.map((item) => renderItem(item, expanded))}
-            </div>
-          </div>
+        <div className="space-y-0.5 pb-0.5">
+          {group.items.map((item) => renderItem(item))}
         </div>
       </div>
     );
@@ -245,9 +164,15 @@ export function Sidebar({
   // never passed it. There were no pinned rows and no prominent ones; the
   // parameter defaulted to false forever, and the two style branches it
   // guarded were unreachable. The five daily entry points now get their
-  // weight from being the first group and never collapsing, which is a
-  // property of the config rather than of a flag nobody sets.
-  function renderItem(item: SidebarItem, reachable = true) {
+  // weight from being the first group, which is a property of the config
+  // rather than of a flag nobody sets.
+  //
+  // A SECOND SUCH PARAMETER LASTED ONE ROUND. `reachable` was added with
+  // the collapse to put a shut group's rows out of the tab order —
+  // `tabIndex={reachable ? undefined : -1}` — and when the collapse went,
+  // its only false call site went with it. Left in place it would have
+  // been the same defect this paragraph is about, one round later.
+  function renderItem(item: SidebarItem) {
     const active = isActive(pathname, item.href);
     const Icon = item.icon;
     const hint = item.hintKey ? t(`hints.${item.hintKey}`) : undefined;
@@ -257,10 +182,6 @@ export function Sidebar({
                   <Link
                     href={item.href}
                     onClick={closeOnMobile}
-                    // -1 while the group is shut: the row is still in
-                    // the DOM at zero height, and a zero-height link is
-                    // still a tab stop. See the aria-hidden note above.
-                    tabIndex={reachable ? undefined : -1}
                     // WARM THE ROUTE THE POINTER IS HEADING FOR.
                     //
                     // Every dashboard route is force-dynamic, so Next's
@@ -301,17 +222,21 @@ export function Sidebar({
                       }`}
                       aria-hidden="true"
                     />
-                    {/* "Ionexa" specifically gets a touch of extra tracking — at
-                        this label's small size, a lone capital "I" can read as
-                        a lowercase "l" ("lonexa"); the app's other standalone
-                        brand-name renderings already lean on wider letter-
-                        spacing for the same reason (see loading-state.tsx,
-                        not-found.tsx). */}
-                    <span
-                      className={`truncate ${item.label === "Ionexa Chat" ? "tracking-wide" : ""}`}
-                    >
-                      {translatedLabel(item.label)}
-                    </span>
+                    {/* THE EXTRA TRACKING IS GONE, and what it was for is
+                        worth keeping written down. "Ionexa" at this size
+                        renders a lone capital "I" that reads as a lowercase
+                        "l" — "lonexa" — so this row leaned on wider
+                        letter-spacing, as loading-state.tsx and
+                        not-found.tsx still do for the standalone wordmark.
+                        `item.label` is a KEY into ITEM_LABEL_KEYS and never
+                        reaches the screen, so the condition matched on
+                        "Ionexa Chat" while what was painted came from
+                        sidebar.items.chat — and on 2026-09-11 the owner
+                        renamed that to "Ask me" in all ten languages. Not
+                        one of them contains "Ionexa". The class had been
+                        spacing out "Ask me", "Ρώτα με" and "问我" for eight
+                        days, for a capital I none of them has. */}
+                    <span className="truncate">{translatedLabel(item.label)}</span>
                   </Link>
                   </Tooltip>
     );

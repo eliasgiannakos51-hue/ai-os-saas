@@ -592,3 +592,36 @@ database and does not run the code. Printed, not gated.
 application code in a shape it does not model is not listed, and only
 `search_index` has a live row count — the other eight are counted by
 suites, most of which need a `DATABASE_URL`.
+
+## 21. A Vercel failure naming a gate that does not exist — 2026-09-19
+
+    node scripts/build-identity.mjs
+    node scripts/tests/plan-claims.test.mjs
+
+**The report:** `plan-feature-matrix.test.mjs`, "no feature is marked
+available on a plan that lacks it", `free: unexpected 3`.
+
+**The gate is in no commit.** 32 remote branches searched by tree, every
+ref by name, the full history for the check's own sentence — zero.
+`main` was byte-identical to the branch it merged, and `npm run build`
+exited 0 on it. The gate written in that commit is `plan-claims.test.mjs`.
+
+**The claim does not reproduce.** Four readings of "free is marked
+available on 3 features it lacks", computed against the real data, all
+give zero. See `docs/shapes.md`, *a red build naming a file that does
+not exist*, for the table.
+
+**What changed anyway, because the question was good:**
+
+- `npm run build` states its own identity on the first line — commit,
+  branch, gate count — reading the SHA from the platform first, because
+  Vercel's detached HEAD makes `git rev-parse --abbrev-ref HEAD` answer
+  "HEAD". A pasted failure now carries its provenance.
+- `plan-claims.test.mjs` holds two more directions, both settled by
+  mutation: a plan shown a **cross for something it has**, which the
+  `minPlan` check structurally cannot see, and a **zero wearing a
+  number** ("0", "0 MB") — a cross with extra steps.
+
+**What is NOT closed:** where the pasted output came from. It is not
+this repository at that commit, and I cannot say what it is. If it
+recurs, the first line of the build now names the tree.

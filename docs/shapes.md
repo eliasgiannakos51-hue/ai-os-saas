@@ -2211,3 +2211,60 @@ what the code says rather than what it does.
 would go red?* If the answer is "nothing, until somebody uses the
 feature and finds it empty", the check you need is a count, and it has
 to come from the live database.
+
+## A red build naming a file that does not exist
+
+    plan-feature-matrix.test.mjs
+    == 4. the matrix agrees with PLANS ==
+      FAIL  no feature is marked available on a plan that lacks it
+            free: unexpected 3
+
+Reported from Vercel, 2026-09-19, as *"the gate you just wrote goes red
+in its own commit"*.
+
+**The gate it names is in no commit.** Searched: 32 remote branches by
+tree, every ref by name, and the full history for the check's own
+sentence. Zero. The gate written in that commit is called
+`plan-claims.test.mjs`; its sections are numbered differently and none
+of them is called "the matrix agrees with PLANS". `main` at the time was
+**byte-identical** to the branch it had merged, and `npm run build` —
+the exact command Vercel runs — exited 0 on it.
+
+**The claim could not be reproduced either.** "Free is marked available
+on 3 features it lacks" was computed against the real data under four
+readings, none of which is the one I would have picked on my own:
+
+| reading | offenders |
+|---|---|
+| a cell shown where the row's `minPlan` is above free | 0 |
+| a row naming a `capability` free's plan sets false, not crossed | 0 |
+| free's own `plan.features` marketing list | 2 rows, both real (`basicAiChat`, `creditsPerMonth`) |
+| a row showing free the word "Included" | 0 |
+
+Free is a non-cross on 22 of the 45 catalogue rows — 15 free chat
+messages, 3 files, 50 MB, 1 project, the help centre — and every one of
+them has `minPlan: "free"`.
+
+**What is worth keeping is not the answer, it is the cost of getting
+it.** Every one of those facts took a search, and the only reason the
+question was answerable at all is that the runner prints the filename it
+is running. What it did not print is WHICH TREE. So the build now says
+so on its first line — commit, branch, and how many gate files are about
+to run — and `scripts/build-identity.mjs` reads the SHA from the
+platform first, because Vercel checks out a detached HEAD where
+`git rev-parse --abbrev-ref HEAD` answers "HEAD" and names nothing.
+
+**And the question was better than the report.** The check the phantom
+gate claimed to be was a good one, and the real gate only held one
+direction of it — a tick above `minPlan`. Two more are held now, both
+settled by mutation: a plan shown a **cross for something it has** (it
+sells somebody less than they bought, and the minPlan check structurally
+cannot see it), and a **zero wearing a number** — a cell reading "0" or
+"0 MB", which is a cross with extra steps and reads on the page as
+though something is included.
+
+**The question to ask:** *does this output come from the tree I am
+looking at?* A failure is evidence about a build, and a build is a
+commit. When the output cannot name its own commit, a report and a
+reproduction can disagree for an afternoon before anybody notices they
+are describing different code.

@@ -152,9 +152,21 @@ export function readMutants(dir = SUITE_DIR) {
     if (evaluated) {
       for (const m of evaluated) {
         if (!m || typeof m.file !== "string" || typeof m.from !== "string") continue;
-        const edits = [{ from: m.from, to: typeof m.to === "string" ? m.to : "" }];
+        // EACH EDIT CARRIES ITS OWN FILE WHEN IT HAS ONE. A mutant that
+        // changes two files at once — a gate and the source it reads —
+        // writes `file:` on the edit, and this used to drop it and let
+        // every edit inherit the mutant's `file`. A caller checking
+        // whether an anchor is present then looked for one file's text
+        // inside another and reported a stale anchor that was not
+        // stale: mutation-suite-shape's anchor check went red on
+        // order-stability.mutation.mjs on 2026-09-19 for exactly that.
+        const edits = [
+          { file: m.file, from: m.from, to: typeof m.to === "string" ? m.to : "" },
+        ];
         for (const e of Array.isArray(m.edits) ? m.edits : []) {
-          if (e && typeof e.from === "string" && typeof e.to === "string") edits.push(e);
+          if (e && typeof e.from === "string" && typeof e.to === "string") {
+            edits.push({ ...e, file: typeof e.file === "string" ? e.file : m.file });
+          }
         }
         mutants.push({ suite, file: m.file, name: m.name, edits });
       }

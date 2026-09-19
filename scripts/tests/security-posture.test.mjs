@@ -390,7 +390,13 @@ console.log("\n== 2. the admin-only tables are never touched with a user client 
 // failure mode this app has been bitten by before.
 function walk(dir) {
   const out = [];
-  for (const e of readdirSync(dir)) {
+  // SORTED. readdirSync promises no order, so an offender list built from
+  // an unsorted walk comes out in a different sequence on a filesystem
+  // that hands the files back differently — and a failure whose lines
+  // move between machines is a failure two people cannot compare.
+  // scripts/scan-order-dependence.mjs found this file by running it twice
+  // with every listing reversed.
+  for (const e of [...readdirSync(dir)].sort()) {
     const p = join(dir, e);
     if (statSync(p).isDirectory()) out.push(...walk(p));
     else if (/\.tsx?$/.test(p)) out.push(p);

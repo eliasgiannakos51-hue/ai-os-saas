@@ -432,7 +432,13 @@ console.log("\n== the annual badge and the annual price say the same thing ==");
   // And every locale still phrases it with the placeholder — a
   // translation that froze the number would leave a percentage standing
   // alone as the whole claim, free to drift from the price again.
-  for (const file of readdirSync("messages").filter((f) => f.endsWith(".json")).map((f) => `messages/${f}`)) {
+  // SORTED. readdirSync promises no order, so an offender list built from
+  // an unsorted walk comes out in a different sequence on a filesystem
+  // that hands the files back differently — and a failure whose lines
+  // move between machines is a failure two people cannot compare.
+  // scripts/scan-order-dependence.mjs found this file by running it twice
+  // with every listing reversed.
+  for (const file of [...readdirSync("messages")].sort().filter((f) => f.endsWith(".json")).map((f) => `messages/${f}`)) {
     const msgs = JSON.parse(readFileSync(file, "utf8"));
     const line = msgs?.pricing?.billingAnnualSaving ?? "";
     checkTrue(`${file}: the annual badge is parameterised, not a frozen number`, line.includes("{percent}"), line);

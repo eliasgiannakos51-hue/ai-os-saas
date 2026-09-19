@@ -198,7 +198,13 @@ const DECLARED = {
 };
 
 function walk(dir, out = []) {
-  for (const entry of readdirSync(dir)) {
+  // SORTED. readdirSync promises no order, so an offender list built from
+  // an unsorted walk comes out in a different sequence on a filesystem
+  // that hands the files back differently — and a failure whose lines
+  // move between machines is a failure two people cannot compare.
+  // scripts/scan-order-dependence.mjs found this file by running it twice
+  // with every listing reversed.
+  for (const entry of [...readdirSync(dir)].sort()) {
     if (entry === "node_modules" || entry.startsWith(".")) continue;
     const p = path.join(dir, entry);
     if (statSync(p).isDirectory()) walk(p, out);
@@ -560,7 +566,7 @@ const SELF = "billing-coverage.test.mjs";
 // delete the rationale.
 const stripJsComments = (src) =>
   src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-for (const file of readdirSync("scripts/tests").filter((f) => f.endsWith(".test.mjs") && f !== SELF)) {
+for (const file of [...readdirSync("scripts/tests")].sort().filter((f) => f.endsWith(".test.mjs") && f !== SELF)) {
   const body = stripJsComments(readFileSync(path.join("scripts/tests", file), "utf8"));
   checkTrue(`${file} binds no port`, !/createServer\s*\(/.test(body));
   checkTrue(`${file} writes nothing into node_modules`, !/loadTsWithDeps/.test(body));

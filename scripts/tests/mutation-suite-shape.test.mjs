@@ -374,13 +374,18 @@ console.log("\n== 5. and every anchor still matches the file it names, TODAY =="
   let anchors = 0;
   const staleAnchors = [];
   for (const m of mutants) {
-    const text = readTarget(m.file);
-    if (text === null) continue;
     for (const e of m.edits) {
       if (e.from === "") continue;
+      // THE EDIT'S OWN FILE, not the mutant's. A mutant that changes a
+      // gate and the source it reads names a file per edit, and reading
+      // them all against the mutant's `file` looks for one file's text
+      // inside another — a stale anchor that is not stale.
+      const file = e.file ?? m.file;
+      const text = readTarget(file);
+      if (text === null) continue;
       anchors += 1;
       if (!text.includes(e.from)) {
-        staleAnchors.push(`${m.suite}: ${m.name ?? "(unnamed)"} -> ${m.file}`);
+        staleAnchors.push(`${m.suite}: ${m.name ?? "(unnamed)"} -> ${file}`);
       }
     }
   }

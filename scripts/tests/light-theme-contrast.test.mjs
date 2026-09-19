@@ -61,7 +61,13 @@ const config = readFileSync("tailwind.config.ts", "utf8");
 /** Every .ts/.tsx under src/ — the whole tree, because a class name that
  *  emits no CSS is invisible in exactly the file nobody thought to open. */
 function walkSource(dir = "src", out = []) {
-  for (const entry of readdirSync(dir)) {
+  // SORTED. readdirSync promises no order, so an offender list built from
+  // an unsorted walk comes out in a different sequence on a filesystem
+  // that hands the files back differently — and a failure whose lines
+  // move between machines is a failure two people cannot compare.
+  // scripts/scan-order-dependence.mjs found this file by running it twice
+  // with every listing reversed.
+  for (const entry of [...readdirSync(dir)].sort()) {
     const full = `${dir}/${entry}`;
     if (statSync(full).isDirectory()) walkSource(full, out);
     else if (/\.(ts|tsx)$/.test(entry)) out.push(full);

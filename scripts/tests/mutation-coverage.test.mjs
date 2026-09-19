@@ -219,7 +219,14 @@ console.log(
 // the gate that asks how a credit hold ENDS — the sweep of the remaining
 // 23 multi-write routes found settleReservation writing a zero where it
 // owed a release. Read off the run.
-const RATCHET = 187;
+// 187 -> 193 ON 2026-09-19: six suites in three rounds —
+// prose-anchored-checks, gate-independence, palette-aliases,
+// plan-claims, order-stability and the two that came with them. The
+// last of those drives the gate that asks whether a gate gives the same
+// answer on a filesystem that hands the files back in another order,
+// which is the question three CI failures had been asking without
+// anybody hearing it. Read off the run.
+const RATCHET = 193;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

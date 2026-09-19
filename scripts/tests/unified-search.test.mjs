@@ -119,7 +119,13 @@ console.log("\n2. Migration specs cover the kinds, and nothing else");
   // A spec whose table does not exist is SKIPPED by the migration's
   // `continue`, silently. That is the right behaviour for a
   // partially-migrated database and the wrong thing to be unaware of.
-  const schemaFiles = readdirSync("supabase/migrations").map((f) =>
+  // SORTED. readdirSync promises no order, so an offender list built from
+  // an unsorted walk comes out in a different sequence on a filesystem
+  // that hands the files back differently — and a failure whose lines
+  // move between machines is a failure two people cannot compare.
+  // scripts/scan-order-dependence.mjs found this file by running it twice
+  // with every listing reversed.
+  const schemaFiles = [...readdirSync("supabase/migrations")].sort().map((f) =>
     readFileSync(`supabase/migrations/${f}`, "utf8"));
   for (const spec of SPECS) {
     const created = schemaFiles.some((t) =>
@@ -160,7 +166,7 @@ console.log("\n4. Every module_slug has a label in every locale");
   const MAP = keys.MODULE_TITLE_KEYS;
   const slugs = [...new Set(SPECS.map((s) => s.moduleSlug).filter(Boolean))];
   ok("the spec list carries module slugs", slugs.length >= 20, String(slugs.length));
-  const locales = readdirSync("messages").filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5));
+  const locales = [...readdirSync("messages")].sort().filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5));
   ok("ten locales", locales.length === 10, locales.join(","));
   const messages = Object.fromEntries(
     locales.map((l) => [l, JSON.parse(readFileSync(`messages/${l}.json`, "utf8"))]));
@@ -186,7 +192,7 @@ console.log("\n4. Every module_slug has a label in every locale");
 
 console.log("\n5. Every interpolated translation key exists in every locale");
 {
-  const locales = readdirSync("messages").filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5));
+  const locales = [...readdirSync("messages")].sort().filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5));
   const messages = Object.fromEntries(
     locales.map((l) => [l, JSON.parse(readFileSync(`messages/${l}.json`, "utf8"))]));
   // The palette builds these with template literals — `kinds.${kind}` —

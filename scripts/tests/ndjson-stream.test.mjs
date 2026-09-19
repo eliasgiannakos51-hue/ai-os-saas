@@ -246,7 +246,13 @@ console.log("\n== 8. every consumer actually uses it, and keeps partial text =="
 const STREAM_READER = /getReader\s*\(\s*\)|readNdjsonStream\s*\(/;
 const streamers = [];
 (function walkComponents(dir) {
-  for (const entry of readdirSync(dir)) {
+  // SORTED. readdirSync promises no order, so an offender list built from
+  // an unsorted walk comes out in a different sequence on a filesystem
+  // that hands the files back differently — and a failure whose lines
+  // move between machines is a failure two people cannot compare.
+  // scripts/scan-order-dependence.mjs found this file by running it twice
+  // with every listing reversed.
+  for (const entry of [...readdirSync(dir)].sort()) {
     const full = `${dir}/${entry}`;
     if (statSync(full).isDirectory()) walkComponents(full);
     else if (entry.endsWith(".tsx") && STREAM_READER.test(readFileSync(full, "utf8"))) streamers.push(full);

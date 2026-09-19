@@ -95,7 +95,13 @@ console.log("\n== 2. every skip line any suite can print is recognised ==");
 // Read them out of the files. A hand-written list here would go stale
 // the first time somebody rewords one, and this gate would keep passing.
 const skipLines = [];
-for (const f of readdirSync(DIR).filter((f) => f.endsWith(".mutation.mjs") || f.endsWith(".dbtest.mjs"))) {
+// SORTED. readdirSync promises no order, so an offender list built from
+// an unsorted walk comes out in a different sequence on a filesystem
+// that hands the files back differently — and a failure whose lines
+// move between machines is a failure two people cannot compare.
+// scripts/scan-order-dependence.mjs found this file by running it twice
+// with every listing reversed.
+for (const f of [...readdirSync(DIR)].sort().filter((f) => f.endsWith(".mutation.mjs") || f.endsWith(".dbtest.mjs"))) {
   const src = readFileSync(path.join(DIR, f), "utf8");
   for (const m of src.matchAll(/console\.log\(\s*[`"']([^`"']*\bSKIPP?E?D?\b[^`"']*)[`"']/g)) {
     const line = m[1];
@@ -163,7 +169,7 @@ check(
 console.log("\n== 4. the floor is not the size of the problem ==");
 
 const floor = Number(runner.match(/const FLOOR = (\d+);/)?.[1]);
-const suiteCount = readdirSync(DIR).filter((f) => f.endsWith(".mutation.mjs")).length;
+const suiteCount = [...readdirSync(DIR)].sort().filter((f) => f.endsWith(".mutation.mjs")).length;
 reportBaseline("MUTATION_SUITE_FLOOR", floor, suiteCount);
 check(`the suite floor (${floor}) is within ten of the real count (${suiteCount})`, floor >= suiteCount - 10 && floor <= suiteCount, "a floor far below the count would not notice most of the directory vanishing");
 

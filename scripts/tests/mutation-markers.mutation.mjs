@@ -65,11 +65,32 @@ const MUTANTS = [
   {
     // The half that is easy to get backwards: strip the comments and the
     // line numbers move, so every report points somewhere else.
+    //
+    // RE-ANCHORED 2026-09-19. stripComments was a chain of regexes and
+    // is a scanner now — it truncated any line containing "//" inside a
+    // string literal, which deleted the open-redirect guard
+    // `!startsWith("//")` from 68 lines of src before handing them to
+    // the 99 files that import it. The block-comment branch is where
+    // the newlines are preserved, so the mutant still removes exactly
+    // that property; only the line it lives on changed.
     name: "stripping collapses the blank lines it leaves",
     file: CHECKER,
-    from: '    .replace(/\\/\\*[\\s\\S]*?\\*\\//g, (m) => m.replace(/[^\\n]/g, " "))',
-    to: '    .replace(/\\/\\*[\\s\\S]*?\\*\\//g, "")',
+    from: "      out += c === \"\\n\" ? \"\\n\" : \" \";",
+    to: '      out += "";',
     expect: "stripping does not move the lines",
+  },
+  {
+    // THE TRUNCATION, PUT BACK. The stripper was a chain of regexes
+    // ending in `line.replace(/\/\/.*$/, "")`, which cut every line at
+    // its first "//" — inside a string literal as readily as at a real
+    // comment. This restores exactly that, as a final pass over the
+    // scanner's output, so the scanner still runs and the damage is the
+    // one that shipped.
+    name: "a double slash inside a string truncates the line again",
+    file: CHECKER,
+    from: "  return out\n    .split(\"\\n\")",
+    to: "  return out\n    .split(\"\\n\")\n    .map((line) => line.replace(/\\/\\/.*$/, \"\"))",
+    expect: "a URL in a double-quoted string survives",
   },
   {
     // The marker that lives ON a comment line. Written without its flag it

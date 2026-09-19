@@ -24,6 +24,28 @@ import { readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
 
+/** The body of the catch whose try contains `needle`, brace-matched, or
+ *  null if there is no such catch. A brace match rather than a character
+ *  window, so that a statement added anywhere in the block is inside what
+ *  is read. */
+function catchBlockAfter(source, needle) {
+  const at = source.indexOf(needle);
+  if (at === -1) return null;
+  const catchAt = source.indexOf("} catch", at);
+  if (catchAt === -1) return null;
+  const open = source.indexOf("{", catchAt + 1);
+  if (open === -1) return null;
+  let depth = 0;
+  for (let i = open; i < source.length; i++) {
+    if (source[i] === "{") depth++;
+    else if (source[i] === "}") {
+      depth--;
+      if (depth === 0) return source.slice(open + 1, i);
+    }
+  }
+  return null;
+}
+
 let pass = 0;
 const failures = [];
 const ok = (name, cond, detail) => {
@@ -392,7 +414,19 @@ console.log("\n== 8. the choice is asked before generation, and shown after ==")
       workspace.indexOf('fetchWithAuthRetry("/api/websites/storage-usage")') <
         workspace.indexOf("const uploadResults = await Promise.all"));
   ok("...on the whole batch", /referenceImageFiles\.map\(\(f\) => f\.size\)/.test(workspace));
-  ok("...and fails open", /catch \{\s*\n\s*\/\* fails open/.test(workspace));
+  // THE COMMENT WAS THE WHOLE CHECK. It was
+  // /catch \{\s*\n\s*\/\* fails open/ — so the guarantee ("a usage
+  // lookup that throws must not stop the upload") rested on the words
+  // inside the catch, and putting a `return;` beside them left it green.
+  // What "fails open" means is that the block does nothing, so that is
+  // what is read: the catch, comments stripped, with nothing left in it.
+  const usageCatch = catchBlockAfter(
+    stripComments(workspace),
+    'fetchWithAuthRetry("/api/websites/storage-usage")'
+  );
+  ok("the usage lookup is wrapped in a catch at all", usageCatch !== null);
+  ok("...and fails open", usageCatch !== null && usageCatch.trim() === "",
+    usageCatch === null ? "no catch found" : `the catch acts on the failure: ${usageCatch.trim()}`);
 
   for (const loc of ["en", "el", "de", "es", "fr", "it", "ja", "pt", "zh", "ar"]) {
     const m = JSON.parse(readFileSync(`messages/${loc}.json`, "utf8"));

@@ -21,6 +21,28 @@
 // Run: node scripts/tests/agent-depth.test.mjs
 import { readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
+import { stripComments } from "../check-mutation-markers.mjs";
+
+/** The body of the catch whose try contains `needle`, brace-matched, or
+ *  null if there is no such catch. Used instead of a regex window so that
+ *  a statement added AFTER the logging line is still inside what is read. */
+function catchBlockAfter(source, needle) {
+  const at = source.indexOf(needle);
+  if (at === -1) return null;
+  const catchAt = source.indexOf("} catch", at);
+  if (catchAt === -1) return null;
+  const open = source.indexOf("{", source.indexOf(")", catchAt));
+  if (open === -1) return null;
+  let depth = 0;
+  for (let i = open; i < source.length; i++) {
+    if (source[i] === "{") depth++;
+    else if (source[i] === "}") {
+      depth--;
+      if (depth === 0) return source.slice(open + 1, i);
+    }
+  }
+  return null;
+}
 
 let pass = 0;
 const failures = [];
@@ -541,8 +563,19 @@ console.log("\n11. The routes");
     "a user at their cap must not pay for a fill call that cannot become an agent");
   ok("no model call when the subject is already known",
     /const needsFill = Boolean\(apiKey\) && !subjectOverride;/.test(adoptSrc));
+  // THIS READ THE COMMENT, NOT THE CODE. The check was
+  // /NOT FATAL[\s\S]{0,300}logApiError/ — and on 2026-09-19 adding
+  // `throw err;` one line BELOW that logApiError left it green, which
+  // is exactly the defect its name forbids. It now takes the catch block
+  // that wraps fillTemplateFromRequest, strips its comments, and requires
+  // that nothing in it leaves the request: no throw, no return.
+  const fillCatch = catchBlockAfter(stripComments(adoptSrc), "await fillTemplateFromRequest(");
+  ok("the fill call is wrapped in a catch at all", fillCatch !== null);
   ok("a fill failure still creates the agent",
-    /NOT FATAL[\s\S]{0,300}logApiError/.test(adoptSrc));
+    fillCatch !== null && !/\bthrow\b/.test(fillCatch) && !/\breturn\b/.test(fillCatch),
+    fillCatch === null ? "no catch block found" : `the catch leaves the request: ${fillCatch.trim()}`);
+  ok("a fill failure is recorded even though it is swallowed",
+    fillCatch !== null && fillCatch.includes("logApiError"));
   ok("nothing is charged when nothing was spent",
     /if \(costs\.callCount > 0\)[\s\S]{0,600}releaseReservation/.test(adoptSrc));
   ok("the use counter moves only after the agent exists",

@@ -1,4 +1,14 @@
-// Every module path a gate spells out must resolve to a real file.
+// Every `@/…` module path a gate spells out must resolve to a real file.
+//
+// THE SCOPE IS THE ALIAS FORM ONLY, and saying so is the point: this
+// header read "every module path a gate spells out" until 2026-09-19,
+// when pointing a gate's relative import at a module that does not
+// exist left this file green. It was not a hole — a broken RELATIVE
+// import throws the moment the gate is loaded, which is the loud
+// direction this file's own paragraph below calls fine. But a header
+// that claims more than the code does is the thing a reader trusts and
+// stops checking, and this repository holds every path named in a
+// comment at zero unresolved for exactly that reason.
 //
 // THE SHAPE. Around thirty assertions across twenty gates check that one
 // file imports another by matching the PATH as a string or a regex:

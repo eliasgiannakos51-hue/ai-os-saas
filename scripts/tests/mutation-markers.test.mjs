@@ -157,6 +157,56 @@ console.log("\n== 3. comments are not code ==");
     "stripping does not move the lines",
     stripComments(before).split("\n").length === before.split("\n").length,
   );
+
+  // A DOUBLE SLASH INSIDE A STRING IS NOT A COMMENT.
+  //
+  // Found 2026-09-19. The stripper was `line.replace(/\/\/.*$/, "")`, so
+  // any line with "//" inside quotes lost everything from there on —
+  // 9,862 non-whitespace characters across 44 files under src/, handed
+  // to the 99 files that import this function as if it were the whole
+  // source. Among the truncated lines:
+  //
+  //     app/auth/callback/route.ts:37
+  //       rawNext.startsWith("/") && !rawNext.startsWith("//")
+  //
+  // which is the open-redirect guard. A gate asserting that guard is
+  // PRESENT goes red, loudly, and gets fixed. A gate asserting
+  // something is ABSENT sees a shorter file and passes on less evidence
+  // than it believes it has — silent, and the direction this repository
+  // keeps being caught by.
+  const keeps = (code, needle) => stripComments(code).includes(needle);
+  ok(
+    'a URL in a double-quoted string survives',
+    keeps('const u = "https://example.com"; // gone', "https://example.com"),
+    JSON.stringify(stripComments('const u = "https://example.com"; // gone')),
+  );
+  ok(
+    "...and the open-redirect guard, which is why this matters",
+    keeps('if (!next.startsWith("//")) go(next);', 'startsWith("//")'),
+    JSON.stringify(stripComments('if (!next.startsWith("//")) go(next);')),
+  );
+  ok(
+    "...in single quotes and backticks too",
+    keeps("const a = 'x//y'; const b = 1;", "x//y") && keeps("const a = `p//q`; const b = 1;", "p//q"),
+  );
+  ok(
+    "...and a regex literal containing an escaped slash pair",
+    keeps("const re = /ab\\/\\/cd/; const k = 9;", "const k = 9"),
+  );
+  // AND IT STILL STRIPS. A stripper that keeps everything would pass
+  // every check above and defeat the whole purpose.
+  ok(
+    "a real line comment is still removed",
+    !keeps('const x = 1; // secretMarker', "secretMarker"),
+  );
+  ok(
+    "...and a block comment's contents too",
+    !keeps("const x = 1; /* secretMarker */ const y = 2;", "secretMarker"),
+  );
+  ok(
+    "...and a whole-line comment",
+    !keeps("// secretMarker\nconst x = 1;", "secretMarker"),
+  );
 }
 
 // ---------------------------------------------------------------------

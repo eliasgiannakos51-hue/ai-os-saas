@@ -103,13 +103,117 @@ export const isExempt = (file) =>
   EXEMPT.some((e) => e.match.test(file.split("\\").join("/")));
 
 /** Source with comments blanked, so prose about a marker is not a marker. */
+/**
+ * Comments out, CODE INTACT — including the code that contains "//".
+ *
+ * THE BUG THIS REPLACES, found 2026-09-19 and measured: the old version
+ * was `line.replace(/\/\/.*$/, "")`, which truncates a line at the first
+ * `//` wherever it appears. Inside a string literal that is not a
+ * comment, and 68 lines under src/ are exactly that. Among them:
+ *
+ *     app/auth/callback/route.ts:37
+ *       rawNext.startsWith("/") && !rawNext.startsWith("//")
+ *     components/jobs/resumed-work-notice.tsx:131
+ *       href.startsWith("/") && !href.startsWith("//")
+ *     api/push/subscribe/route.ts:33
+ *       if (!endpoint.startsWith("https://") || ...) return null;
+ *
+ * The first two are the open-redirect guard — the check that stops
+ * `//evil.com` being treated as a local path — and this function deleted
+ * it, plus the rest of the line, before handing the "source" to any of
+ * the 99 files that import it. A gate asserting that guard is present
+ * goes RED, which is loud and gets fixed; a gate asserting that
+ * something is ABSENT sees a shorter file and passes on less evidence
+ * than it thinks it has. That second direction is silent, and it is the
+ * one this repository keeps being bitten by.
+ *
+ * SO IT IS A SCANNER, NOT A REGEX. Single quotes, double quotes,
+ * backticks and regex literals are tracked, and `//` only ends a line
+ * when it is outside all of them. Block comments and their contents are
+ * blanked as before, newlines preserved so every line number still
+ * matches the original file — several callers report `file:line` and
+ * would otherwise point at the wrong place.
+ *
+ * NOT A PARSER, and the limits are worth stating: a regex literal is
+ * distinguished from division by what precedes it, which is the usual
+ * heuristic and is wrong for the rare `)/re/` shape; and a `--` SQL
+ * comment is still only recognised at the start of a line, as before.
+ */
 export function stripComments(source) {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "))
+  let out = "";
+  let i = 0;
+  const n = source.length;
+  // What we are inside of: null, '"', "'", "`", "/" (regex) or "*" (block).
+  let mode = null;
+  // For telling a regex literal from a division: a `/` starts a regex
+  // only where a value cannot already have ended.
+  let prevMeaningful = "";
+
+  while (i < n) {
+    const c = source[i];
+    const next = source[i + 1];
+
+    if (mode === "*") {
+      if (c === "*" && next === "/") {
+        out += "  ";
+        i += 2;
+        mode = null;
+        continue;
+      }
+      out += c === "\n" ? "\n" : " ";
+      i += 1;
+      continue;
+    }
+
+    if (mode === '"' || mode === "'" || mode === "`" || mode === "/") {
+      out += c;
+      if (c === "\\") {
+        if (i + 1 < n) out += source[i + 1];
+        i += 2;
+        continue;
+      }
+      if (c === mode) mode = null;
+      // An unterminated string cannot cross a line; bail rather than
+      // swallow the rest of the file.
+      else if (c === "\n" && mode !== "`") mode = null;
+      i += 1;
+      continue;
+    }
+
+    if (c === "/" && next === "/") {
+      while (i < n && source[i] !== "\n") i += 1;
+      continue;
+    }
+    if (c === "/" && next === "*") {
+      mode = "*";
+      out += "  ";
+      i += 2;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === "`") {
+      mode = c;
+      out += c;
+      i += 1;
+      prevMeaningful = c;
+      continue;
+    }
+    if (c === "/" && /[=(,:[!&|?{};+\-*%^~<>]|^$|return|typeof/.test(prevMeaningful)) {
+      mode = "/";
+      out += c;
+      i += 1;
+      continue;
+    }
+
+    out += c;
+    if (!/\s/.test(c)) prevMeaningful = c;
+    i += 1;
+  }
+
+  // A WHOLE-LINE `--` IS A SQL COMMENT, and only at the start of a line,
+  // exactly as before: `a -- b` in TypeScript is a decrement.
+  return out
     .split("\n")
-    .map((line) =>
-      /^\s*(\/\/|\*|--)/.test(line) ? "" : line.replace(/\/\/.*$/, ""),
-    )
+    .map((line) => (/^\s*(\*|--)/.test(line) ? "" : line))
     .join("\n");
 }
 

@@ -411,3 +411,56 @@ prose fails the build and the failure says what to do.
 `prose-anchored-checks.mutation.mjs` puts two of the six defects back
 and empties the scan in four places — 6 of 6 caught.
 
+
+## 17. What every gate has to disagree with — swept 2026-09-19
+
+    node scripts/scan-gate-independence.mjs
+    node scripts/tests/gate-independence.test.mjs
+    node scripts/tests/gate-independence.mutation.mjs
+
+**The question, widened:** item 16 answered "which gates are satisfied
+by a comment" for one narrow mechanism. This asks the general form —
+what does each suite hold the code up against, and would it go red if
+the source were wrong?
+
+**Answered as a ladder, not a verdict,** because the verdict version
+scored 0 real of 8. Every suite is reported at its strongest rung:
+NETWORK · DOM · DB · DISK · EXECUTION · CROSS-KIND · LITERAL · NONE.
+The counts are produced by the scan on every run — do not read them
+from here.
+
+**The distribution is the finding.** Of the build's gates, four reach
+the network, seven the DOM and three the database; everything else is
+DISK and EXECUTION. The four independent sources the owner named live
+almost entirely in the 93 prodtests, dbtests and itests that do NOT run
+in the build and mostly cannot run here at all — which is the same
+28% held open in `docs/v5-closing-report.md`, arriving from a different
+direction.
+
+**Four build gates reach NONE and all four HELD under mutation** —
+`address-register` (a corpus of 546 Greek strings), `design-density`
+(a census with ratchets), `language-reachable` (a relation between six
+files), `write-guards` (a shape over the writes it finds). Each carries
+its real reference and the mutation that settled it in
+`gate-independence.test.mjs`. A fifth gate arriving at NONE fails the
+build.
+
+**One real defect, from the sibling shape** (`docs/shapes.md`, *the
+rule targets the shape, the check anchors on the example*):
+`user-photos`' "every table that carries HTML is read" named four
+tables. A fifth table with an `html_content` column left it green — and
+a table the storage cleanup does not read makes every photograph
+reachable only from it an orphan, deleted on a schedule. It derives the
+list from the migrations now, via `tablesWithColumn()`.
+
+**Three detectors were wrong before one was right.** The first LITERAL
+detector counted `.length > 0`, which every gate's footer satisfies:
+264 of 275 matched and NONE could never happen. `BASE_URL` without a
+leading `\b` matches inside `DATABASE_URL`, filing every database suite
+one rung too high. And the scan twice had the blind spot this repo has
+now recorded four times — a path in a `const`, built with `path.join`,
+or read through a wrapper. All three are pinned by fixtures in the gate.
+
+**What is NOT closed:** the ladder reads text. A gate that enumerates a
+directory and ignores the answer still counts as DISK. Only mutation
+settles that, and only the bottom rung has been settled that way.

@@ -1948,3 +1948,124 @@ anchored on prose fails the build and the failure says what to do —
 mutate it, re-anchor it, or name it a documentation check and add it to
 the list. `prose-anchored-checks.mutation.mjs` puts two of the six
 defects back and empties the scan in four different places; 6 of 6.
+
+## A gate that reads the same artefact as the code
+
+The owner's sentence, after the sidebar shipped a heading over nothing
+while every sidebar gate was green:
+
+> Ένα gate που διαβάζει το ίδιο αρχείο με το feature δεν ελέγχει
+> τίποτα — επιβεβαιώνει ότι το αρχείο ισούται με τον εαυτό του.
+
+The first attempt at answering it generally was a binary flag —
+*is this gate self-confirming?* — and it scored **0 real of 8
+candidates**, while missing the one gate that was. The verdict was the
+mistake, not the question. "Self-confirming" is not a property a parser
+can decide; what a parser can decide is **what the gate is holding the
+code up against**, and that is a ladder:
+
+| rung | what disagrees with the code |
+|---|---|
+| NETWORK | what production actually answers |
+| DOM | what actually reaches the screen |
+| DB | what the database actually has |
+| DISK | which files actually exist — an *enumeration*, so a file appearing changes the answer |
+| EXECUTION | the code RUN rather than read |
+| CROSS-KIND | two artefacts a human must keep in step — migrations against TypeScript, messages against components |
+| LITERAL | an expectation written in the gate. Real, but written by the same hand on the same day, so it rots *with* the code |
+| NONE | nothing |
+
+`scripts/scan-gate-independence.mjs` reports every suite at its
+strongest rung. The distribution is the finding, and it is not
+flattering: **of the build's gates, four reach the network, seven the
+DOM, three the database.** Everything else is DISK and EXECUTION. The
+four sources the owner named live almost entirely in the prodtests,
+dbtests and itests — suites that do not run in the build and mostly
+cannot run here at all, for want of a `DATABASE_URL`, an Anthropic
+balance and a published site.
+
+**Four build gates reach NONE, and all four HELD under mutation.** Each
+has a real reference the scan cannot name, which is worth as much as
+the scan:
+
+| gate | what it really holds the code up against |
+|---|---|
+| `address-register` | a CORPUS — 546 real Greek strings. Added one in the polite plural: RED |
+| `design-density` | a CENSUS with ratchets — 918 files, 581 borders, ceiling 581. Added one border (582) and one blurred shadow: RED both |
+| `language-reachable` | a RELATION between six files — rendered once here, not there. Removed it, hid it behind a breakpoint, dropped `showCode`: RED each time |
+| `write-guards` | a SHAPE over the writes it finds — every update re-asserts what it read. Removed the guard, and moved the comparison back into TypeScript: RED both |
+
+**Three detectors were wrong before one was right,** and the way they
+were wrong is the lesson. The first LITERAL detector counted
+`.length > 0` — which every gate's own pass/fail footer satisfies, so
+264 of 275 matched and NONE could never happen. A detector that says
+yes to everything sorts nothing, and it looks exactly like a working
+one from its output. `BASE_URL` without a leading `\b` matches inside
+`DATABASE_URL`, so every database suite was filed one rung too high;
+the gate's own fixtures caught that while it was being written.
+
+And the scan had, twice, the blind spot this repository has now
+recorded four times: a path held in a `const`, built with `path.join`,
+or read through a one-line wrapper. `stop-everywhere` reads a
+migration, ten message files and app source and was reported as holding
+nothing. `website-variation` does `const v = await loadTs(...)` and
+then `const { pickVariation } = v` — one step removed, and it is among
+the few gates in the build that actually run the code.
+
+**The question to ask:** *what would have to be true for this gate to
+go red?* If the answer is "somebody would have to edit the file it
+reads", it is a rung too low, and the rung above is usually available:
+enumerate instead of naming, derive instead of listing, run instead of
+reading.
+
+## The rule targets the shape, the check anchors on the example
+
+    ok("...and every table that carries HTML is read",
+       ["user_websites", "published_sites", "website_versions", "site_versions"]
+         .every((t) => route.includes(`"${t}"`)));
+
+The rule is about a **population** — every table that carries HTML. The
+evidence is **four examples of it**, written in the gate on the day the
+first four existed.
+
+On 2026-09-19 a fifth table with an `html_content` column was added to
+a migration. The gate stayed green. The consequence is written two
+lines above the check, in that gate's own comment: the storage cleanup
+collects references from the tables it reads, and a photograph with no
+references is an orphan and is deleted. A table the cleanup does not
+read contributes no references, so every photograph reachable only from
+it is deleted — permanently, on a schedule, with nothing to look at
+afterwards.
+
+The population was available the whole time. `supabase/migrations/`
+names every table with an `html_content` column; `tablesWithColumn()`
+derives them, and the check now asks which of *those* the route fails
+to read. A fifth table reddens it until the cleanup reads it too.
+
+**This is the same shape as the check that was green on the number its
+own fix removed.** `example-prompts.test.mjs` demanded `min-h-[36px]`
+— the rejected value, surviving only in the comment recording the
+rejection — when the rule was "a chip is a real touch target on a
+phone" and the component had been `min-h-[44px]` for weeks. Rule about
+a class; check pinned to one number from the day it was written.
+
+**Why it survives review.** The check is *correct* when it is written —
+four tables, four names, all four read. It becomes false by addition,
+not by edit, and nothing in a diff that adds a table touches the gate
+that should have noticed.
+
+**Measured, because a scan with no precision is the disease one level
+up.** `kindWideClaims()` in `scan-gate-independence.mjs` finds checks
+whose NAME quantifies over a kind — *every table*, *no route*, *each
+page* — while the evidence is a regex over one hardcoded file of a kind
+the tree has many of. **1 real of 3 on 2026-09-19.** The two others
+quantify inside a single file (`each card` over a `.map` in
+`pricing/page.tsx`) or over behaviour rather than files. Loosening it
+to any universal word found 45 across 20 gates and almost none were
+real; loosening it to any gate naming one file of a many-instance kind
+found 80 of 275, which sorts nothing.
+
+**The question to ask:** *does the check range over the same set the
+rule names?* If the rule says "every X" and the check names three Xs,
+the population exists somewhere — a directory, a migration, an export —
+and derivation costs less than the incident does.

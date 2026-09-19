@@ -23,6 +23,7 @@
 import { readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
+import { schemaSql, tablesWithColumn } from "./lib/schema-sql.mjs";
 
 /** The body of the catch whose try contains `needle`, brace-matched, or
  *  null if there is no such catch. A brace match rather than a character
@@ -358,8 +359,22 @@ console.log("\n== 6. the cleanup deletes only what nothing needs ==");
   ok("a failed document read aborts the whole run",
     /for \(const table of tables\) \{[\s\S]{0,300}if \(error\) throw error;/.test(route),
     route.slice(route.indexOf("for (const table of tables)"), route.indexOf("for (const table of tables)") + 260));
+  // THE RULE WAS ABOUT A POPULATION AND THE CHECK NAMED FOUR EXAMPLES.
+  // This was `["user_websites", "published_sites", "website_versions",
+  // "site_versions"].every(...)` — a list written here. On 2026-09-19 a
+  // fifth table with an html_content column was added to a migration and
+  // this stayed green, while the consequence is two lines above: a table
+  // the cleanup does not read contributes no references, so every
+  // photograph reachable only from it is an orphan and is deleted.
+  // The migrations are the population; derive from them.
+  const htmlTables = tablesWithColumn(schemaSql(), "html_content");
+  ok("the schema still has tables carrying HTML to find",
+    htmlTables.length >= 4,
+    `found ${htmlTables.length}: ${htmlTables.join(", ")} — an empty derivation would pass the check below`);
+  const unread = htmlTables.filter((t) => !route.includes(`"${t}"`));
   ok("...and every table that carries HTML is read",
-    ["user_websites", "published_sites", "website_versions", "site_versions"].every((t) => route.includes(`"${t}"`)));
+    unread.length === 0,
+    `not read by the cleanup: ${unread.join(", ")}`);
   ok("...including the sub-pages inside them", /normalisePages\(row\.pages\)/.test(route));
   ok("the run is authenticated", /checkCronAuth\(request\)/.test(route));
   ok("...and a dry run is possible", /dry.*=== "1"/.test(route));

@@ -125,6 +125,44 @@ recall 0 of 1) rather than a verdict.
 in the target, would this still pass?** If not, strip first — and then
 mutate the code the check names and require it to go red.
 
+### And the general question under both: what would make this gate go red?
+
+    node scripts/scan-gate-independence.mjs
+    node scripts/tests/gate-independence.test.mjs
+
+Every suite is reported at the strongest thing it holds the code up
+against — NETWORK, DOM, DB, DISK, EXECUTION, CROSS-KIND, LITERAL, NONE
+— because the binary version of the question ("is this gate
+self-confirming?") scored 0 real of 8 and missed the one that was.
+
+**The distribution is the finding and it is not flattering.** Of the
+build's gates, four reach the network, seven the DOM, three the
+database; the rest is DISK and EXECUTION. The four independent sources
+live in the prodtests, dbtests and itests, which do not run in the
+build. Four build gates reach NONE; all four were settled by mutation
+on 2026-09-19 and all four held, each for a reason the scan cannot
+name and the gate therefore writes out.
+
+**A detector that says yes to everything looks exactly like a working
+one.** The first LITERAL detector counted `.length > 0` — every gate's
+own footer — so 264 of 275 matched and NONE could never happen. The
+gate pins each rung with a fixture, and the NONE fixture carries a
+footer on purpose.
+
+### The rule targets the shape, the check anchors on the example
+
+`"...and every table that carries HTML is read"` named four tables.
+A fifth table with an `html_content` column left it green, and a table
+the storage cleanup does not read makes every photograph reachable only
+from it an orphan — deleted, on a schedule. The migrations were the
+population all along.
+
+**If the rule says "every X", the check must range over the same set.**
+The population is usually a directory, a migration or an export away.
+`kindWideClaims()` finds the ones that are not: 1 real of 3, measured
+2026-09-19, and the looser versions of it found 45 and then 80 and
+sorted nothing.
+
 ## The plan is updated in the SAME commit as the work, never in a later round
 
 `docs/v5-list.md` was wrong in four places on 2026-09-11, and every one of

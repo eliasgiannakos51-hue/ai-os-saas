@@ -222,17 +222,21 @@ export function Sidebar({
                       }`}
                       aria-hidden="true"
                     />
-                    {/* "Ionexa" specifically gets a touch of extra tracking — at
-                        this label's small size, a lone capital "I" can read as
-                        a lowercase "l" ("lonexa"); the app's other standalone
-                        brand-name renderings already lean on wider letter-
-                        spacing for the same reason (see loading-state.tsx,
-                        not-found.tsx). */}
-                    <span
-                      className={`truncate ${item.label === "Ionexa Chat" ? "tracking-wide" : ""}`}
-                    >
-                      {translatedLabel(item.label)}
-                    </span>
+                    {/* THE EXTRA TRACKING IS GONE, and what it was for is
+                        worth keeping written down. "Ionexa" at this size
+                        renders a lone capital "I" that reads as a lowercase
+                        "l" — "lonexa" — so this row leaned on wider
+                        letter-spacing, as loading-state.tsx and
+                        not-found.tsx still do for the standalone wordmark.
+                        `item.label` is a KEY into ITEM_LABEL_KEYS and never
+                        reaches the screen, so the condition matched on
+                        "Ionexa Chat" while what was painted came from
+                        sidebar.items.chat — and on 2026-09-11 the owner
+                        renamed that to "Ask me" in all ten languages. Not
+                        one of them contains "Ionexa". The class had been
+                        spacing out "Ask me", "Ρώτα με" and "问我" for eight
+                        days, for a capital I none of them has. */}
+                    <span className="truncate">{translatedLabel(item.label)}</span>
                   </Link>
                   </Tooltip>
     );

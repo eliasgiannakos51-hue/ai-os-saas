@@ -273,6 +273,32 @@ checkTrue(
     declared.length >= 6,
     "a scan that loads nothing agrees with every claim below it",
   );
+  // AND THE TWO ROLES ARE THE WHOLE CROSS-PRODUCT, which is only true
+  // because nothing else can empty a group. Asked directly on
+  // 2026-09-19 — "how many groups can end up empty depending on plan,
+  // role or a flag?" — and the answer is that there are exactly three
+  // mechanisms and no plan among them: `ownerOnly` (role), `hidden` and
+  // `notBuilt` (flags, both static in the config). The component
+  // receives `planName` and renders it in the footer; it never filters
+  // on it.
+  //
+  // A FOURTH MECHANISM WOULD MAKE THE LOOP BELOW A SAMPLE INSTEAD OF A
+  // PROOF, and it would not announce itself — so the shape of
+  // SidebarItem is held here. A plan-gated row added tomorrow turns
+  // this red rather than quietly reducing the cross-product to half of
+  // itself.
+  const visibilitySrc = stripComments(readFileSync("src/lib/sidebar-visibility.ts", "utf8"));
+  const optionalFlags = [...visibilitySrc.matchAll(/^\s{2}([a-zA-Z]+)\?:/gm)].map((m) => m[1]).sort();
+  checkTrue(
+    `SidebarItem has exactly the three filters this loop covers, plus hintKey (${optionalFlags.join(", ")})`,
+    optionalFlags.join(",") === "hidden,hintKey,notBuilt,ownerOnly",
+    "a new optional field on SidebarItem may be a fourth way to empty a group, and the two-role loop below would not reach it",
+  );
+  checkTrue(
+    "...and nothing in the visibility filters reads a plan or a tier",
+    !/\bplan\b|\btier\b|minPlan/i.test(visibilitySrc),
+    "a plan-gated row means the owner/non-owner pair is no longer the whole cross-product",
+  );
   for (const isOwner of [true, false]) {
     const drawn = new Set(sidebarGroups(all, isOwner).map((g) => g.heading));
     const gone = declared.filter((h) => !drawn.has(h));

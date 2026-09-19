@@ -137,10 +137,27 @@ const MUTANTS = [
   {
     name: "the check moves to after the unit suite and the compile",
     file: PKG,
-    // RE-ANCHORED: the build script gained check-mutation-tree.mjs
-    // between the marker check and the i18n check.
-    from: "node scripts/apply-function-limits.mjs && node scripts/check-mutation-markers.mjs && node scripts/check-mutation-tree.mjs && node scripts/check-i18n.js && npm run test:unit && next build",
-    to: "node scripts/apply-function-limits.mjs && node scripts/check-mutation-tree.mjs && node scripts/check-i18n.js && npm run test:unit && node scripts/check-mutation-markers.mjs && next build",
+    // RE-ANCHORED TWICE: the build script gained check-mutation-tree.mjs
+    // between the marker check and the i18n check, and on 2026-09-19
+    // build-identity.mjs after the rewriter. Anchoring on the WHOLE
+    // script means every step added to the build restales this mutant,
+    // so it anchors on the pair whose order it is about — the marker
+    // check immediately before the tree check — and moves the marker
+    // check to the end, which is the defect.
+    from: "node scripts/check-mutation-markers.mjs && node scripts/check-mutation-tree.mjs",
+    to: "node scripts/check-mutation-tree.mjs",
+    edits: [
+      {
+        file: PKG,
+        from: "node scripts/check-mutation-markers.mjs && node scripts/check-mutation-tree.mjs",
+        to: "node scripts/check-mutation-tree.mjs",
+      },
+      {
+        file: PKG,
+        from: "npm run test:unit && next build",
+        to: "npm run test:unit && node scripts/check-mutation-markers.mjs && next build",
+      },
+    ],
     expect: "before the build spends time on anything expensive",
   },
   {

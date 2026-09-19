@@ -135,6 +135,57 @@ const atOrAbove = (slug, minPlan) => ORDER.indexOf(slug) >= ORDER.indexOf(minPla
     wronglyShown.map((r) => r.id).join(", "));
 }
 
+// AND THE TWO DIRECTIONS THE minPlan CHECK DOES NOT COVER.
+//
+// On 2026-09-19 a Vercel failure arrived naming a gate
+// (plan-feature-matrix.test.mjs) that exists in no commit on any of
+// this repository's branches, reporting "free: unexpected 3". Four
+// readings of that sentence were computed against the real data and
+// every one gave zero. The claim could not be reproduced and the file
+// could not be found — but the QUESTION is a good one, and the answer
+// should not depend on a gate nobody can see.
+//
+// So both remaining directions are held here:
+//
+//   REVERSE — a plan that HAS the capability and is shown a cross. The
+//   minPlan check cannot see it: a cross is always "allowed" below
+//   minPlan and this is about plans above it. It sells somebody less
+//   than they bought.
+//
+//   A ZERO WEARING A NUMBER — a value cell reading "0" or "0 MB". That
+//   is a cross with extra steps, and it reads on the page as though
+//   something is included.
+{
+  const booleanish = catalog.FEATURE_CATALOG.filter((e) => typeof e.capability === "string");
+  ok(`catalog entries that name a capability (${booleanish.length})`,
+    booleanish.length >= 4,
+    `${booleanish.length} — nothing to compare makes both checks below vacuous`);
+  const sellsLess = [];
+  for (const entry of booleanish) {
+    for (const plan of plans.PLANS) {
+      const shown = entry.cell(plan, "en", WORDS).type !== "cross";
+      const has = Boolean(plan.capabilities[entry.capability]);
+      if (has && !shown) sellsLess.push(`${entry.id} on ${plan.slug}: plan grants it, card crosses it`);
+    }
+  }
+  ok("no plan is shown a cross for something it actually has",
+    sellsLess.length === 0,
+    sellsLess.join("\n        "));
+
+  const zeroes = [];
+  for (const entry of rows.distinguishingFeatures(WORDS).concat(catalog.soldFeatures())) {
+    for (const plan of plans.PLANS) {
+      const cell = entry.cell(plan, "en", WORDS);
+      if (cell.type === "value" && /^0(\s|$)/.test(cell.text)) {
+        zeroes.push(`${entry.id} on ${plan.slug}: "${cell.text}"`);
+      }
+    }
+  }
+  ok("no cell reads as a number when the number is zero",
+    zeroes.length === 0,
+    [...new Set(zeroes)].join("\n        ") + "\n        a zero is a cross with extra steps — return { type: \"cross\" }");
+}
+
 console.log("\n== 3. every row on the card has a label, in every language ==");
 // The seven literals this replaced were English in ten locales.
 let missing = [];

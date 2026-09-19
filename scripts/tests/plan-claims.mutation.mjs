@@ -28,8 +28,9 @@ const SIGNUP = "src/app/signup/signup-flow.tsx";
 const SIGNUP_PAGE = "src/app/signup/page.tsx";
 const PRICING = "src/app/pricing/page.tsx";
 const CSS = "src/app/globals.css";
+const CATALOG = "src/lib/billing/feature-catalog.ts";
 
-const TARGETS = [GATE, PLANS, ROWS, SIGNUP, SIGNUP_PAGE, PRICING, CSS, "messages/el.json"];
+const TARGETS = [GATE, PLANS, ROWS, SIGNUP, SIGNUP_PAGE, PRICING, CSS, CATALOG, "messages/el.json"];
 
 const MUTANTS = [
   {
@@ -106,6 +107,24 @@ const MUTANTS = [
     from: "                    </ul>\n\n                  </button>",
     to: "                    </ul>\n                    <ul>{p.features.map((f) => <li key={f.textKey} />)}</ul>\n\n                  </button>",
     expect: "one list per plan card, not two",
+  },
+  {
+    // THE REVERSE DIRECTION, added 2026-09-19 after a Vercel failure
+    // named a gate that exists in no commit here. The claim could not
+    // be reproduced; the question could, and both directions are held
+    // now rather than only the one the minPlan check covers.
+    name: "a plan is crossed for something it actually has",
+    file: CATALOG,
+    from: "    cell: (p) => boolCell(p.capabilities.teamCollaboration),",
+    to: '    cell: () => ({ type: "cross" } as const),',
+    expect: "shown a cross for something it actually has",
+  },
+  {
+    name: "a zero is dressed up as a number instead of a cross",
+    file: CATALOG,
+    from: "    cell: (p, locale) => countCell(maxSeatsForPlan(p.slug), locale),",
+    to: '    cell: (p, locale) => ({ type: "value", text: String(maxSeatsForPlan(p.slug) ?? 0) } as const),',
+    expect: "reads as a number when the number is zero",
   },
   {
     // A ROW WITH NO LABEL. The seven literals this replaced were English

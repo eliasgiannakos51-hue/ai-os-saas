@@ -464,3 +464,40 @@ or read through a wrapper. All three are pinned by fixtures in the gate.
 **What is NOT closed:** the ladder reads text. A gate that enumerates a
 directory and ignores the answer still counts as DISK. Only mutation
 settles that, and only the bottom rung has been settled that way.
+
+## 18. The final V5 check, re-run 2026-09-19
+
+    node scripts/verify-closing-report.mjs     # every N/N in the report, re-derived
+    npm run test:mutation                      # all 176 suites, ~90 minutes
+
+**The counted claims.** `verify-closing-report.mjs` parses every
+`` `<gate>.test.mjs` — N/N `` out of `docs/v5-closing-report.md`, runs
+that gate and prints AGREES, MOVED or RED. **24 of 24 agree**, nothing
+moved, nothing red, nothing gone. It refuses to report on fewer than
+ten claims, because a parser that finds nothing prints
+"0 agree · 0 moved · 0 red" and exits clean — which reads exactly like
+a verified document. Settled three ways by mutation: an aged number
+(MOVED), a named gate made to fail (RED, exit 1), and an emptied parser
+(the floor, exit 1).
+
+**The uncounted claims have moved, all in one direction — the tree
+grew.** 276 build gates (was 271, then 273), 45 prodtests, 29 dbtests,
+19 itests; 369 in the tree; 74.8% run here, which is §ΣΤ's 75% to one
+decimal. The re-verification is its own dated section at the top of the
+report rather than an edit to the 2026-09-18 record.
+
+**The mutation sweep: 2,399 of 2,400 caught, one hole, now zero.** The
+hole was a mutation that had stopped testing anything —
+`user-photos.mutation.mjs` anchored on an early return that gained a
+`dropped: null` field. The suite reported STALE and exited 1, exactly
+as designed; nothing in the build runs the suites, so nobody saw it for
+a day.
+
+**Closed in the same round:** `mutation-suite-shape.test.mjs` §5 looks
+up every `from:` in every declared mutant in the file it names — 2,418
+anchors in 0.15 seconds, in the build. Proved both ways: the real
+defect put back (RED) and the mutant reader emptied (RED on the floor).
+
+**What is still not verified** is what it was: a `DATABASE_URL`, an
+Anthropic balance and a published site. See
+`docs/v5-closing-report.md`, "the 28% that is still open".

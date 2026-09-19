@@ -58,6 +58,7 @@
 // Run: node scripts/tests/mutation-suite-shape.test.mjs
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
+import { readMutants } from "./lib/mutant-list.mjs";
 
 const DIR = "scripts/tests";
 let pass = 0;
@@ -342,6 +343,59 @@ ok(
   hollow.length === 0,
   hollow.join(", "),
 );
+
+console.log("\n== 5. and every anchor still matches the file it names, TODAY ==");
+// ---------------------------------------------------------------------
+// Section 2 checks that a suite ROUTES a stale anchor to its exit code.
+// It does, and on 2026-09-19 user-photos.mutation.mjs did exactly that —
+// STALE, exit 1, the suite behaving correctly. Nobody saw it for a day,
+// because nothing in the build runs the mutation suites: `npm run build`
+// stops at the gates, and `npm run test:mutation` is a separate command
+// that takes about ninety minutes.
+//
+// The anchor that had gone stale was the `photoSource === "none"` early
+// return in website-image-resolver.ts, which gained a `dropped: null`
+// field when the resolver learned to report what it had dropped. One
+// mutation of forty stopped testing anything, and the suite that would
+// have said so was not being run.
+//
+// THIS COSTS 0.15 SECONDS. Every `from:` in every declared mutant, read
+// through lib/mutant-list.mjs, looked up in the file it names. It is not
+// the behavioural check — it cannot tell an equivalent mutant from a real
+// one — but a needle that is not in the haystack is decidable, and it is
+// decidable in the build rather than an hour and a half later.
+{
+  const { mutants, fellBack } = readMutants();
+  const cache = new Map();
+  const readTarget = (f) => {
+    if (!cache.has(f)) cache.set(f, existsSync(f) ? readFileSync(f, "utf8") : null);
+    return cache.get(f);
+  };
+  let anchors = 0;
+  const staleAnchors = [];
+  for (const m of mutants) {
+    const text = readTarget(m.file);
+    if (text === null) continue;
+    for (const e of m.edits) {
+      if (e.from === "") continue;
+      anchors += 1;
+      if (!text.includes(e.from)) {
+        staleAnchors.push(`${m.suite}: ${m.name ?? "(unnamed)"} -> ${m.file}`);
+      }
+    }
+  }
+  // A FLOOR FIRST, for the reason every count in this directory has one:
+  // an empty mutant list satisfies "none of them are stale".
+  ok(`the mutant list still resolves (${mutants.length} mutants, ${anchors} anchors)`,
+    mutants.length > 1800 && anchors > 1800,
+    `${mutants.length} mutants, ${anchors} anchors — a reader that resolves nothing passes the check below`);
+  ok(`every mutation anchor is present in the file it names (${anchors} checked)`,
+    staleAnchors.length === 0,
+    [...new Set(staleAnchors)].join("\n        "));
+  ok(`...and the ${fellBack.length} suites read by the fallback parser are counted, not ignored`,
+    fellBack.length <= 19,
+    `${fellBack.length} suites cannot be evaluated; their \`edits:\` lists are unread by this section`);
+}
 
 console.log(
   failures.length === 0

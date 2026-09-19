@@ -362,18 +362,52 @@ missed the one gate that was**, and says so in its own output.
 
 **Section 2 is exact and is where the findings came from:** a regex
 whose ONLY match in its target is inside a comment is being satisfied by
-prose today. 1,344 `/regex/.test(fileVariable)` pairs resolve to a real
-target; 38 match only inside a comment; 9 of those look like code.
+prose today. The three figures it prints — pairs resolved, prose-only,
+code-shaped — are produced by the scan on every run; do not read them
+from here. At the close of the sweep they were 1,278 · 28 · **1**, and
+that one is the exception described below.
 
-**Five were real and are fixed** (`docs/shapes.md`, *the gate found the
-sentence about the code, not the code*): four in
-`navigation-cost.test.mjs` anchored on `ONE WAVE, NOT A QUEUE` and
-`requestIdleCallback`, and one in `example-prompts.test.mjs` that was
-green on `min-h-[36px]` — the value its own fix had removed, surviving
-only in the comment that records the rejection.
+It started at 1,344 · 38 · 9. Four of the nine were the scan being
+wrong rather than the gate: `gdpr-coverage` and `clarification-verdict`
+strip their source before testing it (one through a helper, one through
+a `.replace().filter()` chain written in place) and the scan resolved
+the variable to the raw file; `empty-states` and `help-articles` the
+same. A name bound twice, or bound through anything at all, resolves to
+nothing now. And it reported *itself*: the note explaining a regex it
+had just removed was read as a live check, so it strips the gate's own
+comments first.
 
-**What is left:** the remaining candidates in section 2, several of
-which deliberately anchor across a comment AND the code under it, which
-is legitimate. They are listed on every run and settled one at a time by
-mutating the source — never by reading the gate.
+**Eleven were real and are fixed** (`docs/shapes.md`, *the gate found
+the sentence about the code, not the code*). Five in the first pass:
+four in `navigation-cost.test.mjs` anchored on `ONE WAVE, NOT A QUEUE`
+and `requestIdleCallback`, and one in `example-prompts.test.mjs` that
+was green on `min-h-[36px]` — the value its own fix had removed,
+surviving only in the comment that records the rejection. Six in the
+second, each settled by MUTATION and not by reading: `agent-depth`
+("a fill failure still creates the agent" stayed green with `throw err;`
+added under the logging), `user-photos` ("…and fails open" stayed green
+with a `return;` beside the words), `context-optimization` ("…and judges
+blind" — now the three code facts: the arms are swapped, the prompt
+names neither, the verdict is decoded back through the swap),
+`job-consumption` ×2 (the code half was real, but the comment was the
+locator, so rewording it reddened a gate about behaviour), and
+`research-reliability` (a legitimate machine-read marker, but the gate
+held a second copy of the build step's regex — it runs `applyToSource`
+now).
+
+Two more came out of the neighbourhood rather than the list:
+`mutation-sidecar` proved a file gitignored by searching `.gitignore`
+for its name, which a `!` line one row below leaves untouched — it
+evaluates the rules in order now, negations included, and agrees with
+`git check-ignore` on twelve paths. And `context-optimization` held a
+`|| /is false/` disjunct that would have kept a documentation check lit
+off any other sentence in the file.
+
+**Nothing is left open, and it is a gate now rather than a report.**
+`scripts/tests/prose-anchored-checks.test.mjs` holds the code-shaped
+count at its baseline, with one allowed entry carrying its reason and
+checked BOTH ways so the list cannot go stale. A new check anchored on
+prose fails the build and the failure says what to do.
+`prose-anchored-checks.mutation.mjs` puts two of the six defects back
+and empties the scan in four places — 6 of 6 caught.
 

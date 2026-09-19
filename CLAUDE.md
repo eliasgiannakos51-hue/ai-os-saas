@@ -103,6 +103,28 @@ ALL PASS, the section is measuring nothing. That is how all three
 `db-migrations` scrapers were confirmed, and how `pricing-truth` was
 cleared in the same pass.
 
+### And a gate that reads a COMMENT instead of the code under it
+
+    node scripts/scan-self-confirming-gates.mjs
+    node scripts/tests/prose-anchored-checks.test.mjs
+
+A check anchored on a capitalised sentence is stable, unique and
+grep-friendly — everything an anchor should be except load-bearing.
+`agent-depth`'s "a fill failure still creates the agent" was
+`/NOT FATAL[\s\S]{0,300}logApiError/`, and adding `throw err;` one line
+under that `logApiError` left it green. Eleven of these were found and
+fixed on 2026-09-19.
+
+Section 2 of the scan is the exact half: a regex whose only match in its
+target is inside a comment. The gate holds that count at its baseline,
+with each deliberate exception carrying a reason and checked BOTH ways.
+Section 1's census is a heuristic and prints its own precision (0 of 8,
+recall 0 of 1) rather than a verdict.
+
+**The question to ask before writing a check: if I deleted every comment
+in the target, would this still pass?** If not, strip first — and then
+mutate the code the check names and require it to go red.
+
 ## The plan is updated in the SAME commit as the work, never in a later round
 
 `docs/v5-list.md` was wrong in four places on 2026-09-11, and every one of

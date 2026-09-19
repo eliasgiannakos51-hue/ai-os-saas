@@ -232,8 +232,36 @@ console.log("\n== 3. the experiment: kill a process holding a mutant ==");
 
 // ---------------------------------------------------------------------
 console.log("\n== 4. and it is not in a commit ==");
+// THE PRESENCE OF A LINE IS NOT THE ANSWER GIT GIVES. This was
+// /\.mutation-sidecar\.json/.test(ignore) — and adding
+// "!scripts/tests/.mutation-sidecar.json" one line BELOW the rule left
+// it green while the file was no longer ignored, because last match
+// wins and a substring search has no last. So the rules are evaluated
+// the way git evaluates them, in order, negations included. Done in
+// process rather than by spawning git: this runs inside next build, on
+// a host that need not have a .git directory at all.
 const ignore = readFileSync(".gitignore", "utf8");
-check("the sidecar is gitignored", /\.mutation-sidecar\.json/.test(ignore), "otherwise a killed run dirties the tree twice over");
+function gitignores(rules, path) {
+  let verdict = false;
+  for (const raw of rules.split("\n")) {
+    const line = raw.trim();
+    if (line === "" || line.startsWith("#")) continue;
+    const negated = line.startsWith("!");
+    const pattern = (negated ? line.slice(1) : line).replace(/\/+$/, "");
+    const body = pattern
+      .replace(/[.+^${}()|[\]\\]/g, (c) => "\\" + c)
+      .replace(/\*/g, "[^/]*")
+      .replace(/\?/g, "[^/]");
+    const re = new RegExp(pattern.startsWith("/") ? `^${body.slice(1)}(/|$)` : `(^|/)${body}(/|$)`);
+    if (re.test(path)) verdict = !negated;
+  }
+  return verdict;
+}
+check("the sidecar is gitignored", gitignores(ignore, "scripts/tests/.mutation-sidecar.json"),
+  "otherwise a killed run dirties the tree twice over");
+check("...and the matcher is not one that says yes to everything",
+  gitignores(ignore, "node_modules/x/y.js") && !gitignores(ignore, "src/app/page.tsx"),
+  "a matcher answering true unconditionally would pass the line above on its own");
 
 console.log("");
 if (failures.length > 0) {

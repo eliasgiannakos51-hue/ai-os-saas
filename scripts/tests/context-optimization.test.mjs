@@ -18,6 +18,7 @@
 // Run: node scripts/tests/context-optimization.test.mjs
 import { readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
 const failures = [];
@@ -394,13 +395,36 @@ console.log("\n== 5. wired in, and wired in the right order ==");
   ok("...and a narrowing is logged, so it is never silent",
     /if \(selection\.mode === "narrowed"\) \{[\s\S]{0,200}diagLog\(/.test(route));
 
+  // A DOCUMENTATION CHECK, AND LABELLED AS ONE. It reads the file's own
+  // header prose, which is why it cannot stand in for the guarantee: the
+  // executable proof that the selector is off by default is section 3
+  // above, which calls resolveSelectionConfig() with the flag unset, with
+  // "true" and with "on". Flipping `enabled: false` to true reddens those
+  // three and never this. The disjunct that used to be here — `|| /is
+  // false/` — would have kept this green off any other sentence in the
+  // file, so the sentence could rot while the check stayed lit.
   const ctxSrc = readFileSync("src/lib/ai/module-relevance.ts", "utf8");
-  ok("the selector says plainly that it is off until quality is measured",
-    /DEFAULT_SELECTION_CONFIG\.enabled\s*\n \* is false/.test(ctxSrc) || /is false/.test(ctxSrc));
+  ok("DOC, not behaviour: the header still says the selector is off until quality is measured",
+    /DEFAULT_SELECTION_CONFIG\.enabled\s*\n \* is false\./.test(ctxSrc));
   const harness = readFileSync("scripts/context-quality.mjs", "utf8");
   ok("the quality harness refuses to run without a key",
     /if \(!KEY\) \{[\s\S]{0,400}process\.exit\(1\)/.test(harness));
-  ok("...and judges blind", /Blind because a judge told which/.test(harness));
+  // THIS READ THE SENTENCE ABOUT THE JUDGE, NOT THE JUDGE. It was
+  // /Blind because a judge told which/ — a comment. Blindness is three
+  // facts in the code, and all three are checkable: the arms are swapped
+  // by `flip`, the prompt the judge receives never names which arm is
+  // which, and the verdict is decoded back through the same `flip`.
+  const judgeCall = harness.slice(
+    harness.indexOf("const verdict = await anthropic.messages.create("),
+    harness.indexOf("const text = verdict.content")
+  );
+  ok("the two answers are swapped per case, not fixed in position",
+    /const \[a, b\] = flip \? \[narrowAnswer, fullAnswer\] : \[fullAnswer, narrowAnswer\];/.test(harness));
+  ok("...and judges blind: its prompt never names which arm is which",
+    judgeCall.length > 0 && !/narrow|full(?!y)/i.test(stripComments(judgeCall)),
+    judgeCall.length === 0 ? "the judge call was not found" : "the judge prompt names an arm");
+  ok("...and the verdict is decoded back through the same swap",
+    /\(pick === "A"\) === flip \? "NARROW" : "FULL"/.test(harness));
   ok("...ten cases, as the brief asks", (harness.match(/^  "/gm) ?? []).length >= 10);
 }
 

@@ -74,198 +74,237 @@ function kindOf(p) {
   return "other";
 }
 
-const rows = [];
-for (const file of gates) {
-  const raw = readFileSync(path.join(DIR, file), "utf8");
-  const src = stripComments(raw);
-
-  // Paths the gate opens. Both spellings, plus the loadTs form that
-  // EXECUTES rather than reads.
-  //
-  // A PATH HELD IN A CONST COUNTS. The first version matched only a
-  // quoted literal inside the call, and roadmap-hidden.test.mjs — which
-  // runs `loadTs(FOOTER)` — came back as reading nothing it executes and
-  // was flagged as self-confirming. It is not: it executes the real
-  // FOOTER_LINKS array, which is the strongest thing in this whole
-  // classification.
-  //
-  // This repository has been bitten by the same blind spot twice and
-  // written it down both times: env-documented.test.mjs found that 79 of
-  // 130 environment variables are read as `process.env[name]` with the
-  // name in a string, and env-independence.test.mjs resolves a path held
-  // in a const because the gate that broke a CI build spawns
-  // `[RUNNER, ...args]`. A scanner about gates missing their subject had
-  // no business missing its own.
-  const consts = new Map();
-  for (const m of src.matchAll(/const\s+([A-Za-z_$][\w$]*)\s*=\s*["'`]([^"'`]+)["'`]\s*;/g)) {
-    consts.set(m[1], m[2]);
-  }
-  const resolve = (token) => (token.startsWith('"') || token.startsWith("'") || token.startsWith("`")
-    ? token.slice(1, -1)
-    : consts.get(token) ?? null);
-
-  const read = new Set();
-  for (const m of src.matchAll(/readFileSync\(\s*((?:["'`][^"'`]+["'`])|(?:[A-Za-z_$][\w$]*))\s*[,)]/g)) {
-    const p2 = resolve(m[1]);
-    if (p2 && p2.includes("/")) read.add(p2);
-  }
-  const executed = new Set();
-  for (const m of src.matchAll(/loadTs\(\s*((?:["'`][^"'`]+["'`])|(?:[A-Za-z_$][\w$]*))\s*[,)]/g)) {
-    const p2 = resolve(m[1]);
-    if (!p2 || !p2.includes("/")) continue;
-    executed.add(p2);
-    read.add(p2);
-  }
-  // A gate that walks a directory reads whatever is under it.
-  for (const m of src.matchAll(/(?:readdirSync|walk)\(\s*((?:["'`][^"'`]+["'`])|(?:[A-Za-z_$][\w$]*))\s*[,)]/g)) {
-    const p2 = resolve(m[1]);
-    if (p2) read.add(p2 + "/**");
-  }
-
-  const kinds = new Set([...read].map(kindOf));
-  const appOnly = kinds.size > 0 && [...kinds].every((k) => k === "app");
-
-  // LITERAL: a const holding an array or object of strings, or a
-  // comparison against a quoted string / number, used inside a check.
-  // Crude on purpose — it over-counts, which makes a flag rarer and a
-  // flag that survives worth reading.
-  const hasLiteralTable =
-    /const\s+[A-Z][A-Z0-9_]*\s*=\s*[[{]/.test(src) ||
-    // A NAMED CONSTANT STRING COMPARED AGAINST THE SOURCE is an
-    // expectation as much as a table is: `const GUARD = "...";
-    // src.includes(GUARD)` is the gate stating what the file must
-    // contain. mutation-tree.test.mjs is exactly this and was flagged.
-    /\.includes\(\s*[A-Z][A-Z0-9_]*\s*\)/.test(src);
-  const hasInlineExpectation =
-    /(?:check|checkTrue|ok)\([^)]*===\s*["'`]/.test(src) ||
-    /(?:check|checkTrue|ok)\([^)]*\.length\s*(?:===|>=|<=|>|<)\s*\d/.test(src) ||
-    /(?:check|checkTrue|ok)\([^)]*,\s*\d+\s*[,)]/.test(src) ||
-    // A CEILING OR FLOOR ON A MEASURED COUNT. design-density.test.mjs
-    // holds `r.counts.borders <= 581`, which is a number written in the
-    // gate and the strongest kind of independent statement it makes —
-    // and the three patterns above all missed it because the comparison
-    // is on a property rather than on `.length`.
-    /(?:check|checkTrue|ok)\([^)]*[a-z)\]]\s*(?:<=|>=|<|>)\s*\d+/.test(src);
-
-  // A GATE THAT RUNS A PROGRAM IS MEASURING BEHAVIOUR, not text — the
-  // same reason `loadTs` + a call counts. mutation-tree.test.mjs writes
-  // a mutant into the tree and runs check-mutation-markers against it,
-  // which is the strongest thing in this directory, and the first
-  // version of this scan called it self-confirming because it models
-  // only two ways of reading a file.
-  const spawns = /execFileSync\(|spawnSync\(|execSync\(/.test(src);
-
-  const evidence = [];
-  if (hasLiteralTable) evidence.push("LITERAL");
-  if (hasInlineExpectation) evidence.push("EXPECT");
-  if (!appOnly && kinds.size > 1) evidence.push(`SECOND(${[...kinds].filter((k) => k !== "app").join("+")})`);
-  if (executed.size > 0) evidence.push("EXECUTED");
-  if (spawns) evidence.push("RUNS");
-
-  rows.push({
-    file,
-    reads: [...read],
-    kinds: [...kinds],
-    appOnly,
-    executed: executed.size > 0 || spawns,
-    evidence,
-    selfConfirming: evidence.length === 0 && read.size > 0,
-  });
-}
-
-const noReads = rows.filter((r) => r.reads.length === 0);
-const flagged = rows.filter((r) => r.selfConfirming);
-const appOnlyNoExec = rows.filter((r) => r.appOnly && !r.executed && !r.evidence.includes("LITERAL"));
-
-if (process.argv.includes("--json")) {
-  console.log(JSON.stringify({ gates: rows.length, flagged, appOnlyNoExec }, null, 2));
-  process.exit(0);
-}
-
-console.log(`== ${rows.length} gates in ${DIR} ==\n`);
-console.log("-- 1. WHAT EACH GATE HAS TO DISAGREE WITH --\n");
-console.log(`  read at least one artefact        ${rows.length - noReads.length}`);
-console.log(`  read nothing (pure logic/unit)    ${noReads.length}`);
-console.log(`  read ONLY app source              ${rows.filter((r) => r.appOnly).length}`);
-console.log(`  ...of those, also EXECUTE or RUN  ${rows.filter((r) => r.appOnly && r.executed).length}`);
-console.log(`  hold a second KIND of artefact    ${rows.filter((r) => r.kinds.length > 1).length}`);
-
-console.log(`\n  candidates with no independent reference at all: ${flagged.length}`);
-for (const r of flagged) console.log(`     ${r.file}  <- ${r.reads.slice(0, 3).join(", ")}`);
-console.log(
-  "\n  THIS CLASSIFICATION IS WEAK IN BOTH DIRECTIONS AND THE NUMBER IS NOT\n" +
-    "  A FINDING. On 2026-09-19 all eight of its candidates were run down by\n" +
-    "  mutation and every one HELD; the one gate that was really confirming\n" +
-    "  a file against itself — navigation-cost.test.mjs — it did not flag,\n" +
-    "  because a const string comparison elsewhere in the file counted as an\n" +
-    "  independent reference. Precision 0 of 8, recall 0 of 1. Section 2 is\n" +
-    "  the half that works."
-);
-
-// ---------------------------------------------------------------------
-// 2. THE MECHANISM, WHICH IS EXACT.
-// ---------------------------------------------------------------------
-//
-// A gate reads a source file and tests a regex against it. If that
-// regex's ONLY match in the file is inside a comment, the check is
-// being satisfied by prose right now — today, not hypothetically.
-//
-// That is what navigation-cost.test.mjs was doing: a check named
-// "…behind requestIdleCallback, so it never competes with hydration"
-// was `/requestIdleCallback/.test(bridge)` over the raw file, and the
-// component's header explains the decision in those words. Replacing
-// both real calls with setTimeout left the gate green.
-//
-// A gate may legitimately assert that a COMMENT exists — comment-claims
-// and roadmap-hidden both do, and the prose is their subject. So the
-// findings are split: a pattern that looks like CODE and matches only
-// prose is a candidate; a pattern that is a sentence probably is not.
-console.log("\n-- 2. PATTERNS WHOSE ONLY MATCH IN THEIR TARGET IS A COMMENT --\n");
-const pairs = [];
-for (const file of gates) {
-  const src = readFileSync(path.join(DIR, file), "utf8");
-  const vars = new Map();
-  for (const m of src.matchAll(
-    /const\s+([A-Za-z_$][\w$]*)\s*=\s*readFileSync\(\s*["'`]([^"'`]+)["'`]\s*,\s*"utf8"\s*\)\s*;/g
-  )) {
-    vars.set(m[1], m[2]);
-  }
-  if (vars.size === 0) continue;
-  for (const m of src.matchAll(/(!?)\/((?:[^/\\\n]|\\.)+)\/([gimsuy]*)\s*\.test\(\s*([A-Za-z_$][\w$]*)\s*\)/g)) {
-    const [, neg, body, flags, v] = m;
-    const target = vars.get(v);
-    if (!target || !existsSync(target)) continue;
-    let re;
-    try {
-      re = new RegExp(body, flags.replace(/[gy]/g, ""));
-    } catch {
-      continue;
+/** Every /regex/.test(fileVariable) pair in scripts/tests whose target
+ *  resolves to a real file, with `proseOnly` set when the regex matches
+ *  the raw file but not the file with comments stripped. Exported so
+ *  that scripts/tests/prose-anchored-checks.test.mjs holds the count at
+ *  its baseline instead of this scan merely printing it. */
+export function proseAnchoredPairs() {
+  const pairs = [];
+  for (const file of gates) {
+    // THE GATE'S OWN COMMENTS ARE NOT ITS CHECKS. On 2026-09-19 this
+    // reported mutation-sidecar.test.mjs for a regex that existed only in
+    // the note explaining why that regex had been REMOVED — the scan for
+    // gates that read comments, reading a comment.
+    const src = stripComments(readFileSync(path.join(DIR, file), "utf8"));
+    // A NAME IS ONLY USABLE IF IT MEANS ONE THING, UNWRAPPED. Two bindings
+    // of the same name in one gate, or one that reads through a stripper,
+    // and this cannot say which file a `.test(name)` is looking at.
+    // Nor if something is CHAINED onto the read: clarification-verdict
+    // builds its `ambiguityCode` as readFileSync(...).replace(...).filter(...),
+    // which is a stripper spelled out in place, and reading the raw file
+    // instead reported the very comment that stripper removes.
+    // gdpr-coverage.test.mjs was reported on 2026-09-19 for exactly that:
+    // its `confirmSrc` is strip(readFileSync(...)) at the top of the file
+    // and a second, raw readFileSync deep inside a function, and the flat
+    // last-write-wins map pointed the first one's checks at the raw text.
+    // The check was sound; the report was not.
+    const seen = new Map();
+    for (const m of src.matchAll(
+      /const\s+([A-Za-z_$][\w$]*)\s*=\s*([A-Za-z_$][\w$]*\()?\s*readFileSync\(\s*["'`]([^"'`]+)["'`]\s*,\s*"utf8"\s*\)(\s*;|\s*\n)?/g
+    )) {
+      const [, name, wrapper, target, ends] = m;
+      // Usable only if the binding is the WHOLE of the read: no wrapper
+      // call around it, nothing chained onto it, and the name bound once.
+      const plain = !wrapper && /;/.test(ends ?? "");
+      const prior = seen.get(name);
+      seen.set(name, prior === undefined && plain ? target : null);
     }
-    const raw = readFileSync(target, "utf8");
-    if (!re.test(raw) || re.test(stripComments(raw))) {
-      pairs.push({ file, target, body, neg: neg === "!", proseOnly: false });
-      continue;
+    const vars = new Map([...seen].filter(([, t]) => t !== null));
+    if (vars.size === 0) continue;
+    for (const m of src.matchAll(/(!?)\/((?:[^/\\\n]|\\.)+)\/([gimsuy]*)\s*\.test\(\s*([A-Za-z_$][\w$]*)\s*\)/g)) {
+      const [, neg, body, flags, v] = m;
+      const target = vars.get(v);
+      if (!target || !existsSync(target)) continue;
+      let re;
+      try {
+        re = new RegExp(body, flags.replace(/[gy]/g, ""));
+      } catch {
+        continue;
+      }
+      const raw = readFileSync(target, "utf8");
+      if (!re.test(raw) || re.test(stripComments(raw))) {
+        pairs.push({ file, target, body, neg: neg === "!", proseOnly: false });
+        continue;
+      }
+      // CODE-SHAPED vs SENTENCE-SHAPED.
+      const codeish = /[(){}[\]=;]|\\s\*|[a-z][A-Z]|\.\w|_\w/.test(body);
+      const words = body.replace(/\\[a-zA-Z]|[^\w\s]/g, " ").trim().split(/\s+/).filter((w) => /^[A-Za-z]{2,}$/.test(w));
+      const sentenceish = words.length >= 4 && !/[(){}[\]=;]/.test(body);
+      pairs.push({ file, target, body, neg: neg === "!", proseOnly: true, codeish: codeish && !sentenceish });
     }
-    // CODE-SHAPED vs SENTENCE-SHAPED.
-    const codeish = /[(){}[\]=;]|\\s\*|[a-z][A-Z]|\.\w|_\w/.test(body);
-    const words = body.replace(/\\[a-zA-Z]|[^\w\s]/g, " ").trim().split(/\s+/).filter((w) => /^[A-Za-z]{2,}$/.test(w));
-    const sentenceish = words.length >= 4 && !/[(){}[\]=;]/.test(body);
-    pairs.push({ file, target, body, neg: neg === "!", proseOnly: true, codeish: codeish && !sentenceish });
   }
+  return pairs;
 }
-const proseOnly = pairs.filter((p) => p.proseOnly);
-const codeShaped = proseOnly.filter((p) => p.codeish);
-console.log(`  ${pairs.length} /regex/.test(fileVariable) pairs resolved to a real target`);
-console.log(`  ${proseOnly.length} match ONLY inside a comment · ${codeShaped.length} of those look like code\n`);
-for (const p2 of codeShaped) {
-  console.log(`   ${p2.file}`);
-  console.log(`       ${p2.target}`);
-  console.log(`       /${p2.body}/${p2.neg ? "   [negated]" : ""}`);
+
+// EVERYTHING BELOW IS THE REPORT, and it only runs when this file is
+// the program. scripts/tests/prose-anchored-checks.test.mjs imports
+// proseAnchoredPairs from here; without this guard that import would
+// re-read all 274 gates and print the whole census inside the build.
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const rows = [];
+  for (const file of gates) {
+    const raw = readFileSync(path.join(DIR, file), "utf8");
+    const src = stripComments(raw);
+
+    // Paths the gate opens. Both spellings, plus the loadTs form that
+    // EXECUTES rather than reads.
+    //
+    // A PATH HELD IN A CONST COUNTS. The first version matched only a
+    // quoted literal inside the call, and roadmap-hidden.test.mjs — which
+    // runs `loadTs(FOOTER)` — came back as reading nothing it executes and
+    // was flagged as self-confirming. It is not: it executes the real
+    // FOOTER_LINKS array, which is the strongest thing in this whole
+    // classification.
+    //
+    // This repository has been bitten by the same blind spot twice and
+    // written it down both times: env-documented.test.mjs found that 79 of
+    // 130 environment variables are read as `process.env[name]` with the
+    // name in a string, and env-independence.test.mjs resolves a path held
+    // in a const because the gate that broke a CI build spawns
+    // `[RUNNER, ...args]`. A scanner about gates missing their subject had
+    // no business missing its own.
+    const consts = new Map();
+    for (const m of src.matchAll(/const\s+([A-Za-z_$][\w$]*)\s*=\s*["'`]([^"'`]+)["'`]\s*;/g)) {
+      consts.set(m[1], m[2]);
+    }
+    const resolve = (token) => (token.startsWith('"') || token.startsWith("'") || token.startsWith("`")
+      ? token.slice(1, -1)
+      : consts.get(token) ?? null);
+
+    const read = new Set();
+    for (const m of src.matchAll(/readFileSync\(\s*((?:["'`][^"'`]+["'`])|(?:[A-Za-z_$][\w$]*))\s*[,)]/g)) {
+      const p2 = resolve(m[1]);
+      if (p2 && p2.includes("/")) read.add(p2);
+    }
+    const executed = new Set();
+    for (const m of src.matchAll(/loadTs\(\s*((?:["'`][^"'`]+["'`])|(?:[A-Za-z_$][\w$]*))\s*[,)]/g)) {
+      const p2 = resolve(m[1]);
+      if (!p2 || !p2.includes("/")) continue;
+      executed.add(p2);
+      read.add(p2);
+    }
+    // A gate that walks a directory reads whatever is under it.
+    for (const m of src.matchAll(/(?:readdirSync|walk)\(\s*((?:["'`][^"'`]+["'`])|(?:[A-Za-z_$][\w$]*))\s*[,)]/g)) {
+      const p2 = resolve(m[1]);
+      if (p2) read.add(p2 + "/**");
+    }
+
+    const kinds = new Set([...read].map(kindOf));
+    const appOnly = kinds.size > 0 && [...kinds].every((k) => k === "app");
+
+    // LITERAL: a const holding an array or object of strings, or a
+    // comparison against a quoted string / number, used inside a check.
+    // Crude on purpose — it over-counts, which makes a flag rarer and a
+    // flag that survives worth reading.
+    const hasLiteralTable =
+      /const\s+[A-Z][A-Z0-9_]*\s*=\s*[[{]/.test(src) ||
+      // A NAMED CONSTANT STRING COMPARED AGAINST THE SOURCE is an
+      // expectation as much as a table is: `const GUARD = "...";
+      // src.includes(GUARD)` is the gate stating what the file must
+      // contain. mutation-tree.test.mjs is exactly this and was flagged.
+      /\.includes\(\s*[A-Z][A-Z0-9_]*\s*\)/.test(src);
+    const hasInlineExpectation =
+      /(?:check|checkTrue|ok)\([^)]*===\s*["'`]/.test(src) ||
+      /(?:check|checkTrue|ok)\([^)]*\.length\s*(?:===|>=|<=|>|<)\s*\d/.test(src) ||
+      /(?:check|checkTrue|ok)\([^)]*,\s*\d+\s*[,)]/.test(src) ||
+      // A CEILING OR FLOOR ON A MEASURED COUNT. design-density.test.mjs
+      // holds `r.counts.borders <= 581`, which is a number written in the
+      // gate and the strongest kind of independent statement it makes —
+      // and the three patterns above all missed it because the comparison
+      // is on a property rather than on `.length`.
+      /(?:check|checkTrue|ok)\([^)]*[a-z)\]]\s*(?:<=|>=|<|>)\s*\d+/.test(src);
+
+    // A GATE THAT RUNS A PROGRAM IS MEASURING BEHAVIOUR, not text — the
+    // same reason `loadTs` + a call counts. mutation-tree.test.mjs writes
+    // a mutant into the tree and runs check-mutation-markers against it,
+    // which is the strongest thing in this directory, and the first
+    // version of this scan called it self-confirming because it models
+    // only two ways of reading a file.
+    const spawns = /execFileSync\(|spawnSync\(|execSync\(/.test(src);
+
+    const evidence = [];
+    if (hasLiteralTable) evidence.push("LITERAL");
+    if (hasInlineExpectation) evidence.push("EXPECT");
+    if (!appOnly && kinds.size > 1) evidence.push(`SECOND(${[...kinds].filter((k) => k !== "app").join("+")})`);
+    if (executed.size > 0) evidence.push("EXECUTED");
+    if (spawns) evidence.push("RUNS");
+
+    rows.push({
+      file,
+      reads: [...read],
+      kinds: [...kinds],
+      appOnly,
+      executed: executed.size > 0 || spawns,
+      evidence,
+      selfConfirming: evidence.length === 0 && read.size > 0,
+    });
+  }
+
+  const noReads = rows.filter((r) => r.reads.length === 0);
+  const flagged = rows.filter((r) => r.selfConfirming);
+  const appOnlyNoExec = rows.filter((r) => r.appOnly && !r.executed && !r.evidence.includes("LITERAL"));
+
+  if (process.argv.includes("--json")) {
+    console.log(JSON.stringify({ gates: rows.length, flagged, appOnlyNoExec }, null, 2));
+    process.exit(0);
+  }
+
+  console.log(`== ${rows.length} gates in ${DIR} ==\n`);
+  console.log("-- 1. WHAT EACH GATE HAS TO DISAGREE WITH --\n");
+  console.log(`  read at least one artefact        ${rows.length - noReads.length}`);
+  console.log(`  read nothing (pure logic/unit)    ${noReads.length}`);
+  console.log(`  read ONLY app source              ${rows.filter((r) => r.appOnly).length}`);
+  console.log(`  ...of those, also EXECUTE or RUN  ${rows.filter((r) => r.appOnly && r.executed).length}`);
+  console.log(`  hold a second KIND of artefact    ${rows.filter((r) => r.kinds.length > 1).length}`);
+
+  console.log(`\n  candidates with no independent reference at all: ${flagged.length}`);
+  for (const r of flagged) console.log(`     ${r.file}  <- ${r.reads.slice(0, 3).join(", ")}`);
+  console.log(
+    "\n  THIS CLASSIFICATION IS WEAK IN BOTH DIRECTIONS AND THE NUMBER IS NOT\n" +
+      "  A FINDING. On 2026-09-19 all eight of its candidates were run down by\n" +
+      "  mutation and every one HELD; the one gate that was really confirming\n" +
+      "  a file against itself — navigation-cost.test.mjs — it did not flag,\n" +
+      "  because a const string comparison elsewhere in the file counted as an\n" +
+      "  independent reference. Precision 0 of 8, recall 0 of 1. Section 2 is\n" +
+      "  the half that works."
+  );
+
+
+  // ---------------------------------------------------------------------
+  // 2. THE MECHANISM, WHICH IS EXACT.
+  // ---------------------------------------------------------------------
+  //
+  // A gate reads a source file and tests a regex against it. If that
+  // regex's ONLY match in the file is inside a comment, the check is
+  // being satisfied by prose right now — today, not hypothetically.
+  //
+  // That is what navigation-cost.test.mjs was doing: a check named
+  // "…behind requestIdleCallback, so it never competes with hydration"
+  // was `/requestIdleCallback/.test(bridge)` over the raw file, and the
+  // component's header explains the decision in those words. Replacing
+  // both real calls with setTimeout left the gate green.
+  //
+  // A gate may legitimately assert that a COMMENT exists — comment-claims
+  // and roadmap-hidden both do, and the prose is their subject. So the
+  // findings are split: a pattern that looks like CODE and matches only
+  // prose is a candidate; a pattern that is a sentence probably is not.
+  console.log("\n-- 2. PATTERNS WHOSE ONLY MATCH IN THEIR TARGET IS A COMMENT --\n");
+  const pairs = proseAnchoredPairs();
+  const proseOnly = pairs.filter((p) => p.proseOnly);
+  const codeShaped = proseOnly.filter((p) => p.codeish);
+  console.log(`  ${pairs.length} /regex/.test(fileVariable) pairs resolved to a real target`);
+  console.log(`  ${proseOnly.length} match ONLY inside a comment · ${codeShaped.length} of those look like code\n`);
+  for (const p2 of codeShaped) {
+    console.log(`   ${p2.file}`);
+    console.log(`       ${p2.target}`);
+    console.log(`       /${p2.body}/${p2.neg ? "   [negated]" : ""}`);
+  }
+  console.log(
+    "\n  REPORTED, NOT GATED, and the split above is a heuristic: several of\n" +
+      "  these deliberately span a comment AND the code under it, which is a\n" +
+      "  legitimate anchor. CLAUDE.md says how to settle one — MUTATE the\n" +
+      "  source, never read it. Break what the check claims to protect and\n" +
+      "  require it to go red."
+  );
 }
-console.log(
-  "\n  REPORTED, NOT GATED, and the split above is a heuristic: several of\n" +
-    "  these deliberately span a comment AND the code under it, which is a\n" +
-    "  legitimate anchor. CLAUDE.md says how to settle one — MUTATE the\n" +
-    "  source, never read it. Break what the check claims to protect and\n" +
-    "  require it to go red."
-);

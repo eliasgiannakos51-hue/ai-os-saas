@@ -51,6 +51,7 @@ const fl = await loadTs("src/lib/function-limits.ts");
 const getSrc = readFileSync("src/app/api/research/[id]/route.ts", "utf8");
 const uiSrc = readFileSync("src/components/research/research-workspace.tsx", "utf8");
 const researchSrc = readFileSync("src/lib/research/research.ts", "utf8");
+const { applyToSource } = await import("../apply-function-limits.mjs");
 const migration = readFileSync("supabase/migrations/20260809_research_progress.sql", "utf8");
 
 // ---------------------------------------------------------------------
@@ -67,10 +68,16 @@ console.log("== 1. the work fits ANY budget, instead of needing a big one ==");
 // what it wants, and the build step lowers the literal to whatever the
 // platform allows. This assertion followed that change; the guarantee it
 // checks — "this route can be built on a 60-second plan" — is unchanged.
-check(
-  "the route declares a literal with a @function-limit marker",
-  /export const maxDuration = \d+; \/\/ @function-limit \d+/.test(runSrc)
-);
+// THIS HELD ITS OWN COPY OF THE BUILD STEP'S REGEX. The marker is not
+// prose — apply-function-limits.mjs parses it — but a second copy of
+// /export const maxDuration = (\d+); \/\/ @function-limit (\d+)/ living
+// here meant the gate could stay green on a shape the build step had
+// stopped recognising. It now runs the build step's own pure function
+// over the route and reads what came back.
+const marked = applyToSource(runSrc, 60);
+check("the route declares a literal the build step can lower", marked.preferred !== null);
+check("...and a 60-second ceiling lowers it to 60", marked.applied === 60 && marked.changed === true);
+check("...while the marker still records what the route would prefer", marked.preferred === 800);
 check("the runtime budget is still configurable", fl.resolveMaxFunctionDuration({ MAX_FUNCTION_DURATION: "60" }) === 60);
 check("and a 60s budget leaves room to save state", fl.functionBudgetMs() > 0);
 

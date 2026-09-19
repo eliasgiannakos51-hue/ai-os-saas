@@ -1913,3 +1913,38 @@ have.
 would this check still pass?* If not, it is anchored on prose. Strip
 first — and then, because stripping is not enough on its own, mutate the
 code the check names and require it to go red.
+
+**And then the general case, six more, found by asking exactly that
+question mechanically.** `scripts/scan-self-confirming-gates.mjs`
+resolves every `/regex/.test(fileVariable)` pair in `scripts/tests`,
+tests each regex against its target twice — raw, and with comments
+stripped — and reports the pairs that match only the first. 1,278 pairs
+on 2026-09-19; six matched only prose and looked like code. Each was
+settled by mutation, never by reading:
+
+| the check | its anchor | the mutation that stayed green |
+|---|---|---|
+| agent-depth, "a fill failure still creates the agent" | `NOT FATAL` | `throw err;` one line under the `logApiError` |
+| user-photos, "…and fails open" | `/* fails open` | `setGenerating(false); return;` beside it |
+| context-optimization, "…and judges blind" | the sentence about the judge | labelling one arm "narrowed" in the prompt |
+| job-consumption ×2 | `THE MOMENT THE USER SEES IT`, `Explicit discard` | — the code half was real; rewording the comment reddened them for nothing |
+| research-reliability, the `@function-limit` marker | — legitimate: the marker is machine-read | but the gate held a second copy of the build step's regex |
+
+Two more were reported and were **not** findings, and the way they were
+wrong is worth as much as the six: `gdpr-coverage` and
+`clarification-verdict` both strip their source before testing it — one
+through a helper, one through a `.replace().filter()` chain written in
+place — and the scan was resolving the variable to the raw file. A name
+bound twice, or bound through anything at all, now resolves to nothing.
+The scan also reported itself: the note explaining a regex it had just
+*removed* was read as a live check, so it strips the gate's own comments
+before extracting pairs. A scan for gates that read comments, reading a
+comment.
+
+**It is a gate now, not a report.** `prose-anchored-checks.test.mjs`
+holds the count at one, and that one is the exception: a documentation
+check that says so in its own name ("DOC, not behaviour"). A new check
+anchored on prose fails the build and the failure says what to do —
+mutate it, re-anchor it, or name it a documentation check and add it to
+the list. `prose-anchored-checks.mutation.mjs` puts two of the six
+defects back and empties the scan in four different places; 6 of 6.

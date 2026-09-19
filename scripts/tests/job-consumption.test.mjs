@@ -22,6 +22,7 @@
 //
 // Run: node scripts/tests/job-consumption.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
 const failures = [];
@@ -46,6 +47,12 @@ const consumeSrc = readFileSync("src/app/api/jobs/[id]/consume/route.ts", "utf8"
 const clientSrc = readFileSync("src/lib/jobs/consume.ts", "utf8");
 const seenSrc = readFileSync("src/components/jobs/job-seen.tsx", "utf8");
 const agentsUi = readFileSync("src/components/agents/agents-workspace.tsx", "utf8");
+const agentsUiCode = stripComments(agentsUi);
+// stripComments preserves column positions, so a removed comment leaves
+// its own width behind as blanks — 359 characters, here, between the
+// preview conditional and the JobSeen under it. A positional window is
+// only meaningful once that padding is collapsed.
+const agentsUiTight = agentsUiCode.replace(/\s+/g, " ");
 const filesUi = readFileSync("src/components/files/files-workspace.tsx", "utf8");
 const migration = readFileSync("supabase/migrations/20260814_job_consumed_at.sql", "utf8");
 
@@ -324,9 +331,17 @@ check("the request survives the page being left", /keepalive: true/.test(clientS
 
 console.log("\n== 7. every screen that can show a result marks it ==");
 // agent_build — the draft, which is the one that was costing money twice.
-check("the agents preview carries JobSeen INSIDE it", /THE MOMENT THE USER SEES IT[\s\S]{0,200}<JobSeen jobId=\{resultJobId\}/.test(agentsUi));
+// BOTH OF THESE READ A COMMENT AS THEIR LOCATOR. The first was anchored
+// on "THE MOMENT THE USER SEES IT", the second on "Explicit discard" —
+// so rewording either comment reddened a gate about behaviour, and the
+// window the comment opened was the only thing tying the JobSeen to the
+// preview. They now open on the code: the preview's own conditional, and
+// the discard button's testid.
+check("the agents preview carries JobSeen INSIDE it",
+  /\{preview\?\.draft && \([\s\S]{0,200}<JobSeen jobId=\{resultJobId\} \/>/.test(agentsUiTight));
 check("so do the clarifying questions", /<JobSeen jobId=\{resultJobId\} \/>[\s\S]{0,200}<ClarificationQuestions/.test(agentsUi));
-check("(δ) Discard marks it immediately", /Explicit discard[\s\S]{0,200}markJobConsumed\(resultJobId\)/.test(agentsUi));
+check("(δ) Discard marks it immediately",
+  /data-testid="agents-discard"[\s\S]{0,240}void markJobConsumed\(resultJobId\);/.test(agentsUiCode));
 check("closing the create panel does too", /function resetCreate\(\) \{[\s\S]{0,120}markJobConsumed\(resultJobId\)/.test(agentsUi));
 check("a completed build with nothing to render is marked, or it returns forever", /addToast\(result\.error \?\? t\("buildError"\), "error"\);[\s\S]{0,80}markJobConsumed\(job\.id\)/.test(agentsUi));
 check("agent_run's outcome is marked when it is announced", /markJobConsumed\(runJob\.id\)/.test(agentsUi));
@@ -377,7 +392,10 @@ function walk(dir) {
   }
   return out;
 }
-const stripComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+// stripComments is the shared one from check-mutation-markers.mjs. The
+// hand-rolled pair of regexes that used to be here ate from the first
+// /* to the last */ across string literals; the shared scanner tracks
+// quotes, templates and regex literals instead.
 const stale = [];
 let callerCount = 0;
 for (const file of walk("src")) {

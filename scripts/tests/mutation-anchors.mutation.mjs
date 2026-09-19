@@ -25,6 +25,8 @@ import { execFileSync } from "node:child_process";
 const GATE = "scripts/tests/mutation-anchors.test.mjs";
 const READER = "scripts/tests/lib/mutant-list.mjs";
 const TABLE = "scripts/tests/lib/prose-anchors.mjs";
+// A stable, unrelated suite, used only as a place to break one anchor.
+const OTHER_SUITE = "scripts/tests/cron-auth.mutation.mjs";
 
 const MUTANTS = [
   {
@@ -98,6 +100,20 @@ const MUTANTS = [
     from: 'changed: "BOUNDARY-FORMAT"',
     to: 'changed: "T"',
     expect: "is specific enough to mean something",
+  },
+  {
+    // 8. AN ANCHOR THAT IS NOT IN THE TREE. A mutant whose `from` no
+    // longer matches anything does not fail — it does not RUN, so its
+    // suite reports one fewer mutation and stays green while the clause
+    // it was the only evidence for goes unguarded. Two of these survived
+    // a green build, a green build:ci and a push on 2026-09-18; a
+    // 25-minute full sweep was what found them. This check is the cheap
+    // half of that sweep, and it is a string search.
+    name: "a mutant's anchor no longer exists in the file it names",
+    file: OTHER_SUITE,
+    from: '    from: \'      "path": "/api/cron/cost-alerts",\',',
+    to: '    from: \'      "path": "/api/cron/no-such-route-anywhere-in-this-tree",\',',
+    expect: "is still in the tree",
   },
 ];
 

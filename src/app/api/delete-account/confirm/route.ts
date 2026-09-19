@@ -179,10 +179,38 @@ export async function POST(request: Request) {
         }
       } catch (err) {
         logApiError("/api/delete-account/confirm", err, { stage: "cancel_subscription", subscriptionId });
-        await admin
+        // THE SENTENCE BELOW IS ONLY TRUE IF THIS WRITE LANDS.
+        //
+        // "Your link still works" is a promise about a row, and the row
+        // is this one: the claim above consumed the single-use token, and
+        // only putting used_at back makes the emailed link usable a
+        // second time. The write was unchecked, so the one failure that
+        // matters — the give-back not happening — produced the reassuring
+        // half of the message and none of the fact. The person is then
+        // told to try again with a link that can never work again, on the
+        // erasure path, where the alternative to self-service is
+        // contacting support about an account they wanted deleted.
+        const { error: giveBackError } = await admin
           .from("account_deletion_requests")
           .update({ used_at: null })
           .eq("token_hash", tokenHash);
+        if (giveBackError) {
+          logApiError("/api/delete-account/confirm", giveBackError, {
+            stage: "release_deletion_token",
+            hint: "the emailed link is now spent and the account was NOT deleted — this request needs a new deletion link or manual handling",
+          });
+          // THE SAME SENTENCE THE THREE OTHER DEAD ENDS IN THIS ROUTE
+          // USE, deliberately, rather than a new one. This page renders
+          // `data.error` verbatim (confirm-delete-account-form.tsx), so
+          // every distinct string here is one more untranslated sentence
+          // on a public page — and "contact support" is the whole of the
+          // advice anyway once the token is spent. What is NOT reused is
+          // the reassuring one below it.
+          return NextResponse.json(
+            { ok: false, error: "Could not delete the account. Please contact support." },
+            { status: 500 }
+          );
+        }
         return NextResponse.json(
           {
             ok: false,

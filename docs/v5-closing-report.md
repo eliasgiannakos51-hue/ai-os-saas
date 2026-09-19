@@ -1,18 +1,22 @@
 # V5 — closing report
 
-**Every number here was measured on 2026-09-18, on commit `13885c7b`, by
-running the thing that produces it.** Where a number could not be
-measured, the row says so instead of carrying a figure. The commands are
-named so the next reader re-runs rather than trusts.
+**Every number here was measured on 2026-09-18 by running the thing that
+produces it.** Where a number could not be measured, the row says so
+instead of carrying a figure. The commands are named so the next reader
+re-runs rather than trusts.
 
     npm run build            # every gate, then next build
     npm run build:ci         # the same under a deployed environment
-    npm run test:prod        # the 44 prodtests — needs production
-    npm run test:mutation    # the 172 mutation suites
+    npm run test:prod        # the prodtests — needs production
+    npm run test:mutation    # every *.mutation.mjs
 
-**This supersedes the 2026-09-13 edition.** Five days and six rounds of
+**This supersedes the 2026-09-13 edition.** Five days and eight rounds of
 work sit between them; the figures below replace the ones that were true
 then. Where a section is unchanged it says so rather than being retyped.
+
+**Re-measured at the close of the final round**, after the multi-write
+sweep and the unread-write pass: §Δ and the verdict in §ΣΤ carry the last
+figures, and every figure in them names the command that derives it.
 
 ---
 
@@ -239,16 +243,42 @@ a browser. `margin-policy.ts`'s own header claimed the quoted and charged
 multipliers "cannot drift apart"; they can, in exactly one way, and it now
 says which.
 
+### And in the two rounds after this section was first written
+
+**Seven of 33 multi-write routes were broken** — 3 of the 10 touching
+money or publishing, 4 of the remaining 23. The worst was not a route:
+`settleReservation` wrote a cost-log row, two `production_errors` rows
+and a margin-alert email to the owner every time an AI call THREW,
+because it settled a zero instead of releasing. `releaseReservation`'s
+own doc comment, ten lines below it in the same file, stated the rule it
+was breaking. Fixed in the function all forty call sites reach.
+
+**Six of 14 unread writes were broken.** The population — a write whose
+`.error` nobody reads, which in supabase-js is a write that cannot fail
+as far as the surrounding code knows — is printed by `node
+scripts/scan-unread-write-errors.mjs`; it stood at 36 of 145 before that
+pass and 25 of 139 after. Four of the six were a guard whose own silent
+failure removes the thing it guards: a daily email that never stops, a
+scheduled run that reruns its own AI call, an agent that resubmits every
+fifteen minutes, and a deletion link the route promises still works.
+
+**Five of the 14 were read and found CORRECT**, and are held in the gate
+beside the six, because each is safe for a reason located somewhere else:
+a claim that fails closed, a cached id the recovery re-derives, a stale
+reaper that rescues three rows. Any of those three can change without the
+unchecked write changing at all.
+
 ---
 
 ## Δ. The patterns
 
-**There are 47 shapes in `docs/shapes.md` as this report closes
-(2026-09-18), not 29.** `node scripts/tests/shape-names.test.mjs` prints
-the live count — 48 after the multi-write sweep added one the same day —
-and resolves every `SHAPE:` reference against the catalogue. Read the
-command's number, not this sentence's. The brief that asked for this
-report said 29; that is the catalogue's own shape *the number that was
+**There are far more shapes in `docs/shapes.md` than the 29 the brief
+named** — 50 at the close of 2026-09-18, three of them added by the
+multi-write and unread-write sweeps of that day. `node scripts/tests/shape-names.test.mjs`
+prints the live count and resolves every `SHAPE:` reference against the
+catalogue. Read the command's number, not this sentence's.
+
+The brief that asked for this report said 29; that is the catalogue's own shape *the number that was
 right when it was typed*, happening to the request for the audit — for the
 third report running.
 
@@ -341,40 +371,52 @@ ceiling is how many sites an account may publish. Third, the sidebar at
 
 **Two percentages, and the gap between them is the report.**
 
-**In code: 100%.** All **271** `*.test.mjs` gates pass. `npm run build`
-exits 0 with zero failures; `npm run build:ci` passes under a deployed
-environment. The full mutation sweep completed after this audit's changes:
-**172 suites, 171 green, 1 skipped, 0 red** — and the runner's own last
-line is the honest one, *"NO SUITE IS RED, but 1 of 172 never ran — this
-is not all green."* The one is `user-isolation`, which is section Η item 1
-and has been for four reports.
+**In code: 100%.** All **273** `*.test.mjs` gates pass (`ls
+scripts/tests/*.test.mjs | wc -l`). `npm run build` exits 0 with zero
+failures; `npm run build:ci` passes under a deployed environment.
 
-**In proof: 75%.** **271 of the 363** gates in the tree executed here. The
-other 92 — 29 dbtests, 44 prodtests, 19 itests — need a database or
-production, and none of them ran. Mutation coverage over what the sweep
-can drive is **63.8%** (185 of 290), up from 60.6% five days ago.
+**In proof: 75%.** **273 of the 365** gates in the tree executed here.
+The other 92 — 29 dbtests, 44 prodtests, 19 itests — need a database or
+production, and none of them ran. That ratio has not moved in three
+reports and it will not move on this machine: it is a statement about
+what a checkout can execute, not about effort.
+
+Mutation coverage over what the sweep CAN drive is **64.0%**, 187 of 292
+(`node scripts/tests/mutation-coverage.test.mjs`), against 60.6% five
+days ago. 105 gates are bare; none is in the money or access categories,
+which that gate reports separately and holds at zero.
 
 The four axes:
 
 | axis | in code | in proof |
 |---|---|---|
-| **Truth** — does the product say true things? | strong: pricing page, PLANS and catalog gated both directions; a per-row rule now, not a ratio | good: gates ran; the pricing page rendered live locally |
-| **Security** — is one account sealed from another? | strong: 109 of 110 tables with RLS, 106 canary checks, 66 of 66 routes showing an ownership mechanism | **weak: the one test that demonstrates it has still never run** |
-| **Money** — is what is charged what is shown? | improved: the publishing ceiling is asked on every write; 0 model-reaching routes outside the credit system | weak: nothing measures estimate against settlement, and the per-feature override is invisible to the estimate by design |
-| **Endurance** — does it survive scale and a second language? | improved: emails in ten languages with plural forms chosen by `Intl.PluralRules` | weak: 105 bare gates; platform-wide daily cap; 1,108 email strings no reader can reach |
+| **Truth** — does the product say true things? | strong: pricing page, PLANS and catalog gated both directions; a per-row rule, not a ratio. **Five instruments** corrected in the last two rounds for claiming more than they could — a reaper that said a charge was structurally impossible, two gates matching a log tag as prose, a register entry that outlived its file, and `mutation-anchors` printing its count of dead anchors without judging it | good: gates ran; the pricing page rendered live locally. `scan-self-claims` holds every path named in a comment at zero unresolved, and an anchor that no longer resolves is now gated at zero too |
+| **Security** — is one account sealed from another? | strong: **109 of 110** tables with RLS (86 literal, 23 through a resolved loop, 10 deny-all); **120** authenticated routes — 66 acting on a request id, 16 reaching past RLS, 50 delegating to it; 33 function canaries | **weak, unchanged: the one test that demonstrates it has still never run.** §Η item 1, for the fifth report |
+| **Money** — is what is charged what is shown? | **the axis that moved.** `settleReservation` releases rather than settling a zero when no call completed — one change covering forty call sites, closing a cost-log row, two error rows and an owner email per failed request during an AI outage. 7 multi-write defects fixed across 33 routes; 6 unread-write defects across 14 | weak: nothing measures estimate against settlement, and the per-feature override is invisible to the estimate by design (V6 §3, §12) |
+| **Endurance** — does it survive scale and a second language? | improved: emails in ten languages with plural forms from `Intl.PluralRules`; three cron loops that could repeat work indefinitely now count their own failures into their output | weak: 105 bare gates; the platform-wide daily cap; 1,108 email strings no reader of those languages has seen |
+
+**What moved and what did not.** Money is the axis these rounds changed —
+not by adding a gate but by moving a decision into the one function every
+paid action already calls. Security is exactly where it was five days
+ago, and what would move it is fifteen minutes of the owner's time (§Η
+item 1). Truth improved in a direction worth naming: four of the
+corrections were to instruments, not to product code.
 
 **The honest one-line summary.** The code is in better shape than the
-proof, the proof is in better shape than it was, and the single number
-that would move the verdict most is not a number I can produce.
+proof, the proof is where it was, and the single number that would move
+the verdict most is still not a number I can produce.
 
 ---
 
 ## Ζ. Documents
 
-`docs/v6-list.md` carries what this report leaves open. `docs/shapes.md`
-held 47 shapes when this report closed and 48 after the multi-write
-sweep of the same day; `node scripts/tests/shape-names.test.mjs` prints
-the count on every run.
+`docs/v6-list.md` carries what this report leaves open — fourteen items,
+of which §11 closed on the day this report was written and §14 is what
+that closure left behind. `docs/shapes.md` is the pattern catalogue;
+`node scripts/tests/shape-names.test.mjs` prints how many it defines (50
+at the close of 2026-09-18) and resolves every `SHAPE:` reference in the
+tree against it. `node scripts/scan-unread-write-errors.mjs` prints
+§14's population.
 
 ---
 

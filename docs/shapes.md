@@ -1661,3 +1661,91 @@ comment.
 enforces it, and what happens in the ones that do not?* A doc comment
 that says "distinct from X" is a claim about something else's behaviour,
 and it is the one kind of claim the file it sits in cannot make true.
+
+## The column whose only job is the filter one line above it
+
+    .is("stuck_notified_at", null)      // the query
+    ...
+    await admin.from("user_websites")
+      .update({ stuck_notified_at: ... })   // the write, unchecked
+
+`stuck_notified_at` does nothing else. It is not displayed, not reported,
+not read by any other query. It exists so that a user whose website
+generation has been stuck for 24 hours gets **one** email instead of one
+every day — and the entire mechanism is that the daily query filters on
+it being null, and this write sets it.
+
+The write ran after the email, and its result was discarded.
+
+**So the single failure the column was created to prevent was the single
+failure nothing checked.** Every other outcome is fine: the email sends
+and the mark lands (correct), the email fails and the mark lands (one
+lost courtesy). Only "mark did not land" matters, and it produced the
+unbounded daily repeat, silently, to the user least able to act on it.
+
+**The shape is a guard whose own failure is the thing it guards
+against.** It is not the same as an unchecked write in general — most
+unchecked writes degrade something. This one *inverts*: the write
+failing does not weaken the protection, it removes it entirely and
+replaces it with the harm. Three more in the same sweep had it: a
+`next_run_at` that stops an agent resubmitting, a terminal `status` that
+stops a cron rerunning its own AI call, a `used_at: null` that makes the
+sentence "your link still works" true.
+
+**The tell is the ORDER, and it is visible without reading the write.**
+Act-then-mark is the wrong order whenever the mark is what prevents the
+act repeating: the window between them is a window in which the act has
+happened and nothing records it. Mark-then-act can lose one action;
+act-then-mark can lose all bounds on it. A claim before the work is the
+standard answer and this codebase already uses it four routes over
+(`processing_started_at` in `api/cron/agent-runs`, `used_at` in
+`api/delete-account/confirm`, `claimChunk` in research) — the stuck
+notifier was the one place the same author wrote it the other way round.
+
+**The question to ask:** *what is this column FOR — and if this write
+silently did not happen, would anything else notice?* When the answer is
+"nothing, that is what the column is", the write is not bookkeeping. It
+is the feature, and it needs a claim, an error check, or both.
+
+## A mutant whose anchor moved does not fail — it stops existing
+
+A mutation suite proves a gate is load-bearing by putting a real defect
+back and requiring the gate to name it. The mechanism is a string
+replace: find `from` in the file, write `to`, run the gate, expect red.
+
+**When `from` is no longer in the file, nothing goes red.** The edit is
+not applied, so the defect is never reintroduced, so the gate is not
+asked the question. The suite reports one fewer mutation and prints the
+same cheerful last line it always prints. The clause that mutant was the
+only evidence for is now unguarded, and the only trace is a count that
+went down.
+
+**On 2026-09-18 two of these survived a green `npm run build`, a green
+`npm run build:ci` and a push.** Both were created by the same round's
+own work: a `FLOOR` raised from 173 to 174 when a mutation suite was
+added, and a write that moved into a helper when eight unchecked writes
+were fixed. Neither was a mistake in the fix. They were the fix's
+shadow, in a file the fix did not open.
+
+**What found them was a 25-minute full sweep** — `run-mutations.mjs`
+reports STALE ANCHORS separately, which is the one place in the tree
+that knew. What did NOT find them: thirteen mutation suites run by hand,
+chosen by grepping for the files the round had changed. That method
+cannot work, and the reason is the shape itself: the suite that breaks
+is not the suite that mentions your file, it is the suite that mentioned
+*the line*.
+
+**And the check was already there, printing.** `mutation-anchors.test.mjs`
+counted them — *"2093 mutations analysed · 299 target a non-JavaScript
+file · 2 anchor not found in the tree"* — and asserted nothing about the
+third number, one line above a section full of assertions. The general
+case of that is its own entry in this catalogue and its own scanner
+(`scripts/scan-unjudged-numbers.mjs`); this is the instance that cost
+something. It is gated at zero now, because an anchor that does not
+resolve is never a judgement call: the suite is broken, not the code it
+guards.
+
+**The question to ask:** *when my change moves a line, what else was
+pointing at that line?* A gate's assertions are visible in the gate. A
+mutant's anchors live in a different file, are matched by exact text,
+and fail silently by definition.

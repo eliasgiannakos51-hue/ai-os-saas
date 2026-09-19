@@ -772,7 +772,21 @@ const clientFallbacks = sources.flatMap((f) => [
 // the same way. And the client does not depend on the English: the
 // response carries `reason: "taken"` and the publish dialog renders its
 // own translated message from that. Measured, not added.
-const SERVER_PROSE_BASELINE = 663;
+// 663 -> 666 ON 2026-09-18: three refusal SITES, zero new sentences. The
+// census counts sites, not distinct strings (the 662 -> 663 entry above
+// records the same thing), and all three reuse a sentence this tree
+// already says:
+//   api/delete-account/confirm  the token give-back is now checked, and a
+//     give-back that failed answers "Could not delete the account. Please
+//     contact support." — the same string its three other dead ends use.
+//     It must NOT answer "Your link still works", which is what it did
+//     while the write was unchecked, on a page that renders data.error
+//     verbatim.
+//   api/research/[id]/run       the reservation hand-off is now checked;
+//     the refusal and the row it writes both say "Could not start the
+//     report.", already this route's sentence for that outcome.
+// Measured, not added.
+const SERVER_PROSE_BASELINE = 666;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

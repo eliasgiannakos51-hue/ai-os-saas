@@ -28,6 +28,11 @@ const RES = "src/lib/billing/reservations.ts";
 const ANALYSE = "src/app/api/data-analysis/[id]/analyse/route.ts";
 const AGENTS = "src/app/api/cron/agent-runs/route.ts";
 const SPEAK = "src/app/api/voice/speak/route.ts";
+const SCHEDULED = "src/app/api/cron/scheduled-runs/route.ts";
+const STATUS = "src/app/api/websites/status/route.ts";
+const PROCESS = "src/app/api/websites/generate/process/route.ts";
+const DELETE_CONFIRM = "src/app/api/delete-account/confirm/route.ts";
+const RUN = "src/app/api/research/[id]/run/route.ts";
 
 const MUTANTS = [
   {
@@ -92,6 +97,79 @@ const MUTANTS = [
     to: "      stuckRunsClosed: stuckCount ?? 0,",
     expect: "counted into the response",
   },
+  // ---- THE SECOND SITTING, 2026-09-18: six writes whose error nobody read ----
+  {
+    name: "a scheduled run's terminal status goes back to a bare update",
+    file: SCHEDULED,
+    from: '          if (!(await closeRun(admin, run.id, { status: "failed", result: result.error, executed_at: new Date().toISOString() }, "close_run_failed"))) unclosed++;',
+    to: '          await admin\n            .from("scheduled_agent_runs")\n            .update({ status: "failed", result: result.error, executed_at: new Date().toISOString() })\n            .eq("id", run.id);',
+    expect: "no bare scheduled_agent_runs write is left beside it",
+  },
+  {
+    name: "closeRun stops reading the result of its own write",
+    file: SCHEDULED,
+    from: '  const { error } = await admin.from("scheduled_agent_runs").update(patch).eq("id", runId);\n  if (error) {',
+    to: '  const { error } = await admin.from("scheduled_agent_runs").update(patch).eq("id", runId);\n  if (false && error) {',
+    expect: "every terminal status goes through one checked helper",
+  },
+  {
+    name: "an unclosed run stops reaching the cron's output",
+    file: SCHEDULED,
+    from: "      deferred,\n      unclosed,",
+    to: "      deferred,",
+    expect: "counted into the response",
+  },
+  {
+    name: "the stuck-generation email goes back to sending before it marks",
+    file: SCHEDULED,
+    from: '        const { error: markError } = await admin\n          .from("user_websites")\n          .update({ stuck_notified_at: new Date().toISOString() })',
+    to: '        const { data: ownerAuthEarly } = await admin.auth.admin.getUserById(website.user_id);\n        if (ownerAuthEarly?.user?.email) {\n          void sendStuckGenerationEmail({ email: ownerAuthEarly.user.email, userId: website.user_id, websiteName: website.name });\n        }\n        const { error: markError } = await admin\n          .from("user_websites")\n          .update({ stuck_notified_at: new Date().toISOString() })',
+    expect: "claimed BEFORE every send in the loop",
+  },
+  {
+    name: "the stopped-generation write stops reporting what was charged",
+    file: PROCESS,
+    from: '            stage: "save_stopped_status",\n            websiteId,\n            creditsCharged: settlement.creditsCharged,',
+    to: '            stage: "save_stopped_status",\n            websiteId,',
+    expect: "with the amount charged",
+  },
+  {
+    name: "the reaper goes back to claiming a charge is structurally impossible",
+    file: STATUS,
+    from: '    // stage: "save_stopped_status", so the case is findable instead of',
+    to: "    // findable instead of",
+    expect: "no longer claims a charge is structurally impossible",
+  },
+  {
+    name: "the deletion token's give-back stops being checked",
+    file: DELETE_CONFIRM,
+    from: '        const { error: giveBackError } = await admin\n          .from("account_deletion_requests")\n          .update({ used_at: null })',
+    to: '        const giveBack = await admin\n          .from("account_deletion_requests")\n          .update({ used_at: null })',
+    expect: "the token give-back is checked",
+  },
+  {
+    name: "a failed give-back still tells the user their link works",
+    file: DELETE_CONFIRM,
+    from: "        if (giveBackError) {",
+    to: "        if (false && giveBackError) {",
+    expect: "does not say the link still works",
+  },
+  {
+    name: "the research hand-off strands the hold again",
+    file: RUN,
+    from: '      logApiError("/api/research/[id]/run", holdError, { stage: "record_reservation", reportId: report.id });\n      await releaseReservation(user.id, reservationId);',
+    to: '      logApiError("/api/research/[id]/run", holdError, { stage: "record_reservation", reportId: report.id });',
+    expect: "releases rather than stranding the hold",
+  },
+  {
+    // The clearance, not the defect: agent-runs' claim is only safe
+    // because a null result is treated as "somebody else has it".
+    name: "cron/agent-runs' claim stops failing closed",
+    file: AGENTS,
+    from: "        if (!claimed || claimed.length === 0) {\n          skipped++;",
+    to: "        if (claimed && claimed.length === 0) {\n          skipped++;",
+    expect: "fails CLOSED",
+  },
   {
     // voice/speak has exactly one release, so blinding it really does
     // turn the file into an offender rather than leaving a second call
@@ -135,6 +213,6 @@ const MUTANTS = [
 runMutations({
   name: "reservation-lifecycle",
   gate: GATE,
-  targets: [GATE, RES, ANALYSE, AGENTS, SPEAK],
+  targets: [GATE, RES, ANALYSE, AGENTS, SPEAK, SCHEDULED, STATUS, PROCESS, DELETE_CONFIRM, RUN],
   mutants: MUTANTS,
 });

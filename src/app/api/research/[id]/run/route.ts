@@ -12,7 +12,7 @@ import {
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
-import { reserveCredits } from "@/lib/billing/reservations";
+import { releaseReservation, reserveCredits } from "@/lib/billing/reservations";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
 import { RESEARCH_MODEL } from "@/lib/files/file-models";
@@ -215,11 +215,36 @@ export async function POST(_request: Request, { params }: { params: { id: string
     }
 
     // The hold has to outlive this invocation — see the doc comment.
+    //
+    // CHECKED, BECAUSE THIS WRITE IS THE WHOLE MECHANISM. Nothing else
+    // remembers the reservation id: this request returns immediately and
+    // the chunked runner reads it back off the row to settle or release.
+    // A write that does not land strands the hold until the daily
+    // releaseExpiredReservations sweep, and failChunk — which exists to
+    // give the credits back when a chunk dies — has nothing to give back.
+    //
+    // Refusing here is cheap: the run has not started, so releasing the
+    // hold now costs the user nothing and leaves the report exactly as it
+    // was.
     const admin = createAdminClient();
-    await admin
+    const { error: holdError } = await admin
       .from("research_reports")
       .update({ reservation_id: reservationId || null })
       .eq("id", report.id);
+    if (holdError) {
+      logApiError("/api/research/[id]/run", holdError, { stage: "record_reservation", reportId: report.id });
+      await releaseReservation(user.id, reservationId);
+      await supabase
+        .from("research_reports")
+        .update({ status: "failed" satisfies ResearchStatus, error: "Could not start the report.", processing_started_at: null })
+        .eq("id", report.id)
+        .eq("user_id", user.id);
+      // The route's existing sentence for this exact outcome, reused
+      // rather than reworded: research-workspace.tsx toasts `data.error`
+      // as-is, so a new string here is a new untranslated toast for no
+      // new information.
+      return NextResponse.json({ ok: false, error: "Could not start the report." }, { status: 500 });
+    }
 
     void recordAiCallForDailySpend(estimate.estimatedCredits);
 

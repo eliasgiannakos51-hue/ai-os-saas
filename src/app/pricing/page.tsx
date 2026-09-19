@@ -70,9 +70,15 @@ function ComparisonCellContent({
       </>
     );
   }
+  // NOT text-muted/50, which is what this was. Measured against the
+  // panel: 2.25:1 in dark and 2.35:1 in light — below the 3:1 WCAG asks
+  // of a non-text graphic, and against a tick at 9.58:1. Reported from
+  // production on 2026-09-19 as "Free says it has Team collaboration":
+  // it does not, and the ✕ saying so could not be seen. Full muted is
+  // 5.34:1 dark and 7.73:1 light.
   return (
     <>
-      <X className="mx-auto h-4 w-4 text-muted/50" aria-hidden="true" />
+      <X className="mx-auto h-4 w-4 text-muted" aria-hidden="true" />
       <span className="sr-only">{words.no}</span>
     </>
   );

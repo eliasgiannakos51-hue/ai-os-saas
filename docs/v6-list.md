@@ -501,3 +501,58 @@ defect put back (RED) and the mutant reader emptied (RED on the floor).
 **What is still not verified** is what it was: a `DATABASE_URL`, an
 Anthropic balance and a published site. See
 `docs/v5-closing-report.md`, "the 28% that is still open".
+
+## 19. ⌘K found nothing, and the pricing claim on signup — 2026-09-19
+
+Both reported from production, both reproduced, both fixed.
+
+### ⌘K
+
+    node scripts/tests/palette-aliases.test.mjs
+    npm run db:search-rows -- --sql        # the one query for the index
+
+**«οικο» always worked.** Run against the real catalogue, the matcher
+returns Οικονομικά first — the translated-label fix of 2026-09-07 is
+real and is in `main`. **«θέλω να δω τα έσοδά μου» never could**, and
+neither could «έσοδα»: every tier of the matcher compared the WHOLE
+query with a candidate, and nothing is called that. The module is
+«Οικονομικά» and its fields are Ποσό, Περιγραφή, Τύπος.
+
+Worse than one word: a third of the sidebar is a phrase rather than a
+noun — «Δες τι λένε τα νούμερα», «AI που δουλεύει για σένα», «Ψάξ' το
+καλά» — so the label is the word a person is least likely to type.
+
+**Fixed two ways.** `lib/palette-aliases.ts` holds the words people
+actually use, **English and Greek only**, hand-written and dated, with
+coverage printed per locale on every run so the absence of the other
+eight is visible rather than assumed. And the matcher falls back to the
+query's own words, longest first, bounded at eight — so a sentence
+naming three things reaches three pages and a sentence naming none
+reaches none.
+
+**What the 520/520 number could not see.** The existing gate forms its
+query from the first word of the label it is testing, so an
+everything-matcher printed 520 of 520 unchanged. It has a negative
+control in the same loop now. The new gate's queries come from the
+alias table instead — not from the labels — which is the whole point.
+
+**Not answered here:** whether `search_index` has rows. That needs
+`DATABASE_URL`. It is also not the explanation for either reported
+query: both are page navigation and never reach that table.
+
+### The pricing claim
+
+    node scripts/tests/plan-claims.test.mjs
+
+Not `/pricing` — that page was rendered against production at 390×844
+in Greek and English and every card showed only its own features. It
+was **`/signup`**, where seven English string literals were listed
+under every plan with a ✕ at `text-muted/50` — 2.25:1, measured —
+above a second list of the plan's real features. See `docs/shapes.md`,
+*the data was right and the screen said otherwise*.
+
+One list now, derived from the catalogue, labelled from
+`pricing.rows.<id>` in ten languages, with a cross at 5.34:1 / 7.73:1.
+Built on the SERVER: `client-env-reach.test.mjs` caught the first
+version importing the catalogue into the browser, where the seven limit
+modules it reaches read `process.env` and get `undefined`.

@@ -36,8 +36,13 @@ const MUTANTS = [
     name: "the palette matches the English label again",
     gate: LANG_GATE,
     file: PALETTE,
-    from: "candidates: [translatedLabel(item.label), item.label],",
-    to: "candidates: [item.label],",
+    // RE-ANCHORED 2026-09-19. The candidate list gained a third source
+    // — the aliases in lib/palette-aliases.ts — after «έσοδα» was
+    // reported as reaching no page in production. The mutant is
+    // unchanged in what it does: drop the translated label and match
+    // the English key, which is the defect this suite exists for.
+    from: `            translatedLabel(item.label),\n            item.label,`,
+    to: "            item.label,",
     expect: "passes the TRANSLATED label to it",
   },
   {
@@ -49,8 +54,9 @@ const MUTANTS = [
     name: "the English label is dropped in favour of the translation",
     gate: SRC_GATE,
     file: PALETTE,
-    from: "candidates: [translatedLabel(item.label), item.label],",
-    to: "candidates: [translatedLabel(item.label)],",
+    // RE-ANCHORED 2026-09-19, same reason as above.
+    from: `            translatedLabel(item.label),\n            item.label,`,
+    to: "            translatedLabel(item.label),",
     expect: "hands the matcher the label it renders",
   },
   {

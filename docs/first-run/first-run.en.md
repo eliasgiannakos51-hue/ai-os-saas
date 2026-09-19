@@ -1,8 +1,8 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **601 strings**. The whole product is 3274, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **638 strings**. The whole product is 3274, which is why this file exists.
 
-**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 354 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 391 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -257,7 +257,7 @@ Ionexa uses this to pick which plan step to suggest next — lighter work when y
 
 Free — nothing is generated, and you can remove it in one click
 
-## Tier 2 — The labels — skim these (354)
+## Tier 2 — The labels — skim these (391)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -418,105 +418,290 @@ Business
 
 Custom
 
-**`pricing.features.aiMemory`**
-
-
-AI Memory
-
-**`pricing.features.basicAiChat`**
-
-
-Basic AI chat
-
 **`pricing.features.creditsPerMonth`**
 
 
 {count, plural, one {# credit} other {# credits}}/month
-
-**`pricing.features.customAiPersonaNameInIonexaChat`**
-
-
-Custom AI persona name in Ionexa Chat
 
 **`pricing.features.customCredits`**
 
 
 Custom credits
 
-**`pricing.features.everythingInGrowth`**
-
-
-Everything in Growth
-
-**`pricing.features.everythingInProfessional`**
-
-
-Everything in Professional
-
-**`pricing.features.everythingInStarter`**
-
-
-Everything in Starter
-
-**`pricing.features.everythingInUltimate`**
-
-
-Everything in Ultimate
-
-**`pricing.features.extendedChatMemoryRetention100Vs20RecentFact`**
-
-
-Extended chat memory retention (100 vs 20 recent facts)
-
-**`pricing.features.teamCollaboration`**
-
-
-Team collaboration
-
-**`pricing.features.unlimitedMembers`**
-
-
-Unlimited members
-
-**`pricing.features.unlimitedTeamSeatsIncludedNoPerMemberCharge`**
-
-
-Unlimited team seats included — no per-member charge
-
-**`pricing.features.upTo100AiAgents`**
-
-
-Up to 100 AI agents
-
-**`pricing.features.upTo15AiAgentsTeams`**
-
-
-Up to 15 AI agents & teams
-
-**`pricing.features.upTo2AiAgents`**
-
-
-Up to 2 AI agents
-
-**`pricing.features.upTo50AiAgents`**
-
-
-Up to 50 AI agents
-
-**`pricing.features.upTo5AiAgents`**
-
-
-Up to 5 AI agents
-
-**`pricing.features.websiteAutomationBuilderAccess`**
-
-
-Website & Automation Builder access
-
 **`pricing.perMonth`**
 
 
 /month
+
+**`pricing.rows.accountAndPrivacy`**
+
+
+Export or delete your account
+
+**`pricing.rows.agentRunsPerHour`**
+
+
+Agent runs
+
+**`pricing.rows.aiAgents`**
+
+
+AI agents
+
+**`pricing.rows.aiChat`**
+
+
+Ask me
+
+**`pricing.rows.aiMemory`**
+
+
+AI Memory
+
+**`pricing.rows.askYourData`**
+
+
+Ask your own records
+
+**`pricing.rows.automation`**
+
+
+Automation
+
+**`pricing.rows.backgroundJobs`**
+
+
+Work that runs in the background
+
+**`pricing.rows.buildLogs`**
+
+
+Website, app, image and video logs
+
+**`pricing.rows.businessLogs`**
+
+
+My records
+
+**`pricing.rows.chatMemory`**
+
+
+Facts remembered in chat
+
+**`pricing.rows.chatPins`**
+
+
+Pinned conversations
+
+**`pricing.rows.coding`**
+
+
+AI Coding
+
+**`pricing.rows.contactSupport`**
+
+
+Contact form
+
+**`pricing.rows.createStudio`**
+
+
+Make anything
+
+**`pricing.rows.creditsPerMonth`**
+
+
+Credits / month
+
+**`pricing.rows.customAiPersona`**
+
+
+Custom assistant name
+
+**`pricing.rows.deepResearch`**
+
+
+Deep Research runs / month
+
+**`pricing.rows.documents`**
+
+
+Documents
+
+**`pricing.rows.fileQuestionsPerHour`**
+
+
+Questions about a file
+
+**`pricing.rows.files`**
+
+
+Files stored
+
+**`pricing.rows.fileUploadsPerHour`**
+
+
+File uploads
+
+**`pricing.rows.freeChatMessages`**
+
+
+Free chat messages / month
+
+**`pricing.rows.helpCentre`**
+
+
+Help Centre
+
+**`pricing.rows.integrationReadsPerHour`**
+
+
+Reads from a connected account
+
+**`pricing.rows.integrations`**
+
+
+Connected integrations
+
+**`pricing.rows.listRowsShown`**
+
+
+Rows shown in one list
+
+**`pricing.rows.missionControl`**
+
+
+Goals & Plans
+
+**`pricing.rows.notifications`**
+
+
+Notifications and reminders
+
+**`pricing.rows.posts`**
+
+
+Posts
+
+**`pricing.rows.predictions`**
+
+
+Predictions
+
+**`pricing.rows.presentations`**
+
+
+Presentations
+
+**`pricing.rows.projects`**
+
+
+Projects
+
+**`pricing.rows.publishedSites`**
+
+
+Published websites
+
+**`pricing.rows.recordSearch`**
+
+
+Record search across modules
+
+**`pricing.rows.siteEditsPerDay`**
+
+
+Live edits per site
+
+**`pricing.rows.siteVersionsKept`**
+
+
+Versions kept per site
+
+**`pricing.rows.storage`**
+
+
+Storage
+
+**`pricing.rows.teamCollaboration`**
+
+
+Team collaboration
+
+**`pricing.rows.teamMembers`**
+
+
+Team members
+
+**`pricing.rows.teamSeatsAddOn`**
+
+
+Team seats
+
+**`pricing.rows.voiceClipLength`**
+
+
+Longest recording (minutes)
+
+**`pricing.rows.voiceMinutes`**
+
+
+Voice minutes / month
+
+**`pricing.rows.websiteBuilder`**
+
+
+Website & Automation Builder
+
+**`pricing.rows.websiteImageStorage`**
+
+
+Storage for website photos
+
+**`pricing.values.custom`**
+
+
+Custom
+
+**`pricing.values.included`**
+
+
+Included
+
+**`pricing.values.minutesPerMonth`**
+
+
+min/month
+
+**`pricing.values.no`**
+
+
+Not included
+
+**`pricing.values.perDay`**
+
+
+/day
+
+**`pricing.values.perHour`**
+
+
+/hour
+
+**`pricing.values.perSeat`**
+
+
++{currency}{price}/seat
+
+**`pricing.values.unlimited`**
+
+
+Unlimited
+
+**`pricing.values.yes`**
+
+
+Included
 
 **`auth.generateStrongPassword`**
 

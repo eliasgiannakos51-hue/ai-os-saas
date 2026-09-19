@@ -1,8 +1,8 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **601 strings**. The whole product is 3274, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **638 strings**. The whole product is 3274, which is why this file exists.
 
-**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 354 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 391 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -302,7 +302,7 @@ Ionexa はこれをもとに次に提案するプランのステップを選び�
 
 無料。何も生成されず、ワンクリックで削除できます
 
-## Tier 2 — The labels — skim these (354)
+## Tier 2 — The labels — skim these (391)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -494,29 +494,11 @@ Ultimateではチームシートが無料付帯
 
 カスタム
 
-**`pricing.features.aiMemory`**
-
-> EN — AI Memory
-
-AIメモリ
-
-**`pricing.features.basicAiChat`**
-
-> EN — Basic AI chat
-
-基本のAIチャット
-
 **`pricing.features.creditsPerMonth`**
 
 > EN — {count, plural, one {# credit} other {# credits}}/month
 
 {count} クレジット/月
-
-**`pricing.features.customAiPersonaNameInIonexaChat`**
-
-> EN — Custom AI persona name in Ionexa Chat
-
-Ionexa ChatでのAIペルソナ名のカスタマイズ
 
 **`pricing.features.customCredits`**
 
@@ -524,95 +506,335 @@ Ionexa ChatでのAIペルソナ名のカスタマイズ
 
 カスタムクレジット
 
-**`pricing.features.everythingInGrowth`**
-
-> EN — Everything in Growth
-
-Growthのすべて
-
-**`pricing.features.everythingInProfessional`**
-
-> EN — Everything in Professional
-
-Professionalのすべて
-
-**`pricing.features.everythingInStarter`**
-
-> EN — Everything in Starter
-
-Starterのすべて
-
-**`pricing.features.everythingInUltimate`**
-
-> EN — Everything in Ultimate
-
-Ultimateのすべて
-
-**`pricing.features.extendedChatMemoryRetention100Vs20RecentFact`**
-
-> EN — Extended chat memory retention (100 vs 20 recent facts)
-
-チャットメモリの保持拡張（直近100件、通常は20件）
-
-**`pricing.features.teamCollaboration`**
-
-> EN — Team collaboration
-
-チームコラボレーション
-
-**`pricing.features.unlimitedMembers`**
-
-> EN — Unlimited members
-
-メンバー無制限
-
-**`pricing.features.unlimitedTeamSeatsIncludedNoPerMemberCharge`**
-
-> EN — Unlimited team seats included — no per-member charge
-
-チーム席数無制限（メンバーごとの追加料金なし）
-
-**`pricing.features.upTo100AiAgents`**
-
-> EN — Up to 100 AI agents
-
-AIエージェント最大100体
-
-**`pricing.features.upTo15AiAgentsTeams`**
-
-> EN — Up to 15 AI agents & teams
-
-AIエージェント最大15体・チーム
-
-**`pricing.features.upTo2AiAgents`**
-
-> EN — Up to 2 AI agents
-
-AIエージェント最大2体
-
-**`pricing.features.upTo50AiAgents`**
-
-> EN — Up to 50 AI agents
-
-AIエージェント最大50体
-
-**`pricing.features.upTo5AiAgents`**
-
-> EN — Up to 5 AI agents
-
-AIエージェント最大5体
-
-**`pricing.features.websiteAutomationBuilderAccess`**
-
-> EN — Website & Automation Builder access
-
-ウェブサイト＆自動化ビルダーへのアクセス
-
 **`pricing.perMonth`**
 
 > EN — /month
 
 /月
+
+**`pricing.rows.accountAndPrivacy`**
+
+> EN — Export or delete your account
+
+アカウントの書き出しと削除
+
+**`pricing.rows.agentRunsPerHour`**
+
+> EN — Agent runs
+
+エージェントの実行回数
+
+**`pricing.rows.aiAgents`**
+
+> EN — AI agents
+
+AI エージェント
+
+**`pricing.rows.aiChat`**
+
+> EN — Ask me
+
+聞いてみる
+
+**`pricing.rows.aiMemory`**
+
+> EN — AI Memory
+
+AI メモリー
+
+**`pricing.rows.askYourData`**
+
+> EN — Ask your own records
+
+自分の記録に質問する
+
+**`pricing.rows.automation`**
+
+> EN — Automation
+
+自動化
+
+**`pricing.rows.backgroundJobs`**
+
+> EN — Work that runs in the background
+
+バックグラウンドで走る処理
+
+**`pricing.rows.buildLogs`**
+
+> EN — Website, app, image and video logs
+
+サイト・アプリ・画像・動画の記録
+
+**`pricing.rows.businessLogs`**
+
+> EN — My records
+
+マイレコード
+
+**`pricing.rows.chatMemory`**
+
+> EN — Facts remembered in chat
+
+チャットが覚える情報
+
+**`pricing.rows.chatPins`**
+
+> EN — Pinned conversations
+
+固定した会話
+
+**`pricing.rows.coding`**
+
+> EN — AI Coding
+
+AI コーディング
+
+**`pricing.rows.contactSupport`**
+
+> EN — Contact form
+
+問い合わせフォーム
+
+**`pricing.rows.createStudio`**
+
+> EN — Make anything
+
+何でもつくる
+
+**`pricing.rows.creditsPerMonth`**
+
+> EN — Credits / month
+
+クレジット / 月
+
+**`pricing.rows.customAiPersona`**
+
+> EN — Custom assistant name
+
+アシスタント名の変更
+
+**`pricing.rows.deepResearch`**
+
+> EN — Deep Research runs / month
+
+ディープリサーチ実行回数 / 月
+
+**`pricing.rows.documents`**
+
+> EN — Documents
+
+ドキュメント
+
+**`pricing.rows.fileQuestionsPerHour`**
+
+> EN — Questions about a file
+
+ファイルへの質問
+
+**`pricing.rows.files`**
+
+> EN — Files stored
+
+保存ファイル数
+
+**`pricing.rows.fileUploadsPerHour`**
+
+> EN — File uploads
+
+ファイルのアップロード回数
+
+**`pricing.rows.freeChatMessages`**
+
+> EN — Free chat messages / month
+
+無料チャットメッセージ / 月
+
+**`pricing.rows.helpCentre`**
+
+> EN — Help Centre
+
+ヘルプセンター
+
+**`pricing.rows.integrationReadsPerHour`**
+
+> EN — Reads from a connected account
+
+連携アカウントからの読み取り
+
+**`pricing.rows.integrations`**
+
+> EN — Connected integrations
+
+連携済み統合
+
+**`pricing.rows.listRowsShown`**
+
+> EN — Rows shown in one list
+
+一覧に表示される行数
+
+**`pricing.rows.missionControl`**
+
+> EN — Goals & Plans
+
+目標とプラン
+
+**`pricing.rows.notifications`**
+
+> EN — Notifications and reminders
+
+通知とリマインダー
+
+**`pricing.rows.posts`**
+
+> EN — Posts
+
+投稿
+
+**`pricing.rows.predictions`**
+
+> EN — Predictions
+
+傾向
+
+**`pricing.rows.presentations`**
+
+> EN — Presentations
+
+プレゼンテーション
+
+**`pricing.rows.projects`**
+
+> EN — Projects
+
+プロジェクト
+
+**`pricing.rows.publishedSites`**
+
+> EN — Published websites
+
+公開済みウェブサイト
+
+**`pricing.rows.recordSearch`**
+
+> EN — Record search across modules
+
+記録の横断検索
+
+**`pricing.rows.siteEditsPerDay`**
+
+> EN — Live edits per site
+
+サイトごとの公開後の編集回数
+
+**`pricing.rows.siteVersionsKept`**
+
+> EN — Versions kept per site
+
+サイトごとに残る版数
+
+**`pricing.rows.storage`**
+
+> EN — Storage
+
+ストレージ
+
+**`pricing.rows.teamCollaboration`**
+
+> EN — Team collaboration
+
+チームコラボレーション
+
+**`pricing.rows.teamMembers`**
+
+> EN — Team members
+
+チームメンバー
+
+**`pricing.rows.teamSeatsAddOn`**
+
+> EN — Team seats
+
+チームシート
+
+**`pricing.rows.voiceClipLength`**
+
+> EN — Longest recording (minutes)
+
+1回の録音の上限（分）
+
+**`pricing.rows.voiceMinutes`**
+
+> EN — Voice minutes / month
+
+音声の分数 / 月
+
+**`pricing.rows.websiteBuilder`**
+
+> EN — Website & Automation Builder
+
+ウェブサイト＆自動化ビルダー
+
+**`pricing.rows.websiteImageStorage`**
+
+> EN — Storage for website photos
+
+サイト写真の保存容量
+
+**`pricing.values.custom`**
+
+> EN — Custom
+
+カスタム
+
+**`pricing.values.included`**
+
+> EN — Included
+
+込み
+
+**`pricing.values.minutesPerMonth`**
+
+> EN — min/month
+
+分/月
+
+**`pricing.values.no`**
+
+> EN — Not included
+
+含まれない
+
+**`pricing.values.perDay`**
+
+> EN — /day
+
+/日
+
+**`pricing.values.perHour`**
+
+> EN — /hour
+
+/時間
+
+**`pricing.values.perSeat`**
+
+> EN — +{currency}{price}/seat
+
++{currency}{price}/席
+
+**`pricing.values.unlimited`**
+
+> EN — Unlimited
+
+無制限
+
+**`pricing.values.yes`**
+
+> EN — Included
+
+含まれる
 
 **`auth.generateStrongPassword`**
 

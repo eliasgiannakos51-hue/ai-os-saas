@@ -48,9 +48,18 @@ console.log("== 1. the command palette matches what it displays ==");
   // messages/*.json. The fix is not to translate the key — it is to give
   // the matcher every name the entry answers to.
   const palette = readFileSync("src/components/dashboard/command-palette.tsx", "utf8");
+  // THE ANCHOR CLOSED THE LIST, and the list grew. It required the
+  // candidates array to be exactly [translated, english] — correct on
+  // the day it was written and red on 2026-09-19, when a third source
+  // joined: the aliases in lib/palette-aliases.ts, added because «έσοδα»
+  // reached nothing in production. Both original names are still
+  // required; what is no longer required is that they are the only two.
   ok("the palette hands the matcher the label it renders",
-    /candidates:\s*\[\s*translatedLabel\(item\.label\),\s*item\.label\s*\]/.test(palette),
+    /candidates:\s*\[\s*translatedLabel\(item\.label\),\s*item\.label\s*[,\]]/.test(palette),
     "matching the raw English label is the defect this file exists for");
+  ok("...and the words people actually type, which are not the label",
+    /aliasesFor\(/.test(palette),
+    "see scripts/tests/palette-aliases.test.mjs — «έσοδα» reached no page at all");
   ok("...and has no private matcher of its own",
     !/function filterAndRankItems/.test(palette));
   // The full cross-product lives in command-palette-language.test.mjs;

@@ -116,21 +116,15 @@ const EVIDENCE = {
   // that the table IS the catalog rather than a hand-written copy of it.
 
   // --- signup capability grid ---------------------------------------
-  "Website & Automation Builder": { file: "src/lib/website-builder.ts", symbol: "export" },
-  "AI Memory": { file: "src/app/dashboard/ai-memory/page.tsx", symbol: "export default async function" },
-  "Team collaboration": { file: "src/app/api/team/invite/route.ts", symbol: "export async function POST" },
-  "Team seats": { file: "src/lib/billing/plans.ts", symbol: "hasTeamSeats" },
-  "Team seats included free": { file: "src/lib/billing/plans.ts", symbol: "teamSeatsIncluded" },
-  "Extended chat memory retention": {
-    file: "src/lib/chat/memory.ts",
-    symbol: "DEFAULT_MEMORY_LOAD_LIMIT",
-  },
-  "Custom AI persona name": {
-    file: "src/components/settings/ai-persona-settings.tsx",
-    symbol: "export function AiPersonaSettings",
-  },
 };
 
+// THE SEVEN THAT LEFT ON 2026-09-19. The signup card carried its own
+// `CAPABILITY_ROWS` — seven English labels written in the component —
+// and each needed an entry here naming the code behind it. The rows are
+// derived from the catalog now (lib/billing/plan-capability-rows.ts),
+// so every one of them is a catalog id checked by the row section
+// below, and these seven entries justified claims nobody makes any
+// more. The orphan check found them the moment the list went.
 // --- what the product currently claims ---------------------------------
 const { PLANS } = await loadTs("src/lib/billing/plans.ts");
 
@@ -142,12 +136,18 @@ const comparisonRows = soldFeatures();
 const { FEATURE_CATALOG: catalogEntries } = await loadTs("src/lib/billing/feature-catalog.ts");
 const rowClaims = comparisonRows.map((f) => f.id);
 
-const signupSrc = readFileSync("src/app/signup/signup-flow.tsx", "utf8");
-const gridBlock = signupSrc.slice(
-  signupSrc.indexOf("const CAPABILITY_ROWS"),
-  signupSrc.indexOf("];", signupSrc.indexOf("const CAPABILITY_ROWS"))
-);
-const gridClaims = [...gridBlock.matchAll(/label: "([^"]+)"/g)].map((m) => m[1]);
+// THE SIGNUP GRID IS THE CATALOG NOW, so it is not a separate source of
+// claims. It used to hold `CAPABILITY_ROWS` — seven English labels
+// written in the component — and this scraped them. On 2026-09-19 those
+// rows were replaced by lib/billing/plan-capability-rows.ts, which
+// derives them from the catalog, so every claim the signup card makes is
+// already in `rowClaims` and checked by the row section below.
+//
+// The scrape is gone rather than re-pointed: two readers of one list is
+// how two answers about it start disagreeing, and
+// gate-stale-anchors.test.mjs caught this one the moment the list did
+// not exist (indexOf returned -1 and the slice silently became garbage).
+const gridClaims = [];
 
 // The catalog rows justify themselves (see the note in EVIDENCE) and are
 // checked in their own section below, so this map covers the bullets and

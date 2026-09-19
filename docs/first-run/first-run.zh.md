@@ -1,8 +1,8 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **601 strings**. The whole product is 3274, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **638 strings**. The whole product is 3274, which is why this file exists.
 
-**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 354 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 391 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -302,7 +302,7 @@ Ionexa 用它来挑选下一个建议的计划步骤——状态低时给轻松�
 
 免费——不生成任何内容，一键即可移除
 
-## Tier 2 — The labels — skim these (354)
+## Tier 2 — The labels — skim these (391)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -494,29 +494,11 @@ Ultimate 方案免费包含团队席位
 
 定制
 
-**`pricing.features.aiMemory`**
-
-> EN — AI Memory
-
-AI 记忆
-
-**`pricing.features.basicAiChat`**
-
-> EN — Basic AI chat
-
-基础 AI 聊天
-
 **`pricing.features.creditsPerMonth`**
 
 > EN — {count, plural, one {# credit} other {# credits}}/month
 
 {count} 积分/月
-
-**`pricing.features.customAiPersonaNameInIonexaChat`**
-
-> EN — Custom AI persona name in Ionexa Chat
-
-在 Ionexa Chat 中自定义 AI 名称
 
 **`pricing.features.customCredits`**
 
@@ -524,95 +506,335 @@ AI 记忆
 
 定制积分
 
-**`pricing.features.everythingInGrowth`**
-
-> EN — Everything in Growth
-
-包含 Growth 的全部功能
-
-**`pricing.features.everythingInProfessional`**
-
-> EN — Everything in Professional
-
-包含 Professional 的全部功能
-
-**`pricing.features.everythingInStarter`**
-
-> EN — Everything in Starter
-
-包含 Starter 的全部功能
-
-**`pricing.features.everythingInUltimate`**
-
-> EN — Everything in Ultimate
-
-包含 Ultimate 的全部功能
-
-**`pricing.features.extendedChatMemoryRetention100Vs20RecentFact`**
-
-> EN — Extended chat memory retention (100 vs 20 recent facts)
-
-扩展的聊天记忆保留（100 条对比 20 条近期信息）
-
-**`pricing.features.teamCollaboration`**
-
-> EN — Team collaboration
-
-团队协作
-
-**`pricing.features.unlimitedMembers`**
-
-> EN — Unlimited members
-
-无限成员
-
-**`pricing.features.unlimitedTeamSeatsIncludedNoPerMemberCharge`**
-
-> EN — Unlimited team seats included — no per-member charge
-
-包含无限团队席位——不按成员收费
-
-**`pricing.features.upTo100AiAgents`**
-
-> EN — Up to 100 AI agents
-
-最多 100 个 AI 智能体
-
-**`pricing.features.upTo15AiAgentsTeams`**
-
-> EN — Up to 15 AI agents & teams
-
-最多 15 个 AI 智能体与团队
-
-**`pricing.features.upTo2AiAgents`**
-
-> EN — Up to 2 AI agents
-
-最多 2 个 AI 智能体
-
-**`pricing.features.upTo50AiAgents`**
-
-> EN — Up to 50 AI agents
-
-最多 50 个 AI 智能体
-
-**`pricing.features.upTo5AiAgents`**
-
-> EN — Up to 5 AI agents
-
-最多 5 个 AI 智能体
-
-**`pricing.features.websiteAutomationBuilderAccess`**
-
-> EN — Website & Automation Builder access
-
-网站与自动化构建器访问权限
-
 **`pricing.perMonth`**
 
 > EN — /month
 
 /月
+
+**`pricing.rows.accountAndPrivacy`**
+
+> EN — Export or delete your account
+
+导出或删除你的账户
+
+**`pricing.rows.agentRunsPerHour`**
+
+> EN — Agent runs
+
+智能体运行次数
+
+**`pricing.rows.aiAgents`**
+
+> EN — AI agents
+
+AI 智能体
+
+**`pricing.rows.aiChat`**
+
+> EN — Ask me
+
+问我
+
+**`pricing.rows.aiMemory`**
+
+> EN — AI Memory
+
+AI 记忆
+
+**`pricing.rows.askYourData`**
+
+> EN — Ask your own records
+
+向你自己的记录提问
+
+**`pricing.rows.automation`**
+
+> EN — Automation
+
+自动化
+
+**`pricing.rows.backgroundJobs`**
+
+> EN — Work that runs in the background
+
+后台运行的任务
+
+**`pricing.rows.buildLogs`**
+
+> EN — Website, app, image and video logs
+
+网站、应用、图片和视频的记录
+
+**`pricing.rows.businessLogs`**
+
+> EN — My records
+
+我的记录
+
+**`pricing.rows.chatMemory`**
+
+> EN — Facts remembered in chat
+
+对话记住的信息
+
+**`pricing.rows.chatPins`**
+
+> EN — Pinned conversations
+
+置顶的对话
+
+**`pricing.rows.coding`**
+
+> EN — AI Coding
+
+AI 编程
+
+**`pricing.rows.contactSupport`**
+
+> EN — Contact form
+
+联系表单
+
+**`pricing.rows.createStudio`**
+
+> EN — Make anything
+
+创建任何东西
+
+**`pricing.rows.creditsPerMonth`**
+
+> EN — Credits / month
+
+每月额度
+
+**`pricing.rows.customAiPersona`**
+
+> EN — Custom assistant name
+
+自定义助手名称
+
+**`pricing.rows.deepResearch`**
+
+> EN — Deep Research runs / month
+
+每月深度研究次数
+
+**`pricing.rows.documents`**
+
+> EN — Documents
+
+文档
+
+**`pricing.rows.fileQuestionsPerHour`**
+
+> EN — Questions about a file
+
+针对文件的提问
+
+**`pricing.rows.files`**
+
+> EN — Files stored
+
+已存储文件
+
+**`pricing.rows.fileUploadsPerHour`**
+
+> EN — File uploads
+
+文件上传次数
+
+**`pricing.rows.freeChatMessages`**
+
+> EN — Free chat messages / month
+
+每月免费聊天消息
+
+**`pricing.rows.helpCentre`**
+
+> EN — Help Centre
+
+帮助中心
+
+**`pricing.rows.integrationReadsPerHour`**
+
+> EN — Reads from a connected account
+
+从已连接账户读取的次数
+
+**`pricing.rows.integrations`**
+
+> EN — Connected integrations
+
+已连接的集成
+
+**`pricing.rows.listRowsShown`**
+
+> EN — Rows shown in one list
+
+每个列表显示的行数
+
+**`pricing.rows.missionControl`**
+
+> EN — Goals & Plans
+
+目标与计划
+
+**`pricing.rows.notifications`**
+
+> EN — Notifications and reminders
+
+通知与提醒
+
+**`pricing.rows.posts`**
+
+> EN — Posts
+
+帖子
+
+**`pricing.rows.predictions`**
+
+> EN — Predictions
+
+规律
+
+**`pricing.rows.presentations`**
+
+> EN — Presentations
+
+演示文稿
+
+**`pricing.rows.projects`**
+
+> EN — Projects
+
+项目
+
+**`pricing.rows.publishedSites`**
+
+> EN — Published websites
+
+已发布网站
+
+**`pricing.rows.recordSearch`**
+
+> EN — Record search across modules
+
+跨模块记录搜索
+
+**`pricing.rows.siteEditsPerDay`**
+
+> EN — Live edits per site
+
+每个站点的实时修改次数
+
+**`pricing.rows.siteVersionsKept`**
+
+> EN — Versions kept per site
+
+每个站点保留的版本数
+
+**`pricing.rows.storage`**
+
+> EN — Storage
+
+存储空间
+
+**`pricing.rows.teamCollaboration`**
+
+> EN — Team collaboration
+
+团队协作
+
+**`pricing.rows.teamMembers`**
+
+> EN — Team members
+
+团队成员
+
+**`pricing.rows.teamSeatsAddOn`**
+
+> EN — Team seats
+
+团队席位
+
+**`pricing.rows.voiceClipLength`**
+
+> EN — Longest recording (minutes)
+
+单次录音时长上限（分钟）
+
+**`pricing.rows.voiceMinutes`**
+
+> EN — Voice minutes / month
+
+语音分钟数 / 月
+
+**`pricing.rows.websiteBuilder`**
+
+> EN — Website & Automation Builder
+
+网站与自动化构建器
+
+**`pricing.rows.websiteImageStorage`**
+
+> EN — Storage for website photos
+
+网站图片的存储空间
+
+**`pricing.values.custom`**
+
+> EN — Custom
+
+定制
+
+**`pricing.values.included`**
+
+> EN — Included
+
+已包含
+
+**`pricing.values.minutesPerMonth`**
+
+> EN — min/month
+
+分钟/月
+
+**`pricing.values.no`**
+
+> EN — Not included
+
+不包含
+
+**`pricing.values.perDay`**
+
+> EN — /day
+
+/天
+
+**`pricing.values.perHour`**
+
+> EN — /hour
+
+/小时
+
+**`pricing.values.perSeat`**
+
+> EN — +{currency}{price}/seat
+
++{currency}{price}/席位
+
+**`pricing.values.unlimited`**
+
+> EN — Unlimited
+
+无限
+
+**`pricing.values.yes`**
+
+> EN — Included
+
+包含
 
 **`auth.generateStrongPassword`**
 

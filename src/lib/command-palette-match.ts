@@ -147,14 +147,70 @@ export function filterAndRankCandidates<T>(
 ): T[] {
   if (!normalizeForSearch(rawQuery).trim()) return entries.map((e) => e.item);
 
-  const scored: { item: T; rank: number; order: number }[] = [];
-  entries.forEach((entry, order) => {
-    const rank = scoreCandidates(entry.candidates, rawQuery);
-    if (rank !== null) scored.push({ item: entry.item, rank, order });
-  });
-  // Rank first, then the registry's own order — so equally-good matches
-  // come back in the order the sidebar lists them rather than in
-  // whatever order the scoring happened to produce.
-  scored.sort((a, b) => a.rank - b.rank || a.order - b.order);
-  return scored.map((s) => s.item);
+  const rank = (query: string) => {
+    const scored: { item: T; rank: number; order: number }[] = [];
+    entries.forEach((entry, order) => {
+      const r = scoreCandidates(entry.candidates, query);
+      if (r !== null) scored.push({ item: entry.item, rank: r, order });
+    });
+    // Rank first, then the registry's own order — so equally-good
+    // matches come back in the order the sidebar lists them rather than
+    // in whatever order the scoring happened to produce.
+    scored.sort((a, b) => a.rank - b.rank || a.order - b.order);
+    return scored.map((s) => s.item);
+  };
+
+  const whole = rank(rawQuery);
+  if (whole.length > 0) return whole;
+
+  // A SENTENCE IS NOT A PREFIX. Reported from production 2026-09-19:
+  // «θέλω να δω τα έσοδά μου» returned nothing, and it was always going
+  // to — every tier above compares the WHOLE query with a candidate, and
+  // no page is named after a sentence. People type sentences.
+  //
+  // So, only when nothing matched at all: try the query's own words,
+  // longest first, and return what they reach.
+  //
+  // ONE WORD OR ALL OF THEM, and the first version chose wrong. It
+  // returned the first word that hit anything, on the argument that a
+  // sentence must not union its way to every page. Measured against the
+  // real catalogue, that argument does not hold and the rule costs the
+  // user: «θέλω να δω τα έσοδα και τα προϊόντα και τις πωλήσεις μου»
+  // reaches three pages by union and exactly one — Products, because
+  // «προιοντα» is the longest word — by first-hit. A sentence naming
+  // three things wants three answers. The union is safe here because the
+  // only things a word can match are page names and the alias table:
+  // ordinary words reach nothing, which is why «θέλω» and "show" add
+  // none.
+  //
+  // Words shorter than MIN_WORD_FALLBACK_LENGTH are skipped — «να»,
+  // «τα», «μου», "to", "my" are substrings of half the sidebar — and at
+  // most MAX_FALLBACK_WORDS are tried, so a paragraph pasted into the
+  // box is bounded work. Longest first, so the most specific word's
+  // pages come first.
+  const out: T[] = [];
+  const seen = new Set<T>();
+  for (const word of wordsByLength(rawQuery).slice(0, MAX_FALLBACK_WORDS)) {
+    for (const hit of rank(word)) {
+      if (seen.has(hit)) continue;
+      seen.add(hit);
+      out.push(hit);
+    }
+  }
+  return out;
+}
+
+/** A paragraph in the search box is still bounded work. */
+export const MAX_FALLBACK_WORDS = 8;
+
+/** Long enough to mean something on its own. «μου», "my", "the" are not. */
+export const MIN_WORD_FALLBACK_LENGTH = 4;
+
+/** The query's words, longest first, that are worth trying alone. */
+export function wordsByLength(rawQuery: string): string[] {
+  const words = normalizeForSearch(rawQuery)
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((w) => w.length >= MIN_WORD_FALLBACK_LENGTH);
+  if (words.length < 2) return [];
+  return [...new Set(words)].sort((a, b) => b.length - a.length);
 }

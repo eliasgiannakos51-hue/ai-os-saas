@@ -239,7 +239,16 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // it in each new suite, which would have moved this census by three for
   // one idea — and the whole point of the ceiling is that the list stays
   // short enough for a person to read in one sitting.
-  const CENSUS_CEILING = 67;
+  //
+  // 67 -> 68 ON 2026-09-19: src/lib/billing/plan-capability-rows.ts. Its
+  // header carries a "by design" that a reader has to be told and cannot
+  // derive — the signup card shows the SAME rows under every plan on
+  // purpose, because a ✓/✕ list that varied its rows per plan could not
+  // be compared. That sentence is the reason the owner's report ("every
+  // plan shows the same list of 7 features") is half true and half a
+  // legibility defect, and deleting it would leave the next reader
+  // believing the identical rows were the bug.
+  const CENSUS_CEILING = 68;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

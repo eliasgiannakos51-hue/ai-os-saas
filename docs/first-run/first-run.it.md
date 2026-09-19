@@ -1,8 +1,8 @@
 # The first run — it
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **601 strings**. The whole product is 3274, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **638 strings**. The whole product is 3274, which is why this file exists.
 
-**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 354 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 391 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -302,7 +302,7 @@ Ionexa lo usa per scegliere quale passo del piano proporti — lavoro leggero qu
 
 Gratis: non viene generato nulla e lo togli con un clic
 
-## Tier 2 — The labels — skim these (354)
+## Tier 2 — The labels — skim these (391)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -494,29 +494,11 @@ Business
 
 Personalizzato
 
-**`pricing.features.aiMemory`**
-
-> EN — AI Memory
-
-Memoria IA
-
-**`pricing.features.basicAiChat`**
-
-> EN — Basic AI chat
-
-Chat IA di base
-
 **`pricing.features.creditsPerMonth`**
 
 > EN — {count, plural, one {# credit} other {# credits}}/month
 
 {count, plural, one {# credito} other {# crediti}}/mese
-
-**`pricing.features.customAiPersonaNameInIonexaChat`**
-
-> EN — Custom AI persona name in Ionexa Chat
-
-Nome personalizzato dell'assistente in Ionexa Chat
 
 **`pricing.features.customCredits`**
 
@@ -524,95 +506,335 @@ Nome personalizzato dell'assistente in Ionexa Chat
 
 Crediti personalizzati
 
-**`pricing.features.everythingInGrowth`**
-
-> EN — Everything in Growth
-
-Tutto ciò che include Growth
-
-**`pricing.features.everythingInProfessional`**
-
-> EN — Everything in Professional
-
-Tutto ciò che include Professional
-
-**`pricing.features.everythingInStarter`**
-
-> EN — Everything in Starter
-
-Tutto ciò che include Starter
-
-**`pricing.features.everythingInUltimate`**
-
-> EN — Everything in Ultimate
-
-Tutto ciò che include Ultimate
-
-**`pricing.features.extendedChatMemoryRetention100Vs20RecentFact`**
-
-> EN — Extended chat memory retention (100 vs 20 recent facts)
-
-Conservazione estesa della memoria chat (100 contro 20 fatti recenti)
-
-**`pricing.features.teamCollaboration`**
-
-> EN — Team collaboration
-
-Collaborazione in team
-
-**`pricing.features.unlimitedMembers`**
-
-> EN — Unlimited members
-
-Membri illimitati
-
-**`pricing.features.unlimitedTeamSeatsIncludedNoPerMemberCharge`**
-
-> EN — Unlimited team seats included — no per-member charge
-
-Postazioni team illimitate incluse — nessun costo per membro
-
-**`pricing.features.upTo100AiAgents`**
-
-> EN — Up to 100 AI agents
-
-Fino a 100 agenti IA
-
-**`pricing.features.upTo15AiAgentsTeams`**
-
-> EN — Up to 15 AI agents & teams
-
-Fino a 15 agenti IA e team
-
-**`pricing.features.upTo2AiAgents`**
-
-> EN — Up to 2 AI agents
-
-Fino a 2 agenti IA
-
-**`pricing.features.upTo50AiAgents`**
-
-> EN — Up to 50 AI agents
-
-Fino a 50 agenti IA
-
-**`pricing.features.upTo5AiAgents`**
-
-> EN — Up to 5 AI agents
-
-Fino a 5 agenti IA
-
-**`pricing.features.websiteAutomationBuilderAccess`**
-
-> EN — Website & Automation Builder access
-
-Accesso a Website & Automation Builder
-
 **`pricing.perMonth`**
 
 > EN — /month
 
 /mese
+
+**`pricing.rows.accountAndPrivacy`**
+
+> EN — Export or delete your account
+
+Esporta o elimina il tuo account
+
+**`pricing.rows.agentRunsPerHour`**
+
+> EN — Agent runs
+
+Esecuzioni degli agenti
+
+**`pricing.rows.aiAgents`**
+
+> EN — AI agents
+
+Agenti AI
+
+**`pricing.rows.aiChat`**
+
+> EN — Ask me
+
+Chiedimi
+
+**`pricing.rows.aiMemory`**
+
+> EN — AI Memory
+
+Memoria AI
+
+**`pricing.rows.askYourData`**
+
+> EN — Ask your own records
+
+Interroga i tuoi dati
+
+**`pricing.rows.automation`**
+
+> EN — Automation
+
+Automazione
+
+**`pricing.rows.backgroundJobs`**
+
+> EN — Work that runs in the background
+
+Lavori in background
+
+**`pricing.rows.buildLogs`**
+
+> EN — Website, app, image and video logs
+
+Registri di siti, app, immagini e video
+
+**`pricing.rows.businessLogs`**
+
+> EN — My records
+
+I miei record
+
+**`pricing.rows.chatMemory`**
+
+> EN — Facts remembered in chat
+
+Dati ricordati dalla chat
+
+**`pricing.rows.chatPins`**
+
+> EN — Pinned conversations
+
+Conversazioni fissate
+
+**`pricing.rows.coding`**
+
+> EN — AI Coding
+
+Codice con l'IA
+
+**`pricing.rows.contactSupport`**
+
+> EN — Contact form
+
+Modulo di contatto
+
+**`pricing.rows.createStudio`**
+
+> EN — Make anything
+
+Crea qualsiasi cosa
+
+**`pricing.rows.creditsPerMonth`**
+
+> EN — Credits / month
+
+Crediti / mese
+
+**`pricing.rows.customAiPersona`**
+
+> EN — Custom assistant name
+
+Nome assistente personalizzato
+
+**`pricing.rows.deepResearch`**
+
+> EN — Deep Research runs / month
+
+Esecuzioni Deep Research / mese
+
+**`pricing.rows.documents`**
+
+> EN — Documents
+
+Documenti
+
+**`pricing.rows.fileQuestionsPerHour`**
+
+> EN — Questions about a file
+
+Domande su un file
+
+**`pricing.rows.files`**
+
+> EN — Files stored
+
+File archiviati
+
+**`pricing.rows.fileUploadsPerHour`**
+
+> EN — File uploads
+
+Caricamenti di file
+
+**`pricing.rows.freeChatMessages`**
+
+> EN — Free chat messages / month
+
+Messaggi chat gratuiti / mese
+
+**`pricing.rows.helpCentre`**
+
+> EN — Help Centre
+
+Centro assistenza
+
+**`pricing.rows.integrationReadsPerHour`**
+
+> EN — Reads from a connected account
+
+Letture da un account collegato
+
+**`pricing.rows.integrations`**
+
+> EN — Connected integrations
+
+Integrazioni collegate
+
+**`pricing.rows.listRowsShown`**
+
+> EN — Rows shown in one list
+
+Righe mostrate per elenco
+
+**`pricing.rows.missionControl`**
+
+> EN — Goals & Plans
+
+Obiettivi e piani
+
+**`pricing.rows.notifications`**
+
+> EN — Notifications and reminders
+
+Notifiche e promemoria
+
+**`pricing.rows.posts`**
+
+> EN — Posts
+
+Post
+
+**`pricing.rows.predictions`**
+
+> EN — Predictions
+
+Andamenti
+
+**`pricing.rows.presentations`**
+
+> EN — Presentations
+
+Presentazioni
+
+**`pricing.rows.projects`**
+
+> EN — Projects
+
+Progetti
+
+**`pricing.rows.publishedSites`**
+
+> EN — Published websites
+
+Siti web pubblicati
+
+**`pricing.rows.recordSearch`**
+
+> EN — Record search across modules
+
+Ricerca su tutti i dati
+
+**`pricing.rows.siteEditsPerDay`**
+
+> EN — Live edits per site
+
+Modifiche in diretta per sito
+
+**`pricing.rows.siteVersionsKept`**
+
+> EN — Versions kept per site
+
+Versioni conservate per sito
+
+**`pricing.rows.storage`**
+
+> EN — Storage
+
+Spazio di archiviazione
+
+**`pricing.rows.teamCollaboration`**
+
+> EN — Team collaboration
+
+Collaborazione in team
+
+**`pricing.rows.teamMembers`**
+
+> EN — Team members
+
+Membri del team
+
+**`pricing.rows.teamSeatsAddOn`**
+
+> EN — Team seats
+
+Posti team
+
+**`pricing.rows.voiceClipLength`**
+
+> EN — Longest recording (minutes)
+
+Registrazione più lunga (minuti)
+
+**`pricing.rows.voiceMinutes`**
+
+> EN — Voice minutes / month
+
+Minuti di voce / mese
+
+**`pricing.rows.websiteBuilder`**
+
+> EN — Website & Automation Builder
+
+Website Builder e automazioni
+
+**`pricing.rows.websiteImageStorage`**
+
+> EN — Storage for website photos
+
+Spazio per le foto del sito
+
+**`pricing.values.custom`**
+
+> EN — Custom
+
+Personalizzato
+
+**`pricing.values.included`**
+
+> EN — Included
+
+Incluso
+
+**`pricing.values.minutesPerMonth`**
+
+> EN — min/month
+
+min/mese
+
+**`pricing.values.no`**
+
+> EN — Not included
+
+Non incluso
+
+**`pricing.values.perDay`**
+
+> EN — /day
+
+/giorno
+
+**`pricing.values.perHour`**
+
+> EN — /hour
+
+/ora
+
+**`pricing.values.perSeat`**
+
+> EN — +{currency}{price}/seat
+
++{currency}{price}/postazione
+
+**`pricing.values.unlimited`**
+
+> EN — Unlimited
+
+Illimitato
+
+**`pricing.values.yes`**
+
+> EN — Included
+
+Incluso
 
 **`auth.generateStrongPassword`**
 

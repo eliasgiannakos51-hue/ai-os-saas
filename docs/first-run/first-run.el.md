@@ -1,8 +1,8 @@
 # The first run — el
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **601 strings**. The whole product is 3274, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **638 strings**. The whole product is 3274, which is why this file exists.
 
-**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 354 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 391 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -302,7 +302,7 @@ CSV ή tab-separated, έως {max}. Το διαβάζουμε και σου δε
 
 Δωρεάν — δεν παράγεται τίποτα, και το σβήνεις με ένα κλικ
 
-## Tier 2 — The labels — skim these (354)
+## Tier 2 — The labels — skim these (391)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -494,29 +494,11 @@ Business
 
 Κατόπιν συνεννόησης
 
-**`pricing.features.aiMemory`**
-
-> EN — AI Memory
-
-Μνήμη AI
-
-**`pricing.features.basicAiChat`**
-
-> EN — Basic AI chat
-
-Βασική συνομιλία AI
-
 **`pricing.features.creditsPerMonth`**
 
 > EN — {count, plural, one {# credit} other {# credits}}/month
 
 {count, plural, one {# credit} other {# credits}}/μήνα
-
-**`pricing.features.customAiPersonaNameInIonexaChat`**
-
-> EN — Custom AI persona name in Ionexa Chat
-
-Προσαρμοσμένο όνομα AI στο Ionexa Chat
 
 **`pricing.features.customCredits`**
 
@@ -524,95 +506,335 @@ Business
 
 Προσαρμοσμένα credits
 
-**`pricing.features.everythingInGrowth`**
-
-> EN — Everything in Growth
-
-Ό,τι περιλαμβάνει το Growth
-
-**`pricing.features.everythingInProfessional`**
-
-> EN — Everything in Professional
-
-Ό,τι περιλαμβάνει το Professional
-
-**`pricing.features.everythingInStarter`**
-
-> EN — Everything in Starter
-
-Ό,τι περιλαμβάνει το Starter
-
-**`pricing.features.everythingInUltimate`**
-
-> EN — Everything in Ultimate
-
-Ό,τι περιλαμβάνει το Ultimate
-
-**`pricing.features.extendedChatMemoryRetention100Vs20RecentFact`**
-
-> EN — Extended chat memory retention (100 vs 20 recent facts)
-
-Εκτεταμένη διατήρηση μνήμης συνομιλίας (100 έναντι 20 πρόσφατων στοιχείων)
-
-**`pricing.features.teamCollaboration`**
-
-> EN — Team collaboration
-
-Συνεργασία ομάδας
-
-**`pricing.features.unlimitedMembers`**
-
-> EN — Unlimited members
-
-Απεριόριστα μέλη
-
-**`pricing.features.unlimitedTeamSeatsIncludedNoPerMemberCharge`**
-
-> EN — Unlimited team seats included — no per-member charge
-
-Απεριόριστες θέσεις ομάδας — χωρίς χρέωση ανά μέλος
-
-**`pricing.features.upTo100AiAgents`**
-
-> EN — Up to 100 AI agents
-
-Έως 100 πράκτορες AI
-
-**`pricing.features.upTo15AiAgentsTeams`**
-
-> EN — Up to 15 AI agents & teams
-
-Έως 15 πράκτορες AI & ομάδες
-
-**`pricing.features.upTo2AiAgents`**
-
-> EN — Up to 2 AI agents
-
-Έως 2 πράκτορες AI
-
-**`pricing.features.upTo50AiAgents`**
-
-> EN — Up to 50 AI agents
-
-Έως 50 πράκτορες AI
-
-**`pricing.features.upTo5AiAgents`**
-
-> EN — Up to 5 AI agents
-
-Έως 5 πράκτορες AI
-
-**`pricing.features.websiteAutomationBuilderAccess`**
-
-> EN — Website & Automation Builder access
-
-Πρόσβαση σε Website & Automation Builder
-
 **`pricing.perMonth`**
 
 > EN — /month
 
 /μήνα
+
+**`pricing.rows.accountAndPrivacy`**
+
+> EN — Export or delete your account
+
+Εξαγωγή ή διαγραφή λογαριασμού
+
+**`pricing.rows.agentRunsPerHour`**
+
+> EN — Agent runs
+
+Εκτελέσεις agent
+
+**`pricing.rows.aiAgents`**
+
+> EN — AI agents
+
+AI Agents
+
+**`pricing.rows.aiChat`**
+
+> EN — Ask me
+
+Ρώτα με
+
+**`pricing.rows.aiMemory`**
+
+> EN — AI Memory
+
+AI Μνήμη
+
+**`pricing.rows.askYourData`**
+
+> EN — Ask your own records
+
+Ρώτα τα δικά σου δεδομένα
+
+**`pricing.rows.automation`**
+
+> EN — Automation
+
+Αυτοματισμοί
+
+**`pricing.rows.backgroundJobs`**
+
+> EN — Work that runs in the background
+
+Εργασίες που τρέχουν στο παρασκήνιο
+
+**`pricing.rows.buildLogs`**
+
+> EN — Website, app, image and video logs
+
+Αρχεία καταγραφής για ιστότοπους, εφαρμογές, εικόνες και βίντεο
+
+**`pricing.rows.businessLogs`**
+
+> EN — My records
+
+Οι καταχωρήσεις μου
+
+**`pricing.rows.chatMemory`**
+
+> EN — Facts remembered in chat
+
+Στοιχεία που θυμάται το chat
+
+**`pricing.rows.chatPins`**
+
+> EN — Pinned conversations
+
+Καρφιτσωμένες συζητήσεις
+
+**`pricing.rows.coding`**
+
+> EN — AI Coding
+
+Κώδικας με AI
+
+**`pricing.rows.contactSupport`**
+
+> EN — Contact form
+
+Φόρμα επικοινωνίας
+
+**`pricing.rows.createStudio`**
+
+> EN — Make anything
+
+Φτιάξε κάτι
+
+**`pricing.rows.creditsPerMonth`**
+
+> EN — Credits / month
+
+Credits / μήνα
+
+**`pricing.rows.customAiPersona`**
+
+> EN — Custom assistant name
+
+Δικό σου όνομα βοηθού
+
+**`pricing.rows.deepResearch`**
+
+> EN — Deep Research runs / month
+
+Εκτελέσεις Deep Research / μήνα
+
+**`pricing.rows.documents`**
+
+> EN — Documents
+
+Έγγραφα
+
+**`pricing.rows.fileQuestionsPerHour`**
+
+> EN — Questions about a file
+
+Ερωτήσεις πάνω σε αρχείο
+
+**`pricing.rows.files`**
+
+> EN — Files stored
+
+Αποθηκευμένα αρχεία
+
+**`pricing.rows.fileUploadsPerHour`**
+
+> EN — File uploads
+
+Ανεβάσματα αρχείων
+
+**`pricing.rows.freeChatMessages`**
+
+> EN — Free chat messages / month
+
+Δωρεάν μηνύματα chat / μήνα
+
+**`pricing.rows.helpCentre`**
+
+> EN — Help Centre
+
+Κέντρο βοήθειας
+
+**`pricing.rows.integrationReadsPerHour`**
+
+> EN — Reads from a connected account
+
+Αναγνώσεις από συνδεδεμένο λογαριασμό
+
+**`pricing.rows.integrations`**
+
+> EN — Connected integrations
+
+Συνδεδεμένες ενσωματώσεις
+
+**`pricing.rows.listRowsShown`**
+
+> EN — Rows shown in one list
+
+Γραμμές ανά λίστα
+
+**`pricing.rows.missionControl`**
+
+> EN — Goals & Plans
+
+Στόχοι & Σχέδια
+
+**`pricing.rows.notifications`**
+
+> EN — Notifications and reminders
+
+Ειδοποιήσεις και υπενθυμίσεις
+
+**`pricing.rows.posts`**
+
+> EN — Posts
+
+Αναρτήσεις
+
+**`pricing.rows.predictions`**
+
+> EN — Predictions
+
+Προβλέψεις
+
+**`pricing.rows.presentations`**
+
+> EN — Presentations
+
+Παρουσιάσεις
+
+**`pricing.rows.projects`**
+
+> EN — Projects
+
+Projects
+
+**`pricing.rows.publishedSites`**
+
+> EN — Published websites
+
+Δημοσιευμένοι ιστότοποι
+
+**`pricing.rows.recordSearch`**
+
+> EN — Record search across modules
+
+Αναζήτηση σε όλες τις καταχωρήσεις
+
+**`pricing.rows.siteEditsPerDay`**
+
+> EN — Live edits per site
+
+Ζωντανές αλλαγές ανά ιστότοπο
+
+**`pricing.rows.siteVersionsKept`**
+
+> EN — Versions kept per site
+
+Εκδόσεις που κρατιούνται ανά ιστότοπο
+
+**`pricing.rows.storage`**
+
+> EN — Storage
+
+Αποθηκευτικός χώρος
+
+**`pricing.rows.teamCollaboration`**
+
+> EN — Team collaboration
+
+Συνεργασία ομάδας
+
+**`pricing.rows.teamMembers`**
+
+> EN — Team members
+
+Μέλη ομάδας
+
+**`pricing.rows.teamSeatsAddOn`**
+
+> EN — Team seats
+
+Θέσεις ομάδας
+
+**`pricing.rows.voiceClipLength`**
+
+> EN — Longest recording (minutes)
+
+Μέγιστη ηχογράφηση (λεπτά)
+
+**`pricing.rows.voiceMinutes`**
+
+> EN — Voice minutes / month
+
+Λεπτά φωνής / μήνα
+
+**`pricing.rows.websiteBuilder`**
+
+> EN — Website & Automation Builder
+
+Website & Automation Builder
+
+**`pricing.rows.websiteImageStorage`**
+
+> EN — Storage for website photos
+
+Χώρος για φωτογραφίες ιστότοπου
+
+**`pricing.values.custom`**
+
+> EN — Custom
+
+Προσαρμοσμένο
+
+**`pricing.values.included`**
+
+> EN — Included
+
+Περιλαμβάνεται
+
+**`pricing.values.minutesPerMonth`**
+
+> EN — min/month
+
+λεπτά/μήνα
+
+**`pricing.values.no`**
+
+> EN — Not included
+
+Δεν περιλαμβάνεται
+
+**`pricing.values.perDay`**
+
+> EN — /day
+
+/ημέρα
+
+**`pricing.values.perHour`**
+
+> EN — /hour
+
+/ώρα
+
+**`pricing.values.perSeat`**
+
+> EN — +{currency}{price}/seat
+
++{currency}{price}/θέση
+
+**`pricing.values.unlimited`**
+
+> EN — Unlimited
+
+Απεριόριστα
+
+**`pricing.values.yes`**
+
+> EN — Included
+
+Περιλαμβάνεται
 
 **`auth.generateStrongPassword`**
 

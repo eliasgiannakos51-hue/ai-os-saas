@@ -2069,3 +2069,64 @@ found 80 of 275, which sorts nothing.
 rule names?* If the rule says "every X" and the check names three Xs,
 the population exists somewhere — a directory, a migration, an export —
 and derivation costs less than the incident does.
+
+## The data was right and the screen said otherwise
+
+> Κάθε πλάνο δείχνει ΤΗΝ ΙΔΙΑ λίστα 7 features … Το FREE λέει ότι έχει
+> Team collaboration. ΔΕΝ το έχει.
+
+Reported from production, 2026-09-19. Reproduced exactly: live
+`/signup`, 390×844, Greek — the Free card really did list Website &
+Automation Builder, AI Memory, Team collaboration, Team seats, Team
+seats included free, Extended chat memory retention, Custom AI persona
+name, and then the plan's real features underneath.
+
+**`capabilities.teamCollaboration` is `false` for Free, and always
+was.** The card rendered a ✕ beside every one of those seven rows. The
+✕ was `text-muted/50`: **2.25:1 against the panel in dark, 2.35:1 in
+light**, beside a ✓ at 9.58:1. WCAG asks 3:1 of a graphic that carries
+meaning. At a quarter of the tick's contrast, on an 11px line with a
+12px glyph, the cross is not a mark — it is a slightly dirtier patch of
+background.
+
+So the list read as seven features every plan has, and the person who
+**built the product** read it that way. A customer comparing plans would
+have had no chance.
+
+**Three defects wearing one report.** Only the third is the one the
+words describe:
+
+| what was reported | what it was |
+|---|---|
+| "Free says it has Team collaboration" | the ✕ was invisible — a legibility defect, not a data one |
+| "the same 7 under every plan" | correct and deliberate: a ✓/✕ list must show the same rows or the plans cannot be compared |
+| "a second list underneath" | real duplication — "Website & Automation Builder" above, "Website & Automation Builder access" below |
+
+And a fourth nobody reported, found on the way: the seven rows were
+English string literals inside the component, so nine languages read
+them in English on the page a new customer meets first. Neither i18n
+gate reads a JSX text node built from an array of literals — the same
+blind spot the pricing page's seat note sat in, recorded in that file's
+own comment.
+
+**The fix is the rule, not the seven.** The rows are derived from the
+feature catalogue: every entry whose cell is a tick for some plan and a
+cross for another — which is the definition of "what separates the
+plans" — labelled from `pricing.rows.<id>`, already translated ten ways.
+A row added to the catalogue now appears; a capability removed from a
+plan now disappears. This is the same correction as *the rule targets
+the shape, the check anchors on the example*, applied to a UI instead of
+a gate.
+
+**And the gate written for it was self-confirming on its first draft.**
+It compared the catalogue's cell against `plan.capabilities.<x>` — and
+the cell IS `boolCell(p.capabilities.teamCollaboration)`. Flipping the
+flag moved both sides together and the check stayed green. One object,
+read twice, an hour after that shape was written into this file. The
+second statement was sitting in the same entry: `minPlan`, declared
+separately from the cell, which a human has to keep in step. A tick now
+has to agree with the minimum plan beside it.
+
+**The question to ask:** *would I have seen this if I had only read the
+code?* The data was correct at every layer. Only a rendered pixel was
+wrong, and only a measurement of the rendered pixel finds it.

@@ -718,7 +718,7 @@ try {
     const bodyText = () => pageA.evaluate(() => document.body.innerText);
 
     await pageA.goto(AGENTS, { waitUntil: "networkidle", timeout: 60000 });
-    await pageA.getByRole("button", { name: "New agent" }).click();
+    await pageA.getByRole("button", { name: label("dashboard.agents.newAgent") }).click();
     await pageA.locator("#agent-request").fill("Every morning, summarise the most important Nvidia news.");
     const jobsBefore = jobs.size;
     await pageA.getByTestId("agent-design").click();
@@ -800,7 +800,7 @@ try {
     const pageQ = await ctxQ.newPage();
     const AGENTS = `http://127.0.0.1:${PORT}/dashboard/agents`;
     await pageQ.goto(AGENTS, { waitUntil: "networkidle", timeout: 60000 });
-    await pageQ.getByRole("button", { name: "New agent" }).click();
+    await pageQ.getByRole("button", { name: label("dashboard.agents.newAgent") }).click();
     await pageQ.locator("#agent-request").fill("Keep me updated on my competitors");
     await pageQ.getByTestId("agent-design").click();
 
@@ -822,6 +822,12 @@ try {
     check("   all three questions are shown", /Where should it look\?/.test(bodyQ) && /nothing that day/.test(bodyQ));
 
     // (γ) the answers are tappable, not an empty box.
+    // "Every morning" here is NOT a product string: it is one of the
+    // suggestions this file's own fake Anthropic returns (CLARIFY_QUESTIONS
+    // above), echoed back by the UI. scan-english-anchored-gates matched
+    // it against dashboard.agents.requestPlaceholder, which the screen is
+    // not showing — the one mis-attribution in that scan's ten files, and
+    // the reason the literal stays typed here.
     const chip = pageQ.getByRole("button", { name: "Every morning", exact: true });
     check("   the suggested answers are real buttons", (await chip.count()) === 1);
     await chip.click();
@@ -836,12 +842,12 @@ try {
     await pageQ.waitForTimeout(200);
 
     // (γ) Skip is always there.
-    check("   Skip is on the screen", (await pageQ.getByRole("button", { name: "Skip, build it anyway" }).count()) === 1);
+    check("   Skip is on the screen", (await pageQ.getByRole("button", { name: label("dashboard.agents.clarificationSkip") }).count()) === 1);
 
     // The answer is folded back into the ORIGINAL request and resubmitted
     // with skipClarification, so the second pass is not asked again.
     const jobsBeforeAnswer = jobs.size;
-    await pageQ.getByRole("button", { name: "Continue", exact: true }).click();
+    await pageQ.getByRole("button", { name: label("dashboard.agents.clarificationContinue"), exact: true }).click();
     let secondJob = null;
     for (let i = 0; i < 60 && !secondJob; i++) {
       await new Promise((r) => setTimeout(r, 250));

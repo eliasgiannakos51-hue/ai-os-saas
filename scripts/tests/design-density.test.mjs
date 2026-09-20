@@ -62,7 +62,17 @@ console.log("\n== 2. the lines ==");
 // two bordered boxes of it, became components/ui/step-flow.tsx, which
 // draws none. No slack: 581 is the measured count, not a round number
 // above it.
-ok(`border utilities (${r.counts.borders}), ceiling 581`, r.counts.borders <= 581);
+//
+// 581 -> 580. The command palette needed an amber "the search did not
+// answer" callout (docs/shapes.md, "The fallback that reported
+// nothing"), which written inline is another bare `border` token
+// against a ceiling with no slack. Declared as `.notice-warning` in
+// globals.css instead, it costs zero here — and the count went DOWN by
+// one because deleting an orphan component took an inline frame with
+// it. The trade is the same one `.surface` made: a decision that will
+// appear twice belongs in the stylesheet, and this count is what
+// notices when it does not.
+ok(`border utilities (${r.counts.borders}), ceiling 580`, r.counts.borders <= 580);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

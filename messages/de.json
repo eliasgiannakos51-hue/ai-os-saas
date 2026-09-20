@@ -5,6 +5,7 @@
     "noNotifications": "Keine neuen Benachrichtigungen.",
     "jumpToPage": "Zu einem Modul oder einer Seite springen...",
     "noMatches": "Keine Treffer für „{query}“",
+    "searchFailed": "Die Suche ist derzeit nicht verfügbar – das ist kein leeres Ergebnis. Bitte versuche es gleich noch einmal.",
     "createStudio": "Mach irgendwas",
     "cancel": "Abbrechen",
     "save": "Speichern",
@@ -2539,17 +2540,6 @@
         "verb": "Wiederholen",
         "example": "Jeden Montag eine Zusammenfassung meiner Verkäufe"
       }
-    },
-    "library": {
-      "title": "Meine Sachen",
-      "description": "Alles, was Sie hier abgelegt haben: neu, markiert oder gesucht.",
-      "tabs": {
-        "recent": "Neuestes",
-        "starred": "Markiert",
-        "search": "Suchen"
-      },
-      "searchPlaceholder": "Alles durchsuchen, was Sie geschrieben haben",
-      "searchNoResults": "Nichts passt zu „{query}“."
     },
     "voicePage": {
       "title": "Stimme",

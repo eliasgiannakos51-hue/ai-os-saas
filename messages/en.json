@@ -5,6 +5,7 @@
     "noNotifications": "No new notifications.",
     "jumpToPage": "Jump to a module or page...",
     "noMatches": "No matches for “{query}”",
+    "searchFailed": "Search is unavailable right now — this is not an empty result. Try again in a moment.",
     "createStudio": "Make anything",
     "cancel": "Cancel",
     "save": "Save",
@@ -2539,17 +2540,6 @@
         "verb": "Repeat",
         "example": "Every Monday, a summary of my sales"
       }
-    },
-    "library": {
-      "title": "My stuff",
-      "description": "Everything you have put in here: recent, starred, or searched.",
-      "tabs": {
-        "recent": "Recent",
-        "starred": "Starred",
-        "search": "Search"
-      },
-      "searchPlaceholder": "Search everything you have written",
-      "searchNoResults": "Nothing matches “{query}”."
     },
     "voicePage": {
       "title": "Voice",

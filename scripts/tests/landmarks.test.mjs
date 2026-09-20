@@ -94,7 +94,13 @@ console.log("== 2. nor do the components those pages render ==");
     "if this is 0 the mains() detector has stopped matching and the check below is inspecting nothing");
   // The pages OUTSIDE the dashboard have their own layouts and must keep
   // theirs — those are the only legitimate holders.
-  const ALLOWED = new Set(["src/components/legal/legal-layout.tsx", "src/components/loading-state.tsx"]);
+  // loading-state.tsx was the second entry here until 2026-09-20, when it
+  // was deleted as a component no page imports. The "no stale entry" check
+  // below is what would have caught the exemption going out of date — but
+  // only once the file stopped rendering a <main>, not when it stopped
+  // being rendered at all. An exemption can be true about a file and
+  // meaningless about the product.
+  const ALLOWED = new Set(["src/components/legal/legal-layout.tsx"]);
   const unexpected = shared.filter((f) => !ALLOWED.has(f));
   check("no shared component renders a <main> without being on the list",
     unexpected.length === 0, unexpected.join(", "));

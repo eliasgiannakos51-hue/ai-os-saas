@@ -24,6 +24,7 @@ import http from "node:http";
 import { spawn } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
+import { uiRe } from "./lib/ui-text.mjs";
 
 let pass = 0;
 const failures = [];
@@ -362,7 +363,7 @@ try {
   const dialogText = await dialog.innerText();
   check(
     "and the dialog says what to do about it",
-    /valid address/i.test(dialogText) || dialogText.includes(messages["too short"]),
+    (await uiRe(page, "dashboard.publishing.disabledHint")).test(dialogText) || dialogText.includes(messages["too short"]),
     dialogText.slice(0, 400)
   );
   await page.screenshot({ path: path.join(outDir, "after-1280-invalid.png"), fullPage: false });

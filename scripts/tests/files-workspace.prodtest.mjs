@@ -27,6 +27,12 @@ import http from "node:http";
 import { spawn } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
+// The upload-failure toast is asserted against the locale the page is in.
+// Typed in English, the two checks below would have gone red on a Greek
+// screen that was working perfectly — and the message is the whole point
+// of them: a generic "could not be uploaded" is the mutation they exist
+// to catch.
+import { containsUi, uiTextStrict } from "./lib/ui-text.mjs";
 
 let pass = 0;
 const failures = [];
@@ -630,7 +636,9 @@ try {
       bucketExists = false;
       const { context: bc, page: bp } = await openFiles(1280, 900);
       await bp.setInputFiles('input[type="file"]', "scripts/tests/fixtures/browser-print.pdf");
-      const errToast = bp.locator('[role="status"]', { hasText: "bucket" });
+      const errToast = bp.locator('[role="status"]', {
+        hasText: await uiTextStrict(bp, "dashboard.files.uploadStorageMissing"),
+      });
       await errToast.first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
       const toastText = await bp
         .locator('[role="status"]')
@@ -643,9 +651,20 @@ try {
       // the mutation this check exists to catch.
       check(
         `the error names the missing bucket ("${toastText.slice(0, 90)}")`,
-        /'user-files' bucket is missing/.test(toastText)
+        containsUi(toastText, await uiTextStrict(bp, "dashboard.files.uploadStorageMissing"))
       );
-      check("and points at the repair", /storage repair SQL/i.test(toastText));
+      // ...and it is NOT the generic one. Resolved from messages/, the
+      // check above is one string, so "names the bucket" and "points at
+      // the repair" stopped being two assertions the moment they stopped
+      // being two typed substrings. This is the assertion that still has
+      // teeth: weakening the route to the generic message — the mutation
+      // these checks exist to catch — leaves the specific sentence absent
+      // and this one red.
+      check(
+        "and not the generic \"could not be uploaded\"",
+        !containsUi(toastText, await uiTextStrict(bp, "dashboard.files.uploadError")),
+        toastText.slice(0, 200)
+      );
       bucketExists = true;
       await bc.close();
     }

@@ -26,6 +26,44 @@
 import { createServer } from "node:http";
 import { chromium } from "playwright";
 import { loadTs } from "./load-ts.mjs";
+import { readFileSync } from "node:fs";
+
+// THE NOT-FOUND PAGE, READ OUT OF THE ROUTE THAT SERVES IT.
+//
+// TWO THINGS WERE WRONG HERE AND THEY HID EACH OTHER.
+//
+// The check read `!/not available/i.test(heading)`. The page it names
+// says "This site isn't available" — "isn't" is not "not", so the needle
+// could not match, and the assertion passed on every run whatever the nav
+// did. It is the vacuity `lib/ui-text.mjs` exists for, reached without a
+// locale being involved at all: a needle that is never present makes a
+// negative check green forever.
+//
+// And the harness's own 404 was `<!doctype html><title>Site not
+// found</title>` — no <h1> at all, and nothing resembling the page the
+// product serves. So even a correct needle would have been asserting
+// against a fiction: a test that serves its own straw 404 cannot tell you
+// it did not land on the real one.
+//
+// Both halves now come from the route. A published site has no UI locale
+// to resolve against — it is the customer's own content, and the 404 body
+// is a deliberately hard-coded English constant (see the comment above it
+// in the route) — so the independent source is the ROUTE FILE, the same
+// bytes production serves. This throws rather than falling back: an empty
+// heading would make the check vacuous again, quietly.
+function notFoundPage() {
+  const file = "src/app/s/[subdomain]/[page]/route.ts";
+  const html = /const NOT_FOUND_HTML = `([\s\S]*?)`;/.exec(readFileSync(file, "utf8"))?.[1];
+  const h1 = html ? /<h1>([^<]+)<\/h1>/.exec(html)?.[1]?.trim() : null;
+  if (!html || !h1 || h1.length < 6) {
+    throw new Error(
+      `published-site-seo: could not read NOT_FOUND_HTML out of ${file} ` +
+        `(h1 = ${JSON.stringify(h1)}). A missing needle makes the not-a-404 check pass on a 404.`
+    );
+  }
+  return { html, h1 };
+}
+const NOT_FOUND = notFoundPage();
 
 let pass = 0;
 const failures = [];
@@ -138,7 +176,8 @@ const server = createServer((req, res) => {
   const body = SERVED.get(path);
   if (!body) {
     res.writeHead(404, { "Content-Type": "text/html; charset=utf-8" });
-    res.end("<!doctype html><title>Site not found</title>");
+    // The bytes the product serves, not a stand-in — see notFoundPage().
+    res.end(NOT_FOUND.html);
     return;
   }
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
@@ -180,7 +219,11 @@ try {
     ok(`clicking "${label}" from the HOME page lands on ${expected}`, landed === expected, landed);
     // And the page that answered is the right one, not a 404 body.
     const heading = await page.textContent("h1");
-    ok(`...on a real page, not the not-found page`, Boolean(heading) && !/not available/i.test(heading ?? ""), heading);
+    ok(
+      `...on a real page, not the not-found page`,
+      Boolean(heading) && heading.trim() !== NOT_FOUND.h1,
+      `${heading} (the 404 page says "${NOT_FOUND.h1}")`
+    );
   }
 
   // From a SUB-page, where a relative nav happens to work — so a fix that

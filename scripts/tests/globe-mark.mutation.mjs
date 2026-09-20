@@ -217,9 +217,13 @@ const MUTANTS = [
     to: '<span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />',
   },
   {
-    name: "a new file starts spinning without anyone deciding which side of the line it is on",
+    // Retargeted 2026-09-20: this pointed at components/loading-state.tsx,
+    // which was deleted as an orphan. route-skeleton.tsx is what
+    // app/dashboard/loading.tsx actually renders, so this is now a
+    // mutation of a screen somebody sees.
+    name: "a waiting screen starts spinning without anyone deciding which side of the line it is on",
     suites: [UNIT],
-    file: "src/components/loading-state.tsx",
+    file: "src/components/dashboard/route-skeleton.tsx",
     from: "<GlobeMark",
     to: '<span className="animate-spin" />;\n  void 0;\n  const _unused = <GlobeMark',
   },

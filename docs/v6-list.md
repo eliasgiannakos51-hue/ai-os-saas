@@ -88,7 +88,7 @@ alive.
   charge; or
 - **Remove** the column, which needs a migration applied by hand.
 
-## 5. The 10 English-anchored gates — ~2 hours, or 30 minutes for the worst 4
+## 5. ~~The 10 English-anchored gates~~ — DONE 2026-09-20
 
     node scripts/scan-english-anchored-gates.mjs
 
@@ -109,6 +109,38 @@ in any language:
 
 **Take those first.** A check that fails loudly is a nuisance; a check
 that passes vacuously is a lie in a green log.
+
+**Done, 2026-09-20.** All ten converted to needles resolved out of
+`<html lang>` and that locale's own messages file
+(`scripts/tests/lib/ui-text.mjs`, now with `uiFormat` for ICU plurals
+and `quoteForSelector` for Playwright selectors). The BREAKS list is
+**gated at zero** by `scripts/tests/english-anchored-gates.test.mjs`
+(19 checks, 9 of 9 mutations caught), with **two** written exceptions,
+each checked both ways:
+
+| kept | why |
+|---|---|
+| `!/An agent cannot/` on a Greek page | the assertion IS that the English sentence is absent; resolving it through the page makes it say nothing |
+| `"Every morning"` in background-jobs | not a product string — it is that file's own fake Anthropic's suggestion, echoed back. The scan's one mis-attribution of ten |
+
+**Three things came out of it that the list did not ask for:**
+
+1. `published-site-seo` asserted `!/not available/i` about a page
+   whose heading is *"This site isn't available"* — the same vacuity
+   with no locale in it, green on every run since it was written. Its
+   harness also served a straw 404 with no `<h1>`; both halves now come
+   from the route file.
+2. **The guard against the vacuity had the vacuity's own shape.**
+   `uiTextStrict` refused any needle under three characters, and
+   "Succeeded" is 成功 — two characters, the whole word. It would have
+   THROWN on a working Japanese product. Found by the new gate running
+   every key through all ten messages files; eight of nine hits were
+   CJK. The floor is script-aware now and pinned from both ends.
+3. Ten more literals that the scan does not report, because they are
+   not verbatim values in `en.json`: `input[aria-label="Primary colour
+   (hex)"]` is `${t("primary")} (hex)`, and `/7/` was the entire
+   assertion about a sentence, in a product where a digit survives
+   translation.
 
 ## 6. ~~Finish a full mutation sweep~~ — DONE 2026-09-17
 
@@ -668,3 +700,83 @@ nothing, and the empirical sweep now finds no disagreement among them —
 but "no disagreement today" is weaker than "sorted". The gate holds the
 correctness subset (last-writer-wins) at zero; the rest is measured by
 `npm run test:order` rather than forbidden.
+
+## 23. The fallback that reported nothing — 2026-09-20
+
+    node scripts/scan-silent-fallbacks.mjs
+
+⌘K turned a 500 into `[]`, rendered `[]` as **"No matches for
+«έσοδα»"**, and cached it — so retyping never retried. «Το ⌘K δεν βρίσκει
+τίποτα» and «το ⌘K είναι χαλασμένο» were the same screen, reported three
+times, and each round fixed something real in the matcher that was not
+the reason.
+
+**The rule: a fallback MUST report that it was used.** Otherwise it does
+not protect the user from the bug, it protects the bug from being found.
+
+**733 catch blocks across 917 files**, classified: 577 report, rethrow or
+return a value that carries the failure; 59 recover silently; 56 are
+empty; 41 neither. Measured 2026-09-20, after this round's four orphan
+deletions; the gate prints the live figures on every build. The first version of the classifier said 172 were
+silent, because `catch { return NextResponse.json({ ok: false }) }` has
+no `console.error` in it — the discriminator is whether the value
+CARRIES the failure, not whether the block logs.
+
+**Looking for the second caller found something bigger.**
+`LibrarySearch` had the identical shape — and had been an **orphan since
+2026-09-02**, when the merge that chose main's sidebar naming deleted its
+page and left the component behind. Nothing had rendered it for eighteen
+days. It was deleted rather than fixed.
+
+`orphan-i18n-keys` could not see it: `dashboard.library.*` had a reader,
+namely the orphan. **A dead component keeps its translations alive in ten
+languages, and a gate that starts from the thing being read calls that
+health.** `entry-points.test.mjs` now requires every component under
+`src/components` to have an importer. **Four did not** — `library-search`,
+`loading-state` (described in the present tense by three comments as the
+one "the whole app boots with"), `quick-action-card`, `quick-start-button`
+— all deleted, with the three comments corrected in the same commit.
+
+The fallback gate kept the rule that generalises: every component reaching
+`/api/search` must read `res.ok` AND raise a flag on the dropped request.
+**The first version of that sweep found zero**, looking for a quoted string
+where the code uses a template literal; the floor under it caught that, and
+there is now a named-member clause too, because a sweep pointed at the wrong
+directory passes a count.
+
+**What is NOT closed:** the 59 remaining silent recoveries are printed
+and not gated. Most are right — a probe whose contract is "null when it
+cannot ask" reports through its return value. The scan cannot see whether
+the CALLER looks, and settling one means making the inner call fail and
+watching whether anything says so. `scripts/tests/silent-fallbacks.test.mjs`
+holds the classifier's ability to sort them, not the number itself.
+
+## 24. Quick Start is dead end to end — a decision, not a bug
+
+Found on 2026-09-20 by the new orphan-component clause in
+`entry-points.test.mjs`, and **exempted there rather than deleted**,
+because this is a product question:
+
+| piece | state |
+|---|---|
+| `src/components/overview/quick-start-modal.tsx` | rendered by nothing |
+| `/api/templates/apply` | called only by that modal |
+| `src/lib/workspace-templates.ts` | read only by those two |
+| `dashboard.overview.quickStart*` | translated into ten languages |
+
+It became unreachable when `quick-action-card.tsx` and
+`quick-start-button.tsx` — its only importers — turned out to be orphans
+themselves.
+
+**Two ways to close it, and the cost is the asymmetry:** deleting takes
+about twenty minutes and loses a feature somebody once wrote and ten
+translators once translated; wiring it back to the Overview page is
+roughly an hour and needs a decision about where the button goes, which
+is the decision that got lost in the first place. `user-data-registry.ts`
+already documents the route as a source of user rows, so a deletion has
+to go through there too.
+
+**Until it is decided, it is named in the exemption and the exemption is
+checked both ways** — the file must still exist, and it must still have
+no importer. Wiring it up makes the exemption fail rather than leaving a
+paragraph about something that stopped being true.

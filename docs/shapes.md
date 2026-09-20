@@ -1161,8 +1161,9 @@ and the negative ones went green.
 **And the vacuity can come back one level down.** An empty needle makes
 `includes()` always true and its negation always false, so a key that
 resolves to nothing would restore exactly the defect being removed.
-`uiTextStrict` throws on a needle under three characters rather than
-returning one.
+`uiTextStrict` throws rather than returning one — see
+`minNeedleLength` and the section below, which is about how that floor
+was wrong on the day it was written.
 
 **Its precision was measured, not claimed.** The first version of the scan
 took every string in the file and scored 2 real out of 7 hand-checked;
@@ -1175,9 +1176,74 @@ paid for that lesson once: `plan-enforcement.test.mjs` failed a file it
 had just fixed because the explanatory paragraph contained the symbol it
 scanned for.
 
-**It reports; it does not gate.** A prodtest signing in to an English
-account and asserting English is narrow, not wrong, and which to widen is
-a judgement about where the product is going.
+**The BREAKS half is now gated at zero**, with two written exceptions;
+SOURCE-ONLY still only reports, because asserting that the ENGLISH file
+says an English thing is legitimate and a baseline there would be a
+number with nothing behind it. `scripts/tests/english-anchored-gates.test.mjs`
+holds it, and 9 of 9 mutations are caught by its sidecar.
+
+### And the floor put the same shape back, one level down. 2026-09-20
+
+The ten files were converted on 2026-09-20 — every rendered-text needle
+resolved out of `<html lang>` and that locale's own messages file. The
+guard against the vacuity coming back was `uiTextStrict`, and its rule
+was:
+
+    if (!text || text.length < 3) throw
+
+**Which is an ASCII sentence about a ten-language product, written in the
+same hour as the paragraph condemning ASCII sentences about
+ten-language products.** "Succeeded" is 成功 in Japanese and 成功 in
+Chinese: two characters, the whole word. A three-character floor rejects
+it — and rejects it by THROWING, so the correct check fails a working
+product and the obvious repair looks like weakening the gate. It is the
+`\b` word boundary and the final sigma for the third time.
+
+Eight of the nine hits were CJK, and none of them could have been found
+by reading the helper: they were found by
+`english-anchored-gates.test.mjs` running every key the converted files
+name through **every one of the ten messages files**, including the nine
+that no prodtest is ever pointed at. The population was the messages
+directory all along — the rule from "the rule targets the shape, the
+check anchors on the example", applied to a rule about the same thing.
+
+The floor now asks what a word IS in the script it is looking at: one
+han character, kana or hangul syllable is a morpheme; three Latin, Greek
+or Cyrillic letters is about the shortest thing worth asserting on;
+empty is refused everywhere, because that is the vacuity itself and not
+a judgement about length. The gate pins both ends — 成功 passes, "ok"
+does not — so a floor that went back to a constant fails whichever
+constant it picked.
+
+### The same vacuity with no locale in it at all. 2026-09-20
+
+`published-site-seo.prodtest.mjs`, guarding against landing on the
+not-found page:
+
+    !/not available/i.test(heading)
+
+and the page it guards against says **"This site isn't available"**.
+"isn't" is not "not". The needle never matched anything, in English, on
+every run since it was written.
+
+**And the harness's own 404 was a straw one** — `<!doctype
+html><title>Site not found</title>`, no `<h1>` at all — so even a correct
+needle would have been asserting against a page the product does not
+serve. A test that serves its own stand-in for the thing it is checking
+it did not land on cannot tell you it did not land on it.
+
+Both halves now come from the route file: the harness serves the real
+`NOT_FOUND_HTML`, and the check compares the heading against the `<h1>`
+read out of the same constant, throwing if it cannot find one. A
+published site has no UI locale to resolve against — it is the
+customer's own content and the 404 body is deliberately hard-coded
+English — so the independent source is the route, which is the same
+answer `ui-text.mjs` gives for the dashboard, pointed at a different
+file.
+
+**The lesson is not about translation.** A negative assertion is only
+worth the presence of its needle somewhere. If nothing you can run ever
+makes it appear, it is a comment with a `!` in front of it.
 
 ## A line-level tool asserting a structural property
 
@@ -2341,3 +2407,92 @@ minutes, in the before-a-deploy tier beside `npm run test:env`.
 different filesystem?* If it enumerates and then cares which came first,
 the answer is no, and nothing in the build will tell you until a builder
 does.
+
+## The fallback that reported nothing, so the failure looked like an answer
+
+    const results = res.ok && data.ok ? data.results : [];
+    searchCacheRef.current.set(key, results);
+
+That is the whole defect, and it ran in production for weeks. ⌘K turned
+a 500 into an empty array, rendered the empty array as **"No matches for
+«έσοδα»"**, and then **cached it** — so retyping the same word never
+retried, and one outage froze that query as "you have nothing" for the
+rest of the session.
+
+**«Το ⌘K δεν βρίσκει τίποτα» and «το ⌘K είναι χαλασμένο» were the same
+screen.** The owner reported the first sentence three times across three
+rounds. Each round looked at the matcher, because the matcher is what
+"finds nothing" is about, and each round found something real to fix in
+it — aliases, a word-level fallback, a backfilled `search_index`. None of
+them was the reason he saw no results, and nothing anywhere said so.
+
+**The rule:** *a fallback MUST report that it was used.* A recovery that
+says nothing does not protect the user from the bug; it protects the bug
+from being found. Three separate failures were invisible behind this one
+line.
+
+### The census, and the discriminator that made it worth reading
+
+    node scripts/scan-silent-fallbacks.mjs
+
+**733 catch blocks across 917 files**, measured 2026-09-20 after the
+four orphan deletions in the same commit. The first version reported 172
+"silent" ones and was useless: `catch { return NextResponse.json({ ok:
+false, error }) }` is the loudest thing a route can do, and it has no
+`console.error` in it. A scan whose top finding is the correct pattern
+gets closed after five entries.
+
+So the classifier asks whether the value CARRIES the failure — `ok:
+false`, a 4xx/5xx, `null`, `"unchecked"` — not whether the block logs.
+That took 172 to **60**, and the four that mattered were readable in the
+first screenful.
+
+**It reports; it does not gate the number.** Most of those 60 are right:
+a probe whose contract is "null when it cannot ask" reports through its
+return value, and that IS the report. What the scan cannot see is whether
+the CALLER looks. **Settle one by making the inner call fail and seeing
+whether anything, anywhere, says so** — the same rule as the empty-`Set`
+mutation for a vacuous gate.
+
+### Looking for the second one found something else entirely
+
+`/api/search` had a second caller with the identical shape —
+`components/library/library-search.tsx`, `catch { setResults([]) }`,
+`res.ok` never read. It was repaired, and then **the build's route check
+failed on the sentence describing the repair**: it said the bug told a
+user on `/dashboard/library` that nothing matched, and there is no such
+route.
+
+**The component had been an orphan for eighteen days.** The merge of
+2026-09-02 chose main's sidebar naming over a branch's, deleted the
+branch's `/dashboard/library/page.tsx` — its message says *"Verified
+unreferenced before deleting"*, about the PAGE — and left the component
+it rendered behind. The component was written because *"the only way in
+was Ctrl+K"*, and it has been rendered by nothing ever since.
+
+**`orphan-i18n-keys` could not see it, and the reason generalises.**
+That gate asks whether every key in `messages/` has a reader.
+`dashboard.library.*` had one: the orphan itself. **A dead component
+keeps its translations alive, in ten languages, and every check that
+starts from the thing being read calls that health.** The reader has to
+be checked too — `entry-points.test.mjs` now requires every component
+under `src/components` to have an importer, and **four did not**:
+`library-search`, `loading-state` (which three comments in other files
+described, in the present tense, as *"the shared LoadingState the whole
+app boots with"*), `quick-action-card` and `quick-start-button`. A
+fifth, `quick-start-modal`, surfaced once those two went and is exempted
+with a reason rather than deleted: Quick Start is dead end to end — modal,
+route, template table and ten locales of keys — and deleting a FEATURE is
+the owner's decision, not cleanup.
+
+So the fix was a deletion, and what stayed in the fallback gate is the
+rule that generalises: every component reaching `/api/search` must tell a
+failure from an empty answer, on the 500 and on the dropped request
+alike. Today that is one component. **And the first version of that sweep
+found zero**, because it looked for the quoted string `"/api/search?`
+where the code uses a template literal — caught by the floor under it.
+
+**Every "every X" check needs the floor that says X was found**, and a
+named member if it has one: the count clause and *"the palette is one of
+them, by name"* fail differently, and a sweep pointed at the wrong
+directory passes the first.

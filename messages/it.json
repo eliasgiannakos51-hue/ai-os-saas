@@ -5,6 +5,7 @@
     "noNotifications": "Nessuna nuova notifica.",
     "jumpToPage": "Vai a un modulo o pagina...",
     "noMatches": "Nessun risultato per «{query}»",
+    "searchFailed": "La ricerca non è disponibile in questo momento: non è un risultato vuoto. Riprova tra poco.",
     "createStudio": "Crea qualsiasi cosa",
     "cancel": "Annulla",
     "save": "Salva",
@@ -2539,17 +2540,6 @@
         "verb": "Ripeti",
         "example": "Ogni lunedì, un riepilogo delle mie vendite"
       }
-    },
-    "library": {
-      "title": "Le mie cose",
-      "description": "Tutto quello che hai messo qui: recente, preferito o cercato.",
-      "tabs": {
-        "recent": "Recenti",
-        "starred": "Preferiti",
-        "search": "Cerca"
-      },
-      "searchPlaceholder": "Cerca in tutto ciò che hai scritto",
-      "searchNoResults": "Niente corrisponde a «{query}»."
     },
     "voicePage": {
       "title": "Voce",

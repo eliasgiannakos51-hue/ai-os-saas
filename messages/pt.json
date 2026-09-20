@@ -5,6 +5,7 @@
     "noNotifications": "Nenhuma notificação nova.",
     "jumpToPage": "Ir para um módulo ou página...",
     "noMatches": "Nenhum resultado para «{query}»",
+    "searchFailed": "A pesquisa está indisponível neste momento — isto não é um resultado vazio. Tenta novamente daqui a pouco.",
     "createStudio": "Cria qualquer coisa",
     "cancel": "Cancelar",
     "save": "Salvar",
@@ -2539,17 +2540,6 @@
         "verb": "Repete",
         "example": "Todas as segundas, um resumo das minhas vendas"
       }
-    },
-    "library": {
-      "title": "As minhas coisas",
-      "description": "Tudo o que pôs aqui: recente, favorito ou procurado.",
-      "tabs": {
-        "recent": "Recentes",
-        "starred": "Favoritos",
-        "search": "Procurar"
-      },
-      "searchPlaceholder": "Procure em tudo o que escreveu",
-      "searchNoResults": "Nada corresponde a «{query}»."
     },
     "voicePage": {
       "title": "Voz",

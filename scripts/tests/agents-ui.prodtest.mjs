@@ -15,7 +15,7 @@
 //
 // Run: node scripts/tests/agents-ui.prodtest.mjs
 import http from "node:http";
-import { uiTextStrict } from "./lib/ui-text.mjs";
+import { containsUi, uiFormat, uiRe, uiTextStrict } from "./lib/ui-text.mjs";
 import { label } from "./lib/label.mjs";
 import { spawn } from "node:child_process";
 
@@ -302,14 +302,14 @@ try {
   // until 2026-09-13, naming a function in lib/agents/cron-expression.ts
   // that nothing ever called; this check has always been passing because
   // of the other one.
-  checkTrue("the schedule reads as a sentence, not a cron string", body.includes("Every day at 08:00"));
+  checkTrue("the schedule reads as a sentence, not a cron string", containsUi(body, await uiFormat(page, "dashboard.agents.schedule.daily", { time: "08:00" })));
   checkTrue("...and the raw expression is NOT shown", !body.includes("0 8 * * *"), body.slice(0, 600));
   // next_run_at is 06:00Z; the agent's zone is Europe/Athens (UTC+2 in
   // January), so the user must see 08:00 — their clock, not the server's.
   checkTrue("the next run is shown in the AGENT'S timezone", /8:00/.test(body), body.slice(0, 600));
-  checkTrue("the status is shown", body.includes("Active"));
-  checkTrue("the plan allowance is shown", body.includes("1 of 5 agents"), body.slice(0, 600));
-  checkTrue("the EU AI Act notice is on the page", /AI systems/i.test(body));
+  checkTrue("the status is shown", containsUi(body, await uiTextStrict(page, "dashboard.agents.statusActive")));
+  checkTrue("the plan allowance is shown", containsUi(body, await uiFormat(page, "dashboard.agents.agentsUsed", { used: 1, cap: 5 })), body.slice(0, 600));
+  checkTrue("the EU AI Act notice is on the page", (await uiRe(page, "dashboard.agents.aiDisclosure")).test(body));
   // RESOLVED FROM THE PAGE'S OWN LOCALE, not typed in English. As a
   // NEGATIVE assertion this was the dangerous kind: under a Greek UI the
   // English string is never present, so it passed while measuring
@@ -342,15 +342,15 @@ try {
   await page.getByRole("button", { name: "Nvidia Daily News", exact: true }).click();
   await page.waitForTimeout(400);
   body = await text();
-  checkTrue("the history section appears", body.includes("Run history"), body.slice(-800));
-  checkTrue("a successful run is listed", body.includes("Succeeded"));
-  checkTrue("a failed run is listed too", body.includes("Failed"));
+  checkTrue("the history section appears", containsUi(body, await uiTextStrict(page, "dashboard.agents.historyTitle")), body.slice(-800));
+  checkTrue("a successful run is listed", containsUi(body, await uiTextStrict(page, "dashboard.agents.runSucceeded")));
+  checkTrue("a failed run is listed too", containsUi(body, await uiTextStrict(page, "dashboard.agents.runFailedLabel")));
   checkTrue("the failure reason is readable", body.includes("The AI service could not be reached."));
-  checkTrue("what the run cost is shown", body.includes("37 credits"), body.slice(-1200));
+  checkTrue("what the run cost is shown", containsUi(body, await uiFormat(page, "dashboard.agents.runCredits", { credits: 37 })), body.slice(-1200));
   checkTrue("the task itself is shown", body.includes("Find and summarise the most important Nvidia news"));
 
   // The output is behind a disclosure, so it is present but collapsed.
-  await page.getByText("See the result").first().click();
+  await page.getByText(await uiTextStrict(page, "dashboard.agents.viewOutput")).first().click();
   await page.waitForTimeout(250);
   body = await text();
   checkTrue("the run's output is readable", body.includes("Nvidia announced the RTX 6090"), body.slice(-800));

@@ -5,6 +5,7 @@
     "noNotifications": "没有新通知。",
     "jumpToPage": "跳转到模块或页面...",
     "noMatches": "没有找到与“{query}”匹配的结果",
+    "searchFailed": "搜索暂时不可用——这不是“没有结果”。请稍后重试。",
     "createStudio": "创建任何东西",
     "cancel": "取消",
     "save": "保存",
@@ -2539,17 +2540,6 @@
         "verb": "重复",
         "example": "每周一，给我一份销售汇总"
       }
-    },
-    "library": {
-      "title": "我的东西",
-      "description": "你放进来的一切：最近的、收藏的，或搜索到的。",
-      "tabs": {
-        "recent": "最近",
-        "starred": "收藏",
-        "search": "搜索"
-      },
-      "searchPlaceholder": "搜索你写过的一切",
-      "searchNoResults": "没有匹配「{query}」的内容。"
     },
     "voicePage": {
       "title": "语音",

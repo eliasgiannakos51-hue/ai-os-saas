@@ -5,6 +5,7 @@
     "noNotifications": "新しい通知はありません。",
     "jumpToPage": "モジュールやページに移動...",
     "noMatches": "「{query}」に一致する結果はありません",
+    "searchFailed": "検索は現在利用できません。結果が0件という意味ではありません。少し経ってから再度お試しください。",
     "createStudio": "何でもつくる",
     "cancel": "キャンセル",
     "save": "保存",
@@ -2539,17 +2540,6 @@
         "verb": "繰り返す",
         "example": "毎週月曜日に、売上のまとめを"
       }
-    },
-    "library": {
-      "title": "わたしのもの",
-      "description": "ここに入れたすべて：最近のもの、お気に入り、検索。",
-      "tabs": {
-        "recent": "最近",
-        "starred": "お気に入り",
-        "search": "検索"
-      },
-      "searchPlaceholder": "書いたものすべてを検索",
-      "searchNoResults": "「{query}」に一致するものはありません。"
     },
     "voicePage": {
       "title": "音声",

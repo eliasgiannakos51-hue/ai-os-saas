@@ -48,15 +48,24 @@
  *   starts from here.
  *
  * ------------------------------------------------------------------
- * IT REPORTS; IT DOES NOT GATE
+ * BREAKS IS GATED AT ZERO; SOURCE-ONLY REPORTS
  * ------------------------------------------------------------------
  *
- * Same posture as scan-unjudged-numbers.mjs and
- * scan-declared-never-read.mjs. A prodtest that signs in to a real
- * English account and asserts English is not wrong — it is narrow, and
- * narrow has a cost only when somebody changes the locale. Which of
- * those to widen is a judgement about where the product is going, and a
- * build that fails over it would get an ALLOWED list within a week.
+ * This said "it reports; it does not gate", and predicted that "a build
+ * that fails over it would get an ALLOWED list within a week". It got
+ * one on the same day the list was emptied, and that is the right
+ * outcome rather than the feared one: the ten files it found were
+ * converted to needles resolved out of the locale the page says it is in
+ * (scripts/tests/lib/ui-text.mjs), and the two that could NOT be are in
+ * DELIBERATE below, each with a written reason and each checked BOTH
+ * ways by scripts/tests/english-anchored-gates.test.mjs — present in the
+ * file it names, and still the scan's own finding.
+ *
+ * SOURCE-ONLY keeps the old posture, and for the old reason: asserting
+ * that the ENGLISH file says an English thing is legitimate, so a
+ * baseline there would be a number with nothing behind it. It is listed
+ * so that a gate which grows a rendered-text read later shows up as a
+ * move from one section to the other.
  *
  * Run: scripts/scan-english-anchored-gates.mjs
  */
@@ -158,114 +167,182 @@ function candidateLiterals(rawSource) {
  */
 const RENDERS = /page\.(evaluate|innerText|textContent|getByText|locator|\$\$?eval)|\.innerText\b|\.textContent\b|document\.body|has-text\(/;
 
-const messages = userVisibleStrings();
-const stripped = new Map();
-for (const [value, path] of messages) {
-  const s = stripIcu(value);
-  if (s.length >= 6) stripped.set(s, path);
-}
+/**
+ * THE TWO ENGLISH LITERALS THAT STAY, AND WHY.
+ *
+ * Everything else in the BREAKS list was converted on 2026-09-20 to a
+ * needle resolved out of the locale the page says it is in
+ * (scripts/tests/lib/ui-text.mjs). These two cannot be, and the reason is
+ * different in each case — which is the point of writing them down rather
+ * than letting the count drift upward with an unexplained baseline.
+ *
+ * scripts/tests/english-anchored-gates.test.mjs holds the un-excepted
+ * count at ZERO and checks each entry BOTH ways: the literal must still
+ * be present in the file it names (or the exception is stale and goes),
+ * and it must still be the scan's own finding (or the exception is
+ * covering nothing).
+ */
+export const DELIBERATE = [
+  {
+    file: "scripts/tests/agent-capability.prodtest.mjs",
+    literal: "An agent cannot",
+    reason:
+      "The assertion is that this ENGLISH sentence is ABSENT from a Greek screen. " +
+      "Resolving it through the page would turn it into \"the Greek sentence is absent " +
+      "from the Greek screen\", which is false on a working product. Hard-coded is what " +
+      "makes it mean anything, and the scan correctly calls it a negative that measures " +
+      "nothing under a non-English UI — here that IS the measurement.",
+  },
+  {
+    file: "scripts/tests/background-jobs.prodtest.mjs",
+    literal: "Every morning",
+    reason:
+      "Not a product string. It is one of the suggestions that file's own fake Anthropic " +
+      "returns (CLARIFY_QUESTIONS), echoed back by the UI, so it is the same in all ten " +
+      "languages. The scan matched it against dashboard.agents.requestPlaceholder, which " +
+      "the screen is not showing — the one mis-attribution in the ten files it found.",
+  },
+];
 
-const files = readdirSync("scripts/tests")
-  .filter((f) => /\.(test|prodtest|itest)\.mjs$/.test(f))
-  .map((f) => `scripts/tests/${f}`);
+const isDeliberate = (file, literal) =>
+  DELIBERATE.some((d) => d.file === file && d.literal === literal);
 
-const breaks = [];
-const sourceOnly = [];
-let weakTotal = 0;
+export function scanEnglishAnchored() {
+  const messages = userVisibleStrings();
+  const stripped = new Map();
+  for (const [value, path] of messages) {
+    const s = stripIcu(value);
+    if (s.length >= 6) stripped.set(s, path);
+  }
 
-for (const file of files) {
-  const src = readFileSync(file, "utf8");
-  const rendersText = RENDERS.test(stripComments(src));
-  const hits = [];
-  const literals = candidateLiterals(src);
-  const strippedSrc = candidateLiterals.lastStripped;
-  for (const lit of literals) {
-    const norm = stripIcu(lit.text);
-    if (norm.length < 6) continue;
-    let key = stripped.has(norm) ? norm : null;
-    if (!key) {
-      // A literal that is a PHRASE INSIDE a longer rendered string — the
-      // commonest real shape, because a gate asserts on the stable part
-      // of a sentence rather than the whole of it.
-      for (const [value] of stripped) {
-        if (value.length > norm.length && value.includes(norm) && norm.includes(" ")) { key = value; break; }
+  const files = readdirSync("scripts/tests")
+    .filter((f) => /\.(test|prodtest|itest)\.mjs$/.test(f))
+    .map((f) => `scripts/tests/${f}`);
+
+  const breaks = [];
+  const sourceOnly = [];
+  const excused = [];
+  let weakTotal = 0;
+
+  for (const file of files) {
+    const src = readFileSync(file, "utf8");
+    const rendersText = RENDERS.test(stripComments(src));
+    const hits = [];
+    const literals = candidateLiterals(src);
+    const strippedSrc = candidateLiterals.lastStripped;
+    for (const lit of literals) {
+      const norm = stripIcu(lit.text);
+      if (norm.length < 6) continue;
+      let key = stripped.has(norm) ? norm : null;
+      if (!key) {
+        // A literal that is a PHRASE INSIDE a longer rendered string — the
+        // commonest real shape, because a gate asserts on the stable part
+        // of a sentence rather than the whole of it.
+        for (const [value] of stripped) {
+          if (value.length > norm.length && value.includes(norm) && norm.includes(" ")) { key = value; break; }
+        }
       }
+      if (!key) continue;
+      // STRONG vs WEAK, and this split is the whole precision story.
+      //
+      // A single lowercase English word collides with everything a codebase
+      // is already full of: "delete" is an HTTP method, "billing" a URL
+      // segment, "queued"/"running"/"failed" are database status values,
+      // "select" is a DOM call, "description" a column name. Every one of
+      // those matched a value in en.json on the first run and not one was a
+      // gate reading a rendered label.
+      //
+      // What does NOT collide is a PHRASE ("Upgrade Required", "No credit
+      // activity yet") or a capitalised multi-character label that a schema
+      // would not spell that way ("Succeeded"). So a hit is STRONG when it
+      // has a space, or is >= 8 characters and carries an interior capital
+      // or leading capital that a slug/enum/verb would not.
+      // LOUD or VACUOUS, and the second is the dangerous one.
+      //
+      // A POSITIVE assertion — body.includes("Upgrade Required") — fails in
+      // Greek. That is bad, and it is visible: somebody sees red and fixes
+      // it.
+      //
+      // A NEGATIVE one — !/0 credits/.test(text), !/not available/.test(h)
+      // — PASSES in Greek, because the English string it forbids is never
+      // there. The gate goes green having measured nothing at all, which is
+      // the same failure as an empty scraper in db-migrations: the shape of
+      // a check with none of the effect.
+      const before = strippedSrc.slice(Math.max(0, (lit.at ?? 0) - 40), lit.at ?? 0);
+      const negated = /[!]\s*$|[!]\s*\/?[\w.$]*$/.test(before.replace(/\s+$/, "")) || /\btrue\s*!==|!==\s*true/.test(before);
+      const words = lit.text.trim().split(/\s+/).length;
+      const capitalised = /^[A-Z]/.test(lit.text.trim()) && lit.text.trim().length >= 8;
+      const strong = words >= 2 || capitalised;
+      hits.push({ literal: lit.text, kind: lit.kind, messageKey: stripped.get(key), strong, negated });
     }
-    if (!key) continue;
-    // STRONG vs WEAK, and this split is the whole precision story.
-    //
-    // A single lowercase English word collides with everything a codebase
-    // is already full of: "delete" is an HTTP method, "billing" a URL
-    // segment, "queued"/"running"/"failed" are database status values,
-    // "select" is a DOM call, "description" a column name. Every one of
-    // those matched a value in en.json on the first run and not one was a
-    // gate reading a rendered label.
-    //
-    // What does NOT collide is a PHRASE ("Upgrade Required", "No credit
-    // activity yet") or a capitalised multi-character label that a schema
-    // would not spell that way ("Succeeded"). So a hit is STRONG when it
-    // has a space, or is >= 8 characters and carries an interior capital
-    // or leading capital that a slug/enum/verb would not.
-    // LOUD or VACUOUS, and the second is the dangerous one.
-    //
-    // A POSITIVE assertion — body.includes("Upgrade Required") — fails in
-    // Greek. That is bad, and it is visible: somebody sees red and fixes
-    // it.
-    //
-    // A NEGATIVE one — !/0 credits/.test(text), !/not available/.test(h)
-    // — PASSES in Greek, because the English string it forbids is never
-    // there. The gate goes green having measured nothing at all, which is
-    // the same failure as an empty scraper in db-migrations: the shape of
-    // a check with none of the effect.
-    const before = strippedSrc.slice(Math.max(0, (lit.at ?? 0) - 40), lit.at ?? 0);
-    const negated = /[!]\s*$|[!]\s*\/?[\w.$]*$/.test(before.replace(/\s+$/, "")) || /\btrue\s*!==|!==\s*true/.test(before);
-    const words = lit.text.trim().split(/\s+/).length;
-    const capitalised = /^[A-Z]/.test(lit.text.trim()) && lit.text.trim().length >= 8;
-    const strong = words >= 2 || capitalised;
-    hits.push({ literal: lit.text, kind: lit.kind, messageKey: stripped.get(key), strong, negated });
+    if (!hits.length) continue;
+    const seen = new Set();
+    const unique = hits.filter((h) => !seen.has(h.literal) && seen.add(h.literal));
+    const strongHits = unique.filter((h) => h.strong);
+    weakTotal += unique.length - strongHits.length;
+    if (!strongHits.length) continue;
+    const kept = strongHits.filter((h) => !isDeliberate(file, h.literal));
+    if (rendersText) {
+      excused.push(...strongHits.filter((h) => isDeliberate(file, h.literal)).map((h) => ({ file, ...h })));
+      if (kept.length) breaks.push({ file, hits: kept });
+    } else {
+      sourceOnly.push({ file, hits: strongHits });
+    }
   }
-  if (!hits.length) continue;
-  const seen = new Set();
-  const unique = hits.filter((h) => !seen.has(h.literal) && seen.add(h.literal));
-  const strongHits = unique.filter((h) => h.strong);
-  weakTotal += unique.length - strongHits.length;
-  if (!strongHits.length) continue;
-  (rendersText ? breaks : sourceOnly).push({ file, hits: strongHits });
+
+  return { files, stripped, breaks, sourceOnly, excused, weakTotal };
 }
 
-console.log("GATES ANCHORED ON ENGLISH THE USER SEES\n");
-console.log(`scanned ${files.length} gate files against ${stripped.size} rendered strings in ${MESSAGES}\n`);
+if (process.argv[1] && process.argv[1].endsWith("scan-english-anchored-gates.mjs")) {
+  const { files, stripped, breaks, sourceOnly, excused, weakTotal } = scanEnglishAnchored();
 
-console.log(`== BREAKS IF THE UI IS NOT ENGLISH (${breaks.length} file(s)) ==`);
-console.log("   these read text a browser rendered and compare it to an English literal\n");
-for (const b of breaks) {
-  console.log(`  ${b.file}`);
-  for (const h of b.hits.slice(0, 6)) {
-    const fate = h.negated ? "PASSES, measuring nothing" : "FAILS on a working product";
-    console.log(`      ${h.kind === "regex" ? "/" + h.literal + "/" : JSON.stringify(h.literal)}  <- ${h.messageKey}`);
-    console.log(`          in Greek/Arabic/Chinese: ${fate}`);
+  console.log("GATES ANCHORED ON ENGLISH THE USER SEES\n");
+  console.log(`scanned ${files.length} gate files against ${stripped.size} rendered strings in ${MESSAGES}\n`);
+
+  console.log(`== BREAKS IF THE UI IS NOT ENGLISH (${breaks.length} file(s)) ==`);
+  console.log("   these read text a browser rendered and compare it to an English literal\n");
+  for (const b of breaks) {
+    console.log(`  ${b.file}`);
+    for (const h of b.hits.slice(0, 6)) {
+      const fate = h.negated ? "PASSES, measuring nothing" : "FAILS on a working product";
+      console.log(`      ${h.kind === "regex" ? "/" + h.literal + "/" : JSON.stringify(h.literal)}  <- ${h.messageKey}`);
+      console.log(`          in Greek/Arabic/Chinese: ${fate}`);
+    }
+    if (b.hits.length > 6) console.log(`      ... and ${b.hits.length - 6} more`);
   }
-  if (b.hits.length > 6) console.log(`      ... and ${b.hits.length - 6} more`);
-}
 
-console.log(`\n== SOURCE-ONLY (${sourceOnly.length} file(s)) ==`);
-console.log("   assert English against a source file or en.json itself — legitimate,");
-console.log("   listed so a later rendered-text read is visible as a change\n");
-for (const s of sourceOnly.slice(0, 12)) {
-  console.log(`  ${s.file}  (${s.hits.length} literal(s))  e.g. ${JSON.stringify(s.hits[0].literal)}`);
-}
-if (sourceOnly.length > 12) console.log(`  ... and ${sourceOnly.length - 12} more`);
+  console.log(`\n== SOURCE-ONLY (${sourceOnly.length} file(s)) ==`);
+  console.log("   assert English against a source file or en.json itself — legitimate,");
+  console.log("   listed so a later rendered-text read is visible as a change\n");
+  for (const s of sourceOnly.slice(0, 12)) {
+    console.log(`  ${s.file}  (${s.hits.length} literal(s))  e.g. ${JSON.stringify(s.hits[0].literal)}`);
+  }
+  if (sourceOnly.length > 12) console.log(`  ... and ${sourceOnly.length - 12} more`);
 
-console.log(
-  `\n${breaks.length} file(s) would fail against a Greek, Arabic or Chinese UI; ` +
-    `${sourceOnly.length} assert English against source only.`
-);
-console.log(
-  "Each hit is a literal that is PROVABLY user-visible: it matches a value in\n" +
-    "messages/en.json, which has nine other spellings. Reports; does not gate."
-);
-console.log(
-  `\n${weakTotal} single-word match(es) were DISCARDED as collisions — "delete" the\n` +
-    "HTTP method, \"billing\" the URL segment, \"queued\" the database status. They are\n" +
-    "not counted above and not findings; see the STRONG/WEAK note in the source."
-);
+  console.log(`\n== DELIBERATE, AND WHY (${excused.length}) ==`);
+  console.log("   held at this exact list by scripts/tests/english-anchored-gates.test.mjs,");
+  console.log("   which also requires each one to still be present in the file it names\n");
+  for (const e of excused) {
+    console.log(`  ${e.file}`);
+    console.log(`      ${e.kind === "regex" ? "/" + e.literal + "/" : JSON.stringify(e.literal)}`);
+    for (const line of (DELIBERATE.find((d) => d.file === e.file && d.literal === e.literal)?.reason ?? "")
+      .match(/.{1,68}(\s|$)/g) ?? []) {
+      console.log(`          ${line.trim()}`);
+    }
+  }
+
+  console.log(
+    `\n${breaks.length} file(s) would fail against a Greek, Arabic or Chinese UI; ` +
+      `${sourceOnly.length} assert English against source only; ${excused.length} excused with a reason.`
+  );
+  console.log(
+    "Each hit is a literal that is PROVABLY user-visible: it matches a value in\n" +
+      "messages/en.json, which has nine other spellings. The BREAKS list is GATED at\n" +
+      "zero; SOURCE-ONLY reports and does not gate."
+  );
+  console.log(
+    `\n${weakTotal} single-word match(es) were DISCARDED as collisions — "delete" the\n` +
+      "HTTP method, \"billing\" the URL segment, \"queued\" the database status. They are\n" +
+      "not counted above and not findings; see the STRONG/WEAK note in the source."
+  );
+}

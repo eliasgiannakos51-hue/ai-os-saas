@@ -104,7 +104,7 @@ product, and the two have disagreed in this repository before
 |---|---|---|---|
 | Greeklish | WORKS in code | `greeklish.test.mjs` — 25/25 | NO |
 | RTL | WORKS in code | `rtl.test.mjs` — 42/42 | NO |
-| ⌘K per language | WORKS in code | `command-palette-language.test.mjs` — 16/16 | NO |
+| ⌘K per language | WORKS in code | `command-palette-language.test.mjs` — 17/17 | NO |
 | Verbs | WORKS in code | `module-verbs.test.mjs` — 13/13 | NO |
 | `help_articles` locale | WORKS in code | `help-articles.test.mjs` — 147/147 | NO |
 | Projects | WORKS in code | `projects.test.mjs` — 151/151 | NO |
@@ -338,6 +338,88 @@ beside the six, because each is safe for a reason located somewhere else:
 a claim that fails closed, a cached id the recovery re-derives, a stale
 reaper that rescues three rows. Any of those three can change without the
 unchecked write changing at all.
+
+
+### Α′′. RE-VERIFIED AGAIN 2026-09-20, and what the last two rounds added
+
+    node scripts/verify-closing-report.mjs     # 23 agree · 1 moved · 0 red · 0 gone
+    node scripts/tests/silent-fallbacks.test.mjs
+    node scripts/tests/english-anchored-gates.test.mjs
+
+**23 of 24 gates agree; one moved and it moved UP** —
+`command-palette-language.test.mjs` from 16 to 17 checks, gaining one in
+the ⌘K round. The row above is corrected in this commit rather than in a
+later sweep; that is the rule `docs/v5-list.md` cost four entries to
+learn.
+
+The tree, re-counted 2026-09-20 with the commands §Α′ names:
+
+| what | 2026-09-19 | 2026-09-20 | command |
+|---|---|---|---|
+| `*.test.mjs` in the build | 276 | **283** | `ls scripts/tests/*.test.mjs \| wc -l` |
+| prodtests | 45 | 45 | `ls scripts/tests/*.prodtest.mjs \| wc -l` |
+| dbtests | 29 | 29 | `ls scripts/tests/*.dbtest.mjs \| wc -l` |
+| itests | 19 | 19 | `ls scripts/tests/*.itest.mjs \| wc -l` |
+| gates in the tree | 369 | **376** | the four above, summed |
+| mutation suites | 176 | **181** | `ls scripts/tests/*.mutation.mjs \| wc -l` |
+
+**In proof: 283 of 376 = 75.3%.** The 93 that do not run in the build
+are the same 93 — 29 dbtests, 45 prodtests, 19 itests — so the fraction
+moved because the numerator did. §ΣΤ's "75%" stands to the nearest
+point.
+
+#### The three findings that were not on any list
+
+**1. ⌘K's fallback was the reason three rounds fixed the wrong thing.**
+`const results = res.ok && data.ok ? data.results : []`, and the empty
+array was CACHED. A 500 rendered as *"No matches for «έσοδα»"*, and
+retyping the same word never retried. The owner reported «το ⌘K δεν
+βρίσκει τίποτα» three times; each round found something real in the
+matcher — aliases, a word-level fallback, a backfilled `search_index` —
+and none of them was why he saw nothing.
+`node scripts/scan-silent-fallbacks.mjs` now classifies **733 catch
+blocks across 917 files** (2026-09-20, after this round's four orphan
+deletions): 577 report, rethrow or return a value carrying the failure;
+59 recover silently; 56 are empty; 41 neither — and the gate prints the
+live figures on every build rather than these. It
+reports and does not gate the number, and the way to settle one is named
+in its footer: make the inner call fail and see whether anything says so.
+
+**2. Looking for the second caller found a component nobody renders.**
+`/api/search` had two; the other had the identical defect and had been an
+**orphan since 2026-09-02**, when a merge deleted its page and left the
+component. `orphan-i18n-keys` could not see it, because
+`dashboard.library.*` had a reader — the orphan itself. **A dead
+component keeps its translations alive in ten languages, and every gate
+that starts from the thing being read calls that health.**
+`entry-points.test.mjs` now requires every component under
+`src/components` to have an importer; four did not, and all four are
+gone. A fifth is exempted with a written reason, because Quick Start is
+dead end to end — modal, route, template table, ten locales — and
+deleting a feature is the owner's call (`docs/v6-list.md` #24).
+
+**3. The ten English-anchored gates are closed, and the guard written
+for them had the defect's own shape.** All ten now resolve their needles
+out of `<html lang>` and that locale's own messages file; the BREAKS list
+is gated at zero with two written exceptions.
+`published-site-seo` turned out to forbid *"not available"* on a page
+that says *"This site isn't available"* — the same vacuity with no locale
+in it, green since the day it was written, against a harness that served
+its own straw 404 with no `<h1>`.
+And `uiTextStrict` refused any needle under **three characters**, which
+is an ASCII sentence in a ten-language product: "Succeeded" is 成功, two
+characters, the whole word — it would have THROWN on a working Japanese
+build. Found by running all 47 referenced keys through all ten messages
+files; eight of nine hits were CJK. The floor is script-aware now and
+pinned at both ends.
+
+#### What these three have in common, stated once
+
+All three were **green lines about screens nobody was looking at**: a
+cached empty array that read as an answer, a gate asserting a component
+no page renders, and a needle that could not appear in any language. The
+instrument in each case was working exactly as written. `npm run build`
+was green throughout.
 
 ---
 

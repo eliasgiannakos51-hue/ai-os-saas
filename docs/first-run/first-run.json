@@ -1,6 +1,6 @@
 {
-  "total": 3274,
-  "onPath": 638,
+  "total": 3268,
+  "onPath": 639,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -10,7 +10,7 @@
       "n": 1,
       "title": "THE SENTENCES — read these",
       "note": "On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that.",
-      "count": 47
+      "count": 48
     },
     {
       "n": 2,
@@ -1253,6 +1253,12 @@
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/top-nav.tsx"
+        },
+        {
+          "key": "common.searchFailed",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/dashboard/command-palette.tsx"
         },
         {
           "key": "credits.freeMessage",

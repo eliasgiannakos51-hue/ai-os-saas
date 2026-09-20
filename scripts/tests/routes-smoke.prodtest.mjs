@@ -16,6 +16,11 @@
 // Run: node scripts/tests/routes-smoke.prodtest.mjs
 import http from "node:http";
 import { spawn } from "node:child_process";
+// Needles resolved out of the locale the page says it is in, rather than
+// typed in English. This file already opens a Greek context further down;
+// before this, the design section asserted "Animated gradient" against a
+// screen whose language it never asked about.
+import { quoteForSelector, uiRe, uiTextStrict } from "./lib/ui-text.mjs";
 
 let pass = 0,
   fail = 0;
@@ -648,20 +653,31 @@ console.log("\n== 3. new controls are actually visible (production build, 375px)
     const el = page.locator(selector).first();
     return (await el.count()) > 0 && (await el.isVisible());
   };
+  /** The same, for a needle resolved out of the page's own locale. */
+  const visibleText = async (key) => {
+    const el = page.getByText(await uiRe(page, key)).first();
+    return (await el.count()) > 0 && (await el.isVisible());
+  };
+  const hasText = async (tag, key, suffix = "") =>
+    `${tag}:has-text(${quoteForSelector(await uiTextStrict(page, key))})${suffix}`;
 
-  checkTrue("design section heading is on screen", await visible('h3:has-text("Design")'));
+  checkTrue("design section heading is on screen", await visible(await hasText("h3", "dashboard.websiteBuilder.design.title")));
   checkTrue("a primary colour picker is on screen", await visible('input[type="color"]'));
   const colourInputs = await page.locator('input[type="color"]').count();
   check("both primary and secondary colour pickers exist", colourInputs, 2);
-  checkTrue("background options are on screen", await visible('button:has-text("Animated gradient")'));
-  checkTrue('"You choose" is the default background', await visible('button[aria-pressed="true"]:has-text("You choose")'));
+  checkTrue("background options are on screen", await visible(await hasText("button", "dashboard.websiteBuilder.design.backgrounds.gradient")));
+  checkTrue('"You choose" is the default background', await visible(
+      await hasText('button[aria-pressed="true"]', "dashboard.websiteBuilder.design.backgrounds.auto")
+    ));
   checkTrue(
     '"My own photo" is offered but disabled with nothing uploaded',
-    await page.locator('button:has-text("My own photo")[disabled]').count() > 0
+    (await page
+      .locator(await hasText("button", "dashboard.websiteBuilder.design.backgrounds.own-photo", "[disabled]"))
+      .count()) > 0
   );
   checkTrue(
     "the upload control explains what it is for",
-    await visible('text=/logo, product shots/i')
+    await visibleText("dashboard.websiteBuilder.imageIntro")
   );
 
   // The controls must actually DO something — one that renders and is
@@ -675,12 +691,12 @@ console.log("\n== 3. new controls are actually visible (production build, 375px)
   await page.locator('input[type="color"]').first().fill("#1d4ed8");
   check(
     "picking a colour fills the paired hex field",
-    await page.locator('input[aria-label="Primary colour (hex)"]').inputValue(),
+    await page.locator(`input[aria-label="${await uiTextStrict(page, "dashboard.websiteBuilder.design.primary")} (hex)"]`).inputValue(),
     "#1d4ed8"
   );
 
   // ...and the other direction: typing a hex drives the swatch.
-  await page.locator('input[aria-label="Secondary colour (hex)"]').fill("#f59e0b");
+  await page.locator(`input[aria-label="${await uiTextStrict(page, "dashboard.websiteBuilder.design.secondary")} (hex)"]`).fill("#f59e0b");
   check(
     "typing a hex drives the colour swatch",
     await page.locator('input[type="color"]').nth(1).inputValue(),
@@ -688,11 +704,16 @@ console.log("\n== 3. new controls are actually visible (production build, 375px)
   );
 
   // A background chip really selects.
-  await page.locator('button:has-text("Animated gradient")').first().click();
+  await page
+    .locator(await hasText("button", "dashboard.websiteBuilder.design.backgrounds.gradient"))
+    .first()
+    .click();
   checkTrue(
     "choosing a background marks it selected",
     (await page
-      .locator('button[aria-pressed="true"]:has-text("Animated gradient")')
+      .locator(
+        await hasText('button[aria-pressed="true"]', "dashboard.websiteBuilder.design.backgrounds.gradient")
+      )
       .count()) > 0
   );
 

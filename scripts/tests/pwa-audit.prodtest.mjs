@@ -19,6 +19,12 @@ import http from "node:http";
 import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 import { startMockSupabase } from "../lib/mock-supabase.mjs";
+// The iOS install steps are three message keys. Asserted as English
+// substrings, "Share is named" and "Add to Home Screen is named" would go
+// red on the Greek build of a working product — and "7" would keep
+// passing, because a digit survives translation and measured nothing
+// about the sentence around it.
+import { containsUi, uiTextStrict } from "./lib/ui-text.mjs";
 
 let pass = 0;
 const failures = [];
@@ -597,11 +603,28 @@ try {
       );
       const text = await steps.innerText();
       check("three numbered taps are listed", (text.match(/\n?\s*[123]\s/g) ?? []).length >= 3, text.slice(0, 200));
-      check("Share is named", /share/i.test(text), text.slice(0, 200));
-      check("Add to Home Screen is named", /home screen/i.test(text), text.slice(0, 200));
+      check(
+        "the Share step is named",
+        containsUi(text, await uiTextStrict(phone, "pwa.iosStep1")),
+        text.slice(0, 200)
+      );
+      check(
+        "the Add to Home Screen step is named",
+        containsUi(text, await uiTextStrict(phone, "pwa.iosStep2")),
+        text.slice(0, 200)
+      );
+      check(
+        "and the third step, which says what Add actually does",
+        containsUi(text, await uiTextStrict(phone, "pwa.iosStep3")),
+        text.slice(0, 200)
+      );
+      // The "7" in the old version of this check was the whole assertion
+      // about the eviction sentence, and a digit is the same in all ten
+      // languages: it would have passed against any text that happened to
+      // contain a seven. The sentence itself is the claim.
       check(
         "and what iOS loses until then is stated — push and 7-day eviction",
-        /notification/i.test(text) && /7/.test(text),
+        containsUi(text, await uiTextStrict(phone, "pwa.iosWhy")),
         text.slice(0, 400)
       );
     }

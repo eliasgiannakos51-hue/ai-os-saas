@@ -15,6 +15,11 @@
 import http from "node:http";
 import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
+// The three labels this file looks for are resolved out of the locale the
+// page says it is in, rather than typed in English. They are read ONCE,
+// outside page.evaluate — a browser-side function cannot await anything
+// in this process, so the needles are handed in as an argument.
+import { uiTextStrict } from "./lib/ui-text.mjs";
 
 let pass = 0,
   fail = 0;
@@ -333,21 +338,26 @@ async function goHome() {
   await page.waitForTimeout(1200);
 }
 
-const state = () =>
-  page.evaluate(() => ({
-    url: location.pathname,
-    hasLoadButton: Boolean(
-      [...document.querySelectorAll("button")].find((b) => /sample data/i.test(b.textContent || ""))
-    ),
-    hasBanner: Boolean(
-      [...document.querySelectorAll("[role='status']")].find((n) => /Sample data/i.test(n.textContent || ""))
-    ),
-    hasClearButton: Boolean(
-      [...document.querySelectorAll("button")].find((b) => /Remove the sample/i.test(b.textContent || ""))
-    ),
-    bodyText: (document.querySelector("main")?.textContent ?? "").replace(/\s+/g, " "),
-    scoreLabel: document.querySelector('svg[aria-label*="/ 100"]')?.getAttribute("aria-label") ?? null,
-  }));
+const state = async () => {
+  const needles = {
+    load: await uiTextStrict(page, "sampleData.load"),
+    banner: await uiTextStrict(page, "sampleData.banner"),
+    clear: await uiTextStrict(page, "sampleData.clear"),
+  };
+  return page.evaluate((n) => {
+    const flat = (s) => (s || "").replace(/\s+/g, " ").trim().toLowerCase();
+    const has = (selector, needle) =>
+      [...document.querySelectorAll(selector)].some((el) => flat(el.textContent).includes(flat(needle)));
+    return {
+      url: location.pathname,
+      hasLoadButton: has("button", n.load),
+      hasBanner: has("[role='status']", n.banner),
+      hasClearButton: has("button", n.clear),
+      bodyText: (document.querySelector("main")?.textContent ?? "").replace(/\s+/g, " "),
+      scoreLabel: document.querySelector('svg[aria-label*="/ 100"]')?.getAttribute("aria-label") ?? null,
+    };
+  }, needles);
+};
 
 console.log("\n== 1. an empty account is offered the sample ==");
 await goHome();

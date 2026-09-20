@@ -820,6 +820,25 @@ body {
   .surface-tight .surface-tight {
     @apply bg-panel-hover;
   }
+
+  /* THE CALLOUT THAT SAYS SOMETHING FAILED — declared once, for the same
+     reason .surface is.
+
+     The command palette used to turn a 500 from /api/search into an empty
+     array and render it as "No matches" (docs/shapes.md, "The fallback that
+     reported nothing"). It now says the search did not answer, and this is
+     what that notice is made of.
+
+     WHY A CLASS FOR ONE USE. There were two callers when this was written;
+     the second turned out to be an orphan and was deleted the same day. The
+     class stays because the alternative is a border, a background and a text
+     colour spelled out inline — three more bare `border` tokens if the next
+     failure notice copies them, against a design-density ceiling that has no
+     slack. The border carries meaning here rather than framing a card, which
+     is the ~50-callout category that gate's comment allows. */
+  .notice-warning {
+    @apply rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-300;
+  }
 }
 /* ---------------------------------------------------------------------
    THE 16px FLOOR ON ANYTHING YOU CAN TYPE INTO

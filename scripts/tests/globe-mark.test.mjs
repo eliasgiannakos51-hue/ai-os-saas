@@ -273,7 +273,42 @@ for (const [name, file] of SITES) {
 check("and the indicator is the globe now", /<GlobeMark/.test(stripComments(indicator)));
 
 // AND THE OTHER WAITING SURFACES THE BRIEF NAMED.
-check("the whole-app loading state shows it", /<GlobeMark/.test(stripComments(readFileSync("src/components/loading-state.tsx", "utf8"))));
+//
+// THIS USED TO NAME components/loading-state.tsx AS "the whole-app
+// loading state", and that line was green for as long as it existed
+// while being about a screen no user ever saw: nothing imported the
+// component. It was deleted on 2026-09-20 — see entry-points.test.mjs,
+// which now fails on a component no page imports, and docs/shapes.md,
+// "Looking for the second one found something else entirely".
+//
+// SO THE SURFACE IS DERIVED NOW rather than named. Next's waiting screens
+// are its loading.tsx files; whatever each of them renders has to reach a
+// GlobeMark, and adding a second one without the mark fails here. Today
+// there is exactly one, and a floor says so — a walk that finds none
+// agrees with any rule at all, which is how the old line survived.
+{
+  const loadingFiles = sourceFiles("src/app", [], [".tsx"]).filter((f) => /(^|\/)loading\.tsx$/.test(f));
+  check(`Next waiting screens were found (${loadingFiles.length})`, loadingFiles.length >= 1,
+    "an empty list makes the check below pass by ranging over nothing");
+  const withoutGlobe = loadingFiles.filter((file) => {
+    const src = stripComments(readFileSync(file, "utf8"));
+    if (/<GlobeMark/.test(src)) return false;
+    // It almost never renders the mark itself — it renders a skeleton
+    // that does. One hop through a relative or @/ import is enough, and
+    // is the shape every one of these has.
+    return ![...src.matchAll(/from "([^"]+)"/g)].some(([, spec]) => {
+      const path = spec.startsWith("@/") ? spec.replace(/^@\//, "src/") : null;
+      if (!path) return false;
+      for (const ext of [".tsx", ".ts"]) {
+        try {
+          if (/<GlobeMark/.test(readFileSync(path + ext, "utf8"))) return true;
+        } catch { /* not that extension */ }
+      }
+      return false;
+    });
+  });
+  check("every waiting screen reaches the globe", withoutGlobe.length === 0, withoutGlobe.join(", "));
+}
 check("so does the between-pages skeleton", /<GlobeMark/.test(stripComments(readFileSync("src/components/dashboard/route-skeleton.tsx", "utf8"))));
 {
   const empty = stripComments(readFileSync("src/components/empty-state.tsx", "utf8"));

@@ -15,6 +15,13 @@
 import { startProdHarness } from "../lib/prod-harness.mjs";
 import { chromium } from "playwright";
 import { chromiumPath } from "./lib/chromium.mjs";
+// The three assertions below are about a NUMBER inside a sentence, and
+// the sentence is a plural rule. uiFormat runs the locale's own ICU message
+// through the same library the renderer uses, so "0 credits" is resolved
+// rather than typed — the last check is a NEGATIVE one, and a typed
+// English needle makes it pass in the other nine languages having
+// forbidden a string that was never going to be there.
+import { containsUi, uiFormat, uiRe } from "./lib/ui-text.mjs";
 
 const AGENT_ID = "00000000-0000-4000-9000-000000000010";
 const USER_ID = "00000000-0000-4000-8000-000000000001";
@@ -123,21 +130,22 @@ try {
   // credits_charged, which is zero and means "free for you", not "nothing
   // happened".
   check("the bypassed run quotes what it WOULD have cost",
-    /37/.test(text) && /unlimited/i.test(text),
+    containsUi(text, await uiFormat(page, "dashboard.agents.runCreditsUnlimited", { credits: 37 })),
     text.split("\n").filter((l) => /credit|unlimited|37|12/i.test(l)).join(" | ").slice(0, 400));
 
   // ...and the charged run is still reported as charged. A fix that said
   // "unlimited" on every row would pass the check above.
   check("the charged run still reports its real charge",
-    /12 credits/i.test(text),
+    containsUi(text, await uiFormat(page, "dashboard.agents.runCredits", { credits: 12 })),
     text.split("\n").filter((l) => /credit/i.test(l)).join(" | ").slice(0, 400));
 
   // The exact thing the user saw. Not "no zero anywhere" — a zero can
   // legitimately appear elsewhere on the page — but the zero-credits
   // phrasing against a run.
+  const zeroCredits = await uiRe(page, "dashboard.agents.runCredits", { credits: 0 });
   check("no run is described as costing 0 credits",
-    !/\b0 credits\b/i.test(text),
-    text.split("\n").filter((l) => /0 credits/i.test(l)).join(" | "));
+    !zeroCredits.test(text),
+    text.split("\n").filter((l) => zeroCredits.test(l)).join(" | "));
 
   await ctx.close();
 } finally {

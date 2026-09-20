@@ -22,6 +22,7 @@
 // Run: node scripts/tests/agent-capability.prodtest.mjs
 import http from "node:http";
 import { label, labelPattern } from "./lib/label.mjs";
+import { uiRe } from "./lib/ui-text.mjs";
 import { spawn } from "node:child_process";
 
 let pass = 0,
@@ -313,17 +314,17 @@ try {
   await openCreate(page);
 
   const body = await page.locator("body").innerText();
-  checkTrue("the CAN heading is on screen", /An agent can/i.test(body), body.slice(0, 400));
-  checkTrue("the CANNOT heading is on screen", /An agent cannot/i.test(body));
+  checkTrue("the CAN heading is on screen", (await uiRe(page, "dashboard.agents.capability.canTitle")).test(body), body.slice(0, 400));
+  checkTrue("the CANNOT heading is on screen", (await uiRe(page, "dashboard.agents.capability.cannotTitle")).test(body));
   checkTrue(
     "…and it names code explicitly — the thing the reported user asked for",
-    /Write or run code/i.test(body)
+    (await uiRe(page, "dashboard.agents.capability.cannot.code")).test(body)
   );
-  checkTrue("…system access", /Reach your computer/i.test(body));
-  checkTrue("…other platforms", /Act on other platforms/i.test(body));
-  checkTrue("…physical acts", /physical world/i.test(body));
-  checkTrue("…money", /Move money/i.test(body));
-  checkTrue("…phone calls", /Make phone calls/i.test(body));
+  checkTrue("…system access", (await uiRe(page, "dashboard.agents.capability.cannot.system_access")).test(body));
+  checkTrue("…other platforms", (await uiRe(page, "dashboard.agents.capability.cannot.other_platforms")).test(body));
+  checkTrue("…physical acts", (await uiRe(page, "dashboard.agents.capability.cannot.physical")).test(body));
+  checkTrue("…money", (await uiRe(page, "dashboard.agents.capability.cannot.financial")).test(body));
+  checkTrue("…phone calls", (await uiRe(page, "dashboard.agents.capability.cannot.phone")).test(body));
   checkTrue(
     "no raw i18n key path leaked to the screen",
     !/dashboard\.agents\.capability/.test(body),
@@ -335,17 +336,17 @@ try {
   // -------------------------------------------------------------------
   const before = { ...seen };
   await submit(page, "Θέλω agent που φτιάχνει MVP, τρέχει tests, διορθώνει errors");
-  await page.getByText(/An agent can't do this one/i).waitFor({ state: "visible", timeout: 15000 });
+  await page.getByText(await uiRe(page, "dashboard.agents.capability.refusedTitle")).waitFor({ state: "visible", timeout: 15000 });
 
   const refusalText = await page.locator("body").innerText();
-  checkTrue("the refusal panel is shown", /An agent can't do this one/i.test(refusalText));
+  checkTrue("the refusal panel is shown", (await uiRe(page, "dashboard.agents.capability.refusedTitle")).test(refusalText));
   checkTrue(
     "it names the category that blocked it",
-    /Write or run code, build software/i.test(refusalText)
+    (await uiRe(page, "dashboard.agents.capability.cannot.code")).test(refusalText)
   );
-  checkTrue("it quotes the words it matched", /Found in what you wrote/i.test(refusalText));
-  checkTrue("it states that nothing was charged", /You have not been charged/i.test(refusalText));
-  checkTrue("it suggests what to ask for instead", /Try asking for research/i.test(refusalText));
+  checkTrue("it quotes the words it matched", (await uiRe(page, "dashboard.agents.capability.detectedIn")).test(refusalText));
+  checkTrue("it states that nothing was charged", (await uiRe(page, "dashboard.agents.capability.noCharge")).test(refusalText));
+  checkTrue("it suggests what to ask for instead", (await uiRe(page, "dashboard.agents.capability.tryInstead")).test(refusalText));
 
   // THE MONEY ASSERTION.
   checkTrue(
@@ -369,16 +370,16 @@ try {
     page,
     "Κάθε πρωί στείλε μου τα νέα για τη Nvidia και φτιάξε μου ένα script που τα αποθηκεύει"
   );
-  await page.getByText(/Part of this can't be done/i).waitFor({ state: "visible", timeout: 15000 });
+  await page.getByText(await uiRe(page, "dashboard.agents.capability.partialTitle")).waitFor({ state: "visible", timeout: 15000 });
 
   const partialText = await page.locator("body").innerText();
-  checkTrue("the partial panel is shown", /Part of this can't be done/i.test(partialText));
+  checkTrue("the partial panel is shown", (await uiRe(page, "dashboard.agents.capability.partialTitle")).test(partialText));
   checkTrue(
     "it says what the agent WOULD do instead",
-    /The agent would do this instead/i.test(partialText)
+    (await uiRe(page, "dashboard.agents.capability.partialWillDo")).test(partialText)
   );
   checkTrue("and quotes the doable part", /nvidia/i.test(partialText));
-  checkTrue("it says nothing has been charged yet", /Nothing has been charged yet/i.test(partialText));
+  checkTrue("it says nothing has been charged yet", (await uiRe(page, "dashboard.agents.capability.noChargeYet")).test(partialText));
   checkTrue(
     "there is a button to build the part that works",
     (await page.getByRole("button", { name: labelPattern("dashboard.agents.capability.partialContinue") }).count()) === 1
@@ -428,7 +429,7 @@ try {
     "over-blocking is the failure mode with no later layer to catch it"
   );
   const goodText = await page2.locator("body").innerText();
-  checkTrue("…and no refusal panel appeared", !/An agent can't do this one/i.test(goodText));
+  checkTrue("…and no refusal panel appeared", !(await uiRe(page2, "dashboard.agents.capability.refusedTitle")).test(goodText));
   await ctxEn2.close();
 
   // -------------------------------------------------------------------
@@ -442,6 +443,14 @@ try {
   checkTrue("the CAN list is in Greek", /Ένας agent μπορεί/.test(elBody), elBody.slice(0, 300));
   checkTrue("the CANNOT list is in Greek", /Ένας agent δεν μπορεί/.test(elBody));
   checkTrue("…naming code in Greek", /Να γράφει ή να εκτελεί κώδικα/.test(elBody));
+  // THE ONE LITERAL ENGLISH STRING THAT STAYS, and it stays on purpose.
+  // Every other needle in this file is resolved out of the locale the page
+  // says it is in (uiRe), so a rename in messages/ cannot leave a check
+  // waiting for a sentence the product no longer prints. This one is the
+  // opposite assertion — that the ENGLISH sentence is ABSENT from a Greek
+  // screen — and resolving it through the page would turn it into "the
+  // Greek sentence is absent from the Greek screen", which is false when
+  // the product works. Hard-coded is what makes it mean anything.
   checkTrue("no English leaked into the Greek lists", !/An agent cannot/.test(elBody));
 
   await submit(pageEl, "Θέλω agent που φτιάχνει MVP, τρέχει tests, διορθώνει errors");
@@ -465,8 +474,8 @@ try {
   watch(pageM);
   await openCreate(pageM);
   const mobileBody = await pageM.locator("body").innerText();
-  checkTrue("the CAN list renders at 375px", /An agent can/i.test(mobileBody));
-  checkTrue("the CANNOT list renders at 375px", /An agent cannot/i.test(mobileBody));
+  checkTrue("the CAN list renders at 375px", (await uiRe(pageM, "dashboard.agents.capability.canTitle")).test(mobileBody));
+  checkTrue("the CANNOT list renders at 375px", (await uiRe(pageM, "dashboard.agents.capability.cannotTitle")).test(mobileBody));
   const overflow = await pageM.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth
   );

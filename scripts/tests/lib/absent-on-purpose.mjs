@@ -23,6 +23,40 @@
 // the failure mode i18n-coverage's own baseline had — it knew about three
 // and stayed at three long after they were paid off.
 export const ABSENT_ON_PURPOSE = {
+  "scripts/tests/entry-points.test.mjs": {
+    reason:
+      "THE GATE WHOSE FINDING IS THAT THESE FILES SHOULD NOT EXIST. Its new clause requires " +
+      "every component under src/components to have an importer; four did not, and the " +
+      "comment names them because 'four did not' with no names is a number nobody can check. " +
+      "They were deleted on 2026-09-20 in the commit that added the clause — so the paths " +
+      "being absent is the claim, not a stale reference.",
+    paths: [
+      "components/loading-state.tsx",
+      "components/overview/quick-action-card.tsx",
+      "components/overview/quick-start-button.tsx",
+    ],
+  },
+  "docs/shapes.md": {
+    reason:
+      "The shape is 'looking for the second one found something else entirely' — a component " +
+      "that had been an orphan for eighteen days. Naming the file is the whole account; it was " +
+      "deleted on 2026-09-20 in the commit that wrote the section.",
+    paths: ["components/library/library-search.tsx"],
+  },
+  "scripts/tests/silent-fallbacks.test.mjs": {
+    reason:
+      "The second caller of /api/search had the identical silent fallback and turned out to " +
+      "be an orphan — deleted 2026-09-20. The comment tells that story because it is why this " +
+      "gate checks a POPULATION rather than the one file the defect was found in.",
+    paths: ["components/library/library-search.tsx"],
+  },
+  "scripts/tests/light-theme-contrast.test.mjs": {
+    reason:
+      "Quotes quick-action-card as an example of the ring-1 ring-inset pattern. The file was " +
+      "deleted on 2026-09-20 as a component no page imports; the pattern it illustrates is " +
+      "still in the tree, so the sentence is kept and the path is known-absent.",
+    paths: ["components/overview/quick-action-card.tsx"],
+  },
   "docs/unmerged-branches.md": {
     reason:
       "A REPORT ABOUT OTHER BRANCHES. Every path in it is a file that exists on a branch " +

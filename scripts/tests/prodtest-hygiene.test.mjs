@@ -45,7 +45,13 @@ function check(name, cond, detail) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const DIR = "scripts/tests";
-const FILES = readdirSync(DIR).filter((f) => f.endsWith(".prodtest.mjs")).sort();
+// SORTED. readdirSync promises no order, so an offender list built from
+// an unsorted walk comes out in a different sequence on a filesystem
+// that hands the files back differently — and a failure whose lines
+// move between machines is a failure two people cannot compare.
+// scripts/scan-order-dependence.mjs found this file by running it twice
+// with every listing reversed.
+const FILES = [...readdirSync(DIR)].sort().filter((f) => f.endsWith(".prodtest.mjs")).sort();
 const src = new Map(FILES.map((f) => [f, readFileSync(`${DIR}/${f}`, "utf8")]));
 
 check(`there are prodtests to check (${FILES.length})`, FILES.length >= 30, String(FILES.length));

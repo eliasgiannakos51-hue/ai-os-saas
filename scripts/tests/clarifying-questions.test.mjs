@@ -228,7 +228,13 @@ check("and a failure there does not block the build", /catch \(err\) \{[\s\S]{0,
 console.log("\n== 5. every screen that asks offers the answers ==");
 function walk(dir) {
   const out = [];
-  for (const entry of readdirSync(dir)) {
+  // SORTED. readdirSync promises no order, so an offender list built from
+  // an unsorted walk comes out in a different sequence on a filesystem
+  // that hands the files back differently — and a failure whose lines
+  // move between machines is a failure two people cannot compare.
+  // scripts/scan-order-dependence.mjs found this file by running it twice
+  // with every listing reversed.
+  for (const entry of [...readdirSync(dir)].sort()) {
     const p = `${dir}/${entry}`;
     if (statSync(p).isDirectory()) out.push(...walk(p));
     else if (/\.tsx?$/.test(p)) out.push(p);

@@ -133,7 +133,13 @@ console.log("\n== 7. every article link points at a route that exists ==");
 const APP_ROUTES = new Set();
 function collect(dir) {
   const { readdirSync, statSync } = require("node:fs");
-  for (const entry of readdirSync(dir)) {
+  // SORTED. readdirSync promises no order, so an offender list built from
+  // an unsorted walk comes out in a different sequence on a filesystem
+  // that hands the files back differently — and a failure whose lines
+  // move between machines is a failure two people cannot compare.
+  // scripts/scan-order-dependence.mjs found this file by running it twice
+  // with every listing reversed.
+  for (const entry of [...readdirSync(dir)].sort()) {
     const full = `${dir}/${entry}`;
     if (statSync(full).isDirectory()) collect(full);
     else if (entry === "page.tsx") {

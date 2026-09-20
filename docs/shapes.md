@@ -2268,3 +2268,76 @@ looking at?* A failure is evidence about a build, and a build is a
 commit. When the output cannot name its own commit, a report and a
 reproduction can disagree for an afternoon before anybody notices they
 are describing different code.
+
+## The gate read an order nobody promised
+
+> Έτρεξες build:ci και πέρασε τοπικά, και έσπασε στο CI. Τι ΑΛΛΟ
+> διαφέρει; Βρες το ΓΕΝΙΚΟ.
+
+The env half of that question already had an answer: `build:ci` runs the
+build under a deployed environment, and `env-independence.test.mjs`
+forbids handing a gate the machine's environment. This is the half that
+was missing, and it was found by measurement rather than by listing
+candidates.
+
+**`readdirSync` promises no order.** On the ext4 image this tree is
+developed on it is hash order; a clone laid down in another sequence, on
+another filesystem, returns another. So every gate was run three times —
+twice normally, to learn which lines move on their own, and once with
+every directory listing **reversed**. Fifteen disagreed with themselves.
+
+Fourteen differed only in the order offenders were printed in. Not a
+wrong verdict — but a failure whose lines move between machines is a
+failure two people cannot compare, which is the whole cost of a pasted
+CI log. **One flipped green → RED:**
+
+    rpc-signatures.test.mjs
+      sigs[name] = params        over an UNSORTED listing of migrations
+
+Several migrations redefine a function with `create or replace`, so the
+last one to be read wins — and which one is last was the filesystem's
+choice. Under a reversed listing an obsolete signature won and the gate
+reported two call sites as passing arguments the function does not take.
+Both are in the current signature. Migration filenames carry a date
+prefix *precisely* so that sorted order is the order they are applied
+in; the gate was not sorting.
+
+**Green here, red on a builder, with a diff explaining nothing** — the
+same sentence as the `check-site-spelling` incident, from a different
+cause. That is what makes it a shape rather than a bug.
+
+### The gate written for it was blind to it
+
+`order-stability.test.mjs` holds the correctness subset at zero: a loop
+over an unsorted listing whose body assigns into a keyed collection.
+Putting the real defect back left it **green**. Its detector was
+
+    /\w+\[[^\]]+\]\s*=(?!=)/
+
+and the line it exists for is `sigs[m[1]] = …`. A character class that
+excludes `]` stops at the **inner** bracket and never reaches the `=`.
+One nested bracket, and the check could not see the only instance in the
+tree.
+
+**And the scan cried wolf before that.** Comparing one normal run with
+one reversed run reported `prodtest-hygiene` as order-dependent: it
+prints the pid it just killed, which changes every run whatever the
+order. A scan that cannot tell *changed because of the order* from
+*changes every time* produces findings nobody can act on — so it takes a
+control run first, and only differences beyond the naturally volatile
+lines count.
+
+**Why the rule is not "sort every listing".** There are 237
+`readdirSync` call sites in this tooling and almost all of them
+enumerate in order to filter and count, where order changes nothing. A
+gate with a baseline of 234 is a baseline set to the size of the
+problem, which this project names as its own failure mode. The
+correctness subset — last-writer-wins over an unsorted listing — is
+zero, holdable, and decidable without running anything. The empirical
+half is `npm run test:order`: 280 gates, three runs each, about twenty
+minutes, in the before-a-deploy tier beside `npm run test:env`.
+
+**The question to ask:** *would this gate give the same answer on a
+different filesystem?* If it enumerates and then cares which came first,
+the answer is no, and nothing in the build will tell you until a builder
+does.

@@ -80,7 +80,24 @@ export function signatureOf(corpus, name) {
 }
 
 const sigs = {};
-for (const f of readdirSync("supabase/migrations")) {
+// SORTED, AND IT IS THE WHOLE CORRECTNESS OF THIS BLOCK. `sigs[name] =`
+// is last-writer-wins over a function that several migrations redefine
+// with `create or replace`, so WHICH definition survives is decided by
+// the order the loop sees the files in. readdirSync promises no order:
+// on the ext4 image this was written on, the newest happened to come
+// last; on a filesystem that hands them back differently, an OBSOLETE
+// signature wins and every call site is compared against it.
+//
+// Found on 2026-09-19 by scripts/scan-order-dependence.mjs, which runs
+// every gate twice with the listings reversed. This gate went GREEN ->
+// RED and reported two false mismatches — grant_credits_idempotent
+// "passes p_purchased" and increment_daily_ai_spend "passes p_calls" —
+// both of which are in the CURRENT signature and neither of which is a
+// defect. Green here, red on a builder, with a diff explaining nothing.
+//
+// Migration filenames carry a date prefix precisely so that sorted
+// order is chronological order, which is the order they are applied in.
+for (const f of [...readdirSync("supabase/migrations")].sort()) {
   const s = stripSql(readFileSync(path.join("supabase/migrations", f), "utf8"));
   for (const m of s.matchAll(/create\s+(?:or\s+replace\s+)?function\s+(?:public\.)?(\w+)\s*\(([\s\S]*?)\)\s*returns/gi)) {
     sigs[m[1]] = splitParams(m[2]).map((p) => (p.match(/^(\w+)/) || [])[1]).filter(Boolean);
@@ -88,7 +105,11 @@ for (const f of readdirSync("supabase/migrations")) {
 }
 
 const files = [];
-(function walk(d) { for (const e of readdirSync(d)) { const p = path.join(d, e);
+// Sorted too, so the ORDER OFFENDERS ARE REPORTED IN is stable. Not a
+// correctness bug like the loop above — every file is visited either
+// way — but a failure whose lines move between machines is a failure
+// two people cannot compare.
+(function walk(d) { for (const e of [...readdirSync(d)].sort()) { const p = path.join(d, e);
   if (statSync(p).isDirectory()) walk(p); else if (/\.tsx?$/.test(p)) files.push(p); } })("src");
 
 console.log("== 1. the signatures were actually read ==");
@@ -115,7 +136,7 @@ check("every argument name exists in the signature", mismatched.length === 0,
 // AND the other direction: a required parameter left out is the same
 // runtime failure, so anything without a DEFAULT must be supplied.
 const CORPUS = stripSql(
-  readdirSync("supabase/migrations").map((f) => readFileSync(path.join("supabase/migrations", f), "utf8")).join("\n")
+  [...readdirSync("supabase/migrations")].sort().map((f) => readFileSync(path.join("supabase/migrations", f), "utf8")).join("\n")
 );
 const missingRequired = [];
 for (const s of sites) {

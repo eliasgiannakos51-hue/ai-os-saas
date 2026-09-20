@@ -26,6 +26,7 @@
     "hooks:install": "node scripts/install-hooks.mjs",
     "check:markers": "node scripts/check-mutation-markers.mjs",
     "test:env": "node scripts/env-sensitivity.mjs",
+    "test:order": "node scripts/scan-order-dependence.mjs",
     "build:ci": "node scripts/ci-build.mjs"
   },
   "engines": {

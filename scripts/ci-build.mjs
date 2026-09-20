@@ -33,10 +33,31 @@ console.log(`  ${probedNames().size} project variables, each set to a sentinel`)
 console.log(`  CI=1  VERCEL=1  VERCEL_ENV=production  NODE_ENV=production\n`);
 
 const r = spawnSync("npm", ["run", "build"], { stdio: "inherit", env, shell: false });
+
+// THREE OUTCOMES, NOT TWO, and the third is the one this got wrong.
+//
+// On 2026-09-19 this printed "The build FAILS in a deployed environment
+// (exit null)" with no build output above it, four times, while
+// `npm run build` was green. The build had never started: PATH had been
+// swept into the sentinel list (see env-sensitivity.mjs's probedNames),
+// so spawnSync could not find `npm` and returned ENOENT with a null
+// status. `r.status === 0` is false for null, so the else branch
+// announced a failure nobody had observed.
+//
+// A null status is not a verdict. It means the child was never run, or
+// was killed by a signal, and either way this script has measured
+// nothing — which is exactly the shape CLAUDE.md opens with. It says so
+// now, and it prints the error rather than a number.
+if (r.error || r.status === null) {
+  console.log("\nTHE BUILD DID NOT RUN — this says nothing about the build.");
+  console.log(`  ${r.error ? String(r.error) : `killed by signal ${r.signal}`}`);
+  console.log("  Nothing above this line is a verdict. Fix the harness, then re-run.");
+  process.exit(2);
+}
 if (r.status === 0) {
   console.log("\nThe build passes in a deployed environment as well as in this one.");
 } else {
   console.log(`\nThe build FAILS in a deployed environment (exit ${r.status}) while it may pass here.`);
   console.log("scripts/env-sensitivity.mjs names the gate.");
 }
-process.exit(r.status ?? 1);
+process.exit(r.status);

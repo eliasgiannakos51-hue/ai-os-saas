@@ -157,6 +157,25 @@ export function probedNames() {
   const names = new Set([...envVarsInExample(), ...envNamesInScripts()]);
   for (const skip of INTENTIONAL.keys()) names.delete(skip);
   for (const skip of TUNING.keys()) names.delete(skip);
+  // AND NEVER THE MACHINE'S OWN. ALWAYS is copied from the real
+  // environment by bare() precisely because nothing in this project
+  // configures PATH or HOME — and then this loop wrote a sentinel over
+  // the top of them, because `envNamesInScripts()` derives its list
+  // from the CODE and any script that mentions process.env.PATH puts
+  // PATH on it.
+  //
+  // On 2026-09-19 scripts/scan-order-dependence.mjs did exactly that —
+  // it passes `{ PATH: process.env.PATH }` to a child, which is the
+  // right thing for a script that spawns gates — and every subsequent
+  // `npm run build:ci` set PATH to "sentinel-not-a-real-value".
+  // spawnSync could then not find `npm`: ENOENT, status null, no output
+  // at all, and ci-build.mjs printed "The build FAILS in a deployed
+  // environment". The build had not run.
+  //
+  // A probe that reports a failure it never observed is the first thing
+  // CLAUDE.md warns about, and this is the half of it that made the
+  // failure happen.
+  for (const own of ALWAYS) names.delete(own);
   return names;
 }
 

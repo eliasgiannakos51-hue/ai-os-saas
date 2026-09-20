@@ -828,7 +828,13 @@ console.log("\n8. The dashboard");
 
 console.log("\n9. Every string the UI builds, in every locale");
 {
-  const locales = readdirSync("messages")
+  // SORTED. readdirSync promises no order, so an offender list built from
+  // an unsorted walk comes out in a different sequence on a filesystem
+  // that hands the files back differently — and a failure whose lines
+  // move between machines is a failure two people cannot compare.
+  // scripts/scan-order-dependence.mjs found this file by running it twice
+  // with every listing reversed.
+  const locales = [...readdirSync("messages")].sort()
     .filter((f) => f.endsWith(".json"))
     .map((f) => f.slice(0, -5));
   ok("ten locales", locales.length === 10, locales.join(","));

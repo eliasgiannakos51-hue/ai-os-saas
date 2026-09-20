@@ -32,7 +32,13 @@ const ok = (name, cond, detail) => {
 const list = (name, actual) => ok(name, actual.length === 0, actual.slice(0, 8).join("\n        "));
 
 function walk(dir, out = []) {
-  for (const e of readdirSync(dir, { withFileTypes: true })) {
+  // SORTED. readdirSync promises no order, so an offender list built from
+  // an unsorted walk comes out in a different sequence on a filesystem
+  // that hands the files back differently — and a failure whose lines
+  // move between machines is a failure two people cannot compare.
+  // scripts/scan-order-dependence.mjs found this file by running it twice
+  // with every listing reversed.
+  for (const e of [...readdirSync(dir, { withFileTypes: true })].sort()) {
     const p = `${dir}/${e.name}`;
     if (e.isDirectory()) walk(p, out);
     else if (/\.tsx?$/.test(e.name)) out.push(p);
@@ -239,7 +245,7 @@ for (const file of CLASSIFIED.deliverable) {
 console.log("\n== 4. the notice reaches the reader, in their language ==");
 {
   const truncation = await loadTs("src/lib/verification/truncation.ts");
-  const LOCALES = readdirSync("messages").filter((f) => f.endsWith(".json")).map((f) => f.replace(".json", ""));
+  const LOCALES = [...readdirSync("messages")].sort().filter((f) => f.endsWith(".json")).map((f) => f.replace(".json", ""));
   ok(`locales found (${LOCALES.length})`, LOCALES.length >= 9);
   for (const loc of LOCALES) {
     const notice = truncation.truncationNotice(loc);

@@ -625,3 +625,46 @@ not exist*, for the table.
 **What is NOT closed:** where the pasted output came from. It is not
 this repository at that commit, and I cannot say what it is. If it
 recurs, the first line of the build now names the tree.
+
+## 22. What differs from the builder, apart from the environment — 2026-09-19
+
+    npm run test:order                      # 280 gates, three runs each, ~20 min
+    node scripts/tests/order-stability.test.mjs   # the cheap half, in the build
+
+**The question:** three CI failures in a few rounds, two of them naming
+gates that exist in no commit here. The third — `check-site-spelling`,
+2026-09-11, in CLAUDE.md — was real. So: what differs between this
+machine and Vercel beyond env vars?
+
+**Measured, not listed.** Node 22.22.2 against `engines: 22.x`,
+full-icu, UTC, and five paths that exist here and not in a clone
+(`.next/`, `node_modules/`, `next-env.d.ts`, `prod-audit/`,
+`tsconfig.tsbuildinfo`). None of those explained anything. **File order
+did.**
+
+`scripts/scan-order-dependence.mjs` runs every gate three times — twice
+normally, to learn which lines are naturally volatile, and once with
+every `readdirSync` reversed. **15 of 280 disagreed with themselves; one
+flipped green → RED.** All 15 are fixed; the sweep is now clean.
+
+The green → RED one is `rpc-signatures.test.mjs`: `sigs[name] = params`
+over an unsorted listing of `supabase/migrations`, where several
+migrations redefine a function with `create or replace`. Which
+definition survived was the filesystem's choice. See `docs/shapes.md`,
+*the gate read an order nobody promised*.
+
+**Both instruments needed correcting before they were right**, and both
+by mutation:
+
+- the scan reported `prodtest-hygiene` because it prints a pid — a
+  control run now separates volatile from order-dependent;
+- the gate's key-assignment detector was `\w+\[[^\]]+\]\s*=`, which
+  cannot reach past the nested bracket in `sigs[m[1]] =` — the one
+  instance in the tree. Putting the defect back left it green.
+
+**What is NOT closed:** 234 of 237 `readdirSync` call sites are still
+unsorted. Almost all enumerate to filter and count, where order changes
+nothing, and the empirical sweep now finds no disagreement among them —
+but "no disagreement today" is weaker than "sorted". The gate holds the
+correctness subset (last-writer-wins) at zero; the rest is measured by
+`npm run test:order` rather than forbidden.

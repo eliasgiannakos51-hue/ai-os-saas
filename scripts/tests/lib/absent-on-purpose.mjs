@@ -23,6 +23,18 @@
 // the failure mode i18n-coverage's own baseline had — it knew about three
 // and stayed at three long after they were paid off.
 export const ABSENT_ON_PURPOSE = {
+  "scripts/db/reserve-accuracy.mjs": {
+    reason:
+      "THE INSTRUMENT IT REPLACED, AND WHY IT WAS DELETED RATHER THAN TUNED. The static scan " +
+      "compared each estimate profile's expected output against the maxTokens ceiling of the " +
+      "call it estimates. It flagged seven profiles on 2026-09-23 and zero were real, because " +
+      "the metric does not discriminate: measured the same day, EVERY profile's reserve is " +
+      "short of what its own ceiling would cost, including the two the scan ranked safest " +
+      "(missionPlan at 1.1x, createAnything at 1.6x). A ranking every member of the population " +
+      "fails sorts nothing. Naming it is the whole account of why this file reads settled rows " +
+      "instead — it was deleted in the commit that added this one.",
+    paths: ["scripts/scan-estimate-realism.mjs"],
+  },
   "scripts/tests/entry-points.test.mjs": {
     reason:
       "THE GATE WHOSE FINDING IS THAT THESE FILES SHOULD NOT EXIST. Its new clause requires " +

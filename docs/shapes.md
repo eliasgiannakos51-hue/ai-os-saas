@@ -2590,3 +2590,79 @@ That is the difference between a rule and an arrangement. "We are careful
 not to create actions automatically" is a promise about future
 intentions. "The automatic path writes to a jsonb column and the table
 has one writer" is a fact a scan can check every build.
+
+## A ranking metric that every member of the population fails
+
+`scripts/scan-estimate-realism.mjs` asked a real question. Each profile in
+`src/lib/billing/estimate.ts` says how much OUTPUT an action expects, that
+one figure is both shown to the person and used to size the credit hold,
+and the file's own header records what happens when it is too low:
+*"reserved far less than it went on to cost, which defeats the point of
+reserving."*
+
+The scan compared each profile's expected output against the `maxTokens`
+ceiling of the call it estimates and ranked by the ratio. On 2026-09-23 it
+flagged **seven** profiles. **Zero were real.**
+
+It was wrong twice, and only the second time is interesting.
+
+**The first was an ordinary bug.** It invented the input length. Four of
+the seven routes TRANSFORM the input before estimating —
+`api/presentations/generate` passes `deckEstimateInputChars(brief, slides)`,
+the brief plus 1,000 characters per slide asked for. Judged at a made-up
+1,200 characters a ten-slide deck looked like 3 credits; measured at the
+input its route actually passes, it estimates 13 and reserves 15. That is
+fixable, and it was fixed: the scan learned to read each caller's own
+`inputChars:` expression and to print UNDECIDABLE rather than a number when
+the expression is derived. Four findings evaporated.
+
+**The second was the metric.** With the input right, four findings
+remained — and they were not real either, because *short of the ceiling* is
+not a property that distinguishes anything. Measured the same day, at the
+Professional rate with margin 5:
+
+| profile | reserved | what its own ceiling would cost | the scan's verdict |
+|---|---|---|---|
+| presentation, 10 slides | 15 | 59 | flagged |
+| meetingAnalyse, 60 min | 15 | 33 | flagged |
+| importPaste, 20k chars | 26 | 35 | flagged |
+| **missionPlan** | 11 | 15 | **"fine", ranked 1.1x** |
+| **createAnything** | 5 | 8 | **"fine", ranked 1.6x** |
+
+Every profile is short against its own ceiling, including the two the scan
+ranked SAFEST. A ceiling is a limit and not a prediction: a call allowed
+8,000 tokens usually writes a tenth of that, and a reserve sized for the
+limit would hold ten times what every request needs. **No threshold on
+that ratio separates a wrong profile from a model that is simply permitted
+to write more than it will**, because the ordering it produces is not
+correlated with the defect at all.
+
+This is worse than low precision and it is a different failure. `i18n
+symbol claims` run at about 4%: the list is mostly noise but the real ones
+are in it, so a person who reads all of it finds something. A metric whose
+whole population fails is not noisy — it is measuring a different quantity
+than the one in the question, and reading all of it finds nothing, twice.
+
+**The tell, in advance: can any member of the population pass?** If the
+answer is "only one that is over-provisioned by an order of magnitude",
+the threshold is not a line through the data, it is a line under all of
+it.
+
+### What replaced it
+
+The scan was deleted rather than tuned, because tuning it means picking a
+different threshold on the same non-discriminating number.
+`scripts/db/reserve-accuracy.mjs` asks the same question of the rows
+settlement already writes: `credits_charged` on the cost-log row against
+`reservedCredits` in its metadata, per feature, over a window. It needs no
+model of what a call might do — it has what the calls DID, and its
+offender rule ("breaches on more than one request in twenty") is a line
+through real data rather than under it. `reserve-accuracy.dbtest.mjs`
+holds it against a fixture where one feature breaches always, one breaches
+once in twenty-two, and one never: 19 checks, and the middle one must NOT
+be named.
+
+Rule 45 in one line, learned the expensive way: **ask the database, do not
+grep** — and when a static scan and a stored row can answer the same
+question, the row is not merely more convenient, it is the only one of the
+two that is measuring the question.

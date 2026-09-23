@@ -387,6 +387,11 @@ const BASELINE = {
   "dashboard/files/page.tsx": 1,
   "dashboard/images/page.tsx": 1,
   "dashboard/integrations/page.tsx": 1,
+  // V6 #1. ONE, and it is Keep — the action the feature is named for and
+  // the only one on the page that writes a row somebody reads tomorrow.
+  // Transcribe is an outline control on purpose; see the comment at that
+  // button in components/meetings/meetings-workspace.tsx.
+  "dashboard/meetings/page.tsx": 1,
   // ZERO. /memory's one filled control was the paywall's "view plans",
   // and the paywall is a declared replacement surface measured below —
   // the page itself draws none. Nothing was demoted here; the number is

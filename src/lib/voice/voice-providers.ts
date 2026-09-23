@@ -43,7 +43,31 @@ export type SpeakResult =
   | { ok: true; audio: ArrayBuffer; contentType: string; usdCost: number }
   | { ok: false; failure: VoiceFailure };
 
-const OPENAI_TRANSCRIBE_URL = "https://api.openai.com/v1/audio/transcriptions";
+/**
+ * WHERE TRANSCRIPTION GOES, AND WHY IT IS OVERRIDABLE.
+ *
+ * `OPENAI_BASE_URL` is OpenAI's own documented variable and the same
+ * mechanism `ANTHROPIC_BASE_URL` already gives the other provider in
+ * this tree — Azure deployments, a corporate proxy and a self-hosted
+ * Whisper all need it, and none of them can be reached from a constant.
+ *
+ * It also makes this code path testable for the first time. Every other
+ * provider call in this product can be pointed at a stand-in and
+ * exercised in a real production build; this one could not, so the one
+ * place the audio actually leaves the process had never been driven by
+ * anything but a hand test. That is not the reason it exists, but it is
+ * the reason it exists TODAY rather than the day somebody asks for Azure.
+ *
+ * UNSET IT IS THE REAL ENDPOINT. A trailing slash is trimmed so that
+ * "https://host/v1/" and "https://host/v1" behave the same, which is the
+ * shape of every base-URL bug this kind of variable produces.
+ */
+function openAiBase(): string {
+  const raw = process.env.OPENAI_BASE_URL;
+  if (typeof raw !== "string" || raw.trim() === "") return "https://api.openai.com/v1";
+  return raw.trim().replace(/\/+$/, "");
+}
+const OPENAI_TRANSCRIBE_PATH = "/audio/transcriptions";
 const ELEVENLABS_TTS_URL = "https://api.elevenlabs.io/v1/text-to-speech";
 
 /** How long we wait on a provider before giving up. The conversation
@@ -112,7 +136,7 @@ export async function transcribeAudio(params: {
 
   try {
     const response = await withTimeout((signal) =>
-      fetch(OPENAI_TRANSCRIBE_URL, {
+      fetch(`${openAiBase()}${OPENAI_TRANSCRIBE_PATH}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}` },
         body: form,

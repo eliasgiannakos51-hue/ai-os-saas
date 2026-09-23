@@ -836,6 +836,35 @@ body {
      failure notice copies them, against a design-density ceiling that has no
      slack. The border carries meaning here rather than framing a card, which
      is the ~50-callout category that gate's comment allows. */
+  /* THE OUTLINE CONTROL, declared once.
+
+     Phase 4 asked for MORE outline buttons and fewer filled ones, and
+     design-density.test.mjs's ceiling counts the `border` token that
+     makes one. Those two pull in opposite directions only while the
+     outline is spelled out inline in every file: written here it is
+     one decision, and the ceiling stops being an argument against the
+     thing the redesign asked for.
+
+     /dashboard/meetings uses it twice. It is not retrofitted across the
+     tree in the same commit as a feature — that is a separate change
+     with its own before-and-after, and mixing the two would make
+     neither reviewable. */
+  .btn-outline {
+    @apply inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-border bg-panel px-4
+           text-sm font-medium text-foreground transition-colors duration-150
+           hover:border-orange-500/60 disabled:opacity-50;
+  }
+
+  /* A LIST OF ROWS, SEPARATED BY ONE RULE INSTEAD OF N OUTLINES.
+
+     The trade design-density.test.mjs's divide clause describes, made
+     in the direction that clause allows: the border count goes DOWN
+     and the divide is declared here, so the component files gain
+     neither. Forty proposed actions draw one rule between each pair
+     rather than forty rectangles. */
+  .row-list {
+    @apply divide-y divide-border overflow-hidden rounded-xl bg-panel/60;
+  }
   .notice-warning {
     @apply rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-300;
   }

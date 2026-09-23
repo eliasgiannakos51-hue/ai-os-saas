@@ -72,7 +72,18 @@ console.log("\n== 2. the lines ==");
 // it. The trade is the same one `.surface` made: a decision that will
 // appear twice belongs in the stylesheet, and this count is what
 // notices when it does not.
-ok(`border utilities (${r.counts.borders}), ceiling 580`, r.counts.borders <= 580);
+// 580 -> 579, and a whole new screen is what lowered it. /dashboard/meetings
+// draws two outline buttons and two lists of rows; written inline that is
+// four more bare `border` tokens and the count would have gone to 584.
+// Declared once in globals.css as `.btn-outline` and `.row-list` it is
+// zero, and the cost box became `.surface-tight`, which is one fewer than
+// before the feature existed.
+//
+// THE DIVIDE COUNT DID NOT MOVE, which is the half that makes this the
+// trade the clause below describes rather than a shuffle: `.row-list`
+// carries its `divide-y` in the stylesheet, so the rule is drawn once and
+// counted nowhere. A round that raises both numbers has not made it.
+ok(`border utilities (${r.counts.borders}), ceiling 579`, r.counts.borders <= 579);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

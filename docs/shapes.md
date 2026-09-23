@@ -2496,3 +2496,97 @@ where the code uses a template literal — caught by the floor under it.
 named member if it has one: the count clause and *"the palette is one of
 them, by name"* fail differently, and a sweep pointed at the wrong
 directory passes the first.
+
+## A rule about ten languages, written as a number of characters
+
+Three times in two days, in three different files, by the same hand:
+
+| where | the rule | what it rejected |
+|---|---|---|
+| `scripts/tests/lib/ui-text.mjs` | `text.length < 3` throws | **成功** — "Succeeded" in Japanese and Chinese, two characters, the whole word |
+| `meetings.test.mjs` | `notice.length > 30` | the Chinese privacy notice at **29 characters**, saying everything the 86-character English one says |
+| `meeting-analysis.ts` | `MIN_ANALYSABLE_CHARS = 40` | — nothing yet, and it is the same bet: forty characters is about one English sentence and rather more than one Chinese one |
+
+The first two were caught, an hour apart, by gates written for something
+else. The third is still there, deliberately, and the paragraph beside it
+now says what it is betting on.
+
+**Every one of them was written INSIDE work about the ten languages.**
+The `ui-text` floor is in the file whose entire subject is that an
+English needle is one of ten. The notice check is in the section headed
+"the ten-language notice exists in all ten". Knowing the rule is not the
+same as having the instinct, and the instinct is the thing that was
+missing.
+
+### Why a character count is the wrong instrument, specifically
+
+A character is a different amount of meaning in each script. One han
+character is a morpheme; one Latin letter is a phoneme at best. A floor
+that means "long enough to be a word" is therefore not a number at all —
+it is a question about the script, which is what `minNeedleLength` asks
+now:
+
+    const CJK = /[぀-ヿ㐀-䶿一-鿿豈-﫿가-힯]/;
+    export function minNeedleLength(text) {
+      return CJK.test(String(text)) ? 1 : 3;
+    }
+
+**And where the property can be expressed without length at all, that is
+better still.** The notice check does not measure anything now. It asks
+whether the ten sentences are ten DIFFERENT sentences:
+
+    new Set(notices.map(([, n]) => n)).size === notices.length
+
+which is script-neutral, catches the failure that actually happens (a
+locale left holding English), and cannot be wrong about Chinese.
+
+**The question to ask, before writing any threshold in this codebase:**
+*is this number true in Japanese?* If the answer needs a moment's
+thought, the number is the wrong shape and there is usually a property
+underneath it that is not a number.
+
+## A feature whose privacy promise is a schema rather than a `finally`
+
+V6 #1 takes an audio recording of a room full of people, most of whom
+were never asked. The obvious arrangement is the one `/dashboard/files`
+uses — upload to storage, read it back, delete it when done — and it
+puts the recording in a bucket for as long as the work takes.
+
+**Through storage, "the audio is not kept" is a `finally` block. A
+function killed at its ceiling runs no `finally`** — this repository
+already paid for that lesson at the 60-second boundary
+(`src/lib/function-limits.ts`). So the promise would be exactly as good as
+the timeout, and the failure would leave somebody's staff meeting in a
+bucket with nothing pointing at it.
+
+Through the request body there is no promise to keep: **no column, no
+bucket, no path.** The Blob lives in one invocation's memory and is
+unreferenced when it returns. `meetings.test.mjs` §1 reads the migration
+and asserts that nothing in it could hold a recording, and reads the
+route and asserts the blob never reaches `storage.from(...)`.
+
+**The cost is stated rather than hidden**, which is the other half of
+making this a decision instead of a preference: the host caps request
+bodies at ~4.5MB, so the ceiling is about seventeen minutes of
+voice-grade audio, and a longer meeting is REFUSED with both numbers in
+the message. Refused, never truncated — half a meeting transcribed reads
+as a whole one, the summary looks complete, and the actions from the
+second half are simply absent with nothing on the screen saying which
+half is missing.
+
+### The same shape for "no action is created automatically"
+
+The model's reading of the transcript is stored in
+`meetings.proposed_actions`, a **jsonb column on the meeting row**. It is
+data about a meeting and an entity nowhere: nothing joins to it, no other
+screen shows it, and no query treats it as a task.
+
+`meeting_actions` receives a row only when somebody presses Keep, and
+the gate holds that **exactly one file in all of `src/app/api` inserts
+into that table** — ranged over every route in the tree, so a fifth route
+added later fails rather than shipping.
+
+That is the difference between a rule and an arrangement. "We are careful
+not to create actions automatically" is a promise about future
+intentions. "The automatic path writes to a jsonb column and the table
+has one writer" is a fact a scan can check every build.

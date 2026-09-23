@@ -164,7 +164,8 @@
       "predictions": "Muster",
       "posts": "Beiträge",
       "projects": "Projekte",
-      "aiMemory": "Was es sich merkt"
+      "aiMemory": "Was es sich merkt",
+      "meetings": "Besprechungen"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -224,7 +225,8 @@
       "predictions": "Muster in deinen eigenen Einträgen, jeweils mit der Zahl der Einträge dahinter und einem Link darauf.",
       "posts": "Sag es einmal und erhalte pro Plattform einen Beitrag in ihrer Länge und ihrem Ton. Es veröffentlicht nichts – du kopierst und postest.",
       "projects": "Ein Ordner mit einem Ziel. Was du hineinlegst, ist drin — nichts kommt von selbst.",
-      "aiMemory": "Was der Chat über dich behalten hat und wie du es löschst."
+      "aiMemory": "Was der Chat über dich behalten hat und wie du es löschst.",
+      "meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst."
     },
     "closeMenu": "Menü schließen"
   },
@@ -303,7 +305,8 @@
       "websiteImageStorage": "Speicher für Website-Fotos",
       "voiceClipLength": "Längste Aufnahme (Minuten)",
       "teamMembers": "Teammitglieder",
-      "recordSearch": "Suche über alle Einträge"
+      "recordSearch": "Suche über alle Einträge",
+      "meetings": "Besprechungen → Aufgaben"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Für Teams, die gemeinsam aufbauen",
@@ -2541,6 +2544,60 @@
         "example": "Jeden Montag eine Zusammenfassung meiner Verkäufe"
       }
     },
+    "meetings": {
+      "title": "Besprechungen",
+      "description": "Lade eine Aufnahme hoch. Du bekommst das Transkript, eine Zusammenfassung und eine Liste von Aufgaben, aus der du auswählst.",
+      "audioNoticeTitle": "Die Aufnahme wird nicht aufbewahrt",
+      "audioNotice": "Die Aufnahme wird gelöscht, sobald sie transkribiert ist. Stelle sicher, dass die Sprechenden das wissen.",
+      "pick": "Aufnahme auswählen",
+      "dropHint": "M4A, MP3, WAV, WebM oder OGG",
+      "limitHint": "Bis zu {mb} MB, etwa {minutes} Minuten Sprache",
+      "tooLarge": "Diese Datei ist {actual} MB groß. Das Limit sind {allowed} MB — exportiere sie als Sprachaufnahme oder teile sie in zwei.",
+      "tooLong": "Diese Aufnahme dauert {actual} Minuten. Das Limit sind {allowed} Minuten — teile sie in zwei.",
+      "notAudio": "Das ist keine Audiodatei.",
+      "costTitle": "Was das kosten wird",
+      "costTranscribe": "Transkription, {minutes} Min.",
+      "costSummary": "Zusammenfassung und Aufgaben",
+      "costTotal": "Insgesamt etwa {credits} Credits",
+      "costUnknown": "Die Länge konnte nicht gelesen werden, daher wird sie aus der Dateigröße geschätzt.",
+      "start": "Transkribieren",
+      "transcribing": "Wird transkribiert…",
+      "analysing": "Transkript wird gelesen…",
+      "transcriptTitle": "Transkript",
+      "summaryTitle": "Zusammenfassung",
+      "analyse": "Zusammenfassen und Aufgaben finden",
+      "retryAnalysis": "Erneut versuchen",
+      "proposedTitle": "Vorgeschlagene Aufgaben",
+      "proposedHint": "Das sind Vorschläge. Es wird nichts angelegt, bevor du es behältst.",
+      "noActions": "Nichts in dieser Besprechung war eine Zusage, die jemand gemacht hat.",
+      "who": "Wer",
+      "what": "Was",
+      "when": "Wann",
+      "unassigned": "Niemand genannt",
+      "noDate": "Kein Datum genannt",
+      "keepSelected": "{count, plural, one {# Aufgabe} other {# Aufgaben}} behalten",
+      "keepNone": "Hake die an, die du behalten willst",
+      "keptTitle": "Behalten",
+      "keptEmpty": "Noch nichts behalten.",
+      "alreadyKept": "Behalten",
+      "savedWarning": "Dieses Transkript wurde nicht gespeichert — kopiere es, bevor du die Seite verlässt.",
+      "detectedLanguage": "Auf {language} gehalten",
+      "empty": "Noch keine Besprechungen. Lade eine Aufnahme hoch, um zu beginnen.",
+      "delete": "Diese Besprechung löschen",
+      "deleteConfirm": "Transkript, Zusammenfassung und die behaltenen Aufgaben löschen? Das lässt sich nicht rückgängig machen.",
+      "minutesLeft": "{used} von {limit} Minuten diesen Monat genutzt",
+      "errors": {
+        "ai_unavailable": "Der KI-Dienst war nicht erreichbar, es wurde nichts zusammengefasst. Für die Zusammenfassung wurde nichts berechnet.",
+        "unusable": "Die Zusammenfassung kam in einer Form zurück, die wir nicht lesen konnten. Dafür wurde nichts berechnet.",
+        "too_short": "Hier ist zu wenig zum Zusammenfassen.",
+        "not_included": "Besprechungen sind in diesem Tarif nicht enthalten.",
+        "out_of_minutes": "Du hast die Minuten dieses Monats aufgebraucht.",
+        "unsupported_type": "Dieses Audioformat wird nicht unterstützt.",
+        "rate_limited": "Zu viele Aufnahmen in der letzten Stunde. Versuche es später.",
+        "empty": "Diese Aufnahme war leer.",
+        "failed": "Etwas ist schiefgelaufen. Es wurde nichts berechnet."
+      }
+    },
     "voicePage": {
       "title": "Stimme",
       "description": "Etwas vorlesen lassen oder etwas sagen und mitschreiben lassen. Beides wird pro Minute abgerechnet.",
@@ -3288,6 +3345,11 @@
       "is": "Alles, was der Chat über Sie behalten hat, und sonst nichts.",
       "does": "Jede Zeile stammt aus einer Unterhaltung. Sie können diese öffnen, eine Zeile löschen oder korrigieren — und was mehr als einmal gesagt wurde, ist als wiederholt gekennzeichnet, denn so viel Gewicht gibt der Chat ihm.",
       "doesNot": "Es hält weder Ihre Unterhaltungen noch Ihre Einträge. Um Ihre Einträge zu durchsuchen, nutzen Sie Meine Einträge durchsuchen; zum Abschalten liegt der Schalter in den Einstellungen."
+    },
+    "meetings": {
+      "is": "Eine Aufnahme, die zu einem Transkript, einer Zusammenfassung und einer Liste von Aufgaben zum Auswählen wird.",
+      "does": "Transkribiert in der gesprochenen Sprache, fasst in derselben Sprache zusammen und schlägt vor, wer was bis wann zugesagt hat.",
+      "doesNot": "Es behält die Aufnahme nicht — es gibt weder Bucket noch Spalte dafür, sie ist nach dem Hochladen weg. Und es legt nichts von selbst an: eine Aufgabe existiert erst, wenn du sie ankreuzt und behältst."
     }
   },
   "helpCentre": {

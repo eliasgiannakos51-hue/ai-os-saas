@@ -371,11 +371,18 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: "/dashboard/projects", label: "Projects", icon: PROJECTS_ICON, hintKey: "projects" },
       { href: MISSION_NAV_ITEM.href, label: MISSION_NAV_ITEM.label, icon: MISSION_ICON, hintKey: "missionControl" },
       { href: REFLECTION_NAV_ITEM.href, label: REFLECTION_NAV_ITEM.label, icon: REFLECTION_ICON, hintKey: "reflection" },
-      // A POSITION HELD, AND THE ONE THAT WILL TEST THE MECHANISM FIRST.
-      // Meetings turns a recording into a summary and a list of SUGGESTED
-      // actions; it belongs beside the goals those actions become, not at
-      // the end of the group. When the flag comes off it appears here.
-      { href: "/dashboard/meetings", label: "Meetings", icon: MEETINGS_ICON, hintKey: "meetings", notBuilt: true },
+      // THE FLAG CAME OFF ON 2026-09-23, which is what the position was
+      // held for. Meetings turns a recording into a transcript, a summary
+      // and a list of SUGGESTED actions; it belongs beside the goals
+      // those actions become, not at the end of the group.
+      //
+      // The mechanism worked as written: the row was drawn from the day
+      // the decision was made and marked as unbuilt, so the position was
+      // never argued about twice, and removing one word is the whole
+      // change. api/meetings/transcribe, [id]/analyse and [id]/actions
+      // are the routes behind it; lib/billing/feature-catalog.ts `meetings`
+      // is the tier.
+      { href: "/dashboard/meetings", label: "Meetings", icon: MEETINGS_ICON, hintKey: "meetings" },
       { href: "/dashboard/team", label: "Team", icon: TEAM_ICON, hintKey: "team" },
     ],
   },

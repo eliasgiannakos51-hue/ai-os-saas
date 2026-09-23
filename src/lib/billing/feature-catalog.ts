@@ -388,6 +388,32 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     cell: (p) => boolCell(p.capabilities.posts),
   },
   {
+    // V6 #1. THE SAME METER AS VOICE, ON PURPOSE — the same Whisper
+    // seconds at the same price, so `enforcedIn` names the same function.
+    // A second monthly allowance for meetings would be a second uncapped
+    // way to spend the owner's money on one API, and the consequence of
+    // sharing is stated rather than hidden: Starter's 30 minutes is one
+    // long meeting or two short ones.
+    id: "meetings",
+    group: "make",
+    minPlan: "starter",
+    sidebar: ["/dashboard/meetings"],
+    pages: ["meetings"],
+    routes: [
+      "meetings/transcribe",
+      "meetings/[id]",
+      "meetings/[id]/analyse",
+      "meetings/[id]/actions",
+    ],
+    charges: true,
+    enforcedIn: "src/lib/voice/voice-pricing.ts",
+    enforcedSymbol: "voiceMinutesForPlan",
+    // A CHECK OR A CROSS, not the minute count — the row above already
+    // says how many minutes a plan gets, and printing the same number
+    // twice is two places for it to drift.
+    cell: (p) => (voiceMinutesForPlan(p.slug) > 0 ? { type: "check" } : { type: "cross" }),
+  },
+  {
     id: "voiceMinutes",
     group: "make",
     minPlan: "starter",

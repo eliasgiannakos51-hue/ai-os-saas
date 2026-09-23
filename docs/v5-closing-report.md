@@ -1,5 +1,12 @@
 # V5 — closing report
 
+> **CLOSED 2026-09-23.** The figures in the body are a record of the day
+> each was taken and are left as they were taken. **The current ones are
+> in §Α′ and §Α′′**, which re-derive them with the command beside each;
+> §Α′′ also carries the three findings of the last two rounds. What V5
+> left open is `docs/v6-list.md`; what the product does next is the build
+> order at the top of the same file.
+
 **Every number here was measured on 2026-09-18 by running the thing that
 produces it.** Where a number could not be measured, the row says so
 instead of carrying a figure. The commands are named so the next reader
@@ -521,6 +528,11 @@ ceiling is how many sites an account may publish. Third, the sidebar at
 ---
 
 ## ΣΤ. The verdict
+
+> **The two figures below are of 2026-09-18 and both have moved.** §Α′′
+> re-derives them: 283 of 376 gates, 75.3%, on 2026-09-20. The ratio is
+> what has not moved, and the paragraph after it says why. Left as taken
+> rather than retyped, per the rule this report is explicit about.
 
 **Two percentages, and the gap between them is the report.**
 

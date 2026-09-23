@@ -107,7 +107,20 @@ const MIN_DRAWN_ITEMS = 15;
 // "Search my records" at /dashboard/search and "What it remembers" at
 // /dashboard/ai-memory — and ai-memory.test.mjs §5 holds them to different
 // names in every language.
-const MAX_DRAWN_ITEMS = 27;
+//
+// TWENTY-EIGHT SINCE V6 #1: Meetings, and the position was decided
+// before the feature existed rather than argued about on the day it
+// shipped. The row sat in lib/sidebar-nav.ts carrying `notBuilt: true`
+// from the round that chose where it belongs — beside the goals its
+// actions become — so the whole change is one word coming off.
+//
+// It is drawn now because it meets the condition the paragraphs above
+// set for every row before it: api/meetings/transcribe reaches a
+// provider and produces a transcript, and api/meetings/[id]/analyse
+// reaches a model and produces a summary and a list of proposals. The
+// three rows still held (Music, Browser agent, Computer agent) meet none
+// of it, and feature-catalog.test.mjs holds that count at three.
+const MAX_DRAWN_ITEMS = 28;
 
 // The real filters, executed. lib/sidebar-visibility.ts imports no icons
 // precisely so this is possible — see its header.

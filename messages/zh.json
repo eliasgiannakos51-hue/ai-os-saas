@@ -164,7 +164,8 @@
       "predictions": "规律",
       "posts": "帖子",
       "projects": "项目",
-      "aiMemory": "它记得什么"
+      "aiMemory": "它记得什么",
+      "meetings": "会议"
     },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",
@@ -224,7 +225,8 @@
       "predictions": "在你自己的记录里发现的规律，每条都标明依据的条数，并可点回原始记录。",
       "posts": "说一次，就能得到每个平台各一条、长度和语气各自贴合的帖子。它不发布任何内容——由你复制并发布。",
       "projects": "有目标的文件夹。你放什么就有什么——不会自己进来。",
-      "aiMemory": "对话记住了你的哪些事，以及如何删除。"
+      "aiMemory": "对话记住了你的哪些事，以及如何删除。",
+      "meetings": "把录音变成文字记录、摘要，以及由你挑选的行动。"
     },
     "closeMenu": "关闭菜单"
   },
@@ -303,7 +305,8 @@
       "websiteImageStorage": "网站图片的存储空间",
       "voiceClipLength": "单次录音时长上限（分钟）",
       "teamMembers": "团队成员",
-      "recordSearch": "跨模块记录搜索"
+      "recordSearch": "跨模块记录搜索",
+      "meetings": "会议 → 行动"
     },
     "businessTitle": "商业版",
     "businessSubtitle": "为共同打造的团队而生",
@@ -2541,6 +2544,60 @@
         "example": "每周一，给我一份销售汇总"
       }
     },
+    "meetings": {
+      "title": "会议",
+      "description": "上传一段录音。你会得到文字记录、摘要，以及一份由你挑选的行动清单。",
+      "audioNoticeTitle": "录音不会保存",
+      "audioNotice": "录音在转写完成的那一刻就会删除。请确保说话的人知道这一点。",
+      "pick": "选择录音",
+      "dropHint": "M4A、MP3、WAV、WebM 或 OGG",
+      "limitHint": "最多 {mb} MB，约 {minutes} 分钟的讲话",
+      "tooLarge": "该文件为 {actual} MB。上限是 {allowed} MB — 请导出为语音录音，或分成两段。",
+      "tooLong": "该录音为 {actual} 分钟。上限是 {allowed} 分钟 — 请分成两段。",
+      "notAudio": "这不是音频文件。",
+      "costTitle": "这将花费多少",
+      "costTranscribe": "转写，{minutes} 分钟",
+      "costSummary": "摘要与行动",
+      "costTotal": "总计约 {credits} 积分",
+      "costUnknown": "读不到时长，所以这是按文件大小估算的。",
+      "start": "开始转写",
+      "transcribing": "正在转写…",
+      "analysing": "正在阅读文字记录…",
+      "transcriptTitle": "文字记录",
+      "summaryTitle": "摘要",
+      "analyse": "生成摘要并找出行动",
+      "retryAnalysis": "再试一次",
+      "proposedTitle": "建议的行动",
+      "proposedHint": "这些只是建议。在你保留之前不会创建任何东西。",
+      "noActions": "这次会议里没有任何人做出的承诺。",
+      "who": "谁",
+      "what": "做什么",
+      "when": "什么时候",
+      "unassigned": "未提到姓名",
+      "noDate": "未说日期",
+      "keepSelected": "保留 {count, plural, other {# 项行动}}",
+      "keepNone": "勾选要保留的项",
+      "keptTitle": "已保留",
+      "keptEmpty": "还没有保留任何内容。",
+      "alreadyKept": "已保留",
+      "savedWarning": "这份文字记录未能保存 — 离开本页前请先复制。",
+      "detectedLanguage": "以{language}进行",
+      "empty": "还没有会议。上传一段录音即可开始。",
+      "delete": "删除这次会议",
+      "deleteConfirm": "删除文字记录、摘要以及从中保留的行动？此操作无法撤销。",
+      "minutesLeft": "本月已使用 {used} / {limit} 分钟",
+      "errors": {
+        "ai_unavailable": "无法连接 AI 服务，因此没有生成摘要。摘要未收取任何费用。",
+        "unusable": "返回的摘要格式无法读取。未为此收费。",
+        "too_short": "这里的内容不足以生成摘要。",
+        "not_included": "此套餐不包含会议功能。",
+        "out_of_minutes": "你已用完本月的分钟数。",
+        "unsupported_type": "不支持该音频格式。",
+        "rate_limited": "过去一小时内录音次数过多。请稍后再试。",
+        "empty": "该录音是空的。",
+        "failed": "出了点问题。未收取任何费用。"
+      }
+    },
     "voicePage": {
       "title": "语音",
       "description": "把内容读出来，或者说一段话并转成文字。两者都按分钟计费。",
@@ -3288,6 +3345,11 @@
       "is": "对话保留的关于你的一切，仅此而已。",
       "does": "每一条都来自一次对话。你可以打开那次对话、删除某一条或更正它——说过不止一次的会标为重复，因为对话就是这样给它分量的。",
       "doesNot": "它不保存你的对话，也不保存你的记录。要搜索你记录过的内容，请用「搜索我的记录」；要完全关闭，开关在设置里。"
+    },
+    "meetings": {
+      "is": "一段录音，变成文字记录、摘要，以及一份由你挑选的行动清单。",
+      "does": "按说话时使用的语言转写，用同一种语言生成摘要，并提出谁承诺了什么、期限是什么时候。",
+      "doesNot": "它不保留录音 — 没有任何存储桶或字段可以放它，上传结束它就没有了。它也不会自行创建任何东西：只有你勾选并保留之后，行动才存在。"
     }
   },
   "helpCentre": {

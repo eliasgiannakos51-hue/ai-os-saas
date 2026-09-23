@@ -242,6 +242,11 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   // decision, and a per-direction key would let one drift.
   voiceTranscribe: "voice",
   voiceSpeak: "voice",
+  // The meeting's TRANSCRIPTION settles under "voice" — same provider,
+  // same seconds, same meter. Reading the transcript is a separate model
+  // call with its own cost shape, so it gets its own key rather than
+  // being folded into a margin that was decided about speech.
+  meetingAnalyse: "meeting_analyse",
   // The three depth tiers settle under the SAME feature as the untiered
   // profile, so CREDIT_MARGIN_AGENT_RUN still governs all of them — a
   // per-tier margin key would let one tier quietly drop below the floor

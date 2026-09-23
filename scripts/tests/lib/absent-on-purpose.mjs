@@ -119,15 +119,12 @@ export const ABSENT_ON_PURPOSE = {
 // route out loud or the next reader cannot tell what changed. Checked
 // both ways by self-claims.test.mjs.
 export const ROUTES_ABSENT_ON_PURPOSE = {
-  "docs/v5-pricing-and-nav-report.md": {
-    reason:
-      "The report names a route the sidebar deliberately holds a POSITION for and has not " +
-      "built: /dashboard/meetings carries notBuilt:true, which is exactly the claim being " +
-      "made about it. scripts/tests/sidebar-collapse.test.mjs fails the build if that route " +
-      "ever starts resolving while the flag is still on, so the day it exists this entry " +
-      "goes stale in the direction the both-ways check catches.",
-    routes: ["/dashboard/meetings"],
-  },
+  // REMOVED 2026-09-23, and the entry predicted its own removal: it said
+  // "the day it exists this entry goes stale in the direction the
+  // both-ways check catches", and that is what happened. /dashboard/meetings
+  // is a page now, so the report that named it as unbuilt describes
+  // something that used to be true — which is a different kind of
+  // sentence from a wrong one, and the report is dated and left as taken.
   "src/lib/sidebar-nav.ts": {
     reason:
       "The corrected comment names the route it corrected. /dashboard/business was written " +

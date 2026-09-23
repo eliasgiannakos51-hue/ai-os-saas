@@ -12,6 +12,101 @@ multi-write sweep finished, item 14 is what that sweep left behind.
 
 ---
 
+## THE BUILD ORDER — eight features, and it is a different list from the numbers below
+
+**Read this first, because two things in this repository are now called
+"V6 #1".** The numbered items below are ENGINEERING debt V5 left open —
+the isolation test, the guards, the mutation coverage. The eight
+features here are what the product gains, in the order the owner
+accepted on 2026-09-23. When a report says "V6 #1" without qualifying
+it, it means **Meeting → actions**, the feature; the engineering items
+are cited as "v6-list #N".
+
+| # | feature | how much was already there | state |
+|---|---|---|---|
+| 1 | **Meeting → actions** | transcription, billing, minute caps — the "→ actions" half was missing entirely | **built 2026-09-23**, see below |
+| 2 | Universal memory | `chat_memory` exists; it is read in one feature | next |
+| 3 | Images | nothing | analysis first |
+| 4 | Email / Calendar | Gmail, partly | — |
+| 5 | Browser agent | nothing | analysis only, do not build |
+| 6 | Video | nothing | analysis only |
+| 7 | Music | nothing | analysis only — the question asked is whether it is worth anything |
+| 8 | Computer use | nothing | analysis only, and it waits for V7's verification layer |
+
+The order is not arbitrary and the first column is why: 1 and 2 are the
+two where most of the machinery already exists and only the last step is
+missing, so they are the cheapest real gain per hour. 5 and 8 are last
+because they are the two that can take an irreversible action on
+somebody's behalf.
+
+### 1. Meeting → actions — BUILT 2026-09-23
+
+    node scripts/measure-meeting-limits.mjs     # the ceilings, from the tree
+    node scripts/tests/meetings.test.mjs        # 57 checks
+    node scripts/tests/meetings.mutation.mjs    # 13 of 13 caught
+    node scripts/tests/meetings.prodtest.mjs    # 43 checks, a real build
+
+Upload or record → transcript → summary → **a list of proposed actions
+(who, what, when) that are inert until the user keeps them.**
+
+**The ceiling is measured, not chosen.** See the section under item 37
+below: the request body cap is what binds, and the number the product
+enforces is derived from it in code rather than typed in two places.
+
+**The audio is never stored.** Not "deleted promptly" — there is no
+bucket, no column and no cron. It exists as a `Blob` in one function's
+memory and is unreferenced when that function returns, exactly as
+`/api/voice/transcribe` already worked. The ten-language notice says so
+before the file picker opens, because the people in the recording did not
+consent to anything and the person uploading is the only one who can tell
+them.
+
+**No action is ever created automatically.** The model's output is stored
+as JSON **on the meeting row**, where it is data about the meeting and not
+an entity anywhere. `meeting_actions` only ever receives rows the user
+pressed Keep on, and a gate asserts that the insert exists in exactly one
+route.
+
+**Three things the gate found in the code that wrote it**, which is the
+argument for writing the gate in the same commit rather than the next one:
+
+1. `parseAnalysis` accepted a JSON **array** and returned its first
+   element as though it were the whole answer — the parser inventing, in
+   the function whose comment forbids exactly that.
+2. The notice check measured `length > 30`, and the Chinese privacy
+   sentence is 29 characters. That is the **third** ASCII-length rule in
+   two days (`docs/shapes.md`, "A rule about ten languages, written as a
+   number of characters"); it now asks whether the ten sentences are ten
+   DIFFERENT sentences, which is script-neutral.
+3. The parser had **two** guards against the array case and the mutation
+   sidecar showed one of them was doing nothing. One survives, and it is
+   the more general one.
+
+**And two more that only a real request could find.** The prodtest
+builds the product, starts it, and drives the three routes against
+stand-in providers reached through their own documented base-URL
+variables:
+
+4. **Whisper returns a language NAME, not a code.** `verbose_json`
+   answers `"language": "greek"`; every unit test had fed `"el"`. So
+   `languageNameFor` resolved to nothing and the prompt said *"held in
+   the language it was recorded in"* for **every meeting** — in the one
+   feature whose entire point is the language. Invisible to any test
+   that supplies its own input. The column stores a normalised code now.
+5. The keep route's injection guard had never had an injection sent at
+   it. It holds: a body carrying its own `what` gets its sentence
+   dropped, because the text is re-read from the row by index.
+
+**What is still NOT proved, stated rather than implied:** whether a real
+recording of a real Greek meeting comes back with the right NAMES in it.
+The transcript in the prodtest is one the test wrote. No gate in this
+repository can answer that; a person with a recording can, in about a
+minute, and `meetings.test.mjs` §7 says so in the file.
+
+---
+
+---
+
 ## 1. Run the isolation test against a real database — ~15 minutes
 
 **The largest gap in the security axis, and it is not a coding task.**

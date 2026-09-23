@@ -360,6 +360,17 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that speaking to it makes it act — nothing here sends, files or starts anything",
   },
   {
+    // V6 #1. The misreading to correct is not about the audio — it is
+    // about the list. A screen that produces "who, what, when" from a
+    // meeting looks exactly like a screen that files them, and the whole
+    // design is that it does not: the model's output sits in a jsonb
+    // column until somebody ticks a box.
+    id: "meetings",
+    file: "src/app/dashboard/meetings/page.tsx",
+    keyPrefix: "help.meetings",
+    corrects: "that the actions it finds are filed for you — nothing exists until you tick it and press Keep",
+  },
+  {
     id: "predictions",
     file: "src/app/dashboard/predictions/page.tsx",
     keyPrefix: "help.predictions",

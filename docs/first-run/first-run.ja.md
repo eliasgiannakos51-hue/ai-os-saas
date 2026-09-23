@@ -1,12 +1,12 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **639 strings**. The whole product is 3268, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **642 strings**. The whole product is 3324, which is why this file exists.
 
-**Start with tier 1. It is 48 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 391 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 393 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (48)
+## Tier 1 — THE SENTENCES — read these (49)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -186,6 +186,12 @@ Gmail・Drive・Slack を接続して、AI が実際のデータを扱えるよ�
 
 エージェントの構成をテンプレートとして共有し、誰かが共有したものから始められます。
 
+**`sidebar.hints.meetings`**
+
+> EN — Turn a recording into a transcript, a summary, and actions you choose from.
+
+録音を文字起こし・要約・自分で選ぶアクションに変えます。
+
 **`sidebar.hints.posts`**
 
 > EN — Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.
@@ -308,7 +314,7 @@ Ionexa はこれをもとに次に提案するプランのステップを選び�
 
 無料。何も生成されず、ワンクリックで削除できます
 
-## Tier 2 — The labels — skim these (391)
+## Tier 2 — The labels — skim these (393)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -679,6 +685,12 @@ AI コーディング
 > EN — Rows shown in one list
 
 一覧に表示される行数
+
+**`pricing.rows.meetings`**
+
+> EN — Meetings → actions
+
+会議 → アクション
 
 **`pricing.rows.missionControl`**
 
@@ -1993,6 +2005,12 @@ AI コーディング
 > EN — Ready-made helpers
 
 すぐ使える助っ人
+
+**`sidebar.items.meetings`**
+
+> EN — Meetings
+
+会議
 
 **`sidebar.items.memory`**
 

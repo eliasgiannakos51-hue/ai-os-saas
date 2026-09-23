@@ -1,12 +1,12 @@
 # The first run — pt
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **639 strings**. The whole product is 3268, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **642 strings**. The whole product is 3324, which is why this file exists.
 
-**Start with tier 1. It is 48 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 391 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 393 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (48)
+## Tier 1 — THE SENTENCES — read these (49)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -186,6 +186,12 @@ Favoritos, recentes e pesquisa — tudo o seu num só sítio
 
 Partilhe a forma de um agente como modelo e comece a partir de um que outra pessoa partilhou.
 
+**`sidebar.hints.meetings`**
+
+> EN — Turn a recording into a transcript, a summary, and actions you choose from.
+
+Transforma uma gravação em transcrição, resumo e ações que escolhes tu.
+
 **`sidebar.hints.posts`**
 
 > EN — Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.
@@ -308,7 +314,7 @@ O Ionexa usa isto para escolher que passo do plano te sugerir — trabalho leve 
 
 Grátis — não é gerado nada, e remove com um clique
 
-## Tier 2 — The labels — skim these (391)
+## Tier 2 — The labels — skim these (393)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -679,6 +685,12 @@ Integrações ligadas
 > EN — Rows shown in one list
 
 Linhas mostradas por lista
+
+**`pricing.rows.meetings`**
+
+> EN — Meetings → actions
+
+Reuniões → ações
 
 **`pricing.rows.missionControl`**
 
@@ -1993,6 +2005,12 @@ As minhas coisas
 > EN — Ready-made helpers
 
 Ajudantes prontos
+
+**`sidebar.items.meetings`**
+
+> EN — Meetings
+
+Reuniões
 
 **`sidebar.items.memory`**
 

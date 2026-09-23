@@ -66,8 +66,13 @@ const MUTANTS = [
     // search. Swapping them is how a 404 gets into the command palette.
     name: "a not-built row is marked hidden instead",
     file: NAV,
-    from: '      { href: "/dashboard/meetings", label: "Meetings", icon: MEETINGS_ICON, hintKey: "meetings", notBuilt: true },',
-    to: '      { href: "/dashboard/meetings", label: "Meetings", icon: MEETINGS_ICON, hintKey: "meetings", hidden: true },',
+    // RE-ANCHORED 2026-09-23. This pointed at the meetings row, whose
+    // notBuilt flag came off the day the feature was built — so the
+    // mutation stopped EXISTING rather than stopping being caught, which
+    // is the shape docs/shapes.md calls "a mutant whose anchor moved".
+    // Moved to the music row, which is still a held position.
+    from: '      { href: "/dashboard/music", label: "Music", icon: MUSIC_ICON, hintKey: "music", notBuilt: true },',
+    to: '      { href: "/dashboard/music", label: "Music", icon: MUSIC_ICON, hintKey: "music", hidden: true },',
     expect: "carry the flag they are declared with",
   },
   {

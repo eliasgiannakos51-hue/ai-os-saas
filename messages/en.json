@@ -164,7 +164,8 @@
       "predictions": "Predictions",
       "posts": "Posts",
       "projects": "Projects",
-      "aiMemory": "What it remembers"
+      "aiMemory": "What it remembers",
+      "meetings": "Meetings"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -224,7 +225,8 @@
       "predictions": "Patterns found in your own rows, each with the number of entries it rests on and a link to them.",
       "posts": "Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.",
       "projects": "A folder with a goal. What you put in is what is in it — nothing is dragged in with it.",
-      "aiMemory": "What the chat has kept about you, and how to remove it."
+      "aiMemory": "What the chat has kept about you, and how to remove it.",
+      "meetings": "Turn a recording into a transcript, a summary, and actions you choose from."
     },
     "closeMenu": "Close menu"
   },
@@ -303,7 +305,8 @@
       "websiteImageStorage": "Storage for website photos",
       "voiceClipLength": "Longest recording (minutes)",
       "teamMembers": "Team members",
-      "recordSearch": "Record search across modules"
+      "recordSearch": "Record search across modules",
+      "meetings": "Meetings → actions"
     },
     "businessTitle": "Business",
     "businessSubtitle": "For teams building together",
@@ -2541,6 +2544,60 @@
         "example": "Every Monday, a summary of my sales"
       }
     },
+    "meetings": {
+      "title": "Meetings",
+      "description": "Upload a recording. Get the transcript, a summary, and a list of actions you choose from.",
+      "audioNoticeTitle": "The audio is not kept",
+      "audioNotice": "The audio is deleted the moment it is transcribed. Make sure the people speaking know.",
+      "pick": "Choose a recording",
+      "dropHint": "M4A, MP3, WAV, WebM or OGG",
+      "limitHint": "Up to {mb} MB, about {minutes} minutes of speech",
+      "tooLarge": "That file is {actual} MB. The limit is {allowed} MB — export it as a voice recording, or split it in two.",
+      "tooLong": "That recording is {actual} minutes. The limit is {allowed} minutes — split it in two.",
+      "notAudio": "That is not an audio file.",
+      "costTitle": "What this will cost",
+      "costTranscribe": "Transcription, {minutes} min",
+      "costSummary": "Summary and actions",
+      "costTotal": "About {credits} credits in total",
+      "costUnknown": "The length could not be read, so this is estimated from the file size.",
+      "start": "Transcribe",
+      "transcribing": "Transcribing…",
+      "analysing": "Reading the transcript…",
+      "transcriptTitle": "Transcript",
+      "summaryTitle": "Summary",
+      "analyse": "Summarise and find actions",
+      "retryAnalysis": "Try again",
+      "proposedTitle": "Proposed actions",
+      "proposedHint": "These are suggestions. Nothing is created until you keep it.",
+      "noActions": "Nothing in this meeting was a commitment anybody made.",
+      "who": "Who",
+      "what": "What",
+      "when": "When",
+      "unassigned": "Nobody named",
+      "noDate": "No date said",
+      "keepSelected": "Keep {count, plural, one {# action} other {# actions}}",
+      "keepNone": "Tick the ones to keep",
+      "keptTitle": "Kept",
+      "keptEmpty": "Nothing kept yet.",
+      "alreadyKept": "Kept",
+      "savedWarning": "This transcript was not saved — copy it before you leave the page.",
+      "detectedLanguage": "Held in {language}",
+      "empty": "No meetings yet. Upload a recording to start.",
+      "delete": "Delete this meeting",
+      "deleteConfirm": "Delete the transcript, the summary and the actions kept from it? This cannot be undone.",
+      "minutesLeft": "{used} of {limit} minutes used this month",
+      "errors": {
+        "ai_unavailable": "The AI service could not be reached, so nothing was summarised. Nothing was charged for the summary.",
+        "unusable": "The summary came back in a form we could not read. Nothing was charged for it.",
+        "too_short": "There is not enough here to summarise.",
+        "not_included": "Meetings are not included on this plan.",
+        "out_of_minutes": "You have used this month's minutes.",
+        "unsupported_type": "That audio format is not supported.",
+        "rate_limited": "Too many recordings in the last hour. Try again later.",
+        "empty": "That recording was empty.",
+        "failed": "Something went wrong. Nothing was charged."
+      }
+    },
     "voicePage": {
       "title": "Voice",
       "description": "Read something out, or say something and get it written down. Both are metered by the minute.",
@@ -3288,6 +3345,11 @@
       "is": "Everything the chat has kept about you, and nothing else.",
       "does": "Each line came out of one conversation. You can open that conversation, delete a line, or correct it — and a fact said more than once is marked as repeated, because that is how much weight the chat gives it.",
       "doesNot": "It does not hold your conversations or your records. To search what you have logged, use the record search in the sidebar; to switch this off entirely, the toggle is in Settings."
+    },
+    "meetings": {
+      "is": "A recording turned into a transcript, a summary, and a list of actions you pick from.",
+      "does": "Transcribes an upload in the language it was spoken in, summarises it in that same language, and proposes who agreed to do what and by when.",
+      "doesNot": "It does not keep the audio — there is no bucket and no column for it, so it is gone when the upload finishes. And it creates nothing on its own: an action exists only after you tick it and press Keep."
     }
   },
   "helpCentre": {

@@ -103,6 +103,29 @@ still reports a healthy margin**, because the margin is measured against
 the same understated euros. `env-check` flags a value outside a sane
 range; it cannot flag a plausible wrong one.
 
+**And `CREDIT_MARGIN_MULTIPLIER` is not the knob it reads as.** Settlement
+calls `resolveMarginFor()`, which takes `max(general, plan margin, feature
+override)`, and every entry of `PLAN_MARGIN_DEFAULTS` is already above the
+general default. So the general multiplier is a FLOOR under a max(), not
+the number anything is charged at. Run the instrument rather than trusting
+this paragraph:
+
+    node scripts/measure-margin.mjs                              # the (feature x plan) table, derived
+    node scripts/measure-margin.mjs --env CREDIT_MARGIN_MULTIPLIER=2   # and the same table under a what-if
+
+It derives its rows from `ACTION_TO_FEATURE`, so a feature added tomorrow
+appears without anyone editing a list, and it prints which axis decided
+each cell.
+
+A value OUTSIDE the allowed range is refused and the default used —
+never clamped, because a silent clamp looks like the setting worked. That
+refusal used to reach `stderr` once per process and nothing else, so the
+hosting dashboard could show a number that was not in force and no screen
+disagreed. `environmentWarnings()` now carries it as **critical**, which
+is what `/dashboard/system-health` renders, and
+`scripts/tests/margin-value.test.mjs` fails the build if the defaults, the
+floor, the refusal or its route to that screen ever move.
+
 `MAX_FUNCTION_DURATION` (default `800`, a Vercel Pro/Fluid figure): on a
 smaller plan, long generations are killed mid-work and force-failed as
 stale. This one is not a key and it will cost you a Deep Research run.

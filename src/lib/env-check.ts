@@ -519,6 +519,38 @@ function halfPair(env: NodeJS.ProcessEnv, a: string, b: string): boolean {
 export function environmentWarnings(env: NodeJS.ProcessEnv = process.env): EnvWarning[] {
   const out: EnvWarning[] = [];
 
+  // A VALUE THAT WAS REFUSED IS NOT A VALUE THAT WAS APPLIED, and until
+  // 2026-09-23 the only place that said so was a server log.
+  //
+  // THE INCIDENT. CREDIT_MARGIN_MULTIPLIER read "2" on the hosting
+  // dashboard for months. The parser rejects anything outside 4-10 and
+  // uses the default instead, writing one warning per process to stderr
+  // — so the margin in force was never 2, and nobody could know that
+  // from any screen. The owner planned a pricing change around a number
+  // the code had been ignoring since the day it was set.
+  //
+  // It is the same shape as the pairs below and worse in one way: a half
+  // pair is two rows that each look fine, and this is ONE row that looks
+  // fine while the value beside it is inert. `checkEnv` already computes
+  // it; it simply had no way onto a page.
+  //
+  // CRITICAL, not a warning: every one of these variables decides what a
+  // customer is charged or how long a function may run, and being wrong
+  // about them is expensive in a direction nobody notices.
+  for (const bad of checkEnv(env).suspicious) {
+    out.push({
+      key: `refused_value_${bad.name.toLowerCase()}`,
+      severity: "critical",
+      title: `${bad.name} is set to a value the code refuses`,
+      detail:
+        `${bad.reason} The value on the hosting dashboard is NOT the value in force — ` +
+        `the default is being used instead, and the only other place that says so is a ` +
+        `server log written once per process. Set it to something inside the allowed ` +
+        `range, or accept the default deliberately by clearing the variable.`,
+      variables: [bad.name],
+    });
+  }
+
   // THE WORST DEFAULT IN THE PRODUCT.
   if (has(env, "RESEND_API_KEY")) {
     const from = (env.RESEND_FROM_EMAIL ?? "").trim();

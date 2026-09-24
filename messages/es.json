@@ -4119,7 +4119,20 @@
     "clearedAll": "Todo olvidado.",
     "pruneButton": "Limpiar {count} sin usar",
     "pruneConfirm": "¿Borrar {count} líneas dichas una sola vez y que no han vuelto a salir en seis meses? Todo lo repetido se conserva.",
-    "pruned": "{count} eliminadas."
+    "pruned": "{count} eliminadas.",
+    "surfacesTitle": "Qué funciones recuerdan",
+    "surfacesHelp": "Desactivada, una función ni lee lo recordado ni añade nada. No se borra nada de lo ya guardado.",
+    "surfaceOn": "Recuerda",
+    "surfaceOff": "Desactivada",
+    "surfaceSaveFailed": "No se pudo guardar ese ajuste.",
+    "surfaces": {
+      "chat": "Conversación",
+      "website": "Sitios web",
+      "presentation": "Presentaciones",
+      "posts": "Publicaciones",
+      "coding": "Código",
+      "agent": "Agentes"
+    }
   },
   "email": {
     "welcome": {

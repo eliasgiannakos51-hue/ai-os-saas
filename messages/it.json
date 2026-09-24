@@ -4119,7 +4119,20 @@
     "clearedAll": "Dimenticato tutto.",
     "pruneButton": "Pulisci {count} inutilizzate",
     "pruneConfirm": "Cancellare {count} righe dette una sola volta e mai più tornate in sei mesi? Tutto ciò che si ripete resta.",
-    "pruned": "{count} rimosse."
+    "pruned": "{count} rimosse.",
+    "surfacesTitle": "Quali funzioni ricordano",
+    "surfacesHelp": "Disattivata, una funzione non legge la memoria né vi aggiunge nulla. Nulla di già salvato viene cancellato.",
+    "surfaceOn": "Ricorda",
+    "surfaceOff": "Disattivata",
+    "surfaceSaveFailed": "Impossibile salvare questa impostazione.",
+    "surfaces": {
+      "chat": "Conversazione",
+      "website": "Siti web",
+      "presentation": "Presentazioni",
+      "posts": "Post",
+      "coding": "Codice",
+      "agent": "Agenti"
+    }
   },
   "email": {
     "welcome": {

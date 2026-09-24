@@ -4119,7 +4119,20 @@
     "clearedAll": "すべて忘れました。",
     "pruneButton": "使われていない {count} 件を整理",
     "pruneConfirm": "一度だけ出てきて 6 か月出てこなかった {count} 件を削除しますか？繰り返されたものはすべて残ります。",
-    "pruned": "{count} 件を削除しました。"
+    "pruned": "{count} 件を削除しました。",
+    "surfacesTitle": "記憶する機能",
+    "surfacesHelp": "オフにすると、その機能は記憶を読み込まず、追加もしません。すでに保存された内容が消えることはありません。",
+    "surfaceOn": "記憶する",
+    "surfaceOff": "オフ",
+    "surfaceSaveFailed": "この設定を保存できませんでした。",
+    "surfaces": {
+      "chat": "チャット",
+      "website": "ウェブサイト",
+      "presentation": "プレゼン",
+      "posts": "投稿",
+      "coding": "コード",
+      "agent": "エージェント"
+    }
   },
   "email": {
     "welcome": {

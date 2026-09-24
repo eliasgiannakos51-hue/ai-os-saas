@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { scrubSecrets } from "@/lib/scrub-secrets";
+import { memoryPromptFor } from "@/lib/memory/store";
+import { memoryActiveFor } from "@/lib/memory/memory-policy";
 import { createClient } from "@/lib/supabase/server";
 import { GenerationStoppedError, generateWebsiteHtml, WEBSITE_MODEL, type ReferenceImage } from "@/lib/website-builder";
 import { pickVariation, variationDirective } from "@/lib/website-variation";
@@ -447,6 +449,22 @@ export async function POST(request: Request) {
           priorSites: priorSites ?? 0,
         })
       );
+      // THE PERSON'S OWN STYLE, remembered across their sites — V6 #2.
+      //
+      // ONE PREDICATE DECIDES BOTH SIDES (lib/memory/memory-policy.ts): a
+      // surface that is not read is not written either. lib/chat/memory-policy
+      // records what it cost when those two disagreed.
+      //
+      // It reaches generateWebsiteHtml as its LAST argument and lands
+      // between the cached SYSTEM_PROMPT and the per-site form block — see
+      // buildGenerateSystemBlocks, where the ordering is the cost.
+      const memoryBlock = memoryActiveFor({
+        surface: "website",
+        user,
+        planLimit: plan?.capabilities.chatMemoryLimit ?? 0,
+      })
+        ? await memoryPromptFor(supabase, user.id, plan?.capabilities.chatMemoryLimit ?? 0)
+        : "";
       htmlContent = await generateWebsiteHtml(
         apiKey,
         description,
@@ -456,7 +474,8 @@ export async function POST(request: Request) {
         costs,
         variation,
         shouldStop,
-        (cap, started) => notes.push({ kind: "pageCap", cap, started })
+        (cap, started) => notes.push({ kind: "pageCap", cap, started }),
+        memoryBlock
       );
       clearInterval(stopPoll);
       // Real-photo placeholder resolution (Unsplash; unresolved

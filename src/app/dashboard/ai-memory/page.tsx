@@ -29,6 +29,8 @@ import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { MEMORY_ICON } from "@/lib/module-icons";
+import { MEMORY_SURFACES, isMemorySurface, isMemoryKind } from "@/lib/memory/surfaces";
+import { disabledSurfaces } from "@/lib/memory/memory-policy";
 import { AiMemoryList, type RememberedRow } from "@/components/memory/ai-memory-list";
 import { EmptyState } from "@/components/empty-state";
 import { getPlan } from "@/lib/billing/plans";
@@ -53,7 +55,17 @@ export default async function AiMemoryPage() {
   const [rowsResult, prunableResult] = await Promise.all([
     supabase
       .from("chat_memory")
-      .select("id, memory_text, times_seen, created_at, last_seen_at, confirmed_at, source_conversation_id")
+      .select("id, memory_text, times_seen, created_at, last_seen_at, confirmed_at, source_conversation_id, surface, kind")
+      // EXPLICIT, THOUGH RLS ALREADY DOES IT. This page runs under the
+      // user's own session, so select_own_chat_memory is in force and the
+      // filter is redundant here — and that is exactly the reasoning that
+      // makes a rule stop being checkable. The same table is now read
+      // from five more places, one of which (lib/agents/execute-agent.ts)
+      // uses the service-role client on a cron where RLS does NOT apply.
+      // "Every read filters by user_id" is a rule a gate can hold;
+      // "every read is safe, some because of a policy and some because of
+      // a filter" is a sentence somebody has to re-derive each time.
+      .eq("user_id", user.id)
       .order("last_seen_at", { ascending: false }),
     supabase.rpc("chat_memory_prunable"),
   ]);
@@ -66,6 +78,12 @@ export default async function AiMemoryPage() {
     lastSeenAt: String(r.last_seen_at ?? r.created_at ?? ""),
     confirmed: Boolean(r.confirmed_at),
     conversationId: r.source_conversation_id ? String(r.source_conversation_id) : null,
+    // WHERE IT WAS LEARNED, and what kind of claim it is — V6 #2. Shown
+    // per row rather than grouped into six lists: a person looking for one
+    // wrong line scans a single list once, and grouping would make them
+    // guess which feature had heard it.
+    surface: isMemorySurface(r.surface) ? r.surface : "chat",
+    kind: isMemoryKind(r.kind) ? r.kind : "fact",
   }));
 
   // The count is what Settings shows, and it must not disagree with the
@@ -113,6 +131,8 @@ export default async function AiMemoryPage() {
       ) : (
         <AiMemoryList
           rows={rows}
+          surfaces={MEMORY_SURFACES.map((s) => s.id)}
+          disabledSurfaces={disabledSurfaces(user)}
           prunableIds={prunableIds}
           // The window the prompt actually reads. Shown next to the list
           // because "it remembers 340 things" and "it is told 20 of them"

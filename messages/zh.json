@@ -4119,7 +4119,20 @@
     "clearedAll": "已全部忘掉。",
     "pruneButton": "清理 {count} 条未用到的",
     "pruneConfirm": "删除 {count} 条只说过一次、六个月没再出现的记录？重复出现的都会保留。",
-    "pruned": "已移除 {count} 条。"
+    "pruned": "已移除 {count} 条。",
+    "surfacesTitle": "哪些功能会记住",
+    "surfacesHelp": "关闭后，该功能既不读取已记住的内容，也不再添加。已保存的内容不会被删除。",
+    "surfaceOn": "会记住",
+    "surfaceOff": "已关闭",
+    "surfaceSaveFailed": "这个开关没能保存。",
+    "surfaces": {
+      "chat": "对话",
+      "website": "网站",
+      "presentation": "演示文稿",
+      "posts": "帖子",
+      "coding": "代码",
+      "agent": "智能体"
+    }
   },
   "email": {
     "welcome": {

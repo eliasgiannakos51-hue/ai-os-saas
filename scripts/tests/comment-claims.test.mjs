@@ -248,7 +248,18 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // plan shows the same list of 7 features") is half true and half a
   // legibility defect, and deleting it would leave the next reader
   // believing the identical rows were the bug.
-  const CENSUS_CEILING = 68;
+  // 68 -> 69 ON 2026-09-24: src/lib/memory/store.ts. Its header carries a
+  // limitation a reader cannot derive — the read is deliberately NOT
+  // filtered by surface, because "the AI remembers everywhere" means one
+  // memory rather than six, and `surface` is provenance rather than
+  // scope. Without that sentence the next reader adds the filter and
+  // rebuilds the silos the feature exists to remove.
+  // 69 -> 70 IN THE SAME ROUND: lib/health/schema-canaries.ts. The two
+  // new canaries carry a limitation nobody can derive from the code —
+  // both halves of 20261007000000 fail QUIETLY and differently, the
+  // column making every feature read an empty memory and the function
+  // making nothing ever be learned again, each as one log line.
+  const CENSUS_CEILING = 70;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

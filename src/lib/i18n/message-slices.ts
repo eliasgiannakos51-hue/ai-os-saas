@@ -128,7 +128,12 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // slicer cannot bound, and `canTrim` is false while it is above zero.
     // A wrong number here does not loosen anything — it makes the gate
     // disagree with the tree, which is what the check reports.
-    unbounded: 70,
+    // SEVENTY-ONE since V6 #2: memory/ai-memory-list.tsx reaches
+    // `surfaces.<id>` through a template literal, because the row of
+    // switches is rendered from MEMORY_SURFACES rather than written out
+    // six times — which is the same choice that keeps the list in step
+    // with the database's own check constraint.
+    unbounded: 71,
   },
   {
     name: "onboarding",

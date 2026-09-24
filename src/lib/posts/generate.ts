@@ -30,6 +30,21 @@ export async function generatePosts(params: {
   description: string;
   platforms: PostPlatform[];
   locale: string;
+  /**
+   * THE MEMORY BLOCK, ALREADY BUILT, or "" when there is nothing to say.
+   *
+   * Passed in rather than loaded here: this module has no Supabase client
+   * and should not grow one — the route already has the user, the plan
+   * limit and the per-feature switch. See lib/memory/store.ts.
+   *
+   * IT GOES IN perUserBlock AND NOWHERE ELSE. Measured 2026-09-24:
+   * twenty facts are 547 tokens and the minimum cacheable prefix on
+   * Sonnet is 1,024, so a memory block can never be a cache breakpoint
+   * on its own — and Anthropic does not error on a short one, it
+   * silently returns cache_creation_input_tokens: 0. Behind the feature's
+   * own system prompt it is inside the cached region and costs a tenth.
+   */
+  memoryBlock?: string;
   costs: CostAccumulator;
   signal?: AbortSignal;
 }): Promise<GeneratePostsResult> {
@@ -40,7 +55,11 @@ export async function generatePosts(params: {
       {
         model: POSTS_MODEL,
         max_tokens: POSTS_MAX_TOKENS,
-        system: buildCachedSystem({ staticPrefix: buildPostsSystemPrompt(), model: POSTS_MODEL }),
+        system: buildCachedSystem({
+          staticPrefix: buildPostsSystemPrompt(),
+          perUserBlock: params.memoryBlock ?? "",
+          model: POSTS_MODEL,
+        }),
         messages: [{ role: "user", content: buildPostsUserMessage(params.description, params.platforms, params.locale) }],
         tools: [writePostsTool],
         tool_choice: { type: "tool", name: "write_posts" },

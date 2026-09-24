@@ -1413,7 +1413,7 @@ export function WebsiteBuilderWorkspace({
                   </p>
                 </div>
               ) : !viewingVersion && previewWebsite.status === "flagged" ? (
-                <div className="flex h-[500px] w-full flex-col items-center justify-center gap-3 rounded-xl border border-amber-800 bg-amber-950/20 px-6 text-center">
+                <div className="notice-warning flex h-[500px] w-full flex-col items-center justify-center gap-3 px-6 text-center">
                   <AlertTriangle className="h-8 w-8 text-amber-400" aria-hidden="true" />
                   <p className="text-sm font-medium text-amber-300">{t("flaggedTitle")}</p>
                   <p className="max-w-md text-xs text-amber-300/80">{previewWebsite.error_message}</p>

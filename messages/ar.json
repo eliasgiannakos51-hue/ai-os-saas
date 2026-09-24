@@ -4119,7 +4119,20 @@
     "clearedAll": "نُسي كل شيء.",
     "pruneButton": "نظّف {count} غير مستخدمة",
     "pruneConfirm": "حذف {count} سطراً قيلت مرة واحدة ولم تعد خلال ستة أشهر؟ كل ما تكرر يبقى.",
-    "pruned": "أُزيلت {count}."
+    "pruned": "أُزيلت {count}.",
+    "surfacesTitle": "أي الميزات تتذكّر",
+    "surfacesHelp": "عند الإيقاف، لا تقرأ الميزة ما هو محفوظ ولا تضيف إليه. ولا يُحذف أي شيء محفوظ من قبل.",
+    "surfaceOn": "تتذكّر",
+    "surfaceOff": "موقوفة",
+    "surfaceSaveFailed": "تعذّر حفظ هذا الإعداد.",
+    "surfaces": {
+      "chat": "المحادثة",
+      "website": "المواقع",
+      "presentation": "العروض التقديمية",
+      "posts": "المنشورات",
+      "coding": "البرمجة",
+      "agent": "الوكلاء"
+    }
   },
   "email": {
     "welcome": {

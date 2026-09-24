@@ -24,6 +24,8 @@ import { SUPPORTED_LOCALES } from "@/i18n/constants";
 import { checkDescription, normalisePlatforms, postsEstimateInputChars, type PostPlatform } from "@/lib/posts/platforms";
 import { POSTS_MODEL } from "@/lib/posts/prompt";
 import { generatePosts } from "@/lib/posts/generate";
+import { memoryPromptFor } from "@/lib/memory/store";
+import { memoryActiveFor } from "@/lib/memory/memory-policy";
 
 export const dynamic = "force-dynamic";
 // One forced-tool call returning at most five short posts; measured well
@@ -133,12 +135,31 @@ export async function POST(request: Request) {
     const locale = resolveLanguage(description, uiLocale);
     const costs = new CostAccumulator();
     void recordAiCallForDailySpend(estimate.estimatedCredits);
+    // WHAT THE PRODUCT ALREADY KNOWS ABOUT THIS PERSON — V6 #2.
+    //
+    // ONE PREDICATE DECIDES BOTH SIDES. memoryActiveFor reads the global
+    // switch, the per-feature switch and the plan's limit together, and a
+    // surface that is not read is not written either: lib/chat/memory-policy
+    // records what it cost when those two disagreed — Free's limit is 0, the
+    // read came back empty, and the write kept making a second paid model
+    // call per message for rows nothing would ever read back.
+    //
+    // Best-effort. A generator must not fail because the memory could not
+    // be loaded; an empty block is what a person with memory off sends.
+    const memoryBlock = memoryActiveFor({
+      surface: "posts",
+      user,
+      planLimit: plan?.capabilities.chatMemoryLimit ?? 0,
+    })
+      ? await memoryPromptFor(supabase, user.id, plan?.capabilities.chatMemoryLimit ?? 0)
+      : "";
     const outcome = await generatePosts({
       apiKey,
       description,
       platforms,
       locale,
       costs,
+      memoryBlock,
       // THE STOP BUTTON: the request's own abort signal.
       signal: request.signal,
     });

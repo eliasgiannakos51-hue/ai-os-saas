@@ -4119,7 +4119,20 @@
     "clearedAll": "Alles vergessen.",
     "pruneButton": "{count} ungenutzte aufräumen",
     "pruneConfirm": "{count} Zeilen löschen, die einmal gesagt und seit sechs Monaten nicht wieder aufgetaucht sind? Alles Wiederholte bleibt.",
-    "pruned": "{count} entfernt."
+    "pruned": "{count} entfernt.",
+    "surfacesTitle": "Welche Funktionen sich erinnern",
+    "surfacesHelp": "Ausgeschaltet liest eine Funktion nichts aus dem Gedächtnis und fügt nichts hinzu. Bereits Gespeichertes wird nicht gelöscht.",
+    "surfaceOn": "Merkt sich",
+    "surfaceOff": "Aus",
+    "surfaceSaveFailed": "Der Schalter konnte nicht gespeichert werden.",
+    "surfaces": {
+      "chat": "Unterhaltung",
+      "website": "Webseiten",
+      "presentation": "Präsentationen",
+      "posts": "Beiträge",
+      "coding": "Programmierung",
+      "agent": "Agenten"
+    }
   },
   "email": {
     "welcome": {

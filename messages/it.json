@@ -1112,7 +1112,11 @@
       "empty": {
         "title": "Non è ancora stato invitato nessuno",
         "why": "Invita qualcuno via email e avrà un proprio accesso a questo spazio: gli stessi dati, con il suo account, non con la tua password."
-      }
+      },
+      "inviteSavedNotEmailed": "{email} è invitato, ma non è stata inviata alcuna email.",
+      "inviteEmailNotConfigured": "Questa installazione non ha un provider email configurato (RESEND_API_KEY), quindi non è stato consegnato nulla. L'invito è salvato e può essere accettato registrandosi con quell'indirizzo.",
+      "inviteEmailRefused": "Il provider email ha rifiutato il messaggio, il più delle volte per un dominio mittente non verificato, che consegna solo al titolare dell'account. L'invito è salvato e può essere accettato registrandosi con quell'indirizzo.",
+      "inviteShareLink": "Invia tu stesso questo link:"
     },
     "memory": {
       "title": "Cerca nei miei dati",

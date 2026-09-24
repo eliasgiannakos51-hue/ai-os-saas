@@ -1112,7 +1112,11 @@
       "empty": {
         "title": "Todavía no ha invitado a nadie",
         "why": "Invite a alguien por correo y tendrá su propio acceso a este espacio: los mismos datos, bajo su cuenta, no con su contraseña."
-      }
+      },
+      "inviteSavedNotEmailed": "{email} está invitado, pero no se envió ningún correo.",
+      "inviteEmailNotConfigured": "Esta instalación no tiene proveedor de correo configurado (RESEND_API_KEY), así que no se entregó nada. La invitación está guardada y pueden aceptarla registrándose con esa dirección.",
+      "inviteEmailRefused": "El proveedor de correo rechazó el mensaje, casi siempre por un dominio de remitente sin verificar, que solo entrega al propietario de la cuenta. La invitación está guardada y pueden aceptarla registrándose con esa dirección.",
+      "inviteShareLink": "Envíales tú este enlace:"
     },
     "memory": {
       "title": "Buscar en mis registros",

@@ -1112,7 +1112,11 @@
       "empty": {
         "title": "Nobody else has been invited yet",
         "why": "Invite someone by email and they get their own sign-in to this workspace — the same data, under their own account, not your password."
-      }
+      },
+      "inviteSavedNotEmailed": "{email} is invited — but no email was sent.",
+      "inviteEmailNotConfigured": "This deployment has no email provider configured (RESEND_API_KEY), so nothing was delivered. The invite itself is saved and they can accept it by signing up with that address.",
+      "inviteEmailRefused": "The email provider refused the message — most often an unverified sender domain, which only delivers to the provider account's own owner. The invite itself is saved and they can accept it by signing up with that address.",
+      "inviteShareLink": "Send them this link yourself:"
     },
     "memory": {
       "title": "Search my records",

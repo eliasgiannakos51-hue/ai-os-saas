@@ -1112,7 +1112,11 @@
       "empty": {
         "title": "Ainda não convidou ninguém",
         "why": "Convide alguém por email e passa a ter acesso próprio a este espaço: os mesmos dados, na conta dele, não com a sua palavra-passe."
-      }
+      },
+      "inviteSavedNotEmailed": "{email} foi convidado — mas nenhum email foi enviado.",
+      "inviteEmailNotConfigured": "Esta instalação não tem provedor de email configurado (RESEND_API_KEY), por isso nada foi entregue. O convite está guardado e pode ser aceite ao registar-se com esse endereço.",
+      "inviteEmailRefused": "O provedor de email recusou a mensagem — quase sempre por um domínio de remetente não verificado, que só entrega ao dono da conta. O convite está guardado e pode ser aceite ao registar-se com esse endereço.",
+      "inviteShareLink": "Envie-lhe este link você mesmo:"
     },
     "memory": {
       "title": "Procurar nos meus registos",

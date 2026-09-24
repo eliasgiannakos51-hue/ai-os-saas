@@ -1112,7 +1112,11 @@
       "empty": {
         "title": "Es wurde noch niemand eingeladen",
         "why": "Lad jemanden per E-Mail ein — er bekommt einen eigenen Zugang zu diesem Workspace: dieselben Daten, unter seinem Konto, nicht mit deinem Passwort."
-      }
+      },
+      "inviteSavedNotEmailed": "{email} ist eingeladen – es wurde aber keine E-Mail versendet.",
+      "inviteEmailNotConfigured": "Auf dieser Installation ist kein E-Mail-Anbieter konfiguriert (RESEND_API_KEY), daher wurde nichts zugestellt. Die Einladung ist gespeichert und kann durch Registrierung mit dieser Adresse angenommen werden.",
+      "inviteEmailRefused": "Der E-Mail-Anbieter hat die Nachricht abgelehnt – meist wegen einer nicht verifizierten Absenderdomain, die nur an den Kontoinhaber zustellt. Die Einladung ist gespeichert und kann durch Registrierung mit dieser Adresse angenommen werden.",
+      "inviteShareLink": "Senden Sie ihr oder ihm diesen Link selbst:"
     },
     "memory": {
       "title": "Meine Einträge durchsuchen",

@@ -226,7 +226,13 @@ console.log(
 // answer on a filesystem that hands the files back in another order,
 // which is the question three CI failures had been asking without
 // anybody hearing it. Read off the run.
-const RATCHET = 193;
+//
+// 193 -> 199 on 2026-09-24: the three suites of this round — margin-value
+// (the multiplier's VALUE, not its existence), ceiling-vs-outcome (a gate
+// that asks what could happen rather than what did) and
+// email-outcome-reported (a route that says "sent" with no email
+// configured).
+const RATCHET = 199;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

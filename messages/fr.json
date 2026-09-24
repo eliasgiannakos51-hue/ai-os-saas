@@ -1112,7 +1112,11 @@
       "empty": {
         "title": "Personne n'a encore été invité",
         "why": "Invitez quelqu'un par e-mail et il aura son propre accès à cet espace : les mêmes données, sous son compte, pas avec votre mot de passe."
-      }
+      },
+      "inviteSavedNotEmailed": "Invitation créée pour {email}, mais aucun e-mail n'a été envoyé.",
+      "inviteEmailNotConfigured": "Ce déploiement n'a pas de fournisseur d'e-mail configuré (RESEND_API_KEY) : rien n'a été livré. L'invitation est enregistrée et reste acceptable en créant un compte avec cette adresse.",
+      "inviteEmailRefused": "Le fournisseur d'e-mail a refusé le message, le plus souvent à cause d'un domaine d'expéditeur non vérifié, qui ne livre qu'au propriétaire du compte. L'invitation est enregistrée et reste acceptable en créant un compte avec cette adresse.",
+      "inviteShareLink": "Envoyez ce lien vous-même :"
     },
     "memory": {
       "title": "Chercher dans mes données",

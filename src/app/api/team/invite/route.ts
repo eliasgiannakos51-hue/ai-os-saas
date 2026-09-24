@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPlan, type PlanSlug } from "@/lib/billing/plans";
 import { maxSeatsForPlan } from "@/lib/team/seat-limits";
 import { sendTeamInviteEmail } from "@/lib/email/send-team-invite-email";
+import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -191,13 +192,31 @@ export async function POST(request: Request) {
       );
     }
 
-    await sendTeamInviteEmail({
+    // THE INVITE IS SAVED; THE EMAIL IS A SEPARATE FACT, AND BOTH ARE
+    // REPORTED. This route used to answer `{ ok: true }` the instant the
+    // row was written and discard what the send returned, so the screen
+    // said "Invitation sent" with no email configured at all.
+    //
+    // ok:true is still correct — the row exists and the invitee can
+    // accept by signing up with that address. What was wrong was saying
+    // nothing else.
+    const emailResult = await sendTeamInviteEmail({
       to: email,
       inviterEmail: user.email ?? "a Ionexa AI user",
       planName: plan?.name ?? tier,
     });
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({
+      ok: true,
+      emailSent: emailResult.ok,
+      emailReason: emailResult.reason,
+      // The link the owner can pass on by hand when no email went out.
+      // Built here rather than in the component so the site URL comes
+      // from the one place that resolves it (lib/site-url.ts) — a
+      // component reading NEXT_PUBLIC_SITE_URL gets undefined, which is
+      // rule 48 in this repository and has cost a round before.
+      signupUrl: emailResult.ok ? null : `${getSiteUrl()}/signup?plan=free`,
+    });
   } catch (err) {
     logApiError("/api/team/invite", err);
     return NextResponse.json(

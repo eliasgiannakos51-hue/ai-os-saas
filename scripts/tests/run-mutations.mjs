@@ -112,7 +112,9 @@ if (suites.length === 0) {
 // of the real count in both directions, so it cannot drift far below.
 // 173 -> 174 on 2026-09-18: reservation-lifecycle.mutation.mjs, from the
 // sweep of the remaining 23 multi-write routes.
-const FLOOR = 174;
+// 174 -> 185 on 2026-09-24: margin-value, ceiling-vs-outcome and
+// email-outcome-reported, plus the suites the V6 #1 round carried in.
+const FLOOR = 185;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

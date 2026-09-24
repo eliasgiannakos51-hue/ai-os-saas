@@ -1,9 +1,51 @@
+import { execFileSync } from "node:child_process";
+
+/**
+ * WHEN THE CODE IN THIS BUILD WAS WRITTEN, baked in as a literal.
+ *
+ * WHY IT HAS TO BE BAKED. A deployed bundle has no git and no repository:
+ * asked at runtime, "how old is this deployment" has no answer, so it has
+ * to be answered at the only moment anything knows — here.
+ *
+ * THE FAILURE THIS EXISTS FOR, measured by the owner on 2026-09-25: the
+ * production deployment was FORTY DAYS behind main. Every gate was green,
+ * every commit was pushed, /api/health said the schema was fine — and the
+ * thing serving customers was from another month. A redeploy without the
+ * build cache fixed it. Nothing anywhere would have said so.
+ *
+ * Vercel sets VERCEL_GIT_COMMIT_SHA but no commit DATE, so git is asked
+ * first and the build time is the fallback. The fallback is honest rather
+ * than convenient: it says when the BUILD ran, which on a cached build is
+ * still newer than the code, so the age it reports is a LOWER bound. An
+ * over-estimate of freshness would be the wrong direction to fail in, and
+ * /api/health says which of the two it has.
+ */
+function commitDate() {
+  try {
+    return execFileSync("git", ["log", "-1", "--format=%cI"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "";
+  }
+}
+
+const BUILD_COMMIT_DATE = commitDate();
+
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Inlined at build time — see commitDate() above. The DATE is the
+  // commit's; BUILD_AT is when the build ran, and the two differ by
+  // exactly the staleness this is here to report.
+  env: {
+    NEXT_PUBLIC_BUILD_COMMIT_DATE: BUILD_COMMIT_DATE,
+    NEXT_PUBLIC_BUILD_AT: new Date().toISOString(),
+  },
   experimental: {
     // Enables src/instrumentation.ts, which reports the environment once
     // at server startup (see lib/env-check.ts). Next 14 requires the flag;

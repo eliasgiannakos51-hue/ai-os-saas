@@ -2591,6 +2591,38 @@ not to create actions automatically" is a promise about future
 intentions. "The automatic path writes to a jsonb column and the table
 has one writer" is a fact a scan can check every build.
 
+## A metric that measures the wrong quantity
+
+*Named by the owner on 2026-09-23, after the second of two corrections in
+one round. The short form: **a ceiling is a limit, not a prediction** —
+and a gate built on one is asking what COULD happen, while the question
+was what DID.*
+
+### The half that is about a person, not a scan
+
+Before the metric failed, I did. The scan flagged `presentationGenerate`
+and I hand-checked it, got "3 credits shown, 4 reserved, 7–24 charged",
+and **reported it to the owner as a confirmed real bug**.
+
+It was not. I had computed the estimate by handing
+`estimateForAction("presentationGenerate", …)` the raw length of the
+brief. The route does not do that: `api/presentations/generate` passes
+`deckEstimateInputChars(description.length, slideCount)` — the brief plus
+1,000 characters per slide asked for. Measured the way the route measures,
+a ten-slide deck estimates 13 credits and reserves 15.
+
+**I made the scan's own mistake while checking the scan, and the agreement
+between the two read as confirmation.** That is the mechanism worth
+remembering: a hand-check that repeats the instrument's assumption is not
+an independent second opinion, it is the same opinion typed twice. The
+only thing that broke the loop was computing the number at the input the
+CALL SITE passes — which is to say, going to where the value is produced
+rather than where it is defined.
+
+**So the hand-check has a rule now: verify at the call site, never at the
+definition.** A profile, a constant, a config default is what something
+*is*; what the caller hands it is what it *does*.
+
 ## A ranking metric that every member of the population fails
 
 `scripts/scan-estimate-realism.mjs` asked a real question. Each profile in

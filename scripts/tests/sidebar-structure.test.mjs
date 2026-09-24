@@ -80,7 +80,7 @@ const SIDEBAR = "src/components/dashboard/sidebar.tsx";
 //             its own words — and sidebar-naming.test.mjs is what keeps a
 //             notes form out of a heading that promises production. They
 //             stay in the command palette and on the hub.
-//   notBuilt  there is no page. Music, Browser, Computer and Meetings have
+//   notBuilt  there is no page. Music, Browser and Computer have
 //             no route, no component and no table, so visibleGroups strips
 //             them and neither the palette nor the hub can offer a 404.
 //
@@ -138,7 +138,12 @@ const NOT_DRAWN_YET = new Map([
   ["/dashboard/music", "notBuilt"],
   ["/dashboard/browser", "notBuilt"],
   ["/dashboard/computer", "notBuilt"],
-  ["/dashboard/meetings", "notBuilt"],
+  // /dashboard/meetings came OFF this list on 2026-09-23. It is the
+  // first row to make the whole journey the notBuilt flag exists for:
+  // position decided cold, held while the feature did not exist, drawn
+  // the day it did. The FUTURE list above did not change — which is the
+  // point, and is why the row landed between reflection and team without
+  // anybody re-opening the question.
 ]);
 
 // WHAT IS DRAWN IS DERIVED, not typed a second time. Two hand-written

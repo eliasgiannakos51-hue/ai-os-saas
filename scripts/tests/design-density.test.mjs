@@ -62,7 +62,35 @@ console.log("\n== 2. the lines ==");
 // two bordered boxes of it, became components/ui/step-flow.tsx, which
 // draws none. No slack: 581 is the measured count, not a round number
 // above it.
-ok(`border utilities (${r.counts.borders}), ceiling 581`, r.counts.borders <= 581);
+//
+// 581 -> 580. The command palette needed an amber "the search did not
+// answer" callout (docs/shapes.md, "The fallback that reported
+// nothing"), which written inline is another bare `border` token
+// against a ceiling with no slack. Declared as `.notice-warning` in
+// globals.css instead, it costs zero here — and the count went DOWN by
+// one because deleting an orphan component took an inline frame with
+// it. The trade is the same one `.surface` made: a decision that will
+// appear twice belongs in the stylesheet, and this count is what
+// notices when it does not.
+// 579 -> 578 on 2026-09-24, and the same trade again. The invite form
+// gained a third state — the amber box saying an invitation was saved and
+// NOT emailed — and the amber callout already had a name,
+// `.notice-warning` in globals.css. Inline that is one more bare `border`;
+// as the class it is zero, and converting one of the four remaining inline
+// copies (notification-settings.tsx) took the count one BELOW where the
+// feature found it.
+// 580 -> 579, and a whole new screen is what lowered it. /dashboard/meetings
+// draws two outline buttons and two lists of rows; written inline that is
+// four more bare `border` tokens and the count would have gone to 584.
+// Declared once in globals.css as `.btn-outline` and `.row-list` it is
+// zero, and the cost box became `.surface-tight`, which is one fewer than
+// before the feature existed.
+//
+// THE DIVIDE COUNT DID NOT MOVE, which is the half that makes this the
+// trade the clause below describes rather than a shuffle: `.row-list`
+// carries its `divide-y` in the stylesheet, so the rule is drawn once and
+// counted nowhere. A round that raises both numbers has not made it.
+ok(`border utilities (${r.counts.borders}), ceiling 578`, r.counts.borders <= 578);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

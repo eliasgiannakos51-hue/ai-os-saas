@@ -210,5 +210,97 @@ for (const route of ["/dashboard/routing", "/dashboard/trading-journal"]) {
   check(`${route} is searchable by name`, Boolean(item?.label && item.label.length > 2), JSON.stringify(item ?? null));
 }
 
+// ---------------------------------------------------------------------
+console.log("\n== and every component under src/components has an importer ==");
+// ---------------------------------------------------------------------
+// THE HALF THIS FILE DID NOT HAVE. It asks whether every ROUTE has a way
+// in. It never asked whether every COMPONENT has a caller, and on
+// 2026-09-20 four did not:
+//
+//   components/library/library-search.tsx    — the search box written
+//     BECAUSE «the only way in was Ctrl+K». Its page,
+//     /dashboard/library, was deleted in the 2026-09-02 merge that chose
+//     main's sidebar naming over the branch's. The merge message says
+//     "Verified unreferenced before deleting" about the PAGE, and the
+//     component it rendered was left behind.
+//   components/loading-state.tsx             — three comments in other
+//     files described it, in the present tense, as "the shared
+//     LoadingState the whole app boots with". Nothing imported it.
+//   components/overview/quick-action-card.tsx
+//   components/overview/quick-start-button.tsx
+//
+// WHY orphan-i18n-keys.test.mjs COULD NOT SEE IT. That gate asks whether
+// every key in messages/ has a reader. dashboard.library.* had one — the
+// orphan itself. A dead component keeps its translations alive, in ten
+// languages, and the gate reads that as health. An orphan reader is
+// invisible to every check that starts from the thing being read.
+{
+  // `sources` is the same walk section 3 uses, so this cannot range over
+  // a different tree than the link scan above it.
+  const readCache = new Map();
+  const read = (f) => {
+    if (!readCache.has(f)) readCache.set(f, readFileSync(f, "utf8"));
+    return readCache.get(f);
+  };
+  const escapeRe = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, (c) => "\\" + c);
+  const componentFiles = sources.filter((f) => f.startsWith("src/components/") && /\.tsx?$/.test(f));
+  check(
+    `components were found to check (${componentFiles.length})`,
+    componentFiles.length >= 100,
+    "an empty list makes the check below pass by ranging over nothing"
+  );
+  // ONE EXEMPTION, AND IT IS A DECISION RATHER THAN A DEFECT.
+  //
+  // Quick Start is dead end to end, not just unimported: the modal, the
+  // route only it called (/api/templates/apply), lib/workspace-templates.ts
+  // and `dashboard.overview.quickStart*` in ten languages. Deleting a
+  // FEATURE is the owner's call and not a tidy-up, so it is named here
+  // with its reason and raised as v6-list #24 — which is the difference
+  // between an exception and a baseline.
+  //
+  // Checked BOTH ways below: it must still exist, and it must still be
+  // unimported. Wire it to a page and this exemption fails, rather than
+  // sitting here describing something that stopped being true.
+  const EXEMPT_COMPONENTS = {
+    "src/components/overview/quick-start-modal.tsx":
+      "Quick Start is unwired end to end — this modal, /api/templates/apply which " +
+      "only it called, lib/workspace-templates.ts and ten locales of " +
+      "dashboard.overview.quickStart*. Whether the feature ships or goes is the " +
+      "owner's decision (v6-list #24), so it is not deleted as cleanup.",
+  };
+
+  const unimported = [];
+  for (const file of componentFiles) {
+    if (file in EXEMPT_COMPONENTS) continue;
+    const alias = file.replace(/^src\//, "@/").replace(/\.tsx?$/, "");
+    const base = file.split("/").pop().replace(/\.tsx?$/, "");
+    const relative = new RegExp(`from "\\.{1,2}/(?:[^"]*/)?${escapeRe(base)}"`);
+    const hit = sources.some(
+      (other) => other !== file && (read(other).includes(alias) || relative.test(read(other)))
+    );
+    if (!hit) unimported.push(file);
+  }
+  check(
+    `no component is unreachable from any page (${unimported.length})`,
+    unimported.length === 0,
+    unimported.join("\n        ") +
+      "\n        Delete it, or wire it to a page. A component nobody renders keeps its" +
+      "\n        i18n keys alive, so orphan-i18n-keys reads it as a healthy reader."
+  );
+
+  // THE EXEMPTION, CHECKED BOTH WAYS.
+  for (const [file, reason] of Object.entries(EXEMPT_COMPONENTS)) {
+    check(`${file.replace("src/components/", "")} is still there to be exempted`, sources.includes(file),
+      "exempted, but there is no such component — the exemption protects nothing");
+    const alias = file.replace(/^src\//, "@/").replace(/\.tsx?$/, "");
+    const base = file.split("/").pop().replace(/\.tsx?$/, "");
+    const relative = new RegExp(`from "\\\\.{1,2}/(?:[^"]*/)?${escapeRe(base)}"`);
+    check(`  …and still has no importer`,
+      !sources.some((o) => o !== file && (read(o).includes(alias) || relative.test(read(o)))),
+      "something imports it now — delete this exemption");
+    check(`  …and the reason is written out (${reason.length} chars)`, reason.length > 120, reason);
+  }
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length > 0) process.exit(1);

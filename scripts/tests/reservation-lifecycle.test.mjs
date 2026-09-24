@@ -156,6 +156,11 @@ const REGISTER = {
     reason:
       "Same shape as import/csv/analyse: extractFromPaste records usage the moment the model answers, so reason:'invalid' is real tokens and reason:'api_error' never fed the accumulator at all.",
   },
+  "src/app/api/meetings/[id]/analyse/route.ts": {
+    mechanism: "settles_unconditionally",
+    reason:
+      "BOTH failure codes settle, and they settle to different amounts for the same reason import/csv/analyse does. analyseMeeting records usage the moment the model answers, so 'unusable' — a reply that did not parse — is real tokens on the accumulator and is charged; 'ai_unavailable' never reached a provider, so the accumulator is empty and the same settle charges nothing. One path, two honest outcomes, and no release: releasing on 'unusable' would have the owner pay for a call the user made.",
+  },
   "src/app/api/insights/generate/route.ts": {
     mechanism: "settles_unconditionally",
     reason:

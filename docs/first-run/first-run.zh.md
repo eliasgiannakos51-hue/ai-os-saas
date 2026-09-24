@@ -1,12 +1,12 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **638 strings**. The whole product is 3274, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **642 strings**. The whole product is 3328, which is why this file exists.
 
-**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 391 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 393 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (47)
+## Tier 1 — THE SENTENCES — read these (49)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -114,6 +114,12 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 ### dashboard chrome
 
+**`common.searchFailed`**
+
+> EN — Search is unavailable right now — this is not an empty result. Try again in a moment.
+
+搜索暂时不可用——这不是“没有结果”。请稍后重试。
+
 **`sampleData.bannerDetail`**
 
 > EN — These entries are a demo — a small design studio's last three months. They are not yours.
@@ -179,6 +185,12 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 > EN — Share an agent's shape as a template, and start from one someone else shared.
 
 把一个智能体的结构作为模板分享，也可以从别人分享的模板开始。
+
+**`sidebar.hints.meetings`**
+
+> EN — Turn a recording into a transcript, a summary, and actions you choose from.
+
+把录音变成文字记录、摘要，以及由你挑选的行动。
 
 **`sidebar.hints.posts`**
 
@@ -302,7 +314,7 @@ Ionexa 用它来挑选下一个建议的计划步骤——状态低时给轻松�
 
 免费——不生成任何内容，一键即可移除
 
-## Tier 2 — The labels — skim these (391)
+## Tier 2 — The labels — skim these (393)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -673,6 +685,12 @@ AI 编程
 > EN — Rows shown in one list
 
 每个列表显示的行数
+
+**`pricing.rows.meetings`**
+
+> EN — Meetings → actions
+
+会议 → 行动
 
 **`pricing.rows.missionControl`**
 
@@ -1987,6 +2005,12 @@ AI 编程
 > EN — Ready-made helpers
 
 现成的助手
+
+**`sidebar.items.meetings`**
+
+> EN — Meetings
+
+会议
 
 **`sidebar.items.memory`**
 

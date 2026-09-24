@@ -206,6 +206,18 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     // It arrived unaccounted for and this ratchet caught it on the build
     // that introduced it, which is what the ratchet is for.
     "src/lib/ai/ambiguity.ts",
+    // V6 #1, and it is NOT a matcher of user words — it folds a LANGUAGE
+    // NAME that a transcription provider returned, to turn "greek" or
+    // "Greek" into the code "el". The corpus it compares against is
+    // Intl.DisplayNames, not anything a person typed.
+    //
+    // It is listed rather than exempted by the ceiling because the
+    // ceiling's job is to make every new folder be looked at once, and
+    // looking at this one takes a sentence. It uses foldForMatch rather
+    // than toLowerCase for the reason accent-search.test.mjs holds at
+    // zero: Turkish lower-cases I to a dotless ı, and a string from a
+    // provider is not this code's to assume is ASCII.
+    "src/lib/meetings/meeting-analysis.ts",
     // The free producer router (redesign phase 1). Same case as the line
     // above and answered the same way: its cues are phrasings a person
     // TYPES, in four scripts, and scripts/tests/producer-routes.test.mjs

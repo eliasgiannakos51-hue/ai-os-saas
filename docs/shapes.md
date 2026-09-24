@@ -1161,8 +1161,9 @@ and the negative ones went green.
 **And the vacuity can come back one level down.** An empty needle makes
 `includes()` always true and its negation always false, so a key that
 resolves to nothing would restore exactly the defect being removed.
-`uiTextStrict` throws on a needle under three characters rather than
-returning one.
+`uiTextStrict` throws rather than returning one — see
+`minNeedleLength` and the section below, which is about how that floor
+was wrong on the day it was written.
 
 **Its precision was measured, not claimed.** The first version of the scan
 took every string in the file and scored 2 real out of 7 hand-checked;
@@ -1175,9 +1176,74 @@ paid for that lesson once: `plan-enforcement.test.mjs` failed a file it
 had just fixed because the explanatory paragraph contained the symbol it
 scanned for.
 
-**It reports; it does not gate.** A prodtest signing in to an English
-account and asserting English is narrow, not wrong, and which to widen is
-a judgement about where the product is going.
+**The BREAKS half is now gated at zero**, with two written exceptions;
+SOURCE-ONLY still only reports, because asserting that the ENGLISH file
+says an English thing is legitimate and a baseline there would be a
+number with nothing behind it. `scripts/tests/english-anchored-gates.test.mjs`
+holds it, and 9 of 9 mutations are caught by its sidecar.
+
+### And the floor put the same shape back, one level down. 2026-09-20
+
+The ten files were converted on 2026-09-20 — every rendered-text needle
+resolved out of `<html lang>` and that locale's own messages file. The
+guard against the vacuity coming back was `uiTextStrict`, and its rule
+was:
+
+    if (!text || text.length < 3) throw
+
+**Which is an ASCII sentence about a ten-language product, written in the
+same hour as the paragraph condemning ASCII sentences about
+ten-language products.** "Succeeded" is 成功 in Japanese and 成功 in
+Chinese: two characters, the whole word. A three-character floor rejects
+it — and rejects it by THROWING, so the correct check fails a working
+product and the obvious repair looks like weakening the gate. It is the
+`\b` word boundary and the final sigma for the third time.
+
+Eight of the nine hits were CJK, and none of them could have been found
+by reading the helper: they were found by
+`english-anchored-gates.test.mjs` running every key the converted files
+name through **every one of the ten messages files**, including the nine
+that no prodtest is ever pointed at. The population was the messages
+directory all along — the rule from "the rule targets the shape, the
+check anchors on the example", applied to a rule about the same thing.
+
+The floor now asks what a word IS in the script it is looking at: one
+han character, kana or hangul syllable is a morpheme; three Latin, Greek
+or Cyrillic letters is about the shortest thing worth asserting on;
+empty is refused everywhere, because that is the vacuity itself and not
+a judgement about length. The gate pins both ends — 成功 passes, "ok"
+does not — so a floor that went back to a constant fails whichever
+constant it picked.
+
+### The same vacuity with no locale in it at all. 2026-09-20
+
+`published-site-seo.prodtest.mjs`, guarding against landing on the
+not-found page:
+
+    !/not available/i.test(heading)
+
+and the page it guards against says **"This site isn't available"**.
+"isn't" is not "not". The needle never matched anything, in English, on
+every run since it was written.
+
+**And the harness's own 404 was a straw one** — `<!doctype
+html><title>Site not found</title>`, no `<h1>` at all — so even a correct
+needle would have been asserting against a page the product does not
+serve. A test that serves its own stand-in for the thing it is checking
+it did not land on cannot tell you it did not land on it.
+
+Both halves now come from the route file: the harness serves the real
+`NOT_FOUND_HTML`, and the check compares the heading against the `<h1>`
+read out of the same constant, throwing if it cannot find one. A
+published site has no UI locale to resolve against — it is the
+customer's own content and the 404 body is deliberately hard-coded
+English — so the independent source is the route, which is the same
+answer `ui-text.mjs` gives for the dashboard, pointed at a different
+file.
+
+**The lesson is not about translation.** A negative assertion is only
+worth the presence of its needle somewhere. If nothing you can run ever
+makes it appear, it is a comment with a `!` in front of it.
 
 ## A line-level tool asserting a structural property
 
@@ -2341,3 +2407,294 @@ minutes, in the before-a-deploy tier beside `npm run test:env`.
 different filesystem?* If it enumerates and then cares which came first,
 the answer is no, and nothing in the build will tell you until a builder
 does.
+
+## The fallback that reported nothing, so the failure looked like an answer
+
+    const results = res.ok && data.ok ? data.results : [];
+    searchCacheRef.current.set(key, results);
+
+That is the whole defect, and it ran in production for weeks. ⌘K turned
+a 500 into an empty array, rendered the empty array as **"No matches for
+«έσοδα»"**, and then **cached it** — so retyping the same word never
+retried, and one outage froze that query as "you have nothing" for the
+rest of the session.
+
+**«Το ⌘K δεν βρίσκει τίποτα» and «το ⌘K είναι χαλασμένο» were the same
+screen.** The owner reported the first sentence three times across three
+rounds. Each round looked at the matcher, because the matcher is what
+"finds nothing" is about, and each round found something real to fix in
+it — aliases, a word-level fallback, a backfilled `search_index`. None of
+them was the reason he saw no results, and nothing anywhere said so.
+
+**The rule:** *a fallback MUST report that it was used.* A recovery that
+says nothing does not protect the user from the bug; it protects the bug
+from being found. Three separate failures were invisible behind this one
+line.
+
+### The census, and the discriminator that made it worth reading
+
+    node scripts/scan-silent-fallbacks.mjs
+
+**733 catch blocks across 917 files**, measured 2026-09-20 after the
+four orphan deletions in the same commit. The first version reported 172
+"silent" ones and was useless: `catch { return NextResponse.json({ ok:
+false, error }) }` is the loudest thing a route can do, and it has no
+`console.error` in it. A scan whose top finding is the correct pattern
+gets closed after five entries.
+
+So the classifier asks whether the value CARRIES the failure — `ok:
+false`, a 4xx/5xx, `null`, `"unchecked"` — not whether the block logs.
+That took 172 to **60**, and the four that mattered were readable in the
+first screenful.
+
+**It reports; it does not gate the number.** Most of those 60 are right:
+a probe whose contract is "null when it cannot ask" reports through its
+return value, and that IS the report. What the scan cannot see is whether
+the CALLER looks. **Settle one by making the inner call fail and seeing
+whether anything, anywhere, says so** — the same rule as the empty-`Set`
+mutation for a vacuous gate.
+
+### Looking for the second one found something else entirely
+
+`/api/search` had a second caller with the identical shape —
+`components/library/library-search.tsx`, `catch { setResults([]) }`,
+`res.ok` never read. It was repaired, and then **the build's route check
+failed on the sentence describing the repair**: it said the bug told a
+user on `/dashboard/library` that nothing matched, and there is no such
+route.
+
+**The component had been an orphan for eighteen days.** The merge of
+2026-09-02 chose main's sidebar naming over a branch's, deleted the
+branch's `/dashboard/library/page.tsx` — its message says *"Verified
+unreferenced before deleting"*, about the PAGE — and left the component
+it rendered behind. The component was written because *"the only way in
+was Ctrl+K"*, and it has been rendered by nothing ever since.
+
+**`orphan-i18n-keys` could not see it, and the reason generalises.**
+That gate asks whether every key in `messages/` has a reader.
+`dashboard.library.*` had one: the orphan itself. **A dead component
+keeps its translations alive, in ten languages, and every check that
+starts from the thing being read calls that health.** The reader has to
+be checked too — `entry-points.test.mjs` now requires every component
+under `src/components` to have an importer, and **four did not**:
+`library-search`, `loading-state` (which three comments in other files
+described, in the present tense, as *"the shared LoadingState the whole
+app boots with"*), `quick-action-card` and `quick-start-button`. A
+fifth, `quick-start-modal`, surfaced once those two went and is exempted
+with a reason rather than deleted: Quick Start is dead end to end — modal,
+route, template table and ten locales of keys — and deleting a FEATURE is
+the owner's decision, not cleanup.
+
+So the fix was a deletion, and what stayed in the fallback gate is the
+rule that generalises: every component reaching `/api/search` must tell a
+failure from an empty answer, on the 500 and on the dropped request
+alike. Today that is one component. **And the first version of that sweep
+found zero**, because it looked for the quoted string `"/api/search?`
+where the code uses a template literal — caught by the floor under it.
+
+**Every "every X" check needs the floor that says X was found**, and a
+named member if it has one: the count clause and *"the palette is one of
+them, by name"* fail differently, and a sweep pointed at the wrong
+directory passes the first.
+
+## A rule about ten languages, written as a number of characters
+
+Three times in two days, in three different files, by the same hand:
+
+| where | the rule | what it rejected |
+|---|---|---|
+| `scripts/tests/lib/ui-text.mjs` | `text.length < 3` throws | **成功** — "Succeeded" in Japanese and Chinese, two characters, the whole word |
+| `meetings.test.mjs` | `notice.length > 30` | the Chinese privacy notice at **29 characters**, saying everything the 86-character English one says |
+| `meeting-analysis.ts` | `MIN_ANALYSABLE_CHARS = 40` | — nothing yet, and it is the same bet: forty characters is about one English sentence and rather more than one Chinese one |
+
+The first two were caught, an hour apart, by gates written for something
+else. The third is still there, deliberately, and the paragraph beside it
+now says what it is betting on.
+
+**Every one of them was written INSIDE work about the ten languages.**
+The `ui-text` floor is in the file whose entire subject is that an
+English needle is one of ten. The notice check is in the section headed
+"the ten-language notice exists in all ten". Knowing the rule is not the
+same as having the instinct, and the instinct is the thing that was
+missing.
+
+### Why a character count is the wrong instrument, specifically
+
+A character is a different amount of meaning in each script. One han
+character is a morpheme; one Latin letter is a phoneme at best. A floor
+that means "long enough to be a word" is therefore not a number at all —
+it is a question about the script, which is what `minNeedleLength` asks
+now:
+
+    const CJK = /[぀-ヿ㐀-䶿一-鿿豈-﫿가-힯]/;
+    export function minNeedleLength(text) {
+      return CJK.test(String(text)) ? 1 : 3;
+    }
+
+**And where the property can be expressed without length at all, that is
+better still.** The notice check does not measure anything now. It asks
+whether the ten sentences are ten DIFFERENT sentences:
+
+    new Set(notices.map(([, n]) => n)).size === notices.length
+
+which is script-neutral, catches the failure that actually happens (a
+locale left holding English), and cannot be wrong about Chinese.
+
+**The question to ask, before writing any threshold in this codebase:**
+*is this number true in Japanese?* If the answer needs a moment's
+thought, the number is the wrong shape and there is usually a property
+underneath it that is not a number.
+
+## A feature whose privacy promise is a schema rather than a `finally`
+
+V6 #1 takes an audio recording of a room full of people, most of whom
+were never asked. The obvious arrangement is the one `/dashboard/files`
+uses — upload to storage, read it back, delete it when done — and it
+puts the recording in a bucket for as long as the work takes.
+
+**Through storage, "the audio is not kept" is a `finally` block. A
+function killed at its ceiling runs no `finally`** — this repository
+already paid for that lesson at the 60-second boundary
+(`src/lib/function-limits.ts`). So the promise would be exactly as good as
+the timeout, and the failure would leave somebody's staff meeting in a
+bucket with nothing pointing at it.
+
+Through the request body there is no promise to keep: **no column, no
+bucket, no path.** The Blob lives in one invocation's memory and is
+unreferenced when it returns. `meetings.test.mjs` §1 reads the migration
+and asserts that nothing in it could hold a recording, and reads the
+route and asserts the blob never reaches `storage.from(...)`.
+
+**The cost is stated rather than hidden**, which is the other half of
+making this a decision instead of a preference: the host caps request
+bodies at ~4.5MB, so the ceiling is about seventeen minutes of
+voice-grade audio, and a longer meeting is REFUSED with both numbers in
+the message. Refused, never truncated — half a meeting transcribed reads
+as a whole one, the summary looks complete, and the actions from the
+second half are simply absent with nothing on the screen saying which
+half is missing.
+
+### The same shape for "no action is created automatically"
+
+The model's reading of the transcript is stored in
+`meetings.proposed_actions`, a **jsonb column on the meeting row**. It is
+data about a meeting and an entity nowhere: nothing joins to it, no other
+screen shows it, and no query treats it as a task.
+
+`meeting_actions` receives a row only when somebody presses Keep, and
+the gate holds that **exactly one file in all of `src/app/api` inserts
+into that table** — ranged over every route in the tree, so a fifth route
+added later fails rather than shipping.
+
+That is the difference between a rule and an arrangement. "We are careful
+not to create actions automatically" is a promise about future
+intentions. "The automatic path writes to a jsonb column and the table
+has one writer" is a fact a scan can check every build.
+
+## A metric that measures the wrong quantity
+
+*Named by the owner on 2026-09-23, after the second of two corrections in
+one round. The short form: **a ceiling is a limit, not a prediction** —
+and a gate built on one is asking what COULD happen, while the question
+was what DID.*
+
+### The half that is about a person, not a scan
+
+Before the metric failed, I did. The scan flagged `presentationGenerate`
+and I hand-checked it, got "3 credits shown, 4 reserved, 7–24 charged",
+and **reported it to the owner as a confirmed real bug**.
+
+It was not. I had computed the estimate by handing
+`estimateForAction("presentationGenerate", …)` the raw length of the
+brief. The route does not do that: `api/presentations/generate` passes
+`deckEstimateInputChars(description.length, slideCount)` — the brief plus
+1,000 characters per slide asked for. Measured the way the route measures,
+a ten-slide deck estimates 13 credits and reserves 15.
+
+**I made the scan's own mistake while checking the scan, and the agreement
+between the two read as confirmation.** That is the mechanism worth
+remembering: a hand-check that repeats the instrument's assumption is not
+an independent second opinion, it is the same opinion typed twice. The
+only thing that broke the loop was computing the number at the input the
+CALL SITE passes — which is to say, going to where the value is produced
+rather than where it is defined.
+
+**So the hand-check has a rule now: verify at the call site, never at the
+definition.** A profile, a constant, a config default is what something
+*is*; what the caller hands it is what it *does*.
+
+## A ranking metric that every member of the population fails
+
+`scripts/scan-estimate-realism.mjs` asked a real question. Each profile in
+`src/lib/billing/estimate.ts` says how much OUTPUT an action expects, that
+one figure is both shown to the person and used to size the credit hold,
+and the file's own header records what happens when it is too low:
+*"reserved far less than it went on to cost, which defeats the point of
+reserving."*
+
+The scan compared each profile's expected output against the `maxTokens`
+ceiling of the call it estimates and ranked by the ratio. On 2026-09-23 it
+flagged **seven** profiles. **Zero were real.**
+
+It was wrong twice, and only the second time is interesting.
+
+**The first was an ordinary bug.** It invented the input length. Four of
+the seven routes TRANSFORM the input before estimating —
+`api/presentations/generate` passes `deckEstimateInputChars(brief, slides)`,
+the brief plus 1,000 characters per slide asked for. Judged at a made-up
+1,200 characters a ten-slide deck looked like 3 credits; measured at the
+input its route actually passes, it estimates 13 and reserves 15. That is
+fixable, and it was fixed: the scan learned to read each caller's own
+`inputChars:` expression and to print UNDECIDABLE rather than a number when
+the expression is derived. Four findings evaporated.
+
+**The second was the metric.** With the input right, four findings
+remained — and they were not real either, because *short of the ceiling* is
+not a property that distinguishes anything. Measured the same day, at the
+Professional rate with margin 5:
+
+| profile | reserved | what its own ceiling would cost | the scan's verdict |
+|---|---|---|---|
+| presentation, 10 slides | 15 | 59 | flagged |
+| meetingAnalyse, 60 min | 15 | 33 | flagged |
+| importPaste, 20k chars | 26 | 35 | flagged |
+| **missionPlan** | 11 | 15 | **"fine", ranked 1.1x** |
+| **createAnything** | 5 | 8 | **"fine", ranked 1.6x** |
+
+Every profile is short against its own ceiling, including the two the scan
+ranked SAFEST. A ceiling is a limit and not a prediction: a call allowed
+8,000 tokens usually writes a tenth of that, and a reserve sized for the
+limit would hold ten times what every request needs. **No threshold on
+that ratio separates a wrong profile from a model that is simply permitted
+to write more than it will**, because the ordering it produces is not
+correlated with the defect at all.
+
+This is worse than low precision and it is a different failure. `i18n
+symbol claims` run at about 4%: the list is mostly noise but the real ones
+are in it, so a person who reads all of it finds something. A metric whose
+whole population fails is not noisy — it is measuring a different quantity
+than the one in the question, and reading all of it finds nothing, twice.
+
+**The tell, in advance: can any member of the population pass?** If the
+answer is "only one that is over-provisioned by an order of magnitude",
+the threshold is not a line through the data, it is a line under all of
+it.
+
+### What replaced it
+
+The scan was deleted rather than tuned, because tuning it means picking a
+different threshold on the same non-discriminating number.
+`scripts/db/reserve-accuracy.mjs` asks the same question of the rows
+settlement already writes: `credits_charged` on the cost-log row against
+`reservedCredits` in its metadata, per feature, over a window. It needs no
+model of what a call might do — it has what the calls DID, and its
+offender rule ("breaches on more than one request in twenty") is a line
+through real data rather than under it. `reserve-accuracy.dbtest.mjs`
+holds it against a fixture where one feature breaches always, one breaches
+once in twenty-two, and one never: 19 checks, and the middle one must NOT
+be named.
+
+Rule 45 in one line, learned the expensive way: **ask the database, do not
+grep** — and when a static scan and a stored row can answer the same
+question, the row is not merely more convenient, it is the only one of the
+two that is measuring the question.

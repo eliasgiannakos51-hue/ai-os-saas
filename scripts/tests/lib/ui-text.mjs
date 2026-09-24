@@ -85,21 +85,135 @@ export async function uiText(page, key) {
 }
 
 /**
- * Same, but refuses to return something useless.
+ * HOW SHORT IS TOO SHORT, AND WHY IT IS NOT A CONSTANT.
+ *
+ * This floor was `text.length < 3`, written in the same hour as the
+ * helper and wrong in the same way as the `\b` rule and the final sigma
+ * in docs/shapes.md: it is an ASCII sentence about a ten-language
+ * product. "Succeeded" is 成功 in Japanese and 成功 in Chinese — two
+ * characters, the whole word, and a three-character floor rejects it. The
+ * failure is the worst kind, too: uiTextStrict THROWS, so a working
+ * Japanese product fails a correct check, and the fix looks like
+ * loosening the gate.
+ *
+ * scripts/tests/english-anchored-gates.test.mjs found this by running
+ * every key the converted files name through every messages file — nine
+ * of them in languages nobody runs a prodtest in. Eight of the nine hits
+ * were CJK.
+ *
+ * So the floor asks what a word IS in the script it is looking at. One
+ * han character, kana or hangul syllable is a morpheme; three Latin,
+ * Greek or Cyrillic letters is about the shortest thing worth asserting
+ * on. Empty is refused in every script, because that is the vacuity
+ * itself and not a judgement about length.
+ */
+const CJK = /[぀-ヿ㐀-䶿一-鿿豈-﫿가-힯]/;
+export function minNeedleLength(text) {
+  return CJK.test(String(text)) ? 1 : 3;
+}
+
+/**
+ * Same as uiText, but refuses to return something useless.
  *
  * A NEEDLE THAT IS EMPTY MAKES `includes()` ALWAYS TRUE, and its negation
  * always false — the vacuity this file exists to remove, reintroduced one
- * level down. So a key that resolves to nothing, or to fewer than three
- * characters after ICU is stripped, throws here instead of quietly
+ * level down. So a key that resolves to nothing, or to less than a word
+ * in its own script after ICU is stripped, throws here instead of quietly
  * becoming a check that cannot fail.
  */
 export async function uiTextStrict(page, key) {
   const text = await uiText(page, key);
-  if (!text || text.length < 3) {
+  if (!text || text.length < minNeedleLength(text)) {
     throw new Error(
       `ui-text: "${key}" resolved to ${JSON.stringify(text)} — too short to assert on. ` +
         `An empty needle makes includes() always true and its negation always false.`
     );
   }
   return text;
+}
+
+/**
+ * THE SAME THING FOR A MESSAGE THAT HAS PLACEHOLDERS — formatted, not stripped.
+ *
+ * `uiText` throws away `{credits, plural, ...}` because it has no single
+ * rendering. That is right for a needle and wrong for the one check that
+ * cares about a SPECIFIC rendering: agent-credits asserts that no run is
+ * described as costing "0 credits", and the whole assertion is the zero.
+ * Stripped, the needle is empty; hard-coded, the check is English-only and
+ * goes green in Greek having forbidden a string that was never there.
+ *
+ * So this formats the locale's own message with the same library the
+ * renderer uses — Arabic's `zero` form included, which is a different
+ * sentence and not a different number.
+ */
+export async function uiFormat(page, key, values = {}) {
+  const locale = await pageLocale(page);
+  const raw = leaf(messagesFor(locale), key) ?? leaf(messagesFor("en"), key);
+  if (raw === null) {
+    throw new Error(`ui-text: "${key}" is not in messages/${locale}.json or messages/en.json.`);
+  }
+  // DECLARED IN devDependencies ON PURPOSE. It was already in the tree,
+  // transitively, under next-intl — and a transitive dependency is one
+  // upgrade away from not being there, which would turn every check
+  // below into a module-not-found in a file whose whole subject is
+  // checks that stop measuring. english-anchored-gates.test.mjs asserts
+  // the declaration.
+  const { IntlMessageFormat } = await import("intl-messageformat");
+  const out = String(new IntlMessageFormat(raw, locale).format(values));
+  if (out.trim().length < 1) {
+    throw new Error(`ui-text: "${key}" formatted to ${JSON.stringify(out)} — too short to assert on.`);
+  }
+  return out;
+}
+
+/**
+ * A NEEDLE AS A REGEXP, because most of these checks are `/literal/i.test(body)`
+ * and converting them to `includes` would change what each one means at the
+ * same time as changing where its text comes from.
+ *
+ * Case-insensitive like the literals it replaces, and tolerant of the
+ * whitespace a DOM read invents: `innerText` collapses a wrapped line to a
+ * newline and a flex gap to a non-breaking space, neither of which is in
+ * the messages file. Everything else is escaped, so a message containing
+ * `(iOS 16.4+)` is a needle and not a capture group.
+ */
+export async function uiRe(page, key, values = null) {
+  const text = values ? await uiFormat(page, key, values) : await uiTextStrict(page, key);
+  return new RegExp(reSource(text), "i");
+}
+
+/** The same escaping, for a string already resolved. */
+export function reSource(text) {
+  return String(text)
+    .trim()
+    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    .replace(/\s+/g, "[\\s\\u00a0]+");
+}
+
+/**
+ * `haystack.includes(needle)` with the same whitespace tolerance.
+ *
+ * Playwright's `innerText` is not `textContent`: it inserts newlines the
+ * messages file does not have. A check that reads one and compares it to
+ * the other fails on a product that is working, which is how an honest
+ * conversion to locale-resolved text gets reverted.
+ */
+export function containsUi(haystack, needle) {
+  const flat = (s) => String(s ?? "").replace(/[\s ]+/g, " ").trim();
+  return flat(haystack).toLowerCase().includes(flat(needle).toLowerCase());
+}
+
+/**
+ * A SELECTOR THAT CARRIES A LOCALISED STRING, quoted so the string cannot
+ * become syntax.
+ *
+ * `button:has-text("My own photo")` is the shape half of routes-smoke is
+ * written in, and the interesting labels are the ones with punctuation —
+ * "It's in my images", «Δική μου φωτογραφία». Interpolating those raw
+ * produces a selector that either throws or, worse, matches something
+ * else. Both quote styles are escaped, so the caller never has to know
+ * which one the message happens to contain.
+ */
+export function quoteForSelector(text) {
+  return `"${String(text).trim().replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }

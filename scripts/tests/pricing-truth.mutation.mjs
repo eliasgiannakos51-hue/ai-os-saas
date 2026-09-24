@@ -148,7 +148,7 @@ const MUTANTS = [
     // number and the page renders correctly either way.
     name: "the page's stated row count drifts from what it renders",
     file: PRICING_PAGE,
-    from: "ROWS: 45",
+    from: "ROWS: 46",
     to: "ROWS: 43",
     expect: "the page says 43 rows and soldFeatures() returns 45",
   },
@@ -177,7 +177,7 @@ const MUTANTS = [
     // `pricingSrc` read and never judged if it happened again.
     name: "the page stops stating a row count at all",
     file: PRICING_PAGE,
-    from: "ROWS: 45",
+    from: "ROWS: 46",
     to: "Rows, several of them",
     expect: "the pricing page states its own row count in a form this gate can read",
   },

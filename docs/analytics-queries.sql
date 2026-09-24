@@ -314,7 +314,7 @@ with drawn(href) as (values
   ('/dashboard/sales'), ('/dashboard/trading'), ('/dashboard/search'),
   ('/dashboard/ai-memory'),
   ('/dashboard/business-health'), ('/dashboard/projects'), ('/dashboard/mission'),
-  ('/dashboard/reflection'), ('/dashboard/team'), ('/dashboard/integrations'),
+  ('/dashboard/reflection'), ('/dashboard/meetings'), ('/dashboard/team'), ('/dashboard/integrations'),
   ('/dashboard/settings'), ('/help')
 ),
 usage as (

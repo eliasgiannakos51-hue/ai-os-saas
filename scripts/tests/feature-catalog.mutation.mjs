@@ -52,8 +52,12 @@ const MUTANTS = [
     dimension: "A. a feature with no tier",
     name: "a new sidebar row, and nobody says who may use it",
     file: NAV,
-    from: '      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON, hintKey: "marketplace" },',
-    to: '      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON, hintKey: "marketplace" },\n      { href: "/dashboard/zz-new-thing", label: "New Thing", icon: MARKETPLACE_ICON, hintKey: "marketplace" },',
+    // RE-ANCHORED 2026-09-24. This pointed at the one-line Marketplace
+    // row, which became a multi-line object when it was retired.
+    // Automation is a plain row in the same group and says the same
+    // thing: an unclaimed nav row must fail the catalog gate.
+    from: '      { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation" },',
+    to: '      { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation" },\n      { href: "/dashboard/zz-new-thing", label: "New Thing", icon: MODULE_ICONS.automation, hintKey: "automation" },',
     expect: "every sidebar row is claimed",
   },
   {

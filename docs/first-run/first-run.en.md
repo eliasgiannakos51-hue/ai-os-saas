@@ -1,14 +1,14 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **638 strings**. The whole product is 3274, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **642 strings**. The whole product is 3328, which is why this file exists.
 
-**Start with tier 1. It is 47 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 391 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 393 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
 _This is the English original. It is here so a reader of another file can be sent both._
 
-## Tier 1 — THE SENTENCES — read these (47)
+## Tier 1 — THE SENTENCES — read these (49)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -100,6 +100,11 @@ A business plan, notes, a list — we pull the structured bits out.
 
 ### dashboard chrome
 
+**`common.searchFailed`**
+
+
+Search is unavailable right now — this is not an empty result. Try again in a moment.
+
 **`sampleData.bannerDetail`**
 
 
@@ -154,6 +159,11 @@ Starred, recent and search — all your own entries in one place
 
 
 Share an agent's shape as a template, and start from one someone else shared.
+
+**`sidebar.hints.meetings`**
+
+
+Turn a recording into a transcript, a summary, and actions you choose from.
 
 **`sidebar.hints.posts`**
 
@@ -257,7 +267,7 @@ Ionexa uses this to pick which plan step to suggest next — lighter work when y
 
 Free — nothing is generated, and you can remove it in one click
 
-## Tier 2 — The labels — skim these (391)
+## Tier 2 — The labels — skim these (393)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -567,6 +577,11 @@ Connected integrations
 
 
 Rows shown in one list
+
+**`pricing.rows.meetings`**
+
+
+Meetings → actions
 
 **`pricing.rows.missionControl`**
 
@@ -1663,6 +1678,11 @@ My stuff
 
 
 Ready-made helpers
+
+**`sidebar.items.meetings`**
+
+
+Meetings
 
 **`sidebar.items.memory`**
 

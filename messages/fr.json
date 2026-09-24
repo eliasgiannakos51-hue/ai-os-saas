@@ -5,6 +5,7 @@
     "noNotifications": "Aucune nouvelle notification.",
     "jumpToPage": "Aller à un module ou une page...",
     "noMatches": "Aucun résultat pour « {query} »",
+    "searchFailed": "La recherche est indisponible pour le moment — ce n'est pas un résultat vide. Réessayez dans un instant.",
     "createStudio": "Créer n’importe quoi",
     "cancel": "Annuler",
     "save": "Enregistrer",
@@ -163,7 +164,8 @@
       "predictions": "Tendances",
       "posts": "Publications",
       "projects": "Projets",
-      "aiMemory": "Ce dont il se souvient"
+      "aiMemory": "Ce dont il se souvient",
+      "meetings": "Réunions"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -223,7 +225,8 @@
       "predictions": "Des tendances dans vos propres entrées, chacune avec le nombre d'enregistrements sur lequel elle repose et un lien vers eux.",
       "posts": "Dites-le une fois et obtenez une publication par plateforme, à sa longueur et dans son ton. Rien n'est publié : vous copiez et vous publiez.",
       "projects": "Un dossier avec un objectif. Ce que vous mettez est ce qu'il contient — rien n'entre seul.",
-      "aiMemory": "Ce que le chat a retenu sur vous, et comment le supprimer."
+      "aiMemory": "Ce que le chat a retenu sur vous, et comment le supprimer.",
+      "meetings": "Transformez un enregistrement en transcription, résumé et actions que vous choisissez."
     },
     "closeMenu": "Fermer le menu"
   },
@@ -302,7 +305,8 @@
       "websiteImageStorage": "Espace pour les photos du site",
       "voiceClipLength": "Enregistrement le plus long (minutes)",
       "teamMembers": "Membres de l’équipe",
-      "recordSearch": "Recherche dans toutes les données"
+      "recordSearch": "Recherche dans toutes les données",
+      "meetings": "Réunions → actions"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Pour les équipes qui construisent ensemble",
@@ -1108,7 +1112,11 @@
       "empty": {
         "title": "Personne n'a encore été invité",
         "why": "Invitez quelqu'un par e-mail et il aura son propre accès à cet espace : les mêmes données, sous son compte, pas avec votre mot de passe."
-      }
+      },
+      "inviteSavedNotEmailed": "Invitation créée pour {email}, mais aucun e-mail n'a été envoyé.",
+      "inviteEmailNotConfigured": "Ce déploiement n'a pas de fournisseur d'e-mail configuré (RESEND_API_KEY) : rien n'a été livré. L'invitation est enregistrée et reste acceptable en créant un compte avec cette adresse.",
+      "inviteEmailRefused": "Le fournisseur d'e-mail a refusé le message, le plus souvent à cause d'un domaine d'expéditeur non vérifié, qui ne livre qu'au propriétaire du compte. L'invitation est enregistrée et reste acceptable en créant un compte avec cette adresse.",
+      "inviteShareLink": "Envoyez ce lien vous-même :"
     },
     "memory": {
       "title": "Chercher dans mes données",
@@ -2540,16 +2548,59 @@
         "example": "Chaque lundi, un résumé de mes ventes"
       }
     },
-    "library": {
-      "title": "Mes affaires",
-      "description": "Tout ce que vous avez mis ici : récent, favori ou recherché.",
-      "tabs": {
-        "recent": "Récent",
-        "starred": "Favoris",
-        "search": "Rechercher"
-      },
-      "searchPlaceholder": "Cherchez dans tout ce que vous avez écrit",
-      "searchNoResults": "Rien ne correspond à « {query} »."
+    "meetings": {
+      "title": "Réunions",
+      "description": "Téléversez un enregistrement. Vous obtenez la transcription, un résumé et une liste d'actions que vous choisissez.",
+      "audioNoticeTitle": "L'audio n'est pas conservé",
+      "audioNotice": "L'audio est supprimé dès qu'il est transcrit. Assurez-vous que les personnes qui parlent le savent.",
+      "pick": "Choisir un enregistrement",
+      "dropHint": "M4A, MP3, WAV, WebM ou OGG",
+      "limitHint": "Jusqu'à {mb} Mo, environ {minutes} minutes de parole",
+      "tooLarge": "Ce fichier fait {actual} Mo. La limite est de {allowed} Mo — exportez-le en enregistrement vocal ou coupez-le en deux.",
+      "tooLong": "Cet enregistrement dure {actual} minutes. La limite est de {allowed} minutes — coupez-le en deux.",
+      "notAudio": "Ce n'est pas un fichier audio.",
+      "costTitle": "Ce que cela coûtera",
+      "costTranscribe": "Retranscription, {minutes} min",
+      "costSummary": "Résumé et actions",
+      "costTotal": "Environ {credits} crédits au total",
+      "costUnknown": "La durée n'a pas pu être lue, ceci est donc estimé d'après la taille du fichier.",
+      "start": "Transcrire",
+      "transcribing": "Transcription en cours…",
+      "analysing": "Lecture de la transcription…",
+      "transcriptTitle": "Transcription",
+      "summaryTitle": "Résumé",
+      "analyse": "Résumer et trouver les actions",
+      "retryAnalysis": "Réessayer",
+      "proposedTitle": "Actions proposées",
+      "proposedHint": "Ce sont des suggestions. Rien n'est créé tant que vous ne le gardez pas.",
+      "noActions": "Rien dans cette réunion n'était un engagement pris par quelqu'un.",
+      "who": "Qui",
+      "what": "Quoi",
+      "when": "Quand",
+      "unassigned": "Personne nommée",
+      "noDate": "Aucune date dite",
+      "keepSelected": "Garder {count, plural, one {# action} other {# actions}}",
+      "keepNone": "Cochez celles à garder",
+      "keptTitle": "Gardées",
+      "keptEmpty": "Rien de gardé pour l'instant.",
+      "alreadyKept": "Gardée",
+      "savedWarning": "Cette transcription n'a pas été enregistrée — copiez-la avant de quitter la page.",
+      "detectedLanguage": "Tenue en {language}",
+      "empty": "Aucune réunion pour l'instant. Téléversez un enregistrement pour commencer.",
+      "delete": "Supprimer cette réunion",
+      "deleteConfirm": "Supprimer la transcription, le résumé et les actions gardées ? C'est irréversible.",
+      "minutesLeft": "{used} des {limit} minutes utilisées ce mois-ci",
+      "errors": {
+        "ai_unavailable": "Le service d'IA n'a pas pu être joint, rien n'a donc été résumé. Rien n'a été facturé pour le résumé.",
+        "unusable": "Le résumé est revenu dans un format illisible. Rien n'a été facturé pour lui.",
+        "too_short": "Il n'y a pas assez de matière à résumer.",
+        "not_included": "Les réunions ne sont pas incluses dans cette formule.",
+        "out_of_minutes": "Vous avez utilisé les minutes de ce mois-ci.",
+        "unsupported_type": "Ce format audio n'est pas pris en charge.",
+        "rate_limited": "Trop d'enregistrements dans la dernière heure. Réessayez plus tard.",
+        "empty": "Cet enregistrement était vide.",
+        "failed": "Une erreur est survenue. Rien n'a été facturé."
+      }
     },
     "voicePage": {
       "title": "Voix",
@@ -3298,6 +3349,11 @@
       "is": "Tout ce que le chat a retenu sur vous, et rien d’autre.",
       "does": "Chaque ligne vient d’une conversation. Vous pouvez l’ouvrir, supprimer une ligne ou la corriger — et ce qui a été dit plus d’une fois est marqué comme répété, car c’est le poids que le chat lui donne.",
       "doesNot": "Il ne conserve ni vos conversations ni vos données. Pour chercher ce que vous avez consigné, utilisez Chercher dans mes données ; pour tout désactiver, l’interrupteur est dans les Réglages."
+    },
+    "meetings": {
+      "is": "Un enregistrement transformé en transcription, résumé et liste d'actions que vous choisissez.",
+      "does": "Retranscrit dans la langue parlée, résume dans cette même langue et propose qui s'est engagé à quoi et pour quand.",
+      "doesNot": "Il ne conserve pas l'audio — il n'existe ni bucket ni colonne pour lui, il disparaît donc à la fin du téléversement. Et il ne crée rien de lui-même : une action n'existe qu'après que vous l'avez cochée et gardée."
     }
   },
   "helpCentre": {

@@ -226,8 +226,8 @@ export function Sidebar({
                         worth keeping written down. "Ionexa" at this size
                         renders a lone capital "I" that reads as a lowercase
                         "l" — "lonexa" — so this row leaned on wider
-                        letter-spacing, as loading-state.tsx and
-                        not-found.tsx still do for the standalone wordmark.
+                        letter-spacing, as app/not-found.tsx still does for
+                        the standalone wordmark.
                         `item.label` is a KEY into ITEM_LABEL_KEYS and never
                         reaches the screen, so the condition matched on
                         "Ionexa Chat" while what was painted came from

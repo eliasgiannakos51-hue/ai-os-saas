@@ -49,7 +49,10 @@ const MUTANTS = [
     // argument for it existing.
     name: "a page count is left at what it was two pages ago",
     file: DASH_LAYOUT,
-    from: "                    46 pages instead of 8, and the four components below",
+    // RE-ANCHORED 2026-09-23 (46 -> 47) when /dashboard/meetings landed.
+    // The anchor has to move with the number it is about, which is the
+    // same drift this mutation exists to catch, one level up.
+    from: "                    47 pages instead of 8, and the four components below",
     to: "                    44 pages instead of 8, and the four components below",
     expect: "every marker's number is also written in the sentence it vouches for",
   },

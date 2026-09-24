@@ -112,6 +112,9 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [contentResults, setContentResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
+  // A FAILED SEARCH IS NOT AN EMPTY ONE, and until 2026-09-20 this
+  // palette could not tell them apart. See the fetch below.
+  const [searchFailed, setSearchFailed] = useState(false);
   const [kindFilter, setKindFilter] = useState<SearchKind | "">("");
   const [moduleFilter, setModuleFilter] = useState<string>("");
   const [dateFilter, setDateFilter] = useState<DateRange>("any");
@@ -195,6 +198,7 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
       setContentResults([]);
       setFacets(NO_FACETS);
       setSearching(false);
+      setSearchFailed(false);
       return;
     }
 
@@ -226,15 +230,46 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
         const res = await fetch(`/api/search?${key}`);
         const data = await res.json();
         if (token !== searchTokenRef.current) return;
-        const results: SearchResult[] = res.ok && data.ok ? data.results : [];
+
+        // A FAILED SEARCH IS NOT AN EMPTY ONE.
+        //
+        // This was `res.ok && data.ok ? data.results : []` — a 500 from
+        // /api/search became an empty array, was CACHED as one, and the
+        // panel said "No matches for …". The route returns exactly that
+        // 500 for every error it meets, including a search index that
+        // has never been backfilled.
+        //
+        // So for weeks "⌘K finds nothing" and "⌘K is broken" produced
+        // the identical screen, and the owner reported the first while
+        // living with the second. docs/shapes.md: a fallback must
+        // report that it was used, or it hides the bug it exists to
+        // protect against.
+        if (!res.ok || !data.ok) {
+          setSearchFailed(true);
+          setContentResults([]);
+          if (unnarrowed) setFacets(NO_FACETS);
+          return;
+        }
+        setSearchFailed(false);
+        const results: SearchResult[] = data.results;
         // Bounded: a palette left open through a long session should not
         // grow a cache of every query anybody ever typed.
+        //
+        // AND ONLY A REAL ANSWER IS CACHED. The old code cached the
+        // empty array it made out of a failure, so retyping the same
+        // query never even retried — one outage froze that query as
+        // "no matches" for the rest of the session.
         if (searchCacheRef.current.size > 40) searchCacheRef.current.clear();
         searchCacheRef.current.set(key, results);
         setContentResults(results);
         if (unnarrowed) setFacets(facetsOf(results));
       } catch {
-        if (token === searchTokenRef.current) setContentResults([]);
+        // The network half of the same thing: a dropped request is not
+        // a result.
+        if (token === searchTokenRef.current) {
+          setSearchFailed(true);
+          setContentResults([]);
+        }
       } finally {
         if (token === searchTokenRef.current) setSearching(false);
       }
@@ -248,6 +283,9 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
     setQuery("");
     setActiveIndex(0);
     setContentResults([]);
+    // Or the next opening starts by announcing a failure that belonged
+    // to the last one.
+    setSearchFailed(false);
     setFacets(NO_FACETS);
     setKindFilter("");
     setModuleFilter("");
@@ -516,9 +554,27 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
         )}
 
         <div className="max-h-96 overflow-y-auto p-2">
+          {/* THE FAILURE IS SAID OUT LOUD, and it is said even when page
+              results are on screen: page navigation is matched in the
+              browser and keeps working while /api/search is down, so a
+              list with rows in it can still be missing everything the
+              user actually searched for. */}
+          {searchFailed && !searching && (
+            <p
+              data-testid="palette-search-failed"
+              role="status"
+              className="notice-warning mx-3 mb-2 px-3 py-2 text-xs leading-relaxed"
+            >
+              {tCommon("searchFailed")}
+            </p>
+          )}
           {entries.length === 0 ? (
             <p className="px-3 py-6 text-center text-sm text-muted">
-              {searching ? tCommon("loading") : tCommon("noMatches", { query })}
+              {searching
+                ? tCommon("loading")
+                : searchFailed
+                  ? tCommon("searchFailed")
+                  : tCommon("noMatches", { query })}
             </p>
           ) : (
             entries.map((entry, index) => {

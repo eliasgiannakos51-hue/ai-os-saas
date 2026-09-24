@@ -23,6 +23,52 @@
 // the failure mode i18n-coverage's own baseline had — it knew about three
 // and stayed at three long after they were paid off.
 export const ABSENT_ON_PURPOSE = {
+  "scripts/db/reserve-accuracy.mjs": {
+    reason:
+      "THE INSTRUMENT IT REPLACED, AND WHY IT WAS DELETED RATHER THAN TUNED. The static scan " +
+      "compared each estimate profile's expected output against the maxTokens ceiling of the " +
+      "call it estimates. It flagged seven profiles on 2026-09-23 and zero were real, because " +
+      "the metric does not discriminate: measured the same day, EVERY profile's reserve is " +
+      "short of what its own ceiling would cost, including the two the scan ranked safest " +
+      "(missionPlan at 1.1x, createAnything at 1.6x). A ranking every member of the population " +
+      "fails sorts nothing. Naming it is the whole account of why this file reads settled rows " +
+      "instead — it was deleted in the commit that added this one.",
+    paths: ["scripts/scan-estimate-realism.mjs"],
+  },
+  "scripts/tests/entry-points.test.mjs": {
+    reason:
+      "THE GATE WHOSE FINDING IS THAT THESE FILES SHOULD NOT EXIST. Its new clause requires " +
+      "every component under src/components to have an importer; four did not, and the " +
+      "comment names them because 'four did not' with no names is a number nobody can check. " +
+      "They were deleted on 2026-09-20 in the commit that added the clause — so the paths " +
+      "being absent is the claim, not a stale reference.",
+    paths: [
+      "components/loading-state.tsx",
+      "components/overview/quick-action-card.tsx",
+      "components/overview/quick-start-button.tsx",
+    ],
+  },
+  "docs/shapes.md": {
+    reason:
+      "The shape is 'looking for the second one found something else entirely' — a component " +
+      "that had been an orphan for eighteen days. Naming the file is the whole account; it was " +
+      "deleted on 2026-09-20 in the commit that wrote the section.",
+    paths: ["components/library/library-search.tsx"],
+  },
+  "scripts/tests/silent-fallbacks.test.mjs": {
+    reason:
+      "The second caller of /api/search had the identical silent fallback and turned out to " +
+      "be an orphan — deleted 2026-09-20. The comment tells that story because it is why this " +
+      "gate checks a POPULATION rather than the one file the defect was found in.",
+    paths: ["components/library/library-search.tsx"],
+  },
+  "scripts/tests/light-theme-contrast.test.mjs": {
+    reason:
+      "Quotes quick-action-card as an example of the ring-1 ring-inset pattern. The file was " +
+      "deleted on 2026-09-20 as a component no page imports; the pattern it illustrates is " +
+      "still in the tree, so the sentence is kept and the path is known-absent.",
+    paths: ["components/overview/quick-action-card.tsx"],
+  },
   "docs/unmerged-branches.md": {
     reason:
       "A REPORT ABOUT OTHER BRANCHES. Every path in it is a file that exists on a branch " +
@@ -85,15 +131,12 @@ export const ABSENT_ON_PURPOSE = {
 // route out loud or the next reader cannot tell what changed. Checked
 // both ways by self-claims.test.mjs.
 export const ROUTES_ABSENT_ON_PURPOSE = {
-  "docs/v5-pricing-and-nav-report.md": {
-    reason:
-      "The report names a route the sidebar deliberately holds a POSITION for and has not " +
-      "built: /dashboard/meetings carries notBuilt:true, which is exactly the claim being " +
-      "made about it. scripts/tests/sidebar-collapse.test.mjs fails the build if that route " +
-      "ever starts resolving while the flag is still on, so the day it exists this entry " +
-      "goes stale in the direction the both-ways check catches.",
-    routes: ["/dashboard/meetings"],
-  },
+  // REMOVED 2026-09-23, and the entry predicted its own removal: it said
+  // "the day it exists this entry goes stale in the direction the
+  // both-ways check catches", and that is what happened. /dashboard/meetings
+  // is a page now, so the report that named it as unbuilt describes
+  // something that used to be true — which is a different kind of
+  // sentence from a wrong one, and the report is dated and left as taken.
   "src/lib/sidebar-nav.ts": {
     reason:
       "The corrected comment names the route it corrected. /dashboard/business was written " +

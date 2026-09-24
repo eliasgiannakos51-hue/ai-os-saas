@@ -5,6 +5,7 @@
     "noNotifications": "Nessuna nuova notifica.",
     "jumpToPage": "Vai a un modulo o pagina...",
     "noMatches": "Nessun risultato per «{query}»",
+    "searchFailed": "La ricerca non è disponibile in questo momento: non è un risultato vuoto. Riprova tra poco.",
     "createStudio": "Crea qualsiasi cosa",
     "cancel": "Annulla",
     "save": "Salva",
@@ -163,7 +164,8 @@
       "predictions": "Andamenti",
       "posts": "Post",
       "projects": "Progetti",
-      "aiMemory": "Cosa ricorda"
+      "aiMemory": "Cosa ricorda",
+      "meetings": "Riunioni"
     },
     "hints": {
       "chat": "Chiedi qualsiasi cosa — non legato a nessun modulo.",
@@ -223,7 +225,8 @@
       "predictions": "Andamenti nelle tue voci, ciascuno con il numero di registrazioni su cui si basa e un collegamento a esse.",
       "posts": "Dillo una volta e ricevi un post per piattaforma, nella sua lunghezza e nel suo tono. Non pubblica nulla: copi e pubblichi tu.",
       "projects": "Una cartella con un obiettivo. Ciò che metti è ciò che c'è — niente entra da solo.",
-      "aiMemory": "Cosa la chat ha tenuto su di te, e come cancellarlo."
+      "aiMemory": "Cosa la chat ha tenuto su di te, e come cancellarlo.",
+      "meetings": "Trasforma una registrazione in trascrizione, riassunto e azioni tra cui scegli tu."
     },
     "closeMenu": "Chiudi il menu"
   },
@@ -302,7 +305,8 @@
       "websiteImageStorage": "Spazio per le foto del sito",
       "voiceClipLength": "Registrazione più lunga (minuti)",
       "teamMembers": "Membri del team",
-      "recordSearch": "Ricerca su tutti i dati"
+      "recordSearch": "Ricerca su tutti i dati",
+      "meetings": "Riunioni → azioni"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Per team che costruiscono insieme",
@@ -1108,7 +1112,11 @@
       "empty": {
         "title": "Non è ancora stato invitato nessuno",
         "why": "Invita qualcuno via email e avrà un proprio accesso a questo spazio: gli stessi dati, con il suo account, non con la tua password."
-      }
+      },
+      "inviteSavedNotEmailed": "{email} è invitato, ma non è stata inviata alcuna email.",
+      "inviteEmailNotConfigured": "Questa installazione non ha un provider email configurato (RESEND_API_KEY), quindi non è stato consegnato nulla. L'invito è salvato e può essere accettato registrandosi con quell'indirizzo.",
+      "inviteEmailRefused": "Il provider email ha rifiutato il messaggio, il più delle volte per un dominio mittente non verificato, che consegna solo al titolare dell'account. L'invito è salvato e può essere accettato registrandosi con quell'indirizzo.",
+      "inviteShareLink": "Invia tu stesso questo link:"
     },
     "memory": {
       "title": "Cerca nei miei dati",
@@ -2540,16 +2548,59 @@
         "example": "Ogni lunedì, un riepilogo delle mie vendite"
       }
     },
-    "library": {
-      "title": "Le mie cose",
-      "description": "Tutto quello che hai messo qui: recente, preferito o cercato.",
-      "tabs": {
-        "recent": "Recenti",
-        "starred": "Preferiti",
-        "search": "Cerca"
-      },
-      "searchPlaceholder": "Cerca in tutto ciò che hai scritto",
-      "searchNoResults": "Niente corrisponde a «{query}»."
+    "meetings": {
+      "title": "Riunioni",
+      "description": "Carica una registrazione. Ottieni la trascrizione, un riassunto e un elenco di azioni tra cui scegli tu.",
+      "audioNoticeTitle": "L'audio non viene conservato",
+      "audioNotice": "L'audio viene cancellato appena è trascritto. Assicurati che chi parla lo sappia.",
+      "pick": "Scegli una registrazione",
+      "dropHint": "M4A, MP3, WAV, WebM o OGG",
+      "limitHint": "Fino a {mb} MB, circa {minutes} minuti di parlato",
+      "tooLarge": "Quel file è di {actual} MB. Il limite è {allowed} MB — esportalo come registrazione vocale o dividilo in due.",
+      "tooLong": "Quella registrazione dura {actual} minuti. Il limite è {allowed} minuti — dividila in due.",
+      "notAudio": "Quello non è un file audio.",
+      "costTitle": "Quanto costerà",
+      "costTranscribe": "Trascrizione, {minutes} min",
+      "costSummary": "Riassunto e azioni",
+      "costTotal": "Circa {credits} crediti in totale",
+      "costUnknown": "La durata non è stata letta, quindi è stimata dalla dimensione del file.",
+      "start": "Trascrivi",
+      "transcribing": "Trascrizione in corso…",
+      "analysing": "Lettura della trascrizione…",
+      "transcriptTitle": "Trascrizione",
+      "summaryTitle": "Riassunto",
+      "analyse": "Riassumi e trova le azioni",
+      "retryAnalysis": "Riprova",
+      "proposedTitle": "Azioni proposte",
+      "proposedHint": "Sono suggerimenti. Non viene creato nulla finché non lo tieni.",
+      "noActions": "Niente in questa riunione era un impegno preso da qualcuno.",
+      "who": "Chi",
+      "what": "Cosa",
+      "when": "Quando",
+      "unassigned": "Nessuno nominato",
+      "noDate": "Nessuna data detta",
+      "keepSelected": "Tieni {count, plural, one {# azione} other {# azioni}}",
+      "keepNone": "Spunta quelle da tenere",
+      "keptTitle": "Tenute",
+      "keptEmpty": "Ancora niente tenuto.",
+      "alreadyKept": "Tenuta",
+      "savedWarning": "Questa trascrizione non è stata salvata — copiala prima di lasciare la pagina.",
+      "detectedLanguage": "Tenuta in {language}",
+      "empty": "Ancora nessuna riunione. Carica una registrazione per iniziare.",
+      "delete": "Elimina questa riunione",
+      "deleteConfirm": "Eliminare la trascrizione, il riassunto e le azioni tenute? Non si può annullare.",
+      "minutesLeft": "{used} di {limit} minuti usati questo mese",
+      "errors": {
+        "ai_unavailable": "Non è stato possibile raggiungere il servizio di IA, quindi non è stato riassunto nulla. Per il riassunto non è stato addebitato nulla.",
+        "unusable": "Il riassunto è tornato in una forma che non siamo riusciti a leggere. Non è stato addebitato nulla.",
+        "too_short": "Non c'è abbastanza da riassumere.",
+        "not_included": "Le riunioni non sono incluse in questo piano.",
+        "out_of_minutes": "Hai esaurito i minuti di questo mese.",
+        "unsupported_type": "Quel formato audio non è supportato.",
+        "rate_limited": "Troppe registrazioni nell'ultima ora. Riprova più tardi.",
+        "empty": "Quella registrazione era vuota.",
+        "failed": "Qualcosa è andato storto. Non è stato addebitato nulla."
+      }
     },
     "voicePage": {
       "title": "Voce",
@@ -3298,6 +3349,11 @@
       "is": "Tutto quello che la chat ha tenuto su di lei, e nient’altro.",
       "does": "Ogni riga viene da una conversazione. Può aprirla, cancellare una riga o correggerla — e ciò che è stato detto più di una volta è segnato come ripetuto, perché è il peso che la chat gli dà.",
       "doesNot": "Non conserva le sue conversazioni né i suoi dati. Per cercare quello che ha registrato usi Cerca nei miei dati; per disattivarlo del tutto, l’interruttore è nelle Impostazioni."
+    },
+    "meetings": {
+      "is": "Una registrazione trasformata in trascrizione, riassunto ed elenco di azioni tra cui scegli tu.",
+      "does": "Trascrive nella lingua in cui si è parlato, riassume nella stessa lingua e propone chi si è impegnato a fare cosa ed entro quando.",
+      "doesNot": "Non conserva l'audio — non esiste né bucket né colonna per esso, quindi sparisce a caricamento finito. E non crea nulla da solo: un'azione esiste solo dopo che la spunti e la tieni."
     }
   },
   "helpCentre": {

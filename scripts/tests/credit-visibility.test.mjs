@@ -226,6 +226,12 @@ const PAIRS = [
   ["voice/transcribe", "src/app/api/voice/transcribe/route.ts", "src/components/voice/voice-input.tsx"],
   ["transitions/detect", "src/app/api/transitions/detect/route.ts", "src/components/transitions/transition-button.tsx"],
   ["websites/edit", "src/app/api/websites/edit/route.ts", "src/components/website-builder/website-builder-workspace.tsx"],
+  // V6 #1. Both halves of a meeting charge: the transcription per second
+  // and the reading of the transcript per token. One workspace reports
+  // both, because a user who uploaded once should not have to work out
+  // which of two numbers moved their balance.
+  ["meetings/transcribe", "src/app/api/meetings/transcribe/route.ts", "src/components/meetings/meetings-workspace.tsx"],
+  ["meetings/analyse", "src/app/api/meetings/[id]/analyse/route.ts", "src/components/meetings/meetings-workspace.tsx"],
 ];
 const declaredRoutes = PAIRS.map(([, r]) => r);
 const undeclaredReceipts = RECEIPT_ROUTES.filter((r) => !declaredRoutes.includes(r));

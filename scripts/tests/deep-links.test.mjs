@@ -229,7 +229,23 @@ for (const l of favLinks) {
 // link it did not find.
 // 50 -> 52, redesign phase 2: the project page links a member row to its
 // record and the chat to the project it starts in.
-const DEEP_LINK_FLOOR = 52;
+//
+// 52 -> 51, AND A RATCHET GOING DOWN NEEDS THE PROOF THE COMMENT ABOVE
+// DEMANDS. The rule is that a drop means the scanner stopped seeing
+// something; this one is a deletion, and it is nameable rather than
+// argued. The link that went is exactly `/api/search?q=`, and the only
+// file that emitted it was components/library/library-search.tsx, an
+// orphan since the 2026-09-02 merge deleted its page — see
+// entry-points.test.mjs, which now fails on a component no page imports.
+// Before: 52 links over 921 files. After: 51 over 917, differing in that
+// one key. Nothing else moved.
+//
+// WHAT IS GENUINELY LOST, stated rather than glossed: the surviving
+// caller, the command palette, builds the query as
+// `/api/search?${key}`, so no literal `q=` is in the tree any more and
+// this file cannot check that /api/search reads its q parameter. That
+// check now lives only in the palette's own gates.
+const DEEP_LINK_FLOOR = 51;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

@@ -18,6 +18,26 @@ export function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 /**
+ * HIDDEN. The marketplace becomes a separate product at V8+, not a
+ * feature of Ionexa AI.
+ *
+ * WITHDRAWN FROM EVERY SURFACE ON 2026-09-24 and still served. The nav
+ * row carries `retired` (lib/sidebar-visibility.ts), which strips it from
+ * the sidebar, the command palette and the hub at once — `hidden` would
+ * have left it one keystroke away in the palette, which is not
+ * withdrawing it. This page keeps working for anyone holding the URL,
+ * which is why the flag is not `notBuilt`: that one asserts there is no
+ * page, and a gate reads the assertion.
+ *
+ * NOTHING BELOW CHANGED, AND THE TABLE IS UNTOUCHED. agent_templates and
+ * match_agent_templates have four other readers, all reached from the
+ * Agents screen and all still live: api/agents/templates searches through
+ * the RPC, .../share writes a row, .../adopt reads one, and
+ * lib/health/schema-canaries.ts watches the function exist. Deleting this
+ * page to tidy the nav would have broken none of them — and taking the
+ * table with it would have broken all four.
+ *
+ * ---------------------------------------------------------------------
  * THE LIBRARY THAT WAS ALREADY THERE.
  *
  * This page used to be an honest empty state with a disabled "Publish a

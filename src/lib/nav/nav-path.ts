@@ -77,6 +77,10 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "form-submissions",
   "images",
   "integrations",
+  // V6 #1. A screen on disk that is not here is a screen the nav path
+  // parser reads as a module slug, so its rows land under the wrong
+  // heading and its analytics under the wrong name.
+  "meetings",
   "search",
   "marketplace",
   "memory",

@@ -6,9 +6,12 @@ import { GlobeMark } from "@/components/ui/globe-mark";
 /**
  * What a dashboard route looks like while it is arriving.
  *
- * WHY NOT LoadingState. The shared LoadingState is a centred block on a
- * full-height background — right for a whole-app boot, wrong for moving
- * between two dashboard pages. Between pages the chrome does not change:
+ * WHY NOT A CENTRED SPINNER. The obvious fallback is a centred block on
+ * a full-height background — right for a whole-app boot, wrong for moving
+ * between two dashboard pages. (There WAS a shared LoadingState doing
+ * exactly that; it was deleted on 2026-09-20, unimported since some
+ * earlier round, and these three comments were the only thing still
+ * describing it as live.) Between pages the chrome does not change:
  * the sidebar stays, the top bar stays, and only the body is replaced. A
  * centred block in that space reads as "everything went away", which is
  * the feeling the report described — a navigation that looked like a

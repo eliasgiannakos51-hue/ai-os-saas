@@ -29,6 +29,29 @@ import type { Mission } from "@/types/mission";
 import type { ScheduledAgentRun } from "@/types/scheduled-agent-run";
 import type { UserAutomation } from "@/types/user-automation";
 
+// AWAITED, NOT FIRED AND FORGOTTEN — all eleven of them, 2026-09-24.
+//
+// THE SAME SHAPE WAS FOUND AND FIXED ONCE ALREADY, in
+// api/websites/[id]/submit-form, whose comment says it in the past
+// tense: "the response went back before the send resolved, which on a
+// serverless runtime means the function can be frozen mid-flight and the
+// email simply never happens." That fix was applied to the one route
+// somebody was looking at. This file had ten more of the identical call,
+// and nothing pointed at it — shape 35 in the working rules, a defence
+// wired in at the one place where somebody once needed it.
+//
+// IT IS WORSE HERE THAN IT WAS THERE. This is a cron: the invocation ends
+// the moment the handler returns, so a promise nobody awaited is not
+// racing a response, it is racing the end of the process. Every "your
+// scheduled step finished" email and every mission-reminder push was a
+// coin flip, and the failure is invisible from both ends — the run row
+// says it completed, and the person simply never hears.
+//
+// Awaiting is affordable because each sender is already best-effort and
+// cannot throw; scripts/tests/email-outcome-reported.test.mjs holds this
+// route as background, which is about who is WAITING, never about
+// whether the send is allowed to vanish.
+
 export const dynamic = "force-dynamic";
 
 // TIMEZONE, confirmed and documented explicitly (re-verified this pass):
@@ -208,7 +231,7 @@ export async function GET(request: Request) {
           if (!check.ok) {
             if (!(await closeRun(admin, run.id, { status: "failed", result: "insufficient_credits", executed_at: new Date().toISOString() }, "close_insufficient_credits"))) unclosed++;
             failed++;
-            void sendScheduledRunCompleteEmail({
+            await sendScheduledRunCompleteEmail({
               userId: user.id,
               email: user.email ?? "",
               stepText: run.step_text,
@@ -256,7 +279,7 @@ export async function GET(request: Request) {
         if (!breakerCheck.allowed) {
           if (!(await closeRun(admin, run.id, { status: "failed", result: breakerCheck.reason, executed_at: new Date().toISOString() }, "close_circuit_breaker"))) unclosed++;
           failed++;
-          void sendScheduledRunCompleteEmail({
+          await sendScheduledRunCompleteEmail({
             userId: user.id,
             email: user.email ?? "",
             stepText: run.step_text,
@@ -309,7 +332,7 @@ export async function GET(request: Request) {
           await releaseReservation(userId, runReservationId);
           if (!(await closeRun(admin, run.id, { status: "failed", result: result.error, executed_at: new Date().toISOString() }, "close_run_failed"))) unclosed++;
           failed++;
-          void sendScheduledRunCompleteEmail({
+          await sendScheduledRunCompleteEmail({
             userId: user.id,
             email: user.email ?? "",
             stepText: run.step_text,
@@ -340,7 +363,7 @@ export async function GET(request: Request) {
           await releaseReservation(userId, runReservationId);
           if (!(await closeRun(admin, run.id, { status: "failed", result: result.message, executed_at: new Date().toISOString() }, "close_run_unmatched"))) unclosed++;
           failed++;
-          void sendScheduledRunCompleteEmail({
+          await sendScheduledRunCompleteEmail({
             userId: user.id,
             email: user.email ?? "",
             stepText: run.step_text,
@@ -403,7 +426,7 @@ export async function GET(request: Request) {
 
         if (!(await closeRun(admin, run.id, { status: "completed", result: result.outputSummary, executed_at: new Date().toISOString() }, "close_run_completed"))) unclosed++;
         completed++;
-        void sendScheduledRunCompleteEmail({
+        await sendScheduledRunCompleteEmail({
           userId: user.id,
           email: user.email ?? "",
           stepText: run.step_text,
@@ -414,12 +437,31 @@ export async function GET(request: Request) {
         // moment the user wanted to be reminded of it. The step text is
         // the user's own words, truncated so a long step does not overflow
         // a lock-screen notification.
-        void sendPushToUser(user.id, "mission_reminders", {
+        // THE RESULT IS READ, and it is not decoration: sendPushToUser
+        // returns `{ sent, failed, revoked, skipped }` and answers
+        // `skipped: "unconfigured"` when VAPID is not set. Thrown away,
+        // that is a deployment where no mission reminder has ever been
+        // delivered and no line anywhere says so — the cron completes,
+        // the run row says done, and the person simply never hears.
+        // Nobody is waiting on a cron's response, so this is a log and
+        // not a third state on a screen.
+        const pushResult = await sendPushToUser(user.id, "mission_reminders", {
           title: "Mission step done",
           body: run.step_text.slice(0, 120),
           url: "/dashboard/mission",
           tag: `mission-${run.mission_id}`,
         });
+        if (pushResult.skipped || pushResult.failed > 0) {
+          logApiError(
+            "/api/cron/scheduled-runs",
+            new Error(
+              pushResult.skipped
+                ? `mission reminder not delivered: ${pushResult.skipped}`
+                : `mission reminder failed for ${pushResult.failed} subscription(s)`
+            ),
+            { stage: "push", userId: user.id }
+          );
+        }
       }
     }
 
@@ -528,7 +570,7 @@ export async function GET(request: Request) {
               .update({ next_run_at: advancedNextRunAt })
               .eq("id", automation.id);
             automationsFailed++;
-            void sendScheduledRunCompleteEmail({
+            await sendScheduledRunCompleteEmail({
               userId: user.id,
               email: user.email ?? "",
               stepText: automation.description,
@@ -552,7 +594,7 @@ export async function GET(request: Request) {
             .update({ next_run_at: advancedNextRunAt })
             .eq("id", automation.id);
           automationsFailed++;
-          void sendScheduledRunCompleteEmail({
+          await sendScheduledRunCompleteEmail({
             userId: user.id,
             email: user.email ?? "",
             stepText: automation.description,
@@ -598,7 +640,7 @@ export async function GET(request: Request) {
             .update({ next_run_at: advancedNextRunAt })
             .eq("id", automation.id);
           automationsFailed++;
-          void sendScheduledRunCompleteEmail({
+          await sendScheduledRunCompleteEmail({
             userId: user.id,
             email: user.email ?? "",
             stepText: automation.description,
@@ -634,7 +676,7 @@ export async function GET(request: Request) {
           .update({ last_run_at: new Date().toISOString(), next_run_at: advancedNextRunAt })
           .eq("id", automation.id);
         automationsCompleted++;
-        void sendScheduledRunCompleteEmail({
+        await sendScheduledRunCompleteEmail({
           userId: user.id,
           email: user.email ?? "",
           stepText: automation.description,
@@ -718,7 +760,7 @@ export async function GET(request: Request) {
         const { data: ownerAuth } = await admin.auth.admin.getUserById(website.user_id);
         const ownerEmail = ownerAuth?.user?.email;
         if (ownerEmail) {
-          void sendStuckGenerationEmail({ email: ownerEmail, userId: website.user_id, websiteName: website.name });
+          await sendStuckGenerationEmail({ email: ownerEmail, userId: website.user_id, websiteName: website.name });
         }
         stuckNotified++;
       }

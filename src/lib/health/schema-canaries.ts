@@ -197,6 +197,20 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20261001000000_projects.sql",
     breaks: "Projects: the page can neither list nor create a project — every request is rejected",
   },
+  {
+    // THE EXPENSIVE ORDER. The meeting row is written AFTER the
+    // transcription has run and settled, so a missing table is not a page
+    // that fails to load — it is a person who uploaded a recording,
+    // waited, paid for the minutes, and got a transcript that vanishes
+    // when they close the tab. The route hands the text back anyway for
+    // exactly that reason, which makes the failure survivable and
+    // completely invisible without this line.
+    kind: "table",
+    table: "meetings",
+    migration: "20261006000000_meetings.sql",
+    breaks:
+      "Meetings: a recording is transcribed and CHARGED, and then the row fails to save — the person pays for minutes and keeps nothing",
+  },
   // ------------------------------------------------------------------
   // 2026-09-11 — THE RPCs src CALLS, after a sweep found 27 of them with
   // no canary and one canary guarding a function nothing calls any more.

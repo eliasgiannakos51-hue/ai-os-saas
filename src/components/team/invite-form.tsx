@@ -17,11 +17,29 @@ export function InviteForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  /**
+   * SAVED, BUT NOT EMAILED — a third state, because it is neither of the
+   * other two.
+   *
+   * The invite row exists and the person can accept it, so this is not an
+   * error; and no email left the deployment, so it is not the success the
+   * green box used to claim. Measured 2026-09-24: with no RESEND_API_KEY
+   * this form said "Invitation sent to alice@example.com" and nothing had
+   * been sent. The owner then waited for a reply that could not come.
+   *
+   * The link is the repair the owner can actually perform: pass it on by
+   * hand. It comes from the route, not from here — NEXT_PUBLIC_SITE_URL
+   * read in a client component is undefined (rule 48).
+   */
+  const [notEmailed, setNotEmailed] = useState<
+    { reason: "not_configured" | "send_failed"; signupUrl: string; email: string } | null
+  >(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+    setNotEmailed(null);
     setLoading(true);
 
     try {
@@ -37,7 +55,15 @@ export function InviteForm() {
         return;
       }
 
-      setSuccess(t("inviteSent", { email }));
+      if (data.emailSent === false) {
+        setNotEmailed({
+          reason: data.emailReason === "not_configured" ? "not_configured" : "send_failed",
+          signupUrl: typeof data.signupUrl === "string" ? data.signupUrl : "",
+          email,
+        });
+      } else {
+        setSuccess(t("inviteSent", { email }));
+      }
       setEmail("");
       setRole("");
       router.refresh();
@@ -95,6 +121,24 @@ export function InviteForm() {
         <p className="rounded-lg border border-emerald-800 bg-emerald-950/30 px-3 py-2 text-xs text-emerald-400">
           {success}
         </p>
+      )}
+      {notEmailed && (
+        <div className="notice-warning space-y-1.5 px-3 py-2 text-xs">
+          <p className="font-semibold">{t("inviteSavedNotEmailed", { email: notEmailed.email })}</p>
+          <p className="leading-relaxed">
+            {notEmailed.reason === "not_configured"
+              ? t("inviteEmailNotConfigured")
+              : t("inviteEmailRefused")}
+          </p>
+          {notEmailed.signupUrl && (
+            <p className="leading-relaxed">
+              {t("inviteShareLink")}{" "}
+              <span className="select-all break-all font-mono text-amber-200">
+                {notEmailed.signupUrl}
+              </span>
+            </p>
+          )}
+        </div>
       )}
     </form>
   );

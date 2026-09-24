@@ -179,6 +179,17 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // was in it; an erasure takes the project row and the delete trigger in
   // 20261001000000_projects.sql takes those edges with it.
   { table: "projects", label: "projects", scope: "user_content" },
+  // V6 #1. THE TRANSCRIPT IS IN THE EXPORT AND THE AUDIO IS NOT IN EITHER,
+  // because there is no audio: 20261006000000_meetings.sql has no column,
+  // no bucket and no path for it (the header says why). What a person can
+  // take away is what was said, the summary made from it, and the actions
+  // they chose to keep.
+  { table: "meetings", label: "meetings", scope: "user_content" },
+  // Kept separate rather than nested under the meeting: these are the ones
+  // the user PRESSED KEEP on, and an export that folded them into the
+  // meeting row would make them indistinguishable from the proposals in
+  // `meetings.proposed_actions`, which nobody agreed to.
+  { table: "meeting_actions", label: "meeting_actions", scope: "user_content" },
   { table: "ai_videos", label: "ai_videos", scope: "user_content" },
   { table: "ai_websites", label: "ai_website_entries", scope: "user_content" },
 

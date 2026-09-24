@@ -62,6 +62,11 @@ export function itemChunks(body) {
         constantHref: chunk.match(/^([A-Z_]+)\.href/)?.[1] ?? null,
         hidden: /hidden:\s*true/.test(head),
         notBuilt: /notBuilt:\s*true/.test(head),
+        // RETIRED CARRIES ITS REASON, so the test is for the key and not
+        // for `true` — a flag whose value is prose cannot be matched the
+        // way the boolean ones are, and a parser that looked for
+        // `retired: true` would silently see none of them.
+        retired: /retired:\s*["'`+]/.test(head) || /retired:\s*$/m.test(head),
         ownerOnly: /ownerOnly:\s*true/.test(head),
       };
     });

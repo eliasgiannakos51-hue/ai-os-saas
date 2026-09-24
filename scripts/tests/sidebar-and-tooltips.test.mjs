@@ -265,6 +265,9 @@ checkTrue(
       ...(i.hidden ? { hidden: true } : {}),
       ...(i.notBuilt ? { notBuilt: true } : {}),
       ...(i.ownerOnly ? { ownerOnly: true } : {}),
+      // The fourth filter, added 2026-09-24. Its value is the REASON in
+      // prose, not `true`, so the shared parser matches on the key.
+      ...(i.retired ? { retired: "declared" } : {}),
     })),
   }));
   const declared = all.map((g) => g.heading);
@@ -287,12 +290,19 @@ checkTrue(
   // SidebarItem is held here. A plan-gated row added tomorrow turns
   // this red rather than quietly reducing the cross-product to half of
   // itself.
+  //
+  // AND IT DID, ON 2026-09-24. `retired` was added to withdraw the
+  // marketplace from every surface while the page kept serving, and this
+  // check went red the same run — before anything shipped, which is what
+  // it is for. The answer was to teach the loop above the new flag, not
+  // to widen the list it compares against: the parse now carries
+  // `retired` and the cross-product covers it.
   const visibilitySrc = stripComments(readFileSync("src/lib/sidebar-visibility.ts", "utf8"));
   const optionalFlags = [...visibilitySrc.matchAll(/^\s{2}([a-zA-Z]+)\?:/gm)].map((m) => m[1]).sort();
   checkTrue(
-    `SidebarItem has exactly the three filters this loop covers, plus hintKey (${optionalFlags.join(", ")})`,
-    optionalFlags.join(",") === "hidden,hintKey,notBuilt,ownerOnly",
-    "a new optional field on SidebarItem may be a fourth way to empty a group, and the two-role loop below would not reach it",
+    `SidebarItem has exactly the four filters this loop covers, plus hintKey (${optionalFlags.join(", ")})`,
+    optionalFlags.join(",") === "hidden,hintKey,notBuilt,ownerOnly,retired",
+    "a new optional field on SidebarItem may be a fifth way to empty a group, and the two-role loop below would not reach it",
   );
   checkTrue(
     "...and nothing in the visibility filters reads a plan or a tier",

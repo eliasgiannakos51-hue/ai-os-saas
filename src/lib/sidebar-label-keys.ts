@@ -112,6 +112,10 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   // shows what the chat remembered gets a key of its own.
   "Search my records": "memory",
   "What it remembers": "aiMemory",
+  // V6 #1. Added the day the row stopped being `notBuilt`, because a
+  // row without a key is a row the command palette cannot find in any of
+  // the ten languages — which is how a built feature stays unreachable.
+  Meetings: "meetings",
   Team: "team",
   Affiliate: "affiliate",
   Settings: "settings",

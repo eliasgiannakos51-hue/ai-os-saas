@@ -547,6 +547,22 @@ export const ACTION_PROFILES = {
     baseOutputChars: 200,
     outputCharsPerInputChar: 1,
   },
+  // ONE CALL, AND THE INPUT IS THE WHOLE TRANSCRIPT — which is why this
+  // profile's output ratio is the smallest in the table. Seventeen
+  // minutes of speech is roughly 15,000 characters in; a summary plus a
+  // handful of actions is a few hundred out. A ratio anywhere near 1
+  // would price a meeting as though it were rewritten rather than read.
+  //
+  // The system prompt is measured, not guessed: lib/meetings/
+  // meeting-analysis.ts systemPrompt() is ~1,100 characters of rules,
+  // which is ~275 tokens; 400 leaves room for the language name and for
+  // the rules growing a line.
+  meetingAnalyse: {
+    systemPromptTokens: 400,
+    auxiliaryCalls: [],
+    baseOutputChars: 400,
+    outputCharsPerInputChar: 0.06,
+  },
 } as const;
 
 export type ActionProfileKey = keyof typeof ACTION_PROFILES;

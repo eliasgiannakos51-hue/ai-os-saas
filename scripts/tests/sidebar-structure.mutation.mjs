@@ -66,8 +66,13 @@ const MUTANTS = [
     // search. Swapping them is how a 404 gets into the command palette.
     name: "a not-built row is marked hidden instead",
     file: NAV,
-    from: '      { href: "/dashboard/meetings", label: "Meetings", icon: MEETINGS_ICON, hintKey: "meetings", notBuilt: true },',
-    to: '      { href: "/dashboard/meetings", label: "Meetings", icon: MEETINGS_ICON, hintKey: "meetings", hidden: true },',
+    // RE-ANCHORED 2026-09-23. This pointed at the meetings row, whose
+    // notBuilt flag came off the day the feature was built — so the
+    // mutation stopped EXISTING rather than stopping being caught, which
+    // is the shape docs/shapes.md calls "a mutant whose anchor moved".
+    // Moved to the music row, which is still a held position.
+    from: '      { href: "/dashboard/music", label: "Music", icon: MUSIC_ICON, hintKey: "music", notBuilt: true },',
+    to: '      { href: "/dashboard/music", label: "Music", icon: MUSIC_ICON, hintKey: "music", hidden: true },',
     expect: "carry the flag they are declared with",
   },
   {
@@ -77,8 +82,8 @@ const MUTANTS = [
     // the whole guarantee.
     name: "visibleGroups stops stripping the rows that have no page",
     file: VISIBILITY,
-    from: "    .map((group) => ({ ...group, items: group.items.filter((i) => !i.notBuilt) }))",
-    to: "    .map((group) => ({ ...group, items: [...group.items] }))",
+    from: "      items: group.items.filter((i) => !i.notBuilt && !i.retired),",
+    to: "      items: [...group.items],",
     expect: "no unbuilt row is offered in search or on the hub",
   },
   {
@@ -88,8 +93,8 @@ const MUTANTS = [
     // one-sided assertion always has.
     name: "visibleGroups strips the hidden rows too, emptying the palette",
     file: VISIBILITY,
-    from: "    .map((group) => ({ ...group, items: group.items.filter((i) => !i.notBuilt) }))",
-    to: "    .map((group) => ({ ...group, items: group.items.filter((i) => !i.notBuilt && !i.hidden) }))",
+    from: "      items: group.items.filter((i) => !i.notBuilt && !i.retired),",
+    to: "      items: group.items.filter((i) => !i.notBuilt && !i.retired && !i.hidden),",
     expect: "every hidden row still is",
   },
 
@@ -166,7 +171,21 @@ const MUTANTS = [
     file: NAV,
     from: '    heading: "Organise",',
     to: '    heading: "Extra",\n    items: [{ href: "/dashboard/team", label: "Extra", icon: TEAM_ICON, hintKey: "team" }],\n  },\n  {\n    heading: "Organise",',
-    expect: "rows drawn, 27 declared",
+    // ANCHORED ON THE GROUP COUNT, NOT THE ROW COUNT, and that is the
+    // repair rather than a new number.
+    //
+    // It used to read "rows drawn, 27 declared". Twenty-seven was true
+    // when it was written and stopped being true on 2026-09-23, when the
+    // meetings row landed and nobody came back — so this mutant has been
+    // reporting a HOLE ever since, on a gate that catches the defect
+    // perfectly well. Nothing showed it, because `npm run build` runs
+    // check-mutation-tree and not the sidecars.
+    //
+    // The lesson is the anchor, not the arithmetic: a row count moves
+    // every time a feature ships, and an expectation written on one is a
+    // stale claim with a timer on it. The number of GROUPS is what this
+    // mutant is actually about.
+    expect: "groups drawn, 6 declared",
   },
   {
     name: "two rows change places inside a group",

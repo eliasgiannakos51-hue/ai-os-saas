@@ -121,10 +121,15 @@ const declaredItems = [...navSrc.matchAll(/\{\s*href:\s*"([^"]+)"([^}]*)\}/g)].m
 const heldPositions = declaredItems.filter((i) => i.notBuilt).map((i) => i.href);
 check(
   `the nav holds positions for what is not built (${heldPositions.length})`,
-  // FOUR: music, a browser agent, a computer agent and meetings. The
-  // floor exists so a parser that stopped seeing `notBuilt` would
+  // THREE: music, a browser agent and a computer agent. It was FOUR
+  // until 2026-09-23, when meetings was built and its flag came off —
+  // which is the only direction this number is supposed to move, and the
+  // reason it is lowered in the same commit as the feature rather than
+  // left as slack for the next one to grow into.
+  //
+  // The floor exists so a parser that stopped seeing `notBuilt` would
   // silently start demanding tiers for rows nobody has built.
-  heldPositions.length >= 4,
+  heldPositions.length >= 3,
   "a parser that stopped seeing notBuilt would silently start demanding tiers for them"
 );
 const navHrefs = [
@@ -459,7 +464,25 @@ for (const group of FEATURE_GROUPS) {
 // the table stops being read; the page renders each section as a
 // collapsible block for exactly that reason, and this is the number that
 // forces the question to be asked again rather than drifting.
-check(`the table is ${sold.length} rows, and 45 is the ceiling`, sold.length <= 45);
+//
+// 45 -> 46 on 2026-09-23, and the question it forced was asked rather
+// than skipped, so the answer is here with the argument against it.
+//
+// AGAINST: the `meetings` row's cell is a check or a cross decided by
+// `voiceMinutesForPlan(p.slug) > 0`, which is the SAME predicate as the
+// `voiceMinutes` row two lines above it. Every plan with voice minutes
+// has meetings and the only plan without is Free, so as a column of
+// marks it is the voice row again.
+//
+// FOR, and this is why it stayed: the two rows answer different
+// questions. "Voice minutes / month" tells a buyer how much; it does not
+// tell them that uploading a recording and getting back a summary and a
+// list of actions is a thing this product does at all. A capability
+// nobody can find on the page they are deciding from is a capability
+// they do not buy.
+//
+// The number goes up by exactly one, in the commit that adds the row.
+check(`the table is ${sold.length} rows, and 46 is the ceiling`, sold.length <= 46);
 check("the table is not empty", sold.length >= 20);
 
 // AND THE ANSWER TO "WHY WOULD AN ULTIMATE PAY 10x". Stated as a floor

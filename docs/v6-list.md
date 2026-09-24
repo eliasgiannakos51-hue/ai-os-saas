@@ -12,6 +12,101 @@ multi-write sweep finished, item 14 is what that sweep left behind.
 
 ---
 
+## THE BUILD ORDER — eight features, and it is a different list from the numbers below
+
+**Read this first, because two things in this repository are now called
+"V6 #1".** The numbered items below are ENGINEERING debt V5 left open —
+the isolation test, the guards, the mutation coverage. The eight
+features here are what the product gains, in the order the owner
+accepted on 2026-09-23. When a report says "V6 #1" without qualifying
+it, it means **Meeting → actions**, the feature; the engineering items
+are cited as "v6-list #N".
+
+| # | feature | how much was already there | state |
+|---|---|---|---|
+| 1 | **Meeting → actions** | transcription, billing, minute caps — the "→ actions" half was missing entirely | **built 2026-09-23**, see below |
+| 2 | Universal memory | `chat_memory` exists; it is read in one feature | next |
+| 3 | Images | nothing | analysis first |
+| 4 | Email / Calendar | Gmail, partly | — |
+| 5 | Browser agent | nothing | analysis only, do not build |
+| 6 | Video | nothing | analysis only |
+| 7 | Music | nothing | analysis only — the question asked is whether it is worth anything |
+| 8 | Computer use | nothing | analysis only, and it waits for V7's verification layer |
+
+The order is not arbitrary and the first column is why: 1 and 2 are the
+two where most of the machinery already exists and only the last step is
+missing, so they are the cheapest real gain per hour. 5 and 8 are last
+because they are the two that can take an irreversible action on
+somebody's behalf.
+
+### 1. Meeting → actions — BUILT 2026-09-23
+
+    node scripts/measure-meeting-limits.mjs     # the ceilings, from the tree
+    node scripts/tests/meetings.test.mjs        # 57 checks
+    node scripts/tests/meetings.mutation.mjs    # 13 of 13 caught
+    node scripts/tests/meetings.prodtest.mjs    # 43 checks, a real build
+
+Upload or record → transcript → summary → **a list of proposed actions
+(who, what, when) that are inert until the user keeps them.**
+
+**The ceiling is measured, not chosen.** See the section under item 37
+below: the request body cap is what binds, and the number the product
+enforces is derived from it in code rather than typed in two places.
+
+**The audio is never stored.** Not "deleted promptly" — there is no
+bucket, no column and no cron. It exists as a `Blob` in one function's
+memory and is unreferenced when that function returns, exactly as
+`/api/voice/transcribe` already worked. The ten-language notice says so
+before the file picker opens, because the people in the recording did not
+consent to anything and the person uploading is the only one who can tell
+them.
+
+**No action is ever created automatically.** The model's output is stored
+as JSON **on the meeting row**, where it is data about the meeting and not
+an entity anywhere. `meeting_actions` only ever receives rows the user
+pressed Keep on, and a gate asserts that the insert exists in exactly one
+route.
+
+**Three things the gate found in the code that wrote it**, which is the
+argument for writing the gate in the same commit rather than the next one:
+
+1. `parseAnalysis` accepted a JSON **array** and returned its first
+   element as though it were the whole answer — the parser inventing, in
+   the function whose comment forbids exactly that.
+2. The notice check measured `length > 30`, and the Chinese privacy
+   sentence is 29 characters. That is the **third** ASCII-length rule in
+   two days (`docs/shapes.md`, "A rule about ten languages, written as a
+   number of characters"); it now asks whether the ten sentences are ten
+   DIFFERENT sentences, which is script-neutral.
+3. The parser had **two** guards against the array case and the mutation
+   sidecar showed one of them was doing nothing. One survives, and it is
+   the more general one.
+
+**And two more that only a real request could find.** The prodtest
+builds the product, starts it, and drives the three routes against
+stand-in providers reached through their own documented base-URL
+variables:
+
+4. **Whisper returns a language NAME, not a code.** `verbose_json`
+   answers `"language": "greek"`; every unit test had fed `"el"`. So
+   `languageNameFor` resolved to nothing and the prompt said *"held in
+   the language it was recorded in"* for **every meeting** — in the one
+   feature whose entire point is the language. Invisible to any test
+   that supplies its own input. The column stores a normalised code now.
+5. The keep route's injection guard had never had an injection sent at
+   it. It holds: a body carrying its own `what` gets its sentence
+   dropped, because the text is re-read from the row by index.
+
+**What is still NOT proved, stated rather than implied:** whether a real
+recording of a real Greek meeting comes back with the right NAMES in it.
+The transcript in the prodtest is one the test wrote. No gate in this
+repository can answer that; a person with a recording can, in about a
+minute, and `meetings.test.mjs` §7 says so in the file.
+
+---
+
+---
+
 ## 1. Run the isolation test against a real database — ~15 minutes
 
 **The largest gap in the security axis, and it is not a coding task.**
@@ -88,7 +183,7 @@ alive.
   charge; or
 - **Remove** the column, which needs a migration applied by hand.
 
-## 5. The 10 English-anchored gates — ~2 hours, or 30 minutes for the worst 4
+## 5. ~~The 10 English-anchored gates~~ — DONE 2026-09-20
 
     node scripts/scan-english-anchored-gates.mjs
 
@@ -109,6 +204,38 @@ in any language:
 
 **Take those first.** A check that fails loudly is a nuisance; a check
 that passes vacuously is a lie in a green log.
+
+**Done, 2026-09-20.** All ten converted to needles resolved out of
+`<html lang>` and that locale's own messages file
+(`scripts/tests/lib/ui-text.mjs`, now with `uiFormat` for ICU plurals
+and `quoteForSelector` for Playwright selectors). The BREAKS list is
+**gated at zero** by `scripts/tests/english-anchored-gates.test.mjs`
+(19 checks, 9 of 9 mutations caught), with **two** written exceptions,
+each checked both ways:
+
+| kept | why |
+|---|---|
+| `!/An agent cannot/` on a Greek page | the assertion IS that the English sentence is absent; resolving it through the page makes it say nothing |
+| `"Every morning"` in background-jobs | not a product string — it is that file's own fake Anthropic's suggestion, echoed back. The scan's one mis-attribution of ten |
+
+**Three things came out of it that the list did not ask for:**
+
+1. `published-site-seo` asserted `!/not available/i` about a page
+   whose heading is *"This site isn't available"* — the same vacuity
+   with no locale in it, green on every run since it was written. Its
+   harness also served a straw 404 with no `<h1>`; both halves now come
+   from the route file.
+2. **The guard against the vacuity had the vacuity's own shape.**
+   `uiTextStrict` refused any needle under three characters, and
+   "Succeeded" is 成功 — two characters, the whole word. It would have
+   THROWN on a working Japanese product. Found by the new gate running
+   every key through all ten messages files; eight of nine hits were
+   CJK. The floor is script-aware now and pinned from both ends.
+3. Ten more literals that the scan does not report, because they are
+   not verbatim values in `en.json`: `input[aria-label="Primary colour
+   (hex)"]` is `${t("primary")} (hex)`, and `/7/` was the entire
+   assertion about a sentence, in a product where a digit survives
+   translation.
 
 ## 6. ~~Finish a full mutation sweep~~ — DONE 2026-09-17
 
@@ -668,3 +795,83 @@ nothing, and the empirical sweep now finds no disagreement among them —
 but "no disagreement today" is weaker than "sorted". The gate holds the
 correctness subset (last-writer-wins) at zero; the rest is measured by
 `npm run test:order` rather than forbidden.
+
+## 23. The fallback that reported nothing — 2026-09-20
+
+    node scripts/scan-silent-fallbacks.mjs
+
+⌘K turned a 500 into `[]`, rendered `[]` as **"No matches for
+«έσοδα»"**, and cached it — so retyping never retried. «Το ⌘K δεν βρίσκει
+τίποτα» and «το ⌘K είναι χαλασμένο» were the same screen, reported three
+times, and each round fixed something real in the matcher that was not
+the reason.
+
+**The rule: a fallback MUST report that it was used.** Otherwise it does
+not protect the user from the bug, it protects the bug from being found.
+
+**733 catch blocks across 917 files**, classified: 577 report, rethrow or
+return a value that carries the failure; 59 recover silently; 56 are
+empty; 41 neither. Measured 2026-09-20, after this round's four orphan
+deletions; the gate prints the live figures on every build. The first version of the classifier said 172 were
+silent, because `catch { return NextResponse.json({ ok: false }) }` has
+no `console.error` in it — the discriminator is whether the value
+CARRIES the failure, not whether the block logs.
+
+**Looking for the second caller found something bigger.**
+`LibrarySearch` had the identical shape — and had been an **orphan since
+2026-09-02**, when the merge that chose main's sidebar naming deleted its
+page and left the component behind. Nothing had rendered it for eighteen
+days. It was deleted rather than fixed.
+
+`orphan-i18n-keys` could not see it: `dashboard.library.*` had a reader,
+namely the orphan. **A dead component keeps its translations alive in ten
+languages, and a gate that starts from the thing being read calls that
+health.** `entry-points.test.mjs` now requires every component under
+`src/components` to have an importer. **Four did not** — `library-search`,
+`loading-state` (described in the present tense by three comments as the
+one "the whole app boots with"), `quick-action-card`, `quick-start-button`
+— all deleted, with the three comments corrected in the same commit.
+
+The fallback gate kept the rule that generalises: every component reaching
+`/api/search` must read `res.ok` AND raise a flag on the dropped request.
+**The first version of that sweep found zero**, looking for a quoted string
+where the code uses a template literal; the floor under it caught that, and
+there is now a named-member clause too, because a sweep pointed at the wrong
+directory passes a count.
+
+**What is NOT closed:** the 59 remaining silent recoveries are printed
+and not gated. Most are right — a probe whose contract is "null when it
+cannot ask" reports through its return value. The scan cannot see whether
+the CALLER looks, and settling one means making the inner call fail and
+watching whether anything says so. `scripts/tests/silent-fallbacks.test.mjs`
+holds the classifier's ability to sort them, not the number itself.
+
+## 24. Quick Start is dead end to end — a decision, not a bug
+
+Found on 2026-09-20 by the new orphan-component clause in
+`entry-points.test.mjs`, and **exempted there rather than deleted**,
+because this is a product question:
+
+| piece | state |
+|---|---|
+| `src/components/overview/quick-start-modal.tsx` | rendered by nothing |
+| `/api/templates/apply` | called only by that modal |
+| `src/lib/workspace-templates.ts` | read only by those two |
+| `dashboard.overview.quickStart*` | translated into ten languages |
+
+It became unreachable when `quick-action-card.tsx` and
+`quick-start-button.tsx` — its only importers — turned out to be orphans
+themselves.
+
+**Two ways to close it, and the cost is the asymmetry:** deleting takes
+about twenty minutes and loses a feature somebody once wrote and ten
+translators once translated; wiring it back to the Overview page is
+roughly an hour and needs a decision about where the button goes, which
+is the decision that got lost in the first place. `user-data-registry.ts`
+already documents the route as a source of user rows, so a deletion has
+to go through there too.
+
+**Until it is decided, it is named in the exemption and the exemption is
+checked both ways** — the file must still exist, and it must still have
+no importer. Wiring it up makes the exemption fail rather than leaving a
+paragraph about something that stopped being true.

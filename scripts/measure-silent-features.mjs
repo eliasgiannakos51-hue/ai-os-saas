@@ -194,6 +194,9 @@ function entryFiles(entry) {
   return { starts, all };
 }
 
+/** What the pricing page actually publishes — from the function it uses. */
+const SOLD = new Set(catalog.soldFeatures().map((f) => f.id));
+
 const rows = [];
 for (const entry of ENTRIES) {
   const { starts, all } = entryFiles(entry);
@@ -251,7 +254,14 @@ for (const entry of ENTRIES) {
     id: entry.id,
     saysSo,
     charges: entry.charges,
-    sold: !entry.notSold,
+    // SOLD IS ASKED, NOT RE-DERIVED. The first version tested
+    // `!entry.notSold` and reported four features as priced-but-unbuilt —
+    // customDomain, publicApi, privateMarketplace, slaResponse. They are
+    // not: soldFeatures() filters BOTH notSold and notBuilt, and the
+    // catalog's own contract says the row is not drawn. Re-implementing
+    // a rule beside the rule is how a scan disagrees with the product
+    // and calls it a finding.
+    sold: SOLD.has(entry.id),
     notBuilt: Boolean(entry.notBuilt),
     starts: starts.length,
     walked: all.size,

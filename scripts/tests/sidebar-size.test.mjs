@@ -163,6 +163,12 @@ for (let i = 0; i < marks.length; i++) {
         // twenty-seven — a ceiling failing on rows nobody can see, which
         // is the way to teach somebody to raise a ceiling.
         ...(/notBuilt:\s*true/.test(upToNext.split(/\n\s*\{/)[0]) ? { notBuilt: true } : {}),
+        // A RETIRED ROW IS NOT DRAWN EITHER, and its flag carries prose
+        // rather than `true` — so it is matched on the key. Without this
+        // the count of drawn rows includes the marketplace, which no
+        // surface offers any more; the ceiling would still pass, which is
+        // precisely how an over-count survives unnoticed.
+        ...(/retired:\s*["'`+]/.test(upToNext.split(/\n\s*\{/)[0]) ? { retired: "declared" } : {}),
         // icon is required by the type but irrelevant here.
         label:
           upToNext.match(/label:\s*["'`]([^"'`]+)["'`]/)?.[1] ??

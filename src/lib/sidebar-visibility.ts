@@ -77,6 +77,33 @@ export type SidebarItem = {
    * position a promise rather than a comment.
    */
   notBuilt?: true;
+  /**
+   * WITHDRAWN FROM EVERY SURFACE, WHILE THE PAGE KEEPS WORKING.
+   *
+   * The third state, and it is the mirror image of `notBuilt` rather than
+   * a variant of `hidden`:
+   *
+   *   hidden    the page exists, the sidebar does not draw it, and the
+   *             palette and the hub still offer it. Its href MUST resolve.
+   *   notBuilt  there is no page. Nothing offers it anywhere, because
+   *             offering it would be offering a 404. Its href must NOT
+   *             resolve.
+   *   retired   the page exists and keeps working for anyone who has the
+   *             URL, and NOTHING offers it — not the sidebar, not the
+   *             palette, not the hub, not the price list.
+   *
+   * `hidden` was the near miss and the reason this exists: it keeps the
+   * row one keystroke away in the command palette, which is the opposite
+   * of withdrawing a capability from the product. `notBuilt` strips the
+   * right surfaces and makes a false claim — its own contract says the
+   * page does not exist, and a gate reads that contract.
+   *
+   * THE VALUE IS THE REASON, IN WORDS, and it is checked for length so
+   * that "todo" cannot pass for one. A row nobody can find needs to say
+   * why it is still here, or the next reader deletes the page and takes
+   * the URL with it.
+   */
+  retired?: string;
 };
 
 export type SidebarGroupConfig = {
@@ -100,11 +127,17 @@ export function visibleGroups(
   groups: SidebarGroupConfig[],
   isOwner: boolean,
 ): SidebarGroupConfig[] {
-  // NOT-BUILT ROWS ARE STRIPPED FIRST, for everybody including the owner.
-  // They have no page; the palette and the hub are both built on this
-  // function, and either of them offering one would be offering a 404.
+  // NOT-BUILT AND RETIRED ROWS ARE STRIPPED FIRST, for everybody
+  // including the owner, and for two different reasons that land in the
+  // same place. A notBuilt row has no page, so the palette and the hub —
+  // both built on this function — would be offering a 404. A retired row
+  // has a page that works, and offering it is offering a capability the
+  // product has withdrawn; the URL still serves anyone who kept it.
   const built = groups
-    .map((group) => ({ ...group, items: group.items.filter((i) => !i.notBuilt) }))
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((i) => !i.notBuilt && !i.retired),
+    }))
     .filter((group) => group.items.length > 0);
   if (isOwner) return built;
   return built
@@ -133,6 +166,9 @@ export function declaredGroups(groups: SidebarGroupConfig[]): SidebarGroupConfig
 /**
  * The groups the SIDEBAR draws: role-filtered, then stripped of every
  * `hidden` item, then stripped of any group left empty.
+ *
+ * A `retired` row never reaches here: visibleGroups strips it, so the
+ * sidebar and the palette lose it together and cannot drift apart.
  *
  * TWO FILTERS, NOT ONE, AND THE ORDER MATTERS. Role first, so an
  * owner-only item cannot be revealed by being un-hidden; `hidden` second,

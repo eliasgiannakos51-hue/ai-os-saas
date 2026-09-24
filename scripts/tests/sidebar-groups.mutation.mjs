@@ -131,8 +131,12 @@ const MUTANTS = [
     // it is just as invisible in a declaration that still lists it.
     name: "the Run group is emptied",
     file: NAV,
-    from: '      { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents, hintKey: "agents" },\n      { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation" },\n      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON, hintKey: "marketplace" },',
-    to: '      { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents, hintKey: "agents", hidden: true },\n      { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation", hidden: true },\n      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON, hintKey: "marketplace", hidden: true },',
+    // RE-ANCHORED 2026-09-24: the Marketplace row it also covered
+    // became a multi-line object when it was retired. The two rows
+    // left in the group are what the mutant needs — hiding every row
+    // in a group must empty it.
+    from: '      { href: \"/dashboard/agents\", label: \"AI Agents\", icon: MODULE_ICONS.agents, hintKey: \"agents\" },\n      { href: \"/dashboard/automation\", label: \"Automation\", icon: MODULE_ICONS.automation, hintKey: \"automation\" },',
+    to: '      { href: \"/dashboard/agents\", label: \"AI Agents\", icon: MODULE_ICONS.agents, hintKey: \"agents\" , hidden: true },\n      { href: \"/dashboard/automation\", label: \"Automation\", icon: MODULE_ICONS.automation, hintKey: \"automation\" , hidden: true },',
     expect: "every declared group still draws rows",
   },
 

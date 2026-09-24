@@ -241,13 +241,33 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
   },
   {
     // THINGS THAT GO ON WITHOUT YOU WATCHING. An agent runs on a
-    // schedule, an automation fires on a trigger, and the marketplace is
-    // where somebody else's runs and yours are traded.
+    // schedule and an automation fires on a trigger. TWO DRAWN ROWS, and
+    // that is the whole group: the marketplace used to be the third and
+    // was withdrawn on 2026-09-24 — trading somebody else's agents is a
+    // different product from running your own.
     heading: "Run",
     items: [
       { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents, hintKey: "agents" },
       { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation" },
-      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON, hintKey: "marketplace" },
+      // RETIRED, NOT DELETED, and not `hidden` either — the difference is
+      // written out in lib/sidebar-visibility.ts. The page still serves
+      // anyone with the URL and the agent_templates table is untouched,
+      // which matters because the marketplace is NOT its only reader:
+      // api/agents/templates (search, through match_agent_templates),
+      // .../share and .../adopt all run from the Agents page and keep
+      // working. `hidden` would have left it one keystroke away in the
+      // command palette, which is not withdrawing it.
+      {
+        href: "/dashboard/marketplace",
+        label: "Marketplace",
+        icon: MARKETPLACE_ICON,
+        hintKey: "marketplace",
+        retired:
+          "Hidden on 2026-09-24. Trading other people's agent templates is a separate " +
+          "product, planned for V8+, not a capability of Ionexa AI itself. The page and " +
+          "the agent_templates table both stay: sharing and adopting a template still run " +
+          "from the Agents page, and the URL still works for anyone who kept it.",
+      },
       // POSITIONS HELD. Both are things that go on without you watching,
       // which is what this heading means — an agent that drives a browser
       // and one that drives the machine. Neither has a route, a component

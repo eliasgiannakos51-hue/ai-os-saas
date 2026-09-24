@@ -73,8 +73,8 @@ const MUTANTS = [
     // copied, so mutating there mutates a copy and is no longer a
     // defect at all. The first pass is the one that receives the shared
     // config, so that is where in-place mutation is a real bug.
-    from: "    .map((group) => ({ ...group, items: group.items.filter((i) => !i.notBuilt) }))",
-    to: "    .map((group) => { group.items = group.items.filter((i) => !i.notBuilt); return group; })",
+    from: "      items: group.items.filter((i) => !i.notBuilt && !i.retired),",
+    to: "      items: (group.items = group.items.filter((i) => !i.notBuilt && !i.retired)),",
     expect: "the config itself is never mutated",
   },
   {

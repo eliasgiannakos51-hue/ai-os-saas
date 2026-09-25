@@ -2844,3 +2844,65 @@ Deleting the sentence left it green. Its mutation is what found that.
 
 **A checklist item nothing checks is a comment.** Gate the effect where
 there is one, and gate the existence of the sentence where there is not.
+
+## One setting, several places that declare it — and the one that decided
+
+*Named by the owner on 2026-09-25, after eight rounds of a red Vercel
+build: "κάθε ρύθμιση έχει ΜΙΑ πηγή αλήθειας. Οι υπόλοιπες τη διαβάζουν,
+δεν την ξαναδηλώνουν."*
+
+The rule is right. The example needs its numbers corrected, and the
+correction makes the shape sharper rather than softer.
+
+### What the three places actually said
+
+The round was written up as *".nvmrc=20 · package.json=empty ·
+dashboard=18 — three sources, three numbers"*. Two of those three are not
+what the repository contains. Measured 2026-09-25 from the full history of
+both files:
+
+| | what it actually said | since |
+|---|---|---|
+| `.nvmrc` | **22**, in every commit it has ever appeared in | 2026-08-13 |
+| `package.json` `engines.node` | **`22.x`**, added once and never changed | 2026-08-31 |
+| Vercel dashboard | **18.x** — the owner's own reading, 2026-09-25 | unknown |
+
+So it was not three numbers. **It was two files agreeing, and one setting
+nobody could see disagreeing with both.**
+
+### Why that is the worse shape, not the milder one
+
+Three disagreeing declarations is a tidiness problem: anyone reading the
+repository sees two of them and asks. Two agreeing files and a hidden
+third is a **trap**, because the repository looks consistent and *is*
+consistent — and is overruled by something none of it can read. Every
+instrument agreed. All of them were describing a machine that was not the
+one building the code.
+
+The nineteen days of green builds between `engines.node` landing
+(2026-08-31) and the first red one (2026-09-19 17:45) are the proof that
+the disagreement alone broke nothing. Something changed on the builder's
+side that day — Node 18 reached end of life on 2025-04-30 — and until
+then an unread setting had simply been a sleeping one.
+
+### The rule, and the half of it worth adding
+
+**One source of truth; the rest read it, and none of them re-declare it.**
+`.nvmrc` is that source here, and `scripts/ci-build.mjs` now derives the
+pinned major from it rather than from `engines.node`.
+
+And the half the eight rounds paid for: **when a place that declares the
+setting cannot be read, check what it CHANGES that can.** The dashboard's
+value is invisible; the runtime it selects runs the build.
+`scripts/tests/node-version.test.mjs` asserts `process.versions.node`
+against `.nvmrc` from inside `npm run build`, so it executes on the
+builder, and a dashboard that disagrees is now a named red check that
+prints the setting to change.
+
+**WHAT IS STILL NOT PROVEN**, because eight rounds of confident wrong
+answers is the reason this file exists: no Vercel build log was ever read.
+Node 18 on the dashboard is the best-supported explanation of the failure
+— it fits the abrupt onset, the 31-second spread across eight unrelated
+commits, and the nine clean-room builds that all came back green — but
+"best-supported" is not "measured", and it is written here as the first
+and not as the last word.

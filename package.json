@@ -12,7 +12,7 @@
     "test:e2e": "playwright test --config playwright.e2e.config.ts",
     "verify": "npm run typecheck && npm run lint && npm run build && npm run test:mutation && npm run test:integration && npm run test:db && npm run test:prod && npm run test:e2e",
     "check:i18n": "node scripts/check-i18n.js",
-    "test:unit": "for f in scripts/tests/*.test.mjs; do echo \"--- $f\"; node \"$f\" || exit 1; done",
+    "test:unit": "node scripts/tests/run-gates.mjs",
     "test:prod": "for f in scripts/tests/*.prodtest.mjs; do echo \"--- $f\"; node \"$f\" || exit 1; done",
     "test:integration": "for f in scripts/tests/*.itest.mjs; do echo \"--- $f\"; node \"$f\" || exit 1; done",
     "test:mutation": "node scripts/tests/run-mutations.mjs",
@@ -27,7 +27,8 @@
     "check:markers": "node scripts/check-mutation-markers.mjs",
     "test:env": "node scripts/env-sensitivity.mjs",
     "test:order": "node scripts/scan-order-dependence.mjs",
-    "build:ci": "node scripts/ci-build.mjs"
+    "build:ci": "node scripts/ci-build.mjs",
+    "test:unit:verbose": "node scripts/tests/run-gates.mjs --verbose"
   },
   "engines": {
     "node": "22.x"

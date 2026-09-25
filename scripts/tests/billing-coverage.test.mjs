@@ -555,7 +555,43 @@ console.log("\n== 10. the build gate cannot depend on the environment ==");
 // gate that needs a working network is not a gate, it is a coin flip.
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 checkTrue("the build runs the unit suites", /npm run test:unit/.test(pkg.scripts.build));
-check("unit suites are *.test.mjs", pkg.scripts["test:unit"].includes("*.test.mjs"), true);
+// WHICH FILES THE BUILD RUNS, read from the thing that selects them.
+//
+// This used to be `pkg.scripts["test:unit"].includes("*.test.mjs")` — a
+// substring of a shell command, standing in for the rule. It went red on
+// 2026-09-25 when test:unit stopped being a shell loop and became
+// scripts/tests/run-gates.mjs, which applies the SAME rule in a file
+// instead of in a string. The rule had not changed; only where it was
+// written had. That is a check reading the declaration rather than the
+// behaviour, and the repair is to read the selection itself.
+//
+// The runner exists because the old loop printed 27,550 lines — 22,132 of
+// them the word PASS — and a build log truncated at a few thousand lines
+// therefore ended before any failure could appear in it. See that file.
+checkTrue(
+  "test:unit runs the gate runner",
+  /run-gates\.mjs/.test(pkg.scripts["test:unit"]),
+  pkg.scripts["test:unit"]
+);
+const runner = readFileSync("scripts/tests/run-gates.mjs", "utf8");
+check(
+  "unit suites are *.test.mjs",
+  /\.filter\(\(f\) => f\.endsWith\("\.test\.mjs"\)\)/.test(runner),
+  true
+);
+checkTrue(
+  "...selected from scripts/tests, which is the directory this section walks",
+  /const DIR = "scripts\/tests"/.test(runner),
+  "a runner reading another directory would run suites nothing here has checked"
+);
+// AND IT CANNOT PASS ON AN EMPTY LIST. A runner that found no gates would
+// print nothing and exit 0, which reads in a green log exactly like a
+// suite that ran.
+checkTrue(
+  "a runner that finds no gates refuses rather than passing",
+  /no \*\.test\.mjs found/.test(runner),
+  "an empty list satisfies every assertion about it"
+);
 // This file names both patterns in order to search for them, so it would
 // otherwise flag itself.
 const SELF = "billing-coverage.test.mjs";

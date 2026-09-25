@@ -275,10 +275,33 @@ console.log("\n== 7. the gate still reports a CRASH as a failure ==");
 // not be skipped over — that is what made the difference between Vercel
 // failing and my grep passing.
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+// STOPPING AT THE FIRST FAILURE, read from the runner rather than from a
+// substring of a shell command.
+//
+// This was `/\|\|\s*exit 1/` against pkg.scripts["test:unit"], and it went
+// red on 2026-09-25 when that script stopped being a shell loop and
+// became scripts/tests/run-gates.mjs. The BEHAVIOUR was identical — the
+// runner exits 1 on the first non-zero gate — and only the place the rule
+// was written had moved. The same proxy in billing-coverage.test.mjs
+// broke in the same run, for the same reason.
+//
+// A check anchored on how a rule is SPELLED holds until somebody
+// rewrites the spelling, which is exactly when a real check should not
+// move. So this reads the runner's failure branch: non-zero status,
+// output printed, process exited non-zero.
+const runner = readFileSync("scripts/tests/run-gates.mjs", "utf8");
 check(
   "test:unit stops at the first non-zero exit",
-  /\|\|\s*exit 1/.test(pkg.scripts["test:unit"] ?? ""),
-  pkg.scripts["test:unit"]
+  /if \(r\.status !== 0\)[\s\S]{0,700}?process\.exit\(1\)/.test(runner),
+  "the runner has no first-failure exit"
+);
+// AND THE FAILING GATE'S OUTPUT IS PRINTED, which is the whole reason
+// the runner exists: 27,550 lines of PASS meant a truncated build log
+// ended thousands of lines before any failure appeared in it.
+check(
+  "...and prints that gate's whole output before it goes",
+  /FAILED: \$\{path\}/.test(runner) && /console\.log\(out\.trimEnd\(\)\)/.test(runner),
+  "a runner that stops without printing why is a log that says nothing"
 );
 check("and the build runs it before next build", /npm run test:unit\s*&&\s*next build/.test(pkg.scripts.build ?? ""));
 // Every suite must actually SET a non-zero exit code when it fails,

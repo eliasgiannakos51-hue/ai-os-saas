@@ -1266,3 +1266,31 @@ Any Next.js host works (e.g. [Vercel](https://vercel.com/new)). Set the same
 environment variables listed above in your hosting provider's dashboard,
 and make sure `supabase_schema.sql` has been run against the Supabase
 project you point it at.
+
+### The Node version, and the one setting no gate can reach
+
+This repository pins Node in two files that `scripts/tests/node-version.test.mjs`
+holds in step, and the build asserts the version it is actually running on:
+
+| where | value | who reads it |
+|---|---|---|
+| `.nvmrc` | `22` | a person's version manager — the source of truth |
+| `package.json` `engines.node` | `22.x` | npm, and the platform |
+| `process.versions.node` | must be major 22 | asserted by the gate, inside the build |
+
+**The fourth place is the Vercel dashboard: Settings → General → Node.js
+Version. It lives outside this repository and nothing here can read it.**
+Check it by hand after any change to the project's settings, and whenever a
+deploy fails for no reason the code explains. It must say **22.x**.
+
+If it disagrees, the build is now the thing that tells you: the gate above
+runs during `npm run build`, so it runs on the builder too, and it prints
+the setting to change. A wrong dashboard version is a named failure rather
+than a mysterious one.
+
+Why 22 and not 20, measured 2026-09-25 rather than preferred:
+`@supabase/supabase-js@2.110.9` and five of its sibling packages declare
+`"engines": { "node": ">=22.0.0" }`, and Node 20 reached end of life on
+2026-04-30 (`nodejs/Release`'s own `schedule.json`; Node 22 runs to
+2027-04-30). Nothing in `src/` or `scripts/` uses an API that Node 20 lacks
+— the requirement comes from the dependency tree, not from this code.

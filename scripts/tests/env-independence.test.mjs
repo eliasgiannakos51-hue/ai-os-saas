@@ -393,9 +393,14 @@ check(
   "vercel.json declares none today, so the fallback IS what runs"
 );
 check(
-  "build:ci compares this node against package.json engines.node",
-  /engines\?\.node/.test(ciSrc) && /process\.versions\.node/.test(ciSrc),
-  "Vercel picks the build runtime from engines.node"
+  "build:ci takes the pinned major from .nvmrc, not from a literal",
+  /readFileSync\("\.nvmrc"/.test(ciSrc) && /wantMajor = nvmrc\.match/.test(ciSrc),
+  ".nvmrc is the file a person edits, so it is the one the others are checked against"
+);
+check(
+  "...and reads the running runtime to compare it with",
+  /process\.versions\.node/.test(ciSrc),
+  "a pin nothing verifies against the actual runtime is a comment"
 );
 check(
   "...and refuses to run on a different major rather than warning",
@@ -403,9 +408,16 @@ check(
   "a pass measured on another major is not evidence about the one that ships"
 );
 check(
-  "...and refuses when .nvmrc and engines.node disagree",
-  /nvmrcMajor !== wantMajor\)[\s\S]{0,600}process\.exit\(2\)/.test(ciSrc),
+  "...and refuses when engines.node disagrees with .nvmrc",
+  /enginesMajor !== wantMajor\)[\s\S]{0,600}process\.exit\(2\)/.test(ciSrc),
   "they would pick different runtimes for a human and for the builder"
+);
+// THE FOURTH PLACE, and the reason this is not only a checklist: the
+// dashboard cannot be read, but the runtime it selects runs the build.
+check(
+  "a gate asserts the running Node inside the build, where the builder can fail it",
+  existsSync("scripts/tests/node-version.test.mjs"),
+  "scripts/tests/node-version.test.mjs"
 );
 // THE RULE SAYS EVERY PASS, SO THE CHECK RANGES OVER EVERY PASS rather
 // than counting occurrences: a third environment added without a TZ is

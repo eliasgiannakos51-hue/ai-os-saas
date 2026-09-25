@@ -2698,3 +2698,60 @@ Rule 45 in one line, learned the expensive way: **ask the database, do not
 grep** — and when a static scan and a stored row can answer the same
 question, the row is not merely more convenient, it is the only one of the
 two that is measuring the question.
+
+## Dedup that ignores order, when the order is the meaning
+
+*Named by the owner on 2026-09-25, from one sentence: "προτιμά Α πάνω
+από Β" ≠ "προτιμά Β πάνω από Α".*
+
+A dedup key is an IDENTITY test — two things with the same key are
+treated as one thing, and one of them stops existing. Every
+normalisation on the way to that key throws information away, and the
+question for each is the same: **is what I am discarding ever the
+difference between two different facts?**
+
+Case, accents and a final sigma are safe to discard, because no pair of
+distinct facts differs only by them. Word ORDER is not: reversing two
+nouns around a comparative reverses the claim. A dedup that sorted its
+tokens would file "prefers React over Vue" and "prefers Vue over React"
+as one preference, keep whichever arrived first, and count the second as
+a repetition — so the WRONG one would gain the `times_seen` that makes
+the prompt call it settled.
+
+### It was a hypothetical here, and the measurement is the point
+
+`memoryFold` does NOT sort. Measured 2026-09-25, all three pairs stay
+separate:
+
+| | |
+|---|---|
+| `Προτιμά το Α πάνω από το Β` / `…Β πάνω από το Α` | separate |
+| `Prefers React over Vue` / `Prefers Vue over React` | separate |
+| `Δουλεύει Δευτέρα και Τρίτη` / `…Τρίτη και Δευτέρα` | separate |
+
+Writing this up as a defect would have been the second time in a week
+that a plausible sentence about the code was reported without being run.
+It is here as a RULE, not an incident.
+
+### The sweep, and the distinction it produced
+
+`.sort()` before a comparison, a `Set` built from a `split`, sorted
+tokens joined back into a key — 931 files, **two** hits, **zero**
+defects:
+
+- `lib/ai/module-relevance.ts` — a Set of words from a question, to pick
+  which modules are worth reading.
+- `lib/coding/highlight.ts` — a Set of keywords to highlight.
+
+Both are correct, and they are correct for the same reason, which is
+the rule worth keeping:
+
+**Order may be discarded when the question is MEMBERSHIP — does this
+contain X — and never when the question is IDENTITY — is this the same
+as that.** A relevance test asks the first. A dedup key asks the second.
+The two look alike in code and are opposite in what they are allowed to
+forget.
+
+The cheap check before writing a normalisation into a key: **name two
+different facts that would collide under it.** If you can, it does not
+belong in the key. For sorting, that pair takes ten seconds to find.

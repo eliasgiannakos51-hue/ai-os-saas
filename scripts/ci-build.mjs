@@ -27,12 +27,69 @@
 import { spawnSync } from "node:child_process";
 import { deployedEnv, probedNames } from "./env-sensitivity.mjs";
 
-const env = deployedEnv();
-console.log(`Running the build with ${Object.keys(env).length} environment variables:`);
-console.log(`  ${probedNames().size} project variables, each set to a sentinel`);
-console.log(`  CI=1  VERCEL=1  VERCEL_ENV=production  NODE_ENV=production\n`);
+/**
+ * TWO ENVIRONMENTS, NOT ONE, AND THE SECOND IS THE ONE THAT WAS MISSING.
+ *
+ * This ran a single pass with every project variable set to a SENTINEL,
+ * and called the result "a deployed environment". It is one deployed
+ * environment. It is not the one most deployments are in.
+ *
+ * On Vercel a variable the owner has not set is ABSENT. A variable they
+ * have set is a REAL value. The sentinel pass covers neither: it covers
+ * "set, to something wrong", which is a third state. So a gate that
+ * behaves differently when a variable is MISSING — and this repository
+ * has already shipped one, the spelling gate that asserted a runner
+ * prints MISSING ANTHROPIC_API_KEY — passes here and fails there.
+ *
+ * That is precisely the false confidence the owner named after five
+ * red Vercel builds against a green `build:ci`. The absent case is now
+ * a pass of its own.
+ *
+ * WHY NOT THREE PASSES. The real-values case cannot be simulated: this
+ * machine does not have the owner's keys and must not. What it CAN do is
+ * bracket the truth — every variable wrong, and every variable gone —
+ * and a gate that survives both is one no value can surprise.
+ */
+const PASSES = [
+  {
+    name: "every project variable SET, to a sentinel",
+    why: "catches a gate that reads a value and trusts its shape",
+    env: deployedEnv(),
+  },
+  {
+    // ONLY WHAT THE MACHINE ITSELF NEEDS. PATH and HOME are not
+    // configuration — they are how a process runs at all, and sweeping
+    // PATH into the sentinel list is what made this script report four
+    // failures it had never observed (see below).
+    name: "every project variable ABSENT, as on a fresh deployment",
+    why: "catches a gate that behaves differently when a key is simply not there",
+    env: {
+      PATH: process.env.PATH,
+      HOME: process.env.HOME,
+      NODE_ENV: "production",
+      CI: "1",
+      VERCEL: "1",
+      VERCEL_ENV: "production",
+    },
+  },
+];
 
-const r = spawnSync("npm", ["run", "build"], { stdio: "inherit", env, shell: false });
+console.log(`Running the real build ${PASSES.length} times, in ${PASSES.length} different environments.`);
+console.log(`  ${probedNames().size} project variables are known to this repository.\n`);
+
+let r = { status: 0 };
+for (const pass of PASSES) {
+  console.log(`\n${"=".repeat(70)}`);
+  console.log(`PASS: ${pass.name}`);
+  console.log(`      ${pass.why}`);
+  console.log(`${"=".repeat(70)}\n`);
+  r = spawnSync("npm", ["run", "build"], { stdio: "inherit", env: pass.env, shell: false });
+  if (r.error || r.status === null) break;
+  if (r.status !== 0) {
+    console.log(`\nFAILED IN: ${pass.name}`);
+    break;
+  }
+}
 
 // THREE OUTCOMES, NOT TWO, and the third is the one this got wrong.
 //
@@ -55,7 +112,7 @@ if (r.error || r.status === null) {
   process.exit(2);
 }
 if (r.status === 0) {
-  console.log("\nThe build passes in a deployed environment as well as in this one.");
+  console.log(`\nThe build passes in all ${PASSES.length} environments, and in this one.`);
 } else {
   console.log(`\nThe build FAILS in a deployed environment (exit ${r.status}) while it may pass here.`);
   console.log("scripts/env-sensitivity.mjs names the gate.");

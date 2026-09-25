@@ -2755,3 +2755,49 @@ forget.
 The cheap check before writing a normalisation into a key: **name two
 different facts that would collide under it.** If you can, it does not
 belong in the key. For sorting, that pair takes ten seconds to find.
+
+## "I cannot reproduce it", said six times without fetching the evidence
+
+*Measured 2026-09-25, after the owner reported the same red Vercel build
+for the sixth time.*
+
+Six rounds went out saying the failure could not be reproduced. All six
+were true. All six were also the wrong sentence, because the thing that
+would have settled it was sitting on every commit in GitHub the whole
+time: the **commit status** Vercel posts, which carries the deployment
+id, the verdict and the minute it was answered.
+
+One call returned it. What it gave up immediately:
+
+- the failures are **seven consecutive** builds, not five, and nothing
+  has deployed since 2026-09-19 17:45;
+- a green build takes **5m08–5m46**, a red one **2m45–3m16**, and the
+  ranges do not overlap;
+- seven commits with nothing in common land within **31 seconds** of
+  each other, which is not what a content-dependent failure looks like;
+- seven `npx vercel inspect <id> --logs` commands, one per failure.
+
+None of that needed access to Vercel, a token, or the owner.
+
+### The shape
+
+**A reproduction that keeps coming back green is a signal to go and get
+a different observation, not to run the same one again.** Eight
+clean-room builds were run — fresh clone, `npm ci`, empty environment,
+Vercel's real command, and finally a 626 MB `.next/cache` from the last
+green commit restored onto HEAD. Every one exited 0. The ninth would
+have too.
+
+The question "why can I not reproduce it" has a better sibling: **what
+does the thing that CAN see it already know, and who can I ask without
+asking the owner?** Here the answer was an API the session already had
+credentials for, and it had had them for six rounds.
+
+### The tell
+
+The report and the instrument disagreeing is the moment to widen. When
+the owner says "it broke again" and the harness says "green", one of two
+sentences is true — *the harness is measuring the wrong thing*, or
+*nobody has looked at what broke*. Six rounds were spent on the first
+and none on the second, and the second cost one call.
+

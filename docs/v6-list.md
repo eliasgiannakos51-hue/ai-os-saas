@@ -875,3 +875,65 @@ to go through there too.
 checked both ways** — the file must still exist, and it must still have
 no importer. Wiring it up makes the exemption fail rather than leaving a
 paragraph about something that stopped being true.
+
+## 25. Seven red Vercel builds, and the first measurement anybody took of them — 2026-09-25
+
+    npx vercel inspect dpl_H1QSBUAGnm4GfqoAitAAxKkVimST --logs
+    npm run build:ci
+
+**Nobody had ever looked at the evidence GitHub already held.** Vercel
+posts a commit status on every push, and that status carries the
+deployment id and the minute it was answered. Six rounds were spent
+saying "I cannot reproduce it" without once reading it.
+
+**Measured 2026-09-25**, from those statuses, against each commit's own
+committer date:
+
+| commit | pushed | Vercel answered | took | verdict, and the deployment to inspect |
+|---|---|---|---|---|
+| `eafc7be3` | 09-11 20:19:59 | 20:25:07 | **5m08** | green |
+| `7e9599db` | 09-18 19:23:42 | 19:28:53 | **5m11** | green |
+| `0a71fdb4` | 09-19 12:00:12 | 12:05:58 | **5m46** | green — the last one |
+| `64fd4965` | 09-19 17:45:41 | 17:48:29 | **2m48** | RED · `dpl_A82FohDfRbyhnyv6Wy6F5UHrbbHJ` |
+| `81cbcad7` | 09-19 19:24:03 | 19:26:48 | **2m45** | RED · `dpl_9qSWEK36PtBvGrGbZ5x837tFhGRx` |
+| `180d4e07` | 09-19 20:43:57 | 20:46:47 | **2m50** | RED · `dpl_Evm8r7ReVCSxMY6xFt6W8xdB7Ndf` |
+| `44f35f24` | 09-24 15:41:10 | 15:44:13 | **3m03** | RED · `dpl_71uqQWMVqMQ4wnonEAgqBn2tLtBW` |
+| `2e2212d7` | 09-24 21:47:06 | 21:50:22 | **3m16** | RED · `dpl_BfgKRMca7LaqQPqB5AyZFNSKg7RV` |
+| `8ef628f3` | 09-25 11:11:41 | 11:14:34 | **2m53** | RED · `dpl_AupG2fX2L4zjG5zpfBHHESEcFaod` |
+| `a4cff654` | 09-25 12:04:32 | 12:07:20 | **2m48** | RED · `dpl_H1QSBUAGnm4GfqoAitAAxKkVimST` |
+
+**Three things the table says that six rounds of guessing did not.**
+
+1. **It is not five failures, it is seven, and they are consecutive.**
+   Every build since 2026-09-19 17:45 has failed. Nothing has been
+   deployed from this repository for six days.
+2. **Green takes 5m08–5m46. Red takes 2m45–3m16. The ranges do not
+   overlap.** A red build dies at a little over half the wall clock of a
+   green one — and it dies there every time.
+3. **Thirty-one seconds of spread across seven commits with nothing in
+   common** — a migration backfill, a build-identity line, a PATH fix, a
+   fire-and-forget sweep, a deployment-age probe, a two-pass harness, a
+   gate runner. A failure that depended on the CONTENT of the diff would
+   not land within half a minute of itself seven times. Something
+   reaches the same place and stops.
+
+`package.json` did not change in `64fd4965`, so the build command was
+the same on both sides of the boundary.
+
+**The cache theory, tested and NOT confirmed.** Vercel restores
+`.next/cache` between builds and a clean clone never has one, which
+would explain why every reproduction comes back green — and this project
+had already lost forty days of deployments to a stale cache (§ the
+deployment-age probe). So: build `0a71fdb4`, the last green commit, keep
+its 626 MB `.next/cache` the way Vercel does, restore it onto HEAD, and
+build. **Exit 0.** Control with no cache, same commit: exit 0. That is
+the eighth reproduction attempt and the eighth green.
+
+Disk is not it either: the whole workspace after a build is 1.6 GB
+(666 MB `.next`, 824 MB `node_modules`, 47 MB of checkout).
+
+**What is NOT closed, and it is the only thing left:** the log. Seven
+deployment ids are above and each takes one command. Until one of them
+is read, everything here is the shape of the failure and not the
+failure.
+

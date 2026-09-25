@@ -937,3 +937,72 @@ deployment ids are above and each takes one command. Until one of them
 is read, everything here is the shape of the failure and not the
 failure.
 
+
+## 26. The Node version, and the setting that lives outside the repository — 2026-09-25
+
+    node scripts/tests/node-version.test.mjs
+    node scripts/tests/node-version.mutation.mjs
+
+**What is NOT established, first, because a round was nearly spent
+writing it down as settled.** "The dashboard override was ignoring
+.nvmrc" is not a finding. The dashboard's Node.js Version had never been
+read before it was changed, so there is no before-value, no mismatch on
+the record, and nothing that connects it to the eight red builds. It is
+written here as an open question, not as the root cause.
+
+**What IS measured, 2026-09-25:**
+
+- **Nothing in `src/` or `scripts/` needs Node 22.** A sweep for the APIs
+  Node 20 lacks — `Object.groupBy`, `Map.groupBy`, `Promise.withResolvers`,
+  `Array.fromAsync`, `node:sqlite`, `fs.glob`, `util.styleText`,
+  `process.loadEnvFile`, `import.meta.dirname`, `import.meta.filename` —
+  finds **zero** files. The 22 `navigator.*` hits are all the DOM one
+  (`clipboard`, `serviceWorker`, `onLine`, `mediaDevices`) in client
+  components.
+- **The dependency tree does.** `@supabase/supabase-js@2.110.9` and five
+  sibling packages declare `"engines": { "node": ">=22.0.0" }`. Of 312
+  installed packages that declare a range, those six are the binding ones.
+- **Node 20 is past end of life.** `nodejs/Release`'s own `schedule.json`,
+  fetched today: v20 END `2026-04-30`, v22 END `2027-04-30`.
+
+So the pin is 22, on the evidence rather than on preference.
+
+### Three places in the repository, and a fourth that is not
+
+| where | value | who reads it |
+|---|---|---|
+| `.nvmrc` | `22` | a person's version manager — **the source of truth** |
+| `package.json` `engines.node` | `22.x` | npm, and the platform |
+| `process.versions.node` | major 22 | asserted by the gate, **inside the build** |
+| Vercel → Settings → General → Node.js Version | must be `22.x` | the builder. **No file here can read it.** |
+
+`scripts/ci-build.mjs` now derives the pinned major from `.nvmrc` and
+checks the other two against it, rather than reading `engines.node` first
+and treating `.nvmrc` as a second opinion. A person changing Node edits the
+file their version manager reads; the derived copies are what should have
+to justify themselves.
+
+### The part worth keeping: outside the repository is not the same as un-gateable
+
+The obvious conclusion from a setting that lives in a dashboard is "this
+can only be a checklist". It is half right. **The setting cannot be read —
+but the runtime it selects is the one running the build**, and a gate that
+runs inside `npm run build` runs on the builder. So
+`node-version.test.mjs` asserts `process.versions.node` against `.nvmrc`,
+and a dashboard that disagrees now turns the build red on a named check
+that prints the setting to change, instead of somewhere unrelated.
+
+The checklist is still there, in the README's Deploy section, for the
+person who is not running the gate — and the gate checks that the README
+still names the **path**, because the first version of that check wanted
+the words "Node.js Version" and "dashboard" anywhere in the file, and the
+Deploy section already carried the second one. Its own mutation caught it:
+deleting the sentence left the gate green. 5 of 5 mutations caught now,
+including that one and a pin moved to a major nothing is running.
+
+**Whether `engines.node` overrides the dashboard is UNANSWERED.**
+`vercel.com` is blocked by this session's egress proxy, so the
+documentation could not be read, and it is not going in as a guess. The
+manual step in the README assumes the dashboard wins, which is the safe
+assumption of the two: it costs one look and is wrong in the harmless
+direction.

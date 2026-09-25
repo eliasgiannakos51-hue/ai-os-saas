@@ -41,10 +41,13 @@ import { deployedEnv, probedNames } from "./env-sensitivity.mjs";
  *      file declares one, and only falls back to `npm run build` when it
  *      does not. This script hard-coded the fallback, so the day somebody
  *      adds a buildCommand it silently stops running what ships.
- *   2. WHICH NODE. package.json's `engines.node` is what Vercel reads to
- *      pick the runtime. This machine's node is whatever it is. A build
- *      green on one major and red on another is a real failure mode and
- *      this script could not see it.
+ *   2. WHICH NODE. .nvmrc is what this repository pins, package.json's
+ *      `engines.node` is the derived copy npm reads, and this machine's
+ *      node is whatever it is. A build green on one major and red on
+ *      another is a real failure mode and this script could not see it.
+ *      Vercel's own dashboard setting is a fourth place and a file cannot
+ *      reach it — scripts/tests/node-version.test.mjs checks its effect
+ *      instead, from inside the build.
  *   3. WHICH CLOCK. The build bakes `new Date().toISOString()` into
  *      NEXT_PUBLIC_BUILD_AT (see next.config.mjs) and gates compare dates.
  *      Left to the host, the answer depends on the machine's zone.
@@ -102,43 +105,60 @@ function vercelBuildCommand() {
 /**
  * THE SAME NODE THE BUILDER WILL USE, or nothing.
  *
- * Vercel picks the build runtime from package.json's `engines.node`.
- * .nvmrc is what a human's version manager reads; the two disagreeing is
- * a repository bug of its own, so both are checked and both must agree.
+ * .nvmrc IS THE SOURCE OF TRUTH, and the change is deliberate: this used
+ * to read package.json's engines.node first and treat .nvmrc as a second
+ * opinion. That is backwards for the failure it exists to prevent. A
+ * person changing Node changes the file their version manager reads; if
+ * the derived places are checked against it rather than the other way
+ * round, the one they touched is the one that wins.
+ *
+ * Nothing here is hard-coded. Both values are read, and the pinned major
+ * comes out of .nvmrc every time.
+ *
+ * WHAT IT STILL CANNOT SEE: Vercel's own Node.js Version setting, which
+ * lives in the project dashboard and not in any file. Its EFFECT is
+ * checked — scripts/tests/node-version.test.mjs asserts the running
+ * runtime inside the build, so it runs on the builder too — and the
+ * README carries the manual step. See that gate's header.
  *
  * This EXITS rather than warns. A pass under node 20 says nothing about a
  * build on node 22, and a green line that says nothing is the thing this
  * repository keeps having to unlearn.
  */
 function assertNodeMatchesTheBuilder() {
-  const pkg = JSON.parse(readFileSync("package.json", "utf8"));
-  const declared = String(pkg.engines?.node ?? "").trim();
-  const wantMajor = declared.match(/(\d+)/)?.[1];
-  if (!wantMajor) {
-    console.log("package.json declares no engines.node, so nothing says which node Vercel");
-    console.log("will use. Declare it, then this script can check it.");
-    process.exit(2);
-  }
   let nvmrc = "";
   try {
     nvmrc = readFileSync(".nvmrc", "utf8").trim();
   } catch {
     nvmrc = "";
   }
-  const nvmrcMajor = nvmrc.match(/(\d+)/)?.[1];
-  if (nvmrcMajor && nvmrcMajor !== wantMajor) {
+  const wantMajor = nvmrc.match(/(\d+)/)?.[1];
+  if (!wantMajor) {
+    console.log(".nvmrc is missing or names no version, so nothing in this repository says");
+    console.log("which Node it expects. Write one, then this script can check against it.");
+    process.exit(2);
+  }
+  const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+  const declared = String(pkg.engines?.node ?? "").trim();
+  const enginesMajor = declared.match(/(\d+)/)?.[1];
+  if (!enginesMajor) {
+    console.log("package.json declares no engines.node. npm and the platform read that one,");
+    console.log(`so it has to say ${wantMajor}.x as well.`);
+    process.exit(2);
+  }
+  if (enginesMajor !== wantMajor) {
     console.log(`.nvmrc says node ${nvmrc} and package.json engines.node says ${declared}.`);
-    console.log("They pick different runtimes for a human and for Vercel. Fix one.");
+    console.log("They pick different runtimes for a human and for the builder. Fix one.");
     process.exit(2);
   }
   const haveMajor = process.versions.node.split(".")[0];
   if (haveMajor !== wantMajor) {
-    console.log(`This machine runs node v${process.versions.node}; Vercel will run ${declared}.`);
+    console.log(`This machine runs node v${process.versions.node}; .nvmrc pins ${nvmrc}.`);
     console.log("A build measured on the wrong major says nothing about the one that ships,");
     console.log("so this is not going to run and call the result a pass.");
     process.exit(2);
   }
-  return { declared, version: process.versions.node };
+  return { pinned: nvmrc, declared, version: process.versions.node };
 }
 
 const BUILD = vercelBuildCommand();
@@ -181,7 +201,7 @@ const PASSES = [
 
 console.log(`Running the real build ${PASSES.length} times, in ${PASSES.length} different environments.`);
 console.log(`  command : ${BUILD.label}`);
-console.log(`  node    : v${NODE.version} (package.json engines.node: ${NODE.declared})`);
+console.log(`  node    : v${NODE.version} (.nvmrc ${NODE.pinned}, engines.node ${NODE.declared})`);
 console.log(`  TZ      : ${BUILDER_TZ}, pinned`);
 console.log(`  ${probedNames().size} project variables are known to this repository.\n`);
 

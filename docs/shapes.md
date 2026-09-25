@@ -2801,3 +2801,46 @@ sentences is true — *the harness is measuring the wrong thing*, or
 *nobody has looked at what broke*. Six rounds were spent on the first
 and none on the second, and the second cost one call.
 
+
+## A setting outside the repository, and the half of it that IS gateable
+
+*Named by the owner on 2026-09-25: "κάποια πράγματα ΔΕΝ μπορούν να μπουν
+σε gate — ζουν έξω από το repo. Αυτά γράφονται ως checklist."*
+
+True, and it stops one step early. The Vercel project's Node.js Version
+lives in a dashboard. No file in the tree can read it, no gate can assert
+it, and a checklist in the README is the only way to say what it must be.
+
+**But a setting is not the same as its effect.** That dashboard value
+decides which `node` executes the build — and a gate that runs inside
+`npm run build` runs on the builder, under exactly that runtime. So
+`process.versions.node` is the dashboard's answer, readable, assertable,
+and red on the spot when it disagrees with `.nvmrc`.
+
+### The question to ask
+
+Not *"can I read this setting?"* — usually no. Ask **"what does it CHANGE
+that runs inside, and can I check that?"**
+
+| the setting | unreadable | its effect, which is not |
+|---|---|---|
+| dashboard Node version | the value | `process.versions.node` during the build |
+| a platform env var | whether it is set in the UI | whether `process.env.X` is there when the code runs |
+| a deploy that never happened | the deploy log | what the live route answers |
+
+The third row is this project's own precedent: forty days of stale
+production were invisible until `/api/health` started reporting the
+commit date baked in at build time. Nobody could read Vercel's deployment
+list — but the thing it produced was answering HTTP the whole time.
+
+### What stays a checklist, and how to keep it honest
+
+The half that genuinely cannot be reached still needs the sentence, and
+the sentence needs a gate of its own or it rots. The README's manual step
+is checked for the **path** a person clicks, not for the words — the first
+version asked for "Node.js Version" and "dashboard" anywhere in the file,
+and the Deploy section already had the second, so half the check was free.
+Deleting the sentence left it green. Its mutation is what found that.
+
+**A checklist item nothing checks is a comment.** Gate the effect where
+there is one, and gate the existence of the sentence where there is not.

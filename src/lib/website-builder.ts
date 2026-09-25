@@ -728,9 +728,41 @@ function buildReferenceImageUrlList(images: ReferenceImage[]): string {
 // fraction of the normal input price) instead of full price again. The
 // small, per-website form-endpoint block is NOT cached (it's cheap and
 // different every time, so caching it would never hit anyway).
-function buildGenerateSystemBlocks(formEndpointUrl: string | undefined): Anthropic.TextBlockParam[] {
+function buildGenerateSystemBlocks(
+  formEndpointUrl: string | undefined,
+  /**
+   * WHAT THE PRODUCT ALREADY KNOWS ABOUT THIS PERSON'S STYLE — V6 #2,
+   * already rendered by lib/memory/store.ts, or "" when there is nothing.
+   *
+   * ITS PLACE IN THE LIST IS THE WHOLE COST QUESTION. SYSTEM_PROMPT is
+   * ~8,150 tokens and cached; this block is per-USER and stable across
+   * their sites, so it earns a second breakpoint immediately after it —
+   * the same two-breakpoint arrangement lib/ai/cached-system.ts makes for
+   * chat, and for the same reason: Anthropic matches a cache entry by
+   * PREFIX, so everything before a breakpoint must be byte-identical.
+   *
+   * IT CANNOT GO FIRST and it cannot stand alone. Measured 2026-09-24:
+   * twenty remembered facts are 547 tokens against a 1,024-token minimum
+   * cacheable prefix, and a cache_control marker below the minimum does
+   * NOT error — it returns cache_creation_input_tokens: 0 and reads like
+   * an optimisation that works.
+   *
+   * AFTER the form instruction would be worse still: that block differs
+   * per site, so nothing after it can ever hit.
+   */
+  memoryBlock: string
+): Anthropic.TextBlockParam[] {
   return [
     { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
+    ...(memoryBlock
+      ? [
+          {
+            type: "text" as const,
+            text: memoryBlock,
+            cache_control: { type: "ephemeral" as const },
+          },
+        ]
+      : []),
     { type: "text", text: buildFormEndpointInstruction(formEndpointUrl) },
     // LAST, and outside the cached block. See USER_BRIEF_PRECEDENCE.
     { type: "text", text: USER_BRIEF_PRECEDENCE },
@@ -983,7 +1015,14 @@ export async function generateWebsiteHtml(
   /** THE STOP BUTTON — V4.6. See streamHtmlToCompletion. */
   shouldStop?: () => boolean,
   /** THE PAGE CAP was hit: `started` pages were begun, `cap` are kept. */
-  onPageCap?: (cap: number, started: number) => void
+  onPageCap?: (cap: number, started: number) => void,
+  /**
+   * The memory block (V6 #2). Optional and LAST because this signature is
+   * already positional and eight deep — a caller that has not been taught
+   * about memory keeps working and simply sends none, which is the same
+   * thing a person with memory switched off sends.
+   */
+  memoryBlock?: string
 ): Promise<string> {
   const anthropic = new Anthropic({ apiKey });
   const images = referenceImages?.slice(0, MAX_REFERENCE_IMAGES) ?? [];
@@ -1024,7 +1063,7 @@ export async function generateWebsiteHtml(
   // if a single call's output alone isn't enough.
   const { rawText, stopReason } = await streamHtmlToCompletion(
     anthropic,
-    buildGenerateSystemBlocks(formEndpointUrl),
+    buildGenerateSystemBlocks(formEndpointUrl, memoryBlock ?? ""),
     content,
     onDelta,
     costs,

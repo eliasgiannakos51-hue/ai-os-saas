@@ -8,6 +8,7 @@
 //
 // Run: node scripts/tests/website-variation.test.mjs
 import { readFileSync } from "node:fs";
+import { stripComments } from "../check-mutation-markers.mjs";
 import { loadTs } from "./load-ts.mjs";
 
 let pass = 0;
@@ -126,13 +127,60 @@ check(
 // module-level constant and never from the per-call draw — so that is
 // what is measured, from the function that assembles it.
 {
-  const fn = builder.slice(builder.indexOf("function buildGenerateSystemBlocks"));
+  // COMMENTS STRIPPED, AND THE UNIT IS A BLOCK, NOT A LINE.
+  //
+  // Both halves went wrong on 2026-09-24 when the V6 #2 memory block
+  // arrived. The scan read raw source, so a PARAGRAPH EXPLAINING
+  // cache_control counted as a cached block; and it matched line by line,
+  // so a block written across four lines had its `text:` and its
+  // `cache_control:` on different ones and could never satisfy a
+  // per-line rule. A check whose unit is smaller than the thing it is
+  // about reports on formatting.
+  const strippedBuilder = stripComments(builder);
+  const fn = strippedBuilder.slice(strippedBuilder.indexOf("function buildGenerateSystemBlocks"));
   const body = fn.slice(0, fn.indexOf("\n}"));
-  const cachedLines = body.split("\n").filter((l) => l.includes("cache_control"));
+  // Each `{ ... }` inside the returned array, flattened to one line so the
+  // object's own shape — not its line breaks — is what is read.
+  const cachedLines = [...body.matchAll(/\{[^{}]*?type: "text"[\s\S]*?\}/g)]
+    .map((m) => m[0].replace(/\s+/g, " "))
+    .filter((b) => b.includes("cache_control"));
   check(`there really is a cached block (${cachedLines.length})`, cachedLines.length >= 1);
+  // TWO KINDS OF STABLE, AND THE RULE HAD ONLY ONE. A cached block must
+  // not change between calls that should share a cache entry — which is
+  // not the same as "is a module constant".
+  //
+  //   PER-BUILD   SYSTEM_PROMPT. Identical for everyone, so one cache
+  //               entry serves the whole product.
+  //   PER-USER    the V6 #2 memory block. Identical across one person's
+  //               requests and different between people, so it earns its
+  //               own breakpoint AFTER the shared one — exactly the
+  //               two-breakpoint arrangement lib/ai/cached-system.ts
+  //               already makes for chat, and for the same reason.
+  //   PER-CALL    the variation draw. Different every request, so caching
+  //               it can never hit and would break the prefix for
+  //               everything after it. That one is refused below, by name.
+  //
+  // The allowance is a NAMED LIST rather than a loosened pattern: a new
+  // per-call value slipped into the cached region still fails, because it
+  // is neither a constant nor one of the names here.
+  const PER_USER_CACHEABLE = ["memoryBlock"];
   check(
-    "every cached block is a bare module constant, not a per-call value",
-    cachedLines.every((l) => /text: [A-Z_]+,/.test(l))
+    "every cached block is stable across the calls that share its entry",
+    cachedLines.every(
+      (l) => /text: [A-Z_]+[,\s]/.test(l) || PER_USER_CACHEABLE.some((n) => new RegExp(`text: ${n}[,\\s]`).test(l))
+    ),
+    cachedLines.join("\n        ")
+  );
+  // AND THE PER-USER ONE COMES SECOND. Anthropic matches a cache entry by
+  // PREFIX, so a block that differs between people must sit after every
+  // block that does not — in front, it would give each person their own
+  // copy of the 8,150-token system prompt.
+  const constantAt = cachedLines.findIndex((l) => /text: [A-Z_]+[,\s]/.test(l));
+  const perUserAt = cachedLines.findIndex((l) => PER_USER_CACHEABLE.some((n) => new RegExp(`text: ${n}[,\\s]`).test(l)));
+  check(
+    `the shared block precedes the per-user one (${constantAt} < ${perUserAt})`,
+    perUserAt === -1 || (constantAt !== -1 && constantAt < perUserAt),
+    cachedLines.join("\n        ")
   );
   check(
     "the per-call draw is not in the system blocks at all",

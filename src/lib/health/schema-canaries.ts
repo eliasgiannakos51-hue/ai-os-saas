@@ -81,6 +81,29 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "⌘K search returns nothing, on every query",
   },
   {
+    // V6 #2. TWO CANARIES FOR ONE FILE, and the reason is that the two
+    // halves fail differently and both fail quietly.
+    //
+    // Without the COLUMN, every read still works — `select ... surface`
+    // simply errors, loadMemories logs and returns [], and the product
+    // looks like a person who has never told it anything. Nothing on any
+    // screen says the migration did not run.
+    kind: "column",
+    table: "chat_memory",
+    column: "surface",
+    migration: "20261007000000_universal_memory.sql",
+    breaks: "every feature reads an empty memory and the per-feature list on /dashboard/ai-memory is blank",
+  },
+  {
+    // Without the FUNCTION, nothing is ever learned again — recordMemory
+    // is best-effort by design, so the failure is one line in the log and
+    // a memory that silently stops growing.
+    kind: "function",
+    fn: "memory_record",
+    migration: "20261007000000_universal_memory.sql",
+    breaks: "nothing new is ever remembered, in any feature, and the failure is a log line",
+  },
+  {
     kind: "function",
     fn: "match_agent_templates",
     migration: "20260826000000_agent_templates.sql",

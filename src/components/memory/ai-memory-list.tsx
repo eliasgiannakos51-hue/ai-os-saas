@@ -18,6 +18,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDate } from "@/lib/format-number";
 import { memoryFold } from "@/lib/chat/memory-fold";
+import type { MemoryKind, MemorySurface } from "@/lib/memory/surfaces";
 
 export type RememberedRow = {
   id: string;
@@ -27,14 +28,21 @@ export type RememberedRow = {
   lastSeenAt: string;
   confirmed: boolean;
   conversationId: string | null;
+  /** Where this was FIRST learned — provenance, not scope. */
+  surface: MemorySurface;
+  kind: MemoryKind;
 };
 
 export function AiMemoryList({
   rows: initialRows,
+  surfaces,
+  disabledSurfaces: initialDisabled,
   prunableIds,
   windowSize,
 }: {
   rows: RememberedRow[];
+  surfaces: readonly MemorySurface[];
+  disabledSurfaces: readonly MemorySurface[];
   prunableIds: string[];
   windowSize: number;
 }) {
@@ -47,6 +55,44 @@ export function AiMemoryList({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [clearing, setClearing] = useState(false);
+  /**
+   * THE PER-FEATURE SWITCHES — V6 #2.
+   *
+   * Held as the set that is OFF, matching what the server stores, so the
+   * two cannot drift into disagreeing about what "no entry" means.
+   */
+  const [disabled, setDisabled] = useState<Set<MemorySurface>>(new Set(initialDisabled));
+  const [savingSurface, setSavingSurface] = useState<MemorySurface | null>(null);
+
+  async function toggleSurface(surface: MemorySurface) {
+    const next = new Set(disabled);
+    if (next.has(surface)) next.delete(surface);
+    else next.add(surface);
+    setSavingSurface(surface);
+    // OPTIMISTIC, THEN CORRECTED BY WHAT THE SERVER STORED. The route
+    // answers with the value it wrote rather than echoing the request, so
+    // a failed write cannot read as a working switch.
+    setDisabled(next);
+    try {
+      const res = await fetch("/api/memory/surfaces", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ disabled: [...next] }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setDisabled(new Set(disabled));
+        addToast(t("surfaceSaveFailed"), "error");
+        return;
+      }
+      setDisabled(new Set(data.disabled as MemorySurface[]));
+    } catch {
+      setDisabled(new Set(disabled));
+      addToast(t("surfaceSaveFailed"), "error");
+    } finally {
+      setSavingSurface(null);
+    }
+  }
 
   const prunable = useMemo(() => new Set(prunableIds), [prunableIds]);
   const stillPrunable = rows.filter((r) => prunable.has(r.id)).length;
@@ -209,6 +255,9 @@ export function AiMemoryList({
                         and this is the same distinction the prompt now
                         makes — shown here so the person can see why one
                         line carries more weight than another. */}
+                    <span className="rounded-md bg-panel-hover px-1.5 py-0.5">
+                      {t(`surfaces.${row.surface}`)}
+                    </span>
                     <span className={row.timesSeen > 1 ? "text-orange-300" : undefined}>
                       {row.timesSeen > 1 ? t("repeated", { count: row.timesSeen }) : t("once")}
                     </span>
@@ -261,6 +310,38 @@ export function AiMemoryList({
           );
         })}
       </ul>
+
+      {/* THE SWITCH PER FEATURE, under the list rather than above it: the
+          thing a person came here to do is read what is remembered, and a
+          row of controls between them and it makes the page about the
+          settings. */}
+      <div className="mt-6 space-y-2 border-t border-border pt-4">
+        <h3 className="text-sm font-semibold text-foreground">{t("surfacesTitle")}</h3>
+        <p className="text-xs leading-relaxed text-muted">{t("surfacesHelp")}</p>
+        <ul className="row-list mt-2">
+          {surfaces.map((surface) => {
+            const off = disabled.has(surface);
+            return (
+              <li key={surface} className="flex items-center justify-between gap-3 px-3 py-2">
+                <span className="text-sm text-foreground">{t(`surfaces.${surface}`)}</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={!off}
+                  aria-label={t(`surfaces.${surface}`)}
+                  disabled={savingSurface === surface}
+                  onClick={() => toggleSurface(surface)}
+                  className={`min-h-[44px] rounded-xl px-3 text-xs font-medium transition-colors ${
+                    off ? "text-muted hover:text-foreground" : "text-orange-300"
+                  }`}
+                >
+                  {off ? t("surfaceOff") : t("surfaceOn")}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </div>
   );
 }

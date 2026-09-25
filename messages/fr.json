@@ -4119,7 +4119,20 @@
     "clearedAll": "Tout a été oublié.",
     "pruneButton": "Nettoyer {count} inutilisés",
     "pruneConfirm": "Supprimer {count} lignes dites une seule fois et jamais revenues depuis six mois ? Tout ce qui se répète est conservé.",
-    "pruned": "{count} supprimées."
+    "pruned": "{count} supprimées.",
+    "surfacesTitle": "Quelles fonctions se souviennent",
+    "surfacesHelp": "Désactivée, une fonction ne lit pas la mémoire et n'y ajoute rien. Rien de ce qui est déjà enregistré n'est supprimé.",
+    "surfaceOn": "Se souvient",
+    "surfaceOff": "Désactivée",
+    "surfaceSaveFailed": "Impossible d'enregistrer ce réglage.",
+    "surfaces": {
+      "chat": "Discussion",
+      "website": "Sites web",
+      "presentation": "Présentations",
+      "posts": "Publications",
+      "coding": "Écriture de code",
+      "agent": "Agents IA"
+    }
   },
   "email": {
     "welcome": {

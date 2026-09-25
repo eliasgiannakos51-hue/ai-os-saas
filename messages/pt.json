@@ -4119,7 +4119,20 @@
     "clearedAll": "Tudo esquecido.",
     "pruneButton": "Limpar {count} sem uso",
     "pruneConfirm": "Apagar {count} linhas ditas uma vez e que não voltaram em seis meses? Tudo o que se repete fica.",
-    "pruned": "{count} removidas."
+    "pruned": "{count} removidas.",
+    "surfacesTitle": "Que funcionalidades se lembram",
+    "surfacesHelp": "Desligada, uma funcionalidade não lê o que está guardado nem acrescenta nada. Nada do que já está guardado é apagado.",
+    "surfaceOn": "Lembra-se",
+    "surfaceOff": "Desligada",
+    "surfaceSaveFailed": "Não foi possível guardar essa opção.",
+    "surfaces": {
+      "chat": "Conversa",
+      "website": "Sites",
+      "presentation": "Apresentações",
+      "posts": "Publicações",
+      "coding": "Código",
+      "agent": "Agentes"
+    }
   },
   "email": {
     "welcome": {

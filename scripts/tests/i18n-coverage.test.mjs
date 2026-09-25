@@ -786,7 +786,11 @@ const clientFallbacks = sources.flatMap((f) => [
 //     the refusal and the row it writes both say "Could not start the
 //     report.", already this route's sentence for that outcome.
 // Measured, not added.
-const SERVER_PROSE_BASELINE = 666;
+// 666 -> 671 on 2026-09-24: V6 #2 added five server-side reads of the
+// memory (posts, presentations, the website worker, coding, the agent
+// executor) plus the settings route, and each carries the sentence about
+// which predicate decides whether the feature participates.
+const SERVER_PROSE_BASELINE = 671;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

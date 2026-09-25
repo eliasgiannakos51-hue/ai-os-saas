@@ -203,9 +203,19 @@ for (const file of [
   // AND THE TABLE ITSELF IS STILL CREATED SOMEWHERE THAT RUNS. Asserting
   // only that the dangerous files are gone would pass just as well if
   // chat_memory had been dropped from the project entirely.
+  // SQL COMMENTS STRIPPED FIRST, and it is the rule this repository keeps
+  // paying to relearn: a check anchored on text that a comment can
+  // satisfy is not a check on the code.
+  //
+  // It went red on 2026-09-24 against 20261007000000_universal_memory.sql,
+  // whose header promises "No DROP TABLE, no TRUNCATE, no unqualified
+  // DELETE" — a sentence saying the migration is SAFE matched a pattern
+  // hunting for the opposite, because `[^;]*` ran from those words in the
+  // prose into the first `chat_memory` in the code below. The gate was
+  // reading the promise instead of the statements.
   const migrations = readdirSync("supabase/migrations")
     .filter((f) => f.endsWith(".sql"))
-    .map((f) => readFileSync(`supabase/migrations/${f}`, "utf8"))
+    .map((f) => readFileSync(`supabase/migrations/${f}`, "utf8").replace(/--[^\n]*/g, ""))
     .join("\n");
   check(
     "chat_memory is created by the migration path, IF NOT EXISTS",

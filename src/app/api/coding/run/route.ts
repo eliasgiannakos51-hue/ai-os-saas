@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { memoryPromptFor } from "@/lib/memory/store";
+import { memoryActiveFor } from "@/lib/memory/memory-policy";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -140,13 +142,34 @@ export async function POST(request: Request) {
       reservationId = reservation.reservationId;
     }
 
+    // THE HOUSE STYLE, remembered — V6 #2. One predicate decides whether
+    // this feature participates at all (lib/memory/memory-policy.ts); a
+    // surface that is not read is not written either.
+    //
+    // IT IS A SECOND SYSTEM BLOCK, NOT APPENDED TO THE FIRST. Concatenating
+    // it into prompt.system would change the static prefix per user and
+    // destroy the cache hit for the prompt itself — which is the expensive
+    // half. As its own block it sits after a prefix that stays
+    // byte-identical, which is what Anthropic matches on.
+    const memoryBlock = memoryActiveFor({
+      surface: "coding",
+      user,
+      planLimit: plan?.capabilities.chatMemoryLimit ?? 0,
+    })
+      ? await memoryPromptFor(supabase, user.id, plan?.capabilities.chatMemoryLimit ?? 0)
+      : "";
     const costs = new CostAccumulator();
     const outcome = await runCompletion(
       {
         purpose: "create",
         model: MODEL,
         maxTokens: spec.maxTokens,
-        system: [{ type: "text", text: prompt.system }],
+        system: memoryBlock
+          ? [
+              { type: "text", text: prompt.system },
+              { type: "text", text: memoryBlock },
+            ]
+          : [{ type: "text", text: prompt.system }],
         messages: [{ role: "user", content: prompt.user }],
       },
       // THE STOP BUTTON — V4.6: the request's own abort signal. When the

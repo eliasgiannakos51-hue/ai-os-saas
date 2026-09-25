@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { deploymentAge } from "@/lib/health/deployment-age";
 import { logApiError } from "@/lib/log-error";
 import { checkCronAuth } from "@/lib/cron-auth";
 import {
@@ -242,6 +243,31 @@ export async function GET(request: Request) {
     reason: probe.reason,
   };
   if (authorised && probe.detail) body.detail = probe.detail;
+
+  // HOW OLD IS THE CODE THAT IS ANSWERING THIS?
+  //
+  // Asked because on 2026-09-25 the production deployment turned out to
+  // be FORTY DAYS behind main. Every gate was green, every commit was
+  // pushed, and this very route reported a healthy schema — all of it
+  // true about a build from another month. A redeploy with the cache
+  // disabled fixed it in a minute; nothing had any way to say so.
+  //
+  // UNAUTHORISED CALLERS GET THE LEVEL AND THE AGE, not the commit date.
+  // The age is what a monitor needs to alarm on; the exact provenance is
+  // one more thing an unauthenticated probe does not need to know.
+  const age = deploymentAge(process.env);
+  body.deployment = age.known
+    ? { age_days: age.ageDays, level: age.level, source: age.source }
+    : { level: "unknown", reason: age.reason };
+  if (authorised) body.deployment = { ...(body.deployment as object), detail: age.detail };
+  // AND IT COUNTS AGAINST ok. A build a month old serving customers is
+  // not a healthy deployment, and a field nobody reads is how the last
+  // forty days happened — schema-canaries.ts's own header says the same
+  // thing about a probe that reports and never judges.
+  if (age.known && age.level === "ancient") {
+    body.ok = false;
+    body.reason = body.reason ?? "deployment_ancient";
+  }
 
   // DOES THE DATABASE HAVE WHAT THIS BUILD ASKS FOR?
   //

@@ -32,6 +32,8 @@ import {
   type ImageSource,
 } from "@/lib/presentations/deck";
 import { generateDeck } from "@/lib/presentations/generate";
+import { memoryPromptFor } from "@/lib/memory/store";
+import { memoryActiveFor } from "@/lib/memory/memory-policy";
 import { PRESENTATION_MODEL } from "@/lib/presentations/prompt";
 import { resolveOwnImages, resolveUnsplashImages } from "@/lib/presentations/images";
 
@@ -167,6 +169,24 @@ export async function POST(request: Request) {
     const locale = resolveLanguage(description, uiLocale);
     const costs = new CostAccumulator();
     void recordAiCallForDailySpend(estimate.estimatedCredits);
+    // WHAT THE PRODUCT ALREADY KNOWS ABOUT THIS PERSON — V6 #2.
+    //
+    // ONE PREDICATE DECIDES BOTH SIDES. memoryActiveFor reads the global
+    // switch, the per-feature switch and the plan's limit together, and a
+    // surface that is not read is not written either: lib/chat/memory-policy
+    // records what it cost when those two disagreed — Free's limit is 0, the
+    // read came back empty, and the write kept making a second paid model
+    // call per message for rows nothing would ever read back.
+    //
+    // Best-effort. A generator must not fail because the memory could not
+    // be loaded; an empty block is what a person with memory off sends.
+    const memoryBlock = memoryActiveFor({
+      surface: "presentation",
+      user,
+      planLimit: plan?.capabilities.chatMemoryLimit ?? 0,
+    })
+      ? await memoryPromptFor(supabase, user.id, plan?.capabilities.chatMemoryLimit ?? 0)
+      : "";
     const outcome = await generateDeck({
       apiKey,
       description,
@@ -174,6 +194,7 @@ export async function POST(request: Request) {
       locale,
       imageSource,
       costs,
+      memoryBlock,
       // THE STOP BUTTON: the request's own abort signal. When the person
       // stops, the provider call is aborted with it.
       signal: request.signal,

@@ -57,6 +57,21 @@ export async function generateDeck(params: {
   slideCount: number;
   locale: string;
   imageSource: ImageSource;
+  /**
+   * THE MEMORY BLOCK, ALREADY BUILT, or "" when there is nothing to say.
+   *
+   * Passed in rather than loaded here: this module has no Supabase client
+   * and should not grow one — the route already has the user, the plan
+   * limit and the per-feature switch. See lib/memory/store.ts.
+   *
+   * IT GOES IN perUserBlock AND NOWHERE ELSE. Measured 2026-09-24:
+   * twenty facts are 547 tokens and the minimum cacheable prefix on
+   * Sonnet is 1,024, so a memory block can never be a cache breakpoint
+   * on its own — and Anthropic does not error on a short one, it
+   * silently returns cache_creation_input_tokens: 0. Behind the feature's
+   * own system prompt it is inside the cached region and costs a tenth.
+   */
+  memoryBlock?: string;
   costs: CostAccumulator;
   signal?: AbortSignal;
 }): Promise<GenerateDeckResult> {
@@ -67,7 +82,11 @@ export async function generateDeck(params: {
       {
         model: PRESENTATION_MODEL,
         max_tokens: PRESENTATION_MAX_TOKENS,
-        system: buildCachedSystem({ staticPrefix: buildDeckSystemPrompt(), model: PRESENTATION_MODEL }),
+        system: buildCachedSystem({
+          staticPrefix: buildDeckSystemPrompt(),
+          perUserBlock: params.memoryBlock ?? "",
+          model: PRESENTATION_MODEL,
+        }),
         messages: [
           { role: "user", content: buildDeckUserMessage(params.description, params.slideCount, params.locale) },
         ],

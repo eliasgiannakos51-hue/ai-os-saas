@@ -4119,7 +4119,20 @@
     "clearedAll": "Everything forgotten.",
     "pruneButton": "Clean up {count} unused",
     "pruneConfirm": "Delete {count} lines that were said once and have not come up in six months? Anything repeated is kept.",
-    "pruned": "{count} removed."
+    "pruned": "{count} removed.",
+    "surfacesTitle": "Which features remember",
+    "surfacesHelp": "Switched off, a feature neither reads what is remembered nor adds to it. Nothing already saved is deleted.",
+    "surfaceOn": "Remembers",
+    "surfaceOff": "Off",
+    "surfaceSaveFailed": "Could not save that switch.",
+    "surfaces": {
+      "chat": "Chat",
+      "website": "Websites",
+      "presentation": "Presentations",
+      "posts": "Posts",
+      "coding": "Code",
+      "agent": "Agents"
+    }
   },
   "email": {
     "welcome": {

@@ -105,7 +105,7 @@ const MUTANTS = [
     // 67 -> 70 in phase 2: projects-workspace, project-detail and the
     // project page all reach a status or a section through a template
     // literal over a declared array.
-    from: "    unbounded: 70,",
+    from: "    unbounded: 71,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`
@@ -113,7 +113,7 @@ const MUTANTS = [
     // A `to` that can occur legitimately elsewhere in the same file
     // cannot distinguish "mutated" from "normal".
     to: "    unbounded: 1,",
-    expect: "dashboard: 70 unbounded component(s)",
+    expect: "dashboard: 71 unbounded component(s)",
   },
   {
     // With no prefix the dashboard stops claiming its own routes, they

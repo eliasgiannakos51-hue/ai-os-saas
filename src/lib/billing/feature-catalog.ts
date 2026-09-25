@@ -670,6 +670,13 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     // bookmark working.
     sidebar: ["/dashboard/ai-memory"],
     pages: ["ai-memory", "memory"],
+    // THE SWITCHES BELONG TO THE SCREEN THEY ARE ON — V6 #2. One route,
+    // which writes memory_disabled_surfaces onto the user. It charges
+    // nothing and reaches no provider: it is a preference, and it is
+    // claimed here rather than given a row of its own because a buyer
+    // comparing plans is choosing whether the product remembers, not
+    // whether it has a settings endpoint.
+    routes: ["memory/surfaces"],
     charges: false,
     capability: "aiMemory",
     enforcedIn: "src/app/dashboard/ai-memory/page.tsx",

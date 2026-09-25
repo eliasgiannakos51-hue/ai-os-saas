@@ -210,6 +210,19 @@ export async function runAgentTask(params: {
    *  run can ask for a deeper pass once without changing the schedule
    *  (see api/agents/[id]/run). Omitted, the agent's own is used. */
   depth?: AgentDepth;
+  /**
+   * WHAT WORKED BEFORE — V6 #2, already rendered by lib/memory/store.ts.
+   *
+   * Passed in rather than loaded: this module has no Supabase client and
+   * runs from a cron as well as a request, so the caller is the only
+   * place that knows whose memory this is. An agent run with none is an
+   * agent run for somebody who switched it off.
+   *
+   * IT IS A SECOND SYSTEM BLOCK, never concatenated into the runner
+   * prompt: the static prefix has to stay byte-identical across users or
+   * nothing caches.
+   */
+  memoryBlock?: string;
   /** THE STOP BUTTON — V4.6. Asked before every model call: a research
    *  pass or the write. A stop lands between calls, so the passes that
    *  ran are kept and charged and the one that had not begun costs
@@ -311,7 +324,12 @@ export async function runAgentTask(params: {
       purpose: "agent_run",
       model: spec.model,
       maxTokens: spec.outputTokens,
-      system: [{ type: "text", text: runnerSystemPrompt(config) }],
+      system: params.memoryBlock
+        ? [
+            { type: "text", text: runnerSystemPrompt(config) },
+            { type: "text", text: params.memoryBlock },
+          ]
+        : [{ type: "text", text: runnerSystemPrompt(config) }],
       messages: [{ role: "user", content: userContent }],
     },
     { userId: params.userId }

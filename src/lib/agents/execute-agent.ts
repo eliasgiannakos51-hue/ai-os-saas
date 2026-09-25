@@ -1,5 +1,7 @@
 import "server-only";
 import { sendPushToUser } from "@/lib/push/web-push";
+import { memoryPromptFor } from "@/lib/memory/store";
+import { memoryActiveFor } from "@/lib/memory/memory-policy";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -331,8 +333,25 @@ export async function executeAgent(params: {
   //    'unsafe_output' is deliberately NOT retried: it means the output
   //    failed the safety shape check, and retrying a safety failure until
   //    it passes is how a safety check becomes a formality.
+  // WHAT WORKED BEFORE — V6 #2.
+  //
+  // READ THROUGH THE ADMIN CLIENT, AND THAT IS WHY THE user_id FILTER IS
+  // THE WHOLE GUARANTEE HERE. A scheduled run has no browser session, so
+  // this path uses the service-role client and RLS does not apply to it.
+  // loadMemories filters `.eq("user_id", userId)` explicitly rather than
+  // leaning on a policy that is not in force on this code path, and
+  // scripts/tests/memory-universal.test.mjs mutates that filter away and
+  // requires the gate to go red.
+  const memoryBlock = memoryActiveFor({
+    surface: "agent",
+    user,
+    planLimit: plan?.capabilities.chatMemoryLimit ?? 0,
+  })
+    ? await memoryPromptFor(admin, userId, plan?.capabilities.chatMemoryLimit ?? 0)
+    : "";
+
   let attempts = 0;
-  let outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId, shouldStop: params.shouldStop });
+  let outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId, memoryBlock, shouldStop: params.shouldStop });
   attempts = 1;
   while (
     !outcome.ok &&
@@ -340,7 +359,7 @@ export async function executeAgent(params: {
     attempts < AGENT_MAX_ATTEMPTS
   ) {
     attempts++;
-    outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId, shouldStop: params.shouldStop });
+    outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId, memoryBlock, shouldStop: params.shouldStop });
   }
 
   // 8. Settle. Always — every attempt above spent real tokens, including

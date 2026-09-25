@@ -25,7 +25,35 @@
  * that runs on every build.
  */
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { deployedEnv, probedNames } from "./env-sensitivity.mjs";
+
+/**
+ * THE THREE THINGS THIS SCRIPT USED TO ASSUME ABOUT THE BUILDER.
+ *
+ * It ran `npm run build` under a constructed environment and called that
+ * "the way the builder will". Three of the builder's inputs were never
+ * checked, only assumed, and an assumption that is wrong is exactly the
+ * false confidence a green build:ci against a red Vercel build is made
+ * of:
+ *
+ *   1. WHICH COMMAND. Vercel runs vercel.json's `buildCommand` when the
+ *      file declares one, and only falls back to `npm run build` when it
+ *      does not. This script hard-coded the fallback, so the day somebody
+ *      adds a buildCommand it silently stops running what ships.
+ *   2. WHICH NODE. package.json's `engines.node` is what Vercel reads to
+ *      pick the runtime. This machine's node is whatever it is. A build
+ *      green on one major and red on another is a real failure mode and
+ *      this script could not see it.
+ *   3. WHICH CLOCK. The build bakes `new Date().toISOString()` into
+ *      NEXT_PUBLIC_BUILD_AT (see next.config.mjs) and gates compare dates.
+ *      Left to the host, the answer depends on the machine's zone.
+ *
+ * All three are now derived and asserted rather than assumed. Two of them
+ * can make this script REFUSE TO RUN, which is the honest outcome: a run
+ * under the wrong node measures the wrong thing, and "did not run" is not
+ * a verdict (see the null-status branch at the foot of this file).
+ */
 
 /**
  * TWO ENVIRONMENTS, NOT ONE, AND THE SECOND IS THE ONE THAT WAS MISSING.
@@ -50,11 +78,87 @@ import { deployedEnv, probedNames } from "./env-sensitivity.mjs";
  * bracket the truth — every variable wrong, and every variable gone —
  * and a gate that survives both is one no value can surprise.
  */
+/**
+ * WHAT VERCEL WILL ACTUALLY RUN, read out of vercel.json rather than
+ * guessed. A project with no `buildCommand` gets the framework default,
+ * which for Next.js is `npm run build`; the fallback is named here so a
+ * reader can see it is a fallback and not a rule.
+ */
+function vercelBuildCommand() {
+  let cfg;
+  try {
+    cfg = JSON.parse(readFileSync("vercel.json", "utf8"));
+  } catch (e) {
+    console.log("vercel.json could not be read or parsed — this script cannot know");
+    console.log("what the builder runs, so it is not going to guess.");
+    console.log(`  ${String(e)}`);
+    process.exit(2);
+  }
+  const declared = typeof cfg.buildCommand === "string" ? cfg.buildCommand.trim() : "";
+  if (declared) return { label: `vercel.json buildCommand: ${declared}`, shell: true, argv: [declared] };
+  return { label: "npm run build (vercel.json declares no buildCommand)", shell: false, argv: ["npm", ["run", "build"]] };
+}
+
+/**
+ * THE SAME NODE THE BUILDER WILL USE, or nothing.
+ *
+ * Vercel picks the build runtime from package.json's `engines.node`.
+ * .nvmrc is what a human's version manager reads; the two disagreeing is
+ * a repository bug of its own, so both are checked and both must agree.
+ *
+ * This EXITS rather than warns. A pass under node 20 says nothing about a
+ * build on node 22, and a green line that says nothing is the thing this
+ * repository keeps having to unlearn.
+ */
+function assertNodeMatchesTheBuilder() {
+  const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+  const declared = String(pkg.engines?.node ?? "").trim();
+  const wantMajor = declared.match(/(\d+)/)?.[1];
+  if (!wantMajor) {
+    console.log("package.json declares no engines.node, so nothing says which node Vercel");
+    console.log("will use. Declare it, then this script can check it.");
+    process.exit(2);
+  }
+  let nvmrc = "";
+  try {
+    nvmrc = readFileSync(".nvmrc", "utf8").trim();
+  } catch {
+    nvmrc = "";
+  }
+  const nvmrcMajor = nvmrc.match(/(\d+)/)?.[1];
+  if (nvmrcMajor && nvmrcMajor !== wantMajor) {
+    console.log(`.nvmrc says node ${nvmrc} and package.json engines.node says ${declared}.`);
+    console.log("They pick different runtimes for a human and for Vercel. Fix one.");
+    process.exit(2);
+  }
+  const haveMajor = process.versions.node.split(".")[0];
+  if (haveMajor !== wantMajor) {
+    console.log(`This machine runs node v${process.versions.node}; Vercel will run ${declared}.`);
+    console.log("A build measured on the wrong major says nothing about the one that ships,");
+    console.log("so this is not going to run and call the result a pass.");
+    process.exit(2);
+  }
+  return { declared, version: process.versions.node };
+}
+
+const BUILD = vercelBuildCommand();
+const NODE = assertNodeMatchesTheBuilder();
+
+/**
+ * THE CLOCK, PINNED. Vercel's build containers run in UTC; a developer's
+ * machine runs in theirs. next.config.mjs bakes the build time into the
+ * bundle and gates read dates out of it, so the zone is an input to the
+ * answer. Pinning it here means a machine in Athens and a machine in the
+ * builder get the same verdict — and it is a pin, not a measurement: if
+ * Vercel ever stopped being UTC this line would be the thing to change.
+ */
+const BUILDER_TZ = "UTC";
+
 const PASSES = [
   {
     name: "every project variable SET, to a sentinel",
     why: "catches a gate that reads a value and trusts its shape",
-    env: deployedEnv(),
+    env: { ...deployedEnv(), TZ: BUILDER_TZ },
   },
   {
     // ONLY WHAT THE MACHINE ITSELF NEEDS. PATH and HOME are not
@@ -70,11 +174,15 @@ const PASSES = [
       CI: "1",
       VERCEL: "1",
       VERCEL_ENV: "production",
+      TZ: BUILDER_TZ,
     },
   },
 ];
 
 console.log(`Running the real build ${PASSES.length} times, in ${PASSES.length} different environments.`);
+console.log(`  command : ${BUILD.label}`);
+console.log(`  node    : v${NODE.version} (package.json engines.node: ${NODE.declared})`);
+console.log(`  TZ      : ${BUILDER_TZ}, pinned`);
 console.log(`  ${probedNames().size} project variables are known to this repository.\n`);
 
 let r = { status: 0 };
@@ -83,7 +191,9 @@ for (const pass of PASSES) {
   console.log(`PASS: ${pass.name}`);
   console.log(`      ${pass.why}`);
   console.log(`${"=".repeat(70)}\n`);
-  r = spawnSync("npm", ["run", "build"], { stdio: "inherit", env: pass.env, shell: false });
+  r = BUILD.shell
+    ? spawnSync(BUILD.argv[0], { stdio: "inherit", env: pass.env, shell: true })
+    : spawnSync(BUILD.argv[0], BUILD.argv[1], { stdio: "inherit", env: pass.env, shell: false });
   if (r.error || r.status === null) break;
   if (r.status !== 0) {
     console.log(`\nFAILED IN: ${pass.name}`);

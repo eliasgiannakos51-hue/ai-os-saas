@@ -23,6 +23,10 @@
  *   7. a declared exception loses its reason
  *   8. the excuse list grows by one — the cheapest way to silence a
  *      sweep is to declare the finding intentional
+ *   9. build:ci goes back to spawning a literal npm run build
+ *  10. the node-major refusal is downgraded to a warning
+ *  11. a third build environment is added with no clock pinned
+ *  12. the clock is pinned to whatever the machine says
  *
  * Run: node scripts/tests/env-independence.mutation.mjs
  */
@@ -34,8 +38,12 @@ const GATE = "scripts/tests/env-independence.test.mjs";
 const SPELLING = "scripts/tests/check-site-spelling.test.mjs";
 const HYGIENE = "scripts/tests/prodtest-hygiene.test.mjs";
 const SWEEP = "scripts/env-sensitivity.mjs";
+// The harness itself. Mutants 9-12 break what build:ci COPIES from the
+// builder rather than what a gate reads — the level the first eight
+// could not see.
+const CI = "scripts/ci-build.mjs";
 
-const TARGETS = [GATE, SPELLING, HYGIENE, SWEEP];
+const TARGETS = [GATE, SPELLING, HYGIENE, SWEEP, CI];
 
 const MUTANTS = [
   {
@@ -116,6 +124,45 @@ const MUTANTS = [
     // because conflating the two was the first version's fault and its
     // own ratchet is what said so.
     expect: "the switch list has not grown",
+  },
+  {
+    // THE HARNESS STOPS RUNNING WHAT SHIPS. vercel.json declares no
+    // buildCommand today, so the literal is RIGHT today — and that is
+    // the point: the gate has to be red on the assumption, not on the
+    // answer it currently produces.
+    name: "build:ci spawns a literal npm run build again",
+    file: CI,
+    from: "  r = BUILD.shell",
+    to: '  r = spawnSync("npm", ["run", "build"], { stdio: "inherit", env: pass.env, shell: false });\n  if (false) r = BUILD.shell',
+    expect: "...and does not spawn a hard-coded npm run build",
+  },
+  {
+    // A REFUSAL DOWNGRADED TO A SHRUG. This is the commonest way a
+    // harness stops measuring: the check stays, the consequence goes.
+    name: "the node-major mismatch stops stopping the run",
+    file: CI,
+    from: '  const haveMajor = process.versions.node.split(".")[0];\n  if (haveMajor !== wantMajor) {',
+    to: '  const haveMajor = process.versions.node.split(".")[0];\n  if (false) {',
+    expect: "...and refuses to run on a different major rather than warning",
+  },
+  {
+    // THE POPULATION GROWS AND THE RULE DOES NOT FOLLOW IT. A count
+    // pinned at two would call this green.
+    name: "a third build environment is added with no clock pinned",
+    file: CI,
+    from: "const PASSES = [\n  {",
+    to: 'const PASSES = [\n  {\n    name: "a third environment somebody added later",\n    why: "and did not pin the clock in",\n    env: { PATH: process.env.PATH },\n  },\n  {',
+    expect: "...and EVERY one of them pins the timezone",
+  },
+  {
+    // A PIN TO THE MACHINE IS NOT A PIN. It reads as one: the name says
+    // BUILDER_TZ and every pass mentions TZ, so the clause above it
+    // stays green and only the value tells the truth.
+    name: "the timezone is pinned to whatever the machine happens to be",
+    file: CI,
+    from: 'const BUILDER_TZ = "UTC";',
+    to: 'const BUILDER_TZ = process.env.TZ ?? "";',
+    expect: "...to UTC, which is what the builder runs",
   },
 ];
 

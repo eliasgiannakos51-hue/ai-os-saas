@@ -36,6 +36,7 @@
 import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { probedNames } from "../env-sensitivity.mjs";
+const { stripComments } = await import("../check-mutation-markers.mjs");
 
 let pass = 0;
 const failures = [];
@@ -352,6 +353,79 @@ check(
   "...and npm run test:env reaches the sweep",
   pkg.scripts["test:env"] === "node scripts/env-sensitivity.mjs",
   String(pkg.scripts["test:env"])
+);
+
+
+// ===========================================================================
+// AND THE BUILDER'S OWN THREE INPUTS, DERIVED RATHER THAN ASSUMED
+// ===========================================================================
+//
+// Everything above asks whether a GATE could disagree between here and
+// Vercel. This asks the same question one level up, about the harness
+// that runs them: build:ci can only stand in for the builder on the
+// inputs it actually copies.
+//
+// It copied one — the environment — and assumed the other three. The
+// command came from a string literal rather than vercel.json, the node
+// major was whatever the machine had, and the clock was the machine's
+// zone while the bundle bakes a build time (next.config.mjs) that gates
+// read back. A green build:ci on the wrong node is not evidence about
+// the build that ships, and this repository has spent six rounds on
+// exactly that kind of evidence.
+//
+// READ WITH COMMENTS STRIPPED. The paragraph above names "npm run build"
+// and vercel.json, and a check that matched this file's own prose would
+// be the self-confirming shape CLAUDE.md gates separately.
+const ciSrc = stripComments(readFileSync("scripts/ci-build.mjs", "utf8"));
+check(
+  "build:ci reads the build command out of vercel.json",
+  /readFileSync\(\s*"vercel\.json"/.test(ciSrc),
+  "it ran npm run build from a literal, which is only Vercel's FALLBACK"
+);
+check(
+  "...and does not spawn a hard-coded npm run build",
+  !/spawnSync\(\s*"npm"/.test(ciSrc),
+  "a buildCommand added to vercel.json would then never be the thing tested"
+);
+check(
+  "...while still naming npm run build as the no-buildCommand fallback",
+  /\["run",\s*"build"\]/.test(ciSrc),
+  "vercel.json declares none today, so the fallback IS what runs"
+);
+check(
+  "build:ci compares this node against package.json engines.node",
+  /engines\?\.node/.test(ciSrc) && /process\.versions\.node/.test(ciSrc),
+  "Vercel picks the build runtime from engines.node"
+);
+check(
+  "...and refuses to run on a different major rather than warning",
+  /haveMajor !== wantMajor\)[\s\S]{0,600}process\.exit\(2\)/.test(ciSrc),
+  "a pass measured on another major is not evidence about the one that ships"
+);
+check(
+  "...and refuses when .nvmrc and engines.node disagree",
+  /nvmrcMajor !== wantMajor\)[\s\S]{0,600}process\.exit\(2\)/.test(ciSrc),
+  "they would pick different runtimes for a human and for the builder"
+);
+// THE RULE SAYS EVERY PASS, SO THE CHECK RANGES OVER EVERY PASS rather
+// than counting occurrences: a third environment added without a TZ is
+// the failure, and a count pinned at two would pass it.
+const passesBlock = ciSrc.match(/const PASSES = \[([\s\S]*?)\n\];/);
+const passEnvs = passesBlock ? passesBlock[1].split(/\benv:/).slice(1) : [];
+check(
+  "build:ci declares at least two build environments",
+  passEnvs.length >= 2,
+  `found ${passEnvs.length}`
+);
+check(
+  "...and EVERY one of them pins the timezone",
+  passEnvs.length >= 2 && passEnvs.every((e) => /\bTZ\b/.test(e)),
+  passEnvs.map((e, i) => `pass ${i + 1}: ${/\bTZ\b/.test(e) ? "TZ" : "NO TZ"}`).join(", ")
+);
+check(
+  "...to UTC, which is what the builder runs",
+  /const BUILDER_TZ = "UTC"/.test(ciSrc),
+  "a pin to the machine's own zone is not a pin"
 );
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);

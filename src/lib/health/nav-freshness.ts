@@ -100,13 +100,23 @@ const hoursSince = (iso: unknown): number | null => {
  * them apart — so it treated a refusal as an empty table and reported a
  * healthy product. `asked` is the half that was missing.
  */
+/**
+ * THE SCOPES A SIGNED-OUT STRANGER CAN WRITE. Kept next to the reader that
+ * excludes them so the two cannot drift apart, and exported so a gate can
+ * range over the same list the code uses.
+ */
+export const ANONYMOUS_SCOPES = ["login_failed", "device_check"] as const;
+
 async function newestAt(
   supabase: SupabaseClient,
-  table: string
+  table: string,
+  opts: { excludeScopes?: readonly string[] } = {}
 ): Promise<{ ageHours: number | null; asked: boolean }> {
-  const { data, error } = await supabase
-    .from(table)
-    .select("created_at")
+  let q = supabase.from(table).select("created_at");
+  if (opts.excludeScopes?.length) {
+    q = q.not("scope", "in", `(${opts.excludeScopes.join(",")})`);
+  }
+  const { data, error } = await q
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -121,9 +131,22 @@ export async function navFreshness(supabase: SupabaseClient): Promise<NavFreshne
     // is written on requests that never reach a model and never cost
     // anything — so it registers a visit the other tables would miss,
     // which is exactly the visit that makes a silent tracker detectable.
+    //
+    // BUT NOT EVERY ROW IN IT IS A VISIT, and this probe cried wolf over
+    // exactly that on 2026-09-26. api/auth/login records a "login_failed"
+    // row for a rejected password, and api/auth/device-check records
+    // "device_check" — both from anonymous callers who never reach a
+    // dashboard page and therefore could never produce a nav_events row.
+    //
+    // A test harness typed one wrong password at 08:06Z; at 12:57Z the
+    // probe reported activityAgeHours 4.9 and verdict STALE, which reads
+    // as "somebody is using the product and navigation is not being
+    // recorded". Nobody was using the product. The comparison has to range
+    // over activity that COULD have produced a navigation row, or a single
+    // failed login is indistinguishable from a broken tracker.
     const [nav, activity] = await Promise.all([
       newestAt(supabase, "nav_events"),
-      newestAt(supabase, "rate_limit_log"),
+      newestAt(supabase, "rate_limit_log", { excludeScopes: ANONYMOUS_SCOPES }),
     ]);
     const asked = { nav: nav.asked, activity: activity.asked };
 

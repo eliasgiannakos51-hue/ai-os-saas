@@ -33,7 +33,10 @@ const MUTANTS = [
   {
     name: "the comparison table is dropped, so the two causes merge again",
     file: FRESH,
-    from: 'newestAt(supabase, "rate_limit_log"),',
+    // The anchor grew an options argument on 2026-09-26 when the
+    // anonymous scopes were excluded; reported STALE rather than passing,
+    // which is how it was noticed. Re-anchored on the whole call.
+    from: 'newestAt(supabase, "rate_limit_log", { excludeScopes: ANONYMOUS_SCOPES }),',
     to: 'newestAt(supabase, "nav_events"),',
     expect: "it reads a SECOND table",
   },
@@ -86,6 +89,26 @@ const MUTANTS = [
     from: "  if (!asked.nav || !asked.activity) return \"unchecked\";",
     to: "  if (false) return \"unchecked\";",
     expect: "navigation old, activity read refused -> unchecked",
+  },
+  {
+    // THE FALSE ALARM, PUT BACK. Count what a signed-out stranger writes
+    // and one rejected password reads as a broken tracker — which is
+    // what production reported on 2026-09-26 after a harness typed one.
+    name: "the activity comparison counts anonymous requests again",
+    file: FRESH,
+    from: "      newestAt(supabase, \"rate_limit_log\", { excludeScopes: ANONYMOUS_SCOPES }),",
+    to: "      newestAt(supabase, \"rate_limit_log\"),",
+    expect: "the activity comparison excludes what a signed-out stranger can write",
+  },
+  {
+    // AND THE LIST GOING STALE. A scope dropped from it walks straight
+    // back into the comparison, and the gate ranges over the routes so it
+    // can see that.
+    name: "a scope an anonymous route writes drops off the excluded list",
+    file: FRESH,
+    from: "export const ANONYMOUS_SCOPES = [\"login_failed\", \"device_check\"] as const;",
+    to: "export const ANONYMOUS_SCOPES = [\"device_check\"] as const;",
+    expect: "...and the excluded list is the one the routes actually write",
   },
 ];
 

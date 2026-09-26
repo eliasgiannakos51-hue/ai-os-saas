@@ -137,6 +137,31 @@ console.log("\n== 4. the arithmetic ==");
       /if \(!data\) return \{ ageHours: null, asked: true \}/.test(src),
     "one null for two opposite facts is what produced the wrong verdict"
   );
+  // THE COMPARISON HAS TO RANGE OVER ACTIVITY THAT COULD HAVE PRODUCED A
+  // NAVIGATION ROW. A rejected password writes rate_limit_log and never
+  // reaches a dashboard page, so counting it turns one wrong login into
+  // "the tracker is broken" — which is what production reported on
+  // 2026-09-26 after a test harness typed one.
+  ok(
+    "the activity comparison excludes what a signed-out stranger can write",
+    /ANONYMOUS_SCOPES/.test(src) && /excludeScopes: ANONYMOUS_SCOPES/.test(src),
+    "otherwise a failed login is indistinguishable from a broken tracker"
+  );
+  ok(
+    "...and the excluded list is the one the routes actually write",
+    (() => {
+      const names = [...src.matchAll(/ANONYMOUS_SCOPES = \[([^\]]+)\]/g)][0]?.[1] ?? "";
+      const declared = [...names.matchAll(/"([a-z_]+)"/g)].map((m) => m[1]);
+      // THE POPULATION IS THE ROUTES, so the check reads the routes.
+      const written = [];
+      for (const f of ["src/app/api/auth/login/route.ts", "src/app/api/auth/device-check/route.ts"]) {
+        const r = readFileSync(f, "utf8");
+        for (const m of r.matchAll(/SCOPE = "([a-z_]+)"|scope: "([a-z_]+)"/g)) written.push(m[1] ?? m[2]);
+      }
+      return written.length > 0 && written.every((w) => declared.includes(w));
+    })(),
+    "a scope added to an anonymous route and not to the list walks straight back in"
+  );
   ok(
     "...and the report carries which reads happened",
     /asked: \{ nav:/.test(src),

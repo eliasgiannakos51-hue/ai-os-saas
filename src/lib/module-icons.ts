@@ -56,6 +56,7 @@ import {
   Monitor,
   Mic,
   AppWindow,
+  CircleDashed,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -243,3 +244,24 @@ export const PREDICTIONS_ICON: LucideIcon = Compass;
 // and FolderOpen is already the records hub.
 export const PROJECTS_ICON: LucideIcon = FolderKanban;
 
+
+// ONE MARK FOR EVERY POSITION THAT IS ONLY A POSITION.
+//
+// The forty-nine `notBuilt` rows all wear this, and the duplication is
+// the honest answer rather than a shortcut. An icon is chosen against
+// what a screen DOES, and none of these has a screen: picking forty-nine
+// marks today would be forty-nine guesses, each of which has to be
+// revisited the day the feature arrives and none of which anybody can
+// check in the meantime.
+//
+// NOBODY EVER SEES IT. `visibleGroups` strips a notBuilt row before the
+// sidebar, the command palette and the hub, so a duplicated mark cannot
+// collide with anything on screen — the argument that forced
+// PREDICTIONS_ICON off Sparkles and Telescope, which WERE on screen
+// beside their twins. The day a flag comes off, the row needs a mark of
+// its own, and scripts/tests/sidebar-structure.test.mjs is where that is
+// required.
+//
+// A dashed circle, not a solid one: it reads as an outline of something
+// rather than a thing.
+export const HELD_POSITION_ICON: LucideIcon = CircleDashed;

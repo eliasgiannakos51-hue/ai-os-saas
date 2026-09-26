@@ -1,8 +1,8 @@
 # The first run — el
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **642 strings**. The whole product is 3339, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **702 strings**. The whole product is 3399, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 393 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 453 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -314,7 +314,7 @@ CSV ή tab-separated, έως {max}. Το διαβάζουμε και σου δε
 
 Δωρεάν — δεν παράγεται τίποτα, και το σβήνεις με ένα κλικ
 
-## Tier 2 — The labels — skim these (393)
+## Tier 2 — The labels — skim these (453)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1556,6 +1556,24 @@ Email
 
 Ρώτα
 
+**`sidebar.groups.business`**
+
+> EN — Business
+
+Επιχείρηση
+
+**`sidebar.groups.connect`**
+
+> EN — Connect
+
+Σύνδεση
+
+**`sidebar.groups.engineering`**
+
+> EN — Engineering
+
+Μηχανική
+
 **`sidebar.groups.make`**
 
 > EN — Make
@@ -1567,6 +1585,12 @@ Email
 > EN — Organise
 
 Οργάνωσε
+
+**`sidebar.groups.personal`**
+
+> EN — Personal
+
+Προσωπικά
 
 **`sidebar.groups.run`**
 
@@ -1585,6 +1609,12 @@ Email
 > EN — Settings
 
 Ρυθμίσεις
+
+**`sidebar.groups.verify`**
+
+> EN — Verify
+
+Έλεγχος
 
 **`sidebar.hints.affiliate`**
 
@@ -1862,11 +1892,77 @@ AI που δουλεύει για σένα
 
 Αυτοματισμοί
 
+**`sidebar.items.browserAgent`**
+
+> EN — Browser agent
+
+Πράκτορας περιηγητή
+
+**`sidebar.items.businessAccounting`**
+
+> EN — Accounting
+
+Λογιστική
+
+**`sidebar.items.businessCrm`**
+
+> EN — CRM
+
+Διαχείριση πελατών
+
+**`sidebar.items.businessFinance`**
+
+> EN — Company Finance
+
+Οικονομικά εταιρείας
+
 **`sidebar.items.businessHealth`**
 
 > EN — How the business is doing
 
 Πώς πάει η δουλειά
+
+**`sidebar.items.businessHr`**
+
+> EN — HR
+
+Ανθρώπινο δυναμικό
+
+**`sidebar.items.businessInventory`**
+
+> EN — Inventory
+
+Απόθεμα
+
+**`sidebar.items.businessLegal`**
+
+> EN — Legal
+
+Νομικά
+
+**`sidebar.items.businessMarketing`**
+
+> EN — Marketing
+
+Μάρκετινγκ
+
+**`sidebar.items.businessProcurement`**
+
+> EN — Procurement
+
+Προμήθειες
+
+**`sidebar.items.businessSupport`**
+
+> EN — Customer Support
+
+Υποστήριξη πελατών
+
+**`sidebar.items.calendar`**
+
+> EN — Calendar
+
+Ημερολόγιο
 
 **`sidebar.items.campaigns`**
 
@@ -1891,6 +1987,78 @@ AI που δουλεύει για σένα
 > EN — Competitors
 
 Ανταγωνιστές
+
+**`sidebar.items.computerAgent`**
+
+> EN — Computer agent
+
+Πράκτορας υπολογιστή
+
+**`sidebar.items.connectApis`**
+
+> EN — APIs
+
+Διεπαφές API
+
+**`sidebar.items.connectBanking`**
+
+> EN — Banking
+
+Τράπεζες
+
+**`sidebar.items.connectCalendar`**
+
+> EN — Calendar Sync
+
+Συγχρονισμός ημερολογίου
+
+**`sidebar.items.connectCrm`**
+
+> EN — CRM Connector
+
+Σύνδεση CRM
+
+**`sidebar.items.connectDataSources`**
+
+> EN — Data Sources
+
+Πηγές δεδομένων
+
+**`sidebar.items.connectDrive`**
+
+> EN — Google Drive
+
+Google Drive
+
+**`sidebar.items.connectEmail`**
+
+> EN — Email
+
+Ηλεκτρονικό ταχυδρομείο
+
+**`sidebar.items.connectGithub`**
+
+> EN — GitHub
+
+GitHub
+
+**`sidebar.items.connectIot`**
+
+> EN — IoT Devices
+
+Συσκευές IoT
+
+**`sidebar.items.connectMcp`**
+
+> EN — MCP
+
+MCP
+
+**`sidebar.items.connectSlack`**
+
+> EN — Slack
+
+Slack
 
 **`sidebar.items.content`**
 
@@ -1922,11 +2090,71 @@ AI που δουλεύει για σένα
 
 Ψάξ' το καλά
 
+**`sidebar.items.design`**
+
+> EN — Design
+
+Σχεδιασμός
+
 **`sidebar.items.documents`**
 
 > EN — Documents
 
 Έγγραφα
+
+**`sidebar.items.engCloud`**
+
+> EN — Cloud
+
+Νέφος
+
+**`sidebar.items.engCode`**
+
+> EN — Code
+
+Κώδικας
+
+**`sidebar.items.engDatabases`**
+
+> EN — Database Ops
+
+Διαχείριση βάσεων
+
+**`sidebar.items.engDeployment`**
+
+> EN — Deployment
+
+Ανάπτυξη σε παραγωγή
+
+**`sidebar.items.engDevops`**
+
+> EN — DevOps
+
+DevOps
+
+**`sidebar.items.engInfrastructure`**
+
+> EN — Infrastructure
+
+Υποδομή
+
+**`sidebar.items.engMonitoring`**
+
+> EN — Service Monitoring
+
+Παρακολούθηση υπηρεσιών
+
+**`sidebar.items.engSecurity`**
+
+> EN — Security
+
+Ασφάλεια
+
+**`sidebar.items.engTesting`**
+
+> EN — Testing
+
+Δοκιμές
 
 **`sidebar.items.favorites`**
 
@@ -1988,6 +2216,18 @@ AI που δουλεύει για σένα
 
 Συνδέσεις
 
+**`sidebar.items.knowledge`**
+
+> EN — Knowledge
+
+Γνώση
+
+**`sidebar.items.knowledgeGraph`**
+
+> EN — Knowledge Graph
+
+Γράφος γνώσης
+
 **`sidebar.items.learning`**
 
 > EN — Learning
@@ -2030,11 +2270,71 @@ AI που δουλεύει για σένα
 
 Στόχοι & Σχέδια
 
+**`sidebar.items.monitoring`**
+
+> EN — Monitoring
+
+Παρακολούθηση
+
+**`sidebar.items.music`**
+
+> EN — Music
+
+Μουσική
+
 **`sidebar.items.newEntry`**
 
 > EN — New entry
 
 Νέα καταχώρηση
+
+**`sidebar.items.operations`**
+
+> EN — Operations
+
+Λειτουργίες
+
+**`sidebar.items.personalFinance`**
+
+> EN — Personal Finance
+
+Προσωπικά οικονομικά
+
+**`sidebar.items.personalHabits`**
+
+> EN — Habits
+
+Συνήθειες
+
+**`sidebar.items.personalHealth`**
+
+> EN — Health
+
+Υγεία
+
+**`sidebar.items.personalJournal`**
+
+> EN — Journaling
+
+Ημερολόγιο σκέψεων
+
+**`sidebar.items.personalLifeOs`**
+
+> EN — Life OS
+
+Life OS
+
+**`sidebar.items.personalShopping`**
+
+> EN — Shopping
+
+Αγορές
+
+**`sidebar.items.personalTravel`**
+
+> EN — Travel
+
+Ταξίδια
 
 **`sidebar.items.posts`**
 
@@ -2108,6 +2408,12 @@ Projects
 
 Πωλήσεις
 
+**`sidebar.items.scheduledJobs`**
+
+> EN — Scheduled Jobs
+
+Προγραμματισμένες εργασίες
+
 **`sidebar.items.settings`**
 
 > EN — Settings
@@ -2119,6 +2425,12 @@ Projects
 > EN — System Health
 
 Υγεία συστήματος
+
+**`sidebar.items.tasks`**
+
+> EN — Tasks
+
+Εργασίες
 
 **`sidebar.items.team`**
 
@@ -2150,6 +2462,48 @@ Projects
 
 Ροή Εργασίας Trading
 
+**`sidebar.items.verifyCode`**
+
+> EN — Code Verification
+
+Επαλήθευση κώδικα
+
+**`sidebar.items.verifyData`**
+
+> EN — Data Validation
+
+Επικύρωση δεδομένων
+
+**`sidebar.items.verifyFacts`**
+
+> EN — Fact Checking
+
+Έλεγχος γεγονότων
+
+**`sidebar.items.verifyOutput`**
+
+> EN — Output Evaluation
+
+Αξιολόγηση αποτελεσμάτων
+
+**`sidebar.items.verifyRedTeam`**
+
+> EN — Red Teaming
+
+Επιθετικός έλεγχος
+
+**`sidebar.items.verifySecurity`**
+
+> EN — Security Testing
+
+Δοκιμές ασφαλείας
+
+**`sidebar.items.verifySources`**
+
+> EN — Source Verification
+
+Επαλήθευση πηγών
+
 **`sidebar.items.videos`**
 
 > EN — Video ideas
@@ -2173,6 +2527,12 @@ Projects
 > EN — Website plans
 
 Σχέδια ιστότοπων
+
+**`sidebar.items.workflows`**
+
+> EN — Workflows
+
+Ροές εργασίας
 
 ### first result
 

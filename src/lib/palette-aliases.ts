@@ -86,10 +86,15 @@ export const PALETTE_ALIASES: PaletteAliases = {
     en: ["published", "live", "online", "deployed"],
     el: ["δημοσιευμένα", "ζωντανά", "online"],
   },
-  marketplace: {
-    en: ["marketplace", "templates", "ready made"],
-    el: ["πρότυπα", "έτοιμα", "βοηθοί"],
-  },
+  // MARKETPLACE'S SIX ALIASES WERE DELETED ON 2026-09-26, two days after
+  // the row was `retired`. They pointed at a page the command palette no
+  // longer offers, so "templates" and "έτοιμα" reached nothing at all —
+  // the palette does not fall through to a retired row, it does not know
+  // about it. Left here they were six words that looked like coverage.
+  //
+  // It took two days to notice because the gate that checks these was
+  // searching a registry the palette does not use; it uses visibleGroups
+  // now, and it found this the same run.
   routing: {
     en: ["model", "models", "which ai", "routing"],
     el: ["μοντέλο", "μοντέλα", "δρομολόγηση"],

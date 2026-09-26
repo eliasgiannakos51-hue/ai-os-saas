@@ -1,8 +1,8 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **642 strings**. The whole product is 3339, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **702 strings**. The whole product is 3399, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 393 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 453 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -267,7 +267,7 @@ Ionexa uses this to pick which plan step to suggest next — lighter work when y
 
 Free — nothing is generated, and you can remove it in one click
 
-## Tier 2 — The labels — skim these (393)
+## Tier 2 — The labels — skim these (453)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1304,6 +1304,21 @@ Close menu
 
 Ask
 
+**`sidebar.groups.business`**
+
+
+Business
+
+**`sidebar.groups.connect`**
+
+
+Connect
+
+**`sidebar.groups.engineering`**
+
+
+Engineering
+
 **`sidebar.groups.make`**
 
 
@@ -1313,6 +1328,11 @@ Make
 
 
 Organise
+
+**`sidebar.groups.personal`**
+
+
+Personal
 
 **`sidebar.groups.run`**
 
@@ -1328,6 +1348,11 @@ See
 
 
 Settings
+
+**`sidebar.groups.verify`**
+
+
+Verify
 
 **`sidebar.hints.affiliate`**
 
@@ -1559,10 +1584,65 @@ App ideas
 
 Automation
 
+**`sidebar.items.browserAgent`**
+
+
+Browser agent
+
+**`sidebar.items.businessAccounting`**
+
+
+Accounting
+
+**`sidebar.items.businessCrm`**
+
+
+CRM
+
+**`sidebar.items.businessFinance`**
+
+
+Company Finance
+
 **`sidebar.items.businessHealth`**
 
 
 How the business is doing
+
+**`sidebar.items.businessHr`**
+
+
+HR
+
+**`sidebar.items.businessInventory`**
+
+
+Inventory
+
+**`sidebar.items.businessLegal`**
+
+
+Legal
+
+**`sidebar.items.businessMarketing`**
+
+
+Marketing
+
+**`sidebar.items.businessProcurement`**
+
+
+Procurement
+
+**`sidebar.items.businessSupport`**
+
+
+Customer Support
+
+**`sidebar.items.calendar`**
+
+
+Calendar
 
 **`sidebar.items.campaigns`**
 
@@ -1583,6 +1663,66 @@ AI Coding
 
 
 Competitors
+
+**`sidebar.items.computerAgent`**
+
+
+Computer agent
+
+**`sidebar.items.connectApis`**
+
+
+APIs
+
+**`sidebar.items.connectBanking`**
+
+
+Banking
+
+**`sidebar.items.connectCalendar`**
+
+
+Calendar Sync
+
+**`sidebar.items.connectCrm`**
+
+
+CRM Connector
+
+**`sidebar.items.connectDataSources`**
+
+
+Data Sources
+
+**`sidebar.items.connectDrive`**
+
+
+Google Drive
+
+**`sidebar.items.connectEmail`**
+
+
+Email
+
+**`sidebar.items.connectGithub`**
+
+
+GitHub
+
+**`sidebar.items.connectIot`**
+
+
+IoT Devices
+
+**`sidebar.items.connectMcp`**
+
+
+MCP
+
+**`sidebar.items.connectSlack`**
+
+
+Slack
 
 **`sidebar.items.content`**
 
@@ -1609,10 +1749,60 @@ Decisions
 
 Look into it properly
 
+**`sidebar.items.design`**
+
+
+Design
+
 **`sidebar.items.documents`**
 
 
 Documents
+
+**`sidebar.items.engCloud`**
+
+
+Cloud
+
+**`sidebar.items.engCode`**
+
+
+Code
+
+**`sidebar.items.engDatabases`**
+
+
+Database Ops
+
+**`sidebar.items.engDeployment`**
+
+
+Deployment
+
+**`sidebar.items.engDevops`**
+
+
+DevOps
+
+**`sidebar.items.engInfrastructure`**
+
+
+Infrastructure
+
+**`sidebar.items.engMonitoring`**
+
+
+Service Monitoring
+
+**`sidebar.items.engSecurity`**
+
+
+Security
+
+**`sidebar.items.engTesting`**
+
+
+Testing
 
 **`sidebar.items.favorites`**
 
@@ -1664,6 +1854,16 @@ Image ideas
 
 Integrations
 
+**`sidebar.items.knowledge`**
+
+
+Knowledge
+
+**`sidebar.items.knowledgeGraph`**
+
+
+Knowledge Graph
+
 **`sidebar.items.learning`**
 
 
@@ -1699,10 +1899,60 @@ Mine
 
 Goals & Plans
 
+**`sidebar.items.monitoring`**
+
+
+Monitoring
+
+**`sidebar.items.music`**
+
+
+Music
+
 **`sidebar.items.newEntry`**
 
 
 New entry
+
+**`sidebar.items.operations`**
+
+
+Operations
+
+**`sidebar.items.personalFinance`**
+
+
+Personal Finance
+
+**`sidebar.items.personalHabits`**
+
+
+Habits
+
+**`sidebar.items.personalHealth`**
+
+
+Health
+
+**`sidebar.items.personalJournal`**
+
+
+Journaling
+
+**`sidebar.items.personalLifeOs`**
+
+
+Life OS
+
+**`sidebar.items.personalShopping`**
+
+
+Shopping
+
+**`sidebar.items.personalTravel`**
+
+
+Travel
 
 **`sidebar.items.posts`**
 
@@ -1764,6 +2014,11 @@ Which AI is used
 
 Sales
 
+**`sidebar.items.scheduledJobs`**
+
+
+Scheduled Jobs
+
 **`sidebar.items.settings`**
 
 
@@ -1773,6 +2028,11 @@ Settings
 
 
 System Health
+
+**`sidebar.items.tasks`**
+
+
+Tasks
 
 **`sidebar.items.team`**
 
@@ -1799,6 +2059,41 @@ Trading journal
 
 Trading Workflow
 
+**`sidebar.items.verifyCode`**
+
+
+Code Verification
+
+**`sidebar.items.verifyData`**
+
+
+Data Validation
+
+**`sidebar.items.verifyFacts`**
+
+
+Fact Checking
+
+**`sidebar.items.verifyOutput`**
+
+
+Output Evaluation
+
+**`sidebar.items.verifyRedTeam`**
+
+
+Red Teaming
+
+**`sidebar.items.verifySecurity`**
+
+
+Security Testing
+
+**`sidebar.items.verifySources`**
+
+
+Source Verification
+
 **`sidebar.items.videos`**
 
 
@@ -1818,6 +2113,11 @@ Build a site
 
 
 Website plans
+
+**`sidebar.items.workflows`**
+
+
+Workflows
 
 ### first result
 

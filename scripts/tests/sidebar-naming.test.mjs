@@ -336,8 +336,6 @@ const BUILD_ALLOWED = {
   // navigation question — which it already was, for as long as the table
   // had no screen at all.
   "/dashboard/form-submissions": "what the published sites produced",
-  "/dashboard/product-workflow": "a guided build, start to finish",
-  "/dashboard/trading-workflow": "a guided build, start to finish",
   // THREE POSITIONS, NOT THREE ROWS. Images and Videos are tracking logs
   // and Music has no page at all; none of them is drawn under Make and
   // none may be until it generates, which is what the section above
@@ -347,6 +345,29 @@ const BUILD_ALLOWED = {
   "/dashboard/images": "a position held — a tracking log until a route behind it reaches a model",
   "/dashboard/videos": "a position held — a tracking log until a route behind it reaches a model",
   "/dashboard/music": "a position held — no page at all yet",
+  // FOUR CHANGES ON 2026-09-26, when the declared structure landed.
+  //
+  // The two guided workflows LEFT for Run. Both are records of a
+  // sequence that ran, which is Run's subject; neither produces
+  // anything, and under Make they were two of the five rows in this
+  // list that generate nothing. Their entries are deleted rather than
+  // kept "just in case", for the reason the Voice paragraph above gives.
+  //
+  // Design ARRIVED as a fourth held position beside Images, Videos and
+  // Music, and is the emptiest of the four: no page, no route, no
+  // component.
+  "/dashboard/design": "a position held — no page, no route, nothing at all yet",
+  // Apps ARRIVED from See. It is the eighteen-line generic module page,
+  // so it is a tracking log exactly as Images and Videos are, and it is
+  // hidden for the same reason.
+  "/dashboard/apps": "a position held — a tracking log until a route behind it reaches a model",
+  // Data Analysis ARRIVED from See AND IS DRAWN, which makes it the one
+  // row in this list that changed state rather than address. It is here
+  // on the same test every other drawn row in Make passes — section 3b
+  // reads api/data-analysis/[id]/analyse and finds the model call — and
+  // the reason it was not here before is that it was hidden, not that it
+  // could not qualify.
+  "/dashboard/data-analysis": "a file in, what the numbers say out — profiled, analysed by a model, charted",
 };
 const unexpected = buildHrefs.filter((href) => !(href in BUILD_ALLOWED));
 check(

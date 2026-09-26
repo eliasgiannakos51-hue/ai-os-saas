@@ -45,6 +45,7 @@ import {
   BROWSER_ICON,
   COMPUTER_ICON,
   MEETINGS_ICON,
+  HELD_POSITION_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -180,6 +181,34 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // visibleGroups strips it, so neither the palette nor the hub can
       // offer a route that would 404.
       { href: "/dashboard/music", label: "Music", icon: MUSIC_ICON, hintKey: "music", notBuilt: true },
+      // Design has no page and no route: no component under
+      // src/components draws one and no handler under src/app/api
+      // answers for one. Declared here so that the day it does, the row
+      // appears between Audio and Apps rather than at the foot of Make.
+      { href: "/dashboard/design", label: "Design", icon: HELD_POSITION_ICON, hintKey: "design", notBuilt: true },
+      // APPS AND DATA MOVED HERE FROM See on 2026-09-26, and they are
+      // the two halves of the distinction this group keeps:
+      //
+      //   Apps is a RECORD LIST. src/app/dashboard/apps/page.tsx is the
+      //   eighteen-line generic module page, so the page opens and
+      //   stores app ideas; nothing generates an app. It stays hidden
+      //   under a heading that says Make, for the same reason Images and
+      //   Videos do.
+      //
+      //   Data Analysis GENERATES. api/data-analysis/upload profiles the
+      //   file, [id]/analyse hands that profile to a model and stores
+      //   what came back, [id]/ask answers questions about it and
+      //   [id]/export writes it out. It was hidden — one of the six rows
+      //   the September tidy-up took out of the sidebar — and it is the
+      //   one row the inventory of 2026-09-26 moved back INTO it, on the
+      //   owner's rule: if it exists and it works, the flag comes off.
+      { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps, hintKey: "apps", hidden: true },
+      {
+        href: "/dashboard/data-analysis",
+        label: "Data Analysis",
+        icon: MODULE_ICONS["data-analysis"],
+        hintKey: "dataAnalysis",
+      },
 
       // --- in the palette and on the hub, not in the sidebar ---
       // The generator the product used to open with. It still routes a
@@ -195,20 +224,6 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         label: "Form Submissions",
         icon: FORM_SUBMISSIONS_ICON,
         hintKey: "formSubmissions",
-        hidden: true,
-      },
-      {
-        href: "/dashboard/product-workflow",
-        label: "Product Workflow",
-        icon: PRODUCT_WORKFLOW_ICON,
-        hintKey: "productWorkflow",
-        hidden: true,
-      },
-      {
-        href: "/dashboard/trading-workflow",
-        label: "Trading Workflow",
-        icon: TRADING_WORKFLOW_ICON,
-        hintKey: "tradingWorkflow",
         hidden: true,
       },
     ],
@@ -237,6 +252,16 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // providers and metered minutes for as long as they have existed; the
       // move is about where somebody reaches for it, not about what it is.
       { href: "/dashboard/voice", label: "Voice", icon: VOICE_ICON, hintKey: "voice" },
+
+      // --- in the palette and on the hub, not in the sidebar ---
+      // Both are TRACKERS — two of the twelve record lists lib/modules.ts
+      // serves through one route — and both moved here from See on
+      // 2026-09-26 because the owner's structure files them under Ask.
+      // They keep `hidden`: Learning stores what you noted down about a
+      // subject and teaches nothing, Decisions stores decisions and
+      // decides nothing, and a row under Ask promises an answer.
+      { href: "/dashboard/learning", label: "Learning", icon: MODULE_ICONS.learning, hintKey: "learning", hidden: true },
+      { href: "/dashboard/decisions", label: "Decisions", icon: MODULE_ICONS.decisions, hintKey: "decisions", hidden: true },
     ],
   },
   {
@@ -272,8 +297,39 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // which is what this heading means — an agent that drives a browser
       // and one that drives the machine. Neither has a route, a component
       // or a table, so neither is drawn and neither is searchable.
+      // THREE POSITIONS HELD, and what is behind each of them today:
+      //
+      //   Workflows    the two that exist (Product, Trading) are hidden
+      //                trackers at the foot of this group. There is no
+      //                page a person builds a workflow on.
+      //   Scheduled    api/cron and api/jobs run work on a schedule and
+      //                Jobs  vercel.json schedules them; no screen shows
+      //                a person what is scheduled or lets them change it.
+      //   Operations   nothing at all.
+      { href: "/dashboard/workflows", label: "Workflows", icon: HELD_POSITION_ICON, hintKey: "workflows", notBuilt: true },
+      { href: "/dashboard/scheduled-jobs", label: "Scheduled Jobs", icon: HELD_POSITION_ICON, hintKey: "scheduledJobs", notBuilt: true },
+      { href: "/dashboard/operations", label: "Operations", icon: HELD_POSITION_ICON, hintKey: "operations", notBuilt: true },
       { href: "/dashboard/browser", label: "Browser agent", icon: BROWSER_ICON, hintKey: "browserAgent", notBuilt: true },
       { href: "/dashboard/computer", label: "Computer agent", icon: COMPUTER_ICON, hintKey: "computerAgent", notBuilt: true },
+
+      // --- in the palette and on the hub, not in the sidebar ---
+      // Moved here from Make on 2026-09-26: both are records of a
+      // sequence that ran, which is this group's subject rather than
+      // Make's.
+      {
+        href: "/dashboard/product-workflow",
+        label: "Product Workflow",
+        icon: PRODUCT_WORKFLOW_ICON,
+        hintKey: "productWorkflow",
+        hidden: true,
+      },
+      {
+        href: "/dashboard/trading-workflow",
+        label: "Trading Workflow",
+        icon: TRADING_WORKFLOW_ICON,
+        hintKey: "tradingWorkflow",
+        hidden: true,
+      },
     ],
   },
   {
@@ -314,6 +370,19 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         hintKey: "businessHealth",
         ownerOnly: true,
       },
+      // ANALYTICS IS A TRACKER, not a dashboard: /dashboard/analytics is
+      // one of the twelve record lists in lib/modules.ts. It stays
+      // hidden, and its POSITION — the owner's structure puts it here,
+      // after Business health — is now declared rather than left to
+      // wherever it landed.
+      { href: "/dashboard/analytics", label: "Analytics", icon: MODULE_ICONS.analytics, hintKey: "analytics", hidden: true },
+      // Nothing at all behind either of these. /dashboard/system-health
+      // is the nearest thing to Monitoring and it is the owner's own
+      // operational page, not a user's; lib/knowledge-graph.ts and
+      // api/entity-links compute the links a Knowledge Graph would draw,
+      // and no page draws them.
+      { href: "/dashboard/monitoring", label: "Monitoring", icon: HELD_POSITION_ICON, hintKey: "monitoring", notBuilt: true },
+      { href: "/dashboard/knowledge-graph", label: "Knowledge Graph", icon: HELD_POSITION_ICON, hintKey: "knowledgeGraph", notBuilt: true },
 
       // --- in the palette and on the hub, not in the sidebar ---
       // HOME IS HIDDEN AND IS NOT UNREACHABLE: the logo at the top of this
@@ -329,14 +398,6 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // command palette. Two keystrokes, not one.
       { href: "/dashboard/records", label: "My records", icon: MY_BUSINESS_ICON, hintKey: "records", hidden: true },
       { href: "/dashboard/favorites", label: "Favorites", icon: FAVORITES_ICON, hintKey: "favorites", hidden: true },
-      { href: "/dashboard/analytics", label: "Analytics", icon: MODULE_ICONS.analytics, hintKey: "analytics", hidden: true },
-      {
-        href: "/dashboard/data-analysis",
-        label: "Data Analysis",
-        icon: MODULE_ICONS["data-analysis"],
-        hintKey: "dataAnalysis",
-        hidden: true,
-      },
       // The logs. Every one is a table of the user's own rows, served by
       // the same GenericList component, and each still has its route, its
       // translation and its palette entry.
@@ -344,9 +405,7 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: "/dashboard/content", label: "Content", icon: MODULE_ICONS.content, hintKey: "content", hidden: true },
       { href: "/dashboard/products", label: "Products", icon: MODULE_ICONS.products, hintKey: "products", hidden: true },
       { href: "/dashboard/research", label: "Research", icon: MODULE_ICONS.research, hintKey: "research", hidden: true },
-      { href: "/dashboard/learning", label: "Learning", icon: MODULE_ICONS.learning, hintKey: "learning", hidden: true },
       { href: "/dashboard/competitors", label: "Competitors", icon: MODULE_ICONS.competitors, hintKey: "competitors", hidden: true },
-      { href: "/dashboard/decisions", label: "Decisions", icon: MODULE_ICONS.decisions, hintKey: "decisions", hidden: true },
       { href: "/dashboard/feedback", label: "Feedback", icon: MODULE_ICONS.feedback, hintKey: "feedback", hidden: true },
       // The trading log's companion page, and one of the four that had no
       // entry point anywhere in the product before round 5.
@@ -371,7 +430,6 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // under Make above, and no longer in this list. Posts (V5 #22) was
       // never in it: there was no page to hide.
       { href: "/dashboard/websites", label: "Websites", icon: MODULE_ICONS.websites, hintKey: "websites", hidden: true },
-      { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps, hintKey: "apps", hidden: true },
       // Images and Videos WERE here, among the trackers. They are declared
       // under Make now, still hidden and still for the same reason — the
       // group they will be drawn in is the group their position belongs
@@ -404,6 +462,133 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // is the tier.
       { href: "/dashboard/meetings", label: "Meetings", icon: MEETINGS_ICON, hintKey: "meetings" },
       { href: "/dashboard/team", label: "Team", icon: TEAM_ICON, hintKey: "team" },
+      // Three held positions, and none of them has a route: there is no
+      // src/app/dashboard/calendar, no /tasks and no /knowledge, and
+      // nothing under src/app/api answers for any of the three. The
+      // calendar one is the one to watch — lib/agents/agent-templates.ts
+      // already mentions a "calendar" delivery target — but a mention in
+      // an agent template is not a screen.
+      { href: "/dashboard/calendar", label: "Calendar", icon: HELD_POSITION_ICON, hintKey: "calendar", notBuilt: true },
+      { href: "/dashboard/tasks", label: "Tasks", icon: HELD_POSITION_ICON, hintKey: "tasks", notBuilt: true },
+      { href: "/dashboard/knowledge", label: "Knowledge", icon: HELD_POSITION_ICON, hintKey: "knowledge", notBuilt: true },
+    ],
+  },
+  // ---------------------------------------------------------------------
+  // THE FIVE GROUPS NOBODY SEES, AND THE REASON THEY ARE HERE
+  //
+  // Every row below carries `notBuilt`, so `visibleGroups` strips all of
+  // them and then drops the five groups it has just emptied: the sidebar
+  // draws no heading, the command palette offers no row, and the hub at
+  // /dashboard/records lists nothing. A reader of the running app cannot
+  // tell these forty-three positions exist.
+  //
+  // WHAT THEY BUY IS ORDER, and the cost of not having it is recorded
+  // above `notBuilt` in lib/sidebar-visibility.ts: every feature that
+  // arrived after the list was written got appended to the end of
+  // whichever group it belonged to, because nobody had said where it
+  // went. Meetings was the first row to make the whole journey — position
+  // decided cold on 2026-09-19, flag off on 2026-09-23 — and it landed
+  // between Weekly Reflection and Team without anybody re-opening the
+  // question.
+  //
+  // THE ORDER IS HELD BY scripts/tests/sidebar-structure.test.mjs, which
+  // compares the DECLARED list position by position, and by
+  // sidebar-structure.mutation.mjs, which reorders it and requires that
+  // gate to go red. Without those two this is a comment.
+  // CONNECT — ELEVEN HELD POSITIONS AND NOT ONE LIVE ROW, which is why
+  // no heading appears. Three of the eleven are half-true today and the
+  // half matters: lib/integrations/providers.ts supports gmail,
+  // google_drive and slack, and the one screen that uses them is
+  // /dashboard/integrations, filed under Settings because connecting an
+  // account is a setting rather than a daily action. A row here would be
+  // a second door to the same page under a different promise. When Email
+  // becomes a place you READ your mail rather than authorise it, this
+  // flag comes off.
+  {
+    heading: "Connect",
+    items: [
+      { href: "/dashboard/connect/email", label: "Email", icon: HELD_POSITION_ICON, hintKey: "connectEmail", notBuilt: true },
+      { href: "/dashboard/connect/calendar", label: "Calendar Sync", icon: HELD_POSITION_ICON, hintKey: "connectCalendar", notBuilt: true },
+      { href: "/dashboard/connect/github", label: "GitHub", icon: HELD_POSITION_ICON, hintKey: "connectGithub", notBuilt: true },
+      { href: "/dashboard/connect/drive", label: "Google Drive", icon: HELD_POSITION_ICON, hintKey: "connectDrive", notBuilt: true },
+      { href: "/dashboard/connect/slack", label: "Slack", icon: HELD_POSITION_ICON, hintKey: "connectSlack", notBuilt: true },
+      { href: "/dashboard/connect/crm", label: "CRM Connector", icon: HELD_POSITION_ICON, hintKey: "connectCrm", notBuilt: true },
+      { href: "/dashboard/connect/banking", label: "Banking", icon: HELD_POSITION_ICON, hintKey: "connectBanking", notBuilt: true },
+      { href: "/dashboard/connect/apis", label: "APIs", icon: HELD_POSITION_ICON, hintKey: "connectApis", notBuilt: true },
+      { href: "/dashboard/connect/data-sources", label: "Data Sources", icon: HELD_POSITION_ICON, hintKey: "connectDataSources", notBuilt: true },
+      { href: "/dashboard/connect/mcp", label: "MCP", icon: HELD_POSITION_ICON, hintKey: "connectMcp", notBuilt: true },
+      { href: "/dashboard/connect/iot", label: "IoT Devices", icon: HELD_POSITION_ICON, hintKey: "connectIot", notBuilt: true },
+    ],
+  },
+
+  // BUSINESS — nine held positions. Two of the nine have a namesake in
+  // the product already and neither is this: /dashboard/finance and
+  // /dashboard/sales are two of the twelve record lists under See, where
+  // a person writes down what happened. A Business row is a place the
+  // work is DONE, and none of the nine is that yet.
+  {
+    heading: "Business",
+    items: [
+      { href: "/dashboard/business/crm", label: "CRM", icon: HELD_POSITION_ICON, hintKey: "businessCrm", notBuilt: true },
+      { href: "/dashboard/business/marketing", label: "Marketing", icon: HELD_POSITION_ICON, hintKey: "businessMarketing", notBuilt: true },
+      { href: "/dashboard/business/accounting", label: "Accounting", icon: HELD_POSITION_ICON, hintKey: "businessAccounting", notBuilt: true },
+      { href: "/dashboard/business/finance", label: "Company Finance", icon: HELD_POSITION_ICON, hintKey: "businessFinance", notBuilt: true },
+      { href: "/dashboard/business/hr", label: "HR", icon: HELD_POSITION_ICON, hintKey: "businessHr", notBuilt: true },
+      { href: "/dashboard/business/legal", label: "Legal", icon: HELD_POSITION_ICON, hintKey: "businessLegal", notBuilt: true },
+      { href: "/dashboard/business/procurement", label: "Procurement", icon: HELD_POSITION_ICON, hintKey: "businessProcurement", notBuilt: true },
+      { href: "/dashboard/business/inventory", label: "Inventory", icon: HELD_POSITION_ICON, hintKey: "businessInventory", notBuilt: true },
+      { href: "/dashboard/business/support", label: "Customer Support", icon: HELD_POSITION_ICON, hintKey: "businessSupport", notBuilt: true },
+    ],
+  },
+
+  // ENGINEERING — nine held positions. /dashboard/coding is live under
+  // Make and it writes code; the Code row here is the other half, a
+  // place a repository is worked on rather than a snippet produced, and
+  // nothing in src/app does that.
+  {
+    heading: "Engineering",
+    items: [
+      { href: "/dashboard/engineering/code", label: "Code", icon: HELD_POSITION_ICON, hintKey: "engCode", notBuilt: true },
+      { href: "/dashboard/engineering/testing", label: "Testing", icon: HELD_POSITION_ICON, hintKey: "engTesting", notBuilt: true },
+      { href: "/dashboard/engineering/deployment", label: "Deployment", icon: HELD_POSITION_ICON, hintKey: "engDeployment", notBuilt: true },
+      { href: "/dashboard/engineering/cloud", label: "Cloud", icon: HELD_POSITION_ICON, hintKey: "engCloud", notBuilt: true },
+      { href: "/dashboard/engineering/databases", label: "Database Ops", icon: HELD_POSITION_ICON, hintKey: "engDatabases", notBuilt: true },
+      { href: "/dashboard/engineering/devops", label: "DevOps", icon: HELD_POSITION_ICON, hintKey: "engDevops", notBuilt: true },
+      { href: "/dashboard/engineering/security", label: "Security", icon: HELD_POSITION_ICON, hintKey: "engSecurity", notBuilt: true },
+      { href: "/dashboard/engineering/monitoring", label: "Service Monitoring", icon: HELD_POSITION_ICON, hintKey: "engMonitoring", notBuilt: true },
+      { href: "/dashboard/engineering/infrastructure", label: "Infrastructure", icon: HELD_POSITION_ICON, hintKey: "engInfrastructure", notBuilt: true },
+    ],
+  },
+
+  // VERIFY — seven held positions, and the group with the least behind
+  // it: nothing under src/app/api checks a claim, validates a dataset or
+  // scores an output. api/security-check-log records what the security
+  // checks in lib/ found, which is a log of this product's own checks
+  // and not a service a user runs.
+  {
+    heading: "Verify",
+    items: [
+      { href: "/dashboard/verify/facts", label: "Fact Checking", icon: HELD_POSITION_ICON, hintKey: "verifyFacts", notBuilt: true },
+      { href: "/dashboard/verify/data", label: "Data Validation", icon: HELD_POSITION_ICON, hintKey: "verifyData", notBuilt: true },
+      { href: "/dashboard/verify/code", label: "Code Verification", icon: HELD_POSITION_ICON, hintKey: "verifyCode", notBuilt: true },
+      { href: "/dashboard/verify/security", label: "Security Testing", icon: HELD_POSITION_ICON, hintKey: "verifySecurity", notBuilt: true },
+      { href: "/dashboard/verify/output", label: "Output Evaluation", icon: HELD_POSITION_ICON, hintKey: "verifyOutput", notBuilt: true },
+      { href: "/dashboard/verify/sources", label: "Source Verification", icon: HELD_POSITION_ICON, hintKey: "verifySources", notBuilt: true },
+      { href: "/dashboard/verify/red-team", label: "Red Teaming", icon: HELD_POSITION_ICON, hintKey: "verifyRedTeam", notBuilt: true },
+    ],
+  },
+
+  // PERSONAL — seven held positions, nothing behind any of them.
+  {
+    heading: "Personal",
+    items: [
+      { href: "/dashboard/personal/habits", label: "Habits", icon: HELD_POSITION_ICON, hintKey: "personalHabits", notBuilt: true },
+      { href: "/dashboard/personal/health", label: "Health", icon: HELD_POSITION_ICON, hintKey: "personalHealth", notBuilt: true },
+      { href: "/dashboard/personal/travel", label: "Travel", icon: HELD_POSITION_ICON, hintKey: "personalTravel", notBuilt: true },
+      { href: "/dashboard/personal/shopping", label: "Shopping", icon: HELD_POSITION_ICON, hintKey: "personalShopping", notBuilt: true },
+      { href: "/dashboard/personal/finance", label: "Personal Finance", icon: HELD_POSITION_ICON, hintKey: "personalFinance", notBuilt: true },
+      { href: "/dashboard/personal/journal", label: "Journaling", icon: HELD_POSITION_ICON, hintKey: "personalJournal", notBuilt: true },
+      { href: "/dashboard/personal/life-os", label: "Life OS", icon: HELD_POSITION_ICON, hintKey: "personalLifeOs", notBuilt: true },
     ],
   },
 ];

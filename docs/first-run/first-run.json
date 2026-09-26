@@ -1,6 +1,6 @@
 {
-  "total": 3339,
-  "onPath": 642,
+  "total": 3399,
+  "onPath": 702,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -16,7 +16,7 @@
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 393
+      "count": 453
     },
     {
       "n": 3,
@@ -1441,6 +1441,24 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.groups.business",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.groups.connect",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.groups.engineering",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "sidebar.groups.make",
           "depth": 1,
           "tier": 2,
@@ -1448,6 +1466,12 @@
         },
         {
           "key": "sidebar.groups.organise",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.groups.personal",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"
@@ -1466,6 +1490,12 @@
         },
         {
           "key": "sidebar.groups.settings",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.groups.verify",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"
@@ -1861,7 +1891,73 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.items.browserAgent",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.businessAccounting",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.businessCrm",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.businessFinance",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "sidebar.items.businessHealth",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.businessHr",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.businessInventory",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.businessLegal",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.businessMarketing",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.businessProcurement",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.businessSupport",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.calendar",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"
@@ -1886,6 +1982,78 @@
         },
         {
           "key": "sidebar.items.competitors",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.computerAgent",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.connectApis",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.connectBanking",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.connectCalendar",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.connectCrm",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.connectDataSources",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.connectDrive",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.connectEmail",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.connectGithub",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.connectIot",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.connectMcp",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.connectSlack",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"
@@ -1921,7 +2089,67 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.items.design",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "sidebar.items.documents",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.engCloud",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.engCode",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.engDatabases",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.engDeployment",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.engDevops",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.engInfrastructure",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.engMonitoring",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.engSecurity",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.engTesting",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"
@@ -1987,6 +2215,18 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.items.knowledge",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.knowledgeGraph",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "sidebar.items.learning",
           "depth": 1,
           "tier": 2,
@@ -2029,7 +2269,67 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.items.monitoring",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.music",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "sidebar.items.newEntry",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.operations",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.personalFinance",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.personalHabits",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.personalHealth",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.personalJournal",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.personalLifeOs",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.personalShopping",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.personalTravel",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"
@@ -2107,6 +2407,12 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.items.scheduledJobs",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "sidebar.items.settings",
           "depth": 1,
           "tier": 2,
@@ -2114,6 +2420,12 @@
         },
         {
           "key": "sidebar.items.systemHealth",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.tasks",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"
@@ -2149,6 +2461,48 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.items.verifyCode",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.verifyData",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.verifyFacts",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.verifyOutput",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.verifyRedTeam",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.verifySecurity",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.verifySources",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "sidebar.items.videos",
           "depth": 1,
           "tier": 2,
@@ -2168,6 +2522,12 @@
         },
         {
           "key": "sidebar.items.websites",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.workflows",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"

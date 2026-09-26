@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 /*
  * THE PATHS THIS REPOSITORY NAMES ON PURPOSE THAT ARE NOT THERE.
  *
@@ -130,7 +132,53 @@ export const ABSENT_ON_PURPOSE = {
 // files, and the comments that record the fix have to say the wrong
 // route out loud or the next reader cannot tell what changed. Checked
 // both ways by self-claims.test.mjs.
+/**
+ * THE HELD SIDEBAR POSITIONS, READ OUT OF THE CONFIG THAT HOLDS THEM.
+ *
+ * docs/sidebar-structure.md is the register of every declared position,
+ * and fifty-five of them are `notBuilt` — a route that MUST NOT resolve,
+ * because the palette offering it would be offering a 404. The register
+ * names every one, so the route scan reports every one, so every one
+ * needs an entry here.
+ *
+ * TYPED OUT, THAT LIST WOULD BE THE THING IT IS AN EXCEPTION FOR: a
+ * second copy of the config, edited by hand on the day a feature ships
+ * and forgotten on every other. CLAUDE.md's rule for this exact shape is
+ * that if the rule says "every X" the check must range over the same set
+ * — so the set is read from lib/sidebar-nav.ts.
+ *
+ * AND THE BOTH-WAYS CHECK STILL BITES, in the direction that matters.
+ * The day a page lands under one of these the route starts resolving,
+ * the scan stops reporting it, and self-claims.test.mjs calls the entry
+ * orphaned — which is the same signal sidebar-structure.test.mjs gives
+ * from the other side ("no not-built row has a page on disk"). Two gates,
+ * one event, neither of which anybody has to remember.
+ */
+function heldSidebarRoutes() {
+  const src = readFileSync("src/lib/sidebar-nav.ts", "utf8");
+  // Each item runs from its own `href:` to the next `{`, which is what
+  // makes `notBuilt` belong to THIS item — the same slicing rule
+  // scripts/tests/lib/sidebar-source.mjs states at length.
+  return src
+    .split(/href:\s*/)
+    .slice(1)
+    .map((chunk) => ({ head: chunk.split(/\n\s*\{/)[0], href: chunk.match(/^"([^"]+)"/)?.[1] }))
+    .filter((i) => i.href && /notBuilt:\s*true/.test(i.head))
+    .map((i) => i.href);
+}
+
 export const ROUTES_ABSENT_ON_PURPOSE = {
+  "docs/sidebar-structure.md": {
+    reason:
+      "THE REGISTER OF DECLARED POSITIONS, and a held one is a route the app router must NOT " +
+      "answer — that is what `notBuilt` means and why visibleGroups strips it from the palette " +
+      "and the hub. The list is derived from lib/sidebar-nav.ts rather than typed, so it cannot " +
+      "drift from the config; the day a page lands under one of these the route resolves, the " +
+      "scan stops reporting it, and the both-ways check below calls this entry orphaned.",
+    get routes() {
+      return heldSidebarRoutes();
+    },
+  },
   // REMOVED 2026-09-23, and the entry predicted its own removal: it said
   // "the day it exists this entry goes stale in the direction the
   // both-ways check catches", and that is what happened. /dashboard/meetings

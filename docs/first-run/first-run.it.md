@@ -1,8 +1,8 @@
 # The first run — it
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **642 strings**. The whole product is 3339, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **702 strings**. The whole product is 3399, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 393 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 453 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -314,7 +314,7 @@ Ionexa lo usa per scegliere quale passo del piano proporti — lavoro leggero qu
 
 Gratis: non viene generato nulla e lo togli con un clic
 
-## Tier 2 — The labels — skim these (393)
+## Tier 2 — The labels — skim these (453)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1556,6 +1556,24 @@ Chiudi il menu
 
 Chiedi
 
+**`sidebar.groups.business`**
+
+> EN — Business
+
+Attività
+
+**`sidebar.groups.connect`**
+
+> EN — Connect
+
+Collega
+
+**`sidebar.groups.engineering`**
+
+> EN — Engineering
+
+Ingegneria
+
 **`sidebar.groups.make`**
 
 > EN — Make
@@ -1567,6 +1585,12 @@ Crea
 > EN — Organise
 
 Organizza
+
+**`sidebar.groups.personal`**
+
+> EN — Personal
+
+Personale
 
 **`sidebar.groups.run`**
 
@@ -1585,6 +1609,12 @@ Vedi
 > EN — Settings
 
 Impostazioni
+
+**`sidebar.groups.verify`**
+
+> EN — Verify
+
+Verifica
 
 **`sidebar.hints.affiliate`**
 
@@ -1862,11 +1892,77 @@ Idee per app
 
 Automazione
 
+**`sidebar.items.browserAgent`**
+
+> EN — Browser agent
+
+Agente browser
+
+**`sidebar.items.businessAccounting`**
+
+> EN — Accounting
+
+Contabilità
+
+**`sidebar.items.businessCrm`**
+
+> EN — CRM
+
+Clienti (CRM)
+
+**`sidebar.items.businessFinance`**
+
+> EN — Company Finance
+
+Finanza aziendale
+
 **`sidebar.items.businessHealth`**
 
 > EN — How the business is doing
 
 Come va l’attività
+
+**`sidebar.items.businessHr`**
+
+> EN — HR
+
+Risorse umane
+
+**`sidebar.items.businessInventory`**
+
+> EN — Inventory
+
+Inventario
+
+**`sidebar.items.businessLegal`**
+
+> EN — Legal
+
+Legale
+
+**`sidebar.items.businessMarketing`**
+
+> EN — Marketing
+
+Marketing
+
+**`sidebar.items.businessProcurement`**
+
+> EN — Procurement
+
+Approvvigionamento
+
+**`sidebar.items.businessSupport`**
+
+> EN — Customer Support
+
+Assistenza clienti
+
+**`sidebar.items.calendar`**
+
+> EN — Calendar
+
+Calendario
 
 **`sidebar.items.campaigns`**
 
@@ -1891,6 +1987,78 @@ Codice con l'IA
 > EN — Competitors
 
 Concorrenti
+
+**`sidebar.items.computerAgent`**
+
+> EN — Computer agent
+
+Agente computer
+
+**`sidebar.items.connectApis`**
+
+> EN — APIs
+
+Interfacce API
+
+**`sidebar.items.connectBanking`**
+
+> EN — Banking
+
+Banca
+
+**`sidebar.items.connectCalendar`**
+
+> EN — Calendar Sync
+
+Sincronizzazione calendario
+
+**`sidebar.items.connectCrm`**
+
+> EN — CRM Connector
+
+Connettore CRM
+
+**`sidebar.items.connectDataSources`**
+
+> EN — Data Sources
+
+Fonti dati
+
+**`sidebar.items.connectDrive`**
+
+> EN — Google Drive
+
+Google Drive
+
+**`sidebar.items.connectEmail`**
+
+> EN — Email
+
+Posta
+
+**`sidebar.items.connectGithub`**
+
+> EN — GitHub
+
+GitHub
+
+**`sidebar.items.connectIot`**
+
+> EN — IoT Devices
+
+Dispositivi IoT
+
+**`sidebar.items.connectMcp`**
+
+> EN — MCP
+
+MCP
+
+**`sidebar.items.connectSlack`**
+
+> EN — Slack
+
+Slack
 
 **`sidebar.items.content`**
 
@@ -1922,11 +2090,71 @@ Decisioni
 
 Cercalo a fondo
 
+**`sidebar.items.design`**
+
+> EN — Design
+
+Progettazione
+
 **`sidebar.items.documents`**
 
 > EN — Documents
 
 Documenti
+
+**`sidebar.items.engCloud`**
+
+> EN — Cloud
+
+Servizi cloud
+
+**`sidebar.items.engCode`**
+
+> EN — Code
+
+Codice
+
+**`sidebar.items.engDatabases`**
+
+> EN — Database Ops
+
+Gestione database
+
+**`sidebar.items.engDeployment`**
+
+> EN — Deployment
+
+Distribuzione
+
+**`sidebar.items.engDevops`**
+
+> EN — DevOps
+
+DevOps
+
+**`sidebar.items.engInfrastructure`**
+
+> EN — Infrastructure
+
+Infrastruttura
+
+**`sidebar.items.engMonitoring`**
+
+> EN — Service Monitoring
+
+Monitoraggio servizi
+
+**`sidebar.items.engSecurity`**
+
+> EN — Security
+
+Sicurezza
+
+**`sidebar.items.engTesting`**
+
+> EN — Testing
+
+Test
 
 **`sidebar.items.favorites`**
 
@@ -1988,6 +2216,18 @@ Idee per immagini
 
 Integrazioni
 
+**`sidebar.items.knowledge`**
+
+> EN — Knowledge
+
+Conoscenza
+
+**`sidebar.items.knowledgeGraph`**
+
+> EN — Knowledge Graph
+
+Grafo della conoscenza
+
 **`sidebar.items.learning`**
 
 > EN — Learning
@@ -2030,11 +2270,71 @@ Le mie cose
 
 Obiettivi e piani
 
+**`sidebar.items.monitoring`**
+
+> EN — Monitoring
+
+Monitoraggio
+
+**`sidebar.items.music`**
+
+> EN — Music
+
+Musica
+
 **`sidebar.items.newEntry`**
 
 > EN — New entry
 
 Nuova voce
+
+**`sidebar.items.operations`**
+
+> EN — Operations
+
+Operazioni
+
+**`sidebar.items.personalFinance`**
+
+> EN — Personal Finance
+
+Finanze personali
+
+**`sidebar.items.personalHabits`**
+
+> EN — Habits
+
+Abitudini
+
+**`sidebar.items.personalHealth`**
+
+> EN — Health
+
+Salute
+
+**`sidebar.items.personalJournal`**
+
+> EN — Journaling
+
+Diario
+
+**`sidebar.items.personalLifeOs`**
+
+> EN — Life OS
+
+Life OS
+
+**`sidebar.items.personalShopping`**
+
+> EN — Shopping
+
+Acquisti
+
+**`sidebar.items.personalTravel`**
+
+> EN — Travel
+
+Viaggi
 
 **`sidebar.items.posts`**
 
@@ -2108,6 +2408,12 @@ Quale IA viene usata
 
 Vendite
 
+**`sidebar.items.scheduledJobs`**
+
+> EN — Scheduled Jobs
+
+Attività pianificate
+
 **`sidebar.items.settings`**
 
 > EN — Settings
@@ -2119,6 +2425,12 @@ Impostazioni
 > EN — System Health
 
 Stato del sistema
+
+**`sidebar.items.tasks`**
+
+> EN — Tasks
+
+Attività
 
 **`sidebar.items.team`**
 
@@ -2150,6 +2462,48 @@ Diario di trading
 
 Flusso di Lavoro Trading
 
+**`sidebar.items.verifyCode`**
+
+> EN — Code Verification
+
+Verifica del codice
+
+**`sidebar.items.verifyData`**
+
+> EN — Data Validation
+
+Validazione dati
+
+**`sidebar.items.verifyFacts`**
+
+> EN — Fact Checking
+
+Verifica dei fatti
+
+**`sidebar.items.verifyOutput`**
+
+> EN — Output Evaluation
+
+Valutazione degli output
+
+**`sidebar.items.verifyRedTeam`**
+
+> EN — Red Teaming
+
+Simulazione di attacco
+
+**`sidebar.items.verifySecurity`**
+
+> EN — Security Testing
+
+Test di sicurezza
+
+**`sidebar.items.verifySources`**
+
+> EN — Source Verification
+
+Verifica delle fonti
+
 **`sidebar.items.videos`**
 
 > EN — Video ideas
@@ -2173,6 +2527,12 @@ Crea un sito
 > EN — Website plans
 
 Progetti di siti
+
+**`sidebar.items.workflows`**
+
+> EN — Workflows
+
+Flussi di lavoro
 
 ### first result
 

@@ -194,7 +194,88 @@ const MUTANTS = [
       { file: NAV, from: '{ href: "/dashboard/coding", label: "AI Coding"', to: '{ href: "/dashboard/documents", label: "AI Coding"' },
       { file: NAV, from: '{ href: "/dashboard/ZZTEMP", label: "Documents"', to: '{ href: "/dashboard/coding", label: "Documents"' },
     ],
-    expect: "Make: 5 rows, in order",
+    // THE ANCHOR CARRIED A ROW COUNT AND THE COUNT MOVED (2026-09-26):
+    // Data Analysis stopped being hidden, Make drew six rows instead of
+    // five, and this reported a HOLE on a gate that had caught the
+    // defect on two clauses. Exactly the lesson the mutant above this
+    // one writes out, made twice. Anchored on the clause that is about
+    // the position rather than about how many there are.
+    expect: "every locked row is in its declared position",
+  },
+  // ---- THE DECLARED STRUCTURE'S OWN RULES, 2026-09-26 ---------------
+  //
+  // Forty-three positions in five groups that nobody may see, plus
+  // twelve more scattered through the five that are drawn. What makes
+  // them safe to declare is that the two filters below cannot be
+  // loosened without a gate going red — and both are mutated at the
+  // FILTER rather than at the config, because a config edit only asks
+  // whether one row is flagged and these are questions about the rule.
+  {
+    gate: STRUCTURE,
+    // THE DEFECT: visibleGroups stops stripping notBuilt, so fifty-five
+    // rows for pages that do not exist appear in the sidebar, in the
+    // command palette and on the hub — every one of them a 404.
+    name: "a held row is drawn after all",
+    file: VISIBILITY,
+    from: "items: group.items.filter((i) => !i.notBuilt && !i.retired),",
+    to: "items: group.items.filter((i) => !i.retired),",
+    expect: "no held row is drawn",
+  },
+  {
+    gate: STRUCTURE,
+    // THE DEFECT: the emptied groups are kept, so five headings stand
+    // over nothing — the exact production report of 2026-09-17 ("the
+    // sidebar shows the heading Run and NO rows underneath"), arriving
+    // this time through the config rather than through a collapse.
+    name: "a group with nothing live in it keeps its heading",
+    // TWO EDITS, AND THE REASON IS A PROPERTY OF THE CODE RATHER THAN OF
+    // THIS FILE. Removing either filter alone changes nothing on screen:
+    // `visibleGroups` drops the emptied group, and if it does not,
+    // `sidebarGroups` drops it again on its way out. Run as a one-line
+    // mutant this was reported as a HOLE for one run — the gate stayed
+    // green because the sidebar had not changed — which is the mutation
+    // harness correctly saying "the line you deleted was not the one
+    // holding this up". It is held up by both, so both go.
+    edits: [
+      {
+        file: VISIBILITY,
+        from: "    .filter((group) => group.items.length > 0);\n  if (isOwner) return built;",
+        to: "    .filter(() => true);\n  if (isOwner) return built;",
+      },
+      {
+        file: VISIBILITY,
+        from: "    .map((group) => ({ ...group, items: group.items.filter((i) => !i.hidden) }))\n    .filter((group) => group.items.length > 0);",
+        to: "    .map((group) => ({ ...group, items: group.items.filter((i) => !i.hidden) }));",
+      },
+    ],
+    expect: "a heading appears exactly when the group has a live row",
+  },
+  {
+    gate: NAMING,
+    // THE DEFECT: a row that produces nothing is drawn under a heading
+    // that says Make. Apps is the eighteen-line generic module page — a
+    // list of app ideas — and un-hiding it is the cheapest way to break
+    // the rule the owner's structure rests on: the user sees only what
+    // works.
+    name: "a feature that does not work is shown anyway",
+    file: NAV,
+    from: '{ href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps, hintKey: "apps", hidden: true }',
+    to: '{ href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps, hintKey: "apps" }',
+    expect: "no tracking-only module is DRAWN under Make",
+  },
+  {
+    gate: STRUCTURE,
+    // THE DEFECT: one of the five held groups is reordered. Their order
+    // is the whole value of declaring them — a group whose position is
+    // not fixed is a group whose features will be appended wherever
+    // they land — and nothing draws them, so no screen would show it.
+    name: "the held groups change places",
+    edits: [
+      { file: NAV, from: '    heading: "Verify",', to: '    heading: "ZZTEMP",' },
+      { file: NAV, from: '    heading: "Personal",', to: '    heading: "Verify",' },
+      { file: NAV, from: '    heading: "ZZTEMP",', to: '    heading: "Personal",' },
+    ],
+    expect: "groups are in the declared order, drawn or not",
   },
   {
     name: "a drawn row is quietly hidden",

@@ -134,3 +134,84 @@ Production has served the 2026-09-19 build for seven days — **36 commits
 behind `main`** as of 2026-09-26. Every bot would be measuring code from
 last week. Building instruments for a product that cannot change is work
 that produces reports nobody can act on.
+
+## 4. The sidebar structure — BUILT 2026-09-26
+
+    node scripts/sidebar-census.mjs          # drawn · declared · palette · dark
+    node scripts/sidebar-register.mjs        # the register, per position
+    node scripts/tests/sidebar-structure.mutation.mjs   # 26 mutants
+
+**Done.** Eleven groups, 111 declared positions, 27 drawn for an ordinary
+account and 28 for the owner. Five groups — Connect, Business,
+Engineering, Verify, Personal — hold forty-three positions and not one
+live row, so no heading for any of them reaches the screen.
+`docs/sidebar-structure.md` is the register and is written by
+`scripts/sidebar-register.mjs`, not by hand.
+
+**One row changed state:** Data Analysis, hidden since the September
+tidy-up, is drawn again. It was built and it works — upload profiles the
+file, `[id]/analyse` hands the profile to a model, `[id]/ask` answers
+questions about it, `[id]/export` writes it out. *Verified by reading
+those four routes; nothing in this container can sign in, so it has not
+been seen working from a browser.*
+
+**Three gates were wrong in the same direction and all three were found
+by this round rather than by a screen.**
+
+| gate | what it believed | for how long |
+|---|---|---|
+| `sidebar-structure.test.mjs` | the marketplace was drawn — its parse read `hidden`/`notBuilt`/`ownerOnly` and not `retired` | since 2026-09-24 |
+| `palette-aliases.test.mjs` | the palette searches every label in the config, not `visibleGroups` of it | always; it cost nothing until fifty-five rows were held |
+| `lib/palette-aliases.ts` | six aliases pointed at the retired marketplace and reached nothing | since 2026-09-24 |
+
+## 5. Every MAKE feature as a chat — MEASURED, NOT BUILT
+
+    node scripts/measure-make-steps.mjs
+
+**Measured 2026-09-26, on the six rows Make draws:**
+
+The last column is the number of USER inputs, with the busy flag
+(`generating`, `running`, `loading`) discounted — it guards a double
+press and is not something a person has to satisfy. A chat box waits on
+one thing.
+
+| row | textarea | one-line | selects | waits on | n |
+|---|---|---|---|---|---|
+| Website Builder | 2 | 3 | 1 | `!name.trim() \|\| !description.trim()` | **2** |
+| Documents | 0 | 1 | 1 | nothing — there is no prompt at all | 0 |
+| Presentations | 1 | 0 | 1 | `!description.trim()` | **1** |
+| Posts | 1 | 0 | 0 | `!description.trim() \|\| platforms.length === 0` | **2** |
+| AI Coding | 1 | 0 | 3 | `!input.trim()` | **1** |
+| Data Analysis | 0 | 1 | 0 | a FILE is the way in; the follow-up question is one line | 0 |
+
+`scripts/tests/make-as-chat.test.mjs` holds each of those numbers as a
+per-row baseline that may only FALL, requires every drawn Make row to
+have a free-text way in, and floors at one the count of rows whose
+result can be changed by saying so. A per-row baseline rather than a
+total, because a total lets one row get worse while another gets
+better.
+
+**Presentations is already the shape asked for** — one free-text field,
+one gate, the slide count defaulted. **Coding is one operation-picker
+away from it.** The three that are not:
+
+1. **Website Builder requires a name.** A chat box does not ask you to
+   name the thing before it makes it, and the name is derivable from the
+   description by the same call that already runs. This is the single
+   cheapest change in the group and the clearest win.
+2. **Posts requires at least one platform** and starts with all of them
+   selected, so the gate is unreachable in practice and the checkbox row
+   is still the first thing on the screen.
+3. **Documents has no prompt.** You create an empty document and type
+   into it. "Write me a one-page brief about X" is not expressible.
+
+**What is NOT done, and the honest size of it.** The pattern the owner
+asked for is two things, and only the first is close: a single free-text
+way in, and *changing the result by saying so*. Only the Website Builder
+has the second (`editText` → `api/websites/edit`), and it is 2,006 lines.
+Rewriting five workspaces to a chat-plus-preview layout is not one round
+of work, and the measurement above is what says where to start rather
+than an impression of it.
+
+**Re-run the measurement after each one.** The number to watch is the
+last column: a chat box waits on one thing, the text.

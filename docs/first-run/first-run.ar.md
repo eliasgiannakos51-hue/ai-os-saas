@@ -1,8 +1,8 @@
 # The first run — ar
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **642 strings**. The whole product is 3339, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **702 strings**. The whole product is 3399, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 393 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 453 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -314,7 +314,7 @@ CSV أو مفصول بعلامات جدولة، حتى {max}. نقرؤه ونع�
 
 مجانًا — لا يُولَّد شيء، ويمكنك إزالته بنقرة واحدة
 
-## Tier 2 — The labels — skim these (393)
+## Tier 2 — The labels — skim these (453)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1556,6 +1556,24 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 اسأل
 
+**`sidebar.groups.business`**
+
+> EN — Business
+
+الأعمال
+
+**`sidebar.groups.connect`**
+
+> EN — Connect
+
+اتصال
+
+**`sidebar.groups.engineering`**
+
+> EN — Engineering
+
+الهندسة
+
 **`sidebar.groups.make`**
 
 > EN — Make
@@ -1567,6 +1585,12 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 > EN — Organise
 
 نظّم
+
+**`sidebar.groups.personal`**
+
+> EN — Personal
+
+شخصي
 
 **`sidebar.groups.run`**
 
@@ -1585,6 +1609,12 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 > EN — Settings
 
 الإعدادات
+
+**`sidebar.groups.verify`**
+
+> EN — Verify
+
+تحقّق
 
 **`sidebar.hints.affiliate`**
 
@@ -1862,11 +1892,77 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 الأتمتة
 
+**`sidebar.items.browserAgent`**
+
+> EN — Browser agent
+
+وكيل المتصفّح
+
+**`sidebar.items.businessAccounting`**
+
+> EN — Accounting
+
+المحاسبة
+
+**`sidebar.items.businessCrm`**
+
+> EN — CRM
+
+إدارة العملاء
+
+**`sidebar.items.businessFinance`**
+
+> EN — Company Finance
+
+مالية الشركة
+
 **`sidebar.items.businessHealth`**
 
 > EN — How the business is doing
 
 كيف تسير الأعمال
+
+**`sidebar.items.businessHr`**
+
+> EN — HR
+
+الموارد البشرية
+
+**`sidebar.items.businessInventory`**
+
+> EN — Inventory
+
+المخزون
+
+**`sidebar.items.businessLegal`**
+
+> EN — Legal
+
+الشؤون القانونية
+
+**`sidebar.items.businessMarketing`**
+
+> EN — Marketing
+
+التسويق
+
+**`sidebar.items.businessProcurement`**
+
+> EN — Procurement
+
+المشتريات
+
+**`sidebar.items.businessSupport`**
+
+> EN — Customer Support
+
+دعم العملاء
+
+**`sidebar.items.calendar`**
+
+> EN — Calendar
+
+التقويم
 
 **`sidebar.items.campaigns`**
 
@@ -1891,6 +1987,78 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 > EN — Competitors
 
 المنافسون
+
+**`sidebar.items.computerAgent`**
+
+> EN — Computer agent
+
+وكيل الحاسوب
+
+**`sidebar.items.connectApis`**
+
+> EN — APIs
+
+واجهات API
+
+**`sidebar.items.connectBanking`**
+
+> EN — Banking
+
+الخدمات المصرفية
+
+**`sidebar.items.connectCalendar`**
+
+> EN — Calendar Sync
+
+مزامنة التقويم
+
+**`sidebar.items.connectCrm`**
+
+> EN — CRM Connector
+
+موصّل CRM
+
+**`sidebar.items.connectDataSources`**
+
+> EN — Data Sources
+
+مصادر البيانات
+
+**`sidebar.items.connectDrive`**
+
+> EN — Google Drive
+
+Google Drive
+
+**`sidebar.items.connectEmail`**
+
+> EN — Email
+
+البريد
+
+**`sidebar.items.connectGithub`**
+
+> EN — GitHub
+
+GitHub
+
+**`sidebar.items.connectIot`**
+
+> EN — IoT Devices
+
+أجهزة إنترنت الأشياء
+
+**`sidebar.items.connectMcp`**
+
+> EN — MCP
+
+MCP
+
+**`sidebar.items.connectSlack`**
+
+> EN — Slack
+
+Slack
 
 **`sidebar.items.content`**
 
@@ -1922,11 +2090,71 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 ابحث فيها جيدًا
 
+**`sidebar.items.design`**
+
+> EN — Design
+
+تصميم
+
 **`sidebar.items.documents`**
 
 > EN — Documents
 
 المستندات
+
+**`sidebar.items.engCloud`**
+
+> EN — Cloud
+
+السحابة
+
+**`sidebar.items.engCode`**
+
+> EN — Code
+
+الشفرة
+
+**`sidebar.items.engDatabases`**
+
+> EN — Database Ops
+
+تشغيل قواعد البيانات
+
+**`sidebar.items.engDeployment`**
+
+> EN — Deployment
+
+النشر
+
+**`sidebar.items.engDevops`**
+
+> EN — DevOps
+
+DevOps
+
+**`sidebar.items.engInfrastructure`**
+
+> EN — Infrastructure
+
+البنية التحتية
+
+**`sidebar.items.engMonitoring`**
+
+> EN — Service Monitoring
+
+مراقبة الخدمات
+
+**`sidebar.items.engSecurity`**
+
+> EN — Security
+
+الأمان
+
+**`sidebar.items.engTesting`**
+
+> EN — Testing
+
+الاختبار
 
 **`sidebar.items.favorites`**
 
@@ -1988,6 +2216,18 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 التكاملات
 
+**`sidebar.items.knowledge`**
+
+> EN — Knowledge
+
+المعرفة
+
+**`sidebar.items.knowledgeGraph`**
+
+> EN — Knowledge Graph
+
+رسم المعرفة
+
 **`sidebar.items.learning`**
 
 > EN — Learning
@@ -2030,11 +2270,71 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 الأهداف والخطط
 
+**`sidebar.items.monitoring`**
+
+> EN — Monitoring
+
+المراقبة
+
+**`sidebar.items.music`**
+
+> EN — Music
+
+موسيقى
+
 **`sidebar.items.newEntry`**
 
 > EN — New entry
 
 إدخال جديد
+
+**`sidebar.items.operations`**
+
+> EN — Operations
+
+العمليات
+
+**`sidebar.items.personalFinance`**
+
+> EN — Personal Finance
+
+المالية الشخصية
+
+**`sidebar.items.personalHabits`**
+
+> EN — Habits
+
+العادات
+
+**`sidebar.items.personalHealth`**
+
+> EN — Health
+
+الصحة
+
+**`sidebar.items.personalJournal`**
+
+> EN — Journaling
+
+التدوين اليومي
+
+**`sidebar.items.personalLifeOs`**
+
+> EN — Life OS
+
+نظام الحياة
+
+**`sidebar.items.personalShopping`**
+
+> EN — Shopping
+
+التسوّق
+
+**`sidebar.items.personalTravel`**
+
+> EN — Travel
+
+السفر
 
 **`sidebar.items.posts`**
 
@@ -2108,6 +2408,12 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 المبيعات
 
+**`sidebar.items.scheduledJobs`**
+
+> EN — Scheduled Jobs
+
+المهام المجدولة
+
 **`sidebar.items.settings`**
 
 > EN — Settings
@@ -2119,6 +2425,12 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 > EN — System Health
 
 حالة النظام
+
+**`sidebar.items.tasks`**
+
+> EN — Tasks
+
+المهام
 
 **`sidebar.items.team`**
 
@@ -2150,6 +2462,48 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 سير عمل التداول
 
+**`sidebar.items.verifyCode`**
+
+> EN — Code Verification
+
+التحقق من الشفرة
+
+**`sidebar.items.verifyData`**
+
+> EN — Data Validation
+
+التحقق من البيانات
+
+**`sidebar.items.verifyFacts`**
+
+> EN — Fact Checking
+
+تدقيق الحقائق
+
+**`sidebar.items.verifyOutput`**
+
+> EN — Output Evaluation
+
+تقييم المخرجات
+
+**`sidebar.items.verifyRedTeam`**
+
+> EN — Red Teaming
+
+اختبار الفريق الأحمر
+
+**`sidebar.items.verifySecurity`**
+
+> EN — Security Testing
+
+اختبار الأمان
+
+**`sidebar.items.verifySources`**
+
+> EN — Source Verification
+
+التحقق من المصادر
+
 **`sidebar.items.videos`**
 
 > EN — Video ideas
@@ -2173,6 +2527,12 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 > EN — Website plans
 
 خطط المواقع
+
+**`sidebar.items.workflows`**
+
+> EN — Workflows
+
+سير العمل
 
 ### first result
 

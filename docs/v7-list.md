@@ -87,3 +87,50 @@ killed the cache: **measure the volume, then decide.**
 
 **Any model change ships with evidence that quality held in Greek, Arabic
 and Chinese**, not with an argument that it should have.
+
+## 3. The bot system — three built, four deferred with their conditions
+
+    node scripts/e2e-bot.mjs          # signs in, drives the product
+    checks/README.md                  # the eleven-command language
+
+**Five of the seven asked for already exist as prodtests**, measured
+2026-09-26: 47 `*.prodtest.mjs` files that build the product, start it and
+drive a real Chromium, plus 291 build gates. `user-isolation-live.prodtest.mjs`
+alone is 426 lines and 25 checks of exactly the "can A see B's data"
+question a security bot would ask.
+
+**So the gap is not tooling. It is that none of it runs against the live
+deployment, and there is no report that puts the answers in one place.**
+
+| bot | state | what it still needs |
+|---|---|---|
+| **E2E** | `scripts/e2e-bot.mjs` shipped | `BOT_EMAIL`, `BOT_PASSWORD` |
+| **SECURITY** | prodtests exist, unrun against production | **two** accounts — without a second there is no "user B" |
+| **i18n** | 40 files exist, unrun against production | one account |
+| **BENCHMARK** | not built | `GOOGLE_API_KEY`. Costed 2026-09-26 at **$1.46–$2.16** a run from the rates in `src/lib/ai/providers/catalog.ts` |
+| **COST** | tooling exists (`db:spend`, `reserve-accuracy`) | **volume**. With four accounts `ai_cost_log` is nearly empty; ranking features by spend would rank noise |
+| **PERFORMANCE** | `input-latency`, `navigation-latency`, `public-route-speed` exist | volume, and a deployment newer than six days |
+| **UX** | **declined, with a reason** | see below |
+
+### The UX bot is not deferred, it is declined
+
+An AI told to "pretend to be a new user" writes plausible prose that
+cannot be falsified. It will say "I got confused at step 3" with the same
+confidence whether or not anything was confusing, because it has no
+confusion — it has text patterns. That is the *metric that measures the
+wrong quantity* entry in `docs/shapes.md`, and the output would be read as
+user data.
+
+Everything MECHANICAL such a bot could find — dead ends, unlabelled
+controls, two primary actions on one screen — is already found statically
+by `one-primary-action`, `empty-states` and `problem-messages`, without
+guessing at anyone's feelings. What would genuinely add to that is the E2E
+bot recording **clicks per check** and **which element it failed to
+find**: both measurable, both pointing at the same obvious problems.
+
+### The binding constraint, stated plainly
+
+Production has served the 2026-09-19 build for seven days — **36 commits
+behind `main`** as of 2026-09-26. Every bot would be measuring code from
+last week. Building instruments for a product that cannot change is work
+that produces reports nobody can act on.

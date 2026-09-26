@@ -21,6 +21,7 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import path from "node:path";
+const { stripComments } = await import("../check-mutation-markers.mjs");
 
 let pass = 0;
 const failures = [];
@@ -45,10 +46,29 @@ function check(name, cond, detail = "") {
   }
 }
 
-const run = (...args) =>
+/**
+ * THE ENVIRONMENT IS GIVEN, NEVER INHERITED.
+ *
+ * scripts/db-inventory.mjs reads VERCEL_GIT_COMMIT_REF and
+ * VERCEL_GIT_COMMIT_SHA to stamp its output — it has to, because a
+ * deployed build has no .git. That makes it an env-reading program, and
+ * a gate that spawns one WITHOUT an environment of its own asks the
+ * machine a question instead of asking the code: green on a laptop where
+ * those are unset, green on Vercel where they are set, and blind to the
+ * difference. That is merge commit aec56a2, which turned CI red on
+ * byte-identical code; scripts/tests/env-independence.test.mjs exists to
+ * forbid it and caught this within the hour.
+ *
+ * So the environment is explicit, and the checks below ask for BOTH
+ * answers rather than whichever one this machine happens to produce.
+ */
+const BARE = { PATH: process.env.PATH, HOME: process.env.HOME };
+const run = (...args) => runIn(BARE, ...args);
+const runIn = (env, ...args) =>
   execFileSync("node", ["scripts/db-inventory.mjs", ...args], {
     encoding: "utf8",
     maxBuffer: 32 * 1024 * 1024,
+    env,
   });
 
 console.log("== 1. the inventory has no orphans ==");
@@ -276,6 +296,54 @@ console.log("\n== 1b. the output says which code it was measured against ==");
     "the header warns that UNEXPECTED is relative to this tree",
     /nothing in THIS tree queries it/.test(diag)
   );
+
+  // AND THE STAMP HAS TO BE PRODUCIBLE WITHOUT A WORKING TREE.
+  //
+  // A deployed build has no .git: Vercel hands the builder a source
+  // tarball and sets VERCEL_GIT_COMMIT_SHA and VERCEL_GIT_COMMIT_REF
+  // instead. The fallback here used to be the two-word "(no git)", which
+  // the \S+ in the checks above can never match — so in any tree without
+  // .git this gate failed and took the whole build down with it, at gate
+  // 70 of 291. Reproduced on a clean clone of the deployed commit,
+  // 2026-09-26, and green again with the platform variables read first.
+  // STRIPPED, because the comment in that file EXPLAINS the two-word
+  // fallback it removed — and an unstripped read would find the words
+  // and fail the check for quoting the bug it fixed.
+  const producerSrc = stripComments(readFileSync("scripts/db-inventory.mjs", "utf8"));
+  check(
+    "the stamp reads the platform variables before it reaches for git",
+    /VERCEL_GIT_COMMIT_REF/.test(producerSrc) && /VERCEL_GIT_COMMIT_SHA/.test(producerSrc),
+    "scripts/build-identity.mjs has done this since 2026-09-19; this file was the other half"
+  );
+  // BOTH ANSWERS, ASKED OF THE CODE RATHER THAN OF THIS MACHINE.
+  //
+  // On the builder the platform variables are set and git is absent; on a
+  // laptop it is the other way round; in a source tarball with neither,
+  // the fallback is all there is. All three have to produce a stamp the
+  // checks above can match, and only running them proves it.
+  const onBuilder = runIn(
+    { ...BARE, VERCEL_GIT_COMMIT_REF: "main", VERCEL_GIT_COMMIT_SHA: "0".repeat(40) },
+    "--repair",
+    "user_credits"
+  );
+  check(
+    "with the platform variables set, the stamp names THEM",
+    /From branch main @ commit 0{7}/.test(onBuilder),
+    onBuilder.split("\n").find((l) => l.includes("From branch")) ?? "(no stamp line)"
+  );
+  check(
+    "...and with neither those nor a working tree, it still stamps one token",
+    /From branch \S+ @ commit \S+/.test(
+      runIn({ ...BARE, GIT_CEILING_DIRECTORIES: process.cwd(), GIT_DIR: "/nonexistent" }, "--repair", "user_credits")
+    ),
+    "the tarball case — this is the one that failed the build at gate 70"
+  );
+
+  check(
+    "...and its last-resort fallback is ONE token",
+    !/\(no git\)/.test(producerSrc) && /"unknown"/.test(producerSrc),
+    "a fallback with a space in it cannot satisfy the checks above, in any tree without .git"
+  );
 }
 
 console.log("\n== 2. the diagnostic query is READ-ONLY ==");
@@ -330,9 +398,18 @@ const repair = run("--repair");
 // perfect, which is what makes this worth a test: the failure only
 // appears in the one usage that applies the SQL directly.
 {
+  // THE SAME ENVIRONMENT AS THE DIRECT RUN, or the two are not comparable.
+  //
+  // This compared a BARE run against a piped one that inherited the
+  // machine, and the stamp now depends on VERCEL_GIT_COMMIT_REF — so
+  // under build:ci's sentinel pass the two produced different branch
+  // names and the byte counts differed by one. Reported as "pipe lost 1
+  // bytes", which is a true statement about a comparison that was
+  // measuring the environment rather than the flush.
   const viaPipe = execFileSync("sh", ["-c", "node scripts/db-inventory.mjs --repair | cat"], {
     encoding: "utf8",
     maxBuffer: 32 * 1024 * 1024,
+    env: BARE,
   });
   check(
     `piped output is not truncated (${viaPipe.length} bytes vs ${repair.length} captured)`,

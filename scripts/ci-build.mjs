@@ -25,7 +25,7 @@
  * that runs on every build.
  */
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { deployedEnv, probedNames } from "./env-sensitivity.mjs";
 
 /**
@@ -161,6 +161,50 @@ function assertNodeMatchesTheBuilder() {
   return { pinned: nvmrc, declared, version: process.versions.node };
 }
 
+/**
+ * THE "EVERY VARIABLE ABSENT" PASS HAS TO ACTUALLY BE ABSENT.
+ *
+ * `env -i` clears the process environment. It does NOT clear the disk, and
+ * Next does not read its configuration from the environment alone: at
+ * build time @next/env loads .env, .env.local, .env.production and
+ * .env.production.local straight off the filesystem and merges them in.
+ * So on a machine with a .env.local, the second pass is not the absent
+ * case at all — it is the developer's own credentials wearing the label
+ * "absent", and it would pass while a deployment missing the same values
+ * failed.
+ *
+ * The owner named this exact hole. It happens to be empty today — this
+ * tree has only .env.local.example, which Next does not load, and the
+ * fresh-clone run of 2026-09-26 confirmed the build survives with nothing
+ * set. But "empty today" is not a property of the harness, it is a
+ * property of this checkout, and the next person to write a .env.local
+ * would silently turn the pass into decoration.
+ *
+ * So the pass refuses to describe itself as absent when it is not, and
+ * says what to do. --allow-dotenv runs anyway and prints, loudly, that the
+ * second pass no longer means what its name says.
+ */
+const NEXT_READS = [".env", ".env.local", ".env.production", ".env.production.local"];
+function assertNothingOnDiskFillsTheGap() {
+  const present = NEXT_READS.filter((f) => existsSync(f));
+  if (present.length === 0) return [];
+  if (process.argv.includes("--allow-dotenv")) {
+    console.log(`WARNING: ${present.join(", ")} on disk. Next loads those at build time, so`);
+    console.log("         the second pass is NOT the absent case and proves nothing about a");
+    console.log("         deployment with those values missing. Running anyway, as asked.\n");
+    return present;
+  }
+  console.log(`${present.join(", ")} is on disk, and Next loads it at build time whatever`);
+  console.log("the process environment says. The \"every variable absent\" pass would be");
+  console.log("your own credentials wearing that label, so it is not going to run and");
+  console.log("call the result a pass.");
+  console.log("");
+  console.log(`  mv ${present[0]} ${present[0]}.bak && npm run build:ci && mv ${present[0]}.bak ${present[0]}`);
+  console.log("  npm run build:ci -- --allow-dotenv     # run anyway, pass 2 means nothing");
+  process.exit(2);
+}
+const DOTENV_ON_DISK = assertNothingOnDiskFillsTheGap();
+
 const BUILD = vercelBuildCommand();
 const NODE = assertNodeMatchesTheBuilder();
 
@@ -203,6 +247,7 @@ console.log(`Running the real build ${PASSES.length} times, in ${PASSES.length} 
 console.log(`  command : ${BUILD.label}`);
 console.log(`  node    : v${NODE.version} (.nvmrc ${NODE.pinned}, engines.node ${NODE.declared})`);
 console.log(`  TZ      : ${BUILDER_TZ}, pinned`);
+console.log(`  dotenv  : ${DOTENV_ON_DISK.length ? DOTENV_ON_DISK.join(", ") + " ON DISK — pass 2 is not the absent case" : "none on disk, so the absent pass is genuinely absent"}`);
 console.log(`  ${probedNames().size} project variables are known to this repository.\n`);
 
 let r = { status: 0 };

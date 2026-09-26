@@ -27,6 +27,7 @@
  *  10. the node-major refusal is downgraded to a warning
  *  11. a third build environment is added with no clock pinned
  *  12. the clock is pinned to whatever the machine says
+ *  13. the absent pass stops noticing a .env file on disk
  *
  * Run: node scripts/tests/env-independence.mutation.mjs
  */
@@ -163,6 +164,16 @@ const MUTANTS = [
     from: 'const BUILDER_TZ = "UTC";',
     to: 'const BUILDER_TZ = process.env.TZ ?? "";',
     expect: "...to UTC, which is what the builder runs",
+  },
+  {
+    // THE GUARD THAT KEEPS PASS 2 HONEST. Removed, build:ci runs happily
+    // on a machine with a .env.local and reports "every project variable
+    // ABSENT" about a build that read every one of them off the disk.
+    name: "the absent pass stops checking whether a dotenv file is on disk",
+    file: CI,
+    from: "  if (present.length === 0) return [];",
+    to: "  if (true) return [];",
+    expect: "...and REFUSES rather than calling that pass absent",
   },
 ];
 

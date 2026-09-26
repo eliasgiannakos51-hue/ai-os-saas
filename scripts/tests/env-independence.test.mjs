@@ -419,6 +419,33 @@ check(
   existsSync("scripts/tests/node-version.test.mjs"),
   "scripts/tests/node-version.test.mjs"
 );
+// AND THE ABSENT PASS HAS TO BE ABSENT ON DISK TOO.
+//
+// env -i clears the process environment and nothing else. Next loads
+// .env, .env.local, .env.production and .env.production.local off the
+// filesystem at build time, so on a machine that has one, pass 2 is the
+// developer's own credentials wearing the label "absent" — green here,
+// red on a deployment missing the same values. The owner named this hole;
+// it is empty in this checkout and would not stay that way.
+check(
+  "build:ci knows which dotenv files Next reads at build time",
+  ["\\.env\\b", "\\.env\\.local", "\\.env\\.production"].every((p) => new RegExp(p).test(ciSrc)),
+  "all four of them, or the guard has a gap the next .env file walks through"
+);
+check(
+  "...and REFUSES rather than calling that pass absent",
+  // 1600, measured: the two are 935 characters apart because the
+  // --allow-dotenv branch sits between them. A window tight enough to
+  // break on a comment being edited is a check about formatting.
+  /present\.length === 0\)[\s\S]{0,1600}process\.exit\(2\)/.test(ciSrc),
+  "a pass that is not the absent case must not be reported as one"
+);
+check(
+  "...and the log records which case pass 2 actually was",
+  /dotenv\s*:/.test(ciSrc),
+  "a reader of the log has to be able to tell the two apart afterwards"
+);
+
 // THE RULE SAYS EVERY PASS, SO THE CHECK RANGES OVER EVERY PASS rather
 // than counting occurrences: a third environment added without a TZ is
 // the failure, and a count pinned at two would pass it.

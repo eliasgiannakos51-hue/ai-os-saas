@@ -47,8 +47,11 @@ const MUTANTS = [
   {
     name: "a question that could not be asked answers ok",
     file: FRESH,
-    from: '    return { navAgeHours: null, activityAgeHours: null, verdict: "unchecked" };',
-    to: '    return { navAgeHours: null, activityAgeHours: null, verdict: "ok" };',
+    // The catch-all return grew an `asked` field on 2026-09-26, so this
+    // mutant's anchor moved with it. A stale mutant is reported STALE
+    // rather than passing, which is how this was noticed.
+    from: '      verdict: "unchecked",\n      asked: { nav: false, activity: false },',
+    to: '      verdict: "ok",\n      asked: { nav: false, activity: false },',
     expect: "never as ok",
   },
   {
@@ -64,6 +67,25 @@ const MUTANTS = [
     from: "  if (probe.dbAnswered) {\n    body.schema = await currentSchemaSweep();",
     to: "  body.nav = { navAgeHours: null, activityAgeHours: null, verdict: \"ok\" };\n  if (probe.dbAnswered) {\n    body.schema = await currentSchemaSweep();",
     expect: "only when the database actually answered",
+  },
+  {
+    // THE REFUSAL THAT READS AS CALM. Put back the single null that
+    // carried both "empty table" and "the database said no", and a blind
+    // probe reports the healthiest answer it has.
+    name: "a refused read collapses back into an empty table",
+    file: FRESH,
+    from: "  if (error) return { ageHours: null, asked: false };",
+    to: "  if (error) return { ageHours: null, asked: true };",
+    expect: "newestAt separates a refused read from an empty table",
+  },
+  {
+    // AND THE VERDICT THAT USES IT. With the guard gone, an unasked
+    // question becomes "nobody came".
+    name: "the verdict stops caring whether the question was asked",
+    file: FRESH,
+    from: "  if (!asked.nav || !asked.activity) return \"unchecked\";",
+    to: "  if (false) return \"unchecked\";",
+    expect: "navigation old, activity read refused -> unchecked",
   },
 ];
 

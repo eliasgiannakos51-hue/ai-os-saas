@@ -39,6 +39,19 @@ export type NavFreshness = {
    * "unchecked" — the question could not be asked.
    */
   verdict: "ok" | "quiet" | "STALE" | "unchecked";
+  /**
+   * WHICH READS ACTUALLY HAPPENED, because "no rows" and "the query was
+   * refused" arrive here as the same null and mean opposite things.
+   *
+   * THE BUG THIS EXISTS FOR, found 2026-09-26 by reading the code that
+   * produced a live "quiet": newestAt() returned null on `error || !data`.
+   * A refused read of rate_limit_log therefore set activityAgeHours to
+   * null, and navVerdict read that as "nobody came" — so a BROKEN PROBE
+   * reported the healthiest possible answer. docs/shapes.md keeps an
+   * entry under exactly that name: the fallback that reported nothing, so
+   * the failure looked like an answer.
+   */
+  asked: { nav: boolean; activity: boolean };
 };
 
 /**
@@ -54,10 +67,22 @@ export type NavFreshness = {
  */
 export function navVerdict(
   navAgeHours: number | null,
-  activityAgeHours: number | null
+  activityAgeHours: number | null,
+  // DEFAULTS TO "both reads happened", so every existing caller keeps its
+  // meaning. The parameter exists for the one case the two-argument form
+  // cannot express: a null that came from a refusal rather than an empty
+  // table.
+  asked: { nav: boolean; activity: boolean } = { nav: true, activity: true }
 ): NavFreshness["verdict"] {
+  // A recent navigation row is proof on its own, whatever else failed.
   if (navAgeHours !== null && navAgeHours <= NAV_STALE_HOURS) return "ok";
+  // Ordinary use with no navigation row is the fault, and it is still the
+  // fault when the nav read was refused — a refusal is not a row.
   if (activityAgeHours !== null && activityAgeHours <= NAV_STALE_HOURS) return "STALE";
+  // BEFORE "quiet", ask whether silence was even measured. Saying "nobody
+  // came" on the strength of a question nobody managed to ask is the
+  // worst answer available: it is calm, plausible and wrong.
+  if (!asked.nav || !asked.activity) return "unchecked";
   if (navAgeHours === null && activityAgeHours === null) return "unchecked";
   return "quiet";
 }
@@ -69,15 +94,25 @@ const hoursSince = (iso: unknown): number | null => {
   return Math.round(((Date.now() - t) / 3_600_000) * 10) / 10;
 };
 
-async function newestAt(supabase: SupabaseClient, table: string): Promise<number | null> {
+/**
+ * TWO ANSWERS, NOT ONE. `ageHours: null` used to carry both "the table is
+ * empty" and "the database refused me", and the caller could not tell
+ * them apart — so it treated a refusal as an empty table and reported a
+ * healthy product. `asked` is the half that was missing.
+ */
+async function newestAt(
+  supabase: SupabaseClient,
+  table: string
+): Promise<{ ageHours: number | null; asked: boolean }> {
   const { data, error } = await supabase
     .from(table)
     .select("created_at")
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (error || !data) return null;
-  return hoursSince((data as { created_at?: unknown }).created_at);
+  if (error) return { ageHours: null, asked: false };
+  if (!data) return { ageHours: null, asked: true };
+  return { ageHours: hoursSince((data as { created_at?: unknown }).created_at), asked: true };
 }
 
 export async function navFreshness(supabase: SupabaseClient): Promise<NavFreshness> {
@@ -86,13 +121,24 @@ export async function navFreshness(supabase: SupabaseClient): Promise<NavFreshne
     // is written on requests that never reach a model and never cost
     // anything — so it registers a visit the other tables would miss,
     // which is exactly the visit that makes a silent tracker detectable.
-    const [navAgeHours, activityAgeHours] = await Promise.all([
+    const [nav, activity] = await Promise.all([
       newestAt(supabase, "nav_events"),
       newestAt(supabase, "rate_limit_log"),
     ]);
+    const asked = { nav: nav.asked, activity: activity.asked };
 
-    return { navAgeHours, activityAgeHours, verdict: navVerdict(navAgeHours, activityAgeHours) };
+    return {
+      navAgeHours: nav.ageHours,
+      activityAgeHours: activity.ageHours,
+      verdict: navVerdict(nav.ageHours, activity.ageHours, asked),
+      asked,
+    };
   } catch {
-    return { navAgeHours: null, activityAgeHours: null, verdict: "unchecked" };
+    return {
+      navAgeHours: null,
+      activityAgeHours: null,
+      verdict: "unchecked",
+      asked: { nav: false, activity: false },
+    };
   }
 }

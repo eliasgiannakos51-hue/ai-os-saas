@@ -11,6 +11,8 @@ import { matchesSearch } from "@/lib/text/search-match";
 import { useScheduleLabel } from "@/components/agents/schedule-editor";
 import { resolveBrowserTimeZone } from "@/lib/agents/cron-expression";
 import { useCredits } from "@/components/credits/credits-context";
+import { CostEstimateHint } from "@/components/credits/cost-estimate";
+import { useCostEstimate } from "@/components/credits/use-cost-estimate";
 
 /**
  * BROWSING THE TEMPLATES THAT ALREADY EXISTED.
@@ -72,6 +74,28 @@ export function TemplateBrowser({
   const [query, setQuery] = useState("");
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [subject, setSubject] = useState("");
+  /**
+   * WHAT THIS COSTS, BEFORE THE BUTTON AND NOT AFTER THE CHARGE.
+   *
+   * Reported from live production on 2026-09-26: "I press a ready-made
+   * helper, nothing starts, and it charges credits." Two of those three
+   * are true and the third is the product working as designed — adopting
+   * a template CREATES an agent on a schedule, it does not run one, and
+   * the button says «Δημιουργία agent» accordingly.
+   *
+   * What was genuinely missing is the number. /api/agents/templates/adopt
+   * reserves under `agent_build` because a model fills the template from
+   * the person's own words, and that is real spend — but nothing on this
+   * screen said so until after it had happened. `useCredits` was imported
+   * here for reportUsage alone: the receipt, never the price tag.
+   *
+   * Same hook and same hint as the Website Builder, the deck writer and
+   * the mission form, so the figure is the account's own credit price
+   * rather than the list price.
+   */
+  const { credits: adoptCredits } = useCostEstimate("agentBuild", {
+    inputChars: subject.length,
+  });
   const [adopting, setAdopting] = useState(false);
 
   // ACCENT-BLIND AND CASE-BLIND, through the same matcher the rest of the
@@ -220,6 +244,9 @@ export function TemplateBrowser({
                     placeholder={t("subjectPlaceholder")}
                     className="mt-2 min-h-[44px] w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-accent focus:outline-none"
                   />
+                  {/* BEFORE the button, deliberately: a price under the
+                      control it applies to is a price somebody reads. */}
+                  <CostEstimateHint credits={adoptCredits} />
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button
                       type="button"

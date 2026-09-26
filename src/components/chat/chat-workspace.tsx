@@ -869,7 +869,28 @@ export function ChatWorkspace({
               {messages.map((msg) =>
                 msg.role === "user" ? (
                   <div key={msg.id} className="flex items-start justify-end gap-2">
-                    <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-tr-sm border border-orange-500/30 bg-panel px-4 py-2.5 text-foreground">
+                    {/* NO BOX. Reported from live production twice: "the
+                        text is inside a frame, I want it across the
+                        width". The ANSWER lost its card on 2026-09-04 —
+                        see the note above — and the QUESTION kept one,
+                        so what was left read as a frame around half the
+                        conversation.
+
+                        WHAT REPLACES IT, because a bubble was doing two
+                        jobs. Telling the speakers apart is done by the
+                        things that were already there: the turn is
+                        right-aligned, the avatar sits beside it, and
+                        space-y-8 between turns is four times the gap
+                        inside one. What the border added on top of that
+                        was a rectangle, and the rectangle is what was
+                        asked to go.
+
+                        The 85% cap goes with it: it existed to stop a
+                        bubble spanning the pane, and there is no bubble.
+                        Line length is still governed by .chat-measure,
+                        which is a measured readability cap and not a
+                        box — see globals.css. */}
+                    <div className="min-w-0 whitespace-pre-wrap px-1 py-0.5 text-right text-foreground">
                       {msg.content}
                     </div>
                     <span

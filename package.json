@@ -29,7 +29,8 @@
     "test:order": "node scripts/scan-order-dependence.mjs",
     "build:ci": "node scripts/ci-build.mjs",
     "test:unit:verbose": "node scripts/tests/run-gates.mjs --verbose",
-    "db:spend": "node scripts/db/model-spend.mjs"
+    "db:spend": "node scripts/db/model-spend.mjs",
+    "bot": "node scripts/e2e-bot.mjs"
   },
   "engines": {
     "node": "22.x"

@@ -78,3 +78,14 @@ scripts/tests/.mutation-sidecar.json
 # Screenshot output from scripts/design-phase4-verify.mjs and the light-theme audit —
 # large binaries, regenerated on demand, never reviewed as source.
 prod-audit/
+
+# THE BOT'S OUTPUT, and why it is not committed.
+#
+# scripts/e2e-bot.mjs signs in as a real account and screenshots what it
+# sees. Those images are of a logged-in session — a name, an email, whatever
+# that account happens to hold — and a report is a statement about ONE run
+# against ONE deployment at one minute. Committing either would put personal
+# data in the history and a stale verdict in the tree.
+#
+# Read them where they are written. Re-run the bot to get current ones.
+bot-report/

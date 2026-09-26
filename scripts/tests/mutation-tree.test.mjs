@@ -37,6 +37,46 @@ function check(name, cond, detail) {
 const CHECK = "scripts/check-mutation-tree.mjs";
 const MARKERS = "scripts/check-mutation-markers.mjs";
 
+/**
+ * DOES THIS TREE HAVE A GIT WORKTREE, and the whole reason it is asked.
+ *
+ * Vercel hands the builder a source tarball and sets
+ * VERCEL_GIT_COMMIT_SHA rather than shipping .git. check-mutation-tree's
+ * third check asks "which files are uncommitted", which is a question
+ * with no answer there — so the checker skips it, says so, and exits 0,
+ * deliberately, in its own paragraph.
+ *
+ * FOUR CLAUSES IN THIS FILE DEMANDED THE WARNING ANYWAY, and on
+ * 2026-09-26 that was measured as the thing failing the deploy: `npm run
+ * build` in a fresh clone of the rejected commit with .git removed
+ * exited 1 HERE, at gate 167 of 292, 125 gates never run. Reproduced on
+ * demand, twice.
+ *
+ * It is the second gate of this shape found in one day — scripts/db-inventory.mjs
+ * stamped its output from git alone and its gate read the stamp, fixed
+ * in the morning, which is what moved the failure from gate 70 to this
+ * one. Neither could see it, because both ran where .git happens to be.
+ *
+ * So each claim is made in the environment it is about, and which
+ * environment that was is printed rather than inferred. The branch this
+ * run does not take is held by
+ * scripts/tests/mutation-tree-environments.test.mjs, which builds a
+ * throwaway root with and without .git and asserts both in every
+ * environment — so neither branch here is a way out of the other.
+ */
+const HAS_WORKTREE = (() => {
+  try {
+    return (
+      execFileSync("git", ["rev-parse", "--is-inside-work-tree"], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim() === "true"
+    );
+  } catch {
+    return false;
+  }
+})();
+
 function run(script, env = {}) {
   try {
     const out = execFileSync("node", [script], {
@@ -87,9 +127,17 @@ console.log("== 1. the premise: the marker check really is blind to this ==");
   //
   // So it is asserted where it is true — on a developer's machine, as a
   // warning that names the file.
-  check("check-mutation-tree WARNS about it on a developer machine",
-    /WARNING \(advisory, not failing\)/.test(local.out), local.out.slice(0, 240));
-  check("...naming the file", /unicode-patterns\.ts/.test(local.out), local.out.slice(0, 240));
+  // …and only where the question has an answer. See HAS_WORKTREE above.
+  if (HAS_WORKTREE) {
+    check("check-mutation-tree WARNS about it on a developer machine",
+      /WARNING \(advisory, not failing\)/.test(local.out), local.out.slice(0, 240));
+    check("...naming the file", /unicode-patterns\.ts/.test(local.out), local.out.slice(0, 240));
+  } else {
+    check("with no worktree, the deleted guard is reported as UNANSWERABLE, not as absent",
+      /no git worktree — check 3 skipped/.test(local.out), local.out.slice(0, 240));
+    check("...and the build is not failed over a question nothing could answer",
+      local.code === 0, `exit ${local.code}`);
+  }
   check("...and does not fail a fresh-clone build over it", tree.code === 0, `exit ${tree.code}`);
   check("the tree is back", readFileSync(GUARD_FILE, "utf8") === before);
   // AND THE GAP IS NAMED RATHER THAN LEFT IMPLIED: a deleted guard that
@@ -187,8 +235,45 @@ console.log("\n== 4. dirty is ADVISORY, everywhere ==");
   // ADVISORY IS NOT SILENT. If it stopped saying anything, a real leftover
   // on a laptop would pass unnoticed, which is the one place check 3 has
   // value.
-  check("...but it still says so, loudly", /WARNING \(advisory, not failing\)/.test(local.out), local.out.slice(0, 240));
-  check("...and names the file", /nav-path\.ts/.test(local.out), local.out.slice(0, 240));
+  //
+  // AND THE QUESTION ONLY HAS AN ANSWER WHERE THERE IS A WORKTREE, which
+  // is what made this gate the thing that broke the deploy (2026-09-26).
+  //
+  // Vercel hands the builder a source tarball and sets
+  // VERCEL_GIT_COMMIT_SHA instead of shipping .git. The checker is right
+  // about that — it prints "no git worktree — check 3 skipped" and exits
+  // 0, deliberately, see its own paragraph. These two clauses demanded
+  // the warning anyway, so in a tree with no .git they could not pass:
+  // `npm run build` exited 1 here, at gate 167 of 292, with 125 gates
+  // never run. Reproduced on demand in a fresh clone of the commit
+  // Vercel rejected, which is the first time any condition has done that
+  // twice in a row.
+  //
+  // THE SECOND GATE OF THIS EXACT SHAPE IN ONE DAY. scripts/db-inventory.mjs
+  // stamped its output from git alone and its gate read the stamp; that
+  // was fixed in the morning, which moved the failure from gate 70 to
+  // this one. A build that cannot run without a working tree is a build
+  // that cannot run where it ships, and neither gate could see it
+  // because both ran where .git happens to exist.
+  //
+  // So the claim is made in the environment it is about. Where there IS
+  // a worktree the warning is demanded exactly as before; where there is
+  // not, the ABSENCE is demanded to be stated and survivable. Neither
+  // branch is a way out of the other: which one ran is printed, and
+  // scripts/tests/mutation-tree-environments.test.mjs asserts the no-git
+  // branch in EVERY environment by building its own throwaway root, so
+  // the branch this file does not take today is still held.
+  console.log(`        (this tree ${HAS_WORKTREE ? "HAS" : "has NO"} git worktree)`);
+  if (HAS_WORKTREE) {
+    check("...but it still says so, loudly", /WARNING \(advisory, not failing\)/.test(local.out), local.out.slice(0, 240));
+    check("...and names the file", /nav-path\.ts/.test(local.out), local.out.slice(0, 240));
+  } else {
+    check("...and with no worktree it says THAT, rather than going quiet",
+      /no git worktree — check 3 skipped/.test(local.out), local.out.slice(0, 240));
+    check("...and does not invent a finding it cannot have",
+      !/WARNING \(advisory, not failing\)/.test(local.out) && local.code === 0,
+      local.out.slice(0, 240));
+  }
   check("the tree is back", readFileSync(F, "utf8") === before);
 }
 

@@ -98,6 +98,75 @@ console.log("\n== 4. the arithmetic ==");
     const got = mod.navVerdict(nav, act);
     ok(`${label} -> ${want}`, got === want, `got ${got}`);
   }
+
+  // A NULL THAT CAME FROM A REFUSAL IS NOT A NULL THAT CAME FROM AN EMPTY
+  // TABLE, and the difference is the whole value of this probe. Before
+  // 2026-09-26 newestAt() returned null for both, so a database that
+  // refused the read reported "quiet" — nobody came — which is the
+  // calmest possible way to be wrong. Live production was reading exactly
+  // that shape.
+  const refused = [
+    // THE DISCRIMINATING ONE, and the first version of this table did not
+    // have it. With nav and activity both null the fall-through already
+    // answers "unchecked", so removing the guard changes nothing and the
+    // mutation reads as MISSED. An OLD navigation row plus a refused
+    // activity read is the case where the guard is the only thing between
+    // the answer and a confident "nobody came".
+    ["navigation old, activity read refused", 96, null, { nav: true, activity: false }, "unchecked"],
+    ["activity read refused, no navigation", null, null, { nav: true, activity: false }, "unchecked"],
+    ["navigation read refused, no activity", null, null, { nav: false, activity: true }, "unchecked"],
+    ["both refused", null, null, { nav: false, activity: false }, "unchecked"],
+    ["both asked, both empty — genuinely quiet", null, null, { nav: true, activity: true }, "unchecked"],
+    ["both asked, both old — genuinely quiet", 96, 96, { nav: true, activity: true }, "quiet"],
+    // A refusal must not be able to HIDE the fault either: recent activity
+    // with no navigation row is STALE whether or not the nav read worked.
+    ["in use, navigation read refused — still THE FAULT", null, 3, { nav: false, activity: true }, "STALE"],
+    // ...nor manufacture one: a recent navigation row is proof on its own.
+    ["navigation recent, activity read refused", 2, null, { nav: true, activity: false }, "ok"],
+  ];
+  for (const [label, nav, act, asked, want] of refused) {
+    const got = mod.navVerdict(nav, act, asked);
+    ok(`${label} -> ${want}`, got === want, `got ${got}`);
+  }
+
+  // AND THE READER THAT FEEDS IT. The pure function can only be right if
+  // something tells it the truth about what was asked.
+  ok(
+    "newestAt separates a refused read from an empty table",
+    /if \(error\) return \{ ageHours: null, asked: false \}/.test(src) &&
+      /if \(!data\) return \{ ageHours: null, asked: true \}/.test(src),
+    "one null for two opposite facts is what produced the wrong verdict"
+  );
+  // THE COMPARISON HAS TO RANGE OVER ACTIVITY THAT COULD HAVE PRODUCED A
+  // NAVIGATION ROW. A rejected password writes rate_limit_log and never
+  // reaches a dashboard page, so counting it turns one wrong login into
+  // "the tracker is broken" — which is what production reported on
+  // 2026-09-26 after a test harness typed one.
+  ok(
+    "the activity comparison excludes what a signed-out stranger can write",
+    /ANONYMOUS_SCOPES/.test(src) && /excludeScopes: ANONYMOUS_SCOPES/.test(src),
+    "otherwise a failed login is indistinguishable from a broken tracker"
+  );
+  ok(
+    "...and the excluded list is the one the routes actually write",
+    (() => {
+      const names = [...src.matchAll(/ANONYMOUS_SCOPES = \[([^\]]+)\]/g)][0]?.[1] ?? "";
+      const declared = [...names.matchAll(/"([a-z_]+)"/g)].map((m) => m[1]);
+      // THE POPULATION IS THE ROUTES, so the check reads the routes.
+      const written = [];
+      for (const f of ["src/app/api/auth/login/route.ts", "src/app/api/auth/device-check/route.ts"]) {
+        const r = readFileSync(f, "utf8");
+        for (const m of r.matchAll(/SCOPE = "([a-z_]+)"|scope: "([a-z_]+)"/g)) written.push(m[1] ?? m[2]);
+      }
+      return written.length > 0 && written.every((w) => declared.includes(w));
+    })(),
+    "a scope added to an anonymous route and not to the list walks straight back in"
+  );
+  ok(
+    "...and the report carries which reads happened",
+    /asked: \{ nav:/.test(src),
+    "a reader of /api/health has to be able to tell a quiet product from a blind probe"
+  );
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);

@@ -46,6 +46,33 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // "Marketing" IS the word in five European languages — Spanish,
+  // French, German, Italian and Portuguese all borrowed it whole, and
+  // every one of their own marketing departments is called that.
+  // Mercadotecnia (es) and Vermarktung (de) exist and neither is what a
+  // person would look for. Greek, Chinese, Japanese and Arabic translate
+  // it and do: Μάρκετινγκ, 市场营销, マーケティング, التسويق.
+  "es:sidebar.items.businessMarketing",
+  "fr:sidebar.items.businessMarketing",
+  "de:sidebar.items.businessMarketing",
+  "it:sidebar.items.businessMarketing",
+  "pt:sidebar.items.businessMarketing",
+  // "Life OS" is this product's own coinage for the group, and the six
+  // Latin-script locales keep it as a name. The three that do not use
+  // the Latin alphabet translate it — 生活系统, ライフOS, نظام الحياة —
+  // which is why this is five scoped entries and not one blanket
+  // exemption on the key.
+  "el:sidebar.items.personalLifeOs",
+  "es:sidebar.items.personalLifeOs",
+  "fr:sidebar.items.personalLifeOs",
+  "de:sidebar.items.personalLifeOs",
+  "it:sidebar.items.personalLifeOs",
+  "pt:sidebar.items.personalLifeOs",
+  // "Personal" is the Spanish adjective (personal, -es) spelled the same
+  // as the English one. Beside it in the same block: es connect
+  // "Conectar", business "Negocio", engineering "Ingeniería", verify
+  // "Verificar" — the block was translated, this word coincides.
+  "es:sidebar.groups.personal",
   // REDESIGN PHASE 4, the four step flows. Three step names land on the
   // same letters as English and the neighbours in the same block prove
   // the block was translated rather than copied.
@@ -513,6 +540,25 @@ const LOCALE_ALLOWED = new Set([
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
+  // THE HELD POSITIONS THAT ARE PRODUCT NAMES (2026-09-26). Five of the
+  // fifty-five sidebar labels added with the declared structure are the
+  // names of things, not words: GitHub, Google Drive, Slack and MCP are
+  // what those products are called in Athens, Tokyo and Cairo alike, and
+  // a person hunting the command palette for Slack types Slack. The same
+  // argument already exempts the three delivery channels below, and the
+  // rest of that structure's fifty-five labels — Banking, Procurement,
+  // Red Teaming and the other forty-nine — is translated in all ten.
+  //
+  // "DevOps" is the fifth and the weakest of the five, so it is named
+  // separately: it is a term of art rather than a trademark, and every
+  // locale's own engineering writing uses the English word. If a
+  // translator ever has a better one for it, this entry is the thing to
+  // delete.
+  "sidebar.items.connectGithub",
+  "sidebar.items.connectDrive",
+  "sidebar.items.connectSlack",
+  "sidebar.items.connectMcp",
+  "sidebar.items.engDevops",
   // The placeholder in a URL field. "https://..." is a FORMAT, not prose:
   // the scheme is the same eight characters in every written language,
   // including the two that do not use the Latin alphabet at all.

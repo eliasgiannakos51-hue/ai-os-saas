@@ -307,9 +307,20 @@ limit 40;
 -- through the sidebar anyway.
 with drawn(href) as (values
   ('/dashboard/website-builder'), ('/dashboard/documents'), ('/dashboard/coding'),
+  -- Drawn again from 2026-09-26: the feature was built, worked and was
+  -- hidden, which is the one state this query cannot see from the
+  -- outside — it would have reported zero sidebar demand for a row
+  -- nothing drew.
+  ('/dashboard/data-analysis'),
   ('/dashboard/voice'), ('/dashboard/presentations'), ('/dashboard/posts'),
   ('/dashboard/chat'), ('/dashboard/deep-research'), ('/dashboard/predictions'),
-  ('/dashboard/agents'), ('/dashboard/automation'), ('/dashboard/marketplace'),
+  -- The marketplace LEFT this list on 2026-09-26, not because demand
+  -- for it fell but because it is `retired` in lib/sidebar-nav.ts and
+  -- has not been drawn since 2026-09-24: counting a withdrawn row here
+  -- would report it as an unused sidebar row when it is not a sidebar
+  -- row at all. The page still serves anyone holding the URL, and §29.4
+  -- is where that traffic shows.
+  ('/dashboard/agents'), ('/dashboard/automation'),
   ('/dashboard/timeline'), ('/dashboard/files'), ('/dashboard/finance'),
   ('/dashboard/sales'), ('/dashboard/trading'), ('/dashboard/search'),
   ('/dashboard/ai-memory'),

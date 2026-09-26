@@ -309,13 +309,55 @@ checkTrue(
     !/\bplan\b|\btier\b|minPlan/i.test(visibilitySrc),
     "a plan-gated row means the owner/non-owner pair is no longer the whole cross-product",
   );
+  // A GROUP MAY NOW BE DELIBERATELY EMPTY, and the check had to grow a
+  // second half rather than lose its first (2026-09-26).
+  //
+  // Until this round every declared group drew rows, so "none of them
+  // vanished" was the whole rule and `gone.length === 0` was the whole
+  // check. The declared structure added five groups — Connect, Business,
+  // Engineering, Verify, Personal — in which EVERY row is `notBuilt`, so
+  // visibleGroups empties them and drops them, on purpose: forty-three
+  // positions whose order is fixed and which nobody can see.
+  //
+  // The weak repair would have been to exempt the five by name and keep
+  // asserting the rest. That exempts the failure too — a Make emptied by
+  // accident and a Connect emptied on purpose are the same event to a
+  // check that only counts. So the population is SPLIT by reading the
+  // config rather than by naming groups: a group with at least one row
+  // that is not notBuilt and not retired MUST draw, and a group with no
+  // such row MUST NOT. Both directions, and the split itself is floored
+  // so that a parse returning nothing cannot satisfy both halves
+  // vacuously.
+  const alive = (g) => g.items.filter((i) => !i.notBuilt && !i.retired);
+  const liveGroups = all.filter((g) => alive(g).length > 0).map((g) => g.heading);
+  const heldGroups = all.filter((g) => alive(g).length === 0).map((g) => g.heading);
+  checkTrue(
+    `the split is about something: ${liveGroups.length} live, ${heldGroups.length} held entirely`,
+    liveGroups.length >= 6 && heldGroups.length >= 1 && liveGroups.length + heldGroups.length === declared.length,
+    `live: ${liveGroups.join(", ")} | held: ${heldGroups.join(", ")}`,
+  );
   for (const isOwner of [true, false]) {
+    const who = isOwner ? "owner" : "non-owner";
     const drawn = new Set(sidebarGroups(all, isOwner).map((g) => g.heading));
-    const gone = declared.filter((h) => !drawn.has(h));
+    // THE OWNER-ONLY HOLE IN THE FIRST HALF, and it is real rather than
+    // theoretical: a group whose only live row carries `ownerOnly` draws
+    // for the owner and not for anybody else, which is not an accident
+    // and not a held position either. So the live set is recomputed per
+    // role from the same predicate.
+    const visibleHere = all
+      .filter((g) => alive(g).filter((i) => isOwner || !i.ownerOnly).length > 0)
+      .map((g) => g.heading);
+    const gone = visibleHere.filter((h) => !drawn.has(h));
     checkTrue(
-      `${isOwner ? "owner" : "non-owner"}: every declared group still draws rows (${drawn.size} of ${declared.length})`,
+      `${who}: every group with a live row draws it (${drawn.size} drawn, ${visibleHere.length} expected)`,
       gone.length === 0,
-      `${gone.join(", ")} — declared, and nothing under it survives the filters`,
+      `${gone.join(", ")} — declared with a live row, and nothing under it survives the filters`,
+    );
+    const shouldNotBe = heldGroups.filter((h) => drawn.has(h));
+    checkTrue(
+      `${who}: ...and a group that is ENTIRELY held draws nothing (${heldGroups.length} held)`,
+      shouldNotBe.length === 0,
+      `${shouldNotBe.join(", ")} — every row under it is notBuilt or retired, and the heading is on screen anyway`,
     );
   }
 }

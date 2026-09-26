@@ -1,8 +1,8 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **642 strings**. The whole product is 3339, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **702 strings**. The whole product is 3399, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 393 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 453 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -314,7 +314,7 @@ Ionexa 用它来挑选下一个建议的计划步骤——状态低时给轻松�
 
 免费——不生成任何内容，一键即可移除
 
-## Tier 2 — The labels — skim these (393)
+## Tier 2 — The labels — skim these (453)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1556,6 +1556,24 @@ AI 编程
 
 提问
 
+**`sidebar.groups.business`**
+
+> EN — Business
+
+业务
+
+**`sidebar.groups.connect`**
+
+> EN — Connect
+
+连接
+
+**`sidebar.groups.engineering`**
+
+> EN — Engineering
+
+工程
+
 **`sidebar.groups.make`**
 
 > EN — Make
@@ -1567,6 +1585,12 @@ AI 编程
 > EN — Organise
 
 整理
+
+**`sidebar.groups.personal`**
+
+> EN — Personal
+
+个人
 
 **`sidebar.groups.run`**
 
@@ -1585,6 +1609,12 @@ AI 编程
 > EN — Settings
 
 设置
+
+**`sidebar.groups.verify`**
+
+> EN — Verify
+
+验证
 
 **`sidebar.hints.affiliate`**
 
@@ -1862,11 +1892,77 @@ MRR、毛利、流失与现金。仅限所有者。
 
 自动化
 
+**`sidebar.items.browserAgent`**
+
+> EN — Browser agent
+
+浏览器代理
+
+**`sidebar.items.businessAccounting`**
+
+> EN — Accounting
+
+会计
+
+**`sidebar.items.businessCrm`**
+
+> EN — CRM
+
+客户关系管理
+
+**`sidebar.items.businessFinance`**
+
+> EN — Company Finance
+
+公司财务
+
 **`sidebar.items.businessHealth`**
 
 > EN — How the business is doing
 
 生意怎么样
+
+**`sidebar.items.businessHr`**
+
+> EN — HR
+
+人力资源
+
+**`sidebar.items.businessInventory`**
+
+> EN — Inventory
+
+库存
+
+**`sidebar.items.businessLegal`**
+
+> EN — Legal
+
+法务
+
+**`sidebar.items.businessMarketing`**
+
+> EN — Marketing
+
+市场营销
+
+**`sidebar.items.businessProcurement`**
+
+> EN — Procurement
+
+采购
+
+**`sidebar.items.businessSupport`**
+
+> EN — Customer Support
+
+客户支持
+
+**`sidebar.items.calendar`**
+
+> EN — Calendar
+
+日历
 
 **`sidebar.items.campaigns`**
 
@@ -1891,6 +1987,78 @@ AI 编程
 > EN — Competitors
 
 竞争对手
+
+**`sidebar.items.computerAgent`**
+
+> EN — Computer agent
+
+电脑代理
+
+**`sidebar.items.connectApis`**
+
+> EN — APIs
+
+API 接口
+
+**`sidebar.items.connectBanking`**
+
+> EN — Banking
+
+银行
+
+**`sidebar.items.connectCalendar`**
+
+> EN — Calendar Sync
+
+日历同步
+
+**`sidebar.items.connectCrm`**
+
+> EN — CRM Connector
+
+CRM 连接器
+
+**`sidebar.items.connectDataSources`**
+
+> EN — Data Sources
+
+数据源
+
+**`sidebar.items.connectDrive`**
+
+> EN — Google Drive
+
+Google Drive
+
+**`sidebar.items.connectEmail`**
+
+> EN — Email
+
+邮件
+
+**`sidebar.items.connectGithub`**
+
+> EN — GitHub
+
+GitHub
+
+**`sidebar.items.connectIot`**
+
+> EN — IoT Devices
+
+物联网设备
+
+**`sidebar.items.connectMcp`**
+
+> EN — MCP
+
+MCP
+
+**`sidebar.items.connectSlack`**
+
+> EN — Slack
+
+Slack
 
 **`sidebar.items.content`**
 
@@ -1922,11 +2090,71 @@ AI 编程
 
 好好查一下
 
+**`sidebar.items.design`**
+
+> EN — Design
+
+设计
+
 **`sidebar.items.documents`**
 
 > EN — Documents
 
 文档
+
+**`sidebar.items.engCloud`**
+
+> EN — Cloud
+
+云
+
+**`sidebar.items.engCode`**
+
+> EN — Code
+
+代码
+
+**`sidebar.items.engDatabases`**
+
+> EN — Database Ops
+
+数据库运维
+
+**`sidebar.items.engDeployment`**
+
+> EN — Deployment
+
+部署
+
+**`sidebar.items.engDevops`**
+
+> EN — DevOps
+
+DevOps
+
+**`sidebar.items.engInfrastructure`**
+
+> EN — Infrastructure
+
+基础设施
+
+**`sidebar.items.engMonitoring`**
+
+> EN — Service Monitoring
+
+服务监控
+
+**`sidebar.items.engSecurity`**
+
+> EN — Security
+
+安全
+
+**`sidebar.items.engTesting`**
+
+> EN — Testing
+
+测试
 
 **`sidebar.items.favorites`**
 
@@ -1988,6 +2216,18 @@ AI 编程
 
 集成
 
+**`sidebar.items.knowledge`**
+
+> EN — Knowledge
+
+知识
+
+**`sidebar.items.knowledgeGraph`**
+
+> EN — Knowledge Graph
+
+知识图谱
+
 **`sidebar.items.learning`**
 
 > EN — Learning
@@ -2030,11 +2270,71 @@ AI 编程
 
 目标与计划
 
+**`sidebar.items.monitoring`**
+
+> EN — Monitoring
+
+监控
+
+**`sidebar.items.music`**
+
+> EN — Music
+
+音乐
+
 **`sidebar.items.newEntry`**
 
 > EN — New entry
 
 新记录
+
+**`sidebar.items.operations`**
+
+> EN — Operations
+
+运营
+
+**`sidebar.items.personalFinance`**
+
+> EN — Personal Finance
+
+个人理财
+
+**`sidebar.items.personalHabits`**
+
+> EN — Habits
+
+习惯
+
+**`sidebar.items.personalHealth`**
+
+> EN — Health
+
+健康
+
+**`sidebar.items.personalJournal`**
+
+> EN — Journaling
+
+日志
+
+**`sidebar.items.personalLifeOs`**
+
+> EN — Life OS
+
+生活系统
+
+**`sidebar.items.personalShopping`**
+
+> EN — Shopping
+
+购物
+
+**`sidebar.items.personalTravel`**
+
+> EN — Travel
+
+旅行
 
 **`sidebar.items.posts`**
 
@@ -2108,6 +2408,12 @@ AI 编程
 
 销售
 
+**`sidebar.items.scheduledJobs`**
+
+> EN — Scheduled Jobs
+
+定时任务
+
 **`sidebar.items.settings`**
 
 > EN — Settings
@@ -2119,6 +2425,12 @@ AI 编程
 > EN — System Health
 
 系统健康
+
+**`sidebar.items.tasks`**
+
+> EN — Tasks
+
+任务
 
 **`sidebar.items.team`**
 
@@ -2150,6 +2462,48 @@ AI 编程
 
 交易工作流
 
+**`sidebar.items.verifyCode`**
+
+> EN — Code Verification
+
+代码验证
+
+**`sidebar.items.verifyData`**
+
+> EN — Data Validation
+
+数据校验
+
+**`sidebar.items.verifyFacts`**
+
+> EN — Fact Checking
+
+事实核查
+
+**`sidebar.items.verifyOutput`**
+
+> EN — Output Evaluation
+
+输出评估
+
+**`sidebar.items.verifyRedTeam`**
+
+> EN — Red Teaming
+
+红队演练
+
+**`sidebar.items.verifySecurity`**
+
+> EN — Security Testing
+
+安全测试
+
+**`sidebar.items.verifySources`**
+
+> EN — Source Verification
+
+来源核实
+
 **`sidebar.items.videos`**
 
 > EN — Video ideas
@@ -2173,6 +2527,12 @@ AI 编程
 > EN — Website plans
 
 网站计划
+
+**`sidebar.items.workflows`**
+
+> EN — Workflows
+
+工作流
 
 ### first result
 

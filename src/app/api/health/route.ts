@@ -306,7 +306,12 @@ export async function GET(request: Request) {
     try {
       body.nav = await navFreshness(createAdminClient());
     } catch {
-      body.nav = { navAgeHours: null, activityAgeHours: null, verdict: "unchecked" };
+      body.nav = {
+        navAgeHours: null,
+        activityAgeHours: null,
+        verdict: "unchecked",
+        asked: { nav: false, activity: false },
+      };
     }
 
     // AND WHETHER THE DERIVED TABLES HAVE ROWS AT ALL.

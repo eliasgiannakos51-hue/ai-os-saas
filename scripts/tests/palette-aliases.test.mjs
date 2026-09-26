@@ -26,6 +26,7 @@
 //
 // Run: node scripts/tests/palette-aliases.test.mjs
 import { readFileSync } from "node:fs";
+import { groupBlocks, itemChunks } from "./lib/sidebar-source.mjs";
 import { loadTs } from "./load-ts.mjs";
 
 let pass = 0;
@@ -48,10 +49,40 @@ const lookup = (obj, path) => path.split(".").reduce((a, k) => (a ?? {})[k], obj
 // THE REAL REGISTRY, parsed out of the file the sidebar is built from —
 // not a list written here, which would be one more thing equalling
 // itself.
+//
+// AND PUT THROUGH THE PALETTE'S OWN FILTER, which it was not until
+// 2026-09-26. `visibleGroups` is what components/dashboard/command-palette.tsx
+// flattens, and it strips `notBuilt` and `retired`; this file took every
+// `label:` in the config instead, so its registry was everything the
+// file mentions. That cost nothing while four rows were held and broke
+// the moment fifty-five were: "email" ranked the held Email row under
+// Connect above Integrations, "slack" the same, "account" ranked a held
+// Accounting above Settings — three failures naming rows the palette
+// has never been able to offer. A gate that searches a larger registry
+// than the product does reports collisions the product cannot have, and
+// would equally MISS one that only appears once a row goes live.
 const navSource = readFileSync("src/lib/sidebar-nav.ts", "utf8");
-const LABELS = [...navSource.matchAll(/label:\s*"([^"]+)"/g)]
-  .map((m) => m[1])
-  .filter((l) => keys.ITEM_LABEL_KEYS[l]);
+const { visibleGroups } = await loadTs("src/lib/sidebar-visibility.ts");
+const offered = visibleGroups(
+  groupBlocks(navSource).map((g) => ({
+    heading: g.heading,
+    items: itemChunks(g.body).map((i) => ({
+      href: i.literalHref ?? i.constantHref ?? "?",
+      label: i.head.match(/label:\s*"([^"]+)"/)?.[1] ?? null,
+      ...(i.hidden ? { hidden: true } : {}),
+      ...(i.notBuilt ? { notBuilt: true } : {}),
+      ...(i.ownerOnly ? { ownerOnly: true } : {}),
+      ...(i.retired ? { retired: "declared" } : {}),
+    })),
+  })),
+  // The owner sees the most, so this is the widest registry the palette
+  // can have — a collision that exists for anybody exists here.
+  true
+).flatMap((g) => g.items.map((i) => i.label));
+const LABELS = offered.filter((l) => l && keys.ITEM_LABEL_KEYS[l]);
+ok(`the palette registry is the palette's (${LABELS.length} of ${(navSource.match(/label:\s*"/g) ?? []).length} labels in the config)`,
+  LABELS.length >= 20 && LABELS.length < (navSource.match(/label:\s*"/g) ?? []).length,
+  "either the filter found nothing, or it stripped nothing and this is the whole config again");
 
 const entriesFor = (locale) =>
   LABELS.map((label) => {

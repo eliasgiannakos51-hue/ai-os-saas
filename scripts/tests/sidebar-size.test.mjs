@@ -50,6 +50,27 @@ function check(name, cond, detail) {
 // phone before a single link is drawn, which is why this number moves by
 // argument and not by convenience.
 const MAX_GROUPS = 6;
+// AND THE CEILING IS ABOUT THE SCREEN, WHICH IS NOT WHERE IT WAS BEING
+// MEASURED (2026-09-26).
+//
+// The paragraph above prices a group in pixels — 264px of the drawer on
+// a phone before a single link is drawn — and then the check applied
+// that price to `groups.length`, the number of groups DECLARED in
+// lib/sidebar-nav.ts. Those were the same number for as long as every
+// declared group drew rows, and the day they stopped being the same the
+// check failed for a sidebar that had not changed by one pixel: the
+// declared structure added Connect, Business, Engineering, Verify and
+// Personal, in which every row is `notBuilt`, so `visibleGroups` empties
+// all five and drops them and nothing reaches the screen.
+//
+// A DECLARED GROUP COSTS NOTHING UNTIL IT DRAWS. So the pixel ceiling
+// moves to the number it was always about — section 3 already measures
+// it, for both roles, through the real filter — and the declaration gets
+// a ceiling of its own, which is a different argument: not scroll, but
+// how many places a person has to consider before deciding where a
+// feature lives. Eleven is the owner's structure of 2026-09-26; it moves
+// by argument, like the six.
+const MAX_DECLARED_GROUPS = 11;
 // A CEILING WITH NO FLOOR IS SATISFIED BY ZERO. Both limits in this file
 // are "at most", and at most six groups is true of no groups at all — so
 // a config that collapsed, or a parse that stopped matching, would read
@@ -209,10 +230,22 @@ check(
 console.log(`\n== 2. at most ${MAX_GROUPS} groups ==`);
 console.log(`        ${groups.map((g) => g.heading).join(" · ")}`);
 check(
-  `${groups.length} groups, limit ${MAX_GROUPS}`,
-  groups.length <= MAX_GROUPS,
+  `${groups.length} groups declared, limit ${MAX_DECLARED_GROUPS}`,
+  groups.length <= MAX_DECLARED_GROUPS,
   `${groups.length} groups: ${groups.map((g) => g.heading).join(", ")}`
 );
+// THE PIXEL CEILING, ON THE NUMBER THAT COSTS PIXELS. Section 3 asserts
+// this per role as well; it is stated here too because this is the
+// section whose header carries the argument, and a reader who takes the
+// number above for the screen count would be reading the wrong one.
+{
+  const headingsDrawn = sidebarGroups(groups, true).length;
+  check(
+    `${headingsDrawn} headings on screen, limit ${MAX_GROUPS}`,
+    headingsDrawn <= MAX_GROUPS,
+    `${headingsDrawn} headings for the role that sees the most`
+  );
+}
 check(
   `...and at least ${MIN_GROUPS}, so an emptied config cannot pass a ceiling`,
   groups.length >= MIN_GROUPS,

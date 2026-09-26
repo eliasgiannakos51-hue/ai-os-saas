@@ -136,17 +136,35 @@ const MUTATIONS = [
     to: ".chat-ground-dim {\n  backdrop-filter: blur(8px);\n  background: rgb(var(--background) / 0.62);",
     expect: "...and no blur, which is the whole reason it was chosen",
   },
+  // THE DECISION REVERSED ON 2026-09-26: the person's turn lost its box,
+  // so these two anchored on a class string that no longer exists and
+  // came back ANCHOR NOT FOUND. Reported rather than passed, which is how
+  // they were caught. Rewritten against the rule that replaced the old
+  // one — the box must not return, and the three things that tell a
+  // question from an answer without it must stay.
   {
-    name: "the person's turn loses its ground, so a question looks like an answer",
+    name: "the box comes back around the person's message",
     file: WORKSPACE,
-    from: 'border border-orange-500/30 bg-panel px-4 py-2.5 text-foreground',
-    to: 'px-4 py-2.5 text-foreground',
+    from: '<div className="min-w-0 whitespace-pre-wrap px-1 py-0.5 text-right text-foreground">',
+    to: '<div className="max-w-[85%] whitespace-pre-wrap rounded-2xl border border-orange-500/30 bg-panel px-4 py-2.5 text-foreground">',
+    expect: "the person's message has no box around it",
   },
   {
-    name: "the filled orange slab comes back",
+    name: "the filled accent slab comes back",
     file: WORKSPACE,
-    from: 'rounded-2xl rounded-tr-sm border border-orange-500/30 bg-panel px-4 py-2.5 text-foreground',
-    to: 'rounded-2xl rounded-tr-sm bg-orange-500 px-4 py-2.5 text-sm text-black',
+    from: '<div className="min-w-0 whitespace-pre-wrap px-1 py-0.5 text-right text-foreground">',
+    to: '<div className="whitespace-pre-wrap rounded-2xl bg-orange-500 px-4 py-2.5 text-sm text-black">',
+    expect: "the person's message has no box around it",
+  },
+  {
+    // THE OTHER HALF OF THE REPLACEMENT. Taking the box away is only
+    // right if what distinguishes the speakers survives; a turn that is
+    // no longer right-aligned is a conversation nobody can read.
+    name: "the person's turn stops being right-aligned",
+    file: WORKSPACE,
+    from: '<div key={msg.id} className="flex items-start justify-end gap-2">',
+    to: '<div key={msg.id} className="flex items-start gap-2">',
+    expect: "...and is still told apart by being right-aligned",
   },
   // --- the instrument's own clauses, both of which were wrong once -----
   {

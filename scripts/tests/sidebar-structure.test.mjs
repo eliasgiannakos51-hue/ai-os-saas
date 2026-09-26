@@ -92,17 +92,19 @@ const FUTURE = [
   { heading: "Make", hrefs: [
     "/dashboard/website-builder", "/dashboard/documents", "/dashboard/presentations",
     "/dashboard/posts", "/dashboard/coding",
-    "/dashboard/images", "/dashboard/videos", "/dashboard/music",
+    "/dashboard/images", "/dashboard/videos", "/dashboard/music", "/dashboard/design",
+    "/dashboard/apps", "/dashboard/data-analysis",
   ] },
   // VOICE MOVED HERE FROM MAKE. It produces audio, which is why it was
   // filed under production — but what a person does on that page is put a
   // question and be answered, which is this group's subject.
   { heading: "Ask", hrefs: [
     "/dashboard/chat", "/dashboard/deep-research", "/dashboard/predictions",
-    "/dashboard/voice",
+    "/dashboard/voice", "/dashboard/learning", "/dashboard/decisions",
   ] },
   { heading: "Run", hrefs: [
     "/dashboard/agents", "/dashboard/automation", "/dashboard/marketplace",
+    "/dashboard/workflows", "/dashboard/scheduled-jobs", "/dashboard/operations",
     "/dashboard/browser", "/dashboard/computer",
   ] },
   // SEE GAINED A ROW BY SPLITTING ONE, not by adding a feature.
@@ -117,10 +119,45 @@ const FUTURE = [
     "/dashboard/timeline", "/dashboard/files", "/dashboard/finance",
     "/dashboard/sales", "/dashboard/trading", "/dashboard/search",
     "/dashboard/ai-memory", "/dashboard/business-health",
+    "/dashboard/analytics", "/dashboard/monitoring", "/dashboard/knowledge-graph",
   ] },
   { heading: "Organise", hrefs: [
     "/dashboard/projects", "/dashboard/mission", "/dashboard/reflection",
     "/dashboard/meetings", "/dashboard/team",
+    "/dashboard/calendar", "/dashboard/tasks", "/dashboard/knowledge",
+  ] },
+  // THE FIVE GROUPS IN WHICH EVERY ROW IS HELD (2026-09-26). Not one of
+  // the forty-three is drawn, so not one of the five headings is, and
+  // section 1d below is what requires that rather than merely observing
+  // it. Their order is locked here for the same reason every other
+  // position is: the alternative to declaring where a feature goes is
+  // appending it wherever it lands.
+  { heading: "Connect", hrefs: [
+    "/dashboard/connect/email", "/dashboard/connect/calendar", "/dashboard/connect/github",
+    "/dashboard/connect/drive", "/dashboard/connect/slack", "/dashboard/connect/crm",
+    "/dashboard/connect/banking", "/dashboard/connect/apis", "/dashboard/connect/data-sources",
+    "/dashboard/connect/mcp", "/dashboard/connect/iot",
+  ] },
+  { heading: "Business", hrefs: [
+    "/dashboard/business/crm", "/dashboard/business/marketing", "/dashboard/business/accounting",
+    "/dashboard/business/finance", "/dashboard/business/hr", "/dashboard/business/legal",
+    "/dashboard/business/procurement", "/dashboard/business/inventory", "/dashboard/business/support",
+  ] },
+  { heading: "Engineering", hrefs: [
+    "/dashboard/engineering/code", "/dashboard/engineering/testing", "/dashboard/engineering/deployment",
+    "/dashboard/engineering/cloud", "/dashboard/engineering/databases", "/dashboard/engineering/devops",
+    "/dashboard/engineering/security", "/dashboard/engineering/monitoring",
+    "/dashboard/engineering/infrastructure",
+  ] },
+  { heading: "Verify", hrefs: [
+    "/dashboard/verify/facts", "/dashboard/verify/data", "/dashboard/verify/code",
+    "/dashboard/verify/security", "/dashboard/verify/output", "/dashboard/verify/sources",
+    "/dashboard/verify/red-team",
+  ] },
+  { heading: "Personal", hrefs: [
+    "/dashboard/personal/habits", "/dashboard/personal/health", "/dashboard/personal/travel",
+    "/dashboard/personal/shopping", "/dashboard/personal/finance", "/dashboard/personal/journal",
+    "/dashboard/personal/life-os",
   ] },
   // Rendered in its own block at the foot of the sidebar, from
   // SETTINGS_GROUP rather than MAIN_SIDEBAR_GROUPS — section 3 holds
@@ -133,11 +170,52 @@ const FUTURE = [
 
 /** The rows whose position is locked and which are NOT drawn today. */
 const NOT_DRAWN_YET = new Map([
+  // --- Make
   ["/dashboard/images", "hidden"],
   ["/dashboard/videos", "hidden"],
   ["/dashboard/music", "notBuilt"],
+  ["/dashboard/design", "notBuilt"],
+  ["/dashboard/apps", "hidden"],
+  // /dashboard/data-analysis came OFF this list on 2026-09-26 — the one
+  // row the inventory moved from hidden to drawn, on the rule that a
+  // feature which exists and works gets its row back.
+  // --- Ask
+  ["/dashboard/learning", "hidden"],
+  ["/dashboard/decisions", "hidden"],
+  // --- Run
+  // MARKETPLACE IS THE THIRD FLAG, and it was missing from this file
+  // until 2026-09-26. `retired` was added on 2026-09-24 to withdraw the
+  // ready-made helpers from every surface while the page kept serving,
+  // and this gate did not notice: its own parse (section 0) read
+  // hidden/notBuilt/ownerOnly and not retired, so it believed the row
+  // was drawn, compared a drawn list that contained it against a
+  // declared list that contained it, and agreed with itself. The parse
+  // reads the flag now and the declaration carries it.
+  ["/dashboard/marketplace", "retired"],
+  ["/dashboard/workflows", "notBuilt"],
+  ["/dashboard/scheduled-jobs", "notBuilt"],
+  ["/dashboard/operations", "notBuilt"],
   ["/dashboard/browser", "notBuilt"],
   ["/dashboard/computer", "notBuilt"],
+  // --- See
+  ["/dashboard/analytics", "hidden"],
+  ["/dashboard/monitoring", "notBuilt"],
+  ["/dashboard/knowledge-graph", "notBuilt"],
+  // --- Organise
+  ["/dashboard/calendar", "notBuilt"],
+  ["/dashboard/tasks", "notBuilt"],
+  ["/dashboard/knowledge", "notBuilt"],
+  // --- the five groups that are held entirely
+  ...["email", "calendar", "github", "drive", "slack", "crm", "banking", "apis", "data-sources", "mcp", "iot"]
+    .map((x) => [`/dashboard/connect/${x}`, "notBuilt"]),
+  ...["crm", "marketing", "accounting", "finance", "hr", "legal", "procurement", "inventory", "support"]
+    .map((x) => [`/dashboard/business/${x}`, "notBuilt"]),
+  ...["code", "testing", "deployment", "cloud", "databases", "devops", "security", "monitoring", "infrastructure"]
+    .map((x) => [`/dashboard/engineering/${x}`, "notBuilt"]),
+  ...["facts", "data", "code", "security", "output", "sources", "red-team"]
+    .map((x) => [`/dashboard/verify/${x}`, "notBuilt"]),
+  ...["habits", "health", "travel", "shopping", "finance", "journal", "life-os"]
+    .map((x) => [`/dashboard/personal/${x}`, "notBuilt"]),
   // /dashboard/meetings came OFF this list on 2026-09-23. It is the
   // first row to make the whole journey the notBuilt flag exists for:
   // position decided cold, held while the feature did not exist, drawn
@@ -146,20 +224,34 @@ const NOT_DRAWN_YET = new Map([
   // anybody re-opening the question.
 ]);
 
+/** The five whose every row is held, so no heading may appear. */
+const HELD_ENTIRELY = FUTURE.filter((g) => g.hrefs.every((h) => NOT_DRAWN_YET.has(h))).map((g) => g.heading);
+
 // WHAT IS DRAWN IS DERIVED, not typed a second time. Two hand-written
 // lists that must agree is the shape this whole file exists to catch.
 const DECLARED = FUTURE.map((g) => ({
   heading: g.heading,
   hrefs: g.hrefs.filter((h) => !NOT_DRAWN_YET.has(h)),
-}));
+})).filter((g) => g.hrefs.length > 0);
 
 // FLOORS ON THE DECLARATION ITSELF. Every comparison below is against
 // DECLARED, so a DECLARED that had been emptied would agree with an
 // emptied sidebar perfectly and this whole file would pass.
 const DECLARED_ROWS = DECLARED.reduce((n, g) => n + g.hrefs.length, 0);
-ok(`the declaration is not empty (${DECLARED.length} groups, ${DECLARED_ROWS} rows)`,
+ok(`the declaration is not empty (${DECLARED.length} groups drawn of ${FUTURE.length} declared, ${DECLARED_ROWS} rows)`,
   DECLARED.length >= 6 && DECLARED_ROWS >= 26 && DECLARED.every((g) => g.hrefs.length >= 1),
   "a comparison against an empty declaration passes for the wrong reason");
+// AND THE HELD HALF HAS A FLOOR OF ITS OWN. Section 1d asserts that no
+// entirely-held group is drawn; with HELD_ENTIRELY empty that assertion
+// is true of nothing and prints a pass. The five are named, so a
+// NOT_DRAWN_YET that stopped covering one of them says so here rather
+// than three sections later.
+ok(`${HELD_ENTIRELY.length} groups are held entirely (${HELD_ENTIRELY.join(", ")})`,
+  HELD_ENTIRELY.length === 5 &&
+    ["Connect", "Business", "Engineering", "Verify", "Personal"].every((h) => HELD_ENTIRELY.includes(h)),
+  "the five groups with no live row are what section 1d is about");
+const HELD_ROWS = FUTURE.filter((g) => HELD_ENTIRELY.includes(g.heading)).reduce((n, g) => n + g.hrefs.length, 0);
+ok(`...covering ${HELD_ROWS} positions`, HELD_ROWS === 43, String(HELD_ROWS));
 
 // ---------------------------------------------------------------------
 console.log("== 0. the config is read, and read completely ==");
@@ -192,6 +284,13 @@ const parsed = marks.map((mark) => {
         hidden: /hidden:\s*true/.test(head),
         notBuilt: /notBuilt:\s*true/.test(head),
         ownerOnly: /ownerOnly:\s*true/.test(head),
+        // THE FLAG THIS FILE COULD NOT SEE UNTIL 2026-09-26. Its value
+        // is the REASON in prose rather than `true`, so the match is on
+        // the key — the same shape lib/sidebar-source.mjs uses. Without
+        // it `sidebarGroups` below was handed rows with no `retired`
+        // property and drew the marketplace, which the running product
+        // has not drawn since 2026-09-24.
+        retired: /retired:\s*["'`+]/.test(head) || /retired:\s*$/m.test(head) ? "declared" : undefined,
         // A held position for something that does not exist yet.
         // `sidebarGroups` drops it, so the parse has to carry it or the
         // declared list below would have to name rows nothing draws —
@@ -334,7 +433,7 @@ console.log("\n== 1b. the POSITION of a row that is not built yet is locked ==")
   for (const [href, expected] of NOT_DRAWN_YET) {
     const item = byHref.get(href);
     if (!item) { wrongFlag.push(`${href}: not in the config at all`); continue; }
-    const actual = item.notBuilt ? "notBuilt" : item.hidden ? "hidden" : "drawn";
+    const actual = item.notBuilt ? "notBuilt" : item.retired ? "retired" : item.hidden ? "hidden" : "drawn";
     if (actual !== expected) wrongFlag.push(`${href}: declared ${expected}, config says ${actual}`);
   }
   ok(`all ${NOT_DRAWN_YET.size} not-yet rows carry the flag they are declared with`,
@@ -345,7 +444,7 @@ console.log("\n== 1b. the POSITION of a row that is not built yet is locked ==")
   // telling whoever removed it to move the row out of NOT_DRAWN_YET too.
   const surprised = FUTURE.flatMap((g) => g.hrefs)
     .filter((h) => !NOT_DRAWN_YET.has(h))
-    .filter((h) => byHref.get(h)?.hidden || byHref.get(h)?.notBuilt);
+    .filter((h) => byHref.get(h)?.hidden || byHref.get(h)?.notBuilt || byHref.get(h)?.retired);
   ok("no row that should be drawn is flagged", surprised.length === 0, surprised.join(", "));
 
   // A notBuilt row has NO PAGE, so it must reach neither the command
@@ -371,7 +470,73 @@ console.log("\n== 1b. the POSITION of a row that is not built yet is locked ==")
   ok("…and every hidden row still is", hiddenStillSearchable.length === 0, hiddenStillSearchable.join(", "));
 }
 
+console.log("\n== 1d. a held row is not drawn, and a group of nothing but held rows is not there ==");
+// ---------------------------------------------------------------------
+// THE TWO RULES THE DECLARED STRUCTURE RESTS ON, asked of the real
+// filter for BOTH roles rather than of the declaration that produced it.
+//
+// Sections 1 and 2 compare `drawn` against `DECLARED`, and DECLARED is
+// derived from FUTURE by removing NOT_DRAWN_YET — so a `notBuilt` that
+// stopped being stripped would have to be removed from NOT_DRAWN_YET to
+// make those sections pass, and the two lists would agree again. That is
+// the shape this file's own header warns about. Here the claim is made
+// against the flag in the CONFIG instead: whatever FUTURE says, a row
+// carrying notBuilt may not appear on screen, and a group whose every
+// row carries it may not put a heading there.
+//
+// BOTH ROLES, because `ownerOnly` is a third way for a group to empty
+// and the owner is the account that sees the most.
+{
+  const held = parsed.flatMap((g) => g.items).filter((i) => i.notBuilt).map((i) => i.href);
+  ok(`the config carries held rows at all (${held.length})`, held.length >= 40,
+    "with nothing flagged, every claim below is true of an empty set");
+  for (const isOwner of [true, false]) {
+    const who = isOwner ? "owner" : "non-owner";
+    const rows = sidebarGroups(parsed, isOwner);
+    const onScreen = new Set(rows.flatMap((g) => g.items.map((i) => i.href)));
+    const leaked = held.filter((h) => onScreen.has(h));
+    ok(`${who}: no held row is drawn (${onScreen.size} rows on screen)`, leaked.length === 0, leaked.join(", "));
+
+    // AND THE GROUP RULE, derived the same way. A heading is allowed
+    // exactly when the group has at least one row that survives the
+    // filters — so this is one comparison, not an allowlist of five
+    // names, and a Make emptied by accident fails it as loudly as a
+    // Connect drawn by accident.
+    const headings = new Set(rows.map((g) => g.heading));
+    const wrong = [];
+    for (const g of parsed) {
+      const alive = g.items.filter((i) => !i.notBuilt && !i.retired && (isOwner || !i.ownerOnly)).length;
+      if (alive > 0 && !headings.has(g.heading)) wrong.push(`${g.heading}: ${alive} live rows and no heading`);
+      if (alive === 0 && headings.has(g.heading)) wrong.push(`${g.heading}: a heading over nothing`);
+    }
+    ok(`${who}: a heading appears exactly when the group has a live row (${headings.size} headings)`,
+      wrong.length === 0, wrong.join("\n        "));
+  }
+  // …and the five are the five, named once so that a sixth group going
+  // dark — which would mean a feature was withdrawn — cannot pass as
+  // more of the same.
+  const darkNow = parsed
+    .filter((g) => g.items.length > 0 && g.items.every((i) => i.notBuilt || i.retired))
+    .map((g) => g.heading);
+  ok(`the groups drawn nowhere are the five declared ones (${darkNow.join(", ") || "none"})`,
+    darkNow.length === HELD_ENTIRELY.length && darkNow.every((h) => HELD_ENTIRELY.includes(h)),
+    `config says ${darkNow.join(", ")}; the declaration says ${HELD_ENTIRELY.join(", ")}`);
+}
+
 console.log("\n== 2. the ORDER and the NAMES, position by position ==");
+// THE ORDER OF THE GROUPS NOBODY SEES, which the comparison below
+// cannot reach. DECLARED drops the groups left empty, so from here
+// down this file only ever compares the six headings that are drawn —
+// and the five that are not were exactly the ones whose position was
+// the argument for declaring them. Their order is held against the
+// CONFIG, parsed, which is the only place it exists.
+{
+  const configHeadings = parsed.map((g) => g.heading);
+  const declaredHeadings = FUTURE.map((g) => g.heading);
+  ok(`all ${declaredHeadings.length} groups are in the declared order, drawn or not`,
+    configHeadings.join(" · ") === declaredHeadings.join(" · "),
+    `config   ${configHeadings.join(" · ")}\n        declared ${declaredHeadings.join(" · ")}`);
+}
 const drift = [];
 for (let i = 0; i < Math.max(drawn.length, DECLARED.length); i++) {
   const got = drawn[i]?.heading ?? "(nothing)";

@@ -98,6 +98,25 @@ const MUTANTS = [
     to: "      const name = m[1] ?? m[2];\n      if (name.endsWith('_own')) continue;",
     expect: "reaches expected_policies",
   },
+  {
+    // THE STAMP THAT COULD NOT BE PRODUCED WITHOUT A WORKING TREE. Put
+    // the two-word fallback back and the gate goes red the way the build
+    // did on a clean clone with no .git.
+    name: "the no-git fallback becomes two words again",
+    file: INV,
+    from: "    git([\"rev-parse\", \"--abbrev-ref\", \"HEAD\"], \"unknown\") ||",
+    to: "    git([\"rev-parse\", \"--abbrev-ref\", \"HEAD\"], \"(no git)\") ||",
+    expect: "...and its last-resort fallback is ONE token",
+  },
+  {
+    // THE PLATFORM READ, REMOVED. On a builder with no .git this is the
+    // only source of a real branch name.
+    name: "the stamp stops reading the platform variables",
+    file: INV,
+    from: "    process.env.VERCEL_GIT_COMMIT_REF ||",
+    to: "    \"\" ||",
+    expect: "the stamp reads the platform variables before it reaches for git",
+  },
 ];
 
 function runGate() {

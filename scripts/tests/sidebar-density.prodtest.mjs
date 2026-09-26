@@ -24,6 +24,10 @@
 import http from "node:http";
 import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { groupBlocks, itemChunks } from "./lib/sidebar-source.mjs";
+import { loadTs } from "./load-ts.mjs";
+
+const { visibleGroups } = await loadTs("src/lib/sidebar-visibility.ts");
 
 let pass = 0,
   fail = 0;
@@ -461,8 +465,33 @@ async function measureExpanded(width, height) {
 // typed: the hub's filter chips are one per group plus "All types", and
 // a hand-written constant for that went stale the day the sidebar grew
 // from four groups to six.
-const SIDEBAR_GROUP_COUNT = (
-  readFileSync("src/lib/sidebar-nav.ts", "utf8").match(/^\s*heading: "[^"]+",$/gm) ?? []
+// ONE CHIP PER GROUP THE HUB ACTUALLY LISTS, which is not the number of
+// groups the config declares (2026-09-26).
+//
+// This counted every `heading:` line in lib/sidebar-nav.ts, and its own
+// comment said the point was to derive the number rather than type it —
+// after a hand-written 5 stayed 5 while the sidebar went from four
+// groups to six. The derivation was right about the file and wrong about
+// the page: /dashboard/records is built on `visibleGroups`, so a group
+// whose every row is `notBuilt` contributes no cards and therefore no
+// chip. The declared structure added five such groups and this went red
+// expecting twelve chips on a page that draws seven.
+//
+// Derived through the real filter now, the same one the hub calls.
+const SIDEBAR_GROUP_COUNT = visibleGroups(
+  groupBlocks(readFileSync("src/lib/sidebar-nav.ts", "utf8")).map((g) => ({
+    heading: g.heading,
+    items: itemChunks(g.body).map((i) => ({
+      href: i.literalHref ?? i.constantHref ?? "?",
+      ...(i.hidden ? { hidden: true } : {}),
+      ...(i.notBuilt ? { notBuilt: true } : {}),
+      ...(i.ownerOnly ? { ownerOnly: true } : {}),
+      ...(i.retired ? { retired: "declared" } : {}),
+    })),
+  })),
+  // The hub is rendered for the signed-in account this prodtest forges,
+  // which is not the owner.
+  false
 ).length;
 
 const VIEWPORTS = [
@@ -775,7 +804,15 @@ await page.setViewportSize({ width: 1366, height: 900 });
     // the line was red the whole time, read as a missing page rather
     // than as a stale expectation.
     "/dashboard/search", "/dashboard/documents", "/dashboard/published",
-    "/dashboard/marketplace", "/dashboard/integrations", "/dashboard/affiliate",
+    // NOT /dashboard/marketplace. It became `retired` on 2026-09-24 —
+    // the page keeps serving anyone holding the URL and NOTHING offers
+    // it: not the sidebar, not the palette, not this hub. That is the
+    // difference between `retired` and `hidden`, and a hub that listed
+    // it would be offering a capability the product has withdrawn.
+    // Exactly the shape of the /dashboard/memory note above: an
+    // expectation that outlived the decision it described, red for two
+    // days and readable as a missing page.
+    "/dashboard/integrations", "/dashboard/affiliate",
     "/dashboard/trading-workflow", "/dashboard/reflection", "/dashboard/favorites",
   ];
   const absent = MUST_BE_LISTED.filter((h) => !hub.hrefs.includes(h));

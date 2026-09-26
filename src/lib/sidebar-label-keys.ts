@@ -53,6 +53,19 @@ export const GROUP_HEADING_KEYS: Record<string, string> = {
   Run: "run",
   See: "see",
   Organise: "organise",
+  // FIVE HEADINGS NOBODY HAS SEEN, and they are here for the reason the
+  // paragraph above gives: a heading with no key here prints raw English
+  // in all ten locales, and the day one of these groups gains its first
+  // live row is the worst day to discover that. `visibleGroups` drops a
+  // group whose rows are all `notBuilt`, so none of the five reaches the
+  // screen today; scripts/tests/sidebar-structure.test.mjs is what holds
+  // that, and sidebar-naming.test.mjs is what holds these five to ten
+  // translations each.
+  Connect: "connect",
+  Business: "business",
+  Engineering: "engineering",
+  Verify: "verify",
+  Personal: "personal",
   Settings: "settings",
 };
 
@@ -158,4 +171,83 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   // header for what was already there.
   Voice: "voice",
   Predictions: "predictions",
+  // ---------------------------------------------------------------------
+  // THE HELD POSITIONS, TRANSLATED BEFORE THEY ARE DRAWN (2026-09-26)
+  //
+  // Until this round a `notBuilt` label was EXEMPT from needing a key
+  // here — scripts/tests/sidebar-naming.test.mjs skipped it, on the
+  // argument that ten translations of a name that may still change is
+  // stock rather than coverage. That argument was right about hints and
+  // wrong about names: a hint is a sentence about how a feature behaves
+  // and cannot be written before it behaves, while a name is the word
+  // the owner already chose, and the day the flag comes off is the day
+  // the row must be findable in the command palette in all ten
+  // languages. Meetings is the worked example: its key was added in the
+  // same commit that removed its flag, and the comment there says why —
+  // "a row without a key is a row the command palette cannot find in any
+  // of the ten languages".
+  //
+  // So names are demanded now and hints are still refused.
+  // sidebar-hints-coverage.test.mjs holds the second half, both ways: a
+  // notBuilt row may not carry hints EITHER.
+  Music: "music",
+  "Browser agent": "browserAgent",
+  "Computer agent": "computerAgent",
+  Design: "design",
+  Workflows: "workflows",
+  "Scheduled Jobs": "scheduledJobs",
+  Operations: "operations",
+  Monitoring: "monitoring",
+  "Knowledge Graph": "knowledgeGraph",
+  Calendar: "calendar",
+  Tasks: "tasks",
+  Knowledge: "knowledge",
+  // Connect
+  Email: "connectEmail",
+  "Calendar Sync": "connectCalendar",
+  GitHub: "connectGithub",
+  "Google Drive": "connectDrive",
+  Slack: "connectSlack",
+  "CRM Connector": "connectCrm",
+  Banking: "connectBanking",
+  APIs: "connectApis",
+  "Data Sources": "connectDataSources",
+  MCP: "connectMcp",
+  "IoT Devices": "connectIot",
+  // Business
+  CRM: "businessCrm",
+  Marketing: "businessMarketing",
+  Accounting: "businessAccounting",
+  "Company Finance": "businessFinance",
+  HR: "businessHr",
+  Legal: "businessLegal",
+  Procurement: "businessProcurement",
+  Inventory: "businessInventory",
+  "Customer Support": "businessSupport",
+  // Engineering
+  Code: "engCode",
+  Testing: "engTesting",
+  Deployment: "engDeployment",
+  Cloud: "engCloud",
+  "Database Ops": "engDatabases",
+  DevOps: "engDevops",
+  Security: "engSecurity",
+  "Service Monitoring": "engMonitoring",
+  Infrastructure: "engInfrastructure",
+  // Verify
+  "Fact Checking": "verifyFacts",
+  "Data Validation": "verifyData",
+  "Code Verification": "verifyCode",
+  "Security Testing": "verifySecurity",
+  "Output Evaluation": "verifyOutput",
+  "Source Verification": "verifySources",
+  "Red Teaming": "verifyRedTeam",
+  // Personal
+  Habits: "personalHabits",
+  Health: "personalHealth",
+  Travel: "personalTravel",
+  Shopping: "personalShopping",
+  "Personal Finance": "personalFinance",
+  Journaling: "personalJournal",
+  "Life OS": "personalLifeOs",
 };

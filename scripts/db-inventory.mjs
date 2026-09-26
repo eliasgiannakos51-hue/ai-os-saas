@@ -61,8 +61,36 @@ function provenance() {
       return fallback;
     }
   };
-  const branch = git(["rev-parse", "--abbrev-ref", "HEAD"], "(no git)");
-  const commit = git(["rev-parse", "--short", "HEAD"], "(no git)");
+  // THE PLATFORM FIRST, THEN GIT, AND A ONE-WORD FALLBACK.
+  //
+  // WHY THIS ORDER. A deployed build has no working tree: Vercel hands
+  // the builder a source tarball and sets VERCEL_GIT_COMMIT_SHA and
+  // VERCEL_GIT_COMMIT_REF instead. scripts/build-identity.mjs has read
+  // them first since 2026-09-19 for exactly that reason; this file was
+  // the other half that never learned.
+  //
+  // AND WHY THE FALLBACK IS ONE WORD. It was "(no git)" — two words with
+  // a space in the middle — and the check in
+  // scripts/tests/db-inventory.test.mjs is
+  // /GENERATED FROM:\s+branch \S+\s+@\s+commit \S+/, which wants one
+  // token. So in any tree without .git the stamp could not match, the
+  // gate failed, and `npm run build` exited 1 at gate 70 of 291. Measured
+  // 2026-09-26: a clean clone of the exact commit Vercel builds, with
+  // .git removed, fails there every time; with .git present it passes.
+  //
+  // THAT IS NOT PROOF THAT IT IS THE VERCEL FAILURE — the shape has been
+  // in the tree since 2026-08-19 and the builds went red on 09-19 — but
+  // it is the only condition anyone has found that reproduces a red build
+  // on demand, and a stamp that cannot be produced without a working tree
+  // is wrong on its own terms.
+  const branch =
+    process.env.VERCEL_GIT_COMMIT_REF ||
+    git(["rev-parse", "--abbrev-ref", "HEAD"], "unknown") ||
+    "unknown";
+  const commit =
+    (process.env.VERCEL_GIT_COMMIT_SHA || "").slice(0, 7) ||
+    git(["rev-parse", "--short", "HEAD"], "unknown") ||
+    "unknown";
   // The generated artefact itself is excluded from the dirty count.
   // Writing `db_missing_check.sql` dirties the tree, so the header would
   // report "+1 uncommitted file" describing nothing but its own existence —

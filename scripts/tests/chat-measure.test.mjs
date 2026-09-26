@@ -219,15 +219,62 @@ check(
   !/text-foreground\/9\d/.test(workspace),
   "text-foreground/90 is dimmed text — the brief says dim the globe, never the text"
 );
+// THE DECISION REVERSED, 2026-09-26, AND THE RULE MADE STRICTER RATHER
+// THAN LOOSER.
+//
+// This asked for the person's turn to keep "a ground and an accent
+// edge". The owner reported twice from live production that the frame
+// is the thing he wants gone: the ANSWER lost its card on 2026-09-04
+// and the QUESTION kept one, so what remained read as a box around half
+// the conversation.
+//
+// Deleting the clause would have been the weak move. A bubble was doing
+// TWO jobs — drawing a rectangle, and telling the speakers apart — and
+// only the first was asked to go. So the old single check becomes four:
+// the box is gone, AND each of the three things that distinguish a
+// question from an answer without it is present. That is more than was
+// checked before, which is the only acceptable direction for a check
+// that went red.
+// JSX COMMENTS REMOVED FIRST. The block explains WHY the rectangle went,
+// so it names border-orange, rounded-2xl and bg-panel in prose — and an
+// unstripped read finds those words and fails the check for describing
+// the bug it fixed. Third time in one session that a check of mine
+// matched its own comment; comments are not code.
+const stripJsx = (x) => x.replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+const userTurn = stripJsx(
+  workspace.match(/msg\.role === "user" \? \(([\s\S]{0,3000}?)\) : \(/)?.[1] ?? ""
+);
+// THE MESSAGE ELEMENT, NOT THE WHOLE TURN. The first version tested the
+// turn and found bg-panel — on the AVATAR, a 32px circle beside the
+// text. A circle is not a box around a message, and a check that cannot
+// tell them apart would forbid the avatar to keep a shape. Narrowed to
+// the element that actually wraps msg.content.
+const userMessageEl =
+  userTurn.match(/<div className="([^"]*)"[^>]*>\s*\{msg\.content\}/)?.[1] ?? "";
 check(
-  "the person's turn keeps a ground and an accent edge",
-  /border-orange-500\/30 bg-panel/.test(workspace),
-  "the user's message lost its background, so a question and an answer look the same"
+  "the person's message has no box around it",
+  userMessageEl.length > 0 && !/border|rounded-2xl|bg-panel|bg-orange/.test(userMessageEl),
+  userMessageEl || "the element wrapping {msg.content} was not found"
 );
 check(
-  "...and it is no longer a filled accent slab",
+  "...and is still told apart by being right-aligned",
+  /justify-end/.test(userTurn),
+  "alignment is the first of the three things that replaced the rectangle"
+);
+check(
+  "...and by keeping the avatar beside it",
+  /userInitial/.test(userTurn),
+  "the second"
+);
+check(
+  "...and by the gap between turns being larger than the gap inside one",
+  /space-y-8/.test(workspace) && /className="mt-2"/.test(workspace),
+  "the third — space-y-8 between turns against mt-2 inside one"
+);
+check(
+  "...and it is not a filled accent slab either",
   !/bg-orange-500 px-4 py-2\.5 text-sm text-black/.test(workspace),
-  "the filled orange bubble is back"
+  "the filled accent bubble is back"
 );
 
 // ---------------------------------------------------------------------
@@ -255,11 +302,24 @@ check(
   Boolean(streamingWrapper) && /\bchat-ground-dim\b/.test(streamingWrapper),
   streamingWrapper ?? "NOT FOUND"
 );
-const personBubble = workspace.match(/className="[^"]*border-orange-500\/30[^"]*"/)?.[0] ?? "";
+// THE GROUND IS THE ANSWER'S, AND NOW THERE IS NO CARD TO EXEMPT.
+//
+// This looked the person's turn up BY its border — the border removed on
+// 2026-09-26 — and then asserted the thing it found carried no ground
+// class. With no border there is nothing to find, so the check went red
+// for the reason it was written to prevent: it had become a check about
+// a rectangle rather than about the ground.
+//
+// Restated over the whole turn instead of over a class string it can no
+// longer locate: the dim ground belongs to the answer and must not reach
+// the question, whatever either of them is wearing.
+const userTurnGround = stripJsx(
+  workspace.match(/msg\.role === "user" \? \(([\s\S]{0,3000}?)\) : \(/)?.[1] ?? ""
+);
 check(
-  "the person's bubble carries no ground class (a question keeps its own card)",
-  personBubble.length > 0 && !/chat-ground-/.test(personBubble),
-  personBubble || "the person's bubble was not found"
+  "the person's turn carries no ground class — the ground is the answer's",
+  userTurnGround.length > 0 && !/chat-ground-/.test(userTurnGround),
+  userTurnGround.slice(0, 200) || "the person's turn was not found"
 );
 check("no other ground ships", !/chat-ground-(blur|shadow)/.test(workspace), "blur or shadow is applied in the workspace");
 const dimRule = (() => {

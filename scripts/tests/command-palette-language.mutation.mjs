@@ -136,8 +136,12 @@ const MUTANTS = [
     name: "synonymsFor goes back to primary only",
     gate: SRC_GATE,
     file: SYN,
-    from: "  return [...m.primary, ...m.verbs];",
-    to: "  return [...m.primary];",
+    // THE ANCHOR MOVED on 2026-09-27, when the generated Greek plurals
+    // joined the return. The defect is unchanged — the verbs stop being
+    // emitted — so the mutant drops them from the new expression rather
+    // than matching a line that no longer exists.
+    from: "  return [...new Set([...m.primary, ...m.verbs, ...inflected])];",
+    to: "  return [...new Set([...m.primary, ...inflected])];",
     expect: "synonymsFor emits the verbs",
   },
 ];

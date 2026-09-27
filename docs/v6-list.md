@@ -1006,3 +1006,80 @@ documentation could not be read, and it is not going in as a guess. The
 manual step in the README assumes the dashboard wins, which is the safe
 assumption of the two: it costs one look and is wrong in the harmless
 direction.
+
+---
+
+## 27. The moat was a sentence nobody had checked — 2026-09-27
+
+The whole strategy rests on one claim: **the specialist does not have
+your data.** Wix is handed a sentence in a box; so is Gamma; so is
+Copy.ai. That is a claim about this repository's code, and until this
+date nobody had asked it of the code.
+
+    node scripts/data-advantage.mjs
+
+**Five routes of thirty-one** sent the model anything at all about the
+person — and none of the five were Website, Presentations or Posts,
+which are the three the strategy names first. The website builder got
+the brief and nothing else. The deck generator wrote about pricing in
+general because it had never been shown a price.
+
+Nothing new was needed to fix it. `lib/ai/workspace-context.ts` has
+existed since V4 #36 — bounded, RLS-scoped, four rules in its own header
+— and was wired into Coding alone. It is now wired into the other three:
+**5 → 10 of 31**, re-derivable with the command above.
+
+What the routes now do, and the reasons, are in the code: the records go
+inside the untrusted markers with the brief, the person's own words stay
+last in the message, and every route loads the context BEFORE it sizes
+the hold — a context sent and not priced makes every reservation short
+by the size of the account.
+
+### What has NOT been measured, and must not be reported as if it had
+
+**No benchmark has been run.** Not against Wix, Gamma, Copy.ai, Cursor
+or Perplexity — none of which has an API that takes a brief and returns
+a result — and not against a raw frontier model either, because there is
+no `ANTHROPIC_API_KEY` in any environment this repository's tools can
+reach. There is therefore **no "10m → 1-3m"**, no score out of fifteen,
+and no finding that the data version wins. Those sentences exist only as
+a hypothesis, and this entry is the place that says so.
+
+What CAN be shown without a key, and is:
+
+    node scripts/show-context.mjs "παρουσίαση πωλήσεων"
+
+It seeds an account, runs the real loader and the real prompt builders,
+and prints the exact message that would leave this machine. The seed is
+fiction; every line of code between it and the output is the shipped
+one. It cannot show whether the model USES what it is handed — that
+needs a generation and a judge, which needs the key.
+
+### The bug the owner's own example found
+
+"παρουσίαση πωλήσεων" — a sales presentation, the most ordinary phrase
+in the language — scored **every module zero** and reached no Sales rows
+at all. The nominative "πωλήσεις" scored 1. The matcher compares whole
+folded words, the synonym list carried the nominative, and Greek puts
+the genitive after another noun: παρουσίαση πωλήσεων, κόστος προϊόντων,
+λίστα ιδεών. The one form the language actually uses in a brief was the
+one form the vocabulary did not have.
+
+`greekPluralForms` in `lib/ai/module-synonyms.ts` generates it, and
+`scripts/tests/module-inflection.test.mjs` ranges over **every** module's
+Greek primary terms rather than the one that was reported — which is how
+it caught two further defects in the same hour, both in the fix: the
+suffix rules were being applied to accented words (so every accented
+plural fell through silently while the unaccented ones worked), and the
+first version of the gate inflected the verb list too and duly reported
+that "επινόησων" reaches nothing, which is true and is a statement about
+a word this product never makes.
+
+### The message on the first screen
+
+The headline was already data-first — *"The AI that already knows your
+work. Ask it anything."* — and the paragraph under it was not: it listed
+modules to track. It now names what gets MADE with them, in ten
+languages. The demo the owner asked for on that screen (a real site
+pulling real records, rather than a generic one) is **not built**: it
+needs a generated example, which needs the key.

@@ -366,9 +366,15 @@ check("a labelled brief block is built", /function buildUserBriefBlock/.test(src
 // joined it: [image metadata, variation draw, brief], joined and
 // filtered. The ORDER is the property: images first, the brief LAST —
 // and the draw must sit between them, in the uncached user message.
+//
+// 2026-09-27: the account's own records became a fourth block, second
+// to last. The property is unchanged and is exactly the one a new block
+// threatens — a records block appended after the brief would put the
+// person's old rows above their present words — so the check names the
+// whole sequence rather than only its ends.
 check(
   "generation puts image metadata first, the draw and the brief's prohibitions between, and the brief last",
-  /const userText = \[\s*buildReferenceImageUrlList\(images\)\.trim\(\),\s*variationText\?\.trim\(\) \?\? "",\s*negativeInstructionBlock\(parseNegativeInstructions\(description\)\),\s*buildUserBriefBlock\(description\),\s*\]/.test(
+  /const userText = \[\s*buildReferenceImageUrlList\(images\)\.trim\(\),\s*variationText\?\.trim\(\) \?\? "",\s*negativeInstructionBlock\(parseNegativeInstructions\(description\)\),\s*buildBusinessContextBlock\(businessContext \?\? ""\),\s*buildUserBriefBlock\(description\),\s*\]/.test(
     src
   )
 );

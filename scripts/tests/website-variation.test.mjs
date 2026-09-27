@@ -118,7 +118,14 @@ check(
   "the builder puts the draw in the USER message, brief still last",
   // V4.6: what the brief FORBIDS sits between the draw and the brief —
   // derived from the brief, so it may precede it; the brief stays last.
-  /variationText\?\.trim\(\) \?\? "",\s*negativeInstructionBlock\(parseNegativeInstructions\(description\)\),\s*buildUserBriefBlock\(description\),\s*\]/.test(builder)
+  //
+  // 2026-09-27: the account's own records joined the queue, between the
+  // negatives and the brief. Same rule, one more block: whatever else
+  // the message carries, the person's own words are the last thing the
+  // model reads, so they outrank the draw AND their own old records.
+  // The check grew a clause rather than losing one — the ordering it
+  // exists for is exactly what a new block is most likely to break.
+  /variationText\?\.trim\(\) \?\? "",\s*negativeInstructionBlock\(parseNegativeInstructions\(description\)\),\s*buildBusinessContextBlock\(businessContext \?\? ""\),\s*buildUserBriefBlock\(description\),\s*\]/.test(builder)
 );
 // THE REAL PROPERTY, not a word search. The old check looked for the
 // string "variation" anywhere above SYSTEM_PROMPT, which a static

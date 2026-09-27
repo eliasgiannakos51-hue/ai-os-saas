@@ -104,11 +104,29 @@ export const WRITE_DECK_TOOL: ToolDefinition = {
   },
 };
 
-export function buildDeckUserMessage(description: string, slideCount: number, locale: string): string {
+/**
+ * @param businessContext - this account's own records, rendered by
+ *   lib/ai/workspace-context.ts, or "". Gamma writes a deck about
+ *   pricing; with this, the deck can be about THIS pricing — the
+ *   products that exist, at the numbers they are actually sold at.
+ *
+ * INSIDE THE UNTRUSTED MARKERS, WITH THE BRIEF, for the reason
+ * lib/posts/prompt.ts gives: both are text somebody typed into a form,
+ * and a boundary around the smaller half is not a boundary.
+ */
+export function buildDeckUserMessage(
+  description: string,
+  slideCount: number,
+  locale: string,
+  businessContext = ""
+): string {
+  const scrub = (text: string) =>
+    text.split(UNTRUSTED_OPEN).join("(marker removed)").split(UNTRUSTED_CLOSE).join("(marker removed)");
+  const context = businessContext.trim() ? `\n${scrub(businessContext.trim())}\n\n---\n` : "";
   return `Write a deck of exactly ${clampSlideCount(slideCount)} slides, in ${languageNameFor(locale)}.
-
-${UNTRUSTED_OPEN}
-${description.split(UNTRUSTED_OPEN).join("(marker removed)").split(UNTRUSTED_CLOSE).join("(marker removed)")}
+${context ? "\nThe block below has two parts: this account's own records first, then the brief. Prefer a real name or number from the records over one you would otherwise invent; never state a figure the records do not contain." : ""}
+${UNTRUSTED_OPEN}${context}
+${scrub(description)}
 ${UNTRUSTED_CLOSE}`;
 }
 

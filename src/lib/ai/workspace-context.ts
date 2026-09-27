@@ -3,6 +3,9 @@ import { truncate } from "@/lib/text/truncate";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { enModuleTitle } from "@/lib/module-labels";
 import { logApiError } from "@/lib/log-error";
+import { foldForMatch } from "@/lib/text/unicode-patterns";
+import { questionWords, scoreTerms } from "@/lib/ai/module-relevance";
+import { moduleVocabulary } from "@/lib/ai/module-vocabulary";
 
 /**
  * THE ADVANTAGE: THE TOOL KNOWS WHAT YOU ARE BUILDING.
@@ -59,9 +62,39 @@ export const MAX_ITEM_CHARS = 80;
  *  the account's size rather than by the request. */
 export const MAX_CONTEXT_CHARS = 2_000;
 
+/**
+ * CLASSIFIER_MODULES, most relevant to a brief first.
+ *
+ * The scorer is lib/ai/module-relevance.ts — the same one chat uses to
+ * decide which modules an answer needs — so "relevant" means one thing
+ * in this product rather than two. Anything it cannot judge keeps its
+ * registry position: a module we have no words for is not evidence of
+ * irrelevance, it is an absence of evidence, and pushing it to the back
+ * would quietly delete a whole module from every branded request.
+ */
+function modulesByRelevance(brief: string): typeof CLASSIFIER_MODULES {
+  const folded = foldForMatch(brief ?? "");
+  const words = questionWords(folded);
+  if (words.size === 0) return CLASSIFIER_MODULES;
+  // THE CACHED TEN-LANGUAGE VOCABULARY, not one built here out of
+  // English. A brief is written in whichever language the person thinks
+  // in — «site για καφετέρια» is the ordinary case, not the exotic one —
+  // and an English-only term list scores every Greek brief at zero,
+  // which silently restores registry order while looking like it sorted.
+  const vocabulary = moduleVocabulary();
+  const byslug = new Map(vocabulary.map((v) => [v.slug, v]));
+  return [...CLASSIFIER_MODULES]
+    .map((config, index) => {
+      const vocab = byslug.get(config.slug);
+      return { config, index, score: vocab ? scoreTerms(words, folded, vocab.terms) : 0, judged: Boolean(vocab) };
+    })
+    .sort((a, b) => (b.score - a.score) || (a.index - b.index))
+    .map((entry) => entry.config);
+}
+
 export async function loadWorkspaceContext(
   supabase: { from: (table: string) => any },
-  options: { include: boolean } = { include: true }
+  options: { include: boolean; brief?: string } = { include: true }
 ): Promise<WorkspaceContext> {
   if (!options.include) return EMPTY_WORKSPACE;
 
@@ -71,7 +104,20 @@ export async function loadWorkspaceContext(
   // Read in the registry's own order and stop at the cap, rather than
   // reading everything and sorting: twenty-one queries to then discard
   // thirteen is thirteen queries nobody needed.
-  for (const config of CLASSIFIER_MODULES) {
+  //
+  // UNLESS A BRIEF SAYS WHICH ORDER. Registry order is the right default
+  // for Coding, where the request is about the account in general. It is
+  // the WRONG one for "a site for a coffee shop": the eight modules the
+  // cap keeps are the eight that happen to come first, and Products and
+  // Prices — the two that make the site say something a stranger's tool
+  // could not — may be ninth and eleventh.
+  //
+  // So a caller with a brief gets the modules SORTED by how well they
+  // match it, using the same scorer chat narrows with rather than a
+  // second rule that can disagree with it. The caps are untouched: this
+  // changes WHICH eight, never how many.
+  const order = options.brief ? modulesByRelevance(options.brief) : CLASSIFIER_MODULES;
+  for (const config of order) {
     if (facts.length >= MAX_MODULES) {
       omittedModules++;
       continue;

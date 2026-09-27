@@ -153,7 +153,10 @@ console.log("\n== 3. the route: refuse before spend, session client, hold sized 
   const desc = at(/checkDescription\(/), auth = at(/auth\.getUser\(/), breaker = at(/checkAiCallAllowed\(/), reserve = at(/await reserveCredits\(/), call = at(/await generateDeck\(/);
   ok("the brief is checked before the user is read", desc !== -1 && auth !== -1 && desc < auth);
   ok("the breaker runs before the hold, and the hold before the model", breaker < reserve && reserve < call, `${breaker} < ${reserve} < ${call}`);
-  ok("the hold is sized per slide asked for", /inputChars:\s*deckEstimateInputChars\(description\.length,\s*slideCount\)/.test(src));
+  // AND IT COVERS THE RECORDS TOO (2026-09-27) — see the same check in
+  // posts.test.mjs. A hold sized on the brief alone is short by the size
+  // of the account on every request from anybody who has one.
+  ok("the hold is sized per slide asked for", /inputChars:\s*deckEstimateInputChars\(description\.length\s*\+\s*businessContext\.length,\s*slideCount\)/.test(src));
   ok("own-photo paths must be under the person's own folder", /startsWith\(`\$\{user\.id\}\/`\)/.test(src));
   const abortedBlock = src.slice(at(/outcome\.kind === "aborted"/), at(/outcome\.kind === "provider"/));
   ok("a stopped run releases the hold", /releaseReservation\(/.test(abortedBlock) && /status:\s*499/.test(abortedBlock));

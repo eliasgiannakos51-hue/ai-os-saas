@@ -71,8 +71,11 @@ const MUTANTS = [
   {
     name: "the brief is pasted unfenced",
     file: PROMPT,
-    from: "${UNTRUSTED_OPEN}\n${description",
-    to: "${description",
+    // THE ANCHOR MOVED on 2026-09-27, when the account's own records
+    // joined the brief inside the same markers. The defect is unchanged
+    // — the untrusted region no longer opens.
+    from: "${UNTRUSTED_OPEN}${context}",
+    to: "${context}",
     expect: "the brief is fenced as data",
   },
   {
@@ -93,7 +96,7 @@ const MUTANTS = [
   {
     name: "the hold is sized from the brief alone",
     file: ROUTE,
-    from: "        inputChars: deckEstimateInputChars(description.length, slideCount),",
+    from: "        inputChars: deckEstimateInputChars(description.length + businessContext.length, slideCount),",
     to: "        inputChars: description.length,",
     expect: "the hold is sized per slide asked for",
   },

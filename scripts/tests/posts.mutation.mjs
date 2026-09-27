@@ -93,8 +93,12 @@ const MUTANTS = [
   {
     name: "the brief is pasted unfenced",
     file: PROMPT,
-    from: "${UNTRUSTED_OPEN}\n${description",
-    to: "${description",
+    // THE ANCHOR MOVED on 2026-09-27, when the account's own records
+    // joined the brief inside the same markers. The defect is unchanged
+    // — the untrusted region no longer opens — so the mutant deletes the
+    // opening marker rather than matching a line that no longer exists.
+    from: "${UNTRUSTED_OPEN}${context}",
+    to: "${context}",
     expect: "the brief is fenced as data",
   },
   {
@@ -122,7 +126,7 @@ const MUTANTS = [
   {
     name: "the hold is sized from the brief alone",
     file: ROUTE,
-    from: "        inputChars: postsEstimateInputChars(description.length, platforms),",
+    from: "        inputChars: postsEstimateInputChars(description.length + businessContext.length, platforms),",
     to: "        inputChars: description.length,",
     expect: "the hold is sized per platform asked for",
   },

@@ -15,6 +15,7 @@ import { resolveEffectivePlan, getPurchasedPackCreditPriceEur } from "@/lib/bill
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { estimateForAction } from "@/lib/billing/estimate";
+import { loadWorkspaceContext, renderWorkspaceContext } from "@/lib/ai/workspace-context";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
 import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
@@ -307,13 +308,27 @@ export async function POST(request: Request) {
 
     // Same rate settlement will divide by, so the hold is sized in the
     // same currency as the charge.
+    // WHAT THIS BUSINESS SELLS — the difference between a site and a
+    // site about them. See lib/website-builder.ts,
+    // buildBusinessContextBlock. The brief steers which modules are
+    // read; the caps in lib/ai/workspace-context.ts bound it; the user's
+    // own client means RLS decides what is readable; a failed read
+    // contributes nothing rather than failing the generation.
+    //
+    // BEFORE THE ESTIMATE, because these characters are sent to the
+    // model and therefore belong in the hold. Sizing the reservation on
+    // the brief alone under-reserves every request by the size of the
+    // account, which is how a settlement comes to exceed its hold.
+    const workspace = await loadWorkspaceContext(supabase, { include: true, brief: description });
+    const businessContext = renderWorkspaceContext(workspace);
+
     const packPriceEur = await getPurchasedPackCreditPriceEur(user.id);
     const accountCreditPriceEur = effectiveCreditPriceEurForAccount(plan, packPriceEur, pricingConfig);
     const estimate = estimateForAction(
       "websiteGenerate",
       {
         model: WEBSITE_MODEL,
-        inputChars: description.length,
+        inputChars: description.length + businessContext.length,
         imageCount: Math.min(referenceImagePaths.length, MAX_REFERENCE_IMAGES),
         planSlug: plan?.slug ?? null,
       },
@@ -475,7 +490,8 @@ export async function POST(request: Request) {
         variation,
         shouldStop,
         (cap, started) => notes.push({ kind: "pageCap", cap, started }),
-        memoryBlock
+        memoryBlock,
+        businessContext
       );
       clearInterval(stopPoll);
       // Real-photo placeholder resolution (Unsplash; unresolved

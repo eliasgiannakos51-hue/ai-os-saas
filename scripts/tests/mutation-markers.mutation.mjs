@@ -132,7 +132,9 @@ const MUTANTS = [
     file: PKG,
     from: "node scripts/check-mutation-markers.mjs && ",
     to: "",
-    expect: "the build runs the check",
+    // The clause moved with the check: `npm run build` no longer runs
+    // any of them (2026-09-27), and `npm run gates` does.
+    expect: "the gates script runs the check",
   },
   {
     name: "the check moves to after the unit suite and the compile",
@@ -144,6 +146,16 @@ const MUTANTS = [
     // so it anchors on the pair whose order it is about — the marker
     // check immediately before the tree check — and moves the marker
     // check to the end, which is the defect.
+    //
+    // RE-ANCHORED A THIRD TIME ON 2026-09-27, and this one moved house
+    // rather than shuffled: `npm run build` stopped running any check
+    // at all. The five checkers and the unit suite are `npm run gates`
+    // now, a step of their own that CI runs before it builds, because a
+    // gate on the deploy's critical path can take production down. So
+    // the second edit's old anchor — "npm run test:unit && next build"
+    // — names a pipeline that no longer exists in one piece, and the
+    // defect this mutant is about is expressed inside `gates`: the
+    // marker check after the unit suite instead of before it.
     from: "node scripts/check-mutation-markers.mjs && node scripts/check-mutation-tree.mjs",
     to: "node scripts/check-mutation-tree.mjs",
     edits: [
@@ -154,8 +166,8 @@ const MUTANTS = [
       },
       {
         file: PKG,
-        from: "npm run test:unit && next build",
-        to: "npm run test:unit && node scripts/check-mutation-markers.mjs && next build",
+        from: "npm run test:unit",
+        to: "npm run test:unit && node scripts/check-mutation-markers.mjs",
       },
     ],
     expect: "before the build spends time on anything expensive",

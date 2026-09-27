@@ -43,9 +43,11 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { envVarsInExample } from "./lib/env-usage.mjs";
+import { sentinelFor as shapedSentinel } from "./lib/env-shape-rules.mjs";
 
 const ALWAYS = ["PATH", "HOME", "TMPDIR", "TEMP", "TMP", "SHELL", "LANG", "LC_ALL", "NODE_PATH"];
 const SENTINEL = "sentinel-not-a-real-value";
+const sentinelFor = (name) => shapedSentinel(name, SENTINEL);
 
 // A SENTINEL HAS TO HAVE THE RIGHT SHAPE, and the first run of
 // `npm run build:ci` is what proved it: every one of the 252 gates
@@ -61,19 +63,15 @@ const SENTINEL = "sentinel-not-a-real-value";
 // somebody stops running, which is the same end as not having it.
 //
 // .invalid is reserved by RFC 2606 and resolves nowhere, so a
-// URL-shaped sentinel still cannot reach anything. The shape is taken
-// from the NAME, which is all this file knows — and a name that says
-// URL and holds something else is a different problem.
-function sentinelFor(name) {
-  if (/(?:^|_)(?:URL|URI|ENDPOINT|ORIGIN|HOST)(?:_|$)/.test(name)) return "https://sentinel.invalid";
-  if (/EMAIL|MAILTO/.test(name)) return "sentinel@sentinel.invalid";
-  if (/(?:_EUR|_USD|_RATIO|_MS|_DAYS|_SECONDS|_MINUTES|_LIMIT|_MAX|_MIN|_COUNT|_PORT|_PERCENT)$/.test(name)) return "1";
-  // A key with a required length: 32 bytes, base64, so a decoder that
-  // checks the size gets something the right size rather than a crash
-  // that says nothing about the gate under test.
-  if (/ENCRYPTION_KEY|_SECRET_KEY$/.test(name)) return Buffer.alloc(32, 7).toString("base64");
-  return SENTINEL;
-}
+// URL-shaped sentinel still cannot reach anything.
+//
+// THE RULES MOVED OUT ON 2026-09-27, to scripts/lib/env-shape-rules.mjs,
+// and the sentence that used to end this paragraph is why: "the shape is
+// taken from the NAME, which is all this file knows — and a name that
+// says URL and holds something else is a different problem." That
+// problem now has an owner, next.config.mjs refuses such a value at
+// build time NAMING it, and a shape rule that lived in two files could
+// disagree with itself the first time one of them was edited.
 
 // THE SECOND HOLE IN THIS FILE, found by its own first run.
 //

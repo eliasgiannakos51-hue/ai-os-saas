@@ -3,10 +3,12 @@
 # Until this file existed, nothing did. There was no .github/workflows at
 # all, and the only automatic guard in the repository was a pre-commit
 # hook installed by `npm install` that checks for mutation markers and
-# nothing else. `npm run build` — the command Vercel runs — covers the
-# function limits, the marker check, the i18n check, the unit suite and
-# `next build`. It does NOT run the mutation suites, the integration
-# suites, the database suites or the production browser tests.
+# nothing else. `npm run build` — the command Vercel runs — used to cover
+# the function limits, the marker check, the i18n check, the unit suite
+# and `next build`. Since 2026-09-27 it builds and nothing more: the
+# checks are `npm run gates`, a step of their own below. It does NOT run
+# the mutation suites, the integration suites, the database suites or
+# the production browser tests.
 #
 # THE COST OF THAT WAS MEASURED, not imagined. Commit d2c4d81 (2026-08-27)
 # correctly fixed a "NaN credits/month" bug by removing formatNumber()
@@ -81,10 +83,29 @@ jobs:
       - name: lint
         run: npx eslint
 
-      # Covers the function limits, the mutation-MARKER check, the i18n
-      # check, the whole unit suite and a real `next build` — see the
-      # "build" script in package.json. NO env vars are supplied on
-      # purpose: the build must not need secrets to compile.
+      # THE GATES MOVED OUT OF `npm run build` ON 2026-09-27, and this
+      # step is where they went.
+      #
+      # `npm run build` is the command Vercel runs, and it ran the
+      # function limits, the marker check, the mutation-tree check, the
+      # i18n check and all 294 unit gates before it compiled anything.
+      # Two consequences, and the second is the one that cost a week:
+      # every deploy paid for the whole suite, and a gate that fails on
+      # the builder fails the DEPLOY — so a check about this repository's
+      # own conventions could take production down. A build should
+      # build.
+      #
+      # Nothing is lost by moving them here, and that is the whole
+      # argument for it being safe: this job runs on every push to every
+      # branch, and scripts/tests/ci-coverage.test.mjs fails the build if
+      # a suite family is named by no job in this file.
+      - name: gates (everything the build used to run before it compiled)
+        run: npm run gates
+
+      # NO env vars are supplied on purpose: the build must not need
+      # secrets to compile. This is now `apply-function-limits` — which
+      # REWRITES route files and is therefore part of building — and
+      # `next build`, and nothing else.
       - name: build (no env vars — a clean-clone build must not need any)
         run: npm run build
 

@@ -274,8 +274,8 @@ console.log("\n== 5. it is installed where it can act ==");
   // fresh clone and every CI checkout have none. The build is where it
   // holds for everybody.
   ok(
-    "the build runs the check",
-    /check-mutation-markers/.test(pkg.scripts.build ?? ""),
+    "the gates script runs the check",
+    /check-mutation-markers/.test(pkg.scripts.gates ?? ""),
   );
   // BEFORE ANYTHING EXPENSIVE, which is the property that matters, and not
   // "first" — function-limits.test.mjs owns first place and its reason is
@@ -287,7 +287,12 @@ console.log("\n== 5. it is installed where it can act ==");
   // developer waiting on a build hears about a stranded mutation in seconds
   // rather than after the unit suite.
   {
-    const steps = (pkg.scripts.build ?? "").split("&&").map((s) => s.trim());
+    // READ FROM `gates`, NOT `build` (2026-09-27). The checks left the
+    // build command for a script of their own; "before anything
+    // expensive" is a claim about the order INSIDE that script, and the
+    // expensive thing it now precedes is the unit suite rather than
+    // next build.
+    const steps = (pkg.scripts.gates ?? "").split("&&").map((s) => s.trim());
     const at = steps.findIndex((s) => s.includes("check-mutation-markers"));
     const expensive = steps.findIndex((s) =>
       /test:unit|next build|check-i18n/.test(s),

@@ -47,7 +47,11 @@ console.log("== 1. every family of suite is named by some job ==");
   // family -> the npm script or command that runs it. A family with files
   // and no runner is a family nothing executes.
   const FAMILIES = [
-    [".test.mjs", "test:unit", /npm run build|npm run test:unit/],
+    // WAS `/npm run build|npm run test:unit/`, and the first half of that
+    // alternation stopped being true on 2026-09-27: the unit suites left
+    // `npm run build` for `npm run gates`. An alternation that keeps a
+    // stale branch is one that passes on the stale branch.
+    [".test.mjs", "test:unit", /npm run gates|npm run test:unit/],
     [".mutation.mjs", "test:mutation", /npm run test:mutation/],
     [".dbtest.mjs", "test:db", /npm run test:db/],
     [".itest.mjs", "test:integration", /npm run test:integration/],
@@ -60,6 +64,56 @@ console.log("== 1. every family of suite is named by some job ==");
     check(`  and the workflow runs it`, inWorkflow.test(wf),
       `nothing in ${WORKFLOW} matches ${inWorkflow}`);
   }
+}
+
+console.log("== 1b. the build BUILDS, and the checks are a step of their own ==");
+// ---------------------------------------------------------------------
+// ASKED FOR ON 2026-09-27, after a Vercel log finally arrived:
+//
+//   19:28:15  mutation-tree: ...WARNING (advisory, not failing)
+//   19:30:04  Error: Command "npm run build" exited with 1
+//
+// `npm run build` is what Vercel runs, and it ran the function limits,
+// the marker check, the mutation-tree check, the i18n check and all 294
+// unit gates before compiling a line. Two minutes of checks about this
+// repository's own conventions, on the critical path of every
+// deployment — and a gate that goes red there takes the DEPLOY with it.
+// A build should build.
+//
+// THREE CLAIMS, NOT ONE, because a build that stops testing and a CI
+// that never started is strictly worse than what was there before:
+//
+//   1. `build` contains no checker and no suite.
+//   2. `build` still contains the one step that PRODUCES rather than
+//      checks — apply-function-limits REWRITES the route files'
+//      maxDuration literals, so a build without it ships different code
+//      — and still compiles.
+//   3. Every checker that left is named in `gates`, and section 1 above
+//      requires the workflow to run it on every push.
+{
+  const build = pkg.scripts.build ?? "";
+  const gates = pkg.scripts.gates ?? "";
+  const CHECKERS = [
+    "check-mutation-markers.mjs",
+    "check-mutation-tree.mjs",
+    "check-i18n.js",
+    "build-identity.mjs",
+    "test:unit",
+  ];
+  const leftBehind = CHECKERS.filter((c) => build.includes(c));
+  check(`the build runs no checker (${build})`, leftBehind.length === 0,
+    `${leftBehind.join(", ")} — a check on the deploy's critical path can take production down`);
+  check("...and no suite of any kind", !/\.test\.mjs|test:unit|run-gates/.test(build), build);
+  // THE OTHER DIRECTION, AND IT IS THE ONE THAT MATTERS: an empty build
+  // script satisfies every clause above.
+  check("the build still rewrites the function limits — producing, not checking",
+    build.includes("apply-function-limits.mjs"), build);
+  check("...and still compiles", /next build/.test(build), build);
+  const homeless = CHECKERS.filter((c) => !gates.includes(c));
+  check(`every checker that left the build is in gates (${CHECKERS.length})`,
+    homeless.length === 0,
+    `${homeless.join(", ")} — moved out of the build and into nothing`);
+  check("...and gates is not the build under another name", !/next build/.test(gates), gates);
 }
 
 console.log("== 2. the browser tests run on a push, not only on a schedule ==");

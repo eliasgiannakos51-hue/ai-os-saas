@@ -278,3 +278,137 @@ itself (bypass the shim; select no gates).
 (`connect_rejected`, measured) and no token is present, so the
 confirmation that this was THE failure has to come from
 `npx vercel inspect <id> --logs` or from the next deploy going green.
+
+## 7. No env var was ever wrong — the control that settles it, 2026-09-27
+
+    node scripts/tests/env-shape.test.mjs
+    node scripts/tests/env-shape.mutation.mjs
+
+**Asked: which env var holds a wrong value? Answer: none, and it is
+measured rather than argued.** `build:ci` runs the real build with all
+178 project variables set to a deliberately unusable value, and again
+with none of them set. Both `exit=0`. A wrong VALUE does not fail this
+build.
+
+`BOT_EMAIL` and `BOT_PASSWORD` are read by `scripts/e2e-bot.mjs` and by
+nothing else; the build script does not contain the string `e2e-bot`.
+They cannot affect it. *(Separately: a password in the deployment's
+runtime environment is readable by every route. It should not be there.)*
+
+**THE CONTROL, and it is the whole answer to "what changed on 19/09".**
+`0a71fdb4` is the last commit Vercel built green — 2026-09-19 12:00.
+Built here twice, same environment, `npm ci` from an empty tree:
+
+| tree | result |
+|---|---|
+| **with** `.git` | `exit=0` |
+| **without** `.git` | `exit=1`, at `db-inventory.test.mjs`, on the two stamp clauses |
+
+One variable, two answers. And the stamp check has existed since
+**2026-08-19** (`ae9fec96`) — a month before the reds began.
+
+So on 2026-09-19 at 12:00 Vercel's builder **had a working tree**, and by
+17:45 it did not. Nothing in the four commits between those times
+touches git, the build script, or any variable. **The change was in the
+Vercel project or the platform, not in this repository** — which is
+where to look, and is why changing an environment variable would have
+fixed nothing.
+
+**The shape gate, which is a real gap and a different one.** A value can
+be present, well-formed for the sentinel sweep, and still impossible —
+`NEXT_PUBLIC_SUPABASE_URL=abc`. That killed `build:ci`'s own first run
+with `TypeError: Invalid URL`, naming neither the variable nor the file,
+and `env-sensitivity.mjs`'s header named the gap and left it open.
+
+`scripts/lib/env-shape-rules.mjs` is now the one place a name's promised
+shape is written, read by the sentinel builder and by `next.config.mjs`,
+which refuses an impossible value **by name** before the build starts.
+**12 of the 144 declared variables have a shape to check** (4 url, 3
+email, 3 number, 2 key32).
+
+`NEXT_PUBLIC_*` is fatal — it is baked into the bundle, so refusing it
+can only rename a failure that was certain. Everything else is reported
+loudly and is NOT fatal: the build never reads it, and on the day
+sixteen red deploys were traced to a missing `.git`, adding a new way for
+a deploy to go red over values nobody here can see would be the wrong
+trade. One line moves a name into the fatal set.
+
+**Absent is not malformed** — an unset variable and an empty string are a
+different, handled condition, and that property is what makes the
+build-time refusal safe. It is the third mutant of six.
+
+**31 checks, 6 of 6 mutations caught.** One of the six found a fault in
+this gate the hour it was written: the clause "the build calls it"
+matched the string `refuseMalformedEnv();` and stayed green when the
+call was commented out, because the text survives inside the comment.
+Fourth time in one session. It imports the config in a child process
+with a malformed value and requires it to throw.
+
+## 8. The build builds — and the .git finding was WRONG, 2026-09-27
+
+**THE CORRECTION FIRST.** §6 and §7 of this list say the deploy failed
+because Vercel's builder has no `.git`. **That is wrong, and the
+owner's own Vercel log disproves it:**
+
+    19:28:15  mutation-tree: ...WARNING (advisory, not failing):
+              1 of 1 uncommitted file(s) are mutation targets: vercel.json
+
+That line is printed by check-mutation-tree's third check, which runs
+only when `git rev-parse --is-inside-work-tree` succeeds. **Vercel has a
+working tree.** It also explains what §6 could not: why 0a71fdb4 was
+green there while it is red here without `.git`.
+
+What survives from that round is worth keeping and is not the cause:
+`no-worktree.test.mjs` and the `mutation-tree.test.mjs` branch are
+correct — a build that cannot run without a working tree is wrong on its
+own terms — but they were presented as the fix and they were not.
+
+**WHAT THE LOG ACTUALLY SHOWS.**
+
+    19:28:12  Warning: Node "24.x" in settings, "22.x" will be used
+    19:28:15  mutation-tree warning (advisory)
+    19:30:04  Error: Command "npm run build" exited with 1
+
+Two minutes between the fourth build step and the failure — that window
+is `npm run test:unit`, 294 gates. The failing gate is still unnamed:
+run-gates prints `THE BUILD FAILED IN: <path>` last and that line has
+not been read.
+
+**AND THE SHAPE UNDER IT, which is the owner's point and is right.**
+`npm run build` — the command Vercel runs — ran the function limits, the
+marker check, the mutation-tree check, the i18n check and 294 unit gates
+before compiling a line. Checks about this repository's own conventions,
+on the critical path of every deployment. A gate that goes red there
+takes the DEPLOY with it.
+
+    build:  node scripts/apply-function-limits.mjs && next build
+    gates:  apply-function-limits --check && build-identity &&
+            check-mutation-markers && check-mutation-tree &&
+            check-i18n && test:unit
+
+`apply-function-limits` stays in the build because it WRITES the route
+files' maxDuration literals — a producer, not a checker; a build without
+it ships different code.
+
+**Measured 2026-09-27, clean clone, `npm ci` from an empty tree, the
+platform's environment: the new build is `exit=0` in 2m33.** The old one
+took about twenty minutes here.
+
+**Nothing is lost, and that is the argument for it being safe.**
+`.github/workflows/verify.yml` runs on every push to every branch and
+now runs `npm run gates` before it builds. `ci-coverage.test.mjs` §1b
+holds three claims rather than one: the build runs no checker and no
+suite; it STILL runs the producer and still compiles (an empty script
+would satisfy the first claim); and every checker that left is named in
+`gates`, which section 1 requires the workflow to run.
+
+**Six gates read `scripts.build` and would have lied after the split** —
+billing-coverage, function-limits, mutation-markers, mutation-tree,
+no-worktree, test-export-drift — all re-pointed. **Two mutation anchors
+went stale in the same edit**, found by `mutation-suite-shape` (2,572
+anchors checked) and by `mutation-markers.mutation.mjs` reporting a HOLE
+rather than a pass. 15 of 15 after the fix.
+
+**Still unread:** the ~30 lines before `19:30:04`, which name the gate.
+With the gates off the deploy's critical path it no longer blocks
+production — but it is still red somewhere, and CI will now say where.

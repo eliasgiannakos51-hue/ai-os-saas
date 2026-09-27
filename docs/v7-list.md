@@ -425,3 +425,44 @@ rather than a pass. 15 of 15 after the fix.
 **Still unread:** the ~30 lines before `19:30:04`, which name the gate.
 With the gates off the deploy's critical path it no longer blocks
 production — but it is still red somewhere, and CI will now say where.
+
+## 9. Clicks to a result — MEASURED AND MOVED, 2026-09-27
+
+    node scripts/measure-make-steps.mjs
+    node scripts/tests/make-as-chat.test.mjs     § 2b
+
+The target asked for in words was "you write, it comes out — 1-2 steps".
+Counted for somebody who already knows what they want to say: +1 if the
+field is behind a button, +1 if it is not focused on arrival, +1 for the
+action button. Typing is not a click.
+
+| row | before | after |
+|---|---|---|
+| Website Builder | **3** | **1** |
+| Presentations | 2 | **1** |
+| Posts | 2 | **1** |
+| AI Coding | 2 | **1** |
+| Documents | 2 | 2 — no textarea to focus |
+| Data Analysis | 2 | 2 — a file is the way in |
+
+**The Website Builder's third click was invisible in a demo.** The
+description field was `useState(initialWebsites.length === 0)`: it
+existed only for somebody who had never made a site. Anybody who had
+made one pressed "New project" first — a click a first-time visitor
+never pays and every returning user does.
+
+The other three were one `autoFocus` each.
+
+§2b holds a per-row ceiling AND the target itself (`worst <= 2`), so the
+ceilings cannot all drift up together while each passes its own.
+
+**Sixth self-matching check of the session.** The "field behind a
+button" detector looks for `useState(initialWebsites.length === 0)`, and
+the commit that removed that line left a comment saying what it removed
+— so the detector read the comment and reported the click still being
+paid. Both instruments strip comments before detecting now.
+
+**What is still missing is the larger half.** "Say a change in words"
+exists on one row of six: the Website Builder's `editText` →
+`api/websites/edit`. Presentations, Posts, Coding and Documents generate
+and stop.

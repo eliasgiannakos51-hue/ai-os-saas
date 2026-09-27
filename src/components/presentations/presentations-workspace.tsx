@@ -299,6 +299,7 @@ export function PresentationsWorkspace({
           {t("form.description")}
         </label>
         <textarea
+          autoFocus
           id="deck-description"
           value={description}
           onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_CHARS))}

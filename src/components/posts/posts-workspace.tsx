@@ -219,6 +219,7 @@ export function PostsWorkspace({
         </label>
         <textarea
           id="post-description"
+          autoFocus
           value={description}
           onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_CHARS))}
           placeholder={t("form.descriptionPlaceholder")}

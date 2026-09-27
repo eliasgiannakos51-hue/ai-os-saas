@@ -165,6 +165,64 @@ check("every drawn row has a baseline", unlisted.length === 0,
 const stale = Object.keys(BASELINE).filter((h) => !DRAWN.includes(h));
 check("...and no baseline names a row that is not drawn", stale.length === 0, stale.join(", "));
 
+console.log("\n== 2b. how many clicks between arriving and a result ==");
+// ---------------------------------------------------------------------
+// THE TARGET, ASKED FOR IN WORDS: "you write, it comes out — 1-2 steps".
+// This is the countable half of it, for somebody who already knows what
+// they want to say:
+//
+//   + 1  the field is behind a button
+//   + 1  the field is not focused on arrival
+//   + 1  the action button itself
+//
+// Typing is not a click. The question was how many PRESSES stand
+// between arriving and a result, not how much there is to describe.
+//
+// COMMENTS ARE STRIPPED FIRST, and this section is why the measuring
+// script does it too: the "field behind a button" detector looks for
+// `useState(initialWebsites.length === 0)`, the commit that removed
+// that line left a comment saying what it removed, and the detector
+// read the comment and reported the click still being paid.
+{
+  const strip = (x) => x.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  const clicksFor = (href) => {
+    const src = strip(screenOf(href).map((f) => readFileSync(f, "utf8")).join("\n"));
+    const behindAButton = /useState\(\s*initial\w+\.length === 0\s*\)/.test(src);
+    const focused = /autoFocus/.test(src);
+    return (behindAButton ? 1 : 0) + (focused ? 0 : 1) + 1;
+  };
+  // A CEILING PER ROW, recorded at the measured value on 2026-09-27 and
+  // free to fall. Two is the target's upper end; the two rows sitting
+  // there have no textarea to focus (Documents has no prompt at all,
+  // Data Analysis takes a file), so a lower number would have to come
+  // from giving them one, not from a flag.
+  const CEILING = {
+    "/dashboard/website-builder": 1,
+    "/dashboard/documents": 2,
+    "/dashboard/presentations": 1,
+    "/dashboard/posts": 1,
+    "/dashboard/coding": 1,
+    "/dashboard/data-analysis": 2,
+  };
+  const over = [];
+  const unlisted = [];
+  for (const href of DRAWN) {
+    const n = clicksFor(href);
+    if (!(href in CEILING)) { unlisted.push(`${href} (${n})`); continue; }
+    console.log(`        ${href.padEnd(30)} ${n} click${n === 1 ? "" : "s"}${n < CEILING[href] ? `  IMPROVED from ${CEILING[href]} — lower the ceiling` : ""}`);
+    if (n > CEILING[href]) over.push(`${href}: ${n}, ceiling ${CEILING[href]}`);
+  }
+  check("no row costs more clicks than its ceiling", over.length === 0, over.join("\n        "));
+  check("every drawn row has a ceiling", unlisted.length === 0,
+    `${unlisted.join(", ")} — a new Make row needs its number recorded`);
+  const stale = Object.keys(CEILING).filter((h) => !DRAWN.includes(h));
+  check("...and no ceiling names a row that is not drawn", stale.length === 0, stale.join(", "));
+  // AND THE TARGET ITSELF, so the per-row ceilings cannot all drift up
+  // together while each one passes its own.
+  const worst = Math.max(...DRAWN.map(clicksFor));
+  check(`the worst row is within the 1-2 asked for (${worst})`, worst <= 2, String(worst));
+}
+
 console.log("\n== 3. saying a CHANGE in words, which almost nothing has ==");
 // REPORTED WITH A FLOOR, not gated. One of six rows has it, so a gate
 // would be a gate on one file; a floor is what stops it reaching zero

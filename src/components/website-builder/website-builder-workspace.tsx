@@ -255,7 +255,21 @@ export function WebsiteBuilderWorkspace({
   // The generation form is now behind the list's "+ New" button, like
   // every other list in the app — it opens by default only when there is
   // nothing to look at yet.
-  const [showForm, setShowForm] = useState(initialWebsites.length === 0);
+  // OPEN ON ARRIVAL, FOR EVERYBODY (2026-09-27).
+  //
+  // This was `useState(initialWebsites.length === 0)`: the description
+  // field existed only for somebody who had never made a site. Anybody
+  // who had made one paid a press on "New project" before the only
+  // thing this page is for appeared — a click a first-time visitor
+  // never pays, so it is invisible in a demo and charged to every
+  // returning user. Measured at 3 clicks to a result against 2
+  // everywhere else in Make.
+  //
+  // It still CLOSES after a generation (the two setShowForm(false)
+  // calls below), and that is deliberate rather than an oversight: the
+  // result takes the space the question was in, which is what a
+  // conversation does.
+  const [showForm, setShowForm] = useState(true);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [detailTab, setDetailTab] = useState<DetailTabKey>("preview");
@@ -1742,6 +1756,11 @@ export function WebsiteBuilderWorkspace({
                   <textarea
                     id="website-description"
                     ref={descriptionRef}
+                    // FOCUSED ON ARRIVAL. Without it, somebody who knows
+                    // what they want to say still pays a click to put
+                    // the cursor where the only field on the screen
+                    // expects it.
+                    autoFocus
                     required
                     maxLength={MAX_DESCRIPTION_LENGTH}
                     value={description}

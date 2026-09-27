@@ -466,3 +466,55 @@ paid. Both instruments strip comments before detecting now.
 exists on one row of six: the Website Builder's `editText` →
 `api/websites/edit`. Presentations, Posts, Coding and Documents generate
 and stop.
+
+## 10. "Make it more formal" — BUILT for Presentations, 2026-09-27
+
+    node scripts/tests/make-as-chat.test.mjs     § 3
+
+The second half of the pattern, and the half five of the six drawn Make
+rows did not have. A deck that came back almost right was a deck you
+described again from scratch and paid for twice — and the second
+attempt had no idea what the first had produced.
+
+| piece | |
+|---|---|
+| route | `api/presentations/[id]/edit` — breaker, tier, hold, model, settle, in the order `route-refusals` holds |
+| model | `editDeck()` SHARES the call with `generateDeck` — same model, same cached system, same forced tool |
+| charge | its own `presentationEdit` profile: an edit sends the whole deck back up, a generation sends a brief |
+| input chars | `deckEditEstimateInputChars()` counts the deck's real characters, not a per-slide constant |
+| tier | the same as generating it — declared in `feature-catalog.ts`, which is what refused the route until it was |
+| screen | the field sits BETWEEN the deck's header and its slides; the price shows before the press |
+| languages | 9 keys × 10 |
+
+**Four decisions written into the code because they are easy to get
+wrong:** the stored deck is as untrusted as the instruction (it is model
+output from a brief that was untrusted when it arrived — feeding it back
+as trusted would launder an injection through a database row); the
+language comes from the DECK, not the instruction; a failed save is a
+500 with its own message, because the deck on screen IS the stored one
+and silence means the paid-for change vanishes at the next reload; and
+the deck is REPLACED, so the .pptx and PDF links keep working.
+
+**SEVEN GATES CAUGHT SEVEN THINGS IN THIS ONE CHANGE, all correct, none
+of which reading found:**
+
+| gate | what it caught |
+|---|---|
+| `i18n-coverage` | one English sentence added to a server response — a ceiling that may only fall |
+| *(mine, after it)* | `not_included` falling through to "something failed" |
+| `design-density` | a border the tinted ground already provided |
+| `feature-catalog` | a route in no tier at all |
+| `first-run-strings` | the pack not regenerated |
+| `globe-mark` | an accent spinner on an accent button — invisible |
+| `one-primary-action` | two filled accent buttons on one page |
+
+They were at gates 76, 95, 98, 108 and 180: each fix revealed the next
+one DEEPER than where the previous run had stopped. And fixing
+`one-primary-action` broke two others — an outlined button pushed the
+border count back over, and left the spinner asking to inherit on a dark
+ground, the opposite of the mistake `globe-mark` had just caught. One
+answer satisfied all three: a panel fill.
+
+**294 gates, 1,149 anchors, 18 of 18 on presentations.mutation.mjs.**
+Not verified with a signed-in session — nothing in this container can
+sign in.

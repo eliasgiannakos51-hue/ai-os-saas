@@ -3894,6 +3894,17 @@
       "delete": "Eliminar",
       "deleteConfirm": "Eliminar esta apresentação? Não é possível anular.",
       "noteFromBefore": "nota de antes"
+    },
+    "edit": {
+      "title": "Peça uma alteração",
+      "placeholder": "torne-a mais formal · mais curta · acrescente um slide sobre preços",
+      "apply": "Aplicar alteração",
+      "applying": "A alterar a apresentação…",
+      "hint": "Toda a apresentação é reescrita com a sua alteração e substitui esta.",
+      "changed": "Alterada.",
+      "notSaved": "A alteração foi feita mas não pôde ser guardada. Nada se perdeu — tente novamente.",
+      "noDeck": "Esta linha não tem apresentação para alterar.",
+      "notIncluded": "As apresentações não estão incluídas no seu plano."
     }
   },
   "posts": {

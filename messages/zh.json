@@ -3894,6 +3894,17 @@
       "delete": "删除",
       "deleteConfirm": "删除这份演示？此操作无法撤销。",
       "noteFromBefore": "以前的笔记"
+    },
+    "edit": {
+      "title": "说出要改什么",
+      "placeholder": "更正式 · 更简短 · 加一页讲价格",
+      "apply": "应用更改",
+      "applying": "正在修改演示…",
+      "hint": "整个演示会带着你的更改重写，并替换当前这份。",
+      "changed": "已修改。",
+      "notSaved": "更改已完成但未能保存。没有丢失任何内容——请重试。",
+      "noDeck": "该记录没有可修改的演示。",
+      "notIncluded": "你的套餐不包含演示功能。"
     }
   },
   "posts": {

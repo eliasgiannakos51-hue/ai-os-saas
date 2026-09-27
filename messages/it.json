@@ -3894,6 +3894,17 @@
       "delete": "Elimina",
       "deleteConfirm": "Eliminare questa presentazione? Non si può annullare.",
       "noteFromBefore": "nota di prima"
+    },
+    "edit": {
+      "title": "Chiedi una modifica",
+      "placeholder": "rendila più formale · più breve · aggiungi una slide sui prezzi",
+      "apply": "Applica la modifica",
+      "applying": "Modifica in corso…",
+      "hint": "L'intera presentazione viene riscritta con la tua modifica e sostituisce questa.",
+      "changed": "Modificata.",
+      "notSaved": "La modifica è stata fatta ma non è stata salvata. Non è andato perso nulla: riprova.",
+      "noDeck": "Questa riga non ha una presentazione da modificare.",
+      "notIncluded": "Le presentazioni non sono incluse nel tuo piano."
     }
   },
   "posts": {

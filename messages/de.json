@@ -3894,6 +3894,17 @@
       "delete": "Löschen",
       "deleteConfirm": "Diese Präsentation löschen? Das lässt sich nicht rückgängig machen.",
       "noteFromBefore": "Notiz von früher"
+    },
+    "edit": {
+      "title": "Sag eine Änderung",
+      "placeholder": "mach sie formeller · kürzer · füge eine Folie zu den Preisen hinzu",
+      "apply": "Änderung anwenden",
+      "applying": "Die Präsentation wird geändert…",
+      "hint": "Die ganze Präsentation wird mit Ihrer Änderung neu geschrieben und ersetzt diese.",
+      "changed": "Geändert.",
+      "notSaved": "Die Änderung wurde vorgenommen, konnte aber nicht gespeichert werden. Nichts ging verloren — bitte erneut versuchen.",
+      "noDeck": "Dieser Eintrag hat keine Präsentation zum Ändern.",
+      "notIncluded": "Präsentationen sind in Ihrem Tarif nicht enthalten."
     }
   },
   "posts": {

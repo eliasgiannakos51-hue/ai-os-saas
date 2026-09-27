@@ -16,6 +16,7 @@ import { AI_SAFETY_BOUNDARIES_EN, AI_CRISIS_CLASSIFIER_EN } from "@/lib/ai-condu
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import { UNTRUSTED_OPEN, UNTRUSTED_CLOSE } from "@/lib/agents/agent-config";
 import { languageNameFor } from "@/lib/text/language-name";
+import type { Deck } from "@/lib/presentations/deck";
 import {
   MAX_BULLETS,
   MAX_BULLET_CHARS,
@@ -108,5 +109,61 @@ export function buildDeckUserMessage(description: string, slideCount: number, lo
 
 ${UNTRUSTED_OPEN}
 ${description.split(UNTRUSTED_OPEN).join("(marker removed)").split(UNTRUSTED_CLOSE).join("(marker removed)")}
+${UNTRUSTED_CLOSE}`;
+}
+
+/**
+ * A DECK THE MODEL ALREADY WROTE, AS TEXT IT CAN READ BACK.
+ *
+ * Not JSON.stringify of the stored row: that carries `image` objects
+ * with storage paths and Unsplash attribution, none of which the model
+ * decides and all of which it would then try to reproduce. It sees what
+ * it WRITES — layout, title, bullets, notes and the imageQuery it chose
+ * — so the same tool can return the same shape.
+ */
+function renderDeckForEditing(deck: Deck): string {
+  const lines = [`TITLE: ${deck.title}`];
+  deck.slides.forEach((slide, i) => {
+    lines.push(
+      "",
+      `SLIDE ${i + 1} (${slide.layout})`,
+      `title: ${slide.title}`,
+      ...slide.bullets.map((b) => `- ${b}`),
+      `notes: ${slide.notes}`,
+      ...(slide.imageQuery ? [`imageQuery: ${slide.imageQuery}`] : [])
+    );
+  });
+  return lines.join("\n");
+}
+
+/**
+ * "MAKE IT MORE FORMAL" — the deck plus what to change about it.
+ *
+ * WHY THE WHOLE DECK GOES BACK. A change like "shorter" or "more
+ * formal" is about the deck as a whole, and a model given one slide
+ * would rewrite that slide into something that no longer belongs beside
+ * the others. The tool returns the whole deck for the same reason.
+ *
+ * BOTH HALVES ARE UNTRUSTED, and that is not symmetry for its own sake.
+ * The instruction is typed by a person, so it is data by the rule every
+ * other brief in this repository follows. The DECK is model output that
+ * has been sitting in a database — text this system itself produced
+ * from a brief that was untrusted when it arrived. Feeding it back as
+ * trusted content would launder a prompt injection through one
+ * generation and a `user_presentations` row.
+ */
+export function buildDeckEditUserMessage(deck: Deck, instruction: string, locale: string): string {
+  const clean = (s: string) =>
+    s.split(UNTRUSTED_OPEN).join("(marker removed)").split(UNTRUSTED_CLOSE).join("(marker removed)");
+  return `Here is a deck you wrote. Apply the change asked for and return the WHOLE deck, with the same number of slides unless the change asks for a different number, in ${languageNameFor(locale)}.
+
+THE DECK:
+${UNTRUSTED_OPEN}
+${clean(renderDeckForEditing(deck))}
+${UNTRUSTED_CLOSE}
+
+THE CHANGE ASKED FOR:
+${UNTRUSTED_OPEN}
+${clean(instruction)}
 ${UNTRUSTED_CLOSE}`;
 }

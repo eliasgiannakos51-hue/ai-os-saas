@@ -223,17 +223,39 @@ console.log("\n== 2b. how many clicks between arriving and a result ==");
   check(`the worst row is within the 1-2 asked for (${worst})`, worst <= 2, String(worst));
 }
 
-console.log("\n== 3. saying a CHANGE in words, which almost nothing has ==");
-// REPORTED WITH A FLOOR, not gated. One of six rows has it, so a gate
-// would be a gate on one file; a floor is what stops it reaching zero
-// while nobody is looking.
+console.log("\n== 3. saying a CHANGE in words ==");
+// THE HALF THAT IS NOT ABOUT THE FIRST SCREEN, and the half that was
+// missing from five of six rows when this section was written.
+//
+// A ROW IS NAMED, NOT COUNTED. "At least one" was the first version and
+// it was too weak in both directions: it passed while five rows had
+// nothing, and it would have gone on passing if the one that had it
+// lost it while another gained it. The set is written down and checked
+// BOTH ways, so a row losing the capability is as red as the count
+// falling.
+//
+// THE DETECTOR LOOKS FOR A CALL TO AN EDIT ROUTE, quoted any way. It
+// was `/\/edit"/` and missed presentations the hour it shipped,
+// because that call is a template literal
+// (`/api/presentations/${selected.id}/edit`) and ends in a backtick.
+// A detector that only sees one quoting style reports progress as
+// absence.
+const HAS_WORDS_AFTER = ["/dashboard/website-builder", "/dashboard/presentations"];
 const withEdit = DRAWN.filter((href) => {
   const src = screenOf(href).map((f) => readFileSync(f, "utf8")).join("\n");
-  return /editText|editPrompt|refine|\/edit"/.test(src);
+  return /editText|editPrompt|refine|\/edit["'\`]/.test(src);
 });
 console.log(`        ${withEdit.length} of ${DRAWN.length}: ${withEdit.join(", ") || "none"}`);
-check("at least one drawn Make row can be changed by saying so", withEdit.length >= 1,
-  "the pattern the whole group is supposed to move towards exists nowhere");
+const lost = HAS_WORDS_AFTER.filter((h) => !withEdit.includes(h));
+check(`the rows that can be changed by saying so are the ones recorded (${HAS_WORDS_AFTER.length})`,
+  lost.length === 0,
+  `${lost.join(", ")} — a row that had it and lost it`);
+check("...and the count has not fallen", withEdit.length >= HAS_WORDS_AFTER.length,
+  `${withEdit.length} < ${HAS_WORDS_AFTER.length}`);
+const gained = withEdit.filter((h) => !HAS_WORDS_AFTER.includes(h));
+if (gained.length > 0) {
+  console.log(`        IMPROVED  ${gained.join(", ")} gained it — add them to HAS_WORDS_AFTER`);
+}
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

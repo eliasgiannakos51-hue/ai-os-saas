@@ -278,3 +278,68 @@ itself (bypass the shim; select no gates).
 (`connect_rejected`, measured) and no token is present, so the
 confirmation that this was THE failure has to come from
 `npx vercel inspect <id> --logs` or from the next deploy going green.
+
+## 7. No env var was ever wrong — the control that settles it, 2026-09-27
+
+    node scripts/tests/env-shape.test.mjs
+    node scripts/tests/env-shape.mutation.mjs
+
+**Asked: which env var holds a wrong value? Answer: none, and it is
+measured rather than argued.** `build:ci` runs the real build with all
+178 project variables set to a deliberately unusable value, and again
+with none of them set. Both `exit=0`. A wrong VALUE does not fail this
+build.
+
+`BOT_EMAIL` and `BOT_PASSWORD` are read by `scripts/e2e-bot.mjs` and by
+nothing else; the build script does not contain the string `e2e-bot`.
+They cannot affect it. *(Separately: a password in the deployment's
+runtime environment is readable by every route. It should not be there.)*
+
+**THE CONTROL, and it is the whole answer to "what changed on 19/09".**
+`0a71fdb4` is the last commit Vercel built green — 2026-09-19 12:00.
+Built here twice, same environment, `npm ci` from an empty tree:
+
+| tree | result |
+|---|---|
+| **with** `.git` | `exit=0` |
+| **without** `.git` | `exit=1`, at `db-inventory.test.mjs`, on the two stamp clauses |
+
+One variable, two answers. And the stamp check has existed since
+**2026-08-19** (`ae9fec96`) — a month before the reds began.
+
+So on 2026-09-19 at 12:00 Vercel's builder **had a working tree**, and by
+17:45 it did not. Nothing in the four commits between those times
+touches git, the build script, or any variable. **The change was in the
+Vercel project or the platform, not in this repository** — which is
+where to look, and is why changing an environment variable would have
+fixed nothing.
+
+**The shape gate, which is a real gap and a different one.** A value can
+be present, well-formed for the sentinel sweep, and still impossible —
+`NEXT_PUBLIC_SUPABASE_URL=abc`. That killed `build:ci`'s own first run
+with `TypeError: Invalid URL`, naming neither the variable nor the file,
+and `env-sensitivity.mjs`'s header named the gap and left it open.
+
+`scripts/lib/env-shape-rules.mjs` is now the one place a name's promised
+shape is written, read by the sentinel builder and by `next.config.mjs`,
+which refuses an impossible value **by name** before the build starts.
+**12 of the 144 declared variables have a shape to check** (4 url, 3
+email, 3 number, 2 key32).
+
+`NEXT_PUBLIC_*` is fatal — it is baked into the bundle, so refusing it
+can only rename a failure that was certain. Everything else is reported
+loudly and is NOT fatal: the build never reads it, and on the day
+sixteen red deploys were traced to a missing `.git`, adding a new way for
+a deploy to go red over values nobody here can see would be the wrong
+trade. One line moves a name into the fatal set.
+
+**Absent is not malformed** — an unset variable and an empty string are a
+different, handled condition, and that property is what makes the
+build-time refusal safe. It is the third mutant of six.
+
+**31 checks, 6 of 6 mutations caught.** One of the six found a fault in
+this gate the hour it was written: the clause "the build calls it"
+matched the string `refuseMalformedEnv();` and stayed green when the
+call was commented out, because the text survives inside the comment.
+Fourth time in one session. It imports the config in a child process
+with a malformed value and requires it to throw.

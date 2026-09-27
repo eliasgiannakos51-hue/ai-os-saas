@@ -34,6 +34,69 @@ function commitDate() {
 const BUILD_COMMIT_DATE = commitDate();
 
 import createNextIntlPlugin from "next-intl/plugin";
+import { malformedEnvVars } from "./scripts/lib/env-shape-rules.mjs";
+import { envVarsInExample } from "./scripts/lib/env-usage.mjs";
+
+/**
+ * A VALUE THAT CANNOT BE WHAT ITS NAME SAYS, REFUSED HERE AND NAMED.
+ *
+ * THE FAILURE THIS REPLACES, observed on this repository's own first
+ * `build:ci` run: NEXT_PUBLIC_SUPABASE_URL held a value that was not a
+ * URL, 252 gates passed, and `next build` died with
+ *
+ *     TypeError: Invalid URL
+ *     Error: Failed to collect page data for /_not-found
+ *
+ * — which names neither the variable nor the file. The shape rules that
+ * fixed the sentinel for that run are in scripts/lib/env-shape-rules.mjs
+ * and this is their second reader.
+ *
+ * TWO CLASSES, AND THE SPLIT IS DELIBERATE.
+ *
+ *   NEXT_PUBLIC_* is BAKED INTO THE BUNDLE. The build reads it by
+ *   definition, so a malformed one is a broken deployment with
+ *   certainty, and refusing it here can only turn a failure that was
+ *   going to happen into one that says which variable it is. Fatal.
+ *
+ *   Everything else is read by routes at runtime, and the build may
+ *   never touch it. Refusing one here would be a NEW way for a deploy
+ *   to go red over a variable the build does not use — which, on the
+ *   day sixteen red deploys were traced to a missing .git, is the last
+ *   thing to add on a guess about values nobody here can see. Reported,
+ *   loudly and by name, and not fatal.
+ *
+ * To make the second class fatal too, move the name into the fatal
+ * filter below; scripts/tests/env-shape.test.mjs holds both halves.
+ */
+function refuseMalformedEnv() {
+  // THE PROJECT'S OWN NAMES, NOT THE MACHINE'S. The first version read
+  // every variable in process.env and immediately reported
+  // CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST — a container variable ending
+  // in _HOST that holds a boolean and belongs to nothing here. A rule
+  // about what a name in THIS repository promises has to range over the
+  // names this repository declares, which lib/env-usage.mjs collects
+  // from .env.local.example and from every process.env read in src/.
+  const names = [...envVarsInExample()];
+  const bad = malformedEnvVars(process.env, names);
+  if (bad.length === 0) return;
+  const fatal = bad.filter((b) => b.name.startsWith("NEXT_PUBLIC_"));
+  const warn = bad.filter((b) => !b.name.startsWith("NEXT_PUBLIC_"));
+  for (const b of warn) {
+    console.warn(`  env WARNING (not failing): ${b.name} ${b.why}`);
+  }
+  if (warn.length > 0) {
+    console.warn(`  ${warn.length} variable(s) hold a value their name says is impossible. Runtime reads them, this build does not.`);
+  }
+  if (fatal.length > 0) {
+    throw new Error(
+      "This build cannot produce a working bundle:\n" +
+        fatal.map((b) => `  ${b.name} ${b.why}`).join("\n") +
+        "\n  NEXT_PUBLIC_* is baked into the bundle, so this would have failed later without naming the variable." +
+        "\n  Set it in the deployment's environment, or unset it — an absent variable is a different, handled condition."
+    );
+  }
+}
+refuseMalformedEnv();
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 

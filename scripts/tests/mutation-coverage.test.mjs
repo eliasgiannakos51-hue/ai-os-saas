@@ -232,7 +232,15 @@ console.log(
 // that asks what could happen rather than what did) and
 // email-outcome-reported (a route that says "sent" with no email
 // configured).
-const RATCHET = 199;
+//
+// 199 -> 205 on 2026-09-26: six suites across two rounds. The one worth
+// naming is no-worktree, which drives the gate that asks whether the
+// build can run where it SHIPS — in a source tarball with no .git.
+// Sixteen consecutive red deploys came from two gates demanding an
+// answer only a working tree can give, and every instrument in this
+// repository was blind to it because every instrument had only ever run
+// inside a repository. Read off the run.
+const RATCHET = 205;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

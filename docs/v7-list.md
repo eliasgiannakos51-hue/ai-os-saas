@@ -215,3 +215,66 @@ than an impression of it.
 
 **Re-run the measurement after each one.** The number to watch is the
 last column: a chat box waits on one thing, the text.
+
+## 6. The deploy — FOUND AND FIXED, 2026-09-26
+
+    node scripts/tests/no-worktree.test.mjs
+    node scripts/tests/no-worktree.mutation.mjs
+
+**Sixteen consecutive red deploys since 2026-09-19 12:00, and the
+difference between a green `build:ci` and a red Vercel was one thing:
+`.git`.**
+
+Vercel hands the builder a source tarball and sets
+`VERCEL_GIT_COMMIT_SHA` rather than shipping a repository. Two gates
+demanded answers only a working tree can give.
+
+| gate | what it demanded | where the build died |
+|---|---|---|
+| `db-inventory.test.mjs` | a stamp `db-inventory.mjs` could only produce from git | gate 70 of 292 (fixed 2026-09-26, `4419002a`) |
+| `mutation-tree.test.mjs` | that `check-mutation-tree` WARN about an uncommitted file | gate 167 of 292 |
+
+Reproduced on demand, which nothing in fifteen rounds of guessing had
+been:
+
+    git clone --no-hardlinks . /tmp/clean && cd /tmp/clean
+    git checkout 9d84b80c && rm -rf .git && npm ci
+    env -i PATH="$PATH" HOME="$HOME" TZ=UTC CI=1 VERCEL=1 \
+      VERCEL_ENV=production NODE_ENV=production npm run build
+
+RED before the fix, naming the gate. GREEN after it, all 292 gates and
+`next build`. One change.
+
+**The timings agree, independently.** The last green build answered in
+5m46. The reds before the morning's `db-inventory` fix answered in
+2m16–3m16 — gate 70 is 24% of the way through. `9d84b80c`, after that
+fix moved the failure to gate 167 (57%), answered in about four minutes.
+A failure whose fraction of a successful build moves exactly as far as
+the failing gate moves is not a flake, a timeout or a memory limit.
+
+**Why nothing caught it.** `build:ci` runs the real build twice in two
+environments, and the axis it varies is the VARIABLES. Both runs happen
+inside a repository, as did every run of both gates, as did every
+experiment run here for a week. The tree was never a variable.
+
+`no-worktree.test.mjs` makes it one, cheaply: a PATH shim whose `git`
+exits 128 with git's own out-of-repository message, and the population
+derived from the source — every program under `scripts/` that invokes
+git (13 of 699 files), the three the build runs directly, and the ten
+gates that spawn or read one of them. Section 0 proves the shim hides
+git before anything is concluded from it.
+
+**Measured 2026-09-26: 13 programs, all exit 0 with git hidden; 0
+exemptions.** The one exemption written into the first draft was deleted
+on the first run — the both-ways check showed
+`mutation-tree-environments.test.mjs` passes under the shim anyway.
+
+**4 of 4 mutations caught**, two of them putting the original defect
+back at each of the two sites it lived, two emptying the instrument
+itself (bypass the shim; select no gates).
+
+**Still unread after eleven requests:** any line of a Vercel build log.
+`api.vercel.com` is refused by this container's egress policy
+(`connect_rejected`, measured) and no token is present, so the
+confirmation that this was THE failure has to come from
+`npx vercel inspect <id> --logs` or from the next deploy going green.

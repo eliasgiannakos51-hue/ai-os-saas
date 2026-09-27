@@ -15,6 +15,7 @@ import {
 } from "@/lib/billing/credits";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { estimateForAction } from "@/lib/billing/estimate";
+import { loadWorkspaceContext, renderWorkspaceContext } from "@/lib/ai/workspace-context";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
@@ -133,13 +134,24 @@ export async function POST(request: Request) {
       if (!ceiling.allowed) return NextResponse.json({ error: "bypass_ceiling", detail: ceiling.reason }, { status: 429 });
     }
 
+    // THE REAL NUMBERS, IF THERE ARE ANY. See the same block in
+    // api/posts/generate — the brief steers which modules are read, the
+    // caps in lib/ai/workspace-context.ts bound it, the user's own
+    // client means RLS decides, and a failed read contributes nothing
+    // rather than failing the request.
+    //
+    // BEFORE THE ESTIMATE, because its characters are sent to the model
+    // and therefore belong in the reservation.
+    const workspace = await loadWorkspaceContext(supabase, { include: true, brief: description });
+    const businessContext = renderWorkspaceContext(workspace);
+
     const plan = await resolveEffectivePlan(user);
     const pricingConfig = resolvePricingConfig();
     const estimate = estimateForAction(
       "presentationGenerate",
       {
         model: PRESENTATION_MODEL,
-        inputChars: deckEstimateInputChars(description.length, slideCount),
+        inputChars: deckEstimateInputChars(description.length + businessContext.length, slideCount),
         planSlug: plan?.slug ?? null,
       },
       pricingConfig,
@@ -195,6 +207,7 @@ export async function POST(request: Request) {
       imageSource,
       costs,
       memoryBlock,
+      businessContext,
       // THE STOP BUTTON: the request's own abort signal. When the person
       // stops, the provider call is aborted with it.
       signal: request.signal,

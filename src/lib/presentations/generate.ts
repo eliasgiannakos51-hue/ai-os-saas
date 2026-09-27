@@ -73,12 +73,25 @@ export async function generateDeck(params: {
    * own system prompt it is inside the cached region and costs a tenth.
    */
   memoryBlock?: string;
+  /** This account's own records, rendered by lib/ai/workspace-context.ts.
+   *  Passed in rather than loaded here for the reason memoryBlock is:
+   *  this module has no Supabase client and must not grow one.
+   *
+   *  IN THE USER TURN, NOT THE CACHED SYSTEM BLOCK — the records differ
+   *  between two requests from the same person, so behind the cache
+   *  breakpoint they would invalidate the cached prefix every call. */
+  businessContext?: string;
   costs: CostAccumulator;
   signal?: AbortSignal;
 }): Promise<GenerateDeckResult> {
   return runDeckCall({
     ...params,
-    userMessage: buildDeckUserMessage(params.description, params.slideCount, params.locale),
+    userMessage: buildDeckUserMessage(
+      params.description,
+      params.slideCount,
+      params.locale,
+      params.businessContext ?? ""
+    ),
     fallbackTitle: params.description.slice(0, 60),
   });
 }

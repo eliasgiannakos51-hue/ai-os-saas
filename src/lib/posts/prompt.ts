@@ -79,10 +79,33 @@ export const WRITE_POSTS_TOOL: ToolDefinition = {
   },
 };
 
-export function buildPostsUserMessage(description: string, platforms: PostPlatform[], locale: string): string {
+/**
+ * @param businessContext - what this account sells and is working on,
+ *   already rendered by lib/ai/workspace-context.ts, or "" when the
+ *   account is empty or the read failed. It is the difference between a
+ *   post a stranger's tool could write and one only this product can:
+ *   Copy.ai does not know the price of your Atlas plan.
+ *
+ * INSIDE THE UNTRUSTED MARKERS, WITH THE BRIEF. Both are text somebody
+ * typed into a form — a product name reading "ignore your previous
+ * instructions" is a row in a database, not a message from the user —
+ * and a boundary that covered the brief but not the records would be a
+ * boundary with the larger half outside it.
+ */
+export function buildPostsUserMessage(
+  description: string,
+  platforms: PostPlatform[],
+  locale: string,
+  businessContext = ""
+): string {
+  const scrub = (text: string) =>
+    text.split(UNTRUSTED_OPEN).join("(marker removed)").split(UNTRUSTED_CLOSE).join("(marker removed)");
+  const context = businessContext.trim()
+    ? `\n${scrub(businessContext.trim())}\n\n---\n`
+    : "";
   return `Write posts for: ${platforms.join(", ")}. Write them in ${languageNameFor(locale)}.
-
-${UNTRUSTED_OPEN}
-${description.split(UNTRUSTED_OPEN).join("(marker removed)").split(UNTRUSTED_CLOSE).join("(marker removed)")}
+${context ? "\nThe block below has two parts: this account's own records first, then the brief. Use the records for names, prices and facts so the posts are about THIS business; write the post the brief asks for." : ""}
+${UNTRUSTED_OPEN}${context}
+${scrub(description)}
 ${UNTRUSTED_CLOSE}`;
 }

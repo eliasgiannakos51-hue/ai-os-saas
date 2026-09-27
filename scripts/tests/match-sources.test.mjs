@@ -241,6 +241,19 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     // which is the only reason it is safe, and an entry for it would be a
     // name in a register that this scan never produces.)
     "src/lib/chat/memory-fold.ts",
+    // THE MODULE ORDER FOR A BRIEF (2026-09-27). It folds the brief the
+    // person typed — "a site for a coffee shop" — and scores it against
+    // the module vocabulary to decide which of their modules the
+    // generator reads first. So it IS a matcher of user words, and it is
+    // accounted for by section 3: the vocabulary, the scorer and the
+    // ten-language term list are module-relevance.ts's, called rather
+    // than reimplemented. What is new here is only the ORDER the caps in
+    // this file then apply to, never the matching rule.
+    //
+    // The ceiling caught it on the build that introduced it, for the
+    // third time — which is the argument for leaving the ceiling at the
+    // measured value rather than raising it by one each time.
+    "src/lib/ai/workspace-context.ts",
   ]);
   const unaccounted = users.filter((f) => !ACCOUNTED.has(f));
 

@@ -191,7 +191,13 @@ console.log("\n== 3. the route: refuse before spend, a hold per platform, and no
   const desc = at(/checkDescription\(/), auth = at(/auth\.getUser\(/), breaker = at(/checkAiCallAllowed\(/), reserve = at(/await reserveCredits\(/), call = at(/await generatePosts\(/);
   ok("the brief is checked before the user is read", desc !== -1 && auth !== -1 && desc < auth);
   ok("the breaker runs before the hold, and the hold before the model", breaker < reserve && reserve < call, `${breaker} < ${reserve} < ${call}`);
-  ok("the hold is sized per platform asked for", /inputChars:\s*postsEstimateInputChars\(description\.length,\s*platforms\)/.test(src));
+  // THE HOLD COVERS EVERYTHING SENT, which since 2026-09-27 is the brief
+  // AND the account's own records. Sizing on the brief alone would leave
+  // every hold short by the size of the account — a settlement that
+  // exceeds its reservation, on every request from anybody with data.
+  // Strengthened rather than relaxed when the records arrived: it now
+  // names both halves.
+  ok("the hold is sized per platform asked for", /inputChars:\s*postsEstimateInputChars\(description\.length\s*\+\s*businessContext\.length,\s*platforms\)/.test(src));
   const abortedBlock = src.slice(at(/outcome\.kind === "aborted"/), at(/outcome\.kind === "provider"/));
   ok("a stopped run releases the hold and writes no history row", /releaseReservation\(/.test(abortedBlock) && /status:\s*499/.test(abortedBlock) && !/generated_posts/.test(abortedBlock));
   const providerBlock = src.slice(at(/outcome\.kind === "provider"/), src.indexOf("if (!outcome.ok) {"));

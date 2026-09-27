@@ -45,6 +45,17 @@ export async function generatePosts(params: {
    * own system prompt it is inside the cached region and costs a tenth.
    */
   memoryBlock?: string;
+  /** What this account sells and is working on, rendered by
+   *  lib/ai/workspace-context.ts. Passed in for the same reason
+   *  memoryBlock is: the route has the client, this module must not grow
+   *  one. Empty string when the account is new or the read failed —
+   *  context improves a request, it is never a precondition for one.
+   *
+   *  IT GOES IN THE USER TURN, NOT THE SYSTEM BLOCK. The records change
+   *  between two requests from the same person, so putting them behind
+   *  the cache breakpoint would invalidate the cached prefix on every
+   *  call and cost MORE than not caching at all. */
+  businessContext?: string;
   costs: CostAccumulator;
   signal?: AbortSignal;
 }): Promise<GeneratePostsResult> {
@@ -60,7 +71,12 @@ export async function generatePosts(params: {
           perUserBlock: params.memoryBlock ?? "",
           model: POSTS_MODEL,
         }),
-        messages: [{ role: "user", content: buildPostsUserMessage(params.description, params.platforms, params.locale) }],
+        messages: [
+          {
+            role: "user",
+            content: buildPostsUserMessage(params.description, params.platforms, params.locale, params.businessContext ?? ""),
+          },
+        ],
         tools: [writePostsTool],
         tool_choice: { type: "tool", name: "write_posts" },
       },

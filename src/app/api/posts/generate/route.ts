@@ -16,6 +16,7 @@ import {
 } from "@/lib/billing/credits";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { estimateForAction } from "@/lib/billing/estimate";
+import { loadWorkspaceContext, renderWorkspaceContext } from "@/lib/ai/workspace-context";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
@@ -100,13 +101,35 @@ export async function POST(request: Request) {
       if (!ceiling.allowed) return NextResponse.json({ error: "bypass_ceiling", detail: ceiling.reason }, { status: 429 });
     }
 
+    // WHAT THIS ACCOUNT SELLS, BEFORE THE PRICE IS QUOTED.
+    //
+    // Copy.ai gets the sentence in the box and nothing else. So did this,
+    // until now — which meant the one thing a post generator inside a
+    // business OS can do that a standalone one cannot was not being done.
+    // The brief steers WHICH modules are read (lib/ai/workspace-context.ts
+    // sorts by relevance when it is given one), so "post about our summer
+    // hours" reaches Products and Customers rather than the first eight
+    // in registry order.
+    //
+    // THE USER'S OWN CLIENT, so RLS decides what is readable; the caps in
+    // that file bound what a large account can turn this into; and a read
+    // that fails contributes nothing rather than failing the request.
+    //
+    // LOADED BEFORE THE ESTIMATE ON PURPOSE. Its characters are part of
+    // what the model is sent, so they are part of what is reserved. Sizing
+    // the reservation on the brief alone would under-reserve every request
+    // by the size of the account — the shape that makes a settlement
+    // exceed its hold.
+    const workspace = await loadWorkspaceContext(supabase, { include: true, brief: description });
+    const businessContext = renderWorkspaceContext(workspace);
+
     const plan = await resolveEffectivePlan(user);
     const pricingConfig = resolvePricingConfig();
     const estimate = estimateForAction(
       "postsGenerate",
       {
         model: POSTS_MODEL,
-        inputChars: postsEstimateInputChars(description.length, platforms),
+        inputChars: postsEstimateInputChars(description.length + businessContext.length, platforms),
         planSlug: plan?.slug ?? null,
       },
       pricingConfig,
@@ -160,6 +183,7 @@ export async function POST(request: Request) {
       locale,
       costs,
       memoryBlock,
+      businessContext,
       // THE STOP BUTTON: the request's own abort signal.
       signal: request.signal,
     });

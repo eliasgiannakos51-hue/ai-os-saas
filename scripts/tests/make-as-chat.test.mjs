@@ -119,11 +119,14 @@ console.log("\n== 2. how many things the primary action waits on ==");
 // this is here to refuse. Recorded 2026-09-26 by
 // scripts/measure-make-steps.mjs on the tree that shipped it.
 const BASELINE = {
-  // `!name.trim() || !description.trim()` — a chat box does not ask you
-  // to name the thing before it makes it, and the name is derivable
-  // from the description by the call that already runs. This is the
-  // number V7 §5 names as the cheapest one to move.
-  "/dashboard/website-builder": 2,
+  // 2 -> 1 ON 2026-09-27, and this is the entry the whole baseline
+  // exists to record moving. It was `!name.trim() || !description.trim()`:
+  // a required "Website name" input above the description, so the first
+  // thing the product asked somebody who wanted a website was what to
+  // call the record of it. lib/website-name.ts derives it — which the
+  // `?brief=` path from Create Studio had always done — and the field
+  // is gone. One input, one gate, like Presentations.
+  "/dashboard/website-builder": 1,
   // No prompt at all: you create an empty document and type into it.
   // The action waits on a busy flag and nothing else, which is why this
   // is zero and NOT a good sign — section 1 is what says the screen has

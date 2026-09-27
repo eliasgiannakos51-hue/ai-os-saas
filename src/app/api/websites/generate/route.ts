@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { websiteNameFrom } from "@/lib/website-name";
 import { createClient } from "@/lib/supabase/server";
 import { classifyWebsiteDescription, WEBSITE_MODEL } from "@/lib/website-builder";
 import { estimateForAction } from "@/lib/billing/estimate";
@@ -93,12 +94,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
 
-    if (!name || !description) {
+    // A NAME IS DERIVED, NOT DEMANDED (2026-09-27).
+    //
+    // This refused a request without one, so the form above it had a
+    // required "Website name" input over the description — the first
+    // thing the product asked somebody who wanted a website was what to
+    // call the record of it, before there was anything to look at.
+    //
+    // The derivation is not new and that is the argument for it being
+    // safe: a brief arriving from Create Studio has always filled the
+    // name with a slice of itself and submitted, and that path works.
+    // lib/website-name.ts is that rule, deterministic on purpose —
+    // the (user_id, name) duplicate check below depends on the same
+    // description producing the same name.
+    //
+    // The description is still required. It is the one thing nothing
+    // can be derived from.
+    if (!description) {
       return NextResponse.json(
-        { ok: false, error: "Name and description are required." },
+        { ok: false, error: "A description is required." },
         { status: 400 }
       );
     }
+    if (!name) name = websiteNameFrom(description).slice(0, MAX_NAME_LENGTH);
     if (description.length > MAX_DESCRIPTION_LENGTH) {
       return NextResponse.json(
         {

@@ -1,5 +1,6 @@
 "use client";
 
+import { websiteNameFrom } from "@/lib/website-name";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import {
   AlertTriangle,
@@ -698,15 +699,26 @@ export function WebsiteBuilderWorkspace({
 
   async function handleGenerate(e: FormEvent) {
     e.preventDefault();
-    const trimmedName = name.trim();
     const trimmedDescription = description.trim();
-    // pendingClarification blocks a second submission specifically
-    // because the Website Name <input type="text"> isn't disabled while
-    // the clarification prompt is showing — pressing Enter in it (a
-    // plain text input, unlike the textarea, submits its form by
-    // default) would otherwise silently start a second, independent
-    // generation attempt and abandon the pending one's questions.
-    if (!trimmedName || !trimmedDescription || generating || pendingClarification) return;
+    const trimmedName = (name.trim() || websiteNameFrom(trimmedDescription)).slice(0, MAX_NAME_LENGTH);
+    // pendingClarification STILL blocks a second submission, and the
+    // reason it used to give is gone with the field it named.
+    //
+    // It read: "the Website Name <input type="text"> isn't disabled
+    // while the clarification prompt is showing — pressing Enter in it
+    // (a plain text input, unlike the textarea, submits its form by
+    // default) would start a second, independent generation and
+    // abandon the pending one's questions." True, and about an input
+    // that no longer exists as of 2026-09-27.
+    //
+    // The guard stays because the PROPERTY is unchanged: while
+    // questions are on screen there is a generation waiting for
+    // answers, and a second submit abandons it. What has changed is
+    // that the way in is now one button rather than a stray Enter, so
+    // this is defence rather than the only thing standing there — and
+    // a comment describing a mechanism that is gone is the shape this
+    // repository keeps a catalogue of.
+    if (!trimmedDescription || generating || pendingClarification) return;
 
     setGenerating(true);
     setError(null);
@@ -1712,21 +1724,16 @@ export function WebsiteBuilderWorkspace({
                 </button>
               </div>
 
-              <div>
-                <label htmlFor="website-name" className="mb-1 block text-xs text-muted">
-                  {t("nameLabel")}
-                </label>
-                <input
-                  id="website-name"
-                  type="text"
-                  required
-                  maxLength={MAX_NAME_LENGTH}
-                  value={name}
-                  onChange={(e) => setName(e.target.value.slice(0, MAX_NAME_LENGTH))}
-                  placeholder={t("namePlaceholder")}
-                  className="input"
-                />
-              </div>
+              {/* THE NAME INPUT WAS HERE, and it was the first thing this
+                  product asked somebody who wanted a website: what to
+                  call the record of it, before anything existed to look
+                  at. Required, above the description, and its answer is
+                  shown nowhere the person goes next.
+
+                  lib/website-name.ts derives it from the description
+                  instead. Not a new idea — the `?brief=` path from
+                  Create Studio has always filled it with a slice of the
+                  brief and submitted — just no longer the exception. */}
               <div>
                 <label htmlFor="website-description" className="mb-1 block text-xs text-muted">
                   {t("descriptionLabel")}
@@ -1859,7 +1866,7 @@ export function WebsiteBuilderWorkspace({
               ) : (
                 <button
                   type="submit"
-                  disabled={generating || !name.trim() || !description.trim()}
+                  disabled={generating || !description.trim()}
                   className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {generating ? (

@@ -177,7 +177,7 @@ one thing.
 
 | row | textarea | one-line | selects | waits on | n |
 |---|---|---|---|---|---|
-| Website Builder | 2 | 3 | 1 | `!name.trim() \|\| !description.trim()` | **2** |
+| Website Builder | 2 | 2 | 1 | `!description.trim()` | **1** ← was 2, fixed 2026-09-27 |
 | Documents | 0 | 1 | 1 | nothing — there is no prompt at all | 0 |
 | Presentations | 1 | 0 | 1 | `!description.trim()` | **1** |
 | Posts | 1 | 0 | 0 | `!description.trim() \|\| platforms.length === 0` | **2** |
@@ -195,10 +195,14 @@ better.
 one gate, the slide count defaulted. **Coding is one operation-picker
 away from it.** The three that are not:
 
-1. **Website Builder requires a name.** A chat box does not ask you to
-   name the thing before it makes it, and the name is derivable from the
-   description by the same call that already runs. This is the single
-   cheapest change in the group and the clearest win.
+1. ~~**Website Builder requires a name.**~~ **DONE 2026-09-27.** The
+   required "Website name" input is gone and `lib/website-name.ts`
+   derives it from the description — deterministically, because the
+   `(user_id, name)` duplicate check depends on the same description
+   giving the same name. Not a new idea: the `?brief=` path from Create
+   Studio had always filled the name with a slice of the brief and
+   submitted. The gate's baseline for this row moved 2 → 1 and may only
+   fall.
 2. **Posts requires at least one platform** and starts with all of them
    selected, so the gate is unreachable in practice and the checkbox row
    is still the first thing on the screen.

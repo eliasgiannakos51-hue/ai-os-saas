@@ -74,6 +74,35 @@ Anything the bot names should contain `{MARKER}`, which becomes
 that row. **A cleanup that fails is reported in `broken.md`** with the
 marker, so you can remove it by hand — it is never swallowed.
 
+## Where it is pointed, and whether that place can generate
+
+Before the browser starts, the bot asks **the target's own**
+`/api/health` whether that deployment has a model provider key, and
+prints the answer in its banner:
+
+    target can call a model: YES (anthropic)
+    target can call a model: NO
+               ANTHROPIC_API_KEY is not set
+    target can call a model: UNKNOWN — /api/health did not answer: …
+
+A billable check against a target that answered **NO** is **NOT RUN**
+with that reason — never BROKEN. A product is not broken for being
+absent from the environment somebody aimed a harness at, and a report
+that files three empty-environment results next to real failures is a
+report nobody can read. **UNKNOWN is not NO**: a deployment too old to
+carry the field has said nothing, and the run proceeds.
+
+`/api/health` answers from `src/lib/ai/providers/registry.ts` — the same
+function a real generation resolves its chain through — so the answer
+cannot drift from what a real call would find.
+
+## Running it locally
+
+The bot reads `.env.local` (and `.env`) the way `next build` does, so a
+key already in your own file is enough; an environment variable always
+beats the file, and no value from either is ever printed. **`.env*` is
+gitignored — a key never goes in a commit.**
+
 ## The three outcomes
 
 **WORKS**, **BROKEN**, **NOT RUN** — and the third is not a quiet version

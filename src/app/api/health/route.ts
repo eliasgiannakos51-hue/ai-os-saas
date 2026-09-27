@@ -13,6 +13,7 @@ import { scrubSecrets } from "@/lib/scrub-secrets";
 import { SCHEMA_CANARIES } from "@/lib/health/schema-canaries";
 import { navFreshness } from "@/lib/health/nav-freshness";
 import { derivedDataHealth } from "@/lib/health/derived-data";
+import { providerStatuses } from "@/lib/ai/providers/registry";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -267,6 +268,42 @@ export async function GET(request: Request) {
   if (age.known && age.level === "ancient") {
     body.ok = false;
     body.reason = body.reason ?? "deployment_ancient";
+  }
+
+  // CAN THIS DEPLOYMENT CALL A MODEL AT ALL?
+  //
+  // THE QUESTION THE e2e-BOT HAD NO WAY TO ASK. A run against a target
+  // with no provider key reports every generation as BROKEN — the
+  // product blamed for the environment the harness was pointed at. It is
+  // the same shape as the fifteen red builds: an instrument running
+  // somewhere that does not look like production, with nothing saying
+  // so. So the bot now asks this field BEFORE it spends anything, and
+  // marks its billable checks NOT RUN rather than broken when the answer
+  // is no. See scripts/e2e-bot.mjs, the preflight.
+  //
+  // IT ASKS THE REGISTRY, NOT process.env. providerStatuses() is the same
+  // function lib/ai/providers/complete.ts resolves its chain through, so
+  // this cannot drift from what a real call would find — the mistake
+  // this endpoint has already made twice, reporting six functions missing
+  // that were being used at the time.
+  //
+  // BOOLEANS AND NAMES ONLY, never a value: which provider is configured
+  // is operational, the same class as `deployment` and the `hasUrl` /
+  // `hasKey` pair already logged above, and no key or fragment of one
+  // reaches this function.
+  //
+  // OUTSIDE `ok` AND THE STATUS CODE, deliberately, like `schema` and
+  // `nav`: a deployment with no model key is misconfigured for the AI
+  // features and perfectly healthy for everything else, and paging
+  // somebody for it is how a signal gets its meaning drained.
+  {
+    const statuses = providerStatuses(process.env);
+    const enabled = statuses.filter((p) => p.enabled).map((p) => p.provider);
+    body.ai = {
+      canCallModel: enabled.length > 0,
+      providers: enabled,
+      missing: statuses.filter((p) => !p.enabled).map((p) => p.disabledReason ?? p.provider),
+    };
   }
 
   // DOES THE DATABASE HAVE WHAT THIS BUILD ASKS FOR?

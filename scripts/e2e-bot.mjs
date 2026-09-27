@@ -40,15 +40,68 @@
  * because the alternative is a database that fills with test rows nobody
  * can tell from real ones.
  *
+ * WHERE IT IS POINTED, AND WHETHER THAT PLACE CAN GENERATE. Before the
+ * browser starts it asks the TARGET's own /api/health whether the
+ * deployment has a provider key, and prints the answer in its banner. A
+ * billable check against a keyless target is NOT RUN with that reason —
+ * never BROKEN, because a product is not broken for being absent from
+ * the environment somebody aimed a harness at. See
+ * scripts/tests/bot-environment.test.mjs, which runs all three answers.
+ *
+ * IT READS .env.local. Next.js loads one by itself and a plain node
+ * script does not, which is how a key sitting in a developer's own file
+ * stayed invisible to this bot and to nothing else. An environment
+ * variable always beats the file, and no value from it is ever printed.
+ *
  * HOW TO WRITE A CHECK: checks/README.md, and checks/basic.md is the
  * worked example.
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { preflight, preflightLine } from "./lib/bot-preflight.mjs";
 
 // ---------------------------------------------------------------------
 // arguments and environment
 // ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+// .env.local, BEFORE anything reads the environment
+// ---------------------------------------------------------------------
+/*
+ * WHY THIS FILE LOADS ONE AND `next build` DOES NOT NEED TO BE TOLD TO.
+ * Next.js reads .env.local itself; a plain node script does not, so a key
+ * sitting in the developer's own .env.local was invisible to the bot and
+ * to nothing else. That is how an instrument ends up running in an
+ * environment that does not look like the one it is reporting on.
+ *
+ * NEVER OVERWRITES. A variable already in the environment wins, so
+ * `BOT_BASE_URL=... node scripts/e2e-bot.mjs` still means what it says and
+ * a stale file cannot silently redirect a run.
+ *
+ * .env.local IS GITIGNORED (`.env*`, .gitignore:38) and this reads it
+ * rather than printing it: no value from it reaches stdout, works.md or
+ * broken.md by any path here.
+ */
+function loadEnvFile(path) {
+  if (!existsSync(path)) return 0;
+  let n = 0;
+  for (const raw of readFileSync(path, "utf8").split("\n")) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const eq = line.indexOf("=");
+    if (eq < 1) continue;
+    const key = line.slice(0, eq).trim().replace(/^export\s+/, "");
+    if (process.env[key] !== undefined) continue;
+    let value = line.slice(eq + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    process.env[key] = value;
+    n++;
+  }
+  return n;
+}
+const ENV_FILES_READ = [".env.local", ".env"].filter((f) => loadEnvFile(f) > 0);
+
 const argv = process.argv.slice(2);
 const ALLOW_COST = argv.includes("--allow-cost");
 const BASE =
@@ -58,6 +111,7 @@ const BASE =
 const HEADFUL = argv.includes("--headful");
 const files = argv.filter((a) => a.endsWith(".md"));
 const COST_LIMIT = Number(process.env.BOT_COST_LIMIT ?? 1);
+
 
 const EMAIL = process.env.BOT_EMAIL ?? "";
 const PASSWORD = process.env.BOT_PASSWORD ?? "";
@@ -383,6 +437,23 @@ console.log(`  target : ${BASE}`);
 console.log(`  marker : ${RUN_MARKER}`);
 console.log(`  cost   : ${ALLOW_COST ? `allowed, at most ${COST_LIMIT}` : "NOT allowed — billable checks are NOT RUN"}\n`);
 
+// ---------------------------------------------------------------------
+// THE PREFLIGHT: what kind of place is this, before a penny is spent
+// ---------------------------------------------------------------------
+/*
+ * THE PREFLIGHT ITSELF IS IN scripts/lib/bot-preflight.mjs, because this
+ * file is a top-level script — importing it starts a run — and a gate
+ * that wanted to exercise the three answers would otherwise have to bind
+ * a port, which billing-coverage.test.mjs §10 forbids for good reason.
+ * The module carries the argument for all of it.
+ */
+const PRE = await preflight(BASE);
+console.log(preflightLine(PRE));
+console.log("");
+
+// A TARGET THAT CANNOT GENERATE MAKES EVERY BILLABLE CHECK NOT RUN.
+const NO_MODEL_KEY = PRE.known && !PRE.canCallModel;
+
 // THE HARNESS'S OWN PRECONDITION, checked before the browser starts. A run
 // with no credentials is not a run that found nothing; it is a run that did
 // not happen, and it says so and exits 2.
@@ -443,6 +514,15 @@ for (const check of allChecks) {
   if (!loggedIn) {
     record(check, "NOT RUN", { why: "the bot could not sign in", detail: loginDetail, ms: 0, shots: [] });
     console.log(`  NOT RUN  ${check.name}`);
+    continue;
+  }
+  if (check.costs && NO_MODEL_KEY) {
+    record(check, "NOT RUN", {
+      why: `${BASE} has no model provider key, so nothing here could have generated — ${PRE.missing.join("; ")}`,
+      ms: 0,
+      shots: [],
+    });
+    console.log(`  NOT RUN  ${check.name}  (the target cannot call a model)`);
     continue;
   }
   if (check.costs && !ALLOW_COST) {

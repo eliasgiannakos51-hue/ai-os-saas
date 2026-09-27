@@ -3894,6 +3894,17 @@
       "delete": "Supprimer",
       "deleteConfirm": "Supprimer cette présentation ? C'est irréversible.",
       "noteFromBefore": "note d'avant"
+    },
+    "edit": {
+      "title": "Demandez un changement",
+      "placeholder": "rendez-la plus formelle · plus courte · ajoutez une diapo sur les tarifs",
+      "apply": "Appliquer",
+      "applying": "Modification en cours…",
+      "hint": "Toute la présentation est réécrite avec votre changement et remplace celle-ci.",
+      "changed": "Modifiée.",
+      "notSaved": "La modification a été faite mais n'a pas pu être enregistrée. Rien n'est perdu — réessayez.",
+      "noDeck": "Cette ligne n'a pas de présentation à modifier.",
+      "notIncluded": "Les présentations ne sont pas incluses dans votre forfait."
     }
   },
   "posts": {

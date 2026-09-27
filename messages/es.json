@@ -3894,6 +3894,17 @@
       "delete": "Eliminar",
       "deleteConfirm": "¿Eliminar esta presentación? No se puede deshacer.",
       "noteFromBefore": "nota de antes"
+    },
+    "edit": {
+      "title": "Pide un cambio",
+      "placeholder": "hazla más formal · más corta · añade una diapositiva de precios",
+      "apply": "Aplicar el cambio",
+      "applying": "Cambiando la presentación…",
+      "hint": "Toda la presentación se reescribe con tu cambio y sustituye a esta.",
+      "changed": "Cambiada.",
+      "notSaved": "El cambio se hizo pero no se pudo guardar. No se perdió nada: inténtalo de nuevo.",
+      "noDeck": "Esta fila no tiene presentación que cambiar.",
+      "notIncluded": "Las presentaciones no están incluidas en tu plan."
     }
   },
   "posts": {

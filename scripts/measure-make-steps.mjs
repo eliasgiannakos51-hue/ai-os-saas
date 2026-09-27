@@ -29,6 +29,17 @@
  *   words after   a second free-text field that changes the RESULT.
  *                 This is the half of "like a chat" that is not about
  *                 the first screen, and the half nearly nothing has.
+ *   clicks        how many presses between arriving and a result, for
+ *                 somebody who already knows what they want to say:
+ *
+ *                   + 1  the field is behind a button ("New project")
+ *                   + 1  the field is not focused on arrival
+ *                   + 1  the action button itself
+ *
+ *                 A chat box is ONE: you land, you type, you press.
+ *                 Typing is not a click and the count says so — the
+ *                 question asked was "how many clicks to a result",
+ *                 not how much work it is to describe a website.
  *
  * IT REPORTS AND DOES NOT GATE. scripts/tests/make-as-chat.test.mjs is
  * the gate, and it holds the one property that is true of every drawn
@@ -105,20 +116,48 @@ function primaryAction(src) {
 
 const STATE = /\b([a-z][A-Za-z0-9]*)\b/g;
 const NOISE = new Set(["trim", "length", "true", "false", "null", "undefined", "status", "completed"]);
+// A BUSY FLAG IS NOT AN INPUT, and this file and its gate have to agree
+// about that (2026-09-27). `generating`, `running` and `loading` guard a
+// double press; they are not something a person has to satisfy. This
+// script counted them and scripts/tests/make-as-chat.test.mjs did not,
+// so the two printed different numbers for the same screen — two
+// instruments disagreeing about one measurement, which is the shape
+// this repository keeps a catalogue of. Named, not pattern-matched: a
+// name ending in "ing" is not evidence, and `editing` guards a
+// different button in the same file.
+const BUSY = new Set(["generating", "running", "loading", "creating", "asking", "exporting", "uploading"]);
 
 console.log("how far each drawn MAKE row is from a chat box\n");
 const rows = [];
 for (const item of make.items) {
   const files = screenOf(item.href);
   if (files.length === 0) { rows.push({ href: item.href, files: [] }); continue; }
-  const src = files.map((f) => readFileSync(f, "utf8")).join("\n");
+  const raw = files.map((f) => readFileSync(f, "utf8")).join("\n");
+  // COMMENTS STRIPPED BEFORE ANY DETECTION, and this file learned it the
+  // hard way on its first run after the fix it was measuring. The
+  // "field behind a button" detector looks for
+  // `useState(initialWebsites.length === 0)`, the commit that removed
+  // that line left a comment SAYING what it removed, and the detector
+  // found the comment and reported the click still being paid. Sixth
+  // time in one session that a check here matched its own commentary.
+  const src = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
   const action = primaryAction(src);
   const gates = action
-    ? [...new Set((action.cond.match(STATE) ?? []).filter((w) => !NOISE.has(w)))]
+    ? [...new Set((action.cond.match(STATE) ?? []).filter((w) => !NOISE.has(w) && !BUSY.has(w)))]
     : [];
+  // THE FIELD BEHIND A BUTTON. website-builder starts with
+  // `showForm = useState(initialWebsites.length === 0)`, so somebody
+  // who has made one site before has to press "New project" before the
+  // description exists at all — a click that a first-time visitor does
+  // not pay and that therefore never shows up in a demo.
+  const behindAButton = /useState\(\s*initial\w+\.length === 0\s*\)/.test(src);
+  const focused = /autoFocus/.test(src);
   rows.push({
     href: item.href,
     files,
+    behindAButton,
+    focused,
+    clicks: (behindAButton ? 1 : 0) + (focused ? 0 : 1) + 1,
     textareas: (src.match(/<textarea/g) ?? []).length,
     textInputs: (src.match(/<input\s[^>]*type="text"/g) ?? []).length,
     selects: (src.match(/<select/g) ?? []).length,
@@ -139,12 +178,19 @@ for (const r of rows) {
   console.log(`      choosers in      : ${r.selects} select, ${r.checkboxes} checkbox`);
   console.log(`      the action waits on: ${r.cond}`);
   console.log(`      ...which is ${r.gates.length} thing(s): ${r.gates.join(", ") || "—"}`);
+  console.log(
+    `      clicks to a result: ${r.clicks}` +
+      `  (${r.behindAButton ? "+1 field behind a button, " : ""}${r.focused ? "focused on arrival" : "+1 to focus the field"}, +1 the button)`
+  );
 }
 
 const withText = rows.filter((r) => r.files.length && r.textareas > 0).length;
 const withAny = rows.filter((r) => r.files.length && (r.textareas > 0 || r.textInputs > 0)).length;
 const measured = rows.filter((r) => r.files.length).length;
 console.log(`\n  ${withText} of ${measured} drawn MAKE rows have a textarea; ${withAny} have a free-text field of any kind.`);
-console.log(`  gates on the primary action: ${rows.filter((r) => r.files.length).map((r) => r.gates.length).join(", ")}`);
+console.log(`  user inputs the primary action waits on: ${rows.filter((r) => r.files.length).map((r) => r.gates.length).join(", ")}`);
+console.log(`  clicks to a result           : ${rows.filter((r) => r.files.length).map((r) => r.clicks).join(", ")}`);
+console.log("  (busy flags discounted — the same rule scripts/tests/make-as-chat.test.mjs uses,");
+console.log("   so the two cannot print different numbers for one screen)");
 console.log("\n  A chat box has one gate: the text is not empty. Anything above one");
 console.log("  is a form pretending to be a prompt.");

@@ -3894,6 +3894,17 @@
       "delete": "Delete",
       "deleteConfirm": "Delete this presentation? This can't be undone.",
       "noteFromBefore": "note from before"
+    },
+    "edit": {
+      "title": "Say a change",
+      "placeholder": "make it more formal · shorter · add a slide about pricing",
+      "apply": "Apply the change",
+      "applying": "Changing the deck…",
+      "hint": "The whole deck is rewritten with your change and replaces this one.",
+      "changed": "Changed.",
+      "notSaved": "The change was made but could not be saved. Nothing was lost — try again.",
+      "noDeck": "This row has no deck to change.",
+      "notIncluded": "Presentations are not included on your plan."
     }
   },
   "posts": {

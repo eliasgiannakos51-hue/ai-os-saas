@@ -368,7 +368,20 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     capability: "presentations",
     sidebar: ["/dashboard/presentations"],
     pages: ["presentations"],
-    routes: ["presentations/generate", "presentations/[id]/pdf", "presentations/[id]/pptx"],
+    // THE EDIT ROUTE IS THE SAME FEATURE AND THE SAME TIER (2026-09-27).
+    // "Make it more formal" is a deck you already own becoming a
+    // slightly different deck; asking a higher plan for it than for
+    // making the deck would price the correction above the thing being
+    // corrected. It charges on its own `presentationEdit` profile —
+    // an edit sends the whole deck back up, which a generation does not
+    // — and enforces the same capability at the same point in the
+    // pipeline.
+    routes: [
+      "presentations/generate",
+      "presentations/[id]/edit",
+      "presentations/[id]/pdf",
+      "presentations/[id]/pptx",
+    ],
     charges: true,
     enforcedIn: "src/app/api/presentations/generate/route.ts",
     enforcedSymbol: 'accountHasCapability(await resolveEffectivePlanSlug(user), "presentations"',

@@ -119,11 +119,14 @@ console.log("\n== 2. how many things the primary action waits on ==");
 // this is here to refuse. Recorded 2026-09-26 by
 // scripts/measure-make-steps.mjs on the tree that shipped it.
 const BASELINE = {
-  // `!name.trim() || !description.trim()` — a chat box does not ask you
-  // to name the thing before it makes it, and the name is derivable
-  // from the description by the call that already runs. This is the
-  // number V7 §5 names as the cheapest one to move.
-  "/dashboard/website-builder": 2,
+  // 2 -> 1 ON 2026-09-27, and this is the entry the whole baseline
+  // exists to record moving. It was `!name.trim() || !description.trim()`:
+  // a required "Website name" input above the description, so the first
+  // thing the product asked somebody who wanted a website was what to
+  // call the record of it. lib/website-name.ts derives it — which the
+  // `?brief=` path from Create Studio had always done — and the field
+  // is gone. One input, one gate, like Presentations.
+  "/dashboard/website-builder": 1,
   // No prompt at all: you create an empty document and type into it.
   // The action waits on a busy flag and nothing else, which is why this
   // is zero and NOT a good sign — section 1 is what says the screen has
@@ -132,10 +135,15 @@ const BASELINE = {
   // ALREADY THE SHAPE: one free-text field, one gate, slide count
   // defaulted.
   "/dashboard/presentations": 1,
-  // `platforms.length === 0`, and every platform starts selected — so
-  // the gate is unreachable in practice and the checkbox row is still
-  // the first thing on the screen.
-  "/dashboard/posts": 2,
+  // 2 -> 1 ON 2026-09-27. It was `!description.trim() || platforms.length === 0`
+  // with all four platforms ticked by default, so the second half could
+  // only fire for somebody who had deliberately unticked every one —
+  // and what it gave them was a dead button with no explanation. An
+  // empty selection means all four now, in generate() and in the result
+  // panel, which had to move together: the request is sent for the
+  // fallback, so a panel built from the empty selection would show no
+  // platforms beside four posts that exist.
+  "/dashboard/posts": 1,
   // One, after the busy flag is discounted: the operation picker has a
   // default and the two language selects are optional.
   "/dashboard/coding": 1,
@@ -157,17 +165,97 @@ check("every drawn row has a baseline", unlisted.length === 0,
 const stale = Object.keys(BASELINE).filter((h) => !DRAWN.includes(h));
 check("...and no baseline names a row that is not drawn", stale.length === 0, stale.join(", "));
 
-console.log("\n== 3. saying a CHANGE in words, which almost nothing has ==");
-// REPORTED WITH A FLOOR, not gated. One of six rows has it, so a gate
-// would be a gate on one file; a floor is what stops it reaching zero
-// while nobody is looking.
+console.log("\n== 2b. how many clicks between arriving and a result ==");
+// ---------------------------------------------------------------------
+// THE TARGET, ASKED FOR IN WORDS: "you write, it comes out — 1-2 steps".
+// This is the countable half of it, for somebody who already knows what
+// they want to say:
+//
+//   + 1  the field is behind a button
+//   + 1  the field is not focused on arrival
+//   + 1  the action button itself
+//
+// Typing is not a click. The question was how many PRESSES stand
+// between arriving and a result, not how much there is to describe.
+//
+// COMMENTS ARE STRIPPED FIRST, and this section is why the measuring
+// script does it too: the "field behind a button" detector looks for
+// `useState(initialWebsites.length === 0)`, the commit that removed
+// that line left a comment saying what it removed, and the detector
+// read the comment and reported the click still being paid.
+{
+  const strip = (x) => x.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  const clicksFor = (href) => {
+    const src = strip(screenOf(href).map((f) => readFileSync(f, "utf8")).join("\n"));
+    const behindAButton = /useState\(\s*initial\w+\.length === 0\s*\)/.test(src);
+    const focused = /autoFocus/.test(src);
+    return (behindAButton ? 1 : 0) + (focused ? 0 : 1) + 1;
+  };
+  // A CEILING PER ROW, recorded at the measured value on 2026-09-27 and
+  // free to fall. Two is the target's upper end; the two rows sitting
+  // there have no textarea to focus (Documents has no prompt at all,
+  // Data Analysis takes a file), so a lower number would have to come
+  // from giving them one, not from a flag.
+  const CEILING = {
+    "/dashboard/website-builder": 1,
+    "/dashboard/documents": 2,
+    "/dashboard/presentations": 1,
+    "/dashboard/posts": 1,
+    "/dashboard/coding": 1,
+    "/dashboard/data-analysis": 2,
+  };
+  const over = [];
+  const unlisted = [];
+  for (const href of DRAWN) {
+    const n = clicksFor(href);
+    if (!(href in CEILING)) { unlisted.push(`${href} (${n})`); continue; }
+    console.log(`        ${href.padEnd(30)} ${n} click${n === 1 ? "" : "s"}${n < CEILING[href] ? `  IMPROVED from ${CEILING[href]} — lower the ceiling` : ""}`);
+    if (n > CEILING[href]) over.push(`${href}: ${n}, ceiling ${CEILING[href]}`);
+  }
+  check("no row costs more clicks than its ceiling", over.length === 0, over.join("\n        "));
+  check("every drawn row has a ceiling", unlisted.length === 0,
+    `${unlisted.join(", ")} — a new Make row needs its number recorded`);
+  const stale = Object.keys(CEILING).filter((h) => !DRAWN.includes(h));
+  check("...and no ceiling names a row that is not drawn", stale.length === 0, stale.join(", "));
+  // AND THE TARGET ITSELF, so the per-row ceilings cannot all drift up
+  // together while each one passes its own.
+  const worst = Math.max(...DRAWN.map(clicksFor));
+  check(`the worst row is within the 1-2 asked for (${worst})`, worst <= 2, String(worst));
+}
+
+console.log("\n== 3. saying a CHANGE in words ==");
+// THE HALF THAT IS NOT ABOUT THE FIRST SCREEN, and the half that was
+// missing from five of six rows when this section was written.
+//
+// A ROW IS NAMED, NOT COUNTED. "At least one" was the first version and
+// it was too weak in both directions: it passed while five rows had
+// nothing, and it would have gone on passing if the one that had it
+// lost it while another gained it. The set is written down and checked
+// BOTH ways, so a row losing the capability is as red as the count
+// falling.
+//
+// THE DETECTOR LOOKS FOR A CALL TO AN EDIT ROUTE, quoted any way. It
+// was `/\/edit"/` and missed presentations the hour it shipped,
+// because that call is a template literal
+// (`/api/presentations/${selected.id}/edit`) and ends in a backtick.
+// A detector that only sees one quoting style reports progress as
+// absence.
+const HAS_WORDS_AFTER = ["/dashboard/website-builder", "/dashboard/presentations"];
 const withEdit = DRAWN.filter((href) => {
   const src = screenOf(href).map((f) => readFileSync(f, "utf8")).join("\n");
-  return /editText|editPrompt|refine|\/edit"/.test(src);
+  return /editText|editPrompt|refine|\/edit["'\`]/.test(src);
 });
 console.log(`        ${withEdit.length} of ${DRAWN.length}: ${withEdit.join(", ") || "none"}`);
-check("at least one drawn Make row can be changed by saying so", withEdit.length >= 1,
-  "the pattern the whole group is supposed to move towards exists nowhere");
+const lost = HAS_WORDS_AFTER.filter((h) => !withEdit.includes(h));
+check(`the rows that can be changed by saying so are the ones recorded (${HAS_WORDS_AFTER.length})`,
+  lost.length === 0,
+  `${lost.join(", ")} — a row that had it and lost it`);
+check("...and the count has not fallen", withEdit.length >= HAS_WORDS_AFTER.length,
+  `${withEdit.length} < ${HAS_WORDS_AFTER.length}`);
+const gained = withEdit.filter((h) => !HAS_WORDS_AFTER.includes(h));
+if (gained.length > 0) {
+  console.log(`        IMPROVED  ${gained.join(", ")} gained it — add them to HAS_WORDS_AFTER`);
+}
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

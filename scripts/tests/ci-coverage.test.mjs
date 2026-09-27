@@ -39,6 +39,22 @@ const WORKFLOW = ".github/workflows/verify.yml";
 check("the workflow exists at all", existsSync(WORKFLOW),
   "without one, the only automatic guard is a pre-commit hook");
 const wf = readFileSync(WORKFLOW, "utf8");
+// WHAT THE WORKFLOW RUNS, WITH ITS PROSE STRIPPED.
+//
+// This file's own mutation sidecar caught the reason on its first run:
+// the "CI stops running the gates" mutant replaced `run: npm run gates`
+// with `run: echo skipped` and section 1 stayed GREEN, because the
+// phrase `npm run gates` also appears in the comment paragraph above
+// that step explaining why it exists. Fifth time in one session that a
+// check of mine has matched its own commentary.
+//
+// `wf` is kept for section 3, which reads the prose ON PURPOSE — it is
+// the section about numbers written into comments where nothing checks
+// them. Everything that asks "does CI RUN this" reads wfCode.
+const wfCode = wf
+  .split("\n")
+  .filter((l) => !/^\s*#/.test(l))
+  .join("\n");
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 const suites = readdirSync("scripts/tests");
 
@@ -61,7 +77,7 @@ console.log("== 1. every family of suite is named by some job ==");
     const count = suites.filter((f) => f.endsWith(ext)).length;
     check(`there are ${ext} suites to run (${count})`, count >= 1);
     check(`  package.json has a script for ${ext} (${script})`, typeof pkg.scripts?.[script] === "string");
-    check(`  and the workflow runs it`, inWorkflow.test(wf),
+    check(`  and the workflow runs it`, inWorkflow.test(wfCode),
       `nothing in ${WORKFLOW} matches ${inWorkflow}`);
   }
 }

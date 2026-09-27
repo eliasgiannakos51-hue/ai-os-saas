@@ -63,6 +63,20 @@ export const DEFAULT_SLIDES = 10;
 export const MAX_DESCRIPTION_CHARS = 4_000;
 export const MIN_DESCRIPTION_CHARS = 10;
 
+/**
+ * HOW LONG "make it more formal" IS ALLOWED TO BE.
+ *
+ * The floor is four characters rather than the brief's ten: "blue" and
+ * "πιο επίσημο" are both complete instructions, and a minimum written
+ * for a whole brief would refuse them. The ceiling is a quarter of the
+ * brief's, because an instruction longer than a thousand characters is
+ * a new deck being described rather than a change being asked for —
+ * and describing a new deck is what the generator is for and what it
+ * prices.
+ */
+export const MIN_INSTRUCTION_CHARS = 4;
+export const MAX_INSTRUCTION_CHARS = 1_000;
+
 export const MAX_TITLE_CHARS = 90;
 export const MAX_BULLETS = 6;
 export const MAX_BULLET_CHARS = 140;
@@ -254,6 +268,28 @@ export function parseSlideImage(raw: unknown): SlideImage | null {
  */
 export function deckEstimateInputChars(descriptionChars: number, slideCount: number): number {
   return Math.max(0, descriptionChars) + clampSlideCount(slideCount) * SLIDE_OUTPUT_CHARS;
+}
+
+/**
+ * WHAT AN EDIT ACTUALLY SENDS, for the reservation to hold against.
+ *
+ * deckEstimateInputChars above prices a GENERATION, where the input is
+ * a short brief and the per-slide allowance stands in for the output.
+ * An edit is the other way round: the whole deck goes back up as input
+ * — titles, bullets, notes, imageQueries — and comes back down the same
+ * size. So this counts the deck's real characters plus the instruction,
+ * and estimate.ts's ratio of 1 turns that into the expected output.
+ *
+ * COUNTED FROM THE DECK, NOT FROM A PER-SLIDE CONSTANT. A deck of three
+ * dense slides and a deck of three sparse ones cost different amounts
+ * to send back, and SLIDE_OUTPUT_CHARS would price them the same.
+ */
+export function deckEditEstimateInputChars(deck: Deck, instructionChars: number): number {
+  const deckChars = deck.slides.reduce(
+    (n, s) => n + s.title.length + s.notes.length + (s.imageQuery?.length ?? 0) + s.bullets.reduce((b, x) => b + x.length, 0),
+    deck.title.length
+  );
+  return deckChars + Math.max(0, instructionChars);
 }
 
 export type DescriptionVerdict =

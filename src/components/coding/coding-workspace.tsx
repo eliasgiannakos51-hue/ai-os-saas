@@ -218,6 +218,7 @@ export function CodingWorkspace({
         </div>
 
         <textarea
+          autoFocus
           value={input}
           onChange={(e) => {
             setInput(e.target.value);

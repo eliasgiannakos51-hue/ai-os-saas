@@ -9,6 +9,7 @@ import {
   WRITE_DECK_TOOL,
   buildDeckSystemPrompt,
   buildDeckUserMessage,
+  buildDeckEditUserMessage,
 } from "@/lib/presentations/prompt";
 
 /**
@@ -75,6 +76,59 @@ export async function generateDeck(params: {
   costs: CostAccumulator;
   signal?: AbortSignal;
 }): Promise<GenerateDeckResult> {
+  return runDeckCall({
+    ...params,
+    userMessage: buildDeckUserMessage(params.description, params.slideCount, params.locale),
+    fallbackTitle: params.description.slice(0, 60),
+  });
+}
+
+/**
+ * "MAKE IT MORE FORMAL" — the same call, a different message.
+ *
+ * WHY THIS EXISTS AT ALL. Measured 2026-09-27: of the six rows the
+ * sidebar draws under Make, exactly ONE could be changed by saying so
+ * (the website builder's editText -> api/websites/edit). The other five
+ * generated and stopped, so a deck that came back almost right was a
+ * deck you regenerated from scratch and paid for twice.
+ *
+ * Everything that is not the message is shared with generateDeck by
+ * construction rather than by copying: the same model, the same cached
+ * system prompt, the same forced tool, the same truncation and parse
+ * rules. A second copy of that call is a second thing to keep in step
+ * with the tool schema.
+ */
+export async function editDeck(params: {
+  apiKey: string;
+  deck: Deck;
+  instruction: string;
+  locale: string;
+  imageSource: ImageSource;
+  memoryBlock?: string;
+  costs: CostAccumulator;
+  signal?: AbortSignal;
+}): Promise<GenerateDeckResult> {
+  return runDeckCall({
+    ...params,
+    userMessage: buildDeckEditUserMessage(params.deck, params.instruction, params.locale),
+    // THE TITLE IT ALREADY HAS. parseDeckToolInput falls back to this
+    // when the model returns a deck with no title; for an edit the
+    // honest fallback is what the deck was called, not a slice of the
+    // instruction — "make it more formal" is not a title.
+    fallbackTitle: params.deck.title,
+  });
+}
+
+async function runDeckCall(params: {
+  apiKey: string;
+  userMessage: string;
+  fallbackTitle: string;
+  locale: string;
+  imageSource: ImageSource;
+  memoryBlock?: string;
+  costs: CostAccumulator;
+  signal?: AbortSignal;
+}): Promise<GenerateDeckResult> {
   const anthropic = new Anthropic({ apiKey: params.apiKey });
   let response: Anthropic.Message;
   try {
@@ -87,9 +141,7 @@ export async function generateDeck(params: {
           perUserBlock: params.memoryBlock ?? "",
           model: PRESENTATION_MODEL,
         }),
-        messages: [
-          { role: "user", content: buildDeckUserMessage(params.description, params.slideCount, params.locale) },
-        ],
+        messages: [{ role: "user", content: params.userMessage }],
         tools: [writeDeckTool],
         tool_choice: { type: "tool", name: "write_deck" },
       },
@@ -121,7 +173,7 @@ export async function generateDeck(params: {
   const verdict = parseDeckToolInput(toolUse.input, {
     locale: params.locale,
     imageSource: params.imageSource,
-    fallbackTitle: params.description.slice(0, 60),
+    fallbackTitle: params.fallbackTitle,
   });
   if (!verdict.ok) return { ok: false, kind: "unusable", detail: verdict.reason };
   return { ok: true, deck: verdict.deck };

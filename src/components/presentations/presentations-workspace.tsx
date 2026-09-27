@@ -4,7 +4,7 @@ import { useMemo, useRef, useState, type ChangeEvent } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { FileDown, Paperclip, Play, Square, Trash2, X } from "lucide-react";
+import { FileDown, Paperclip, Play, Square, Trash2, Wand2, X } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { DownloadPdfButton, saveFileResponse } from "@/components/ui/download-pdf-button";
@@ -29,6 +29,9 @@ import {
   type Deck,
   type ImageSource,
   type Slide,
+  MIN_INSTRUCTION_CHARS,
+  MAX_INSTRUCTION_CHARS,
+  deckEditEstimateInputChars,
 } from "@/lib/presentations/deck";
 
 export type DeckRow = {
@@ -101,6 +104,61 @@ export function PresentationsWorkspace({
   // Object URLs for photos uploaded THIS session, so a freshly generated
   // deck shows them before the page has re-rendered with signed URLs.
   const [localImageUrls, setLocalImageUrls] = useState<Record<string, string>>({});
+
+  // SAY A CHANGE (2026-09-27). Until this, a deck that came back almost
+  // right was a deck you described again from scratch and paid for
+  // twice — and the second attempt had no idea what the first had
+  // produced. api/presentations/[id]/edit sends the whole deck back
+  // with the sentence and returns the whole deck.
+  const [instruction, setInstruction] = useState("");
+  const [applying, setApplying] = useState(false);
+  const editEstimate = useCostEstimate("presentationEdit", {
+    inputChars: selected ? deckEditEstimateInputChars(selected.deck, instruction.length) : 0,
+  });
+
+  async function applyChange() {
+    const text = instruction.trim();
+    if (!selected?.id || text.length < MIN_INSTRUCTION_CHARS || applying) return;
+    setApplying(true);
+    try {
+      const response = await fetch(`/api/presentations/${selected.id}/edit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instruction: text }),
+      });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        const code = String(body?.error ?? "");
+        // EACH REFUSAL SAYS ITS OWN THING. "not_saved" is the one that
+        // matters most: the change was made and charged, and the person
+        // must not be told it simply failed.
+        const message =
+          code === "not_included"
+            ? t("edit.notIncluded")
+            : code === "no_deck"
+            ? t("edit.noDeck")
+            : code === "not_saved"
+              ? t("edit.notSaved")
+              : code === "too_long"
+                ? t("errors.tooLong", { limit: MAX_INSTRUCTION_CHARS })
+                : t("errors.failed");
+        addToast(message, "error");
+        return;
+      }
+      setSelected({
+        id: String(body.id),
+        deck: body.deck as Deck,
+        creditsCharged: Number(body?.creditsCharged ?? 0),
+      });
+      setInstruction("");
+      addToast(t("edit.changed"));
+      router.refresh();
+    } catch {
+      addToast(t("errors.failed"), "error");
+    } finally {
+      setApplying(false);
+    }
+  }
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const estimate = useCostEstimate("presentationGenerate", {
@@ -299,6 +357,7 @@ export function PresentationsWorkspace({
           {t("form.description")}
         </label>
         <textarea
+          autoFocus
           id="deck-description"
           value={description}
           onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_CHARS))}
@@ -474,6 +533,86 @@ export function PresentationsWorkspace({
               </div>
             )}
           </div>
+
+          {/* SAY A CHANGE — the second half of "like a chat", and the
+              half five of the six Make rows did not have. It sits
+              BETWEEN the deck's header and its slides on purpose: the
+              thing you want to change is right below the box you type
+              the change into, which is the layout a conversation has.
+              Only for a deck with an id — a deck that was never saved
+              has nothing to replace.
+
+              NO BORDER ON THE WRAPPER, and that was a gate's call rather
+              than taste: design-density.test.mjs holds the number of
+              border utilities at a ceiling that may only fall, and this
+              block tripped it by one. It was right — the tinted ground
+              already separates this from the deck above it, so the
+              outline was a second way of saying the same thing. */}
+          {selected.id && (
+            <div className="mt-4 rounded-xl bg-panel-hover/40 p-3">
+              <label htmlFor="deck-instruction" className="text-sm font-semibold text-foreground">
+                {t("edit.title")}
+              </label>
+              <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                <textarea
+                  id="deck-instruction"
+                  value={instruction}
+                  onChange={(e) => setInstruction(e.target.value.slice(0, MAX_INSTRUCTION_CHARS))}
+                  placeholder={t("edit.placeholder")}
+                  rows={2}
+                  disabled={applying}
+                  className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-orange-500/40 disabled:opacity-60"
+                />
+                <button
+                  type="button"
+                  onClick={applyChange}
+                  disabled={applying || instruction.trim().length < MIN_INSTRUCTION_CHARS}
+                  // FILLED, BUT NOT ACCENT — and three gates between them
+                  // chose this rather than taste.
+                  //
+                  //   one-primary-action: the page already has its one
+                  //     loud control ("Generate"). Two shouting buttons
+                  //     is a screen where neither says where to look.
+                  //   design-density: an OUTLINED button was the first
+                  //     answer and it pushed the border count past its
+                  //     ceiling — a ceiling that may only fall.
+                  //   globe-mark: whatever ground this ends up on, the
+                  //     indicator inside has to match it.
+                  //
+                  // A panel fill satisfies all three: quieter than the
+                  // generate button, no new border, and a dark ground
+                  // the accent mark is visible on.
+                  className="inline-flex min-h-[44px] items-center justify-center gap-2 self-start rounded-lg bg-panel-hover px-4 text-sm font-semibold text-foreground hover:bg-panel disabled:opacity-50"
+                >
+                  {applying ? (
+                    <>
+                      {/* THE DEFAULT ACCENT TONE, because the button is
+                          a dark panel fill. It was tone="inherit" for
+                          one revision, while the button was orange —
+                          globe-mark.test.mjs caught both directions in
+                          turn, which is the point of reading the ground
+                          rather than trusting the author. */}
+                      <ThinkingIndicator size="sm" />
+                      {t("edit.applying")}
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      {t("edit.apply")}
+                    </>
+                  )}
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-muted">{t("edit.hint")}</p>
+              {/* THE PRICE BEFORE THE PRESS, the same rule the generate
+                  button follows: an edit is a paid model call and the
+                  figure is the account's own credit price. */}
+              {!applying && instruction.trim().length >= MIN_INSTRUCTION_CHARS && (
+                <CostEstimateHint credits={editEstimate.credits} />
+              )}
+            </div>
+          )}
+
           <ol className="mt-4 grid gap-3 sm:grid-cols-2">
             {selected.deck.slides.map((slide, index) => {
               const url = imageUrlFor(slide);

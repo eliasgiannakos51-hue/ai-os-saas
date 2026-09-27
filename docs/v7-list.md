@@ -177,12 +177,17 @@ one thing.
 
 | row | textarea | one-line | selects | waits on | n |
 |---|---|---|---|---|---|
-| Website Builder | 2 | 3 | 1 | `!name.trim() \|\| !description.trim()` | **2** |
+| Website Builder | 2 | 2 | 1 | `!description.trim()` | **1** ← was 2, fixed 2026-09-27 |
 | Documents | 0 | 1 | 1 | nothing — there is no prompt at all | 0 |
 | Presentations | 1 | 0 | 1 | `!description.trim()` | **1** |
-| Posts | 1 | 0 | 0 | `!description.trim() \|\| platforms.length === 0` | **2** |
+| Posts | 1 | 0 | 0 | `!description.trim()` | **1** ← was 2, fixed 2026-09-27 |
 | AI Coding | 1 | 0 | 3 | `!input.trim()` | **1** |
 | Data Analysis | 0 | 1 | 0 | a FILE is the way in; the follow-up question is one line | 0 |
+
+Both instruments discount busy flags since 2026-09-27 — `generating`,
+`running`, `loading` guard a double press and are not something a
+person satisfies. They did not agree before, which meant two
+measurements of one screen.
 
 `scripts/tests/make-as-chat.test.mjs` holds each of those numbers as a
 per-row baseline that may only FALL, requires every drawn Make row to
@@ -195,13 +200,21 @@ better.
 one gate, the slide count defaulted. **Coding is one operation-picker
 away from it.** The three that are not:
 
-1. **Website Builder requires a name.** A chat box does not ask you to
-   name the thing before it makes it, and the name is derivable from the
-   description by the same call that already runs. This is the single
-   cheapest change in the group and the clearest win.
-2. **Posts requires at least one platform** and starts with all of them
-   selected, so the gate is unreachable in practice and the checkbox row
-   is still the first thing on the screen.
+1. ~~**Website Builder requires a name.**~~ **DONE 2026-09-27.** The
+   required "Website name" input is gone and `lib/website-name.ts`
+   derives it from the description — deterministically, because the
+   `(user_id, name)` duplicate check depends on the same description
+   giving the same name. Not a new idea: the `?brief=` path from Create
+   Studio had always filled the name with a slice of the brief and
+   submitted. The gate's baseline for this row moved 2 → 1 and may only
+   fall.
+2. ~~**Posts requires at least one platform.**~~ **DONE 2026-09-27.** All
+   four start selected, so the refusal could only fire for somebody who
+   had unticked every one — and what it gave them was a dead button
+   with no explanation. An empty selection means all four now, in
+   `generate()` **and** in the result panel: the request is sent for the
+   fallback, so a panel built from the empty selection would have shown
+   no platforms beside four posts that exist.
 3. **Documents has no prompt.** You create an empty document and type
    into it. "Write me a one-page brief about X" is not expressible.
 
@@ -412,3 +425,96 @@ rather than a pass. 15 of 15 after the fix.
 **Still unread:** the ~30 lines before `19:30:04`, which name the gate.
 With the gates off the deploy's critical path it no longer blocks
 production — but it is still red somewhere, and CI will now say where.
+
+## 9. Clicks to a result — MEASURED AND MOVED, 2026-09-27
+
+    node scripts/measure-make-steps.mjs
+    node scripts/tests/make-as-chat.test.mjs     § 2b
+
+The target asked for in words was "you write, it comes out — 1-2 steps".
+Counted for somebody who already knows what they want to say: +1 if the
+field is behind a button, +1 if it is not focused on arrival, +1 for the
+action button. Typing is not a click.
+
+| row | before | after |
+|---|---|---|
+| Website Builder | **3** | **1** |
+| Presentations | 2 | **1** |
+| Posts | 2 | **1** |
+| AI Coding | 2 | **1** |
+| Documents | 2 | 2 — no textarea to focus |
+| Data Analysis | 2 | 2 — a file is the way in |
+
+**The Website Builder's third click was invisible in a demo.** The
+description field was `useState(initialWebsites.length === 0)`: it
+existed only for somebody who had never made a site. Anybody who had
+made one pressed "New project" first — a click a first-time visitor
+never pays and every returning user does.
+
+The other three were one `autoFocus` each.
+
+§2b holds a per-row ceiling AND the target itself (`worst <= 2`), so the
+ceilings cannot all drift up together while each passes its own.
+
+**Sixth self-matching check of the session.** The "field behind a
+button" detector looks for `useState(initialWebsites.length === 0)`, and
+the commit that removed that line left a comment saying what it removed
+— so the detector read the comment and reported the click still being
+paid. Both instruments strip comments before detecting now.
+
+**What is still missing is the larger half.** "Say a change in words"
+exists on one row of six: the Website Builder's `editText` →
+`api/websites/edit`. Presentations, Posts, Coding and Documents generate
+and stop.
+
+## 10. "Make it more formal" — BUILT for Presentations, 2026-09-27
+
+    node scripts/tests/make-as-chat.test.mjs     § 3
+
+The second half of the pattern, and the half five of the six drawn Make
+rows did not have. A deck that came back almost right was a deck you
+described again from scratch and paid for twice — and the second
+attempt had no idea what the first had produced.
+
+| piece | |
+|---|---|
+| route | `api/presentations/[id]/edit` — breaker, tier, hold, model, settle, in the order `route-refusals` holds |
+| model | `editDeck()` SHARES the call with `generateDeck` — same model, same cached system, same forced tool |
+| charge | its own `presentationEdit` profile: an edit sends the whole deck back up, a generation sends a brief |
+| input chars | `deckEditEstimateInputChars()` counts the deck's real characters, not a per-slide constant |
+| tier | the same as generating it — declared in `feature-catalog.ts`, which is what refused the route until it was |
+| screen | the field sits BETWEEN the deck's header and its slides; the price shows before the press |
+| languages | 9 keys × 10 |
+
+**Four decisions written into the code because they are easy to get
+wrong:** the stored deck is as untrusted as the instruction (it is model
+output from a brief that was untrusted when it arrived — feeding it back
+as trusted would launder an injection through a database row); the
+language comes from the DECK, not the instruction; a failed save is a
+500 with its own message, because the deck on screen IS the stored one
+and silence means the paid-for change vanishes at the next reload; and
+the deck is REPLACED, so the .pptx and PDF links keep working.
+
+**SEVEN GATES CAUGHT SEVEN THINGS IN THIS ONE CHANGE, all correct, none
+of which reading found:**
+
+| gate | what it caught |
+|---|---|
+| `i18n-coverage` | one English sentence added to a server response — a ceiling that may only fall |
+| *(mine, after it)* | `not_included` falling through to "something failed" |
+| `design-density` | a border the tinted ground already provided |
+| `feature-catalog` | a route in no tier at all |
+| `first-run-strings` | the pack not regenerated |
+| `globe-mark` | an accent spinner on an accent button — invisible |
+| `one-primary-action` | two filled accent buttons on one page |
+
+They were at gates 76, 95, 98, 108 and 180: each fix revealed the next
+one DEEPER than where the previous run had stopped. And fixing
+`one-primary-action` broke two others — an outlined button pushed the
+border count back over, and left the spinner asking to inherit on a dark
+ground, the opposite of the mistake `globe-mark` had just caught. One
+answer satisfied all three: a panel fill.
+
+**294 gates, 1,149 anchors, 18 of 18 on presentations.mutation.mjs.**
+Not verified with a signed-in session — nothing in this container can
+sign in.

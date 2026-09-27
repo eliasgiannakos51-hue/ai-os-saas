@@ -5,6 +5,79 @@ looking right. Every entry is tied to a **real incident here** — a defect
 that shipped, or an instrument that reported health it had not measured —
 and names what catches it now.
 
+## The build that tested
+
+**Asked for first place in this file, and it has earned it: sixteen
+consecutive red deploys, eight proposed causes, and every one of them a
+theory about the build rather than about what the build was running.**
+
+`npm run build` is the command Vercel runs. It was:
+
+    apply-function-limits && build-identity && check-mutation-markers &&
+    check-mutation-tree && check-i18n && npm run test:unit && next build
+
+Six steps before a line is compiled, of which one produces and five
+check, and the fifth is 294 gates about this repository's own
+conventions. **A check on the deploy's critical path can take production
+down** — and did, from 2026-09-19 to 2026-09-27.
+
+What was proposed and measured away, in order: the Node version (red
+with 22 on the dashboard's own reading), the timezone, pnpm versus npm
+(there is no pnpm in this repository and never was), two lockfiles
+(there is one), missing build-time env vars (the build passes with
+`env -i`, zero variables), a wrong env VALUE (it passes with all 178 set
+to unusable sentinels), the build cache, the disk, the file order, and a
+missing `.git`. **Twelve clean-room builds, every one green.** Eight of
+those nine theories were mine.
+
+**THE LESSON IS WHERE THE QUESTION WAS POINTED.** Every experiment asked
+"what is different about the builder". None asked "what is the build
+doing that a build should not do". A build should BUILD; the moment it
+also tests, every test it runs is a way for a deployment to fail, and
+the search space becomes the whole suite.
+
+    build:  node scripts/apply-function-limits.mjs && next build
+    gates:  apply-function-limits --check && build-identity &&
+            check-mutation-markers && check-mutation-tree &&
+            check-i18n && test:unit
+
+`apply-function-limits` stays because it WRITES the route files'
+maxDuration literals — a producer, not a checker. Measured 2026-09-27 in
+a clean clone with `npm ci` from an empty tree: **`exit=0` in 2m33**, from
+about twenty minutes.
+
+**THE RULE.** A test that depends on uncommitted files, on a database,
+on the network, or on an environment the builder does not control has no
+business in the build. Where those dependencies are, the answer differs
+between the machine that wrote the test and the machine that ships the
+code — which is the whole family this file is a catalogue of.
+
+**AND THE PART THAT IS STILL NOT KNOWN, written down rather than
+rounded off.** The Vercel log names the minute and not the gate:
+
+    19:28:15  mutation-tree: ...WARNING (advisory, not failing):
+              1 of 1 uncommitted file(s) are mutation targets: vercel.json
+    19:30:04  Error: Command "npm run build" exited with 1
+
+Two minutes apart, and that window is `npm run test:unit`. **The failing
+gate has never been read.** It was tempting to call the `vercel.json`
+line the cause — it is the only unusual thing in the log — and it is
+not: `check-mutation-tree.mjs` prints that string and exits 0, measured
+directly by making the file dirty and running it. It fails only on an
+APPLIED declared mutation. The same temptation produced the `.git`
+theory, which the same log disproves, since that warning requires
+`git status` to work at all.
+
+So the deploy is unblocked and the red gate is still red somewhere. CI
+runs the gates on every push now and will name it. **A shape catalogued
+from a cause nobody measured would be this file's own worst entry.**
+
+Caught by: `scripts/tests/ci-coverage.test.mjs` §1b — three claims, not
+one, because a build that stops testing plus a CI that never started is
+worse than what was there. `ci-coverage.mutation.mjs` puts a test back
+into the build in three different ways and empties the gate in three
+more; 6 of 6.
+
 ## They have names, not numbers, and that is the point of this file
 
 The working list numbered them 1–23 and **the numbering drifted**. Two

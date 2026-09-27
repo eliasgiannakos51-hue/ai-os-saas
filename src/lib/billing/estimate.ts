@@ -532,6 +532,34 @@ export const ACTION_PROFILES = {
     baseOutputChars: 400,
     outputCharsPerInputChar: 1,
   },
+  // ONE CHANGE TO A DECK THAT EXISTS (api/presentations/[id]/edit),
+  // added 2026-09-27 so that a deck which came back almost right is a
+  // sentence rather than a second generation paid for in full.
+  //
+  // ITS SHAPE IS NOT presentationGenerate'S, and the difference is the
+  // input. A generation sends a brief; an edit sends the WHOLE DECK
+  // BACK — every slide's title, bullets, notes and imageQuery — plus the
+  // sentence asking for the change. So the call site passes
+  // deckEditEstimateInputChars(): the deck's own rendered characters
+  // plus the instruction, both of which are real input rather than the
+  // per-slide allowance the generator over-states on purpose.
+  //
+  // The OUTPUT is the same deck again, so the ratio is taken from what
+  // was sent rather than from a per-slide allowance: a twelve-slide deck
+  // comes back as twelve slides whatever the instruction says, and a
+  // ratio of 1 on an input that already IS the deck is the honest
+  // statement of that. baseOutputChars covers the title and the shape
+  // around the slides.
+  //
+  // The system prompt is the same one the generator uses — same rules,
+  // same conduct block, same checklist — so the token figure is
+  // presentationGenerate's, not a second guess at the same string.
+  presentationEdit: {
+    systemPromptTokens: 1800,
+    auxiliaryCalls: [],
+    baseOutputChars: 400,
+    outputCharsPerInputChar: 1,
+  },
   // One set of social posts (api/posts/generate) — V5 #22. The same
   // shape as presentationGenerate: one forced-tool call, and the cost is
   // set by WHICH platforms were asked for rather than by the brief, so

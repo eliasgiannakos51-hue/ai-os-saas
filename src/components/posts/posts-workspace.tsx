@@ -120,7 +120,17 @@ export function PostsWorkspace({
   }
 
   async function generate() {
-    if (!description.trim() || platforms.length === 0 || running) return;
+    // EVERY PLATFORM, WHEN NONE IS CHOSEN (2026-09-27).
+    //
+    // This refused to run on an empty selection, and the button was
+    // disabled on it too — a second thing to satisfy before anything
+    // happens, on a screen whose whole job is "say what you want". The
+    // selection starts with all four ticked, so the refusal could only
+    // ever fire for somebody who had deliberately unticked all of them,
+    // and what they get now is the default rather than a dead button
+    // with no explanation on it.
+    const chosen = platforms.length > 0 ? platforms : [...POST_PLATFORMS];
+    if (!description.trim() || running) return;
     setRunning(true);
     const controller = new AbortController();
     abortRef.current = controller;
@@ -129,7 +139,7 @@ export function PostsWorkspace({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
-        body: JSON.stringify({ description, platforms, locale }),
+        body: JSON.stringify({ description, platforms: chosen, locale }),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
@@ -154,7 +164,11 @@ export function PostsWorkspace({
       setSelected({
         id: (body?.id as string | null) ?? null,
         set: body.set as PostSet,
-        platforms,
+        // `chosen`, NOT `platforms`, and the difference is visible: the
+        // request was generated for `chosen`, so a result panel built
+        // from `platforms` would show an empty list beside four posts
+        // that exist.
+        platforms: chosen,
         creditsCharged: Number(body?.creditsCharged ?? 0),
       });
       router.refresh();
@@ -205,6 +219,7 @@ export function PostsWorkspace({
         </label>
         <textarea
           id="post-description"
+          autoFocus
           value={description}
           onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_CHARS))}
           placeholder={t("form.descriptionPlaceholder")}
@@ -256,7 +271,7 @@ export function PostsWorkspace({
             <button
               type="button"
               onClick={generate}
-              disabled={!description.trim() || platforms.length === 0}
+              disabled={!description.trim()}
               className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-4 text-sm font-semibold text-black hover:bg-orange-400 disabled:opacity-50"
             >
               <Play className="h-3.5 w-3.5" aria-hidden="true" />

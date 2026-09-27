@@ -112,3 +112,14 @@ console.log("\n  notBuilt : no page — the palette would be offering a 404.");
 console.log("  hidden   : the page works; the sidebar is kept short.");
 console.log("  retired  : the page works and the capability was withdrawn.");
 console.log("  ownerOnly: drawn for the account owner, nobody else.");
+
+// --rows: the drawn rows themselves, group by group. The counts above
+// answer "how many"; a benchmark needs "which", and a list retyped by
+// hand beside a list that is derived is the next stale number.
+if (process.argv.includes("--rows")) {
+  console.log("\n  the 27 drawn rows:");
+  for (const g of drawn) {
+    console.log(`    [${g.heading}]`);
+    for (const i of g.items) console.log(`      ${i.label.padEnd(26)} ${i.href}`);
+  }
+}

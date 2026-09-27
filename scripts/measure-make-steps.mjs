@@ -105,6 +105,16 @@ function primaryAction(src) {
 
 const STATE = /\b([a-z][A-Za-z0-9]*)\b/g;
 const NOISE = new Set(["trim", "length", "true", "false", "null", "undefined", "status", "completed"]);
+// A BUSY FLAG IS NOT AN INPUT, and this file and its gate have to agree
+// about that (2026-09-27). `generating`, `running` and `loading` guard a
+// double press; they are not something a person has to satisfy. This
+// script counted them and scripts/tests/make-as-chat.test.mjs did not,
+// so the two printed different numbers for the same screen — two
+// instruments disagreeing about one measurement, which is the shape
+// this repository keeps a catalogue of. Named, not pattern-matched: a
+// name ending in "ing" is not evidence, and `editing` guards a
+// different button in the same file.
+const BUSY = new Set(["generating", "running", "loading", "creating", "asking", "exporting", "uploading"]);
 
 console.log("how far each drawn MAKE row is from a chat box\n");
 const rows = [];
@@ -114,7 +124,7 @@ for (const item of make.items) {
   const src = files.map((f) => readFileSync(f, "utf8")).join("\n");
   const action = primaryAction(src);
   const gates = action
-    ? [...new Set((action.cond.match(STATE) ?? []).filter((w) => !NOISE.has(w)))]
+    ? [...new Set((action.cond.match(STATE) ?? []).filter((w) => !NOISE.has(w) && !BUSY.has(w)))]
     : [];
   rows.push({
     href: item.href,
@@ -145,6 +155,8 @@ const withText = rows.filter((r) => r.files.length && r.textareas > 0).length;
 const withAny = rows.filter((r) => r.files.length && (r.textareas > 0 || r.textInputs > 0)).length;
 const measured = rows.filter((r) => r.files.length).length;
 console.log(`\n  ${withText} of ${measured} drawn MAKE rows have a textarea; ${withAny} have a free-text field of any kind.`);
-console.log(`  gates on the primary action: ${rows.filter((r) => r.files.length).map((r) => r.gates.length).join(", ")}`);
+console.log(`  user inputs the primary action waits on: ${rows.filter((r) => r.files.length).map((r) => r.gates.length).join(", ")}`);
+console.log("  (busy flags discounted — the same rule scripts/tests/make-as-chat.test.mjs uses,");
+console.log("   so the two cannot print different numbers for one screen)");
 console.log("\n  A chat box has one gate: the text is not empty. Anything above one");
 console.log("  is a form pretending to be a prompt.");

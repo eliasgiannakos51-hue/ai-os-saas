@@ -135,10 +135,15 @@ const BASELINE = {
   // ALREADY THE SHAPE: one free-text field, one gate, slide count
   // defaulted.
   "/dashboard/presentations": 1,
-  // `platforms.length === 0`, and every platform starts selected — so
-  // the gate is unreachable in practice and the checkbox row is still
-  // the first thing on the screen.
-  "/dashboard/posts": 2,
+  // 2 -> 1 ON 2026-09-27. It was `!description.trim() || platforms.length === 0`
+  // with all four platforms ticked by default, so the second half could
+  // only fire for somebody who had deliberately unticked every one —
+  // and what it gave them was a dead button with no explanation. An
+  // empty selection means all four now, in generate() and in the result
+  // panel, which had to move together: the request is sent for the
+  // fallback, so a panel built from the empty selection would show no
+  // platforms beside four posts that exist.
+  "/dashboard/posts": 1,
   // One, after the busy flag is discounted: the operation picker has a
   // default and the two language selects are optional.
   "/dashboard/coding": 1,

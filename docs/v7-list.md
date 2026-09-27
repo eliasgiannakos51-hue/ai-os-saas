@@ -180,9 +180,14 @@ one thing.
 | Website Builder | 2 | 2 | 1 | `!description.trim()` | **1** ← was 2, fixed 2026-09-27 |
 | Documents | 0 | 1 | 1 | nothing — there is no prompt at all | 0 |
 | Presentations | 1 | 0 | 1 | `!description.trim()` | **1** |
-| Posts | 1 | 0 | 0 | `!description.trim() \|\| platforms.length === 0` | **2** |
+| Posts | 1 | 0 | 0 | `!description.trim()` | **1** ← was 2, fixed 2026-09-27 |
 | AI Coding | 1 | 0 | 3 | `!input.trim()` | **1** |
 | Data Analysis | 0 | 1 | 0 | a FILE is the way in; the follow-up question is one line | 0 |
+
+Both instruments discount busy flags since 2026-09-27 — `generating`,
+`running`, `loading` guard a double press and are not something a
+person satisfies. They did not agree before, which meant two
+measurements of one screen.
 
 `scripts/tests/make-as-chat.test.mjs` holds each of those numbers as a
 per-row baseline that may only FALL, requires every drawn Make row to
@@ -203,9 +208,13 @@ away from it.** The three that are not:
    Studio had always filled the name with a slice of the brief and
    submitted. The gate's baseline for this row moved 2 → 1 and may only
    fall.
-2. **Posts requires at least one platform** and starts with all of them
-   selected, so the gate is unreachable in practice and the checkbox row
-   is still the first thing on the screen.
+2. ~~**Posts requires at least one platform.**~~ **DONE 2026-09-27.** All
+   four start selected, so the refusal could only fire for somebody who
+   had unticked every one — and what it gave them was a dead button
+   with no explanation. An empty selection means all four now, in
+   `generate()` **and** in the result panel: the request is sent for the
+   fallback, so a panel built from the empty selection would have shown
+   no platforms beside four posts that exist.
 3. **Documents has no prompt.** You create an empty document and type
    into it. "Write me a one-page brief about X" is not expressible.
 

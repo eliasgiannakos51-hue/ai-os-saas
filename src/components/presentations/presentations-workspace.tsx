@@ -492,6 +492,7 @@ export function PresentationsWorkspace({
           ) : (
             <button
               type="button"
+              data-testid="deck-generate"
               onClick={generate}
               disabled={!description.trim()}
               className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-4 text-sm font-semibold text-black hover:bg-orange-400 disabled:opacity-50"
@@ -505,7 +506,7 @@ export function PresentationsWorkspace({
       </div>
 
       {selected && (
-        <section className="surface" aria-label={t("result.title")}>
+        <section className="surface" data-testid="deck-result" aria-label={t("result.title")}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="truncate text-lg font-semibold text-foreground">{selected.deck.title}</h2>

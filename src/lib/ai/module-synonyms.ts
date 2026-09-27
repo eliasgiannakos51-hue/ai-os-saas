@@ -24,6 +24,7 @@
  *
  * Pure and react-free so the gate can load it.
  */
+import { foldForMatch } from "@/lib/text/unicode-patterns";
 export type ModuleSynonyms = {
   /**
    * The module's own subject. A question containing one of these IS about
@@ -384,6 +385,61 @@ export const MODULE_SYNONYMS: Record<string, ModuleSynonyms> = {
   },
 };
 
+/**
+ * THE GENITIVE PLURAL, WHICH GREEK PUTS IN EVERY SECOND HEADING.
+ *
+ * FOUND 2026-09-27 by the owner's own example. "παρουσίαση πωλήσεων" —
+ * a sales presentation, the most ordinary phrase there is — scored
+ * every module zero and reached no Sales rows at all, while the
+ * nominative "πωλήσεις" scored 1. The matcher compares whole folded
+ * words and the list carried only the nominative, so the form Greek
+ * actually uses after another noun was the one form that did not match.
+ *
+ * NOT A STEMMER. lib/text/unicode-patterns.ts's `stem` prefixes a word
+ * and allows more letters after it, which cannot turn πωλησεισ into
+ * πωλησεων — the ending is what changes. Four suffix rules cover the
+ * plural forms the language forms regularly, and anything that does not
+ * end in one is left exactly as it was.
+ *
+ * PRIMARY TERMS ONLY. The file's own header records where false matches
+ * come from: ordinary words in field labels, scored as evidence. A
+ * module's own name in the case Greek writes it in is the opposite of
+ * that — it is the strongest term there is, in the form it is usually
+ * typed.
+ */
+const GREEK_WORD = /^[\u0370-\u03ff\u1f00-\u1fff]+$/;
+export function greekPluralForms(term: string): string[] {
+  // FOLDED FIRST, AND THAT IS NOT A DETAIL. The first draft applied the
+  // suffix rules to the raw word and "ανταγωνιστές" produced nothing:
+  // it ends in "ές" with a tonos, which is not the two characters "ες".
+  // Every accented plural in the list — the common case in Greek — fell
+  // through silently while the unaccented ones worked, so the feature
+  // looked like it was running. Its own gate caught it within a minute
+  // of ranging over all thirteen modules instead of the one reported.
+  //
+  // Folding is also what the emitted form must be: the matcher compares
+  // folded words, so an accented output would be folded again anyway.
+  const word = foldForMatch(term.trim());
+  if (!GREEK_WORD.test(word)) return [];
+  // THE ENDINGS ARE WRITTEN IN THE FOLDED ALPHABET, which is not the
+  // one the terms above are written in. foldForMatch strips accents AND
+  // normalises final sigma, so "πωλήσεις" arrives here as "πωλησεισ" —
+  // and the obvious rule, /εις$/, matches none of it. The second draft
+  // of this function had exactly that bug and produced nothing for the
+  // three commonest plurals while still working for "προϊόντα", which
+  // happens to end in a letter the fold leaves alone.
+  const rules: [RegExp, string][] = [
+    [/εισ$/, "εων"],   // πωλήσεις -> πωλήσεων
+    [/εσ$/, "ων"],     // ιδέες -> ιδεών, ανταγωνιστές -> ανταγωνιστών
+    [/οι$/, "ων"],     // υποψήφιοι -> υποψηφίων
+    [/α$/, "ων"],      // προϊόντα -> προϊόντων
+  ];
+  for (const [from, to] of rules) {
+    if (from.test(word)) return [word.replace(from, to)];
+  }
+  return [];
+}
+
 /** The subject words for a module, or an empty list. A module with no
  *  entry keeps exactly the vocabulary it had, so adding this file cannot
  *  make any existing match worse. These join the module vocabulary, so
@@ -395,7 +451,11 @@ export function synonymsFor(slug: string): readonly string[] {
   // than a noun — "ξόδεψα" is exactly as much a claim about Finance as
   // "έξοδα" — and putting them at half weight would have left every
   // verb-led question losing to any noun that happened to appear.
-  return [...m.primary, ...m.verbs];
+  // The generated forms are APPENDED, never substituted, so every word
+  // that matched before still matches — this file cannot make an
+  // existing match worse, and now that is true of the plurals too.
+  const inflected = m.primary.flatMap((term) => greekPluralForms(term));
+  return [...new Set([...m.primary, ...m.verbs, ...inflected])];
 }
 
 /** The words that travel with the module without belonging to it. Scored

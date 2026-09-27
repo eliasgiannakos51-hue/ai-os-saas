@@ -343,3 +343,72 @@ matched the string `refuseMalformedEnv();` and stayed green when the
 call was commented out, because the text survives inside the comment.
 Fourth time in one session. It imports the config in a child process
 with a malformed value and requires it to throw.
+
+## 8. The build builds — and the .git finding was WRONG, 2026-09-27
+
+**THE CORRECTION FIRST.** §6 and §7 of this list say the deploy failed
+because Vercel's builder has no `.git`. **That is wrong, and the
+owner's own Vercel log disproves it:**
+
+    19:28:15  mutation-tree: ...WARNING (advisory, not failing):
+              1 of 1 uncommitted file(s) are mutation targets: vercel.json
+
+That line is printed by check-mutation-tree's third check, which runs
+only when `git rev-parse --is-inside-work-tree` succeeds. **Vercel has a
+working tree.** It also explains what §6 could not: why 0a71fdb4 was
+green there while it is red here without `.git`.
+
+What survives from that round is worth keeping and is not the cause:
+`no-worktree.test.mjs` and the `mutation-tree.test.mjs` branch are
+correct — a build that cannot run without a working tree is wrong on its
+own terms — but they were presented as the fix and they were not.
+
+**WHAT THE LOG ACTUALLY SHOWS.**
+
+    19:28:12  Warning: Node "24.x" in settings, "22.x" will be used
+    19:28:15  mutation-tree warning (advisory)
+    19:30:04  Error: Command "npm run build" exited with 1
+
+Two minutes between the fourth build step and the failure — that window
+is `npm run test:unit`, 294 gates. The failing gate is still unnamed:
+run-gates prints `THE BUILD FAILED IN: <path>` last and that line has
+not been read.
+
+**AND THE SHAPE UNDER IT, which is the owner's point and is right.**
+`npm run build` — the command Vercel runs — ran the function limits, the
+marker check, the mutation-tree check, the i18n check and 294 unit gates
+before compiling a line. Checks about this repository's own conventions,
+on the critical path of every deployment. A gate that goes red there
+takes the DEPLOY with it.
+
+    build:  node scripts/apply-function-limits.mjs && next build
+    gates:  apply-function-limits --check && build-identity &&
+            check-mutation-markers && check-mutation-tree &&
+            check-i18n && test:unit
+
+`apply-function-limits` stays in the build because it WRITES the route
+files' maxDuration literals — a producer, not a checker; a build without
+it ships different code.
+
+**Measured 2026-09-27, clean clone, `npm ci` from an empty tree, the
+platform's environment: the new build is `exit=0` in 2m33.** The old one
+took about twenty minutes here.
+
+**Nothing is lost, and that is the argument for it being safe.**
+`.github/workflows/verify.yml` runs on every push to every branch and
+now runs `npm run gates` before it builds. `ci-coverage.test.mjs` §1b
+holds three claims rather than one: the build runs no checker and no
+suite; it STILL runs the producer and still compiles (an empty script
+would satisfy the first claim); and every checker that left is named in
+`gates`, which section 1 requires the workflow to run.
+
+**Six gates read `scripts.build` and would have lied after the split** —
+billing-coverage, function-limits, mutation-markers, mutation-tree,
+no-worktree, test-export-drift — all re-pointed. **Two mutation anchors
+went stale in the same edit**, found by `mutation-suite-shape` (2,572
+anchors checked) and by `mutation-markers.mutation.mjs` reporting a HOLE
+rather than a pass. 15 of 15 after the fix.
+
+**Still unread:** the ~30 lines before `19:30:04`, which name the gate.
+With the gates off the deploy's critical path it no longer blocks
+production — but it is still red somewhere, and CI will now say where.

@@ -121,9 +121,15 @@ check(`the scan found programs that ask git (${gitUsers.length} of ${all.length}
 
 // WHICH OF THEM THE BUILD RUNS DIRECTLY, read out of package.json rather
 // than listed here: a step added to the build joins this set by itself.
-const buildScript = JSON.parse(readFileSync("package.json", "utf8")).scripts.build;
+// BOTH COMMANDS A PUSH RUNS, since the checks left `build` for `gates`
+// on 2026-09-27. Reading `build` alone would have found zero
+// git-asking programs the day after that split and reported a floor
+// met by an empty set — the question is what runs on a machine with no
+// worktree, and on Vercel that is `build`, while in CI it is both.
+const pkgScripts = JSON.parse(readFileSync("package.json", "utf8")).scripts;
+const buildScript = `${pkgScripts.build} && ${pkgScripts.gates}`;
 const buildSteps = gitUsers.filter((f) => buildScript.includes(f));
-check(`the build runs ${buildSteps.length} of them directly (${buildSteps.map((f) => f.replace("scripts/", "")).join(", ")})`,
+check(`the two commands a push runs invoke ${buildSteps.length} of them (${buildSteps.map((f) => f.replace("scripts/", "")).join(", ")})`,
   buildSteps.length >= 1, buildScript);
 
 // AND THE GATES THAT REACH ONE — SPAWN OR READ, NOT IMPORT.

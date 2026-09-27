@@ -554,7 +554,12 @@ console.log("\n== 10. the build gate cannot depend on the environment ==");
 // node_modules and drive the Anthropic SDK ran inside `next build`. A
 // gate that needs a working network is not a gate, it is a coin flip.
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
-checkTrue("the build runs the unit suites", /npm run test:unit/.test(pkg.scripts.build));
+// THE UNIT SUITES LEFT `build` ON 2026-09-27 for `gates`, a script of
+// their own. The claim is the same claim — something a push runs must
+// run them — and it is checked where they now live; ci-coverage.test.mjs
+// is what requires the workflow to run `gates` on every push.
+checkTrue("the gates script runs the unit suites", /npm run test:unit/.test(pkg.scripts.gates));
+checkTrue("...and the build does NOT — a build builds", !/test:unit/.test(pkg.scripts.build));
 // WHICH FILES THE BUILD RUNS, read from the thing that selects them.
 //
 // This used to be `pkg.scripts["test:unit"].includes("*.test.mjs")` — a

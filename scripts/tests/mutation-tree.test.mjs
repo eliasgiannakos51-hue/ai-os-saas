@@ -280,10 +280,17 @@ console.log("\n== 4. dirty is ADVISORY, everywhere ==");
 // ---------------------------------------------------------------------
 console.log("\n== 5. it is wired in, and it looked at something ==");
 {
-  const build = JSON.parse(readFileSync("package.json", "utf8")).scripts.build;
-  check("the build runs it", build.includes("node scripts/check-mutation-tree.mjs"));
-  check("...before next build, so a mutant never reaches a bundle",
-    build.indexOf("check-mutation-tree") < build.indexOf("next build"));
+  const pkg = JSON.parse(readFileSync("package.json", "utf8")).scripts;
+  // MOVED OUT OF `build` ON 2026-09-27. The property that matters is
+  // unchanged — a mutant must not reach a bundle — but it is now two
+  // facts instead of one: the check is in `gates`, and the workflow
+  // runs `gates` before `build`. Asserting only the first would let the
+  // workflow reorder them.
+  check("the gates script runs it", pkg.gates.includes("node scripts/check-mutation-tree.mjs"));
+  check("...and the build itself no longer does", !pkg.build.includes("check-mutation-tree"));
+  const wf = readFileSync(".github/workflows/verify.yml", "utf8");
+  check("...and CI runs the gates before it builds, so a mutant never reaches a bundle",
+    wf.indexOf("run: npm run gates") > 0 && wf.indexOf("run: npm run gates") < wf.indexOf("run: npm run build"));
   const clean = run(CHECK);
   // FLOORS. "No mutation is applied" is trivially true of a check that
   // parsed no mutations and found no targets.

@@ -303,7 +303,16 @@ check(
   /FAILED: \$\{path\}/.test(runner) && /console\.log\(out\.trimEnd\(\)\)/.test(runner),
   "a runner that stops without printing why is a log that says nothing"
 );
-check("and the build runs it before next build", /npm run test:unit\s*&&\s*next build/.test(pkg.scripts.build ?? ""));
+// WAS `/npm run test:unit\s*&&\s*next build/` ON `build`. The suites
+// moved to `gates` on 2026-09-27 and next build stayed in `build`, so
+// the ordering claim moved with them: the unit suites are the LAST
+// thing `gates` does, and the workflow runs `gates` before `build`.
+check("the gates script ends with the unit suites",
+  /npm run test:unit\s*$/.test((pkg.scripts.gates ?? "").trim()));
+check("...and the workflow runs the gates before it builds", (() => {
+  const wf = readFileSync(".github/workflows/verify.yml", "utf8");
+  return wf.indexOf("run: npm run gates") > 0 && wf.indexOf("run: npm run gates") < wf.indexOf("run: npm run build");
+})());
 // Every suite must actually SET a non-zero exit code when it fails,
 // otherwise `|| exit 1` never fires.
 const noExit = suites.filter((s) => !/process\.exit\(/.test(readFileSync(s, "utf8")));

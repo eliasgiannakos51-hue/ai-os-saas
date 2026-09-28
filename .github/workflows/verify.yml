@@ -280,7 +280,16 @@ jobs:
         with:
           script: |
             const title = "Branches carrying work that is not on main";
-            const body = `${{ toJSON(steps.look.outputs.report) }}`.replace(/^"|"$/g, "");
+            // NOT WRAPPED IN A TEMPLATE LITERAL, and that single pair of
+            // backticks cost this job every run since the report first
+            // contained a code span. toJSON() emits a JSON string —
+            // quotes included — and JSON string syntax is a subset of
+            // JavaScript's, so it IS the literal and needs no quoting.
+            // Wrapping it in backticks meant the first ` inside the
+            // markdown ended the template, and the job died with
+            // `SyntaxError: Unexpected identifier 'node'` — the word
+            // after the backtick in "`node scripts/unmerged-branches.mjs`".
+            const body = ${{ toJSON(steps.look.outputs.report) }};
             const open = (await github.rest.issues.listForRepo({
               owner: context.repo.owner, repo: context.repo.repo,
               state: "open", labels: "unmerged-work", per_page: 10,

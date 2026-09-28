@@ -333,17 +333,24 @@ console.log("\n== 2. ONE filled accent button per screen ==");
 // The rule, measured the only way it can honestly be measured: what is
 // painted. Not what the source could paint.
 //
-// ONE PAGE IS OVER IT AND IS NAMED HERE RATHER THAN ROUNDED AWAY.
-// /dashboard/settings paints two: the top bar's "Make anything", which
-// every page carries, and Integrations' "Connect". Two filled buttons on
-// a settings page is the rule broken — a settings page has no single
-// action, which is exactly why the loud one should not be there — and the
-// fix is one class on one button. It is recorded rather than made because
-// which button loses its fill is a design decision, not a test's.
+// THE TABLE IS EMPTY NOW, AND THAT IS THE POINT OF HAVING HAD IT.
 //
-// The allowance only ever goes DOWN. Lower it in the same commit that
+// It carried one entry: /dashboard/settings painted two filled accent
+// buttons — the top bar's "Make anything", which every page carries, and
+// Integrations' "Connect". Two loud buttons on a settings page is the
+// rule broken, and the allowance recorded it rather than hiding it,
+// because which button loses its fill is a design decision and not a
+// test's.
+//
+// The button was changed and the loop below noticed: it reported "1
+// painted — lower the allowance to 1" on 2026-09-28 and went red, which
+// is an exception refusing to outlive the thing it was written for.
+// With the table empty, EVERY page is held at one, which is strictly
+// stronger than any entry here could be.
+//
+// An allowance only ever goes DOWN. Lower it in the same commit that
 // changes the button.
-const ALLOWED = { "/dashboard/settings": 2 };
+const ALLOWED = {};
 for (const url of PAGES) {
   const pressable = seen[url].filled.filter((f) => f.pressable);
   const allowed = ALLOWED[url] ?? 1;

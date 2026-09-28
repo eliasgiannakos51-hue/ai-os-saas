@@ -141,6 +141,15 @@ const MUTANTS = [
     to: "      - name: the report",
     expect: "uploaded even when the run fails",
   },
+  {
+    // THE BACKTICKS BACK. The job that reports failures fails, and the
+    // report it built is thrown away with it.
+    name: "a toJSON substitution is wrapped in a template literal again",
+    file: WF,
+    from: "            const body = ${{ toJSON(steps.look.outputs.report) }};",
+    to: '            const body = `${{ toJSON(steps.look.outputs.report) }}`.replace(/^"|"$/g, "");',
+    expect: "wrapped in backticks",
+  },
 ];
 
 function runGate() {

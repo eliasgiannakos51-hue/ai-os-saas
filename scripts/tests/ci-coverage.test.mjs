@@ -278,6 +278,38 @@ console.log("== 3b. a red run tells somebody ==");
     /actions\/runs\/\$\{context\.runId\}/.test(alertBlock) && /context\.sha/.test(alertBlock));
 }
 
+console.log("== 3c. an expression the workflow pastes into JavaScript is a literal, not a template ==");
+// ---------------------------------------------------------------------
+// ONE PAIR OF BACKTICKS killed this workflow's unmerged-branches job on
+// every run for as long as the report contained a code span:
+//
+//   const body = `${{ toJSON(steps.look.outputs.report) }}`.replace(...)
+//   SyntaxError: Unexpected identifier 'node'
+//
+// toJSON() emits a JSON string, quotes and all, and JSON string syntax
+// is a subset of JavaScript's — so the substitution already IS the
+// literal. Wrapping it in a template meant the first backtick inside the
+// markdown ended the string, and the word after it ("node", from
+// "`node scripts/unmerged-branches.mjs`") became a syntax error.
+//
+// The job still ran, still built the report, and still failed — a
+// failure in the thing that exists to report failures.
+{
+  // THE FLOOR FIRST, and the emptiness check DERIVED from it. A
+  // workflow that stopped using toJSON at all would satisfy "none is
+  // wrapped" by having none — the vacuity shape gate-vacuity.test.mjs
+  // holds at zero, and it caught this block's first draft, where the
+  // two collections were scanned independently and the floor was on the
+  // wrong one.
+  const uses = [...wfCode.matchAll(/\$\{\{\s*toJSON\([^)]*\)\s*\}\}/g)];
+  check(`there is a toJSON() substitution to check (${uses.length})`, uses.length >= 1,
+    "nothing in the workflow pastes a value into a script any more");
+  const wrapped = uses.filter((m) => wfCode[m.index - 1] === "`");
+  check(`no toJSON() substitution is wrapped in backticks (${wrapped.length})`,
+    wrapped.length === 0,
+    wrapped.map((m) => m[0]).join("\n        "));
+}
+
 console.log("== 4. the build gate needs no secret ==");
 {
   // A build that needs env vars is a build a clean clone cannot do, and

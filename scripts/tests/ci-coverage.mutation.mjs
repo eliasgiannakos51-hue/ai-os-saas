@@ -90,6 +90,57 @@ const MUTANTS = [
     to: "        run: echo skipped",
     expect: "and the workflow runs it",
   },
+  // ---- the bot on every production deploy (2026-09-28) --------------
+  {
+    // THE FENCE THAT COSTS MONEY IF IT GOES. deployment_status fires for
+    // every preview too; without this the bot would generate a website
+    // per push, with real credits, forever.
+    name: "the bot runs on preview deployments as well",
+    file: WF,
+    from: "      github.event.deployment_status.environment == 'Production'",
+    to: "      github.event.deployment_status.state != 'pending'",
+    expect: "only a PRODUCTION one",
+  },
+  {
+    // THE URL WRITTEN DOWN. The classic form: the harness reports on a
+    // deployment nobody shipped today.
+    name: "the bot is aimed at a hard-coded address",
+    file: WF,
+    from: "          BOT_BASE_URL: ${{ github.event.deployment_status.environment_url }}",
+    to: "          BOT_BASE_URL: https://ai-os-saas-five.vercel.app",
+    expect: "the event's own environment_url",
+  },
+  {
+    // GREEN ON A DEPLOYMENT NOBODY TRIED. The tempting version, and the
+    // exact shape this whole file exists to refuse.
+    name: "a missing credential skips the job instead of failing it",
+    file: WF,
+    // THE ANCHOR CARRIES ITS OWN LINE ABOVE IT, because `exit 1\n  fi`
+    // occurs three times in this workflow and String.replace takes the
+    // first — so the first version of this mutant edited a different
+    // job entirely and reported the gate as not load-bearing when it
+    // was. A mutant that lands somewhere else measures nothing.
+    from: '            } >> "$GITHUB_STEP_SUMMARY"\n            exit 1',
+    to: '            } >> "$GITHUB_STEP_SUMMARY"',
+    expect: "fails the job rather than skipping",
+  },
+  {
+    // A JOB THAT RUNS ONE CHECK FILE reports on nine checks and says
+    // nothing at all about the four that cost money.
+    name: "the job forgets the check file that was added last",
+    file: WF,
+    from: "run: node scripts/e2e-bot.mjs checks/basic.md checks/make.md --allow-cost",
+    to: "run: node scripts/e2e-bot.mjs checks/basic.md --allow-cost",
+    expect: "names checks/make.md",
+  },
+  {
+    // THE REPORT THROWN AWAY on exactly the run whose report is wanted.
+    name: "the report is kept only when the run passed",
+    file: WF,
+    from: "      - name: the report\n        if: always()",
+    to: "      - name: the report",
+    expect: "uploaded even when the run fails",
+  },
 ];
 
 function runGate() {

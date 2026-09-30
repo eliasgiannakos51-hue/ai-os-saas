@@ -640,12 +640,44 @@ for (const route of DASHBOARD_ROUTES) {
 // phone width.
 console.log("\n== 3. new controls are actually visible (production build, 375px) ==");
 {
+  // ON A PLAN THAT CAN OPEN THE PAGE, and this section spent sixteen days
+  // not being on one.
+  //
+  // It was written 2026-08-31, when Build a site was free on every plan.
+  // On 2026-09-12 the feature catalog gave it a Starter minimum
+  // (b9e05d5a, "a ✕ on the pricing page that refused nothing"), and from
+  // that commit this section has been photographing an Upgrade Required
+  // panel and reporting that the design controls are missing. They are
+  // not missing: they are behind a wall the account was never given the
+  // plan to pass, and every one of its seven assertions was true of the
+  // wall and false of the feature.
+  //
+  // THE FREE ACCOUNT IS CHECKED FIRST, on purpose. A section that only
+  // sets a paid plan would go back to reporting on a wall the day the
+  // minimum changes again, and say nothing. So: free sees the wall, paid
+  // sees the controls, and the two cannot both be satisfied by one state.
   const page = await authed.newPage();
   await page.setViewportSize({ width: 375, height: 812 });
+
+  setPlan(null);
   await page.goto(`http://127.0.0.1:${PORT}/dashboard/website-builder`, {
     waitUntil: "networkidle",
     timeout: 45000,
   });
+  checkTrue(
+    "a free account is stopped by the plan wall, not by a missing control",
+    (await page.locator('a[href^="/pricing#plan-"]').count()) > 0
+  );
+
+  setPlan("starter");
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/website-builder`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+  checkTrue(
+    "...and a paid one is not",
+    (await page.locator('a[href^="/pricing#plan-"]').count()) === 0
+  );
 
   // The generation form opens by default when the account has no sites,
   // which is the state this stand-in serves.
@@ -669,12 +701,41 @@ console.log("\n== 3. new controls are actually visible (production build, 375px)
   checkTrue('"You choose" is the default background', await visible(
       await hasText('button[aria-pressed="true"]', "dashboard.websiteBuilder.design.backgrounds.auto")
     ));
-  checkTrue(
-    '"My own photo" is offered but disabled with nothing uploaded',
-    (await page
-      .locator(await hasText("button", "dashboard.websiteBuilder.design.backgrounds.own-photo", "[disabled]"))
-      .count()) > 0
-  );
+  // aria-disabled, NOT disabled, and the difference is the feature.
+  //
+  // A `disabled` button cannot be tapped, so it cannot say WHY it is
+  // unavailable — and "My own photo" with nothing uploaded has exactly
+  // one useful thing to do: explain that a photo has to be uploaded
+  // first (design-controls.tsx sets chipNote on the press). This check
+  // named the attribute that would have made that impossible, so it went
+  // red against the better behaviour.
+  //
+  // CHECKED AS BEHAVIOUR TOO. An attribute alone is a promise; pressing
+  // it and finding it still unselected is the promise kept.
+  {
+    const own = page.locator(
+      await hasText("button", "dashboard.websiteBuilder.design.backgrounds.own-photo", '[aria-disabled="true"]')
+    );
+    checkTrue('"My own photo" is offered but not usable with nothing uploaded', (await own.count()) > 0);
+    if ((await own.count()) > 0) {
+      // force: true, because Playwright treats aria-disabled as "not
+      // enabled" and will not click it at all — it retried for thirty
+      // seconds and timed out. A browser has no such rule: aria-disabled
+      // is advisory, the click is dispatched, and React's handler runs,
+      // which is the whole point of choosing it over `disabled`. Forcing
+      // reproduces what a thumb does; waiting reproduces Playwright.
+      await own.first().click({ force: true });
+      check(
+        "...and pressing it does not select it",
+        await own.first().getAttribute("aria-pressed"),
+        "false"
+      );
+      checkTrue(
+        "...it says why instead",
+        await visibleText("dashboard.websiteBuilder.design.ownPhotoNeedsUpload")
+      );
+    }
+  }
   checkTrue(
     "the upload control explains what it is for",
     await visibleText("dashboard.websiteBuilder.imageIntro")
@@ -717,6 +778,9 @@ console.log("\n== 3. new controls are actually visible (production build, 375px)
       .count()) > 0
   );
 
+  // THE PLAN GOES BACK, or every section after this one silently runs as
+  // a paying customer and stops measuring what it says it measures.
+  setPlan(null);
   await page.close();
 }
 
@@ -915,14 +979,38 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   const greekHeading = greekIn("groups");
   const greekItem = greekIn("items");
 
+  // A HEADING MAY LEGITIMATELY BE ABSENT, and five of them now are.
+  //
+  // GROUP_HEADING_KEYS is the DECLARED list. Connect, Business,
+  // Engineering, Verify and Personal are entirely notBuilt — every item
+  // in them is a position with no page — so lib/sidebar-visibility.ts
+  // drops the whole group and its heading with it. That is the rule
+  // working, and demanding the heading render was this check asserting
+  // the opposite of the product's own rule.
+  //
+  // SAME SHAPE AS THE ITEM LOOP BELOW, for the same reason it has it:
+  // one assertion, never a branch with a `true` in it. What may never
+  // happen is the ENGLISH filing category showing instead of the Greek.
+  let headingsShown = 0;
   for (const [english, key] of headings) {
     const word = greekHeading(key);
     checkTrue(`heading "${english}" has Greek in messages/el.json (${key})`, typeof word === "string" && word.length > 0, String(word));
     if (typeof word !== "string") continue;
-    checkTrue(`heading "${english}" renders as "${word}"`, foldedNav.includes(fold(word)), navText.slice(0, 400));
-    // The English filing category must not survive beside it.
-    checkTrue(`...and "${english}" itself is gone from the nav`, !new RegExp(`\\b${english}\\b`).test(navText), navText.slice(0, 300));
+    const shown = foldedNav.includes(fold(word));
+    if (shown) headingsShown++;
+    checkTrue(
+      `heading "${english}" is either "${word}" or absent — never English`,
+      shown || !new RegExp(`\\b${english}\\b`).test(navText),
+      navText.slice(0, 400)
+    );
   }
+  // AND THE FLOOR UNDER IT. "Absent is allowed" is satisfied by a
+  // sidebar that renders no headings at all, which is the vacuity shape
+  // gate-vacuity.test.mjs caught in this very block once already. Six
+  // groups are drawn (scripts/sidebar-census.mjs); the floor is set
+  // below that so adding a group does not break it, and above zero so
+  // an empty nav cannot pass.
+  checkTrue(`at least four headings actually rendered in Greek (${headingsShown})`, headingsShown >= 4, navText.slice(0, 400));
   for (const [english, key] of items) {
     const word = greekItem(key);
     if (typeof word !== "string" || !word) {

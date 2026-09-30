@@ -132,6 +132,86 @@ console.log("== 1b. the build BUILDS, and the checks are a step of their own =="
   check("...and gates is not the build under another name", !/next build/.test(gates), gates);
 }
 
+console.log("== 1c. the deployment itself is tried, by something ==");
+// ---------------------------------------------------------------------
+// A SIXTH FAMILY, and it is not a *.mjs one: checks/*.md are the briefs
+// the e2e-bot drives a real, signed-in deployment with. Same rule as
+// section 1 — a family with files and no runner is a family nothing
+// executes — and the same failure it exists to prevent: checks/make.md
+// was written on 2026-09-27 and nothing anywhere ran it.
+{
+  const checkFiles = readdirSync("checks").filter((f) => f.endsWith(".md") && f !== "README.md");
+  check(`there are check files to run (${checkFiles.length})`, checkFiles.length >= 1, checkFiles.join(", "));
+  check("some job runs the bot", /node scripts\/e2e-bot\.mjs/.test(wfCode),
+    `nothing in ${WORKFLOW} runs scripts/e2e-bot.mjs`);
+  // EVERY check file, not the one that happened to be named first. A
+  // job naming basic.md alone would report on nine checks and stay
+  // silent about the four that cost money.
+  for (const f of checkFiles) {
+    check(`  ...and it names checks/${f}`, wfCode.includes(`checks/${f}`),
+      `the job runs the bot but never passes checks/${f}`);
+  }
+
+  // THE THREE FENCES ROUND A JOB THAT SPENDS REAL MONEY.
+  //
+  // Without them this is a bill: deployment_status fires for every
+  // preview too, and a job that ran on each of them would generate a
+  // website per push. Each fence is checked by what it does rather than
+  // by the comment above it.
+  check("it runs only on a SUCCESSFUL deployment",
+    /github\.event\.deployment_status\.state == 'success'/.test(wfCode),
+    "a failed deployment would be driven as if it were live");
+  // THE FILTER MOVED OUT OF THE JOB'S `if:` on 2026-09-30, because a job
+  // that does not match one is `skipped` — a grey tick with no reason.
+  // It is now a step that PRINTS what it saw and gates the rest on its
+  // own output, so a preview says so in one line instead of being
+  // invisible, and a changed environment string is visible rather than
+  // silently stopping the bot forever.
+  check("...only a PRODUCTION one, never a preview",
+    /production\|prod\) is_prod=true/.test(wfCode) &&
+      /steps\.which\.outputs\.is_production == 'true'/.test(wfCode),
+    "every preview deployment would spend credits");
+  check("...and the environment it saw is printed, so a skip is never silent",
+    /echo "- environment:/.test(wfCode) && /the bot runs here:/.test(wfCode),
+    "a deployment that does not match leaves no trace of why");
+  // CASE-INSENSITIVE, because the exact string is Vercel's to choose.
+  check("...matched without depending on its capitalisation",
+    /tr '\[:upper:\]' '\[:lower:\]'/.test(wfCode),
+    "a rename from Production to production would stop the bot silently");
+  check("...and the billable checks are capped",
+    /BOT_COST_LIMIT: "\d+"/.test(wfCode),
+    "nothing bounds how many paid generations one run can make");
+
+  // AND IT IS AIMED AT THE DEPLOYMENT THAT FIRED THE EVENT, not at a URL
+  // typed into this file — which is how a bot ends up reporting on a
+  // deployment from last month.
+  check("the target is the event's own environment_url",
+    /BOT_BASE_URL: \$\{\{ github\.event\.deployment_status\.environment_url \}\}/.test(wfCode),
+    "the bot is pointed at a hard-coded address");
+
+  // A MISSING SECRET IS RED, NOT GREEN. Skipping the job when the
+  // credentials are absent produces a tick on a deployment nobody tried.
+  // SCOPED TO THE STEP, because `exit 1` appears elsewhere in this
+  // workflow and an unscoped search for it was satisfied by a line in
+  // another job. Its own mutation run found that: deleting the exit from
+  // the credentials step left this green.
+  {
+    const step = wfCode.slice(
+      wfCode.indexOf("- name: the credentials exist"),
+      wfCode.indexOf("- name: try every Make feature")
+    );
+    check("a missing credential fails the job rather than skipping it",
+      /if \[ -z "\$\{\{ secrets\.BOT_EMAIL \}\}" \]/.test(step) && /exit 1/.test(step),
+      "the job goes green when it cannot sign in");
+  }
+
+  // THE REPORT SURVIVES A FAILURE, which is the run whose report is
+  // wanted.
+  check("the report is uploaded even when the run fails",
+    /if: always\(\)[\s\S]{0,200}upload-artifact/.test(wfCode),
+    "broken.md is thrown away exactly when it matters");
+}
+
 console.log("== 2. the browser tests run on a push, not only on a schedule ==");
 {
   // The nightly job is fine as a nightly job. What was missing was
@@ -210,6 +290,38 @@ console.log("== 3b. a red run tells somebody ==");
     "an issue per failing push turns the tracker into a log nobody reads");
   check("...linking the run, the commit and the branch",
     /actions\/runs\/\$\{context\.runId\}/.test(alertBlock) && /context\.sha/.test(alertBlock));
+}
+
+console.log("== 3c. an expression the workflow pastes into JavaScript is a literal, not a template ==");
+// ---------------------------------------------------------------------
+// ONE PAIR OF BACKTICKS killed this workflow's unmerged-branches job on
+// every run for as long as the report contained a code span:
+//
+//   const body = `${{ toJSON(steps.look.outputs.report) }}`.replace(...)
+//   SyntaxError: Unexpected identifier 'node'
+//
+// toJSON() emits a JSON string, quotes and all, and JSON string syntax
+// is a subset of JavaScript's — so the substitution already IS the
+// literal. Wrapping it in a template meant the first backtick inside the
+// markdown ended the string, and the word after it ("node", from
+// "`node scripts/unmerged-branches.mjs`") became a syntax error.
+//
+// The job still ran, still built the report, and still failed — a
+// failure in the thing that exists to report failures.
+{
+  // THE FLOOR FIRST, and the emptiness check DERIVED from it. A
+  // workflow that stopped using toJSON at all would satisfy "none is
+  // wrapped" by having none — the vacuity shape gate-vacuity.test.mjs
+  // holds at zero, and it caught this block's first draft, where the
+  // two collections were scanned independently and the floor was on the
+  // wrong one.
+  const uses = [...wfCode.matchAll(/\$\{\{\s*toJSON\([^)]*\)\s*\}\}/g)];
+  check(`there is a toJSON() substitution to check (${uses.length})`, uses.length >= 1,
+    "nothing in the workflow pastes a value into a script any more");
+  const wrapped = uses.filter((m) => wfCode[m.index - 1] === "`");
+  check(`no toJSON() substitution is wrapped in backticks (${wrapped.length})`,
+    wrapped.length === 0,
+    wrapped.map((m) => m[0]).join("\n        "));
 }
 
 console.log("== 4. the build gate needs no secret ==");

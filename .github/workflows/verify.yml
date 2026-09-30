@@ -334,18 +334,60 @@ jobs:
     name: the bot signs in and tries the product (every production deploy)
     if: >-
       github.event_name == 'deployment_status' &&
-      github.event.deployment_status.state == 'success' &&
-      github.event.deployment_status.environment == 'Production'
+      github.event.deployment_status.state == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # WHICH DEPLOYMENT IS THIS, SAID OUT LOUD.
+      #
+      # The environment filter used to sit in the job's `if:`, and a job
+      # that does not match one is `skipped` — a grey tick with no
+      # reason attached. Two of those went past on 2026-09-28 and the
+      # only way to know WHY was to reason about a payload nobody can
+      # see. That is the shape this repository keeps finding: a check
+      # that declines to run and says nothing about it.
+      #
+      # So the filter moved into a step that prints what it saw. Every
+      # deployment_status run now states the environment and the URL in
+      # its own summary, and the preview runs — which must not spend
+      # credits — say so in one line instead of being invisible.
+      #
+      # CASE-INSENSITIVE, because the exact string is Vercel's to choose
+      # and a filter that depends on its capitalisation is a filter that
+      # silently stops working when they change it.
+      - name: which deployment is this
+        id: which
+        run: |
+          env_name="${{ github.event.deployment_status.environment }}"
+          url="${{ github.event.deployment_status.environment_url }}"
+          lower=$(printf '%s' "$env_name" | tr '[:upper:]' '[:lower:]')
+          case "$lower" in
+            production|prod) is_prod=true ;;
+            *) is_prod=false ;;
+          esac
+          echo "is_production=$is_prod" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Deployment seen"
+            echo ""
+            echo "- environment: \`$env_name\`"
+            echo "- url: $url"
+            echo "- the bot runs here: **$is_prod**"
+            if [ "$is_prod" != "true" ]; then
+              echo ""
+              echo "A preview deployment spends no credits. This is not a result about the product."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/checkout@v4
+        if: steps.which.outputs.is_production == 'true'
       - uses: actions/setup-node@v4
+        if: steps.which.outputs.is_production == 'true'
         with:
           node-version: "22"
           cache: npm
       - run: npm ci
+        if: steps.which.outputs.is_production == 'true'
       - name: chromium
+        if: steps.which.outputs.is_production == 'true'
         run: |
           npx playwright install --with-deps chromium
           echo "CHROMIUM_PATH=$(node -e 'console.log(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
@@ -357,6 +399,7 @@ jobs:
       # nobody tried, which is the exact shape this whole file exists to
       # refuse. Red until the secrets are set is the honest state.
       - name: the credentials exist
+        if: steps.which.outputs.is_production == 'true'
         run: |
           if [ -z "${{ secrets.BOT_EMAIL }}" ] || [ -z "${{ secrets.BOT_PASSWORD }}" ]; then
             {
@@ -371,6 +414,7 @@ jobs:
             exit 1
           fi
       - name: try every Make feature on the deployment
+        if: steps.which.outputs.is_production == 'true'
         env:
           BOT_EMAIL: ${{ secrets.BOT_EMAIL }}
           BOT_PASSWORD: ${{ secrets.BOT_PASSWORD }}
@@ -382,7 +426,7 @@ jobs:
       # per check, kept whether the run passed or failed — a failed run is
       # the one whose report somebody needs.
       - name: the report
-        if: always()
+        if: always() && steps.which.outputs.is_production == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: bot-report

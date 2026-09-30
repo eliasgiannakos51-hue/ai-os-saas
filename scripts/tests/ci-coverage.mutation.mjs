@@ -95,10 +95,10 @@ const MUTANTS = [
     // THE FENCE THAT COSTS MONEY IF IT GOES. deployment_status fires for
     // every preview too; without this the bot would generate a website
     // per push, with real credits, forever.
-    name: "the bot runs on preview deployments as well",
+    name: "every deployment counts as production",
     file: WF,
-    from: "      github.event.deployment_status.environment == 'Production'",
-    to: "      github.event.deployment_status.state != 'pending'",
+    from: "            production|prod) is_prod=true ;;",
+    to: "            *) is_prod=true ;;",
     expect: "only a PRODUCTION one",
   },
   {

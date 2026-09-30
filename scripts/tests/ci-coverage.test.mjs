@@ -161,9 +161,23 @@ console.log("== 1c. the deployment itself is tried, by something ==");
   check("it runs only on a SUCCESSFUL deployment",
     /github\.event\.deployment_status\.state == 'success'/.test(wfCode),
     "a failed deployment would be driven as if it were live");
+  // THE FILTER MOVED OUT OF THE JOB'S `if:` on 2026-09-30, because a job
+  // that does not match one is `skipped` — a grey tick with no reason.
+  // It is now a step that PRINTS what it saw and gates the rest on its
+  // own output, so a preview says so in one line instead of being
+  // invisible, and a changed environment string is visible rather than
+  // silently stopping the bot forever.
   check("...only a PRODUCTION one, never a preview",
-    /github\.event\.deployment_status\.environment == 'Production'/.test(wfCode),
+    /production\|prod\) is_prod=true/.test(wfCode) &&
+      /steps\.which\.outputs\.is_production == 'true'/.test(wfCode),
     "every preview deployment would spend credits");
+  check("...and the environment it saw is printed, so a skip is never silent",
+    /echo "- environment:/.test(wfCode) && /the bot runs here:/.test(wfCode),
+    "a deployment that does not match leaves no trace of why");
+  // CASE-INSENSITIVE, because the exact string is Vercel's to choose.
+  check("...matched without depending on its capitalisation",
+    /tr '\[:upper:\]' '\[:lower:\]'/.test(wfCode),
+    "a rename from Production to production would stop the bot silently");
   check("...and the billable checks are capped",
     /BOT_COST_LIMIT: "\d+"/.test(wfCode),
     "nothing bounds how many paid generations one run can make");

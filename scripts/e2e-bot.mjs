@@ -459,8 +459,24 @@ const NO_MODEL_KEY = PRE.known && !PRE.canCallModel;
 // not happen, and it says so and exits 2.
 if (!EMAIL || !PASSWORD) {
   console.log("BOT_EMAIL and BOT_PASSWORD are not set, so the bot cannot sign in.");
-  console.log("NOTHING WAS CHECKED — this is not a result about the product.");
-  console.log("  BOT_EMAIL=... BOT_PASSWORD=... node scripts/e2e-bot.mjs");
+  console.log("NOTHING WAS CHECKED — this is not a result about the product.\n");
+  // THE THREE PLACES THEY GET PUT, AND THE TWO THAT WORK.
+  //
+  // Named because the wrong one was chosen three times. Vercel's
+  // environment variables are handed to the RUNNING APPLICATION — the
+  // deployment reads them at request time. This file is not the
+  // application: it is a browser driven from somewhere else, signing in
+  // over HTTP like a person. Nothing Vercel holds is visible to it.
+  //
+  // The confusion is reasonable and the cost is not: each round ends
+  // with a report that says the bot ran when it did not.
+  console.log("WHERE THEY GO, and Vercel is not one of them:");
+  console.log("  - running it here, by hand : BOT_EMAIL=… BOT_PASSWORD=… node scripts/e2e-bot.mjs");
+  console.log("  - the deploy job in CI     : GitHub -> Settings -> Secrets and variables -> Actions");
+  console.log("  - an agent session         : the environment's own variables");
+  console.log("");
+  console.log("  Vercel's env vars reach the DEPLOYMENT, which does not run this file.");
+  console.log("  The deployment needs ANTHROPIC_API_KEY; the bot needs an ACCOUNT.");
   process.exit(2);
 }
 

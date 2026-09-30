@@ -203,6 +203,14 @@ console.log("== 1c. the deployment itself is tried, by something ==");
     check("a missing credential fails the job rather than skipping it",
       /if \[ -z "\$\{\{ secrets\.BOT_EMAIL \}\}" \]/.test(step) && /exit 1/.test(step),
       "the job goes green when it cannot sign in");
+    // AND IT NAMES THE PLACE THEY KEEP BEING PUT INSTEAD. The
+    // credentials were set in Vercel three times running, which hands
+    // them to the deployment — the one process that has no use for
+    // them. A message that says "not set" and not "not set HERE" is
+    // what made that round trip cost three days.
+    check("...and says why Vercel is not the place",
+      /Vercel is not the place/.test(step),
+      "the message does not name the mistake that has been made three times");
   }
 
   // THE REPORT SURVIVES A FAILURE, which is the run whose report is

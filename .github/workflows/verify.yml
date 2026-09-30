@@ -410,6 +410,11 @@ jobs:
               echo ""
               echo "Settings -> Secrets and variables -> Actions. Use a BOT account,"
               echo "never the owner's: the bot deletes what it creates."
+              echo ""
+              echo "**Vercel is not the place.** Vercel's environment variables are handed"
+              echo "to the running deployment, which does not run this job. The deployment"
+              echo "needs \`ANTHROPIC_API_KEY\`; this job needs an ACCOUNT to sign in with,"
+              echo "and it reads it from a repository secret."
             } >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi

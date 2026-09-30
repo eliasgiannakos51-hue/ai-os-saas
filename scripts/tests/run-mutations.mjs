@@ -114,7 +114,10 @@ if (suites.length === 0) {
 // sweep of the remaining 23 multi-write routes.
 // 174 -> 185 on 2026-09-24: margin-value, ceiling-vs-outcome and
 // email-outcome-reported, plus the suites the V6 #1 round carried in.
-const FLOOR = 185;
+// 185 -> 196 on 2026-09-30, with connector-safety.mutation.mjs. The
+// floor follows the suites that exist; it is a floor, so it rises when
+// they do and never falls to accommodate one that was deleted.
+const FLOOR = 196;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

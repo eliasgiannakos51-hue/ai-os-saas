@@ -240,7 +240,12 @@ console.log(
 // answer only a working tree can give, and every instrument in this
 // repository was blind to it because every instrument had only ever run
 // inside a repository. Read off the run.
-const RATCHET = 205;
+// 205 -> 211 on 2026-09-30: connector-safety.mutation.mjs added six
+// anchors — a widened Gmail scope, an abandoned write allowance, a
+// dropped untrusted wrapper, a plaintext token, one encryption context
+// for both tokens, and a second write path. Raised because six real
+// mutants arrived, never to make room.
+const RATCHET = 211;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

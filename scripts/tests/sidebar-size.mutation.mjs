@@ -47,7 +47,18 @@ const MUTANTS = [
       '  {\n    heading: "Extra",\n    items: [\n' +
       '      { href: "/help", label: "Help Centre", icon: HELP_ICON, hintKey: "help" },\n' +
       "    ],\n  },\n];\n\nexport const SETTINGS_GROUP",
-    expect: "groups, limit 6",
+    // RE-NAMED 2026-10-01. The gate's one group check became four when
+    // the declared structure grew: declared groups against their own
+    // limit, headings ON SCREEN against theirs, and rows and groups
+    // drawn per role. "groups, limit 6" matched the sentence that used
+    // to carry all of it and now carries none of it — the mutant goes
+    // red on all four, and the runner was right to call an expectation
+    // that matches nothing a miss rather than a catch.
+    //
+    // Anchored on the ON-SCREEN count, which is the one the brief is
+    // about: a seventh group that nobody can see is a different defect
+    // from a seventh group in the sidebar.
+    expect: "headings on screen, limit",
   },
   {
     // 2. THE `hidden` FILTER. Without it every one of the fifty-two

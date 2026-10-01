@@ -56,6 +56,22 @@ function check(name, cond, detail) {
   if (!cond) { console.log("  FAIL  " + name + " " + (detail ?? "")); process.exitCode = 1; }
   else console.log("  PASS  " + name);
 }
+// THE THREE OTHER NAMES THIS REPOSITORY WRITES ASSERTIONS UNDER. The
+// gate parser matches check, checkTrue, ok and eq; until 2026-10-01
+// every fixture line used the first, so narrowing the parser to it
+// alone changed nothing the probe could observe and the mutant that
+// does exactly that was filed as a hole. The claim was real and
+// nothing exercised it.
+//
+// NO BACKTICKS IN THIS COMMENT, and that is not style: it lives INSIDE
+// a template literal, so one backtick ends the string and the next
+// word becomes a syntax error. Which is what happened on the first
+// draft of this very paragraph — the same defect fixed in the GitHub
+// workflow two commits earlier, in a file that had just been taught
+// to refuse it.
+const ok = check;
+const eq = check;
+const checkTrue = check;
 `;
 
 // Both vacuity fixtures walk the filesystem, filter it, and assert the
@@ -106,13 +122,22 @@ check("exactly one overload survives", 1);
 // tracking this is an ordinary tautology; parsed without it the paren
 // raises the nesting depth, the call never closes, and the line is
 // skipped in silence.
-check("the retry budget is spent (see the note above", true, true);`
+check("the retry budget is spent (see the note above", true, true);
+// AND ONE UNDER EACH OF THE OTHER THREE HELPER NAMES. Same shapes, same
+// inability to go red; what they add is that the parser has to RECOGNISE
+// them to count them.
+ok("the queue drained", true);
+eq("the row count matched", 2, 2);
+checkTrue("the lock was released", true);`
     : `// THE SAME CLAIMS, WRITTEN SO THEY CAN GO RED.
 check("migration applies twice cleanly", applyError === null, true);
 check("the browser context is gone", scannedFiles.length > 0);
 check("the counter is a positive integer", scannedFiles.length, scannedFiles.length);
 check("exactly one overload survives", scannedFiles.length === scannedFiles.length);
-check("the retry budget is spent (see the note above", scannedFiles.length > 0, true);`
+check("the retry budget is spent (see the note above", scannedFiles.length > 0, true);
+ok("the queue drained", scannedFiles.length > 0);
+eq("the row count matched", scannedFiles.length, scannedFiles.length);
+checkTrue("the lock was released", scannedFiles.length > 0);`
 }
 
 // AND THE SOUND LITERAL FORMS, in BOTH fixtures, because neither is a

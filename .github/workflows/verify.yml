@@ -118,6 +118,26 @@ jobs:
         run: npm run build
 
       # THE ONE THIS FILE WAS WRITTEN FOR.
+      # POSTGRES BEFORE THE MUTATION SUITES, not after them.
+      #
+      # It used to be installed in the step below the mutation run, on the
+      # reasonable-looking argument that only the database suites need it.
+      # They are not the only ones: ai-memory.mutation.mjs drives
+      # chat-memory-store.itest.mjs, which starts an ephemeral cluster with
+      # initdb — and with no initdb on PATH that gate is RED on the
+      # unmutated tree, so the whole suite reports "BASELINE IS RED" and
+      # kills nothing. It had been doing that on main while the build
+      # stayed green, because the mutation suites are not part of
+      # `npm run gates`.
+      #
+      # Installing it earlier costs the same minute and removes a whole
+      # class of suite that cannot run where it is asked to.
+      - name: postgres, for the suites that need one
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql
+          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
+
       - name: mutation suites
         run: npm run test:mutation
 
@@ -138,11 +158,6 @@ jobs:
       # scripts/db/run-dbtests.mjs provisions a throwaway PostgreSQL with
       # initdb, applies bootstrap-supabase.sql and every migration in
       # order, and runs the suites against it — no secrets needed.
-      - name: postgres, for the database suites
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql
-          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
 
       # ITS EXIT CODE CANNOT TELL YOU IT RAN. run-dbtests.mjs exits 0 when
       # no Postgres is reachable — deliberately, and its own header says

@@ -220,6 +220,29 @@ console.log("== 1c. the deployment itself is tried, by something ==");
     "broken.md is thrown away exactly when it matters");
 }
 
+console.log("== 1d. a suite that needs a database is not asked to run before there is one ==");
+// ---------------------------------------------------------------------
+// ai-memory.mutation.mjs drives an INTEGRATION suite that starts an
+// ephemeral cluster with initdb. Postgres used to be installed in the
+// step BELOW the mutation run, so that gate was red on the unmutated
+// tree, the whole suite printed "BASELINE IS RED" and killed nothing —
+// on main, for as long as the step order was that way, while the build
+// stayed green because the mutation suites are not part of the gates.
+//
+// Checked as ORDER, which is the property. A step that exists in the
+// wrong place is not the same as a step that is missing, and only one
+// of those two is what happened.
+{
+  const pg = wfCode.indexOf("sudo apt-get install -y -qq postgresql");
+  const mutations = wfCode.indexOf("run: npm run test:mutation");
+  const dbtests = wfCode.indexOf("npm run test:db");
+  check("postgres is installed somewhere", pg !== -1, "no step installs it");
+  check("...before the mutation suites run", pg !== -1 && mutations !== -1 && pg < mutations,
+    `postgres at ${pg}, mutations at ${mutations} — a mutation suite whose gate needs a database cannot run`);
+  check("...and before the database suites, which is where it started",
+    pg !== -1 && dbtests !== -1 && pg < dbtests, `postgres at ${pg}, db suites at ${dbtests}`);
+}
+
 console.log("== 2. the browser tests run on a push, not only on a schedule ==");
 {
   // The nightly job is fine as a nightly job. What was missing was

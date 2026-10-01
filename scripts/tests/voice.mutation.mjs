@@ -326,10 +326,17 @@ const MUTANTS = [
     to: '"thinkingX": "Σκέφτεται"',
   },
   {
+    // ANCHORED ON THE WHOLE PAIR, 2026-10-01. `"out_of_minutes"` occurs
+    // TWICE in messages/el.json — once for voice, once elsewhere — and
+    // String.replace takes the first, which is not the one the voice
+    // gate reads. So the mutant renamed a key nobody here depends on
+    // and the gate stayed green: a hole that was never a hole in the
+    // product, only in the anchor. Settled by renaming each occurrence
+    // in turn: the voice wording is RED, the other is GREEN.
     name: "Greek loses the out-of-minutes error, so a Greek user out of minutes reads English",
     file: EL,
-    from: '"out_of_minutes"',
-    to: '"out_of_minutesX"',
+    from: '"out_of_minutes": "Τα λεπτά φωνής αυτού του μήνα εξαντλήθηκαν."',
+    to: '"out_of_minutesX": "Τα λεπτά φωνής αυτού του μήνα εξαντλήθηκαν."',
   },
   {
     name: "the price placeholder is dropped from the Listen button in English",

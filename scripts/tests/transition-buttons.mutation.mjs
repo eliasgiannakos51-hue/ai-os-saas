@@ -124,8 +124,19 @@ const MUTANTS = [
     // teach nothing: the user could never find that page again alone.
     name: "a destination points at a page the sidebar does not draw",
     file: LIB,
+    // RE-AIMED 2026-10-01. The mutant used to send the button at
+    // /dashboard/data-analysis, which WAS hidden when it was written and
+    // is drawn now — so it stopped producing the defect and started
+    // producing a perfectly good destination, and the gate was right to
+    // stay green. A mutant whose target becomes legal is a mutant that
+    // measures nothing, and it reports as a hole rather than a pass,
+    // which is the runner behaving correctly.
+    //
+    // /dashboard/images is `hidden`: the page works and the sidebar does
+    // not draw it, which is exactly the shape this check exists for —
+    // a button that lands somewhere the user can never find again.
     from: 'href: "/dashboard/coding",',
-    to: 'href: "/dashboard/data-analysis",',
+    to: 'href: "/dashboard/images",',
     expect: "every destination is a row the sidebar actually draws",
   },
   {

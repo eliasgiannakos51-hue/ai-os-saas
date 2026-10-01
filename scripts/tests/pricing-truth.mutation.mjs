@@ -150,7 +150,14 @@ const MUTANTS = [
     file: PRICING_PAGE,
     from: "ROWS: 46",
     to: "ROWS: 43",
-    expect: "the page says 43 rows and soldFeatures() returns 45",
+    // THE COUNT IS NOT PINNED, 2026-10-01. This expected "returns 45"
+    // and the catalog has 46 — so the mutant went red on exactly the
+    // right check and was filed as a miss because the sentence quoted a
+    // number that moved. The defect is the DRIFT between what the page
+    // says and what the catalog returns; the size of the catalog is not
+    // part of it, and pinning it makes this mutant go stale every time
+    // a feature is added.
+    expect: "the page says 43 rows and soldFeatures() returns",
   },
   {
     // The same shape on the other half of the sentence. Seven sections is

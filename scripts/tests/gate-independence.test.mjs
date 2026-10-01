@@ -86,6 +86,14 @@ const NONE_IS_FINE = {
     "`hidden` wrapper, and NOT rendered in the sidebar or the account menu — no single " +
     "file can satisfy that alone. Settled three ways (removed, hidden behind a breakpoint, " +
     "showCode dropped): RED each time.",
+  "connector-safety.test.mjs":
+    "a RELATION across four files that no one of them can satisfy alone: the scope list in " +
+    "providers.ts, the wrapper in chat-tool.ts, the two encryption contexts in store.ts, and " +
+    "the write census over read.ts. The population is the provider list, derived — a fourth " +
+    "provider is held to the same rules without anyone returning here. Settled 2026-09-30 by " +
+    "connector-safety.mutation.mjs: 6 of 6, including the two that matter most — a widened " +
+    "gmail scope and a dropped untrusted wrapper. (It reads its four files with readFileSync " +
+    "through a helper, which is why the scan does not see DISK.)",
   "write-guards.test.mjs":
     "a SHAPE over the write paths it finds. Every update must re-assert what it read. " +
     "Settled twice — dropping the .or() guard, and moving the comparison back into " +

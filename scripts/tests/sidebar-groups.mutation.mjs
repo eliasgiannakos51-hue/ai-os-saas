@@ -137,7 +137,16 @@ const MUTANTS = [
     // in a group must empty it.
     from: '      { href: \"/dashboard/agents\", label: \"AI Agents\", icon: MODULE_ICONS.agents, hintKey: \"agents\" },\n      { href: \"/dashboard/automation\", label: \"Automation\", icon: MODULE_ICONS.automation, hintKey: \"automation\" },',
     to: '      { href: \"/dashboard/agents\", label: \"AI Agents\", icon: MODULE_ICONS.agents, hintKey: \"agents\" , hidden: true },\n      { href: \"/dashboard/automation\", label: \"Automation\", icon: MODULE_ICONS.automation, hintKey: \"automation\" , hidden: true },',
-    expect: "every declared group still draws rows",
+    // RE-NAMED 2026-10-01, not relaxed. The check this trips was
+    // rewritten when the five all-notBuilt groups arrived: "every
+    // declared group still draws rows" stopped being the rule, because
+    // Connect and the other four are declared and draw nothing ON
+    // PURPOSE. The population split into live groups and held ones, and
+    // the sentence moved with it. The mutant still goes red on exactly
+    // the defect it was written for — a live group emptied by accident
+    // — and the runner was right to refuse a stale expectation rather
+    // than count it as caught.
+    expect: "every group with a live row draws it",
   },
 
   // ---- D. ONE ACTION, NOT A PINNED BLOCK ----------------------------

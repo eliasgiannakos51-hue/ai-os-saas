@@ -150,6 +150,21 @@ const MUTANTS = [
     to: '            const body = `${{ toJSON(steps.look.outputs.report) }}`.replace(/^"|"$/g, "");',
     expect: "wrapped in backticks",
   },
+  {
+    // THE STEP MOVES BACK BELOW THE MUTATION RUN, and ai-memory goes
+    // back to reporting BASELINE IS RED and killing nothing.
+    // THE TWO STEPS SWAP BACK, which is the defect exactly as it was:
+    // the install is still there, still correct, and still one step too
+    // late. Renaming the step alone did not do it — the first version of
+    // this mutant changed the step's NAME and the gate stayed green,
+    // because the gate keys on the install command and not on a label.
+    // A mutant that edits a name is testing the name.
+    name: "postgres is installed after the suites that need it",
+    file: WF,
+    from: '      - name: postgres, for the suites that need one\n        run: |\n          sudo apt-get update -qq\n          sudo apt-get install -y -qq postgresql\n          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"\n\n      - name: mutation suites\n        run: npm run test:mutation',
+    to: '      - name: mutation suites\n        run: npm run test:mutation\n\n      - name: postgres, for the suites that need one\n        run: |\n          sudo apt-get update -qq\n          sudo apt-get install -y -qq postgresql\n          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"',
+    expect: "before the mutation suites",
+  },
 ];
 
 function runGate() {

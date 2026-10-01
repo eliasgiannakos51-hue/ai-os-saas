@@ -74,9 +74,37 @@ function tallyOf(out) {
   return m[2] === undefined ? { passed: Number(m[1]), failed: 0 } : { passed: Number(m[1]), failed: Number(m[2]) };
 }
 
+// THE GATES THAT PRINT NO COUNT OF THEIR OWN, AND SO ADD NOTHING TO THE
+// TOTAL. This list exists because on 2026-10-01 the footer read 21454
+// where every other run of the same tree read 22353: billing-coverage had
+// silently joined this set for one run, its 899 assertions vanished from
+// the total, and the line still said ALL 298 GATES PASSED. A gate that
+// prints nothing at all looks exactly like a gate that passed.
+//
+// Held BOTH ways: a gate that newly stops printing a count fails the run,
+// and a gate on this list that starts printing one fails it too, so the
+// list cannot quietly grow stale. The footer says the number out loud
+// rather than leaving the reader to subtract.
+const UNCOUNTED = new Set([
+  "api-keys-doc.test.mjs",
+  "cron-firing.test.mjs",
+  "email-silence.test.mjs",
+  "health-classify.test.mjs",
+  "html-escape.test.mjs",
+  "mutation-runner-honesty.test.mjs",
+  "mutation-sidecar.test.mjs",
+  "mutation-tree.test.mjs",
+  "nav-events.test.mjs",
+  "numeric-boundaries.test.mjs",
+  "truncate.test.mjs",
+]);
+
 let totalPassed = 0;
 let totalFailed = 0;
 let ran = 0;
+let uncountedRan = 0;
+const silent = [];
+const spoke = [];
 const started = Date.now();
 
 for (const file of gates) {
@@ -103,6 +131,10 @@ for (const file of gates) {
   if (tally) {
     totalPassed += tally.passed;
     totalFailed += tally.failed;
+    if (UNCOUNTED.has(file)) spoke.push(file);
+  } else {
+    uncountedRan++;
+    if (!UNCOUNTED.has(file)) silent.push(file);
   }
 
   if (r.status !== 0) {
@@ -128,6 +160,24 @@ for (const file of gates) {
 }
 
 const seconds = ((Date.now() - started) / 1000).toFixed(1);
+
+if (silent.length || spoke.length) {
+  console.log(`\n${"=".repeat(70)}`);
+  for (const f of silent) {
+    console.log(`PRINTED NO COUNT: ${f}`);
+    console.log("  Its assertions are missing from the total below, and the");
+    console.log("  run cannot tell that from a gate with nothing to check.");
+  }
+  for (const f of spoke) {
+    console.log(`NOW PRINTS A COUNT: ${f}`);
+    console.log("  It is listed as uncountable and is not. Remove it from UNCOUNTED.");
+  }
+  console.log(`${"=".repeat(70)}`);
+  console.log("THE TOTAL BELOW IS NOT THE NUMBER OF CHECKS THAT RAN.");
+  process.exit(1);
+}
+
 console.log(
-  `\nALL ${gates.length} GATES PASSED — ${totalPassed} checks, ${totalFailed} failed, ${seconds}s`
+  `\nALL ${gates.length} GATES PASSED — ${totalPassed} checks, ${totalFailed} failed, ${seconds}s` +
+    `\n${uncountedRan} of the ${gates.length} print no count of their own and add nothing to that total.`
 );

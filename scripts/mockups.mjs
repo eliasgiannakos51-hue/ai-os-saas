@@ -21,69 +21,87 @@ const OUT = "docs/mockups";
 const SHOT_DIR = process.env.SHOT_DIR || "/tmp/mockup-shots";
 
 // ---------------------------------------------------------------- the skins
+// Each skin is ONE structure and TWO palettes. The structure is shared on
+// purpose: if the dark and the light version differ in anything but colour,
+// one of them is going to rot, and it will be the one nobody opens.
 const SKINS = [
   {
     id: "a-claude",
-    name: "A - ANOIXTO (Claude)",
-    note: "Light paper, one clay accent, no rail on home.",
-    rail: "none-on-home",
-    railW: 236,
+    name: "A - Claude-inspired",
+    note: "Warm paper and warm graphite. Serif headline, clay accent.",
     headlineFont: 'ui-serif, "Iowan Old Style", Georgia, serif',
-    headlineSize: "40px",
-    headlineWeight: "400",
-    vars: {
-      bg: "#faf9f7", canvas: "#faf9f7", surface: "#ffffff", rail: "#f4f2ee",
-      text: "#1f1e1d", muted: "#6b6763", faint: "#908b85", line: "#e7e3dd",
-      accent: "#c15f3c", accentText: "#ffffff", chip: "#f1eee9",
+    headlineSize: "40px", headlineWeight: "400", tracking: "-.4px",
+    radius: "12px",
+    screens: ["home", "typed", "menu", "filter", "grid", "chat", "build"],
+    shots: ["home", "chat", "build"],
+    themes: {
+      dark: {
+        bg: "#262624", canvas: "#1f1e1d", surface: "#302f2d", rail: "#1f1e1d",
+        text: "#f3f1ec", muted: "#b2ada4", faint: "#89847c", line: "#3d3b37",
+        accent: "#d97757", accentText: "#1f1e1d", chip: "#35332f",
+        shadow: "0 1px 2px rgba(0,0,0,.30)", shadowUp: "0 10px 34px rgba(0,0,0,.38)",
+      },
+      light: {
+        bg: "#faf9f7", canvas: "#f4f2ee", surface: "#ffffff", rail: "#f4f2ee",
+        text: "#1f1e1d", muted: "#6b6763", faint: "#908b85", line: "#e7e3dd",
+        accent: "#c15f3c", accentText: "#ffffff", chip: "#f1eee9",
+        shadow: "0 1px 2px rgba(31,30,29,.05)", shadowUp: "0 10px 34px rgba(31,30,29,.08)",
+      },
     },
   },
   {
-    id: "b-chatgpt",
-    name: "B - SKOURO (ChatGPT)",
-    note: "Near-black, white send button, rail always on with history.",
-    rail: "always",
-    railW: 258,
+    id: "b-linear",
+    name: "B - Linear-inspired",
+    note: "Near-black, tight type, 8px corners, the palette front and centre.",
     headlineFont: "inherit",
-    headlineSize: "30px",
-    headlineWeight: "600",
-    vars: {
-      bg: "#0d0d0d", canvas: "#0d0d0d", surface: "#171717", rail: "#000000",
-      text: "#ececec", muted: "#9b9b9b", faint: "#6e6e6e", line: "#262626",
-      accent: "#ffffff", accentText: "#0d0d0d", chip: "#1e1e1e",
+    headlineSize: "33px", headlineWeight: "600", tracking: "-.9px",
+    radius: "8px",
+    screens: ["home", "typed", "menu", "filter", "grid", "chat", "build"],
+    shots: ["home", "chat", "build"],
+    themes: {
+      dark: {
+        bg: "#08090a", canvas: "#0c0d0e", surface: "#121315", rail: "#0a0b0c",
+        text: "#f7f8f8", muted: "#8a8f98", faint: "#62666d", line: "#1f2023",
+        accent: "#7b84eb", accentText: "#08090a", chip: "#191a1d",
+        shadow: "0 1px 2px rgba(0,0,0,.50)", shadowUp: "0 12px 40px rgba(0,0,0,.55)",
+      },
+      light: {
+        bg: "#ffffff", canvas: "#fbfbfb", surface: "#ffffff", rail: "#fafafa",
+        text: "#0d0e10", muted: "#6b6f76", faint: "#8a8f98", line: "#e8e8ea",
+        accent: "#5e6ad2", accentText: "#ffffff", chip: "#f2f2f4",
+        shadow: "0 1px 2px rgba(13,14,16,.05)", shadowUp: "0 12px 40px rgba(13,14,16,.09)",
+      },
     },
   },
   {
     id: "c-hybrid",
-    name: "C - YBRIDIKO",
-    note: "Icon rail that names itself, muted indigo, panel is first class.",
-    rail: "icons",
-    railW: 220,
+    name: "C - the hybrid",
+    note: "Deep grey, never black. Slate indigo, generous spacing.",
     headlineFont: "inherit",
-    headlineSize: "34px",
-    headlineWeight: "550",
-    vars: {
-      bg: "#ffffff", canvas: "#f7f7f8", surface: "#ffffff", rail: "#fbfbfc",
-      text: "#15161a", muted: "#70727d", faint: "#9a9ca6", line: "#e6e7eb",
-      accent: "#5b6bb0", accentText: "#ffffff", chip: "#f2f3f6",
-    },
-  },
-  {
-    id: "c-simple",
-    name: "C2 - APLO",
-    note: "Three rows in the rail. Every tool still reachable, through the field.",
-    rail: "minimal",
-    railW: 244,
-    headlineFont: "inherit",
-    headlineSize: "36px",
-    headlineWeight: "550",
+    headlineSize: "36px", headlineWeight: "550", tracking: "-.5px",
+    radius: "11px",
     screens: ["home", "typed", "menu", "filter", "grid", "chat", "build"],
-    vars: {
-      bg: "#ffffff", canvas: "#f7f7f8", surface: "#ffffff", rail: "#fbfbfc",
-      text: "#15161a", muted: "#70727d", faint: "#9a9ca6", line: "#e6e7eb",
-      accent: "#5b6bb0", accentText: "#ffffff", chip: "#f2f3f6",
+    shots: ["home", "typed", "menu", "grid", "chat", "build"],
+    phoneShots: ["home", "chat", "build"],
+    themes: {
+      dark: {
+        bg: "#1a1b1e", canvas: "#151619", surface: "#212328", rail: "#151619",
+        text: "#eceef2", muted: "#9aa0ab", faint: "#71767f", line: "#2c2f36",
+        accent: "#8b95e8", accentText: "#16171a", chip: "#262931",
+        shadow: "0 1px 2px rgba(0,0,0,.35)", shadowUp: "0 12px 38px rgba(0,0,0,.42)",
+      },
+      light: {
+        bg: "#ffffff", canvas: "#f7f7f8", surface: "#ffffff", rail: "#fbfbfc",
+        text: "#15161a", muted: "#70727d", faint: "#9a9ca6", line: "#e6e7eb",
+        accent: "#5b6bb0", accentText: "#ffffff", chip: "#f2f3f6",
+        shadow: "0 1px 2px rgba(21,22,26,.05)", shadowUp: "0 12px 38px rgba(21,22,26,.08)",
+      },
     },
   },
 ];
+
+// Every skin now uses the same rail and the same three roads to the tools.
+for (const skin of SKINS) { skin.rail = "minimal"; skin.railW = 240; }
 
 // -------------------------------------------------------------- the content
 // One source for all three. Edited once, lands in all three.
@@ -137,6 +155,9 @@ const ICONS = {
   chart: "M4 20V9 M10 20V4 M16 20v-7 M3 20h18",
   mic: "M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z M5 11a7 7 0 0 0 14 0 M12 18v3",
   people: "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M2 21a7 7 0 0 1 14 0 M17 7a3 3 0 1 1 0 6 M18 21a5 5 0 0 0-1-3",
+  moon: "M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z",
+  sun: "M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z M12 2v2 M12 20v2 M2 12h2 M20 12h2 M4.9 4.9l1.4 1.4 M17.7 17.7l1.4 1.4 M19.1 4.9l-1.4 1.4 M6.3 17.7l-1.4 1.4",
+  half: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M12 3v18a9 9 0 0 0 0-18z",
   gear: "M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7.5 19l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 13.6H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 3.1V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1.3z",
 };
 
@@ -146,16 +167,30 @@ const icon = (k) => '<svg viewBox="0 0 24 24" class="ic" fill="none" stroke="cur
 // Every rule here earns its place or is not written. There are no shadows,
 // no gradients and no background art: the three things the current UI uses
 // hardest and the three a person reads as noise before they read anything.
+// Every colour is a variable, and the variables are declared three times:
+// once as the default (dark), once under [data-theme=light], and once under
+// prefers-color-scheme for the person who picked Auto. Changing theme is
+// then one attribute, which is the whole point - a second stylesheet is a
+// second thing to forget to update.
+function themeVars(t) {
+  return "--bg:" + t.bg + ";--canvas:" + t.canvas + ";--surface:" + t.surface + ";--rail:" + t.rail +
+    ";--text:" + t.text + ";--muted:" + t.muted + ";--faint:" + t.faint + ";--line:" + t.line +
+    ";--accent:" + t.accent + ";--accentText:" + t.accentText + ";--chip:" + t.chip +
+    ";--shadow:" + t.shadow + ";--shadowUp:" + t.shadowUp + ";";
+}
+
 function css(skin) {
-  const v = skin.vars;
+  const dark = themeVars(skin.themes.dark);
+  const light = themeVars(skin.themes.light);
   return [
-    ":root{",
-    "--bg:" + v.bg + ";--canvas:" + v.canvas + ";--surface:" + v.surface + ";--rail:" + v.rail + ";",
-    "--text:" + v.text + ";--muted:" + v.muted + ";--faint:" + v.faint + ";--line:" + v.line + ";",
-    "--accent:" + v.accent + ";--accentText:" + v.accentText + ";--chip:" + v.chip + ";",
-    "--railW:" + skin.railW + "px;--r:10px;--gut:28px}",
+    // Dark is the default, so it is what :root says. Light is opt-in, and
+    // Auto is the one case where the attribute is absent.
+    ":root{" + dark + "--railW:" + skin.railW + "px;--r:" + skin.radius + ";--gut:28px}",
+    ':root[data-theme="dark"]{' + dark + "}",
+    ':root[data-theme="light"]{' + light + "}",
+    "@media(prefers-color-scheme:light){:root:not([data-theme]){" + light + "}}",
     "*{box-sizing:border-box;margin:0;padding:0}",
-    "body{background:var(--bg);color:var(--text);font:15px/1.55 ui-sans-serif,-apple-system,'Segoe UI',Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}",
+    "body{background:var(--bg);color:var(--text);font:15px/1.55 ui-sans-serif,-apple-system,'Segoe UI',Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;transition:background-color .22s ease,color .22s ease}",
     ".ic{width:17px;height:17px;flex:none;opacity:.72}",
     // ---- shell
     ".shell{display:flex;min-height:100vh}",
@@ -164,10 +199,11 @@ function css(skin) {
     ".dot{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--accent)}",
     ".grp{font-size:10.5px;letter-spacing:.9px;color:var(--faint);padding:16px 8px 6px;font-weight:600}",
     ".nav{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;color:var(--muted);cursor:pointer;font-size:14px}",
+    ".nav{transition:background-color .15s ease,color .15s ease}",
     ".nav:hover{background:var(--chip);color:var(--text)}",
     ".nav.on{background:var(--chip);color:var(--text);font-weight:500}",
     ".nav.on .ic{opacity:1;color:var(--accent)}",
-    ".new{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;font-size:14px;color:var(--text);cursor:pointer;margin-bottom:4px}",
+    ".new{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--line);border-radius:calc(var(--r) - 2px);font-size:14px;color:var(--text);cursor:pointer;margin-bottom:4px}",
     ".hist{font-size:13.5px;color:var(--muted);padding:6px 8px;border-radius:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}",
     ".hist:hover{background:var(--chip);color:var(--text)}",
     ".main{flex:1;min-width:0;display:flex;flex-direction:column}",
@@ -177,27 +213,32 @@ function css(skin) {
     ".ghost{color:var(--muted);font-size:13.5px;cursor:pointer}",
     ".ava{width:27px;height:27px;border-radius:50%;background:var(--chip);border:1px solid var(--line);display:grid;place-items:center;font-size:11.5px;color:var(--muted)}",
     ".burger{display:none;cursor:pointer}",
+    ".tgl{width:30px;height:30px;border-radius:calc(var(--r) - 3px);display:grid;place-items:center;cursor:pointer;color:var(--muted);transition:background-color .15s ease,color .15s ease}",
+    ".tgl:hover{background:var(--chip);color:var(--text)}",
+    ".tgl > span{display:none}",
+    ".tgl[data-mode=dark] .i-dark,.tgl[data-mode=light] .i-light,.tgl[data-mode=auto] .i-auto{display:grid}",
+    ".tgl .ic{opacity:1}",
     ".deskmenu{margin-left:4px}",
     ".deskmenu:hover{color:var(--text)}",
     // ---- home
     ".home{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px var(--gut) 60px;gap:0}",
-    ".h1{font-family:" + skin.headlineFont + ";font-size:" + skin.headlineSize + ";font-weight:" + skin.headlineWeight + ";letter-spacing:-.4px;text-align:center;max-width:620px;line-height:1.25}",
+    ".h1{font-family:" + skin.headlineFont + ";font-size:" + skin.headlineSize + ";font-weight:" + skin.headlineWeight + ";letter-spacing:" + skin.tracking + ";text-align:center;max-width:620px;line-height:1.25}",
     ".sub{color:var(--muted);font-size:14.5px;margin-top:12px;text-align:center}",
     ".wrap{width:100%;max-width:680px;margin-top:30px}",
     // ---- the one field
-    ".field{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 14px 10px;transition:border-color .15s}",
-    ".field:focus-within{border-color:var(--accent)}",
+    ".field{background:var(--surface);border:1px solid var(--line);border-radius:calc(var(--r) + 3px);padding:14px 14px 10px;box-shadow:var(--shadow);transition:border-color .18s ease,box-shadow .18s ease,background-color .22s ease}",
+    ".field:focus-within{border-color:var(--accent);box-shadow:var(--shadowUp)}",
     ".ta{width:100%;border:0;outline:0;background:transparent;color:var(--text);font:inherit;resize:none;min-height:46px}",
     ".ta::placeholder{color:var(--faint)}",
     ".row{display:flex;align-items:center;gap:8px;margin-top:6px}",
     ".tool{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;color:var(--muted);cursor:pointer}",
     ".tool:hover{background:var(--chip)}",
-    ".send{margin-left:auto;width:30px;height:30px;border-radius:8px;background:var(--accent);color:var(--accentText);display:grid;place-items:center;cursor:pointer}",
+    ".send{margin-left:auto;width:30px;height:30px;border-radius:calc(var(--r) - 3px);transition:opacity .18s ease;background:var(--accent);color:var(--accentText);display:grid;place-items:center;cursor:pointer}",
     ".seen{color:var(--faint);font-size:12.5px;margin-top:11px;text-align:center}",
     // ---- cards: three, same weight, no shadow
     ".cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:26px}",
-    ".card{border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;background:var(--surface);transition:border-color .15s}",
-    ".card:hover{border-color:var(--accent)}",
+    ".card{border:1px solid var(--line);border-radius:var(--r);padding:14px;cursor:pointer;background:var(--surface);transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}",
+    ".card:hover{border-color:var(--accent);box-shadow:var(--shadowUp);transform:translateY(-1px)}",
     ".card b{display:block;font-size:14px;font-weight:550;margin-bottom:4px}",
     ".card span{color:var(--muted);font-size:13px;line-height:1.45}",
     // ---- chat
@@ -212,7 +253,7 @@ function css(skin) {
     ".src i{width:5px;height:5px;border-radius:50%;background:var(--accent);font-style:normal}",
     ".lab{font-size:11px;letter-spacing:.7px;color:var(--faint);font-weight:600;margin-bottom:7px}",
     ".fups{display:flex;flex-direction:column;gap:7px;margin-top:20px;border-top:1px solid var(--line);padding-top:16px}",
-    ".fup{border:1px solid var(--line);border-radius:9px;padding:9px 13px;font-size:14px;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:space-between}",
+    ".fup{border:1px solid var(--line);border-radius:calc(var(--r) - 2px);transition:border-color .18s ease;padding:9px 13px;font-size:14px;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:space-between}",
     ".fup:hover{border-color:var(--accent)}",
     ".fup em{color:var(--faint);font-style:normal}",
     ".composer{max-width:720px;width:100%;margin:0 auto;padding:10px 0 18px}",
@@ -220,7 +261,7 @@ function css(skin) {
     // On a phone the side panel has nowhere to go. It does NOT vanish:
     // it becomes a card in the thread that opens full screen, which is
     // the only version of "the panel beside" a 390px screen can keep.
-    ".opener{display:none;align-items:center;gap:10px;border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin:16px 0 0;background:var(--surface);cursor:pointer}",
+    ".opener{display:none;align-items:center;gap:10px;border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin:16px 0 0;background:var(--surface);cursor:pointer;box-shadow:var(--shadow)}",
     ".opener b{font-size:13.5px;font-weight:550}",
     ".opener span{color:var(--muted);font-size:12.5px}",
     ".opener em{margin-left:auto;color:var(--faint);font-style:normal}",
@@ -229,7 +270,7 @@ function css(skin) {
     ".ph{height:46px;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--muted)}",
     ".ph b{color:var(--text);font-weight:550;font-size:13.5px}",
     ".pb{padding:16px;overflow:auto}",
-    ".rcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:10px}",
+    ".rcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:10px}",
     ".rcard h4{font-size:13px;font-weight:600;margin-bottom:12px}",
     ".kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px}",
     ".kv:last-child{border:0}",
@@ -248,15 +289,15 @@ function css(skin) {
     ".chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}",
     ".chip{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12.5px;color:var(--muted);cursor:pointer}",
     ".chip:hover{border-color:var(--accent);color:var(--text)}",
-    ".notdo{border:1px solid var(--line);border-radius:11px;padding:14px 16px;margin-top:22px}",
+    ".notdo{border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-top:22px}",
     ".notdo b{font-size:12.5px;display:block;margin-bottom:8px}",
     ".notdo li{list-style:none;color:var(--muted);font-size:13px;padding:3px 0 3px 15px;position:relative}",
     ".notdo li:before{content:'-';position:absolute;left:0;color:var(--faint)}",
-    ".go{margin-top:20px;background:var(--accent);color:var(--accentText);border:0;border-radius:9px;padding:10px 18px;font:inherit;font-weight:550;font-size:14px;cursor:pointer}",
+    ".go{margin-top:20px;background:var(--accent);color:var(--accentText);border:0;border-radius:calc(var(--r) - 2px);transition:opacity .18s ease;padding:10px 18px;font:inherit;font-weight:550;font-size:14px;cursor:pointer}",
     ".opts{display:flex;gap:18px;align-items:center;margin-top:16px;font-size:13.5px;color:var(--muted);flex-wrap:wrap}",
     ".sel{border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--text);background:var(--surface)}",
     // ---- the live preview inside the panel
-    ".frame{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#fff;color:#1a1a1a}",
+    ".frame{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#fff;color:#1a1a1a}",
     ".fhero{padding:30px 22px;background:#f4f1ec;text-align:center}",
     ".fhero h5{font-size:17px;font-weight:600;margin-bottom:6px;color:#1a1a1a}",
     ".fhero p{font-size:12px;color:#6b6763}",
@@ -280,7 +321,7 @@ function css(skin) {
     ".inline{display:flex;gap:9px;justify-content:center;margin-top:14px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--muted)}",
     // ---- everything else, one keystroke away
     ".ovl{position:fixed;inset:0;background:rgba(16,18,28,.30);display:flex;align-items:flex-start;justify-content:center;padding:96px 16px 16px;z-index:5}",
-    ".pal{width:580px;max-width:100%;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}",
+    ".pal{width:580px;max-width:100%;background:var(--surface);border:1px solid var(--line);border-radius:calc(var(--r) + 3px);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadowUp)}",
     ".palin{padding:15px 18px;border-bottom:1px solid var(--line);color:var(--faint);font-size:15px;display:flex;align-items:center;gap:10px}",
     ".palbody{max-height:470px;overflow:auto;padding:6px 8px 10px}",
     ".palrow{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:8px;font-size:14px;color:var(--text);cursor:pointer}",
@@ -295,8 +336,8 @@ function css(skin) {
     ".tools{flex:1;overflow:auto;padding:26px var(--gut) 40px;max-width:980px;width:100%;margin:0 auto}",
     ".gsec{margin-top:22px}",
     ".grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}",
-    ".gcard{border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;background:var(--surface);transition:border-color .15s}",
-    ".gcard:hover{border-color:var(--accent)}",
+    ".gcard{border:1px solid var(--line);border-radius:var(--r);padding:14px;cursor:pointer;background:var(--surface);transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}",
+    ".gcard:hover{border-color:var(--accent);box-shadow:var(--shadowUp);transform:translateY(-1px)}",
     ".gic{width:30px;height:30px;border-radius:8px;background:var(--chip);display:grid;place-items:center;margin-bottom:10px;color:var(--accent)}",
     ".gic .ic{opacity:1}",
     ".gcard b{display:block;font-size:14px;font-weight:550;margin-bottom:3px}",
@@ -363,12 +404,22 @@ function rail(skin, screen, active) {
 // way back to it. Without that, A's home had an EMPTY top-left corner: the
 // five-second test fails on "where am I", before it ever reaches "what do I
 // press".
+// Three states, not two: dark (the default), light, and auto - which is
+// the only one that can be right for a person whose machine already knows
+// what time it is. The icon IS the state, so the button says which.
+const toggle = () =>
+  '<div class="tgl" data-mode="dark" title="Theme: dark">' +
+  '<span class="i-dark">' + icon("moon") + "</span>" +
+  '<span class="i-light">' + icon("sun") + "</span>" +
+  '<span class="i-auto">' + icon("half") + "</span></div>";
+
 const top = (railless) =>
   '<header class="top"><svg class="ic burger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
   '<path d="M4 7h16M4 12h16M4 17h16"/></svg>' +
   (railless ? '<div class="brand" style="padding:0;gap:8px"><span class="dot"></span>Ionexa</div>' +
     '<span class="ghost deskmenu">Menu</span>' : "") +
-  '<div class="sp"></div><span class="ghost">500 credits</span><div class="ava">O</div></header>';
+  '<div class="sp"></div><span class="ghost">500 credits</span>' + toggle() +
+  '<div class="ava">O</div></header>';
 
 const arrow = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 19V5M6 11l6-6 6 6"/></svg>';
 const clip = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11l-9 9a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg>';
@@ -547,6 +598,15 @@ function page(skin) {
     ids.map((k) => "body.s-" + k + " [data-screen=" + k + "]{display:flex}").join("") +
     "</style></head><body class=\"s-home\">" + body + tabs +
     "<script>" +
+    // Remembered, because a person who picks light and gets dark back
+    // tomorrow has not been given a choice, only a gesture.
+    "var KEY='ionexa-theme',MODES=['dark','light','auto'];" +
+    "function apply(m){var r=document.documentElement;" +
+    "if(m==='auto'){r.removeAttribute('data-theme')}else{r.setAttribute('data-theme',m)}" +
+    "document.querySelectorAll('.tgl').forEach(function(b){b.dataset.mode=m;b.title='Theme: '+m})}" +
+    "var mode=localStorage.getItem(KEY)||'dark';apply(mode);" +
+    "document.querySelectorAll('.tgl').forEach(function(b){b.onclick=function(){" +
+    "mode=MODES[(MODES.indexOf(mode)+1)%3];localStorage.setItem(KEY,mode);apply(mode)}});" +
     "function go(s){document.body.className=(document.body.classList.contains('shot')?'shot ':'')+'s-'+s;" +
     "document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('on',t.dataset.go===s)});" +
     "if(location.hash.slice(1)!==s)location.hash=s}" +
@@ -575,31 +635,58 @@ if (process.env.SKIP_SHOTS) {
 mkdirSync(SHOT_DIR, { recursive: true });
 const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox"] });
 const DEVICES = [["desktop", 1440, 900], ["phone", 390, 844]];
+const THEMES = ["dark", "light"];
+const backgrounds = {};
 let n = 0;
+
+// A screenshot named "dark" that is light is the only failure this script
+// can have that nobody notices, so the theme is read back off the body
+// rather than trusted, and the two are required to differ at the end.
+const lum = (rgb) => {
+  const m = rgb.match(/\d+/g) || [];
+  return (0.2126 * +m[0] + 0.7152 * +m[1] + 0.0722 * +m[2]) / 255;
+};
+
 try {
   for (const skin of SKINS) {
     for (const [dev, w, h] of DEVICES) {
-      const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 2 });
-      const p = await ctx.newPage();
-      for (const screen of (skin.screens || ["home", "chat", "build"])) {
-        await p.goto("file://" + process.cwd() + "/" + OUT + "/" + skin.id + ".html#" + screen);
-        await p.evaluate(() => document.body.classList.add("shot"));
-        await p.waitForTimeout(150);
-        const shown = await p.evaluate(() => {
-          const el = document.querySelector("[data-shell]:not([style*='none'])");
-          const vis = [...document.querySelectorAll("[data-shell]")].find((d) => d.offsetParent !== null);
-          return vis ? vis.dataset.shell : (el ? el.dataset.shell : "none");
-        });
-        if (shown !== screen) throw new Error(skin.id + " " + screen + ": the page is showing " + shown);
-        const file = SHOT_DIR + "/" + skin.id + "-" + dev + "-" + screen + ".png";
-        await p.screenshot({ path: file });
-        console.log("  " + file);
-        n++;
+      const list = dev === "phone" ? (skin.phoneShots || skin.shots) : skin.shots;
+      for (const theme of THEMES) {
+        const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 2 });
+        const p = await ctx.newPage();
+        for (const screen of list) {
+          await p.goto("file://" + process.cwd() + "/" + OUT + "/" + skin.id + ".html#" + screen);
+          await p.evaluate((t) => {
+            localStorage.setItem("ionexa-theme", t);
+            document.documentElement.setAttribute("data-theme", t);
+            document.querySelectorAll(".tgl").forEach((b) => { b.dataset.mode = t; });
+            document.body.classList.add("shot");
+          }, theme);
+          await p.waitForTimeout(260);
+          const state = await p.evaluate(() => {
+            const vis = [...document.querySelectorAll("[data-shell]")].find((d) => d.offsetParent !== null);
+            return { shell: vis ? vis.dataset.shell : "none", bg: getComputedStyle(document.body).backgroundColor };
+          });
+          if (state.shell !== screen) throw new Error(skin.id + " " + screen + ": the page is showing " + state.shell);
+          backgrounds[skin.id + ":" + theme] = state.bg;
+          const file = SHOT_DIR + "/" + skin.id + "-" + theme + "-" + dev + "-" + screen + ".png";
+          await p.screenshot({ path: file });
+          console.log("  " + file);
+          n++;
+        }
+        await ctx.close();
       }
-      await ctx.close();
     }
   }
 } finally {
   await browser.close();
 }
-console.log("\n" + n + " shots, every one asserted to be the screen its name claims.");
+
+for (const skin of SKINS) {
+  const d = backgrounds[skin.id + ":dark"], l = backgrounds[skin.id + ":light"];
+  if (!d || !l) throw new Error(skin.id + ": one of the two themes was never photographed");
+  if (d === l) throw new Error(skin.id + ": both themes rendered the same background " + d);
+  if (lum(d) >= lum(l)) throw new Error(skin.id + ": the dark theme is not darker - " + d + " vs " + l);
+  console.log("  " + skin.id + ": dark " + d + "  light " + l);
+}
+console.log("\n" + n + " shots. Every one asserted to be its own screen, in its own theme.");

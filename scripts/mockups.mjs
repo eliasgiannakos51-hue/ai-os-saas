@@ -19,6 +19,8 @@ import { chromium } from "playwright";
 
 const OUT = "docs/mockups";
 const SHOT_DIR = process.env.SHOT_DIR || "/tmp/mockup-shots";
+// The publishable form: the same page without the document skeleton.
+const FRAG = process.env.FRAG_DIR || "/tmp/mockup-fragments";
 
 // ---------------------------------------------------------------- the skins
 // Each skin is ONE structure and TWO palettes. The structure is shared on
@@ -27,6 +29,7 @@ const SHOT_DIR = process.env.SHOT_DIR || "/tmp/mockup-shots";
 const SKINS = [
   {
     id: "a-claude",
+    title: "Ionexa Paper",
     name: "A - Claude-inspired",
     note: "Warm paper and warm graphite. Serif headline, clay accent.",
     headlineFont: 'ui-serif, "Iowan Old Style", Georgia, serif',
@@ -51,6 +54,7 @@ const SKINS = [
   },
   {
     id: "b-linear",
+    title: "Ionexa Graphite",
     name: "B - Linear-inspired",
     note: "Near-black, tight type, 8px corners, the palette front and centre.",
     headlineFont: "inherit",
@@ -75,6 +79,7 @@ const SKINS = [
   },
   {
     id: "c-hybrid",
+    title: "Ionexa Slate",
     name: "C - the hybrid",
     note: "Deep grey, never black. Slate indigo, generous spacing.",
     headlineFont: "inherit",
@@ -185,15 +190,24 @@ function css(skin) {
   return [
     // Dark is the default, so it is what :root says. Light is opt-in, and
     // Auto is the one case where the attribute is absent.
-    ":root{" + dark + "--railW:" + skin.railW + "px;--r:" + skin.radius + ";--gut:28px}",
-    ':root[data-theme="dark"]{' + dark + "}",
-    ':root[data-theme="light"]{' + light + "}",
-    "@media(prefers-color-scheme:light){:root:not([data-theme]){" + light + "}}",
-    "*{box-sizing:border-box;margin:0;padding:0}",
+    ":root{" + dark + "color-scheme:dark;--railW:" + skin.railW + "px;--r:" + skin.radius + ";--gut:28px}",
+    // Guarded on :not([data-theme="dark"]) rather than :not([data-theme]),
+    // so the page's own Auto - which removes the attribute - still follows
+    // the machine, while an explicit dark choice wins over a light OS.
+    "@media(prefers-color-scheme:light){:root:not([data-theme=\"dark\"]){" + light + "color-scheme:light}}",
+    ':root[data-theme="light"]{' + light + "color-scheme:light}",
+    ':root[data-theme="dark"]{' + dark + "color-scheme:dark}",
+    // NOT `* { margin: 0; padding: 0 }`: published as an artifact, the host
+    // pads :root by the phone's safe-area insets, and a universal reset
+    // takes that away - the page then runs under the status bar.
+    "*{box-sizing:border-box}",
+    "body,h1,h4,h5,p,ul,li,button{margin:0;padding:0}",
+    "ul{list-style:none}",
+    "html,body{height:100%}",
     "body{background:var(--bg);color:var(--text);font:15px/1.55 ui-sans-serif,-apple-system,'Segoe UI',Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;transition:background-color .22s ease,color .22s ease}",
     ".ic{width:17px;height:17px;flex:none;opacity:.72}",
     // ---- shell
-    ".shell{display:flex;min-height:100vh}",
+    ".shell{display:flex;min-height:100%}",
     ".rail{width:var(--railW);flex:none;background:var(--rail);border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:2px}",
     ".brand{display:flex;align-items:center;gap:9px;padding:4px 8px 20px;font-weight:600;letter-spacing:.2px}",
     ".dot{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--accent)}",
@@ -345,7 +359,7 @@ function css(skin) {
     // ---- screens + tabs
     "[data-screen]{display:none}",
     ".main[data-screen]{position:relative}",
-    ".tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:9;display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px}",
+    ".tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:9;display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px}",
     ".tab{padding:5px 13px;border-radius:999px;font-size:12.5px;color:var(--muted);cursor:pointer}",
     ".tab.on{background:var(--accent);color:var(--accentText)}",
     "body.shot .tabs{display:none}",
@@ -590,13 +604,11 @@ function page(skin) {
   // all is one of the things the skins disagree about.
   const body = ids.map((id) =>
     '<div class="shell" data-shell="' + id + '">' + screenOf(skin, id) + "</div>").join("");
-  return "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">" +
-    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
-    "<title>Ionexa " + skin.name + "</title><style>" + css(skin) +
+  return "<title>" + skin.title + "</title><style>" + css(skin) +
     "[data-shell]{display:none}" +
     ids.map((k) => "body.s-" + k + " [data-shell=" + k + "]{display:flex}").join("") +
     ids.map((k) => "body.s-" + k + " [data-screen=" + k + "]{display:flex}").join("") +
-    "</style></head><body class=\"s-home\">" + body + tabs +
+    "</style>" + body + tabs +
     "<script>" +
     // Remembered, because a person who picks light and gets dark back
     // tomorrow has not been given a choice, only a gesture.
@@ -604,22 +616,44 @@ function page(skin) {
     "function apply(m){var r=document.documentElement;" +
     "if(m==='auto'){r.removeAttribute('data-theme')}else{r.setAttribute('data-theme',m)}" +
     "document.querySelectorAll('.tgl').forEach(function(b){b.dataset.mode=m;b.title='Theme: '+m})}" +
-    "var mode=localStorage.getItem(KEY)||'dark';apply(mode);" +
+    // Wrapped: in a private window, with site data blocked, or during a
+    // thumbnail capture, the accessor THROWS - and an unguarded read here
+    // kills the script that also runs the tab strip.
+    "function readMode(){try{return localStorage.getItem(KEY)}catch(e){return null}}" +
+    "function saveMode(v){try{localStorage.setItem(KEY,v)}catch(e){}}" +
+    "var mode=readMode()||'dark';apply(mode);" +
     "document.querySelectorAll('.tgl').forEach(function(b){b.onclick=function(){" +
-    "mode=MODES[(MODES.indexOf(mode)+1)%3];localStorage.setItem(KEY,mode);apply(mode)}});" +
+    "mode=MODES[(MODES.indexOf(mode)+1)%3];saveMode(mode);apply(mode)}});" +
+    "document.body.className='s-home';" +
     "function go(s){document.body.className=(document.body.classList.contains('shot')?'shot ':'')+'s-'+s;" +
     "document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('on',t.dataset.go===s)});" +
     "if(location.hash.slice(1)!==s)location.hash=s}" +
     "document.querySelectorAll('.tab').forEach(function(t){t.onclick=function(){go(t.dataset.go)}});" +
     "go(location.hash.slice(1)||'home');" +
     "addEventListener('hashchange',function(){go(location.hash.slice(1)||'home')});" +
-    "</script></body></html>";
+    "</script>";
 }
 
 // ------------------------------------------------------------------ write
+//
+// ONE CONTENT, TWO ENVELOPES. Published as an artifact the page must NOT
+// carry its own doctype, html, head or body - the host supplies those and
+// pads the root for the phone's safe areas. Opened as a file on disk it
+// must carry all four or the browser reads it in quirks mode.
+//
+// So page() emits the inside and standalone() wraps it. Two generated
+// envelopes around one source beats two hand-kept copies, which is the
+// same argument that made this a generator in the first place.
+const standalone = (skin) =>
+  '<!doctype html><html lang="en"><head><meta charset="utf-8">' +
+  '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">' +
+  "</head><body>" + page(skin) + "</body></html>";
+
 mkdirSync(OUT, { recursive: true });
+mkdirSync(FRAG, { recursive: true });
 for (const skin of SKINS) {
-  writeFileSync(OUT + "/" + skin.id + ".html", page(skin));
+  writeFileSync(OUT + "/" + skin.id + ".html", standalone(skin));
+  writeFileSync(FRAG + "/" + skin.id + ".html", page(skin));
   console.log("  " + OUT + "/" + skin.id + ".html   " + skin.note);
 }
 

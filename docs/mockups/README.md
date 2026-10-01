@@ -5,6 +5,12 @@ them to be chosen. Nothing in `src/` changed to make them.
 
     node scripts/mockups.mjs              # writes the three, photographs them
     SKIP_SHOTS=1 node scripts/mockups.mjs # just the HTML
+    FRAG_DIR=... node scripts/mockups.mjs # also writes the publishable form
+
+Published as artifacts, 2026-10-01 — the files here open the same page:
+Paper `claude.ai/artifact/WLeoDnbpAbVxdHAjocSBHZ`,
+Graphite `claude.ai/artifact/Ro2HbGqsVZ8jGagwYkD3NK`,
+Slate `claude.ai/artifact/QukqSADXg9QikUA7hHdA7o`.
 
 | file | what it is |
 |---|---|
@@ -108,3 +114,27 @@ dark one to be darker:
     c-hybrid: dark rgb(26, 27, 30)  light rgb(255, 255, 255)
 
 Those three lines are printed by the run, not copied into this file by hand.
+
+## One content, two envelopes
+
+A page published as an artifact must NOT carry its own doctype, `html`,
+`head` or `body`: the host supplies those and pads the root element by the
+phone's safe-area insets. The same page opened as a file on disk must carry
+all four, or the browser reads it in quirks mode.
+
+So `page()` emits the inside and `standalone()` wraps it, and the run writes
+both. Two generated envelopes around one source beats two hand-kept copies —
+the same argument that made this a generator rather than three files.
+
+Three things that only matter in the published form, and all three were
+wrong first:
+
+- the reset was `* { margin: 0; padding: 0 }`, which takes the host's
+  safe-area padding off `:root` and runs the page under the status bar;
+- `localStorage` was read unguarded. It throws in a private window, with
+  site data blocked, and during thumbnail capture — and that read sits in
+  the same script as the tab strip, so the whole page would have gone inert
+  rather than merely forgetting the theme;
+- the dark-theme guard was `:root:not([data-theme])`, which breaks the
+  page's own Auto: Auto removes the attribute, so the guard has to be
+  `:not([data-theme="dark"])`.

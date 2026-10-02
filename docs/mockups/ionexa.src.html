@@ -1,0 +1,916 @@
+<title>Ionexa Home</title>
+<style>
+/* One interface. Claude's calm as the base; Linear's precision and its
+   palette; Arc's motion; Stripe's type; Perplexity's sources.
+   Layout: a quiet rail on the left, one field in the centre, and the
+   result in a panel beside it. Nothing else earns a place. */
+/*@FONTS@*/
+:root{
+  /* dark is the default, so bare :root carries it */
+  --bg:#18191c; --rail:#141518; --surface:#1f2024; --surface-2:#26272c;
+  --line:#2c2d32; --line-strong:#3a3b41;
+  --text:#ececee; --muted:#a3a4ab; --faint:#74757c;
+  --accent:#d6a35c; --accent-ink:#1b1408; --accent-soft:rgba(214,163,92,.14);
+  --focus:rgba(214,163,92,.45);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.03) inset, 0 1px 2px rgba(0,0,0,.25);
+  --shadow-lg:0 1px 0 rgba(255,255,255,.04) inset, 0 18px 48px rgba(0,0,0,.45);
+  --scrim:rgba(8,9,11,.55);
+  --site-bg:#fbf8f3; --site-ink:#1d1a16; --site-soft:#efe8dc; --site-mute:#6f665b;
+  color-scheme:dark;
+
+  --font:"Commissioner",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --fs-display:clamp(27px,3.1vw,38px); --fs-title:20px; --fs-body:15px;
+  --fs-small:13px; --fs-label:11px;
+  --r-sm:8px; --r:12px; --r-lg:16px;
+  --rail-w:252px; --panel-w:440px; --gut:28px;
+  --ease:cubic-bezier(.2,.8,.2,1); --t:220ms;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#ffffff; --rail:#f8f8f9; --surface:#ffffff; --surface-2:#f2f2f4;
+  --line:#e8e8eb; --line-strong:#d6d6db;
+  --text:#16171a; --muted:#5f6068; --faint:#94959c;
+  --accent:#a5651a; --accent-ink:#ffffff; --accent-soft:rgba(165,101,26,.10);
+  --focus:rgba(165,101,26,.35);
+  --shadow-sm:0 1px 2px rgba(16,17,20,.05);
+  --shadow-lg:0 1px 2px rgba(16,17,20,.05), 0 18px 44px rgba(16,17,20,.10);
+  --scrim:rgba(22,23,26,.28);
+  color-scheme:light;
+}}
+:root[data-theme="light"]{
+  --bg:#ffffff; --rail:#f8f8f9; --surface:#ffffff; --surface-2:#f2f2f4;
+  --line:#e8e8eb; --line-strong:#d6d6db;
+  --text:#16171a; --muted:#5f6068; --faint:#94959c;
+  --accent:#a5651a; --accent-ink:#ffffff; --accent-soft:rgba(165,101,26,.10);
+  --focus:rgba(165,101,26,.35);
+  --shadow-sm:0 1px 2px rgba(16,17,20,.05);
+  --shadow-lg:0 1px 2px rgba(16,17,20,.05), 0 18px 44px rgba(16,17,20,.10);
+  --scrim:rgba(22,23,26,.28);
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#18191c; --rail:#141518; --surface:#1f2024; --surface-2:#26272c;
+  --line:#2c2d32; --line-strong:#3a3b41;
+  --text:#ececee; --muted:#a3a4ab; --faint:#74757c;
+  --accent:#d6a35c; --accent-ink:#1b1408; --accent-soft:rgba(214,163,92,.14);
+  --focus:rgba(214,163,92,.45);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.03) inset, 0 1px 2px rgba(0,0,0,.25);
+  --shadow-lg:0 1px 0 rgba(255,255,255,.04) inset, 0 18px 48px rgba(0,0,0,.45);
+  --scrim:rgba(8,9,11,.55);
+  color-scheme:dark;
+}
+
+/* Not `* { margin:0; padding:0 }`: the host pads :root for the phone's
+   safe areas, and a universal reset would take that away. */
+*{box-sizing:border-box}
+html,body{height:100%}
+/* the host's skeleton carries this; the file on disk does not */
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font:400 var(--fs-body)/1.6 var(--font);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  transition:background-color var(--t) var(--ease),color var(--t) var(--ease)}
+h1,h2,h3,h4,p,ul,ol,li,figure{margin:0;padding:0}
+ul,ol{list-style:none}
+button,input,textarea,select{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer;padding:0}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+.ic{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.kbd{font:500 11px/1 var(--mono);color:var(--faint);border:1px solid var(--line);border-bottom-width:2px;
+  border-radius:5px;padding:3px 5px;min-width:20px;text-align:center}
+.label{font-size:var(--fs-label);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+
+/* ---------------------------------------------------------------- shell */
+.app{display:flex;height:100%;min-height:0}
+.rail{width:var(--rail-w);flex:none;background:var(--rail);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;padding:14px 12px 12px;gap:2px;min-height:0;
+  transition:background-color var(--t) var(--ease),transform 280ms var(--ease)}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 14px;font-weight:600;letter-spacing:-.01em;font-size:15.5px}
+.mark{width:22px;height:22px;flex:none}
+.row{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:var(--r-sm);color:var(--muted);
+  font-size:14px;text-decoration:none;transition:background-color 140ms var(--ease),color 140ms var(--ease);width:100%;text-align:left}
+.row:hover{background:var(--surface-2);color:var(--text)}
+.row.on{background:var(--surface-2);color:var(--text)}
+.row .kbd{margin-left:auto}
+.new{color:var(--text);border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow-sm);margin-bottom:4px}
+.new:hover{border-color:var(--line-strong);background:var(--surface)}
+.recent{flex:1;overflow:auto;margin-top:12px;min-height:0;display:flex;flex-direction:column;gap:1px}
+.recent .label{padding:10px 9px 6px}
+.recent .row{font-size:13.5px;padding:6px 9px}
+.recent .row span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.rail-foot{border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:2px}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0;position:relative}
+.top{height:56px;flex:none;display:flex;align-items:center;gap:6px;padding:0 18px 0 var(--gut)}
+.top .sp{flex:1}
+.top-brand{display:none;align-items:center;gap:9px;font-weight:600}
+.icon-btn{width:34px;height:34px;display:grid;place-items:center;border-radius:var(--r-sm);color:var(--muted);
+  transition:background-color 140ms var(--ease),color 140ms var(--ease)}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.pill{display:flex;align-items:center;gap:7px;height:30px;padding:0 11px;border-radius:999px;border:1px solid var(--line);
+  color:var(--muted);font-size:12.5px}
+.pill b{color:var(--text);font-weight:600}
+.lang{font:600 11.5px/1 var(--font);letter-spacing:.06em}
+.burger{display:none}
+.theme [data-i]{display:none}
+.theme[data-mode="dark"] [data-i="dark"],.theme[data-mode="light"] [data-i="light"],.theme[data-mode="auto"] [data-i="auto"]{display:block}
+
+/* views: Arc-style, the incoming one rises 6px and settles */
+.view{flex:1;min-height:0;display:none}
+.view.on{display:flex;animation:enter var(--t) var(--ease) both}
+@keyframes enter{from{opacity:0;transform:translateY(6px) scale(.996)}to{opacity:1;transform:none}}
+
+/* ----------------------------------------------------------------- home */
+.home{flex-direction:column;align-items:center;justify-content:center;padding:24px var(--gut) 64px;overflow:auto}
+.hello{color:var(--faint);font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.hello .mark{width:18px;height:18px}
+.display{font-size:var(--fs-display);font-weight:600;letter-spacing:-.025em;line-height:1.15;text-align:center;
+  text-wrap:balance;max-width:640px}
+.stack{width:100%;max-width:700px;margin-top:28px;display:flex;flex-direction:column;gap:14px}
+
+.field{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);
+  padding:14px 14px 10px 16px;transition:border-color 160ms var(--ease),box-shadow 160ms var(--ease)}
+.field:focus-within{border-color:var(--line-strong);box-shadow:0 0 0 4px var(--accent-soft),var(--shadow-sm)}
+.field textarea{display:block;width:100%;border:0;outline:0;background:transparent;resize:none;min-height:52px;
+  font-size:16px;line-height:1.55;color:var(--text)}
+.field textarea::placeholder{color:var(--faint)}
+.field-row{display:flex;align-items:center;gap:6px;margin-top:6px}
+.field-row .sp{flex:1}
+.send{width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;
+  transition:transform 140ms var(--ease),opacity 140ms var(--ease)}
+.send:hover{transform:translateY(-1px)}
+.send .ic{stroke-width:2}
+
+/* the routed line: what the field decided, and the way to undo it */
+/* One line under the field, two meanings: while it is empty it says what
+   the field already reads; once you type, it says where you are going.
+   They share the slot, so the field never sits over an empty gap. */
+.route{display:none;align-items:center;gap:8px;min-height:30px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.route.on{display:flex;animation:enter 180ms var(--ease) both}
+.chip{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 11px;border-radius:999px;background:var(--accent-soft);
+  color:var(--text);font-weight:500}
+.chip .ic{width:15px;height:15px;color:var(--accent)}
+.link{color:var(--accent);font-weight:500}
+.cost{margin-left:auto;color:var(--faint)}
+
+.seen{display:flex;align-items:center;gap:8px;justify-content:center;color:var(--faint);font-size:13px;min-height:30px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none}
+.sample{border:1px solid var(--line);border-radius:999px;padding:1px 7px;font-size:11px}
+.suggest{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:6px}
+.sug{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-size:13.5px;
+  transition:border-color 140ms var(--ease),color 140ms var(--ease),background-color 140ms var(--ease)}
+.sug:hover{border-color:var(--line-strong);color:var(--text);background:var(--surface)}
+.hint{text-align:center;color:var(--faint);font-size:12.5px;margin-top:10px;display:flex;gap:6px;justify-content:center;align-items:center}
+
+/* ----------------------------------------------------- chat and build */
+/* NOT display:flex here: written below .view, it would beat display:none
+   and show every screen at once. Only .view.on turns a screen on. */
+.split{flex:1;min-height:0}
+.thread{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+.scroll{flex:1;overflow:auto;padding:12px var(--gut) 8px}
+.col{max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.me{align-self:flex-end;max-width:80%;background:var(--surface-2);border-radius:var(--r-lg) var(--r-lg) 6px var(--r-lg);
+  padding:11px 15px;font-size:15px}
+.ai{display:flex;flex-direction:column;gap:12px;font-size:15.5px;line-height:1.7}
+.ai p{max-width:66ch}
+.cite{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;margin:0 0 0 3px;border-radius:5px;
+  background:var(--surface-2);color:var(--muted);font:600 11px/1 var(--font);vertical-align:2px;cursor:pointer;
+  transition:background-color 140ms var(--ease),color 140ms var(--ease)}
+.cite:hover{background:var(--accent-soft);color:var(--text)}
+.sources{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.src{border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:6px;
+  background:var(--surface);transition:border-color 140ms var(--ease)}
+.src:hover{border-color:var(--line-strong)}
+.src-top{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--faint)}
+.src-n{width:18px;height:18px;border-radius:5px;background:var(--surface-2);display:grid;place-items:center;
+  font-size:11px;font-weight:600;color:var(--muted)}
+.src b{font-size:13px;font-weight:500;line-height:1.35}
+.fups{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.fup{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line);color:var(--text);
+  font-size:14.5px;text-align:left;transition:color 140ms var(--ease)}
+.fup .ic{color:var(--faint);width:16px;height:16px}
+.fup:hover{color:var(--accent)}
+.composer{padding:6px var(--gut) 16px}
+.composer .field{max-width:700px;margin:0 auto}
+.composer .field textarea{min-height:26px}
+.sees{max-width:700px;margin:9px auto 0;text-align:center;color:var(--faint);font-size:12px;line-height:1.5}
+
+.panel{width:var(--panel-w);flex:none;border-left:1px solid var(--line);background:var(--rail);display:flex;flex-direction:column;
+  min-height:0;animation:slide 280ms var(--ease) both}
+@keyframes slide{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+.ph{height:52px;flex:none;display:flex;align-items:center;gap:10px;padding:0 10px 0 18px;border-bottom:1px solid var(--line)}
+.ph h3{font-size:14px;font-weight:600;letter-spacing:-.005em}
+.ph small{color:var(--faint);font-size:12.5px}
+.ph .sp{flex:1}
+.pb{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.card h4{margin-bottom:10px}
+.kv{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.kv:last-child{border-bottom:0}
+.kv span{color:var(--muted)}
+.kv b{font-weight:600}
+.kv b.warn{color:var(--accent)}
+.meter{height:6px;border-radius:3px;background:var(--surface-2);margin-top:14px;overflow:hidden;display:flex}
+.meter i{display:block;height:100%;background:var(--muted)}
+.meter i+i{background:var(--accent)}
+.legend{display:flex;gap:14px;margin-top:8px;font-size:12px;color:var(--faint)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:8px;height:8px;border-radius:2px;background:var(--muted)}
+.legend span+span i{background:var(--accent)}
+
+/* build: the conversation on the left, the site beside it */
+.build-col{max-width:560px}
+.steps{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:var(--r);padding:6px 4px;background:var(--surface)}
+.step{display:flex;align-items:center;gap:10px;padding:7px 10px;font-size:14px}
+.step .ic{width:16px;height:16px;color:var(--accent);stroke-width:2.2}
+.step small{margin-left:auto;color:var(--faint);font-size:12px}
+.notdo{border-left:2px solid var(--line-strong);padding:2px 0 2px 14px;display:flex;flex-direction:column;gap:5px}
+.notdo li{color:var(--muted);font-size:13.5px}
+.seg{display:flex;padding:3px;border-radius:9px;background:var(--surface-2);gap:2px}
+.seg button{height:26px;padding:0 10px;border-radius:7px;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
+.seg .ic{width:15px;height:15px}
+.publish{height:30px;padding:0 13px;border-radius:8px;background:var(--text);color:var(--bg);font-size:13px;font-weight:600}
+.stage{flex:1;overflow:auto;padding:18px;display:flex;justify-content:center;background:
+  radial-gradient(circle at 1px 1px,var(--line) 1px,transparent 0) 0 0/18px 18px}
+.site{width:100%;max-width:400px;background:var(--site-bg);color:var(--site-ink);border-radius:10px;overflow:hidden;
+  box-shadow:var(--shadow-lg);align-self:flex-start;font-family:var(--font)}
+.site-nav{display:flex;align-items:center;gap:14px;padding:12px 16px;font-size:11px;color:var(--site-mute)}
+.site-nav b{color:var(--site-ink);font-size:12.5px;margin-right:auto;letter-spacing:-.01em}
+.site-hero{padding:26px 18px 22px;background:var(--site-soft)}
+.site-hero h5{font-size:22px;line-height:1.15;letter-spacing:-.02em;font-weight:600;margin:0 0 8px;text-wrap:balance}
+.site-hero p{font-size:12px;color:var(--site-mute);margin:0 0 14px}
+.site-btn{display:inline-block;background:var(--site-ink);color:var(--site-bg);border-radius:6px;padding:7px 12px;font-size:11px;font-weight:600}
+.site-menu{padding:16px 18px 20px;display:flex;flex-direction:column;gap:9px}
+.site-menu h6{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--site-mute);margin:0 0 2px}
+.dish{display:flex;justify-content:space-between;gap:12px;font-size:12px;border-bottom:1px dotted #d9cfbf;padding-bottom:7px}
+.dish span:last-child{font-variant-numeric:tabular-nums}
+.edit{border-top:1px solid var(--line);padding:12px}
+.edit .field{border-radius:var(--r)}
+.edit .field textarea{min-height:24px;font-size:14.5px}
+
+/* --------------------------------------------------------------- tools */
+.tools{flex-direction:column;overflow:auto;padding:12px var(--gut) 56px}
+.tools-in{max-width:1000px;width:100%;margin:0 auto}
+.page-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:10px 0 22px}
+.page-h h2{font-size:26px;font-weight:600;letter-spacing:-.02em}
+.page-h p{color:var(--muted);font-size:14px;margin-top:4px}
+.filter{display:flex;align-items:center;gap:8px;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:10px;
+  background:var(--surface);width:280px;max-width:100%;color:var(--faint)}
+.filter input{border:0;outline:0;background:transparent;flex:1;min-width:0;font-size:14px;color:var(--text)}
+.group{margin-top:26px}
+.group .label{margin-bottom:10px;display:block}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tool{display:flex;gap:13px;align-items:flex-start;text-align:left;border:1px solid var(--line);border-radius:var(--r);padding:14px;
+  background:var(--surface);transition:border-color 160ms var(--ease),transform 160ms var(--ease),box-shadow 160ms var(--ease)}
+.tool:hover{border-color:var(--line-strong);transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+.tile{width:34px;height:34px;flex:none;border-radius:9px;background:var(--surface-2);display:grid;place-items:center;color:var(--text)}
+.tile .ic{width:17px;height:17px}
+/* scoped to .txt: written as `.tool span` it outranked .tile and pushed
+   every icon into the corner of its square */
+.tool .txt{min-width:0}
+.tool .txt b{display:block;font-size:14.5px;font-weight:600;letter-spacing:-.005em}
+.tool .txt span{display:block;color:var(--muted);font-size:13px;line-height:1.45;margin-top:2px}
+.tool .txt .tag{display:inline-block;margin-top:7px;font-size:11px;color:var(--faint);border:1px solid var(--line);border-radius:999px;padding:1px 8px;line-height:1.5}
+
+/* ------------------------------------------------------------- palette */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:20;display:flex;justify-content:center;
+  padding:calc(12vh + env(safe-area-inset-top,0px)) 16px 16px;animation:fade 160ms var(--ease) both}
+.scrim[hidden]{display:none}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.pal{width:620px;max-width:100%;max-height:min(560px,76vh);background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;
+  animation:pop 200ms var(--ease) both;align-self:flex-start}
+@keyframes pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+.pal-in{display:flex;align-items:center;gap:10px;padding:0 16px;height:54px;border-bottom:1px solid var(--line);color:var(--faint)}
+.pal-in input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:16px;color:var(--text)}
+.pal-in input::placeholder{color:var(--faint)}
+.count{font-size:12px;color:var(--faint);white-space:nowrap}
+.pal-body{overflow:auto;padding:6px 8px 8px}
+.pal-body .label{display:block;padding:12px 10px 6px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:8px 10px;border-radius:9px}
+.opt .tile{width:30px;height:30px;border-radius:8px}
+.opt .tile .ic{width:16px;height:16px}
+.opt div{min-width:0;flex:1}
+.opt div b{display:block;font-size:14px;font-weight:500}
+.opt div span{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.opt .kbd{opacity:0}
+.opt.on{background:var(--surface-2)}
+.opt.on .kbd{opacity:1}
+.opt.on .tile{background:var(--accent-soft);color:var(--accent)}
+.instead{color:var(--muted)}
+.pal-foot{display:flex;gap:16px;align-items:center;padding:9px 14px;border-top:1px solid var(--line);font-size:12px;color:var(--faint)}
+.pal-foot span{display:flex;gap:6px;align-items:center}
+.pal-foot .sp{flex:1}
+
+/* ---------------------------------------------------------- the mockup */
+/* in the flow of each screen, never laid over it - absolute, it sat on
+   top of the chat footer and the last row of tools */
+.foot{margin:28px 0 0;text-align:center;font-size:11px;color:var(--faint)}
+.tour{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;gap:2px;
+  padding:4px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-lg);max-width:calc(100% - 32px);overflow-x:auto}
+.tour button{height:28px;padding:0 12px;border-radius:999px;font-size:12px;color:var(--muted);white-space:nowrap}
+.tour button.on{background:var(--text);color:var(--bg)}
+body.shot .tour{display:none}
+body.shot *{animation:none!important;transition:none!important}
+
+/* --------------------------------------------------------------- phone */
+.opener{display:none;align-items:center;gap:12px;border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;
+  background:var(--surface);text-align:left;width:100%}
+.opener .tile{background:var(--accent-soft);color:var(--accent)}
+.opener div{flex:1;min-width:0}
+.opener div b{display:block;font-size:14px;font-weight:600}
+.opener div span{display:block;font-size:12.5px;color:var(--muted)}
+.opener em{font-style:normal;color:var(--accent);font-size:13px;font-weight:500}
+.drawer-scrim{display:none}
+.toast{position:fixed;left:50%;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;
+  background:var(--text);color:var(--bg);font-size:13px;padding:9px 14px;border-radius:10px;box-shadow:var(--shadow-lg);animation:pop 180ms var(--ease) both}
+.toast[hidden]{display:none}
+@media (max-width:900px){ :root{--panel-w:360px} }
+@media (max-width:760px){
+  :root{--gut:16px}
+  .rail{position:fixed;left:0;top:0;bottom:0;z-index:25;transform:translateX(-102%);box-shadow:var(--shadow-lg);
+    padding-top:calc(14px + env(safe-area-inset-top,0px))}
+  body.drawer .rail{transform:none}
+  body.drawer .drawer-scrim{display:block;position:fixed;inset:0;z-index:24;background:var(--scrim);animation:fade 160ms var(--ease) both}
+  .burger,.top-brand{display:flex}
+  .top{padding:0 10px 0 8px;border-bottom:1px solid var(--line)}
+  .pill.credits,.lang-btn{display:none}
+  .panel{display:none}
+  .opener{display:flex}
+  .sources{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  .display{font-size:28px}
+  .home{justify-content:flex-start;padding-top:40px}
+  .suggest{justify-content:flex-start}
+  .scrim{padding-top:calc(10px + env(safe-area-inset-top,0px))}
+  .pal{max-height:calc(100% - 20px)}
+  .pal-foot .k{display:none}
+  /* a phone has no ⌘ key: the road to every tool there is the search icon */
+  .hint,.rail .kbd{display:none}
+  .filter{width:100%}
+  .cost{margin-left:0;width:100%}
+}
+@media (min-width:480px) and (max-width:760px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-mark" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="18.6" cy="7.4" r="2.3" fill="var(--accent)"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.2A8 8 0 0 1 9.8 4a8 8 0 1 0 10.2 10.2z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"/></symbol>
+  <symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v16a8 8 0 0 0 0-16z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="M20 11.5 12 19.5a5 5 0 0 1-7-7l8-8a3.3 3.3 0 0 1 4.7 4.7l-8 8a1.7 1.7 0 0 1-2.4-2.4L14.5 8"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-desktop" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M9 20h6M12 16.5V20"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2.2"/><path d="M11 17.5h2"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></symbol>
+  <!-- the seventeen tools -->
+  <symbol id="t-site" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.2"/><path d="M3.5 9h17M7 6.8h.01M9.5 6.8h.01"/></symbol>
+  <symbol id="t-doc" viewBox="0 0 24 24"><path d="M7 3.5h7l4.5 4.5v12.5H7z"/><path d="M14 3.5V8h4.5M9.5 12.5h6M9.5 16h4"/></symbol>
+  <symbol id="t-deck" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="11.5" rx="1.8"/><path d="M12 16v4M8.5 20h7M7.5 12l3-3 2.5 2.5 3.5-4"/></symbol>
+  <symbol id="t-post" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3.6"/><path d="M16.7 7.3h.01"/></symbol>
+  <symbol id="t-code" viewBox="0 0 24 24"><path d="m8.5 7-5 5 5 5M15.5 7l5 5-5 5M13.5 5l-3 14"/></symbol>
+  <symbol id="t-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6"/></symbol>
+  <symbol id="t-chat" viewBox="0 0 24 24"><path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4.5 3.5v-3.5h0a2 2 0 0 1-1-1.7z"/></symbol>
+  <symbol id="t-research" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="m19.5 19.5-4.6-4.6M8 10.5h5M10.5 8v5"/></symbol>
+  <symbol id="t-trend" viewBox="0 0 24 24"><path d="M3.5 16.5 9 11l3.5 3.5L20 7M15 7h5v5"/></symbol>
+  <symbol id="t-voice" viewBox="0 0 24 24"><path d="M5 10v4M9 7v10M13 4v16M17 8v8M21 11v2"/></symbol>
+  <symbol id="t-agent" viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4.5V8M9.5 13h.01M14.5 13h.01M2.5 13v2M21.5 13v2"/></symbol>
+  <symbol id="t-auto" viewBox="0 0 24 24"><path d="M13 3 5 13.5h6L10 21l8-10.5h-6z"/></symbol>
+  <symbol id="t-mine" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="t-files" viewBox="0 0 24 24"><path d="M3.5 7a2 2 0 0 1 2-2h4l2 2.5h7a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="t-money" viewBox="0 0 24 24"><path d="M17 6.5a6.5 6.5 0 1 0 0 11M4.5 10.5h9M4.5 13.5h9"/></symbol>
+  <symbol id="t-sales" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.5"/><path d="M2.5 19.5a6.5 6.5 0 0 1 13 0M16.5 5.5a3.5 3.5 0 0 1 0 6.5M18.5 19.5a6.5 6.5 0 0 0-2-4.5"/></symbol>
+  <symbol id="t-trade" viewBox="0 0 24 24"><path d="M7 4v16M7 8h-2.5v6H7M17 6v14M17 10h-2.5v5H17M7 8h2.5v6H7M17 10h2.5v5H17"/></symbol>
+</svg>
+
+<div class="app" id="app">
+  <aside class="rail" id="rail" aria-label="Navigation">
+    <div class="brand"><svg class="mark"><use href="#i-mark"/></svg>Ionexa</div>
+    <button class="row new" data-go="home"><svg class="ic"><use href="#i-plus"/></svg><span data-t="new"></span></button>
+    <button class="row" data-open="palette"><svg class="ic"><use href="#i-search"/></svg><span data-t="search"></span><span class="kbd">⌘K</span></button>
+    <nav class="recent" id="recent"></nav>
+    <div class="rail-foot">
+      <button class="row" data-go="tools"><svg class="ic"><use href="#i-grid"/></svg><span data-t="allTools"></span></button>
+      <button class="row"><svg class="ic"><use href="#i-gear"/></svg><span data-t="settings"></span></button>
+    </div>
+  </aside>
+  <div class="drawer-scrim" data-close="drawer"></div>
+
+  <main class="main">
+    <header class="top">
+      <button class="icon-btn burger" data-open="drawer" aria-label="Menu"><svg class="ic"><use href="#i-menu"/></svg></button>
+      <div class="top-brand"><svg class="mark"><use href="#i-mark"/></svg>Ionexa</div>
+      <div class="sp"></div>
+      <span class="pill credits num"><b data-t="vCred"></b><span data-t="credits"></span></span>
+      <button class="icon-btn lang-btn" id="lang" aria-label="Language"><span class="lang" id="langLabel">EL</span></button>
+      <button class="icon-btn burger" data-open="palette" aria-label="Search"><svg class="ic"><use href="#i-search"/></svg></button>
+      <button class="icon-btn theme" id="theme" data-mode="dark" aria-label="Theme">
+        <svg class="ic" data-i="dark"><use href="#i-moon"/></svg><svg class="ic" data-i="light"><use href="#i-sun"/></svg><svg class="ic" data-i="auto"><use href="#i-auto"/></svg>
+      </button>
+    </header>
+
+    <!-- HOME: one field. Everything else is a way back to it. -->
+    <section class="view home" id="v-home">
+      <p class="hello"><span data-t="hello"></span></p>
+      <h1 class="display" data-t="ask"></h1>
+      <div class="stack">
+        <div class="field">
+          <textarea id="homeInput" rows="2" data-tp="homePh"></textarea>
+          <div class="field-row">
+            <button class="icon-btn" aria-label="Attach"><svg class="ic"><use href="#i-clip"/></svg></button>
+            <button class="icon-btn" aria-label="Voice"><svg class="ic"><use href="#i-mic"/></svg></button>
+            <div class="sp"></div>
+            <button class="send" aria-label="Send"><svg class="ic"><use href="#i-up"/></svg></button>
+          </div>
+        </div>
+        <div class="route" id="route" aria-live="polite">
+          <span data-t="goingTo"></span>
+          <span class="chip"><svg class="ic" id="routeIcon"><use href="#t-site"/></svg><span id="routeName"></span></span>
+          <button class="link" data-open="palette" data-t="change"></button>
+          <span class="cost num" id="routeCost"></span>
+        </div>
+        <p class="seen" id="seen"><span class="dot"></span><span data-t="seen"></span><span class="sample" data-t="sample"></span></p>
+        <div class="suggest" id="suggest"></div>
+        <p class="hint"><span data-t="orPress"></span><span class="kbd">⌘K</span><span data-t="forAll"></span></p>
+        <p class="foot" data-t="mock"></p>
+      </div>
+    </section>
+
+    <!-- CHAT: answer, its sources, what to ask next; the numbers beside it -->
+    <section class="view split" id="v-chat">
+      <div class="thread">
+        <div class="scroll"><div class="col">
+          <p class="me" data-t="q"></p>
+          <div class="ai">
+            <p data-th="a1"></p>
+            <p data-th="a2"></p>
+            <div class="sources" id="sources"></div>
+            <button class="opener" data-show="panel"><span class="tile"><svg class="ic"><use href="#t-chart"/></svg></span>
+              <div><b data-t="sept"></b><span data-t="septSub"></span></div><em data-t="open"></em></button>
+            <div class="fups" id="fups"></div>
+          </div>
+        </div></div>
+        <div class="composer">
+          <div class="field"><textarea rows="1" data-tp="chatPh"></textarea>
+            <div class="field-row"><button class="icon-btn" aria-label="Attach"><svg class="ic"><use href="#i-clip"/></svg></button><div class="sp"></div>
+            <button class="send" aria-label="Send"><svg class="ic"><use href="#i-up"/></svg></button></div></div>
+          <p class="sees" data-t="sees"></p>
+        </div>
+      </div>
+      <aside class="panel">
+        <div class="ph"><h3 data-t="sept"></h3><small data-t="fromRecords"></small><span class="sample" data-t="sample"></span><div class="sp"></div>
+          <button class="icon-btn" aria-label="Expand"><svg class="ic"><use href="#i-expand"/></svg></button></div>
+        <div class="pb">
+          <div class="card">
+            <h4 class="label" data-t="moved"></h4>
+            <div class="kv"><span data-t="invoiced"></span><b class="num" data-t="vInv"></b></div>
+            <div class="kv"><span data-t="collected"></span><b class="num" data-t="vCol"></b></div>
+            <div class="kv"><span data-t="pastDue"></span><b class="num warn" data-t="vDue"></b></div>
+            <div class="meter"><i style="width:80.5%"></i><i style="width:19.5%"></i></div>
+            <div class="legend"><span><i></i><span data-t="collected"></span></span><span><i></i><span data-t="pastDue"></span></span></div>
+          </div>
+          <div class="card">
+            <h4 class="label" data-t="late"></h4>
+            <div class="kv"><span>Καφέ Λαδάδικα</span><b class="num" data-t="d18"></b></div>
+            <div class="kv"><span>Ξενοδοχείο Ολύμπια</span><b class="num" data-t="d11"></b></div>
+            <div class="kv"><span>Studio Nine</span><b class="num" data-t="d6"></b></div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- BUILD: what it read, what it made, what it will not do -->
+    <section class="view split" id="v-build">
+      <div class="thread">
+        <div class="scroll"><div class="col build-col">
+          <p class="me" data-t="brief"></p>
+          <div class="ai">
+            <p data-t="made"></p>
+            <div class="steps">
+              <div class="step"><svg class="ic"><use href="#i-check"/></svg><span data-t="s1"></span><small class="num" data-t="s1n"></small></div>
+              <div class="step"><svg class="ic"><use href="#i-check"/></svg><span data-t="s2"></span><small data-t="s2n"></small></div>
+              <div class="step"><svg class="ic"><use href="#i-check"/></svg><span data-t="s3"></span><small class="num" data-t="s3n"></small></div>
+            </div>
+            <button class="opener" data-show="panel"><span class="tile"><svg class="ic"><use href="#t-site"/></svg></span>
+              <div><b>Λαδάδικα Catering</b><span data-t="onePage"></span></div><em data-t="open"></em></button>
+            <h4 class="label" data-t="notTitle"></h4>
+            <ul class="notdo"><li data-t="n1"></li><li data-t="n2"></li><li data-t="n3"></li><li data-t="n4"></li></ul>
+            <p class="foot" data-t="mock"></p>
+          </div>
+        </div></div>
+      </div>
+      <aside class="panel">
+        <div class="ph">
+          <div class="seg"><button class="on" data-t="preview"></button><button data-t="code"></button></div>
+          <div class="sp"></div>
+          <div class="seg"><button class="on" aria-label="Desktop"><svg class="ic"><use href="#i-desktop"/></svg></button><button aria-label="Phone"><svg class="ic"><use href="#i-phone"/></svg></button></div>
+          <button class="publish" data-t="publish"></button>
+        </div>
+        <div class="stage">
+          <article class="site">
+            <div class="site-nav"><b>Λαδάδικα Catering</b><span>Μενού</span><span>Ώρες</span><span>Επικοινωνία</span></div>
+            <div class="site-hero"><h5>Φαγητό για σαράντα, ζεστό στην πόρτα σας.</h5>
+              <p>Κατσάμπα 12, Θεσσαλονίκη · Δευ–Σάβ 08:00–18:00</p><span class="site-btn">Δείτε το μενού</span></div>
+            <div class="site-menu"><h6>Φθινόπωρο</h6>
+              <div class="dish"><span>Γεμιστά με κιμά</span><span>€9,50</span></div>
+              <div class="dish"><span>Μουσακάς ταψιού</span><span>€11,00</span></div>
+              <div class="dish"><span>Σαλάτα με κινόα και ρόδι</span><span>€7,80</span></div>
+              <div class="dish"><span>Πορτοκαλόπιτα</span><span>€4,20</span></div>
+            </div>
+          </article>
+        </div>
+        <div class="edit"><div class="field"><textarea rows="1" data-tp="editPh"></textarea>
+          <div class="field-row"><div class="sp"></div><button class="send" aria-label="Send"><svg class="ic"><use href="#i-up"/></svg></button></div></div></div>
+      </aside>
+    </section>
+
+    <!-- ALL TOOLS: the one road a person can browse -->
+    <section class="view tools" id="v-tools">
+      <div class="tools-in">
+        <div class="page-h"><div><h2 data-t="allTools"></h2><p data-t="toolsSub"></p></div>
+          <label class="filter"><svg class="ic"><use href="#i-search"/></svg><input id="toolFilter" data-tp="filterPh"></label></div>
+        <div id="groups"></div>
+        <p class="foot" data-t="mock"></p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ⌘K: every tool, one keystroke away, narrowed by typing -->
+<div class="scrim" id="palette" hidden data-close="palette">
+  <div class="pal" role="dialog" aria-modal="true" aria-label="Command palette">
+    <div class="pal-in"><svg class="ic"><use href="#i-search"/></svg><input id="palInput" autocomplete="off" data-tp="palPh"><span class="count num" id="palCount"></span></div>
+    <div class="pal-body" id="palBody"></div>
+    <div class="pal-foot"><span class="k"><span class="kbd">↑</span><span class="kbd">↓</span><span data-t="move"></span></span>
+      <span class="k"><span class="kbd">↵</span><span data-t="openK"></span></span><span class="k"><span class="kbd">esc</span><span data-t="closeK"></span></span>
+      <span class="sp"></span><span data-t="seventeen"></span></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden role="status"></div>
+<div class="tour" id="tour"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------------------------------------------------- the words */
+  var T = {
+    el: {
+      new: "Νέο", search: "Αναζήτηση", allTools: "Όλα τα εργαλεία", settings: "Ρυθμίσεις", credits: "credits",
+      vCred: "2.480", hello: "Καλησπέρα", ask: "Τι θέλεις να κάνεις;",
+      homePh: "Περίγραψέ το με δικά σου λόγια…", goingTo: "Θα ανοίξει", change: "αλλαγή",
+      estimate: "εκτίμηση ~{n} credits",
+      seen: "Βλέπει τα 14 τιμολόγια, τα 3 sites και τα 8 έγγραφά σου", sample: "δείγμα",
+      orPress: "ή πάτα", forAll: "για όλα τα εργαλεία",
+      suggest: ["Φτιάξε site για το μαγαζί μου", "Τι πούλησα αυτόν τον μήνα;", "Παρουσίαση για έναν πελάτη", "Ξαναβγάλε την ανάρτηση της Δευτέρας"],
+      q: "Γιατί ο Σεπτέμβριος είναι χαμηλότερα από τον Αύγουστο;",
+      a1: "Ο Σεπτέμβριος είναι 8% κάτω, και έχει μία αιτία, όχι τάση: τρία τιμολόγια, συνολικά €4.180, είναι ληξιπρόθεσμα{1}. Ο όγκος δεν άλλαξε· η είσπραξη άλλαξε{2}.",
+      a2: "Όλα τα υπόλοιπα κινήθηκαν λιγότερο από 2%{3}. Αν εισπραχθούν τα τρία, ο μήνας κλείνει πάνω από τον Αύγουστο.",
+      sources: [["Τιμολόγια", "14 τιμολόγια · Σεπτέμβριος"], ["Αρχείο", "sales-2026.csv"], ["Αναφορά", "Σύγκριση με Αύγουστο"]],
+      fups: ["Ποια είναι τα τρία;", "Γράψε υπενθύμιση πληρωμής", "Δείξε τον Αύγουστο δίπλα-δίπλα"],
+      chatPh: "Ρώτα κάτι…",
+      sees: "Βλέπει τις εγγραφές, τους στόχους και τα αρχεία που ανέβασες. Δεν βλέπει ό,τι δεν πρόσθεσες, και δεν αλλάζει τίποτα αν δεν το ζητήσεις.",
+      sept: "Σεπτέμβριος", septSub: "3 ληξιπρόθεσμα · €4.180", open: "Άνοιγμα", fromRecords: "από τις εγγραφές σου",
+      moved: "Τι κινήθηκε", invoiced: "Τιμολογήθηκαν", collected: "Εισπράχθηκαν", pastDue: "Ληξιπρόθεσμα",
+      vInv: "€21.400", vCol: "€17.220", vDue: "€4.180",
+      late: "Τα τρία που αργούν", d18: "18 μέρες", d11: "11 μέρες", d6: "6 μέρες",
+      brief: "Ένα site για το catering μου στα Λαδάδικα — ζεστό, με το μενού και τις ώρες.",
+      made: "Έφτιαξα μία σελίδα από τα δικά σου στοιχεία, όχι από πρότυπο:",
+      s1: "Διάβασα το μενού σου", s1n: "12 πιάτα", s2: "Πήρα διεύθυνση και ώρες", s2n: "από το προφίλ",
+      s3: "Έβαλα τις φωτογραφίες σου", s3n: "3 από 3", onePage: "Μία σελίδα · έτοιμη για δημοσίευση",
+      notTitle: "Τι δεν κάνει",
+      n1: "Είναι λίγες σελίδες — όχι e-shop, όχι εφαρμογή.", n2: "Δεν συνδέεται με τα συστήματά σου.",
+      n3: "Δεν φτιάχνει φωτογραφίες — μόνο τις δικές σου, ή καμία.", n4: "Το HTML είναι δικό σου· τίποτα δεν κλειδώνει εδώ.",
+      preview: "Προεπισκόπηση", code: "Κώδικας", publish: "Δημοσίευση",
+      editPh: "Άλλαξέ το με λόγια — «πιο ζεστά χρώματα»",
+      toolsSub: "Δεκαεπτά. Ή γράψε στην αρχική τι θέλεις, και διαλέγει μόνο του.", filterPh: "Φίλτρο…",
+      palPh: "Γράψε εργαλείο ή περίγραψε τι θέλεις…", move: "μετακίνηση", openK: "άνοιγμα", closeK: "κλείσιμο",
+      seventeen: "17 εργαλεία", countOf: "{n} από 17", instead: "Περίγραψέ το αντί γι' αυτό",
+      insteadSub: "Esc, και γράψε τι θέλεις στο πεδίο.", needsKey: "χρειάζεται κλειδί",
+      today: "Σήμερα", week: "7 ημέρες", wouldOpen: "Στο προϊόν θα άνοιγε: {x}",
+      mock: "Mockup · τα νούμερα είναι δείγμα, όχι μέτρηση",
+      recentToday: ["Γιατί ο Σεπτέμβριος έπεσε 8%", "Site για το catering"],
+      recentWeek: ["Τιμές για το deck του ξενοδοχείου", "Υπενθύμιση σε 3 πελάτες", "Πρόγραμμα Instagram εβδομάδας", "Μενού φθινοπώρου"],
+      typed: "Φτιάξε ένα site για το catering μου, ζεστό, με το μενού και τις ώρες"
+    },
+    en: {
+      new: "New", search: "Search", allTools: "All tools", settings: "Settings", credits: "credits",
+      vCred: "2,480", hello: "Good evening", ask: "What do you want to do?",
+      homePh: "Describe it in your own words…", goingTo: "Going to", change: "change",
+      estimate: "estimate ~{n} credits",
+      seen: "Reading your 14 invoices, 3 sites and 8 documents", sample: "sample",
+      orPress: "or press", forAll: "for every tool",
+      suggest: ["Build a site for my shop", "What did I sell this month?", "A deck for a client", "Repost Monday's post"],
+      q: "Why is September lower than August?",
+      a1: "September is 8% down, and it has one cause, not a trend: three invoices totalling €4,180 are past due{1}. Volume held; collection didn't{2}.",
+      a2: "Everything else moved less than 2%{3}. If the three are paid, the month closes above August.",
+      sources: [["Invoices", "14 invoices · September"], ["File", "sales-2026.csv"], ["Report", "Compared with August"]],
+      fups: ["Which three?", "Draft a payment reminder", "Show August side by side"],
+      chatPh: "Ask anything…",
+      sees: "It sees your entries, your goals and the files you uploaded. It sees nothing you have not added, and changes nothing unless you ask.",
+      sept: "September", septSub: "3 past due · €4,180", open: "Open", fromRecords: "from your records",
+      moved: "What moved", invoiced: "Invoiced", collected: "Collected", pastDue: "Past due",
+      vInv: "€21,400", vCol: "€17,220", vDue: "€4,180",
+      late: "The three that are late", d18: "18 days", d11: "11 days", d6: "6 days",
+      brief: "A site for my catering in Ladadika — warm, with the menu and the hours.",
+      made: "I made one page from your own records, not from a template:",
+      s1: "Read your menu", s1n: "12 dishes", s2: "Took the address and hours", s2n: "from your profile",
+      s3: "Used your photos", s3n: "3 of 3", onePage: "One page · ready to publish",
+      notTitle: "What this does not do",
+      n1: "A few pages — not a shop, not an app.", n2: "It does not connect to your systems.",
+      n3: "It makes no photographs — yours, or none.", n4: "The HTML is yours; nothing is locked in here.",
+      preview: "Preview", code: "Code", publish: "Publish",
+      editPh: "Change it in words — “warmer colours”",
+      toolsSub: "Seventeen. Or say what you want on the home screen and it picks one.", filterPh: "Filter…",
+      palPh: "Type a tool, or describe what you want…", move: "move", openK: "open", closeK: "close",
+      seventeen: "17 tools", countOf: "{n} of 17", instead: "Describe it instead",
+      insteadSub: "Esc, then say what you want in the field.", needsKey: "needs a key",
+      today: "Today", week: "Previous 7 days", wouldOpen: "In the product this opens: {x}",
+      mock: "Mockup · the numbers are a sample, not a measurement",
+      recentToday: ["Why September fell 8%", "Catering site"],
+      recentWeek: ["Pricing for the hotel deck", "Reminder to 3 customers", "Instagram week plan", "Autumn menu"],
+      typed: "Build a site for my catering, warm, with the menu and the hours"
+    }
+  };
+
+  /* ------------------------------------------- the seventeen, one source
+     Each carries the three things a person needs to recognise it: an icon,
+     the name a customer would say, and one line of what it does. The words
+     are also what the field routes on, so the rail, the palette, the grid
+     and "Going to" can never disagree about what a tool is called. */
+  var GROUPS = [
+    ["make", { el: "Φτιάξε", en: "Make" }],
+    ["ask", { el: "Ρώτα", en: "Ask" }],
+    ["run", { el: "Αυτόματα", en: "Run" }],
+    ["see", { el: "Δες", en: "See" }]
+  ];
+  var TOOLS = [
+    { id: "site", g: "make", go: "build", cost: 87, el: ["Site", "Μια περιγραφή, μια αληθινή σελίδα, το HTML δικό σου."], en: ["Website", "One description, a real page, the HTML to take away."], k: "site σαιτ ιστοσελιδ σελιδα website landing" },
+    { id: "doc", g: "make", el: ["Έγγραφα", "Επιστολές, προσφορές και αναφορές, με τα δικά σου λόγια."], en: ["Documents", "Letters, offers and reports, in your own words."], k: "εγγραφ επιστολ προσφορ αναφορ document letter offer report" },
+    { id: "deck", g: "make", cost: 15, el: ["Παρουσιάσεις", "Ένα deck που το κατεβάζεις και το τελειώνεις στο PowerPoint."], en: ["Presentations", "A deck you download and finish in PowerPoint."], k: "παρουσιασ deck slides presentation" },
+    { id: "post", g: "make", cost: 8, el: ["Αναρτήσεις", "Μια ιδέα, πέντε πλατφόρμες, η καθεμία στο σχήμα της."], en: ["Posts", "One idea, five platforms, each in its own shape."], k: "αναρτησ post instagram facebook linkedin" },
+    { id: "code", g: "make", cost: 3, el: ["Κώδικας", "Περίγραψε την αλλαγή· παίρνεις τον κώδικα και το diff."], en: ["AI Coding", "Describe the change; get the code and the diff."], k: "κωδικ code bug script" },
+    { id: "chart", g: "make", el: ["Αριθμοί", "Ανέβασε ένα αρχείο· δες τι άλλαξε και γιατί."], en: ["See the numbers", "Upload a file, see what moved and why."], k: "αρχειο csv excel αριθμ numbers upload" },
+    { id: "chat", g: "ask", go: "chat", el: ["Ρώτα με", "Οτιδήποτε, με τις δικές σου εγγραφές ως πλαίσιο."], en: ["Ask me", "Anything, with your own records as the context."], k: "ρωτα γιατι ποσο τι πουλησ πωλησ εσοδ ask why how much sold revenue" },
+    { id: "research", g: "ask", el: ["Έρευνα", "Μεγαλύτερη απάντηση, με τις πηγές της."], en: ["Look into it", "A longer answer, with its sources listed."], k: "ερευν research πηγες sources" },
+    { id: "trend", g: "ask", el: ["Προβλέψεις", "Πώς μοιάζει ο επόμενος μήνας, από όσα έγιναν."], en: ["Predictions", "What next month looks like, from what happened."], k: "προβλεψ forecast predict επομενο" },
+    { id: "voice", g: "ask", key: true, el: ["Φωνή", "Μίλα αντί να γράφεις."], en: ["Voice", "Talk instead of typing."], k: "φωνη voice μιλα speak" },
+    { id: "agent", g: "run", el: ["Βοηθοί", "Εκτελούν μια δουλειά για λογαριασμό σου."], en: ["Works for you", "Agents that carry out a job on your behalf."], k: "βοηθ agent" },
+    { id: "auto", g: "run", el: ["Αυτοματισμοί", "Όταν γίνει αυτό, κάνε εκείνο — χωρίς εσένα."], en: ["Automation", "When this happens, do that — without you."], k: "αυτοματ automation οταν when" },
+    { id: "mine", g: "see", el: ["Δικά μου", "Ό,τι έχεις φτιάξει, σε μία λίστα."], en: ["Mine", "Everything you have made, in one list."], k: "δικα μου mine history ιστορικ" },
+    { id: "files", g: "see", el: ["Αρχεία", "Ό,τι ανέβασες, και τι το διαβάζει."], en: ["Files", "What you uploaded, and what reads it."], k: "αρχεια files" },
+    { id: "money", g: "see", el: ["Οικονομικά", "Τιμολόγια: τι πληρώθηκε και τι αργεί."], en: ["Finances", "Invoices: what is paid, and what is late."], k: "τιμολογ invoice πληρωμ payment οικονομ finance" },
+    { id: "sales", g: "see", el: ["Πωλήσεις", "Πελάτες, συμφωνίες, και πού βρίσκεται η καθεμία."], en: ["Sales", "Customers, deals, and where each one stands."], k: "πελατ customer deal συμφων crm" },
+    { id: "trade", g: "see", el: ["Trading", "Θέσεις και κανόνες. Μόνο διαβάζει· δεν εκτελεί."], en: ["Trading", "Positions and rules. Reads only; places nothing."], k: "trading θεσεις μετοχ stock" }
+  ];
+  var ICON = { site: "t-site", doc: "t-doc", deck: "t-deck", post: "t-post", code: "t-code", chart: "t-chart", chat: "t-chat",
+    research: "t-research", trend: "t-trend", voice: "t-voice", agent: "t-agent", auto: "t-auto", mine: "t-mine",
+    files: "t-files", money: "t-money", sales: "t-sales", trade: "t-trade" };
+
+  /* ----------------------------------------------------------- helpers */
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  // Greek has accents and a final sigma; "σάιτ", "σαιτ" and "ΣΆΙΤ" are one word.
+  var fold = function (s) { return String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ς/g, "σ"); };
+  var icon = function (id, cls) { return '<svg class="' + (cls || "ic") + '"><use href="#' + id + '"/></svg>'; };
+  // Storage throws in a private window, with site data blocked, and during
+  // thumbnail capture. Unguarded, that one throw would stop every control
+  // on the page, not just the memory of a preference.
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  };
+
+  var lang = store.get("ionexa-lang") === "en" ? "en" : "el";
+  var t = function (k) { return T[lang][k]; };
+  var name = function (tool) { return tool[lang][0]; };
+  var line = function (tool) { return tool[lang][1]; };
+
+  /* ------------------------------------------------------------- theme */
+  var MODES = ["dark", "light", "auto"];
+  var mode = MODES.indexOf(store.get("ionexa-theme")) >= 0 ? store.get("ionexa-theme") : "dark";
+  function applyTheme(m) {
+    mode = m;
+    if (m === "auto") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", m);
+    var b = $("#theme"); b.dataset.mode = m; b.title = "Theme: " + m;
+  }
+  $("#theme").addEventListener("click", function () {
+    applyTheme(MODES[(MODES.indexOf(mode) + 1) % 3]); store.set("ionexa-theme", mode);
+  });
+
+  /* ------------------------------------------------------------ render */
+  function render() {
+    document.documentElement.lang = lang;
+    $("#langLabel").textContent = lang === "el" ? "EL" : "EN";
+    $$("[data-t]").forEach(function (el) { el.textContent = t(el.dataset.t); });
+    $$("[data-tp]").forEach(function (el) { el.placeholder = t(el.dataset.tp); });
+    $$("[data-th]").forEach(function (el) {
+      el.innerHTML = esc(t(el.dataset.th)).replace(/\{(\d)\}/g, '<button class="cite" aria-label="source $1">$1</button>');
+    });
+    $("#recent").innerHTML =
+      '<span class="label">' + t("today") + "</span>" +
+      t("recentToday").map(function (r, i) { return '<button class="row" data-go="' + (i === 0 ? "chat" : "build") + '"><span>' + esc(r) + "</span></button>"; }).join("") +
+      '<span class="label">' + t("week") + "</span>" +
+      t("recentWeek").map(function (r) { return '<button class="row"><span>' + esc(r) + "</span></button>"; }).join("");
+    $("#suggest").innerHTML = t("suggest").map(function (s) { return '<button class="sug">' + esc(s) + "</button>"; }).join("");
+    $("#sources").innerHTML = t("sources").map(function (s, i) {
+      return '<div class="src"><div class="src-top"><span class="src-n">' + (i + 1) + "</span>" + esc(s[0]) + "</div><b>" + esc(s[1]) + "</b></div>";
+    }).join("");
+    $("#fups").innerHTML = t("fups").map(function (f) { return '<button class="fup">' + icon("i-arrow") + esc(f) + "</button>"; }).join("");
+    renderTools($("#toolFilter").value);
+    renderPalette($("#palInput").value);
+    route($("#homeInput").value);
+  }
+
+  function matches(tool, q) {
+    if (!q) return true;
+    var hay = fold(tool.el[0] + " " + tool.el[1] + " " + tool.en[0] + " " + tool.en[1] + " " + tool.k);
+    return fold(q).split(/\s+/).filter(Boolean).every(function (w) { return hay.indexOf(w) >= 0; });
+  }
+
+  function renderTools(q) {
+    $("#groups").innerHTML = GROUPS.map(function (g) {
+      var list = TOOLS.filter(function (x) { return x.g === g[0] && matches(x, q); });
+      if (!list.length) return "";
+      return '<section class="group"><span class="label">' + g[1][lang] + '</span><div class="grid">' +
+        list.map(function (x) {
+          return '<button class="tool" data-tool="' + x.id + '"><span class="tile">' + icon(ICON[x.id]) + "</span><span class=\"txt\"><b>" + esc(name(x)) +
+            "</b><span>" + esc(line(x)) + "</span>" + (x.key ? '<span class="tag">' + t("needsKey") + "</span>" : "") + "</span></button>";
+        }).join("") + "</div></section>";
+    }).join("");
+  }
+
+  /* ----------------------------------------------------------- palette */
+  var palIndex = 0;
+  function renderPalette(q) {
+    var shown = TOOLS.filter(function (x) { return matches(x, q); });
+    var html = "", n = 0;
+    GROUPS.forEach(function (g) {
+      var list = shown.filter(function (x) { return x.g === g[0]; });
+      if (!list.length) return;
+      html += '<span class="label">' + g[1][lang] + "</span>";
+      list.forEach(function (x) {
+        html += '<button class="opt" data-tool="' + x.id + '" data-i="' + n + '"><span class="tile">' + icon(ICON[x.id]) + "</span><div><b>" +
+          esc(name(x)) + "</b><span>" + esc(line(x)) + '</span></div><span class="kbd">↵</span></button>';
+        n++;
+      });
+    });
+    if (q) html += '<button class="opt instead" data-instead="1" data-i="' + n + '"><span class="tile">' + icon("i-arrow") + "</span><div><b>" +
+      t("instead") + "</b><span>" + t("insteadSub") + '</span></div><span class="kbd">↵</span></button>';
+    $("#palBody").innerHTML = html;
+    $("#palCount").textContent = q ? t("countOf").replace("{n}", shown.length) : "";
+    palIndex = Math.min(palIndex, Math.max(0, $$(".opt", $("#palBody")).length - 1));
+    markPal();
+  }
+  function markPal() {
+    $$(".opt", $("#palBody")).forEach(function (o, i) { o.classList.toggle("on", i === palIndex); if (i === palIndex) o.scrollIntoView({ block: "nearest" }); });
+  }
+  function openPalette(q) {
+    closeDrawer();
+    var p = $("#palette"); p.hidden = false;
+    var inp = $("#palInput"); inp.value = q || ""; palIndex = 0; renderPalette(inp.value);
+    setTimeout(function () { inp.focus(); }, 0);
+  }
+  function closePalette() { $("#palette").hidden = true; }
+
+  /* ------------------------------------------------------------- route
+     The field picks the tool, and SAYS which. A system that picks
+     silently is one nobody can correct: the credits are spent before the
+     wrong guess is visible. Nothing matched means "Ask me", never a guess. */
+  function route(text) {
+    var r = $("#route");
+    if (!text.trim()) { r.classList.remove("on"); $("#seen").hidden = false; return; }
+    var hit = null;
+    for (var i = 0; i < TOOLS.length && !hit; i++) {
+      var words = TOOLS[i].k.split(" ");
+      for (var j = 0; j < words.length; j++) { if (fold(text).indexOf(words[j]) >= 0) { hit = TOOLS[i]; break; } }
+    }
+    hit = hit || TOOLS[6];
+    $("#routeName").textContent = name(hit);
+    $("#routeIcon").innerHTML = '<use href="#' + ICON[hit.id] + '"/>';
+    // Only the four estimates measured by scripts/make-cost.mjs are shown;
+    // a tool with no measurement shows no number rather than a guess.
+    $("#routeCost").textContent = hit.cost ? t("estimate").replace("{n}", hit.cost) : "";
+    r.classList.add("on"); $("#seen").hidden = true;
+  }
+  $("#homeInput").addEventListener("input", function (e) { route(e.target.value); });
+
+  /* ------------------------------------------------------------- views */
+  var VIEWS = ["home", "chat", "build", "tools"];
+  var view = "home";
+  function go(v) {
+    if (VIEWS.indexOf(v) < 0) v = "home";
+    view = v;
+    VIEWS.forEach(function (x) { $("#v-" + x).classList.toggle("on", x === v); });
+    $$(".rail-foot .row")[0].classList.toggle("on", v === "tools");
+    closePalette(); closeDrawer();
+    if (location.hash.slice(1) !== v) { try { history.replaceState(null, "", "#" + v); } catch (e) {} }
+    markTour();
+  }
+  function openDrawer() { document.body.classList.add("drawer"); }
+  function closeDrawer() { document.body.classList.remove("drawer"); }
+
+  function useTool(id) {
+    var x = TOOLS.filter(function (y) { return y.id === id; })[0];
+    if (!x) return;
+    if (x.go) { go(x.go); return; }
+    closePalette();
+    var tst = $("#toast"); tst.textContent = t("wouldOpen").replace("{x}", name(x)); tst.hidden = false;
+    clearTimeout(useTool.timer); useTool.timer = setTimeout(function () { tst.hidden = true; }, 1800);
+  }
+
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-go],[data-open],[data-close],[data-tool],[data-instead],.sug,#lang");
+    if (!el) return;
+    if (el.id === "lang") { lang = lang === "el" ? "en" : "el"; store.set("ionexa-lang", lang); render(); return; }
+    if (el.classList.contains("sug")) { var h = $("#homeInput"); h.value = el.textContent; route(h.value); h.focus(); return; }
+    if (el.dataset.go) return go(el.dataset.go);
+    if (el.dataset.open === "palette") return openPalette("");
+    if (el.dataset.open === "drawer") return openDrawer();
+    if (el.dataset.close === "drawer") return closeDrawer();
+    if (el.dataset.close === "palette" && e.target === el) return closePalette();
+    if (el.dataset.instead) { closePalette(); go("home"); $("#homeInput").focus(); return; }
+    if (el.dataset.tool) return useTool(el.dataset.tool);
+  });
+
+  $("#palInput").addEventListener("input", function (e) { palIndex = 0; renderPalette(e.target.value); });
+  $("#toolFilter").addEventListener("input", function (e) { renderTools(e.target.value); });
+
+  document.addEventListener("keydown", function (e) {
+    var typing = /INPUT|TEXTAREA/.test((e.target || {}).tagName || "");
+    var palOpen = !$("#palette").hidden;
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); palOpen ? closePalette() : openPalette(""); return; }
+    if (e.key === "/" && !typing && !palOpen) { e.preventDefault(); openPalette(""); return; }
+    if (e.key === "Escape") { closePalette(); closeDrawer(); return; }
+    if (!palOpen) return;
+    var opts = $$(".opt", $("#palBody"));
+    if (e.key === "ArrowDown") { e.preventDefault(); palIndex = Math.min(opts.length - 1, palIndex + 1); markPal(); }
+    if (e.key === "ArrowUp") { e.preventDefault(); palIndex = Math.max(0, palIndex - 1); markPal(); }
+    if (e.key === "Enter" && opts[palIndex]) { e.preventDefault(); opts[palIndex].click(); }
+  });
+
+  /* ------------------------------------------------- the mockup's tour */
+  var TOUR = [["home", "Home"], ["typed", "Typed"], ["chat", "Chat"], ["build", "Build"], ["palette", "⌘K"], ["filter", "⌘K · site"], ["tools", "All tools"], ["drawer", "Menu"]];
+  var shown = "home";
+  function show(s) {
+    shown = s;
+    var h = $("#homeInput");
+    if (s === "typed") { go("home"); h.value = t("typed"); route(h.value); }
+    else if (s === "palette") { go("home"); h.value = ""; route(""); openPalette(""); }
+    else if (s === "filter") { go("home"); h.value = ""; route(""); openPalette("site"); }
+    else if (s === "drawer") { go("home"); h.value = ""; route(""); openDrawer(); }
+    else { if (s === "home") { h.value = ""; route(""); } go(s); }
+    shown = s; markTour();
+  }
+  function markTour() { $$("#tour button").forEach(function (b) { b.classList.toggle("on", b.dataset.s === shown); }); }
+  $("#tour").innerHTML = TOUR.map(function (x) { return '<button data-s="' + x[0] + '">' + x[1] + "</button>"; }).join("");
+  $("#tour").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) show(b.dataset.s); });
+
+  // What the photographing script asks, so a picture can be checked against
+  // the state it claims to be, instead of trusted.
+  window.mock = {
+    show: show,
+    theme: applyTheme,
+    lang: function (l) { lang = l; render(); },
+    state: function () {
+      return { shown: shown, view: view, theme: document.documentElement.getAttribute("data-theme") || "auto", lang: lang,
+        palette: !$("#palette").hidden, drawer: document.body.classList.contains("drawer"),
+        bg: getComputedStyle(document.body).backgroundColor,
+        // What is actually ON the screen, read from layout rather than from
+        // the variable that says what should be. The first version asserted
+        // `shown` alone and passed while all four screens were stacked.
+        visible: VIEWS.filter(function (x) { var el = $("#v-" + x); return el.offsetWidth > 0 && el.offsetHeight > 0; }),
+        font: document.fonts ? document.fonts.check('16px "Commissioner"', "Τι θέλεις") : null,
+        overflowX: document.documentElement.scrollWidth - window.innerWidth,
+        // How far the worst icon sits from the centre of its square. A text
+        // rule once outranked .tile and put every icon in the corner; the
+        // screen-level checks above all passed while it did.
+        tileOff: $$(".tile").filter(function (el) { return el.offsetWidth > 0; }).reduce(function (worst, el) {
+          var ic = el.querySelector("svg"); if (!ic) return worst;
+          var a = el.getBoundingClientRect(), b = ic.getBoundingClientRect();
+          return Math.max(worst, Math.abs((a.left + a.width / 2) - (b.left + b.width / 2)), Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)));
+        }, 0) };
+    }
+  };
+
+  applyTheme(mode);
+  render();
+  var start = location.hash.slice(1);
+  show(TOUR.some(function (x) { return x[0] === start; }) ? start : "home");
+})();
+</script>

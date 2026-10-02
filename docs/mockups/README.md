@@ -1,140 +1,94 @@
-# Three mockups for the next interface, each in two themes
+# The Ionexa mockup
 
-Not the product. Three HTML pages that exist to be compared and for one of
-them to be chosen. Nothing in `src/` changed to make them.
+One design. Not the product: nothing in `src/` changed to make it.
 
-    node scripts/mockups.mjs              # writes the three, photographs them
+    node scripts/mockups.mjs              # writes ionexa.html, photographs it
     SKIP_SHOTS=1 node scripts/mockups.mjs # just the HTML
-    FRAG_DIR=... node scripts/mockups.mjs # also writes the publishable form
 
-Published as artifacts, 2026-10-01 — the files here open the same page:
-Paper `claude.ai/artifact/WLeoDnbpAbVxdHAjocSBHZ`,
-Graphite `claude.ai/artifact/Ro2HbGqsVZ8jGagwYkD3NK`,
-Slate `claude.ai/artifact/QukqSADXg9QikUA7hHdA7o`.
+`ionexa.src.html` is the page, written by hand. `ionexa.html` is what the
+script makes of it: the same page with the typeface inlined and a document
+skeleton around it, so it opens from disk. Edit the first; the second is
+generated.
 
-| file | what it is |
-|---|---|
-| `a-claude.html` | Warm paper and warm graphite, serif headline, clay accent |
-| `b-linear.html` | Near-black, tight type, 8px corners, indigo accent |
-| `c-hybrid.html` | Deep grey never black, slate indigo, generous spacing |
+On 2026-10-02 this replaced three skins (Claude-, Linear- and hybrid-style)
+that the owner rejected in favour of one that combines them. Those three were
+also published as private artifacts; the pages still exist until they are
+deleted from the gallery, and nothing here refers to them any more.
 
-Each page carries seven screens behind the tab strip at the bottom, in both
-themes, and responds at 390px. The tab strip is a mockup affordance and is
-hidden when `body` carries `shot`, which is how the photographs are taken.
+## What it takes from where
 
-## One structure, three palettes, two themes each
+- **Claude** — the base. One field in the centre, a quiet rail with New,
+  Recent, All tools and Settings, and the result in a panel beside the
+  conversation rather than replacing it.
+- **Linear** — the palette (`⌘K`, or `/`), with arrow keys, Enter and Esc
+  working, and typing that narrows it: `site` leaves `1 of 17`.
+- **Arc** — motion: the incoming screen rises six pixels and settles, the
+  palette scales in, the result panel slides in from the right. All of it off
+  under `prefers-reduced-motion`.
+- **Stripe** — type: one face at four weights, tight display tracking, a
+  strict scale, tabular figures wherever digits stack.
+- **Perplexity** — sources: numbered citations inside the answer and the
+  same numbers on the source cards beneath it.
 
-The three differ in **colour, typography and corner radius**. Nothing else.
-That is deliberate twice over: it makes the comparison a comparison rather
-than a vote on whichever page got the better sentence, and it is the same
-reason the dark and light versions of each are the same markup. If dark and
-light differed in anything but colour, one of them would rot, and it would
-be the one nobody opens.
+## The typeface, and why not the obvious one
 
-Every colour is a CSS variable, declared three times: as the default, under
-`[data-theme="light"]`, and under `prefers-color-scheme` for the person who
-picked Auto. Changing theme is one attribute.
+Commissioner, drawn by Kostas Bartsokas. The faces that read most like Stripe
+— Geist, Instrument Sans, Hanken Grotesk, Onest, Figtree — have **no Greek**,
+checked against Google Fonts' own subset list on 2026-10-02, and this product
+sells to Greek businesses. Commissioner, Geologica and Manrope do.
 
-## The switch has three states, not two
+The two subsets used are in `fonts/` with their licence (`fonts/OFL.txt`, SIL
+Open Font License 1.1), and are inlined into the page so the published copy
+and the photographs cannot quietly render in a fallback face.
 
-Dark, light, **auto**. Auto is the only one that can be right for a person
-whose machine already knows what time it is, and it is the state where no
-attribute is set at all. The icon is the state, so the button says which one
-is on, and the choice is kept in `localStorage` — a person who picks light
-and gets dark back tomorrow has been given a gesture, not a choice.
+The mockup opens in Greek with an `EL / EN` switch, because Greek words run
+about a third longer than English ones and a layout that only ever saw English
+has not been tested.
 
-Dark is the default.
+## Three roads to every tool
 
-## Hidden and reachable are different words
+1. **Type it.** The line under the field says what the field already reads
+   while it is empty, and where it is going once you type — `Θα ανοίξει →
+   Site · αλλαγή`. A system that picks the tool silently is one nobody can
+   correct before the credits are spent. Nothing matched means "Ask me",
+   never a guess.
+2. **The palette.** Every tool, one keystroke away, narrowed by typing.
+3. **All tools.** Seventeen cards in four groups — the only road a person can
+   browse without knowing a name.
 
-Every one of the seventeen tools is reachable three ways, for three
-different people:
+Each tool carries an icon, the name a customer would say, and one line of what
+it does, from one list in the page script that the rail, the palette, the grid
+and the routed line all read.
 
-1. **Type it.** The newcomer does not know the names yet, so they describe
-   what they want and the routed chip says which tool that was.
-2. **The palette** (`/`, or the row at the foot of the rail). Seventeen rows
-   are unusable unprioritised, so typing narrows them — `site` leaves one,
-   and the header counts `1 of 17` so the person can see that the other
-   sixteen still exist.
-3. **The grid.** `All tools` opens a page of seventeen cards in the same
-   four groups. A palette rewards knowing the name; a grid does not require
-   it, and it is the only one of the three a person can browse.
+The routed line shows a cost only for the four tools `scripts/make-cost.mjs`
+has measured (site 87, deck 15, posts 8, code 3 on Growth); the rest show no
+number rather than an invented one.
 
-Each card and each palette row carries the same three things: the icon, the
-name a customer would say, and one line of what it does. Seventeen icons
-with no lines is a quiz, not a menu — which is why the line lives in `NAV`
-beside the name, one source for the rail, the palette and the grid.
+## What it keeps, because it is the product and not the paint
 
-## What a rail with no tools in it owes the person
+- the data: what the home screen is reading, the sources under an answer, the
+  panel built from the person's own records, and the build screen listing
+  what it read (menu, hours, photographs) before what it made;
+- **What this does not do**, in full, on the build screen;
+- **What it can see**, in full, under the chat composer.
 
-If they no longer pick the tool, the system picks it, and a system that
-picks silently is one nobody can correct: the credits are spent before the
-mistake is visible. So the typed state prints the choice and offers to undo
-it —
+The numbers on every screen are a sample, and each screen says so.
 
-    Going to  [ Build a site ]  change
-    Images [Mine only]  Pages [One]   30 credits
+## What the photographs are checked against
 
-— which is the difference between understanding someone and claiming to.
-The `typed` screen is what the whole idea stands on; the rest is paint.
+`window.mock.state()` reports what the page is actually showing, and each of
+the 21 shots is refused unless it matches the file name. Two of these checks
+exist because the first version passed without them:
 
-## What all three keep, because it is the product and not the paint
+- **Which screens are laid out.** The first check read the page's own
+  variable for the current screen, and passed while all four screens were
+  stacked on top of each other — `.split{display:flex}`, written below
+  `.view{display:none}`, won. The check now reads layout. Putting the rule
+  back fails with `visible screens are [home, chat, build]`.
+- **Whether every icon is centred in its square.** `.opt span` and
+  `.tool span` outranked `.tile` and put every icon in the corner. Putting
+  one back fails with `an icon sits 7.0px off the centre of its square`.
 
-- **The data.** Home says what it is already reading; chat shows SOURCES
-  under the answer; the panel beside is built out of the person's own
-  records. This is the only thing that distinguishes Ionexa from a prompt
-  box, so it survives every skin and both themes.
-- **"What this does NOT do"** on Build a site, in full.
-- **"What it can see"** under the chat composer, in full.
-- **Voice says it needs a speech key**, in its one line, because it does.
-
-## What all three drop
-
-The background network art, the amber-on-black contrast, the heavy shadows,
-the second row of buttons, and the duplicate action (the builder had both a
-send arrow and a Build it button). The shadows that remain are two variables
-per theme and are used on four things.
-
-## The numbers inside them are a sample
-
-Each page says so in its own footer. 14 invoices, EUR 4,180 past due and the
-three late customers are invented furniture for a screenshot, not a
-measurement of anything. They exist so the layout can be judged with
-realistic text lengths in it.
-
-## The one check the photographs get
-
-A screenshot named `dark` that is in fact light is the only way this script
-can fail without anyone noticing. So the theme is read back off the body
-rather than trusted, and at the end the two are required to differ and the
-dark one to be darker:
-
-    a-claude: dark rgb(38, 38, 36)  light rgb(250, 249, 247)
-    b-linear: dark rgb(8, 9, 10)    light rgb(255, 255, 255)
-    c-hybrid: dark rgb(26, 27, 30)  light rgb(255, 255, 255)
-
-Those three lines are printed by the run, not copied into this file by hand.
-
-## One content, two envelopes
-
-A page published as an artifact must NOT carry its own doctype, `html`,
-`head` or `body`: the host supplies those and pads the root element by the
-phone's safe-area insets. The same page opened as a file on disk must carry
-all four, or the browser reads it in quirks mode.
-
-So `page()` emits the inside and `standalone()` wraps it, and the run writes
-both. Two generated envelopes around one source beats two hand-kept copies —
-the same argument that made this a generator rather than three files.
-
-Three things that only matter in the published form, and all three were
-wrong first:
-
-- the reset was `* { margin: 0; padding: 0 }`, which takes the host's
-  safe-area padding off `:root` and runs the page under the status bar;
-- `localStorage` was read unguarded. It throws in a private window, with
-  site data blocked, and during thumbnail capture — and that read sits in
-  the same script as the tab strip, so the whole page would have gone inert
-  rather than merely forgetting the theme;
-- the dark-theme guard was `:root:not([data-theme])`, which breaks the
-  page's own Auto: Auto removes the attribute, so the guard has to be
-  `:not([data-theme="dark"])`.
+Also checked on every shot: the theme and language the name claims, that
+Commissioner actually loaded, and that nothing scrolls sideways; and at the
+end, that the dark background is darker than the light one.

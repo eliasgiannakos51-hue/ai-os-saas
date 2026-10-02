@@ -44,6 +44,30 @@ import { ALLOWED_IFRAME_EMBEDS } from "@/lib/website-html-security-scan";
 //   base-uri 'none' stops a <base> tag from re-pointing every relative
 //     URL on the page.
 //   object-src 'none' — no Flash/applet/plugin surface at all.
+//   sandbox WITHOUT allow-same-origin — the one directive that answers
+//     "we serve it from our own origin". Everything above limits what the
+//     page may load; none of it stops the page's own inline script from
+//     acting AS our origin. Measured 2026-10-02 in a real browser
+//     (scripts/tests/published-origin.prodtest.mjs) before this line
+//     existed: a published page's script read a signed-in visitor's whole
+//     session cookie — @supabase/ssr keeps it in document.cookie, so it is
+//     not httpOnly — and read /api/credits/balance as them, 200 with their
+//     balance. The only thing in the way was the generator's prompt asking
+//     it not to write script, and a prompt is not a boundary.
+//     Sandboxed, the page gets an opaque origin of its own: no cookie, no
+//     storage, and a fetch to the app is a cross-site request carrying no
+//     credentials. What the page still needs is granted by name:
+//       allow-scripts      scroll-reveal and the contact-form handler
+//       allow-forms        the contact form
+//       allow-popups       target="_blank" links (Instagram, a map)
+//       allow-popups-to-escape-sandbox  so the site a link opens is a
+//                          normal page, not a crippled sandboxed one
+//     The contact form keeps working because its endpoint already answers
+//     any origin (api/websites/[id]/submit-form, corsHeaders — a site is
+//     also meant to be downloaded and hosted elsewhere). NEVER add
+//     allow-same-origin here: next to allow-scripts it hands the page our
+//     origin back, and scripts/tests/publishing-sandbox.test.mjs is red on it.
+const SANDBOX_TOKENS = ["allow-scripts", "allow-forms", "allow-popups", "allow-popups-to-escape-sandbox"];
 const CSP_DIRECTIVES = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
@@ -58,6 +82,7 @@ const CSP_DIRECTIVES = [
   "base-uri 'none'",
   "object-src 'none'",
   "upgrade-insecure-requests",
+  `sandbox ${SANDBOX_TOKENS.join(" ")}`,
 ].join("; ");
 
 export function publishedSiteHeaders(options: { cacheSeconds?: number } = {}): HeadersInit {

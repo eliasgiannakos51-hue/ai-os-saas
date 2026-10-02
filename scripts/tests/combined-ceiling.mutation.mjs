@@ -66,6 +66,23 @@ const MUTANTS = [
     from: "  free_chat: 0.05,",
     to: "  free_chat: 0.15,",
   },
+  // ------------------------------------------------------------------
+  // EXACTLY 4x, from both sides (the owner's "Margin ΑΚΡΙΒΩΣ 4×",
+  // 2026-10-02). Before that clause, both of these were green: the gate
+  // was a ceiling, and a price rise or a smaller free quota is UNDER it.
+  // ------------------------------------------------------------------
+  {
+    name: "a paid plan's margin is raised from 5 to 6 (a price rise nobody decided)",
+    file: "src/lib/billing/margin-policy.ts",
+    from: "  growth: 5,",
+    to: "  growth: 6,",
+  },
+  {
+    name: "the free chat share shrinks, so paid plans quietly earn more than 4x",
+    file: CEILING,
+    from: "  free_chat: 0.05,",
+    to: "  free_chat: 0.02,",
+  },
 ];
 
 let caught = 0;

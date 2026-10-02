@@ -33,6 +33,7 @@ import { spawn } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import http from "node:http";
 import { startMockSupabase, MOCK_USER } from "./lib/mock-supabase.mjs";
+import { loadTs } from "./tests/load-ts.mjs";
 
 const OUT = process.env.SHOTS;
 if (!OUT) {
@@ -43,9 +44,28 @@ mkdirSync(OUT, { recursive: true });
 
 MOCK_USER.user_metadata = { subscription_tier: "ultimate" };
 
+// THE BALANCE IS THE PLAN'S OWN NUMBER, read from lib/billing/plans.ts.
+// The stand-in's default row is 500 of 500, which is right for nothing:
+// the 2026-10-02 shots put "500" in the header of an Ultimate account
+// whose pricing card says 25,000, beside chat's "430 free messages",
+// and the owner read the three as one number disagreeing with itself.
+// A fresh month on Ultimate, nothing spent, is what an empty account
+// actually shows — and the header is checked against it below.
+const { PLANS } = await loadTs("src/lib/billing/plans.ts");
+const ULTIMATE_CREDITS = PLANS.find((p) => p.slug === "ultimate")?.monthlyCredits;
+if (typeof ULTIMATE_CREDITS !== "number") {
+  console.log("lib/billing/plans.ts has no numeric Ultimate allowance — nothing to show a balance against.");
+  process.exit(1);
+}
+
 const PORT = 34571;
 const ORIGIN = `http://127.0.0.1:${PORT}`;
-const supa = await startMockSupabase({ port: 54351 });
+const supa = await startMockSupabase({
+  port: 54351,
+  tableRows: {
+    user_credits: [{ user_id: MOCK_USER.id, credits_remaining: ULTIMATE_CREDITS, credits_total: ULTIMATE_CREDITS }],
+  },
+});
 
 const env = {
   ...process.env,
@@ -119,6 +139,7 @@ try {
   browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 
   let shot = 0;
+  const balanceReads = [];
   for (const [dev, width, height] of DEVICES) {
     const ctx = await browser.newContext({ viewport: { width, height }, hasTouch: dev === "phone" });
     await ctx.addCookies([{ ...supa.authCookie, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" }]);
@@ -129,6 +150,14 @@ try {
         await page.waitForTimeout(500);
         const landed = new URL(page.url()).pathname;
         await page.screenshot({ path: `${OUT}/${dev}-${name}.png`, fullPage: false });
+        // THE HEADER'S BALANCE, read off the page and compared with the
+        // plan's. Digits only, so the locale's grouping (25,000 / 25.000)
+        // does not decide the answer.
+        const badge = page.locator('header a[href="/dashboard/settings#buy-credits"]').first();
+        if ((await badge.count()) > 0 && (await badge.isVisible())) {
+          const shown = Number(((await badge.innerText()) || "").replace(/\D/g, ""));
+          balanceReads.push({ dev, name, shown });
+        }
         shot++;
         // THE LANDED PATH IS PRINTED, every time. A screenshot of the
         // login page filed under "chat" is the failure this whole file
@@ -152,6 +181,12 @@ try {
     await ctx.close();
   }
   console.log(`\n${shot} screenshots in ${OUT}`);
+  const wrong = balanceReads.filter((r) => r.shown !== ULTIMATE_CREDITS);
+  console.log(
+    `header balance read on ${balanceReads.length} screen(s); the plan grants ${ULTIMATE_CREDITS}` +
+      (wrong.length ? ` — DIFFERENT on ${wrong.map((r) => `${r.dev}/${r.name} (${r.shown})`).join(", ")}` : " — the same on every one"),
+  );
+  if (balanceReads.length === 0 || wrong.length) process.exitCode = 1;
 } finally {
   if (browser) await browser.close().catch(() => {});
   stop();

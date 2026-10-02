@@ -1,10 +1,19 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import "@fontsource/inter/400.css";
-import "@fontsource/inter/500.css";
-import "@fontsource/inter/600.css";
-import "@fontsource/inter/700.css";
+// THE TYPEFACE IS COMMISSIONER, by Kostas Bartsokas (SIL OFL 1.1) — the
+// owner's choice with the design, 2026-10-02 (docs/mockups/README.md, "The
+// typeface, and why not the obvious one"). The faces that read most like
+// the Stripe-style type the design asked for have no Greek; this one does,
+// and this product's first language is Greek. Self-hosted through
+// @fontsource like Inter was: each weight's stylesheet declares every
+// subset with its unicode-range, so a page downloads only the Greek and
+// Latin files it actually draws. PDFs keep their own stack
+// (lib/pdf/document.tsx), which is measured for scripts this face lacks.
+import "@fontsource/commissioner/400.css";
+import "@fontsource/commissioner/500.css";
+import "@fontsource/commissioner/600.css";
+import "@fontsource/commissioner/700.css";
 import "./globals.css";
 import { GlobalControls } from "@/components/global-controls";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";

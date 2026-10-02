@@ -288,7 +288,12 @@
       "aiMemory": "Lo que el chat ha guardado sobre ti, y cómo borrarlo.",
       "meetings": "Convierte una grabación en transcripción, resumen y acciones que eliges tú."
     },
-    "closeMenu": "Cerrar el menú"
+    "closeMenu": "Cerrar el menú",
+    "rail": {
+      "new": "Nuevo",
+      "recent": "Recientes",
+      "allTools": "Todas las herramientas"
+    }
   },
   "landing": {
     "description": "Guarda tus productos, precios, clientes y cifras — y luego escribe con ellos. Una web con tu carta real, una presentación con las cifras reales de septiembre, publicaciones que saben qué vendes. No un borrador genérico que tengas que corregir.",
@@ -1303,7 +1308,12 @@
       "willHandle": "No se nombra ninguna herramienta, así que Ionexa lo leerá: puede responder o guardarlo como registro.",
       "costsNow": "{credits, plural, one {# crédito} other {# créditos}} al pulsar «Sí». Hasta entonces no se cobra nada.",
       "sendIt": "Sí, envíalo",
-      "fix": "Corregir el texto"
+      "fix": "Corregir el texto",
+      "goingTo": "Se abrirá",
+      "routeAsk": "Lo leerá Ionexa",
+      "routeChange": "cambiar",
+      "routeCostThere": "≈ {credits, plural, one {# crédito} other {# créditos}} allí",
+      "routeCostNow": "≈ {credits, plural, one {# crédito} other {# créditos}} al enviar"
     },
     "timeline": {
       "title": "Lo mío",
@@ -2723,6 +2733,11 @@
       "agents": "Crear el agente",
       "automation": "Abrir Automatización",
       "deepResearch": "Iniciar Investigación profunda"
+    },
+    "tools": {
+      "title": "Todas las herramientas",
+      "description": "Cada herramienta, con una línea sobre lo que hace.",
+      "orPress": "O pulsa ⌘K y escribe su nombre, o descríbelo en el campo de Inicio."
     }
   },
   "module": {
@@ -3419,6 +3434,11 @@
       "is": "Una grabación convertida en transcripción, resumen y una lista de acciones que eliges tú.",
       "does": "Transcribe en el idioma en que se habló, resume en ese mismo idioma y propone quién se comprometió a qué y para cuándo.",
       "doesNot": "No guarda el audio — no hay bucket ni columna para él, así que desaparece al terminar la subida. Y no crea nada por su cuenta: una acción existe solo después de que la marques y pulses Guardar."
+    },
+    "tools": {
+      "is": "Un mapa de todo Ionexa, en una página.",
+      "does": "Muestra cada herramienta con una línea sobre lo que hace, agrupadas por lo que creas, preguntas, ejecutas y ves.",
+      "doesNot": "No es el único camino: escribe lo que quieres en el campo de Inicio o pulsa ⌘K y llegas a la misma herramienta."
     }
   },
   "helpCentre": {

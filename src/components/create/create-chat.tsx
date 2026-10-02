@@ -24,7 +24,8 @@ import {
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { producerHref, PRODUCER_SPECS, type ProducerKey } from "@/lib/create-studio/producer-routes";
 import { preflight, voiceStep, VOICE_IDLE, type VoiceState } from "@/lib/voice/voice-command";
-import { GoalPreview, GoalQuestion, VoiceSendConfirm } from "@/components/create/goal-preview";
+import { GoalPreview, GoalQuestion, RouteLine, VoiceSendConfirm } from "@/components/create/goal-preview";
+import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 import { useCostEstimate } from "@/components/credits/use-cost-estimate";
 import { useRouter } from "next/navigation";
 import { VoiceInput } from "@/components/voice/voice-input";
@@ -110,6 +111,20 @@ export function CreateChat({
   // photo of a product alongside "log this as a new idea". Uploaded right
   // before submit, same pattern as Website Builder's reference images.
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  // THE ROUTING LINE under the field (components/create/goal-preview.tsx,
+  // RouteLine). Read live from the same preflight() Send uses; with a photo
+  // attached Send goes to the classifier, so the line says so too.
+  const { setOpen: setPaletteOpen } = useCommandPalette();
+  const livePlan =
+    input.trim() && voice.kind === "idle" && !goal && !loading
+      ? imageFiles.length > 0
+        ? ({ kind: "classify", brief: input.trim() } as const)
+        : preflight(input)
+      : null;
+  const liveEstimate = useCostEstimate(
+    (livePlan?.kind === "open" ? PRODUCER_SPECS[livePlan.producer].profile : null) ?? "createAnything",
+    { inputChars: input.length, imageCount: imageFiles.length },
+  );
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
@@ -454,6 +469,14 @@ export function CreateChat({
           </button>
         </div>
       </form>
+
+      {/* A destination with no estimate profile shows no number — not the
+          classifier's number under the destination's name. */}
+      <RouteLine
+        plan={livePlan}
+        credits={livePlan?.kind === "open" && !PRODUCER_SPECS[livePlan.producer].profile ? 0 : liveEstimate.credits}
+        onChange={() => setPaletteOpen(true)}
+      />
 
       <SmartSuggestions
         modules={suggestions.modules}

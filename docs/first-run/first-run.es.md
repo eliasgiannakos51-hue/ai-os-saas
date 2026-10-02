@@ -1,8 +1,8 @@
 # The first run — es
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **707 strings**. The whole product is 3413, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **715 strings**. The whole product is 3427, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 453 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 456 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -314,7 +314,7 @@ Ionexa lo usa para elegir qué paso del plan sugerirte — trabajo ligero cuando
 
 Gratis: no se genera nada y puedes quitarlo con un clic
 
-## Tier 2 — The labels — skim these (453)
+## Tier 2 — The labels — skim these (456)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -2534,6 +2534,24 @@ Planes de webs
 
 Flujos de trabajo
 
+**`sidebar.rail.allTools`**
+
+> EN — All tools
+
+Todas las herramientas
+
+**`sidebar.rail.new`**
+
+> EN — New
+
+Nuevo
+
+**`sidebar.rail.recent`**
+
+> EN — Recent
+
+Recientes
+
 ### first result
 
 **`dashboard.ideas.loadError`**
@@ -3046,7 +3064,7 @@ No funcionó. Inténtalo otra vez.
 
 Cargando…
 
-## Tier 3 — Further in — only if you have time (205)
+## Tier 3 — Further in — only if you have time (210)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3356,11 +3374,41 @@ Corregir el texto
 
 No se cobra nada ahora, ni al llegar.
 
+**`dashboard.goal.goingTo`**
+
+> EN — Going to
+
+Se abrirá
+
 **`dashboard.goal.heard`**
 
 > EN — I heard: “{heard}”
 
 Entendí: «{heard}»
+
+**`dashboard.goal.routeAsk`**
+
+> EN — Ionexa will read it
+
+Lo leerá Ionexa
+
+**`dashboard.goal.routeChange`**
+
+> EN — change
+
+cambiar
+
+**`dashboard.goal.routeCostNow`**
+
+> EN — ≈ {credits, plural, one {# credit} other {# credits}} on send
+
+≈ {credits, plural, one {# crédito} other {# créditos}} al enviar
+
+**`dashboard.goal.routeCostThere`**
+
+> EN — ≈ {credits, plural, one {# credit} other {# credits}} there
+
+≈ {credits, plural, one {# crédito} other {# créditos}} allí
 
 **`dashboard.goal.sendIt`**
 

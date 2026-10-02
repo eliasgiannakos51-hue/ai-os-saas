@@ -99,6 +99,8 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "system-health",
   "team",
   "timeline",
+  // The All tools grid the rail links to (2026-10-02).
+  "tools",
   "trading-journal",
   "trading-workflow",
   "videos",

@@ -30,7 +30,8 @@ const TOOLTIPS = "scripts/tests/sidebar-and-tooltips.test.mjs";
 const NAV = "src/lib/sidebar-nav.ts";
 const SIDEBAR = "src/components/dashboard/sidebar.tsx";
 const PALETTE = "src/components/dashboard/command-palette.tsx";
-const TARGETS = [NAV, SIDEBAR, PALETTE];
+const TOOLS_PAGE = "src/app/dashboard/tools/page.tsx";
+const TARGETS = [NAV, SIDEBAR, PALETTE, TOOLS_PAGE];
 
 const MUTANTS = [
   // ---- A. NOTHING BECAME UNREACHABLE --------------------------------
@@ -149,14 +150,36 @@ const MUTANTS = [
     expect: "every group with a live row draws it",
   },
 
+  // ---- R. THE RAIL (2026-10-02) ----------------------------------------
+  {
+    dimension: "R. the rail",
+    gate: TOOLTIPS,
+    name: "the sidebar starts storing its own state again, beside the recent list",
+    file: SIDEBAR,
+    from: "        window.localStorage.setItem(RECENT_TOOLS_KEY, JSON.stringify(next));",
+    to: '        window.localStorage.setItem(RECENT_TOOLS_KEY, JSON.stringify(next));\n        window.localStorage.setItem("ionexa.sidebarOpen", "1");',
+    expect: "the only thing remembered across a reload",
+  },
+  {
+    dimension: "R. the rail",
+    gate: TOOLTIPS,
+    name: "the All tools grid lists the hidden trackers",
+    file: TOOLS_PAGE,
+    from: "sidebarGroups(MAIN_SIDEBAR_GROUPS, isAdminEmail(user.email))",
+    to: "visibleGroups(MAIN_SIDEBAR_GROUPS, isAdminEmail(user.email))",
+    expect: "...and so does the All tools page",
+  },
+
   // ---- D. ONE ACTION, NOT A PINNED BLOCK ----------------------------
   {
     dimension: "D. one action",
     gate: TOOLTIPS,
     name: "the sidebar renders the hidden trackers after all",
     file: SIDEBAR,
-    from: "          {sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).map(renderGroup)}",
-    to: "          {visibleGroups(MAIN_SIDEBAR_GROUPS, isOwner).map(renderGroup)}",
+    // RE-ANCHORED 2026-10-02: the rail draws New, Recent and All tools,
+    // and the tool list reaches it only through the Recent lookup below.
+    from: "    () => sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).flatMap((g) => g.items),",
+    to: "    () => visibleGroups(MAIN_SIDEBAR_GROUPS, isOwner).flatMap((g) => g.items),",
     expect: "hidden",
   },
   {

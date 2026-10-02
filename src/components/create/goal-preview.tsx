@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowRight, Mic, Pencil, Send, Zap } from "lucide-react";
 import { PRODUCER_SPECS, type ProducerKey } from "@/lib/create-studio/producer-routes";
+import type { Preflight } from "@/lib/voice/voice-command";
 
 /**
  * WHAT IT WILL DO, BEFORE IT DOES IT.
@@ -237,5 +238,70 @@ export function VoiceSendConfirm({
       onSecondary={onFix}
       onCancel={onCancel}
     />
+  );
+}
+
+/**
+ * WHERE THE SENTENCE IS GOING, WHILE IT IS BEING TYPED.
+ *
+ * The design's routing line ("Θα ανοίξει → Site · αλλαγή", docs/mockups/
+ * README.md, "Three roads to every tool"). It reads the same free
+ * preflight() that Send and the microphone read (lib/voice/voice-command.ts),
+ * so what it says is what Send will do — never a second guess.
+ *
+ * SHIPPED ON A MEASUREMENT, as the owner asked: scripts/router-accuracy.mjs,
+ * 2026-10-02, 50 sentences — when the router names a page it named the
+ * right one 30 of 30 times; 10 of the 40 that meant a page were not named
+ * and fell back to "Ionexa reads it", which is the safe direction. Too thin
+ * to act on draws no line: the one question after Send says that better.
+ *
+ * "change" opens the ⌘K palette — every tool, narrowed by typing — because
+ * a pick nobody can undo before the credits go is the thing this line exists
+ * to prevent.
+ */
+export function RouteLine({
+  plan,
+  credits,
+  onChange,
+}: {
+  plan: Preflight | null;
+  /** The estimate of what Send leads to: the destination's own action
+   *  ("there"), or the classifier's ("now"). */
+  credits: number;
+  onChange: () => void;
+}) {
+  const t = useTranslations("dashboard.goal");
+  const tKey = useTranslations();
+  if (!plan || plan.kind === "question") return null;
+  const destination = plan.kind === "open" ? tKey(PRODUCER_SPECS[plan.producer].destinationKey) : null;
+  return (
+    <p
+      className="route-line mt-2 flex flex-wrap items-center gap-x-2 text-sm text-muted"
+      data-route={plan.kind === "open" ? plan.producer : "classify"}
+    >
+      {destination ? (
+        <>
+          <span>{t("goingTo")}</span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-panel px-2.5 py-0.5 font-medium text-foreground">
+            <ArrowRight className="h-3.5 w-3.5 text-orange-400" aria-hidden="true" />
+            {destination}
+          </span>
+        </>
+      ) : (
+        <span>{t("routeAsk")}</span>
+      )}
+      <button
+        type="button"
+        onClick={onChange}
+        className="inline-flex min-h-[44px] items-center px-1 text-foreground/80 underline-offset-2 hover:text-foreground hover:underline"
+      >
+        {t("routeChange")}
+      </button>
+      {credits > 0 && (
+        <span className="tabular-nums">
+          {plan.kind === "open" ? t("routeCostThere", { credits }) : t("routeCostNow", { credits })}
+        </span>
+      )}
+    </p>
   );
 }

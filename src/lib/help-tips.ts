@@ -122,6 +122,15 @@ export type HelpTip = {
 
 export const HELP_TIPS: HelpTip[] = [
   {
+    id: "tools",
+    file: "src/app/dashboard/tools/page.tsx",
+    keyPrefix: "help.tools",
+    // The rail of 2026-10-02 put the 26 tool rows behind one link. A grid
+    // reached that way reads as "the place you must come to start
+    // anything"; the field on Home and ⌘K reach the same tools faster.
+    corrects: "that this page is the only way to open a tool",
+  },
+  {
     id: "agents",
     article: "create-agent",
     file: "src/app/dashboard/agents/page.tsx",

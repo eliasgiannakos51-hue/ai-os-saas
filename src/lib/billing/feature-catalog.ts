@@ -631,6 +631,10 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "",
       "[module]",
       "overview",
+      // The full tool list, drawn as a grid since the rail replaced the
+      // sidebar's 26 rows (2026-10-02) — a map of the product, free on
+      // every plan like the overview that leads to it.
+      "tools",
       "records",
       "timeline",
       "trading-journal",

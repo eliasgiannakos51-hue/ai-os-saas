@@ -288,7 +288,12 @@
       "aiMemory": "Cosa la chat ha tenuto su di te, e come cancellarlo.",
       "meetings": "Trasforma una registrazione in trascrizione, riassunto e azioni tra cui scegli tu."
     },
-    "closeMenu": "Chiudi il menu"
+    "closeMenu": "Chiudi il menu",
+    "rail": {
+      "new": "Nuovo",
+      "recent": "Recenti",
+      "allTools": "Tutti gli strumenti"
+    }
   },
   "landing": {
     "description": "Conserva i tuoi prodotti, prezzi, clienti e numeri — e poi scrive con quelli. Un sito con il tuo menu vero, una presentazione con i numeri reali di settembre, post che sanno cosa vendi. Non una bozza generica da correggere.",
@@ -1303,7 +1308,12 @@
       "willHandle": "Non è indicato nessuno strumento, quindi Ionexa lo leggerà: può rispondere o salvarlo come voce.",
       "costsNow": "{credits, plural, one {# credito} other {# crediti}} quando premi «Sì». Fino ad allora non si paga nulla.",
       "sendIt": "Sì, invialo",
-      "fix": "Correggi il testo"
+      "fix": "Correggi il testo",
+      "goingTo": "Si aprirà",
+      "routeAsk": "Lo leggerà Ionexa",
+      "routeChange": "cambia",
+      "routeCostThere": "≈ {credits, plural, one {# credito} other {# crediti}} lì",
+      "routeCostNow": "≈ {credits, plural, one {# credito} other {# crediti}} all’invio"
     },
     "timeline": {
       "title": "Le mie cose",
@@ -2723,6 +2733,11 @@
       "agents": "Crea l'agente",
       "automation": "Apri Automazione",
       "deepResearch": "Avvia la ricerca approfondita"
+    },
+    "tools": {
+      "title": "Tutti gli strumenti",
+      "description": "Ogni strumento, con una riga su cosa fa.",
+      "orPress": "Oppure premi ⌘K e scrivi il nome, o descrivilo nel campo della Home."
     }
   },
   "module": {
@@ -3419,6 +3434,11 @@
       "is": "Una registrazione trasformata in trascrizione, riassunto ed elenco di azioni tra cui scegli tu.",
       "does": "Trascrive nella lingua in cui si è parlato, riassume nella stessa lingua e propone chi si è impegnato a fare cosa ed entro quando.",
       "doesNot": "Non conserva l'audio — non esiste né bucket né colonna per esso, quindi sparisce a caricamento finito. E non crea nulla da solo: un'azione esiste solo dopo che la spunti e la tieni."
+    },
+    "tools": {
+      "is": "Una mappa di tutto Ionexa, in una pagina.",
+      "does": "Mostra ogni strumento con una riga su cosa fa, raggruppati per ciò che crei, chiedi, esegui e vedi.",
+      "doesNot": "Non è l’unica strada: scrivi cosa vuoi nel campo della Home o premi ⌘K e arrivi allo stesso strumento."
     }
   },
   "helpCentre": {

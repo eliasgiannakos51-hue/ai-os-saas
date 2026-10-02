@@ -175,24 +175,47 @@ checkTrue(
   /if \(group\.items\.length === 0\) return null;/.test(sidebarForOpen),
   "the whole defect was a heading over nothing; sidebarGroups() prevents one cause and this prevents the rest",
 );
+// WHAT THE SIDEBAR MAY REMEMBER. Until 2026-10-02 the answer was
+// "nothing": there was no open/shut state left, so any storage was a
+// regression. The rail the owner approved that day has one list worth
+// keeping per device — the five most recent tools — and that is now the
+// ONLY thing stored: every storage call names RECENT_TOOLS_KEY, none is
+// sessionStorage, and every one sits inside a try (blocked storage in a
+// private window must leave the rail without the list, not broken).
+// STRIPPED, because the component explains what it stores and what it
+// does not, and a sentence about storage is not storage.
+const sidebarCode = stripComments(sidebarForOpen);
+const storageCalls = sidebarCode.match(/localStorage\.\w+\([^)]*\)/g) ?? [];
 checkTrue(
-  "...and nothing is remembered across a reload",
-  // STRIPPED, because the component EXPLAINS what it no longer stores —
-  // and a check reading the raw file found the word in that sentence and
-  // called it storage. Comments are not code; the same shape put a `--`
-  // in front of an RLS statement in security-posture.test.mjs.
-  !/localStorage|sessionStorage/.test(stripComments(sidebarForOpen)),
-  "there is no open/shut state left to store, so storing anything is a regression by itself",
+  `...and the only thing remembered across a reload is the recent-tools list (${storageCalls.length} storage calls)`,
+  storageCalls.length >= 1 &&
+    storageCalls.every((c) => c.includes("RECENT_TOOLS_KEY")) &&
+    !/sessionStorage/.test(sidebarCode),
+  storageCalls.join(" | ") || "no storage call found — the Recent list cannot survive a reload",
+);
+checkTrue(
+  "...and every storage call is guarded",
+  (sidebarCode.match(/try\s*\{[^}]*localStorage\./g) ?? []).length === storageCalls.length,
+  "a storage call outside a try throws in a private window and takes the sidebar with it",
 );
 // V4.6: the config carries items marked hidden — trackers reachable from
 // the records hub and ⌘K, kept out of the sidebar on purpose. The sidebar
 // must render through sidebarGroups() (which drops them), never through
 // visibleGroups() (which keeps them for the palette).
 const sidebarSrc = readFileSync("src/components/dashboard/sidebar.tsx", "utf8");
+// Since 2026-10-02 the tool list is drawn in two places — the rail's Recent
+// lookup and the All tools grid (app/dashboard/tools/page.tsx) — and both
+// must read sidebarGroups(), never visibleGroups().
+const toolsPageSrc = stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"));
 checkTrue(
-  "the sidebar renders through sidebarGroups, so hidden items stay out of it",
-  /sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\)\.map\(renderGroup\)/.test(sidebarSrc) && !/visibleGroups\([^)]*\)\.map\(renderGroup\)/.test(sidebarSrc),
-  "the sidebar is rendering a group list that still carries hidden items",
+  "the sidebar reads its tools through sidebarGroups, so hidden items stay out of it",
+  /sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\)/.test(stripComments(sidebarSrc)) && !/visibleGroups\(/.test(stripComments(sidebarSrc)),
+  "the sidebar is reading a group list that still carries hidden items",
+);
+checkTrue(
+  "...and so does the All tools page",
+  /sidebarGroups\(MAIN_SIDEBAR_GROUPS, isAdminEmail\(user\.email\)\)/.test(toolsPageSrc) && !/visibleGroups\(/.test(toolsPageSrc),
+  "the grid would show the hidden trackers the sidebar has always kept out",
 );
 // The other half of hidden: ⌘K must still find every hidden tracker, or
 // "hidden from the sidebar" becomes "gone from the product". The palette

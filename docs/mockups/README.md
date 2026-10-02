@@ -1,6 +1,28 @@
 # The Ionexa mockup
 
-One design. Not the product: nothing in `src/` changed to make it.
+One design. The page here is still the mockup, not the product — but the
+owner approved it on 2026-10-02 and it is going into `src/` in parts.
+
+**Applied 2026-10-02, part 1:**
+
+- **The typeface.** Commissioner across the interface, through
+  `@fontsource/commissioner` (`src/app/layout.tsx`).
+- **The routing line** under the Home field — `Θα ανοίξει → X · αλλαγή ·
+  ≈ N credits` — after the router was measured as the owner asked:
+  `node scripts/router-accuracy.mjs`, 50 sentences, 30 of 30 right when it
+  names a page (`RouteLine` in `src/components/create/goal-preview.tsx`).
+- **The rail** — New, Recent, All tools, Settings
+  (`src/components/dashboard/sidebar.tsx`) — and **All tools** as a page
+  (`src/app/dashboard/tools/page.tsx`).
+
+`scripts/tests/design-home.prodtest.mjs` drives all three in Greek on a
+desktop and a phone.
+
+**Already in the product before this:** ⌘K over every tool, dark by
+default with a light switch.
+
+**Not yet:** numbered sources in chat answers (Perplexity), the Build split
+view, the Arc-style motion, the Stripe type scale.
 
     node scripts/mockups.mjs              # writes ionexa.html, photographs it
     SKIP_SHOTS=1 node scripts/mockups.mjs # just the HTML

@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Tooltip } from "@/components/ui/tooltip";
 import { displayNameFromEmail } from "@/lib/greeting";
-import { ChevronRight, X } from "lucide-react";
+import { ChevronRight, LayoutGrid, Plus, X } from "lucide-react";
 import { OVERVIEW_NAV_ITEM, CREATE_NAV_ITEM } from "@/lib/modules";
 import {
   ALL_SIDEBAR_GROUPS,
@@ -50,6 +50,11 @@ function isActive(pathname: string | null, href: string) {
 // a constant cannot.
 const RESTING_ICON = "text-emerald-400/50";
 
+/** Where the full list lives now — app/dashboard/tools/page.tsx. */
+const ALL_TOOLS_HREF = "/dashboard/tools";
+const RECENT_TOOLS_KEY = "ionexa.recentTools";
+const RECENT_TOOLS_MAX = 5;
+
 export function Sidebar({
   email = "",
   planName = "",
@@ -83,36 +88,20 @@ export function Sidebar({
     return key ? t(`items.${key}`) : label;
   }
 
-  // EVERY GROUP IS OPEN, ALWAYS — and this reverses the one-open-group
-  // rule of 2026-09-17 on a production report rather than a preference.
+  // THE RAIL, NOT THE DIRECTORY — the design the owner approved on
+  // 2026-10-02 (docs/mockups/README.md): New, Recent, All tools, Settings.
   //
-  // WHAT THAT RULE DID TO THE SCREEN. It opened only the group holding
-  // the current page, so five of the six headings stood over nothing.
-  // Measured in a browser on the build before this change:
+  // WHERE THE TWENTY-SIX ROWS WENT. Nowhere: lib/sidebar-nav.ts is the
+  // same list, with the same groups, names and hints, and it is drawn in
+  // full at /dashboard/tools (app/dashboard/tools/page.tsx) through the
+  // same sidebarGroups() and owner filter — with each hint written out,
+  // where here it was a tooltip a phone never shows. The ⌘K palette and the
+  // field on Home are the other two roads to the same list.
   //
-  //     1440x900: 7 of 26 rows painted, 6 group headings
-  //               Mine · Files · Finances · Sales · Trading ·
-  //               Search my records · What it remembers
-  //
-  // All seven are the See group. Make, Ask, Run, Organise and Settings
-  // were a heading and a chevron over empty space. The report that came
-  // back was "the sidebar shows Run and NO rows — did a filter remove
-  // Agents, Automation and Marketplace?" Nothing had. A shut group and a
-  // group whose contents were filtered away look identical, and the
-  // second is the one a reader assumes.
-  //
-  // WHAT IT COSTS TO OPEN THEM, measured rather than feared. `node
-  // scripts/measure-sidebar-height.mjs`, computed from this file's own
-  // classes, and section 4 of sidebar-density.prodtest.mjs, measured in
-  // the browser. Both are printed on every run, so neither number needs
-  // to be trusted from here.
-  //
-  // WHAT REPLACED THE MACHINERY. `touched`, `isExpanded`, `toggleGroup`,
-  // `headingContaining`, `groupContainsActive`, the chevron, the
-  // grid-template-rows animation and the aria-hidden / tabIndex pair are
-  // all gone, along with `collapsible` on SidebarGroupConfig. None of
-  // them had a second purpose: a flag that is false for every group is
-  // the `prominent` parameter this file already deleted once.
+  // WHAT THE GROUPS LEFT BEHIND. Every heading always open, a measured
+  // 26-row column, and a report that five headings "stood over nothing"
+  // when only one was open. A rail of four rows and the five most recent
+  // tools has none of those problems because it has no headings to shut.
 
   const router = useRouter();
   /** Routes already asked for, so a pointer sweeping down the sidebar
@@ -126,6 +115,39 @@ export function Sidebar({
     },
     [router]
   );
+
+  // RECENT: the last five tools this browser opened, newest first. Kept in
+  // localStorage because it is a per-device convenience, not a record —
+  // every read and write is guarded, so a private window or blocked
+  // storage leaves the rail without the list rather than broken.
+  const tools = useMemo(
+    () => sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).flatMap((g) => g.items),
+    [isOwner]
+  );
+  const [recent, setRecent] = useState<string[]>([]);
+  useEffect(() => {
+    let stored: string[] = [];
+    try {
+      const raw = window.localStorage.getItem(RECENT_TOOLS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(parsed)) stored = parsed.filter((h): h is string => typeof h === "string");
+    } catch {
+      stored = [];
+    }
+    const here = tools.find((item) => isActive(pathname, item.href));
+    const next = here ? [here.href, ...stored.filter((h) => h !== here.href)].slice(0, RECENT_TOOLS_MAX) : stored;
+    setRecent(next);
+    if (here) {
+      try {
+        window.localStorage.setItem(RECENT_TOOLS_KEY, JSON.stringify(next));
+      } catch {
+        /* storage blocked: the list lives for this page only */
+      }
+    }
+  }, [pathname, tools]);
+  const recentItems = recent
+    .map((href) => tools.find((item) => item.href === href))
+    .filter((item): item is SidebarItem => Boolean(item));
 
   function renderGroup(group: SidebarGroupConfig) {
     // A HEADING IS ONLY DRAWN WHEN SOMETHING IS UNDER IT.
@@ -278,7 +300,18 @@ export function Sidebar({
         </div>
 
         <nav className="space-y-4 p-3">
-          {sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).map(renderGroup)}
+          <div className="space-y-0.5">
+            {renderItem({ href: OVERVIEW_NAV_ITEM.href, label: t("rail.new"), icon: Plus })}
+            {renderItem({ href: ALL_TOOLS_HREF, label: t("rail.allTools"), icon: LayoutGrid })}
+          </div>
+          {recentItems.length > 0 && (
+            <div>
+              <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
+                {t("rail.recent")}
+              </p>
+              <div className="space-y-0.5 pb-0.5">{recentItems.map((item) => renderItem(item))}</div>
+            </div>
+          )}
         </nav>
 
         <div className="border-t border-white/[0.07] p-3">

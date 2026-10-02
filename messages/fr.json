@@ -288,7 +288,12 @@
       "aiMemory": "Ce que le chat a retenu sur vous, et comment le supprimer.",
       "meetings": "Transformez un enregistrement en transcription, résumé et actions que vous choisissez."
     },
-    "closeMenu": "Fermer le menu"
+    "closeMenu": "Fermer le menu",
+    "rail": {
+      "new": "Nouveau",
+      "recent": "Récents",
+      "allTools": "Tous les outils"
+    }
   },
   "landing": {
     "description": "Il garde vos produits, vos prix, vos clients et vos chiffres — puis il écrit avec. Un site avec votre vraie carte, une présentation avec les chiffres réels de septembre, des publications qui savent ce que vous vendez. Pas un brouillon générique à corriger.",
@@ -1303,7 +1308,12 @@
       "willHandle": "Aucun outil n’est nommé : Ionexa va le lire, et peut y répondre ou l’enregistrer comme entrée.",
       "costsNow": "{credits, plural, one {# crédit} other {# crédits}} quand vous appuyez sur « Oui ». Rien n’est facturé avant.",
       "sendIt": "Oui, l’envoyer",
-      "fix": "Corriger le texte"
+      "fix": "Corriger le texte",
+      "goingTo": "Ouvrira",
+      "routeAsk": "Ionexa le lira",
+      "routeChange": "changer",
+      "routeCostThere": "≈ {credits, plural, one {# crédit} other {# crédits}} là-bas",
+      "routeCostNow": "≈ {credits, plural, one {# crédit} other {# crédits}} à l’envoi"
     },
     "timeline": {
       "title": "Mes éléments",
@@ -2723,6 +2733,11 @@
       "agents": "Créer l'agent",
       "automation": "Ouvrir Automatisation",
       "deepResearch": "Lancer la recherche approfondie"
+    },
+    "tools": {
+      "title": "Tous les outils",
+      "description": "Chaque outil, avec une ligne sur ce qu’il fait.",
+      "orPress": "Ou appuyez sur ⌘K et tapez son nom, ou décrivez-le dans le champ de l’accueil."
     }
   },
   "module": {
@@ -3419,6 +3434,11 @@
       "is": "Un enregistrement transformé en transcription, résumé et liste d'actions que vous choisissez.",
       "does": "Retranscrit dans la langue parlée, résume dans cette même langue et propose qui s'est engagé à quoi et pour quand.",
       "doesNot": "Il ne conserve pas l'audio — il n'existe ni bucket ni colonne pour lui, il disparaît donc à la fin du téléversement. Et il ne crée rien de lui-même : une action n'existe qu'après que vous l'avez cochée et gardée."
+    },
+    "tools": {
+      "is": "Une carte de tout Ionexa, sur une page.",
+      "does": "Montre chaque outil avec une ligne sur ce qu’il fait, regroupés selon ce que vous créez, demandez, lancez et consultez.",
+      "doesNot": "Ce n’est pas le seul chemin : écrivez ce que vous voulez dans le champ de l’accueil ou appuyez sur ⌘K, et vous arrivez au même outil."
     }
   },
   "helpCentre": {

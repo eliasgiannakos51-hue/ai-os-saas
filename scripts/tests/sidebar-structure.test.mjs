@@ -358,13 +358,21 @@ console.log("\n== 1c. the flag comes off, the state is not stored, and a shut gr
     builtAnyway.join(", ")
   );
 
-  // 2. NOTHING IS STORED. The open/shut state is a pure function of the
-  //    URL plus what the user touched THIS visit. A sidebar that
+  // 2. NO GROUP STATE IS STORED. The open/shut state was a pure function
+  //    of the URL plus what the user touched THIS visit; a sidebar that
   //    restores three groups from yesterday is thirty-odd lines again,
-  //    on the one visit where the person has no idea why.
-  //    Comments stripped first: the component's header explains what it
-  //    used to store, in the words a scanner would match.
-  ok("the sidebar stores nothing", !/localStorage|sessionStorage|document\.cookie/.test(componentSrc));
+  //    on the one visit where the person has no idea why. Since the rail
+  //    of 2026-10-02 there are no groups in the sidebar at all, and the
+  //    one thing it keeps is the recent-tools list — every storage call
+  //    must name that key (sidebar-and-tooltips.test.mjs also holds that
+  //    each is guarded). No cookie, no session storage.
+  //    Comments stripped first: the component explains what it stores.
+  const storageCalls = componentSrc.match(/localStorage\.\w+\([^)]*\)/g) ?? [];
+  ok(
+    "the sidebar stores no group state — only the recent-tools list",
+    storageCalls.every((c) => c.includes("RECENT_TOOLS_KEY")) && !/sessionStorage|document\.cookie/.test(componentSrc),
+    storageCalls.join(" | ")
+  );
   // 3. THERE IS NO SHUT GROUP ANY MORE, and the four checks that used to
   //    stand here were the most carefully-written wrong thing in this
   //    file. They asserted that a collapsed group leaves the

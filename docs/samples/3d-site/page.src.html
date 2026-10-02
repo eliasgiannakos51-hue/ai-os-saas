@@ -1,0 +1,197 @@
+<title>Λαδάδικα Catering</title>
+<meta name="description" content="Μαγειρεμένο φαγητό για γραφεία και εκδηλώσεις στη Θεσσαλονίκη. Μενού φθινοπώρου, ώρες και παραγγελίες.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400..700&display=swap">
+<!-- THIS FILE IS WHAT THE MODEL WOULD WRITE. HTML and CSS only: there is no
+     JavaScript in it. Every moving thing is asked for with a data-attribute
+     and done by ionexa-3d.js, which we write once and serve ourselves. -->
+<style>
+:root{
+  --cream:#f6efe4; --paper:#fbf7f0; --clay:#b4532d; --clay-deep:#8f3d1f; --olive:#4f5d2f; --ink:#1d1a16; --mute:#6b6257; --line:#e4d9c8;
+  --font:"Commissioner",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:auto}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.6 var(--font);-webkit-font-smoothing:antialiased}
+h1,h2,h3,p,ul,li,dl,dd,dt{margin:0;padding:0}
+ul{list-style:none}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:24px}
+.num{font-variant-numeric:tabular-nums}
+
+/* nav */
+.nav{position:absolute;top:0;left:0;right:0;z-index:5}
+.nav .wrap{display:flex;align-items:center;gap:28px;height:76px}
+.logo{font-weight:700;letter-spacing:-.02em;font-size:19px;text-decoration:none;margin-right:auto}
+.nav a:not(.logo){text-decoration:none;font-size:15px;color:var(--mute)}
+.nav a.cta{color:var(--paper);background:var(--ink);padding:9px 16px;border-radius:999px}
+
+/* hero: the text is real HTML; the bowl behind it is either WebGL or the
+   drawing below, never nothing */
+.hero{position:relative;min-height:min(92vh,860px);background:radial-gradient(120% 90% at 78% 40%,#f3dcc3 0%,var(--cream) 46%,var(--paper) 100%);
+  overflow:hidden;display:flex;align-items:center}
+.hero .wrap{position:relative;z-index:2;width:100%;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:24px;align-items:center;padding-block:120px 80px}
+.kicker{font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--clay)}
+.hero h1{font-size:clamp(42px,6.6vw,88px);line-height:.98;letter-spacing:-.045em;font-weight:650;margin:18px 0 22px;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--clay)}
+.lead{font-size:19px;color:var(--mute);max-width:30ch}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.btn{display:inline-flex;align-items:center;gap:8px;height:50px;padding:0 22px;border-radius:999px;font-weight:600;font-size:15.5px;text-decoration:none;
+  transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+.btn:hover{transform:translateY(-2px)}
+.btn.primary{background:var(--clay);color:#fff}
+.btn.ghost{border:1.5px solid var(--ink)}
+.facts{display:flex;gap:28px;margin-top:40px;color:var(--mute);font-size:14px;flex-wrap:wrap}
+.facts b{display:block;color:var(--ink);font-size:15px}
+.stage{position:relative;aspect-ratio:1/1;max-width:100%}
+/* the canvas sits over the drawing; the component removes the drawing only
+   once the first WebGL frame exists */
+.stage canvas{position:absolute;inset:-12%;width:124%!important;height:124%!important}
+.bowl-static{width:100%;height:auto;display:block}
+html[data-ready="3d"] .bowl-static{visibility:hidden}
+
+/* how it works */
+section{padding-block:120px}
+.h2{font-size:clamp(32px,4.2vw,54px);letter-spacing:-.035em;line-height:1.04;font-weight:650;max-width:16ch;text-wrap:balance}
+.sub{color:var(--mute);max-width:52ch;margin-top:16px}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:56px}
+.step{background:var(--cream);border-radius:22px;padding:30px 28px 34px;min-height:220px;display:flex;flex-direction:column;gap:10px}
+.step .n{font-size:13px;font-weight:700;color:var(--clay);letter-spacing:.1em}
+.step h3{font-size:23px;letter-spacing:-.02em;font-weight:650}
+.step p{color:var(--mute);font-size:16px}
+
+/* menu: the business's own dishes and prices */
+.menu{background:var(--ink);color:var(--paper)}
+.menu .h2{color:var(--paper)}
+.menu .sub{color:#b9ad9d}
+.cats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:48px 72px;margin-top:64px}
+.cat h3{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#d98b63;font-weight:600;margin-bottom:12px}
+.dish{display:flex;justify-content:space-between;align-items:baseline;gap:18px;padding:15px 0;border-bottom:1px solid #3a342d;font-size:18px}
+.dish span:first-child{min-width:0}
+.dish small{display:block;color:#9d917f;font-size:14px}
+.dish .num{color:var(--paper);font-weight:600}
+
+/* where and when */
+.visit .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:start}
+.card{background:var(--cream);border-radius:22px;padding:34px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:12px 24px;margin-top:22px;font-size:17px}
+dt{color:var(--mute)}
+form{display:grid;gap:12px}
+label{display:grid;gap:6px;font-size:14px;color:var(--mute)}
+input,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+textarea{min-height:96px;resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sent{color:var(--olive);font-weight:600;min-height:1.6em}
+
+footer{padding-block:40px 60px;color:var(--mute);font-size:14px;border-top:1px solid var(--line)}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.sample{position:fixed;right:14px;bottom:14px;z-index:20;background:var(--ink);color:var(--paper);font-size:12px;padding:7px 12px;border-radius:999px;opacity:.86}
+
+@media (max-width:820px){
+  .hero .wrap{grid-template-columns:1fr;padding-block:104px 56px}
+  .stage{max-width:420px;margin:0 auto;order:-1;width:78%}
+  .steps,.cats,.visit .wrap{grid-template-columns:1fr}
+  .nav a:not(.logo):not(.cta){display:none}
+  section{padding-block:84px}
+  .row2{grid-template-columns:1fr}
+  /* fixed at the corner it sat on the hero's second button */
+  .sample{position:absolute;top:80px;left:50%;right:auto;bottom:auto;transform:translateX(-50%);white-space:nowrap}
+}
+</style>
+
+<header class="nav"><div class="wrap">
+  <a class="logo" href="#top">Λαδάδικα Catering</a>
+  <a href="#menu">Μενού</a><a href="#how">Πώς δουλεύουμε</a><a href="#visit">Ώρες</a>
+  <a class="cta" href="#visit">Παραγγελία</a>
+</div></header>
+
+<main id="top">
+  <section class="hero" style="padding:0">
+    <div class="wrap">
+      <div data-reveal>
+        <p class="kicker">Θεσσαλονίκη · catering για γραφεία και εκδηλώσεις</p>
+        <h1>Φαγητό για σαράντα, <em>ζεστό</em> στην πόρτα σας.</h1>
+        <p class="lead">Μαγειρεμένο το πρωί στα Λαδάδικα, στο τραπέζι σας το μεσημέρι.</p>
+        <div class="actions"><a class="btn primary" href="#menu">Δείτε το μενού</a><a class="btn ghost" href="#visit">Ζητήστε προσφορά</a></div>
+        <div class="facts"><div><b>12 πιάτα</b>στο φθινοπωρινό μενού</div><div><b>Δευ–Σάβ</b>08:00–18:00</div></div>
+      </div>
+      <!-- data-ionexa-3d names the scene; the colours are the business's own -->
+      <div class="stage" data-ionexa-3d="bowl" data-color="#b4532d" data-accent="#4f5d2f" data-glaze="#f1e3cf">
+        <svg class="bowl-static" viewBox="0 0 400 400" role="img" aria-label="Πήλινο μπολ με φαγητό">
+          <defs><radialGradient id="g" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#d0714a"/><stop offset="1" stop-color="#8f3d1f"/></radialGradient></defs>
+          <ellipse cx="200" cy="318" rx="128" ry="18" fill="#000" opacity=".08"/>
+          <path d="M70 182 Q76 300 200 306 Q324 300 330 182 Z" fill="url(#g)"/>
+          <ellipse cx="200" cy="182" rx="130" ry="34" fill="#f1e3cf"/>
+          <ellipse cx="200" cy="186" rx="112" ry="25" fill="#e2c9a8"/>
+          <circle cx="168" cy="178" r="15" fill="#4f5d2f"/><circle cx="204" cy="170" r="13" fill="#c2412d"/><circle cx="236" cy="182" r="14" fill="#4f5d2f"/>
+          <circle cx="190" cy="190" r="11" fill="#e0a43a"/><ellipse cx="226" cy="166" rx="20" ry="8" fill="#6d8a3e" transform="rotate(-24 226 166)"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section id="how"><div class="wrap">
+    <h2 class="h2" data-reveal>Τρία βήματα, και το φαγητό έρχεται.</h2>
+    <p class="sub" data-reveal>Χωρίς περιπλοκές: διαλέγετε, μας λέτε πότε, το φέρνουμε.</p>
+    <div class="steps">
+      <article class="step" data-reveal data-parallax="0.06"><span class="n">01</span><h3>Διαλέγετε</h3><p>Από τα 12 πιάτα του μενού, ή μας ζητάτε κάτι συγκεκριμένο.</p></article>
+      <article class="step" data-reveal data-parallax="0.12"><span class="n">02</span><h3>Μας λέτε πόσους και πότε</h3><p>Αριθμό ατόμων, μέρα και ώρα παράδοσης.</p></article>
+      <article class="step" data-reveal data-parallax="0.18"><span class="n">03</span><h3>Το φέρνουμε ζεστό</h3><p>Στην πόρτα σας, έτοιμο για σερβίρισμα.</p></article>
+    </div>
+  </div></section>
+
+  <section class="menu" id="menu"><div class="wrap">
+    <h2 class="h2" data-reveal>Το φθινοπωρινό μενού</h2>
+    <p class="sub" data-reveal>Τιμές ανά μερίδα. Τα μεζεδάκια ανά πιατέλα.</p>
+    <div class="cats">
+      <div class="cat" data-reveal><h3>Κυρίως</h3><ul>
+        <li class="dish"><span>Γεμιστά με κιμά</span><span class="num">€9,50</span></li>
+        <li class="dish"><span>Μουσακάς ταψιού</span><span class="num">€11,00</span></li>
+        <li class="dish"><span>Κοτόπουλο λεμονάτο <small>με πατάτες φούρνου</small></span><span class="num">€10,20</span></li>
+        <li class="dish"><span>Φασολάκια λαδερά</span><span class="num">€8,40</span></li>
+      </ul></div>
+      <div class="cat" data-reveal><h3>Σαλάτες</h3><ul>
+        <li class="dish"><span>Κινόα με ρόδι</span><span class="num">€7,80</span></li>
+        <li class="dish"><span>Χωριάτικη</span><span class="num">€7,20</span></li>
+        <li class="dish"><span>Πατζαροσαλάτα <small>με καρύδι</small></span><span class="num">€6,90</span></li>
+      </ul></div>
+      <div class="cat" data-reveal><h3>Μεζέδες</h3><ul>
+        <li class="dish"><span>Τυροπιτάκια <small>6 τεμάχια</small></span><span class="num">€5,60</span></li>
+        <li class="dish"><span>Κεφτεδάκια <small>8 τεμάχια</small></span><span class="num">€6,80</span></li>
+        <li class="dish"><span>Ντολμαδάκια γιαλαντζί</span><span class="num">€6,20</span></li>
+      </ul></div>
+      <div class="cat" data-reveal><h3>Γλυκά</h3><ul>
+        <li class="dish"><span>Πορτοκαλόπιτα</span><span class="num">€4,20</span></li>
+        <li class="dish"><span>Γαλακτομπούρεκο</span><span class="num">€4,60</span></li>
+      </ul></div>
+    </div>
+  </div></section>
+
+  <section class="visit" id="visit"><div class="wrap">
+    <div data-reveal>
+      <h2 class="h2">Πού θα μας βρείτε</h2>
+      <dl class="num"><dt>Διεύθυνση</dt><dd>Κατσάμπα 12, Θεσσαλονίκη</dd><dt>Ώρες</dt><dd>Δευτέρα–Σάββατο, 08:00–18:00</dd><dt>Κυριακή</dt><dd>Κλειστά</dd></dl>
+    </div>
+    <div class="card" data-reveal>
+      <form data-sample-form>
+        <div class="row2"><label>Όνομα<input name="name" autocomplete="name" required></label><label>Email<input name="email" type="email" autocomplete="email" required></label></div>
+        <div class="row2"><label>Άτομα<input name="people" type="number" min="1" inputmode="numeric"></label><label>Ημερομηνία<input name="date" type="date"></label></div>
+        <label>Σημείωση<textarea name="note"></textarea></label>
+        <button class="btn primary" type="submit">Ζητήστε προσφορά</button>
+        <p class="sent" aria-live="polite"></p>
+      </form>
+    </div>
+  </div></section>
+</main>
+
+<footer><div class="wrap"><span>© Λαδάδικα Catering</span><span>Κατσάμπα 12, Θεσσαλονίκη</span></div></footer>
+<p class="sample">Δείγμα · φανταστική επιχείρηση</p>
+
+<!-- Same-origin, pinned, ours. The scanner would allow these paths and
+     nothing else; the model never writes a <script> of its own. -->
+<script defer src="vendor/three-0.160.0.min.js"></script>
+<script defer src="vendor/gsap-3.12.5.min.js"></script>
+<script defer src="vendor/ScrollTrigger-3.12.5.min.js"></script>
+<script defer src="vendor/lenis-1.1.13.min.js"></script>
+<script defer src="ionexa-3d.js"></script>

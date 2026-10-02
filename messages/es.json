@@ -1298,7 +1298,12 @@
       "change": "Cambiar algo",
       "which": "¿A cuál te refieres?",
       "vague": "Cuéntame un poco más, para que vaya al sitio correcto.",
-      "dismiss": "Déjalo"
+      "dismiss": "Déjalo",
+      "heard": "Entendí: «{heard}»",
+      "willHandle": "No se nombra ninguna herramienta, así que Ionexa lo leerá: puede responder o guardarlo como registro.",
+      "costsNow": "{credits, plural, one {# crédito} other {# créditos}} al pulsar «Sí». Hasta entonces no se cobra nada.",
+      "sendIt": "Sí, envíalo",
+      "fix": "Corregir el texto"
     },
     "timeline": {
       "title": "Lo mío",

@@ -1,6 +1,6 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **702 strings**. The whole product is 3408, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **707 strings**. The whole product is 3413, which is why this file exists.
 
 **Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 453 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2546,7 +2546,7 @@ That did not work. Try again.
 
 Loading…
 
-## Tier 3 — Further in — only if you have time (200)
+## Tier 3 — Further in — only if you have time (205)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2781,6 +2781,11 @@ Change something
 
 Yes, do it
 
+**`dashboard.goal.costsNow`**
+
+
+{credits, plural, one {# credit} other {# credits}} when you press Yes. Nothing is charged until then.
+
 **`dashboard.goal.costsThere`**
 
 
@@ -2791,10 +2796,25 @@ Yes, do it
 
 Never mind
 
+**`dashboard.goal.fix`**
+
+
+Fix the text
+
 **`dashboard.goal.freeThere`**
 
 
 Nothing is charged now, and nothing is charged on arrival.
+
+**`dashboard.goal.heard`**
+
+
+I heard: “{heard}”
+
+**`dashboard.goal.sendIt`**
+
+
+Yes, send it
 
 **`dashboard.goal.vague`**
 
@@ -2805,6 +2825,11 @@ Say a little more, so this goes to the right place.
 
 
 Which one do you mean?
+
+**`dashboard.goal.willHandle`**
+
+
+No tool is named, so Ionexa will read it — it may answer it or save it as an entry.
 
 **`dashboard.goal.willOpen`**
 

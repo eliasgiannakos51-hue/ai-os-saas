@@ -1,6 +1,6 @@
 # The first run — de
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **702 strings**. The whole product is 3408, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **707 strings**. The whole product is 3413, which is why this file exists.
 
 **Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 453 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -3046,7 +3046,7 @@ Das hat nicht geklappt. Versuch es nochmal.
 
 Lädt…
 
-## Tier 3 — Further in — only if you have time (200)
+## Tier 3 — Further in — only if you have time (205)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3326,6 +3326,12 @@ Etwas ändern
 
 Ja, mach das
 
+**`dashboard.goal.costsNow`**
+
+> EN — {credits, plural, one {# credit} other {# credits}} when you press Yes. Nothing is charged until then.
+
+{credits, plural, one {# Credit} other {# Credits}}, sobald du auf „Ja“ drückst. Bis dahin wird nichts berechnet.
+
 **`dashboard.goal.costsThere`**
 
 > EN — {credits, plural, one {# credit} other {# credits}} when you press the button there. Nothing is charged now.
@@ -3338,11 +3344,29 @@ Ja, mach das
 
 Lass gut sein
 
+**`dashboard.goal.fix`**
+
+> EN — Fix the text
+
+Text korrigieren
+
 **`dashboard.goal.freeThere`**
 
 > EN — Nothing is charged now, and nothing is charged on arrival.
 
 Jetzt wird nichts berechnet, und bei der Ankunft auch nicht.
+
+**`dashboard.goal.heard`**
+
+> EN — I heard: “{heard}”
+
+Ich habe verstanden: „{heard}“
+
+**`dashboard.goal.sendIt`**
+
+> EN — Yes, send it
+
+Ja, senden
 
 **`dashboard.goal.vague`**
 
@@ -3355,6 +3379,12 @@ Sag ein bisschen mehr, damit es an die richtige Stelle geht.
 > EN — Which one do you mean?
 
 Welches meinst du?
+
+**`dashboard.goal.willHandle`**
+
+> EN — No tool is named, so Ionexa will read it — it may answer it or save it as an entry.
+
+Es wird kein Werkzeug genannt, also liest Ionexa es – es kann antworten oder einen Eintrag anlegen.
 
 **`dashboard.goal.willOpen`**
 

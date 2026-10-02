@@ -90,7 +90,14 @@ console.log("\n== 2. the lines ==");
 // trade the clause below describes rather than a shuffle: `.row-list`
 // carries its `divide-y` in the stylesheet, so the rule is drawn once and
 // counted nowhere. A round that raises both numbers has not made it.
-ok(`border utilities (${r.counts.borders}), ceiling 578`, r.counts.borders <= 578);
+// 578 -> 577 on 2026-10-02. The microphone's "Yes, send it" card
+// (components/create/goal-preview.tsx, VoiceSendConfirm) is the same
+// shape as GoalPreview's: an orange frame, one filled button, one
+// outline. Written twice it took this count to 580. Drawn once as a
+// shared ConfirmCard, with its outline as `.btn-outline`, the two cards
+// cost one frame between them and the count went one below where the
+// feature found it.
+ok(`border utilities (${r.counts.borders}), ceiling 577`, r.counts.borders <= 577);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

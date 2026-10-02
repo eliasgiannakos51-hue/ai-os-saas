@@ -1298,7 +1298,12 @@
       "change": "Cambia qualcosa",
       "which": "Quale intendi?",
       "vague": "Dimmi qualcosa in più, così va nel posto giusto.",
-      "dismiss": "Lascia stare"
+      "dismiss": "Lascia stare",
+      "heard": "Ho capito: «{heard}»",
+      "willHandle": "Non è indicato nessuno strumento, quindi Ionexa lo leggerà: può rispondere o salvarlo come voce.",
+      "costsNow": "{credits, plural, one {# credito} other {# crediti}} quando premi «Sì». Fino ad allora non si paga nulla.",
+      "sendIt": "Sì, invialo",
+      "fix": "Correggi il testo"
     },
     "timeline": {
       "title": "Le mie cose",

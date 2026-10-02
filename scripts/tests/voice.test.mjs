@@ -829,23 +829,51 @@ ok(
   ),
 );
 
-// THE TRANSCRIPT DOES NOT LEAVE send(). It goes into a draft; only the
-// draft dialog's accept button calls onTranscript.
-const sendBody = blockAfter(inputSrc, "const send = useCallback(");
+// THE TRANSCRIPT DOES NOT LEAVE send() — EXCEPT TO A PARENT THAT ASKED
+// FOR IT WITH review="card". The Home field draws its own confirmation card
+// (components/create/goal-preview.tsx, VoiceSendConfirm and the cards
+// beside it), so a second dialog in front of the first would ask the same
+// question twice. Every other caller gets the draft. The parent's card is
+// what keeps the owner's rule there — never an irreversible action from
+// voice without a confirmation — and scripts/tests/voice-command.test.mjs
+// holds it: the transcript only becomes a card, and only create-chat.tsx
+// passes review="card".
+//
+// Measured with the comments stripped, and on the two branches separately:
+// a check on "does send() mention setDraft" passes with the branch
+// condition replaced by `true`, which hands EVERY caller's transcript
+// straight to its parent.
+const sendBody = blockAfter(stripComments(inputSrc), "const send = useCallback(");
 ok("the upload path was found", sendBody !== null);
-ok(
-  "the transcript is put into a DRAFT by the upload path, never handed to the parent from it",
-  (sendBody ?? "").includes("setDraft(") &&
-    !(sendBody ?? "").includes("onTranscript("),
-  (sendBody ?? "")
-    .split("\n")
-    .filter((l) => l.includes("onTranscript"))
-    .join(" | "),
+const reviewBranch = (sendBody ?? "").match(
+  /if \(review === "card"\) \{([^{}]*)\} else \{([^{}]*)\}/,
 );
 ok(
-  "onTranscript is called from exactly one place in the whole component — the accept button",
-  (inputSrc.match(/onTranscript\(/g) ?? []).length === 1,
-  `${(inputSrc.match(/onTranscript\(/g) ?? []).length} call sites`,
+  "send() decides between the draft and the parent's card on review === \"card\", and nothing else",
+  reviewBranch !== null,
+  (sendBody ?? "").split("\n").filter((l) => l.includes("review")).join(" | "),
+);
+ok(
+  "...the default branch puts the transcript into a DRAFT and hands nothing to the parent",
+  (reviewBranch?.[2] ?? "").includes("setDraft(") && !(reviewBranch?.[2] ?? "").includes("onTranscript("),
+  reviewBranch?.[2]?.trim(),
+);
+ok(
+  "...only the card branch hands it on, and it draws no draft as well",
+  (reviewBranch?.[1] ?? "").includes("onTranscript(") && !(reviewBranch?.[1] ?? "").includes("setDraft("),
+  reviewBranch?.[1]?.trim(),
+);
+const sendOutsideBranch = (sendBody ?? "").replace(reviewBranch?.[0] ?? "\u0000", "");
+ok(
+  "...and nowhere else in send() does the transcript reach the parent",
+  !sendOutsideBranch.includes("onTranscript("),
+  sendOutsideBranch.split("\n").filter((l) => l.includes("onTranscript")).join(" | "),
+);
+const transcriptCalls = (stripComments(inputSrc).match(/onTranscript\(/g) ?? []).length;
+ok(
+  "onTranscript is called from exactly two places — the draft's accept button and the card branch above",
+  transcriptCalls === 2,
+  `${transcriptCalls} call sites`,
 );
 ok(
   "the draft dialog says out loud that nothing has been sent",

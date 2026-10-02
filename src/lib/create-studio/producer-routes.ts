@@ -127,7 +127,13 @@ export const PRODUCER_SPECS: Record<ProducerKey, ProducerSpec> = {
       "webshop", "onlineshop", "online shop", "loja", "tienda online",
       "网站", "网店", "ウェブサイト", "サイト", "موقع", "متجر",
     ],
-    stems: ["ιστοσελιδ", "ιστοτοπ", "καταστημ"],
+    // "σαιτ" is "site" said aloud in Greek and written down by Whisper
+    // ("φτιάξε μου ένα σάιτ"). Typed, people write "site"; spoken, the
+    // transcript is often Greek letters, and without this the microphone's
+    // most common sentence reached no producer at all. A stem, so σάιτ,
+    // σάιτς and σαιτάκι all count. Not in `greek`: that list is Greek
+    // stems spelt in Latin letters, and this one is already Greek.
+    stems: ["ιστοσελιδ", "ιστοτοπ", "καταστημ", "σαιτ"],
     greek: ["ιστοσελιδ", "ιστοτοπ", "καταστημ"],
   },
   research: {

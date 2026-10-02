@@ -1298,7 +1298,12 @@
       "change": "Change something",
       "which": "Which one do you mean?",
       "vague": "Say a little more, so this goes to the right place.",
-      "dismiss": "Never mind"
+      "dismiss": "Never mind",
+      "heard": "I heard: “{heard}”",
+      "willHandle": "No tool is named, so Ionexa will read it — it may answer it or save it as an entry.",
+      "costsNow": "{credits, plural, one {# credit} other {# credits}} when you press Yes. Nothing is charged until then.",
+      "sendIt": "Yes, send it",
+      "fix": "Fix the text"
     },
     "timeline": {
       "title": "Mine",

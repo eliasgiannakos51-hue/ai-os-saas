@@ -1298,7 +1298,12 @@
       "change": "Etwas ändern",
       "which": "Welches meinst du?",
       "vague": "Sag ein bisschen mehr, damit es an die richtige Stelle geht.",
-      "dismiss": "Lass gut sein"
+      "dismiss": "Lass gut sein",
+      "heard": "Ich habe verstanden: „{heard}“",
+      "willHandle": "Es wird kein Werkzeug genannt, also liest Ionexa es – es kann antworten oder einen Eintrag anlegen.",
+      "costsNow": "{credits, plural, one {# Credit} other {# Credits}}, sobald du auf „Ja“ drückst. Bis dahin wird nichts berechnet.",
+      "sendIt": "Ja, senden",
+      "fix": "Text korrigieren"
     },
     "timeline": {
       "title": "Meine Sachen",

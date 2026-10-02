@@ -1,6 +1,6 @@
 # The first run — es
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **702 strings**. The whole product is 3408, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **707 strings**. The whole product is 3413, which is why this file exists.
 
 **Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 453 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -3046,7 +3046,7 @@ No funcionó. Inténtalo otra vez.
 
 Cargando…
 
-## Tier 3 — Further in — only if you have time (200)
+## Tier 3 — Further in — only if you have time (205)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3326,6 +3326,12 @@ Cambiar algo
 
 Sí, hazlo
 
+**`dashboard.goal.costsNow`**
+
+> EN — {credits, plural, one {# credit} other {# credits}} when you press Yes. Nothing is charged until then.
+
+{credits, plural, one {# crédito} other {# créditos}} al pulsar «Sí». Hasta entonces no se cobra nada.
+
 **`dashboard.goal.costsThere`**
 
 > EN — {credits, plural, one {# credit} other {# credits}} when you press the button there. Nothing is charged now.
@@ -3338,11 +3344,29 @@ Sí, hazlo
 
 Déjalo
 
+**`dashboard.goal.fix`**
+
+> EN — Fix the text
+
+Corregir el texto
+
 **`dashboard.goal.freeThere`**
 
 > EN — Nothing is charged now, and nothing is charged on arrival.
 
 No se cobra nada ahora, ni al llegar.
+
+**`dashboard.goal.heard`**
+
+> EN — I heard: “{heard}”
+
+Entendí: «{heard}»
+
+**`dashboard.goal.sendIt`**
+
+> EN — Yes, send it
+
+Sí, envíalo
 
 **`dashboard.goal.vague`**
 
@@ -3355,6 +3379,12 @@ Cuéntame un poco más, para que vaya al sitio correcto.
 > EN — Which one do you mean?
 
 ¿A cuál te refieres?
+
+**`dashboard.goal.willHandle`**
+
+> EN — No tool is named, so Ionexa will read it — it may answer it or save it as an entry.
+
+No se nombra ninguna herramienta, así que Ionexa lo leerá: puede responder o guardarlo como registro.
 
 **`dashboard.goal.willOpen`**
 

@@ -172,6 +172,16 @@ const MUTANTS = [
     to: "",
     expect: "the free assessment runs before the API client is built",
   },
+  {
+    // THE APOSTROPHE COUNTS AS A QUOTE AGAIN - the shape this file had
+    // until 2026-10-02, when "κάν' το" read as specific because of its
+    // elision mark and went to the paid classifier.
+    name: "an apostrophe inside a word is read as a quotation",
+    file: AMB,
+    from: "      /(^|[\\s(])'[^'\\n]+'(?=$|[\\s.,!?;:)])/.test(raw) ||",
+    to: "      /'/.test(raw) ||",
+    expect: "an apostrophe is not a quotation",
+  },
 ];
 
 function runGate() {

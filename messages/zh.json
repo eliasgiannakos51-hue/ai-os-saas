@@ -1298,7 +1298,12 @@
       "change": "改一下",
       "which": "你指的是哪一个？",
       "vague": "再多说一点，这样才能送到正确的地方。",
-      "dismiss": "算了"
+      "dismiss": "算了",
+      "heard": "我听到的是：“{heard}”",
+      "willHandle": "没有提到具体工具，所以由 Ionexa 读取——它可能会回答，也可能保存为一条记录。",
+      "costsNow": "按下“是”时会用掉 {credits} 积分。在此之前不收取任何费用。",
+      "sendIt": "是的，发送",
+      "fix": "修改文字"
     },
     "timeline": {
       "title": "我的内容",

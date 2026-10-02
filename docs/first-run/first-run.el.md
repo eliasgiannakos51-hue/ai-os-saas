@@ -1,6 +1,6 @@
 # The first run — el
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **702 strings**. The whole product is 3408, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **707 strings**. The whole product is 3413, which is why this file exists.
 
 **Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 453 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -3046,7 +3046,7 @@ Credits που Απομένουν
 
 Φορτώνει…
 
-## Tier 3 — Further in — only if you have time (200)
+## Tier 3 — Further in — only if you have time (205)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3326,6 +3326,12 @@ _Reachable from these screens but deeper in: shared components, error states, th
 
 Ναι, κάν' το
 
+**`dashboard.goal.costsNow`**
+
+> EN — {credits, plural, one {# credit} other {# credits}} when you press Yes. Nothing is charged until then.
+
+{credits, plural, one {# credit} other {# credits}} μόλις πατήσεις «Ναι». Μέχρι τότε δεν χρεώνεται τίποτα.
+
 **`dashboard.goal.costsThere`**
 
 > EN — {credits, plural, one {# credit} other {# credits}} when you press the button there. Nothing is charged now.
@@ -3338,11 +3344,29 @@ _Reachable from these screens but deeper in: shared components, error states, th
 
 Άσ' το
 
+**`dashboard.goal.fix`**
+
+> EN — Fix the text
+
+Διόρθωσε το κείμενο
+
 **`dashboard.goal.freeThere`**
 
 > EN — Nothing is charged now, and nothing is charged on arrival.
 
 Δεν χρεώνεται τίποτα τώρα, ούτε με την άφιξη εκεί.
+
+**`dashboard.goal.heard`**
+
+> EN — I heard: “{heard}”
+
+Κατάλαβα: «{heard}»
+
+**`dashboard.goal.sendIt`**
+
+> EN — Yes, send it
+
+Ναι, στείλ’ το
 
 **`dashboard.goal.vague`**
 
@@ -3355,6 +3379,12 @@ _Reachable from these screens but deeper in: shared components, error states, th
 > EN — Which one do you mean?
 
 Ποιο από τα δύο εννοείς;
+
+**`dashboard.goal.willHandle`**
+
+> EN — No tool is named, so Ionexa will read it — it may answer it or save it as an entry.
+
+Δεν αναφέρεται εργαλείο, οπότε θα το διαβάσει το Ionexa — μπορεί να απαντήσει ή να το καταχωρίσει.
 
 **`dashboard.goal.willOpen`**
 

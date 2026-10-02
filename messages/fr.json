@@ -1298,7 +1298,12 @@
       "change": "Modifier quelque chose",
       "which": "Lequel voulez-vous dire ?",
       "vague": "Dites-en un peu plus, pour que cela arrive au bon endroit.",
-      "dismiss": "Laissez tomber"
+      "dismiss": "Laissez tomber",
+      "heard": "J’ai compris : « {heard} »",
+      "willHandle": "Aucun outil n’est nommé : Ionexa va le lire, et peut y répondre ou l’enregistrer comme entrée.",
+      "costsNow": "{credits, plural, one {# crédit} other {# crédits}} quand vous appuyez sur « Oui ». Rien n’est facturé avant.",
+      "sendIt": "Oui, l’envoyer",
+      "fix": "Corriger le texte"
     },
     "timeline": {
       "title": "Mes éléments",

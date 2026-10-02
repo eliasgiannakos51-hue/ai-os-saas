@@ -1,6 +1,6 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **702 strings**. The whole product is 3408, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **707 strings**. The whole product is 3413, which is why this file exists.
 
 **Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 453 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -3046,7 +3046,7 @@ credits の履歴を見る
 
 読み込み中…
 
-## Tier 3 — Further in — only if you have time (200)
+## Tier 3 — Further in — only if you have time (205)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3326,6 +3326,12 @@ Ionexa をホーム画面に追加
 
 はい、実行
 
+**`dashboard.goal.costsNow`**
+
+> EN — {credits, plural, one {# credit} other {# credits}} when you press Yes. Nothing is charged until then.
+
+「はい」を押すと {credits} クレジットかかります。それまでは何も請求されません。
+
 **`dashboard.goal.costsThere`**
 
 > EN — {credits, plural, one {# credit} other {# credits}} when you press the button there. Nothing is charged now.
@@ -3338,11 +3344,29 @@ Ionexa をホーム画面に追加
 
 やめておく
 
+**`dashboard.goal.fix`**
+
+> EN — Fix the text
+
+テキストを直す
+
 **`dashboard.goal.freeThere`**
 
 > EN — Nothing is charged now, and nothing is charged on arrival.
 
 今は何も請求されませんし、移動しても請求されません。
+
+**`dashboard.goal.heard`**
+
+> EN — I heard: “{heard}”
+
+聞き取った内容：「{heard}」
+
+**`dashboard.goal.sendIt`**
+
+> EN — Yes, send it
+
+はい、送信する
 
 **`dashboard.goal.vague`**
 
@@ -3355,6 +3379,12 @@ Ionexa をホーム画面に追加
 > EN — Which one do you mean?
 
 どちらのことですか？
+
+**`dashboard.goal.willHandle`**
+
+> EN — No tool is named, so Ionexa will read it — it may answer it or save it as an entry.
+
+ツールの指定がないため、Ionexa が読み取ります。回答するか、記録として保存することがあります。
 
 **`dashboard.goal.willOpen`**
 

@@ -22,9 +22,9 @@ import {
   MAX_ATTACHMENT_IMAGES,
 } from "@/lib/create-attachment-image";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
-import { assessAmbiguity } from "@/lib/ai/ambiguity";
-import { matchProducer, producerHref, PRODUCER_SPECS, type ProducerKey } from "@/lib/create-studio/producer-routes";
-import { GoalPreview, GoalQuestion } from "@/components/create/goal-preview";
+import { producerHref, PRODUCER_SPECS, type ProducerKey } from "@/lib/create-studio/producer-routes";
+import { preflight, voiceStep, VOICE_IDLE, type VoiceState } from "@/lib/voice/voice-command";
+import { GoalPreview, GoalQuestion, VoiceSendConfirm } from "@/components/create/goal-preview";
 import { useCostEstimate } from "@/components/credits/use-cost-estimate";
 import { useRouter } from "next/navigation";
 import { VoiceInput } from "@/components/voice/voice-input";
@@ -92,6 +92,16 @@ export function CreateChat({
   const goalEstimate = useCostEstimate(goalProfile ?? "createAnything", {
     inputChars: goal?.kind === "preview" ? goal.brief.length : 0,
   });
+  // THE MICROPHONE'S CARD. A transcript becomes "heard", shown with what it
+  // would do, and nothing moves until the card is answered - see
+  // lib/voice/voice-command.ts for why, and voice-command.test.mjs for the
+  // run that holds it.
+  const [voice, setVoice] = useState<VoiceState>(VOICE_IDLE);
+  const heardPlan = voice.kind === "heard" ? voice.plan : null;
+  const voiceEstimate = useCostEstimate(
+    (heardPlan?.kind === "open" ? PRODUCER_SPECS[heardPlan.producer].profile : null) ?? "createAnything",
+    { inputChars: heardPlan ? heardPlan.brief.length : 0 }
+  );
   const supabase = createClient();
   const { addToast } = useToast();
 
@@ -180,28 +190,32 @@ export function CreateChat({
 
     setResult(null);
     setGoal(null);
+    setVoice(VOICE_IDLE);
 
     // An attached image is evidence for the paid classifier ("log this
     // photo as an idea") and says nothing about which producer is meant,
     // so the free pre-flight is skipped whenever one is present rather
     // than being allowed to route on the text alone and drop the picture.
+    // The pre-flight itself is lib/voice/voice-command.ts's, shared with
+    // the microphone so typed and spoken text are read the same way.
     if (imageFiles.length === 0) {
-      const assessment = assessAmbiguity(message, { hasContext: false });
-      if (assessment.verdict === "vague") {
-        setGoal({ kind: "question", choices: [], brief: message });
+      const plan = preflight(message);
+      if (plan.kind === "question") {
+        setGoal({ kind: "question", choices: plan.choices, brief: message });
         return;
       }
-      const match = matchProducer(message);
-      if (match.kind === "ambiguous") {
-        setGoal({ kind: "question", choices: match.producers, brief: message });
-        return;
-      }
-      if (match.kind === "one") {
-        setGoal({ kind: "preview", producer: match.producer, brief: message });
+      if (plan.kind === "open") {
+        setGoal({ kind: "preview", producer: plan.producer, brief: message });
         return;
       }
     }
+    await sendToClassifier(message);
+  }
 
+  /** The paid path: /api/create reads the sentence and may answer it or
+   *  file it. Reached by typed Send, or by "Yes" on the microphone's card -
+   *  never by a transcript on its own. */
+  async function sendToClassifier(message: string) {
     setLastSubmitted(message);
     const imagePaths = await uploadAttachedImages();
     const outcome = await submit(message, false, imagePaths);
@@ -264,6 +278,62 @@ export function CreateChat({
         </div>
       )}
 
+      {voice.kind === "heard" && voice.plan.kind === "open" && (
+        <GoalPreview
+          producer={voice.plan.producer}
+          credits={voiceEstimate.credits}
+          heard={voice.transcript}
+          onConfirm={() => {
+            if (voice.kind !== "heard" || voice.plan.kind !== "open") return;
+            const href = producerHref(voice.plan.producer, voice.plan.brief);
+            setVoice((v) => voiceStep(v, { type: "CONFIRM" }));
+            setInput("");
+            router.push(href);
+          }}
+          onChange={() => {
+            setVoice((v) => voiceStep(v, { type: "EDIT" }));
+            textareaRef.current?.focus();
+          }}
+        />
+      )}
+      {voice.kind === "heard" && voice.plan.kind === "question" && (
+        <GoalQuestion
+          choices={voice.plan.choices}
+          heard={voice.transcript}
+          onPick={(producer) => {
+            if (voice.kind !== "heard") return;
+            const href = producerHref(producer, voice.plan.brief);
+            setVoice((v) => voiceStep(v, { type: "CONFIRM" }));
+            setInput("");
+            router.push(href);
+          }}
+          onDismiss={() => {
+            setVoice((v) => voiceStep(v, { type: "EDIT" }));
+            textareaRef.current?.focus();
+          }}
+        />
+      )}
+      {voice.kind === "heard" && voice.plan.kind === "classify" && (
+        <VoiceSendConfirm
+          heard={voice.transcript}
+          credits={voiceEstimate.credits}
+          onConfirm={() => {
+            if (voice.kind !== "heard") return;
+            const message = voice.plan.brief;
+            setVoice((v) => voiceStep(v, { type: "CONFIRM" }));
+            void sendToClassifier(message).finally(() => setVoice((v) => voiceStep(v, { type: "DONE" })));
+          }}
+          onFix={() => {
+            setVoice((v) => voiceStep(v, { type: "EDIT" }));
+            textareaRef.current?.focus();
+          }}
+          onCancel={() => {
+            setVoice((v) => voiceStep(v, { type: "CANCEL" }));
+            setInput("");
+          }}
+        />
+      )}
+
       {goal?.kind === "preview" && (
         <GoalPreview
           producer={goal.producer}
@@ -323,7 +393,12 @@ export function CreateChat({
           <textarea
             ref={textareaRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              // Edited by hand, the card's reading is of words no longer in
+              // the box; Send reads them afresh.
+              if (voice.kind === "heard") setVoice((v) => voiceStep(v, { type: "EDIT" }));
+            }}
             placeholder={t("describePlaceholder")}
             rows={4}
             maxLength={20000}
@@ -335,16 +410,23 @@ export function CreateChat({
             autoFocus
           />
           {/* THE MICROPHONE, BESIDE THE BOX. Its transcript lands in the
-              textarea to be read and corrected — Create spends real
-              credits on the first press of Send, so a mishearing that
-              went straight through would cost money. */}
+              textarea AND becomes the card above, which says what was
+              heard and what would happen. It never sends and never
+              navigates: Create spends real credits, and a mishearing that
+              went straight through would cost money or file a record
+              nobody asked for. Only the card's own buttons move on. */}
           <div className="absolute bottom-3 end-[6.75rem] z-[2]">
             <VoiceInput
               compact
+              review="card"
               disabled={loading}
-              onTranscript={(text) =>
-                setInput((current) => (current.trim() ? `${current.trim()} ${text}` : text))
-              }
+              onTranscript={(text) => {
+                const combined = input.trim() ? `${input.trim()} ${text}` : text;
+                setInput(combined);
+                setResult(null);
+                setGoal(null);
+                setVoice((v) => voiceStep(v, { type: "TRANSCRIBED", transcript: combined, withImages: imageFiles.length > 0 }));
+              }}
             />
           </div>
           {imageFiles.length < MAX_ATTACHMENT_IMAGES && (

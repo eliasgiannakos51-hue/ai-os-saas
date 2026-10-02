@@ -136,7 +136,20 @@ const PLACEHOLDERS: readonly string[] = [
 const SPECIFICITY = [
   { code: "url", test: (raw: string) => /https?:\/\/|www\.|\.[a-z]{2,}\//i.test(raw) },
   { code: "number", test: (raw: string) => /\d/.test(raw) },
-  { code: "quoted", test: (raw: string) => /["'«»“”„]/.test(raw) },
+  {
+    // A QUOTATION, NOT AN APOSTROPHE. The first version counted every `'`
+    // as a quotation mark, so "κάν' το" - typed on any keyboard, or
+    // written by Whisper - read as specific and went to the paid
+    // classifier, while "κάν’ το" with the typographic apostrophe read as
+    // vague and got the free question. Inside a word `'` is elision
+    // (κάν', don't, l'ami). Double and guillemet marks always quote; a
+    // single mark quotes only as a PAIR around something.
+    code: "quoted",
+    test: (raw: string) =>
+      /["«»“”„]/.test(raw) ||
+      /(^|[\s(])'[^'\n]+'(?=$|[\s.,!?;:)])/.test(raw) ||
+      /‘[^’\n]+’/.test(raw),
+  },
   { code: "email", test: (raw: string) => /@[\w.-]+\.\w{2,}/.test(raw) },
   {
     // A capitalised word that is not the first — a name, a product, a

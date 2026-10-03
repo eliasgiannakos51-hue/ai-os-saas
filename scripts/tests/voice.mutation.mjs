@@ -172,8 +172,14 @@ const MUTANTS = [
   {
     name: "the transcript is handed straight to the parent with no chance to correct it",
     file: INPUT,
-    from: '        setDraft(String(data.text ?? ""));',
-    to: '        onTranscript(String(data.text ?? ""));',
+    from: "          setDraft(heard);",
+    to: "          onTranscript(heard);",
+  },
+  {
+    name: "every caller skips the draft, not only the one with a card of its own",
+    file: INPUT,
+    from: '        if (review === "card") {',
+    to: "        if (true) {",
   },
 
   // ------------------------------------------------------------------

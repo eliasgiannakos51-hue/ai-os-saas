@@ -42,7 +42,10 @@ export const revalidate = 0;
 //   2. THE HEADERS ARE THE SANDBOX. lib/publishing/public-serving.ts sets
 //      a CSP that permits the inline CSS/JS a single-file generated site
 //      needs and nothing else — no external script host, form-action
-//      'self', frame-ancestors 'none', base-uri 'none'.
+//      'self', frame-ancestors 'none', base-uri 'none' — and the CSP
+//      `sandbox` directive, which gives the page an opaque origin so its
+//      script cannot act as the signed-in app it is served beside
+//      (scripts/tests/published-origin.prodtest.mjs).
 //   3. IT IS RATE LIMITED IN MEMORY, not through the database — a DB write
 //      per page view would make the limiter the outage under a spike.
 //   4. IT IS SERVED AS A ROUTE HANDLER, not a page. A React page would

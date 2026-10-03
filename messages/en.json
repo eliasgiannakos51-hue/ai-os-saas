@@ -288,7 +288,12 @@
       "aiMemory": "What the chat has kept about you, and how to remove it.",
       "meetings": "Turn a recording into a transcript, a summary, and actions you choose from."
     },
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "rail": {
+      "new": "New",
+      "recent": "Recent",
+      "allTools": "All tools"
+    }
   },
   "landing": {
     "description": "It keeps your products, prices, customers and numbers — then writes with them. A website with your real menu on it, a deck with September's real figures, posts that know what you sell. Not a generic draft you have to correct.",
@@ -1298,7 +1303,17 @@
       "change": "Change something",
       "which": "Which one do you mean?",
       "vague": "Say a little more, so this goes to the right place.",
-      "dismiss": "Never mind"
+      "dismiss": "Never mind",
+      "heard": "I heard: “{heard}”",
+      "willHandle": "No tool is named, so Ionexa will read it — it may answer it or save it as an entry.",
+      "costsNow": "{credits, plural, one {# credit} other {# credits}} when you press Yes. Nothing is charged until then.",
+      "sendIt": "Yes, send it",
+      "fix": "Fix the text",
+      "goingTo": "Going to",
+      "routeAsk": "Ionexa will read it",
+      "routeChange": "change",
+      "routeCostThere": "≈ {credits, plural, one {# credit} other {# credits}} there",
+      "routeCostNow": "≈ {credits, plural, one {# credit} other {# credits}} on send"
     },
     "timeline": {
       "title": "Mine",
@@ -2718,6 +2733,11 @@
       "agents": "Build the agent",
       "automation": "Open Automation",
       "deepResearch": "Start Deep Research"
+    },
+    "tools": {
+      "title": "All tools",
+      "description": "Every tool, with one line on what it does.",
+      "orPress": "Or press ⌘K and type its name — or describe it in the field on Home."
     }
   },
   "module": {
@@ -3414,6 +3434,11 @@
       "is": "A recording turned into a transcript, a summary, and a list of actions you pick from.",
       "does": "Transcribes an upload in the language it was spoken in, summarises it in that same language, and proposes who agreed to do what and by when.",
       "doesNot": "It does not keep the audio — there is no bucket and no column for it, so it is gone when the upload finishes. And it creates nothing on its own: an action exists only after you tick it and press Keep."
+    },
+    "tools": {
+      "is": "A map of all of Ionexa, on one page.",
+      "does": "Shows every tool with one line on what it does, grouped by what you make, ask, run and see.",
+      "doesNot": "It is not the only way in: type what you want in the field on Home, or press ⌘K, and you reach the same tool."
     }
   },
   "helpCentre": {

@@ -97,6 +97,33 @@ for (const row of combinedCeilingTable(BASE_CONFIG, {})) {
   check(`${row.planSlug}: combined worst case within the ceiling`, row.withinCeiling, detail);
 }
 
+// EXACTLY 4x, NOT "AT LEAST". The owner's rule, 2026-10-02: "Margin
+// ΑΚΡΙΒΩΣ 4×". The check above is a ceiling, so it stays green if a plan's
+// margin is RAISED — and a raised margin is a price increase nobody
+// decided. On every plan sold at a list price, credits plus every free
+// quota must come to the ceiling itself: 25.0% of the price, 4.00x.
+//
+// That is why the per-action multiplier is 5 and not 4
+// (lib/billing/margin-policy.ts, PLAN_MARGIN_DEFAULTS): credits take
+// 1/5 = 20% and the free chat on every paid plan takes the remaining 5%.
+// At 4 per action the credits alone are 25%, and allowanceBudgetEur takes
+// the free chat's headroom away to stay inside: measured 2026-10-02 with
+// CREDIT_MARGIN_<PLAN>=4 on the four paid plans, free chat went from
+// 43 / 107 / 215 / 430 messages a month to 0 on every one of them.
+//
+// Not free: it has no price, so it has no share; its cap is the absolute
+// EUR figure above. Not enterprise: its price is a contract FLOOR
+// (ENTERPRISE_MIN_PRICE_EUR), so its share is the upper bound and lower on
+// any deal above it — 4.44x at the floor today.
+for (const row of combinedCeilingTable(BASE_CONFIG, {})) {
+  if (row.planSlug === "free" || row.planSlug === "enterprise") continue;
+  check(
+    `${row.planSlug}: the real margin is exactly ${COMBINED_MARGIN_TARGET}x — not above, not below`,
+    row.combinedMargin !== null && Math.abs(row.combinedMargin - COMBINED_MARGIN_TARGET) < 0.01,
+    row.combinedMargin === null ? "no price" : `${row.combinedMargin.toFixed(3)}x (${pct(row.totalShare)} of price)`
+  );
+}
+
 // The ceiling and the margin target are the same statement. If they ever
 // stop being reciprocal, one of the two numbers below was edited alone.
 check(

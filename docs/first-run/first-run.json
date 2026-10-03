@@ -1,6 +1,6 @@
 {
-  "total": 3408,
-  "onPath": 702,
+  "total": 3427,
+  "onPath": 715,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -16,13 +16,13 @@
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 453
+      "count": 456
     },
     {
       "n": 3,
       "title": "Further in — only if you have time",
       "note": "Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour.",
-      "count": 200
+      "count": 210
     }
   ],
   "screens": [
@@ -2533,6 +2533,24 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.rail.allTools",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.rail.new",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.rail.recent",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "common.dismiss",
           "depth": 2,
           "tier": 3,
@@ -3337,6 +3355,12 @@
           "file": "src/components/create/goal-preview.tsx"
         },
         {
+          "key": "dashboard.goal.costsNow",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
           "key": "dashboard.goal.costsThere",
           "depth": 2,
           "tier": 3,
@@ -3349,7 +3373,55 @@
           "file": "src/components/create/goal-preview.tsx"
         },
         {
+          "key": "dashboard.goal.fix",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
           "key": "dashboard.goal.freeThere",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.goingTo",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.heard",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.routeAsk",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.routeChange",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.routeCostNow",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.routeCostThere",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.sendIt",
           "depth": 2,
           "tier": 3,
           "file": "src/components/create/goal-preview.tsx"
@@ -3362,6 +3434,12 @@
         },
         {
           "key": "dashboard.goal.which",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/create/goal-preview.tsx"
+        },
+        {
+          "key": "dashboard.goal.willHandle",
           "depth": 2,
           "tier": 3,
           "file": "src/components/create/goal-preview.tsx"

@@ -1146,4 +1146,9 @@ for (const [label, file] of [
 }
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
-process.exit(fail === 0 ? 0 : 1);
+// exitCode, NOT process.exit(). This file prints ~55 KB, and through
+// run-gates.mjs's pipe process.exit() cut it off mid-section in 4 of 40
+// runs on 2026-10-02 (status 0, the last ~3 KB and this summary gone) —
+// which is how its 905 assertions twice vanished from the build's total.
+// Letting the process end on its own lets the pipe drain: 0 of 60.
+process.exitCode = fail === 0 ? 0 : 1;

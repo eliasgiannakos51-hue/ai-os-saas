@@ -40,6 +40,7 @@ export function VoiceInput({
   onTranscript,
   disabled,
   compact,
+  review = "dialog",
 }: {
   /** Called with the text once the user accepts it. The PARENT decides
    *  where it goes — appended to a textarea, put in a field — and the
@@ -48,6 +49,21 @@ export function VoiceInput({
   disabled?: boolean;
   /** A small icon button, for a form row rather than a chat composer. */
   compact?: boolean;
+  /**
+   * WHO SHOWS THE TRANSCRIPT BEFORE ANYTHING USES IT.
+   *
+   * "dialog" (the default): this component does, in the editable draft
+   * below, and hands the text on only once it is accepted.
+   *
+   * "card": the PARENT does, in a card that quotes what was heard and says
+   * what would happen before anything happens - the Home field's
+   * "Κατάλαβα: «…»" (components/create/goal-preview.tsx). Asking twice in a
+   * row, "is this what you said?" and then "shall I do this?", is one
+   * question too many; the card asks both. Only a parent with such a card
+   * may pass it: scripts/tests/voice-command.test.mjs holds the list to the
+   * Home field.
+   */
+  review?: "dialog" | "card";
 }) {
   const t = useTranslations("voice");
   const locale = useLocale();
@@ -87,15 +103,21 @@ export function VoiceInput({
         void reportUsage(data);
         availability.refresh();
         // INTO A DRAFT, not into the field and not into a send. The user
-        // reads it, fixes it, and accepts it.
-        setDraft(String(data.text ?? ""));
+        // reads it, fixes it, and accepts it - here, or in the parent's own
+        // card when the parent has one (see `review`).
+        const heard = String(data.text ?? "").trim();
+        if (review === "card") {
+          if (heard) onTranscript(heard);
+        } else {
+          setDraft(heard);
+        }
       } catch {
         addToast(t("errors.failed"), "error");
       } finally {
         setBusy(false);
       }
     },
-    [addToast, availability, locale, refreshCredits, reportUsage, t, voiceError]
+    [addToast, availability, locale, onTranscript, refreshCredits, reportUsage, review, t, voiceError]
   );
 
   const recorder = useRecorder({

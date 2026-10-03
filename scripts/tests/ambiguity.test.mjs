@@ -213,6 +213,17 @@ console.log("\n== 5. specificity outranks brevity ==");
     const a = amb.assessAmbiguity(q);
     ok(`"${q}" is clear (${why})`, a.verdict === "clear", `${a.verdict}: ${a.reasons.join(",")}`);
   }
+  // A SINGLE-QUOTED NAME IS STILL A QUOTATION...
+  ok(`"rename it to 'Q3 plan'" is clear (quoted, single marks)`,
+    amb.assessAmbiguity("rename it to 'Q3 plan'").verdict === "clear",
+    amb.assessAmbiguity("rename it to 'Q3 plan'").verdict);
+  // ...BUT AN APOSTROPHE IS NOT ONE. "κάν' το" with the keyboard's `'`
+  // used to count as quoted and go to the paid classifier, while the same
+  // words with the typographic ’ got the free question.
+  for (const q of ["κάν' το", "κάν’ το"]) {
+    const a = amb.assessAmbiguity(q);
+    ok(`an apostrophe is not a quotation: "${q}" is vague`, a.verdict === "vague", `${a.verdict}: ${a.reasons.join(",")}`);
+  }
   // AND THE NEGATIVE CONTROL: strip the specific part and the same shape
   // stops being clear. Without this the checks above would pass for a
   // function that returns "clear" unconditionally.

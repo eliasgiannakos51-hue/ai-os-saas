@@ -1,8 +1,8 @@
 # The first run — fr
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **702 strings**. The whole product is 3408, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **715 strings**. The whole product is 3427, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 453 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 456 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -314,7 +314,7 @@ Ionexa s'en sert pour choisir quelle étape du plan vous proposer — du travail
 
 Gratuit : rien n'est généré, et vous pouvez tout retirer en un clic
 
-## Tier 2 — The labels — skim these (453)
+## Tier 2 — The labels — skim these (456)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -2534,6 +2534,24 @@ Projets de sites
 
 Flux de travail
 
+**`sidebar.rail.allTools`**
+
+> EN — All tools
+
+Tous les outils
+
+**`sidebar.rail.new`**
+
+> EN — New
+
+Nouveau
+
+**`sidebar.rail.recent`**
+
+> EN — Recent
+
+Récents
+
 ### first result
 
 **`dashboard.ideas.loadError`**
@@ -3046,7 +3064,7 @@ Cela n'a pas marché. Réessayez.
 
 Chargement…
 
-## Tier 3 — Further in — only if you have time (200)
+## Tier 3 — Further in — only if you have time (210)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3326,6 +3344,12 @@ Modifier quelque chose
 
 Oui, allez-y
 
+**`dashboard.goal.costsNow`**
+
+> EN — {credits, plural, one {# credit} other {# credits}} when you press Yes. Nothing is charged until then.
+
+{credits, plural, one {# crédit} other {# crédits}} quand vous appuyez sur « Oui ». Rien n’est facturé avant.
+
 **`dashboard.goal.costsThere`**
 
 > EN — {credits, plural, one {# credit} other {# credits}} when you press the button there. Nothing is charged now.
@@ -3338,11 +3362,59 @@ Oui, allez-y
 
 Laissez tomber
 
+**`dashboard.goal.fix`**
+
+> EN — Fix the text
+
+Corriger le texte
+
 **`dashboard.goal.freeThere`**
 
 > EN — Nothing is charged now, and nothing is charged on arrival.
 
 Rien n'est facturé maintenant, ni à l'arrivée.
+
+**`dashboard.goal.goingTo`**
+
+> EN — Going to
+
+Ouvrira
+
+**`dashboard.goal.heard`**
+
+> EN — I heard: “{heard}”
+
+J’ai compris : « {heard} »
+
+**`dashboard.goal.routeAsk`**
+
+> EN — Ionexa will read it
+
+Ionexa le lira
+
+**`dashboard.goal.routeChange`**
+
+> EN — change
+
+changer
+
+**`dashboard.goal.routeCostNow`**
+
+> EN — ≈ {credits, plural, one {# credit} other {# credits}} on send
+
+≈ {credits, plural, one {# crédit} other {# crédits}} à l’envoi
+
+**`dashboard.goal.routeCostThere`**
+
+> EN — ≈ {credits, plural, one {# credit} other {# credits}} there
+
+≈ {credits, plural, one {# crédit} other {# crédits}} là-bas
+
+**`dashboard.goal.sendIt`**
+
+> EN — Yes, send it
+
+Oui, l’envoyer
 
 **`dashboard.goal.vague`**
 
@@ -3355,6 +3427,12 @@ Dites-en un peu plus, pour que cela arrive au bon endroit.
 > EN — Which one do you mean?
 
 Lequel voulez-vous dire ?
+
+**`dashboard.goal.willHandle`**
+
+> EN — No tool is named, so Ionexa will read it — it may answer it or save it as an entry.
+
+Aucun outil n’est nommé : Ionexa va le lire, et peut y répondre ou l’enregistrer comme entrée.
 
 **`dashboard.goal.willOpen`**
 

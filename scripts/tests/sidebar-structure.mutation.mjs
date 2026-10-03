@@ -136,14 +136,15 @@ const MUTANTS = [
   },
   {
     gate: TOOLTIPS,
-    // Nothing is left to remember, so storing anything is a regression on
-    // its own — and the check reads the source with comments STRIPPED,
-    // because the component explains what it used to store.
-    name: "the sidebar starts storing something again",
+    // Since the rail (2026-10-02) the recent-tools list is the ONE thing
+    // remembered; anything else stored is a regression on its own — and
+    // the check reads the source with comments STRIPPED, because the
+    // component explains what it stores.
+    name: "the sidebar starts storing something besides the recent list",
     file: SIDEBAR,
     from: "  function renderGroup(group: SidebarGroupConfig) {",
     to: "  function persistOpen(v: string) {\n    window.localStorage.setItem(\"ionexa:sidebar-open\", v);\n  }\n\n  function renderGroup(group: SidebarGroupConfig) {\n    void persistOpen;",
-    expect: "nothing is remembered across a reload",
+    expect: "the only thing remembered across a reload is the recent-tools list",
   },
 
   // ---- the order, the names, the count ------------------------------

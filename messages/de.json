@@ -288,7 +288,12 @@
       "aiMemory": "Was der Chat über dich behalten hat und wie du es löschst.",
       "meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst."
     },
-    "closeMenu": "Menü schließen"
+    "closeMenu": "Menü schließen",
+    "rail": {
+      "new": "Neu",
+      "recent": "Zuletzt",
+      "allTools": "Alle Werkzeuge"
+    }
   },
   "landing": {
     "description": "Es kennt deine Produkte, Preise, Kunden und Zahlen — und schreibt damit. Eine Website mit deiner echten Karte, eine Präsentation mit den echten September-Zahlen, Posts, die wissen, was du verkaufst. Kein generischer Entwurf, den du erst korrigieren musst.",
@@ -1298,7 +1303,17 @@
       "change": "Etwas ändern",
       "which": "Welches meinst du?",
       "vague": "Sag ein bisschen mehr, damit es an die richtige Stelle geht.",
-      "dismiss": "Lass gut sein"
+      "dismiss": "Lass gut sein",
+      "heard": "Ich habe verstanden: „{heard}“",
+      "willHandle": "Es wird kein Werkzeug genannt, also liest Ionexa es – es kann antworten oder einen Eintrag anlegen.",
+      "costsNow": "{credits, plural, one {# Credit} other {# Credits}}, sobald du auf „Ja“ drückst. Bis dahin wird nichts berechnet.",
+      "sendIt": "Ja, senden",
+      "fix": "Text korrigieren",
+      "goingTo": "Öffnet",
+      "routeAsk": "Ionexa liest es",
+      "routeChange": "ändern",
+      "routeCostThere": "≈ {credits, plural, one {# Credit} other {# Credits}} dort",
+      "routeCostNow": "≈ {credits, plural, one {# Credit} other {# Credits}} beim Senden"
     },
     "timeline": {
       "title": "Meine Sachen",
@@ -2718,6 +2733,11 @@
       "agents": "Agent erstellen",
       "automation": "Automatisierung öffnen",
       "deepResearch": "Tiefenrecherche starten"
+    },
+    "tools": {
+      "title": "Alle Werkzeuge",
+      "description": "Jedes Werkzeug, mit einer Zeile dazu, was es tut.",
+      "orPress": "Oder drücke ⌘K und tippe den Namen – oder beschreibe es im Feld auf der Startseite."
     }
   },
   "module": {
@@ -3414,6 +3434,11 @@
       "is": "Eine Aufnahme, die zu einem Transkript, einer Zusammenfassung und einer Liste von Aufgaben zum Auswählen wird.",
       "does": "Transkribiert in der gesprochenen Sprache, fasst in derselben Sprache zusammen und schlägt vor, wer was bis wann zugesagt hat.",
       "doesNot": "Es behält die Aufnahme nicht — es gibt weder Bucket noch Spalte dafür, sie ist nach dem Hochladen weg. Und es legt nichts von selbst an: eine Aufgabe existiert erst, wenn du sie ankreuzt und behältst."
+    },
+    "tools": {
+      "is": "Eine Karte von ganz Ionexa, auf einer Seite.",
+      "does": "Zeigt jedes Werkzeug mit einer Zeile dazu, was es tut – gruppiert danach, was du erstellst, fragst, laufen lässt und ansiehst.",
+      "doesNot": "Es ist nicht der einzige Weg: Schreib in das Feld auf der Startseite, was du willst, oder drücke ⌘K – du landest beim selben Werkzeug."
     }
   },
   "helpCentre": {

@@ -76,6 +76,14 @@ const NONE_IS_FINE = {
     "a CORPUS. The rule ('no Greek string addresses the reader in the polite plural') " +
     "ranges over 546 real strings in messages/*.json, so a new offending string reddens " +
     "it. Settled by adding one: RED.",
+  "cost-before.test.mjs":
+    "EXECUTION through a shared module. Its population is what lib/billing/estimate.ts " +
+    "prices each of the 30 actions on each plan, computed by scripts/lib/price-rows.mjs " +
+    "(loadTs on the estimator, the credit formula and the catalog) — the same rows " +
+    "scripts/price-table.mjs prints. The scan reads the gate's own file and sees an import " +
+    "of a script. Settled 2026-10-02 by cost-before.mutation.mjs: 7 of 7, including a " +
+    "website edit grown until it is large (the population moved, the gate went red) and " +
+    "the large-action line raised until nothing is large (an empty population: RED).",
   "design-density.test.mjs":
     "a CENSUS with ratchets. 918 files walked; 581 border utilities, ceiling 581; blurred " +
     "accent shadows forbidden at 0. Settled twice — one added border (582) and one added " +

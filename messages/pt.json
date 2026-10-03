@@ -1282,7 +1282,10 @@
       "clarificationTitle": "Primeiro uma pergunta rápida:",
       "clarificationSkip": "Responder mesmo assim",
       "clarificationContinue": "Enviar",
-      "clarificationAnswerPlaceholder": "A sua resposta..."
+      "clarificationAnswerPlaceholder": "A sua resposta...",
+      "sources": {
+        "title": "Fontes"
+      }
     },
     "create": {
       "title": "Criar Qualquer Coisa",

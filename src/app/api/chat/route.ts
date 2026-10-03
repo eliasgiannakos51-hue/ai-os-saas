@@ -72,6 +72,7 @@ import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
 import { matchCannedAnswer, type CannedMatch } from "@/lib/support/knowledge-base";
 import { loadCannedArticles } from "@/lib/support/help-articles";
 import { getLocale } from "next-intl/server";
+import { attachWebSources } from "@/lib/chat/web-sources";
 
 export const dynamic = "force-dynamic";
 
@@ -977,6 +978,7 @@ export async function POST(request: Request) {
         );
 
         let assistantText = "";
+        let lastRoundBlocks: Anthropic.ContentBlock[] = [];
         let webSearchCount = 0;
 
         // RESERVE, now that the full request (history included) is known.
@@ -1134,6 +1136,9 @@ export async function POST(request: Request) {
             MODEL
           ) as Anthropic.MessageParam[];
 
+          // The last round's blocks, kept for the numbered sources: the web
+          // search citations live on them (lib/chat/web-sources.ts).
+          lastRoundBlocks = [];
           for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
             const claudeStream = anthropic.messages.stream({
               model: MODEL,
@@ -1225,6 +1230,7 @@ export async function POST(request: Request) {
             // last round would charge for part of the work it did.
             costs.record("generation", finalResponse.usage, finalResponse.model || MODEL);
             webSearchCount += finalResponse.usage.server_tool_use?.web_search_requests ?? 0;
+            lastRoundBlocks = finalResponse.content;
 
             const toolUses = finalResponse.content.filter(
               (block): block is Anthropic.ToolUseBlock =>
@@ -1329,11 +1335,15 @@ export async function POST(request: Request) {
           })}`
         );
 
+        // NUMBERED SOURCES, when the answer searched the web: the numbers
+        // and the definitions go INTO the stored text, so a reload shows
+        // what the stream showed (lib/chat/web-sources.ts says why).
+        const sourced = attachWebSources(assistantText, lastRoundBlocks);
         const { error: assistantMessageError } = await supabase.from("chat_messages").insert({
           conversation_id: finalConversationId,
           user_id: user.id,
           role: "assistant",
-          content: assistantText,
+          content: sourced.text,
         });
         if (assistantMessageError) {
           logApiError("/api/chat", assistantMessageError, { stage: "save_assistant_message" });
@@ -1356,6 +1366,9 @@ export async function POST(request: Request) {
         controller.enqueue(
           ndjsonLine({
             type: "done",
+            // The final text, only when it differs from what streamed — the
+            // client swaps it in so the numbers appear without a reload.
+            content: sourced.sources.length > 0 ? sourced.text : undefined,
             usage: buildUsageReceipt({
               creditsCharged: settlement.creditsCharged,
               bypass: bypassCredits || isFreeMessage,

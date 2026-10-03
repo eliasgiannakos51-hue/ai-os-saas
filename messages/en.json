@@ -1282,7 +1282,10 @@
       "clarificationTitle": "One quick question first:",
       "clarificationSkip": "Answer it anyway",
       "clarificationContinue": "Send",
-      "clarificationAnswerPlaceholder": "Your answer..."
+      "clarificationAnswerPlaceholder": "Your answer...",
+      "sources": {
+        "title": "Sources"
+      }
     },
     "create": {
       "title": "Create Anything",

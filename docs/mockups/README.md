@@ -21,8 +21,27 @@ desktop and a phone.
 **Already in the product before this:** ⌘K over every tool, dark by
 default with a light switch.
 
-**Not yet:** numbered sources in chat answers (Perplexity), the Build split
-view, the Arc-style motion, the Stripe type scale.
+**Applied 2026-10-03, part 2:**
+
+- **Numbered sources in chat** (Perplexity): an answer that searched the web
+  carries `[1]` in the sentence and cards underneath, built only from
+  Anthropic's citation blocks, kept inside the stored message so a reload
+  shows the same (`src/lib/chat/web-sources.ts`,
+  `src/components/chat/source-cards.tsx`; `scripts/tests/web-sources.test.mjs`).
+- **Build split**: an open site sits beside the list from 1280px and slides
+  in from its side (`src/components/website-builder/website-builder-workspace.tsx`).
+- **Motion** (Arc): the page rise was already there (`.page-enter`, 8px in
+  160ms — kept, its comment says why short); added the palette's scale-in and
+  the result panel's slide, both off under reduced motion
+  (`src/app/globals.css`).
+- **Type** (Stripe): the scale was already in rem at the mockup's sizes and the
+  Home title already at −0.025em; tabular figures added to the credit badge,
+  the routing line and the source numbers.
+
+`scripts/tests/design-part2.prodtest.mjs` drives part 2 on a desktop and a
+phone. It found one real defect on the way: on a phone an achievement toast
+sat on the chat's Send button, so the tap dismissed the toast and the message
+never left. Toasts now open at the top (`src/components/toast/toast-container.tsx`).
 
     node scripts/mockups.mjs              # writes ionexa.html, photographs it
     SKIP_SHOTS=1 node scripts/mockups.mjs # just the HTML

@@ -1264,7 +1264,19 @@ export function WebsiteBuilderWorkspace({
   return (
     <div className="space-y-6">
       <StepFlow flow="website" current={websiteStep} />
+      {/* THE BUILD SPLIT — the design approved 2026-10-02 (docs/mockups/
+          README.md): the result beside the list, not above it. From 1280px
+          the open site is a sticky column on the right and slides in from
+          that side; below it the order is unchanged, preview first. */}
+      <div
+        className={
+          previewWebsite
+            ? "build-split xl:grid xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-start xl:gap-6"
+            : undefined
+        }
+      >
       {previewWebsite && (
+        <div className="result-panel mb-6 min-w-0 xl:sticky xl:top-20 xl:order-2 xl:mb-0">
         <DetailPanel
           icon={WEBSITE_BUILDER_ICON}
           accentSlug="websiteBuilder"
@@ -1713,8 +1725,10 @@ export function WebsiteBuilderWorkspace({
             </form>
           )}
         </DetailPanel>
+        </div>
       )}
 
+      <div className="min-w-0 xl:order-1">
       <ListLayout
         newAction={
           showForm ? (
@@ -2028,6 +2042,8 @@ export function WebsiteBuilderWorkspace({
           </>
         )}
       </ListLayout>
+      </div>
+      </div>
     </div>
   );
 }

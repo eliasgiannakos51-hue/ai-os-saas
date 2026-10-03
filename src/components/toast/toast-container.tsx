@@ -9,8 +9,14 @@ export function ToastContainer() {
 
   if (toasts.length === 0) return null;
 
+  // TOP, BELOW THE BAR — not bottom-end, where every composer in the app
+  // keeps its Send button. Measured 2026-10-03 on a 390px phone
+  // (scripts/tests/design-part2.prodtest.mjs): an achievement toast sat
+  // exactly on Send, so the tap dismissed the toast and the message never
+  // left. At 1440px the old box (x 1136–1424) covered the chat's Send
+  // (x 1234–1278) too; it only had not happened during a test yet.
   return (
-    <div className="fixed bottom-4 end-4 z-[60] flex w-72 max-w-[calc(100vw-2rem)] flex-col gap-2">
+    <div className="fixed end-4 top-20 z-[60] flex w-72 max-w-[calc(100vw-2rem)] flex-col gap-2">
       {toasts.map((toast) => (
         <div
           key={toast.id}

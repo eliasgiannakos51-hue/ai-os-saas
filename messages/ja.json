@@ -1282,7 +1282,10 @@
       "clarificationTitle": "先に一つだけ確認させてください:",
       "clarificationSkip": "このまま答えて",
       "clarificationContinue": "送信",
-      "clarificationAnswerPlaceholder": "あなたの答え..."
+      "clarificationAnswerPlaceholder": "あなたの答え...",
+      "sources": {
+        "title": "出典"
+      }
     },
     "create": {
       "title": "何でも作成",

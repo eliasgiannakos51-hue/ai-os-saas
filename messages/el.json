@@ -1282,7 +1282,10 @@
       "clarificationTitle": "Μία γρήγορη ερώτηση πρώτα:",
       "clarificationSkip": "Απάντησέ το έτσι κι αλλιώς",
       "clarificationContinue": "Στείλε",
-      "clarificationAnswerPlaceholder": "Η απάντησή σου..."
+      "clarificationAnswerPlaceholder": "Η απάντησή σου...",
+      "sources": {
+        "title": "Πηγές"
+      }
     },
     "create": {
       "title": "Δημιουργία Οτιδήποτε",

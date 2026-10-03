@@ -1282,7 +1282,10 @@
       "clarificationTitle": "先问一个小问题：",
       "clarificationSkip": "直接回答就好",
       "clarificationContinue": "发送",
-      "clarificationAnswerPlaceholder": "你的回答……"
+      "clarificationAnswerPlaceholder": "你的回答……",
+      "sources": {
+        "title": "来源"
+      }
     },
     "create": {
       "title": "创建任何内容",

@@ -1282,7 +1282,10 @@
       "clarificationTitle": "سؤال سريع أولًا:",
       "clarificationSkip": "أجب على أي حال",
       "clarificationContinue": "إرسال",
-      "clarificationAnswerPlaceholder": "إجابتك..."
+      "clarificationAnswerPlaceholder": "إجابتك...",
+      "sources": {
+        "title": "المصادر"
+      }
     },
     "create": {
       "title": "إنشاء أي شيء",

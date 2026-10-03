@@ -314,8 +314,13 @@ check("...and the workflow runs the gates before it builds", (() => {
   return wf.indexOf("run: npm run gates") > 0 && wf.indexOf("run: npm run gates") < wf.indexOf("run: npm run build");
 })());
 // Every suite must actually SET a non-zero exit code when it fails,
-// otherwise `|| exit 1` never fires.
-const noExit = suites.filter((s) => !/process\.exit\(/.test(readFileSync(s, "utf8")));
+// otherwise `|| exit 1` never fires. Either form counts — process.exit(n),
+// or process.exitCode = n, which lets a long output drain before the
+// process ends (billing-coverage.test.mjs lost its summary to a pipe with
+// the first; see its last lines). Read with the comments STRIPPED: until
+// 2026-10-03 this matched the raw file, and billing-coverage passed on the
+// words "NOT process.exit()" in its own comment.
+const noExit = suites.filter((s) => !/process\.exit\(|process\.exitCode\s*=/.test(stripComments(readFileSync(s, "utf8"))));
 check(
   `every suite exits non-zero on failure (${suites.length - noExit.length}/${suites.length})`,
   noExit.length === 0,

@@ -22,6 +22,7 @@
 // Run: node scripts/tests/credit-visibility.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { schemaSql } from "./lib/schema-sql.mjs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0,
   fail = 0;
@@ -264,7 +265,13 @@ for (const f of [
   "src/components/records/ask-ai-modal.tsx",
   "src/components/create/studio-chat.tsx",
 ]) {
-  checkTrue(`${f.split("/").pop()} captures the done event`, /if \(event\.type === "done"\) usageEvent = event;/.test(readFileSync(f, "utf8")));
+  // The one-line form or a block that also reads the event's other fields
+  // (chat-workspace.tsx takes the numbered answer from the same event,
+  // 2026-10-03) — either way, the FIRST thing done does is keep the event.
+  checkTrue(
+    `${f.split("/").pop()} captures the done event`,
+    /if \(event\.type === "done"\)\s*(?:\{\s*)?usageEvent = event;/.test(stripComments(readFileSync(f, "utf8")))
+  );
 }
 // The Website Builder settles in a worker, so it has no response to
 // attach to — the figure is read back from the settled cost-log row.

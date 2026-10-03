@@ -958,6 +958,7 @@ const OWNER_ONLY_BASELINE = {
   "src/components/system-health/db-exposure.tsx": 3,
   "src/components/system-health/env-warnings.tsx": 1,
   "src/components/system-health/error-list.tsx": 2,
+  "src/components/system-health/key-checks.tsx": 4,
   "src/components/system-health/pwa-adoption.tsx": 8,
   "src/components/system-health/storage-diagnostics.tsx": 3,
 };

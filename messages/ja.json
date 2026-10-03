@@ -1037,6 +1037,15 @@
       "loaded": "サンプルは読み込み済みです。削除するまで各ページに表示されます。",
       "notLoaded": "未読み込み。",
       "open": "ホームで見る"
+    },
+    "displayName": {
+      "title": "何とお呼びしましょうか？",
+      "description": "ホーム画面のあいさつに使われます。呼ばれたい形のとおりに入力してください。",
+      "placeholder": "お名前",
+      "saved": "名前を保存しました",
+      "saveFailed": "名前を保存できませんでした。しばらくしてからもう一度お試しください。",
+      "save": "保存",
+      "saving": "保存中…"
     }
   },
   "dashboard": {
@@ -4119,7 +4128,12 @@
     "clearFailed": "うまくいきませんでした。"
   },
   "promise": {
-    "oneSentence": "あなたの仕事をすでに知っている AI。何でも聞いてください。"
+    "oneSentence": "あなたの仕事をすでに知っている AI。何でも聞いてください。",
+    "greeting": {
+      "morning": "おはようございます",
+      "afternoon": "こんにちは",
+      "evening": "こんばんは"
+    }
   },
   "legal": {
     "lastUpdated": "最終更新: {date}",

@@ -28,6 +28,31 @@ const TARGETS = [GATE, ROUTES, PATTERNS, POSTS_PAGE];
 
 const MUTANTS = [
   {
+    // V6 1.10b, undone: the owner's own sentence reaches nothing again.
+    name: "the competitor-search phrase is dropped from research",
+    file: ROUTES,
+    from: '"ψαξε τουσ ανταγωνιστεσ", ',
+    to: "",
+    expect: "ψάξε τους ανταγωνιστές μου στη Θεσσαλονίκη",
+  },
+  {
+    // The mistake made while writing it: a cue with a final ς never
+    // matches, because foldForMatch has already turned the text's ς into σ.
+    name: "a cue is written with a final sigma",
+    file: ROUTES,
+    from: '"βρεσ ανταγωνιστεσ"',
+    to: '"βρες ανταγωνιστες"',
+    expect: "every cue is written folded",
+  },
+  {
+    // The bare noun as a stem: filing a competitor would open Research.
+    name: "the bare noun becomes a research stem",
+    file: ROUTES,
+    from: 'stems: ["ερευν", "μελετ"],',
+    to: 'stems: ["ερευν", "μελετ", "ανταγωνιστ"],',
+    expect: "πρόσθεσε ανταγωνιστή την Acme",
+  },
+  {
     // THE DEFECT THIS ROUND FOUND, PUT BACK. With only the αυ reading,
     // every Greek word with a phi after an alpha is unreachable from an
     // English keyboard: "diafanies", "grafeio", "kafe".

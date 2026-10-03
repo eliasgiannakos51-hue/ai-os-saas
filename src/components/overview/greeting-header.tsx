@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { timeOfDayGreeting, displayNameFromEmail } from "@/lib/greeting";
+import { timeOfDayGreeting } from "@/lib/greeting";
 import { HelpTip } from "@/components/ui/help-tip";
 
-export function GreetingHeader({ email }: { email: string }) {
+export function GreetingHeader({ name }: { name: string | null }) {
   // Falls back to the device's local time on first render (matches this
   // component's original behavior), then — once mounted — recomputes
   // using the browser's actual IANA timezone via Intl, so the greeting is
@@ -15,7 +15,6 @@ export function GreetingHeader({ email }: { email: string }) {
   // give the same answer.
   const tPromise = useTranslations("promise");
   const [greeting, setGreeting] = useState(() => timeOfDayGreeting());
-  const name = displayNameFromEmail(email);
 
   useEffect(() => {
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -61,7 +60,8 @@ export function GreetingHeader({ email }: { email: string }) {
         <HelpTip helpKey="help.overview" />
       </div>
       <p className="mt-2 text-sm text-muted" suppressHydrationWarning>
-        {greeting.text}, {name} {greeting.emoji}
+        {tPromise(`greeting.${greeting.part}`)}
+        {name ? `, ${name}` : ""} {greeting.emoji}
       </p>
     </div>
   );

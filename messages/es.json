@@ -1037,6 +1037,15 @@
       "loaded": "La muestra está cargada. Se marca en todas las páginas hasta que la quites.",
       "notLoaded": "No cargada.",
       "open": "Verla en Inicio"
+    },
+    "displayName": {
+      "title": "¿Cómo quieres que te llamemos?",
+      "description": "Aparece en el saludo de tu página de inicio. Escríbelo tal como quieres que te llamen.",
+      "placeholder": "Tu nombre",
+      "saved": "Nombre guardado",
+      "saveFailed": "No pudimos guardar el nombre. Inténtalo de nuevo en un momento.",
+      "save": "Guardar",
+      "saving": "Guardando…"
     }
   },
   "dashboard": {
@@ -4119,7 +4128,12 @@
     "clearFailed": "No funcionó."
   },
   "promise": {
-    "oneSentence": "La IA que ya conoce tu trabajo. Pregúntale lo que sea."
+    "oneSentence": "La IA que ya conoce tu trabajo. Pregúntale lo que sea.",
+    "greeting": {
+      "morning": "Buenos días",
+      "afternoon": "Buenas tardes",
+      "evening": "Buenas noches"
+    }
   },
   "legal": {
     "lastUpdated": "última actualización: {date}",

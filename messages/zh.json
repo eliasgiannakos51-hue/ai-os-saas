@@ -1037,6 +1037,15 @@
       "loaded": "示例已加载。在你移除之前，每个页面都会有标记。",
       "notLoaded": "未加载。",
       "open": "在首页查看"
+    },
+    "displayName": {
+      "title": "我们该怎么称呼你？",
+      "description": "用于主页上的问候语。请按你希望被称呼的方式填写。",
+      "placeholder": "你的名字",
+      "saved": "名字已保存",
+      "saveFailed": "无法保存名字，请稍后再试。",
+      "save": "保存",
+      "saving": "正在保存…"
     }
   },
   "dashboard": {
@@ -4119,7 +4128,12 @@
     "clearFailed": "没有成功。"
   },
   "promise": {
-    "oneSentence": "已经了解你工作的 AI。什么都可以问它。"
+    "oneSentence": "已经了解你工作的 AI。什么都可以问它。",
+    "greeting": {
+      "morning": "早上好",
+      "afternoon": "下午好",
+      "evening": "晚上好"
+    }
   },
   "legal": {
     "lastUpdated": "最后更新：{date}",

@@ -146,6 +146,19 @@ export const PRODUCER_SPECS: Record<ProducerKey, ProducerSpec> = {
       "research", "deep research", "market research", "investigacion",
       "recherche", "recherches", "ricerca", "pesquisa", "recherche de marche",
       "marktforschung", "调研", "研究", "市场调查", "リサーチ", "調査", "بحث", "دراسة",
+      // LOOKING FOR COMPETITORS IS RESEARCH — V6 1.10a's sibling, 1.10b.
+      // "ψάξε τους ανταγωνιστές μου" reached no producer (the 50-sentence
+      // measurement, scripts/router-accuracy.mjs, logged it MISSED). As
+      // PHRASES, never the bare noun: "πρόσθεσε ανταγωνιστή" files a
+      // record and "παρακολούθησε τον ανταγωνιστή" is an agent's job, and
+      // a stem on "ανταγωνιστ" would open Research for both. Written with
+      // σ for ς, because foldForMatch folds the final sigma.
+      "ψαξε τουσ ανταγωνιστεσ", "ψαξε μου τουσ ανταγωνιστεσ", "ψαξε ανταγωνιστεσ",
+      "βρεσ τουσ ανταγωνιστεσ", "βρεσ ανταγωνιστεσ", "αναλυση ανταγωνισμου",
+      "αναλυση ανταγωνιστων", "psakse tous antagonistes", "psaxe tous antagonistes",
+      "vres tous antagonistes", "find my competitors", "find competitors",
+      "competitor analysis", "competitive analysis", "analyze my competitors",
+      "analyse my competitors",
     ],
     stems: ["ερευν", "μελετ"],
     greek: ["ερευν", "μελετ"],

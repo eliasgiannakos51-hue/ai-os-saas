@@ -1037,6 +1037,15 @@
       "loaded": "L'exemple est chargé. Il est signalé sur chaque page jusqu'à ce que vous le retiriez.",
       "notLoaded": "Non chargé.",
       "open": "Le voir sur l'accueil"
+    },
+    "displayName": {
+      "title": "Comment devons-nous t'appeler ?",
+      "description": "Utilisé dans le message d'accueil de ta page d'accueil. Écris-le exactement comme tu veux qu'on s'adresse à toi.",
+      "placeholder": "Ton prénom",
+      "saved": "Prénom enregistré",
+      "saveFailed": "Impossible d'enregistrer le prénom. Réessaie dans un instant.",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…"
     }
   },
   "dashboard": {
@@ -4119,7 +4128,12 @@
     "clearFailed": "Cela n'a pas marché."
   },
   "promise": {
-    "oneSentence": "L'IA qui connaît déjà votre travail. Demandez-lui n'importe quoi."
+    "oneSentence": "L'IA qui connaît déjà votre travail. Demandez-lui n'importe quoi.",
+    "greeting": {
+      "morning": "Bonjour",
+      "afternoon": "Bon après-midi",
+      "evening": "Bonsoir"
+    }
   },
   "legal": {
     "lastUpdated": "dernière mise à jour : {date}",

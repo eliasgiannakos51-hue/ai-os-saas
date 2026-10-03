@@ -262,6 +262,7 @@ const DECLARED = {
   // --- not a user-facing route at all ---
   "cron/website-storage-cleanup": { bound: "none", why: "cron, guarded by CRON_SECRET; the caller is Vercel and there is no user to charge" },
   "system-health/files": { bound: "none", why: "owner-only (isAdminEmail); writes and removes one canary object per call" },
+  "system-health/keys": { bound: "none", why: "owner-only (isAdminEmail); one free READ per provider (a model or account list, never a generation), so the provider URLs it names are never asked to produce anything" },
   "import/csv/apply": { bound: "limited", scope: "import_apply", why: "scope import_apply; the model call it makes was reserved by import/csv/analyse" },
 };
 
@@ -380,6 +381,7 @@ const CONTINUES_SOMEBODY_ELSES_HOLD = {
     why: "it queues rather than generates: the model call and the hold both live in /api/websites/generate/process, against the SAME estimate this route computes. What stops a loop here is hasEnoughCredits — an account that cannot afford the generation is refused before the row is written, so the queue cannot outrun the balance.",
   },
   "voice/usage": { bound: "reads_only", why: "reads a usage counter; the provider URL is a constant in voice-providers, imported to say whether voice is configured at all." },
+  "system-health/keys": { bound: "reads_only", why: "owner-only; one GET per provider to a model or account LIST, never a generation, and only when the owner presses the button. There is no loop to stop." },
 };
 const unboundModel = modelRoutes
   .filter((c) => !BOUNDS_ITSELF.test(SOURCE.get(c.route)))

@@ -159,8 +159,23 @@ check("the route answers the owner alone, before any provider is called", adminA
 check("a non-owner gets 404, so the route does not advertise itself", /isAdminEmail\(user\.email\)\)\s*return NextResponse\.json\([^)]*status:\s*404/.test(route));
 check("the route returns checkKey's results, not the environment", /results\s*}/.test(route) && !/process\.env\[/.test(route));
 const panel = stripComments(readFileSync(PANEL, "utf8"));
-check("the panel imports only TYPES from the inventory", !/import\s+{[^}]*}\s+from\s+"@\/lib\/ai\/providers\/key-inventory"/.test(panel.replace(/import\s+type\s+{[^}]*}\s+from\s+"[^"]+";/g, "")));
-check("the panel says when a key is set and read by nothing", /No code reads this key yet/.test(panel));
+check("the panel does not import the provider layer", !/ai\/providers/.test(panel));
+{
+  const { KEY_STATUSES } = await loadTs(INVENTORY);
+  const panelStatuses = [...(panel.match(/type KeyStatus =([^;]+);/)?.[1] ?? "").matchAll(/"([a-z-]+)"/g)].map((m) => m[1]);
+  const labelled = [...(panel.match(/STATUS_TEXT[^=]*=\s*{([\s\S]*?)\n};/)?.[1] ?? "").matchAll(/^\s*"?([a-z-]+)"?:/gm)].map((m) => m[1]);
+  check(
+    `the panel's statuses are the inventory's (${KEY_STATUSES.length})`,
+    panelStatuses.length === KEY_STATUSES.length && KEY_STATUSES.every((k) => panelStatuses.includes(k)),
+    `panel: ${panelStatuses.join(", ")}`,
+  );
+  check(
+    "every status has words on the panel",
+    KEY_STATUSES.every((k) => labelled.includes(k)),
+    `labelled: ${labelled.join(", ")}`,
+  );
+}
+check("the panel says when a key is set and read by nothing", /No code reads this key yet — it is set, and does nothing/.test(panel) && /row\.set \? UNREAD_BUT_SET : UNREAD/.test(panel));
 const page = stripComments(readFileSync(PAGE, "utf8"));
 check("the page renders the panel", /<KeyChecks rows={keyRows} \/>/.test(page));
 check("the page passes whether a key is set, as a boolean", /set:\s*keyVarFor\(entry,\s*process\.env\)\s*!==\s*null/.test(page));

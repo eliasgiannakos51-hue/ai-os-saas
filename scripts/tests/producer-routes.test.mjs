@@ -64,7 +64,8 @@ ok(`six producers (${PRODUCERS.join(", ")})`, PRODUCERS.length === 6 && PRODUCER
   const unfolded = [];
   for (const key of PRODUCERS) {
     for (const cue of PRODUCER_SPECS[key].cues) {
-      if (cue !== cue.toLowerCase() || /[̀-ͯ]/.test(cue.normalize("NFD"))) unfolded.push(`${key}: ${cue}`);
+      // ς too: foldForMatch turns it into σ, so a cue spelt with it never matches.
+      if (cue !== cue.toLowerCase() || /[̀-ͯ]/.test(cue.normalize("NFD")) || cue.includes("ς")) unfolded.push(`${key}: ${cue}`);
     }
   }
   ok(`every cue is written folded (${PRODUCERS.reduce((n, k) => n + PRODUCER_SPECS[k].cues.length, 0)} cues)`,
@@ -156,6 +157,23 @@ const NOT_PRODUCERS = [
 const falsePositives = NOT_PRODUCERS.filter(([, t]) => matchProducer(t).kind !== "none")
   .map(([l, t]) => `${l}: "${t}" -> ${JSON.stringify(matchProducer(t))}`);
 ok(`none of the ${NOT_PRODUCERS.length} non-requests matches a producer`, falsePositives.length === 0, falsePositives.join("\n        "));
+
+console.log("\n== 2b'. looking for competitors is research; filing or watching one is not ==");
+// V6 1.10b. The phrase opens Research; the bare noun must not, because
+// adding a competitor is a record and watching one is an agent's job.
+for (const [text, want] of [
+  ["ψάξε τους ανταγωνιστές μου στη Θεσσαλονίκη", "research"],
+  ["βρες τους ανταγωνιστές μου", "research"],
+  ["psakse tous antagonistes mou", "research"],
+  ["find my competitors in Athens", "research"],
+  ["competitor analysis for my bakery", "research"],
+  ["πρόσθεσε ανταγωνιστή την Acme", "none"],
+  ["παρακολούθησε τις τιμές του ανταγωνιστή καθημερινά", "none"],
+]) {
+  const v = matchProducer(text);
+  const got = v.kind === "one" ? v.producer : v.kind;
+  ok(`"${text}" -> ${want}`, got === want, `got ${got}`);
+}
 
 console.log("\n== 2c. two producers in one sentence is a question, not a coin toss ==");
 {

@@ -1,8 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { KeyRound, Loader2 } from "lucide-react";
-import type { KeyCheckResult, KeyStatus } from "@/lib/ai/providers/key-inventory";
+import { KeyRound } from "lucide-react";
+
+// Spelt out here, not imported: no component may import the provider layer
+// (scripts/tests/ai-providers.test.mjs). scripts/tests/key-inventory.test.mjs
+// holds this list equal to KEY_STATUSES in the inventory.
+type KeyStatus =
+  | "ok"
+  | "invalid"
+  | "forbidden"
+  | "rate-limited"
+  | "unknown-endpoint"
+  | "unreachable"
+  | "not-set"
+  | "no-check";
+type KeyCheckResult = { id: string; envVar: string | null; status: KeyStatus; httpStatus: number | null };
 
 /** What the server knows about each key without asking the provider. */
 export type KeyInventoryRow = {
@@ -25,6 +38,16 @@ const STATUS_TEXT: Record<KeyStatus, { text: string; tone: string }> = {
   "not-set": { text: "not set", tone: "text-muted" },
   "no-check": { text: "set — this provider has no free call to test it", tone: "text-muted" },
 };
+
+// Named constants rather than literals in a ternary: English reached through
+// a ternary is how a string escapes every scanner (i18n-coverage.test.mjs).
+// This screen is owner-only and English on purpose (i18n-population).
+const RUN = "Check keys";
+const CHECKING = "Checking…";
+const SET_UNCHECKED = "set — not checked yet";
+const NOT_SET = "not set";
+const UNREAD = "No code reads this key yet.";
+const UNREAD_BUT_SET = "No code reads this key yet — it is set, and does nothing.";
 
 /**
  * The owner's question of §1.0 (docs/v6-master.md): which keys work, and
@@ -67,16 +90,10 @@ export function KeyChecks({ rows }: { rows: KeyInventoryRow[] }) {
           type="button"
           onClick={() => void run()}
           disabled={running}
-          className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-white/5 disabled:opacity-50"
+          className="rounded-lg bg-white/5 px-3 py-1.5 text-xs font-medium hover:bg-white/10 disabled:opacity-50"
           data-testid="key-checks-run"
         >
-          {running ? (
-            <span className="inline-flex items-center gap-1.5">
-              <Loader2 className="h-3 w-3 animate-spin" aria-hidden /> Checking…
-            </span>
-          ) : (
-            "Check keys"
-          )}
+          {running ? CHECKING : RUN}
         </button>
       </div>
       <p className="mt-1 text-xs text-muted">
@@ -86,7 +103,7 @@ export function KeyChecks({ rows }: { rows: KeyInventoryRow[] }) {
       </p>
 
       {failed && (
-        <p className="mt-3 rounded-lg border border-red-500/30 bg-red-500/[0.05] p-3 text-xs text-red-300">
+        <p className="mt-3 rounded-lg bg-red-500/[0.08] p-3 text-xs text-red-300">
           The check itself failed to run — see the function logs for /api/system-health/keys.
         </p>
       )}
@@ -101,13 +118,13 @@ export function KeyChecks({ rows }: { rows: KeyInventoryRow[] }) {
                 <span className="font-medium">{row.label}</span>
                 <code className="text-muted">{row.envVars.join(" | ")}</code>
                 <span className={status ? status.tone : row.set ? "text-foreground" : "text-muted"}>
-                  {status ? status.text : row.set ? "set — not checked yet" : "not set"}
+                  {status ? status.text : row.set ? SET_UNCHECKED : NOT_SET}
                 </span>
               </div>
               <p className="text-muted">Role: {row.roles.join("; ")}</p>
               {row.readBy.length === 0 && (
                 <p className="text-amber-300" data-testid={`key-${row.id}-unread`}>
-                  No code reads this key yet{row.set ? " — it is set, and does nothing." : "."}
+                  {row.set ? UNREAD_BUT_SET : UNREAD}
                 </p>
               )}
               {row.missing && <p className="text-muted">Missing: {row.missing}</p>}

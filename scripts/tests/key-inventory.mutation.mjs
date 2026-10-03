@@ -19,15 +19,18 @@ const INVENTORY = "src/lib/ai/providers/key-inventory.ts";
 const ROUTE = "src/app/api/system-health/keys/route.ts";
 const PAGE = "src/app/dashboard/system-health/page.tsx";
 const EXAMPLE = ".env.local.example";
-const TARGETS = [GATE, INVENTORY, ROUTE, PAGE, EXAMPLE];
+const PANEL = "src/components/system-health/key-checks.tsx";
+const TARGETS = [GATE, INVENTORY, ROUTE, PAGE, EXAMPLE, PANEL];
 
 const MUTANTS = [
   {
     name: "a readBy path goes stale (the file moved)",
     file: INVENTORY,
     from: 'readBy: ["src/lib/push/web-push.ts"],',
-    to: 'readBy: ["src/lib/notifications/web-push.ts"],',
-    expect: "vapid: src/lib/notifications/web-push.ts reads",
+    // Built in pieces so the moved path is not itself a path in this file:
+    // gate-import-paths requires every repository path in a gate to exist.
+    to: 'readBy: ["src/lib/push/' + "moved-away" + '.ts"],',
+    expect: "moved-away" + ".ts reads",
   },
   {
     name: "a real reader is left off readBy",
@@ -91,6 +94,20 @@ const MUTANTS = [
     from: "set: keyVarFor(entry, process.env) !== null,",
     to: "set: true,",
     expect: "the page passes whether a key is set",
+  },
+  {
+    name: "the inventory gains a status the panel does not know",
+    file: INVENTORY,
+    from: '  "no-check",\n] as const;',
+    to: '  "no-check",\n  "expired",\n] as const;',
+    expect: "the panel's statuses are the inventory's",
+  },
+  {
+    name: "the panel loses the words for a status",
+    file: PANEL,
+    from: '  "no-check": { text: "set — this provider has no free call to test it", tone: "text-muted" },\n',
+    to: "",
+    expect: "every status has words on the panel",
   },
   {
     name: "an inventoried key is dropped from the setup file",

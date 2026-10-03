@@ -159,15 +159,24 @@ export const KEY_INVENTORY: KeyEntry[] = [
   },
 ];
 
-export type KeyStatus =
-  | "ok" // the provider accepted the key
-  | "invalid" // 401: the provider does not know this key
-  | "forbidden" // 403: the key is real but may not make this call
-  | "rate-limited" // 429: accepted, but out of quota right now
-  | "unknown-endpoint" // 404: the check URL is wrong, not the key
-  | "unreachable" // network error, timeout or 5xx
-  | "not-set"
-  | "no-check";
+export const KEY_STATUSES = [
+  "ok", // the provider accepted the key
+  "invalid", // 401: the provider does not know this key
+  "forbidden", // 403: the key is real but may not make this call
+  "rate-limited", // 429: accepted, but out of quota right now
+  "unknown-endpoint", // 404: the check URL is wrong, not the key
+  "unreachable", // network error, timeout or 5xx
+  "not-set",
+  "no-check",
+] as const;
+
+/**
+ * The panel (src/components/system-health/key-checks.tsx) spells these out
+ * again rather than importing them, because no component may import the
+ * provider layer (scripts/tests/ai-providers.test.mjs). The key-inventory
+ * gate holds the two lists equal.
+ */
+export type KeyStatus = (typeof KEY_STATUSES)[number];
 
 export type KeyCheckResult = { id: KeyId; envVar: string | null; status: KeyStatus; httpStatus: number | null };
 

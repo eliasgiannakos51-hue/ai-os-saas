@@ -266,7 +266,7 @@ const MUTANTS = [
     name: "the greeting climbs back above the headline",
     file: GREETING,
     from: '      <div className="flex flex-wrap items-center justify-center gap-3">',
-    to: '      <p className="mt-2 text-sm text-muted">{greeting.text}</p>\n      <div className="flex flex-wrap items-center justify-center gap-3">',
+    to: '      <p className="mt-2 text-sm text-muted">{greeting.part}</p>\n      <div className="flex flex-wrap items-center justify-center gap-3">',
     expect: "is still below the headline",
   },
   {

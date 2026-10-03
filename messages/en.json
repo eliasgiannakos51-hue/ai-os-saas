@@ -1037,6 +1037,15 @@
       "loaded": "The sample is loaded. It is marked on every page until you remove it.",
       "notLoaded": "Not loaded.",
       "open": "See it on Home"
+    },
+    "displayName": {
+      "title": "What should we call you?",
+      "description": "Used in the greeting on your home page. Write it exactly as you want to be addressed.",
+      "placeholder": "Your name",
+      "saved": "Name saved",
+      "saveFailed": "We couldn't save the name. Try again in a moment.",
+      "save": "Save",
+      "saving": "Saving…"
     }
   },
   "dashboard": {
@@ -4119,7 +4128,12 @@
     "clearFailed": "That did not work."
   },
   "promise": {
-    "oneSentence": "The AI that already knows your work. Ask it anything."
+    "oneSentence": "The AI that already knows your work. Ask it anything.",
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    }
   },
   "legal": {
     "lastUpdated": "last updated: {date}",

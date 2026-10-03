@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { KEY_INVENTORY, checkKey } from "@/lib/ai/providers/key-inventory";
+import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -25,9 +26,17 @@ export async function GET() {
   if (!user) return NextResponse.json({ ok: false }, { status: 401 });
   if (!isAdminEmail(user.email)) return NextResponse.json({ ok: false }, { status: 404 });
 
-  const results = await Promise.all(KEY_INVENTORY.map((entry) => checkKey(entry, process.env)));
-  return NextResponse.json(
-    { ok: true, checkedAt: new Date().toISOString(), results },
-    { headers: { "cache-control": "no-store" } }
-  );
+  try {
+    const results = await Promise.all(KEY_INVENTORY.map((entry) => checkKey(entry, process.env)));
+    return NextResponse.json(
+      { ok: true, checkedAt: new Date().toISOString(), results },
+      { headers: { "cache-control": "no-store" } }
+    );
+  } catch (err) {
+    // checkKey turns every provider failure into a status, so reaching
+    // here is a bug in this route, not a bad key. The error is logged; the
+    // response says only that the check did not run.
+    logApiError("/api/system-health/keys", err);
+    return NextResponse.json({ ok: false }, { status: 500 });
+  }
 }

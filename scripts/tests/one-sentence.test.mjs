@@ -104,10 +104,10 @@ check(
 // The greeting is still there — it just no longer occupies the line that
 // should say what the product is.
 const greeting = readFileSync("src/components/overview/greeting-header.tsx", "utf8");
-check("the greeting still exists, below the heading", /greeting\.text/.test(greeting));
+check("the greeting still exists, below the heading", /greeting\.part/.test(greeting));
 check(
   "...and the sentence is above it",
-  greeting.indexOf(`tPromise("${key}")`) < greeting.indexOf("greeting.text"),
+  greeting.indexOf(`tPromise("${key}")`) < greeting.indexOf("greeting.part"),
   "the first line after signing in must be the promise, not the time of day",
 );
 

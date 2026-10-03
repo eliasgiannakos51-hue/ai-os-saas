@@ -28,6 +28,7 @@ import { VoiceSettings } from "@/components/settings/voice-settings";
 import { Reveal } from "@/components/ui/reveal";
 import { MarginReport } from "@/components/settings/margin-report";
 import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
+import { DisplayNameSettings } from "@/components/settings/display-name-settings";
 import { EmailNotificationSettings } from "@/components/settings/email-notification-settings";
 import { PushNotificationSettings } from "@/components/settings/push-notification-settings";
 import { InstallSection } from "@/components/pwa/install-section";
@@ -259,6 +260,10 @@ export default async function SettingsPage() {
           <p className="text-xs text-muted">{t("signedInAs")}</p>
           <p className="mt-1 text-sm text-foreground">{user.email}</p>
         </div>
+
+        <DisplayNameSettings
+          initialName={typeof user.user_metadata?.display_name === "string" ? user.user_metadata.display_name : ""}
+        />
 
         {/* Read BEFORE the summary, because it is about the thing that
             just happened rather than about the account's steady state.

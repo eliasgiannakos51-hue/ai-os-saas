@@ -1037,6 +1037,15 @@
       "loaded": "L'esempio è caricato. Viene segnalato su ogni pagina finché non lo rimuovi.",
       "notLoaded": "Non caricato.",
       "open": "Vedilo nella Home"
+    },
+    "displayName": {
+      "title": "Come vuoi che ti chiamiamo?",
+      "description": "Compare nel saluto della tua pagina iniziale. Scrivilo esattamente come vuoi essere chiamato.",
+      "placeholder": "Il tuo nome",
+      "saved": "Nome salvato",
+      "saveFailed": "Non siamo riusciti a salvare il nome. Riprova tra un momento.",
+      "save": "Salva",
+      "saving": "Salvataggio…"
     }
   },
   "dashboard": {
@@ -4119,7 +4128,12 @@
     "clearFailed": "Non ha funzionato."
   },
   "promise": {
-    "oneSentence": "L'IA che conosce già il tuo lavoro. Chiedile qualsiasi cosa."
+    "oneSentence": "L'IA che conosce già il tuo lavoro. Chiedile qualsiasi cosa.",
+    "greeting": {
+      "morning": "Buongiorno",
+      "afternoon": "Buon pomeriggio",
+      "evening": "Buonasera"
+    }
   },
   "legal": {
     "lastUpdated": "ultimo aggiornamento: {date}",

@@ -5,6 +5,7 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { GreetingHeader } from "@/components/overview/greeting-header";
+import { greetingName } from "@/lib/greeting";
 import { InsightList, type Insight } from "@/components/onboarding/insight-list";
 import { CreateChat } from "@/components/create/create-chat";
 import { FirstScreenExamples } from "@/components/overview/first-screen-examples";
@@ -510,7 +511,7 @@ export default async function OverviewPage() {
             of the past and buried the present. */}
         <div className="relative flex flex-wrap items-start justify-between gap-3">
           <GlowOrb className="-start-10 -top-20 -z-10 h-56 w-56" />
-          <GreetingHeader email={user.email ?? ""} />
+          <GreetingHeader name={greetingName(user.user_metadata)} />
           <LowCreditsBanner />
         </div>
 

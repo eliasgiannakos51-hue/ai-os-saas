@@ -938,6 +938,22 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   const foldedNav = fold(navText);
   await aside.screenshot({ path: "/tmp/ionexa-sidebar-el.png" });
 
+  // THE GROUP HEADINGS LIVE ON /dashboard/tools NOW. On 2026-10-02 the
+  // owner approved the short rail (a256ac96): New, All tools, Recent,
+  // Settings. The grouped list, with its headings, moved unchanged to
+  // app/dashboard/tools/page.tsx through the same sidebarGroups(). This
+  // section went on counting headings in the rail and failed in CI on
+  // every push after that ("at least four headings actually rendered in
+  // Greek (2)") — the property had moved, not broken. So the headings are
+  // read where they are drawn, and the rail is still held to "never
+  // English".
+  const toolsPage = await greek.newPage();
+  await toolsPage.goto(`http://127.0.0.1:${PORT}/dashboard/tools`, { waitUntil: "networkidle", timeout: 45000 });
+  const listText = await toolsPage.locator("main").first().innerText();
+  const foldedList = fold(listText);
+  await toolsPage.close();
+  checkTrue("the tools list rendered something to read", listText.trim().length > 200, listText.slice(0, 200));
+
   // DERIVED FROM THE CONFIG, NOT TYPED OUT — and it took a stale run to
   // make that point.
   //
@@ -996,21 +1012,22 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
     const word = greekHeading(key);
     checkTrue(`heading "${english}" has Greek in messages/el.json (${key})`, typeof word === "string" && word.length > 0, String(word));
     if (typeof word !== "string") continue;
-    const shown = foldedNav.includes(fold(word));
+    const shown = foldedList.includes(fold(word));
     if (shown) headingsShown++;
+    const englishIn = (text) => new RegExp(`\\b${english}\\b`).test(text);
     checkTrue(
-      `heading "${english}" is either "${word}" or absent — never English`,
-      shown || !new RegExp(`\\b${english}\\b`).test(navText),
-      navText.slice(0, 400)
+      `heading "${english}" is either "${word}" or absent — never English (rail and /dashboard/tools)`,
+      (shown || !englishIn(listText)) && (foldedNav.includes(fold(word)) || !englishIn(navText)),
+      listText.slice(0, 400)
     );
   }
   // AND THE FLOOR UNDER IT. "Absent is allowed" is satisfied by a
   // sidebar that renders no headings at all, which is the vacuity shape
   // gate-vacuity.test.mjs caught in this very block once already. Six
-  // groups are drawn (scripts/sidebar-census.mjs); the floor is set
+  // groups are drawn on /dashboard/tools (scripts/sidebar-census.mjs); the floor is set
   // below that so adding a group does not break it, and above zero so
   // an empty nav cannot pass.
-  checkTrue(`at least four headings actually rendered in Greek (${headingsShown})`, headingsShown >= 4, navText.slice(0, 400));
+  checkTrue(`at least four headings actually rendered in Greek on /dashboard/tools (${headingsShown})`, headingsShown >= 4, listText.slice(0, 400));
   for (const [english, key] of items) {
     const word = greekItem(key);
     if (typeof word !== "string" || !word) {

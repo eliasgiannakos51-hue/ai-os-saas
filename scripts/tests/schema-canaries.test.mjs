@@ -181,8 +181,6 @@ console.log("\n== 3. every migration in the window has a canary, or says why it 
 // object exist"; a file that only revokes, grants, or replaces the body of
 // a function that already existed cannot be seen that way, by anybody.
 const NOT_PROBEABLE = {
-  "20260926000000_revoke_authenticated_grants_without_policy.sql":
-    "revokes grants; it removes rather than adds, and an object that is still THERE is what a canary detects",
   "20260928000000_privileges_rls_cannot_scope.sql":
     "revokes and re-grants privileges; nothing new exists afterwards to probe for",
   "20261002000000_search_index_locale_translations_only.sql":

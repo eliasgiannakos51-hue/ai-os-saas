@@ -50,3 +50,18 @@ suite had exactly one real file to test against.
 
 Same rule as browser-print.pdf: do not regenerate them to make a test
 pass.
+
+## 20260815_purchased_credits.at-1c437e0.sql
+
+`supabase/migrations/20260815_purchased_credits.sql` **as it was at commit
+1c437e0**, before its backfill was corrected. `purchased-credits-marker` and
+`purchased-credits-upgrade` replay that old version and then the fixes, the
+order a database that ran the old file really went through.
+
+They used to read it with `git show 1c437e0:…`. CI checks out a shallow
+clone without that commit, so both tests printed SKIPPED, exited 0, and
+their mutation suites reported ten mutants as missed (CI run of 30908b2d,
+2026-10-03). A test that needs history does not run where it ships; the
+bytes are committed instead. **Do not edit it** — it is a record of a file
+that existed, and `git show 1c437e0:supabase/migrations/20260815_purchased_credits.sql`
+reproduces it in a full clone.

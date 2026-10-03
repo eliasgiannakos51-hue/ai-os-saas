@@ -373,6 +373,12 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   },
   {
     kind: "function",
+    fn: "chat_memory_fold",
+    migration: "20261004100000_chat_memory_fold_matches_app.sql",
+    breaks: "every fact remembered before 2026-10-03 is stored again as a second row the next time it is said, because its stored fold still ends in a full stop",
+  },
+  {
+    kind: "function",
     fn: "chat_memory_prunable",
     migration: "20261003000000_chat_memory_dedup_and_retention.sql",
     breaks: "/dashboard/ai-memory cannot show what retention would remove, so the page loads without its clean-up offer",

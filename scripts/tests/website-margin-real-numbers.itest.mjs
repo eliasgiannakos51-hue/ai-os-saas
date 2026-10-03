@@ -171,16 +171,30 @@ if (worst < 4) console.log("        at", JSON.stringify(worstAt));
 
 console.log("\n== 7. a discounted plan or credit pack cannot dilute it either ==");
 // The multiplier is only real if it divides by what a credit actually
-// sold for. These are the cheapest real rates in the product.
-for (const [label, plan, pack] of [
-  ["list price", null, null],
-  ["Ultimate plan", { price: 199, monthlyCredits: 40000 }, null],
-  ["EUR 100 / 8,000 pack", null, 100 / 8000],
-  ["Ultimate + pack", { price: 199, monthlyCredits: 40000 }, 100 / 8000],
-]) {
-  const c = formula.creditsForRealCostOnAccount(eur, plan, pack, config);
-  const m = formula.achievedMarginOnAccount(c, eur, plan, pack, config);
-  checkTrue(`${label}: ${c} credits, ${m.toFixed(4)}x >= 4`, m >= 4);
+// sold for, and only if it is the multiplier settlement really applies.
+//
+// READ FROM THE PRODUCT, NOT TYPED. Until 2026-10-03 this section carried
+// literals — an Ultimate plan of 40,000 credits and an "EUR 100 / 8,000"
+// pack — and called them "the cheapest real rates in the product". After
+// credits became one size (063da767) neither existed: Ultimate is
+// whatever lib/billing/plans.ts says and the packs are CREDIT_PACKS. And
+// it priced with the raw config multiplier, which settlement never uses:
+// settleReservation applies resolveMarginFor(feature, plan), so the
+// margin checked here is that one, for website_generate, on every plan.
+// It went red in CI on the stale pack (2.54x) and nothing read it,
+// because this step runs after the mutation suites.
+const plansMod = await loadTs("src/lib/billing/plans.ts");
+const marginPolicy = await loadTs("src/lib/billing/margin-policy.ts");
+const cheapestPack = Math.min(...plansMod.CREDIT_PACKS.map((p) => p.price / p.credits));
+check("the plans were read", plansMod.PLANS.length >= 5, true);
+check("the packs were read", plansMod.CREDIT_PACKS.length >= 1, true);
+for (const plan of plansMod.PLANS) {
+  for (const pack of [null, cheapestPack]) {
+    const margin = marginPolicy.resolveMarginFor("website_generate", plan.slug, config, {}).margin;
+    const c = formula.creditsForRealCostOnAccount(eur, plan, pack, config, margin);
+    const m = formula.achievedMarginOnAccount(c, eur, plan, pack, config);
+    checkTrue(`${plan.slug}${pack ? " + cheapest pack" : ""}: ${c} credits at ${margin}x, ${m.toFixed(4)}x >= 4`, m >= 4);
+  }
 }
 
 console.log("\n== 8. web searches are billed, and are read off the real stream ==");

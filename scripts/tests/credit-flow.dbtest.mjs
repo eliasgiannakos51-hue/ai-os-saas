@@ -178,7 +178,11 @@ console.log("== 0. the database really is the one the migrations build ==");
 // 20260929 (presentation decks) added COLUMNS to ai_presentations and no
 // table, which is why three migrations landed and the count moved by two.
 // migration in supabase/migrations on a real Postgres 16: 109.
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 109);
+// 109 -> 111 on 2026-10-03: 20261006000000_meetings.sql adds meetings and
+// meeting_actions (V6 #1). It went unnoticed for days because this step
+// runs after the mutation suites in CI, and they were red or timed out
+// on every push in between — a gate nothing reaches reports nothing.
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 111);
 eq(
   "the credit functions exist",
   Number(

@@ -1010,7 +1010,7 @@
       "oneOffNote": "Ein Credit-Paket wird sofort gutgeschrieben und kann nicht storniert werden.",
       "items": {
         "credits_1000": {
-          "name": "1.000 Credits",
+          "name": "750 Credits",
           "grants": "einmalige Aufladung"
         },
         "agents_5": {

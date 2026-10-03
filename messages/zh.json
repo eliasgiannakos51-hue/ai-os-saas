@@ -1010,7 +1010,7 @@
       "oneOffNote": "额度包即时到账，无法取消。",
       "items": {
         "credits_1000": {
-          "name": "1,000 点额度",
+          "name": "750 点额度",
           "grants": "一次性充值"
         },
         "agents_5": {

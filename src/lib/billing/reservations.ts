@@ -8,6 +8,8 @@ import {
   creditsForRealCostOnAccount,
   achievedMarginOnAccount,
   effectiveCreditPriceEurForAccount,
+  expectedAchievedMarginOnAccount,
+  revenuePerCreditEurForAccount,
 } from "@/lib/billing/credit-formula";
 import { getPurchasedPackCreditPriceEur, grantCredits } from "@/lib/billing/credits";
 import { resolveMarginFor } from "@/lib/billing/margin-policy";
@@ -403,6 +405,12 @@ export async function settleReservation(params: {
   // feature override), never below 4 — see lib/billing/margin-policy.ts
   // for the rule and why max() is the only safe combination.
   const marginPolicy = resolveMarginFor(feature, plan?.slug ?? null, config);
+  // What a credit BROUGHT IN on this account, and the margin that implies.
+  // Equal to the price and the target for anyone without a pack; lower by
+  // the pack's discount for a pack holder (one credit size since
+  // 2026-10-03 — see expectedAchievedMarginOnAccount).
+  const revenuePrice = revenuePerCreditEurForAccount(plan, packPriceEur, config);
+  const expectedMargin = expectedAchievedMarginOnAccount(plan, packPriceEur, marginPolicy.margin, config);
 
   const creditsCharged = bypassCharge
     ? 0
@@ -475,7 +483,7 @@ export async function settleReservation(params: {
   // not be computed at all — and an alert that only tests `< 4` treats
   // that as healthy, because null is not less than 4. The case the alert
   // exists for is precisely the one where something upstream went wrong.
-  if (!bypassCharge && (margin === null || margin < marginPolicy.margin - 1e-9)) {
+  if (!bypassCharge && (margin === null || margin < expectedMargin - 1e-9)) {
     logApiError("billing:marginBelowTarget", new Error("settled below the guaranteed margin"), {
       userId,
       feature,
@@ -484,8 +492,10 @@ export async function settleReservation(params: {
       realCostEur,
       achievedMargin: margin,
       targetMargin: marginPolicy.margin,
+      expectedMargin,
       marginSource: marginPolicy.source,
       effectiveCreditPriceEur: effectivePrice,
+      revenuePerCreditEur: revenuePrice,
     });
     // The log line alone is only useful to someone already reading logs.
     // A shortfall keeps costing money until it is fixed, so it has to
@@ -534,6 +544,10 @@ export async function settleReservation(params: {
         ...metadata,
         planSlug: plan?.slug ?? null,
         effectiveCreditPriceEur: effectivePrice,
+        // What each credit brought in — differs from the price above only
+        // for a pack holder. lib/billing/margin-report.ts reads it to price
+        // a bypass row's hypothetical charge the way achieved_margin is.
+        revenuePerCreditEur: revenuePrice,
         packCreditPriceEur: packPriceEur,
         // WHICH margin applied and WHY — "general" | "plan" | "feature" —
         // with the inputs, so a cost-log row explains its own multiplier.

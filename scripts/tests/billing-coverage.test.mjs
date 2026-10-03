@@ -395,22 +395,50 @@ console.log("\n== 4. the reported Ultimate scenario ==");
 // Ultimate, a website generation costing EUR 0.28. 44 credits was
 // reported. At EUR 0.008 per credit that is EUR 0.352 of revenue on
 // EUR 0.28 of cost — 1.26x.
+//
+// Ultimate AS IT WAS SOLD THEN: 25,000 credits for EUR 200. Frozen, not
+// read from PLANS — since 2026-10-03 a credit is one size and Ultimate is
+// 10,000 for EUR 200, so the reported figures only reproduce on the old
+// table. Today's charge for the same cost is checked after them, in euros.
 const COST_EUR = 0.28;
-const ultimate = PLANS[4];
-check("Ultimate is EUR 0.008 per credit", Number(ultimateRate.toFixed(6)), 0.008);
-const shouldCharge = formula.creditsForRealCostOnAccount(COST_EUR, ultimate, null, config);
+const ultimateThen = { slug: "ultimate", name: "Ultimate", price: 200, monthlyCredits: 25_000 };
+check(
+  "Ultimate was EUR 0.008 per credit",
+  Number(formula.effectiveCreditPriceEur(ultimateThen, config).toFixed(6)),
+  0.008
+);
+const shouldCharge = formula.creditsForRealCostOnAccount(COST_EUR, ultimateThen, null, config);
 check("EUR 0.28 x 4 / EUR 0.008 = 140 credits", shouldCharge, 140);
-const achieved = formula.achievedMarginOnAccount(shouldCharge, COST_EUR, ultimate, null, config);
+const achieved = formula.achievedMarginOnAccount(shouldCharge, COST_EUR, ultimateThen, null, config);
 checkTrue(`which is ${achieved.toFixed(4)}x, at or above ${M}x`, achieved >= M);
 // And the reported charge, scored honestly.
-const reportedMargin = formula.achievedMarginOnAccount(44, COST_EUR, ultimate, null, config);
+const reportedMargin = formula.achievedMarginOnAccount(44, COST_EUR, ultimateThen, null, config);
 checkTrue(`44 credits would have been ${reportedMargin.toFixed(3)}x — below ${M}x`, reportedMargin < M);
 // The settled path produces 140, not 44, so a settled website generation
 // cannot be the source of a 44-credit charge at this cost.
 checkTrue("the settled formula does not produce 44 here", shouldCharge !== 44);
+// Today, at the plan's own margin and the one-size credit: fewer credits,
+// each worth more, and never less money than the 140 were.
+{
+  const ultimateNow = PLANS[4];
+  const target = margin.resolveMarginFor(null, ultimateNow.slug, config, {}).margin;
+  const now = formula.creditsForRealCostOnAccount(COST_EUR, ultimateNow, null, config, target);
+  const rateNow = formula.effectiveCreditPriceEurForAccount(ultimateNow, null, config);
+  checkTrue(
+    `today Ultimate charges ${now} credits x EUR ${rateNow} = EUR ${(now * rateNow).toFixed(2)}, at least the EUR ${(140 * 0.008).toFixed(2)} the 140 were worth`,
+    now * rateNow >= 140 * 0.008 - 1e-9 && rateNow === config.creditPriceEur
+  );
+}
 
 console.log("\n== 5. brute force: every plan x pack x cost clears the margin ==");
-const PACKS = [null, 10 / 500, 25 / 1500, 50 / 3500, 100 / 8000];
+// The LIVE packs, not a copy: this held 1,500 / 3,500 / 8,000 after
+// 2026-10-03 replaced them, and a brute force over a table that is no
+// longer sold proves nothing about the one that is. Settled at the plan's
+// own resolved margin, as reservations.ts settles them — the general 4x
+// is only the floor every plan's margin is held at or above.
+const { CREDIT_PACKS } = await loadTs("src/lib/billing/plans.ts");
+const PACKS = [null, ...CREDIT_PACKS.map((p) => p.price / p.credits)];
+const planMargin = (plan) => margin.resolveMarginFor(null, plan.slug, config, {}).margin;
 let worst = Infinity,
   worstAt = null,
   combos = 0;
@@ -419,7 +447,7 @@ for (const plan of PLANS) {
     // From a trivial classifier call to a full 128k-output generation.
     for (let usd = 0.0001; usd < 3; usd *= 1.15) {
       const eur = usd * config.usdToEurRate;
-      const credits = formula.creditsForRealCostOnAccount(eur, plan, pack, config);
+      const credits = formula.creditsForRealCostOnAccount(eur, plan, pack, config, planMargin(plan));
       const m = formula.achievedMarginOnAccount(credits, eur, plan, pack, config);
       combos++;
       if (m !== null && m < worst) {
@@ -491,17 +519,14 @@ checkTrue("and hands it to settlement", /\n\s*plan,\n/.test(routeSrc));
 // Free and Enterprise have no per-credit rate, so they must fall back to
 // the LIST price — never to zero, which would divide by zero.
 // Free has a real rate (its allowance is a marketing cost, and a free
-// user who wants more buys at list), and so does "no plan at all". A
-// CUSTOM-priced plan is different: its rate is unknowable, so it takes
-// the cheapest published one instead — see section 21.
-for (const plan of [PLANS[0], null, undefined]) {
+// user who wants more buys at list), and so does "no plan at all". Until
+// 2026-10-03 a CUSTOM-priced plan took the cheapest published rate
+// instead; since a credit became one size it prices at list too — see
+// section 21.
+for (const plan of [PLANS[0], null, undefined, PLANS[5]]) {
   const r = formula.effectiveCreditPriceEur(plan, config);
   checkTrue(`${plan?.name ?? String(plan)} prices at the list rate`, r === config.creditPriceEur);
 }
-checkTrue(
-  "Enterprise does NOT price at the list rate — that would under-charge a bulk deal",
-  formula.effectiveCreditPriceEur(PLANS[5], config) < config.creditPriceEur
-);
 
 console.log("\n== 8. a charging settlement always charges, and always clears the bar ==");
 // Production showed seven ai_cost_log rows with credits_charged = 0 and
@@ -520,7 +545,7 @@ for (const plan of PLANS) {
   for (const pack of PACKS) {
     for (let usd = 0.000001; usd < 3; usd *= 1.3) {
       const eur = usd * config.usdToEurRate;
-      const credits = formula.creditsForRealCostOnAccount(eur, plan, pack, config);
+      const credits = formula.creditsForRealCostOnAccount(eur, plan, pack, config, planMargin(plan));
       const m = formula.achievedMarginOnAccount(credits, eur, plan, pack, config);
       checked++;
       if (credits <= 0) zeroCharges++;
@@ -537,8 +562,43 @@ console.log("\n== 9. the alert cannot be defeated by null ==");
 // could not be computed, was the one case it stayed silent for.
 checkTrue(
   "the shortfall alert fires on null as well as on a low number",
-  /if \(!bypassCharge && \(margin === null \|\| margin < marginPolicy\.margin/.test(res)
+  /if \(!bypassCharge && \(margin === null \|\| margin < expectedMargin - 1e-9\)\)/.test(res)
 );
+// ...and the bar is the RESOLVED target scaled by what a credit brought
+// in. Since 2026-10-03 a pack holder is charged the same credits as
+// everyone and earns less per credit — the owner's decision; against the bare target
+// every one of their settlements would read as a shortfall and email.
+checkTrue(
+  "the bar is the resolved target, scaled only by the account's own pack discount",
+  /const expectedMargin = expectedAchievedMarginOnAccount\(plan, packPriceEur, marginPolicy\.margin, config\);/.test(res)
+);
+{
+  const starter = PLANS[1];
+  const target = planMargin(starter);
+  let falseAlarms = 0;
+  let pairs = 0;
+  for (const pack of [null, ...CREDIT_PACKS.map((p) => p.price / p.credits), 25 / 1500, 50 / 3500, 100 / 8000]) {
+    for (let usd = 0.0001; usd < 3; usd *= 1.4) {
+      const eur = usd * config.usdToEurRate;
+      const credits = formula.creditsForRealCostOnAccount(eur, starter, pack, config, target);
+      const m = formula.achievedMarginOnAccount(credits, eur, starter, pack, config);
+      const bar = formula.expectedAchievedMarginOnAccount(starter, pack, target, config);
+      pairs++;
+      if (m < bar - 1e-9) falseAlarms++;
+    }
+  }
+  check(`no correct settlement trips the alert, with or without a pack (${pairs} checked)`, falseAlarms, 0);
+  checkTrue(
+    "...while a charge one credit short of it still does, on a pack",
+    (() => {
+      const pack = Math.min(...CREDIT_PACKS.map((p) => p.price / p.credits));
+      const eur = 0.5;
+      const credits = formula.creditsForRealCostOnAccount(eur, starter, pack, config, target);
+      const short = formula.achievedMarginOnAccount(credits - 1, eur, starter, pack, config);
+      return short < formula.expectedAchievedMarginOnAccount(starter, pack, target, config) - 1e-9;
+    })()
+  );
+}
 checkTrue("and does not fire for a bypass row, which is legitimately null", /!bypassCharge &&/.test(res));
 // A zero-credit row must say WHY it is zero, or the next person reading
 // the cost log has to guess — which is what happened here.
@@ -905,37 +965,78 @@ console.log("\n== 18. the real production row, priced on every plan and pack =="
 // website_generate, 2 AI calls, input 6064, output 14136,
 // real_cost_usd $0.28640440, wouldHaveChargedCredits 53.
 //
-// 53 is the LIST rate. The Ultimate rate gives 132. That is not a bug:
-// the rate determines the credits, so a dearer credit means FEWER of
-// them, not a thinner margin. The worry it looks like — "53 credits on
-// Ultimate is 1.6x" — would only be real if the charge were fixed at 53
-// while the rate fell, and it never is.
+// 53 is the LIST rate. Ultimate's rate, as it was then (EUR 0.008), gave
+// 132. That was not a bug: the rate determined the credits, so a dearer
+// credit meant FEWER of them, not a thinner margin. Since 2026-10-03 a
+// credit is one size, and the same row is 53 on every plan at the same
+// multiplier — the "53 on one plan, 132 on another" a person could see
+// is exactly what the owner asked to remove.
 const REAL_USD = 0.28640440;
 const realEur = REAL_USD * config.usdToEurRate;
 check("realCostEur", Number(realEur.toFixed(9)), 0.263492048);
 check("at the list rate that is 53 credits", formula.creditsForRealCostOnAccount(realEur, null, null, config), 53);
-check("and on Ultimate it is 132, not 53", formula.creditsForRealCostOnAccount(realEur, PLANS[4], null, config), 132);
-checkTrue("53 on Ultimate WOULD be under target, which is why it is never charged there",
-  (53 * formula.effectiveCreditPriceEur(PLANS[4], config)) / realEur < M);
+check(
+  "on Ultimate as it was sold then (25,000 for EUR 200) it was 132",
+  formula.creditsForRealCostOnAccount(realEur, { price: 200, monthlyCredits: 25_000 }, null, config),
+  132
+);
+{
+  const perPlan = PLANS.map((p) => formula.creditsForRealCostOnAccount(realEur, p, null, config));
+  checkTrue(
+    `today it is 53 on EVERY plan at the same multiplier — one credit size (${perPlan.join(", ")})`,
+    perPlan.every((c) => c === 53)
+  );
+}
 
+// The packs on sale, then the packs sold before 2026-10-03, which are
+// honoured as they are (the owner's decision): charged the same credits as
+// everyone, earning less per credit because the account paid less for it.
 const PACK_ROWS = [
   ["none", null],
-  ["EUR 10 / 500", 10 / 500],
-  ["EUR 25 / 1,500", 25 / 1500],
-  ["EUR 50 / 3,500", 50 / 3500],
-  ["EUR 100 / 8,000", 100 / 8000],
+  ...CREDIT_PACKS.map((p) => [`EUR ${p.price} / ${p.credits.toLocaleString("en")}`, p.price / p.credits]),
 ];
-console.log("   plan          pack              EUR/cr   credits  revenue   margin");
+const LEGACY_PACK_ROWS = [
+  ["old EUR 25 / 1,500", 25 / 1500],
+  ["old EUR 50 / 3,500", 50 / 3500],
+  ["old EUR 100 / 8,000", 100 / 8000],
+];
+console.log("   plan          pack                 credits  revenue   margin");
 for (const plan of PLANS) {
+  const target = planMargin(plan);
   for (const [packName, pack] of PACK_ROWS) {
-    const rate = formula.effectiveCreditPriceEurForAccount(plan, pack, config);
-    const credits = formula.creditsForRealCostOnAccount(realEur, plan, pack, config);
+    const credits = formula.creditsForRealCostOnAccount(realEur, plan, pack, config, target);
+    const revenue = credits * formula.revenuePerCreditEurForAccount(plan, pack, config);
     const m = formula.achievedMarginOnAccount(credits, realEur, plan, pack, config);
     console.log(
-      `   ${plan.name.padEnd(13)} ${packName.padEnd(17)} ${rate.toFixed(4)}   ${String(credits).padStart(5)}   EUR ${(credits * rate).toFixed(3).padEnd(7)} ${m.toFixed(4)}x`
+      `   ${plan.name.padEnd(13)} ${packName.padEnd(20)} ${String(credits).padStart(5)}   EUR ${revenue.toFixed(3).padEnd(7)} ${m.toFixed(4)}x`
     );
     checkTrue(`${plan.name} + ${packName}: ${credits} credits, ${m.toFixed(4)}x >= ${M}`, m >= M);
   }
+}
+{
+  const legacy = [];
+  let sameCredits = true;
+  for (const plan of PLANS) {
+    const target = planMargin(plan);
+    const plain = formula.creditsForRealCostOnAccount(realEur, plan, null, config, target);
+    for (const [, pack] of LEGACY_PACK_ROWS) {
+      const credits = formula.creditsForRealCostOnAccount(realEur, plan, pack, config, target);
+      if (credits !== plain) sameCredits = false;
+      legacy.push(formula.achievedMarginOnAccount(credits, realEur, plan, pack, config));
+    }
+  }
+  const worstLegacy = Math.min(...legacy);
+  console.log(
+    `   legacy packs, honoured: ${LEGACY_PACK_ROWS.map(([n]) => n).join(" · ")} — worst ${worstLegacy.toFixed(3)}x when spent`
+  );
+  checkTrue("a legacy pack holder is charged the same credits as everyone on their plan", sameCredits);
+  // Pinned BOTH ways: 3.125x is 5 x 0.0125 / 0.02 rounded up by ceil(). If
+  // it moves, either the legacy rate or the plan margin moved, and the
+  // report to the owner (docs/v6-pricing-2026-10-02.md, section 3) with it.
+  checkTrue(
+    `KNOWN: the worst legacy pack earns ${worstLegacy.toFixed(3)}x when spent — honoured by decision, not by accident`,
+    worstLegacy >= 3.1 && worstLegacy < 3.2
+  );
 }
 
 console.log("\n== 19. every real feature, on every plan ==");
@@ -985,13 +1086,24 @@ const chargeExpr = /creditsForRealCostOnAccount\(realCostEur, plan, packPriceEur
 checkTrue("computed by the same function as a real charge", (res.match(chargeExpr) ?? []).length >= 2);
 // And the row says which plan produced the number, so it can be checked.
 checkTrue("the row records the plan it priced against", /planSlug: plan\?\.slug \?\? null/.test(res));
-// Concretely: a bypass account holding the cheapest pack.
-const packRate = 100 / 8000;
-check("a pack holder would have paid 85 credits, not 53",
-  formula.creditsForRealCostOnAccount(realEur, null, packRate, config), 85);
-checkTrue("which is still >= 4x", formula.achievedMarginOnAccount(85, realEur, null, packRate, config) >= M);
+// Concretely: a bypass account on Starter holding the pack with the
+// largest bonus. Until 2026-10-03 the pack moved the charge (85 credits
+// instead of 53, at the old EUR 0.0125); since a credit is one size it no
+// longer does — the figure is what anyone on the plan pays, and the pack
+// shows up only in what those credits brought in.
+{
+  const packRate = Math.min(...CREDIT_PACKS.map((p) => p.price / p.credits));
+  const starter = PLANS[1];
+  const withPack = formula.creditsForRealCostOnAccount(realEur, starter, packRate, config, planMargin(starter));
+  const without = formula.creditsForRealCostOnAccount(realEur, starter, null, config, planMargin(starter));
+  check(`a pack holder would have paid ${without} credits, the same as without the pack`, withPack, without);
+  checkTrue(
+    "which is still >= 4x on what the pack brought in",
+    formula.achievedMarginOnAccount(withPack, realEur, starter, packRate, config) >= M
+  );
+}
 
-console.log("\n== 21. plan resolution: the tier decides the rate, so it must be right ==");
+console.log("\n== 21. plan resolution: the tier decides the margin, so it must be right ==");
 // PRODUCTION: an owner/admin generation logged planSlug "free" and
 // wouldHaveChargedCredits 53, when the owner's real tier prices the same
 // EUR 0.2635 at 132. Two precheck rows logged planSlug NULL.
@@ -1021,51 +1133,32 @@ checkTrue("an admin no longer falls through to free", /if \(isAdminEmail\(user\?
 checkTrue("...matching what the rest of the app already calls an admin",
   /isAdmin \? "enterprise"/.test(readFileSync("src/app/pricing/page.tsx", "utf8")));
 
-// Enterprise is priced per deal, so its per-credit rate is unknowable.
-// It used to fall back to the LIST price — the most EXPENSIVE rate in the
-// product, and therefore the least safe guess for a bulk contract.
+// Enterprise is priced per deal. It has priced at three rates:
+//   - the LIST price, first;
+//   - the cheapest published rate, from 2026-09 (Ultimate monthly, EUR
+//     0.008, then annual Ultimate once annual billing shipped), because
+//     plans sold credits below list and list under-charged it;
+//   - the LIST price again since 2026-10-03, because every published plan
+//     now sells a credit at list (one credit size, the owner's decision).
+//     Its contract buys a NUMBER of list-price credits.
+// The cheapest published rate still exists — annual billing, list x
+// 10/12 — and Enterprise deliberately does NOT track it: that would charge
+// it 20% more credits for the same action than any other plan.
 const ENT = PLANS[5];
-// THE NUMBER MOVED WHEN ANNUAL BILLING SHIPPED, and it moved in the safe
-// direction. "The cheapest published rate" was Ultimate monthly
-// (EUR 200 / 25,000 = EUR 0.008) until annual existed; annual Ultimate
-// sells the same credits at ten monthly payments over 300,000, so that is
-// now the cheapest rate a customer can actually reach and therefore the
-// only safe assumption for a negotiated Enterprise contract.
-//
-// The assertions below are written against the DERIVED value rather than
-// a fresh hardcoded one, so the next plan or interval that undercuts it
-// updates this test's expectation by construction instead of turning it
-// red. What is pinned is the property: Enterprise never prices above the
-// cheapest reachable rate, and the charge never goes DOWN when a cheaper
-// rate appears.
 const cheapest = formula.cheapestPublishedCreditPriceEur(config);
-// DERIVED, because this was the literal 0.0064 — true only while the
-// annual discount was 20%. Two months free makes it 0.006667, and a
-// pinned literal turns a correct pricing change into a red build.
 check(
-  "the cheapest published rate now includes annual",
-  Number(cheapest.toFixed(6)),
-  Number(((200 * ANNUAL_MONTHS_CHARGED) / 300_000).toFixed(6))
+  "the cheapest published rate is annual, list x 10/12",
+  Number(cheapest.toFixed(8)),
+  Number(((config.creditPriceEur * ANNUAL_MONTHS_CHARGED) / 12).toFixed(8))
 );
-check(
-  "Enterprise prices at exactly that rate",
-  Number(formula.effectiveCreditPriceEur(ENT, config).toFixed(8)),
-  Number(cheapest.toFixed(8))
-);
+check("Enterprise prices at list, not at that rate", formula.effectiveCreditPriceEur(ENT, config), config.creditPriceEur);
 const entCredits = formula.creditsForRealCostOnAccount(realEur, ENT, null, config);
-// Same shape: 165 was this row at the 20% floor. The charge scales
-// inversely with the rate, so it is asserted against the pre-annual 132
-// scaled by how far the floor moved, not against a fresh literal.
-const PRE_ANNUAL_ROW = 132;
-const PRE_ANNUAL_FLOOR = 200 / 25_000; // Ultimate MONTHLY
-check(
-  `so the real production row is ${PRE_ANNUAL_ROW} scaled by the floor (${entCredits}), not 53`,
-  Math.abs(entCredits - PRE_ANNUAL_ROW * (PRE_ANNUAL_FLOOR / cheapest)) <= 1,
-  true
-);
+check("so the real production row is 53 on Enterprise, as on every plan", entCredits, 53);
+// 132 credits at Ultimate-monthly's EUR 0.008 was the pre-annual charge.
+// Compared in EUROS, because a credit changed size in between.
 checkTrue(
-  "and never fewer than the 132 it was before annual existed",
-  entCredits >= 132,
+  `and never less money than the 132 x EUR 0.008 it was before annual existed (EUR ${(entCredits * config.creditPriceEur).toFixed(3)} >= EUR ${(132 * 0.008).toFixed(3)})`,
+  entCredits * config.creditPriceEur >= 132 * 0.008 - 1e-9,
   `got ${entCredits}`
 );
 checkTrue("which clears the bar", formula.achievedMarginOnAccount(entCredits, realEur, ENT, null, config) >= M);
@@ -1078,15 +1171,24 @@ check("Free still prices at list", formula.effectiveCreditPriceEur(PLANS[0], con
 console.log("\n== 22. a real user's tier, through every lifecycle step ==");
 const meta = (tier) => ({ id: "u", email: "user@example.com", user_metadata: tier ? { subscription_tier: tier } : {} });
 check("brand-new user -> free", formula.effectiveCreditPriceEur(null, config), config.creditPriceEur);
-for (const [label, tier, expectedRate] of [
-  ["subscribed to Starter", "starter", 0.02],
-  ["upgraded to Growth", "growth", 50 / 3000],
-  ["upgraded to Professional", "professional", 0.01],
-  ["upgraded to Ultimate", "ultimate", 0.008],
-  ["cancelled, back to free", "free", 0.02],
+// Since 2026-10-03 the tier no longer decides the SIZE of a credit — every
+// step below prices at list — but it still decides the MARGIN (Free 6x,
+// paid 5x, lib/billing/margin-policy.ts), so a wrong tier is still a
+// wrong charge, and the lifecycle is still asserted step by step.
+for (const [label, tier, expectedMargin] of [
+  ["subscribed to Starter", "starter", 5],
+  ["upgraded to Growth", "growth", 5],
+  ["upgraded to Professional", "professional", 5],
+  ["upgraded to Ultimate", "ultimate", 5],
+  ["cancelled, back to free", "free", 6],
 ]) {
   const plan = PLANS.find((p) => p.name.toLowerCase() === tier) ?? PLANS[0];
-  check(`${label}: EUR ${expectedRate.toFixed(6)} per credit`, Number(formula.effectiveCreditPriceEur(plan, config).toFixed(8)), Number(expectedRate.toFixed(8)));
+  checkTrue(
+    `${label}: EUR ${config.creditPriceEur} per credit at ${expectedMargin}x`,
+    plan.slug === tier &&
+      formula.effectiveCreditPriceEur(plan, config) === config.creditPriceEur &&
+      planMargin(plan) === expectedMargin
+  );
 }
 // Stripe is what writes the tier. If it ever stopped, every paying
 // customer would silently be billed as free — this is the line that

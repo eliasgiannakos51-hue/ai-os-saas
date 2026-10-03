@@ -1042,14 +1042,14 @@ Billing Portal — no card data ever touches this app's servers.
 ### Add-ons
 
 Four optional purchases sit alongside the plan
-(`src/lib/billing/addons.ts`): **+1,000 credits** (EUR15, one-off),
+(`src/lib/billing/addons.ts`): **+750 credits** (EUR15, one-off; 1,000 until 2026-10-03),
 **+5 agents** (EUR10/month), **+10 GB storage** (EUR5/month) and
 **priority execution** (EUR20/month, not stackable). Each needs its own
 Stripe price ID:
 
 | Env var | Add-on | Default | Without it |
 | --- | --- | --- | --- |
-| `STRIPE_PRICE_ADDON_CREDITS_1000` | +1,000 credits | unset | The add-on is listed as unavailable and the buy button is disabled; the panel names the missing variable. Nothing else is affected. |
+| `STRIPE_PRICE_ADDON_CREDITS_1000` | +750 credits | unset | The add-on is listed as unavailable and the buy button is disabled; the panel names the missing variable. Nothing else is affected. |
 | `STRIPE_PRICE_ADDON_AGENTS_5` | +5 agents | unset | Same — and every agent cap stays at the plan's own number. |
 | `STRIPE_PRICE_ADDON_STORAGE_10GB` | +10 GB storage | unset | Same. |
 | `STRIPE_PRICE_ADDON_PRIORITY` | Priority execution | unset | Same. |
@@ -1157,7 +1157,8 @@ own rows, every write goes through the service-role client).
   reset by a Stripe event that cycle — Free accounts never touch Stripe at
   all, so for them this IS the reset.
 - **Buying more credits** — Settings → Buy Credits sells 4 one-time packs
-  (€10=500, €25=1500, €50=3500, €100=8000 credits) via `/api/credits/checkout`
+  (as of 2026-10-03: €10=500, €25=1,300, €50=2,650, €100=5,500 credits —
+  the source is `CREDIT_PACKS` in `src/lib/billing/plans.ts`) via `/api/credits/checkout`
   (Stripe Checkout, `mode: "payment"`, not a subscription); credits are
   granted on `checkout.session.completed` for that payment-mode session,
   from the session's own metadata.

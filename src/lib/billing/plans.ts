@@ -289,7 +289,7 @@ export const PLANS: Plan[] = [
     slug: "growth",
     name: "Growth",
     price: 50,
-    monthlyCredits: 3000,
+    monthlyCredits: 2500,
     hasTeamSeats: false,
     highlighted: true,
     capabilities: {
@@ -318,7 +318,7 @@ export const PLANS: Plan[] = [
     slug: "professional",
     name: "Professional",
     price: 100,
-    monthlyCredits: 10000,
+    monthlyCredits: 5000,
     hasTeamSeats: true,
     capabilities: {
       maxAiAgents: 15,
@@ -347,7 +347,7 @@ export const PLANS: Plan[] = [
     slug: "ultimate",
     name: "Ultimate",
     price: 200,
-    monthlyCredits: 25000,
+    monthlyCredits: 10000,
     hasTeamSeats: true,
     teamSeatsIncluded: true,
     capabilities: {
@@ -483,15 +483,27 @@ export function planMeetsMinimum(tier: string, minimum: PlanSlug): boolean {
 
 // One-time credit packs (mode: "payment", not a subscription) — display
 // metadata only, client-safe. Stripe Price IDs live in price-ids.ts
-// (server-only) keyed by the same `id`. Amounts/prices match the actual
-// Stripe Products created for this app (EUR).
+// (server-only) keyed by the same `id`. Prices match the actual Stripe
+// Products created for this app (EUR); the credit amount travels in the
+// checkout session's metadata, so it is decided here, not in Stripe.
+//
+// ONE CREDIT IS ONE SIZE — the owner's decision, 2026-10-03. Every plan
+// sells a credit at EUR 0.02 and every action costs the same number of
+// credits on every plan (lib/billing/credit-formula.ts,
+// effectiveCreditPriceEurForAccount). A larger pack is cheaper per credit
+// the honest way: MORE credits for the money, never a bigger credit. The
+// bonus has a ceiling — spent at EUR 0.02 face value, a pack's credits must
+// still earn the 4x the rest of the product does, which caps the bonus at
+// 25% at the per-action multiplier of 5 (5 x 0.02 / 1.25 = 4).
+// scripts/tests/credit-size.test.mjs holds every pack to it; these sit at
+// +0% / +4% / +6% / +10%, leaving room for estimates that run high.
 export type CreditPackId = "credits_10" | "credits_25" | "credits_50" | "credits_100";
 
 export const CREDIT_PACKS: { id: CreditPackId; price: number; credits: number }[] = [
   { id: "credits_10", price: 10, credits: 500 },
-  { id: "credits_25", price: 25, credits: 1500 },
-  { id: "credits_50", price: 50, credits: 3500 },
-  { id: "credits_100", price: 100, credits: 8000 },
+  { id: "credits_25", price: 25, credits: 1300 },
+  { id: "credits_50", price: 50, credits: 2650 },
+  { id: "credits_100", price: 100, credits: 5500 },
 ];
 
 export function getCreditPack(id: string): { id: CreditPackId; price: number; credits: number } | undefined {

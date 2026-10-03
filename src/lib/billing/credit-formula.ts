@@ -88,8 +88,11 @@ export function needsLargeActionConfirmation(
 // rather than on a nominal credit price.
 // ---------------------------------------------------------------------
 //
-// CREDIT_PRICE_EUR (€0.02) is the a-la-carte price of a credit. Every
-// paid plan sells them for less than that in bulk:
+// CREDIT_PRICE_EUR (€0.02) is the a-la-carte price of a credit. Until
+// 2026-10-03 every paid plan sold them for less than that in bulk (since
+// then every plan sells them at exactly €0.02 — one credit size, see
+// effectiveCreditPriceEurForAccount; the table and the reasoning below are
+// the history of why the rate was ever plan-aware):
 //
 //   Starter        1,000 credits / €20   = €0.0200 per credit
 //   Growth         3,000 credits / €50   = €0.0167 per credit
@@ -146,21 +149,20 @@ export function effectiveCreditPriceEur(
   const c = config ?? resolvePricingConfig();
   if (!plan) return c.creditPriceEur;
   if (typeof plan.price !== "number" || typeof plan.monthlyCredits !== "number") {
-    // A CUSTOM-priced plan (Enterprise) used to fall back to the list
-    // price. That is the most expensive per-credit rate in the product,
-    // which makes it the least safe possible guess: an Enterprise deal is
-    // negotiated in bulk, so its real rate is at or below the cheapest
-    // published one. Pricing it at EUR 0.02 charged an Enterprise
-    // customer 53 credits for a generation that costs 132 at Ultimate's
-    // rate — a 60% under-charge on the highest-value accounts, and one
-    // that no test caught because the multiplier still read 4x against
-    // the assumed rate.
+    // A CUSTOM-priced plan (Enterprise). From 2026-09 to 2026-10-03 it was
+    // priced at the cheapest published rate, because plans then sold a
+    // credit below list (Ultimate at EUR 0.008) and charging Enterprise at
+    // EUR 0.02 under-charged it 60% against Ultimate.
     //
-    // The cheapest known plan rate is the only assumption that cannot
-    // under-charge, and it is the same reasoning FALLBACK_MODEL_PRICING
-    // already applies to an unrecognised model: over-charging slightly is
-    // the safe direction to fail in.
-    return Math.min(c.creditPriceEur, cheapestPublishedCreditPriceEur(c));
+    // SINCE 2026-10-03 A CREDIT IS ONE SIZE, and every published plan sells
+    // it at the list price, so an Enterprise credit is a list-price credit
+    // too: its contract buys a NUMBER of them (ENTERPRISE_MIN_PRICE_EUR in
+    // lib/billing/ceiling.ts is the floor that number is measured against).
+    // The cheapest published rate now exists only on ANNUAL billing, and
+    // charging Enterprise at it (EUR 0.02 x 10/12) would charge 20% more
+    // credits for the same action than on any other plan — the
+    // inconsistency this change removes.
+    return c.creditPriceEur;
   }
   // Free (price 0) genuinely has no per-credit revenue — its allowance is
   // a marketing cost, and a free user who wants more buys at list. That
@@ -219,17 +221,16 @@ export function achievedMarginOnPlan(
 //   credits_50    3,500 credits / €50   = €0.0143 per credit  -> 2.86x
 //   credits_100   8,000 credits / €100  = €0.0125 per credit  -> 2.50x
 //
-// A Free user who buys the €100 pack holds 8,000 credits that cost them
-// €0.0125 each. Charging them `cost x M / 0.02` yields a nominal 4x and a
-// real 2.5x — money lost on every action, exactly as on Ultimate before.
+// (The packs as sold until 2026-10-03.) Until then settlement divided by
+// the CHEAPEST rate the account had reached, plan or pack, so a pack
+// holder's credit was bigger than everyone else's.
 //
-// The rule is the same one that fixed plans, applied to whichever source
-// the credits could have come from: divide by the CHEAPEST euro-per-credit
-// rate the account has access to. Cheapest, not "most recent", because
-// credits are fungible once granted — the balance is one number, and there
-// is no lot accounting that could tell a plan credit from a pack credit at
-// spend time. Taking the minimum is the only choice that cannot
-// under-charge, whichever credits the user is actually burning.
+// SINCE 2026-10-03 A CREDIT IS ONE SIZE: settlement divides by the list
+// price for every account (effectiveCreditPriceEurForAccount), and a
+// pack's discount is in BONUS credits, capped so that spending them at
+// list still earns 4x (lib/billing/plans.ts, CREDIT_PACKS). Packs already
+// bought are honoured as they are — their credits earn less when spent,
+// and revenuePerCreditEurForAccount is the number that says how much.
 
 /** Euro-per-credit of any bulk source (a plan month, a one-time pack). */
 export function perCreditPriceEur(
@@ -243,17 +244,48 @@ export function perCreditPriceEur(
 }
 
 /**
- * The rate settlement must divide by for a given account: the minimum of
- * the list price, the plan's own rate, and the rate of the cheapest pack
- * the account has bought.
+ * The rate settlement divides by for a given account — since 2026-10-03,
+ * the list price for every account (see the comment inside).
  *
  * `purchasedPackPriceEur` is the persisted running minimum over that
  * account's pack purchases (user_credits.min_pack_credit_price_eur, written
- * by grantCredits on every pack grant). Null/absent for the overwhelming
- * majority of accounts, which never buy a pack — they fall through to
- * exactly the plan behaviour that already shipped.
+ * by grantCredits on every pack grant). It is kept in the signature so the
+ * callers do not change, and it is read for the margin by
+ * revenuePerCreditEurForAccount.
  */
 export function effectiveCreditPriceEurForAccount(
+  plan: { price: number | "custom"; monthlyCredits: number | "custom" } | null | undefined,
+  purchasedPackPriceEur: number | null | undefined,
+  config?: PricingConfig
+): number {
+  // ONE CREDIT IS ONE SIZE (the owner's decision, 2026-10-03): an action
+  // costs the same number of credits on every plan and for every account,
+  // so the divisor is the list price and nothing else. It used to be the
+  // CHEAPEST rate the account could reach — plan or pack — which made a
+  // credit 2.5x SMALLER on Ultimate (EUR 0.008) than on Starter (EUR 0.02): the
+  // same website was 187 credits on one and 75 on the other. That stopped being necessary
+  // the day every plan was priced at the list rate (lib/billing/plans.ts:
+  // 1,000 / 2,500 / 5,000 / 10,000 credits for EUR 20 / 50 / 100 / 200),
+  // and scripts/tests/credit-size.test.mjs fails if a plan drifts off it.
+  //
+  // `purchasedPackPriceEur` no longer moves the price. A pack's discount
+  // is in its BONUS credits, bounded so that spending them at list still
+  // earns 4x; what the account actually paid per credit is read where it
+  // belongs — revenuePerCreditEurForAccount, for the margin it reports.
+  void purchasedPackPriceEur;
+  return effectiveCreditPriceEur(plan, config ?? resolvePricingConfig());
+}
+
+/**
+ * What a credit actually BROUGHT IN for this account: the cheapest rate it
+ * reached, plan or pack. Not the price an action is charged at — that is
+ * effectiveCreditPriceEurForAccount, one size for everyone — but the
+ * revenue behind the credits being spent, which is what a margin is
+ * measured against. A pack bought before 2026-10-03 at EUR 0.0125 a credit
+ * is honoured as it is (the owner's decision), and its credits earn less
+ * when spent; this is the number that shows it.
+ */
+export function revenuePerCreditEurForAccount(
   plan: { price: number | "custom"; monthlyCredits: number | "custom" } | null | undefined,
   purchasedPackPriceEur: number | null | undefined,
   config?: PricingConfig
@@ -268,6 +300,33 @@ export function effectiveCreditPriceEurForAccount(
     return planRate;
   }
   return Math.min(planRate, purchasedPackPriceEur);
+}
+
+/**
+ * The margin a settlement on this account is EXPECTED to achieve: the
+ * resolved target, scaled by what a credit brought in against what it is
+ * charged at. Without a pack the two rates are equal and this is the
+ * target itself. With a pack, it is lower by exactly the pack's discount —
+ * since 2026-10-03 a known, accepted reduction (the bonus credits on sale
+ * are capped so it stays at or above 4x, and packs sold before then are
+ * honoured as they are).
+ *
+ * lib/billing/reservations.ts alerts below THIS, not below the bare
+ * target: against the bare target every pack holder's settlement would
+ * read as a shortfall and email the owner, and an alert that always fires
+ * is one nobody reads — which is how a real shortfall would get missed.
+ */
+export function expectedAchievedMarginOnAccount(
+  plan: { price: number | "custom"; monthlyCredits: number | "custom" } | null | undefined,
+  purchasedPackPriceEur: number | null | undefined,
+  targetMargin: number,
+  config?: PricingConfig
+): number {
+  const c = config ?? resolvePricingConfig();
+  return (
+    (targetMargin * revenuePerCreditEurForAccount(plan, purchasedPackPriceEur, c)) /
+    effectiveCreditPriceEurForAccount(plan, purchasedPackPriceEur, c)
+  );
 }
 
 export function creditsForRealCostOnAccount(
@@ -295,7 +354,7 @@ export function achievedMarginOnAccount(
   const c = config ?? resolvePricingConfig();
   if (!Number.isFinite(realCostEur) || realCostEur <= 0) return null;
   return (
-    (creditsCharged * effectiveCreditPriceEurForAccount(plan, purchasedPackPriceEur, c)) / realCostEur
+    (creditsCharged * revenuePerCreditEurForAccount(plan, purchasedPackPriceEur, c)) / realCostEur
   );
 }
 

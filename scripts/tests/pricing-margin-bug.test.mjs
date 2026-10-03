@@ -148,7 +148,11 @@ const lastRound = { input: 350, output: 200 };
 const oldComputedUsd =
   (lastRound.input / 1_000_000) * OLD_SONNET_PRICING.inputPerMTok +
   (lastRound.output / 1_000_000) * OLD_SONNET_PRICING.outputPerMTok;
-const ultimate = getPlan("ultimate");
+// Ultimate AS IT WAS SOLD on the day of the incident: 25,000 credits for
+// EUR 200. Frozen here, not read from PLANS — since 2026-10-03 Ultimate is
+// 10,000 credits (one credit size everywhere), and the incident happened
+// at the old rate, so the reproduction has to keep it.
+const ultimate = { slug: "ultimate", price: 200, monthlyCredits: 25_000 };
 const oldComputedEur = usdToEur(oldComputedUsd, DEFAULTS);
 const oldCredits = creditsForRealCostOnAccount(oldComputedEur, ultimate, null, DEFAULTS, 4);
 const realEur = usdToEur(realBreakdown.usdCost, DEFAULTS);
@@ -287,7 +291,11 @@ const SIZES = [
   { input: 120_000, output: 8_000, cacheW: 30_000, cacheR: 60_000, searches: 6 },
   { input: 1_000_000, output: 128_000, cacheW: 100_000, cacheR: 500_000, searches: 20 },
 ];
-const PACK_RATES = [null, 100 / 8000]; // no pack, and the cheapest pack (€0.0125)
+// No pack, and every pack on sale. A pack's bonus credits earn less than
+// list when spent, so with a pack the floor is 4x (the bonus is capped for
+// exactly that — lib/billing/plans.ts, CREDIT_PACKS); without one it is the
+// resolved target itself.
+const PACK_RATES = [null, ...plansMod.CREDIT_PACKS.map((p) => p.price / p.credits)];
 let combos = 0;
 let worstAchievedVsTarget = Infinity;
 let broken = 0;
@@ -312,20 +320,21 @@ for (const feature of FEATURES) {
           const eur = usdToEur(usage.usdCost, DEFAULTS);
           const credits = creditsForRealCostOnAccount(eur, plan, pack, DEFAULTS, target);
           const achieved = achievedMarginOnAccount(credits, eur, plan, pack, DEFAULTS);
-          if (achieved === null || achieved < target - 1e-9) broken++;
-          else worstAchievedVsTarget = Math.min(worstAchievedVsTarget, achieved / target);
+          const floor = pack === null ? target : 4;
+          if (achieved === null || achieved < floor - 1e-9) broken++;
+          else if (pack === null) worstAchievedVsTarget = Math.min(worstAchievedVsTarget, achieved / target);
         }
       }
     }
   }
 }
 check(
-  `all ${combos} combinations meet their resolved margin (>= 4x)`,
+  `all ${combos} combinations meet their resolved margin — or 4x, holding a pack on sale`,
   broken === 0,
   `${broken} broken`
 );
 check(
-  "the worst combination still lands AT or above its target, never below",
+  "without a pack, the worst combination still lands AT or above its target, never below",
   worstAchievedVsTarget >= 1 - 1e-9,
   `worst achieved/target = ${worstAchievedVsTarget}`
 );
@@ -389,7 +398,8 @@ check(
 );
 check(
   "the below-target alert now compares against the RESOLVED margin",
-  /margin < marginPolicy\.margin/.test(resSrc)
+  /margin < expectedMargin - 1e-9/.test(resSrc) &&
+    /expectedAchievedMarginOnAccount\(plan, packPriceEur, marginPolicy\.margin, config\)/.test(resSrc)
 );
 check(
   "the cost-log row stores which margin applied and why",

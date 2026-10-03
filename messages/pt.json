@@ -1010,7 +1010,7 @@
       "oneOffNote": "Um pacote de créditos é atribuído de imediato e não pode ser cancelado.",
       "items": {
         "credits_1000": {
-          "name": "1.000 créditos",
+          "name": "750 créditos",
           "grants": "recarga única"
         },
         "agents_5": {

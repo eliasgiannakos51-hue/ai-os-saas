@@ -317,6 +317,11 @@ const LOCALE_ALLOWED = new Set([
   // "credits" is used verbatim in Greek — the same loanword the rest of the
   // Greek UI already uses ("Αγορά Credits", "Ιστορικό Credits").
   "el:credits.estimate.approx",
+  // The credits add-on's name. It was "1.000 credits" and differed from
+  // English only by the thousands separator; since 2026-10-03 it is 750
+  // (lib/billing/addons.ts), which has none, and "credits" is the same
+  // Greek loanword as above.
+  "el:settings.addons.items.credits_1000.name",
   // V5 #21: the same loanword, on the deck's own receipt line ("{n}
   // credits" under a generated presentation). Greek keeps "credits" as
   // the other seven allowances in this block do.

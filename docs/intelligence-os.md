@@ -174,6 +174,11 @@ days, 2026-10-03, not measurements** — one system per round, gate + mutations
 | **4 (V6.3)** | Browser Agent · Computer Use · Security Agent |
 | **5 (V6.3)** | Agent / Skill / Workflow / Tool Builders · Multi-agent Projects |
 
+**Accepted by the owner on 2026-10-03**, all three changes as written below:
+the Activity Timeline first in Phase 1, Sandbox and the Permission System
+before the Coding Agent, and the Evaluation Lab before the Router. The table
+above is the order V6.2 and V6.3 are built in.
+
 **Why it differs from the proposal:**
 
 1. **Sandbox and Permission System move from Phase 4 to Phase 3.** The Coding
@@ -230,6 +235,6 @@ Estimates, not measurements, assuming one system per round to the standard in
 
 | | Contents | Estimate |
 |---|---|---|
-| **V6.1** | Security ✅ (2026-10-02) · Design part 1 ✅ (2026-10-02) · Design part 2 · Credits one size · 3D · Video · Games (quiz from files) | **3–4 weeks** of rounds: design 2 ≈ 3 d, credits ≈ 2 d (it converts existing balances — a migration), 3D ≈ 4 d, video ≈ 6–7 d, quiz ≈ 4 d |
+| **V6.1** | Security ✅ (2026-10-02) · Design part 1 ✅ (2026-10-02) · Design part 2 ✅ (2026-10-03) · Credits one size ✅ (2026-10-03) · the new design (replaces "Ionexa Home", with an app-wide 3D system) · 3D sites · Video · Games (quiz from files) | **3–4 weeks** of rounds, estimated 2026-10-03: design 2 ≈ 3 d, credits ≈ 2 d, 3D ≈ 4 d, video ≈ 6–7 d, quiz ≈ 4 d. The new design was not in that estimate. Credits needed **no migration**, which this row said it would: the owner kept monthly balances until their next reset and honoured bought packs as they are, and both already work that way (`docs/v6-pricing-2026-10-02.md`, §3) |
 | **V6.2** | Phases 1–2 of §4 | **6–8 weeks** |
 | **V6.3** | Phases 3–5 | **3–4 months**; Browser and Computer Use alone are 3–4 weeks after Sandbox |

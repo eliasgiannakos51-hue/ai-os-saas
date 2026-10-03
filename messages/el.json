@@ -1010,7 +1010,7 @@
       "oneOffNote": "Ένα πακέτο credits αποδίδεται αμέσως και δεν ακυρώνεται.",
       "items": {
         "credits_1000": {
-          "name": "1.000 credits",
+          "name": "750 credits",
           "grants": "εφάπαξ ανανέωση"
         },
         "agents_5": {

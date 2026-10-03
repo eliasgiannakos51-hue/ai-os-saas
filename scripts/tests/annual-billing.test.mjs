@@ -171,29 +171,62 @@ check(
 );
 
 // ---------------------------------------------------------------------------
-console.log("\n== 3. Enterprise tracks the cheapest rate a customer can reach ==");
-// Enterprise is priced per deal, so the app assumes the cheapest PUBLISHED
-// rate. Annual made that cheaper; if cheapestPublishedCreditPriceEur only
-// looked at monthly prices it would now be 25% above the real floor —
-// an under-charge on the highest-value accounts.
-const cheapest = cf.cheapestPublishedCreditPriceEur(C);
+console.log("\n== 3. one credit size: annual is a discount on the PRICE, never on the credit ==");
+// Until 2026-10-03 Enterprise tracked the cheapest rate a customer could
+// reach, which annual Ultimate set at EUR 0.0067 — so annual billing moved
+// the size of an Enterprise credit. Since the owner's decision that a
+// credit is one size everywhere, every published plan sells it at list
+// monthly, annual is the SAME ten-twelfths of list on every plan, and
+// Enterprise settles at list like everyone else.
+const list = C.creditPriceEur;
+const annualRate = (list * ANNUAL_MONTHS_CHARGED) / 12;
+const annualRates = PAID.map((slug) => planCreditPriceEur(getPlan(slug), "year"));
 check(
-  `the cheapest published rate is annual Ultimate, €${cheapest.toFixed(6)}`,
-  Math.abs(cheapest - (200 * ANNUAL_MONTHS_CHARGED) / 300_000) < 1e-9
+  `every paid plan's annual rate is list x ${ANNUAL_MONTHS_CHARGED}/12 = €${annualRate.toFixed(6)} — the same on every plan`,
+  annualRates.every((r) => r !== null && Math.abs(r - annualRate) < 1e-12),
+  annualRates.join(", ")
 );
-check("…which is below the cheapest MONTHLY rate", cheapest < 200 / 25_000);
 check(
-  "Enterprise prices at it",
-  Math.abs(cf.effectiveCreditPriceEur(getPlan("enterprise"), C) - cheapest) < 1e-9
+  "...and every paid plan's MONTHLY rate is the list price",
+  PAID.every((slug) => Math.abs(planCreditPriceEur(getPlan(slug), "month") - list) < 1e-12)
+);
+check(
+  "Enterprise prices at list, NOT at the cheapest published (annual) rate",
+  Math.abs(cf.effectiveCreditPriceEur(getPlan("enterprise"), C) - list) < 1e-12 &&
+    cf.cheapestPublishedCreditPriceEur(C) < list
 );
 let floorOk = true;
 for (const plan of PLANS) {
   for (const interval of ["month", "year"]) {
     const rate = planCreditPriceEur(plan, interval);
-    if (rate !== null && rate < cheapest - 1e-12) floorOk = false;
+    if (rate !== null && rate < annualRate - 1e-12) floorOk = false;
   }
 }
-check("no plan+interval combination sells below that floor", floorOk);
+check("no plan+interval combination sells below the annual rate", floorOk);
+
+// THE KNOWN, UNDECIDED PART. Settlement charges an annual subscriber at the
+// same list rate as a monthly one, and the free-chat budget is sized on the
+// MONTHLY price. So an annual account that spends its whole allowance earns
+// (10/12) / (1/M + chat share) — 3.33x instead of 4x. This predates the
+// one-size change (annual has always settled at the monthly rate) and the
+// owner has not decided it: docs/v6-pricing-2026-10-02.md, section 3.
+// Pinned so that it cannot change in EITHER direction without this line
+// and that document changing with it.
+{
+  const ceiling = await loadTs("src/lib/billing/ceiling.ts");
+  const worst = PAID.map((slug) => {
+    const plan = getPlan(slug);
+    const monthlyCost =
+      ceiling.creditCeilingEur(slug, C, {}) + (ceiling.allowanceBudgetEur("free_chat", slug, C, {}) ?? 0);
+    return annualMonthlyEquivalentEur(plan) / monthlyCost;
+  });
+  console.log(`        annual real margin, whole allowance spent: ${PAID.map((s, i) => `${s} ${worst[i].toFixed(2)}x`).join(" · ")}`);
+  check(
+    "KNOWN: an annual subscriber who spends everything earns 3.33x, not 4x — an open owner decision, pinned both ways",
+    worst.every((m) => Math.abs(m - 10 / 3) < 0.01),
+    worst.map((m) => m.toFixed(4)).join(", ")
+  );
+}
 
 // ---------------------------------------------------------------------------
 console.log("\n== 4. THE CREDIT DRIP: monthly, never twelve months at once ==");

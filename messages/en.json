@@ -1010,7 +1010,7 @@
       "oneOffNote": "A credit pack is granted immediately and cannot be cancelled.",
       "items": {
         "credits_1000": {
-          "name": "1,000 credits",
+          "name": "750 credits",
           "grants": "one-time top-up"
         },
         "agents_5": {

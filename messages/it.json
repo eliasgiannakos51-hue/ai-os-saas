@@ -1010,7 +1010,7 @@
       "oneOffNote": "Un pacchetto di crediti viene accreditato subito e non è annullabile.",
       "items": {
         "credits_1000": {
-          "name": "1.000 crediti",
+          "name": "750 crediti",
           "grants": "ricarica una tantum"
         },
         "agents_5": {

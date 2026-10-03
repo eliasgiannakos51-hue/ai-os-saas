@@ -1,0 +1,151 @@
+<title>Οινοθήκη Αμπελών</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:wght@400;500&family=Manrope:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;600&display=swap">
+<style>
+/* Style C, the product turn: the bottle of the month turns through 360°
+   as the page scrolls (and under a finger), its notes on one side and its
+   numbers on stepped cards on the other; then the shelf. A single look:
+   cellar black, one burgundy, gold for the figures. */
+:root{
+  --cellar:#0e0b0b; --cellar-2:#1a1213; --wine:#5a1726; --gold:#d3ad66; --bone:#efe7da; --muted:#b4a796; --line:rgba(239,231,218,.13);
+  --sb-ink:#d3ad66;
+  --display:"Noto Serif Display","Noto Naskh Arabic",Georgia,serif;
+  --body:"Manrope","Noto Naskh Arabic",system-ui,sans-serif;
+  color-scheme:dark;
+}
+body{margin:0;background:var(--cellar);color:var(--bone);font:400 16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:24px}
+header{position:absolute;inset-inline:0;top:0;z-index:5}
+.nav{display:flex;align-items:center;gap:28px;padding-block:22px}
+.logo{font:500 21px/1 var(--display);text-decoration:none;letter-spacing:.03em}
+.nav nav{display:flex;gap:22px;margin-inline-start:auto;font-size:14px;color:var(--muted)}
+.nav nav a{text-decoration:none}
+.btn{display:inline-block;border:1px solid var(--gold);border-radius:999px;padding:11px 20px;background:none;color:var(--gold);font:600 14px/1 var(--body);text-decoration:none;cursor:pointer}
+.btn.solid{background:var(--gold);color:var(--cellar)}
+
+/* ---- the turn ---- */
+.ix-scrub{position:relative;height:300svh}
+.stage{position:sticky;top:0;height:100svh;overflow:hidden;background:radial-gradient(60% 70% at 50% 55%,var(--cellar-2),var(--cellar) 70%)}
+.glow{position:absolute;left:50%;top:55%;width:60vmin;height:60vmin;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,rgba(90,23,38,.55),transparent);filter:blur(10px)}
+.bottle{position:absolute;left:50%;top:52%;height:min(78svh,720px);aspect-ratio:1;transform:translate(-50%,-50%);touch-action:pan-y;cursor:grab}
+.bottle img,.bottle .ix-canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.ix-live img{opacity:0}
+.num{direction:ltr;unicode-bidi:isolate}
+.notes{position:absolute;inset-inline-start:max(24px,calc(50% - 566px));top:26%;max-width:330px}
+.notes p.k{margin:0 0 10px;font-size:12.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+h1{font:400 clamp(36px,4.4vw,60px)/1.04 var(--display);margin:0;text-wrap:balance}
+.notes ul{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:8px;color:var(--muted)}
+.notes li::before{content:"— ";color:var(--wine)}
+.cards{position:absolute;inset-inline-end:max(24px,calc(50% - 566px));bottom:12%;display:grid;gap:12px;width:240px}
+.card{background:rgba(26,18,19,.8);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.card:nth-child(2){transform:translateX(-32px)} .card:nth-child(3){transform:translateX(-64px)}
+[dir="rtl"] .card:nth-child(2){transform:translateX(32px)} [dir="rtl"] .card:nth-child(3){transform:translateX(64px)}
+.card small{display:block;color:var(--muted);font-size:12.5px}
+.card b{font:500 20px/1.3 var(--display);color:var(--gold);font-variant-numeric:tabular-nums}
+.sb-note{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);white-space:nowrap;font-size:11.5px;color:var(--gold);border:1px solid rgba(211,173,102,.4);border-radius:999px;padding:4px 10px;background:rgba(14,11,11,.85)}
+.hint{position:absolute;inset-inline-start:max(24px,calc(50% - 566px));bottom:24px;margin:0;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+
+/* ---- the shelf ---- */
+section.block{padding-block:92px;border-top:1px solid var(--line)}
+h2{font:400 clamp(30px,3.2vw,42px)/1.12 var(--display);margin:0 0 30px}
+.shelf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.wine{border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.wine h3{font:400 22px/1.2 var(--display);margin:0}
+.wine p{margin:0;color:var(--muted);font-size:14px}
+.wine footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:14px;border:0;font-size:inherit;color:inherit}
+.wine b{color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums}
+.wine form output{display:block;font-size:13px;color:var(--gold)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:48px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:8px 24px;margin:0}
+dt{color:var(--muted)} dd{margin:0}
+address{font-style:normal;line-height:1.9}
+.age{margin-top:22px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:14px;color:var(--muted)}
+body>footer{padding-block:36px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+.sample-lang{position:fixed;z-index:20;inset-block-end:14px;inset-inline-end:14px;display:flex;gap:4px;background:rgba(14,11,11,.9);border:1px solid var(--line);border-radius:999px;padding:4px}
+.sample-lang button{border:0;background:none;color:var(--muted);border-radius:999px;padding:4px 10px;font:600 12px var(--body);cursor:pointer}
+.sample-lang button[aria-pressed="true"]{background:var(--bone);color:var(--cellar)}
+@media (max-width:900px){ .shelf{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:760px){
+  .nav nav{display:none}
+  .ix-scrub{height:240svh}
+  .bottle{height:min(56svh,460px);top:50%}
+  .notes{top:11%;inset-inline:24px;max-width:none}
+  .notes ul{display:none}
+  .cards{inset-inline:16px;bottom:8%;width:auto;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .card,.card:nth-child(n),[dir="rtl"] .card:nth-child(n){transform:none;padding:10px}
+  .card b{font-size:16px}
+  .sb-note{bottom:calc(8% + 92px);white-space:normal;width:max-content;max-width:86vw;text-align:center}
+  .hint{display:none}
+  .shelf,.two{grid-template-columns:minmax(0,1fr)}
+  section.block{padding-block:64px}
+}
+.ix-still .ix-scrub{height:auto}
+.ix-still .stage{position:relative;height:max(680px,100svh)}
+.ix-still .ix-canvas{display:none}
+</style>
+
+<header><div class="wrap nav">
+  <a class="logo" href="#top">Οινοθήκη Αμπελών</a>
+  <nav aria-label="Κύρια"><a href="#shelf" data-t="nav1">Κρασιά</a><a href="#delivery" data-t="nav2">Αποστολή</a><a href="#where" data-t="nav3">Το κατάστημα</a></nav>
+  <a class="btn" href="#shelf" data-t="shop">Αγορά</a>
+</div></header>
+
+<main id="top">
+  <section class="ix-scrub" aria-labelledby="h">
+    <div class="stage">
+      <div class="glow" data-ix-depth="0.04" aria-hidden="true"></div>
+      <div class="bottle" data-ix="rotate" data-frames="source:bottle" data-count="72" data-count-mobile="36" data-turns="1">
+        <img src="bottle.png" alt="Φιάλη Ασύρτικο Σαντορίνης 2023, με την ετικέτα μπροστά" data-tp="alt" width="1200" height="1200">
+      </div>
+      <div class="notes">
+        <p class="k" data-t="month">Το κρασί του μήνα</p>
+        <h1 id="h" data-t="h1">Ασύρτικο Σαντορίνης 2023</h1>
+        <ul><li data-t="n1">Ορυκτό, με αλμύρα θάλασσας</li><li data-t="n2">Λεμόνι, πέτρα, λίγο μέλι</li><li data-t="n3">Με ψάρι στη σχάρα ή φάβα</li></ul>
+      </div>
+      <div class="cards">
+        <div class="card"><small data-t="k1">Τιμή · 75 cl</small><b class="num">24,00 €</b></div>
+        <div class="card"><small data-t="k2">Αλκοόλ</small><b class="num">13,5%</b></div>
+        <div class="card"><small data-t="k3">Σερβίρισμα</small><b class="num">10–12 °C</b></div>
+      </div>
+      <p class="sb-note" data-t="sb">Storyboard · εδώ μπαίνουν τα καρέ του AI βίντεο: η φιάλη γυρίζει 360°, 72 καρέ</p>
+      <p class="hint" aria-hidden="true" data-t="hint">Κύλισε ή σύρε</p>
+    </div>
+  </section>
+
+  <section class="block" id="shelf" aria-labelledby="s"><div class="wrap">
+    <h2 id="s" data-t="shelf">Στο ράφι αυτή την εβδομάδα</h2>
+    <div class="shelf">
+      <article class="wine"><h3 data-t="w1">Ασύρτικο Σαντορίνης 2023</h3><p data-t="w1d">Λευκό · 75 cl · 13,5%</p><footer><b class="num">24,00 €</b><button class="btn" type="button" data-t="add">Στο καλάθι</button></footer></article>
+      <article class="wine"><h3 data-t="w2">Ξινόμαυρο Νάουσας 2020</h3><p data-t="w2d">Ερυθρό · 75 cl · 14%</p><footer><b class="num">19,00 €</b><button class="btn" type="button" data-t="add">Στο καλάθι</button></footer></article>
+      <article class="wine"><h3 data-t="w3">Αγιωργίτικο Νεμέας 2021</h3><p data-t="w3d">Ερυθρό · 75 cl · 13%</p><footer><b class="num">16,00 €</b><button class="btn" type="button" data-t="add">Στο καλάθι</button></footer></article>
+      <article class="wine"><h3 data-t="w4">Μαλαγουζιά 2024</h3><p data-t="w4d">Λευκό · 75 cl · 12,5%</p><footer><b class="num">13,00 €</b><button class="btn" type="button" data-t="add">Στο καλάθι</button></footer></article>
+      <article class="wine"><h3 data-t="w5">Βινσάντο 2015</h3><p data-t="w5d">Γλυκό · 50 cl · 14%</p><footer><b class="num">38,00 €</b><button class="btn" type="button" data-t="add">Στο καλάθι</button></footer></article>
+      <article class="wine"><h3 data-t="w6">Τσίπουρο χωρίς γλυκάνισο</h3><p data-t="w6d">Απόσταγμα · 70 cl · 40%</p><footer><b class="num">14,00 €</b><button class="btn" type="button" data-t="add">Στο καλάθι</button></footer></article>
+    </div>
+  </div></section>
+
+  <section class="block" aria-label="Αποστολή και κατάστημα" data-tp="infoLabel"><div class="wrap two">
+    <div id="delivery"><h2 data-t="deliv">Αποστολή</h2>
+      <dl><dt data-t="d1">Αθήνα</dt><dd data-t="d1v">αυθημερόν, για παραγγελίες ως τις 14:00</dd><dt data-t="d2">Υπόλοιπη Ελλάδα</dt><dd data-t="d2v">1–3 εργάσιμες</dd><dt data-t="d3">Δωρεάν από</dt><dd class="num">60,00 €</dd></dl>
+      <p class="age" data-t="age">Δεν πωλούμε αλκοόλ σε άτομα κάτω των 18 ετών. Στην παράδοση ζητάμε ταυτότητα.</p>
+    </div>
+    <div id="where"><h2 data-t="where">Το κατάστημα</h2>
+      <address data-t="addr">Σκουφά 40, 106 73 Αθήνα<br>Δευτέρα–Σάββατο, 10:00–21:00<br><a href="tel:+302100000000">210 000 0000</a> · <a href="https://www.openstreetmap.org/search?query=Skoufa%2040%20Athens">χάρτης</a></address>
+    </div>
+  </div></section>
+</main>
+
+<footer><div class="wrap" data-t="foot">Οινοθήκη Αμπελών · παράδειγμα Ionexa, φανταστική επιχείρηση. Η φιάλη της πρώτης οθόνης φτιάχνεται με AI.</div></footer>
+
+<div class="sample-lang" role="group" aria-label="Γλώσσα"><button type="button" data-lang="el" aria-pressed="true">EL</button><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="ar" aria-pressed="false">AR</button></div>
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LiquorStore","name":"Οινοθήκη Αμπελών","address":{"@type":"PostalAddress","streetAddress":"Σκουφά 40","postalCode":"106 73","addressLocality":"Αθήνα","addressCountry":"GR"},"openingHours":"Mo-Sa 10:00-21:00","makesOffer":[{"@type":"Offer","itemOffered":{"@type":"Product","name":"Ασύρτικο Σαντορίνης 2023"},"price":"24.00","priceCurrency":"EUR"},{"@type":"Offer","itemOffered":{"@type":"Product","name":"Ξινόμαυρο Νάουσας 2020"},"price":"19.00","priceCurrency":"EUR"}]}</script>
+<script type="application/json" id="i18n">{
+"en":{"nav1":"Wines","nav2":"Delivery","nav3":"The shop","shop":"Shop","alt":"A bottle of Santorini Assyrtiko 2023, label to the front","month":"Wine of the month","h1":"Santorini Assyrtiko 2023","n1":"Mineral, with a sea-salt edge","n2":"Lemon, stone, a little honey","n3":"With grilled fish or fava","k1":"Price · 75 cl","k2":"Alcohol","k3":"Serve at","sb":"Storyboard · the AI clip's frames go here: the bottle turning 360°, 72 frames","hint":"Scroll or drag","shelf":"On the shelf this week","w1":"Santorini Assyrtiko 2023","w1d":"White · 75 cl · 13.5%","w2":"Xinomavro Naoussa 2020","w2d":"Red · 75 cl · 14%","w3":"Agiorgitiko Nemea 2021","w3d":"Red · 75 cl · 13%","w4":"Malagousia 2024","w4d":"White · 75 cl · 12.5%","w5":"Vinsanto 2015","w5d":"Sweet · 50 cl · 14%","w6":"Tsipouro, no anise","w6d":"Spirit · 70 cl · 40%","add":"Add to basket","infoLabel":"Delivery and the shop","deliv":"Delivery","d1":"Athens","d1v":"same day, for orders before 14:00","d2":"Rest of Greece","d2v":"1–3 working days","d3":"Free from","age":"We do not sell alcohol to anyone under 18. We ask for ID on delivery.","where":"The shop","addr":"40 Skoufa St, 106 73 Athens<br>Monday–Saturday, 10:00–21:00<br><a href=\"tel:+302100000000\">+30 210 000 0000</a> · <a href=\"https://www.openstreetmap.org/search?query=Skoufa%2040%20Athens\">map</a>","foot":"Ampelon Wine Cellar · an Ionexa sample, a fictional business. The first screen's bottle is made with AI."},
+"ar":{"nav1":"النبيذ","nav2":"التوصيل","nav3":"المتجر","shop":"تسوّق","alt":"زجاجة أسيرتيكو سانتوريني 2023 والملصق إلى الأمام","month":"نبيذ الشهر","h1":"أسيرتيكو سانتوريني 2023","n1":"معدني بلمسة من ملح البحر","n2":"ليمون وحجر وقليل من العسل","n3":"مع السمك المشوي أو الفافا","k1":"السعر · 75 سل","k2":"الكحول","k3":"درجة التقديم","sb":"لوحة قصصية · هنا توضع إطارات مقطع الذكاء الاصطناعي: الزجاجة تدور 360°، 72 إطارًا","hint":"مرّر أو اسحب","shelf":"على الرف هذا الأسبوع","w1":"أسيرتيكو سانتوريني 2023","w1d":"أبيض · 75 سل · 13.5%","w2":"كسينومافرو ناوسا 2020","w2d":"أحمر · 75 سل · 14%","w3":"أغيورغيتيكو نيميا 2021","w3d":"أحمر · 75 سل · 13%","w4":"مالاغوزيا 2024","w4d":"أبيض · 75 سل · 12.5%","w5":"فينسانتو 2015","w5d":"حلو · 50 سل · 14%","w6":"تسيبورو من دون يانسون","w6d":"مشروب مقطّر · 70 سل · 40%","add":"أضف إلى السلة","infoLabel":"التوصيل والمتجر","deliv":"التوصيل","d1":"أثينا","d1v":"في اليوم نفسه للطلبات قبل 14:00","d2":"باقي اليونان","d2v":"1–3 أيام عمل","d3":"مجاني ابتداءً من","age":"لا نبيع الكحول لمن هم دون 18 عامًا، ونطلب بطاقة الهوية عند التسليم.","where":"المتجر","addr":"شارع سكوفا 40، 106 73 أثينا<br>الاثنين–السبت، 10:00–21:00<br><a href=\"tel:+302100000000\">‎+30 210 000 0000</a> · <a href=\"https://www.openstreetmap.org/search?query=Skoufa%2040%20Athens\">الخريطة</a>","foot":"قبو أمبيلون للنبيذ · نموذج من Ionexa لنشاط تجاري خيالي. زجاجة الشاشة الأولى مصنوعة بالذكاء الاصطناعي."}
+}</script>
+<script src="sample.js"></script>
+<script src="ionexa-players.js"></script>

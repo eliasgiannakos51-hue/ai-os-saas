@@ -66,9 +66,11 @@ if (args[0] === "--posters") {
 }
 
 // ------------------------------------------------------------ the real thing
-const KEY = process.env.GEMINI_API_KEY;
+// Either name: the app's failover registry reads GOOGLE_API_KEY, the
+// owner's environment may carry GEMINI_API_KEY. Same key, same provider.
+const KEY = (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "").trim();
 if (!KEY) {
-  console.error("SKIPPED: GEMINI_API_KEY is not set in this environment.\n" +
+  console.error("SKIPPED: neither GEMINI_API_KEY nor GOOGLE_API_KEY is set in this environment.\n" +
     "  It is set in the environment's settings, never pasted into the chat.\n" +
     "  One key covers both the images (Nano Banana Pro) and the clips (Veo 3.1).");
   process.exit(2);

@@ -1,5 +1,14 @@
 # Working rules for this repository
 
+## Every session starts here
+
+Read `docs/CONTEXT.md` (the owner's frame, design system and operating
+mode), then `docs/QUEUE.md`, `docs/PROGRESS.md` and
+`docs/NEEDS-FROM-ELIAS.md`. Check first whether anything blocked has been
+unblocked (a key now present in the environment), run the gates, and
+continue from the first item in progress or pending. Before ending, bring
+those files up to date — in the same commit as the work.
+
 ## Migrations are applied by hand — say so, every time
 
 There is no migration runner, no CI step and no ledger table. Every file in

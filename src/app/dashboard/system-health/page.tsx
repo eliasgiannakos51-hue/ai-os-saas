@@ -16,6 +16,8 @@ import { ErrorList, type ProductionErrorRow } from "@/components/system-health/e
 import { StorageDiagnostics } from "@/components/system-health/storage-diagnostics";
 import { PwaAdoption, type PwaAdoptionRow } from "@/components/system-health/pwa-adoption";
 import { formatNumber } from "@/lib/format-number";
+import { KeyChecks, type KeyInventoryRow } from "@/components/system-health/key-checks";
+import { KEY_INVENTORY, keyVarFor } from "@/lib/ai/providers/key-inventory";
 import { getLocale } from "next-intl/server";
 
 export function generateMetadata(): Promise<Metadata> {
@@ -50,6 +52,19 @@ export default async function SystemHealthPage() {
     level: req.level,
     what: req.what,
     set: (process.env[req.name] ?? "").trim() !== "",
+  }));
+
+  // THE KEY INVENTORY, reduced the same way: names, roles and whether one
+  // of the entry's variables is set. Whether the key WORKS is asked by a
+  // button, through /api/system-health/keys, because it calls providers.
+  const keyRows: KeyInventoryRow[] = KEY_INVENTORY.map((entry) => ({
+    id: entry.id,
+    label: entry.label,
+    envVars: entry.envVars,
+    roles: entry.roles,
+    readBy: entry.readBy,
+    missing: entry.missing,
+    set: keyVarFor(entry, process.env) !== null,
   }));
 
   // THE PAIRS. A per-variable list cannot show a problem that belongs to
@@ -184,6 +199,8 @@ export default async function SystemHealthPage() {
             <ErrorList rows={rows} />
           </>
         )}
+
+        <KeyChecks rows={keyRows} />
 
         <PwaAdoption row={pwa} days={PWA_WINDOW_DAYS} />
 

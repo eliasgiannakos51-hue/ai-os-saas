@@ -3216,7 +3216,11 @@
     "watchFailed": "La progression ne peut pas être affichée pour le moment — le travail continue en arrière-plan.",
     "stop": "Arrêter",
     "stopping": "Arrêt…",
-    "stopped": "Arrêté. Seul le travail déjà fait est facturé."
+    "stopped": "Arrêté. Seul le travail déjà fait est facturé.",
+    "timeline": {
+      "title": "Ce qu'il a fait",
+      "running": "en cours"
+    }
   },
   "problem": {
     "out_of_credits": {

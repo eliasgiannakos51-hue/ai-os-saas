@@ -3216,7 +3216,11 @@
     "watchFailed": "O progresso não pode ser mostrado agora — o trabalho continua em segundo plano.",
     "stop": "Parar",
     "stopping": "A parar…",
-    "stopped": "Parado. Só o trabalho já feito é cobrado."
+    "stopped": "Parado. Só o trabalho já feito é cobrado.",
+    "timeline": {
+      "title": "O que fez",
+      "running": "em andamento"
+    }
   },
   "problem": {
     "out_of_credits": {

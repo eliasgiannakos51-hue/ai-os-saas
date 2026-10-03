@@ -3216,7 +3216,11 @@
     "watchFailed": "Der Fortschritt kann gerade nicht angezeigt werden — die Arbeit läuft im Hintergrund weiter.",
     "stop": "Stopp",
     "stopping": "Wird gestoppt…",
-    "stopped": "Gestoppt. Nur die bereits erledigte Arbeit wird berechnet."
+    "stopped": "Gestoppt. Nur die bereits erledigte Arbeit wird berechnet.",
+    "timeline": {
+      "title": "Was es getan hat",
+      "running": "läuft"
+    }
   },
   "problem": {
     "out_of_credits": {

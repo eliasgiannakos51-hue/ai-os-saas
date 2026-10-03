@@ -3216,7 +3216,11 @@
     "watchFailed": "Progress can't be shown right now — the work continues in the background.",
     "stop": "Stop",
     "stopping": "Stopping…",
-    "stopped": "Stopped. Only the work already done is charged."
+    "stopped": "Stopped. Only the work already done is charged.",
+    "timeline": {
+      "title": "What it did",
+      "running": "in progress"
+    }
   },
   "problem": {
     "out_of_credits": {

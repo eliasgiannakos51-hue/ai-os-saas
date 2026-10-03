@@ -3216,7 +3216,11 @@
     "watchFailed": "El progreso no se puede mostrar ahora mismo; el trabajo continúa en segundo plano.",
     "stop": "Detener",
     "stopping": "Deteniendo…",
-    "stopped": "Detenido. Solo se cobra el trabajo ya hecho."
+    "stopped": "Detenido. Solo se cobra el trabajo ya hecho.",
+    "timeline": {
+      "title": "Qué hizo",
+      "running": "en curso"
+    }
   },
   "problem": {
     "out_of_credits": {

@@ -251,7 +251,7 @@ eq("a running job never shows 100%", jt.jobPercent(4, 4, "running"), 99);
 eq("only a finished one does", jt.jobPercent(0, 4, "done"), 100);
 eq("a nonsense total is 0, not NaN", jt.jobPercent(1, 0, "running"), 0);
 eq("a negative step is clamped", jt.jobPercent(-5, 4, "running"), 0);
-check("the worker writes each step as it passes it", /progress: async \(step, label\)/.test(runJobSrc));
+check("the worker writes each step as it passes it", /progress: async \(step, label(, evidence)?\)/.test(runJobSrc));
 check("the handler reports its own steps", /ctx\.progress\(/.test(readFileSync("src/lib/jobs/handlers/agent-build.ts", "utf8")));
 check("the poll returns a percentage", /percent: jobPercent\(/.test(pollSrc));
 

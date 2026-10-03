@@ -3216,7 +3216,11 @@
     "watchFailed": "目前无法显示进度 — 任务仍在后台继续。",
     "stop": "停止",
     "stopping": "正在停止…",
-    "stopped": "已停止。只按已完成的工作计费。"
+    "stopped": "已停止。只按已完成的工作计费。",
+    "timeline": {
+      "title": "完成了哪些步骤",
+      "running": "进行中"
+    }
   },
   "problem": {
     "out_of_credits": {

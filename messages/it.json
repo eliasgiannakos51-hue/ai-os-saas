@@ -3216,7 +3216,11 @@
     "watchFailed": "Al momento non è possibile mostrare l'avanzamento — il lavoro continua in background.",
     "stop": "Ferma",
     "stopping": "Interruzione…",
-    "stopped": "Fermato. Viene addebitato solo il lavoro già svolto."
+    "stopped": "Fermato. Viene addebitato solo il lavoro già svolto.",
+    "timeline": {
+      "title": "Cosa ha fatto",
+      "running": "in corso"
+    }
   },
   "problem": {
     "out_of_credits": {

@@ -372,6 +372,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "chat memory stops being written at all — the extractor calls this and nothing else",
   },
   {
+    kind: "column",
+    table: "ai_jobs",
+    column: "timeline",
+    migration: "20261004200000_ai_jobs_timeline.sql",
+    breaks: "no job records its steps, so the timeline under a finished agent run stays empty",
+  },
+  {
     kind: "function",
     fn: "chat_memory_fold",
     migration: "20261004100000_chat_memory_fold_matches_app.sql",

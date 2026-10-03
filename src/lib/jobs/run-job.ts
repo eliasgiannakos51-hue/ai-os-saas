@@ -1,4 +1,5 @@
 import "server-only";
+import { appendStep, restoreTimeline } from "@/lib/jobs/job-timeline";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { getSiteUrl } from "@/lib/site-url";
@@ -49,6 +50,8 @@ type JobRow = {
   status: string;
   input: Record<string, unknown> | null;
   usage_entries: unknown;
+  /** Present only once 20261004200000_ai_jobs_timeline.sql has run. */
+  timeline?: unknown;
   reservation_id: string | null;
   attempts: number | null;
 };
@@ -70,7 +73,7 @@ export type JobContext = {
    *  step that just completed. THROWS StoppedByUserError when the owner
    *  has pressed Stop and there is still work after this step — see the
    *  note in runJob; a handler does not catch it. */
-  progress: (step: number, label: string) => Promise<void>;
+  progress: (step: number, label: string, evidence?: string | null) => Promise<void>;
   /** For a handler with its own long loop (an agent run's research
    *  rounds): has the owner pressed Stop? Cheap, one read by key. */
   shouldStop: () => Promise<boolean>;
@@ -249,6 +252,13 @@ export async function runJob(params: { jobId: string; apiKey: string }): Promise
   // already in `costs`, so recording costs.callCount at the end would
   // count the first chunk again on every continuation.
   const callsBeforeThisAttempt = costs.callCount;
+  // THE TIMELINE (lib/jobs/job-timeline.ts), restored across continuations
+  // like usage_entries. Written only when the row HAS the column: the
+  // migration is applied by hand, and an update naming a column that does
+  // not exist fails as a whole — which would take the step label and the
+  // usage snapshot down with it.
+  const recordsTimeline = Object.prototype.hasOwnProperty.call(raw, "timeline");
+  let timeline = restoreTimeline(job.timeline);
   const attempts = (job.attempts ?? 0) + 1;
   await admin.from("ai_jobs").update({ attempts, step_total: stepCount(kind) }).eq("id", jobId);
 
@@ -258,13 +268,27 @@ export async function runJob(params: { jobId: string; apiKey: string }): Promise
     input: (job.input ?? {}) as Record<string, unknown>,
     costs,
     apiKey,
-    progress: async (step, label) => {
+    progress: async (step, label, evidence) => {
+      if (recordsTimeline) {
+        timeline = appendStep(timeline, {
+          at: new Date().toISOString(),
+          step,
+          label,
+          costUsd: costs.totalUsdCost,
+          evidence: evidence ?? null,
+        });
+      }
       // Usage is snapshotted with every step, not only at the end: a kill
       // between two steps must not lose the tokens already spent, or the
       // eventual settlement under-charges for work really done.
       await admin
         .from("ai_jobs")
-        .update({ step, step_label: label, usage_entries: costs.snapshot() })
+        .update({
+          step,
+          step_label: label,
+          usage_entries: costs.snapshot(),
+          ...(recordsTimeline ? { timeline } : {}),
+        })
         .eq("id", jobId);
       // THE STOP BUTTON LANDS HERE — V4.6. A step boundary is the one
       // place a job can stop without wasting what it has: the previous

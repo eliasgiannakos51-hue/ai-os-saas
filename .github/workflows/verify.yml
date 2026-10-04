@@ -185,6 +185,15 @@ jobs:
       # family of suite in scripts/tests/ is run by some job here.
       #
       # After the database step because several of them want its Postgres.
+      # A BROWSER FOR THE ONE INTEGRATION SUITE THAT OPENS ONE.
+      # offline-shell-language.itest.mjs builds the app and loads the
+      # offline page in Chromium. The browser was installed only in the
+      # smoke job, so the first time this step was reached (run of
+      # df83449e, 2026-10-03 — every earlier run stopped before it) it died
+      # on "Executable doesn't exist". Same install as the smoke job.
+      - name: chromium, for the integration suite that needs one
+        run: npx playwright install --with-deps chromium
+
       - name: integration suites
         run: npm run test:integration
 

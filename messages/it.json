@@ -3219,7 +3219,12 @@
     "stopped": "Fermato. Viene addebitato solo il lavoro già svolto.",
     "timeline": {
       "title": "Cosa ha fatto",
-      "running": "in corso"
+      "running": "in corso",
+      "evidence": {
+        "files": "{count, plural, one {# file} other {# file}}",
+        "parts": "{count, plural, one {in # parte} other {in # parti}}",
+        "planSteps": "{count, plural, one {# passaggio} other {# passaggi}}"
+      }
     }
   },
   "problem": {

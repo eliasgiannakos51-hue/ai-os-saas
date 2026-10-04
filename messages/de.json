@@ -3219,7 +3219,12 @@
     "stopped": "Gestoppt. Nur die bereits erledigte Arbeit wird berechnet.",
     "timeline": {
       "title": "Was es getan hat",
-      "running": "läuft"
+      "running": "läuft",
+      "evidence": {
+        "files": "{count, plural, one {# Datei} other {# Dateien}}",
+        "parts": "{count, plural, one {in # Teil} other {in # Teilen}}",
+        "planSteps": "{count, plural, one {# Schritt} other {# Schritte}}"
+      }
     }
   },
   "problem": {

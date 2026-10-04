@@ -3219,7 +3219,12 @@
     "stopped": "已停止。只按已完成的工作计费。",
     "timeline": {
       "title": "完成了哪些步骤",
-      "running": "进行中"
+      "running": "进行中",
+      "evidence": {
+        "files": "{count, plural, other {# 个文件}}",
+        "parts": "{count, plural, other {分 # 部分}}",
+        "planSteps": "{count, plural, other {# 个步骤}}"
+      }
     }
   },
   "problem": {

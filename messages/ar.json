@@ -3219,7 +3219,12 @@
     "stopped": "تم الإيقاف. يُحتسب فقط العمل الذي أُنجز بالفعل.",
     "timeline": {
       "title": "ما الذي فعله",
-      "running": "قيد التنفيذ"
+      "running": "قيد التنفيذ",
+      "evidence": {
+        "files": "{count, plural, zero {لا ملفات} one {ملف واحد} two {ملفان} few {# ملفات} many {# ملفًا} other {# ملف}}",
+        "parts": "{count, plural, zero {بلا أجزاء} one {في جزء واحد} two {في جزأين} few {في # أجزاء} many {في # جزءًا} other {في # جزء}}",
+        "planSteps": "{count, plural, zero {لا خطوات} one {خطوة واحدة} two {خطوتان} few {# خطوات} many {# خطوة} other {# خطوة}}"
+      }
     }
   },
   "problem": {

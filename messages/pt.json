@@ -3219,7 +3219,12 @@
     "stopped": "Parado. Só o trabalho já feito é cobrado.",
     "timeline": {
       "title": "O que fez",
-      "running": "em andamento"
+      "running": "em andamento",
+      "evidence": {
+        "files": "{count, plural, one {# arquivo} other {# arquivos}}",
+        "parts": "{count, plural, one {em # parte} other {em # partes}}",
+        "planSteps": "{count, plural, one {# etapa} other {# etapas}}"
+      }
     }
   },
   "problem": {

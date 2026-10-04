@@ -3219,7 +3219,12 @@
     "stopped": "Διακόπηκε. Χρεώνεται μόνο η δουλειά που έχει ήδη γίνει.",
     "timeline": {
       "title": "Τι έκανε",
-      "running": "σε εξέλιξη"
+      "running": "σε εξέλιξη",
+      "evidence": {
+        "files": "{count, plural, one {# αρχείο} other {# αρχεία}}",
+        "parts": "{count, plural, one {σε # μέρος} other {σε # μέρη}}",
+        "planSteps": "{count, plural, one {# βήμα} other {# βήματα}}"
+      }
     }
   },
   "problem": {

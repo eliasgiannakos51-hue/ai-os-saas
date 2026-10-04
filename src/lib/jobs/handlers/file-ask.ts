@@ -88,8 +88,10 @@ export const fileAskHandler: JobHandler = async (ctx: JobContext): Promise<JobHa
   if (context.passes.length === 0) {
     return { refund: true, result: { answered: false, reason: "no_readable_files" } };
   }
+  // What the reading step found, for the job's timeline (job-timeline.ts).
+  await ctx.evidence({ key: "files", count: files.length });
 
-  await ctx.progress(2, steps[1]);
+  await ctx.progress(2, steps[1], { key: "parts", count: context.passes.length });
 
   const anthropic = new Anthropic({ apiKey: ctx.apiKey });
   const filenames = files.map((f) => f.filename);

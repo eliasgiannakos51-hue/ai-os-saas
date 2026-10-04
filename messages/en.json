@@ -3219,7 +3219,12 @@
     "stopped": "Stopped. Only the work already done is charged.",
     "timeline": {
       "title": "What it did",
-      "running": "in progress"
+      "running": "in progress",
+      "evidence": {
+        "files": "{count, plural, one {# file} other {# files}}",
+        "parts": "{count, plural, one {in # part} other {in # parts}}",
+        "planSteps": "{count, plural, one {# step} other {# steps}}"
+      }
     }
   },
   "problem": {

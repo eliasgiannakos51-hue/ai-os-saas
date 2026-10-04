@@ -3219,7 +3219,12 @@
     "stopped": "停止しました。すでに完了した作業分のみ課金されます。",
     "timeline": {
       "title": "実行した内容",
-      "running": "実行中"
+      "running": "実行中",
+      "evidence": {
+        "files": "{count, plural, other {#件のファイル}}",
+        "parts": "{count, plural, other {#回に分けて}}",
+        "planSteps": "{count, plural, other {#ステップ}}"
+      }
     }
   },
   "problem": {

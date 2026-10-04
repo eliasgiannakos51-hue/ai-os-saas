@@ -26,7 +26,7 @@ function check(name, cond, detail) {
   }
 }
 
-const { splitCredits, timelineForClient, appendStep, restoreTimeline, MAX_TIMELINE_ENTRIES } = await loadTs(
+const { splitCredits, timelineForClient, appendStep, attachEvidence, restoreTimeline, MAX_TIMELINE_ENTRIES, EVIDENCE_KEYS } = await loadTs(
   "src/lib/jobs/job-timeline.ts"
 );
 const sum = (a) => a.reduce((x, y) => x + y, 0);
@@ -52,7 +52,7 @@ const t0 = Date.parse("2026-10-03T10:00:00Z");
 const at = (s) => new Date(t0 + s * 1000).toISOString();
 const entries = [
   { at: at(0), step: 1, label: "preparing", costUsd: 0, evidence: null },
-  { at: at(4), step: 2, label: "working", costUsd: 0.01, evidence: "6 sources" },
+  { at: at(4), step: 2, label: "working", costUsd: 0.01, evidence: { key: "files", count: 6 } },
   { at: at(30), step: 3, label: "delivering", costUsd: 0.09, evidence: null },
 ];
 // A charge on the row does not make a running job's steps priced: the
@@ -64,7 +64,7 @@ const done = timelineForClient(entries, { status: "done", creditsCharged: 13, fi
 check(`when done, the steps add up to the charge (${done.map((s) => s.credits).join("+")} = 13)`, sum(done.map((s) => s.credits)) === 13);
 check("…weighted by what each step cost", done[1].credits > done[2].credits && done[2].credits >= done[0].credits);
 check("the last step ends when the job finished", done[2].seconds === 11);
-check("evidence is carried", done[1].evidence === "6 sources");
+check("evidence is carried as a key and a number", done[1].evidence?.key === "files" && done[1].evidence?.count === 6);
 const json = JSON.stringify(done);
 check("no provider cost reaches the client", !/costUsd|usd/i.test(json), json.slice(0, 200));
 const unweighable = timelineForClient(
@@ -85,6 +85,37 @@ check(
   restoreTimeline([null, 3, { at: "nope", step: 1, costUsd: 0 }, { at: at(1), step: 2, costUsd: 0.1 }]).length === 1 &&
     restoreTimeline("garbage").length === 0
 );
+
+console.log("\n== 3b. what a step found is a key and a number, never a sentence ==");
+check("an unknown key is dropped", restoreTimeline([{ at: at(1), step: 1, costUsd: 0, evidence: { key: "rumours", count: 3 } }])[0].evidence === null);
+check("a sentence is dropped", restoreTimeline([{ at: at(1), step: 1, costUsd: 0, evidence: "6 sources" }])[0].evidence === null);
+check("a negative count is dropped", restoreTimeline([{ at: at(1), step: 1, costUsd: 0, evidence: { key: "files", count: -1 } }])[0].evidence === null);
+{
+  const one = appendStep([], { at: at(0), step: 1, label: "a", costUsd: 0, evidence: null });
+  const two = appendStep(one, { at: at(5), step: 2, label: "b", costUsd: 0.1, evidence: null });
+  const noted = attachEvidence(two, { key: "planSteps", count: 5 });
+  check("evidence attaches to the CURRENT step only", noted[1].evidence?.count === 5 && noted[0].evidence === null);
+  check("…and nothing attaches before the first step", attachEvidence([], { key: "files", count: 1 }).length === 0);
+}
+const panelSrc = stripComments(readFileSync("src/components/ui/ai-job-timeline.tsx", "utf8"));
+const panelKeys = [...(panelSrc.match(/EVIDENCE_MESSAGE = \{([\s\S]*?)\}/)?.[1] ?? "").matchAll(/(\w+):/g)].map((m) => m[1]);
+check(
+  `every evidence key has a message on the screen, and no other (${EVIDENCE_KEYS.length})`,
+  panelKeys.length === EVIDENCE_KEYS.length && EVIDENCE_KEYS.every((k) => panelKeys.includes(k)),
+  panelKeys.join(", ")
+);
+for (const locale of ["en", "el", "ar", "ja"]) {
+  const m = JSON.parse(readFileSync(`messages/${locale}.json`, "utf8"));
+  check(`${locale}: every evidence key has words`, EVIDENCE_KEYS.every((k) => typeof m.aiSteps?.timeline?.evidence?.[k] === "string"));
+}
+const plan = stripComments(readFileSync("src/lib/jobs/handlers/mission-plan.ts", "utf8"));
+check(
+  "the planner attaches its count with evidence(), which never checks Stop, after the paid work",
+  /ctx\.evidence\(\{ key: "planSteps"/.test(plan) && !/ctx\.progress\(2, steps\[1\], \{/.test(plan)
+);
+const runnerSrc = stripComments(readFileSync("src/lib/jobs/run-job.ts", "utf8"));
+const evidenceFn = runnerSrc.slice(runnerSrc.indexOf("evidence: async (evidence)"), runnerSrc.indexOf("evidence: async (evidence)") + 400);
+check("evidence() writes the timeline and does not check Stop", /attachEvidence/.test(evidenceFn) && !/isStopRequested|StoppedByUserError/.test(evidenceFn));
 
 console.log("\n== 4. the worker, the poll and the screen ==");
 const runner = stripComments(readFileSync("src/lib/jobs/run-job.ts", "utf8"));

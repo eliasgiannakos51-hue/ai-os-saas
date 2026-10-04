@@ -1,5 +1,5 @@
 import "server-only";
-import { appendStep, restoreTimeline } from "@/lib/jobs/job-timeline";
+import { appendStep, attachEvidence, restoreTimeline, type Evidence } from "@/lib/jobs/job-timeline";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { getSiteUrl } from "@/lib/site-url";
@@ -73,10 +73,15 @@ export type JobContext = {
    *  step that just completed. THROWS StoppedByUserError when the owner
    *  has pressed Stop and there is still work after this step — see the
    *  note in runJob; a handler does not catch it. */
-  progress: (step: number, label: string, evidence?: string | null) => Promise<void>;
+  progress: (step: number, label: string, evidence?: Evidence | null) => Promise<void>;
   /** For a handler with its own long loop (an agent run's research
    *  rounds): has the owner pressed Stop? Cheap, one read by key. */
   shouldStop: () => Promise<boolean>;
+  /** What the current step found, for the timeline. Writes the timeline
+   *  only — no step change, and NO stop check: a handler calls it after
+   *  paid work, and a stop there would throw away a result already paid
+   *  for. A no-op on a database without the timeline column. */
+  evidence: (evidence: Evidence) => Promise<void>;
 };
 
 export type JobHandlerResult = {
@@ -302,6 +307,11 @@ export async function runJob(params: { jobId: string; apiKey: string }): Promise
       }
     },
     shouldStop: () => isStopRequested(admin, "ai_jobs", jobId),
+    evidence: async (evidence) => {
+      if (!recordsTimeline) return;
+      timeline = attachEvidence(timeline, evidence);
+      await admin.from("ai_jobs").update({ timeline }).eq("id", jobId);
+    },
   };
 
   try {

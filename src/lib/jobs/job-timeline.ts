@@ -24,6 +24,24 @@
  * remainder, and while the job runs no step shows credits at all.
  */
 
+/**
+ * WHAT A STEP FOUND, as a key and a number — never as a sentence. A
+ * sentence written by the worker would be in one language; the key is
+ * rendered through messages (aiSteps.timeline.evidence.<key>) in the
+ * reader's, with the plural rules of that language.
+ */
+export const EVIDENCE_KEYS = ["files", "parts", "planSteps"] as const;
+export type EvidenceKey = (typeof EVIDENCE_KEYS)[number];
+export type Evidence = { key: EvidenceKey; count: number };
+
+function cleanEvidence(value: unknown): Evidence | null {
+  if (!value || typeof value !== "object") return null;
+  const v = value as Record<string, unknown>;
+  if (typeof v.key !== "string" || !(EVIDENCE_KEYS as readonly string[]).includes(v.key)) return null;
+  if (typeof v.count !== "number" || !Number.isFinite(v.count) || v.count < 0) return null;
+  return { key: v.key as EvidenceKey, count: Math.floor(v.count) };
+}
+
 export type TimelineEntry = {
   /** When the step began (ISO). */
   at: string;
@@ -32,8 +50,8 @@ export type TimelineEntry = {
   label: string | null;
   /** Provider cost of the whole job so far, in USD, when the step began. */
   costUsd: number;
-  /** Optional, from the handler: what this step found ("6 sources"). */
-  evidence: string | null;
+  /** Optional, from the handler: what this step found. */
+  evidence: Evidence | null;
 };
 
 export type ClientStep = {
@@ -44,12 +62,11 @@ export type ClientStep = {
   seconds: number | null;
   /** Null until the job has a charge to split. */
   credits: number | null;
-  evidence: string | null;
+  evidence: Evidence | null;
 };
 
 /** A runaway loop must not grow a row without bound. */
 export const MAX_TIMELINE_ENTRIES = 60;
-const MAX_EVIDENCE_CHARS = 160;
 
 function isEntry(value: unknown): value is TimelineEntry {
   if (!value || typeof value !== "object") return false;
@@ -72,20 +89,21 @@ export function restoreTimeline(raw: unknown): TimelineEntry[] {
     step: e.step,
     label: typeof e.label === "string" ? e.label : null,
     costUsd: Math.max(0, e.costUsd),
-    evidence: typeof e.evidence === "string" ? e.evidence.slice(0, MAX_EVIDENCE_CHARS) : null,
+    evidence: cleanEvidence(e.evidence),
   }));
 }
 
 /**
- * One more step. A repeated report of the SAME step (a handler that
- * refreshes its label mid-step) updates the label and evidence in place
- * and keeps the original start time — the step did not start twice.
+ * One more step. A repeated report of the SAME step updates the label and
+ * evidence in place and keeps the original start time — the step did not
+ * start twice. That is how a handler attaches what a step FOUND: it
+ * reports the step again, after the work, with the count.
  */
 export function appendStep(timeline: TimelineEntry[], entry: TimelineEntry): TimelineEntry[] {
   const clean: TimelineEntry = {
     ...entry,
     costUsd: Math.max(0, Number.isFinite(entry.costUsd) ? entry.costUsd : 0),
-    evidence: entry.evidence ? entry.evidence.slice(0, MAX_EVIDENCE_CHARS) : null,
+    evidence: cleanEvidence(entry.evidence),
   };
   const last = timeline[timeline.length - 1];
   if (last && last.step === clean.step) {
@@ -93,6 +111,16 @@ export function appendStep(timeline: TimelineEntry[], entry: TimelineEntry): Tim
   }
   const next = [...timeline, clean];
   return next.length > MAX_TIMELINE_ENTRIES ? next.slice(next.length - MAX_TIMELINE_ENTRIES) : next;
+}
+
+/**
+ * What the CURRENT step found. Attached to the last entry and nothing else:
+ * there is no step to attach it to before the first one has begun.
+ */
+export function attachEvidence(timeline: TimelineEntry[], evidence: Evidence): TimelineEntry[] {
+  const clean = cleanEvidence(evidence);
+  if (!clean || timeline.length === 0) return timeline;
+  return [...timeline.slice(0, -1), { ...timeline[timeline.length - 1], evidence: clean }];
 }
 
 /** Split `total` whole credits by `weights`, largest remainder first. */

@@ -4,6 +4,15 @@ import { useFormatter, useTranslations } from "next-intl";
 import { stepLabelKey } from "@/lib/jobs/step-labels";
 import type { AiJob } from "@/lib/jobs/use-ai-job";
 
+// What a step found, by key — the worker stores a key and a number, never
+// a sentence (lib/jobs/job-timeline.ts EVIDENCE_KEYS). Named rather than
+// built from the key, so every message this can render is a literal.
+const EVIDENCE_MESSAGE = {
+  files: "timeline.evidence.files",
+  parts: "timeline.evidence.parts",
+  planSteps: "timeline.evidence.planSteps",
+} as const;
+
 /**
  * WHAT A JOB DID, STEP BY STEP — V6.2 2.1 (lib/jobs/job-timeline.ts).
  *
@@ -35,7 +44,9 @@ export function AiJobTimeline({ job, className = "" }: { job: AiJob | null; clas
           return (
             <li key={`${s.step}-${s.startedAt}`} className="flex flex-wrap items-baseline gap-x-2" data-testid="ai-job-timeline-step">
               <span className="text-foreground">{key ? tSteps(key.slice("aiSteps.".length) as never) : s.label}</span>
-              {s.evidence && <span>{s.evidence}</span>}
+              {s.evidence && EVIDENCE_MESSAGE[s.evidence.key] && (
+                <span>{tSteps(EVIDENCE_MESSAGE[s.evidence.key], { count: s.evidence.count })}</span>
+              )}
               <span className="tabular-nums">
                 {s.seconds === null
                   ? tSteps("timeline.running")

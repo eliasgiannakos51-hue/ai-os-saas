@@ -17,7 +17,8 @@ const GATE = "scripts/tests/job-timeline.test.mjs";
 const LIB = "src/lib/jobs/job-timeline.ts";
 const RUNNER = "src/lib/jobs/run-job.ts";
 const ROUTE = "src/app/api/jobs/[id]/route.ts";
-const TARGETS = [GATE, LIB, RUNNER, ROUTE];
+const PLAN = "src/lib/jobs/handlers/mission-plan.ts";
+const TARGETS = [GATE, LIB, RUNNER, ROUTE, PLAN];
 
 const MUTANTS = [
   {
@@ -47,6 +48,27 @@ const MUTANTS = [
     from: "  const weighable = weights.some((w) => w > 0) || job.creditsCharged === 0;",
     to: "  const weighable = true;",
     expect: "shows no credits rather than wrong ones",
+  },
+  {
+    name: "evidence() checks the Stop button, so a paid plan can be thrown away",
+    file: RUNNER,
+    from: "      timeline = attachEvidence(timeline, evidence);",
+    to: "      if (await isStopRequested(admin, \"ai_jobs\", jobId)) throw new StoppedByUserError();\n      timeline = attachEvidence(timeline, evidence);",
+    expect: "evidence() writes the timeline and does not check Stop",
+  },
+  {
+    name: "any key is accepted as evidence",
+    file: LIB,
+    from: "  if (typeof v.key !== \"string\" || !(EVIDENCE_KEYS as readonly string[]).includes(v.key)) return null;",
+    to: "  if (typeof v.key !== \"string\") return null;",
+    expect: "an unknown key is dropped",
+  },
+  {
+    name: "the planner reports its count through progress(), which checks Stop",
+    file: PLAN,
+    from: "  await ctx.evidence({ key: \"planSteps\", count: planResult.steps.length });",
+    to: "  await ctx.progress(2, steps[1], { key: \"planSteps\", count: planResult.steps.length });",
+    expect: "the planner attaches its count with evidence()",
   },
   {
     name: "the worker writes the column whether or not it exists",

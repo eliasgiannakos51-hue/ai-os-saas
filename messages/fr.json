@@ -3219,7 +3219,12 @@
     "stopped": "Arrêté. Seul le travail déjà fait est facturé.",
     "timeline": {
       "title": "Ce qu'il a fait",
-      "running": "en cours"
+      "running": "en cours",
+      "evidence": {
+        "files": "{count, plural, one {# fichier} other {# fichiers}}",
+        "parts": "{count, plural, one {en # partie} other {en # parties}}",
+        "planSteps": "{count, plural, one {# étape} other {# étapes}}"
+      }
     }
   },
   "problem": {

@@ -106,7 +106,7 @@ export function AiJobProgress({
           aria-label={t("aiSteps.stop")}
           title={t("aiSteps.stop")}
           data-testid="ai-job-stop"
-          className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-border px-2.5 text-[11px] font-medium text-muted transition-colors duration-150 hover:border-foreground/50 hover:text-foreground disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-border px-2.5 text-[11px] font-medium text-muted transition-colors duration-150 hover:border-foreground/50 hover:text-foreground disabled:opacity-50"
         >
           <Square className="h-2.5 w-2.5 fill-current" aria-hidden="true" />
           {stopping === job.id ? t("aiSteps.stopping") : t("aiSteps.stop")}

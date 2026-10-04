@@ -1357,7 +1357,9 @@
         "why": "Escreve-se sozinho. Tudo o que regista em qualquer módulo chega aqui num único fluxo, que é como se responde a «o que fiz eu no mês passado»."
       },
       "tabAll": "Tudo",
-      "tabStarred": "Favoritos"
+      "tabStarred": "Favoritos",
+      "filterSection": "Secção",
+      "filterPeriod": "Período"
     },
     "favorites": {
       "title": "Favoritos",

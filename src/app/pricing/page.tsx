@@ -134,7 +134,7 @@ export default async function PricingPage({
         <div className="text-center">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 transition-colors duration-150 hover:text-foreground"
+            className="inline-flex min-h-[44px] items-center gap-2 transition-colors duration-150 hover:text-foreground"
           >
             <Logo iconOnly px={24} />
             <span className="text-base font-bold tracking-tight text-foreground">
@@ -406,7 +406,10 @@ export default async function PricingPage({
                       `contain: paint` both fix it and `width: 100%`,
                       `min-width: 0`, `overflow: clip` on the details and
                       four other guesses do not. */}
-                  <div className="relative overflow-x-auto">
+                  {/* FOCUSABLE, because it scrolls: a keyboard has to be
+                      able to reach a table that is wider than a phone
+                      (axe scrollable-region-focusable, site audit D.11). */}
+                  <div className="relative overflow-x-auto" tabIndex={0} role="region" aria-label={t(`groups.${group}`)}>
                     {/* FIXED LAYOUT, so the seven sections line up.
                         Each <table> sizes its own columns from its own
                         content by default, and the seven of them

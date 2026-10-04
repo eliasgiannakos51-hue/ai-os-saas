@@ -242,7 +242,7 @@ export function TemplateBrowser({
                     value={subject}
                     onChange={(event) => setSubject(event.target.value)}
                     placeholder={t("subjectPlaceholder")}
-                    className="mt-2 min-h-[44px] w-full rounded-item border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-accent focus:outline-none"
+                    className="mt-2 min-h-[44px] w-full rounded-item border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-foreground/60 focus:outline-none"
                   />
                   {/* BEFORE the button, deliberately: a price under the
                       control it applies to is a price somebody reads. */}
@@ -252,7 +252,7 @@ export function TemplateBrowser({
                       type="button"
                       onClick={() => adopt(tpl.slug)}
                       disabled={adopting}
-                      className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground disabled:opacity-60"
+                      className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-button px-4 py-2 text-sm font-semibold text-button-ink disabled:opacity-60"
                     >
                       {adopting ? (
                         <Loader2
@@ -281,7 +281,7 @@ export function TemplateBrowser({
                     setOpenSlug(tpl.slug);
                     setSubject("");
                   }}
-                  className="mt-3 inline-flex min-h-[44px] items-center rounded-item border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition-colors duration-150 hover:border-accent"
+                  className="mt-3 inline-flex min-h-[44px] items-center rounded-item border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition-colors duration-150 hover:border-foreground/60"
                 >
                   {t("useThis")}
                 </button>

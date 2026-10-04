@@ -292,7 +292,7 @@ export function DeliveryPicker({
                   data-testid="delivery-test-telegram"
                   onClick={() => void test("telegram")}
                   disabled={testing === "telegram" || connecting === "telegram"}
-                  className="inline-flex min-h-[36px] items-center gap-1.5 rounded-item border border-foreground/40 px-3 py-1 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/40 px-3 py-1 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:opacity-50"
                 >
                   {testing === "telegram" ? (
                     <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
@@ -305,7 +305,7 @@ export function DeliveryPicker({
                   type="button"
                   onClick={() => void disconnect("telegram")}
                   disabled={connecting === "telegram"}
-                  className="inline-flex min-h-[36px] items-center rounded-item border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center rounded-item border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
                 >
                   {t("disconnect")}
                 </button>
@@ -369,7 +369,7 @@ export function DeliveryPicker({
                   data-testid="delivery-test-discord"
                   onClick={() => void test("discord")}
                   disabled={testing === "discord" || connecting === "discord"}
-                  className="inline-flex min-h-[36px] items-center gap-1.5 rounded-item border border-foreground/40 px-3 py-1 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/40 px-3 py-1 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:opacity-50"
                 >
                   {testing === "discord" ? (
                     <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
@@ -382,7 +382,7 @@ export function DeliveryPicker({
                   type="button"
                   onClick={() => void disconnect("discord")}
                   disabled={connecting === "discord"}
-                  className="inline-flex min-h-[36px] items-center rounded-item border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center rounded-item border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
                 >
                   {t("disconnect")}
                 </button>

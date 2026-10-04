@@ -1357,7 +1357,9 @@
         "why": "Si scrive da sé. Tutto ciò che registri in qualunque modulo finisce qui in un unico flusso: è così che si risponde a «cosa ho fatto davvero il mese scorso»."
       },
       "tabAll": "Tutto",
-      "tabStarred": "Preferiti"
+      "tabStarred": "Preferiti",
+      "filterSection": "Sezione",
+      "filterPeriod": "Periodo"
     },
     "favorites": {
       "title": "Preferiti",

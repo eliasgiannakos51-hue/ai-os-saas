@@ -297,7 +297,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
                       type="button"
                       onClick={() => toggleType(type)}
                       disabled={busy}
-                      className="text-start disabled:opacity-50"
+                      className="min-h-[44px] text-start disabled:opacity-50"
                     >
                       <span className={`block text-sm ${enabled ? "text-foreground" : "text-muted line-through"}`}>
                         {t(`types.${type}.label`)}
@@ -315,14 +315,19 @@ export function NotificationSettings({ userId }: { userId: string }) {
                     const checked = active.includes(channel);
                     return (
                       <td key={channel} className="py-3 text-center">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          disabled={busy || locked || !usable || !enabled}
-                          onChange={() => toggleChannel(type, channel)}
-                          aria-label={`${t(`types.${type}.label`)} — ${t(`channels.${channel}`)}`}
-                          className="h-5 w-5 accent-foreground disabled:opacity-40"
-                        />
+                        {/* The 20px box is pressed through a 44px label
+                            (site audit, D.11: 28 boxes under 44px on a
+                            phone, the most on any screen). */}
+                        <label className="inline-flex h-11 w-11 cursor-pointer items-center justify-center">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            disabled={busy || locked || !usable || !enabled}
+                            onChange={() => toggleChannel(type, channel)}
+                            aria-label={`${t(`types.${type}.label`)} — ${t(`channels.${channel}`)}`}
+                            className="h-5 w-5 accent-foreground disabled:opacity-40"
+                          />
+                        </label>
                       </td>
                     );
                   })}
@@ -341,7 +346,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
           <Moon className="h-4 w-4 text-foreground" /> {t("quiet.title")}
         </h3>
         <p className="text-xs text-muted">{t("quiet.description")}</p>
-        <label className="flex items-center gap-2 text-sm text-foreground">
+        <label className="flex min-h-[44px] items-center gap-2 text-sm text-foreground">
           <input
             type="checkbox"
             checked={quietOn}
@@ -364,7 +369,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
                 disabled={busy}
                 onChange={(e) => setQuietFrom(e.target.value)}
                 onBlur={() => void saveQuietHours({ on: true, from: quietFrom, to: quietTo, offsetMinutes: offset })}
-                className="rounded-item border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+                className="min-h-[44px] rounded-item border border-border bg-panel-hover px-3 text-sm text-foreground"
               />
             </label>
             <label className="text-xs text-muted">
@@ -375,7 +380,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
                 disabled={busy}
                 onChange={(e) => setQuietTo(e.target.value)}
                 onBlur={() => void saveQuietHours({ on: true, from: quietFrom, to: quietTo, offsetMinutes: offset })}
-                className="rounded-item border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+                className="min-h-[44px] rounded-item border border-border bg-panel-hover px-3 text-sm text-foreground"
               />
             </label>
             <p className="text-xs text-muted">
@@ -409,7 +414,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
                     type="button"
                     onClick={() => void disconnectChat(kind)}
                     disabled={connecting !== null}
-                    className="rounded-item border border-border px-3 py-1.5 text-xs text-foreground disabled:opacity-50"
+                    className="min-h-[44px] rounded-item border border-border px-3 text-xs text-foreground disabled:opacity-50"
                   >
                     {t("chat.disconnect")}
                   </button>
@@ -428,13 +433,13 @@ export function NotificationSettings({ userId }: { userId: string }) {
                       onChange={(e) => setConnectTarget((prev) => ({ ...prev, [kind]: e.target.value }))}
                       placeholder={t(`chat.${kind}.placeholder`)}
                       aria-label={t(`channels.${kind}`)}
-                      className="min-w-0 flex-1 rounded-item border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+                      className="min-h-[44px] min-w-0 flex-1 rounded-item border border-border bg-panel-hover px-3 text-sm text-foreground"
                     />
                     <button
                       type="button"
                       onClick={() => void connectChat(kind)}
                       disabled={connecting !== null || !(connectTarget[kind] ?? "").trim()}
-                      className="hover:bg-foreground/10 rounded-item border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground disabled:opacity-50"
+                      className="min-h-[44px] rounded-item border border-foreground/60 px-4 text-xs font-semibold text-foreground hover:bg-foreground/10 disabled:opacity-50"
                     >
                       {connecting === kind ? t("chat.connecting") : t("chat.connect")}
                     </button>

@@ -176,7 +176,7 @@ export function DocumentEditor({
             onChange={handleTitleChange}
             placeholder={t("titlePlaceholder")}
             aria-label={t("titlePlaceholder")}
-            className="w-full bg-transparent text-2xl font-bold text-foreground outline-none placeholder:text-muted/50"
+            className="w-full bg-transparent text-2xl font-bold text-foreground outline-none placeholder:text-muted"
           />
           <FavoriteButton
             table="user_documents"

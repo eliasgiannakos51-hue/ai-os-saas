@@ -1357,7 +1357,9 @@
         "why": "Das schreibt sich von selbst. Alles, was du in irgendeinem Modul erfasst, landet hier in einem Strom — so beantwortest du \"was habe ich letzten Monat eigentlich getan\"."
       },
       "tabAll": "Alles",
-      "tabStarred": "Favoriten"
+      "tabStarred": "Favoriten",
+      "filterSection": "Bereich",
+      "filterPeriod": "Zeitraum"
     },
     "favorites": {
       "title": "Favoriten",

@@ -152,7 +152,7 @@ export function HomeStatCard({
           when somebody is reading rather than pointing. */}
       <p className="relative z-[1] mt-2 text-[11px] leading-snug text-muted">{explain}</p>
       {basis && (
-        <p className="relative z-[1] mt-0.5 text-[10px] leading-none text-muted/70">{basis}</p>
+        <p className="relative z-[1] mt-0.5 text-[10px] leading-none text-muted">{basis}</p>
       )}
       {href && (
         <span className="relative z-[1] mt-1.5 block text-[10px] font-medium text-muted transition-colors duration-150 group-hover:text-foreground">

@@ -243,7 +243,7 @@ export function CodingWorkspace({
         </p>
 
         <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-          <label className="flex items-center gap-2 text-xs text-muted">
+          <label className="flex min-h-[44px] items-center gap-2 text-xs text-muted">
             <input
               type="checkbox"
               checked={useWorkspace}

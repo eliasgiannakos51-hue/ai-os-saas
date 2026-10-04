@@ -22,7 +22,7 @@ export function ProgressCard({
         {stats.map((stat) => (
           <div key={stat.label} className="min-w-0">
             <p className="break-words text-xl font-bold text-foreground">{stat.value}</p>
-            <p className="break-words text-[11px] text-muted/80">{stat.label}</p>
+            <p className="break-words text-[11px] text-muted">{stat.label}</p>
           </div>
         ))}
       </div>

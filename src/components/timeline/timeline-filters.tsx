@@ -44,6 +44,7 @@ export function TimelineFilters({
       <select
         value={moduleSlug}
         onChange={(e) => navigate(e.target.value, range)}
+        aria-label={t("filterSection")}
         className="input w-auto min-w-0 max-w-full"
       >
         <option value="all">{t("showOnly", { module: t("allModules") })}</option>
@@ -56,6 +57,7 @@ export function TimelineFilters({
       <select
         value={range}
         onChange={(e) => navigate(moduleSlug, e.target.value as TimelineRange)}
+        aria-label={t("filterPeriod")}
         className="input w-auto min-w-0 max-w-full"
       >
         {RANGE_ORDER.map((value) => (

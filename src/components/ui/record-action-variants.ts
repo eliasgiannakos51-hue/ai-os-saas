@@ -25,7 +25,7 @@ export function recordActionClasses(
   }
 
   if (variant === "action") {
-    return `inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-item border border-border px-3 py-2 text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 ${
+    return `inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-item border border-border px-3 py-2 text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 ${
       destructive
         ? "text-danger hover:border-danger/60 hover:bg-danger/10"
         : "text-foreground hover:border-foreground/40 hover:text-foreground"

@@ -135,7 +135,7 @@ export default async function ProductWorkflowPage() {
           </div>
           <Link
             href="/dashboard/timeline?module=products"
-            className="mt-2 inline-block text-xs text-foreground transition-colors duration-150 hover:underline"
+            className="mt-2 inline-flex min-h-[44px] items-center text-xs text-foreground transition-colors duration-150 hover:underline"
           >
             {t("viewFullTimeline")}
           </Link>

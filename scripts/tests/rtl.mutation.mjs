@@ -207,8 +207,8 @@ const MUTANTS = [
     // to be tight enough that re-introducing physical utilities trips it.
     name: "physical reading-order utilities come back in a component",
     file: SIDEBAR,
-    from: 'className="flex items-center rounded-item px-1 py-1"',
-    to: 'className="flex items-center rounded-item px-1 py-1 text-left ml-2 pl-4 pr-4 border-l"',
+    from: 'className="flex min-h-[44px] items-center rounded-item px-1"',
+    to: 'className="flex min-h-[44px] items-center rounded-item px-1 text-left ml-2 pl-4 pr-4 border-l"',
     expect: "physical reading-order utilities remain",
   },
 ];

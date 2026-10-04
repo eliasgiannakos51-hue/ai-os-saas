@@ -82,7 +82,7 @@ export function ClarificationQuestions({
                         onClick={() => setAnswer(index, chosen ? "" : option)}
                         aria-pressed={chosen}
                         disabled={submitting}
-                        className={`inline-flex min-h-[36px] items-center rounded-full border px-3 py-1 text-xs transition-colors duration-150 disabled:opacity-50 ${
+                        className={`inline-flex min-h-[44px] items-center rounded-full border px-3 py-1 text-xs transition-colors duration-150 disabled:opacity-50 ${
                           chosen
                             ? "border-foreground/40 bg-foreground/15 font-medium text-foreground"
                             : "border-border text-muted hover:border-foreground/50 hover:text-foreground"

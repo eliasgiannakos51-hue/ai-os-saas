@@ -58,7 +58,7 @@ export function ExamplePrompts({
           </button>
         ))}
       </div>
-      <p data-testid="ai-limits" className="text-[11px] leading-relaxed text-muted/80">
+      <p data-testid="ai-limits" className="text-[11px] leading-relaxed text-muted">
         {t("limits")}
       </p>
     </div>

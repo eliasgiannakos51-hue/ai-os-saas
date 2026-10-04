@@ -1357,7 +1357,9 @@
         "why": "This writes itself. Everything you log in any module lands here in one stream, which is how you answer \"what did I actually do last month\"."
       },
       "tabAll": "Everything",
-      "tabStarred": "Starred"
+      "tabStarred": "Starred",
+      "filterSection": "Section",
+      "filterPeriod": "Period"
     },
     "favorites": {
       "title": "Favorites",

@@ -144,7 +144,7 @@ export function AffiliateDashboard({
           <button
             type="button"
             onClick={() => void copyLink()}
-            className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-item border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/50 sm:min-h-0"
+            className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-item border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/50 sm:min-h-0"
           >
             {copied ? (
               <Check className="h-3.5 w-3.5 text-success" aria-hidden="true" />
@@ -194,7 +194,7 @@ export function AffiliateDashboard({
               type="button"
               onClick={() => void setUpPayouts()}
               disabled={busy || status === "suspended"}
-              className="inline-flex min-h-[40px] items-center justify-center rounded-item bg-button px-4 py-2 text-xs font-semibold text-button-ink transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-0"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-item bg-button px-4 py-2 text-xs font-semibold text-button-ink transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-0"
             >
               {busy ? t("opening") : hasConnectAccount ? t("finishSetup") : t("setUpPayouts")}
             </button>

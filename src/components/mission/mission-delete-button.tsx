@@ -42,7 +42,7 @@ export function MissionDeleteButton({
         data-testid="mission-delete"
         onClick={() => void handleDelete()}
         disabled={deleting}
-        className="inline-flex min-h-[36px] items-center gap-1.5 rounded-item border border-danger/40 px-3 py-1 text-xs font-medium text-danger transition-colors duration-150 hover:bg-danger/10 disabled:opacity-50"
+        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-danger/40 px-3 py-1 text-xs font-medium text-danger transition-colors duration-150 hover:bg-danger/10 disabled:opacity-50"
       >
         {deleting ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />

@@ -109,7 +109,7 @@ export function AddonsSettings() {
         {addons.map((addon) => (
           <li
             key={addon.slug}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border bg-surface p-4"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border bg-panel p-4"
           >
             <div className="min-w-0">
               <p className="text-sm font-medium text-foreground">{t(`items.${addon.slug}.name`)}</p>
@@ -133,7 +133,7 @@ export function AddonsSettings() {
                   type="button"
                   onClick={() => cancel(addon.slug)}
                   disabled={busy !== null}
-                  className="inline-flex min-h-[36px] items-center gap-2 rounded-card border border-border px-3 text-xs text-foreground transition-colors duration-150 hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-card border border-border px-3 text-xs text-foreground transition-colors duration-150 hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {busy === addon.slug ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : null}
                   {t("cancel")}
@@ -143,7 +143,7 @@ export function AddonsSettings() {
                 type="button"
                 onClick={() => buy(addon.slug)}
                 disabled={busy !== null || !addon.canBuy}
-                className="inline-flex min-h-[36px] items-center gap-2 rounded-card border border-foreground/60 px-3 text-xs font-semibold text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-card border border-foreground/60 px-3 text-xs font-semibold text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {busy === addon.slug ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : null}
                 {addon.billing === "one_off" ? t("buy") : t("subscribe")}

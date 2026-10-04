@@ -86,7 +86,7 @@ function Article({
           how the original bug — a Greek-only Help Centre shown to ten
           locales — survived: it looked like content, not like a gap. */}
       {article.isFallback && (
-        <p className="mb-2 inline-flex rounded-full border border-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted/80">
+        <p className="mb-2 inline-flex rounded-full border border-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted">
           {fallbackNotice}
         </p>
       )}
@@ -135,7 +135,7 @@ export default async function HelpPage() {
     <div className="relative min-h-screen">
       <div className="relative mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
         <header className="mb-8">
-          <Link href="/" className="inline-block">
+          <Link href="/" className="inline-flex min-h-[44px] items-center">
             <Logo />
           </Link>
           <h1 className="mt-6 flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground">
@@ -210,7 +210,7 @@ export default async function HelpPage() {
               {t("pricingLink")}
             </Link>
           </div>
-          <p className="mt-3 text-[11px] text-muted/70">
+          <p className="mt-3 text-[11px] text-muted">
             {t("answerCount", { count: articles.length })}
           </p>
         </footer>

@@ -109,7 +109,7 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
           type="button"
           onClick={withdraw}
           disabled={withdrawing}
-          className="min-h-[36px] rounded-item border border-success/40 px-2.5 text-xs text-success transition-colors hover:bg-success/10 disabled:opacity-60"
+          className="min-h-[44px] rounded-item border border-success/40 px-2.5 text-xs text-success transition-colors hover:bg-success/10 disabled:opacity-60"
         >
           {withdrawing ? t("withdrawing") : t("withdraw")}
         </button>
@@ -122,7 +122,7 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex min-h-[36px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-muted transition-colors hover:text-foreground"
+        className="flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-muted transition-colors hover:text-foreground"
       >
         <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
         {t("open")}
@@ -190,14 +190,14 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
           type="button"
           onClick={() => void share()}
           disabled={busy || !preview.ok || title.trim().length < 3 || description.trim().length < 3}
-          className="min-h-[36px] rounded-item border border-foreground/60 px-3 text-xs font-semibold text-foreground transition-opacity hover:bg-foreground/10 disabled:opacity-50"
+          className="min-h-[44px] rounded-item border border-foreground/60 px-3 text-xs font-semibold text-foreground transition-opacity hover:bg-foreground/10 disabled:opacity-50"
         >
           {busy ? t("sharing") : t("shareButton")}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="min-h-[36px] rounded-item border border-border px-3 text-xs text-muted transition-colors hover:text-foreground"
+          className="min-h-[44px] rounded-item border border-border px-3 text-xs text-muted transition-colors hover:text-foreground"
         >
           {t("cancel")}
         </button>

@@ -133,6 +133,34 @@ const BARE = new RegExp(`(?<!rgb\\()var\\(--(?:${CHANNEL_VARS.join("|")})\\)`, "
 const bareVars = UI_FILES.flatMap((f) => [...CODE.get(f).matchAll(BARE)].map((m) => `${f}: ${m[0]}`));
 check("no channel variable is used bare, outside rgb()", bareVars.length === 0, bareVars.slice(0, 6).join("\n        "));
 
+// AND NO NAME THE PALETTE DOES NOT HAVE. A closed palette drops an
+// unknown colour without a word: `bg-surface` and `bg-accent` produced no
+// CSS at all, so the Marketplace's main button and four settings panels
+// had no background, and `text-fg` had no colour — sixteen dead classes
+// found by hand on 2026-10-04 (design D.11). Every colour utility on a
+// class line must name a palette entry; the values below are the
+// utilities' other meanings (size, side, style), not colours.
+const NON_COLOR = new Set([
+  "left", "center", "right", "start", "end", "justify", "ellipsis", "clip", "wrap", "nowrap", "balance", "pretty",
+  "cover", "contain", "top", "bottom", "fixed", "local", "scroll", "repeat", "no-repeat", "repeat-x", "repeat-y", "auto", "none",
+  "origin-border", "origin-padding", "origin-content", "clip-border", "clip-padding", "clip-content", "clip-text",
+  "t", "b", "l", "r", "x", "y", "s", "e", "solid", "dashed", "dotted", "double", "hidden", "collapse", "separate",
+  "inset", "wavy", "reverse", "offset", "current", "xs", "sm", "base", "lg", "xl",
+]);
+const COLOR_UTIL = /(?:^|[\s"'`{(])(?:[a-z0-9-]+:)*(bg|text|border(?:-[trblxyse])?|ring|ring-offset|fill|stroke|divide|outline|decoration|caret|accent|placeholder)-([a-z][a-z-]*)(?=[\s"'`/})]|$)/g;
+const unknownColors = [];
+for (const f of UI_FILES) {
+  for (const line of CODE.get(f).split("\n")) {
+    if (!/className|\bcn\(|clsx\(|`|: "/.test(line)) continue;
+    for (const m of line.matchAll(COLOR_UTIL)) {
+      const value = m[2];
+      if (NON_COLOR.has(value) || DESIGN_NAMES.includes(value)) continue;
+      unknownColors.push(`${f}: ${m[1]}-${value}`);
+    }
+  }
+}
+check(`every colour class names a palette colour (${unknownColors.length} do not)`, unknownColors.length === 0, unknownColors.slice(0, 10).join("\n        "));
+
 console.log("\n== 3. the signal colour: the globe and the logo, nowhere else ==");
 const SIGNAL_FILES = new Set(["src/components/logo.tsx", "src/components/ui/globe-mark.tsx", "src/components/brand/earth.tsx", "src/lib/brand/globe.ts", "src/lib/brand/globe-svg.ts", "src/lib/brand/earth.ts"]);
 const SIGNAL = /f2a65a|--signal\b|--globe-ink\b|--logo-accent\b|(?<![\w-])(?:[a-z0-9-]+:)*(?:bg|text|border|ring|fill|stroke|outline|decoration|accent|caret|from|to|via)-signal(?![\w-])/i;
@@ -263,6 +291,45 @@ const mainFields = ["src/components/chat/chat-composer.tsx", "src/components/cre
   (f) => !/<textarea[\s\S]{0,1200}?\brounded-field\b/.test(CODE.get(f) ?? "")
 );
 check("the main field — Home's and the conversation's — is the 18px one", mainFields.length === 0, mainFields.join(", "));
+
+// ---------------------------------------------------------------------
+console.log("\n== 8. no text fainter than the design's muted ==");
+// Muted (#8D96A8) is 6.6:1 on the background and about 6:1 on a panel;
+// at 80% it is about 4.5:1 on the background and under it on a panel.
+// The site audit of D.11 (scripts/site-audit.mjs) found five screens
+// where axe reported exactly that, every one a `text-muted/70` or `/80`.
+// So muted text is drawn at full strength. A disabled control is the
+// exception WCAG makes (1.4.3), so a line that says cursor-not-allowed,
+// or a `disabled:` variant, may fade it.
+const fadedText = [];
+for (const f of UI_FILES) {
+  for (const line of CODE.get(f).split("\n")) {
+    if (/cursor-not-allowed/.test(line)) continue;
+    for (const m of line.matchAll(/(?:^|[\s"'`])((?:[a-z-]+:)*)text-muted\/\d+\b/g)) {
+      if (!m[1].includes("disabled:")) fadedText.push(`${f}: ${m[0].trim()}`);
+    }
+  }
+}
+check(`muted text is never faded below the design's value (${fadedText.length} faded)`, fadedText.length === 0, fadedText.slice(0, 8).join("\n        "));
+
+// ---------------------------------------------------------------------
+console.log("\n== 9. a target is at least 44px ==");
+// «Στόχοι αφής τουλάχιστον 44 px» (docs/CONTEXT.md, «ΚΙΝΗΤΟ»). The site
+// audit of D.11 (scripts/site-audit.mjs) found 48 controls whose own
+// class said so in numbers — min-h-[32px], [36px], [40px] — and raised
+// them. A smaller height is allowed only behind a breakpoint prefix
+// (sm:min-h-[36px] on a desktop pointer), never as the phone's size.
+const smallTargets = [];
+for (const f of UI_FILES) {
+  // A line marked aria-hidden is a spacer, not something to press.
+  for (const line of CODE.get(f).split("\n")) {
+    if (/aria-hidden="true"/.test(line)) continue;
+    for (const m of line.matchAll(/(?<![\w:\-\[])min-h-\[(\d+)px\]/g)) {
+      if (Number(m[1]) < 44) smallTargets.push(`${f}: ${m[0]}`);
+    }
+  }
+}
+check(`no control sets a height under 44px for the phone (${smallTargets.length})`, smallTargets.length === 0, smallTargets.slice(0, 8).join("\n        "));
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);
 process.exit(failures.length === 0 ? 0 : 1);

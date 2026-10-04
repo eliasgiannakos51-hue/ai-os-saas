@@ -425,7 +425,7 @@ export function CreateChat({
               navigates: Create spends real credits, and a mishearing that
               went straight through would cost money or file a record
               nobody asked for. Only the card's own buttons move on. */}
-          <div className="absolute bottom-3 start-14 z-[2]">
+          <div className="absolute bottom-3 start-16 z-[2]">
             <VoiceInput
               compact
               review="card"
@@ -445,7 +445,7 @@ export function CreateChat({
               onClick={() => imageInputRef.current?.click()}
               aria-label={t("attachImage")}
               title={t("attachImage")}
-              className="absolute bottom-3 start-3 z-[2] flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              className="absolute bottom-3 start-3 z-[2] flex h-11 w-11 items-center justify-center rounded-full text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               <Paperclip className="h-4 w-4" aria-hidden="true" />
             </button>

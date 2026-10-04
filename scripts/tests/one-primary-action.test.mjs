@@ -398,6 +398,11 @@ const BASELINE = {
   // the page itself draws none. Nothing was demoted here; the number is
   // what it always was once the surfaces were told apart.
   "dashboard/memory/page.tsx": 0,
+  // 1 SINCE 2026-10-04 (design D.11), and it is a repair, not a new loud
+  // thing: "Use this template" was written bg-accent, a colour the closed
+  // palette does not have, so it drew no fill and the page had no visible
+  // primary action at all. It is bg-button now — the one.
+  "dashboard/marketplace/page.tsx": 1,
   "dashboard/mission/page.tsx": 1,
   // 2 SINCE 2026-10-04, AND BOTH ARE THE FIELD'S. The design makes the
   // composer's send button white — "αποστολή, λευκό κουμπί με σκούρο

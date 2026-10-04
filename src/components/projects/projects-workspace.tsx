@@ -100,7 +100,7 @@ export function ProjectsWorkspace({ projects }: { projects: ProjectRow[] }) {
           value={name}
           onChange={(e) => setName(e.target.value.slice(0, MAX_NAME_CHARS))}
           placeholder={t("form.namePlaceholder")}
-          className="mt-2 w-full rounded-card border border-border bg-background px-3 py-2 text-base text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-foreground/40"
+          className="mt-2 min-h-[44px] w-full rounded-card border border-border bg-background px-3 py-2 text-base text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-foreground/40"
         />
         <label htmlFor="project-goal" className="mt-3 block text-sm font-semibold text-foreground">
           {t("form.goal")}

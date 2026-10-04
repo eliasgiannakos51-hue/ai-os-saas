@@ -94,7 +94,7 @@ export function EmptyState({
           ) : (
             <p
               data-testid="empty-example"
-              className="mx-auto mt-4 max-w-md text-xs italic leading-relaxed text-muted/80"
+              className="mx-auto mt-4 max-w-md text-xs italic leading-relaxed text-muted"
             >
               &ldquo;{example}&rdquo;
             </p>

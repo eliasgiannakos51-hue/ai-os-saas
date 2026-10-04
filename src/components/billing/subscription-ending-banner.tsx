@@ -50,7 +50,7 @@ export function SubscriptionEndingBanner({ daysLeft }: { daysLeft: number }) {
         type="button"
         onClick={resume}
         disabled={loading}
-        className="inline-flex min-h-[36px] shrink-0 items-center justify-center rounded-item border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+        className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-item border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
       >
         {loading ? tCommon("loading") : t("restore")}
       </button>

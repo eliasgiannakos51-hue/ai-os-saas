@@ -461,7 +461,7 @@ export function MissionDetail({
             onClick={onClose}
             aria-label={tCommon("cancel")}
             title={tCommon("cancel")}
-            className="flex h-8 w-8 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="flex h-11 w-11 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -566,7 +566,7 @@ export function MissionDetail({
                       </p>
                     )}
                     {step.status === "completed" && step.output && (
-                      <p className="mt-1 line-clamp-2 text-[11px] text-muted/80">{step.output}</p>
+                      <p className="mt-1 line-clamp-2 text-[11px] text-muted">{step.output}</p>
                     )}
 
                     {/* What you will have when it's done, and roughly how
@@ -581,7 +581,7 @@ export function MissionDetail({
                           </span>
                         )}
                         {step.estimatedMinutes ? (
-                          <span className="inline-flex items-center gap-1 text-muted/80">
+                          <span className="inline-flex items-center gap-1 text-muted">
                             <Clock className="h-3 w-3" aria-hidden="true" />
                             {t("stepMinutes", { count: step.estimatedMinutes })}
                           </span>

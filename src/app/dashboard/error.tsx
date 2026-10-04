@@ -72,7 +72,7 @@ export default function DashboardError({
           {t("reload")}
         </button>
         {error.digest ? (
-          <p className="mt-4 font-mono text-[11px] text-muted/70">{error.digest}</p>
+          <p className="mt-4 font-mono text-[11px] text-muted">{error.digest}</p>
         ) : null}
       </div>
     </div>

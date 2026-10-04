@@ -189,7 +189,7 @@ export function Sidebar({
         } ${open ? "translate-x-0" : "-translate-x-full rtl:translate-x-full md:rtl:translate-x-0"}`}
       >
         <div className={`flex items-center gap-2 px-3 py-4 ${collapsed ? "md:justify-center md:px-0" : ""}`}>
-          <Link href="/dashboard/overview" onClick={closeOnMobile} className="flex items-center rounded-item px-1 py-1" aria-label="Ionexa">
+          <Link href="/dashboard/overview" onClick={closeOnMobile} className="flex min-h-[44px] items-center rounded-item px-1" aria-label="Ionexa">
             {collapsed ? <Logo iconOnly px={26} /> : <Logo px={24} />}
           </Link>
           <button

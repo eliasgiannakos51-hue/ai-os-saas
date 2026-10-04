@@ -79,7 +79,7 @@ export function ProblemNotice({
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="inline-flex min-h-[36px] items-center rounded-item border border-foreground/60 px-3 py-1.5 text-xs font-semibold text-foreground transition-opacity duration-150 hover:bg-foreground/10"
+                  className="inline-flex min-h-[44px] items-center rounded-item border border-foreground/60 px-3 py-1.5 text-xs font-semibold text-foreground transition-opacity duration-150 hover:bg-foreground/10"
                 >
                   {tCommon("retry")}
                 </button>
@@ -87,7 +87,7 @@ export function ProblemNotice({
               {action && (
                 <Link
                   href={action.href}
-                  className="inline-flex min-h-[36px] items-center rounded-item border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40"
+                  className="inline-flex min-h-[44px] items-center rounded-item border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40"
                 >
                   {t(action.labelKey)}
                 </Link>

@@ -157,7 +157,7 @@ export function VoicePlayer({ text, compact }: { text: string; compact?: boolean
           onClick={() => void play()}
           disabled={loading || !availability.hasMinutes || trimmed.length === 0}
           aria-label={playing ? t("pause") : t("listen")}
-          className="flex min-h-[36px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-foreground transition-colors hover:bg-panel-hover disabled:opacity-40"
+          className="flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-foreground transition-colors hover:bg-panel-hover disabled:opacity-40"
         >
           {/* Same reasoning as the microphone button: the wait is a
               speech model producing the clip, not a round trip to our
@@ -183,7 +183,7 @@ export function VoicePlayer({ text, compact }: { text: string; compact?: boolean
                 if (audioRef.current) audioRef.current.playbackRate = next;
               }}
               aria-label={t("speed")}
-              className="min-h-[36px] rounded-item border border-border bg-panel px-2 text-xs text-foreground"
+              className="min-h-[44px] rounded-item border border-border bg-panel px-2 text-xs text-foreground"
             >
               {PLAYBACK_RATES.map((r) => (
                 <option key={r} value={r}>
@@ -200,7 +200,7 @@ export function VoicePlayer({ text, compact }: { text: string; compact?: boolean
                 teardown();
               }}
               aria-label={t("voice")}
-              className="min-h-[36px] rounded-item border border-border bg-panel px-2 text-xs text-foreground"
+              className="min-h-[44px] rounded-item border border-border bg-panel px-2 text-xs text-foreground"
             >
               {VOICES.map((v) => (
                 <option key={v.key} value={v.key}>

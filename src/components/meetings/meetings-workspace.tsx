@@ -347,6 +347,7 @@ export function MeetingsWorkspace({
           type="file"
           accept="audio/*"
           className="sr-only"
+          aria-label={t("pick")}
           data-testid="meeting-file"
           onChange={(e) => choose(e.target.files?.[0] ?? null)}
         />

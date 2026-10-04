@@ -100,7 +100,7 @@ export function EnergyCheckinWidget({
               when the number is low, demanding work when it is not), and
               it also goes into the AI context. None of that was written
               anywhere the person answering could see it. */}
-          <p className="mt-1 text-xs leading-relaxed text-muted/80">{t("whatItDoes")}</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted">{t("whatItDoes")}</p>
         </div>
       </div>
 

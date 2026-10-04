@@ -42,7 +42,7 @@ export function DbExposure({ rows }: { rows: ExposureRow[] | null }) {
   if (rows === null) {
     return (
       <section className="mb-6 surface-tight">
-        <h2 className="text-sm font-semibold text-fg">Database exposure</h2>
+        <h2 className="text-sm font-semibold text-foreground">Database exposure</h2>
         <p className="mt-1 text-xs text-muted">
           Could not read it. public.db_exposure_report() is added by migration
           20260917000000 — apply it, or check that the service-role key is set.
@@ -57,7 +57,7 @@ export function DbExposure({ rows }: { rows: ExposureRow[] | null }) {
     bad.length === 0 ? ALL_CLEAR : `${bad.length} of ${rows.length} ${WANT_ATTENTION}`;
   return (
     <section className="mb-6 surface-tight">
-      <h2 className="text-sm font-semibold text-fg">Database exposure</h2>
+      <h2 className="text-sm font-semibold text-foreground">Database exposure</h2>
       <p className="mt-1 text-xs text-muted">{summary}</p>
       <ul className="mt-3 space-y-1.5">
         {rows.map((r) => (
@@ -71,7 +71,7 @@ export function DbExposure({ rows }: { rows: ExposureRow[] | null }) {
               <span className={r.ok ? "text-muted" : "text-danger"}>
                 {LABELS[r.key] ?? r.key}
               </span>{" "}
-              <span className="font-mono text-fg">{r.found}</span>
+              <span className="font-mono text-foreground">{r.found}</span>
               {/* THE EXPECTED VALUE IS PRINTED ONLY WHEN IT IS NOT MET.
                   "0, expected 0" on eight green rows is noise that makes
                   the one red row harder to find. */}

@@ -157,7 +157,7 @@ export function StudioChat({ context }: { context: string }) {
         <button
           type="button"
           onClick={jumpToBottom}
-          className="absolute bottom-2 left-1/2 z-10 inline-flex min-h-[36px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-foreground/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:bg-foreground/10"
+          className="absolute bottom-2 left-1/2 z-10 inline-flex min-h-[44px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-foreground/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:bg-foreground/10"
         >
           <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
           {tCommon("newMessagesBelow")}
@@ -184,7 +184,7 @@ export function StudioChat({ context }: { context: string }) {
           type="submit"
           disabled={sending || !input.trim()}
           aria-label={t("chatSend")}
-          className="absolute bottom-1.5 end-1.5 flex h-8 w-8 items-center justify-center rounded-full border border-foreground/60 text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-40"
+          className="absolute bottom-1.5 end-1.5 flex h-11 w-11 items-center justify-center rounded-full border border-foreground/60 text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ArrowUp className="h-4 w-4" aria-hidden="true" />
         </button>

@@ -250,7 +250,7 @@ function DocumentPdfDialog({ documentId, onClose }: { documentId: string; onClos
                 setMode("translate");
               }}
               aria-label={t("translateTo")}
-              className="min-h-[36px] min-w-0 flex-1 rounded-item border border-border bg-input px-2 text-sm text-foreground"
+              className="min-h-[44px] min-w-0 flex-1 rounded-item border border-border bg-input px-2 text-sm text-foreground"
             >
               {LANGUAGES.map((l) => (
                 <option key={l.code} value={l.code} lang={l.code}>

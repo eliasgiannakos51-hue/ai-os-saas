@@ -37,7 +37,9 @@ export function TopNav({ email }: { email: string }) {
       <Link
         href={OVERVIEW_NAV_ITEM.href}
         // Height only — the bar has 64px of it and no spare width.
-        className="flex min-h-[44px] shrink-0 items-center gap-2"
+        // 44px both ways: below 400px the word is hidden and the link is
+        // the earth alone, which measured 24px wide (site audit, D.11).
+        className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2"
       >
         <Logo iconOnly px={24} />
         <span className="hidden text-base font-bold tracking-tight text-foreground min-[400px]:inline">
@@ -128,12 +130,15 @@ export function TopNav({ email }: { email: string }) {
         <button
           type="button"
           onClick={openCreate}
+          // Below lg the button is the icon alone, and an icon is not a
+          // name: axe reported it unnamed on every phone screen (D.11).
+          aria-label={t("createStudio")}
           // Below `lg` this is the icon alone, which `px-3 py-2` sized at
           // 40x40 — the one control in the header that stayed under 44px
           // after everything else was raised.
           className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-item bg-button px-3 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 lg:px-3.5"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
           {/* THE BUTTON AND THE PAGE IT OPENS SAY THE SAME WORD.
               It said "New Project" — Title Case, and a promise of a
               thing this app has no concept of. It opens Create Studio,

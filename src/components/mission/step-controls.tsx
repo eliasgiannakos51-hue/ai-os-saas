@@ -97,7 +97,7 @@ export function StepControls({
               onEdit(draft.trim());
               setEditing(false);
             }}
-            className="inline-flex min-h-[32px] items-center gap-1 rounded-item border border-foreground/60 px-2.5 py-1 text-xs font-semibold text-foreground transition-opacity duration-150 hover:bg-foreground/10 disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-item border border-foreground/60 px-2.5 py-1 text-xs font-semibold text-foreground transition-opacity duration-150 hover:bg-foreground/10 disabled:opacity-50"
           >
             <Check className="h-3 w-3" aria-hidden="true" />
             {t("saveStep")}
@@ -108,7 +108,7 @@ export function StepControls({
               setDraft(text);
               setEditing(false);
             }}
-            className="inline-flex min-h-[32px] items-center gap-1 rounded-item border border-border px-2.5 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-item border border-border px-2.5 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground"
           >
             <X className="h-3 w-3" aria-hidden="true" />
             {t("cancelStepEdit")}
@@ -197,7 +197,7 @@ export function StepUndoStrip({
         type="button"
         data-testid="step-undo-button"
         onClick={onUndo}
-        className="inline-flex min-h-[32px] items-center gap-1.5 rounded-item border border-foreground/40 px-2.5 py-1 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
+        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/40 px-2.5 py-1 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
       >
         <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />
         {t("undoWithSeconds", { seconds })}

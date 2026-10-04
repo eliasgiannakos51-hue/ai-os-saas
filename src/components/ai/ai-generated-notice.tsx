@@ -69,7 +69,7 @@ export function AiGeneratedNotice({
   }
 
   return (
-    <p className={`mt-1.5 flex items-center gap-1 text-[10px] leading-none text-muted/80 ${className}`}>
+    <p className={`mt-1.5 flex items-center gap-1 text-[10px] leading-none text-muted ${className}`}>
       <Sparkles className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
       {t("short")}
     </p>

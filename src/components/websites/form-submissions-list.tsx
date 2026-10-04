@@ -177,7 +177,7 @@ export function FormSubmissionsList({
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               aria-label={t("filterType")}
-              className="min-h-[36px] rounded-item border border-border bg-panel px-2 text-xs text-foreground"
+              className="min-h-[44px] rounded-item border border-border bg-panel px-2 text-xs text-foreground"
             >
               <option value="">{t("allTypes")}</option>
               {FORM_TYPES.map((type) => (
@@ -191,7 +191,7 @@ export function FormSubmissionsList({
                 value={siteFilter}
                 onChange={(e) => setSiteFilter(e.target.value)}
                 aria-label={t("filterSite")}
-                className="min-h-[36px] max-w-[200px] rounded-item border border-border bg-panel px-2 text-xs text-foreground"
+                className="min-h-[44px] max-w-[200px] rounded-item border border-border bg-panel px-2 text-xs text-foreground"
               >
                 <option value="">{t("allSites")}</option>
                 {sites.map(([id, name]) => (
@@ -210,7 +210,7 @@ export function FormSubmissionsList({
               type="button"
               onClick={exportCsv}
               disabled={visible.length === 0}
-              className="flex min-h-[36px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-foreground transition-colors hover:bg-panel-hover disabled:opacity-40"
+              className="flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-foreground transition-colors hover:bg-panel-hover disabled:opacity-40"
             >
               <Download className="h-3.5 w-3.5" aria-hidden="true" />
               {t("exportCsv")}
@@ -313,7 +313,7 @@ export function FormSubmissionsList({
                         type="button"
                         onClick={() => void remove(row)}
                         disabled={busyId === row.id}
-                        className="flex min-h-[36px] items-center gap-1.5 rounded-item border border-danger/30 px-2.5 text-xs text-danger transition-colors hover:bg-danger/10 disabled:opacity-40"
+                        className="flex min-h-[44px] items-center gap-1.5 rounded-item border border-danger/30 px-2.5 text-xs text-danger transition-colors hover:bg-danger/10 disabled:opacity-40"
                       >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         {t("delete")}

@@ -26,9 +26,30 @@ const LAYOUT = "src/app/layout.tsx";
 const MENU = "src/components/ui/card-menu.tsx";
 const CHART = "src/components/data-analysis/analysis-chart.tsx";
 const HEADER = "src/components/dashboard/page-header.tsx";
-const TARGETS = [GATE, TW, CSS, STEP, EMPTY, PREFS, LAYOUT, MENU, CHART, HEADER, "src/components/chat/chat-composer.tsx"];
+const TARGETS = [GATE, TW, CSS, STEP, EMPTY, PREFS, LAYOUT, MENU, CHART, HEADER, "src/components/chat/chat-composer.tsx", "src/components/websites/form-submissions-list.tsx"];
 
 const MUTANTS = [
+  {
+    name: "a colour the palette does not have comes back, and paints nothing",
+    file: MENU,
+    from: "overflow-hidden rounded-card border border-border bg-panel p-1\"",
+    to: "overflow-hidden rounded-card border border-border bg-surface p-1\"",
+    expect: "every colour class names a palette colour",
+  },
+  {
+    name: "a control is set to 36px tall again",
+    file: "src/components/websites/form-submissions-list.tsx",
+    from: "min-h-[44px]",
+    to: "min-h-[36px]",
+    expect: "no control sets a height under 44px",
+  },
+  {
+    name: "muted text is faded again, under 4.5:1 on a panel",
+    file: HEADER,
+    from: "text-muted",
+    to: "text-muted/80",
+    expect: "muted text is never faded",
+  },
   {
     name: "a component goes back to Tailwind's own radius scale",
     file: MENU,

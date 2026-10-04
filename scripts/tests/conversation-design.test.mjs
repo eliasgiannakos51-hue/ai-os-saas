@@ -39,7 +39,7 @@ check("no other icon stands in for it", !/MessageCircle/.test(ws));
 check("the empty conversation opens with the earth too", /<Earth variant="small" px=\{64\} \/>/.test(ws));
 
 console.log("\n== 2. the same field as Home's ==");
-check("voice bottom-left, as on Home", /absolute bottom-2 start-2/.test(composer) && /absolute bottom-3 start-14/.test(home));
+check("voice bottom-left, as on Home", /absolute bottom-2 start-2/.test(composer) && /absolute bottom-3 start-16/.test(home));
 check("send bottom-right, white with a dark arrow, as on Home", /absolute bottom-2 end-2 [^"]*bg-button text-button-ink/.test(composer) && /absolute bottom-3 end-3 [^"]*bg-button text-button-ink/.test(home));
 check("the text never runs under the controls: they have a row of their own", /\bpb-14\b/.test(composer) && /\bpb-16\b/.test(home) && !/\bpe-\[/.test(composer + home));
 

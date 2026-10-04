@@ -136,7 +136,7 @@ export function IdeaRow({
             type="button"
             onClick={cancelEditing}
             aria-label={tCommon("cancel")}
-            className="flex h-8 w-8 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="flex h-11 w-11 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -321,7 +321,7 @@ export function IdeaRow({
             onClick={startEditing}
             aria-label={t("editAria", { name: idea.name })}
             title={tModule("edit")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-foreground/10 hover:text-foreground"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-foreground/10 hover:text-foreground"
           >
             <Pencil className="h-4 w-4" />
           </button>

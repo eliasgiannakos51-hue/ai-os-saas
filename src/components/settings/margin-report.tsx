@@ -158,7 +158,7 @@ function SummaryTile({ label, value, hint }: { label: string; value: string; hin
     <div className="rounded-card border border-border bg-input p-3">
       <p className="text-[11px] uppercase tracking-wide text-muted">{label}</p>
       <p className="mt-1 text-lg font-bold text-foreground">{value}</p>
-      {hint && <p className="mt-0.5 text-[11px] leading-snug text-muted/80">{hint}</p>}
+      {hint && <p className="mt-0.5 text-[11px] leading-snug text-muted">{hint}</p>}
     </div>
   );
 }

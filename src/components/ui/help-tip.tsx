@@ -178,7 +178,7 @@ export function HelpTip({
                 two. */}
             {scopeKey && (
               <p className="mt-2 flex gap-2 text-xs leading-relaxed text-muted">
-                <Eye className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted/80" aria-hidden="true" />
+                <Eye className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted" aria-hidden="true" />
                 <span>{t(`${scopeKey}.body`)}</span>
               </p>
             )}

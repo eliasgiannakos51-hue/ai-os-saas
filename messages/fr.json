@@ -1357,7 +1357,9 @@
         "why": "Cela s'écrit tout seul. Tout ce que vous consignez dans n'importe quel module arrive ici en un seul fil : c'est ainsi qu'on répond à « qu'ai-je fait le mois dernier »."
       },
       "tabAll": "Tout",
-      "tabStarred": "Favoris"
+      "tabStarred": "Favoris",
+      "filterSection": "Rubrique",
+      "filterPeriod": "Période"
     },
     "favorites": {
       "title": "Favoris",

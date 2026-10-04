@@ -92,7 +92,7 @@ check("...in that order", order.every((i) => i > 0) && order[0] < order[1] && or
 check("no card, no number, no list is read for it", (home.match(/\.from\("/g) ?? []).length === 1);
 const field = read("src/components/create/create-chat.tsx");
 check("the field asks the design's question on Home", /placeholder=\{hero \? t\("accomplishPlaceholder"\) : t\("describePlaceholder"\)\}/.test(field));
-check("attach and voice bottom-left, send bottom-right", /absolute bottom-3 start-3 z-\[2\]/.test(field) && /absolute bottom-3 start-14 z-\[2\]/.test(field) && /absolute bottom-3 end-3 z-\[2\][^"]*bg-button text-button-ink/.test(field));
+check("attach and voice bottom-left, send bottom-right", /absolute bottom-3 start-3 z-\[2\]/.test(field) && /absolute bottom-3 start-16 z-\[2\]/.test(field) && /absolute bottom-3 end-3 z-\[2\][^"]*bg-button text-button-ink/.test(field));
 for (const l of LOCALES) {
   check(`${l}: the field's question is worded`, typeof messages[l].dashboard?.createAnything?.accomplishPlaceholder === "string");
 }

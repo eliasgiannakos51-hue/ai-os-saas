@@ -92,7 +92,7 @@ export function DesignControls({
                   value={isValidHexColor(current) ? current : "#f97316"}
                   onChange={(e) => set(key, e.target.value)}
                   aria-label={label}
-                  className="h-9 w-10 shrink-0 cursor-pointer rounded-item border border-border bg-input p-1"
+                  className="h-11 w-11 shrink-0 cursor-pointer rounded-item border border-border bg-input p-1"
                 />
                 <input
                   type="text"

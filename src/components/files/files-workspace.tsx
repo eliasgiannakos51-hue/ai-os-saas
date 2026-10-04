@@ -804,6 +804,9 @@ export function FilesWorkspace({
           multiple
           accept={ACCEPT_ATTRIBUTE}
           className="sr-only"
+          // The button below opens it; a screen reader that lands on the
+          // input itself needs the same name (site audit, D.11).
+          aria-label={t("dropHere")}
           onChange={(e) => {
             void uploadMany(e.target.files);
             e.target.value = "";
@@ -864,7 +867,7 @@ export function FilesWorkspace({
               <FileText className="mx-auto mb-3 h-7 w-7 text-foreground/70" aria-hidden="true" />
               <p className="text-sm font-semibold text-foreground">{t("emptyTitle")}</p>
               <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-muted">{t("emptyBody")}</p>
-              <p className="mx-auto mt-2 max-w-md text-xs italic leading-relaxed text-muted/80">
+              <p className="mx-auto mt-2 max-w-md text-xs italic leading-relaxed text-muted">
                 {t("emptyExample")}
               </p>
               <button

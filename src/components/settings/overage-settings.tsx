@@ -121,7 +121,7 @@ export function OverageSettings() {
 
       {state.enabled ? (
         <div className="space-y-3">
-          <div className="rounded-card border border-border bg-surface p-4">
+          <div className="rounded-card border border-border bg-panel p-4">
             <div className="flex items-baseline justify-between text-sm">
               <span className="text-foreground">{t("thisMonth")}</span>
               <span className="font-semibold text-foreground">
@@ -160,7 +160,7 @@ export function OverageSettings() {
             type="button"
             onClick={disable}
             disabled={busy}
-            className="inline-flex min-h-[40px] items-center gap-2 rounded-card border border-border px-4 text-sm text-foreground transition-colors duration-150 hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-card border border-border px-4 text-sm text-foreground transition-colors duration-150 hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-60"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
             {t("turnOff")}
@@ -184,7 +184,7 @@ export function OverageSettings() {
             value={cap}
             onChange={(event) => setCap(event.target.value)}
             placeholder={t("capPlaceholder")}
-            className="w-full max-w-[200px] rounded-card border border-border bg-surface px-3 py-2 text-sm text-foreground"
+            className="min-h-[44px] w-full max-w-[200px] rounded-item border border-border bg-panel px-3 text-sm text-foreground"
           />
 
           {/* WHAT IT COSTS, BEFORE THE BUTTON. Shown from the moment a
@@ -208,7 +208,7 @@ export function OverageSettings() {
             type="button"
             onClick={enable}
             disabled={busy || !capValid}
-            className="inline-flex min-h-[40px] items-center gap-2 rounded-card border border-foreground/60 px-4 text-sm font-semibold text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-card border border-foreground/60 px-4 text-sm font-semibold text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
             {t("agree")}

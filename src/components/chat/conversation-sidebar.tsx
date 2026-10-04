@@ -74,7 +74,7 @@ export function ConversationSidebar({
       <div className="flex-1 space-y-4 overflow-y-auto px-3 pb-3">
         {groups.length === 0 ? (
           <div className="mt-6 flex flex-col items-center gap-2 px-2 text-center">
-            <MessageCircle className="h-5 w-5 text-muted/80" aria-hidden="true" />
+            <MessageCircle className="h-5 w-5 text-muted" aria-hidden="true" />
             <p className="text-xs text-muted">{t("noConversations")}</p>
           </div>
         ) : (

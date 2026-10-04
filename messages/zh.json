@@ -1357,7 +1357,9 @@
         "why": "它自己会写。你在任何模块里记的东西都会汇到这一条流里——「上个月我到底做了什么」就是这么答的。"
       },
       "tabAll": "全部",
-      "tabStarred": "已收藏"
+      "tabStarred": "已收藏",
+      "filterSection": "板块",
+      "filterPeriod": "时间段"
     },
     "favorites": {
       "title": "收藏",

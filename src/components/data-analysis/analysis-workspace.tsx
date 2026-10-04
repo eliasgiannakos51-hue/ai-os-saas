@@ -144,7 +144,7 @@ export function AnalysisWorkspace({
           type="button"
           onClick={() => fileInput.current?.click()}
           disabled={uploading}
-          className="mt-3 inline-flex items-center gap-2 rounded-item bg-button px-4 py-2 text-xs font-semibold text-button-ink disabled:opacity-50"
+          className="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-item bg-button px-4 text-xs font-semibold text-button-ink disabled:opacity-50"
         >
           {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           {uploading ? t("upload.working") : t("upload.button")}

@@ -887,7 +887,7 @@ export function AgentsWorkspace({
               "runs tests and fixes errors" was outside the product — and
               nothing on this screen told them.
             */}
-            <div className="grid gap-3 rounded-card border border-border bg-surface/40 p-3 sm:grid-cols-2">
+            <div className="grid gap-3 rounded-card border border-border bg-panel p-3 sm:grid-cols-2">
               <div>
                 <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-success">
                   <Check className="h-3.5 w-3.5" aria-hidden="true" />
@@ -952,7 +952,7 @@ export function AgentsWorkspace({
                 <button
                   type="button"
                   onClick={() => setCapability(null)}
-                  className="min-h-[36px] rounded-item border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-surface"
+                  className="min-h-[44px] rounded-item border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-panel"
                 >
                   {t("capability.rephrase")}
                 </button>
@@ -992,14 +992,14 @@ export function AgentsWorkspace({
                       setCapability(null);
                       void build(requestText, true, true);
                     }}
-                    className="min-h-[36px] rounded-item border border-foreground/60 px-3 py-1.5 text-xs font-semibold text-foreground transition-opacity hover:bg-foreground/10"
+                    className="min-h-[44px] rounded-item border border-foreground/60 px-3 py-1.5 text-xs font-semibold text-foreground transition-opacity hover:bg-foreground/10"
                   >
                     {t("capability.partialContinue")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setCapability(null)}
-                    className="min-h-[36px] rounded-item border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-surface"
+                    className="min-h-[44px] rounded-item border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-panel"
                   >
                     {t("capability.rephrase")}
                   </button>
@@ -1058,7 +1058,7 @@ export function AgentsWorkspace({
                   label. These three lines are the thing they are agreeing
                   to, spelled out in the order the agent performs them.
                 */}
-                <div className="rounded-item border border-border bg-surface/40 p-2.5">
+                <div className="rounded-item border border-border bg-panel p-2.5">
                   <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted">
                     {t("capability.previewWhatItDoes")}
                   </p>

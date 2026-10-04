@@ -76,7 +76,7 @@ export default function OverviewError({
           // NOT the message. The digest is the value that matches the
           // server log, so it is the one thing worth showing and the one
           // thing support can act on.
-          <p className="mt-4 font-mono text-[11px] text-muted/70">{error.digest}</p>
+          <p className="mt-4 font-mono text-[11px] text-muted">{error.digest}</p>
         ) : null}
       </div>
     </div>

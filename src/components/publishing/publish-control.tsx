@@ -234,7 +234,7 @@ export function PublishControl({
 
   if (loading) {
     return (
-      <span className="inline-flex min-h-[40px] items-center gap-1.5 px-3 py-2 text-xs text-muted">
+      <span className="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 text-xs text-muted">
         <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
       </span>
     );

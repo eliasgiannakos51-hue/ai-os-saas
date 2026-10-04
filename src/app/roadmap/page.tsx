@@ -165,7 +165,7 @@ export default async function RoadmapPage() {
         <div className="text-center">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 transition-colors duration-150 hover:text-foreground"
+            className="inline-flex min-h-[44px] items-center gap-2 transition-colors duration-150 hover:text-foreground"
           >
             <Logo iconOnly px={24} />
             <span className="text-base font-bold tracking-tight text-foreground">IONEXA</span>

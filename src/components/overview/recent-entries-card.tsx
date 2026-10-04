@@ -33,7 +33,7 @@ export async function RecentEntriesCard({ entries }: { entries: RecentEntry[] })
 
       {entries.length === 0 ? (
         <div className="mt-4 flex items-center gap-2 text-sm text-muted">
-          <Clock className="h-4 w-4 shrink-0 text-muted/80" aria-hidden="true" />
+          <Clock className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
           {t("empty")}
         </div>
       ) : (

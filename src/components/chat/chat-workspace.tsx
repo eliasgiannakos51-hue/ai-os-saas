@@ -770,7 +770,7 @@ export function ChatWorkspace({
               onClick={toggleSidebar}
               aria-expanded={sidebarOpen}
               aria-label={sidebarOpen ? t("hideConversations") : t("showConversations")}
-              className="flex h-11 shrink-0 items-center gap-1.5 rounded-item px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground sm:h-9"
+              className="flex h-11 min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-item px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               {sidebarOpen ? (
                 <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -1032,7 +1032,7 @@ export function ChatWorkspace({
             type="button"
             onClick={jumpToBottom}
             data-testid="chat-jump-to-latest"
-            className="absolute bottom-3 left-1/2 z-10 inline-flex min-h-[36px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-foreground/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:bg-foreground/10"
+            className="absolute bottom-3 left-1/2 z-10 inline-flex min-h-[44px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-foreground/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:bg-foreground/10"
           >
             <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
             {tCommon("newMessagesBelow")}

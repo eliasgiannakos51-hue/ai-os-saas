@@ -1357,7 +1357,9 @@
         "why": "Se escribe solo. Todo lo que registra en cualquier módulo llega aquí en un único flujo, que es como se responde a «qué hice realmente el mes pasado»."
       },
       "tabAll": "Todo",
-      "tabStarred": "Destacados"
+      "tabStarred": "Destacados",
+      "filterSection": "Sección",
+      "filterPeriod": "Periodo"
     },
     "favorites": {
       "title": "Favoritos",

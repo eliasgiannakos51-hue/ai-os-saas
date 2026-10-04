@@ -37,7 +37,7 @@ export function BillingIntervalToggle({
   }
 
   const base =
-    "min-h-[40px] rounded-item px-4 py-2 text-sm font-semibold transition-colors duration-200";
+    "min-h-[44px] rounded-item px-4 py-2 text-sm font-semibold transition-colors duration-200";
   const on = "bg-button text-button-ink";
   const off = "text-muted hover:text-foreground";
 

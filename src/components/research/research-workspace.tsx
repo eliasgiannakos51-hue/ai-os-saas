@@ -501,7 +501,7 @@ export function ResearchWorkspace({
                         () => addToast(t("runError"), "error")
                       );
                     }}
-                    className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-border px-2.5 text-[11px] font-medium text-muted transition-colors duration-150 hover:border-foreground/50 hover:text-foreground"
+                    className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-border px-2.5 text-[11px] font-medium text-muted transition-colors duration-150 hover:border-foreground/50 hover:text-foreground"
                   >
                     <Square className="h-2.5 w-2.5 fill-current" aria-hidden="true" />
                     {tSteps("stop")}
@@ -518,7 +518,7 @@ export function ResearchWorkspace({
                         : t("inProgress")}
                   </p>
                   {report.current_question && report.status === "researching" && (
-                    <p className="line-clamp-2 ps-[18px] text-[11px] leading-relaxed text-muted/80">
+                    <p className="line-clamp-2 ps-[18px] text-[11px] leading-relaxed text-muted">
                       {report.current_question}
                     </p>
                   )}
@@ -538,7 +538,7 @@ export function ResearchWorkspace({
                       />
                     </div>
                   )}
-                  <p className="ps-[18px] text-[11px] text-muted/70">{t("keepsRunning")}</p>
+                  <p className="ps-[18px] text-[11px] text-muted">{t("keepsRunning")}</p>
                 </div>
               )}
               {/* What each question found and took — live while it runs,

@@ -3223,8 +3223,10 @@
       "evidence": {
         "files": "{count, plural, one {# αρχείο} other {# αρχεία}}",
         "parts": "{count, plural, one {σε # μέρος} other {σε # μέρη}}",
-        "planSteps": "{count, plural, one {# βήμα} other {# βήματα}}"
-      }
+        "planSteps": "{count, plural, one {# βήμα} other {# βήματα}}",
+        "sources": "{count, plural, one {# πηγή} other {# πηγές}}"
+      },
+      "writing": "Γράφω την αναφορά"
     }
   },
   "problem": {

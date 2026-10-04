@@ -3223,8 +3223,10 @@
       "evidence": {
         "files": "{count, plural, other {#件のファイル}}",
         "parts": "{count, plural, other {#回に分けて}}",
-        "planSteps": "{count, plural, other {#ステップ}}"
-      }
+        "planSteps": "{count, plural, other {#ステップ}}",
+        "sources": "{count, plural, other {#件の情報源}}"
+      },
+      "writing": "レポートを作成"
     }
   },
   "problem": {

@@ -3223,8 +3223,10 @@
       "evidence": {
         "files": "{count, plural, zero {لا ملفات} one {ملف واحد} two {ملفان} few {# ملفات} many {# ملفًا} other {# ملف}}",
         "parts": "{count, plural, zero {بلا أجزاء} one {في جزء واحد} two {في جزأين} few {في # أجزاء} many {في # جزءًا} other {في # جزء}}",
-        "planSteps": "{count, plural, zero {لا خطوات} one {خطوة واحدة} two {خطوتان} few {# خطوات} many {# خطوة} other {# خطوة}}"
-      }
+        "planSteps": "{count, plural, zero {لا خطوات} one {خطوة واحدة} two {خطوتان} few {# خطوات} many {# خطوة} other {# خطوة}}",
+        "sources": "{count, plural, zero {لا مصادر} one {مصدر واحد} two {مصدران} few {# مصادر} many {# مصدرًا} other {# مصدر}}"
+      },
+      "writing": "كتابة التقرير"
     }
   },
   "problem": {

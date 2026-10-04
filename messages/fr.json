@@ -3223,8 +3223,10 @@
       "evidence": {
         "files": "{count, plural, one {# fichier} other {# fichiers}}",
         "parts": "{count, plural, one {en # partie} other {en # parties}}",
-        "planSteps": "{count, plural, one {# étape} other {# étapes}}"
-      }
+        "planSteps": "{count, plural, one {# étape} other {# étapes}}",
+        "sources": "{count, plural, one {# source consultée} other {# sources consultées}}"
+      },
+      "writing": "Rédaction du rapport"
     }
   },
   "problem": {

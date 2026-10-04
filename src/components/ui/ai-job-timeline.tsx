@@ -2,7 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { stepLabelKey } from "@/lib/jobs/step-labels";
-import type { AiJob } from "@/lib/jobs/use-ai-job";
+import type { ClientStep } from "@/lib/jobs/job-timeline";
 
 // What a step found, by key — the worker stores a key and a number, never
 // a sentence (lib/jobs/job-timeline.ts EVIDENCE_KEYS). Named rather than
@@ -11,6 +11,7 @@ const EVIDENCE_MESSAGE = {
   files: "timeline.evidence.files",
   parts: "timeline.evidence.parts",
   planSteps: "timeline.evidence.planSteps",
+  sources: "timeline.evidence.sources",
 } as const;
 
 /**
@@ -25,7 +26,19 @@ const EVIDENCE_MESSAGE = {
  * Renders nothing for a job with no recorded steps: an un-migrated
  * database, or a job from before the timeline existed.
  */
-export function AiJobTimeline({ job, className = "" }: { job: AiJob | null; className?: string }) {
+export function AiJobTimeline({
+  job,
+  labelFor,
+  className = "",
+}: {
+  // A background job (lib/jobs/use-ai-job), or anything else that keeps
+  // the same steps — Deep Research does (lib/research/research-timeline).
+  job: { kind: string; timeline?: ClientStep[] } | null;
+  // For a caller whose labels are its own keys rather than JOB_STEPS.
+  // Returns null to fall through to the job wording, or the raw label.
+  labelFor?: (label: string | null) => string | null;
+  className?: string;
+}) {
   // NAMESPACED, so the dashboard's message slice can be bounded
   // (scripts/tests/message-slices.test.mjs): the step labels live under
   // aiSteps, the credits string under settings.billing.
@@ -43,7 +56,9 @@ export function AiJobTimeline({ job, className = "" }: { job: AiJob | null; clas
           const key = stepLabelKey(job.kind, s.label);
           return (
             <li key={`${s.step}-${s.startedAt}`} className="flex flex-wrap items-baseline gap-x-2" data-testid="ai-job-timeline-step">
-              <span className="text-foreground">{key ? tSteps(key.slice("aiSteps.".length) as never) : s.label}</span>
+              <span className="text-foreground">
+                {labelFor?.(s.label) ?? (key ? tSteps(key.slice("aiSteps.".length) as never) : s.label)}
+              </span>
               {s.evidence && EVIDENCE_MESSAGE[s.evidence.key] && (
                 <span>{tSteps(EVIDENCE_MESSAGE[s.evidence.key], { count: s.evidence.count })}</span>
               )}

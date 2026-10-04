@@ -30,7 +30,7 @@
  * rendered through messages (aiSteps.timeline.evidence.<key>) in the
  * reader's, with the plural rules of that language.
  */
-export const EVIDENCE_KEYS = ["files", "parts", "planSteps"] as const;
+export const EVIDENCE_KEYS = ["files", "parts", "planSteps", "sources"] as const;
 export type EvidenceKey = (typeof EVIDENCE_KEYS)[number];
 export type Evidence = { key: EvidenceKey; count: number };
 

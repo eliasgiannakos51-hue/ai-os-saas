@@ -177,3 +177,10 @@ export function isResearchJobStale(
  * when something is genuinely wrong.
  */
 export const MAX_RESEARCH_CHUNKS = 12;
+
+/**
+ * The label of the last step of a report's timeline — writing the report
+ * from the findings. Lives here, not in research-timeline.ts, because the
+ * screen needs it and that file pulls the cost accumulator in with it.
+ */
+export const RESEARCH_WRITING_LABEL = "writing";

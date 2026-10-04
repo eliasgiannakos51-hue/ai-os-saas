@@ -24,7 +24,9 @@ import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
-import { MAX_TOPIC_CHARS } from "@/lib/research/research-limits";
+import { MAX_TOPIC_CHARS, RESEARCH_WRITING_LABEL } from "@/lib/research/research-limits";
+import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
+import type { ClientStep } from "@/lib/jobs/job-timeline";
 import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { VoiceInput } from "@/components/voice/voice-input";
 import { VoicePlayer } from "@/components/voice/voice-player";
@@ -51,6 +53,10 @@ export type ResearchReport = {
   questions_done?: number | null;
   questions_total?: number | null;
   current_question?: string | null;
+  // One step per question, then the writing — built by the server from
+  // the findings (lib/research/research-timeline.ts). Absent from the
+  // list endpoint; present on every poll of api/research/[id].
+  timeline?: ClientStep[];
 };
 
 /** Poll interval while a report runs. A report takes minutes, so a
@@ -535,6 +541,12 @@ export function ResearchWorkspace({
                   <p className="ps-[18px] text-[11px] text-muted/70">{t("keepsRunning")}</p>
                 </div>
               )}
+              {/* What each question found and took — live while it runs,
+                  and afterwards with the credits each step cost. */}
+              <AiJobTimeline
+                job={{ kind: "research", timeline: report.timeline }}
+                labelFor={(label) => (label === RESEARCH_WRITING_LABEL ? tSteps("timeline.writing") : null)}
+              />
             </EntityCard>
           ))}
         </CardGrid>

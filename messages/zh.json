@@ -3223,8 +3223,10 @@
       "evidence": {
         "files": "{count, plural, other {# 个文件}}",
         "parts": "{count, plural, other {分 # 部分}}",
-        "planSteps": "{count, plural, other {# 个步骤}}"
-      }
+        "planSteps": "{count, plural, other {# 个步骤}}",
+        "sources": "{count, plural, other {# 个来源}}"
+      },
+      "writing": "撰写报告"
     }
   },
   "problem": {

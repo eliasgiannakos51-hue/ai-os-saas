@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isResearchJobStale, type ResearchStatus } from "@/lib/research/research-limits";
+import { researchReportForClient } from "@/lib/research/research-timeline";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -78,7 +79,7 @@ export async function GET(_request: Request, { params }: { params: { id: string 
           status: data.status,
           processingStartedAt: data.processing_started_at ?? null,
         });
-        return NextResponse.json({ ok: true, report: failed });
+        return NextResponse.json({ ok: true, report: researchReportForClient(failed) });
       }
       // The worker won the race — re-read rather than returning our now
       // stale copy.
@@ -88,10 +89,12 @@ export async function GET(_request: Request, { params }: { params: { id: string 
         .eq("id", params.id)
         .eq("user_id", user.id)
         .maybeSingle();
-      if (fresh) return NextResponse.json({ ok: true, report: fresh });
+      if (fresh) return NextResponse.json({ ok: true, report: researchReportForClient(fresh) });
     }
 
-    return NextResponse.json({ ok: true, report: data });
+    // Never the row as is: it carries usage_entries (every model, token
+    // and USD cost the report spent). See researchReportForClient.
+    return NextResponse.json({ ok: true, report: researchReportForClient(data) });
   } catch (err) {
     logApiError("/api/research/[id]", err, {});
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });

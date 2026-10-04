@@ -339,32 +339,6 @@
   );
 }
 
-/* Premium theme variants (settings/theme-settings.tsx) — same variable
-   set as dark/light above, just a different base palette. The amber
-   accent (orange-500 etc, used directly via Tailwind classes rather than
-   a variable) deliberately isn't part of this system, so it stays
-   identical across every theme for brand consistency. */
-[data-theme="midnight"] {
-  --background: 5 7 15;
-  --panel: 13 18 32;
-  --panel-hover: 19 26 44;
-  --border: 99 105 131;
-  --foreground: 230 233 245;
-  --muted: 129 136 168;
-  --input-bg: rgba(5, 10, 25, 0.5);
-  color-scheme: dark;
-}
-
-[data-theme="carbon"] {
-  --background: 26 26 28;
-  --panel: 35 35 38;
-  --panel-hover: 42 42 46;
-  --border: 122 122 130;
-  --foreground: 238 238 239;
-  --muted: 156 156 163;
-  --input-bg: rgba(255, 255, 255, 0.04);
-  color-scheme: dark;
-}
 
 /* ALPHA DOES NOT CARRY HIERARCHY IN LIGHT.
    
@@ -793,8 +767,6 @@ body {
 
          dark      background 10,10,10   panel 20,20,20
          light     background 247        panel 255
-         midnight  background 5,7,15     panel 13,18,32
-         grey      background 26,26,28   panel 35,35,38
 
      so the panel reads as raised without a line around it. What a border
      added was not definition but noise, 140 times over.

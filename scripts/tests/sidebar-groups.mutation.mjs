@@ -136,8 +136,10 @@ const MUTANTS = [
     // became a multi-line object when it was retired. The two rows
     // left in the group are what the mutant needs — hiding every row
     // in a group must empty it.
-    from: '      { href: \"/dashboard/agents\", label: \"AI Agents\", icon: MODULE_ICONS.agents, hintKey: \"agents\" },\n      { href: \"/dashboard/automation\", label: \"Automation\", icon: MODULE_ICONS.automation, hintKey: \"automation\" },',
-    to: '      { href: \"/dashboard/agents\", label: \"AI Agents\", icon: MODULE_ICONS.agents, hintKey: \"agents\" , hidden: true },\n      { href: \"/dashboard/automation\", label: \"Automation\", icon: MODULE_ICONS.automation, hintKey: \"automation\" , hidden: true },',
+    // RE-ANCHORED AGAIN 2026-10-04: AI Agents was retired, so Automation
+    // is the one row left drawn in Run, and hiding it is what empties it.
+    from: '      { href: \"/dashboard/automation\", label: \"Automation\", icon: MODULE_ICONS.automation, hintKey: \"automation\" },',
+    to: '      { href: \"/dashboard/automation\", label: \"Automation\", icon: MODULE_ICONS.automation, hintKey: \"automation\" , hidden: true },',
     // RE-NAMED 2026-10-01, not relaxed. The check this trips was
     // rewritten when the five all-notBuilt groups arrived: "every
     // declared group still draws rows" stopped being the rule, because

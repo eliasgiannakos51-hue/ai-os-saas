@@ -11,14 +11,8 @@ import { useTranslations } from "next-intl";
 // flash); this component only needs to read that attribute back on mount
 // and toggle it afterward, same source of truth either way.
 //
-// This is deliberately still a plain dark/light toggle even though Theme
-// now has 4 members (see theme-prefs.ts / settings/theme-settings.tsx for
-// the full picker) — a two-icon button can't represent 4 states. From
-// "midnight" or "carbon" it falls through to "light" (since neither is
-// "light"), same as it already did for anything that wasn't literally
-// "light"; from "light" it goes to "dark". The full picker in Settings is
-// the only place to reach midnight/carbon, but this quick toggle never
-// corrupts that choice — it just doesn't cycle through it.
+// A plain dark/light toggle, and since 2026-10-04 those are the only two
+// themes there are (lib/theme-prefs.ts).
 export function ThemeToggle({ className }: { className?: string }) {
   const t = useTranslations("common");
   const [theme, setTheme] = useState<Theme | null>(null);

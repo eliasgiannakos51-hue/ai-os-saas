@@ -703,9 +703,7 @@
       "description": "اختر لوحة ألوان للتطبيق بالكامل — يبقى التخطيط ولون التمييز كما هما.",
       "options": {
         "dark": "داكن",
-        "light": "فاتح",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "فاتح"
       }
     },
     "language": {

@@ -703,9 +703,7 @@
       "description": "Wähle eine Farbpalette für die gesamte App — Layout und Akzentfarbe bleiben gleich.",
       "options": {
         "dark": "Dunkel",
-        "light": "Hell",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "Hell"
       }
     },
     "language": {

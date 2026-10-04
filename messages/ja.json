@@ -703,9 +703,7 @@
       "description": "アプリ全体の配色を選択できます — レイアウトとアクセントカラーは変わりません。",
       "options": {
         "dark": "ダーク",
-        "light": "ライト",
-        "midnight": "ミッドナイト",
-        "carbon": "カーボン"
+        "light": "ライト"
       }
     },
     "language": {

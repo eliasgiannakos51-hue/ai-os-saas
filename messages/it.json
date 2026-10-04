@@ -703,9 +703,7 @@
       "description": "Scegli una tavolozza di colori per tutta l'app — il layout e il colore d'accento restano invariati.",
       "options": {
         "dark": "Scuro",
-        "light": "Chiaro",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "Chiaro"
       }
     },
     "language": {

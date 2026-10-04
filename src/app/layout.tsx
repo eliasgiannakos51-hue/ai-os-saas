@@ -87,7 +87,8 @@ export const viewport: Viewport = {
 // places these values are written.
 const INIT_SCRIPT = `(function(){try{
 var t=localStorage.getItem('theme');
-document.documentElement.setAttribute('data-theme',(t==='light'||t==='midnight'||t==='carbon')?t:'dark');
+if(t==='midnight'||t==='carbon'){t='dark';localStorage.setItem('theme','dark');}
+document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');
 var fs=localStorage.getItem('${FONT_SIZE_STORAGE_KEY}');
 document.documentElement.setAttribute('data-font-size',(fs==='small'||fs==='large'||fs==='xl')?fs:'medium');
 if(localStorage.getItem('${HIGH_CONTRAST_STORAGE_KEY}')==='1'){document.documentElement.setAttribute('data-contrast','high');}

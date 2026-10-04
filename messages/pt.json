@@ -703,9 +703,7 @@
       "description": "Escolha uma paleta de cores para todo o app — o layout e a cor de destaque permanecem os mesmos.",
       "options": {
         "dark": "Escuro",
-        "light": "Claro",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "Claro"
       }
     },
     "language": {

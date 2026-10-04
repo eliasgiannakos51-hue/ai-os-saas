@@ -703,9 +703,7 @@
       "description": "为整个应用选择配色方案——布局和强调色保持不变。",
       "options": {
         "dark": "深色",
-        "light": "浅色",
-        "midnight": "午夜蓝",
-        "carbon": "石墨灰"
+        "light": "浅色"
       }
     },
     "language": {

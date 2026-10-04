@@ -703,9 +703,7 @@
       "description": "Choose a color palette for the whole app — layout and accent color stay the same.",
       "options": {
         "dark": "Dark",
-        "light": "Light",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "Light"
       }
     },
     "language": {

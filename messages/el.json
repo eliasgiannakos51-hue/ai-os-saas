@@ -703,9 +703,7 @@
       "description": "Επίλεξε χρωματική παλέτα για όλη την εφαρμογή — το layout και το χρώμα accent παραμένουν ίδια.",
       "options": {
         "dark": "Σκοτεινό",
-        "light": "Φωτεινό",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "Φωτεινό"
       }
     },
     "language": {

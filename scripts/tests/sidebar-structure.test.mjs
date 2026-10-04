@@ -192,6 +192,10 @@ const NOT_DRAWN_YET = new Map([
   // declared list that contained it, and agreed with itself. The parse
   // reads the flag now and the declaration carries it.
   ["/dashboard/marketplace", "retired"],
+  // AGENTS LEFT THE MENU ON 2026-10-04 (owner's decision, BUILD-SPECS 3E):
+  // they track rather than execute, so they are not offered until they do.
+  // Retired, not hidden: the page answers its URL and nothing offers it.
+  ["/dashboard/agents", "retired"],
   ["/dashboard/workflows", "notBuilt"],
   ["/dashboard/scheduled-jobs", "notBuilt"],
   ["/dashboard/operations", "notBuilt"],

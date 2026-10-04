@@ -28,8 +28,10 @@ const MUTANTS = [
     // THE ONE ASKED FOR: the row is drawn again.
     name: "the row goes back into the sidebar",
     file: NAV,
-    from: "        retired:",
-    to: "        notRetired:",
+    // Anchored on the marketplace's own row: since 2026-10-04 AI Agents is
+    // retired too and comes first, and a bare "retired:" would hit it.
+    from: '        hintKey: "marketplace",\n        retired:',
+    to: '        hintKey: "marketplace",\n        notRetired:',
     expect: "the sidebar does not draw it",
   },
   {
@@ -39,8 +41,8 @@ const MUTANTS = [
     // exists at all.
     name: "retired is downgraded to hidden",
     file: NAV,
-    from: "        retired:",
-    to: "        hidden: true,\n        unusedReason:",
+    from: '        hintKey: "marketplace",\n        retired:',
+    to: '        hintKey: "marketplace",\n        hidden: true,\n        unusedReason:',
     expect: "the command palette does not offer it",
   },
   {

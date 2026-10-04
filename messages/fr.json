@@ -703,9 +703,7 @@
       "description": "Choisissez une palette de couleurs pour toute l'application — la mise en page et la couleur d'accent restent identiques.",
       "options": {
         "dark": "Sombre",
-        "light": "Clair",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "Clair"
       }
     },
     "language": {

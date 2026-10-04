@@ -50,10 +50,11 @@ export const PALETTE_ALIASES: PaletteAliases = {
     en: ["numbers", "stats", "statistics", "metrics", "charts", "reports", "dashboard"],
     el: ["αναλυτικά", "στατιστικά", "νούμερα", "αριθμοί", "μετρήσεις", "γραφήματα", "αναφορές"],
   },
-  agents: {
-    en: ["agents", "agent", "assistants", "workers", "bots"],
-    el: ["πράκτορες", "εργάτες", "αυτόματα"],
-  },
+  // agents: REMOVED 2026-10-04 with the row itself — AI Agents is retired
+  // from every surface until it executes (lib/sidebar-nav.ts), so a
+  // synonym that finds it would offer a page the menu withdrew. Put
+  // ["agents", "agent", "assistants", "workers", "bots"] / ["πράκτορες",
+  // "εργάτες", "αυτόματα"] back when the row comes back.
   deepResearch: {
     en: ["deep research", "investigate", "dig", "thorough"],
     el: ["βαθιά έρευνα", "ψάξιμο", "διερεύνηση"],

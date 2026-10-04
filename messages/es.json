@@ -703,9 +703,7 @@
       "description": "Elige una paleta de colores para toda la app — el diseño y el color de acento se mantienen igual.",
       "options": {
         "dark": "Oscuro",
-        "light": "Claro",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "Claro"
       }
     },
     "language": {

@@ -88,7 +88,10 @@ for (const isOwner of [false, true]) {
   check(`${who}: and the palette still has plenty else`, pal.length >= 30, String(pal.length));
 }
 
-console.log("\n== 3. the Run group draws exactly two rows ==");
+// ONE ROW SINCE 2026-10-04. AI Agents was retired from the menu that day
+// by the owner's decision (BUILD-SPECS 3E: not shown until it executes),
+// the same way the marketplace was; lib/sidebar-nav.ts records why.
+console.log("\n== 3. the Run group draws exactly one row ==");
 for (const isOwner of [false, true]) {
   const who = isOwner ? "owner" : "non-owner";
   const run = sidebarGroups(groups, isOwner).find((g) => g.heading === "Run");
@@ -97,11 +100,11 @@ for (const isOwner of [false, true]) {
   check(`${who}: the Run group is still drawn`, Boolean(run), "Run was dropped — every row under it was filtered out");
   const labels = run ? run.items.map((i) => i.label) : [];
   check(
-    `${who}: it has exactly two items (${labels.join(" · ") || "none"})`,
-    labels.length === 2,
+    `${who}: it has exactly one item (${labels.join(" · ") || "none"})`,
+    labels.length === 1,
     `${labels.length}: ${labels.join(", ")}`
   );
-  check(`${who}: AI Agents and Automation`, labels.includes("AI Agents") && labels.includes("Automation"), labels.join(", "));
+  check(`${who}: Automation, and not AI Agents`, labels.includes("Automation") && !labels.includes("AI Agents"), labels.join(", "));
 }
 
 console.log("\n== 4. the page is still there and still served ==");
@@ -112,7 +115,11 @@ check("it still exports a default page component", /export default async functio
 check("it still reads the table", /\.from\("agent_templates"\)/.test(stripComments(page)));
 // THE REASON IS RECORDED. A row nobody can find has to say why it is
 // still here, or the next reader deletes the page and takes the URL.
-const retiredReason = navSrc.match(/retired:\s*([\s\S]{0,400}?)(?:,\n\s*\}|\n\s*\},)/)?.[1] ?? "";
+// Read from the marketplace's own row: since 2026-10-04 it is not the
+// only retired row (AI Agents is too), so "the first retired: in the
+// file" would be somebody else's reason.
+const marketplaceRow = navSrc.slice(navSrc.indexOf('href: "/dashboard/marketplace"'));
+const retiredReason = marketplaceRow.match(/retired:\s*([\s\S]{0,400}?)(?:,\n\s*\}|\n\s*\},)/)?.[1] ?? "";
 check(
   `the nav row records why, in words (${retiredReason.replace(/\s+/g, " ").trim().length} chars)`,
   retiredReason.replace(/\s+/g, " ").trim().length > 80,

@@ -301,6 +301,17 @@ const MUTANTS = [
     to: '})("src/lib/overview");',
     expect: "the tree was scanned",
   },
+  {
+    dimension: "G. instruments",
+    // The page the hierarchy checks read. A gate pointed at a file that is
+    // not there reads "" — and `read` returns "" on purpose, so a missing
+    // path must fail on what it was supposed to find, not pass on nothing.
+    name: "the hierarchy is read from a page that does not exist",
+    file: GATE,
+    from: 'const OVERVIEW = "src/app/dashboard/overview/page.tsx";',
+    to: 'const OVERVIEW = "src/app/dashboard/overview/missing.tsx";',
+    expect: "Home renders the quick actions",
+  },
 ];
 
 function runGate() {

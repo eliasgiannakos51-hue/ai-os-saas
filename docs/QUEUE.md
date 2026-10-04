@@ -40,7 +40,7 @@
 | D.10 | Κινητό: κάτω μπάρα Home, Chat, Tools, You | 2.4 σεν. 13 | φτιαγμένο, αδοκίμαστο σε browser (τοπικό branch `design-d`) | `mobile-tabs.test.mjs` 23 έλεγχοι, 7/7 mutations |
 | D.11 | Έλεγχος όλου του site (μέρος Γ, `docs/CONTEXT.md`) και διορθώσεις με test | 1.1, 1.6, 1.7, 2.4, 2.6 | έγινε εδώ (production build, ψεύτικη βάση)· στο preview μπλοκαρισμένο στο NEEDS 2 | `scripts/site-audit.mjs`: 63 σελίδες × 2 πλάτη. axe 0, «…» 0, console 0, οριζόντια κύλιση 0. CLS του chat μένει (DECISIONS) |
 | D.11b | Η διαθεσιμότητα της φωνής από τον server, μαζί με τη σελίδα | 1.6 | εκκρεμεί | Βγάζει το CLS του chat (0,01–0,15 τοπικά), που έμεινε από το D.11 |
-| D.12 | Pull request για το design | — | εκκρεμεί | Χωρίς merge· τον κάνει ο ιδιοκτήτης |
+| D.12 | Pull request για το design | — | ανέβηκε στο #223, μαζί με το timeline (NEEDS 3) | Χωρίς merge· τον κάνει ο ιδιοκτήτης, μετά το preview |
 
 ## ΦΑΣΗ 0 — ό,τι τρέχει τώρα
 

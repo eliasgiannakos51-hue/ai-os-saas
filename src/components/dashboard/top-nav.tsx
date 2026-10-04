@@ -58,7 +58,7 @@ export function TopNav({ email }: { email: string }) {
       >
         <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
         <span className="flex-1 text-start">{t("search")}</span>
-        <kbd className="rounded border border-border bg-input px-1.5 py-0.5 text-[10px] font-medium text-muted">
+        <kbd className="rounded-item border border-border bg-input px-1.5 py-0.5 text-[10px] font-medium text-muted">
           ⌘K
         </kbd>
       </button>
@@ -112,7 +112,7 @@ export function TopNav({ email }: { email: string }) {
 
         <Link
           href="/dashboard/settings#buy-credits"
-          className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold tabular-nums text-muted transition-colors duration-150 hover:border-foreground/50 hover:text-foreground lg:inline-flex"
+          className="hidden shrink-0 items-center gap-1.5 rounded-item border border-border px-3 py-2 text-xs font-semibold tabular-nums text-muted transition-colors duration-150 hover:border-foreground/50 hover:text-foreground lg:inline-flex"
           title={isAdmin ? t("ownerAccessTooltip") : t("creditsTooltip")}
         >
           <Zap className="h-3.5 w-3.5 text-foreground" aria-hidden="true" />
@@ -131,7 +131,7 @@ export function TopNav({ email }: { email: string }) {
           // Below `lg` this is the icon alone, which `px-3 py-2` sized at
           // 40x40 — the one control in the header that stayed under 44px
           // after everything else was raised.
-          className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-lg bg-button px-3 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 lg:px-3.5"
+          className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-item bg-button px-3 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 lg:px-3.5"
         >
           <Plus className="h-4 w-4" />
           {/* THE BUTTON AND THE PAGE IT OPENS SAY THE SAME WORD.
@@ -160,7 +160,7 @@ export function TopNav({ email }: { email: string }) {
           </button>
           {userMenuOpen && (
             <div className="absolute end-0 top-11 w-56 surface-tight">
-              <p className="truncate text-xs text-muted">{email}</p>
+              <p className="break-words text-xs text-muted">{email}</p>
               <div className="mt-3">
                 <LogoutButton />
               </div>

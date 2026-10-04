@@ -55,7 +55,7 @@ export function LowCreditsBanner({ variant = "banner" }: { variant?: "banner" | 
   return (
     <div
       className={[
-        "mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3",
+        "mb-6 flex flex-wrap items-center justify-between gap-3 rounded-card border px-4 py-3",
         isEmpty
           ? "border-danger/35 bg-danger/[0.06]"
           : "border-foreground/35 bg-foreground/[0.06]",
@@ -68,7 +68,7 @@ export function LowCreditsBanner({ variant = "banner" }: { variant?: "banner" | 
       </p>
       <Link
         href="/dashboard/settings#credits"
-        className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground"
+        className="shrink-0 rounded-item border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground"
       >
         {t("topUp")}
       </Link>

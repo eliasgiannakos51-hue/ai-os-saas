@@ -99,7 +99,7 @@ export function PasswordChangeForm() {
       </label>
 
       {error && (
-        <p className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+        <p className="rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
           {tCommon("errorWithMessage", { message: error })}
         </p>
       )}
@@ -107,7 +107,7 @@ export function PasswordChangeForm() {
       <button
         type="submit"
         disabled={loading}
-        className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+        className="inline-flex min-h-[44px] w-full items-center justify-center rounded-item border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
       >
         {loading ? t("updating") : t("updatePassword")}
       </button>

@@ -68,7 +68,7 @@ export function CancelSubscription({ endsAt }: { endsAt: string | null }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-danger/40 hover:text-danger"
+        className="inline-flex min-h-[40px] items-center justify-center rounded-item border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-danger/40 hover:text-danger"
       >
         {t("button")}
       </button>
@@ -76,7 +76,7 @@ export function CancelSubscription({ endsAt }: { endsAt: string | null }) {
   }
 
   return (
-    <div className="w-full rounded-xl border border-border bg-input p-4">
+    <div className="w-full rounded-card border border-border bg-input p-4">
       <h3 className="text-sm font-semibold text-foreground">{t("title")}</h3>
 
       {/* The four facts, before the decision. */}
@@ -129,7 +129,7 @@ export function CancelSubscription({ endsAt }: { endsAt: string | null }) {
           type="button"
           onClick={confirm}
           disabled={loading}
-          className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-danger/40 bg-danger/10 px-4 py-2 text-sm font-medium text-danger transition-colors duration-150 hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[40px] items-center justify-center rounded-item border border-danger/40 bg-danger/10 px-4 py-2 text-sm font-medium text-danger transition-colors duration-150 hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? tCommon("loading") : t("confirm")}
         </button>
@@ -137,7 +137,7 @@ export function CancelSubscription({ endsAt }: { endsAt: string | null }) {
           type="button"
           onClick={() => setOpen(false)}
           disabled={loading}
-          className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
+          className="inline-flex min-h-[40px] items-center justify-center rounded-item border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
         >
           {t("keepIt")}
         </button>

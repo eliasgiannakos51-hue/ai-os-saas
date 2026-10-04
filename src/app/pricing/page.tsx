@@ -160,7 +160,7 @@ export default async function PricingPage({
               // about is the one on screen — see
               // components/billing/upgrade-required.tsx.
               id={`plan-${plan.slug}`}
-              className={`relative flex scroll-mt-8 flex-col rounded-2xl border p-6 ${
+              className={`relative flex scroll-mt-8 flex-col rounded-card border p-6 ${
                 plan.highlighted
                   ? "border-foreground/60 bg-foreground/[0.04]"
                   : "border-border bg-panel"
@@ -262,14 +262,14 @@ export default async function PricingPage({
                 {plan.slug === "free" ? (
                   <Link
                     href="/signup?plan=free"
-                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground"
+                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded-card border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground"
                   >
                     {t("signUp")}
                   </Link>
                 ) : plan.slug === "enterprise" ? (
                   <a
                     href="mailto:sales@ionexa.ai?subject=Ionexa%20AI%20Enterprise"
-                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground"
+                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded-card border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground"
                   >
                     {t("contactSales")}
                   </a>
@@ -278,7 +278,7 @@ export default async function PricingPage({
                     plan={plan.slug as PaidPlanSlug}
                     interval={interval}
                     label={t("getPlan", { plan: plan.name })}
-                    className={`inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
+                    className={`inline-flex min-h-[44px] w-full items-center justify-center rounded-card px-4 py-2 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
                       plan.highlighted
                         ? "bg-button text-button-ink hover:opacity-90"
                         : "border border-border text-foreground hover:border-foreground/40 hover:text-foreground"
@@ -307,7 +307,7 @@ export default async function PricingPage({
               {hasTeamCapablePlan ? (
                 <Link
                   href="/dashboard/team"
-                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-card border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground"
                 >
                   {t("setUpTeam")}
                 </Link>
@@ -316,7 +316,7 @@ export default async function PricingPage({
                   plan="professional"
                   label={t("setUpTeam")}
                   successPath="/dashboard/team?setup=success"
-                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-card border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
                 />
               )}
             </div>
@@ -381,7 +381,7 @@ export default async function PricingPage({
               // band separates it from its own rows, without drawing
               // anything.
               return (
-                <details key={group} open className="group/section overflow-hidden rounded-2xl bg-panel">
+                <details key={group} open className="group/section overflow-hidden rounded-card bg-panel">
                   <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold text-foreground">
                     <span>
                       {t(`groups.${group}`)}

@@ -17,7 +17,7 @@ export function recordActionClasses(
   const destructive = tone === "destructive";
 
   if (variant === "menuItem") {
-    return `flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
+    return `flex w-full items-center gap-2.5 rounded-item px-2.5 py-2 text-left text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
       destructive
         ? "text-danger hover:bg-danger/10"
         : "text-foreground hover:bg-panel-hover hover:text-foreground"
@@ -25,14 +25,14 @@ export function recordActionClasses(
   }
 
   if (variant === "action") {
-    return `inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 ${
+    return `inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-item border border-border px-3 py-2 text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 ${
       destructive
         ? "text-danger hover:border-danger/60 hover:bg-danger/10"
         : "text-foreground hover:border-foreground/40 hover:text-foreground"
     }`;
   }
 
-  return `flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 disabled:opacity-50 ${
+  return `flex h-8 w-8 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 disabled:opacity-50 ${
     destructive ? "hover:bg-danger/10 hover:text-danger" : "hover:bg-foreground/10 hover:text-foreground"
   }`;
 }

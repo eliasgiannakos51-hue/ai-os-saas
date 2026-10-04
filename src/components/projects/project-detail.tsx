@@ -118,7 +118,7 @@ export function ProjectDetail({
         <div className="mt-4">
           <Link
             href={`/dashboard/chat?project=${encodeURIComponent(project.id)}`}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-button px-4 text-sm font-semibold text-button-ink hover:bg-button"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-item bg-button px-4 text-sm font-semibold text-button-ink hover:bg-button"
           >
             <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
             {t("startChat")}
@@ -138,14 +138,14 @@ export function ProjectDetail({
               {section.rows.map((member) => (
                 <li key={`${member.table}:${member.id}`} className="flex items-center justify-between gap-3 py-2">
                   <div className="min-w-0 flex-1">
-                    <p className="line-clamp-1 text-sm text-foreground">{member.headline || t("untitled")}</p>
+                    <p className="break-words text-sm text-foreground">{member.headline || t("untitled")}</p>
                     <p className="text-[11px] text-muted">{tKey(member.titleKey)}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => removeMember(member)}
                     aria-label={t("removeMember")}
-                    className="rounded-md p-2 text-muted hover:text-foreground"
+                    className="rounded-item p-2 text-muted hover:text-foreground"
                   >
                     <X className="h-4 w-4" aria-hidden="true" />
                   </button>

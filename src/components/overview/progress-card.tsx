@@ -13,16 +13,16 @@ export function ProgressCard({
   stats: { label: string; value: number }[];
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-panel p-5">
-      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-foreground/10 text-foreground">
+    <div className="rounded-card border border-border bg-panel p-5">
+      <span className="flex h-11 w-11 items-center justify-center rounded-card bg-foreground/10 text-foreground">
         <TrendingUp className="h-5 w-5" aria-hidden="true" />
       </span>
       <p className="mt-3 text-xs uppercase tracking-wide text-muted">{title}</p>
       <div className="mt-2 grid grid-cols-3 gap-2">
         {stats.map((stat) => (
           <div key={stat.label} className="min-w-0">
-            <p className="truncate text-xl font-bold text-foreground">{stat.value}</p>
-            <p className="truncate text-[11px] text-muted/80">{stat.label}</p>
+            <p className="break-words text-xl font-bold text-foreground">{stat.value}</p>
+            <p className="break-words text-[11px] text-muted/80">{stat.label}</p>
           </div>
         ))}
       </div>

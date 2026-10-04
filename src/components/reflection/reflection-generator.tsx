@@ -100,14 +100,14 @@ export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" }
         type="button"
         onClick={handleGenerate}
         disabled={loading}
-        className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-card border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Sparkles className="h-4 w-4" aria-hidden="true" />
         {loading ? t("generating") : t("generateButton")}
       </button>
 
       {error && (
-        <p className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+        <p className="rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
           {error}
         </p>
       )}
@@ -167,7 +167,7 @@ export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" }
       )}
 
       {reflection && (
-        <div className="rounded-2xl border border-foreground/20 bg-foreground/[0.03] p-5">
+        <div className="rounded-card border border-foreground/20 bg-foreground/[0.03] p-5">
           <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-foreground">
             {t("reflectionLabel")}
           </p>

@@ -74,13 +74,13 @@ export function LanguageSettings() {
               onClick={() => selectLanguage(lang.code)}
               disabled={pending}
               aria-pressed={isSelected}
-              className={`flex min-h-[44px] items-center gap-2 rounded-xl border px-3 py-2.5 text-start transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${
+              className={`flex min-h-[44px] items-center gap-2 rounded-card border px-3 py-2.5 text-start transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${
                 isSelected
                   ? "border-foreground/40 bg-foreground/[0.06]"
                   : "border-border hover:border-foreground/40"
               }`}
             >
-              <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
+              <span className="min-w-0 flex-1 break-words text-xs font-medium text-foreground">
                 {lang.label}
               </span>
               {isSelected && (

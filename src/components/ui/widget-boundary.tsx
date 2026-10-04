@@ -68,7 +68,7 @@ export class WidgetBoundary extends Component<
       <div
         role="alert"
         data-widget-boundary="failed"
-        className="rounded-2xl border border-danger/30 bg-danger/[0.04] p-4 text-xs text-muted"
+        className="rounded-card border border-danger/30 bg-danger/[0.04] p-4 text-xs text-muted"
       >
         <p className="flex items-center gap-2 font-medium text-danger">
           <AlertTriangle className="h-4 w-4" aria-hidden="true" />

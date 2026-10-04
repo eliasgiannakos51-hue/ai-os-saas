@@ -180,7 +180,7 @@ export default async function SystemHealthPage() {
         <EnvWarnings warnings={warnings} />
 
         {failed ? (
-          <p className="rounded-xl border border-danger/30 bg-danger/[0.05] p-4 text-xs text-danger">
+          <p className="rounded-card border border-danger/30 bg-danger/[0.05] p-4 text-xs text-danger">
             Could not load errors. Check that the production_errors table exists.
           </p>
         ) : (

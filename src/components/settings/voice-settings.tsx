@@ -40,11 +40,11 @@ export function VoiceSettings() {
       <p className="text-xs leading-relaxed text-muted">{t("description")}</p>
 
       {!v.included ? (
-        <p className="rounded-xl border border-border bg-input px-3 py-2 text-xs text-muted">
+        <p className="rounded-card border border-border bg-input px-3 py-2 text-xs text-muted">
           {t("notIncluded")}
         </p>
       ) : !configured ? (
-        <p className="rounded-xl border border-border bg-input px-3 py-2 text-xs text-muted">
+        <p className="rounded-card border border-border bg-input px-3 py-2 text-xs text-muted">
           {t("notConfigured")}
         </p>
       ) : (
@@ -96,7 +96,7 @@ export function VoiceSettings() {
               feature is worse than silence: silence is at least not a
               claim. */}
           <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <div className="rounded-xl border border-border bg-input px-3 py-2">
+            <div className="rounded-card border border-border bg-input px-3 py-2">
               <dt className="text-[11px] text-muted">{t("transcribeLabel")}</dt>
               <dd
                 className={
@@ -108,7 +108,7 @@ export function VoiceSettings() {
                   : t("directionNotConfigured")}
               </dd>
             </div>
-            <div className="rounded-xl border border-border bg-input px-3 py-2">
+            <div className="rounded-card border border-border bg-input px-3 py-2">
               <dt className="text-[11px] text-muted">{t("speakLabel")}</dt>
               <dd
                 className={
@@ -125,7 +125,7 @@ export function VoiceSettings() {
           {/* And say what that costs the reader, in words, rather than
               leaving them to infer it from a missing button. */}
           {v.included && (!v.configured.transcribe || !v.configured.speak) ? (
-            <p className="rounded-xl border border-warning/40 bg-warning/10 px-3 py-2 text-xs leading-relaxed text-warning">
+            <p className="rounded-card border border-warning/40 bg-warning/10 px-3 py-2 text-xs leading-relaxed text-warning">
               {!v.configured.speak && !v.configured.transcribe
                 ? t("notConfigured")
                 : !v.configured.speak

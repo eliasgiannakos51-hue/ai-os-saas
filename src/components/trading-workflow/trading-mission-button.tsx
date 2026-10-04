@@ -82,7 +82,7 @@ export function TradingMissionButton({
         disabled={loading}
         className="flex w-full items-center gap-3 text-start transition-opacity duration-150 disabled:opacity-60"
       >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/10 text-foreground">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-card bg-foreground/10 text-foreground">
           <Rocket className="h-4 w-4" aria-hidden="true" />
         </span>
         <div className="min-w-0">
@@ -91,7 +91,7 @@ export function TradingMissionButton({
         </div>
       </button>
       {error && (
-        <p className="mt-2 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+        <p className="mt-2 rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
           {error}
         </p>
       )}

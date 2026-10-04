@@ -59,7 +59,7 @@ export function ConfirmDeleteAccountForm() {
           <Logo className="h-[168px] w-auto max-w-full" />
         </div>
 
-        <div className="rounded-2xl border border-danger/40 bg-danger/[0.03] p-6">
+        <div className="rounded-card border border-danger/40 bg-danger/[0.03] p-6">
           <h1 className="flex items-center justify-center gap-2 text-lg font-semibold text-danger">
             <AlertTriangle className="h-5 w-5" /> {t("title")}
           </h1>
@@ -75,7 +75,7 @@ export function ConfirmDeleteAccountForm() {
               </p>
 
               {error && (
-                <p className="mt-4 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+                <p className="mt-4 rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                   {error}
                 </p>
               )}
@@ -84,7 +84,7 @@ export function ConfirmDeleteAccountForm() {
                 type="button"
                 onClick={confirmDeletion}
                 disabled={status === "loading"}
-                className="mt-5 inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-danger px-4 py-2.5 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-5 inline-flex min-h-[44px] w-full items-center justify-center rounded-card bg-danger px-4 py-2.5 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {status === "loading" ? t("deleting") : t("confirmButton")}
               </button>

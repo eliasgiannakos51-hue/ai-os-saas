@@ -84,7 +84,12 @@ const IS_DIVIDE = (t) => /^divide-[xy](-\d+)?$/.test(t);
 // utilities made every migrated card disappear from this number and the
 // census reported "fewer cards" for a change that moved zero cards. The
 // class names count as frames because they ARE frames.
-const IS_FRAME = (t) => /^rounded(-(sm|md|lg|xl|2xl|3xl))?$/.test(t) || t === "surface" || t === "surface-tight";
+// The design's three radii (item, card, field — tailwind.config.ts) since
+// design D.8 (2026-10-04), when every rounded-sm…3xl was mapped onto
+// them; the old scale stays in the pattern so a stray one is still a
+// frame and still counted.
+const IS_FRAME = (t) =>
+  /^rounded(-(sm|md|lg|xl|2xl|3xl|item|card|field))?$/.test(t) || t === "surface" || t === "surface-tight";
 const IS_CARD_PAD = (t) => /^p-[0-9.]+$/.test(t);
 const TYPE_SIZES = ["text-xs", "text-sm", "text-base", "text-lg", "text-xl", "text-2xl", "text-3xl", "text-4xl", "text-5xl", "text-6xl"];
 /** An accent-coloured shadow: the orange/amber rgb triples this product uses. */

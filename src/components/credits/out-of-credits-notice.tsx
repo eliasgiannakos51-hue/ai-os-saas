@@ -30,12 +30,12 @@ export function OutOfCreditsNotice({
     <div
       role="alert"
       className={[
-        "rounded-xl border border-foreground/40 bg-foreground/[0.07] p-4",
+        "rounded-card border border-foreground/40 bg-foreground/[0.07] p-4",
         className,
       ].join(" ")}
     >
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-foreground/15 text-foreground">
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-item bg-foreground/15 text-foreground">
           <Zap className="h-4 w-4" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
@@ -81,14 +81,14 @@ export function OutOfCreditsNotice({
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
               href="/dashboard/settings#credits"
-              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-foreground/40 px-3.5 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-item border border-foreground/40 px-3.5 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
             >
               <CreditCard className="h-3.5 w-3.5" aria-hidden="true" />
               {t("buyCredits")}
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-border px-3.5 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-item border border-border px-3.5 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground"
             >
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               {t("upgradePlan")}

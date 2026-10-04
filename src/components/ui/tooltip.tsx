@@ -157,7 +157,7 @@ export function Tooltip({
             }}
             // pointer-events-none: the tooltip must never sit between the
             // pointer and the thing it describes.
-            className="pointer-events-none fixed z-[100] max-w-[220px] rounded-lg border border-border bg-panel px-2.5 py-1.5 text-xs leading-snug text-foreground"
+            className="pointer-events-none fixed z-[100] max-w-[220px] rounded-item border border-border bg-panel px-2.5 py-1.5 text-xs leading-snug text-foreground"
           >
             {content}
           </span>,

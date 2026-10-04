@@ -66,7 +66,7 @@ export function ForgotPasswordForm() {
               </p>
               <Link
                 href="/login"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-card border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
               >
                 {t("backToLogin")}
               </Link>
@@ -86,13 +86,13 @@ export function ForgotPasswordForm() {
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40"
+                  className="w-full rounded-card border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40"
                   placeholder="you@domain.com"
                 />
               </div>
 
               {error && (
-                <p className="rounded-xl border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+                <p className="rounded-card border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                   {error}
                 </p>
               )}
@@ -100,7 +100,7 @@ export function ForgotPasswordForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-button px-4 py-2.5 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:opacity-50"
+                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-card bg-button px-4 py-2.5 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:opacity-50"
               >
                 {loading ? t("sending") : t("sendResetLink")}
               </button>

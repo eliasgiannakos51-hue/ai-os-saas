@@ -50,7 +50,7 @@ export function ErrorMessage({
 
   return (
     <div
-      className="mb-4 rounded-xl border border-danger/40 bg-danger/5 px-4 py-3 text-xs text-danger"
+      className="mb-4 rounded-card border border-danger/40 bg-danger/5 px-4 py-3 text-xs text-danger"
       title={detail}
       role="alert"
     >
@@ -81,7 +81,7 @@ export function ErrorMessage({
         <button
           type="button"
           onClick={() => router.refresh()}
-          className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-danger/40 px-3 text-[11px] text-danger transition-colors duration-150 hover:border-danger hover:text-danger"
+          className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-item border border-danger/40 px-3 text-[11px] text-danger transition-colors duration-150 hover:border-danger hover:text-danger"
         >
           <RotateCw className="h-4 w-4" aria-hidden="true" /> {t("retry")}
         </button>

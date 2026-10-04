@@ -44,7 +44,7 @@ export function LoadSampleButton({ className = "" }: { className?: string }) {
         type="button"
         onClick={load}
         disabled={loading}
-        className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors duration-150 hover:border-foreground/50 hover:text-foreground disabled:opacity-60"
+        className="inline-flex min-h-[44px] items-center gap-2 rounded-card border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors duration-150 hover:border-foreground/50 hover:text-foreground disabled:opacity-60"
       >
         <FlaskConical className="h-4 w-4 shrink-0 text-success/70" aria-hidden="true" />
         {loading ? t("loading") : t("load")}

@@ -59,7 +59,7 @@ export function LargeActionConfirm({
     >
       <div className="panel-pop-in w-full max-w-sm surface">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/15 text-foreground">
+          <span className="flex h-9 w-9 items-center justify-center rounded-card bg-foreground/15 text-foreground">
             <Zap className="h-4 w-4" aria-hidden="true" />
           </span>
           <p className="text-sm font-semibold text-foreground">{t("confirmTitle")}</p>
@@ -71,7 +71,7 @@ export function LargeActionConfirm({
           <button
             type="button"
             onClick={onCancel}
-            className="min-h-[44px] flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors duration-200 hover:border-foreground/50"
+            className="min-h-[44px] flex-1 rounded-item border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors duration-200 hover:border-foreground/50"
           >
             {t("cancel")}
           </button>
@@ -79,7 +79,7 @@ export function LargeActionConfirm({
             type="button"
             onClick={onConfirm}
             onMouseDown={ripple}
-            className="ripple-host min-h-[44px] flex-1 rounded-lg bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
+            className="ripple-host min-h-[44px] flex-1 rounded-item bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
           >
             {t("continue")}
           </button>

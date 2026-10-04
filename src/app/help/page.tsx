@@ -199,13 +199,13 @@ export default async function HelpPage() {
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
               href="/dashboard/chat"
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-button px-4 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-button px-4 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
             >
               {t("openChat")}
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
             >
               {t("pricingLink")}
             </Link>

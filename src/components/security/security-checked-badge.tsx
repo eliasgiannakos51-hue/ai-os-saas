@@ -109,7 +109,7 @@ export function SecurityCheckedBadge({
               type="button"
               onClick={() => setOpen(false)}
               aria-label={tCommon("close")}
-              className="flex h-5 w-5 items-center justify-center rounded text-muted hover:text-foreground"
+              className="flex h-5 w-5 items-center justify-center rounded-item text-muted hover:text-foreground"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>

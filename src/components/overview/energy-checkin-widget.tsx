@@ -74,7 +74,7 @@ export function EnergyCheckinWidget({
   return (
     <div className={`surface-tight ${className}`}>
       <div className="flex items-center gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/10 text-foreground">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-card bg-foreground/10 text-foreground">
           <Zap className="h-4 w-4" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
@@ -114,7 +114,7 @@ export function EnergyCheckinWidget({
                 onClick={() => submit(level)}
                 disabled={submitting}
                 aria-label={t("levelLabel", { level })}
-                className="flex h-11 flex-1 items-center justify-center rounded-lg border border-border text-sm font-semibold text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-11 flex-1 items-center justify-center rounded-item border border-border text-sm font-semibold text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {level}
               </button>

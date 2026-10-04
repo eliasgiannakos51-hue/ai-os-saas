@@ -193,28 +193,28 @@ export function AskAiModal({
         role="dialog"
         aria-modal="true"
         aria-label={t("title", { title: moduleTitle })}
-        className="relative flex h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-panel sm:h-[640px]"
+        className="relative flex h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-card border border-border bg-panel sm:h-[640px]"
       >
         <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div className="flex min-w-0 items-start gap-3">
             <span
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/10 text-foreground"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-card bg-foreground/10 text-foreground"
               aria-hidden="true"
             >
               <Sparkles className="h-4 w-4" />
             </span>
             <div className="min-w-0">
-              <h2 className="truncate text-sm font-semibold text-foreground">
+              <h2 className="break-words text-sm font-semibold text-foreground">
                 {t("title", { title: moduleTitle })}
               </h2>
-              <p className="truncate text-xs text-muted">{recordHeadline}</p>
+              <p className="break-words text-xs text-muted">{recordHeadline}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label={t("close")}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -229,7 +229,7 @@ export function AskAiModal({
               {messages.map((msg) =>
                 msg.role === "user" ? (
                   <div key={msg.id} className="flex justify-end">
-                    <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-button px-4 py-2.5 text-sm text-button-ink">
+                    <div className="max-w-[85%] whitespace-pre-wrap rounded-card rounded-tr-item bg-button px-4 py-2.5 text-sm text-button-ink">
                       {msg.content}
                     </div>
                   </div>
@@ -241,7 +241,7 @@ export function AskAiModal({
                     >
                       <Sparkles className="h-3.5 w-3.5" />
                     </span>
-                    <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-border bg-input px-4 py-2.5 text-foreground/90">
+                    <div className="max-w-[85%] rounded-card rounded-tl-item border border-border bg-input px-4 py-2.5 text-foreground/90">
                       <MessageContent content={msg.content} />
                       {/* ONLY WHEN THERE WERE SOME. "and 0 past messages"
                           is a sentence that answers a question nobody
@@ -266,11 +266,11 @@ export function AskAiModal({
                     <Sparkles className="h-3.5 w-3.5" />
                   </span>
                   {streamingText !== null ? (
-                    <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-border bg-input px-4 py-2.5 text-foreground/90">
+                    <div className="max-w-[85%] rounded-card rounded-tl-item border border-border bg-input px-4 py-2.5 text-foreground/90">
                       <MessageContent content={streamingText} />
                     </div>
                   ) : (
-                    <AiActivity kind="recordsAsk" className="rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-3.5" />
+                    <AiActivity kind="recordsAsk" className="rounded-card rounded-tl-item border border-border bg-panel px-4 py-3.5" />
                   )}
                 </div>
               )}
@@ -293,7 +293,7 @@ export function AskAiModal({
         <div className="border-t border-border p-4">
           {error && (
             <p
-              className={`mb-3 rounded-xl border px-3 py-2 text-xs ${
+              className={`mb-3 rounded-card border px-3 py-2 text-xs ${
                 isRateLimitNotice
                   ? "border-border bg-foreground/5 text-foreground"
                   : "border-danger/40 bg-danger/10 text-danger"
@@ -313,7 +313,7 @@ export function AskAiModal({
                 rows={1}
                 // pe-24 rather than pe-12: two controls sit in the
                 // right gutter now, not one.
-                className="max-h-32 min-h-[48px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-background px-4 py-3 pe-24 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-foreground/60"
+                className="max-h-32 min-h-[48px] w-full resize-none overflow-y-auto rounded-card border border-border bg-background px-4 py-3 pe-24 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-foreground/60"
               />
               {/* ASKING YOUR OWN RECORDS A QUESTION, OUT LOUD.
                   V4 re-audit #2. This box is a sentence somebody types to

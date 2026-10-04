@@ -136,7 +136,7 @@ export function IdeaRow({
             type="button"
             onClick={cancelEditing}
             aria-label={tCommon("cancel")}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -221,7 +221,7 @@ export function IdeaRow({
         </div>
 
         {error && (
-          <p className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+          <p className="rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
             {tCommon("error")}: {error}
           </p>
         )}
@@ -229,7 +229,7 @@ export function IdeaRow({
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-50 sm:w-auto"
+          className="inline-flex min-h-[44px] w-full items-center justify-center rounded-item border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-50 sm:w-auto"
         >
           {loading ? tModule("saving") : tModule("save")}
         </button>
@@ -238,7 +238,7 @@ export function IdeaRow({
   }
 
   return (
-    <div className="card-lift card-lift-row relative rounded-2xl border border-border bg-panel p-4">
+    <div className="card-lift card-lift-row relative rounded-card border border-border bg-panel p-4">
       {/* Pinned to the card corner, not buried in the bottom
           action row — see favorite-button.tsx for what that
           position cost. The card root is `relative` for this. */}
@@ -259,13 +259,13 @@ export function IdeaRow({
         </div>
         <div className="flex items-center gap-2">
           {idea.score !== null && (
-            <span className="rounded-md border border-border bg-input px-2 py-0.5 text-xs text-foreground">
+            <span className="rounded-item border border-border bg-input px-2 py-0.5 text-xs text-foreground">
               {t("cardScore", { score: idea.score })}
             </span>
           )}
           {idea.verdict && (
             <span
-              className={`rounded-md border px-2 py-0.5 text-xs ${verdictBadgeClasses(
+              className={`rounded-item border px-2 py-0.5 text-xs ${verdictBadgeClasses(
                 idea.verdict
               )}`}
             >
@@ -321,7 +321,7 @@ export function IdeaRow({
             onClick={startEditing}
             aria-label={t("editAria", { name: idea.name })}
             title={tModule("edit")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-foreground/10 hover:text-foreground"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-foreground/10 hover:text-foreground"
           >
             <Pencil className="h-4 w-4" />
           </button>

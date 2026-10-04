@@ -85,7 +85,7 @@ export function FavoriteButton({
       title={favorited ? t("remove") : t("add")}
       data-favorited={favorited}
       className={[
-        "z-[2] flex shrink-0 items-center justify-center rounded-xl transition-all duration-200",
+        "z-[2] flex shrink-0 items-center justify-center rounded-card transition-all duration-200",
         // Both variants are 36px: "inline" now sits beside the card's
         // "..." menu (components/ui/card-menu.tsx) and has to match it.
         corner ? "absolute end-3 top-3 h-11 w-11" : "h-11 w-11",

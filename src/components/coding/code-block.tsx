@@ -56,7 +56,7 @@ export function CodeBlock({
   return (
     <div className="rounded-card border border-border bg-panel">
       <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
-        <span className="truncate text-[11px] uppercase tracking-wider text-muted">
+        <span className="break-words text-[11px] uppercase tracking-wider text-muted">
           {label ?? language ?? t("code")}
         </span>
         <button

@@ -96,7 +96,7 @@ export function ExportDataButton() {
       type="button"
       onClick={handleExport}
       disabled={loading}
-      className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-item border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
     >
       <Download className="h-4 w-4" /> {loading ? t("exporting") : t("exportAll")}
     </button>

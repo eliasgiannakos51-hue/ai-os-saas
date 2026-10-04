@@ -186,7 +186,7 @@ export function DocumentEditor({
           />
         </div>
 
-        <div className="mb-3 flex flex-wrap items-center gap-1 rounded-xl border border-border bg-panel p-1.5">
+        <div className="mb-3 flex flex-wrap items-center gap-1 rounded-card border border-border bg-panel p-1.5">
           {toolbarButtons.map(({ label, icon: Icon, onClick }) => (
             <button
               key={label}
@@ -195,7 +195,7 @@ export function DocumentEditor({
               aria-label={label}
               onMouseDown={(e) => e.preventDefault()}
               onClick={onClick}
-              className="flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              className="flex h-11 w-11 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               <Icon className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -208,7 +208,7 @@ export function DocumentEditor({
           suppressContentEditableWarning
           onInput={handleEditorInput}
           data-placeholder={t("contentPlaceholder")}
-          className="document-editor-content min-h-[60vh] rounded-2xl border border-border bg-panel px-5 py-4 text-sm leading-relaxed text-foreground outline-none focus:border-foreground/40"
+          className="document-editor-content min-h-[60vh] rounded-card border border-border bg-panel px-5 py-4 text-sm leading-relaxed text-foreground outline-none focus:border-foreground/40"
         />
       </div>
     </div>

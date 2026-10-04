@@ -68,7 +68,7 @@ export function BusinessInputsForm({
         value={value}
         onChange={(e) => setValue(e.target.value)}
         aria-label={label}
-        className="w-full rounded-lg border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+        className="w-full rounded-item border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
       />
       <span className="mt-1 block text-[11px] text-muted">{hint}</span>
     </label>
@@ -89,7 +89,7 @@ export function BusinessInputsForm({
         type="button"
         onClick={() => void save()}
         disabled={saving}
-        className="mt-3 rounded-lg bg-button px-4 py-2 text-xs font-semibold text-button-ink disabled:opacity-50"
+        className="mt-3 rounded-item bg-button px-4 py-2 text-xs font-semibold text-button-ink disabled:opacity-50"
       >
         {saving ? t("saving") : t("save")}
       </button>

@@ -155,7 +155,7 @@ function Margin({ value, projected = false }: { value: number | null; projected?
 
 function SummaryTile({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-xl border border-border bg-input p-3">
+    <div className="rounded-card border border-border bg-input p-3">
       <p className="text-[11px] uppercase tracking-wide text-muted">{label}</p>
       <p className="mt-1 text-lg font-bold text-foreground">{value}</p>
       {hint && <p className="mt-0.5 text-[11px] leading-snug text-muted/80">{hint}</p>}
@@ -239,7 +239,7 @@ export async function MarginReportView({
               When nothing charged, say so in words rather than leaving a
               column of dashes to be interpreted. */}
           {summary.projectionOnly && (
-            <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-foreground/30 bg-foreground/[0.05] px-3 py-2 text-[11px] leading-relaxed text-foreground">
+            <p className="mt-3 flex items-start gap-1.5 rounded-item border border-foreground/30 bg-foreground/[0.05] px-3 py-2 text-[11px] leading-relaxed text-foreground">
               <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
               {t("projectionOnly")}
             </p>
@@ -253,7 +253,7 @@ export async function MarginReportView({
               unexamined one. */}
           {summary.absorbedRefusals && (
             <p
-              className={`mt-3 flex items-start gap-1.5 rounded-lg border px-3 py-2 text-[11px] leading-relaxed ${
+              className={`mt-3 flex items-start gap-1.5 rounded-item border px-3 py-2 text-[11px] leading-relaxed ${
                 summary.absorbedRefusals.overBudget
                   ? "border-danger/40 bg-danger/10 text-danger"
                   : "border-border bg-panel/60 text-muted"
@@ -276,7 +276,7 @@ export async function MarginReportView({
           )}
 
           {summary.belowTarget.length > 0 && (
-            <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-[11px] leading-relaxed text-danger">
+            <p className="mt-3 flex items-start gap-1.5 rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-[11px] leading-relaxed text-danger">
               <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
               {t("belowTargetAlert", {
                 count: summary.belowTarget.length,
@@ -371,7 +371,7 @@ export async function MarginReportView({
                     ever served back. Named features, so the fix has an
                     address. */}
                 {cacheSummary.miscached.length > 0 && (
-                  <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-[11px] leading-relaxed text-danger">
+                  <p className="mt-3 flex items-start gap-1.5 rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-[11px] leading-relaxed text-danger">
                     <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
                     {t("cacheMiscachedAlert", { features: cacheSummary.miscached.join(", ") })}
                   </p>

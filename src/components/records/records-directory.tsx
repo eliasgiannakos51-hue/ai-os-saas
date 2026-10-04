@@ -96,7 +96,7 @@ export function RecordsDirectory({ groups }: { groups: DirectoryGroup[] }) {
           placeholder={t("searchLabel")}
           // text-base, not text-sm: iOS Safari zooms the whole page in on
           // focus for any input under 16px.
-          className="min-h-[44px] w-full rounded-xl border border-border bg-panel py-2 ps-9 pe-3 text-base text-foreground placeholder:text-muted focus:border-foreground/50 focus:outline-none"
+          className="min-h-[44px] w-full rounded-card border border-border bg-panel py-2 ps-9 pe-3 text-base text-foreground placeholder:text-muted focus:border-foreground/50 focus:outline-none"
         />
       </label>
 
@@ -145,7 +145,7 @@ export function RecordsDirectory({ groups }: { groups: DirectoryGroup[] }) {
                         <Icon className="mt-0.5 h-4 w-4 shrink-0 text-success/50" aria-hidden="true" />
                       )}
                       <span className="min-w-0">
-                        <span className="block truncate text-sm font-medium text-foreground">
+                        <span className="block break-words text-sm font-medium text-foreground">
                           {item.label}
                         </span>
                         {item.hint && <span className="mt-0.5 block text-xs text-muted">{item.hint}</span>}

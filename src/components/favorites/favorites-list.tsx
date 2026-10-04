@@ -95,7 +95,7 @@ export function FavoritesList({ groups }: { groups: FavoriteGroup[] }) {
                       section itself names the module — inside a group, a
                       per-row badge repeating that heading is pure noise. */}
                   <span
-                    className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium ${moduleBadgeColor(
+                    className={`inline-flex items-center rounded-item border px-2 py-0.5 text-[11px] font-medium ${moduleBadgeColor(
                       group.moduleSlug
                     )}`}
                   >

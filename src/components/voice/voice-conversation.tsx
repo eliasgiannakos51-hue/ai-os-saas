@@ -260,7 +260,7 @@ export function VoiceConversation({
           type="button"
           onClick={close}
           aria-label={t("conversation.close")}
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-muted transition-colors hover:text-foreground"
+          className="flex h-10 w-10 items-center justify-center rounded-item text-muted transition-colors hover:text-foreground"
         >
           <X className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -287,7 +287,7 @@ export function VoiceConversation({
               : t("conversation.hint")}
         </span>
         {state === "idle" && turns.length === 0 && (
-          <span className="flex items-center gap-2 rounded-lg bg-button px-4 py-2 text-sm font-semibold text-button-ink">
+          <span className="flex items-center gap-2 rounded-item bg-button px-4 py-2 text-sm font-semibold text-button-ink">
             <Mic className="h-4 w-4" aria-hidden="true" />
             {t("conversation.start")}
           </span>

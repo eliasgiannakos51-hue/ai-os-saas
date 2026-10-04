@@ -97,7 +97,7 @@ export function StepControls({
               onEdit(draft.trim());
               setEditing(false);
             }}
-            className="inline-flex min-h-[32px] items-center gap-1 rounded-lg border border-foreground/60 px-2.5 py-1 text-xs font-semibold text-foreground transition-opacity duration-150 hover:bg-foreground/10 disabled:opacity-50"
+            className="inline-flex min-h-[32px] items-center gap-1 rounded-item border border-foreground/60 px-2.5 py-1 text-xs font-semibold text-foreground transition-opacity duration-150 hover:bg-foreground/10 disabled:opacity-50"
           >
             <Check className="h-3 w-3" aria-hidden="true" />
             {t("saveStep")}
@@ -108,7 +108,7 @@ export function StepControls({
               setDraft(text);
               setEditing(false);
             }}
-            className="inline-flex min-h-[32px] items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground"
+            className="inline-flex min-h-[32px] items-center gap-1 rounded-item border border-border px-2.5 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground"
           >
             <X className="h-3 w-3" aria-hidden="true" />
             {t("cancelStepEdit")}
@@ -127,7 +127,7 @@ export function StepControls({
         onClick={() => onMove("up")}
         aria-label={t("moveStepUp")}
         title={t("moveStepUp")}
-        className="rounded-md p-1 text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground disabled:opacity-30"
+        className="rounded-item p-1 text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground disabled:opacity-30"
       >
         <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
       </button>
@@ -138,7 +138,7 @@ export function StepControls({
         onClick={() => onMove("down")}
         aria-label={t("moveStepDown")}
         title={t("moveStepDown")}
-        className="rounded-md p-1 text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground disabled:opacity-30"
+        className="rounded-item p-1 text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground disabled:opacity-30"
       >
         <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
       </button>
@@ -149,7 +149,7 @@ export function StepControls({
         onClick={() => setEditing(true)}
         aria-label={t("editStep")}
         title={t("editStep")}
-        className="rounded-md p-1 text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground disabled:opacity-30"
+        className="rounded-item p-1 text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground disabled:opacity-30"
       >
         <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
       </button>
@@ -160,7 +160,7 @@ export function StepControls({
         onClick={onDelete}
         aria-label={t("deleteStep")}
         title={t("deleteStep")}
-        className="rounded-md p-1 text-muted transition-colors duration-150 hover:bg-danger/10 hover:text-danger disabled:opacity-30"
+        className="rounded-item p-1 text-muted transition-colors duration-150 hover:bg-danger/10 hover:text-danger disabled:opacity-30"
       >
         {busy ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -190,14 +190,14 @@ export function StepUndoStrip({
   return (
     <li
       data-testid="step-undo"
-      className="flex items-center justify-between gap-2 rounded-xl border border-dashed border-foreground/40 bg-foreground/[0.06] px-3 py-2.5"
+      className="flex items-center justify-between gap-2 rounded-card border border-dashed border-foreground/40 bg-foreground/[0.06] px-3 py-2.5"
     >
       <span className="text-xs text-muted">{t("stepDeleted")}</span>
       <button
         type="button"
         data-testid="step-undo-button"
         onClick={onUndo}
-        className="inline-flex min-h-[32px] items-center gap-1.5 rounded-lg border border-foreground/40 px-2.5 py-1 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
+        className="inline-flex min-h-[32px] items-center gap-1.5 rounded-item border border-foreground/40 px-2.5 py-1 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
       >
         <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />
         {t("undoWithSeconds", { seconds })}

@@ -217,7 +217,7 @@ export function GenericAddForm({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-card bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
         >
           {/* The module's own sentence, not "New " + the page title.
               The title is plural and the grammar around it changes with
@@ -237,7 +237,7 @@ export function GenericAddForm({
               type="button"
               onClick={() => setOpen(false)}
               aria-label={tCommon("cancel")}
-              className="flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              className="flex h-11 w-11 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
@@ -315,7 +315,7 @@ export function GenericAddForm({
           </div>
 
           {error && (
-            <p className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+            <p className="rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
               {tCommon("error")}: {error}
               {upgradeRequired && (
                 <>
@@ -331,7 +331,7 @@ export function GenericAddForm({
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-50 sm:w-auto"
+            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-item border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-50 sm:w-auto"
           >
             {loading ? t("saving") : t("save")}
           </button>

@@ -29,8 +29,8 @@ function StatTile({
   detail?: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-input p-3.5">
-      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/10 text-foreground">
+    <div className="rounded-card border border-border bg-input p-3.5">
+      <span className="flex h-8 w-8 items-center justify-center rounded-item bg-foreground/10 text-foreground">
         <Icon className="h-4 w-4" aria-hidden="true" />
       </span>
       <p className="mt-2 text-xl font-bold text-foreground">{value}</p>

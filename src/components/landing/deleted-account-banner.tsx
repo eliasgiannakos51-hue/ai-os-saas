@@ -19,7 +19,7 @@ export function DeletedAccountBanner() {
   if (!show) return null;
 
   return (
-    <p className="mb-6 max-w-md rounded-xl border border-success/40 bg-success/10 px-4 py-2 text-center text-xs text-success">
+    <p className="mb-6 max-w-md rounded-card border border-success/40 bg-success/10 px-4 py-2 text-center text-xs text-success">
       {t("accountDeleted")}
     </p>
   );

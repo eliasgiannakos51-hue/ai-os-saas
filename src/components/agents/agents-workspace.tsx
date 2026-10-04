@@ -823,7 +823,7 @@ export function AgentsWorkspace({
             data-testid="agents-new"
             onClick={() => (creating ? resetCreate() : setCreating(true))}
             disabled={atCapacity && !creating}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-card bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             {creating ? t("cancel") : t("newAgent")}
@@ -887,7 +887,7 @@ export function AgentsWorkspace({
               "runs tests and fixes errors" was outside the product — and
               nothing on this screen told them.
             */}
-            <div className="grid gap-3 rounded-xl border border-border bg-surface/40 p-3 sm:grid-cols-2">
+            <div className="grid gap-3 rounded-card border border-border bg-surface/40 p-3 sm:grid-cols-2">
               <div>
                 <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-success">
                   <Check className="h-3.5 w-3.5" aria-hidden="true" />
@@ -922,7 +922,7 @@ export function AgentsWorkspace({
               screen and the incident that produced it.
             */}
             {capability?.capabilityBlocked && (
-              <div className="space-y-2 rounded-xl border border-danger/40 bg-danger/[0.06] p-4">
+              <div className="space-y-2 rounded-card border border-danger/40 bg-danger/[0.06] p-4">
                 <p className="flex items-center gap-2 text-sm font-semibold text-danger">
                   <Ban className="h-4 w-4" aria-hidden="true" />
                   {t("capability.refusedTitle")}
@@ -952,7 +952,7 @@ export function AgentsWorkspace({
                 <button
                   type="button"
                   onClick={() => setCapability(null)}
-                  className="min-h-[36px] rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-surface"
+                  className="min-h-[36px] rounded-item border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-surface"
                 >
                   {t("capability.rephrase")}
                 </button>
@@ -965,7 +965,7 @@ export function AgentsWorkspace({
               instead, and ask whether to continue.
             */}
             {capability?.capabilityPartial && (
-              <div className="space-y-2 rounded-xl border border-warning/40 bg-warning/[0.06] p-4">
+              <div className="space-y-2 rounded-card border border-warning/40 bg-warning/[0.06] p-4">
                 <p className="flex items-center gap-2 text-sm font-semibold text-warning">
                   <AlertTriangle className="h-4 w-4" aria-hidden="true" />
                   {t("capability.partialTitle")}
@@ -992,14 +992,14 @@ export function AgentsWorkspace({
                       setCapability(null);
                       void build(requestText, true, true);
                     }}
-                    className="min-h-[36px] rounded-lg border border-foreground/60 px-3 py-1.5 text-xs font-semibold text-foreground transition-opacity hover:bg-foreground/10"
+                    className="min-h-[36px] rounded-item border border-foreground/60 px-3 py-1.5 text-xs font-semibold text-foreground transition-opacity hover:bg-foreground/10"
                   >
                     {t("capability.partialContinue")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setCapability(null)}
-                    className="min-h-[36px] rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-surface"
+                    className="min-h-[36px] rounded-item border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-surface"
                   >
                     {t("capability.rephrase")}
                   </button>
@@ -1030,7 +1030,7 @@ export function AgentsWorkspace({
             )}
 
             {preview?.draft && (
-              <div className="space-y-3 rounded-xl border border-foreground/30 bg-foreground/[0.04] p-4">
+              <div className="space-y-3 rounded-card border border-foreground/30 bg-foreground/[0.04] p-4">
                 {/* THE MOMENT THE USER SEES IT. Inside the preview rather
                     than in an effect beside it, so a draft can only be
                     marked seen by actually being on the screen. */}
@@ -1040,7 +1040,7 @@ export function AgentsWorkspace({
                   <p className="text-sm leading-relaxed text-foreground">{preview.understood}</p>
                 )}
                 {preview.unsupported && (
-                  <div className="rounded-lg border border-warning/40 bg-warning/10 p-2.5">
+                  <div className="rounded-item border border-warning/40 bg-warning/10 p-2.5">
                     <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-warning">
                       {t("capability.previewWillNotDo")}
                     </p>
@@ -1058,7 +1058,7 @@ export function AgentsWorkspace({
                   label. These three lines are the thing they are agreeing
                   to, spelled out in the order the agent performs them.
                 */}
-                <div className="rounded-lg border border-border bg-surface/40 p-2.5">
+                <div className="rounded-item border border-border bg-surface/40 p-2.5">
                   <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted">
                     {t("capability.previewWhatItDoes")}
                   </p>
@@ -1169,7 +1169,7 @@ export function AgentsWorkspace({
                     type="button"
                     onClick={createAgent}
                     disabled={savingAgent}
-                    className="inline-flex min-h-[44px] items-center rounded-lg border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex min-h-[44px] items-center rounded-item border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {savingAgent ? t("creating") : t("createButton")}
                   </button>
@@ -1184,7 +1184,7 @@ export function AgentsWorkspace({
                       setPreview(null);
                     }}
                     disabled={savingAgent}
-                    className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
+                    className="inline-flex min-h-[44px] items-center rounded-item border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
                   >
                     {t("discard")}
                   </button>
@@ -1213,7 +1213,7 @@ export function AgentsWorkspace({
                 type="button"
                 disabled
                 data-testid="agent-design"
-                className="hover:bg-foreground/10 inline-flex min-h-[44px] cursor-not-allowed items-center rounded-lg border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground opacity-50"
+                className="hover:bg-foreground/10 inline-flex min-h-[44px] cursor-not-allowed items-center rounded-item border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground opacity-50"
               >
                 {t("designButton")}
               </button>
@@ -1247,7 +1247,7 @@ export function AgentsWorkspace({
             card's status badge and no words anywhere, for three real steps
             that can take minutes. */}
         {runJob && (runJob.status === "queued" || runJob.status === "running") && (
-          <div className="mb-4 rounded-xl border border-foreground/25 bg-foreground/5 px-3 py-2">
+          <div className="mb-4 rounded-card border border-foreground/25 bg-foreground/5 px-3 py-2">
             <AiJobProgress job={runJob} watchLost={runWatchLost} />
             <AiJobTimeline job={runJob} className="mt-1" />
           </div>
@@ -1364,7 +1364,7 @@ export function AgentsWorkspace({
         <section className="space-y-4 surface-tight">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="truncate text-base font-semibold text-foreground">{selected.name}</h2>
+              <h2 className="break-words text-base font-semibold text-foreground">{selected.name}</h2>
               <p className="mt-0.5 text-xs text-muted">
                 {scheduleLabel(selected.schedule_cron)} · {selected.timezone}
               </p>
@@ -1394,7 +1394,7 @@ export function AgentsWorkspace({
             const reason = lastFailure?.error ?? null;
             if (selected.status === "disabled") {
               return (
-                <div className="rounded-lg border border-danger/40 bg-danger/10 p-2.5 text-xs leading-relaxed text-danger">
+                <div className="rounded-item border border-danger/40 bg-danger/10 p-2.5 text-xs leading-relaxed text-danger">
                   <p>{t("disabledExplanation", { failures: selected.consecutive_failures })}</p>
                   {reason && <p className="mt-1.5 text-danger/90">{t("disabledReason", { reason })}</p>}
                 </div>
@@ -1402,7 +1402,7 @@ export function AgentsWorkspace({
             }
             if (selected.consecutive_failures > 0) {
               return (
-                <div className="rounded-lg border border-warning/40 bg-warning/10 p-2.5 text-xs leading-relaxed text-warning">
+                <div className="rounded-item border border-warning/40 bg-warning/10 p-2.5 text-xs leading-relaxed text-warning">
                   <p>
                     {t("failingWarning", {
                       failures: selected.consecutive_failures,
@@ -1513,7 +1513,7 @@ export function AgentsWorkspace({
                   type="button"
                   onClick={() => void saveEdit(selected)}
                   disabled={busyId === selected.id}
-                  className="inline-flex min-h-[44px] items-center rounded-lg border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center rounded-item border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-50"
                 >
                   {busyId === selected.id ? t("saving") : t("saveButton")}
                 </button>
@@ -1523,7 +1523,7 @@ export function AgentsWorkspace({
                     setEditing(false);
                     setEditDraft(null);
                   }}
-                  className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+                  className="inline-flex min-h-[44px] items-center rounded-item border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
                 >
                   {t("cancel")}
                 </button>
@@ -1562,7 +1562,7 @@ export function AgentsWorkspace({
               <ShareTemplate agentId={selected.id} prompt={selected.prompt} />
 
               {lastRunOutput && (
-                <div className="rounded-xl border border-success/30 bg-success/[0.05] p-3">
+                <div className="rounded-card border border-success/30 bg-success/[0.05] p-3">
                   <p className="mb-1.5 text-xs font-semibold text-success">{t("latestOutput")}</p>
                   <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
                     {lastRunOutput}

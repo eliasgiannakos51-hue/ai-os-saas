@@ -149,7 +149,7 @@ export function InlineTitle({
         }}
         className={
           inputClassName ??
-          "min-w-0 flex-1 rounded-lg border border-foreground/60 bg-input px-2.5 py-[7px] text-sm text-foreground outline-none"
+          "min-w-0 flex-1 rounded-item border border-foreground/60 bg-input px-2.5 py-[7px] text-sm text-foreground outline-none"
         }
       />
       {/* The counter appears only in the last stretch. Shown from the

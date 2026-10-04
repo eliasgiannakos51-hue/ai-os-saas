@@ -103,13 +103,13 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
 
   if (sharedSlug) {
     return (
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-success/30 bg-success/[0.05] p-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-card border border-success/30 bg-success/[0.05] p-3">
         <p className="text-xs text-success">{t("shared")}</p>
         <button
           type="button"
           onClick={withdraw}
           disabled={withdrawing}
-          className="min-h-[36px] rounded-lg border border-success/40 px-2.5 text-xs text-success transition-colors hover:bg-success/10 disabled:opacity-60"
+          className="min-h-[36px] rounded-item border border-success/40 px-2.5 text-xs text-success transition-colors hover:bg-success/10 disabled:opacity-60"
         >
           {withdrawing ? t("withdrawing") : t("withdraw")}
         </button>
@@ -122,7 +122,7 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex min-h-[36px] items-center gap-1.5 rounded-lg border border-border px-2.5 text-xs text-muted transition-colors hover:text-foreground"
+        className="flex min-h-[36px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-muted transition-colors hover:text-foreground"
       >
         <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
         {t("open")}
@@ -172,7 +172,7 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
       />
 
       {/* EXACTLY WHAT WOULD BE PUBLISHED, before agreeing to publish it. */}
-      <div className="rounded-lg bg-background/20 p-2">
+      <div className="rounded-item bg-background/20 p-2">
         <p className="mb-1 text-[10px] uppercase tracking-wide text-muted">{t("previewLabel")}</p>
         {preview.ok ? (
           <p className="whitespace-pre-wrap text-[11px] leading-relaxed text-foreground">
@@ -190,14 +190,14 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
           type="button"
           onClick={() => void share()}
           disabled={busy || !preview.ok || title.trim().length < 3 || description.trim().length < 3}
-          className="min-h-[36px] rounded-lg border border-foreground/60 px-3 text-xs font-semibold text-foreground transition-opacity hover:bg-foreground/10 disabled:opacity-50"
+          className="min-h-[36px] rounded-item border border-foreground/60 px-3 text-xs font-semibold text-foreground transition-opacity hover:bg-foreground/10 disabled:opacity-50"
         >
           {busy ? t("sharing") : t("shareButton")}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="min-h-[36px] rounded-lg border border-border px-3 text-xs text-muted transition-colors hover:text-foreground"
+          className="min-h-[36px] rounded-item border border-border px-3 text-xs text-muted transition-colors hover:text-foreground"
         >
           {t("cancel")}
         </button>

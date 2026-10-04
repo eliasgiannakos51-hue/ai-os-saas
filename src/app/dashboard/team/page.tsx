@@ -107,7 +107,7 @@ export default async function TeamPage({
         )}
 
         {justSetUp && (
-          <div className="mb-6 rounded-2xl border border-success/40 bg-success/10 px-4 py-3 text-sm text-success">
+          <div className="mb-6 rounded-card border border-success/40 bg-success/10 px-4 py-3 text-sm text-success">
             <p className="font-semibold">{t("setupSuccessTitle")}</p>
             <p className="mt-1 text-xs text-success/80">{t("setupSuccessBody")}</p>
           </div>

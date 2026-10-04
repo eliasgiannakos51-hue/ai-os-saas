@@ -139,8 +139,8 @@ export function ContactForm({ degraded = false }: { degraded?: boolean }) {
         role="status"
         className={
           degraded
-            ? "rounded-2xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning"
-            : "rounded-2xl border border-success/40 bg-success/10 p-4 text-sm text-success"
+            ? "rounded-card border border-warning/40 bg-warning/10 p-4 text-sm text-warning"
+            : "rounded-card border border-success/40 bg-success/10 p-4 text-sm text-success"
         }
       >
         {degraded ? t("sentDegraded") : t("sent")}
@@ -218,7 +218,7 @@ export function ContactForm({ degraded = false }: { degraded?: boolean }) {
 
       {error ? (
         <p
-          className="rounded-xl border border-danger/40 bg-danger/10 p-3 text-xs text-danger"
+          className="rounded-card border border-danger/40 bg-danger/10 p-3 text-xs text-danger"
           role="alert"
         >
           {error}
@@ -227,7 +227,7 @@ export function ContactForm({ degraded = false }: { degraded?: boolean }) {
 
       <button
         type="submit"
-        className="cta-amber inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-button-ink disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+        className="cta-amber inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-card px-4 py-2.5 text-sm font-semibold text-button-ink disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
         disabled={busy || message.trim().length < 10}
       >
         {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}

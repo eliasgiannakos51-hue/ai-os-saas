@@ -79,10 +79,10 @@ export function TeamMembersList({ members: initialMembers }: { members: TeamMemb
       {members.map((member) => (
         <div
           key={member.id}
-          className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-panel px-4 py-3"
+          className="flex items-center justify-between gap-3 rounded-card border border-border bg-panel px-4 py-3"
         >
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-foreground">
+            <p className="break-words text-sm font-medium text-foreground">
               {member.member_email}
               {member.role && (
                 <span className="ms-2 text-xs font-normal text-muted">— {member.role}</span>
@@ -119,7 +119,7 @@ export function TeamMembersList({ members: initialMembers }: { members: TeamMemb
               disabled={removingId === member.id}
               aria-label={t("removeLabel", { email: member.member_email })}
               title={t("removeTitle")}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-danger/70 transition-colors duration-150 hover:bg-danger/10 hover:text-danger disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-8 w-8 items-center justify-center rounded-item text-danger/70 transition-colors duration-150 hover:bg-danger/10 hover:text-danger disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Trash2 className="h-4 w-4" aria-hidden="true" />
             </button>

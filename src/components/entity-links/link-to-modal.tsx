@@ -158,26 +158,26 @@ export function LinkToModal({
         role="dialog"
         aria-modal="true"
         aria-label={`${t("modalTitle")}: ${sourceHeadline}`}
-        className="relative flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-border bg-panel"
+        className="relative flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-card border border-border bg-panel"
       >
         <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div className="flex min-w-0 items-start gap-3">
             <span
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/10 text-foreground"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-card bg-foreground/10 text-foreground"
               aria-hidden="true"
             >
               <Link2 className="h-4 w-4" />
             </span>
             <div className="min-w-0">
-              <h2 className="truncate text-sm font-semibold text-foreground">{t("modalTitle")}</h2>
-              <p className="truncate text-xs text-muted">{sourceHeadline}</p>
+              <h2 className="break-words text-sm font-semibold text-foreground">{t("modalTitle")}</h2>
+              <p className="break-words text-xs text-muted">{sourceHeadline}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label={tCommon("close")}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -193,7 +193,7 @@ export function LinkToModal({
                     key={m.slug}
                     type="button"
                     onClick={() => setSelectedModule(m)}
-                    className="flex min-h-[44px] items-center rounded-xl border border-border bg-input px-3 py-2.5 text-start text-sm text-foreground transition-colors duration-150 hover:border-foreground/60 hover:text-foreground"
+                    className="flex min-h-[44px] items-center rounded-card border border-border bg-input px-3 py-2.5 text-start text-sm text-foreground transition-colors duration-150 hover:border-foreground/60 hover:text-foreground"
                   >
                     {tKey(m.titleKey)}
                   </button>
@@ -233,7 +233,7 @@ export function LinkToModal({
                     type="button"
                     onClick={() => handleLink(r.id)}
                     disabled={linkingId === r.id}
-                    className="block w-full rounded-lg border border-border bg-input px-3 py-2 text-start text-sm text-foreground transition-colors duration-150 hover:border-foreground/60 hover:text-foreground disabled:opacity-50"
+                    className="block w-full rounded-item border border-border bg-input px-3 py-2 text-start text-sm text-foreground transition-colors duration-150 hover:border-foreground/60 hover:text-foreground disabled:opacity-50"
                   >
                     {r.headline}
                   </button>
@@ -243,7 +243,7 @@ export function LinkToModal({
           )}
 
           {error && (
-            <p className="mt-3 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+            <p className="mt-3 rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
               {tCommon("errorWithMessage", { message: error })}
             </p>
           )}

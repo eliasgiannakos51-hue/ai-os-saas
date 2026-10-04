@@ -76,7 +76,7 @@ export default async function ContactPage() {
         {status !== "ok" ? (
           <div
             role="status"
-            className="mt-6 flex gap-3 rounded-xl border border-warning/40 bg-warning/10 p-4 text-xs leading-relaxed text-warning"
+            className="mt-6 flex gap-3 rounded-card border border-warning/40 bg-warning/10 p-4 text-xs leading-relaxed text-warning"
           >
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
             <div className="space-y-2">

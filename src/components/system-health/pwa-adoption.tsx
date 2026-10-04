@@ -43,7 +43,7 @@ function Figure({
   note?: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-background/20 p-3">
+    <div className="rounded-item border border-border bg-background/20 p-3">
       <p className="text-[11px] uppercase tracking-wide text-muted">{label}</p>
       <p className="mt-1 text-xl font-semibold tabular-nums">
         {/* No denominator means no percentage — printing 0% here would
@@ -115,7 +115,7 @@ export function PwaAdoption({ row, days }: { row: PwaAdoptionRow | null; days: n
               of={row.iosDevices}
               note="iOS grants web push only to an installed app — this is the ceiling on iPhone notifications"
             />
-            <div className="rounded-lg border border-border bg-background/20 p-3">
+            <div className="rounded-item border border-border bg-background/20 p-3">
               <p className="text-[11px] uppercase tracking-wide text-muted">Counted</p>
               <p className="mt-1 text-xl font-semibold tabular-nums">{row.devices}</p>
               <p className="text-[11px] text-muted">

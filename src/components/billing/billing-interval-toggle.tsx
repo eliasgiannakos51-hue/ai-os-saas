@@ -37,7 +37,7 @@ export function BillingIntervalToggle({
   }
 
   const base =
-    "min-h-[40px] rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200";
+    "min-h-[40px] rounded-item px-4 py-2 text-sm font-semibold transition-colors duration-200";
   const on = "bg-button text-button-ink";
   const off = "text-muted hover:text-foreground";
 
@@ -46,7 +46,7 @@ export function BillingIntervalToggle({
       <div
         role="group"
         aria-label={t("billingIntervalLabel")}
-        className="inline-flex items-center gap-1 rounded-xl border border-border bg-panel p-1"
+        className="inline-flex items-center gap-1 rounded-card border border-border bg-panel p-1"
       >
         <button
           type="button"

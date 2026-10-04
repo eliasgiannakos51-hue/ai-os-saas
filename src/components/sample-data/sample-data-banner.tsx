@@ -58,7 +58,7 @@ export function SampleDataClearButton() {
         // Outline, not filled: the top bar already carries the one filled
         // accent control on every screen (V4.6 #4), and this is a way out
         // rather than the action of the page.
-        className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-warning/40 px-3 py-1.5 text-xs font-semibold text-warning transition-colors duration-150 hover:bg-warning/10 disabled:opacity-60"
+        className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-item border border-warning/40 px-3 py-1.5 text-xs font-semibold text-warning transition-colors duration-150 hover:bg-warning/10 disabled:opacity-60"
       >
         <X className="h-3.5 w-3.5" aria-hidden="true" />
         {clearing ? t("clearing") : t("clear")}

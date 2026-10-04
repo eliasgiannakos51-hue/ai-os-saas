@@ -40,7 +40,7 @@ export function HealthScoreCard({
   const hasTrend = chartData && chartData.length > 1 && chartData.some((d) => d.count > 0);
 
   return (
-    <div className="glass-panel mt-6 flex flex-col gap-5 rounded-2xl p-5 sm:flex-row sm:items-center">
+    <div className="glass-panel mt-6 flex flex-col gap-5 rounded-card p-5 sm:flex-row sm:items-center">
       {/* `shrink-0` used to be on THIS row, which put it around the ring
           AND the text beside it. The text block's own `min-w-0` below then
           did nothing — a child cannot shrink inside a parent that has

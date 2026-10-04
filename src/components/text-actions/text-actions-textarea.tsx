@@ -144,7 +144,7 @@ export function TextActionsTextarea({
       />
 
       {selection && (
-        <div className="absolute end-2 top-2 z-10 flex items-center gap-0.5 rounded-lg border border-border bg-panel p-1">
+        <div className="absolute end-2 top-2 z-10 flex items-center gap-0.5 rounded-item border border-border bg-panel p-1">
           {ACTIONS.map(({ id, labelKey, icon: Icon }) => (
             <button
               key={id}
@@ -154,7 +154,7 @@ export function TextActionsTextarea({
               disabled={pendingAction !== null}
               aria-label={tCommon(labelKey)}
               title={tCommon(labelKey)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-muted transition-colors duration-150 hover:bg-foreground/10 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-7 w-7 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-foreground/10 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
             >
               {pendingAction === id ? (
                 <ThinkingIndicator size="sm" />
@@ -167,7 +167,7 @@ export function TextActionsTextarea({
       )}
 
       {(result || error) && (
-        <div className="absolute inset-x-0 top-full z-10 mt-1 rounded-lg border border-border bg-panel p-2.5 text-xs">
+        <div className="absolute inset-x-0 top-full z-10 mt-1 rounded-item border border-border bg-panel p-2.5 text-xs">
           {error ? (
             <p className="text-danger">{error}</p>
           ) : (
@@ -180,7 +180,7 @@ export function TextActionsTextarea({
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={reject}
-                  className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-muted transition-colors duration-150 hover:text-foreground"
+                  className="inline-flex items-center gap-1 rounded-item border border-border px-2 py-1 text-muted transition-colors duration-150 hover:text-foreground"
                 >
                   <X className="h-3 w-3" /> {tCommon("textActions.reject")}
                 </button>
@@ -188,7 +188,7 @@ export function TextActionsTextarea({
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={accept}
-                  className="inline-flex items-center gap-1 rounded-md border border-foreground/60 px-2 py-1 font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
+                  className="inline-flex items-center gap-1 rounded-item border border-foreground/60 px-2 py-1 font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
                 >
                   <Check className="h-3 w-3" /> {tCommon("textActions.accept")}
                 </button>

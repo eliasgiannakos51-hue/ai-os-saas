@@ -167,7 +167,7 @@ export function GenericRecordDetail({
             onClick={onClose}
             aria-label={tCommon("cancel")}
             title={tCommon("cancel")}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -183,7 +183,7 @@ export function GenericRecordDetail({
               type="submit"
               form={formId}
               disabled={saving}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-item border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-50"
             >
               {saving ? t("saving") : t("save")}
             </button>
@@ -193,7 +193,7 @@ export function GenericRecordDetail({
                 setForm(formStateFor(module, record));
                 setTab("details");
               }}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-item border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
             >
               {tCommon("cancel")}
             </button>
@@ -296,7 +296,7 @@ export function GenericRecordDetail({
           </div>
 
           {error && (
-            <p className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+            <p className="rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
               {error}
             </p>
           )}

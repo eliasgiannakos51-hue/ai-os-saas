@@ -48,7 +48,7 @@ export function CostDashboard({ data, locale }: { data: CostDashboardData; local
   return (
     <>
       {data.unavailable.length > 0 && (
-        <p className="mb-6 rounded-xl border border-warning/30 bg-warning/[0.06] p-4 text-xs text-warning">
+        <p className="mb-6 rounded-card border border-warning/30 bg-warning/[0.06] p-4 text-xs text-warning">
           {/* NOT "no data": a query that failed is not a quiet month, and
               showing €0.00 for one would be the most misleading number on
               the page. */}
@@ -83,7 +83,7 @@ export function CostDashboard({ data, locale }: { data: CostDashboardData; local
             {data.daily.map((d) => (
               <li key={d.day} className="flex items-center gap-3 text-xs">
                 <span className="w-20 shrink-0 tabular-nums text-muted">{d.day}</span>
-                <span className="h-2 min-w-[2px] rounded-sm bg-foreground/70" style={{ width: `${(d.costEur / peak) * 100}%` }} />
+                <span className="h-2 min-w-[2px] rounded-item bg-foreground/70" style={{ width: `${(d.costEur / peak) * 100}%` }} />
                 <span className="tabular-nums text-foreground">{eur(d.costEur)}</span>
                 <span className="tabular-nums text-muted">{d.calls} calls</span>
               </li>
@@ -167,7 +167,7 @@ export function CostDashboard({ data, locale }: { data: CostDashboardData; local
         ) : (
           <ul className="space-y-2">
             {data.alerts.map((a) => (
-              <li key={a.id} className="rounded-lg border border-border bg-input px-3 py-2 text-xs">
+              <li key={a.id} className="rounded-item border border-border bg-input px-3 py-2 text-xs">
                 <div className="flex items-center justify-between gap-3">
                   <span className="font-medium text-foreground">{a.type}</span>
                   <span className="tabular-nums text-muted">{a.createdAt.slice(0, 16).replace("T", " ")}</span>

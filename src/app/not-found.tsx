@@ -31,7 +31,7 @@ export default async function NotFound() {
 
       <Link
         href="/dashboard/overview"
-        className="mt-10 inline-flex min-h-[44px] items-center justify-center rounded bg-button px-6 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
+        className="mt-10 inline-flex min-h-[44px] items-center justify-center rounded-item bg-button px-6 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
       >
         {t("notFoundAction")}
       </Link>

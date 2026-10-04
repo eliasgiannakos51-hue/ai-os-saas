@@ -58,7 +58,7 @@ export default function OverviewError({
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
       <div
         role="alert"
-        className="rounded-2xl border border-danger/30 bg-danger/[0.04] p-6"
+        className="rounded-card border border-danger/30 bg-danger/[0.04] p-6"
       >
         <p className="flex items-center gap-2 text-base font-semibold text-foreground">
           <AlertTriangle className="h-5 w-5 shrink-0 text-danger" aria-hidden="true" />
@@ -68,7 +68,7 @@ export default function OverviewError({
         <button
           type="button"
           onClick={() => reset()}
-          className="mt-5 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-opacity hover:opacity-90"
+          className="mt-5 inline-flex min-h-[44px] items-center justify-center rounded-item bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-opacity hover:opacity-90"
         >
           {t("reload")}
         </button>

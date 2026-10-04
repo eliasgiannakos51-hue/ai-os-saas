@@ -74,7 +74,7 @@ export function DocumentPdfButton({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
         >
           <Download className="h-3.5 w-3.5" aria-hidden="true" />
           {tPdf("label")}
@@ -227,20 +227,20 @@ function DocumentPdfDialog({ documentId, onClose }: { documentId: string; onClos
             type="button"
             onClick={onClose}
             aria-label={tCommon("close")}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-panel-hover hover:text-foreground"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
         <div className="mt-4 space-y-2" role="radiogroup" aria-label={t("title")}>
-          <label className={`flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm ${mode === "original" ? "border-foreground/50 bg-foreground/10" : "border-border"}`}>
+          <label className={`flex min-h-[44px] cursor-pointer items-center gap-3 rounded-card border px-3 py-2 text-sm ${mode === "original" ? "border-foreground/50 bg-foreground/10" : "border-border"}`}>
             <input type="radio" name="pdf-language" checked={mode === "original"} onChange={() => setMode("original")} className="accent-foreground" />
             <span className="min-w-0 flex-1 text-foreground">
               {t("inLanguage", { language: labelFor(detected) || "…" })}
             </span>
           </label>
-          <label className={`flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm ${mode === "translate" ? "border-foreground/50 bg-foreground/10" : "border-border"}`}>
+          <label className={`flex min-h-[44px] cursor-pointer items-center gap-3 rounded-card border px-3 py-2 text-sm ${mode === "translate" ? "border-foreground/50 bg-foreground/10" : "border-border"}`}>
             <input type="radio" name="pdf-language" checked={mode === "translate"} onChange={() => setMode("translate")} className="accent-foreground" />
             <span className="text-foreground">{t("translateTo")}</span>
             <select
@@ -250,7 +250,7 @@ function DocumentPdfDialog({ documentId, onClose }: { documentId: string; onClos
                 setMode("translate");
               }}
               aria-label={t("translateTo")}
-              className="min-h-[36px] min-w-0 flex-1 rounded-lg border border-border bg-input px-2 text-sm text-foreground"
+              className="min-h-[36px] min-w-0 flex-1 rounded-item border border-border bg-input px-2 text-sm text-foreground"
             >
               {LANGUAGES.map((l) => (
                 <option key={l.code} value={l.code} lang={l.code}>
@@ -271,7 +271,7 @@ function DocumentPdfDialog({ documentId, onClose }: { documentId: string; onClos
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 text-xs font-medium text-muted hover:text-foreground"
+            className="inline-flex min-h-[44px] items-center rounded-item border border-border px-4 text-xs font-medium text-muted hover:text-foreground"
           >
             {tCommon("cancel")}
           </button>
@@ -280,7 +280,7 @@ function DocumentPdfDialog({ documentId, onClose }: { documentId: string; onClos
             onClick={download}
             disabled={!ready}
             data-testid="document-pdf-download"
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-4 text-xs font-semibold text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/60 px-4 text-xs font-semibold text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {/* NOT THE FILLED ORANGE SLAB: a page has one primary action
                 (scripts/tests/one-primary-action.test.mjs) and on the

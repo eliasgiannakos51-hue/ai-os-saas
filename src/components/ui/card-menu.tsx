@@ -109,7 +109,7 @@ export function CardMenu({
         // 36px, matching FavoriteButton's inline variant exactly — the two
         // sit side by side in every card corner, and 32px was a thin tap
         // target at 375px.
-        className="flex h-11 w-11 items-center justify-center rounded-xl bg-foreground/[0.04] text-muted ring-1 ring-inset ring-foreground/10 transition-all duration-200 hover:bg-panel-hover hover:text-foreground"
+        className="flex h-11 w-11 items-center justify-center rounded-card bg-foreground/[0.04] text-muted ring-1 ring-inset ring-foreground/10 transition-all duration-200 hover:bg-panel-hover hover:text-foreground"
       >
         <MoreHorizontal className="h-[18px] w-[18px]" aria-hidden="true" />
       </button>
@@ -121,7 +121,7 @@ export function CardMenu({
           aria-label={label}
           // dropdown-in is the existing shared entrance animation (see
           // globals.css) — reduced-motion is already handled globally.
-          className="dropdown-in absolute end-0 top-11 z-[4] min-w-[11rem] overflow-hidden rounded-xl border border-border bg-panel p-1"
+          className="dropdown-in absolute end-0 top-11 z-[4] min-w-[11rem] overflow-hidden rounded-card border border-border bg-panel p-1"
         >
           {actions.map((action) => {
             const Icon = action.icon;
@@ -136,7 +136,7 @@ export function CardMenu({
                   setOpen(false);
                   action.onSelect();
                 }}
-                className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-start text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
+                className={`flex w-full items-center gap-2.5 rounded-item px-2.5 py-2 text-start text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
                   action.destructive
                     ? "text-danger hover:bg-danger/10"
                     : "text-foreground hover:bg-panel-hover hover:text-foreground"

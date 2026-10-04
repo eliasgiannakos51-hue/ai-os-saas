@@ -189,7 +189,7 @@ export function VoiceInput({
             // layout gate measures (scripts/tests/layout-stress.prodtest.mjs),
             // and a 32px one grew its under-44px count by four.
             compact
-              ? "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-lg text-muted/50"
+              ? "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-item text-muted/50"
               : "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-full border border-dashed border-border text-muted/50"
           }
         >
@@ -232,7 +232,7 @@ export function VoiceInput({
             ? t("costPerMinute", { credits: availability.creditsPerMinute.transcribe })
             : t("outOfMinutes")
         }
-        className={`flex ${compact ? "h-9 w-9" : "min-h-[44px] min-w-[44px]"} items-center justify-center rounded-lg border transition-colors duration-150 disabled:opacity-40 ${
+        className={`flex ${compact ? "h-9 w-9" : "min-h-[44px] min-w-[44px]"} items-center justify-center rounded-item border transition-colors duration-150 disabled:opacity-40 ${
           recorder.recording
             ? "border-foreground/50 bg-foreground/15 text-foreground"
             : "border-border text-muted hover:text-foreground"
@@ -279,14 +279,14 @@ export function VoiceInput({
                   setExplaining(false);
                   void recorder.start();
                 }}
-                className="min-h-[44px] rounded-lg bg-button px-4 text-xs font-semibold text-button-ink transition-opacity hover:opacity-90"
+                className="min-h-[44px] rounded-item bg-button px-4 text-xs font-semibold text-button-ink transition-opacity hover:opacity-90"
               >
                 {t("permission.allow")}
               </button>
               <button
                 type="button"
                 onClick={() => setExplaining(false)}
-                className="min-h-[44px] rounded-lg border border-border px-4 text-xs text-muted transition-colors hover:text-foreground"
+                className="min-h-[44px] rounded-item border border-border px-4 text-xs text-muted transition-colors hover:text-foreground"
               >
                 {t("permission.cancel")}
               </button>
@@ -306,7 +306,7 @@ export function VoiceInput({
           <button
             type="button"
             onClick={() => recorder.stop()}
-            className="flex min-h-[44px] items-center gap-2 rounded-lg bg-button px-4 text-sm font-semibold text-button-ink"
+            className="flex min-h-[44px] items-center gap-2 rounded-item bg-button px-4 text-sm font-semibold text-button-ink"
           >
             <Square className="h-4 w-4" aria-hidden="true" />
             {t("stopListening")}
@@ -337,7 +337,7 @@ export function VoiceInput({
                   if (text) onTranscript(text);
                 }}
                 disabled={draft.trim().length === 0}
-                className="flex min-h-[44px] items-center gap-2 rounded-lg bg-button px-4 text-xs font-semibold text-button-ink transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="flex min-h-[44px] items-center gap-2 rounded-item bg-button px-4 text-xs font-semibold text-button-ink transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 <Check className="h-4 w-4" aria-hidden="true" />
                 {t("draft.use")}
@@ -345,7 +345,7 @@ export function VoiceInput({
               <button
                 type="button"
                 onClick={() => setDraft(null)}
-                className="flex min-h-[44px] items-center gap-2 rounded-lg border border-border px-4 text-xs text-muted transition-colors hover:text-foreground"
+                className="flex min-h-[44px] items-center gap-2 rounded-item border border-border px-4 text-xs text-muted transition-colors hover:text-foreground"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
                 {t("draft.discard")}

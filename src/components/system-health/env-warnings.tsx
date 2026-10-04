@@ -58,7 +58,7 @@ export function EnvWarnings({ warnings }: { warnings: EnvWarning[] }) {
         rows.length === 0 ? null : (
           <ul key={i} className="mt-3 space-y-2">
             {rows.map((w) => (
-              <li key={w.key} className={`rounded-xl border px-3 py-2.5 ${tone}`}>
+              <li key={w.key} className={`rounded-card border px-3 py-2.5 ${tone}`}>
                 <div className="flex items-start gap-2">
                   <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                   <div className="min-w-0">

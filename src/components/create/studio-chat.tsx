@@ -135,7 +135,7 @@ export function StudioChat({ context }: { context: string }) {
           messages.map((message) =>
             message.role === "user" ? (
               <div key={message.id} className="flex justify-end">
-                <p className="max-w-[85%] rounded-2xl rounded-tr-sm bg-button px-3.5 py-2 text-sm text-button-ink">
+                <p className="max-w-[85%] rounded-card rounded-tr-item bg-button px-3.5 py-2 text-sm text-button-ink">
                   {message.content}
                 </p>
               </div>
@@ -166,7 +166,7 @@ export function StudioChat({ context }: { context: string }) {
       </div>
 
       {error && (
-        <p className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+        <p className="rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
           {error}
         </p>
       )}

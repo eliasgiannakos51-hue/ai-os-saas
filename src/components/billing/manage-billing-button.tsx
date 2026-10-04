@@ -33,7 +33,7 @@ export function ManageBillingButton() {
         type="button"
         onClick={handleClick}
         disabled={loading}
-        className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex min-h-[44px] items-center justify-center rounded-item border border-border px-4 py-2 text-sm text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? tCommon("loading") : t("manageBilling")}
       </button>

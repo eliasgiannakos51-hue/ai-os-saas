@@ -57,10 +57,10 @@ export function ProblemNotice({
     <div
       role="alert"
       data-testid={`problem-${code}`}
-      className={`rounded-xl border border-foreground/40 bg-foreground/[0.07] p-4 ${className}`}
+      className={`rounded-card border border-foreground/40 bg-foreground/[0.07] p-4 ${className}`}
     >
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-foreground/15 text-foreground">
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-item bg-foreground/15 text-foreground">
           <Icon className="h-4 w-4" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
@@ -79,7 +79,7 @@ export function ProblemNotice({
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="inline-flex min-h-[36px] items-center rounded-lg border border-foreground/60 px-3 py-1.5 text-xs font-semibold text-foreground transition-opacity duration-150 hover:bg-foreground/10"
+                  className="inline-flex min-h-[36px] items-center rounded-item border border-foreground/60 px-3 py-1.5 text-xs font-semibold text-foreground transition-opacity duration-150 hover:bg-foreground/10"
                 >
                   {tCommon("retry")}
                 </button>
@@ -87,7 +87,7 @@ export function ProblemNotice({
               {action && (
                 <Link
                   href={action.href}
-                  className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40"
+                  className="inline-flex min-h-[36px] items-center rounded-item border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40"
                 >
                   {t(action.labelKey)}
                 </Link>

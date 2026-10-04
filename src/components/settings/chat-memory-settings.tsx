@@ -144,7 +144,7 @@ export function ChatMemorySettings({
               which is normal until a conversation contains something
               durable worth keeping. */}
       {reason && (
-        <p className="flex items-start gap-1.5 rounded-lg border border-border bg-input px-3 py-2 text-xs leading-relaxed text-muted">
+        <p className="flex items-start gap-1.5 rounded-item border border-border bg-input px-3 py-2 text-xs leading-relaxed text-muted">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground" aria-hidden="true" />
           <span>{reason}</span>
         </p>
@@ -163,7 +163,7 @@ export function ChatMemorySettings({
               way to it from the switch that turns the feature on. */}
           <Link
             href="/dashboard/ai-memory"
-            className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-foreground transition-colors duration-150 hover:bg-panel-hover"
+            className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-item px-3 py-1.5 text-xs text-foreground transition-colors duration-150 hover:bg-panel-hover"
           >
             <ListTree className="h-3.5 w-3.5" /> {t("seeAll")}
           </Link>
@@ -171,7 +171,7 @@ export function ChatMemorySettings({
             type="button"
             onClick={handleClearAll}
             disabled={clearing || count === 0}
-            className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-item border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Trash2 className="h-3.5 w-3.5" /> {clearing ? t("clearing") : t("clearAll")}
           </button>

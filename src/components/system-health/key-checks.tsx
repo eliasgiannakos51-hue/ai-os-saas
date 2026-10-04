@@ -90,7 +90,7 @@ export function KeyChecks({ rows }: { rows: KeyInventoryRow[] }) {
           type="button"
           onClick={() => void run()}
           disabled={running}
-          className="rounded-lg bg-foreground/5 px-3 py-1.5 text-xs font-medium hover:bg-foreground/10 disabled:opacity-50"
+          className="rounded-item bg-foreground/5 px-3 py-1.5 text-xs font-medium hover:bg-foreground/10 disabled:opacity-50"
           data-testid="key-checks-run"
         >
           {running ? CHECKING : RUN}
@@ -103,7 +103,7 @@ export function KeyChecks({ rows }: { rows: KeyInventoryRow[] }) {
       </p>
 
       {failed && (
-        <p className="mt-3 rounded-lg bg-danger/[0.08] p-3 text-xs text-danger">
+        <p className="mt-3 rounded-item bg-danger/[0.08] p-3 text-xs text-danger">
           The check itself failed to run — see the function logs for /api/system-health/keys.
         </p>
       )}

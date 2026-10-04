@@ -46,7 +46,7 @@ export function BetaExpiryBanner({
   if (dismissed) return null;
 
   return (
-    <div className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-border bg-foreground/5 px-4 py-3 text-sm">
+    <div className="mt-6 flex items-center justify-between gap-3 rounded-card border border-border bg-foreground/5 px-4 py-3 text-sm">
       <div className="flex min-w-0 items-center gap-2.5">
         <Clock className="h-4 w-4 shrink-0 text-foreground" aria-hidden="true" />
         {/* ONE SENTENCE, NOT THREE FRAGMENTS. The English version was built
@@ -74,7 +74,7 @@ export function BetaExpiryBanner({
         type="button"
         onClick={dismiss}
         aria-label={t("dismiss")}
-        className="shrink-0 rounded p-1 text-foreground/70 transition-colors duration-150 hover:text-foreground"
+        className="shrink-0 rounded-item p-1 text-foreground/70 transition-colors duration-150 hover:text-foreground"
       >
         <X className="h-4 w-4" aria-hidden="true" />
       </button>

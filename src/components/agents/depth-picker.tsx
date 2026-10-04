@@ -77,7 +77,7 @@ export function DepthPicker({
             aria-checked={selected}
             disabled={disabled}
             onClick={() => onChange(depth)}
-            className={`flex w-full items-start gap-3 rounded-xl border p-3 text-start transition-colors duration-150 disabled:opacity-50 ${
+            className={`flex w-full items-start gap-3 rounded-card border p-3 text-start transition-colors duration-150 disabled:opacity-50 ${
               selected
                 ? "border-foreground/50 bg-foreground/10"
                 : "border-border hover:bg-panel-hover"

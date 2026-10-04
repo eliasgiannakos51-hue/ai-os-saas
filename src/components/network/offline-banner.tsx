@@ -114,7 +114,7 @@ export function OfflineBanner() {
           data-testid="offline-retry"
           onClick={() => void retry()}
           disabled={checking}
-          className="inline-flex min-h-[32px] shrink-0 items-center gap-1.5 rounded-lg border border-warning/50 px-3 py-1 text-[11px] font-semibold text-warning transition-colors duration-150 hover:bg-warning/20 disabled:opacity-60"
+          className="inline-flex min-h-[32px] shrink-0 items-center gap-1.5 rounded-item border border-warning/50 px-3 py-1 text-[11px] font-semibold text-warning transition-colors duration-150 hover:bg-warning/20 disabled:opacity-60"
         >
           {checking ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />

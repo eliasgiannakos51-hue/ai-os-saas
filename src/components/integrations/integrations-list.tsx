@@ -124,7 +124,7 @@ export function IntegrationsList({
         }
       >
         {!encryptionReady && (
-          <p className="mb-4 rounded-xl border border-warning/40 bg-warning/10 p-3 text-xs leading-relaxed text-warning">
+          <p className="mb-4 rounded-card border border-warning/40 bg-warning/10 p-3 text-xs leading-relaxed text-warning">
             {t("notConfigured")}
           </p>
         )}
@@ -275,7 +275,7 @@ function ConsentPanel({
   const provider = PROVIDERS.find((p) => p.id === providerId)!;
 
   return (
-    <section className="space-y-3 rounded-2xl border border-foreground/30 bg-foreground/[0.04] p-4">
+    <section className="space-y-3 rounded-card border border-foreground/30 bg-foreground/[0.04] p-4">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
         <ShieldCheck className="h-4 w-4 text-foreground" aria-hidden="true" />
         {t("consentTitle", { name: provider.name })}
@@ -307,7 +307,7 @@ function ConsentPanel({
       <div className="flex flex-wrap gap-2">
         <a
           href={`/api/integrations/${provider.id}/connect`}
-          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-button px-4 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-button px-4 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
         >
           <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
           {t("consentApprove", { name: provider.name })}
@@ -315,7 +315,7 @@ function ConsentPanel({
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+          className="inline-flex min-h-[44px] items-center rounded-item border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
         >
           {t("cancel")}
         </button>

@@ -77,17 +77,17 @@ export function DetailPanel({
   }
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-border bg-panel">
+    <section className="relative overflow-hidden rounded-card border border-border bg-panel">
       <header className="flex items-start justify-between gap-3 p-5 pb-4">
         <div className="flex min-w-0 items-start gap-3">
           <span
             aria-hidden="true"
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${moduleAccent(accentSlug)}`}
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-card border ${moduleAccent(accentSlug)}`}
           >
             <Icon className="h-[18px] w-[18px]" />
           </span>
           <div className="min-w-0">
-            <h2 className="truncate text-base font-semibold tracking-tight text-foreground">{title}</h2>
+            <h2 className="break-words text-base font-semibold tracking-tight text-foreground">{title}</h2>
             {subtitle ? <div className="mt-0.5 text-xs text-muted">{subtitle}</div> : null}
           </div>
         </div>

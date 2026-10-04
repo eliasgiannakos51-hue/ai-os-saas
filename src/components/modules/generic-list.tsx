@@ -197,7 +197,7 @@ export function GenericList({
               type="button"
               onClick={handleExport}
               disabled={filtered.length === 0}
-              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-item border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Download className="h-3.5 w-3.5" aria-hidden="true" /> {t("exportCsv")}
             </button>

@@ -97,7 +97,7 @@ export async function CreditHistory({
           {rows.map((row) => (
             <li key={row.id} className="flex items-center justify-between gap-3 py-2.5 text-xs">
               <div className="min-w-0">
-                <p className="truncate text-foreground">{row.label}</p>
+                <p className="break-words text-foreground">{row.label}</p>
                 <p className="mt-0.5 text-muted" suppressHydrationWarning>
                   {formatRelativeTime(row.at, locale)}
                   {row.kind === "tx" && row.balanceAfter !== null && (

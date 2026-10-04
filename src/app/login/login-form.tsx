@@ -128,13 +128,13 @@ export function LoginForm() {
         </div>
 
         {resetSuccess && (
-          <p className="mb-4 rounded-xl border border-success/40 bg-success/10 px-3 py-2 text-center text-xs text-success">
+          <p className="mb-4 rounded-card border border-success/40 bg-success/10 px-3 py-2 text-center text-xs text-success">
             {t("resetSuccess")}
           </p>
         )}
 
         {sharePrompt && (
-          <p className="mb-4 rounded-xl border border-border bg-panel px-3 py-2 text-center text-xs text-muted">
+          <p className="mb-4 rounded-card border border-border bg-panel px-3 py-2 text-center text-xs text-muted">
             {t("sharedSignInFirst")}
           </p>
         )}
@@ -154,7 +154,7 @@ export function LoginForm() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40"
+                className="w-full rounded-card border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40"
                 placeholder="you@domain.com"
               />
             </div>
@@ -170,13 +170,13 @@ export function LoginForm() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40"
+                className="w-full rounded-card border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40"
                 placeholder="••••••••"
               />
             </div>
 
             {error && (
-              <p className="rounded-xl border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+              <p className="rounded-card border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                 {error}
               </p>
             )}
@@ -184,7 +184,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="cta-amber inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-button-ink disabled:opacity-50"
+              className="cta-amber inline-flex min-h-[44px] w-full items-center justify-center rounded-card px-4 py-2.5 text-sm font-semibold text-button-ink disabled:opacity-50"
             >
               {loading ? t("working") : t("logIn")}
             </button>

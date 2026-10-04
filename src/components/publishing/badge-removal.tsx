@@ -151,7 +151,7 @@ export function BadgeRemoval({ siteId }: { siteId: string }) {
         type="button"
         onClick={buy}
         disabled={busy || !state.canBuy}
-        className="inline-flex min-h-[32px] items-center gap-1.5 rounded-lg border border-border px-2.5 text-xs text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex min-h-[32px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
       >
         {busy ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : null}
         {t("remove")}

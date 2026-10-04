@@ -16,8 +16,8 @@ export function NextActionCard({
   ctaLabel: string;
 }) {
   return (
-    <div className="mt-6 flex items-start gap-3 rounded-2xl border border-foreground/20 bg-foreground/[0.03] p-4">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/10 text-foreground">
+    <div className="mt-6 flex items-start gap-3 rounded-card border border-foreground/20 bg-foreground/[0.03] p-4">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-card bg-foreground/10 text-foreground">
         <Compass className="h-4 w-4" aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">

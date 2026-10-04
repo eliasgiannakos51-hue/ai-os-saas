@@ -114,7 +114,7 @@ export function DownloadPdfButton({
       disabled={loading}
       className={
         className ??
-        "inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-60"
+        "inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-60"
       }
     >
       {loading ? (

@@ -60,7 +60,7 @@ export function AiGeneratedNotice({
   if (variant === "block") {
     return (
       <p
-        className={`flex items-start gap-1.5 rounded-lg border border-border bg-panel/60 px-3 py-2 text-[11px] leading-relaxed text-muted ${className}`}
+        className={`flex items-start gap-1.5 rounded-item border border-border bg-panel/60 px-3 py-2 text-[11px] leading-relaxed text-muted ${className}`}
       >
         <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-foreground" aria-hidden="true" />
         <span>{t("long")}</span>

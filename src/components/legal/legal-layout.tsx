@@ -71,11 +71,11 @@ export async function LegalLayout({
         </p>
 
         {notice === "draft" ? (
-          <div className="mt-4 rounded border border-border bg-panel-hover/20 px-4 py-3 text-xs leading-relaxed text-foreground/80">
+          <div className="mt-4 rounded-item border border-border bg-panel-hover/20 px-4 py-3 text-xs leading-relaxed text-foreground/80">
             {t("legal.draftNotice")}
           </div>
         ) : (
-          <div className="mt-4 rounded border border-border bg-input px-4 py-3 text-xs leading-relaxed text-muted">
+          <div className="mt-4 rounded-item border border-border bg-input px-4 py-3 text-xs leading-relaxed text-muted">
             {t("legal.factualNotice")}
           </div>
         )}

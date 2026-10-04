@@ -41,7 +41,7 @@ export function SubscriptionEndingBanner({ daysLeft }: { daysLeft: number }) {
   }
 
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-foreground/5 px-4 py-3">
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-card border border-border bg-foreground/5 px-4 py-3">
       <p className="flex items-center gap-2 text-xs text-foreground">
         <Clock className="h-4 w-4 shrink-0" aria-hidden="true" />
         {t("endingIn", { days: daysLeft })}
@@ -50,7 +50,7 @@ export function SubscriptionEndingBanner({ daysLeft }: { daysLeft: number }) {
         type="button"
         onClick={resume}
         disabled={loading}
-        className="inline-flex min-h-[36px] shrink-0 items-center justify-center rounded-lg border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+        className="inline-flex min-h-[36px] shrink-0 items-center justify-center rounded-item border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
       >
         {loading ? tCommon("loading") : t("restore")}
       </button>

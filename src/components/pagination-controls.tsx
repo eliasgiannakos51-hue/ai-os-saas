@@ -23,7 +23,7 @@ export function PaginationControls({
         onClick={() => onChange(page - 1)}
         disabled={page <= 1}
         aria-label={t("previousPage")}
-        className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-lg border border-border px-3 transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 sm:py-1.5"
+        className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-item border border-border px-3 transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 sm:py-1.5"
       >
         <ChevronLeft className="h-4 w-4" /> {t("paginationPrev")}
       </button>
@@ -38,7 +38,7 @@ export function PaginationControls({
         onClick={() => onChange(page + 1)}
         disabled={page >= totalPages}
         aria-label={t("nextPage")}
-        className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-lg border border-border px-3 transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 sm:py-1.5"
+        className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-item border border-border px-3 transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 sm:py-1.5"
       >
         {t("paginationNext")} <ChevronRight className="h-4 w-4" />
       </button>

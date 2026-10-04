@@ -43,13 +43,13 @@ export function AutomationRealizeList({ records }: { records: ModuleRecord[] }) 
           const isOpen = openId === record.id;
 
           return (
-            <li key={record.id} className="rounded-lg border border-border bg-input px-3 py-2.5">
+            <li key={record.id} className="rounded-item border border-border bg-input px-3 py-2.5">
               <div className="flex items-center justify-between gap-3">
-                <p className="min-w-0 flex-1 truncate text-sm text-foreground">{taskName || t("untitledIdea")}</p>
+                <p className="min-w-0 flex-1 break-words text-sm text-foreground">{taskName || t("untitledIdea")}</p>
                 <button
                   type="button"
                   onClick={() => setOpenId(isOpen ? null : record.id)}
-                  className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:bg-panel-hover"
+                  className="shrink-0 rounded-item border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:bg-panel-hover"
                 >
                   {isOpen ? t("cancel") : t("makeThisReal")}
                 </button>
@@ -245,7 +245,7 @@ function RealizeForm({
           type="button"
           onClick={handleSubmit}
           disabled={submitting || !isComplete}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-item border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? t("realizing") : t("confirmMakeReal")}
         </button>

@@ -28,7 +28,7 @@ const markdownComponents: Components = {
   h2: ({ children }) => <h2 className="mb-2 mt-1 text-[15px] font-bold first:mt-0">{children}</h2>,
   h3: ({ children }) => <h3 className="mb-1.5 mt-1 text-sm font-bold first:mt-0">{children}</h3>,
   pre: ({ children }) => (
-    <pre className="mb-2 overflow-x-auto rounded-lg border border-border bg-input p-3 text-xs leading-relaxed last:mb-0">
+    <pre className="mb-2 overflow-x-auto rounded-item border border-border bg-input p-3 text-xs leading-relaxed last:mb-0">
       {children}
     </pre>
   ),
@@ -38,7 +38,7 @@ const markdownComponents: Components = {
       return <code className="font-mono">{children}</code>;
     }
     return (
-      <code className="rounded bg-input px-1 py-0.5 font-mono text-[13px]">{children}</code>
+      <code className="rounded-item bg-input px-1 py-0.5 font-mono text-[13px]">{children}</code>
     );
   },
   blockquote: ({ children }) => (

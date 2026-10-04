@@ -43,7 +43,7 @@ export function BetaFeedbackBanner({
   if (dismissed) return null;
 
   return (
-    <div className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-success/40 bg-success/10 px-4 py-3 text-sm">
+    <div className="mt-6 flex items-center justify-between gap-3 rounded-card border border-success/40 bg-success/10 px-4 py-3 text-sm">
       <div className="flex min-w-0 items-center gap-2.5">
         <MessageSquareHeart className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
         <p className="min-w-0 text-success/90">
@@ -62,7 +62,7 @@ export function BetaFeedbackBanner({
         type="button"
         onClick={dismiss}
         aria-label={t("dismiss")}
-        className="shrink-0 rounded p-1 text-success/70 transition-colors duration-150 hover:text-success"
+        className="shrink-0 rounded-item p-1 text-success/70 transition-colors duration-150 hover:text-success"
       >
         <X className="h-4 w-4" aria-hidden="true" />
       </button>

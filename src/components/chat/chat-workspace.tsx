@@ -770,7 +770,7 @@ export function ChatWorkspace({
               onClick={toggleSidebar}
               aria-expanded={sidebarOpen}
               aria-label={sidebarOpen ? t("hideConversations") : t("showConversations")}
-              className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground sm:h-9"
+              className="flex h-11 shrink-0 items-center gap-1.5 rounded-item px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground sm:h-9"
             >
               {sidebarOpen ? (
                 <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -779,7 +779,7 @@ export function ChatWorkspace({
               )}
               {/* Hidden below sm only — at 375px the composer needs the
                   width more than the label does. */}
-              <span className="hidden truncate text-xs sm:inline">
+              <span className="hidden break-words text-xs sm:inline">
                 {sidebarOpen ? t("hideConversations") : t("focusMode")}
               </span>
             </button>
@@ -816,7 +816,7 @@ export function ChatWorkspace({
                 editing={headerRenaming}
                 onEditingChange={setHeaderRenaming}
                 onRename={(next) => void renameConversation(activeConversation.id, next)}
-                className="min-w-0 truncate text-sm font-medium text-foreground"
+                className="min-w-0 break-words text-sm font-medium text-foreground"
               />
             </div>
           )}
@@ -862,7 +862,7 @@ export function ChatWorkspace({
                   is the only moment the expectation is still being set.
                   The same three sentences are in the chat's help entry;
                   one wording, two places. */}
-              <div className="mt-5 w-full rounded-xl border border-border bg-panel/60 px-4 py-3 text-start">
+              <div className="mt-5 w-full rounded-card border border-border bg-panel/60 px-4 py-3 text-start">
                 <p className="text-xs font-semibold text-foreground/80">{t("dataScope.title")}</p>
                 <p className="mt-1 text-xs leading-relaxed text-muted">{t("dataScope.body")}</p>
               </div>
@@ -879,7 +879,7 @@ export function ChatWorkspace({
             </div>
           ) : (
             /* NO BUBBLE ON THE ANSWER — V4.6 #12.
-               The reply used to sit in `rounded-2xl border border-border
+               The reply used to sit in `rounded-card border border-border
                bg-panel`, an opaque card that covered the backdrop the
                product is built around. The answer is the page; a card
                around it says the page is a container for messages.
@@ -1121,7 +1121,7 @@ export function ChatWorkspace({
             )}
             {error && (
               <p
-                className={`mb-3 rounded-xl border px-3 py-2 text-xs ${
+                className={`mb-3 rounded-card border px-3 py-2 text-xs ${
                   isRateLimitNotice
                     ? "border-border bg-foreground/5 text-foreground"
                     : "border-danger/40 bg-danger/10 text-danger"

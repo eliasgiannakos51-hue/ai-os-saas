@@ -461,7 +461,7 @@ export function MissionDetail({
             onClick={onClose}
             aria-label={tCommon("cancel")}
             title={tCommon("cancel")}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -477,7 +477,7 @@ export function MissionDetail({
               type="button"
               onClick={runReview}
               disabled={reviewing}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
               {reviewing ? t("reviewing") : t("reviewMission")}
@@ -504,7 +504,7 @@ export function MissionDetail({
       }
     >
       {error && (
-        <p className="mb-3 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+        <p className="mb-3 rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
           {error}
         </p>
       )}
@@ -512,7 +512,7 @@ export function MissionDetail({
       {tab === "steps" && (
         <>
           {stuckStep && (
-            <div className="mb-3 flex items-start gap-2.5 rounded-xl border border-warning/40 bg-warning/5 px-3 py-2.5 text-xs text-warning">
+            <div className="mb-3 flex items-start gap-2.5 rounded-card border border-warning/40 bg-warning/5 px-3 py-2.5 text-xs text-warning">
               <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <p>{t("stillWorkingOn", { step: stuckStep.text })}</p>
             </div>
@@ -531,7 +531,7 @@ export function MissionDetail({
                   <StepUndoStrip seconds={undoSeconds} onUndo={() => void undoDelete()} />
                 )}
                 <li
-                  className={`relative flex items-start gap-2.5 rounded-xl border border-border bg-input px-3 py-2.5 ${
+                  className={`relative flex items-start gap-2.5 rounded-card border border-border bg-input px-3 py-2.5 ${
                     celebratingIndex === index ? "celebration-pop" : ""
                   }`}
                 >
@@ -600,7 +600,7 @@ export function MissionDetail({
                                 onClick={() => toggleSubstep(index, subIndex)}
                                 disabled={togglingSubstep !== null}
                                 aria-pressed={done}
-                                className="flex w-full items-start gap-2 rounded-md px-1 py-0.5 text-start transition-colors duration-150 hover:bg-panel-hover disabled:cursor-not-allowed disabled:opacity-60"
+                                className="flex w-full items-start gap-2 rounded-item px-1 py-0.5 text-start transition-colors duration-150 hover:bg-panel-hover disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 {done ? (
                                   <CheckCircle2
@@ -636,7 +636,7 @@ export function MissionDetail({
                           {looksLikeWebsiteStep(step.text) && (
                             <Link
                               href="/dashboard/website-builder"
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/40 px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
+                              className="inline-flex items-center gap-1.5 rounded-item border border-foreground/40 px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
                             >
                               <WEBSITE_BUILDER_ICON className="h-3.5 w-3.5" aria-hidden="true" />
                               {t("openWebsiteBuilder")}
@@ -652,7 +652,7 @@ export function MissionDetail({
                             }
                             disabled={buildingIndex !== null}
                             aria-label={t("agentRoleLabel")}
-                            className="rounded-lg border border-border bg-input px-2 py-1 text-[11px] text-foreground outline-none transition-colors duration-150 focus:border-foreground/60 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded-item border border-border bg-input px-2 py-1 text-[11px] text-foreground outline-none transition-colors duration-150 focus:border-foreground/60 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {AGENT_ROLES.map((role) => (
                               <option key={role} value={role}>
@@ -664,7 +664,7 @@ export function MissionDetail({
                             type="button"
                             onClick={() => buildStep(index)}
                             disabled={buildingIndex !== null}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 rounded-item border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {buildingIndex === index ? (
                               <ThinkingIndicator size="sm" />
@@ -695,7 +695,7 @@ export function MissionDetail({
                               type="button"
                               onClick={() => scheduleStep(index)}
                               disabled={buildingIndex !== null || schedulingIndex !== null}
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                              className="inline-flex items-center gap-1.5 rounded-item border border-border px-2.5 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               {schedulingIndex === index ? (
                                 <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -738,7 +738,7 @@ export function MissionDetail({
       {tab === "review" && (
         <div>
           {review ? (
-            <div className="rounded-xl border border-success/40 bg-success/10 p-4">
+            <div className="rounded-card border border-success/40 bg-success/10 p-4">
               <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-success">
                 {t("reviewerLabel")}
               </p>

@@ -335,14 +335,14 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
               <div className="flex min-w-0 flex-1 items-start gap-2">
                 <Icon className="mt-0.5 h-4 w-4 shrink-0 text-foreground/40" aria-hidden="true" />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate">{result.title}</span>
+                  <span className="block break-words">{result.title}</span>
                   {/* THE PREVIEW. Rendered as text nodes and a <mark>,
                       never as HTML — ts_headline's <<…>> markers are
                       split in lib/search/unified-search.ts precisely so
                       nothing calls dangerouslySetInnerHTML on a string
                       that came out of a database. */}
                   {segments.length > 0 && (
-                    <span className="mt-0.5 block truncate text-[11px] text-muted">
+                    <span className="mt-0.5 block break-words text-[11px] text-muted">
                       {segments.map((seg, i) =>
                         seg.match ? (
                           <mark key={i} className="bg-foreground/25 text-foreground">
@@ -457,7 +457,7 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
         role="dialog"
         aria-modal="true"
         aria-label={tCommon("commandPalette")}
-        className="palette-enter relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-panel"
+        className="palette-enter relative w-full max-w-lg overflow-hidden rounded-card border border-border bg-panel"
       >
         <div className="relative border-b border-border">
           <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
@@ -590,7 +590,7 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
                     type="button"
                     onClick={() => goTo(entry.href)}
                     onMouseEnter={() => setActiveIndex(index)}
-                    className={`flex min-h-[44px] w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-start text-sm transition-colors duration-150 ${
+                    className={`flex min-h-[44px] w-full items-center gap-2.5 rounded-item px-3 py-2.5 text-start text-sm transition-colors duration-150 ${
                       active
                         ? "bg-foreground/10 text-foreground"
                         : "text-foreground hover:bg-panel-hover"

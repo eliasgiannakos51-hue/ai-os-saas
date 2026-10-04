@@ -144,7 +144,7 @@ export function AnalysisWorkspace({
           type="button"
           onClick={() => fileInput.current?.click()}
           disabled={uploading}
-          className="mt-3 inline-flex items-center gap-2 rounded-lg bg-button px-4 py-2 text-xs font-semibold text-button-ink disabled:opacity-50"
+          className="mt-3 inline-flex items-center gap-2 rounded-item bg-button px-4 py-2 text-xs font-semibold text-button-ink disabled:opacity-50"
         >
           {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           {uploading ? t("upload.working") : t("upload.button")}
@@ -159,7 +159,7 @@ export function AnalysisWorkspace({
               key={item.id}
               type="button"
               onClick={() => router.push(`/dashboard/data-analysis?id=${item.id}`)}
-              className={`rounded-lg border px-3 py-1.5 text-xs ${
+              className={`rounded-item border px-3 py-1.5 text-xs ${
                 current?.id === item.id
                   ? "border-foreground/40 bg-foreground/10 text-foreground"
                   : "border-border bg-panel text-muted"
@@ -195,13 +195,13 @@ export function AnalysisWorkspace({
               <div className="flex flex-wrap gap-2">
                 <a
                   href={`/api/data-analysis/${current.id}/export?format=csv`}
-                  className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs text-foreground"
+                  className="inline-flex items-center gap-2 rounded-item border border-border px-3 py-2 text-xs text-foreground"
                 >
                   <Download className="h-3.5 w-3.5" /> CSV
                 </a>
                 <a
                   href={`/api/data-analysis/${current.id}/export?format=json`}
-                  className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs text-foreground"
+                  className="inline-flex items-center gap-2 rounded-item border border-border px-3 py-2 text-xs text-foreground"
                 >
                   <Download className="h-3.5 w-3.5" /> JSON
                 </a>
@@ -209,7 +209,7 @@ export function AnalysisWorkspace({
                   type="button"
                   onClick={() => void handleAnalyse()}
                   disabled={analysing}
-                  className="hover:bg-foreground/10 inline-flex items-center gap-2 rounded-lg border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground disabled:opacity-50"
+                  className="hover:bg-foreground/10 inline-flex items-center gap-2 rounded-item border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground disabled:opacity-50"
                 >
                   {/* THE GLOBE for the analysis, because that wait is
                       the model thinking. The ring above it stays on the
@@ -292,7 +292,7 @@ export function AnalysisWorkspace({
                     key={suggestion}
                     type="button"
                     onClick={() => setQuestion(suggestion)}
-                    className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted"
+                    className="rounded-item border border-border px-3 py-1.5 text-xs text-muted"
                   >
                     {suggestion}
                   </button>
@@ -317,7 +317,7 @@ export function AnalysisWorkspace({
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder={t("ask.placeholder")}
                 aria-label={t("ask.title")}
-                className="min-w-0 flex-1 rounded-lg border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+                className="min-w-0 flex-1 rounded-item border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
               />
               <VoiceInput
                 compact
@@ -330,7 +330,7 @@ export function AnalysisWorkspace({
                 type="button"
                 onClick={() => void handleAsk()}
                 disabled={asking || !question.trim()}
-                className="hover:bg-foreground/10 rounded-lg border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground disabled:opacity-50"
+                className="hover:bg-foreground/10 rounded-item border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground disabled:opacity-50"
               >
                 {asking ? t("ask.working") : t("ask.button")}
               </button>

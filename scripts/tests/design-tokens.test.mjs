@@ -234,5 +234,35 @@ const BACKDROPS = ["app-background", "dashboard-background", "auth-background", 
 const backdropImports = [...CODE].filter(([, code]) => BACKDROPS.some((b) => code.includes(`/${b}"`))).map(([f]) => f);
 check("no screen mounts a backdrop", backdropImports.length === 0, backdropImports.join(", "));
 
+// ---------------------------------------------------------------------
+console.log("\n== 7. three radii: the field, the card, the item ==");
+// The design names three — 18px the main field, 14px a card, 10px an
+// item (tailwind.config.ts) — and rounded-full for tags and round
+// buttons. Design D.8 (2026-10-04) mapped every rounded-sm…3xl onto them
+// (sm/md/lg → item, xl/2xl/3xl → card, the two main fields → field). Any
+// other size, on any side, in any component or in an @apply, is a radius
+// the design does not have.
+const RADIUS = /(?<![\w-])rounded(?:-(?:tl|tr|bl|br|ss|se|es|ee|t|b|l|r|s|e))?-(sm|md|lg|xl|2xl|3xl|\[[^\]]+\])(?![\w-])/g;
+const radiusHits = [];
+for (const [f, code] of CODE) for (const m of code.matchAll(RADIUS)) radiusHits.push(`${f}: ${m[0]}`);
+// And the bare `rounded` — Tailwind's 4px, which is none of the three —
+// as a class: between quotes, backticks or spaces, on a class line.
+// Only in a component's class strings, so a variable called `rounded`
+// (lib/trading/guardian.ts has two) is not a hit.
+for (const f of UI_FILES) {
+  for (const line of CODE.get(f).split("\n")) {
+    if (!/className|\bcn\(|clsx\(|`/.test(line)) continue;
+    for (const m of line.matchAll(/(?<=["'` ])rounded(?=["'` ])/g)) radiusHits.push(`${f}: ${m[0]} (4px)`);
+  }
+}
+for (const st of applyStatements) for (const m of st[0].matchAll(RADIUS)) radiusHits.push(`globals.css @apply: ${m[0]}`);
+check(`every radius is one of the design's (${radiusHits.length} others)`, radiusHits.length === 0, radiusHits.slice(0, 8).join("\n        "));
+const usedRadii = new Set([...[...CODE.values()].join("\n").matchAll(/\brounded(?:-[a-z]{1,2})?-(item|card|field)\b/g)].map((m) => m[1]));
+check(`...and all three are in use (${[...usedRadii].sort().join(", ")})`, usedRadii.size === 3);
+const mainFields = ["src/components/chat/chat-composer.tsx", "src/components/create/create-chat.tsx"].filter(
+  (f) => !/<textarea[\s\S]{0,1200}?\brounded-field\b/.test(CODE.get(f) ?? "")
+);
+check("the main field — Home's and the conversation's — is the 18px one", mainFields.length === 0, mainFields.join(", "));
+
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);
 process.exit(failures.length === 0 ? 0 : 1);

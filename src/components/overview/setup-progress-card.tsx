@@ -46,7 +46,7 @@ export function SetupProgressCard({
   const next = steps.find((s) => !s.done);
 
   return (
-    <div className="glass-panel mt-6 flex flex-col gap-5 rounded-2xl p-5 sm:flex-row sm:items-center">
+    <div className="glass-panel mt-6 flex flex-col gap-5 rounded-card p-5 sm:flex-row sm:items-center">
       <div className="relative z-[1] flex min-w-0 items-center gap-4">
         <svg
           viewBox="0 0 120 120"
@@ -119,7 +119,7 @@ export function SetupProgressCard({
           <li key={step.id}>
             <Link
               href={step.href}
-              className={`flex min-h-[44px] items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm transition-colors duration-150 hover:bg-foreground/[0.04] ${
+              className={`flex min-h-[44px] items-center gap-2.5 rounded-item px-2 py-1.5 text-sm transition-colors duration-150 hover:bg-foreground/[0.04] ${
                 step.done ? "text-muted" : "text-foreground"
               }`}
             >
@@ -128,7 +128,7 @@ export function SetupProgressCard({
               ) : (
                 <Circle className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
               )}
-              <span className={`min-w-0 truncate ${step.done ? "line-through decoration-muted/50" : ""}`}>
+              <span className={`min-w-0 break-words ${step.done ? "line-through decoration-muted/50" : ""}`}>
                 {step.label}
               </span>
               {step.id === next?.id && (

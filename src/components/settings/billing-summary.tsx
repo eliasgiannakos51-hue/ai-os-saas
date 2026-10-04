@@ -117,7 +117,7 @@ export async function BillingSummary({
           ) : (
             <Link
               href="/pricing"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-item bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
             >
               {t("upgradePlan")}
             </Link>
@@ -125,7 +125,7 @@ export async function BillingSummary({
           {(hasSubscription || isAdmin || isBetaTester) && tier !== "free" && (
             <Link
               href="/dashboard/team"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-item border border-border px-4 py-2 text-sm text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
             >
               {t("manageTeam")}
             </Link>

@@ -270,7 +270,7 @@ export function PublishControl({
           disabled={busy || disabled}
           title={isLive ? t("unpublishHint") : undefined}
           className={
-            "inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 " +
+            "inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-item border px-3 py-2 text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 " +
             (isLive
               ? "border-warning/40 text-warning hover:border-warning hover:bg-warning/10"
               : "border-border text-foreground hover:border-foreground/40 hover:text-foreground")
@@ -307,7 +307,7 @@ export function PublishControl({
               href={site.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-success/40 bg-success/10 px-3 py-2 text-xs font-medium text-success transition-colors duration-150 hover:bg-success/20"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-item border border-success/40 bg-success/10 px-3 py-2 text-xs font-medium text-success transition-colors duration-150 hover:bg-success/20"
             >
               <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
               {t("viewLive")}
@@ -320,7 +320,7 @@ export function PublishControl({
             <CopyButton
               label={t("copyLink")}
               text={site.url}
-              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:opacity-50"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-item border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:opacity-50"
             />
             {/* Publishing an EDIT is a different action from publishing or
                 unpublishing the site, so it is not folded into the toggle
@@ -330,7 +330,7 @@ export function PublishControl({
               type="button"
               onClick={() => void publish()}
               disabled={busy || disabled}
-              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:opacity-40"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-item border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:opacity-40"
             >
               {busy ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -384,12 +384,12 @@ export function PublishControl({
             // max-h + an internal scroll region: at 375x812 the dialog was
             // taller than the screen and its bottom edge sat below the fold,
             // which put the Publish button somewhere the user could not reach.
-            className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-panel"
+            className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-card border border-border bg-panel"
           >
             <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
               <div className="flex min-w-0 items-start gap-3">
                 <span
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/10 text-foreground"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-card bg-foreground/10 text-foreground"
                   aria-hidden="true"
                 >
                   <Globe className="h-4 w-4" />
@@ -407,7 +407,7 @@ export function PublishControl({
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label={t("close")}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </button>
@@ -439,7 +439,7 @@ export function PublishControl({
                   a valid value — watching the address build itself is what
                   makes the field's purpose obvious without reading a word
                   of help text. */}
-              <div className="mt-3 rounded-xl border border-border bg-input px-3 py-2.5">
+              <div className="mt-3 rounded-card border border-border bg-input px-3 py-2.5">
                 <p className="text-[11px] uppercase tracking-wide text-muted">{t("previewLabel")}</p>
                 <p className="mt-1 break-all font-mono text-sm text-foreground">
                   {previewBefore}
@@ -474,7 +474,7 @@ export function PublishControl({
                 type="button"
                 onClick={() => void publish()}
                 disabled={busy || !valid}
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-button px-5 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-button px-5 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
                 {busy ? t("publishing") : t("publishNow")}
@@ -482,7 +482,7 @@ export function PublishControl({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted transition-colors duration-150 hover:text-foreground"
+                className="inline-flex min-h-[44px] items-center rounded-item border border-border px-4 py-2 text-sm font-medium text-muted transition-colors duration-150 hover:text-foreground"
               >
                 {t("cancel")}
               </button>

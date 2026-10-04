@@ -112,7 +112,7 @@ export function RuleEditor({
 
         {/* WHAT WE UNDERSTOOD, BEFORE ANYTHING IS SAVED. */}
         {text.trim().length > 0 && (
-          <div className="rounded-xl border border-border bg-input px-3 py-2">
+          <div className="rounded-card border border-border bg-input px-3 py-2">
             {parsed.length === 0 ? (
               <p className="text-[11px] leading-relaxed text-muted">{t("rules.couldNotParse")}</p>
             ) : (
@@ -135,7 +135,7 @@ export function RuleEditor({
           type="button"
           onClick={() => void save()}
           disabled={saving || parsed.length === 0}
-          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-button px-4 text-xs font-semibold text-button-ink transition-opacity hover:opacity-90 disabled:opacity-40"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-button px-4 text-xs font-semibold text-button-ink transition-opacity hover:opacity-90 disabled:opacity-40"
         >
           <Plus className="h-3.5 w-3.5" aria-hidden="true" />
           {t("rules.add")}
@@ -149,7 +149,7 @@ export function RuleEditor({
           {rules.map((rule) => {
             const broken = violationFor(rule.originalText);
             return (
-              <li key={rule.id} className="rounded-xl border border-border px-3 py-2.5">
+              <li key={rule.id} className="rounded-card border border-border px-3 py-2.5">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   {/* THEIR OWN SENTENCE, verbatim, never rewritten. */}
                   <p className="min-w-0 flex-1 text-xs text-foreground">{rule.originalText}</p>
@@ -157,7 +157,7 @@ export function RuleEditor({
                     type="button"
                     onClick={() => void remove(rule.id)}
                     aria-label={t("rules.delete")}
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:text-danger"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-item text-muted transition-colors hover:text-danger"
                   >
                     <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                   </button>

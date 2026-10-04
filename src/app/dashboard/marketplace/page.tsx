@@ -102,7 +102,7 @@ export default async function MarketplacePage() {
             silent fallback would show "nothing here yet" to somebody whose
             request was refused. */}
         {error ? (
-          <p className="rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
+          <p className="rounded-card border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
             {t("loadError")}
           </p>
         ) : (

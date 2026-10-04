@@ -58,7 +58,7 @@ export function TimelineList({
           >
           <Link href={entry.href} className="flex min-w-0 flex-1 items-start gap-3">
             <span
-              className={`mt-0.5 inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-[11px] font-medium ${moduleBadgeColor(
+              className={`mt-0.5 inline-flex shrink-0 items-center rounded-item border px-2 py-0.5 text-[11px] font-medium ${moduleBadgeColor(
                 entry.moduleSlug
               )}`}
             >
@@ -66,7 +66,7 @@ export function TimelineList({
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-1.5">
-                <h3 className="truncate text-sm font-semibold text-foreground">{entry.headline}</h3>
+                <h3 className="break-words text-sm font-semibold text-foreground">{entry.headline}</h3>
                 {entry.linked.length > 0 && (
                   <span
                     className="flex shrink-0 items-center text-foreground"
@@ -77,7 +77,7 @@ export function TimelineList({
                 )}
               </div>
               {entry.excerpt && (
-                <p className="mt-1 truncate text-xs text-muted">{entry.excerpt}</p>
+                <p className="mt-1 break-words text-xs text-muted">{entry.excerpt}</p>
               )}
             </div>
             <p

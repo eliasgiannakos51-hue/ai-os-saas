@@ -25,7 +25,7 @@ export async function TradingDisclaimer({ variant = "inline" }: { variant?: "inl
       <div
         data-testid="trading-disclaimer"
         role="note"
-        className="mb-5 flex gap-2.5 rounded-2xl border border-warning/30 bg-warning/[0.06] px-4 py-3"
+        className="mb-5 flex gap-2.5 rounded-card border border-warning/30 bg-warning/[0.06] px-4 py-3"
       >
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden="true" />
         <div className="space-y-1">

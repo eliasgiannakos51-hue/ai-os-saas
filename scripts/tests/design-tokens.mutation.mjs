@@ -26,9 +26,37 @@ const LAYOUT = "src/app/layout.tsx";
 const MENU = "src/components/ui/card-menu.tsx";
 const CHART = "src/components/data-analysis/analysis-chart.tsx";
 const HEADER = "src/components/dashboard/page-header.tsx";
-const TARGETS = [GATE, TW, CSS, STEP, EMPTY, PREFS, LAYOUT, MENU, CHART, HEADER];
+const TARGETS = [GATE, TW, CSS, STEP, EMPTY, PREFS, LAYOUT, MENU, CHART, HEADER, "src/components/chat/chat-composer.tsx"];
 
 const MUTANTS = [
+  {
+    name: "a component goes back to Tailwind's own radius scale",
+    file: MENU,
+    from: "overflow-hidden rounded-card border border-border bg-panel p-1\"",
+    to: "overflow-hidden rounded-lg border border-border bg-panel p-1\"",
+    expect: "every radius is one of the design's",
+  },
+  {
+    name: "a stylesheet rule applies a radius the design does not have",
+    file: "src/app/globals.css",
+    from: "@apply min-h-[44px] w-full rounded-item border border-border bg-input",
+    to: "@apply min-h-[44px] w-full rounded-t-2xl border border-border bg-input",
+    expect: "every radius is one of the design's",
+  },
+  {
+    name: "a bare rounded, Tailwind's 4px, comes back",
+    file: MENU,
+    from: "overflow-hidden rounded-card border border-border bg-panel p-1\"",
+    to: "overflow-hidden rounded border border-border bg-panel p-1\"",
+    expect: "every radius is one of the design's",
+  },
+  {
+    name: "the conversation's field loses the 18px radius",
+    file: "src/components/chat/chat-composer.tsx",
+    from: "overflow-y-auto rounded-field border",
+    to: "overflow-y-auto rounded-card border",
+    expect: "the main field",
+  },
   {
     name: "the palette is reopened with an orange",
     file: TW,
@@ -81,8 +109,8 @@ const MUTANTS = [
   {
     name: "a shadow comes back on a menu",
     file: MENU,
-    from: "overflow-hidden rounded-xl border border-border bg-panel p-1\"",
-    to: "overflow-hidden rounded-xl border border-border bg-panel p-1 shadow-lg\"",
+    from: "overflow-hidden rounded-card border border-border bg-panel p-1\"",
+    to: "overflow-hidden rounded-card border border-border bg-panel p-1 shadow-lg\"",
     expect: "no shadow, gradient or glow utility",
   },
   {

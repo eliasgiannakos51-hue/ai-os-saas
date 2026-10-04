@@ -149,7 +149,7 @@ export function HelpTip({
               buttonRef.current?.focus();
             }}
             aria-label={tCommon("close")}
-            className="absolute end-2 top-2 flex h-7 w-7 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="absolute end-2 top-2 flex h-7 w-7 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-3.5 w-3.5" aria-hidden="true" />
           </button>

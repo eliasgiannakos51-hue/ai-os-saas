@@ -91,7 +91,7 @@ export function ResumedWorkNotice({ kind }: { kind: JobKind }) {
   if (dismissed || state.phase === "none") return null;
 
   return (
-    <div className="mb-3 flex items-start gap-2.5 rounded-xl border border-border bg-panel/60 px-3 py-2.5">
+    <div className="mb-3 flex items-start gap-2.5 rounded-card border border-border bg-panel/60 px-3 py-2.5">
       {state.phase === "working" ? (
         <ThinkingIndicator size="sm" className="mt-0.5 shrink-0" />
       ) : (
@@ -114,7 +114,7 @@ export function ResumedWorkNotice({ kind }: { kind: JobKind }) {
         type="button"
         onClick={() => setDismissed(true)}
         aria-label={t("dismiss")}
-        className="-me-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:text-foreground"
+        className="-me-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:text-foreground"
       >
         <X className="h-3.5 w-3.5" aria-hidden="true" />
       </button>

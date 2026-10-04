@@ -65,8 +65,8 @@ export function NewDocumentButton({ label, large = false }: { label: string; lar
       disabled={loading}
       className={
         large
-          ? "inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-button px-6 py-3 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-          : "inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          ? "inline-flex min-h-[48px] items-center justify-center gap-2 rounded-card bg-button px-6 py-3 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          : "inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-card bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       }
     >
       {loading ? (

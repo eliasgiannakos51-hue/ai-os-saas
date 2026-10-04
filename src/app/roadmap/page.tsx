@@ -199,7 +199,7 @@ export default async function RoadmapPage() {
                     >
                       <div className="flex items-start justify-between gap-2">
                         <span
-                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${styles.icon}`}
+                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-card ${styles.icon}`}
                         >
                           <item.icon className="h-5 w-5" aria-hidden="true" />
                         </span>

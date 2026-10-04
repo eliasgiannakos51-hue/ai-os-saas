@@ -121,7 +121,7 @@ export function EntityCard({
       data-selected={selected ? "true" : undefined}
       style={index === undefined ? undefined : ({ "--i": index } as CSSProperties)}
       className={[
-        "card-lift group relative flex flex-col rounded-2xl border p-4 transition-colors duration-200",
+        "card-lift group relative flex flex-col rounded-card border p-4 transition-colors duration-200",
         index === undefined ? "" : "list-slide-in",
         selected
           ? "border-foreground/50 bg-panel"
@@ -132,7 +132,7 @@ export function EntityCard({
         {media ?? (
           <span
             aria-hidden="true"
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${accent}`}
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-card border ${accent}`}
           >
             <Icon className="h-[18px] w-[18px]" />
           </span>
@@ -145,7 +145,7 @@ export function EntityCard({
           href ? (
             <Link
               href={href}
-              className="line-clamp-2 outline-none after:absolute after:inset-0 after:rounded-2xl group-hover:text-foreground focus-visible:after:ring-2 focus-visible:after:ring-foreground/60"
+              className="break-words outline-none after:absolute after:inset-0 after:rounded-card group-hover:text-foreground focus-visible:after:ring-2 focus-visible:after:ring-foreground/60"
             >
               {title}
             </Link>
@@ -153,13 +153,13 @@ export function EntityCard({
             <button
               type="button"
               onClick={onSelect}
-              className="line-clamp-2 text-start outline-none after:absolute after:inset-0 after:rounded-2xl group-hover:text-foreground focus-visible:after:ring-2 focus-visible:after:ring-foreground/60"
+              className="break-words text-start outline-none after:absolute after:inset-0 after:rounded-card group-hover:text-foreground focus-visible:after:ring-2 focus-visible:after:ring-foreground/60"
             >
               {title}
             </button>
           )
         ) : (
-          <span className="line-clamp-2">{title}</span>
+          <span className="break-words">{title}</span>
         )}
       </h3>
 
@@ -185,7 +185,7 @@ export function EntityCard({
             {tags.map((tag) => (
               <span
                 key={tag.key}
-                className={`inline-flex max-w-[12rem] items-center truncate rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${
+                className={`inline-flex max-w-[12rem] items-center break-words rounded-item border px-1.5 py-0.5 text-[10px] font-medium ${
                   tag.tone === "accent" ? accent : "border-border bg-input text-muted"
                 }`}
               >
@@ -202,7 +202,7 @@ export function EntityCard({
             // Capped and truncated like the tags directly above it, which
             // already had exactly this treatment.
             <span
-              className={`inline-flex min-w-0 max-w-[12rem] shrink-0 items-center gap-1.5 truncate text-[11px] font-medium ${tone.text}`}
+              className={`inline-flex min-w-0 max-w-[12rem] shrink-0 items-center gap-1.5 break-words text-[11px] font-medium ${tone.text}`}
               title={status.label}
             >
               <span

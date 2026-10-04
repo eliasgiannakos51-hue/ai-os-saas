@@ -94,7 +94,7 @@ export default async function RoutingPage() {
             />
           </div>
 
-          <div className="mt-6 overflow-x-auto rounded-2xl border border-border bg-panel">
+          <div className="mt-6 overflow-x-auto rounded-card border border-border bg-panel">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="border-b border-border text-start text-xs text-muted">

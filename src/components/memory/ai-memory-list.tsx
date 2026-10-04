@@ -255,7 +255,7 @@ export function AiMemoryList({
                         and this is the same distinction the prompt now
                         makes — shown here so the person can see why one
                         line carries more weight than another. */}
-                    <span className="rounded-md bg-panel-hover px-1.5 py-0.5">
+                    <span className="rounded-item bg-panel-hover px-1.5 py-0.5">
                       {t(`surfaces.${row.surface}`)}
                     </span>
                     <span className={row.timesSeen > 1 ? "text-foreground" : undefined}>
@@ -290,7 +290,7 @@ export function AiMemoryList({
                       setEditingId(row.id);
                       setDraft(row.text);
                     }}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-muted hover:bg-panel-hover hover:text-foreground"
+                    className="flex h-11 w-11 items-center justify-center rounded-card text-muted hover:bg-panel-hover hover:text-foreground"
                   >
                     <Pencil className="h-4 w-4" aria-hidden="true" />
                   </button>
@@ -300,7 +300,7 @@ export function AiMemoryList({
                     title={t("deleteLabel")}
                     disabled={busyId === row.id}
                     onClick={() => deleteOne(row.id)}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-muted hover:bg-panel-hover hover:text-foreground"
+                    className="flex h-11 w-11 items-center justify-center rounded-card text-muted hover:bg-panel-hover hover:text-foreground"
                   >
                     <X className="h-4 w-4" aria-hidden="true" />
                   </button>
@@ -331,7 +331,7 @@ export function AiMemoryList({
                   aria-label={t(`surfaces.${surface}`)}
                   disabled={savingSurface === surface}
                   onClick={() => toggleSurface(surface)}
-                  className={`min-h-[44px] rounded-xl px-3 text-xs font-medium transition-colors ${
+                  className={`min-h-[44px] rounded-card px-3 text-xs font-medium transition-colors ${
                     off ? "text-muted hover:text-foreground" : "text-foreground"
                   }`}
                 >

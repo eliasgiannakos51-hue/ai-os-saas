@@ -15,7 +15,7 @@ export function ProductMentorButton({ label, description }: { label: string; des
       href="/dashboard/chat?preset=product"
       className="flex items-center gap-3 surface-tight transition-all duration-200 hover:border-foreground/40"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/10 text-foreground">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-card bg-foreground/10 text-foreground">
         <Compass className="h-4 w-4" aria-hidden="true" />
       </span>
       <div className="min-w-0">

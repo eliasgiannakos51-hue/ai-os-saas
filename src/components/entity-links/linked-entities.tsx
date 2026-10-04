@@ -31,7 +31,7 @@ export function LinkedEntities({ entities }: { entities: LinkedEntity[] }) {
         {entities.map((entity) => (
           <span
             key={entity.linkId}
-            className="inline-flex items-center gap-1 rounded-md border border-border bg-input py-0.5 ps-2 pe-1 text-xs text-foreground/90"
+            className="inline-flex items-center gap-1 rounded-item border border-border bg-input py-0.5 ps-2 pe-1 text-xs text-foreground/90"
           >
             <Link href={entity.href} className="transition-colors duration-150 hover:text-foreground">
               <span className="text-muted">{tKey(entity.moduleTitleKey)}:</span> {entity.headline}
@@ -42,7 +42,7 @@ export function LinkedEntities({ entities }: { entities: LinkedEntity[] }) {
               disabled={removingId === entity.linkId}
               aria-label={t("unlinkAria", { name: entity.headline })}
               title={t("unlink")}
-              className="flex h-4 w-4 shrink-0 items-center justify-center rounded text-muted transition-colors duration-150 hover:text-danger disabled:opacity-50"
+              className="flex h-4 w-4 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:text-danger disabled:opacity-50"
             >
               <X className="h-3 w-3" />
             </button>

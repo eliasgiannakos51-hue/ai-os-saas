@@ -63,7 +63,7 @@ export function AiPersonaSettings({ initialName }: { initialName: string }) {
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-item border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save"}
         </button>

@@ -31,7 +31,7 @@ function Figure({
 }) {
   const t = useTranslations("dashboard.trading");
   return (
-    <div className="rounded-xl border border-border bg-panel px-3 py-2.5">
+    <div className="rounded-card border border-border bg-panel px-3 py-2.5">
       <p className="text-[10px] uppercase tracking-wide text-muted">{label}</p>
       {value === null ? (
         <p className="mt-0.5 text-[11px] leading-snug text-muted">{hint ?? t("stats.notEnough")}</p>

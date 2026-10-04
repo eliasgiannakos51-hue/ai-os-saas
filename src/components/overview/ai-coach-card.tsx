@@ -15,8 +15,8 @@ import { Sparkles } from "lucide-react";
 // Control while a step is actually building).
 export function AiCoachCard({ title, summary }: { title: string; summary: string }) {
   return (
-    <div className="glass-panel mt-6 flex items-start gap-3 rounded-2xl p-4">
-      <span className="relative z-[1] flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-panel-hover text-foreground ring-1 ring-inset ring-foreground/10">
+    <div className="glass-panel mt-6 flex items-start gap-3 rounded-card p-4">
+      <span className="relative z-[1] flex h-9 w-9 shrink-0 items-center justify-center rounded-card bg-panel-hover text-foreground ring-1 ring-inset ring-foreground/10">
         <Sparkles className="h-4 w-4" aria-hidden="true" />
       </span>
       <div className="relative z-[1] min-w-0">

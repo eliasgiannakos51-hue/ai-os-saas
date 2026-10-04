@@ -80,7 +80,7 @@ function ConfirmCard({
 }) {
   const t = useTranslations("dashboard.goal");
   return (
-    <div className="mb-3 rounded-2xl border border-foreground/30 bg-panel p-4" role="status" aria-live="polite">
+    <div className="mb-3 rounded-card border border-foreground/30 bg-panel p-4" role="status" aria-live="polite">
       <Heard heard={heard} />
       <p className="text-sm text-foreground">{line}</p>
       <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
@@ -91,7 +91,7 @@ function ConfirmCard({
         <button
           type="button"
           onClick={onConfirm}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-button px-4 text-sm font-semibold text-button-ink hover:bg-button"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-item bg-button px-4 text-sm font-semibold text-button-ink hover:bg-button"
         >
           {confirmIcon}
           {confirmLabel}
@@ -104,7 +104,7 @@ function ConfirmCard({
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex min-h-[44px] items-center rounded-lg px-3 text-sm text-muted hover:text-foreground"
+            className="inline-flex min-h-[44px] items-center rounded-item px-3 text-sm text-muted hover:text-foreground"
           >
             {t("dismiss")}
           </button>
@@ -183,7 +183,7 @@ export function GoalQuestion({
             key={key}
             type="button"
             onClick={() => onPick(key)}
-            className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-3 text-sm font-medium text-foreground hover:border-foreground/60"
+            className="inline-flex min-h-[44px] items-center rounded-item border border-border px-3 text-sm font-medium text-foreground hover:border-foreground/60"
           >
             {tKey(PRODUCER_SPECS[key].destinationKey)}
           </button>
@@ -191,7 +191,7 @@ export function GoalQuestion({
         <button
           type="button"
           onClick={onDismiss}
-          className="inline-flex min-h-[44px] items-center rounded-lg px-3 text-sm text-muted hover:text-foreground"
+          className="inline-flex min-h-[44px] items-center rounded-item px-3 text-sm text-muted hover:text-foreground"
         >
           {t("dismiss")}
         </button>

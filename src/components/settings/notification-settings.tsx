@@ -364,7 +364,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
                 disabled={busy}
                 onChange={(e) => setQuietFrom(e.target.value)}
                 onBlur={() => void saveQuietHours({ on: true, from: quietFrom, to: quietTo, offsetMinutes: offset })}
-                className="rounded-lg border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+                className="rounded-item border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
               />
             </label>
             <label className="text-xs text-muted">
@@ -375,7 +375,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
                 disabled={busy}
                 onChange={(e) => setQuietTo(e.target.value)}
                 onBlur={() => void saveQuietHours({ on: true, from: quietFrom, to: quietTo, offsetMinutes: offset })}
-                className="rounded-lg border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+                className="rounded-item border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
               />
             </label>
             <p className="text-xs text-muted">
@@ -409,7 +409,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
                     type="button"
                     onClick={() => void disconnectChat(kind)}
                     disabled={connecting !== null}
-                    className="rounded-lg border border-border px-3 py-1.5 text-xs text-foreground disabled:opacity-50"
+                    className="rounded-item border border-border px-3 py-1.5 text-xs text-foreground disabled:opacity-50"
                   >
                     {t("chat.disconnect")}
                   </button>
@@ -428,13 +428,13 @@ export function NotificationSettings({ userId }: { userId: string }) {
                       onChange={(e) => setConnectTarget((prev) => ({ ...prev, [kind]: e.target.value }))}
                       placeholder={t(`chat.${kind}.placeholder`)}
                       aria-label={t(`channels.${kind}`)}
-                      className="min-w-0 flex-1 rounded-lg border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+                      className="min-w-0 flex-1 rounded-item border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
                     />
                     <button
                       type="button"
                       onClick={() => void connectChat(kind)}
                       disabled={connecting !== null || !(connectTarget[kind] ?? "").trim()}
-                      className="hover:bg-foreground/10 rounded-lg border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground disabled:opacity-50"
+                      className="hover:bg-foreground/10 rounded-item border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground disabled:opacity-50"
                     >
                       {connecting === kind ? t("chat.connecting") : t("chat.connect")}
                     </button>

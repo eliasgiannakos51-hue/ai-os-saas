@@ -45,7 +45,7 @@ export function EmptyState({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted">
+    <div className="relative overflow-hidden rounded-card border border-dashed border-border p-10 text-center text-sm text-muted">
       {/* THE MODULE ICON STAYS; THE DECORATION BECOMES THE BRAND.
           The two rings behind the icon were an `animate-ping` wash and a
           border circle — pure decoration carrying no meaning. They are
@@ -89,7 +89,7 @@ export function EmptyState({
               className="mx-auto mt-5 inline-flex min-h-[44px] max-w-full items-center gap-2 rounded-full border border-foreground/40 bg-foreground/10 px-4 py-2 text-start text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:bg-foreground/20 hover:text-foreground"
             >
               <CornerDownRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              <span className="truncate">&ldquo;{example}&rdquo;</span>
+              <span className="break-words">&ldquo;{example}&rdquo;</span>
             </button>
           ) : (
             <p

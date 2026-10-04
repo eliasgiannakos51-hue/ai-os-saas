@@ -207,7 +207,7 @@ body {
     /* min-h-[44px]: px-3/py-2 renders 40px, and this class is what every
        text field, textarea and select in the app is built from — so it was
        twenty of the under-44px controls by itself. */
-    @apply min-h-[44px] w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40;
+    @apply min-h-[44px] w-full rounded-item border border-border bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40;
   }
 
   /* -------------------------------------------------------------------
@@ -216,7 +216,7 @@ body {
      scripts/design-census.mjs counted 683 border utilities over 904 files
      and 140 class strings that were letter-for-letter the same card:
 
-         rounded-2xl border border-border bg-panel p-5
+         rounded-card border border-border bg-panel p-5
 
      Repeated markup cannot be redesigned; it can only be re-typed. These
      two classes are that string, named, so "more space and fewer lines"
@@ -241,10 +241,10 @@ body {
      +40%, and 24px where it was p-4 (16px) is +50%. In rem, so the
      Settings font-size control still scales the layout with it. */
   .surface {
-    @apply rounded-2xl bg-panel p-[1.75rem];
+    @apply rounded-card bg-panel p-[1.75rem];
   }
   .surface-tight {
-    @apply rounded-2xl bg-panel p-[1.5rem];
+    @apply rounded-card bg-panel p-[1.5rem];
   }
   .surface .surface,
   .surface .surface-tight,
@@ -282,7 +282,7 @@ body {
      with its own before-and-after, and mixing the two would make
      neither reviewable. */
   .btn-outline {
-    @apply inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-border bg-panel px-4
+    @apply inline-flex min-h-[44px] items-center gap-2 rounded-card border border-border bg-panel px-4
            text-sm font-medium text-foreground transition-colors duration-150
            hover:border-foreground/40 disabled:opacity-50;
   }
@@ -295,10 +295,10 @@ body {
      neither. Forty proposed actions draw one rule between each pair
      rather than forty rectangles. */
   .row-list {
-    @apply divide-y divide-border overflow-hidden rounded-xl bg-panel/60;
+    @apply divide-y divide-border overflow-hidden rounded-card bg-panel/60;
   }
   .notice-warning {
-    @apply rounded-xl border border-warning/40 bg-warning/10 text-warning;
+    @apply rounded-card border border-warning/40 bg-warning/10 text-warning;
   }
 }
 /* ---------------------------------------------------------------------

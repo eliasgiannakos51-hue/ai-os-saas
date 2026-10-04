@@ -122,7 +122,7 @@ export function TransitionButton({ text }: { text: string }) {
       <Link
         href={destination.href}
         onClick={() => record(destination.id, source, "taken")}
-        className="flex min-h-[44px] items-center gap-1.5 rounded-xl border border-foreground/30 px-3 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/60 hover:bg-foreground/10"
+        className="flex min-h-[44px] items-center gap-1.5 rounded-card border border-foreground/30 px-3 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/60 hover:bg-foreground/10"
       >
         {t(destination.labelKey)}
         <ArrowRight className="h-3 w-3 shrink-0" aria-hidden="true" />
@@ -134,7 +134,7 @@ export function TransitionButton({ text }: { text: string }) {
           setDismissed(true);
         }}
         aria-label={tCommon("dismissSuggestion")}
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:text-foreground"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:text-foreground"
       >
         <X className="h-3.5 w-3.5" aria-hidden="true" />
       </button>

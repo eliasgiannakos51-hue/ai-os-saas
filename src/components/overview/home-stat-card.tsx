@@ -86,19 +86,19 @@ export function HomeStatCard({
   // shows its destination on hover and reaches the keyboard for free.
   const Shell = href ? Link : "div";
   const shellProps = href
-    ? { href, className: "glass-card group relative block overflow-hidden rounded-2xl p-4 transition-colors duration-150 hover:border-foreground/40" }
-    : { className: "glass-card relative overflow-hidden rounded-2xl p-4" };
+    ? { href, className: "glass-card group relative block overflow-hidden rounded-card p-4 transition-colors duration-150 hover:border-foreground/40" }
+    : { className: "glass-card relative overflow-hidden rounded-card p-4" };
 
   return (
     <Shell {...(shellProps as { href: string; className: string })}>
       <div className="relative z-[1] flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate text-[11px] uppercase tracking-wider text-muted">{label}</p>
-          <p className="mt-1.5 truncate text-2xl font-bold leading-none text-foreground sm:text-[1.75rem]">
+          <p className="break-words text-[11px] uppercase tracking-wider text-muted">{label}</p>
+          <p className="mt-1.5 break-words text-2xl font-bold leading-none text-foreground sm:text-[1.75rem]">
             <CountUpValue value={value} />
           </p>
         </div>
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-panel-hover text-foreground ring-1 ring-inset ring-foreground/10">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-card bg-panel-hover text-foreground ring-1 ring-inset ring-foreground/10">
           {icon}
         </span>
       </div>
@@ -119,7 +119,7 @@ export function HomeStatCard({
             className="absolute inset-x-0 top-1/2 border-t border-dashed border-foreground/15"
             aria-hidden="true"
           />
-          <p className="absolute inset-x-0 bottom-0 truncate text-[10px] leading-none text-muted">
+          <p className="absolute inset-x-0 bottom-0 break-words text-[10px] leading-none text-muted">
             {placeholderLabel}
           </p>
         </div>

@@ -63,7 +63,7 @@ export function DesignControls({
 
 
   return (
-    <div className="space-y-3 rounded-xl border border-border bg-input p-3">
+    <div className="space-y-3 rounded-card border border-border bg-input p-3">
       <div className="flex items-center gap-1.5">
         <Palette className="h-3.5 w-3.5 text-foreground" aria-hidden="true" />
         <h3 className="text-xs font-semibold text-foreground">{t("title")}</h3>
@@ -92,7 +92,7 @@ export function DesignControls({
                   value={isValidHexColor(current) ? current : "#f97316"}
                   onChange={(e) => set(key, e.target.value)}
                   aria-label={label}
-                  className="h-9 w-10 shrink-0 cursor-pointer rounded-lg border border-border bg-input p-1"
+                  className="h-9 w-10 shrink-0 cursor-pointer rounded-item border border-border bg-input p-1"
                 />
                 <input
                   type="text"
@@ -107,7 +107,7 @@ export function DesignControls({
                   <button
                     type="button"
                     onClick={() => set(key, "")}
-                    className="shrink-0 rounded-lg px-2 py-1 text-[11px] text-muted transition-colors duration-150 hover:text-foreground"
+                    className="shrink-0 rounded-item px-2 py-1 text-[11px] text-muted transition-colors duration-150 hover:text-foreground"
                   >
                     {t("clear")}
                   </button>

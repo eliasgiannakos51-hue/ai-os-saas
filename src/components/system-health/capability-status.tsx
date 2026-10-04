@@ -85,7 +85,7 @@ export function CapabilityStatus({ rows }: { rows: CapabilityRow[] }) {
     <section className="mt-8">
       <h2 className="text-sm font-semibold text-foreground">Capabilities</h2>
       <p className="mt-1 text-xs text-muted">
-        Built from <code className="rounded bg-input px-1 py-0.5 font-mono text-[11px]">ENV_REQUIREMENTS</code> in
+        Built from <code className="rounded-item bg-input px-1 py-0.5 font-mono text-[11px]">ENV_REQUIREMENTS</code> in
         lib/env-check.ts — the same list the boot check reads. Names and statuses only; no values.
       </p>
 
@@ -95,7 +95,7 @@ export function CapabilityStatus({ rows }: { rows: CapabilityRow[] }) {
       </p>
 
       {off.length === 0 ? (
-        <p className="mt-3 rounded-xl border border-success/40 bg-success/10 px-3 py-2.5 text-xs text-success">
+        <p className="mt-3 rounded-card border border-success/40 bg-success/10 px-3 py-2.5 text-xs text-success">
           Every variable the code reads is set. Nothing is silently off.
         </p>
       ) : (
@@ -104,7 +104,7 @@ export function CapabilityStatus({ rows }: { rows: CapabilityRow[] }) {
           if (items.length === 0) return null;
           const Icon = group.icon;
           return (
-            <div key={group.level} className={`mt-3 rounded-xl border px-3 py-2.5 ${group.tone}`}>
+            <div key={group.level} className={`mt-3 rounded-card border px-3 py-2.5 ${group.tone}`}>
               <p className="flex items-center gap-1.5 text-xs font-semibold">
                 <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                 {group.title} ({items.length})

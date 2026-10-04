@@ -25,7 +25,7 @@ import { COUNTRIES } from "@/lib/countries";
 import { formatNumber } from "@/lib/format-number";
 
 const FIELD_CLASS =
-  "w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40";
+  "w-full rounded-card border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40";
 
 type Step = 1 | 2;
 
@@ -265,7 +265,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
                       setWantsTeamSetup(false);
                     }}
                     aria-pressed={selected && !wantsTeamSetup}
-                    className={`relative flex flex-col items-start rounded-2xl border p-4 text-start transition-all duration-150 ${
+                    className={`relative flex flex-col items-start rounded-card border p-4 text-start transition-all duration-150 ${
                       selected && !wantsTeamSetup
                         ? "border-foreground/40 bg-foreground/[0.04]"
                         : "border-border bg-panel hover:border-foreground/40"
@@ -376,7 +376,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
                   setWantsTeamSetup(true);
                 }}
                 aria-pressed={wantsTeamSetup}
-                className={`relative flex flex-col items-start rounded-2xl border p-4 text-start transition-all duration-150 ${
+                className={`relative flex flex-col items-start rounded-card border p-4 text-start transition-all duration-150 ${
                   wantsTeamSetup
                     ? "border-foreground/40 bg-foreground/[0.04]"
                     : "border-border bg-panel hover:border-foreground/40"
@@ -425,7 +425,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
             <button
               type="button"
               onClick={() => setStep(2)}
-              className="cta-amber mt-6 inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-button-ink"
+              className="cta-amber mt-6 inline-flex min-h-[44px] w-full items-center justify-center rounded-card px-4 py-2.5 text-sm font-semibold text-button-ink"
             >
               {t("continue")}
             </button>
@@ -555,7 +555,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
                   required
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-border bg-input text-foreground accent-foreground outline-none focus:ring-2 focus:ring-foreground/40"
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded-item border-border bg-input text-foreground accent-foreground outline-none focus:ring-2 focus:ring-foreground/40"
                 />
                 <span>
                   {t("agreeTerms")}{" "}
@@ -580,7 +580,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
               </label>
 
               {error && (
-                <p className="rounded-xl border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+                <p className="rounded-card border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                   {error}
                 </p>
               )}
@@ -588,7 +588,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
               <button
                 type="submit"
                 disabled={loading || !termsAccepted || !isPasswordStrong(password)}
-                className="cta-amber inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-button-ink disabled:opacity-50"
+                className="cta-amber inline-flex min-h-[44px] w-full items-center justify-center rounded-card px-4 py-2.5 text-sm font-semibold text-button-ink disabled:opacity-50"
               >
                 {loading
                   ? t("working")

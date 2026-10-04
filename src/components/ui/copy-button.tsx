@@ -101,10 +101,10 @@ export function CopyButton({
         className={
           className ??
           (variant === "icon"
-            ? `inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground disabled:opacity-50 ${
+            ? `inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground disabled:opacity-50 ${
                 copied ? "text-success" : ""
               }`
-            : `inline-flex min-h-[32px] items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-[11px] transition-colors duration-150 hover:border-foreground/50 hover:text-foreground disabled:opacity-50 ${
+            : `inline-flex min-h-[32px] items-center gap-1.5 rounded-item border border-border px-2.5 py-1 text-[11px] transition-colors duration-150 hover:border-foreground/50 hover:text-foreground disabled:opacity-50 ${
                 copied ? "border-success/50 text-success" : "text-muted"
               }`)
         }

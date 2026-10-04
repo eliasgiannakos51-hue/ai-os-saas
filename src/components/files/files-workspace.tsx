@@ -789,7 +789,7 @@ export function FilesWorkspace({
           setDragging(false);
           void uploadMany(e.dataTransfer.files);
         }}
-        className={`rounded-2xl border-2 border-dashed p-6 text-center transition-colors duration-150 ${
+        className={`rounded-card border-2 border-dashed p-6 text-center transition-colors duration-150 ${
           dragging ? "border-foreground/40 bg-foreground/[0.06]" : "border-border bg-panel/40"
         }`}
       >
@@ -814,7 +814,7 @@ export function FilesWorkspace({
           data-testid="files-upload-button"
           onClick={() => inputRef.current?.click()}
           disabled={Boolean(uploading)}
-          className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-button px-4 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+          className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-button px-4 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:opacity-60"
         >
           {uploading ? (
             <>
@@ -859,7 +859,7 @@ export function FilesWorkspace({
                and the fastest way to convey the second is to show one. */
             <div
               data-testid="files-empty"
-              className="rounded-2xl border border-border bg-panel/40 px-5 py-8 text-center"
+              className="rounded-card border border-border bg-panel/40 px-5 py-8 text-center"
             >
               <FileText className="mx-auto mb-3 h-7 w-7 text-foreground/70" aria-hidden="true" />
               <p className="text-sm font-semibold text-foreground">{t("emptyTitle")}</p>
@@ -871,7 +871,7 @@ export function FilesWorkspace({
                 type="button"
                 data-testid="files-empty-upload"
                 onClick={() => inputRef.current?.click()}
-                className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-5 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
+                className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/60 px-5 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
               >
                 <Upload className="h-4 w-4" aria-hidden="true" />
                 {t("choose")}
@@ -937,7 +937,7 @@ export function FilesWorkspace({
                         target, a real label, and the card itself lights up
                         (EntityCard's `selected`). */}
                     <label
-                      className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors duration-150 ${
+                      className={`flex cursor-pointer items-center gap-2.5 rounded-item border px-2.5 py-2 text-xs font-medium transition-colors duration-150 ${
                         file.processing_status !== "ready"
                           ? "cursor-not-allowed border-transparent text-muted/70"
                           : isSelected
@@ -950,7 +950,7 @@ export function FilesWorkspace({
                         checked={isSelected}
                         disabled={file.processing_status !== "ready"}
                         onChange={() => toggle(file.id)}
-                        className="h-[18px] w-[18px] rounded border-border accent-foreground"
+                        className="h-[18px] w-[18px] rounded-item border-border accent-foreground"
                       />
                       {file.processing_status === "ready" ? t("include") : t("cannotInclude")}
                     </label>
@@ -990,7 +990,7 @@ export function FilesWorkspace({
                 key={collection.id}
                 type="button"
                 onClick={() => setSelected(collection.fileIds)}
-                className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-3 py-1 text-[11px] font-medium text-muted transition-colors duration-150 hover:text-foreground"
+                className="inline-flex min-h-[44px] items-center rounded-item border border-border px-3 py-1 text-[11px] font-medium text-muted transition-colors duration-150 hover:text-foreground"
               >
                 {collection.name} · {collection.fileIds.length}
               </button>
@@ -1003,13 +1003,13 @@ export function FilesWorkspace({
             onChange={(e) => setNewCollectionName(e.target.value)}
             placeholder={t("collectionPlaceholder")}
             maxLength={80}
-            className="min-h-[44px] flex-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted"
+            className="min-h-[44px] flex-1 rounded-item border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted"
           />
           <button
             type="button"
             onClick={() => void createCollection()}
             disabled={creatingCollection || !newCollectionName.trim()}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
           >
             <FolderPlus className="h-3.5 w-3.5" aria-hidden="true" />
             {t("saveSelection", { count: selected.length })}
@@ -1022,7 +1022,7 @@ export function FilesWorkspace({
           reader's certainty about what it was drawn from. */}
       <section
         id="files-ask"
-        className="space-y-3 rounded-2xl border border-foreground/30 bg-foreground/[0.04] p-4"
+        className="space-y-3 rounded-card border border-foreground/30 bg-foreground/[0.04] p-4"
       >
         <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Sparkles className="h-4 w-4 text-foreground" aria-hidden="true" />
@@ -1046,7 +1046,7 @@ export function FilesWorkspace({
             placeholder={t("askPlaceholder")}
             rows={3}
             maxLength={MAX_QUESTION_CHARS}
-            className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
+            className="min-w-0 flex-1 rounded-item border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
           />
           <VoiceInput
             compact
@@ -1098,7 +1098,7 @@ export function FilesWorkspace({
             data-testid="files-ask-button"
             onClick={() => void ask()}
             disabled={asking || Boolean(askDisabledReason)}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-foreground/60 px-6 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-item border border-foreground/60 px-6 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {asking ? (
               // tone="inherit" because this button's background IS the
@@ -1160,7 +1160,7 @@ export function FilesWorkspace({
                       key={`${citation.filename}-${citation.label}-${i}`}
                       className="flex items-center gap-1.5 text-[11px] text-muted"
                     >
-                      <span className="min-w-0 truncate">
+                      <span className="min-w-0 break-words">
                         {citation.filename} — {citation.label}
                       </span>
                       {/* Each one on its own, because a citation is what
@@ -1290,7 +1290,7 @@ export function FilesWorkspace({
                   350
                 );
               }}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-foreground/60 px-5 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-item border border-foreground/60 px-5 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
             >
               <Sparkles className="h-4 w-4" aria-hidden="true" />
               {t("goToAsk")}

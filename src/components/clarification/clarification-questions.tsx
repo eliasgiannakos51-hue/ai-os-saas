@@ -47,7 +47,7 @@ export function ClarificationQuestions({
   }
 
   return (
-    <div className="space-y-3 rounded-2xl border border-foreground/30 bg-foreground/[0.04] p-4">
+    <div className="space-y-3 rounded-card border border-foreground/30 bg-foreground/[0.04] p-4">
       <p className="text-sm font-semibold text-foreground">{title}</p>
       <div className="space-y-3">
         {questions.map((question, index) => {
@@ -103,7 +103,7 @@ export function ClarificationQuestions({
           type="button"
           onClick={() => onAnswer(answers)}
           disabled={submitting}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-item border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {continueLabel}
         </button>
@@ -115,7 +115,7 @@ export function ClarificationQuestions({
           type="button"
           onClick={onSkip}
           disabled={submitting}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-item border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
         >
           {skipLabel}
         </button>

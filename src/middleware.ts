@@ -2,6 +2,8 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { diagLog } from "@/lib/diag";
 import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, SUPPORTED_LOCALES } from "@/i18n/constants";
 import { NextResponse, type NextRequest } from "next/server";
+import { PERMANENT_MOVES, onboardingRedirectTarget, teamRedirectTarget } from "@/lib/nav/early-redirects";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 
 export async function middleware(request: NextRequest) {
   // NO x-pathname HEADER. One was set here for a single deploy, so the
@@ -133,6 +135,50 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return withRefreshedCookies(NextResponse.redirect(url));
+  }
+
+  // REDIRECTS DECIDED HERE, NOT IN THE PAGE (issue #61, React #310).
+  // A dashboard page that redirects has already started streaming
+  // (app/dashboard/loading.tsx), so its redirect reaches the browser as a
+  // client-side navigation racing the router's prefetches — the crash.
+  // Answered here it is a plain HTTP redirect. lib/nav/early-redirects.ts
+  // has the measurement; the pages keep the same check as a fallback.
+  if (user && isDashboardRoute) {
+    const moved = PERMANENT_MOVES[request.nextUrl.pathname];
+    if (moved) {
+      const url = request.nextUrl.clone();
+      url.pathname = moved;
+      return withRefreshedCookies(NextResponse.redirect(url, 308));
+    }
+    if (request.nextUrl.pathname === "/dashboard/team") {
+      const target = teamRedirectTarget({
+        isAdmin: isAdminEmail(user.email),
+        userMetadata: user.user_metadata,
+        setupParam: request.nextUrl.searchParams.get("setup"),
+      });
+      if (target) {
+        const url = request.nextUrl.clone();
+        url.pathname = target;
+        url.search = "";
+        return withRefreshedCookies(NextResponse.redirect(url));
+      }
+    }
+    // One extra read, on Home only — the page runs the same one, and the
+    // alternative is the crash on the first screen a new account sees.
+    if (request.nextUrl.pathname === "/dashboard/overview") {
+      const { data, error } = await supabase
+        .from("user_onboarding")
+        .select("completed_at, skipped_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const target = onboardingRedirectTarget({ error, state: data });
+      if (target) {
+        const url = request.nextUrl.clone();
+        url.pathname = target;
+        url.search = "";
+        return withRefreshedCookies(NextResponse.redirect(url));
+      }
+    }
   }
 
   if (user && isAuthRoute) {

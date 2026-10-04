@@ -117,7 +117,10 @@ if (suites.length === 0) {
 // 185 -> 196 on 2026-09-30, with connector-safety.mutation.mjs. The
 // floor follows the suites that exist; it is a floor, so it rises when
 // they do and never falls to accommodate one that was deleted.
-const FLOOR = 196;
+// 196 -> 208 on 2026-10-04: the suites of 2026-10-01..04 (job-timeline,
+// greeting-name, key-inventory, email-strings, research-timeline,
+// ci-step-timeouts, early-redirects and the rest of that round).
+const FLOOR = 208;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

@@ -11,6 +11,7 @@ import { InviteForm } from "@/components/team/invite-form";
 import { TeamMembersList, type TeamMember } from "@/components/team/team-members-list";
 import { getPlan, TEAM_SEAT_PRICE, CURRENCY_SYMBOL } from "@/lib/billing/plans";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { teamRedirectTarget } from "@/lib/nav/early-redirects";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.team");
@@ -58,7 +59,12 @@ export default async function TeamPage({
   // owners only — a team member who joined via invite has subscription_tier
   // set too, but no stripe_subscription_id of their own, so this correctly
   // excludes them.
-  if (!justSetUp && (!ownsSubscription || !tier || !getPlan(tier)?.capabilities.teamCollaboration)) {
+  //
+  // middleware.ts decides this first, with the same function
+  // (lib/nav/early-redirects.ts): a redirect from here arrives after the
+  // page began streaming, as the client-side navigation behind issue #61.
+  // This is the fallback.
+  if (teamRedirectTarget({ isAdmin, userMetadata: user.user_metadata, setupParam: searchParams?.setup })) {
     diagLog(`[team-page-diag] userId=${user.id} REDIRECTING to /dashboard/settings (gate failed)`);
     redirect("/dashboard/settings");
   }

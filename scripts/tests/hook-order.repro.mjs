@@ -23,6 +23,7 @@
 // Run: node scripts/tests/hook-order.repro.mjs
 import http from "node:http";
 import { spawn } from "node:child_process";
+import { writeFileSync } from "node:fs";
 
 let pass = 0,
   fail = 0;
@@ -267,6 +268,7 @@ await ctx.addCookies([{ ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly
 
 const RUNS = Number(process.env.RUNS ?? 3);
 const allErrors = [];
+const landed = [];
 
 // THE SEQUENCE THAT SAW IT, replayed.
 //
@@ -304,7 +306,11 @@ for (let pass = 0; pass < RUNS; pass++) {
   for (const route of SEQUENCE) {
     visiting = route;
     try {
-      await page.goto(`http://127.0.0.1:${PORT}${route}`, { waitUntil: "domcontentloaded", timeout: 60000 });
+      const res = await page.goto(`http://127.0.0.1:${PORT}${route}`, { waitUntil: "domcontentloaded", timeout: 60000 });
+      // WHERE IT LANDED, and with what. Zero errors is only evidence if
+      // the pages rendered: a middleware that throws answers 500 on every
+      // route and produces no console error at all (2026-10-04).
+      landed.push(`${route} -> ${res?.status() ?? "no response"} ${new URL(page.url()).pathname}`);
       for (const [w, h] of WIDTHS) {
         await page.setViewportSize({ width: w, height: h });
         await page.waitForTimeout(120);
@@ -322,7 +328,19 @@ for (let pass = 0; pass < RUNS; pass++) {
 // killed. Both fixed: this names the React error explicitly.
 const HOOK = /Rendered more hooks|Rendered fewer hooks|order of Hooks|Minified React error #(3(0[0-9]|1[0-9]))|Invalid hook call/;
 const found = allErrors.filter((e) => HOOK.test(e));
+// DUMP=<file> writes EVERY console error, in order, with its pass and route.
+// The summary below keeps twelve; finding what happens just BEFORE a crash
+// needs all of them (added 2026-10-04 for issue #61).
+if (process.env.DUMP) writeFileSync(process.env.DUMP, allErrors.join("\n\n"));
 
+const statusCount = new Map();
+for (const l of landed) {
+  const status = l.split(" -> ")[1].split(" ")[0];
+  statusCount.set(status, (statusCount.get(status) ?? 0) + 1);
+}
+console.log(`\nresponses: ${[...statusCount].map(([s, n]) => `${n}x ${s}`).join(", ")}`);
+for (const l of [...new Set(landed)].filter((l) => !l.includes(" -> 200 "))) console.log(`  not 200: ${l}`);
+for (const l of [...new Set(landed)].filter((l) => { const [from, to] = l.split(" -> "); return !to.endsWith(" " + from); })) console.log(`  redirected: ${l}`);
 console.log(`\n${allErrors.length} console error(s) in total across ${RUNS} pass(es)`);
 const noise = /ERR_CONNECTION_REFUSED|webpack-hmr|Failed to fetch RSC payload|Download the React DevTools/;
 const real = allErrors.filter((e) => !noise.test(e));

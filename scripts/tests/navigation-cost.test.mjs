@@ -198,7 +198,9 @@ check(
   // that reads onboarding first and redirects afterwards runs every query
   // on the page for somebody who will never see it.
   const readAt = body.indexOf('.from("user_onboarding")');
-  const redirectAt = body.indexOf('redirect("/onboarding")');
+  // redirect(onboardingTarget) since 2026-10-04: the target comes from
+  // lib/nav/early-redirects.ts, shared with middleware.ts (issue #61).
+  const redirectAt = body.indexOf("redirect(onboardingTarget)");
   // THE WAVE IS WHERE Promise.all IS, not where the sentence about it
   // is. With the sentence as the anchor the read could be moved
   // anywhere below the comment and the ordering check below stayed

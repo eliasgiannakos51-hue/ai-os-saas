@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { GreetingHeader } from "@/components/overview/greeting-header";
 import { greetingName } from "@/lib/greeting";
+import { onboardingRedirectTarget } from "@/lib/nav/early-redirects";
 import { InsightList, type Insight } from "@/components/onboarding/insight-list";
 import { CreateChat } from "@/components/create/create-chat";
 import { FirstScreenExamples } from "@/components/overview/first-screen-examples";
@@ -136,8 +137,13 @@ export default async function OverviewPage() {
   // itself failed we do not know what they decided, and guessing "not
   // onboarded" is the guess that bounces an established user out of the
   // product.
-  if (!onboardingError && !onboardingState?.completed_at && !onboardingState?.skipped_at) {
-    redirect("/onboarding");
+  //
+  // middleware.ts makes this decision first, with the same function, so
+  // this line is the fallback: a redirect from here arrives after the
+  // page began streaming, as the client-side navigation behind issue #61.
+  const onboardingTarget = onboardingRedirectTarget({ error: onboardingError, state: onboardingState });
+  if (onboardingTarget) {
+    redirect(onboardingTarget);
   }
 
   const now = Date.now();

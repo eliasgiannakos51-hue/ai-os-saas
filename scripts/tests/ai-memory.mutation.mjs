@@ -33,7 +33,7 @@ const MEMORY = "src/lib/chat/memory.ts";
 const PROMPT = "src/lib/chat/memory-prompt.ts";
 const LIST = "src/components/memory/ai-memory-list.tsx";
 const SEARCH_PAGE = "src/app/dashboard/search/page.tsx";
-const OLD_ROUTE = "src/app/dashboard/memory/page.tsx";
+const EARLY_REDIRECTS = "src/lib/nav/early-redirects.ts";
 const ARTICLE = "scripts/help-articles/en.mjs";
 const MESSAGES_EN = "messages/en.json";
 const MESSAGES_EL = "messages/el.json";
@@ -123,9 +123,9 @@ const MUTANTS = [
     // the page shipped.
     name: "the old address stops redirecting",
     gate: UNIT,
-    file: OLD_ROUTE,
-    from: 'permanentRedirect("/dashboard/search")',
-    to: 'permanentRedirect("/dashboard/nowhere")',
+    file: EARLY_REDIRECTS,
+    from: '"/dashboard/memory": "/dashboard/search",',
+    to: '"/dashboard/memory": "/dashboard/nowhere",',
     expect: "permanent redirect to the search page",
   },
   {

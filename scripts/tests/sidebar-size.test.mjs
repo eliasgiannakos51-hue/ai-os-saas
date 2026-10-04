@@ -24,7 +24,7 @@
 //
 // Run: node scripts/tests/sidebar-size.test.mjs
 import { readFileSync, existsSync } from "node:fs";
-import { loadTs } from "./load-ts.mjs";
+import { loadTs, loadTsLinked } from "./load-ts.mjs";
 import { groupBlocks } from "./lib/sidebar-source.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
 
@@ -386,10 +386,19 @@ const nowHrefs = new Set(parsedItems.map((i) => CONSTANT_HREFS[i.href] ?? i.href
 // pass over a redirect somebody deleted, which is exactly the failure the
 // section is about. The target has to be a destination the sidebar or the
 // palette can still reach, so a redirect into nowhere is still a loss.
+//
+// Since 2026-10-04 the target may come from PERMANENT_MOVES in
+// lib/nav/early-redirects.ts, which middleware.ts answers first (issue
+// #61). The route still has to name the table for its own address, so a
+// deleted page is still a loss; the table is run, not read.
+const { PERMANENT_MOVES } = await loadTsLinked("src/lib/nav/early-redirects.ts");
 function redirectsToALiveDestination(href) {
   const route = `src/app${href}/page.tsx`;
   if (!existsSync(route)) return false;
-  const target = readFileSync(route, "utf8").match(/permanentRedirect\("([^"]+)"\)/)?.[1];
+  const code = readFileSync(route, "utf8");
+  const literal = code.match(/permanentRedirect\("([^"]+)"\)/)?.[1];
+  const viaTable = code.includes(`permanentRedirect(PERMANENT_MOVES["${href}"])`) ? PERMANENT_MOVES[href] : undefined;
+  const target = literal ?? viaTable;
   return Boolean(target) && nowHrefs.has(target);
 }
 const lost = BEFORE_V46_3.filter((href) => !nowHrefs.has(href) && !redirectsToALiveDestination(href));

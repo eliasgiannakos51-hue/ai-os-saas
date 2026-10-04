@@ -84,6 +84,15 @@ const NONE_IS_FINE = {
     "of a script. Settled 2026-10-02 by cost-before.mutation.mjs: 7 of 7, including a " +
     "website edit grown until it is large (the population moved, the gate went red) and " +
     "the large-action line raised until nothing is large (an empty population: RED).",
+  "ci-step-timeouts.test.mjs":
+    "a CENSUS of the workflow itself. Every job and every step of " +
+    ".github/workflows/verify.yml (6 jobs, 36 steps, 2026-10-04) must carry " +
+    "timeout-minutes, and no step's limit may reach its job's; the population is the " +
+    "file's own steps, so a new step without a limit reddens it. Settled 2026-10-04 by " +
+    "ci-step-timeouts.mutation.mjs: 3 of 3 (a step's limit removed, a job's removed, a " +
+    "step's raised past its job's). It also found two jobs with no limit at all on its " +
+    "first run. (It reads the YAML line by line rather than through a library, which is " +
+    "why the scan does not see DISK.)",
   "design-density.test.mjs":
     "a CENSUS with ratchets. 918 files walked; 581 border utilities, ceiling 581; blurred " +
     "accent shadows forbidden at 0. Settled twice — one added border (582) and one added " +

@@ -1510,9 +1510,9 @@ Gmail や Drive を接続
 
 **`sidebar.items.coding`**
 
-> EN — AI Coding
+> EN — Coding
 
-AI コーディング
+コーディング
 
 **`sidebar.items.competitors`**
 

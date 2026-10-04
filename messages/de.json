@@ -125,7 +125,7 @@
       "apps": "App-Ideen",
       "images": "Bild-Ideen",
       "videos": "Video-Ideen",
-      "coding": "Programmieren mit KI",
+      "coding": "Code",
       "dataAnalysis": "Sieh, was die Zahlen sagen",
       "documents": "Dokumente",
       "presentations": "Präsentationen",
@@ -3857,7 +3857,7 @@
     }
   },
   "coding": {
-    "title": "Programmieren mit KI",
+    "title": "Code",
     "description": "Fünf Dinge, die es tut, und vier, die es nicht tut. Alles arbeitet genau auf dem Text im Feld.",
     "code": "Code",
     "copy": "Kopieren",

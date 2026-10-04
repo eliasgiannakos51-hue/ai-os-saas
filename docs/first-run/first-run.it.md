@@ -1510,9 +1510,9 @@ Chiedimi
 
 **`sidebar.items.coding`**
 
-> EN — AI Coding
+> EN — Coding
 
-Codice con l'IA
+Codice
 
 **`sidebar.items.competitors`**
 

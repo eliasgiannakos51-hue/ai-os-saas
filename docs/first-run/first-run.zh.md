@@ -1510,9 +1510,9 @@ AI 编程
 
 **`sidebar.items.coding`**
 
-> EN — AI Coding
+> EN — Coding
 
-AI 编程
+编程
 
 **`sidebar.items.competitors`**
 

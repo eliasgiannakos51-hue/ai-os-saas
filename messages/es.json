@@ -125,7 +125,7 @@
       "apps": "Ideas de apps",
       "images": "Ideas de imágenes",
       "videos": "Ideas de vídeos",
-      "coding": "Programación con IA",
+      "coding": "Código",
       "dataAnalysis": "Mira qué dicen los números",
       "documents": "Documentos",
       "presentations": "Presentaciones",
@@ -3857,7 +3857,7 @@
     }
   },
   "coding": {
-    "title": "Programación con IA",
+    "title": "Código",
     "description": "Cinco cosas que hace y cuatro que no. Todo funciona exactamente sobre el texto de la caja.",
     "code": "Código",
     "copy": "Copiar",

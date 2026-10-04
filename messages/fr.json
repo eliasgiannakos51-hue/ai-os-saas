@@ -125,7 +125,7 @@
       "apps": "Idées d’applications",
       "images": "Idées d’images",
       "videos": "Idées de vidéos",
-      "coding": "Code avec l'IA",
+      "coding": "Code",
       "dataAnalysis": "Vois ce que disent les chiffres",
       "documents": "Documents",
       "presentations": "Présentations",
@@ -3857,7 +3857,7 @@
     }
   },
   "coding": {
-    "title": "Code avec l'IA",
+    "title": "Code",
     "description": "Cinq choses qu'il fait, quatre qu'il ne fait pas. Tout porte exactement sur le texte de la zone.",
     "code": "Code",
     "copy": "Copier",

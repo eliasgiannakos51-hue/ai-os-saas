@@ -125,7 +125,7 @@
       "apps": "App ideas",
       "images": "Image ideas",
       "videos": "Video ideas",
-      "coding": "AI Coding",
+      "coding": "Coding",
       "dataAnalysis": "See what the numbers say",
       "documents": "Documents",
       "presentations": "Presentations",
@@ -3857,7 +3857,7 @@
     }
   },
   "coding": {
-    "title": "AI Coding",
+    "title": "Coding",
     "description": "Five things it does, and four it doesn't. Everything works on exactly the text in the box.",
     "code": "Code",
     "copy": "Copy",

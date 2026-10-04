@@ -125,7 +125,7 @@
       "apps": "应用点子",
       "images": "图片点子",
       "videos": "视频点子",
-      "coding": "AI 编程",
+      "coding": "编程",
       "dataAnalysis": "看看数字怎么说",
       "documents": "文档",
       "presentations": "演示文稿",
@@ -3857,7 +3857,7 @@
     }
   },
   "coding": {
-    "title": "AI 编程",
+    "title": "编程",
     "description": "五件它会做的事，四件它不做的事。所有操作都只针对框里的那段文本。",
     "code": "代码",
     "copy": "复制",

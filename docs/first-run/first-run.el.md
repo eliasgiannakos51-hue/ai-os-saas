@@ -1510,9 +1510,9 @@ AI που δουλεύει για σένα
 
 **`sidebar.items.coding`**
 
-> EN — AI Coding
+> EN — Coding
 
-Κώδικας με AI
+Κώδικας
 
 **`sidebar.items.competitors`**
 

@@ -1267,7 +1267,7 @@ Ask me
 **`sidebar.items.coding`**
 
 
-AI Coding
+Coding
 
 **`sidebar.items.competitors`**
 

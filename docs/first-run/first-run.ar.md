@@ -1510,9 +1510,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`sidebar.items.coding`**
 
-> EN — AI Coding
+> EN — Coding
 
-البرمجة بالذكاء الاصطناعي
+البرمجة
 
 **`sidebar.items.competitors`**
 

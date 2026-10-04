@@ -76,7 +76,7 @@ export function CancelSubscription({ endsAt }: { endsAt: string | null }) {
   }
 
   return (
-    <div className="w-full rounded-card border border-border bg-input p-4">
+    <div data-testid="cancel-subscription-panel" className="w-full rounded-card border border-border bg-input p-4">
       <h3 className="text-sm font-semibold text-foreground">{t("title")}</h3>
 
       {/* The four facts, before the decision. */}

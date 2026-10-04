@@ -1933,7 +1933,10 @@ console.log("\n== 11. cancelling is one click away, in the user's language ==");
   // ONE click opens the confirmation. Not a wizard.
   await cancelButton.click();
   await page.waitForTimeout(250);
-  const panelRoot = page.locator('main div.rounded-xl.border.border-border.bg-input').first();
+  // BY ITS NAME, NOT ITS CLASSES. This was `div.rounded-xl.border…`, and
+  // design D.8 mapped every radius onto the design's three — the panel
+  // was still there and this locator timed out (CI, 2026-10-04).
+  const panelRoot = page.locator('main [data-testid="cancel-subscription-panel"]').first();
   const panel = await panelRoot.innerText();
   for (const [what, needle] of [
     ["access end", "μέχρι το τέλος της περιόδου"],

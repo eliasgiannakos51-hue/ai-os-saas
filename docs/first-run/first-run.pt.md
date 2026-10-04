@@ -1510,9 +1510,9 @@ Pergunta-me
 
 **`sidebar.items.coding`**
 
-> EN — AI Coding
+> EN — Coding
 
-Programar com IA
+Código
 
 **`sidebar.items.competitors`**
 

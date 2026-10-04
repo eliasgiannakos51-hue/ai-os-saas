@@ -39,7 +39,9 @@ export function TopNav({ email }: { email: string }) {
         // Height only — the bar has 64px of it and no spare width.
         // 44px both ways: below 400px the word is hidden and the link is
         // the earth alone, which measured 24px wide (site audit, D.11).
-        className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2"
+        // md:hidden: from md up the sidebar carries the logo, and the
+        // audit's screenshots showed it twice, side by side.
+        className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2 md:hidden"
       >
         <Logo iconOnly px={24} />
         <span className="hidden text-base font-bold tracking-tight text-foreground min-[400px]:inline">

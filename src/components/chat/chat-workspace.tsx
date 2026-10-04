@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, AudioLines, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen, X, Zap } from "lucide-react";
+import { ArrowDown, AudioLines, Compass, Gift, PanelLeftClose, PanelLeftOpen, X, Zap } from "lucide-react";
+import { Earth } from "@/components/brand/earth";
 import { useTranslations } from "next-intl";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { AiActivity } from "@/components/ui/ai-activity";
@@ -77,20 +78,20 @@ function nextLocalId(prefix: string) {
   return `${prefix}-${localIdCounter}`;
 }
 
-function AssistantAvatar() {
-  return (
-    <span
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-foreground"
-      aria-hidden="true"
-    >
-      <MessageCircle className="h-4 w-4" />
-    </span>
-  );
+/**
+ * THE SMALL EARTH BESIDE EVERY ANSWER (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN,
+ * «Η ΓΗ»: «η ίδια μικρή γη δίπλα σε κάθε απάντηση του Ionexa. Γυρίζει
+ * πιο γρήγορα όσο δουλεύει και ηρεμεί όταν τελειώσει»). 32px: the 64px
+ * of Home beside every turn would be wider than the indent of the text.
+ * Only the answer being written and the latest one move; older ones are
+ * drawn still, so a long thread does not run a canvas per turn.
+ */
+function AssistantAvatar({ working = false, still = false }: { working?: boolean; still?: boolean }) {
+  return <Earth variant="small" px={32} working={working} still={still} className="mt-0.5 shrink-0" />;
 }
 
 export function ChatWorkspace({
   initialConversations,
-  userInitial,
   initialMentorPreset,
   initialFreeChatRemaining,
   initialConversationId,
@@ -99,7 +100,6 @@ export function ChatWorkspace({
   initialWorkMode,
 }: {
   initialConversations: ChatConversation[];
-  userInitial: string;
   /** Conversation to open on load — the `?c=` deep link a starred
    *  conversation on /dashboard/favorites points at. Already checked
    *  against the user's own list server-side. */
@@ -159,6 +159,8 @@ export function ChatWorkspace({
   // one thing, and two structures keyed by id drift the moment a message
   // is removed from one of them.
   const [messages, setMessages] = useState<(ChatMessage & { provenance?: Provenance; timeline?: ClientStep[] })[]>([]);
+  // The one answer whose earth keeps turning, calmly, once it is done.
+  const lastAnswerId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
   // The text being typed lives INSIDE ChatComposer, not here: as state on
   // this component, every keystroke re-rendered the whole workspace —
   // thread, sidebar, header — measured at 128ms median per key with a
@@ -847,9 +849,7 @@ export function ChatWorkspace({
             </div>
           ) : messages.length === 0 && !sending ? (
             <div className="mx-auto flex h-full max-w-md flex-col items-center justify-center text-center">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-foreground/10 text-foreground">
-                <MessageCircle className="h-6 w-6" aria-hidden="true" />
-              </span>
+              <Earth variant="small" px={64} />
               <h1 className="mt-4 text-xl font-bold tracking-wide text-foreground">{t("title")}</h1>
               {/* Was three hardcoded English sentences. A Greek user opening
                   Chat met an English explanation of what it is for — which
@@ -910,41 +910,22 @@ export function ChatWorkspace({
             <div className="chat-measure space-y-8">
               {messages.map((msg) =>
                 msg.role === "user" ? (
-                  <div key={msg.id} className="flex items-start justify-end gap-2">
-                    {/* NO BOX. Reported from live production twice: "the
-                        text is inside a frame, I want it across the
-                        width". The ANSWER lost its card on 2026-09-04 —
-                        see the note above — and the QUESTION kept one,
-                        so what was left read as a frame around half the
-                        conversation.
-
-                        WHAT REPLACES IT, because a bubble was doing two
-                        jobs. Telling the speakers apart is done by the
-                        things that were already there: the turn is
-                        right-aligned, the avatar sits beside it, and
-                        space-y-8 between turns is four times the gap
-                        inside one. What the border added on top of that
-                        was a rectangle, and the rectangle is what was
-                        asked to go.
-
-                        The 85% cap goes with it: it existed to stop a
-                        bubble spanning the pane, and there is no bubble.
-                        Line length is still governed by .chat-measure,
-                        which is a measured readability cap and not a
-                        box — see globals.css. */}
-                    <div className="min-w-0 whitespace-pre-wrap px-1 py-0.5 text-right text-foreground">
+                  <div key={msg.id} className="flex justify-end">
+                    {/* ON A SURFACE AGAIN, by the owner's design of
+                        2026-10-04 (docs/CONTEXT.md, «ΣΥΝΟΜΙΛΙΑ»: «Το
+                        μήνυμα του χρήστη δεξιά, σε επιφάνεια #0D1220»).
+                        What was asked to go in September was the FRAME —
+                        a border around half the conversation; this is a
+                        fill with no border, and the answer stays bare.
+                        The 85% cap comes back with the surface, so a
+                        long question does not paint the whole pane. */}
+                    <div className="min-w-0 max-w-[85%] whitespace-pre-wrap rounded-card bg-panel px-4 py-2.5 text-foreground">
                       {msg.content}
                     </div>
-                    <span
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-panel text-xs font-semibold text-muted"
-                      aria-hidden="true"
-                    >
-                      {userInitial}
-                    </span>
                   </div>
                 ) : (
                   <div key={msg.id} className="flex items-start gap-2.5">
-                    <AssistantAvatar />
+                    <AssistantAvatar still={sending || msg.id !== lastAnswerId} />
                     {/* THE GROUND UNDER THE ANSWER — V4.6, decided
                         2026-09-04 from the screenshots: `dim`. A 62%
                         page-colour pane over the answer's own rectangle,
@@ -993,7 +974,7 @@ export function ChatWorkspace({
 
               {sending && (
                 <div className="flex items-start gap-2.5">
-                  <AssistantAvatar />
+                  <AssistantAvatar working />
                   {streamingText !== null ? (
                     <div className="chat-ground-dim min-w-0 flex-1 text-foreground">
                       {chatTimelineWorthShowing(liveTimeline) && (
@@ -1016,7 +997,7 @@ export function ChatWorkspace({
                   product rather than four. */}
               {clarify && !sending && (
                 <div className="flex items-start gap-2.5" data-testid="chat-clarify">
-                  <AssistantAvatar />
+                  <AssistantAvatar still />
                   <div className="min-w-0 flex-1">
                     <ClarificationQuestions
                       questions={clarify.questions}

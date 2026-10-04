@@ -115,7 +115,9 @@ const MUTANTS = [
     // A `to` that can occur legitimately elsewhere in the same file
     // cannot distinguish "mutated" from "normal".
     to: "    unbounded: 1,",
-    expect: "dashboard: 71 unbounded component(s)",
+    // NO NUMBER IN THE EXPECTATION: it said "71" while the record said
+    // 70 and then 69, so the suite reported WRONG on a mutant it caught.
+    expect: "unbounded component(s), recorded as 1",
   },
   {
     // With no prefix the dashboard stops claiming its own routes, they

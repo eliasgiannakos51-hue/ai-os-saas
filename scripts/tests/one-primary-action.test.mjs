@@ -642,8 +642,12 @@ console.log(`        accent box-shadows: ${glow} · gradient backgrounds: ${grad
 // makes that distinction (a shadow counts as glow only when its third
 // length is non-zero) and reports ZERO; this pattern cannot, so the
 // ceiling is 2 rather than 0 and says why.
-check(`accent box-shadows: ${glow}, ceiling 2`, glow <= 2, String(glow));
-check(`gradient backgrounds: ${gradients}, ceiling 13`, gradients <= 13, String(gradients));
+// 2 -> 0 and 13 -> 0, design D.1 (2026-10-04): one dark theme with a
+// closed palette took both one-pixel edges and every gradient, and a
+// ceiling above the measured count let "a glow is added" through — the
+// mutation suite reported it MISSED on the D.1 tree.
+check(`accent box-shadows: ${glow}, ceiling 0`, glow <= 0, String(glow));
+check(`gradient backgrounds: ${gradients}, ceiling 0`, gradients <= 0, String(gradients));
 // TWO, THEN ZERO. The decision this comment asked for was taken in
 // redesign phase 4 — "κανένα gradient σε τίτλο" — and both went:
 //   1. the health score's range label, bg-clip-text amber-300 to

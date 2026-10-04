@@ -75,7 +75,10 @@ check("the server renders a static frame as SVG", /<svg[\s\S]{0,200}viewBox=\{`0
 check("the canvas starts only once the browser is idle", /requestIdleCallback\(begin/.test(C) && /setTimeout\(begin/.test(C));
 check("reduced motion keeps it still, by the app's switch and the OS's", /dataset\.motion === "reduce"/.test(C) && /prefers-reduced-motion: reduce/.test(C) && /if \(reduce\) return;/.test(C));
 check("no canvas means the static frame stays", /const ctx = cv\.getContext\("2d"\);\s*if \(!ctx\) return;/.test(C));
-check("the logo never animates", /if \(variant === "logo"\) return;/.test(C) && /\{variant !== "logo" && \(\s*<canvas/.test(C));
+check(
+  "the logo never animates, nor does a still earth",
+  /const animated = variant !== "logo" && !still;/.test(C) && /if \(!animated\) return;/.test(C) && /\{animated && \(\s*<canvas/.test(C)
+);
 check("it stops drawing off screen and in a hidden tab", /new IntersectionObserver/.test(C) && /document\.hidden/.test(C));
 check("working eases the speed up, and back", /easeSpeed\(spinSpeed, workingRef\.current \? SPIN\.working : SPIN\.rest, dt\)/.test(C));
 check("the canvas is drawn from the same geometry", /draw\(earthFrame\(variant, spin, orbit\)\)/.test(C));

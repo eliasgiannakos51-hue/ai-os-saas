@@ -13,7 +13,6 @@ import { ArrowUp, Square } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { VoiceInput } from "@/components/voice/voice-input";
-import { useVoiceAvailability } from "@/components/voice/voice-availability";
 
 /**
  * The chat's text box, owning its own keystrokes.
@@ -58,14 +57,6 @@ export const ChatComposer = forwardRef<
 >(function ChatComposer({ sending, onSend, onStop, initialText = "", children }, ref) {
   const t = useTranslations("dashboard.chat");
   const [input, setInput] = useState(initialText);
-  // Only to decide the box's right padding. VoiceInput now draws an
-  // inert microphone whenever the availability call has answered (V4.6:
-  // a control that silently is not there cannot say why), so the box
-  // makes room once `loaded` — not only when transcription works. Before
-  // the answer nothing is drawn and no gap is left. This context changes
-  // on load and after a transcription — never per keystroke, which is
-  // what this component exists to keep cheap.
-  const { loaded: voiceLoaded } = useVoiceAvailability();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   function resize(el: HTMLTextAreaElement) {
@@ -130,9 +121,11 @@ export const ChatComposer = forwardRef<
           // inside a box a quarter the height of the thread above it. A
           // viewport-relative cap grows with the screen instead of
           // pinning the composer to one small absolute size.
-          className={`focus-glow max-h-[45vh] min-h-[60px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-panel px-4 py-3.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-foreground/60 ${
-            voiceLoaded ? "pe-[7.5rem]" : "pe-14"
-          }`}
+          // THE SAME FIELD AS HOME'S (docs/CONTEXT.md, «ΣΥΝΟΜΙΛΙΑ»: «Το
+          // πεδίο μένει κάτω, ίδιο με της αρχικής»): the controls sit on
+          // a row under the text — voice bottom-left, send bottom-right —
+          // so the text has the full width and never runs under a button.
+          className="focus-glow max-h-[45vh] min-h-[6.5rem] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-panel px-4 pb-14 pt-3.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-foreground/60"
           autoFocus
         />
         {/* THE MICROPHONE SITS BESIDE THE BOX, NEVER INSTEAD OF IT, and
@@ -140,7 +133,7 @@ export const ChatComposer = forwardRef<
             and fix — it does not send. Renders nothing at all when the
             deployment has no transcription provider or the plan does not
             include voice (components/voice/voice-input.tsx). */}
-        <div className="absolute bottom-2 end-14">
+        <div className="absolute bottom-2 start-2">
           <VoiceInput
             disabled={sending}
             onTranscript={(text) => {

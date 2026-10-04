@@ -251,9 +251,14 @@ const userTurn = stripJsx(
 // the element that actually wraps msg.content.
 const userMessageEl =
   userTurn.match(/<div className="([^"]*)"[^>]*>\s*\{msg\.content\}/)?.[1] ?? "";
+// THE SURFACE CAME BACK, THE FRAME DID NOT. The owner's design of
+// 2026-10-04 (docs/CONTEXT.md, «ΣΥΝΟΜΙΛΙΑ») puts the person's message
+// «δεξιά, σε επιφάνεια #0D1220» — the panel colour. What was asked to go
+// in September was the frame: a border around half the conversation. So
+// the element holds the fill and never a border or an accent.
 check(
-  "the person's message has no box around it",
-  userMessageEl.length > 0 && !/border|rounded-2xl|bg-panel|bg-orange/.test(userMessageEl),
+  "the person's message sits on the design's surface, with no frame around it",
+  userMessageEl.length > 0 && /\bbg-panel\b/.test(userMessageEl) && !/border|bg-orange|bg-button/.test(userMessageEl),
   userMessageEl || "the element wrapping {msg.content} was not found"
 );
 check(
@@ -261,9 +266,12 @@ check(
   /justify-end/.test(userTurn),
   "alignment is the first of the three things that replaced the rectangle"
 );
+// The second thing that tells them apart: since 2026-10-04 the ANSWER
+// carries the small earth (AssistantAvatar), and the question carries
+// nothing beside it.
 check(
-  "...and by keeping the avatar beside it",
-  /userInitial/.test(userTurn),
+  "...and by the earth beside the answer, never beside the question",
+  !/AssistantAvatar|<Earth\b/.test(userTurn) && /<AssistantAvatar still=\{sending \|\| msg\.id !== lastAnswerId\} \/>/.test(workspace),
   "the second"
 );
 check(

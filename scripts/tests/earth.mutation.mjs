@@ -71,9 +71,16 @@ const MUTANTS = [
   {
     name: "the logo spins",
     file: COMP,
-    from: "    if (variant === \"logo\") return;\n",
-    to: "",
+    from: '  const animated = variant !== "logo" && !still;',
+    to: "  const animated = !still;",
     expect: "the logo never animates",
+  },
+  {
+    name: "a still earth turns anyway",
+    file: COMP,
+    from: '  const animated = variant !== "logo" && !still;',
+    to: '  const animated = variant !== "logo";',
+    expect: "nor does a still earth",
   },
   {
     name: "a colour is written into the component",

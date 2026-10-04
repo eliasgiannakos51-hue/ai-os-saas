@@ -32,7 +32,7 @@
 | D.2 | Η γη ως component σε τρία μεγέθη: λογότυπο, 64 px, 160 px | 2.6 σεν. 7–10 | φτιαγμένο, αδοκίμαστο σε browser (τοπικό branch `design-d`) | `earth.test.mjs` 32 έλεγχοι, 9/9 mutations. Στο λογότυπο ήδη· 64 px στο D.4–D.5, 160 px στο D.9 |
 | D.3 | Sidebar και Recent tools | 2.4 σεν. 1–8, 15 | φτιαγμένο, αδοκίμαστο σε browser (τοπικό branch `design-d`) | Αντικαθιστά το 1.6. `recent-tools.test.mjs` 53 έλεγχοι, 14/14 mutations. Recent tools στο `user_metadata` του λογαριασμού: χωρίς migration |
 | D.4 | Αρχική | 2.4 σεν. 16–18 | φτιαγμένο, αδοκίμαστο σε browser (τοπικό branch `design-d`) | `home-design.test.mjs` 55 έλεγχοι, 13/13 mutations. Οι κάρτες της παλιάς αρχικής στο `/dashboard/activity`. Το `one-primary-action` μένει 2: και τα δύο κουμπιά είναι του πεδίου (D.5) |
-| D.5 | Συνομιλία | 2.6 σεν. 9, 11, 12 | εκκρεμεί | |
+| D.5 | Συνομιλία | 2.6 σεν. 9, 11, 12 | φτιαγμένο, αδοκίμαστο σε browser (τοπικό branch `design-d`) | `conversation-design.test.mjs` 9 έλεγχοι, 6/6 mutations. Το δεξί πλαίσιο δεν φτιάχτηκε στο chat (`docs/DECISIONS.md`) |
 | D.6 | All tools | 2.4 σεν. 9–12 | εκκρεμεί | |
 | D.7 | Coding | — | εκκρεμεί | |
 | D.8 | Κάθε άλλη σελίδα του dashboard, μία μία | 2.6 | εκκρεμεί | |

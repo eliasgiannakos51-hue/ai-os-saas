@@ -79,7 +79,6 @@ export default async function ChatPage({
     ? null
     : await getFreeChatStatus(user.id, plan?.slug ?? "free", legacy);
 
-  const userInitial = (user.email?.[0] ?? "?").toUpperCase();
   const initialMentorPreset =
     searchParams.preset === "trading" ? "trading" : searchParams.preset === "product" ? "product" : undefined;
 
@@ -87,7 +86,6 @@ export default async function ChatPage({
     <div className="h-[calc(100vh-4rem)]">
       <ChatWorkspace
         initialConversations={conversations}
-        userInitial={userInitial}
         initialMentorPreset={initialMentorPreset}
         // Deep link from /dashboard/favorites. Validated against the
         // user's own list rather than trusted: an id in the URL must not

@@ -40,6 +40,7 @@ export function Earth({
   variant,
   px,
   working = false,
+  still = false,
   label,
   className = "",
 }: {
@@ -47,6 +48,12 @@ export function Earth({
   /** Rendered size in CSS pixels. */
   px?: number;
   working?: boolean;
+  /**
+   * Drawn, never animated — for the earths beside a conversation's older
+   * answers. "Ηρεμεί όταν τελειώσει": the latest one keeps turning, and
+   * a thread of forty answers does not run forty canvases.
+   */
+  still?: boolean;
   /** Accessible name; omit for a decorative instance (aria-hidden). */
   label?: string;
   className?: string;
@@ -57,9 +64,10 @@ export function Earth({
   const workingRef = useRef(working);
   workingRef.current = working;
   const [live, setLive] = useState(false);
+  const animated = variant !== "logo" && !still;
 
   useEffect(() => {
-    if (variant === "logo") return;
+    if (!animated) return;
     const el = host.current;
     const cv = canvas.current;
     if (!el || !cv) return;
@@ -159,7 +167,7 @@ export function Earth({
       io.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [variant, size]);
+  }, [variant, size, animated]);
 
   const frame = earthFrame(variant, 0.6, 0.9);
   return (
@@ -189,7 +197,7 @@ export function Earth({
           <circle key={`n${i}`} cx={n.x} cy={n.y} r={n.r} fill="currentColor" stroke="none" fillOpacity={n.opacity} />
         ))}
       </svg>
-      {variant !== "logo" && (
+      {animated && (
         <canvas
           ref={canvas}
           width={size}

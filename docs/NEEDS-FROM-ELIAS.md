@@ -136,6 +136,32 @@
     `docs/first-run/first-run.<γλώσσα>.md` και
     `docs/first-run/emails.<γλώσσα>.md`.
 
+16. **Νέο migration: `supabase/migrations/20261008000000_website_timeline.sql`**
+    (γράφτηκε 2026-10-04, μαζί με το timeline του builder ιστοσελίδων).
+    - **Τι κάνει:** προσθέτει μία στήλη, `user_websites.timeline`. Δεν
+      αλλάζει και δεν σβήνει τίποτα. Τρέχει και δεύτερη φορά χωρίς πρόβλημα.
+    - **Πριν τρέξει:** οι ιστοσελίδες φτιάχνονται κανονικά, απλώς χωρίς
+      timeline. Η οθόνη δείχνει τις παλιές εναλλασσόμενες φράσεις.
+    - **Πού:** Supabase → το project του Ionexa → **SQL Editor** → «New
+      query». Επικόλλησε ολόκληρο το αρχείο → **Run**.
+    - **Προεπισκόπηση (μόνο ανάγνωση), πριν:**
+      ```sql
+      select count(*) as timeline_column
+      from information_schema.columns
+      where table_schema = 'public' and table_name = 'user_websites'
+        and column_name = 'timeline';   -- περιμένεις 0 πριν, 1 μετά
+      ```
+    - **Αντίγραφο:** δεν χρειάζεται. Μόνο προσθέτει στήλη, δεν πειράζει
+      δεδομένα.
+    - **Έλεγχος μετά:** το ίδιο ερώτημα πρέπει να βγάλει `1`. Και
+      `npm run db:pending` (ή `-- --sql`) δεν πρέπει να το δείχνει πια ως
+      PENDING.
+    - **Αν βγει σφάλμα:** μην τρέξεις τίποτα άλλο. Στείλε μου το κόκκινο
+      μήνυμα όπως είναι. Το πιθανότερο, `relation "public.user_websites"
+      does not exist`, σημαίνει λάθος project.
+    *Ξεμπλοκάρει:* στον builder, οι πέντε πραγματικές φάσεις και τα
+    credits ανά φάση. Και το 0.3 (δοκιμή σε browser), μαζί με το 2.
+
 ## Έκλεισαν 2026-10-04
 
 - Τα δύο migrations: έτρεξαν (μένει μόνο ο έλεγχος του 1).

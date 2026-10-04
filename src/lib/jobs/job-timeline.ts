@@ -30,11 +30,11 @@
  * rendered through messages (aiSteps.timeline.evidence.<key>) in the
  * reader's, with the plural rules of that language.
  */
-export const EVIDENCE_KEYS = ["files", "parts", "planSteps", "sources"] as const;
+export const EVIDENCE_KEYS = ["files", "parts", "planSteps", "sources", "pages", "photos"] as const;
 export type EvidenceKey = (typeof EVIDENCE_KEYS)[number];
 export type Evidence = { key: EvidenceKey; count: number };
 
-function cleanEvidence(value: unknown): Evidence | null {
+export function cleanEvidence(value: unknown): Evidence | null {
   if (!value || typeof value !== "object") return null;
   const v = value as Record<string, unknown>;
   if (typeof v.key !== "string" || !(EVIDENCE_KEYS as readonly string[]).includes(v.key)) return null;

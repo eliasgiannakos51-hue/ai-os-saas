@@ -3222,9 +3222,18 @@
         "files": "{count, plural, other {#件のファイル}}",
         "parts": "{count, plural, other {#回に分けて}}",
         "planSteps": "{count, plural, other {#ステップ}}",
-        "sources": "{count, plural, other {#件の情報源}}"
+        "sources": "{count, plural, other {#件の情報源}}",
+        "pages": "{count, plural, other {#ページ}}",
+        "photos": "{count, plural, =0 {写真なし} other {#枚の写真}}"
       },
       "writing": "レポートを作成"
+    },
+    "website": {
+      "preparing": "依頼内容を準備しています",
+      "writing": "ページを書いています",
+      "photos": "写真を配置しています",
+      "checking": "サイトを確認しています",
+      "saving": "保存しています"
     }
   },
   "problem": {

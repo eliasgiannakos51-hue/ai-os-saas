@@ -3222,9 +3222,18 @@
         "files": "{count, plural, other {# 个文件}}",
         "parts": "{count, plural, other {分 # 部分}}",
         "planSteps": "{count, plural, other {# 个步骤}}",
-        "sources": "{count, plural, other {# 个来源}}"
+        "sources": "{count, plural, other {# 个来源}}",
+        "pages": "{count, plural, other {# 个页面}}",
+        "photos": "{count, plural, =0 {没有照片} other {# 张照片}}"
       },
       "writing": "撰写报告"
+    },
+    "website": {
+      "preparing": "正在准备需求说明",
+      "writing": "正在撰写页面",
+      "photos": "正在放置照片",
+      "checking": "正在检查网站",
+      "saving": "正在保存"
     }
   },
   "problem": {

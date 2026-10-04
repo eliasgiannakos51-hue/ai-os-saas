@@ -27,6 +27,11 @@ export type UserWebsite = {
    *  See lib/website-generation-notes.ts. Null when nothing was done and
    *  on every site generated before the column existed. */
   generation_notes?: unknown;
+  /** The generation's phases (lib/websites/website-timeline.ts). Stored
+   *  entries on a raw row; steps only on what api/websites/status returns,
+   *  which is why it stays unknown here. Absent until
+   *  20261008000000_website_timeline.sql is run. */
+  timeline?: unknown;
   status: UserWebsiteStatus;
   error_message: string | null;
   // Superseded by website_reference_images (below) — no longer written by

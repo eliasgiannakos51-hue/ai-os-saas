@@ -54,6 +54,14 @@ import { parsePhotoSource } from "@/lib/website-design-brief";
 import { enforceSeoHead } from "@/lib/seo/head";
 import { enforceImageAltText } from "@/lib/seo/alt-text";
 import type { WebsitePage } from "@/lib/publishing/website-pages";
+import type { Evidence } from "@/lib/jobs/job-timeline";
+import {
+  attachWebsiteEvidence,
+  finishWebsiteTimeline,
+  startWebsiteStep,
+  type WebsiteStep,
+  type WebsiteTimelineEntry,
+} from "@/lib/websites/website-timeline";
 
 export const dynamic = "force-dynamic";
 
@@ -306,6 +314,36 @@ export async function POST(request: Request) {
     const plan = await resolveEffectivePlan(user);
     const costs = new CostAccumulator();
 
+    // THE ACTIVITY TIMELINE — V6.2 2.1, slice 5 (lib/websites/website-timeline.ts).
+    // The five phases this function really goes through, written to
+    // user_websites.timeline as each begins, so the builder's poll can show
+    // them live. Its OWN update, never folded into a status or content
+    // write: until supabase/migrations/20261008000000_website_timeline.sql
+    // is run the column does not exist, PostgREST refuses the write, and
+    // that refusal must cost nothing but the timeline. No money is written:
+    // the cost at each phase start stays here, in memory, and only the
+    // per-mille shares are stored when the generation finishes.
+    let timeline: WebsiteTimelineEntry[] = [];
+    const costAtStepStart: number[] = [];
+    async function writeTimeline(next: WebsiteTimelineEntry[]) {
+      timeline = next;
+      const { error: timelineError } = await supabase.from("user_websites").update({ timeline }).eq("id", websiteId);
+      if (timelineError && !/timeline/i.test(timelineError.message ?? "")) {
+        logApiError("/api/websites/generate/process", timelineError, { stage: "timeline_write", websiteId });
+      }
+    }
+    async function markStep(step: WebsiteStep) {
+      const next = startWebsiteStep(timeline, step, new Date().toISOString());
+      if (next === timeline) return;
+      // One cost mark per entry, so finishWebsiteTimeline's indices line up.
+      costAtStepStart.push(costs.totalUsdCost);
+      await writeTimeline(next);
+    }
+    async function markEvidence(step: WebsiteStep, evidence: Evidence) {
+      await writeTimeline(attachWebsiteEvidence(timeline, step, evidence));
+    }
+    await markStep("preparing");
+
     // Same rate settlement will divide by, so the hold is sized in the
     // same currency as the charge.
     // WHAT THIS BUSINESS SELLS — the difference between a site and a
@@ -473,6 +511,7 @@ export async function POST(request: Request) {
       // It reaches generateWebsiteHtml as its LAST argument and lands
       // between the cached SYSTEM_PROMPT and the per-site form block — see
       // buildGenerateSystemBlocks, where the ordering is the cost.
+      await markStep("writing");
       const memoryBlock = memoryActiveFor({
         surface: "website",
         user,
@@ -499,8 +538,10 @@ export async function POST(request: Request) {
       // see lib/website-image-resolver.ts. A no-op when the model didn't
       // emit any PLACEHOLDER:<slug> images, which is the common case for
       // a description that didn't ask for real photos.
+      await markStep("photos");
       images = await resolveWebsiteImagePlaceholders(htmlContent, { photoSource });
       htmlContent = images.html;
+      await markEvidence("photos", { key: "photos", count: images.used.length });
       // PICTURES THE PAGE ASKED FOR AND DID NOT GET.
       //
       // The resolver removes a placeholder it cannot fill rather than
@@ -533,6 +574,9 @@ export async function POST(request: Request) {
       // numbers, an unattributed photo or an injected script. That is not
       // hypothetical: it is what splitting at the end would have produced.
       const split = splitGeneratedPages(htmlContent);
+      // Home plus every page that survived validation: what was written.
+      await markEvidence("writing", { key: "pages", count: 1 + split.pages.length });
+      await markStep("checking");
       if (split.dropped.length > 0) {
         logApiError(
           "/api/websites/generate/process",
@@ -968,6 +1012,7 @@ export async function POST(request: Request) {
     // bypassCharge — they charge nothing, but their real spend still lands
     // in the cost log, which is the only way the margin report reflects
     // total AI spend rather than only billed spend.
+    await markStep("saving");
     const settlement = await settleReservation({
       userId: user.id,
       reservationId,
@@ -999,6 +1044,9 @@ export async function POST(request: Request) {
     // api/websites/status eventually marked it 'failed' — with the user
     // already charged above and the free regenerate, which is offered only
     // for 'flagged', permanently out of reach. Nothing anywhere said so.
+    // The shares and the end mark, written before the status so a poll that
+    // sees "completed" can already price every step.
+    await writeTimeline(finishWebsiteTimeline(timeline, costAtStepStart, costs.totalUsdCost, new Date().toISOString()));
     const { error: finalStatusError } = await supabase
       .from("user_websites")
       .update({ status: isFlagged ? "flagged" : "completed" })

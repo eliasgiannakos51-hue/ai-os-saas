@@ -4,6 +4,7 @@ import { isGenerationJobStale } from "@/lib/website-generation-limits";
 import { logApiError } from "@/lib/log-error";
 import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
 import type { UserWebsite } from "@/types/user-website";
+import { websiteTimelineForClient } from "@/lib/websites/website-timeline";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +49,20 @@ async function readUsageForWebsite(
   } catch {
     return null;
   }
+}
+
+/**
+ * The row as the builder reads it, with user_websites.timeline turned into
+ * steps (lib/websites/website-timeline.ts): durations always, credits once
+ * the generation is finished and its charge is known. The stored column
+ * holds per-mille shares, never money, but the screen wants credits, so it
+ * is never handed over raw.
+ */
+function withClientTimeline<T extends { status?: unknown; timeline?: unknown }>(
+  row: T,
+  creditsCharged: number | null
+): T & { timeline: ReturnType<typeof websiteTimelineForClient> } {
+  return { ...row, timeline: websiteTimelineForClient(row.timeline, { status: String(row.status ?? ""), creditsCharged }) };
 }
 
 export async function GET(request: Request) {
@@ -141,7 +156,7 @@ export async function GET(request: Request) {
           // timeout (it defaults to 800s, a Pro/Fluid figure).
           hint: "if this recurs, verify MAX_FUNCTION_DURATION matches the platform's function timeout",
         });
-        return NextResponse.json({ ok: true, record: failedRecord });
+        return NextResponse.json({ ok: true, record: withClientTimeline(failedRecord, null) });
       }
       // failedRecord === null means the worker won the race and already
       // moved the row to a terminal status between our SELECT and this
@@ -149,7 +164,7 @@ export async function GET(request: Request) {
       // of trusting it.
       const { data: freshRecord } = await supabase.from("user_websites").select("*").eq("id", id).maybeSingle();
       if (freshRecord) {
-        return NextResponse.json({ ok: true, record: freshRecord });
+        return NextResponse.json({ ok: true, record: withClientTimeline(freshRecord, null) });
       }
     }
 
@@ -161,7 +176,7 @@ export async function GET(request: Request) {
       record.status === "completed" || record.status === "flagged"
         ? await readUsageForWebsite(supabase, user.id, String(record.id))
         : null;
-    return NextResponse.json({ ok: true, record, usage });
+    return NextResponse.json({ ok: true, record: withClientTimeline(record, usage?.creditsCharged ?? null), usage });
   } catch (err) {
     logApiError("/api/websites/status", err);
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });

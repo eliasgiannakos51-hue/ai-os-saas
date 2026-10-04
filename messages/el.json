@@ -3222,9 +3222,18 @@
         "files": "{count, plural, one {# αρχείο} other {# αρχεία}}",
         "parts": "{count, plural, one {σε # μέρος} other {σε # μέρη}}",
         "planSteps": "{count, plural, one {# βήμα} other {# βήματα}}",
-        "sources": "{count, plural, one {# πηγή} other {# πηγές}}"
+        "sources": "{count, plural, one {# πηγή} other {# πηγές}}",
+        "pages": "{count, plural, one {# σελίδα} other {# σελίδες}}",
+        "photos": "{count, plural, =0 {καμία φωτογραφία} one {# φωτογραφία} other {# φωτογραφίες}}"
       },
       "writing": "Γράφω την αναφορά"
+    },
+    "website": {
+      "preparing": "Προετοιμάζω την περιγραφή",
+      "writing": "Γράφω τις σελίδες",
+      "photos": "Βάζω φωτογραφίες",
+      "checking": "Ελέγχω τον ιστότοπο",
+      "saving": "Αποθηκεύω"
     }
   },
   "problem": {

@@ -3222,9 +3222,18 @@
         "files": "{count, plural, zero {لا ملفات} one {ملف واحد} two {ملفان} few {# ملفات} many {# ملفًا} other {# ملف}}",
         "parts": "{count, plural, zero {بلا أجزاء} one {في جزء واحد} two {في جزأين} few {في # أجزاء} many {في # جزءًا} other {في # جزء}}",
         "planSteps": "{count, plural, zero {لا خطوات} one {خطوة واحدة} two {خطوتان} few {# خطوات} many {# خطوة} other {# خطوة}}",
-        "sources": "{count, plural, zero {لا مصادر} one {مصدر واحد} two {مصدران} few {# مصادر} many {# مصدرًا} other {# مصدر}}"
+        "sources": "{count, plural, zero {لا مصادر} one {مصدر واحد} two {مصدران} few {# مصادر} many {# مصدرًا} other {# مصدر}}",
+        "pages": "{count, plural, zero {لا صفحات} one {صفحة واحدة} two {صفحتان} few {# صفحات} many {# صفحة} other {# صفحة}}",
+        "photos": "{count, plural, zero {لا صور} one {صورة واحدة} two {صورتان} few {# صور} many {# صورة} other {# صورة}}"
       },
       "writing": "كتابة التقرير"
+    },
+    "website": {
+      "preparing": "أجهّز الوصف",
+      "writing": "أكتب الصفحات",
+      "photos": "أضع الصور",
+      "checking": "أتحقق من الموقع",
+      "saving": "أحفظ"
     }
   },
   "problem": {

@@ -58,6 +58,9 @@ import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
 import { DesignControls } from "@/components/website-builder/design-controls";
+import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
+import type { ClientStep } from "@/lib/jobs/job-timeline";
+import { clientWebsiteTimeline, isWebsiteStep, type WebsiteStep } from "@/lib/websites/website-timeline";
 import {
   applyDesignBrief,
   DEFAULT_DESIGN_CHOICES,
@@ -114,8 +117,21 @@ const WEBSITE_STATUS_TONES: Record<string, EntityCardStatusTone> = {
 // that can legitimately take minutes.
 const POLL_INTERVAL_MS = 2500;
 
+// What each generation phase is called on screen (V6.2 2.1, slice 5 —
+// lib/websites/website-timeline.ts). Named rather than built from the
+// step, so every message this can render is a literal.
+const WEBSITE_STEP_MESSAGE = {
+  preparing: "website.preparing",
+  writing: "website.writing",
+  photos: "website.photos",
+  checking: "website.checking",
+  saving: "website.saving",
+} as const satisfies Record<WebsiteStep, string>;
+
 // Rotating "still working on it" messages shown while a website is
-// pending/processing — see the previewIsGenerating effect below.
+// pending/processing — see the previewIsGenerating effect below. Only
+// until the worker has reported a real phase: on a database without
+// user_websites.timeline it never does, and these are all there is.
 const PROGRESS_MESSAGE_KEYS = ["progressStep1", "progressStep2", "progressStep3", "progressStep4"] as const;
 const PROGRESS_MESSAGE_INTERVAL_MS = 17000;
 
@@ -233,6 +249,11 @@ export function WebsiteBuilderWorkspace({
   const { addToast } = useToast();
 
   const [websites, setWebsites] = useState<UserWebsite[]>(initialWebsites);
+  // Each site's phases as api/websites/status returns them, by id. Kept
+  // apart from the rows because every other route hands back the stored
+  // entries (clientWebsiteTimeline), and a row replaced by an edit must
+  // not take its timeline with it.
+  const [timelines, setTimelines] = useState<Record<string, ClientStep[]>>({});
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   // The description field only exists once showForm is true, and React has
@@ -372,6 +393,7 @@ export function WebsiteBuilderWorkspace({
 
       if (!mountedRef.current) return;
       setWebsites((prev) => prev.map((w) => (w.id === id ? record : w)));
+      setTimelines((prev) => ({ ...prev, [id]: clientWebsiteTimeline(record.timeline) }));
 
       if (record.status === "pending" || record.status === "processing") {
         setTimeout(tick, POLL_INTERVAL_MS);
@@ -1158,6 +1180,35 @@ export function WebsiteBuilderWorkspace({
   // affordance only, same spirit as other AI tools' rotating "thinking"
   // messages.
   const previewIsGenerating = previewWebsite?.status === "pending" || previewWebsite?.status === "processing";
+  const previewTimeline = previewWebsite ? timelines[previewWebsite.id] : undefined;
+  // The open step is the last one, and it has no end yet.
+  const liveStep = previewIsGenerating && previewTimeline?.length ? previewTimeline[previewTimeline.length - 1] : null;
+  const liveStepText =
+    liveStep && liveStep.seconds === null && isWebsiteStep(liveStep.label) ? tSteps(WEBSITE_STEP_MESSAGE[liveStep.label]) : null;
+
+  // A finished site opened from the list has only its stored entries (the
+  // page selects the raw row), so its steps and their credits are asked
+  // for once, from the same poll a generation uses. Failed sites have
+  // none to show (websiteTimelineForClient).
+  const previewSiteId = previewWebsite?.id ?? null;
+  const previewFinished = previewWebsite?.status === "completed" || previewWebsite?.status === "flagged";
+  const previewTimelineKnown = previewTimeline !== undefined;
+  useEffect(() => {
+    if (!previewSiteId || !previewFinished || previewTimelineKnown) return;
+    const id = previewSiteId;
+    let cancelled = false;
+    fetch(`/api/websites/status?id=${id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { ok?: boolean; record?: UserWebsite } | null) => {
+        if (cancelled || !data?.ok || !data.record) return;
+        setTimelines((prev) => ({ ...prev, [id]: clientWebsiteTimeline(data.record?.timeline) }));
+      })
+      // Nothing to show is what an unanswered request already shows.
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [previewSiteId, previewFinished, previewTimelineKnown]);
   const [progressMessageIndex, setProgressMessageIndex] = useState(0);
   useEffect(() => {
     if (!previewIsGenerating) {
@@ -1418,8 +1469,8 @@ export function WebsiteBuilderWorkspace({
                   <ThinkingIndicator className="scale-150" />
                   <p className="text-sm font-medium text-foreground">{t("generatingTitle")}</p>
                   <p className="max-w-md text-xs text-muted">{t("generatingBody")}</p>
-                  <p className="text-xs text-orange-400/80" aria-live="polite">
-                    {t(PROGRESS_MESSAGE_KEYS[progressMessageIndex])}
+                  <p className="text-xs text-orange-400/80" aria-live="polite" data-testid="website-live-step">
+                    {liveStepText ?? t(PROGRESS_MESSAGE_KEYS[progressMessageIndex])}
                   </p>
                   {/* THE STOP BUTTON — V4.6. The generation runs in a request
                       this tab is not attached to, so this sets a flag the
@@ -1590,6 +1641,16 @@ export function WebsiteBuilderWorkspace({
                   <p className="text-sm font-medium text-red-300">{t("previewIncompleteTitle")}</p>
                   <p className="max-w-md text-xs text-red-300/80">{t("previewIncompleteBody")}</p>
                 </div>
+              )}
+              {/* What the generation did, phase by phase — live while it
+                  runs, and once it is charged, the credits each phase
+                  cost. Not under an old version: it describes the latest. */}
+              {!viewingVersion && (
+                <AiJobTimeline
+                  job={{ kind: "website", timeline: previewTimeline }}
+                  labelFor={(label) => (isWebsiteStep(label) ? tSteps(WEBSITE_STEP_MESSAGE[label]) : null)}
+                  className="mt-3"
+                />
               )}
             </>
           )}

@@ -3222,9 +3222,18 @@
         "files": "{count, plural, one {# file} other {# files}}",
         "parts": "{count, plural, one {in # part} other {in # parts}}",
         "planSteps": "{count, plural, one {# step} other {# steps}}",
-        "sources": "{count, plural, one {# source} other {# sources}}"
+        "sources": "{count, plural, one {# source} other {# sources}}",
+        "pages": "{count, plural, one {# page} other {# pages}}",
+        "photos": "{count, plural, =0 {no photos} one {# photo} other {# photos}}"
       },
       "writing": "Writing the report"
+    },
+    "website": {
+      "preparing": "Preparing the brief",
+      "writing": "Writing the pages",
+      "photos": "Placing photos",
+      "checking": "Checking the site",
+      "saving": "Saving"
     }
   },
   "problem": {

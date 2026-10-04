@@ -2,7 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { stepLabelKey } from "@/lib/jobs/step-labels";
-import type { ClientStep } from "@/lib/jobs/job-timeline";
+import type { ClientStep, EvidenceKey } from "@/lib/jobs/job-timeline";
 
 // What a step found, by key — the worker stores a key and a number, never
 // a sentence (lib/jobs/job-timeline.ts EVIDENCE_KEYS). Named rather than
@@ -12,7 +12,9 @@ const EVIDENCE_MESSAGE = {
   parts: "timeline.evidence.parts",
   planSteps: "timeline.evidence.planSteps",
   sources: "timeline.evidence.sources",
-} as const;
+  pages: "timeline.evidence.pages",
+  photos: "timeline.evidence.photos",
+} as const satisfies Record<EvidenceKey, string>;
 
 /**
  * WHAT A JOB DID, STEP BY STEP — V6.2 2.1 (lib/jobs/job-timeline.ts).

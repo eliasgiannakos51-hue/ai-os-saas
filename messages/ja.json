@@ -288,8 +288,18 @@
     "closeMenu": "メニューを閉じる",
     "rail": {
       "new": "新規",
-      "recent": "最近",
-      "allTools": "すべてのツール"
+      "chat": "チャット",
+      "coding": "コーディング",
+      "allTools": "すべてのツール",
+      "recentTools": "最近使ったツール",
+      "settings": "設定",
+      "pin": "{tool}をピン留め",
+      "unpin": "{tool}のピン留めを外す",
+      "remove": "{tool}を最近使ったツールから外す",
+      "collapse": "サイドバーを折りたたむ",
+      "expand": "サイドバーを広げる",
+      "label": "メインメニュー",
+      "saveFailed": "変更を保存できませんでした。もう一度お試しください。"
     }
   },
   "landing": {

@@ -73,6 +73,12 @@ const LOCALE_ALLOWED = new Set([
   // "Conectar", business "Negocio", engineering "Ingeniería", verify
   // "Verificar" — the block was translated, this word coincides.
   "es:sidebar.groups.personal",
+  // "Chat" is the word for it in German, Spanish and Italian: der Chat,
+  // el chat, la chat — what those products' own menus say. French has
+  // "Discussion" and Portuguese "Conversa", and they are used.
+  "de:sidebar.rail.chat",
+  "es:sidebar.rail.chat",
+  "it:sidebar.rail.chat",
   // REDESIGN PHASE 4, the four step flows. Three step names land on the
   // same letters as English and the neighbours in the same block prove
   // the block was translated rather than copied.

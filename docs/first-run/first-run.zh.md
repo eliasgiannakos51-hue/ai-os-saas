@@ -1,12 +1,12 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **716 strings**. The whole product is 3449, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **656 strings**. The whole product is 3459, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 459 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 30 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 418 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (49)
+## Tier 1 — THE SENTENCES — read these (30)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -126,120 +126,6 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 这些条目是演示数据——一家小设计工作室最近三个月的记录，不是你的。
 
-**`sidebar.hints.aiMemory`**
-
-> EN — What the chat has kept about you, and how to remove it.
-
-对话记住了你的哪些事，以及如何删除。
-
-**`sidebar.hints.apps`**
-
-> EN — Keep track of apps you are planning or have already shipped. It does not build them.
-
-记录你正在筹划或已经上线的应用。它不会构建应用。
-
-**`sidebar.hints.coding`**
-
-> EN — Write, explain, fix, convert and test snippets of code. It does not run code or open a repository.
-
-编写、解释、修复、转换和测试代码片段。它不运行代码，也不访问代码仓库。
-
-**`sidebar.hints.create`**
-
-> EN — Describe what you want in one sentence; it works out the rest.
-
-用一句话描述你要什么，其余的它自己判断。
-
-**`sidebar.hints.deepResearch`**
-
-> EN — Give it a topic and it searches, cross-checks and writes a sourced report
-
-给一个主题，它会搜索、交叉核对并写出带来源的报告
-
-**`sidebar.hints.files`**
-
-> EN — Upload PDFs, Word and Excel files and ask the AI questions about them
-
-上传 PDF、Word 和 Excel 文件，然后向 AI 提问
-
-**`sidebar.hints.images`**
-
-> EN — Keep track of images you are planning or have already made. It does not generate them.
-
-记录你正在筹划或已经做好的图片。它不会生成图片。
-
-**`sidebar.hints.integrations`**
-
-> EN — Connect Gmail, Drive and Slack so the AI can work with your real data
-
-连接 Gmail、Drive 与 Slack，让 AI 处理你真实的数据
-
-**`sidebar.hints.library`**
-
-> EN — Starred, recent and search — all your own entries in one place
-
-收藏、最近和搜索 —— 你的东西都在这里
-
-**`sidebar.hints.marketplace`**
-
-> EN — Share an agent's shape as a template, and start from one someone else shared.
-
-把一个智能体的结构作为模板分享，也可以从别人分享的模板开始。
-
-**`sidebar.hints.meetings`**
-
-> EN — Turn a recording into a transcript, a summary, and actions you choose from.
-
-把录音变成文字记录、摘要，以及由你挑选的行动。
-
-**`sidebar.hints.posts`**
-
-> EN — Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.
-
-说一次，就能得到每个平台各一条、长度和语气各自贴合的帖子。它不发布任何内容——由你复制并发布。
-
-**`sidebar.hints.predictions`**
-
-> EN — Patterns found in your own rows, each with the number of entries it rests on and a link to them.
-
-在你自己的记录里发现的规律，每条都标明依据的条数，并可点回原始记录。
-
-**`sidebar.hints.presentations`**
-
-> EN — Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.
-
-描述一份演示并获得幻灯片——PowerPoint 或 PDF，配图来自 Unsplash 或你自己的照片。它不绘制图表。
-
-**`sidebar.hints.projects`**
-
-> EN — A folder with a goal. What you put in is what is in it — nothing is dragged in with it.
-
-有目标的文件夹。你放什么就有什么——不会自己进来。
-
-**`sidebar.hints.published`**
-
-> EN — Every site you have live on the web, with its traffic and version history
-
-你所有已上线的网站，含访问量与版本历史
-
-**`sidebar.hints.records`**
-
-> EN — Every log in one place — filter by type instead of hunting the menu
-
-所有记录集中在一处——按类型筛选，不必在菜单里找
-
-**`sidebar.hints.videos`**
-
-> EN — Keep track of videos you are planning or have already made. It does not generate them.
-
-记录你正在筹划或已经做好的视频。它不会生成视频。
-
-**`sidebar.hints.voice`**
-
-> EN — Have text read out loud, or speak and have it written down. Minutes are metered and the price per minute is on the page.
-
-把文字读出来，或者说话并转成文字。按分钟计量，每分钟价格显示在页面上。
-
 ### first result
 
 **`dashboard.overview.healthScore.suggestion.recency`**
@@ -314,7 +200,7 @@ Ionexa 用它来挑选下一个建议的计划步骤——状态低时给轻松�
 
 免费——不生成任何内容，一键即可移除
 
-## Tier 2 — The labels — skim these (459)
+## Tier 2 — The labels — skim these (418)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1550,312 +1436,6 @@ AI 编程
 
 关闭菜单
 
-**`sidebar.groups.ask`**
-
-> EN — Ask
-
-提问
-
-**`sidebar.groups.business`**
-
-> EN — Business
-
-业务
-
-**`sidebar.groups.connect`**
-
-> EN — Connect
-
-连接
-
-**`sidebar.groups.engineering`**
-
-> EN — Engineering
-
-工程
-
-**`sidebar.groups.make`**
-
-> EN — Make
-
-创建
-
-**`sidebar.groups.organise`**
-
-> EN — Organise
-
-整理
-
-**`sidebar.groups.personal`**
-
-> EN — Personal
-
-个人
-
-**`sidebar.groups.run`**
-
-> EN — Run
-
-运行
-
-**`sidebar.groups.see`**
-
-> EN — See
-
-查看
-
-**`sidebar.groups.settings`**
-
-> EN — Settings
-
-设置
-
-**`sidebar.groups.verify`**
-
-> EN — Verify
-
-验证
-
-**`sidebar.hints.affiliate`**
-
-> EN — Your referral link, what you've earned, and how you get paid.
-
-你的推广链接、已赚金额，以及如何收款。
-
-**`sidebar.hints.agents`**
-
-> EN — Plan the agents you want. A tracker, not a runtime.
-
-规划你想要的智能体。这是记录，不是运行时。
-
-**`sidebar.hints.analytics`**
-
-> EN — Metrics you're watching.
-
-你在关注的指标。
-
-**`sidebar.hints.automation`**
-
-> EN — Things that run on a schedule.
-
-按计划自动运行的事情。
-
-**`sidebar.hints.businessHealth`**
-
-> EN — MRR, margin, churn and runway. Owner only.
-
-MRR、毛利、流失与现金。仅限所有者。
-
-**`sidebar.hints.campaigns`**
-
-> EN — Plan campaigns — channel, budget, status.
-
-规划营销活动——渠道、预算、状态。
-
-**`sidebar.hints.chat`**
-
-> EN — Ask anything — not tied to any module.
-
-什么都可以问——不绑定任何模块。
-
-**`sidebar.hints.competitors`**
-
-> EN — Track rival products, pricing and positioning.
-
-跟踪竞品、定价与定位。
-
-**`sidebar.hints.content`**
-
-> EN — Content ideas, captions and threads.
-
-内容创意、文案和推文串。
-
-**`sidebar.hints.costs`**
-
-> EN — What every AI call has cost, per model and per day.
-
-每次 AI 调用的花费，按模型和日期列出。
-
-**`sidebar.hints.dataAnalysis`**
-
-> EN — Analysis requests and what you found.
-
-分析请求以及你的发现。
-
-**`sidebar.hints.decisions`**
-
-> EN — Weigh the options before you decide.
-
-决定之前先权衡选项。
-
-**`sidebar.hints.documents`**
-
-> EN — Freeform notes and documents you write yourself.
-
-你自己撰写的自由笔记和文档。
-
-**`sidebar.hints.favorites`**
-
-> EN — Everything you've starred.
-
-你收藏的一切。
-
-**`sidebar.hints.feedback`**
-
-> EN — What users told you, in one place.
-
-用户告诉你的话，集中在一处。
-
-**`sidebar.hints.finance`**
-
-> EN — Log income and expenses.
-
-记录收入和支出。
-
-**`sidebar.hints.formSubmissions`**
-
-> EN — Everything visitors sent through a form on your published sites
-
-访客通过已发布网站上的表单提交的全部内容
-
-**`sidebar.hints.help`**
-
-> EN — Answers to the questions people ask most — no credits used.
-
-最常见问题的答案，不消耗额度。
-
-**`sidebar.hints.home`**
-
-> EN — Your dashboard — activity, stats and quick actions.
-
-你的仪表板——活动、统计和快捷操作。
-
-**`sidebar.hints.ideas`**
-
-> EN — Capture new ideas before you forget them.
-
-在忘记之前记下新想法。
-
-**`sidebar.hints.learning`**
-
-> EN — Track what you're studying.
-
-记录你正在学习的内容。
-
-**`sidebar.hints.memory`**
-
-> EN — Search across everything you have saved.
-
-搜索你保存过的一切。
-
-**`sidebar.hints.mine`**
-
-> EN — Everything you have made, newest first — with a starred-only tab
-
-你创建的全部内容，最新在前，并有仅收藏标签页
-
-**`sidebar.hints.missionControl`**
-
-> EN — Set a goal, AI breaks it into steps.
-
-设定目标，AI 拆成步骤。
-
-**`sidebar.hints.newEntry`**
-
-> EN — Write anything down — it files itself
-
-随便写点什么 —— 它会自己归位
-
-**`sidebar.hints.products`**
-
-> EN — Product plans — pricing, roadmap, launch.
-
-产品规划——定价、路线图、发布。
-
-**`sidebar.hints.productWorkflow`**
-
-> EN — Your products, patterns and mentor in one view.
-
-你的产品、模式和导师，一个视图。
-
-**`sidebar.hints.reflection`**
-
-> EN — A weekly summary of your progress.
-
-每周进度小结。
-
-**`sidebar.hints.research`**
-
-> EN — Save research, sources and summaries.
-
-保存研究、来源和摘要。
-
-**`sidebar.hints.routing`**
-
-> EN — Which model each kind of request is sent to.
-
-每类请求会发送到哪个模型。
-
-**`sidebar.hints.sales`**
-
-> EN — Leads, outreach and next steps.
-
-线索、触达和后续动作。
-
-**`sidebar.hints.settings`**
-
-> EN — Account, billing, language and preferences.
-
-账户、账单、语言和偏好设置。
-
-**`sidebar.hints.systemHealth`**
-
-> EN — Whether the database, the queues and the providers are answering.
-
-数据库、队列和服务商是否在响应。
-
-**`sidebar.hints.team`**
-
-> EN — Invite people to your workspace.
-
-邀请他人加入你的工作区。
-
-**`sidebar.hints.timeline`**
-
-> EN — Everything you've done, in order.
-
-你做过的一切，按时间排列。
-
-**`sidebar.hints.trading`**
-
-> EN — Trade log — symbol, direction, result, P&L.
-
-交易日志——品种、方向、结果、盈亏。
-
-**`sidebar.hints.tradingJournal`**
-
-> EN — Your trades, with the reasoning you wrote at the time.
-
-你的交易记录，以及当时写下的理由。
-
-**`sidebar.hints.tradingWorkflow`**
-
-> EN — Your trades, patterns and mentor in one view.
-
-你的交易、模式和导师，一个视图。
-
-**`sidebar.hints.websiteBuilder`**
-
-> EN — Describe a site and AI generates the real page.
-
-描述一个网站，AI 生成真实页面。
-
-**`sidebar.hints.websites`**
-
-> EN — Track sites you own — name, URL, status. No generation.
-
-记录你拥有的网站——名称、网址、状态。不生成。
-
 **`sidebar.items.affiliate`**
 
 > EN — Affiliate
@@ -2540,17 +2120,77 @@ DevOps
 
 全部工具
 
+**`sidebar.rail.chat`**
+
+> EN — Chat
+
+对话
+
+**`sidebar.rail.coding`**
+
+> EN — Coding
+
+编程
+
+**`sidebar.rail.collapse`**
+
+> EN — Collapse sidebar
+
+收起侧边栏
+
+**`sidebar.rail.expand`**
+
+> EN — Expand sidebar
+
+展开侧边栏
+
+**`sidebar.rail.label`**
+
+> EN — Main
+
+主菜单
+
 **`sidebar.rail.new`**
 
 > EN — New
 
 新建
 
-**`sidebar.rail.recent`**
+**`sidebar.rail.pin`**
 
-> EN — Recent
+> EN — Pin {tool}
 
-最近
+固定 {tool}
+
+**`sidebar.rail.recentTools`**
+
+> EN — Recent tools
+
+最近使用的工具
+
+**`sidebar.rail.remove`**
+
+> EN — Remove {tool} from Recent tools
+
+从最近使用中移除 {tool}
+
+**`sidebar.rail.saveFailed`**
+
+> EN — Could not save that change. Try again.
+
+无法保存此更改，请重试。
+
+**`sidebar.rail.settings`**
+
+> EN — Settings
+
+设置
+
+**`sidebar.rail.unpin`**
+
+> EN — Unpin {tool}
+
+取消固定 {tool}
 
 ### first result
 

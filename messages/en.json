@@ -288,8 +288,18 @@
     "closeMenu": "Close menu",
     "rail": {
       "new": "New",
-      "recent": "Recent",
-      "allTools": "All tools"
+      "chat": "Chat",
+      "coding": "Coding",
+      "allTools": "All tools",
+      "recentTools": "Recent tools",
+      "settings": "Settings",
+      "pin": "Pin {tool}",
+      "unpin": "Unpin {tool}",
+      "remove": "Remove {tool} from Recent tools",
+      "collapse": "Collapse sidebar",
+      "expand": "Expand sidebar",
+      "label": "Main",
+      "saveFailed": "Could not save that change. Try again."
     }
   },
   "landing": {

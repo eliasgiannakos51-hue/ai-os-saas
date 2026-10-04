@@ -76,8 +76,9 @@ check("no Tailwind palette colour anywhere in src", paletteHits.length === 0, pa
 // THE STYLESHEET'S @apply TOO. A palette class there is not "no colour",
 // it is a failed build — `next build` stopped on one on 2026-10-04 that
 // this gate had not looked for.
-const applyHits = [...CSS.matchAll(/@apply[^;]*;/g)].flatMap((m) => [...m[0].matchAll(PALETTE)].map((x) => x[0]));
-check(`the stylesheet's @apply lines are read (${[...CSS.matchAll(/@apply/g)].length})`, [...CSS.matchAll(/@apply/g)].length >= 3);
+const applyStatements = [...CSS.matchAll(/@apply[^;]*;/g)];
+check(`the stylesheet's @apply lines are read (${applyStatements.length})`, applyStatements.length >= 3);
+const applyHits = applyStatements.flatMap((m) => [...m[0].matchAll(PALETTE)].map((x) => x[0]));
 check("no Tailwind palette colour in an @apply", applyHits.length === 0, applyHits.join(", "));
 
 // ---------------------------------------------------------------------
@@ -87,7 +88,6 @@ console.log("\n== 2. no colour written straight into a component ==");
 // Checked BOTH ways: the file must still carry a literal, or the entry is
 // stale and goes.
 const LITERAL_ALLOWED = {
-  "src/components/logo.tsx": "the logo is the mark itself: its two inks are the signal and the text colour, with the variables as the first choice and these as fallbacks",
   "src/components/auth/social-auth-buttons.tsx": "a third party's sign-in mark, drawn in the colours its owner requires",
   "src/components/website-builder/design-controls.tsx": "the colour picker's starting value for the USER'S website palette — their content, not the app",
   "src/app/opengraph-image.tsx": "rendered to a PNG at the edge, where there is no stylesheet and no variable",
@@ -134,7 +134,7 @@ const bareVars = UI_FILES.flatMap((f) => [...CODE.get(f).matchAll(BARE)].map((m)
 check("no channel variable is used bare, outside rgb()", bareVars.length === 0, bareVars.slice(0, 6).join("\n        "));
 
 console.log("\n== 3. the signal colour: the globe and the logo, nowhere else ==");
-const SIGNAL_FILES = new Set(["src/components/logo.tsx", "src/components/ui/globe-mark.tsx", "src/lib/brand/globe.ts", "src/lib/brand/globe-svg.ts"]);
+const SIGNAL_FILES = new Set(["src/components/logo.tsx", "src/components/ui/globe-mark.tsx", "src/components/brand/earth.tsx", "src/lib/brand/globe.ts", "src/lib/brand/globe-svg.ts", "src/lib/brand/earth.ts"]);
 const SIGNAL = /f2a65a|--signal\b|--globe-ink\b|--logo-accent\b|(?<![\w-])(?:[a-z0-9-]+:)*(?:bg|text|border|ring|fill|stroke|outline|decoration|accent|caret|from|to|via)-signal(?![\w-])/i;
 const signalHits = [...CODE].filter(([f, code]) => !SIGNAL_FILES.has(f) && SIGNAL.test(code)).map(([f]) => f);
 check("no other source file names the signal colour", signalHits.length === 0, signalHits.join(", "));
@@ -144,7 +144,7 @@ check(`the stylesheet parses into rules (${cssRules.length})`, cssRules.length >
 const signalRules = cssRules.filter((r) => SIGNAL.test(r.body)).map((r) => r.sel);
 check(
   "in globals.css it is used only by :root and the globe",
-  signalRules.length > 0 && signalRules.every((sel) => sel === ":root" || /^\.ionexa-globe\b/.test(sel)),
+  signalRules.length > 0 && signalRules.every((sel) => sel === ":root" || /^\.ionexa-(?:globe|earth)\b/.test(sel)),
   signalRules.join(" | ")
 );
 check("the globe takes its colour from it", cssRules.some((r) => r.sel === ".ionexa-globe" && /color:\s*var\(--globe-ink\)/.test(r.body)));

@@ -288,8 +288,18 @@
     "closeMenu": "Menü schließen",
     "rail": {
       "new": "Neu",
-      "recent": "Zuletzt",
-      "allTools": "Alle Werkzeuge"
+      "chat": "Chat",
+      "coding": "Code",
+      "allTools": "Alle Werkzeuge",
+      "recentTools": "Zuletzt genutzt",
+      "settings": "Einstellungen",
+      "pin": "{tool} anheften",
+      "unpin": "{tool} lösen",
+      "remove": "{tool} aus „Zuletzt genutzt“ entfernen",
+      "collapse": "Seitenleiste einklappen",
+      "expand": "Seitenleiste ausklappen",
+      "label": "Hauptmenü",
+      "saveFailed": "Die Änderung wurde nicht gespeichert. Bitte erneut versuchen."
     }
   },
   "landing": {

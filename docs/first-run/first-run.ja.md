@@ -1,12 +1,12 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **716 strings**. The whole product is 3449, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **656 strings**. The whole product is 3459, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 459 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 30 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 418 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (49)
+## Tier 1 — THE SENTENCES — read these (30)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -126,120 +126,6 @@ CSV またはタブ区切り、最大 {max}。保存する前に読み取り結�
 
 これらはデモの記録です。小さなデザイン事務所の 3 か月分で、あなたのものではありません。
 
-**`sidebar.hints.aiMemory`**
-
-> EN — What the chat has kept about you, and how to remove it.
-
-チャットがあなたについて保持している内容と、その消し方。
-
-**`sidebar.hints.apps`**
-
-> EN — Keep track of apps you are planning or have already shipped. It does not build them.
-
-作成予定または公開済みのアプリを記録します。アプリは作成しません。
-
-**`sidebar.hints.coding`**
-
-> EN — Write, explain, fix, convert and test snippets of code. It does not run code or open a repository.
-
-コードの断片を書く・説明する・修正する・変換する・テストする。コードの実行やリポジトリの参照はしません。
-
-**`sidebar.hints.create`**
-
-> EN — Describe what you want in one sentence; it works out the rest.
-
-やりたいことを一文で。あとは自動で判断します。
-
-**`sidebar.hints.deepResearch`**
-
-> EN — Give it a topic and it searches, cross-checks and writes a sourced report
-
-トピックを渡すと検索・照合して出典付きのレポートを書きます
-
-**`sidebar.hints.files`**
-
-> EN — Upload PDFs, Word and Excel files and ask the AI questions about them
-
-PDF・Word・Excel をアップロードして、AI に内容を質問できます
-
-**`sidebar.hints.images`**
-
-> EN — Keep track of images you are planning or have already made. It does not generate them.
-
-作成予定または作成済みの画像を記録します。画像は生成しません。
-
-**`sidebar.hints.integrations`**
-
-> EN — Connect Gmail, Drive and Slack so the AI can work with your real data
-
-Gmail・Drive・Slack を接続して、AI が実際のデータを扱えるようにします
-
-**`sidebar.hints.library`**
-
-> EN — Starred, recent and search — all your own entries in one place
-
-お気に入り・最近・検索 — 自分のものを一か所に
-
-**`sidebar.hints.marketplace`**
-
-> EN — Share an agent's shape as a template, and start from one someone else shared.
-
-エージェントの構成をテンプレートとして共有し、誰かが共有したものから始められます。
-
-**`sidebar.hints.meetings`**
-
-> EN — Turn a recording into a transcript, a summary, and actions you choose from.
-
-録音を文字起こし・要約・自分で選ぶアクションに変えます。
-
-**`sidebar.hints.posts`**
-
-> EN — Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.
-
-一度書けば、プラットフォームごとにその長さとトーンの投稿文ができます。何も投稿はしません。コピーして、あなたが投稿します。
-
-**`sidebar.hints.predictions`**
-
-> EN — Patterns found in your own rows, each with the number of entries it rests on and a link to them.
-
-あなた自身の記録から見つかった傾向。根拠となった件数と、その記録へのリンクが付きます。
-
-**`sidebar.hints.presentations`**
-
-> EN — Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.
-
-プレゼンの内容を説明するとスライドができます。PowerPoint か PDF で、写真は Unsplash か自分のものから。グラフは描きません。
-
-**`sidebar.hints.projects`**
-
-> EN — A folder with a goal. What you put in is what is in it — nothing is dragged in with it.
-
-目標のあるフォルダー。入れたものだけが入っています。
-
-**`sidebar.hints.published`**
-
-> EN — Every site you have live on the web, with its traffic and version history
-
-公開中のすべてのサイトと、その閲覧数・バージョン履歴
-
-**`sidebar.hints.records`**
-
-> EN — Every log in one place — filter by type instead of hunting the menu
-
-すべての記録を一か所に。メニューを探さず種類で絞り込めます
-
-**`sidebar.hints.videos`**
-
-> EN — Keep track of videos you are planning or have already made. It does not generate them.
-
-作成予定または作成済みの動画を記録します。動画は生成しません。
-
-**`sidebar.hints.voice`**
-
-> EN — Have text read out loud, or speak and have it written down. Minutes are metered and the price per minute is on the page.
-
-文章を読み上げさせる、または話した内容を書き起こす。分単位で計測され、1分あたりの料金はページに表示されます。
-
 ### first result
 
 **`dashboard.overview.healthScore.suggestion.recency`**
@@ -314,7 +200,7 @@ Ionexa はこれをもとに次に提案するプランのステップを選び�
 
 無料。何も生成されず、ワンクリックで削除できます
 
-## Tier 2 — The labels — skim these (459)
+## Tier 2 — The labels — skim these (418)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1550,312 +1436,6 @@ Gmail や Drive を接続
 
 メニューを閉じる
 
-**`sidebar.groups.ask`**
-
-> EN — Ask
-
-きく
-
-**`sidebar.groups.business`**
-
-> EN — Business
-
-ビジネス
-
-**`sidebar.groups.connect`**
-
-> EN — Connect
-
-接続
-
-**`sidebar.groups.engineering`**
-
-> EN — Engineering
-
-エンジニアリング
-
-**`sidebar.groups.make`**
-
-> EN — Make
-
-つくる
-
-**`sidebar.groups.organise`**
-
-> EN — Organise
-
-ととのえる
-
-**`sidebar.groups.personal`**
-
-> EN — Personal
-
-パーソナル
-
-**`sidebar.groups.run`**
-
-> EN — Run
-
-うごかす
-
-**`sidebar.groups.see`**
-
-> EN — See
-
-見る
-
-**`sidebar.groups.settings`**
-
-> EN — Settings
-
-設定
-
-**`sidebar.groups.verify`**
-
-> EN — Verify
-
-検証
-
-**`sidebar.hints.affiliate`**
-
-> EN — Your referral link, what you've earned, and how you get paid.
-
-紹介リンク、これまでの報酬、受け取り方法。
-
-**`sidebar.hints.agents`**
-
-> EN — Plan the agents you want. A tracker, not a runtime.
-
-欲しいエージェントを計画。記録であり実行環境ではありません。
-
-**`sidebar.hints.analytics`**
-
-> EN — Metrics you're watching.
-
-追いかけている指標。
-
-**`sidebar.hints.automation`**
-
-> EN — Things that run on a schedule.
-
-スケジュールで動くもの。
-
-**`sidebar.hints.businessHealth`**
-
-> EN — MRR, margin, churn and runway. Owner only.
-
-MRR、粗利、解約、手元資金。オーナー専用。
-
-**`sidebar.hints.campaigns`**
-
-> EN — Plan campaigns — channel, budget, status.
-
-キャンペーンを計画 — チャネル、予算、状態。
-
-**`sidebar.hints.chat`**
-
-> EN — Ask anything — not tied to any module.
-
-何でも聞けます — どのモジュールにも紐づきません。
-
-**`sidebar.hints.competitors`**
-
-> EN — Track rival products, pricing and positioning.
-
-競合製品・価格・ポジショニングを追う。
-
-**`sidebar.hints.content`**
-
-> EN — Content ideas, captions and threads.
-
-コンテンツ案・キャプション・スレッド。
-
-**`sidebar.hints.costs`**
-
-> EN — What every AI call has cost, per model and per day.
-
-AI呼び出しごとのコストを、モデル別・日別に表示します。
-
-**`sidebar.hints.dataAnalysis`**
-
-> EN — Analysis requests and what you found.
-
-分析の依頼と、わかったこと。
-
-**`sidebar.hints.decisions`**
-
-> EN — Weigh the options before you decide.
-
-決める前に選択肢を比べる。
-
-**`sidebar.hints.documents`**
-
-> EN — Freeform notes and documents you write yourself.
-
-自分で書く自由形式のメモと文書。
-
-**`sidebar.hints.favorites`**
-
-> EN — Everything you've starred.
-
-スターを付けたすべて。
-
-**`sidebar.hints.feedback`**
-
-> EN — What users told you, in one place.
-
-ユーザーの声を一か所に。
-
-**`sidebar.hints.finance`**
-
-> EN — Log income and expenses.
-
-収入と支出を記録。
-
-**`sidebar.hints.formSubmissions`**
-
-> EN — Everything visitors sent through a form on your published sites
-
-公開サイトのフォームから訪問者が送った内容のすべて
-
-**`sidebar.hints.help`**
-
-> EN — Answers to the questions people ask most — no credits used.
-
-よくある質問への回答です。クレジットは消費しません。
-
-**`sidebar.hints.home`**
-
-> EN — Your dashboard — activity, stats and quick actions.
-
-ダッシュボード — アクティビティ、統計、クイック操作。
-
-**`sidebar.hints.ideas`**
-
-> EN — Capture new ideas before you forget them.
-
-忘れる前に新しいアイデアを残す。
-
-**`sidebar.hints.learning`**
-
-> EN — Track what you're studying.
-
-学んでいることを記録。
-
-**`sidebar.hints.memory`**
-
-> EN — Search across everything you have saved.
-
-保存したものすべてを検索します。
-
-**`sidebar.hints.mine`**
-
-> EN — Everything you have made, newest first — with a starred-only tab
-
-作成したものすべてを新しい順に。お気に入りだけのタブもあります
-
-**`sidebar.hints.missionControl`**
-
-> EN — Set a goal, AI breaks it into steps.
-
-目標を決めると AI がステップに分解します。
-
-**`sidebar.hints.newEntry`**
-
-> EN — Write anything down — it files itself
-
-何でも書いてください — 自動で仕分けされます
-
-**`sidebar.hints.products`**
-
-> EN — Product plans — pricing, roadmap, launch.
-
-プロダクト計画 — 価格、ロードマップ、ローンチ。
-
-**`sidebar.hints.productWorkflow`**
-
-> EN — Your products, patterns and mentor in one view.
-
-プロダクト・パターン・メンターを一画面で。
-
-**`sidebar.hints.reflection`**
-
-> EN — A weekly summary of your progress.
-
-週ごとの進捗サマリー。
-
-**`sidebar.hints.research`**
-
-> EN — Save research, sources and summaries.
-
-調査・出典・要約を保存。
-
-**`sidebar.hints.routing`**
-
-> EN — Which model each kind of request is sent to.
-
-どの種類のリクエストがどのモデルに送られるか。
-
-**`sidebar.hints.sales`**
-
-> EN — Leads, outreach and next steps.
-
-リード、アプローチ、次の一手。
-
-**`sidebar.hints.settings`**
-
-> EN — Account, billing, language and preferences.
-
-アカウント、請求、言語、設定。
-
-**`sidebar.hints.systemHealth`**
-
-> EN — Whether the database, the queues and the providers are answering.
-
-データベース、キュー、プロバイダーが応答しているか。
-
-**`sidebar.hints.team`**
-
-> EN — Invite people to your workspace.
-
-ワークスペースに人を招待。
-
-**`sidebar.hints.timeline`**
-
-> EN — Everything you've done, in order.
-
-やってきたことを時系列で。
-
-**`sidebar.hints.trading`**
-
-> EN — Trade log — symbol, direction, result, P&L.
-
-トレード記録 — 銘柄、方向、結果、損益。
-
-**`sidebar.hints.tradingJournal`**
-
-> EN — Your trades, with the reasoning you wrote at the time.
-
-あなたの取引と、そのとき書いた根拠。
-
-**`sidebar.hints.tradingWorkflow`**
-
-> EN — Your trades, patterns and mentor in one view.
-
-トレード・パターン・メンターを一画面で。
-
-**`sidebar.hints.websiteBuilder`**
-
-> EN — Describe a site and AI generates the real page.
-
-サイトを説明すると AI が実際のページを生成します。
-
-**`sidebar.hints.websites`**
-
-> EN — Track sites you own — name, URL, status. No generation.
-
-持っているサイトを記録 — 名前・URL・状態。生成はしません。
-
 **`sidebar.items.affiliate`**
 
 > EN — Affiliate
@@ -2540,17 +2120,77 @@ DevOps
 
 すべてのツール
 
+**`sidebar.rail.chat`**
+
+> EN — Chat
+
+チャット
+
+**`sidebar.rail.coding`**
+
+> EN — Coding
+
+コーディング
+
+**`sidebar.rail.collapse`**
+
+> EN — Collapse sidebar
+
+サイドバーを折りたたむ
+
+**`sidebar.rail.expand`**
+
+> EN — Expand sidebar
+
+サイドバーを広げる
+
+**`sidebar.rail.label`**
+
+> EN — Main
+
+メインメニュー
+
 **`sidebar.rail.new`**
 
 > EN — New
 
 新規
 
-**`sidebar.rail.recent`**
+**`sidebar.rail.pin`**
 
-> EN — Recent
+> EN — Pin {tool}
 
-最近
+{tool}をピン留め
+
+**`sidebar.rail.recentTools`**
+
+> EN — Recent tools
+
+最近使ったツール
+
+**`sidebar.rail.remove`**
+
+> EN — Remove {tool} from Recent tools
+
+{tool}を最近使ったツールから外す
+
+**`sidebar.rail.saveFailed`**
+
+> EN — Could not save that change. Try again.
+
+変更を保存できませんでした。もう一度お試しください。
+
+**`sidebar.rail.settings`**
+
+> EN — Settings
+
+設定
+
+**`sidebar.rail.unpin`**
+
+> EN — Unpin {tool}
+
+{tool}のピン留めを外す
 
 ### first result
 

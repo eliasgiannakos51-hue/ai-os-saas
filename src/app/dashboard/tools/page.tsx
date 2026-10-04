@@ -7,7 +7,7 @@ import { pageTitle } from "@/lib/page-title";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { MAIN_SIDEBAR_GROUPS, sidebarGroups } from "@/lib/sidebar-nav";
+import { MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups } from "@/lib/sidebar-nav";
 import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 
 export const dynamic = "force-dynamic";
@@ -21,8 +21,8 @@ export function generateMetadata(): Promise<Metadata> {
  * browse without knowing a name (docs/mockups/README.md, "Three roads to
  * every tool"; the owner's OK on the design, 2026-10-02).
  *
- * The rail beside it (components/dashboard/sidebar.tsx) is now New, Recent,
- * All tools and Settings. The list it used to draw did not go anywhere: it
+ * The rail beside it (components/dashboard/sidebar.tsx) is New, Chat,
+ * Coding, All tools, Recent tools and Settings. The list it used to draw did not go anywhere: it
  * is lib/sidebar-nav.ts, unchanged, read here through the same
  * sidebarGroups() with the same owner filter, so every gate on that list —
  * names, hints in ten languages, the catalog claiming every row — still
@@ -37,7 +37,11 @@ export default async function ToolsPage() {
   const t = await getTranslations("dashboard.tools");
   const tSidebar = await getTranslations("sidebar");
   const tCommon = await getTranslations("common");
-  const groups = sidebarGroups(MAIN_SIDEBAR_GROUPS, isAdminEmail(user.email));
+  // The tools, then the Settings block last — Integrations and the Help
+  // Centre live there and the rail has no row for either, so this page is
+  // where they are found (scripts/tests/sidebar-structure.test.mjs §3).
+  const isOwner = isAdminEmail(user.email);
+  const groups = [...sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner), ...sidebarGroups([SETTINGS_GROUP], isOwner)];
 
   // The same two lookups the sidebar makes, so a card cannot be named
   // differently from the row it replaced.

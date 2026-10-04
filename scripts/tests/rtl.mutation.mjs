@@ -129,8 +129,8 @@ const MUTANTS = [
     // sideways scroll in rtl.
     name: "the mobile drawer is pinned to the physical left again",
     file: SIDEBAR,
-    from: "fixed inset-y-0 start-0 z-50 w-64",
-    to: "fixed inset-y-0 left-0 z-50 w-64",
+    from: "fixed inset-y-0 start-0 z-50 flex w-64",
+    to: "fixed inset-y-0 left-0 z-50 flex w-64",
     expect: "the mobile drawer hangs off the leading edge",
   },
   {
@@ -207,8 +207,8 @@ const MUTANTS = [
     // to be tight enough that re-introducing physical utilities trips it.
     name: "physical reading-order utilities come back in a component",
     file: SIDEBAR,
-    from: 'className="flex items-center"',
-    to: 'className="flex items-center text-left ml-2 pl-4 pr-4 border-l"',
+    from: 'className="flex items-center rounded-item px-1 py-1"',
+    to: 'className="flex items-center rounded-item px-1 py-1 text-left ml-2 pl-4 pr-4 border-l"',
     expect: "physical reading-order utilities remain",
   },
 ];

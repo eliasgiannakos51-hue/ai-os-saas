@@ -1,6 +1,6 @@
 {
-  "total": 3449,
-  "onPath": 716,
+  "total": 3459,
+  "onPath": 656,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -10,13 +10,13 @@
       "n": 1,
       "title": "THE SENTENCES — read these",
       "note": "On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that.",
-      "count": 49
+      "count": 30
     },
     {
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 459
+      "count": 418
     },
     {
       "n": 3,
@@ -1156,7 +1156,7 @@
           "key": "common.createStudio",
           "depth": 1,
           "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
+          "file": "src/components/dashboard/command-palette.tsx"
         },
         {
           "key": "common.creditsTooltip",
@@ -1430,426 +1430,6 @@
         },
         {
           "key": "sidebar.closeMenu",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.ask",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.business",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.connect",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.engineering",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.make",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.organise",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.personal",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.run",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.see",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.settings",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.groups.verify",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.affiliate",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.agents",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.aiMemory",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.analytics",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.apps",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.automation",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.businessHealth",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.campaigns",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.chat",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.coding",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.competitors",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.content",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.costs",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.create",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.dataAnalysis",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.decisions",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.deepResearch",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.documents",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.favorites",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.feedback",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.files",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.finance",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.formSubmissions",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.help",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.home",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.ideas",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.images",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.integrations",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.learning",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.library",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.marketplace",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.meetings",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.memory",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.mine",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.missionControl",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.newEntry",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.posts",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.predictions",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.presentations",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.products",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.productWorkflow",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.projects",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.published",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.records",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.reflection",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.research",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.routing",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.sales",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.settings",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.systemHealth",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.team",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.timeline",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.trading",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.tradingJournal",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.tradingWorkflow",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.videos",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.voice",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.websiteBuilder",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/dashboard/sidebar.tsx"
-        },
-        {
-          "key": "sidebar.hints.websites",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"
@@ -2539,13 +2119,73 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.rail.chat",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.rail.coding",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.rail.collapse",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.rail.expand",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.rail.label",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "sidebar.rail.new",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
-          "key": "sidebar.rail.recent",
+          "key": "sidebar.rail.pin",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.rail.recentTools",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.rail.remove",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.rail.saveFailed",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.rail.settings",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.rail.unpin",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"

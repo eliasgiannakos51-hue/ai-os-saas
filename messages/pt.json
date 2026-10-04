@@ -288,8 +288,18 @@
     "closeMenu": "Fechar o menu",
     "rail": {
       "new": "Novo",
-      "recent": "Recentes",
-      "allTools": "Todas as ferramentas"
+      "chat": "Conversa",
+      "coding": "Código",
+      "allTools": "Todas as ferramentas",
+      "recentTools": "Ferramentas recentes",
+      "settings": "Definições",
+      "pin": "Fixar {tool}",
+      "unpin": "Desafixar {tool}",
+      "remove": "Retirar {tool} das recentes",
+      "collapse": "Recolher a barra lateral",
+      "expand": "Expandir a barra lateral",
+      "label": "Menu principal",
+      "saveFailed": "Não foi possível guardar a alteração. Tente de novo."
     }
   },
   "landing": {

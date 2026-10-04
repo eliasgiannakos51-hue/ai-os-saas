@@ -23,6 +23,8 @@ import { findSampleImport } from "@/lib/sample-data/apply";
 import { AchievementUnlockBridge } from "@/components/achievements/achievement-unlock-bridge";
 import { NavTracker } from "@/components/dashboard/nav-tracker";
 import { PageTransition } from "@/components/page-transition";
+import { MAIN_SIDEBAR_GROUPS, sidebarGroups } from "@/lib/sidebar-nav";
+import { NEVER_RECENT, RECENT_WINDOW_DAYS, readRecentPrefs, recentTools, type RecentTool } from "@/lib/nav/recent-tools";
 
 export default async function DashboardLayout({
   children,
@@ -82,6 +84,31 @@ export default async function DashboardLayout({
   // handful of rows per account.
   const sampleImport = await findSampleImport(supabase, user.id);
 
+  // RECENT TOOLS, ON THE ACCOUNT (lib/nav/recent-tools.ts): the last 30
+  // days of this person's own nav_events, through their own session, on
+  // the (user_id, created_at desc) index. Computed here, once per full
+  // load, so the sidebar does not change while somebody moves between
+  // pages — the design's "δεν αλλάζει ποτέ από σελίδα σε σελίδα". A
+  // failed read is an empty list, which is also what a new account sees.
+  let recent: RecentTool[] = [];
+  try {
+    const since = new Date(Date.now() - RECENT_WINDOW_DAYS * 86_400_000).toISOString();
+    const { data: events, error: eventsError } = await supabase
+      .from("nav_events")
+      .select("path, created_at")
+      .eq("user_id", user.id)
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(2000);
+    if (eventsError) throw eventsError;
+    const toolHrefs = sidebarGroups(MAIN_SIDEBAR_GROUPS, isAdmin)
+      .flatMap((g) => g.items.map((i) => i.href))
+      .filter((h) => !NEVER_RECENT.includes(h));
+    recent = recentTools({ events: events ?? [], toolHrefs, prefs: readRecentPrefs(user.user_metadata), now: new Date() });
+  } catch (err) {
+    logApiError("/dashboard (layout)", err, { stage: "recent_tools" });
+  }
+
 
   return (
     <ToastProvider>
@@ -115,7 +142,7 @@ export default async function DashboardLayout({
                 updating. Renders nothing while the connection is fine. */}
             <OfflineBanner />
             <div className="relative z-10 flex min-h-screen">
-              <Sidebar email={user.email ?? ""} planName={plan.name} isOwner={isAdmin} />
+              <Sidebar email={user.email ?? ""} planName={plan.name} isOwner={isAdmin} recent={recent} />
               <div className="flex min-w-0 flex-1 flex-col">
                 <TopNav email={user.email ?? ""} />
                 {/* Below the top bar and ABOVE the page transition, so it

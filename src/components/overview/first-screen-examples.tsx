@@ -76,7 +76,7 @@ export function FirstScreenExamples() {
                   <span
                     className={`mt-1 block text-[11px] ${
                       // Full opacity: the badge is text, and text is
-                      // held at 4.5:1 by design-tokens.test.mjs.
+                      // held at 4.5:1 in design-tokens.test.mjs.
                       example.cost === "charged" ? "text-foreground" : "text-muted"
                     }`}
                   >

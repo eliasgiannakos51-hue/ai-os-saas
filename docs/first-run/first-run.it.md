@@ -1,12 +1,12 @@
 # The first run — it
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **716 strings**. The whole product is 3449, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **656 strings**. The whole product is 3459, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 459 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 30 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 418 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (49)
+## Tier 1 — THE SENTENCES — read these (30)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -126,120 +126,6 @@ La ricerca non è disponibile in questo momento: non è un risultato vuoto. Ripr
 
 Queste voci sono una demo: tre mesi di un piccolo studio di design. Non sono tue.
 
-**`sidebar.hints.aiMemory`**
-
-> EN — What the chat has kept about you, and how to remove it.
-
-Cosa la chat ha tenuto su di te, e come cancellarlo.
-
-**`sidebar.hints.apps`**
-
-> EN — Keep track of apps you are planning or have already shipped. It does not build them.
-
-Tieni traccia delle app che stai pianificando o hai già pubblicato. Non le costruisce.
-
-**`sidebar.hints.coding`**
-
-> EN — Write, explain, fix, convert and test snippets of code. It does not run code or open a repository.
-
-Scrivi, spiega, correggi, converti e testa frammenti di codice. Non esegue codice e non apre un repository.
-
-**`sidebar.hints.create`**
-
-> EN — Describe what you want in one sentence; it works out the rest.
-
-Descrivi in una frase cosa vuoi; il resto lo capisce da solo.
-
-**`sidebar.hints.deepResearch`**
-
-> EN — Give it a topic and it searches, cross-checks and writes a sourced report
-
-Dai un argomento: cerca, verifica e scrive un report con le fonti
-
-**`sidebar.hints.files`**
-
-> EN — Upload PDFs, Word and Excel files and ask the AI questions about them
-
-Carica PDF, Word ed Excel e fai domande all'IA su di essi
-
-**`sidebar.hints.images`**
-
-> EN — Keep track of images you are planning or have already made. It does not generate them.
-
-Tieni traccia delle immagini che stai pianificando o hai già fatto. Non le genera.
-
-**`sidebar.hints.integrations`**
-
-> EN — Connect Gmail, Drive and Slack so the AI can work with your real data
-
-Collega Gmail, Drive e Slack così l'IA lavora sui tuoi dati reali
-
-**`sidebar.hints.library`**
-
-> EN — Starred, recent and search — all your own entries in one place
-
-Preferiti, recenti e ricerca — tutto il tuo in un posto
-
-**`sidebar.hints.marketplace`**
-
-> EN — Share an agent's shape as a template, and start from one someone else shared.
-
-Condividi la forma di un agente come modello e parti da uno condiviso da qualcun altro.
-
-**`sidebar.hints.meetings`**
-
-> EN — Turn a recording into a transcript, a summary, and actions you choose from.
-
-Trasforma una registrazione in trascrizione, riassunto e azioni tra cui scegli tu.
-
-**`sidebar.hints.posts`**
-
-> EN — Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.
-
-Dillo una volta e ricevi un post per piattaforma, nella sua lunghezza e nel suo tono. Non pubblica nulla: copi e pubblichi tu.
-
-**`sidebar.hints.predictions`**
-
-> EN — Patterns found in your own rows, each with the number of entries it rests on and a link to them.
-
-Andamenti nelle tue voci, ciascuno con il numero di registrazioni su cui si basa e un collegamento a esse.
-
-**`sidebar.hints.presentations`**
-
-> EN — Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.
-
-Descrivi una presentazione e ottieni le slide: PowerPoint o PDF, con foto da Unsplash o tue. Non disegna grafici.
-
-**`sidebar.hints.projects`**
-
-> EN — A folder with a goal. What you put in is what is in it — nothing is dragged in with it.
-
-Una cartella con un obiettivo. Ciò che metti è ciò che c'è — niente entra da solo.
-
-**`sidebar.hints.published`**
-
-> EN — Every site you have live on the web, with its traffic and version history
-
-Tutti i tuoi siti online, con traffico e cronologia delle versioni
-
-**`sidebar.hints.records`**
-
-> EN — Every log in one place — filter by type instead of hunting the menu
-
-Tutti i record in un unico posto: filtra per tipo invece di cercare nel menu
-
-**`sidebar.hints.videos`**
-
-> EN — Keep track of videos you are planning or have already made. It does not generate them.
-
-Tieni traccia dei video che stai pianificando o hai già fatto. Non li genera.
-
-**`sidebar.hints.voice`**
-
-> EN — Have text read out loud, or speak and have it written down. Minutes are metered and the price per minute is on the page.
-
-Fatti leggere un testo ad alta voce, oppure parla e viene scritto. I minuti sono contati e il prezzo al minuto è nella pagina.
-
 ### first result
 
 **`dashboard.overview.healthScore.suggestion.recency`**
@@ -314,7 +200,7 @@ Ionexa lo usa per scegliere quale passo del piano proporti — lavoro leggero qu
 
 Gratis: non viene generato nulla e lo togli con un clic
 
-## Tier 2 — The labels — skim these (459)
+## Tier 2 — The labels — skim these (418)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1550,312 +1436,6 @@ Rimozione…
 
 Chiudi il menu
 
-**`sidebar.groups.ask`**
-
-> EN — Ask
-
-Chiedi
-
-**`sidebar.groups.business`**
-
-> EN — Business
-
-Attività
-
-**`sidebar.groups.connect`**
-
-> EN — Connect
-
-Collega
-
-**`sidebar.groups.engineering`**
-
-> EN — Engineering
-
-Ingegneria
-
-**`sidebar.groups.make`**
-
-> EN — Make
-
-Crea
-
-**`sidebar.groups.organise`**
-
-> EN — Organise
-
-Organizza
-
-**`sidebar.groups.personal`**
-
-> EN — Personal
-
-Personale
-
-**`sidebar.groups.run`**
-
-> EN — Run
-
-Esegui
-
-**`sidebar.groups.see`**
-
-> EN — See
-
-Vedi
-
-**`sidebar.groups.settings`**
-
-> EN — Settings
-
-Impostazioni
-
-**`sidebar.groups.verify`**
-
-> EN — Verify
-
-Verifica
-
-**`sidebar.hints.affiliate`**
-
-> EN — Your referral link, what you've earned, and how you get paid.
-
-Il tuo link di invito, quanto hai guadagnato e come vieni pagato.
-
-**`sidebar.hints.agents`**
-
-> EN — Plan the agents you want. A tracker, not a runtime.
-
-Pianifica gli agenti che vuoi. Un registro, non un runtime.
-
-**`sidebar.hints.analytics`**
-
-> EN — Metrics you're watching.
-
-Le metriche che segui.
-
-**`sidebar.hints.automation`**
-
-> EN — Things that run on a schedule.
-
-Cose che partono a orario.
-
-**`sidebar.hints.businessHealth`**
-
-> EN — MRR, margin, churn and runway. Owner only.
-
-MRR, margine, abbandono e liquidità. Solo il proprietario.
-
-**`sidebar.hints.campaigns`**
-
-> EN — Plan campaigns — channel, budget, status.
-
-Pianifica campagne — canale, budget, stato.
-
-**`sidebar.hints.chat`**
-
-> EN — Ask anything — not tied to any module.
-
-Chiedi qualsiasi cosa — non legato a nessun modulo.
-
-**`sidebar.hints.competitors`**
-
-> EN — Track rival products, pricing and positioning.
-
-Segui prodotti rivali, prezzi e posizionamento.
-
-**`sidebar.hints.content`**
-
-> EN — Content ideas, captions and threads.
-
-Idee di contenuto, didascalie e thread.
-
-**`sidebar.hints.costs`**
-
-> EN — What every AI call has cost, per model and per day.
-
-Quanto è costata ogni chiamata AI, per modello e per giorno.
-
-**`sidebar.hints.dataAnalysis`**
-
-> EN — Analysis requests and what you found.
-
-Richieste di analisi e cosa hai trovato.
-
-**`sidebar.hints.decisions`**
-
-> EN — Weigh the options before you decide.
-
-Valuta le opzioni prima di decidere.
-
-**`sidebar.hints.documents`**
-
-> EN — Freeform notes and documents you write yourself.
-
-Note e documenti liberi che scrivi tu.
-
-**`sidebar.hints.favorites`**
-
-> EN — Everything you've starred.
-
-Tutto quello che hai messo tra i preferiti.
-
-**`sidebar.hints.feedback`**
-
-> EN — What users told you, in one place.
-
-Cosa ti hanno detto gli utenti, in un posto solo.
-
-**`sidebar.hints.finance`**
-
-> EN — Log income and expenses.
-
-Registra entrate e uscite.
-
-**`sidebar.hints.formSubmissions`**
-
-> EN — Everything visitors sent through a form on your published sites
-
-Tutto ciò che i visitatori hanno inviato tramite un modulo sui tuoi siti pubblicati
-
-**`sidebar.hints.help`**
-
-> EN — Answers to the questions people ask most — no credits used.
-
-Le risposte alle domande più frequenti, senza consumare crediti.
-
-**`sidebar.hints.home`**
-
-> EN — Your dashboard — activity, stats and quick actions.
-
-La tua dashboard: attività, statistiche e azioni rapide.
-
-**`sidebar.hints.ideas`**
-
-> EN — Capture new ideas before you forget them.
-
-Annota nuove idee prima di dimenticarle.
-
-**`sidebar.hints.learning`**
-
-> EN — Track what you're studying.
-
-Segui cosa stai studiando.
-
-**`sidebar.hints.memory`**
-
-> EN — Search across everything you have saved.
-
-Cerca in tutto quello che hai salvato.
-
-**`sidebar.hints.mine`**
-
-> EN — Everything you have made, newest first — with a starred-only tab
-
-Tutto ciò che hai creato, dal più recente, con una scheda solo preferiti
-
-**`sidebar.hints.missionControl`**
-
-> EN — Set a goal, AI breaks it into steps.
-
-Fissa un obiettivo, l'IA lo divide in passaggi.
-
-**`sidebar.hints.newEntry`**
-
-> EN — Write anything down — it files itself
-
-Scrivi qualsiasi cosa — si archivia da sola
-
-**`sidebar.hints.products`**
-
-> EN — Product plans — pricing, roadmap, launch.
-
-Piani di prodotto — prezzi, roadmap, lancio.
-
-**`sidebar.hints.productWorkflow`**
-
-> EN — Your products, patterns and mentor in one view.
-
-I tuoi prodotti, i pattern e il mentore in una vista.
-
-**`sidebar.hints.reflection`**
-
-> EN — A weekly summary of your progress.
-
-Un riepilogo settimanale dei tuoi progressi.
-
-**`sidebar.hints.research`**
-
-> EN — Save research, sources and summaries.
-
-Salva ricerche, fonti e sintesi.
-
-**`sidebar.hints.routing`**
-
-> EN — Which model each kind of request is sent to.
-
-A quale modello viene inviato ogni tipo di richiesta.
-
-**`sidebar.hints.sales`**
-
-> EN — Leads, outreach and next steps.
-
-Contatti, messaggi e prossimi passi.
-
-**`sidebar.hints.settings`**
-
-> EN — Account, billing, language and preferences.
-
-Account, fatturazione, lingua e preferenze.
-
-**`sidebar.hints.systemHealth`**
-
-> EN — Whether the database, the queues and the providers are answering.
-
-Se il database, le code e i fornitori rispondono.
-
-**`sidebar.hints.team`**
-
-> EN — Invite people to your workspace.
-
-Invita persone nel tuo spazio.
-
-**`sidebar.hints.timeline`**
-
-> EN — Everything you've done, in order.
-
-Tutto quello che hai fatto, in ordine.
-
-**`sidebar.hints.trading`**
-
-> EN — Trade log — symbol, direction, result, P&L.
-
-Diario dei trade — simbolo, direzione, esito, P&L.
-
-**`sidebar.hints.tradingJournal`**
-
-> EN — Your trades, with the reasoning you wrote at the time.
-
-Le tue operazioni, con il ragionamento che hai scritto allora.
-
-**`sidebar.hints.tradingWorkflow`**
-
-> EN — Your trades, patterns and mentor in one view.
-
-I tuoi trade, i pattern e il mentore in una vista.
-
-**`sidebar.hints.websiteBuilder`**
-
-> EN — Describe a site and AI generates the real page.
-
-Descrivi un sito e l'IA genera la pagina vera.
-
-**`sidebar.hints.websites`**
-
-> EN — Track sites you own — name, URL, status. No generation.
-
-Tieni traccia dei siti che hai — nome, URL, stato. Nessuna generazione.
-
 **`sidebar.items.affiliate`**
 
 > EN — Affiliate
@@ -2540,17 +2120,77 @@ Flussi di lavoro
 
 Tutti gli strumenti
 
+**`sidebar.rail.chat`**
+
+> EN — Chat
+
+Chat
+
+**`sidebar.rail.coding`**
+
+> EN — Coding
+
+Codice
+
+**`sidebar.rail.collapse`**
+
+> EN — Collapse sidebar
+
+Comprimi la barra laterale
+
+**`sidebar.rail.expand`**
+
+> EN — Expand sidebar
+
+Espandi la barra laterale
+
+**`sidebar.rail.label`**
+
+> EN — Main
+
+Menu principale
+
 **`sidebar.rail.new`**
 
 > EN — New
 
 Nuovo
 
-**`sidebar.rail.recent`**
+**`sidebar.rail.pin`**
 
-> EN — Recent
+> EN — Pin {tool}
 
-Recenti
+Fissa {tool}
+
+**`sidebar.rail.recentTools`**
+
+> EN — Recent tools
+
+Strumenti recenti
+
+**`sidebar.rail.remove`**
+
+> EN — Remove {tool} from Recent tools
+
+Rimuovi {tool} dagli strumenti recenti
+
+**`sidebar.rail.saveFailed`**
+
+> EN — Could not save that change. Try again.
+
+Impossibile salvare la modifica. Riprova.
+
+**`sidebar.rail.settings`**
+
+> EN — Settings
+
+Impostazioni
+
+**`sidebar.rail.unpin`**
+
+> EN — Unpin {tool}
+
+Sblocca {tool}
 
 ### first result
 

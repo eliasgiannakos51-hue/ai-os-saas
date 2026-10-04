@@ -1,12 +1,12 @@
 # The first run — de
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **716 strings**. The whole product is 3449, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **656 strings**. The whole product is 3459, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 459 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 30 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 418 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (49)
+## Tier 1 — THE SENTENCES — read these (30)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -126,120 +126,6 @@ Die Suche ist derzeit nicht verfügbar – das ist kein leeres Ergebnis. Bitte v
 
 Diese Einträge sind eine Demo — drei Monate eines kleinen Designstudios. Sie gehören nicht dir.
 
-**`sidebar.hints.aiMemory`**
-
-> EN — What the chat has kept about you, and how to remove it.
-
-Was der Chat über dich behalten hat und wie du es löschst.
-
-**`sidebar.hints.apps`**
-
-> EN — Keep track of apps you are planning or have already shipped. It does not build them.
-
-Behalten Sie geplante oder bereits veröffentlichte Apps im Blick. Baut sie nicht.
-
-**`sidebar.hints.coding`**
-
-> EN — Write, explain, fix, convert and test snippets of code. It does not run code or open a repository.
-
-Codeausschnitte schreiben, erklären, korrigieren, umwandeln und testen. Führt keinen Code aus und öffnet kein Repository.
-
-**`sidebar.hints.create`**
-
-> EN — Describe what you want in one sentence; it works out the rest.
-
-Beschreibe in einem Satz, was du willst; den Rest findet es heraus.
-
-**`sidebar.hints.deepResearch`**
-
-> EN — Give it a topic and it searches, cross-checks and writes a sourced report
-
-Thema angeben — es recherchiert, gleicht ab und schreibt einen belegten Bericht
-
-**`sidebar.hints.files`**
-
-> EN — Upload PDFs, Word and Excel files and ask the AI questions about them
-
-PDFs, Word- und Excel-Dateien hochladen und das KI dazu befragen
-
-**`sidebar.hints.images`**
-
-> EN — Keep track of images you are planning or have already made. It does not generate them.
-
-Behalten Sie geplante oder bereits erstellte Bilder im Blick. Erzeugt sie nicht.
-
-**`sidebar.hints.integrations`**
-
-> EN — Connect Gmail, Drive and Slack so the AI can work with your real data
-
-Gmail, Drive und Slack verbinden, damit die KI mit Ihren echten Daten arbeitet
-
-**`sidebar.hints.library`**
-
-> EN — Starred, recent and search — all your own entries in one place
-
-Favoriten, Neuestes und Suche — alles Eigene an einem Ort
-
-**`sidebar.hints.marketplace`**
-
-> EN — Share an agent's shape as a template, and start from one someone else shared.
-
-Teilen Sie die Form eines Agenten als Vorlage und starten Sie mit einer, die jemand anders geteilt hat.
-
-**`sidebar.hints.meetings`**
-
-> EN — Turn a recording into a transcript, a summary, and actions you choose from.
-
-Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst.
-
-**`sidebar.hints.posts`**
-
-> EN — Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.
-
-Sag es einmal und erhalte pro Plattform einen Beitrag in ihrer Länge und ihrem Ton. Es veröffentlicht nichts – du kopierst und postest.
-
-**`sidebar.hints.predictions`**
-
-> EN — Patterns found in your own rows, each with the number of entries it rests on and a link to them.
-
-Muster in deinen eigenen Einträgen, jeweils mit der Zahl der Einträge dahinter und einem Link darauf.
-
-**`sidebar.hints.presentations`**
-
-> EN — Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.
-
-Beschreibe eine Präsentation und erhalte die Folien – PowerPoint oder PDF, mit Fotos von Unsplash oder deinen eigenen. Es zeichnet keine Diagramme.
-
-**`sidebar.hints.projects`**
-
-> EN — A folder with a goal. What you put in is what is in it — nothing is dragged in with it.
-
-Ein Ordner mit einem Ziel. Was du hineinlegst, ist drin — nichts kommt von selbst.
-
-**`sidebar.hints.published`**
-
-> EN — Every site you have live on the web, with its traffic and version history
-
-Alle Ihre Live-Seiten, mit Zugriffen und Versionsverlauf
-
-**`sidebar.hints.records`**
-
-> EN — Every log in one place — filter by type instead of hunting the menu
-
-Alle Einträge an einem Ort — nach Typ filtern statt im Menü zu suchen
-
-**`sidebar.hints.videos`**
-
-> EN — Keep track of videos you are planning or have already made. It does not generate them.
-
-Behalten Sie geplante oder bereits erstellte Videos im Blick. Erzeugt sie nicht.
-
-**`sidebar.hints.voice`**
-
-> EN — Have text read out loud, or speak and have it written down. Minutes are metered and the price per minute is on the page.
-
-Text vorlesen lassen oder sprechen und mitschreiben lassen. Minuten werden gezählt, der Minutenpreis steht auf der Seite.
-
 ### first result
 
 **`dashboard.overview.healthScore.suggestion.recency`**
@@ -314,7 +200,7 @@ Ionexa wählt damit den nächsten Planschritt aus — leichte Arbeit, wenn du un
 
 Kostenlos — es wird nichts generiert, und du entfernst es mit einem Klick
 
-## Tier 2 — The labels — skim these (459)
+## Tier 2 — The labels — skim these (418)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1550,312 +1436,6 @@ Wird entfernt…
 
 Menü schließen
 
-**`sidebar.groups.ask`**
-
-> EN — Ask
-
-Fragen
-
-**`sidebar.groups.business`**
-
-> EN — Business
-
-Geschäft
-
-**`sidebar.groups.connect`**
-
-> EN — Connect
-
-Verbinden
-
-**`sidebar.groups.engineering`**
-
-> EN — Engineering
-
-Technik
-
-**`sidebar.groups.make`**
-
-> EN — Make
-
-Erstellen
-
-**`sidebar.groups.organise`**
-
-> EN — Organise
-
-Organisieren
-
-**`sidebar.groups.personal`**
-
-> EN — Personal
-
-Persönlich
-
-**`sidebar.groups.run`**
-
-> EN — Run
-
-Ausführen
-
-**`sidebar.groups.see`**
-
-> EN — See
-
-Ansehen
-
-**`sidebar.groups.settings`**
-
-> EN — Settings
-
-Einstellungen
-
-**`sidebar.groups.verify`**
-
-> EN — Verify
-
-Prüfen
-
-**`sidebar.hints.affiliate`**
-
-> EN — Your referral link, what you've earned, and how you get paid.
-
-Dein Empfehlungslink, dein Verdienst und wie du ausgezahlt wirst.
-
-**`sidebar.hints.agents`**
-
-> EN — Plan the agents you want. A tracker, not a runtime.
-
-Plane die Agenten, die du willst. Eine Liste, keine Laufzeit.
-
-**`sidebar.hints.analytics`**
-
-> EN — Metrics you're watching.
-
-Kennzahlen, die du beobachtest.
-
-**`sidebar.hints.automation`**
-
-> EN — Things that run on a schedule.
-
-Dinge, die nach Zeitplan laufen.
-
-**`sidebar.hints.businessHealth`**
-
-> EN — MRR, margin, churn and runway. Owner only.
-
-MRR, Marge, Abwanderung und Liquidität. Nur für den Inhaber.
-
-**`sidebar.hints.campaigns`**
-
-> EN — Plan campaigns — channel, budget, status.
-
-Kampagnen planen — Kanal, Budget, Status.
-
-**`sidebar.hints.chat`**
-
-> EN — Ask anything — not tied to any module.
-
-Frag alles — an kein Modul gebunden.
-
-**`sidebar.hints.competitors`**
-
-> EN — Track rival products, pricing and positioning.
-
-Konkurrenzprodukte, Preise und Positionierung verfolgen.
-
-**`sidebar.hints.content`**
-
-> EN — Content ideas, captions and threads.
-
-Content-Ideen, Texte und Threads.
-
-**`sidebar.hints.costs`**
-
-> EN — What every AI call has cost, per model and per day.
-
-Was jeder KI-Aufruf gekostet hat, pro Modell und pro Tag.
-
-**`sidebar.hints.dataAnalysis`**
-
-> EN — Analysis requests and what you found.
-
-Analyse-Anfragen und was dabei herauskam.
-
-**`sidebar.hints.decisions`**
-
-> EN — Weigh the options before you decide.
-
-Optionen abwägen, bevor du entscheidest.
-
-**`sidebar.hints.documents`**
-
-> EN — Freeform notes and documents you write yourself.
-
-Freie Notizen und Dokumente, die du selbst schreibst.
-
-**`sidebar.hints.favorites`**
-
-> EN — Everything you've starred.
-
-Alles, was du markiert hast.
-
-**`sidebar.hints.feedback`**
-
-> EN — What users told you, in one place.
-
-Was Nutzer dir gesagt haben, an einem Ort.
-
-**`sidebar.hints.finance`**
-
-> EN — Log income and expenses.
-
-Einnahmen und Ausgaben erfassen.
-
-**`sidebar.hints.formSubmissions`**
-
-> EN — Everything visitors sent through a form on your published sites
-
-Alles, was Besucher über ein Formular auf Ihren veröffentlichten Seiten gesendet haben
-
-**`sidebar.hints.help`**
-
-> EN — Answers to the questions people ask most — no credits used.
-
-Antworten auf die häufigsten Fragen — ohne Credits zu verbrauchen.
-
-**`sidebar.hints.home`**
-
-> EN — Your dashboard — activity, stats and quick actions.
-
-Ihr Dashboard — Aktivität, Statistiken und Schnellaktionen.
-
-**`sidebar.hints.ideas`**
-
-> EN — Capture new ideas before you forget them.
-
-Neue Ideen festhalten, bevor sie weg sind.
-
-**`sidebar.hints.learning`**
-
-> EN — Track what you're studying.
-
-Verfolgen, was du gerade lernst.
-
-**`sidebar.hints.memory`**
-
-> EN — Search across everything you have saved.
-
-Durchsuche alles, was du gespeichert hast.
-
-**`sidebar.hints.mine`**
-
-> EN — Everything you have made, newest first — with a starred-only tab
-
-Alles, was du erstellt hast, neueste zuerst — mit einem Tab nur für Favoriten
-
-**`sidebar.hints.missionControl`**
-
-> EN — Set a goal, AI breaks it into steps.
-
-Ziel setzen, die KI zerlegt es in Schritte.
-
-**`sidebar.hints.newEntry`**
-
-> EN — Write anything down — it files itself
-
-Schreiben Sie irgendetwas auf — es ordnet sich selbst ein
-
-**`sidebar.hints.products`**
-
-> EN — Product plans — pricing, roadmap, launch.
-
-Produktpläne — Preise, Roadmap, Launch.
-
-**`sidebar.hints.productWorkflow`**
-
-> EN — Your products, patterns and mentor in one view.
-
-Deine Produkte, Muster und dein Mentor in einer Ansicht.
-
-**`sidebar.hints.reflection`**
-
-> EN — A weekly summary of your progress.
-
-Eine wöchentliche Zusammenfassung deines Fortschritts.
-
-**`sidebar.hints.research`**
-
-> EN — Save research, sources and summaries.
-
-Recherche, Quellen und Zusammenfassungen sichern.
-
-**`sidebar.hints.routing`**
-
-> EN — Which model each kind of request is sent to.
-
-An welches Modell jede Art von Anfrage geht.
-
-**`sidebar.hints.sales`**
-
-> EN — Leads, outreach and next steps.
-
-Leads, Kontaktaufnahme und nächste Schritte.
-
-**`sidebar.hints.settings`**
-
-> EN — Account, billing, language and preferences.
-
-Konto, Abrechnung, Sprache und Einstellungen.
-
-**`sidebar.hints.systemHealth`**
-
-> EN — Whether the database, the queues and the providers are answering.
-
-Ob Datenbank, Warteschlangen und Anbieter antworten.
-
-**`sidebar.hints.team`**
-
-> EN — Invite people to your workspace.
-
-Lade Leute in deinen Arbeitsbereich ein.
-
-**`sidebar.hints.timeline`**
-
-> EN — Everything you've done, in order.
-
-Alles, was du getan hast, der Reihe nach.
-
-**`sidebar.hints.trading`**
-
-> EN — Trade log — symbol, direction, result, P&L.
-
-Trade-Log — Symbol, Richtung, Ergebnis, P&L.
-
-**`sidebar.hints.tradingJournal`**
-
-> EN — Your trades, with the reasoning you wrote at the time.
-
-Deine Trades, mit der Begründung, die du damals notiert hast.
-
-**`sidebar.hints.tradingWorkflow`**
-
-> EN — Your trades, patterns and mentor in one view.
-
-Deine Trades, Muster und dein Mentor in einer Ansicht.
-
-**`sidebar.hints.websiteBuilder`**
-
-> EN — Describe a site and AI generates the real page.
-
-Beschreibe eine Website, die KI erzeugt die echte Seite.
-
-**`sidebar.hints.websites`**
-
-> EN — Track sites you own — name, URL, status. No generation.
-
-Deine eigenen Sites verfolgen — Name, URL, Status. Ohne Erzeugung.
-
 **`sidebar.items.affiliate`**
 
 > EN — Affiliate
@@ -2540,17 +2120,77 @@ Arbeitsabläufe
 
 Alle Werkzeuge
 
+**`sidebar.rail.chat`**
+
+> EN — Chat
+
+Chat
+
+**`sidebar.rail.coding`**
+
+> EN — Coding
+
+Code
+
+**`sidebar.rail.collapse`**
+
+> EN — Collapse sidebar
+
+Seitenleiste einklappen
+
+**`sidebar.rail.expand`**
+
+> EN — Expand sidebar
+
+Seitenleiste ausklappen
+
+**`sidebar.rail.label`**
+
+> EN — Main
+
+Hauptmenü
+
 **`sidebar.rail.new`**
 
 > EN — New
 
 Neu
 
-**`sidebar.rail.recent`**
+**`sidebar.rail.pin`**
 
-> EN — Recent
+> EN — Pin {tool}
 
-Zuletzt
+{tool} anheften
+
+**`sidebar.rail.recentTools`**
+
+> EN — Recent tools
+
+Zuletzt genutzt
+
+**`sidebar.rail.remove`**
+
+> EN — Remove {tool} from Recent tools
+
+{tool} aus „Zuletzt genutzt“ entfernen
+
+**`sidebar.rail.saveFailed`**
+
+> EN — Could not save that change. Try again.
+
+Die Änderung wurde nicht gespeichert. Bitte erneut versuchen.
+
+**`sidebar.rail.settings`**
+
+> EN — Settings
+
+Einstellungen
+
+**`sidebar.rail.unpin`**
+
+> EN — Unpin {tool}
+
+{tool} lösen
 
 ### first result
 

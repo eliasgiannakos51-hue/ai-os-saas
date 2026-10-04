@@ -50,8 +50,6 @@
      (design-tokens.test.mjs holds that, file by file). */
   --signal: 242 166 90;         /* #F2A65A */
   --globe-ink: #f2a65a;
-  --logo-ink: #f5f7fb;
-  --logo-accent: #f2a65a;
 
   /* A user's own content — a generated website, a document page — is
      shown on white, because that is what it will look like when it is
@@ -1103,6 +1101,13 @@ html[data-motion="reduce"] .ionexa-globe.is-spinning .globe-orbit-group {
 }
 
 /* END GlobeMark */
+
+/* THE EARTH — components/brand/earth.tsx. Its colour is the signal's;
+   the globe and the logo are the only places that colour may appear
+   (ΣΥΣΤΗΜΑ DESIGN; design-tokens.test.mjs holds it). */
+.ionexa-earth {
+  color: var(--globe-ink);
+}
 
 /* ============================================================================
    THE VOICE ORB (V4 #23)

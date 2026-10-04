@@ -132,66 +132,74 @@ checkTrue(
 // asking whether the collapse was well-built rather than whether the
 // screen showed anything.
 //
-// node scripts/measure-sidebar-height.mjs is where the cost is produced:
-// everything open is 1,937px on today's 27 rows, 2.3 screens on a
-// 390x844 phone and 2.2 on a 1440x900 laptop. That is the trade, taken
-// deliberately, and the command palette is still one keystroke.
+// That trade — every group open, 2.3 screens of scroll on a phone,
+// measured 2026-09-19 — ended with the rail of ΣΥΣΤΗΜΑ DESIGN
+// (2026-10-04): the groups are on the All tools page, and
+// `node scripts/measure-sidebar-height.mjs` now prints whether the
+// longest rail fits on one screen.
 checkTrue(
   `every group was read (${groupBlocks.length})`,
   groupBlocks.length >= 6,
   "a scan that finds nothing agrees with every claim below it",
 );
 const sidebarForOpen = readFileSync("src/components/dashboard/sidebar.tsx", "utf8");
+// WHERE THE GROUPS ARE DRAWN NOW. The sidebar of ΣΥΣΤΗΜΑ DESIGN
+// (docs/CONTEXT.md, 2026-10-04) draws no group at all — New, Chat,
+// Coding, All tools, Recent tools, Settings — and every group of tools is
+// drawn on the All tools page (src/app/dashboard/tools/page.tsx). The
+// property this section held over the sidebar's renderGroup is held over
+// that page's group renderer, because that is where a heading over
+// nothing could appear again.
+const toolsPageSrc = stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"));
+const groupRenderer = toolsPageSrc.slice(
+  toolsPageSrc.indexOf("{groups.map((group) =>"),
+  toolsPageSrc.indexOf('t("orPress")')
+);
+checkTrue(
+  "the All tools group renderer was located",
+  groupRenderer.length > 200,
+  "the checks below measure nothing without it",
+);
 // COUNTED, NOT GREPPED. A word search for isExpanded / aria-expanded /
 // collapsible is a substring test on something that has structure, and
 // the mutation that proves it takes four lines: `const expanded = true;
 // ... if (!expanded) return <p/>;` reintroduces the whole defect without
-// using any of those words.
-//
-// What renderGroup must be is simple enough to state: ONE guard and ONE
-// render. A third exit is a condition deciding whether rows appear, and
-// that is the collapse whatever it is called.
-const renderGroupBody = stripComments(sidebarForOpen).slice(
-  stripComments(sidebarForOpen).indexOf("function renderGroup("),
-  stripComments(sidebarForOpen).indexOf("function renderItem(")
+// using any of those words. The group renderer is an expression with ONE
+// return inside it, the card's; a second is a condition deciding whether
+// rows appear, and that is the collapse whatever it is called.
+checkTrue(
+  `no group can be collapsed — the group renderer has only the card's return (${(groupRenderer.match(/\breturn\b/g) ?? []).length} returns)`,
+  (groupRenderer.match(/\breturn\b/g) ?? []).length === 1 && /\{group\.items\.map\(\(item\) =>/.test(groupRenderer),
+  "a second exit from the group renderer is a condition deciding whether rows appear — a collapse under another name",
 );
 checkTrue(
-  "renderGroup was located",
-  renderGroupBody.length > 200,
-  "the two checks below measure nothing without it",
-);
-checkTrue(
-  `no group can be collapsed — renderGroup has one guard and one render (${(renderGroupBody.match(/\breturn\b/g) ?? []).length} returns)`,
-  (renderGroupBody.match(/\breturn\b/g) ?? []).length === 2,
-  "a third exit from renderGroup is a condition deciding whether rows appear — a collapse under another name",
-);
-checkTrue(
-  "...and the names the old collapse used are gone too",
-  !/isExpanded|toggleGroup|aria-expanded|collapsible|grid-rows-\[0fr\]/.test(stripComments(sidebarForOpen)),
+  "...and the names the old collapse used are gone, from the sidebar and the page",
+  !/isExpanded|toggleGroup|aria-expanded|collapsible|grid-rows-\[0fr\]/.test(stripComments(sidebarForOpen) + toolsPageSrc),
   "the cheap half of the check above, kept because it names what was removed",
 );
 checkTrue(
   "...and a heading with no rows under it is not drawn at all",
-  /if \(group\.items\.length === 0\) return null;/.test(sidebarForOpen),
-  "the whole defect was a heading over nothing; sidebarGroups() prevents one cause and this prevents the rest",
+  /const groups = \[\.\.\.sidebarGroups\(/.test(toolsPageSrc) &&
+    /\{list\.length > 0 && \([\s\S]{0,200}t\("rail\.recentTools"\)/.test(stripComments(sidebarForOpen)),
+  "the page's groups come only from sidebarGroups(), which drops an empty group; the sidebar's one heading, Recent tools, sits under the guard on its list",
 );
 // WHAT THE SIDEBAR MAY REMEMBER. Until 2026-10-02 the answer was
-// "nothing": there was no open/shut state left, so any storage was a
-// regression. The rail the owner approved that day has one list worth
-// keeping per device — the five most recent tools — and that is now the
-// ONLY thing stored: every storage call names RECENT_TOOLS_KEY, none is
-// sessionStorage, and every one sits inside a try (blocked storage in a
-// private window must leave the rail without the list, not broken).
-// STRIPPED, because the component explains what it stores and what it
-// does not, and a sentence about storage is not storage.
+// "nothing"; from then to 2026-10-04 it was the recent-tools list, kept
+// per device. That list is the ACCOUNT's now (src/lib/nav/recent-tools.ts,
+// computed by the dashboard layout), so the one thing a browser keeps is
+// whether the sidebar is narrow — every storage call names COLLAPSED_KEY,
+// none is sessionStorage, and every one sits inside a try (blocked
+// storage in a private window must leave the wide sidebar, not a broken
+// one). STRIPPED, because the component explains what it stores and what
+// it does not, and a sentence about storage is not storage.
 const sidebarCode = stripComments(sidebarForOpen);
 const storageCalls = sidebarCode.match(/localStorage\.\w+\([^)]*\)/g) ?? [];
 checkTrue(
-  `...and the only thing remembered across a reload is the recent-tools list (${storageCalls.length} storage calls)`,
+  `...and the only thing remembered across a reload is whether the sidebar is narrow (${storageCalls.length} storage calls)`,
   storageCalls.length >= 1 &&
-    storageCalls.every((c) => c.includes("RECENT_TOOLS_KEY")) &&
+    storageCalls.every((c) => c.includes("COLLAPSED_KEY")) &&
     !/sessionStorage/.test(sidebarCode),
-  storageCalls.join(" | ") || "no storage call found — the Recent list cannot survive a reload",
+  storageCalls.join(" | ") || "no storage call found — the narrow sidebar cannot survive a reload",
 );
 checkTrue(
   "...and every storage call is guarded",
@@ -199,22 +207,21 @@ checkTrue(
   "a storage call outside a try throws in a private window and takes the sidebar with it",
 );
 // V4.6: the config carries items marked hidden — trackers reachable from
-// the records hub and ⌘K, kept out of the sidebar on purpose. The sidebar
-// must render through sidebarGroups() (which drops them), never through
-// visibleGroups() (which keeps them for the palette).
+// the records hub and ⌘K, kept out of the sidebar on purpose. Every list
+// of tools a person sees must come through sidebarGroups() (which drops
+// them), never through visibleGroups() (which keeps them for the palette):
+// the sidebar's lookup for Recent rows, and the All tools grid.
 const sidebarSrc = readFileSync("src/components/dashboard/sidebar.tsx", "utf8");
-// Since 2026-10-02 the tool list is drawn in two places — the rail's Recent
-// lookup and the All tools grid (app/dashboard/tools/page.tsx) — and both
-// must read sidebarGroups(), never visibleGroups().
-const toolsPageSrc = stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"));
 checkTrue(
   "the sidebar reads its tools through sidebarGroups, so hidden items stay out of it",
-  /sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\)/.test(stripComments(sidebarSrc)) && !/visibleGroups\(/.test(stripComments(sidebarSrc)),
+  /sidebarGroups\(\[\.\.\.MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP\], isOwner\)/.test(sidebarCode) && !/visibleGroups\(/.test(sidebarCode),
   "the sidebar is reading a group list that still carries hidden items",
 );
 checkTrue(
   "...and so does the All tools page",
-  /sidebarGroups\(MAIN_SIDEBAR_GROUPS, isAdminEmail\(user\.email\)\)/.test(toolsPageSrc) && !/visibleGroups\(/.test(toolsPageSrc),
+  /const isOwner = isAdminEmail\(user\.email\);/.test(toolsPageSrc) &&
+    /sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\)/.test(toolsPageSrc) &&
+    !/visibleGroups\(/.test(toolsPageSrc),
   "the grid would show the hidden trackers the sidebar has always kept out",
 );
 // The other half of hidden: ⌘K must still find every hidden tracker, or
@@ -227,31 +234,24 @@ checkTrue(
   "the palette is dropping hidden items, so a hidden page has no entry point at all",
 );
 checkTrue(
-  "Settings is rendered as its own group below the main ones",
-  /sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)\.map\(renderGroup\)/.test(sidebarSrc),
-  "the Settings group is no longer rendered by the sidebar",
+  "Settings is drawn as its own group below the main ones, on All tools",
+  /\.\.\.sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\), \.\.\.sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)\]/.test(toolsPageSrc),
+  "Integrations and the Help Centre have no row in the rail, so without this group they have none anywhere",
 );
-// EVERY HEADING IS A CAPTION NOW, not a control — there is nothing to
-// toggle. It is a <p>, which is what a label with no behaviour should be:
-// a <button> that does nothing is worse for a screen reader than no
+// EVERY HEADING IS A CAPTION, not a control — there is nothing to toggle.
+// A <button> that does nothing is worse for a screen reader than no
 // button at all.
 checkTrue(
   "the heading is a caption, not a button that does nothing",
-  /<p className="px-3 pb-1\.5 text-\[10px\] font-semibold uppercase tracking-widest text-muted">/.test(sidebarForOpen) &&
-    !/<button[\s\S]{0,200}translatedHeading/.test(sidebarForOpen),
+  /<h2[\s\S]{0,200}\{heading\(group\.heading\)\}/.test(groupRenderer) && !/<button/.test(groupRenderer),
   "a control that cannot change anything is announced to a screen reader as something to press",
 );
 // AND NO CHEVRON BESIDE IT. The turning marker was the affordance that
 // said "this opens" — on a heading that opens nothing it is a promise
-// the nav cannot keep. Checked inside the group renderer only: the
-// account link in the footer has its own chevron and always did.
-const groupRenderer = sidebarForOpen.slice(
-  sidebarForOpen.indexOf("function renderGroup("),
-  sidebarForOpen.indexOf("function renderItem(")
-);
+// the page cannot keep.
 checkTrue(
   "...with no marker suggesting it turns",
-  groupRenderer.length > 100 && !/ChevronRight|rotate-90/.test(groupRenderer),
+  !/ChevronRight|rotate-90/.test(groupRenderer),
   "a chevron on a heading that cannot be pressed is the same broken promise as the heading with no rows",
 );
 // EVERY DECLARED GROUP STILL HAS ROWS AFTER THE FILTERS RUN — and that
@@ -401,8 +401,10 @@ checkTrue("...and refuses to place against a collapsed rect", /r\.width === 0 &&
 checkTrue("it is clamped into the viewport", /window\.innerHeight/.test(tip));
 // The sidebar must USE it, and must not also set a native title (two
 // tooltips means the OS one appears a second later, on top).
-checkTrue("the sidebar renders it", /<Tooltip[\s\S]{0,120}content=\{hint\}/.test(sidebar));
-check("the sidebar sets no native title on nav links", /title=\{hint\}/.test(sidebar), false);
+// Since the rail of 2026-10-04 the tooltip carries the NAME of a row in
+// the narrow sidebar (the hint is written out on the All tools card).
+checkTrue("the sidebar renders it", /<Tooltip content=\{label\} side="right">/.test(sidebar));
+check("the sidebar sets no native title on nav links", /title=\{/.test(stripComments(sidebar)), false);
 
 console.log("\n== 4. the Timeline filter and the sidebar agree ==");
 // The reported symptom was the Timeline still offering filters for modules

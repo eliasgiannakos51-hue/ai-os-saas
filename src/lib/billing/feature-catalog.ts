@@ -653,6 +653,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "templates/apply",
       "sample-data",
       "nav/track",
+      "nav/recent-tools",
       "cron/nav-retention",
     ],
     charges: true,

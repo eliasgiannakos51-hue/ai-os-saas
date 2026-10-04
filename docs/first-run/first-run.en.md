@@ -1,14 +1,14 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **716 strings**. The whole product is 3449, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **656 strings**. The whole product is 3459, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 459 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 30 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 418 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
 _This is the English original. It is here so a reader of another file can be sent both._
 
-## Tier 1 — THE SENTENCES — read these (49)
+## Tier 1 — THE SENTENCES — read these (30)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -110,101 +110,6 @@ Search is unavailable right now — this is not an empty result. Try again in a 
 
 These entries are a demo — a small design studio's last three months. They are not yours.
 
-**`sidebar.hints.aiMemory`**
-
-
-What the chat has kept about you, and how to remove it.
-
-**`sidebar.hints.apps`**
-
-
-Keep track of apps you are planning or have already shipped. It does not build them.
-
-**`sidebar.hints.coding`**
-
-
-Write, explain, fix, convert and test snippets of code. It does not run code or open a repository.
-
-**`sidebar.hints.create`**
-
-
-Describe what you want in one sentence; it works out the rest.
-
-**`sidebar.hints.deepResearch`**
-
-
-Give it a topic and it searches, cross-checks and writes a sourced report
-
-**`sidebar.hints.files`**
-
-
-Upload PDFs, Word and Excel files and ask the AI questions about them
-
-**`sidebar.hints.images`**
-
-
-Keep track of images you are planning or have already made. It does not generate them.
-
-**`sidebar.hints.integrations`**
-
-
-Connect Gmail, Drive and Slack so the AI can work with your real data
-
-**`sidebar.hints.library`**
-
-
-Starred, recent and search — all your own entries in one place
-
-**`sidebar.hints.marketplace`**
-
-
-Share an agent's shape as a template, and start from one someone else shared.
-
-**`sidebar.hints.meetings`**
-
-
-Turn a recording into a transcript, a summary, and actions you choose from.
-
-**`sidebar.hints.posts`**
-
-
-Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.
-
-**`sidebar.hints.predictions`**
-
-
-Patterns found in your own rows, each with the number of entries it rests on and a link to them.
-
-**`sidebar.hints.presentations`**
-
-
-Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.
-
-**`sidebar.hints.projects`**
-
-
-A folder with a goal. What you put in is what is in it — nothing is dragged in with it.
-
-**`sidebar.hints.published`**
-
-
-Every site you have live on the web, with its traffic and version history
-
-**`sidebar.hints.records`**
-
-
-Every log in one place — filter by type instead of hunting the menu
-
-**`sidebar.hints.videos`**
-
-
-Keep track of videos you are planning or have already made. It does not generate them.
-
-**`sidebar.hints.voice`**
-
-
-Have text read out loud, or speak and have it written down. Minutes are metered and the price per minute is on the page.
-
 ### first result
 
 **`dashboard.overview.healthScore.suggestion.recency`**
@@ -267,7 +172,7 @@ Ionexa uses this to pick which plan step to suggest next — lighter work when y
 
 Free — nothing is generated, and you can remove it in one click
 
-## Tier 2 — The labels — skim these (459)
+## Tier 2 — The labels — skim these (418)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1299,261 +1204,6 @@ Removing…
 
 Close menu
 
-**`sidebar.groups.ask`**
-
-
-Ask
-
-**`sidebar.groups.business`**
-
-
-Business
-
-**`sidebar.groups.connect`**
-
-
-Connect
-
-**`sidebar.groups.engineering`**
-
-
-Engineering
-
-**`sidebar.groups.make`**
-
-
-Make
-
-**`sidebar.groups.organise`**
-
-
-Organise
-
-**`sidebar.groups.personal`**
-
-
-Personal
-
-**`sidebar.groups.run`**
-
-
-Run
-
-**`sidebar.groups.see`**
-
-
-See
-
-**`sidebar.groups.settings`**
-
-
-Settings
-
-**`sidebar.groups.verify`**
-
-
-Verify
-
-**`sidebar.hints.affiliate`**
-
-
-Your referral link, what you've earned, and how you get paid.
-
-**`sidebar.hints.agents`**
-
-
-Plan the agents you want. A tracker, not a runtime.
-
-**`sidebar.hints.analytics`**
-
-
-Metrics you're watching.
-
-**`sidebar.hints.automation`**
-
-
-Things that run on a schedule.
-
-**`sidebar.hints.businessHealth`**
-
-
-MRR, margin, churn and runway. Owner only.
-
-**`sidebar.hints.campaigns`**
-
-
-Plan campaigns — channel, budget, status.
-
-**`sidebar.hints.chat`**
-
-
-Ask anything — not tied to any module.
-
-**`sidebar.hints.competitors`**
-
-
-Track rival products, pricing and positioning.
-
-**`sidebar.hints.content`**
-
-
-Content ideas, captions and threads.
-
-**`sidebar.hints.costs`**
-
-
-What every AI call has cost, per model and per day.
-
-**`sidebar.hints.dataAnalysis`**
-
-
-Analysis requests and what you found.
-
-**`sidebar.hints.decisions`**
-
-
-Weigh the options before you decide.
-
-**`sidebar.hints.documents`**
-
-
-Freeform notes and documents you write yourself.
-
-**`sidebar.hints.favorites`**
-
-
-Everything you've starred.
-
-**`sidebar.hints.feedback`**
-
-
-What users told you, in one place.
-
-**`sidebar.hints.finance`**
-
-
-Log income and expenses.
-
-**`sidebar.hints.formSubmissions`**
-
-
-Everything visitors sent through a form on your published sites
-
-**`sidebar.hints.help`**
-
-
-Answers to the questions people ask most — no credits used.
-
-**`sidebar.hints.home`**
-
-
-Your dashboard — activity, stats and quick actions.
-
-**`sidebar.hints.ideas`**
-
-
-Capture new ideas before you forget them.
-
-**`sidebar.hints.learning`**
-
-
-Track what you're studying.
-
-**`sidebar.hints.memory`**
-
-
-Search across everything you have saved.
-
-**`sidebar.hints.mine`**
-
-
-Everything you have made, newest first — with a starred-only tab
-
-**`sidebar.hints.missionControl`**
-
-
-Set a goal, AI breaks it into steps.
-
-**`sidebar.hints.newEntry`**
-
-
-Write anything down — it files itself
-
-**`sidebar.hints.products`**
-
-
-Product plans — pricing, roadmap, launch.
-
-**`sidebar.hints.productWorkflow`**
-
-
-Your products, patterns and mentor in one view.
-
-**`sidebar.hints.reflection`**
-
-
-A weekly summary of your progress.
-
-**`sidebar.hints.research`**
-
-
-Save research, sources and summaries.
-
-**`sidebar.hints.routing`**
-
-
-Which model each kind of request is sent to.
-
-**`sidebar.hints.sales`**
-
-
-Leads, outreach and next steps.
-
-**`sidebar.hints.settings`**
-
-
-Account, billing, language and preferences.
-
-**`sidebar.hints.systemHealth`**
-
-
-Whether the database, the queues and the providers are answering.
-
-**`sidebar.hints.team`**
-
-
-Invite people to your workspace.
-
-**`sidebar.hints.timeline`**
-
-
-Everything you've done, in order.
-
-**`sidebar.hints.trading`**
-
-
-Trade log — symbol, direction, result, P&L.
-
-**`sidebar.hints.tradingJournal`**
-
-
-Your trades, with the reasoning you wrote at the time.
-
-**`sidebar.hints.tradingWorkflow`**
-
-
-Your trades, patterns and mentor in one view.
-
-**`sidebar.hints.websiteBuilder`**
-
-
-Describe a site and AI generates the real page.
-
-**`sidebar.hints.websites`**
-
-
-Track sites you own — name, URL, status. No generation.
-
 **`sidebar.items.affiliate`**
 
 
@@ -2124,15 +1774,65 @@ Workflows
 
 All tools
 
+**`sidebar.rail.chat`**
+
+
+Chat
+
+**`sidebar.rail.coding`**
+
+
+Coding
+
+**`sidebar.rail.collapse`**
+
+
+Collapse sidebar
+
+**`sidebar.rail.expand`**
+
+
+Expand sidebar
+
+**`sidebar.rail.label`**
+
+
+Main
+
 **`sidebar.rail.new`**
 
 
 New
 
-**`sidebar.rail.recent`**
+**`sidebar.rail.pin`**
 
 
-Recent
+Pin {tool}
+
+**`sidebar.rail.recentTools`**
+
+
+Recent tools
+
+**`sidebar.rail.remove`**
+
+
+Remove {tool} from Recent tools
+
+**`sidebar.rail.saveFailed`**
+
+
+Could not save that change. Try again.
+
+**`sidebar.rail.settings`**
+
+
+Settings
+
+**`sidebar.rail.unpin`**
+
+
+Unpin {tool}
 
 ### first result
 

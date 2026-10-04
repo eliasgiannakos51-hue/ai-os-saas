@@ -288,8 +288,18 @@
     "closeMenu": "Fermer le menu",
     "rail": {
       "new": "Nouveau",
-      "recent": "Récents",
-      "allTools": "Tous les outils"
+      "chat": "Discussion",
+      "coding": "Code",
+      "allTools": "Tous les outils",
+      "recentTools": "Outils récents",
+      "settings": "Paramètres",
+      "pin": "Épingler {tool}",
+      "unpin": "Désépingler {tool}",
+      "remove": "Retirer {tool} des outils récents",
+      "collapse": "Réduire la barre latérale",
+      "expand": "Développer la barre latérale",
+      "label": "Menu principal",
+      "saveFailed": "La modification n’a pas été enregistrée. Réessayez."
     }
   },
   "landing": {

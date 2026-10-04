@@ -3234,6 +3234,12 @@
       "photos": "Βάζω φωτογραφίες",
       "checking": "Ελέγχω τον ιστότοπο",
       "saving": "Αποθηκεύω"
+    },
+    "chatTimeline": {
+      "thinking": "Σκέφτομαι",
+      "searching_web": "Ψάχνω στο διαδίκτυο",
+      "searching_data": "Ψάχνω στα δεδομένα σου",
+      "writing": "Γράφω την απάντηση"
     }
   },
   "problem": {

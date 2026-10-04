@@ -3234,6 +3234,12 @@
       "photos": "正在放置照片",
       "checking": "正在检查网站",
       "saving": "正在保存"
+    },
+    "chatTimeline": {
+      "thinking": "正在思考",
+      "searching_web": "正在搜索网络",
+      "searching_data": "正在搜索你的数据",
+      "writing": "正在撰写回答"
     }
   },
   "problem": {

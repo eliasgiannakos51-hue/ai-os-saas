@@ -3234,6 +3234,12 @@
       "photos": "Placement des photos",
       "checking": "Vérification du site",
       "saving": "Enregistrement"
+    },
+    "chatTimeline": {
+      "thinking": "Réflexion",
+      "searching_web": "Recherche sur le web",
+      "searching_data": "Recherche dans vos données",
+      "writing": "Rédaction de la réponse"
     }
   },
   "problem": {

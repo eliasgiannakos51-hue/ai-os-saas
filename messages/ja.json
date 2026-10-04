@@ -3234,6 +3234,12 @@
       "photos": "写真を配置しています",
       "checking": "サイトを確認しています",
       "saving": "保存しています"
+    },
+    "chatTimeline": {
+      "thinking": "考えています",
+      "searching_web": "ウェブを検索しています",
+      "searching_data": "あなたのデータを検索しています",
+      "writing": "回答を書いています"
     }
   },
   "problem": {

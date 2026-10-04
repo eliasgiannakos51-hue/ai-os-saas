@@ -3234,6 +3234,12 @@
       "photos": "Ich setze Fotos ein",
       "checking": "Ich prüfe die Website",
       "saving": "Ich speichere"
+    },
+    "chatTimeline": {
+      "thinking": "Ich denke nach",
+      "searching_web": "Ich suche im Web",
+      "searching_data": "Ich suche in deinen Daten",
+      "writing": "Ich schreibe die Antwort"
     }
   },
   "problem": {

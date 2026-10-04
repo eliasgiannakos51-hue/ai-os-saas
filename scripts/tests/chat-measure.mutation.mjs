@@ -118,8 +118,8 @@ const MUTATIONS = [
   {
     name: "the streaming answer loses its ground",
     file: WORKSPACE,
-    from: '<div className="chat-ground-dim min-w-0 flex-1 text-foreground">\n                      <MessageContent content={streamingText}',
-    to: '<div className="min-w-0 flex-1 text-foreground">\n                      <MessageContent content={streamingText}',
+    from: '<div className="chat-ground-dim min-w-0 flex-1 text-foreground">\n                      {chatTimelineWorthShowing(liveTimeline) && (',
+    to: '<div className="min-w-0 flex-1 text-foreground">\n                      {chatTimelineWorthShowing(liveTimeline) && (',
     expect: "the streaming answer wrapper carries the dim ground",
   },
   {

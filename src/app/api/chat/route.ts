@@ -73,6 +73,7 @@ import { matchCannedAnswer, type CannedMatch } from "@/lib/support/knowledge-bas
 import { loadCannedArticles } from "@/lib/support/help-articles";
 import { getLocale } from "next-intl/server";
 import { attachWebSources } from "@/lib/chat/web-sources";
+import { addChatEvidence, chatTimelineForClient, chatTimelineWorthShowing, markChatStep, type ChatStep, type ChatTimelineEntry } from "@/lib/chat/chat-timeline";
 
 export const dynamic = "force-dynamic";
 
@@ -986,6 +987,21 @@ export async function POST(request: Request) {
         // second concurrent message sees a balance that already excludes
         // this one.
         const costs = new CostAccumulator();
+
+        // THE ACTIVITY TIMELINE OF THIS ANSWER — V6.2 2.1, slice 6. Sent
+        // whole on every change (at most MAX_CHAT_STEPS short entries), so
+        // the client only ever replaces it; closed in the `done` frame.
+        // Never stored, and never priced per step: lib/chat/chat-timeline.ts
+        // says why.
+        let chatTimeline: ChatTimelineEntry[] = [];
+        const sendTimeline = () =>
+          safeEnqueue(controller, ndjsonLine({ type: "timeline", steps: chatTimelineForClient(chatTimeline, null) }));
+        const markStep = (label: ChatStep) => {
+          const next = markChatStep(chatTimeline, label, new Date().toISOString());
+          if (next === chatTimeline) return;
+          chatTimeline = next;
+          sendTimeline();
+        };
         // Empty until the pre-check runs. An absent key is "not asked" —
         // a follow-up message, or a free one — and must never be read as
         // "clear", which is a decision somebody made.
@@ -1139,6 +1155,7 @@ export async function POST(request: Request) {
           // The last round's blocks, kept for the numbered sources: the web
           // search citations live on them (lib/chat/web-sources.ts).
           lastRoundBlocks = [];
+          markStep("thinking");
           for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
             const claudeStream = anthropic.messages.stream({
               model: MODEL,
@@ -1157,7 +1174,20 @@ export async function POST(request: Request) {
             // settled must still stop this one.
             if (stopped.value) claudeStream.abort();
 
+            // THE PHASES, AS THEY OPEN (lib/chat/chat-timeline.ts): a web
+            // search block starting is the search, its result block says
+            // how many sources came back, the first word is the writing.
+            claudeStream.on("streamEvent", (event) => {
+              if (event.type !== "content_block_start") return;
+              const block = event.content_block;
+              if (block.type === "server_tool_use" && block.name === "web_search") markStep("searching_web");
+              else if (block.type === "web_search_tool_result" && Array.isArray(block.content)) {
+                chatTimeline = addChatEvidence(chatTimeline, { key: "sources", count: block.content.length });
+                sendTimeline();
+              }
+            });
             claudeStream.on("text", (delta) => {
+              markStep("writing");
               assistantText += delta;
               safeEnqueue(controller, ndjsonLine({ type: "delta", text: delta }));
             });
@@ -1242,6 +1272,7 @@ export async function POST(request: Request) {
             if (toolUses.length === 0 || round === MAX_TOOL_ROUNDS) break;
 
             conversation.push({ role: "assistant", content: finalResponse.content });
+            markStep("searching_data");
             const results = await Promise.all(
               toolUses.map(async (toolUse) => {
                 const executed = await executeSearchTool({ userId: user.id, input: toolUse.input });
@@ -1369,6 +1400,11 @@ export async function POST(request: Request) {
             // The final text, only when it differs from what streamed — the
             // client swaps it in so the numbers appear without a reload.
             content: sourced.sources.length > 0 ? sourced.text : undefined,
+            // The finished steps, with the last one closed — only for an
+            // answer that searched; a plain one has nothing to show.
+            timeline: chatTimelineWorthShowing(chatTimeline)
+              ? chatTimelineForClient(chatTimeline, new Date().toISOString())
+              : undefined,
             usage: buildUsageReceipt({
               creditsCharged: settlement.creditsCharged,
               bypass: bypassCredits || isFreeMessage,

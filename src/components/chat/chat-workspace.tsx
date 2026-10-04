@@ -30,6 +30,18 @@ import { ProvenanceLine } from "@/components/chat/provenance-line";
 import { TransitionButton } from "@/components/transitions/transition-button";
 import type { Provenance } from "@/lib/chat/provenance";
 import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
+import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
+import type { ClientStep } from "@/lib/jobs/job-timeline";
+import { chatTimelineWorthShowing, isChatStep, readChatStepFrame, type ChatStep } from "@/lib/chat/chat-timeline";
+
+// What each phase of an answer is called on screen (lib/chat/chat-timeline.ts).
+// Named rather than built from the step, so every message is a literal.
+const CHAT_STEP_MESSAGE = {
+  thinking: "chatTimeline.thinking",
+  searching_web: "chatTimeline.searching_web",
+  searching_data: "chatTimeline.searching_data",
+  writing: "chatTimeline.writing",
+} as const satisfies Record<ChatStep, string>;
 
 // Remembered across visits, per the focus-mode toggle below.
 const CHAT_SIDEBAR_STORAGE_KEY = "chat-sidebar";
@@ -127,6 +139,8 @@ export function ChatWorkspace({
   const tProduct = useTranslations("dashboard.productWorkflow");
   const tFree = useTranslations("credits.freeChat");
   const t = useTranslations("dashboard.chat");
+  const tSteps = useTranslations("aiSteps");
+  const chatStepLabel = (label: string | null) => (isChatStep(label) ? tSteps(CHAT_STEP_MESSAGE[label]) : null);
   const tVoice = useTranslations("voice");
   const { refresh: refreshCredits, reportUsage } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
@@ -137,7 +151,7 @@ export function ChatWorkspace({
   // parallel map: a reply and the list of entries it was built from are
   // one thing, and two structures keyed by id drift the moment a message
   // is removed from one of them.
-  const [messages, setMessages] = useState<(ChatMessage & { provenance?: Provenance })[]>([]);
+  const [messages, setMessages] = useState<(ChatMessage & { provenance?: Provenance; timeline?: ClientStep[] })[]>([]);
   // The text being typed lives INSIDE ChatComposer, not here: as state on
   // this component, every keystroke re-rendered the whole workspace —
   // thread, sidebar, header — measured at 128ms median per key with a
@@ -168,6 +182,9 @@ export function ChatWorkspace({
   const [mentorMode, setMentorMode] = useState(initialMentorPreset != null);
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState<string | null>(null);
+  // The answer's steps while it streams, replaced whole by every
+  // `timeline` frame (app/api/chat/route.ts).
+  const [liveTimeline, setLiveTimeline] = useState<ClientStep[]>([]);
   // THE STOP BUTTON — V4.6. One controller per send; pressing ✕ aborts
   // the fetch, which is what the server reads as "stop" (api/chat). The
   // text already on screen is kept, the box is handed back at once, and
@@ -498,6 +515,7 @@ export function ChatWorkspace({
     ]);
     setSending(true);
     setStreamingText(null);
+    setLiveTimeline([]);
     setStoppedNote(false);
     const controller = new AbortController();
     abortRef.current = controller;
@@ -543,12 +561,17 @@ export function ChatWorkspace({
       let usageEvent: unknown = null;
       let provenance: Provenance | null = null;
       let finalContent: string | null = null;
+      let finishedTimeline: ClientStep[] | undefined;
       const { interrupted } = await readNdjsonStream(res.body, (event) => {
         if (event.type === "done") {
           usageEvent = event;
           // With web sources the server sends the answer back numbered
           // (lib/chat/web-sources.ts); without them, what streamed stands.
           if (typeof event.content === "string" && event.content.trim()) finalContent = event.content;
+          finishedTimeline = keepChatSteps(event.timeline);
+        }
+        if (event.type === "timeline") {
+          setLiveTimeline(keepChatSteps(event.steps) ?? []);
         }
         if (event.type === "meta") {
           resolvedConversationId = (event.conversationId as string | null) ?? null;
@@ -616,6 +639,7 @@ export function ChatWorkspace({
             content: finalContent ?? accumulatedText,
             created_at: new Date().toISOString(),
             provenance: provenance ?? undefined,
+            timeline: finishedTimeline,
           },
         ]);
         if (resolvedConversationId) {
@@ -670,6 +694,7 @@ export function ChatWorkspace({
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
       setStreamingText(null);
+      setLiveTimeline([]);
       setSending(false);
     }
   }
@@ -944,6 +969,10 @@ export function ChatWorkspace({
                           "Listen" is: half a sentence points nowhere. */}
                       <TransitionButton text={msg.content} />
                       <ProvenanceLine provenance={msg.provenance} />
+                      {/* What the answer did, step by step — only on an
+                          answer that searched, and only in this page:
+                          a reloaded conversation has none (not stored). */}
+                      <AiJobTimeline job={{ kind: "chat", timeline: msg.timeline }} labelFor={chatStepLabel} />
                       {/* EU AI Act art. 50 — on the reply itself, not in
                           metadata. */}
                       <AiGeneratedNotice />
@@ -957,9 +986,14 @@ export function ChatWorkspace({
                   <AssistantAvatar />
                   {streamingText !== null ? (
                     <div className="chat-ground-dim min-w-0 flex-1 text-foreground">
+                      {chatTimelineWorthShowing(liveTimeline) && (
+                        <AiJobTimeline job={{ kind: "chat", timeline: liveTimeline }} labelFor={chatStepLabel} defaultOpen className="mb-2" />
+                      )}
                       <MessageContent content={streamingText} className="leading-relaxed" />
                       <AiGeneratedNotice />
                     </div>
+                  ) : chatTimelineWorthShowing(liveTimeline) ? (
+                    <AiJobTimeline job={{ kind: "chat", timeline: liveTimeline }} labelFor={chatStepLabel} defaultOpen className="py-1" />
                   ) : (
                     <AiActivity kind="chat" className="py-1" />
                   )}
@@ -1146,4 +1180,19 @@ export function ChatWorkspace({
       )}
     </div>
   );
+}
+
+// A `timeline` or `done` frame's steps, kept only when every one is a
+// well-formed chat step — a frame from an older server, or anything
+// else, is dropped rather than drawn.
+function keepChatSteps(raw: unknown): ClientStep[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const steps = raw.filter(
+    (s): s is ClientStep =>
+      !!s &&
+      typeof s === "object" &&
+      typeof (s as ClientStep).step === "number" &&
+      readChatStepFrame({ label: (s as ClientStep).label, at: (s as ClientStep).startedAt }) !== null
+  );
+  return steps.length === raw.length ? steps : undefined;
 }

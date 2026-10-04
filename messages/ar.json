@@ -3234,6 +3234,12 @@
       "photos": "أضع الصور",
       "checking": "أتحقق من الموقع",
       "saving": "أحفظ"
+    },
+    "chatTimeline": {
+      "thinking": "أفكر",
+      "searching_web": "أبحث في الويب",
+      "searching_data": "أبحث في بياناتك",
+      "writing": "أكتب الإجابة"
     }
   },
   "problem": {

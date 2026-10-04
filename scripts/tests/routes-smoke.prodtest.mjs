@@ -1170,6 +1170,20 @@ console.log("\n== 6. touch targets on a phone ==");
 {
   const bySize = new Map();
   const skippedRoutes = [];
+  // A WEDGED PAGE MUST NOT HANG THE RUN. page.evaluate has no timeout of
+  // its own: on 2026-10-04 (run of d0acaed6, deployment trigger) this
+  // section printed its heading and then nothing for twenty minutes, until
+  // the job's 25-minute cap cancelled it — no route named, no verdict. The
+  // push-triggered run of the same commit took 8 minutes and passed. Each
+  // step that can wait forever now has a deadline, and a route that misses
+  // it is reported below by name and fails "every route was actually
+  // measured", which is the honest outcome, instead of taking the job down
+  // silently.
+  const withDeadline = (promise, ms, what) =>
+    Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error(`${what} did not return in ${ms / 1000}s`)), ms)),
+    ]);
   for (const route of TOUCH_ROUTES) {
     const page = await authed.newPage();
     try {
@@ -1183,7 +1197,7 @@ console.log("\n== 6. touch targets on a phone ==");
       // it. Reported as a skipped route instead.
       let small;
       try {
-        small = await page.evaluate(() => {
+        small = await withDeadline(page.evaluate(() => {
         const out = [];
         for (const el of Array.from(document.querySelectorAll("button, a[href], [role=button], select"))) {
           const rect = el.getBoundingClientRect();
@@ -1196,14 +1210,16 @@ console.log("\n== 6. touch targets on a phone ==");
           out.push(`${el.tagName.toLowerCase()}${id}${testid ? `[${testid}]` : ""} "${label}" ${Math.round(rect.width)}x${Math.round(rect.height)}`);
         }
         return out;
-        });
+        }), 20000, "measuring the page");
       } catch (err) {
         skippedRoutes.push(`${route}: ${String(err.message ?? err).slice(0, 80)}`);
         small = [];
       }
       if (small.length) bySize.set(route, small);
     } finally {
-      await page.close();
+      await withDeadline(page.close(), 10000, "closing the page").catch((err) =>
+        skippedRoutes.push(`${route}: ${String(err.message ?? err).slice(0, 80)}`)
+      );
     }
   }
   // A SKIPPED ROUTE IS NOT A PASSING ROUTE. If measuring stops working

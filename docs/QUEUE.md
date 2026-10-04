@@ -34,7 +34,7 @@
 | D.4 | Αρχική | 2.4 σεν. 16–18 | φτιαγμένο, αδοκίμαστο σε browser (τοπικό branch `design-d`) | `home-design.test.mjs` 55 έλεγχοι, 13/13 mutations. Οι κάρτες της παλιάς αρχικής στο `/dashboard/activity`. Το `one-primary-action` μένει 2: και τα δύο κουμπιά είναι του πεδίου (D.5) |
 | D.5 | Συνομιλία | 2.6 σεν. 9, 11, 12 | φτιαγμένο, αδοκίμαστο σε browser (τοπικό branch `design-d`) | `conversation-design.test.mjs` 9 έλεγχοι, 6/6 mutations. Το δεξί πλαίσιο δεν φτιάχτηκε στο chat (`docs/DECISIONS.md`) |
 | D.6 | All tools | 2.4 σεν. 9–12 | φτιαγμένο, αδοκίμαστο σε browser (τοπικό branch `design-d`) | `all-tools.test.mjs` 31 έλεγχοι, 8/8 mutations. Η «μία οθόνη» είναι αριθμητική (884/900 px)· μέτρηση στο D.11 |
-| D.7 | Coding | — | εκκρεμεί | |
+| D.7 | Coding | — | φτιαγμένο, αδοκίμαστο σε browser (τοπικό branch `design-d`) | Πεδίο όπως της αρχικής, στόχοι 44 px, `aria-pressed` στις λειτουργίες |
 | D.8 | Κάθε άλλη σελίδα του dashboard, μία μία | 2.6 | εκκρεμεί | |
 | D.9 | Σύνδεση, εγγραφή, onboarding, τιμές | 2.6 | εκκρεμεί | Γη 160 px πάνω από τη φόρμα |
 | D.10 | Κινητό: κάτω μπάρα Home, Chat, Tools, You | 2.4 σεν. 13 | εκκρεμεί | |

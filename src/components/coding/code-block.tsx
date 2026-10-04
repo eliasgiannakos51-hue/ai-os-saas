@@ -54,7 +54,7 @@ export function CodeBlock({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-panel-hover">
+    <div className="rounded-card border border-border bg-panel">
       <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
         <span className="truncate text-[11px] uppercase tracking-wider text-muted">
           {label ?? language ?? t("code")}
@@ -63,7 +63,7 @@ export function CodeBlock({
           type="button"
           onClick={() => void copy()}
           aria-label={t("copy")}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-[11px] text-foreground"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 text-[11px] text-foreground hover:bg-panel-hover"
         >
           {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
           {copied ? t("copied") : t("copy")}

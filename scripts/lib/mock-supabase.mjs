@@ -42,6 +42,22 @@ export async function startMockSupabase({ port = 54341, tableRows = {} } = {}) {
 
   const hits = [];
   const server = http.createServer((req, res) => {
+    // CORS, as the real project answers it. Pages that read from the
+    // BROWSER (the chat thread loads its messages client-side) call this
+    // stand-in from another port; without these headers every such read
+    // failed with "Failed to fetch" and the screen showed an error the
+    // real deployment never does (found 2026-10-03 by
+    // scripts/tests/design-part2.prodtest.mjs). Server-side reads are
+    // unaffected — they do not ask.
+    res.setHeader("Access-Control-Allow-Origin", req.headers.origin ?? "*");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Headers", req.headers["access-control-request-headers"] ?? "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD");
+    res.setHeader("Access-Control-Expose-Headers", "Content-Range");
+    if (req.method === "OPTIONS") {
+      res.writeHead(204);
+      return res.end();
+    }
     let body = "";
     req.on("data", (c) => (body += c));
     req.on("end", () => {

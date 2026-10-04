@@ -497,55 +497,28 @@ async function inspect(context, route) {
   // is the graceful path — a user never sees it. Filtered by that exact
   // signature rather than by "fetch", so a genuine failed request on the
   // page still fails the route.
-  // KNOWN, OPEN, AND EXCLUDED ON PURPOSE:
-  //
-  //   React #310, production-only, intermittent (6/1/4 σε τρεις ίδιες
-  //   εκτελέσεις). Frame D είναι στον app-router του Next, όχι δικός μας
-  //   κώδικας. 0 conditional hooks σε 835 modules. Το error boundary
-  //   πιάνει το crash.
-  //   ΑΦΑΙΡΕΣΕ ΤΟ EXCLUSION όταν διορθωθεί.
-  //
-  // Tracked in issue #61, which carries the stack, the chunk offset that
-  // identifies the frame as Next's app-router, the AST scan result, and
-  // the repro command.
-  //
-  // EXCLUDED BY SIGNATURE, NOT BY ROUTE. The instruction was to stop
-  // checking console errors on /dashboard/overview, and this does less
-  // than that on purpose: dropping every console error on the app's
-  // busiest signed-in page would hide the next, unrelated one for as long
-  // as this stays open. It also would not have worked — CI recorded the
-  // crash on /dashboard/favorites and the local repro on
-  // /dashboard/overview, because an intermittent error is attributed to
-  // whichever route is loading when it fires. Excluding the error itself
-  // covers both and costs one signature instead of a whole page.
-  //
-  // Counted and printed rather than silently dropped, so "it stopped
-  // happening" and "we stopped looking" do not look the same.
-  const HOOK_310 = /Minified React error #310|Rendered more hooks than during the previous render/;
-  const suppressed310 = errors.filter((e) => HOOK_310.test(e)).length;
-  if (suppressed310 > 0) {
-    console.log(`        (${route}: ${suppressed310} known React #310 suppressed — see the comment in this file)`);
-  }
+  // REACT #310 IS NOT EXCLUDED ANY MORE. It was, by signature, from issue
+  // #61 until 2026-10-04, when its cause was found: a dashboard page that
+  // redirected from its server component, after the page had started
+  // streaming, so the redirect reached the router as a navigation racing
+  // its prefetches. Those redirects are decided in middleware.ts now
+  // (lib/nav/early-redirects.ts; scripts/tests/early-redirects.test.mjs),
+  // and 300 loads of hook-order.repro.mjs gave 0. A #310 here is a real
+  // failure again.
   const real = errors.filter(
     (e) =>
       !/favicon|Failed to load resource|net::ERR_/i.test(e) &&
-      !/Failed to fetch RSC payload[\s\S]*Falling back to browser navigation/i.test(e) &&
-      !HOOK_310.test(e)
+      !/Failed to fetch RSC payload[\s\S]*Falling back to browser navigation/i.test(e)
   );
   await page.close();
-  return { status, errors: real, keys, overflow, overflowTablet, byWidth, landedOn, suppressed310 };
+  return { status, errors: real, keys, overflow, overflowTablet, byWidth, landedOn };
 }
 
-// Tallied across every route so the total is in the run summary. An
-// exclusion that nobody can see the size of is an exclusion that
-// outlives the bug it was written for.
-let total310 = 0;
 
 console.log("\n== 1. public routes (logged out) ==");
 const anon = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 for (const route of PUBLIC_ROUTES) {
   const r = await inspect(anon, route);
-  total310 += r.suppressed310 ?? 0;
   check(`${route}: 200`, r.status, 200);
   check(`${route}: no console errors`, r.errors, []);
   check(`${route}: no unresolved i18n keys`, r.keys, []);
@@ -603,7 +576,6 @@ await authed.addCookies([
 ]);
 for (const route of DASHBOARD_ROUTES) {
   const r = await inspect(authed, route);
-  total310 += r.suppressed310 ?? 0;
   check(`${route}: 200`, r.status, 200);
   // A silent redirect to /login is the failure mode that makes every
   // other assertion on this route pass while proving nothing.
@@ -938,6 +910,22 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   const foldedNav = fold(navText);
   await aside.screenshot({ path: "/tmp/ionexa-sidebar-el.png" });
 
+  // THE GROUP HEADINGS LIVE ON /dashboard/tools NOW. On 2026-10-02 the
+  // owner approved the short rail (a256ac96): New, All tools, Recent,
+  // Settings. The grouped list, with its headings, moved unchanged to
+  // app/dashboard/tools/page.tsx through the same sidebarGroups(). This
+  // section went on counting headings in the rail and failed in CI on
+  // every push after that ("at least four headings actually rendered in
+  // Greek (2)") — the property had moved, not broken. So the headings are
+  // read where they are drawn, and the rail is still held to "never
+  // English".
+  const toolsPage = await greek.newPage();
+  await toolsPage.goto(`http://127.0.0.1:${PORT}/dashboard/tools`, { waitUntil: "networkidle", timeout: 45000 });
+  const listText = await toolsPage.locator("main").first().innerText();
+  const foldedList = fold(listText);
+  await toolsPage.close();
+  checkTrue("the tools list rendered something to read", listText.trim().length > 200, listText.slice(0, 200));
+
   // DERIVED FROM THE CONFIG, NOT TYPED OUT — and it took a stale run to
   // make that point.
   //
@@ -996,21 +984,22 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
     const word = greekHeading(key);
     checkTrue(`heading "${english}" has Greek in messages/el.json (${key})`, typeof word === "string" && word.length > 0, String(word));
     if (typeof word !== "string") continue;
-    const shown = foldedNav.includes(fold(word));
+    const shown = foldedList.includes(fold(word));
     if (shown) headingsShown++;
+    const englishIn = (text) => new RegExp(`\\b${english}\\b`).test(text);
     checkTrue(
-      `heading "${english}" is either "${word}" or absent — never English`,
-      shown || !new RegExp(`\\b${english}\\b`).test(navText),
-      navText.slice(0, 400)
+      `heading "${english}" is either "${word}" or absent — never English (rail and /dashboard/tools)`,
+      (shown || !englishIn(listText)) && (foldedNav.includes(fold(word)) || !englishIn(navText)),
+      listText.slice(0, 400)
     );
   }
   // AND THE FLOOR UNDER IT. "Absent is allowed" is satisfied by a
   // sidebar that renders no headings at all, which is the vacuity shape
   // gate-vacuity.test.mjs caught in this very block once already. Six
-  // groups are drawn (scripts/sidebar-census.mjs); the floor is set
+  // groups are drawn on /dashboard/tools (scripts/sidebar-census.mjs); the floor is set
   // below that so adding a group does not break it, and above zero so
   // an empty nav cannot pass.
-  checkTrue(`at least four headings actually rendered in Greek (${headingsShown})`, headingsShown >= 4, navText.slice(0, 400));
+  checkTrue(`at least four headings actually rendered in Greek on /dashboard/tools (${headingsShown})`, headingsShown >= 4, listText.slice(0, 400));
   for (const [english, key] of items) {
     const word = greekItem(key);
     if (typeof word !== "string" || !word) {
@@ -1153,6 +1142,20 @@ console.log("\n== 6. touch targets on a phone ==");
 {
   const bySize = new Map();
   const skippedRoutes = [];
+  // A WEDGED PAGE MUST NOT HANG THE RUN. page.evaluate has no timeout of
+  // its own: on 2026-10-04 (run of d0acaed6, deployment trigger) this
+  // section printed its heading and then nothing for twenty minutes, until
+  // the job's 25-minute cap cancelled it — no route named, no verdict. The
+  // push-triggered run of the same commit took 8 minutes and passed. Each
+  // step that can wait forever now has a deadline, and a route that misses
+  // it is reported below by name and fails "every route was actually
+  // measured", which is the honest outcome, instead of taking the job down
+  // silently.
+  const withDeadline = (promise, ms, what) =>
+    Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error(`${what} did not return in ${ms / 1000}s`)), ms)),
+    ]);
   for (const route of TOUCH_ROUTES) {
     const page = await authed.newPage();
     try {
@@ -1166,7 +1169,7 @@ console.log("\n== 6. touch targets on a phone ==");
       // it. Reported as a skipped route instead.
       let small;
       try {
-        small = await page.evaluate(() => {
+        small = await withDeadline(page.evaluate(() => {
         const out = [];
         for (const el of Array.from(document.querySelectorAll("button, a[href], [role=button], select"))) {
           const rect = el.getBoundingClientRect();
@@ -1179,14 +1182,16 @@ console.log("\n== 6. touch targets on a phone ==");
           out.push(`${el.tagName.toLowerCase()}${id}${testid ? `[${testid}]` : ""} "${label}" ${Math.round(rect.width)}x${Math.round(rect.height)}`);
         }
         return out;
-        });
+        }), 20000, "measuring the page");
       } catch (err) {
         skippedRoutes.push(`${route}: ${String(err.message ?? err).slice(0, 80)}`);
         small = [];
       }
       if (small.length) bySize.set(route, small);
     } finally {
-      await page.close();
+      await withDeadline(page.close(), 10000, "closing the page").catch((err) =>
+        skippedRoutes.push(`${route}: ${String(err.message ?? err).slice(0, 80)}`)
+      );
     }
   }
   // A SKIPPED ROUTE IS NOT A PASSING ROUTE. If measuring stops working
@@ -1975,11 +1980,6 @@ console.log("\n== 11. cancelling is one click away, in the user's language ==");
 
 await browser.close();
 cleanup();
-console.log(
-  total310 === 0
-    ? "\nknown React #310 suppressions: none this run (the bug is intermittent — this is not evidence it is fixed)"
-    : `\nknown React #310 suppressions: ${total310} — still open, see the comment in inspect()`
-);
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

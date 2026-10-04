@@ -88,7 +88,7 @@ filters the sidebar does.
 
 <!-- REGISTER:BEGIN — written by scripts/sidebar-register.mjs, do not edit by hand -->
 
-Declared positions: **111** in **11** groups. Drawn for an ordinary account: **27**; for the owner: **28**. Offered by the command palette and the hub: **51**.
+Declared positions: **111** in **11** groups. Drawn for an ordinary account: **26**; for the owner: **27**. Offered by the command palette and the hub: **50**.
 
 ### Make — 6 drawn of 14 declared
 
@@ -120,11 +120,11 @@ Declared positions: **111** in **11** groups. Drawn for an ordinary account: **2
 | 19 | 5 | Learning | `/dashboard/learning` | hidden | ⌘K + hub |
 | 20 | 6 | Decisions | `/dashboard/decisions` | hidden | ⌘K + hub |
 
-### Run — 2 drawn of 10 declared
+### Run — 1 drawn of 10 declared
 
 | # | position | label (en) | href | state | reachable from |
 |---|---|---|---|---|---|
-| 21 | 1 | AI Agents | `/dashboard/agents` | **live** | sidebar |
+| 21 | 1 | AI Agents | `/dashboard/agents` | retired | nowhere |
 | 22 | 2 | Automation | `/dashboard/automation` | **live** | sidebar |
 | 23 | 3 | Marketplace | `/dashboard/marketplace` | retired | nowhere |
 | 24 | 4 | Workflows | `/dashboard/workflows` | notBuilt | nowhere |

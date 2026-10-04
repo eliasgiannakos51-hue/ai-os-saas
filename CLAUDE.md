@@ -1,5 +1,14 @@
 # Working rules for this repository
 
+## Every session starts here
+
+Read `docs/CONTEXT.md` (the owner's frame, design system and operating
+mode), then `docs/QUEUE.md`, `docs/PROGRESS.md` and
+`docs/NEEDS-FROM-ELIAS.md`. Check first whether anything blocked has been
+unblocked (a key now present in the environment), run the gates, and
+continue from the first item in progress or pending. Before ending, bring
+those files up to date — in the same commit as the work.
+
 ## Migrations are applied by hand — say so, every time
 
 There is no migration runner, no CI step and no ledger table. Every file in
@@ -63,7 +72,7 @@ network, at service-worker install) and a gate REQUIRED that excuse.
 when only one was running. The README said two cron jobs were unscheduled
 while both sat in `vercel.json`.
 
-    npm run build            # runs scripts/tests/self-claims.test.mjs
+    npm run gates            # runs scripts/tests/self-claims.test.mjs
     node scripts/scan-self-claims.mjs
 
 Every path named in a comment or in the markdown must resolve — held at
@@ -258,15 +267,20 @@ failed in CI because it was **set**.
     npm run build:ci     # the real build, under a deployed environment
     npm run test:env     # every gate twice, and which one disagrees (~25 min)
 
-`npm run build` runs `scripts/tests/env-independence.test.mjs`, which is
+`npm run gates` runs `scripts/tests/env-independence.test.mjs`, which is
 the cheap structural half: no gate may hand an env-reading program the
 machine's environment. It resolves a path held in a `const`, because the
 gate that broke the build spawns `[RUNNER, ...args]`.
 
 ## Gates
 
-`npm run build` runs the whole gate: function limits, mutation markers,
-the mutation tree, i18n, then every `scripts/tests/*.test.mjs`, then
-`next build`. `npm run test:mutation` runs every `*.mutation.mjs` — each
-one re-introduces a real defect and requires its gate to go red on the
-clause that names it.
+`npm run gates` runs the whole gate: function limits, mutation markers,
+the mutation tree, i18n, then every `scripts/tests/*.test.mjs`. It is NOT
+part of `npm run build` any more: since 724d3842 (2026-09-27) the build
+is function limits and `next build` only, which is what Vercel runs, and
+the gates run in `.github/workflows/verify.yml` on every push. So
+`npm run build:ci` alone says nothing about the gates — a push needs
+both, and on 2026-10-03 a green `build:ci` sat on top of a red gate
+(`ai-providers`) until `npm run gates` was run. `npm run test:mutation`
+runs every `*.mutation.mjs` — each one re-introduces a real defect and
+requires its gate to go red on the clause that names it.

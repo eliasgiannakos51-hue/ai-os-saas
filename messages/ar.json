@@ -703,9 +703,7 @@
       "description": "اختر لوحة ألوان للتطبيق بالكامل — يبقى التخطيط ولون التمييز كما هما.",
       "options": {
         "dark": "داكن",
-        "light": "فاتح",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "فاتح"
       }
     },
     "language": {
@@ -1010,7 +1008,7 @@
       "oneOffNote": "باقة النقاط تُضاف فوراً ولا يمكن إلغاؤها.",
       "items": {
         "credits_1000": {
-          "name": "1000 نقطة",
+          "name": "750 نقطة",
           "grants": "شحنة لمرة واحدة"
         },
         "agents_5": {
@@ -1037,6 +1035,15 @@
       "loaded": "العينة محمّلة. تظهر علامة على كل صفحة حتى تزيلها.",
       "notLoaded": "غير محمّلة.",
       "open": "اعرضها في الصفحة الرئيسية"
+    },
+    "displayName": {
+      "title": "بماذا نناديك؟",
+      "description": "يظهر في التحية على صفحتك الرئيسية. اكتبه تمامًا كما تريد أن نناديك.",
+      "placeholder": "اسمك",
+      "saved": "تم حفظ الاسم",
+      "saveFailed": "تعذّر حفظ الاسم. حاول مرة أخرى بعد قليل.",
+      "save": "حفظ",
+      "saving": "جارٍ الحفظ…"
     }
   },
   "dashboard": {
@@ -1282,7 +1289,10 @@
       "clarificationTitle": "سؤال سريع أولًا:",
       "clarificationSkip": "أجب على أي حال",
       "clarificationContinue": "إرسال",
-      "clarificationAnswerPlaceholder": "إجابتك..."
+      "clarificationAnswerPlaceholder": "إجابتك...",
+      "sources": {
+        "title": "المصادر"
+      }
     },
     "create": {
       "title": "إنشاء أي شيء",
@@ -3204,7 +3214,18 @@
     "watchFailed": "لا يمكن عرض التقدم الآن — العمل مستمر في الخلفية.",
     "stop": "إيقاف",
     "stopping": "جارٍ الإيقاف…",
-    "stopped": "تم الإيقاف. يُحتسب فقط العمل الذي أُنجز بالفعل."
+    "stopped": "تم الإيقاف. يُحتسب فقط العمل الذي أُنجز بالفعل.",
+    "timeline": {
+      "title": "ما الذي فعله",
+      "running": "قيد التنفيذ",
+      "evidence": {
+        "files": "{count, plural, zero {لا ملفات} one {ملف واحد} two {ملفان} few {# ملفات} many {# ملفًا} other {# ملف}}",
+        "parts": "{count, plural, zero {بلا أجزاء} one {في جزء واحد} two {في جزأين} few {في # أجزاء} many {في # جزءًا} other {في # جزء}}",
+        "planSteps": "{count, plural, zero {لا خطوات} one {خطوة واحدة} two {خطوتان} few {# خطوات} many {# خطوة} other {# خطوة}}",
+        "sources": "{count, plural, zero {لا مصادر} one {مصدر واحد} two {مصدران} few {# مصادر} many {# مصدرًا} other {# مصدر}}"
+      },
+      "writing": "كتابة التقرير"
+    }
   },
   "problem": {
     "out_of_credits": {
@@ -4116,7 +4137,12 @@
     "clearFailed": "لم ينجح ذلك."
   },
   "promise": {
-    "oneSentence": "الذكاء الاصطناعي الذي يعرف عملك بالفعل. اسأله أي شيء."
+    "oneSentence": "الذكاء الاصطناعي الذي يعرف عملك بالفعل. اسأله أي شيء.",
+    "greeting": {
+      "morning": "صباح الخير",
+      "afternoon": "مساء الخير",
+      "evening": "مساء الخير"
+    }
   },
   "legal": {
     "lastUpdated": "آخر تحديث: {date}",

@@ -527,18 +527,24 @@ check("a malformed ENTERPRISE_MIN_PRICE_EUR falls back to the default", (() => {
 })());
 
 // The invariant that makes Enterprise's credit half equal 1/M like every
-// other plan: it must never sell credits below the cheapest published
-// rate. Settlement already assumes this (effectiveCreditPriceEur falls
-// back to cheapestPublishedCreditPriceEur for a custom plan) — asserted
-// here so a future cheaper tier cannot silently invalidate the ceiling.
+// other plan: it settles at the rate its credits are sold at. Since
+// 2026-10-03 a credit is one size — every published monthly plan sells it
+// at the list price (scripts/tests/credit-size.test.mjs) — so Enterprise
+// settles at list too. Until then it settled at the cheapest published
+// rate, because Ultimate sold a credit at EUR 0.008.
 {
   const ent = PLANS.find((p) => p.slug === "enterprise");
   const entRate = formula.effectiveCreditPriceEur(ent, BASE_CONFIG);
-  const cheapest = formula.cheapestPublishedCreditPriceEur(BASE_CONFIG);
   check(
-    "Enterprise settles at the cheapest published rate, so its credit half is 1/M",
-    Math.abs(entRate - cheapest) < 1e-12,
-    `enterprise ${entRate}, cheapest published ${cheapest}`
+    "Enterprise settles at the list price, the rate every published plan sells a credit at, so its credit half is 1/M",
+    Math.abs(entRate - BASE_CONFIG.creditPriceEur) < 1e-12 &&
+      PLANS.every(
+        (p) =>
+          typeof p.price !== "number" ||
+          p.price <= 0 ||
+          Math.abs(p.price / p.monthlyCredits - BASE_CONFIG.creditPriceEur) < 1e-12
+      ),
+    `enterprise ${entRate}, list ${BASE_CONFIG.creditPriceEur}, plans ${PLANS.map((p) => `${p.slug} ${typeof p.price === "number" && p.price > 0 ? (p.price / p.monthlyCredits).toFixed(5) : "-"}`).join(", ")}`
   );
 }
 

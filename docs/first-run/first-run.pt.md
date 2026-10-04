@@ -1,8 +1,8 @@
 # The first run — pt
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **715 strings**. The whole product is 3427, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **718 strings**. The whole product is 3443, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 456 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 459 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -314,7 +314,7 @@ O Ionexa usa isto para escolher que passo do plano te sugerir — trabalho leve 
 
 Grátis — não é gerado nada, e remove com um clique
 
-## Tier 2 — The labels — skim these (456)
+## Tier 2 — The labels — skim these (459)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -3045,6 +3045,24 @@ Ver histórico de créditos
 > EN — Try again
 
 Tentar de novo
+
+**`promise.greeting.afternoon`**
+
+> EN — Good afternoon
+
+Boa tarde
+
+**`promise.greeting.evening`**
+
+> EN — Good evening
+
+Boa noite
+
+**`promise.greeting.morning`**
+
+> EN — Good morning
+
+Bom dia
 
 **`sampleData.load`**
 

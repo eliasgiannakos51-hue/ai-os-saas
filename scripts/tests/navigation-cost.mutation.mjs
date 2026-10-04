@@ -93,7 +93,7 @@ const MUTANTS = [
     // now asserts that ordering rather than the read's.
     name: "an un-onboarded account runs the whole page before being redirected",
     file: OVERVIEW,
-    from: '    redirect("/onboarding");',
+    from: "    redirect(onboardingTarget);",
     to: "",
     expect: "the onboarding check stays first",
   },

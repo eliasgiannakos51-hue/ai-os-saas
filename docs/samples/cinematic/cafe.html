@@ -1,0 +1,155 @@
+<title>Κόκκος Καφέ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Commissioner:wght@400;500&family=Noto+Naskh+Arabic:wght@400;600&display=swap">
+<style>
+/* Style A, the subject hero: one subject in a loop at the centre, bokeh
+   behind it, the brand word enormous behind that, the title on the left and
+   the real prices on stepped cards. A single look, the brand's own: dark
+   roast and cream, one copper accent. */
+:root{
+  --roast:#1d1410; --roast-2:#2a1d16; --cream:#f3e9dc; --milk:#cdbba8; --copper:#d08a52; --line:rgba(243,233,220,.14);
+  --sb-ink:#d08a52;
+  --display:"Literata","Noto Naskh Arabic",Georgia,serif;
+  --body:"Commissioner","Noto Naskh Arabic",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--roast);color:var(--cream);font:400 16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--copper);outline-offset:3px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:24px}
+header{position:absolute;inset-inline:0;top:0;z-index:5}
+.nav{display:flex;align-items:center;gap:28px;padding-block:22px}
+.logo{font:600 22px/1 var(--display);letter-spacing:.02em;text-decoration:none}
+.nav nav{display:flex;gap:22px;margin-inline-start:auto;font-size:14px;color:var(--milk)}
+.nav nav a{text-decoration:none}
+.btn{display:inline-block;border:0;border-radius:999px;padding:12px 22px;background:var(--copper);color:var(--roast);font:500 15px/1 var(--body);text-decoration:none;cursor:pointer}
+.btn.ghost{background:none;color:var(--cream);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* ---- the hero ---- */
+.hero{position:relative;min-height:max(680px,100svh);overflow:hidden;isolation:isolate}
+.bokeh{position:absolute;inset:-10% -5%;z-index:-3;background:
+  radial-gradient(closest-side,rgba(208,138,82,.38),transparent) 12% 22%/240px 240px no-repeat,
+  radial-gradient(closest-side,rgba(243,233,220,.16),transparent) 82% 18%/320px 320px no-repeat,
+  radial-gradient(closest-side,rgba(208,138,82,.24),transparent) 70% 74%/200px 200px no-repeat,
+  radial-gradient(closest-side,rgba(205,187,168,.14),transparent) 28% 80%/380px 380px no-repeat,
+  radial-gradient(closest-side,rgba(208,138,82,.2),transparent) 50% 40%/520px 520px no-repeat,
+  linear-gradient(180deg,var(--roast-2),var(--roast) 70%);filter:blur(6px)}
+.bigword{position:absolute;z-index:-2;inset-inline:0;top:18%;text-align:center;font:600 clamp(96px,21vw,330px)/.86 var(--display);letter-spacing:-.02em;color:rgba(243,233,220,.07);white-space:nowrap;pointer-events:none;user-select:none}
+.subject{position:absolute;z-index:-1;left:50%;top:50%;width:min(58vh,46vw);aspect-ratio:1;transform:translate(-50%,-46%)}
+.subject img,.subject .ix-canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.ix-live img{opacity:0}
+.num{direction:ltr;unicode-bidi:isolate}
+.sb-note{position:absolute;inset-inline-start:50%;bottom:-6px;transform:translateX(-50%);white-space:nowrap;font-size:11.5px;letter-spacing:.04em;color:var(--copper);background:rgba(29,20,16,.8);border:1px solid rgba(208,138,82,.4);border-radius:999px;padding:4px 10px}
+[dir="rtl"] .sb-note{transform:translateX(50%)}
+.hero-copy{position:absolute;inset-inline-start:max(24px,calc(50% - 566px));top:30%;max-width:min(390px,40vw)}
+.eyebrow{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--copper);margin:0 0 14px}
+h1{font:600 clamp(34px,4.4vw,56px)/1.06 var(--display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.lede{color:var(--milk);margin:16px 0 26px;max-width:34ch}
+.cta{display:flex;gap:10px;flex-wrap:wrap}
+.cards{position:absolute;inset-inline-end:max(24px,calc(50% - 566px));bottom:9%;display:grid;gap:12px;width:250px}
+.card{background:rgba(42,29,22,.78);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.card:nth-child(2){transform:translateX(-36px)}
+.card:nth-child(3){transform:translateX(-72px)}
+[dir="rtl"] .card:nth-child(2){transform:translateX(36px)}
+[dir="rtl"] .card:nth-child(3){transform:translateX(72px)}
+.card small{display:block;color:var(--milk);font-size:12.5px}
+.card b{font:600 20px/1.3 var(--display);font-variant-numeric:tabular-nums}
+
+/* ---- after the hero: quiet ---- */
+section.block{padding-block:88px;border-top:1px solid var(--line)}
+h2{font:600 clamp(28px,3vw,38px)/1.15 var(--display);margin:0 0 28px}
+.menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 48px}
+.item{display:flex;align-items:baseline;gap:12px;padding-block:12px;border-bottom:1px solid var(--line)}
+.item span{flex:1;min-width:0}
+.item small{display:block;color:var(--milk);font-size:13.5px}
+.item b{font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:48px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:8px 24px;margin:0}
+dt{color:var(--milk)} dd{margin:0;font-variant-numeric:tabular-nums}
+address{font-style:normal;line-height:1.8}
+footer{padding-block:36px;border-top:1px solid var(--line);color:var(--milk);font-size:13px}
+.sample-lang{position:fixed;z-index:20;inset-block-end:14px;inset-inline-end:14px;display:flex;gap:4px;background:rgba(29,20,16,.85);border:1px solid var(--line);border-radius:999px;padding:4px}
+.sample-lang button{border:0;background:none;color:var(--milk);border-radius:999px;padding:4px 10px;font:500 12px var(--body);cursor:pointer}
+.sample-lang button[aria-pressed="true"]{background:var(--cream);color:var(--roast)}
+@media (max-width:760px){
+  .nav nav{display:none}
+  /* On a phone the hero stacks: the words first, the subject under them,
+     the prices under that — nothing written over the picture. */
+  .hero{min-height:auto;padding-bottom:24px;display:flex;flex-direction:column}
+  .hero-copy{order:1;position:relative;top:auto;inset-inline:auto;max-width:none;padding:104px 24px 0}
+  .subject{order:2;position:relative;left:auto;top:auto;transform:none;margin:16px auto 0;width:min(78vw,340px)}
+  .cards{order:3;position:relative;inset:auto;bottom:auto;margin:8px 16px 0;width:auto;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .card:nth-child(3){grid-column:1/-1}
+  .card,.card:nth-child(n),[dir="rtl"] .card:nth-child(n){transform:none;padding:10px}
+  .card b{font-size:16px}
+  .bigword{top:auto;bottom:22%}
+  .menu,.two{grid-template-columns:minmax(0,1fr)}
+  section.block{padding-block:64px}
+}
+.ix-still .ix-canvas{display:none}
+</style>
+
+<header><div class="wrap nav">
+  <a class="logo" href="#top">Κόκκος</a>
+  <nav aria-label="Κύρια"><a href="#menu" data-t="nav1">Μενού</a><a href="#hours" data-t="nav2">Ώρες</a><a href="#where" data-t="nav3">Πού είμαστε</a></nav>
+  <a class="btn" href="#menu" data-t="order">Δες το μενού</a>
+</div></header>
+
+<main id="top">
+  <section class="hero" aria-labelledby="h">
+    <div class="bokeh" data-ix-depth="0.06" aria-hidden="true"></div>
+    <div class="bigword" data-ix-depth="0.16" aria-hidden="true">ΚΟΚΚΟΣ</div>
+    <div class="subject" data-ix="loop" data-frames="source:cup" data-count="48" data-fps="24" data-speed="1">
+      <img src="cup.png" alt="Φλιτζάνι espresso στο πιατάκι του, με ατμό που ανεβαίνει" data-tp="alt" width="1200" height="1200">
+      <span class="sb-note" data-t="sb">Storyboard · εδώ μπαίνει το AI βίντεο: φλιτζάνι με ατμό, loop 8 s</span>
+    </div>
+    <div class="hero-copy">
+      <p class="eyebrow" data-t="eyebrow">Θεσσαλονίκη · από το 2011</p>
+      <h1 id="h" data-t="h1">Καφές που τον ψήνουμε εδώ, κάθε πρωί.</h1>
+      <p class="lede" data-t="lede">Μικρές παρτίδες από τέσσερις φάρμες, ψημένες στο πίσω δωμάτιο και σερβιρισμένες όσο είναι φρέσκιες.</p>
+      <div class="cta"><a class="btn" href="#menu" data-t="cta1">Δες το μενού</a><a class="btn ghost" href="#where" data-t="cta2">Πώς θα έρθεις</a></div>
+    </div>
+    <div class="cards" data-ix-depth="-0.05">
+      <div class="card"><small data-t="c1">Freddo espresso</small><b class="num">3,20 €</b></div>
+      <div class="card"><small data-t="c2">Flat white</small><b class="num">3,60 €</b></div>
+      <div class="card"><small data-t="c3">Ανοιχτά σήμερα</small><b class="num">07:00–21:00</b></div>
+    </div>
+  </section>
+
+  <section class="block" id="menu" aria-labelledby="m"><div class="wrap">
+    <h2 id="m" data-t="menu">Μενού</h2>
+    <div class="menu">
+      <div class="item"><span>Espresso<small data-t="d1">διπλός, από το χαρμάνι της ημέρας</small></span><b class="num">2,40 €</b></div>
+      <div class="item"><span>Freddo espresso<small data-t="d2">με ή χωρίς ζάχαρη</small></span><b class="num">3,20 €</b></div>
+      <div class="item"><span>Flat white<small data-t="d3">διπλό ristretto, βελούδινο γάλα</small></span><b class="num">3,60 €</b></div>
+      <div class="item"><span>Filter V60<small data-t="d4">μονοποικιλιακός της εβδομάδας</small></span><b class="num">4,20 €</b></div>
+      <div class="item"><span data-t="i5">Ελληνικός<small>σκέτος, μέτριος ή γλυκός</small></span><b class="num">2,20 €</b></div>
+      <div class="item"><span data-t="i6">Κουλούρι Θεσσαλονίκης<small>από τον φούρνο της γωνίας</small></span><b class="num">1,20 €</b></div>
+      <div class="item"><span data-t="i7">Τσουρέκι με μαστίχα<small>φέτα, ζεσταμένη</small></span><b class="num">2,80 €</b></div>
+      <div class="item"><span data-t="i8">Καφές σε κόκκους, 250 g<small>για το σπίτι, αλεσμένος όπως τον θέλεις</small></span><b class="num">9,50 €</b></div>
+    </div>
+  </div></section>
+
+  <section class="block" aria-label="Ώρες και διεύθυνση" data-tp="infoLabel"><div class="wrap two">
+    <div id="hours"><h2 data-t="hours">Ώρες</h2>
+      <dl><dt data-t="wk">Δευτέρα–Παρασκευή</dt><dd class="num">07:00–21:00</dd><dt data-t="sat">Σάββατο</dt><dd class="num">08:00–22:00</dd><dt data-t="sun">Κυριακή</dt><dd class="num">09:00–20:00</dd></dl>
+    </div>
+    <div id="where"><h2 data-t="where">Πού είμαστε</h2>
+      <address data-t="addr">Ζεύξιδος 12, 546 22 Θεσσαλονίκη<br>τρία λεπτά από την Αριστοτέλους<br><a href="tel:+302310000000">2310 000 000</a> · <a href="https://www.openstreetmap.org/search?query=Ζεύξιδος%2012%20Θεσσαλονίκη">χάρτης</a></address>
+    </div>
+  </div></section>
+</main>
+
+<footer><div class="wrap" data-t="foot">Κόκκος Καφέ · παράδειγμα Ionexa, φανταστική επιχείρηση. Η εικόνα και το βίντεο της πρώτης οθόνης φτιάχνονται με AI.</div></footer>
+
+<div class="sample-lang" role="group" aria-label="Γλώσσα"><button type="button" data-lang="el" aria-pressed="true">EL</button><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="ar" aria-pressed="false">AR</button></div>
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CafeOrCoffeeShop","name":"Κόκκος Καφέ","servesCuisine":"Coffee","priceRange":"€","address":{"@type":"PostalAddress","streetAddress":"Ζεύξιδος 12","postalCode":"546 22","addressLocality":"Θεσσαλονίκη","addressCountry":"GR"},"openingHours":["Mo-Fr 07:00-21:00","Sa 08:00-22:00","Su 09:00-20:00"],"hasMenu":{"@type":"Menu","hasMenuSection":{"@type":"MenuSection","hasMenuItem":[{"@type":"MenuItem","name":"Freddo espresso","offers":{"@type":"Offer","price":"3.20","priceCurrency":"EUR"}},{"@type":"MenuItem","name":"Flat white","offers":{"@type":"Offer","price":"3.60","priceCurrency":"EUR"}}]}}}</script>
+<script type="application/json" id="i18n">{
+"en":{"nav1":"Menu","nav2":"Hours","nav3":"Find us","order":"See the menu","alt":"An espresso cup on its saucer, steam rising","sb":"Storyboard · the AI clip goes here: a cup with steam, 8 s loop","eyebrow":"Thessaloniki · since 2011","h1":"Coffee we roast here, every morning.","lede":"Small batches from four farms, roasted in the back room and served while they are fresh.","cta1":"See the menu","cta2":"How to get here","c1":"Freddo espresso","c2":"Flat white","c3":"Open today","menu":"Menu","d1":"double, from the house blend of the day","d2":"with or without sugar","d3":"double ristretto, silky milk","d4":"this week's single origin","i5":"Greek coffee<small>plain, medium or sweet</small>","i6":"Thessaloniki koulouri<small>from the bakery on the corner</small>","i7":"Tsoureki with mastic<small>a warm slice</small>","i8":"Coffee beans, 250 g<small>for home, ground the way you like</small>","infoLabel":"Hours and address","hours":"Hours","wk":"Monday–Friday","sat":"Saturday","sun":"Sunday","where":"Find us","addr":"12 Zefxidos St, 546 22 Thessaloniki<br>three minutes from Aristotelous Square<br><a href=\"tel:+302310000000\">+30 2310 000 000</a> · <a href=\"https://www.openstreetmap.org/search?query=Zefxidos%2012%20Thessaloniki\">map</a>","foot":"Kokkos Coffee · an Ionexa sample, a fictional business. The first screen's image and clip are made with AI."},
+"ar":{"nav1":"القائمة","nav2":"المواعيد","nav3":"موقعنا","order":"اطّلع على القائمة","alt":"فنجان إسبريسو على صحنه يتصاعد منه البخار","sb":"لوحة قصصية · هنا يوضع مقطع الذكاء الاصطناعي: فنجان مع بخار، حلقة 8 ثوانٍ","eyebrow":"ثيسالونيكي · منذ 2011","h1":"قهوة نحمّصها هنا، كل صباح.","lede":"دفعات صغيرة من أربع مزارع، تُحمَّص في الغرفة الخلفية وتُقدَّم وهي طازجة.","cta1":"اطّلع على القائمة","cta2":"كيف تصل إلينا","c1":"فريدو إسبريسو","c2":"فلات وايت","c3":"مفتوح اليوم","menu":"القائمة","d1":"مزدوج، من خلطة اليوم","d2":"بسكر أو من دونه","d3":"ريستريتو مزدوج وحليب ناعم","d4":"قهوة أحادية المصدر لهذا الأسبوع","i5":"قهوة يونانية<small>سادة أو وسط أو حلوة</small>","i6":"كولوري ثيسالونيكي<small>من المخبز عند الزاوية</small>","i7":"تسوريكي بالمستكة<small>شريحة دافئة</small>","i8":"حبوب قهوة، 250 غ<small>للبيت، تُطحن كما تحب</small>","infoLabel":"المواعيد والعنوان","hours":"المواعيد","wk":"الاثنين–الجمعة","sat":"السبت","sun":"الأحد","where":"موقعنا","addr":"شارع زيفكسيدوس 12، 546 22 ثيسالونيكي<br>على بعد ثلاث دقائق من ساحة أرسطوطاليس<br><a href=\"tel:+302310000000\">‎+30 2310 000 000</a> · <a href=\"https://www.openstreetmap.org/search?query=Zefxidos%2012%20Thessaloniki\">الخريطة</a>","foot":"مقهى كوكوس · نموذج من Ionexa لنشاط تجاري خيالي. صورة الشاشة الأولى ومقطعها مصنوعان بالذكاء الاصطناعي."}
+}</script>
+<script src="sample.js"></script>
+<script src="ionexa-players.js"></script>

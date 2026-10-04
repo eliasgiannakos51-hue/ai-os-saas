@@ -307,6 +307,13 @@ async function grantAddon(session: Stripe.Checkout.Session, eventId: string) {
       );
       if (!granted) {
         diagLog(`[webhook-diag] duplicate addon credit grant suppressed session=${session.id} event=${eventId}`);
+      } else {
+        // What these credits cost, recorded like a pack's (below), so the
+        // margin a settlement reports is taken on what was actually paid.
+        // It was never recorded for the add-on, and since 2026-10-03 the
+        // charge is one size for everyone — this is the only place a
+        // cheaper credit can still be seen.
+        await recordPackPurchaseRate(supabaseUserId, ADDONS[slug].priceEur / grants.amount);
       }
     } catch (err) {
       logApiError("/api/webhooks/stripe", err, { stage: "grant_addon_credits", slug });

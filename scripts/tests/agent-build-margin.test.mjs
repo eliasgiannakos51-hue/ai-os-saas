@@ -1,7 +1,8 @@
 // "agent_build χρεώνει 2.03x — χάνουμε χρήματα σε κάθε build."
 //
 // Reported: a build that really cost $0.06 was charged 14 credits, where
-// 4x on Ultimate's €0.008/credit is 28. The settlement had apparently
+// 4x on Ultimate's €0.008/credit is 28 (Ultimate as sold until
+// 2026-10-03: 25,000 credits for EUR 200). The settlement had apparently
 // "seen" $0.0304 — almost exactly half. agent_run, measured the same way,
 // read a healthy 4.35x.
 //
@@ -62,6 +63,16 @@ const REPORTED_CREDITS = 14;
 const REPORTED_MARGIN = 2.03;
 const EXPECTED_CREDITS = 28;
 
+// ULTIMATE AS IT WAS SOLD WHEN THE REPORT WAS FILED: 25,000 credits for
+// EUR 200, EUR 0.008 a credit. Frozen here, not read from PLANS — since
+// 2026-10-03 a credit is one size (EUR 0.02 on every plan, Ultimate 10,000),
+// and none of the reported figures reproduces at the new size.
+const ULTIMATE_AS_REPORTED = { slug: "ultimate", price: 200, monthlyCredits: 25_000 };
+// What "28 credits" MEANT, in a unit that did not change size: the money.
+// A requirement stated in credits stops meaning anything the day a credit
+// changes size; the euros the report asked for are still the euros.
+const EXPECTED_REVENUE_EUR = EXPECTED_CREDITS * (ULTIMATE_AS_REPORTED.price / ULTIMATE_AS_REPORTED.monthlyCredits);
+
 // THE MULTIPLIER THE INCIDENT HAPPENED AT.
 //
 // Pinned as a literal rather than read from PLAN_MARGIN_DEFAULTS, because
@@ -80,8 +91,8 @@ const EXPECTED_CREDITS = 28;
 const INCIDENT_MARGIN = 4;
 
 /** Settlement for one measured cost on one plan, at an explicit margin. */
-function settleAtMargin(slug, usd, margin, pack = null) {
-  const plan = getPlan(slug);
+function settleAtMargin(planOrSlug, usd, margin, pack = null) {
+  const plan = typeof planOrSlug === "string" ? getPlan(planOrSlug) : planOrSlug;
   const eur = cf.usdToEur(usd, C);
   const credits = cf.creditsForRealCostOnAccount(eur, plan, pack, C, margin);
   const rate = cf.effectiveCreditPriceEurForAccount(plan, pack, C);
@@ -146,10 +157,10 @@ console.log("\n== 2. THE REPORTED NUMBERS, reproduced exactly ==");
 // Every reported figure falls out of one assumption: the account is on a
 // €0.008/credit rate (Ultimate or Enterprise) and the settlement measured
 // $0.0304 rather than $0.06.
-const full = settleAtMargin("ultimate", REPORTED_TOTAL_USD, INCIDENT_MARGIN);
-const half = settleAtMargin("ultimate", REPORTED_SETTLED_USD, INCIDENT_MARGIN);
+const full = settleAtMargin(ULTIMATE_AS_REPORTED, REPORTED_TOTAL_USD, INCIDENT_MARGIN);
+const half = settleAtMargin(ULTIMATE_AS_REPORTED, REPORTED_SETTLED_USD, INCIDENT_MARGIN);
 check(
-  `€${full.rate}/credit is Ultimate's rate, the divisor in the report`,
+  `€${full.rate}/credit was Ultimate's rate, the divisor in the report`,
   Math.abs(full.rate - 0.008) < 1e-9
 );
 check(
@@ -192,8 +203,8 @@ for (const plan of PLANS) {
 }
 const ultimate = settle("agent_build", "ultimate", REPORTED_TOTAL_USD);
 check(
-  `on Ultimate specifically: at least the ${EXPECTED_CREDITS} credits the report asked for (${ultimate.credits})`,
-  ultimate.credits >= EXPECTED_CREDITS,
+  `on Ultimate specifically: at least the €${EXPECTED_REVENUE_EUR.toFixed(3)} the report's ${EXPECTED_CREDITS} credits were worth (${ultimate.credits} x €${ultimate.rate} = €${(ultimate.credits * ultimate.rate).toFixed(3)})`,
+  ultimate.credits * ultimate.rate >= EXPECTED_REVENUE_EUR - 1e-9,
   `got ${ultimate.credits} at the live margin ${ultimate.target}x`
 );
 check(`and the margin is >= 4x (${ultimate.achieved.toFixed(3)}x)`, ultimate.achieved >= 4 - 1e-9);
@@ -213,11 +224,13 @@ for (const plan of PLANS) {
     `live margin ${live.target}x charged ${live.credits}, floor would charge ${atFloor.credits}`
   );
 }
-// The same requirement with a credit pack in play, which is the cheapest
-// rate any account can reach.
-const packed = settle("agent_build", "ultimate", REPORTED_TOTAL_USD, 100 / 8000);
+// The same requirement with a credit pack in play: the pack on sale with
+// the largest bonus is the least revenue a credit can bring in.
+const { CREDIT_PACKS } = await loadTs("src/lib/billing/plans.ts");
+const cheapestPack = Math.min(...CREDIT_PACKS.map((p) => p.price / p.credits));
+const packed = settle("agent_build", "ultimate", REPORTED_TOTAL_USD, cheapestPack);
 check(
-  `with the cheapest pack (€0.0125) it charges ${packed.credits} and still makes ${packed.achieved.toFixed(2)}x`,
+  `with the cheapest pack on sale (€${cheapestPack.toFixed(4)}) it charges ${packed.credits} and still makes ${packed.achieved.toFixed(2)}x`,
   packed.achieved >= 4 - 1e-9
 );
 
@@ -256,8 +269,8 @@ check(
   "if this ever fails, splitting an action really does leak margin"
 );
 check(
-  `and together they charge ${roundA.credits + roundB.credits} credits, at least the ${EXPECTED_CREDITS} a single row would`,
-  roundA.credits + roundB.credits >= EXPECTED_CREDITS
+  `and together they bring in €${combinedRevenue.toFixed(3)}, at least the €${EXPECTED_REVENUE_EUR.toFixed(3)} a single row would have`,
+  combinedRevenue >= EXPECTED_REVENUE_EUR - 1e-9
 );
 
 // ---------------------------------------------------------------------------
@@ -354,7 +367,8 @@ console.log(
 );
 check(`a real build settles at >= 4x (${realBuild.achieved.toFixed(2)}x)`, realBuild.achieved >= 4 - 1e-9);
 
-// Scaled up to the reported $0.06 with the SAME shape, the charge is 28.
+// Scaled up to the reported $0.06 with the SAME shape, the charge is worth
+// at least what the report's 28 credits were.
 const scale = REPORTED_TOTAL_USD / totals.usdCost;
 const scaled = new CostAccumulator();
 scaled.record("clarification", { input_tokens: Math.round(1_100 * scale), output_tokens: Math.round(90 * scale) }, MODEL);
@@ -362,8 +376,8 @@ scaled.record("generation", { input_tokens: Math.round(1_400 * scale), output_to
 const scaledCost = scaled.totals().usdCost;
 const scaledSettle = settle("agent_build", "ultimate", scaledCost);
 check(
-  `a $${scaledCost.toFixed(4)} build charges ${scaledSettle.credits} credits (>= ${EXPECTED_CREDITS}) at ${scaledSettle.achieved.toFixed(2)}x`,
-  scaledSettle.credits >= EXPECTED_CREDITS && scaledSettle.achieved >= 4 - 1e-9
+  `a $${scaledCost.toFixed(4)} build charges ${scaledSettle.credits} credits (€${(scaledSettle.credits * scaledSettle.rate).toFixed(3)} >= €${EXPECTED_REVENUE_EUR.toFixed(3)}) at ${scaledSettle.achieved.toFixed(2)}x`,
+  scaledSettle.credits * scaledSettle.rate >= EXPECTED_REVENUE_EUR - 1e-9 && scaledSettle.achieved >= 4 - 1e-9
 );
 
 // ---------------------------------------------------------------------------

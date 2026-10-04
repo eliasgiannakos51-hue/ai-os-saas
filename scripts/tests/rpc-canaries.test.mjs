@@ -71,6 +71,11 @@ const CANARY_WITHOUT_CALLER = {
     "search_all_localized now, but unified-search.dbtest.mjs re-runs the " +
     "20260824 migration to prove it is safe to apply twice, and that file " +
     "re-creates this signature — so its absence is still a real signal.",
+  chat_memory_fold:
+    "the SQL twin of memoryFold() in lib/chat/memory-fold.ts. The app " +
+    "computes the fold itself and never calls this; 20261004100000 uses it " +
+    "to re-fold the stored rows. The canary says whether that migration " +
+    "was pasted, which is the only way to know it ran.",
 };
 
 // ---------------------------------------------------------------------

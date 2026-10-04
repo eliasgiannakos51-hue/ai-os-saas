@@ -703,9 +703,7 @@
       "description": "为整个应用选择配色方案——布局和强调色保持不变。",
       "options": {
         "dark": "深色",
-        "light": "浅色",
-        "midnight": "午夜蓝",
-        "carbon": "石墨灰"
+        "light": "浅色"
       }
     },
     "language": {
@@ -1010,7 +1008,7 @@
       "oneOffNote": "额度包即时到账，无法取消。",
       "items": {
         "credits_1000": {
-          "name": "1,000 点额度",
+          "name": "750 点额度",
           "grants": "一次性充值"
         },
         "agents_5": {
@@ -1037,6 +1035,15 @@
       "loaded": "示例已加载。在你移除之前，每个页面都会有标记。",
       "notLoaded": "未加载。",
       "open": "在首页查看"
+    },
+    "displayName": {
+      "title": "我们该怎么称呼你？",
+      "description": "用于主页上的问候语。请按你希望被称呼的方式填写。",
+      "placeholder": "你的名字",
+      "saved": "名字已保存",
+      "saveFailed": "无法保存名字，请稍后再试。",
+      "save": "保存",
+      "saving": "正在保存…"
     }
   },
   "dashboard": {
@@ -1282,7 +1289,10 @@
       "clarificationTitle": "先问一个小问题：",
       "clarificationSkip": "直接回答就好",
       "clarificationContinue": "发送",
-      "clarificationAnswerPlaceholder": "你的回答……"
+      "clarificationAnswerPlaceholder": "你的回答……",
+      "sources": {
+        "title": "来源"
+      }
     },
     "create": {
       "title": "创建任何内容",
@@ -3204,7 +3214,18 @@
     "watchFailed": "目前无法显示进度 — 任务仍在后台继续。",
     "stop": "停止",
     "stopping": "正在停止…",
-    "stopped": "已停止。只按已完成的工作计费。"
+    "stopped": "已停止。只按已完成的工作计费。",
+    "timeline": {
+      "title": "完成了哪些步骤",
+      "running": "进行中",
+      "evidence": {
+        "files": "{count, plural, other {# 个文件}}",
+        "parts": "{count, plural, other {分 # 部分}}",
+        "planSteps": "{count, plural, other {# 个步骤}}",
+        "sources": "{count, plural, other {# 个来源}}"
+      },
+      "writing": "撰写报告"
+    }
   },
   "problem": {
     "out_of_credits": {
@@ -4116,7 +4137,12 @@
     "clearFailed": "没有成功。"
   },
   "promise": {
-    "oneSentence": "已经了解你工作的 AI。什么都可以问它。"
+    "oneSentence": "已经了解你工作的 AI。什么都可以问它。",
+    "greeting": {
+      "morning": "早上好",
+      "afternoon": "下午好",
+      "evening": "晚上好"
+    }
   },
   "legal": {
     "lastUpdated": "最后更新：{date}",

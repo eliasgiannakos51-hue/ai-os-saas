@@ -1,0 +1,145 @@
+<title>Αιθρία Suites Οία</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Manrope:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;600&display=swap">
+<style>
+/* Style B, the scroll build: one tall section whose scroll drives an image
+   sequence — the hotel rising out of the caldera as the sun goes down —
+   and then the ordinary page, quiet. A single look: whitewash, Aegean ink,
+   one dusk amber. */
+:root{
+  --lime:#f6f3ee; --lime-2:#ece6dc; --ink:#1d2733; --aegean:#1c3a5e; --dusk:#e08a3c; --muted:#56606c; --line:rgba(29,39,51,.14);
+  --sb-ink:#1c3a5e; --sb-sun:#e08a3c;
+  --display:"GFS Didot","Noto Naskh Arabic",Georgia,serif;
+  --body:"Manrope","Noto Naskh Arabic",system-ui,sans-serif;
+  color-scheme:light;
+}
+body{margin:0;background:var(--lime);color:var(--ink);font:400 16px/1.65 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--aegean);outline-offset:3px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:24px}
+header{position:absolute;inset-inline:0;top:0;z-index:5}
+.nav{display:flex;align-items:center;gap:28px;padding-block:22px}
+.logo{font:400 26px/1 var(--display);text-decoration:none;letter-spacing:.04em}
+.nav nav{display:flex;gap:22px;margin-inline-start:auto;font-size:14px;color:var(--muted)}
+.nav nav a{text-decoration:none}
+.btn{display:inline-block;border:0;border-radius:2px;padding:13px 22px;background:var(--aegean);color:#fff;font:600 14px/1 var(--body);letter-spacing:.04em;text-decoration:none;cursor:pointer}
+
+/* ---- the scroll build ---- */
+.ix-scrub{position:relative;height:320svh}
+.stage{position:sticky;top:0;height:100svh;overflow:hidden}
+.seq{position:absolute;inset:0}
+.seq img,.seq .ix-canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ix-live img{opacity:0}
+.num{direction:ltr;unicode-bidi:isolate}
+/* The title sits on the side the PICTURE leaves free — the sky on the left —
+   whatever the reading direction: a photograph of Oia cannot be mirrored for
+   Arabic, so the block stays left and only its text runs right to left. */
+.title{position:absolute;left:max(24px,calc(50% - 566px));top:16%;max-width:520px}
+.title p{margin:0 0 10px;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+h1{font:400 clamp(44px,6.4vw,92px)/.98 var(--display);margin:0;letter-spacing:-.005em}
+.title span{display:block;margin-top:16px;font-size:17px;color:var(--muted);max-width:34ch}
+.hint{position:absolute;inset-inline:0;bottom:26px;text-align:center;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.sb-note{position:absolute;right:max(24px,calc(50% - 566px));top:16%;font-size:11.5px;color:var(--aegean);border:1px solid rgba(28,58,94,.35);border-radius:999px;padding:4px 10px;background:rgba(246,243,238,.85);max-width:min(300px,70vw)}
+
+/* ---- the ordinary page ---- */
+section.block{padding-block:96px;border-top:1px solid var(--line)}
+h2{font:400 clamp(32px,3.6vw,48px)/1.1 var(--display);margin:0 0 32px}
+.rooms{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.room{background:var(--lime-2);padding:20px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.room h3{font:400 24px/1.15 var(--display);margin:0}
+.room p{margin:0;color:var(--muted);font-size:14px}
+.room b{margin-top:auto;padding-top:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.room b small{font-weight:400;color:var(--muted)}
+form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:12px;align-items:end;background:var(--lime-2);padding:20px}
+label{display:grid;gap:6px;font-size:13px;color:var(--muted)}
+input,select{font:inherit;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:2px;padding:10px 12px;min-width:0}
+form output{grid-column:1/-1;font-size:14px;color:var(--aegean)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:48px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:8px 24px;margin:0}
+dt{color:var(--muted)} dd{margin:0;font-variant-numeric:tabular-nums}
+address{font-style:normal;line-height:1.9}
+footer{padding-block:36px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+.sample-lang{position:fixed;z-index:20;inset-block-end:14px;inset-inline-end:14px;display:flex;gap:4px;background:rgba(246,243,238,.92);border:1px solid var(--line);border-radius:999px;padding:4px}
+.sample-lang button{border:0;background:none;color:var(--muted);border-radius:999px;padding:4px 10px;font:600 12px var(--body);cursor:pointer}
+.sample-lang button[aria-pressed="true"]{background:var(--ink);color:var(--lime)}
+@media (max-width:900px){ .rooms{grid-template-columns:repeat(2,minmax(0,1fr))} form{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:760px){
+  .nav nav{display:none}
+  .ix-scrub{height:240svh}
+  .title{top:11%;left:24px;right:24px}
+  .sb-note{top:42%;bottom:auto;left:24px;right:24px;max-width:none}
+  .rooms,.two,form{grid-template-columns:minmax(0,1fr)}
+  section.block{padding-block:64px}
+}
+/* No motion: the build is one picture, and the page does not need a tall
+   section to scroll through to reach it. */
+.ix-still .ix-scrub{height:auto}
+.ix-still .stage{position:relative;height:max(640px,100svh)}
+.ix-still .ix-canvas{display:none}
+</style>
+
+<header><div class="wrap nav">
+  <a class="logo" href="#top">Αιθρία</a>
+  <nav aria-label="Κύρια"><a href="#rooms" data-t="nav1">Σουίτες</a><a href="#book" data-t="nav2">Κράτηση</a><a href="#where" data-t="nav3">Πού είμαστε</a></nav>
+  <a class="btn" href="#book" data-t="book">Κράτηση</a>
+</div></header>
+
+<main id="top">
+  <section class="ix-scrub" aria-labelledby="h">
+    <div class="stage">
+      <div class="seq" data-ix="sequence" data-frames="source:hotel" data-count="48" data-count-mobile="32">
+        <picture><source media="(max-width:760px)" srcset="hotel-mobile.png"><img src="hotel.png" alt="Λευκά σπίτια στην καλντέρα της Οίας την ώρα που δύει ο ήλιος, με έναν μπλε τρούλο" data-tp="alt" width="1600" height="1000"></picture>
+      </div>
+      <div class="title">
+        <p data-t="eyebrow">Οία · Σαντορίνη</p>
+        <h1 id="h">Αιθρία Suites</h1>
+        <span data-t="lede">Δεκατέσσερις σουίτες σκαμμένες στον βράχο, με τη θέα που έρχεται ο κόσμος να δει.</span>
+      </div>
+      <p class="sb-note" data-t="sb">Storyboard · εδώ μπαίνουν τα καρέ του AI βίντεο: το ξενοδοχείο υψώνεται στην καλντέρα, 8 s, 48 καρέ</p>
+      <p class="hint" aria-hidden="true" data-t="hint">Κύλισε</p>
+    </div>
+  </section>
+
+  <section class="block" id="rooms" aria-labelledby="r"><div class="wrap">
+    <h2 id="r" data-t="rooms">Οι σουίτες</h2>
+    <div class="rooms">
+      <article class="room"><h3 data-t="r1">Κλασικό Δίκλινο</h3><p data-t="r1d">22 m² · 2 άτομα · θέα στο χωριό</p><b><span class="num">260 €</span> <small data-t="night">/ βράδυ</small></b></article>
+      <article class="room"><h3 data-t="r2">Σουίτα Σπηλιά</h3><p data-t="r2d">38 m² · 2 άτομα · θέα στην καλντέρα</p><b><span class="num">420 €</span> <small data-t="night">/ βράδυ</small></b></article>
+      <article class="room"><h3 data-t="r3">Σουίτα Καλντέρας</h3><p data-t="r3d">46 m² · 3 άτομα · ιδιωτική πισίνα</p><b><span class="num">560 €</span> <small data-t="night">/ βράδυ</small></b></article>
+      <article class="room"><h3 data-t="r4">Βίλα Μέλιτος</h3><p data-t="r4d">70 m² · 2 άτομα · τζακούζι, ηλιοβασίλεμα</p><b><span class="num">780 €</span> <small data-t="night">/ βράδυ</small></b></article>
+    </div>
+  </div></section>
+
+  <section class="block" id="book" aria-labelledby="b"><div class="wrap">
+    <h2 id="b" data-t="bookh">Κράτηση</h2>
+    <form>
+      <label><span data-t="in">Άφιξη</span><input id="in" type="date" value="2027-06-14"></label>
+      <label><span data-t="out">Αναχώρηση</span><input id="out" type="date" value="2027-06-18"></label>
+      <label><span data-t="guests">Άτομα</span><select id="guests"><option>2</option><option>3</option></select></label>
+      <button class="btn" type="submit" data-t="check">Έλεγχος διαθεσιμότητας</button>
+      <output hidden data-t="sampleForm">Σε αυτό το δείγμα δεν γίνεται κράτηση. Στο κανονικό site εδώ συνδέεται το σύστημα κρατήσεων του ξενοδοχείου.</output>
+    </form>
+  </div></section>
+
+  <section class="block" aria-label="Πληροφορίες" data-tp="infoLabel"><div class="wrap two">
+    <div><h2 data-t="info">Καλό να ξέρεις</h2>
+      <dl><dt data-t="ci">Check-in</dt><dd class="num">15:00</dd><dt data-t="co">Check-out</dt><dd class="num">11:00</dd><dt data-t="air">Αεροδρόμιο</dt><dd data-t="airv">22 km · 30 λεπτά</dd><dt data-t="port">Λιμάνι Αθηνιού</dt><dd data-t="portv">26 km · 35 λεπτά</dd><dt data-t="season">Ανοιχτά</dt><dd data-t="seasonv">Απρίλιο–Οκτώβριο</dd></dl>
+    </div>
+    <div id="where"><h2 data-t="where">Πού είμαστε</h2>
+      <address data-t="addr">Οία, 847 02 Σαντορίνη<br>στον δρόμο προς το Κάστρο<br><a href="tel:+302286000000">22860 00000</a> · <a href="https://www.openstreetmap.org/search?query=Oia%20Santorini">χάρτης</a></address>
+    </div>
+  </div></section>
+</main>
+
+<footer><div class="wrap" data-t="foot">Αιθρία Suites · παράδειγμα Ionexa, φανταστική επιχείρηση. Η σκηνή της πρώτης οθόνης φτιάχνεται με AI.</div></footer>
+
+<div class="sample-lang" role="group" aria-label="Γλώσσα"><button type="button" data-lang="el" aria-pressed="true">EL</button><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="ar" aria-pressed="false">AR</button></div>
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Hotel","name":"Αιθρία Suites","address":{"@type":"PostalAddress","addressLocality":"Οία","postalCode":"847 02","addressRegion":"Σαντορίνη","addressCountry":"GR"},"checkinTime":"15:00","checkoutTime":"11:00","numberOfRooms":14,"priceRange":"260–780 €","makesOffer":[{"@type":"Offer","name":"Σουίτα Σπηλιά","price":"420","priceCurrency":"EUR"},{"@type":"Offer","name":"Σουίτα Καλντέρας","price":"560","priceCurrency":"EUR"}]}</script>
+<script type="application/json" id="i18n">{
+"en":{"nav1":"Suites","nav2":"Book","nav3":"Find us","book":"Book","alt":"White houses on the Oia caldera at sunset, with a blue dome","eyebrow":"Oia · Santorini","lede":"Fourteen suites cut into the rock, with the view people come here to see.","sb":"Storyboard · the AI clip's frames go here: the hotel rising on the caldera, 8 s, 48 frames","hint":"Scroll","rooms":"The suites","r1":"Classic Double","r1d":"22 m² · 2 guests · village view","r2":"Cave Suite","r2d":"38 m² · 2 guests · caldera view","r3":"Caldera Suite","r3d":"46 m² · 3 guests · private pool","r4":"Villa Melitos","r4d":"70 m² · 2 guests · hot tub, sunset","night":"/ night","bookh":"Book","in":"Arrival","out":"Departure","guests":"Guests","check":"Check availability","sampleForm":"Nothing is booked in this sample. On the real site the hotel's booking system connects here.","infoLabel":"Information","info":"Good to know","ci":"Check-in","co":"Check-out","air":"Airport","airv":"22 km · 30 minutes","port":"Athinios port","portv":"26 km · 35 minutes","season":"Open","seasonv":"April–October","where":"Find us","addr":"Oia, 847 02 Santorini<br>on the road to the Castle<br><a href=\"tel:+302286000000\">+30 22860 00000</a> · <a href=\"https://www.openstreetmap.org/search?query=Oia%20Santorini\">map</a>","foot":"Aithria Suites · an Ionexa sample, a fictional business. The first screen's scene is made with AI."},
+"ar":{"nav1":"الأجنحة","nav2":"الحجز","nav3":"موقعنا","book":"احجز","alt":"بيوت بيضاء على كالديرا أويا عند الغروب مع قبة زرقاء","eyebrow":"أويا · سانتوريني","lede":"أربعة عشر جناحًا محفورًا في الصخر، مع الإطلالة التي يأتي الناس لرؤيتها.","sb":"لوحة قصصية · هنا توضع إطارات مقطع الذكاء الاصطناعي: الفندق يرتفع على الكالديرا، 8 ثوانٍ، 48 إطارًا","hint":"مرّر","rooms":"الأجنحة","r1":"غرفة مزدوجة كلاسيكية","r1d":"22 م² · شخصان · إطلالة على القرية","r2":"جناح الكهف","r2d":"38 م² · شخصان · إطلالة على الكالديرا","r3":"جناح الكالديرا","r3d":"46 م² · 3 أشخاص · مسبح خاص","r4":"فيلا ميليتوس","r4d":"70 م² · شخصان · جاكوزي وغروب","night":"/ الليلة","bookh":"الحجز","in":"الوصول","out":"المغادرة","guests":"الأشخاص","check":"تحقّق من التوفر","sampleForm":"لا يتم أي حجز في هذا النموذج. في الموقع الحقيقي يتصل هنا نظام حجوزات الفندق.","infoLabel":"معلومات","info":"معلومات مفيدة","ci":"تسجيل الوصول","co":"تسجيل المغادرة","air":"المطار","airv":"22 كم · 30 دقيقة","port":"ميناء أثينيوس","portv":"26 كم · 35 دقيقة","season":"مفتوح","seasonv":"أبريل–أكتوبر","where":"موقعنا","addr":"أويا، 847 02 سانتوريني<br>على الطريق إلى القلعة<br><a href=\"tel:+302286000000\">‎+30 22860 00000</a> · <a href=\"https://www.openstreetmap.org/search?query=Oia%20Santorini\">الخريطة</a>","foot":"أجنحة إيثريا · نموذج من Ionexa لنشاط تجاري خيالي. مشهد الشاشة الأولى مصنوع بالذكاء الاصطناعي."}
+}</script>
+<script src="sample.js"></script>
+<script src="ionexa-players.js"></script>

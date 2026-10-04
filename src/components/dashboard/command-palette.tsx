@@ -457,7 +457,7 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
         role="dialog"
         aria-modal="true"
         aria-label={tCommon("commandPalette")}
-        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-panel"
+        className="palette-enter relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-panel"
       >
         <div className="relative border-b border-border">
           <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />

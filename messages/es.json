@@ -703,9 +703,7 @@
       "description": "Elige una paleta de colores para toda la app — el diseño y el color de acento se mantienen igual.",
       "options": {
         "dark": "Oscuro",
-        "light": "Claro",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "Claro"
       }
     },
     "language": {
@@ -1010,7 +1008,7 @@
       "oneOffNote": "Un paquete de créditos se entrega al instante y no se puede cancelar.",
       "items": {
         "credits_1000": {
-          "name": "1.000 créditos",
+          "name": "750 créditos",
           "grants": "recarga única"
         },
         "agents_5": {
@@ -1037,6 +1035,15 @@
       "loaded": "La muestra está cargada. Se marca en todas las páginas hasta que la quites.",
       "notLoaded": "No cargada.",
       "open": "Verla en Inicio"
+    },
+    "displayName": {
+      "title": "¿Cómo quieres que te llamemos?",
+      "description": "Aparece en el saludo de tu página de inicio. Escríbelo tal como quieres que te llamen.",
+      "placeholder": "Tu nombre",
+      "saved": "Nombre guardado",
+      "saveFailed": "No pudimos guardar el nombre. Inténtalo de nuevo en un momento.",
+      "save": "Guardar",
+      "saving": "Guardando…"
     }
   },
   "dashboard": {
@@ -1282,7 +1289,10 @@
       "clarificationTitle": "Una pregunta rápida primero:",
       "clarificationSkip": "Respóndelo igualmente",
       "clarificationContinue": "Enviar",
-      "clarificationAnswerPlaceholder": "Tu respuesta..."
+      "clarificationAnswerPlaceholder": "Tu respuesta...",
+      "sources": {
+        "title": "Fuentes"
+      }
     },
     "create": {
       "title": "Crear Cualquier Cosa",
@@ -3204,7 +3214,18 @@
     "watchFailed": "El progreso no se puede mostrar ahora mismo; el trabajo continúa en segundo plano.",
     "stop": "Detener",
     "stopping": "Deteniendo…",
-    "stopped": "Detenido. Solo se cobra el trabajo ya hecho."
+    "stopped": "Detenido. Solo se cobra el trabajo ya hecho.",
+    "timeline": {
+      "title": "Qué hizo",
+      "running": "en curso",
+      "evidence": {
+        "files": "{count, plural, one {# archivo} other {# archivos}}",
+        "parts": "{count, plural, one {en # parte} other {en # partes}}",
+        "planSteps": "{count, plural, one {# paso} other {# pasos}}",
+        "sources": "{count, plural, one {# fuente} other {# fuentes}}"
+      },
+      "writing": "Redactando el informe"
+    }
   },
   "problem": {
     "out_of_credits": {
@@ -4116,7 +4137,12 @@
     "clearFailed": "No funcionó."
   },
   "promise": {
-    "oneSentence": "La IA que ya conoce tu trabajo. Pregúntale lo que sea."
+    "oneSentence": "La IA que ya conoce tu trabajo. Pregúntale lo que sea.",
+    "greeting": {
+      "morning": "Buenos días",
+      "afternoon": "Buenas tardes",
+      "evening": "Buenas noches"
+    }
   },
   "legal": {
     "lastUpdated": "última actualización: {date}",

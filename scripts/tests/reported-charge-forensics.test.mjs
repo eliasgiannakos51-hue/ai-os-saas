@@ -6,8 +6,9 @@
 // The report assumed Enterprise's rate (EUR 0.008/credit):
 //     110 x 0.008 = EUR 0.88 revenue against EUR 0.40 cost = 2.2x.
 //
-// That multiplication is right. The premise is not: on Enterprise, a $0.44
-// generation is charged 203 credits, not 110. 110 credits for $0.44 is
+// That multiplication is right. The premise is not: on Enterprise (as
+// priced then — every rate in this file is the reported-era one), a $0.44
+// generation was charged 203 credits, not 110. 110 credits for $0.44 was
 // produced by exactly one plan in the product — Growth — and at Growth's
 // own rate (EUR 0.0166.../credit, 4.5x) it achieves 4.53x, which is ABOVE
 // target rather than half of it.
@@ -70,21 +71,44 @@ const INCIDENT_PLAN_MARGINS = {
   enterprise: 4,
 };
 
-function chargeAt(slug, margin) {
-  const plan = getPlan(slug);
-  const credits = cf.creditsForRealCostOnAccount(eur, plan, null, config, margin);
-  const achieved = cf.achievedMarginOnAccount(credits, eur, plan, null, config);
-  return { credits, achieved, margin, rate: cf.effectiveCreditPriceEur(plan, config) };
+// THE PRICE OF A CREDIT ON EACH PLAN WHEN THE REPORT WAS FILED — before
+// annual billing, and before 2026-10-03 made a credit one size (EUR 0.02)
+// on every plan. Frozen as data for the same reason as the margins above:
+// every reported figure is arithmetic on these rates, and none of them
+// reproduces on today's. Enterprise was priced at the cheapest monthly
+// rate then on sale, Ultimate's.
+const INCIDENT_PLAN_RATES = {
+  free: 0.02,
+  starter: 20 / 1000,
+  growth: 50 / 3000,
+  professional: 100 / 10_000,
+  ultimate: MONTHLY_ERA_RATE,
+  enterprise: MONTHLY_ERA_RATE,
+};
+
+function chargeAt(slug, margin, rate) {
+  const credits = cf.creditsForRealCostOnRate(eur, rate, config, margin);
+  return { credits, achieved: (credits * rate) / eur, margin, rate, revenueEur: credits * rate };
 }
 
 /** The charge as it was when the report was filed. */
 function chargeThen(slug) {
-  return chargeAt(slug, INCIDENT_PLAN_MARGINS[slug]);
+  return chargeAt(slug, INCIDENT_PLAN_MARGINS[slug], INCIDENT_PLAN_RATES[slug]);
 }
 
 /** The charge under the policy that is live right now. */
 function chargeOn(slug) {
-  return chargeAt(slug, mp.resolveMarginFor("website_generate", slug, config, {}).margin);
+  const plan = getPlan(slug);
+  const margin = mp.resolveMarginFor("website_generate", slug, config, {}).margin;
+  const credits = cf.creditsForRealCostOnAccount(eur, plan, null, config, margin);
+  const rate = cf.effectiveCreditPriceEurForAccount(plan, null, config);
+  return {
+    credits,
+    achieved: cf.achievedMarginOnAccount(credits, eur, plan, null, config),
+    margin,
+    rate,
+    revenueEur: credits * rate,
+  };
 }
 
 console.log(`== the reported figures: $${REPORTED_USD} -> €${eur.toFixed(4)} ==`);
@@ -93,38 +117,13 @@ check("the USD->EUR rate is the documented 0.92", config.usdToEurRate === 0.92);
 console.log("\n== 1. 110 credits is NOT what Enterprise would have charged ==");
 const ent = chargeThen("enterprise");
 check(`Enterprise charges ${ent.credits}, not ${REPORTED_CREDITS}`, ent.credits !== REPORTED_CREDITS);
-// Enterprise is priced at the cheapest rate any published plan sells at,
-// because its own negotiated rate is unknowable and under-guessing it is
-// the only unsafe direction. That rate was Ultimate monthly (EUR 0.008)
-// when this file was written; annual billing made it Ultimate annual
-// (EUR 1,920 / 300,000 = EUR 0.0064), so the charge went UP. Asserted
-// against the derived rate rather than a fresh literal, so the next
-// cheaper option updates this by construction — what is pinned is that
-// Enterprise tracks the floor and never charges less than it used to.
-const cheapestRate = cf.cheapestPublishedCreditPriceEur(config);
-const plansMod = await loadTs("src/lib/billing/plans.ts");
-// THE COMMENT ABOVE SAID "asserted against the derived rate rather than a
-// fresh literal" and the two lines under it were both fresh literals —
-// 253 credits and €0.0064/credit, each true only while the annual
-// discount was 20%. Changing that discount to two-months-free (16.67%)
-// moved the floor to €0.006667 and the charge to 243, and both assertions
-// went red for a change that was correct. They are derived now, so the
-// comment is true and the next change to the cheapest rate updates them
-// by construction.
+// Enterprise was priced at the cheapest rate any published plan sold at,
+// because its own negotiated rate was unknowable: Ultimate monthly, EUR
+// 0.008. (Annual billing later moved that floor, and since 2026-10-03
+// Enterprise prices at the EUR 0.02 list like every plan — section 3.)
 const PRE_ANNUAL_CREDITS = 203;
-const PRE_ANNUAL_RATE = MONTHLY_ERA_RATE; // Ultimate MONTHLY — the floor before annual existed
-check("at the cheapest published rate", Math.abs(ent.rate - cheapestRate) < 1e-9);
-check(
-  `the floor is Ultimate ANNUAL — €${ent.rate.toFixed(6)}/credit`,
-  Math.abs(ent.rate - PRE_ANNUAL_RATE * (plansMod.ANNUAL_MONTHS_CHARGED / 12)) < 1e-9
-);
-// The charge scales inversely with the floor: a credit worth less money
-// buys less Anthropic cost, so the same generation needs more of them.
-check(
-  `Enterprise charges ${ent.credits}, which is ${PRE_ANNUAL_CREDITS} scaled by the floor`,
-  Math.abs(ent.credits - PRE_ANNUAL_CREDITS * (PRE_ANNUAL_RATE / ent.rate)) <= 1
-);
-check(`never fewer than the ${PRE_ANNUAL_CREDITS} it charged before annual existed`, ent.credits >= PRE_ANNUAL_CREDITS);
+check(`at the reported-era floor, Ultimate monthly — €${ent.rate}/credit`, ent.rate === MONTHLY_ERA_RATE);
+check(`Enterprise charged ${PRE_ANNUAL_CREDITS} for it`, ent.credits === PRE_ANNUAL_CREDITS, `got ${ent.credits}`);
 check("achieving at least 4x", ent.achieved >= 4);
 check(
   "so the reported 2.2x mixes Growth's charge with Enterprise's rate",
@@ -136,7 +135,7 @@ const matches = PLANS.filter((p) => chargeThen(p.slug).credits === REPORTED_CRED
 check(`only one plan matches (${matches.join(", ") || "none"})`, matches.length === 1);
 check("and it is Growth", matches[0] === "growth");
 const growth = chargeThen("growth");
-check("Growth's rate is €50/3000 = €0.01667", Math.abs(growth.rate - 50 / 3000) < 1e-9);
+check("Growth's rate was €50/3000 = €0.01667", Math.abs(growth.rate - 50 / 3000) < 1e-9);
 check("Growth's margin target was 4.5x at the time of the report", growth.margin === 4.5);
 check(
   `the achieved margin is above target, not 2.2x (${growth.achieved.toFixed(3)}x)`,
@@ -144,16 +143,19 @@ check(
 );
 
 // The property that survives any future policy edit: whatever the numbers
-// become, no plan may ever charge LESS than it did when the report was
-// filed. That is the guarantee the hardcoded 110/203 were standing in for,
-// and unlike them it cannot be invalidated by a legitimate change.
+// become, no plan may ever bring in LESS for this cost than it did when
+// the report was filed. That is the guarantee the hardcoded 110/203 were
+// standing in for. It is measured in EUROS, not credits: since 2026-10-03
+// a credit is one size, and a count of credits compared across a change
+// of size compares nothing (Ultimate's 203 then is 102 now, and the 102
+// are worth more).
 for (const plan of PLANS) {
   const then = chargeThen(plan.slug);
   const now = chargeOn(plan.slug);
   check(
-    `${plan.slug.padEnd(13)} still charges at least the reported-era amount (${now.credits} >= ${then.credits})`,
-    now.credits >= then.credits,
-    `now ${now.credits} at ${now.margin}x, then ${then.credits} at ${then.margin}x`
+    `${plan.slug.padEnd(13)} still brings in at least the reported-era amount (€${now.revenueEur.toFixed(3)} >= €${then.revenueEur.toFixed(3)})`,
+    now.revenueEur >= then.revenueEur - 1e-9,
+    `now ${now.credits} x €${now.rate} at ${now.margin}x, then ${then.credits} x €${then.rate} at ${then.margin}x`
   );
 }
 
@@ -240,10 +242,13 @@ check(
   roundsRatio > 1,
   "four continuation rounds must estimate above two"
 );
-const cheapestRatio = ent.rate / MONTHLY_ERA_RATE;
-const expectedCredits = (REPORTED_CREDITS / cheapestRatio) * roundsRatio;
+// At the reported-era rate the only thing that has moved the estimate
+// since is the continuation-round correction. (The intermediate re-anchor
+// to the cheapest ANNUAL rate is gone with it: Enterprise no longer tracks
+// that rate — a credit is one size since 2026-10-03.)
+const expectedCredits = REPORTED_CREDITS * roundsRatio;
 check(
-  `the Enterprise estimate tracks the cheapest rate: ${REPORTED_CREDITS} at €${MONTHLY_ERA_RATE} -> ${expectedCredits.toFixed(1)} at €${ent.rate}, got ${entEstimate.estimatedCredits}`,
+  `the Enterprise estimate at the reported-era rate: ${REPORTED_CREDITS} x${roundsRatio.toFixed(3)} = ${expectedCredits.toFixed(1)}, got ${entEstimate.estimatedCredits}`,
   Math.abs(entEstimate.estimatedCredits - expectedCredits) <= 5,
   `got ${entEstimate.estimatedCredits}, expected ${expectedCredits.toFixed(1)} +/- 5`
 );

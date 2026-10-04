@@ -199,7 +199,13 @@ check(
 );
 
 console.log("\n== 6. progress is real, not a spinner ==");
-check("the worker persists progress after each question", /findings\.push\(result\.finding\);[\s\S]{0,400}await persist\(\);/.test(workerSrc));
+// The finding is pushed stamped since 2026-10-04 (finishedAt, usageCount:
+// lib/research/research-timeline.ts); the claim here is unchanged — it is
+// persisted straight after.
+check(
+  "the worker persists progress after each question",
+  /findings\.push\(\{\s*\.\.\.result\.finding,[\s\S]{0,160}?\}\);[\s\S]{0,400}await persist\(\);/.test(workerSrc)
+);
 check("progress carries the current question", /current_question: questions\[answered\]\?\.question/.test(workerSrc));
 check("the UI renders which question it is on", /progressStep/.test(uiSrc));
 check("and the question text", /report\.current_question/.test(uiSrc));

@@ -1,5 +1,58 @@
 # The Ionexa mockup
 
+## The new design — `ionexa-3d.src.html`, waiting for the owner's OK (2026-10-03)
+
+It replaces the "Ionexa Home" direction below, and nothing of it is in
+`src/` yet. The owner's brief: a darker ground with the page in one
+floating panel, a 184px rail that shows every tool, dark by default with a
+light theme that is remembered, Commissioner at 400 and 500 only, and one
+pattern on every page — a small 3D symbol, the title and one line of what
+the product already knows, one pill bar, and recents as cards that tilt.
+
+    node scripts/mockups-3d.mjs              # writes ionexa-3d.html, measures it, photographs it
+    SKIP_SHOTS=1 node scripts/mockups-3d.mjs # just the HTML
+
+- **The rail is the product's.** `scripts/mockups-3d.mjs` writes it from
+  `src/lib/sidebar-nav.ts` through the same `sidebarGroups()` the sidebar
+  draws with, named from `messages/{el,en,ar,zh}.json`.
+- **One shape per group**, so every tool has a symbol without a model per
+  page: Make a stack of pages, Ask a polyhedron, Run rings in orbit, See
+  bars, Organise a lattice. Home has the globe: the land is Natural Earth's
+  1:110m coastline (world-atlas 2.0.2, ISC) sampled onto a Fibonacci
+  sphere by `scripts/globe-mask.mjs` and stored in `globe-land.json`.
+- **One 3D layer.** three.js 0.160.0, the last release with a UMD build,
+  served from our own origin (`vendor/three-0.160.0.min.js`, pinned by its
+  sha-256 in the script; licence beside it). One renderer, in a Web Worker
+  on an OffscreenCanvas: it draws every visible symbol into one strip per
+  frame and each slot copies its square out. Where a worker cannot run
+  WebGL it runs on the page, and then only when nobody is typing; with
+  reduced motion it draws one still frame; with no WebGL or a weak device
+  nothing loads and the SVG drawing every slot shows from the first paint
+  stays. Under 24 fps for three seconds it stops animating and keeps its
+  last frame. It pauses when the tab is hidden.
+
+What the script measured, 2026-10-03, on this container (headless
+Chromium, software WebGL — SwiftShader, so the frame rates are a floor
+rather than what a GPU does):
+
+| | |
+|---|---|
+| three.js 0.160.0 | 654 KB raw, 163 KB gzip — loaded after the page, never before the field |
+| the 3D layer itself | 6 KB gzip |
+| field typable, 3D in a worker / 3D off | 42 / 39 ms (median of 5) |
+| longest main-thread task after that, worker / on the page / off | 0 / 1,481 / 0 ms |
+| frames per second, desktop / phone with CPU ÷4 | 60 / 30 (the phone is capped at 30) |
+| Greek, English, Arabic (RTL), Chinese, desktop and phone | nothing scrolls sideways or clips on any of the five pages |
+
+The 1,481 ms is why the page path exists only as a fallback and waits for
+the person to stop typing: the first version of this mockup ran three.js on
+the page and blocked for 285 ms right after the field was ready, which is
+exactly the delay the brief rules out.
+
+The Commissioner files cover Latin and Greek only; Arabic and Chinese fall
+back to the system's faces.
+
+
 One design. The page here is still the mockup, not the product — but the
 owner approved it on 2026-10-02 and it is going into `src/` in parts.
 
@@ -21,8 +74,27 @@ desktop and a phone.
 **Already in the product before this:** ⌘K over every tool, dark by
 default with a light switch.
 
-**Not yet:** numbered sources in chat answers (Perplexity), the Build split
-view, the Arc-style motion, the Stripe type scale.
+**Applied 2026-10-03, part 2:**
+
+- **Numbered sources in chat** (Perplexity): an answer that searched the web
+  carries `[1]` in the sentence and cards underneath, built only from
+  Anthropic's citation blocks, kept inside the stored message so a reload
+  shows the same (`src/lib/chat/web-sources.ts`,
+  `src/components/chat/source-cards.tsx`; `scripts/tests/web-sources.test.mjs`).
+- **Build split**: an open site sits beside the list from 1280px and slides
+  in from its side (`src/components/website-builder/website-builder-workspace.tsx`).
+- **Motion** (Arc): the page rise was already there (`.page-enter`, 8px in
+  160ms — kept, its comment says why short); added the palette's scale-in and
+  the result panel's slide, both off under reduced motion
+  (`src/app/globals.css`).
+- **Type** (Stripe): the scale was already in rem at the mockup's sizes and the
+  Home title already at −0.025em; tabular figures added to the credit badge,
+  the routing line and the source numbers.
+
+`scripts/tests/design-part2.prodtest.mjs` drives part 2 on a desktop and a
+phone. It found one real defect on the way: on a phone an achievement toast
+sat on the chat's Send button, so the tap dismissed the toast and the message
+never left. Toasts now open at the top (`src/components/toast/toast-container.tsx`).
 
     node scripts/mockups.mjs              # writes ionexa.html, photographs it
     SKIP_SHOTS=1 node scripts/mockups.mjs # just the HTML

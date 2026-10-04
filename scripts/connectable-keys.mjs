@@ -65,6 +65,38 @@ const PROVIDERS = {
     url: "https://console.groq.com/keys",
     freeTier: "yes — a free tier with rate limits",
   },
+  // The five below are read only by the key check on /dashboard/system-health
+  // (src/lib/ai/providers/key-inventory.ts); no feature uses them yet.
+  GEMINI_API_KEY: {
+    provider: "Google (Gemini) — second name for GOOGLE_API_KEY",
+    category: "Models",
+    url: "https://aistudio.google.com/apikey",
+    freeTier: "yes — a free tier with rate limits",
+  },
+  DEEPGRAM_API_KEY: {
+    provider: "Deepgram",
+    category: "Image/Video/Audio",
+    url: "https://console.deepgram.com",
+    freeTier: "yes — a starting credit",
+  },
+  BFL_API_KEY: {
+    provider: "Black Forest Labs (Flux)",
+    category: "Image/Video/Audio",
+    url: "https://api.bfl.ai",
+    freeTier: "no",
+  },
+  IDEOGRAM_API_KEY: {
+    provider: "Ideogram",
+    category: "Image/Video/Audio",
+    url: "https://ideogram.ai/manage-api",
+    freeTier: "no",
+  },
+  RUNWAYML_API_SECRET: {
+    provider: "Runway (not to be wired: video through Gemini only)",
+    category: "Image/Video/Audio",
+    url: "https://dev.runwayml.com",
+    freeTier: "no",
+  },
   ELEVENLABS_API_KEY: {
     provider: "ElevenLabs",
     category: "Image/Video/Audio",

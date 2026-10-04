@@ -703,9 +703,7 @@
       "description": "Choisissez une palette de couleurs pour toute l'application — la mise en page et la couleur d'accent restent identiques.",
       "options": {
         "dark": "Sombre",
-        "light": "Clair",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "Clair"
       }
     },
     "language": {
@@ -1010,7 +1008,7 @@
       "oneOffNote": "Un pack de crédits est attribué immédiatement et ne peut pas être annulé.",
       "items": {
         "credits_1000": {
-          "name": "1 000 crédits",
+          "name": "750 crédits",
           "grants": "recharge unique"
         },
         "agents_5": {
@@ -1037,6 +1035,15 @@
       "loaded": "L'exemple est chargé. Il est signalé sur chaque page jusqu'à ce que vous le retiriez.",
       "notLoaded": "Non chargé.",
       "open": "Le voir sur l'accueil"
+    },
+    "displayName": {
+      "title": "Comment devons-nous t'appeler ?",
+      "description": "Utilisé dans le message d'accueil de ta page d'accueil. Écris-le exactement comme tu veux qu'on s'adresse à toi.",
+      "placeholder": "Ton prénom",
+      "saved": "Prénom enregistré",
+      "saveFailed": "Impossible d'enregistrer le prénom. Réessaie dans un instant.",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…"
     }
   },
   "dashboard": {
@@ -1282,7 +1289,10 @@
       "clarificationTitle": "Une question rapide d’abord :",
       "clarificationSkip": "Répondez quand même",
       "clarificationContinue": "Envoyer",
-      "clarificationAnswerPlaceholder": "Votre réponse..."
+      "clarificationAnswerPlaceholder": "Votre réponse...",
+      "sources": {
+        "title": "Sources consultées"
+      }
     },
     "create": {
       "title": "Créer N'importe Quoi",
@@ -3204,7 +3214,18 @@
     "watchFailed": "La progression ne peut pas être affichée pour le moment — le travail continue en arrière-plan.",
     "stop": "Arrêter",
     "stopping": "Arrêt…",
-    "stopped": "Arrêté. Seul le travail déjà fait est facturé."
+    "stopped": "Arrêté. Seul le travail déjà fait est facturé.",
+    "timeline": {
+      "title": "Ce qu'il a fait",
+      "running": "en cours",
+      "evidence": {
+        "files": "{count, plural, one {# fichier} other {# fichiers}}",
+        "parts": "{count, plural, one {en # partie} other {en # parties}}",
+        "planSteps": "{count, plural, one {# étape} other {# étapes}}",
+        "sources": "{count, plural, one {# source consultée} other {# sources consultées}}"
+      },
+      "writing": "Rédaction du rapport"
+    }
   },
   "problem": {
     "out_of_credits": {
@@ -4116,7 +4137,12 @@
     "clearFailed": "Cela n'a pas marché."
   },
   "promise": {
-    "oneSentence": "L'IA qui connaît déjà votre travail. Demandez-lui n'importe quoi."
+    "oneSentence": "L'IA qui connaît déjà votre travail. Demandez-lui n'importe quoi.",
+    "greeting": {
+      "morning": "Bonjour",
+      "afternoon": "Bon après-midi",
+      "evening": "Bonsoir"
+    }
   },
   "legal": {
     "lastUpdated": "dernière mise à jour : {date}",

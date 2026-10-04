@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { AiJobProgress } from "@/components/ui/ai-job-progress";
+import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
 import { useSmoothedJob, type AiJob } from "@/lib/jobs/use-ai-job";
 import { useRouter } from "next/navigation";
 import { Loader2, Rocket } from "lucide-react";
@@ -186,6 +187,8 @@ export function MissionForm({
         {/* The worker's real step, under the button. Three steps take long
             enough that one static word for all of them reads as a hang. */}
         <AiJobProgress job={displayJob} />
+        {/* What the planner did, step by step, live and after — V6.2 2.1. */}
+        <AiJobTimeline job={displayJob} className="w-full" />
       </div>
 
       {/* THREE REAL GOALS, pressable. "What do you want to achieve?" is a

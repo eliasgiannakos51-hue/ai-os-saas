@@ -245,7 +245,11 @@ console.log(
 // dropped untrusted wrapper, a plaintext token, one encryption context
 // for both tokens, and a second write path. Raised because six real
 // mutants arrived, never to make room.
-const RATCHET = 211;
+// 211 -> 219 on 2026-10-03: key-inventory, greeting-name and
+// email-strings mutation suites arrived (V6 1.0, 1.10a, 1.10d), and with
+// them eight newly covered anchors. Read off the run, raised because they
+// exist, never to make room.
+const RATCHET = 219;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

@@ -27,7 +27,8 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/billing-coverage.test.mjs";
 const SPELLING = "src/lib/websites-greek-spelling-check.ts";
-const TARGETS = [GATE, SPELLING];
+const RESERVATIONS = "src/lib/billing/reservations.ts";
+const TARGETS = [GATE, SPELLING, RESERVATIONS];
 
 const MUTANTS = [
   {
@@ -50,6 +51,17 @@ const MUTANTS = [
     from: "        model: MODEL,\n",
     to: "",
     expect: "no runCompletion() call site leaves its model to the default tier",
+  },
+  {
+    // 3. THE ALERT THAT ALWAYS FIRES. Since 2026-10-03 a pack holder is
+    // charged the same credits as everyone and earns less per credit by
+    // design; held to the bare target, every one of their settlements
+    // emails the owner, and an alert that always fires is not read.
+    name: "the shortfall alert goes back to the bare target",
+    file: RESERVATIONS,
+    from: "margin < expectedMargin - 1e-9",
+    to: "margin < marginPolicy.margin - 1e-9",
+    expect: "the shortfall alert fires on null as well as on a low number",
   },
 ];
 

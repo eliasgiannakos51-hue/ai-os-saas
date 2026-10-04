@@ -59,6 +59,10 @@ export type ResearchFinding = {
   question: string;
   summary: string;
   sources: ResearchSource[];
+  /** When the question was answered. Set by run-research, read by research-timeline. */
+  finishedAt?: string;
+  /** How many cost entries the report had at that moment — a count, not money. */
+  usageCount?: number;
 };
 
 const WEB_SEARCH_TOOL: Anthropic.ToolUnion = {

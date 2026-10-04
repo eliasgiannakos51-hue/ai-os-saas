@@ -38,6 +38,7 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { AGENT_MAX_CONSECUTIVE_FAILURES } from "@/lib/agents/agent-failure-limits";
 import { useAiJob } from "@/lib/jobs/use-ai-job";
 import { AiJobProgress } from "@/components/ui/ai-job-progress";
+import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
 import { ProblemNotice } from "@/components/errors/problem-notice";
 import {
   problemCodeFrom,
@@ -1237,6 +1238,8 @@ export function AgentsWorkspace({
                 the button said "Designing…" for all of them and the job
                 row's stepLabel was never read. */}
             <AiJobProgress job={job} watchLost={buildWatchLost} className="w-full" />
+            {/* The steps already finished, live — V6.2 2.1. */}
+            <AiJobTimeline job={job} className="mt-1 w-full" />
           </div>
         )}
 
@@ -1246,7 +1249,14 @@ export function AgentsWorkspace({
         {runJob && (runJob.status === "queued" || runJob.status === "running") && (
           <div className="mb-4 rounded-xl border border-orange-500/25 bg-orange-500/5 px-3 py-2">
             <AiJobProgress job={runJob} watchLost={runWatchLost} />
+            <AiJobTimeline job={runJob} className="mt-1" />
           </div>
+        )}
+
+        {/* WHAT THE RUN DID, once it has finished — V6.2 2.1. Each step,
+            how long it took, and its share of the charge. */}
+        {runJob && (runJob.status === "done" || runJob.status === "failed") && (
+          <AiJobTimeline job={runJob} className="mb-4" />
         )}
 
         {agents.length === 0 ? (

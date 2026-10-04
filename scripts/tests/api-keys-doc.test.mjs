@@ -122,8 +122,10 @@ console.log("\n== 4. 'not in the code' still is not in the code ==");
 // for exactly as long as nobody re-reads this file.
 const NOT_WIRED = [
   "XAI", "GROK", "PERPLEXITY", "MANUS", "DEEPSEEK", "TOGETHER", "MISTRAL", "COHERE",
-  "RUNWAY", "LUMA", "KLING", "PIKA", "HEYGEN", "SYNTHESIA",
-  "MIDJOURNEY", "IDEOGRAM", "RECRAFT", "DEEPGRAM", "ASSEMBLYAI",
+  // RUNWAY, IDEOGRAM and DEEPGRAM left this list on 2026-10-03, when the
+  // document moved them to Table A ("Keys the code CHECKS").
+  "LUMA", "KLING", "PIKA", "HEYGEN", "SYNTHESIA",
+  "MIDJOURNEY", "RECRAFT", "ASSEMBLYAI",
   "PLAID", "TINK", "GOCARDLESS", "ALCHEMY", "MORALIS",
   "TAVILY", "BRAVE", "FIRECRAWL", "APIFY",
 ];

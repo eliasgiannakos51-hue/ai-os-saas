@@ -96,7 +96,14 @@ check(
   "if it did, there would be two pages doing this and the article could not be right about either"
 );
 check("the old /dashboard/memory address still answers", read(OLD_ROUTE).length > 0);
-check("…as a permanent redirect to the search page", /permanentRedirect\("\/dashboard\/search"\)/.test(code(OLD_ROUTE)));
+// The target lives in lib/nav/early-redirects.ts since 2026-10-04: the
+// middleware answers the old address before the page streams (issue #61),
+// and this page is the fallback reading the same entry.
+check(
+  "…as a permanent redirect to the search page",
+  /permanentRedirect\(PERMANENT_MOVES\["\/dashboard\/memory"\]\)/.test(code(OLD_ROUTE)) &&
+    /"\/dashboard\/memory":\s*"\/dashboard\/search"/.test(code("src/lib/nav/early-redirects.ts"))
+);
 
 console.log("\n== 5. the two pages cannot share a name in ANY language ==");
 {

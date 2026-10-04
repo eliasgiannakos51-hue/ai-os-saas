@@ -307,7 +307,13 @@ async function runResearchChunkInner(
       asked: questions.length,
     });
     for (const remaining of questions.slice(answered)) {
-      findings.push({ question: remaining.question, summary: "", sources: [] });
+      findings.push({
+        question: remaining.question,
+        summary: "",
+        sources: [],
+        finishedAt: new Date().toISOString(),
+        usageCount: costs.snapshot().length,
+      });
     }
     answered = findings.length;
     await persist();
@@ -365,7 +371,11 @@ async function runResearchChunkInner(
       language,
       costs,
     });
-    findings.push(result.finding);
+    // Stamped with when it finished and how many cost entries the report
+    // had by then — a count, never money, because partial_findings is
+    // returned to the browser. lib/research/research-timeline.ts turns the
+    // two into the report's timeline, pricing each step on the server.
+    findings.push({ ...result.finding, finishedAt: new Date().toISOString(), usageCount: costs.snapshot().length });
     answered = findings.length;
     // Written after every question, not at the end of the chunk: a kill
     // between two questions must not lose the one that just finished and

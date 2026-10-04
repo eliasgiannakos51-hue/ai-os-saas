@@ -66,15 +66,21 @@ jobs:
   verify:
     name: typecheck · lint · build · mutations · database
     runs-on: ubuntu-latest
-    # The mutation suites alone take roughly twenty minutes: forty-six
-    # files, each of which edits the working tree, runs a gate, and
-    # restores. The default six-hour cap is not a limit, it is an absence
-    # of one; this is set to something a stuck run will actually hit.
-    timeout-minutes: 60
+    # THE MUTATION SUITES ARE MOST OF THIS JOB. Measured on 2026-10-03:
+    # 201 suites took 38.5 minutes (run of 30908b2d) and 204 took more than
+    # 53 on a slower runner (run of 3cee7809, every suite 1.3-1.5x slower),
+    # which hit the old 60-minute cap with ten suites, the database suites
+    # and the integration suites still to run — cancelled, not failed, so
+    # nothing said which. `node scripts/tests/run-mutations.mjs` prints
+    # each suite's time. The default six-hour cap is not a limit, it is an
+    # absence of one; this is set to something a stuck run will still hit.
+    timeout-minutes: 100
     steps:
       - uses: actions/checkout@v4
+        timeout-minutes: 5
 
       - uses: actions/setup-node@v4
+        timeout-minutes: 5
         with:
           node-version: "22"
           cache: npm
@@ -83,12 +89,15 @@ jobs:
       # resolution that drifts silently in CI is a build that does not
       # describe the commit.
       - name: install
+        timeout-minutes: 10
         run: npm ci
 
       - name: typecheck
+        timeout-minutes: 10
         run: npx tsc --noEmit
 
       - name: lint
+        timeout-minutes: 10
         run: npx eslint
 
       # THE GATES MOVED OUT OF `npm run build` ON 2026-09-27, and this
@@ -108,6 +117,7 @@ jobs:
       # branch, and scripts/tests/ci-coverage.test.mjs fails the build if
       # a suite family is named by no job in this file.
       - name: gates (everything the build used to run before it compiled)
+        timeout-minutes: 20
         run: npm run gates
 
       # NO env vars are supplied on purpose: the build must not need
@@ -115,6 +125,7 @@ jobs:
       # REWRITES route files and is therefore part of building — and
       # `next build`, and nothing else.
       - name: build (no env vars — a clean-clone build must not need any)
+        timeout-minutes: 15
         run: npm run build
 
       # THE ONE THIS FILE WAS WRITTEN FOR.
@@ -133,12 +144,14 @@ jobs:
       # Installing it earlier costs the same minute and removes a whole
       # class of suite that cannot run where it is asked to.
       - name: postgres, for the suites that need one
+        timeout-minutes: 5
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq postgresql
           echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
 
       - name: mutation suites
+        timeout-minutes: 75
         run: npm run test:mutation
 
       # A mutation suite that dies part-way leaves its edit in the working
@@ -146,6 +159,7 @@ jobs:
       # A green run that left the tree dirty is not a green run, and the
       # next step would otherwise inherit somebody else's mutant.
       - name: the mutation suites put the tree back
+        timeout-minutes: 5
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "::error::a mutation suite left the working tree modified"
@@ -165,6 +179,7 @@ jobs:
       # passed AT THE EXIT CODE". In CI that is the difference between a
       # gate and a green tick, so the log is read for the skip it prints.
       - name: database suites
+        timeout-minutes: 10
         run: |
           set -o pipefail
           npm run test:db 2>&1 | tee /tmp/dbtests.log
@@ -181,7 +196,18 @@ jobs:
       # family of suite in scripts/tests/ is run by some job here.
       #
       # After the database step because several of them want its Postgres.
+      # A BROWSER FOR THE ONE INTEGRATION SUITE THAT OPENS ONE.
+      # offline-shell-language.itest.mjs builds the app and loads the
+      # offline page in Chromium. The browser was installed only in the
+      # smoke job, so the first time this step was reached (run of
+      # df83449e, 2026-10-03 — every earlier run stopped before it) it died
+      # on "Executable doesn't exist". Same install as the smoke job.
+      - name: chromium, for the integration suite that needs one
+        timeout-minutes: 10
+        run: npx playwright install --with-deps chromium
+
       - name: integration suites
+        timeout-minutes: 15
         run: npm run test:integration
 
   # ONE BROWSER TEST ON EVERY PUSH, and the rest nightly.
@@ -209,18 +235,23 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        timeout-minutes: 5
       - uses: actions/setup-node@v4
+        timeout-minutes: 5
         with:
           node-version: "22"
           cache: npm
       - run: npm ci
+        timeout-minutes: 10
       - name: chromium
+        timeout-minutes: 10
         run: |
           npx playwright install --with-deps chromium
           echo "CHROMIUM_PATH=$(node -e 'console.log(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
       # It stands up its own stand-in Supabase on 127.0.0.1 and builds
       # against it, so no secret and no live project are involved.
       - name: routes-smoke
+        timeout-minutes: 18
         run: node scripts/tests/routes-smoke.prodtest.mjs
 
   # THE REST OF THE BROWSER TESTS ARE NIGHTLY, and the reason is
@@ -241,18 +272,23 @@ jobs:
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
+        timeout-minutes: 5
       - uses: actions/setup-node@v4
+        timeout-minutes: 5
         with:
           node-version: "22"
           cache: npm
       - run: npm ci
+        timeout-minutes: 10
       # Every prodtest reads CHROMIUM_PATH before falling back to the
       # image-local path this repo's own sandbox uses.
       - name: chromium
+        timeout-minutes: 10
         run: |
           npx playwright install --with-deps chromium
           echo "CHROMIUM_PATH=$(node -e 'console.log(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
       - name: production browser tests
+        timeout-minutes: 160
         run: npm run test:prod
 
   # ---------------------------------------------------------------------
@@ -270,16 +306,20 @@ jobs:
     name: branches carrying work that is not on main
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       issues: write
     steps:
       - uses: actions/checkout@v4
+        timeout-minutes: 5
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v4
+        timeout-minutes: 5
         with:
           node-version: "22"
       - name: look
+        timeout-minutes: 5
         id: look
         run: |
           node scripts/unmerged-branches.mjs --write > /dev/null || true
@@ -291,6 +331,7 @@ jobs:
           node scripts/unmerged-branches.mjs --json > /tmp/b.json
           echo "routes=$(node -e 'const r=require("/tmp/b.json");console.log(r.filter(x=>x.routes>0).length)')" >> "$GITHUB_OUTPUT"
       - uses: actions/github-script@v7
+        timeout-minutes: 5
         if: steps.look.outputs.routes != '0'
         with:
           script: |
@@ -371,6 +412,7 @@ jobs:
       # and a filter that depends on its capitalisation is a filter that
       # silently stops working when they change it.
       - name: which deployment is this
+        timeout-minutes: 5
         id: which
         run: |
           env_name="${{ github.event.deployment_status.environment }}"
@@ -393,15 +435,19 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/checkout@v4
+        timeout-minutes: 5
         if: steps.which.outputs.is_production == 'true'
       - uses: actions/setup-node@v4
+        timeout-minutes: 5
         if: steps.which.outputs.is_production == 'true'
         with:
           node-version: "22"
           cache: npm
       - run: npm ci
+        timeout-minutes: 10
         if: steps.which.outputs.is_production == 'true'
       - name: chromium
+        timeout-minutes: 10
         if: steps.which.outputs.is_production == 'true'
         run: |
           npx playwright install --with-deps chromium
@@ -414,6 +460,7 @@ jobs:
       # nobody tried, which is the exact shape this whole file exists to
       # refuse. Red until the secrets are set is the honest state.
       - name: the credentials exist
+        timeout-minutes: 2
         if: steps.which.outputs.is_production == 'true'
         run: |
           if [ -z "${{ secrets.BOT_EMAIL }}" ] || [ -z "${{ secrets.BOT_PASSWORD }}" ]; then
@@ -434,6 +481,7 @@ jobs:
             exit 1
           fi
       - name: try every Make feature on the deployment
+        timeout-minutes: 20
         if: steps.which.outputs.is_production == 'true'
         env:
           BOT_EMAIL: ${{ secrets.BOT_EMAIL }}
@@ -446,6 +494,7 @@ jobs:
       # per check, kept whether the run passed or failed — a failed run is
       # the one whose report somebody needs.
       - name: the report
+        timeout-minutes: 5
         if: always() && steps.which.outputs.is_production == 'true'
         uses: actions/upload-artifact@v4
         with:
@@ -471,10 +520,12 @@ jobs:
     needs: [verify, prodtest-smoke, prodtests, unmerged-branches, bot-on-deploy]
     if: failure()
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       issues: write
     steps:
       - uses: actions/github-script@v7
+        timeout-minutes: 5
         with:
           script: |
             const title = `CI red on ${context.ref.replace("refs/heads/", "")}`;

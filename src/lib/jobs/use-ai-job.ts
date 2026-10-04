@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { JOB_STEPS, type JobKind } from "@/lib/jobs/job-types";
+import type { ClientStep } from "@/lib/jobs/job-timeline";
 
 /**
  * Watches a background job and reports what it is doing.
@@ -40,6 +41,8 @@ export type AiJob = {
   attempts: number;
   createdAt: string;
   finishedAt: string | null;
+  /** lib/jobs/job-timeline.ts ClientStep[]; absent from an older poll. */
+  timeline?: ClientStep[];
 };
 
 const POLL_MS = 2000;

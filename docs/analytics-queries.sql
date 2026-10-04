@@ -320,7 +320,9 @@ with drawn(href) as (values
   -- would report it as an unused sidebar row when it is not a sidebar
   -- row at all. The page still serves anyone holding the URL, and §29.4
   -- is where that traffic shows.
-  ('/dashboard/agents'), ('/dashboard/automation'),
+  -- Agents LEFT this list on 2026-10-04, for the marketplace's reason:
+  -- retired in lib/sidebar-nav.ts, so not a sidebar row any more.
+  ('/dashboard/automation'),
   ('/dashboard/timeline'), ('/dashboard/files'), ('/dashboard/finance'),
   ('/dashboard/sales'), ('/dashboard/trading'), ('/dashboard/search'),
   ('/dashboard/ai-memory'),

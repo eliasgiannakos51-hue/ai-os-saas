@@ -703,9 +703,7 @@
       "description": "Επίλεξε χρωματική παλέτα για όλη την εφαρμογή — το layout και το χρώμα accent παραμένουν ίδια.",
       "options": {
         "dark": "Σκοτεινό",
-        "light": "Φωτεινό",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "Φωτεινό"
       }
     },
     "language": {
@@ -1010,7 +1008,7 @@
       "oneOffNote": "Ένα πακέτο credits αποδίδεται αμέσως και δεν ακυρώνεται.",
       "items": {
         "credits_1000": {
-          "name": "1.000 credits",
+          "name": "750 credits",
           "grants": "εφάπαξ ανανέωση"
         },
         "agents_5": {
@@ -1037,6 +1035,15 @@
       "loaded": "Το δείγμα είναι φορτωμένο. Επισημαίνεται σε κάθε σελίδα μέχρι να το αφαιρέσεις.",
       "notLoaded": "Δεν έχει φορτωθεί.",
       "open": "Δες το στην Αρχική"
+    },
+    "displayName": {
+      "title": "Πώς να σε λέμε;",
+      "description": "Μπαίνει στον χαιρετισμό της αρχικής σου σελίδας. Γράψ' το όπως θέλεις να σε προσφωνούμε — π.χ. «Ηλία», όχι «Ηλίας».",
+      "placeholder": "Το όνομά σου",
+      "saved": "Το όνομα αποθηκεύτηκε",
+      "saveFailed": "Δεν μπορέσαμε να αποθηκεύσουμε το όνομα. Δοκίμασε ξανά σε λίγο.",
+      "save": "Αποθήκευση",
+      "saving": "Αποθήκευση…"
     }
   },
   "dashboard": {
@@ -1282,7 +1289,10 @@
       "clarificationTitle": "Μία γρήγορη ερώτηση πρώτα:",
       "clarificationSkip": "Απάντησέ το έτσι κι αλλιώς",
       "clarificationContinue": "Στείλε",
-      "clarificationAnswerPlaceholder": "Η απάντησή σου..."
+      "clarificationAnswerPlaceholder": "Η απάντησή σου...",
+      "sources": {
+        "title": "Πηγές"
+      }
     },
     "create": {
       "title": "Δημιουργία Οτιδήποτε",
@@ -3204,7 +3214,18 @@
     "watchFailed": "Η πρόοδος δεν μπορεί να εμφανιστεί αυτή τη στιγμή — η εργασία συνεχίζεται στο παρασκήνιο.",
     "stop": "Διακοπή",
     "stopping": "Διακόπτεται…",
-    "stopped": "Διακόπηκε. Χρεώνεται μόνο η δουλειά που έχει ήδη γίνει."
+    "stopped": "Διακόπηκε. Χρεώνεται μόνο η δουλειά που έχει ήδη γίνει.",
+    "timeline": {
+      "title": "Τι έκανε",
+      "running": "σε εξέλιξη",
+      "evidence": {
+        "files": "{count, plural, one {# αρχείο} other {# αρχεία}}",
+        "parts": "{count, plural, one {σε # μέρος} other {σε # μέρη}}",
+        "planSteps": "{count, plural, one {# βήμα} other {# βήματα}}",
+        "sources": "{count, plural, one {# πηγή} other {# πηγές}}"
+      },
+      "writing": "Γράφω την αναφορά"
+    }
   },
   "problem": {
     "out_of_credits": {
@@ -4116,7 +4137,12 @@
     "clearFailed": "Δεν πέτυχε."
   },
   "promise": {
-    "oneSentence": "Η AI που ξέρει ήδη τη δουλειά σου. Ρώτα την οτιδήποτε."
+    "oneSentence": "Η AI που ξέρει ήδη τη δουλειά σου. Ρώτα την οτιδήποτε.",
+    "greeting": {
+      "morning": "Καλημέρα",
+      "afternoon": "Καλό απόγευμα",
+      "evening": "Καλησπέρα"
+    }
   },
   "legal": {
     "lastUpdated": "τελευταία ενημέρωση: {date}",

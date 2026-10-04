@@ -1,0 +1,778 @@
+<title>Νέο Ionexa</title>
+<style>
+/*@FONTS@*/
+/* Layout: a quiet 184px rail on the darkest ground, and ONE floating panel
+   beside it that holds the page. Every page is the same pattern: a small
+   3D symbol, the title and what it already knows, one pill bar, recents. */
+:root{
+  --bg:#0f1012; --panel:#16171a; --surface:#1d1e22; --text:#eceef1; --muted:#8a8f98;
+  --border:#26282d; --field:#1f2024; --accent:#e6ad5c;
+  --on-accent:#1b1406; --hover:rgba(236,238,241,.05); --active:#202125; --faint:rgba(138,143,152,.55);
+  --font:"Commissioner","Noto Sans Arabic","Noto Naskh Arabic","Noto Sans SC","PingFang SC","WenQuanYi Zen Hei","Microsoft YaHei",system-ui,sans-serif;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#eeece8; --panel:#fdfcfa; --surface:#f2f0ec; --text:#1f1e1c; --muted:#77736b;
+  --border:#e2ded6; --field:#ffffff; --accent:#b47724;
+  --on-accent:#ffffff; --hover:rgba(31,30,28,.045); --active:#ebe8e2; --faint:rgba(119,115,107,.55);
+  color-scheme:light;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:400 14px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--muted);outline-offset:2px}
+.app{display:grid;grid-template-columns:184px minmax(0,1fr);height:100%}
+
+/* ---- the rail ---- */
+.side{display:flex;flex-direction:column;gap:10px;padding:14px 8px 10px;min-height:0}
+.brand{display:flex;align-items:center;gap:9px;padding:2px 8px 4px;background:none;border:0;color:var(--text);font-weight:500;font-size:15px;letter-spacing:.01em}
+.brand svg{flex:none}
+.earth-m{transform-box:fill-box;transform-origin:center;animation:spin 7s linear infinite}
+@keyframes spin{0%{transform:scaleX(1)}25%{transform:scaleX(0)}50%{transform:scaleX(-1)}75%{transform:scaleX(0)}100%{transform:scaleX(1)}}
+.search{display:flex;align-items:center;gap:8px;margin:0 2px;padding:6px 9px;border-radius:8px;border:0;background:var(--field);color:var(--muted);font-size:13px;text-align:start}
+.search span{flex:1}
+kbd{font:inherit;font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:0 5px}
+.nav{flex:1;overflow:auto;min-height:0;scrollbar-width:thin;display:flex;flex-direction:column;gap:6px}
+.grp h3{margin:0;padding:4px 10px 2px;font-size:11px;font-weight:500;color:var(--faint);letter-spacing:.04em}
+.grp a{display:block;padding:4px 10px;border-radius:7px;color:var(--muted);text-decoration:none;font-size:13px;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grp a:hover{background:var(--hover);color:var(--text)}
+.grp a[aria-current="page"]{background:var(--active);color:var(--text)}
+.me{display:flex;align-items:center;gap:9px;padding:8px 8px 2px;border-top:1px solid var(--border)}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-size:12px;font-weight:500;flex:none}
+.me-txt{flex:1;min-width:0;line-height:1.25}
+.me-name{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me-cr{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.icon-btn{width:30px;height:30px;border-radius:50%;border:0;background:none;color:var(--muted);display:grid;place-items:center;flex:none}
+.icon-btn:hover{background:var(--hover);color:var(--text)}
+
+/* ---- the panel ---- */
+.panel{margin:10px;margin-inline-start:0;background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:auto;min-width:0;position:relative;scrollbar-width:thin}
+.topbar{display:none}
+#view{min-height:100%;display:flex;flex-direction:column}
+.page{flex:1;width:100%;max-width:780px;margin:0 auto;padding:44px 28px 24px;display:flex;flex-direction:column;gap:22px;min-height:100%;box-sizing:border-box}
+.view-enter{animation:rise .32s ease-out both}
+@keyframes rise{from{opacity:.001;transform:translateY(6px)}to{opacity:1;transform:none}}
+.head{display:flex;align-items:center;gap:20px}
+.head-txt{min-width:0}
+h1{margin:0;font-size:22px;font-weight:500;line-height:1.25;letter-spacing:-.005em;text-wrap:balance}
+.knows{margin:4px 0 0;color:var(--muted);font-size:14px}
+.sym{position:relative;width:130px;height:130px;flex:none}
+.sym>svg{position:absolute;inset:0;width:100%;height:100%;transition:opacity .4s}
+.sym.gl>svg{opacity:0}
+.sym:not(.gl)>canvas{opacity:0}
+.home .head{flex-direction:column;text-align:center;gap:14px;padding-top:4px}
+.home h1{font-size:26px}
+.home .sym{width:300px;height:300px;max-width:100%}
+
+/* ---- the one bar ---- */
+.bar{display:flex;align-items:center;gap:4px;background:var(--field);border:1px solid var(--border);border-radius:22px;padding:5px;min-height:44px;box-sizing:border-box}
+.bar:focus-within{border-color:var(--faint)}
+.bar input{flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:15px;padding:0 6px;height:34px}
+.bar input::placeholder{color:var(--muted)}
+.bar .icon-btn{width:34px;height:34px}
+.send{width:34px;height:34px;border-radius:50%;border:0;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;flex:none}
+.pill{border:0;border-radius:14px;padding:4px 10px;background:var(--surface);color:var(--muted);font-size:12px;white-space:nowrap;flex:none}
+.switch{display:flex;align-items:center;gap:7px;border:0;border-radius:14px;padding:4px 6px 4px 10px;background:var(--surface);color:var(--muted);font-size:12px;flex:none;white-space:nowrap}
+.switch i{width:24px;height:14px;border-radius:7px;background:var(--border);position:relative;transition:background .2s}
+.switch i::after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:10px;height:10px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s}
+.switch[aria-checked="true"]{color:var(--text)}
+.switch[aria-checked="true"] i{background:color-mix(in srgb,var(--accent) 35%,transparent)}
+.switch[aria-checked="true"] i::after{background:var(--accent);transform:translateX(10px)}
+[dir="rtl"] .switch[aria-checked="true"] i::after{transform:translateX(-10px)}
+.meta{margin:-12px 0 0;padding-inline-start:16px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.meta b{font-weight:500;color:var(--text)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:-8px}
+.chip{border:1px solid var(--border);background:none;border-radius:16px;padding:5px 12px;font-size:13px;color:var(--muted)}
+.chip:hover{color:var(--text);background:var(--hover)}
+
+/* ---- recents ---- */
+h2{margin:6px 0 -8px;font-size:13px;font-weight:500;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;perspective:900px}
+.card{background:var(--surface);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;transform-style:preserve-3d;transition:transform .25s ease-out;will-change:transform;min-width:0}
+.thumb{aspect-ratio:16/10;border-radius:6px;background:var(--panel);position:relative;overflow:hidden;max-width:100%}
+.thumb i{position:absolute;inset-inline:10%;height:7%;border-radius:3px;background:var(--border)}
+.card-t{font-size:14px;font-weight:500;overflow-wrap:anywhere}
+.card-m{font-size:12px;color:var(--muted)}
+
+/* ---- chat ---- */
+.thread{display:flex;flex-direction:column;gap:18px}
+.q{align-self:flex-end;background:var(--surface);border-radius:14px;padding:8px 13px;max-width:80%}
+.a{line-height:1.7;font-size:15px}
+.cite{display:inline-grid;place-items:center;min-width:16px;height:16px;padding:0 3px;margin-inline:2px;border-radius:5px;font-size:10.5px;font-weight:500;color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);text-decoration:none;vertical-align:2px}
+.srcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.src{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--border);border-radius:9px;padding:8px 10px;text-decoration:none;color:inherit;min-width:0}
+.src b{color:var(--accent);font-weight:500;font-size:12px}
+.src span{min-width:0;font-size:13px;line-height:1.35}
+.src small{display:block;color:var(--muted);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dock{position:sticky;bottom:0;margin-top:auto;padding-top:14px;background:linear-gradient(to bottom,transparent,var(--panel) 30%)}
+
+/* ---- finance ---- */
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.stat{background:var(--surface);border-radius:10px;padding:14px;min-width:0}
+.stat-l{font-size:12px;color:var(--muted)}
+.stat-v{font-size:24px;font-weight:500;font-variant-numeric:tabular-nums;margin-top:2px;letter-spacing:-.01em}
+.stat-d{font-size:12px;color:var(--muted)}
+
+/* ---- the palette ---- */
+.pal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45);display:grid;place-items:start center;padding:12vh 16px 0}
+.pal-box{width:min(520px,100%);background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;animation:pal .14s ease-out}
+@keyframes pal{from{transform:scale(.98);opacity:.001}to{transform:none;opacity:1}}
+.pal input{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid var(--border);background:none;padding:13px 16px;font-size:15px;outline:none}
+.pal ul{list-style:none;margin:0;padding:6px;max-height:50vh;overflow:auto}
+.pal li{padding:7px 10px;border-radius:7px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;cursor:pointer}
+.pal li[aria-selected="true"]{background:var(--active);color:var(--text)}
+.pal li small{color:var(--faint)}
+
+/* ---- the single 3D canvas, and the mock's own controls ---- */
+.sym canvas{position:absolute;inset:0;width:100%;height:100%}
+.mockbar{position:fixed;inset-block-end:12px;inset-inline-end:14px;z-index:40;display:flex;gap:4px;align-items:center;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:3px 4px;font-size:11.5px;color:var(--muted)}
+.mockbar button{border:0;background:none;border-radius:12px;padding:3px 8px;color:var(--muted)}
+.mockbar button[aria-pressed="true"]{background:var(--active);color:var(--text)}
+.mockbar output{padding:0 8px;font-variant-numeric:tabular-nums}
+.shot .mockbar{display:none}
+
+/* ---- phone ---- */
+@media (max-width:760px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;z-index:50;inset-block:0;inset-inline-start:0;width:240px;background:var(--bg);transform:translateX(-105%);transition:transform .22s ease-out;box-shadow:0 0 0 100vmax transparent}
+  [dir="rtl"] .side{transform:translateX(105%)}
+  .drawer-open .side{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.45)}
+  .panel{margin:6px}
+  .topbar{display:flex;align-items:center;gap:8px;padding:8px 8px 0}
+  .page{padding:16px 16px 16px;gap:18px}
+  .head{gap:14px}
+  .sym{width:84px;height:84px}
+  .home .sym{width:200px;height:200px}
+  .stats{grid-template-columns:minmax(0,1fr)}
+  .cards{grid-template-columns:minmax(0,1fr)}
+  .mockbar{inset-block-end:auto;inset-block-start:10px}
+}
+@media (prefers-reduced-motion:reduce){
+  .earth-m,.view-enter,.pal-box{animation:none}
+  .card,.side,.switch i,.switch i::after{transition:none}
+}
+</style>
+
+<div class="app" id="app">
+  <aside class="side" id="side">
+    <button class="brand" id="brand" type="button">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" aria-hidden="true">
+        <circle cx="12" cy="12" r="9.25"/><ellipse class="earth-m" cx="12" cy="12" rx="4.4" ry="9.25"/><path d="M2.75 12h18.5"/>
+      </svg>
+      <span>Ionexa</span>
+    </button>
+    <button class="search" id="search" type="button"><span id="searchLabel"></span><kbd>⌘K</kbd></button>
+    <nav class="nav" id="nav"></nav>
+    <div class="me">
+      <div class="avatar" id="avatar"></div>
+      <div class="me-txt"><div class="me-name" id="meName"></div><div class="me-cr" id="meCr"></div></div>
+      <button class="icon-btn" id="themeBtn" type="button"></button>
+    </div>
+  </aside>
+  <main class="panel" id="panel">
+    <div class="topbar"><button class="icon-btn" id="menuBtn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
+    <div id="view"></div>
+  </main>
+</div>
+<div class="mockbar" id="mockbar" role="toolbar" aria-label="mockup"></div>
+
+<script>
+"use strict";
+// ---------------------------------------------------------------------------
+// The data the page is built from. NAV is not typed here: scripts/mockups-3d.mjs
+// writes it from src/lib/sidebar-nav.ts through the same sidebarGroups() the
+// product's sidebar uses, labelled from messages/*.json, so the rail below is
+// the product's own list of tools and cannot drift from it. GLOBE is the land
+// mask scripts/globe-mask.mjs derives from Natural Earth (world-atlas 2.0.2).
+// ---------------------------------------------------------------------------
+var NAV = /*@NAV@*/null;
+var GLOBE = /*@GLOBE@*/null;
+var THREE_SRC = "vendor/three-0.160.0.min.js";
+
+var STR = {
+  el:{search:"Αναζήτηση",name:"Μαρία Κ.",initials:"ΜΚ",creditsWord:"credits",menu:"Μενού",dark:"Σκούρο θέμα",light:"Ανοιχτό θέμα",attach:"Επισύναψη",mic:"Υπαγόρευση",send:"Αποστολή",recent:"Πρόσφατα",palette:"Βρες εργαλείο…",auto:"Auto",
+    home:{t:"Τι φτιάχνουμε σήμερα;",k:"Βλέπω 3 νέες παραγγελίες από χθες και μια ιστοσελίδα που περιμένει δημοσίευση.",p:"Γράψε τι θέλεις να φτιάξουμε…",chips:["Ιστοσελίδα για το καφέ","Σύνοψη της εβδομάδας","Απάντησε στις κριτικές"],
+      cards:[["Καφέ Λιμάνι","ιστοσελίδα · πριν 2 ώρες"],["Σύνοψη Σεπτεμβρίου","αναφορά · χθες"],["Τιμολόγιο #214","οικονομικά · 30 Σεπ"]]},
+    sites:{t:"Ιστοσελίδες",k:"Ξέρω τα προϊόντα, τις τιμές και τις ώρες σου.",p:"Περίγραψε την ιστοσελίδα…",est:"Εκτίμηση: ~{n} credits",three:"3D: ~{n} credits (8× απλό) · από Growth",
+      cards:[["Καφέ Λιμάνι","δημοσιευμένη · πριν 2 μέρες"],["Φούρνος Ανατολή","πρόχειρο · χθες"],["Yoga Αιγάλεω","δημοσιευμένη · 12 Σεπ"]]},
+    chat:{t:"Chat",k:"Ξέρω τις εγγραφές, τα αρχεία και τις συζητήσεις σου.",p:"Ρώτα οτιδήποτε…",
+      q:"Πόσο κοστίζει κατά μέσο όρο ένας espresso στην Αθήνα φέτος;",
+      a:"Ο μέσος espresso στην Αθήνα κοστίζει γύρω στα 2,10 €{1} και ανέβηκε περίπου 6% μέσα στη χρονιά{2}. Η δική σου τιμή, 1,90 €, είναι κάτω από τον μέσο όρο, οπότε χωράει μια μικρή αύξηση χωρίς να βγεις από την αγορά.",
+      src:[["Τιμές καφέ 2026","kafeneio.example.gr"],["Έκθεση κλάδου εστίασης","stats.example.org"]]},
+    finance:{t:"Οικονομικά",k:"Ξέρω τα τιμολόγια και τις πληρωμές του Οκτωβρίου.",p:"Ρώτα για τα οικονομικά σου…",
+      stats:[["Έσοδα Οκτωβρίου",4820,"+12% από τον Σεπτέμβριο"],["Έξοδα",2140,"ενοίκιο, πρώτες ύλες"],["Ανεξόφλητα",610,"3 τιμολόγια"]]},
+    generic:{k:"Ξέρω ό,τι έχεις κάνει εδώ.",p:"Τι να κάνουμε εδώ;"},
+    projects:{k:"Ξέρω 4 ενεργά έργα και τις προθεσμίες τους.",p:"Τι να οργανώσουμε;",
+      cards:[["Νέο μενού φθινοπώρου","προθεσμία 15 Οκτ"],["Ανακαίνιση βιτρίνας","προθεσμία 2 Νοε"],["Εκπαίδευση νέου barista","σε εξέλιξη"],["Έκθεση HORECA","προθεσμία 14 Φεβ"]]}},
+  en:{search:"Search",name:"Maria K.",initials:"MK",creditsWord:"credits",menu:"Menu",dark:"Dark theme",light:"Light theme",attach:"Attach",mic:"Dictate",send:"Send",recent:"Recent",palette:"Find a tool…",auto:"Auto",
+    home:{t:"What are we making today?",k:"I see 3 new orders since yesterday and a website waiting to be published.",p:"Describe what to make…",chips:["A website for the café","This week in summary","Reply to reviews"],
+      cards:[["Limani Café","website · 2 hours ago"],["September summary","report · yesterday"],["Invoice #214","finance · 30 Sep"]]},
+    sites:{t:"Websites",k:"I know your products, prices and opening hours.",p:"Describe the website…",est:"Estimate: ~{n} credits",three:"3D: ~{n} credits (8× simple) · Growth and up",
+      cards:[["Limani Café","published · 2 days ago"],["Anatoli Bakery","draft · yesterday"],["Aigaleo Yoga","published · 12 Sep"]]},
+    chat:{t:"Chat",k:"I know your records, files and past chats.",p:"Ask anything…",
+      q:"What does an espresso cost in Athens on average this year?",
+      a:"An average espresso in Athens costs about €2.10{1}, up roughly 6% over the year{2}. Your price, €1.90, is below that, so there is room for a small increase without leaving the market.",
+      src:[["Coffee prices 2026","kafeneio.example.gr"],["Food service industry report","stats.example.org"]]},
+    finance:{t:"Finance",k:"I know October's invoices and payments.",p:"Ask about your finances…",
+      stats:[["October revenue",4820,"+12% on September"],["Expenses",2140,"rent, supplies"],["Unpaid",610,"3 invoices"]]},
+    generic:{k:"I know everything you have done here.",p:"What should we do here?"},
+    projects:{k:"I know 4 active projects and their deadlines.",p:"What should we organise?",
+      cards:[["Autumn menu","due 15 Oct"],["Shop window refit","due 2 Nov"],["Training a new barista","in progress"],["HORECA trade fair","due 14 Feb"]]}},
+  ar:{search:"بحث",name:"ماريا ك.",initials:"م ك",creditsWord:"نقطة",menu:"القائمة",dark:"المظهر الداكن",light:"المظهر الفاتح",attach:"إرفاق",mic:"إملاء",send:"إرسال",recent:"الأحدث",palette:"ابحث عن أداة…",auto:"تلقائي",
+    home:{t:"ماذا نصنع اليوم؟",k:"أرى 3 طلبات جديدة منذ الأمس وموقعًا ينتظر النشر.",p:"صف ما تريد أن نصنعه…",chips:["موقع للمقهى","ملخص الأسبوع","الرد على المراجعات"],
+      cards:[["مقهى ليماني","موقع · قبل ساعتين"],["ملخص سبتمبر","تقرير · أمس"],["فاتورة رقم 214","المالية · 30 سبتمبر"]]},
+    sites:{t:"المواقع",k:"أعرف منتجاتك وأسعارك وساعات العمل.",p:"صف الموقع…",est:"التقدير: ~{n} نقطة",three:"ثلاثي الأبعاد: ~{n} نقطة (8× البسيط) · من Growth",
+      cards:[["مقهى ليماني","منشور · قبل يومين"],["مخبز أناتولي","مسودة · أمس"],["يوغا إيغاليو","منشور · 12 سبتمبر"]]},
+    chat:{t:"الدردشة",k:"أعرف سجلاتك وملفاتك ومحادثاتك.",p:"اسأل أي شيء…",
+      q:"كم يكلّف الإسبريسو في أثينا في المتوسط هذا العام؟",
+      a:"يكلّف الإسبريسو في أثينا نحو 2.10 يورو في المتوسط{1}، وقد ارتفع بنحو 6% خلال العام{2}. سعرك 1.90 يورو أقل من المتوسط، لذا يتسع لزيادة صغيرة دون الخروج من السوق.",
+      src:[["أسعار القهوة 2026","kafeneio.example.gr"],["تقرير قطاع المطاعم","stats.example.org"]]},
+    finance:{t:"المالية",k:"أعرف فواتير ومدفوعات أكتوبر.",p:"اسأل عن أموالك…",
+      stats:[["إيرادات أكتوبر",4820,"+12% عن سبتمبر"],["المصروفات",2140,"الإيجار والمواد"],["غير مدفوع",610,"3 فواتير"]]},
+    generic:{k:"أعرف كل ما فعلته هنا.",p:"ماذا نفعل هنا؟"},
+    projects:{k:"أعرف 4 مشاريع نشطة ومواعيدها النهائية.",p:"ماذا ننظّم؟",
+      cards:[["قائمة الخريف","حتى 15 أكتوبر"],["تجديد الواجهة","حتى 2 نوفمبر"],["تدريب باريستا جديد","قيد التنفيذ"],["معرض HORECA","حتى 14 فبراير"]]}},
+  zh:{search:"搜索",name:"玛丽亚 K.",initials:"MK",creditsWord:"点额度",menu:"菜单",dark:"深色主题",light:"浅色主题",attach:"附件",mic:"听写",send:"发送",recent:"最近",palette:"查找工具…",auto:"自动",
+    home:{t:"今天做点什么？",k:"自昨天以来有 3 个新订单，还有一个网站等待发布。",p:"描述你想做的东西…",chips:["为咖啡馆做个网站","本周总结","回复评价"],
+      cards:[["利马尼咖啡","网站 · 2 小时前"],["九月总结","报告 · 昨天"],["发票 #214","财务 · 9 月 30 日"]]},
+    sites:{t:"网站",k:"我了解你的产品、价格和营业时间。",p:"描述网站…",est:"预计：约 {n} 点额度",three:"3D：约 {n} 点额度（简单版的 8 倍）· Growth 及以上",
+      cards:[["利马尼咖啡","已发布 · 2 天前"],["阿纳托利面包店","草稿 · 昨天"],["伊加莱奥瑜伽","已发布 · 9 月 12 日"]]},
+    chat:{t:"聊天",k:"我了解你的记录、文件和以往对话。",p:"随便问…",
+      q:"今年雅典一杯浓缩咖啡平均多少钱？",
+      a:"雅典一杯浓缩咖啡平均约 2.10 欧元{1}，今年上涨了约 6%{2}。你的价格 1.90 欧元低于平均水平，因此可以小幅提价而不脱离市场。",
+      src:[["2026 年咖啡价格","kafeneio.example.gr"],["餐饮行业报告","stats.example.org"]]},
+    finance:{t:"财务",k:"我了解十月的发票和付款。",p:"询问你的财务…",
+      stats:[["十月收入",4820,"比九月 +12%"],["支出",2140,"房租、原料"],["未付",610,"3 张发票"]]},
+    generic:{k:"我了解你在这里做过的一切。",p:"在这里做什么？"},
+    projects:{k:"我了解 4 个进行中的项目及其截止日期。",p:"要整理什么？",
+      cards:[["秋季菜单","10 月 15 日截止"],["橱窗翻新","11 月 2 日截止"],["培训新咖啡师","进行中"],["HORECA 展会","2 月 14 日截止"]]}}
+};
+// The website figure is the estimator's own, measured 2026-10-03 for a short
+// request (scripts/tests/credit-size.test.mjs §4: websiteGenerate, 76
+// credits on every paid plan); 3D is 8x it, the owner's value price.
+var SITE_CREDITS = 76, CREDITS_BALANCE = 2500;
+var LOCALE = {el:"el-GR",en:"en-GB",ar:"ar-u-nu-latn",zh:"zh-CN"};
+var VIEW_OF = {"/dashboard/website-builder":"sites","/dashboard/chat":"chat","/dashboard/finance":"finance","/dashboard/projects":"projects"};
+// One shape per GROUP, so every tool has a symbol without a model per page:
+// Make a stack of pages, Ask a polyhedron, Run rings in orbit, See bars,
+// Organise a lattice.
+var SHAPE_OF_GROUP = {make:"pages",ask:"poly",run:"rings",see:"bars",organise:"lattice"};
+
+var state = {view:"home", tool:"/dashboard/projects", theme:"dark", lang:"el", three:false};
+var T = {fieldReady:null, threeRequested:null, threeLoaded:null, firstFrame:null};
+var $ = function(id){return document.getElementById(id);};
+var S = function(){return STR[state.lang];};
+var esc = function(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});};
+var fmt = function(n){return new Intl.NumberFormat(LOCALE[state.lang]).format(n);};
+var eur = function(n){return new Intl.NumberFormat(LOCALE[state.lang],{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);};
+var store = {get:function(k){try{return localStorage.getItem(k);}catch(e){return null;}},set:function(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+
+// --- the SVG every symbol shows first, and keeps when there is no WebGL ---
+var SVG = {
+  globe:'<circle cx="50" cy="50" r="38" opacity=".35"/><ellipse cx="50" cy="50" rx="16" ry="38" opacity=".5"/><path d="M12 50h76" opacity=".5"/><path d="M57 40 Q74 18 86 34" /><path d="M57 40 Q36 22 24 38"/><circle cx="57" cy="40" r="2.2" fill="var(--accent)"/><circle cx="86" cy="34" r="1.6" fill="var(--accent)"/><circle cx="24" cy="38" r="1.6" fill="var(--accent)"/><ellipse cx="50" cy="50" rx="47" ry="14" opacity=".25" transform="rotate(-18 50 50)"/>',
+  pages:'<rect x="34" y="20" width="38" height="50" rx="3" opacity=".35"/><rect x="28" y="26" width="38" height="50" rx="3" opacity=".6"/><rect x="22" y="32" width="38" height="50" rx="3"/><path d="M29 44h22M29 52h16M29 60h19" opacity=".7"/>',
+  poly:'<path d="M50 14 81 32v36L50 86 19 68V32Z"/><path d="M50 14 35 46h30Zm-15 32L19 68m46-22 16 22M35 46l15 40 15-40M19 32l16 14m46-14L65 46" opacity=".55"/>',
+  bars:'<path d="M18 74 50 88 82 74 50 60Z" opacity=".35"/><path d="M28 70V48l8 4v22m0-22 8-4m-8 4-8-4 8-4 8 4v22" /><path d="M46 79V34l8 4v45m0-45 8-4m-8 4-8-4 8-4 8 4v45" /><path d="M64 70V56l8 4v14m0-14 8-4m-8 4-8-4 8-4 8 4v14" />',
+  rings:'<ellipse cx="50" cy="50" rx="36" ry="12"/><ellipse cx="50" cy="50" rx="36" ry="12" transform="rotate(60 50 50)" opacity=".6"/><ellipse cx="50" cy="50" rx="36" ry="12" transform="rotate(-60 50 50)" opacity=".6"/><circle cx="50" cy="50" r="3" fill="var(--accent)"/><circle cx="86" cy="50" r="2" fill="var(--accent)"/>',
+  lattice:'<path d="M50 14 82 30v40L50 86 18 70V30Z"/><path d="M18 30 50 46 82 30M50 46v40" /><path d="M34 22v40l32 16M66 22v40L34 78M18 50l32 16 32-16" opacity=".4"/>'
+};
+function symHTML(shape){
+  return '<div class="sym" data-shape="'+shape+'"><svg viewBox="0 0 100 100" fill="none" stroke="var(--accent)" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true">'+SVG[shape]+"</svg></div>";
+}
+var ICON = {
+  plus:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+  mic:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>',
+  send:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
+  moon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z"/></svg>',
+  sun:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
+};
+function bar(placeholder, extra){
+  var s = S();
+  return '<div class="bar">'+(extra && extra.before||"")+
+    '<button class="icon-btn" type="button" aria-label="'+esc(s.attach)+'">'+ICON.plus+'</button>'+
+    '<input id="field" type="text" autocomplete="off" placeholder="'+esc(placeholder)+'" aria-label="'+esc(placeholder)+'">'+
+    (extra && extra.after||"")+
+    '<button class="icon-btn" type="button" aria-label="'+esc(s.mic)+'">'+ICON.mic+'</button>'+
+    '<button class="send" type="button" aria-label="'+esc(s.send)+'">'+ICON.send+"</button></div>";
+}
+function cards(list, thumbs){
+  return '<h2>'+esc(S().recent)+'</h2><div class="cards">'+list.map(function(c,i){
+    var th = thumbs ? '<div class="thumb" aria-hidden="true"><i style="top:14%;width:40%"></i><i style="top:30%;inset-inline-end:30%"></i><i style="top:58%;height:28%;inset-inline-end:52%"></i><i style="top:58%;height:28%;inset-inline-start:52%"></i></div>' : "";
+    return '<article class="card" tabindex="0">'+th+'<div class="card-t">'+esc(c[0])+'</div><div class="card-m">'+esc(c[1])+"</div></article>";
+  }).join("")+"</div>";
+}
+function toolOf(href){
+  for (var g=0; g<NAV.groups.length; g++) for (var i=0; i<NAV.groups[g].items.length; i++)
+    if (NAV.groups[g].items[i].href===href) return {group:NAV.groups[g], item:NAV.groups[g].items[i]};
+  return null;
+}
+
+// --- the five pages ---
+function render(){
+  var s = S(), v = state.view, html;
+  if (v==="home"){
+    html = '<div class="page home view-enter"><div class="head">'+symHTML("globe")+'<div class="head-txt"><h1>'+esc(s.home.t)+'</h1><p class="knows">'+esc(s.home.k)+"</p></div></div>"+
+      bar(s.home.p,{before:'<button class="pill" type="button">'+esc(s.auto)+" ▾</button>"})+
+      '<div class="chips">'+s.home.chips.map(function(c){return '<button class="chip" type="button">'+esc(c)+"</button>";}).join("")+"</div>"+
+      cards(s.home.cards)+"</div>";
+  } else if (v==="sites"){
+    html = '<div class="page view-enter"><div class="head">'+symHTML("pages")+'<div class="head-txt"><h1>'+esc(s.sites.t)+'</h1><p class="knows">'+esc(s.sites.k)+"</p></div></div>"+
+      bar(s.sites.p,{after:'<button class="switch" id="sw3d" type="button" role="switch" aria-checked="'+state.three+'">3D: '+(state.three?"ON":"OFF")+"<i></i></button>"})+
+      '<p class="meta" id="est"></p>'+cards(s.sites.cards,true)+"</div>";
+  } else if (v==="chat"){
+    var a = esc(s.chat.a).replace(/\{(\d)\}/g,function(_,n){return '<a class="cite" href="#src'+n+'">'+n+"</a>";});
+    html = '<div class="page view-enter"><div class="head">'+symHTML("poly")+'<div class="head-txt"><h1>'+esc(s.chat.t)+'</h1><p class="knows">'+esc(s.chat.k)+"</p></div></div>"+
+      '<div class="thread"><div class="q">'+esc(s.chat.q)+'</div><div class="a">'+a+'</div><div class="srcs">'+
+      s.chat.src.map(function(x,i){return '<a class="src" id="src'+(i+1)+'" href="#chat"><b>'+(i+1)+"</b><span>"+esc(x[0])+"<small>"+esc(x[1])+"</small></span></a>";}).join("")+
+      '</div></div><div class="dock">'+bar(s.chat.p)+"</div></div>";
+  } else if (v==="finance"){
+    html = '<div class="page view-enter"><div class="head">'+symHTML("bars")+'<div class="head-txt"><h1>'+esc(s.finance.t)+'</h1><p class="knows">'+esc(s.finance.k)+"</p></div></div>"+
+      '<div class="stats">'+s.finance.stats.map(function(x){return '<div class="stat"><div class="stat-l">'+esc(x[0])+'</div><div class="stat-v">'+eur(x[1])+'</div><div class="stat-d">'+esc(x[2])+"</div></div>";}).join("")+
+      '</div><div class="dock">'+bar(s.finance.p)+"</div></div>";
+  } else {
+    var t = toolOf(state.tool) || toolOf("/dashboard/projects");
+    var isProj = t.item.href==="/dashboard/projects";
+    html = '<div class="page view-enter"><div class="head">'+symHTML(SHAPE_OF_GROUP[t.group.key]||"lattice")+'<div class="head-txt"><h1>'+esc(t.item.labels[state.lang])+'</h1><p class="knows">'+esc(isProj?s.projects.k:s.generic.k)+"</p></div></div>"+
+      bar(isProj?s.projects.p:s.generic.p)+(isProj?cards(s.projects.cards):"")+"</div>";
+  }
+  $("view").innerHTML = html;
+  var sw = $("sw3d");
+  if (sw) sw.onclick = function(){ state.three = !state.three; render(); };
+  var est = $("est");
+  if (est) est.innerHTML = '<b>'+esc(s.sites.est.replace("{n}",fmt(SITE_CREDITS)))+"</b>"+(state.three?" · "+esc(s.sites.three.replace("{n}",fmt(SITE_CREDITS*8))):"");
+  tilt();
+  markNav();
+  if (T.fieldReady===null && $("field")) T.fieldReady = performance.now();
+  G3.sync();
+}
+
+function renderChrome(){
+  var s = S();
+  document.documentElement.lang = state.lang;
+  document.documentElement.dir = state.lang==="ar" ? "rtl" : "ltr";
+  $("searchLabel").textContent = s.search;
+  $("nav").innerHTML = NAV.groups.map(function(g){
+    return '<div class="grp"><h3>'+esc(g.labels[state.lang])+"</h3>"+g.items.map(function(it){
+      return '<a href="#'+esc(it.href)+'" data-href="'+esc(it.href)+'">'+esc(it.labels[state.lang])+"</a>";
+    }).join("")+"</div>";
+  }).join("");
+  $("avatar").textContent = s.initials;
+  $("meName").textContent = s.name;
+  $("meCr").textContent = fmt(CREDITS_BALANCE)+" "+s.creditsWord;
+  $("menuBtn").setAttribute("aria-label", s.menu);
+  $("themeBtn").innerHTML = state.theme==="dark" ? ICON.sun : ICON.moon;
+  $("themeBtn").setAttribute("aria-label", state.theme==="dark" ? s.light : s.dark);
+  renderMockbar();
+}
+function markNav(){
+  var cur = state.view==="sites" ? "/dashboard/website-builder" : state.view==="chat" ? "/dashboard/chat" : state.view==="finance" ? "/dashboard/finance" : state.view==="generic" ? state.tool : null;
+  var links = $("nav").querySelectorAll("a");
+  for (var i=0;i<links.length;i++){ if (links[i].dataset.href===cur) links[i].setAttribute("aria-current","page"); else links[i].removeAttribute("aria-current"); }
+}
+function go(view, tool){
+  state.view = view; if (tool) state.tool = tool;
+  document.body.classList.remove("drawer-open");
+  render();
+  $("panel").scrollTop = 0;
+}
+function openTool(href){
+  var v = VIEW_OF[href];
+  if (href.indexOf("/dashboard/chat")===0) v = "chat";
+  go(v || "generic", v ? null : href);
+}
+
+// --- cards tilt in 3D under the pointer; never on touch, never with reduced motion ---
+var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function tilt(){
+  if (reduced) return;
+  var list = document.querySelectorAll(".card");
+  for (var i=0;i<list.length;i++) (function(c){
+    c.onpointermove = function(e){
+      if (e.pointerType!=="mouse") return;
+      var r = c.getBoundingClientRect(), x = (e.clientX-r.left)/r.width-.5, y = (e.clientY-r.top)/r.height-.5;
+      c.style.transform = "rotateX("+(-y*8).toFixed(2)+"deg) rotateY("+(x*10).toFixed(2)+"deg) translateZ(4px)";
+    };
+    c.onpointerleave = function(){ c.style.transform = ""; };
+  })(list[i]);
+}
+
+// --- theme: dark by default, light on request, remembered ---
+function setTheme(t){
+  state.theme = t;
+  if (t==="light") document.documentElement.setAttribute("data-theme","light"); else document.documentElement.removeAttribute("data-theme");
+  store.set("ionexa.theme", t);
+  renderChrome(); G3.recolor();
+}
+
+// --- the palette ---
+function openPalette(){
+  var s = S(), items = [];
+  NAV.groups.forEach(function(g){ g.items.forEach(function(it){ items.push({href:it.href,label:it.labels[state.lang],group:g.labels[state.lang]}); }); });
+  var wrap = document.createElement("div");
+  wrap.className = "pal";
+  wrap.innerHTML = '<div class="pal-box" role="dialog" aria-modal="true"><input id="palIn" type="text" autocomplete="off" placeholder="'+esc(s.palette)+'" aria-label="'+esc(s.palette)+'"><ul role="listbox" id="palList"></ul></div>';
+  document.body.appendChild(wrap);
+  var inp = wrap.querySelector("input"), ul = wrap.querySelector("ul"), sel = 0, shown = items;
+  function draw(){
+    ul.innerHTML = shown.map(function(it,i){return '<li role="option" aria-selected="'+(i===sel)+'" data-href="'+esc(it.href)+'">'+esc(it.label)+"<small>"+esc(it.group)+"</small></li>";}).join("");
+  }
+  function close(){ wrap.remove(); }
+  inp.oninput = function(){ var q = inp.value.toLowerCase(); shown = items.filter(function(it){return it.label.toLowerCase().indexOf(q)>=0;}); sel = 0; draw(); };
+  inp.onkeydown = function(e){
+    if (e.key==="ArrowDown"){ sel = Math.min(sel+1, shown.length-1); draw(); e.preventDefault(); }
+    else if (e.key==="ArrowUp"){ sel = Math.max(sel-1, 0); draw(); e.preventDefault(); }
+    else if (e.key==="Enter" && shown[sel]){ close(); openTool(shown[sel].href); }
+    else if (e.key==="Escape"){ close(); }
+  };
+  ul.onclick = function(e){ var li = e.target.closest("li"); if (li){ close(); openTool(li.dataset.href); } };
+  wrap.onclick = function(e){ if (e.target===wrap) close(); };
+  draw(); inp.focus();
+}
+
+// --- the mock's own controls: language, view, and what the 3D layer is doing ---
+function renderMockbar(){
+  var m = $("mockbar");
+  m.innerHTML = ["el","en","ar","zh"].map(function(l){return '<button type="button" data-lang="'+l+'" aria-pressed="'+(state.lang===l)+'">'+l.toUpperCase()+"</button>";}).join("")+'<output id="glinfo"></output>';
+  m.onclick = function(e){ var b = e.target.closest("button"); if (b){ state.lang = b.dataset.lang; renderChrome(); render(); } };
+}
+
+// ===========================================================================
+// THE ONE 3D LAYER. One WebGL renderer for the whole app, and it does not
+// run on the page's thread: it lives in a Web Worker on an OffscreenCanvas,
+// draws every symbol on screen into one strip per frame, and hands the strip
+// back as an ImageBitmap that each slot copies its own square out of. The
+// page never parses three.js, so nothing the 3D layer does can stand between
+// a keystroke and the field (measured: scripts/mockups-3d.mjs).
+//
+// Where a browser cannot run WebGL in a worker, the same code runs on the
+// page instead, and then it waits until the person is not typing. Where
+// there is no WebGL at all, or the device is weak, nothing is loaded and
+// every slot keeps the SVG drawing it has shown from the first paint: never
+// an empty square, never a wait in the field.
+// ===========================================================================
+function g3core(env){
+  var THREE, O, renderer, canvas, scenes = {}, slots = [], mats = [], raf = 0, last = 0, acked = true, paused = false, dirty = true;
+  var frames = 0, fpsT = 0, fps = 0, total = 0, lowSince = 0, mode = "animate";
+  var tick = env.raf || function(f){ return setTimeout(function(){ f(performance.now()); }, 16); };
+  var untick = env.caf || clearTimeout;
+  function mat(kind, op, size){
+    var m = kind==="points" ? new THREE.PointsMaterial({color:O.accent, size:size||.03, transparent:true, opacity:op==null?1:op, depthWrite:false})
+                            : new THREE.LineBasicMaterial({color:O.accent, transparent:true, opacity:op==null?1:op, depthWrite:false});
+    mats.push(m); return m;
+  }
+  function lines(geo, op){ return new THREE.LineSegments(geo, mat("line", op)); }
+  function vec(lat, lon){ var a = lat*Math.PI/180, b = lon*Math.PI/180; return new THREE.Vector3(Math.cos(a)*Math.cos(b), Math.sin(a), Math.cos(a)*Math.sin(b)); }
+  function circle(r, n){ var p = []; for (var i=0;i<=n;i++){ var t = i/n*Math.PI*2; p.push(new THREE.Vector3(Math.cos(t)*r, Math.sin(t)*r, 0)); } return new THREE.BufferGeometry().setFromPoints(p); }
+  var GLOBE;
+  var BUILD = {
+    globe: function(){
+      var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(35, 1, .1, 50); cam.position.z = 4.7;
+      var tiltG = new THREE.Group(); tiltG.rotation.x = .38; scene.add(tiltG);
+      var spin = new THREE.Group(); tiltG.add(spin);
+      var bin = atob(GLOBE.mask), n = GLOBE.n, GOLD = Math.PI*(3-Math.sqrt(5)), pos = [], k = 0, every = O.phone ? 2 : 1;
+      for (var i=0;i<n;i++){
+        if (!(bin.charCodeAt(i>>3) & (1<<(i&7)))) continue;
+        if ((k++ % every)!==0) continue;
+        var y = 1-2*(i+.5)/n, r = Math.sqrt(1-y*y), t = i*GOLD;
+        pos.push(Math.cos(t)*r, y, Math.sin(t)*r);
+      }
+      var g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+      spin.add(new THREE.Points(g, mat("points", .95, O.phone?.04:.028)));
+      scene.add(new THREE.Line(circle(1.0, 96), mat("line", .22)));
+      var ATH = [37.98, 23.73];
+      var CITIES = [[51.51,-.13],[40.71,-74.0],[25.2,55.27],[1.35,103.82],[30.04,31.24],[-23.55,-46.63],[35.68,139.69],[52.52,13.4]];
+      var a0 = vec(ATH[0],ATH[1]), arcs = [];
+      CITIES.forEach(function(c, idx){
+        var b = vec(c[0],c[1]), ang = a0.angleTo(b), mid = a0.clone().add(b).normalize().multiplyScalar(1+.18+ang*.22);
+        var pts = new THREE.QuadraticBezierCurve3(a0, mid, b).getPoints(60);
+        var geo = new THREE.BufferGeometry().setFromPoints(pts); geo.setDrawRange(0, 0);
+        var line = new THREE.Line(geo, mat("line", .95)); spin.add(line);
+        arcs.push({geo:geo, delay:idx*.55});
+      });
+      var cityPos = []; CITIES.forEach(function(c){ var v = vec(c[0],c[1]); cityPos.push(v.x,v.y,v.z); });
+      var cg = new THREE.BufferGeometry(); cg.setAttribute("position", new THREE.Float32BufferAttribute(cityPos, 3));
+      spin.add(new THREE.Points(cg, mat("points", 1, .055)));
+      var ag = new THREE.BufferGeometry(); ag.setAttribute("position", new THREE.Float32BufferAttribute([a0.x,a0.y,a0.z], 3));
+      spin.add(new THREE.Points(ag, mat("points", 1, .09)));
+      var orbits = [];
+      [[1.32,.5,.0,.35],[1.42,-.35,1.2,-.24],[1.5,.9,2.4,.18]].forEach(function(o){
+        var pivot = new THREE.Group(); pivot.rotation.set(o[1], o[2], 0); scene.add(pivot);
+        pivot.add(new THREE.Line(circle(o[0], 120), mat("line", .14)));
+        var sat = lines(new THREE.EdgesGeometry(new THREE.OctahedronGeometry(.055)), .95); sat.position.x = o[0];
+        var arm = new THREE.Group(); arm.add(sat); pivot.add(arm);
+        orbits.push({arm:arm, speed:o[3]});
+      });
+      var y0 = ATH[1]*Math.PI/180 - Math.PI/2;
+      spin.rotation.y = -y0;
+      return {scene:scene, cam:cam, tick:function(t){
+        spin.rotation.y = -y0 + t*.06;
+        var cyc = 7.5;
+        arcs.forEach(function(a){
+          var p = ((t - a.delay) % cyc + cyc) % cyc, grow = Math.min(1, Math.max(0, p/1.4)), fade = p > 5.6 ? Math.max(0, 1-(p-5.6)/1.2) : 1;
+          a.geo.setDrawRange(0, Math.round(61*grow*fade));
+        });
+        orbits.forEach(function(o){ o.arm.rotation.z = t*o.speed*2; });
+      }, still:function(){ arcs.forEach(function(a){ a.geo.setDrawRange(0, 61); }); }};
+    },
+    pages: function(){
+      var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(35, 1, .1, 50); cam.position.z = 4.4;
+      var grp = new THREE.Group(); grp.rotation.set(.28, -.55, 0); scene.add(grp);
+      for (var i=0;i<4;i++){
+        var p = lines(new THREE.EdgesGeometry(new THREE.PlaneGeometry(1.15, 1.5)), i===0 ? 1 : .75-.17*i);
+        p.position.set(i*.16, -i*.12, -i*.32); grp.add(p);
+      }
+      var tl = []; [[.7,.42],[.48,.25],[.6,.08],[.36,-.09]].forEach(function(l){ tl.push(-.42,l[1],0, -.42+l[0],l[1],0); });
+      var tg = new THREE.BufferGeometry(); tg.setAttribute("position", new THREE.Float32BufferAttribute(tl, 3));
+      grp.add(new THREE.LineSegments(tg, mat("line", .7)));
+      return {scene:scene, cam:cam, tick:function(t){ grp.rotation.y = -.55 + Math.sin(t*.6)*.22; grp.rotation.x = .28 + Math.sin(t*.4)*.06; }};
+    },
+    poly: function(){
+      var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(35, 1, .1, 50); cam.position.z = 4.2;
+      var geo = new THREE.IcosahedronGeometry(1.05, 0), m = lines(new THREE.EdgesGeometry(geo), 1);
+      var v = new THREE.Points(geo, mat("points", 1, .07)), inner = lines(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(.55, 0)), .35);
+      scene.add(m, v, inner);
+      return {scene:scene, cam:cam, tick:function(t){ m.rotation.set(t*.17, t*.3, 0); v.rotation.copy(m.rotation); inner.rotation.set(-t*.2, -t*.25, 0); }};
+    },
+    bars: function(){
+      var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(35, 1, .1, 50); cam.position.set(0, .4, 4.6);
+      var grp = new THREE.Group(); grp.rotation.x = .45; scene.add(grp);
+      var H = [.5,.8,1.25,.65,1.05,1.5,.4,.9,1.2], idx = 0;
+      for (var x=-1;x<=1;x++) for (var z=-1;z<=1;z++){
+        var h = H[idx++], b = lines(new THREE.EdgesGeometry(new THREE.BoxGeometry(.32, h, .32)), .5+h*.33);
+        b.position.set(x*.5, h/2-.6, z*.5); grp.add(b);
+      }
+      grp.add(lines(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.5, .001, 1.5)), .3).translateY(-.6));
+      return {scene:scene, cam:cam, tick:function(t){ grp.rotation.y = t*.25; }};
+    },
+    rings: function(){
+      var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(35, 1, .1, 50); cam.position.z = 4.2;
+      var pivots = [], dots = [];
+      [[0,0],[1.05,.4],[-1.05,.4]].forEach(function(r, i){
+        var p = new THREE.Group(); p.rotation.set(Math.PI/2.4 + r[1], r[0], 0); scene.add(p);
+        var ring = new THREE.Line(circle(1.1, 128), mat("line", i===0 ? 1 : .6)); p.add(ring);
+        var arm = new THREE.Group(), d = new THREE.Points(new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute([1.1,0,0],3)), mat("points", 1, .12));
+        arm.add(d); p.add(arm); dots.push({arm:arm, speed:.5+i*.25});
+      });
+      scene.add(new THREE.Points(new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute([0,0,0],3)), mat("points", 1, .16)));
+      return {scene:scene, cam:cam, tick:function(t){ dots.forEach(function(d){ d.arm.rotation.z = t*d.speed; }); scene.rotation.y = Math.sin(t*.3)*.3; }};
+    },
+    lattice: function(){
+      var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(35, 1, .1, 50); cam.position.z = 4.4;
+      var grp = new THREE.Group(); grp.rotation.set(.5, .6, 0); scene.add(grp);
+      grp.add(lines(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.4, 1.4, 1.4)), 1));
+      var pts = [], seg = [];
+      for (var x=-1;x<=1;x++) for (var y=-1;y<=1;y++) for (var z=-1;z<=1;z++){ pts.push(x*.7,y*.7,z*.7); }
+      for (var a=-1;a<=1;a++) for (var b=-1;b<=1;b++){ seg.push(-.7,a*.7,b*.7, .7,a*.7,b*.7, a*.7,-.7,b*.7, a*.7,.7,b*.7, a*.7,b*.7,-.7, a*.7,b*.7,.7); }
+      var pg = new THREE.BufferGeometry(); pg.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
+      var sg = new THREE.BufferGeometry(); sg.setAttribute("position", new THREE.Float32BufferAttribute(seg, 3));
+      grp.add(new THREE.Points(pg, mat("points", 1, .07)), new THREE.LineSegments(sg, mat("line", .22)));
+      return {scene:scene, cam:cam, tick:function(t){ grp.rotation.y = .6 + t*.22; }};
+    }
+  };
+
+  // One strip, every visible slot side by side at device pixels.
+  var strip = [], stripW = 1, stripH = 1;
+  function layout(){
+    strip = []; var x = 0, h = 1;
+    slots.forEach(function(s){ if (!s.vis) return; var w = Math.max(1, Math.round(s.w*O.dpr)), hh = Math.max(1, Math.round(s.h*O.dpr)); strip.push({id:s.id, shape:s.shape, x:x, y:0, w:w, h:hh}); x += w; h = Math.max(h, hh); });
+    stripW = Math.max(1, x); stripH = h;
+    if (canvas.width !== stripW || canvas.height !== stripH) renderer.setSize(stripW, stripH, false);
+  }
+  function draw(now){
+    raf = 0;
+    if (paused || !acked || !strip.length) return;
+    dirty = false;
+    var animate = mode==="animate";
+    if (animate && O.phone && last && now-last < 30){ raf = tick(draw); return; } // 30 fps on a phone
+    last = now;
+    var t = now/1000;
+    renderer.setScissorTest(false); renderer.clear(); renderer.setScissorTest(true);
+    strip.forEach(function(r){
+      var sc = scenes[r.shape] || (scenes[r.shape] = BUILD[r.shape]());
+      if (animate) sc.tick(t); else { sc.tick(12); if (sc.still) sc.still(); }
+      sc.cam.aspect = r.w/r.h; sc.cam.updateProjectionMatrix();
+      renderer.setViewport(r.x, stripH-r.y-r.h, r.w, r.h); renderer.setScissor(r.x, stripH-r.y-r.h, r.w, r.h);
+      renderer.render(sc.scene, sc.cam);
+    });
+    acked = false;
+    env.frame(canvas, strip);
+    if (!animate) return;
+    // Frames per second, and the way out for a device that cannot keep up:
+    // under 24 fps for three seconds, the layer keeps its last frame.
+    frames++; total++;
+    if (now-fpsT >= 1000){
+      fps = Math.round(frames*1000/(now-fpsT)); frames = 0; fpsT = now; env.post({t:"fps", fps:fps, mode:mode});
+      if (total > 60 && fps < 24){ if (!lowSince) lowSince = now; else if (now-lowSince > 3000){ mode = "static"; env.post({t:"fps", fps:fps, mode:mode, why:"slow device ("+fps+" fps)"}); return; } }
+      else lowSince = 0;
+    }
+    raf = tick(draw);
+  }
+  function kick(){ dirty = true; if (raf) untick(raf); raf = tick(draw); }
+  return function(m){
+    if (m.t==="init"){
+      O = m; GLOBE = m.globe; mode = m.mode;
+      try {
+        if (env.loadThree) env.loadThree(m.threeUrl);
+        THREE = env.THREE();
+        canvas = env.canvas();
+        renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true, antialias:true, powerPreference:"low-power"});
+        renderer.setPixelRatio(1);
+        renderer.setClearColor(0x000000, 0);
+        var g = renderer.getContext(), e = g.getExtension("WEBGL_debug_renderer_info");
+        env.post({t:"ready", gl:e ? g.getParameter(e.UNMASKED_RENDERER_WEBGL) : "webgl"});
+      } catch (err) { env.post({t:"fail", why:String(err && err.message || err)}); }
+    } else if (!renderer) {
+      return;
+    } else if (m.t==="slots"){ slots = m.list; layout(); kick(); }
+    else if (m.t==="ack"){ acked = true; if (!raf && (mode==="animate" || dirty)) raf = tick(draw); }
+    else if (m.t==="accent"){ O.accent = m.c; mats.forEach(function(x){ x.color.set(m.c); }); kick(); }
+    else if (m.t==="pause"){ paused = true; if (raf) untick(raf); raf = 0; }
+    else if (m.t==="resume"){ paused = false; kick(); }
+  };
+}
+
+var G3 = (function(){
+  var mode = "svg", why = "not loaded yet", where = null, gl = null, fps = 0, port = null, slots = [], nextId = 1, io = null, lastKey = 0;
+  var phone = function(){ return window.innerWidth <= 760; };
+  var override = window.__IONEXA_3D || null; // set by scripts/mockups-3d.mjs to measure each branch
+  var accent = function(){ return getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(); };
+  document.addEventListener("keydown", function(e){ if (e.target && e.target.id==="field") lastKey = performance.now(); }, true);
+
+  function decide(){
+    if (override==="off") return "off";
+    if (override==="nogl") return "svg:no WebGL";
+    var weak = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) || (navigator.deviceMemory && navigator.deviceMemory <= 2);
+    if (weak) return "svg:weak device";
+    var c = document.createElement("canvas"), ok = null;
+    try { ok = c.getContext("webgl2") || c.getContext("webgl"); } catch (e) {}
+    if (!ok) return "svg:no WebGL";
+    return reduced ? "static" : "animate";
+  }
+  function initMsg(m){ return {t:"init", threeUrl:new URL(THREE_SRC, location.href).href, globe:GLOBE, accent:accent(), dpr:Math.min(window.devicePixelRatio||1, phone()?1.5:2), phone:phone(), mode:m}; }
+  function load(){
+    var d = decide();
+    if (d==="off"){ mode = "off"; why = "switched off"; info(); return; }
+    if (d.indexOf("svg:")===0){ mode = "svg"; why = d.slice(4); info(); return; }
+    T.threeRequested = performance.now();
+    if (typeof OffscreenCanvas !== "undefined" && override!=="page") inWorker(d); else onPage(d);
+  }
+  // The worker: g3core, three.js and every scene, off the page's thread.
+  function inWorker(d){
+    var src = "var env = {post:function(m,t){ self.postMessage(m,t||[]); }, raf:self.requestAnimationFrame && self.requestAnimationFrame.bind(self), caf:self.cancelAnimationFrame && self.cancelAnimationFrame.bind(self),"+
+      " loadThree:function(u){ importScripts(u); }, THREE:function(){ return self.THREE; }, canvas:function(){ return new OffscreenCanvas(1,1); },"+
+      " frame:function(c, strip){ var b = c.transferToImageBitmap(); self.postMessage({t:\"frame\", src:b, strip:strip}, [b]); }};"+
+      " var handle = ("+g3core.toString()+")(env); self.onmessage = function(e){ handle(e.data); };";
+    var w;
+    try { w = new Worker(URL.createObjectURL(new Blob([src], {type:"text/javascript"}))); } catch (e) { onPage(d); return; }
+    w.onmessage = function(e){ receive(e.data); };
+    w.onerror = function(){ if (where==="worker" && mode!=="svg") return; w.terminate(); onPage(d); };
+    port = function(m){ w.postMessage(m); };
+    where = "worker"; mode = d;
+    port(initMsg(d));
+  }
+  // The page: only where a worker cannot do it, and never while typing.
+  function onPage(d){
+    where = "page";
+    if (performance.now()-lastKey < 1500){ setTimeout(function(){ onPage(d); }, 1500); return; }
+    var s = document.createElement("script");
+    s.src = THREE_SRC; s.async = true;
+    s.onerror = function(){ mode = "svg"; why = "three.js did not load"; info(); };
+    s.onload = function(){
+      var handle = g3core({post:function(m){ if (m.t==="fail") m.page = true; receive(m); }, raf:requestAnimationFrame.bind(window), caf:cancelAnimationFrame.bind(window),
+        THREE:function(){ return window.THREE; }, canvas:function(){ return document.createElement("canvas"); },
+        frame:function(c, strip){ receive({t:"frame", src:c, strip:strip}); }});
+      port = function(m){ handle(m); };
+      mode = d; port(initMsg(d));
+    };
+    document.head.appendChild(s);
+  }
+  function receive(m){
+    if (m.t==="ready"){ T.threeLoaded = performance.now(); gl = m.gl; sync(); }
+    else if (m.t==="fail" && where==="worker" && !m.page){ onPage(mode); }   // a worker that could not, the page can still try
+    else if (m.t==="fail"){ mode = "svg"; why = "init failed: "+m.why; unglAll(); info(); }
+    else if (m.t==="fps"){ fps = m.fps; if (m.mode==="static" && mode!=="static"){ mode = "static"; why = m.why; } info(); }
+    else if (m.t==="frame"){
+      m.strip.forEach(function(r){
+        var s = slots.find(function(x){ return x.id===r.id; }); if (!s || !s.el.isConnected) return;
+        var c = s.canvas;
+        if (!c){ c = s.canvas = document.createElement("canvas"); s.el.appendChild(c); }
+        if (c.width !== r.w || c.height !== r.h){ c.width = r.w; c.height = r.h; }
+        var ctx = c.getContext("2d"); ctx.clearRect(0, 0, r.w, r.h); ctx.drawImage(m.src, r.x, r.y, r.w, r.h, 0, 0, r.w, r.h);
+        s.el.classList.add("gl");
+      });
+      if (m.src.close) m.src.close();
+      if (T.firstFrame===null) T.firstFrame = performance.now();
+      if (port) port({t:"ack"});
+    }
+  }
+  function sync(){
+    if (io) io.disconnect();
+    var els = document.querySelectorAll(".sym");
+    slots = Array.prototype.map.call(els, function(el){ var r = el.getBoundingClientRect(); return {id:nextId++, el:el, shape:el.dataset.shape, w:r.width, h:r.height, vis:true}; });
+    info();
+    if (!port || mode==="svg" || mode==="off") return;
+    // Only what is on screen is drawn: the panel is the scroll root.
+    io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ var s = slots.find(function(x){ return x.el===en.target; }); if (s) s.vis = en.isIntersecting; });
+      send();
+    }, {root:$("panel")});
+    slots.forEach(function(s){ io.observe(s.el); });
+    send();
+  }
+  function send(){
+    if (!port) return;
+    slots.forEach(function(s){ var r = s.el.getBoundingClientRect(); s.w = r.width; s.h = r.height; });
+    port({t:"slots", list:slots.map(function(s){ return {id:s.id, shape:s.shape, w:s.w, h:s.h, vis:s.vis}; })});
+  }
+  function unglAll(){ slots.forEach(function(s){ s.el.classList.remove("gl"); }); }
+  window.addEventListener("resize", function(){ send(); });
+  document.addEventListener("visibilitychange", function(){ if (port) port({t:document.hidden ? "pause" : "resume"}); });
+  function recolor(){ if (port) port({t:"accent", c:accent()}); }
+  function info(){
+    var o = $("glinfo"); if (!o) return;
+    o.textContent = "3D: "+mode+(where && mode!=="svg" && mode!=="off" ? " · "+where : "")+(mode==="animate"&&fps?" · "+fps+" fps":"")+(mode==="svg"||mode==="off"||mode==="static"&&why!=="not loaded yet"?" · "+why:"");
+  }
+  return {load:load, sync:sync, recolor:recolor, state:function(){ return {mode:mode, why:why, where:where, fps:fps, slots:slots.length, gl:gl}; }};
+})();
+
+// --- wiring ---
+(function boot(){
+  var saved = store.get("ionexa.theme");
+  state.theme = saved==="light" ? "light" : "dark";
+  if (state.theme==="light") document.documentElement.setAttribute("data-theme","light");
+  var h = (location.hash||"").slice(1);
+  if (h==="sites"||h==="chat"||h==="finance"||h==="projects"||h==="home") state.view = h==="projects" ? "generic" : h;
+  renderChrome();
+  render();
+  $("nav").addEventListener("click", function(e){ var a = e.target.closest("a"); if (!a) return; e.preventDefault(); openTool(a.dataset.href); });
+  $("brand").onclick = function(){ go("home"); };
+  $("search").onclick = openPalette;
+  $("themeBtn").onclick = function(){ setTheme(state.theme==="dark" ? "light" : "dark"); };
+  $("menuBtn").onclick = function(){ document.body.classList.toggle("drawer-open"); };
+  document.addEventListener("click", function(e){ if (document.body.classList.contains("drawer-open") && !e.target.closest("#side") && !e.target.closest("#menuBtn")) document.body.classList.remove("drawer-open"); });
+  document.addEventListener("keydown", function(e){ if ((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==="k"){ e.preventDefault(); if (!document.querySelector(".pal")) openPalette(); } });
+  // The 3D layer waits for the page: after load, and after the browser is idle.
+  var later = function(){ (window.requestIdleCallback || function(f){ return setTimeout(f, 200); })(G3.load, {timeout:1500}); };
+  if (document.readyState==="complete") later(); else window.addEventListener("load", later);
+})();
+
+// For scripts/mockups-3d.mjs: put the page in a state, and report the state it is in.
+window.mock = {
+  show:function(v, tool){ if (v==="drawer"){ go("home"); document.body.classList.add("drawer-open"); return; } if (v==="palette"){ go("home"); openPalette(); return; } if (v==="projects") go("generic","/dashboard/projects"); else go(v, tool); },
+  theme:setTheme,
+  lang:function(l){ state.lang = l; renderChrome(); render(); },
+  three:function(on){ state.three = !!on; render(); },
+  state:function(){
+    var clipped = [];
+    document.querySelectorAll("h1,.knows,.card-t,.chip,.stat-v,.src span,.bar input,.meta,.q,.a").forEach(function(el){ if (el.scrollWidth > el.clientWidth+1 && getComputedStyle(el).overflow!=="visible") clipped.push(el.className||el.tagName); });
+    var navLinks = Array.prototype.map.call(document.querySelectorAll("#nav a"), function(a){ return a.dataset.href; });
+    var ellipsised = Array.prototype.filter.call(document.querySelectorAll("#nav a"), function(a){ return a.scrollWidth > a.clientWidth+1; }).map(function(a){ return a.textContent; });
+    var syms = Array.prototype.map.call(document.querySelectorAll(".sym"), function(s){ var r = s.getBoundingClientRect(); return {shape:s.dataset.shape, gl:s.classList.contains("gl"), svgShown:getComputedStyle(s.querySelector("svg")).opacity!=="0", w:Math.round(r.width)}; });
+    return {view:state.view, theme:state.theme, lang:state.lang, dir:document.documentElement.dir,
+      font:document.fonts.check('16px "Commissioner"'), bg:getComputedStyle(document.body).backgroundColor,
+      overflowX:document.documentElement.scrollWidth - window.innerWidth, clipped:clipped, navLinks:navLinks, navEllipsised:ellipsised,
+      syms:syms, g3:G3.state(), T:T, field:!!document.getElementById("field")};
+  }
+};
+</script>

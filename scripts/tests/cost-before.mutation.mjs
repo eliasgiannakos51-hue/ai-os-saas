@@ -59,7 +59,11 @@ const MUTANTS = [
     name: "a website edit becomes large and nobody lists where it is priced",
     file: ESTIMATE,
     from: "  websiteEdit: {\n    systemPromptTokens: 2900,\n    auxiliaryCalls: [{ inputTokens: 4000, outputTokens: 300 }],\n    baseOutputChars: 4000,",
-    to: "  websiteEdit: {\n    systemPromptTokens: 2900,\n    auxiliaryCalls: [{ inputTokens: 4000, outputTokens: 300 }],\n    baseOutputChars: 40000,",
+    // 80,000, not 40,000: after one credit became EUR 0.02 on every plan
+    // (063da767) a 40,000-character edit priced under the 50-credit line,
+    // so the mutant stopped making the edit large and the gate stayed green
+    // for the right reason. Same defect, sized for the current credit.
+    to: "  websiteEdit: {\n    systemPromptTokens: 2900,\n    auxiliaryCalls: [{ inputTokens: 4000, outputTokens: 300 }],\n    baseOutputChars: 80000,",
     expect: "websiteEdit: has an entry",
   },
   {

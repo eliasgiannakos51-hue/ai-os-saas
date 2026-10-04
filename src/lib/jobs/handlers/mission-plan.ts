@@ -57,6 +57,10 @@ export const missionPlanHandler: JobHandler = async (ctx: JobContext): Promise<J
     return { result: { planned: false, message: planResult.clarificationQuestion } };
   }
 
+  // What the planning step produced, for the job's timeline
+  // (job-timeline.ts). evidence(), not progress(): no stop check here, after
+  // the plan has been paid for.
+  await ctx.evidence({ key: "planSteps", count: planResult.steps.length });
   await ctx.progress(3, steps[2]);
 
   const planSteps: MissionPlan = {

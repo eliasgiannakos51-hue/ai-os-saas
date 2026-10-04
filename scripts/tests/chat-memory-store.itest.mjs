@@ -150,6 +150,8 @@ try {
   let applyError = null;
   try {
     applyFile(path.join(ROOT, "supabase/migrations/20261003000000_chat_memory_dedup_and_retention.sql"));
+    // The fold fix that has to follow it, in the order production gets them.
+    applyFile(path.join(ROOT, "supabase/migrations/20261004100000_chat_memory_fold_matches_app.sql"));
   } catch (err) {
     applyError = err;
   }
@@ -183,6 +185,7 @@ try {
 
   // Re-running a hand-applied migration is the normal case in this project.
   applyFile(path.join(ROOT, "supabase/migrations/20261003000000_chat_memory_dedup_and_retention.sql"));
+  applyFile(path.join(ROOT, "supabase/migrations/20261004100000_chat_memory_fold_matches_app.sql"));
   check("a second application changes nothing", await sql(`select count(*) from public.chat_memory`), "3");
 
   // ------------------------------------------------------------------
@@ -231,6 +234,27 @@ try {
     const inSql = await sql(`select public.search_fold('${sample}')`);
     check(`fold agrees on "${sample}"`, memoryFold(sample), inSql);
   }
+  // THE CASE THE SAMPLES ABOVE MISSED: whole sentences, as the extractor
+  // writes them — a full stop at the end, sometimes a doubled space. The
+  // backfill folded with search_fold(), which keeps both, and every old
+  // fact was then recorded twice. chat_memory_fold() is the SQL twin of
+  // memoryFold() and is what the stored folds must equal.
+  for (const sentence of [
+    "Τον λένε Ηλία και φτιάχνει ένα SaaS.",
+    "Prefers  short answers!",
+    "Η καφετέρια είναι στη Θεσσαλονίκη;",
+    "喜欢简短的回答。",
+    "يفضل الإجابات القصيرة؟",
+    "يعمل في مقهى في سالونيك۔",
+  ]) {
+    const inSql = await sql(`select public.chat_memory_fold('${sentence}')`);
+    check(`the app's fold and the stored fold agree on "${sentence}"`, memoryFold(sentence), inSql);
+  }
+  check(
+    "every stored fold is the app's fold of its text",
+    await sql(`select count(*) from public.chat_memory where memory_fold is distinct from public.chat_memory_fold(memory_text)`),
+    "0"
+  );
 
   // ------------------------------------------------------------------
   console.log("\n== A does not see B's memory, and delete is one row ==");
@@ -344,6 +368,36 @@ try {
                where n.nspname = 'public' and p.proname = 'chat_memory_prunable'`),
     "false"
   );
+
+  // ------------------------------------------------------------------
+  console.log("\n== the fold fix repairs a database that already has the bug ==");
+  // ------------------------------------------------------------------
+  // Production ran 20261003000000 first and lived with it: old facts carry
+  // a fold ending in "." and each one said again since then has a second
+  // row with the app's fold. Built here exactly that way, then the fix is
+  // applied on its own.
+  const C = await sql(`insert into auth.users (id) values (gen_random_uuid()) returning id`);
+  const olderFact = "Έχει δύο υπαλλήλους.";
+  await sql(`insert into public.chat_memory (user_id, memory_text, memory_fold, times_seen, created_at, last_seen_at) values
+      ('${C}', '${olderFact}', public.search_fold('${olderFact}'), 2, now() - interval '90 days', now() - interval '30 days'),
+      ('${C}', '${olderFact}', '${memoryFold(olderFact)}', 1, now() - interval '2 days', now() - interval '2 days')`);
+  check("the bug's shape: two rows for one fact", await sql(`select count(*) from public.chat_memory where user_id = '${C}'`), "2");
+  applyFile(path.join(ROOT, "supabase/migrations/20261004100000_chat_memory_fold_matches_app.sql"));
+  check("the fix merges them into one", await sql(`select count(*) from public.chat_memory where user_id = '${C}'`), "1");
+  check("…whose count is the SUM of both", await sql(`select times_seen from public.chat_memory where user_id = '${C}'`), "3");
+  check(
+    "…keeping the older row's created_at",
+    await sql(`select round(extract(epoch from now() - created_at) / 86400) from public.chat_memory where user_id = '${C}'`),
+    "90"
+  );
+  check(
+    "…and the newer sighting",
+    await sql(`select round(extract(epoch from now() - last_seen_at) / 86400) from public.chat_memory where user_id = '${C}'`),
+    "2"
+  );
+  check("…with the app's fold", await sql(`select memory_fold from public.chat_memory where user_id = '${C}'`), memoryFold(olderFact));
+  applyFile(path.join(ROOT, "supabase/migrations/20261004100000_chat_memory_fold_matches_app.sql"));
+  check("running the fix again changes nothing", await sql(`select times_seen from public.chat_memory where user_id = '${C}'`), "3");
 } finally {
   pg.stop();
 }

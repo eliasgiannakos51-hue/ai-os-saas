@@ -14,6 +14,7 @@ import { InlineTitle } from "@/components/chat/inline-title";
 import { HelpTip } from "@/components/ui/help-tip";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { MessageContent } from "@/components/chat/message-content";
+import { SourceCards } from "@/components/chat/source-cards";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { alignSuggestions, appendClarificationAnswers } from "@/lib/clarification-client";
 import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
@@ -541,8 +542,14 @@ export function ChatWorkspace({
       // discarded when the connection drops partway through it.
       let usageEvent: unknown = null;
       let provenance: Provenance | null = null;
+      let finalContent: string | null = null;
       const { interrupted } = await readNdjsonStream(res.body, (event) => {
-        if (event.type === "done") usageEvent = event;
+        if (event.type === "done") {
+          usageEvent = event;
+          // With web sources the server sends the answer back numbered
+          // (lib/chat/web-sources.ts); without them, what streamed stands.
+          if (typeof event.content === "string" && event.content.trim()) finalContent = event.content;
+        }
         if (event.type === "meta") {
           resolvedConversationId = (event.conversationId as string | null) ?? null;
           provenance = (event.provenance as Provenance | undefined) ?? null;
@@ -606,7 +613,7 @@ export function ChatWorkspace({
             id: nextLocalId("assistant"),
             conversation_id: resolvedConversationId ?? "",
             role: "assistant",
-            content: accumulatedText,
+            content: finalContent ?? accumulatedText,
             created_at: new Date().toISOString(),
             provenance: provenance ?? undefined,
           },
@@ -914,6 +921,9 @@ export function ChatWorkspace({
                         measuring; nothing else ships them. */}
                     <div className="chat-ground-dim min-w-0 flex-1 text-foreground">
                       <MessageContent content={msg.content} className="leading-relaxed" />
+                      {/* NUMBERED WEB SOURCES — only when the answer searched
+                          the web; the numbers in the prose above link here. */}
+                      <SourceCards content={msg.content} />
                       {/* "LISTEN" — on the finished answer only. Never on
                           the one still streaming: half a sentence read
                           aloud is a clip charged for text that changed a

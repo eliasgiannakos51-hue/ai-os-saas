@@ -21,7 +21,7 @@
 // Run: node scripts/tests/purchased-credits-marker.itest.mjs
 import { execFile, execFileSync } from "node:child_process";
 import { promisify } from "node:util";
-import { writeFileSync, mkdtempSync } from "node:fs";
+import { writeFileSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { startEphemeralPostgres, psqlArgs } from "../lib/ephemeral-postgres.mjs";
@@ -57,18 +57,16 @@ if (!pg.available) {
   process.exit(0);
 }
 
-let originalSql;
-try {
-  originalSql = execFileSync("git", ["show", `${ORIGINAL_COMMIT}:${ORIGINAL}`], {
-    cwd: ROOT,
-    encoding: "utf8",
-    maxBuffer: 1 << 24,
-  });
-} catch (err) {
-  console.log(`purchased-credits-marker: SKIPPED\n  cannot read ${ORIGINAL_COMMIT}:${ORIGINAL} — ${err.message}`);
-  pg.stop();
-  process.exit(0);
-}
+// THE OLD VERSION IS A FIXTURE, NOT A `git show`. It used to be read from
+// history with `git show ${ORIGINAL_COMMIT}:${ORIGINAL}`, and CI checks out a
+// shallow clone that does not have that commit: the test printed SKIPPED,
+// exited 0, and its mutation suite reported every mutant as missed. The
+// bytes are those of that commit, committed beside the other fixtures
+// (scripts/tests/fixtures/README.md says which and why).
+const originalSql = readFileSync(
+  path.join(ROOT, "scripts/tests/fixtures/20260815_purchased_credits.at-1c437e0.sql"),
+  "utf8"
+);
 const tmp = mkdtempSync(path.join(tmpdir(), "pc-marker-"));
 const ORIGINAL_FILE = path.join(tmp, "original.sql");
 writeFileSync(ORIGINAL_FILE, originalSql, "utf8");

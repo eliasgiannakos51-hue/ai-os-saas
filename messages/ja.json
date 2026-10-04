@@ -703,9 +703,7 @@
       "description": "アプリ全体の配色を選択できます — レイアウトとアクセントカラーは変わりません。",
       "options": {
         "dark": "ダーク",
-        "light": "ライト",
-        "midnight": "ミッドナイト",
-        "carbon": "カーボン"
+        "light": "ライト"
       }
     },
     "language": {
@@ -1010,7 +1008,7 @@
       "oneOffNote": "クレジットパックは即時付与され、解約はできません。",
       "items": {
         "credits_1000": {
-          "name": "1,000クレジット",
+          "name": "750クレジット",
           "grants": "一度きりの追加"
         },
         "agents_5": {
@@ -1037,6 +1035,15 @@
       "loaded": "サンプルは読み込み済みです。削除するまで各ページに表示されます。",
       "notLoaded": "未読み込み。",
       "open": "ホームで見る"
+    },
+    "displayName": {
+      "title": "何とお呼びしましょうか？",
+      "description": "ホーム画面のあいさつに使われます。呼ばれたい形のとおりに入力してください。",
+      "placeholder": "お名前",
+      "saved": "名前を保存しました",
+      "saveFailed": "名前を保存できませんでした。しばらくしてからもう一度お試しください。",
+      "save": "保存",
+      "saving": "保存中…"
     }
   },
   "dashboard": {
@@ -1282,7 +1289,10 @@
       "clarificationTitle": "先に一つだけ確認させてください:",
       "clarificationSkip": "このまま答えて",
       "clarificationContinue": "送信",
-      "clarificationAnswerPlaceholder": "あなたの答え..."
+      "clarificationAnswerPlaceholder": "あなたの答え...",
+      "sources": {
+        "title": "出典"
+      }
     },
     "create": {
       "title": "何でも作成",
@@ -3204,7 +3214,18 @@
     "watchFailed": "現在進捗を表示できません — 処理はバックグラウンドで続いています。",
     "stop": "停止",
     "stopping": "停止しています…",
-    "stopped": "停止しました。すでに完了した作業分のみ課金されます。"
+    "stopped": "停止しました。すでに完了した作業分のみ課金されます。",
+    "timeline": {
+      "title": "実行した内容",
+      "running": "実行中",
+      "evidence": {
+        "files": "{count, plural, other {#件のファイル}}",
+        "parts": "{count, plural, other {#回に分けて}}",
+        "planSteps": "{count, plural, other {#ステップ}}",
+        "sources": "{count, plural, other {#件の情報源}}"
+      },
+      "writing": "レポートを作成"
+    }
   },
   "problem": {
     "out_of_credits": {
@@ -4116,7 +4137,12 @@
     "clearFailed": "うまくいきませんでした。"
   },
   "promise": {
-    "oneSentence": "あなたの仕事をすでに知っている AI。何でも聞いてください。"
+    "oneSentence": "あなたの仕事をすでに知っている AI。何でも聞いてください。",
+    "greeting": {
+      "morning": "おはようございます",
+      "afternoon": "こんにちは",
+      "evening": "こんばんは"
+    }
   },
   "legal": {
     "lastUpdated": "最終更新: {date}",

@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { reapJob } from "@/lib/jobs/run-job";
 import { isJobStale, jobPercent } from "@/lib/jobs/job-types";
+import { restoreTimeline, timelineForClient } from "@/lib/jobs/job-timeline";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +81,18 @@ export async function GET(_request: Request, { params }: { params: { id: string 
         attempts: job.attempts ?? 0,
         createdAt: job.created_at,
         finishedAt: job.finished_at ?? null,
+        // Steps, durations and — once charged — credits. The provider cost
+        // stored with each entry stays here: timelineForClient returns no
+        // USD figure, and the final cost below is used only to weigh the
+        // last step.
+        timeline: timelineForClient(restoreTimeline(job.timeline), {
+          status: String(job.status),
+          creditsCharged: typeof job.credits_charged === "number" ? job.credits_charged : null,
+          finishedAt: (job.finished_at as string | null) ?? null,
+          finalCostUsd: CostAccumulator.restore(
+            Array.isArray(job.usage_entries) ? (job.usage_entries as never) : []
+          ).totalUsdCost,
+        }),
       },
     });
   } catch (err) {

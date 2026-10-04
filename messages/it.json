@@ -703,9 +703,7 @@
       "description": "Scegli una tavolozza di colori per tutta l'app — il layout e il colore d'accento restano invariati.",
       "options": {
         "dark": "Scuro",
-        "light": "Chiaro",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "Chiaro"
       }
     },
     "language": {
@@ -1010,7 +1008,7 @@
       "oneOffNote": "Un pacchetto di crediti viene accreditato subito e non è annullabile.",
       "items": {
         "credits_1000": {
-          "name": "1.000 crediti",
+          "name": "750 crediti",
           "grants": "ricarica una tantum"
         },
         "agents_5": {
@@ -1037,6 +1035,15 @@
       "loaded": "L'esempio è caricato. Viene segnalato su ogni pagina finché non lo rimuovi.",
       "notLoaded": "Non caricato.",
       "open": "Vedilo nella Home"
+    },
+    "displayName": {
+      "title": "Come vuoi che ti chiamiamo?",
+      "description": "Compare nel saluto della tua pagina iniziale. Scrivilo esattamente come vuoi essere chiamato.",
+      "placeholder": "Il tuo nome",
+      "saved": "Nome salvato",
+      "saveFailed": "Non siamo riusciti a salvare il nome. Riprova tra un momento.",
+      "save": "Salva",
+      "saving": "Salvataggio…"
     }
   },
   "dashboard": {
@@ -1282,7 +1289,10 @@
       "clarificationTitle": "Prima una domanda veloce:",
       "clarificationSkip": "Rispondi comunque",
       "clarificationContinue": "Invia",
-      "clarificationAnswerPlaceholder": "La tua risposta..."
+      "clarificationAnswerPlaceholder": "La tua risposta...",
+      "sources": {
+        "title": "Fonti"
+      }
     },
     "create": {
       "title": "Crea Qualsiasi Cosa",
@@ -3204,7 +3214,18 @@
     "watchFailed": "Al momento non è possibile mostrare l'avanzamento — il lavoro continua in background.",
     "stop": "Ferma",
     "stopping": "Interruzione…",
-    "stopped": "Fermato. Viene addebitato solo il lavoro già svolto."
+    "stopped": "Fermato. Viene addebitato solo il lavoro già svolto.",
+    "timeline": {
+      "title": "Cosa ha fatto",
+      "running": "in corso",
+      "evidence": {
+        "files": "{count, plural, one {# file} other {# file}}",
+        "parts": "{count, plural, one {in # parte} other {in # parti}}",
+        "planSteps": "{count, plural, one {# passaggio} other {# passaggi}}",
+        "sources": "{count, plural, one {# fonte} other {# fonti}}"
+      },
+      "writing": "Stesura del report"
+    }
   },
   "problem": {
     "out_of_credits": {
@@ -4116,7 +4137,12 @@
     "clearFailed": "Non ha funzionato."
   },
   "promise": {
-    "oneSentence": "L'IA che conosce già il tuo lavoro. Chiedile qualsiasi cosa."
+    "oneSentence": "L'IA che conosce già il tuo lavoro. Chiedile qualsiasi cosa.",
+    "greeting": {
+      "morning": "Buongiorno",
+      "afternoon": "Buon pomeriggio",
+      "evening": "Buonasera"
+    }
   },
   "legal": {
     "lastUpdated": "ultimo aggiornamento: {date}",

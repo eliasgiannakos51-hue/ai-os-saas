@@ -19,6 +19,7 @@ import { execFileSync } from "node:child_process";
 const TARGET = "scripts/tests/light-theme-contrast.test.mjs";
 const CSS = "src/app/globals.css";
 const CFG = "tailwind.config.ts";
+const PREFS = "src/lib/theme-prefs.ts";
 
 const MUTANTS = [
   // ------------------------------------------------------------------
@@ -159,12 +160,11 @@ const MUTANTS = [
     file: CSS, from: "  --border: 106 106 113;", to: "  --border: 36 36 36;",
   },
   {
-    name: "midnight's border left at its dark-only value",
-    file: CSS, from: "  --border: 99 105 131;", to: "  --border: 31 39 64;",
-  },
-  {
-    name: "carbon's border left at its dark-only value",
-    file: CSS, from: "  --border: 122 122 130;", to: "  --border: 56 56 60;",
+    // Replaces the two midnight/carbon mutants of before 2026-10-04: those
+    // themes are gone, and the risk left is the reverse — a theme offered
+    // in the picker with no CSS behind it.
+    name: "a theme is offered with no CSS block of its own",
+    file: PREFS, from: 'export const THEMES: Theme[] = ["dark", "light"];', to: 'export const THEMES: Theme[] = ["dark", "light", "midnight" as Theme];',
   },
   {
     name: "--border loses its headroom (3.02:1 — passes, but nothing left for the next backdrop)",

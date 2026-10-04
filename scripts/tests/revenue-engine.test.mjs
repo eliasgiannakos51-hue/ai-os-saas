@@ -298,7 +298,7 @@ const heldAll = [
 }
 {
   // THE PRICES THE BRIEF NAMES.
-  eq("+1,000 credits is EUR15", addons.ADDONS.credits_1000.priceEur, 15);
+  eq("the credits add-on is EUR15", addons.ADDONS.credits_1000.priceEur, 15);
   eq("+5 agents is EUR10", addons.ADDONS.agents_5.priceEur, 10);
   eq("+10GB is EUR5", addons.ADDONS.storage_10gb.priceEur, 5);
   eq("priority is EUR20", addons.ADDONS.priority.priceEur, 20);

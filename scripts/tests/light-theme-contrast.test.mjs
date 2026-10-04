@@ -260,15 +260,28 @@ console.log("\n== THE STRUCTURAL BORDER — every theme, every surface ==");
 // The same token fails identically in dark (#242424 is 1.12:1 on
 // --panel-hover), which nobody had measured because nobody had looked.
 //
-// ALL FOUR THEMES, not the two the rest of this file checks. midnight and
-// carbon are shipped themes with their own --border, and "cross-product,
-// not a sample" has to include them or it is a sample again.
-const ALL_THEMES = {
-  dark: DARK,
-  light: LIGHT,
-  midnight: '[data-theme="midnight"]',
-  carbon: '[data-theme="carbon"]',
-};
+// EVERY SHIPPED THEME, read from lib/theme-prefs.ts rather than listed
+// here. Until 2026-10-04 this was a hand-written list of four; midnight
+// and carbon were retired that day (two themes, the owner's design
+// system), and a list kept here would have gone on checking CSS for
+// themes nobody can pick — or, the other way, missed a new one. A theme
+// added to THEMES without its CSS block fails below, because varOf()
+// finds nothing for its selector.
+const { THEMES } = await loadTs("src/lib/theme-prefs.ts");
+const ALL_THEMES = Object.fromEntries(
+  THEMES.map((theme) => [theme, theme === "dark" ? DARK : theme === "light" ? LIGHT : `[data-theme="${theme}"]`])
+);
+ok(`the theme list is read from the code (${THEMES.join(", ")})`, THEMES.length >= 2 && "dark" in ALL_THEMES && "light" in ALL_THEMES);
+// A theme the code offers must have its own block here, or every theme
+// below would be measured but that one: named as a failure, not a throw.
+const BUILT_IN = new Set(["dark", "light"]);
+for (const theme of THEMES) {
+  if (BUILT_IN.has(theme)) continue;
+  ok(`${theme} has its own [data-theme] block in globals.css`, css.includes(`${ALL_THEMES[theme]} {`));
+}
+for (const theme of Object.keys(ALL_THEMES)) {
+  if (!BUILT_IN.has(theme) && !css.includes(`${ALL_THEMES[theme]} {`)) delete ALL_THEMES[theme];
+}
 for (const [theme, selector] of Object.entries(ALL_THEMES)) {
   const themeSurfaces =
     surfaces[theme] ??

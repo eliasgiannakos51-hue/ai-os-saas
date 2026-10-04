@@ -703,9 +703,7 @@
       "description": "Choose a color palette for the whole app — layout and accent color stay the same.",
       "options": {
         "dark": "Dark",
-        "light": "Light",
-        "midnight": "Midnight",
-        "carbon": "Carbon"
+        "light": "Light"
       }
     },
     "language": {
@@ -1010,7 +1008,7 @@
       "oneOffNote": "A credit pack is granted immediately and cannot be cancelled.",
       "items": {
         "credits_1000": {
-          "name": "1,000 credits",
+          "name": "750 credits",
           "grants": "one-time top-up"
         },
         "agents_5": {
@@ -1037,6 +1035,15 @@
       "loaded": "The sample is loaded. It is marked on every page until you remove it.",
       "notLoaded": "Not loaded.",
       "open": "See it on Home"
+    },
+    "displayName": {
+      "title": "What should we call you?",
+      "description": "Used in the greeting on your home page. Write it exactly as you want to be addressed.",
+      "placeholder": "Your name",
+      "saved": "Name saved",
+      "saveFailed": "We couldn't save the name. Try again in a moment.",
+      "save": "Save",
+      "saving": "Saving…"
     }
   },
   "dashboard": {
@@ -1282,7 +1289,10 @@
       "clarificationTitle": "One quick question first:",
       "clarificationSkip": "Answer it anyway",
       "clarificationContinue": "Send",
-      "clarificationAnswerPlaceholder": "Your answer..."
+      "clarificationAnswerPlaceholder": "Your answer...",
+      "sources": {
+        "title": "Sources"
+      }
     },
     "create": {
       "title": "Create Anything",
@@ -3204,7 +3214,18 @@
     "watchFailed": "Progress can't be shown right now — the work continues in the background.",
     "stop": "Stop",
     "stopping": "Stopping…",
-    "stopped": "Stopped. Only the work already done is charged."
+    "stopped": "Stopped. Only the work already done is charged.",
+    "timeline": {
+      "title": "What it did",
+      "running": "in progress",
+      "evidence": {
+        "files": "{count, plural, one {# file} other {# files}}",
+        "parts": "{count, plural, one {in # part} other {in # parts}}",
+        "planSteps": "{count, plural, one {# step} other {# steps}}",
+        "sources": "{count, plural, one {# source} other {# sources}}"
+      },
+      "writing": "Writing the report"
+    }
   },
   "problem": {
     "out_of_credits": {
@@ -4116,7 +4137,12 @@
     "clearFailed": "That did not work."
   },
   "promise": {
-    "oneSentence": "The AI that already knows your work. Ask it anything."
+    "oneSentence": "The AI that already knows your work. Ask it anything.",
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    }
   },
   "legal": {
     "lastUpdated": "last updated: {date}",

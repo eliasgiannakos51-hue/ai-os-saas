@@ -52,9 +52,17 @@ export const ADDONS: Record<AddonSlug, AddonSpec> = {
     priceEur: 15,
     billing: "one_off",
     priceEnvVar: "STRIPE_PRICE_ADDON_CREDITS_1000",
-    grants: { kind: "credits", amount: 1_000 },
-    // Buying two packs is two thousand credits. The obvious case, and the
-    // one that would be most annoying to get wrong.
+    // 750, not the 1,000 it was until 2026-10-03. A credit is one size
+    // since then (EUR 0.02 everywhere) and a bulk discount is paid in BONUS
+    // credits, capped at 25% so the credits still earn 4x when spent
+    // (lib/billing/plans.ts, CREDIT_PACKS). 1,000 for EUR 15 was a 33%
+    // bonus — 3.75x. The slug and its env var keep the old name because
+    // the owner's Stripe configuration is keyed on them; the name the
+    // customer reads is messages' settings.addons.items.credits_1000.
+    // scripts/tests/credit-size.test.mjs holds this to the same cap.
+    grants: { kind: "credits", amount: 750 },
+    // Buying two packs is two packs' worth of credits. The obvious case,
+    // and the one that would be most annoying to get wrong.
     stackable: true,
   },
   agents_5: {

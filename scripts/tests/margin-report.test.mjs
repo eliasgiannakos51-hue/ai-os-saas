@@ -129,6 +129,23 @@ check("the credits it would have taken are summed", aggregateMarginRows([bypassR
 check("it is counted as bypass, not charged", aggregateMarginRows([bypassRow])[0].bypassCalls, 1);
 check("and contributes nothing to charged credits", aggregateMarginRows([bypassRow])[0].chargedCredits, 0);
 
+// A PACK HOLDER'S ROW, since 2026-10-03. A credit is one size, so the
+// charge rate (effectiveCreditPriceEur) is the list price for everyone and
+// the pack's discount lives in what the credit brought in
+// (revenuePerCreditEur). Projected at the charge rate, a pack holder's
+// would-be margin reads 10% better than it is.
+{
+  const packRow = {
+    feature: "website_generate",
+    achieved_margin: null,
+    real_cost_eur: "0.4",
+    credits_charged: 0,
+    metadata: { bypassCharge: true, wouldHaveChargedCredits: 100, effectiveCreditPriceEur: 0.02, revenuePerCreditEur: 100 / 5500 },
+  };
+  // (100 x 0.0181818) / 0.4 = 4.545, not (100 x 0.02) / 0.4 = 5
+  check("a pack holder's row is projected at what a credit brought in, not at the charge rate", to3(hypotheticalMargin(packRow)), 4.545);
+}
+
 console.log("\n== 14. a row with no figures to project from stays honest ==");
 // Rows written before wouldHaveChargedCredits existed must read "no data",
 // not a made-up number.

@@ -360,7 +360,7 @@ checkList(
 );
 
 // The greeting is still there, and still below the headline.
-const greetingAt = greeting.indexOf("greeting.text");
+const greetingAt = greeting.indexOf("greeting.part");
 check("the greeting still exists", greetingAt !== -1);
 check(
   "...and is still below the headline",

@@ -33,12 +33,13 @@ const MEMORY = "src/lib/chat/memory.ts";
 const PROMPT = "src/lib/chat/memory-prompt.ts";
 const LIST = "src/components/memory/ai-memory-list.tsx";
 const SEARCH_PAGE = "src/app/dashboard/search/page.tsx";
-const OLD_ROUTE = "src/app/dashboard/memory/page.tsx";
+const EARLY_REDIRECTS = "src/lib/nav/early-redirects.ts";
 const ARTICLE = "scripts/help-articles/en.mjs";
 const MESSAGES_EN = "messages/en.json";
 const MESSAGES_EL = "messages/el.json";
 const CANARIES = "src/lib/health/schema-canaries.ts";
 const MIG = "supabase/migrations/20261003000000_chat_memory_dedup_and_retention.sql";
+const FIX = "supabase/migrations/20261004100000_chat_memory_fold_matches_app.sql";
 
 const MUTANTS = [
   {
@@ -122,9 +123,9 @@ const MUTANTS = [
     // the page shipped.
     name: "the old address stops redirecting",
     gate: UNIT,
-    file: OLD_ROUTE,
-    from: 'permanentRedirect("/dashboard/search")',
-    to: 'permanentRedirect("/dashboard/nowhere")',
+    file: EARLY_REDIRECTS,
+    from: '"/dashboard/memory": "/dashboard/search",',
+    to: '"/dashboard/memory": "/dashboard/nowhere",',
     expect: "permanent redirect to the search page",
   },
   {
@@ -180,6 +181,40 @@ const MUTANTS = [
     from: "             order by m.created_at, m.id\n             limit 1) as keep_id",
     to: "             order by m.created_at desc, m.id\n             limit 1) as keep_id",
     expect: "OLDEST created_at",
+  },
+  {
+    // HALF OF THE DEFECT 20261004000000 EXISTS FOR: the SQL fold stops
+    // collapsing whitespace, so "short  answers" and "short answers" are two
+    // facts in the database and one in the app. (The other half, the full
+    // stop, is what the duplicate checks above go red on.)
+    name: "the stored fold stops collapsing whitespace",
+    gate: ITEST,
+    file: FIX,
+    from: "  select btrim(\n           regexp_replace(\n             btrim(regexp_replace(public.search_fold(p_text), '\\s+', ' ', 'g')),",
+    to: "  select btrim(\n           regexp_replace(\n             btrim(public.search_fold(p_text)),",
+    expect: "the app's fold and the stored fold agree",
+  },
+  {
+    // THE OTHER HALF: the trailing full stop is kept, which is exactly what
+    // the backfill did. Every old fact said again becomes a second row.
+    name: "the stored fold keeps the trailing full stop",
+    gate: ITEST,
+    file: FIX,
+    // No "$" in these strings: the runner uses String.replace, where "$'"
+    // in the replacement means "the rest of the file".
+    from: "             '[.!?;",
+    to: "             '[!?;",
+    expect: "still one row for that fact",
+  },
+  {
+    // THE REPAIR LOSES COUNTS. A fact said twice before the fix and once
+    // after must say three, or the retention rule reads it as said once.
+    name: "the repair keeps the larger count instead of the sum",
+    gate: ITEST,
+    file: FIX,
+    from: "sum(times_seen)   as seen",
+    to: "max(times_seen)   as seen",
+    expect: "whose count is the SUM of both",
   },
   {
     // RETENTION EATS STABLE KNOWLEDGE. Dropping `times_seen = 1` turns the

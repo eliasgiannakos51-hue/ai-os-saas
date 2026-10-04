@@ -52,12 +52,13 @@ export type MarginLogRow = {
   input_tokens?: number | string | null;
   cache_read_tokens?: number | string | null;
   cache_write_tokens?: number | string | null;
-  /** settle_reservation's metadata. Only two keys are read here — see
+  /** settle_reservation's metadata. Three keys are read here — see
    *  hypotheticalMargin below for why they have to be. */
   metadata?: {
     bypassCharge?: unknown;
     wouldHaveChargedCredits?: unknown;
     effectiveCreditPriceEur?: unknown;
+    revenuePerCreditEur?: unknown;
   } | null;
 };
 
@@ -85,7 +86,16 @@ export type MarginLogRow = {
  */
 export function hypotheticalMargin(row: MarginLogRow): number | null {
   const credits = row.metadata?.wouldHaveChargedCredits;
-  const price = row.metadata?.effectiveCreditPriceEur;
+  // What a credit brought in, when the row carries it (written since
+  // 2026-10-03). Before then the charge rate WAS the revenue rate — the
+  // cheapest the account reached — so an older row's
+  // effectiveCreditPriceEur is still the right number for it. Since a
+  // credit is one size, they differ for a pack holder, and the charge rate
+  // would overstate that row's margin.
+  const price =
+    typeof row.metadata?.revenuePerCreditEur === "number"
+      ? row.metadata.revenuePerCreditEur
+      : row.metadata?.effectiveCreditPriceEur;
   const cost = Number(row.real_cost_eur ?? 0);
   if (typeof credits !== "number" || !Number.isFinite(credits)) return null;
   if (typeof price !== "number" || !Number.isFinite(price) || price <= 0) return null;

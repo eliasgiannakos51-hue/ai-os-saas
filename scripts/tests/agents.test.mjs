@@ -557,30 +557,39 @@ console.log("\n== 11. the hold covers what settlement will charge ==");
   );
 }
 // The margin guarantee itself, on the agent path specifically: settlement
-// charges creditsForRealCostOnAccount, so brute-force the plans an agent
-// can exist on.
+// charges creditsForRealCostOnAccount at the plan's resolved margin
+// (lib/billing/reservations.ts passes marginPolicy.margin), so brute-force
+// every plan an agent can exist on, with and without each pack on sale.
+// The plans and packs are the LIVE ones, not a copy that can go stale: this
+// held a hand-typed Ultimate of 25,000 credits after it stopped existing.
 {
   const cfg = pricingCfg.resolvePricingConfig();
-  const plans = [
-    { price: 20, monthlyCredits: 1000 },
-    { price: 50, monthlyCredits: 3000 },
-    { price: 100, monthlyCredits: 10000 },
-    { price: 200, monthlyCredits: 25000 },
-  ];
+  const { PLANS, CREDIT_PACKS } = await loadTs("src/lib/billing/plans.ts");
+  const { resolveMarginFor } = await loadTs("src/lib/billing/margin-policy.ts");
   let worst = Infinity;
-  for (const plan of plans) {
-    for (const pack of [null, 0.0125, 0.0143]) {
+  let worstNoPack = Infinity;
+  let combos = 0;
+  for (const plan of PLANS) {
+    const margin = resolveMarginFor(null, plan.slug, cfg, {}).margin;
+    for (const pack of [null, ...CREDIT_PACKS.map((p) => p.price / p.credits)]) {
       for (const usd of [0.0005, 0.002, 0.01, 0.05, 0.25, 1.5]) {
         const eur = formula.usdToEur(usd, cfg);
-        const credits = formula.creditsForRealCostOnAccount(eur, plan, pack, cfg);
-        const margin = formula.achievedMarginOnAccount(credits, eur, plan, pack, cfg);
-        if (margin !== null) worst = Math.min(worst, margin);
+        const credits = formula.creditsForRealCostOnAccount(eur, plan, pack, cfg, margin);
+        const achieved = formula.achievedMarginOnAccount(credits, eur, plan, pack, cfg);
+        if (achieved === null) continue;
+        combos++;
+        worst = Math.min(worst, achieved);
+        if (pack === null) worstNoPack = Math.min(worstNoPack, achieved / margin);
       }
     }
   }
   checkTrue(
-    `an agent run never settles below the guaranteed margin (worst ${worst.toFixed(3)}x >= ${cfg.marginMultiplier}x)`,
-    worst >= cfg.marginMultiplier - 1e-9
+    `an agent run never settles below 4x, on any plan with any pack on sale (${combos} combinations, worst ${worst.toFixed(3)}x)`,
+    combos >= PLANS.length * 6 && worst >= 4 - 1e-9
+  );
+  checkTrue(
+    `...and without a pack, never below its plan's own margin (worst ${worstNoPack.toFixed(3)} of it)`,
+    worstNoPack >= 1 - 1e-9
   );
 }
 

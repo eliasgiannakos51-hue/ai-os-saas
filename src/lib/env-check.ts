@@ -255,6 +255,44 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
     fallback: "the provider is skipped; if Anthropic is unreachable the call fails rather than failing over",
     secret: true,
   },
+  // THE KEYS NOTHING READS YET (src/lib/ai/providers/key-inventory.ts).
+  // Listed so the screen says so instead of a set key looking like a
+  // working feature: the only reader is the key check itself.
+  {
+    name: "GEMINI_API_KEY",
+    level: "optional",
+    what: "Accepted in place of GOOGLE_API_KEY by the key check and scripts/cinematic-media.mjs; the failover chain reads GOOGLE_API_KEY only",
+    fallback: "nothing changes; set GOOGLE_API_KEY for Gemini failover",
+    secret: true,
+  },
+  {
+    name: "DEEPGRAM_API_KEY",
+    level: "optional",
+    what: "Deepgram transcription — NO FEATURE READS THIS YET; only the key check on this page",
+    fallback: "nothing changes: transcription uses OPENAI_API_KEY (Whisper)",
+    secret: true,
+  },
+  {
+    name: "BFL_API_KEY",
+    level: "optional",
+    what: "Black Forest Labs (Flux) images — NO FEATURE READS THIS YET; only the key check on this page",
+    fallback: "nothing changes: there is no image generator",
+    secret: true,
+  },
+  {
+    name: "IDEOGRAM_API_KEY",
+    level: "optional",
+    what: "Ideogram images with text — NO FEATURE READS THIS YET, and the provider has no free call to test it",
+    fallback: "nothing changes: there is no image generator",
+    secret: true,
+  },
+  {
+    name: "RUNWAYML_API_SECRET",
+    level: "optional",
+    what: "Runway video — NOT TO BE WIRED (owner, 2026-10-03: video through Gemini only); only the key check reads it",
+    fallback: "nothing changes",
+    secret: true,
+  },
   {
     name: "ELEVENLABS_API_KEY",
     level: "optional",

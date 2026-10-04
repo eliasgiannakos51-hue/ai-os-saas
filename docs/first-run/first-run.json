@@ -1,6 +1,6 @@
 {
-  "total": 3427,
-  "onPath": 715,
+  "total": 3443,
+  "onPath": 718,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -16,7 +16,7 @@
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 456
+      "count": 459
     },
     {
       "n": 3,
@@ -3257,6 +3257,24 @@
           "depth": 1,
           "tier": 2,
           "file": "src/components/error-message.tsx"
+        },
+        {
+          "key": "promise.greeting.afternoon",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/greeting-header.tsx"
+        },
+        {
+          "key": "promise.greeting.evening",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/greeting-header.tsx"
+        },
+        {
+          "key": "promise.greeting.morning",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/overview/greeting-header.tsx"
         },
         {
           "key": "sampleData.load",

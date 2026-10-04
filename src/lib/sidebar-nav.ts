@@ -272,7 +272,17 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     // different product from running your own.
     heading: "Run",
     items: [
-      { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents, hintKey: "agents" },
+      {
+        href: "/dashboard/agents",
+        label: "AI Agents",
+        icon: MODULE_ICONS.agents,
+        hintKey: "agents",
+        retired:
+          "Withdrawn from the menu on 2026-10-04, by the owner's decision: an agent today " +
+          "tracks rather than executes, and docs/BUILD-SPECS.md (3E, Βοηθοί) says it is not " +
+          "shown until it really runs multi-step work. The page, its data and every API " +
+          "route stay, and the URL keeps working for anyone who has it.",
+      },
       { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation, hintKey: "automation" },
       // RETIRED, NOT DELETED, and not `hidden` either — the difference is
       // written out in lib/sidebar-visibility.ts. The page still serves

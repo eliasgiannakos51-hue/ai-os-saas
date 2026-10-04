@@ -14,11 +14,13 @@
 // Whitespace is collapsed on top of it, because the extractor's output is
 // a sentence and a stray newline is not a different fact.
 //
-// The migration's backfill folds legacy rows with SQL's
-// public.search_fold() instead, which cannot import this. The two agree on
-// Latin and Greek — scripts/tests/chat-memory-store.itest.mjs pins them
-// against each other on the shapes that matter, so a disagreement is a
-// failing gate rather than a duplicate row nobody notices.
+// THE DATABASE HAS A COPY OF THIS FUNCTION: public.chat_memory_fold(), in
+// supabase/migrations/20261004100000_chat_memory_fold_matches_app.sql,
+// which re-folds every stored row with it. Change one and the other must
+// change in the same commit — scripts/tests/chat-memory-store.itest.mjs
+// compares them on whole sentences, punctuation and doubled spaces
+// included, so a disagreement is a failing gate rather than a duplicate
+// row nobody notices.
 import { foldForMatch } from "@/lib/text/unicode-patterns";
 
 /**
@@ -46,22 +48,21 @@ import { foldForMatch } from "@/lib/text/unicode-patterns";
  * apart, and one extra word stays apart. Only the mark at the END of the
  * sentence goes.
  *
- * THE SQL FOLD DOES NOT DO THIS, and the divergence is bounded and
- * written down rather than hidden. public.search_fold() folded the legacy
- * rows during the 20261003000000 backfill; a legacy row whose text ended
- * in a stop keeps a fold that ends in one, and a new extraction of the
- * same fact will not match it. That is one extra line on
- * /dashboard/ai-memory which the person can delete — not lost data, and
- * not worse than the state before this change, where EVERY repetition
- * could split. scripts/tests/chat-memory-store.itest.mjs pins the two
- * folds on unpunctuated samples, which is where they still agree exactly.
+ * THE SQL FOLD DID NOT DO THIS, and the divergence was called bounded
+ * here: "one extra line the person can delete". It was not bounded — every
+ * fact remembered before 20261003000000 ends in a stop, so every one of
+ * them split the first time it was said again, and the itest that asserted
+ * otherwise was red in CI from the day it landed. 20261004100000 gives the
+ * database the same fold and re-folds the stored rows.
  */
 export function memoryFold(text: string): string {
   return foldForMatch(String(text ?? ""))
     .replace(/\s+/g, " ")
     .trim()
-    // Latin and Greek sentence marks, plus the Arabic full stop and the
-    // CJK ideographic one — the extractor writes in the user's language.
-    .replace(/[.!?;··。！？]+$/u, "")
+    // Latin and Greek sentence marks (the Greek question mark and ano
+    // teleia arrive here as ; and · — foldForMatch decomposes them), the
+    // Arabic question mark and full stop, and the CJK ones — the extractor
+    // writes in the user's language.
+    .replace(/[.!?;··。！？\u061F\u06D4]+$/u, "")
     .trim();
 }

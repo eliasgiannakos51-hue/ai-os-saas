@@ -602,7 +602,13 @@ if (!DB) {
   // its own migration set; summing two ratchets is arithmetic across two
   // different schemas. Built from bootstrap-supabase.sql plus every
   // migration in supabase/migrations on a real Postgres 16: 107.
-  check(`107 tables`, tables === 107, `got ${tables}`);
+  // 107 -> 111 on 2026-10-03: generated_posts (20260930), projects
+  // (20261001), meetings and meeting_actions (20261006). The same
+  // two-copies trap again: credit-flow.dbtest.mjs was raised to 109 on its
+  // own and this copy was not, and neither moved for meetings — the
+  // database step runs after the mutation suites in CI, which were red or
+  // timed out on every push in between, so nothing reached either.
+  check(`111 tables`, tables === 111, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 
@@ -755,6 +761,18 @@ if (!DB) {
     // only and must stay off this list. A signed-in user who could call
     // it could consume somebody else's month.
     "voice_usage_this_month",
+    // THE FOUR MEMORY FUNCTIONS, argued for one by one in
+    // grants-and-policies.dbtest.mjs (EXPECTED) and kept in step with it
+    // here on 2026-10-03, when this copy was found never to have been
+    // updated for 20261003 and 20261007. chat_memory_record and
+    // memory_record are SECURITY DEFINER with the user taken from
+    // auth.uid(), never from an argument; chat_memory_prunable and
+    // prune_chat_memory are what the Forget control on
+    // /dashboard/ai-memory calls, prune_chat_memory as SECURITY INVOKER.
+    "chat_memory_record",
+    "chat_memory_prunable",
+    "prune_chat_memory",
+    "memory_record",
   ];
   const unexpected = leaky
     ? leaky.split(", ").filter((s) => !ALLOWED.some((a) => s.startsWith(`${a}(`)))

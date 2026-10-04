@@ -108,6 +108,13 @@ const EXPECTED = {
   // given a cron: "nothing deletes a remembered fact without somebody
   // pressing a button."
   chat_memory_record: "records or bumps one remembered fact for the signed-in user (20261003)",
+  // memory_record (20261007, universal memory) is chat_memory_record told
+  // which surface it came from: SECURITY DEFINER, the user taken from
+  // auth.uid() and never from an argument, called with the person's own
+  // client from lib/memory/store.ts recordMemory(). Same argument, same
+  // reason to be callable. Missing from this list since it landed, and
+  // unnoticed because this suite runs after the mutation step in CI.
+  memory_record: "records or bumps one remembered fact for the signed-in user, with where it was learned (20261007)",
   chat_memory_prunable: "how many remembered facts are old enough to forget — read before the Forget button is offered (20261003)",
   prune_chat_memory: "the Forget button itself; security invoker, so it deletes only the caller's own rows (20261003)",
   immutable_unaccent: "index support, wrapping unaccent()",

@@ -61,6 +61,22 @@ does nothing.
 `UNSPLASH_REQUESTS_PER_GENERATION` caps how many photos one generation may
 pull, so a rate limit cannot be hit by a single site build.
 
+### Keys the code CHECKS, that no feature uses yet
+
+Added 2026-10-03 (V6 §1.0, `docs/v6-keys-2026-10-03.md`). The owner has
+these keys in Vercel; the only code that reads them is the key check on
+`/dashboard/system-health` (`src/lib/ai/providers/key-inventory.ts`),
+which asks each provider whether it accepts the key. **Setting one turns
+on no feature.** The panel says so next to each of them.
+
+| Provider | Env var | What it enables | What goes silent without it | Cost shape | Free tier | URL | Priority |
+|---|---|---|---|---|---|---|---|
+| **Google (Gemini), second name** | `GEMINI_API_KEY` | Accepted in place of `GOOGLE_API_KEY` by the key check and the cinematic media script. The failover chain reads `GOOGLE_API_KEY` only | Nothing | per token / per image / per second of video | yes | aistudio.google.com/apikey | with images and video (V6 1.3–1.5) |
+| **Deepgram** | `DEEPGRAM_API_KEY` | Nothing yet — a second speech-to-text, for meetings. Greek support unverified | Nothing | per audio minute | yes, a starting credit | console.deepgram.com | after a Greek test |
+| **Black Forest Labs (Flux)** | `BFL_API_KEY` | Nothing yet — photoreal images. Images go through Gemini first (owner, 2026-10-03) | Nothing | per image | no | api.bfl.ai | later |
+| **Ideogram** | `IDEOGRAM_API_KEY` | Nothing yet — images with text in them. No free call exists to test the key | Nothing | per image | no | ideogram.ai/manage-api | later |
+| **Runway** | `RUNWAYML_API_SECRET` | Nothing, and not to be wired: the owner chose Gemini only for video (2026-10-03) | Nothing | per second of video | no | dev.runwayml.com | never, unless that changes |
+
 ### Infrastructure
 
 | Provider | Env var | What it enables | What goes silent without it | Cost shape | Free tier | URL | Priority |
@@ -169,9 +185,11 @@ comment at the top of `src/lib/research/entry-sources.ts` says so.
 
 ### Image / video / audio — none of these is wired
 
-`Runway` · `Luma` · `Kling` · `Pika` · `HeyGen` · `Synthesia` ·
-`Midjourney` · `Ideogram` · `Flux` · `Recraft` · `Deepgram` ·
-`AssemblyAI` · `OpenAI TTS`
+`Luma` · `Kling` · `Pika` · `HeyGen` · `Synthesia` · `Midjourney` ·
+`Recraft` · `AssemblyAI` · `OpenAI TTS`
+
+(Runway, Ideogram, Flux and Deepgram moved to Table A on 2026-10-03: they
+have a variable now, read by the key check and by no feature.)
 
 Two notes worth having:
 
@@ -220,7 +238,7 @@ works rather than filling a gap.
 ### α) Which are already in the code and missing?
 
 That question has a live answer rather than a written one:
-**`/dashboard/system-health`** lists all 45 variables grouped by level,
+**`/dashboard/system-health`** lists all 50 variables grouped by level,
 with the sentence for each, computed on the server and reduced to a
 boolean before it reaches the browser — no value ever crosses.
 `scripts/tests/capability-visibility.test.mjs` holds it to being built

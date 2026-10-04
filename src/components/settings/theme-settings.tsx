@@ -3,21 +3,20 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check, Palette } from "lucide-react";
-import { THEMES, THEME_STORAGE_KEY, THEME_SWATCHES, type Theme } from "@/lib/theme-prefs";
+import { THEMES, THEME_STORAGE_KEY, THEME_SWATCHES, normalizeTheme, type Theme } from "@/lib/theme-prefs";
 
 // Same no-context/provider approach as accessibility-settings.tsx and
 // theme-toggle.tsx: <html data-theme> + localStorage are the only source
 // of truth, written directly to the DOM. Selecting a theme here also
 // updates the same "theme" localStorage key theme-toggle.tsx reads, so
-// the two stay in sync — picking "midnight" here and later hitting the
-// quick top-nav toggle won't fight over two different stored values.
+// the two stay in sync. Two themes since 2026-10-04 (lib/theme-prefs.ts).
 export function ThemeSettings() {
   const t = useTranslations("settings.theme");
   const [theme, setThemeState] = useState<Theme>("dark");
 
   useEffect(() => {
     const current = document.documentElement.getAttribute("data-theme");
-    setThemeState(current === "light" || current === "midnight" || current === "carbon" ? current : "dark");
+    setThemeState(normalizeTheme(current));
   }, []);
 
   function selectTheme(next: Theme) {
@@ -38,7 +37,7 @@ export function ThemeSettings() {
       </h2>
       <p className="text-xs text-muted">{t("description")}</p>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2">
         {THEMES.map((option) => {
           const swatch = THEME_SWATCHES[option];
           const selected = theme === option;

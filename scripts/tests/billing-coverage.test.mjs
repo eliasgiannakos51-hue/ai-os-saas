@@ -357,7 +357,7 @@ console.log("\n== 2c. a normal user IS charged for a website generation ==");
 // real credits, which is what this asserts.
 const REAL_COST_EUR = 0.25531762; // the exact production row
 const adminSrc = readFileSync("src/lib/auth/admin-emails.ts", "utf8");
-checkTrue("the bypass is an explicit admin list, not a default", /HARDCODED_ADMIN_EMAILS = \[/.test(adminSrc));
+checkTrue("the bypass is an explicit admin list, not a default", /export const ADMIN_EMAILS: string\[\] = Array\.from\(new Set\(parseEnvAdminEmails\(\)\)\)/.test(adminSrc) && /if \(!raw\) return \[\];/.test(adminSrc));
 for (const plan of PLANS) {
   if (typeof plan.price !== "number" || plan.price <= 0) continue;
   const credits = formula.creditsForRealCostOnAccount(REAL_COST_EUR, plan, null, config);

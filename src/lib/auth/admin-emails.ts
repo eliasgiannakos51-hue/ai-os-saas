@@ -10,12 +10,14 @@
 // database — is a mix-up waiting for a tired afternoon.
 import "server-only";
 
-// Emails baked into the app that always get full Ultimate-tier access,
-// regardless of what's on file in Stripe/Supabase. Extend at deploy time
-// via the comma-separated ADMIN_EMAILS env var instead of editing this file
-// when possible.
-const HARDCODED_ADMIN_EMAILS = ["eliasgiannakos51@gmail.com"];
-
+// WHO IS STAFF COMES FROM THE ENVIRONMENT, AND ONLY FROM THERE.
+//
+// Until 2026-10-04 the owner's address was a literal here, in a public
+// repository. It now lives in the deployment's ADMIN_EMAILS variable
+// (comma-separated), set in Vercel → Settings → Environment Variables. An
+// unset variable means NO admins: the owner-only pages answer 404 and the
+// cost-bypass is off for everyone, which is the safe way for it to fail.
+// docs/NEEDS-FROM-ELIAS.md has the steps.
 function parseEnvAdminEmails(): string[] {
   const raw = process.env.ADMIN_EMAILS;
   if (!raw) return [];
@@ -25,9 +27,7 @@ function parseEnvAdminEmails(): string[] {
     .filter(Boolean);
 }
 
-export const ADMIN_EMAILS: string[] = Array.from(
-  new Set([...HARDCODED_ADMIN_EMAILS.map((email) => email.toLowerCase()), ...parseEnvAdminEmails()])
-);
+export const ADMIN_EMAILS: string[] = Array.from(new Set(parseEnvAdminEmails()));
 
 export function isAdminEmail(email: string | null | undefined): boolean {
   if (!email) return false;

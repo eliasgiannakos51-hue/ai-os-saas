@@ -46,7 +46,11 @@ function walk(dir, filename) {
 console.log("== 1. the owner check itself ==");
 const admin = readFileSync("src/lib/auth/admin-emails.ts", "utf8");
 check("it is server-only", /^import "server-only";/m.test(admin));
-check("the list comes from ADMIN_EMAILS plus a hardcoded owner", /HARDCODED_ADMIN_EMAILS/.test(admin) && /process\.env\.ADMIN_EMAILS/.test(admin));
+// Since 2026-10-04 the list is the environment's alone: no address is
+// written in a public repository (the owner's was, until then).
+const adminCode = admin.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+check("the list comes from the ADMIN_EMAILS environment variable", /process\.env\.ADMIN_EMAILS/.test(adminCode));
+check("no email address is written in the code", !/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(adminCode), adminCode.match(/[^\s"']+@[^\s"']+/)?.[0]);
 check("comparison is case-insensitive", /toLowerCase\(\)/.test(admin));
 check("a missing email is never an admin", /if \(!email\) return false;/.test(admin));
 

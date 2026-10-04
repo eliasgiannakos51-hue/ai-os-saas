@@ -3,7 +3,7 @@
 // V6 1.10a (docs/QUEUE.md). Until 2026-10-03 the greeting was English in
 // every locale ("Good morning" was a literal in src/lib/greeting.ts) and
 // the name was the email's local part with the digits stripped:
-// "eliasgiannakos51" greeted as "Eliasgiannakos". This holds the three
+// "nikos84" greeted as "Nikos". This holds the three
 // halves of the fix: the words come from the messages files, the name comes
 // from what the person typed or what Google sign-in supplies, and the
 // email is never the source.
@@ -28,13 +28,13 @@ function check(name, cond, detail) {
 const { greetingName, timeOfDayGreeting, MAX_DISPLAY_NAME_LENGTH } = await loadTs("src/lib/greeting.ts");
 
 console.log("== 1. the name: typed, then Google's, then none ==");
-check("what the person typed wins, exactly as typed", greetingName({ display_name: "Ηλία", given_name: "Elias" }) === "Ηλία");
-check("Google's given_name is next", greetingName({ given_name: "Elias", full_name: "Elias Giannakos" }) === "Elias");
-check("then the first word of full_name", greetingName({ full_name: "Elias Giannakos" }) === "Elias");
+check("what the person typed wins, exactly as typed", greetingName({ display_name: "Νίκο", given_name: "Nikos" }) === "Νίκο");
+check("Google's given_name is next", greetingName({ given_name: "Nikos", full_name: "Nikos Papadakis" }) === "Nikos");
+check("then the first word of full_name", greetingName({ full_name: "Nikos Papadakis" }) === "Nikos");
 check("then the first word of name", greetingName({ name: "Maria Papadopoulou" }) === "Maria");
-check("a blank typed name falls through", greetingName({ display_name: "   ", given_name: "Elias" }) === "Elias");
+check("a blank typed name falls through", greetingName({ display_name: "   ", given_name: "Nikos" }) === "Nikos");
 check("nothing known -> no name", greetingName({}) === null && greetingName(null) === null);
-check("the email is never the source", greetingName({ email: "eliasgiannakos51@gmail.com" }) === null);
+check("the email is never the source", greetingName({ email: "nikos84@example.com" }) === null);
 check("a non-string is ignored", greetingName({ display_name: 42 }) === null);
 check(
   `a name is capped at ${MAX_DISPLAY_NAME_LENGTH} characters`,

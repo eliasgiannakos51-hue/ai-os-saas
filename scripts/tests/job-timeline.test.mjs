@@ -99,7 +99,10 @@ check("the poll returns the timeline through timelineForClient", /timeline:\s*ti
 check("the poll never returns the stored entries or the usage", !/timeline:\s*job\.timeline/.test(route) && !/usageEntries|usage_entries:\s*job/.test(route));
 const panel = stripComments(readFileSync("src/components/ui/ai-job-timeline.tsx", "utf8"));
 check("the screen shows credits with the shared plural string", /useTranslations\("settings\.billing"\)/.test(panel) && /tBilling\("creditsAmount"/.test(panel));
-check("the agent run shows its timeline when it has finished", /<AiJobTimeline job=\{runJob\}/.test(readFileSync("src/components/agents/agents-workspace.tsx", "utf8")));
+const agentsSrc = stripComments(readFileSync("src/components/agents/agents-workspace.tsx", "utf8"));
+check("the agent run shows its timeline, while running and after", (agentsSrc.match(/<AiJobTimeline job=\{runJob\}/g) ?? []).length >= 2);
+check("the agent build shows its timeline while it runs", /<AiJobTimeline job=\{job\}/.test(agentsSrc));
+check("the mission planner shows its timeline", /<AiJobTimeline job=\{displayJob\}/.test(stripComments(readFileSync("src/components/mission/mission-form.tsx", "utf8"))));
 const MIG = "supabase/migrations/20261004200000_ai_jobs_timeline.sql";
 check("the migration adds the column", existsSync(MIG) && /add column if not exists timeline jsonb/.test(readFileSync(MIG, "utf8")));
 

@@ -1238,6 +1238,8 @@ export function AgentsWorkspace({
                 the button said "Designing…" for all of them and the job
                 row's stepLabel was never read. */}
             <AiJobProgress job={job} watchLost={buildWatchLost} className="w-full" />
+            {/* The steps already finished, live — V6.2 2.1. */}
+            <AiJobTimeline job={job} className="mt-1 w-full" />
           </div>
         )}
 
@@ -1247,6 +1249,7 @@ export function AgentsWorkspace({
         {runJob && (runJob.status === "queued" || runJob.status === "running") && (
           <div className="mb-4 rounded-xl border border-orange-500/25 bg-orange-500/5 px-3 py-2">
             <AiJobProgress job={runJob} watchLost={runWatchLost} />
+            <AiJobTimeline job={runJob} className="mt-1" />
           </div>
         )}
 

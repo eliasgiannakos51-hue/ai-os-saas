@@ -1,72 +1,39 @@
 #!/usr/bin/env node
 /*
- * CAN conversation-design.test.mjs SEE THE CONVERSATION DRIFT?
+ * CAN count-up.test.mjs SEE A STAT COUNT UP TO THE WRONG NUMBER?
  *
- * The old icon back beside the answer, the writing answer not speeding
- * up, every old answer animating, the earth gone from the empty state,
- * and the field's controls moving back over the text.
+ * The old comma-only parse, and a decimal counted up as if whole.
  *
- * Run: node scripts/tests/conversation-design.mutation.mjs
+ * Run: node scripts/tests/count-up.mutation.mjs
  */
 import { readFileSync } from "node:fs";
 import { writeFileSync } from "./lib/sidecar-write.mjs";
 import { execFileSync } from "node:child_process";
 
-const GATE = "scripts/tests/conversation-design.test.mjs";
-const WS = "src/components/chat/chat-workspace.tsx";
-const COMPOSER = "src/components/chat/chat-composer.tsx";
-const TARGETS = [GATE, WS, COMPOSER];
+const GATE = "scripts/tests/count-up.test.mjs";
+const LIB = "src/lib/leading-number.ts";
+const TARGETS = [GATE, LIB];
 
 const MUTANTS = [
   {
-    name: "the empty conversation is clipped at the top on a phone again",
-    file: WS,
-    from: '<div className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center py-6 text-center">',
-    to: '<div className="mx-auto flex h-full max-w-md flex-col items-center justify-center text-center">',
-    expect: "rather than losing its top",
+    name: "only English's comma is a thousands separator again",
+    file: LIB,
+    from: "    const grouped = /^\\d{1,3}([,.\\u00a0\\u202f' ])\\d{3}(?:\\1\\d{3})*$/.exec(digits);",
+    to: "    const grouped = /^\\d{1,3}(,)\\d{3}(?:\\1\\d{3})*$/.exec(digits);\n    if (!grouped) return { prefix: match[1], number: Math.trunc(Number(digits.replace(/,/g, \"\"))), suffix: match[3] };",
+    expect: "ten thousand",
   },
   {
-    name: "the answer's mark goes back to a chat icon",
-    file: WS,
-    from: '  return <Earth variant="small" px={32} working={working} still={still} className="mt-0.5 shrink-0" />;',
-    to: '  return <span className="h-8 w-8" />;',
-    expect: "the answer's mark is the small earth",
+    name: "a decimal is counted up as if it were whole",
+    file: LIB,
+    from: "    if (!grouped) return null;",
+    to: "    if (!grouped) return { prefix: match[1], number: Math.round(Number(digits.replace(\",\", \".\"))), suffix: match[3] };",
+    expect: "is not counted up",
   },
-  {
-    name: "the answer being written does not speed up",
-    file: WS,
-    from: "                  <AssistantAvatar working />",
-    to: "                  <AssistantAvatar />",
-    expect: "the answer being written turns faster",
-  },
-  {
-    name: "every old answer animates",
-    file: WS,
-    from: "<AssistantAvatar still={sending || msg.id !== lastAnswerId} />",
-    to: "<AssistantAvatar />",
-    expect: "older ones are drawn still",
-  },
-  {
-    name: "the empty conversation loses its earth",
-    file: WS,
-    from: '              <Earth variant="small" px={64} />',
-    to: "",
-    expect: "the empty conversation opens with the earth too",
-  },
-  {
-    name: "the microphone moves back to the right, over the text",
-    file: COMPOSER,
-    from: '        <div className="absolute bottom-2 start-2">',
-    to: '        <div className="absolute bottom-2 end-14">',
-    expect: "voice bottom-left",
-  },
-  {
-    name: "the controls lose their own row",
-    file: COMPOSER,
-    from: " pb-14 pt-3.5 ",
-    to: " py-3.5 pe-[7.5rem] ",
-    expect: "the text never runs under the controls",
-  },
+  // NOT A MUTANT: letting two different separators pass as one grouping
+  // ([,.] in place of \1). It was written and stayed green, and rightly:
+  // the digits are split on the FIRST separator only, so "1,234.567"
+  // becomes "1234.567", which the integer check refuses — the number is
+  // shown as written either way. Equivalent, so it is not in the list.
 ];
 
 function runGate() {
@@ -82,7 +49,7 @@ function runGate() {
   }
 }
 
-console.log("conversation-design mutations\n");
+console.log("count-up mutations\n");
 
 const originals = new Map(TARGETS.map((f) => [f, readFileSync(f, "utf8")]));
 const restoreAll = () => {

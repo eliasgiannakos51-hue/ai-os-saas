@@ -72,21 +72,3 @@ function prefersReducedMotion(): boolean {
   if (document.documentElement.dataset.motion === "reduce") return true;
   return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 }
-
-// Stat values in the UI are already-formatted strings ("12", "1.2k",
-// "€48", "3 days"). Rather than forcing every caller to thread a raw
-// number through, this splits off a leading integer so the numeric part
-// can animate while any prefix/suffix stays put. Returns null when there
-// is no leading integer to animate (e.g. "Ideas", "—"), which callers
-// use as the "just render the string as-is" signal.
-export function splitLeadingNumber(
-  formatted: string
-): { prefix: string; number: number; suffix: string } | null {
-  // [\s\S] rather than the `s` (dotAll) flag — the tsconfig target
-  // predates es2018, where that flag was introduced.
-  const match = /^(\D*?)(\d[\d,.]*)([\s\S]*)$/.exec(formatted);
-  if (!match) return null;
-  const numeric = Number(match[2].replace(/,/g, ""));
-  if (!Number.isFinite(numeric) || !Number.isInteger(numeric)) return null;
-  return { prefix: match[1], number: numeric, suffix: match[3] };
-}

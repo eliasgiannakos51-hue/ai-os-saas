@@ -37,6 +37,14 @@ check("the answer being written turns faster", /<AssistantAvatar working \/>/.te
 check("the latest finished answer keeps turning, calmly; older ones are drawn still", /<AssistantAvatar still=\{sending \|\| msg\.id !== lastAnswerId\} \/>/.test(ws) && /const lastAnswerId = \[\.\.\.messages\]\.reverse\(\)\.find\(\(m\) => m\.role === "assistant"\)\?\.id;/.test(ws));
 check("no other icon stands in for it", !/MessageCircle/.test(ws));
 check("the empty conversation opens with the earth too", /<Earth variant="small" px=\{64\} \/>/.test(ws));
+// CENTRED WITHOUT BEING CUT. h-full with justify-center centres a block
+// taller than the pane by pushing its top above the scroll origin, where
+// no scroll reaches: on a 390px phone the earth and the title were
+// simply gone (D.11 screenshots). min-h-full lets it grow and scroll.
+check(
+  "the empty conversation grows and scrolls rather than losing its top on a phone",
+  /<div className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center[^"]*">\s*<Earth variant="small" px=\{64\} \/>/.test(ws)
+);
 
 console.log("\n== 2. the same field as Home's ==");
 check("voice bottom-left, as on Home", /absolute bottom-2 start-2/.test(composer) && /absolute bottom-3 start-16/.test(home));

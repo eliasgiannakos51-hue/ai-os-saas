@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { ResponsiveContainer, LineChart, Line } from "recharts";
-import { useCountUp, splitLeadingNumber } from "@/hooks/use-count-up";
+import { useCountUp } from "@/hooks/use-count-up";
+import { splitLeadingNumber } from "@/lib/leading-number";
 import { usePulseOnChange } from "@/hooks/use-pulse-on-change";
 import { formatNumber } from "@/lib/format-number";
 import { useLocale } from "next-intl";

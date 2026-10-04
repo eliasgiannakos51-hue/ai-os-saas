@@ -848,7 +848,7 @@ export function ChatWorkspace({
               {tCommon("loading")}
             </div>
           ) : messages.length === 0 && !sending ? (
-            <div className="mx-auto flex h-full max-w-md flex-col items-center justify-center text-center">
+            <div className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center py-6 text-center">
               <Earth variant="small" px={64} />
               <h1 className="mt-4 text-xl font-bold tracking-wide text-foreground">{t("title")}</h1>
               {/* Was three hardcoded English sentences. A Greek user opening

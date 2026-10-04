@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
-import { Logo } from "@/components/logo";
+import { Earth } from "@/components/brand/earth";
 import { getErrorMessage } from "@/lib/get-error-message";
 
 type Status = "idle" | "loading" | "done";
@@ -56,7 +56,7 @@ export function ConfirmDeleteAccountForm() {
     <main className="flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4">
       <div className="w-full max-w-md text-center">
         <div className="mb-6 flex items-center justify-center">
-          <Logo className="h-[168px] w-auto max-w-full" />
+          <Earth variant="large" px={160} label="Ionexa" />
         </div>
 
         <div className="rounded-card border border-danger/40 bg-danger/[0.03] p-6">

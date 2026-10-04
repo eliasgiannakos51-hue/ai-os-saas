@@ -10,7 +10,7 @@ import { isPasswordStrong } from "@/lib/password-strength";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PasswordStrengthChecklist } from "@/components/auth/password-strength-checklist";
 import { GeneratePasswordButton } from "@/components/auth/generate-password-button";
-import { Logo } from "@/components/logo";
+import { Earth } from "@/components/brand/earth";
 
 type Status = "checking" | "ready" | "invalid";
 
@@ -194,7 +194,7 @@ export function ResetPasswordForm() {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mb-4 flex items-center justify-center">
-            <Logo className="h-[168px] w-auto max-w-full" />
+            <Earth variant="large" px={160} label="Ionexa" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">
             {t("title")}

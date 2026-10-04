@@ -15,7 +15,7 @@
 // watched.
 //
 // Run: node scripts/tests/earth.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { stripComments } from "../check-mutation-markers.mjs";
 import { loadTs } from "./load-ts.mjs";
 
@@ -89,6 +89,33 @@ const css = readFileSync("src/app/globals.css", "utf8").replace(/\/\*[\s\S]*?\*\
 check("the earth takes the globe ink", /\.ionexa-earth\s*\{\s*color:\s*var\(--globe-ink\);\s*\}/.test(css));
 check("the component carries that class", /className=\{`ionexa-earth /.test(C));
 check("and draws in currentColor, never a written colour", /stroke="currentColor"/.test(C) && !/#[0-9a-fA-F]{6}/.test(C));
+
+console.log("\n== 6. where it is drawn: 160px above the sign-in forms, the logo by its size ==");
+// «Σύνδεση και εγγραφή: μεγαλύτερη, περίπου 160 px, πάνω από τη φόρμα»
+// — and the same on the three other account screens that share that
+// layout (forgotten and reset password, deleting the account).
+const AUTH = [
+  "src/app/login/login-form.tsx",
+  "src/app/signup/signup-flow.tsx",
+  "src/app/forgot-password/forgot-password-form.tsx",
+  "src/app/reset-password/reset-password-form.tsx",
+  "src/app/delete-account/confirm/confirm-delete-account-form.tsx",
+];
+const noLargeEarth = AUTH.filter((f) => !/<Earth variant="large" px=\{160\} label="Ionexa" \/>/.test(stripComments(readFileSync(f, "utf8"))));
+check(`the account screens carry the 160px earth (${AUTH.length - noLargeEarth.length}/${AUTH.length})`, noLargeEarth.length === 0, noLargeEarth.join(", "));
+// THE LOGO IS SIZED BY px, NOT BY A CLASS. It used to be an SVG that a
+// height class scaled; the earth is drawn at the px it is given, so an
+// h-6 on it sizes a box around a 24px drawing and nothing else.
+const logoTags = [];
+(function walk(dir) {
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const p = `${dir}/${e.name}`;
+    if (e.isDirectory()) walk(p);
+    else if (p.endsWith(".tsx")) for (const m of readFileSync(p, "utf8").matchAll(/<Logo\b[^>]*>/g)) logoTags.push(`${p}: ${m[0]}`);
+  }
+})("src");
+const logoBySize = logoTags.filter((tag) => /className="[^"]*\bh-/.test(tag));
+check(`no logo is sized by a height class (${logoTags.length} logos read)`, logoTags.length >= 5 && logoBySize.length === 0, logoBySize.join("\n        "));
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);
 process.exit(failures.length === 0 ? 0 : 1);

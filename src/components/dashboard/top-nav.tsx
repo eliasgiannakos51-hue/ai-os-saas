@@ -39,7 +39,7 @@ export function TopNav({ email }: { email: string }) {
         // Height only — the bar has 64px of it and no spare width.
         className="flex min-h-[44px] shrink-0 items-center gap-2"
       >
-        <Logo iconOnly className="h-6 w-6" />
+        <Logo iconOnly px={24} />
         <span className="hidden text-base font-bold tracking-tight text-foreground min-[400px]:inline">
           IONEXA
         </span>

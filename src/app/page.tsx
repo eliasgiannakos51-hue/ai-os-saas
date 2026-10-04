@@ -59,7 +59,7 @@ export default async function Home() {
         <DeletedAccountBanner />
 
         <div className="mb-6 flex items-center justify-center">
-          <Logo className="h-16 w-auto" />
+          <Logo px={40} />
         </div>
 
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">

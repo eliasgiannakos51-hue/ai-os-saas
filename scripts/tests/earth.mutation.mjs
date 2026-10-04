@@ -16,9 +16,23 @@ import { execFileSync } from "node:child_process";
 const GATE = "scripts/tests/earth.test.mjs";
 const LIB = "src/lib/brand/earth.ts";
 const COMP = "src/components/brand/earth.tsx";
-const TARGETS = [GATE, LIB, COMP];
+const TARGETS = [GATE, LIB, COMP, "src/app/login/login-form.tsx", "src/app/pricing/page.tsx"];
 
 const MUTANTS = [
+  {
+    name: "the sign-in form loses its earth",
+    file: "src/app/login/login-form.tsx",
+    from: '<Earth variant="large" px={160} label="Ionexa" />',
+    to: '<Earth variant="small" px={64} label="Ionexa" />',
+    expect: "the account screens carry the 160px earth",
+  },
+  {
+    name: "a logo is sized by a class again",
+    file: "src/app/pricing/page.tsx",
+    from: "<Logo iconOnly px={24} />",
+    to: '<Logo iconOnly className="h-6 w-6" />',
+    expect: "no logo is sized by a height class",
+  },
   {
     name: "the small earth is drawn as busy as the large one",
     file: LIB,

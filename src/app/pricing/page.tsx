@@ -136,7 +136,7 @@ export default async function PricingPage({
             href="/"
             className="inline-flex items-center gap-2 transition-colors duration-150 hover:text-foreground"
           >
-            <Logo iconOnly className="h-6 w-6" />
+            <Logo iconOnly px={24} />
             <span className="text-base font-bold tracking-tight text-foreground">
               IONEXA
             </span>

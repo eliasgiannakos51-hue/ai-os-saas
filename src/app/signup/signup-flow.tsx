@@ -19,7 +19,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { PasswordStrengthChecklist } from "@/components/auth/password-strength-checklist";
 import { GeneratePasswordButton } from "@/components/auth/generate-password-button";
 import { LoginSplash } from "@/components/auth/login-splash";
-import { Logo } from "@/components/logo";
+import { Earth } from "@/components/brand/earth";
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { COUNTRIES } from "@/lib/countries";
 import { formatNumber } from "@/lib/format-number";
@@ -236,7 +236,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
       <div className={`relative z-10 w-full ${step === 1 ? "max-w-3xl" : "max-w-md"}`}>
         <div className="mb-8 text-center">
           <div className="mb-4 flex items-center justify-center">
-            <Logo className="h-[168px] w-auto max-w-full" />
+            <Earth variant="large" px={160} label="Ionexa" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">
             {step === 1 ? t("chooseYourPlan") : t("createYourAccount")}

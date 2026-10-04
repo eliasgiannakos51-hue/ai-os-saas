@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
-import { Logo } from "@/components/logo";
+import { Earth } from "@/components/brand/earth";
 
 export function ForgotPasswordForm() {
   const supabase = createClient();
@@ -48,7 +48,7 @@ export function ForgotPasswordForm() {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mb-4 flex items-center justify-center">
-            <Logo className="h-[168px] w-auto max-w-full" />
+            <Earth variant="large" px={160} label="Ionexa" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">
             {t("title")}

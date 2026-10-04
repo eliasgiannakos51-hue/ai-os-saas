@@ -60,7 +60,7 @@ export default async function OverviewPage() {
   const boundary = { title: tErr("boundary.section"), body: tErr("boundary.sectionBody") };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-10 sm:px-6">
+    <div className="flex min-h-[calc(100dvh-8rem)] items-center md:min-h-[calc(100vh-4rem)] justify-center px-4 py-10 sm:px-6">
       <div className="w-full max-w-2xl">
         <WidgetBoundary label="greeting" {...boundary}>
           <GreetingHeader name={greetingName(user.user_metadata)} />

@@ -1,8 +1,8 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **585 strings**. The whole product is 3473, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **586 strings**. The whole product is 3478, which is why this file exists.
 
-**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 356 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 357 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -146,7 +146,7 @@ CSV またはタブ区切り、最大 {max}。保存する前に読み取り結�
 
 何でも書いてください — 製品のアイデア、トレード、ユーザーからのフィードバック、指標 — 自動的に適切なモジュールに入ります。
 
-## Tier 2 — The labels — skim these (356)
+## Tier 2 — The labels — skim these (357)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -2143,6 +2143,12 @@ DevOps
 > EN — Unpin {tool}
 
 {tool}のピン留めを外す
+
+**`sidebar.tabs.label`**
+
+> EN — Main navigation
+
+メインナビゲーション
 
 ### first result
 

@@ -302,6 +302,13 @@
       "expand": "Développer la barre latérale",
       "label": "Menu principal",
       "saveFailed": "La modification n’a pas été enregistrée. Réessayez."
+    },
+    "tabs": {
+      "home": "Accueil",
+      "chat": "Discussion",
+      "tools": "Outils",
+      "you": "Vous",
+      "label": "Navigation principale"
     }
   },
   "landing": {

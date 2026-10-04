@@ -1,3 +1,4 @@
+import { MobileTabBar } from "@/components/dashboard/mobile-tab-bar";
 import { redirect } from "next/navigation";
 import { PwaProvider } from "@/components/pwa/pwa-provider";
 import { getCurrentUser } from "@/lib/auth/current-user";
@@ -167,11 +168,15 @@ export default async function DashboardLayout({
                     became plain <div>s in the same change: a <main>
                     inside a <main> is invalid, and two landmarks are
                     worse than one in the wrong place. */}
-                <main id="main-content" className="flex-1">
+                {/* pb-16 below md: the phone's bottom bar
+                    (components/dashboard/mobile-tab-bar.tsx) sits over the
+                    last 64px, and content must not end underneath it. */}
+                <main id="main-content" className="flex-1 pb-16 md:pb-0">
                   <PageTransition>{children}</PageTransition>
                 </main>
               </div>
             </div>
+            <MobileTabBar />
             <ToastContainer />
             {/* ONE ROW PER SCREEN CHANGE, for every dashboard page.
                 Mounted HERE and nowhere else: this layout is what

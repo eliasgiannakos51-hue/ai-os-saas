@@ -79,6 +79,12 @@ const LOCALE_ALLOWED = new Set([
   "de:sidebar.rail.chat",
   "es:sidebar.rail.chat",
   "it:sidebar.rail.chat",
+  // The phone's bottom bar names the same place the same way (design
+  // D.10), and Italian's own apps call the start screen "Home".
+  "de:sidebar.tabs.chat",
+  "es:sidebar.tabs.chat",
+  "it:sidebar.tabs.chat",
+  "it:sidebar.tabs.home",
   // REDESIGN PHASE 4, the four step flows. Three step names land on the
   // same letters as English and the neighbours in the same block prove
   // the block was translated rather than copied.

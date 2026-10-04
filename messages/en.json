@@ -302,6 +302,13 @@
       "expand": "Expand sidebar",
       "label": "Main",
       "saveFailed": "Could not save that change. Try again."
+    },
+    "tabs": {
+      "home": "Home",
+      "chat": "Chat",
+      "tools": "Tools",
+      "you": "You",
+      "label": "Main navigation"
     }
   },
   "landing": {

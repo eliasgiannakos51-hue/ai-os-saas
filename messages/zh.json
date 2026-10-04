@@ -302,6 +302,13 @@
       "expand": "展开侧边栏",
       "label": "主菜单",
       "saveFailed": "无法保存此更改，请重试。"
+    },
+    "tabs": {
+      "home": "首页",
+      "chat": "聊天",
+      "tools": "工具",
+      "you": "我",
+      "label": "主导航"
     }
   },
   "landing": {

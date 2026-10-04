@@ -302,6 +302,13 @@
       "expand": "Espandi la barra laterale",
       "label": "Menu principale",
       "saveFailed": "Impossibile salvare la modifica. Riprova."
+    },
+    "tabs": {
+      "home": "Home",
+      "chat": "Chat",
+      "tools": "Strumenti",
+      "you": "Tu",
+      "label": "Navigazione principale"
     }
   },
   "landing": {

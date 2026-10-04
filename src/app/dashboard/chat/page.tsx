@@ -83,7 +83,9 @@ export default async function ChatPage({
     searchParams.preset === "trading" ? "trading" : searchParams.preset === "product" ? "product" : undefined;
 
   return (
-    <div className="h-[calc(100vh-4rem)]">
+    // Below md the bottom bar takes 4rem more (mobile-tab-bar.tsx), and
+    // the composer must stay above it.
+    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
       <ChatWorkspace
         initialConversations={conversations}
         initialMentorPreset={initialMentorPreset}

@@ -302,6 +302,13 @@
       "expand": "Seitenleiste ausklappen",
       "label": "Hauptmenü",
       "saveFailed": "Die Änderung wurde nicht gespeichert. Bitte erneut versuchen."
+    },
+    "tabs": {
+      "home": "Start",
+      "chat": "Chat",
+      "tools": "Werkzeuge",
+      "you": "Du",
+      "label": "Hauptnavigation"
     }
   },
   "landing": {

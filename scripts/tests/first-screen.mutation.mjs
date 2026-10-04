@@ -308,8 +308,8 @@ const MUTANTS = [
     // path must fail on what it was supposed to find, not pass on nothing.
     name: "the hierarchy is read from a page that does not exist",
     file: GATE,
-    from: 'const OVERVIEW = "src/app/dashboard/overview/page.tsx";',
-    to: 'const OVERVIEW = "src/app/dashboard/overview/missing.tsx";',
+    from: "const overview = read(OVERVIEW);",
+    to: 'const overview = read(OVERVIEW + ".gone");',
     expect: "Home renders the quick actions",
   },
 ];

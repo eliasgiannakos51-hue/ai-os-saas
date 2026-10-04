@@ -2760,7 +2760,12 @@
     "tools": {
       "title": "全部工具",
       "description": "每个工具,一行说明它做什么。",
-      "orPress": "或按 ⌘K 输入名称,或在首页的输入框中描述。"
+      "orPress": "或按 ⌘K 输入名称,或在首页的输入框中描述。",
+      "search": "查找工具",
+      "searchLabel": "搜索工具",
+      "noMatch": "没有名为“{query}”的工具。请在首页的输入框中描述它。",
+      "beta": "测试版",
+      "betaHint": "测试中：可以使用，但尚未具备全部功能。"
     },
     "home": {
       "actions": {

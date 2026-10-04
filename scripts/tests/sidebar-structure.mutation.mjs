@@ -39,7 +39,8 @@ const NAV = "src/lib/sidebar-nav.ts";
 const VISIBILITY = "src/lib/sidebar-visibility.ts";
 const TOOLTIPS = "scripts/tests/sidebar-and-tooltips.test.mjs";
 const SIDEBAR = "src/components/dashboard/sidebar.tsx";
-const TOOLS_PAGE = "src/app/dashboard/tools/page.tsx";
+// The groups are assembled and drawn by the grid the page renders (D.6).
+const TOOLS_PAGE = "src/components/tools/tools-grid.tsx";
 
 const TARGETS = [STRUCTURE, SIZE, NAMING, HINTS, NAV, VISIBILITY, SIDEBAR, TOOLS_PAGE, SOURCE, "docs/analytics-queries.sql"];
 
@@ -136,9 +137,9 @@ const MUTANTS = [
     // renderer's exits instead.
     name: "a collapse comes back under another name",
     file: TOOLS_PAGE,
-    from: "                {group.items.map((item) => {",
-    to: "                {group.items.map((item) => {\n                  if (group.heading !== \"Make\") return null;",
-    expect: "the group renderer has only the card's return",
+    from: "<ul className={GRID}>{group.items.map(tile)}</ul>",
+    to: "<ul className={GRID}>{group.heading === \"Make\" && group.items.map(tile)}</ul>",
+    expect: "every row is drawn, unconditionally",
   },
   {
     gate: TOOLTIPS,
@@ -298,8 +299,8 @@ const MUTANTS = [
     // RE-ANCHORED 2026-10-04: the block is drawn on All tools now.
     name: "Settings stops being its own block",
     file: TOOLS_PAGE,
-    from: ", ...sidebarGroups([SETTINGS_GROUP], isOwner)];",
-    to: ", ...sidebarGroups([], isOwner)];",
+    from: ", ...sidebarGroups([SETTINGS_GROUP], isOwner)],",
+    to: ", ...sidebarGroups([], isOwner)],",
     expect: "...and All tools draws the main groups before it, and it last",
   },
 

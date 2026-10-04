@@ -146,40 +146,39 @@ const sidebarForOpen = readFileSync("src/components/dashboard/sidebar.tsx", "utf
 // WHERE THE GROUPS ARE DRAWN NOW. The sidebar of ΣΥΣΤΗΜΑ DESIGN
 // (docs/CONTEXT.md, 2026-10-04) draws no group at all — New, Chat,
 // Coding, All tools, Recent tools, Settings — and every group of tools is
-// drawn on the All tools page (src/app/dashboard/tools/page.tsx). The
-// property this section held over the sidebar's renderGroup is held over
-// that page's group renderer, because that is where a heading over
-// nothing could appear again.
+// drawn on the All tools page, by components/tools/tools-grid.tsx since
+// D.6. The property this section held over the sidebar's renderGroup is
+// held over that grid's group renderer, because that is where a heading
+// over nothing could appear again.
 const toolsPageSrc = stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"));
-const groupRenderer = toolsPageSrc.slice(
-  toolsPageSrc.indexOf("{groups.map((group) =>"),
-  toolsPageSrc.indexOf('t("orPress")')
-);
+const toolsGridSrc = stripComments(readFileSync("src/components/tools/tools-grid.tsx", "utf8"));
+const groupRenderer = toolsGridSrc.slice(toolsGridSrc.indexOf("{groups.map((group) =>"));
 checkTrue(
   "the All tools group renderer was located",
-  groupRenderer.length > 200,
+  groupRenderer.length > 200 && toolsGridSrc.includes("{groups.map((group) =>"),
   "the checks below measure nothing without it",
 );
 // COUNTED, NOT GREPPED. A word search for isExpanded / aria-expanded /
 // collapsible is a substring test on something that has structure, and
 // the mutation that proves it takes four lines: `const expanded = true;
 // ... if (!expanded) return <p/>;` reintroduces the whole defect without
-// using any of those words. The group renderer is an expression with ONE
-// return inside it, the card's; a second is a condition deciding whether
-// rows appear, and that is the collapse whatever it is called.
+// using any of those words. The group renderer draws every item through
+// `tile` with no condition of its own: a `return`, a `?` or an `&&` in it
+// is something deciding whether rows appear, and that is the collapse
+// whatever it is called.
 checkTrue(
-  `no group can be collapsed — the group renderer has only the card's return (${(groupRenderer.match(/\breturn\b/g) ?? []).length} returns)`,
-  (groupRenderer.match(/\breturn\b/g) ?? []).length === 1 && /\{group\.items\.map\(\(item\) =>/.test(groupRenderer),
-  "a second exit from the group renderer is a condition deciding whether rows appear — a collapse under another name",
+  `no group can be collapsed — every row is drawn, unconditionally (${(groupRenderer.match(/\breturn\b|\?|&&/g) ?? []).length} conditions)`,
+  (groupRenderer.match(/\breturn\b|\?|&&/g) ?? []).length === 0 && /<ul className=\{GRID\}>\{group\.items\.map\(tile\)\}<\/ul>/.test(groupRenderer),
+  "a condition in the group renderer is a decision about whether rows appear — a collapse under another name",
 );
 checkTrue(
   "...and the names the old collapse used are gone, from the sidebar and the page",
-  !/isExpanded|toggleGroup|aria-expanded|collapsible|grid-rows-\[0fr\]/.test(stripComments(sidebarForOpen) + toolsPageSrc),
+  !/isExpanded|toggleGroup|aria-expanded|collapsible|grid-rows-\[0fr\]/.test(stripComments(sidebarForOpen) + toolsGridSrc),
   "the cheap half of the check above, kept because it names what was removed",
 );
 checkTrue(
   "...and a heading with no rows under it is not drawn at all",
-  /const groups = \[\.\.\.sidebarGroups\(/.test(toolsPageSrc) &&
+  /\(\) => \[\.\.\.sidebarGroups\(/.test(toolsGridSrc) &&
     /\{list\.length > 0 && \([\s\S]{0,200}t\("rail\.recentTools"\)/.test(stripComments(sidebarForOpen)),
   "the page's groups come only from sidebarGroups(), which drops an empty group; the sidebar's one heading, Recent tools, sits under the guard on its list",
 );
@@ -220,8 +219,9 @@ checkTrue(
 checkTrue(
   "...and so does the All tools page",
   /const isOwner = isAdminEmail\(user\.email\);/.test(toolsPageSrc) &&
-    /sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\)/.test(toolsPageSrc) &&
-    !/visibleGroups\(/.test(toolsPageSrc),
+    /<ToolsGrid isOwner=\{isOwner\} \/>/.test(toolsPageSrc) &&
+    /sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\)/.test(toolsGridSrc) &&
+    !/visibleGroups\(/.test(toolsPageSrc + toolsGridSrc),
   "the grid would show the hidden trackers the sidebar has always kept out",
 );
 // The other half of hidden: ⌘K must still find every hidden tracker, or
@@ -235,7 +235,7 @@ checkTrue(
 );
 checkTrue(
   "Settings is drawn as its own group below the main ones, on All tools",
-  /\.\.\.sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\), \.\.\.sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)\]/.test(toolsPageSrc),
+  /\.\.\.sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\), \.\.\.sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)\]/.test(toolsGridSrc),
   "Integrations and the Help Centre have no row in the rail, so without this group they have none anywhere",
 );
 // EVERY HEADING IS A CAPTION, not a control — there is nothing to toggle.

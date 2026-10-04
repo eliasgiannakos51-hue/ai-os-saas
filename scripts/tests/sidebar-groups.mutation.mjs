@@ -30,7 +30,8 @@ const TOOLTIPS = "scripts/tests/sidebar-and-tooltips.test.mjs";
 const NAV = "src/lib/sidebar-nav.ts";
 const SIDEBAR = "src/components/dashboard/sidebar.tsx";
 const PALETTE = "src/components/dashboard/command-palette.tsx";
-const TOOLS_PAGE = "src/app/dashboard/tools/page.tsx";
+// The groups are assembled and drawn by the grid the page renders (D.6).
+const TOOLS_PAGE = "src/components/tools/tools-grid.tsx";
 const TARGETS = [NAV, SIDEBAR, PALETTE, TOOLS_PAGE];
 
 const MUTANTS = [
@@ -117,9 +118,9 @@ const MUTANTS = [
     // (the sidebar of ΣΥΣΤΗΜΑ DESIGN has none), so that is where it
     // would come back.
     file: TOOLS_PAGE,
-    from: "                {group.items.map((item) => {",
-    to: "                {group.items.map((item) => {\n                  const expanded = true;\n                  if (!expanded) return null;",
-    expect: "the group renderer has only the card's return",
+    from: "<ul className={GRID}>{group.items.map(tile)}</ul>",
+    to: "<ul className={GRID}>{expanded ? group.items.map(tile) : null}</ul>",
+    expect: "every row is drawn, unconditionally",
   },
   {
     dimension: "C. four groups",
@@ -195,8 +196,8 @@ const MUTANTS = [
     name: "Settings stops being its own group",
     // RE-ANCHORED 2026-10-04: drawn on All tools now.
     file: TOOLS_PAGE,
-    from: ", ...sidebarGroups([SETTINGS_GROUP], isOwner)];",
-    to: "];",
+    from: ", ...sidebarGroups([SETTINGS_GROUP], isOwner)],",
+    to: "],",
     expect: "Settings",
   },
 ];

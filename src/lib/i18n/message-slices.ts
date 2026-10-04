@@ -135,6 +135,8 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // with the database's own check constraint.
     // SEVENTY on 2026-10-04: the theme toggle went with the light theme
     // (ΣΥΣΤΗΜΑ DESIGN, one theme), and with it one unbounded component.
+    // SIXTY-NINE on 2026-10-04 (design D.4): the Home examples strip
+    // (overview/first-screen-examples.tsx) went with the cards.
     unbounded: 69,
   },
   {

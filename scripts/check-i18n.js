@@ -551,6 +551,12 @@ const LOCALE_ALLOWED = new Set([
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
+  // THE BETA TAG ON AN ALL TOOLS TILE (design D.6, 2026-10-04). "Beta"
+  // is the word software uses for this state in Greek, German, Spanish,
+  // Italian and Portuguese alike — the owner's own Greek design text
+  // writes «Εργαλεία beta» — and a tile tag is one short word, not a
+  // sentence. The full meaning is translated in all ten: betaHint.
+  "dashboard.tools.beta",
   // THE HELD POSITIONS THAT ARE PRODUCT NAMES (2026-09-26). Five of the
   // fifty-five sidebar labels added with the declared structure are the
   // names of things, not words: GitHub, Google Drive, Slack and MCP are

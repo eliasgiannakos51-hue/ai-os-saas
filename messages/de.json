@@ -2760,7 +2760,12 @@
     "tools": {
       "title": "Alle Werkzeuge",
       "description": "Jedes Werkzeug, mit einer Zeile dazu, was es tut.",
-      "orPress": "Oder drücke ⌘K und tippe den Namen – oder beschreibe es im Feld auf der Startseite."
+      "orPress": "Oder drücke ⌘K und tippe den Namen – oder beschreibe es im Feld auf der Startseite.",
+      "search": "Werkzeug finden",
+      "searchLabel": "Werkzeuge durchsuchen",
+      "noMatch": "Kein Werkzeug heißt „{query}“. Beschreibe es stattdessen im Feld auf der Startseite.",
+      "beta": "Beta",
+      "betaHint": "In Erprobung: Es funktioniert, kann aber noch nicht alles, was es soll."
     },
     "home": {
       "actions": {

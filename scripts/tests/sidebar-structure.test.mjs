@@ -594,12 +594,14 @@ console.log("\n== 3. Settings is a separate block, not the sixth group ==");
 ok("SETTINGS_GROUP is declared apart from MAIN_SIDEBAR_GROUPS",
   /export const SETTINGS_GROUP: SidebarGroupConfig = \{/.test(navSrc) &&
   /export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig\[\] = \[/.test(navSrc));
-const toolsSrc = stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"));
+// The page renders components/tools/tools-grid.tsx since D.6 (the tiles
+// and their search), and that is where the groups are assembled.
+const toolsSrc = stripComments(readFileSync("src/components/tools/tools-grid.tsx", "utf8"));
 const mainAt = toolsSrc.indexOf("sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner)");
 const settingsAt = toolsSrc.indexOf("sidebarGroups([SETTINGS_GROUP], isOwner)");
 ok("...and All tools draws the main groups before it, and it last",
   mainAt >= 0 && settingsAt > mainAt &&
-  /const groups = \[\.\.\.sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\), \.\.\.sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)\];/.test(toolsSrc) &&
+  /\(\) => \[\.\.\.sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\), \.\.\.sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)\],/.test(toolsSrc) &&
   /\{groups\.map\(\(group\) =>/.test(toolsSrc));
 ok("Settings is the last declared block", DECLARED[DECLARED.length - 1].heading === "Settings");
 

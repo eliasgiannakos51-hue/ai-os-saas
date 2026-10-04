@@ -116,7 +116,9 @@ const FUTURE = [
   // /dashboard/ai-memory, next to it. The old address permanently
   // redirects.
   { heading: "See", hrefs: [
-    "/dashboard/timeline", "/dashboard/files", "/dashboard/finance",
+    // Activity, 2026-10-04: the cards Home carried before it became the
+    // design's one block (src/app/dashboard/activity/page.tsx).
+    "/dashboard/timeline", "/dashboard/activity", "/dashboard/files", "/dashboard/finance",
     "/dashboard/sales", "/dashboard/trading", "/dashboard/search",
     "/dashboard/ai-memory", "/dashboard/business-health",
     "/dashboard/analytics", "/dashboard/monitoring", "/dashboard/knowledge-graph",

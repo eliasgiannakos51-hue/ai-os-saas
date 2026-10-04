@@ -112,12 +112,20 @@ console.log("== 5. the widget boundary is actually USED ==");
   );
   check(`WidgetBoundary is used by at least one page (${users.length})`, users.length >= 1,
     "a boundary nothing wraps is a file, not a boundary");
+  // Home is the design's one block since 2026-10-04 — two client widgets,
+  // the greeting (with the earth's canvas) and the field — and the cards
+  // it carried are on /dashboard/activity, with their boundaries.
   const home = "src/app/dashboard/overview/page.tsx";
   const wraps = (read(home).match(/<WidgetBoundary\b/g) ?? []).length;
-  check(`the Home wraps its client widgets individually (${wraps})`, wraps >= 3,
-    "one card failing must not take the first screen after signing in");
-  check("...and hands the boundary its translated strings",
-    /tErr\("boundary\.section"\)/.test(read(home)),
+  check(`the Home wraps both of its client widgets individually (${wraps})`,
+    wraps >= 2 && /<WidgetBoundary[^>]*>\s*<GreetingHeader/.test(read(home)) && /<WidgetBoundary[^>]*>\s*<CreateChat/.test(read(home)),
+    "one widget failing must not take the first screen after signing in");
+  const activity = "src/app/dashboard/activity/page.tsx";
+  const cardWraps = (read(activity).match(/<WidgetBoundary\b/g) ?? []).length;
+  check(`...and Activity wraps its cards individually (${cardWraps})`, cardWraps >= 2,
+    "one card failing must not take the rest of the page");
+  check("...and both hand the boundary its translated strings",
+    [home, activity].every((f) => /tErr\("boundary\.section"\)/.test(read(f))),
     "the boundary is a class component and cannot call useTranslations itself");
 }
 

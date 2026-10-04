@@ -222,7 +222,8 @@
       "personalShopping": "Compras",
       "personalFinance": "Finanzas personales",
       "personalJournal": "Diario",
-      "personalLifeOs": "Life OS"
+      "personalLifeOs": "Life OS",
+      "activity": "Actividad"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -283,7 +284,8 @@
       "posts": "Dilo una vez y recibe una publicación por plataforma, con su longitud y su tono. No publica nada: copias y publicas tú.",
       "projects": "Una carpeta con un objetivo. Lo que metes es lo que hay — nada entra solo.",
       "aiMemory": "Lo que el chat ha guardado sobre ti, y cómo borrarlo.",
-      "meetings": "Convierte una grabación en transcripción, resumen y acciones que eliges tú."
+      "meetings": "Convierte una grabación en transcripción, resumen y acciones que eliges tú.",
+      "activity": "Tu próximo paso, qué ha cambiado, tu progreso y tus cifras"
     },
     "closeMenu": "Cerrar el menú",
     "rail": {
@@ -1298,6 +1300,10 @@
       "clarificationAnswerPlaceholder": "Tu respuesta...",
       "sources": {
         "title": "Fuentes"
+      },
+      "workMode": {
+        "active": "Modo: {mode}",
+        "clear": "Quitar el modo de trabajo"
       }
     },
     "create": {
@@ -1735,7 +1741,8 @@
       "clarifyTitle": "Un par de preguntas rápidas:",
       "clarifySkip": "Omitir y registrarlo igualmente",
       "clarifyContinue": "Continuar",
-      "clarifyAnswerPlaceholder": "Tu respuesta..."
+      "clarifyAnswerPlaceholder": "Tu respuesta...",
+      "accomplishPlaceholder": "¿Qué quieres conseguir?"
     },
     "createStudio": {
       "title": "Crea lo que sea",
@@ -2754,6 +2761,14 @@
       "title": "Todas las herramientas",
       "description": "Cada herramienta, con una línea sobre lo que hace.",
       "orPress": "O pulsa ⌘K y escribe su nombre, o descríbelo en el campo de Inicio."
+    },
+    "home": {
+      "actions": {
+        "research": "Investigar",
+        "create": "Crear",
+        "run": "Ejecutar",
+        "analyze": "Analizar"
+      }
     }
   },
   "module": {
@@ -3336,7 +3351,7 @@
       "does": "Cambia de plan, compra créditos, elige idioma y tema, pon nombre al asistente y descarga cada registro de la cuenta en un solo archivo.",
       "doesNot": "No guarda aquí tus registros: cada módulo guarda los suyos. Y Eliminar cuenta no es una forma de limpiarlos y empezar de cero: termina la cuenta, se lleva todo con ella y no se puede deshacer. Exporta antes."
     },
-    "overview": {
+    "activity": {
       "is": "Un resumen de lo que has registrado, y una cosa que hacer a continuación.",
       "does": "Lee tus propias entradas en todos los módulos y muestra una puntuación de salud, lo que ha cambiado y un siguiente paso sugerido.",
       "doesNot": "No se conecta a tu banco, tu CRM ni tu correo. Cada cifra viene de algo que tú o tus agentes habéis introducido, así que una semana vacía está realmente vacía: no es que esté cargando."

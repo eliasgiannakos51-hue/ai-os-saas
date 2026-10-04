@@ -1,12 +1,12 @@
 # The first run — fr
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **656 strings**. The whole product is 3459, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **585 strings**. The whole product is 3468, which is why this file exists.
 
-**Start with tier 1. It is 30 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 418 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 356 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (30)
+## Tier 1 — THE SENTENCES — read these (21)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -128,48 +128,6 @@ Ces entrées sont une démo : trois mois d'un petit studio de design. Elles ne s
 
 ### first result
 
-**`dashboard.overview.healthScore.suggestion.recency`**
-
-> EN — You haven't logged anything in a while — add a new entry to pick things back up.
-
-Vous n'avez rien enregistré depuis un moment — ajoutez une entrée pour reprendre.
-
-**`dashboard.overview.nextAction.revisitLink`**
-
-> EN — You linked "{source}" to "{target}" a few days ago — worth revisiting?
-
-Vous avez lié "{source}" à "{target}" il y a quelques jours — ça vaut le coup d'y revenir ?
-
-**`dashboard.overview.nextAction.startNew`**
-
-> EN — No new activity in the last 3 days — ready to start something new?
-
-Aucune nouvelle activité depuis 3 jours — prêt à commencer quelque chose de nouveau ?
-
-**`dashboard.overview.setupProgress.suggestion`**
-
-> EN — Your activity score appears once you have logged {count} entries — enough that no single one decides it.
-
-Votre score d'activité apparaît une fois {count} entrées enregistrées — assez pour qu'aucune seule ne le décide.
-
-**`dashboard.overview.statRow.mostActiveExplain`**
-
-> EN — The module you have written in most. Where your attention has gone.
-
-Le module où vous écrivez le plus. Là où va votre attention.
-
-**`dashboard.overview.statRow.thisWeekExplain`**
-
-> EN — Logged in the last seven days — how active this week has been.
-
-Enregistré ces sept derniers jours — à quel point la semaine a été active.
-
-**`common.betaExpiry`**
-
-> EN — Your beta access expires in {days, plural, one {# day} other {# days}}. <link>Upgrade to keep full access</link>.
-
-Votre accès bêta expire dans {days, plural, one {# jour} other {# jours}}. <link>Passez à un forfait supérieur pour garder l'accès complet</link>.
-
 **`common.listCapped`**
 
 > EN — Showing the most recent {count, number}. Older entries are still saved — use Search my records to find them.
@@ -188,19 +146,7 @@ Cela ressemble à une question. Dois-je y répondre ou l'enregistrer ?
 
 Décrivez n'importe quoi — une idée de produit, une opération, le retour d'un utilisateur, un indicateur — et cela atterrit automatiquement dans le bon module.
 
-**`dashboard.energyCheckIn.whatItDoes`**
-
-> EN — Ionexa uses this to pick which plan step to suggest next — lighter work when you're low, demanding work when you're not.
-
-Ionexa s'en sert pour choisir quelle étape du plan vous proposer — du travail léger quand vous êtes bas, exigeant sinon.
-
-**`sampleData.loadFree`**
-
-> EN — Free — nothing is generated, and you can remove it in one click
-
-Gratuit : rien n'est généré, et vous pouvez tout retirer en un clic
-
-## Tier 2 — The labels — skim these (418)
+## Tier 2 — The labels — skim these (356)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1436,6 +1382,12 @@ Retrait…
 
 Fermer le menu
 
+**`sidebar.items.activity`**
+
+> EN — Activity
+
+Activité
+
 **`sidebar.items.affiliate`**
 
 > EN — Affiliate
@@ -2200,246 +2152,6 @@ Désépingler {tool}
 
 Impossible de charger vos idées : {message}
 
-**`dashboard.insights.title`**
-
-> EN — What I noticed
-
-Ce que j'ai remarqué
-
-**`dashboard.overview.activeMission.open`**
-
-> EN — Open the plan
-
-Ouvrir le plan
-
-**`dashboard.overview.activeMission.stepsLabel`**
-
-> EN — {completed}/{total} steps completed
-
-{completed}/{total} étapes terminées
-
-**`dashboard.overview.aiCoach.entryCount`**
-
-> EN — {count, plural, one {# new {module} entry} other {# new {module} entries}}
-
-{count, plural, one {# nouvelle entrée dans {module}} other {# nouvelles entrées dans {module}}}
-
-**`dashboard.overview.aiCoach.mostActiveIn`**
-
-> EN — Most active in {module}
-
-Le plus actif dans {module}
-
-**`dashboard.overview.aiCoach.noActivity`**
-
-> EN — No activity yet this week — log something to get started.
-
-Aucune activité cette semaine — enregistrez quelque chose pour commencer.
-
-**`dashboard.overview.betaFeedback.linkLabel`**
-
-> EN — Share feedback
-
-Envoyer un avis
-
-**`dashboard.overview.betaFeedback.message`**
-
-> EN — Thanks for testing Ionexa AI. Your feedback is welcome.
-
-Merci de tester Ionexa AI. Votre avis est le bienvenu.
-
-**`dashboard.overview.healthScore.buildingMomentum`**
-
-> EN — Building momentum
-
-Vous prenez de l'élan
-
-**`dashboard.overview.healthScore.excellentConsistency`**
-
-> EN — Excellent consistency
-
-Excellente régularité
-
-**`dashboard.overview.healthScore.justStarting`**
-
-> EN — Just getting started
-
-Vous débutez
-
-**`dashboard.overview.healthScore.strongProgress`**
-
-> EN — Strong progress
-
-Bons progrès
-
-**`dashboard.overview.healthScore.suggestion.consistency`**
-
-> EN — Try logging something every day this week.
-
-Essayez d'enregistrer quelque chose chaque jour cette semaine.
-
-**`dashboard.overview.healthScore.suggestion.coverage`**
-
-> EN — Try exploring a module you haven't used yet.
-
-Essayez d'explorer un module que vous n'avez pas encore utilisé.
-
-**`dashboard.overview.healthScore.suggestion.missionSteps`**
-
-> EN — Complete a plan step to keep your momentum going.
-
-Terminez une étape du plan pour garder votre élan.
-
-**`dashboard.overview.healthScore.title`**
-
-> EN — Business Health Score
-
-Score de Santé de l'Entreprise
-
-**`dashboard.overview.next.title`**
-
-> EN — Next
-
-La suite
-
-**`dashboard.overview.nextAction.continueMission`**
-
-> EN — Continue: {step} from your "{goal}" plan
-
-Continuer : {step} de votre plan "{goal}"
-
-**`dashboard.overview.nextAction.cta`**
-
-> EN — Go there →
-
-Y aller →
-
-**`dashboard.overview.setupProgress.count`**
-
-> EN — {done} of {total} steps
-
-{done} sur {total} étapes
-
-**`dashboard.overview.setupProgress.steps.firstEntry`**
-
-> EN — Log your first entry
-
-Enregistrez votre première entrée
-
-**`dashboard.overview.setupProgress.steps.mission`**
-
-> EN — Set a goal
-
-Définissez un objectif
-
-**`dashboard.overview.setupProgress.steps.onboarding`**
-
-> EN — Finish the welcome questions
-
-Terminez les questions d'accueil
-
-**`dashboard.overview.setupProgress.steps.secondModule`**
-
-> EN — Log something in a second area
-
-Enregistrez quelque chose dans un deuxième domaine
-
-**`dashboard.overview.setupProgress.title`**
-
-> EN — Setup progress
-
-Progression de la configuration
-
-**`dashboard.overview.statRow.creditsExplain`**
-
-> EN — What is left of this month's allowance for AI work.
-
-Ce qu'il reste de votre quota mensuel pour le travail avec l'IA.
-
-**`dashboard.overview.statRow.creditsRemaining`**
-
-> EN — Credits Remaining
-
-Crédits Restants
-
-**`dashboard.overview.statRow.fillsAfter`**
-
-> EN — Fills in after {count} entries
-
-Se remplit après {count} entrées
-
-**`dashboard.overview.statRow.fromEntries`**
-
-> EN — {count, plural, one {from # entry} other {from # entries}}
-
-{count, plural, one {à partir de # entrée} other {à partir de # entrées}}
-
-**`dashboard.overview.statRow.mostActive`**
-
-> EN — Most Active
-
-Le Plus Actif
-
-**`dashboard.overview.statRow.ofTotal`**
-
-> EN — {count, plural, one {of # in total} other {of # in total}}
-
-{count, plural, one {sur # au total} other {sur # au total}}
-
-**`dashboard.overview.statRow.openCredits`**
-
-> EN — See the ledger →
-
-Voir l'historique →
-
-**`dashboard.overview.statRow.openEntries`**
-
-> EN — See the entries →
-
-Voir les entrées →
-
-**`dashboard.overview.statRow.thisWeek`**
-
-> EN — This Week
-
-Cette Semaine
-
-**`dashboard.overview.statRow.totalEntries`**
-
-> EN — Total Entries
-
-Total des Entrées
-
-**`dashboard.overview.statRow.totalEntriesExplain`**
-
-> EN — Everything you have logged, in every module, since you started.
-
-Tout ce que vous avez enregistré, dans chaque module, depuis le début.
-
-**`dashboard.overview.whatChanged.entries`**
-
-> EN — new entries
-
-nouvelles entrées
-
-**`dashboard.overview.whatChanged.insights`**
-
-> EN — new insights
-
-nouveaux constats
-
-**`dashboard.overview.whatChanged.since`**
-
-> EN — since {when}
-
-depuis {when}
-
-**`dashboard.overview.whatChanged.title`**
-
-> EN — What changed
-
-Ce qui a changé
-
 **`errors.boundary.section`**
 
 > EN — This section could not be displayed.
@@ -2493,6 +2205,12 @@ Créer N'importe Quoi
 > EN — View {module} →
 
 Ouvrir {module} →
+
+**`dashboard.createAnything.accomplishPlaceholder`**
+
+> EN — What do you want to accomplish?
+
+Que voulez-vous accomplir ?
 
 **`dashboard.createAnything.attachImage`**
 
@@ -2548,132 +2266,6 @@ Envoyer
 
 Impossible d'envoyer une ou plusieurs images.
 
-**`dashboard.energyCheckIn.change`**
-
-> EN — Change
-
-Modifier
-
-**`dashboard.energyCheckIn.checkedInToday`**
-
-> EN — Today's energy: {level}/5.
-
-Énergie du jour : {level}/5.
-
-**`dashboard.energyCheckIn.levelLabel`**
-
-> EN — Energy level {level}
-
-Niveau d'énergie {level}
-
-**`dashboard.energyCheckIn.logged`**
-
-> EN — Energy logged
-
-Énergie enregistrée
-
-**`dashboard.energyCheckIn.notePlaceholder`**
-
-> EN — Optional note...
-
-Note facultative...
-
-**`dashboard.energyCheckIn.prompt`**
-
-> EN — How's your energy today?
-
-Comment est votre énergie aujourd'hui ?
-
-**`dashboard.energyCheckIn.scaleHigh`**
-
-> EN — 5 = great
-
-5 = au top
-
-**`dashboard.energyCheckIn.scaleLow`**
-
-> EN — 1 = exhausted
-
-1 = épuisé
-
-**`dashboard.energyCheckIn.title`**
-
-> EN — Energy Check-In
-
-Bilan d'Énergie
-
-**`dashboard.firstScreen.build.example`**
-
-> EN — Build a website for my shop
-
-Créez un site pour ma boutique
-
-**`dashboard.firstScreen.build.verb`**
-
-> EN — Build
-
-Créez
-
-**`dashboard.firstScreen.cost.charged`**
-
-> EN — Uses credits
-
-Consomme des crédits
-
-**`dashboard.firstScreen.cost.free`**
-
-> EN — Free
-
-Gratuit
-
-**`dashboard.firstScreen.cost.freeAllowance`**
-
-> EN — Free up to your monthly limit
-
-Gratuit jusqu’à votre limite mensuelle
-
-**`dashboard.firstScreen.label`**
-
-> EN — Press one — it runs right away
-
-Cliquez sur l’un — il s’exécute aussitôt
-
-**`dashboard.firstScreen.repeat.example`**
-
-> EN — Every Monday, a summary of my sales
-
-Chaque lundi, un résumé de mes ventes
-
-**`dashboard.firstScreen.repeat.verb`**
-
-> EN — Repeat
-
-Répétez
-
-**`dashboard.firstScreen.understand.example`**
-
-> EN — What do my numbers say this week?
-
-Que disent mes chiffres cette semaine ?
-
-**`dashboard.firstScreen.understand.verb`**
-
-> EN — Understand
-
-Comprenez
-
-**`dashboard.overview.recentEntries.empty`**
-
-> EN — No entries yet.
-
-Aucune entrée pour l'instant.
-
-**`dashboard.overview.recentEntries.title`**
-
-> EN — Recent Entries
-
-Entrées Récentes
-
 **`errors.creditHistory`**
 
 > EN — See credit history
@@ -2703,24 +2295,6 @@ Bonsoir
 > EN — Good morning
 
 Bonjour
-
-**`sampleData.load`**
-
-> EN — See it with sample data
-
-Voir avec des données d'exemple
-
-**`sampleData.loadFailed`**
-
-> EN — That did not work. Try again.
-
-Cela n'a pas marché. Réessayez.
-
-**`sampleData.loading`**
-
-> EN — Loading…
-
-Chargement…
 
 ## Tier 3 — Further in — only if you have time (208)
 

@@ -1,12 +1,12 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **656 strings**. The whole product is 3459, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **585 strings**. The whole product is 3468, which is why this file exists.
 
-**Start with tier 1. It is 30 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 418 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 356 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (30)
+## Tier 1 — THE SENTENCES — read these (21)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -128,48 +128,6 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 ### first result
 
-**`dashboard.overview.healthScore.suggestion.recency`**
-
-> EN — You haven't logged anything in a while — add a new entry to pick things back up.
-
-你有一段时间没有记录任何内容了 — 添加一条新条目继续前进。
-
-**`dashboard.overview.nextAction.revisitLink`**
-
-> EN — You linked "{source}" to "{target}" a few days ago — worth revisiting?
-
-你几天前把"{source}"关联到了"{target}" — 值得重新看看吗?
-
-**`dashboard.overview.nextAction.startNew`**
-
-> EN — No new activity in the last 3 days — ready to start something new?
-
-过去3天没有新活动 — 准备好开始新的事情了吗?
-
-**`dashboard.overview.setupProgress.suggestion`**
-
-> EN — Your activity score appears once you have logged {count} entries — enough that no single one decides it.
-
-记录 {count} 条条目后会出现活跃度评分——足够多，才不会由某一条决定。
-
-**`dashboard.overview.statRow.mostActiveExplain`**
-
-> EN — The module you have written in most. Where your attention has gone.
-
-你写得最多的模块，也就是注意力所在。
-
-**`dashboard.overview.statRow.thisWeekExplain`**
-
-> EN — Logged in the last seven days — how active this week has been.
-
-最近七天记录的条目——本周的活跃程度。
-
-**`common.betaExpiry`**
-
-> EN — Your beta access expires in {days, plural, one {# day} other {# days}}. <link>Upgrade to keep full access</link>.
-
-你的 Beta 访问将在 {days, plural, other {#天}}后到期。<link>升级即可继续使用全部功能</link>。
-
 **`common.listCapped`**
 
 > EN — Showing the most recent {count, number}. Older entries are still saved — use Search my records to find them.
@@ -188,19 +146,7 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 描述任何内容——一个产品创意、一笔交易、一条用户反馈、一项指标——它会自动归入正确的模块。
 
-**`dashboard.energyCheckIn.whatItDoes`**
-
-> EN — Ionexa uses this to pick which plan step to suggest next — lighter work when you're low, demanding work when you're not.
-
-Ionexa 用它来挑选下一个建议的计划步骤——状态低时给轻松的，状态好时给有挑战的。
-
-**`sampleData.loadFree`**
-
-> EN — Free — nothing is generated, and you can remove it in one click
-
-免费——不生成任何内容，一键即可移除
-
-## Tier 2 — The labels — skim these (418)
+## Tier 2 — The labels — skim these (356)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1436,6 +1382,12 @@ AI 编程
 
 关闭菜单
 
+**`sidebar.items.activity`**
+
+> EN — Activity
+
+动态
+
 **`sidebar.items.affiliate`**
 
 > EN — Affiliate
@@ -2200,246 +2152,6 @@ DevOps
 
 无法加载你的创意：{message}
 
-**`dashboard.insights.title`**
-
-> EN — What I noticed
-
-我注意到的
-
-**`dashboard.overview.activeMission.open`**
-
-> EN — Open the plan
-
-打开计划
-
-**`dashboard.overview.activeMission.stepsLabel`**
-
-> EN — {completed}/{total} steps completed
-
-已完成 {completed}/{total} 步
-
-**`dashboard.overview.aiCoach.entryCount`**
-
-> EN — {count, plural, one {# new {module} entry} other {# new {module} entries}}
-
-{module} 中新增 {count} 条记录
-
-**`dashboard.overview.aiCoach.mostActiveIn`**
-
-> EN — Most active in {module}
-
-在 {module} 中最活跃
-
-**`dashboard.overview.aiCoach.noActivity`**
-
-> EN — No activity yet this week — log something to get started.
-
-本周还没有活动——记录点什么开始吧。
-
-**`dashboard.overview.betaFeedback.linkLabel`**
-
-> EN — Share feedback
-
-提交反馈
-
-**`dashboard.overview.betaFeedback.message`**
-
-> EN — Thanks for testing Ionexa AI. Your feedback is welcome.
-
-感谢你测试 Ionexa AI。欢迎提供反馈。
-
-**`dashboard.overview.healthScore.buildingMomentum`**
-
-> EN — Building momentum
-
-势头正在增长
-
-**`dashboard.overview.healthScore.excellentConsistency`**
-
-> EN — Excellent consistency
-
-非常稳定
-
-**`dashboard.overview.healthScore.justStarting`**
-
-> EN — Just getting started
-
-刚刚起步
-
-**`dashboard.overview.healthScore.strongProgress`**
-
-> EN — Strong progress
-
-进展强劲
-
-**`dashboard.overview.healthScore.suggestion.consistency`**
-
-> EN — Try logging something every day this week.
-
-试着这周每天都记录一些内容。
-
-**`dashboard.overview.healthScore.suggestion.coverage`**
-
-> EN — Try exploring a module you haven't used yet.
-
-试试探索一个你还没用过的模块。
-
-**`dashboard.overview.healthScore.suggestion.missionSteps`**
-
-> EN — Complete a plan step to keep your momentum going.
-
-完成一个计划步骤以保持你的势头。
-
-**`dashboard.overview.healthScore.title`**
-
-> EN — Business Health Score
-
-业务健康分数
-
-**`dashboard.overview.next.title`**
-
-> EN — Next
-
-接下来
-
-**`dashboard.overview.nextAction.continueMission`**
-
-> EN — Continue: {step} from your "{goal}" plan
-
-继续：来自你的"{goal}"计划的 {step}
-
-**`dashboard.overview.nextAction.cta`**
-
-> EN — Go there →
-
-前往 →
-
-**`dashboard.overview.setupProgress.count`**
-
-> EN — {done} of {total} steps
-
-{total} 步中的 {done} 步
-
-**`dashboard.overview.setupProgress.steps.firstEntry`**
-
-> EN — Log your first entry
-
-记录你的第一条条目
-
-**`dashboard.overview.setupProgress.steps.mission`**
-
-> EN — Set a goal
-
-设定一个目标
-
-**`dashboard.overview.setupProgress.steps.onboarding`**
-
-> EN — Finish the welcome questions
-
-完成欢迎问题
-
-**`dashboard.overview.setupProgress.steps.secondModule`**
-
-> EN — Log something in a second area
-
-在第二个领域记录一些内容
-
-**`dashboard.overview.setupProgress.title`**
-
-> EN — Setup progress
-
-设置进度
-
-**`dashboard.overview.statRow.creditsExplain`**
-
-> EN — What is left of this month's allowance for AI work.
-
-本月 AI 额度的剩余部分。
-
-**`dashboard.overview.statRow.creditsRemaining`**
-
-> EN — Credits Remaining
-
-剩余额度
-
-**`dashboard.overview.statRow.fillsAfter`**
-
-> EN — Fills in after {count} entries
-
-记录 {count} 条后填充
-
-**`dashboard.overview.statRow.fromEntries`**
-
-> EN — {count, plural, one {from # entry} other {from # entries}}
-
-{count, plural, other {来自 # 条记录}}
-
-**`dashboard.overview.statRow.mostActive`**
-
-> EN — Most Active
-
-最活跃
-
-**`dashboard.overview.statRow.ofTotal`**
-
-> EN — {count, plural, one {of # in total} other {of # in total}}
-
-{count, plural, other {共 # 条中的}}
-
-**`dashboard.overview.statRow.openCredits`**
-
-> EN — See the ledger →
-
-查看明细 →
-
-**`dashboard.overview.statRow.openEntries`**
-
-> EN — See the entries →
-
-查看条目 →
-
-**`dashboard.overview.statRow.thisWeek`**
-
-> EN — This Week
-
-本周
-
-**`dashboard.overview.statRow.totalEntries`**
-
-> EN — Total Entries
-
-总记录数
-
-**`dashboard.overview.statRow.totalEntriesExplain`**
-
-> EN — Everything you have logged, in every module, since you started.
-
-你在所有模块中记录过的全部内容。
-
-**`dashboard.overview.whatChanged.entries`**
-
-> EN — new entries
-
-条新记录
-
-**`dashboard.overview.whatChanged.insights`**
-
-> EN — new insights
-
-条新洞察
-
-**`dashboard.overview.whatChanged.since`**
-
-> EN — since {when}
-
-自 {when} 起
-
-**`dashboard.overview.whatChanged.title`**
-
-> EN — What changed
-
-有什么变化
-
 **`errors.boundary.section`**
 
 > EN — This section could not be displayed.
@@ -2493,6 +2205,12 @@ DevOps
 > EN — View {module} →
 
 查看 {module} →
+
+**`dashboard.createAnything.accomplishPlaceholder`**
+
+> EN — What do you want to accomplish?
+
+你想完成什么？
 
 **`dashboard.createAnything.attachImage`**
 
@@ -2548,132 +2266,6 @@ DevOps
 
 有一张或多张图片上传失败。
 
-**`dashboard.energyCheckIn.change`**
-
-> EN — Change
-
-更改
-
-**`dashboard.energyCheckIn.checkedInToday`**
-
-> EN — Today's energy: {level}/5.
-
-今天的能量:{level}/5。
-
-**`dashboard.energyCheckIn.levelLabel`**
-
-> EN — Energy level {level}
-
-能量等级 {level}
-
-**`dashboard.energyCheckIn.logged`**
-
-> EN — Energy logged
-
-能量已记录
-
-**`dashboard.energyCheckIn.notePlaceholder`**
-
-> EN — Optional note...
-
-可选备注...
-
-**`dashboard.energyCheckIn.prompt`**
-
-> EN — How's your energy today?
-
-你今天的能量如何?
-
-**`dashboard.energyCheckIn.scaleHigh`**
-
-> EN — 5 = great
-
-5 = 状态很好
-
-**`dashboard.energyCheckIn.scaleLow`**
-
-> EN — 1 = exhausted
-
-1 = 精疲力尽
-
-**`dashboard.energyCheckIn.title`**
-
-> EN — Energy Check-In
-
-能量签到
-
-**`dashboard.firstScreen.build.example`**
-
-> EN — Build a website for my shop
-
-为我的店铺做一个网站
-
-**`dashboard.firstScreen.build.verb`**
-
-> EN — Build
-
-构建
-
-**`dashboard.firstScreen.cost.charged`**
-
-> EN — Uses credits
-
-消耗额度
-
-**`dashboard.firstScreen.cost.free`**
-
-> EN — Free
-
-免费
-
-**`dashboard.firstScreen.cost.freeAllowance`**
-
-> EN — Free up to your monthly limit
-
-在每月额度内免费
-
-**`dashboard.firstScreen.label`**
-
-> EN — Press one — it runs right away
-
-点一个 — 立刻运行
-
-**`dashboard.firstScreen.repeat.example`**
-
-> EN — Every Monday, a summary of my sales
-
-每周一，给我一份销售汇总
-
-**`dashboard.firstScreen.repeat.verb`**
-
-> EN — Repeat
-
-重复
-
-**`dashboard.firstScreen.understand.example`**
-
-> EN — What do my numbers say this week?
-
-我这周的数据说明了什么？
-
-**`dashboard.firstScreen.understand.verb`**
-
-> EN — Understand
-
-理解
-
-**`dashboard.overview.recentEntries.empty`**
-
-> EN — No entries yet.
-
-还没有条目。
-
-**`dashboard.overview.recentEntries.title`**
-
-> EN — Recent Entries
-
-最近条目
-
 **`errors.creditHistory`**
 
 > EN — See credit history
@@ -2703,24 +2295,6 @@ DevOps
 > EN — Good morning
 
 早上好
-
-**`sampleData.load`**
-
-> EN — See it with sample data
-
-用示例数据查看
-
-**`sampleData.loadFailed`**
-
-> EN — That did not work. Try again.
-
-没有成功，请重试。
-
-**`sampleData.loading`**
-
-> EN — Loading…
-
-加载中…
 
 ## Tier 3 — Further in — only if you have time (208)
 

@@ -1,12 +1,12 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **656 strings**. The whole product is 3459, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **585 strings**. The whole product is 3468, which is why this file exists.
 
-**Start with tier 1. It is 30 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 418 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 356 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (30)
+## Tier 1 — THE SENTENCES — read these (21)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -128,48 +128,6 @@ CSV またはタブ区切り、最大 {max}。保存する前に読み取り結�
 
 ### first result
 
-**`dashboard.overview.healthScore.suggestion.recency`**
-
-> EN — You haven't logged anything in a while — add a new entry to pick things back up.
-
-しばらく記録がありません — 新しいエントリを追加して再開しましょう。
-
-**`dashboard.overview.nextAction.revisitLink`**
-
-> EN — You linked "{source}" to "{target}" a few days ago — worth revisiting?
-
-数日前に "{source}" を "{target}" にリンクしました — 見直す価値があるかも?
-
-**`dashboard.overview.nextAction.startNew`**
-
-> EN — No new activity in the last 3 days — ready to start something new?
-
-過去3日間新しい活動がありません — 何か新しいことを始めませんか?
-
-**`dashboard.overview.setupProgress.suggestion`**
-
-> EN — Your activity score appears once you have logged {count} entries — enough that no single one decides it.
-
-{count} 件記録すると活動スコアが表示されます。1 件で決まってしまわない程度の数です。
-
-**`dashboard.overview.statRow.mostActiveExplain`**
-
-> EN — The module you have written in most. Where your attention has gone.
-
-いちばん書いているモジュール。注意が向いている場所です。
-
-**`dashboard.overview.statRow.thisWeekExplain`**
-
-> EN — Logged in the last seven days — how active this week has been.
-
-直近 7 日間の記録——今週どれだけ動いたか。
-
-**`common.betaExpiry`**
-
-> EN — Your beta access expires in {days, plural, one {# day} other {# days}}. <link>Upgrade to keep full access</link>.
-
-ベータ利用はあと{days, plural, other {#日}}で終了します。<link>アップグレードすれば全機能を使い続けられます</link>。
-
 **`common.listCapped`**
 
 > EN — Showing the most recent {count, number}. Older entries are still saved — use Search my records to find them.
@@ -188,19 +146,7 @@ CSV またはタブ区切り、最大 {max}。保存する前に読み取り結�
 
 何でも書いてください — 製品のアイデア、トレード、ユーザーからのフィードバック、指標 — 自動的に適切なモジュールに入ります。
 
-**`dashboard.energyCheckIn.whatItDoes`**
-
-> EN — Ionexa uses this to pick which plan step to suggest next — lighter work when you're low, demanding work when you're not.
-
-Ionexa はこれをもとに次に提案するプランのステップを選びます。調子が低いときは軽い作業、そうでなければ手応えのある作業を。
-
-**`sampleData.loadFree`**
-
-> EN — Free — nothing is generated, and you can remove it in one click
-
-無料。何も生成されず、ワンクリックで削除できます
-
-## Tier 2 — The labels — skim these (418)
+## Tier 2 — The labels — skim these (356)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1436,6 +1382,12 @@ Gmail や Drive を接続
 
 メニューを閉じる
 
+**`sidebar.items.activity`**
+
+> EN — Activity
+
+アクティビティ
+
 **`sidebar.items.affiliate`**
 
 > EN — Affiliate
@@ -2200,246 +2152,6 @@ DevOps
 
 アイデアを読み込めませんでした: {message}
 
-**`dashboard.insights.title`**
-
-> EN — What I noticed
-
-気づいたこと
-
-**`dashboard.overview.activeMission.open`**
-
-> EN — Open the plan
-
-プランを開く
-
-**`dashboard.overview.activeMission.stepsLabel`**
-
-> EN — {completed}/{total} steps completed
-
-{completed}/{total} ステップ完了
-
-**`dashboard.overview.aiCoach.entryCount`**
-
-> EN — {count, plural, one {# new {module} entry} other {# new {module} entries}}
-
-{module} に {count} 件の新しいエントリー
-
-**`dashboard.overview.aiCoach.mostActiveIn`**
-
-> EN — Most active in {module}
-
-{module} で最もアクティブ
-
-**`dashboard.overview.aiCoach.noActivity`**
-
-> EN — No activity yet this week — log something to get started.
-
-今週はまだアクティビティがありません — 何か記録して始めましょう。
-
-**`dashboard.overview.betaFeedback.linkLabel`**
-
-> EN — Share feedback
-
-フィードバックを送る
-
-**`dashboard.overview.betaFeedback.message`**
-
-> EN — Thanks for testing Ionexa AI. Your feedback is welcome.
-
-Ionexa AI をお試しいただきありがとうございます。ご意見をお待ちしています。
-
-**`dashboard.overview.healthScore.buildingMomentum`**
-
-> EN — Building momentum
-
-勢いがついてきた
-
-**`dashboard.overview.healthScore.excellentConsistency`**
-
-> EN — Excellent consistency
-
-優れた継続性
-
-**`dashboard.overview.healthScore.justStarting`**
-
-> EN — Just getting started
-
-始めたばかり
-
-**`dashboard.overview.healthScore.strongProgress`**
-
-> EN — Strong progress
-
-順調に進行中
-
-**`dashboard.overview.healthScore.suggestion.consistency`**
-
-> EN — Try logging something every day this week.
-
-今週は毎日何かを記録してみましょう。
-
-**`dashboard.overview.healthScore.suggestion.coverage`**
-
-> EN — Try exploring a module you haven't used yet.
-
-まだ使っていないモジュールを試してみましょう。
-
-**`dashboard.overview.healthScore.suggestion.missionSteps`**
-
-> EN — Complete a plan step to keep your momentum going.
-
-プランのステップを完了して勢いを維持しましょう。
-
-**`dashboard.overview.healthScore.title`**
-
-> EN — Business Health Score
-
-ビジネスヘルススコア
-
-**`dashboard.overview.next.title`**
-
-> EN — Next
-
-次にやること
-
-**`dashboard.overview.nextAction.continueMission`**
-
-> EN — Continue: {step} from your "{goal}" plan
-
-続ける: 「{goal}」プランの {step}
-
-**`dashboard.overview.nextAction.cta`**
-
-> EN — Go there →
-
-移動する →
-
-**`dashboard.overview.setupProgress.count`**
-
-> EN — {done} of {total} steps
-
-{total} 件中 {done} 件
-
-**`dashboard.overview.setupProgress.steps.firstEntry`**
-
-> EN — Log your first entry
-
-最初の記録をつける
-
-**`dashboard.overview.setupProgress.steps.mission`**
-
-> EN — Set a goal
-
-目標を設定する
-
-**`dashboard.overview.setupProgress.steps.onboarding`**
-
-> EN — Finish the welcome questions
-
-ようこそ質問に答える
-
-**`dashboard.overview.setupProgress.steps.secondModule`**
-
-> EN — Log something in a second area
-
-2 つ目の領域にも記録する
-
-**`dashboard.overview.setupProgress.title`**
-
-> EN — Setup progress
-
-セットアップの進捗
-
-**`dashboard.overview.statRow.creditsExplain`**
-
-> EN — What is left of this month's allowance for AI work.
-
-今月の AI 利用枠の残りです。
-
-**`dashboard.overview.statRow.creditsRemaining`**
-
-> EN — Credits Remaining
-
-残りクレジット
-
-**`dashboard.overview.statRow.fillsAfter`**
-
-> EN — Fills in after {count} entries
-
-{count} 件記録すると表示されます
-
-**`dashboard.overview.statRow.fromEntries`**
-
-> EN — {count, plural, one {from # entry} other {from # entries}}
-
-{count, plural, other {# 件の記録から}}
-
-**`dashboard.overview.statRow.mostActive`**
-
-> EN — Most Active
-
-最も活発
-
-**`dashboard.overview.statRow.ofTotal`**
-
-> EN — {count, plural, one {of # in total} other {of # in total}}
-
-{count, plural, other {全 # 件中}}
-
-**`dashboard.overview.statRow.openCredits`**
-
-> EN — See the ledger →
-
-明細を見る →
-
-**`dashboard.overview.statRow.openEntries`**
-
-> EN — See the entries →
-
-記録を見る →
-
-**`dashboard.overview.statRow.thisWeek`**
-
-> EN — This Week
-
-今週
-
-**`dashboard.overview.statRow.totalEntries`**
-
-> EN — Total Entries
-
-合計エントリー数
-
-**`dashboard.overview.statRow.totalEntriesExplain`**
-
-> EN — Everything you have logged, in every module, since you started.
-
-これまでに全モジュールで記録したものすべて。
-
-**`dashboard.overview.whatChanged.entries`**
-
-> EN — new entries
-
-件の新しい記録
-
-**`dashboard.overview.whatChanged.insights`**
-
-> EN — new insights
-
-件の新しい発見
-
-**`dashboard.overview.whatChanged.since`**
-
-> EN — since {when}
-
-{when}から
-
-**`dashboard.overview.whatChanged.title`**
-
-> EN — What changed
-
-変わったこと
-
 **`errors.boundary.section`**
 
 > EN — This section could not be displayed.
@@ -2493,6 +2205,12 @@ Ionexa AI をお試しいただきありがとうございます。ご意見を�
 > EN — View {module} →
 
 {module} を開く →
+
+**`dashboard.createAnything.accomplishPlaceholder`**
+
+> EN — What do you want to accomplish?
+
+何を達成したいですか？
 
 **`dashboard.createAnything.attachImage`**
 
@@ -2548,132 +2266,6 @@ Ionexa AI をお試しいただきありがとうございます。ご意見を�
 
 1枚以上の画像をアップロードできませんでした。
 
-**`dashboard.energyCheckIn.change`**
-
-> EN — Change
-
-変更
-
-**`dashboard.energyCheckIn.checkedInToday`**
-
-> EN — Today's energy: {level}/5.
-
-今日のエネルギー: {level}/5。
-
-**`dashboard.energyCheckIn.levelLabel`**
-
-> EN — Energy level {level}
-
-エネルギーレベル {level}
-
-**`dashboard.energyCheckIn.logged`**
-
-> EN — Energy logged
-
-エネルギーを記録しました
-
-**`dashboard.energyCheckIn.notePlaceholder`**
-
-> EN — Optional note...
-
-任意のメモ...
-
-**`dashboard.energyCheckIn.prompt`**
-
-> EN — How's your energy today?
-
-今日のエネルギーはどうですか?
-
-**`dashboard.energyCheckIn.scaleHigh`**
-
-> EN — 5 = great
-
-5 = 絶好調
-
-**`dashboard.energyCheckIn.scaleLow`**
-
-> EN — 1 = exhausted
-
-1 = 疲れきっている
-
-**`dashboard.energyCheckIn.title`**
-
-> EN — Energy Check-In
-
-エネルギーチェックイン
-
-**`dashboard.firstScreen.build.example`**
-
-> EN — Build a website for my shop
-
-私の店のウェブサイトを作って
-
-**`dashboard.firstScreen.build.verb`**
-
-> EN — Build
-
-作る
-
-**`dashboard.firstScreen.cost.charged`**
-
-> EN — Uses credits
-
-クレジットを消費
-
-**`dashboard.firstScreen.cost.free`**
-
-> EN — Free
-
-無料
-
-**`dashboard.firstScreen.cost.freeAllowance`**
-
-> EN — Free up to your monthly limit
-
-月の無料枠まで無料
-
-**`dashboard.firstScreen.label`**
-
-> EN — Press one — it runs right away
-
-ひとつ押すと、すぐ動きます
-
-**`dashboard.firstScreen.repeat.example`**
-
-> EN — Every Monday, a summary of my sales
-
-毎週月曜日に、売上のまとめを
-
-**`dashboard.firstScreen.repeat.verb`**
-
-> EN — Repeat
-
-繰り返す
-
-**`dashboard.firstScreen.understand.example`**
-
-> EN — What do my numbers say this week?
-
-今週の私の数字は何を示している？
-
-**`dashboard.firstScreen.understand.verb`**
-
-> EN — Understand
-
-わかる
-
-**`dashboard.overview.recentEntries.empty`**
-
-> EN — No entries yet.
-
-まだ項目がありません。
-
-**`dashboard.overview.recentEntries.title`**
-
-> EN — Recent Entries
-
-最近の項目
-
 **`errors.creditHistory`**
 
 > EN — See credit history
@@ -2703,24 +2295,6 @@ credits の履歴を見る
 > EN — Good morning
 
 おはようございます
-
-**`sampleData.load`**
-
-> EN — See it with sample data
-
-サンプルデータで見る
-
-**`sampleData.loadFailed`**
-
-> EN — That did not work. Try again.
-
-うまくいきませんでした。もう一度お試しください。
-
-**`sampleData.loading`**
-
-> EN — Loading…
-
-読み込み中…
 
 ## Tier 3 — Further in — only if you have time (208)
 

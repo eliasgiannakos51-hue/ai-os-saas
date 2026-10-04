@@ -1,6 +1,6 @@
 {
-  "total": 3459,
-  "onPath": 656,
+  "total": 3468,
+  "onPath": 585,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -10,13 +10,13 @@
       "n": 1,
       "title": "THE SENTENCES — read these",
       "note": "On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that.",
-      "count": 30
+      "count": 21
     },
     {
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 418
+      "count": 356
     },
     {
       "n": 3,
@@ -1435,6 +1435,12 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.items.activity",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "sidebar.items.affiliate",
           "depth": 1,
           "tier": 2,
@@ -2335,282 +2341,6 @@
           "file": "src/app/dashboard/page.tsx"
         },
         {
-          "key": "dashboard.insights.title",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.activeMission.open",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.activeMission.stepsLabel",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.aiCoach.entryCount",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.aiCoach.mostActiveIn",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.aiCoach.noActivity",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.betaFeedback.linkLabel",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.betaFeedback.message",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.healthScore.buildingMomentum",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.healthScore.excellentConsistency",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.healthScore.justStarting",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.healthScore.strongProgress",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.healthScore.suggestion.consistency",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.healthScore.suggestion.coverage",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.healthScore.suggestion.missionSteps",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.healthScore.suggestion.recency",
-          "depth": 0,
-          "tier": 1,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.healthScore.title",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.next.title",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.nextAction.continueMission",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.nextAction.cta",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.nextAction.revisitLink",
-          "depth": 0,
-          "tier": 1,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.nextAction.startNew",
-          "depth": 0,
-          "tier": 1,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.setupProgress.count",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.setupProgress.steps.firstEntry",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.setupProgress.steps.mission",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.setupProgress.steps.onboarding",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.setupProgress.steps.secondModule",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.setupProgress.suggestion",
-          "depth": 0,
-          "tier": 1,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.setupProgress.title",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.statRow.creditsExplain",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.statRow.creditsRemaining",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.statRow.fillsAfter",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.statRow.fromEntries",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.statRow.mostActive",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.statRow.mostActiveExplain",
-          "depth": 0,
-          "tier": 1,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.statRow.ofTotal",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.statRow.openCredits",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.statRow.openEntries",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.statRow.thisWeek",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.statRow.thisWeekExplain",
-          "depth": 0,
-          "tier": 1,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.statRow.totalEntries",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.statRow.totalEntriesExplain",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.whatChanged.entries",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.whatChanged.insights",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.whatChanged.since",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "dashboard.overview.whatChanged.title",
-          "depth": 0,
-          "tier": 2,
-          "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
           "key": "errors.boundary.section",
           "depth": 0,
           "tier": 2,
@@ -2621,12 +2351,6 @@
           "depth": 0,
           "tier": 2,
           "file": "src/app/dashboard/overview/page.tsx"
-        },
-        {
-          "key": "common.betaExpiry",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/overview/beta-expiry-banner.tsx"
         },
         {
           "key": "common.listCapped",
@@ -2689,6 +2413,12 @@
           "file": "src/components/create/create-chat.tsx"
         },
         {
+          "key": "dashboard.createAnything.accomplishPlaceholder",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/create/create-chat.tsx"
+        },
+        {
           "key": "dashboard.createAnything.attachImage",
           "depth": 1,
           "tier": 2,
@@ -2743,138 +2473,6 @@
           "file": "src/components/create/create-chat.tsx"
         },
         {
-          "key": "dashboard.energyCheckIn.change",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/energy-checkin-widget.tsx"
-        },
-        {
-          "key": "dashboard.energyCheckIn.checkedInToday",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/energy-checkin-widget.tsx"
-        },
-        {
-          "key": "dashboard.energyCheckIn.levelLabel",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/energy-checkin-widget.tsx"
-        },
-        {
-          "key": "dashboard.energyCheckIn.logged",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/energy-checkin-widget.tsx"
-        },
-        {
-          "key": "dashboard.energyCheckIn.notePlaceholder",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/energy-checkin-widget.tsx"
-        },
-        {
-          "key": "dashboard.energyCheckIn.prompt",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/energy-checkin-widget.tsx"
-        },
-        {
-          "key": "dashboard.energyCheckIn.scaleHigh",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/energy-checkin-widget.tsx"
-        },
-        {
-          "key": "dashboard.energyCheckIn.scaleLow",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/energy-checkin-widget.tsx"
-        },
-        {
-          "key": "dashboard.energyCheckIn.title",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/energy-checkin-widget.tsx"
-        },
-        {
-          "key": "dashboard.energyCheckIn.whatItDoes",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/overview/energy-checkin-widget.tsx"
-        },
-        {
-          "key": "dashboard.firstScreen.build.example",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/first-screen-examples.tsx"
-        },
-        {
-          "key": "dashboard.firstScreen.build.verb",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/first-screen-examples.tsx"
-        },
-        {
-          "key": "dashboard.firstScreen.cost.charged",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/first-screen-examples.tsx"
-        },
-        {
-          "key": "dashboard.firstScreen.cost.free",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/first-screen-examples.tsx"
-        },
-        {
-          "key": "dashboard.firstScreen.cost.freeAllowance",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/first-screen-examples.tsx"
-        },
-        {
-          "key": "dashboard.firstScreen.label",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/first-screen-examples.tsx"
-        },
-        {
-          "key": "dashboard.firstScreen.repeat.example",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/first-screen-examples.tsx"
-        },
-        {
-          "key": "dashboard.firstScreen.repeat.verb",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/first-screen-examples.tsx"
-        },
-        {
-          "key": "dashboard.firstScreen.understand.example",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/first-screen-examples.tsx"
-        },
-        {
-          "key": "dashboard.firstScreen.understand.verb",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/first-screen-examples.tsx"
-        },
-        {
-          "key": "dashboard.overview.recentEntries.empty",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/recent-entries-card.tsx"
-        },
-        {
-          "key": "dashboard.overview.recentEntries.title",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/recent-entries-card.tsx"
-        },
-        {
           "key": "errors.creditHistory",
           "depth": 1,
           "tier": 2,
@@ -2903,30 +2501,6 @@
           "depth": 1,
           "tier": 2,
           "file": "src/components/overview/greeting-header.tsx"
-        },
-        {
-          "key": "sampleData.load",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/sample-data/load-sample-button.tsx"
-        },
-        {
-          "key": "sampleData.loadFailed",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/sample-data/load-sample-button.tsx"
-        },
-        {
-          "key": "sampleData.loadFree",
-          "depth": 1,
-          "tier": 1,
-          "file": "src/components/sample-data/load-sample-button.tsx"
-        },
-        {
-          "key": "sampleData.loading",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/sample-data/load-sample-button.tsx"
         },
         {
           "key": "common.cancel",

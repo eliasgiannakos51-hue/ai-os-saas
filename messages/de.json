@@ -222,7 +222,8 @@
       "personalShopping": "Einkaufen",
       "personalFinance": "Persönliche Finanzen",
       "personalJournal": "Tagebuch",
-      "personalLifeOs": "Life OS"
+      "personalLifeOs": "Life OS",
+      "activity": "Aktivität"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -283,7 +284,8 @@
       "posts": "Sag es einmal und erhalte pro Plattform einen Beitrag in ihrer Länge und ihrem Ton. Es veröffentlicht nichts – du kopierst und postest.",
       "projects": "Ein Ordner mit einem Ziel. Was du hineinlegst, ist drin — nichts kommt von selbst.",
       "aiMemory": "Was der Chat über dich behalten hat und wie du es löschst.",
-      "meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst."
+      "meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst.",
+      "activity": "Dein nächster Schritt, was sich geändert hat, dein Fortschritt und deine Zahlen"
     },
     "closeMenu": "Menü schließen",
     "rail": {
@@ -1298,6 +1300,10 @@
       "clarificationAnswerPlaceholder": "Deine Antwort...",
       "sources": {
         "title": "Quellen"
+      },
+      "workMode": {
+        "active": "Modus: {mode}",
+        "clear": "Arbeitsweise entfernen"
       }
     },
     "create": {
@@ -1735,7 +1741,8 @@
       "clarifyTitle": "Zwei kurze Fragen:",
       "clarifySkip": "Überspringen und trotzdem speichern",
       "clarifyContinue": "Weiter",
-      "clarifyAnswerPlaceholder": "Deine Antwort..."
+      "clarifyAnswerPlaceholder": "Deine Antwort...",
+      "accomplishPlaceholder": "Was möchtest du erreichen?"
     },
     "createStudio": {
       "title": "Mach irgendwas",
@@ -2754,6 +2761,14 @@
       "title": "Alle Werkzeuge",
       "description": "Jedes Werkzeug, mit einer Zeile dazu, was es tut.",
       "orPress": "Oder drücke ⌘K und tippe den Namen – oder beschreibe es im Feld auf der Startseite."
+    },
+    "home": {
+      "actions": {
+        "research": "Recherche",
+        "create": "Erstellen",
+        "run": "Ausführen",
+        "analyze": "Analysieren"
+      }
     }
   },
   "module": {
@@ -3336,7 +3351,7 @@
       "does": "Tarif wechseln, Credits kaufen, Sprache und Design festlegen, dem Assistenten einen Namen geben und jeden Datensatz des Kontos als eine Datei herunterladen.",
       "doesNot": "Deine Datensätze liegen nicht hier — jedes Modul verwaltet seine eigenen. Und Konto löschen ist kein Weg, sie zu bereinigen und neu anzufangen: es beendet das Konto, nimmt alles mit, und es gibt kein Zurück. Vorher exportieren."
     },
-    "overview": {
+    "activity": {
       "is": "Eine Übersicht dessen, was Sie erfasst haben — und ein nächster Schritt.",
       "does": "Liest Ihre eigenen Einträge aus allen Modulen und zeigt einen Health-Score, die jüngsten Änderungen und einen Vorschlag, was als Nächstes zu tun ist.",
       "doesNot": "Es verbindet sich nicht mit Ihrer Bank, Ihrem CRM oder Ihrem Postfach. Jede Zahl hier stammt aus etwas, das Sie oder Ihre Agenten eingetragen haben — eine leere Woche ist also wirklich leer und kein Ladeproblem."

@@ -222,7 +222,8 @@
       "personalShopping": "Achats",
       "personalFinance": "Finances personnelles",
       "personalJournal": "Journal",
-      "personalLifeOs": "Life OS"
+      "personalLifeOs": "Life OS",
+      "activity": "Activité"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -283,7 +284,8 @@
       "posts": "Dites-le une fois et obtenez une publication par plateforme, à sa longueur et dans son ton. Rien n'est publié : vous copiez et vous publiez.",
       "projects": "Un dossier avec un objectif. Ce que vous mettez est ce qu'il contient — rien n'entre seul.",
       "aiMemory": "Ce que le chat a retenu sur vous, et comment le supprimer.",
-      "meetings": "Transformez un enregistrement en transcription, résumé et actions que vous choisissez."
+      "meetings": "Transformez un enregistrement en transcription, résumé et actions que vous choisissez.",
+      "activity": "Votre prochaine étape, ce qui a changé, vos progrès et vos chiffres"
     },
     "closeMenu": "Fermer le menu",
     "rail": {
@@ -1298,6 +1300,10 @@
       "clarificationAnswerPlaceholder": "Votre réponse...",
       "sources": {
         "title": "Sources consultées"
+      },
+      "workMode": {
+        "active": "Mode : {mode}",
+        "clear": "Retirer le mode de travail"
       }
     },
     "create": {
@@ -1735,7 +1741,8 @@
       "clarifyTitle": "Deux questions rapides :",
       "clarifySkip": "Ignorer et enregistrer quand même",
       "clarifyContinue": "Continuer",
-      "clarifyAnswerPlaceholder": "Votre réponse..."
+      "clarifyAnswerPlaceholder": "Votre réponse...",
+      "accomplishPlaceholder": "Que voulez-vous accomplir ?"
     },
     "createStudio": {
       "title": "Créer n’importe quoi",
@@ -2754,6 +2761,14 @@
       "title": "Tous les outils",
       "description": "Chaque outil, avec une ligne sur ce qu’il fait.",
       "orPress": "Ou appuyez sur ⌘K et tapez son nom, ou décrivez-le dans le champ de l’accueil."
+    },
+    "home": {
+      "actions": {
+        "research": "Rechercher",
+        "create": "Créer",
+        "run": "Exécuter",
+        "analyze": "Analyser"
+      }
     }
   },
   "module": {
@@ -3336,7 +3351,7 @@
       "does": "Changez d'offre, achetez des crédits, choisissez la langue et le thème, nommez l'assistant et téléchargez chaque enregistrement du compte dans un seul fichier.",
       "doesNot": "Vos enregistrements ne sont pas ici : chaque module garde les siens. Et Supprimer le compte n'est pas une façon de faire le ménage et de repartir de zéro : cela met fin au compte, emporte tout avec lui, et rien ne peut être annulé. Exportez d'abord."
     },
-    "overview": {
+    "activity": {
       "is": "Un résumé de ce que vous avez consigné, et une chose à faire ensuite.",
       "does": "Lit vos propres entrées dans tous les modules et affiche un score de santé, ce qui a changé récemment et une prochaine étape suggérée.",
       "doesNot": "Il ne se connecte ni à votre banque, ni à votre CRM, ni à votre messagerie. Chaque chiffre vient de ce que vous ou vos agents avez saisi — une semaine vide est donc vraiment vide, ce n'est pas un chargement."

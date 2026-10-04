@@ -30,7 +30,7 @@ const GATE = "scripts/tests/metric-clarity.test.mjs";
 const FORMAT = "src/lib/format-number.ts";
 const MODULES = "src/lib/modules.ts";
 const CARD = "src/components/modules/generic-record-card.tsx";
-const OVERVIEW = "src/app/dashboard/overview/page.tsx";
+const OVERVIEW = "src/app/dashboard/activity/page.tsx";
 const REFLECTION = "src/components/reflection/reflection-generator.tsx";
 const TARGETS = [GATE, FORMAT, MODULES, CARD, OVERVIEW, REFLECTION];
 

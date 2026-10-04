@@ -53,16 +53,21 @@ const MUTANTS = [
     expect: "the old landing hero key is gone from every locale",
   },
   {
-    name: "the greeting climbs back above the promise",
+    // RE-AIMED 2026-10-04: the owner's design makes Home's first line the
+    // earth and the greeting, nothing else, so the defect is now the
+    // opposite one — a second line coming back above the greeting.
+    name: "a sentence climbs back above Home's greeting",
     file: GREETING,
-    // Re-anchored by redesign phase 4: the heading no longer carries
-    // hero-gradient-text (a title has no gradient now), so the anchor is
-    // the CONTENT rather than the class list — which is what this mutant
-    // is about anyway, and does not go stale the next time the heading is
-    // restyled.
-    from: '          {tPromise("oneSentence")}\n        </h1>',
-    to: '          {greeting}\n        </h1>',
-    expect: "every declared surface renders the sentence",
+    from: '    <div className="flex items-center gap-4">',
+    to: '    <div className="flex items-center gap-4">\n      <p>{tPromise("oneSentence")}</p>',
+    expect: "...beside the small earth, and with no sentence of its own",
+  },
+  {
+    name: "the greeting stops being the heading",
+    file: GREETING,
+    from: "        {tPromise(`greeting.${greeting.part}`)}",
+    to: "        {name}",
+    expect: "the greeting is Home's heading",
   },
   {
     name: "Greek is left holding the English sentence",
@@ -95,7 +100,7 @@ const MUTANTS = [
     // `= [].concat([`, which concatenates the three real entries and
     // changes nothing — the suite reported it as a hole, correctly.
     to: "export const ONE_SENTENCE_SURFACES: readonly { file: string; when: string }[] = [];\nconst UNUSED_SURFACES: readonly { file: string; when: string }[] = [",
-    expect: "three surfaces are declared",
+    expect: "two surfaces are declared",
   },
   {
     name: "the key points at something that does not exist",

@@ -222,7 +222,8 @@
       "personalShopping": "Acquisti",
       "personalFinance": "Finanze personali",
       "personalJournal": "Diario",
-      "personalLifeOs": "Life OS"
+      "personalLifeOs": "Life OS",
+      "activity": "Attività"
     },
     "hints": {
       "chat": "Chiedi qualsiasi cosa — non legato a nessun modulo.",
@@ -283,7 +284,8 @@
       "posts": "Dillo una volta e ricevi un post per piattaforma, nella sua lunghezza e nel suo tono. Non pubblica nulla: copi e pubblichi tu.",
       "projects": "Una cartella con un obiettivo. Ciò che metti è ciò che c'è — niente entra da solo.",
       "aiMemory": "Cosa la chat ha tenuto su di te, e come cancellarlo.",
-      "meetings": "Trasforma una registrazione in trascrizione, riassunto e azioni tra cui scegli tu."
+      "meetings": "Trasforma una registrazione in trascrizione, riassunto e azioni tra cui scegli tu.",
+      "activity": "Il prossimo passo, cosa è cambiato, i progressi e i tuoi numeri"
     },
     "closeMenu": "Chiudi il menu",
     "rail": {
@@ -1298,6 +1300,10 @@
       "clarificationAnswerPlaceholder": "La tua risposta...",
       "sources": {
         "title": "Fonti"
+      },
+      "workMode": {
+        "active": "Modalità: {mode}",
+        "clear": "Togli la modalità di lavoro"
       }
     },
     "create": {
@@ -1735,7 +1741,8 @@
       "clarifyTitle": "Un paio di domande veloci:",
       "clarifySkip": "Salta e registralo comunque",
       "clarifyContinue": "Continua",
-      "clarifyAnswerPlaceholder": "La tua risposta..."
+      "clarifyAnswerPlaceholder": "La tua risposta...",
+      "accomplishPlaceholder": "Cosa vuoi realizzare?"
     },
     "createStudio": {
       "title": "Crea qualsiasi cosa",
@@ -2754,6 +2761,14 @@
       "title": "Tutti gli strumenti",
       "description": "Ogni strumento, con una riga su cosa fa.",
       "orPress": "Oppure premi ⌘K e scrivi il nome, o descrivilo nel campo della Home."
+    },
+    "home": {
+      "actions": {
+        "research": "Ricerca",
+        "create": "Crea",
+        "run": "Esegui",
+        "analyze": "Analizza"
+      }
     }
   },
   "module": {
@@ -3336,7 +3351,7 @@
       "does": "Cambia piano, acquista crediti, imposta lingua e tema, dai un nome all'assistente e scarica ogni voce dell'account in un unico file.",
       "doesNot": "Le tue voci non stanno qui: ogni modulo conserva le proprie. Ed Elimina account non è un modo per ripulirle e ricominciare: chiude l'account, si porta via tutto e non si può annullare. Prima esporta."
     },
-    "overview": {
+    "activity": {
       "is": "Un riepilogo di ciò che hai registrato, e una cosa da fare dopo.",
       "does": "Legge le tue voci in tutti i moduli e mostra un punteggio di salute, cosa è cambiato di recente e un passo successivo suggerito.",
       "doesNot": "Non si collega alla tua banca, al tuo CRM o alla tua posta. Ogni numero qui viene da qualcosa che hai inserito tu o i tuoi agenti: una settimana vuota è davvero vuota, non è un caricamento."

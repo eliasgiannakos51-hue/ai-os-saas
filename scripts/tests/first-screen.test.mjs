@@ -19,7 +19,7 @@
 //   4. Concrete, not generic. "Build something" is the disease.
 //
 // Run: node scripts/tests/first-screen.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { createTranslator } from "next-intl";
 
 let pass = 0;
@@ -59,7 +59,6 @@ const { FIRST_SCREEN_EXAMPLES, MAX_EXAMPLE_CHARS, readExampleParam, exampleHref,
 const { ONE_SENTENCE_KEY } = await loadTs("src/lib/i18n/one-sentence.ts");
 
 const GREETING = "src/components/overview/greeting-header.tsx";
-const STRIP = "src/components/overview/first-screen-examples.tsx";
 const OVERVIEW = "src/app/dashboard/overview/page.tsx";
 
 // ---------------------------------------------------------------------
@@ -291,9 +290,27 @@ for (const example of FIRST_SCREEN_EXAMPLES) {
   );
   checkList(`${example.id}: the "${example.cost}" wording exists in all ten locales`, missing);
 }
-check(
-  "the strip renders the cost of every card",
-  read(STRIP).includes("cost.${example.cost}") || /t\(`cost\.\$\{example\.cost\}`\)/.test(read(STRIP)),
+// WHO RENDERS THEM. The strip under Home's field left on 2026-10-04 with
+// the owner's design (docs/CONTEXT.md, «ΑΡΧΙΚΗ»: four quick actions and
+// nothing else), so today no screen draws an example and none can be
+// pressed. The rule stands over whatever draws them next: the population
+// is every file that reads FIRST_SCREEN_EXAMPLES, and each must render
+// the cost beside it.
+const srcFiles = [];
+(function walk(dir) {
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const p = `${dir}/${e.name}`;
+    if (e.isDirectory()) walk(p);
+    else if (/\.tsx?$/.test(e.name)) srcFiles.push(p);
+  }
+})("src");
+check(`the tree was scanned (${srcFiles.length} files)`, srcFiles.length >= 200);
+const renderers = srcFiles.filter(
+  (f) => f !== "src/lib/overview/first-screen-examples.ts" && /FIRST_SCREEN_EXAMPLES/.test(stripComments(read(f))),
+);
+checkList(
+  `every screen that draws an example draws its cost (${renderers.length} draw them)`,
+  renderers.filter((f) => !/cost\.\$\{example\.cost\}/.test(read(f))),
 );
 // At least one card must be able to say each thing, or a wording nobody
 // can reach is a wording nobody maintains.
@@ -305,51 +322,42 @@ checkList(
 );
 
 // ---------------------------------------------------------------------
-console.log("\n== 5. the strip is on the first screen, under the input ==");
+console.log("\n== 5. Home is the design's block: the field, then the quick actions ==");
 
 const overview = read(OVERVIEW);
 // `<`, AND THAT ANGLE BRACKET IS THE WHOLE CHECK. Written first as
 // includes("FirstScreenExamples") and indexOf("CreateChat"), both of
 // which the import lines at the top of the file satisfy on their own:
-// deleting the element left the gate green, and moving the strip above
-// the input compared against an import 400 characters higher up. Four
-// checks in this file had the same defect. The element is what is being
-// asserted about, so the element is what is matched.
-check("the overview renders the examples", overview.includes("<FirstScreenExamples"));
+// deleting the element left the gate green. The element is what is
+// being asserted about, so the element is what is matched.
+check("Home renders the quick actions", overview.includes("<QuickActions"));
 check(
   "...below the input, not above it",
   overview.indexOf("<CreateChat") !== -1 &&
-    overview.indexOf("<FirstScreenExamples") !== -1 &&
-    overview.indexOf("<CreateChat") < overview.indexOf("<FirstScreenExamples"),
-  `CreateChat at ${overview.indexOf("<CreateChat")}, examples at ${overview.indexOf("<FirstScreenExamples")}`,
+    overview.indexOf("<QuickActions") !== -1 &&
+    overview.indexOf("<CreateChat") < overview.indexOf("<QuickActions"),
+  `CreateChat at ${overview.indexOf("<CreateChat")}, quick actions at ${overview.indexOf("<QuickActions")}`,
 );
-
-const strip = read(STRIP);
-check("the strip is driven by the shared list", strip.includes("FIRST_SCREEN_EXAMPLES.map("));
-check("...and builds its links with exampleHref", strip.includes("exampleHref"));
-check(
-  "...and writes no example of its own",
-  !/Build a website|my shop|Every Monday/i.test(strip),
-);
+check("...and the old strip is not rendered", !overview.includes("<FirstScreenExamples"));
 
 // ---------------------------------------------------------------------
-console.log("\n== 6. the sentence is the headline now ==");
+console.log("\n== 6. the greeting is the headline now ==");
 
-const greeting = read(GREETING);
-const [ns, key] = ONE_SENTENCE_KEY.split(".");
-check("the greeting header still renders the one sentence", greeting.includes(`"${key}"`));
-
-// THE HIERARCHY, MEASURED BY POSITION. A sentence in small text above a
-// larger, vaguer question leaves the vaguest thing loudest — which is
-// the state seven testers were shown.
+// The one sentence was this headline from V4.6 until 2026-10-04; the
+// owner's design made Home's first line the small earth and «Good
+// morning, [όνομα]». The sentence is held on the landing page and in
+// onboarding by one-sentence.test.mjs.
+const greeting = stripComments(read(GREETING));
+const [, key] = ONE_SENTENCE_KEY.split(".");
 const h1 = greeting.indexOf("<h1");
-const sentenceAt = greeting.indexOf(`("${key}")`);
+const greetingAt = greeting.indexOf("greeting.${greeting.part}");
 check("there is a headline", h1 !== -1);
 check(
-  "the one sentence IS the headline",
-  h1 !== -1 && sentenceAt > h1 && sentenceAt < greeting.indexOf("</h1>"),
-  `h1 at ${h1}, sentence at ${sentenceAt}, </h1> at ${greeting.indexOf("</h1>")}`,
+  "the greeting IS the headline",
+  h1 !== -1 && greetingAt > h1 && greetingAt < greeting.indexOf("</h1>"),
+  `h1 at ${h1}, greeting at ${greetingAt}, </h1> at ${greeting.indexOf("</h1>")}`,
 );
+check("...and the sentence is not drawn beside it", !greeting.includes(`("${key}")`));
 check(
   'the generic "What do you want to build today?" is gone from the screen',
   !greeting.includes("heroQuestion"),
@@ -357,15 +365,6 @@ check(
 checkList(
   "...and gone from every locale, not merely unused",
   LOCALES.filter((l) => messages[l]?.dashboard?.overview?.heroQuestion !== undefined),
-);
-
-// The greeting is still there, and still below the headline.
-const greetingAt = greeting.indexOf("greeting.part");
-check("the greeting still exists", greetingAt !== -1);
-check(
-  "...and is still below the headline",
-  greetingAt > greeting.indexOf("</h1>"),
-  `greeting at ${greetingAt}, </h1> at ${greeting.indexOf("</h1>")}`,
 );
 
 // ---------------------------------------------------------------------

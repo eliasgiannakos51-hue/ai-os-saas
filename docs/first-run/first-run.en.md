@@ -1,14 +1,14 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **656 strings**. The whole product is 3459, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **585 strings**. The whole product is 3468, which is why this file exists.
 
-**Start with tier 1. It is 30 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 418 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 356 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
 _This is the English original. It is here so a reader of another file can be sent both._
 
-## Tier 1 — THE SENTENCES — read these (30)
+## Tier 1 — THE SENTENCES — read these (21)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -112,41 +112,6 @@ These entries are a demo — a small design studio's last three months. They are
 
 ### first result
 
-**`dashboard.overview.healthScore.suggestion.recency`**
-
-
-You haven't logged anything in a while — add a new entry to pick things back up.
-
-**`dashboard.overview.nextAction.revisitLink`**
-
-
-You linked "{source}" to "{target}" a few days ago — worth revisiting?
-
-**`dashboard.overview.nextAction.startNew`**
-
-
-No new activity in the last 3 days — ready to start something new?
-
-**`dashboard.overview.setupProgress.suggestion`**
-
-
-Your activity score appears once you have logged {count} entries — enough that no single one decides it.
-
-**`dashboard.overview.statRow.mostActiveExplain`**
-
-
-The module you have written in most. Where your attention has gone.
-
-**`dashboard.overview.statRow.thisWeekExplain`**
-
-
-Logged in the last seven days — how active this week has been.
-
-**`common.betaExpiry`**
-
-
-Your beta access expires in {days, plural, one {# day} other {# days}}. <link>Upgrade to keep full access</link>.
-
 **`common.listCapped`**
 
 
@@ -162,17 +127,7 @@ That looks like a question. Should I answer it, or record it?
 
 Describe anything — a product idea, a trade, feedback from a user, a metric — and it lands in the right module automatically.
 
-**`dashboard.energyCheckIn.whatItDoes`**
-
-
-Ionexa uses this to pick which plan step to suggest next — lighter work when you're low, demanding work when you're not.
-
-**`sampleData.loadFree`**
-
-
-Free — nothing is generated, and you can remove it in one click
-
-## Tier 2 — The labels — skim these (418)
+## Tier 2 — The labels — skim these (356)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1204,6 +1159,11 @@ Removing…
 
 Close menu
 
+**`sidebar.items.activity`**
+
+
+Activity
+
 **`sidebar.items.affiliate`**
 
 
@@ -1841,206 +1801,6 @@ Unpin {tool}
 
 Could not load your ideas: {message}
 
-**`dashboard.insights.title`**
-
-
-What I noticed
-
-**`dashboard.overview.activeMission.open`**
-
-
-Open the plan
-
-**`dashboard.overview.activeMission.stepsLabel`**
-
-
-{completed}/{total} steps completed
-
-**`dashboard.overview.aiCoach.entryCount`**
-
-
-{count, plural, one {# new {module} entry} other {# new {module} entries}}
-
-**`dashboard.overview.aiCoach.mostActiveIn`**
-
-
-Most active in {module}
-
-**`dashboard.overview.aiCoach.noActivity`**
-
-
-No activity yet this week — log something to get started.
-
-**`dashboard.overview.betaFeedback.linkLabel`**
-
-
-Share feedback
-
-**`dashboard.overview.betaFeedback.message`**
-
-
-Thanks for testing Ionexa AI. Your feedback is welcome.
-
-**`dashboard.overview.healthScore.buildingMomentum`**
-
-
-Building momentum
-
-**`dashboard.overview.healthScore.excellentConsistency`**
-
-
-Excellent consistency
-
-**`dashboard.overview.healthScore.justStarting`**
-
-
-Just getting started
-
-**`dashboard.overview.healthScore.strongProgress`**
-
-
-Strong progress
-
-**`dashboard.overview.healthScore.suggestion.consistency`**
-
-
-Try logging something every day this week.
-
-**`dashboard.overview.healthScore.suggestion.coverage`**
-
-
-Try exploring a module you haven't used yet.
-
-**`dashboard.overview.healthScore.suggestion.missionSteps`**
-
-
-Complete a plan step to keep your momentum going.
-
-**`dashboard.overview.healthScore.title`**
-
-
-Business Health Score
-
-**`dashboard.overview.next.title`**
-
-
-Next
-
-**`dashboard.overview.nextAction.continueMission`**
-
-
-Continue: {step} from your "{goal}" plan
-
-**`dashboard.overview.nextAction.cta`**
-
-
-Go there →
-
-**`dashboard.overview.setupProgress.count`**
-
-
-{done} of {total} steps
-
-**`dashboard.overview.setupProgress.steps.firstEntry`**
-
-
-Log your first entry
-
-**`dashboard.overview.setupProgress.steps.mission`**
-
-
-Set a goal
-
-**`dashboard.overview.setupProgress.steps.onboarding`**
-
-
-Finish the welcome questions
-
-**`dashboard.overview.setupProgress.steps.secondModule`**
-
-
-Log something in a second area
-
-**`dashboard.overview.setupProgress.title`**
-
-
-Setup progress
-
-**`dashboard.overview.statRow.creditsExplain`**
-
-
-What is left of this month's allowance for AI work.
-
-**`dashboard.overview.statRow.creditsRemaining`**
-
-
-Credits Remaining
-
-**`dashboard.overview.statRow.fillsAfter`**
-
-
-Fills in after {count} entries
-
-**`dashboard.overview.statRow.fromEntries`**
-
-
-{count, plural, one {from # entry} other {from # entries}}
-
-**`dashboard.overview.statRow.mostActive`**
-
-
-Most Active
-
-**`dashboard.overview.statRow.ofTotal`**
-
-
-{count, plural, one {of # in total} other {of # in total}}
-
-**`dashboard.overview.statRow.openCredits`**
-
-
-See the ledger →
-
-**`dashboard.overview.statRow.openEntries`**
-
-
-See the entries →
-
-**`dashboard.overview.statRow.thisWeek`**
-
-
-This Week
-
-**`dashboard.overview.statRow.totalEntries`**
-
-
-Total Entries
-
-**`dashboard.overview.statRow.totalEntriesExplain`**
-
-
-Everything you have logged, in every module, since you started.
-
-**`dashboard.overview.whatChanged.entries`**
-
-
-new entries
-
-**`dashboard.overview.whatChanged.insights`**
-
-
-new insights
-
-**`dashboard.overview.whatChanged.since`**
-
-
-since {when}
-
-**`dashboard.overview.whatChanged.title`**
-
-
-What changed
-
 **`errors.boundary.section`**
 
 
@@ -2085,6 +1845,11 @@ Create Anything
 
 
 View {module} →
+
+**`dashboard.createAnything.accomplishPlaceholder`**
+
+
+What do you want to accomplish?
 
 **`dashboard.createAnything.attachImage`**
 
@@ -2131,111 +1896,6 @@ Send
 
 Could not upload one or more images.
 
-**`dashboard.energyCheckIn.change`**
-
-
-Change
-
-**`dashboard.energyCheckIn.checkedInToday`**
-
-
-Today's energy: {level}/5.
-
-**`dashboard.energyCheckIn.levelLabel`**
-
-
-Energy level {level}
-
-**`dashboard.energyCheckIn.logged`**
-
-
-Energy logged
-
-**`dashboard.energyCheckIn.notePlaceholder`**
-
-
-Optional note...
-
-**`dashboard.energyCheckIn.prompt`**
-
-
-How's your energy today?
-
-**`dashboard.energyCheckIn.scaleHigh`**
-
-
-5 = great
-
-**`dashboard.energyCheckIn.scaleLow`**
-
-
-1 = exhausted
-
-**`dashboard.energyCheckIn.title`**
-
-
-Energy Check-In
-
-**`dashboard.firstScreen.build.example`**
-
-
-Build a website for my shop
-
-**`dashboard.firstScreen.build.verb`**
-
-
-Build
-
-**`dashboard.firstScreen.cost.charged`**
-
-
-Uses credits
-
-**`dashboard.firstScreen.cost.free`**
-
-
-Free
-
-**`dashboard.firstScreen.cost.freeAllowance`**
-
-
-Free up to your monthly limit
-
-**`dashboard.firstScreen.label`**
-
-
-Press one — it runs right away
-
-**`dashboard.firstScreen.repeat.example`**
-
-
-Every Monday, a summary of my sales
-
-**`dashboard.firstScreen.repeat.verb`**
-
-
-Repeat
-
-**`dashboard.firstScreen.understand.example`**
-
-
-What do my numbers say this week?
-
-**`dashboard.firstScreen.understand.verb`**
-
-
-Understand
-
-**`dashboard.overview.recentEntries.empty`**
-
-
-No entries yet.
-
-**`dashboard.overview.recentEntries.title`**
-
-
-Recent Entries
-
 **`errors.creditHistory`**
 
 
@@ -2260,21 +1920,6 @@ Good evening
 
 
 Good morning
-
-**`sampleData.load`**
-
-
-See it with sample data
-
-**`sampleData.loadFailed`**
-
-
-That did not work. Try again.
-
-**`sampleData.loading`**
-
-
-Loading…
 
 ## Tier 3 — Further in — only if you have time (208)
 

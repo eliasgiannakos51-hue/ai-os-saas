@@ -500,14 +500,13 @@ export const HELP_TIPS: HelpTip[] = [
       "that the assistant can act on your account — create, edit or delete records — from the conversation",
   },
   {
-    // The home screen opens with a greeting and one very large question.
-    // The "?" goes beside that question: it is the page's single focal
-    // point and its line box is tall enough to hold a 28px control with
-    // room to spare, so nothing below it moves.
-    id: "overview",
-    file: "src/components/overview/greeting-header.tsx",
-    route: "src/app/dashboard/overview/page.tsx",
-    keyPrefix: "help.overview",
+    // What used to be the home screen's cards — the next step, what
+    // changed, progress, the numbers, recent entries — moved here when
+    // Home became the design's one block (docs/CONTEXT.md, ΣΥΣΤΗΜΑ
+    // DESIGN, 2026-10-04). The tip moved with them, onto the PageHeader.
+    id: "activity",
+    file: "src/app/dashboard/activity/page.tsx",
+    keyPrefix: "help.activity",
     corrects:
       "that the figures come from your bank, your CRM or your inbox rather than from what you logged",
   },

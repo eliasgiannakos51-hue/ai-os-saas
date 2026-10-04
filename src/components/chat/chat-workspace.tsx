@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, AudioLines, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react";
+import { ArrowDown, AudioLines, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen, X, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { AiActivity } from "@/components/ui/ai-activity";
@@ -32,6 +32,7 @@ import type { Provenance } from "@/lib/chat/provenance";
 import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
 import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
 import type { ClientStep } from "@/lib/jobs/job-timeline";
+import type { WorkMode } from "@/lib/chat/work-modes";
 import { chatTimelineWorthShowing, isChatStep, readChatStepFrame, type ChatStep } from "@/lib/chat/chat-timeline";
 
 // What each phase of an answer is called on screen (lib/chat/chat-timeline.ts).
@@ -95,6 +96,7 @@ export function ChatWorkspace({
   initialConversationId,
   initialAsk,
   initialProjectId,
+  initialWorkMode,
 }: {
   initialConversations: ChatConversation[];
   userInitial: string;
@@ -122,6 +124,11 @@ export function ChatWorkspace({
    * consent pressing Send would be.
    */
   initialAsk?: string;
+  /**
+   * The way of working a Home quick action chose (lib/chat/work-modes.ts).
+   * Sent with every message until the person clears it.
+   */
+  initialWorkMode?: WorkMode;
   /**
    * The project a conversation STARTED here belongs to, for the whole of
    * its life. Chosen on arrival (/dashboard/projects/[id] links here with
@@ -180,6 +187,8 @@ export function ChatWorkspace({
   // NEXT message sent, same as the API route treating it as a per-request
   // flag (see api/chat/route.ts) rather than conversation state.
   const [mentorMode, setMentorMode] = useState(initialMentorPreset != null);
+  const [workMode, setWorkMode] = useState<WorkMode | null>(initialWorkMode ?? null);
+  const tModes = useTranslations("dashboard.home.actions");
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState<string | null>(null);
   // The answer's steps while it streams, replaced whole by every
@@ -535,6 +544,7 @@ export function ChatWorkspace({
           // mid-conversation switch that would rewrite the cached prefix.
           ...(initialProjectId && !sentFromId ? { projectId: initialProjectId } : {}),
           ...(mentorPreset ? { mentorPreset } : {}),
+          ...(workMode ? { workMode } : {}),
           ...(options.skipClarification ? { skipClarification: true } : {}),
         }),
       });
@@ -1091,6 +1101,18 @@ export function ChatWorkspace({
                 >
                   <AudioLines className="h-3.5 w-3.5" aria-hidden="true" />
                   {tVoice("conversation.start")}
+                </button>
+              )}
+              {workMode && (
+                <button
+                  type="button"
+                  onClick={() => setWorkMode(null)}
+                  aria-label={t("workMode.clear")}
+                  data-testid="work-mode-chip"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-foreground/60 bg-foreground/10 px-3 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/15"
+                >
+                  {t("workMode.active", { mode: tModes(workMode) })}
+                  <X className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
               )}
               <button

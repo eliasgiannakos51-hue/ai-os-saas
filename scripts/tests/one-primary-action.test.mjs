@@ -399,11 +399,13 @@ const BASELINE = {
   // what it always was once the surfaces were told apart.
   "dashboard/memory/page.tsx": 0,
   "dashboard/mission/page.tsx": 1,
-  // 2 SINCE 2026-10-04, AND ONLY UNTIL HOME IS REDESIGNED (docs/QUEUE.md
-  // D.4). The design makes the composer's send button white — "αποστολή,
-  // λευκό κουμπί με σκούρο βέλος" — so it now counts, next to the goal
-  // preview's confirm. The new Home has one field and nothing else, and
-  // D.4 brings this back to 1.
+  // 2 SINCE 2026-10-04, AND BOTH ARE THE FIELD'S. The design makes the
+  // composer's send button white — "αποστολή, λευκό κουμπί με σκούρο
+  // βέλος" — so it counts, next to the goal preview's confirm, which the
+  // field shows after a send. The redesigned Home (D.4) adds no filled
+  // control of its own: the quick actions are outlined links. QUEUE
+  // said D.4 would bring this to 1; it could not without restyling the
+  // field's confirm, which is D.5's (the field is shared with the chat).
   "dashboard/overview/page.tsx": 2,
   "dashboard/page.tsx": 1,
   "dashboard/posts/page.tsx": 1,

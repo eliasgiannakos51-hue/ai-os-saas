@@ -609,6 +609,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     sidebar: [
       "/dashboard",
       "/dashboard/overview",
+      "/dashboard/activity",
       "/dashboard/records",
       "/dashboard/timeline",
       "/dashboard/content",
@@ -631,6 +632,8 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "",
       "[module]",
       "overview",
+      // What Home carried until the design of 2026-10-04 made it one block.
+      "activity",
       // The full tool list, drawn as a grid since the rail replaced the
       // sidebar's 26 rows (2026-10-02) — a map of the product, free on
       // every plan like the overview that leads to it.

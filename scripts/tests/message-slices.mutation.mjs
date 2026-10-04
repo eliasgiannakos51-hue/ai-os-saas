@@ -105,7 +105,9 @@ const MUTANTS = [
     // 67 -> 70 in phase 2: projects-workspace, project-detail and the
     // project page all reach a status or a section through a template
     // literal over a declared array.
-    from: "    unbounded: 70,",
+    // 70 -> 69 in design D.4 (2026-10-04): the Home examples strip
+    // (first-screen-examples.tsx) was removed with the cards.
+    from: "    unbounded: 69,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`

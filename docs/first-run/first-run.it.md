@@ -1,12 +1,12 @@
 # The first run — it
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **656 strings**. The whole product is 3459, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **585 strings**. The whole product is 3468, which is why this file exists.
 
-**Start with tier 1. It is 30 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 418 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 356 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (30)
+## Tier 1 — THE SENTENCES — read these (21)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -128,48 +128,6 @@ Queste voci sono una demo: tre mesi di un piccolo studio di design. Non sono tue
 
 ### first result
 
-**`dashboard.overview.healthScore.suggestion.recency`**
-
-> EN — You haven't logged anything in a while — add a new entry to pick things back up.
-
-Non registri nulla da un po' — aggiungi una nuova voce per riprendere.
-
-**`dashboard.overview.nextAction.revisitLink`**
-
-> EN — You linked "{source}" to "{target}" a few days ago — worth revisiting?
-
-Hai collegato "{source}" a "{target}" qualche giorno fa — vale la pena rivederlo?
-
-**`dashboard.overview.nextAction.startNew`**
-
-> EN — No new activity in the last 3 days — ready to start something new?
-
-Nessuna nuova attività negli ultimi 3 giorni — pronto a iniziare qualcosa di nuovo?
-
-**`dashboard.overview.setupProgress.suggestion`**
-
-> EN — Your activity score appears once you have logged {count} entries — enough that no single one decides it.
-
-Il tuo punteggio di attività appare dopo {count} voci registrate: abbastanza perché nessuna singola lo decida.
-
-**`dashboard.overview.statRow.mostActiveExplain`**
-
-> EN — The module you have written in most. Where your attention has gone.
-
-Il modulo in cui scrivi di più. Dove va la tua attenzione.
-
-**`dashboard.overview.statRow.thisWeekExplain`**
-
-> EN — Logged in the last seven days — how active this week has been.
-
-Registrato negli ultimi sette giorni: quanto è stata attiva la settimana.
-
-**`common.betaExpiry`**
-
-> EN — Your beta access expires in {days, plural, one {# day} other {# days}}. <link>Upgrade to keep full access</link>.
-
-Il tuo accesso beta scade tra {days, plural, one {# giorno} other {# giorni}}. <link>Passa a un piano superiore per mantenere l'accesso completo</link>.
-
 **`common.listCapped`**
 
 > EN — Showing the most recent {count, number}. Older entries are still saved — use Search my records to find them.
@@ -188,19 +146,7 @@ Sembra una domanda. La rispondo o la registro?
 
 Descrivi qualsiasi cosa — un'idea di prodotto, un'operazione, il feedback di un utente, una metrica — e finisce automaticamente nel modulo giusto.
 
-**`dashboard.energyCheckIn.whatItDoes`**
-
-> EN — Ionexa uses this to pick which plan step to suggest next — lighter work when you're low, demanding work when you're not.
-
-Ionexa lo usa per scegliere quale passo del piano proporti — lavoro leggero quando sei giù, impegnativo quando non lo sei.
-
-**`sampleData.loadFree`**
-
-> EN — Free — nothing is generated, and you can remove it in one click
-
-Gratis: non viene generato nulla e lo togli con un clic
-
-## Tier 2 — The labels — skim these (418)
+## Tier 2 — The labels — skim these (356)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1436,6 +1382,12 @@ Rimozione…
 
 Chiudi il menu
 
+**`sidebar.items.activity`**
+
+> EN — Activity
+
+Attività
+
 **`sidebar.items.affiliate`**
 
 > EN — Affiliate
@@ -2200,246 +2152,6 @@ Sblocca {tool}
 
 Non è stato possibile caricare le tue idee: {message}
 
-**`dashboard.insights.title`**
-
-> EN — What I noticed
-
-Cosa ho notato
-
-**`dashboard.overview.activeMission.open`**
-
-> EN — Open the plan
-
-Apri il piano
-
-**`dashboard.overview.activeMission.stepsLabel`**
-
-> EN — {completed}/{total} steps completed
-
-{completed}/{total} passaggi completati
-
-**`dashboard.overview.aiCoach.entryCount`**
-
-> EN — {count, plural, one {# new {module} entry} other {# new {module} entries}}
-
-{count, plural, one {# nuova voce in {module}} other {# nuove voci in {module}}}
-
-**`dashboard.overview.aiCoach.mostActiveIn`**
-
-> EN — Most active in {module}
-
-Più attivo in {module}
-
-**`dashboard.overview.aiCoach.noActivity`**
-
-> EN — No activity yet this week — log something to get started.
-
-Nessuna attività questa settimana — registra qualcosa per iniziare.
-
-**`dashboard.overview.betaFeedback.linkLabel`**
-
-> EN — Share feedback
-
-Invia feedback
-
-**`dashboard.overview.betaFeedback.message`**
-
-> EN — Thanks for testing Ionexa AI. Your feedback is welcome.
-
-Grazie per aver testato Ionexa AI. Il tuo feedback è benvenuto.
-
-**`dashboard.overview.healthScore.buildingMomentum`**
-
-> EN — Building momentum
-
-Stai prendendo slancio
-
-**`dashboard.overview.healthScore.excellentConsistency`**
-
-> EN — Excellent consistency
-
-Coerenza eccellente
-
-**`dashboard.overview.healthScore.justStarting`**
-
-> EN — Just getting started
-
-Appena iniziato
-
-**`dashboard.overview.healthScore.strongProgress`**
-
-> EN — Strong progress
-
-Ottimi progressi
-
-**`dashboard.overview.healthScore.suggestion.consistency`**
-
-> EN — Try logging something every day this week.
-
-Prova a registrare qualcosa ogni giorno questa settimana.
-
-**`dashboard.overview.healthScore.suggestion.coverage`**
-
-> EN — Try exploring a module you haven't used yet.
-
-Prova a esplorare un modulo che non hai ancora usato.
-
-**`dashboard.overview.healthScore.suggestion.missionSteps`**
-
-> EN — Complete a plan step to keep your momentum going.
-
-Completa un passo del piano per mantenere lo slancio.
-
-**`dashboard.overview.healthScore.title`**
-
-> EN — Business Health Score
-
-Punteggio di Salute Aziendale
-
-**`dashboard.overview.next.title`**
-
-> EN — Next
-
-Prossimo
-
-**`dashboard.overview.nextAction.continueMission`**
-
-> EN — Continue: {step} from your "{goal}" plan
-
-Continua: {step} dal tuo piano "{goal}"
-
-**`dashboard.overview.nextAction.cta`**
-
-> EN — Go there →
-
-Vai →
-
-**`dashboard.overview.setupProgress.count`**
-
-> EN — {done} of {total} steps
-
-{done} di {total} passaggi
-
-**`dashboard.overview.setupProgress.steps.firstEntry`**
-
-> EN — Log your first entry
-
-Registra la tua prima voce
-
-**`dashboard.overview.setupProgress.steps.mission`**
-
-> EN — Set a goal
-
-Imposta un obiettivo
-
-**`dashboard.overview.setupProgress.steps.onboarding`**
-
-> EN — Finish the welcome questions
-
-Completa le domande di benvenuto
-
-**`dashboard.overview.setupProgress.steps.secondModule`**
-
-> EN — Log something in a second area
-
-Registra qualcosa in una seconda area
-
-**`dashboard.overview.setupProgress.title`**
-
-> EN — Setup progress
-
-Avanzamento configurazione
-
-**`dashboard.overview.statRow.creditsExplain`**
-
-> EN — What is left of this month's allowance for AI work.
-
-Quel che resta della tua quota mensile per il lavoro con l'IA.
-
-**`dashboard.overview.statRow.creditsRemaining`**
-
-> EN — Credits Remaining
-
-Crediti Rimanenti
-
-**`dashboard.overview.statRow.fillsAfter`**
-
-> EN — Fills in after {count} entries
-
-Si riempie dopo {count} voci
-
-**`dashboard.overview.statRow.fromEntries`**
-
-> EN — {count, plural, one {from # entry} other {from # entries}}
-
-{count, plural, one {da # voce} other {da # voci}}
-
-**`dashboard.overview.statRow.mostActive`**
-
-> EN — Most Active
-
-Più Attivo
-
-**`dashboard.overview.statRow.ofTotal`**
-
-> EN — {count, plural, one {of # in total} other {of # in total}}
-
-{count, plural, one {su # in totale} other {su # in totale}}
-
-**`dashboard.overview.statRow.openCredits`**
-
-> EN — See the ledger →
-
-Vedi lo storico →
-
-**`dashboard.overview.statRow.openEntries`**
-
-> EN — See the entries →
-
-Vedi le voci →
-
-**`dashboard.overview.statRow.thisWeek`**
-
-> EN — This Week
-
-Questa Settimana
-
-**`dashboard.overview.statRow.totalEntries`**
-
-> EN — Total Entries
-
-Voci Totali
-
-**`dashboard.overview.statRow.totalEntriesExplain`**
-
-> EN — Everything you have logged, in every module, since you started.
-
-Tutto ciò che hai registrato, in ogni modulo, dall'inizio.
-
-**`dashboard.overview.whatChanged.entries`**
-
-> EN — new entries
-
-nuove voci
-
-**`dashboard.overview.whatChanged.insights`**
-
-> EN — new insights
-
-nuove osservazioni
-
-**`dashboard.overview.whatChanged.since`**
-
-> EN — since {when}
-
-da {when}
-
-**`dashboard.overview.whatChanged.title`**
-
-> EN — What changed
-
-Cosa è cambiato
-
 **`errors.boundary.section`**
 
 > EN — This section could not be displayed.
@@ -2493,6 +2205,12 @@ Crea Qualsiasi Cosa
 > EN — View {module} →
 
 Apri {module} →
+
+**`dashboard.createAnything.accomplishPlaceholder`**
+
+> EN — What do you want to accomplish?
+
+Cosa vuoi realizzare?
 
 **`dashboard.createAnything.attachImage`**
 
@@ -2548,132 +2266,6 @@ Invia
 
 Impossibile caricare una o più immagini.
 
-**`dashboard.energyCheckIn.change`**
-
-> EN — Change
-
-Modifica
-
-**`dashboard.energyCheckIn.checkedInToday`**
-
-> EN — Today's energy: {level}/5.
-
-Energia di oggi: {level}/5.
-
-**`dashboard.energyCheckIn.levelLabel`**
-
-> EN — Energy level {level}
-
-Livello di energia {level}
-
-**`dashboard.energyCheckIn.logged`**
-
-> EN — Energy logged
-
-Energia registrata
-
-**`dashboard.energyCheckIn.notePlaceholder`**
-
-> EN — Optional note...
-
-Nota opzionale...
-
-**`dashboard.energyCheckIn.prompt`**
-
-> EN — How's your energy today?
-
-Come va la tua energia oggi?
-
-**`dashboard.energyCheckIn.scaleHigh`**
-
-> EN — 5 = great
-
-5 = alla grande
-
-**`dashboard.energyCheckIn.scaleLow`**
-
-> EN — 1 = exhausted
-
-1 = esausto
-
-**`dashboard.energyCheckIn.title`**
-
-> EN — Energy Check-In
-
-Controllo Energia
-
-**`dashboard.firstScreen.build.example`**
-
-> EN — Build a website for my shop
-
-Crea un sito per il mio negozio
-
-**`dashboard.firstScreen.build.verb`**
-
-> EN — Build
-
-Crea
-
-**`dashboard.firstScreen.cost.charged`**
-
-> EN — Uses credits
-
-Consuma crediti
-
-**`dashboard.firstScreen.cost.free`**
-
-> EN — Free
-
-Gratis
-
-**`dashboard.firstScreen.cost.freeAllowance`**
-
-> EN — Free up to your monthly limit
-
-Gratis fino al limite mensile
-
-**`dashboard.firstScreen.label`**
-
-> EN — Press one — it runs right away
-
-Premi uno — parte subito
-
-**`dashboard.firstScreen.repeat.example`**
-
-> EN — Every Monday, a summary of my sales
-
-Ogni lunedì, un riepilogo delle mie vendite
-
-**`dashboard.firstScreen.repeat.verb`**
-
-> EN — Repeat
-
-Ripeti
-
-**`dashboard.firstScreen.understand.example`**
-
-> EN — What do my numbers say this week?
-
-Cosa dicono i miei numeri questa settimana?
-
-**`dashboard.firstScreen.understand.verb`**
-
-> EN — Understand
-
-Capisci
-
-**`dashboard.overview.recentEntries.empty`**
-
-> EN — No entries yet.
-
-Nessuna voce ancora.
-
-**`dashboard.overview.recentEntries.title`**
-
-> EN — Recent Entries
-
-Voci Recenti
-
 **`errors.creditHistory`**
 
 > EN — See credit history
@@ -2703,24 +2295,6 @@ Buonasera
 > EN — Good morning
 
 Buongiorno
-
-**`sampleData.load`**
-
-> EN — See it with sample data
-
-Guardalo con dati di esempio
-
-**`sampleData.loadFailed`**
-
-> EN — That did not work. Try again.
-
-Non ha funzionato. Riprova.
-
-**`sampleData.loading`**
-
-> EN — Loading…
-
-Caricamento…
 
 ## Tier 3 — Further in — only if you have time (208)
 

@@ -165,9 +165,14 @@ check(
 );
 
 console.log("\n== 3. the two pages the measurement singled out ==");
-const overview = stripComments(readFileSync("src/app/dashboard/overview/page.tsx", "utf8"));
+// THE CARDS LEFT HOME ON 2026-10-04 for /dashboard/activity (the owner's
+// design), and the fourteen-module wave went with them. Home itself now
+// reads one row — the onboarding decision — and redirects before
+// anything else; both halves are held below.
+const overview = stripComments(readFileSync("src/app/dashboard/activity/page.tsx", "utf8"));
+const home = stripComments(readFileSync("src/app/dashboard/overview/page.tsx", "utf8"));
 check(
-  "Home fans its fourteen modules out in one wave, not two per module",
+  "Activity fans its fourteen modules out in one wave, not two per module",
   /Promise\.allSettled\(\[/.test(overview),
   "the two per-module reads are independent and were awaited in sequence"
 );
@@ -191,7 +196,7 @@ check(
 // The `.from(...)` call is the thing whose position matters, and it is
 // looked for in the body rather than in the prose about it.
 {
-  const body = overview.slice(overview.indexOf("export default async function"));
+  const body = home.slice(home.indexOf("export default async function"));
   // THE REDIRECT, not the read. The read being first is necessary and not
   // sufficient: what makes a redirected account do no work is the
   // redirect() that leaves the function before the wave starts. A page
@@ -206,15 +211,19 @@ check(
   // anywhere below the comment and the ordering check below stayed
   // green — the identical defect this block's own header records being
   // fixed on `readAt`, left in place on this line.
-  const waveAt = body.indexOf(waveOpen);
+  //
+  // On Home the "wave" is every other read the page makes: none today,
+  // and any that is added must come after the redirect.
+  const reads = [...body.matchAll(/\.from\("/g)].map((m) => m.index);
+  const otherReads = reads.filter((at) => at !== readAt);
   check(
-    "the onboarding read, its redirect and the wave were all found",
-    readAt >= 0 && redirectAt >= 0 && waveAt >= 0,
-    `read ${readAt} / redirect ${redirectAt} / wave ${waveAt}`
+    "Home's onboarding read and its redirect were both found",
+    readAt >= 0 && redirectAt >= 0,
+    `read ${readAt} / redirect ${redirectAt}`
   );
   check(
-    "…while the onboarding check stays first, so a redirected account does no work",
-    readAt >= 0 && redirectAt >= 0 && waveAt >= 0 && readAt < redirectAt && redirectAt < waveAt
+    `…while the onboarding check stays first, so a redirected account does no work (${otherReads.length} other read(s))`,
+    reads.length >= 1 && readAt >= 0 && redirectAt >= 0 && readAt < redirectAt && otherReads.every((at) => at > redirectAt)
   );
 }
 const settings = stripComments(readFileSync("src/app/dashboard/settings/page.tsx", "utf8"));

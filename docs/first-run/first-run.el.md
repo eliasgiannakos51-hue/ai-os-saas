@@ -1,12 +1,12 @@
 # The first run — el
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **656 strings**. The whole product is 3459, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **585 strings**. The whole product is 3468, which is why this file exists.
 
-**Start with tier 1. It is 30 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 418 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 356 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (30)
+## Tier 1 — THE SENTENCES — read these (21)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -128,48 +128,6 @@ CSV ή tab-separated, έως {max}. Το διαβάζουμε και σου δε
 
 ### first result
 
-**`dashboard.overview.healthScore.suggestion.recency`**
-
-> EN — You haven't logged anything in a while — add a new entry to pick things back up.
-
-Δεν έχεις καταγράψει κάτι εδώ και καιρό — πρόσθεσε μια νέα εγγραφή για να συνεχίσεις.
-
-**`dashboard.overview.nextAction.revisitLink`**
-
-> EN — You linked "{source}" to "{target}" a few days ago — worth revisiting?
-
-Σύνδεσες το "{source}" με το "{target}" πριν από λίγες μέρες — αξίζει να το ξανακοιτάξεις;
-
-**`dashboard.overview.nextAction.startNew`**
-
-> EN — No new activity in the last 3 days — ready to start something new?
-
-Καμία νέα δραστηριότητα τις τελευταίες 3 μέρες — έτοιμος/η να ξεκινήσεις κάτι νέο;
-
-**`dashboard.overview.setupProgress.suggestion`**
-
-> EN — Your activity score appears once you have logged {count} entries — enough that no single one decides it.
-
-Το σκορ δραστηριότητας εμφανίζεται μόλις καταχωρήσεις {count} καταχωρήσεις — αρκετές ώστε να μην το κρίνει μία μόνο.
-
-**`dashboard.overview.statRow.mostActiveExplain`**
-
-> EN — The module you have written in most. Where your attention has gone.
-
-Η ενότητα όπου γράφεις περισσότερο. Εκεί πάει η προσοχή σου.
-
-**`dashboard.overview.statRow.thisWeekExplain`**
-
-> EN — Logged in the last seven days — how active this week has been.
-
-Καταχωρήθηκαν τις τελευταίες επτά μέρες — πόσο δραστήρια ήταν η εβδομάδα.
-
-**`common.betaExpiry`**
-
-> EN — Your beta access expires in {days, plural, one {# day} other {# days}}. <link>Upgrade to keep full access</link>.
-
-Η beta πρόσβασή σου λήγει σε {days, plural, one {# ημέρα} other {# ημέρες}}. <link>Αναβάθμισε για να κρατήσεις πλήρη πρόσβαση</link>.
-
 **`common.listCapped`**
 
 > EN — Showing the most recent {count, number}. Older entries are still saved — use Search my records to find them.
@@ -188,19 +146,7 @@ CSV ή tab-separated, έως {max}. Το διαβάζουμε και σου δε
 
 Περίγραψε οτιδήποτε — μια ιδέα προϊόντος, μια συναλλαγή, ένα σχόλιο χρήστη, έναν δείκτη — και καταλήγει αυτόματα στο σωστό module.
 
-**`dashboard.energyCheckIn.whatItDoes`**
-
-> EN — Ionexa uses this to pick which plan step to suggest next — lighter work when you're low, demanding work when you're not.
-
-Το Ionexa το χρησιμοποιεί για να διαλέξει ποιο βήμα του σχεδίου θα σου προτείνει — ελαφριά δουλειά όταν είσαι χαμηλά, απαιτητική όταν δεν είσαι.
-
-**`sampleData.loadFree`**
-
-> EN — Free — nothing is generated, and you can remove it in one click
-
-Δωρεάν — δεν παράγεται τίποτα, και το σβήνεις με ένα κλικ
-
-## Tier 2 — The labels — skim these (418)
+## Tier 2 — The labels — skim these (356)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1436,6 +1382,12 @@ Email
 
 Κλείσιμο μενού
 
+**`sidebar.items.activity`**
+
+> EN — Activity
+
+Δραστηριότητα
+
 **`sidebar.items.affiliate`**
 
 > EN — Affiliate
@@ -2200,246 +2152,6 @@ Projects
 
 Δεν ήταν δυνατή η φόρτωση των ιδεών σου: {message}
 
-**`dashboard.insights.title`**
-
-> EN — What I noticed
-
-Τι πρόσεξα
-
-**`dashboard.overview.activeMission.open`**
-
-> EN — Open the plan
-
-Άνοιξε το σχέδιο
-
-**`dashboard.overview.activeMission.stepsLabel`**
-
-> EN — {completed}/{total} steps completed
-
-{completed}/{total} βήματα ολοκληρώθηκαν
-
-**`dashboard.overview.aiCoach.entryCount`**
-
-> EN — {count, plural, one {# new {module} entry} other {# new {module} entries}}
-
-{count, plural, one {# νέα καταχώρηση στο {module}} other {# νέες καταχωρήσεις στο {module}}}
-
-**`dashboard.overview.aiCoach.mostActiveIn`**
-
-> EN — Most active in {module}
-
-Πιο ενεργό/ή στο {module}
-
-**`dashboard.overview.aiCoach.noActivity`**
-
-> EN — No activity yet this week — log something to get started.
-
-Καμία δραστηριότητα ακόμα αυτή την εβδομάδα — καταχώρησε κάτι για να ξεκινήσεις.
-
-**`dashboard.overview.betaFeedback.linkLabel`**
-
-> EN — Share feedback
-
-Στείλε feedback
-
-**`dashboard.overview.betaFeedback.message`**
-
-> EN — Thanks for testing Ionexa AI. Your feedback is welcome.
-
-Ευχαριστούμε που δοκιμάζεις το Ionexa AI. Τα σχόλιά σου είναι ευπρόσδεκτα.
-
-**`dashboard.overview.healthScore.buildingMomentum`**
-
-> EN — Building momentum
-
-Χτίζεις φόρα
-
-**`dashboard.overview.healthScore.excellentConsistency`**
-
-> EN — Excellent consistency
-
-Εξαιρετική συνέπεια
-
-**`dashboard.overview.healthScore.justStarting`**
-
-> EN — Just getting started
-
-Μόλις ξεκινάς
-
-**`dashboard.overview.healthScore.strongProgress`**
-
-> EN — Strong progress
-
-Ισχυρή πρόοδος
-
-**`dashboard.overview.healthScore.suggestion.consistency`**
-
-> EN — Try logging something every day this week.
-
-Δοκίμασε να καταγράφεις κάτι κάθε μέρα αυτή την εβδομάδα.
-
-**`dashboard.overview.healthScore.suggestion.coverage`**
-
-> EN — Try exploring a module you haven't used yet.
-
-Δοκίμασε να εξερευνήσεις μια ενότητα που δεν έχεις χρησιμοποιήσει ακόμα.
-
-**`dashboard.overview.healthScore.suggestion.missionSteps`**
-
-> EN — Complete a plan step to keep your momentum going.
-
-Ολοκλήρωσε ένα βήμα του σχεδίου για να διατηρήσεις τη φόρα σου.
-
-**`dashboard.overview.healthScore.title`**
-
-> EN — Business Health Score
-
-Σκορ Υγείας Επιχείρησης
-
-**`dashboard.overview.next.title`**
-
-> EN — Next
-
-Επόμενο
-
-**`dashboard.overview.nextAction.continueMission`**
-
-> EN — Continue: {step} from your "{goal}" plan
-
-Συνέχισε: {step} από το σχέδιο "{goal}"
-
-**`dashboard.overview.nextAction.cta`**
-
-> EN — Go there →
-
-Πήγαινε →
-
-**`dashboard.overview.setupProgress.count`**
-
-> EN — {done} of {total} steps
-
-{done} από {total} βήματα
-
-**`dashboard.overview.setupProgress.steps.firstEntry`**
-
-> EN — Log your first entry
-
-Κάνε την πρώτη σου καταχώρηση
-
-**`dashboard.overview.setupProgress.steps.mission`**
-
-> EN — Set a goal
-
-Όρισε έναν στόχο
-
-**`dashboard.overview.setupProgress.steps.onboarding`**
-
-> EN — Finish the welcome questions
-
-Ολοκλήρωσε τις ερωτήσεις υποδοχής
-
-**`dashboard.overview.setupProgress.steps.secondModule`**
-
-> EN — Log something in a second area
-
-Καταχώρησε κάτι σε δεύτερη περιοχή
-
-**`dashboard.overview.setupProgress.title`**
-
-> EN — Setup progress
-
-Πρόοδος ρύθμισης
-
-**`dashboard.overview.statRow.creditsExplain`**
-
-> EN — What is left of this month's allowance for AI work.
-
-Ό,τι απομένει από το μηνιαίο σου όριο για δουλειά με AI.
-
-**`dashboard.overview.statRow.creditsRemaining`**
-
-> EN — Credits Remaining
-
-Credits που Απομένουν
-
-**`dashboard.overview.statRow.fillsAfter`**
-
-> EN — Fills in after {count} entries
-
-Γεμίζει μετά από {count} καταχωρήσεις
-
-**`dashboard.overview.statRow.fromEntries`**
-
-> EN — {count, plural, one {from # entry} other {from # entries}}
-
-{count, plural, one {από # καταχώρηση} other {από # καταχωρήσεις}}
-
-**`dashboard.overview.statRow.mostActive`**
-
-> EN — Most Active
-
-Πιο Ενεργό
-
-**`dashboard.overview.statRow.ofTotal`**
-
-> EN — {count, plural, one {of # in total} other {of # in total}}
-
-{count, plural, one {από # συνολικά} other {από # συνολικά}}
-
-**`dashboard.overview.statRow.openCredits`**
-
-> EN — See the ledger →
-
-Δες το ιστορικό →
-
-**`dashboard.overview.statRow.openEntries`**
-
-> EN — See the entries →
-
-Δες τις καταχωρήσεις →
-
-**`dashboard.overview.statRow.thisWeek`**
-
-> EN — This Week
-
-Αυτή την Εβδομάδα
-
-**`dashboard.overview.statRow.totalEntries`**
-
-> EN — Total Entries
-
-Σύνολο Εγγραφών
-
-**`dashboard.overview.statRow.totalEntriesExplain`**
-
-> EN — Everything you have logged, in every module, since you started.
-
-Ό,τι έχεις καταχωρήσει, σε κάθε ενότητα, από την αρχή.
-
-**`dashboard.overview.whatChanged.entries`**
-
-> EN — new entries
-
-νέες καταχωρήσεις
-
-**`dashboard.overview.whatChanged.insights`**
-
-> EN — new insights
-
-νέες παρατηρήσεις
-
-**`dashboard.overview.whatChanged.since`**
-
-> EN — since {when}
-
-από {when}
-
-**`dashboard.overview.whatChanged.title`**
-
-> EN — What changed
-
-Τι άλλαξε
-
 **`errors.boundary.section`**
 
 > EN — This section could not be displayed.
@@ -2493,6 +2205,12 @@ Credits που Απομένουν
 > EN — View {module} →
 
 Άνοιγμα: {module} →
+
+**`dashboard.createAnything.accomplishPlaceholder`**
+
+> EN — What do you want to accomplish?
+
+Τι θέλεις να πετύχεις;
 
 **`dashboard.createAnything.attachImage`**
 
@@ -2548,132 +2266,6 @@ Credits που Απομένουν
 
 Δεν ήταν δυνατή η μεταφόρτωση μίας ή περισσότερων εικόνων.
 
-**`dashboard.energyCheckIn.change`**
-
-> EN — Change
-
-Άλλαξε
-
-**`dashboard.energyCheckIn.checkedInToday`**
-
-> EN — Today's energy: {level}/5.
-
-Σημερινή ενέργεια: {level}/5.
-
-**`dashboard.energyCheckIn.levelLabel`**
-
-> EN — Energy level {level}
-
-Επίπεδο ενέργειας {level}
-
-**`dashboard.energyCheckIn.logged`**
-
-> EN — Energy logged
-
-Η ενέργεια καταγράφηκε
-
-**`dashboard.energyCheckIn.notePlaceholder`**
-
-> EN — Optional note...
-
-Προαιρετική σημείωση...
-
-**`dashboard.energyCheckIn.prompt`**
-
-> EN — How's your energy today?
-
-Πώς είναι η ενέργειά σου σήμερα;
-
-**`dashboard.energyCheckIn.scaleHigh`**
-
-> EN — 5 = great
-
-5 = τέλεια
-
-**`dashboard.energyCheckIn.scaleLow`**
-
-> EN — 1 = exhausted
-
-1 = εξαντλημένος
-
-**`dashboard.energyCheckIn.title`**
-
-> EN — Energy Check-In
-
-Έλεγχος Ενέργειας
-
-**`dashboard.firstScreen.build.example`**
-
-> EN — Build a website for my shop
-
-Φτιάξε site για το μαγαζί μου
-
-**`dashboard.firstScreen.build.verb`**
-
-> EN — Build
-
-Φτιάξε
-
-**`dashboard.firstScreen.cost.charged`**
-
-> EN — Uses credits
-
-Χρεώνει credits
-
-**`dashboard.firstScreen.cost.free`**
-
-> EN — Free
-
-Δωρεάν
-
-**`dashboard.firstScreen.cost.freeAllowance`**
-
-> EN — Free up to your monthly limit
-
-Δωρεάν μέχρι το μηνιαίο όριο
-
-**`dashboard.firstScreen.label`**
-
-> EN — Press one — it runs right away
-
-Πάτα ένα — τρέχει αμέσως
-
-**`dashboard.firstScreen.repeat.example`**
-
-> EN — Every Monday, a summary of my sales
-
-Κάθε Δευτέρα, σύνοψη των πωλήσεών μου
-
-**`dashboard.firstScreen.repeat.verb`**
-
-> EN — Repeat
-
-Επανάλαβε
-
-**`dashboard.firstScreen.understand.example`**
-
-> EN — What do my numbers say this week?
-
-Τι δείχνουν τα νούμερά μου αυτή τη βδομάδα;
-
-**`dashboard.firstScreen.understand.verb`**
-
-> EN — Understand
-
-Κατάλαβε
-
-**`dashboard.overview.recentEntries.empty`**
-
-> EN — No entries yet.
-
-Καμία καταχώρηση ακόμα.
-
-**`dashboard.overview.recentEntries.title`**
-
-> EN — Recent Entries
-
-Πρόσφατες Καταχωρήσεις
-
 **`errors.creditHistory`**
 
 > EN — See credit history
@@ -2703,24 +2295,6 @@ Credits που Απομένουν
 > EN — Good morning
 
 Καλημέρα
-
-**`sampleData.load`**
-
-> EN — See it with sample data
-
-Δες το με δείγμα δεδομένων
-
-**`sampleData.loadFailed`**
-
-> EN — That did not work. Try again.
-
-Δεν πέτυχε. Δοκίμασε ξανά.
-
-**`sampleData.loading`**
-
-> EN — Loading…
-
-Φορτώνει…
 
 ## Tier 3 — Further in — only if you have time (208)
 

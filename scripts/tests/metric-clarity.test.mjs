@@ -148,7 +148,7 @@ check(
 );
 
 console.log("\n== 5. every metric on Home explains itself ==");
-const overviewSrc = stripComments(readFileSync("src/app/dashboard/overview/page.tsx", "utf8"));
+const overviewSrc = stripComments(readFileSync("src/app/dashboard/activity/page.tsx", "utf8"));
 const statCards = (overviewSrc.match(/<HomeStatCard\b/g) ?? []).length;
 const creditCards = (overviewSrc.match(/<CreditsHomeStat\b/g) ?? []).length;
 const metrics = statCards + creditCards;

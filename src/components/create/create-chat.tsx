@@ -29,7 +29,6 @@ import { useCommandPalette } from "@/components/dashboard/command-palette-contex
 import { useCostEstimate } from "@/components/credits/use-cost-estimate";
 import { useRouter } from "next/navigation";
 import { VoiceInput } from "@/components/voice/voice-input";
-import { useVoiceAvailability } from "@/components/voice/voice-availability";
 
 export function CreateChat({
   showHeading = true,
@@ -57,7 +56,6 @@ export function CreateChat({
   // Only decides how much room the box leaves on the right: with no
   // transcription provider VoiceInput draws nothing, and padding for a
   // button that was never there is dead space.
-  const { transcribeAvailable: micHere } = useVoiceAvailability();
   const { submit, loading } = useCreateAnything();
   const [input, setInput] = useState("");
   const [focused, setFocused] = useState(false);
@@ -383,7 +381,7 @@ export function CreateChat({
                 key={`${file.name}-${index}`}
                 className="flex items-center gap-1.5 rounded-lg border border-border bg-input px-2 py-1 text-xs text-foreground"
               >
-                <span className="max-w-[140px] truncate">{file.name}</span>
+                <span className="max-w-[140px] break-all">{file.name}</span>
                 <button type="button" onClick={() => removeImage(index)} aria-label={t("removeImage")} className="text-muted hover:text-foreground">
                   <X className="h-3 w-3" aria-hidden="true" />
                 </button>
@@ -391,11 +389,10 @@ export function CreateChat({
             ))}
           </ul>
         )}
-        {/* `data-active` drives the animated rim in globals.css: the
-            gradient speeds up and the halo brightens while the user is
-            actually engaged with the box (focused OR mid-sentence), so it
-            reacts to real intent rather than pulsing at full strength all
-            the time. */}
+        {/* `data-active` marks the box as in use (focused OR
+            mid-sentence); the rim itself is .prompt-glow in globals.css.
+            Attach and voice sit bottom-left, Send bottom-right — the
+            design's field (docs/CONTEXT.md, «ΑΡΧΙΚΗ»). */}
         <div className="prompt-glow relative" data-active={focused || input.trim().length > 0}>
           <input
             ref={imageInputRef}
@@ -414,14 +411,12 @@ export function CreateChat({
               // the box; Send reads them afresh.
               if (voice.kind === "heard") setVoice((v) => voiceStep(v, { type: "EDIT" }));
             }}
-            placeholder={t("describePlaceholder")}
+            placeholder={hero ? t("accomplishPlaceholder") : t("describePlaceholder")}
             rows={4}
             maxLength={20000}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            className={`relative z-[1] ${hero ? "min-h-[46vh]" : "min-h-32"} max-h-[60vh] w-full resize-y rounded-2xl border-0 bg-panel/85 px-4 py-4 text-base text-foreground outline-none backdrop-blur-sm transition-all duration-200 placeholder:text-muted ${
-              micHere ? "pe-[9.5rem]" : "pe-28"
-            }`}
+            className={`relative z-[1] ${hero ? "min-h-36" : "min-h-32"} max-h-[60vh] w-full resize-y rounded-2xl border-0 bg-panel px-4 pb-16 pt-4 text-base text-foreground outline-none transition-all duration-200 placeholder:text-muted`}
             autoFocus
           />
           {/* THE MICROPHONE, BESIDE THE BOX. Its transcript lands in the
@@ -430,7 +425,7 @@ export function CreateChat({
               navigates: Create spends real credits, and a mishearing that
               went straight through would cost money or file a record
               nobody asked for. Only the card's own buttons move on. */}
-          <div className="absolute bottom-3 end-[6.75rem] z-[2]">
+          <div className="absolute bottom-3 start-14 z-[2]">
             <VoiceInput
               compact
               review="card"
@@ -450,7 +445,7 @@ export function CreateChat({
               onClick={() => imageInputRef.current?.click()}
               aria-label={t("attachImage")}
               title={t("attachImage")}
-              className="absolute bottom-3 end-16 z-[2] flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              className="absolute bottom-3 start-3 z-[2] flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               <Paperclip className="h-4 w-4" aria-hidden="true" />
             </button>

@@ -323,7 +323,8 @@ with drawn(href) as (values
   -- Agents LEFT this list on 2026-10-04, for the marketplace's reason:
   -- retired in lib/sidebar-nav.ts, so not a sidebar row any more.
   ('/dashboard/automation'),
-  ('/dashboard/timeline'), ('/dashboard/files'), ('/dashboard/finance'),
+  -- Activity joined on 2026-10-04: the cards Home used to carry.
+  ('/dashboard/timeline'), ('/dashboard/activity'), ('/dashboard/files'), ('/dashboard/finance'),
   ('/dashboard/sales'), ('/dashboard/trading'), ('/dashboard/search'),
   ('/dashboard/ai-memory'),
   ('/dashboard/business-health'), ('/dashboard/projects'), ('/dashboard/mission'),

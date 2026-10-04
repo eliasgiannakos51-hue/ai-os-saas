@@ -1,12 +1,12 @@
 # The first run — ar
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **656 strings**. The whole product is 3459, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **585 strings**. The whole product is 3468, which is why this file exists.
 
-**Start with tier 1. It is 30 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 418 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 356 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (30)
+## Tier 1 — THE SENTENCES — read these (21)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -128,48 +128,6 @@ CSV أو مفصول بعلامات جدولة، حتى {max}. نقرؤه ونع�
 
 ### first result
 
-**`dashboard.overview.healthScore.suggestion.recency`**
-
-> EN — You haven't logged anything in a while — add a new entry to pick things back up.
-
-لم تسجل شيئًا منذ فترة — أضف إدخالًا جديدًا لاستئناف النشاط.
-
-**`dashboard.overview.nextAction.revisitLink`**
-
-> EN — You linked "{source}" to "{target}" a few days ago — worth revisiting?
-
-قمت بربط "{source}" بـ "{target}" قبل بضعة أيام — هل يستحق إعادة النظر؟
-
-**`dashboard.overview.nextAction.startNew`**
-
-> EN — No new activity in the last 3 days — ready to start something new?
-
-لا يوجد نشاط جديد في آخر 3 أيام — مستعد لبدء شيء جديد؟
-
-**`dashboard.overview.setupProgress.suggestion`**
-
-> EN — Your activity score appears once you have logged {count} entries — enough that no single one decides it.
-
-تظهر درجة نشاطك بعد تسجيل {count} إدخالات — عدد يكفي ألّا يحدّدها إدخال واحد.
-
-**`dashboard.overview.statRow.mostActiveExplain`**
-
-> EN — The module you have written in most. Where your attention has gone.
-
-الوحدة التي تكتب فيها أكثر. حيث يذهب انتباهك.
-
-**`dashboard.overview.statRow.thisWeekExplain`**
-
-> EN — Logged in the last seven days — how active this week has been.
-
-ما سُجّل في آخر سبعة أيام — مدى نشاط هذا الأسبوع.
-
-**`common.betaExpiry`**
-
-> EN — Your beta access expires in {days, plural, one {# day} other {# days}}. <link>Upgrade to keep full access</link>.
-
-ينتهي وصولك التجريبي خلال {days, plural, zero {# يوم} one {يوم واحد} two {يومين} few {# أيام} many {# يومًا} other {# يوم}}. <link>رقِّ خطتك للاحتفاظ بالوصول الكامل</link>.
-
 **`common.listCapped`**
 
 > EN — Showing the most recent {count, number}. Older entries are still saved — use Search my records to find them.
@@ -188,19 +146,7 @@ CSV أو مفصول بعلامات جدولة، حتى {max}. نقرؤه ونع�
 
 صف أي شيء — فكرة منتج، صفقة، ملاحظة من مستخدم، مؤشرًا — وسيصل تلقائيًا إلى الوحدة الصحيحة.
 
-**`dashboard.energyCheckIn.whatItDoes`**
-
-> EN — Ionexa uses this to pick which plan step to suggest next — lighter work when you're low, demanding work when you're not.
-
-يستخدم Ionexa هذا لاختيار خطوة الخطة التالية المقترحة — عمل خفيف عندما تكون طاقتك منخفضة، وعمل يتطلب جهدًا عندما لا تكون كذلك.
-
-**`sampleData.loadFree`**
-
-> EN — Free — nothing is generated, and you can remove it in one click
-
-مجانًا — لا يُولَّد شيء، ويمكنك إزالته بنقرة واحدة
-
-## Tier 2 — The labels — skim these (418)
+## Tier 2 — The labels — skim these (356)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1436,6 +1382,12 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 إغلاق القائمة
 
+**`sidebar.items.activity`**
+
+> EN — Activity
+
+النشاط
+
 **`sidebar.items.affiliate`**
 
 > EN — Affiliate
@@ -2200,246 +2152,6 @@ DevOps
 
 تعذّر تحميل أفكارك: {message}
 
-**`dashboard.insights.title`**
-
-> EN — What I noticed
-
-ما لاحظته
-
-**`dashboard.overview.activeMission.open`**
-
-> EN — Open the plan
-
-افتح الخطة
-
-**`dashboard.overview.activeMission.stepsLabel`**
-
-> EN — {completed}/{total} steps completed
-
-اكتمل {completed}/{total} خطوات
-
-**`dashboard.overview.aiCoach.entryCount`**
-
-> EN — {count, plural, one {# new {module} entry} other {# new {module} entries}}
-
-{count, plural, zero {لا إدخالات جديدة في {module}} one {إدخال جديد واحد في {module}} two {إدخالان جديدان في {module}} few {# إدخالات جديدة في {module}} many {# إدخالًا جديدًا في {module}} other {# إدخال جديد في {module}}}
-
-**`dashboard.overview.aiCoach.mostActiveIn`**
-
-> EN — Most active in {module}
-
-الأكثر نشاطًا في {module}
-
-**`dashboard.overview.aiCoach.noActivity`**
-
-> EN — No activity yet this week — log something to get started.
-
-لا يوجد نشاط بعد هذا الأسبوع — سجّل شيئًا للبدء.
-
-**`dashboard.overview.betaFeedback.linkLabel`**
-
-> EN — Share feedback
-
-إرسال ملاحظات
-
-**`dashboard.overview.betaFeedback.message`**
-
-> EN — Thanks for testing Ionexa AI. Your feedback is welcome.
-
-شكرًا لتجربتك Ionexa AI. رأيك موضع ترحيب.
-
-**`dashboard.overview.healthScore.buildingMomentum`**
-
-> EN — Building momentum
-
-تكتسب زخمًا
-
-**`dashboard.overview.healthScore.excellentConsistency`**
-
-> EN — Excellent consistency
-
-انتظام ممتاز
-
-**`dashboard.overview.healthScore.justStarting`**
-
-> EN — Just getting started
-
-بداية جديدة
-
-**`dashboard.overview.healthScore.strongProgress`**
-
-> EN — Strong progress
-
-تقدم قوي
-
-**`dashboard.overview.healthScore.suggestion.consistency`**
-
-> EN — Try logging something every day this week.
-
-حاول تسجيل شيء ما كل يوم هذا الأسبوع.
-
-**`dashboard.overview.healthScore.suggestion.coverage`**
-
-> EN — Try exploring a module you haven't used yet.
-
-جرّب استكشاف وحدة لم تستخدمها بعد.
-
-**`dashboard.overview.healthScore.suggestion.missionSteps`**
-
-> EN — Complete a plan step to keep your momentum going.
-
-أكمل خطوة من الخطة للحفاظ على زخمك.
-
-**`dashboard.overview.healthScore.title`**
-
-> EN — Business Health Score
-
-مؤشر صحة العمل
-
-**`dashboard.overview.next.title`**
-
-> EN — Next
-
-التالي
-
-**`dashboard.overview.nextAction.continueMission`**
-
-> EN — Continue: {step} from your "{goal}" plan
-
-تابع: {step} من خطة "{goal}"
-
-**`dashboard.overview.nextAction.cta`**
-
-> EN — Go there →
-
-اذهب إلى هناك ←
-
-**`dashboard.overview.setupProgress.count`**
-
-> EN — {done} of {total} steps
-
-{done} من {total} خطوات
-
-**`dashboard.overview.setupProgress.steps.firstEntry`**
-
-> EN — Log your first entry
-
-سجّل مدخلك الأول
-
-**`dashboard.overview.setupProgress.steps.mission`**
-
-> EN — Set a goal
-
-حدّد هدفًا
-
-**`dashboard.overview.setupProgress.steps.onboarding`**
-
-> EN — Finish the welcome questions
-
-أكمل أسئلة الترحيب
-
-**`dashboard.overview.setupProgress.steps.secondModule`**
-
-> EN — Log something in a second area
-
-سجّل شيئًا في مجال ثانٍ
-
-**`dashboard.overview.setupProgress.title`**
-
-> EN — Setup progress
-
-تقدّم الإعداد
-
-**`dashboard.overview.statRow.creditsExplain`**
-
-> EN — What is left of this month's allowance for AI work.
-
-ما تبقّى من حصتك الشهرية لعمل الذكاء الاصطناعي.
-
-**`dashboard.overview.statRow.creditsRemaining`**
-
-> EN — Credits Remaining
-
-الرصيد المتبقي
-
-**`dashboard.overview.statRow.fillsAfter`**
-
-> EN — Fills in after {count} entries
-
-يمتلئ بعد {count} إدخالات
-
-**`dashboard.overview.statRow.fromEntries`**
-
-> EN — {count, plural, one {from # entry} other {from # entries}}
-
-{count, plural, zero {من # إدخال} one {من # إدخال} two {من # إدخالين} few {من # إدخالات} many {من # إدخالًا} other {من # إدخال}}
-
-**`dashboard.overview.statRow.mostActive`**
-
-> EN — Most Active
-
-الأكثر نشاطًا
-
-**`dashboard.overview.statRow.ofTotal`**
-
-> EN — {count, plural, one {of # in total} other {of # in total}}
-
-{count, plural, zero {من # إجمالًا} one {من # إجمالًا} two {من # إجمالًا} few {من # إجمالًا} many {من # إجمالًا} other {من # إجمالًا}}
-
-**`dashboard.overview.statRow.openCredits`**
-
-> EN — See the ledger →
-
-اعرض السجل ←
-
-**`dashboard.overview.statRow.openEntries`**
-
-> EN — See the entries →
-
-اعرض المدخلات ←
-
-**`dashboard.overview.statRow.thisWeek`**
-
-> EN — This Week
-
-هذا الأسبوع
-
-**`dashboard.overview.statRow.totalEntries`**
-
-> EN — Total Entries
-
-إجمالي الإدخالات
-
-**`dashboard.overview.statRow.totalEntriesExplain`**
-
-> EN — Everything you have logged, in every module, since you started.
-
-كل ما سجّلته، في كل وحدة، منذ البداية.
-
-**`dashboard.overview.whatChanged.entries`**
-
-> EN — new entries
-
-إدخالات جديدة
-
-**`dashboard.overview.whatChanged.insights`**
-
-> EN — new insights
-
-ملاحظات جديدة
-
-**`dashboard.overview.whatChanged.since`**
-
-> EN — since {when}
-
-منذ {when}
-
-**`dashboard.overview.whatChanged.title`**
-
-> EN — What changed
-
-ما الذي تغيّر
-
 **`errors.boundary.section`**
 
 > EN — This section could not be displayed.
@@ -2493,6 +2205,12 @@ DevOps
 > EN — View {module} →
 
 عرض {module} ←
+
+**`dashboard.createAnything.accomplishPlaceholder`**
+
+> EN — What do you want to accomplish?
+
+ما الذي تريد إنجازه؟
 
 **`dashboard.createAnything.attachImage`**
 
@@ -2548,132 +2266,6 @@ DevOps
 
 تعذّر رفع صورة أو أكثر.
 
-**`dashboard.energyCheckIn.change`**
-
-> EN — Change
-
-تغيير
-
-**`dashboard.energyCheckIn.checkedInToday`**
-
-> EN — Today's energy: {level}/5.
-
-طاقة اليوم: {level}/5.
-
-**`dashboard.energyCheckIn.levelLabel`**
-
-> EN — Energy level {level}
-
-مستوى الطاقة {level}
-
-**`dashboard.energyCheckIn.logged`**
-
-> EN — Energy logged
-
-تم تسجيل الطاقة
-
-**`dashboard.energyCheckIn.notePlaceholder`**
-
-> EN — Optional note...
-
-ملاحظة اختيارية...
-
-**`dashboard.energyCheckIn.prompt`**
-
-> EN — How's your energy today?
-
-كيف هي طاقتك اليوم؟
-
-**`dashboard.energyCheckIn.scaleHigh`**
-
-> EN — 5 = great
-
-٥ = ممتاز
-
-**`dashboard.energyCheckIn.scaleLow`**
-
-> EN — 1 = exhausted
-
-١ = منهك
-
-**`dashboard.energyCheckIn.title`**
-
-> EN — Energy Check-In
-
-تسجيل الطاقة
-
-**`dashboard.firstScreen.build.example`**
-
-> EN — Build a website for my shop
-
-ابنِ موقعًا لمتجري
-
-**`dashboard.firstScreen.build.verb`**
-
-> EN — Build
-
-ابنِ
-
-**`dashboard.firstScreen.cost.charged`**
-
-> EN — Uses credits
-
-يستهلك رصيدًا
-
-**`dashboard.firstScreen.cost.free`**
-
-> EN — Free
-
-مجانًا
-
-**`dashboard.firstScreen.cost.freeAllowance`**
-
-> EN — Free up to your monthly limit
-
-مجانًا ضمن حدك الشهري
-
-**`dashboard.firstScreen.label`**
-
-> EN — Press one — it runs right away
-
-اضغط واحدًا — يبدأ فورًا
-
-**`dashboard.firstScreen.repeat.example`**
-
-> EN — Every Monday, a summary of my sales
-
-كل يوم اثنين، ملخص مبيعاتي
-
-**`dashboard.firstScreen.repeat.verb`**
-
-> EN — Repeat
-
-كرّر
-
-**`dashboard.firstScreen.understand.example`**
-
-> EN — What do my numbers say this week?
-
-ماذا تقول أرقامي هذا الأسبوع؟
-
-**`dashboard.firstScreen.understand.verb`**
-
-> EN — Understand
-
-افهم
-
-**`dashboard.overview.recentEntries.empty`**
-
-> EN — No entries yet.
-
-لا توجد إدخالات بعد.
-
-**`dashboard.overview.recentEntries.title`**
-
-> EN — Recent Entries
-
-الإدخالات الأخيرة
-
 **`errors.creditHistory`**
 
 > EN — See credit history
@@ -2703,24 +2295,6 @@ DevOps
 > EN — Good morning
 
 صباح الخير
-
-**`sampleData.load`**
-
-> EN — See it with sample data
-
-شاهده ببيانات تجريبية
-
-**`sampleData.loadFailed`**
-
-> EN — That did not work. Try again.
-
-لم ينجح ذلك. حاول مرة أخرى.
-
-**`sampleData.loading`**
-
-> EN — Loading…
-
-جارٍ التحميل…
 
 ## Tier 3 — Further in — only if you have time (208)
 

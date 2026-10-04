@@ -135,7 +135,7 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // with the database's own check constraint.
     // SEVENTY on 2026-10-04: the theme toggle went with the light theme
     // (ΣΥΣΤΗΜΑ DESIGN, one theme), and with it one unbounded component.
-    unbounded: 70,
+    unbounded: 69,
   },
   {
     name: "onboarding",

@@ -222,7 +222,8 @@
       "personalShopping": "Compras",
       "personalFinance": "Finanças pessoais",
       "personalJournal": "Diário",
-      "personalLifeOs": "Life OS"
+      "personalLifeOs": "Life OS",
+      "activity": "Atividade"
     },
     "hints": {
       "chat": "Pergunte qualquer coisa — sem ligação a nenhum módulo.",
@@ -283,7 +284,8 @@
       "posts": "Diz uma vez e recebe uma publicação por plataforma, no seu tamanho e tom. Não publica nada: copias e publicas tu.",
       "projects": "Uma pasta com um objetivo. O que colocas é o que lá está — nada entra sozinho.",
       "aiMemory": "O que o chat guardou sobre si, e como apagar.",
-      "meetings": "Transforma uma gravação em transcrição, resumo e ações que escolhes tu."
+      "meetings": "Transforma uma gravação em transcrição, resumo e ações que escolhes tu.",
+      "activity": "O seu próximo passo, o que mudou, o seu progresso e os seus números"
     },
     "closeMenu": "Fechar o menu",
     "rail": {
@@ -1298,6 +1300,10 @@
       "clarificationAnswerPlaceholder": "A sua resposta...",
       "sources": {
         "title": "Fontes"
+      },
+      "workMode": {
+        "active": "Modo: {mode}",
+        "clear": "Remover o modo de trabalho"
       }
     },
     "create": {
@@ -1735,7 +1741,8 @@
       "clarifyTitle": "Duas perguntas rápidas:",
       "clarifySkip": "Ignorar e registar mesmo assim",
       "clarifyContinue": "Continuar",
-      "clarifyAnswerPlaceholder": "A sua resposta..."
+      "clarifyAnswerPlaceholder": "A sua resposta...",
+      "accomplishPlaceholder": "O que quer alcançar?"
     },
     "createStudio": {
       "title": "Cria qualquer coisa",
@@ -2754,6 +2761,14 @@
       "title": "Todas as ferramentas",
       "description": "Cada ferramenta, com uma linha sobre o que faz.",
       "orPress": "Ou carregue em ⌘K e escreva o nome, ou descreva-o no campo do Início."
+    },
+    "home": {
+      "actions": {
+        "research": "Pesquisar",
+        "create": "Criar",
+        "run": "Executar",
+        "analyze": "Analisar"
+      }
     }
   },
   "module": {
@@ -3336,7 +3351,7 @@
       "does": "Muda de plano, compra créditos, define idioma e tema, dá um nome ao assistente e descarrega todos os registos da conta num único ficheiro.",
       "doesNot": "Os teus registos não estão aqui — cada módulo guarda os seus. E Eliminar conta não é uma forma de os limpar e começar de novo: termina a conta, leva tudo com ela e não há como desfazer. Exporta primeiro."
     },
-    "overview": {
+    "activity": {
       "is": "Um resumo do que registaste, e uma coisa para fazer a seguir.",
       "does": "Lê as tuas próprias entradas em todos os módulos e mostra uma pontuação de saúde, o que mudou recentemente e um próximo passo sugerido.",
       "doesNot": "Não se liga ao teu banco, ao teu CRM nem ao teu email. Cada número vem de algo que tu ou os teus agentes introduziram — uma semana vazia está mesmo vazia, não está a carregar."

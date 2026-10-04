@@ -46,6 +46,7 @@ import { loadLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 import type { PlanSlug } from "@/lib/billing/plans";
 import { CHAT_MODEL } from "@/lib/ai-models";
 import { buildCachedSystem, buildCachedMessages } from "@/lib/ai/cached-system";
+import { readWorkMode, workModeInstruction, type WorkMode } from "@/lib/chat/work-modes";
 import { consumeFreeChatMessage, releaseFreeChatMessage } from "@/lib/billing/free-chat-usage";
 import { diagLog } from "@/lib/diag";
 import {
@@ -317,6 +318,7 @@ export async function POST(request: Request) {
     let mentorMode: boolean;
     let mentorPreset: string | null;
     let skipClarification = false;
+    let workMode: WorkMode | null = null;
     try {
       const body = await request.json();
       message = typeof body?.message === "string" ? body.message.trim() : "";
@@ -339,6 +341,9 @@ export async function POST(request: Request) {
       // sends the SAME text again on a conversation that still has no
       // history, and would meet the identical question for ever.
       skipClarification = body?.skipClarification === true;
+      // The way of working a Home quick action chose
+      // (lib/chat/work-modes.ts) — one of four, or none.
+      workMode = readWorkMode(body?.workMode);
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -693,8 +698,11 @@ export async function POST(request: Request) {
     // paying ~1,246 full-price tokens a message to save at most 177.
     // scripts/tests/context-optimization.test.mjs caught it, which is
     // exactly what that gate is for.
+    // The work mode goes last too: it is chosen per conversation on the
+    // client, and anywhere earlier it would split the cached prefix in
+    // five (lib/chat/work-modes.ts).
     const systemDynamicSuffix =
-      buildEntityMentionPromptAddition(mentionedEntities) + codingContext + deepDive.prompt;
+      buildEntityMentionPromptAddition(mentionedEntities) + codingContext + deepDive.prompt + workModeInstruction(workMode);
     // Kept as the concatenation of the two halves, unchanged, because
     // every cost estimate below sizes the request with
     // `systemPrompt.length`. The split changes where the block boundary

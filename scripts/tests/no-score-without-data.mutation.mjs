@@ -22,7 +22,7 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/no-score-without-data.test.mjs";
 const LIB = "src/lib/health-score.ts";
-const PAGE = "src/app/dashboard/overview/page.tsx";
+const PAGE = "src/app/dashboard/activity/page.tsx";
 const CARD = "src/components/overview/home-stat-card.tsx";
 const TARGETS = [GATE, LIB, PAGE, CARD];
 

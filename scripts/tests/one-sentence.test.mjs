@@ -13,6 +13,7 @@
 //
 // Run: node scripts/tests/one-sentence.test.mjs
 import { readFileSync } from "node:fs";
+import { stripComments } from "../check-mutation-markers.mjs";
 import { createTranslator } from "next-intl";
 
 let pass = 0;
@@ -74,10 +75,13 @@ for (const locale of LOCALES) {
   );
 }
 
-console.log("\n== 3. all three surfaces render it ==");
+console.log("\n== 3. every surface renders it ==");
+// Two since 2026-10-04: the landing page and onboarding's first step.
+// Home left the list by the owner's design (src/lib/i18n/one-sentence.ts
+// says why), and section 4 holds that it really left.
 check(
-  `three surfaces are declared (${ONE_SENTENCE_SURFACES.length})`,
-  ONE_SENTENCE_SURFACES.length >= 3,
+  `two surfaces are declared (${ONE_SENTENCE_SURFACES.length})`,
+  ONE_SENTENCE_SURFACES.length >= 2,
 );
 const notRendering = [];
 for (const surface of ONE_SENTENCE_SURFACES) {
@@ -101,14 +105,16 @@ check(
   "the landing page no longer renders a hero of its own",
   !/t\("hero"\)/.test(landing),
 );
-// The greeting is still there — it just no longer occupies the line that
-// should say what the product is.
-const greeting = readFileSync("src/components/overview/greeting-header.tsx", "utf8");
-check("the greeting still exists, below the heading", /greeting\.part/.test(greeting));
+// HOME'S LINE IS THE EARTH AND THE GREETING, by the owner's design of
+// 2026-10-04 (docs/CONTEXT.md, «ΑΡΧΙΚΗ»). The greeting is the heading,
+// and the sentence is not drawn above it any more — a second line there
+// is exactly the "something else on the screen" the design rules out.
+const greeting = stripComments(readFileSync("src/components/overview/greeting-header.tsx", "utf8"));
+check("the greeting is Home's heading", /<h1[\s\S]{0,200}greeting\.\$\{greeting\.part\}/.test(greeting));
 check(
-  "...and the sentence is above it",
-  greeting.indexOf(`tPromise("${key}")`) < greeting.indexOf("greeting.part"),
-  "the first line after signing in must be the promise, not the time of day",
+  "...beside the small earth, and with no sentence of its own",
+  /<Earth variant="small" px=\{64\}/.test(greeting) && !greeting.includes(`("${key.split(".").pop()}")`),
+  "the design's first line is the earth and the greeting, nothing else",
 );
 
 console.log("\n== 5. it is one sentence, not a paragraph ==");

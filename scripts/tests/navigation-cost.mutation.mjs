@@ -24,7 +24,8 @@ import { execFileSync } from "node:child_process";
 const GATE = "scripts/tests/navigation-cost.test.mjs";
 const LAYOUT = "src/app/dashboard/layout.tsx";
 const BRIDGE = "src/components/achievements/achievement-unlock-bridge.tsx";
-const OVERVIEW = "src/app/dashboard/overview/page.tsx";
+const OVERVIEW = "src/app/dashboard/activity/page.tsx";
+const HOME = "src/app/dashboard/overview/page.tsx";
 const CSS = "src/app/globals.css";
 const SKELETON = "src/components/dashboard/route-skeleton.tsx";
 
@@ -64,7 +65,7 @@ const MUTANTS = [
     // HOME'S FOURTEEN MODULES, TWO AWAITS EACH. The reads are independent
     // and were awaited in sequence; one wave is the difference between 103
     // queries in a chain and 103 queries at once.
-    name: "Home stops fanning its module reads out in one wave",
+    name: "Activity stops fanning its module reads out in one wave",
     file: OVERVIEW,
     from: "await Promise.allSettled([",
     to: "await Promise.resolve([",
@@ -91,10 +92,14 @@ const MUTANTS = [
     // leaves the function before the wave. Deleting it means every query
     // on the page runs for somebody who will never see it, and the check
     // now asserts that ordering rather than the read's.
-    name: "an un-onboarded account runs the whole page before being redirected",
-    file: OVERVIEW,
-    from: "    redirect(onboardingTarget);",
-    to: "",
+    //
+    // RE-AIMED 2026-10-04: Home is one block now and reads one row, so the
+    // defect is a read that runs BEFORE the redirect — the account is
+    // about to leave and pays for a query anyway.
+    name: "an un-onboarded account runs a read before being redirected",
+    file: HOME,
+    from: '  const { data: onboardingState, error: onboardingError } = await supabase',
+    to: '  await supabase.from("user_insights").select("id").limit(1);\n  const { data: onboardingState, error: onboardingError } = await supabase',
     expect: "the onboarding check stays first",
   },
   {

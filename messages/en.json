@@ -222,7 +222,8 @@
       "personalShopping": "Shopping",
       "personalFinance": "Personal Finance",
       "personalJournal": "Journaling",
-      "personalLifeOs": "Life OS"
+      "personalLifeOs": "Life OS",
+      "activity": "Activity"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -283,7 +284,8 @@
       "posts": "Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.",
       "projects": "A folder with a goal. What you put in is what is in it — nothing is dragged in with it.",
       "aiMemory": "What the chat has kept about you, and how to remove it.",
-      "meetings": "Turn a recording into a transcript, a summary, and actions you choose from."
+      "meetings": "Turn a recording into a transcript, a summary, and actions you choose from.",
+      "activity": "Your next step, what changed, your progress and your numbers"
     },
     "closeMenu": "Close menu",
     "rail": {
@@ -1298,6 +1300,10 @@
       "clarificationAnswerPlaceholder": "Your answer...",
       "sources": {
         "title": "Sources"
+      },
+      "workMode": {
+        "active": "Mode: {mode}",
+        "clear": "Clear the way of working"
       }
     },
     "create": {
@@ -1735,7 +1741,8 @@
       "clarifyTitle": "A couple of quick questions:",
       "clarifySkip": "Skip, log it anyway",
       "clarifyContinue": "Continue",
-      "clarifyAnswerPlaceholder": "Your answer..."
+      "clarifyAnswerPlaceholder": "Your answer...",
+      "accomplishPlaceholder": "What do you want to accomplish?"
     },
     "createStudio": {
       "title": "Make anything",
@@ -2754,6 +2761,14 @@
       "title": "All tools",
       "description": "Every tool, with one line on what it does.",
       "orPress": "Or press ⌘K and type its name — or describe it in the field on Home."
+    },
+    "home": {
+      "actions": {
+        "research": "Research",
+        "create": "Create",
+        "run": "Run",
+        "analyze": "Analyze"
+      }
     }
   },
   "module": {
@@ -3336,7 +3351,7 @@
       "does": "Change your plan, buy credits, set the language and theme, name the assistant, and download every record in the account as one file.",
       "doesNot": "It does not hold your records — each module keeps its own. And Delete account is not a way to clear them and start again: it ends the account, takes everything with it, and there is no undo. Export first."
     },
-    "overview": {
+    "activity": {
       "is": "A summary of what you have logged, and one thing to do next.",
       "does": "Reads your own entries across the modules and shows a health score, what changed recently, and a suggested next step.",
       "doesNot": "It does not connect to your bank, your CRM or your inbox. Every figure here comes from something you or your agents put in — so an empty week really is empty, not a loading problem."

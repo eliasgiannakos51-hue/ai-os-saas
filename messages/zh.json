@@ -222,7 +222,8 @@
       "personalShopping": "购物",
       "personalFinance": "个人理财",
       "personalJournal": "日志",
-      "personalLifeOs": "生活系统"
+      "personalLifeOs": "生活系统",
+      "activity": "动态"
     },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",
@@ -283,7 +284,8 @@
       "posts": "说一次，就能得到每个平台各一条、长度和语气各自贴合的帖子。它不发布任何内容——由你复制并发布。",
       "projects": "有目标的文件夹。你放什么就有什么——不会自己进来。",
       "aiMemory": "对话记住了你的哪些事，以及如何删除。",
-      "meetings": "把录音变成文字记录、摘要，以及由你挑选的行动。"
+      "meetings": "把录音变成文字记录、摘要，以及由你挑选的行动。",
+      "activity": "下一步、变化、进度和你的数据"
     },
     "closeMenu": "关闭菜单",
     "rail": {
@@ -1298,6 +1300,10 @@
       "clarificationAnswerPlaceholder": "你的回答……",
       "sources": {
         "title": "来源"
+      },
+      "workMode": {
+        "active": "模式：{mode}",
+        "clear": "取消工作模式"
       }
     },
     "create": {
@@ -1735,7 +1741,8 @@
       "clarifyTitle": "几个简短的问题：",
       "clarifySkip": "跳过，仍然记录",
       "clarifyContinue": "继续",
-      "clarifyAnswerPlaceholder": "你的回答..."
+      "clarifyAnswerPlaceholder": "你的回答...",
+      "accomplishPlaceholder": "你想完成什么？"
     },
     "createStudio": {
       "title": "创建任何东西",
@@ -2754,6 +2761,14 @@
       "title": "全部工具",
       "description": "每个工具,一行说明它做什么。",
       "orPress": "或按 ⌘K 输入名称,或在首页的输入框中描述。"
+    },
+    "home": {
+      "actions": {
+        "research": "研究",
+        "create": "创作",
+        "run": "执行",
+        "analyze": "分析"
+      }
     }
   },
   "module": {
@@ -3336,7 +3351,7 @@
       "does": "更换套餐、购买额度、设置语言与主题、给助手起名，并把账户里的每一条记录导出为一个文件。",
       "doesNot": "你的记录不在这里——每个模块各自保存。而且「删除账户」不是清空重来的方式：它会结束账户、带走所有内容，并且无法撤销。请先导出。"
     },
-    "overview": {
+    "activity": {
       "is": "你已记录内容的概览，以及下一步该做的一件事。",
       "does": "读取你在各模块中的记录，展示健康分、近期变化，以及一个建议的下一步。",
       "doesNot": "它不会连接你的银行、CRM 或邮箱。这里的每个数字都来自你或你的智能体录入的内容——所以空白的一周就是真的空白，不是还在加载。"

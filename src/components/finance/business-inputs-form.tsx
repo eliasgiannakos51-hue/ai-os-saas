@@ -89,7 +89,7 @@ export function BusinessInputsForm({
         type="button"
         onClick={() => void save()}
         disabled={saving}
-        className="mt-3 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black disabled:opacity-50"
+        className="mt-3 rounded-lg bg-button px-4 py-2 text-xs font-semibold text-button-ink disabled:opacity-50"
       >
         {saving ? t("saving") : t("save")}
       </button>

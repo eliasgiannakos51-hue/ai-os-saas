@@ -218,7 +218,7 @@ export function VoicePlayer({ text, compact }: { text: string; compact?: boolean
       {playing && wordIndex >= 0 && words[wordIndex] && (
         <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground" aria-hidden="true">
           {text.slice(0, words[wordIndex].start)}
-          <mark className="bg-blue-500/25 text-foreground">{words[wordIndex].word}</mark>
+          <mark className="bg-foreground/25 text-foreground">{words[wordIndex].word}</mark>
           {text.slice(words[wordIndex].end)}
         </p>
       )}

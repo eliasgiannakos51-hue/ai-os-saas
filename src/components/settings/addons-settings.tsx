@@ -118,7 +118,7 @@ export function AddonsSettings() {
                 {addon.billing === "monthly" ? t("perMonth") : t("oneOff")} · {t(`items.${addon.slug}.grants`)}
               </p>
               {addon.owned > 0 ? (
-                <p className="mt-1 text-xs text-emerald-400">{t("owned", { count: addon.owned })}</p>
+                <p className="mt-1 text-xs text-success">{t("owned", { count: addon.owned })}</p>
               ) : null}
               {!addon.available && addon.notConfiguredVar ? (
                 <p className="mt-1 text-xs text-muted">
@@ -133,7 +133,7 @@ export function AddonsSettings() {
                   type="button"
                   onClick={() => cancel(addon.slug)}
                   disabled={busy !== null}
-                  className="inline-flex min-h-[36px] items-center gap-2 rounded-xl border border-border px-3 text-xs text-foreground transition-colors duration-150 hover:border-red-500 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-[36px] items-center gap-2 rounded-xl border border-border px-3 text-xs text-foreground transition-colors duration-150 hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {busy === addon.slug ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : null}
                   {t("cancel")}
@@ -143,7 +143,7 @@ export function AddonsSettings() {
                 type="button"
                 onClick={() => buy(addon.slug)}
                 disabled={busy !== null || !addon.canBuy}
-                className="hover:bg-orange-500/10 inline-flex min-h-[36px] items-center gap-2 rounded-xl border border-orange-500/60 px-3 text-xs font-semibold text-orange-300 transition-colors duration-150 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex min-h-[36px] items-center gap-2 rounded-xl border border-foreground/60 px-3 text-xs font-semibold text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {busy === addon.slug ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : null}
                 {addon.billing === "one_off" ? t("buy") : t("subscribe")}
@@ -156,7 +156,7 @@ export function AddonsSettings() {
       {/* A CANCEL BUTTON THAT WOULD FAIL IS NOT SHOWN AT ALL, and the
           reason is stated once here rather than as a broken control. */}
       <p className="text-xs text-muted">{t("oneOffNote")}</p>
-      {error ? <p className="text-xs text-red-400">{error}</p> : null}
+      {error ? <p className="text-xs text-danger">{error}</p> : null}
     </div>
   );
 }

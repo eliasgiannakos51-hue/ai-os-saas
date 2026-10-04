@@ -144,7 +144,7 @@ export function AnalysisWorkspace({
           type="button"
           onClick={() => fileInput.current?.click()}
           disabled={uploading}
-          className="mt-3 inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black disabled:opacity-50"
+          className="mt-3 inline-flex items-center gap-2 rounded-lg bg-button px-4 py-2 text-xs font-semibold text-button-ink disabled:opacity-50"
         >
           {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           {uploading ? t("upload.working") : t("upload.button")}
@@ -161,7 +161,7 @@ export function AnalysisWorkspace({
               onClick={() => router.push(`/dashboard/data-analysis?id=${item.id}`)}
               className={`rounded-lg border px-3 py-1.5 text-xs ${
                 current?.id === item.id
-                  ? "border-orange-500 bg-orange-500/10 text-foreground"
+                  ? "border-foreground/40 bg-foreground/10 text-foreground"
                   : "border-border bg-panel text-muted"
               }`}
             >
@@ -187,9 +187,9 @@ export function AnalysisWorkspace({
                 {/* SAID, NOT HIDDEN. A file we only partly read, or one
                     whose rows did not line up, produces charts that are
                     true of what we read and not of what they uploaded. */}
-                {current.truncated ? <p className="mt-1 text-xs text-amber-400">{t("summary.truncated")}</p> : null}
+                {current.truncated ? <p className="mt-1 text-xs text-warning">{t("summary.truncated")}</p> : null}
                 {current.raggedRows > 0 ? (
-                  <p className="mt-1 text-xs text-amber-400">{t("summary.ragged", { count: current.raggedRows })}</p>
+                  <p className="mt-1 text-xs text-warning">{t("summary.ragged", { count: current.raggedRows })}</p>
                 ) : null}
               </div>
               <div className="flex flex-wrap gap-2">
@@ -209,7 +209,7 @@ export function AnalysisWorkspace({
                   type="button"
                   onClick={() => void handleAnalyse()}
                   disabled={analysing}
-                  className="hover:bg-orange-500/10 inline-flex items-center gap-2 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 disabled:opacity-50"
+                  className="hover:bg-foreground/10 inline-flex items-center gap-2 rounded-lg border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground disabled:opacity-50"
                 >
                   {/* THE GLOBE for the analysis, because that wait is
                       the model thinking. The ring above it stays on the
@@ -260,7 +260,7 @@ export function AnalysisWorkspace({
               ) : null}
               <ul className="mt-3 space-y-3">
                 {current.findings.findings.map((finding) => (
-                  <li key={finding.headline} className="border-s-2 border-orange-500 ps-3">
+                  <li key={finding.headline} className="border-s-2 border-foreground/40 ps-3">
                     <p className="text-sm text-foreground">{finding.headline}</p>
                     <p className="mt-0.5 text-xs text-muted">{finding.detail}</p>
                   </li>
@@ -330,7 +330,7 @@ export function AnalysisWorkspace({
                 type="button"
                 onClick={() => void handleAsk()}
                 disabled={asking || !question.trim()}
-                className="hover:bg-orange-500/10 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 disabled:opacity-50"
+                className="hover:bg-foreground/10 rounded-lg border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground disabled:opacity-50"
               >
                 {asking ? t("ask.working") : t("ask.button")}
               </button>

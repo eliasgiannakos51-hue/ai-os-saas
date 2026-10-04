@@ -326,9 +326,13 @@ const dimRule = (() => {
   const at = css.indexOf(".chat-ground-dim {");
   return at < 0 ? "" : css.slice(at, css.indexOf("}", at));
 })();
+// 62% UNTIL 2026-10-04, when the backdrop it dimmed was removed (ΣΥΣΤΗΜΑ
+// DESIGN: no background behind text). There is nothing left to dim, so
+// the ground paints nothing and the answer sits on the page — which is
+// also the design's "η απάντηση αριστερά, χωρίς πλαίσιο".
 check(
-  "the dim ground keeps its 62% strength",
-  /rgb\(var\(--background\) \/ 0\.62\)/.test(dimRule),
+  "the dim ground paints nothing, now that there is no backdrop to dim",
+  /background:\s*transparent/.test(dimRule),
   dimRule || ".chat-ground-dim not found in globals.css"
 );
 check("...and no blur, which is the whole reason it was chosen", dimRule.length > 0 && !/backdrop-filter/.test(dimRule), dimRule);

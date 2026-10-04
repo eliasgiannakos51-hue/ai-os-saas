@@ -790,7 +790,7 @@ export function FilesWorkspace({
           void uploadMany(e.dataTransfer.files);
         }}
         className={`rounded-2xl border-2 border-dashed p-6 text-center transition-colors duration-150 ${
-          dragging ? "border-orange-500 bg-orange-500/[0.06]" : "border-border bg-panel/40"
+          dragging ? "border-foreground/40 bg-foreground/[0.06]" : "border-border bg-panel/40"
         }`}
       >
         <Upload className="mx-auto mb-2 h-5 w-5 text-muted" aria-hidden="true" />
@@ -814,7 +814,7 @@ export function FilesWorkspace({
           data-testid="files-upload-button"
           onClick={() => inputRef.current?.click()}
           disabled={Boolean(uploading)}
-          className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+          className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-button px-4 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:opacity-60"
         >
           {uploading ? (
             <>
@@ -861,7 +861,7 @@ export function FilesWorkspace({
               data-testid="files-empty"
               className="rounded-2xl border border-border bg-panel/40 px-5 py-8 text-center"
             >
-              <FileText className="mx-auto mb-3 h-7 w-7 text-orange-400/70" aria-hidden="true" />
+              <FileText className="mx-auto mb-3 h-7 w-7 text-foreground/70" aria-hidden="true" />
               <p className="text-sm font-semibold text-foreground">{t("emptyTitle")}</p>
               <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-muted">{t("emptyBody")}</p>
               <p className="mx-auto mt-2 max-w-md text-xs italic leading-relaxed text-muted/80">
@@ -871,7 +871,7 @@ export function FilesWorkspace({
                 type="button"
                 data-testid="files-empty-upload"
                 onClick={() => inputRef.current?.click()}
-                className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-5 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
+                className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-5 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
               >
                 <Upload className="h-4 w-4" aria-hidden="true" />
                 {t("choose")}
@@ -941,8 +941,8 @@ export function FilesWorkspace({
                         file.processing_status !== "ready"
                           ? "cursor-not-allowed border-transparent text-muted/70"
                           : isSelected
-                            ? "border-orange-500/50 bg-orange-500/10 text-orange-300"
-                            : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
+                            ? "border-foreground/50 bg-foreground/10 text-foreground"
+                            : "border-border text-muted hover:border-foreground/40 hover:text-foreground"
                       }`}
                     >
                       <input
@@ -950,7 +950,7 @@ export function FilesWorkspace({
                         checked={isSelected}
                         disabled={file.processing_status !== "ready"}
                         onChange={() => toggle(file.id)}
-                        className="h-[18px] w-[18px] rounded border-border accent-orange-500"
+                        className="h-[18px] w-[18px] rounded border-border accent-foreground"
                       />
                       {file.processing_status === "ready" ? t("include") : t("cannotInclude")}
                     </label>
@@ -960,13 +960,13 @@ export function FilesWorkspace({
                         chip reading "Unreadable" does not say the file has
                         to be replaced rather than re-selected. */}
                     {(file.processing_status === "pending" || file.processing_status === "processing") && (
-                      <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-amber-400/90">
+                      <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-warning/90">
                         <Loader2 className="mt-0.5 h-3 w-3 shrink-0 animate-spin" aria-hidden="true" />
                         {t("processingHint")}
                       </p>
                     )}
                     {file.processing_status === "failed" && (
-                      <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-amber-400/90">
+                      <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-warning/90">
                         <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
                         {file.error ?? t("failedHint")}
                       </p>
@@ -1022,10 +1022,10 @@ export function FilesWorkspace({
           reader's certainty about what it was drawn from. */}
       <section
         id="files-ask"
-        className="space-y-3 rounded-2xl border border-orange-500/30 bg-orange-500/[0.04] p-4"
+        className="space-y-3 rounded-2xl border border-foreground/30 bg-foreground/[0.04] p-4"
       >
         <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Sparkles className="h-4 w-4 text-orange-400" aria-hidden="true" />
+          <Sparkles className="h-4 w-4 text-foreground" aria-hidden="true" />
           {t("askTitle")}
         </h2>
 
@@ -1071,7 +1071,7 @@ export function FilesWorkspace({
           <p
             data-testid="files-question-count"
             className={`text-[11px] ${
-              question.length >= MAX_QUESTION_CHARS ? "text-amber-400" : "text-muted"
+              question.length >= MAX_QUESTION_CHARS ? "text-warning" : "text-muted"
             }`}
           >
             {question.length >= MAX_QUESTION_CHARS
@@ -1098,7 +1098,7 @@ export function FilesWorkspace({
             data-testid="files-ask-button"
             onClick={() => void ask()}
             disabled={asking || Boolean(askDisabledReason)}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-orange-500/60 px-6 py-2.5 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-foreground/60 px-6 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {asking ? (
               // tone="inherit" because this button's background IS the
@@ -1113,7 +1113,7 @@ export function FilesWorkspace({
               Which of the two prerequisites is missing decides what the user
               does next, so it is named. */}
           {askDisabledReason && !asking && (
-            <p data-testid="files-ask-disabled-reason" className="text-xs text-amber-400/90">
+            <p data-testid="files-ask-disabled-reason" className="text-xs text-warning/90">
               {askDisabledReason}
             </p>
           )}
@@ -1129,7 +1129,7 @@ export function FilesWorkspace({
                 of the documents at all is the most important thing about
                 it. */}
             {!answer.fromDocuments && (
-              <p className="flex items-start gap-1.5 text-[11px] font-medium leading-relaxed text-amber-400">
+              <p className="flex items-start gap-1.5 text-[11px] font-medium leading-relaxed text-warning">
                 <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
                 {t("notInDocuments")}
               </p>
@@ -1186,7 +1186,7 @@ export function FilesWorkspace({
             {answer.fromDocuments && answer.citations.length === 0 && (
               <p
                 data-testid="files-answer-uncited"
-                className="flex items-start gap-1.5 text-[11px] font-medium leading-relaxed text-amber-400"
+                className="flex items-start gap-1.5 text-[11px] font-medium leading-relaxed text-warning"
               >
                 <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
                 {t("uncitedAnswer")}
@@ -1196,7 +1196,7 @@ export function FilesWorkspace({
                 references, the reader is entitled to know the answer was
                 less grounded than it looked. */}
             {answer.removedCitations > 0 && (
-              <p className="text-[11px] text-amber-400/90">
+              <p className="text-[11px] text-warning/90">
                 {t("removedCitations", { count: answer.removedCitations })}
               </p>
             )}
@@ -1210,9 +1210,9 @@ export function FilesWorkspace({
                 {t("readInParts", { parts: answer.parts })}
               </p>
             )}
-            {answer.truncated && <p className="text-[11px] text-amber-400/90">{t("truncatedWarning")}</p>}
+            {answer.truncated && <p className="text-[11px] text-warning/90">{t("truncatedWarning")}</p>}
             {answer.skippedFiles.length > 0 && (
-              <p className="text-[11px] text-amber-400/90">
+              <p className="text-[11px] text-warning/90">
                 {t("skippedFiles", { names: answer.skippedFiles.join(", ") })}
               </p>
             )}
@@ -1238,7 +1238,7 @@ export function FilesWorkspace({
           appears only once something is selected, which is also the moment
           the count becomes worth showing. */}
       {selected.length > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-orange-500/30 bg-panel/95 px-4 py-3 backdrop-blur">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-foreground/30 bg-panel/95 px-4 py-3 backdrop-blur">
           <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-3 gap-y-2">
             {/* "3 of 12 selected", not "3 files selected": the question the
                 user is actually asking is how much of what they uploaded
@@ -1247,7 +1247,7 @@ export function FilesWorkspace({
               data-testid="files-selected-count"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground"
             >
-              <Check className="h-4 w-4 text-orange-400" aria-hidden="true" />
+              <Check className="h-4 w-4 text-foreground" aria-hidden="true" />
               {t("selectedOfTotal", { count: selected.length, total: askableFiles.length })}
             </span>
             {selected.length < Math.min(askableFiles.length, MAX_FILES_PER_QUESTION) && (
@@ -1271,7 +1271,7 @@ export function FilesWorkspace({
             {/* The limit is stated BEFORE it is hit — a rule you only meet
                 by breaking it is a rule the UI kept to itself. */}
             {selected.length > MAX_FILES_PER_QUESTION ? (
-              <span className="text-[11px] text-amber-400/90">
+              <span className="text-[11px] text-warning/90">
                 {t("tooManySelected", { max: MAX_FILES_PER_QUESTION })}
               </span>
             ) : (
@@ -1290,7 +1290,7 @@ export function FilesWorkspace({
                   350
                 );
               }}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-orange-500/60 px-5 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-foreground/60 px-5 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
             >
               <Sparkles className="h-4 w-4" aria-hidden="true" />
               {t("goToAsk")}

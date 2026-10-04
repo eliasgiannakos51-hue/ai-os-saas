@@ -38,7 +38,7 @@ export function EnergySuggestion({
   return (
     <div className="mb-4 rounded-lg border border-border bg-panel/60 px-3 py-2.5">
       <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted">
-        <Icon className="h-3.5 w-3.5 text-orange-400/80" aria-hidden="true" />
+        <Icon className="h-3.5 w-3.5 text-foreground/80" aria-hidden="true" />
         {t(`heading.${suggestion.preferred}`)}
       </p>
       <p className="mt-1.5 text-sm text-foreground">{suggestion.top.text}</p>

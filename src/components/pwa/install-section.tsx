@@ -85,11 +85,11 @@ export function InstallSection() {
     <div className="surface">
       <h2 className="flex items-center gap-2 text-sm font-semibold">
         {installed ? (
-          <Check className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+          <Check className="h-4 w-4 text-success" aria-hidden="true" />
         ) : onApple ? (
-          <Smartphone className="h-4 w-4 text-orange-400" aria-hidden="true" />
+          <Smartphone className="h-4 w-4 text-foreground" aria-hidden="true" />
         ) : (
-          <Download className="h-4 w-4 text-orange-400" aria-hidden="true" />
+          <Download className="h-4 w-4 text-foreground" aria-hidden="true" />
         )}
         {installed ? t("installedHere") : onApple ? t("iosTitle") : t("installTitle")}
       </h2>
@@ -101,7 +101,7 @@ export function InstallSection() {
             type="button"
             onClick={install}
             data-testid="settings-install"
-            className="mt-3 rounded-lg border border-orange-500/60 px-3 py-1.5 text-xs font-semibold text-orange-300 transition hover:bg-orange-500/10"
+            className="mt-3 rounded-lg border border-foreground/60 px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-foreground/10"
           >
             {t("install")}
           </button>

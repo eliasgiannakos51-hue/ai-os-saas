@@ -111,7 +111,7 @@ export default async function PublishedSitesPage() {
   const cap = isAdmin ? Number.POSITIVE_INFINITY : planCap;
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.published" helpArticle="publish-website" icon={Globe} title={t("title")} description={t("description")} />
 

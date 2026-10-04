@@ -337,7 +337,7 @@ export function ResearchWorkspace({
             type="button"
             onClick={() => void plan()}
             disabled={planning || !topic.trim() || capReached}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-button px-4 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:opacity-60"
           >
             {planning ? (
               <>
@@ -357,15 +357,15 @@ export function ResearchWorkspace({
               : t("usedThisMonth", { used: usedThisMonth, cap: monthlyCap })}
           </span>
         </div>
-        {capReached && <p className="text-[11px] text-amber-400/90">{t("capReached")}</p>}
+        {capReached && <p className="text-[11px] text-warning/90">{t("capReached")}</p>}
       </section>
 
       {/* The stop. The questions and the price, together, before anything
           expensive happens. */}
       {draft && (
-        <section className="space-y-3 rounded-2xl border border-orange-500/30 bg-orange-500/[0.04] p-4">
+        <section className="space-y-3 rounded-2xl border border-foreground/30 bg-foreground/[0.04] p-4">
           <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-            <Telescope className="h-4 w-4 text-orange-400" aria-hidden="true" />
+            <Telescope className="h-4 w-4 text-foreground" aria-hidden="true" />
             {t("planTitle")}
           </h2>
           <p className="text-[11px] leading-relaxed text-muted">{t("planIntro")}</p>
@@ -390,7 +390,7 @@ export function ResearchWorkspace({
             <button
               type="button"
               onClick={() => void run(draft.report.id)}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
             >
               <Play className="h-3.5 w-3.5" aria-hidden="true" />
               {t("start")}
@@ -473,7 +473,7 @@ export function ResearchWorkspace({
               ]}
             >
               {report.error && (
-                <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-amber-400/90">
+                <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-warning/90">
                   <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
                   {isStoppedMessage(report.error) ? tSteps("stopped") : report.error}
                 </p>
@@ -501,7 +501,7 @@ export function ResearchWorkspace({
                         () => addToast(t("runError"), "error")
                       );
                     }}
-                    className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-border px-2.5 text-[11px] font-medium text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-300"
+                    className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-border px-2.5 text-[11px] font-medium text-muted transition-colors duration-150 hover:border-foreground/50 hover:text-foreground"
                   >
                     <Square className="h-2.5 w-2.5 fill-current" aria-hidden="true" />
                     {tSteps("stop")}
@@ -531,7 +531,7 @@ export function ResearchWorkspace({
                       aria-valuenow={report.questions_done ?? 0}
                     >
                       <div
-                        className="h-full rounded-full bg-orange-500 transition-all duration-500"
+                        className="h-full rounded-full bg-button transition-all duration-500"
                         style={{
                           width: `${Math.round(((report.questions_done ?? 0) / report.questions_total) * 100)}%`,
                         }}

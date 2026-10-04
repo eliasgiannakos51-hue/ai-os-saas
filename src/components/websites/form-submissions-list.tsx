@@ -147,8 +147,8 @@ export function FormSubmissionsList({
   return (
     <div className="space-y-4">
       {deliveryFault && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm">
-          <p className="flex items-center gap-2 font-medium text-amber-300">
+        <div className="rounded-xl border border-warning/30 bg-warning/10 p-4 text-sm">
+          <p className="flex items-center gap-2 font-medium text-warning">
             <MailWarning className="h-4 w-4 shrink-0" aria-hidden="true" />
             {t(`delivery.${deliveryFault}`)}
           </p>
@@ -159,7 +159,7 @@ export function FormSubmissionsList({
               says what to change, and paraphrasing it would lose the
               domain name it usually contains. */}
           {deliveryFaultDetail && (
-            <p className="mt-2 break-words rounded-lg bg-black/20 p-2 font-mono text-[11px] text-muted">
+            <p className="mt-2 break-words rounded-lg bg-background/20 p-2 font-mono text-[11px] text-muted">
               {deliveryFaultDetail}
             </p>
           )}
@@ -235,7 +235,7 @@ export function FormSubmissionsList({
                 <li
                   key={row.id}
                   className={`rounded-xl border p-3 transition-colors ${
-                    row.read_at ? "border-border bg-panel/50" : "border-orange-500/30 bg-panel"
+                    row.read_at ? "border-border bg-panel/50" : "border-foreground/30 bg-panel"
                   }`}
                 >
                   <button
@@ -256,7 +256,7 @@ export function FormSubmissionsList({
                           {formTypeLabel(row.form_type)}
                         </span>
                         {!row.read_at && (
-                          <span className="rounded-full bg-orange-500/20 px-2 py-0.5 text-[10px] text-orange-300">
+                          <span className="rounded-full bg-foreground/20 px-2 py-0.5 text-[10px] text-foreground">
                             {t("new")}
                           </span>
                         )}
@@ -272,14 +272,14 @@ export function FormSubmissionsList({
                           did not. */}
                       {isDeliveryFault(row.email_status) ? (
                         <MailWarning
-                          className="h-4 w-4 text-amber-400"
+                          className="h-4 w-4 text-warning"
                           aria-label={t(`delivery.${row.email_status}` as never)}
                         />
                       ) : row.email_status === "sent" ? (
-                        <Mail className="h-4 w-4 text-emerald-400/70" aria-label={t("delivery.sent")} />
+                        <Mail className="h-4 w-4 text-success/70" aria-label={t("delivery.sent")} />
                       ) : null}
                       {row.consent ? (
-                        <ShieldCheck className="h-4 w-4 text-emerald-400/70" aria-label={t("consentGiven")} />
+                        <ShieldCheck className="h-4 w-4 text-success/70" aria-label={t("consentGiven")} />
                       ) : (
                         <ShieldAlert className="h-4 w-4 text-muted" aria-label={t("consentMissing")} />
                       )}
@@ -304,7 +304,7 @@ export function FormSubmissionsList({
                       </p>
 
                       {row.email_detail && (
-                        <p className="break-words rounded-lg bg-black/20 p-2 font-mono text-[11px] text-muted">
+                        <p className="break-words rounded-lg bg-background/20 p-2 font-mono text-[11px] text-muted">
                           {row.email_detail}
                         </p>
                       )}
@@ -313,7 +313,7 @@ export function FormSubmissionsList({
                         type="button"
                         onClick={() => void remove(row)}
                         disabled={busyId === row.id}
-                        className="flex min-h-[36px] items-center gap-1.5 rounded-lg border border-red-500/30 px-2.5 text-xs text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-40"
+                        className="flex min-h-[36px] items-center gap-1.5 rounded-lg border border-danger/30 px-2.5 text-xs text-danger transition-colors hover:bg-danger/10 disabled:opacity-40"
                       >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         {t("delete")}

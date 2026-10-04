@@ -63,8 +63,8 @@ export function TemplateMatches({
   return (
     <div className="space-y-3">
       {matches.length > 0 && (
-        <div className="space-y-2 rounded-xl border border-orange-500/25 bg-orange-500/[0.06] p-3">
-          <p className="flex items-center gap-2 text-sm font-medium text-orange-300">
+        <div className="space-y-2 rounded-xl border border-foreground/25 bg-foreground/[0.06] p-3">
+          <p className="flex items-center gap-2 text-sm font-medium text-foreground">
             <Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />
             {t("found", { count: matches.length })}
           </p>
@@ -74,14 +74,14 @@ export function TemplateMatches({
                 <p className="text-sm font-medium text-foreground">{match.title}</p>
                 <p className="mt-0.5 text-[11px] leading-relaxed text-muted">{match.description}</p>
                 {/* THE ACTUAL TASK, with the slot still showing. */}
-                <p className="mt-2 line-clamp-3 rounded bg-black/20 p-2 text-[11px] leading-relaxed text-muted">
+                <p className="mt-2 line-clamp-3 rounded bg-background/20 p-2 text-[11px] leading-relaxed text-muted">
                   {match.taskPattern}
                 </p>
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => onUse(match)}
-                  className="hover:bg-orange-500/10 mt-2 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-orange-500/90 px-3 text-sm font-medium text-orange-300 transition-colors hover:border border-orange-500/60 disabled:opacity-50"
+                  className="hover:bg-foreground/10 mt-2 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-foreground/90 px-3 text-sm font-medium text-foreground transition-colors hover:border border-foreground/60 disabled:opacity-50"
                 >
                   {t("use", { credits: templateCredits })}
                 </button>

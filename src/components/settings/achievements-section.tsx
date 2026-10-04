@@ -62,12 +62,12 @@ export function AchievementsSection({ unlocked }: { unlocked: UnlockedAchievemen
             <li
               key={display.key}
               className={`flex items-start gap-2.5 rounded-xl border px-3 py-2.5 ${
-                isUnlocked ? "border-orange-500/30 bg-orange-500/[0.03]" : "border-border bg-input"
+                isUnlocked ? "border-foreground/30 bg-foreground/[0.03]" : "border-border bg-input"
               }`}
             >
               <span
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                  isUnlocked ? "bg-orange-500/10 text-orange-400" : "bg-panel-hover text-muted"
+                  isUnlocked ? "bg-foreground/10 text-foreground" : "bg-panel-hover text-muted"
                 }`}
               >
                 {isUnlocked ? (

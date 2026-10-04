@@ -57,17 +57,17 @@ export default function DashboardError({
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div
         role="alert"
-        className="w-full max-w-md rounded-2xl border border-red-500/30 bg-red-500/[0.04] p-6"
+        className="w-full max-w-md rounded-2xl border border-danger/30 bg-danger/[0.04] p-6"
       >
         <p className="flex items-center gap-2 text-base font-semibold text-foreground">
-          <AlertTriangle className="h-5 w-5 shrink-0 text-red-400" aria-hidden="true" />
+          <AlertTriangle className="h-5 w-5 shrink-0 text-danger" aria-hidden="true" />
           {t("title")}
         </p>
         <p className="mt-2 text-sm text-muted">{t("body")}</p>
         <button
           type="button"
           onClick={() => reset()}
-          className="mt-5 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90"
+          className="mt-5 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-opacity hover:opacity-90"
         >
           {t("reload")}
         </button>

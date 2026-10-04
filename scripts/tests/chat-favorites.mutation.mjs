@@ -117,8 +117,8 @@ const MUTANTS = [
     // asserting it, so re-adding it is a failure and not a silent revert.
     name: "the removed orange glow is put back on the starred state",
     file: BUTTON,
-    from: '"bg-white/[0.04] text-muted shadow-[0_0_0_1px_rgba(255,255,255,0.09)]',
-    to: '"bg-white/[0.04] text-muted shadow-[0_0_16px_rgba(249,115,22,0.5)]',
+    from: '"bg-foreground/[0.04] text-muted ring-1 ring-inset ring-foreground/10',
+    to: '"bg-foreground/[0.04] text-muted ring-1 ring-inset ring-foreground/10 shadow-[0_0_16px_rgba(249,115,22,0.5)]',
     expect: "does not glow",
   },
   {

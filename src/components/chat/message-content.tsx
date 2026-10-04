@@ -19,7 +19,7 @@ const markdownComponents: Components = {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-orange-400 underline underline-offset-2"
+      className="text-foreground underline underline-offset-2"
     >
       {children}
     </a>
@@ -42,7 +42,7 @@ const markdownComponents: Components = {
     );
   },
   blockquote: ({ children }) => (
-    <blockquote className="mb-2 border-s-2 border-orange-500/40 ps-3 text-foreground/80 last:mb-0">
+    <blockquote className="mb-2 border-s-2 border-foreground/40 ps-3 text-foreground/80 last:mb-0">
       {children}
     </blockquote>
   ),

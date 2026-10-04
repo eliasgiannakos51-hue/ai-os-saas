@@ -17,7 +17,6 @@ import {
   type SidebarItem,
 } from "@/lib/sidebar-nav";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { useToast } from "@/components/toast/toast-context";
 import { Logo } from "@/components/logo";
 import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
@@ -48,7 +47,7 @@ function isActive(pathname: string | null, href: string) {
 // is now stated as a constant rather than left to a dead branch: a
 // function of the heading could go back to disagreeing with the config,
 // a constant cannot.
-const RESTING_ICON = "text-emerald-400/50";
+const RESTING_ICON = "text-success/50";
 
 /** Where the full list lives now — app/dashboard/tools/page.tsx. */
 const ALL_TOOLS_HREF = "/dashboard/tools";
@@ -232,15 +231,15 @@ export function Sidebar({
                     data-active={active}
                     className={`nav-item group relative flex min-h-[44px] items-center gap-2.5 rounded-xl py-2 ps-2.5 pe-3 text-sm transition-colors duration-200 ${
                       active
-                        ? "font-semibold text-orange-200"
-                        : "text-muted hover:bg-white/[0.045] hover:text-foreground hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.18)]"
+                        ? "font-semibold text-foreground"
+                        : "text-muted hover:bg-foreground/[0.045] hover:text-foreground"
                     }`}
                   >
                     <Icon
                       className={`icon-bounce h-4 w-4 shrink-0 ${
                         active
-                          ? "text-orange-300 drop-"
-                          : `${RESTING_ICON} group-hover:text-orange-300`
+                          ? "text-foreground drop-"
+                          : `${RESTING_ICON} group-hover:text-foreground`
                       }`}
                       aria-hidden="true"
                     />
@@ -269,13 +268,13 @@ export function Sidebar({
       {open && (
         <div
           onClick={closeOnMobile}
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-200 md:hidden"
+          className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm transition-opacity duration-200 md:hidden"
           aria-hidden="true"
         />
       )}
 
       <aside
-        className={`fixed inset-y-0 start-0 z-50 w-64 transform overflow-y-auto border-e border-white/[0.07] bg-panel/80 backdrop-blur-xl transition-transform duration-200 ease-in-out md:sticky md:top-0 md:z-auto md:h-screen md:w-60 md:shrink-0 md:translate-x-0 ${
+        className={`fixed inset-y-0 start-0 z-50 w-64 transform overflow-y-auto border-e border-foreground/[0.07] bg-panel/80 backdrop-blur-xl transition-transform duration-200 ease-in-out md:sticky md:top-0 md:z-auto md:h-screen md:w-60 md:shrink-0 md:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full rtl:translate-x-full md:rtl:translate-x-0"
         }`}
       >
@@ -314,7 +313,7 @@ export function Sidebar({
           )}
         </nav>
 
-        <div className="border-t border-white/[0.07] p-3">
+        <div className="border-t border-foreground/[0.07] p-3">
             {sidebarGroups([SETTINGS_GROUP], isOwner).map(renderGroup)}
           </div>
 
@@ -331,21 +330,18 @@ export function Sidebar({
             below the fold of a scrolling drawer is not reachable. It is
             now in the top bar at every width (top-nav.tsx), which is
             visible without a scroll and without opening anything. */}
-        <div className="flex items-center gap-1 border-t border-white/[0.07] p-3 sm:hidden">
-          <ThemeToggle />
-        </div>
 
         {/* Account card. Both values come from the already-loaded session
             in dashboard/layout.tsx — no extra query, and nothing is
             rendered at all if the layout couldn't supply them. */}
         {email && (
-          <div className="border-t border-white/[0.07] p-3">
+          <div className="border-t border-foreground/[0.07] p-3">
             <Link
               href="/dashboard/settings"
               onClick={closeOnMobile}
-              className="group flex items-center gap-2.5 rounded-xl px-2 py-2 transition-colors duration-200 hover:bg-white/[0.05]"
+              className="group flex items-center gap-2.5 rounded-xl px-2 py-2 transition-colors duration-200 hover:bg-foreground/[0.05]"
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fbbf24_0%,#f97316_55%,#a855f7_100%)] text-sm font-bold text-black">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-panel-hover text-sm font-semibold text-foreground">
                 {displayNameFromEmail(email).charAt(0).toUpperCase()}
               </span>
               <span className="min-w-0 flex-1">

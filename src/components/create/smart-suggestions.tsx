@@ -23,13 +23,13 @@ export function SmartSuggestions({
 
   return (
     <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted">
-      <Lightbulb className="h-3.5 w-3.5 shrink-0 text-orange-400/70" aria-hidden="true" />
+      <Lightbulb className="h-3.5 w-3.5 shrink-0 text-foreground/70" aria-hidden="true" />
       {modules.map((m) => (
         <button
           key={m.slug}
           type="button"
           onClick={() => onPick(suggestionPhrase(m.title))}
-          className="rounded-full border border-border px-2.5 py-1 transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+          className="rounded-full border border-border px-2.5 py-1 transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
         >
           {m.title}
         </button>

@@ -35,7 +35,7 @@ export function VoiceSettings() {
   return (
     <div id="voice" className="mb-6 scroll-mt-20 space-y-4 surface">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <AudioLines className="h-4 w-4 text-orange-400" aria-hidden="true" /> {t("title")}
+        <AudioLines className="h-4 w-4 text-foreground" aria-hidden="true" /> {t("title")}
       </h2>
       <p className="text-xs leading-relaxed text-muted">{t("description")}</p>
 
@@ -65,7 +65,7 @@ export function VoiceSettings() {
               aria-label={t("title")}
             >
               <div
-                className="h-full rounded-full bg-orange-500 transition-[width] duration-300"
+                className="h-full rounded-full bg-button transition-[width] duration-300"
                 style={{ width: `${percent}%` }}
               />
             </div>
@@ -100,7 +100,7 @@ export function VoiceSettings() {
               <dt className="text-[11px] text-muted">{t("transcribeLabel")}</dt>
               <dd
                 className={
-                  v.configured.transcribe ? "text-sm text-foreground" : "text-xs text-amber-400/90"
+                  v.configured.transcribe ? "text-sm text-foreground" : "text-xs text-warning/90"
                 }
               >
                 {v.configured.transcribe
@@ -112,7 +112,7 @@ export function VoiceSettings() {
               <dt className="text-[11px] text-muted">{t("speakLabel")}</dt>
               <dd
                 className={
-                  v.configured.speak ? "text-sm text-foreground" : "text-xs text-amber-400/90"
+                  v.configured.speak ? "text-sm text-foreground" : "text-xs text-warning/90"
                 }
               >
                 {v.configured.speak
@@ -125,7 +125,7 @@ export function VoiceSettings() {
           {/* And say what that costs the reader, in words, rather than
               leaving them to infer it from a missing button. */}
           {v.included && (!v.configured.transcribe || !v.configured.speak) ? (
-            <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs leading-relaxed text-amber-200">
+            <p className="rounded-xl border border-warning/40 bg-warning/10 px-3 py-2 text-xs leading-relaxed text-warning">
               {!v.configured.speak && !v.configured.transcribe
                 ? t("notConfigured")
                 : !v.configured.speak

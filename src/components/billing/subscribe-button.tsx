@@ -82,7 +82,7 @@ export function SubscribeButton({
       <button type="button" onClick={handleClick} disabled={loading} className={className}>
         {loading ? tCommon("loading") : label}
       </button>
-      {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+      {error && <p className="mt-2 text-xs text-danger">{error}</p>}
     </div>
   );
 }

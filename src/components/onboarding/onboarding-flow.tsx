@@ -297,7 +297,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                 // user gets past the first minute.
                 className={`flex min-h-[44px] items-center rounded-xl border p-3 text-start text-xs font-medium transition-colors duration-150 ${
                   goal === value
-                    ? "border-orange-500 bg-orange-500/[0.06] text-foreground"
+                    ? "border-foreground/40 bg-foreground/[0.06] text-foreground"
                     : "border-border bg-panel/60 text-muted hover:text-foreground"
                 }`}
               >
@@ -373,7 +373,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                 type="button"
                 onClick={() => inputRef.current?.click()}
                 disabled={busy}
-                className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+                className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-button px-4 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:opacity-60"
               >
                 {pending === "reading" ? (
                   <>
@@ -404,8 +404,8 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                   cannot decide. A silently-wrong date order poisons every
                   time-based insight and is invisible afterwards. */}
               {analysis.dateAmbiguous && (
-                <div className="space-y-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3">
-                  <p className="flex items-start gap-1.5 text-[11px] font-medium leading-relaxed text-amber-300">
+                <div className="space-y-1.5 rounded-xl border border-warning/40 bg-warning/10 p-3">
+                  <p className="flex items-start gap-1.5 text-[11px] font-medium leading-relaxed text-warning">
                     <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
                     {t("dateAmbiguous")}
                   </p>
@@ -417,7 +417,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                         onClick={() => setDateOrder(order)}
                         className={`inline-flex min-h-[44px] items-center rounded-lg border px-3 py-1 text-[11px] font-medium transition-colors duration-150 ${
                           dateOrder === order
-                            ? "border-orange-500 text-foreground"
+                            ? "border-foreground/40 text-foreground"
                             : "border-border text-muted hover:text-foreground"
                         }`}
                       >
@@ -510,7 +510,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                   type="button"
                   onClick={() => void applyImport()}
                   disabled={busy || analysis.counts.readyRows === 0}
-                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-60"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-60"
                 >
                   {/* THE ONE SPINNER THAT STAYS. /api/import/csv/apply
                       writes rows and calls no model; spending the globe on
@@ -562,7 +562,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
             type="button"
             onClick={() => void applyPaste()}
             disabled={busy || pasteText.trim().length < MIN_PASTE_CHARS}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-60"
           >
             {pending === "pasting" ? (
               <>
@@ -580,7 +580,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
       )}
 
       {step === "analysing" && (
-        <section className="space-y-2 rounded-2xl border border-orange-500/30 bg-orange-500/[0.04] p-6 text-center">
+        <section className="space-y-2 rounded-2xl border border-foreground/30 bg-foreground/[0.04] p-6 text-center">
           <ThinkingIndicator className="mx-auto" />
           <p className="text-sm font-medium text-foreground">{t("analysing")}</p>
           <p className="text-[11px] leading-relaxed text-muted">{t("analysingHint")}</p>
@@ -590,7 +590,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
       {step === "insights" && (
         <section className="space-y-3">
           <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-            <Sparkles className="h-4 w-4 text-orange-400" aria-hidden="true" />
+            <Sparkles className="h-4 w-4 text-foreground" aria-hidden="true" />
             {t("insightsTitle")}
           </h2>
 
@@ -617,7 +617,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
           <button
             type="button"
             onClick={() => void finish()}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
           >
             {t("goToDashboard")}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -649,9 +649,9 @@ function SourceCard({
     <button
       type="button"
       onClick={onSelect}
-      className="flex min-h-[44px] items-center surface-tight text-start transition-colors duration-150 hover:border-orange-500/40"
+      className="flex min-h-[44px] items-center surface-tight text-start transition-colors duration-150 hover:border-foreground/40"
     >
-      <Icon className="mb-1.5 h-4 w-4 text-orange-400" aria-hidden="true" />
+      <Icon className="mb-1.5 h-4 w-4 text-foreground" aria-hidden="true" />
       <p className="text-xs font-semibold text-foreground">{title}</p>
       <p className="mt-0.5 text-[11px] leading-relaxed text-muted">{description}</p>
     </button>

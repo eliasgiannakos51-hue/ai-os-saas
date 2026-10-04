@@ -83,10 +83,10 @@ export function InsightList({
         return (
           <li
             key={key}
-            className="rounded-2xl border border-orange-500/30 bg-orange-500/[0.04] p-4"
+            className="rounded-2xl border border-foreground/30 bg-foreground/[0.04] p-4"
           >
             <div className="flex items-start gap-3">
-              <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
+              <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-foreground" aria-hidden="true" />
               <div className="min-w-0 flex-1 space-y-1.5">
                 <p className="text-sm font-semibold leading-snug text-foreground">{insight.headline}</p>
                 <p className="text-xs leading-relaxed text-muted">{insight.detail}</p>
@@ -109,7 +109,7 @@ export function InsightList({
                   {route && (
                     <Link
                       href={route}
-                      className="-my-3 inline-flex min-h-[44px] items-center gap-1 text-[11px] font-medium text-orange-400 transition-colors duration-150 hover:text-orange-300"
+                      className="-my-3 inline-flex min-h-[44px] items-center gap-1 text-[11px] font-medium text-foreground transition-colors duration-150 hover:text-foreground"
                     >
                       {t("checkIt")}
                       <ArrowRight className="h-3 w-3" aria-hidden="true" />

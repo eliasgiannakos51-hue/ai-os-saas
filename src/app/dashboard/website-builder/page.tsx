@@ -67,7 +67,7 @@ export default async function WebsiteBuilderPage({
   const planSlug = await resolveEffectivePlanSlug(user);
   if (!accountHasCapability(planSlug, "websiteBuilder", isAdmin)) {
     return (
-      <div className="min-h-full bg-dot-grid">
+      <div className="min-h-full">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader
             helpKey="help.websiteBuilder"
@@ -93,7 +93,7 @@ export default async function WebsiteBuilderPage({
   ];
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.websiteBuilder" helpArticle="create-website" icon={WEBSITE_BUILDER_ICON} title={t("title")} description={t("description")} />
         <WebsiteBuilderWorkspace

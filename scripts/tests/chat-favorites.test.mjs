@@ -108,14 +108,16 @@ check(
   /h-11 w-11/.test(cardMenu),
   "the star and the ... menu are adjacent on every card; different sizes read as a mistake."
 );
-check("resting ring when unstarred", /shadow-\[0_0_0_1px_rgba\(255,255,255,0\.09\)\]/.test(btn));
+check("resting ring when unstarred", /ring-1 ring-inset ring-foreground\/10/.test(btn));
 // FILLED WHEN STARRED, AND NO LONGER GLOWING. Redesign phase 4 removed
 // the 16px orange bloom from this button along with every other one;
 // what says "starred" is the fill, the accent text colour and the solid
 // star, which are three signals and none of them needs light. The glow
 // is FORBIDDEN here rather than merely absent, so putting it back turns
 // this red instead of quietly re-introducing the thing the round removed.
-check("filled amber when starred", /bg-orange-500\/20/.test(btn) && /text-orange-300/.test(btn));
+// Since 2026-10-04 the fill is the text colour at 20%: the design has no
+// accent to fill it with (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN).
+check("filled when starred", /bg-foreground\/20 text-foreground/.test(btn));
 check("...and it does not glow", !/0_0_16px/.test(btn) && !/0_0_\d\dpx_.*rgba\(249,115,22/.test(btn));
 check("the star fills only when favourited", /fill=\{favorited \? "currentColor" : "none"\}/.test(btn));
 check("corner variant still pins at 12px from the trailing corner", /absolute end-3 top-3/.test(btn));

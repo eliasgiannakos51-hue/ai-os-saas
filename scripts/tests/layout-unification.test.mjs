@@ -184,12 +184,19 @@ console.log("\n== 6. what must NOT have changed ==");
 // The unification was a layout change only. These are the things that
 // were explicitly out of scope, asserted so a future pass cannot quietly
 // take them with it.
-checkTrue("the globe background still exists", existsSync("src/components/dashboard/dashboard-background.tsx"));
-checkTrue("...and is still mounted in the dashboard layout", /DashboardBackground/.test(read("src/app/dashboard/layout.tsx")));
-checkTrue("ambient animation is still mounted", /AmbientDots/.test(read("src/app/dashboard/layout.tsx")));
+// The globe backdrop and the ambient dots were out of scope for the
+// unification and were asserted kept. The owner's design of 2026-10-04
+// removes them ("Αφαίρεσε το παλιό φόντο με τις γραμμές από όλες τις
+// οθόνες"), so the assertion turns round rather than going away.
+checkTrue("the globe backdrop is gone, by the design's decision", !existsSync("src/components/dashboard/dashboard-background.tsx"));
+checkTrue("...and nothing mounts it in the dashboard layout", !/DashboardBackground|AmbientDots/.test(read("src/app/dashboard/layout.tsx")));
 checkTrue("page transitions still wrap the content", /PageTransition/.test(read("src/app/dashboard/layout.tsx")));
-// The amber/orange identity lives in the nav item styling.
-checkTrue("the amber active state survives", /text-orange-200|orange-300/.test(read("src/components/dashboard/sidebar.tsx")));
+// The active nav row: the design's active surface with the text at full
+// strength (ΣΥΣΤΗΜΑ DESIGN, SIDEBAR). Read from the stylesheet the rail uses.
+checkTrue(
+  "the active state is the active surface",
+  /\.nav-item\[data-active="true"\]\s*\{[^}]*background-color:\s*rgb\(var\(--panel-hover\)\)/.test(read("src/app/globals.css"))
+);
 // Functionality: the primitive must not have swallowed any of it.
 checkTrue("search is still wired by the caller", /onSearchChange/.test(LAYOUT));
 checkTrue("filters are still the caller's", /filters\?:/.test(LAYOUT));

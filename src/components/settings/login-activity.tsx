@@ -47,7 +47,7 @@ export function LoginActivity({ devices: initialDevices }: { devices: KnownDevic
   return (
     <div className="mb-6 space-y-3 surface">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <ShieldCheck className="h-4 w-4 text-orange-400" /> {t("title")}
+        <ShieldCheck className="h-4 w-4 text-foreground" /> {t("title")}
       </h2>
       <p className="text-xs text-muted">{t("description")}</p>
 
@@ -79,7 +79,7 @@ export function LoginActivity({ devices: initialDevices }: { devices: KnownDevic
                   disabled={removingId === device.id}
                   aria-label={t("removeDeviceAria", { device: label })}
                   title={t("removeDevice")}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-red-950/30 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-danger/10 hover:text-danger disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
                 </button>

@@ -149,7 +149,7 @@ export function InlineTitle({
         }}
         className={
           inputClassName ??
-          "min-w-0 flex-1 rounded-lg border border-orange-500/60 bg-input px-2.5 py-[7px] text-sm text-foreground outline-none"
+          "min-w-0 flex-1 rounded-lg border border-foreground/60 bg-input px-2.5 py-[7px] text-sm text-foreground outline-none"
         }
       />
       {/* The counter appears only in the last stretch. Shown from the
@@ -158,7 +158,7 @@ export function InlineTitle({
       {remaining <= 20 && (
         <span
           data-testid="conversation-rename-count"
-          className={`shrink-0 text-[11px] tabular-nums ${remaining === 0 ? "text-amber-400" : "text-muted"}`}
+          className={`shrink-0 text-[11px] tabular-nums ${remaining === 0 ? "text-warning" : "text-muted"}`}
         >
           {remaining}
         </span>

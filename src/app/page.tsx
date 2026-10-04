@@ -3,8 +3,6 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { DeletedAccountBanner } from "@/components/landing/deleted-account-banner";
-import { GlowOrb } from "@/components/ui/glow-orb";
-import { AppBackground } from "@/components/ui/app-background";
 import { Logo } from "@/components/logo";
 import { FOOTER_LINKS } from "@/lib/footer-links";
 
@@ -57,15 +55,6 @@ export default async function Home() {
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 text-center">
-      {/* Same rotating wireframe globe used on /login and /signup (see
-          auth-background.tsx) — the landing page previously only had
-          GlowOrb's warm accent glow, which read as a different, less
-          striking background than the auth pages right next to it.
-          GlowOrb stays layered on top as a subtle color accent near the
-          hero; the globe sits behind everything. */}
-      <AppBackground />
-      <GlowOrb className="left-1/2 top-0 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/3" />
-
       <div className="relative z-10">
         <DeletedAccountBanner />
 
@@ -98,13 +87,13 @@ export default async function Home() {
         <div className="mx-auto mt-10 flex w-full max-w-xs flex-col justify-center gap-3 sm:max-w-none sm:flex-row">
           <Link
             href="/login"
-            className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-6 py-2.5 text-sm font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+            className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-6 py-2.5 text-sm font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
           >
             {t("logIn")}
           </Link>
           <Link
             href="/signup"
-            className="cta-amber inline-flex min-h-[44px] items-center justify-center rounded-xl px-6 py-2.5 text-sm font-semibold text-black"
+            className="cta-amber inline-flex min-h-[44px] items-center justify-center rounded-xl px-6 py-2.5 text-sm font-semibold text-button-ink"
           >
             {t("signUp")}
           </Link>
@@ -148,7 +137,7 @@ export default async function Home() {
               ) : null}
               <Link
                 href={href}
-                className="inline-flex min-h-[44px] items-center px-2 transition-colors duration-150 hover:text-orange-400 sm:min-h-0 sm:px-0"
+                className="inline-flex min-h-[44px] items-center px-2 transition-colors duration-150 hover:text-foreground sm:min-h-0 sm:px-0"
               >
                 {t(labelKey)}
               </Link>

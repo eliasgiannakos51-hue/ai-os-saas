@@ -107,7 +107,7 @@ export default async function ProductWorkflowPage() {
   ).entries.slice(0, MINI_TIMELINE_LIMIT);
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader
           icon={PRODUCT_WORKFLOW_ICON}
@@ -135,7 +135,7 @@ export default async function ProductWorkflowPage() {
           </div>
           <Link
             href="/dashboard/timeline?module=products"
-            className="mt-2 inline-block text-xs text-orange-400 transition-colors duration-150 hover:underline"
+            className="mt-2 inline-block text-xs text-foreground transition-colors duration-150 hover:underline"
           >
             {t("viewFullTimeline")}
           </Link>

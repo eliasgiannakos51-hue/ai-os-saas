@@ -82,8 +82,8 @@ export function SecurityCheckedBadge({
         onClick={() => setOpen((o) => !o)}
         className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors duration-150 ${
           passed
-            ? "border-emerald-800 bg-emerald-500/10 text-emerald-400 hover:border-emerald-600"
-            : "border-amber-800 bg-amber-500/10 text-amber-400 hover:border-amber-600"
+            ? "border-success/40 bg-success/10 text-success hover:border-success"
+            : "border-warning/40 bg-warning/10 text-warning hover:border-warning"
         }`}
         aria-expanded={open}
       >
@@ -101,7 +101,7 @@ export function SecurityCheckedBadge({
       {open && (
         <div
           ref={panelRef}
-          className="absolute start-0 top-full z-20 mt-1.5 w-72 surface-tight text-start shadow-xl"
+          className="absolute start-0 top-full z-20 mt-1.5 w-72 surface-tight text-start"
         >
           <div className="mb-2 flex items-center justify-between">
             <p className="text-xs font-semibold text-foreground">{t("title")}</p>
@@ -125,15 +125,15 @@ export function SecurityCheckedBadge({
           </ul>
           {log.check_result.issues.length > 0 ? (
             <>
-              <p className="mb-1 text-[11px] font-medium text-amber-400">{t("issuesFound")}</p>
-              <ul className="list-inside list-disc space-y-0.5 text-[11px] text-amber-300/80">
+              <p className="mb-1 text-[11px] font-medium text-warning">{t("issuesFound")}</p>
+              <ul className="list-inside list-disc space-y-0.5 text-[11px] text-warning/80">
                 {log.check_result.issues.map((issue, i) => (
                   <li key={i}>{issue}</li>
                 ))}
               </ul>
             </>
           ) : (
-            <p className="text-[11px] text-emerald-400">{t("noIssues")}</p>
+            <p className="text-[11px] text-success">{t("noIssues")}</p>
           )}
         </div>
       )}

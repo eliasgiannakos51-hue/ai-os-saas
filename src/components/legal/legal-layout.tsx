@@ -59,7 +59,7 @@ export async function LegalLayout({
       <div className="mx-auto max-w-2xl">
         <Link
           href="/"
-          className="text-sm tracking-widest text-orange-500 transition-colors hover:text-orange-400"
+          className="text-sm tracking-widest text-foreground transition-colors hover:text-foreground"
         >
           Ionexa AI
         </Link>
@@ -71,7 +71,7 @@ export async function LegalLayout({
         </p>
 
         {notice === "draft" ? (
-          <div className="mt-4 rounded border border-orange-900 bg-orange-950/20 px-4 py-3 text-xs leading-relaxed text-orange-200/80">
+          <div className="mt-4 rounded border border-border bg-panel-hover/20 px-4 py-3 text-xs leading-relaxed text-foreground/80">
             {t("legal.draftNotice")}
           </div>
         ) : (
@@ -85,7 +85,7 @@ export async function LegalLayout({
         <div className="mt-12 border-t border-border pt-6">
           <Link
             href="/"
-            className="text-xs tracking-wide text-orange-500 underline underline-offset-2"
+            className="text-xs tracking-wide text-foreground underline underline-offset-2"
           >
             {t("legal.backHome")}
           </Link>

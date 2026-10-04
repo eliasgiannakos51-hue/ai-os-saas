@@ -35,8 +35,10 @@ import type { BuiltChart } from "@/lib/data-analysis/charts";
 // they are only valid inside rgb(). Recharts takes stroke and fill as
 // STRINGS, which the compiler never looks at — a bare var(--muted) here
 // compiles, renders `stroke: var(--muted)`, and the axis simply has no
-// colour. light-theme-contrast.test.mjs scans for exactly this.
-const COLOURS = ["#f97316", "#60a5fa", "#4ade80", "#f472b6", "#facc15", "#a78bfa", "#22d3ee", "#fb7185"];
+// colour. design-tokens.test.mjs scans for exactly this.
+// Shades of the text colour, never hues: the design has no accent colour
+// to give a series (globals.css, --chart-*).
+const COLOURS = ["rgb(var(--chart-1))", "rgb(var(--chart-2))", "rgb(var(--chart-3))", "rgb(var(--chart-4))", "rgb(var(--chart-5))"];
 
 function formatValue(value: number): string {
   if (!Number.isFinite(value)) return "—";
@@ -82,7 +84,7 @@ export function AnalysisChart({ chart }: { chart: BuiltChart }) {
       <p className="text-sm font-semibold text-foreground">{spec.title}</p>
       {spec.reason ? <p className="mt-1 text-xs text-muted">{spec.reason}</p> : null}
       {chart.truncated ? (
-        <p className="mt-1 text-xs text-amber-400">
+        <p className="mt-1 text-xs text-warning">
           {t("truncated", { count: points.length })}
         </p>
       ) : null}

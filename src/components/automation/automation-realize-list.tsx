@@ -31,7 +31,7 @@ export function AutomationRealizeList({ records }: { records: ModuleRecord[] }) 
   return (
     <div className="mb-6 surface-tight">
       <div className="mb-3 flex items-center gap-2">
-        <Sparkles className="h-4 w-4 text-orange-400" aria-hidden="true" />
+        <Sparkles className="h-4 w-4 text-foreground" aria-hidden="true" />
         <p className="text-sm font-semibold text-foreground">{t("realizeSectionTitle")}</p>
       </div>
       <ul className="space-y-2">
@@ -49,7 +49,7 @@ export function AutomationRealizeList({ records }: { records: ModuleRecord[] }) 
                 <button
                   type="button"
                   onClick={() => setOpenId(isOpen ? null : record.id)}
-                  className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-orange-400 transition-colors duration-150 hover:border-orange-500 hover:bg-panel-hover"
+                  className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:bg-panel-hover"
                 >
                   {isOpen ? t("cancel") : t("makeThisReal")}
                 </button>
@@ -245,7 +245,7 @@ function RealizeForm({
           type="button"
           onClick={handleSubmit}
           disabled={submitting || !isComplete}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? t("realizing") : t("confirmMakeReal")}
         </button>

@@ -363,7 +363,7 @@ export function PresentationsWorkspace({
           onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_CHARS))}
           placeholder={t("form.descriptionPlaceholder")}
           rows={5}
-          className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+          className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-foreground/40"
         />
         <div className="mt-3 flex flex-wrap items-end gap-4">
           <div>
@@ -392,7 +392,7 @@ export function PresentationsWorkspace({
                   <label
                     key={source}
                     className={`inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm ${
-                      imageSource === source ? "border-orange-500/60 text-foreground" : "border-border text-muted"
+                      imageSource === source ? "border-foreground/60 text-foreground" : "border-border text-muted"
                     } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
                   >
                     <input
@@ -459,7 +459,7 @@ export function PresentationsWorkspace({
                       type="button"
                       onClick={() => removeOwnFile(i)}
                       aria-label={t("form.remove")}
-                      className="absolute -end-1 -top-1 rounded-full bg-background p-0.5 text-muted shadow"
+                      className="absolute -end-1 -top-1 rounded-full bg-background p-0.5 text-muted"
                     >
                       <X className="h-3 w-3" aria-hidden="true" />
                     </button>
@@ -495,7 +495,7 @@ export function PresentationsWorkspace({
               data-testid="deck-generate"
               onClick={generate}
               disabled={!description.trim()}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-4 text-sm font-semibold text-black hover:bg-orange-400 disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-button px-4 text-sm font-semibold text-button-ink hover:bg-button disabled:opacity-50"
             >
               <Play className="h-3.5 w-3.5" aria-hidden="true" />
               {t("form.generate")}
@@ -562,7 +562,7 @@ export function PresentationsWorkspace({
                   placeholder={t("edit.placeholder")}
                   rows={2}
                   disabled={applying}
-                  className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-orange-500/40 disabled:opacity-60"
+                  className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-foreground/40 disabled:opacity-60"
                 />
                 <button
                   type="button"
@@ -708,7 +708,7 @@ export function PresentationsWorkspace({
             {orderedNotes.map((row) => (
               <li
                 key={row.id}
-                className={`flex items-center justify-between gap-3 py-2 ${row.id === requestedRecord ? "rounded-lg bg-orange-500/10 px-2" : ""}`}
+                className={`flex items-center justify-between gap-3 py-2 ${row.id === requestedRecord ? "rounded-lg bg-foreground/10 px-2" : ""}`}
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm text-foreground">{row.title}</p>

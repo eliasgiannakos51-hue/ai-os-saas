@@ -34,14 +34,14 @@ function ToggleSwitch({
     >
       <span
         className={`inline-block h-5 w-5 transform rounded-full transition-transform duration-200 ${
-          checked ? "translate-x-[22px] bg-panel" : "translate-x-0.5 bg-white"
+          checked ? "translate-x-[22px] bg-panel" : "translate-x-0.5 bg-paper"
         }`}
       />
     </button>
   );
 }
 
-// No context/provider — same approach as theme-toggle.tsx: each preference
+// No context/provider: each preference
 // lives on <html data-*> and in localStorage, both written directly to the
 // DOM. The blocking inline script in layout.tsx sets the initial
 // attributes before paint (avoiding a flash); this component only reads
@@ -101,7 +101,7 @@ export function AccessibilitySettings() {
   return (
     <div id="accessibility" className="mb-6 scroll-mt-20 space-y-4 surface">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <Eye className="h-4 w-4 text-orange-400" /> {t("title")}
+        <Eye className="h-4 w-4 text-foreground" /> {t("title")}
       </h2>
 
       <div>

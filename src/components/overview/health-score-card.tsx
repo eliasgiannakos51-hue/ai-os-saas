@@ -56,29 +56,13 @@ export function HealthScoreCard({
           role="img"
           aria-label={`${title}: ${clamped} / 100`}
         >
-          <defs>
-            {/* A stroke can't take a CSS gradient, so the amber-to-violet
-                sweep has to be an SVG paint server referenced by url(). */}
-            <linearGradient id="healthRing" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#fbbf24" />
-              <stop offset="55%" stopColor="#f97316" />
-              <stop offset="100%" stopColor="#a855f7" />
-            </linearGradient>
-            <filter id="healthRingGlow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3" result="b" />
-              <feMerge>
-                <feMergeNode in="b" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
 
           <circle
             cx="60"
             cy="60"
             r={RADIUS}
             fill="none"
-            stroke="rgba(255,255,255,0.07)"
+            stroke="rgb(var(--foreground) / 0.07)"
             strokeWidth={STROKE_WIDTH}
           />
           <circle
@@ -86,12 +70,11 @@ export function HealthScoreCard({
             cy="60"
             r={RADIUS}
             fill="none"
-            stroke="url(#healthRing)"
+            stroke="rgb(var(--chart-1))"
             strokeWidth={STROKE_WIDTH}
             strokeLinecap="round"
             strokeDasharray={CIRCUMFERENCE}
             strokeDashoffset={offset}
-            filter="url(#healthRingGlow)"
             className="transition-[stroke-dashoffset] duration-1000 ease-out"
           />
           <text
@@ -108,7 +91,7 @@ export function HealthScoreCard({
 
         <div className="min-w-0">
           <p className="text-sm font-semibold text-foreground">{title}</p>
-          <p className="mt-0.5 text-lg font-bold text-orange-300">
+          <p className="mt-0.5 text-lg font-bold text-foreground">
             {rangeLabel}
           </p>
           <p className="mt-1 text-xs leading-relaxed text-muted">{suggestion}</p>
@@ -134,18 +117,12 @@ export function HealthScoreCard({
         <div className="relative z-[1] h-16 min-w-0 flex-1 sm:basis-60" aria-hidden="true">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
-              <defs>
-                <linearGradient id="healthArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#f97316" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
-                </linearGradient>
-              </defs>
               <Area
                 type="monotone"
                 dataKey="count"
-                stroke="#fbbf24"
+                stroke="rgb(var(--chart-1))"
                 strokeWidth={2}
-                fill="url(#healthArea)"
+                fill="rgb(var(--chart-1) / 0.08)"
                 // CSS handles the draw-in (globals.css .draw-line) so it
                 // respects the app's reduce-motion switch, which recharts'
                 // own animation would ignore.

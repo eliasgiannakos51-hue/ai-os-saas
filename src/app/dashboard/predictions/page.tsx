@@ -52,7 +52,7 @@ export default async function PredictionsPage() {
   const planSlug = await resolveEffectivePlanSlug(user);
   if (!accountHasCapability(planSlug, "predictions", isAdmin)) {
     return (
-      <div className="min-h-full bg-dot-grid">
+      <div className="min-h-full">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader icon={PREDICTIONS_ICON} title={t("title")} helpKey="help.predictions" />
           <UpgradeRequired {...upgradeWallProps("predictions", t("title"))!} />

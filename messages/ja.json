@@ -29,8 +29,6 @@
       "long": "これは AI が生成した内容です。誤りが含まれる場合があります。重要な点は確認してください。"
     },
     "close": "閉じる",
-    "switchToDarkMode": "ダークテーマに切り替える",
-    "switchToLightMode": "ライトテーマに切り替える",
     "showPassword": "パスワードを表示",
     "hidePassword": "パスワードを非表示",
     "networkErrorCheckConnection": "ネットワークエラー — 接続を確認してもう一度お試しください。",
@@ -63,7 +61,6 @@
       "lastResortBody": "新しいデータを読み込むには接続が必要です。すでに開いたページはこの端末のキャッシュから引き続き見られます。作業中の内容はサーバー上に安全に保存されています。"
     },
     "creditsUnlimited": "無制限",
-    "whatIsThis": "これは何ですか？",
     "examplesLabel": "例：",
     "newMessagesBelow": "下に新しいメッセージ",
     "downloadPdf": {
@@ -1049,7 +1046,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "最もアクティブなモジュール",
-      "acrossAllModules": "全モジュール合計",
       "entry": "{count} 件のエントリー",
       "statRow": {
         "totalEntries": "合計エントリー数",
@@ -2801,7 +2797,6 @@
       "images": "料金ページのメイン画像",
       "videos": "60秒のプロダクト紹介",
       "coding": "Stripe の入金を照合するスクリプト",
-      "data-analysis": "解約率がいちばん低いプランは？",
       "campaigns": "9月のローンチ — メール＋LinkedIn",
       "presentations": "第3四半期の取締役会報告 — 要点",
       "ideas": "表計算から乗り換えた人向けのニュースレター"

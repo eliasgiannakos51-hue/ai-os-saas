@@ -5,7 +5,7 @@
 // constants instead of duplicating string literals that could drift.
 //
 // Each preference lives on <html> as a data-* attribute (same pattern as
-// data-theme in theme-toggle.tsx) so globals.css can style off it with no
+// data-theme, set once in app/layout.tsx) so globals.css can style off it with no
 // JS re-render required, and in localStorage so it survives reloads.
 export type FontSize = "small" | "medium" | "large" | "xl";
 

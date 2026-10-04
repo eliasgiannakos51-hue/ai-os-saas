@@ -187,7 +187,7 @@ export function AskAiModal({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4 sm:items-center sm:pb-0">
-      <div onClick={onClose} className="fixed inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" />
+      <div onClick={onClose} className="fixed inset-0 bg-background/60 backdrop-blur-sm" aria-hidden="true" />
 
       <div
         role="dialog"
@@ -198,7 +198,7 @@ export function AskAiModal({
         <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div className="flex min-w-0 items-start gap-3">
             <span
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/10 text-foreground"
               aria-hidden="true"
             >
               <Sparkles className="h-4 w-4" />
@@ -229,14 +229,14 @@ export function AskAiModal({
               {messages.map((msg) =>
                 msg.role === "user" ? (
                   <div key={msg.id} className="flex justify-end">
-                    <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-orange-500 px-4 py-2.5 text-sm text-black">
+                    <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-button px-4 py-2.5 text-sm text-button-ink">
                       {msg.content}
                     </div>
                   </div>
                 ) : (
                   <div key={msg.id} className="flex items-start gap-2">
                     <span
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-500/10 text-orange-400"
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-foreground"
                       aria-hidden="true"
                     >
                       <Sparkles className="h-3.5 w-3.5" />
@@ -260,7 +260,7 @@ export function AskAiModal({
               {sending && (
                 <div className="flex items-start gap-2">
                   <span
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-500/10 text-orange-400"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-foreground"
                     aria-hidden="true"
                   >
                     <Sparkles className="h-3.5 w-3.5" />
@@ -282,7 +282,7 @@ export function AskAiModal({
           <button
             type="button"
             onClick={jumpToBottom}
-            className="absolute bottom-2 left-1/2 z-10 inline-flex min-h-[36px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-orange-500/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-orange-300 shadow-lg transition-colors duration-150 hover:border-orange-500 hover:bg-orange-500/10"
+            className="absolute bottom-2 left-1/2 z-10 inline-flex min-h-[36px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-foreground/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:bg-foreground/10"
           >
             <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
             {tCommon("newMessagesBelow")}
@@ -295,8 +295,8 @@ export function AskAiModal({
             <p
               className={`mb-3 rounded-xl border px-3 py-2 text-xs ${
                 isRateLimitNotice
-                  ? "border-orange-900/50 bg-orange-500/5 text-orange-400"
-                  : "border-red-900 bg-red-950/40 text-red-400"
+                  ? "border-border bg-foreground/5 text-foreground"
+                  : "border-danger/40 bg-danger/10 text-danger"
               }`}
             >
               {error}
@@ -313,7 +313,7 @@ export function AskAiModal({
                 rows={1}
                 // pe-24 rather than pe-12: two controls sit in the
                 // right gutter now, not one.
-                className="max-h-32 min-h-[48px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-background px-4 py-3 pe-24 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500/60"
+                className="max-h-32 min-h-[48px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-background px-4 py-3 pe-24 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-foreground/60"
               />
               {/* ASKING YOUR OWN RECORDS A QUESTION, OUT LOUD.
                   V4 re-audit #2. This box is a sentence somebody types to
@@ -338,7 +338,7 @@ export function AskAiModal({
                 type="submit"
                 disabled={sending || !input.trim()}
                 aria-label={t("send")}
-                className="absolute bottom-2 end-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="absolute bottom-2 end-2 flex h-11 w-11 items-center justify-center rounded-full bg-button text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {sending ? (
                   <ThinkingIndicator size="sm" tone="inherit" />

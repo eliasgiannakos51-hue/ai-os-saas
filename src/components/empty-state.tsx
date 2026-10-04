@@ -46,14 +46,6 @@ export function EmptyState({
 }) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-0 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(249,115,22,0.18) 0%, rgba(220,38,38,0.06) 50%, transparent 75%)",
-        }}
-      />
       {/* THE MODULE ICON STAYS; THE DECORATION BECOMES THE BRAND.
           The two rings behind the icon were an `animate-ping` wash and a
           border circle — pure decoration carrying no meaning. They are
@@ -69,8 +61,8 @@ export function EmptyState({
           detail="full"
           className="absolute inset-0 opacity-40"
         />
-        <span className="relative flex h-11 w-11 animate-[float_3s_ease-in-out_infinite] items-center justify-center rounded-full bg-orange-500/10">
-          <Icon className="h-6 w-6 text-orange-400" aria-hidden="true" />
+        <span className="relative flex h-11 w-11 animate-[float_3s_ease-in-out_infinite] items-center justify-center rounded-full bg-foreground/10">
+          <Icon className="h-6 w-6 text-foreground" aria-hidden="true" />
         </span>
       </span>
       <div className="relative">
@@ -94,7 +86,7 @@ export function EmptyState({
               // control on a phone — the same floor every other button in
               // this codebase uses. Measured at 375px by routes-smoke,
               // which reported it at 261x34.
-              className="mx-auto mt-5 inline-flex min-h-[44px] max-w-full items-center gap-2 rounded-full border border-orange-500/40 bg-orange-500/10 px-4 py-2 text-start text-xs font-medium text-orange-300 transition-colors duration-150 hover:border-orange-500 hover:bg-orange-500/20 hover:text-orange-200"
+              className="mx-auto mt-5 inline-flex min-h-[44px] max-w-full items-center gap-2 rounded-full border border-foreground/40 bg-foreground/10 px-4 py-2 text-start text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:bg-foreground/20 hover:text-foreground"
             >
               <CornerDownRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <span className="truncate">&ldquo;{example}&rdquo;</span>

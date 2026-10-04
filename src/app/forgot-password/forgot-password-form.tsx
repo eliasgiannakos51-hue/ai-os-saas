@@ -60,13 +60,13 @@ export function ForgotPasswordForm() {
             <div className="space-y-4 text-center">
               <p className="text-sm text-foreground/90">
                 {t.rich("checkInbox", {
-                  highlight: (chunks) => <span className="text-orange-400">{chunks}</span>,
+                  highlight: (chunks) => <span className="text-foreground">{chunks}</span>,
                   emailAddress: email,
                 })}
               </p>
               <Link
                 href="/login"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
               >
                 {t("backToLogin")}
               </Link>
@@ -86,13 +86,13 @@ export function ForgotPasswordForm() {
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500"
+                  className="w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40"
                   placeholder="you@domain.com"
                 />
               </div>
 
               {error && (
-                <p className="rounded-xl border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+                <p className="rounded-xl border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                   {error}
                 </p>
               )}
@@ -100,7 +100,7 @@ export function ForgotPasswordForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-50"
+                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-button px-4 py-2.5 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:opacity-50"
               >
                 {loading ? t("sending") : t("sendResetLink")}
               </button>
@@ -113,7 +113,7 @@ export function ForgotPasswordForm() {
             {t("rememberedIt")}{" "}
             <Link
               href="/login"
-              className="text-orange-400 underline underline-offset-2"
+              className="text-foreground underline underline-offset-2"
             >
               {t("logIn")}
             </Link>

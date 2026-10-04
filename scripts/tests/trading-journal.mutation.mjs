@@ -516,8 +516,8 @@ const MUTANTS = [
   {
     name: "the disclaimer gains a dismiss control",
     file: DISCLAIMER,
-    from: "        <AlertTriangle className=\"mt-0.5 h-4 w-4 shrink-0 text-amber-400\" aria-hidden=\"true\" />",
-    to: "        <button type=\"button\" onClick={() => {}}>x</button>\n        <AlertTriangle className=\"mt-0.5 h-4 w-4 shrink-0 text-amber-400\" aria-hidden=\"true\" />",
+    from: "        <AlertTriangle className=\"mt-0.5 h-4 w-4 shrink-0 text-warning\" aria-hidden=\"true\" />",
+    to: "        <button type=\"button\" onClick={() => {}}>x</button>\n        <AlertTriangle className=\"mt-0.5 h-4 w-4 shrink-0 text-warning\" aria-hidden=\"true\" />",
   },
   {
     name: "the English disclaimer stops saying it is not investment advice",

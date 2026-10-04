@@ -24,10 +24,10 @@ export type EntityCardStatus = {
 
 const STATUS_TONE: Record<EntityCardStatusTone, { dot: string; text: string }> = {
   neutral: { dot: "bg-muted", text: "text-muted" },
-  active: { dot: "bg-orange-400", text: "text-orange-400" },
-  success: { dot: "bg-emerald-400", text: "text-emerald-400" },
-  warning: { dot: "bg-amber-400", text: "text-amber-400" },
-  danger: { dot: "bg-red-400", text: "text-red-400" },
+  active: { dot: "bg-button", text: "text-foreground" },
+  success: { dot: "bg-success", text: "text-success" },
+  warning: { dot: "bg-warning", text: "text-warning" },
+  danger: { dot: "bg-danger", text: "text-danger" },
 };
 
 /**
@@ -124,8 +124,8 @@ export function EntityCard({
         "card-lift group relative flex flex-col rounded-2xl border p-4 transition-colors duration-200",
         index === undefined ? "" : "list-slide-in",
         selected
-          ? "border-orange-500/50 bg-[linear-gradient(160deg,rgb(var(--panel))_0%,rgb(var(--panel))_60%,rgba(249,115,22,0.07)_100%)]"
-          : "border-border bg-[linear-gradient(160deg,rgb(var(--panel))_0%,rgb(var(--panel))_65%,rgba(249,115,22,0.035)_100%)] hover:border-orange-500/40",
+          ? "border-foreground/50 bg-panel"
+          : "border-border bg-panel hover:border-foreground/40",
       ].join(" ")}
     >
       <div className="flex items-start justify-between gap-2">
@@ -145,7 +145,7 @@ export function EntityCard({
           href ? (
             <Link
               href={href}
-              className="line-clamp-2 outline-none after:absolute after:inset-0 after:rounded-2xl group-hover:text-orange-400 focus-visible:after:ring-2 focus-visible:after:ring-orange-500/60"
+              className="line-clamp-2 outline-none after:absolute after:inset-0 after:rounded-2xl group-hover:text-foreground focus-visible:after:ring-2 focus-visible:after:ring-foreground/60"
             >
               {title}
             </Link>
@@ -153,7 +153,7 @@ export function EntityCard({
             <button
               type="button"
               onClick={onSelect}
-              className="line-clamp-2 text-start outline-none after:absolute after:inset-0 after:rounded-2xl group-hover:text-orange-400 focus-visible:after:ring-2 focus-visible:after:ring-orange-500/60"
+              className="line-clamp-2 text-start outline-none after:absolute after:inset-0 after:rounded-2xl group-hover:text-foreground focus-visible:after:ring-2 focus-visible:after:ring-foreground/60"
             >
               {title}
             </button>

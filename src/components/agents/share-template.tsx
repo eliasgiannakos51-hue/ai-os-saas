@@ -103,13 +103,13 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
 
   if (sharedSlug) {
     return (
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.05] p-3">
-        <p className="text-xs text-emerald-300">{t("shared")}</p>
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-success/30 bg-success/[0.05] p-3">
+        <p className="text-xs text-success">{t("shared")}</p>
         <button
           type="button"
           onClick={withdraw}
           disabled={withdrawing}
-          className="min-h-[36px] rounded-lg border border-emerald-500/40 px-2.5 text-xs text-emerald-200 transition-colors hover:bg-emerald-500/10 disabled:opacity-60"
+          className="min-h-[36px] rounded-lg border border-success/40 px-2.5 text-xs text-success transition-colors hover:bg-success/10 disabled:opacity-60"
         >
           {withdrawing ? t("withdrawing") : t("withdraw")}
         </button>
@@ -133,7 +133,7 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
   return (
     <div className="space-y-2 surface-tight">
       <p className="flex items-center gap-2 text-xs font-medium text-foreground">
-        <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
+        <ShieldCheck className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
         {t("title")}
       </p>
       <p className="text-[11px] leading-relaxed text-muted">{t("explainer")}</p>
@@ -172,14 +172,14 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
       />
 
       {/* EXACTLY WHAT WOULD BE PUBLISHED, before agreeing to publish it. */}
-      <div className="rounded-lg bg-black/20 p-2">
+      <div className="rounded-lg bg-background/20 p-2">
         <p className="mb-1 text-[10px] uppercase tracking-wide text-muted">{t("previewLabel")}</p>
         {preview.ok ? (
           <p className="whitespace-pre-wrap text-[11px] leading-relaxed text-foreground">
             {preview.pattern}
           </p>
         ) : (
-          <p className="text-[11px] leading-relaxed text-amber-300">
+          <p className="text-[11px] leading-relaxed text-warning">
             {t(`refused.${preview.reason}`)}
           </p>
         )}
@@ -190,7 +190,7 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
           type="button"
           onClick={() => void share()}
           disabled={busy || !preview.ok || title.trim().length < 3 || description.trim().length < 3}
-          className="min-h-[36px] rounded-lg border border-orange-500/60 px-3 text-xs font-semibold text-orange-300 transition-opacity hover:bg-orange-500/10 disabled:opacity-50"
+          className="min-h-[36px] rounded-lg border border-foreground/60 px-3 text-xs font-semibold text-foreground transition-opacity hover:bg-foreground/10 disabled:opacity-50"
         >
           {busy ? t("sharing") : t("shareButton")}
         </button>

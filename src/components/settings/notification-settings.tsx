@@ -248,7 +248,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
     <div className="mb-6 space-y-5 surface" id="notifications">
       <div>
         <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Bell className="h-4 w-4 text-orange-400" /> {t("title")}
+          <Bell className="h-4 w-4 text-foreground" /> {t("title")}
         </h2>
         <p className="mt-1 text-xs text-muted">{t("description")}</p>
         {/* SAID ONCE, AT THE TOP, RATHER THAN PER ROW. The Email column
@@ -321,7 +321,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
                           disabled={busy || locked || !usable || !enabled}
                           onChange={() => toggleChannel(type, channel)}
                           aria-label={`${t(`types.${type}.label`)} — ${t(`channels.${channel}`)}`}
-                          className="h-5 w-5 accent-orange-500 disabled:opacity-40"
+                          className="h-5 w-5 accent-foreground disabled:opacity-40"
                         />
                       </td>
                     );
@@ -338,7 +338,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
       {/* ---- quiet hours ---- */}
       <div className="space-y-2 border-t border-border pt-4">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Moon className="h-4 w-4 text-orange-400" /> {t("quiet.title")}
+          <Moon className="h-4 w-4 text-foreground" /> {t("quiet.title")}
         </h3>
         <p className="text-xs text-muted">{t("quiet.description")}</p>
         <label className="flex items-center gap-2 text-sm text-foreground">
@@ -350,7 +350,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
               setQuietOn(e.target.checked);
               void saveQuietHours({ on: e.target.checked, from: quietFrom, to: quietTo, offsetMinutes: offset });
             }}
-            className="h-5 w-5 accent-orange-500"
+            className="h-5 w-5 accent-foreground"
           />
           {t("quiet.enable")}
         </label>
@@ -390,7 +390,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
       {/* ---- chat channels ---- */}
       <div className="space-y-3 border-t border-border pt-4">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <MessageSquare className="h-4 w-4 text-orange-400" /> {t("chat.title")}
+          <MessageSquare className="h-4 w-4 text-foreground" /> {t("chat.title")}
         </h3>
         <p className="text-xs text-muted">{t("chat.description")}</p>
 
@@ -401,10 +401,10 @@ export function NotificationSettings({ userId }: { userId: string }) {
             <div key={kind} className="space-y-1">
               <p className="text-sm text-foreground">{t(`channels.${kind}`)}</p>
               {unavailable ? (
-                <p className="text-xs text-amber-400">{t("chat.notConfigured")}</p>
+                <p className="text-xs text-warning">{t("chat.notConfigured")}</p>
               ) : isConnected ? (
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-emerald-400">{t("chat.connected")}</span>
+                  <span className="text-xs text-success">{t("chat.connected")}</span>
                   <button
                     type="button"
                     onClick={() => void disconnectChat(kind)}
@@ -434,7 +434,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
                       type="button"
                       onClick={() => void connectChat(kind)}
                       disabled={connecting !== null || !(connectTarget[kind] ?? "").trim()}
-                      className="hover:bg-orange-500/10 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 disabled:opacity-50"
+                      className="hover:bg-foreground/10 rounded-lg border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground disabled:opacity-50"
                     >
                       {connecting === kind ? t("chat.connecting") : t("chat.connect")}
                     </button>

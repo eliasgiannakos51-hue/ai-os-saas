@@ -67,7 +67,7 @@ export async function BuildModulePage({
   ) {
     const requiredPlan = getPlan(config.minPlanSlug);
     return (
-      <div className="min-h-full bg-dot-grid">
+      <div className="min-h-full">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader icon={icon} title={title} helpKey="help.trackingModule" />
           {/* THE PLAN COMES FROM THE GATE THAT JUST REFUSED, not from
@@ -101,7 +101,7 @@ export async function BuildModulePage({
   ]);
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader icon={icon} title={title} helpKey="help.trackingModule" />
 

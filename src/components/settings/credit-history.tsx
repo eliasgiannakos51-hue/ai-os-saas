@@ -107,7 +107,7 @@ export async function CreditHistory({
               </div>
               {row.kind === "tx" ? (
                 <span
-                  className={`shrink-0 font-semibold ${row.amount < 0 ? "text-red-400" : "text-emerald-400"}`}
+                  className={`shrink-0 font-semibold ${row.amount < 0 ? "text-danger" : "text-success"}`}
                 >
                   {row.amount > 0 ? "+" : ""}
                   {formatNumber(row.amount, locale)}
@@ -116,7 +116,7 @@ export async function CreditHistory({
                 // The whole point of showing a bypass row: what it WOULD
                 // have cost. "Unlimited" on its own tells the owner
                 // nothing about whether pricing is working.
-                <span className="shrink-0 text-end font-semibold text-amber-300">
+                <span className="shrink-0 text-end font-semibold text-warning">
                   {t("unlimited")}
                   {row.wouldHave !== null && (
                     <span className="ms-1 block font-normal text-[11px] text-muted">

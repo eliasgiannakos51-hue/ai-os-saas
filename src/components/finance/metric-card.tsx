@@ -35,7 +35,7 @@ export function MetricCard({ metric }: { metric: Metric }) {
       {metric.state === "computed" ? (
         <>
           <p className="mt-1 text-2xl font-semibold text-foreground">{format(metric)}</p>
-          {metric.note ? <p className="mt-1 text-[11px] text-amber-400">{metric.note}</p> : null}
+          {metric.note ? <p className="mt-1 text-[11px] text-warning">{metric.note}</p> : null}
         </>
       ) : metric.state === "needs_input" ? (
         <>

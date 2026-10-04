@@ -105,7 +105,7 @@ const MUTANTS = [
     // 67 -> 70 in phase 2: projects-workspace, project-detail and the
     // project page all reach a status or a section through a template
     // literal over a declared array.
-    from: "    unbounded: 71,",
+    from: "    unbounded: 70,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`

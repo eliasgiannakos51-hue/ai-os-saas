@@ -48,7 +48,7 @@ export function CostDashboard({ data, locale }: { data: CostDashboardData; local
   return (
     <>
       {data.unavailable.length > 0 && (
-        <p className="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/[0.06] p-4 text-xs text-amber-300">
+        <p className="mb-6 rounded-xl border border-warning/30 bg-warning/[0.06] p-4 text-xs text-warning">
           {/* NOT "no data": a query that failed is not a quiet month, and
               showing €0.00 for one would be the most misleading number on
               the page. */}
@@ -83,7 +83,7 @@ export function CostDashboard({ data, locale }: { data: CostDashboardData; local
             {data.daily.map((d) => (
               <li key={d.day} className="flex items-center gap-3 text-xs">
                 <span className="w-20 shrink-0 tabular-nums text-muted">{d.day}</span>
-                <span className="h-2 min-w-[2px] rounded-sm bg-orange-500/70" style={{ width: `${(d.costEur / peak) * 100}%` }} />
+                <span className="h-2 min-w-[2px] rounded-sm bg-foreground/70" style={{ width: `${(d.costEur / peak) * 100}%` }} />
                 <span className="tabular-nums text-foreground">{eur(d.costEur)}</span>
                 <span className="tabular-nums text-muted">{d.calls} calls</span>
               </li>
@@ -118,8 +118,8 @@ export function CostDashboard({ data, locale }: { data: CostDashboardData; local
                       f.margin === null
                         ? "text-muted"
                         : f.margin < data.marginTarget
-                          ? "text-red-400"
-                          : "text-emerald-400"
+                          ? "text-danger"
+                          : "text-success"
                     }`}
                   >
                     {/* An em dash, not 0x. A feature whose calls were all
@@ -179,7 +179,7 @@ export function CostDashboard({ data, locale }: { data: CostDashboardData; local
                     send is the worst outcome — silent for an hour AND
                     nothing delivered — so it is named, not hidden. */}
                 {!a.delivered && (
-                  <p className="mt-1 text-[11px] text-red-400">Claimed the hour but was never delivered.</p>
+                  <p className="mt-1 text-[11px] text-danger">Claimed the hour but was never delivered.</p>
                 )}
               </li>
             ))}
@@ -219,12 +219,12 @@ function Stat({
       <p className="text-[11px] text-muted">{label}</p>
       <p
         className={`mt-0.5 text-lg font-semibold tabular-nums ${
-          tone === "bad" ? "text-red-400" : tone === "good" ? "text-emerald-400" : "text-foreground"
+          tone === "bad" ? "text-danger" : tone === "good" ? "text-success" : "text-foreground"
         }`}
       >
         {value}
       </p>
-      {note && <p className="mt-0.5 text-[11px] text-amber-400">{note}</p>}
+      {note && <p className="mt-0.5 text-[11px] text-warning">{note}</p>}
     </div>
   );
 }

@@ -21,7 +21,7 @@ export function ListCappedNotice({ cap }: { cap: number }) {
     <p
       role="status"
       data-testid="list-capped-notice"
-      className="mb-3 flex items-start gap-2 rounded-xl border border-border bg-white/[0.02] px-3 py-2 text-xs text-muted"
+      className="mb-3 flex items-start gap-2 rounded-xl border border-border bg-foreground/[0.02] px-3 py-2 text-xs text-muted"
     >
       <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
       <span>{t("listCapped", { count: cap })}</span>

@@ -52,7 +52,7 @@ export function ExamplePrompts({
             // `sm:min-h-[36px]`, which is the pattern layout-stress's
             // ratchet was written to stop: a tablet is a touch screen, and
             // this is the first thing a new user is invited to press.
-            className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1 text-[11px] leading-tight text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-300"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1 text-[11px] leading-tight text-muted transition-colors duration-150 hover:border-foreground/50 hover:text-foreground"
           >
             {example}
           </button>

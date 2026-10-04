@@ -68,7 +68,7 @@ export function CancelSubscription({ endsAt }: { endsAt: string | null }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-red-800 hover:text-red-400"
+        className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-danger/40 hover:text-danger"
       >
         {t("button")}
       </button>
@@ -104,8 +104,8 @@ export function CancelSubscription({ endsAt }: { endsAt: string | null }) {
               onClick={() => setReason((r) => (r === value ? null : value))}
               className={`min-h-[32px] rounded-full border px-3 py-1 text-xs transition-colors duration-150 ${
                 reason === value
-                  ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
-                  : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
+                  ? "border-foreground/60 bg-foreground/10 text-foreground"
+                  : "border-border text-muted hover:border-foreground/40 hover:text-foreground"
               }`}
             >
               {t(`reasons.${value}`)}
@@ -122,14 +122,14 @@ export function CancelSubscription({ endsAt }: { endsAt: string | null }) {
         />
       </fieldset>
 
-      {error && <p className="mt-3 text-xs text-red-400">{error}</p>}
+      {error && <p className="mt-3 text-xs text-danger">{error}</p>}
 
       <div className="mt-4 flex flex-wrap gap-2">
         <button
           type="button"
           onClick={confirm}
           disabled={loading}
-          className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-red-800 bg-red-950/40 px-4 py-2 text-sm font-medium text-red-300 transition-colors duration-150 hover:bg-red-950/70 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-danger/40 bg-danger/10 px-4 py-2 text-sm font-medium text-danger transition-colors duration-150 hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? tCommon("loading") : t("confirm")}
         </button>

@@ -20,7 +20,9 @@ const PIECE_COUNT = 24;
 // Brand amber through gold, plus two greens for the "success" read. Fixed
 // palette rather than random hues so the burst always looks like this
 // product rather than like generic party confetti.
-const COLORS = ["#fbbf24", "#f97316", "#fcd34d", "#ea580c", "#10b981", "#34d399"];
+// The success colour and the text colour: the design gives a celebration
+// no hue of its own.
+const COLORS = ["rgb(var(--success))", "rgb(var(--foreground))", "rgb(var(--muted))"];
 
 // Precomputed once at module load, not per render: the spray needs to be
 // irregular (a perfectly even ring reads as a mechanical loading spinner,

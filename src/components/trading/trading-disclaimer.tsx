@@ -25,11 +25,11 @@ export async function TradingDisclaimer({ variant = "inline" }: { variant?: "inl
       <div
         data-testid="trading-disclaimer"
         role="note"
-        className="mb-5 flex gap-2.5 rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] px-4 py-3"
+        className="mb-5 flex gap-2.5 rounded-2xl border border-warning/30 bg-warning/[0.06] px-4 py-3"
       >
-        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden="true" />
         <div className="space-y-1">
-          <p className="text-xs font-semibold text-amber-200">{t("disclaimerTitle")}</p>
+          <p className="text-xs font-semibold text-warning">{t("disclaimerTitle")}</p>
           <p className="text-[11px] leading-relaxed text-muted">{t("disclaimer")}</p>
         </div>
       </div>
@@ -42,7 +42,7 @@ export async function TradingDisclaimer({ variant = "inline" }: { variant?: "inl
       role="note"
       className="mt-3 flex items-start gap-1.5 text-[10px] leading-relaxed text-muted"
     >
-      <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-amber-400/80" aria-hidden="true" />
+      <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-warning/80" aria-hidden="true" />
       {t("disclaimer")}
     </p>
   );

@@ -52,8 +52,8 @@ export function EnvWarnings({ warnings }: { warnings: EnvWarning[] }) {
       <p className="mt-1 text-xs text-muted">{summary}</p>
 
       {[
-        { rows: critical, tone: "border-red-800 bg-red-950/30 text-red-300", Icon: ShieldAlert },
-        { rows: rest, tone: "border-amber-800 bg-amber-950/20 text-amber-300", Icon: AlertTriangle },
+        { rows: critical, tone: "border-danger/40 bg-danger/10 text-danger", Icon: ShieldAlert },
+        { rows: rest, tone: "border-warning/40 bg-warning/10 text-warning", Icon: AlertTriangle },
       ].map(({ rows, tone, Icon }, i) =>
         rows.length === 0 ? null : (
           <ul key={i} className="mt-3 space-y-2">

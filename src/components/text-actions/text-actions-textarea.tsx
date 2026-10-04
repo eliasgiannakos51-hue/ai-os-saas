@@ -144,7 +144,7 @@ export function TextActionsTextarea({
       />
 
       {selection && (
-        <div className="absolute end-2 top-2 z-10 flex items-center gap-0.5 rounded-lg border border-border bg-panel p-1 shadow-lg">
+        <div className="absolute end-2 top-2 z-10 flex items-center gap-0.5 rounded-lg border border-border bg-panel p-1">
           {ACTIONS.map(({ id, labelKey, icon: Icon }) => (
             <button
               key={id}
@@ -154,7 +154,7 @@ export function TextActionsTextarea({
               disabled={pendingAction !== null}
               aria-label={tCommon(labelKey)}
               title={tCommon(labelKey)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-muted transition-colors duration-150 hover:bg-orange-500/10 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-muted transition-colors duration-150 hover:bg-foreground/10 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
             >
               {pendingAction === id ? (
                 <ThinkingIndicator size="sm" />
@@ -167,9 +167,9 @@ export function TextActionsTextarea({
       )}
 
       {(result || error) && (
-        <div className="absolute inset-x-0 top-full z-10 mt-1 rounded-lg border border-border bg-panel p-2.5 text-xs shadow-lg">
+        <div className="absolute inset-x-0 top-full z-10 mt-1 rounded-lg border border-border bg-panel p-2.5 text-xs">
           {error ? (
-            <p className="text-red-400">{error}</p>
+            <p className="text-danger">{error}</p>
           ) : (
             <>
               <p className="max-h-24 overflow-y-auto whitespace-pre-wrap text-foreground/90">
@@ -188,7 +188,7 @@ export function TextActionsTextarea({
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={accept}
-                  className="inline-flex items-center gap-1 rounded-md border border-orange-500/60 px-2 py-1 font-medium text-orange-300 transition-colors duration-150 hover:bg-orange-500/10"
+                  className="inline-flex items-center gap-1 rounded-md border border-foreground/60 px-2 py-1 font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
                 >
                   <Check className="h-3 w-3" /> {tCommon("textActions.accept")}
                 </button>

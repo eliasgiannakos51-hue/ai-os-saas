@@ -316,7 +316,7 @@ for (const key of ["colFeature", "colCalls", "colCharged", "colBypass", "colMarg
 }
 checkTrue("the summary tiles render", /SummaryTile/.test(view));
 checkTrue("projection-only is announced", /summary\.projectionOnly &&/.test(view));
-checkTrue("below-target rows are tinted red", /flagged \? "bg-red-950\/20"/.test(view));
+checkTrue("below-target rows are tinted with the danger colour", /flagged \? "bg-danger\/10"/.test(view));
 checkTrue("and an alert email is sent for each", /for \(const below of summary\.belowTarget\)/.test(view));
 checkTrue("credits_charged is actually selected", /credits_charged, metadata/.test(view));
 

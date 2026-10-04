@@ -248,10 +248,10 @@ const MUTANTS = [
     to: "  opacity: 1;\n  box-shadow: 0 0 calc(var(--orb-halo) * 60px) currentColor;\n  width: calc(100% * var(--orb-scale));",
   },
   {
-    name: "the light theme loses its voice colours, so every state is the dark palette on white",
+    name: "listening is given speaking's colour, so an open microphone looks like a reply",
     file: CSS,
-    from: "  --voice-listening: 234 88 12;",
-    to: "  --voice-listening-unused: 234 88 12;",
+    from: "  --voice-listening: 240 113 120;",
+    to: "  --voice-listening: 245 247 251;",
   },
   {
     // Targets the ORB'S OWN reduced-motion rule rather than the first

@@ -183,44 +183,44 @@ function DocumentPdfDialog({ documentId, onClose }: { documentId: string; onClos
   }
 
   const price = (() => {
-    if (mode === "original") return <span className="text-emerald-300">{t("free")}</span>;
+    if (mode === "original") return <span className="text-success">{t("free")}</span>;
     switch (estimate.state) {
       case "loading":
       case "idle":
         return <span className="text-muted">{t("estimating")}</span>;
       case "free":
-        return <span className="text-emerald-300">{t("sameLanguage")}</span>;
+        return <span className="text-success">{t("sameLanguage")}</span>;
       case "priced":
         return estimate.bypass ? (
-          <span className="text-emerald-300">{t("bypassFree")}</span>
+          <span className="text-success">{t("bypassFree")}</span>
         ) : (
-          <span className="text-orange-300" data-testid="document-pdf-price">
+          <span className="text-foreground" data-testid="document-pdf-price">
             {t("estimate", { count: estimate.credits })}
           </span>
         );
       case "tooLong":
         return (
-          <span className="text-red-300">
+          <span className="text-danger">
             {t("tooLong", { chars: formatNumber(estimate.chars, locale), limit: formatNumber(estimate.limit, locale) })}
           </span>
         );
       default:
-        return <span className="text-red-300">{t("estimateFailed")}</span>;
+        return <span className="text-danger">{t("estimateFailed")}</span>;
     }
   })();
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center p-4 sm:items-center">
-      <button type="button" aria-label={tCommon("close")} onClick={onClose} className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
+      <button type="button" aria-label={tCommon("close")} onClick={onClose} className="fixed inset-0 bg-background/60 backdrop-blur-sm" />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="document-pdf-title"
-        className="relative w-full max-w-md surface shadow-xl"
+        className="relative w-full max-w-md surface"
       >
         <div className="flex items-start justify-between gap-3">
           <h2 id="document-pdf-title" className="flex items-center gap-2 text-sm font-semibold text-foreground">
-            <Languages className="h-4 w-4 text-orange-400" aria-hidden="true" />
+            <Languages className="h-4 w-4 text-foreground" aria-hidden="true" />
             {t("title")}
           </h2>
           <button
@@ -234,14 +234,14 @@ function DocumentPdfDialog({ documentId, onClose }: { documentId: string; onClos
         </div>
 
         <div className="mt-4 space-y-2" role="radiogroup" aria-label={t("title")}>
-          <label className={`flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm ${mode === "original" ? "border-orange-500/50 bg-orange-500/10" : "border-border"}`}>
-            <input type="radio" name="pdf-language" checked={mode === "original"} onChange={() => setMode("original")} className="accent-orange-500" />
+          <label className={`flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm ${mode === "original" ? "border-foreground/50 bg-foreground/10" : "border-border"}`}>
+            <input type="radio" name="pdf-language" checked={mode === "original"} onChange={() => setMode("original")} className="accent-foreground" />
             <span className="min-w-0 flex-1 text-foreground">
               {t("inLanguage", { language: labelFor(detected) || "…" })}
             </span>
           </label>
-          <label className={`flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm ${mode === "translate" ? "border-orange-500/50 bg-orange-500/10" : "border-border"}`}>
-            <input type="radio" name="pdf-language" checked={mode === "translate"} onChange={() => setMode("translate")} className="accent-orange-500" />
+          <label className={`flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm ${mode === "translate" ? "border-foreground/50 bg-foreground/10" : "border-border"}`}>
+            <input type="radio" name="pdf-language" checked={mode === "translate"} onChange={() => setMode("translate")} className="accent-foreground" />
             <span className="text-foreground">{t("translateTo")}</span>
             <select
               value={target}
@@ -280,7 +280,7 @@ function DocumentPdfDialog({ documentId, onClose }: { documentId: string; onClos
             onClick={download}
             disabled={!ready}
             data-testid="document-pdf-download"
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 text-xs font-semibold text-orange-300 transition-colors duration-150 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-4 text-xs font-semibold text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {/* NOT THE FILLED ORANGE SLAB: a page has one primary action
                 (scripts/tests/one-primary-action.test.mjs) and on the

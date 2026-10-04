@@ -79,7 +79,7 @@ function nextLocalId(prefix: string) {
 function AssistantAvatar() {
   return (
     <span
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-500/10 text-orange-400"
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-foreground"
       aria-hidden="true"
     >
       <MessageCircle className="h-4 w-4" />
@@ -737,7 +737,7 @@ export function ChatWorkspace({
           type="button"
           aria-label={t("hideConversations")}
           onClick={toggleSidebar}
-          className="absolute inset-0 z-20 bg-black/50 xl:hidden"
+          className="absolute inset-0 z-20 bg-background/50 xl:hidden"
         />
       )}
 
@@ -837,7 +837,7 @@ export function ChatWorkspace({
             </div>
           ) : messages.length === 0 && !sending ? (
             <div className="mx-auto flex h-full max-w-md flex-col items-center justify-center text-center">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-400">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-foreground/10 text-foreground">
                 <MessageCircle className="h-6 w-6" aria-hidden="true" />
               </span>
               <h1 className="mt-4 text-xl font-bold tracking-wide text-foreground">{t("title")}</h1>
@@ -887,7 +887,7 @@ export function ChatWorkspace({
                nothing to tell a question from an answer once both are
                bare text on the same surface. It is a quiet one: the
                panel colour with an accent EDGE, not the filled
-               `bg-orange-500 text-black` slab it was. Opaque on purpose
+               `bg-button text-button-ink` slab it was. Opaque on purpose
                — a translucent tint over a moving wireframe is a
                contrast figure that changes with the pixel underneath.
 
@@ -1041,7 +1041,7 @@ export function ChatWorkspace({
             type="button"
             onClick={jumpToBottom}
             data-testid="chat-jump-to-latest"
-            className="absolute bottom-3 left-1/2 z-10 inline-flex min-h-[36px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-orange-500/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-orange-300 shadow-lg transition-colors duration-150 hover:border-orange-500 hover:bg-orange-500/10"
+            className="absolute bottom-3 left-1/2 z-10 inline-flex min-h-[36px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-foreground/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:bg-foreground/10"
           >
             <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
             {tCommon("newMessagesBelow")}
@@ -1087,7 +1087,7 @@ export function ChatWorkspace({
                   // aria-describedby so a screen reader gets it with the
                   // button rather than as a separate paragraph.
                   aria-describedby={talkBlockedReason ? "talk-blocked-reason" : undefined}
-                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-orange-500/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <AudioLines className="h-3.5 w-3.5" aria-hidden="true" />
                   {tVoice("conversation.start")}
@@ -1100,8 +1100,8 @@ export function ChatWorkspace({
                 title={t("mentorModeHint")}
                 className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 ${
                   mentorMode
-                    ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
-                    : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
+                    ? "border-foreground/60 bg-foreground/10 text-foreground"
+                    : "border-border text-muted hover:border-foreground/40 hover:text-foreground"
                 }`}
               >
                 <Compass className="h-3.5 w-3.5" aria-hidden="true" />
@@ -1120,8 +1120,8 @@ export function ChatWorkspace({
               <p
                 className={`mb-3 rounded-xl border px-3 py-2 text-xs ${
                   isRateLimitNotice
-                    ? "border-orange-900/50 bg-orange-500/5 text-orange-400"
-                    : "border-red-900 bg-red-950/40 text-red-400"
+                    ? "border-border bg-foreground/5 text-foreground"
+                    : "border-danger/40 bg-danger/10 text-danger"
                 }`}
               >
                 {error}
@@ -1140,14 +1140,14 @@ export function ChatWorkspace({
               initialText={composerInitialText}
             >
               {largeMessageCredits !== null && (
-                <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-orange-300/90">
-                  <Zap className="h-3 w-3 text-orange-400/80" aria-hidden="true" />
+                <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
+                  <Zap className="h-3 w-3 text-foreground/80" aria-hidden="true" />
                   {tFree("largeMessage", { count: largeMessageCredits })}
                 </p>
               )}
               {freeRemaining !== null && (
                 <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
-                  <Gift className="h-3 w-3 text-emerald-400/80" aria-hidden="true" />
+                  <Gift className="h-3 w-3 text-success/80" aria-hidden="true" />
                   {freeRemaining > 0
                     ? tFree("remaining", { count: freeRemaining })
                     : tFree("exhausted")}

@@ -89,7 +89,7 @@ export default async function MarketplacePage() {
   }));
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader
           helpKey="help.marketplace"
@@ -102,7 +102,7 @@ export default async function MarketplacePage() {
             silent fallback would show "nothing here yet" to somebody whose
             request was refused. */}
         {error ? (
-          <p className="rounded-xl border border-red-900 bg-red-950/40 px-4 py-3 text-sm text-red-400">
+          <p className="rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
             {t("loadError")}
           </p>
         ) : (

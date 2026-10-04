@@ -29,7 +29,7 @@ export function NextStepSuggestion({ sourceHref }: { sourceHref: string }) {
     <div className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-border bg-background/40 px-3 py-2 text-xs text-muted transition-colors duration-150">
       <Link
         href={suggestion.href}
-        className="flex min-w-0 items-center gap-1.5 transition-colors duration-150 hover:text-orange-400"
+        className="flex min-w-0 items-center gap-1.5 transition-colors duration-150 hover:text-foreground"
       >
         <span className="truncate">{tRoot(suggestion.messageKey)}</span>
         <ArrowRight className="h-3 w-3 shrink-0" aria-hidden="true" />

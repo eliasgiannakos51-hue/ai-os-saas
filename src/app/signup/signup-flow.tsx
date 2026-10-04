@@ -20,13 +20,12 @@ import { PasswordStrengthChecklist } from "@/components/auth/password-strength-c
 import { GeneratePasswordButton } from "@/components/auth/generate-password-button";
 import { LoginSplash } from "@/components/auth/login-splash";
 import { Logo } from "@/components/logo";
-import { AppBackground } from "@/components/ui/app-background";
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { COUNTRIES } from "@/lib/countries";
 import { formatNumber } from "@/lib/format-number";
 
 const FIELD_CLASS =
-  "w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500";
+  "w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40";
 
 type Step = 1 | 2;
 
@@ -234,7 +233,6 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4 py-10">
-      <AppBackground />
       <div className={`relative z-10 w-full ${step === 1 ? "max-w-3xl" : "max-w-md"}`}>
         <div className="mb-8 text-center">
           <div className="mb-4 flex items-center justify-center">
@@ -247,8 +245,8 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
 
         <div className="mx-auto mb-8 max-w-xs">
           <div className="flex items-center gap-2">
-            <div className="h-1 flex-1 rounded-full bg-orange-500" />
-            <div className={`h-1 flex-1 rounded-full ${step >= 2 ? "bg-orange-500" : "bg-border"}`} />
+            <div className="h-1 flex-1 rounded-full bg-button" />
+            <div className={`h-1 flex-1 rounded-full ${step >= 2 ? "bg-button" : "bg-border"}`} />
           </div>
           <p className="mt-2 text-center text-xs text-muted">{t("step", { step })}</p>
         </div>
@@ -269,18 +267,18 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
                     aria-pressed={selected && !wantsTeamSetup}
                     className={`relative flex flex-col items-start rounded-2xl border p-4 text-start transition-all duration-150 ${
                       selected && !wantsTeamSetup
-                        ? "border-orange-500 bg-orange-500/[0.04]"
-                        : "border-border bg-panel hover:border-orange-500/40"
+                        ? "border-foreground/40 bg-foreground/[0.04]"
+                        : "border-border bg-panel hover:border-foreground/40"
                     }`}
                   >
                     {p.highlighted && (
-                      <span className="absolute -top-2.5 end-3 inline-flex items-center rounded-full bg-orange-500 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-black">
+                      <span className="absolute -top-2.5 end-3 inline-flex items-center rounded-full bg-button px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-button-ink">
                         {t("mostPopular")}
                       </span>
                     )}
                     <div className="flex w-full items-center justify-between gap-2">
-                      <span className="text-sm font-semibold text-orange-400">{p.name}</span>
-                      {selected && <Check className="h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />}
+                      <span className="text-sm font-semibold text-foreground">{p.name}</span>
+                      {selected && <Check className="h-4 w-4 shrink-0 text-foreground" aria-hidden="true" />}
                     </div>
                     <p className="mt-1 text-lg font-bold text-foreground">
                       {typeof p.price === "number" ? `${CURRENCY_SYMBOL}${p.price}` : tPricing("custom")}
@@ -318,7 +316,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
                             }`}
                           >
                             {included ? (
-                              <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" aria-hidden="true" />
+                              <Check className="mt-0.5 h-3 w-3 shrink-0 text-success" aria-hidden="true" />
                             ) : (
                               /* NOT text-muted/50. At half opacity this
                                  glyph is 2.25:1 against the panel in dark
@@ -380,16 +378,16 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
                 aria-pressed={wantsTeamSetup}
                 className={`relative flex flex-col items-start rounded-2xl border p-4 text-start transition-all duration-150 ${
                   wantsTeamSetup
-                    ? "border-orange-500 bg-orange-500/[0.04]"
-                    : "border-border bg-panel hover:border-orange-500/40"
+                    ? "border-foreground/40 bg-foreground/[0.04]"
+                    : "border-border bg-panel hover:border-foreground/40"
                 }`}
               >
                 <div className="flex w-full items-center justify-between gap-2">
-                  <span className="text-sm font-semibold text-orange-400">
+                  <span className="text-sm font-semibold text-foreground">
                     {tPricing("businessTitle")}
                   </span>
                   {wantsTeamSetup && (
-                    <Check className="h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
+                    <Check className="h-4 w-4 shrink-0 text-foreground" aria-hidden="true" />
                   )}
                 </div>
                 <p className="mt-1 text-lg font-bold text-foreground">
@@ -416,7 +414,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
                       key={feature}
                       className="flex items-start gap-1.5 text-[11px] text-foreground/80"
                     >
-                      <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" aria-hidden="true" />
+                      <Check className="mt-0.5 h-3 w-3 shrink-0 text-success" aria-hidden="true" />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -427,14 +425,14 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
             <button
               type="button"
               onClick={() => setStep(2)}
-              className="cta-amber mt-6 inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-black"
+              className="cta-amber mt-6 inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-button-ink"
             >
               {t("continue")}
             </button>
 
             <p className="mt-4 text-center text-xs text-muted">
               {t("alreadyHaveAccount")}{" "}
-              <Link href="/login" className="text-orange-400 underline underline-offset-2">
+              <Link href="/login" className="text-foreground underline underline-offset-2">
                 {t("logIn")}
               </Link>
             </p>
@@ -557,7 +555,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
                   required
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-border bg-input text-orange-500 accent-orange-500 outline-none focus:ring-2 focus:ring-orange-500/40"
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-border bg-input text-foreground accent-foreground outline-none focus:ring-2 focus:ring-foreground/40"
                 />
                 <span>
                   {t("agreeTerms")}{" "}
@@ -565,7 +563,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
                     href="/terms"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-orange-400 underline underline-offset-2"
+                    className="text-foreground underline underline-offset-2"
                   >
                     {t("termsOfService")}
                   </Link>{" "}
@@ -574,7 +572,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
                     href="/privacy"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-orange-400 underline underline-offset-2"
+                    className="text-foreground underline underline-offset-2"
                   >
                     {t("privacyPolicy")}
                   </Link>
@@ -582,7 +580,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
               </label>
 
               {error && (
-                <p className="rounded-xl border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+                <p className="rounded-xl border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                   {error}
                 </p>
               )}
@@ -590,7 +588,7 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
               <button
                 type="submit"
                 disabled={loading || !termsAccepted || !isPasswordStrong(password)}
-                className="cta-amber inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-black disabled:opacity-50"
+                className="cta-amber inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-button-ink disabled:opacity-50"
               >
                 {loading
                   ? t("working")

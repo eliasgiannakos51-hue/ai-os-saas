@@ -18,10 +18,8 @@ import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula"
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { logApiError } from "@/lib/log-error";
-import { AmbientDots } from "@/components/ui/ambient-dots";
 import { SampleDataBanner } from "@/components/sample-data/sample-data-banner";
 import { findSampleImport } from "@/lib/sample-data/apply";
-import { DashboardBackground } from "@/components/dashboard/dashboard-background";
 import { AchievementUnlockBridge } from "@/components/achievements/achievement-unlock-bridge";
 import { NavTracker } from "@/components/dashboard/nav-tracker";
 import { PageTransition } from "@/components/page-transition";
@@ -100,17 +98,6 @@ export default async function DashboardLayout({
             initialPlanSlug={plan.slug}
             isAdmin={isAdmin}
           >
-            {/* Same wireframe globe as login/signup/landing, now behind every
-                dashboard page for visual continuity with the auth pages —
-                fixed to the viewport, z-0. The whole app shell below is
-                explicitly `relative z-10` (one wrap here, not per-page) so
-                it stacks above the globe as a unit: Sidebar/TopNav's own
-                z-index values (z-50/z-30) still order correctly *within*
-                that shell, and every page's content, opaque or not, paints
-                on top of the globe by default instead of needing its own
-                stacking fix. DashboardBackground (not AuthBackground
-                directly) picks the opacity per-route, since Chat/Create
-                need a higher one — see its own comment for why. */}
             {/* WHETHER VOICE EXISTS HERE AT ALL — one read, shared by
                 every microphone button and every "Listen" button below
                 it. Two provider keys are optional to a deployment and
@@ -120,15 +107,6 @@ export default async function DashboardLayout({
                 inside CreditsProvider because the voice controls show a
                 price and refresh the balance after spending it. */}
             <VoiceAvailabilityProvider>
-            <DashboardBackground />
-            {/* A second, much quieter ambient layer above the globe: ten
-                slowly drifting dots and two breathing glows, pure CSS. The
-                globe is a canvas with its own render loop and is not
-                touched — this sits on top of it at z-0 and costs nothing
-                per frame. */}
-            <div className="pointer-events-none fixed inset-0 z-0">
-              <AmbientDots />
-            </div>
             {/* WHAT A PAGE SAYS WHEN IT CANNOT REACH THE SERVER.
                 Mounted once, above the whole dashboard, because the
                 service worker will happily serve the last version of any

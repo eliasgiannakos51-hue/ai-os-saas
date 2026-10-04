@@ -107,7 +107,7 @@ export function BadgeRemoval({ siteId }: { siteId: string }) {
   if (state.active) {
     return (
       <div className="space-y-1">
-        <p className="flex items-center gap-1.5 text-xs text-emerald-400">
+        <p className="flex items-center gap-1.5 text-xs text-success">
           <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
           {t("removedThisMonth")}
         </p>
@@ -126,7 +126,7 @@ export function BadgeRemoval({ siteId }: { siteId: string }) {
             {t("stopRenewing")}
           </button>
         )}
-        {error ? <p className="text-xs text-red-400">{error}</p> : null}
+        {error ? <p className="text-xs text-danger">{error}</p> : null}
       </div>
     );
   }
@@ -151,12 +151,12 @@ export function BadgeRemoval({ siteId }: { siteId: string }) {
         type="button"
         onClick={buy}
         disabled={busy || !state.canBuy}
-        className="inline-flex min-h-[32px] items-center gap-1.5 rounded-lg border border-border px-2.5 text-xs text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex min-h-[32px] items-center gap-1.5 rounded-lg border border-border px-2.5 text-xs text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
       >
         {busy ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : null}
         {t("remove")}
       </button>
-      {error ? <p className="text-xs text-red-400">{error}</p> : null}
+      {error ? <p className="text-xs text-danger">{error}</p> : null}
     </div>
   );
 }

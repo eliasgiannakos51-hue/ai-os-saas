@@ -61,7 +61,7 @@ export function CookieConsentBanner() {
           <button
             type="button"
             onClick={accept}
-            className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
+            className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg bg-button px-4 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
           >
             {t("accept")}
           </button>
@@ -123,12 +123,12 @@ export function CookieConsentBanner() {
                     is true and worth continuing to see. */}
                 {t.rich("noTracking", {
                   cookiePolicy: (chunks) => (
-                    <a href="/cookies" className="py-[9px] text-orange-400 underline underline-offset-2">
+                    <a href="/cookies" className="py-[9px] text-foreground underline underline-offset-2">
                       {chunks}
                     </a>
                   ),
                   privacyPolicy: (chunks) => (
-                    <a href="/privacy" className="py-[9px] text-orange-400 underline underline-offset-2">
+                    <a href="/privacy" className="py-[9px] text-foreground underline underline-offset-2">
                       {chunks}
                     </a>
                   ),

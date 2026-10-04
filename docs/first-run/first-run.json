@@ -1,6 +1,6 @@
 {
-  "total": 3454,
-  "onPath": 718,
+  "total": 3449,
+  "onPath": 716,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -22,7 +22,7 @@
       "n": 3,
       "title": "Further in — only if you have time",
       "note": "Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour.",
-      "count": 210
+      "count": 208
     }
   ],
   "screens": [
@@ -2567,18 +2567,6 @@
           "depth": 2,
           "tier": 3,
           "file": "src/components/dashboard/notification-bell.tsx"
-        },
-        {
-          "key": "common.switchToDarkMode",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/components/theme/theme-toggle.tsx"
-        },
-        {
-          "key": "common.switchToLightMode",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/components/theme/theme-toggle.tsx"
         },
         {
           "key": "common.toggleMenu",

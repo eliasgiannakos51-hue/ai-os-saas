@@ -147,7 +147,7 @@ console.log("\n== 1b. a suite says WHICH check caught each mutation ==");
 //
 // Measured across the directory: 57 of 58 suites already do this, in one
 // of two ways. The better one reads the gate's OWN first failing line
-// from its stdout (light-theme-contrast.mutation.mjs is the model); the
+// from its stdout (chat-timeline.mutation.mjs is the model); the
 // weaker one carries an `expect:` label naming the check the author
 // believes will fire. Both are accepted here — a predicted name is still
 // a name somebody can check — but the stdout form is what to copy,

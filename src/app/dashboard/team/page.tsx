@@ -85,7 +85,7 @@ export default async function TeamPage({
   const activeMemberCount = members?.length ?? 0;
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.team" helpArticle="team-members"
           icon={Users}
@@ -107,9 +107,9 @@ export default async function TeamPage({
         )}
 
         {justSetUp && (
-          <div className="mb-6 rounded-2xl border border-emerald-800 bg-emerald-950/30 px-4 py-3 text-sm text-emerald-400">
+          <div className="mb-6 rounded-2xl border border-success/40 bg-success/10 px-4 py-3 text-sm text-success">
             <p className="font-semibold">{t("setupSuccessTitle")}</p>
-            <p className="mt-1 text-xs text-emerald-400/80">{t("setupSuccessBody")}</p>
+            <p className="mt-1 text-xs text-success/80">{t("setupSuccessBody")}</p>
           </div>
         )}
 

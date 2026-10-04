@@ -112,11 +112,11 @@ export default async function RoutingPage() {
                     <td className="p-3 font-mono text-xs text-foreground">{row.modelId}</td>
                     <td className="p-3 text-foreground">{formatNumber(row.decisions, locale)}</td>
                     <td className="p-3 text-foreground">${row.chargedUsd.toFixed(5)}</td>
-                    <td className={`p-3 ${row.absorbedUsd > 0 ? "text-orange-400" : "text-muted"}`}>
+                    <td className={`p-3 ${row.absorbedUsd > 0 ? "text-foreground" : "text-muted"}`}>
                       ${row.absorbedUsd.toFixed(5)}
                     </td>
                     <td className="p-3 text-foreground">{formatNumber(row.overrides, locale)}</td>
-                    <td className="p-3 text-emerald-400">${row.overrideSavingUsd.toFixed(5)}</td>
+                    <td className="p-3 text-success">${row.overrideSavingUsd.toFixed(5)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -145,7 +145,7 @@ export default async function RoutingPage() {
                   <span className="text-muted">
                     {row.feature} <span className="font-mono">{row.modelId}</span>
                   </span>
-                  <span className={failing ? "text-orange-400" : "text-foreground"}>
+                  <span className={failing ? "text-foreground" : "text-foreground"}>
                     {t("runs", { rate: (row.rate * 100).toFixed(1), samples: row.samples })}
                     {failing ? ` — ${t("routedUp")}` : enough ? "" : ` (${t("notEnough")})`}
                   </span>
@@ -173,7 +173,7 @@ function Card({
   return (
     <div className="surface-tight">
       <p className="text-xs text-muted">{label}</p>
-      <p className={`mt-1 text-lg font-semibold ${alarming ? "text-orange-400" : "text-foreground"}`}>{value}</p>
+      <p className={`mt-1 text-lg font-semibold ${alarming ? "text-foreground" : "text-foreground"}`}>{value}</p>
       {note ? <p className="mt-1 text-xs text-muted">{note}</p> : null}
     </div>
   );

@@ -823,7 +823,7 @@ export function AgentsWorkspace({
             data-testid="agents-new"
             onClick={() => (creating ? resetCreate() : setCreating(true))}
             disabled={atCapacity && !creating}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             {creating ? t("cancel") : t("newAgent")}
@@ -889,7 +889,7 @@ export function AgentsWorkspace({
             */}
             <div className="grid gap-3 rounded-xl border border-border bg-surface/40 p-3 sm:grid-cols-2">
               <div>
-                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-success">
                   <Check className="h-3.5 w-3.5" aria-hidden="true" />
                   {t("capability.canTitle")}
                 </p>
@@ -902,7 +902,7 @@ export function AgentsWorkspace({
                 </ul>
               </div>
               <div>
-                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-rose-400">
+                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-danger">
                   <Ban className="h-3.5 w-3.5" aria-hidden="true" />
                   {t("capability.cannotTitle")}
                 </p>
@@ -922,19 +922,19 @@ export function AgentsWorkspace({
               screen and the incident that produced it.
             */}
             {capability?.capabilityBlocked && (
-              <div className="space-y-2 rounded-xl border border-rose-500/40 bg-rose-500/[0.06] p-4">
-                <p className="flex items-center gap-2 text-sm font-semibold text-rose-300">
+              <div className="space-y-2 rounded-xl border border-danger/40 bg-danger/[0.06] p-4">
+                <p className="flex items-center gap-2 text-sm font-semibold text-danger">
                   <Ban className="h-4 w-4" aria-hidden="true" />
                   {t("capability.refusedTitle")}
                 </p>
                 <p className="text-sm leading-relaxed text-foreground">{t("capability.refusedBody")}</p>
                 {capability.modelNote && (
-                  <p className="text-sm leading-relaxed text-rose-200/90">{capability.modelNote}</p>
+                  <p className="text-sm leading-relaxed text-danger/90">{capability.modelNote}</p>
                 )}
                 {(capability.blocked ?? []).length > 0 && (
                   <ul className="space-y-1">
                     {(capability.blocked ?? []).map((id) => (
-                      <li key={id} className="text-xs leading-relaxed text-rose-200/90">
+                      <li key={id} className="text-xs leading-relaxed text-danger/90">
                         • {t(`capability.cannot.${id}`)}
                       </li>
                     ))}
@@ -947,7 +947,7 @@ export function AgentsWorkspace({
                     })}
                   </p>
                 )}
-                <p className="text-xs font-medium text-emerald-400">{t("capability.noCharge")}</p>
+                <p className="text-xs font-medium text-success">{t("capability.noCharge")}</p>
                 <p className="text-xs leading-relaxed text-muted">{t("capability.tryInstead")}</p>
                 <button
                   type="button"
@@ -965,14 +965,14 @@ export function AgentsWorkspace({
               instead, and ask whether to continue.
             */}
             {capability?.capabilityPartial && (
-              <div className="space-y-2 rounded-xl border border-amber-500/40 bg-amber-500/[0.06] p-4">
-                <p className="flex items-center gap-2 text-sm font-semibold text-amber-300">
+              <div className="space-y-2 rounded-xl border border-warning/40 bg-warning/[0.06] p-4">
+                <p className="flex items-center gap-2 text-sm font-semibold text-warning">
                   <AlertTriangle className="h-4 w-4" aria-hidden="true" />
                   {t("capability.partialTitle")}
                 </p>
                 <ul className="space-y-1">
                   {(capability.blocked ?? []).map((id) => (
-                    <li key={id} className="text-xs leading-relaxed text-amber-200/90">
+                    <li key={id} className="text-xs leading-relaxed text-warning/90">
                       • {t(`capability.cannot.${id}`)}
                     </li>
                   ))}
@@ -984,7 +984,7 @@ export function AgentsWorkspace({
                     })}
                   </p>
                 )}
-                <p className="text-xs font-medium text-emerald-400">{t("capability.noChargeYet")}</p>
+                <p className="text-xs font-medium text-success">{t("capability.noChargeYet")}</p>
                 <div className="flex flex-wrap gap-2 pt-1">
                   <button
                     type="button"
@@ -992,7 +992,7 @@ export function AgentsWorkspace({
                       setCapability(null);
                       void build(requestText, true, true);
                     }}
-                    className="min-h-[36px] rounded-lg border border-orange-500/60 px-3 py-1.5 text-xs font-semibold text-orange-300 transition-opacity hover:bg-orange-500/10"
+                    className="min-h-[36px] rounded-lg border border-foreground/60 px-3 py-1.5 text-xs font-semibold text-foreground transition-opacity hover:bg-foreground/10"
                   >
                     {t("capability.partialContinue")}
                   </button>
@@ -1030,7 +1030,7 @@ export function AgentsWorkspace({
             )}
 
             {preview?.draft && (
-              <div className="space-y-3 rounded-xl border border-orange-500/30 bg-orange-500/[0.04] p-4">
+              <div className="space-y-3 rounded-xl border border-foreground/30 bg-foreground/[0.04] p-4">
                 {/* THE MOMENT THE USER SEES IT. Inside the preview rather
                     than in an effect beside it, so a draft can only be
                     marked seen by actually being on the screen. */}
@@ -1040,11 +1040,11 @@ export function AgentsWorkspace({
                   <p className="text-sm leading-relaxed text-foreground">{preview.understood}</p>
                 )}
                 {preview.unsupported && (
-                  <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2.5">
-                    <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-400">
+                  <div className="rounded-lg border border-warning/40 bg-warning/10 p-2.5">
+                    <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-warning">
                       {t("capability.previewWillNotDo")}
                     </p>
-                    <p className="text-xs leading-relaxed text-amber-300">{preview.unsupported}</p>
+                    <p className="text-xs leading-relaxed text-warning">{preview.unsupported}</p>
                   </div>
                 )}
 
@@ -1169,7 +1169,7 @@ export function AgentsWorkspace({
                     type="button"
                     onClick={createAgent}
                     disabled={savingAgent}
-                    className="inline-flex min-h-[44px] items-center rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex min-h-[44px] items-center rounded-lg border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {savingAgent ? t("creating") : t("createButton")}
                   </button>
@@ -1213,7 +1213,7 @@ export function AgentsWorkspace({
                 type="button"
                 disabled
                 data-testid="agent-design"
-                className="hover:bg-orange-500/10 inline-flex min-h-[44px] cursor-not-allowed items-center rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 opacity-50"
+                className="hover:bg-foreground/10 inline-flex min-h-[44px] cursor-not-allowed items-center rounded-lg border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground opacity-50"
               >
                 {t("designButton")}
               </button>
@@ -1247,7 +1247,7 @@ export function AgentsWorkspace({
             card's status badge and no words anywhere, for three real steps
             that can take minutes. */}
         {runJob && (runJob.status === "queued" || runJob.status === "running") && (
-          <div className="mb-4 rounded-xl border border-orange-500/25 bg-orange-500/5 px-3 py-2">
+          <div className="mb-4 rounded-xl border border-foreground/25 bg-foreground/5 px-3 py-2">
             <AiJobProgress job={runJob} watchLost={runWatchLost} />
             <AiJobTimeline job={runJob} className="mt-1" />
           </div>
@@ -1394,22 +1394,22 @@ export function AgentsWorkspace({
             const reason = lastFailure?.error ?? null;
             if (selected.status === "disabled") {
               return (
-                <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-2.5 text-xs leading-relaxed text-red-300">
+                <div className="rounded-lg border border-danger/40 bg-danger/10 p-2.5 text-xs leading-relaxed text-danger">
                   <p>{t("disabledExplanation", { failures: selected.consecutive_failures })}</p>
-                  {reason && <p className="mt-1.5 text-red-200/90">{t("disabledReason", { reason })}</p>}
+                  {reason && <p className="mt-1.5 text-danger/90">{t("disabledReason", { reason })}</p>}
                 </div>
               );
             }
             if (selected.consecutive_failures > 0) {
               return (
-                <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2.5 text-xs leading-relaxed text-amber-200">
+                <div className="rounded-lg border border-warning/40 bg-warning/10 p-2.5 text-xs leading-relaxed text-warning">
                   <p>
                     {t("failingWarning", {
                       failures: selected.consecutive_failures,
                       max: AGENT_MAX_CONSECUTIVE_FAILURES,
                     })}
                   </p>
-                  {reason && <p className="mt-1.5 text-amber-200/80">{t("disabledReason", { reason })}</p>}
+                  {reason && <p className="mt-1.5 text-warning/80">{t("disabledReason", { reason })}</p>}
                 </div>
               );
             }
@@ -1513,7 +1513,7 @@ export function AgentsWorkspace({
                   type="button"
                   onClick={() => void saveEdit(selected)}
                   disabled={busyId === selected.id}
-                  className="inline-flex min-h-[44px] items-center rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center rounded-lg border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-50"
                 >
                   {busyId === selected.id ? t("saving") : t("saveButton")}
                 </button>
@@ -1562,8 +1562,8 @@ export function AgentsWorkspace({
               <ShareTemplate agentId={selected.id} prompt={selected.prompt} />
 
               {lastRunOutput && (
-                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.05] p-3">
-                  <p className="mb-1.5 text-xs font-semibold text-emerald-300">{t("latestOutput")}</p>
+                <div className="rounded-xl border border-success/30 bg-success/[0.05] p-3">
+                  <p className="mb-1.5 text-xs font-semibold text-success">{t("latestOutput")}</p>
                   <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
                     {lastRunOutput}
                   </p>
@@ -1596,12 +1596,12 @@ export function AgentsWorkspace({
                           <span
                             className={`text-xs font-medium ${
                               run.status === "success"
-                                ? "text-emerald-400"
+                                ? "text-success"
                                 : run.status === "failed"
-                                  ? "text-red-400"
+                                  ? "text-danger"
                                   : run.status === "queued"
-                                    ? "text-sky-400"
-                                    : "text-amber-400"
+                                    ? "text-muted"
+                                    : "text-warning"
                             }`}
                           >
                             {run.status === "success"
@@ -1626,7 +1626,7 @@ export function AgentsWorkspace({
                                 })}
                           </span>
                         </div>
-                        {run.error && <p className="mt-1.5 text-xs text-red-300">{run.error}</p>}
+                        {run.error && <p className="mt-1.5 text-xs text-danger">{run.error}</p>}
                         {run.status === "queued" && (
                           <p className="mt-1.5 text-xs text-muted">{t("runQueuedHint")}</p>
                         )}

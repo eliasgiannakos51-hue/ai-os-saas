@@ -50,7 +50,7 @@ export function ErrorMessage({
 
   return (
     <div
-      className="mb-4 rounded-xl border border-red-900/60 bg-red-500/5 px-4 py-3 text-xs text-red-400"
+      className="mb-4 rounded-xl border border-danger/40 bg-danger/5 px-4 py-3 text-xs text-danger"
       title={detail}
       role="alert"
     >
@@ -58,17 +58,17 @@ export function ErrorMessage({
         <div className="flex items-start gap-2">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           <div className="space-y-1">
-            <p className="font-medium text-red-300">{message ?? failure.what}</p>
-            {!message && <p className="text-red-400/90">{failure.next}</p>}
+            <p className="font-medium text-danger">{message ?? failure.what}</p>
+            {!message && <p className="text-danger/90">{failure.next}</p>}
             {!message && (
-              <p className="text-red-400/70">
+              <p className="text-danger/70">
                 {failure.credits}
                 {failure.showCreditHistory && (
                   <>
                     {" "}
                     <Link
                       href="/dashboard/settings#ai-usage"
-                      className="underline underline-offset-2 hover:text-red-200"
+                      className="underline underline-offset-2 hover:text-danger"
                     >
                       {t("creditHistory")}
                     </Link>
@@ -81,7 +81,7 @@ export function ErrorMessage({
         <button
           type="button"
           onClick={() => router.refresh()}
-          className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-red-900/60 px-3 text-[11px] text-red-300 transition-colors duration-150 hover:border-red-500 hover:text-red-100"
+          className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-danger/40 px-3 text-[11px] text-danger transition-colors duration-150 hover:border-danger hover:text-danger"
         >
           <RotateCw className="h-4 w-4" aria-hidden="true" /> {t("retry")}
         </button>

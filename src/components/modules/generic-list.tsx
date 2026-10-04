@@ -176,7 +176,7 @@ export function GenericList({
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 aria-label={t("filterBy", { label: tKey(statusField.labelKey) })}
-                className="min-h-[44px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60"
+                className="min-h-[44px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-foreground/60"
               >
                 <option value="">{t("filterAll", { label: tKey(statusField.labelKey) })}</option>
                 {statusField.options?.map((option) => (
@@ -197,7 +197,7 @@ export function GenericList({
               type="button"
               onClick={handleExport}
               disabled={filtered.length === 0}
-              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Download className="h-3.5 w-3.5" aria-hidden="true" /> {t("exportCsv")}
             </button>

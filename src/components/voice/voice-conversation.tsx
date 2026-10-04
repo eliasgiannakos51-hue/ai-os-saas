@@ -253,7 +253,7 @@ export function VoiceConversation({
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col bg-black/85 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[70] flex flex-col bg-background/85 backdrop-blur-sm">
       <div className="flex items-center justify-between px-4 py-3">
         <p className="text-xs text-muted">{t("conversation.title")}</p>
         <button
@@ -287,7 +287,7 @@ export function VoiceConversation({
               : t("conversation.hint")}
         </span>
         {state === "idle" && turns.length === 0 && (
-          <span className="flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black">
+          <span className="flex items-center gap-2 rounded-lg bg-button px-4 py-2 text-sm font-semibold text-button-ink">
             <Mic className="h-4 w-4" aria-hidden="true" />
             {t("conversation.start")}
           </span>
@@ -303,11 +303,11 @@ export function VoiceConversation({
           <ul className="mx-auto max-w-lg space-y-3">
             {turns.map((turn, index) => (
               <li key={index} className="space-y-1">
-                <p className="text-[11px] text-orange-300">{turn.question}</p>
+                <p className="text-[11px] text-foreground">{turn.question}</p>
                 <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{turn.answer}</p>
               </li>
             ))}
-            {partial && <li className="text-[11px] text-orange-300">{partial}</li>}
+            {partial && <li className="text-[11px] text-foreground">{partial}</li>}
           </ul>
         )}
       </div>

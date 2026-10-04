@@ -167,9 +167,9 @@ function WebsiteThumbnail({ website }: { website: UserWebsite }) {
         aria-hidden="true"
       >
         {website.status === "failed" ? (
-          <AlertTriangle className="h-4 w-4 text-red-400" />
+          <AlertTriangle className="h-4 w-4 text-danger" />
         ) : website.status === "flagged" ? (
-          <AlertTriangle className="h-4 w-4 text-amber-400" />
+          <AlertTriangle className="h-4 w-4 text-warning" />
         ) : (
           <ThinkingIndicator size="sm" />
         )}
@@ -179,7 +179,7 @@ function WebsiteThumbnail({ website }: { website: UserWebsite }) {
 
   return (
     <div
-      className="shrink-0 overflow-hidden rounded-md border border-border bg-white"
+      className="shrink-0 overflow-hidden rounded-md border border-border bg-paper"
       style={{ width: THUMB_DISPLAY_WIDTH, height: THUMB_DISPLAY_HEIGHT }}
       aria-hidden="true"
     >
@@ -1150,7 +1150,7 @@ export function WebsiteBuilderWorkspace({
               aria-current={isCurrent ? "page" : undefined}
               className={`rounded-lg border px-2.5 py-1 text-xs transition-colors duration-150 ${
                 isCurrent
-                  ? "border-orange-500/50 bg-orange-500/[0.07] text-foreground"
+                  ? "border-foreground/50 bg-foreground/[0.07] text-foreground"
                   : "border-border bg-input text-muted hover:text-foreground"
               }`}
             >
@@ -1372,7 +1372,7 @@ export function WebsiteBuilderWorkspace({
                 type="submit"
                 form={EDIT_FORM_ID}
                 disabled={editing || !editText.trim() || previewWebsite.status !== "completed"}
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {editing ? (
                   <ThinkingIndicator size="sm" />
@@ -1410,7 +1410,7 @@ export function WebsiteBuilderWorkspace({
                   type="button"
                   onClick={() => downloadHtml(previewWebsite)}
                   disabled={previewWebsite.status !== "completed"}
-                  className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Download className="h-3.5 w-3.5" aria-hidden="true" />
                   {t("downloadButton")}
@@ -1419,7 +1419,7 @@ export function WebsiteBuilderWorkspace({
                   type="button"
                   onClick={() => handleDelete(previewWebsite.id)}
                   disabled={deletingId === previewWebsite.id}
-                  className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-red-400 transition-colors duration-150 hover:border-red-500/60 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-danger transition-colors duration-150 hover:border-danger/60 hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                   {t("deleteButton")}
@@ -1438,7 +1438,7 @@ export function WebsiteBuilderWorkspace({
               <AiGeneratedNotice variant="block" className="mb-3" />
 
               {viewingVersion && (
-                <p className="mb-3 rounded-lg border border-orange-800 bg-orange-950/20 px-3 py-2 text-xs text-orange-300">
+                <p className="mb-3 rounded-lg border border-border bg-panel-hover/20 px-3 py-2 text-xs text-foreground">
                   {t("viewingOldVersion", { number: viewingVersion.version_number })}{" "}
                   <button
                     type="button"
@@ -1457,9 +1457,9 @@ export function WebsiteBuilderWorkspace({
                     srcDoc={livePreviewHtml}
                     sandbox=""
                     title={previewWebsite.name}
-                    className="h-full w-full rounded-xl border border-border bg-white"
+                    className="h-full w-full rounded-xl border border-border bg-paper"
                   />
-                  <div className="absolute left-1/2 top-3 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-orange-500/40 bg-black/80 px-3 py-1.5 text-xs font-medium text-orange-300 shadow-lg backdrop-blur">
+                  <div className="absolute left-1/2 top-3 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-foreground/40 bg-background/80 px-3 py-1.5 text-xs font-medium text-foreground backdrop-blur">
                     <ThinkingIndicator size="sm" />
                     {t("livePreviewBadge")}
                   </div>
@@ -1469,7 +1469,7 @@ export function WebsiteBuilderWorkspace({
                   <ThinkingIndicator className="scale-150" />
                   <p className="text-sm font-medium text-foreground">{t("generatingTitle")}</p>
                   <p className="max-w-md text-xs text-muted">{t("generatingBody")}</p>
-                  <p className="text-xs text-orange-400/80" aria-live="polite" data-testid="website-live-step">
+                  <p className="text-xs text-foreground/80" aria-live="polite" data-testid="website-live-step">
                     {liveStepText ?? t(PROGRESS_MESSAGE_KEYS[progressMessageIndex])}
                   </p>
                   {/* THE STOP BUTTON — V4.6. The generation runs in a request
@@ -1487,25 +1487,25 @@ export function WebsiteBuilderWorkspace({
                         () => addToast(t("generateFailed"), "error")
                       );
                     }}
-                    className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 text-sm font-medium text-orange-300 transition-colors duration-150 hover:bg-orange-500/10"
+                    className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-4 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
                   >
                     <Square className="h-3 w-3 fill-current" aria-hidden="true" />
                     {tSteps("stop")}
                   </button>
                 </div>
               ) : !viewingVersion && previewWebsite.status === "failed" ? (
-                <div className="flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-red-800 bg-red-950/20 px-6 text-center">
-                  <AlertTriangle className="h-8 w-8 text-red-400" aria-hidden="true" />
-                  <p className="text-sm font-medium text-red-300">{t("generationFailedTitle")}</p>
-                  <p className="max-w-md text-xs text-red-300/80">
+                <div className="flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-danger/40 bg-danger/10 px-6 text-center">
+                  <AlertTriangle className="h-8 w-8 text-danger" aria-hidden="true" />
+                  <p className="text-sm font-medium text-danger">{t("generationFailedTitle")}</p>
+                  <p className="max-w-md text-xs text-danger/80">
                     {stoppedNote ? describeNote(stoppedNote) : previewWebsite.error_message ?? t("generateFailed")}
                   </p>
                 </div>
               ) : !viewingVersion && previewWebsite.status === "flagged" ? (
                 <div className="notice-warning flex h-[500px] w-full flex-col items-center justify-center gap-3 px-6 text-center">
-                  <AlertTriangle className="h-8 w-8 text-amber-400" aria-hidden="true" />
-                  <p className="text-sm font-medium text-amber-300">{t("flaggedTitle")}</p>
-                  <p className="max-w-md text-xs text-amber-300/80">{previewWebsite.error_message}</p>
+                  <AlertTriangle className="h-8 w-8 text-warning" aria-hidden="true" />
+                  <p className="text-sm font-medium text-warning">{t("flaggedTitle")}</p>
+                  <p className="max-w-md text-xs text-warning/80">{previewWebsite.error_message}</p>
                   {/* THE OFFER, OR WHY THERE IS NOT ONE.
                       The button used to simply vanish when the free retry
                       was spent or the original brief was never stored, so
@@ -1518,7 +1518,7 @@ export function WebsiteBuilderWorkspace({
                       type="button"
                       onClick={() => handleRegenerateFlagged(previewWebsite.id)}
                       disabled={regeneratingId === previewWebsite.id}
-                      className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {regeneratingId === previewWebsite.id ? (
                         <ThinkingIndicator size="sm" />
@@ -1528,7 +1528,7 @@ export function WebsiteBuilderWorkspace({
                       {t("regenerateFree")}
                     </button>
                   ) : (
-                    <p className="max-w-md text-xs text-amber-300/70">
+                    <p className="max-w-md text-xs text-warning/70">
                       {previewWebsite.free_retry_used
                         ? t("regenerateAlreadyUsed")
                         : t("regenerateNoBrief")}
@@ -1540,20 +1540,20 @@ export function WebsiteBuilderWorkspace({
                   {unfilled.length > 0 && (
                     <div
                       data-testid="website-unfilled"
-                      className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/[0.06] p-3"
+                      className="mb-3 rounded-xl border border-warning/30 bg-warning/[0.06] p-3"
                     >
-                      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-amber-300">
+                      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-warning">
                         <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                         {t("unfilledTitle", { count: unfilled.length })}
                       </p>
-                      <p className="mb-2 text-[11px] leading-relaxed text-amber-200/80">
+                      <p className="mb-2 text-[11px] leading-relaxed text-warning/80">
                         {t("unfilledBody")}
                       </p>
                       <ul className="flex flex-wrap gap-1.5">
                         {unfilled.map((item: UnfilledPlaceholder) => (
                           <li
                             key={item.text}
-                            className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-200"
+                            className="rounded-md border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] text-warning"
                           >
                             {item.text}
                             {item.count > 1 && <span className="ms-1 opacity-70">×{item.count}</span>}
@@ -1565,20 +1565,20 @@ export function WebsiteBuilderWorkspace({
                   {inventedNumbers.length > 0 && (
                     <div
                       data-testid="website-invented-numbers"
-                      className="mb-3 rounded-xl border border-rose-500/30 bg-rose-500/[0.06] p-3"
+                      className="mb-3 rounded-xl border border-danger/30 bg-danger/[0.06] p-3"
                     >
-                      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-rose-300">
+                      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-danger">
                         <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                         {t("inventedTitle", { count: inventedNumbers.length })}
                       </p>
-                      <p className="mb-2 text-[11px] leading-relaxed text-rose-200/80">
+                      <p className="mb-2 text-[11px] leading-relaxed text-danger/80">
                         {t("inventedBody")}
                       </p>
                       <ul className="flex flex-wrap gap-1.5">
                         {inventedNumbers.map((item: SuspectNumber) => (
                           <li
                             key={`${item.kind}:${item.text}`}
-                            className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[11px] text-rose-200"
+                            className="rounded-md border border-danger/30 bg-danger/10 px-2 py-0.5 text-[11px] text-danger"
                           >
                             <span className="opacity-70">{t(`inventedKind.${item.kind}`)}</span>{" "}
                             {item.text}
@@ -1590,15 +1590,15 @@ export function WebsiteBuilderWorkspace({
                   {generationNotes.length > 0 && (
                     <div
                       data-testid="website-generation-notes"
-                      className="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] p-3"
+                      className="mb-3 rounded-xl border border-success/30 bg-success/[0.06] p-3"
                     >
-                      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-emerald-300">
+                      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-success">
                         <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                         {t("notes.title")}
                       </p>
                       <ul className="space-y-1">
                         {generationNotes.filter((note) => note.kind !== "stopped").map((note, i) => (
-                          <li key={`${note.kind}:${i}`} className="text-[11px] leading-relaxed text-emerald-200/90">
+                          <li key={`${note.kind}:${i}`} className="text-[11px] leading-relaxed text-success/90">
                             {describeNote(note)}
                           </li>
                         ))}
@@ -1621,7 +1621,7 @@ export function WebsiteBuilderWorkspace({
                           selectDetailTab("edit");
                           editImageInputRef.current?.click();
                         }}
-                        className="mt-1.5 text-[11px] font-medium text-orange-400 underline-offset-2 hover:underline"
+                        className="mt-1.5 text-[11px] font-medium text-foreground underline-offset-2 hover:underline"
                       >
                         {t("stockNoticeAction")}
                       </button>
@@ -1632,14 +1632,14 @@ export function WebsiteBuilderWorkspace({
                     srcDoc={displayedHtml}
                     sandbox=""
                     title={previewWebsite.name}
-                    className="h-[500px] w-full rounded-xl border border-border bg-white"
+                    className="h-[500px] w-full rounded-xl border border-border bg-paper"
                   />
                 </>
               ) : (
-                <div className="flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-red-800 bg-red-950/20 px-6 text-center">
-                  <AlertTriangle className="h-8 w-8 text-red-400" aria-hidden="true" />
-                  <p className="text-sm font-medium text-red-300">{t("previewIncompleteTitle")}</p>
-                  <p className="max-w-md text-xs text-red-300/80">{t("previewIncompleteBody")}</p>
+                <div className="flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-danger/40 bg-danger/10 px-6 text-center">
+                  <AlertTriangle className="h-8 w-8 text-danger" aria-hidden="true" />
+                  <p className="text-sm font-medium text-danger">{t("previewIncompleteTitle")}</p>
+                  <p className="max-w-md text-xs text-danger/80">{t("previewIncompleteBody")}</p>
                 </div>
               )}
               {/* What the generation did, phase by phase — live while it
@@ -1678,7 +1678,7 @@ export function WebsiteBuilderWorkspace({
                         }}
                         className={`w-full rounded-lg border px-2.5 py-1.5 text-start text-xs transition-colors duration-150 ${
                           viewingVersion?.id === version.id
-                            ? "border-orange-500/40 bg-orange-500/[0.03] text-foreground"
+                            ? "border-foreground/40 bg-foreground/[0.03] text-foreground"
                             : "border-transparent text-muted hover:bg-panel-hover"
                         }`}
                       >
@@ -1775,11 +1775,11 @@ export function WebsiteBuilderWorkspace({
                     onChange={handleEditImageChange}
                   />
                 )}
-                {editImageError && <p className="mt-1 text-[11px] text-red-400">{editImageError}</p>}
+                {editImageError && <p className="mt-1 text-[11px] text-danger">{editImageError}</p>}
               </div>
 
               {editError && (
-                <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+                <p className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                   {editError}
                 </p>
               )}
@@ -1907,7 +1907,7 @@ export function WebsiteBuilderWorkspace({
                   />
                 )}
                 <p className="mt-1 text-[11px] text-muted">{t("imageHelp", { max: MAX_REFERENCE_IMAGES })}</p>
-                {imageError && <p className="mt-1 text-[11px] text-red-400">{imageError}</p>}
+                {imageError && <p className="mt-1 text-[11px] text-danger">{imageError}</p>}
               </div>
 
               {/* Custom design — colours, background, and what to do with
@@ -1928,19 +1928,19 @@ export function WebsiteBuilderWorkspace({
               )}
 
               {isLargeGenerationRequest(description.length, referenceImageFiles.length) ? (
-                <p className="rounded-lg border border-amber-800/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-300">
+                <p className="rounded-lg border border-warning/40 bg-warning/5 px-3 py-2 text-xs text-warning">
                   {t("estimatedTimeLargeRequest")}
                 </p>
               ) : (
                 referenceImageFiles.length > 0 && (
-                  <p className="rounded-lg border border-amber-800/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-300">
+                  <p className="rounded-lg border border-warning/40 bg-warning/5 px-3 py-2 text-xs text-warning">
                     {t("estimatedTimeWithImages")}
                   </p>
                 )
               )}
 
               {error && (
-                <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+                <p className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                   {error}
                 </p>
               )}
@@ -1962,7 +1962,7 @@ export function WebsiteBuilderWorkspace({
                   type="submit"
                   data-testid="site-generate"
                   disabled={generating || !description.trim()}
-                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {generating ? (
                     <ThinkingIndicator size="sm" />
@@ -1980,7 +1980,7 @@ export function WebsiteBuilderWorkspace({
                 resetGenerationForm();
                 setShowForm(true);
               }}
-              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
             >
               <Plus className="h-4 w-4" aria-hidden="true" /> {t("newProject")}
             </button>
@@ -1996,7 +1996,7 @@ export function WebsiteBuilderWorkspace({
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               aria-label={tModule("filterBy", { label: t("statusLabel") })}
-              className="min-h-[44px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60"
+              className="min-h-[44px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-foreground/60"
             >
               <option value="">{tModule("filterAll", { label: t("statusLabel") })}</option>
               {WEBSITE_STATUSES.map((status) => (

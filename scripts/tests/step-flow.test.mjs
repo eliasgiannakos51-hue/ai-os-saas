@@ -119,7 +119,9 @@ const SCREENS = {
   files: "src/components/files/files-workspace.tsx",
   coding: "src/components/coding/coding-workspace.tsx",
 };
-const FILLED = /\bbg-(?:orange-400|orange-500|amber-500)(?![/\w-])/;
+// The design's filled control since 2026-10-04 is the white button
+// (bg-button); it was bg-orange-500/400 before.
+const FILLED = /\bbg-(?:button|warning)(?![/\w-])/;
 
 // SAME BUTTON POSITION, which is half of what the brief asked for and
 // the half a word-only check cannot see: the flow is drawn BEFORE the
@@ -142,11 +144,11 @@ function describeOrder(src) {
 }
 check(
   "the order check accepts flow-then-button",
-  flowBeforeAction('<StepFlow flow="x" current={n} />\n<button className="bg-orange-500">go</button>')
+  flowBeforeAction('<StepFlow flow="x" current={n} />\n<button className="bg-button">go</button>')
 );
 check(
   "...and refuses button-then-flow",
-  !flowBeforeAction('<button className="bg-orange-500">go</button>\n<StepFlow flow="x" current={n} />')
+  !flowBeforeAction('<button className="bg-button">go</button>\n<StepFlow flow="x" current={n} />')
 );
 for (const [flow, file] of Object.entries(SCREENS)) {
   const src = stripComments(readFileSync(file, "utf8"));
@@ -228,24 +230,24 @@ check("and the list says what it is", /aria-label=\{t\("label"\)\}/.test(shape))
 // ---------------------------------------------------------------------
 console.log("\n== 6. the one colour a static reader cannot judge ==");
 // THE DIGIT INSIDE THE CURRENT STEP'S CHIP, pinned to the class that was
-// MEASURED rather than the one that looked right. text-orange-300 on the
-// 15% wash reads 4.44:1 in the light theme at 11px — under AA — and
-// text-orange-400 reads the same 4.44 because the two collapse to one
-// token there. text-orange-500 reads 6.27:1 light and 5.35:1 dark.
+// MEASURED rather than the one that looked right. Until 2026-10-04 it was
+// an orange that read 4.44:1 in the light theme. Since then there is one
+// theme and no accent: text-foreground on a 15% wash of itself, measured
+// 14.62:1 on 2026-10-04 by the tool named below.
 //
 // A contrast ratio is not something this file can compute: it needs the
 // composited ground, which needs a browser. So the browser does it in
 // scripts/step-flow-contrast.mjs and this pins the answer, which is the
 // only half of the pair that can run on every build.
 check(
-  "the current step's digit uses the accent text that measured above 4.5:1",
-  /here \? "bg-orange-500\/15 text-orange-500"/.test(shape),
-  "text-orange-300 there is 4.44:1 in light — see scripts/step-flow-contrast.mjs"
+  "the current step's digit uses the text colour that measured above 4.5:1",
+  /here \? "bg-foreground\/15 text-foreground"/.test(shape),
+  "see scripts/step-flow-contrast.mjs"
 );
 const contrastTool = readFileSync("scripts/step-flow-contrast.mjs", "utf8");
 check(
   "...and the measurement that decided it is in the repository",
-  /for \(const theme of \["dark", "light"\]\)/.test(contrastTool) &&
+  /for \(const theme of \["dark"\]\)/.test(contrastTool) &&
     /el:/.test(contrastTool) && /ar:/.test(contrastTool) && /zh:/.test(contrastTool),
   "a number quoted in a comment with no way to re-derive it is a number nobody can check"
 );
@@ -254,7 +256,7 @@ check(
 // green this project has been bitten by four times.
 check(
   "...against the same class",
-  contrastTool.includes('here ? "bg-orange-500/15 text-orange-500"'),
+  contrastTool.includes('here ? "bg-foreground/15 text-foreground"'),
   "the harness and the component have drifted apart"
 );
 

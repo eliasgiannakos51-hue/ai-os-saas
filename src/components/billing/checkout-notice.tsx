@@ -41,7 +41,7 @@ export function CheckoutNotice() {
       role="status"
       className={
         state === "success"
-          ? "mb-6 flex items-center gap-2 rounded-2xl border border-emerald-800 bg-emerald-950/30 px-4 py-3 text-xs text-emerald-400"
+          ? "mb-6 flex items-center gap-2 rounded-2xl border border-success/40 bg-success/10 px-4 py-3 text-xs text-success"
           : "mb-6 rounded-2xl border border-border bg-panel px-4 py-3 text-xs text-muted"
       }
     >

@@ -130,7 +130,7 @@ export function DocumentEditor({
   ];
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <div className="mb-4 flex items-center justify-between gap-3">
           <Link
@@ -158,11 +158,11 @@ export function DocumentEditor({
             )}
             {saveState === "saved" && (
               <>
-                <Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
+                <Check className="h-3.5 w-3.5 text-success" aria-hidden="true" />
                 {t("saved")}
               </>
             )}
-            {saveState === "error" && <span className="text-red-400">{t("saveError")}</span>}
+            {saveState === "error" && <span className="text-danger">{t("saveError")}</span>}
             </span>
           </div>
         </div>
@@ -208,7 +208,7 @@ export function DocumentEditor({
           suppressContentEditableWarning
           onInput={handleEditorInput}
           data-placeholder={t("contentPlaceholder")}
-          className="document-editor-content min-h-[60vh] rounded-2xl border border-border bg-panel px-5 py-4 text-sm leading-relaxed text-foreground outline-none focus:border-orange-500/40"
+          className="document-editor-content min-h-[60vh] rounded-2xl border border-border bg-panel px-5 py-4 text-sm leading-relaxed text-foreground outline-none focus:border-foreground/40"
         />
       </div>
     </div>

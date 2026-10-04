@@ -55,14 +55,14 @@ export function ErrorList({ rows }: { rows: ProductionErrorRow[] }) {
             key={row.id}
             style={{ ["--i" as string]: i }}
             className={`list-slide-in rounded-2xl border p-4 transition-colors duration-200 ${
-              resolved ? "border-border bg-panel/50 opacity-60" : "border-red-500/25 bg-panel"
+              resolved ? "border-border bg-panel/50 opacity-60" : "border-danger/25 bg-panel"
             }`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-foreground">{row.errorMessage}</p>
                 <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-                  <code className="rounded bg-white/[0.05] px-1.5 py-0.5">{row.route}</code>
+                  <code className="rounded bg-foreground/[0.05] px-1.5 py-0.5">{row.route}</code>
                   <span>
                     {row.occurrenceCount}x
                     {row.affectedUsers > 0 && ` · ${row.affectedUsers} user${row.affectedUsers === 1 ? "" : "s"}`}
@@ -91,7 +91,7 @@ export function ErrorList({ rows }: { rows: ProductionErrorRow[] }) {
                     type="button"
                     onClick={() => resolve(row.id)}
                     disabled={resolving === row.id}
-                    className="flex h-8 items-center gap-1.5 rounded-lg border border-border px-2.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-emerald-500/50 hover:text-emerald-300 disabled:opacity-50"
+                    className="flex h-8 items-center gap-1.5 rounded-lg border border-border px-2.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-success/50 hover:text-success disabled:opacity-50"
                   >
                     <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                     Resolve
@@ -100,7 +100,7 @@ export function ErrorList({ rows }: { rows: ProductionErrorRow[] }) {
               </div>
             </div>
             {open && row.stackTrace && (
-              <pre className="content-fade-in mt-3 max-h-64 overflow-auto rounded-lg bg-black/40 p-3 text-[11px] leading-relaxed text-muted">
+              <pre className="content-fade-in mt-3 max-h-64 overflow-auto rounded-lg bg-background/40 p-3 text-[11px] leading-relaxed text-muted">
                 {row.stackTrace}
               </pre>
             )}

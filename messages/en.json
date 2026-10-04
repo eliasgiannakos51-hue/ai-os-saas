@@ -29,8 +29,6 @@
       "long": "AI-generated content. It can be wrong — check anything important before you rely on it."
     },
     "close": "Close",
-    "switchToDarkMode": "Switch to dark mode",
-    "switchToLightMode": "Switch to light mode",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "networkErrorCheckConnection": "Network error — please check your connection and try again.",
@@ -63,7 +61,6 @@
       "lastResortBody": "Ionexa needs a connection to load new data. Pages you already opened are still available from this device's cache — and anything you were working on is safe on the server."
     },
     "creditsUnlimited": "Unlimited",
-    "whatIsThis": "What is this?",
     "examplesLabel": "Try:",
     "newMessagesBelow": "New message below",
     "downloadPdf": {
@@ -1049,7 +1046,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "Most Active Module",
-      "acrossAllModules": "across all modules",
       "entry": "{count, plural, one {# entry} other {# entries}}",
       "statRow": {
         "totalEntries": "Total Entries",
@@ -2801,7 +2797,6 @@
       "images": "Hero image for the pricing page",
       "videos": "60-second product walkthrough",
       "coding": "Script to reconcile Stripe payouts",
-      "data-analysis": "Which plan has the lowest churn?",
       "campaigns": "September launch — email + LinkedIn",
       "presentations": "Q3 board update — talking points",
       "ideas": "A newsletter for people who switched from spreadsheets"

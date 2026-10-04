@@ -152,7 +152,7 @@ export function LinkToModal({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4 sm:items-center sm:pb-0">
-      <div onClick={onClose} className="fixed inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" />
+      <div onClick={onClose} className="fixed inset-0 bg-background/60 backdrop-blur-sm" aria-hidden="true" />
 
       <div
         role="dialog"
@@ -163,7 +163,7 @@ export function LinkToModal({
         <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div className="flex min-w-0 items-start gap-3">
             <span
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/10 text-foreground"
               aria-hidden="true"
             >
               <Link2 className="h-4 w-4" />
@@ -193,7 +193,7 @@ export function LinkToModal({
                     key={m.slug}
                     type="button"
                     onClick={() => setSelectedModule(m)}
-                    className="flex min-h-[44px] items-center rounded-xl border border-border bg-input px-3 py-2.5 text-start text-sm text-foreground transition-colors duration-150 hover:border-orange-500/60 hover:text-orange-400"
+                    className="flex min-h-[44px] items-center rounded-xl border border-border bg-input px-3 py-2.5 text-start text-sm text-foreground transition-colors duration-150 hover:border-foreground/60 hover:text-foreground"
                   >
                     {tKey(m.titleKey)}
                   </button>
@@ -233,7 +233,7 @@ export function LinkToModal({
                     type="button"
                     onClick={() => handleLink(r.id)}
                     disabled={linkingId === r.id}
-                    className="block w-full rounded-lg border border-border bg-input px-3 py-2 text-start text-sm text-foreground transition-colors duration-150 hover:border-orange-500/60 hover:text-orange-400 disabled:opacity-50"
+                    className="block w-full rounded-lg border border-border bg-input px-3 py-2 text-start text-sm text-foreground transition-colors duration-150 hover:border-foreground/60 hover:text-foreground disabled:opacity-50"
                   >
                     {r.headline}
                   </button>
@@ -243,7 +243,7 @@ export function LinkToModal({
           )}
 
           {error && (
-            <p className="mt-3 rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+            <p className="mt-3 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
               {tCommon("errorWithMessage", { message: error })}
             </p>
           )}

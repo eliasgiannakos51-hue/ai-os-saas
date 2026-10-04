@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { PasswordInput } from "@/components/ui/password-input";
 import { LoginSplash } from "@/components/auth/login-splash";
-import { AppBackground } from "@/components/ui/app-background";
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { Logo } from "@/components/logo";
 
@@ -120,7 +119,6 @@ export function LoginForm() {
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4">
-      <AppBackground />
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mb-4 flex items-center justify-center">
@@ -130,7 +128,7 @@ export function LoginForm() {
         </div>
 
         {resetSuccess && (
-          <p className="mb-4 rounded-xl border border-emerald-800 bg-emerald-950/30 px-3 py-2 text-center text-xs text-emerald-400">
+          <p className="mb-4 rounded-xl border border-success/40 bg-success/10 px-3 py-2 text-center text-xs text-success">
             {t("resetSuccess")}
           </p>
         )}
@@ -156,7 +154,7 @@ export function LoginForm() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500"
+                className="w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40"
                 placeholder="you@domain.com"
               />
             </div>
@@ -172,13 +170,13 @@ export function LoginForm() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500"
+                className="w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40"
                 placeholder="••••••••"
               />
             </div>
 
             {error && (
-              <p className="rounded-xl border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+              <p className="rounded-xl border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                 {error}
               </p>
             )}
@@ -186,7 +184,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="cta-amber inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-black disabled:opacity-50"
+              className="cta-amber inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-button-ink disabled:opacity-50"
             >
               {loading ? t("working") : t("logIn")}
             </button>
@@ -195,13 +193,13 @@ export function LoginForm() {
 
         <p className="mt-4 text-center text-xs text-muted">
           {t("noAccount")}{" "}
-          <Link href="/signup" className="text-orange-400 underline underline-offset-2">
+          <Link href="/signup" className="text-foreground underline underline-offset-2">
             {t("signUp")}
           </Link>
         </p>
 
         <p className="mt-2 text-center text-xs text-muted">
-          <Link href="/forgot-password" className="text-orange-400 underline underline-offset-2">
+          <Link href="/forgot-password" className="text-foreground underline underline-offset-2">
             {t("forgotPassword")}
           </Link>
         </p>

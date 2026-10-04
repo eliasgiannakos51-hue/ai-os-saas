@@ -85,11 +85,11 @@ const MUTANTS = [
     expect: "charts at",
   },
   {
-    name: "the placeholder is drawn in the accent, so it reads as a zero",
+    name: "the placeholder is drawn in a colour that means something, so it reads as a zero",
     file: CARD,
-    from: "rgb(255_255_255/0.14)",
-    to: "#f97316",
-    expect: "not the accent colour",
+    from: "border-dashed border-foreground/15",
+    to: "border-dashed border-success",
+    expect: "not drawn in a colour that means something",
   },
 ];
 

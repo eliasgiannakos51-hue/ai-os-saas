@@ -459,7 +459,7 @@ export function CreateChat({
             type="submit"
             disabled={loading || !input.trim()}
             aria-label={t("send")}
-            className="absolute bottom-3 end-3 z-[2] flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fcd34d_0%,#f97316_60%,#dc4a04_100%)] text-black transition-all duration-200 hover:brightness-110 hover: disabled:cursor-not-allowed disabled:opacity-40"
+            className="absolute bottom-3 end-3 z-[2] flex h-11 w-11 items-center justify-center rounded-full bg-button text-button-ink transition-all duration-200 hover:brightness-110 hover: disabled:cursor-not-allowed disabled:opacity-40"
           >
             {loading ? (
               <ThinkingIndicator size="sm" tone="inherit" />
@@ -501,17 +501,17 @@ export function CreateChat({
           )}
 
           {result.type === "matched" && (
-            <div className="flex items-start gap-3 rounded-2xl border border-emerald-900/60 bg-emerald-500/5 p-4 text-sm">
-              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
+            <div className="flex items-start gap-3 rounded-2xl border border-success/40 bg-success/5 p-4 text-sm">
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" />
               <div className="min-w-0">
-                <p className="text-emerald-400">
+                <p className="text-success">
                   {tCreate("loggedTo")}{" "}
                   <span className="font-semibold">{result.moduleTitle}</span>
                 </p>
                 <p className="mt-1 text-foreground/90">{result.message}</p>
                 <Link
                   href={result.href}
-                  className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-emerald-900/60 px-3 py-1.5 text-xs text-emerald-400 transition-colors duration-150 hover:border-emerald-500"
+                  className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-success/40 px-3 py-1.5 text-xs text-success transition-colors duration-150 hover:border-success"
                 >
                   {tCreate("viewModule", { module: result.moduleTitle })}
                 </Link>
@@ -527,13 +527,13 @@ export function CreateChat({
               data-testid="create-answer"
               className="flex items-start gap-3 surface-tight text-sm"
             >
-              <MessageCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" aria-hidden="true" />
+              <MessageCircle className="mt-0.5 h-5 w-5 shrink-0 text-foreground" aria-hidden="true" />
               <div className="min-w-0">
                 <p className="whitespace-pre-wrap text-foreground/90">{result.answer}</p>
                 <p className="mt-2 text-[11px] text-muted">{tCreate("answeredNotFiled")}</p>
                 <Link
                   href="/dashboard/chat"
-                  className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+                  className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
                 >
                   {tCreate("continueInChat")}
                 </Link>
@@ -546,15 +546,15 @@ export function CreateChat({
           {result.type === "ambiguous" && (
             <div
               data-testid="create-ambiguous"
-              className="flex items-start gap-3 rounded-2xl border border-orange-900/50 bg-orange-500/5 p-4 text-sm"
+              className="flex items-start gap-3 rounded-2xl border border-border bg-foreground/5 p-4 text-sm"
             >
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" aria-hidden="true" />
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-foreground" aria-hidden="true" />
               <div className="min-w-0">
                 <p className="text-foreground/90">{result.message || tCreate("looksLikeQuestion")}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Link
                     href="/dashboard/chat"
-                    className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-orange-500/50 px-3 py-1.5 text-xs font-medium text-orange-300 transition-colors duration-150 hover:bg-orange-500/10"
+                    className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-foreground/50 px-3 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
                   >
                     {tCreate("answerItInstead")}
                   </Link>
@@ -574,8 +574,8 @@ export function CreateChat({
           {result.type === "outOfCredits" && <OutOfCreditsNotice className="mt-3" />}
 
           {result.type === "unmatched" && (
-            <div className="flex items-start gap-3 rounded-2xl border border-orange-900/50 bg-orange-500/5 p-4 text-sm">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" />
+            <div className="flex items-start gap-3 rounded-2xl border border-border bg-foreground/5 p-4 text-sm">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-foreground" />
               <div className="min-w-0">
                 <p className="text-foreground/90">{result.message}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -583,7 +583,7 @@ export function CreateChat({
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:px-2.5"
+                      className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground sm:px-2.5"
                     >
                       {tKey(item.titleKey)}
                     </Link>
@@ -594,7 +594,7 @@ export function CreateChat({
           )}
 
           {result.type === "error" && (
-            <div className="flex items-start gap-3 rounded-2xl border border-red-900/60 bg-red-500/5 p-4 text-sm text-red-400">
+            <div className="flex items-start gap-3 rounded-2xl border border-danger/40 bg-danger/5 p-4 text-sm text-danger">
               <XCircle className="mt-0.5 h-5 w-5 shrink-0" />
               <span>{result.message}</span>
             </div>

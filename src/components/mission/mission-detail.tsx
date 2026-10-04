@@ -477,7 +477,7 @@ export function MissionDetail({
               type="button"
               onClick={runReview}
               disabled={reviewing}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
               {reviewing ? t("reviewing") : t("reviewMission")}
@@ -504,7 +504,7 @@ export function MissionDetail({
       }
     >
       {error && (
-        <p className="mb-3 rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+        <p className="mb-3 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
           {error}
         </p>
       )}
@@ -512,7 +512,7 @@ export function MissionDetail({
       {tab === "steps" && (
         <>
           {stuckStep && (
-            <div className="mb-3 flex items-start gap-2.5 rounded-xl border border-amber-800/50 bg-amber-500/5 px-3 py-2.5 text-xs text-amber-300">
+            <div className="mb-3 flex items-start gap-2.5 rounded-xl border border-warning/40 bg-warning/5 px-3 py-2.5 text-xs text-warning">
               <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <p>{t("stillWorkingOn", { step: stuckStep.text })}</p>
             </div>
@@ -540,7 +540,7 @@ export function MissionDetail({
                     onDone={() => setCelebratingIndex(null)}
                   />
                   {step.status === "completed" ? (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
                   ) : (
                     <Circle className="mt-0.5 h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
                   )}
@@ -555,7 +555,7 @@ export function MissionDetail({
                     {step.status === "completed" && step.href && (
                       <Link
                         href={step.href}
-                        className="mt-0.5 inline-block text-xs text-orange-400 hover:underline"
+                        className="mt-0.5 inline-block text-xs text-foreground hover:underline"
                       >
                         {t("viewIn", { module: step.moduleTitleKey ? tKey(step.moduleTitleKey) : step.module ?? "" })}
                       </Link>
@@ -577,7 +577,7 @@ export function MissionDetail({
                       <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted">
                         {step.outcome && (
                           <span>
-                            <span className="text-emerald-400/80">→</span> {step.outcome}
+                            <span className="text-success/80">→</span> {step.outcome}
                           </span>
                         )}
                         {step.estimatedMinutes ? (
@@ -604,7 +604,7 @@ export function MissionDetail({
                               >
                                 {done ? (
                                   <CheckCircle2
-                                    className="mt-[3px] h-3.5 w-3.5 shrink-0 text-emerald-400"
+                                    className="mt-[3px] h-3.5 w-3.5 shrink-0 text-success"
                                     aria-hidden="true"
                                   />
                                 ) : (
@@ -628,7 +628,7 @@ export function MissionDetail({
                   {step.status !== "completed" && (
                     <div className="flex shrink-0 flex-col items-end gap-1.5">
                       {stepAttemptsExhausted(step.attempts) ? (
-                        <p className="max-w-[160px] text-end text-[11px] text-red-400">
+                        <p className="max-w-[160px] text-end text-[11px] text-danger">
                           {t("stepFailedMax", { max: MAX_STEP_ATTEMPTS })}
                         </p>
                       ) : (
@@ -636,7 +636,7 @@ export function MissionDetail({
                           {looksLikeWebsiteStep(step.text) && (
                             <Link
                               href="/dashboard/website-builder"
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-orange-500/40 px-2.5 py-1.5 text-xs font-medium text-orange-400 transition-colors duration-150 hover:bg-orange-500/10"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-foreground/40 px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
                             >
                               <WEBSITE_BUILDER_ICON className="h-3.5 w-3.5" aria-hidden="true" />
                               {t("openWebsiteBuilder")}
@@ -652,7 +652,7 @@ export function MissionDetail({
                             }
                             disabled={buildingIndex !== null}
                             aria-label={t("agentRoleLabel")}
-                            className="rounded-lg border border-border bg-input px-2 py-1 text-[11px] text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded-lg border border-border bg-input px-2 py-1 text-[11px] text-foreground outline-none transition-colors duration-150 focus:border-foreground/60 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {AGENT_ROLES.map((role) => (
                               <option key={role} value={role}>
@@ -664,7 +664,7 @@ export function MissionDetail({
                             type="button"
                             onClick={() => buildStep(index)}
                             disabled={buildingIndex !== null}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {buildingIndex === index ? (
                               <ThinkingIndicator size="sm" />
@@ -695,7 +695,7 @@ export function MissionDetail({
                               type="button"
                               onClick={() => scheduleStep(index)}
                               disabled={buildingIndex !== null || schedulingIndex !== null}
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               {schedulingIndex === index ? (
                                 <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -738,8 +738,8 @@ export function MissionDetail({
       {tab === "review" && (
         <div>
           {review ? (
-            <div className="rounded-xl border border-emerald-800 bg-emerald-950/20 p-4">
-              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-emerald-400">
+            <div className="rounded-xl border border-success/40 bg-success/10 p-4">
+              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-success">
                 {t("reviewerLabel")}
               </p>
               <MessageContent content={review} />

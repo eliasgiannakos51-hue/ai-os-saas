@@ -46,7 +46,7 @@ export function StepFlow({ flow, current }: { flow: FlowName; current: number })
                 // orange-500 reads 6.27:1 light and 5.35:1 dark. It was
                 // shipped at 4.44 for as long as it took to measure it.
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
-                  here ? "bg-orange-500/15 text-orange-500" : "bg-panel-hover text-muted"
+                  here ? "bg-foreground/15 text-foreground" : "bg-panel-hover text-muted"
                 }`}
                 aria-hidden="true"
               >

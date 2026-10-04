@@ -65,8 +65,8 @@ export const metadata: Metadata = {
 // Colours the browser chrome on mobile to match the app's own background,
 // so the status bar doesn't sit as a white band above a black page.
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
-  colorScheme: "dark light",
+  themeColor: "#070a12",
+  colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
 };
@@ -83,12 +83,13 @@ export const viewport: Viewport = {
 // explicitly asked for motion" apart from "this page has no JS yet" —
 // see the prefers-reduced-motion media query there, which is the
 // JS-free floor and must not override an explicit opt-in.
-// theme-toggle.tsx and accessibility-settings.tsx are the only other
-// places these values are written.
+// ONE THEME since 2026-10-04 (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN): data-theme
+// is always "dark", and a stored choice from before is cleared rather than
+// honoured. accessibility-settings.tsx is the only other place these
+// values are written.
 const INIT_SCRIPT = `(function(){try{
-var t=localStorage.getItem('theme');
-if(t==='midnight'||t==='carbon'){t='dark';localStorage.setItem('theme','dark');}
-document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');
+if(localStorage.getItem('theme')!==null){localStorage.removeItem('theme');}
+document.documentElement.setAttribute('data-theme','dark');
 var fs=localStorage.getItem('${FONT_SIZE_STORAGE_KEY}');
 document.documentElement.setAttribute('data-font-size',(fs==='small'||fs==='large'||fs==='xl')?fs:'medium');
 if(localStorage.getItem('${HIGH_CONTRAST_STORAGE_KEY}')==='1'){document.documentElement.setAttribute('data-contrast','high');}
@@ -139,7 +140,7 @@ export default async function RootLayout({
     // "ltr" for the nine locales that read left to right — see
     // lib/text-direction.ts, which obeys the same catalogue this app's
     // own website-builder prompt hands to every model it calls.
-    <html lang={locale} dir={dirAttribute(locale)} className="h-full" suppressHydrationWarning>
+    <html lang={locale} dir={dirAttribute(locale)} data-theme="dark" className="h-full" suppressHydrationWarning>
       <head>
         {/* eslint-disable-next-line react/no-danger */}
         <script dangerouslySetInnerHTML={{ __html: INIT_SCRIPT }} />

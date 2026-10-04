@@ -172,7 +172,7 @@ export function CodingWorkspace({
               onClick={() => setOperation(candidate)}
               className={`rounded-lg border px-3 py-1.5 text-xs ${
                 operation === candidate
-                  ? "border-orange-500 bg-orange-500/10 text-foreground"
+                  ? "border-foreground/40 bg-foreground/10 text-foreground"
                   : "border-border text-muted"
               }`}
             >
@@ -247,7 +247,7 @@ export function CodingWorkspace({
               type="checkbox"
               checked={useWorkspace}
               onChange={(e) => setUseWorkspace(e.target.checked)}
-              className="h-4 w-4 accent-orange-500"
+              className="h-4 w-4 accent-foreground"
             />
             {t("useWorkspace")}
           </label>
@@ -256,7 +256,7 @@ export function CodingWorkspace({
               type="button"
               onClick={stopRun}
               data-testid="coding-stop"
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-3 text-sm font-medium text-orange-300 transition-colors duration-150 hover:bg-orange-500/10"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-3 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
             >
               <Square className="h-3 w-3 fill-current" aria-hidden="true" />
               {tSteps("stop")}
@@ -266,7 +266,7 @@ export function CodingWorkspace({
             type="button"
             onClick={() => void run()}
             disabled={running || !input.trim()}
-            className="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-button px-4 py-2 text-xs font-semibold text-button-ink disabled:opacity-50"
           >
             {/* THE GLOBE, NOT A SPINNER. Running an operation is the
                 model thinking, which is the one wait this product marks

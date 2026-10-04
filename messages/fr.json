@@ -29,8 +29,6 @@
       "long": "Contenu généré par IA. Il peut comporter des erreurs — vérifiez ce qui compte avant de vous y fier."
     },
     "close": "Fermer",
-    "switchToDarkMode": "Passer au thème sombre",
-    "switchToLightMode": "Passer au thème clair",
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
     "networkErrorCheckConnection": "Erreur réseau — vérifiez votre connexion et réessayez.",
@@ -63,7 +61,6 @@
       "lastResortBody": "Ionexa a besoin d'une connexion pour charger de nouvelles données. Les pages déjà ouvertes restent disponibles depuis le cache de cet appareil — et ce sur quoi vous travailliez est en sécurité sur le serveur."
     },
     "creditsUnlimited": "Illimités",
-    "whatIsThis": "Qu'est-ce que c'est ?",
     "examplesLabel": "Essayez :",
     "newMessagesBelow": "Nouveau message en bas",
     "downloadPdf": {
@@ -1049,7 +1046,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "Module le plus actif",
-      "acrossAllModules": "tous modules confondus",
       "entry": "{count, plural, one {# entrée} other {# entrées}}",
       "statRow": {
         "totalEntries": "Total des Entrées",
@@ -2801,7 +2797,6 @@
       "images": "Image principale de la page tarifs",
       "videos": "Présentation du produit en 60 secondes",
       "coding": "Script de rapprochement des versements Stripe",
-      "data-analysis": "Quelle formule a le taux d'attrition le plus bas ?",
       "campaigns": "Lancement de septembre — e-mail + LinkedIn",
       "presentations": "Point trimestriel au conseil — éléments de langage",
       "ideas": "Une newsletter pour ceux qui ont quitté les tableurs"

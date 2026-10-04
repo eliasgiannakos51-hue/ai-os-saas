@@ -17,10 +17,10 @@ import { highlight, type TokenKind } from "@/lib/coding/highlight";
 const CLASSES: Record<TokenKind, string> = {
   plain: "text-foreground",
   comment: "text-muted italic",
-  string: "text-emerald-400",
-  number: "text-sky-400",
-  keyword: "text-orange-400",
-  builtin: "text-violet-400",
+  string: "text-success",
+  number: "text-muted",
+  keyword: "text-foreground",
+  builtin: "text-muted",
   punctuation: "text-muted",
 };
 
@@ -65,7 +65,7 @@ export function CodeBlock({
           aria-label={t("copy")}
           className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-[11px] text-foreground"
         >
-          {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+          {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
           {copied ? t("copied") : t("copy")}
         </button>
       </div>

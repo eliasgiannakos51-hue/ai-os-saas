@@ -29,8 +29,6 @@
       "long": "Von KI erzeugter Inhalt. Er kann Fehler enthalten — prüfen Sie Wichtiges, bevor Sie sich darauf verlassen."
     },
     "close": "Schließen",
-    "switchToDarkMode": "Zum dunklen Design wechseln",
-    "switchToLightMode": "Zum hellen Design wechseln",
     "showPassword": "Passwort anzeigen",
     "hidePassword": "Passwort verbergen",
     "networkErrorCheckConnection": "Netzwerkfehler — bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
@@ -63,7 +61,6 @@
       "lastResortBody": "Ionexa braucht eine Verbindung, um neue Daten zu laden. Bereits geöffnete Seiten sind weiterhin aus dem Cache dieses Geräts verfügbar — und woran du gearbeitet hast, liegt sicher auf dem Server."
     },
     "creditsUnlimited": "Unbegrenzt",
-    "whatIsThis": "Was ist das?",
     "examplesLabel": "Probier:",
     "newMessagesBelow": "Neue Nachricht unten",
     "downloadPdf": {
@@ -1049,7 +1046,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "Aktivstes Modul",
-      "acrossAllModules": "über alle Module hinweg",
       "entry": "{count, plural, one {# Eintrag} other {# Einträge}}",
       "statRow": {
         "totalEntries": "Einträge insgesamt",
@@ -2801,7 +2797,6 @@
       "images": "Titelbild für die Preisseite",
       "videos": "60-Sekunden-Produktrundgang",
       "coding": "Skript zum Abgleich der Stripe-Auszahlungen",
-      "data-analysis": "Welcher Tarif hat die niedrigste Abwanderung?",
       "campaigns": "September-Launch — E-Mail + LinkedIn",
       "presentations": "Q3-Update fürs Board — Kernaussagen",
       "ideas": "Ein Newsletter für alle, die von Tabellen umgestiegen sind"

@@ -118,7 +118,7 @@ export function ProjectDetail({
         <div className="mt-4">
           <Link
             href={`/dashboard/chat?project=${encodeURIComponent(project.id)}`}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-4 text-sm font-semibold text-black hover:bg-orange-400"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-button px-4 text-sm font-semibold text-button-ink hover:bg-button"
           >
             <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
             {t("startChat")}

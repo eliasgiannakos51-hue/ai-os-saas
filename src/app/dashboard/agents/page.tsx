@@ -82,7 +82,7 @@ export default async function AgentsPage({
 
   if (!isAdmin && planCap <= 0) {
     return (
-      <div className="min-h-full bg-dot-grid">
+      <div className="min-h-full">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader helpKey="help.agents" helpArticle="create-agent" icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} />
           <UpgradeRequired {...upgradeWallProps("aiAgents", t("title"))!} />
@@ -198,7 +198,7 @@ export default async function AgentsPage({
   );
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.agents" helpArticle="create-agent" icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} />
 

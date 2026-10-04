@@ -249,8 +249,8 @@ check(
   "an empty slice makes every assertion about it pass on nothing"
 );
 check(
-  "the placeholder is not the accent colour, so it cannot read as a value",
-  !/#f97316|orange-[45]00/.test(placeholderBlock),
+  "the placeholder is not drawn in a colour that means something, so it cannot read as a value",
+  !/#f97316|orange-[45]00|(?:text|bg|border|stroke|fill)-(?:signal|success|warning|danger)\b|--chart-1/.test(placeholderBlock),
   placeholderBlock.slice(0, 160)
 );
 

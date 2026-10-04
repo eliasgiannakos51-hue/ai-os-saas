@@ -61,7 +61,7 @@ export function SetupProgressCard({
             fill="none"
             stroke="currentColor"
             strokeWidth={STROKE_WIDTH}
-            className="text-white/[0.06]"
+            className="text-foreground/[0.06]"
           />
           <circle
             cx="60"
@@ -73,7 +73,7 @@ export function SetupProgressCard({
             strokeLinecap="round"
             strokeDasharray={CIRCUMFERENCE}
             strokeDashoffset={offset}
-            className="text-emerald-400/70"
+            className="text-success/70"
           />
           {/* Counter-rotated so the text sits upright inside a ring the
               parent has turned -90deg to start the sweep at twelve. */}
@@ -95,7 +95,7 @@ export function SetupProgressCard({
               gradient on this line; the page already has one gradient
               headline above it, and a second one here is the colour
               hierarchy the accent rule is about. */}
-          <p className="mt-0.5 text-lg font-bold text-emerald-300">{countLabel}</p>
+          <p className="mt-0.5 text-lg font-bold text-success">{countLabel}</p>
           <p className="mt-1 text-xs leading-relaxed text-muted">{suggestion}</p>
         </div>
       </div>
@@ -119,12 +119,12 @@ export function SetupProgressCard({
           <li key={step.id}>
             <Link
               href={step.href}
-              className={`flex min-h-[44px] items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm transition-colors duration-150 hover:bg-white/[0.04] ${
+              className={`flex min-h-[44px] items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm transition-colors duration-150 hover:bg-foreground/[0.04] ${
                 step.done ? "text-muted" : "text-foreground"
               }`}
             >
               {step.done ? (
-                <Check className="h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
+                <Check className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
               ) : (
                 <Circle className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
               )}

@@ -27,7 +27,6 @@ import {
   type FeatureCell,
 } from "@/lib/billing/feature-catalog";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
-import { AppBackground } from "@/components/ui/app-background";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { formatNumber } from "@/lib/format-number";
@@ -65,7 +64,7 @@ function ComparisonCellContent({
   if (cell.type === "check") {
     return (
       <>
-        <Check className="mx-auto h-4 w-4 text-emerald-400" aria-hidden="true" />
+        <Check className="mx-auto h-4 w-4 text-success" aria-hidden="true" />
         <span className="sr-only">{words.yes}</span>
       </>
     );
@@ -131,12 +130,11 @@ export default async function PricingPage({
 
   return (
     <main className="relative min-h-screen px-4 py-16 text-foreground sm:px-6">
-      <AppBackground />
       <div className="relative z-10 mx-auto max-w-6xl">
         <div className="text-center">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 transition-colors duration-150 hover:text-orange-400"
+            className="inline-flex items-center gap-2 transition-colors duration-150 hover:text-foreground"
           >
             <Logo iconOnly className="h-6 w-6" />
             <span className="text-base font-bold tracking-tight text-foreground">
@@ -164,16 +162,16 @@ export default async function PricingPage({
               id={`plan-${plan.slug}`}
               className={`relative flex scroll-mt-8 flex-col rounded-2xl border p-6 ${
                 plan.highlighted
-                  ? "border-orange-500/60 bg-orange-500/[0.04]"
+                  ? "border-foreground/60 bg-foreground/[0.04]"
                   : "border-border bg-panel"
               }`}
             >
               {plan.highlighted && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full bg-orange-500 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-black">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full bg-button px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-button-ink">
                   {t("mostPopular")}
                 </span>
               )}
-              <h2 className="text-sm font-semibold text-orange-400">{plan.name}</h2>
+              <h2 className="text-sm font-semibold text-foreground">{plan.name}</h2>
               <p className="mt-3 text-2xl font-bold text-foreground">
                 {typeof plan.price === "number" ? (
                   <>
@@ -206,7 +204,7 @@ export default async function PricingPage({
                 )}
               </p>
               {interval === "year" && annualPriceEur(plan) !== null && (
-                <p className="mt-1 text-xs text-emerald-400">
+                <p className="mt-1 text-xs text-success">
                   {t("billedAnnually", {
                     total: `${CURRENCY_SYMBOL}${formatNumber(annualPriceEur(plan)!, locale)}`,
                     saving: `${CURRENCY_SYMBOL}${formatNumber(annualSavingsEur(plan)!, locale)}`,
@@ -222,7 +220,7 @@ export default async function PricingPage({
               <ul className="mt-6 flex-1 space-y-2.5 text-sm text-muted">
                 {plan.features.map((feature) => (
                   <li key={feature.textKey} className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-foreground" aria-hidden="true" />
                     {/* `count` is only consumed by the creditsPerMonth key,
                         and next-intl ignores unused params.
 
@@ -264,14 +262,14 @@ export default async function PricingPage({
                 {plan.slug === "free" ? (
                   <Link
                     href="/signup?plan=free"
-                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400"
+                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground"
                   >
                     {t("signUp")}
                   </Link>
                 ) : plan.slug === "enterprise" ? (
                   <a
                     href="mailto:sales@ionexa.ai?subject=Ionexa%20AI%20Enterprise"
-                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400"
+                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground"
                   >
                     {t("contactSales")}
                   </a>
@@ -282,8 +280,8 @@ export default async function PricingPage({
                     label={t("getPlan", { plan: plan.name })}
                     className={`inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
                       plan.highlighted
-                        ? "bg-orange-500 text-black hover:opacity-90"
-                        : "border border-border text-foreground hover:border-orange-500 hover:text-orange-400"
+                        ? "bg-button text-button-ink hover:opacity-90"
+                        : "border border-border text-foreground hover:border-foreground/40 hover:text-foreground"
                     }`}
                   />
                 )}
@@ -297,7 +295,7 @@ export default async function PricingPage({
               The grid is xl:grid-cols-7 so all seven cards share one row at
               full width without displacing Enterprise. */}
           <div className="relative flex flex-col surface">
-            <h2 className="text-sm font-semibold text-orange-400">{t("businessTitle")}</h2>
+            <h2 className="text-sm font-semibold text-foreground">{t("businessTitle")}</h2>
             <p className="mt-3 text-lg font-bold text-foreground">{t("businessSubtitle")}</p>
             <p className="mt-3 text-xs leading-relaxed text-muted">
               {t("businessCardDescription", { price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}` })}
@@ -309,7 +307,7 @@ export default async function PricingPage({
               {hasTeamCapablePlan ? (
                 <Link
                   href="/dashboard/team"
-                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground"
                 >
                   {t("setUpTeam")}
                 </Link>
@@ -318,7 +316,7 @@ export default async function PricingPage({
                   plan="professional"
                   label={t("setUpTeam")}
                   successPath="/dashboard/team?setup=success"
-                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
                 />
               )}
             </div>
@@ -337,7 +335,7 @@ export default async function PricingPage({
           data-deploy-check="deploy-check-a2ac56f"
           className="mx-auto mt-8 max-w-3xl surface text-center"
         >
-          <h2 className="text-sm font-semibold text-orange-400">{t("teamBannerTitle")}</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t("teamBannerTitle")}</h2>
           <p className="mt-2 text-sm text-muted">
             {t("teamBannerBody", { price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}` })}
           </p>
@@ -384,7 +382,7 @@ export default async function PricingPage({
               // anything.
               return (
                 <details key={group} open className="group/section overflow-hidden rounded-2xl bg-panel">
-                  <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold text-orange-400">
+                  <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold text-foreground">
                     <span>
                       {t(`groups.${group}`)}
                       <span className="ms-2 text-xs font-normal text-muted">
@@ -432,7 +430,7 @@ export default async function PricingPage({
                               key={plan.slug}
                               scope="col"
                               className={`px-4 py-3 text-center font-semibold ${
-                                plan.highlighted ? "text-orange-400" : "text-foreground"
+                                plan.highlighted ? "text-foreground" : "text-foreground"
                               }`}
                             >
                               {plan.name}
@@ -479,7 +477,7 @@ export default async function PricingPage({
         <div className="mt-12 text-center">
           <Link
             href="/"
-            className="text-xs text-orange-400 underline underline-offset-2"
+            className="text-xs text-foreground underline underline-offset-2"
           >
             {t("backToHome")}
           </Link>

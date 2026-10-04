@@ -26,7 +26,7 @@ export function CostEstimateHint({ credits }: { credits: number }) {
   if (credits <= 0) return null;
   return (
     <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
-      <Zap className="h-3 w-3 text-orange-400/70" aria-hidden="true" />
+      <Zap className="h-3 w-3 text-foreground/70" aria-hidden="true" />
       {t("approx", { count: credits })}
     </p>
   );
@@ -53,13 +53,13 @@ export function LargeActionConfirm({
 
   return (
     <div
-      className="overlay-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      className="overlay-fade-in fixed inset-0 z-50 flex items-center justify-center bg-background/70 p-4"
       role="dialog"
       aria-modal="true"
     >
-      <div className="panel-pop-in w-full max-w-sm surface shadow-2xl">
+      <div className="panel-pop-in w-full max-w-sm surface">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/15 text-foreground">
             <Zap className="h-4 w-4" aria-hidden="true" />
           </span>
           <p className="text-sm font-semibold text-foreground">{t("confirmTitle")}</p>
@@ -71,7 +71,7 @@ export function LargeActionConfirm({
           <button
             type="button"
             onClick={onCancel}
-            className="min-h-[44px] flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors duration-200 hover:border-orange-500/50"
+            className="min-h-[44px] flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors duration-200 hover:border-foreground/50"
           >
             {t("cancel")}
           </button>
@@ -79,7 +79,7 @@ export function LargeActionConfirm({
             type="button"
             onClick={onConfirm}
             onMouseDown={ripple}
-            className="ripple-host min-h-[44px] flex-1 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+            className="ripple-host min-h-[44px] flex-1 rounded-lg bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
           >
             {t("continue")}
           </button>

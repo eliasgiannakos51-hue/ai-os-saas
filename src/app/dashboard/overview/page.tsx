@@ -26,7 +26,6 @@ import { HomeStatCard } from "@/components/overview/home-stat-card";
 import { CreditsHomeStat } from "@/components/overview/credits-home-stat";
 import { BetaFeedbackBanner } from "@/components/overview/beta-feedback-banner";
 import { BetaExpiryBanner } from "@/components/overview/beta-expiry-banner";
-import { GlowOrb } from "@/components/ui/glow-orb";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
 import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
@@ -516,7 +515,6 @@ export default async function OverviewPage() {
             hundred pixels below the fold. The page opened with a summary
             of the past and buried the present. */}
         <div className="relative flex flex-wrap items-start justify-between gap-3">
-          <GlowOrb className="-start-10 -top-20 -z-10 h-56 w-56" />
           <GreetingHeader name={greetingName(user.user_metadata)} />
           <LowCreditsBanner />
         </div>

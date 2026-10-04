@@ -65,13 +65,13 @@ export function CapabilityStatus({ rows }: { rows: CapabilityRow[] }) {
       level: "required" as const,
       title: "Missing and required — the app is meaningfully broken",
       icon: AlertTriangle,
-      tone: "border-red-900 bg-red-950/30 text-red-300",
+      tone: "border-danger/40 bg-danger/10 text-danger",
     },
     {
       level: "recommended" as const,
       title: "Missing and recommended — a feature is silently off",
       icon: AlertTriangle,
-      tone: "border-amber-800/50 bg-amber-500/5 text-amber-300",
+      tone: "border-warning/40 bg-warning/5 text-warning",
     },
     {
       level: "optional" as const,
@@ -89,13 +89,13 @@ export function CapabilityStatus({ rows }: { rows: CapabilityRow[] }) {
         lib/env-check.ts — the same list the boot check reads. Names and statuses only; no values.
       </p>
 
-      <p className="mt-3 flex items-center gap-1.5 text-xs text-emerald-400">
+      <p className="mt-3 flex items-center gap-1.5 text-xs text-success">
         <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
         {on} of {rows.length} configured
       </p>
 
       {off.length === 0 ? (
-        <p className="mt-3 rounded-xl border border-emerald-800 bg-emerald-950/30 px-3 py-2.5 text-xs text-emerald-400">
+        <p className="mt-3 rounded-xl border border-success/40 bg-success/10 px-3 py-2.5 text-xs text-success">
           Every variable the code reads is set. Nothing is silently off.
         </p>
       ) : (

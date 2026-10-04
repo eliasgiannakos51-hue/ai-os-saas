@@ -59,7 +59,7 @@ export function FilePicker({
           "inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-input px-3 py-1.5 text-xs font-medium text-foreground transition-colors duration-150",
           disabled
             ? "cursor-not-allowed opacity-50"
-            : "hover:border-orange-500 hover:text-orange-400",
+            : "hover:border-foreground/40 hover:text-foreground",
         ].join(" ")}
       >
         <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />

@@ -235,7 +235,7 @@ export function CreateStudio() {
           />
 
           {detectError && (
-            <p className="mt-2 rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+            <p className="mt-2 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
               {detectError}
             </p>
           )}
@@ -255,7 +255,7 @@ export function CreateStudio() {
           <button
             type="submit"
             disabled={detecting || !description.trim()}
-            className="mt-3 inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            className="mt-3 inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {detecting ? (
               <ThinkingIndicator size="sm" tone="inherit" />
@@ -290,7 +290,7 @@ export function CreateStudio() {
               <Icon className="h-5 w-5" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-orange-500/80">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-foreground/80">
                 {t("understoodLabel")}
               </p>
               <p className="mt-1 text-[15px] leading-relaxed text-foreground">
@@ -356,8 +356,8 @@ export function CreateStudio() {
                       aria-pressed={type === detection.type}
                       className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors duration-150 ${
                         type === detection.type
-                          ? "border-orange-500 text-orange-400"
-                          : "border-border text-foreground hover:border-orange-500 hover:text-orange-400"
+                          ? "border-foreground/40 text-foreground"
+                          : "border-border text-foreground hover:border-foreground/40 hover:text-foreground"
                       }`}
                     >
                       <TypeIcon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -374,7 +374,7 @@ export function CreateStudio() {
               type="button"
               onClick={() => studio.create(detection, description.trim())}
               disabled={studio.running}
-              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {studio.running ? (
                 <ThinkingIndicator size="sm" />
@@ -386,7 +386,7 @@ export function CreateStudio() {
             <button
               type="button"
               onClick={editDescription}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
             >
               <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
               {t("editDescription")}
@@ -394,7 +394,7 @@ export function CreateStudio() {
             <button
               type="button"
               onClick={() => setChangingType((v) => !v)}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
             >
               <Shuffle className="h-3.5 w-3.5" aria-hidden="true" />
               {t("changeType")}
@@ -402,7 +402,7 @@ export function CreateStudio() {
           </div>
 
           {studio.error && (
-            <p className="mt-3 rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+            <p className="mt-3 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
               {studio.error}
             </p>
           )}
@@ -459,7 +459,7 @@ export function CreateStudio() {
               <Link
                 href={studio.result.href}
                 data-testid="studio-destination-link"
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
               >
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                 {destinationLabelKey(studio.result.destinationKey)
@@ -472,7 +472,7 @@ export function CreateStudio() {
             <button
               type="button"
               onClick={startOver}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
             >
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               {t("createAnother")}
@@ -483,7 +483,7 @@ export function CreateStudio() {
         {tab === "overview" && (
           <div className="space-y-4">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-orange-500/80">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-foreground/80">
                 {t("understoodLabel")}
               </p>
               <p className="mt-1 text-sm leading-relaxed text-foreground">
@@ -499,7 +499,7 @@ export function CreateStudio() {
               </p>
             </div>
             {studio.result?.moduleTitle && (
-              <p className="rounded-lg border border-emerald-900/60 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-400">
+              <p className="rounded-lg border border-success/40 bg-success/5 px-3 py-2 text-xs text-success">
                 {t("routedTo", { module: studio.result.moduleTitle })}
               </p>
             )}
@@ -507,7 +507,7 @@ export function CreateStudio() {
               <p className="text-sm text-foreground/90">{studio.result.message}</p>
             )}
             {studio.error && (
-              <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+              <p className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                 {studio.error}
               </p>
             )}
@@ -525,9 +525,9 @@ export function CreateStudio() {
                   className="flex items-start gap-2.5 rounded-xl border border-border bg-input px-3 py-2.5"
                 >
                   {step.status === "done" ? (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
                   ) : step.status === "failed" ? (
-                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" aria-hidden="true" />
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden="true" />
                   ) : (
                     <ThinkingIndicator size="sm" className="mt-1" />
                   )}
@@ -564,7 +564,7 @@ export function CreateStudio() {
                 <button
                   type="button"
                   onClick={() => downloadHtml(website.name, website.html_content)}
-                  className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+                  className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
                 >
                   <Download className="h-3.5 w-3.5" aria-hidden="true" />
                   {tCommon("save")}

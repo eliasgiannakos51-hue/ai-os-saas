@@ -82,11 +82,11 @@ export async function BillingSummary({
               The badge still renders; it just no longer swallows the
               controls beside it. */}
           {isAdmin ? (
-            <span className="inline-flex items-center rounded-full border border-orange-800 bg-orange-950/30 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-orange-400">
+            <span className="inline-flex items-center rounded-full border border-border bg-panel-hover/30 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-foreground">
               {t("ownerAccess")}
             </span>
           ) : isBetaTester ? (
-            <span className="inline-flex items-center rounded-full border border-emerald-800 bg-emerald-950/30 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-emerald-400">
+            <span className="inline-flex items-center rounded-full border border-success/40 bg-success/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-success">
               {/* ICU plural, not `day${n === 1 ? "" : "s"}`. Arabic has six
                   plural forms and Japanese has none; an English "(s)" hack
                   is wrong in both directions and cannot be fixed by a
@@ -117,7 +117,7 @@ export async function BillingSummary({
           ) : (
             <Link
               href="/pricing"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
             >
               {t("upgradePlan")}
             </Link>
@@ -125,7 +125,7 @@ export async function BillingSummary({
           {(hasSubscription || isAdmin || isBetaTester) && tier !== "free" && (
             <Link
               href="/dashboard/team"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
             >
               {t("manageTeam")}
             </Link>

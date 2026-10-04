@@ -153,10 +153,10 @@ const MUTANTS = [
   // THE LIGHT THEME. The defect the previous pass spent itself on.
   // ------------------------------------------------------------------
   {
-    name: "the mark is hardcoded to orange-500, which is 2.62:1 on the light page",
+    name: "the mark is hardcoded to a literal orange, outside the design's variable",
     suites: [UNIT, BROWSER],
     file: CSS,
-    from: "  color: rgb(var(--accent-border));",
+    from: "  color: var(--globe-ink);",
     to: "  color: #f97316;",
   },
   {
@@ -188,7 +188,7 @@ const MUTANTS = [
     name: "the empty state loses its per-module icon, so 21 pages look identical",
     suites: [UNIT],
     file: "src/components/empty-state.tsx",
-    from: '          <Icon className="h-6 w-6 text-orange-400" aria-hidden="true" />',
+    from: '          <Icon className="h-6 w-6 text-foreground" aria-hidden="true" />',
     to: "",
   },
   {

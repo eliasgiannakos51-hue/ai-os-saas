@@ -63,12 +63,12 @@ export function DbExposure({ rows }: { rows: ExposureRow[] | null }) {
         {rows.map((r) => (
           <li key={r.key} className="flex items-start gap-2 text-xs">
             {r.ok ? (
-              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" aria-hidden="true" />
+              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" aria-hidden="true" />
             ) : (
-              <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-400" aria-hidden="true" />
+              <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-danger" aria-hidden="true" />
             )}
             <span className="min-w-0">
-              <span className={r.ok ? "text-muted" : "text-red-300"}>
+              <span className={r.ok ? "text-muted" : "text-danger"}>
                 {LABELS[r.key] ?? r.key}
               </span>{" "}
               <span className="font-mono text-fg">{r.found}</span>

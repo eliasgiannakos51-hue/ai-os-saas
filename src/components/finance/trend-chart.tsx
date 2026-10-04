@@ -41,7 +41,7 @@ export function TrendChart({
           // zero baseline — is not a change of nothing.
           <span className="text-xs text-muted">{t("noChangeYet")}</span>
         ) : (
-          <span className={`text-xs ${changePercent >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+          <span className={`text-xs ${changePercent >= 0 ? "text-success" : "text-danger"}`}>
             {changePercent >= 0 ? "+" : ""}
             {changePercent.toFixed(1)}%
           </span>
@@ -67,7 +67,7 @@ export function TrendChart({
                   color: "rgb(var(--foreground))",
                 }}
               />
-              <Area type="monotone" dataKey="value" stroke="#f97316" fill="#f97316" fillOpacity={0.18} />
+              <Area type="monotone" dataKey="value" stroke="rgb(var(--chart-1))" fill="rgb(var(--chart-1))" fillOpacity={0.18} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

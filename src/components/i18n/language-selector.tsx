@@ -93,9 +93,9 @@ export function LanguageSelector({
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-40 cursor-default"
           />
-          <div className="absolute end-0 top-11 z-50 max-h-80 w-48 overflow-y-auto rounded-xl border border-border bg-panel p-1.5 shadow-lg">
+          <div className="absolute end-0 top-11 z-50 max-h-80 w-48 overflow-y-auto rounded-xl border border-border bg-panel p-1.5">
             {failed && (
-              <p role="alert" className="px-3 py-2 text-xs text-red-400">
+              <p role="alert" className="px-3 py-2 text-xs text-danger">
                 {t("saveFailed")}
               </p>
             )}
@@ -110,7 +110,7 @@ export function LanguageSelector({
                   aria-pressed={selected}
                   className={`flex min-h-[44px] w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-start text-sm transition-colors duration-150 ${
                     selected
-                      ? "bg-orange-500/10 text-orange-400"
+                      ? "bg-foreground/10 text-foreground"
                       : "text-foreground hover:bg-panel-hover"
                   }`}
                 >

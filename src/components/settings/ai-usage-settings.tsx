@@ -30,7 +30,7 @@ function StatTile({
 }) {
   return (
     <div className="rounded-xl border border-border bg-input p-3.5">
-      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400">
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/10 text-foreground">
         <Icon className="h-4 w-4" aria-hidden="true" />
       </span>
       <p className="mt-2 text-xl font-bold text-foreground">{value}</p>
@@ -77,7 +77,7 @@ export function AiUsageSettings({
   return (
     <div id="ai-usage" className="mb-6 scroll-mt-20 space-y-4 surface">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <BarChart3 className="h-4 w-4 text-orange-400" /> {t("title")}
+        <BarChart3 className="h-4 w-4 text-foreground" /> {t("title")}
       </h2>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -129,9 +129,9 @@ export function AiUsageSettings({
                   fontSize: 12,
                   color: "rgb(var(--foreground))",
                 }}
-                cursor={{ fill: "rgba(249,115,22,0.06)" }}
+                cursor={{ fill: "rgb(var(--foreground) / 0.06)" }}
               />
-              <Bar dataKey="count" fill="#f97316" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="count" fill="rgb(var(--chart-1))" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

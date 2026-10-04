@@ -86,7 +86,7 @@ export function HomeStatCard({
   // shows its destination on hover and reaches the keyboard for free.
   const Shell = href ? Link : "div";
   const shellProps = href
-    ? { href, className: "glass-card group relative block overflow-hidden rounded-2xl p-4 transition-colors duration-150 hover:border-orange-500/40" }
+    ? { href, className: "glass-card group relative block overflow-hidden rounded-2xl p-4 transition-colors duration-150 hover:border-foreground/40" }
     : { className: "glass-card relative overflow-hidden rounded-2xl p-4" };
 
   return (
@@ -98,7 +98,7 @@ export function HomeStatCard({
             <CountUpValue value={value} />
           </p>
         </div>
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/25 to-purple-500/20 text-orange-300 ring-1 ring-inset ring-white/10">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-panel-hover text-foreground ring-1 ring-inset ring-foreground/10">
           {icon}
         </span>
       </div>
@@ -116,7 +116,7 @@ export function HomeStatCard({
       {!hasTrend && placeholderLabel && chartData && (
         <div className="relative z-[1] mt-3 h-8 w-full">
           <div
-            className="absolute inset-x-0 top-1/2 h-px bg-[repeating-linear-gradient(90deg,rgb(255_255_255/0.14)_0_6px,transparent_6px_12px)]"
+            className="absolute inset-x-0 top-1/2 border-t border-dashed border-foreground/15"
             aria-hidden="true"
           />
           <p className="absolute inset-x-0 bottom-0 truncate text-[10px] leading-none text-muted">
@@ -131,7 +131,7 @@ export function HomeStatCard({
               <Line
                 type="monotone"
                 dataKey="count"
-                stroke="#f97316"
+                stroke="rgb(var(--chart-1))"
                 strokeWidth={2}
                 dot={false}
                 // recharts' own animation is left off and the draw-in is
@@ -155,7 +155,7 @@ export function HomeStatCard({
         <p className="relative z-[1] mt-0.5 text-[10px] leading-none text-muted/70">{basis}</p>
       )}
       {href && (
-        <span className="relative z-[1] mt-1.5 block text-[10px] font-medium text-muted transition-colors duration-150 group-hover:text-orange-300">
+        <span className="relative z-[1] mt-1.5 block text-[10px] font-medium text-muted transition-colors duration-150 group-hover:text-foreground">
           {openLabel}
         </span>
       )}

@@ -9,9 +9,9 @@ export function TradingMentorButton({ label, description }: { label: string; des
   return (
     <Link
       href="/dashboard/chat?preset=trading"
-      className="flex items-center gap-3 surface-tight transition-all duration-200 hover:border-orange-500/40"
+      className="flex items-center gap-3 surface-tight transition-all duration-200 hover:border-foreground/40"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/10 text-foreground">
         <Compass className="h-4 w-4" aria-hidden="true" />
       </span>
       <div className="min-w-0">

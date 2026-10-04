@@ -29,8 +29,6 @@
       "long": "Contenuto generato dall’IA. Può contenere errori: verifica ciò che è importante prima di fidartene."
     },
     "close": "Chiudi",
-    "switchToDarkMode": "Passa al tema scuro",
-    "switchToLightMode": "Passa al tema chiaro",
     "showPassword": "Mostra password",
     "hidePassword": "Nascondi password",
     "networkErrorCheckConnection": "Errore di rete — controlla la connessione e riprova.",
@@ -63,7 +61,6 @@
       "lastResortBody": "Ionexa ha bisogno di una connessione per caricare nuovi dati. Le pagine che hai già aperto restano disponibili dalla cache di questo dispositivo — e ciò a cui stavi lavorando è al sicuro sul server."
     },
     "creditsUnlimited": "Illimitati",
-    "whatIsThis": "Che cos'è?",
     "examplesLabel": "Prova:",
     "newMessagesBelow": "Nuovo messaggio in basso",
     "downloadPdf": {
@@ -1049,7 +1046,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "Modulo più attivo",
-      "acrossAllModules": "in tutti i moduli",
       "entry": "{count, plural, one {# voce} other {# voci}}",
       "statRow": {
         "totalEntries": "Voci Totali",
@@ -2801,7 +2797,6 @@
       "images": "Immagine principale per la pagina prezzi",
       "videos": "Panoramica del prodotto in 60 secondi",
       "coding": "Script per riconciliare i pagamenti Stripe",
-      "data-analysis": "Quale piano ha il churn più basso?",
       "campaigns": "Lancio di settembre — email + LinkedIn",
       "presentations": "Aggiornamento al board Q3 — punti chiave",
       "ideas": "Una newsletter per chi ha lasciato i fogli di calcolo"

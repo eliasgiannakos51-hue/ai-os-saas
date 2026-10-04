@@ -29,8 +29,6 @@
       "long": "Contenido generado por IA. Puede contener errores: comprueba lo importante antes de fiarte de ello."
     },
     "close": "Cerrar",
-    "switchToDarkMode": "Cambiar al tema oscuro",
-    "switchToLightMode": "Cambiar al tema claro",
     "showPassword": "Mostrar contraseña",
     "hidePassword": "Ocultar contraseña",
     "networkErrorCheckConnection": "Error de red: comprueba tu conexión e inténtalo de nuevo.",
@@ -63,7 +61,6 @@
       "lastResortBody": "Ionexa necesita conexión para cargar datos nuevos. Las páginas que ya abriste siguen disponibles desde la caché de este dispositivo — y lo que estabas haciendo está a salvo en el servidor."
     },
     "creditsUnlimited": "Ilimitados",
-    "whatIsThis": "¿Qué es esto?",
     "examplesLabel": "Prueba:",
     "newMessagesBelow": "Mensaje nuevo abajo",
     "downloadPdf": {
@@ -1049,7 +1046,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "Módulo más activo",
-      "acrossAllModules": "en todos los módulos",
       "entry": "{count, plural, one {# entrada} other {# entradas}}",
       "statRow": {
         "totalEntries": "Entradas Totales",
@@ -2801,7 +2797,6 @@
       "images": "Imagen principal para la página de precios",
       "videos": "Recorrido del producto en 60 segundos",
       "coding": "Script para conciliar los pagos de Stripe",
-      "data-analysis": "¿Qué plan tiene la menor cancelación?",
       "campaigns": "Lanzamiento de septiembre: email + LinkedIn",
       "presentations": "Actualización al consejo del T3: puntos clave",
       "ideas": "Un boletín para quienes dejaron las hojas de cálculo"

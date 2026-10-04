@@ -221,7 +221,7 @@ export function IdeaRow({
         </div>
 
         {error && (
-          <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+          <p className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
             {tCommon("error")}: {error}
           </p>
         )}
@@ -229,7 +229,7 @@ export function IdeaRow({
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-50 sm:w-auto"
+          className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-50 sm:w-auto"
         >
           {loading ? tModule("saving") : tModule("save")}
         </button>
@@ -238,7 +238,7 @@ export function IdeaRow({
   }
 
   return (
-    <div className="card-lift card-lift-row relative rounded-2xl border border-border bg-[linear-gradient(160deg,rgb(var(--panel))_0%,rgb(var(--panel))_65%,rgba(249,115,22,0.035)_100%)] p-4">
+    <div className="card-lift card-lift-row relative rounded-2xl border border-border bg-panel p-4">
       {/* Pinned to the card corner, not buried in the bottom
           action row — see favorite-button.tsx for what that
           position cost. The card root is `relative` for this. */}
@@ -277,24 +277,24 @@ export function IdeaRow({
 
       {idea.problem && (
         <p className="mt-3 text-sm text-foreground/90">
-          <span className="text-orange-500">{t("cardProblem")}</span> {idea.problem}
+          <span className="text-foreground">{t("cardProblem")}</span> {idea.problem}
         </p>
       )}
       {idea.competitors && (
         <p className="mt-1 text-sm text-foreground/90">
-          <span className="text-orange-500">{t("cardCompetitors")}</span>{" "}
+          <span className="text-foreground">{t("cardCompetitors")}</span>{" "}
           {idea.competitors}
         </p>
       )}
       {idea.market_size && (
         <p className="mt-1 text-sm text-foreground/90">
-          <span className="text-orange-500">{t("cardMarketSize")}</span>{" "}
+          <span className="text-foreground">{t("cardMarketSize")}</span>{" "}
           {idea.market_size}
         </p>
       )}
       {idea.mvp && (
         <p className="mt-1 text-sm text-foreground/90">
-          <span className="text-orange-500">{t("cardMvp")}</span> {idea.mvp}
+          <span className="text-foreground">{t("cardMvp")}</span> {idea.mvp}
         </p>
       )}
 
@@ -321,7 +321,7 @@ export function IdeaRow({
             onClick={startEditing}
             aria-label={t("editAria", { name: idea.name })}
             title={tModule("edit")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-orange-500/10 hover:text-orange-400"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-foreground/10 hover:text-foreground"
           >
             <Pencil className="h-4 w-4" />
           </button>
@@ -352,7 +352,7 @@ function Field({
     <label className={`block text-xs text-muted ${full ? "sm:col-span-2" : ""}`}>
       <span className="mb-1 block">
         {label}
-        {required && <span className="text-red-400"> *</span>}
+        {required && <span className="text-danger"> *</span>}
       </span>
       {children}
     </label>

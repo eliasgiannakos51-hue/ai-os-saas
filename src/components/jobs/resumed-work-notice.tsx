@@ -95,14 +95,14 @@ export function ResumedWorkNotice({ kind }: { kind: JobKind }) {
       {state.phase === "working" ? (
         <ThinkingIndicator size="sm" className="mt-0.5 shrink-0" />
       ) : (
-        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
+        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
       )}
       <div className="min-w-0 flex-1">
         <p className="text-xs leading-relaxed text-foreground">
           {state.phase === "working" ? t("working") : t("finished")}
         </p>
         {state.phase === "finished" && state.href && (
-          <Link href={state.href} className="mt-1 inline-block text-xs font-medium text-orange-400 hover:underline">
+          <Link href={state.href} className="mt-1 inline-block text-xs font-medium text-foreground hover:underline">
             {t("open")}
           </Link>
         )}

@@ -29,8 +29,6 @@
       "long": "本内容由 AI 生成，可能有误。在依赖之前请核实重要信息。"
     },
     "close": "关闭",
-    "switchToDarkMode": "切换到深色主题",
-    "switchToLightMode": "切换到浅色主题",
     "showPassword": "显示密码",
     "hidePassword": "隐藏密码",
     "networkErrorCheckConnection": "网络错误 — 请检查您的连接后重试。",
@@ -63,7 +61,6 @@
       "lastResortBody": "Ionexa 需要联网才能加载新数据。你已经打开过的页面仍可从本机缓存中查看，正在处理的内容也安全地保存在服务器上。"
     },
     "creditsUnlimited": "无限制",
-    "whatIsThis": "这是什么？",
     "examplesLabel": "试试：",
     "newMessagesBelow": "下方有新消息",
     "downloadPdf": {
@@ -1049,7 +1046,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "最活跃模块",
-      "acrossAllModules": "涵盖所有模块",
       "entry": "{count} 条记录",
       "statRow": {
         "totalEntries": "总记录数",
@@ -2801,7 +2797,6 @@
       "images": "定价页的主视觉图",
       "videos": "60 秒产品演示",
       "coding": "对账 Stripe 付款的脚本",
-      "data-analysis": "哪个方案的流失率最低？",
       "campaigns": "9 月发布 — 邮件 + LinkedIn",
       "presentations": "第三季度董事会汇报 — 要点",
       "ideas": "写给从电子表格转过来的人的通讯"

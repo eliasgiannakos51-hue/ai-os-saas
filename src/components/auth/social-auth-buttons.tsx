@@ -77,7 +77,7 @@ export function SocialAuthButtons({ next }: { next?: string }) {
         type="button"
         onClick={handleGoogle}
         disabled={loadingProvider !== null}
-        className="inline-flex min-h-[44px] w-full items-center justify-center gap-2.5 rounded-xl border border-border bg-panel px-4 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500/50 hover:bg-panel-hover disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex min-h-[44px] w-full items-center justify-center gap-2.5 rounded-xl border border-border bg-panel px-4 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/50 hover:bg-panel-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loadingProvider === "google" ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -88,7 +88,7 @@ export function SocialAuthButtons({ next }: { next?: string }) {
       </button>
 
       {error && (
-        <p className="mt-2 rounded-xl border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+        <p className="mt-2 rounded-xl border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
           {error}
         </p>
       )}

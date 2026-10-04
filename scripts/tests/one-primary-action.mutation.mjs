@@ -169,7 +169,7 @@ const MUTANTS = [
     // button is gone is a licence to add a different one back in silence.
     name: "a control disappears and its baseline is left standing",
     file: TEAM,
-    from: "bg-orange-500",
+    from: "bg-button",
     to: "bg-panel",
     expect: "no baseline is higher than the page needs",
   },

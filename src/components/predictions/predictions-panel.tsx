@@ -111,7 +111,7 @@ export function PredictionsPanel({ initial }: { initial: Insight[] }) {
           type="button"
           onClick={run}
           disabled={running}
-          className="flex min-h-[44px] shrink-0 items-center gap-2 rounded-xl bg-orange-500 px-4 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex min-h-[44px] shrink-0 items-center gap-2 rounded-xl bg-button px-4 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {/* NOT A SPINNER. A model call is running behind this button —
               the narration pass in api/insights/generate — and this
@@ -129,7 +129,7 @@ export function PredictionsPanel({ initial }: { initial: Insight[] }) {
       </div>
       {credits > 0 ? (
         <p className="flex items-center gap-1.5 text-[11px] text-muted">
-          <Zap className="h-3 w-3 text-orange-400/70" aria-hidden="true" />
+          <Zap className="h-3 w-3 text-foreground/70" aria-hidden="true" />
           {tCredits("approx", { count: credits })}
         </p>
       ) : null}

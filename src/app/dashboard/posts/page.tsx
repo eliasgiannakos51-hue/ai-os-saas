@@ -51,7 +51,7 @@ export default async function PostsPage({
   const planSlug = await resolveEffectivePlanSlug(user);
   if (!accountHasCapability(planSlug, "posts", isAdmin)) {
     return (
-      <div className="min-h-full bg-dot-grid">
+      <div className="min-h-full">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader icon={POSTS_ICON} title={t("title")} helpKey="help.posts" />
           <UpgradeRequired {...upgradeWallProps("posts", t("title"))!} />

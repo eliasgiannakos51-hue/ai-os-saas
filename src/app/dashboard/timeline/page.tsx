@@ -101,7 +101,7 @@ export default async function TimelinePage({
   diagLog(`[timeline-diag ${reqId}] render -> entriesPassedToComponent=${entries.length}`);
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.timeline" icon={TIMELINE_ICON} title={t("title")} />
         <TimelineTabs view="all" />

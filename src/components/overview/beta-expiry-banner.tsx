@@ -46,9 +46,9 @@ export function BetaExpiryBanner({
   if (dismissed) return null;
 
   return (
-    <div className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-orange-900/50 bg-orange-500/5 px-4 py-3 text-sm">
+    <div className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-border bg-foreground/5 px-4 py-3 text-sm">
       <div className="flex min-w-0 items-center gap-2.5">
-        <Clock className="h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
+        <Clock className="h-4 w-4 shrink-0 text-foreground" aria-hidden="true" />
         {/* ONE SENTENCE, NOT THREE FRAGMENTS. The English version was built
             from "expires in", a number, a hand-made "day/days", a link and a
             full stop — five pieces a translator never sees together, and the
@@ -56,13 +56,13 @@ export function BetaExpiryBanner({
             exists in English and nowhere else. As one ICU message the count
             pluralises through Intl and each language puts the link where its
             own grammar wants it. */}
-        <p className="min-w-0 text-orange-200/90">
+        <p className="min-w-0 text-foreground/90">
           {t.rich("betaExpiry", {
             days: daysRemaining,
             link: (chunks) => (
               <Link
                 href="/pricing"
-                className="font-medium text-orange-400 underline underline-offset-2 transition-colors duration-150 hover:text-orange-300"
+                className="font-medium text-foreground underline underline-offset-2 transition-colors duration-150 hover:text-foreground"
               >
                 {chunks}
               </Link>
@@ -74,7 +74,7 @@ export function BetaExpiryBanner({
         type="button"
         onClick={dismiss}
         aria-label={t("dismiss")}
-        className="shrink-0 rounded p-1 text-orange-400/70 transition-colors duration-150 hover:text-orange-300"
+        className="shrink-0 rounded p-1 text-foreground/70 transition-colors duration-150 hover:text-foreground"
       >
         <X className="h-4 w-4" aria-hidden="true" />
       </button>

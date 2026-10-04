@@ -271,10 +271,9 @@ const varOf = (name, from = 0) => {
   const m = new RegExp(`--${name}:\\s*(\\d+) (\\d+) (\\d+)`).exec(css.slice(from));
   return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
 };
-const lightAt = css.indexOf("--background: 247 247 248");
+// One theme since 2026-10-04 (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN).
 const themes = {
   dark: { panel: varOf("panel"), muted: varOf("muted") },
-  light: { panel: varOf("panel", lightAt), muted: varOf("muted", lightAt) },
 };
 for (const [name, t] of Object.entries(themes)) {
   ok(`${name}: the theme's panel and muted were read out of globals.css`,

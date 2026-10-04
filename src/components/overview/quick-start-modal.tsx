@@ -45,7 +45,7 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
-      <div onClick={onClose} className="fixed inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" />
+      <div onClick={onClose} className="fixed inset-0 bg-background/60 backdrop-blur-sm" aria-hidden="true" />
 
       <div
         role="dialog"
@@ -55,7 +55,7 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
       >
         <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div className="flex items-start gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/10 text-foreground">
               <Rocket className="h-4 w-4" aria-hidden="true" />
             </span>
             <div>
@@ -77,7 +77,7 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
           {WORKSPACE_TEMPLATES.map((template) => (
             <div
               key={template.id}
-              className="flex items-center justify-between gap-3 rounded-xl border border-border bg-input p-3.5 transition-colors duration-150 hover:border-orange-500/30"
+              className="flex items-center justify-between gap-3 rounded-xl border border-border bg-input p-3.5 transition-colors duration-150 hover:border-foreground/30"
             >
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground">{template.name}</p>
@@ -87,7 +87,7 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
                 type="button"
                 onClick={() => apply(template.id)}
                 disabled={applyingId !== null}
-                className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg bg-button px-3 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {applyingId === template.id ? (
                   <ThinkingIndicator size="sm" tone="inherit" />

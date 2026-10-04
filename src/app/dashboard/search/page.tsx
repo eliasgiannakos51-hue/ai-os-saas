@@ -74,7 +74,7 @@ export default async function MemoryPage() {
   // see lib/billing/capability-gate.ts for the case where they stopped.
   if (!accountHasCapability(planSlug, "recordSearch", isAdmin)) {
     return (
-      <div className="min-h-full bg-dot-grid">
+      <div className="min-h-full">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader helpKey="help.memory" helpArticle="chat-memory" icon={MEMORY_ICON} title={t("title")} />
           <UpgradeRequired {...upgradeWallProps("recordSearch", t("title"))!} />
@@ -116,7 +116,7 @@ export default async function MemoryPage() {
     .slice(0, MAX_MEMORY_RESULTS);
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader
           helpKey="help.memory"

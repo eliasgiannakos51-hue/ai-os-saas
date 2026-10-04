@@ -21,20 +21,20 @@ export function ActiveMissionCard({
   return (
     <Link
       href={href}
-      className="mt-6 flex items-center gap-3 surface-tight transition-all duration-200 hover:border-orange-500/40"
+      className="mt-6 flex items-center gap-3 surface-tight transition-all duration-200 hover:border-foreground/40"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/10 text-foreground">
         <Rocket className="h-4 w-4" aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm font-semibold text-foreground">{title}</p>
-          <span className="shrink-0 text-xs font-semibold text-orange-400">{progressPercent}%</span>
+          <span className="shrink-0 text-xs font-semibold text-foreground">{progressPercent}%</span>
         </div>
         <p className="mt-0.5 truncate text-xs text-muted">{goal}</p>
         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-input">
           <div
-            className="h-full rounded-full bg-orange-500 transition-all duration-300"
+            className="h-full rounded-full bg-button transition-all duration-300"
             style={{ width: `${progressPercent}%` }}
           />
         </div>

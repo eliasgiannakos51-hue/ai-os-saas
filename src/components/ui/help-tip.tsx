@@ -99,7 +99,7 @@ export function HelpTip({
         // Same technique as the switches (globals.css), for the same
         // reason: a target you can hit is not the same thing as a target
         // you can see.
-        className="group -m-2 flex h-11 w-11 items-center justify-center text-muted transition-colors duration-150 hover:text-orange-400 focus-visible:text-orange-400"
+        className="group -m-2 flex h-11 w-11 items-center justify-center text-muted transition-colors duration-150 hover:text-foreground focus-visible:text-foreground"
       >
         {/* border-current, so the ring follows the button's own text
             colour on hover and focus instead of needing a second variant
@@ -117,7 +117,7 @@ export function HelpTip({
           <span
             aria-hidden="true"
             onClick={() => setOpen(false)}
-            className="fixed inset-0 z-40 bg-black/50 sm:hidden"
+            className="fixed inset-0 z-40 bg-background/50 sm:hidden"
           />
           <div
             id={panelId}
@@ -140,7 +140,7 @@ export function HelpTip({
             // So below `sm` it is a centred sheet pinned to both edges,
             // which cannot overflow by construction; from `sm` up it goes
             // back to hanging under the button, where there is room.
-            className="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 surface-tight text-start shadow-[0_12px_40px_rgba(0,0,0,0.45)] sm:absolute sm:inset-x-auto sm:left-1/2 sm:top-9 sm:z-40 sm:w-80 sm:-translate-x-1/2 sm:translate-y-0"
+            className="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 surface-tight text-start sm:absolute sm:inset-x-auto sm:left-1/2 sm:top-9 sm:z-40 sm:w-80 sm:-translate-x-1/2 sm:translate-y-0"
           >
           <button
             type="button"
@@ -159,7 +159,7 @@ export function HelpTip({
           </p>
 
           <p className="mt-3 flex gap-2 text-xs leading-relaxed text-muted">
-            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" aria-hidden="true" />
+            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" aria-hidden="true" />
             <span>{t(`${helpKey}.does`)}</span>
           </p>
 
@@ -168,7 +168,7 @@ export function HelpTip({
               gets skimmed past, which is how somebody ends up expecting a
               domain they were never going to get. */}
           <p className="mt-2 flex gap-2 text-xs leading-relaxed text-muted">
-            <Ban className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-400/80" aria-hidden="true" />
+            <Ban className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/80" aria-hidden="true" />
             <span>{t(`${helpKey}.doesNot`)}</span>
             </p>
 
@@ -178,7 +178,7 @@ export function HelpTip({
                 two. */}
             {scopeKey && (
               <p className="mt-2 flex gap-2 text-xs leading-relaxed text-muted">
-                <Eye className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-400/80" aria-hidden="true" />
+                <Eye className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted/80" aria-hidden="true" />
                 <span>{t(`${scopeKey}.body`)}</span>
               </p>
             )}
@@ -189,7 +189,7 @@ export function HelpTip({
               <Link
                 href={`/help#${articleSlug}`}
                 onClick={() => setOpen(false)}
-                className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-orange-400 transition-colors duration-150 hover:text-orange-300"
+                className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-foreground transition-colors duration-150 hover:text-foreground"
               >
                 {tCommon("readMore")}
                 <ArrowRight className="h-3 w-3" aria-hidden="true" />

@@ -122,7 +122,7 @@ export function TransitionButton({ text }: { text: string }) {
       <Link
         href={destination.href}
         onClick={() => record(destination.id, source, "taken")}
-        className="flex min-h-[44px] items-center gap-1.5 rounded-xl border border-orange-500/30 px-3 text-xs font-medium text-orange-200 transition-colors duration-150 hover:border-orange-500/60 hover:bg-orange-500/10"
+        className="flex min-h-[44px] items-center gap-1.5 rounded-xl border border-foreground/30 px-3 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/60 hover:bg-foreground/10"
       >
         {t(destination.labelKey)}
         <ArrowRight className="h-3 w-3 shrink-0" aria-hidden="true" />

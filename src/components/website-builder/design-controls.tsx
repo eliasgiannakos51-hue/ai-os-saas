@@ -65,7 +65,7 @@ export function DesignControls({
   return (
     <div className="space-y-3 rounded-xl border border-border bg-input p-3">
       <div className="flex items-center gap-1.5">
-        <Palette className="h-3.5 w-3.5 text-orange-400" aria-hidden="true" />
+        <Palette className="h-3.5 w-3.5 text-foreground" aria-hidden="true" />
         <h3 className="text-xs font-semibold text-foreground">{t("title")}</h3>
         <span className="text-[11px] text-muted">{t("optional")}</span>
       </div>
@@ -114,7 +114,7 @@ export function DesignControls({
                 )}
               </div>
               {current && !isValidHexColor(current) && (
-                <p className="mt-1 text-[11px] text-amber-400/90">{t("hexInvalid")}</p>
+                <p className="mt-1 text-[11px] text-warning/90">{t("hexInvalid")}</p>
               )}
             </div>
           );
@@ -145,8 +145,8 @@ export function DesignControls({
                 }
                 className={`min-h-[44px] rounded-full border px-3 py-1 text-[11px] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
                   selected
-                    ? "border-orange-500/60 bg-orange-500/10 text-orange-300"
-                    : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
+                    ? "border-foreground/60 bg-foreground/10 text-foreground"
+                    : "border-border text-muted hover:border-foreground/40 hover:text-foreground"
                 }`}
               >
                 {t(`backgrounds.${style}`)}
@@ -176,8 +176,8 @@ export function DesignControls({
                 onClick={() => set("photoSource", choice)}
                 className={`min-h-[44px] rounded-full border px-3 py-1 text-[11px] font-medium transition-colors duration-150 ${
                   selected
-                    ? "border-orange-500/60 bg-orange-500/10 text-orange-300"
-                    : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
+                    ? "border-foreground/60 bg-foreground/10 text-foreground"
+                    : "border-border text-muted hover:border-foreground/40 hover:text-foreground"
                 }`}
               >
                 {t(`photoSourceChoices.${choice}`)}
@@ -221,8 +221,8 @@ export function DesignControls({
                 }
                 className={`min-h-[44px] rounded-full border px-3 py-1 text-[11px] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
                   selected
-                    ? "border-orange-500/60 bg-orange-500/10 text-orange-300"
-                    : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
+                    ? "border-foreground/60 bg-foreground/10 text-foreground"
+                    : "border-border text-muted hover:border-foreground/40 hover:text-foreground"
                 }`}
               >
                 {t(`logoChoices.${choice}`)}
@@ -248,8 +248,8 @@ export function DesignControls({
                 onClick={() => set("referenceImageUse", use as ReferenceImageUse)}
                 className={`min-h-[44px] rounded-full border px-3 py-1 text-[11px] font-medium transition-colors duration-150 ${
                   value.referenceImageUse === use
-                    ? "border-orange-500/60 bg-orange-500/10 text-orange-300"
-                    : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
+                    ? "border-foreground/60 bg-foreground/10 text-foreground"
+                    : "border-border text-muted hover:border-foreground/40 hover:text-foreground"
                 }`}
               >
                 {t(`imageUses.${use}`)}

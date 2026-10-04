@@ -54,7 +54,7 @@ export function TimelineList({
           <div
             key={entry.key}
             style={{ "--i": i } as React.CSSProperties}
-            className="list-slide-in group relative flex items-start gap-3 surface-tight pe-14 transition-all duration-200 hover:border-orange-500/40 hover:"
+            className="list-slide-in group relative flex items-start gap-3 surface-tight pe-14 transition-all duration-200 hover:border-foreground/40 hover:"
           >
           <Link href={entry.href} className="flex min-w-0 flex-1 items-start gap-3">
             <span
@@ -69,7 +69,7 @@ export function TimelineList({
                 <h3 className="truncate text-sm font-semibold text-foreground">{entry.headline}</h3>
                 {entry.linked.length > 0 && (
                   <span
-                    className="flex shrink-0 items-center text-orange-400"
+                    className="flex shrink-0 items-center text-foreground"
                     title={`Linked to: ${entry.linked.map((l) => l.headline).join(", ")}`}
                   >
                     <Link2 className="h-3 w-3" aria-hidden="true" />

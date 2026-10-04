@@ -51,9 +51,9 @@ export function FirstScreenExamples() {
                 // min-h-[44px] is the tap floor the rest of the codebase
                 // uses; these are three of the first things a new account
                 // will ever press, on a phone.
-                className="flex min-h-[44px] w-full items-start gap-2.5 rounded-xl border border-border bg-panel/60 px-3 py-2.5 text-start transition-colors duration-150 hover:border-orange-500/60 hover:bg-panel"
+                className="flex min-h-[44px] w-full items-start gap-2.5 rounded-xl border border-border bg-panel/60 px-3 py-2.5 text-start transition-colors duration-150 hover:border-foreground/60 hover:bg-panel"
               >
-                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
+                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-foreground" aria-hidden="true" />
                 <span className="min-w-0">
                   <span className="block text-[11px] font-semibold uppercase tracking-wide text-muted">
                     {t(`${example.id}.verb`)}
@@ -75,13 +75,9 @@ export function FirstScreenExamples() {
                       drifts the first time a route grows a charge. */}
                   <span
                     className={`mt-1 block text-[11px] ${
-                      // Full opacity, no /90: an alpha-modified themed
-                      // utility needs its own light-theme rule to stop
-                      // the alpha washing toward white instead of
-                      // dimming toward black, and this badge does not
-                      // need one badly enough to add a CSS rule for it.
-                      // light-theme-contrast.test.mjs caught the /90.
-                      example.cost === "charged" ? "text-orange-400" : "text-muted"
+                      // Full opacity: the badge is text, and text is
+                      // held at 4.5:1 by design-tokens.test.mjs.
+                      example.cost === "charged" ? "text-foreground" : "text-muted"
                     }`}
                   >
                     {t(`cost.${example.cost}`)}

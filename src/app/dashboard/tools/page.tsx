@@ -67,7 +67,7 @@ export default async function ToolsPage() {
                       href={item.href}
                       className="tool-card surface-tight group flex min-h-[44px] items-start gap-3 transition-colors duration-150 hover:bg-panel-hover"
                     >
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-300">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-foreground/10 text-foreground">
                         <Icon className="h-4 w-4" aria-hidden="true" />
                       </span>
                       <span className="min-w-0">

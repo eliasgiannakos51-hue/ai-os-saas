@@ -44,10 +44,10 @@ export function InstallInvitation({
       aria-label={t("installTitle")}
       data-testid="install-invitation"
       data-surface={surface}
-      className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-sm surface-tight shadow-lg md:left-auto md:end-4 md:mx-0"
+      className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-sm surface-tight md:left-auto md:end-4 md:mx-0"
     >
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400">
+        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-foreground/10 text-foreground">
           {surface === "ios" ? (
             <Smartphone className="h-4 w-4" aria-hidden="true" />
           ) : (
@@ -81,7 +81,7 @@ export function InstallInvitation({
               type="button"
               onClick={surface === "native" ? onInstall : showSteps ? onDismiss : () => setShowSteps(true)}
               data-testid={surface === "native" || showSteps ? "install-accept" : "install-show-how"}
-              className="rounded-lg border border-orange-500/60 px-3 py-1.5 text-xs font-semibold text-orange-300 transition hover:bg-orange-500/10"
+              className="rounded-lg border border-foreground/60 px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-foreground/10"
             >
               {surface === "native" ? t("install") : showSteps ? t("iosGotIt") : t("showHow")}
             </button>
@@ -141,7 +141,7 @@ export function IosInstallSteps() {
       {/* Said plainly rather than hidden in a help article: these are the
           two things that silently stop working on an iPhone until the app
           is on the Home Screen. */}
-      <p className="mt-3 rounded-lg border border-border bg-black/20 px-2.5 py-2 text-[11px] leading-relaxed text-muted">
+      <p className="mt-3 rounded-lg border border-border bg-background/20 px-2.5 py-2 text-[11px] leading-relaxed text-muted">
         {t("iosWhy")}
       </p>
     </div>

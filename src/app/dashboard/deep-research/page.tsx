@@ -45,7 +45,7 @@ export default async function DeepResearchPage({
 
   if (!isAdmin && cap <= 0) {
     return (
-      <div className="min-h-full bg-dot-grid">
+      <div className="min-h-full">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader helpKey="help.deepResearch" icon={Telescope} title={t("title")} description={t("description")} />
           <UpgradeRequired {...upgradeWallProps("deepResearch", t("title"))!} />
@@ -76,7 +76,7 @@ export default async function DeepResearchPage({
   ]);
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.deepResearch" icon={Telescope} title={t("title")} description={t("description")} />
 

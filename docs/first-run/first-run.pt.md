@@ -1,6 +1,6 @@
 # The first run — pt
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **718 strings**. The whole product is 3454, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **716 strings**. The whole product is 3449, which is why this file exists.
 
 **Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 459 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -3082,7 +3082,7 @@ Não resultou. Tente de novo.
 
 A carregar…
 
-## Tier 3 — Further in — only if you have time (210)
+## Tier 3 — Further in — only if you have time (208)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3161,18 +3161,6 @@ Nenhuma notificação nova.
 > EN — Notifications
 
 Notificações
-
-**`common.switchToDarkMode`**
-
-> EN — Switch to dark mode
-
-Mudar para o tema escuro
-
-**`common.switchToLightMode`**
-
-> EN — Switch to light mode
-
-Mudar para o tema claro
 
 **`common.toggleMenu`**
 

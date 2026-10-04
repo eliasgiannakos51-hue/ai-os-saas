@@ -82,13 +82,13 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
               <Link
                 key={result.id}
                 href={result.moduleHref}
-                className="group block surface-tight transition-colors duration-150 hover:border-orange-500/30"
+                className="group block surface-tight transition-colors duration-150 hover:border-foreground/30"
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <h3 className="text-base font-semibold text-foreground">
                     {result.headline}
                   </h3>
-                  <span className="inline-flex shrink-0 items-center rounded-full border border-orange-800 bg-orange-950/30 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-orange-400">
+                  <span className="inline-flex shrink-0 items-center rounded-full border border-border bg-panel-hover/30 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-foreground">
                     {tKey(result.moduleTitleKey)}
                   </span>
                 </div>

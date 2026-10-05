@@ -301,7 +301,9 @@
       "collapse": "收起侧边栏",
       "expand": "展开侧边栏",
       "label": "主菜单",
-      "saveFailed": "无法保存此更改，请重试。"
+      "saveFailed": "无法保存此更改，请重试。",
+      "recentChats": "最近的对话",
+      "untitledChat": "新对话"
     },
     "tabs": {
       "home": "首页",

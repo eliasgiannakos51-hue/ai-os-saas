@@ -1,8 +1,8 @@
 # The first run — ar
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **589 strings**. The whole product is 3548, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **591 strings**. The whole product is 3550, which is why this file exists.
 
-**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 358 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 360 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -158,7 +158,7 @@ CSV أو مفصول بعلامات جدولة، حتى {max}. نقرؤه ونع�
 
 صف أي شيء — فكرة منتج، صفقة، ملاحظة من مستخدم، مؤشرًا — وسيصل تلقائيًا إلى الوحدة الصحيحة.
 
-## Tier 2 — The labels — skim these (358)
+## Tier 2 — The labels — skim these (360)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -2132,6 +2132,12 @@ DevOps
 
 تثبيت {tool}
 
+**`sidebar.rail.recentChats`**
+
+> EN — Recent chats
+
+المحادثات الأخيرة
+
 **`sidebar.rail.recentTools`**
 
 > EN — Recent tools
@@ -2161,6 +2167,12 @@ DevOps
 > EN — Unpin {tool}
 
 إلغاء تثبيت {tool}
+
+**`sidebar.rail.untitledChat`**
+
+> EN — New conversation
+
+محادثة جديدة
 
 **`sidebar.tabs.label`**
 

@@ -301,7 +301,9 @@
       "collapse": "Contraer la barra lateral",
       "expand": "Expandir la barra lateral",
       "label": "Menú principal",
-      "saveFailed": "No se pudo guardar el cambio. Inténtalo de nuevo."
+      "saveFailed": "No se pudo guardar el cambio. Inténtalo de nuevo.",
+      "recentChats": "Chats recientes",
+      "untitledChat": "Nueva conversación"
     },
     "tabs": {
       "home": "Inicio",

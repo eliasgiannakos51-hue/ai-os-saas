@@ -301,7 +301,9 @@
       "collapse": "Réduire la barre latérale",
       "expand": "Développer la barre latérale",
       "label": "Menu principal",
-      "saveFailed": "La modification n’a pas été enregistrée. Réessayez."
+      "saveFailed": "La modification n’a pas été enregistrée. Réessayez.",
+      "recentChats": "Discussions récentes",
+      "untitledChat": "Nouvelle conversation"
     },
     "tabs": {
       "home": "Accueil",

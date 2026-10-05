@@ -301,7 +301,9 @@
       "collapse": "Seitenleiste einklappen",
       "expand": "Seitenleiste ausklappen",
       "label": "Hauptmenü",
-      "saveFailed": "Die Änderung wurde nicht gespeichert. Bitte erneut versuchen."
+      "saveFailed": "Die Änderung wurde nicht gespeichert. Bitte erneut versuchen.",
+      "recentChats": "Letzte Chats",
+      "untitledChat": "Neue Unterhaltung"
     },
     "tabs": {
       "home": "Start",

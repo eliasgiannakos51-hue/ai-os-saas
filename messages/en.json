@@ -301,7 +301,9 @@
       "collapse": "Collapse sidebar",
       "expand": "Expand sidebar",
       "label": "Main",
-      "saveFailed": "Could not save that change. Try again."
+      "saveFailed": "Could not save that change. Try again.",
+      "recentChats": "Recent chats",
+      "untitledChat": "New conversation"
     },
     "tabs": {
       "home": "Home",

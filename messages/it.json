@@ -301,7 +301,9 @@
       "collapse": "Comprimi la barra laterale",
       "expand": "Espandi la barra laterale",
       "label": "Menu principale",
-      "saveFailed": "Impossibile salvare la modifica. Riprova."
+      "saveFailed": "Impossibile salvare la modifica. Riprova.",
+      "recentChats": "Chat recenti",
+      "untitledChat": "Nuova conversazione"
     },
     "tabs": {
       "home": "Home",

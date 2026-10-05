@@ -45,6 +45,11 @@ export const NEVER_RECENT: readonly string[] = ["/dashboard/chat", "/dashboard/c
 
 export type RecentPrefs = { pinned: string[]; removed: Record<string, string> };
 export type RecentTool = { href: string; pinned: boolean; lastUsed: string | null };
+
+/** The sidebar's «Πρόσφατες συνομιλίες»: the latest conversations, by
+ *  last activity (app/dashboard/layout.tsx reads them). */
+export const RECENT_CONVERSATIONS = 5;
+export type RecentConversation = { id: string; title: string };
 /** One finished piece of work: where it happened, and when. */
 export type NavEvent = { path: string; created_at: string };
 export type RecentAction = "pin" | "unpin" | "remove";

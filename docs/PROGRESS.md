@@ -5,6 +5,23 @@
 
 ## 2026-10-05
 
+**Α.9: Next 14.2 → 16.3.8, React 18 → 19 (ΑΣ-8.1).**
+- Κανένα κρίσιμο κενό πια στο `npm audit --omit=dev`· μένουν 2 υψηλά στο
+  `pptxgenjs`/`image-size`, χωρίς διόρθωση στη σειρά 4.x.
+- Αλλαγές: παράμετροι, cookies και headers είναι πλέον async (codemod του
+  Next, 64 αρχεία)· ο server client του Supabase async (206 κλήσεις)·
+  `middleware.ts` → `proxy.ts`· το next.config στη νέα μορφή· οι
+  γραμματοσειρές PDF με σταθερή διαδρομή ώστε το build να μην ανεβάζει όλο
+  το repository. Build χωρίς καμία προειδοποίηση.
+- Έλεγχοι: όλα τα gates· 228 από 230 σουίτες mutation (το user-isolation
+  θέλει βάση· το schema-canaries 11/11 τρεις φορές χωρίς φόρτο)·
+  `routes-smoke` 662/662 σε production build (κάθε σελίδα, συνδεδεμένος
+  χρήστης, χωρίς 500, χωρίς κλειδιά μετάφρασης, χωρίς οριζόντια κύλιση στο
+  κινητό)· 23 prodtests αποτυγχάνουν, και τα 11 που ελέγχθηκαν στο Next 14
+  αποτυγχάνουν εκεί με τις ίδιες ακριβώς γραμμές (Α.13).
+- `dependency-floors`: πάτωμα για next, react, react-dom, 6 κόκκινοι με τα
+  παλιά, 6/6 mutations.
+
 **Πού έμεινα (για το επόμενο session).** Η ομάδα 1 είναι ένα pull request,
 https://github.com/eliasgiannakos51-hue/ai-os-saas/pull/244 (branch
 `claude/keen-turing-bv8gw4-login-alert`), που περιέχει όλα τα

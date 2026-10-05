@@ -40,6 +40,20 @@ const MUTANTS = [
     expect: "package.json declares sharp at or above",
   },
   {
+    name: "the lockfile goes back to the Next with the critical advisories",
+    file: LOCK,
+    from: '"node_modules/next": {\n      "version": "16.3.8"',
+    to: '"node_modules/next": {\n      "version": "14.2.35"',
+    expect: "every copy of next is at least",
+  },
+  {
+    name: "package.json goes back to Next 14",
+    file: PKG,
+    from: '"next": "^16.3.8"',
+    to: '"next": "^14.2.35"',
+    expect: "package.json declares next at or above",
+  },
+  {
     name: "the comparison degrades to string order",
     file: GATE,
     from: "    const d = (pa[i] || 0) - (pb[i] || 0);",

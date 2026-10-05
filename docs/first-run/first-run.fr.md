@@ -32,9 +32,9 @@ Vous devez accepter les Conditions d'utilisation et la Politique de confidential
 
 **`pricing.businessCardDescription`**
 
-> EN — Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.
+> EN — Start with Professional or Ultimate as your team's base, then invite members for +{price}/month each — everyone gets your plan's tier on their own account.
 
-Commencez avec n'importe quel plan comme base pour votre équipe, puis invitez des membres pour +{price}/mois chacun — tout le monde obtient un accès complet au niveau de votre plan. Parfait pour les équipes qui travaillent ensemble.
+Commencez avec Professional ou Ultimate comme base de votre équipe, puis invitez des membres pour +{price}/mois chacun — chacun obtient le niveau de votre offre sur son propre compte.
 
 ### login
 
@@ -328,9 +328,9 @@ Sièges d'équipe inclus gratuitement avec Ultimate
 
 **`pricing.businessFeatureFullAccess`**
 
-> EN — Every member gets full access at your plan's tier
+> EN — Every member gets your plan's tier on their own account
 
-Chaque membre obtient un accès complet au niveau de votre plan
+Chaque membre obtient le niveau de votre offre sur son propre compte
 
 **`pricing.businessFeatureManage`**
 
@@ -388,9 +388,9 @@ Exécutions d’agents
 
 **`pricing.rows.aiAgents`**
 
-> EN — AI agents
+> EN — Scheduled web-research agents
 
-Agents IA
+Agents programmés de recherche sur le web
 
 **`pricing.rows.aiChat`**
 
@@ -460,9 +460,9 @@ Formulaire de contact
 
 **`pricing.rows.createStudio`**
 
-> EN — Make anything
+> EN — Describe it, it opens the right tool
 
-Créer n’importe quoi
+Décrivez-le, il ouvre le bon outil
 
 **`pricing.rows.creditsPerMonth`**
 
@@ -610,9 +610,9 @@ Stockage
 
 **`pricing.rows.teamCollaboration`**
 
-> EN — Team collaboration
+> EN — Members get your plan
 
-Collaboration d'équipe
+Les membres obtiennent votre offre
 
 **`pricing.rows.teamMembers`**
 
@@ -640,9 +640,9 @@ Minutes de voix / mois
 
 **`pricing.rows.websiteBuilder`**
 
-> EN — Website & Automation Builder
+> EN — Website Builder
 
-Créateur de sites web et d'automatisations
+Website Builder
 
 **`pricing.rows.websiteImageStorage`**
 

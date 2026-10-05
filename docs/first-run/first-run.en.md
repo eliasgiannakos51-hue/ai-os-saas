@@ -32,7 +32,7 @@ You must agree to the Terms of Service and Privacy Policy to create an account.
 **`pricing.businessCardDescription`**
 
 
-Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.
+Start with Professional or Ultimate as your team's base, then invite members for +{price}/month each — everyone gets your plan's tier on their own account.
 
 ### login
 
@@ -281,7 +281,7 @@ Team seats included free on Ultimate
 **`pricing.businessFeatureFullAccess`**
 
 
-Every member gets full access at your plan's tier
+Every member gets your plan's tier on their own account
 
 **`pricing.businessFeatureManage`**
 
@@ -331,7 +331,7 @@ Agent runs
 **`pricing.rows.aiAgents`**
 
 
-AI agents
+Scheduled web-research agents
 
 **`pricing.rows.aiChat`**
 
@@ -391,7 +391,7 @@ Contact form
 **`pricing.rows.createStudio`**
 
 
-Make anything
+Describe it, it opens the right tool
 
 **`pricing.rows.creditsPerMonth`**
 
@@ -516,7 +516,7 @@ Storage
 **`pricing.rows.teamCollaboration`**
 
 
-Team collaboration
+Members get your plan
 
 **`pricing.rows.teamMembers`**
 
@@ -541,7 +541,7 @@ Voice minutes / month
 **`pricing.rows.websiteBuilder`**
 
 
-Website & Automation Builder
+Website Builder
 
 **`pricing.rows.websiteImageStorage`**
 

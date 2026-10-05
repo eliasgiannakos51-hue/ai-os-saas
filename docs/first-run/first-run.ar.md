@@ -32,9 +32,9 @@ _On the first screens, 12 words or more. This is prose somebody wrote, and prose
 
 **`pricing.businessCardDescription`**
 
-> EN — Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.
+> EN — Start with Professional or Ultimate as your team's base, then invite members for +{price}/month each — everyone gets your plan's tier on their own account.
 
-ابدأ بأي خطة كأساس لفريقك، ثم ادعُ الأعضاء مقابل +{price}/شهريًا لكل عضو — يحصل الجميع على وصول كامل بمستوى خطتك. مثالي للفرق التي تعمل معًا.
+ابدأ بـ Professional أو Ultimate كأساس لفريقك، ثم ادعُ أعضاء مقابل +{price}/شهر لكل عضو — يحصل الجميع على مستوى خطتك في حساباتهم الخاصة.
 
 ### login
 
@@ -328,9 +328,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`pricing.businessFeatureFullAccess`**
 
-> EN — Every member gets full access at your plan's tier
+> EN — Every member gets your plan's tier on their own account
 
-يحصل كل عضو على وصول كامل بمستوى خطتك
+يحصل كل عضو على مستوى خطتك في حسابه الخاص
 
 **`pricing.businessFeatureManage`**
 
@@ -388,9 +388,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`pricing.rows.aiAgents`**
 
-> EN — AI agents
+> EN — Scheduled web-research agents
 
-وكلاء الذكاء الاصطناعي
+وكلاء مجدولون يبحثون في الويب
 
 **`pricing.rows.aiChat`**
 
@@ -460,9 +460,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`pricing.rows.createStudio`**
 
-> EN — Make anything
+> EN — Describe it, it opens the right tool
 
-أنشئ أي شيء
+صِفه فتُفتح الأداة المناسبة
 
 **`pricing.rows.creditsPerMonth`**
 
@@ -610,9 +610,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`pricing.rows.teamCollaboration`**
 
-> EN — Team collaboration
+> EN — Members get your plan
 
-تعاون الفريق
+يحصل الأعضاء على خطتك
 
 **`pricing.rows.teamMembers`**
 
@@ -640,9 +640,9 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 
 **`pricing.rows.websiteBuilder`**
 
-> EN — Website & Automation Builder
+> EN — Website Builder
 
-منشئ المواقع والأتمتة
+Website Builder
 
 **`pricing.rows.websiteImageStorage`**
 

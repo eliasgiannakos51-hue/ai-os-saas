@@ -32,9 +32,9 @@ Debes aceptar los Términos del Servicio y la Política de Privacidad para crear
 
 **`pricing.businessCardDescription`**
 
-> EN — Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.
+> EN — Start with Professional or Ultimate as your team's base, then invite members for +{price}/month each — everyone gets your plan's tier on their own account.
 
-Empieza con cualquier plan como base de tu equipo, luego invita a miembros por +{price}/mes cada uno — todos obtienen acceso completo al nivel de tu plan. Perfecto para equipos que trabajan juntos.
+Empieza con Professional o Ultimate como base de tu equipo y luego invita a miembros por +{price}/mes cada uno: todos obtienen el nivel de tu plan en su propia cuenta.
 
 ### login
 
@@ -328,9 +328,9 @@ Puestos de equipo incluidos gratis en Ultimate
 
 **`pricing.businessFeatureFullAccess`**
 
-> EN — Every member gets full access at your plan's tier
+> EN — Every member gets your plan's tier on their own account
 
-Cada miembro obtiene acceso completo al nivel de tu plan
+Cada miembro obtiene el nivel de tu plan en su propia cuenta
 
 **`pricing.businessFeatureManage`**
 
@@ -388,9 +388,9 @@ Ejecuciones de agentes
 
 **`pricing.rows.aiAgents`**
 
-> EN — AI agents
+> EN — Scheduled web-research agents
 
-Agentes AI
+Agentes programados que buscan en la web
 
 **`pricing.rows.aiChat`**
 
@@ -460,9 +460,9 @@ Formulario de contacto
 
 **`pricing.rows.createStudio`**
 
-> EN — Make anything
+> EN — Describe it, it opens the right tool
 
-Crea lo que sea
+Descríbelo y abre la herramienta adecuada
 
 **`pricing.rows.creditsPerMonth`**
 
@@ -610,9 +610,9 @@ Almacenamiento
 
 **`pricing.rows.teamCollaboration`**
 
-> EN — Team collaboration
+> EN — Members get your plan
 
-Colaboración en equipo
+Los miembros obtienen tu plan
 
 **`pricing.rows.teamMembers`**
 
@@ -640,9 +640,9 @@ Minutos de voz / mes
 
 **`pricing.rows.websiteBuilder`**
 
-> EN — Website & Automation Builder
+> EN — Website Builder
 
-Creador de sitios web y automatización
+Website Builder
 
 **`pricing.rows.websiteImageStorage`**
 

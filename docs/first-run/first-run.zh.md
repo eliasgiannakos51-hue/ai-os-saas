@@ -32,9 +32,9 @@ _On the first screens, 12 words or more. This is prose somebody wrote, and prose
 
 **`pricing.businessCardDescription`**
 
-> EN — Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.
+> EN — Start with Professional or Ultimate as your team's base, then invite members for +{price}/month each — everyone gets your plan's tier on their own account.
 
-选择任意方案作为团队的基础方案,然后以每位成员 +{price}/月 的价格邀请成员 — 每个人都能获得与您方案同等级别的完整访问权限。非常适合共同协作的团队。
+以 Professional 或 Ultimate 作为团队的基础方案，然后以每人 +{price}/月邀请成员——每个人都在自己的账户中获得你方案的等级。
 
 ### login
 
@@ -328,9 +328,9 @@ Ultimate 方案免费包含团队席位
 
 **`pricing.businessFeatureFullAccess`**
 
-> EN — Every member gets full access at your plan's tier
+> EN — Every member gets your plan's tier on their own account
 
-每位成员都能获得与您方案同等级别的完整访问权限
+每位成员在自己的账户中获得你方案的等级
 
 **`pricing.businessFeatureManage`**
 
@@ -388,9 +388,9 @@ Ultimate 方案免费包含团队席位
 
 **`pricing.rows.aiAgents`**
 
-> EN — AI agents
+> EN — Scheduled web-research agents
 
-AI 智能体
+定时网络搜索代理
 
 **`pricing.rows.aiChat`**
 
@@ -460,9 +460,9 @@ AI 编程
 
 **`pricing.rows.createStudio`**
 
-> EN — Make anything
+> EN — Describe it, it opens the right tool
 
-创建任何东西
+描述一下，它会打开合适的工具
 
 **`pricing.rows.creditsPerMonth`**
 
@@ -610,9 +610,9 @@ AI 编程
 
 **`pricing.rows.teamCollaboration`**
 
-> EN — Team collaboration
+> EN — Members get your plan
 
-团队协作
+成员获得你的方案
 
 **`pricing.rows.teamMembers`**
 
@@ -640,9 +640,9 @@ AI 编程
 
 **`pricing.rows.websiteBuilder`**
 
-> EN — Website & Automation Builder
+> EN — Website Builder
 
-网站与自动化构建器
+Website Builder
 
 **`pricing.rows.websiteImageStorage`**
 

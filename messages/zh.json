@@ -232,7 +232,7 @@
       "missionControl": "设定目标，AI 拆成步骤。",
       "documents": "你自己撰写的自由笔记和文档。",
       "websites": "记录你拥有的网站——名称、网址、状态。不生成。",
-      "agents": "规划你想要的智能体。这是记录，不是运行时。",
+      "agents": "按计划搜索网络并通过电子邮件把结果发给你的代理。",
       "finance": "记录收入和支出。",
       "sales": "线索、触达和后续动作。",
       "content": "内容创意、文案和推文串。",
@@ -337,16 +337,16 @@
     "contactSales": "联系销售",
     "getPlan": "选择 {plan}",
     "teamBannerTitle": "和团队一起使用？",
-    "teamBannerBody": "邀请队友直接在你的工作区中协作——每位成员都能获得你所在方案等级的完整权限，而不是受限的访客视图。在 Professional 方案中，可按 +{price}/成员/月 添加成员，按席位按月计费。Ultimate 和 Enterprise 方案包含无限团队席位，不收取额外费用，因此你的整个团队都能免费加入。你可以随时在「设置」的「团队」页面管理邀请和移除访问权限。",
+    "teamBannerBody": "把你的方案给团队成员：每位成员登录自己的账户，获得你方案的等级，而不是受限的访客视图。账户之间暂不共享工作——每个人保留自己的内容。在 Professional 方案中，每增加一位成员需 +{price}/成员/月，按席位每月计费。Ultimate 和 Enterprise 包含无限团队席位，无需额外费用。可随时在设置中的团队页面管理邀请和移除访问权限。",
     "comparePlans": "对比方案",
     "feature": "功能",
     "backToHome": "← 返回 Ionexa AI",
     "rows": {
       "creditsPerMonth": "每月额度",
-      "aiAgents": "AI 智能体",
-      "websiteBuilder": "网站与自动化构建器",
+      "aiAgents": "定时网络搜索代理",
+      "websiteBuilder": "Website Builder",
       "aiMemory": "AI 记忆",
-      "teamCollaboration": "团队协作",
+      "teamCollaboration": "成员获得你的方案",
       "teamSeatsAddOn": "团队席位",
       "freeChatMessages": "每月免费聊天消息",
       "deepResearch": "每月深度研究次数",
@@ -365,7 +365,7 @@
       "projects": "项目",
       "missionControl": "目标与计划",
       "helpCentre": "帮助中心",
-      "createStudio": "创建任何东西",
+      "createStudio": "描述一下，它会打开合适的工具",
       "voiceMinutes": "语音分钟数 / 月",
       "chatMemory": "对话记住的信息",
       "chatPins": "置顶的对话",
@@ -391,10 +391,10 @@
     },
     "businessTitle": "商业版",
     "businessSubtitle": "为共同打造的团队而生",
-    "businessExplanation": "选择 Professional 或 Ultimate 作为你的基础方案 — 两者都包含团队协作。然后邀请团队成员：每位成员都可获得与你方案同等级别的完整访问权限，Professional 方案每位成员每月 +{price}，Ultimate 方案则免费包含。",
-    "businessCardDescription": "选择任意方案作为团队的基础方案,然后以每位成员 +{price}/月 的价格邀请成员 — 每个人都能获得与您方案同等级别的完整访问权限。非常适合共同协作的团队。",
+    "businessExplanation": "选择 Professional 或 Ultimate 作为基础方案——两者都可以添加团队成员。每位成员在自己的账户中获得你方案的等级，Professional 为 +{price}/成员/月，Ultimate 免费包含。账户之间暂不共享工作。",
+    "businessCardDescription": "以 Professional 或 Ultimate 作为团队的基础方案，然后以每人 +{price}/月邀请成员——每个人都在自己的账户中获得你方案的等级。",
     "businessFeatureBase": "选择 Professional 或 Ultimate 作为基础方案",
-    "businessFeatureFullAccess": "每位成员都能获得与您方案同等级别的完整访问权限",
+    "businessFeatureFullAccess": "每位成员在自己的账户中获得你方案的等级",
     "businessFeatureFreeOnUltimate": "Ultimate 方案免费包含团队席位",
     "businessFeatureManage": "随时在团队设置中管理席位",
     "setUpTeam": "设置团队",
@@ -402,11 +402,11 @@
       "basicAiChat": "基础 AI 聊天",
       "creditsPerMonth": "{count} 积分/月",
       "aiMemory": "AI 记忆",
-      "websiteAutomationBuilderAccess": "网站与自动化构建器访问权限",
+      "websiteAutomationBuilderAccess": "Website Builder，以及每天运行一次的自动化",
       "everythingInStarter": "包含 Starter 的全部功能",
-      "upTo100AiAgents": "最多 100 个 AI 智能体",
+      "upTo100AiAgents": "最多 100 个定时网络搜索代理",
       "everythingInGrowth": "包含 Growth 的全部功能",
-      "teamCollaboration": "团队协作",
+      "teamCollaboration": "团队席位：成员获得你的方案",
       "everythingInProfessional": "包含 Professional 的全部功能",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "包含无限团队席位——不按成员收费",
       "extendedChatMemoryRetention100Vs20RecentFact": "扩展的聊天记忆保留（100 条对比 20 条近期信息）",
@@ -414,10 +414,10 @@
       "everythingInUltimate": "包含 Ultimate 的全部功能",
       "unlimitedMembers": "无限成员",
       "customCredits": "定制积分",
-      "upTo2AiAgents": "最多 2 个 AI 智能体",
-      "upTo5AiAgents": "最多 5 个 AI 智能体",
-      "upTo15AiAgentsTeams": "最多 15 个 AI 智能体与团队",
-      "upTo50AiAgents": "最多 50 个 AI 智能体"
+      "upTo2AiAgents": "最多 2 个定时网络搜索代理",
+      "upTo5AiAgents": "最多 5 个定时网络搜索代理",
+      "upTo15AiAgentsTeams": "最多 15 个定时网络搜索代理",
+      "upTo50AiAgents": "最多 50 个定时网络搜索代理"
     },
     "values": {
       "unlimited": "无限",
@@ -432,7 +432,7 @@
     },
     "seatNote": {
       "included": "包含无限团队席位 — 无需按成员付费",
-      "perMember": "+ 每位团队成员每月 {currency}{price} — 每位成员均可获得您所在套餐等级的完整访问权限"
+      "perMember": "+ 每位团队成员每月 {currency}{price} — 每位成员在自己的账户中获得您方案的等级"
     },
     "metaDescription": "Ionexa AI 价格 — Free、Starter、Growth、Professional、Ultimate 和 Enterprise 方案。",
     "billingMonthly": "按月",
@@ -464,12 +464,12 @@
     },
     "items": {
       "modules": {
-        "title": "13 个业务模块",
-        "description": "创意、竞争对手、调研、财务、学习、交易、决策、产品、内容、销售/CRM、反馈、数据统计和自动化笔记。"
+        "title": "13 个业务记录列表",
+        "description": "在「我的记录」中用 13 个列表保存你自己的记录：创意、竞争对手、调研、财务、学习、交易、决策、产品、内容、销售/CRM、反馈、数据统计和自动化笔记。"
       },
       "createAnything": {
-        "title": "创建任何内容",
-        "description": "用自然语言描述任何内容，AI 会自动将其归档到正确的模块。"
+        "title": "描述一次即可",
+        "description": "用简单文字描述你的需要：它会带着你的描述打开合适的工具，或把笔记归入正确的模块。"
       },
       "chat": {
         "title": "Ionexa 对话",
@@ -481,7 +481,7 @@
       },
       "team": {
         "title": "团队协作",
-        "description": "邀请团队成员，并让他们获得你所在方案等级的完整权限。"
+        "description": "邀请团队成员：每个人在自己的账户中获得你方案的等级。共享工作尚未构建。"
       },
       "agentBuilder": {
         "title": "AI 智能体构建器",

@@ -232,7 +232,7 @@
       "missionControl": "Ziel setzen, die KI zerlegt es in Schritte.",
       "documents": "Freie Notizen und Dokumente, die du selbst schreibst.",
       "websites": "Deine eigenen Sites verfolgen — Name, URL, Status. Ohne Erzeugung.",
-      "agents": "Plane die Agenten, die du willst. Eine Liste, keine Laufzeit.",
+      "agents": "Agenten, die nach Zeitplan im Web suchen und Ihnen ihre Ergebnisse per E-Mail senden.",
       "finance": "Einnahmen und Ausgaben erfassen.",
       "sales": "Leads, Kontaktaufnahme und nächste Schritte.",
       "content": "Content-Ideen, Texte und Threads.",
@@ -337,16 +337,16 @@
     "contactSales": "Vertrieb kontaktieren",
     "getPlan": "{plan} wählen",
     "teamBannerTitle": "Arbeitest du im Team?",
-    "teamBannerBody": "Lade Teammitglieder ein, direkt in deinem Arbeitsbereich mitzuarbeiten — jedes Mitglied erhält vollen Zugriff auf der Stufe deines Plans, keine eingeschränkte Gast-Ansicht. Bei Professional fügst du Mitglieder für +{price}/Mitglied/Monat hinzu, monatlich pro Platz abgerechnet. Ultimate und Enterprise enthalten unbegrenzte Team-Plätze ohne Aufpreis, sodass dein ganzes Team kostenlos beitritt. Verwalte Einladungen und entziehe den Zugriff jederzeit über die Team-Seite in den Einstellungen.",
+    "teamBannerBody": "Geben Sie Ihren Teammitgliedern Ihren Plan: Jedes Mitglied meldet sich in seinem eigenen Konto an und erhält die Stufe Ihres Plans, keine eingeschränkte Gastansicht. Arbeit wird zwischen Konten noch nicht geteilt — jede Person behält ihre eigene. Bei Professional fügen Sie Mitglieder für +{price}/Mitglied/Monat hinzu, monatlich pro Platz abgerechnet. Ultimate und Enterprise enthalten unbegrenzte Teamplätze ohne Aufpreis. Einladungen verwalten und Zugriff jederzeit entziehen können Sie auf der Seite Team in den Einstellungen.",
     "comparePlans": "Pläne vergleichen",
     "feature": "Funktion",
     "backToHome": "← Zurück zu Ionexa AI",
     "rows": {
       "creditsPerMonth": "Credits / Monat",
-      "aiAgents": "KI-Agenten",
-      "websiteBuilder": "Website- & Automatisierungs-Builder",
+      "aiAgents": "Geplante Agenten für Websuche",
+      "websiteBuilder": "Website Builder",
       "aiMemory": "KI-Gedächtnis",
-      "teamCollaboration": "Teamzusammenarbeit",
+      "teamCollaboration": "Mitglieder erhalten Ihren Plan",
       "teamSeatsAddOn": "Team-Plätze",
       "freeChatMessages": "Kostenlose Chat-Nachrichten / Monat",
       "deepResearch": "Deep-Research-Läufe / Monat",
@@ -365,7 +365,7 @@
       "projects": "Projekte",
       "missionControl": "Ziele & Pläne",
       "helpCentre": "Hilfe-Center",
-      "createStudio": "Mach irgendwas",
+      "createStudio": "Beschreiben Sie es, es öffnet das passende Werkzeug",
       "voiceMinutes": "Sprachminuten / Monat",
       "chatMemory": "Fakten, die der Chat behält",
       "chatPins": "Angeheftete Unterhaltungen",
@@ -391,10 +391,10 @@
     },
     "businessTitle": "Business",
     "businessSubtitle": "Für Teams, die gemeinsam aufbauen",
-    "businessExplanation": "Wähle Professional oder Ultimate als Basisplan — beide enthalten die Teamzusammenarbeit. Lade dann Teammitglieder ein: Jedes Mitglied erhält vollen Zugriff auf der Stufe deines Plans, für +{price}/Mitglied/Monat bei Professional, oder kostenlos inklusive bei Ultimate.",
-    "businessCardDescription": "Starte mit jedem beliebigen Plan als Basis für dein Team, lade dann Mitglieder für je +{price}/Monat ein — jeder erhält vollen Zugriff auf der Stufe deines Plans. Perfekt für Teams, die zusammenarbeiten.",
+    "businessExplanation": "Wählen Sie Professional oder Ultimate als Basisplan — mit beiden können Sie Teammitglieder hinzufügen. Jedes Mitglied erhält die Stufe Ihres Plans im eigenen Konto, für +{price}/Mitglied/Monat bei Professional oder kostenlos bei Ultimate. Arbeit wird zwischen Konten noch nicht geteilt.",
+    "businessCardDescription": "Starten Sie mit Professional oder Ultimate als Basis Ihres Teams und laden Sie dann Mitglieder für je +{price}/Monat ein — alle erhalten die Stufe Ihres Plans im eigenen Konto.",
     "businessFeatureBase": "Wähle Professional oder Ultimate als Basisplan",
-    "businessFeatureFullAccess": "Jedes Mitglied erhält vollen Zugriff auf der Stufe deines Plans",
+    "businessFeatureFullAccess": "Jedes Mitglied erhält die Stufe Ihres Plans im eigenen Konto",
     "businessFeatureFreeOnUltimate": "Team-Plätze bei Ultimate kostenlos inklusive",
     "businessFeatureManage": "Verwalte Plätze jederzeit in den Team-Einstellungen",
     "setUpTeam": "Team einrichten",
@@ -402,11 +402,11 @@
       "basicAiChat": "Basis-KI-Chat",
       "creditsPerMonth": "{count, plural, one {# Credit} other {# Credits}}/Monat",
       "aiMemory": "KI-Gedächtnis",
-      "websiteAutomationBuilderAccess": "Zugang zum Website- & Automation-Builder",
+      "websiteAutomationBuilderAccess": "Website Builder und Automatisierungen, die einmal täglich laufen",
       "everythingInStarter": "Alles aus Starter",
-      "upTo100AiAgents": "Bis zu 100 KI-Agenten",
+      "upTo100AiAgents": "Bis zu 100 geplante Agenten für Websuche",
       "everythingInGrowth": "Alles aus Growth",
-      "teamCollaboration": "Team-Zusammenarbeit",
+      "teamCollaboration": "Teamplätze: Mitglieder erhalten Ihren Plan",
       "everythingInProfessional": "Alles aus Professional",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Unbegrenzte Team-Plätze inklusive — keine Gebühr pro Mitglied",
       "extendedChatMemoryRetention100Vs20RecentFact": "Erweiterte Chat-Speicherdauer (100 statt 20 aktuelle Fakten)",
@@ -414,10 +414,10 @@
       "everythingInUltimate": "Alles aus Ultimate",
       "unlimitedMembers": "Unbegrenzte Mitglieder",
       "customCredits": "Individuelle Credits",
-      "upTo2AiAgents": "Bis zu 2 KI-Agenten",
-      "upTo5AiAgents": "Bis zu 5 KI-Agenten",
-      "upTo15AiAgentsTeams": "Bis zu 15 KI-Agenten & Teams",
-      "upTo50AiAgents": "Bis zu 50 KI-Agenten"
+      "upTo2AiAgents": "Bis zu 2 geplante Agenten für Websuche",
+      "upTo5AiAgents": "Bis zu 5 geplante Agenten für Websuche",
+      "upTo15AiAgentsTeams": "Bis zu 15 geplante Agenten für Websuche",
+      "upTo50AiAgents": "Bis zu 50 geplante Agenten für Websuche"
     },
     "values": {
       "unlimited": "Unbegrenzt",
@@ -432,7 +432,7 @@
     },
     "seatNote": {
       "included": "Unbegrenzte Team-Plätze inklusive — keine Gebühr pro Mitglied",
-      "perMember": "+ {currency}{price}/Monat pro Teammitglied — jedes Mitglied erhält vollen Zugriff auf der Stufe Ihres Tarifs"
+      "perMember": "+ {currency}{price}/Monat pro Teammitglied — jedes Mitglied erhält die Stufe Ihres Tarifs im eigenen Konto"
     },
     "metaDescription": "Ionexa-AI-Preise — die Tarife Free, Starter, Growth, Professional, Ultimate und Enterprise.",
     "billingMonthly": "Monatlich",
@@ -464,12 +464,12 @@
     },
     "items": {
       "modules": {
-        "title": "13 Business-Module",
-        "description": "Ideen, Wettbewerber, Recherche, Finanzen, Lernen, Trading, Entscheidungen, Produkte, Content, Vertrieb/CRM, Feedback, Analytik und Automatisierungsnotizen."
+        "title": "13 Eintragslisten",
+        "description": "Führen Sie Ihre eigenen Einträge in 13 Listen, über „Meine Einträge“: Ideen, Wettbewerber, Recherche, Finanzen, Lernen, Trading, Entscheidungen, Produkte, Content, Vertrieb/CRM, Feedback, Analytik und Automatisierungsnotizen."
       },
       "createAnything": {
-        "title": "Alles Erstellen",
-        "description": "Beschreibe alles in Klartext und die KI ordnet es automatisch dem richtigen Modul zu."
+        "title": "Einmal beschreiben",
+        "description": "Beschreiben Sie in einfachem Text, was Sie brauchen: Es öffnet das passende Werkzeug mit Ihren Worten oder legt eine Notiz im richtigen Modul ab."
       },
       "chat": {
         "title": "Ionexa Chat",
@@ -481,7 +481,7 @@
       },
       "team": {
         "title": "Teamzusammenarbeit",
-        "description": "Lade Teammitglieder ein und gib ihnen vollen Zugriff auf der Stufe deines Plans."
+        "description": "Laden Sie Teammitglieder ein: Jedes erhält die Stufe Ihres Plans im eigenen Konto. Gemeinsame Arbeit ist noch nicht gebaut."
       },
       "agentBuilder": {
         "title": "KI-Agenten-Builder",

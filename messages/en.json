@@ -232,7 +232,7 @@
       "missionControl": "Set a goal, AI breaks it into steps.",
       "documents": "Freeform notes and documents you write yourself.",
       "websites": "Track sites you own — name, URL, status. No generation.",
-      "agents": "Plan the agents you want. A tracker, not a runtime.",
+      "agents": "Agents that search the web on a schedule and email you what they found.",
       "finance": "Log income and expenses.",
       "sales": "Leads, outreach and next steps.",
       "content": "Content ideas, captions and threads.",
@@ -337,16 +337,16 @@
     "contactSales": "Contact Sales",
     "getPlan": "Get {plan}",
     "teamBannerTitle": "Building with a team?",
-    "teamBannerBody": "Invite teammates to work directly inside your workspace — every member gets full access at your plan's tier, not a limited guest view. On Professional, add members for +{price}/member/month, billed monthly per seat. Ultimate and Enterprise include unlimited team seats at no extra charge, so your whole team joins for free. Manage invites and remove access anytime from the Team page in Settings.",
+    "teamBannerBody": "Give teammates your plan: each member signs in to their own account and gets your plan's tier, not a limited guest view. Work is not shared between accounts yet — each person keeps their own. On Professional, add members for +{price}/member/month, billed monthly per seat. Ultimate and Enterprise include unlimited team seats at no extra charge. Manage invites and remove access anytime from the Team page in Settings.",
     "comparePlans": "Compare plans",
     "feature": "Feature",
     "backToHome": "← Back to Ionexa AI",
     "rows": {
       "creditsPerMonth": "Credits / month",
-      "aiAgents": "AI agents",
-      "websiteBuilder": "Website & Automation Builder",
+      "aiAgents": "Scheduled web-research agents",
+      "websiteBuilder": "Website Builder",
       "aiMemory": "AI Memory",
-      "teamCollaboration": "Team collaboration",
+      "teamCollaboration": "Members get your plan",
       "teamSeatsAddOn": "Team seats",
       "freeChatMessages": "Free chat messages / month",
       "deepResearch": "Deep Research runs / month",
@@ -365,7 +365,7 @@
       "projects": "Projects",
       "missionControl": "Goals & Plans",
       "helpCentre": "Help Centre",
-      "createStudio": "Make anything",
+      "createStudio": "Describe it, it opens the right tool",
       "voiceMinutes": "Voice minutes / month",
       "chatMemory": "Facts remembered in chat",
       "chatPins": "Pinned conversations",
@@ -391,10 +391,10 @@
     },
     "businessTitle": "Business",
     "businessSubtitle": "For teams building together",
-    "businessExplanation": "Choose Professional or Ultimate as your base plan — both include team collaboration. Then invite team members: each one gets full access at your plan's tier, for +{price}/member/month on Professional, or included free on Ultimate.",
-    "businessCardDescription": "Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.",
+    "businessExplanation": "Choose Professional or Ultimate as your base plan — both let you add team members. Each member gets your plan's tier on their own account, for +{price}/member/month on Professional, or included free on Ultimate. Work is not shared between accounts yet.",
+    "businessCardDescription": "Start with Professional or Ultimate as your team's base, then invite members for +{price}/month each — everyone gets your plan's tier on their own account.",
     "businessFeatureBase": "Choose Professional or Ultimate as your base plan",
-    "businessFeatureFullAccess": "Every member gets full access at your plan's tier",
+    "businessFeatureFullAccess": "Every member gets your plan's tier on their own account",
     "businessFeatureFreeOnUltimate": "Team seats included free on Ultimate",
     "businessFeatureManage": "Manage seats anytime from Team settings",
     "setUpTeam": "Set Up Team",
@@ -402,11 +402,11 @@
       "basicAiChat": "Basic AI chat",
       "creditsPerMonth": "{count, plural, one {# credit} other {# credits}}/month",
       "aiMemory": "AI Memory",
-      "websiteAutomationBuilderAccess": "Website & Automation Builder access",
+      "websiteAutomationBuilderAccess": "Website Builder, and automations that run once a day",
       "everythingInStarter": "Everything in Starter",
-      "upTo100AiAgents": "Up to 100 AI agents",
+      "upTo100AiAgents": "Up to 100 scheduled web-research agents",
       "everythingInGrowth": "Everything in Growth",
-      "teamCollaboration": "Team collaboration",
+      "teamCollaboration": "Team seats: members get your plan",
       "everythingInProfessional": "Everything in Professional",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Unlimited team seats included — no per-member charge",
       "extendedChatMemoryRetention100Vs20RecentFact": "Extended chat memory retention (100 vs 20 recent facts)",
@@ -414,10 +414,10 @@
       "everythingInUltimate": "Everything in Ultimate",
       "unlimitedMembers": "Unlimited members",
       "customCredits": "Custom credits",
-      "upTo2AiAgents": "Up to 2 AI agents",
-      "upTo5AiAgents": "Up to 5 AI agents",
-      "upTo15AiAgentsTeams": "Up to 15 AI agents & teams",
-      "upTo50AiAgents": "Up to 50 AI agents"
+      "upTo2AiAgents": "Up to 2 scheduled web-research agents",
+      "upTo5AiAgents": "Up to 5 scheduled web-research agents",
+      "upTo15AiAgentsTeams": "Up to 15 scheduled web-research agents",
+      "upTo50AiAgents": "Up to 50 scheduled web-research agents"
     },
     "values": {
       "unlimited": "Unlimited",
@@ -432,7 +432,7 @@
     },
     "seatNote": {
       "included": "Unlimited team seats included — no per-member charge",
-      "perMember": "+ {currency}{price}/month per team member — each member gets full access at your plan's tier"
+      "perMember": "+ {currency}{price}/month per team member — each member gets your plan's tier on their own account"
     },
     "metaDescription": "Ionexa AI pricing — Free, Starter, Growth, Professional, Ultimate, and Enterprise plans.",
     "billingMonthly": "Monthly",
@@ -464,12 +464,12 @@
     },
     "items": {
       "modules": {
-        "title": "13 Business Modules",
-        "description": "Ideas, Competitors, Research, Finance, Learning, Trading, Decisions, Products, Content, Sales/CRM, Feedback, Analytics, and Automation notes."
+        "title": "13 Business Entry Lists",
+        "description": "Keep your own entries in 13 lists, from My records: Ideas, Competitors, Research, Finance, Learning, Trading, Decisions, Products, Content, Sales/CRM, Feedback, Analytics, and Automation notes."
       },
       "createAnything": {
-        "title": "Create Anything",
-        "description": "Describe anything in plain text and AI files it into the right module automatically."
+        "title": "Describe it once",
+        "description": "Describe what you need in plain text: it opens the right tool with your words, or files a note into the right module."
       },
       "chat": {
         "title": "Ionexa Chat",
@@ -481,7 +481,7 @@
       },
       "team": {
         "title": "Team Collaboration",
-        "description": "Invite teammates and give them full access at your plan's tier."
+        "description": "Invite teammates: each one gets your plan's tier on their own account. Shared work is not built yet."
       },
       "agentBuilder": {
         "title": "AI Agent Builder",

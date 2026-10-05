@@ -232,7 +232,7 @@
       "missionControl": "Fija un objetivo y la IA lo divide en pasos.",
       "documents": "Notas y documentos libres que escribes tú.",
       "websites": "Registra sitios que tienes — nombre, URL, estado. Sin generación.",
-      "agents": "Planifica los agentes que quieres. Un registro, no un runtime.",
+      "agents": "Agentes que buscan en la web según un horario y te envían por email lo que encontraron.",
       "finance": "Registra ingresos y gastos.",
       "sales": "Clientes potenciales, contacto y siguientes pasos.",
       "content": "Ideas de contenido, textos e hilos.",
@@ -337,16 +337,16 @@
     "contactSales": "Contactar ventas",
     "getPlan": "Obtener {plan}",
     "teamBannerTitle": "¿Trabajas en equipo?",
-    "teamBannerBody": "Invita a tus compañeros a trabajar directamente dentro de tu espacio de trabajo — cada miembro obtiene acceso completo al nivel de tu plan, no una vista de invitado limitada. En Professional, añade miembros por +{price}/miembro/mes, facturado mensualmente por puesto. Ultimate y Enterprise incluyen puestos de equipo ilimitados sin coste extra, así que todo tu equipo se une gratis. Gestiona las invitaciones y revoca el acceso cuando quieras desde la página de Equipo en Configuración.",
+    "teamBannerBody": "Da tu plan a tus compañeros: cada miembro entra en su propia cuenta y obtiene el nivel de tu plan, no una vista limitada de invitado. El trabajo aún no se comparte entre cuentas: cada persona conserva el suyo. En Professional, añade miembros por +{price}/miembro/mes, con cobro mensual por puesto. Ultimate y Enterprise incluyen puestos de equipo ilimitados sin coste adicional. Gestiona las invitaciones y retira el acceso cuando quieras desde la página Equipo en Ajustes.",
     "comparePlans": "Comparar planes",
     "feature": "Función",
     "backToHome": "← Volver a Ionexa AI",
     "rows": {
       "creditsPerMonth": "Créditos / mes",
-      "aiAgents": "Agentes AI",
-      "websiteBuilder": "Creador de sitios web y automatización",
+      "aiAgents": "Agentes programados que buscan en la web",
+      "websiteBuilder": "Website Builder",
       "aiMemory": "Memoria AI",
-      "teamCollaboration": "Colaboración en equipo",
+      "teamCollaboration": "Los miembros obtienen tu plan",
       "teamSeatsAddOn": "Puestos de equipo",
       "freeChatMessages": "Mensajes de chat gratuitos / mes",
       "deepResearch": "Ejecuciones de Deep Research / mes",
@@ -365,7 +365,7 @@
       "projects": "Proyectos",
       "missionControl": "Objetivos y planes",
       "helpCentre": "Centro de ayuda",
-      "createStudio": "Crea lo que sea",
+      "createStudio": "Descríbelo y abre la herramienta adecuada",
       "voiceMinutes": "Minutos de voz / mes",
       "chatMemory": "Datos que recuerda el chat",
       "chatPins": "Conversaciones fijadas",
@@ -391,10 +391,10 @@
     },
     "businessTitle": "Business",
     "businessSubtitle": "Para equipos que construyen juntos",
-    "businessExplanation": "Elige Professional o Ultimate como tu plan base — ambos incluyen la colaboración en equipo. Luego invita a miembros del equipo: cada uno obtiene acceso completo al nivel de tu plan, por +{price}/miembro/mes en Professional, o incluido gratis en Ultimate.",
-    "businessCardDescription": "Empieza con cualquier plan como base de tu equipo, luego invita a miembros por +{price}/mes cada uno — todos obtienen acceso completo al nivel de tu plan. Perfecto para equipos que trabajan juntos.",
+    "businessExplanation": "Elige Professional o Ultimate como plan base: ambos permiten añadir miembros. Cada miembro obtiene el nivel de tu plan en su propia cuenta, por +{price}/miembro/mes en Professional, o gratis en Ultimate. El trabajo aún no se comparte entre cuentas.",
+    "businessCardDescription": "Empieza con Professional o Ultimate como base de tu equipo y luego invita a miembros por +{price}/mes cada uno: todos obtienen el nivel de tu plan en su propia cuenta.",
     "businessFeatureBase": "Elige Professional o Ultimate como tu plan base",
-    "businessFeatureFullAccess": "Cada miembro obtiene acceso completo al nivel de tu plan",
+    "businessFeatureFullAccess": "Cada miembro obtiene el nivel de tu plan en su propia cuenta",
     "businessFeatureFreeOnUltimate": "Puestos de equipo incluidos gratis en Ultimate",
     "businessFeatureManage": "Gestiona los puestos en cualquier momento desde Configuración de equipo",
     "setUpTeam": "Configurar Equipo",
@@ -402,11 +402,11 @@
       "basicAiChat": "Chat de IA básico",
       "creditsPerMonth": "{count, plural, one {# crédito} other {# créditos}}/mes",
       "aiMemory": "Memoria de IA",
-      "websiteAutomationBuilderAccess": "Acceso a Website & Automation Builder",
+      "websiteAutomationBuilderAccess": "Website Builder y automatizaciones que se ejecutan una vez al día",
       "everythingInStarter": "Todo lo de Starter",
-      "upTo100AiAgents": "Hasta 100 agentes de IA",
+      "upTo100AiAgents": "Hasta 100 agentes programados que buscan en la web",
       "everythingInGrowth": "Todo lo de Growth",
-      "teamCollaboration": "Colaboración en equipo",
+      "teamCollaboration": "Puestos de equipo: los miembros obtienen tu plan",
       "everythingInProfessional": "Todo lo de Professional",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Puestos de equipo ilimitados incluidos, sin cargo por miembro",
       "extendedChatMemoryRetention100Vs20RecentFact": "Retención ampliada de memoria de chat (100 frente a 20 datos recientes)",
@@ -414,10 +414,10 @@
       "everythingInUltimate": "Todo lo de Ultimate",
       "unlimitedMembers": "Miembros ilimitados",
       "customCredits": "Créditos personalizados",
-      "upTo2AiAgents": "Hasta 2 agentes de IA",
-      "upTo5AiAgents": "Hasta 5 agentes de IA",
-      "upTo15AiAgentsTeams": "Hasta 15 agentes de IA y equipos",
-      "upTo50AiAgents": "Hasta 50 agentes de IA"
+      "upTo2AiAgents": "Hasta 2 agentes programados que buscan en la web",
+      "upTo5AiAgents": "Hasta 5 agentes programados que buscan en la web",
+      "upTo15AiAgentsTeams": "Hasta 15 agentes programados que buscan en la web",
+      "upTo50AiAgents": "Hasta 50 agentes programados que buscan en la web"
     },
     "values": {
       "unlimited": "Ilimitado",
@@ -432,7 +432,7 @@
     },
     "seatNote": {
       "included": "Puestos de equipo ilimitados incluidos: sin cargo por miembro",
-      "perMember": "+ {currency}{price}/mes por miembro del equipo: cada miembro obtiene acceso completo al nivel de tu plan"
+      "perMember": "+ {currency}{price}/mes por miembro del equipo: cada miembro obtiene el nivel de tu plan en su propia cuenta"
     },
     "metaDescription": "Precios de Ionexa AI: planes Free, Starter, Growth, Professional, Ultimate y Enterprise.",
     "billingMonthly": "Mensual",
@@ -464,12 +464,12 @@
     },
     "items": {
       "modules": {
-        "title": "13 módulos de negocio",
-        "description": "Ideas, Competidores, Investigación, Finanzas, Aprendizaje, Trading, Decisiones, Productos, Contenido, Ventas/CRM, Comentarios, Analítica y notas de Automatización."
+        "title": "13 listas de entradas",
+        "description": "Guarda tus propias entradas en 13 listas, desde «Mis registros»: Ideas, Competidores, Investigación, Finanzas, Aprendizaje, Trading, Decisiones, Productos, Contenido, Ventas/CRM, Comentarios, Analítica y notas de Automatización."
       },
       "createAnything": {
-        "title": "Crear Cualquier Cosa",
-        "description": "Describe cualquier cosa en texto y la IA la clasifica automáticamente en el módulo correcto."
+        "title": "Descríbelo una vez",
+        "description": "Describe lo que necesitas en texto sencillo: abre la herramienta adecuada con tus palabras o guarda una nota en el módulo correcto."
       },
       "chat": {
         "title": "Ionexa Chat",
@@ -481,7 +481,7 @@
       },
       "team": {
         "title": "Colaboración en equipo",
-        "description": "Invita a compañeros y dales acceso completo al nivel de tu plan."
+        "description": "Invita a compañeros: cada uno obtiene el nivel de tu plan en su propia cuenta. El trabajo compartido aún no está construido."
       },
       "agentBuilder": {
         "title": "Creador de Agentes AI",

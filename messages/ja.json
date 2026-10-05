@@ -232,7 +232,7 @@
       "missionControl": "目標を決めると AI がステップに分解します。",
       "documents": "自分で書く自由形式のメモと文書。",
       "websites": "持っているサイトを記録 — 名前・URL・状態。生成はしません。",
-      "agents": "欲しいエージェントを計画。記録であり実行環境ではありません。",
+      "agents": "スケジュールに沿ってウェブを検索し、見つけた内容をメールで送るエージェント。",
       "finance": "収入と支出を記録。",
       "sales": "リード、アプローチ、次の一手。",
       "content": "コンテンツ案・キャプション・スレッド。",
@@ -337,16 +337,16 @@
     "contactSales": "営業に問い合わせる",
     "getPlan": "{plan} を選択",
     "teamBannerTitle": "チームで利用しますか？",
-    "teamBannerBody": "チームメンバーを招待して、あなたのワークスペース内で直接一緒に作業できます — 各メンバーは制限されたゲスト表示ではなく、あなたのプランと同じレベルの完全なアクセス権を得られます。Professional プランでは +{price}/メンバー/月 でメンバーを追加でき、シートごとに毎月請求されます。Ultimate と Enterprise プランは追加料金なしで無制限のチームシートが含まれるため、チーム全員が無料で参加できます。招待の管理やアクセスの削除は、設定内のチームページからいつでも行えます。",
+    "teamBannerBody": "チームメンバーにあなたのプランを：各メンバーは自分のアカウントにログインし、制限付きのゲスト表示ではなく、あなたのプランのレベルを利用できます。アカウント間で作業はまだ共有されません。各自が自分の作業を保持します。Professional では、メンバーを +{price}/メンバー/月 で追加でき、席ごとに毎月請求されます。Ultimate と Enterprise には追加料金なしで無制限のチーム席が含まれます。招待の管理やアクセスの削除は、設定のチームページからいつでも行えます。",
     "comparePlans": "プランを比較",
     "feature": "機能",
     "backToHome": "← Ionexa AI に戻る",
     "rows": {
       "creditsPerMonth": "クレジット / 月",
-      "aiAgents": "AI エージェント",
-      "websiteBuilder": "ウェブサイト＆自動化ビルダー",
+      "aiAgents": "スケジュール実行のウェブ検索エージェント",
+      "websiteBuilder": "Website Builder",
       "aiMemory": "AI メモリー",
-      "teamCollaboration": "チームコラボレーション",
+      "teamCollaboration": "メンバーがあなたのプランを利用",
       "teamSeatsAddOn": "チームシート",
       "freeChatMessages": "無料チャットメッセージ / 月",
       "deepResearch": "ディープリサーチ実行回数 / 月",
@@ -365,7 +365,7 @@
       "projects": "プロジェクト",
       "missionControl": "目標とプラン",
       "helpCentre": "ヘルプセンター",
-      "createStudio": "何でもつくる",
+      "createStudio": "説明すると適切なツールが開きます",
       "voiceMinutes": "音声の分数 / 月",
       "chatMemory": "チャットが覚える情報",
       "chatPins": "固定した会話",
@@ -391,10 +391,10 @@
     },
     "businessTitle": "ビジネス",
     "businessSubtitle": "チームで共に構築する",
-    "businessExplanation": "ベースプランとしてProfessionalまたはUltimateを選択してください — どちらもチームコラボレーションを含みます。その後チームメンバーを招待しましょう。各メンバーはあなたのプランと同じ機能に完全アクセスでき、Professionalでは+{price}/メンバー/月、Ultimateでは無料で利用できます。",
-    "businessCardDescription": "どのプランでもチームのベースとして始められます。その後、メンバーを1人あたり+{price}/月で招待できます — 全員があなたのプランと同じレベルの完全アクセスを得られます。共同作業をするチームに最適です。",
+    "businessExplanation": "基本プランとして Professional または Ultimate を選択してください。どちらもチームメンバーを追加できます。各メンバーは自分のアカウントであなたのプランのレベルを利用でき、Professional では +{price}/メンバー/月、Ultimate では無料で含まれます。アカウント間で作業はまだ共有されません。",
+    "businessCardDescription": "Professional または Ultimate をチームの基本にして、メンバーを1人あたり +{price}/月 で招待しましょう。全員が自分のアカウントであなたのプランのレベルを利用できます。",
     "businessFeatureBase": "ベースプランとしてProfessionalまたはUltimateを選択",
-    "businessFeatureFullAccess": "各メンバーはあなたのプランと同じレベルの完全アクセスを取得",
+    "businessFeatureFullAccess": "各メンバーは自分のアカウントであなたのプランのレベルを利用できます",
     "businessFeatureFreeOnUltimate": "Ultimateではチームシートが無料付帯",
     "businessFeatureManage": "チーム設定からいつでもシートを管理可能",
     "setUpTeam": "チームを設定",
@@ -402,11 +402,11 @@
       "basicAiChat": "基本のAIチャット",
       "creditsPerMonth": "{count} クレジット/月",
       "aiMemory": "AIメモリ",
-      "websiteAutomationBuilderAccess": "ウェブサイト＆自動化ビルダーへのアクセス",
+      "websiteAutomationBuilderAccess": "Website Builder と、1日1回実行される自動化",
       "everythingInStarter": "Starterのすべて",
-      "upTo100AiAgents": "AIエージェント最大100体",
+      "upTo100AiAgents": "スケジュール実行のウェブ検索エージェント最大100個",
       "everythingInGrowth": "Growthのすべて",
-      "teamCollaboration": "チームコラボレーション",
+      "teamCollaboration": "チーム席：メンバーがあなたのプランを利用",
       "everythingInProfessional": "Professionalのすべて",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "チーム席数無制限（メンバーごとの追加料金なし）",
       "extendedChatMemoryRetention100Vs20RecentFact": "チャットメモリの保持拡張（直近100件、通常は20件）",
@@ -414,10 +414,10 @@
       "everythingInUltimate": "Ultimateのすべて",
       "unlimitedMembers": "メンバー無制限",
       "customCredits": "カスタムクレジット",
-      "upTo2AiAgents": "AIエージェント最大2体",
-      "upTo5AiAgents": "AIエージェント最大5体",
-      "upTo15AiAgentsTeams": "AIエージェント最大15体・チーム",
-      "upTo50AiAgents": "AIエージェント最大50体"
+      "upTo2AiAgents": "スケジュール実行のウェブ検索エージェント最大2個",
+      "upTo5AiAgents": "スケジュール実行のウェブ検索エージェント最大5個",
+      "upTo15AiAgentsTeams": "スケジュール実行のウェブ検索エージェント最大15個",
+      "upTo50AiAgents": "スケジュール実行のウェブ検索エージェント最大50個"
     },
     "values": {
       "unlimited": "無制限",
@@ -432,7 +432,7 @@
     },
     "seatNote": {
       "included": "無制限のチームシートを含む — メンバーごとの追加料金なし",
-      "perMember": "+ チームメンバー1人あたり月額{currency}{price} — 各メンバーはご利用プランの階層で全機能を利用できます"
+      "perMember": "+ チームメンバー1人あたり月額{currency}{price} — 各メンバーは自分のアカウントでご利用プランのレベルを利用できます"
     },
     "metaDescription": "Ionexa AI の料金 — Free、Starter、Growth、Professional、Ultimate、Enterprise の各プラン。",
     "billingMonthly": "月額",
@@ -464,12 +464,12 @@
     },
     "items": {
       "modules": {
-        "title": "13のビジネスモジュール",
-        "description": "アイデア、競合、リサーチ、財務、学習、トレーディング、意思決定、プロダクト、コンテンツ、営業/CRM、フィードバック、アナリティクス、自動化メモ。"
+        "title": "13 のビジネス記録リスト",
+        "description": "「マイレコード」から、13 のリストに自分の記録を保存できます：アイデア、競合、リサーチ、財務、学習、トレーディング、意思決定、プロダクト、コンテンツ、営業/CRM、フィードバック、アナリティクス、自動化メモ。"
       },
       "createAnything": {
-        "title": "何でも作成",
-        "description": "自然な文章で何でも説明するだけで、AI が自動的に適切なモジュールに振り分けます。"
+        "title": "一度説明するだけ",
+        "description": "必要なことを普通の文章で説明してください。あなたの言葉で適切なツールを開くか、メモを正しいモジュールに保存します。"
       },
       "chat": {
         "title": "Ionexa Chat",
@@ -481,7 +481,7 @@
       },
       "team": {
         "title": "チームコラボレーション",
-        "description": "チームメンバーを招待し、あなたのプランと同じレベルの完全なアクセス権を付与。"
+        "description": "チームメンバーを招待：各自が自分のアカウントであなたのプランのレベルを利用できます。共有作業はまだ構築されていません。"
       },
       "agentBuilder": {
         "title": "AI エージェントビルダー",

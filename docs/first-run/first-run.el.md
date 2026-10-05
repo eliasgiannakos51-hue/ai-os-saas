@@ -32,9 +32,9 @@ _On the first screens, 12 words or more. This is prose somebody wrote, and prose
 
 **`pricing.businessCardDescription`**
 
-> EN — Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.
+> EN — Start with Professional or Ultimate as your team's base, then invite members for +{price}/month each — everyone gets your plan's tier on their own account.
 
-Ξεκίνα με οποιοδήποτε πλάνο ως βάση της ομάδας σου, μετά πρόσκαλε μέλη για +{price}/μήνα το καθένα — όλοι αποκτούν πλήρη πρόσβαση στο επίπεδο του πλάνου σου. Ιδανικό για ομάδες που δουλεύουν μαζί.
+Ξεκίνα με Professional ή Ultimate ως βάση της ομάδας σου, μετά προσκάλεσε μέλη για +{price}/μήνα το καθένα — όλοι παίρνουν το επίπεδο του πλάνου σου στον δικό τους λογαριασμό.
 
 ### login
 
@@ -328,9 +328,9 @@ Email
 
 **`pricing.businessFeatureFullAccess`**
 
-> EN — Every member gets full access at your plan's tier
+> EN — Every member gets your plan's tier on their own account
 
-Κάθε μέλος αποκτά πλήρη πρόσβαση στο επίπεδο του πλάνου σου
+Κάθε μέλος παίρνει το επίπεδο του πλάνου σου στον δικό του λογαριασμό
 
 **`pricing.businessFeatureManage`**
 
@@ -388,9 +388,9 @@ Business
 
 **`pricing.rows.aiAgents`**
 
-> EN — AI agents
+> EN — Scheduled web-research agents
 
-AI Agents
+Βοηθοί που ψάχνουν στο διαδίκτυο με πρόγραμμα
 
 **`pricing.rows.aiChat`**
 
@@ -460,9 +460,9 @@ AI Μνήμη
 
 **`pricing.rows.createStudio`**
 
-> EN — Make anything
+> EN — Describe it, it opens the right tool
 
-Φτιάξε κάτι
+Περιέγραψέ το και ανοίγει το σωστό εργαλείο
 
 **`pricing.rows.creditsPerMonth`**
 
@@ -610,9 +610,9 @@ Projects
 
 **`pricing.rows.teamCollaboration`**
 
-> EN — Team collaboration
+> EN — Members get your plan
 
-Συνεργασία ομάδας
+Τα μέλη παίρνουν το πλάνο σου
 
 **`pricing.rows.teamMembers`**
 
@@ -640,9 +640,9 @@ Projects
 
 **`pricing.rows.websiteBuilder`**
 
-> EN — Website & Automation Builder
+> EN — Website Builder
 
-Website & Automation Builder
+Website Builder
 
 **`pricing.rows.websiteImageStorage`**
 

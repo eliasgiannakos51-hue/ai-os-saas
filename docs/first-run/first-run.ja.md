@@ -32,9 +32,9 @@ _On the first screens, 12 words or more. This is prose somebody wrote, and prose
 
 **`pricing.businessCardDescription`**
 
-> EN — Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.
+> EN — Start with Professional or Ultimate as your team's base, then invite members for +{price}/month each — everyone gets your plan's tier on their own account.
 
-どのプランでもチームのベースとして始められます。その後、メンバーを1人あたり+{price}/月で招待できます — 全員があなたのプランと同じレベルの完全アクセスを得られます。共同作業をするチームに最適です。
+Professional または Ultimate をチームの基本にして、メンバーを1人あたり +{price}/月 で招待しましょう。全員が自分のアカウントであなたのプランのレベルを利用できます。
 
 ### login
 
@@ -328,9 +328,9 @@ Ultimateではチームシートが無料付帯
 
 **`pricing.businessFeatureFullAccess`**
 
-> EN — Every member gets full access at your plan's tier
+> EN — Every member gets your plan's tier on their own account
 
-各メンバーはあなたのプランと同じレベルの完全アクセスを取得
+各メンバーは自分のアカウントであなたのプランのレベルを利用できます
 
 **`pricing.businessFeatureManage`**
 
@@ -388,9 +388,9 @@ Ultimateではチームシートが無料付帯
 
 **`pricing.rows.aiAgents`**
 
-> EN — AI agents
+> EN — Scheduled web-research agents
 
-AI エージェント
+スケジュール実行のウェブ検索エージェント
 
 **`pricing.rows.aiChat`**
 
@@ -460,9 +460,9 @@ AI コーディング
 
 **`pricing.rows.createStudio`**
 
-> EN — Make anything
+> EN — Describe it, it opens the right tool
 
-何でもつくる
+説明すると適切なツールが開きます
 
 **`pricing.rows.creditsPerMonth`**
 
@@ -610,9 +610,9 @@ AI コーディング
 
 **`pricing.rows.teamCollaboration`**
 
-> EN — Team collaboration
+> EN — Members get your plan
 
-チームコラボレーション
+メンバーがあなたのプランを利用
 
 **`pricing.rows.teamMembers`**
 
@@ -640,9 +640,9 @@ AI コーディング
 
 **`pricing.rows.websiteBuilder`**
 
-> EN — Website & Automation Builder
+> EN — Website Builder
 
-ウェブサイト＆自動化ビルダー
+Website Builder
 
 **`pricing.rows.websiteImageStorage`**
 

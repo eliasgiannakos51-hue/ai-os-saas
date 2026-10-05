@@ -32,9 +32,9 @@ Sie müssen den Nutzungsbedingungen und der Datenschutzerklärung zustimmen, um 
 
 **`pricing.businessCardDescription`**
 
-> EN — Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.
+> EN — Start with Professional or Ultimate as your team's base, then invite members for +{price}/month each — everyone gets your plan's tier on their own account.
 
-Starte mit jedem beliebigen Plan als Basis für dein Team, lade dann Mitglieder für je +{price}/Monat ein — jeder erhält vollen Zugriff auf der Stufe deines Plans. Perfekt für Teams, die zusammenarbeiten.
+Starten Sie mit Professional oder Ultimate als Basis Ihres Teams und laden Sie dann Mitglieder für je +{price}/Monat ein — alle erhalten die Stufe Ihres Plans im eigenen Konto.
 
 ### login
 
@@ -328,9 +328,9 @@ Team-Plätze bei Ultimate kostenlos inklusive
 
 **`pricing.businessFeatureFullAccess`**
 
-> EN — Every member gets full access at your plan's tier
+> EN — Every member gets your plan's tier on their own account
 
-Jedes Mitglied erhält vollen Zugriff auf der Stufe deines Plans
+Jedes Mitglied erhält die Stufe Ihres Plans im eigenen Konto
 
 **`pricing.businessFeatureManage`**
 
@@ -388,9 +388,9 @@ Agentenläufe
 
 **`pricing.rows.aiAgents`**
 
-> EN — AI agents
+> EN — Scheduled web-research agents
 
-KI-Agenten
+Geplante Agenten für Websuche
 
 **`pricing.rows.aiChat`**
 
@@ -460,9 +460,9 @@ Kontaktformular
 
 **`pricing.rows.createStudio`**
 
-> EN — Make anything
+> EN — Describe it, it opens the right tool
 
-Mach irgendwas
+Beschreiben Sie es, es öffnet das passende Werkzeug
 
 **`pricing.rows.creditsPerMonth`**
 
@@ -610,9 +610,9 @@ Speicherplatz
 
 **`pricing.rows.teamCollaboration`**
 
-> EN — Team collaboration
+> EN — Members get your plan
 
-Teamzusammenarbeit
+Mitglieder erhalten Ihren Plan
 
 **`pricing.rows.teamMembers`**
 
@@ -640,9 +640,9 @@ Sprachminuten / Monat
 
 **`pricing.rows.websiteBuilder`**
 
-> EN — Website & Automation Builder
+> EN — Website Builder
 
-Website- & Automatisierungs-Builder
+Website Builder
 
 **`pricing.rows.websiteImageStorage`**
 

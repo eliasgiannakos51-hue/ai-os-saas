@@ -56,6 +56,7 @@ import {
   buildMemoryPromptAddition,
 } from "@/lib/chat/memory";
 import { isChatMemoryEnabled, chatMemoryActive } from "@/lib/chat/memory-policy";
+import { memoryActiveFor } from "@/lib/memory/memory-policy";
 import { findMentionedEntities, buildEntityMentionPromptAddition } from "@/lib/chat/entity-mentions";
 import { loadMentorContext } from "@/lib/chat/mentor-context";
 import { loadTradingMentorContext } from "@/lib/chat/trading-mentor-context";
@@ -435,8 +436,16 @@ export async function POST(request: Request) {
     // Free is chatMemoryLimit 0, so the read returned nothing while the
     // write still made a second billed Claude call per message. See
     // chatMemoryActive() in lib/chat/memory.ts.
+    //
+    // AND THE CHAT'S OWN SWITCH. /dashboard/ai-memory shows one switch per
+    // feature, chat first, and until 2026-10-05 this read only the global
+    // one — "Chat: Off" did nothing to the chat. memoryActiveFor() is the
+    // predicate every other feature asks; scripts/tests/memory-universal
+    // §7 checks every surface in lib/memory/surfaces.ts is asked about.
     const memoryActive = chatMemoryActive({
-      userEnabled: isChatMemoryEnabled(user),
+      userEnabled:
+        isChatMemoryEnabled(user) &&
+        memoryActiveFor({ surface: "chat", user, planLimit: plan.capabilities.chatMemoryLimit }),
       planLimit: plan.capabilities.chatMemoryLimit,
     });
     const memories = memoryActive

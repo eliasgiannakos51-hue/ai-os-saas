@@ -24,10 +24,20 @@ const BUILDER = "src/lib/website-builder.ts";
 const POSTS = "src/lib/posts/generate.ts";
 const ROUTE = "src/app/api/memory/surfaces/route.ts";
 const AGENT = "src/lib/agents/execute-agent.ts";
+const CHAT = "src/app/api/chat/route.ts";
 
-const TARGETS = [GATE, STORE, POLICY, SURFACES, SQL, BUILDER, POSTS, ROUTE, AGENT];
+const TARGETS = [GATE, STORE, POLICY, SURFACES, SQL, BUILDER, POSTS, ROUTE, AGENT, CHAT];
 
 const MUTANTS = [
+  {
+    // 2026-10-05: the "Chat" switch on /dashboard/ai-memory, read by
+    // nothing. Put back, §7 must see a switch no code asks about.
+    name: "the chat stops asking about its own switch",
+    file: CHAT,
+    from: 'memoryActiveFor({ surface: "chat", user, planLimit: plan.capabilities.chatMemoryLimit })',
+    to: "true",
+    expect: "every switch on /dashboard/ai-memory is asked about by some code",
+  },
   {
     // 🔴 THE ONE ASKED FOR. The loader stops scoping to the caller, so
     // every feature reads whatever the newest rows in the table are —

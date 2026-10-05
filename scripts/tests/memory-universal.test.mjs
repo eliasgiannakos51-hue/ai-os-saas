@@ -278,6 +278,43 @@ check(
 );
 
 console.log("\n== 7. every feature that reads is wired to the switch ==");
+// THE POPULATION IS lib/memory/surfaces.ts. The list below named five call
+// sites by hand; the sixth switch on /dashboard/ai-memory, "Chat", had no
+// call site asking about it until 2026-10-05, so turning it off did
+// nothing — and the five-file list was green the whole time.
+{
+  const all = (dir) =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+      e.isDirectory() ? all(`${dir}/${e.name}`) : [`${dir}/${e.name}`]
+    );
+  const srcFiles = all("src").filter((f) => /\.(ts|tsx)$/.test(f));
+  check(`the source tree was walked (${srcFiles.length} files)`, srcFiles.length > 500);
+  const asked = new Set();
+  for (const f of srcFiles) {
+    const s = stripComments(readFileSync(f, "utf8"));
+    for (const m of s.matchAll(/memoryActiveFor\(\{\s*surface:\s*"(\w+)"/g)) asked.add(m[1]);
+  }
+  check(`surfaces were read from lib/memory/surfaces.ts (${surfaces.MEMORY_SURFACE_IDS.length})`, surfaces.MEMORY_SURFACE_IDS.length >= 6);
+  const unasked = surfaces.MEMORY_SURFACE_IDS.filter((s) => !asked.has(s));
+  check(
+    `every switch on /dashboard/ai-memory is asked about by some code (${surfaces.MEMORY_SURFACE_IDS.length - unasked.length}/${surfaces.MEMORY_SURFACE_IDS.length})`,
+    unasked.length === 0,
+    unasked.join(", ") + " — a switch nothing reads"
+  );
+  // THE HELP TEXT SAYS ONLY THE CHAT ADDS, which is true while
+  // recordMemory() has no caller: the chat writes through its own
+  // extractor (lib/chat/memory.ts). The day a second feature records, the
+  // sentence is stale, and this says so.
+  const recorders = srcFiles.filter(
+    (f) => !f.endsWith("lib/memory/store.ts") && /\brecordMemory\(/.test(stripComments(readFileSync(f, "utf8")))
+  );
+  const help = JSON.parse(readFileSync("messages/en.json", "utf8")).aiMemory.surfacesHelp;
+  check(
+    "the switches' help says only the chat adds — and nothing else records",
+    /only the chat adds/.test(help) && recorders.length === 0,
+    recorders.length ? `recordMemory is called by ${recorders.join(", ")}: rewrite the help in all ten` : help
+  );
+}
 const WIRED = [
   "src/app/api/posts/generate/route.ts",
   "src/app/api/presentations/generate/route.ts",

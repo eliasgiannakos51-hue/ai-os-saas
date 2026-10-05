@@ -205,5 +205,22 @@ console.log("\n== 4. the Tooltip renders nothing without content ==");
 const tip = readFileSync("src/components/ui/tooltip.tsx", "utf8");
 checkTrue("an empty content short-circuits", /if \(!content\) return <>\{children\}<\/>;/.test(tip));
 
+// "Everything you have made, newest first" (2026-10-05, docs/REMAINING.md):
+// the page behind that hint is the Timeline, which reads the module tables
+// of lib/knowledge-graph.ts and no generated site, deck, post, document,
+// file or report. While none of those tables is among the ones it reads,
+// the hint may not say "everything".
+{
+  const sources = ["src/lib/timeline.ts", "src/lib/knowledge-graph.ts", "src/lib/modules.ts", "src/lib/build-modules.ts"]
+    .map((f) => readFileSync(f, "utf8"))
+    .join("\n");
+  const readsMadeThings = /"user_websites"|"presentations"|"user_documents"|"research_reports"/.test(sources);
+  const mine = JSON.parse(readFileSync("messages/en.json", "utf8")).sidebar.hints.mine;
+  checkTrue(
+    "the Timeline hint claims everything only if the Timeline reads what was made",
+    readsMadeThings || !/^Everything you have made/.test(mine)
+  );
+}
+
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

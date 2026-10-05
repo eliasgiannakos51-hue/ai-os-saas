@@ -93,6 +93,23 @@ export const ADDONS: Record<AddonSlug, AddonSpec> = {
   },
 };
 
+/**
+ * WITHDRAWN FROM SALE (2026-10-05, the owner's decision, NEEDS 17).
+ *
+ * "10 GB storage" and "Priority execution" were sold while nothing read
+ * them: no quota counts storage_gb and no queue orders by priority
+ * (docs/REMAINING.md, "Υποσχέσεις χωρίς αντίκρισμα" 7). They are not
+ * offered to anyone, and api/billing/addons refuses to sell them. An
+ * account that already holds one still sees it — so it can cancel it —
+ * and resolveEntitlements still counts it, so nothing a customer has is
+ * taken away by this.
+ */
+export const WITHDRAWN_ADDONS: readonly AddonSlug[] = ["storage_10gb", "priority"];
+
+export function addonOffered(slug: AddonSlug): boolean {
+  return !WITHDRAWN_ADDONS.includes(slug);
+}
+
 /** An add-on the account holds, as the store returns it. */
 export type HeldAddon = {
   slug: AddonSlug;

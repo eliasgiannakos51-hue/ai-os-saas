@@ -132,7 +132,8 @@ sessions ξαναβγαίνουν από τους πίνακες με την ε�
    week's transactions») περιγράφει κάτι που ο αυτοματισμός δεν κάνει.
 7. **Add-ons «10 GB storage» και «Priority execution — your jobs run
    first»** (`:1035-1041`, `src/lib/billing/addons.ts:76-89`). Κανένα όριο
-   και καμία ουρά δεν τα διαβάζει. NEEDS 17.
+   και καμία ουρά δεν τα διαβάζει. NEEDS 17. **Διορθώθηκε 2026-10-05**:
+   δεν πωλούνται πλέον, με απόφαση του ιδιοκτήτη (`revenue-engine` §9).
 8. **«Regenerate (free)»** (`:1590`, στο
    `src/components/website-builder/website-builder-workspace.tsx:1528`) και
    «you can regenerate it once for free» (`:2116`). Χρεώνεται κανονικά.

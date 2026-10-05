@@ -911,5 +911,35 @@ console.log("\n== 8. THE ONE PLACE OVERAGE CAN HAPPEN, AND THE INVOICE ==");
   ok("…and the overage rules are written down", /Usage overage \(opt-in\)/.test(readme));
 }
 
+console.log("\n== 9. withdrawn add-ons are not sold, and holders are not stripped (NEEDS 17) ==");
+{
+  // "10 GB storage" and "Priority execution" were sold with nothing
+  // reading them. The owner withdrew both on 2026-10-05.
+  // Absent, the function reads as "everything is offered" — which is what
+  // the code did before — so a missing export fails by name, not by crash.
+  const offered = (slug) => (typeof addons.addonOffered === "function" ? addons.addonOffered(slug) : true);
+  eq("10 GB storage is not offered", offered("storage_10gb"), false);
+  eq("priority execution is not offered", offered("priority"), false);
+  eq("…the credit pack still is", offered("credits_1000"), true);
+  eq("…and so are the agent packs", offered("agents_5"), true);
+  const route = readFileSync("src/app/api/billing/addons/route.ts", "utf8");
+  ok(
+    "the list shows a withdrawn add-on only to an account that holds one",
+    /ADDON_SLUGS\.filter\(\s*\(slug\) => addonOffered\(slug\) \|\| held\.some\(/.test(route)
+  );
+  ok("…and never as buyable", /canBuy: addonOffered\(slug\) &&/.test(route));
+  ok(
+    "the purchase route refuses one, not only hides it",
+    /if \(!addonOffered\(slug\)\) return NextResponse\.json\(\{ error: "withdrawn" \}, \{ status: 410 \}\);/.test(route)
+  );
+  // Nothing a customer has is taken away: a held one still counts.
+  const kept = addons.resolveEntitlements({
+    plan: plans.getPlan("starter"),
+    addons: [{ slug: "storage_10gb", quantity: 1, status: "active", expiresAt: null }],
+    now: new Date("2026-03-01"),
+  });
+  eq("…and a held one still counts toward the account", kept.storageGb, addons.PLAN_STORAGE_GB.starter + 10);
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length) { console.log(failures.map((f) => "  - " + f).join("\n")); process.exit(1); }

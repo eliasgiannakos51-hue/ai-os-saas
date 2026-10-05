@@ -59,13 +59,14 @@ export const maxDuration = 800; // @function-limit 800
  * polls GET /api/research/[id] either way and cannot tell the difference
  * except that a small budget takes more wall-clock.
  */
-export async function POST(_request: Request, { params }: { params: { id: string } }) {
+export async function POST(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const startedAt = Date.now();
   let userId = "";
   let reservationId = "";
 
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

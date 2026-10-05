@@ -25,7 +25,7 @@ export function generateMetadata(): Promise<Metadata> {
  * invitation to wander off into an empty product.
  */
 export default async function OnboardingPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

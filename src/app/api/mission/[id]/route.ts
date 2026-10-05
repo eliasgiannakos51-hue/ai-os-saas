@@ -23,9 +23,10 @@ export const dynamic = "force-dynamic";
  * is `on delete cascade` (baseline_schema.sql:1285) — so they go too,
  * which is why the confirmation is told to count them.
  */
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

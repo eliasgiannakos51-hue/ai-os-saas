@@ -23,13 +23,14 @@ export function generateMetadata(): Promise<Metadata> {
 // rows. Sending 50,000 rows to the browser so it can add them up would be
 // a slow page AND a second implementation of every aggregation — one that
 // could disagree with the export and with the answers.
-export default async function DataAnalysisPage({
-  searchParams,
-}: {
-  searchParams: { id?: string };
-}) {
+export default async function DataAnalysisPage(
+  props: {
+    searchParams: Promise<{ id?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const t = await getTranslations("dataAnalysis");
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

@@ -265,7 +265,7 @@ check("the handler reports its own steps", /ctx\.progress\(/.test(readFileSync("
 check("the poll returns a percentage", /percent: jobPercent\(/.test(pollSrc));
 
 console.log("\n== 9. nobody can read or forge someone else's job ==");
-check("the poll reads through the user's client", /const supabase = createClient\(\);/.test(pollSrc));
+check("the poll reads through the user's client", /const supabase = await createClient\(\);/.test(pollSrc));
 check("a missing job is 404, not 403", /status: 404/.test(pollSrc) && !/status: 403/.test(pollSrc));
 check("the continue route checks ownership when not internal", /user\.id !== job\.user_id/.test(continueSrc));
 check("and 404s rather than confirming the job exists", /Job not found/.test(continueSrc));

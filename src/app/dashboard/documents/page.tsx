@@ -25,7 +25,7 @@ export const fetchCache = "force-no-store";
 
 export default async function DocumentsPage() {
   const t = await getTranslations("dashboard.documents");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

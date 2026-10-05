@@ -221,7 +221,7 @@ check(
   "the root layout does not read a path it cannot trust",
   !/x-pathname/.test(layout) && !/isMarketingPath/.test(layout),
 );
-const middleware = readFileSync("src/middleware.ts", "utf8");
+const middleware = readFileSync("src/proxy.ts", "utf8");
 check("the middleware sets no x-pathname header", !/requestHeaders\.set\("x-pathname"/.test(middleware));
 check(
   "the layout records why it cannot be trimmed here",

@@ -16,9 +16,10 @@ export const dynamic = "force-dynamic";
  * sentence that says so. Ownership is decided by a user-scoped read
  * (RLS), and only a row still pending or processing can be stopped.
  */
-export async function POST(_request: Request, { params }: { params: { id: string } }) {
+export async function POST(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

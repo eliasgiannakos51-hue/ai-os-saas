@@ -28,7 +28,7 @@ export async function POST() {
 }
 
 async function resend() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

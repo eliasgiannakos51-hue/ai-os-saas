@@ -167,7 +167,7 @@ check("every reason is an argument", shortReasons.length === 0, shortReasons.map
 // scope, outside any request — so the catalogue plainly does load there.
 // And the language was on the ACCOUNT the whole time:
 // src/lib/locale-preference.ts writes
-// raw_user_meta_data.preferred_locale and src/middleware.ts reads it
+// raw_user_meta_data.preferred_locale and src/proxy.ts reads it
 // back.
 //
 // What was actually true was narrower: the send functions took an

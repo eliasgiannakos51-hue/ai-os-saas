@@ -67,7 +67,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
     // THE PASSWORD WAS RIGHT, THE ADDRESS IS NOT YET PROVED (NEEDS 22).

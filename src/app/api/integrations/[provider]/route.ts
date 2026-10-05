@@ -17,9 +17,10 @@ export const dynamic = "force-dynamic";
 //
 // The delete cascades to integration_sync_log, so the record of what the
 // AI read goes with the access that let it read.
-export async function DELETE(_request: Request, { params }: { params: { provider: string } }) {
+export async function DELETE(_request: Request, props: { params: Promise<{ provider: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

@@ -26,7 +26,7 @@ import { logApiError } from "@/lib/log-error";
  * to look a language up for. The language itself has been on the account
  * the whole time — lib/locale-preference.ts writes
  * raw_user_meta_data.preferred_locale when somebody changes it, and
- * middleware.ts reads it back on every request.
+ * proxy.ts reads it back on every request.
  *
  * FAILS TO ENGLISH, NEVER THROWS. An email is sent from a catch-block's
  * neighbourhood — a welcome after signup, a warning after a login, a
@@ -46,7 +46,7 @@ export async function emailLocaleFor(userId: string | null | undefined): Promise
     const { data, error } = await admin.auth.admin.getUserById(userId);
     if (error || !data?.user) return "en";
     const stored = data.user.user_metadata?.preferred_locale;
-    // The same shape middleware.ts accepts: a bare code, matched against
+    // The same shape proxy.ts accepts: a bare code, matched against
     // what this product actually ships rather than trusted.
     const code = typeof stored === "string" ? stored.split("-")[0].trim().toLowerCase() : "";
     return CATALOGUES[code] ? code : "en";

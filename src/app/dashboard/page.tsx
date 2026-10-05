@@ -24,7 +24,7 @@ export function generateMetadata(): Promise<Metadata> {
 export default async function DashboardPage() {
   const t = await getTranslations("sidebar");
   const tIdeas = await getTranslations("dashboard.ideas");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

@@ -167,7 +167,7 @@ const MUTATIONS = [
   {
     name: "the reader scanner forgets a server page's searchParams prop",
     file: GATE,
-    from: "for (const m of stripped.matchAll(/searchParams\\s*:\\s*\\{([^}]*)\\}/g)) {",
+    from: "for (const m of stripped.matchAll(/searchParams\\s*:\\s*(?:Promise<\\s*)?\\{([^}]*)\\}/g)) {",
     to: "for (const m of [].values()) {",
   },
   {

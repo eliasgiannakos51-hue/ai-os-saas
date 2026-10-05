@@ -38,7 +38,7 @@ export function generateMetadata(): Promise<Metadata> {
 const PAGE_SIZE = 200;
 
 export default async function FormSubmissionsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

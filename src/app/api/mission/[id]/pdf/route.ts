@@ -33,8 +33,9 @@ const STATUS_MARK: Record<string, string> = {
  *
  * Read under the user's own session, so row level security decides access.
  */
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function GET(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

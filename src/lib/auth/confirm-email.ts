@@ -10,7 +10,7 @@ import { logApiError } from "@/lib/log-error";
  * An account is created unconfirmed (src/app/api/signup/route.ts), and the
  * person is NOT signed in. They get a link at the address they typed; the
  * link lands on src/app/auth/confirm/route.ts, which verifies it, confirms
- * the address and opens the session. Until then src/middleware.ts sends
+ * the address and opens the session. Until then src/proxy.ts sends
  * the account to /verify-email instead of the dashboard, and answers its
  * API calls with email_not_confirmed.
  *

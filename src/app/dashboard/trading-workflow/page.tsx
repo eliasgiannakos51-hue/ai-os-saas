@@ -41,7 +41,7 @@ const MINI_TIMELINE_LIMIT = 10;
 // here is the pattern-detection insight (lib/trading-pattern.ts, no AI).
 export default async function TradingWorkflowPage() {
   const t = await getTranslations("dashboard.tradingWorkflow");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

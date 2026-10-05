@@ -3,7 +3,7 @@
  * DID REDESIGN PHASE 4 MOVE REAL PIXELS?
  *
  * WHY THIS SHAPE, AND WHAT IT CANNOT SHOW. A local `next start` cannot
- * serve this product's pages — middleware.ts builds a Supabase client and
+ * serve this product's pages — proxy.ts builds a Supabase client and
  * 500s without a real project — and standing up a fake one is the mistake
  * that once let six broken features pass every test. So the method is the
  * one the light-theme border work established (its script was retired

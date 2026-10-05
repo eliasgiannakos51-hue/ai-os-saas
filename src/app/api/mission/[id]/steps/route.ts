@@ -27,9 +27,10 @@ const MAX_STEP_TEXT = 500;
  * remember only the first. The index fix-up itself lives in
  * lib/mission-step-edits.ts, once per operation.
  */
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

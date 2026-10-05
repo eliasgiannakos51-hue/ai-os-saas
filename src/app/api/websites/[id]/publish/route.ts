@@ -38,9 +38,10 @@ const MAX_CHANGE_DESCRIPTION = 200;
 // renders from. Cheap, owner-scoped, and deliberately not folded into the
 // website list query: the builder page is the hottest read in the app and
 // most of its rows are never published.
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -98,14 +99,15 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 // here than anywhere else in the app, because this is the moment the HTML
 // stops being a sandboxed preview and starts being a page served from our
 // origin to strangers.
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const websiteId = params.id;
     if (!websiteId) {
       return NextResponse.json({ ok: false, error: "Missing website id." }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -535,14 +537,15 @@ export async function POST(request: Request, { params }: { params: { id: string 
 // `is_active` change — so re-publishing restores the same address and
 // every link that was ever shared starts working again. Deleting would
 // hand the address to the next person who asked for it.
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const websiteId = params.id;
     if (!websiteId) {
       return NextResponse.json({ ok: false, error: "Missing website id." }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -584,7 +587,7 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
  * addresses exist across the whole platform, one guess at a time.
  */
 async function subdomainTaken(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   subdomain: string,
   excludeId: string | null
 ): Promise<boolean> {
@@ -595,7 +598,7 @@ async function subdomainTaken(
 }
 
 async function nextVersionFor(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   publishedSiteId: string
 ): Promise<number> {
   const { data } = await supabase
@@ -612,7 +615,7 @@ async function nextVersionFor(
  *  HTML, so an unbounded history is a table of megabyte rows that every
  *  dashboard query has to step over. */
 async function pruneVersions(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   publishedSiteId: string
 ): Promise<void> {
   const { data } = await supabase

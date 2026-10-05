@@ -41,7 +41,7 @@ export const fetchCache = "force-no-store";
 export default async function FavoritesPage() {
   const t = await getTranslations("dashboard.timeline");
   const tSidebar = await getTranslations("sidebar");
-  const supabase = createClient();
+  const supabase = await createClient();
   const { user } = await getCurrentUserResult();
   if (!user) redirect("/login");
 

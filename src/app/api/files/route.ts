@@ -14,7 +14,7 @@ export const fetchCache = "force-no-store";
  *  half — "you have 3 files" only means something next to "of 3". */
 export async function GET() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

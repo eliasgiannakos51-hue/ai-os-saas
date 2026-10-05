@@ -28,14 +28,15 @@ function resolveRange(value: string | undefined): TimelineRange {
   return (TIMELINE_RANGES as string[]).includes(value ?? "") ? (value as TimelineRange) : "all";
 }
 
-export default async function TimelinePage({
-  searchParams,
-}: {
-  searchParams: { module?: string; range?: string; view?: string };
-}) {
+export default async function TimelinePage(
+  props: {
+    searchParams: Promise<{ module?: string; range?: string; view?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const t = await getTranslations("dashboard.timeline");
   const tMission = await getTranslations("dashboard.mission");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // TEMPORARY diagnostic logging — see dashboard/mission/page.tsx for why
   // (same "disappears after refresh" investigation, same query shape).

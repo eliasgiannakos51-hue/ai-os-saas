@@ -33,7 +33,7 @@ const PWA_WINDOW_DAYS = 30;
 
 export default async function SystemHealthPage() {
   const locale = await getLocale();
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getCurrentUser();
 
   if (!user) redirect("/login");

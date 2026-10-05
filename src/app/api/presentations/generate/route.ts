@@ -92,7 +92,7 @@ export async function POST(request: Request) {
       ? body.locale
       : "en";
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -300,7 +300,7 @@ export async function POST(request: Request) {
  * the response the person is waiting for is the failure itself.
  */
 async function recordFailure(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
   description: string,
   slideCount: number,

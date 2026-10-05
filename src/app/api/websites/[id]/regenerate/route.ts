@@ -23,14 +23,15 @@ export const dynamic = "force-dynamic";
 // immediately re-fire the normal /api/websites/generate/process worker
 // request, same as a fresh generation — this route itself makes no AI
 // call and charges nothing; the worker holds and settles.
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const websiteId = params.id;
     if (!websiteId) {
       return NextResponse.json({ ok: false, error: "Missing website id." }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

@@ -40,8 +40,9 @@ const MODEL = "claude-sonnet-4-6";
  * file with the same columns genuinely cost the same to analyse, and
  * pricing by upload size would be charging for storage.
  */
-export async function POST(_request: Request, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function POST(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

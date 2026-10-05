@@ -52,7 +52,7 @@ export function generateMetadata(): Promise<Metadata> {
  */
 export default async function FinancePage() {
   const t = await getTranslations("finance");
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (!isAdminEmail(user.email)) notFound();

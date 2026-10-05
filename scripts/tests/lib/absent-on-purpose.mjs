@@ -25,6 +25,14 @@ import { readFileSync } from "node:fs";
 // the failure mode i18n-coverage's own baseline had — it knew about three
 // and stayed at three long after they were paid off.
 export const ABSENT_ON_PURPOSE = {
+  "supabase/migrations/20260906000000_revoke_anon_grants.sql": {
+    reason:
+      "AN APPLIED MIGRATION IS A RECORD, NOT A COMMENT TO KEEP CURRENT. It was pasted into the " +
+      "production SQL editor in September and names the file that read the anon key then. Next 16 " +
+      "renamed the convention (2026-10-05) and the same code now lives in src/proxy.ts. Editing an " +
+      "applied migration to follow a rename would make the file disagree with what actually ran.",
+    paths: ["src/middleware.ts"],
+  },
   "docs/BUILD-SPECS.md": {
     reason:
       "DELIVERABLES THE SPEC ORDERS, NOT FILES IT DESCRIBES. Sections 7, 10 and 11 were saved word " +

@@ -69,7 +69,7 @@ function computeFingerprint(ip: string, userAgent: string): string {
 // device.
 export async function POST(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

@@ -120,10 +120,11 @@ function paramsReadIn(src) {
   }
   // The server-page shape: the TYPE of the searchParams prop is the
   // declaration of which parameters the page understands.
-  for (const m of stripped.matchAll(/searchParams\s*:\s*\{([^}]*)\}/g)) {
+  // Since Next 15 the prop is a promise: `searchParams: Promise<{ … }>`.
+  for (const m of stripped.matchAll(/searchParams\s*:\s*(?:Promise<\s*)?\{([^}]*)\}/g)) {
     for (const k of m[1].matchAll(/([a-zA-Z_][a-zA-Z0-9_]*)\s*\??\s*:/g)) found.add(k[1]);
   }
-  for (const m of stripped.matchAll(/searchParams\.([a-zA-Z_][a-zA-Z0-9_]*)\b/g)) {
+  for (const m of stripped.matchAll(/searchParams\??\.([a-zA-Z_][a-zA-Z0-9_]*)\b/g)) {
     found.add(m[1]);
   }
   return found;
@@ -165,6 +166,14 @@ check(
 check(
   "...and a server page's property access",
   paramsReadIn('const view = searchParams.view === "fav" ? "fav" : "all";').has("view")
+);
+check(
+  "...the Next 15+ promise TYPE of the same prop",
+  paramsReadIn("searchParams: Promise<{ setup?: string }>;").has("setup")
+);
+check(
+  "...and an optional-chained access to it",
+  paramsReadIn('const done = searchParams?.setup === "success";').has("setup")
 );
 check(
   "a read inside a comment is not a read",

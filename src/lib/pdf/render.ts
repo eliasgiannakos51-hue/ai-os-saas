@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { renderToBuffer } from "@react-pdf/renderer";
+import { renderToBuffer, type DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import { registerPdfFonts } from "@/lib/pdf/fonts";
 import { safeFilename } from "@/lib/pdf/blocks";
@@ -17,7 +17,9 @@ export async function pdfResponse(
   options: { filename: string; fallbackName: string },
 ): Promise<NextResponse> {
   registerPdfFonts();
-  const buffer = await renderToBuffer(element);
+  // Every caller passes a component whose root is <Document>; React 19's
+  // element types cannot see through the component to say so.
+  const buffer = await renderToBuffer(element as ReactElement<DocumentProps>);
   const name = `${safeFilename(options.filename, options.fallbackName)}.pdf`;
   // `new Uint8Array(...)` rather than the Buffer: a Node Buffer is not a
   // BodyInit under this TypeScript lib, and passing it compiles only because

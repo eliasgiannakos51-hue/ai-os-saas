@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const q = (url.searchParams.get("q") ?? "").trim().slice(0, MAX_QUERY);
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

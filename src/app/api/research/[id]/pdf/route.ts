@@ -27,8 +27,9 @@ type Source = { title?: unknown; url?: unknown };
  * The row is read under the user's own session, so row level security is
  * what decides whether it may be read.
  */
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function GET(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

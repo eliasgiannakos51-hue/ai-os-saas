@@ -26,7 +26,7 @@ export function generateMetadata(): Promise<Metadata> {
  */
 export default async function ProjectsPage() {
   const t = await getTranslations("projects");
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

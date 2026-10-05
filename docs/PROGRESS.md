@@ -704,7 +704,7 @@ https://github.com/eliasgiannakos51-hue/ai-os-saas/pull/244 (branch
   μετάβαση.
 - **Η διόρθωση:** οι αποφάσεις αυτές (αρχική → onboarding, team →
   settings, παλιό `/dashboard/memory` → αναζήτηση) παίρνονται πλέον στο
-  `middleware.ts`, πριν ξεκινήσει η σελίδα. Ο browser παίρνει απλό HTTP
+  `proxy.ts`, πριν ξεκινήσει η σελίδα. Ο browser παίρνει απλό HTTP
   redirect. Οι σελίδες κρατούν τον ίδιο έλεγχο ως εφεδρεία, με τις ίδιες
   συναρτήσεις (`src/lib/nav/early-redirects.ts`). Κόστος: ένα επιπλέον
   διάβασμα της βάσης όταν ανοίγει η αρχική.

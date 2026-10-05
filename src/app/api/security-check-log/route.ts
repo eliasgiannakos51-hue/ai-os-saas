@@ -22,7 +22,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ ok: false, error: "Invalid resourceType or resourceId." }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

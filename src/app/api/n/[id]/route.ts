@@ -32,7 +32,8 @@ export const dynamic = "force-dynamic";
  * redirects to login WITHOUT recording anything: a click by somebody who
  * turns out not to be the owner is not a click.
  */
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const site = getSiteUrl();
   const fallback = `${site}/dashboard`;
 
@@ -45,7 +46,7 @@ export async function GET(_request: Request, { params }: { params: { id: string 
   }
 
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

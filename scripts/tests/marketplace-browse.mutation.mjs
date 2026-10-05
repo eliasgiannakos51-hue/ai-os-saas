@@ -61,7 +61,7 @@ const MUTANTS = [
   {
     name: "the page reads with the admin client, so RLS stops deciding",
     file: PAGE,
-    from: "  const supabase = createClient();",
+    from: "  const supabase = await createClient();",
     to: "  const supabase = createAdminClient();",
     expect: "through the caller's client",
   },

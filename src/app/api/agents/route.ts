@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

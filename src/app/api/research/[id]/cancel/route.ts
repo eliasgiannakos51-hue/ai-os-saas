@@ -15,9 +15,10 @@ export const dynamic = "force-dynamic";
  * and marks the report failed with a sentence that says it was stopped.
  * A report that is already ready or failed is left alone.
  */
-export async function POST(_request: Request, { params }: { params: { id: string } }) {
+export async function POST(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

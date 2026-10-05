@@ -50,15 +50,16 @@ export function generateMetadata(): Promise<Metadata> {
 // query — one query, filtered client-side by agent.
 const RUN_HISTORY_LIMIT = 60;
 
-export default async function AgentsPage({
-  searchParams,
-}: {
-  // `agent` is the Home screen's "repeat" example (see
-  // lib/overview/first-screen-examples.ts). A runtime string on both
-  // sides, compared by first-screen.test.mjs.
-  searchParams: { agent?: string };
-}) {
-  const supabase = createClient();
+export default async function AgentsPage(
+  props: {
+    // `agent` is the Home screen's "repeat" example (see
+    // lib/overview/first-screen-examples.ts). A runtime string on both
+    // sides, compared by first-screen.test.mjs.
+    searchParams: Promise<{ agent?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

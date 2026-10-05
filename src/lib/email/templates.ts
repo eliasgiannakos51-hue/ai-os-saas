@@ -24,7 +24,7 @@ const MONO_STACK = "'Courier New', Courier, monospace";
 // reasons, all of which this file's URL choice now avoids:
 //
 //   1. /email-logo has no file extension, so it did NOT match
-//      src/middleware.ts's matcher exclusion (which only skips paths
+//      src/proxy.ts's matcher exclusion (which only skips paths
 //      ending .svg/.png/.jpg/...). Every image fetch from every inbox
 //      therefore ran the auth middleware, including a Supabase
 //      getUser() round trip, before the image was produced.

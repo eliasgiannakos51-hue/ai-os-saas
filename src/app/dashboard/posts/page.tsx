@@ -32,13 +32,14 @@ export function generateMetadata(): Promise<Metadata> {
 // THE BRIEF ARRIVES IN THE URL when Home's field routed a post request
 // here. Read through the shared clamp, and the parameter's name is
 // compared against the emitter by scripts/tests/producer-routes.test.mjs.
-export default async function PostsPage({
-  searchParams,
-}: {
-  searchParams: { brief?: string };
-}) {
+export default async function PostsPage(
+  props: {
+    searchParams: Promise<{ brief?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const t = await getTranslations("posts");
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

@@ -5,7 +5,7 @@
 // invisible in every real inbox, because the thing that was broken was
 // never the markup — it was what the markup pointed AT:
 //
-//   - /email-logo had no file extension, so src/middleware.ts's matcher
+//   - /email-logo had no file extension, so src/proxy.ts's matcher
 //     did not exclude it. Every image fetch, from every inbox, ran the
 //     auth middleware including a Supabase getUser() round trip.
 //   - it was a dynamically rendered edge ImageResponse route, which
@@ -148,7 +148,7 @@ console.log("\n== 3. middleware does not gate the image ==");
 // This is the actual root cause of the reported bug: the matcher's
 // exclusion list is extension-based, so an extensionless URL fell through
 // to the auth check on every fetch.
-const middleware = readFileSync("src/middleware.ts", "utf8");
+const middleware = readFileSync("src/proxy.ts", "utf8");
 const matcher = middleware.match(/matcher:\s*\[([\s\S]*?)\]/)?.[1] ?? "";
 checkTrue("matcher excludes .png", /png/.test(matcher));
 checkTrue("matcher excludes .webmanifest", /webmanifest/.test(matcher));

@@ -7,7 +7,7 @@ export const LOCALE_COOKIE = "NEXT_LOCALE";
 // A year. The language somebody picked is not a session-scoped fact.
 //
 // Lives here rather than beside the writer in lib/locale-preference.ts
-// because middleware.ts also writes this cookie, and that file is a
+// because proxy.ts also writes this cookie, and that file is a
 // "use client" module importing the Supabase browser client — pulling it
 // into the edge bundle for one integer.
 export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;

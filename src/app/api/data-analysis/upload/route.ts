@@ -21,7 +21,7 @@ export const maxDuration = 60; // @function-limit 60
  * The reader is chosen by the BYTES, not the file name (lib/data-analysis/store.ts).
  */
 export async function POST(request: Request) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -43,8 +43,9 @@ const MAX_QUESTION_CHARS = 400;
  * failure mode of every "chat with your spreadsheet" feature, and it is
  * indistinguishable from a real one on the screen.
  */
-export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -21,7 +21,7 @@ import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from "@/i18n/constants";
 // The cookie does not go away — next-intl's request config runs on every
 // server render and reading it from a cookie costs nothing, whereas an
 // auth round trip per render would cost a network call per page. The cookie
-// is a CACHE of the account value; middleware.ts refreshes that cache on
+// is a CACHE of the account value; proxy.ts refreshes that cache on
 // every request, which is what makes a new device pick up the right
 // language on its very first page load.
 //

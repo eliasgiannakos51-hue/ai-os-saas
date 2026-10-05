@@ -41,7 +41,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

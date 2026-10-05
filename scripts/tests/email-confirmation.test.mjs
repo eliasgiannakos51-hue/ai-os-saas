@@ -8,7 +8,7 @@
 //   src/lib/auth/confirm-email.ts          the link, and the one rule for
 //                                          where it may send somebody
 //   src/app/auth/confirm/route.ts          verifies the single-use token
-//   src/middleware.ts                      keeps an unconfirmed session out
+//   src/proxy.ts                      keeps an unconfirmed session out
 //                                          of the dashboard and the API
 //   src/app/api/auth/login/route.ts        a right password on an unproved
 //                                          address gets a new link, bounded
@@ -62,7 +62,7 @@ ok(
 );
 
 console.log("\n== 3. an unconfirmed session stays outside ==");
-const mw = read("src/middleware.ts");
+const mw = read("src/proxy.ts");
 ok("the middleware asks whether the address is proved", /if \(user && !user\.email_confirmed_at\)/.test(mw));
 ok("…sends a page to /verify-email", /url\.pathname = "\/verify-email"/.test(mw) && /isDashboardRoute \|\| path\.startsWith\("\/onboarding"\)/.test(mw));
 ok("…and refuses an API call by code", /code: "email_not_confirmed" \}, \{ status: 403 \}/.test(mw));

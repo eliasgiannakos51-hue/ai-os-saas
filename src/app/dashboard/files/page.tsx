@@ -23,7 +23,7 @@ export function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function FilesPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

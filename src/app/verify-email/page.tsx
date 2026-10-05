@@ -7,7 +7,7 @@ export function generateMetadata(): Promise<Metadata> {
 }
 
 // Where an account whose address is not yet proved is sent instead of the
-// dashboard (src/middleware.ts, lib/auth/confirm-email.ts), and where a used
+// dashboard (src/proxy.ts, lib/auth/confirm-email.ts), and where a used
 // or expired confirmation link lands (?error=1).
 export default function VerifyEmailPage() {
   return <VerifyEmailPanel />;

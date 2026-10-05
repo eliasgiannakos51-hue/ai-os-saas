@@ -19,13 +19,14 @@ export const dynamic = "force-dynamic";
  * in this file that touches the member row itself, and
  * scripts/tests/projects.test.mjs reads this file for the absence.
  */
-async function loadOwnProject(supabase: ReturnType<typeof createClient>, userId: string, id: string) {
+async function loadOwnProject(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, id: string) {
   const { data } = await supabase.from("projects").select("id").eq("id", id).eq("user_id", userId).maybeSingle();
   return data;
 }
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -77,8 +78,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

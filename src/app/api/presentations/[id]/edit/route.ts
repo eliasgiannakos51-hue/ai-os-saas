@@ -67,7 +67,8 @@ export const maxDuration = 120; // @function-limit 120
  * the thing being asked for. The row keeps its id, so the .pptx and PDF
  * links a person already has keep working.
  */
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ error: "not_configured" }, { status: 503 });
@@ -87,7 +88,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     return NextResponse.json({ error: "too_long", limit: MAX_INSTRUCTION_CHARS }, { status: 400 });
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

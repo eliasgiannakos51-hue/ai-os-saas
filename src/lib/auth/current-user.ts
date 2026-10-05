@@ -7,7 +7,7 @@ import type { AuthError, User } from "@supabase/supabase-js";
  *
  * THREE ROUND TRIPS PER NAVIGATION, MEASURED BY COUNTING THEM:
  *
- *   1. middleware.ts        supabase.auth.getUser()
+ *   1. proxy.ts        supabase.auth.getUser()
  *   2. dashboard/layout.tsx supabase.auth.getUser()
  *   3. the page itself      supabase.auth.getUser()
  *
@@ -39,7 +39,7 @@ import type { AuthError, User } from "@supabase/supabase-js";
  */
 export const getCurrentUserResult = cache(
   async (): Promise<{ user: User | null; error: AuthError | null }> => {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data, error } = await supabase.auth.getUser();
     return { user: data.user, error };
   },

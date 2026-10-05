@@ -1,8 +1,11 @@
 import { cookies } from "next/headers";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
-export function createClient() {
-  const cookieStore = cookies();
+// ASYNC SINCE NEXT 15/16: cookies() returns a promise, and Next 16
+// removed the synchronous access the codemod's cast relied on. Every
+// caller awaits it.
+export async function createClient() {
+  const cookieStore = await cookies();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

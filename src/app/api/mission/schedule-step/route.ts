@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "missionId and stepIndex are required." }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

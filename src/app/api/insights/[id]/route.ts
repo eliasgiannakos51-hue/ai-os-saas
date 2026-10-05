@@ -14,9 +14,10 @@ export const fetchCache = "force-no-store";
  * not be re-reported to a user who has already said they know, and what
  * makes a wrong claim answerable for afterwards.
  */
-export async function POST(_request: Request, { params }: { params: { id: string } }) {
+export async function POST(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

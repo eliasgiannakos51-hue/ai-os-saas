@@ -211,7 +211,7 @@ function ndjsonLine(event: Record<string, unknown>): Uint8Array {
  * already alerts on.
  */
 async function answerFromKnowledgeBase(params: {
-  supabase: ReturnType<typeof createClient>;
+  supabase: Awaited<ReturnType<typeof createClient>>;
   userId: string;
   message: string;
   conversationId: string | null;
@@ -370,7 +370,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -1467,7 +1467,7 @@ export async function POST(request: Request) {
  * pressed Stop.
  */
 async function settleStoppedTurn(params: {
-  supabase: ReturnType<typeof createClient>;
+  supabase: Awaited<ReturnType<typeof createClient>>;
   userId: string;
   conversationId: string;
   assistantText: string;

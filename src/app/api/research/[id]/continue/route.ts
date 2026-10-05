@@ -38,7 +38,8 @@ export const maxDuration = 800; // @function-limit 800
  *  budget, so it can never reap a chunk that is genuinely working. */
 const CHUNK_LOCK_STALE_MS = 15 * 60 * 1000;
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const startedAt = Date.now();
   const reportId = params.id;
 
@@ -58,7 +59,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     if (!isInternal) {
       // The nudge path. Must be the report's owner.
-      const supabase = createClient();
+      const supabase = await createClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();

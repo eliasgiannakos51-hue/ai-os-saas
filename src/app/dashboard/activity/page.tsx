@@ -70,7 +70,7 @@ export const fetchCache = "force-no-store";
  *
  * It reads the onboarding row as Home did — with the same fallback when
  * home_seen_at's migration has not run — but never redirects on it:
- * deciding onboarding is Home's and middleware.ts's.
+ * deciding onboarding is Home's and proxy.ts's.
  */
 export default async function ActivityPage() {
   const t = await getTranslations("dashboard.overview");
@@ -81,7 +81,7 @@ export default async function ActivityPage() {
   // The config carries the sidebar key directly now, so this no longer
   // has to look an English string up in a table to find its own name.
   const tKey = await getTranslations();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 
@@ -90,7 +90,7 @@ export default async function ActivityPage() {
   }
 
   // The onboarding row, read for the setup steps and for home_seen_at.
-  // NOT a redirect: Home (src/app/dashboard/overview/page.tsx) and middleware.ts
+  // NOT a redirect: Home (src/app/dashboard/overview/page.tsx) and proxy.ts
   // decide onboarding; this page only shows what the row says.
   // AN ERROR IS NOT A STATE, AND READING IT AS ONE TOOK HOME DOWN.
   //

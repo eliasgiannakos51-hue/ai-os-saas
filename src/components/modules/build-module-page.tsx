@@ -47,7 +47,7 @@ export async function BuildModulePage({
   // than a convention.
   const t = await getTranslations();
   const title = t(config.titleKey);
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

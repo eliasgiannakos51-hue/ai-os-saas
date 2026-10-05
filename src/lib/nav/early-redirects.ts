@@ -15,7 +15,7 @@
  * that window is what tips React into #310. A new account opening Home
  * before finishing onboarding is exactly that page.
  *
- * The cure is to decide these in middleware.ts, before any byte of the
+ * The cure is to decide these in proxy.ts, before any byte of the
  * page exists, so the browser gets an ordinary HTTP redirect and the
  * router never sees one. The pages keep their own check as a fallback,
  * through the same functions here, so the two cannot drift.

@@ -32,8 +32,9 @@ export const dynamic = "force-dynamic";
  * Read under the user's own session, so RLS decides whether the document
  * may be priced at all. No model call, no charge, no side effect.
  */
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

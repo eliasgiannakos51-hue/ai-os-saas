@@ -95,15 +95,25 @@ check(
 // sequential (the plan needs the user, the credits need the plan); anything
 // beyond that is a queue.
 const layoutBody = layout.slice(layout.indexOf("export default async function"));
-const layoutAwaits = (layoutBody.match(/^ {2}(?:const|let)[^\n]*= await |^ {2}await /gm) ?? []).length;
-check(`the layout awaits ${layoutAwaits} things in sequence (≤ 3)`, layoutAwaits <= 3, layoutBody.match(/^ {2}(?:const|let)[^\n]*= await /gm)?.join("\n        "));
+// The cookie-jar read (`await createClient()`, a promise since Next 16) is
+// not a round trip, by the same rule as FREE below.
+const layoutAwaitLines = (layoutBody.match(/^ {2}(?:const|let)[^\n]*= await [^\n]*$|^ {2}await [^\n]*$/gm) ?? []).filter(
+  (line) => !/await createClient\(\)/.test(line)
+);
+const layoutAwaits = layoutAwaitLines.length;
+check(`the layout awaits ${layoutAwaits} things in sequence (≤ 3)`, layoutAwaits <= 3, layoutAwaitLines.join("\n        "));
 
 console.log("\n== 2. no page rebuilds the queue ==");
 // Translations are not database round trips — getTranslations/getLocale
 // resolve from a message bundle already in memory — so they do not count
 // against a page's budget. Everything else at the top level of the page
 // component is a thing the user waits for, one after another.
-const FREE = /await (getTranslations|getLocale|headers|cookies|params|searchParams)\b/;
+//
+// Two more since Next 15/16, for the same reason: `await createClient()`
+// only reads the cookie jar of this request (cookies() became a promise),
+// and `await props.params` / `await props.searchParams` unwrap values the
+// framework already has. Neither is a round trip.
+const FREE = /await (?:(?:props\.)?(?:getTranslations|getLocale|headers|cookies|params|searchParams)\b|createClient\(\))/;
 /** Every page.tsx under src/app/dashboard, at any depth. */
 function pagesUnder(dir) {
   const found = [];
@@ -204,7 +214,7 @@ check(
   // on the page for somebody who will never see it.
   const readAt = body.indexOf('.from("user_onboarding")');
   // redirect(onboardingTarget) since 2026-10-04: the target comes from
-  // lib/nav/early-redirects.ts, shared with middleware.ts (issue #61).
+  // lib/nav/early-redirects.ts, shared with proxy.ts (issue #61).
   const redirectAt = body.indexOf("redirect(onboardingTarget)");
   // THE WAVE IS WHERE Promise.all IS, not where the sentence about it
   // is. With the sentence as the anchor the read could be moved

@@ -85,7 +85,8 @@ export async function OPTIONS() {
 // specifically because there is no authenticated user context here — the
 // same reasoning as api/cron/scheduled-runs, just triggered by a public
 // visitor instead of a cron schedule.
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const headers = corsHeaders();
   try {
     const websiteId = params.id;

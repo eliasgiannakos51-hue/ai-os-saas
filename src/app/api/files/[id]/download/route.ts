@@ -21,9 +21,10 @@ export const fetchCache = "force-no-store";
  * rather than against convenience. It is enough to begin a download and
  * short enough that a leaked link is almost always already dead.
  */
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

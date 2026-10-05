@@ -12,9 +12,10 @@ export const fetchCache = "force-no-store";
 /** One report, in full. Polled while it runs, then read once it is
  *  ready — the same endpoint for both, so the client has one shape to
  *  handle rather than a progress API and a results API that can disagree. */
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -115,9 +116,10 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 /** Delete a report. The Document it produced is left alone: it is the
  *  user's writing now, and deleting the job that generated it must not
  *  take the output with it. */
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

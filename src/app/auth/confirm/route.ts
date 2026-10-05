@@ -40,7 +40,7 @@ async function confirm(request: Request) {
     return NextResponse.redirect(new URL("/verify-email?error=1", url.origin));
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
   if (error || !data.user) {
     logApiError("/auth/confirm", error ?? new Error("verifyOtp returned no user"), { stage: "verify" });

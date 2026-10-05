@@ -203,11 +203,11 @@ const MUTANTS = [
   {
     name: "the usage endpoint uses an admin client, so a parameter could ask about anyone",
     file: USAGE,
-    from: "  const supabase = createClient();",
-    to: "  const supabase = createClient();\n  void createAdminClient;",
+    from: "  const supabase = await createClient();",
+    to: "  const supabase = await createClient();\n  void createAdminClient;",
     edits: [
       { from: 'import { createClient } from "@/lib/supabase/server";', to: 'import { createClient } from "@/lib/supabase/server";\nimport { createAdminClient } from "@/lib/supabase/admin";' },
-      { from: "  const supabase = createClient();", to: "  const supabase = createClient();\n  void createAdminClient;" },
+      { from: "  const supabase = await createClient();", to: "  const supabase = await createClient();\n  void createAdminClient;" },
     ],
   },
 

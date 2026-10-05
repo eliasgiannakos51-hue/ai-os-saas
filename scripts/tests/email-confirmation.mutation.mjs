@@ -13,7 +13,7 @@ import { runMutations } from "./lib/mutation-runner.mjs";
 const GATE = "scripts/tests/email-confirmation.test.mjs";
 const LIB = "src/lib/auth/confirm-email.ts";
 const CONFIRM = "src/app/auth/confirm/route.ts";
-const MW = "src/middleware.ts";
+const MW = "src/proxy.ts";
 const LOGIN = "src/app/api/auth/login/route.ts";
 const RESEND = "src/app/api/auth/resend-confirmation/route.ts";
 

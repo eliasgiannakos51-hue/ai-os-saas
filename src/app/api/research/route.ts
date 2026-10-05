@@ -54,7 +54,7 @@ export async function POST(request: Request) {
   const costs = new CostAccumulator();
 
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -290,7 +290,7 @@ export async function POST(request: Request) {
  *  bulk of the row. */
 export async function GET() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

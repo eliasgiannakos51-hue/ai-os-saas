@@ -6,7 +6,7 @@ import { LOCALE_COOKIE, resolveSupportedLocale, SUPPORTED_LOCALES, DEFAULT_LOCAL
 // rather than one.
 //
 //   1. THE COOKIE. Written by both language selectors, and refreshed from
-//      the account by middleware.ts on every request. It is the fast path:
+//      the account by proxy.ts on every request. It is the fast path:
 //      this function runs on EVERY server render, so anything here that
 //      cost a network round trip would cost one per page.
 //
@@ -20,7 +20,7 @@ import { LOCALE_COOKIE, resolveSupportedLocale, SUPPORTED_LOCALES, DEFAULT_LOCAL
 //   3. English, when neither says anything we serve.
 //
 // THE ACCOUNT IS NOT READ HERE, deliberately. It is authoritative — see
-// middleware.ts — but reading it would mean an auth round trip per render.
+// proxy.ts — but reading it would mean an auth round trip per render.
 // Middleware already pays for exactly one getUser() per request and writes
 // the answer onto the cookie, so by the time this runs the cookie IS the
 // account's value.
@@ -56,13 +56,13 @@ export function localeFromAcceptLanguage(header: string | null | undefined): str
 }
 
 export default getRequestConfig(async () => {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const chosen = cookieStore.get(LOCALE_COOKIE)?.value;
 
   const locale = (SUPPORTED_LOCALES as readonly string[]).includes(chosen ?? "")
     ? resolveSupportedLocale(chosen)
     : resolveSupportedLocale(
-        localeFromAcceptLanguage(headers().get("accept-language")) ?? DEFAULT_LOCALE
+        localeFromAcceptLanguage((await headers()).get("accept-language")) ?? DEFAULT_LOCALE
       );
 
   return {

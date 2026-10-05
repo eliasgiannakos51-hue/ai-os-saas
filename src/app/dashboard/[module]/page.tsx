@@ -24,21 +24,23 @@ import type { UserAutomation } from "@/types/user-automation";
 // same one the sidebar link and the favorites grouping read — so
 // /dashboard/finance puts the same word in the tab as in the nav that got
 // you there, and a renamed module cannot leave the tab behind.
-export async function generateMetadata({
-  params,
-}: {
-  params: { module: string };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ module: string }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const moduleConfig = getModule(params.module);
   if (!moduleConfig) return pageTitle("pageTitle.notFound");
   return pageTitle(moduleConfig.titleKey);
 }
 
-export default async function ModulePage({
-  params,
-}: {
-  params: { module: string };
-}) {
+export default async function ModulePage(
+  props: {
+    params: Promise<{ module: string }>;
+  }
+) {
+  const params = await props.params;
   const moduleConfig = getModule(params.module);
 
   if (!moduleConfig) {
@@ -46,7 +48,7 @@ export default async function ModulePage({
   }
 
   const t = await getTranslations();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

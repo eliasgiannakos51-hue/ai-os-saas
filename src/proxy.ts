@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { PERMANENT_MOVES, onboardingRedirectTarget, teamRedirectTarget } from "@/lib/nav/early-redirects";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // NO x-pathname HEADER. One was set here for a single deploy, so the
   // root layout could trim the message catalogue per path. It could not:
   // a shared layout is not re-rendered across client-side navigations, so

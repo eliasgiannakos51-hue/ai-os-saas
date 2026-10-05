@@ -27,7 +27,8 @@ export const revalidate = 0;
  * limited, and a site that is not live is a 404 rather than an empty
  * sitemap — an empty one reads to a crawler as "this site has no pages".
  */
-export async function GET(request: Request, { params }: { params: { subdomain: string } }) {
+export async function GET(request: Request, props: { params: Promise<{ subdomain: string }> }) {
+  const params = await props.params;
   try {
     if (!publicRequestAllowed(request)) {
       return new Response("Too many requests.", {

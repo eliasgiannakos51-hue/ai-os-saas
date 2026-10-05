@@ -18,16 +18,17 @@ export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.chat");
 }
 
-export default async function ChatPage({
-  searchParams,
-}: {
-  // `ask` is the Home screen's "understand" example (see
-  // lib/overview/first-screen-examples.ts). The name is a runtime string
-  // on both sides — nothing here would stop compiling if the link sent
-  // `?question=` instead — so first-screen.test.mjs compares the two.
-  searchParams: { preset?: string; c?: string; ask?: string; project?: string; mode?: string };
-}) {
-  const supabase = createClient();
+export default async function ChatPage(
+  props: {
+    // `ask` is the Home screen's "understand" example (see
+    // lib/overview/first-screen-examples.ts). The name is a runtime string
+    // on both sides — nothing here would stop compiling if the link sent
+    // `?question=` instead — so first-screen.test.mjs compares the two.
+    searchParams: Promise<{ preset?: string; c?: string; ask?: string; project?: string; mode?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

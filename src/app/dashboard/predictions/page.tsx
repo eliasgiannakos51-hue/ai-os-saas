@@ -61,7 +61,7 @@ export default async function PredictionsPage() {
     );
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data } = await supabase
     .from("user_insights")
     .select("id, detector, module_slug, headline, detail, evidence, sample_size, created_at")

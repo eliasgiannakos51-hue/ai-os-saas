@@ -35,10 +35,11 @@ export const dynamic = "force-dynamic";
 // exactly as they were; ?active=0 still finds it and the GDPR export still
 // contains it. The only thing that changes is whether the next page-open
 // puts it back in front of the user.
-export async function POST(_request: Request, { params }: { params: { id: string } }) {
+export async function POST(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const jobId = params.id;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

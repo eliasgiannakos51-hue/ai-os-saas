@@ -83,11 +83,12 @@ function ComparisonCellContent({
   );
 }
 
-export default async function PricingPage({
-  searchParams,
-}: {
-  searchParams?: { billing?: string };
-}) {
+export default async function PricingPage(
+  props: {
+    searchParams?: Promise<{ billing?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   // The interval lives in the URL so this page stays a server component —
   // see components/billing/billing-interval-toggle.tsx. Annual is only
   // ever offered when every paid plan has a Stripe annual price
@@ -119,7 +120,7 @@ export default async function PricingPage({
   // the exact gate dashboard/team/page.tsx and api/team/invite/route.ts
   // already enforce server-side (Professional+ owned subscription), so
   // this is purely a UX shortcut, not a new access rule.
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -51,7 +51,7 @@ const MODEL = "claude-sonnet-4-6";
  * a visible toggle; nothing reads the workspace because a default said so.
  */
 export async function POST(request: Request) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

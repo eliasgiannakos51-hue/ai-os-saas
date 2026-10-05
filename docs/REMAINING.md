@@ -156,7 +156,8 @@ sessions ξαναβγαίνουν από τους πίνακες με την ε�
 12. **Onboarding, «Connect Gmail or Drive»** (`:2335`,
     `src/components/onboarding/onboarding-flow.tsx:328-333`). Η κάρτα
     εμφανίζεται πάντα· χωρίς τα κλειδιά OAuth η σύνδεση δεν γίνεται
-    (NEEDS 10).
+    (NEEDS 10). **Διορθώθηκε 2026-10-05** (Α.8): η κάρτα φαίνεται μόνο
+    όταν το Google OAuth είναι ρυθμισμένο.
 13. **Μνήμη, «Which features remember»** (`:4295-4296` του el): έξι
     διακόπτες «διαβάζει και προσθέτει», ενώ μόνο το chat προσθέτει. Το
     `recordMemory` (`src/lib/memory/store.ts:117`) δεν έχει κανέναν καλούντα.

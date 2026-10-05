@@ -1329,6 +1329,13 @@
       "workMode": {
         "active": "Mode : {mode}",
         "clear": "Retirer le mode de travail"
+      },
+      "answer": {
+        "copy": "Copier la réponse",
+        "good": "Bonne réponse",
+        "bad": "Mauvaise réponse",
+        "retry": "Redemander",
+        "ratingFailed": "La note n’a pas été enregistrée. Réessayez."
       }
     },
     "create": {

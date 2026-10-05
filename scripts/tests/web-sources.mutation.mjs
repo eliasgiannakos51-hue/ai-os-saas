@@ -58,8 +58,8 @@ const MUTANTS = [
   {
     name: "the route stores what streamed, so a reload loses the numbers",
     file: ROUTE,
-    from: "          content: sourced.text,\n        });",
-    to: "          content: assistantText,\n        });",
+    from: "            content: sourced.text,\n          })\n          .select(\"id\")",
+    to: "            content: assistantText,\n          })\n          .select(\"id\")",
     expect: "STORES the numbered text",
   },
   {

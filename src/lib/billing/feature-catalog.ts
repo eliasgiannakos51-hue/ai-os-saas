@@ -451,7 +451,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     minPlan: "free",
     sidebar: ["/dashboard/chat"],
     pages: ["chat"],
-    routes: ["chat", "conversations/[id]"],
+    routes: ["chat", "chat/messages/[id]/rating", "conversations/[id]"],
     charges: true,
     enforcedIn: "src/app/api/chat/route.ts",
     enforcedSymbol: "resolveEffectivePlan",

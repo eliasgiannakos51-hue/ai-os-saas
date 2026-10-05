@@ -1329,6 +1329,13 @@
       "workMode": {
         "active": "モード: {mode}",
         "clear": "作業モードを解除"
+      },
+      "answer": {
+        "copy": "回答をコピー",
+        "good": "良い回答",
+        "bad": "良くない回答",
+        "retry": "もう一度聞く",
+        "ratingFailed": "評価を保存できませんでした。もう一度お試しください。"
       }
     },
     "create": {

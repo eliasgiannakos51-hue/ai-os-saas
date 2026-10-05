@@ -29,6 +29,7 @@ import { useStickToBottom } from "@/hooks/use-stick-to-bottom";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
 import { ProvenanceLine } from "@/components/chat/provenance-line";
 import { TransitionButton } from "@/components/transitions/transition-button";
+import { AnswerActions } from "@/components/chat/answer-actions";
 import type { Provenance } from "@/lib/chat/provenance";
 import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
 import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
@@ -78,17 +79,9 @@ function nextLocalId(prefix: string) {
   return `${prefix}-${localIdCounter}`;
 }
 
-/**
- * THE SMALL EARTH BESIDE EVERY ANSWER (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN,
- * «Η ΓΗ»: «η ίδια μικρή γη δίπλα σε κάθε απάντηση του Ionexa. Γυρίζει
- * πιο γρήγορα όσο δουλεύει και ηρεμεί όταν τελειώσει»). 32px: the 64px
- * of Home beside every turn would be wider than the indent of the text.
- * Only the answer being written and the latest one move; older ones are
- * drawn still, so a long thread does not run a canvas per turn.
- */
-function AssistantAvatar({ working = false, still = false }: { working?: boolean; still?: boolean }) {
-  return <Earth variant="small" px={32} working={working} still={still} className="mt-0.5 shrink-0" />;
-}
+/** A row the server has written has a uuid; one only this page knows
+ *  (nextLocalId) does not, and cannot be rated yet. */
+const PERSISTED_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function ChatWorkspace({
   initialConversations,
@@ -161,6 +154,12 @@ export function ChatWorkspace({
   const [messages, setMessages] = useState<(ChatMessage & { provenance?: Provenance; timeline?: ClientStep[] })[]>([]);
   // The one answer whose earth keeps turning, calmly, once it is done.
   const lastAnswerId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
+  // What "again" asks: the person's message right before the latest answer.
+  const retryText = (() => {
+    const at = messages.findIndex((m) => m.id === lastAnswerId);
+    for (let i = at - 1; i >= 0; i--) if (messages[i].role === "user") return messages[i].content;
+    return null;
+  })();
   // The text being typed lives INSIDE ChatComposer, not here: as state on
   // this component, every keystroke re-rendered the whole workspace —
   // thread, sidebar, header — measured at 128ms median per key with a
@@ -224,15 +223,13 @@ export function ChatWorkspace({
   const talkAvailable =
     voiceAvailability.loaded && voiceAvailability.transcribeAvailable && voiceAvailability.speakAvailable && voiceAvailability.hasMinutes;
 
-  // Focus mode: hides the conversation list so the thread gets the full
-  // width, the way ChatGPT and Claude do it.
-  //
-  // Starts CLOSED on the very first render and is opened by the effect
-  // below rather than defaulting to open. That order matters: the server
-  // has no idea how wide the viewport is, and a 256px sidebar rendered
-  // into a 375px phone before hydration is a visible, ugly flash of a
-  // layout that immediately disappears. Closed-then-open is invisible on
-  // desktop and correct on mobile.
+  // THE CONVERSATION LIST IS A DRAWER, CLOSED UNTIL ASKED FOR (Δ.2,
+  // 2026-10-05). ΣΥΣΤΗΜΑ DESIGN §3: one sidebar, the same everywhere —
+  // and the app's sidebar already lists the latest conversations. This
+  // list stays one press away because it is the only place that holds
+  // EVERY conversation, with rename, pin, star and delete; removing it
+  // would lose those («Καμία λειτουργία δεν χάνεται», §9). Opened once,
+  // the choice is remembered on this device.
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarResolved, setSidebarResolved] = useState(false);
 
@@ -244,13 +241,8 @@ export function ChatWorkspace({
       // Private browsing / storage disabled — fall through to the
       // width-based default rather than failing to render a sidebar.
     }
-    if (stored === "open" || stored === "closed") {
-      setSidebarOpen(stored === "open");
-    } else {
-      // No stored preference: open on a desktop-width viewport, closed on
-      // a phone, where it would otherwise cover most of the thread.
-      setSidebarOpen(window.innerWidth >= SIDEBAR_BREAKPOINT_PX);
-    }
+    // No stored preference is closed, at every width.
+    setSidebarOpen(stored === "open");
     setSidebarResolved(true);
   }, []);
 
@@ -555,6 +547,7 @@ export function ChatWorkspace({
       let provenance: Provenance | null = null;
       let finalContent: string | null = null;
       let finishedTimeline: ClientStep[] | undefined;
+      let savedId: string | null = null;
       const { interrupted } = await readNdjsonStream(res.body, (event) => {
         if (event.type === "done") {
           usageEvent = event;
@@ -562,6 +555,7 @@ export function ChatWorkspace({
           // (lib/chat/web-sources.ts); without them, what streamed stands.
           if (typeof event.content === "string" && event.content.trim()) finalContent = event.content;
           finishedTimeline = keepChatSteps(event.timeline);
+          if (typeof event.messageId === "string" && PERSISTED_ID.test(event.messageId)) savedId = event.messageId;
         }
         if (event.type === "timeline") {
           setLiveTimeline(keepChatSteps(event.steps) ?? []);
@@ -626,7 +620,9 @@ export function ChatWorkspace({
         setMessages((m) => [
           ...m,
           {
-            id: nextLocalId("assistant"),
+            // The server's id when it sent one, so the answer can be rated
+            // at once; a local one otherwise (a stopped or cut-off reply).
+            id: savedId ?? nextLocalId("assistant"),
             conversation_id: resolvedConversationId ?? "",
             role: "assistant",
             content: finalContent ?? accumulatedText,
@@ -905,8 +901,7 @@ export function ChatWorkspace({
                     </div>
                   </div>
                 ) : (
-                  <div key={msg.id} className="flex items-start gap-2.5">
-                    <AssistantAvatar still={sending || msg.id !== lastAnswerId} />
+                  <div key={msg.id}>
                     {/* THE GROUND UNDER THE ANSWER — V4.6, decided
                         2026-09-04 from the screenshots: `dim`. A 62%
                         page-colour pane over the answer's own rectangle,
@@ -921,11 +916,26 @@ export function ChatWorkspace({
                       {/* NUMBERED WEB SOURCES — only when the answer searched
                           the web; the numbers in the prose above link here. */}
                       <SourceCards content={msg.content} />
+                      {/* THE ROW UNDER THE ANSWER (ΣΥΣΤΗΜΑ DESIGN §5): the
+                          26px earth, copy, the thumbs, again
+                          (components/chat/answer-actions.tsx). Again only
+                          under the latest answer, and not while one is
+                          being written. */}
+                      <AnswerActions
+                        key={`${msg.id}:${msg.rating ?? 0}`}
+                        messageId={msg.id}
+                        text={msg.content}
+                        rating={msg.rating === 1 || msg.rating === -1 ? msg.rating : null}
+                        persisted={PERSISTED_ID.test(msg.id)}
+                        still={sending || msg.id !== lastAnswerId}
+                        onRetry={!sending && msg.id === lastAnswerId && retryText ? () => void handleSend(retryText) : undefined}
+                        onRated={(rating) => setMessages((m) => m.map((x) => (x.id === msg.id ? { ...x, rating } : x)))}
+                      />
                       {/* "LISTEN" — on the finished answer only. Never on
                           the one still streaming: half a sentence read
                           aloud is a clip charged for text that changed a
                           second later. */}
-                      <div className="mt-2">
+                      <div className="mt-1">
                         <VoicePlayer text={msg.content} compact />
                       </div>
                       {/* WHERE IT CAME FROM — V4.6 #9. Only on messages
@@ -954,14 +964,14 @@ export function ChatWorkspace({
               )}
 
               {sending && (
-                <div className="flex items-start gap-2.5">
-                  <AssistantAvatar working />
+                <div>
                   {streamingText !== null ? (
                     <div className="chat-ground-dim min-w-0 flex-1 text-foreground">
                       {chatTimelineWorthShowing(liveTimeline) && (
                         <AiJobTimeline job={{ kind: "chat", timeline: liveTimeline }} labelFor={chatStepLabel} defaultOpen className="mb-2" />
                       )}
                       <MessageContent content={streamingText} className="leading-relaxed" />
+                      <AnswerActions messageId="streaming" text={streamingText} persisted={false} working />
                       <AiGeneratedNotice />
                     </div>
                   ) : chatTimelineWorthShowing(liveTimeline) ? (
@@ -977,9 +987,8 @@ export function ChatWorkspace({
                   use, so a person meets one shape of question across the
                   product rather than four. */}
               {clarify && !sending && (
-                <div className="flex items-start gap-2.5" data-testid="chat-clarify">
-                  <AssistantAvatar still />
-                  <div className="min-w-0 flex-1">
+                <div data-testid="chat-clarify">
+                  <div className="min-w-0">
                     <ClarificationQuestions
                       questions={clarify.questions}
                       suggestions={clarify.suggestions}

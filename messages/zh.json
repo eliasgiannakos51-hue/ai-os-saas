@@ -1329,6 +1329,13 @@
       "workMode": {
         "active": "模式：{mode}",
         "clear": "取消工作模式"
+      },
+      "answer": {
+        "copy": "复制回答",
+        "good": "好的回答",
+        "bad": "不好的回答",
+        "retry": "再问一次",
+        "ratingFailed": "评分未保存，请重试。"
       }
     },
     "create": {

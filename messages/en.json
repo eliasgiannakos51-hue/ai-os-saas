@@ -1329,6 +1329,13 @@
       "workMode": {
         "active": "Mode: {mode}",
         "clear": "Clear the way of working"
+      },
+      "answer": {
+        "copy": "Copy the answer",
+        "good": "Good answer",
+        "bad": "Bad answer",
+        "retry": "Ask again",
+        "ratingFailed": "The rating was not saved. Try again."
       }
     },
     "create": {

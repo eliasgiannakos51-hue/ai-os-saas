@@ -1329,6 +1329,13 @@
       "workMode": {
         "active": "Modus: {mode}",
         "clear": "Arbeitsweise entfernen"
+      },
+      "answer": {
+        "copy": "Antwort kopieren",
+        "good": "Gute Antwort",
+        "bad": "Schlechte Antwort",
+        "retry": "Noch einmal fragen",
+        "ratingFailed": "Die Bewertung wurde nicht gespeichert. Versuch es noch einmal."
       }
     },
     "create": {

@@ -34,7 +34,9 @@ begin
      or has_table_privilege('authenticated', 'public.research_reports', 'UPDATE') then
     raise exception 'research_reports: authenticated can still write';
   end if;
-  if not has_table_privilege('authenticated', 'public.research_reports', 'SELECT')
+  -- ANY column, not the table: 20261013000000_cost_columns_server_only.sql
+  -- narrows SELECT to listed columns, and this file must still re-run.
+  if not has_any_column_privilege('authenticated', 'public.research_reports', 'SELECT')
      or not has_table_privilege('authenticated', 'public.research_reports', 'DELETE') then
     raise exception 'research_reports: authenticated lost read or delete';
   end if;

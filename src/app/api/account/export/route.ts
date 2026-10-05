@@ -85,7 +85,7 @@ export async function GET() {
       // its own rows and the listed columns only (user-data-registry.ts).
       const { data: rows, error } = await (t.serverExportColumns
         ? createAdminClient().from(t.table).select(t.serverExportColumns.join(", "))
-        : supabase.from(t.table).select("*"))
+        : supabase.from(t.table).select(t.exportColumns ?? "*"))
         .eq("user_id", user.id)
         .limit(MAX_ROWS_PER_TABLE);
 
@@ -100,7 +100,7 @@ export async function GET() {
 
       const list = rows ?? [];
       if (list.length >= MAX_ROWS_PER_TABLE) truncated.push(t.table);
-      data[t.label] = list.map((row) => redactRow(row as Record<string, unknown>, t.redactColumns));
+      data[t.label] = list.map((row) => redactRow(row as unknown as Record<string, unknown>, t.redactColumns));
     }
 
     const payload = {

@@ -179,7 +179,7 @@ check(
 check("the poll endpoint actually applies it", /isResearchJobStale/.test(getSrc));
 check(
   "and the force-fail is conditioned on the status it read",
-  /\.eq\("status", data\.status\)/.test(getSrc)
+  /\.eq\("status", String\(data\.status\)\)/.test(getSrc)
 );
 check("the reaped row says no credits were charged", /No credits were charged/.test(getSrc));
 
@@ -212,10 +212,13 @@ check("and the question text", /report\.current_question/.test(uiSrc));
 check("with an accessible progress bar", /role="progressbar"/.test(uiSrc));
 
 console.log("\n== 7. new columns cannot break an un-migrated deployment ==");
-// The failure this guards: a column list in a PostgREST select fails the
-// WHOLE query when one column does not exist. Every poll would 500.
-check("the poll endpoint selects *", /\.from\("research_reports"\)\s*\n\s*\.select\("\*"\)/.test(getSrc));
-check("no column list remains in the poll endpoint", !/select\(\s*\n?\s*"id, topic, language, status/.test(getSrc));
+// The failure this guarded: a column list fails the WHOLE query when one
+// column does not exist. Since 2026-10-05 the account reads listed columns
+// only (20261013000000_cost_columns_server_only.sql), so `*` would be
+// refused; the list is one shared constant whose every name predates that
+// migration, and the cost record comes from the server after the read.
+check("the poll endpoint selects the account's columns", /\.from\("research_reports"\)\s*\n\s*\.select\(RESEARCH_CLIENT_COLUMNS\)/.test(getSrc));
+check("no hand-written column list remains in the poll endpoint", !/select\(\s*\n?\s*"id, topic, language, status/.test(getSrc));
 check("the migration is idempotent", (migration.match(/add column if not exists/g) ?? []).length >= 3);
 check("questions_done is added", /add column if not exists questions_done/.test(migration));
 check("questions_total is added", /add column if not exists questions_total/.test(migration));

@@ -550,7 +550,14 @@ for (const [table, ownerCol] of owned) {
   const may = Object.fromEntries(
     ["select", "update", "delete"].map((v) => [
       v,
-      psql(`select has_table_privilege('authenticated', 'public.${table}', '${v}')`) === "t",
+      // SELECT on ANY column counts: ai_jobs and research_reports grant
+      // it column by column (20261013000000_cost_columns_server_only.sql),
+      // and the probe below reads only the owner column and the id.
+      psql(
+        v === "select"
+          ? `select has_any_column_privilege('authenticated', 'public.${table}', 'select')`
+          : `select has_table_privilege('authenticated', 'public.${table}', '${v}')`
+      ) === "t",
     ])
   );
   if (!may.select) {

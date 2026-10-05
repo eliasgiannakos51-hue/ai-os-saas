@@ -22,11 +22,17 @@
 //  10. The cost log and the provider log are read by the server only: the
 //      migration takes SELECT from the account, and every read in src/
 //      goes through the admin client.
+//  11. A job's and a report's cost columns are read by the server only: the
+//      migration grants the account exactly the lists in
+//      src/lib/billing/client-columns.ts, every column the migrations give
+//      either table is on one of its two lists, and no read through the
+//      user's client asks for `*`.
 //
 // The behaviour of the migration itself is run against a real Postgres by
 // scripts/tests/entitlement-metadata.dbtest.mjs, and that of the research
 // migration by scripts/tests/research-reports-writes.dbtest.mjs, and the
-// cost-log one by scripts/tests/cost-log-reads.dbtest.mjs.
+// cost-log one by scripts/tests/cost-log-reads.dbtest.mjs, and the
+// cost-column one by scripts/tests/cost-columns.dbtest.mjs.
 //
 // Run: node scripts/tests/entitlement-trust.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -205,6 +211,59 @@ ok(
     /table: "ai_provider_log",[\s\S]{0,120}serverExportColumns: \["id", "created_at", "purpose", "outcome"\]/.test(REGISTRY) &&
     /t\.serverExportColumns\s*\?\s*createAdminClient\(\)\.from\(t\.table\)\.select\(t\.serverExportColumns\.join\(", "\)\)/.test(read("src/app/api/account/export/route.ts"))
 );
+
+// =====================================================================
+console.log("\n== 11. a job's and a report's cost columns are read by the server only ==");
+// =====================================================================
+{
+  const COLS = read("src/lib/billing/client-columns.ts");
+  const list = (name) => (COLS.match(new RegExp(`${name} =\\s*"([^"]+)"`))?.[1] ?? "").split(",").map((c) => c.trim()).filter(Boolean);
+  const arr = (name) => [...(COLS.match(new RegExp(`${name} = \\[([^\\]]*)\\]`))?.[1] ?? "").matchAll(/"([a-z_]+)"/g)].map((m) => m[1]);
+  const MIG = strip(readFileSync("supabase/migrations/20261013000000_cost_columns_server_only.sql", "utf8").replace(/--.*$/gm, ""));
+  const granted = (table) => (MIG.match(new RegExp(`grant select \\(([^)]*)\\) on public\\.${table} to authenticated;`))?.[1] ?? "").split(",").map((c) => c.trim()).filter(Boolean);
+  const same = (a, b) => a.length > 0 && JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
+
+  // The population: every column the migrations give each table.
+  const migrationColumns = (table) => {
+    const cols = new Set();
+    for (const f of readdirSync("supabase/migrations").filter((n) => n.endsWith(".sql"))) {
+      const sql = readFileSync(path.join("supabase/migrations", f), "utf8").replace(/--.*$/gm, "");
+      const body = sql.match(new RegExp(`create table if not exists public\\.${table} \\(([\\s\\S]*?)\\n\\);`))?.[1];
+      if (body) for (const m of body.matchAll(/^\s*([a-z_]+)\s+[a-z]/gm)) if (!/^(primary|unique|constraint|check|foreign)$/.test(m[1])) cols.add(m[1]);
+      for (const m of sql.matchAll(new RegExp(`alter table (?:if exists )?public\\.${table}[\\s\\S]*?;`, "g"))) {
+        for (const c of m[0].matchAll(/add column if not exists ([a-z_]+)/g)) cols.add(c[1]);
+      }
+    }
+    return [...cols];
+  };
+
+  for (const [table, client, server] of [
+    ["ai_jobs", list("JOB_CLIENT_COLUMNS"), arr("JOB_SERVER_ONLY_COLUMNS")],
+    ["research_reports", list("RESEARCH_CLIENT_COLUMNS"), arr("RESEARCH_SERVER_ONLY_COLUMNS")],
+  ]) {
+    ok(`${table}: the migration grants exactly the client list`, same(granted(table), client), `migration: ${granted(table).join(", ")}`);
+    ok(`${table}: the client list holds no server-only column`, server.length >= 2 && !server.some((c) => client.includes(c)));
+    const all = migrationColumns(table);
+    const unplaced = all.filter((c) => !client.includes(c) && !server.includes(c));
+    ok(
+      `${table}: every column the migrations create is on one of the two lists (${all.length} columns)`,
+      all.length >= 18 && unplaced.length === 0,
+      `not placed: ${unplaced.join(", ")}`
+    );
+  }
+  ok("the account loses table-wide SELECT on both", /revoke select on public\.ai_jobs from anon, authenticated;/.test(MIG) && /revoke select on public\.research_reports from anon, authenticated;/.test(MIG));
+
+  // No read through the user's client asks either table for `*`.
+  const tableReads = [];
+  for (const f of walk("src")) {
+    for (const m of read(f).matchAll(/([\w.]+(?:\(\))?)\s*\.from\(\s*"(ai_jobs|research_reports)"\s*\)\s*\.select\(\s*("\*"|[A-Z_]+|"[^"]*")/g)) {
+      tableReads.push({ file: f, receiver: m[1], table: m[2], columns: m[3] });
+    }
+  }
+  ok("the scan found the reads of both tables", tableReads.length >= 15, `${tableReads.length} reads`);
+  const starReads = tableReads.filter((r) => r.columns === '"*"' && !["admin", "createAdminClient()"].includes(r.receiver));
+  ok("no read through the user's client asks for `*`", starReads.length === 0, starReads.map((r) => `${r.file}: ${r.receiver} -> ${r.table}`).join("\n        "));
+}
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\nFAILED: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

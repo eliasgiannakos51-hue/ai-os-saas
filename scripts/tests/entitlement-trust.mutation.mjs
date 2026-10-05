@@ -24,6 +24,9 @@
  *  17. the cost-log migration leaves the account able to read
  *  18. a page reads the cost log through the user's client again
  *  19. the export reads the cost log in full again
+ *  20. the column migration grants the cost record too
+ *  21. a column the migrations create is on neither list
+ *  22. the job poll asks for `*` through the user's client again
  *
  * Run: node scripts/tests/entitlement-trust.mutation.mjs
  */
@@ -44,6 +47,9 @@ const RESEARCH_START = "src/app/api/research/route.ts";
 const COST_MIGRATION = "supabase/migrations/20261012000000_cost_log_server_reads.sql";
 const SETTINGS_PAGE = "src/app/dashboard/settings/page.tsx";
 const REGISTRY = "src/lib/gdpr/user-data-registry.ts";
+const COLUMN_MIGRATION = "supabase/migrations/20261013000000_cost_columns_server_only.sql";
+const CLIENT_COLUMNS = "src/lib/billing/client-columns.ts";
+const JOB_POLL = "src/app/api/jobs/[id]/route.ts";
 
 // Top-level declaration under the name the reader looks for — see the
 // SHAPE note in scripts/tests/lib/mutation-runner.mjs.
@@ -181,11 +187,32 @@ const MUTANTS = [
     to: 'serverExportColumns: ["id", "feature", "credits_charged", "real_cost_usd", "created_at"],',
     expect: "the export reads them by the server",
   },
+  {
+    name: "the column migration grants the cost record too",
+    file: COLUMN_MIGRATION,
+    from: "consumed_at, cancel_requested_at) on public.ai_jobs to authenticated;",
+    to: "consumed_at, cancel_requested_at, usage_entries) on public.ai_jobs to authenticated;",
+    expect: "ai_jobs: the migration grants exactly the client list",
+  },
+  {
+    name: "a column the migrations create is on neither list",
+    file: CLIENT_COLUMNS,
+    from: 'export const JOB_SERVER_ONLY_COLUMNS = ["reservation_id", "usage_entries", "running", "timeline"] as const;',
+    to: 'export const JOB_SERVER_ONLY_COLUMNS = ["reservation_id", "usage_entries", "running"] as const;',
+    expect: "ai_jobs: every column the migrations create is on one of the two lists",
+  },
+  {
+    name: "the job poll asks for * through the user's client again",
+    file: JOB_POLL,
+    from: '.from("ai_jobs").select(JOB_CLIENT_COLUMNS).eq("id", params.id)',
+    to: '.from("ai_jobs").select("*").eq("id", params.id)',
+    expect: "no read through the user's client asks for",
+  },
 ];
 
 runMutations({
   name: "entitlement-trust",
   gate: GATE,
-  targets: [GATE, MIGRATION, SIGNUP, BETA, OVERAGE, WEBHOOK, CRON, CREATE_JOB, CONFIG, JOBS_CONTINUE, RESEARCH_MIGRATION, RESEARCH_START, COST_MIGRATION, SETTINGS_PAGE, REGISTRY],
+  targets: [GATE, MIGRATION, SIGNUP, BETA, OVERAGE, WEBHOOK, CRON, CREATE_JOB, CONFIG, JOBS_CONTINUE, RESEARCH_MIGRATION, RESEARCH_START, COST_MIGRATION, SETTINGS_PAGE, REGISTRY, COLUMN_MIGRATION, CLIENT_COLUMNS, JOB_POLL],
   mutants: MUTANTS,
 });

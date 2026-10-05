@@ -325,6 +325,28 @@
        ```
        και πες μου.
 
+27. **Το migration των πεδίων κόστους,
+    `20261013000000_cost_columns_server_only.sql`.** Τρέχει μετά το merge
+    του pull request του, όχι πριν: ο παλιός κώδικας διαβάζει τις εργασίες
+    και τις αναφορές «όλες τις στήλες», και αυτό το migration το
+    απαγορεύει. Δεν σβήνει τίποτα.
+    1. **Προεπισκόπηση** (μόνο ανάγνωση):
+       ```sql
+       select has_column_privilege('authenticated', 'public.ai_jobs', 'usage_entries', 'SELECT');
+       ```
+       Σήμερα βγάζει `true`.
+    2. **Το migration:** GitHub, branch `main` μετά το merge →
+       `supabase/migrations/20261013000000_cost_columns_server_only.sql` →
+       «Copy raw file» → νέο query στο SQL Editor → **Run** → «Success».
+    3. **Έλεγχος:** το ερώτημα του βήματος 1 βγάζει πλέον `false`. Στο
+       site, άνοιξε μια παλιά Deep Research και ξεκίνα μια δημιουργία στο
+       Create: πρέπει να δουλεύουν όπως πριν.
+    4. **Αν κάτι από αυτά δεν ανοίγει:**
+       ```sql
+       grant select on public.ai_jobs, public.research_reports to authenticated;
+       ```
+       και πες μου.
+
 ## Έκλεισαν 2026-10-04
 
 - **NEEDS 3 και 16, το #223 και το «ένα pull request ανά βήμα»:** έγινε

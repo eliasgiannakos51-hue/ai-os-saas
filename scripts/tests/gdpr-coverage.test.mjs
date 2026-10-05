@@ -412,7 +412,7 @@ if (existsSync(routeFile)) {
   const adminUses = [...route.matchAll(/createAdminClient\(\)/g)].length;
   check(
     "it uses the user's session (RLS), the service role only for the server-read tables",
-    /\(t\.serverExportColumns\s*\?\s*createAdminClient\(\)\.from\(t\.table\)\.select\(t\.serverExportColumns\.join\(", "\)\)\s*:\s*supabase\.from\(t\.table\)\.select\("\*"\)\)\s*\.eq\("user_id", user\.id\)/.test(route) &&
+    /\(t\.serverExportColumns\s*\?\s*createAdminClient\(\)\.from\(t\.table\)\.select\(t\.serverExportColumns\.join\(", "\)\)\s*:\s*supabase\.from\(t\.table\)\.select\(t\.exportColumns \?\? "\*"\)\)\s*\.eq\("user_id", user\.id\)/.test(route) &&
       adminUses === 1
   );
   check("it redacts on the way out", /redactRow/.test(route));

@@ -19,6 +19,8 @@
 // "not exported, nobody noticed".
 
 /** How a table's rows are tied to a person. */
+import { JOB_CLIENT_COLUMNS, RESEARCH_CLIENT_COLUMNS } from "@/lib/billing/client-columns";
+
 export type UserDataScope =
   /** Ordinary content the user created. Exported in full. */
   | "user_content"
@@ -51,6 +53,12 @@ export type UserDataTable = {
    * See api/account/export.
    */
   serverExportColumns?: string[];
+  /**
+   * A table the account reads only SOME columns of (2026-10-05: ai_jobs,
+   * research_reports — lib/billing/client-columns.ts) is exported through
+   * the user's own session with THIS list, since `*` would be refused.
+   */
+  exportColumns?: string;
   /** Set when the row is NOT removed by `auth.users` cascade and therefore
    *  needs explicit deletion. See erasureNote for why. */
   needsExplicitErasure?: boolean;
@@ -138,12 +146,12 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "file_collections", label: "file_collections", scope: "user_content" },
   { table: "file_collection_items", label: "file_collection_items", scope: "user_content" },
   { table: "user_documents", label: "documents", scope: "user_content" },
-  { table: "research_reports", label: "research_reports", scope: "user_content" },
+  { table: "research_reports", label: "research_reports", scope: "user_content", exportColumns: RESEARCH_CLIENT_COLUMNS },
   // Background job rows. `input` holds the user's own words — the agent
   // they described, the question they asked — and `result` holds what came
   // back, so a job row is user content in the ordinary sense and has to be
   // exported and erased like any other.
-  { table: "ai_jobs", label: "background_jobs", scope: "user_content" },
+  { table: "ai_jobs", label: "background_jobs", scope: "user_content", exportColumns: JOB_CLIENT_COLUMNS },
   { table: "user_insights", label: "insights", scope: "user_content" },
   // In-app notifications. An agent delivering "in_app" writes its whole
   // result into the body, so these rows hold the same content an emailed

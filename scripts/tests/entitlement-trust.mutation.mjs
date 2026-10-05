@@ -30,6 +30,9 @@
  *  23. the three-table migration leaves file rows writable
  *  24. a team invite is written through the user's client again
  *  25. the files diagnostic accepts a direct insert as healthy
+ *  26. the agents migration leaves agents writable
+ *  27. an agent edit is written through the user's client again
+ *  28. a site update in the generation route loses its owner scope
  *
  * Run: node scripts/tests/entitlement-trust.mutation.mjs
  */
@@ -56,6 +59,9 @@ const JOB_POLL = "src/app/api/jobs/[id]/route.ts";
 const WRITES_MIGRATION = "supabase/migrations/20261014000000_server_written_tables.sql";
 const TEAM_INVITE = "src/app/api/team/invite/route.ts";
 const FILES_DIAGNOSTIC = "src/app/api/system-health/files/route.ts";
+const AGENTS_MIGRATION = "supabase/migrations/20261015000000_agents_websites_server_written.sql";
+const AGENT_EDIT = "src/app/api/agents/[id]/route.ts";
+const SITE_PROCESS = "src/app/api/websites/generate/process/route.ts";
 
 // Top-level declaration under the name the reader looks for — see the
 // SHAPE note in scripts/tests/lib/mutation-runner.mjs.
@@ -235,11 +241,32 @@ const MUTANTS = [
     to: "const refused = true;",
     expect: "the diagnostic expects its insert to be refused",
   },
+  {
+    name: "the agents migration leaves agents writable",
+    file: AGENTS_MIGRATION,
+    from: "revoke insert, update, delete on public.user_agents from anon, authenticated;",
+    to: "revoke delete on public.user_agents from anon, authenticated;",
+    expect: "the account loses the writes on both",
+  },
+  {
+    name: "an agent edit is written through the user's client again",
+    file: AGENT_EDIT,
+    from: "const { data: updated, error: updateError } = await createAdminClient()",
+    to: "const { data: updated, error: updateError } = await supabase",
+    expect: "no insert or update of either goes through the user's client",
+  },
+  {
+    name: "a site update in the generation route loses its owner scope",
+    file: SITE_PROCESS,
+    from: '.update({ status: isFlagged ? "flagged" : "completed" })\n      .eq("id", websiteId)\n      .eq("user_id", writerUserId);',
+    to: '.update({ status: isFlagged ? "flagged" : "completed" })\n      .eq("id", websiteId);',
+    expect: "every site update in the routes is scoped to the caller",
+  },
 ];
 
 runMutations({
   name: "entitlement-trust",
   gate: GATE,
-  targets: [GATE, MIGRATION, SIGNUP, BETA, OVERAGE, WEBHOOK, CRON, CREATE_JOB, CONFIG, JOBS_CONTINUE, RESEARCH_MIGRATION, RESEARCH_START, COST_MIGRATION, SETTINGS_PAGE, REGISTRY, COLUMN_MIGRATION, CLIENT_COLUMNS, JOB_POLL, WRITES_MIGRATION, TEAM_INVITE, FILES_DIAGNOSTIC],
+  targets: [GATE, MIGRATION, SIGNUP, BETA, OVERAGE, WEBHOOK, CRON, CREATE_JOB, CONFIG, JOBS_CONTINUE, RESEARCH_MIGRATION, RESEARCH_START, COST_MIGRATION, SETTINGS_PAGE, REGISTRY, COLUMN_MIGRATION, CLIENT_COLUMNS, JOB_POLL, WRITES_MIGRATION, TEAM_INVITE, FILES_DIAGNOSTIC, AGENTS_MIGRATION, AGENT_EDIT, SITE_PROCESS],
   mutants: MUTANTS,
 });

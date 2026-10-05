@@ -1,9 +1,11 @@
-// TEAM INVITES, FILE ROWS AND PUBLISHED PAGES ARE WRITTEN BY THE SERVER
-// ONLY, AGAINST A REAL POSTGRES.
+// TEAM INVITES, FILE ROWS, PUBLISHED PAGES, AGENTS AND SITES ARE WRITTEN
+// BY THE SERVER ONLY, AGAINST A REAL POSTGRES.
 //
-// supabase/migrations/20261014000000_server_written_tables.sql. As the
-// signed-in role, on the account's OWN rows: reading works, inserting,
-// updating and deleting do not. As the service role, all of it does.
+// supabase/migrations/20261014000000_server_written_tables.sql and
+// 20261015000000_agents_websites_server_written.sql. As the signed-in
+// role, on the account's OWN rows: reading works, inserting and updating
+// do not, and deleting does not either — except a site, which the
+// builder deletes from the browser. As the service role, all of it does.
 //
 // Run: node scripts/tests/server-written-tables.dbtest.mjs   (needs a
 // database; run through `npm run test:db`, which provisions one)
@@ -51,6 +53,7 @@ sql(`insert into public.user_websites (id, user_id, name, html_content) values (
 sql(`insert into public.team_members (owner_id, member_email, role) values ('${U}', 'member@test.local', 'Ops')`);
 sql(`insert into public.user_files (user_id, filename, file_type, size_bytes, storage_path) values ('${U}', 'a.txt', 'txt', 10, '${U}/a')`);
 sql(`insert into public.published_sites (website_id, user_id, subdomain, html_content) values ('${W}', '${U}', 'server-written-test', '<p>x</p>')`);
+sql(`insert into public.user_agents (user_id, name, prompt, schedule_cron, status, delivery_target) values ('${U}', 'a', 'p', '0 9 * * *', 'paused', 'a@test.local')`);
 
 const CASES = [
   {
@@ -74,6 +77,20 @@ const CASES = [
     update: `update public.published_sites set html_content = '<p>z</p>' where user_id = '${U}'`,
     del: `delete from public.published_sites where user_id = '${U}'`,
   },
+  {
+    table: "user_agents",
+    read: `select count(*) from public.user_agents where user_id = '${U}'`,
+    insert: `insert into public.user_agents (user_id, name, prompt, schedule_cron, delivery_target) values ('${U}', 'b', 'p', '0 9 * * *', 'a@test.local')`,
+    update: `update public.user_agents set status = 'active', next_run_at = now() where user_id = '${U}'`,
+    del: `delete from public.user_agents where user_id = '${U}'`,
+  },
+  {
+    table: "user_websites",
+    read: `select count(*) from public.user_websites where user_id = '${U}'`,
+    insert: `insert into public.user_websites (user_id, name, html_content, status) values ('${U}', 'b', '', 'pending')`,
+    update: `update public.user_websites set status = 'completed', attempt_count = 0 where user_id = '${U}'`,
+    del: null,
+  },
 ];
 
 for (const c of CASES) {
@@ -82,11 +99,15 @@ for (const c of CASES) {
   ok(`${c.table}: the account reads its own rows`, r.ok && r.out === "1", r.out);
   ok(`${c.table}: ...but cannot insert`, denied(asUser(U, c.insert)));
   ok(`${c.table}: ...nor update`, denied(asUser(U, c.update)));
-  ok(`${c.table}: ...nor delete`, denied(asUser(U, c.del)));
+  if (c.del) ok(`${c.table}: ...nor delete`, denied(asUser(U, c.del)));
   ok(`${c.table}: the row is as the server left it`, sql(c.read) === "1");
   const s = asServer(c.update);
   ok(`${c.table}: the server still writes`, s.ok, s.out);
 }
+
+console.log("\n== user_websites: the builder still deletes its own site ==");
+const siteDel = asUser(U, `delete from public.user_websites where id = '${W}'`);
+ok("user_websites: delete works", siteDel.ok && sql(`select count(*) from public.user_websites where id = '${W}'`) === "0", siteDel.out);
 
 sql(`delete from auth.users where id = '${U}'`);
 

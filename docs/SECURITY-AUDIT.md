@@ -19,7 +19,7 @@
 | βαρύτητα | βρέθηκαν | διορθώθηκαν | ανοιχτά |
 |---|---|---|---|
 | κρίσιμο | 4 | 3 | 1 (ΑΣ-4.3) |
-| σοβαρό | 16 | 8 | 8 |
+| σοβαρό | 16 | 9 | 7 |
 | μέτριο | 15 | 1 | 14 |
 | μικρό | 11 | 2 | 9 |
 
@@ -58,6 +58,9 @@
 ομάδας, αρχείων και δημοσιευμένων sites (migration
 `20261014000000_server_written_tables.sql`).
 
+**Στο έβδομο (2026-10-05):** διορθώθηκε έλεγχος πρόσβασης στις εγγραφές
+agents και sites (migration `20261015000000_agents_websites_server_written.sql`).
+
 Tests: `scripts/tests/entitlement-trust.test.mjs` (24 έλεγχοι,
 13/13 mutations στο `entitlement-trust.mutation.mjs`) και
 `scripts/tests/entitlement-metadata.dbtest.mjs` (18 έλεγχοι σε
@@ -72,7 +75,7 @@ Tests: `scripts/tests/entitlement-trust.test.mjs` (24 έλεγχοι,
 | ΑΣ-1.3 | Στοιχεία πλάνου του λογαριασμού: γράφονται μόνο από τον server | διορθώθηκε | κρίσιμο | Migration `20261010000000_guard_entitlement_metadata.sql` (ΠΡΕΠΕΙ ΝΑ ΤΡΕΞΕΙ: NEEDS 20). Tests: `entitlement-trust`, `entitlement-metadata.dbtest` |
 | ΑΣ-1.4 | Έλεγχος ιδιοκτησίας στις προγραμματισμένες εκτελέσεις | διορθώθηκε | σοβαρό | `src/app/api/cron/scheduled-runs/route.ts`. Test: `entitlement-trust` §6 |
 | ΑΣ-1.5 | Έλεγχος ιδιοκτησίας στα συνημμένα του Create | διορθώθηκε | σοβαρό | `src/lib/jobs/handlers/create.ts`. Test: `entitlement-trust` §6 |
-| ΑΣ-1.6 | Πίνακες που ο χρήστης γράφει απευθείας ενώ τα όριά τους ελέγχονται μόνο στα routes | μισό | σοβαρό | Ομάδα, αρχεία, δημοσιευμένα sites: διορθώθηκε (migration `20261014000000_server_written_tables.sql`, NEEDS 28· tests: `entitlement-trust` §12, `server-written-tables.dbtest`). Μένουν agents και sites |
+| ΑΣ-1.6 | Πίνακες που ο χρήστης γράφει απευθείας ενώ τα όριά τους ελέγχονται μόνο στα routes | διορθώθηκε | σοβαρό | Ομάδα, αρχεία, δημοσιευμένα sites: `20261014000000_server_written_tables.sql` (NEEDS 28). Agents και sites: `20261015000000_agents_websites_server_written.sql` (NEEDS 29). Tests: `entitlement-trust` §12–13, `server-written-tables.dbtest` |
 | ΑΣ-1.7 | Ομάδες: ό,τι δίνει η ομάδα στα μέλη αφαιρείται όταν ο ιδιοκτήτης σταματά να πληρώνει ή αφαιρεί μέλος | ανοιχτό | σοβαρό | Χρήματα: θέλει απόφαση (NEEDS 24) |
 | ΑΣ-1.8 | Test «ο Α δεν βλέπει του Β» για κάθε είδος δεδομένων | μισό | — | `user-isolation.dbtest` τρέχει σε προσωρινή βάση· το `user-isolation-live.prodtest` με δύο πραγματικούς λογαριασμούς δεν έχει τρέξει ποτέ (NEEDS 2) |
 | ΑΣ-1.9 | Ρόλοι ομάδας | εντάξει | — | Ο ρόλος είναι μόνο ετικέτα· η ιδιότητα μέλους δεν δίνει πρόσβαση σε δεδομένα του ιδιοκτήτη |

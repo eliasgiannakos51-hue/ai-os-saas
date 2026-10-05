@@ -383,6 +383,34 @@
        ```
        και πες μου.
 
+29. **Το migration των agents και των sites,
+    `20261015000000_agents_websites_server_written.sql`.** Τρέχει μετά το
+    merge του pull request του, όχι πριν: ο παλιός κώδικας γράφει ακόμα
+    agents και sites με τα δικαιώματα του χρήστη, και η δημιουργία τους θα
+    σταματούσε. Δεν σβήνει τίποτα.
+    1. **Προεπισκόπηση** (μόνο ανάγνωση):
+       ```sql
+       select has_table_privilege('authenticated', 'public.user_websites', 'UPDATE');
+       ```
+       Σήμερα βγάζει `true`.
+    2. **Το migration:** GitHub, branch `main` μετά το merge →
+       `supabase/migrations/20261015000000_agents_websites_server_written.sql`
+       → «Copy raw file» → νέο query στο SQL Editor → **Run** → «Success».
+    3. **Έλεγχος:** το ερώτημα του βήματος 1 βγάζει πλέον `false`. Στο
+       site: φτιάξε ένα μικρό site στο Website Builder και έναν agent·
+       πρέπει να δουλεύουν όπως πριν.
+    4. **Αν κάτι από αυτά δεν δουλεύει:**
+       ```sql
+       create policy "insert_own_user_agents" on public.user_agents for insert with check (auth.uid() = user_id);
+       create policy "update_own_user_agents" on public.user_agents for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+       create policy "delete_own_user_agents" on public.user_agents for delete using (auth.uid() = user_id);
+       create policy "insert_own_user_websites" on public.user_websites for insert with check (auth.uid() = user_id);
+       create policy "update_own_user_websites" on public.user_websites for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+       grant insert, update, delete on public.user_agents to authenticated;
+       grant insert, update on public.user_websites to authenticated;
+       ```
+       και πες μου.
+
 ## Έκλεισαν 2026-10-04
 
 - **NEEDS 3 και 16, το #223 και το «ένα pull request ανά βήμα»:** έγινε

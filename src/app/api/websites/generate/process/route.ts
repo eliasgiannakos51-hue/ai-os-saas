@@ -3,6 +3,7 @@ import { scrubSecrets } from "@/lib/scrub-secrets";
 import { memoryPromptFor } from "@/lib/memory/store";
 import { memoryActiveFor } from "@/lib/memory/memory-policy";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { GenerationStoppedError, generateWebsiteHtml, WEBSITE_MODEL, type ReferenceImage } from "@/lib/website-builder";
 import { pickVariation, variationDirective } from "@/lib/website-variation";
 import { MAX_REFERENCE_IMAGES, referenceImagePathBelongsToUser } from "@/lib/website-reference-image";
@@ -163,15 +164,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    // THE SERVER WRITES THE ROW (20261015000000_agents_websites_server_written.sql):
+    // the account can read its sites but not change them, so status,
+    // attempt_count and html_content move only through these checks. Every
+    // write is scoped by id AND user_id.
+    const websiteWriter = createAdminClient();
+    const writerUserId = user.id;
+
     // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts)
     // — the actual expensive AI call in this route, so this is checked
     // here too, not just in the start route (api/websites/generate).
     const breakerCheck = await checkAiCallAllowed(user.id, "website_generate_process", fingerprintRequest(websiteId));
     if (!breakerCheck.allowed) {
-      await supabase
+      await websiteWriter
         .from("user_websites")
         .update({ status: "failed", error_message: breakerCheck.reason })
         .eq("id", websiteId)
+        .eq("user_id", writerUserId)
         .eq("status", "pending");
       return NextResponse.json({ ok: true, failed: true });
     }
@@ -231,13 +240,14 @@ export async function POST(request: Request) {
     // double-submit race, a manually replayed request) can ever push a
     // single row's real AI-call count past a fixed ceiling.
     if (website.attempt_count >= MAX_GENERATION_ATTEMPTS) {
-      await supabase
+      await websiteWriter
         .from("user_websites")
         .update({
           status: "failed",
           error_message: "Something went wrong generating your website — please try again. No credits were charged.",
         })
-        .eq("id", websiteId);
+        .eq("id", websiteId)
+        .eq("user_id", writerUserId);
       logApiError("/api/websites/generate/process", "generation attempt cap reached", {
         websiteId,
         attemptCount: website.attempt_count,
@@ -269,10 +279,11 @@ export async function POST(request: Request) {
     // second caller matches no row. The same shape the breaker write at
     // the top of this function already uses (`.eq("status", "pending")`)
     // and the same shape api/websites/edit takes before editing.
-    const { data: claimed, error: claimError } = await supabase
+    const { data: claimed, error: claimError } = await websiteWriter
       .from("user_websites")
       .update({ status: "processing", attempt_count: website.attempt_count + 1 })
       .eq("id", websiteId)
+      .eq("user_id", writerUserId)
       .eq("status", "pending")
       .eq("attempt_count", website.attempt_count)
       .select("id");
@@ -327,7 +338,11 @@ export async function POST(request: Request) {
     const costAtStepStart: number[] = [];
     async function writeTimeline(next: WebsiteTimelineEntry[]) {
       timeline = next;
-      const { error: timelineError } = await supabase.from("user_websites").update({ timeline }).eq("id", websiteId);
+      const { error: timelineError } = await websiteWriter
+        .from("user_websites")
+        .update({ timeline })
+        .eq("id", websiteId)
+        .eq("user_id", writerUserId);
       if (timelineError && !/timeline/i.test(timelineError.message ?? "")) {
         logApiError("/api/websites/generate/process", timelineError, { stage: "timeline_write", websiteId });
       }
@@ -386,10 +401,11 @@ export async function POST(request: Request) {
           reservation.reason === "insufficient"
             ? `Not enough credits to generate this website (you have ${reservation.available}, this needs about ${estimate.reserveCredits}). No credits were charged.`
             : "Could not reserve credits for this generation. No credits were charged — please try again.";
-        await supabase
+        await websiteWriter
           .from("user_websites")
           .update({ status: "failed", error_message: message })
-          .eq("id", websiteId);
+          .eq("id", websiteId)
+          .eq("user_id", writerUserId);
         return NextResponse.json({ ok: true, failed: true, insufficientCredits: true });
       }
       reservationId = reservation.reservationId;
@@ -426,7 +442,11 @@ export async function POST(request: Request) {
       const now = Date.now();
       if (now - lastPartialSaveAt < PARTIAL_SAVE_THROTTLE_MS) return;
       lastPartialSaveAt = now;
-      void supabase.from("user_websites").update({ html_content: accumulatedText }).eq("id", websiteId);
+      void websiteWriter
+        .from("user_websites")
+        .update({ html_content: accumulatedText })
+        .eq("id", websiteId)
+        .eq("user_id", writerUserId);
     };
 
     // The form submission endpoint for THIS website — always resolvable
@@ -857,7 +877,7 @@ export async function POST(request: Request) {
         // Nothing can be done about it from here except make it
         // findable, so the failure is logged WITH the amount, which is
         // what a refund needs.
-        const { error: stoppedError } = await supabase
+        const { error: stoppedError } = await websiteWriter
           .from("user_websites")
           .update({
             status: "failed",
@@ -870,7 +890,8 @@ export async function POST(request: Request) {
                 ? `Stopped by you. ${settlement.creditsCharged} credits were charged for the part that was generated; the rest of the hold was released.`
                 : "Stopped by you. Nothing was charged.",
           })
-          .eq("id", websiteId);
+          .eq("id", websiteId)
+          .eq("user_id", writerUserId);
         if (stoppedError) {
           logApiError("/api/websites/generate/process", stoppedError, {
             stage: "save_stopped_status",
@@ -903,13 +924,14 @@ export async function POST(request: Request) {
       const errMessage = scrubSecrets(
         err instanceof Error ? err.message : "The website generation request failed."
       );
-      await supabase
+      await websiteWriter
         .from("user_websites")
         .update({
           status: "failed",
           error_message: `${errMessage} No credits were charged — please try again.`,
         })
-        .eq("id", websiteId);
+        .eq("id", websiteId)
+        .eq("user_id", writerUserId);
       return NextResponse.json({ ok: true, failed: true });
     }
 
@@ -920,7 +942,7 @@ export async function POST(request: Request) {
     // error_message carries a user-facing summary of what was found, and
     // (see api/websites/generate/route.ts) the user gets exactly one
     // free, no-extra-charge regenerate attempt for this row.
-    const { data: updatedRecord, error: updateError } = await supabase
+    const { data: updatedRecord, error: updateError } = await websiteWriter
       .from("user_websites")
       .update({
         html_content: htmlContent,
@@ -945,6 +967,7 @@ export async function POST(request: Request) {
           : null,
       })
       .eq("id", websiteId)
+      .eq("user_id", writerUserId)
       .select()
       // maybeSingle, not single: the row can legitimately be GONE by now —
       // the user deleted the site mid-generation, or the stale reaper and
@@ -1047,10 +1070,11 @@ export async function POST(request: Request) {
     // The shares and the end mark, written before the status so a poll that
     // sees "completed" can already price every step.
     await writeTimeline(finishWebsiteTimeline(timeline, costAtStepStart, costs.totalUsdCost, new Date().toISOString()));
-    const { error: finalStatusError } = await supabase
+    const { error: finalStatusError } = await websiteWriter
       .from("user_websites")
       .update({ status: isFlagged ? "flagged" : "completed" })
-      .eq("id", websiteId);
+      .eq("id", websiteId)
+      .eq("user_id", writerUserId);
 
     if (finalStatusError) {
       logApiError("/api/websites/generate/process", finalStatusError, {
@@ -1064,7 +1088,7 @@ export async function POST(request: Request) {
       // is no safe fallback that both shows the content and keeps the
       // warning, so the row is failed with the real reason — the user can
       // see what happened instead of watching a spinner for 25 minutes.
-      await supabase
+      await websiteWriter
         .from("user_websites")
         .update(
           isFlagged
@@ -1075,7 +1099,8 @@ export async function POST(request: Request) {
               }
             : { status: "completed" }
         )
-        .eq("id", websiteId);
+        .eq("id", websiteId)
+        .eq("user_id", writerUserId);
     }
 
     diagLog(

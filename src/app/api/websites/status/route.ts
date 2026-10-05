@@ -130,7 +130,7 @@ export async function GET(request: Request) {
         typedRecord.is_large_request
       )
     ) {
-      const { data: failedRecord, error: staleUpdateError } = await supabase
+      const { data: failedRecord, error: staleUpdateError } = await createAdminClient()
         .from("user_websites")
         .update({
           status: "failed",
@@ -141,6 +141,7 @@ export async function GET(request: Request) {
         // written by the worker in the small window between our SELECT
         // above and this UPDATE.
         .eq("id", id)
+        .eq("user_id", user.id)
         .eq("status", typedRecord.status)
         .select()
         .maybeSingle();

@@ -5,6 +5,22 @@
 
 ## 2026-10-05
 
+**Α.4δ (BUILD-SPECS 6): διορθώθηκε έλεγχος πρόσβασης στις εγγραφές agents και sites.**
+- Migration `20261015000000_agents_websites_server_written.sql` (NEEDS 29):
+  οι agents γράφονται μόνο από τον server· τα sites επίσης, εκτός από τη
+  διαγραφή, που ο builder κάνει από τον browser.
+- Όλες οι εγγραφές sites στα routes (δημιουργία, παραγωγή, κατάσταση,
+  επεξεργασία, νέα προσπάθεια) γίνονται από τον server, με id ΚΑΙ
+  user_id. Μια γραμμή «pending» υπάρχει μόνο μετά τους ελέγχους πλάνου
+  και ορίου του `/generate`, και η κατάσταση ενός site αλλάζει μόνο μέσα
+  από τους ελέγχους.
+- Tests: `entitlement-trust` §13 (50 έλεγχοι, 28/28 mutations)·
+  `server-written-tables.dbtest` 30, 7 κόκκινοι χωρίς το migration.
+  Ενημερώθηκαν `enum-schema-drift`, `reservation-lifecycle`,
+  `pending-migrations` (μετρά πλέον τους κανόνες που σβήστηκαν οριστικά),
+  `schema-canaries`, και ένα mutation του `write-guards`.
+  `npm run test:db`: 36 suites.
+
 **Α.4γ (BUILD-SPECS 6): διορθώθηκε έλεγχος πρόσβασης στις εγγραφές ομάδας, αρχείων και δημοσιευμένων sites.**
 - Migration `20261014000000_server_written_tables.sql` (NEEDS 28): ο
   λογαριασμός διαβάζει, αλλά δεν γράφει απευθείας, τα μέλη ομάδας, τις

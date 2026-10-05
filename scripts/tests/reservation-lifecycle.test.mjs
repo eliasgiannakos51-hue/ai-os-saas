@@ -386,7 +386,7 @@ check(
 const PROCESS_SRC = SRC.get(PROCESS) ?? "";
 check(
   "the stopped-generation status write is checked, with the amount charged",
-  /const \{ error: stoppedError \} = await supabase[\s\S]{0,900}if \(stoppedError\) \{[\s\S]{0,300}creditsCharged: settlement\.creditsCharged/.test(
+  /const \{ error: stoppedError \} = await (?:supabase|websiteWriter)[\s\S]{0,900}if \(stoppedError\) \{[\s\S]{0,300}creditsCharged: settlement\.creditsCharged/.test(
     PROCESS_SRC
   ),
   "this is the only path here that settles BEFORE writing a terminal status, so a lost write leaves a charged row for api/websites/status to stamp 'No credits were charged'"

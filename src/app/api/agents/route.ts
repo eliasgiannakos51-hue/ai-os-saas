@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -124,7 +125,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, agent: recentDuplicate, duplicateSuppressed: true });
     }
 
-    const { data: created, error: insertError } = await supabase
+    // THE SERVER'S WRITE: the account cannot write user_agents itself
+    // (20261015000000_agents_websites_server_written.sql), so every agent
+    // passes the plan gate, the activation cap, the schedule rule and the
+    // prompt sanitising above. The owner is the session's.
+    const { data: created, error: insertError } = await createAdminClient()
       .from("user_agents")
       .insert({
         user_id: user.id,

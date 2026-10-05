@@ -181,8 +181,8 @@ console.log("\n== 3. every migration in the window has a canary, or says why it 
 // object exist"; a file that only revokes, grants, or replaces the body of
 // a function that already existed cannot be seen that way, by anybody.
 const NOT_PROBEABLE = {
-  "20261004000000_revoke_public_execute_prune_project_links.sql":
-    "revokes EXECUTE from PUBLIC and from authenticated on three functions and grants nothing new. A canary asks whether an OBJECT exists; all three exist either way, and the property this file changes is a privilege, which /api/health cannot see at all — grants-and-policies.dbtest.mjs and role-grants.dbtest.mjs are what read it",
+  "20261015000000_agents_websites_server_written.sql":
+    "drops five write policies and revokes INSERT and UPDATE (and DELETE on agents) on two tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write what it should not, and server-written-tables.dbtest.mjs checks it against a real Postgres",
   "20261014000000_server_written_tables.sql":
     "drops nine write policies and revokes INSERT, UPDATE and DELETE on three tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write any of them, and server-written-tables.dbtest.mjs checks it against a real Postgres",
   "20261013000000_cost_columns_server_only.sql":

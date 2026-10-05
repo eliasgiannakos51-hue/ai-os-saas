@@ -30,6 +30,9 @@
 //  12. Team invites, file rows and published pages are written by the
 //      server only: the migration takes the three verbs from the account,
 //      and every write in src/ goes through the admin client.
+//  13. Agents and sites likewise: no insert or update of either through
+//      the user's client, every site update scoped by user_id as well as
+//      id, and the only user-client write left is the builder's delete.
 //
 // The behaviour of the migration itself is run against a real Postgres by
 // scripts/tests/entitlement-metadata.dbtest.mjs, and that of the research
@@ -299,6 +302,45 @@ console.log("\n== 12. team invites, file rows and published pages are written by
   ok(
     "...and the diagnostic expects its insert to be refused",
     /const refused = \/permission denied\/i\.test\(insError\?\.message \?\? ""\);/.test(read(DIAGNOSTIC))
+  );
+}
+
+// =====================================================================
+console.log("\n== 13. agents and sites are written by the server only ==");
+// =====================================================================
+{
+  const MIG = strip(readFileSync("supabase/migrations/20261015000000_agents_websites_server_written.sql", "utf8").replace(/--.*$/gm, ""));
+  ok(
+    "the account loses the writes on both, and keeps deleting its own site",
+    /revoke insert, update, delete on public\.user_agents from anon, authenticated;/.test(MIG) &&
+      /revoke insert, update on public\.user_websites from anon, authenticated;/.test(MIG) &&
+      !/drop policy if exists "delete_own_user_websites"/.test(MIG)
+  );
+  const writes = [];
+  for (const f of walk("src")) {
+    const src = read(f);
+    for (const m of src.matchAll(/([\w.]+(?:\(\))?)\s*\.from\(\s*"(user_agents|user_websites)"\s*\)\s*\.(insert|update|upsert|delete)\(/g)) {
+      writes.push({ file: f, receiver: m[1], table: m[2], verb: m[3], tail: src.slice(m.index, m.index + 900) });
+    }
+  }
+  ok("the scan found the writes", writes.length >= 25, `${writes.length} writes`);
+  const userWrites = writes.filter(
+    (w) => !["admin", "createAdminClient()", "websiteWriter"].includes(w.receiver) &&
+      !(w.table === "user_websites" && w.verb === "delete")
+  );
+  ok(
+    "no insert or update of either goes through the user's client",
+    userWrites.length === 0,
+    userWrites.map((w) => `${w.file}: ${w.receiver} ${w.verb} ${w.table}`).join("\n        ")
+  );
+  // The routes the account drives: every site update there is scoped by
+  // user_id as well as id, so the service role never writes a stranger's row.
+  const routeUpdates = writes.filter((w) => w.table === "user_websites" && w.verb === "update" && w.file.startsWith("src/app/api/websites/") && w.receiver !== "admin");
+  const unscoped = routeUpdates.filter((w) => !/\.eq\("user_id", (?:user\.id|writerUserId)\)/.test(w.tail.split(/;\s*\n/)[0]));
+  ok(
+    `every site update in the routes is scoped to the caller (${routeUpdates.length})`,
+    routeUpdates.length >= 12 && unscoped.length === 0,
+    unscoped.map((w) => w.file).join("\n        ")
   );
 }
 

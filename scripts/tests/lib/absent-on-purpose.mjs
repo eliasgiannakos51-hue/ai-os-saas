@@ -33,6 +33,14 @@ export const ABSENT_ON_PURPOSE = {
       "applied migration to follow a rename would make the file disagree with what actually ran.",
     paths: ["src/middleware.ts"],
   },
+  "docs/MASTER.md": {
+    reason:
+      "THE OWNER'S MESSAGE, SAVED WORD FOR WORD ON 2026-10-05, ORDERS THESE; IT DOES NOT DESCRIBE " +
+      "THEM. 5.24 says to make the capability catalogue and the planning section says to group every " +
+      "point into packages. Neither exists yet. Editing the message to match the tree would make it " +
+      "stop being his words; each path goes stale, and this entry with it, the day the file is written.",
+    paths: ["docs/CATALOG.md", "docs/PACKAGES.md"],
+  },
   "docs/BUILD-SPECS.md": {
     reason:
       "DELIVERABLES THE SPEC ORDERS, NOT FILES IT DESCRIBES. Sections 7, 10 and 11 were saved word " +

@@ -124,7 +124,7 @@ check(
 );
 // NEVER DOWN. Equal is allowed at the widest step, where the FONT grows
 // instead (checked next): the line gets longer in pixels while the
-// character count stays put, because at 61ch the English count is
+// character count stays put, because at 51ch the English count is
 // already at the brief's ceiling and one more ch would cross it.
 check(
   "the caps never descend as the screen grows",
@@ -168,13 +168,20 @@ console.log("\n== 3. the caps are inside the band the brief asked for ==");
 // 1.21 chars per ch; Greek 70/64 = 1.09 and 73/66 = 1.11. The wider
 // script sets the floor, the narrower sets the ceiling, each with its
 // own larger measured value so both halves are the conservative ones.
-const CHARS_PER_CH = { en: 1.22, el: 1.11 };
+//
+// THE THIRD TIME, AND THE FONT MOVED IT. The design set the body in
+// Commissioner (ΣΥΣΤΗΜΑ DESIGN §2), narrower against its "0", and on
+// 2026-10-05 the prodtest read 61ch as English 86 / Greek 77 at 16px and
+// 17px alike: 1.41 and 1.26 chars per ch. Both past 75 while this line
+// said 74 and 68 — read off the old face. The caps came down to 51ch in
+// the same commit (QUEUE Α.13).
+const CHARS_PER_CH = { en: 1.41, el: 1.26 };
 // THE INSTRUMENT IS CALIBRATED AGAINST WHAT WAS MEASURED, not against
 // itself: a ratio below the prodtest's reading would pass a cap the
 // screen does not hold — which is exactly how 1.05 passed 64/66ch.
 check(
-  `the English ratio is at least the measured 1.20 (${CHARS_PER_CH.en}) and the Greek at least 1.09 (${CHARS_PER_CH.el})`,
-  CHARS_PER_CH.en >= 1.2 && CHARS_PER_CH.el >= 1.09
+  `the English ratio is at least the measured 1.41 (${CHARS_PER_CH.en}) and the Greek at least 1.26 (${CHARS_PER_CH.el})`,
+  CHARS_PER_CH.en >= 1.41 && CHARS_PER_CH.el >= 1.26
 );
 for (const c of caps) {
   const en = Math.round(c.ch * CHARS_PER_CH.en);

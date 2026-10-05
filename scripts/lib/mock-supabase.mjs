@@ -67,6 +67,16 @@ export async function startMockSupabase({ port = 54341, tableRows = {} } = {}) {
         res.writeHead(code, { "Content-Type": "application/json" });
         res.end(JSON.stringify(data));
       };
+      // updateUser({ data }) is a PUT here, and GoTrue MERGES `data` into
+      // user_metadata. Kept, so a preference the app writes on the
+      // account (src/app/api/nav/recent-tools/route.ts pins a tool there)
+      // is what the next page reads, as it is in production.
+      if (url.pathname === "/auth/v1/user" && req.method === "PUT") {
+        let data = null;
+        try { data = JSON.parse(body || "{}").data ?? null; } catch {}
+        if (data && typeof data === "object") MOCK_USER.user_metadata = { ...(MOCK_USER.user_metadata ?? {}), ...data };
+        return json(200, MOCK_USER);
+      }
       if (url.pathname === "/auth/v1/user") return json(200, MOCK_USER);
       if (url.pathname.startsWith("/auth/v1/")) return json(200, { user: MOCK_USER, session: null });
       if (url.pathname.startsWith("/rest/v1/")) {

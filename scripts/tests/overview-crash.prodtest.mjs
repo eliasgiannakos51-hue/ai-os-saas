@@ -31,8 +31,8 @@
  *
  * THE BOUNDARY IS PROVEN BY FIRING IT, NOT BY READING IT. Step 2 patches
  * one component in the tree to throw behind a query parameter, rebuilds,
- * loads the page with it, and asserts a person sees words and a button
- * rather than a white screen. The patch is written through
+ * loads the page with it, and asserts a person sees words where the
+ * greeting was, and the field still there, rather than a white screen. The patch is written through
  * lib/sidecar-write.mjs, so a kill -9 does not leave a throwing component
  * in the working tree.
  *
@@ -60,12 +60,12 @@ import { writeFileSync, healFromSidecar } from "./lib/sidecar-write.mjs";
 // English — an English literal is a gate that goes red the first time
 // somebody runs the app in Greek.
 const localeOf = (html) => (html.match(/<html[^>]+lang="([a-z-]+)"/i) ?? [])[1] ?? "en";
-function boundaryTitle(locale) {
+function boundaryTitle(locale, key = "title") {
   const file = `messages/${locale}.json`;
   try {
-    return JSON.parse(readFileSync(file, "utf8")).errors.boundary.title;
+    return JSON.parse(readFileSync(file, "utf8")).errors.boundary[key];
   } catch {
-    return JSON.parse(readFileSync("messages/en.json", "utf8")).errors.boundary.title;
+    return JSON.parse(readFileSync("messages/en.json", "utf8")).errors.boundary[key];
   }
 }
 
@@ -174,8 +174,13 @@ const env = {
 // One build, not two: a second `next build` costs another two minutes and
 // buys nothing, because the throw is behind a query parameter that the 20
 // measurement loads never set. GreetingHeader is the first client
-// component the Home renders, so a throw here is caught by
-// app/dashboard/overview/error.tsx and not by a card's own WidgetBoundary.
+// component the Home renders. On the centred Home (ΣΥΣΤΗΜΑ DESIGN §4) it
+// sits inside its own WidgetBoundary (app/dashboard/overview/page.tsx), as
+// does the field, so a throw in it is caught THERE and the field stays —
+// which is what section 3 now asserts. It used to assert the page-level
+// boundary (app/dashboard/overview/error.tsx), and kept "passing" the
+// replaced-the-Home half on a needle from a Home that no longer existed
+// (QUEUE Α.13, 2026-10-05).
 const PROBE_FILE = "src/components/overview/greeting-header.tsx";
 const probeOriginal = readFileSync(PROBE_FILE, "utf8");
 const PROBE_ANCHOR = '"use client";';
@@ -305,34 +310,33 @@ try {
   const since = await snapshot();
   await page.goto(`${HOME}?__boundary_probe=1`, { waitUntil: "networkidle", timeout: 60000 });
   const locale = localeOf(await page.content());
-  const title = boundaryTitle(locale);
+  const title = boundaryTitle(locale, "section");
   const titled = page.locator(`text=${title}`);
   const shown = (await titled.count()) > 0;
   // The boundary's own container, reached from its title rather than from
   // a role every banner on the page also has.
   const box = page.locator('[role="alert"]').filter({ hasText: title });
   const text = shown ? (await box.first().innerText()).trim() : "";
-  const buttons = shown ? await box.first().locator("button").count() : 0;
   const bodyText = (await page.locator("body").innerText()).trim();
-  // A CONTROL ON THE CONTROL: the probe is only proof if the Home is gone.
-  // A boundary rendered BESIDE the page it replaced would mean the throw
-  // was swallowed by a card's WidgetBoundary instead.
-  const homeStillThere = await page.locator("text=Subscription tier for agencies").count();
-  results.probe = { locale, shown, text, buttons, bodyLength: bodyText.length, homeStillThere, errors: since().length };
+  // A CONTROL ON THE CONTROL: the probe is only proof of a SECTION
+  // boundary if the rest of the Home survived it — the field a person
+  // came to type into, and the page-level boundary NOT drawn.
+  const fieldStillThere = await page.locator("main textarea").count();
+  const pageBoundary = await page.locator(`text=${boundaryTitle(locale)}`).count();
+  results.probe = { locale, shown, text, bodyLength: bodyText.length, fieldStillThere, pageBoundary, errors: since().length };
 
   check("a thrown component does NOT leave a white page", bodyText.length > 30, `body text length ${bodyText.length}`);
   check(
-    `the page-level boundary rendered, found by its own title (locale ${locale})`,
+    `the greeting's own boundary rendered, found by its own title (locale ${locale})`,
     shown,
     JSON.stringify(title)
   );
   check(
-    "...and it REPLACED the Home rather than appearing beside it",
-    homeStillThere === 0,
-    `Home content still on the page: ${homeStillThere} node(s) — the throw was caught lower down`
+    "...and the rest of the Home survived it: the field is still there to type into",
+    fieldStillThere > 0 && pageBoundary === 0,
+    `field: ${fieldStillThere}, page-level boundary: ${pageBoundary}`
   );
   check("...and it says something in words", text.length > 20, JSON.stringify(text.slice(0, 200)));
-  check("...and offers a way out", buttons > 0, `buttons inside the boundary: ${buttons}`);
   check(
     "...and does not print the raw React error text at the person",
     !/Minified React error|#310/.test(text),

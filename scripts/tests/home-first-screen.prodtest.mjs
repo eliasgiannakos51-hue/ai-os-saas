@@ -2,20 +2,20 @@
 /*
  * IS THE FIELD ACTUALLY THE SCREEN? MEASURED, IN A REAL BROWSER.
  *
- * Redesign phase 1 Α asks for a box that takes at least 40% of the FIRST
- * SCREEN at 1440 and at 390. Two viewports whose heights differ by 56
- * pixels and whose widths differ by more than a thousand, so a height
- * that satisfies one can be wrong for the other — which is why the
- * component expresses it as 46vh and why this file measures the rendered
- * result instead of reading the class back.
+ * WHAT THE FIRST SCREEN MUST HOLD, since ΣΥΣΤΗΜΑ DESIGN §4 (2026-10-04):
+ * «Ένα μπλοκ στο κέντρο της οθόνης» — the earth with the greeting beside
+ * it, the field, and four quick actions, Research, Create, Run, Analyze.
+ * Nothing else. So each of those must be wholly on the first screen at
+ * 1440 and at 390, with no scroll, and the field must start in the upper
+ * half: a box below the fold is a box nobody sees.
+ *
+ * UNTIL 2026-10-05 this asked for a field of at least 40% of the screen,
+ * from the earlier brief («Redesign phase 1 Α»). The design replaced that
+ * page with a centred block, and the 40% rule failed every nightly run
+ * since (QUEUE Α.13) while describing a page that no longer exists.
  *
  * WHAT "THE FIELD" MEANS HERE: the textarea's own border box, not the
- * card around it and not the form. The smallest honest reading of the
- * requirement, so a pass cannot be bought with padding.
- *
- * AND WHAT IS ABOVE IT, because a box that is 46% of the screen is still
- * missable if it starts below the fold: the top of the field must sit in
- * the upper half of the viewport at both sizes.
+ * card around it and not the form.
  *
  * Run: node scripts/tests/home-first-screen.prodtest.mjs
  */
@@ -40,7 +40,9 @@ const VIEWPORTS = [
   { name: "desktop-1440", width: 1440, height: 900 },
   { name: "phone-390", width: 390, height: 844 },
 ];
-const MIN_SHARE = 0.4;
+// The four quick actions, by the words the account reads.
+const EN = JSON.parse((await import("node:fs")).readFileSync("messages/en.json", "utf8"));
+const ACTIONS = ["research", "create", "run", "analyze"].map((k) => EN.dashboard.home.actions[k]);
 
 // ONBOARDING HAS TO BE PAST, or /dashboard/overview redirects to
 // /onboarding and this file measures a page that has no field on it —
@@ -81,12 +83,19 @@ try {
       continue;
     }
 
-    const box = await page.evaluate(() => {
+    const box = await page.evaluate((actions) => {
       const el = document.querySelector("#create-input") ?? document.querySelector("textarea");
       if (!el) return null;
       const r = el.getBoundingClientRect();
-      return { top: r.top, height: r.height, width: r.width, viewport: window.innerHeight };
-    });
+      const main = document.querySelector("main") ?? document.body;
+      const quick = actions.map((name) => {
+        const b = [...main.querySelectorAll("a, button")].find((n) => (n.textContent ?? "").trim() === name);
+        if (!b) return { name, found: false };
+        const q = b.getBoundingClientRect();
+        return { name, found: true, top: q.top, bottom: q.bottom };
+      });
+      return { top: r.top, bottom: r.bottom, height: r.height, width: r.width, viewport: window.innerHeight, quick };
+    }, ACTIONS);
     await page.screenshot({ path: `${SHOTS}/${vp.name}.png` });
 
     ok(`${vp.name}: the field is on the page`, Boolean(box), "no textarea was found on /dashboard/overview");
@@ -97,8 +106,10 @@ try {
       `        ${vp.name.padEnd(13)} field ${Math.round(box.height)}px of ${box.viewport}px viewport = ${(share * 100).toFixed(1)}%` +
       `  (top at ${Math.round(box.top)}px)`
     );
-    ok(`${vp.name}: the field holds at least ${MIN_SHARE * 100}% of the first screen (${(share * 100).toFixed(1)}%)`,
-      share >= MIN_SHARE, `${Math.round(box.height)}px of ${box.viewport}px`);
+    ok(`${vp.name}: the field is wholly on the first screen`, box.bottom <= box.viewport, `bottom at ${Math.round(box.bottom)}px of ${box.viewport}px`);
+    ok(`${vp.name}: the four quick actions are there (${box.quick.filter((q) => q.found).length}/4)`, box.quick.every((q) => q.found), JSON.stringify(box.quick));
+    ok(`${vp.name}: ...under the field, and wholly on the first screen, with no scroll`,
+      box.quick.every((q) => q.found && q.top >= box.top && q.bottom <= box.viewport), JSON.stringify(box.quick));
     ok(`${vp.name}: and it starts in the upper half (${Math.round(box.top)}px)`,
       box.top < box.viewport / 2, "a big box below the fold is still a box nobody sees");
     ok(`${vp.name}: the page threw nothing`, errors.length === 0, errors.join(" | "));

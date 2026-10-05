@@ -38,6 +38,9 @@ const user = () => ({
   aud: "authenticated",
   role: "authenticated",
   email: "owner@example.com",
+  // An unconfirmed account is sent to "Confirm your email" by src/proxy.ts,
+  // and this fixture had none, so the mission never opened (QUEUE Α.13).
+  email_confirmed_at: "2026-01-01T00:00:00Z",
   user_metadata: { subscription_tier: "ultimate" },
   app_metadata: {},
   created_at: "2026-01-01T00:00:00Z",

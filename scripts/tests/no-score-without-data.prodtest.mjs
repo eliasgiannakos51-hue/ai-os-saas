@@ -256,8 +256,15 @@ page.on("pageerror", (e) => consoleErrors.push(`pageerror: ${e.message}`));
 
 
 // --- what the page says to an empty account ---------------------------
+// THE CARDS LEFT HOME FOR ACTIVITY. The centred Home (ΣΥΣΤΗΜΑ DESIGN §4,
+// 2026-10-04) is a greeting, a field and four quick actions; the health
+// ring, setup progress and stat cards this file was written about are on
+// /dashboard/activity (app/dashboard/activity/page.tsx), so sections 2, 3
+// and 5 read that page now. Home stays in the list, at zero zeros
+// (QUEUE Α.13, 2026-10-05).
 const PAGES = [
   "/dashboard/overview",
+  "/dashboard/activity",
   "/dashboard",
   "/dashboard/timeline",
   "/dashboard/records",
@@ -325,7 +332,7 @@ for (const url of PAGES) {
 }
 
 console.log("\n== 2. NO SCORE BEFORE THERE IS EVIDENCE ==");
-const home = seen["/dashboard/overview"];
+const home = seen["/dashboard/activity"];
 checkTrue(
   `the health ring is absent on an empty account (${JSON.stringify(home.scoreLabel)})`,
   home.scoreLabel === null,
@@ -374,7 +381,11 @@ const ALLOWED_ZEROS = {
   // <WidgetBoundary>; a widget that throws renders a short alert instead
   // of itself, and every zero it would have shown disappears with it.
   // "Fewer zeros" and "the card is gone" look identical to a counter.
-  "/dashboard/overview": 2,
+  //
+  // 2 -> 0 for Home and 2 for Activity, 2026-10-05: the cards that showed
+  // those two zeros moved to Activity with the centred Home.
+  "/dashboard/overview": 0,
+  "/dashboard/activity": 2,
   "/dashboard": 0,
   "/dashboard/timeline": 0,
   "/dashboard/records": 0,
@@ -428,7 +439,7 @@ console.log("\n== 5. and the one place already doing it right still is ==");
 // rest of this section is measured against, so it is asserted rather than
 // admired.
 checkTrue(
-  `the overview still prints an em dash where it does not know (${home.dashes.length})`,
+  `Activity still prints an em dash where it does not know (${home.dashes.length})`,
   home.dashes.length >= 1,
   "the em dash is gone — something started answering a question it cannot"
 );

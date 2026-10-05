@@ -91,6 +91,9 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
+  // Set when the account exists and a confirmation link is on its way
+  // (lib/auth/confirm-email.ts): nobody is signed in until it is followed.
+  const [checkEmail, setCheckEmail] = useState(false);
 
   // Enterprise is Contact Sales only (custom pricing, no Stripe price to
   // self-serve checkout with) — never selectable here.
@@ -156,16 +159,28 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
           termsAccepted,
           country: country || undefined,
           inviteCode: inviteCode.trim() || undefined,
+          // Where the confirmation link lands: someone who chose a paid plan
+          // resumes on the pricing page, signed in, and starts checkout
+          // there themselves — nothing charges on arrival.
+          next: isPaidPlanSlug(selectedPlan) ? "/pricing" : "/dashboard/overview",
         }),
       });
       const signupData = (await readRawResponse(signupRes, "/api/signup")) as {
         ok?: boolean;
         error?: unknown;
+        confirmEmail?: boolean;
       };
       if (!signupRes.ok || !signupData.ok) {
         // eslint-disable-next-line no-console
         console.error("/api/signup returned error:", signupData.error);
         setError(getErrorMessage(signupData.error, "Signup failed."));
+        return;
+      }
+
+      // THE ADDRESS FIRST (NEEDS 22). The account exists; the session and,
+      // for a paid plan, checkout follow the link in the mail.
+      if (signupData.confirmEmail) {
+        setCheckEmail(true);
         return;
       }
 
@@ -227,6 +242,22 @@ export function SignupFlow({ capabilityRows }: { capabilityRows: PlanCapabilityR
 
   if (authenticated) {
     return <LoginSplash onDone={goToDashboard} />;
+  }
+
+  if (checkEmail) {
+    return (
+      <main className="flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4">
+        <div className="w-full max-w-md text-center">
+          <div className="mb-6 flex items-center justify-center">
+            <Earth variant="large" px={160} label="Ionexa" />
+          </div>
+          <div className="rounded-card bg-panel p-6">
+            <h1 className="text-lg font-semibold text-foreground">{t("checkEmailTitle")}</h1>
+            <p className="mt-3 text-sm text-muted">{t("checkEmailBody", { email })}</p>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   const plan = PLANS.find((p) => p.slug === selectedPlan);

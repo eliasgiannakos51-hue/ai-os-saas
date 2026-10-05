@@ -85,7 +85,9 @@ export function LoginForm() {
       if (!res.ok || !data.ok) {
         // eslint-disable-next-line no-console
         console.error("Login error:", data?.error);
-        setError(getErrorMessage(data?.error, t("failed")));
+        // A right password on an address not yet proved: a new link has
+        // been sent (api/auth/login), and the reader is told so.
+        setError(data?.code === "email_not_confirmed" ? t("emailNotConfirmed") : getErrorMessage(data?.error, t("failed")));
         return;
       }
 

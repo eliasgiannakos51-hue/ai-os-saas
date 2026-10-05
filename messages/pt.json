@@ -595,7 +595,8 @@
       "resetSuccess": "Senha atualizada — entre com sua nova senha.",
       "failed": "Não conseguimos iniciar a tua sessão. Verifica o email e a palavra-passe, ou repõe-na se não tiveres a certeza.",
       "oauthFailed": "Esse início de sessão não foi concluído. Tente novamente ou use o seu e-mail e palavra-passe abaixo.",
-      "sharedSignInFirst": "Inicie sessão para guardar o que partilhou."
+      "sharedSignInFirst": "Inicie sessão para guardar o que partilhou.",
+      "emailNotConfirmed": "Confirme primeiro o seu email. Acabámos de enviar um novo link."
     },
     "signup": {
       "chooseYourPlan": "Escolha seu plano",
@@ -623,7 +624,9 @@
       "mostPopular": "Mais popular",
       "mustAgreeToTerms": "Tem de aceitar os Termos de Serviço e a Política de Privacidade para criar uma conta.",
       "passwordRequirementsNotMet": "Escolha uma palavra-passe que cumpra todos os requisitos acima.",
-      "failed": "Não conseguimos criar a conta. Verifica os dados e tenta outra vez — não te foi cobrado nada."
+      "failed": "Não conseguimos criar a conta. Verifica os dados e tenta outra vez — não te foi cobrado nada.",
+      "checkEmailTitle": "Verifique o seu email",
+      "checkEmailBody": "Enviámos um link para {email}. Abra-o para confirmar o seu endereço e começar a usar a sua conta."
     },
     "forgotPassword": {
       "title": "Redefinir senha",
@@ -663,7 +666,18 @@
       "cancel": "Cancelar e voltar",
       "confirmFailed": "Não conseguimos concluir a eliminação. A tua conta continua a existir — tenta o link outra vez ou contacta o apoio."
     },
-    "generateStrongPassword": "Gerar senha forte"
+    "generateStrongPassword": "Gerar senha forte",
+    "verifyEmail": {
+      "title": "Confirme o seu email",
+      "body": "Enviámos-lhe um link por email. Abra-o para começar a usar a sua conta.",
+      "linkInvalid": "Esse link expirou ou já foi usado. Peça um novo abaixo.",
+      "resend": "Enviar um novo link",
+      "sending": "A enviar…",
+      "sent": "Um novo link está a caminho. Verifique a caixa de entrada e o spam.",
+      "failed": "Não foi possível enviar o email. Tente novamente dentro de alguns minutos.",
+      "rateLimited": "Demasiados links na última hora. Tente mais tarde.",
+      "signedOut": "Inicie sessão com o seu email e palavra-passe e será enviado um novo link."
+    }
   },
   "settings": {
     "title": "Configurações",
@@ -3559,7 +3573,9 @@
     "costs": "Custos",
     "acceptableUseDescription": "O que pode e o que não pode fazer com o Ionexa AI.",
     "aiTransparencyDescription": "Que modelos de IA o Ionexa usa, o que fazem e que dados veem.",
-    "contactDescription": "Fale com a equipa do Ionexa AI."
+    "contactDescription": "Fale com a equipa do Ionexa AI.",
+    "verifyEmail": "Confirmar email",
+    "verifyEmailDescription": "Confirme o endereço de email da sua conta Ionexa AI."
   },
   "errors": {
     "retry": "Tentar de novo",
@@ -4455,6 +4471,15 @@
         "trafficUp": "o tráfego do site subiu {percent}%",
         "trafficDown": "o tráfego do site desceu {percent}%"
       }
+    },
+    "confirm": {
+      "subject": "Confirme o seu email para a Ionexa AI",
+      "preheader": "Um clique e a sua conta fica pronta.",
+      "label": "confirmar email",
+      "title": "Confirme que é você",
+      "body": "Toque no botão para confirmar este endereço e abrir a sua conta Ionexa AI.",
+      "button": "Confirmar email",
+      "ignore": "Se não criou esta conta, ignore este email: sem o link nada acontece."
     }
   },
   "routerReport": {

@@ -173,6 +173,44 @@ export function welcomeEmailHtml({ email, locale = "en" }: { email: string; loca
   });
 }
 
+/**
+ * The address check every new account goes through (lib/auth/confirm-email.ts).
+ * The link is the whole message: one button, and the plain URL under it
+ * for a mail client that strips buttons.
+ */
+export function confirmEmailHtml({
+  email,
+  confirmUrl,
+  locale = "en",
+}: {
+  email: string;
+  confirmUrl: string;
+  locale?: string;
+}): string {
+  const t = emailTranslator(locale);
+  const href = escapeHtml(confirmUrl);
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.confirm.label"))} · ${escapeHtml(email)}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">${escapeHtml(t("email.confirm.title"))}</h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      ${escapeHtml(t("email.confirm.body"))}
+    </p>
+    <p style="margin:0 0 20px;">
+      <a href="${href}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        ${escapeHtml(t("email.confirm.button"))}
+      </a>
+    </p>
+    <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:0 0 12px; word-break:break-all;">${href}</p>
+    <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:0;">${escapeHtml(t("email.confirm.ignore"))}</p>
+  `;
+  return layout({
+    preheader: escapeHtml(t("email.confirm.preheader")),
+    bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
+  });
+}
+
 export function teamInviteEmailHtml({
   inviterEmail,
   planName,

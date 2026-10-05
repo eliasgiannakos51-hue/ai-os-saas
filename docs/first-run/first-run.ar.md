@@ -1,16 +1,22 @@
 # The first run — ar
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **586 strings**. The whole product is 3527, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **589 strings**. The whole product is 3548, which is why this file exists.
 
-**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 357 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 358 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (21)
+## Tier 1 — THE SENTENCES — read these (23)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
 ### signup
+
+**`auth.signup.checkEmailBody`**
+
+> EN — We sent a link to {email}. Open it to confirm your address and start using your account.
+
+أرسلنا رابطًا إلى {email}. افتحه لتأكيد عنوانك والبدء في استخدام حسابك.
 
 **`auth.signup.failed`**
 
@@ -31,6 +37,12 @@ _On the first screens, 12 words or more. This is prose somebody wrote, and prose
 ابدأ بأي خطة كأساس لفريقك، ثم ادعُ الأعضاء مقابل +{price}/شهريًا لكل عضو — يحصل الجميع على وصول كامل بمستوى خطتك. مثالي للفرق التي تعمل معًا.
 
 ### login
+
+**`auth.login.emailNotConfirmed`**
+
+> EN — Confirm your email first. We just sent a new link to your inbox.
+
+أكّد بريدك أولًا. أرسلنا للتو رابطًا جديدًا إلى بريدك.
 
 **`auth.login.failed`**
 
@@ -146,7 +158,7 @@ CSV أو مفصول بعلامات جدولة، حتى {max}. نقرؤه ونع�
 
 صف أي شيء — فكرة منتج، صفقة، ملاحظة من مستخدم، مؤشرًا — وسيصل تلقائيًا إلى الوحدة الصحيحة.
 
-## Tier 2 — The labels — skim these (357)
+## Tier 2 — The labels — skim these (358)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -175,6 +187,12 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 > EN — change
 
 تغيير
+
+**`auth.signup.checkEmailTitle`**
+
+> EN — Check your email
+
+تحقّق من بريدك
 
 **`auth.signup.chooseYourPlan`**
 

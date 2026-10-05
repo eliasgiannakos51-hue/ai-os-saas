@@ -595,7 +595,8 @@
       "resetSuccess": "密码已更新——请使用新密码登录。",
       "failed": "无法登录。请检查邮箱和密码，如不确定可重置密码。",
       "oauthFailed": "该登录未完成。请重试，或在下方使用邮箱和密码登录。",
-      "sharedSignInFirst": "登录后即可保存你分享的内容。"
+      "sharedSignInFirst": "登录后即可保存你分享的内容。",
+      "emailNotConfirmed": "请先确认你的邮箱。我们刚刚向你发送了新链接。"
     },
     "signup": {
       "chooseYourPlan": "选择你的方案",
@@ -623,7 +624,9 @@
       "mostPopular": "最受欢迎",
       "mustAgreeToTerms": "您必须同意服务条款和隐私政策才能创建账户。",
       "passwordRequirementsNotMet": "请选择满足以上所有要求的密码。",
-      "failed": "无法创建账户。请检查填写的信息后重试 — 未向你收费。"
+      "failed": "无法创建账户。请检查填写的信息后重试 — 未向你收费。",
+      "checkEmailTitle": "查看你的邮箱",
+      "checkEmailBody": "我们已向 {email} 发送了一个链接。打开它以确认地址并开始使用你的账户。"
     },
     "forgotPassword": {
       "title": "重置密码",
@@ -663,7 +666,18 @@
       "cancel": "取消并返回",
       "confirmFailed": "无法完成删除。你的账户仍然存在 — 请重新点击链接，或联系客服。"
     },
-    "generateStrongPassword": "生成高强度密码"
+    "generateStrongPassword": "生成高强度密码",
+    "verifyEmail": {
+      "title": "确认你的邮箱",
+      "body": "我们已向你的邮箱发送了一个链接。打开它即可开始使用你的账户。",
+      "linkInvalid": "该链接已过期或已被使用。请在下方重新获取。",
+      "resend": "发送新链接",
+      "sending": "发送中…",
+      "sent": "新链接已发送。请查看收件箱和垃圾邮件。",
+      "failed": "邮件发送失败。请几分钟后重试。",
+      "rateLimited": "过去一小时内发送的链接过多。请稍后再试。",
+      "signedOut": "使用邮箱和密码登录，系统会发送新链接。"
+    }
   },
   "settings": {
     "title": "设置",
@@ -3559,7 +3573,9 @@
     "costs": "成本",
     "acceptableUseDescription": "使用 Ionexa AI 时哪些行为允许、哪些不允许。",
     "aiTransparencyDescription": "Ionexa 使用哪些 AI 模型、它们做什么，以及它们能看到哪些数据。",
-    "contactDescription": "与 Ionexa AI 团队取得联系。"
+    "contactDescription": "与 Ionexa AI 团队取得联系。",
+    "verifyEmail": "确认邮箱",
+    "verifyEmailDescription": "确认你的 Ionexa AI 账户邮箱地址。"
   },
   "errors": {
     "retry": "重试",
@@ -4455,6 +4471,15 @@
         "trafficUp": "网站访问量上升了 {percent}%",
         "trafficDown": "网站访问量下降了 {percent}%"
       }
+    },
+    "confirm": {
+      "subject": "确认你的 Ionexa AI 邮箱",
+      "preheader": "点击一下，你的账户即可使用。",
+      "label": "确认邮箱",
+      "title": "确认是你本人",
+      "body": "点击按钮确认此地址并打开你的 Ionexa AI 账户。",
+      "button": "确认邮箱",
+      "ignore": "如果你没有创建此账户，请忽略此邮件：不点击链接就不会有任何变化。"
     }
   },
   "routerReport": {

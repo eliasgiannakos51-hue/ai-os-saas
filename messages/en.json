@@ -595,7 +595,8 @@
       "resetSuccess": "Password updated — sign in with your new password.",
       "failed": "We couldn't sign you in. Check the email and password, or reset your password if you're not sure.",
       "oauthFailed": "That sign-in didn't complete. Try again, or use your email and password below.",
-      "sharedSignInFirst": "Sign in to save what you shared."
+      "sharedSignInFirst": "Sign in to save what you shared.",
+      "emailNotConfirmed": "Confirm your email first. We just sent a new link to your inbox."
     },
     "signup": {
       "chooseYourPlan": "Choose your plan",
@@ -623,7 +624,9 @@
       "mostPopular": "Most Popular",
       "mustAgreeToTerms": "You must agree to the Terms of Service and Privacy Policy to create an account.",
       "passwordRequirementsNotMet": "Please choose a password that meets every requirement above.",
-      "failed": "We couldn't create the account. Check the details and try again — you have not been charged."
+      "failed": "We couldn't create the account. Check the details and try again — you have not been charged.",
+      "checkEmailTitle": "Check your email",
+      "checkEmailBody": "We sent a link to {email}. Open it to confirm your address and start using your account."
     },
     "forgotPassword": {
       "title": "Reset password",
@@ -663,7 +666,18 @@
       "cancel": "Cancel and go back",
       "confirmFailed": "We couldn't complete the deletion. Your account is still here — try the link again, or contact support."
     },
-    "generateStrongPassword": "Generate strong password"
+    "generateStrongPassword": "Generate strong password",
+    "verifyEmail": {
+      "title": "Confirm your email",
+      "body": "We sent a link to your email. Open it to start using your account.",
+      "linkInvalid": "That link has expired or was already used. Ask for a new one below.",
+      "resend": "Send a new link",
+      "sending": "Sending…",
+      "sent": "A new link is on its way. Check your inbox and spam folder.",
+      "failed": "The email could not be sent. Try again in a few minutes.",
+      "rateLimited": "Too many links in the last hour. Try again later.",
+      "signedOut": "Sign in with your email and password, and a new link will be sent."
+    }
   },
   "settings": {
     "title": "Settings",
@@ -3559,7 +3573,9 @@
     "costs": "Costs",
     "acceptableUseDescription": "What you may and may not do with Ionexa AI.",
     "aiTransparencyDescription": "Which AI models Ionexa uses, what they do, and what data they see.",
-    "contactDescription": "Get in touch with the Ionexa AI team."
+    "contactDescription": "Get in touch with the Ionexa AI team.",
+    "verifyEmail": "Confirm Your Email",
+    "verifyEmailDescription": "Confirm the email address of your Ionexa AI account."
   },
   "errors": {
     "retry": "Try again",
@@ -4455,6 +4471,15 @@
         "trafficUp": "site traffic is up {percent}%",
         "trafficDown": "site traffic is down {percent}%"
       }
+    },
+    "confirm": {
+      "subject": "Confirm your email for Ionexa AI",
+      "preheader": "One click and your account is ready.",
+      "label": "confirm your email",
+      "title": "Confirm it's you",
+      "body": "Press the button to confirm this address and open your Ionexa AI account.",
+      "button": "Confirm email",
+      "ignore": "If you did not create this account, ignore this email: nothing happens without the link."
     }
   },
   "routerReport": {

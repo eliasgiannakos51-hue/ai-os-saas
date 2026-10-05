@@ -124,6 +124,7 @@ const PUBLIC_ON_PURPOSE = {
   "src/app/terms/page.tsx": "a legal page that must be readable before agreeing to it.",
   "src/app/privacy/page.tsx": "the same, and linked from the footer of every public page.",
   "src/app/cookies/page.tsx": "the same, and the one a consent banner links to before any session exists.",
+  "src/app/verify-email/page.tsx": "where an account whose address is not yet proved is sent (src/middleware.ts), and where a used confirmation link lands; it shows two fixed sentences and a resend button whose route reads the session itself, so a stranger sees nothing of anybody's.",
   "src/app/acceptable-use/page.tsx": "the same: a rule nobody can read before accepting is not a rule.",
   "src/app/ai-transparency/page.tsx": "what the product does with a model, published so it can be read without an account.",
   "src/app/roadmap/page.tsx": "what is coming, linked from the public footer.",

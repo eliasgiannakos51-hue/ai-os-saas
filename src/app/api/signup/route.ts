@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendWelcomeEmail } from "@/lib/email/send-welcome-email";
+import { sendConfirmEmail } from "@/lib/email/send-confirm-email";
+import { confirmLinkFor, safeNextPath } from "@/lib/auth/confirm-email";
 import { logApiError } from "@/lib/log-error";
 import { attributeReferral } from "@/lib/affiliate/store";
 import { REFERRAL_COOKIE } from "@/lib/affiliate/cookie";
@@ -64,6 +64,7 @@ export async function POST(request: Request) {
     let termsAccepted: boolean;
     let country: string | null;
     let inviteCode: string;
+    let next: string;
     try {
       const body = await request.json();
       email = typeof body?.email === "string" ? body.email.trim() : "";
@@ -74,6 +75,9 @@ export async function POST(request: Request) {
           ? body.country
           : null;
       inviteCode = typeof body?.inviteCode === "string" ? body.inviteCode.trim().slice(0, 100) : "";
+      // Where the confirmation link lands (a paid plan resumes at the
+      // pricing page): a path on this site only, lib/auth/confirm-email.ts.
+      next = safeNextPath(body?.next);
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -128,7 +132,10 @@ export async function POST(request: Request) {
     const { data: createData, error: createError } = await admin.auth.admin.createUser({
       email,
       password,
-      email_confirm: true,
+      // UNCONFIRMED (NEEDS 22, the owner's decision of 2026-10-05): the
+      // address is proved by the link sent below, and nobody is signed in
+      // until it is (lib/auth/confirm-email.ts).
+      email_confirm: false,
       // subscription_tier/seat_count mirror the shape the Stripe webhook
       // writes on checkout (see api/webhooks/stripe/route.ts) — every
       // account gets an explicit "free" tier from the moment it exists,
@@ -224,9 +231,16 @@ export async function POST(request: Request) {
         ?.slice(LOCALE_COOKIE.length + 1)
     );
 
-    const welcomeEmail = sendWelcomeEmail(email, null, signupLocale).catch((err) => {
-      logApiError("/api/signup", err, { stage: "welcome_email" });
-    });
+    // THE CONFIRMATION LINK, made now and sent in the background. The
+    // welcome mail waits for the address to be proved (auth/confirm).
+    const confirmUrl = await confirmLinkFor(admin, email, next);
+    mark("confirm_link");
+    const confirmEmail = (confirmUrl ? sendConfirmEmail(email, confirmUrl, signupLocale) : Promise.resolve(false)).catch(
+      (err) => {
+        logApiError("/api/signup", err, { stage: "confirm_email" });
+        return false;
+      }
+    );
 
     // Affiliate attribution, if they arrived through somebody's link.
     //
@@ -249,7 +263,6 @@ export async function POST(request: Request) {
           logApiError("/api/signup", err, { stage: "affiliate_attribution" });
         })
       : Promise.resolve();
-    const supabase = createClient();
 
     // Grant the signup plan's monthly credits so user_credits exists from
     // the moment the account does — everything downstream (api/create,
@@ -285,13 +298,8 @@ export async function POST(request: Request) {
     }
     mark("grant_credits");
 
-    // Sign in on the same (cookie-aware) server client so the session lands
-    // on this response and the browser is authenticated right away.
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    mark("sign_in");
+    // NO SIGN-IN HERE ANY MORE. The session opens when the link in the
+    // confirmation mail is followed (src/app/auth/confirm/route.ts).
 
     // The welcome email now costs ~nothing, because it no longer WAITS its
     // turn: it was started immediately after the account existed (above),
@@ -308,27 +316,16 @@ export async function POST(request: Request) {
     // whole send: past it the response goes out and the send continues for
     // whatever remains of the invocation.
     await Promise.race([
-      Promise.all([welcomeEmail, referralAttribution]).then(() => undefined),
+      Promise.all([confirmEmail, referralAttribution]).then(() => undefined),
       new Promise<void>((resolve) => setTimeout(resolve, WELCOME_EMAIL_RESIDUAL_MS)),
     ]);
-    mark("welcome_email");
+    mark("confirm_email");
     diagLog(`[signup] stage timings: ${marks.join(" ")}`);
 
-    if (signInError) {
-      logApiError("/api/signup", signInError, { stage: "signInWithPassword" });
-      return NextResponse.json(
-        {
-          ok: false,
-          error: getErrorMessage(
-            signInError,
-            "Account created, but sign-in failed. Please log in manually."
-          ),
-        },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({ ok: true });
+    // The client shows "check your inbox". The mail can be sent again from
+    // /verify-email after signing in, so a failed send is not a failed
+    // signup — but it is logged above.
+    return NextResponse.json({ ok: true, confirmEmail: true });
   } catch (err) {
     logApiError("/api/signup", err);
     // Deliberately NOT getErrorMessage(err) here. This is the catch-all

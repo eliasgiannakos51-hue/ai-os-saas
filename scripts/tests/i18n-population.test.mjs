@@ -248,7 +248,10 @@ check(
 // that accepts a locale nobody passes renders English for everybody and
 // looks converted.
 const TRANSLATED_EMAILS = {
-  "src/lib/email/send-welcome-email.ts": "src/app/api/signup/route.ts",
+  // Since 2026-10-05 the first is the confirmation link (NEEDS 22), and the
+  // welcome waits for the address to be proved.
+  "src/lib/email/send-confirm-email.ts": "src/app/api/signup/route.ts",
+  "src/lib/email/send-welcome-email.ts": "src/app/auth/confirm/route.ts",
   "src/lib/email/send-new-device-login-email.ts": "src/app/api/auth/device-check/route.ts",
   "src/lib/email/send-delete-account-confirmation-email.ts": "src/app/api/delete-account/request/route.ts",
   "src/lib/email/send-subscription-cancelled-email.ts": "src/app/api/billing/cancel/route.ts",

@@ -1,16 +1,42 @@
 # The emails — ar
 
-Every line of every email the product sends: **108 strings**. The interface has its own pack, `first-run.ar.md`, beside this one.
+Every line of every email the product sends: **115 strings**. The interface has its own pack, `first-run.ar.md`, beside this one.
 
-**Start with tier 1. It is 37 sentences and it is the whole ask.** Tier 2 is 26 more sentences from emails fewer people get. Tier 3 is 45 short lines to skim.
+**Start with tier 1. It is 41 sentences and it is the whole ask.** Tier 2 is 26 more sentences from emails fewer people get. Tier 3 is 48 short lines to skim.
 
 **What to look for.** An email is read when the product is not on screen, often on a phone, sometimes as the only thing a person reads from us that week. Does it sound like a person wrote it? Is it the right register — the same "you" as the app? Would you send it to a customer under your own name? `{name}`-style placeholders are filled in when it is sent.
 
-## Tier 1 — THE SENTENCES — read these (37)
+## Tier 1 — THE SENTENCES — read these (41)
 
 _From the emails a person is sure or likely to receive, 5 words or more._
 
-### welcome — every account gets it, minutes after signing up
+### confirm — every new account gets it first: the link that proves the address (NEEDS 22)
+
+**`email.confirm.subject`**
+
+> EN — Confirm your email for Ionexa AI
+
+أكّد بريدك الإلكتروني في Ionexa AI
+
+**`email.confirm.preheader`**
+
+> EN — One click and your account is ready.
+
+نقرة واحدة ويصبح حسابك جاهزًا.
+
+**`email.confirm.body`**
+
+> EN — Press the button to confirm this address and open your Ionexa AI account.
+
+اضغط الزر لتأكيد هذا العنوان وفتح حسابك في Ionexa AI.
+
+**`email.confirm.ignore`**
+
+> EN — If you did not create this account, ignore this email: nothing happens without the link.
+
+إذا لم تنشئ هذا الحساب فتجاهل هذه الرسالة: لا يحدث شيء دون الرابط.
+
+### welcome — every account gets it, minutes after confirming its address
 
 **`email.welcome.body`**
 
@@ -414,11 +440,31 @@ _The digest, form submissions and shared lines. Fewer people get them._
 
 تصلك هذه الرسالة لأن لديك حسابًا في Ionexa AI.
 
-## Tier 3 — Subjects, labels and the footer — skim (45)
+## Tier 3 — Subjects, labels and the footer — skim (48)
 
 _Short lines. A wrong one is usually obvious; look for the one that means something else in your language._
 
-### welcome — every account gets it, minutes after signing up
+### confirm — every new account gets it first: the link that proves the address (NEEDS 22)
+
+**`email.confirm.label`**
+
+> EN — confirm your email
+
+تأكيد البريد
+
+**`email.confirm.title`**
+
+> EN — Confirm it's you
+
+أكّد أنك أنت
+
+**`email.confirm.button`**
+
+> EN — Confirm email
+
+تأكيد البريد
+
+### welcome — every account gets it, minutes after confirming its address
 
 **`email.welcome.label`**
 

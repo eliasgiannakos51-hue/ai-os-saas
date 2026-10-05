@@ -1,16 +1,22 @@
 # The first run — pt
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **586 strings**. The whole product is 3527, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **589 strings**. The whole product is 3548, which is why this file exists.
 
-**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 357 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 358 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (21)
+## Tier 1 — THE SENTENCES — read these (23)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
 ### signup
+
+**`auth.signup.checkEmailBody`**
+
+> EN — We sent a link to {email}. Open it to confirm your address and start using your account.
+
+Enviámos um link para {email}. Abra-o para confirmar o seu endereço e começar a usar a sua conta.
 
 **`auth.signup.failed`**
 
@@ -31,6 +37,12 @@ Tem de aceitar os Termos de Serviço e a Política de Privacidade para criar uma
 Comece com qualquer plano como base da sua equipe, depois convide membros por +{price}/mês cada — todos obtêm acesso completo ao nível do seu plano. Perfeito para equipes que trabalham juntas.
 
 ### login
+
+**`auth.login.emailNotConfirmed`**
+
+> EN — Confirm your email first. We just sent a new link to your inbox.
+
+Confirme primeiro o seu email. Acabámos de enviar um novo link.
 
 **`auth.login.failed`**
 
@@ -146,7 +158,7 @@ Isso parece uma pergunta. Respondo ou registo?
 
 Descreva qualquer coisa — uma ideia de produto, uma operação, o feedback de um utilizador, uma métrica — e vai parar automaticamente ao módulo certo.
 
-## Tier 2 — The labels — skim these (357)
+## Tier 2 — The labels — skim these (358)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -175,6 +187,12 @@ e a
 > EN — change
 
 alterar
+
+**`auth.signup.checkEmailTitle`**
+
+> EN — Check your email
+
+Verifique o seu email
 
 **`auth.signup.chooseYourPlan`**
 

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { countRateLimitHits, recordRateLimitHit } from "@/lib/rate-limit";
+import { checkRateLimit, countRateLimitHits, recordRateLimitHit } from "@/lib/rate-limit";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { confirmLinkFor } from "@/lib/auth/confirm-email";
+import { sendConfirmEmail } from "@/lib/email/send-confirm-email";
+import { LOCALE_COOKIE, resolveSupportedLocale } from "@/i18n/constants";
 import { getClientIp } from "@/lib/get-client-ip";
 import { logApiError } from "@/lib/log-error";
 
@@ -64,6 +68,36 @@ export async function POST(request: Request) {
 
     const supabase = createClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+    // THE PASSWORD WAS RIGHT, THE ADDRESS IS NOT YET PROVED (NEEDS 22).
+    // Supabase answers this only after the password checks out, so a new
+    // link is sent to the address on the account — three an hour, keyed on
+    // the address — and the form says so in the reader's language.
+    if (signInError?.code === "email_not_confirmed") {
+      const limit = await checkRateLimit({
+        scope: "login_resend_confirmation",
+        identifier: email.toLowerCase(),
+        maxAttempts: 3,
+        windowMinutes: 60,
+      });
+      if (!limit.allowed) {
+        return NextResponse.json({ ok: false, code: "email_not_confirmed" }, { status: 403 });
+      }
+      const link = await confirmLinkFor(createAdminClient(), email, "/dashboard/overview");
+      // The language of the page they are signing in from (the cookie
+      // i18n/request.ts reads), as at signup.
+      const locale = resolveSupportedLocale(
+        request.headers
+          .get("cookie")
+          ?.split(";")
+          .map((c) => c.trim())
+          .find((c) => c.startsWith(`${LOCALE_COOKIE}=`))
+          ?.slice(LOCALE_COOKIE.length + 1)
+      );
+      const sent = link ? await sendConfirmEmail(email, link, locale) : false;
+      if (!sent) logApiError("/api/auth/login", new Error("confirmation link not sent"), { stage: "resend_confirmation" });
+      return NextResponse.json({ ok: false, code: "email_not_confirmed" }, { status: 403 });
+    }
 
     if (signInError) {
       await recordRateLimitHit({ scope: LOGIN_FAILURE_SCOPE, identifier: ip });

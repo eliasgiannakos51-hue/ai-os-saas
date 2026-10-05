@@ -595,7 +595,8 @@
       "resetSuccess": "Passwort aktualisiert — melde dich mit deinem neuen Passwort an.",
       "failed": "Wir konnten dich nicht anmelden. Prüfe E-Mail und Passwort, oder setze das Passwort zurück, wenn du unsicher bist.",
       "oauthFailed": "Diese Anmeldung wurde nicht abgeschlossen. Versuche es erneut oder nutze unten E-Mail und Passwort.",
-      "sharedSignInFirst": "Melde dich an, um das Geteilte zu speichern."
+      "sharedSignInFirst": "Melde dich an, um das Geteilte zu speichern.",
+      "emailNotConfirmed": "Bestätige zuerst deine E-Mail. Wir haben dir gerade einen neuen Link geschickt."
     },
     "signup": {
       "chooseYourPlan": "Wähle deinen Plan",
@@ -623,7 +624,9 @@
       "mostPopular": "Am beliebtesten",
       "mustAgreeToTerms": "Sie müssen den Nutzungsbedingungen und der Datenschutzerklärung zustimmen, um ein Konto zu erstellen.",
       "passwordRequirementsNotMet": "Bitte wählen Sie ein Passwort, das alle oben genannten Anforderungen erfüllt.",
-      "failed": "Wir konnten das Konto nicht anlegen. Prüfe die Angaben und versuch es erneut — dir wurde nichts berechnet."
+      "failed": "Wir konnten das Konto nicht anlegen. Prüfe die Angaben und versuch es erneut — dir wurde nichts berechnet.",
+      "checkEmailTitle": "Sieh in deine E-Mails",
+      "checkEmailBody": "Wir haben einen Link an {email} geschickt. Öffne ihn, um deine Adresse zu bestätigen und loszulegen."
     },
     "forgotPassword": {
       "title": "Passwort zurücksetzen",
@@ -663,7 +666,18 @@
       "cancel": "Abbrechen und zurück",
       "confirmFailed": "Wir konnten die Löschung nicht abschließen. Dein Konto besteht weiterhin — versuch den Link erneut oder wende dich an den Support."
     },
-    "generateStrongPassword": "Sicheres Passwort erzeugen"
+    "generateStrongPassword": "Sicheres Passwort erzeugen",
+    "verifyEmail": {
+      "title": "Bestätige deine E-Mail",
+      "body": "Wir haben dir einen Link per E-Mail geschickt. Öffne ihn, um dein Konto zu nutzen.",
+      "linkInvalid": "Dieser Link ist abgelaufen oder wurde bereits verwendet. Fordere unten einen neuen an.",
+      "resend": "Neuen Link senden",
+      "sending": "Wird gesendet…",
+      "sent": "Ein neuer Link ist unterwegs. Sieh in deinem Posteingang und im Spam nach.",
+      "failed": "Die E-Mail konnte nicht gesendet werden. Versuche es in ein paar Minuten erneut.",
+      "rateLimited": "Zu viele Links in der letzten Stunde. Versuche es später erneut.",
+      "signedOut": "Melde dich mit E-Mail und Passwort an, dann wird ein neuer Link gesendet."
+    }
   },
   "settings": {
     "title": "Einstellungen",
@@ -3559,7 +3573,9 @@
     "costs": "Kosten",
     "acceptableUseDescription": "Was Sie mit Ionexa AI dürfen und was nicht.",
     "aiTransparencyDescription": "Welche KI-Modelle Ionexa nutzt, was sie tun und welche Daten sie sehen.",
-    "contactDescription": "Nehmen Sie Kontakt mit dem Ionexa-AI-Team auf."
+    "contactDescription": "Nehmen Sie Kontakt mit dem Ionexa-AI-Team auf.",
+    "verifyEmail": "E-Mail bestätigen",
+    "verifyEmailDescription": "Bestätige die E-Mail-Adresse deines Ionexa-AI-Kontos."
   },
   "errors": {
     "retry": "Erneut versuchen",
@@ -4455,6 +4471,15 @@
         "trafficUp": "der Website-Traffic ist um {percent}% gestiegen",
         "trafficDown": "der Website-Traffic ist um {percent}% gesunken"
       }
+    },
+    "confirm": {
+      "subject": "Bestätige deine E-Mail für Ionexa AI",
+      "preheader": "Ein Klick, und dein Konto ist bereit.",
+      "label": "E-Mail bestätigen",
+      "title": "Bestätige, dass du es bist",
+      "body": "Klicke auf die Schaltfläche, um diese Adresse zu bestätigen und dein Ionexa-AI-Konto zu öffnen.",
+      "button": "E-Mail bestätigen",
+      "ignore": "Wenn du dieses Konto nicht erstellt hast, ignoriere diese E-Mail: Ohne den Link passiert nichts."
     }
   },
   "routerReport": {

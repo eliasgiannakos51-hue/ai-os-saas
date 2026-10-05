@@ -245,7 +245,9 @@ for (const l of favLinks) {
 // `/api/search?${key}`, so no literal `q=` is in the tree any more and
 // this file cannot check that /api/search reads its q parameter. That
 // check now lives only in the palette's own gates.
-const DEEP_LINK_FLOOR = 53;
+// 53 -> 54 (2026-10-05): /verify-email, linked from the middleware and the
+// confirmation flow (lib/auth/confirm-email.ts).
+const DEEP_LINK_FLOOR = 54;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

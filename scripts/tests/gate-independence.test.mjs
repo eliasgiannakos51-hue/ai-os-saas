@@ -119,6 +119,11 @@ const NONE_IS_FINE = {
     "connector-safety.mutation.mjs: 6 of 6, including the two that matter most — a widened " +
     "gmail scope and a dropped untrusted wrapper. (It reads its four files with readFileSync " +
     "through a helper, which is why the scan does not see DISK.)",
+  "email-confirmation.test.mjs":
+    "EXECUTION of safeNextPath on seven inputs (the scan does not see loadTs), and SHAPES over " +
+    "the five files of the address check. Settled by mutation on 2026-10-05: a protocol-relative " +
+    "next accepted, the landing trusting the request's redirect, the middleware wall removed, " +
+    "and either resend path unbounded — RED all five times (email-confirmation.mutation.mjs).",
   "write-guards.test.mjs":
     "a SHAPE over the write paths it finds. Every update must re-assert what it read. " +
     "Settled twice — dropping the .or() guard, and moving the comparison back into " +

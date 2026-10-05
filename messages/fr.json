@@ -595,7 +595,8 @@
       "resetSuccess": "Mot de passe mis à jour — connectez-vous avec votre nouveau mot de passe.",
       "failed": "Nous n'avons pas pu vous connecter. Vérifiez l'e-mail et le mot de passe, ou réinitialisez-le en cas de doute.",
       "oauthFailed": "Cette connexion n'a pas abouti. Réessayez ou utilisez votre e-mail et votre mot de passe ci-dessous.",
-      "sharedSignInFirst": "Connectez-vous pour enregistrer ce que vous avez partagé."
+      "sharedSignInFirst": "Connectez-vous pour enregistrer ce que vous avez partagé.",
+      "emailNotConfirmed": "Confirmez d’abord votre e-mail. Nous venons de vous envoyer un nouveau lien."
     },
     "signup": {
       "chooseYourPlan": "Choisissez votre forfait",
@@ -623,7 +624,9 @@
       "mostPopular": "Le plus populaire",
       "mustAgreeToTerms": "Vous devez accepter les Conditions d'utilisation et la Politique de confidentialité pour créer un compte.",
       "passwordRequirementsNotMet": "Choisissez un mot de passe qui remplit toutes les conditions ci-dessus.",
-      "failed": "Nous n'avons pas pu créer le compte. Vérifiez les informations et réessayez — vous n'avez pas été débité."
+      "failed": "Nous n'avons pas pu créer le compte. Vérifiez les informations et réessayez — vous n'avez pas été débité.",
+      "checkEmailTitle": "Vérifiez vos e-mails",
+      "checkEmailBody": "Nous avons envoyé un lien à {email}. Ouvrez-le pour confirmer votre adresse et commencer à utiliser votre compte."
     },
     "forgotPassword": {
       "title": "Réinitialiser le mot de passe",
@@ -663,7 +666,18 @@
       "cancel": "Annuler et revenir",
       "confirmFailed": "Nous n'avons pas pu terminer la suppression. Votre compte existe toujours — réessayez le lien ou contactez le support."
     },
-    "generateStrongPassword": "Générer un mot de passe fort"
+    "generateStrongPassword": "Générer un mot de passe fort",
+    "verifyEmail": {
+      "title": "Confirmez votre e-mail",
+      "body": "Nous vous avons envoyé un lien par e-mail. Ouvrez-le pour commencer à utiliser votre compte.",
+      "linkInvalid": "Ce lien a expiré ou a déjà été utilisé. Demandez-en un nouveau ci-dessous.",
+      "resend": "Envoyer un nouveau lien",
+      "sending": "Envoi…",
+      "sent": "Un nouveau lien est en route. Vérifiez votre boîte de réception et vos spams.",
+      "failed": "L’e-mail n’a pas pu être envoyé. Réessayez dans quelques minutes.",
+      "rateLimited": "Trop de liens au cours de la dernière heure. Réessayez plus tard.",
+      "signedOut": "Connectez-vous avec votre e-mail et votre mot de passe, et un nouveau lien sera envoyé."
+    }
   },
   "settings": {
     "title": "Paramètres",
@@ -3559,7 +3573,9 @@
     "costs": "Coûts",
     "acceptableUseDescription": "Ce que vous pouvez et ne pouvez pas faire avec Ionexa AI.",
     "aiTransparencyDescription": "Quels modèles d'IA Ionexa utilise, ce qu'ils font et quelles données ils voient.",
-    "contactDescription": "Contactez l'équipe d'Ionexa AI."
+    "contactDescription": "Contactez l'équipe d'Ionexa AI.",
+    "verifyEmail": "Confirmez votre e-mail",
+    "verifyEmailDescription": "Confirmez l’adresse e-mail de votre compte Ionexa AI."
   },
   "errors": {
     "retry": "Réessayer",
@@ -4455,6 +4471,15 @@
         "trafficUp": "le trafic du site a augmenté de {percent}%",
         "trafficDown": "le trafic du site a baissé de {percent}%"
       }
+    },
+    "confirm": {
+      "subject": "Confirmez votre e-mail pour Ionexa AI",
+      "preheader": "Un clic et votre compte est prêt.",
+      "label": "confirmez votre e-mail",
+      "title": "Confirmez que c’est bien vous",
+      "body": "Appuyez sur le bouton pour confirmer cette adresse et ouvrir votre compte Ionexa AI.",
+      "button": "Confirmer l’e-mail",
+      "ignore": "Si vous n’avez pas créé ce compte, ignorez cet e-mail : rien ne se passe sans le lien."
     }
   },
   "routerReport": {

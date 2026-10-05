@@ -137,6 +137,32 @@ export async function middleware(request: NextRequest) {
     return withRefreshedCookies(NextResponse.redirect(url));
   }
 
+  // AN ADDRESS NOT YET PROVED (NEEDS 22, lib/auth/confirm-email.ts). An
+  // account opened with a password has no session until its link is
+  // followed; this is the second wall, for a session that exists anyway
+  // (a sign-in the Supabase project let through). Pages go to
+  // /verify-email; API calls are refused by code — except the two that
+  // exist to get out of this state, and sign-out.
+  if (user && !user.email_confirmed_at) {
+    const path = request.nextUrl.pathname;
+    const isApi = path.startsWith("/api/");
+    const exempt =
+      path.startsWith("/api/auth/resend-confirmation") ||
+      path.startsWith("/auth/") ||
+      path === "/verify-email";
+    if (!exempt && isApi) {
+      return withRefreshedCookies(
+        NextResponse.json({ ok: false, code: "email_not_confirmed" }, { status: 403 })
+      );
+    }
+    if (!exempt && (isDashboardRoute || path.startsWith("/onboarding"))) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/verify-email";
+      url.search = "";
+      return withRefreshedCookies(NextResponse.redirect(url));
+    }
+  }
+
   // REDIRECTS DECIDED HERE, NOT IN THE PAGE (issue #61, React #310).
   // A dashboard page that redirects has already started streaming
   // (app/dashboard/loading.tsx), so its redirect reaches the browser as a

@@ -843,7 +843,9 @@ const SERVER_PROSE_BASELINE = 671;
 // three and stayed at three long after they were paid off". The gap is
 // a number somebody else reads now — see lib/baseline.mjs and
 // baselines.test.mjs.
-const CLIENT_FALLBACK_BASELINE = 28;
+// 28 -> 27 (2026-10-05): the login form's unconfirmed-address case reads a
+// translated key instead of falling back to English.
+const CLIENT_FALLBACK_BASELINE = 27;
 reportBaseline("SERVER_PROSE_BASELINE", SERVER_PROSE_BASELINE, serverErrorProse.length);
 checkTrue(
   `server-side English error prose has not grown (${serverErrorProse.length} <= ${SERVER_PROSE_BASELINE})`,

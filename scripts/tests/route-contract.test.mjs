@@ -202,6 +202,11 @@ const askedNothing = routes.filter((f) => {
 // is built before this object exists and never reads it.
 // ---------------------------------------------------------------------
 const OUTSIDE_EVERY_POPULATION = {
+  "src/app/auth/confirm/route.ts": {
+    has: ["ownership:scoped_helper"],
+    why:
+      "the landing of the confirmation mail (lib/auth/confirm-email.ts). It is reached by a link in an inbox, so no screen asks it anything; it verifies a single-use token with verifyOtp, which opens the session, writes welcome_sent_at once through merge_user_metadata for the user that verification returned, and redirects to a path that safeNextPath keeps on this site.",
+  },
   "src/app/api/contact/route.ts": {
     has: ["bound:rate_limit"],
     why:

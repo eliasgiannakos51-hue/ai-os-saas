@@ -450,7 +450,8 @@
       "limits": "Limites",
       "support": "Apoio"
     },
-    "comparisonRowCount": "Funcionalidades comparadas: {count}"
+    "comparisonRowCount": "Funcionalidades comparadas: {count}",
+    "paymentPending": "O pagamento desta alteração não foi concluído, por isso o seu plano não mudou."
   },
   "roadmap": {
     "title": "Roteiro",

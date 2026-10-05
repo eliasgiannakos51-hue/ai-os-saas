@@ -450,7 +450,8 @@
       "limits": "Limiti",
       "support": "Assistenza"
     },
-    "comparisonRowCount": "Funzioni confrontate: {count}"
+    "comparisonRowCount": "Funzioni confrontate: {count}",
+    "paymentPending": "Il pagamento per questa modifica non è andato a buon fine, quindi il tuo piano non è cambiato."
   },
   "roadmap": {
     "title": "Roadmap",

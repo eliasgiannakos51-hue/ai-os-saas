@@ -450,7 +450,8 @@
       "limits": "Limites",
       "support": "Assistance"
     },
-    "comparisonRowCount": "Fonctionnalités comparées : {count}"
+    "comparisonRowCount": "Fonctionnalités comparées : {count}",
+    "paymentPending": "Le paiement de ce changement n’a pas abouti, votre forfait n’a donc pas changé."
   },
   "roadmap": {
     "title": "Feuille de route",

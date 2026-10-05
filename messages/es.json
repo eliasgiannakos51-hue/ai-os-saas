@@ -450,7 +450,8 @@
       "limits": "Límites",
       "support": "Soporte"
     },
-    "comparisonRowCount": "Funciones comparadas: {count}"
+    "comparisonRowCount": "Funciones comparadas: {count}",
+    "paymentPending": "El pago de este cambio no se completó, así que tu plan no ha cambiado."
   },
   "roadmap": {
     "title": "Hoja de ruta",

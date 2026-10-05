@@ -450,7 +450,8 @@
       "limits": "الحدود",
       "support": "الدعم"
     },
-    "comparisonRowCount": "الميزات المقارَنة: {count}"
+    "comparisonRowCount": "الميزات المقارَنة: {count}",
+    "paymentPending": "لم يكتمل الدفع لهذا التغيير، لذلك لم تتغير خطتك."
   },
   "roadmap": {
     "title": "خارطة الطريق",

@@ -249,15 +249,34 @@ export async function POST(request: Request) {
             );
           }
 
-          const subscriptionUpdate = {
-            items: [{ id: planItem.id, price: planPriceId, quantity: 1 }],
-            proration_behavior: isUpgrade ? "always_invoice" : "create_prorations",
-            // Stripe otherwise keeps the old anniversary when moving
-            // between intervals, which bills a full year on a date the
-            // customer has no reason to expect.
-            ...(current.interval !== interval ? { billing_cycle_anchor: "now" as const } : {}),
-            metadata: { supabase_user_id: user.id, plan, interval },
-          };
+          // NO PLAN WITHOUT PAYMENT (ΑΣ-4.3, 2026-10-05). An upgrade is a
+          // PENDING update: Stripe applies the new price only once the
+          // prorated invoice is paid, and drops the change if it is not.
+          // Without it the subscription took the bigger price at once and
+          // the invoice was left to be paid later — and the webhook reads
+          // the plan from the subscription's price. A downgrade costs
+          // nothing up front, so it applies as before.
+          //
+          // Stripe refuses `metadata` on a pending update; nothing reads it
+          // for the plan (the webhook reads the price), so it rides only on
+          // the downgrade.
+          const subscriptionUpdate = isUpgrade
+            ? {
+                items: [{ id: planItem.id, price: planPriceId, quantity: 1 }],
+                proration_behavior: "always_invoice" as const,
+                payment_behavior: "pending_if_incomplete" as const,
+                // Stripe otherwise keeps the old anniversary when moving
+                // between intervals, which bills a full year on a date the
+                // customer has no reason to expect.
+                ...(current.interval !== interval ? { billing_cycle_anchor: "now" as const } : {}),
+                expand: ["latest_invoice"],
+              }
+            : {
+                items: [{ id: planItem.id, price: planPriceId, quantity: 1 }],
+                proration_behavior: "create_prorations" as const,
+                ...(current.interval !== interval ? { billing_cycle_anchor: "now" as const } : {}),
+                metadata: { supabase_user_id: user.id, plan, interval },
+              };
 
           // THE BACKSTOP, and its limitation stated rather than left to be
           // discovered. A Stripe idempotency key lives for 24 hours, so a
@@ -269,11 +288,34 @@ export async function POST(request: Request) {
           // A pair of clicks that straddles a bucket boundary is not
           // deduped HERE — that is what the database guard above is for,
           // and it has no buckets.
-          await stripe.subscriptions.update(existingSubscriptionId, subscriptionUpdate, {
+          const updated = await stripe.subscriptions.update(existingSubscriptionId, subscriptionUpdate, {
             idempotencyKey: `sub_update:${existingSubscriptionId}:${plan}:${interval}:${Math.floor(
               Date.now() / 120000
             )}`,
           });
+
+          // THE PAYMENT DID NOT GO THROUGH YET — most often a bank asking
+          // the customer to confirm. The plan has NOT changed (that is the
+          // pending update above); the customer is sent to Stripe's own
+          // page for that invoice to finish paying, and the change applies
+          // when they do. Unpaid, Stripe expires it and nothing changes.
+          if (updated.pending_update) {
+            const invoice = updated.latest_invoice;
+            const payUrl =
+              invoice && typeof invoice === "object" && typeof invoice.hosted_invoice_url === "string"
+                ? invoice.hosted_invoice_url
+                : null;
+            diagLog(
+              `[checkout-diag] subscription update pending payment id=${existingSubscriptionId} -> ${plan}/${interval}`
+            );
+            if (payUrl) return NextResponse.json({ ok: true, pendingPayment: true, url: payUrl });
+            return NextResponse.json(
+              // A code, not a sentence: components/billing/subscribe-button.tsx
+              // shows pricing.paymentPending in the reader's language.
+              { ok: false, code: "payment_pending" },
+              { status: 402 }
+            );
+          }
 
           diagLog(
             `[checkout-diag] subscription updated id=${existingSubscriptionId} ${current.slug}/${current.interval} -> ${plan}/${interval} upgrade=${isUpgrade}`

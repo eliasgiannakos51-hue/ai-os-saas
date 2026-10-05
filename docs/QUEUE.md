@@ -54,7 +54,7 @@ Sessions: εκτίμηση της 2026-10-05, από τη στήλη Sessions τ
 | # | Εργασία | Κατάσταση | Σημείωση |
 |---|---|---|---|
 | Α.1 | Στοιχεία πλάνου μόνο από τον server, overage μόνο για συνδρομητές, κωδικός beta μόνο από το περιβάλλον, add-on χωρίς αλλαγή πλάνου, δύο έλεγχοι ιδιοκτησίας, κεφαλίδες ασφαλείας | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-security`· το migration περιμένει το NEEDS 20 | `entitlement-trust` 24 έλεγχοι, 13/13 mutations· `entitlement-metadata.dbtest` 18 |
-| Α.2 | Έλεγχος χρέωσης κατά την αλλαγή πλάνου (ΑΣ-4.3) | εκκρεμεί | Χρήματα: πρώτα η περιγραφή στον ιδιοκτήτη |
+| Α.2 | Έλεγχος χρέωσης κατά την αλλαγή πλάνου (ΑΣ-4.3) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-plan-payment`· με την έγκριση του ιδιοκτήτη | Η αναβάθμιση εφαρμόζεται μόνο αφού πληρωθεί· `annual-billing` §5, 3/3 mutations. Billing portal: NEEDS 32 |
 | Α.3 | Έλεγχος πρόσβασης στην έρευνα (ΑΣ-4.4) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-research`· το migration περιμένει το NEEDS 25 | `entitlement-trust` §9, 16/16 mutations· `research-reports-writes.dbtest` 7, κόκκινο χωρίς το migration |
 | Α.4α | Κόστος και μοντέλα έξω από ό,τι διαβάζει ο χρήστης: αρχείο κόστους και αρχείο παρόχων (ΑΣ-3.2, μέρος 1) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-cost-visibility`· το migration περιμένει το NEEDS 26 | `entitlement-trust` §10, 19/19 mutations· `cost-log-reads.dbtest` 5, κόκκινο χωρίς το migration |
 | Α.4β | Το ίδιο για τα πεδία κόστους στις εργασίες και στην έρευνα (ΑΣ-3.2, μέρος 2) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-cost-visibility-2`· το migration περιμένει το NEEDS 27 | `entitlement-trust` §11, 22/22 mutations· `cost-columns.dbtest` 13, 7 κόκκινοι χωρίς το migration |

@@ -450,7 +450,8 @@
       "limits": "Όρια",
       "support": "Υποστήριξη"
     },
-    "comparisonRowCount": "Δυνατότητες που συγκρίνονται: {count}"
+    "comparisonRowCount": "Δυνατότητες που συγκρίνονται: {count}",
+    "paymentPending": "Η πληρωμή για αυτή την αλλαγή δεν ολοκληρώθηκε, οπότε το πλάνο σου δεν άλλαξε."
   },
   "roadmap": {
     "title": "Roadmap",

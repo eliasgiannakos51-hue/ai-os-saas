@@ -450,7 +450,8 @@
       "limits": "限额",
       "support": "支持"
     },
-    "comparisonRowCount": "对比的功能项：{count}"
+    "comparisonRowCount": "对比的功能项：{count}",
+    "paymentPending": "此项变更的付款未完成，因此你的套餐没有变化。"
   },
   "roadmap": {
     "title": "路线图",

@@ -54,7 +54,8 @@ export function SubscribeButton({
 
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setError(data.error ?? t("checkoutFailed"));
+        // The plan change was not paid, so it did not happen (api/checkout).
+        setError(data.code === "payment_pending" ? t("paymentPending") : (data.error ?? t("checkoutFailed")));
         return;
       }
 

@@ -450,7 +450,8 @@
       "limits": "上限",
       "support": "サポート"
     },
-    "comparisonRowCount": "比較した機能: {count}"
+    "comparisonRowCount": "比較した機能: {count}",
+    "paymentPending": "この変更のお支払いが完了しなかったため、プランは変更されていません。"
   },
   "roadmap": {
     "title": "ロードマップ",

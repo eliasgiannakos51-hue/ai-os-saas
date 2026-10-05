@@ -450,7 +450,8 @@
       "limits": "Limits",
       "support": "Support"
     },
-    "comparisonRowCount": "Features compared: {count}"
+    "comparisonRowCount": "Features compared: {count}",
+    "paymentPending": "The payment for this change did not go through, so your plan has not changed."
   },
   "roadmap": {
     "title": "Roadmap",

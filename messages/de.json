@@ -450,7 +450,8 @@
       "limits": "Grenzen",
       "support": "Unterstützung"
     },
-    "comparisonRowCount": "Verglichene Funktionen: {count}"
+    "comparisonRowCount": "Verglichene Funktionen: {count}",
+    "paymentPending": "Die Zahlung für diese Änderung ist nicht durchgegangen, daher hat sich dein Tarif nicht geändert."
   },
   "roadmap": {
     "title": "Roadmap",

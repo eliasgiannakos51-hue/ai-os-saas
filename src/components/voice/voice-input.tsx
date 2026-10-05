@@ -135,77 +135,28 @@ export function VoiceInput({
     if (draft !== null) draftRef.current?.focus();
   }, [draft]);
 
-  // Whether the "why is this off" note is showing. See the disabled branch
-  // below: a phone cannot hover, so the reason has to be tappable.
-  const [reasonShown, setReasonShown] = useState(false);
-
-  // RENDERED, BUT INERT, WHEN VOICE CANNOT WORK HERE — V4.6.
+  // NOT DRAWN WHEN IT CANNOT RECORD — the owner's rule, 2026-10-05
+  // (the voice brief «ΦΩΝΗ ΣΤΟ CHAT», Μέρος Α): «Κουμπί που δεν κάνει τίποτα δεν
+  // μένει στην οθόνη», and scenario 11, «Χωρίς κλειδί παρόχου, τα δύο
+  // κουμπιά δεν εμφανίζονται».
   //
-  // This used to return null, on the reasoning that a microphone that
-  // appears and then says "not configured" has wasted somebody's breath.
-  // What that produced was the report "the microphone does not exist in
-  // the main chat" from the owner of a deployment with no OPENAI_API_KEY:
-  // a control that silently is not there cannot tell anybody WHY it is
-  // not there. So it is drawn, disabled, and its title says which of the
-  // three reasons applies — not set up on this deployment, not on this
-  // plan, or no minutes left — and it does not record, so no breath is
-  // wasted either. Before the availability call has answered it is still
-  // nothing: a button that flickers from "not set up" to live is worse
-  // than a moment of absence.
-  if (!availability.transcribeAvailable) {
-    if (!availability.loaded) return null;
-    const reason = !availability.configured.transcribe
-      ? t("settings.notConfigured")
-      : !availability.included
-        ? t("settings.notIncluded")
-        : t("outOfMinutes");
-    // A `title` IS A HOVER, AND A PHONE CANNOT HOVER — V4.6, round 6.
-    //
-    // The previous version put the reason in `title` and set `disabled`.
-    // On a desktop that reads as a tooltip; on a phone it is nothing at
-    // all, and `disabled` means the tap fires no event either. Measured on
-    // the live site at 390px with a real CDP touch on 2026-09-05: the
-    // button is 44x44 and uncovered, the tap lands on it, and the screen
-    // does not change by one character. So the control that exists ONLY to
-    // explain why voice is missing explained nothing to the person most
-    // likely to be looking at it.
-    //
-    // `aria-disabled` without `disabled` keeps it inert and announced as
-    // unavailable while still receiving the tap, which is the accessible
-    // shape for exactly this: a control that must say why rather than one
-    // that must be silent. The reason is revealed IN THE PAGE, so it does
-    // not depend on a pointer that can hover.
-    return (
-      <span className="flex items-center gap-2">
-        <button
-          type="button"
-          aria-disabled="true"
-          onClick={() => setReasonShown((shown) => !shown)}
-          aria-label={`${t("startListening")} — ${reason}`}
-          title={reason}
-          data-testid="voice-input-unavailable"
-          className={
-            // 44px in both variants: an inert control is still a control the
-            // layout gate measures (scripts/tests/layout-stress.prodtest.mjs),
-            // and a 32px one grew its under-44px count by four.
-            compact
-              ? "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-item text-muted/50"
-              : "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-full border border-dashed border-border text-muted/50"
-          }
-        >
-          <Mic className={compact ? "h-4 w-4" : "h-[18px] w-[18px]"} aria-hidden="true" />
-        </button>
-        {/* THE REASON, ON THE PAGE. role="status" so a screen reader
-            announces it when it appears, and it stays until the control
-            is tapped again — a phone has no hover to dismiss it with. */}
-        {reasonShown ? (
-          <span role="status" className="max-w-[18rem] text-xs leading-snug text-muted">
-            {reason}
-          </span>
-        ) : null}
-      </span>
-    );
-  }
+  // V4.6 drew an inert microphone here instead, with the reason revealed
+  // on a tap. What that produced was the report "I pressed the microphone
+  // in Chat and nothing was written": a button the size and place of a
+  // working one, which records nothing, reads as broken rather than as
+  // off. Not on the plan, no provider key, no minutes left, or an
+  // availability read that failed — each is "this cannot record", and
+  // each now draws nothing. WHY voice is off is said once, where
+  // somebody goes to turn it on: the Voice settings screen
+  // (components/settings/voice-settings.tsx), which names all three.
+  //
+  // Before the availability call has answered it is also nothing: a
+  // button that flickers from absent to live is better than one that
+  // flickers from live to absent.
+  //
+  // Held by scripts/tests/chat-dictation.prodtest.mjs (each state, both
+  // devices) and scripts/tests/voice.test.mjs.
+  if (!availability.transcribeAvailable || !availability.hasMinutes) return null;
 
   function press() {
     if (recorder.recording) {
@@ -224,14 +175,10 @@ export function VoiceInput({
       <button
         type="button"
         onClick={press}
-        disabled={disabled || busy || !availability.hasMinutes}
+        disabled={disabled || busy}
         aria-pressed={recorder.recording}
         aria-label={recorder.recording ? t("stopListening") : t("startListening")}
-        title={
-          availability.hasMinutes
-            ? t("costPerMinute", { credits: availability.creditsPerMinute.transcribe })
-            : t("outOfMinutes")
-        }
+        title={t("costPerMinute", { credits: availability.creditsPerMinute.transcribe })}
         className={`flex ${compact ? "h-9 w-9" : "min-h-[44px] min-w-[44px]"} items-center justify-center rounded-item border transition-colors duration-150 disabled:opacity-40 ${
           recorder.recording
             ? "border-foreground/50 bg-foreground/15 text-foreground"

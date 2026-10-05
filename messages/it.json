@@ -1602,7 +1602,6 @@
       "statusCompleted": "Pronto",
       "statusFlagged": "Segnalato",
       "flaggedTitle": "Segnalato dal nostro controllo di sicurezza",
-      "regenerateFree": "Rigenera (gratis)",
       "editUnavailable": "Potrai richiedere modifiche una volta terminata la generazione del sito.",
       "design": {
         "title": "Design",
@@ -1650,7 +1649,6 @@
         "photoSourceNeedsUpload": "Allega le tue foto sopra, altrimenti verranno usate foto stock."
       },
       "imageIntro": "Il tuo logo, foto dei prodotti o del locale: quello che vuoi nella pagina o che deve dare lo stile.",
-      "regenerateAlreadyUsed": "Hai già usato la rigenerazione gratuita per questo sito. Crea un nuovo sito con una descrizione diversa.",
       "regenerateNoBrief": "Questo sito è stato creato prima che salvassimo la descrizione originale, quindi non può essere rigenerato automaticamente. Crea un nuovo sito con la stessa descrizione.",
       "empty": {
         "title": "Descrivi il sito, ottieni il sito",
@@ -1690,7 +1688,9 @@
           "quota": "{count, plural, one {Una immagine} other {# immagini}} non sono state aggiunte: la libreria di foto ha rifiutato altre richieste per ora. Riprova tra un'ora o aggiungi immagini tue.",
           "noMatch": "{count, plural, one {È stata richiesta una immagine} other {Sono state richieste # immagini}} e nessuna fotografia corrispondeva. Non è stato messo nulla di estraneo al suo posto — descrivere il soggetto in modo diverso di solito aiuta."
         }
-      }
+      },
+      "regeneratePaid": "Rigenera · circa {count} crediti",
+      "regenerateNoCredits": "Crediti insufficienti per un'altra rigenerazione: ne servono circa {needed}, ne hai {available}. Non è stato avviato nulla."
     },
     "marketplace": {
       "title": "Aiutanti pronti",
@@ -2128,7 +2128,7 @@
       "reasonBadEdges": "Non può iniziare né finire con un trattino.",
       "reasonReserved": "Questo indirizzo è riservato. Scegline un altro.",
       "reasonTaken": "Questo indirizzo è già occupato. Provane un altro.",
-      "disabledFlagged": "Questo sito è stato trattenuto dalla nostra revisione di sicurezza e non può andare online. Vedi i dettagli qui sotto: puoi rigenerarlo una volta gratuitamente.",
+      "disabledFlagged": "Questo sito è stato trattenuto dalla nostra revisione di sicurezza e non può andare online. Vedi i dettagli qui sotto: puoi rigenerarlo, e il pulsante indica quanto costa.",
       "disabledFailed": "La generazione di questo sito non è stata completata, quindi non c’è ancora nulla da pubblicare.",
       "disabledGenerating": "Generazione in corso. Potrai pubblicarlo appena sarà pronto.",
       "empty": {

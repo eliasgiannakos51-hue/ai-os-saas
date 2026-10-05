@@ -42,7 +42,7 @@ Sessions: εκτίμηση της 2026-10-05, από τη στήλη Sessions τ
 | 13 | Τα πολύ δύσκολα, αφού δεις τα σενάρια | 72 |
 | | **Σύνολο** | **≈520** |
 
-Το `docs/REMAINING.md` αθροίζει ≈737. Η διαφορά είναι δουλειά που οι
+Το `docs/REMAINING.md` αθροίζει ≈735,5. Η διαφορά είναι δουλειά που οι
 προδιαγραφές περιγράφουν δύο φορές: το BUILD-SPECS 4.3 ξαναπαραθέτει τα
 εργαλεία του 3, το v6-master ξαναλέει πολλά του 2, οι Συνδέσεις του 2.8
 και του v6-master 75 είναι οι ίδιες. Εδώ μετρούν μία φορά.
@@ -61,7 +61,7 @@ Sessions: εκτίμηση της 2026-10-05, από τη στήλη Sessions τ
 | Α.4γ | Εγγραφές πινάκων με όρια μόνο από τον server (ΑΣ-1.6): ομάδα, αρχεία, δημοσιευμένα sites | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-table-writes`· το migration περιμένει το NEEDS 28 | `entitlement-trust` §12, 25/25 mutations· `server-written-tables.dbtest` 18, 12 κόκκινοι χωρίς το migration |
 | Α.4δ | Το ίδιο για agents και sites (ΑΣ-1.6, υπόλοιπο) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-agents-sites`· το migration περιμένει το NEEDS 29 | `entitlement-trust` §13, 28/28 mutations· `server-written-tables.dbtest` 30, 7 κόκκινοι χωρίς το migration. Μια γραμμή «pending» υπάρχει πλέον μόνο μετά τους ελέγχους του `/generate`, άρα και το `/process` δεν τρέχει χωρίς αυτούς |
 | Α.5 | Φωνή και συσκέψεις χρεώνονται από τη διάρκεια του παρόχου (ΑΣ-4.9) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-voice-duration` | `voice` §8, 52/52 mutations. Χωρίς migration |
-| Α.6 | Ομάδες, επιβεβαίωση email, `next` | επιβεβαίωση email φτιαγμένη (2026-10-05), branch `claude/keen-turing-bv8gw4-email-confirm`· ομάδες: NEEDS 24 (αποφασίστηκε, επόμενο)· `next`: Α.9 | `email-confirmation` 22, 5/5· `signup-latency` 26 |
+| Α.6 | Ομάδες, επιβεβαίωση email, `next` | επιβεβαίωση email φτιαγμένη (2026-10-05), branch `claude/keen-turing-bv8gw4-email-confirm`· ομάδες, αναδημιουργία με κόστος πριν και «ποτέ πάνω από το υπόλοιπο» (NEEDS 24) φτιαγμένα (2026-10-05), branch `claude/keen-turing-bv8gw4-needs24`· η δωρεάν πρώτη αναδημιουργία: NEEDS 33· `next`: Α.9 | `email-confirmation` 22, 5/5· `signup-latency` 26· `team-grant` §6, 3/3· `regenerate-cost` 14, 4/4. Χωρίς migration |
 | Α.7 | Β1: ο πλήρης έλεγχος λαθών σε browser | μπλοκαρισμένο | NEEDS 2 |
 | Α.8 | Κείμενα που υπόσχονται κάτι που ο κώδικας δεν κάνει (`docs/REMAINING.md`, «Υποσχέσεις χωρίς αντίκρισμα», 16): πρώτα το `/ai-transparency` και το `/privacy`, μετά roadmap, hints, ειδοποιήσεις, Telegram, Συνδέσεις, onboarding | σε εξέλιξη: `/ai-transparency`, `/privacy`, roadmap, ειδοποιήσεις, Telegram, Συνδέσεις, onboarding, μνήμη, «Τα δικά μου», routing φτιαγμένα (2026-10-05)· μένουν όσα αγγίζουν τιμές (NEEDS 17, 24 και το νέο 31), branch `claude/keen-turing-bv8gw4-promises`· `legal-pages` 135 έλεγχοι, 25/25 mutations· `roadmap-truth` 25, 4/4 | Χωρίς απόφαση όσα δεν αγγίζουν τι πωλείται. Όσα είναι στις τιμές (βοηθοί, ομάδα, Automation Builder, add-ons, «δωρεάν» αναδημιουργία) αλλάζουν τι αγοράζει ο πελάτης: πρώτα σε σένα (NEEDS 17, 24). 2 sessions |
 | Α.9 | Αναβάθμιση `next` και των βιβλιοθηκών με γνωστά κενά (ΑΣ-8.1) | σε εξέλιξη: `sharp` και `nanoid` φτιαγμένα (2026-10-05), branch `claude/keen-turing-bv8gw4-deps`· `dependency-floors` 8, 4/4 | Μένουν: `next` 14 → 16 (μεγάλη αλλαγή έκδοσης, 2 sessions) και `pptxgenjs` (χωρίς διόρθωση στη σειρά 4.x) |

@@ -1602,7 +1602,6 @@
       "statusCompleted": "已就绪",
       "statusFlagged": "已标记",
       "flaggedTitle": "已被我们的安全审核标记",
-      "regenerateFree": "重新生成（免费）",
       "editUnavailable": "网站生成完成后即可提出修改要求。",
       "design": {
         "title": "设计",
@@ -1650,7 +1649,6 @@
         "photoSourceNeedsUpload": "请在上方添加照片，否则将使用图库照片。"
       },
       "imageIntro": "你的标志、产品照片、店内照片——想放到页面上的，或想让它决定风格的。",
-      "regenerateAlreadyUsed": "您已使用过此站点的免费重新生成。请用其他描述创建新站点。",
       "regenerateNoBrief": "此站点创建于我们开始保存原始描述之前，因此无法自动重新生成。请用相同描述创建新站点。",
       "empty": {
         "title": "描述这个网站，拿到这个网站",
@@ -1690,7 +1688,9 @@
           "quota": "有 {count} 张图片无法添加：图片库暂时拒绝了更多请求。请一小时后重试，或添加你自己的图片。",
           "noMatch": "请求了 {count} 张图片，但没有匹配的照片。我们没有放入无关的图片——换一种方式描述主题通常会有帮助。"
         }
-      }
+      },
+      "regeneratePaid": "重新生成 · 约 {count} 积分",
+      "regenerateNoCredits": "积分不足,无法再次重新生成:大约需要 {needed},你有 {available}。未开始任何操作。"
     },
     "marketplace": {
       "title": "现成的助手",
@@ -2128,7 +2128,7 @@
       "reasonBadEdges": "不能以连字符开头或结尾。",
       "reasonReserved": "该网址已被保留，请另选一个。",
       "reasonTaken": "该网址已被占用，请换一个。",
-      "disabledFlagged": "此站点被安全审核暂留，因此无法上线。请查看下方详情 — 您可以免费重新生成一次。",
+      "disabledFlagged": "此站点被安全审核暂留，因此无法上线。请查看下方详情 — 您可以重新生成，按钮上会显示所需费用。",
       "disabledFailed": "此站点尚未生成完成，暂无内容可发布。",
       "disabledGenerating": "正在生成。完成后即可发布。",
       "empty": {

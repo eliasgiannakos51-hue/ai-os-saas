@@ -790,7 +790,7 @@ const clientFallbacks = sources.flatMap((f) => [
 // memory (posts, presentations, the website worker, coding, the agent
 // executor) plus the settings route, and each carries the sentence about
 // which predicate decides whether the feature participates.
-const SERVER_PROSE_BASELINE = 671;
+const SERVER_PROSE_BASELINE = 670;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

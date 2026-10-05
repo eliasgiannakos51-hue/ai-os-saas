@@ -1602,7 +1602,6 @@
       "statusCompleted": "Fertig",
       "statusFlagged": "Markiert",
       "flaggedTitle": "Von unserer Sicherheitsprüfung markiert",
-      "regenerateFree": "Neu erzeugen (kostenlos)",
       "editUnavailable": "Änderungen sind möglich, sobald die Website fertig erzeugt ist.",
       "design": {
         "title": "Design",
@@ -1650,7 +1649,6 @@
         "photoSourceNeedsUpload": "Lade oben deine Fotos hoch, sonst werden Stockfotos verwendet."
       },
       "imageIntro": "Ihr Logo, Produktfotos, Bilder vom Laden — alles, was auf die Seite soll oder den Stil vorgeben darf.",
-      "regenerateAlreadyUsed": "Sie haben die kostenlose Neuerstellung für diese Website bereits genutzt. Erstellen Sie eine neue Website mit einer anderen Beschreibung.",
       "regenerateNoBrief": "Diese Website entstand, bevor wir die ursprüngliche Beschreibung gespeichert haben, daher ist keine automatische Neuerstellung möglich. Erstellen Sie eine neue Website mit derselben Beschreibung.",
       "empty": {
         "title": "Beschreib die Website, bekomm die Website",
@@ -1690,7 +1688,9 @@
           "quota": "{count, plural, one {Ein Bild} other {# Bilder}} konnten nicht eingefügt werden: die Fotobibliothek hat weitere Anfragen vorerst abgelehnt. Versuchen Sie es in einer Stunde erneut oder fügen Sie eigene Bilder hinzu.",
           "noMatch": "{count, plural, one {Ein Bild wurde} other {# Bilder wurden}} angefordert und kein Foto passte. Nichts Unpassendes wurde eingesetzt — eine andere Beschreibung des Motivs hilft meist."
         }
-      }
+      },
+      "regeneratePaid": "Neu erstellen · etwa {count} Credits",
+      "regenerateNoCredits": "Nicht genug Credits für eine weitere Neugenerierung: Sie braucht etwa {needed}, Sie haben {available}. Es wurde nichts gestartet."
     },
     "marketplace": {
       "title": "Fertige Helfer",
@@ -2128,7 +2128,7 @@
       "reasonBadEdges": "Sie darf nicht mit einem Bindestrich beginnen oder enden.",
       "reasonReserved": "Diese Adresse ist reserviert. Bitte wähle eine andere.",
       "reasonTaken": "Diese Adresse ist bereits vergeben. Probiere eine andere.",
-      "disabledFlagged": "Diese Website wurde von unserer Sicherheitsprüfung zurückgehalten und kann nicht online gehen. Details siehe unten — Sie können sie einmal kostenlos neu erstellen lassen.",
+      "disabledFlagged": "Diese Website wurde von unserer Sicherheitsprüfung zurückgehalten und kann nicht online gehen. Details siehe unten — Sie können sie neu erstellen lassen; die Schaltfläche zeigt, was das kostet.",
       "disabledFailed": "Diese Website wurde nicht fertiggestellt, es gibt also noch nichts zu veröffentlichen.",
       "disabledGenerating": "Wird noch erstellt. Sie können sie veröffentlichen, sobald sie fertig ist.",
       "empty": {

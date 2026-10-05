@@ -412,9 +412,10 @@ export function WebsiteBuilderWorkspace({
     void tick();
   }
 
-  // AI Output Protection Layer — one complimentary, no-extra-charge
-  // regenerate for a website flagged by the safety review (see
-  // api/websites/[id]/regenerate/route.ts). The route itself only resets
+  // AI Output Protection Layer — regenerate a website flagged by the
+  // safety review, at the price the button shows (see
+  // api/websites/[id]/regenerate/route.ts, which also refuses one the
+  // balance cannot cover). The route itself only resets
   // the row and hands back the original description/image paths; this
   // fires the exact same two-request flow (process + poll) a fresh
   // generation uses.
@@ -428,6 +429,10 @@ export function WebsiteBuilderWorkspace({
     try {
       const res = await fetchWithAuthRetry(`/api/websites/${id}/regenerate`, { method: "POST" });
       const data = await res.json();
+      if (data?.code === "insufficient_credits") {
+        addToast(`✗ ${t("regenerateNoCredits", { needed: data.needed, available: data.available })}`, "error");
+        return;
+      }
       if (!res.ok || !data.ok) {
         addToast(`✗ ${getErrorMessage(data?.error, "Could not regenerate this website.")}`, "error");
         return;
@@ -1513,7 +1518,11 @@ export function WebsiteBuilderWorkspace({
                       already paid for it was left with a warning and no
                       next step at all. Both cases now say what happened
                       and what to do instead. */}
-                  {!previewWebsite.free_retry_used && previewWebsite.description ? (
+                  {/* PRICED BEFORE THE PRESS (NEEDS 24): the button says what
+                      the run is estimated to cost. It used to say "free" and
+                      charge (docs/BUGS.md ΛΘ-7); a free first one waits on
+                      where its budget comes from (NEEDS 33). */}
+                  {previewWebsite.description ? (
                     <button
                       type="button"
                       onClick={() => handleRegenerateFlagged(previewWebsite.id)}
@@ -1525,14 +1534,22 @@ export function WebsiteBuilderWorkspace({
                       ) : (
                         <Wand2 className="h-3.5 w-3.5" aria-hidden="true" />
                       )}
-                      {t("regenerateFree")}
+                      {t("regeneratePaid", {
+                        count: estimateForAction(
+                          "websiteGenerate",
+                          {
+                            model: WEBSITE_BUILDER_MODEL,
+                            inputChars: previewWebsite.description.length,
+                            imageCount: 0,
+                            planSlug,
+                          },
+                          DEFAULTS,
+                          accountCreditPriceEur ?? undefined
+                        ).estimatedCredits,
+                      })}
                     </button>
                   ) : (
-                    <p className="max-w-md text-xs text-warning/70">
-                      {previewWebsite.free_retry_used
-                        ? t("regenerateAlreadyUsed")
-                        : t("regenerateNoBrief")}
-                    </p>
+                    <p className="max-w-md text-xs text-warning/70">{t("regenerateNoBrief")}</p>
                   )}
                 </div>
               ) : displayedHtmlIsComplete ? (

@@ -1602,7 +1602,6 @@
       "statusCompleted": "Listo",
       "statusFlagged": "Marcado",
       "flaggedTitle": "Marcado por nuestra revisión de seguridad",
-      "regenerateFree": "Regenerar (gratis)",
       "editUnavailable": "Podrás pedir cambios cuando termine de generarse el sitio web.",
       "design": {
         "title": "Diseño",
@@ -1650,7 +1649,6 @@
         "photoSourceNeedsUpload": "Adjunta tus fotos arriba, o se usarán fotos de stock."
       },
       "imageIntro": "Tu logo, fotos de producto o del local: lo que quieras que aparezca o que marque el estilo.",
-      "regenerateAlreadyUsed": "Ya has usado la regeneración gratuita de este sitio. Crea un sitio nuevo con otra descripción.",
       "regenerateNoBrief": "Este sitio se creó antes de que guardáramos la descripción original, así que no puede regenerarse automáticamente. Crea un sitio nuevo con la misma descripción.",
       "empty": {
         "title": "Describa el sitio y tendrá el sitio",
@@ -1690,7 +1688,9 @@
           "quota": "{count, plural, one {Una imagen} other {# imágenes}} no se pudieron añadir: la biblioteca de fotos rechazó más peticiones por ahora. Inténtalo en una hora o añade tus propias imágenes.",
           "noMatch": "{count, plural, one {Se pidió una imagen} other {Se pidieron # imágenes}} y ninguna fotografía coincidió. No se puso nada ajeno en su lugar — describir el tema de otra forma suele ayudar."
         }
-      }
+      },
+      "regeneratePaid": "Regenerar · unos {count} créditos",
+      "regenerateNoCredits": "No hay créditos suficientes para otra regeneración: necesita unos {needed} y tienes {available}. No se ha iniciado nada."
     },
     "marketplace": {
       "title": "Ayudantes listos",
@@ -2128,7 +2128,7 @@
       "reasonBadEdges": "No puede empezar ni terminar con un guion.",
       "reasonReserved": "Esa dirección está reservada. Elige otra.",
       "reasonTaken": "Esa dirección ya está ocupada. Prueba con otra.",
-      "disabledFlagged": "Nuestra revisión de seguridad ha retenido este sitio, así que no puede publicarse. Consulta los detalles abajo: puedes regenerarlo una vez gratis.",
+      "disabledFlagged": "Nuestra revisión de seguridad ha retenido este sitio, así que no puede publicarse. Consulta los detalles abajo: puedes regenerarlo y el botón indica cuánto cuesta.",
       "disabledFailed": "Este sitio no terminó de generarse, así que todavía no hay nada que publicar.",
       "disabledGenerating": "Aún se está generando. Podrás publicarlo en cuanto termine.",
       "empty": {

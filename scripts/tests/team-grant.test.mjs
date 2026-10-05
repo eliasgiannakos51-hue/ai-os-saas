@@ -182,6 +182,32 @@ check(
   `also written by: ${unexpected.join(", ")}`
 );
 
+console.log("\n== 6. the grant ends with the owner's paid period, and only the grant (NEEDS 24) ==");
+{
+  const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  const revoke = strip(readFileSync("src/lib/team/revoke-team-grants.ts", "utf8"));
+  const hook = strip(readFileSync("src/app/api/webhooks/stripe/route.ts", "utf8"));
+  check(
+    "an owner's subscription that stops being active takes the members' grants with it",
+    /if \(!isActive\) \{\s*const revoked = await revokeTeamGrants\(supabaseUserId\);/.test(hook)
+  );
+  check(
+    "…after the add-on early return, so an add-on ending is not the plan ending",
+    hook.indexOf("if (subscription.metadata?.addon_slug) return;") > 0 &&
+      hook.indexOf("if (subscription.metadata?.addon_slug) return;") < hook.indexOf("await revokeTeamGrants(")
+  );
+  check("only the owner's active members are read", /\.eq\("owner_id", ownerId\)\s*\.eq\("status", "active"\)/.test(revoke));
+  check(
+    "…and only a grant THIS owner gave is taken back",
+    /if \(memberData\.user\.user_metadata\?\.team_owner_id !== ownerId\) continue;/.test(revoke)
+  );
+  check(
+    "what is removed is the grant, never the member's own plan",
+    /remove: \["team_owner_id", "team_granted_tier"\]/.test(revoke) && !/subscription_tier/.test(revoke)
+  );
+  check("nothing of theirs is deleted", !/\.delete\(/.test(revoke));
+}
+
 console.log(
   failures.length === 0
     ? `\nALL ${pass} CHECKS PASSED`

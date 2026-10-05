@@ -3,17 +3,26 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import type { UserWebsite } from "@/types/user-website";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { hasActiveBetaBypass } from "@/lib/beta";
+import { getPurchasedPackCreditPriceEur, hasEnoughCredits, resolveEffectivePlan } from "@/lib/billing/credits";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
+import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
+import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 
 export const dynamic = "force-dynamic";
 
-// One complimentary, no-extra-charge regenerate for a website the AI
-// Output Protection Layer flagged (status 'flagged' — see
-// api/websites/generate/process/route.ts). Resets the row back to
-// 'pending' and hands the client back the original description +
-// already-uploaded reference image paths so it can immediately re-fire
-// the normal /api/websites/generate/process worker request, same as a
-// fresh generation — this route itself makes no AI call and charges
-// nothing.
+// Regenerate a website the AI Output Protection Layer flagged (status
+// 'flagged' — see api/websites/generate/process/route.ts). Every one is a
+// normal paid generation, priced on the button before it is pressed (the
+// free first one waits on a budget decision, NEEDS 33). Resets
+// the row back to 'pending' and hands the client back the original
+// description + already-uploaded reference image paths so it can
+// immediately re-fire the normal /api/websites/generate/process worker
+// request, same as a fresh generation — this route itself makes no AI
+// call and charges nothing; the worker holds and settles.
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
     const websiteId = params.id;
@@ -46,13 +55,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     if (typedWebsite.status !== "flagged") {
       return NextResponse.json(
-        { ok: false, error: "Only a flagged website can be regenerated for free." },
-        { status: 400 }
-      );
-    }
-    if (typedWebsite.free_retry_used) {
-      return NextResponse.json(
-        { ok: false, error: "The free regenerate for this website has already been used." },
+        { ok: false, error: "Only a flagged website can be regenerated." },
         { status: 400 }
       );
     }
@@ -72,18 +75,52 @@ export async function POST(request: Request, { params }: { params: { id: string 
       .eq("website_id", websiteId);
     const referenceImagePaths = (imageRows ?? []).map((r) => r.image_url as string);
 
-    // Atomic conditional UPDATE — only claims if it's still 'flagged' and
-    // the free retry hasn't already been spent, same race-guard pattern
-    // used by editing_started_at/processing_started_at elsewhere in this
-    // app: a fast double-click on "Regenerate (free)" can only ever win
-    // this update once.
+    // NO BALANCE, NO START (NEEDS 24). A run with too few credits
+    // would be refused by the worker's hold anyway — but only after this
+    // route had moved the row out of 'flagged', leaving a failed site the
+    // button can no longer reach. So it is asked here first, against the
+    // same estimate the button shows, and the row stays as it was. The
+    // worker's hold is still the real gate: it also counts the account
+    // context this estimate cannot see.
+    if (!isAdminEmail(user.email) && !(await hasActiveBetaBypass(user))) {
+      const plan = await resolveEffectivePlan(user);
+      const config = resolvePricingConfig();
+      const packPriceEur = await getPurchasedPackCreditPriceEur(user.id);
+      const estimate = estimateForAction(
+        "websiteGenerate",
+        {
+          model: WEBSITE_BUILDER_MODEL,
+          inputChars: typedWebsite.description.length,
+          imageCount: Math.min(referenceImagePaths.length, MAX_REFERENCE_IMAGES),
+          planSlug: plan?.slug ?? null,
+        },
+        config,
+        effectiveCreditPriceEurForAccount(plan, packPriceEur, config)
+      );
+      const affordable = await hasEnoughCredits(user.id, estimate.reserveCredits, plan);
+      if (!affordable.ok) {
+        return NextResponse.json(
+          {
+            ok: false,
+            code: "insufficient_credits",
+            needed: estimate.reserveCredits,
+            available: affordable.remaining,
+          },
+          { status: 402 }
+        );
+      }
+    }
+
+    // Atomic conditional UPDATE — only claims if it's still 'flagged',
+    // same race-guard pattern used by editing_started_at/
+    // processing_started_at elsewhere in this app: a fast double-click on
+    // "Regenerate" can only ever win this update once.
     const { data: claimedRows, error: claimError } = await createAdminClient()
       .from("user_websites")
-      .update({ status: "pending", error_message: null, free_retry_used: true })
+      .update({ status: "pending", error_message: null })
       .eq("id", websiteId)
       .eq("user_id", user.id)
       .eq("status", "flagged")
-      .eq("free_retry_used", false)
       .select("id");
 
     if (claimError) {
@@ -92,7 +129,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
     if (!claimedRows || claimedRows.length === 0) {
       return NextResponse.json(
-        { ok: false, error: "This website's free regenerate has already been started or used." },
+        { ok: false, error: "This website's regenerate has already been started." },
         { status: 409 }
       );
     }

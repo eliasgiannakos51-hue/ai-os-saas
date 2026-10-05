@@ -21,6 +21,7 @@ import {
 } from "@/lib/billing/credits";
 import { logApiError } from "@/lib/log-error";
 import { mergeUserMetadata } from "@/lib/auth/user-metadata";
+import { revokeTeamGrants } from "@/lib/team/revoke-team-grants";
 import {
   recordCommissionForInvoice,
   reverseCommissionForInvoice,
@@ -176,6 +177,14 @@ async function syncSubscriptionToUser(
     { context: "/api/webhooks/stripe" }
   );
   const updateError = merged ? null : new Error("merge_user_metadata failed");
+
+  // THE TEAM ENDS WITH THE OWNER'S PAID PERIOD (NEEDS 24). An inactive
+  // subscription here is a period that ended unpaid or a cancellation
+  // reaching its end — the members' grants go with it, and nothing else.
+  if (!isActive) {
+    const revoked = await revokeTeamGrants(supabaseUserId);
+    diagLog(`[webhook-diag] team grants revoked=${revoked} owner=${supabaseUserId}`);
+  }
   diagLog(`[webhook-diag] syncSubscriptionToUser result supabaseUserId=${supabaseUserId} planSlug=${planSlug} isActive=${isActive} seatCount=${seatCount} updateError=${updateError?.message ?? "none"}`);
 
   // CREDITS — a GATE and, inside it, TWO PATHS. Both halves of a merge,

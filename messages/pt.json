@@ -1602,7 +1602,6 @@
       "statusCompleted": "Pronto",
       "statusFlagged": "Sinalizado",
       "flaggedTitle": "Sinalizado pela nossa revisão de segurança",
-      "regenerateFree": "Regenerar (grátis)",
       "editUnavailable": "Poderá pedir alterações assim que o site terminar de ser gerado.",
       "design": {
         "title": "Design",
@@ -1650,7 +1649,6 @@
         "photoSourceNeedsUpload": "Anexa as tuas fotos acima, ou serão usadas fotos de stock."
       },
       "imageIntro": "O seu logótipo, fotos de produto ou do espaço — o que quiser na página ou que defina o estilo.",
-      "regenerateAlreadyUsed": "Já usou a regeneração gratuita deste site. Crie um novo site com outra descrição.",
       "regenerateNoBrief": "Este site foi criado antes de guardarmos a descrição original, por isso não pode ser regenerado automaticamente. Crie um novo site com a mesma descrição.",
       "empty": {
         "title": "Descreva o site e receba o site",
@@ -1690,7 +1688,9 @@
           "quota": "{count, plural, one {Uma imagem} other {# imagens}} não puderam ser adicionadas: a biblioteca de fotografias recusou mais pedidos por agora. Tente daqui a uma hora ou adicione as suas próprias imagens.",
           "noMatch": "{count, plural, one {Foi pedida uma imagem} other {Foram pedidas # imagens}} e nenhuma fotografia correspondeu. Nada de alheio foi colocado no lugar — descrever o tema de outra forma costuma ajudar."
         }
-      }
+      },
+      "regeneratePaid": "Regenerar · cerca de {count} créditos",
+      "regenerateNoCredits": "Créditos insuficientes para outra regeneração: são precisos cerca de {needed} e tem {available}. Nada foi iniciado."
     },
     "marketplace": {
       "title": "Ajudantes prontos",
@@ -2128,7 +2128,7 @@
       "reasonBadEdges": "Não pode começar nem terminar com um hífen.",
       "reasonReserved": "Esse endereço está reservado. Escolhe outro.",
       "reasonTaken": "Esse endereço já está ocupado. Tenta outro.",
-      "disabledFlagged": "Este site foi retido pela nossa revisão de segurança, por isso não pode ficar online. Veja os detalhes abaixo — pode regenerá-lo uma vez gratuitamente.",
+      "disabledFlagged": "Este site foi retido pela nossa revisão de segurança, por isso não pode ficar online. Veja os detalhes abaixo — pode regenerá-lo, e o botão mostra quanto custa.",
       "disabledFailed": "Este site não terminou de ser gerado, por isso ainda não há nada para publicar.",
       "disabledGenerating": "Ainda a gerar. Poderá publicar assim que terminar.",
       "empty": {

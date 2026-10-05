@@ -258,7 +258,9 @@ console.log(
 // 231 -> 237 on 2026-10-05: the suites added since — the security round's
 // and roadmap-truth.mutation.mjs — covered six more between them. Read
 // off the run.
-const RATCHET = 237;
+// 237 -> 243 on 2026-10-05: plan-payment, addons, email-confirmation,
+// team-grant and regenerate-cost covered six more. Read off the run.
+const RATCHET = 243;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

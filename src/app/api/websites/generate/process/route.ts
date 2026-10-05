@@ -963,7 +963,7 @@ export async function POST(request: Request) {
         // after settlement instead.
         status: "processing",
         error_message: isFlagged
-          ? `This website was flagged by our safety review and can't be published as-is: ${flaggedSummary}. You can regenerate it once at no extra charge.`
+          ? `This website was flagged by our safety review and can't be published as-is: ${flaggedSummary}. You can regenerate it; the button shows what that costs.`
           : null,
       })
       .eq("id", websiteId)

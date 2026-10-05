@@ -1602,7 +1602,6 @@
       "statusCompleted": "Ready",
       "statusFlagged": "Flagged",
       "flaggedTitle": "Flagged by our safety review",
-      "regenerateFree": "Regenerate (free)",
       "editUnavailable": "You can request changes once this website has finished generating.",
       "design": {
         "title": "Design",
@@ -1650,7 +1649,6 @@
         "photoSourceNeedsUpload": "Attach your photos above, or this falls back to stock."
       },
       "imageIntro": "Your logo, product shots, photos of the place — anything you want on the page or want the style taken from.",
-      "regenerateAlreadyUsed": "You’ve already used the free regeneration for this site. Create a new website to try a different brief.",
       "regenerateNoBrief": "This site was made before we started saving the original brief, so it can’t be regenerated automatically. Create a new website with the same description.",
       "empty": {
         "title": "Describe the site, get the site",
@@ -1690,7 +1688,9 @@
           "quota": "{count, plural, one {One picture} other {# pictures}} could not be added: the photo library refused more requests for now. Try again in an hour, or add your own images.",
           "noMatch": "{count, plural, one {One picture was} other {# pictures were}} asked for and no photograph matched. Nothing unrelated was put in its place — describing the subject differently usually helps."
         }
-      }
+      },
+      "regeneratePaid": "Regenerate · about {count} credits",
+      "regenerateNoCredits": "Not enough credits for another regeneration: it needs about {needed}, you have {available}. Nothing was started."
     },
     "marketplace": {
       "title": "Ready-made helpers",
@@ -2128,7 +2128,7 @@
       "reasonBadEdges": "It can't start or end with a hyphen.",
       "reasonReserved": "That address is reserved. Please pick another.",
       "reasonTaken": "That address is already taken. Try a different one.",
-      "disabledFlagged": "This site was held by our safety review, so it can’t go live. See the details below — you can regenerate it once for free.",
+      "disabledFlagged": "This site was held by our safety review, so it can’t go live. See the details below — you can regenerate it, and the button shows what that costs.",
       "disabledFailed": "This site didn’t finish generating, so there’s nothing to publish yet.",
       "disabledGenerating": "Still generating. You can publish as soon as it’s finished.",
       "empty": {

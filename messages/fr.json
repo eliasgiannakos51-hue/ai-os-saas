@@ -1602,7 +1602,6 @@
       "statusCompleted": "Prêt",
       "statusFlagged": "Signalé",
       "flaggedTitle": "Signalé par notre contrôle de sécurité",
-      "regenerateFree": "Régénérer (gratuit)",
       "editUnavailable": "Vous pourrez demander des modifications une fois le site généré.",
       "design": {
         "title": "Design",
@@ -1650,7 +1649,6 @@
         "photoSourceNeedsUpload": "Ajoutez vos photos ci-dessus, sinon des photos de stock seront utilisées."
       },
       "imageIntro": "Votre logo, vos photos de produits ou du lieu — ce que vous voulez voir sur la page ou qui doit inspirer le style.",
-      "regenerateAlreadyUsed": "Vous avez déjà utilisé la régénération gratuite pour ce site. Créez un nouveau site avec une autre description.",
       "regenerateNoBrief": "Ce site a été créé avant que nous enregistrions la description d’origine ; il ne peut donc pas être régénéré automatiquement. Créez un nouveau site avec la même description.",
       "empty": {
         "title": "Décrivez le site, obtenez le site",
@@ -1690,7 +1688,9 @@
           "quota": "{count, plural, one {Une image} other {# images}} n'ont pas pu être ajoutées : la bibliothèque de photos a refusé d'autres requêtes pour l'instant. Réessayez dans une heure ou ajoutez vos propres images.",
           "noMatch": "{count, plural, one {Une image a été} other {# images ont été}} demandée et aucune photographie ne correspondait. Rien d'étranger n'a été mis à la place — décrire le sujet autrement aide généralement."
         }
-      }
+      },
+      "regeneratePaid": "Régénérer · environ {count} crédits",
+      "regenerateNoCredits": "Pas assez de crédits pour une nouvelle régénération : il en faut environ {needed}, vous en avez {available}. Rien n’a été lancé."
     },
     "marketplace": {
       "title": "Assistants prêts à l’emploi",
@@ -2128,7 +2128,7 @@
       "reasonBadEdges": "Elle ne peut pas commencer ni finir par un tiret.",
       "reasonReserved": "Cette adresse est réservée. Choisissez-en une autre.",
       "reasonTaken": "Cette adresse est déjà prise. Essayez-en une autre.",
-      "disabledFlagged": "Ce site a été retenu par notre contrôle de sécurité et ne peut pas être mis en ligne. Voir les détails ci-dessous — vous pouvez le régénérer une fois gratuitement.",
+      "disabledFlagged": "Ce site a été retenu par notre contrôle de sécurité et ne peut pas être mis en ligne. Voir les détails ci-dessous — vous pouvez le régénérer, et le bouton indique ce que cela coûte.",
       "disabledFailed": "La génération de ce site n’a pas abouti, il n’y a donc rien à publier.",
       "disabledGenerating": "Génération en cours. Vous pourrez publier dès qu’elle sera terminée.",
       "empty": {

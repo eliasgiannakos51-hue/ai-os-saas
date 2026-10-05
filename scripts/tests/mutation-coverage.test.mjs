@@ -255,7 +255,10 @@ console.log(
 // 225 -> 231 on 2026-10-04: the design's suites — earth, recent-tools,
 // home-design, conversation-design, all-tools, mobile-tabs — covered six
 // more. Read off the run.
-const RATCHET = 231;
+// 231 -> 237 on 2026-10-05: the suites added since — the security round's
+// and roadmap-truth.mutation.mjs — covered six more between them. Read
+// off the run.
+const RATCHET = 237;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

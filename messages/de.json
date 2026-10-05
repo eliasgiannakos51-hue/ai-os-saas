@@ -484,19 +484,19 @@
       },
       "agentBuilder": {
         "title": "KI-Agenten-Builder",
-        "description": "Beschreibe ein Ziel und erhalte einen funktionierenden autonomen Agenten, der es verfolgt."
+        "description": "Beschreibe ein Ziel und erhalte einen Agenten, der nach deinem Zeitplan im Web danach sucht und dir schickt, was er gefunden hat."
       },
       "websiteBuilder": {
         "title": "Website-Builder",
         "description": "KI-generierte Websites aus einem einzigen Prompt."
       },
       "automationBuilder": {
-        "title": "Echter Automatisierungs-Builder",
-        "description": "Echte Workflow-Automatisierung, die tatsächlich läuft — nicht nur notierte Ideen."
+        "title": "Automatisierungen",
+        "description": "Beschreibe eine Aufgabe in einem Satz: Sie läuft einmal am Tag und speichert das Ergebnis. Schritte und Bedingungen gibt es noch nicht."
       },
       "aiMemory": {
         "title": "KI-Gedächtnis",
-        "description": "Projektübergreifender Kontext und Erinnerung, damit die KI sich das Wichtige merkt."
+        "description": "Der Chat merkt sich, was du ihm über dich und dein Unternehmen erzählst, und die Werkzeuge für Websites, Präsentationen und Beiträge nutzen es. Du kannst jeden Eintrag sehen und löschen."
       },
       "mobileApps": {
         "title": "Mobile- & Desktop-Apps",
@@ -520,7 +520,7 @@
       },
       "coding": {
         "title": "KI-Coding-Assistent",
-        "description": "Vollständige App-Generierung, nicht nur Code-Schnipsel."
+        "description": "Schreibt Code nach einer Beschreibung oder erklärt, debuggt, konvertiert oder testet Code, den du einfügst. Er führt keinen Code aus und öffnet kein Repository."
       },
       "dataAnalysis": {
         "title": "KI-Datenanalyse",

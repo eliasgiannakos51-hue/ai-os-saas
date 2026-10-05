@@ -484,19 +484,19 @@
       },
       "agentBuilder": {
         "title": "AI Agent Builder",
-        "description": "Describe a goal and get a working autonomous agent that pursues it."
+        "description": "Describe a goal and get an agent that searches the web for it on the schedule you set and sends you what it found."
       },
       "websiteBuilder": {
         "title": "Website Builder",
         "description": "AI-generated websites from a single prompt."
       },
       "automationBuilder": {
-        "title": "Real Automation Builder",
-        "description": "Actual workflow automation that runs — not just logged ideas."
+        "title": "Automations",
+        "description": "Describe a task in a sentence: it runs once a day and saves the result for you. Steps and conditions are not built yet."
       },
       "aiMemory": {
         "title": "AI Memory",
-        "description": "Cross-project context and recall, so AI remembers what matters."
+        "description": "Chat remembers what you tell it about you and your business, and the site, presentation and post tools use it. You can see and delete every item."
       },
       "mobileApps": {
         "title": "Mobile & Desktop Apps",
@@ -520,7 +520,7 @@
       },
       "coding": {
         "title": "AI Coding Assistant",
-        "description": "Full app generation, not just snippets."
+        "description": "Writes code from a description, or explains, debugs, converts or writes tests for code you paste in. It does not run code or open a repository."
       },
       "dataAnalysis": {
         "title": "AI Data Analysis",

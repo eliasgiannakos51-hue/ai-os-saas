@@ -103,12 +103,13 @@ const SECTIONS: RoadmapSection[] = [
       // anywhere in it". These four produce:
       //   coding        five real operations through lib/coding/operations.ts
       //   dataAnalysis  parses an uploaded sheet, profiles it, charts it
-      //   router        lib/ai/routing/route.ts + the provider adapters
       //   marketplace   agent_templates, browsed and adopted
+      // (A fourth, router, was moved back to "soon" on 2026-10-05: route.ts
+      // serves no request — every feature names its own model — and a
+      // directory is not a feature, as the line above says.)
       // roadmap-truth.test.mjs now checks that reasoning mechanically.
       { icon: Code2, key: "coding" },
       { icon: LineChart, key: "dataAnalysis" },
-      { icon: Shuffle, key: "router" },
       { icon: Store, key: "marketplace" },
       // V5 #21. Was under "future" with the reason "/dashboard/presentations
       // is a tracking log"; lib/presentations/generate.ts and
@@ -135,6 +136,11 @@ const SECTIONS: RoadmapSection[] = [
       { icon: Mic, key: "voice" },
       { icon: Bell, key: "pushNotifications" },
       { icon: Workflow, key: "workflowBuilder" },
+      // Measured in the shadow since E.2 (lib/ai/routing/categorize.ts):
+      // it records what it would choose and changes no model yet.
+      // roadmap-truth.test.mjs moves it back up the day a request is
+      // served by it, by counting route.ts's callers.
+      { icon: Shuffle, key: "router" },
       { icon: Monitor, key: "desktopApp" },
       { icon: Send, key: "messagingChannels" },
       { icon: Share2, key: "socialPosting" },

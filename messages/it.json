@@ -484,19 +484,19 @@
       },
       "agentBuilder": {
         "title": "AI Agent Builder",
-        "description": "Descrivi un obiettivo e ottieni un agente autonomo funzionante che lo persegue."
+        "description": "Descrivi un obiettivo e ottieni un agente che lo cerca sul web secondo la pianificazione che imposti e ti invia ciò che ha trovato."
       },
       "websiteBuilder": {
         "title": "Website Builder",
         "description": "Siti web generati dall'IA a partire da un singolo prompt."
       },
       "automationBuilder": {
-        "title": "Vero Automation Builder",
-        "description": "Automazione dei flussi di lavoro reale ed eseguibile — non solo idee registrate."
+        "title": "Automazioni",
+        "description": "Descrivi un'attività in una frase: viene eseguita una volta al giorno e salva il risultato. Passaggi e condizioni non esistono ancora."
       },
       "aiMemory": {
         "title": "Memoria AI",
-        "description": "Contesto e memoria tra progetti, così l'IA ricorda ciò che conta."
+        "description": "La chat ricorda ciò che le dici su di te e sulla tua attività, e gli strumenti per siti, presentazioni e post lo usano. Puoi vedere ed eliminare ogni elemento."
       },
       "mobileApps": {
         "title": "App mobili e desktop",
@@ -520,7 +520,7 @@
       },
       "coding": {
         "title": "Assistente di coding AI",
-        "description": "Generazione di app complete, non solo frammenti di codice."
+        "description": "Scrive codice da una descrizione, oppure spiega, corregge, converte o testa il codice che incolli. Non esegue codice e non apre repository."
       },
       "dataAnalysis": {
         "title": "Analisi dati AI",

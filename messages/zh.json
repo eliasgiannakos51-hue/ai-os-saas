@@ -484,19 +484,19 @@
       },
       "agentBuilder": {
         "title": "AI 智能体构建器",
-        "description": "描述一个目标，即可获得一个可自主执行该目标的智能体。"
+        "description": "描述一个目标，即可获得一个按你设定的时间在网上搜索并把结果发给你的智能体。"
       },
       "websiteBuilder": {
         "title": "网站构建器",
         "description": "根据单条提示词由 AI 生成网站。"
       },
       "automationBuilder": {
-        "title": "真正的自动化构建器",
-        "description": "真实可运行的工作流自动化——而不仅仅是记录下来的想法。"
+        "title": "自动化",
+        "description": "用一句话描述任务：它每天运行一次并保存结果。多步骤和条件尚未提供。"
       },
       "aiMemory": {
         "title": "AI 记忆",
-        "description": "跨项目的上下文与记忆，让 AI 记住重要信息。"
+        "description": "聊天会记住你告诉它的关于你和你业务的信息，网站、演示文稿和帖子工具都会使用。你可以查看并删除每一条。"
       },
       "mobileApps": {
         "title": "移动端与桌面应用",
@@ -520,7 +520,7 @@
       },
       "coding": {
         "title": "AI 编程助手",
-        "description": "生成完整应用，而不只是代码片段。"
+        "description": "根据描述编写代码，或解释、排查、转换你粘贴的代码并为其编写测试。它不会运行代码，也不会打开代码仓库。"
       },
       "dataAnalysis": {
         "title": "AI 数据分析",

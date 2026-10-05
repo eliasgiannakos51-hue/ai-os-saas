@@ -484,19 +484,19 @@
       },
       "agentBuilder": {
         "title": "Créateur d'agents IA",
-        "description": "Décrivez un objectif et obtenez un agent autonome fonctionnel qui le poursuit."
+        "description": "Décrivez un objectif et obtenez un agent qui le recherche sur le web selon le calendrier que vous fixez et vous envoie ce qu'il a trouvé."
       },
       "websiteBuilder": {
         "title": "Créateur de sites web",
         "description": "Sites web générés par IA à partir d'un simple prompt."
       },
       "automationBuilder": {
-        "title": "Vrai créateur d'automatisation",
-        "description": "Une automatisation de workflow réelle qui s'exécute — pas juste des idées notées."
+        "title": "Automatisations",
+        "description": "Décrivez une tâche en une phrase : elle s'exécute une fois par jour et enregistre le résultat. Les étapes et les conditions n'existent pas encore."
       },
       "aiMemory": {
         "title": "Mémoire IA",
-        "description": "Contexte et mémoire inter-projets, pour que l'IA se souvienne de ce qui compte."
+        "description": "Le chat retient ce que vous lui dites sur vous et votre activité, et les outils de site, de présentation et de publications s'en servent. Vous pouvez voir et supprimer chaque élément."
       },
       "mobileApps": {
         "title": "Applications mobiles et de bureau",
@@ -520,7 +520,7 @@
       },
       "coding": {
         "title": "Assistant de codage IA",
-        "description": "Génération d'applications complètes, pas seulement des extraits."
+        "description": "Écrit du code à partir d'une description, ou explique, débogue, convertit ou teste le code que vous collez. Il n'exécute pas de code et n'ouvre pas de dépôt."
       },
       "dataAnalysis": {
         "title": "Analyse de données par IA",

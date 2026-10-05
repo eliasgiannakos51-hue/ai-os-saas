@@ -484,19 +484,19 @@
       },
       "agentBuilder": {
         "title": "Criador de Agentes IA",
-        "description": "Descreva uma meta e obtenha um agente autônomo funcional que a persegue."
+        "description": "Descreva um objetivo e receba um agente que pesquisa na web no horário que você definir e envia o que encontrou."
       },
       "websiteBuilder": {
         "title": "Criador de Sites",
         "description": "Sites gerados por IA a partir de um único prompt."
       },
       "automationBuilder": {
-        "title": "Criador de Automação Real",
-        "description": "Automação de fluxo de trabalho real que executa — não apenas ideias registradas."
+        "title": "Automações",
+        "description": "Descreva uma tarefa numa frase: ela é executada uma vez por dia e guarda o resultado. Etapas e condições ainda não existem."
       },
       "aiMemory": {
         "title": "Memória IA",
-        "description": "Contexto e memória entre projetos, para que a IA lembre do que importa."
+        "description": "O chat lembra o que você conta sobre você e o seu negócio, e as ferramentas de sites, apresentações e posts usam isso. Você pode ver e apagar cada item."
       },
       "mobileApps": {
         "title": "Apps móveis e de desktop",
@@ -520,7 +520,7 @@
       },
       "coding": {
         "title": "Assistente de codificação com IA",
-        "description": "Geração de apps completos, não apenas trechos de código."
+        "description": "Escreve código a partir de uma descrição, ou explica, depura, converte ou testa o código que você colar. Não executa código nem abre repositórios."
       },
       "dataAnalysis": {
         "title": "Análise de dados com IA",

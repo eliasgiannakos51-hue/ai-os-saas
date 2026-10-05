@@ -255,7 +255,7 @@
       "memory": "Cerca in tutto quello che hai salvato.",
       "favorites": "Tutto quello che hai messo tra i preferiti.",
       "marketplace": "Condividi la forma di un agente come modello e parti da uno condiviso da qualcun altro.",
-      "team": "Invita persone nel tuo spazio.",
+      "team": "Dai il tuo piano ad altre persone, ognuna sul proprio account.",
       "apps": "Tieni traccia delle app che stai pianificando o hai già pubblicato. Non le costruisce.",
       "images": "Tieni traccia delle immagini che stai pianificando o hai già fatto. Non le genera.",
       "videos": "Tieni traccia dei video che stai pianificando o hai già fatto. Non li genera.",
@@ -2791,8 +2791,12 @@
       "search": "Trova uno strumento",
       "searchLabel": "Cerca strumenti",
       "noMatch": "Nessuno strumento si chiama «{query}». Descrivilo nel campo della Home.",
-      "beta": "Beta",
-      "betaHint": "In prova: funziona, ma non fa ancora tutto ciò che dovrebbe."
+      "groups": {
+        "make": "Crea",
+        "ask": "Chiedi",
+        "organise": "Organizza",
+        "business": "Attività"
+      }
     },
     "home": {
       "actions": {

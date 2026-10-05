@@ -9,7 +9,7 @@ import { MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } 
 import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { filterAndRankCandidates } from "@/lib/command-palette-match";
 import { aliasesFor } from "@/lib/palette-aliases";
-import { ALL_TOOLS_GROUPS } from "@/lib/nav/all-tools";
+import { ALL_TOOLS_GROUPS, type AllToolsGroupKey } from "@/lib/nav/all-tools";
 import { NEVER_RECENT } from "@/lib/nav/recent-tools";
 import { useToast } from "@/components/toast/toast-context";
 
@@ -50,9 +50,17 @@ export function ToolsGrid({ isOwner, pinned = [] }: { isOwner: boolean; pinned?:
     const byHref = new Map(
       sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).flatMap((g) => g.items.map((i) => [i.href, i] as const))
     );
+    // Literal keys, so the message slicer can bound what this page needs
+    // (lib/i18n/message-slices.ts): a template-literal key is unbounded.
+    const headings: Record<AllToolsGroupKey, string> = {
+      make: t("groups.make"),
+      ask: t("groups.ask"),
+      organise: t("groups.organise"),
+      business: t("groups.business"),
+    };
     const tools = ALL_TOOLS_GROUPS.map((g) => ({
       key: g.key,
-      heading: t(`groups.${g.key}`),
+      heading: headings[g.key],
       items: g.hrefs.map((h) => byHref.get(h)).filter((i): i is SidebarItem => Boolean(i)),
     })).filter((g) => g.items.length > 0);
     const settings = sidebarGroups([SETTINGS_GROUP], isOwner).map((g) => ({

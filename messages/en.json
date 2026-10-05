@@ -255,7 +255,7 @@
       "memory": "Search across everything you have saved.",
       "favorites": "Everything you've starred.",
       "marketplace": "Share an agent's shape as a template, and start from one someone else shared.",
-      "team": "Invite people to your workspace.",
+      "team": "Give people your plan, each on their own account.",
       "apps": "Keep track of apps you are planning or have already shipped. It does not build them.",
       "images": "Keep track of images you are planning or have already made. It does not generate them.",
       "videos": "Keep track of videos you are planning or have already made. It does not generate them.",
@@ -2791,8 +2791,12 @@
       "search": "Find a tool",
       "searchLabel": "Search tools",
       "noMatch": "No tool is called “{query}”. Describe it in the field on Home instead.",
-      "beta": "Beta",
-      "betaHint": "In testing: it works, but it does not do everything it should yet."
+      "groups": {
+        "make": "Make",
+        "ask": "Ask",
+        "organise": "Organise",
+        "business": "Business"
+      }
     },
     "home": {
       "actions": {

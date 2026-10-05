@@ -255,7 +255,7 @@
       "memory": "Durchsuche alles, was du gespeichert hast.",
       "favorites": "Alles, was du markiert hast.",
       "marketplace": "Teilen Sie die Form eines Agenten als Vorlage und starten Sie mit einer, die jemand anders geteilt hat.",
-      "team": "Lade Leute in deinen Arbeitsbereich ein.",
+      "team": "Gib anderen deinen Tarif, jedem auf seinem eigenen Konto.",
       "apps": "Behalten Sie geplante oder bereits veröffentlichte Apps im Blick. Baut sie nicht.",
       "images": "Behalten Sie geplante oder bereits erstellte Bilder im Blick. Erzeugt sie nicht.",
       "videos": "Behalten Sie geplante oder bereits erstellte Videos im Blick. Erzeugt sie nicht.",
@@ -2791,8 +2791,12 @@
       "search": "Werkzeug finden",
       "searchLabel": "Werkzeuge durchsuchen",
       "noMatch": "Kein Werkzeug heißt „{query}“. Beschreibe es stattdessen im Feld auf der Startseite.",
-      "beta": "Beta",
-      "betaHint": "In Erprobung: Es funktioniert, kann aber noch nicht alles, was es soll."
+      "groups": {
+        "make": "Erstellen",
+        "ask": "Fragen",
+        "organise": "Organisieren",
+        "business": "Geschäft"
+      }
     },
     "home": {
       "actions": {

@@ -255,7 +255,7 @@
       "memory": "Cherchez dans tout ce que vous avez enregistré.",
       "favorites": "Tout ce que vous avez mis en favori.",
       "marketplace": "Partagez la forme d'un agent comme modèle et partez de celui qu'une autre personne a partagé.",
-      "team": "Invitez des personnes dans votre espace.",
+      "team": "Faites profiter d’autres personnes de votre forfait, chacune sur son propre compte.",
       "apps": "Suivez les applis que vous préparez ou avez déjà livrées. Ne les construit pas.",
       "images": "Suivez les images que vous préparez ou avez déjà faites. Ne les génère pas.",
       "videos": "Suivez les vidéos que vous préparez ou avez déjà faites. Ne les génère pas.",
@@ -2791,8 +2791,12 @@
       "search": "Trouver un outil",
       "searchLabel": "Rechercher des outils",
       "noMatch": "Aucun outil ne s’appelle « {query} ». Décrivez-le plutôt dans le champ de l’accueil.",
-      "beta": "Bêta",
-      "betaHint": "En test : il fonctionne, mais ne fait pas encore tout ce qu’il devrait."
+      "groups": {
+        "make": "Créer",
+        "ask": "Demander",
+        "organise": "Organiser",
+        "business": "Entreprise"
+      }
     },
     "home": {
       "actions": {

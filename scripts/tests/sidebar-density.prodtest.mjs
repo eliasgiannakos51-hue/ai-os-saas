@@ -72,10 +72,21 @@ try {
     await page.goto(`${harness.origin}/dashboard/overview`, { waitUntil: "networkidle", timeout: 45000 });
     checkTrue(`${label}: the real dashboard, not a login redirect`, new URL(page.url()).pathname === "/dashboard/overview", page.url());
 
-    // On a phone the sidebar is a drawer, opened by the top bar's menu.
+    // On a phone the sidebar is a drawer, opened by the top bar's menu —
+    // with A REAL TAP THROUGH CDP, as the file this replaced did: a tap is
+    // what opens it on the device the 390 column exists for, and a
+    // `.click()` here is a mouse-only driver that
+    // interaction-coverage.test.mjs's MOUSE_ONLY_CEILING (which only goes
+    // down) counts. Input.dispatchTouchEvent is trusted input.
     if (viewport.width < 768) {
       const menu = page.locator('header button[aria-label]').first();
-      if (await menu.isVisible().catch(() => false)) await menu.click();
+      const box = (await menu.isVisible().catch(() => false)) ? await menu.boundingBox() : null;
+      if (box) {
+        const cdp = await context.newCDPSession(page);
+        const point = { x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2) };
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [point] });
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      }
       await page.waitForTimeout(400);
     }
 

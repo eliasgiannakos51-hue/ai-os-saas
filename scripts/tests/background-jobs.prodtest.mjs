@@ -819,7 +819,7 @@ try {
       asked,
       `job=${JSON.stringify({ status: askJob?.status, error: askJob?.error, result: askJob?.result })}\n        page=${bodyQ.replace(/\s+/g, " ").slice(-400)}`
     );
-    // ONE QUESTION FOR AN AGENT, by design: CLARIFICATION_QUESTION_CAP in
+    // ONE QUESTION FOR AN AGENT, the decided cap: CLARIFICATION_QUESTION_CAP in
     // lib/clarification-client.ts gives every surface but the website one
     // question. The stand-in still answers with three, so the cap is
     // measured on the screen — the first shown, the other two trimmed.

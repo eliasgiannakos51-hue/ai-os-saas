@@ -924,9 +924,15 @@ const LEGAL_BASELINE = {
   "src/app/acceptable-use/page.tsx": 19,
   // 58 -> 57: V5 #21 rewrote the presentations paragraph as one paragraph
   // rather than two, which is one text node fewer.
-  "src/app/ai-transparency/page.tsx": 57,
+  // 57 -> 60 (2026-10-05): section 2 rewritten to what runs — a fixed model
+  // per feature, the two speech providers, a router that only records —
+  // as four paragraphs where there were three.
+  "src/app/ai-transparency/page.tsx": 60,
   "src/app/cookies/page.tsx": 19,
-  "src/app/privacy/page.tsx": 17,
+  // 17 -> 24 (2026-10-05): the sub-processor list grew from four companies
+  // to every one the code sends data to (legal-pages.test.mjs §5b derives
+  // that set from lib/env-check.ts), plus a paragraph on recordings.
+  "src/app/privacy/page.tsx": 24,
   "src/app/terms/page.tsx": 10,
 };
 

@@ -77,6 +77,10 @@ sessions ξαναβγαίνουν από τους πίνακες με την ε�
    (`src/lib/ai/routing/route.ts`) τη διαβάζει μόνο η σελίδα
    `/dashboard/routing`. **Η πιο σοβαρή:** είναι το κείμενο διαφάνειας του
    άρθρου 50 του EU AI Act.
+   **Διορθώθηκε 2026-10-05** (`docs/QUEUE.md` Α.8): η ενότητα 2 λέει πλέον
+   ότι κάθε feature έχει το μοντέλο του γραμμένο στον κώδικα, ότι η φωνή
+   πηγαίνει σε OpenAI και ElevenLabs, και ότι ο router μόνο καταγράφει·
+   gate `legal-pages` §5.
 2. **`/privacy` (`src/app/privacy/page.tsx`)**, τρία σημεία:
    - `:43-68`: οι sub-processors είναι μόνο Supabase, Vercel, Anthropic,
      Resend. Λείπουν OpenAI (Whisper), ElevenLabs, Stripe, Unsplash,
@@ -85,6 +89,9 @@ sessions ξαναβγαίνουν από τους πίνακες με την ε�
    - `:77`: «across all 13 modules». Η εξαγωγή καλύπτει κάθε πίνακα του
      `src/lib/gdpr/user-data-registry.ts`.
    - `:80`: «Account deletion is immediate». Περνά από email επιβεβαίωσης.
+   **Διορθώθηκαν και τα τρία 2026-10-05** (Α.8): η λίστα βγαίνει πλέον από
+   τα κλειδιά του `src/lib/env-check.ts`, και ένα νέο κλειδί χωρίς όνομα
+   στη σελίδα κάνει κόκκινο το `legal-pages` §5b.
 3. **Roadmap, στήλη «Available Now»** (`src/app/roadmap/page.tsx:73-115`·
    κρυμμένο από μενού και footer, ανοίγει από τη διεύθυνση):
    - Universal AI Router (`:545-547`): κανένα αίτημα δεν περνά από router.

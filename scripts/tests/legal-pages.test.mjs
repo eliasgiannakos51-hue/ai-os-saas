@@ -149,6 +149,16 @@ function readOrNull(file) {
   }
 }
 
+function walk(dir) {
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const p = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) out.push(...walk(p));
+    else out.push(p);
+  }
+  return out;
+}
+
 /** loadTs, degraded to `{}` so a missing module fails checks by name. */
 async function loadOrEmpty(file) {
   try {
@@ -354,6 +364,22 @@ const RETRACTED = [
     claim: /via the Anthropic API\b/,
     why: "the catalogue lists four providers; section 2 now says which are on",
   },
+  // 2026-10-05: three more, from docs/REMAINING.md. Every feature passes a
+  // model fixed in its own code to lib/ai/providers/complete.ts; the tier
+  // ladder is read by /dashboard/routing alone; speech goes to OpenAI and
+  // ElevenLabs (lib/voice/voice-providers.ts).
+  {
+    claim: /routes each call to a model/,
+    why: "nothing chooses a model per request — each feature names its own",
+  },
+  {
+    claim: /go to the smallest model/,
+    why: "the tier ladder in lib/ai/routing/route.ts serves no request",
+  },
+  {
+    claim: /Anthropic answers every call/,
+    why: "voice and meetings send audio to OpenAI, read-aloud sends text to ElevenLabs",
+  },
 ];
 for (const { claim, why } of RETRACTED) {
   check(`retracted: ${claim.source}`, !claim.test(body), why);
@@ -369,9 +395,85 @@ for (const [what, re] of [
   ["Presentation notes is described as using no AI", /use no AI at all/],
   ["the two features added since August are covered", /AI Coding/],
   ["the unmarked-published-sites gap is stated", /machine-readable marking/],
+  ["the fixed-model truth replaces the routing claim", /model written into its own code/],
+  ["the speech providers are named", /OpenAI[\s\S]{0,200}ElevenLabs/],
+  ["the router is described as not changing the model", /does not change the model that answers/],
 ]) {
   check(what, re.test(body));
 }
+
+// ---------------------------------------------------------------------
+console.log("\n== 5b. /privacy names every company the code sends data to ==");
+// ---------------------------------------------------------------------
+// THE POPULATION IS THE CODE'S, NOT THIS LIST'S. /privacy named four
+// sub-processors from 2026-07-30 to 2026-10-05 while the code called
+// OpenAI, ElevenLabs, Stripe, Unsplash, Google, Slack and Telegram as
+// well. A list of names here would have gone stale the same way, so the
+// set is read from lib/env-check.ts: every credential an external service
+// needs is declared there, and a new one turns this red until /privacy
+// names its company or the exception below says why it is not one.
+const privacy = readOrNull("src/app/privacy/page.tsx") ?? "";
+const privacyBody = privacy.slice(privacy.indexOf("<LegalLayout"));
+const envCheck = readOrNull("src/lib/env-check.ts") ?? "";
+const CREDENTIAL = /_(API_KEY|API_SECRET|SECRET_KEY|ACCESS_KEY|BOT_TOKEN|CLIENT_ID|ROLE_KEY|PRIVATE_KEY)$/;
+const credentials = [...envCheck.matchAll(/name: "([A-Z0-9_]+)"/g)]
+  .map((m) => m[1])
+  .filter((n) => CREDENTIAL.test(n));
+const COMPANY = {
+  SUPABASE_SERVICE_ROLE_KEY: "Supabase",
+  ANTHROPIC_API_KEY: "Anthropic",
+  OPENAI_API_KEY: "OpenAI",
+  ELEVENLABS_API_KEY: "ElevenLabs",
+  STRIPE_SECRET_KEY: "Stripe",
+  RESEND_API_KEY: "Resend",
+  UNSPLASH_ACCESS_KEY: "Unsplash",
+  GOOGLE_OAUTH_CLIENT_ID: "Google",
+  SLACK_CLIENT_ID: "Slack",
+  TELEGRAM_BOT_TOKEN: "Telegram",
+};
+// Not sub-processors, each for a reason that is CHECKED below rather than
+// trusted: a key the inventory lists but no code sends anything with.
+const INVENTORY_ONLY = ["DEEPGRAM_API_KEY", "BFL_API_KEY", "IDEOGRAM_API_KEY", "RUNWAYML_API_SECRET", "GEMINI_API_KEY"];
+// Text providers the failover CAN use, off unless an operator names them in
+// AI_PROVIDER_ORDER (lib/ai/providers/registry.ts: DEFAULT_PROVIDER_ORDER
+// is anthropic alone). The day that default changes, these become
+// sub-processors, and the check on the default below goes red first.
+const FAILOVER_OFF_BY_DEFAULT = ["GOOGLE_API_KEY", "GROQ_API_KEY"];
+// Web push carries a payload encrypted to the browser (RFC 8291): the push
+// service relays ciphertext it cannot read.
+const NOT_A_RECIPIENT = ["VAPID_PRIVATE_KEY"];
+
+check(`credentials were read from env-check.ts (${credentials.length})`, credentials.length >= 15);
+const unclassified = credentials.filter(
+  (n) => !(n in COMPANY) && ![...INVENTORY_ONLY, ...FAILOVER_OFF_BY_DEFAULT, ...NOT_A_RECIPIENT].includes(n)
+);
+check(
+  "every credential is a named company or a stated exception",
+  unclassified.length === 0,
+  `unclassified: ${unclassified.join(", ")}`
+);
+for (const [key, company] of Object.entries(COMPANY)) {
+  if (!credentials.includes(key)) continue;
+  check(`/privacy names ${company} (${key})`, new RegExp(`>${company}<`).test(privacyBody));
+}
+// The exceptions, both ways: an inventory-only key that some code starts
+// using is a sub-processor, and must stop being excused.
+const srcFiles = walk("src").filter((f) => /\.(ts|tsx)$/.test(f));
+check(`the source tree was walked (${srcFiles.length} files)`, srcFiles.length > 500);
+for (const key of INVENTORY_ONLY) {
+  const users = srcFiles.filter(
+    (f) => !/lib\/env-check\.ts$|lib\/ai\/providers\/key-inventory\.ts$/.test(f) && readOrNull(f)?.includes(key)
+  );
+  check(`${key} is still read only by the key inventory`, users.length === 0, users.join(", "));
+}
+const registry = readOrNull("src/lib/ai/providers/registry.ts") ?? "";
+check(
+  "the default text provider order is still anthropic alone",
+  /DEFAULT_PROVIDER_ORDER: readonly AiProvider\[\] = \["anthropic"\];/.test(registry)
+);
+check("…and the stale four-name claim is gone", !/used to classify &quot;Create Anything&quot;/.test(privacyBody));
+check("…and so is \"all 13 modules\"", !/all 13 modules/.test(privacyBody));
+check("…and \"deletion is immediate\"", !/deletion is immediate/i.test(privacyBody));
 
 // ---------------------------------------------------------------------
 console.log("\n== 6. /contact says what state the mailer is in ==");

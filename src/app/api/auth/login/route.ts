@@ -7,6 +7,7 @@ import { sendConfirmEmail } from "@/lib/email/send-confirm-email";
 import { LOCALE_COOKIE, resolveSupportedLocale } from "@/i18n/constants";
 import { getClientIp } from "@/lib/get-client-ip";
 import { logApiError } from "@/lib/log-error";
+import { noteLoginFailure } from "@/lib/auth/login-failure-alert";
 
 // @service-role-justified pre-auth — there is no session yet; the
 // rate_limit_log access in lib/rate-limit.ts uses the admin client, reads
@@ -101,6 +102,9 @@ export async function POST(request: Request) {
 
     if (signInError) {
       await recordRateLimitHit({ scope: LOGIN_FAILURE_SCOPE, identifier: ip });
+      // The waves the per-IP block cannot see (ΑΣ-8.5): many addresses at
+      // once, or one account from many. lib/auth/login-failure-alert.ts.
+      await noteLoginFailure(email);
       return NextResponse.json({ ok: false, error: signInError.message }, { status: 401 });
     }
 

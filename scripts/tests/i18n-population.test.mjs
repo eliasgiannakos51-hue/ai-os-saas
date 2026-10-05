@@ -210,6 +210,7 @@ check(
 const EMAIL_ENGLISH_ON_PURPOSE = {
   "src/lib/email/error-alert.ts": "an operator alert to ADMIN_EMAILS. The reader is the owner, and the subject carries a route name and a provider message that do not translate.",
   "src/lib/email/margin-alert.ts": "the same: a margin figure and a feature name, sent to the owner and to nobody else.",
+  "src/lib/email/login-failure-alert.ts": "the same: a count of failed sign-ins, sent to ADMIN_EMAILS and to nobody else.",
   // FOUND BY WIDENING THE WALK, not by anybody remembering it. It sends
   // to ADMIN_EMAILS with a subject that begins "[Ionexa cost alert]" and
   // it sat outside every i18n instrument this project has, purely because

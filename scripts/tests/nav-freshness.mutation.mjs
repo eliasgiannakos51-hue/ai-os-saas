@@ -106,8 +106,8 @@ const MUTANTS = [
     // can see that.
     name: "a scope an anonymous route writes drops off the excluded list",
     file: FRESH,
-    from: "export const ANONYMOUS_SCOPES = [\"login_failed\", \"device_check\", \"login_resend_confirmation\"] as const;",
-    to: "export const ANONYMOUS_SCOPES = [\"device_check\", \"login_resend_confirmation\"] as const;",
+    from: "export const ANONYMOUS_SCOPES = [\"login_failed\", \"device_check\", \"login_resend_confirmation\", \"login_failed_global\", \"login_failed_account\", \"login_failure_alert\"] as const;",
+    to: "export const ANONYMOUS_SCOPES = [\"device_check\", \"login_resend_confirmation\", \"login_failed_global\", \"login_failed_account\", \"login_failure_alert\"] as const;",
     expect: "...and the excluded list is the one the routes actually write",
   },
 ];

@@ -107,7 +107,7 @@ const hoursSince = (iso: unknown): number | null => {
  */
 // login_resend_confirmation (2026-10-05): the login route's new link for
 // an address not yet proved — written before any dashboard page is seen.
-export const ANONYMOUS_SCOPES = ["login_failed", "device_check", "login_resend_confirmation"] as const;
+export const ANONYMOUS_SCOPES = ["login_failed", "device_check", "login_resend_confirmation", "login_failed_global", "login_failed_account", "login_failure_alert"] as const;
 
 async function newestAt(
   supabase: SupabaseClient,

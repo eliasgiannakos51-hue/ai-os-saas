@@ -113,13 +113,15 @@ try {
       convoRows.length === CONVERSATIONS.length && CONVERSATIONS.every((c) => convoRows.some((r) => r.href.endsWith(c.id))), JSON.stringify(convoRows));
     // NOTHING ELSE. The fixed rows, the account's recent tools (none for
     // this account, so no heading either), its conversations and Settings
-    // — and the logo, which links Home.
+    // — and the logo, which links Home (known by where it goes: its word
+    // is set in capitals, IONEXA, so a text match missed it).
     const known = new Set([...RAIL, SETTINGS]);
-    const other = read.links.filter((l) => !known.has(l.text) && !/\/dashboard\/chat\?c=/.test(l.href) && l.text !== "Ionexa");
+    const isLogo = (l) => l.href === "/dashboard/overview";
+    const other = read.links.filter((l) => !known.has(l.text) && !/\/dashboard\/chat\?c=/.test(l.href) && !isLogo(l));
     checkTrue(`${label}: no other row is in the sidebar`, other.length === 0, JSON.stringify(other));
     checkTrue(`${label}: no Recent tools heading over an empty list`, !read.headings.includes(en.sidebar.rail.recentTools), JSON.stringify(read.headings));
     checkTrue(`${label}: every row is readable without scrolling`, read.links.every((l) => l.visible), JSON.stringify(read.links.filter((l) => !l.visible)));
-    checkTrue(`${label}: every row is a 44px target`, read.links.filter((l) => l.text !== "Ionexa").every((l) => l.h >= 44), JSON.stringify(read.links.map((l) => [l.text, l.h])));
+    checkTrue(`${label}: every row is a 44px target`, read.links.filter((l) => !isLogo(l)).every((l) => l.h >= 44), JSON.stringify(read.links.map((l) => [l.text, l.h])));
     await context.close();
   }
 

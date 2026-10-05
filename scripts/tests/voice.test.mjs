@@ -751,45 +751,62 @@ ok(
 );
 
 const inputSrc = readFileSync("src/components/voice/voice-input.tsx", "utf8");
-// V4.6: it used to render NOTHING when transcription was unavailable, and
-// "the microphone does not exist in the main chat" was the report from a
-// deployment with no OPENAI_API_KEY. It now renders an INERT button that
-// says which of the three reasons applies — and still never records.
+// NOT DRAWN WHEN IT CANNOT RECORD (2026-10-05). V4.6 drew an inert mic
+// with its reason revealed on a tap; the owner's rule since is «Κουμπί που
+// δεν κάνει τίποτα δεν μένει στην οθόνη» (the voice brief «ΦΩΝΗ ΣΤΟ CHAT», Μέρος Α),
+// after "I pressed the microphone in Chat and nothing was written". The
+// reason is said on the Voice settings screen, checked further down.
+// Read with the comments stripped: the component's own comment names the
+// old inert shape, and a check on prose would pass on the history.
+const inputCode = stripComments(inputSrc);
+const guard = inputCode.match(/if \(([^)]*?transcribeAvailable[^)]*?)\) return null;/);
 ok(
-  "the mic button is inert when transcription is unavailable — announced disabled, and never recording",
-  /if \(!availability\.transcribeAvailable\) \{[\s\S]{0,2600}?aria-disabled="true"[\s\S]{0,900}?data-testid="voice-input-unavailable"/.test(inputSrc),
-);
-// A `title` IS A HOVER, AND A PHONE CANNOT HOVER.
-//
-// This check used to require `disabled` plus `title={reason}` and called
-// that done. Measured on the live site at 390px with a real CDP touch on
-// 2026-09-05: the button is 44x44 and uncovered, the tap lands on it, and
-// nothing happens — `disabled` fires no event and `title` never renders.
-// The one control whose whole purpose is to say WHY voice is missing said
-// it only to a pointer that could hover over it.
-//
-// So the requirement is stronger now, not different: the reason has to be
-// reachable by TAP, and it has to end up in the page rather than in an
-// attribute.
-ok(
-  "...and the reason is reachable by a tap, not only by a hover",
-  /aria-disabled="true"[\s\S]{0,200}?onClick=\{\(\) => setReasonShown/.test(inputSrc),
+  "the mic draws NOTHING when transcription is unavailable",
+  Boolean(guard) && /!availability\.transcribeAvailable/.test(guard?.[1] ?? ""),
+  guard?.[0] ?? "no `if (...transcribeAvailable...) return null;` in the code",
 );
 ok(
-  "...which renders the reason IN THE PAGE, announced to a screen reader",
-  /reasonShown \? \([\s\S]{0,300}?role="status"[\s\S]{0,200}?\{reason\}/.test(inputSrc),
+  "...nor when there are no minutes left, where it would be a button that cannot record",
+  /!availability\.hasMinutes/.test(guard?.[1] ?? ""),
+  guard?.[0],
 );
 ok(
-  "...and it is not `disabled`, which would swallow the tap",
-  !/if \(!availability\.transcribeAvailable\) \{[\s\S]{0,2600}?\n\s+disabled\n/.test(inputSrc),
+  "...and that guard comes BEFORE the button, so no state of it can paint one",
+  Boolean(guard) && inputCode.indexOf(guard[0]) < inputCode.indexOf("<button"),
 );
 ok(
-  "...names all three reasons: not configured, not on the plan, out of minutes",
-  /settings\.notConfigured/.test(inputSrc) && /settings\.notIncluded/.test(inputSrc) && /outOfMinutes/.test(inputSrc),
+  "...and no inert stand-in is left behind: no aria-disabled control, no reason toggle",
+  !/aria-disabled/.test(inputCode) && !/voice-input-unavailable/.test(inputCode) && !/setReasonShown/.test(inputCode),
 );
 ok(
-  "...and draws nothing before the availability call has answered, so it never flickers from 'not set up' to live",
-  /if \(!availability\.loaded\) return null;/.test(inputSrc),
+  "...and the live button is not disabled for want of minutes (that state is now not drawn at all)",
+  !/disabled=\{[^}]*hasMinutes/.test(inputCode),
+);
+// Before the availability call has answered, transcribeAvailable is false
+// (EMPTY in voice-availability.tsx), so the guard above also covers "not
+// loaded yet": nothing flickers from live to absent.
+ok(
+  "...which also covers the moment before the availability call answers (it starts false)",
+  /const EMPTY[\s\S]{0,200}?transcribeAvailable: false/.test(readFileSync("src/components/voice/voice-availability.tsx", "utf8")),
+);
+// THE TALK BUTTON, SAME RULE. Scenario 11: «Χωρίς κλειδί παρόχου, τα δύο
+// κουμπιά δεν εμφανίζονται».
+const chatCode = stripComments(readFileSync("src/components/chat/chat-workspace.tsx", "utf8"));
+const talkGate = chatCode.match(/\{(\w+) && \(\s*<button[\s\S]{0,200}?data-testid="voice-conversation-start"/);
+const talkDecl = talkGate ? chatCode.match(new RegExp(`const ${talkGate[1]} =([\\s\\S]*?);`)) : null;
+ok(
+  "the Talk button is drawn only behind an availability flag",
+  Boolean(talkGate) && Boolean(talkDecl),
+  talkGate?.[0]?.slice(0, 80) ?? "no `{flag && (<button ... voice-conversation-start` in chat-workspace",
+);
+ok(
+  "...which needs BOTH providers, the plan and minutes left",
+  ["transcribeAvailable", "speakAvailable", "hasMinutes"].every((k) => (talkDecl?.[1] ?? "").includes(k)),
+  talkDecl?.[1]?.trim(),
+);
+ok(
+  "...and the inert Talk with its reason line is gone",
+  !/talk-blocked-reason/.test(chatCode) && !/conversation\.blocked/.test(chatCode),
 );
 // THE PRESS HANDLER'S OWN GUARD. Asking whether setExplaining appears
 // before recorder.start() in the file is answered by the source order of

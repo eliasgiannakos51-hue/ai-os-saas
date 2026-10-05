@@ -266,17 +266,18 @@ check(
   /justify-end/.test(userTurn),
   "alignment is the first of the three things that replaced the rectangle"
 );
-// The second thing that tells them apart: since 2026-10-04 the ANSWER
-// carries the small earth (AssistantAvatar), and the question carries
-// nothing beside it.
+// The second thing that tells them apart: the ANSWER carries the small
+// earth — since Δ.2 (2026-10-05) 26px in the row UNDER it
+// (components/chat/answer-actions.tsx) — and the question carries nothing.
+const answerActions = stripComments(readFileSync("src/components/chat/answer-actions.tsx", "utf8"));
 check(
-  "...and by the earth beside the answer, never beside the question",
-  !/AssistantAvatar|<Earth\b/.test(userTurn) && /<AssistantAvatar still=\{sending \|\| msg\.id !== lastAnswerId\} \/>/.test(workspace),
+  "...and by the earth under the answer, never beside the question",
+  !/AnswerActions|<Earth\b/.test(userTurn) && /<AnswerActions\b[\s\S]{0,400}?still=\{sending \|\| msg\.id !== lastAnswerId\}/.test(workspace),
   "the second"
 );
 check(
   "...and by the gap between turns being larger than the gap inside one",
-  /space-y-8/.test(workspace) && /className="mt-2"/.test(workspace),
+  /space-y-8/.test(workspace) && /className="mt-2 flex flex-wrap items-center gap-0\.5" data-testid="answer-actions"/.test(answerActions),
   "the third — space-y-8 between turns against mt-2 inside one"
 );
 check(

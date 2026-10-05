@@ -55,7 +55,7 @@ const tw = readFileSync("tailwind.config.ts", "utf8");
 const themeColors = tw.match(/\n  theme: \{\n[\s\S]*?\n    colors: \{([\s\S]*?)\n    \},\n    extend: \{/);
 check("tailwind's `colors` replaces the palette instead of extending it", Boolean(themeColors), "expected theme.colors before theme.extend");
 const names = themeColors ? [...themeColors[1].matchAll(/^\s+"?([a-z-]+)"?:/gm)].map((m) => m[1]) : [];
-const DESIGN_NAMES = ["transparent", "current", "inherit", "background", "panel", "panel-hover", "border", "divider", "tag", "foreground", "muted", "button", "button-ink", "success", "warning", "danger", "signal", "paper", "input"];
+const DESIGN_NAMES = ["transparent", "current", "inherit", "background", "panel", "panel-hover", "workspace", "border", "divider", "tag", "foreground", "body", "muted", "button", "button-ink", "success", "warning", "danger", "signal", "paper", "input"];
 check("it holds the design's names and nothing else", names.join() === DESIGN_NAMES.join(), names.join());
 // CHANNEL FORM, or `text-muted/70` emits no CSS at all: Tailwind can only
 // apply an alpha modifier to a colour it can rewrite. (Moved here from the
@@ -186,8 +186,8 @@ const channel = (name) => {
   return m ? m.slice(1, 4).map(Number) : null;
 };
 const EXPECTED = {
-  background: "#070A12", panel: "#0D1220", "panel-hover": "#0F1524", divider: "#161D2E", border: "#222A3D", tag: "#1E2638",
-  foreground: "#F5F7FB", muted: "#8D96A8", button: "#F5F7FB", "button-ink": "#070A12",
+  background: "#070A12", panel: "#0D1220", "panel-hover": "#0F1524", workspace: "#0A0E18", divider: "#161D2E", border: "#222A3D", tag: "#1E2638",
+  foreground: "#F5F7FB", body: "#DCE2EE", muted: "#8D96A8", button: "#F5F7FB", "button-ink": "#070A12",
 };
 const hex = (rgb) => "#" + rgb.map((v) => v.toString(16).padStart(2, "0")).join("").toUpperCase();
 for (const [name, want] of Object.entries(EXPECTED)) {
@@ -205,8 +205,8 @@ const ratio = (a, b) => {
   const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
   return (x + 0.05) / (y + 0.05);
 };
-const SURFACES = ["background", "panel", "panel-hover"];
-for (const ink of ["foreground", "muted", "success", "warning", "danger"]) {
+const SURFACES = ["background", "panel", "panel-hover", "workspace"];
+for (const ink of ["foreground", "body", "muted", "success", "warning", "danger"]) {
   for (const surface of SURFACES) {
     const r = channel(ink) && channel(surface) ? ratio(channel(ink), channel(surface)) : 0;
     check(`${ink} on ${surface}: ${r.toFixed(2)}:1, at least 4.5`, r >= 4.5);
@@ -219,8 +219,8 @@ check(
   /a:focus-visible[\s\S]*?outline:\s*2px solid rgb\(var\(--foreground\)\);/.test(CSS)
 );
 check(
-  "the three radii are the design's: 18 / 14 / 10",
-  /--radius-field:\s*18px;/.test(root) && /--radius-card:\s*14px;/.test(root) && /--radius-item:\s*10px;/.test(root)
+  "the three radii are the design's: 18 / 16 / 10",
+  /--radius-field:\s*18px;/.test(root) && /--radius-card:\s*16px;/.test(root) && /--radius-item:\s*10px;/.test(root)
 );
 
 // ---------------------------------------------------------------------

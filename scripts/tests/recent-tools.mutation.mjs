@@ -41,6 +41,27 @@ const MUTANTS = [
     expect: "three finished tasks on the same day: not yet",
   },
   {
+    name: "the layout reads conversations as the server, not as the person",
+    file: "src/app/dashboard/layout.tsx",
+    from: '      supabase\n        .from("chat_conversations")',
+    to: '      createAdminClient()\n        .from("chat_conversations")',
+    expect: "through the person's own session",
+  },
+  {
+    name: "a failed conversations read takes Recent tools down with it",
+    file: "src/app/dashboard/layout.tsx",
+    from: "    if (!chats.error) {",
+    to: "    if (chats.error) throw chats.error;\n    {",
+    expect: "a failed read leaves the list empty",
+  },
+  {
+    name: "an empty conversations list still shows its heading",
+    file: "src/components/dashboard/sidebar.tsx",
+    from: "{conversations.length > 0 && !collapsed && (",
+    to: "{!collapsed && (",
+    expect: "with no heading while there is none",
+  },
+  {
     name: "the window is no longer thirty days",
     file: LIB,
     from: "export const RECENT_WINDOW_DAYS = 30;",

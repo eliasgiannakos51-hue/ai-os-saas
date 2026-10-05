@@ -33,6 +33,21 @@ export const ABSENT_ON_PURPOSE = {
       "applied migration to follow a rename would make the file disagree with what actually ran.",
     paths: ["src/middleware.ts"],
   },
+  "docs/PROGRESS.md": {
+    reason:
+      "A DATED LOG, NOT A DESCRIPTION OF TODAY. The D.6 entry of 2026-10-04 says where the beta " +
+      "tag came from; the tag and its list were removed on 2026-10-05 (Δ.3, ΣΥΣΤΗΜΑ DESIGN §6: no " +
+      "beta anywhere). Rewriting a past entry to match the present would make the log lie about the past.",
+    paths: ["src/lib/nav/tool-status.ts"],
+  },
+  "docs/MASTER.md": {
+    reason:
+      "THE OWNER'S MESSAGE, SAVED WORD FOR WORD ON 2026-10-05, ORDERS THESE; IT DOES NOT DESCRIBE " +
+      "THEM. 5.24 says to make the capability catalogue and the planning section says to group every " +
+      "point into packages. Neither exists yet. Editing the message to match the tree would make it " +
+      "stop being his words; each path goes stale, and this entry with it, the day the file is written.",
+    paths: ["docs/CATALOG.md", "docs/PACKAGES.md"],
+  },
   "docs/BUILD-SPECS.md": {
     reason:
       "DELIVERABLES THE SPEC ORDERS, NOT FILES IT DESCRIBES. Sections 7, 10 and 11 were saved word " +

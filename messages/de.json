@@ -255,7 +255,7 @@
       "memory": "Durchsuche alles, was du gespeichert hast.",
       "favorites": "Alles, was du markiert hast.",
       "marketplace": "Teilen Sie die Form eines Agenten als Vorlage und starten Sie mit einer, die jemand anders geteilt hat.",
-      "team": "Lade Leute in deinen Arbeitsbereich ein.",
+      "team": "Gib anderen deinen Tarif, jedem auf seinem eigenen Konto.",
       "apps": "Behalten Sie geplante oder bereits veröffentlichte Apps im Blick. Baut sie nicht.",
       "images": "Behalten Sie geplante oder bereits erstellte Bilder im Blick. Erzeugt sie nicht.",
       "videos": "Behalten Sie geplante oder bereits erstellte Videos im Blick. Erzeugt sie nicht.",
@@ -301,7 +301,9 @@
       "collapse": "Seitenleiste einklappen",
       "expand": "Seitenleiste ausklappen",
       "label": "Hauptmenü",
-      "saveFailed": "Die Änderung wurde nicht gespeichert. Bitte erneut versuchen."
+      "saveFailed": "Die Änderung wurde nicht gespeichert. Bitte erneut versuchen.",
+      "recentChats": "Letzte Chats",
+      "untitledChat": "Neue Unterhaltung"
     },
     "tabs": {
       "home": "Start",
@@ -1327,6 +1329,13 @@
       "workMode": {
         "active": "Modus: {mode}",
         "clear": "Arbeitsweise entfernen"
+      },
+      "answer": {
+        "copy": "Antwort kopieren",
+        "good": "Gute Antwort",
+        "bad": "Schlechte Antwort",
+        "retry": "Noch einmal fragen",
+        "ratingFailed": "Die Bewertung wurde nicht gespeichert. Versuch es noch einmal."
       }
     },
     "create": {
@@ -2789,8 +2798,12 @@
       "search": "Werkzeug finden",
       "searchLabel": "Werkzeuge durchsuchen",
       "noMatch": "Kein Werkzeug heißt „{query}“. Beschreibe es stattdessen im Feld auf der Startseite.",
-      "beta": "Beta",
-      "betaHint": "In Erprobung: Es funktioniert, kann aber noch nicht alles, was es soll."
+      "groups": {
+        "make": "Erstellen",
+        "ask": "Fragen",
+        "organise": "Organisieren",
+        "business": "Geschäft"
+      }
     },
     "home": {
       "actions": {
@@ -3724,7 +3737,6 @@
     "startListening": "Sprechen statt tippen",
     "stopListening": "Stopp",
     "costPerMinute": "{credits, plural, one {# Credit} other {# Credits}} pro Minute Sprache",
-    "outOfMinutes": "Diesen Monat sind keine Sprachminuten mehr übrig",
     "states": {
       "idle": "Bereit",
       "listening": "Hört dir zu",
@@ -3784,14 +3796,7 @@
       "tapToSpeak": "Drücke irgendwo und sprich. Das Zuhören endet von selbst, wenn du aufhörst.",
       "tapToInterrupt": "Drücke irgendwo, um zu unterbrechen und wieder zu sprechen.",
       "hint": "Sprich normal — der Zug endet, wenn du aufhörst.",
-      "empty": "Alles Gesagte erscheint hier auch als Text.",
-      "blocked": {
-        "notConfigured": "Freihändiges Sprechen benötigt zwei Sprachanbieter, und in dieser Installation ist kein Schlüssel hinterlegt — die Schaltfläche kann kein Gespräch starten.",
-        "notConfiguredTranscribe": "Freihändiges Sprechen benötigt einen Schlüssel für Spracherkennung, und in dieser Installation ist keiner hinterlegt — die Schaltfläche kann kein Gespräch starten.",
-        "notConfiguredSpeak": "Freihändiges Sprechen benötigt einen Schlüssel für Sprachausgabe, und in dieser Installation ist keiner hinterlegt — die Schaltfläche kann kein Gespräch starten.",
-        "notIncluded": "Freihändiges Sprechen ist in Ihrem Tarif nicht enthalten. Sie können hier weiterhin tippen und jede Antwort lesen.",
-        "outOfMinutes": "Diesen Monat sind keine Sprachminuten mehr übrig, deshalb kann kein freihändiges Gespräch starten. Tippen funktioniert weiterhin."
-      }
+      "empty": "Alles Gesagte erscheint hier auch als Text."
     },
     "settings": {
       "description": "Sprich statt zu tippen und lass dir Antworten vorlesen. Tippen und Lesen werden nie ersetzt — jedes Sprachelement steht neben dem Text, nicht an seiner Stelle.",

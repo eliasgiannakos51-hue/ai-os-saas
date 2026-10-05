@@ -1,8 +1,8 @@
 # The first run — pt
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **589 strings**. The whole product is 3548, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **588 strings**. The whole product is 3551, which is why this file exists.
 
-**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 358 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 360 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -158,7 +158,7 @@ Isso parece uma pergunta. Respondo ou registo?
 
 Descreva qualquer coisa — uma ideia de produto, uma operação, o feedback de um utilizador, uma métrica — e vai parar automaticamente ao módulo certo.
 
-## Tier 2 — The labels — skim these (358)
+## Tier 2 — The labels — skim these (360)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -2132,6 +2132,12 @@ Novo
 
 Fixar {tool}
 
+**`sidebar.rail.recentChats`**
+
+> EN — Recent chats
+
+Conversas recentes
+
 **`sidebar.rail.recentTools`**
 
 > EN — Recent tools
@@ -2161,6 +2167,12 @@ Definições
 > EN — Unpin {tool}
 
 Desafixar {tool}
+
+**`sidebar.rail.untitledChat`**
+
+> EN — New conversation
+
+Nova conversa
 
 **`sidebar.tabs.label`**
 
@@ -2320,7 +2332,7 @@ Boa noite
 
 Bom dia
 
-## Tier 3 — Further in — only if you have time (208)
+## Tier 3 — Further in — only if you have time (205)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3194,12 +3206,6 @@ A ouvir
 
 Fala e depois carrega em Parar. Nada é enviado antes de o teres lido.
 
-**`voice.outOfMinutes`**
-
-> EN — No voice minutes left this month
-
-Sem minutos de voz este mês
-
 **`voice.permission.allow`**
 
 > EN — Open the microphone
@@ -3241,18 +3247,6 @@ A gravação só começa quando carregas e para quando carregas de novo.
 > EN — Before the microphone opens
 
 Antes de o microfone abrir
-
-**`voice.settings.notConfigured`**
-
-> EN — Voice is not set up on this deployment, so the microphone and Listen buttons do not appear.
-
-A voz não está configurada nesta instalação, por isso os botões de microfone e Ouvir não aparecem.
-
-**`voice.settings.notIncluded`**
-
-> EN — Voice is not included on your plan. Everything here can still be typed and read.
-
-A voz não está incluída no teu plano. Tudo aqui continua a poder ser escrito e lido.
 
 **`voice.startListening`**
 

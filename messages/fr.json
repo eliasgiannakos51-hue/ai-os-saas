@@ -255,7 +255,7 @@
       "memory": "Cherchez dans tout ce que vous avez enregistré.",
       "favorites": "Tout ce que vous avez mis en favori.",
       "marketplace": "Partagez la forme d'un agent comme modèle et partez de celui qu'une autre personne a partagé.",
-      "team": "Invitez des personnes dans votre espace.",
+      "team": "Faites profiter d’autres personnes de votre forfait, chacune sur son propre compte.",
       "apps": "Suivez les applis que vous préparez ou avez déjà livrées. Ne les construit pas.",
       "images": "Suivez les images que vous préparez ou avez déjà faites. Ne les génère pas.",
       "videos": "Suivez les vidéos que vous préparez ou avez déjà faites. Ne les génère pas.",
@@ -301,7 +301,9 @@
       "collapse": "Réduire la barre latérale",
       "expand": "Développer la barre latérale",
       "label": "Menu principal",
-      "saveFailed": "La modification n’a pas été enregistrée. Réessayez."
+      "saveFailed": "La modification n’a pas été enregistrée. Réessayez.",
+      "recentChats": "Discussions récentes",
+      "untitledChat": "Nouvelle conversation"
     },
     "tabs": {
       "home": "Accueil",
@@ -1327,6 +1329,13 @@
       "workMode": {
         "active": "Mode : {mode}",
         "clear": "Retirer le mode de travail"
+      },
+      "answer": {
+        "copy": "Copier la réponse",
+        "good": "Bonne réponse",
+        "bad": "Mauvaise réponse",
+        "retry": "Redemander",
+        "ratingFailed": "La note n’a pas été enregistrée. Réessayez."
       }
     },
     "create": {
@@ -2789,8 +2798,12 @@
       "search": "Trouver un outil",
       "searchLabel": "Rechercher des outils",
       "noMatch": "Aucun outil ne s’appelle « {query} ». Décrivez-le plutôt dans le champ de l’accueil.",
-      "beta": "Bêta",
-      "betaHint": "En test : il fonctionne, mais ne fait pas encore tout ce qu’il devrait."
+      "groups": {
+        "make": "Créer",
+        "ask": "Demander",
+        "organise": "Organiser",
+        "business": "Entreprise"
+      }
     },
     "home": {
       "actions": {
@@ -3724,7 +3737,6 @@
     "startListening": "Parler au lieu d'écrire",
     "stopListening": "Arrêter",
     "costPerMinute": "{credits, plural, one {# crédit} other {# crédits}} par minute de parole",
-    "outOfMinutes": "Plus de minutes de voix ce mois-ci",
     "states": {
       "idle": "Prêt",
       "listening": "Vous écoute",
@@ -3784,14 +3796,7 @@
       "tapToSpeak": "Appuyez n'importe où et parlez. L'écoute s'arrête d'elle-même quand vous vous arrêtez.",
       "tapToInterrupt": "Appuyez n'importe où pour interrompre et reprendre la parole.",
       "hint": "Parlez normalement : le tour se termine quand vous vous arrêtez.",
-      "empty": "Tout ce qui est dit apparaît aussi ici sous forme de texte.",
-      "blocked": {
-        "notConfigured": "Parler mains libres nécessite deux fournisseurs vocaux et ce déploiement n'a aucune clé, donc le bouton ne peut pas démarrer de conversation.",
-        "notConfiguredTranscribe": "Parler mains libres nécessite une clé de reconnaissance vocale et ce déploiement n'en a aucune, donc le bouton ne peut pas démarrer de conversation.",
-        "notConfiguredSpeak": "Parler mains libres nécessite une clé de synthèse vocale et ce déploiement n'en a aucune, donc le bouton ne peut pas démarrer de conversation.",
-        "notIncluded": "Parler mains libres n'est pas inclus dans votre formule. Vous pouvez toujours écrire ici et lire chaque réponse.",
-        "outOfMinutes": "Il ne reste plus de minutes vocales ce mois-ci, donc la conversation mains libres ne peut pas démarrer. La saisie fonctionne toujours."
-      }
+      "empty": "Tout ce qui est dit apparaît aussi ici sous forme de texte."
     },
     "settings": {
       "description": "Parlez au lieu d'écrire, et faites-vous lire les réponses. Écrire et lire ne disparaissent jamais : chaque commande vocale est à côté du texte, pas à sa place.",

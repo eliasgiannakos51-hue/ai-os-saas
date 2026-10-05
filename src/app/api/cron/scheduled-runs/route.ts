@@ -249,7 +249,10 @@ export async function GET(request: Request) {
           .eq("id", run.mission_id)
           .maybeSingle();
 
-        if (missionError || !mission) {
+        // THE MISSION MUST BE THE RUN'S OWN (ownership check, 2026-10-05).
+        // This client is the admin one, so the check is made here; a
+        // mismatch is treated exactly like a mission that no longer exists.
+        if (missionError || !mission || (mission as { user_id?: string }).user_id !== run.user_id) {
           if (!(await closeRun(admin, run.id, { status: "failed", result: "Mission no longer exists.", executed_at: new Date().toISOString() }, "close_mission_gone"))) unclosed++;
           failed++;
           continue;

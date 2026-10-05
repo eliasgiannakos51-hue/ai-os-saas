@@ -1009,7 +1009,8 @@
       "agreedRate": "Zu {price} € pro Credit, dem von Ihnen zugestimmten Preis.",
       "capReached": "Sie haben Ihr Limit erreicht. Es wird nichts weiter berechnet, bis Sie es anheben.",
       "turnOff": "Zusatznutzung abschalten",
-      "turnOffNote": "Das Abschalten stoppt künftige Kosten. Bereits genutzte Beträge dieses Monats werden weiterhin berechnet."
+      "turnOffNote": "Das Abschalten stoppt künftige Kosten. Bereits genutzte Beträge dieses Monats werden weiterhin berechnet.",
+      "needsSubscription": "Nutzungsbasierte Abrechnung gibt es für bezahlte Pläne: Sie wird mit deiner nächsten Rechnung abgerechnet. Wähle zuerst einen Plan."
     },
     "addons": {
       "title": "Zusatzpakete",

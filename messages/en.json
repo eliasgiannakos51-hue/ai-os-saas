@@ -1009,7 +1009,8 @@
       "agreedRate": "At €{price} per credit, the rate you agreed to.",
       "capReached": "You have reached your limit. Nothing further will be charged until you raise it.",
       "turnOff": "Turn off overage",
-      "turnOffNote": "Turning it off stops future charges. Anything already used this month is still invoiced."
+      "turnOffNote": "Turning it off stops future charges. Anything already used this month is still invoiced.",
+      "needsSubscription": "Pay-as-you-go is for paying plans: it is billed with your next invoice. Choose a plan first."
     },
     "addons": {
       "title": "Add-ons",

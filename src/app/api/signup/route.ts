@@ -14,6 +14,7 @@ import { getClientIp } from "@/lib/get-client-ip";
 import { COUNTRIES } from "@/lib/countries";
 import { getBetaInviteCode, computeBetaExpiresAt } from "@/lib/beta";
 import { diagLog } from "@/lib/diag";
+import { mergeUserMetadata } from "@/lib/auth/user-metadata";
 
 // @service-role-justified pre-auth — account creation happens before a
 // session can exist. admin.auth.admin.createUser only creates the caller's
@@ -110,10 +111,9 @@ export async function POST(request: Request) {
 
     // Never blocks signup — an empty, missing, or wrong code just means no
     // beta bonus, same as if the field were never shown at all.
-    // getBetaInviteCode() falls back to a hardcoded default ("IONEXA200")
-    // so this works even without BETA_INVITE_CODE configured.
+    // No BETA_INVITE_CODE set means no code is valid (lib/beta.ts).
     const betaCode = getBetaInviteCode();
-    const isValidBetaCode = Boolean(inviteCode && inviteCode === betaCode);
+    const isValidBetaCode = Boolean(betaCode && inviteCode && inviteCode === betaCode);
 
     // Create the user directly via the Admin API instead of the client-side
     // supabase.auth.signUp(). signUp() has Supabase's GoTrue server send a
@@ -146,11 +146,12 @@ export async function POST(request: Request) {
       // user_credits.beta_expires_at (set below via grantCredits), and
       // resolveEffectivePlanSlug/hasActiveBetaBypass (lib/billing/credits.ts,
       // lib/beta.ts) are what collapse this back to "free" once it passes.
+      // ONLY WHAT THE PERSON MAY SET. The plan, the seats and the beta flag
+      // are entitlement keys: since 20261010000000_guard_entitlement_metadata.sql
+      // Supabase Auth cannot write them — this call included — so they are
+      // written below, through merge_user_metadata, once the account exists.
       user_metadata: {
         terms_accepted_at: new Date().toISOString(),
-        subscription_tier: isValidBetaCode ? "ultimate" : "free",
-        seat_count: 0,
-        ...(isValidBetaCode ? { is_beta_tester: true } : {}),
         ...(country ? { country } : {}),
       },
     });
@@ -188,6 +189,19 @@ export async function POST(request: Request) {
     }
 
     mark("create_user");
+    // THE STARTING PLAN, WRITTEN BY THE SERVER (see the createUser comment).
+    const entitled = await mergeUserMetadata(
+      createData.user.id,
+      {
+        subscription_tier: isValidBetaCode ? "ultimate" : "free",
+        seat_count: 0,
+        ...(isValidBetaCode ? { is_beta_tester: true } : {}),
+      },
+      { context: "/api/signup" }
+    );
+    if (!entitled) {
+      logApiError("/api/signup", new Error("merge_user_metadata failed"), { stage: "starting_plan" });
+    }
     // STARTED HERE, AWAITED LAST. The email needs nothing but the address,
     // so making it wait for the credit grant and the sign-in put its whole
     // latency on the critical path — up to 2.5s of a signup nobody was

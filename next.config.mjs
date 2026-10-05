@@ -100,8 +100,37 @@ refuseMalformedEnv();
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+/**
+ * THE APP'S OWN SECURITY HEADERS (BUILD-SPECS 6, Α8; 2026-10-05).
+ *
+ * Measured on production the same day: the only security header the app
+ * sent was the HSTS Vercel adds itself. Every page could be framed by any
+ * site, and nothing told a browser not to guess content types.
+ *
+ * EVERY PATH BUT /s/. Published sites set their own, stricter set —
+ * sandboxed CSP, frame-ancestors 'none' — in
+ * src/lib/publishing/public-serving.ts, and two sources for one header is
+ * how a weaker value wins. The app never frames itself: every iframe in
+ * src/ renders `srcDoc`, which `frame-ancestors` does not govern.
+ *
+ * The microphone stays allowed for the app's own origin: voice input
+ * (src/components/voice/) asks for it.
+ */
+export const APP_SECURITY_HEADERS = [
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), geolocation=(), microphone=(self)" },
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // "x-powered-by: Next.js" tells a stranger which advisories to try.
+  poweredByHeader: false,
+  async headers() {
+    return [{ source: "/((?!s/).*)", headers: APP_SECURITY_HEADERS }];
+  },
   // Inlined at build time — see commitDate() above. The DATE is the
   // commit's; BUILD_AT is when the build ran, and the two differ by
   // exactly the staleness this is here to report.

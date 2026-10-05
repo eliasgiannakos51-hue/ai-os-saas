@@ -48,6 +48,17 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
 
   try {
+    // ONLY A SUBSCRIBER. Overage is billed as invoice items on the
+    // customer's next Stripe invoice (lib/billing/overage-invoice.ts), so
+    // an account with no customer and subscription has nothing to bill it
+    // to. The ids are server-owned since
+    // 20261010000000_guard_entitlement_metadata.sql.
+    const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+    const isSubscriber =
+      typeof meta.stripe_customer_id === "string" && meta.stripe_customer_id.length > 0 &&
+      typeof meta.stripe_subscription_id === "string" && meta.stripe_subscription_id.length > 0;
+    if (!isSubscriber) return NextResponse.json({ error: "needs_subscription" }, { status: 403 });
+
     const body = (await request.json()) as { capEur?: unknown; shortfall?: unknown };
 
     const cap = checkCap(body.capEur);

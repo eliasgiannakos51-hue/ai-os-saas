@@ -185,6 +185,8 @@ const NOT_PROBEABLE = {
     "`create or replace` on search_index_sync, which existed before it. The function is present whether or not this file ran, so its existence proves nothing — the property it changes is behavioural and only unified-search.dbtest.mjs can see it",
   "20261004000000_revoke_public_execute_prune_project_links.sql":
     "revokes EXECUTE from PUBLIC and from authenticated on three functions and grants nothing new. A canary asks whether an OBJECT exists; all three exist either way, and the property this file changes is a privilege, which /api/health cannot see at all — grants-and-policies.dbtest.mjs and role-grants.dbtest.mjs are what read it",
+  "20261010000000_guard_entitlement_metadata.sql":
+    "adds a trigger on auth.users and its trigger function. Neither is visible to /api/health: the auth schema is not exposed through the database API, and a function returning `trigger` never appears in its OpenAPI list. The migration raises at the end if the trigger did not attach, and entitlement-metadata.dbtest.mjs runs its behaviour against a real Postgres",
 };
 
 const canariedMigrations = new Set(SCHEMA_CANARIES.map((c) => c.migration));

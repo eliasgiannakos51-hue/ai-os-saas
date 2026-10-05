@@ -187,6 +187,101 @@
        χρηστών.
     *Ξεμπλοκάρει:* το «πριν» του σεναρίου 12 (μέσο κόστος ανά αίτημα).
 
+19. **Εργαλεία που δεν είναι ακόμα «λειτουργικά»: κρύβονται ή μένουν;**
+    (2026-10-05, `docs/DECISIONS.md` → «Ο νέος τρόπος λειτουργίας… οι
+    συγκρούσεις» 4.) Με τον ορισμό του «λειτουργικό» κανένα εργαλείο
+    δεν περνά σήμερα, γιατί δεν υπάρχει ακόμα η Βιβλιοθήκη. Μέχρι να
+    απαντήσεις, κρύβω μόνο όσα είναι «μόνο οθόνη» στο `docs/FEATURES.md`
+    και τα υπόλοιπα μένουν, χωρίς ένδειξη beta.
+    *Ξεμπλοκάρει:* το All tools του design.
+
+20. **ΚΡΙΣΙΜΟ — το migration της ασφάλειας,
+    `20261010000000_guard_entitlement_metadata.sql`.** Τρέχει μετά το
+    merge του pull request της ασφάλειας, όχι πριν (η εγγραφή χρειάζεται
+    τον νέο κώδικα). Δεν σβήνει τίποτα· προσθέτει έναν φύλακα στον πίνακα
+    των λογαριασμών.
+    1. **Προεπισκόπηση** (μόνο ανάγνωση). Supabase → SQL Editor → New
+       query:
+       ```sql
+       select tgname from pg_trigger
+        where tgrelid = 'auth.users'::regclass and not tgisinternal;
+       ```
+       Κράτα τι βγάζει. Μετά το migration θα βγάζει τα ίδια συν
+       `guard_entitlement_metadata`.
+    2. **Αντίγραφο** (δεν σβήνει τίποτα, μόνο αντιγράφει):
+       ```sql
+       create schema if not exists backup;
+       revoke all on schema backup from public, anon, authenticated;
+       create table backup.user_meta_20261010 as
+         select id, raw_user_meta_data from auth.users;
+       select count(*) from backup.user_meta_20261010;
+       ```
+    3. **Το migration:** άνοιξε το αρχείο στο GitHub (branch `main` μετά
+       το merge) → `supabase/migrations/20261010000000_guard_entitlement_metadata.sql`
+       → «Copy raw file» → επικόλληση σε νέο query → **Run**. Πρέπει να
+       δεις «Success». Αν δεις μήνυμα «the trigger is not on
+       auth.users», δεν πέτυχε· στείλε μου το μήνυμα.
+    4. **Έλεγχος** στο site: αποσυνδέσου και ξανασυνδέσου. Μετά άλλαξε
+       το εμφανιζόμενο όνομα στις Ρυθμίσεις. Και τα δύο πρέπει να
+       δουλεύουν όπως πριν.
+    5. **Αν η σύνδεση δεν δουλεύει**, τρέξε αμέσως αυτό και πες μου:
+       ```sql
+       drop trigger if exists guard_entitlement_metadata on auth.users;
+       ```
+       Ο λογαριασμός σου και τα δεδομένα δεν αλλάζουν από αυτό.
+    6. **Έλεγχος λογαριασμών** (μόνο ανάγνωση): λογαριασμοί με
+       πληρωμένο πλάνο χωρίς συνδρομή, που δεν είναι beta ούτε μέλη
+       ομάδας.
+       ```sql
+       select u.id, u.created_at,
+              u.raw_user_meta_data->>'subscription_tier' as tier
+         from auth.users u
+        where coalesce(u.raw_user_meta_data->>'subscription_tier', 'free') <> 'free'
+          and coalesce(u.raw_user_meta_data->>'stripe_subscription_id', '') = ''
+          and coalesce(u.raw_user_meta_data->>'is_beta_tester', 'false') <> 'true'
+          and not exists (select 1 from public.team_members t
+                           where t.member_user_id = u.id and t.status = 'active');
+       ```
+       Πες μου μόνο πόσες γραμμές βγαίνουν. Αν βγουν, τι κάνουμε μαζί
+       τους είναι δική σου απόφαση (χρήματα).
+    7. Όταν περάσει μία εβδομάδα χωρίς πρόβλημα:
+       `drop table backup.user_meta_20261010;`
+
+21. **`BETA_INVITE_CODE` στο Vercel.** Ο κωδικός beta δεν έχει πλέον
+    προεπιλογή στον κώδικα. Αν η μεταβλητή λείπει, κανένας κωδικός δεν
+    δουλεύει και οι νέοι λογαριασμοί ξεκινούν στο Free (η εγγραφή
+    δουλεύει κανονικά).
+    1. Vercel → το project → Settings → Environment Variables.
+    2. Ψάξε `BETA_INVITE_CODE`. Αν θέλεις να συνεχίσει το beta,
+       **Add New** με έναν **καινούργιο** κωδικό που δεν έχει γραφτεί
+       ποτέ στο repository, Production και Preview, Save.
+    3. Πες μου μόνο «υπάρχει» ή «δεν υπάρχει». Όχι την τιμή.
+
+22. **Επιβεβαίωση email στην εγγραφή.** Σήμερα ο λογαριασμός
+    δημιουργείται χωρίς να επιβεβαιωθεί ότι το email ανήκει σε αυτόν που
+    γράφεται (σοβαρό, `docs/SECURITY-AUDIT.md` ΑΣ-5.8· οι λεπτομέρειες
+    στη συνομιλία). Η διόρθωση αλλάζει τη ροή: ο νέος χρήστης θα
+    πατά σύνδεσμο στο email πριν μπει. Ναι ή όχι;
+
+23. **Supabase: αντίγραφα ασφαλείας και όρια σύνδεσης.**
+    1. Supabase → το project → **Database** → **Backups**. Πες μου τι
+       γράφει: υπάρχουν; κάθε πότε; υπάρχει «Point in time recovery»;
+    2. Supabase → **Authentication** → **Rate Limits**. Στείλε μου
+       screenshot.
+    3. Supabase → **Authentication** → **Sign In / Providers**: ποιοι
+       πάροχοι είναι ενεργοί (Email, Google…);
+
+24. **Τρεις αποφάσεις για χρήματα** (`docs/SECURITY-AUDIT.md`,
+    `docs/BUGS.md`):
+    - **Ομάδες:** όταν ο ιδιοκτήτης σταματά να πληρώνει ή αφαιρεί μέλος,
+      το μέλος χάνει αμέσως το πλάνο της ομάδας. Προτείνω ναι.
+    - **«Regenerate (free)»:** γίνεται πραγματικά δωρεάν (μία φορά ανά
+      site), ή αλλάζει το κείμενο σε «Regenerate». Προτείνω το δεύτερο.
+    - **Χρέωση που ξεπερνά το υπόλοιπο:** σήμερα το επιπλέον το
+      απορροφάς εσύ. Προτείνω να μένει έτσι, με όριο ανά ενέργεια.
+    Και η διόρθωση της αλλαγής πλάνου (ΑΣ-4.3): στο επόμενο pull request
+    σου γράφω πρώτα τι αλλάζει στη χρέωση, πριν μπει.
+
 ## Έκλεισαν 2026-10-04
 
 - **NEEDS 3 και 16, το #223 και το «ένα pull request ανά βήμα»:** έγινε

@@ -1009,7 +1009,8 @@
       "agreedRate": "A {price} € per credito, la tariffa che hai accettato.",
       "capReached": "Hai raggiunto il tuo limite. Non verrà addebitato altro finché non lo aumenti.",
       "turnOff": "Disattiva l'utilizzo extra",
-      "turnOffNote": "Disattivarlo ferma gli addebiti futuri. Quanto già usato questo mese resta fatturato."
+      "turnOffNote": "Disattivarlo ferma gli addebiti futuri. Quanto già usato questo mese resta fatturato.",
+      "needsSubscription": "Il pagamento a consumo è per i piani a pagamento: viene addebitato con la prossima fattura. Scegli prima un piano."
     },
     "addons": {
       "title": "Componenti aggiuntivi",

@@ -1009,7 +1009,8 @@
       "agreedRate": "A {price} € por crédito, a tarifa que aceitou.",
       "capReached": "Atingiu o seu limite. Nada mais será cobrado até o aumentar.",
       "turnOff": "Desligar uso adicional",
-      "turnOffNote": "Desligar para as cobranças futuras. O que já foi usado este mês continua a ser faturado."
+      "turnOffNote": "Desligar para as cobranças futuras. O que já foi usado este mês continua a ser faturado.",
+      "needsSubscription": "O pagamento por uso é para planos pagos: é cobrado na sua próxima fatura. Escolha primeiro um plano."
     },
     "addons": {
       "title": "Extras",

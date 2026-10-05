@@ -1,8 +1,8 @@
 // THE SIDEBAR IS ONE AND THE SAME ON EVERY PAGE, AND RECENT TOOLS KEEPS
 // THE DESIGN'S RULES.
 //
-// docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN — ΤΟ ΤΕΛΙΚΟ, SIDEBAR; BUILD-SPECS 2.4
-// scenarios 1–8. The rules are run (src/lib/nav/recent-tools.ts,
+// docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §3 and «RECENT TOOLS, Ο ΣΩΣΤΟΣ
+// ΚΑΝΟΝΑΣ» (2026-10-05), whose eight scenarios are section 1 below. The rules are run (src/lib/nav/recent-tools.ts,
 // src/lib/nav/rail.ts); the sidebar, the layout that feeds it and the
 // route that stores a pin are read with their comments stripped.
 //
@@ -33,32 +33,57 @@ const run = (events, prefs = none) => R.recentTools({ events, toolHrefs: TOOLS, 
 const ev = (path, days, minutes = 0) => ({ path, created_at: ago(days, minutes) });
 const hrefs = (list) => list.map((r) => r.href).join(",");
 
-console.log("== 1. when a tool appears ==");
+console.log("== 1. the eight scenarios of 2026-10-05: finished work only ==");
+// An event here is FINISHED work. Opens and clicks never reach the rule:
+// the layout reads settled actions and saved things, not page views
+// (section 5 checks that), and completionEvents drops what did not finish.
+const done = (path, ...days) => days.map((d, i) => ev(path, d, i));
 check("a new person has no recent tools", run([]).length === 0);
-check("one use is not enough", run([ev("/dashboard/posts", 1)]).length === 0);
 check(
-  "two opens a few minutes apart are ONE use",
-  run([ev("/dashboard/posts", 1, 0), ev("/dashboard/posts", 1, 10)]).length === 0
+  "1. a click from All tools is not a use: nothing reaches the rule from an open",
+  R.completionEvents([]).length === 0 && run([]).length === 0
 );
 check(
-  "two separate uses within 30 days: it appears",
-  hrefs(run([ev("/dashboard/posts", 1), ev("/dashboard/posts", 5)])) === "/dashboard/posts"
+  "2. ten opens with nothing done: the layout does not read opens at all",
+  !/\.from\("nav_events"\)/.test(stripComments(readFileSync("src/app/dashboard/layout.tsx", "utf8")))
 );
+check("3. three finished tasks on the same day: not yet", run(done("/dashboard/posts", 1, 1, 1)).length === 0);
+check("4. three finished tasks on two different days: it appears", hrefs(run(done("/dashboard/posts", 1, 1, 3))) === "/dashboard/posts");
+check("...two tasks on two days are not enough", run(done("/dashboard/posts", 1, 3)).length === 0);
 check(
-  "a use older than 30 days does not count",
-  run([ev("/dashboard/posts", 1), ev("/dashboard/posts", 31)]).length === 0
+  "5. a failed, cancelled or refunded task does not count",
+  R.completionEvents([
+    { feature: "deep_research_refunded", created_at: ago(1) },
+    { feature: "file_ask_stopped", created_at: ago(2) },
+    { feature: "agent_run_cannot_complete", created_at: ago(3) },
+  ]).length === 0 &&
+    R.completionEvents([{ feature: "deep_research", created_at: ago(1) }]).map((e) => e.path).join() === "/dashboard/deep-research"
+);
+check("6. a pin puts it in at once, with no use", hrefs(run([], { pinned: [TOOLS[1]], removed: {} })) === TOOLS[1]);
+check("7. 30 days without a use: it goes", run(done("/dashboard/posts", 31, 32, 35)).length === 0);
+check("...unless it is pinned", hrefs(run(done("/dashboard/posts", 31, 32, 35), { pinned: ["/dashboard/posts"], removed: {} })) === "/dashboard/posts");
+const fiveUsed = TOOLS.slice(0, 5).flatMap((t, i) => done(t, i + 1, i + 1, i + 3));
+const withPin = run([...fiveUsed, ...done(TOOLS[5], 0, 0, 2)], { pinned: [TOOLS[5]], removed: {} });
+check("8. a sixth does not push out a pinned tool", withPin.length === 5 && withPin[0].href === TOOLS[5] && withPin[0].pinned, hrefs(withPin));
+check(
+  "a saved thing counts, with its query string",
+  hrefs(run(R.savedEvents([{ href: "/dashboard/files?file=1", created_at: ago(1) }, { href: "/dashboard/files?file=2", created_at: ago(1) }, { href: "/dashboard/files", created_at: ago(4) }]))) === "/dashboard/files"
 );
 check(
   "a sub-page of a tool counts as the tool",
-  hrefs(run([ev("/dashboard/documents/:id", 1), ev("/dashboard/documents", 3)])) === "/dashboard/documents"
+  hrefs(run([ev("/dashboard/documents/:id", 1), ev("/dashboard/documents", 3), ev("/dashboard/documents", 4)])) === "/dashboard/documents"
 );
 check(
   "Chat and Coding never appear, however much they are used",
-  run([ev("/dashboard/chat", 1), ev("/dashboard/chat", 2), ev("/dashboard/coding", 1), ev("/dashboard/coding", 2)]).length === 0
+  run([...done("/dashboard/chat", 1, 2, 3), ...done("/dashboard/coding", 1, 2, 3)]).length === 0
+);
+check(
+  "every settlement feature that maps to a tool maps to a real route",
+  Object.values(R.COMPLETION_TOOLS).every((h) => h.startsWith("/dashboard/")) && Object.keys(R.COMPLETION_TOOLS).length >= 15
 );
 
 console.log("\n== 2. five at most, the oldest goes ==");
-const six = TOOLS.slice(0, 6).flatMap((t, i) => [ev(t, i + 1), ev(t, i + 10)]);
+const six = TOOLS.slice(0, 6).flatMap((t, i) => [ev(t, i + 1), ev(t, i + 1, 5), ev(t, i + 10)]);
 const five = run(six);
 check("six candidates give five", five.length === R.RECENT_TOOLS_MAX && R.RECENT_TOOLS_MAX === 5, hrefs(five));
 check("the one unused for longest is the one that goes", !five.some((r) => r.href === TOOLS[5]), hrefs(five));
@@ -79,12 +104,12 @@ check("Chat cannot be pinned into the list either", run([], { pinned: ["/dashboa
 const removedPrefs = R.applyRecentAction(none, "remove", "/dashboard/posts", new Date(ago(0, 30)));
 check(
   "removing a tool takes it out, past uses and all",
-  run([ev("/dashboard/posts", 1), ev("/dashboard/posts", 5)], removedPrefs).length === 0
+  run(done("/dashboard/posts", 1, 1, 5), removedPrefs).length === 0
 );
 check(
-  "...and it comes back only after two uses since",
-  run([ev("/dashboard/posts", 0, 20), ev("/dashboard/posts", 0, 1), ev("/dashboard/posts", 5)], removedPrefs).length === 0 &&
-    hrefs(run([ev("/dashboard/posts", 0, 35), ev("/dashboard/posts", 0, 1)], { pinned: [], removed: { "/dashboard/posts": ago(0, 40) } })) === "/dashboard/posts"
+  "...and it comes back only when it qualifies again on uses since",
+  run([...done("/dashboard/posts", 0, 0), ev("/dashboard/posts", 5)], removedPrefs).length === 0 &&
+    hrefs(run(done("/dashboard/posts", 0, 0, 2), { pinned: [], removed: { "/dashboard/posts": ago(3) } })) === "/dashboard/posts"
 );
 const pinned = R.applyRecentAction(removedPrefs, "pin", "/dashboard/posts", now);
 check("pinning a removed tool brings it back", pinned.pinned.includes("/dashboard/posts") && !("/dashboard/posts" in pinned.removed));
@@ -125,8 +150,16 @@ check("the active row is the active surface", /data-active=\{isActive\}/.test(S)
 
 const L = stripComments(readFileSync("src/app/dashboard/layout.tsx", "utf8"));
 check(
-  "the layout reads the person's own last 30 days of nav_events",
-  /\.from\("nav_events"\)[\s\S]{0,120}\.eq\("user_id", user\.id\)[\s\S]{0,80}\.gte\("created_at", since\)/.test(L)
+  "the layout reads the person's own last 30 days of settled work",
+  /\.from\("ai_cost_log"\)[\s\S]{0,120}\.eq\("user_id", user\.id\)[\s\S]{0,80}\.gte\("created_at", since\)/.test(L)
+);
+check(
+  "...and of saved things",
+  /\.from\("search_index"\)[\s\S]{0,120}\.eq\("user_id", user\.id\)[\s\S]{0,80}\.gte\("created_at", since\)/.test(L)
+);
+check(
+  "...and feeds the rule only those, never page opens",
+  /const events = \[\.\.\.completionEvents\(settled\.data \?\? \[\]\), \.\.\.savedEvents\(saved\.data \?\? \[\]\)\];/.test(L)
 );
 check("and hands the result to the sidebar", /<Sidebar [^>]*recent=\{recent\} \/>/.test(L));
 

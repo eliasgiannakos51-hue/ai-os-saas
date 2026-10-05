@@ -1009,7 +1009,8 @@
       "agreedRate": "À {price} € par crédit, le tarif que vous avez accepté.",
       "capReached": "Vous avez atteint votre plafond. Rien ne sera facturé de plus tant que vous ne l'aurez pas relevé.",
       "turnOff": "Désactiver le dépassement",
-      "turnOffNote": "La désactivation arrête les prochains frais. Ce qui a déjà été utilisé ce mois-ci reste facturé."
+      "turnOffNote": "La désactivation arrête les prochains frais. Ce qui a déjà été utilisé ce mois-ci reste facturé.",
+      "needsSubscription": "Le paiement à l’usage est réservé aux forfaits payants : il est facturé avec votre prochaine facture. Choisissez d’abord un forfait."
     },
     "addons": {
       "title": "Options",

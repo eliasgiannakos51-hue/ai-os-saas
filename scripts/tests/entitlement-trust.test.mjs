@@ -1,0 +1,144 @@
+// WHAT AN ACCOUNT PAYS FOR IS DECIDED BY THE SERVER (BUILD-SPECS 6, Α1 and
+// Α4; the security round of 2026-10-05).
+//
+// The checks name what was fixed, not how it could be abused: the
+// repository is public (BUILD-SPECS 6, «ΠΩΣ ΔΟΥΛΕΥΕΙΣ ΕΔΩ»).
+//
+//   1. Every entitlement key the billing code reads from user_metadata is
+//      on the list supabase/migrations/20261010000000_guard_entitlement_metadata.sql
+//      keeps for the server. The population is the code's own reads.
+//   2. Signup writes the starting plan through the server's merge, not
+//      through Supabase Auth (which the migration now fences).
+//   3. The beta invite code exists only when the environment sets one.
+//   4. Overage can be switched on only by a subscriber.
+//   5. A recurring add-on never overwrites the plan.
+//   6. Ownership checks where the admin client reads by an id or a path
+//      that came from a user's own row or request.
+//   7. The app sends its own security headers.
+//   8. The internal hand-off secret is compared in constant time.
+//
+// The behaviour of the migration itself is run against a real Postgres by
+// scripts/tests/entitlement-metadata.dbtest.mjs.
+//
+// Run: node scripts/tests/entitlement-trust.test.mjs
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import path from "node:path";
+
+let pass = 0;
+const failures = [];
+const ok = (name, cond, detail) => {
+  if (cond) { pass++; console.log(`  PASS  ${name}`); }
+  else { failures.push(name); console.log(`  FAIL  ${name}${detail !== undefined ? "\n        " + detail : ""}`); }
+};
+const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+const read = (p) => strip(readFileSync(p, "utf8"));
+
+function walk(dir, out = []) {
+  for (const name of readdirSync(dir)) {
+    const p = path.join(dir, name);
+    if (statSync(p).isDirectory()) walk(p, out);
+    else if (/\.(ts|tsx)$/.test(name)) out.push(p);
+  }
+  return out;
+}
+
+// =====================================================================
+console.log("\n== 1. every entitlement key the billing code reads is the server's ==");
+// =====================================================================
+const MIGRATION = readFileSync("supabase/migrations/20261010000000_guard_entitlement_metadata.sql", "utf8");
+const listed = new Set([...(MIGRATION.match(/protected constant text\[\] := array\[([\s\S]*?)\];/)?.[1] ?? "").matchAll(/'([a-z_]+)'/g)].map((m) => m[1]));
+// Where billing decisions are made: plans, credits, checkout, the portal,
+// the team, the crons, beta, deletion.
+const BILLING_DIRS = ["src/lib/billing", "src/lib/team", "src/app/api/billing", "src/app/api/billing-portal", "src/app/api/checkout", "src/app/api/credits", "src/app/api/team", "src/app/api/cron", "src/app/api/delete-account"];
+const BILLING_FILES = ["src/lib/beta.ts", ...BILLING_DIRS.flatMap((d) => walk(d))];
+const read_keys = new Set();
+for (const f of BILLING_FILES) {
+  for (const m of read(f).matchAll(/user_metadata\??\.([a-z_]+)/g)) read_keys.add(m[1]);
+}
+ok("the scan found the billing code's reads", read_keys.size >= 6 && BILLING_FILES.length >= 30, `${read_keys.size} keys over ${BILLING_FILES.length} files`);
+const unguarded = [...read_keys].filter((k) => !listed.has(k));
+ok("every one is on the server-only list", unguarded.length === 0, `not guarded: ${unguarded.join(", ")}`);
+ok("the guard fences Supabase Auth's own role", /if current_user <> 'supabase_auth_admin' then\s+return new;/.test(MIGRATION));
+ok("it runs as the caller, so the role it sees is real", /security invoker/.test(MIGRATION) && !/security definer/.test(MIGRATION.split("create or replace function public.guard_entitlement_metadata")[1].split("$$;")[0]));
+
+// =====================================================================
+console.log("\n== 2. signup writes the starting plan through the server ==");
+// =====================================================================
+const SIGNUP = read("src/app/api/signup/route.ts");
+const createUserMeta = SIGNUP.match(/admin\.auth\.admin\.createUser\(\{[\s\S]*?user_metadata: \{([\s\S]*?)\},\s*\}\);/)?.[1] ?? null;
+ok("the createUser call was found", createUserMeta !== null);
+ok("it asks Supabase Auth for no entitlement key", createUserMeta !== null && ![...listed].some((k) => createUserMeta.includes(k)), createUserMeta ?? "");
+ok(
+  "the plan, the seats and the beta flag are merged by the server after it",
+  /mergeUserMetadata\(\s*createData\.user\.id,\s*\{\s*subscription_tier: isValidBetaCode \? "ultimate" : "free",\s*seat_count: 0,/.test(SIGNUP)
+);
+
+// =====================================================================
+console.log("\n== 3. no beta code unless the environment sets one ==");
+// =====================================================================
+// beta.ts imports the admin client, which the TS loader does not stub, so
+// the function is read rather than run; the read is narrow enough to need
+// no running: it returns the trimmed variable or null, and nothing else.
+const BETA = read("src/lib/beta.ts");
+const betaFn = BETA.slice(BETA.indexOf("export function getBetaInviteCode"), BETA.indexOf("export function computeBetaExpiresAt"));
+ok("the code is the environment's or nothing", /const code = process\.env\.BETA_INVITE_CODE\?\.trim\(\);\s*return code \? code : null;/.test(betaFn), betaFn);
+ok("no literal code anywhere in the function", !/["'`][A-Z0-9]{4,}["'`]/.test(betaFn) && !/\|\|/.test(betaFn));
+ok("signup refuses every code when none is set", /const isValidBetaCode = Boolean\(betaCode && inviteCode && inviteCode === betaCode\);/.test(SIGNUP));
+
+// =====================================================================
+console.log("\n== 4. overage only for a subscriber ==");
+// =====================================================================
+const OVERAGE = read("src/app/api/billing/overage/route.ts");
+const post = OVERAGE.slice(OVERAGE.indexOf("export async function POST"));
+const refuse = post.indexOf('if (!isSubscriber) return NextResponse.json({ error: "needs_subscription" }, { status: 403 });');
+ok("switching overage on refuses an account with no subscription", refuse > 0);
+ok("...before anything is saved", refuse > 0 && refuse < post.indexOf("enableOverage("));
+ok("...and a subscription means a customer and a subscription id", /typeof meta\.stripe_customer_id === "string" && meta\.stripe_customer_id\.length > 0 &&\s*typeof meta\.stripe_subscription_id === "string" && meta\.stripe_subscription_id\.length > 0/.test(post));
+
+// =====================================================================
+console.log("\n== 5. an add-on never overwrites the plan ==");
+// =====================================================================
+const WEBHOOK = read("src/app/api/webhooks/stripe/route.ts");
+const sync = WEBHOOK.slice(WEBHOOK.indexOf("async function syncSubscriptionToUser"));
+const skip = sync.indexOf("if (subscription.metadata?.addon_slug) return;");
+ok("the plan sync returns on an add-on subscription", skip > 0);
+ok("...before it resolves a plan from the price", skip > 0 && skip < sync.indexOf("mergeUserMetadata("));
+
+// =====================================================================
+console.log("\n== 6. the admin client reads only what is the account's own ==");
+// =====================================================================
+const CRON = read("src/app/api/cron/scheduled-runs/route.ts");
+ok(
+  "a scheduled run whose mission is someone else's is refused",
+  /if \(missionError \|\| !mission \|\| \(mission as \{ user_id\?: string \}\)\.user_id !== run\.user_id\) \{/.test(CRON)
+);
+const CREATE_JOB = read("src/lib/jobs/handlers/create.ts");
+ok(
+  "attachment paths are filtered to the account's folder before the admin download",
+  /const ownPaths = imagePaths\.filter\(\(p\) => p\.startsWith\(`\$\{ctx\.userId\}\/`\) && !p\.includes\("\.\."\)\);/.test(CREATE_JOB) &&
+    /downloadAttachmentImages\(admin, ownPaths,/.test(CREATE_JOB) &&
+    !/downloadAttachmentImages\(admin, imagePaths,/.test(CREATE_JOB)
+);
+
+// =====================================================================
+console.log("\n== 7. the app's own security headers ==");
+// =====================================================================
+const config = await import(path.resolve("next.config.mjs"));
+const headers = Object.fromEntries((config.APP_SECURITY_HEADERS ?? []).map((h) => [h.key, h.value]));
+ok("framing refused", headers["X-Frame-Options"] === "DENY" && /frame-ancestors 'none'/.test(headers["Content-Security-Policy"] ?? ""));
+ok("no content-type guessing", headers["X-Content-Type-Options"] === "nosniff");
+ok("a referrer policy and a permissions policy", Boolean(headers["Referrer-Policy"]) && /camera=\(\)/.test(headers["Permissions-Policy"] ?? ""));
+const resolved = await config.default.headers();
+ok("applied to every path but the published sites", resolved.length === 1 && resolved[0].source === "/((?!s/).*)" && resolved[0].headers === config.APP_SECURITY_HEADERS);
+ok("the framework is not announced", config.default.poweredByHeader === false);
+
+// =====================================================================
+console.log("\n== 8. the internal hand-off secret, in constant time ==");
+// =====================================================================
+for (const f of ["src/app/api/jobs/[id]/continue/route.ts", "src/app/api/research/[id]/continue/route.ts"]) {
+  const s = read(f);
+  ok(`${f}: compared with secretsMatch`, /secretsMatch\(presented, expected\)/.test(s) && !/presented === expected/.test(s));
+}
+
+console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\nFAILED: ${pass} passed, ${failures.length} failed`);
+process.exit(failures.length === 0 ? 0 : 1);

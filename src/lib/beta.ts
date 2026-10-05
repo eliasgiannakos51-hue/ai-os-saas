@@ -23,12 +23,13 @@ export function isBetaTester(
 
 export const BETA_ACCESS_DAYS = 30;
 
-// Falls back to a hardcoded default so beta invites work out of the box
-// without requiring BETA_INVITE_CODE to be configured in every environment
-// — set the env var to override it (e.g. to rotate the code) without a
-// code change.
-export function getBetaInviteCode(): string {
-  return process.env.BETA_INVITE_CODE || "IONEXA200";
+// The code comes from BETA_INVITE_CODE and nowhere else (fixed
+// 2026-10-05: no default in the source). Unset means no code is valid:
+// beta signups stop until the variable is set, which is the safe direction
+// for a code that grants a paid plan.
+export function getBetaInviteCode(): string | null {
+  const code = process.env.BETA_INVITE_CODE?.trim();
+  return code ? code : null;
 }
 
 export function computeBetaExpiresAt(): string {

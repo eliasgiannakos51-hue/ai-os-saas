@@ -69,10 +69,13 @@ begin
 end;
 $$;
 
+-- NO GRANT TO ANYONE. Postgres does not check EXECUTE when a trigger
+-- fires, so the auth role needs none to be fenced by it (measured on a
+-- real Postgres, 2026-10-05), and scripts/tests/role-grants.dbtest.mjs
+-- holds every holding to a named list.
 revoke all on function public.guard_entitlement_metadata() from public;
 revoke all on function public.guard_entitlement_metadata() from anon;
 revoke all on function public.guard_entitlement_metadata() from authenticated;
-grant execute on function public.guard_entitlement_metadata() to supabase_auth_admin;
 
 drop trigger if exists guard_entitlement_metadata on auth.users;
 create trigger guard_entitlement_metadata

@@ -3726,7 +3726,6 @@
     "startListening": "用说的，不用打字",
     "stopListening": "停止",
     "costPerMinute": "每分钟语音 {credits} 积分",
-    "outOfMinutes": "本月的语音分钟数已用完",
     "states": {
       "idle": "就绪",
       "listening": "正在听你说",

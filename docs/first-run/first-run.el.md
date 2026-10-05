@@ -1,6 +1,6 @@
 # The first run — el
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **591 strings**. The whole product is 3550, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **588 strings**. The whole product is 3544, which is why this file exists.
 
 **Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 360 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2332,7 +2332,7 @@ Projects
 
 Καλημέρα
 
-## Tier 3 — Further in — only if you have time (208)
+## Tier 3 — Further in — only if you have time (205)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3206,12 +3206,6 @@ _Reachable from these screens but deeper in: shared components, error states, th
 
 Μίλα και μετά πάτα Σταμάτα. Τίποτα δεν στέλνεται πριν το διαβάσεις.
 
-**`voice.outOfMinutes`**
-
-> EN — No voice minutes left this month
-
-Δεν έμειναν λεπτά φωνής αυτόν τον μήνα
-
 **`voice.permission.allow`**
 
 > EN — Open the microphone
@@ -3253,18 +3247,6 @@ _Reachable from these screens but deeper in: shared components, error states, th
 > EN — Before the microphone opens
 
 Πριν ανοίξει το μικρόφωνο
-
-**`voice.settings.notConfigured`**
-
-> EN — Voice is not set up on this deployment, so the microphone and Listen buttons do not appear.
-
-Η φωνή δεν είναι ρυθμισμένη σε αυτή την εγκατάσταση, οπότε το μικρόφωνο και το «Άκου» δεν εμφανίζονται.
-
-**`voice.settings.notIncluded`**
-
-> EN — Voice is not included on your plan. Everything here can still be typed and read.
-
-Η φωνή δεν περιλαμβάνεται στο πλάνο σου. Όλα εδώ γράφονται και διαβάζονται κανονικά.
 
 **`voice.startListening`**
 

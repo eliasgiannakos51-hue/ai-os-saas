@@ -3726,7 +3726,6 @@
     "startListening": "Μίλα αντί να γράφεις",
     "stopListening": "Σταμάτα",
     "costPerMinute": "{credits, plural, one {# credit} other {# credits}} ανά λεπτό ομιλίας",
-    "outOfMinutes": "Δεν έμειναν λεπτά φωνής αυτόν τον μήνα",
     "states": {
       "idle": "Έτοιμο",
       "listening": "Σε ακούει",

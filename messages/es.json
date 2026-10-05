@@ -3706,7 +3706,6 @@
     "startListening": "Habla en lugar de escribir",
     "stopListening": "Detener",
     "costPerMinute": "{credits, plural, one {# crédito} other {# créditos}} por minuto de habla",
-    "outOfMinutes": "No quedan minutos de voz este mes",
     "states": {
       "idle": "Listo",
       "listening": "Te está escuchando",

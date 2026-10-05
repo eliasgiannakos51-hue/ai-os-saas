@@ -3706,7 +3706,6 @@
     "startListening": "Sprechen statt tippen",
     "stopListening": "Stopp",
     "costPerMinute": "{credits, plural, one {# Credit} other {# Credits}} pro Minute Sprache",
-    "outOfMinutes": "Diesen Monat sind keine Sprachminuten mehr übrig",
     "states": {
       "idle": "Bereit",
       "listening": "Hört dir zu",

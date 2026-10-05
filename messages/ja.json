@@ -3706,7 +3706,6 @@
     "startListening": "入力せずに話す",
     "stopListening": "停止",
     "costPerMinute": "音声1分あたり {credits} クレジット",
-    "outOfMinutes": "今月の音声の残り時間がありません",
     "states": {
       "idle": "準備完了",
       "listening": "あなたの声を聞いています",

@@ -1,6 +1,6 @@
 # The first run — it
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **586 strings**. The whole product is 3480, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **583 strings**. The whole product is 3474, which is why this file exists.
 
 **Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 357 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2302,7 +2302,7 @@ Buonasera
 
 Buongiorno
 
-## Tier 3 — Further in — only if you have time (208)
+## Tier 3 — Further in — only if you have time (205)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3176,12 +3176,6 @@ In ascolto
 
 Parla, poi premi Ferma. Nulla viene inviato prima che tu l'abbia letto.
 
-**`voice.outOfMinutes`**
-
-> EN — No voice minutes left this month
-
-Nessun minuto di voce rimasto questo mese
-
 **`voice.permission.allow`**
 
 > EN — Open the microphone
@@ -3223,18 +3217,6 @@ La registrazione parte solo quando premi e si ferma quando premi di nuovo.
 > EN — Before the microphone opens
 
 Prima che si apra il microfono
-
-**`voice.settings.notConfigured`**
-
-> EN — Voice is not set up on this deployment, so the microphone and Listen buttons do not appear.
-
-La voce non è configurata su questa installazione, quindi i pulsanti microfono e Ascolta non compaiono.
-
-**`voice.settings.notIncluded`**
-
-> EN — Voice is not included on your plan. Everything here can still be typed and read.
-
-La voce non è inclusa nel tuo piano. Tutto qui si può comunque scrivere e leggere.
 
 **`voice.startListening`**
 

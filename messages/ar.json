@@ -3706,7 +3706,6 @@
     "startListening": "تحدّث بدل الكتابة",
     "stopListening": "إيقاف",
     "costPerMinute": "{credits, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}} لكل دقيقة كلام",
-    "outOfMinutes": "لم تتبقّ دقائق صوتية هذا الشهر",
     "states": {
       "idle": "جاهز",
       "listening": "يستمع إليك",

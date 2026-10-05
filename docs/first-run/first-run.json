@@ -1,6 +1,6 @@
 {
-  "total": 3480,
-  "onPath": 586,
+  "total": 3474,
+  "onPath": 583,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -22,7 +22,7 @@
       "n": 3,
       "title": "Further in — only if you have time",
       "note": "Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour.",
-      "count": 208
+      "count": 205
     }
   ],
   "screens": [
@@ -3187,12 +3187,6 @@
           "file": "src/components/voice/voice-input.tsx"
         },
         {
-          "key": "voice.outOfMinutes",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/components/voice/voice-input.tsx"
-        },
-        {
           "key": "voice.permission.allow",
           "depth": 2,
           "tier": 3,
@@ -3230,18 +3224,6 @@
         },
         {
           "key": "voice.permission.title",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/components/voice/voice-input.tsx"
-        },
-        {
-          "key": "voice.settings.notConfigured",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/components/voice/voice-input.tsx"
-        },
-        {
-          "key": "voice.settings.notIncluded",
           "depth": 2,
           "tier": 3,
           "file": "src/components/voice/voice-input.tsx"

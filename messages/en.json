@@ -3706,7 +3706,6 @@
     "startListening": "Speak instead of typing",
     "stopListening": "Stop",
     "costPerMinute": "{credits, plural, one {# credit} other {# credits}} per minute of speech",
-    "outOfMinutes": "No voice minutes left this month",
     "states": {
       "idle": "Ready",
       "listening": "Listening to you",

@@ -25,6 +25,14 @@ import { readFileSync } from "node:fs";
 // the failure mode i18n-coverage's own baseline had — it knew about three
 // and stayed at three long after they were paid off.
 export const ABSENT_ON_PURPOSE = {
+  "docs/BUILD-SPECS.md": {
+    reason:
+      "DELIVERABLES THE SPEC ORDERS, NOT FILES IT DESCRIBES. Sections 7, 10 and 11 were saved word " +
+      "for word on 2026-10-05 and each says to make one of these: the capability catalogue, the cost " +
+      "sheet, the benchmark. They are queued after group 1 and do not exist yet. Each path goes stale, " +
+      "and fails this gate, on the day its file is written.",
+    paths: ["docs/CATALOG.md", "docs/COSTS.md", "docs/BENCHMARK.md"],
+  },
   "scripts/db/reserve-accuracy.mjs": {
     reason:
       "THE INSTRUMENT IT REPLACED, AND WHY IT WAS DELETED RATHER THAN TUNED. The static scan " +

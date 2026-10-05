@@ -819,7 +819,13 @@ try {
       asked,
       `job=${JSON.stringify({ status: askJob?.status, error: askJob?.error, result: askJob?.result })}\n        page=${bodyQ.replace(/\s+/g, " ").slice(-400)}`
     );
-    check("   all three questions are shown", /Where should it look\?/.test(bodyQ) && /nothing that day/.test(bodyQ));
+    // ONE QUESTION FOR AN AGENT, by design: CLARIFICATION_QUESTION_CAP in
+    // lib/clarification-client.ts gives every surface but the website one
+    // question. The stand-in still answers with three, so the cap is
+    // measured on the screen — the first shown, the other two trimmed.
+    // This said "all three questions are shown" until 2026-10-05, a
+    // rule the cap replaced (QUEUE Α.13).
+    check("   only the first question is shown — the agent's cap of one holds", asked && !/Where should it look\?/.test(bodyQ) && !/nothing that day/.test(bodyQ));
 
     // (γ) the answers are tappable, not an empty box.
     // "Every morning" here is NOT a product string: it is one of the

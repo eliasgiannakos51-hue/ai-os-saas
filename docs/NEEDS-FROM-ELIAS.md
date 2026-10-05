@@ -282,6 +282,27 @@
     Και η διόρθωση της αλλαγής πλάνου (ΑΣ-4.3): στο επόμενο pull request
     σου γράφω πρώτα τι αλλάζει στη χρέωση, πριν μπει.
 
+25. **ΚΡΙΣΙΜΟ — το migration της έρευνας,
+    `20261011000000_research_reports_server_writes.sql`.** Τρέχει μετά το
+    merge του pull request της έρευνας, όχι πριν: ο παλιός κώδικας γράφει
+    ακόμα τις αναφορές με τον client του χρήστη και θα σταματούσε. Δεν
+    σβήνει τίποτα· αλλάζει μόνο ποιος μπορεί να γράψει στον πίνακα.
+    1. **Προεπισκόπηση** (μόνο ανάγνωση):
+       ```sql
+       select has_table_privilege('authenticated', 'public.research_reports', 'UPDATE');
+       ```
+       Σήμερα βγάζει `true`.
+    2. **Το migration:** GitHub, branch `main` μετά το merge →
+       `supabase/migrations/20261011000000_research_reports_server_writes.sql`
+       → «Copy raw file» → νέο query στο SQL Editor → **Run** → «Success».
+    3. **Έλεγχος:** το ερώτημα του βήματος 1 βγάζει πλέον `false`. Στο
+       site, ξεκίνα μια Deep Research: πρέπει να δουλεύει όπως πριν.
+    4. **Αν η Deep Research σταματήσει να ξεκινά:**
+       ```sql
+       grant insert, update on public.research_reports to authenticated;
+       ```
+       και πες μου.
+
 ## Έκλεισαν 2026-10-04
 
 - **NEEDS 3 και 16, το #223 και το «ένα pull request ανά βήμα»:** έγινε

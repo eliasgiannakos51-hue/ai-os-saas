@@ -16,9 +16,13 @@
 //      that came from a user's own row or request.
 //   7. The app sends its own security headers.
 //   8. The internal hand-off secret is compared in constant time.
+//   9. A research report is written by the server only: the migration
+//      takes INSERT and UPDATE from the account, and every write in src/
+//      goes through the admin client.
 //
 // The behaviour of the migration itself is run against a real Postgres by
-// scripts/tests/entitlement-metadata.dbtest.mjs.
+// scripts/tests/entitlement-metadata.dbtest.mjs, and that of the research
+// migration by scripts/tests/research-reports-writes.dbtest.mjs.
 //
 // Run: node scripts/tests/entitlement-trust.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -139,6 +143,31 @@ for (const f of ["src/app/api/jobs/[id]/continue/route.ts", "src/app/api/researc
   const s = read(f);
   ok(`${f}: compared with secretsMatch`, /secretsMatch\(presented, expected\)/.test(s) && !/presented === expected/.test(s));
 }
+
+// =====================================================================
+console.log("\n== 9. a research report is written by the server only ==");
+// =====================================================================
+const RESEARCH_MIGRATION = readFileSync("supabase/migrations/20261011000000_research_reports_server_writes.sql", "utf8");
+ok(
+  "the account loses INSERT and UPDATE on research_reports",
+  /revoke insert, update on public\.research_reports from authenticated;/.test(strip(RESEARCH_MIGRATION.replace(/--.*$/gm, ""))) &&
+    /drop policy if exists "insert_own_research_reports"/.test(RESEARCH_MIGRATION) &&
+    /drop policy if exists "update_own_research_reports"/.test(RESEARCH_MIGRATION)
+);
+// The population is every write to the table anywhere in src/.
+const researchWrites = [];
+for (const f of walk("src")) {
+  for (const m of read(f).matchAll(/([\w.]+(?:\(\))?)\s*\.from\(\s*"research_reports"\s*\)\s*\.(insert|update|upsert)\(/g)) {
+    researchWrites.push({ file: f, receiver: m[1] });
+  }
+}
+ok("the scan found the writes", researchWrites.length >= 15, `${researchWrites.length} writes`);
+const userClientWrites = researchWrites.filter((w) => !["admin", "createAdminClient()"].includes(w.receiver));
+ok(
+  "every one goes through the admin client",
+  userClientWrites.length === 0,
+  userClientWrites.map((w) => `${w.file}: ${w.receiver}`).join("\n        ")
+);
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\nFAILED: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

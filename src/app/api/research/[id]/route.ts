@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { isResearchJobStale, type ResearchStatus } from "@/lib/research/research-limits";
 import { researchReportForClient } from "@/lib/research/research-timeline";
@@ -58,7 +59,10 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     // by releaseExpiredReservations on the daily cron (reservations carry
     // their own expires_at). A row reaped here was never charged.
     if (isResearchJobStale(String(data.status), data.processing_started_at ?? null, String(data.created_at), new Date())) {
-      const { data: failed } = await supabase
+      // The server's write: the account cannot update its reports
+      // (20261011000000_research_reports_server_writes.sql). Still scoped
+      // to this user's own row.
+      const { data: failed } = await createAdminClient()
         .from("research_reports")
         .update({
           status: "failed" satisfies ResearchStatus,

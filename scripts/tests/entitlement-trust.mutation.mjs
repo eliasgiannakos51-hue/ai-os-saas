@@ -18,6 +18,9 @@
  *  11. the framework announces itself again
  *  12. a hand-off secret is compared with === again
  *  13. the billing scan reads no files, so section 1 checks nothing
+ *  14. the research migration leaves the account able to write
+ *  15. a research route writes through the user's client again
+ *  16. the research scan matches nothing, so section 9 checks nothing
  *
  * Run: node scripts/tests/entitlement-trust.mutation.mjs
  */
@@ -33,6 +36,8 @@ const CRON = "src/app/api/cron/scheduled-runs/route.ts";
 const CREATE_JOB = "src/lib/jobs/handlers/create.ts";
 const CONFIG = "next.config.mjs";
 const JOBS_CONTINUE = "src/app/api/jobs/[id]/continue/route.ts";
+const RESEARCH_MIGRATION = "supabase/migrations/20261011000000_research_reports_server_writes.sql";
+const RESEARCH_START = "src/app/api/research/route.ts";
 
 // Top-level declaration under the name the reader looks for — see the
 // SHAPE note in scripts/tests/lib/mutation-runner.mjs.
@@ -128,11 +133,32 @@ const MUTANTS = [
     to: "const BILLING_FILES = [];",
     expect: "the scan found the billing code's reads",
   },
+  {
+    name: "the research migration leaves the account able to write",
+    file: RESEARCH_MIGRATION,
+    from: "revoke insert, update on public.research_reports from authenticated;",
+    to: "revoke insert on public.research_reports from anon;",
+    expect: "the account loses INSERT and UPDATE on research_reports",
+  },
+  {
+    name: "a research route writes through the user's client again",
+    file: RESEARCH_START,
+    from: "const { data: report, error } = await createAdminClient()",
+    to: "const { data: report, error } = await supabase",
+    expect: "every one goes through the admin client",
+  },
+  {
+    name: "the research scan matches nothing, so section 9 checks nothing",
+    file: GATE,
+    from: '.from\\(\\s*"research_reports"\\s*\\)',
+    to: '.from\\(\\s*"no_such_table"\\s*\\)',
+    expect: "the scan found the writes",
+  },
 ];
 
 runMutations({
   name: "entitlement-trust",
   gate: GATE,
-  targets: [GATE, MIGRATION, SIGNUP, BETA, OVERAGE, WEBHOOK, CRON, CREATE_JOB, CONFIG, JOBS_CONTINUE],
+  targets: [GATE, MIGRATION, SIGNUP, BETA, OVERAGE, WEBHOOK, CRON, CREATE_JOB, CONFIG, JOBS_CONTINUE, RESEARCH_MIGRATION, RESEARCH_START],
   mutants: MUTANTS,
 });

@@ -18,7 +18,7 @@
 
 | βαρύτητα | βρέθηκαν | διορθώθηκαν | ανοιχτά |
 |---|---|---|---|
-| κρίσιμο | 4 | 2 | 2 (ΑΣ-4.3, ΑΣ-4.4) |
+| κρίσιμο | 4 | 3 | 1 (ΑΣ-4.3) |
 | σοβαρό | 15 | 5 | 10 |
 | μέτριο | 15 | 1 | 14 |
 | μικρό | 11 | 2 | 9 |
@@ -39,6 +39,9 @@
 - κεφαλίδες ασφαλείας στην εφαρμογή·
 - σύγκριση μυστικού σε σταθερό χρόνο σε δύο routes·
 - βγήκε το email του ιδιοκτήτη από το `.env.local.example`.
+
+**Στο δεύτερο pull request (2026-10-05):** διορθώθηκε έλεγχος πρόσβασης
+στην έρευνα (migration `20261011000000_research_reports_server_writes.sql`).
 
 Tests: `scripts/tests/entitlement-trust.test.mjs` (24 έλεγχοι,
 13/13 mutations στο `entitlement-trust.mutation.mjs`) και
@@ -90,7 +93,7 @@ Tests: `scripts/tests/entitlement-trust.test.mjs` (24 έλεγχοι,
 | ΑΣ-4.1 | Ποσό, τιμή και υπόλοιπο ποτέ από τον browser | εντάξει | — | Όλα από τον server, από αναγνωριστικό |
 | ΑΣ-4.2 | Δύο ταυτόχρονα αιτήματα δεν ξοδεύουν δύο φορές, ούτε κάτω από το μηδέν | εντάξει | — | Κλείδωμα γραμμής στο `reserve_credits`· οι συναρτήσεις credits δεν καλούνται από τον χρήστη. Gates: `credit-grants`, `reservation-*` |
 | ΑΣ-4.3 | Έλεγχος χρέωσης κατά την αλλαγή πλάνου | ανοιχτό | κρίσιμο | Επόμενο pull request. Αγγίζει χρήματα: η διόρθωση περιγράφεται στον ιδιοκτήτη πριν μπει |
-| ΑΣ-4.4 | Έλεγχος πρόσβασης στην έρευνα (Deep Research) | ανοιχτό | κρίσιμο | Επόμενο pull request |
+| ΑΣ-4.4 | Έλεγχος πρόσβασης στην έρευνα (Deep Research) | διορθώθηκε | κρίσιμο | Migration `20261011000000_research_reports_server_writes.sql` (NEEDS 25). Tests: `entitlement-trust` §9, `research-reports-writes.dbtest` (κόκκινο χωρίς το migration) |
 | ΑΣ-4.5 | Overage μόνο για συνδρομητές | διορθώθηκε | κρίσιμο | `src/app/api/billing/overage/route.ts`. Test: `entitlement-trust` §4 |
 | ΑΣ-4.6 | Add-on δεν αλλάζει το πλάνο | διορθώθηκε | σοβαρό | `src/app/api/webhooks/stripe/route.ts`. Test: `entitlement-trust` §5 |
 | ΑΣ-4.7 | Ειδοποιήσεις Stripe με υπογραφή | εντάξει | — | `constructEvent` στο ακατέργαστο σώμα |

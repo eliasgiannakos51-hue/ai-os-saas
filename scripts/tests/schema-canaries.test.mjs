@@ -185,6 +185,8 @@ const NOT_PROBEABLE = {
     "`create or replace` on search_index_sync, which existed before it. The function is present whether or not this file ran, so its existence proves nothing — the property it changes is behavioural and only unified-search.dbtest.mjs can see it",
   "20261004000000_revoke_public_execute_prune_project_links.sql":
     "revokes EXECUTE from PUBLIC and from authenticated on three functions and grants nothing new. A canary asks whether an OBJECT exists; all three exist either way, and the property this file changes is a privilege, which /api/health cannot see at all — grants-and-policies.dbtest.mjs and role-grants.dbtest.mjs are what read it",
+  "20261012000000_cost_log_server_reads.sql":
+    "drops two select policies and revokes SELECT on two tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still read either table, and cost-log-reads.dbtest.mjs checks it against a real Postgres",
   "20261011000000_research_reports_server_writes.sql":
     "drops two policies and revokes INSERT and UPDATE from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the privileges are wrong, and research-reports-writes.dbtest.mjs checks them against a real Postgres",
   "20261010000000_guard_entitlement_metadata.sql":

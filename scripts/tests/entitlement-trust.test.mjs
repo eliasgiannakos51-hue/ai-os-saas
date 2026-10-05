@@ -19,10 +19,14 @@
 //   9. A research report is written by the server only: the migration
 //      takes INSERT and UPDATE from the account, and every write in src/
 //      goes through the admin client.
+//  10. The cost log and the provider log are read by the server only: the
+//      migration takes SELECT from the account, and every read in src/
+//      goes through the admin client.
 //
 // The behaviour of the migration itself is run against a real Postgres by
 // scripts/tests/entitlement-metadata.dbtest.mjs, and that of the research
-// migration by scripts/tests/research-reports-writes.dbtest.mjs.
+// migration by scripts/tests/research-reports-writes.dbtest.mjs, and the
+// cost-log one by scripts/tests/cost-log-reads.dbtest.mjs.
 //
 // Run: node scripts/tests/entitlement-trust.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -167,6 +171,39 @@ ok(
   "every one goes through the admin client",
   userClientWrites.length === 0,
   userClientWrites.map((w) => `${w.file}: ${w.receiver}`).join("\n        ")
+);
+
+// =====================================================================
+console.log("\n== 10. the cost log and the provider log are read by the server only ==");
+// =====================================================================
+const COST_MIGRATION = strip(readFileSync("supabase/migrations/20261012000000_cost_log_server_reads.sql", "utf8").replace(/--.*$/gm, ""));
+ok(
+  "the account loses SELECT on both",
+  /revoke select on public\.ai_cost_log from anon, authenticated;/.test(COST_MIGRATION) &&
+    /revoke select on public\.ai_provider_log from anon, authenticated;/.test(COST_MIGRATION) &&
+    /drop policy if exists "select_own_ai_cost_log"/.test(COST_MIGRATION) &&
+    /drop policy if exists "ai_provider_log_select_own"/.test(COST_MIGRATION)
+);
+// The population is every direct read of either table anywhere in src/.
+const costReads = [];
+for (const f of walk("src")) {
+  for (const m of read(f).matchAll(/([\w.]+(?:\(\))?)\s*\.from\(\s*"(ai_cost_log|ai_provider_log)"\s*\)/g)) {
+    costReads.push({ file: f, receiver: m[1], table: m[2] });
+  }
+}
+ok("the scan found the reads", costReads.length >= 10, `${costReads.length} reads`);
+const userClientReads = costReads.filter((r) => !["admin", "createAdminClient()"].includes(r.receiver));
+ok(
+  "every one goes through the admin client",
+  userClientReads.length === 0,
+  userClientReads.map((r) => `${r.file}: ${r.receiver} -> ${r.table}`).join("\n        ")
+);
+const REGISTRY = read("src/lib/gdpr/user-data-registry.ts");
+ok(
+  "the export reads them by the server, without cost, margin or model columns",
+  /table: "ai_cost_log",[\s\S]{0,120}serverExportColumns: \["id", "feature", "credits_charged", "created_at"\]/.test(REGISTRY) &&
+    /table: "ai_provider_log",[\s\S]{0,120}serverExportColumns: \["id", "created_at", "purpose", "outcome"\]/.test(REGISTRY) &&
+    /t\.serverExportColumns\s*\?\s*createAdminClient\(\)\.from\(t\.table\)\.select\(t\.serverExportColumns\.join\(", "\)\)/.test(read("src/app/api/account/export/route.ts"))
 );
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\nFAILED: ${pass} passed, ${failures.length} failed`);

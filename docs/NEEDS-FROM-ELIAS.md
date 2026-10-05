@@ -303,6 +303,28 @@
        ```
        και πες μου.
 
+26. **Το migration του αρχείου κόστους,
+    `20261012000000_cost_log_server_reads.sql`.** Τρέχει μετά το merge
+    του pull request του, όχι πριν: ο παλιός κώδικας διαβάζει ακόμα το
+    αρχείο κόστους με τα δικαιώματα του χρήστη, και τα Recent tools και η
+    απόδειξη του site θα έμεναν κενά. Δεν σβήνει τίποτα.
+    1. **Προεπισκόπηση** (μόνο ανάγνωση):
+       ```sql
+       select has_table_privilege('authenticated', 'public.ai_cost_log', 'SELECT');
+       ```
+       Σήμερα βγάζει `true`.
+    2. **Το migration:** GitHub, branch `main` μετά το merge →
+       `supabase/migrations/20261012000000_cost_log_server_reads.sql` →
+       «Copy raw file» → νέο query στο SQL Editor → **Run** → «Success».
+    3. **Έλεγχος:** το ερώτημα του βήματος 1 βγάζει πλέον `false`. Στο
+       site, άνοιξε τις Ρυθμίσεις: η δραστηριότητα credits φαίνεται όπως
+       πριν.
+    4. **Αν κάτι από αυτά μείνει κενό:**
+       ```sql
+       grant select on public.ai_cost_log, public.ai_provider_log to authenticated;
+       ```
+       και πες μου.
+
 ## Έκλεισαν 2026-10-04
 
 - **NEEDS 3 και 16, το #223 και το «ένα pull request ανά βήμα»:** έγινε

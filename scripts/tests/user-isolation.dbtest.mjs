@@ -159,9 +159,10 @@ check(
   rlsOff.join(", ")
 );
 
-// SEALED, OR OWNED. Five of these carry RLS and NO POLICY AT ALL —
-// account_deletion_requests, production_errors, routing_decisions,
-// subscriber_months, subscription_events. On Postgres that means nothing
+// SEALED, OR OWNED. Seven of these carry RLS and NO POLICY AT ALL —
+// account_deletion_requests, ai_cost_log, ai_provider_log,
+// production_errors, routing_decisions, subscriber_months,
+// subscription_events. On Postgres that means nothing
 // reaches them but the service role: the server writes them and no user
 // reads them, ever. db-migrations.dbtest.mjs already knows this set as
 // "every policy-less table is one we meant to be unreachable".
@@ -169,7 +170,7 @@ check(
 // The distinction is not cosmetic, it decides what the positive control
 // asserts. On an owned table "A sees A's row" is the proof that the probe
 // works; on a sealed one A sees NOTHING, and demanding a row would make
-// this file fail on five tables that are doing the strictest thing there
+// this file fail on seven tables that are doing the strictest thing there
 // is. Read from the live catalogue rather than listed here, so a table
 // that gains a policy moves category by itself.
 const readable = new Set(
@@ -183,10 +184,15 @@ const readable = new Set(
 // AND THE SEALED SET IS NAMED, NOT INFERRED — for the same reason.
 // Reading it live from pg_policies means that DROPPING a policy moves its
 // table into the sealed category, where "A sees nothing" is the expected
-// answer, and the leak becomes the pass. The five are written down and
+// answer, and the leak becomes the pass. The seven are written down and
 // the live set must equal them exactly.
 const SEALED_ON_PURPOSE = [
   "account_deletion_requests",
+  // 2026-10-05, 20261012000000_cost_log_server_reads.sql: the cost log and
+  // the provider log carry our cost, margin and model names, so the server
+  // reads them and the account does not (cost-log-reads.dbtest.mjs).
+  "ai_cost_log",
+  "ai_provider_log",
   "production_errors",
   "routing_decisions",
   "subscriber_months",

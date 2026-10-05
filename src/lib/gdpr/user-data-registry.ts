@@ -44,6 +44,13 @@ export type UserDataTable = {
   /** Columns stripped before export — secrets that belong to the account
    *  but must never be written into a file the user emails to themselves. */
   redactColumns?: string[];
+  /**
+   * A table the account cannot read itself (2026-10-05: ai_cost_log,
+   * ai_provider_log) is exported by the server, with THESE columns only —
+   * what the user did and was charged, never our cost, margin or model.
+   * See api/account/export.
+   */
+  serverExportColumns?: string[];
   /** Set when the row is NOT removed by `auth.users` cascade and therefore
    *  needs explicit deletion. See erasureNote for why. */
   needsExplicitErasure?: boolean;
@@ -197,7 +204,12 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "user_credits", label: "credits_balance", scope: "account" },
   { table: "credit_transactions", label: "credit_transactions", scope: "account" },
   { table: "credit_reservations", label: "credit_reservations", scope: "account" },
-  { table: "ai_cost_log", label: "ai_usage_log", scope: "account" },
+  {
+    table: "ai_cost_log",
+    label: "ai_usage_log",
+    scope: "account",
+    serverExportColumns: ["id", "feature", "credits_charged", "created_at"],
+  },
   // Voice minutes (V4 #19/#2). ACCOUNT scope, and it is a short row: the
   // seconds of speech in and out this month and last, and nothing else.
   // No audio, no transcript, no language, no device — the table has
@@ -212,7 +224,12 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // requests, so it is theirs, and it carries no prompt, no completion
   // and no tool arguments — nothing the model was shown or said. Removed
   // by the auth.users cascade.
-  { table: "ai_provider_log", label: "ai_provider_routing", scope: "account" },
+  {
+    table: "ai_provider_log",
+    label: "ai_provider_routing",
+    scope: "account",
+    serverExportColumns: ["id", "created_at", "purpose", "outcome"],
+  },
   // Which MODEL served which of this account's calls, at which tier, and
   // what it cost (V4 #34/#35). ACCOUNT scope for exactly the reason
   // ai_provider_log above is: it is an operational record OF this user's

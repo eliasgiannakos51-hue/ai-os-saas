@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { PwaProvider } from "@/components/pwa/pwa-provider";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { SidebarProvider } from "@/components/dashboard/sidebar-context";
 import { ToastProvider } from "@/components/toast/toast-context";
@@ -104,7 +105,9 @@ export default async function DashboardLayout({
   try {
     const since = new Date(Date.now() - RECENT_WINDOW_DAYS * 86_400_000).toISOString();
     const [settled, saved] = await Promise.all([
-      supabase
+      // THE SERVER'S READ: the account cannot read ai_cost_log itself
+      // (20261012000000_cost_log_server_reads.sql). Two columns, its own rows.
+      createAdminClient()
         .from("ai_cost_log")
         .select("feature, created_at")
         .eq("user_id", user.id)

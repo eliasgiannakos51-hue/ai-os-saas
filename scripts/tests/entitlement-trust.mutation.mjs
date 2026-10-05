@@ -21,6 +21,9 @@
  *  14. the research migration leaves the account able to write
  *  15. a research route writes through the user's client again
  *  16. the research scan matches nothing, so section 9 checks nothing
+ *  17. the cost-log migration leaves the account able to read
+ *  18. a page reads the cost log through the user's client again
+ *  19. the export reads the cost log in full again
  *
  * Run: node scripts/tests/entitlement-trust.mutation.mjs
  */
@@ -38,6 +41,9 @@ const CONFIG = "next.config.mjs";
 const JOBS_CONTINUE = "src/app/api/jobs/[id]/continue/route.ts";
 const RESEARCH_MIGRATION = "supabase/migrations/20261011000000_research_reports_server_writes.sql";
 const RESEARCH_START = "src/app/api/research/route.ts";
+const COST_MIGRATION = "supabase/migrations/20261012000000_cost_log_server_reads.sql";
+const SETTINGS_PAGE = "src/app/dashboard/settings/page.tsx";
+const REGISTRY = "src/lib/gdpr/user-data-registry.ts";
 
 // Top-level declaration under the name the reader looks for — see the
 // SHAPE note in scripts/tests/lib/mutation-runner.mjs.
@@ -154,11 +160,32 @@ const MUTANTS = [
     to: '.from\\(\\s*"no_such_table"\\s*\\)',
     expect: "the scan found the writes",
   },
+  {
+    name: "the cost-log migration leaves the account able to read",
+    file: COST_MIGRATION,
+    from: "revoke select on public.ai_cost_log from anon, authenticated;",
+    to: "revoke select on public.ai_cost_log from anon;",
+    expect: "the account loses SELECT on both",
+  },
+  {
+    name: "a page reads the cost log through the user's client again",
+    file: SETTINGS_PAGE,
+    from: "const { data: bypassRows } = await createAdminClient()",
+    to: "const { data: bypassRows } = await supabase",
+    expect: "every one goes through the admin client",
+  },
+  {
+    name: "the export reads the cost log in full again",
+    file: REGISTRY,
+    from: 'serverExportColumns: ["id", "feature", "credits_charged", "created_at"],',
+    to: 'serverExportColumns: ["id", "feature", "credits_charged", "real_cost_usd", "created_at"],',
+    expect: "the export reads them by the server",
+  },
 ];
 
 runMutations({
   name: "entitlement-trust",
   gate: GATE,
-  targets: [GATE, MIGRATION, SIGNUP, BETA, OVERAGE, WEBHOOK, CRON, CREATE_JOB, CONFIG, JOBS_CONTINUE, RESEARCH_MIGRATION, RESEARCH_START],
+  targets: [GATE, MIGRATION, SIGNUP, BETA, OVERAGE, WEBHOOK, CRON, CREATE_JOB, CONFIG, JOBS_CONTINUE, RESEARCH_MIGRATION, RESEARCH_START, COST_MIGRATION, SETTINGS_PAGE, REGISTRY],
   mutants: MUTANTS,
 });

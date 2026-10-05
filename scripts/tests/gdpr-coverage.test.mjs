@@ -406,7 +406,15 @@ if (existsSync(routeFile)) {
   const route = strip(readFileSync(routeFile, "utf8"));
   check("it builds from the registry, not from CLASSIFIER_MODULES", /exportableTables\(\)/.test(route) && !/CLASSIFIER_MODULES/.test(route));
   check("it filters by the authenticated user's id", /\.eq\("user_id", user\.id\)/.test(route));
-  check("it uses the user's session (RLS), not the service role", !/createAdminClient/.test(route));
+  // THE ONE EXCEPTION (2026-10-05): a table the account cannot read
+  // itself (registry: serverExportColumns) is read by the server, its own
+  // rows, the listed columns only. Every other table, the user's session.
+  const adminUses = [...route.matchAll(/createAdminClient\(\)/g)].length;
+  check(
+    "it uses the user's session (RLS), the service role only for the server-read tables",
+    /\(t\.serverExportColumns\s*\?\s*createAdminClient\(\)\.from\(t\.table\)\.select\(t\.serverExportColumns\.join\(", "\)\)\s*:\s*supabase\.from\(t\.table\)\.select\("\*"\)\)\s*\.eq\("user_id", user\.id\)/.test(route) &&
+      adminUses === 1
+  );
   check("it redacts on the way out", /redactRow/.test(route));
   check("it reports tables it could not read instead of implying they were empty", /unreadable_tables/.test(route));
 }

@@ -50,20 +50,6 @@ export const ABSENT_ON_PURPOSE = {
       "components/overview/quick-start-button.tsx",
     ],
   },
-  "docs/BUILD-SPECS.md": {
-    reason:
-      "THE OWNER'S TEXT, VERBATIM (section 6, 2026-10-05), which ORDERS this file to be built: " +
-      "'Φτιάξε το docs/REMAINING.md από τον κώδικα'. The words are his and are not edited. " +
-      "The day the file is written, the both-ways check calls this entry stale and it goes.",
-    paths: ["docs/REMAINING.md"],
-  },
-  "docs/CONTEXT.md": {
-    reason:
-      "THE OWNER'S OPERATING RULES, VERBATIM (Τρόπος λειτουργίας §5, 2026-10-05), list the " +
-      "files every session keeps, this one among them; it is next in docs/QUEUE.md after the " +
-      "security round. The day it is written this entry goes stale and is removed.",
-    paths: ["docs/REMAINING.md"],
-  },
   "docs/shapes.md": {
     reason:
       "The shape is 'looking for the second one found something else entirely' — a component " +

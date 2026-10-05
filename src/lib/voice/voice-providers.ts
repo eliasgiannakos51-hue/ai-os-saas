@@ -2,6 +2,7 @@ import "server-only";
 import {
   VOICE_MODELS,
   MAX_SPEAK_CHARS,
+  billableTranscribeSeconds,
   transcribeCostUsd,
   speakCostUsd,
 } from "@/lib/voice/voice-pricing";
@@ -36,7 +37,7 @@ export type VoiceFailure =
   | { kind: "empty"; detail: string };
 
 export type TranscribeResult =
-  | { ok: true; text: string; language: string | null; usdCost: number }
+  | { ok: true; text: string; language: string | null; usdCost: number; seconds: number }
   | { ok: false; failure: VoiceFailure };
 
 export type SpeakResult =
@@ -99,10 +100,9 @@ export function speechConfigured(): boolean {
  *
  * `durationSeconds` is what the BROWSER measured and what the cap was
  * checked against — the provider bills on the audio's real length, which
- * we cannot know before sending it. The two agree for any honest client;
- * a client that lies about a long clip is bounded by MAX_AUDIO_BYTES,
- * which is the reason that limit exists as well as the per-clip second
- * ceiling.
+ * we cannot know before sending it. It comes back in the response, and
+ * `seconds` in the result is the larger of the two
+ * (billableTranscribeSeconds): the figure the route meters and charges.
  */
 export async function transcribeAudio(params: {
   audio: Blob;
@@ -153,7 +153,7 @@ export async function transcribeAudio(params: {
       };
     }
 
-    const data = (await response.json()) as { text?: unknown; language?: unknown };
+    const data = (await response.json()) as { text?: unknown; language?: unknown; duration?: unknown };
     const text = typeof data.text === "string" ? data.text.trim() : "";
     // AN EMPTY TRANSCRIPT IS ITS OWN OUTCOME, not an error. It means the
     // clip had no speech in it — a muted microphone, a wrong device, a
@@ -162,11 +162,13 @@ export async function transcribeAudio(params: {
     if (!text) {
       return { ok: false, failure: { kind: "empty", detail: "No speech was found in that recording." } };
     }
+    const seconds = billableTranscribeSeconds(params.durationSeconds, data.duration);
     return {
       ok: true,
       text,
       language: typeof data.language === "string" ? data.language : null,
-      usdCost: transcribeCostUsd(params.durationSeconds),
+      usdCost: transcribeCostUsd(seconds),
+      seconds,
     };
   } catch (err) {
     logApiError("voice:transcribe", err);

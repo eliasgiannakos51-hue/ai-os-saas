@@ -24,7 +24,7 @@ import {
   voiceMinutesForPlan,
 } from "@/lib/voice/voice-pricing";
 import { MAX_AUDIO_BYTES, isAcceptedAudioType, languageHint } from "@/lib/voice/voice-config";
-import { consumeVoiceSeconds, readVoiceUsage } from "@/lib/voice/voice-usage";
+import { consumeVoiceSeconds, readVoiceUsage, recordExtraVoiceSeconds } from "@/lib/voice/voice-usage";
 import { transcribeAudio } from "@/lib/voice/voice-providers";
 
 export const dynamic = "force-dynamic";
@@ -211,11 +211,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // BILLED ON THE PROVIDER'S LENGTH (2026-10-05). `result.seconds` is
+    // the larger of the reported and the measured duration; any seconds
+    // past what was metered above are recorded on the meter too.
+    const billedSeconds = result.seconds;
+    await recordExtraVoiceSeconds(admin, { userId: user.id, seconds: billedSeconds - seconds, kind: "transcribe" });
+
     const costs = new CostAccumulator();
     costs.recordExternal("transcribe", {
       provider: "openai",
       usdCost: result.usdCost,
-      units: seconds,
+      units: billedSeconds,
       unit: "seconds",
     });
 
@@ -226,7 +232,7 @@ export async function POST(request: Request) {
       costs,
       plan,
       bypassCharge: bypassCredits,
-      metadata: { kind: "transcribe", seconds, detectedLanguage: result.language },
+      metadata: { kind: "transcribe", seconds: billedSeconds, reportedSeconds: seconds, detectedLanguage: result.language },
     });
 
     return NextResponse.json({
@@ -235,7 +241,7 @@ export async function POST(request: Request) {
       // presses send themselves — see components/voice/voice-input.tsx.
       text: result.text,
       language: result.language,
-      seconds,
+      seconds: billedSeconds,
       usage: buildUsageReceipt({
         creditsCharged: settlement.creditsCharged,
         bypass: bypassCredits,

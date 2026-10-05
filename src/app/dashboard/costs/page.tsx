@@ -17,6 +17,13 @@ import {
   type CostDashboardData,
 } from "@/components/costs/cost-dashboard";
 import { getLocale } from "next-intl/server";
+import { RouterReport, readRouterPeriod } from "@/components/costs/router-report";
+import { buildRoutingReport, type CostLogRow, type ProviderAttemptRow } from "@/lib/billing/routing-report";
+import { loadModelTable, expandModelTable } from "@/lib/ai/routing/model-table";
+
+/** The most cost-log rows the router section reads in one load. Above
+ *  it the section says so rather than reporting a partial month as one. */
+const ROUTER_ROW_CAP = 20_000;
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("pageTitle.costs");
@@ -35,8 +42,13 @@ export const fetchCache = "force-no-store";
  * notFound() rather than a redirect or a "not allowed" page: a customer
  * should not learn that a page showing every account's spend exists.
  */
-export default async function CostsPage() {
+export default async function CostsPage({
+  searchParams,
+}: {
+  searchParams: { days?: string };
+}) {
   const locale = await getLocale();
+  const routerPeriod = readRouterPeriod(searchParams.days);
   const supabase = createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -60,6 +72,46 @@ export default async function CostsPage() {
       return [];
     }
   };
+
+  // THE ROUTER SECTION (BUILD-SPECS 2.13 Ζ), over the chosen period. Raw
+  // rows rather than an RPC: an aggregate RPC would be a migration, and
+  // migrations here are pasted by hand (CLAUDE.md). The sums are
+  // lib/billing/routing-report.ts's, tested against hand-worked figures.
+  const since = new Date(Date.now() - routerPeriod * 86_400_000).toISOString();
+  const routerRowsPromise = (async () => {
+    try {
+      const { data, error } = await admin
+        .from("ai_cost_log")
+        .select(
+          "feature, real_cost_usd, real_cost_eur, credits_charged, input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, metadata",
+        )
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(ROUTER_ROW_CAP);
+      if (error) throw error;
+      return (data ?? []) as CostLogRow[];
+    } catch (err) {
+      console.error("costs: ai_cost_log rows failed", err);
+      unavailable.push("ai_cost_log");
+      return [] as CostLogRow[];
+    }
+  })();
+  const routerAttemptsPromise = (async () => {
+    try {
+      const { data, error } = await admin
+        .from("ai_provider_log")
+        .select("request_id, attempt_index, outcome")
+        .gte("created_at", since)
+        .limit(ROUTER_ROW_CAP * 3);
+      if (error) throw error;
+      return (data ?? []) as ProviderAttemptRow[];
+    } catch (err) {
+      // Null, not []: "could not read the provider log" must not print as
+      // "nothing ever went to the fallback".
+      console.error("costs: ai_provider_log failed", err);
+      return null;
+    }
+  })();
 
   const [daily, features, topUsers, alerts, mrrRows] = await Promise.all([
     call<{
@@ -163,6 +215,10 @@ export default async function CostsPage() {
     unavailable,
   };
 
+  const [routerRows, routerAttempts] = await Promise.all([routerRowsPromise, routerAttemptsPromise]);
+  const routerReport = buildRoutingReport(routerRows, routerAttempts);
+  const loadedTable = loadModelTable();
+
   return (
     <div className="min-h-full">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
@@ -173,6 +229,16 @@ export default async function CostsPage() {
           helpKey="help.costs"
         />
         <CostDashboard data={data} locale={locale} />
+        <RouterReport
+          report={routerReport}
+          period={routerPeriod}
+          table={expandModelTable(loadedTable.table)}
+          tableVersion={loadedTable.table.version}
+          tableSource={loadedTable.source}
+          tableRejected={loadedTable.rejected}
+          truncatedAt={routerRows.length >= ROUTER_ROW_CAP ? ROUTER_ROW_CAP : null}
+          locale={locale}
+        />
       </div>
     </div>
   );

@@ -1,0 +1,11 @@
+{
+  "version": "2026-10-05",
+  "note": "BUILD-SPECS 2.13 Β. Primary = the tier models of tiers.ts until the quality set (E.4) measures something cheaper. Prices are NOT here: they are read from src/lib/ai/providers/catalog.ts so there is one price list. Override the whole table without a code change with the AI_MODEL_TABLE environment variable (same JSON).",
+  "tiers": {
+    "trivial": { "primary": "claude-haiku-4-5", "fallback": "openai/gpt-5-mini", "maxWaitMs": 30000, "quality": null },
+    "simple": { "primary": "claude-haiku-4-5", "fallback": "openai/gpt-5-mini", "maxWaitMs": 30000, "quality": null },
+    "complex": { "primary": "claude-sonnet-4-6", "fallback": "openai/gpt-4.1", "maxWaitMs": 60000, "quality": null },
+    "expert": { "primary": "claude-opus-4-6", "fallback": "openai/gpt-5", "maxWaitMs": 120000, "quality": null }
+  },
+  "overrides": {}
+}

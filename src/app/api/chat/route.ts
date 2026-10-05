@@ -36,6 +36,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { shadowRouteSafe, type ShadowDecision } from "@/lib/ai/routing/shadow";
 import { checkNeedsClarification, clarificationMetadata } from "@/lib/clarification";
 import {
   freeChatMaxCostEur,
@@ -1258,6 +1259,7 @@ export async function POST(request: Request) {
                 webSearchCount,
                 estimatedCredits: streamEstimate.estimatedCredits,
                 reservedCredits: bypassCredits || isFreeMessage ? 0 : streamEstimate.reserveCredits,
+                routing: shadowRouteSafe({ feature: "chat_message", text: message }),
               });
               safeClose(controller);
               return;
@@ -1354,6 +1356,9 @@ export async function POST(request: Request) {
           bypassCharge: bypassCredits || isFreeMessage,
           metadata: {
             conversationId: finalConversationId,
+            // The 2.13 router's decision from the user's own words, in
+            // the shadow (lib/ai/routing/shadow.ts): recorded, not used.
+            routing: shadowRouteSafe({ feature: "chat_message", text: message }),
             webSearches: webSearchCount,
             replyChars: assistantText.length,
             estimatedCredits: streamEstimate.estimatedCredits,
@@ -1467,6 +1472,7 @@ async function settleStoppedTurn(params: {
   webSearchCount: number;
   estimatedCredits: number;
   reservedCredits: number;
+  routing: ShadowDecision | undefined;
 }): Promise<void> {
   const { supabase, userId, conversationId, assistantText, bypassCredits, isFreeMessage } = params;
   const { error: partialSaveError } = await supabase.from("chat_messages").insert({
@@ -1494,6 +1500,7 @@ async function settleStoppedTurn(params: {
       estimatedCredits: params.estimatedCredits,
       reservedCredits: params.reservedCredits,
       freeMessage: params.isFreeMessage,
+      routing: params.routing,
     },
   });
   diagLog(

@@ -27,6 +27,9 @@
  *  20. the column migration grants the cost record too
  *  21. a column the migrations create is on neither list
  *  22. the job poll asks for `*` through the user's client again
+ *  23. the three-table migration leaves file rows writable
+ *  24. a team invite is written through the user's client again
+ *  25. the files diagnostic accepts a direct insert as healthy
  *
  * Run: node scripts/tests/entitlement-trust.mutation.mjs
  */
@@ -50,6 +53,9 @@ const REGISTRY = "src/lib/gdpr/user-data-registry.ts";
 const COLUMN_MIGRATION = "supabase/migrations/20261013000000_cost_columns_server_only.sql";
 const CLIENT_COLUMNS = "src/lib/billing/client-columns.ts";
 const JOB_POLL = "src/app/api/jobs/[id]/route.ts";
+const WRITES_MIGRATION = "supabase/migrations/20261014000000_server_written_tables.sql";
+const TEAM_INVITE = "src/app/api/team/invite/route.ts";
+const FILES_DIAGNOSTIC = "src/app/api/system-health/files/route.ts";
 
 // Top-level declaration under the name the reader looks for — see the
 // SHAPE note in scripts/tests/lib/mutation-runner.mjs.
@@ -208,11 +214,32 @@ const MUTANTS = [
     to: '.from("ai_jobs").select("*").eq("id", params.id)',
     expect: "no read through the user's client asks for",
   },
+  {
+    name: "the three-table migration leaves file rows writable",
+    file: WRITES_MIGRATION,
+    from: "revoke insert, update, delete on public.user_files from anon, authenticated;",
+    to: "revoke insert on public.user_files from anon, authenticated;",
+    expect: "user_files: the account loses INSERT, UPDATE and DELETE",
+  },
+  {
+    name: "a team invite is written through the user's client again",
+    file: TEAM_INVITE,
+    from: "const { error: insertError } = await createAdminClient()",
+    to: "const { error: insertError } = await supabase",
+    expect: "every one goes through the admin client",
+  },
+  {
+    name: "the files diagnostic accepts a direct insert as healthy",
+    file: FILES_DIAGNOSTIC,
+    from: 'const refused = /permission denied/i.test(insError?.message ?? "");',
+    to: "const refused = true;",
+    expect: "the diagnostic expects its insert to be refused",
+  },
 ];
 
 runMutations({
   name: "entitlement-trust",
   gate: GATE,
-  targets: [GATE, MIGRATION, SIGNUP, BETA, OVERAGE, WEBHOOK, CRON, CREATE_JOB, CONFIG, JOBS_CONTINUE, RESEARCH_MIGRATION, RESEARCH_START, COST_MIGRATION, SETTINGS_PAGE, REGISTRY, COLUMN_MIGRATION, CLIENT_COLUMNS, JOB_POLL],
+  targets: [GATE, MIGRATION, SIGNUP, BETA, OVERAGE, WEBHOOK, CRON, CREATE_JOB, CONFIG, JOBS_CONTINUE, RESEARCH_MIGRATION, RESEARCH_START, COST_MIGRATION, SETTINGS_PAGE, REGISTRY, COLUMN_MIGRATION, CLIENT_COLUMNS, JOB_POLL, WRITES_MIGRATION, TEAM_INVITE, FILES_DIAGNOSTIC],
   mutants: MUTANTS,
 });

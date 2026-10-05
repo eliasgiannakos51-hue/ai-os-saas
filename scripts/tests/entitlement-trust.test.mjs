@@ -27,12 +27,16 @@
 //      src/lib/billing/client-columns.ts, every column the migrations give
 //      either table is on one of its two lists, and no read through the
 //      user's client asks for `*`.
+//  12. Team invites, file rows and published pages are written by the
+//      server only: the migration takes the three verbs from the account,
+//      and every write in src/ goes through the admin client.
 //
 // The behaviour of the migration itself is run against a real Postgres by
 // scripts/tests/entitlement-metadata.dbtest.mjs, and that of the research
 // migration by scripts/tests/research-reports-writes.dbtest.mjs, and the
 // cost-log one by scripts/tests/cost-log-reads.dbtest.mjs, and the
-// cost-column one by scripts/tests/cost-columns.dbtest.mjs.
+// cost-column one by scripts/tests/cost-columns.dbtest.mjs, and the
+// three-table one by scripts/tests/server-written-tables.dbtest.mjs.
 //
 // Run: node scripts/tests/entitlement-trust.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -263,6 +267,39 @@ console.log("\n== 11. a job's and a report's cost columns are read by the server
   ok("the scan found the reads of both tables", tableReads.length >= 15, `${tableReads.length} reads`);
   const starReads = tableReads.filter((r) => r.columns === '"*"' && !["admin", "createAdminClient()"].includes(r.receiver));
   ok("no read through the user's client asks for `*`", starReads.length === 0, starReads.map((r) => `${r.file}: ${r.receiver} -> ${r.table}`).join("\n        "));
+}
+
+// =====================================================================
+console.log("\n== 12. team invites, file rows and published pages are written by the server only ==");
+// =====================================================================
+{
+  const MIG = strip(readFileSync("supabase/migrations/20261014000000_server_written_tables.sql", "utf8").replace(/--.*$/gm, ""));
+  const TABLES = ["team_members", "user_files", "published_sites"];
+  for (const t of TABLES) {
+    ok(
+      `${t}: the account loses INSERT, UPDATE and DELETE`,
+      new RegExp(`revoke insert, update, delete on public\\.${t} from anon, authenticated;`).test(MIG) &&
+        ["insert", "update", "delete"].every((v) => MIG.includes(`drop policy if exists "${v}_own_${t}" on public.${t};`))
+    );
+  }
+  // The population: every write to the three tables anywhere in src/.
+  const writes = [];
+  for (const f of walk("src")) {
+    for (const m of read(f).matchAll(/([\w.]+(?:\(\))?)\s*\.from\(\s*"(team_members|user_files|published_sites)"\s*\)\s*\.(insert|update|upsert|delete)\(/g)) {
+      writes.push({ file: f, receiver: m[1], table: m[2], verb: m[3] });
+    }
+  }
+  ok("the scan found the writes", writes.length >= 9, `${writes.length} writes`);
+  // The files diagnostic writes through the user's client ON PURPOSE: its
+  // check 4 requires that insert to be refused, and removes a canary that
+  // lands with the server's client.
+  const DIAGNOSTIC = "src/app/api/system-health/files/route.ts";
+  const userWrites = writes.filter((w) => !["admin", "createAdminClient()"].includes(w.receiver) && !(w.file === DIAGNOSTIC && w.verb === "insert"));
+  ok("every one goes through the admin client", userWrites.length === 0, userWrites.map((w) => `${w.file}: ${w.receiver} ${w.verb} ${w.table}`).join("\n        "));
+  ok(
+    "...and the diagnostic expects its insert to be refused",
+    /const refused = \/permission denied\/i\.test\(insError\?\.message \?\? ""\);/.test(read(DIAGNOSTIC))
+  );
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\nFAILED: ${pass} passed, ${failures.length} failed`);

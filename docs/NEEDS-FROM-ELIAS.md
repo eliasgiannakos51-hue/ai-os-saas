@@ -299,6 +299,8 @@
        site, ξεκίνα μια Deep Research: πρέπει να δουλεύει όπως πριν.
     4. **Αν η Deep Research σταματήσει να ξεκινά:**
        ```sql
+       create policy "insert_own_research_reports" on public.research_reports for insert with check (auth.uid() = user_id);
+       create policy "update_own_research_reports" on public.research_reports for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
        grant insert, update on public.research_reports to authenticated;
        ```
        και πες μου.
@@ -321,6 +323,8 @@
        πριν.
     4. **Αν κάτι από αυτά μείνει κενό:**
        ```sql
+       create policy "select_own_ai_cost_log" on public.ai_cost_log for select using (auth.uid() = user_id);
+       create policy ai_provider_log_select_own on public.ai_provider_log for select using (auth.uid() = user_id);
        grant select on public.ai_cost_log, public.ai_provider_log to authenticated;
        ```
        και πες μου.
@@ -344,6 +348,38 @@
     4. **Αν κάτι από αυτά δεν ανοίγει:**
        ```sql
        grant select on public.ai_jobs, public.research_reports to authenticated;
+       ```
+       και πες μου.
+
+28. **Το migration των εγγραφών ομάδας, αρχείων και σελίδων,
+    `20261014000000_server_written_tables.sql`.** Τρέχει μετά το merge
+    του pull request του, όχι πριν: ο παλιός κώδικας γράφει ακόμα αυτούς
+    τους πίνακες με τα δικαιώματα του χρήστη, και η πρόσκληση μέλους, το
+    ανέβασμα αρχείου και η δημοσίευση θα σταματούσαν. Δεν σβήνει τίποτα.
+    1. **Προεπισκόπηση** (μόνο ανάγνωση):
+       ```sql
+       select has_table_privilege('authenticated', 'public.user_files', 'INSERT');
+       ```
+       Σήμερα βγάζει `true`.
+    2. **Το migration:** GitHub, branch `main` μετά το merge →
+       `supabase/migrations/20261014000000_server_written_tables.sql` →
+       «Copy raw file» → νέο query στο SQL Editor → **Run** → «Success».
+    3. **Έλεγχος:** το ερώτημα του βήματος 1 βγάζει πλέον `false`. Στο
+       site: ανέβασε ένα αρχείο στα Files και άνοιξε το
+       `/dashboard/system-health`· ο έλεγχος «user_files writes» πρέπει να
+       είναι πράσινος.
+    4. **Αν κάτι από αυτά δεν δουλεύει:**
+       ```sql
+       create policy "insert_own_team_members" on public.team_members for insert with check (auth.uid() = owner_id);
+       create policy "update_own_team_members" on public.team_members for update using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+       create policy "delete_own_team_members" on public.team_members for delete using (auth.uid() = owner_id);
+       create policy "insert_own_user_files" on public.user_files for insert with check (auth.uid() = user_id);
+       create policy "update_own_user_files" on public.user_files for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+       create policy "delete_own_user_files" on public.user_files for delete using (auth.uid() = user_id);
+       create policy "insert_own_published_sites" on public.published_sites for insert with check (auth.uid() = user_id);
+       create policy "update_own_published_sites" on public.published_sites for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+       create policy "delete_own_published_sites" on public.published_sites for delete using (auth.uid() = user_id);
+       grant insert, update, delete on public.team_members, public.user_files, public.published_sites to authenticated;
        ```
        και πες μου.
 

@@ -22,6 +22,12 @@
  * this builds things — ChatGPT builds things. It was that it already
  * knows their own data. That is the claim, so that is the sentence.
  *
+ * HOME LEFT THE LIST ON 2026-10-04. The owner's design (docs/CONTEXT.md,
+ * ΣΥΣΤΗΜΑ DESIGN, «ΑΡΧΙΚΗ») makes the first line after signing in the
+ * small earth and «Good morning, [όνομα]», and nothing else on the
+ * screen. The sentence stays where a person meets the product before
+ * using it: the landing page and the first step of onboarding.
+ *
  * CHANGING IT is one string in messages/*.json under `promise`. Nothing
  * else needs touching, which is the point of it being one key.
  */
@@ -36,10 +42,6 @@ export const ONE_SENTENCE_KEY = "promise.oneSentence";
  */
 export const ONE_SENTENCE_SURFACES: readonly { file: string; when: string }[] = [
   { file: "src/app/page.tsx", when: "the landing page, before anyone has an account" },
-  {
-    file: "src/components/overview/greeting-header.tsx",
-    when: "the first line after signing in, where the greeting used to be",
-  },
   {
     file: "src/components/onboarding/onboarding-flow.tsx",
     when: "the first step of onboarding, above the first question",

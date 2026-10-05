@@ -344,7 +344,9 @@ const allTsx = tsxFiles("src");
 // panel and an accent-coloured mark is right there; the first version of
 // this check matched it and would have demanded the opposite.
 {
-  const SOLID = /(?<!hover:)(?<!focus:)(?<!group-hover:)\bbg-(orange|amber)-500(?![/\w])|bg-\[linear-gradient/;
+  // Since 2026-10-04 the bright fill is the design's white button (or a
+  // solid status fill), with the dark button ink on it.
+  const SOLID = /(?<!hover:)(?<!focus:)(?<!group-hover:)\bbg-(button|warning|success|danger)(?![/\w])/;
   const wrong = [];
   for (const f of allTsx) {
     const lines = stripComments(readFileSync(f, "utf8")).split("\n");
@@ -352,7 +354,7 @@ const allTsx = tsxFiles("src");
       if (!/<ThinkingIndicator/.test(line)) return;
       // The surface is an ANCESTOR, so look back, not at the line itself.
       const above = lines.slice(Math.max(0, i - 12), i).join("\n");
-      const bright = SOLID.test(above) && /text-black/.test(above);
+      const bright = SOLID.test(above) && /text-button-ink/.test(above);
       const inherits = /tone="inherit"/.test(line);
       if (bright !== inherits) {
         wrong.push(`${f}:${i + 1} sits on ${bright ? "a bright" : "a dark"} surface but asks for tone=${inherits ? "inherit" : "accent"}`);
@@ -736,14 +738,15 @@ check("and nothing is left at zero opacity", !/opacity: 0;/.test(reduced));
 
 // =====================================================================
 console.log("\n== 8. the colour is themed once, not chosen twice ==");
-check("the mark takes its colour from the accent token", /color: rgb\(var\(--accent-border\)\)/.test(cssBlock));
+// The signal colour, which the design allows on the globe and the logo
+// only (design-tokens.test.mjs holds the "only").
+check("the mark takes its colour from the globe ink", /color: var\(--globe-ink\)/.test(cssBlock));
 // A literal hex here would be a dark-theme value shipped to both themes,
 // which is the exact defect the light-theme pass spent itself on.
 checkList(
   "no literal hex in the block",
   [...cssCode.matchAll(/#[0-9a-fA-F]{3,8}\b/g)].map((m) => m[0])
 );
-check("the CSS records why orange-500 is not used in light", /2\.62:1/.test(cssBlock));
 check("there is a tone for accent-coloured surfaces", /tone\?: "accent" \| "inherit"/.test(indicator));
 check("and it takes the parent's colour", /\.ionexa-globe\.is-inherit\s*\{\s*color: inherit/.test(cssBlock));
 check("with the glow dropped, since a halo in the parent's colour is a smudge", /is-inherit \.globe-node[\s\S]{0,80}filter: none/.test(cssCode));
@@ -754,12 +757,12 @@ check("with the glow dropped, since a halo in the parent's colour is a smudge", 
 // one filled control per screen — so the inherit tone became the WRONG
 // answer there and section 4's per-call-site check said so before this
 // line did. It is anchored on the chat composer's send button instead,
-// which is still a solid orange fill with black text and is the screen's
-// one primary action.
+// which is a solid fill (the design's white, since 2026-10-04) with the
+// dark button ink, and is the screen's one primary action.
 const composer = stripComments(readFileSync("src/components/chat/chat-composer.tsx", "utf8"));
 check(
   "the chat composer's send button, which is still a solid fill, uses it",
-  /bg-orange-500 text-black/.test(composer) && /<ThinkingIndicator size="sm" tone="inherit"/.test(composer)
+  /bg-button text-button-ink/.test(composer) && /<ThinkingIndicator size="sm" tone="inherit"/.test(composer)
 );
 
 // =====================================================================

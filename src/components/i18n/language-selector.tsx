@@ -72,8 +72,8 @@ export function LanguageSelector({
         className={
           className ??
           (showCode
-            ? "flex h-11 min-w-[44px] shrink-0 items-center justify-center gap-1 rounded-lg px-2 text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
-            : "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground")
+            ? "flex h-11 min-w-[44px] shrink-0 items-center justify-center gap-1 rounded-item px-2 text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
+            : "flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground")
         }
       >
         <Globe className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -93,9 +93,9 @@ export function LanguageSelector({
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-40 cursor-default"
           />
-          <div className="absolute end-0 top-11 z-50 max-h-80 w-48 overflow-y-auto rounded-xl border border-border bg-panel p-1.5 shadow-lg">
+          <div className="absolute end-0 top-11 z-50 max-h-80 w-48 overflow-y-auto rounded-card border border-border bg-panel p-1.5">
             {failed && (
-              <p role="alert" className="px-3 py-2 text-xs text-red-400">
+              <p role="alert" className="px-3 py-2 text-xs text-danger">
                 {t("saveFailed")}
               </p>
             )}
@@ -108,9 +108,9 @@ export function LanguageSelector({
                   lang={lang.code}
                   onClick={() => selectLanguage(lang.code)}
                   aria-pressed={selected}
-                  className={`flex min-h-[44px] w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-start text-sm transition-colors duration-150 ${
+                  className={`flex min-h-[44px] w-full items-center justify-between gap-2 rounded-item px-3 py-2 text-start text-sm transition-colors duration-150 ${
                     selected
-                      ? "bg-orange-500/10 text-orange-400"
+                      ? "bg-foreground/10 text-foreground"
                       : "text-foreground hover:bg-panel-hover"
                   }`}
                 >

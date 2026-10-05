@@ -56,7 +56,10 @@ const MUTANTS = [
     name: "a second filled orange button appears on a page that had one",
     file: TEAM,
     from: "<div",
-    to: '<button className="bg-orange-500">x</button>\n    <div',
+    // RE-AIMED 2026-10-04 (design D.1): the palette is closed, so a
+    // bg-orange-500 is no colour at all and is caught as a stray accent
+    // shade instead. The filled control of the design is bg-button.
+    to: '<button className="bg-button text-button-ink">x</button>\n    <div',
     expect: "dashboard/team/page.tsx",
   },
   {
@@ -169,7 +172,7 @@ const MUTANTS = [
     // button is gone is a licence to add a different one back in silence.
     name: "a control disappears and its baseline is left standing",
     file: TEAM,
-    from: "bg-orange-500",
+    from: "bg-button",
     to: "bg-panel",
     expect: "no baseline is higher than the page needs",
   },

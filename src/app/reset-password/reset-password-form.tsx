@@ -10,7 +10,7 @@ import { isPasswordStrong } from "@/lib/password-strength";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PasswordStrengthChecklist } from "@/components/auth/password-strength-checklist";
 import { GeneratePasswordButton } from "@/components/auth/generate-password-button";
-import { Logo } from "@/components/logo";
+import { Earth } from "@/components/brand/earth";
 
 type Status = "checking" | "ready" | "invalid";
 
@@ -194,7 +194,7 @@ export function ResetPasswordForm() {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mb-4 flex items-center justify-center">
-            <Logo className="h-[168px] w-auto max-w-full" />
+            <Earth variant="large" px={160} label="Ionexa" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">
             {t("title")}
@@ -210,10 +210,10 @@ export function ResetPasswordForm() {
 
           {status === "invalid" && (
             <div className="space-y-4 text-center">
-              <p className="text-sm text-red-400">{invalidReason}</p>
+              <p className="text-sm text-danger">{invalidReason}</p>
               <Link
                 href="/forgot-password"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-card border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
               >
                 {t("requestNewLink")}
               </Link>
@@ -241,7 +241,7 @@ export function ResetPasswordForm() {
                   autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500"
+                  className="w-full rounded-card border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40"
                   placeholder="••••••••"
                 />
                 <div className="mt-2">
@@ -260,13 +260,13 @@ export function ResetPasswordForm() {
                   autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500"
+                  className="w-full rounded-card border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-foreground/40"
                   placeholder="••••••••"
                 />
               </div>
 
               {error && (
-                <p className="rounded-xl border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+                <p className="rounded-card border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                   {error}
                 </p>
               )}
@@ -274,7 +274,7 @@ export function ResetPasswordForm() {
               <button
                 type="submit"
                 disabled={loading || !isPasswordStrong(password)}
-                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-50"
+                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-card bg-button px-4 py-2.5 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:opacity-50"
               >
                 {loading ? t("saving") : t("saveNewPassword")}
               </button>

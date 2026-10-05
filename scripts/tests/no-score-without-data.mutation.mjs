@@ -22,7 +22,7 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/no-score-without-data.test.mjs";
 const LIB = "src/lib/health-score.ts";
-const PAGE = "src/app/dashboard/overview/page.tsx";
+const PAGE = "src/app/dashboard/activity/page.tsx";
 const CARD = "src/components/overview/home-stat-card.tsx";
 const TARGETS = [GATE, LIB, PAGE, CARD];
 
@@ -85,11 +85,11 @@ const MUTANTS = [
     expect: "charts at",
   },
   {
-    name: "the placeholder is drawn in the accent, so it reads as a zero",
+    name: "the placeholder is drawn in a colour that means something, so it reads as a zero",
     file: CARD,
-    from: "rgb(255_255_255/0.14)",
-    to: "#f97316",
-    expect: "not the accent colour",
+    from: "border-dashed border-foreground/15",
+    to: "border-dashed border-success",
+    expect: "not drawn in a colour that means something",
   },
 ];
 

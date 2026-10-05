@@ -189,7 +189,7 @@ export function VoiceInput({
             // layout gate measures (scripts/tests/layout-stress.prodtest.mjs),
             // and a 32px one grew its under-44px count by four.
             compact
-              ? "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-lg text-muted/50"
+              ? "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-item text-muted/50"
               : "flex min-h-[44px] min-w-[44px] cursor-not-allowed items-center justify-center rounded-full border border-dashed border-border text-muted/50"
           }
         >
@@ -232,9 +232,9 @@ export function VoiceInput({
             ? t("costPerMinute", { credits: availability.creditsPerMinute.transcribe })
             : t("outOfMinutes")
         }
-        className={`flex ${compact ? "h-9 w-9" : "min-h-[44px] min-w-[44px]"} items-center justify-center rounded-lg border transition-colors duration-150 disabled:opacity-40 ${
+        className={`flex ${compact ? "h-9 w-9" : "min-h-[44px] min-w-[44px]"} items-center justify-center rounded-item border transition-colors duration-150 disabled:opacity-40 ${
           recorder.recording
-            ? "border-orange-500/50 bg-orange-500/15 text-orange-300"
+            ? "border-foreground/50 bg-foreground/15 text-foreground"
             : "border-border text-muted hover:text-foreground"
         }`}
       >
@@ -256,7 +256,7 @@ export function VoiceInput({
       {/* THE EXPLANATION, BEFORE THE BROWSER PROMPT. */}
       {explaining && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setExplaining(false)} aria-hidden="true" />
+          <div className="fixed inset-0 bg-background/60 backdrop-blur-sm" onClick={() => setExplaining(false)} aria-hidden="true" />
           <div role="dialog" aria-modal="true" aria-label={t("permission.title")} className="relative w-full max-w-sm surface">
             <p className="text-sm font-semibold text-foreground">{t("permission.title")}</p>
             <ul className="mt-3 space-y-2 text-[12px] leading-relaxed text-muted">
@@ -279,14 +279,14 @@ export function VoiceInput({
                   setExplaining(false);
                   void recorder.start();
                 }}
-                className="min-h-[44px] rounded-lg bg-orange-500 px-4 text-xs font-semibold text-black transition-opacity hover:opacity-90"
+                className="min-h-[44px] rounded-item bg-button px-4 text-xs font-semibold text-button-ink transition-opacity hover:opacity-90"
               >
                 {t("permission.allow")}
               </button>
               <button
                 type="button"
                 onClick={() => setExplaining(false)}
-                className="min-h-[44px] rounded-lg border border-border px-4 text-xs text-muted transition-colors hover:text-foreground"
+                className="min-h-[44px] rounded-item border border-border px-4 text-xs text-muted transition-colors hover:text-foreground"
               >
                 {t("permission.cancel")}
               </button>
@@ -297,16 +297,16 @@ export function VoiceInput({
 
       {/* WHILE IT IS LISTENING: the orb, full screen, unmistakable. */}
       {recorder.recording && (
-        <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center gap-6 bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center gap-6 bg-background/80 backdrop-blur-sm">
           <VoiceOrb state="listening" readLevel={level.readLevel} />
-          <p className="text-sm font-medium text-orange-300">{t("listening")}</p>
+          <p className="text-sm font-medium text-foreground">{t("listening")}</p>
           <p className="max-w-xs text-center text-[11px] leading-relaxed text-muted">
             {t("listeningHint")}
           </p>
           <button
             type="button"
             onClick={() => recorder.stop()}
-            className="flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-4 text-sm font-semibold text-black"
+            className="flex min-h-[44px] items-center gap-2 rounded-item bg-button px-4 text-sm font-semibold text-button-ink"
           >
             <Square className="h-4 w-4" aria-hidden="true" />
             {t("stopListening")}
@@ -317,7 +317,7 @@ export function VoiceInput({
       {/* THE TRANSCRIPT, EDITABLE, BEFORE ANYTHING IS SENT. */}
       {draft !== null && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDraft(null)} aria-hidden="true" />
+          <div className="fixed inset-0 bg-background/60 backdrop-blur-sm" onClick={() => setDraft(null)} aria-hidden="true" />
           <div role="dialog" aria-modal="true" aria-label={t("draft.title")} className="relative w-full max-w-md surface-tight">
             <p className="mb-2 text-sm font-semibold text-foreground">{t("draft.title")}</p>
             <textarea
@@ -337,7 +337,7 @@ export function VoiceInput({
                   if (text) onTranscript(text);
                 }}
                 disabled={draft.trim().length === 0}
-                className="flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-4 text-xs font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="flex min-h-[44px] items-center gap-2 rounded-item bg-button px-4 text-xs font-semibold text-button-ink transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 <Check className="h-4 w-4" aria-hidden="true" />
                 {t("draft.use")}
@@ -345,7 +345,7 @@ export function VoiceInput({
               <button
                 type="button"
                 onClick={() => setDraft(null)}
-                className="flex min-h-[44px] items-center gap-2 rounded-lg border border-border px-4 text-xs text-muted transition-colors hover:text-foreground"
+                className="flex min-h-[44px] items-center gap-2 rounded-item border border-border px-4 text-xs text-muted transition-colors hover:text-foreground"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
                 {t("draft.discard")}

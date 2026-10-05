@@ -170,10 +170,11 @@ export function CodingWorkspace({
               key={candidate}
               type="button"
               onClick={() => setOperation(candidate)}
-              className={`rounded-lg border px-3 py-1.5 text-xs ${
+              aria-pressed={operation === candidate}
+              className={`min-h-[44px] rounded-full border px-4 text-xs transition-colors duration-150 ${
                 operation === candidate
-                  ? "border-orange-500 bg-orange-500/10 text-foreground"
-                  : "border-border text-muted"
+                  ? "border-foreground/40 bg-foreground/10 text-foreground"
+                  : "border-border text-muted hover:text-foreground"
               }`}
             >
               {t(`operations.${candidate}.label`)}
@@ -189,7 +190,7 @@ export function CodingWorkspace({
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="rounded-lg border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+                className="min-h-[44px] rounded-item border border-border bg-panel px-3 text-sm text-foreground"
               >
                 {CODE_LANGUAGES.map((item) => (
                   <option key={item} value={item}>
@@ -205,7 +206,7 @@ export function CodingWorkspace({
               <select
                 value={targetLanguage}
                 onChange={(e) => setTargetLanguage(e.target.value)}
-                className="rounded-lg border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+                className="min-h-[44px] rounded-item border border-border bg-panel px-3 text-sm text-foreground"
               >
                 {CODE_LANGUAGES.map((item) => (
                   <option key={item} value={item}>
@@ -235,19 +236,19 @@ export function CodingWorkspace({
           maxLength={MAX_INPUT_CHARS}
           placeholder={t(`operations.${operation}.placeholder`)}
           aria-label={t(`operations.${operation}.label`)}
-          className="mt-3 w-full rounded-xl border border-border bg-panel-hover px-3 py-2 font-mono text-xs text-foreground"
+          className="mt-3 w-full rounded-field border border-border bg-panel px-4 py-3 font-mono text-xs text-foreground outline-none placeholder:text-muted focus:border-foreground/60"
         />
         <p className="mt-1 text-end text-[11px] text-muted">
           {input.length} / {MAX_INPUT_CHARS}
         </p>
 
         <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-          <label className="flex items-center gap-2 text-xs text-muted">
+          <label className="flex min-h-[44px] items-center gap-2 text-xs text-muted">
             <input
               type="checkbox"
               checked={useWorkspace}
               onChange={(e) => setUseWorkspace(e.target.checked)}
-              className="h-4 w-4 accent-orange-500"
+              className="h-4 w-4 accent-foreground"
             />
             {t("useWorkspace")}
           </label>
@@ -256,7 +257,7 @@ export function CodingWorkspace({
               type="button"
               onClick={stopRun}
               data-testid="coding-stop"
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-3 text-sm font-medium text-orange-300 transition-colors duration-150 hover:bg-orange-500/10"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-foreground/60 px-4 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
             >
               <Square className="h-3 w-3 fill-current" aria-hidden="true" />
               {tSteps("stop")}
@@ -266,7 +267,7 @@ export function CodingWorkspace({
             type="button"
             onClick={() => void run()}
             disabled={running || !input.trim()}
-            className="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-button px-5 text-sm font-semibold text-button-ink transition-opacity duration-150 hover:opacity-90 disabled:opacity-40"
           >
             {/* THE GLOBE, NOT A SPINNER. Running an operation is the
                 model thinking, which is the one wait this product marks
@@ -286,7 +287,7 @@ export function CodingWorkspace({
           {result.kind === "code" ? (
             <CodeBlock code={result.output} language={spec.needsTargetLanguage ? targetLanguage : language} />
           ) : (
-            <div className="whitespace-pre-wrap surface-tight text-sm text-muted">
+            <div className="whitespace-pre-wrap surface-tight text-sm text-foreground">
               {result.output}
             </div>
           )}
@@ -304,14 +305,14 @@ export function CodingWorkspace({
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t("history.search")}
               aria-label={t("history.search")}
-              className="rounded-lg border border-border bg-panel-hover px-3 py-1.5 text-xs text-foreground"
+              className="min-h-[44px] rounded-item border border-border bg-panel px-3 text-xs text-foreground"
             />
             {folders.length > 0 && (
               <select
                 value={folderFilter}
                 onChange={(e) => setFolderFilter(e.target.value)}
                 aria-label={t("history.folder")}
-                className="rounded-lg border border-border bg-panel-hover px-3 py-1.5 text-xs text-foreground"
+                className="min-h-[44px] rounded-item border border-border bg-panel px-3 text-xs text-foreground"
               >
                 <option value="">{t("history.allFolders")}</option>
                 {folders.map((folder) => (

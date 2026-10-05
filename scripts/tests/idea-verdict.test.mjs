@@ -173,8 +173,8 @@ check("null is none", classifyVerdict(null), "none");
 check("empty string is none", classifyVerdict("   "), "none");
 check("free text with no verdict word is unclear", classifyVerdict("needs more research"), "unclear");
 check("none gets the neutral badge", verdictBadgeClasses(null).includes("text-muted"), true);
-check("a kill gets the red badge", verdictBadgeClasses("no-go").includes("text-red-400"), true);
-check("a go gets the green badge", verdictBadgeClasses("pursue").includes("text-emerald-400"), true);
+check("a kill gets the danger badge", verdictBadgeClasses("no-go").includes("text-danger"), true);
+check("a go gets the success badge", verdictBadgeClasses("pursue").includes("text-success"), true);
 check("watch and unclear share the amber badge",
   verdictBadgeClasses("watch") === verdictBadgeClasses("needs more research"), true);
 

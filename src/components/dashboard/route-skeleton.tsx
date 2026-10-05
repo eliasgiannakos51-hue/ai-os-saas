@@ -30,7 +30,7 @@ export function RouteSkeleton() {
   const t = useTranslations("common");
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6" role="status" aria-label={t("loadingContent")}>
         {/* The header row: icon tile, title, subtitle. */}
         <div className="mb-6 flex items-center gap-3">
@@ -38,19 +38,19 @@ export function RouteSkeleton() {
               WHOSE page is arriving. It is the brand mark, not a claim
               about the content — the icon tile beside it stays a blank
               skeleton because that one WOULD be a claim. */}
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-card border border-border">
             <GlobeMark size={22} spin />
           </span>
           <div className="min-w-0 flex-1">
-            <div className="skeleton h-6 w-48 rounded" />
-            <div className="skeleton mt-2 h-3 w-72 max-w-full rounded" style={{ animationDelay: "90ms" }} />
+            <div className="skeleton h-6 w-48 rounded-item" />
+            <div className="skeleton mt-2 h-3 w-72 max-w-full rounded-item" style={{ animationDelay: "90ms" }} />
           </div>
         </div>
 
         {/* The toolbar every list page carries. */}
         <div className="mb-4 flex gap-2">
-          <div className="skeleton h-10 flex-1 rounded-xl" style={{ animationDelay: "120ms" }} />
-          <div className="skeleton h-10 w-28 rounded-xl" style={{ animationDelay: "150ms" }} />
+          <div className="skeleton h-10 flex-1 rounded-card" style={{ animationDelay: "120ms" }} />
+          <div className="skeleton h-10 w-28 rounded-card" style={{ animationDelay: "150ms" }} />
         </div>
 
         {/* And the body. Four rows is enough to read as a list without
@@ -59,7 +59,7 @@ export function RouteSkeleton() {
           {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
-              className="skeleton h-20 w-full rounded-xl"
+              className="skeleton h-20 w-full rounded-card"
               style={{ animationDelay: `${180 + i * 70}ms` }}
             />
           ))}

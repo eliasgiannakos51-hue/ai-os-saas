@@ -59,7 +59,7 @@ export function LanguageSettings() {
       className="mb-6 scroll-mt-20 space-y-3 surface"
     >
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <Languages className="h-4 w-4 text-orange-400" /> {t("title")}
+        <Languages className="h-4 w-4 text-foreground" /> {t("title")}
       </h2>
       <p className="text-xs text-muted">{t("description")}</p>
 
@@ -74,17 +74,17 @@ export function LanguageSettings() {
               onClick={() => selectLanguage(lang.code)}
               disabled={pending}
               aria-pressed={isSelected}
-              className={`flex min-h-[44px] items-center gap-2 rounded-xl border px-3 py-2.5 text-start transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${
+              className={`flex min-h-[44px] items-center gap-2 rounded-card border px-3 py-2.5 text-start transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${
                 isSelected
-                  ? "border-orange-500 bg-orange-500/[0.06]"
-                  : "border-border hover:border-orange-500/40"
+                  ? "border-foreground/40 bg-foreground/[0.06]"
+                  : "border-border hover:border-foreground/40"
               }`}
             >
-              <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
+              <span className="min-w-0 flex-1 break-words text-xs font-medium text-foreground">
                 {lang.label}
               </span>
               {isSelected && (
-                <Check className="h-3.5 w-3.5 shrink-0 text-orange-400" aria-hidden="true" />
+                <Check className="h-3.5 w-3.5 shrink-0 text-foreground" aria-hidden="true" />
               )}
             </button>
           );

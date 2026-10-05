@@ -77,21 +77,21 @@ export function DepthPicker({
             aria-checked={selected}
             disabled={disabled}
             onClick={() => onChange(depth)}
-            className={`flex w-full items-start gap-3 rounded-xl border p-3 text-start transition-colors duration-150 disabled:opacity-50 ${
+            className={`flex w-full items-start gap-3 rounded-card border p-3 text-start transition-colors duration-150 disabled:opacity-50 ${
               selected
-                ? "border-orange-500/50 bg-orange-500/10"
+                ? "border-foreground/50 bg-foreground/10"
                 : "border-border hover:bg-panel-hover"
             }`}
           >
             <Icon
-              className={`mt-0.5 h-4 w-4 shrink-0 ${selected ? "text-orange-400" : "text-muted"}`}
+              className={`mt-0.5 h-4 w-4 shrink-0 ${selected ? "text-foreground" : "text-muted"}`}
               aria-hidden="true"
             />
             <span className="min-w-0 flex-1">
               <span className="flex flex-wrap items-center gap-2">
                 <span className="text-sm font-medium text-foreground">{t(`${depth}.title`)}</span>
                 {suggested === depth && (
-                  <span className="rounded-full border border-orange-500/40 px-2 py-0.5 text-[10px] text-orange-300">
+                  <span className="rounded-full border border-foreground/40 px-2 py-0.5 text-[10px] text-foreground">
                     {t("suggested")}
                   </span>
                 )}

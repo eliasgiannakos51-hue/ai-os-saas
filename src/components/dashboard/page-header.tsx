@@ -1,5 +1,4 @@
 import type { LucideIcon } from "lucide-react";
-import { GlowOrb } from "@/components/ui/glow-orb";
 import { HelpTip } from "@/components/ui/help-tip";
 
 // Shared by every page-level header (Home, module pages, Settings, Team,
@@ -32,9 +31,8 @@ export function PageHeader({
 }) {
   return (
     <div className="relative mb-6 flex items-center gap-3">
-      <GlowOrb className="-start-8 -top-16 -z-10 h-40 w-40" />
       {Icon && (
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-foreground/10 text-foreground">
           <Icon className="h-5 w-5" aria-hidden="true" />
         </span>
       )}
@@ -43,7 +41,7 @@ export function PageHeader({
           header still has room to its right. */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <h1 className="truncate text-2xl font-bold text-foreground">{title}</h1>
+          <h1 className="break-words text-2xl font-bold text-foreground">{title}</h1>
           {helpKey && <HelpTip helpKey={helpKey} articleSlug={helpArticle} />}
         </div>
         {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}

@@ -97,7 +97,7 @@ export async function CreditHistory({
           {rows.map((row) => (
             <li key={row.id} className="flex items-center justify-between gap-3 py-2.5 text-xs">
               <div className="min-w-0">
-                <p className="truncate text-foreground">{row.label}</p>
+                <p className="break-words text-foreground">{row.label}</p>
                 <p className="mt-0.5 text-muted" suppressHydrationWarning>
                   {formatRelativeTime(row.at, locale)}
                   {row.kind === "tx" && row.balanceAfter !== null && (
@@ -107,7 +107,7 @@ export async function CreditHistory({
               </div>
               {row.kind === "tx" ? (
                 <span
-                  className={`shrink-0 font-semibold ${row.amount < 0 ? "text-red-400" : "text-emerald-400"}`}
+                  className={`shrink-0 font-semibold ${row.amount < 0 ? "text-danger" : "text-success"}`}
                 >
                   {row.amount > 0 ? "+" : ""}
                   {formatNumber(row.amount, locale)}
@@ -116,7 +116,7 @@ export async function CreditHistory({
                 // The whole point of showing a bypass row: what it WOULD
                 // have cost. "Unlimited" on its own tells the owner
                 // nothing about whether pricing is working.
-                <span className="shrink-0 text-end font-semibold text-amber-300">
+                <span className="shrink-0 text-end font-semibold text-warning">
                   {t("unlimited")}
                   {row.wouldHave !== null && (
                     <span className="ms-1 block font-normal text-[11px] text-muted">

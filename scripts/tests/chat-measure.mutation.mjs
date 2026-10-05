@@ -118,22 +118,22 @@ const MUTATIONS = [
   {
     name: "the streaming answer loses its ground",
     file: WORKSPACE,
-    from: '<div className="chat-ground-dim min-w-0 flex-1 text-foreground">\n                      <MessageContent content={streamingText}',
-    to: '<div className="min-w-0 flex-1 text-foreground">\n                      <MessageContent content={streamingText}',
+    from: '<div className="chat-ground-dim min-w-0 flex-1 text-foreground">\n                      {chatTimelineWorthShowing(liveTimeline) && (',
+    to: '<div className="min-w-0 flex-1 text-foreground">\n                      {chatTimelineWorthShowing(liveTimeline) && (',
     expect: "the streaming answer wrapper carries the dim ground",
   },
   {
     name: "the dim pane is thinned to 20%, which no screenshot was taken at",
     file: CSS,
-    from: ".chat-ground-dim {\n  background: rgb(var(--background) / 0.62);",
-    to: ".chat-ground-dim {\n  background: rgb(var(--background) / 0.2);",
-    expect: "the dim ground keeps its 62% strength",
+    from: "  background: transparent;\n  border-radius: 0.875rem;",
+    to: "  background: rgb(var(--background) / 0.62);\n  border-radius: 0.875rem;",
+    expect: "the dim ground paints nothing",
   },
   {
     name: "blur is put back on the dim pane, so a phone pays for it",
     file: CSS,
-    from: ".chat-ground-dim {\n  background: rgb(var(--background) / 0.62);",
-    to: ".chat-ground-dim {\n  backdrop-filter: blur(8px);\n  background: rgb(var(--background) / 0.62);",
+    from: "  background: transparent;\n  border-radius: 0.875rem;",
+    to: "  backdrop-filter: blur(8px);\n  background: transparent;\n  border-radius: 0.875rem;",
     expect: "...and no blur, which is the whole reason it was chosen",
   },
   // THE DECISION REVERSED ON 2026-09-26: the person's turn lost its box,
@@ -143,18 +143,27 @@ const MUTATIONS = [
   // one — the box must not return, and the three things that tell a
   // question from an answer without it must stay.
   {
-    name: "the box comes back around the person's message",
+    // RE-AIMED 2026-10-04: the design puts the message on the panel
+    // surface; the frame — a border — is what must not come back.
+    name: "the frame comes back around the person's message",
     file: WORKSPACE,
-    from: '<div className="min-w-0 whitespace-pre-wrap px-1 py-0.5 text-right text-foreground">',
-    to: '<div className="max-w-[85%] whitespace-pre-wrap rounded-2xl border border-orange-500/30 bg-panel px-4 py-2.5 text-foreground">',
-    expect: "the person's message has no box around it",
+    from: '<div className="min-w-0 max-w-[85%] whitespace-pre-wrap rounded-card bg-panel px-4 py-2.5 text-foreground">',
+    to: '<div className="min-w-0 max-w-[85%] whitespace-pre-wrap rounded-card border border-border bg-panel px-4 py-2.5 text-foreground">',
+    expect: "with no frame around it",
   },
   {
-    name: "the filled accent slab comes back",
+    name: "the person's message loses the design's surface",
     file: WORKSPACE,
-    from: '<div className="min-w-0 whitespace-pre-wrap px-1 py-0.5 text-right text-foreground">',
-    to: '<div className="whitespace-pre-wrap rounded-2xl bg-orange-500 px-4 py-2.5 text-sm text-black">',
-    expect: "the person's message has no box around it",
+    from: '<div className="min-w-0 max-w-[85%] whitespace-pre-wrap rounded-card bg-panel px-4 py-2.5 text-foreground">',
+    to: '<div className="min-w-0 max-w-[85%] whitespace-pre-wrap px-4 py-2.5 text-foreground">',
+    expect: "sits on the design's surface",
+  },
+  {
+    name: "the filled slab comes back",
+    file: WORKSPACE,
+    from: '<div className="min-w-0 max-w-[85%] whitespace-pre-wrap rounded-card bg-panel px-4 py-2.5 text-foreground">',
+    to: '<div className="whitespace-pre-wrap rounded-2xl bg-button px-4 py-2.5 text-sm text-button-ink">',
+    expect: "with no frame around it",
   },
   {
     // THE OTHER HALF OF THE REPLACEMENT. Taking the box away is only
@@ -162,8 +171,8 @@ const MUTATIONS = [
     // no longer right-aligned is a conversation nobody can read.
     name: "the person's turn stops being right-aligned",
     file: WORKSPACE,
-    from: '<div key={msg.id} className="flex items-start justify-end gap-2">',
-    to: '<div key={msg.id} className="flex items-start gap-2">',
+    from: '<div key={msg.id} className="flex justify-end">',
+    to: '<div key={msg.id} className="flex">',
     expect: "...and is still told apart by being right-aligned",
   },
   // --- the instrument's own clauses, both of which were wrong once -----

@@ -88,20 +88,20 @@ export function NotificationBell({ locale }: { locale: string }) {
         onClick={() => void openPanel()}
         aria-label={t("notifications")}
         aria-expanded={open}
-        className="relative flex h-11 w-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground sm:h-9"
+        className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
       >
         <Bell className="h-[18px] w-[18px]" />
         {unread > 0 && (
           <span
             aria-hidden="true"
-            className="absolute end-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-orange-500 px-1 text-[10px] font-bold text-black"
+            className="absolute end-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-button px-1 text-[10px] font-bold text-button-ink"
           >
             {unread > 9 ? "9+" : unread}
           </span>
         )}
       </button>
       {open && (
-        <div className="absolute end-0 top-11 max-h-96 w-72 overflow-y-auto rounded-xl border border-border bg-panel p-2 text-xs shadow-lg sm:w-80">
+        <div className="absolute end-0 top-11 max-h-96 w-72 overflow-y-auto rounded-card border border-border bg-panel p-2 text-xs sm:w-80">
           {items.length === 0 ? (
             <p className="p-2 text-muted">{t("noNotifications")}</p>
           ) : (
@@ -121,7 +121,7 @@ export function NotificationBell({ locale }: { locale: string }) {
                   </>
                 );
                 return (
-                  <li key={item.id} className={`rounded-lg p-2 ${item.readAt ? "" : "bg-orange-500/[0.06]"}`}>
+                  <li key={item.id} className={`rounded-item p-2 ${item.readAt ? "" : "bg-foreground/[0.06]"}`}>
                     {item.url ? (
                       <Link href={item.url} onClick={() => setOpen(false)} className="block">
                         {inner}

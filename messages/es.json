@@ -29,8 +29,6 @@
       "long": "Contenido generado por IA. Puede contener errores: comprueba lo importante antes de fiarte de ello."
     },
     "close": "Cerrar",
-    "switchToDarkMode": "Cambiar al tema oscuro",
-    "switchToLightMode": "Cambiar al tema claro",
     "showPassword": "Mostrar contraseña",
     "hidePassword": "Ocultar contraseña",
     "networkErrorCheckConnection": "Error de red: comprueba tu conexión e inténtalo de nuevo.",
@@ -63,7 +61,6 @@
       "lastResortBody": "Ionexa necesita conexión para cargar datos nuevos. Las páginas que ya abriste siguen disponibles desde la caché de este dispositivo — y lo que estabas haciendo está a salvo en el servidor."
     },
     "creditsUnlimited": "Ilimitados",
-    "whatIsThis": "¿Qué es esto?",
     "examplesLabel": "Prueba:",
     "newMessagesBelow": "Mensaje nuevo abajo",
     "downloadPdf": {
@@ -128,7 +125,7 @@
       "apps": "Ideas de apps",
       "images": "Ideas de imágenes",
       "videos": "Ideas de vídeos",
-      "coding": "Programación con IA",
+      "coding": "Código",
       "dataAnalysis": "Mira qué dicen los números",
       "documents": "Documentos",
       "presentations": "Presentaciones",
@@ -225,7 +222,8 @@
       "personalShopping": "Compras",
       "personalFinance": "Finanzas personales",
       "personalJournal": "Diario",
-      "personalLifeOs": "Life OS"
+      "personalLifeOs": "Life OS",
+      "activity": "Actividad"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -286,13 +284,31 @@
       "posts": "Dilo una vez y recibe una publicación por plataforma, con su longitud y su tono. No publica nada: copias y publicas tú.",
       "projects": "Una carpeta con un objetivo. Lo que metes es lo que hay — nada entra solo.",
       "aiMemory": "Lo que el chat ha guardado sobre ti, y cómo borrarlo.",
-      "meetings": "Convierte una grabación en transcripción, resumen y acciones que eliges tú."
+      "meetings": "Convierte una grabación en transcripción, resumen y acciones que eliges tú.",
+      "activity": "Tu próximo paso, qué ha cambiado, tu progreso y tus cifras"
     },
     "closeMenu": "Cerrar el menú",
     "rail": {
       "new": "Nuevo",
-      "recent": "Recientes",
-      "allTools": "Todas las herramientas"
+      "chat": "Chat",
+      "coding": "Código",
+      "allTools": "Todas las herramientas",
+      "recentTools": "Herramientas recientes",
+      "settings": "Ajustes",
+      "pin": "Fijar {tool}",
+      "unpin": "Desfijar {tool}",
+      "remove": "Quitar {tool} de las recientes",
+      "collapse": "Contraer la barra lateral",
+      "expand": "Expandir la barra lateral",
+      "label": "Menú principal",
+      "saveFailed": "No se pudo guardar el cambio. Inténtalo de nuevo."
+    },
+    "tabs": {
+      "home": "Inicio",
+      "chat": "Chat",
+      "tools": "Herramientas",
+      "you": "Tú",
+      "label": "Navegación principal"
     }
   },
   "landing": {
@@ -1049,7 +1065,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "Módulo más activo",
-      "acrossAllModules": "en todos los módulos",
       "entry": "{count, plural, one {# entrada} other {# entradas}}",
       "statRow": {
         "totalEntries": "Entradas Totales",
@@ -1292,6 +1307,10 @@
       "clarificationAnswerPlaceholder": "Tu respuesta...",
       "sources": {
         "title": "Fuentes"
+      },
+      "workMode": {
+        "active": "Modo: {mode}",
+        "clear": "Quitar el modo de trabajo"
       }
     },
     "create": {
@@ -1338,7 +1357,9 @@
         "why": "Se escribe solo. Todo lo que registra en cualquier módulo llega aquí en un único flujo, que es como se responde a «qué hice realmente el mes pasado»."
       },
       "tabAll": "Todo",
-      "tabStarred": "Destacados"
+      "tabStarred": "Destacados",
+      "filterSection": "Sección",
+      "filterPeriod": "Periodo"
     },
     "favorites": {
       "title": "Favoritos",
@@ -1729,7 +1750,8 @@
       "clarifyTitle": "Un par de preguntas rápidas:",
       "clarifySkip": "Omitir y registrarlo igualmente",
       "clarifyContinue": "Continuar",
-      "clarifyAnswerPlaceholder": "Tu respuesta..."
+      "clarifyAnswerPlaceholder": "Tu respuesta...",
+      "accomplishPlaceholder": "¿Qué quieres conseguir?"
     },
     "createStudio": {
       "title": "Crea lo que sea",
@@ -2747,7 +2769,20 @@
     "tools": {
       "title": "Todas las herramientas",
       "description": "Cada herramienta, con una línea sobre lo que hace.",
-      "orPress": "O pulsa ⌘K y escribe su nombre, o descríbelo en el campo de Inicio."
+      "orPress": "O pulsa ⌘K y escribe su nombre, o descríbelo en el campo de Inicio.",
+      "search": "Buscar una herramienta",
+      "searchLabel": "Buscar herramientas",
+      "noMatch": "Ninguna herramienta se llama «{query}». Descríbela en el campo de Inicio.",
+      "beta": "Beta",
+      "betaHint": "En pruebas: funciona, pero aún no hace todo lo que debería."
+    },
+    "home": {
+      "actions": {
+        "research": "Investigar",
+        "create": "Crear",
+        "run": "Ejecutar",
+        "analyze": "Analizar"
+      }
     }
   },
   "module": {
@@ -2801,7 +2836,6 @@
       "images": "Imagen principal para la página de precios",
       "videos": "Recorrido del producto en 60 segundos",
       "coding": "Script para conciliar los pagos de Stripe",
-      "data-analysis": "¿Qué plan tiene la menor cancelación?",
       "campaigns": "Lanzamiento de septiembre: email + LinkedIn",
       "presentations": "Actualización al consejo del T3: puntos clave",
       "ideas": "Un boletín para quienes dejaron las hojas de cálculo"
@@ -3222,9 +3256,24 @@
         "files": "{count, plural, one {# archivo} other {# archivos}}",
         "parts": "{count, plural, one {en # parte} other {en # partes}}",
         "planSteps": "{count, plural, one {# paso} other {# pasos}}",
-        "sources": "{count, plural, one {# fuente} other {# fuentes}}"
+        "sources": "{count, plural, one {# fuente} other {# fuentes}}",
+        "pages": "{count, plural, one {# página} other {# páginas}}",
+        "photos": "{count, plural, =0 {ninguna foto} one {# foto} other {# fotos}}"
       },
       "writing": "Redactando el informe"
+    },
+    "website": {
+      "preparing": "Preparando la descripción",
+      "writing": "Escribiendo las páginas",
+      "photos": "Colocando fotos",
+      "checking": "Revisando el sitio",
+      "saving": "Guardando"
+    },
+    "chatTimeline": {
+      "thinking": "Pensando",
+      "searching_web": "Buscando en la web",
+      "searching_data": "Buscando en tus datos",
+      "writing": "Escribiendo la respuesta"
     }
   },
   "problem": {
@@ -3316,7 +3365,7 @@
       "does": "Cambia de plan, compra créditos, elige idioma y tema, pon nombre al asistente y descarga cada registro de la cuenta en un solo archivo.",
       "doesNot": "No guarda aquí tus registros: cada módulo guarda los suyos. Y Eliminar cuenta no es una forma de limpiarlos y empezar de cero: termina la cuenta, se lleva todo con ella y no se puede deshacer. Exporta antes."
     },
-    "overview": {
+    "activity": {
       "is": "Un resumen de lo que has registrado, y una cosa que hacer a continuación.",
       "does": "Lee tus propias entradas en todos los módulos y muestra una puntuación de salud, lo que ha cambiado y un siguiente paso sugerido.",
       "doesNot": "No se conecta a tu banco, tu CRM ni tu correo. Cada cifra viene de algo que tú o tus agentes habéis introducido, así que una semana vacía está realmente vacía: no es que esté cargando."
@@ -3808,7 +3857,7 @@
     }
   },
   "coding": {
-    "title": "Programación con IA",
+    "title": "Código",
     "description": "Cinco cosas que hace y cuatro que no. Todo funciona exactamente sobre el texto de la caja.",
     "code": "Código",
     "copy": "Copiar",

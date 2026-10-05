@@ -51,7 +51,7 @@ export function BuyCredits() {
             type="button"
             onClick={() => handleBuy(pack.id)}
             disabled={loadingId !== null}
-            className="flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-xl border border-border px-3 py-3 text-center transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-card border border-border px-3 py-3 text-center transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="text-sm font-bold text-foreground">
               {CURRENCY_SYMBOL}
@@ -66,7 +66,7 @@ export function BuyCredits() {
         ))}
       </div>
       {error && (
-        <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+        <p className="rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
           {tCommon("errorWithMessage", { message: error })}
         </p>
       )}

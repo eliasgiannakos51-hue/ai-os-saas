@@ -4,108 +4,125 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Code2, LayoutGrid, MessageCircle, PanelLeftClose, PanelLeftOpen, Pin, PinOff, Plus, Settings, X } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip";
-import { displayNameFromEmail } from "@/lib/greeting";
-import { ChevronRight, LayoutGrid, Plus, X } from "lucide-react";
-import { OVERVIEW_NAV_ITEM, CREATE_NAV_ITEM } from "@/lib/modules";
-import {
-  ALL_SIDEBAR_GROUPS,
-  MAIN_SIDEBAR_GROUPS,
-  SETTINGS_GROUP,
-  sidebarGroups,
-  type SidebarGroupConfig,
-  type SidebarItem,
-} from "@/lib/sidebar-nav";
-import { useSidebar } from "@/components/dashboard/sidebar-context";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { useToast } from "@/components/toast/toast-context";
 import { Logo } from "@/components/logo";
-import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
-import { CREATE_ICON } from "@/lib/module-icons";
+import { displayNameFromEmail } from "@/lib/greeting";
+import { MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";
+import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
+import { RAIL_ROWS, SETTINGS_HREF, activeRail, type RailKey } from "@/lib/nav/rail";
+import type { RecentAction, RecentTool } from "@/lib/nav/recent-tools";
+import { useSidebar } from "@/components/dashboard/sidebar-context";
+import { useToast } from "@/components/toast/toast-context";
 
-function isActive(pathname: string | null, href: string) {
-  if (href === "/dashboard") return pathname === "/dashboard";
-  if (!pathname) return false;
-  // Segment-boundary match, not a raw prefix — otherwise "/dashboard/trading"
-  // would also light up on "/dashboard/trading-workflow" (and any other
-  // href that happens to be a string prefix of a sibling route).
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-// ONE COLOUR FOR EVERY RESTING ICON. Only the current page gets the
-// accent — V4.6 #3.
-//
-// What stood here was a `switch (heading)` returning purple, sky or amber
-// for "Create", "My Business" and "Insights", above a comment claiming
-// "one resting tint per sidebar section". Not one of those three headings
-// had existed in lib/sidebar-nav.ts since the rename that made it
-// Workspace / Build / Tracking / Business / Strategy / Operations, so
-// every group fell through to `default` and the whole nav was already a
-// single emerald. The comment described a behaviour the code could not
-// produce, and it read as deliberate, which is why it survived.
-//
-// The behaviour it accidentally had is the one the brief asks for, so it
-// is now stated as a constant rather than left to a dead branch: a
-// function of the heading could go back to disagreeing with the config,
-// a constant cannot.
-const RESTING_ICON = "text-emerald-400/50";
-
-/** Where the full list lives now — app/dashboard/tools/page.tsx. */
-const ALL_TOOLS_HREF = "/dashboard/tools";
-const RECENT_TOOLS_KEY = "ionexa.recentTools";
-const RECENT_TOOLS_MAX = 5;
+/**
+ * THE SIDEBAR — ΣΥΣΤΗΜΑ DESIGN (docs/CONTEXT.md, 2026-10-04): the same
+ * on every page. Logo, New, Chat, Coding, All tools, Recent tools, and
+ * Settings at the bottom with the account inside it. Nothing else is
+ * ever here; every tool is in All tools and ⌘K (lib/nav/rail.ts).
+ *
+ * WHY THE OLD "All tools changes the sidebar" BUG CANNOT HAPPEN. The
+ * Recent list used to be rebuilt from localStorage on every page change,
+ * so opening a tool from All tools grew a new section under the cursor.
+ * It is now computed on the server from the account's own history
+ * (lib/nav/recent-tools.ts) once per load, and a navigation does not
+ * touch it. Only an explicit pin or removal changes it, and then by the
+ * person's own hand.
+ *
+ * NARROW MODE: icons only, the name in a tooltip AND as the link's
+ * accessible name. Kept per device (localStorage, guarded), because how
+ * wide a sidebar should be is a property of the screen, not the account.
+ */
+const RAIL_ICONS: Record<RailKey, LucideIcon> = {
+  new: Plus,
+  chat: MessageCircle,
+  coding: Code2,
+  allTools: LayoutGrid,
+  settings: Settings,
+};
+const COLLAPSED_KEY = "ionexa.sidebarCollapsed";
 
 export function Sidebar({
   email = "",
   planName = "",
   isOwner = false,
+  recent = [],
 }: {
   email?: string;
   planName?: string;
-  /** Owner-only nav items are removed for everybody else — see
-   *  lib/sidebar-nav.ts's `ownerOnly`. Defaults to false, so a caller
-   *  that forgets to pass it hides too much rather than too little. */
+  /** Owner-only rows are left out for everybody else (lib/sidebar-nav.ts). */
   isOwner?: boolean;
+  /** Recent tools, computed by the dashboard layout from the account. */
+  recent?: RecentTool[];
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const t = useTranslations("sidebar");
-  const tCommon = useTranslations("common");
   const { open, setOpen } = useSidebar();
   const { addToast } = useToast();
   const closeOnMobile = () => setOpen(false);
 
-  function translatedHeading(heading: string): string {
-    const key = GROUP_HEADING_KEYS[heading];
-    return key ? t(`groups.${key}`) : heading;
-  }
+  const [collapsed, setCollapsed] = useState(false);
+  useEffect(() => {
+    try {
+      setCollapsed(window.localStorage.getItem(COLLAPSED_KEY) === "1");
+    } catch {
+      /* storage blocked: the wide sidebar, which is the default */
+    }
+  }, []);
+  const toggleCollapsed = () => {
+    setCollapsed((c) => {
+      try {
+        window.localStorage.setItem(COLLAPSED_KEY, c ? "0" : "1");
+      } catch {
+        /* storage blocked: this page only */
+      }
+      return !c;
+    });
+  };
 
-  function translatedLabel(label: string): string {
-    // Lives under "common" (shared with command-palette.tsx's identical
-    // special case) rather than sidebar.items, since Create Anything is
-    // also referenced by that non-sidebar name elsewhere in the app.
-    if (label === "Create Studio") return tCommon("createStudio");
-    const key = ITEM_LABEL_KEYS[label];
-    return key ? t(`items.${key}`) : label;
-  }
+  // The tools a Recent row may name, with their icons and labels.
+  const tools = useMemo(
+    () => sidebarGroups([...MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP], isOwner).flatMap((g) => g.items),
+    [isOwner]
+  );
+  const toolFor = (href: string): SidebarItem | undefined => tools.find((i) => i.href === href);
 
-  // THE RAIL, NOT THE DIRECTORY — the design the owner approved on
-  // 2026-10-02 (docs/mockups/README.md): New, Recent, All tools, Settings.
-  //
-  // WHERE THE TWENTY-SIX ROWS WENT. Nowhere: lib/sidebar-nav.ts is the
-  // same list, with the same groups, names and hints, and it is drawn in
-  // full at /dashboard/tools (app/dashboard/tools/page.tsx) through the
-  // same sidebarGroups() and owner filter — with each hint written out,
-  // where here it was a tooltip a phone never shows. The ⌘K palette and the
-  // field on Home are the other two roads to the same list.
-  //
-  // WHAT THE GROUPS LEFT BEHIND. Every heading always open, a measured
-  // 26-row column, and a report that five headings "stood over nothing"
-  // when only one was open. A rail of four rows and the five most recent
-  // tools has none of those problems because it has no headings to shut.
+  // A pin or removal, shown at once and then confirmed by the server.
+  const [list, setList] = useState<RecentTool[]>(recent);
+  useEffect(() => setList(recent), [recent]);
+  const act = async (action: RecentAction, href: string) => {
+    const before = list;
+    setList((l) =>
+      action === "remove"
+        ? l.filter((r) => r.href !== href)
+        : l.map((r) => (r.href === href ? { ...r, pinned: action === "pin" } : r))
+    );
+    try {
+      const res = await fetch("/api/nav/recent-tools", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, href }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      router.refresh();
+    } catch {
+      setList(before);
+      addToast(t("rail.saveFailed"), "error");
+    }
+  };
 
-  const router = useRouter();
-  /** Routes already asked for, so a pointer sweeping down the sidebar
-   *  cannot fire the same prefetch a dozen times. */
+  const active = activeRail(
+    pathname,
+    list.map((r) => r.href),
+    tools.map((i) => i.href)
+  );
+  const isRowActive = (key: RailKey) => Boolean(active && "key" in active && active.key === key);
+
+  // Warm the route the pointer is heading for: every dashboard route is
+  // dynamic, so the fetch after a click is the transition the person
+  // feels. One prefetch for the link being approached, not twenty.
   const warmed = useRef<Set<string>>(new Set());
   const warm = useCallback(
     (href: string) => {
@@ -116,253 +133,146 @@ export function Sidebar({
     [router]
   );
 
-  // RECENT: the last five tools this browser opened, newest first. Kept in
-  // localStorage because it is a per-device convenience, not a record —
-  // every read and write is guarded, so a private window or blocked
-  // storage leaves the rail without the list rather than broken.
-  const tools = useMemo(
-    () => sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).flatMap((g) => g.items),
-    [isOwner]
-  );
-  const [recent, setRecent] = useState<string[]>([]);
-  useEffect(() => {
-    let stored: string[] = [];
-    try {
-      const raw = window.localStorage.getItem(RECENT_TOOLS_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      if (Array.isArray(parsed)) stored = parsed.filter((h): h is string => typeof h === "string");
-    } catch {
-      stored = [];
-    }
-    const here = tools.find((item) => isActive(pathname, item.href));
-    const next = here ? [here.href, ...stored.filter((h) => h !== here.href)].slice(0, RECENT_TOOLS_MAX) : stored;
-    setRecent(next);
-    if (here) {
-      try {
-        window.localStorage.setItem(RECENT_TOOLS_KEY, JSON.stringify(next));
-      } catch {
-        /* storage blocked: the list lives for this page only */
-      }
-    }
-  }, [pathname, tools]);
-  const recentItems = recent
-    .map((href) => tools.find((item) => item.href === href))
-    .filter((item): item is SidebarItem => Boolean(item));
+  const labelOf = (item: SidebarItem) => {
+    const key = ITEM_LABEL_KEYS[item.label];
+    return key ? t(`items.${key}`) : item.label;
+  };
 
-  function renderGroup(group: SidebarGroupConfig) {
-    // A HEADING IS ONLY DRAWN WHEN SOMETHING IS UNDER IT.
-    //
-    // sidebarGroups() already drops a group whose items all filter away,
-    // so on the declared config this is unreachable — and it is here
-    // because "unreachable today" was exactly the state of affairs while
-    // five headings stood over nothing. The filter that emptied them was
-    // not a filter at all, it was the collapse, and no amount of
-    // correctness in sidebarGroups() could have caught it.
-    //
-    // This is the last line of defence and the only one inside the
-    // renderer. Section 0 of scripts/tests/sidebar-density.prodtest.mjs
-    // asks the same question of the SCREEN, which is the version that
-    // would have caught the real thing.
-    if (group.items.length === 0) return null;
-
+  const row = (href: string, label: string, Icon: LucideIcon, isActive: boolean, extra?: React.ReactNode) => {
+    const link = (
+      <Link
+        href={href}
+        onClick={closeOnMobile}
+        onMouseEnter={() => warm(href)}
+        onFocus={() => warm(href)}
+        onTouchStart={() => warm(href)}
+        aria-label={collapsed ? label : undefined}
+        aria-current={isActive ? "page" : undefined}
+        data-active={isActive}
+        className={`nav-item flex min-h-[44px] flex-1 items-center gap-3 px-3 py-2 text-sm ${
+          isActive ? "text-foreground" : "text-muted hover:bg-panel-hover hover:text-foreground"
+        } ${collapsed ? "md:justify-center md:px-0" : ""}`}
+      >
+        <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+        <span className={`min-w-0 break-words ${collapsed ? "md:sr-only" : ""}`}>{label}</span>
+      </Link>
+    );
     return (
-      <div key={group.heading}>
-        <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
-          {translatedHeading(group.heading)}
-        </p>
-
-        <div className="space-y-0.5 pb-0.5">
-          {group.items.map((item) => renderItem(item))}
-        </div>
+      <div key={href} className="group relative flex items-center">
+        {collapsed ? (
+          <Tooltip content={label} side="right">
+            {link}
+          </Tooltip>
+        ) : (
+          link
+        )}
+        {extra}
       </div>
     );
-  }
-
-  // One renderer for every nav row.
-  //
-  // It used to take a third argument, `prominent`, whose comment said it
-  // "gives the three daily entry points their visual weight over the
-  // twenty-odd module links" — and it had exactly one call site, which
-  // never passed it. There were no pinned rows and no prominent ones; the
-  // parameter defaulted to false forever, and the two style branches it
-  // guarded were unreachable. The five daily entry points now get their
-  // weight from being the first group, which is a property of the config
-  // rather than of a flag nobody sets.
-  //
-  // A SECOND SUCH PARAMETER LASTED ONE ROUND. `reachable` was added with
-  // the collapse to put a shut group's rows out of the tab order —
-  // `tabIndex={reachable ? undefined : -1}` — and when the collapse went,
-  // its only false call site went with it. Left in place it would have
-  // been the same defect this paragraph is about, one round later.
-  function renderItem(item: SidebarItem) {
-    const active = isActive(pathname, item.href);
-    const Icon = item.icon;
-    const hint = item.hintKey ? t(`hints.${item.hintKey}`) : undefined;
-
-    return (
-                  <Tooltip key={item.href} content={hint} side="right">
-                  <Link
-                    href={item.href}
-                    onClick={closeOnMobile}
-                    // WARM THE ROUTE THE POINTER IS HEADING FOR.
-                    //
-                    // Every dashboard route is force-dynamic, so Next's
-                    // default prefetch fetches only the loading boundary —
-                    // the page itself is still a full server round trip
-                    // AFTER the click, and that round trip is inside the
-                    // time the user experiences as "the transition". A
-                    // pointer arriving on a link is a few hundred
-                    // milliseconds of warning; spending them on the fetch
-                    // is what turns a click into an instant one.
-                    //
-                    // Not prefetch on ALL of them at render time: there are
-                    // twenty-odd links in this sidebar, and prefetching
-                    // every one would mean twenty-odd dynamic page renders
-                    // per visit. One, for the link actually being
-                    // approached, is the difference.
-                    //
-                    // Focus and touch get the same treatment, because a
-                    // keyboard or a phone never produces a hover.
-                    onMouseEnter={() => warm(item.href)}
-                    onFocus={() => warm(item.href)}
-                    onTouchStart={() => warm(item.href)}
-                    // nav-item draws the active highlight and the leading
-                    // rail as pseudo-elements so both can animate; the
-                    // look is unchanged, it just slides in now.
-                    data-active={active}
-                    className={`nav-item group relative flex min-h-[44px] items-center gap-2.5 rounded-xl py-2 ps-2.5 pe-3 text-sm transition-colors duration-200 ${
-                      active
-                        ? "font-semibold text-orange-200"
-                        : "text-muted hover:bg-white/[0.045] hover:text-foreground hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.18)]"
-                    }`}
-                  >
-                    <Icon
-                      className={`icon-bounce h-4 w-4 shrink-0 ${
-                        active
-                          ? "text-orange-300 drop-"
-                          : `${RESTING_ICON} group-hover:text-orange-300`
-                      }`}
-                      aria-hidden="true"
-                    />
-                    {/* THE EXTRA TRACKING IS GONE, and what it was for is
-                        worth keeping written down. "Ionexa" at this size
-                        renders a lone capital "I" that reads as a lowercase
-                        "l" — "lonexa" — so this row leaned on wider
-                        letter-spacing, as app/not-found.tsx still does for
-                        the standalone wordmark.
-                        `item.label` is a KEY into ITEM_LABEL_KEYS and never
-                        reaches the screen, so the condition matched on
-                        "Ionexa Chat" while what was painted came from
-                        sidebar.items.chat — and on 2026-09-11 the owner
-                        renamed that to "Ask me" in all ten languages. Not
-                        one of them contains "Ionexa". The class had been
-                        spacing out "Ask me", "Ρώτα με" and "问我" for eight
-                        days, for a capital I none of them has. */}
-                    <span className="truncate">{translatedLabel(item.label)}</span>
-                  </Link>
-                  </Tooltip>
-    );
-  }
+  };
 
   return (
     <>
       {open && (
         <div
           onClick={closeOnMobile}
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-200 md:hidden"
+          className="fixed inset-0 z-40 bg-background/70 transition-opacity duration-200 md:hidden"
           aria-hidden="true"
         />
       )}
 
       <aside
-        className={`fixed inset-y-0 start-0 z-50 w-64 transform overflow-y-auto border-e border-white/[0.07] bg-panel/80 backdrop-blur-xl transition-transform duration-200 ease-in-out md:sticky md:top-0 md:z-auto md:h-screen md:w-60 md:shrink-0 md:translate-x-0 ${
-          open ? "translate-x-0" : "-translate-x-full rtl:translate-x-full md:rtl:translate-x-0"
-        }`}
+        data-testid="sidebar"
+        data-collapsed={collapsed}
+        className={`fixed inset-y-0 start-0 z-50 flex w-64 flex-col overflow-y-auto border-e border-divider bg-background transition-[transform,width] duration-200 ease-out md:sticky md:top-0 md:z-auto md:h-screen md:shrink-0 md:translate-x-0 ${
+          collapsed ? "md:w-16" : "md:w-60"
+        } ${open ? "translate-x-0" : "-translate-x-full rtl:translate-x-full md:rtl:translate-x-0"}`}
       >
-        <div className="relative flex items-center justify-center px-4 py-3">
-          <Link href={OVERVIEW_NAV_ITEM.href} onClick={closeOnMobile} className="flex items-center">
-            {/* 72px, not 130px. The full logo's viewBox is 202x190 — very
-                nearly square — so 130px of width was 122px of height, and
-                the header block measured 146px in a 768px-tall viewport:
-                more than any group of links. Measured at 72px it is 92px,
-                which is 54px back, and 54px is 1.2 rows of nav. The mark
-                is unchanged; only its size is. */}
-            <Logo className="h-auto w-[72px] max-w-full" />
+        <div className={`flex items-center gap-2 px-3 py-4 ${collapsed ? "md:justify-center md:px-0" : ""}`}>
+          <Link href="/dashboard/overview" onClick={closeOnMobile} className="flex min-h-[44px] items-center rounded-item px-1" aria-label="Ionexa">
+            {collapsed ? <Logo iconOnly px={26} /> : <Logo px={24} />}
           </Link>
           <button
             type="button"
             onClick={closeOnMobile}
             aria-label={t("closeMenu")}
-            className="absolute end-3 top-3 flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground md:hidden"
+            className="ms-auto flex h-11 w-11 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground md:hidden"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
-        <nav className="space-y-4 p-3">
-          <div className="space-y-0.5">
-            {renderItem({ href: OVERVIEW_NAV_ITEM.href, label: t("rail.new"), icon: Plus })}
-            {renderItem({ href: ALL_TOOLS_HREF, label: t("rail.allTools"), icon: LayoutGrid })}
-          </div>
-          {recentItems.length > 0 && (
-            <div>
-              <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
-                {t("rail.recent")}
-              </p>
-              <div className="space-y-0.5 pb-0.5">{recentItems.map((item) => renderItem(item))}</div>
+        <nav className="flex-1 space-y-1 px-2" aria-label={t("rail.label")}>
+          {RAIL_ROWS.map((r) => row(r.href, t(`rail.${r.key}`), RAIL_ICONS[r.key], isRowActive(r.key)))}
+
+          {list.length > 0 && (
+            <div className="pt-5" data-testid="recent-tools">
+              {!collapsed && <p className="px-3 pb-2 text-xs text-muted">{t("rail.recentTools")}</p>}
+              <div className="space-y-1">
+                {list.map((r) => {
+                  const item = toolFor(r.href);
+                  if (!item) return null;
+                  const label = labelOf(item);
+                  const isActive = Boolean(active && "recent" in active && active.recent === r.href);
+                  return row(
+                    r.href,
+                    label,
+                    item.icon,
+                    isActive,
+                    collapsed ? null : (
+                      <span className="absolute end-1 flex items-center opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
+                        <button
+                          type="button"
+                          onClick={() => act(r.pinned ? "unpin" : "pin", r.href)}
+                          aria-label={t(r.pinned ? "rail.unpin" : "rail.pin", { tool: label })}
+                          aria-pressed={r.pinned}
+                          className="flex h-8 w-8 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
+                        >
+                          {r.pinned ? <PinOff className="h-3.5 w-3.5" aria-hidden="true" /> : <Pin className="h-3.5 w-3.5" aria-hidden="true" />}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => act("remove", r.href)}
+                          aria-label={t("rail.remove", { tool: label })}
+                          className="flex h-8 w-8 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
+                        >
+                          <X className="h-3.5 w-3.5" aria-hidden="true" />
+                        </button>
+                      </span>
+                    )
+                  );
+                })}
+              </div>
             </div>
           )}
         </nav>
 
-        <div className="border-t border-white/[0.07] p-3">
-            {sidebarGroups([SETTINGS_GROUP], isOwner).map(renderGroup)}
-          </div>
-
-        {/* THE THEME TOGGLE, HERE BECAUSE ON A PHONE IT IS NOWHERE ELSE.
-            top-nav.tsx wraps it in `hidden sm:contents`, so below 640px
-            this drawer is where it lives. Shown only where the top bar
-            hides it, so desktop keeps one rather than two.
-
-            THE LANGUAGE CONTROL WAS HERE TOO, AND IT WAS NOT FOUND. This
-            block sits under sixteen nav rows and the settings group,
-            which on a 390x844 phone is below the fold of the drawer: a
-            person opening the menu saw a list of pages and no globe, and
-            reported that the language control did not exist. Rendered
-            below the fold of a scrolling drawer is not reachable. It is
-            now in the top bar at every width (top-nav.tsx), which is
-            visible without a scroll and without opening anything. */}
-        <div className="flex items-center gap-1 border-t border-white/[0.07] p-3 sm:hidden">
-          <ThemeToggle />
+        <div className="space-y-1 border-t border-divider px-2 py-3">
+          {row(
+            SETTINGS_HREF,
+            t("rail.settings"),
+            Settings,
+            isRowActive("settings"),
+            null
+          )}
+          {email && !collapsed && (
+            <p className="px-3 text-xs text-muted">
+              <span className="block break-words text-foreground">{displayNameFromEmail(email)}</span>
+              {planName && <span className="block break-words">{planName}</span>}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            aria-label={t(collapsed ? "rail.expand" : "rail.collapse")}
+            className={`hidden min-h-[44px] w-full items-center gap-3 rounded-item px-3 text-sm text-muted hover:bg-panel-hover hover:text-foreground md:flex ${
+              collapsed ? "md:justify-center md:px-0" : ""
+            }`}
+          >
+            {collapsed ? <PanelLeftOpen className="h-4 w-4" aria-hidden="true" /> : <PanelLeftClose className="h-4 w-4" aria-hidden="true" />}
+            <span className={collapsed ? "sr-only" : ""}>{t(collapsed ? "rail.expand" : "rail.collapse")}</span>
+          </button>
         </div>
-
-        {/* Account card. Both values come from the already-loaded session
-            in dashboard/layout.tsx — no extra query, and nothing is
-            rendered at all if the layout couldn't supply them. */}
-        {email && (
-          <div className="border-t border-white/[0.07] p-3">
-            <Link
-              href="/dashboard/settings"
-              onClick={closeOnMobile}
-              className="group flex items-center gap-2.5 rounded-xl px-2 py-2 transition-colors duration-200 hover:bg-white/[0.05]"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fbbf24_0%,#f97316_55%,#a855f7_100%)] text-sm font-bold text-black">
-                {displayNameFromEmail(email).charAt(0).toUpperCase()}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-medium text-foreground">
-                  {displayNameFromEmail(email)}
-                </span>
-                {planName && (
-                  <span className="block truncate text-[11px] text-muted">{planName}</span>
-                )}
-              </span>
-              <ChevronRight
-                className="h-3.5 w-3.5 shrink-0 text-muted transition-transform duration-200 group-hover:translate-x-0.5"
-                aria-hidden="true"
-              />
-            </Link>
-          </div>
-        )}
       </aside>
     </>
   );

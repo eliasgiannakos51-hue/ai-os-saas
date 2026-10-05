@@ -47,7 +47,7 @@ export function ClarificationQuestions({
   }
 
   return (
-    <div className="space-y-3 rounded-2xl border border-orange-500/30 bg-orange-500/[0.04] p-4">
+    <div className="space-y-3 rounded-card border border-foreground/30 bg-foreground/[0.04] p-4">
       <p className="text-sm font-semibold text-foreground">{title}</p>
       <div className="space-y-3">
         {questions.map((question, index) => {
@@ -82,10 +82,10 @@ export function ClarificationQuestions({
                         onClick={() => setAnswer(index, chosen ? "" : option)}
                         aria-pressed={chosen}
                         disabled={submitting}
-                        className={`inline-flex min-h-[36px] items-center rounded-full border px-3 py-1 text-xs transition-colors duration-150 disabled:opacity-50 ${
+                        className={`inline-flex min-h-[44px] items-center rounded-full border px-3 py-1 text-xs transition-colors duration-150 disabled:opacity-50 ${
                           chosen
-                            ? "border-orange-500 bg-orange-500/15 font-medium text-orange-300"
-                            : "border-border text-muted hover:border-orange-500/50 hover:text-foreground"
+                            ? "border-foreground/40 bg-foreground/15 font-medium text-foreground"
+                            : "border-border text-muted hover:border-foreground/50 hover:text-foreground"
                         }`}
                       >
                         {option}
@@ -103,7 +103,7 @@ export function ClarificationQuestions({
           type="button"
           onClick={() => onAnswer(answers)}
           disabled={submitting}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-item border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {continueLabel}
         </button>
@@ -115,7 +115,7 @@ export function ClarificationQuestions({
           type="button"
           onClick={onSkip}
           disabled={submitting}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-item border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
         >
           {skipLabel}
         </button>

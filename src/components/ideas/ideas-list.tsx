@@ -145,7 +145,7 @@ export function IdeasList({
             type="button"
             onClick={handleExport}
             disabled={filtered.length === 0}
-            className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-item border border-border px-3.5 py-2 text-sm text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="h-4 w-4" /> {t("exportCsv")}
           </button>
@@ -175,7 +175,7 @@ export function IdeasList({
                 ref={idea.id === highlightId ? highlightRef : undefined}
                 className={
                   idea.id === highlightId
-                    ? "rounded-2xl ring-2 ring-orange-500 ring-offset-2 ring-offset-background"
+                    ? "rounded-card ring-2 ring-foreground ring-offset-2 ring-offset-background"
                     : undefined
                 }
               >

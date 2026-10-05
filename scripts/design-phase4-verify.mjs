@@ -6,7 +6,8 @@
  * serve this product's pages — middleware.ts builds a Supabase client and
  * 500s without a real project — and standing up a fake one is the mistake
  * that once let six broken features pass every test. So the method is the
- * one scripts/light-border-before-after.mjs established: load the REAL
+ * one the light-theme border work established (its script was retired
+ * with the light theme on 2026-10-04): load the REAL
  * deployment, measure it, then replace its stylesheets with the ones this
  * working tree just built and measure the same DOM again.
  *

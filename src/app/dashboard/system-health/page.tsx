@@ -164,7 +164,7 @@ export default async function SystemHealthPage() {
   }
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <PageHeader
           icon={Activity}
@@ -180,7 +180,7 @@ export default async function SystemHealthPage() {
         <EnvWarnings warnings={warnings} />
 
         {failed ? (
-          <p className="rounded-xl border border-red-500/30 bg-red-500/[0.05] p-4 text-xs text-red-300">
+          <p className="rounded-card border border-danger/30 bg-danger/[0.05] p-4 text-xs text-danger">
             Could not load errors. Check that the production_errors table exists.
           </p>
         ) : (
@@ -233,7 +233,7 @@ async function Stat({
       <p className="text-[11px] uppercase tracking-wider text-muted">{label}</p>
       <p
         className={`mt-1 text-2xl font-bold ${
-          tone === "bad" ? "text-red-400" : tone === "good" ? "text-emerald-400" : "text-foreground"
+          tone === "bad" ? "text-danger" : tone === "good" ? "text-success" : "text-foreground"
         }`}
       >
         {formatNumber(value, locale)}

@@ -249,7 +249,13 @@ console.log(
 // email-strings mutation suites arrived (V6 1.0, 1.10a, 1.10d), and with
 // them eight newly covered anchors. Read off the run, raised because they
 // exist, never to make room.
-const RATCHET = 219;
+// 219 -> 225 on 2026-10-04: research-timeline, early-redirects,
+// ci-step-timeouts, website-timeline and chat-timeline mutation suites
+// (V6.2 2.1, #310, §9) covered six more anchors. Read off the run.
+// 225 -> 231 on 2026-10-04: the design's suites — earth, recent-tools,
+// home-design, conversation-design, all-tools, mobile-tabs — covered six
+// more. Read off the run.
+const RATCHET = 231;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

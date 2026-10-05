@@ -65,7 +65,7 @@ export default async function PresentationsPage({
   const planSlug = await resolveEffectivePlanSlug(user);
   if (!accountHasCapability(planSlug, "presentations", isAdmin)) {
     return (
-      <div className="min-h-full bg-dot-grid">
+      <div className="min-h-full">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader icon={MODULE_ICONS.presentations} title={t("title")} helpKey="help.presentations" />
           <UpgradeRequired {...upgradeWallProps("presentations", t("title"))!} />

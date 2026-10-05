@@ -53,14 +53,14 @@ export default async function OfflinePage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6 text-foreground">
       <div className="max-w-md text-center">
-        <span className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-orange-500/10 text-orange-400">
+        <span className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-foreground/10 text-foreground">
           <WifiOff className="h-7 w-7" aria-hidden="true" />
         </span>
         <h1 className="text-2xl font-semibold">{t("offline.title")}</h1>
         <p className="mt-3 text-sm text-muted">{t("offline.lastResortBody")}</p>
         <Link
           href="/dashboard/overview"
-          className="mt-6 inline-flex items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-orange-400"
+          className="min-h-[44px] mt-6 inline-flex items-center justify-center rounded-item bg-button px-4 py-2 text-sm font-semibold text-button-ink transition hover:bg-button"
         >
           {t("offline.retry")}
         </Link>

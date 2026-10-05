@@ -45,8 +45,8 @@ export function UpgradeRequired({
 }) {
   const t = useTranslations("common");
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-panel p-10 text-center">
-      <Lock className="h-8 w-8 text-orange-400" aria-hidden="true" />
+    <div className="flex flex-col items-center gap-3 rounded-card border border-border bg-panel p-10 text-center">
+      <Lock className="h-8 w-8 text-foreground" aria-hidden="true" />
       <h2 className="text-sm font-semibold text-foreground">{t("upgradeRequired.title")}</h2>
       <p className="max-w-sm text-xs text-muted">
         {t("upgradeRequired.body", { feature: featureName, plan: planName })}
@@ -64,7 +64,7 @@ export function UpgradeRequired({
         // rendered by app/pricing/page.tsx on each card's wrapper, so the
         // browser scrolls to the thing the sentence above just named.
         href={`/pricing#plan-${planSlug}`}
-        className="mt-2 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+        className="mt-2 inline-flex min-h-[44px] items-center justify-center rounded-item bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
       >
         {t("upgradeRequired.cta", { plan: planName })}
       </Link>

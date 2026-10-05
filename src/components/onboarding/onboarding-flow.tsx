@@ -295,9 +295,9 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                 // 343x42 measured — two pixels short of the size a finger
                 // reliably hits, on the screen that decides whether a new
                 // user gets past the first minute.
-                className={`flex min-h-[44px] items-center rounded-xl border p-3 text-start text-xs font-medium transition-colors duration-150 ${
+                className={`flex min-h-[44px] items-center rounded-card border p-3 text-start text-xs font-medium transition-colors duration-150 ${
                   goal === value
-                    ? "border-orange-500 bg-orange-500/[0.06] text-foreground"
+                    ? "border-foreground/40 bg-foreground/[0.06] text-foreground"
                     : "border-border bg-panel/60 text-muted hover:text-foreground"
                 }`}
               >
@@ -353,7 +353,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
           <h2 className="text-sm font-semibold text-foreground">{t("csvTitle")}</h2>
 
           {!analysis && (
-            <div className="rounded-2xl border-2 border-dashed border-border bg-panel/40 p-6 text-center">
+            <div className="rounded-card border-2 border-dashed border-border bg-panel/40 p-6 text-center">
               <Upload className="mx-auto mb-2 h-5 w-5 text-muted" aria-hidden="true" />
               <p className="text-xs leading-relaxed text-muted">
                 {t("csvHint", { max: formatBytes(MAX_CSV_BYTES) })}
@@ -373,7 +373,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                 type="button"
                 onClick={() => inputRef.current?.click()}
                 disabled={busy}
-                className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+                className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-button px-4 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:opacity-60"
               >
                 {pending === "reading" ? (
                   <>
@@ -404,8 +404,8 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                   cannot decide. A silently-wrong date order poisons every
                   time-based insight and is invisible afterwards. */}
               {analysis.dateAmbiguous && (
-                <div className="space-y-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3">
-                  <p className="flex items-start gap-1.5 text-[11px] font-medium leading-relaxed text-amber-300">
+                <div className="space-y-1.5 rounded-card border border-warning/40 bg-warning/10 p-3">
+                  <p className="flex items-start gap-1.5 text-[11px] font-medium leading-relaxed text-warning">
                     <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
                     {t("dateAmbiguous")}
                   </p>
@@ -415,9 +415,9 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                         key={order}
                         type="button"
                         onClick={() => setDateOrder(order)}
-                        className={`inline-flex min-h-[44px] items-center rounded-lg border px-3 py-1 text-[11px] font-medium transition-colors duration-150 ${
+                        className={`inline-flex min-h-[44px] items-center rounded-item border px-3 py-1 text-[11px] font-medium transition-colors duration-150 ${
                           dateOrder === order
-                            ? "border-orange-500 text-foreground"
+                            ? "border-foreground/40 text-foreground"
                             : "border-border text-muted hover:text-foreground"
                         }`}
                       >
@@ -435,7 +435,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                 <ul className="space-y-1">
                   {mappings.map((entry, index) => (
                     <li key={entry.column} className="flex flex-wrap items-center gap-2">
-                      <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-muted">
+                      <span className="min-w-0 flex-1 break-words font-mono text-[11px] text-muted">
                         {entry.column}
                       </span>
                       <ArrowRight className="h-3 w-3 shrink-0 text-muted" aria-hidden="true" />
@@ -447,7 +447,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                           setMappings(next);
                         }}
                         aria-label={t("mapColumn", { column: entry.column })}
-                        className="min-h-[44px] rounded-lg border border-border bg-background px-2 py-1 text-[11px] text-foreground"
+                        className="min-h-[44px] rounded-item border border-border bg-background px-2 py-1 text-[11px] text-foreground"
                       >
                         <option value="">{t("ignoreColumn")}</option>
                         {analysis.fields.map((field) => (
@@ -467,7 +467,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
               {analysis.preview.length > 0 && (
                 <div className="space-y-1.5">
                   <p className="text-[11px] font-medium text-muted">{t("previewTitle")}</p>
-                  <div className="overflow-x-auto rounded-xl border border-border bg-panel/60">
+                  <div className="overflow-x-auto rounded-card border border-border bg-panel/60">
                     <table className="w-full text-start text-[11px]">
                       <thead>
                         <tr className="border-b border-border">
@@ -510,7 +510,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                   type="button"
                   onClick={() => void applyImport()}
                   disabled={busy || analysis.counts.readyRows === 0}
-                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-60"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-60"
                 >
                   {/* THE ONE SPINNER THAT STAYS. /api/import/csv/apply
                       writes rows and calls no model; spending the globe on
@@ -536,7 +536,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                     setAnalysis(null);
                     setFile(null);
                   }}
-                  className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+                  className="inline-flex min-h-[44px] items-center rounded-item border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
                 >
                   {t("chooseAnother")}
                 </button>
@@ -556,13 +556,13 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
             placeholder={t("pastePlaceholder")}
             rows={8}
             maxLength={MAX_PASTE_CHARS}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
+            className="w-full rounded-item border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
           />
           <button
             type="button"
             onClick={() => void applyPaste()}
             disabled={busy || pasteText.trim().length < MIN_PASTE_CHARS}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-60"
           >
             {pending === "pasting" ? (
               <>
@@ -580,7 +580,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
       )}
 
       {step === "analysing" && (
-        <section className="space-y-2 rounded-2xl border border-orange-500/30 bg-orange-500/[0.04] p-6 text-center">
+        <section className="space-y-2 rounded-card border border-foreground/30 bg-foreground/[0.04] p-6 text-center">
           <ThinkingIndicator className="mx-auto" />
           <p className="text-sm font-medium text-foreground">{t("analysing")}</p>
           <p className="text-[11px] leading-relaxed text-muted">{t("analysingHint")}</p>
@@ -590,7 +590,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
       {step === "insights" && (
         <section className="space-y-3">
           <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-            <Sparkles className="h-4 w-4 text-orange-400" aria-hidden="true" />
+            <Sparkles className="h-4 w-4 text-foreground" aria-hidden="true" />
             {t("insightsTitle")}
           </h2>
 
@@ -617,7 +617,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
           <button
             type="button"
             onClick={() => void finish()}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
           >
             {t("goToDashboard")}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -649,9 +649,9 @@ function SourceCard({
     <button
       type="button"
       onClick={onSelect}
-      className="flex min-h-[44px] items-center surface-tight text-start transition-colors duration-150 hover:border-orange-500/40"
+      className="flex min-h-[44px] items-center surface-tight text-start transition-colors duration-150 hover:border-foreground/40"
     >
-      <Icon className="mb-1.5 h-4 w-4 text-orange-400" aria-hidden="true" />
+      <Icon className="mb-1.5 h-4 w-4 text-foreground" aria-hidden="true" />
       <p className="text-xs font-semibold text-foreground">{title}</p>
       <p className="mt-0.5 text-[11px] leading-relaxed text-muted">{description}</p>
     </button>

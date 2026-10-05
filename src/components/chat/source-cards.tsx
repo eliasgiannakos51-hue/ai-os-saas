@@ -33,14 +33,14 @@ export function SourceCards({ content }: { content: string }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 data-source={s.n}
-                className="flex min-h-[44px] items-start gap-2 rounded-xl bg-panel px-3 py-2 text-xs transition-colors duration-150 hover:bg-panel-hover"
+                className="flex min-h-[44px] items-start gap-2 rounded-card bg-panel px-3 py-2 text-xs transition-colors duration-150 hover:bg-panel-hover"
               >
-                <span className="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-orange-500/15 text-[11px] font-semibold tabular-nums text-orange-300">
+                <span className="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-foreground/15 text-[11px] font-semibold tabular-nums text-foreground">
                   {s.n}
                 </span>
                 <span className="min-w-0">
-                  <span className="line-clamp-2 block font-medium text-foreground">{s.title}</span>
-                  <span className="block truncate text-muted">{host}</span>
+                  <span className="block break-words font-medium text-foreground">{s.title}</span>
+                  <span className="block break-words text-muted">{host}</span>
                 </span>
               </a>
             </li>

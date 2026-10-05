@@ -1,12 +1,13 @@
 // ONE FILLED ACCENT CONTROL PER SCREEN — and where that is not true yet.
 //
-// A filled orange button says "this is the thing to press". Six of them
+// A filled button says "this is the thing to press". Six of them
 // on one screen says nothing at all, which is the state this file was
 // written to measure and then to stop getting worse.
 //
-// WHAT COUNTS. A filled accent surface — bg-orange-500, bg-orange-400 or
-// bg-amber-500 with NO opacity modifier — on an element a person can
-// press. `bg-orange-500/10` is a tint behind a card and is not counted;
+// WHAT COUNTS. A filled surface — bg-button (the design's white button,
+// since 2026-10-04; it was bg-orange-500/400 before) or a solid
+// bg-warning, with NO opacity modifier — on an element a person can
+// press. `bg-button/10` is a tint behind a card and is not counted;
 // the rule is about one control being louder than the rest, so a wash
 // that is quieter than everything cannot break it.
 //
@@ -66,7 +67,7 @@ function check(name, cond, detail) {
   }
 }
 
-const FILLED = /\bbg-(?:orange-400|orange-500|amber-500)(?![/\w-])/;
+const FILLED = /\bbg-(?:button|warning)(?![/\w-])/;
 
 // AN IMPORT LINE IS NOT A USE, and the census below could not tell.
 //
@@ -144,32 +145,32 @@ console.log("== 0. the instrument, fed samples it must get right ==");
 // reached.
 check(
   "a filled accent button is counted",
-  controlsInSource('<button className="bg-orange-500 px-3">go</button>').length === 1
+  controlsInSource('<button className="bg-button px-3">go</button>').length === 1
 );
 check(
   "a Link is too",
-  controlsInSource('<Link href="/x" className="bg-orange-500">go</Link>').length === 1
+  controlsInSource('<Link href="/x" className="bg-button">go</Link>').length === 1
 );
 check(
-  "a TINT is not — bg-orange-500/10 is a wash, not a primary action",
-  controlsInSource('<button className="bg-orange-500/10">go</button>').length === 0
+  "a TINT is not — bg-button/10 is a wash, not a primary action",
+  controlsInSource('<button className="bg-button/10">go</button>').length === 0
 );
 check(
   "nor is a filled accent on something you cannot press",
-  controlsInSource('<div className="bg-orange-500" />').length === 0
+  controlsInSource('<div className="bg-button" />').length === 0
 );
 // THE CLAUSE THE MUTATION SUITE CAUGHT AS INERT.
 check(
   "a button inside a // comment is not a button",
-  controlsInSource('// <button className="bg-orange-500">go</button>\nconst x = 1;').length === 0
+  controlsInSource('// <button className="bg-button">go</button>\nconst x = 1;').length === 0
 );
 check(
   "...nor one inside a block comment",
-  controlsInSource('/* <button className="bg-orange-500">go</button> */\nconst x = 1;').length === 0
+  controlsInSource('/* <button className="bg-button">go</button> */\nconst x = 1;').length === 0
 );
 check(
   "...nor one in a JSX comment explaining the rule",
-  controlsInSource('{/* never write <button className="bg-orange-500"> twice */}').length === 0
+  controlsInSource('{/* never write <button className="bg-button"> twice */}').length === 0
 );
 
 // THE ARROW FUNCTION THAT HID FORTY-SIX BUTTONS.
@@ -185,15 +186,15 @@ check(
 // is outside brace depth and outside quotes, which is where JSX ends it.
 check(
   "a handler written before the class does not hide the class",
-  controlsInSource('<button onClick={() => setOpen(true)} className="bg-orange-500">go</button>').length === 1
+  controlsInSource('<button onClick={() => setOpen(true)} className="bg-button">go</button>').length === 1
 );
 check(
   "...nor does a `>` inside a string attribute",
-  controlsInSource('<button title="a > b" className="bg-orange-500">go</button>').length === 1
+  controlsInSource('<button title="a > b" className="bg-button">go</button>').length === 1
 );
 check(
   "...nor a nested object in a brace expression",
-  controlsInSource('<button style={{ width: 1 }} onClick={() => x({ a: () => 2 })} className="bg-orange-500">go</button>')
+  controlsInSource('<button style={{ width: 1 }} onClick={() => x({ a: () => 2 })} className="bg-button">go</button>')
     .length === 1
 );
 
@@ -202,9 +203,9 @@ check(
 // is pressable in the same moment.
 const OVERLAY_SAMPLE = [
   '<div className="page">',
-  '  <button className="bg-orange-500">page</button>',
+  '  <button className="bg-button">page</button>',
   '  <div className="fixed inset-0 z-50">',
-  '    <button className="bg-orange-500">modal</button>',
+  '    <button className="bg-button">modal</button>',
   '  </div>',
   '</div>',
 ].join("\n");
@@ -224,9 +225,9 @@ check(
 const AFTER_SAMPLE = [
   '<div className="page">',
   '  <div className="fixed inset-0 z-50">',
-  '    <button className="bg-orange-500">modal</button>',
+  '    <button className="bg-button">modal</button>',
   '  </div>',
-  '  <button className="bg-orange-500">page</button>',
+  '  <button className="bg-button">page</button>',
   '</div>',
 ].join("\n");
 check(
@@ -237,7 +238,7 @@ check(
 // ...AND `fixed` ALONE IS NOT AN OVERLAY. A sticky toolbar is on the page.
 check(
   "a fixed element that does not cover the viewport is not an overlay",
-  controlsInSource('<div className="fixed bottom-0">\n  <button className="bg-orange-500">x</button>\n</div>')
+  controlsInSource('<div className="fixed bottom-0">\n  <button className="bg-button">x</button>\n</div>')
     .every((h) => h.surface === "base")
 );
 
@@ -257,7 +258,7 @@ check(
 );
 check(
   "nor is an import from a path named after the class",
-  controlsInSource('import { x } from "./styles/bg-orange-500";').length === 0
+  controlsInSource('import { x } from "./styles/bg-button";').length === 0
 );
 // THE CENSUS COULD, AND THAT IS THE ONE WORTH PROVING. Three separate
 // patterns, each of which matches inside a module path.
@@ -397,8 +398,20 @@ const BASELINE = {
   // the page itself draws none. Nothing was demoted here; the number is
   // what it always was once the surfaces were told apart.
   "dashboard/memory/page.tsx": 0,
+  // 1 SINCE 2026-10-04 (design D.11), and it is a repair, not a new loud
+  // thing: "Use this template" was written bg-accent, a colour the closed
+  // palette does not have, so it drew no fill and the page had no visible
+  // primary action at all. It is bg-button now — the one.
+  "dashboard/marketplace/page.tsx": 1,
   "dashboard/mission/page.tsx": 1,
-  "dashboard/overview/page.tsx": 1,
+  // 2 SINCE 2026-10-04, AND BOTH ARE THE FIELD'S. The design makes the
+  // composer's send button white — "αποστολή, λευκό κουμπί με σκούρο
+  // βέλος" — so it counts, next to the goal preview's confirm, which the
+  // field shows after a send. The redesigned Home (D.4) adds no filled
+  // control of its own: the quick actions are outlined links. QUEUE
+  // said D.4 would bring this to 1; it could not without restyling the
+  // field's confirm, which is D.5's (the field is shared with the chat).
+  "dashboard/overview/page.tsx": 2,
   "dashboard/page.tsx": 1,
   "dashboard/posts/page.tsx": 1,
   "dashboard/predictions/page.tsx": 1,
@@ -634,8 +647,12 @@ console.log(`        accent box-shadows: ${glow} · gradient backgrounds: ${grad
 // makes that distinction (a shadow counts as glow only when its third
 // length is non-zero) and reports ZERO; this pattern cannot, so the
 // ceiling is 2 rather than 0 and says why.
-check(`accent box-shadows: ${glow}, ceiling 2`, glow <= 2, String(glow));
-check(`gradient backgrounds: ${gradients}, ceiling 13`, gradients <= 13, String(gradients));
+// 2 -> 0 and 13 -> 0, design D.1 (2026-10-04): one dark theme with a
+// closed palette took both one-pixel edges and every gradient, and a
+// ceiling above the measured count let "a glow is added" through — the
+// mutation suite reported it MISSED on the D.1 tree.
+check(`accent box-shadows: ${glow}, ceiling 0`, glow <= 0, String(glow));
+check(`gradient backgrounds: ${gradients}, ceiling 0`, gradients <= 0, String(gradients));
 // TWO, THEN ZERO. The decision this comment asked for was taken in
 // redesign phase 4 — "κανένα gradient σε τίτλο" — and both went:
 //   1. the health score's range label, bg-clip-text amber-300 to
@@ -667,20 +684,12 @@ check(
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. how many different accent shades the product uses ==");
-// FIFTEEN. Eight oranges and seven ambers, from orange-200 to orange-950.
-//
-// This is not the same complaint as the filled-button count and it is
-// worth keeping separate: two buttons both in bg-orange-500 compete for
-// attention, while orange-400 next to orange-500 next to amber-400 reads
-// as three different meanings that turn out to be none. The count is
-// capped where it stands rather than reduced, because which shades merge
-// is a design decision.
-//
-// NOT A THEME BUG, checked before it was called one. tailwind.config.ts
-// deliberately routes textColor and borderColor through theme tokens and
-// leaves backgroundColor's orange-500 on Tailwind's own palette — its
-// comment gives the measurement (7.49:1 as a filled button with black
-// text) and scripts/tests/light-theme-contrast.test.mjs holds the rest.
+// FIFTEEN until 2026-10-04 — eight oranges and seven ambers — and capped
+// where it stood. The design that day has NO accent colour (ΣΥΣΤΗΜΑ
+// DESIGN: the orange is the signal, on the globe and the logo only), so
+// the cap is now zero. design-tokens.test.mjs closes the palette itself;
+// this keeps the count where the rule about competing meanings lives.
+let shadeFiles = 0;
 const shadeCounts = new Map();
 for (const f of allFiles) {
   let src;
@@ -689,18 +698,18 @@ for (const f of allFiles) {
   } catch {
     continue;
   }
+  shadeFiles++;
   for (const m of src.matchAll(/\b(?:orange|amber)-([0-9]{2,3})\b/g)) {
     shadeCounts.set(m[0], (shadeCounts.get(m[0]) ?? 0) + 1);
   }
 }
 const shades = [...shadeCounts].sort((a, b) => b[1] - a[1]);
-console.log(`        ${shades.map(([k, v]) => `${k}(${v})`).join(" ")}`);
 check(
-  `the shade scan found shades (${shades.length})`,
-  shades.length >= 5,
+  `the shade scan read the source (${shadeFiles} files)`,
+  shadeFiles >= 300,
   "a ceiling checked against nothing passes for the wrong reason"
 );
-check(`${shades.length} distinct accent shades, ceiling 15`, shades.length <= 15, shades.map(([k]) => k).join(", "));
+check(`${shades.length} distinct accent shades, ceiling 0`, shades.length === 0, shades.map(([k, v]) => `${k}(${v})`).join(", "));
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

@@ -116,7 +116,9 @@ const FUTURE = [
   // /dashboard/ai-memory, next to it. The old address permanently
   // redirects.
   { heading: "See", hrefs: [
-    "/dashboard/timeline", "/dashboard/files", "/dashboard/finance",
+    // Activity, 2026-10-04: the cards Home carried before it became the
+    // design's one block (src/app/dashboard/activity/page.tsx).
+    "/dashboard/timeline", "/dashboard/activity", "/dashboard/files", "/dashboard/finance",
     "/dashboard/sales", "/dashboard/trading", "/dashboard/search",
     "/dashboard/ai-memory", "/dashboard/business-health",
     "/dashboard/analytics", "/dashboard/monitoring", "/dashboard/knowledge-graph",
@@ -366,15 +368,19 @@ console.log("\n== 1c. the flag comes off, the state is not stored, and a shut gr
   //    of the URL plus what the user touched THIS visit; a sidebar that
   //    restores three groups from yesterday is thirty-odd lines again,
   //    on the one visit where the person has no idea why. Since the rail
-  //    of 2026-10-02 there are no groups in the sidebar at all, and the
-  //    one thing it keeps is the recent-tools list — every storage call
-  //    must name that key (sidebar-and-tooltips.test.mjs also holds that
-  //    each is guarded). No cookie, no session storage.
+  //    of 2026-10-02 there are no groups in the sidebar at all. Since the
+  //    design of 2026-10-04 the Recent tools list is the account's and
+  //    comes from the server (src/lib/nav/recent-tools.ts), so the one
+  //    thing the browser keeps is whether the sidebar is narrow — every
+  //    storage call must name that key (sidebar-and-tooltips.test.mjs
+  //    also holds that each is guarded). No cookie, no session storage.
   //    Comments stripped first: the component explains what it stores.
   const storageCalls = componentSrc.match(/localStorage\.\w+\([^)]*\)/g) ?? [];
   ok(
-    "the sidebar stores no group state — only the recent-tools list",
-    storageCalls.every((c) => c.includes("RECENT_TOOLS_KEY")) && !/sessionStorage|document\.cookie/.test(componentSrc),
+    `the sidebar stores no group state — only whether it is narrow (${storageCalls.length} storage calls)`,
+    storageCalls.length > 0 &&
+      storageCalls.every((c) => c.includes("COLLAPSED_KEY")) &&
+      !/sessionStorage|document\.cookie/.test(componentSrc),
     storageCalls.join(" | ")
   );
   // 3. THERE IS NO SHUT GROUP ANY MORE, and the four checks that used to
@@ -390,10 +396,14 @@ console.log("\n== 1c. the flag comes off, the state is not stored, and a shut gr
   //    asked: NO HEADING WITHOUT ROWS. Here from the component, and from
   //    the screen in section 0 of scripts/tests/sidebar-density.prodtest.mjs,
   //    which is the half that would have caught the collapse.
+  //    The rail has one heading left, Recent tools, and it is the one
+  //    that is empty for every new person — so the same property is held
+  //    on it: the heading sits inside the guard on the list.
   ok(
-    "no group renders a heading with nothing under it",
-    /if \(group\.items\.length === 0\) return null;/.test(componentSrc),
-    "sidebarGroups() drops empty groups, so this is unreachable on the declared config — which is exactly what was true of the collapse"
+    "no heading is drawn with nothing under it — Recent tools only when it has a tool",
+    /\{list\.length > 0 && \([\s\S]{0,200}t\("rail\.recentTools"\)/.test(componentSrc) &&
+      (componentSrc.match(/t\("rail\.recentTools"\)/g) ?? []).length === 1,
+    "the heading must be drawn once, and only under `list.length > 0`"
   );
   ok(
     "…and the collapse machinery is gone, not merely defaulted to open",
@@ -575,17 +585,24 @@ for (const declared of DECLARED) {
 
 // ---------------------------------------------------------------------
 console.log("\n== 3. Settings is a separate block, not the sixth group ==");
-// The component renders MAIN_SIDEBAR_GROUPS and then SETTINGS_GROUP in
-// its own bordered block. Both facts are load-bearing: if Settings ever
-// became the sixth entry of MAIN_SIDEBAR_GROUPS the order above would
-// still pass and the sidebar would look different.
+// The groups are drawn on the All tools page now (the rail has none), and
+// it draws MAIN_SIDEBAR_GROUPS and then SETTINGS_GROUP. Both facts are
+// load-bearing: if Settings ever became the sixth entry of
+// MAIN_SIDEBAR_GROUPS the order above would still pass; and if the page
+// stopped drawing SETTINGS_GROUP, Integrations and the Help Centre would
+// have no row anywhere, because the rail has none for them.
 ok("SETTINGS_GROUP is declared apart from MAIN_SIDEBAR_GROUPS",
   /export const SETTINGS_GROUP: SidebarGroupConfig = \{/.test(navSrc) &&
   /export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig\[\] = \[/.test(navSrc));
-const sidebarSrc = readFileSync("src/components/dashboard/sidebar.tsx", "utf8");
-ok("...and the component draws the main groups before it",
-  sidebarSrc.indexOf("sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner)") < sidebarSrc.indexOf("sidebarGroups([SETTINGS_GROUP], isOwner)") &&
-  sidebarSrc.includes("sidebarGroups([SETTINGS_GROUP], isOwner)"));
+// The page renders components/tools/tools-grid.tsx since D.6 (the tiles
+// and their search), and that is where the groups are assembled.
+const toolsSrc = stripComments(readFileSync("src/components/tools/tools-grid.tsx", "utf8"));
+const mainAt = toolsSrc.indexOf("sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner)");
+const settingsAt = toolsSrc.indexOf("sidebarGroups([SETTINGS_GROUP], isOwner)");
+ok("...and All tools draws the main groups before it, and it last",
+  mainAt >= 0 && settingsAt > mainAt &&
+  /\(\) => \[\.\.\.sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\), \.\.\.sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)\],/.test(toolsSrc) &&
+  /\{groups\.map\(\(group\) =>/.test(toolsSrc));
 ok("Settings is the last declared block", DECLARED[DECLARED.length - 1].heading === "Settings");
 
 // ---------------------------------------------------------------------

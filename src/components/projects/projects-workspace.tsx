@@ -100,7 +100,7 @@ export function ProjectsWorkspace({ projects }: { projects: ProjectRow[] }) {
           value={name}
           onChange={(e) => setName(e.target.value.slice(0, MAX_NAME_CHARS))}
           placeholder={t("form.namePlaceholder")}
-          className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-base text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+          className="mt-2 min-h-[44px] w-full rounded-card border border-border bg-background px-3 py-2 text-base text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-foreground/40"
         />
         <label htmlFor="project-goal" className="mt-3 block text-sm font-semibold text-foreground">
           {t("form.goal")}
@@ -111,14 +111,14 @@ export function ProjectsWorkspace({ projects }: { projects: ProjectRow[] }) {
           onChange={(e) => setGoal(e.target.value.slice(0, MAX_GOAL_CHARS))}
           placeholder={t("form.goalPlaceholder")}
           rows={2}
-          className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+          className="mt-2 w-full rounded-card border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-foreground/40"
         />
         <div className="mt-4">
           <button
             type="button"
             onClick={create}
             disabled={!name.trim() || busy}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-4 text-sm font-semibold text-black hover:bg-orange-400 disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-item bg-button px-4 text-sm font-semibold text-button-ink hover:bg-button disabled:opacity-50"
           >
             <Plus className="h-3.5 w-3.5" aria-hidden="true" />
             {t("form.create")}
@@ -135,7 +135,7 @@ export function ProjectsWorkspace({ projects }: { projects: ProjectRow[] }) {
             {projects.map((project) => (
               <li key={project.id} className="flex items-center justify-between gap-3 py-2">
                 <Link href={`/dashboard/projects/${project.id}`} className="min-w-0 flex-1">
-                  <p className="line-clamp-1 text-sm text-foreground">{project.name}</p>
+                  <p className="break-words text-sm text-foreground">{project.name}</p>
                   <p className="text-[11px] text-muted">
                     {t(`status.${project.status}`)}
                     {" · "}
@@ -146,7 +146,7 @@ export function ProjectsWorkspace({ projects }: { projects: ProjectRow[] }) {
                   type="button"
                   onClick={() => remove(project.id)}
                   aria-label={t("delete")}
-                  className="rounded-md p-2 text-muted hover:text-foreground"
+                  className="rounded-item p-2 text-muted hover:text-foreground"
                 >
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>

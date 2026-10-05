@@ -25,7 +25,7 @@ export function LoginSplash({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-background">
-      <Logo iconOnly className="h-10 w-10" />
+      <Logo iconOnly px={40} />
       {/* 32px crosses the threshold where the interior bands stop being
           noise, so this is the full globe rather than the mark — the one
           place in the product where a person is looking at nothing else. */}

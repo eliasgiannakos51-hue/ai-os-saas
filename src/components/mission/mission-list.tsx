@@ -125,7 +125,7 @@ export function MissionList({
                 onClick={() => setShowForm(false)}
                 aria-label={tCommon("cancel")}
                 title={tCommon("cancel")}
-                className="absolute end-3 top-3 z-[2] flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                className="absolute end-3 top-3 z-[2] flex h-11 w-11 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </button>
@@ -135,7 +135,7 @@ export function MissionList({
             <button
               type="button"
               onClick={() => setShowForm(true)}
-              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-card bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
             >
               <Plus className="h-4 w-4" aria-hidden="true" /> {t("newMission")}
             </button>
@@ -151,7 +151,7 @@ export function MissionList({
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               aria-label={tModule("filterBy", { label: t("statusFilterLabel") })}
-              className="min-h-[44px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60"
+              className="min-h-[44px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-foreground/60"
             >
               <option value="">{tModule("filterAll", { label: t("statusFilterLabel") })}</option>
               {MISSION_STATUSES.map((status) => (

@@ -13,7 +13,6 @@ import { Logo } from "@/components/logo";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 import { useCredits } from "@/components/credits/credits-context";
 import { LowCreditsBanner } from "@/components/credits/low-credits-banner";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { LanguageSelector } from "@/components/i18n/language-selector";
 import { formatNumber } from "@/lib/format-number";
 
@@ -38,9 +37,13 @@ export function TopNav({ email }: { email: string }) {
       <Link
         href={OVERVIEW_NAV_ITEM.href}
         // Height only — the bar has 64px of it and no spare width.
-        className="flex min-h-[44px] shrink-0 items-center gap-2"
+        // 44px both ways: below 400px the word is hidden and the link is
+        // the earth alone, which measured 24px wide (site audit, D.11).
+        // md:hidden: from md up the sidebar carries the logo, and the
+        // audit's screenshots showed it twice, side by side.
+        className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2 md:hidden"
       >
-        <Logo iconOnly className="h-6 w-6" />
+        <Logo iconOnly px={24} />
         <span className="hidden text-base font-bold tracking-tight text-foreground min-[400px]:inline">
           IONEXA
         </span>
@@ -55,11 +58,11 @@ export function TopNav({ email }: { email: string }) {
         // pushed the whole header past the viewport. Measured at 640px:
         // 92 (logo) + 161 (this) + 416 (controls) + gaps + padding = 765
         // inside 640, i.e. 125px of horizontal page scroll.
-        className="mx-auto hidden min-w-0 max-w-md flex-1 items-center gap-2 rounded-full border border-border bg-panel px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-foreground sm:flex"
+        className="mx-auto hidden min-w-0 max-w-md flex-1 items-center gap-2 rounded-full border border-border bg-panel px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-foreground/50 hover:text-foreground sm:flex"
       >
         <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
         <span className="flex-1 text-start">{t("search")}</span>
-        <kbd className="rounded border border-border bg-input px-1.5 py-0.5 text-[10px] font-medium text-muted">
+        <kbd className="rounded-item border border-border bg-input px-1.5 py-0.5 text-[10px] font-medium text-muted">
           ⌘K
         </kbd>
       </button>
@@ -87,7 +90,7 @@ export function TopNav({ email }: { email: string }) {
       <div className="ms-auto flex min-w-0 items-center gap-1.5 lg:gap-3">
         {/* THE LANGUAGE CONTROL IS IN THIS BAR AT EVERY WIDTH — V4.6.
 
-            It was wrapped in `hidden sm:contents` with the theme toggle,
+            It was wrapped in `hidden sm:contents` with the old theme toggle,
             on the reasoning that language is "changed once and never
             again" and could live one tap deeper on a phone. Below 640px it
             then existed in two places nobody found: the account menu
@@ -104,14 +107,8 @@ export function TopNav({ email }: { email: string }) {
             Chromium at 1920/1440/768/390/375 and asserts
             document.elementFromPoint on the control's centre IS the
             control — rendered is not the same as visible, and visible is
-            what was asked for.
-
-            The theme toggle keeps the old arrangement: hidden below sm,
-            in the account menu instead. */}
+            what was asked for. */}
         <LanguageSelector showCode testId="language-control" />
-        <span className="hidden sm:contents">
-          <ThemeToggle />
-        </span>
 
         {/* Was a hard-coded "No notifications" with no table behind it —
             see components/dashboard/notification-bell.tsx. */}
@@ -119,10 +116,10 @@ export function TopNav({ email }: { email: string }) {
 
         <Link
           href="/dashboard/settings#buy-credits"
-          className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold tabular-nums text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-400 lg:inline-flex"
+          className="hidden shrink-0 items-center gap-1.5 rounded-item border border-border px-3 py-2 text-xs font-semibold tabular-nums text-muted transition-colors duration-150 hover:border-foreground/50 hover:text-foreground lg:inline-flex"
           title={isAdmin ? t("ownerAccessTooltip") : t("creditsTooltip")}
         >
-          <Zap className="h-3.5 w-3.5 text-orange-400" aria-hidden="true" />
+          <Zap className="h-3.5 w-3.5 text-foreground" aria-hidden="true" />
           {isAdmin ? t("creditsUnlimited") : credits === null ? "…" : formatNumber(credits, locale)}
         </Link>
 
@@ -135,12 +132,15 @@ export function TopNav({ email }: { email: string }) {
         <button
           type="button"
           onClick={openCreate}
+          // Below lg the button is the icon alone, and an icon is not a
+          // name: axe reported it unnamed on every phone screen (D.11).
+          aria-label={t("createStudio")}
           // Below `lg` this is the icon alone, which `px-3 py-2` sized at
           // 40x40 — the one control in the header that stayed under 44px
           // after everything else was raised.
-          className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 lg:px-3.5"
+          className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-item bg-button px-3 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 lg:px-3.5"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
           {/* THE BUTTON AND THE PAGE IT OPENS SAY THE SAME WORD.
               It said "New Project" — Title Case, and a promise of a
               thing this app has no concept of. It opens Create Studio,
@@ -161,22 +161,13 @@ export function TopNav({ email }: { email: string }) {
             onClick={() => setUserMenuOpen((v) => !v)}
             aria-label={t("accountMenu")}
             aria-expanded={userMenuOpen}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-500/15 text-sm font-semibold text-orange-400 transition-colors duration-150 hover:bg-orange-500/25"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-foreground/15 text-sm font-semibold text-foreground transition-colors duration-150 hover:bg-foreground/25"
           >
             {initial}
           </button>
           {userMenuOpen && (
-            <div className="absolute end-0 top-11 w-56 surface-tight shadow-lg">
-              <p className="truncate text-xs text-muted">{email}</p>
-              {/* The phone-width home for the theme toggle. `sm:hidden`
-                  mirrors the `hidden sm:contents` above exactly, so it
-                  appears in one place and never in both. The language
-                  control is NOT here any more: it is in the bar itself at
-                  every width (see above), and a second copy behind the
-                  avatar was one of the two places it hid. */}
-              <div className="mt-3 flex items-center gap-1 border-t border-border pt-3 sm:hidden">
-                <ThemeToggle />
-              </div>
+            <div className="absolute end-0 top-11 w-56 surface-tight">
+              <p className="break-words text-xs text-muted">{email}</p>
               <div className="mt-3">
                 <LogoutButton />
               </div>

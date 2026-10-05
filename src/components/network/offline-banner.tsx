@@ -95,17 +95,17 @@ export function OfflineBanner() {
       // Assertive, not polite: the page underneath is stale and the
       // reader is entitled to be interrupted about it.
       role="alert"
-      className="sticky top-0 z-50 border-b border-amber-500/40 bg-amber-500/10 px-4 py-2.5 pe-28 backdrop-blur sm:pe-32"
+      className="sticky top-0 z-50 border-b border-warning/40 bg-warning/10 px-4 py-2.5 pe-28 backdrop-blur sm:pe-32"
     >
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-3 gap-y-1.5">
-        <WifiOff className="h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
-        <p className="text-xs font-medium text-amber-200">{t("title")}</p>
-        <p className="text-[11px] text-amber-200/80">
+        <WifiOff className="h-4 w-4 shrink-0 text-warning" aria-hidden="true" />
+        <p className="text-xs font-medium text-warning">{t("title")}</p>
+        <p className="text-[11px] text-warning/80">
           {minutesOld === null ? t("showingCached") : t("showingCachedAge", { minutes: minutesOld })}
         </p>
         <span className="grow" />
         {failedRetry && (
-          <p data-testid="offline-retry-failed" className="text-[11px] text-amber-200/80">
+          <p data-testid="offline-retry-failed" className="text-[11px] text-warning/80">
             {t("stillOffline")}
           </p>
         )}
@@ -114,7 +114,7 @@ export function OfflineBanner() {
           data-testid="offline-retry"
           onClick={() => void retry()}
           disabled={checking}
-          className="inline-flex min-h-[32px] shrink-0 items-center gap-1.5 rounded-lg border border-amber-500/50 px-3 py-1 text-[11px] font-semibold text-amber-200 transition-colors duration-150 hover:bg-amber-500/20 disabled:opacity-60"
+          className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-item border border-warning/50 px-3 py-1 text-[11px] font-semibold text-warning transition-colors duration-150 hover:bg-warning/20 disabled:opacity-60"
         >
           {checking ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />

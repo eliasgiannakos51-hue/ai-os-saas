@@ -322,39 +322,27 @@ console.log("\n== 6. rule 3: no negative offset that becomes reachable ==");
   ok("the prompt still forbids the negative-offset hide",
     /NEVER HIDE ANYTHING WITH A NEGATIVE OFFSET/.test(SECTION));
 
-  // GlowOrb's own doc says the parent needs overflow-hidden to clip it,
-  // and two call sites only had `relative`. Left at a negative PHYSICAL
-  // offset that is unreachable in ltr and scrollable in rtl, they were
-  // the prompt's rule 3 happening inside the app. Logical offsets put
-  // them past the START edge, which is the unreachable side in both.
-  const orbCallers = [];
+  // THE POPULATION, NOT THE ONE COMPONENT IT WAS FOUND IN. This rule was
+  // first caught inside GlowOrb (two call sites placed it at a negative
+  // PHYSICAL offset — unreachable in ltr, scrollable in rtl). GlowOrb went
+  // with every other backdrop on 2026-10-04; the rule did not, so it now
+  // ranges over every component's classes. Positive centring
+  // (`left-1/2 -translate-x-1/2`) is direction-neutral and not matched.
+  const tsxAll = [];
   (function walk(dir) {
     for (const e of readdirSync(dir)) {
       const p = path.join(dir, e);
       if (statSync(p).isDirectory()) walk(p);
-      else if (p.endsWith(".tsx")) {
-        const s = readFileSync(p, "utf8");
-        if (/<GlowOrb\b/.test(s)) orbCallers.push([p, s]);
-      }
+      else if (p.endsWith(".tsx")) tsxAll.push([p, readFileSync(p, "utf8")]);
     }
   })("src");
-  ok("GlowOrb is still used somewhere", orbCallers.length > 0,
-    "if it is gone this check is vacuous and should be deleted with it");
-  // NEGATIVE offsets only, which is what rule 3 is about: leftward
-  // overflow is unreachable in a left-to-right page and scrollable in a
-  // mirrored one. The first version of this clause matched `-?(left|
-  // right)-` and so flagged the landing page's `left-1/2 -translate-x-1/2`
-  // — the centring idiom, which is positive, direction-neutral and
-  // explicitly carved out above. A check that reports a correct line is
-  // how a gate gets switched off.
-  const physicalOrbs = orbCallers.filter(([, s]) =>
-    [...s.matchAll(/<GlowOrb[^>]*className="([^"]*)"/g)].some((m) =>
-      /(^|[\s])-(left|right)-/.test(m[1])
-    )
+  ok(`the offset scan read the components (${tsxAll.length})`, tsxAll.length >= 200);
+  const physicalNegative = tsxAll.filter(([, s]) =>
+    [...s.matchAll(/className="([^"]*)"/g)].some((m) => /(^|[\s])-(left|right)-/.test(m[1]))
   );
-  ok("no GlowOrb is placed with a negative physical offset",
-    physicalOrbs.length === 0,
-    physicalOrbs.map(([p]) => p).join(", "));
+  ok("no element is placed with a negative physical offset",
+    physicalNegative.length === 0,
+    physicalNegative.map(([p]) => p).join(", "));
 }
 
 // ---------------------------------------------------------------------

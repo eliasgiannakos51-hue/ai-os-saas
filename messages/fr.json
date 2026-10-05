@@ -29,8 +29,6 @@
       "long": "Contenu généré par IA. Il peut comporter des erreurs — vérifiez ce qui compte avant de vous y fier."
     },
     "close": "Fermer",
-    "switchToDarkMode": "Passer au thème sombre",
-    "switchToLightMode": "Passer au thème clair",
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
     "networkErrorCheckConnection": "Erreur réseau — vérifiez votre connexion et réessayez.",
@@ -63,7 +61,6 @@
       "lastResortBody": "Ionexa a besoin d'une connexion pour charger de nouvelles données. Les pages déjà ouvertes restent disponibles depuis le cache de cet appareil — et ce sur quoi vous travailliez est en sécurité sur le serveur."
     },
     "creditsUnlimited": "Illimités",
-    "whatIsThis": "Qu'est-ce que c'est ?",
     "examplesLabel": "Essayez :",
     "newMessagesBelow": "Nouveau message en bas",
     "downloadPdf": {
@@ -128,7 +125,7 @@
       "apps": "Idées d’applications",
       "images": "Idées d’images",
       "videos": "Idées de vidéos",
-      "coding": "Code avec l'IA",
+      "coding": "Code",
       "dataAnalysis": "Vois ce que disent les chiffres",
       "documents": "Documents",
       "presentations": "Présentations",
@@ -225,7 +222,8 @@
       "personalShopping": "Achats",
       "personalFinance": "Finances personnelles",
       "personalJournal": "Journal",
-      "personalLifeOs": "Life OS"
+      "personalLifeOs": "Life OS",
+      "activity": "Activité"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -286,13 +284,31 @@
       "posts": "Dites-le une fois et obtenez une publication par plateforme, à sa longueur et dans son ton. Rien n'est publié : vous copiez et vous publiez.",
       "projects": "Un dossier avec un objectif. Ce que vous mettez est ce qu'il contient — rien n'entre seul.",
       "aiMemory": "Ce que le chat a retenu sur vous, et comment le supprimer.",
-      "meetings": "Transformez un enregistrement en transcription, résumé et actions que vous choisissez."
+      "meetings": "Transformez un enregistrement en transcription, résumé et actions que vous choisissez.",
+      "activity": "Votre prochaine étape, ce qui a changé, vos progrès et vos chiffres"
     },
     "closeMenu": "Fermer le menu",
     "rail": {
       "new": "Nouveau",
-      "recent": "Récents",
-      "allTools": "Tous les outils"
+      "chat": "Discussion",
+      "coding": "Code",
+      "allTools": "Tous les outils",
+      "recentTools": "Outils récents",
+      "settings": "Paramètres",
+      "pin": "Épingler {tool}",
+      "unpin": "Désépingler {tool}",
+      "remove": "Retirer {tool} des outils récents",
+      "collapse": "Réduire la barre latérale",
+      "expand": "Développer la barre latérale",
+      "label": "Menu principal",
+      "saveFailed": "La modification n’a pas été enregistrée. Réessayez."
+    },
+    "tabs": {
+      "home": "Accueil",
+      "chat": "Discussion",
+      "tools": "Outils",
+      "you": "Vous",
+      "label": "Navigation principale"
     }
   },
   "landing": {
@@ -1049,7 +1065,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "Module le plus actif",
-      "acrossAllModules": "tous modules confondus",
       "entry": "{count, plural, one {# entrée} other {# entrées}}",
       "statRow": {
         "totalEntries": "Total des Entrées",
@@ -1292,6 +1307,10 @@
       "clarificationAnswerPlaceholder": "Votre réponse...",
       "sources": {
         "title": "Sources consultées"
+      },
+      "workMode": {
+        "active": "Mode : {mode}",
+        "clear": "Retirer le mode de travail"
       }
     },
     "create": {
@@ -1338,7 +1357,9 @@
         "why": "Cela s'écrit tout seul. Tout ce que vous consignez dans n'importe quel module arrive ici en un seul fil : c'est ainsi qu'on répond à « qu'ai-je fait le mois dernier »."
       },
       "tabAll": "Tout",
-      "tabStarred": "Favoris"
+      "tabStarred": "Favoris",
+      "filterSection": "Rubrique",
+      "filterPeriod": "Période"
     },
     "favorites": {
       "title": "Favoris",
@@ -1729,7 +1750,8 @@
       "clarifyTitle": "Deux questions rapides :",
       "clarifySkip": "Ignorer et enregistrer quand même",
       "clarifyContinue": "Continuer",
-      "clarifyAnswerPlaceholder": "Votre réponse..."
+      "clarifyAnswerPlaceholder": "Votre réponse...",
+      "accomplishPlaceholder": "Que voulez-vous accomplir ?"
     },
     "createStudio": {
       "title": "Créer n’importe quoi",
@@ -2747,7 +2769,20 @@
     "tools": {
       "title": "Tous les outils",
       "description": "Chaque outil, avec une ligne sur ce qu’il fait.",
-      "orPress": "Ou appuyez sur ⌘K et tapez son nom, ou décrivez-le dans le champ de l’accueil."
+      "orPress": "Ou appuyez sur ⌘K et tapez son nom, ou décrivez-le dans le champ de l’accueil.",
+      "search": "Trouver un outil",
+      "searchLabel": "Rechercher des outils",
+      "noMatch": "Aucun outil ne s’appelle « {query} ». Décrivez-le plutôt dans le champ de l’accueil.",
+      "beta": "Bêta",
+      "betaHint": "En test : il fonctionne, mais ne fait pas encore tout ce qu’il devrait."
+    },
+    "home": {
+      "actions": {
+        "research": "Rechercher",
+        "create": "Créer",
+        "run": "Exécuter",
+        "analyze": "Analyser"
+      }
     }
   },
   "module": {
@@ -2801,7 +2836,6 @@
       "images": "Image principale de la page tarifs",
       "videos": "Présentation du produit en 60 secondes",
       "coding": "Script de rapprochement des versements Stripe",
-      "data-analysis": "Quelle formule a le taux d'attrition le plus bas ?",
       "campaigns": "Lancement de septembre — e-mail + LinkedIn",
       "presentations": "Point trimestriel au conseil — éléments de langage",
       "ideas": "Une newsletter pour ceux qui ont quitté les tableurs"
@@ -3222,9 +3256,24 @@
         "files": "{count, plural, one {# fichier} other {# fichiers}}",
         "parts": "{count, plural, one {en # partie} other {en # parties}}",
         "planSteps": "{count, plural, one {# étape} other {# étapes}}",
-        "sources": "{count, plural, one {# source consultée} other {# sources consultées}}"
+        "sources": "{count, plural, one {# source consultée} other {# sources consultées}}",
+        "pages": "{count, plural, one {# page écrite} other {# pages écrites}}",
+        "photos": "{count, plural, =0 {aucune photo} one {# photo} other {# photos}}"
       },
       "writing": "Rédaction du rapport"
+    },
+    "website": {
+      "preparing": "Préparation du brief",
+      "writing": "Rédaction des pages",
+      "photos": "Placement des photos",
+      "checking": "Vérification du site",
+      "saving": "Enregistrement"
+    },
+    "chatTimeline": {
+      "thinking": "Réflexion",
+      "searching_web": "Recherche sur le web",
+      "searching_data": "Recherche dans vos données",
+      "writing": "Rédaction de la réponse"
     }
   },
   "problem": {
@@ -3316,7 +3365,7 @@
       "does": "Changez d'offre, achetez des crédits, choisissez la langue et le thème, nommez l'assistant et téléchargez chaque enregistrement du compte dans un seul fichier.",
       "doesNot": "Vos enregistrements ne sont pas ici : chaque module garde les siens. Et Supprimer le compte n'est pas une façon de faire le ménage et de repartir de zéro : cela met fin au compte, emporte tout avec lui, et rien ne peut être annulé. Exportez d'abord."
     },
-    "overview": {
+    "activity": {
       "is": "Un résumé de ce que vous avez consigné, et une chose à faire ensuite.",
       "does": "Lit vos propres entrées dans tous les modules et affiche un score de santé, ce qui a changé récemment et une prochaine étape suggérée.",
       "doesNot": "Il ne se connecte ni à votre banque, ni à votre CRM, ni à votre messagerie. Chaque chiffre vient de ce que vous ou vos agents avez saisi — une semaine vide est donc vraiment vide, ce n'est pas un chargement."
@@ -3808,7 +3857,7 @@
     }
   },
   "coding": {
-    "title": "Code avec l'IA",
+    "title": "Code",
     "description": "Cinq choses qu'il fait, quatre qu'il ne fait pas. Tout porte exactement sur le texte de la zone.",
     "code": "Code",
     "copy": "Copier",

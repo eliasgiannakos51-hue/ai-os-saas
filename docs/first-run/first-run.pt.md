@@ -1,12 +1,12 @@
 # The first run — pt
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **718 strings**. The whole product is 3443, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **586 strings**. The whole product is 3480, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 459 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 357 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (49)
+## Tier 1 — THE SENTENCES — read these (21)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -126,163 +126,7 @@ A pesquisa está indisponível neste momento — isto não é um resultado vazio
 
 Estas entradas são uma demonstração — três meses de um pequeno estúdio de design. Não são suas.
 
-**`sidebar.hints.aiMemory`**
-
-> EN — What the chat has kept about you, and how to remove it.
-
-O que o chat guardou sobre si, e como apagar.
-
-**`sidebar.hints.apps`**
-
-> EN — Keep track of apps you are planning or have already shipped. It does not build them.
-
-Acompanhe as apps que está a planear ou já lançou. Não as constrói.
-
-**`sidebar.hints.coding`**
-
-> EN — Write, explain, fix, convert and test snippets of code. It does not run code or open a repository.
-
-Escreva, explique, corrija, converta e teste excertos de código. Não executa código nem abre um repositório.
-
-**`sidebar.hints.create`**
-
-> EN — Describe what you want in one sentence; it works out the rest.
-
-Descreva o que quer numa frase; o resto ele descobre.
-
-**`sidebar.hints.deepResearch`**
-
-> EN — Give it a topic and it searches, cross-checks and writes a sourced report
-
-Dá um tema: pesquisa, cruza fontes e escreve um relatório com referências
-
-**`sidebar.hints.files`**
-
-> EN — Upload PDFs, Word and Excel files and ask the AI questions about them
-
-Carrega PDF, Word e Excel e faz perguntas à IA sobre eles
-
-**`sidebar.hints.images`**
-
-> EN — Keep track of images you are planning or have already made. It does not generate them.
-
-Acompanhe as imagens que está a planear ou já fez. Não as gera.
-
-**`sidebar.hints.integrations`**
-
-> EN — Connect Gmail, Drive and Slack so the AI can work with your real data
-
-Ligue Gmail, Drive e Slack para a IA trabalhar com os seus dados reais
-
-**`sidebar.hints.library`**
-
-> EN — Starred, recent and search — all your own entries in one place
-
-Favoritos, recentes e pesquisa — tudo o seu num só sítio
-
-**`sidebar.hints.marketplace`**
-
-> EN — Share an agent's shape as a template, and start from one someone else shared.
-
-Partilhe a forma de um agente como modelo e comece a partir de um que outra pessoa partilhou.
-
-**`sidebar.hints.meetings`**
-
-> EN — Turn a recording into a transcript, a summary, and actions you choose from.
-
-Transforma uma gravação em transcrição, resumo e ações que escolhes tu.
-
-**`sidebar.hints.posts`**
-
-> EN — Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.
-
-Diz uma vez e recebe uma publicação por plataforma, no seu tamanho e tom. Não publica nada: copias e publicas tu.
-
-**`sidebar.hints.predictions`**
-
-> EN — Patterns found in your own rows, each with the number of entries it rests on and a link to them.
-
-Padrões nos seus próprios registos, cada um com o número de entradas em que assenta e uma ligação para elas.
-
-**`sidebar.hints.presentations`**
-
-> EN — Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.
-
-Descreve uma apresentação e recebe os diapositivos: PowerPoint ou PDF, com fotos do Unsplash ou tuas. Não desenha gráficos.
-
-**`sidebar.hints.projects`**
-
-> EN — A folder with a goal. What you put in is what is in it — nothing is dragged in with it.
-
-Uma pasta com um objetivo. O que colocas é o que lá está — nada entra sozinho.
-
-**`sidebar.hints.published`**
-
-> EN — Every site you have live on the web, with its traffic and version history
-
-Todos os seus sites no ar, com o tráfego e o histórico de versões
-
-**`sidebar.hints.records`**
-
-> EN — Every log in one place — filter by type instead of hunting the menu
-
-Todos os registos num só lugar — filtre por tipo em vez de procurar no menu
-
-**`sidebar.hints.videos`**
-
-> EN — Keep track of videos you are planning or have already made. It does not generate them.
-
-Acompanhe os vídeos que está a planear ou já fez. Não os gera.
-
-**`sidebar.hints.voice`**
-
-> EN — Have text read out loud, or speak and have it written down. Minutes are metered and the price per minute is on the page.
-
-Ouça um texto lido em voz alta, ou fale e ele é escrito. Os minutos são contados e o preço por minuto está na página.
-
 ### first result
-
-**`dashboard.overview.healthScore.suggestion.recency`**
-
-> EN — You haven't logged anything in a while — add a new entry to pick things back up.
-
-Você não registra nada há um tempo — adicione uma nova entrada para retomar.
-
-**`dashboard.overview.nextAction.revisitLink`**
-
-> EN — You linked "{source}" to "{target}" a few days ago — worth revisiting?
-
-Você vinculou "{source}" a "{target}" há alguns dias — vale a pena revisitar?
-
-**`dashboard.overview.nextAction.startNew`**
-
-> EN — No new activity in the last 3 days — ready to start something new?
-
-Nenhuma atividade nova nos últimos 3 dias — pronto para começar algo novo?
-
-**`dashboard.overview.setupProgress.suggestion`**
-
-> EN — Your activity score appears once you have logged {count} entries — enough that no single one decides it.
-
-A sua pontuação de atividade aparece assim que registar {count} entradas — suficientes para que nenhuma sozinha a decida.
-
-**`dashboard.overview.statRow.mostActiveExplain`**
-
-> EN — The module you have written in most. Where your attention has gone.
-
-O módulo onde mais escreve. Para onde vai a sua atenção.
-
-**`dashboard.overview.statRow.thisWeekExplain`**
-
-> EN — Logged in the last seven days — how active this week has been.
-
-Registado nos últimos sete dias — o quão ativa foi a semana.
-
-**`common.betaExpiry`**
-
-> EN — Your beta access expires in {days, plural, one {# day} other {# days}}. <link>Upgrade to keep full access</link>.
-
-Seu acesso beta expira em {days, plural, one {# dia} other {# dias}}. <link>Faça upgrade para manter o acesso completo</link>.
 
 **`common.listCapped`**
 
@@ -302,19 +146,7 @@ Isso parece uma pergunta. Respondo ou registo?
 
 Descreva qualquer coisa — uma ideia de produto, uma operação, o feedback de um utilizador, uma métrica — e vai parar automaticamente ao módulo certo.
 
-**`dashboard.energyCheckIn.whatItDoes`**
-
-> EN — Ionexa uses this to pick which plan step to suggest next — lighter work when you're low, demanding work when you're not.
-
-O Ionexa usa isto para escolher que passo do plano te sugerir — trabalho leve quando estás em baixo, exigente quando não estás.
-
-**`sampleData.loadFree`**
-
-> EN — Free — nothing is generated, and you can remove it in one click
-
-Grátis — não é gerado nada, e remove com um clique
-
-## Tier 2 — The labels — skim these (459)
+## Tier 2 — The labels — skim these (357)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1550,311 +1382,11 @@ A remover…
 
 Fechar o menu
 
-**`sidebar.groups.ask`**
+**`sidebar.items.activity`**
 
-> EN — Ask
+> EN — Activity
 
-Perguntar
-
-**`sidebar.groups.business`**
-
-> EN — Business
-
-Negócio
-
-**`sidebar.groups.connect`**
-
-> EN — Connect
-
-Conectar
-
-**`sidebar.groups.engineering`**
-
-> EN — Engineering
-
-Engenharia
-
-**`sidebar.groups.make`**
-
-> EN — Make
-
-Criar
-
-**`sidebar.groups.organise`**
-
-> EN — Organise
-
-Organizar
-
-**`sidebar.groups.personal`**
-
-> EN — Personal
-
-Pessoal
-
-**`sidebar.groups.run`**
-
-> EN — Run
-
-Executar
-
-**`sidebar.groups.see`**
-
-> EN — See
-
-Ver
-
-**`sidebar.groups.settings`**
-
-> EN — Settings
-
-Configurações
-
-**`sidebar.groups.verify`**
-
-> EN — Verify
-
-Verificar
-
-**`sidebar.hints.affiliate`**
-
-> EN — Your referral link, what you've earned, and how you get paid.
-
-O teu link de referência, o que ganhaste e como recebes.
-
-**`sidebar.hints.agents`**
-
-> EN — Plan the agents you want. A tracker, not a runtime.
-
-Planeie os agentes que quer. Um registo, não um runtime.
-
-**`sidebar.hints.analytics`**
-
-> EN — Metrics you're watching.
-
-As métricas que acompanha.
-
-**`sidebar.hints.automation`**
-
-> EN — Things that run on a schedule.
-
-Coisas que correm com horário.
-
-**`sidebar.hints.businessHealth`**
-
-> EN — MRR, margin, churn and runway. Owner only.
-
-MRR, margem, cancelamentos e tesouraria. Apenas o proprietário.
-
-**`sidebar.hints.campaigns`**
-
-> EN — Plan campaigns — channel, budget, status.
-
-Planeie campanhas — canal, orçamento, estado.
-
-**`sidebar.hints.chat`**
-
-> EN — Ask anything — not tied to any module.
-
-Pergunte qualquer coisa — sem ligação a nenhum módulo.
-
-**`sidebar.hints.competitors`**
-
-> EN — Track rival products, pricing and positioning.
-
-Acompanhe produtos rivais, preços e posicionamento.
-
-**`sidebar.hints.content`**
-
-> EN — Content ideas, captions and threads.
-
-Ideias de conteúdo, legendas e threads.
-
-**`sidebar.hints.costs`**
-
-> EN — What every AI call has cost, per model and per day.
-
-Quanto custou cada chamada de IA, por modelo e por dia.
-
-**`sidebar.hints.dataAnalysis`**
-
-> EN — Analysis requests and what you found.
-
-Pedidos de análise e o que encontrou.
-
-**`sidebar.hints.decisions`**
-
-> EN — Weigh the options before you decide.
-
-Pese as opções antes de decidir.
-
-**`sidebar.hints.documents`**
-
-> EN — Freeform notes and documents you write yourself.
-
-Notas e documentos livres que escreve você.
-
-**`sidebar.hints.favorites`**
-
-> EN — Everything you've starred.
-
-Tudo o que marcou.
-
-**`sidebar.hints.feedback`**
-
-> EN — What users told you, in one place.
-
-O que os utilizadores lhe disseram, num só lugar.
-
-**`sidebar.hints.finance`**
-
-> EN — Log income and expenses.
-
-Registe receitas e despesas.
-
-**`sidebar.hints.formSubmissions`**
-
-> EN — Everything visitors sent through a form on your published sites
-
-Tudo o que os visitantes enviaram por um formulário nos seus sites publicados
-
-**`sidebar.hints.help`**
-
-> EN — Answers to the questions people ask most — no credits used.
-
-Respostas às perguntas mais frequentes, sem gastar créditos.
-
-**`sidebar.hints.home`**
-
-> EN — Your dashboard — activity, stats and quick actions.
-
-O teu painel — atividade, estatísticas e ações rápidas.
-
-**`sidebar.hints.ideas`**
-
-> EN — Capture new ideas before you forget them.
-
-Registe ideias novas antes de as esquecer.
-
-**`sidebar.hints.learning`**
-
-> EN — Track what you're studying.
-
-Acompanhe o que está a estudar.
-
-**`sidebar.hints.memory`**
-
-> EN — Search across everything you have saved.
-
-Procure em tudo o que guardou.
-
-**`sidebar.hints.mine`**
-
-> EN — Everything you have made, newest first — with a starred-only tab
-
-Tudo o que criou, do mais recente, com um separador só de favoritos
-
-**`sidebar.hints.missionControl`**
-
-> EN — Set a goal, AI breaks it into steps.
-
-Defina um objetivo e a IA divide-o em passos.
-
-**`sidebar.hints.newEntry`**
-
-> EN — Write anything down — it files itself
-
-Escreva o que quiser — arruma-se sozinho
-
-**`sidebar.hints.products`**
-
-> EN — Product plans — pricing, roadmap, launch.
-
-Planos de produto — preços, roteiro, lançamento.
-
-**`sidebar.hints.productWorkflow`**
-
-> EN — Your products, patterns and mentor in one view.
-
-Os seus produtos, padrões e mentor numa vista.
-
-**`sidebar.hints.reflection`**
-
-> EN — A weekly summary of your progress.
-
-Um resumo semanal do seu progresso.
-
-**`sidebar.hints.research`**
-
-> EN — Save research, sources and summaries.
-
-Guarde pesquisa, fontes e resumos.
-
-**`sidebar.hints.routing`**
-
-> EN — Which model each kind of request is sent to.
-
-Para que modelo vai cada tipo de pedido.
-
-**`sidebar.hints.sales`**
-
-> EN — Leads, outreach and next steps.
-
-Contactos, abordagem e próximos passos.
-
-**`sidebar.hints.settings`**
-
-> EN — Account, billing, language and preferences.
-
-Conta, faturação, idioma e preferências.
-
-**`sidebar.hints.systemHealth`**
-
-> EN — Whether the database, the queues and the providers are answering.
-
-Se a base de dados, as filas e os fornecedores respondem.
-
-**`sidebar.hints.team`**
-
-> EN — Invite people to your workspace.
-
-Convide pessoas para o seu espaço.
-
-**`sidebar.hints.timeline`**
-
-> EN — Everything you've done, in order.
-
-Tudo o que fez, por ordem.
-
-**`sidebar.hints.trading`**
-
-> EN — Trade log — symbol, direction, result, P&L.
-
-Diário de trades — símbolo, direção, resultado, P&L.
-
-**`sidebar.hints.tradingJournal`**
-
-> EN — Your trades, with the reasoning you wrote at the time.
-
-As tuas operações, com o raciocínio que escreveste na altura.
-
-**`sidebar.hints.tradingWorkflow`**
-
-> EN — Your trades, patterns and mentor in one view.
-
-Os seus trades, padrões e mentor numa vista.
-
-**`sidebar.hints.websiteBuilder`**
-
-> EN — Describe a site and AI generates the real page.
-
-Descreva um site e a IA gera a página real.
-
-**`sidebar.hints.websites`**
-
-> EN — Track sites you own — name, URL, status. No generation.
-
-Acompanhe sites que tem — nome, URL, estado. Sem geração.
+Atividade
 
 **`sidebar.items.affiliate`**
 
@@ -1978,9 +1510,9 @@ Pergunta-me
 
 **`sidebar.items.coding`**
 
-> EN — AI Coding
+> EN — Coding
 
-Programar com IA
+Código
 
 **`sidebar.items.competitors`**
 
@@ -2540,17 +2072,83 @@ Fluxos de trabalho
 
 Todas as ferramentas
 
+**`sidebar.rail.chat`**
+
+> EN — Chat
+
+Conversa
+
+**`sidebar.rail.coding`**
+
+> EN — Coding
+
+Código
+
+**`sidebar.rail.collapse`**
+
+> EN — Collapse sidebar
+
+Recolher a barra lateral
+
+**`sidebar.rail.expand`**
+
+> EN — Expand sidebar
+
+Expandir a barra lateral
+
+**`sidebar.rail.label`**
+
+> EN — Main
+
+Menu principal
+
 **`sidebar.rail.new`**
 
 > EN — New
 
 Novo
 
-**`sidebar.rail.recent`**
+**`sidebar.rail.pin`**
 
-> EN — Recent
+> EN — Pin {tool}
 
-Recentes
+Fixar {tool}
+
+**`sidebar.rail.recentTools`**
+
+> EN — Recent tools
+
+Ferramentas recentes
+
+**`sidebar.rail.remove`**
+
+> EN — Remove {tool} from Recent tools
+
+Retirar {tool} das recentes
+
+**`sidebar.rail.saveFailed`**
+
+> EN — Could not save that change. Try again.
+
+Não foi possível guardar a alteração. Tente de novo.
+
+**`sidebar.rail.settings`**
+
+> EN — Settings
+
+Definições
+
+**`sidebar.rail.unpin`**
+
+> EN — Unpin {tool}
+
+Desafixar {tool}
+
+**`sidebar.tabs.label`**
+
+> EN — Main navigation
+
+Navegação principal
 
 ### first result
 
@@ -2559,246 +2157,6 @@ Recentes
 > EN — Could not load your ideas: {message}
 
 Não foi possível carregar as suas ideias: {message}
-
-**`dashboard.insights.title`**
-
-> EN — What I noticed
-
-O que reparei
-
-**`dashboard.overview.activeMission.open`**
-
-> EN — Open the plan
-
-Abrir o plano
-
-**`dashboard.overview.activeMission.stepsLabel`**
-
-> EN — {completed}/{total} steps completed
-
-{completed}/{total} etapas concluídas
-
-**`dashboard.overview.aiCoach.entryCount`**
-
-> EN — {count, plural, one {# new {module} entry} other {# new {module} entries}}
-
-{count, plural, one {# nova entrada em {module}} other {# novas entradas em {module}}}
-
-**`dashboard.overview.aiCoach.mostActiveIn`**
-
-> EN — Most active in {module}
-
-Mais ativo em {module}
-
-**`dashboard.overview.aiCoach.noActivity`**
-
-> EN — No activity yet this week — log something to get started.
-
-Nenhuma atividade ainda esta semana — registre algo para começar.
-
-**`dashboard.overview.betaFeedback.linkLabel`**
-
-> EN — Share feedback
-
-Enviar feedback
-
-**`dashboard.overview.betaFeedback.message`**
-
-> EN — Thanks for testing Ionexa AI. Your feedback is welcome.
-
-Obrigado por testar o Ionexa AI. O teu feedback é bem-vindo.
-
-**`dashboard.overview.healthScore.buildingMomentum`**
-
-> EN — Building momentum
-
-Ganhando ritmo
-
-**`dashboard.overview.healthScore.excellentConsistency`**
-
-> EN — Excellent consistency
-
-Consistência excelente
-
-**`dashboard.overview.healthScore.justStarting`**
-
-> EN — Just getting started
-
-Começando agora
-
-**`dashboard.overview.healthScore.strongProgress`**
-
-> EN — Strong progress
-
-Ótimo progresso
-
-**`dashboard.overview.healthScore.suggestion.consistency`**
-
-> EN — Try logging something every day this week.
-
-Tente registrar algo todos os dias desta semana.
-
-**`dashboard.overview.healthScore.suggestion.coverage`**
-
-> EN — Try exploring a module you haven't used yet.
-
-Tente explorar um módulo que ainda não usou.
-
-**`dashboard.overview.healthScore.suggestion.missionSteps`**
-
-> EN — Complete a plan step to keep your momentum going.
-
-Conclui uma etapa do plano para manteres o teu ritmo.
-
-**`dashboard.overview.healthScore.title`**
-
-> EN — Business Health Score
-
-Pontuação de Saúde do Negócio
-
-**`dashboard.overview.next.title`**
-
-> EN — Next
-
-A seguir
-
-**`dashboard.overview.nextAction.continueMission`**
-
-> EN — Continue: {step} from your "{goal}" plan
-
-Continue: {step} do teu plano "{goal}"
-
-**`dashboard.overview.nextAction.cta`**
-
-> EN — Go there →
-
-Ir até lá →
-
-**`dashboard.overview.setupProgress.count`**
-
-> EN — {done} of {total} steps
-
-{done} de {total} passos
-
-**`dashboard.overview.setupProgress.steps.firstEntry`**
-
-> EN — Log your first entry
-
-Registe a sua primeira entrada
-
-**`dashboard.overview.setupProgress.steps.mission`**
-
-> EN — Set a goal
-
-Defina um objetivo
-
-**`dashboard.overview.setupProgress.steps.onboarding`**
-
-> EN — Finish the welcome questions
-
-Termine as perguntas de boas-vindas
-
-**`dashboard.overview.setupProgress.steps.secondModule`**
-
-> EN — Log something in a second area
-
-Registe algo numa segunda área
-
-**`dashboard.overview.setupProgress.title`**
-
-> EN — Setup progress
-
-Progresso da configuração
-
-**`dashboard.overview.statRow.creditsExplain`**
-
-> EN — What is left of this month's allowance for AI work.
-
-O que resta da sua quota mensal para trabalho com IA.
-
-**`dashboard.overview.statRow.creditsRemaining`**
-
-> EN — Credits Remaining
-
-Créditos Restantes
-
-**`dashboard.overview.statRow.fillsAfter`**
-
-> EN — Fills in after {count} entries
-
-Preenche-se após {count} entradas
-
-**`dashboard.overview.statRow.fromEntries`**
-
-> EN — {count, plural, one {from # entry} other {from # entries}}
-
-{count, plural, one {a partir de # entrada} other {a partir de # entradas}}
-
-**`dashboard.overview.statRow.mostActive`**
-
-> EN — Most Active
-
-Mais Ativo
-
-**`dashboard.overview.statRow.ofTotal`**
-
-> EN — {count, plural, one {of # in total} other {of # in total}}
-
-{count, plural, one {de # no total} other {de # no total}}
-
-**`dashboard.overview.statRow.openCredits`**
-
-> EN — See the ledger →
-
-Ver o histórico →
-
-**`dashboard.overview.statRow.openEntries`**
-
-> EN — See the entries →
-
-Ver as entradas →
-
-**`dashboard.overview.statRow.thisWeek`**
-
-> EN — This Week
-
-Esta Semana
-
-**`dashboard.overview.statRow.totalEntries`**
-
-> EN — Total Entries
-
-Total de Entradas
-
-**`dashboard.overview.statRow.totalEntriesExplain`**
-
-> EN — Everything you have logged, in every module, since you started.
-
-Tudo o que registou, em cada módulo, desde o início.
-
-**`dashboard.overview.whatChanged.entries`**
-
-> EN — new entries
-
-entradas novas
-
-**`dashboard.overview.whatChanged.insights`**
-
-> EN — new insights
-
-observações novas
-
-**`dashboard.overview.whatChanged.since`**
-
-> EN — since {when}
-
-desde {when}
-
-**`dashboard.overview.whatChanged.title`**
-
-> EN — What changed
-
-O que mudou
 
 **`errors.boundary.section`**
 
@@ -2854,6 +2212,12 @@ Criar Qualquer Coisa
 
 Abrir {module} →
 
+**`dashboard.createAnything.accomplishPlaceholder`**
+
+> EN — What do you want to accomplish?
+
+O que quer alcançar?
+
 **`dashboard.createAnything.attachImage`**
 
 > EN — Attach image
@@ -2908,132 +2272,6 @@ Enviar
 
 Não foi possível carregar uma ou mais imagens.
 
-**`dashboard.energyCheckIn.change`**
-
-> EN — Change
-
-Alterar
-
-**`dashboard.energyCheckIn.checkedInToday`**
-
-> EN — Today's energy: {level}/5.
-
-Energia de hoje: {level}/5.
-
-**`dashboard.energyCheckIn.levelLabel`**
-
-> EN — Energy level {level}
-
-Nível de energia {level}
-
-**`dashboard.energyCheckIn.logged`**
-
-> EN — Energy logged
-
-Energia registrada
-
-**`dashboard.energyCheckIn.notePlaceholder`**
-
-> EN — Optional note...
-
-Nota opcional...
-
-**`dashboard.energyCheckIn.prompt`**
-
-> EN — How's your energy today?
-
-Como está sua energia hoje?
-
-**`dashboard.energyCheckIn.scaleHigh`**
-
-> EN — 5 = great
-
-5 = ótimo
-
-**`dashboard.energyCheckIn.scaleLow`**
-
-> EN — 1 = exhausted
-
-1 = exausto
-
-**`dashboard.energyCheckIn.title`**
-
-> EN — Energy Check-In
-
-Registo de Energia
-
-**`dashboard.firstScreen.build.example`**
-
-> EN — Build a website for my shop
-
-Cria um site para a minha loja
-
-**`dashboard.firstScreen.build.verb`**
-
-> EN — Build
-
-Cria
-
-**`dashboard.firstScreen.cost.charged`**
-
-> EN — Uses credits
-
-Consome créditos
-
-**`dashboard.firstScreen.cost.free`**
-
-> EN — Free
-
-Grátis
-
-**`dashboard.firstScreen.cost.freeAllowance`**
-
-> EN — Free up to your monthly limit
-
-Grátis até ao limite mensal
-
-**`dashboard.firstScreen.label`**
-
-> EN — Press one — it runs right away
-
-Carregue num — corre logo
-
-**`dashboard.firstScreen.repeat.example`**
-
-> EN — Every Monday, a summary of my sales
-
-Todas as segundas, um resumo das minhas vendas
-
-**`dashboard.firstScreen.repeat.verb`**
-
-> EN — Repeat
-
-Repete
-
-**`dashboard.firstScreen.understand.example`**
-
-> EN — What do my numbers say this week?
-
-O que dizem os meus números esta semana?
-
-**`dashboard.firstScreen.understand.verb`**
-
-> EN — Understand
-
-Entende
-
-**`dashboard.overview.recentEntries.empty`**
-
-> EN — No entries yet.
-
-Ainda sem entradas.
-
-**`dashboard.overview.recentEntries.title`**
-
-> EN — Recent Entries
-
-Entradas Recentes
-
 **`errors.creditHistory`**
 
 > EN — See credit history
@@ -3064,25 +2302,7 @@ Boa noite
 
 Bom dia
 
-**`sampleData.load`**
-
-> EN — See it with sample data
-
-Ver com dados de exemplo
-
-**`sampleData.loadFailed`**
-
-> EN — That did not work. Try again.
-
-Não resultou. Tente de novo.
-
-**`sampleData.loading`**
-
-> EN — Loading…
-
-A carregar…
-
-## Tier 3 — Further in — only if you have time (210)
+## Tier 3 — Further in — only if you have time (208)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3161,18 +2381,6 @@ Nenhuma notificação nova.
 > EN — Notifications
 
 Notificações
-
-**`common.switchToDarkMode`**
-
-> EN — Switch to dark mode
-
-Mudar para o tema escuro
-
-**`common.switchToLightMode`**
-
-> EN — Switch to light mode
-
-Mudar para o tema claro
 
 **`common.toggleMenu`**
 

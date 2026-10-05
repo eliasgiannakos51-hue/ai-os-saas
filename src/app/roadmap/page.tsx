@@ -34,7 +34,6 @@ import {
   Share2,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
-import { AppBackground } from "@/components/ui/app-background";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitleAndDescription("roadmap.title", "roadmap.metaDescription");
@@ -58,12 +57,12 @@ type RoadmapSection = {
 
 const STATUS_STYLES: Record<RoadmapStatus, { badge: string; icon: string }> = {
   available: {
-    badge: "border-emerald-800 bg-emerald-950/30 text-emerald-400",
-    icon: "bg-emerald-500/10 text-emerald-400",
+    badge: "border-success/40 bg-success/10 text-success",
+    icon: "bg-success/10 text-success",
   },
   soon: {
-    badge: "border-orange-800 bg-orange-950/30 text-orange-400",
-    icon: "bg-orange-500/10 text-orange-400",
+    badge: "border-border bg-panel-hover/30 text-foreground",
+    icon: "bg-foreground/10 text-foreground",
   },
   future: {
     badge: "border-border bg-panel-hover text-muted",
@@ -162,14 +161,13 @@ export default async function RoadmapPage() {
 
   return (
     <main className="relative min-h-screen px-4 py-16 text-foreground sm:px-6">
-      <AppBackground />
       <div className="relative z-10 mx-auto max-w-5xl">
         <div className="text-center">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 transition-colors duration-150 hover:text-orange-400"
+            className="inline-flex min-h-[44px] items-center gap-2 transition-colors duration-150 hover:text-foreground"
           >
-            <Logo iconOnly className="h-6 w-6" />
+            <Logo iconOnly px={24} />
             <span className="text-base font-bold tracking-tight text-foreground">IONEXA</span>
           </Link>
           <h1 className="mt-6 text-3xl font-bold text-foreground sm:text-4xl">{t("title")}</h1>
@@ -201,7 +199,7 @@ export default async function RoadmapPage() {
                     >
                       <div className="flex items-start justify-between gap-2">
                         <span
-                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${styles.icon}`}
+                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-card ${styles.icon}`}
                         >
                           <item.icon className="h-5 w-5" aria-hidden="true" />
                         </span>
@@ -226,7 +224,7 @@ export default async function RoadmapPage() {
         </div>
 
         <div className="mt-16 text-center">
-          <Link href="/" className="text-xs text-orange-400 underline underline-offset-2">
+          <Link href="/" className="text-xs text-foreground underline underline-offset-2">
             {t("backToHome")}
           </Link>
         </div>

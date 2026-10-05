@@ -27,7 +27,7 @@ export function EnvWarnings({ warnings }: { warnings: EnvWarning[] }) {
   if (warnings.length === 0) {
     return (
       <section className="mb-6 surface-tight">
-        <h2 className="text-sm font-semibold text-fg">Configuration</h2>
+        <h2 className="text-sm font-semibold text-foreground">Configuration</h2>
         <p className="mt-1 text-xs text-muted">
           No half-configured pairs. Every variable that needs a partner has one.
         </p>
@@ -48,17 +48,17 @@ export function EnvWarnings({ warnings }: { warnings: EnvWarning[] }) {
 
   return (
     <section className="mb-6">
-      <h2 className="text-sm font-semibold text-fg">Configuration</h2>
+      <h2 className="text-sm font-semibold text-foreground">Configuration</h2>
       <p className="mt-1 text-xs text-muted">{summary}</p>
 
       {[
-        { rows: critical, tone: "border-red-800 bg-red-950/30 text-red-300", Icon: ShieldAlert },
-        { rows: rest, tone: "border-amber-800 bg-amber-950/20 text-amber-300", Icon: AlertTriangle },
+        { rows: critical, tone: "border-danger/40 bg-danger/10 text-danger", Icon: ShieldAlert },
+        { rows: rest, tone: "border-warning/40 bg-warning/10 text-warning", Icon: AlertTriangle },
       ].map(({ rows, tone, Icon }, i) =>
         rows.length === 0 ? null : (
           <ul key={i} className="mt-3 space-y-2">
             {rows.map((w) => (
-              <li key={w.key} className={`rounded-xl border px-3 py-2.5 ${tone}`}>
+              <li key={w.key} className={`rounded-card border px-3 py-2.5 ${tone}`}>
                 <div className="flex items-start gap-2">
                   <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                   <div className="min-w-0">

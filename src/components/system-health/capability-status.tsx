@@ -65,13 +65,13 @@ export function CapabilityStatus({ rows }: { rows: CapabilityRow[] }) {
       level: "required" as const,
       title: "Missing and required — the app is meaningfully broken",
       icon: AlertTriangle,
-      tone: "border-red-900 bg-red-950/30 text-red-300",
+      tone: "border-danger/40 bg-danger/10 text-danger",
     },
     {
       level: "recommended" as const,
       title: "Missing and recommended — a feature is silently off",
       icon: AlertTriangle,
-      tone: "border-amber-800/50 bg-amber-500/5 text-amber-300",
+      tone: "border-warning/40 bg-warning/5 text-warning",
     },
     {
       level: "optional" as const,
@@ -85,17 +85,17 @@ export function CapabilityStatus({ rows }: { rows: CapabilityRow[] }) {
     <section className="mt-8">
       <h2 className="text-sm font-semibold text-foreground">Capabilities</h2>
       <p className="mt-1 text-xs text-muted">
-        Built from <code className="rounded bg-input px-1 py-0.5 font-mono text-[11px]">ENV_REQUIREMENTS</code> in
+        Built from <code className="rounded-item bg-input px-1 py-0.5 font-mono text-[11px]">ENV_REQUIREMENTS</code> in
         lib/env-check.ts — the same list the boot check reads. Names and statuses only; no values.
       </p>
 
-      <p className="mt-3 flex items-center gap-1.5 text-xs text-emerald-400">
+      <p className="mt-3 flex items-center gap-1.5 text-xs text-success">
         <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
         {on} of {rows.length} configured
       </p>
 
       {off.length === 0 ? (
-        <p className="mt-3 rounded-xl border border-emerald-800 bg-emerald-950/30 px-3 py-2.5 text-xs text-emerald-400">
+        <p className="mt-3 rounded-card border border-success/40 bg-success/10 px-3 py-2.5 text-xs text-success">
           Every variable the code reads is set. Nothing is silently off.
         </p>
       ) : (
@@ -104,7 +104,7 @@ export function CapabilityStatus({ rows }: { rows: CapabilityRow[] }) {
           if (items.length === 0) return null;
           const Icon = group.icon;
           return (
-            <div key={group.level} className={`mt-3 rounded-xl border px-3 py-2.5 ${group.tone}`}>
+            <div key={group.level} className={`mt-3 rounded-card border px-3 py-2.5 ${group.tone}`}>
               <p className="flex items-center gap-1.5 text-xs font-semibold">
                 <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                 {group.title} ({items.length})

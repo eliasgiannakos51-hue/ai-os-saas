@@ -255,7 +255,10 @@ for (const [label, routeFile, clientFile] of PAIRS) {
     `${label}: from the real settled figure, not a guess`,
     /settlement\.creditsCharged/.test(route) || /Number\(data\.credits_charged\)/.test(route)
   );
-  checkTrue(`${label}: returned under \`usage\``, /usage: buildUsageReceipt\(|record, usage \}/.test(route));
+  // The status poll returns `{ ok, record: withClientTimeline(...), usage }`
+  // since the website timeline (lib/websites/website-timeline.ts), so the
+  // shorthand is matched as the object's last property, not after `record`.
+  checkTrue(`${label}: returned under \`usage\``, /usage: buildUsageReceipt\(|record(?:: [^\n]*?)?, usage \}/.test(route));
   checkTrue(`${label}: client reports it`, /reportUsage\(/.test(client));
 }
 // The streaming clients must capture the terminal event, or reportUsage

@@ -121,7 +121,7 @@ export function OverageSettings() {
 
       {state.enabled ? (
         <div className="space-y-3">
-          <div className="rounded-xl border border-border bg-surface p-4">
+          <div className="rounded-card border border-border bg-panel p-4">
             <div className="flex items-baseline justify-between text-sm">
               <span className="text-foreground">{t("thisMonth")}</span>
               <span className="font-semibold text-foreground">
@@ -142,7 +142,7 @@ export function OverageSettings() {
               aria-label={t("thisMonth")}
             >
               <div
-                className={usedPercent >= 100 ? "h-full bg-red-500" : "h-full bg-orange-500"}
+                className={usedPercent >= 100 ? "h-full bg-danger" : "h-full bg-button"}
                 style={{ width: `${usedPercent}%` }}
               />
             </div>
@@ -150,7 +150,7 @@ export function OverageSettings() {
           </div>
 
           {usedPercent >= 100 ? (
-            <p className="flex items-start gap-2 text-xs text-red-400">
+            <p className="flex items-start gap-2 text-xs text-danger">
               <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               {t("capReached")}
             </p>
@@ -160,7 +160,7 @@ export function OverageSettings() {
             type="button"
             onClick={disable}
             disabled={busy}
-            className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-border px-4 text-sm text-foreground transition-colors duration-150 hover:border-red-500 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-card border border-border px-4 text-sm text-foreground transition-colors duration-150 hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-60"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
             {t("turnOff")}
@@ -184,14 +184,14 @@ export function OverageSettings() {
             value={cap}
             onChange={(event) => setCap(event.target.value)}
             placeholder={t("capPlaceholder")}
-            className="w-full max-w-[200px] rounded-xl border border-border bg-surface px-3 py-2 text-sm text-foreground"
+            className="min-h-[44px] w-full max-w-[200px] rounded-item border border-border bg-panel px-3 text-sm text-foreground"
           />
 
           {/* WHAT IT COSTS, BEFORE THE BUTTON. Shown from the moment a
               valid cap is typed — not after clicking, not on a next
               screen. */}
           {capValid ? (
-            <div className="rounded-xl border border-orange-500/40 bg-orange-500/5 p-4 text-xs text-foreground">
+            <div className="rounded-card border border-foreground/40 bg-foreground/5 p-4 text-xs text-foreground">
               <p className="font-semibold">{t("preview.heading")}</p>
               <ul className="mt-2 space-y-1 text-muted">
                 <li>{t("preview.rate", { price: price.toFixed(2) })}</li>
@@ -208,7 +208,7 @@ export function OverageSettings() {
             type="button"
             onClick={enable}
             disabled={busy || !capValid}
-            className="hover:bg-orange-500/10 inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-orange-500/60 px-4 text-sm font-semibold text-orange-300 transition-colors duration-150 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-card border border-foreground/60 px-4 text-sm font-semibold text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
             {t("agree")}
@@ -217,12 +217,12 @@ export function OverageSettings() {
       )}
 
       {saved ? (
-        <p className="flex items-center gap-2 text-xs text-emerald-400">
+        <p className="flex items-center gap-2 text-xs text-success">
           <Check className="h-3.5 w-3.5" aria-hidden="true" />
           {t("saved")}
         </p>
       ) : null}
-      {error ? <p className="text-xs text-red-400">{error}</p> : null}
+      {error ? <p className="text-xs text-danger">{error}</p> : null}
     </div>
   );
 }

@@ -131,7 +131,7 @@ check(
 console.log("\n== 6. the page actually asks before it shows ==");
 // The rule lives in lib/health-score.ts so it can be executed; this is
 // the half that checks the page calls it rather than re-deciding.
-const overview = readFileSync("src/app/dashboard/overview/page.tsx", "utf8");
+const overview = readFileSync("src/app/dashboard/activity/page.tsx", "utf8");
 check(
   "overview/page.tsx calls hasEnoughDataForScore",
   /hasEnoughDataForScore\(totalEntries\)/.test(overview),
@@ -249,8 +249,8 @@ check(
   "an empty slice makes every assertion about it pass on nothing"
 );
 check(
-  "the placeholder is not the accent colour, so it cannot read as a value",
-  !/#f97316|orange-[45]00/.test(placeholderBlock),
+  "the placeholder is not drawn in a colour that means something, so it cannot read as a value",
+  !/#f97316|orange-[45]00|(?:text|bg|border|stroke|fill)-(?:signal|success|warning|danger)\b|--chart-1/.test(placeholderBlock),
   placeholderBlock.slice(0, 160)
 );
 

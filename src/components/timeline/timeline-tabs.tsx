@@ -44,8 +44,8 @@ export function TimelineTabs({ view }: { view: "all" | "fav" }) {
             aria-selected={active}
             className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors duration-150 ${
               active
-                ? "border-orange-500/50 bg-orange-500/15 font-semibold text-orange-200"
-                : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
+                ? "border-foreground/50 bg-foreground/15 font-semibold text-foreground"
+                : "border-border text-muted hover:border-foreground/40 hover:text-foreground"
             }`}
           >
             <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />

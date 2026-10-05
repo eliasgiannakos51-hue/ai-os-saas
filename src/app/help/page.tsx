@@ -4,7 +4,6 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { LifeBuoy, ArrowRight } from "lucide-react";
 import { Logo } from "@/components/logo";
-import { AppBackground } from "@/components/ui/app-background";
 import { articlesByCategory } from "@/lib/support/knowledge-base";
 import { loadHelpArticles, type HelpArticle } from "@/lib/support/help-articles";
 import { getLocale } from "next-intl/server";
@@ -87,7 +86,7 @@ function Article({
           how the original bug — a Greek-only Help Centre shown to ten
           locales — survived: it looked like content, not like a gap. */}
       {article.isFallback && (
-        <p className="mb-2 inline-flex rounded-full border border-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted/80">
+        <p className="mb-2 inline-flex rounded-full border border-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted">
           {fallbackNotice}
         </p>
       )}
@@ -98,7 +97,7 @@ function Article({
       {article.href && (
         <Link
           href={article.href}
-          className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-orange-400 transition-colors duration-150 hover:text-orange-300"
+          className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-foreground transition-colors duration-150 hover:text-foreground"
         >
           {goThere}
           <ArrowRight className="h-3 w-3" aria-hidden="true" />
@@ -134,14 +133,13 @@ export default async function HelpPage() {
 
   return (
     <div className="relative min-h-screen">
-      <AppBackground />
       <div className="relative mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
         <header className="mb-8">
-          <Link href="/" className="inline-block">
+          <Link href="/" className="inline-flex min-h-[44px] items-center">
             <Logo />
           </Link>
           <h1 className="mt-6 flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground">
-            <LifeBuoy className="h-6 w-6 text-orange-400" aria-hidden="true" />
+            <LifeBuoy className="h-6 w-6 text-foreground" aria-hidden="true" />
             {t("title")}
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted">
@@ -156,7 +154,7 @@ export default async function HelpPage() {
             <a
               key={category}
               href={`#category-${category}`}
-              className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted transition-colors duration-150 hover:border-orange-500/40 hover:text-foreground"
+              className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
             >
               {t.has(`categories.${category}`) ? t(`categories.${category}`) : category}
             </a>
@@ -201,18 +199,18 @@ export default async function HelpPage() {
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
               href="/dashboard/chat"
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-button px-4 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
             >
               {t("openChat")}
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
             >
               {t("pricingLink")}
             </Link>
           </div>
-          <p className="mt-3 text-[11px] text-muted/70">
+          <p className="mt-3 text-[11px] text-muted">
             {t("answerCount", { count: articles.length })}
           </p>
         </footer>

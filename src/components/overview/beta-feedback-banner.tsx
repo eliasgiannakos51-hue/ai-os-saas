@@ -43,16 +43,16 @@ export function BetaFeedbackBanner({
   if (dismissed) return null;
 
   return (
-    <div className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-emerald-900/50 bg-emerald-950/20 px-4 py-3 text-sm">
+    <div className="mt-6 flex items-center justify-between gap-3 rounded-card border border-success/40 bg-success/10 px-4 py-3 text-sm">
       <div className="flex min-w-0 items-center gap-2.5">
-        <MessageSquareHeart className="h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
-        <p className="min-w-0 text-emerald-200/90">
+        <MessageSquareHeart className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
+        <p className="min-w-0 text-success/90">
           {message}{" "}
           <a
             href={feedbackUrl}
             target={feedbackUrl.startsWith("http") ? "_blank" : undefined}
             rel={feedbackUrl.startsWith("http") ? "noopener noreferrer" : undefined}
-            className="font-medium text-emerald-400 underline underline-offset-2 transition-colors duration-150 hover:text-emerald-300"
+            className="font-medium text-success underline underline-offset-2 transition-colors duration-150 hover:text-success"
           >
             {linkLabel}
           </a>
@@ -62,7 +62,7 @@ export function BetaFeedbackBanner({
         type="button"
         onClick={dismiss}
         aria-label={t("dismiss")}
-        className="shrink-0 rounded p-1 text-emerald-400/70 transition-colors duration-150 hover:text-emerald-300"
+        className="shrink-0 rounded-item p-1 text-success/70 transition-colors duration-150 hover:text-success"
       >
         <X className="h-4 w-4" aria-hidden="true" />
       </button>

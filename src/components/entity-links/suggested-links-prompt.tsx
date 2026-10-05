@@ -85,9 +85,9 @@ export function SuggestedLinksPrompt({
   const titles = visible.map((s) => s.headline).join(", ");
 
   return (
-    <div className="mt-3 rounded-xl border border-orange-500/20 bg-orange-500/[0.03] p-3">
+    <div className="mt-3 rounded-card border border-foreground/20 bg-foreground/[0.03] p-3">
       <p className="flex items-start gap-1.5 text-xs text-muted">
-        <Link2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-400" aria-hidden="true" />
+        <Link2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground" aria-hidden="true" />
         {t("mightBeRelated", { titles })}
       </p>
       <ul className="mt-2 space-y-1.5">
@@ -96,13 +96,13 @@ export function SuggestedLinksPrompt({
           return (
             <li
               key={s.id}
-              className="flex items-center justify-between gap-2 rounded-lg border border-border bg-input px-2.5 py-1.5 text-xs"
+              className="flex items-center justify-between gap-2 rounded-item border border-border bg-input px-2.5 py-1.5 text-xs"
             >
-              <span className="min-w-0 truncate text-foreground">
+              <span className="min-w-0 break-words text-foreground">
                 <span className="text-muted">{s.moduleTitle}:</span> {s.headline}
               </span>
               {state === "linked" ? (
-                <span className="flex shrink-0 items-center gap-1 text-emerald-400">
+                <span className="flex shrink-0 items-center gap-1 text-success">
                   <Check className="h-3.5 w-3.5" aria-hidden="true" /> {t("linked")}
                 </span>
               ) : (
@@ -111,7 +111,7 @@ export function SuggestedLinksPrompt({
                     type="button"
                     onClick={() => handleLink(s)}
                     disabled={state === "linking"}
-                    className="rounded-md border border-border px-2 py-1 font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-item border border-border px-2 py-1 font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {t("yes")}
                   </button>
@@ -121,7 +121,7 @@ export function SuggestedLinksPrompt({
                     disabled={state === "linking"}
                     aria-label={t("no")}
                     title={t("no")}
-                    className="flex h-6 w-6 items-center justify-center rounded-md text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-6 w-6 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>

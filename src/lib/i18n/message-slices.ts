@@ -133,7 +133,11 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // switches is rendered from MEMORY_SURFACES rather than written out
     // six times — which is the same choice that keeps the list in step
     // with the database's own check constraint.
-    unbounded: 71,
+    // SEVENTY on 2026-10-04: the theme toggle went with the light theme
+    // (ΣΥΣΤΗΜΑ DESIGN, one theme), and with it one unbounded component.
+    // SIXTY-NINE on 2026-10-04 (design D.4): the Home examples strip
+    // (overview/first-screen-examples.tsx) went with the cards.
+    unbounded: 69,
   },
   {
     name: "onboarding",

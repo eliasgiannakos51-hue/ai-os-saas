@@ -1,3 +1,4 @@
+import { MobileTabBar } from "@/components/dashboard/mobile-tab-bar";
 import { redirect } from "next/navigation";
 import { PwaProvider } from "@/components/pwa/pwa-provider";
 import { getCurrentUser } from "@/lib/auth/current-user";
@@ -18,13 +19,13 @@ import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula"
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { logApiError } from "@/lib/log-error";
-import { AmbientDots } from "@/components/ui/ambient-dots";
 import { SampleDataBanner } from "@/components/sample-data/sample-data-banner";
 import { findSampleImport } from "@/lib/sample-data/apply";
-import { DashboardBackground } from "@/components/dashboard/dashboard-background";
 import { AchievementUnlockBridge } from "@/components/achievements/achievement-unlock-bridge";
 import { NavTracker } from "@/components/dashboard/nav-tracker";
 import { PageTransition } from "@/components/page-transition";
+import { MAIN_SIDEBAR_GROUPS, sidebarGroups } from "@/lib/sidebar-nav";
+import { NEVER_RECENT, RECENT_WINDOW_DAYS, readRecentPrefs, recentTools, type RecentTool } from "@/lib/nav/recent-tools";
 
 export default async function DashboardLayout({
   children,
@@ -84,6 +85,31 @@ export default async function DashboardLayout({
   // handful of rows per account.
   const sampleImport = await findSampleImport(supabase, user.id);
 
+  // RECENT TOOLS, ON THE ACCOUNT (lib/nav/recent-tools.ts): the last 30
+  // days of this person's own nav_events, through their own session, on
+  // the (user_id, created_at desc) index. Computed here, once per full
+  // load, so the sidebar does not change while somebody moves between
+  // pages — the design's "δεν αλλάζει ποτέ από σελίδα σε σελίδα". A
+  // failed read is an empty list, which is also what a new account sees.
+  let recent: RecentTool[] = [];
+  try {
+    const since = new Date(Date.now() - RECENT_WINDOW_DAYS * 86_400_000).toISOString();
+    const { data: events, error: eventsError } = await supabase
+      .from("nav_events")
+      .select("path, created_at")
+      .eq("user_id", user.id)
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(2000);
+    if (eventsError) throw eventsError;
+    const toolHrefs = sidebarGroups(MAIN_SIDEBAR_GROUPS, isAdmin)
+      .flatMap((g) => g.items.map((i) => i.href))
+      .filter((h) => !NEVER_RECENT.includes(h));
+    recent = recentTools({ events: events ?? [], toolHrefs, prefs: readRecentPrefs(user.user_metadata), now: new Date() });
+  } catch (err) {
+    logApiError("/dashboard (layout)", err, { stage: "recent_tools" });
+  }
+
 
   return (
     <ToastProvider>
@@ -100,17 +126,6 @@ export default async function DashboardLayout({
             initialPlanSlug={plan.slug}
             isAdmin={isAdmin}
           >
-            {/* Same wireframe globe as login/signup/landing, now behind every
-                dashboard page for visual continuity with the auth pages —
-                fixed to the viewport, z-0. The whole app shell below is
-                explicitly `relative z-10` (one wrap here, not per-page) so
-                it stacks above the globe as a unit: Sidebar/TopNav's own
-                z-index values (z-50/z-30) still order correctly *within*
-                that shell, and every page's content, opaque or not, paints
-                on top of the globe by default instead of needing its own
-                stacking fix. DashboardBackground (not AuthBackground
-                directly) picks the opacity per-route, since Chat/Create
-                need a higher one — see its own comment for why. */}
             {/* WHETHER VOICE EXISTS HERE AT ALL — one read, shared by
                 every microphone button and every "Listen" button below
                 it. Two provider keys are optional to a deployment and
@@ -120,15 +135,6 @@ export default async function DashboardLayout({
                 inside CreditsProvider because the voice controls show a
                 price and refresh the balance after spending it. */}
             <VoiceAvailabilityProvider>
-            <DashboardBackground />
-            {/* A second, much quieter ambient layer above the globe: ten
-                slowly drifting dots and two breathing glows, pure CSS. The
-                globe is a canvas with its own render loop and is not
-                touched — this sits on top of it at z-0 and costs nothing
-                per frame. */}
-            <div className="pointer-events-none fixed inset-0 z-0">
-              <AmbientDots />
-            </div>
             {/* WHAT A PAGE SAYS WHEN IT CANNOT REACH THE SERVER.
                 Mounted once, above the whole dashboard, because the
                 service worker will happily serve the last version of any
@@ -137,7 +143,7 @@ export default async function DashboardLayout({
                 updating. Renders nothing while the connection is fine. */}
             <OfflineBanner />
             <div className="relative z-10 flex min-h-screen">
-              <Sidebar email={user.email ?? ""} planName={plan.name} isOwner={isAdmin} />
+              <Sidebar email={user.email ?? ""} planName={plan.name} isOwner={isAdmin} recent={recent} />
               <div className="flex min-w-0 flex-1 flex-col">
                 <TopNav email={user.email ?? ""} />
                 {/* Below the top bar and ABOVE the page transition, so it
@@ -157,16 +163,20 @@ export default async function DashboardLayout({
                     had nothing to land on, and so did the page's own
                     outline.
                     Putting it in the layout is what makes it true for all
-                    48 pages instead of 8, and the four components below
-                    COUNT: 48 /page\.tsx$/ in src/app/dashboard/
+                    49 pages instead of 8, and the four components below
+                    COUNT: 49 /page\.tsx$/ in src/app/dashboard/
                     became plain <div>s in the same change: a <main>
                     inside a <main> is invalid, and two landmarks are
                     worse than one in the wrong place. */}
-                <main id="main-content" className="flex-1">
+                {/* pb-16 below md: the phone's bottom bar
+                    (components/dashboard/mobile-tab-bar.tsx) sits over the
+                    last 64px, and content must not end underneath it. */}
+                <main id="main-content" className="flex-1 pb-16 md:pb-0">
                   <PageTransition>{children}</PageTransition>
                 </main>
               </div>
             </div>
+            <MobileTabBar />
             <ToastContainer />
             {/* ONE ROW PER SCREEN CHANGE, for every dashboard page.
                 Mounted HERE and nowhere else: this layout is what

@@ -285,8 +285,10 @@ const MUTANTS = [
     // suffix. Same lesson as the matcher above: STALE is not SURVIVED.
     name: "the coding block is dropped from the per-message suffix, so it never ships",
     file: CHAT_ROUTE,
-    from: "      buildEntityMentionPromptAddition(mentionedEntities) + codingContext + deepDive.prompt;",
-    to: "      buildEntityMentionPromptAddition(mentionedEntities) + deepDive.prompt;",
+    // RE-ANCHORED 2026-10-04: the work mode (lib/chat/work-modes.ts)
+    // joined the end of the same line.
+    from: "      buildEntityMentionPromptAddition(mentionedEntities) + codingContext + deepDive.prompt + workModeInstruction(workMode);",
+    to: "      buildEntityMentionPromptAddition(mentionedEntities) + deepDive.prompt + workModeInstruction(workMode);",
   },
   {
     name: "a coding-context failure is no longer caught, so it costs the message",

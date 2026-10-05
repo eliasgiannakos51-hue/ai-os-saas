@@ -248,7 +248,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
     <div className="mb-6 space-y-5 surface" id="notifications">
       <div>
         <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Bell className="h-4 w-4 text-orange-400" /> {t("title")}
+          <Bell className="h-4 w-4 text-foreground" /> {t("title")}
         </h2>
         <p className="mt-1 text-xs text-muted">{t("description")}</p>
         {/* SAID ONCE, AT THE TOP, RATHER THAN PER ROW. The Email column
@@ -297,7 +297,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
                       type="button"
                       onClick={() => toggleType(type)}
                       disabled={busy}
-                      className="text-start disabled:opacity-50"
+                      className="min-h-[44px] text-start disabled:opacity-50"
                     >
                       <span className={`block text-sm ${enabled ? "text-foreground" : "text-muted line-through"}`}>
                         {t(`types.${type}.label`)}
@@ -315,14 +315,19 @@ export function NotificationSettings({ userId }: { userId: string }) {
                     const checked = active.includes(channel);
                     return (
                       <td key={channel} className="py-3 text-center">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          disabled={busy || locked || !usable || !enabled}
-                          onChange={() => toggleChannel(type, channel)}
-                          aria-label={`${t(`types.${type}.label`)} — ${t(`channels.${channel}`)}`}
-                          className="h-5 w-5 accent-orange-500 disabled:opacity-40"
-                        />
+                        {/* The 20px box is pressed through a 44px label
+                            (site audit, D.11: 28 boxes under 44px on a
+                            phone, the most on any screen). */}
+                        <label className="inline-flex h-11 w-11 cursor-pointer items-center justify-center">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            disabled={busy || locked || !usable || !enabled}
+                            onChange={() => toggleChannel(type, channel)}
+                            aria-label={`${t(`types.${type}.label`)} — ${t(`channels.${channel}`)}`}
+                            className="h-5 w-5 accent-foreground disabled:opacity-40"
+                          />
+                        </label>
                       </td>
                     );
                   })}
@@ -338,10 +343,10 @@ export function NotificationSettings({ userId }: { userId: string }) {
       {/* ---- quiet hours ---- */}
       <div className="space-y-2 border-t border-border pt-4">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Moon className="h-4 w-4 text-orange-400" /> {t("quiet.title")}
+          <Moon className="h-4 w-4 text-foreground" /> {t("quiet.title")}
         </h3>
         <p className="text-xs text-muted">{t("quiet.description")}</p>
-        <label className="flex items-center gap-2 text-sm text-foreground">
+        <label className="flex min-h-[44px] items-center gap-2 text-sm text-foreground">
           <input
             type="checkbox"
             checked={quietOn}
@@ -350,7 +355,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
               setQuietOn(e.target.checked);
               void saveQuietHours({ on: e.target.checked, from: quietFrom, to: quietTo, offsetMinutes: offset });
             }}
-            className="h-5 w-5 accent-orange-500"
+            className="h-5 w-5 accent-foreground"
           />
           {t("quiet.enable")}
         </label>
@@ -364,7 +369,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
                 disabled={busy}
                 onChange={(e) => setQuietFrom(e.target.value)}
                 onBlur={() => void saveQuietHours({ on: true, from: quietFrom, to: quietTo, offsetMinutes: offset })}
-                className="rounded-lg border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+                className="min-h-[44px] rounded-item border border-border bg-panel-hover px-3 text-sm text-foreground"
               />
             </label>
             <label className="text-xs text-muted">
@@ -375,7 +380,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
                 disabled={busy}
                 onChange={(e) => setQuietTo(e.target.value)}
                 onBlur={() => void saveQuietHours({ on: true, from: quietFrom, to: quietTo, offsetMinutes: offset })}
-                className="rounded-lg border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+                className="min-h-[44px] rounded-item border border-border bg-panel-hover px-3 text-sm text-foreground"
               />
             </label>
             <p className="text-xs text-muted">
@@ -390,7 +395,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
       {/* ---- chat channels ---- */}
       <div className="space-y-3 border-t border-border pt-4">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <MessageSquare className="h-4 w-4 text-orange-400" /> {t("chat.title")}
+          <MessageSquare className="h-4 w-4 text-foreground" /> {t("chat.title")}
         </h3>
         <p className="text-xs text-muted">{t("chat.description")}</p>
 
@@ -401,15 +406,15 @@ export function NotificationSettings({ userId }: { userId: string }) {
             <div key={kind} className="space-y-1">
               <p className="text-sm text-foreground">{t(`channels.${kind}`)}</p>
               {unavailable ? (
-                <p className="text-xs text-amber-400">{t("chat.notConfigured")}</p>
+                <p className="text-xs text-warning">{t("chat.notConfigured")}</p>
               ) : isConnected ? (
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-emerald-400">{t("chat.connected")}</span>
+                  <span className="text-xs text-success">{t("chat.connected")}</span>
                   <button
                     type="button"
                     onClick={() => void disconnectChat(kind)}
                     disabled={connecting !== null}
-                    className="rounded-lg border border-border px-3 py-1.5 text-xs text-foreground disabled:opacity-50"
+                    className="min-h-[44px] rounded-item border border-border px-3 text-xs text-foreground disabled:opacity-50"
                   >
                     {t("chat.disconnect")}
                   </button>
@@ -428,13 +433,13 @@ export function NotificationSettings({ userId }: { userId: string }) {
                       onChange={(e) => setConnectTarget((prev) => ({ ...prev, [kind]: e.target.value }))}
                       placeholder={t(`chat.${kind}.placeholder`)}
                       aria-label={t(`channels.${kind}`)}
-                      className="min-w-0 flex-1 rounded-lg border border-border bg-panel-hover px-3 py-2 text-sm text-foreground"
+                      className="min-h-[44px] min-w-0 flex-1 rounded-item border border-border bg-panel-hover px-3 text-sm text-foreground"
                     />
                     <button
                       type="button"
                       onClick={() => void connectChat(kind)}
                       disabled={connecting !== null || !(connectTarget[kind] ?? "").trim()}
-                      className="hover:bg-orange-500/10 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 disabled:opacity-50"
+                      className="min-h-[44px] rounded-item border border-foreground/60 px-4 text-xs font-semibold text-foreground hover:bg-foreground/10 disabled:opacity-50"
                     >
                       {connecting === kind ? t("chat.connecting") : t("chat.connect")}
                     </button>

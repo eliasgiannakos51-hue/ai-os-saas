@@ -29,8 +29,6 @@
       "long": "本内容由 AI 生成，可能有误。在依赖之前请核实重要信息。"
     },
     "close": "关闭",
-    "switchToDarkMode": "切换到深色主题",
-    "switchToLightMode": "切换到浅色主题",
     "showPassword": "显示密码",
     "hidePassword": "隐藏密码",
     "networkErrorCheckConnection": "网络错误 — 请检查您的连接后重试。",
@@ -63,7 +61,6 @@
       "lastResortBody": "Ionexa 需要联网才能加载新数据。你已经打开过的页面仍可从本机缓存中查看，正在处理的内容也安全地保存在服务器上。"
     },
     "creditsUnlimited": "无限制",
-    "whatIsThis": "这是什么？",
     "examplesLabel": "试试：",
     "newMessagesBelow": "下方有新消息",
     "downloadPdf": {
@@ -128,7 +125,7 @@
       "apps": "应用点子",
       "images": "图片点子",
       "videos": "视频点子",
-      "coding": "AI 编程",
+      "coding": "编程",
       "dataAnalysis": "看看数字怎么说",
       "documents": "文档",
       "presentations": "演示文稿",
@@ -225,7 +222,8 @@
       "personalShopping": "购物",
       "personalFinance": "个人理财",
       "personalJournal": "日志",
-      "personalLifeOs": "生活系统"
+      "personalLifeOs": "生活系统",
+      "activity": "动态"
     },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",
@@ -286,13 +284,31 @@
       "posts": "说一次，就能得到每个平台各一条、长度和语气各自贴合的帖子。它不发布任何内容——由你复制并发布。",
       "projects": "有目标的文件夹。你放什么就有什么——不会自己进来。",
       "aiMemory": "对话记住了你的哪些事，以及如何删除。",
-      "meetings": "把录音变成文字记录、摘要，以及由你挑选的行动。"
+      "meetings": "把录音变成文字记录、摘要，以及由你挑选的行动。",
+      "activity": "下一步、变化、进度和你的数据"
     },
     "closeMenu": "关闭菜单",
     "rail": {
       "new": "新建",
-      "recent": "最近",
-      "allTools": "全部工具"
+      "chat": "对话",
+      "coding": "编程",
+      "allTools": "全部工具",
+      "recentTools": "最近使用的工具",
+      "settings": "设置",
+      "pin": "固定 {tool}",
+      "unpin": "取消固定 {tool}",
+      "remove": "从最近使用中移除 {tool}",
+      "collapse": "收起侧边栏",
+      "expand": "展开侧边栏",
+      "label": "主菜单",
+      "saveFailed": "无法保存此更改，请重试。"
+    },
+    "tabs": {
+      "home": "首页",
+      "chat": "聊天",
+      "tools": "工具",
+      "you": "我",
+      "label": "主导航"
     }
   },
   "landing": {
@@ -1049,7 +1065,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "最活跃模块",
-      "acrossAllModules": "涵盖所有模块",
       "entry": "{count} 条记录",
       "statRow": {
         "totalEntries": "总记录数",
@@ -1292,6 +1307,10 @@
       "clarificationAnswerPlaceholder": "你的回答……",
       "sources": {
         "title": "来源"
+      },
+      "workMode": {
+        "active": "模式：{mode}",
+        "clear": "取消工作模式"
       }
     },
     "create": {
@@ -1338,7 +1357,9 @@
         "why": "它自己会写。你在任何模块里记的东西都会汇到这一条流里——「上个月我到底做了什么」就是这么答的。"
       },
       "tabAll": "全部",
-      "tabStarred": "已收藏"
+      "tabStarred": "已收藏",
+      "filterSection": "板块",
+      "filterPeriod": "时间段"
     },
     "favorites": {
       "title": "收藏",
@@ -1729,7 +1750,8 @@
       "clarifyTitle": "几个简短的问题：",
       "clarifySkip": "跳过，仍然记录",
       "clarifyContinue": "继续",
-      "clarifyAnswerPlaceholder": "你的回答..."
+      "clarifyAnswerPlaceholder": "你的回答...",
+      "accomplishPlaceholder": "你想完成什么？"
     },
     "createStudio": {
       "title": "创建任何东西",
@@ -2747,7 +2769,20 @@
     "tools": {
       "title": "全部工具",
       "description": "每个工具,一行说明它做什么。",
-      "orPress": "或按 ⌘K 输入名称,或在首页的输入框中描述。"
+      "orPress": "或按 ⌘K 输入名称,或在首页的输入框中描述。",
+      "search": "查找工具",
+      "searchLabel": "搜索工具",
+      "noMatch": "没有名为“{query}”的工具。请在首页的输入框中描述它。",
+      "beta": "测试版",
+      "betaHint": "测试中：可以使用，但尚未具备全部功能。"
+    },
+    "home": {
+      "actions": {
+        "research": "研究",
+        "create": "创作",
+        "run": "执行",
+        "analyze": "分析"
+      }
     }
   },
   "module": {
@@ -2801,7 +2836,6 @@
       "images": "定价页的主视觉图",
       "videos": "60 秒产品演示",
       "coding": "对账 Stripe 付款的脚本",
-      "data-analysis": "哪个方案的流失率最低？",
       "campaigns": "9 月发布 — 邮件 + LinkedIn",
       "presentations": "第三季度董事会汇报 — 要点",
       "ideas": "写给从电子表格转过来的人的通讯"
@@ -3222,9 +3256,24 @@
         "files": "{count, plural, other {# 个文件}}",
         "parts": "{count, plural, other {分 # 部分}}",
         "planSteps": "{count, plural, other {# 个步骤}}",
-        "sources": "{count, plural, other {# 个来源}}"
+        "sources": "{count, plural, other {# 个来源}}",
+        "pages": "{count, plural, other {# 个页面}}",
+        "photos": "{count, plural, =0 {没有照片} other {# 张照片}}"
       },
       "writing": "撰写报告"
+    },
+    "website": {
+      "preparing": "正在准备需求说明",
+      "writing": "正在撰写页面",
+      "photos": "正在放置照片",
+      "checking": "正在检查网站",
+      "saving": "正在保存"
+    },
+    "chatTimeline": {
+      "thinking": "正在思考",
+      "searching_web": "正在搜索网络",
+      "searching_data": "正在搜索你的数据",
+      "writing": "正在撰写回答"
     }
   },
   "problem": {
@@ -3316,7 +3365,7 @@
       "does": "更换套餐、购买额度、设置语言与主题、给助手起名，并把账户里的每一条记录导出为一个文件。",
       "doesNot": "你的记录不在这里——每个模块各自保存。而且「删除账户」不是清空重来的方式：它会结束账户、带走所有内容，并且无法撤销。请先导出。"
     },
-    "overview": {
+    "activity": {
       "is": "你已记录内容的概览，以及下一步该做的一件事。",
       "does": "读取你在各模块中的记录，展示健康分、近期变化，以及一个建议的下一步。",
       "doesNot": "它不会连接你的银行、CRM 或邮箱。这里的每个数字都来自你或你的智能体录入的内容——所以空白的一周就是真的空白，不是还在加载。"
@@ -3808,7 +3857,7 @@
     }
   },
   "coding": {
-    "title": "AI 编程",
+    "title": "编程",
     "description": "五件它会做的事，四件它不做的事。所有操作都只针对框里的那段文本。",
     "code": "代码",
     "copy": "复制",

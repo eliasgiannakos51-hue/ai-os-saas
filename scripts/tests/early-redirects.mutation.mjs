@@ -44,8 +44,10 @@ const MUTANTS = [
   {
     name: "Home goes back to its own literal redirect",
     file: OVERVIEW,
-    from: "    redirect(onboardingTarget);",
-    to: '    redirect("/onboarding");',
+    // RE-ANCHORED 2026-10-04: Home became the design's one block and
+    // the guard one line.
+    from: "  if (onboardingTarget) redirect(onboardingTarget);",
+    to: '  if (onboardingTarget) redirect("/onboarding");',
     expect: "Home's own fallback uses the same function",
   },
   {

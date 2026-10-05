@@ -314,7 +314,7 @@ export function ResearchWorkspace({
             placeholder={t("topicPlaceholder")}
             rows={3}
             maxLength={MAX_TOPIC_CHARS}
-            className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
+            className="min-w-0 flex-1 rounded-item border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
           />
           {/* Dictating a research subject and correcting it before
               pressing Plan — the transcript never starts a run. */}
@@ -337,7 +337,7 @@ export function ResearchWorkspace({
             type="button"
             onClick={() => void plan()}
             disabled={planning || !topic.trim() || capReached}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-button px-4 py-1.5 text-xs font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:opacity-60"
           >
             {planning ? (
               <>
@@ -357,22 +357,22 @@ export function ResearchWorkspace({
               : t("usedThisMonth", { used: usedThisMonth, cap: monthlyCap })}
           </span>
         </div>
-        {capReached && <p className="text-[11px] text-amber-400/90">{t("capReached")}</p>}
+        {capReached && <p className="text-[11px] text-warning/90">{t("capReached")}</p>}
       </section>
 
       {/* The stop. The questions and the price, together, before anything
           expensive happens. */}
       {draft && (
-        <section className="space-y-3 rounded-2xl border border-orange-500/30 bg-orange-500/[0.04] p-4">
+        <section className="space-y-3 rounded-card border border-foreground/30 bg-foreground/[0.04] p-4">
           <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-            <Telescope className="h-4 w-4 text-orange-400" aria-hidden="true" />
+            <Telescope className="h-4 w-4 text-foreground" aria-hidden="true" />
             {t("planTitle")}
           </h2>
           <p className="text-[11px] leading-relaxed text-muted">{t("planIntro")}</p>
 
           <ol className="space-y-2">
             {draft.report.questions.map((q, i) => (
-              <li key={`${q.question}-${i}`} className="rounded-lg border border-border bg-panel/60 p-2.5">
+              <li key={`${q.question}-${i}`} className="rounded-item border border-border bg-panel/60 p-2.5">
                 <p className="text-xs font-medium text-foreground">
                   {i + 1}. {q.question}
                 </p>
@@ -390,7 +390,7 @@ export function ResearchWorkspace({
             <button
               type="button"
               onClick={() => void run(draft.report.id)}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-1.5 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/60 px-4 py-1.5 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
             >
               <Play className="h-3.5 w-3.5" aria-hidden="true" />
               {t("start")}
@@ -398,7 +398,7 @@ export function ResearchWorkspace({
             <button
               type="button"
               onClick={() => setDraft(null)}
-              className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+              className="inline-flex min-h-[44px] items-center rounded-item border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
             >
               {t("notNow")}
             </button>
@@ -473,7 +473,7 @@ export function ResearchWorkspace({
               ]}
             >
               {report.error && (
-                <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-amber-400/90">
+                <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-warning/90">
                   <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
                   {isStoppedMessage(report.error) ? tSteps("stopped") : report.error}
                 </p>
@@ -501,7 +501,7 @@ export function ResearchWorkspace({
                         () => addToast(t("runError"), "error")
                       );
                     }}
-                    className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-border px-2.5 text-[11px] font-medium text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-300"
+                    className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-border px-2.5 text-[11px] font-medium text-muted transition-colors duration-150 hover:border-foreground/50 hover:text-foreground"
                   >
                     <Square className="h-2.5 w-2.5 fill-current" aria-hidden="true" />
                     {tSteps("stop")}
@@ -518,7 +518,7 @@ export function ResearchWorkspace({
                         : t("inProgress")}
                   </p>
                   {report.current_question && report.status === "researching" && (
-                    <p className="line-clamp-2 ps-[18px] text-[11px] leading-relaxed text-muted/80">
+                    <p className="line-clamp-2 ps-[18px] text-[11px] leading-relaxed text-muted">
                       {report.current_question}
                     </p>
                   )}
@@ -531,14 +531,14 @@ export function ResearchWorkspace({
                       aria-valuenow={report.questions_done ?? 0}
                     >
                       <div
-                        className="h-full rounded-full bg-orange-500 transition-all duration-500"
+                        className="h-full rounded-full bg-button transition-all duration-500"
                         style={{
                           width: `${Math.round(((report.questions_done ?? 0) / report.questions_total) * 100)}%`,
                         }}
                       />
                     </div>
                   )}
-                  <p className="ps-[18px] text-[11px] text-muted/70">{t("keepsRunning")}</p>
+                  <p className="ps-[18px] text-[11px] text-muted">{t("keepsRunning")}</p>
                 </div>
               )}
               {/* What each question found and took — live while it runs,
@@ -629,7 +629,7 @@ export function ResearchWorkspace({
           {open.document_id && (
             <Link
               href={`/dashboard/documents/${open.document_id}`}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
             >
               <FileText className="h-3.5 w-3.5" aria-hidden="true" />
               {t("openDocument")}

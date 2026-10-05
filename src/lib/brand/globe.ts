@@ -1,8 +1,8 @@
 /**
  * THE GLOBE, DEFINED ONCE.
  *
- * Ionexa had two marks. The backdrop (components/auth/auth-background.tsx)
- * is a wireframe globe: a sphere with latitude and meridian ellipses. The
+ * Ionexa had two marks. The backdrop (a full-page wireframe globe, removed
+ * with every backdrop on 2026-10-04) was a sphere of ellipses. The
  * favicon, the apple icon and the email logo were a different drawing —
  * a ring with a tilted orbit and a node — and the ThinkingIndicator was a
  * third thing again, a three-node constellation borrowed from

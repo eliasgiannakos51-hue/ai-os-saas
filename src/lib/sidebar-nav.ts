@@ -10,6 +10,7 @@ import {
 import {
   MODULE_ICONS,
   OVERVIEW_ICON,
+  ACTIVITY_ICON,
   CHAT_ICON,
   CREATE_ICON,
   SETTINGS_ICON,
@@ -356,6 +357,11 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     heading: "See",
     items: [
       { href: TIMELINE_NAV_ITEM.href, label: "Timeline", icon: TIMELINE_ICON, hintKey: "mine" },
+      // WHAT HOME USED TO CARRY. Home became the design's one block on
+      // 2026-10-04 (docs/CONTEXT.md, «Όχι κάρτες, όχι στατιστικά, όχι
+      // λίστες»), and "Καμία λειτουργία δεν χάνεται" put the next step,
+      // what changed, progress, the numbers and recent entries here.
+      { href: "/dashboard/activity", label: "Activity", icon: ACTIVITY_ICON, hintKey: "activity" },
       { href: "/dashboard/files", label: "Files", icon: FILES_ICON, hintKey: "files" },
       { href: "/dashboard/finance", label: "Finance", icon: MODULE_ICONS.finance, hintKey: "finance" },
       { href: "/dashboard/sales", label: "Sales", icon: MODULE_ICONS.sales, hintKey: "sales" },

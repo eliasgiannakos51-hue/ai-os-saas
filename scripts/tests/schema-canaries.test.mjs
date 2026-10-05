@@ -181,8 +181,6 @@ console.log("\n== 3. every migration in the window has a canary, or says why it 
 // object exist"; a file that only revokes, grants, or replaces the body of
 // a function that already existed cannot be seen that way, by anybody.
 const NOT_PROBEABLE = {
-  "20260928000000_privileges_rls_cannot_scope.sql":
-    "revokes and re-grants privileges; nothing new exists afterwards to probe for",
   "20261002000000_search_index_locale_translations_only.sql":
     "`create or replace` on search_index_sync, which existed before it. The function is present whether or not this file ran, so its existence proves nothing — the property it changes is behavioural and only unified-search.dbtest.mjs can see it",
   "20261004000000_revoke_public_execute_prune_project_links.sql":

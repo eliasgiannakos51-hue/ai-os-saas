@@ -69,7 +69,7 @@ function CopyButton({ text, className }: { text: string; className?: string }) {
       onClick={copy}
       className={
         className ??
-        "inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+        "inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
       }
     >
       <Copy className="h-3.5 w-3.5" aria-hidden="true" />
@@ -224,7 +224,7 @@ export function PostsWorkspace({
           onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_CHARS))}
           placeholder={t("form.descriptionPlaceholder")}
           rows={4}
-          className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+          className="mt-2 w-full rounded-card border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-foreground/40"
         />
         <fieldset className="mt-3">
           <legend className="text-xs font-medium text-muted">{t("form.platforms")}</legend>
@@ -235,8 +235,8 @@ export function PostsWorkspace({
               return (
                 <label
                   key={p}
-                  className={`inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm ${
-                    on ? "border-orange-500/60 text-foreground" : "border-border text-muted"
+                  className={`inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-item border px-3 text-sm ${
+                    on ? "border-foreground/60 text-foreground" : "border-border text-muted"
                   }`}
                 >
                   <input type="checkbox" checked={on} onChange={() => togglePlatform(p)} />
@@ -262,7 +262,7 @@ export function PostsWorkspace({
             <button
               type="button"
               onClick={stopRun}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-border px-4 text-sm font-medium text-foreground"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-item border border-border px-4 text-sm font-medium text-foreground"
             >
               <Square className="h-3.5 w-3.5" aria-hidden="true" />
               {tSteps("stop")}
@@ -273,7 +273,7 @@ export function PostsWorkspace({
               data-testid="posts-generate"
               onClick={generate}
               disabled={!description.trim()}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-4 text-sm font-semibold text-black hover:bg-orange-400 disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-item bg-button px-4 text-sm font-semibold text-button-ink hover:bg-button disabled:opacity-50"
             >
               <Play className="h-3.5 w-3.5" aria-hidden="true" />
               {t("form.generate")}
@@ -299,7 +299,7 @@ export function PostsWorkspace({
               const spec = PLATFORMS[post.platform];
               const clipboard = postClipboardText(post);
               return (
-                <li key={post.platform} className="flex flex-col rounded-xl border border-border bg-background p-4">
+                <li key={post.platform} className="flex flex-col rounded-card border border-border bg-background p-4">
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="text-sm font-semibold text-foreground">{spec.label}</h3>
                     <span className="text-[11px] text-muted">
@@ -315,7 +315,7 @@ export function PostsWorkspace({
               );
             })}
             {missing.map((p) => (
-              <li key={p} className="rounded-xl border border-dashed border-border p-4 text-xs text-muted">
+              <li key={p} className="rounded-card border border-dashed border-border p-4 text-xs text-muted">
                 {t("result.missing", { platform: PLATFORMS[p].label })}
               </li>
             ))}
@@ -339,7 +339,7 @@ export function PostsWorkspace({
                   }
                   className="min-w-0 flex-1 text-start disabled:cursor-default"
                 >
-                  <p className="line-clamp-1 text-sm text-foreground">{row.description}</p>
+                  <p className="break-words text-sm text-foreground">{row.description}</p>
                   <p className="text-[11px] text-muted">
                     {row.set ? row.platforms.map((p) => PLATFORMS[p].label).join(" · ") : t("history.failed")}
                     {" · "}
@@ -350,7 +350,7 @@ export function PostsWorkspace({
                   type="button"
                   onClick={() => remove(row.id)}
                   aria-label={t("history.delete")}
-                  className="rounded-md p-2 text-muted hover:text-foreground"
+                  className="rounded-item p-2 text-muted hover:text-foreground"
                 >
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>

@@ -65,7 +65,7 @@ export default async function ContactPage() {
       <div className="mx-auto max-w-2xl">
         <Link
           href="/"
-          className="text-sm tracking-widest text-orange-500 transition-colors hover:text-orange-400"
+          className="text-sm tracking-widest text-foreground transition-colors hover:text-foreground"
         >
           Ionexa AI
         </Link>
@@ -76,7 +76,7 @@ export default async function ContactPage() {
         {status !== "ok" ? (
           <div
             role="status"
-            className="mt-6 flex gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-xs leading-relaxed text-amber-200"
+            className="mt-6 flex gap-3 rounded-card border border-warning/40 bg-warning/10 p-4 text-xs leading-relaxed text-warning"
           >
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
             <div className="space-y-2">

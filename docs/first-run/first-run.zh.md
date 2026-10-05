@@ -1,12 +1,12 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **718 strings**. The whole product is 3443, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **586 strings**. The whole product is 3480, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 459 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 357 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (49)
+## Tier 1 — THE SENTENCES — read these (21)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -126,163 +126,7 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 这些条目是演示数据——一家小设计工作室最近三个月的记录，不是你的。
 
-**`sidebar.hints.aiMemory`**
-
-> EN — What the chat has kept about you, and how to remove it.
-
-对话记住了你的哪些事，以及如何删除。
-
-**`sidebar.hints.apps`**
-
-> EN — Keep track of apps you are planning or have already shipped. It does not build them.
-
-记录你正在筹划或已经上线的应用。它不会构建应用。
-
-**`sidebar.hints.coding`**
-
-> EN — Write, explain, fix, convert and test snippets of code. It does not run code or open a repository.
-
-编写、解释、修复、转换和测试代码片段。它不运行代码，也不访问代码仓库。
-
-**`sidebar.hints.create`**
-
-> EN — Describe what you want in one sentence; it works out the rest.
-
-用一句话描述你要什么，其余的它自己判断。
-
-**`sidebar.hints.deepResearch`**
-
-> EN — Give it a topic and it searches, cross-checks and writes a sourced report
-
-给一个主题，它会搜索、交叉核对并写出带来源的报告
-
-**`sidebar.hints.files`**
-
-> EN — Upload PDFs, Word and Excel files and ask the AI questions about them
-
-上传 PDF、Word 和 Excel 文件，然后向 AI 提问
-
-**`sidebar.hints.images`**
-
-> EN — Keep track of images you are planning or have already made. It does not generate them.
-
-记录你正在筹划或已经做好的图片。它不会生成图片。
-
-**`sidebar.hints.integrations`**
-
-> EN — Connect Gmail, Drive and Slack so the AI can work with your real data
-
-连接 Gmail、Drive 与 Slack，让 AI 处理你真实的数据
-
-**`sidebar.hints.library`**
-
-> EN — Starred, recent and search — all your own entries in one place
-
-收藏、最近和搜索 —— 你的东西都在这里
-
-**`sidebar.hints.marketplace`**
-
-> EN — Share an agent's shape as a template, and start from one someone else shared.
-
-把一个智能体的结构作为模板分享，也可以从别人分享的模板开始。
-
-**`sidebar.hints.meetings`**
-
-> EN — Turn a recording into a transcript, a summary, and actions you choose from.
-
-把录音变成文字记录、摘要，以及由你挑选的行动。
-
-**`sidebar.hints.posts`**
-
-> EN — Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.
-
-说一次，就能得到每个平台各一条、长度和语气各自贴合的帖子。它不发布任何内容——由你复制并发布。
-
-**`sidebar.hints.predictions`**
-
-> EN — Patterns found in your own rows, each with the number of entries it rests on and a link to them.
-
-在你自己的记录里发现的规律，每条都标明依据的条数，并可点回原始记录。
-
-**`sidebar.hints.presentations`**
-
-> EN — Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.
-
-描述一份演示并获得幻灯片——PowerPoint 或 PDF，配图来自 Unsplash 或你自己的照片。它不绘制图表。
-
-**`sidebar.hints.projects`**
-
-> EN — A folder with a goal. What you put in is what is in it — nothing is dragged in with it.
-
-有目标的文件夹。你放什么就有什么——不会自己进来。
-
-**`sidebar.hints.published`**
-
-> EN — Every site you have live on the web, with its traffic and version history
-
-你所有已上线的网站，含访问量与版本历史
-
-**`sidebar.hints.records`**
-
-> EN — Every log in one place — filter by type instead of hunting the menu
-
-所有记录集中在一处——按类型筛选，不必在菜单里找
-
-**`sidebar.hints.videos`**
-
-> EN — Keep track of videos you are planning or have already made. It does not generate them.
-
-记录你正在筹划或已经做好的视频。它不会生成视频。
-
-**`sidebar.hints.voice`**
-
-> EN — Have text read out loud, or speak and have it written down. Minutes are metered and the price per minute is on the page.
-
-把文字读出来，或者说话并转成文字。按分钟计量，每分钟价格显示在页面上。
-
 ### first result
-
-**`dashboard.overview.healthScore.suggestion.recency`**
-
-> EN — You haven't logged anything in a while — add a new entry to pick things back up.
-
-你有一段时间没有记录任何内容了 — 添加一条新条目继续前进。
-
-**`dashboard.overview.nextAction.revisitLink`**
-
-> EN — You linked "{source}" to "{target}" a few days ago — worth revisiting?
-
-你几天前把"{source}"关联到了"{target}" — 值得重新看看吗?
-
-**`dashboard.overview.nextAction.startNew`**
-
-> EN — No new activity in the last 3 days — ready to start something new?
-
-过去3天没有新活动 — 准备好开始新的事情了吗?
-
-**`dashboard.overview.setupProgress.suggestion`**
-
-> EN — Your activity score appears once you have logged {count} entries — enough that no single one decides it.
-
-记录 {count} 条条目后会出现活跃度评分——足够多，才不会由某一条决定。
-
-**`dashboard.overview.statRow.mostActiveExplain`**
-
-> EN — The module you have written in most. Where your attention has gone.
-
-你写得最多的模块，也就是注意力所在。
-
-**`dashboard.overview.statRow.thisWeekExplain`**
-
-> EN — Logged in the last seven days — how active this week has been.
-
-最近七天记录的条目——本周的活跃程度。
-
-**`common.betaExpiry`**
-
-> EN — Your beta access expires in {days, plural, one {# day} other {# days}}. <link>Upgrade to keep full access</link>.
-
-你的 Beta 访问将在 {days, plural, other {#天}}后到期。<link>升级即可继续使用全部功能</link>。
 
 **`common.listCapped`**
 
@@ -302,19 +146,7 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 描述任何内容——一个产品创意、一笔交易、一条用户反馈、一项指标——它会自动归入正确的模块。
 
-**`dashboard.energyCheckIn.whatItDoes`**
-
-> EN — Ionexa uses this to pick which plan step to suggest next — lighter work when you're low, demanding work when you're not.
-
-Ionexa 用它来挑选下一个建议的计划步骤——状态低时给轻松的，状态好时给有挑战的。
-
-**`sampleData.loadFree`**
-
-> EN — Free — nothing is generated, and you can remove it in one click
-
-免费——不生成任何内容，一键即可移除
-
-## Tier 2 — The labels — skim these (459)
+## Tier 2 — The labels — skim these (357)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1550,311 +1382,11 @@ AI 编程
 
 关闭菜单
 
-**`sidebar.groups.ask`**
+**`sidebar.items.activity`**
 
-> EN — Ask
+> EN — Activity
 
-提问
-
-**`sidebar.groups.business`**
-
-> EN — Business
-
-业务
-
-**`sidebar.groups.connect`**
-
-> EN — Connect
-
-连接
-
-**`sidebar.groups.engineering`**
-
-> EN — Engineering
-
-工程
-
-**`sidebar.groups.make`**
-
-> EN — Make
-
-创建
-
-**`sidebar.groups.organise`**
-
-> EN — Organise
-
-整理
-
-**`sidebar.groups.personal`**
-
-> EN — Personal
-
-个人
-
-**`sidebar.groups.run`**
-
-> EN — Run
-
-运行
-
-**`sidebar.groups.see`**
-
-> EN — See
-
-查看
-
-**`sidebar.groups.settings`**
-
-> EN — Settings
-
-设置
-
-**`sidebar.groups.verify`**
-
-> EN — Verify
-
-验证
-
-**`sidebar.hints.affiliate`**
-
-> EN — Your referral link, what you've earned, and how you get paid.
-
-你的推广链接、已赚金额，以及如何收款。
-
-**`sidebar.hints.agents`**
-
-> EN — Plan the agents you want. A tracker, not a runtime.
-
-规划你想要的智能体。这是记录，不是运行时。
-
-**`sidebar.hints.analytics`**
-
-> EN — Metrics you're watching.
-
-你在关注的指标。
-
-**`sidebar.hints.automation`**
-
-> EN — Things that run on a schedule.
-
-按计划自动运行的事情。
-
-**`sidebar.hints.businessHealth`**
-
-> EN — MRR, margin, churn and runway. Owner only.
-
-MRR、毛利、流失与现金。仅限所有者。
-
-**`sidebar.hints.campaigns`**
-
-> EN — Plan campaigns — channel, budget, status.
-
-规划营销活动——渠道、预算、状态。
-
-**`sidebar.hints.chat`**
-
-> EN — Ask anything — not tied to any module.
-
-什么都可以问——不绑定任何模块。
-
-**`sidebar.hints.competitors`**
-
-> EN — Track rival products, pricing and positioning.
-
-跟踪竞品、定价与定位。
-
-**`sidebar.hints.content`**
-
-> EN — Content ideas, captions and threads.
-
-内容创意、文案和推文串。
-
-**`sidebar.hints.costs`**
-
-> EN — What every AI call has cost, per model and per day.
-
-每次 AI 调用的花费，按模型和日期列出。
-
-**`sidebar.hints.dataAnalysis`**
-
-> EN — Analysis requests and what you found.
-
-分析请求以及你的发现。
-
-**`sidebar.hints.decisions`**
-
-> EN — Weigh the options before you decide.
-
-决定之前先权衡选项。
-
-**`sidebar.hints.documents`**
-
-> EN — Freeform notes and documents you write yourself.
-
-你自己撰写的自由笔记和文档。
-
-**`sidebar.hints.favorites`**
-
-> EN — Everything you've starred.
-
-你收藏的一切。
-
-**`sidebar.hints.feedback`**
-
-> EN — What users told you, in one place.
-
-用户告诉你的话，集中在一处。
-
-**`sidebar.hints.finance`**
-
-> EN — Log income and expenses.
-
-记录收入和支出。
-
-**`sidebar.hints.formSubmissions`**
-
-> EN — Everything visitors sent through a form on your published sites
-
-访客通过已发布网站上的表单提交的全部内容
-
-**`sidebar.hints.help`**
-
-> EN — Answers to the questions people ask most — no credits used.
-
-最常见问题的答案，不消耗额度。
-
-**`sidebar.hints.home`**
-
-> EN — Your dashboard — activity, stats and quick actions.
-
-你的仪表板——活动、统计和快捷操作。
-
-**`sidebar.hints.ideas`**
-
-> EN — Capture new ideas before you forget them.
-
-在忘记之前记下新想法。
-
-**`sidebar.hints.learning`**
-
-> EN — Track what you're studying.
-
-记录你正在学习的内容。
-
-**`sidebar.hints.memory`**
-
-> EN — Search across everything you have saved.
-
-搜索你保存过的一切。
-
-**`sidebar.hints.mine`**
-
-> EN — Everything you have made, newest first — with a starred-only tab
-
-你创建的全部内容，最新在前，并有仅收藏标签页
-
-**`sidebar.hints.missionControl`**
-
-> EN — Set a goal, AI breaks it into steps.
-
-设定目标，AI 拆成步骤。
-
-**`sidebar.hints.newEntry`**
-
-> EN — Write anything down — it files itself
-
-随便写点什么 —— 它会自己归位
-
-**`sidebar.hints.products`**
-
-> EN — Product plans — pricing, roadmap, launch.
-
-产品规划——定价、路线图、发布。
-
-**`sidebar.hints.productWorkflow`**
-
-> EN — Your products, patterns and mentor in one view.
-
-你的产品、模式和导师，一个视图。
-
-**`sidebar.hints.reflection`**
-
-> EN — A weekly summary of your progress.
-
-每周进度小结。
-
-**`sidebar.hints.research`**
-
-> EN — Save research, sources and summaries.
-
-保存研究、来源和摘要。
-
-**`sidebar.hints.routing`**
-
-> EN — Which model each kind of request is sent to.
-
-每类请求会发送到哪个模型。
-
-**`sidebar.hints.sales`**
-
-> EN — Leads, outreach and next steps.
-
-线索、触达和后续动作。
-
-**`sidebar.hints.settings`**
-
-> EN — Account, billing, language and preferences.
-
-账户、账单、语言和偏好设置。
-
-**`sidebar.hints.systemHealth`**
-
-> EN — Whether the database, the queues and the providers are answering.
-
-数据库、队列和服务商是否在响应。
-
-**`sidebar.hints.team`**
-
-> EN — Invite people to your workspace.
-
-邀请他人加入你的工作区。
-
-**`sidebar.hints.timeline`**
-
-> EN — Everything you've done, in order.
-
-你做过的一切，按时间排列。
-
-**`sidebar.hints.trading`**
-
-> EN — Trade log — symbol, direction, result, P&L.
-
-交易日志——品种、方向、结果、盈亏。
-
-**`sidebar.hints.tradingJournal`**
-
-> EN — Your trades, with the reasoning you wrote at the time.
-
-你的交易记录，以及当时写下的理由。
-
-**`sidebar.hints.tradingWorkflow`**
-
-> EN — Your trades, patterns and mentor in one view.
-
-你的交易、模式和导师，一个视图。
-
-**`sidebar.hints.websiteBuilder`**
-
-> EN — Describe a site and AI generates the real page.
-
-描述一个网站，AI 生成真实页面。
-
-**`sidebar.hints.websites`**
-
-> EN — Track sites you own — name, URL, status. No generation.
-
-记录你拥有的网站——名称、网址、状态。不生成。
+动态
 
 **`sidebar.items.affiliate`**
 
@@ -1978,9 +1510,9 @@ MRR、毛利、流失与现金。仅限所有者。
 
 **`sidebar.items.coding`**
 
-> EN — AI Coding
+> EN — Coding
 
-AI 编程
+编程
 
 **`sidebar.items.competitors`**
 
@@ -2540,17 +2072,83 @@ DevOps
 
 全部工具
 
+**`sidebar.rail.chat`**
+
+> EN — Chat
+
+对话
+
+**`sidebar.rail.coding`**
+
+> EN — Coding
+
+编程
+
+**`sidebar.rail.collapse`**
+
+> EN — Collapse sidebar
+
+收起侧边栏
+
+**`sidebar.rail.expand`**
+
+> EN — Expand sidebar
+
+展开侧边栏
+
+**`sidebar.rail.label`**
+
+> EN — Main
+
+主菜单
+
 **`sidebar.rail.new`**
 
 > EN — New
 
 新建
 
-**`sidebar.rail.recent`**
+**`sidebar.rail.pin`**
 
-> EN — Recent
+> EN — Pin {tool}
 
-最近
+固定 {tool}
+
+**`sidebar.rail.recentTools`**
+
+> EN — Recent tools
+
+最近使用的工具
+
+**`sidebar.rail.remove`**
+
+> EN — Remove {tool} from Recent tools
+
+从最近使用中移除 {tool}
+
+**`sidebar.rail.saveFailed`**
+
+> EN — Could not save that change. Try again.
+
+无法保存此更改，请重试。
+
+**`sidebar.rail.settings`**
+
+> EN — Settings
+
+设置
+
+**`sidebar.rail.unpin`**
+
+> EN — Unpin {tool}
+
+取消固定 {tool}
+
+**`sidebar.tabs.label`**
+
+> EN — Main navigation
+
+主导航
 
 ### first result
 
@@ -2559,246 +2157,6 @@ DevOps
 > EN — Could not load your ideas: {message}
 
 无法加载你的创意：{message}
-
-**`dashboard.insights.title`**
-
-> EN — What I noticed
-
-我注意到的
-
-**`dashboard.overview.activeMission.open`**
-
-> EN — Open the plan
-
-打开计划
-
-**`dashboard.overview.activeMission.stepsLabel`**
-
-> EN — {completed}/{total} steps completed
-
-已完成 {completed}/{total} 步
-
-**`dashboard.overview.aiCoach.entryCount`**
-
-> EN — {count, plural, one {# new {module} entry} other {# new {module} entries}}
-
-{module} 中新增 {count} 条记录
-
-**`dashboard.overview.aiCoach.mostActiveIn`**
-
-> EN — Most active in {module}
-
-在 {module} 中最活跃
-
-**`dashboard.overview.aiCoach.noActivity`**
-
-> EN — No activity yet this week — log something to get started.
-
-本周还没有活动——记录点什么开始吧。
-
-**`dashboard.overview.betaFeedback.linkLabel`**
-
-> EN — Share feedback
-
-提交反馈
-
-**`dashboard.overview.betaFeedback.message`**
-
-> EN — Thanks for testing Ionexa AI. Your feedback is welcome.
-
-感谢你测试 Ionexa AI。欢迎提供反馈。
-
-**`dashboard.overview.healthScore.buildingMomentum`**
-
-> EN — Building momentum
-
-势头正在增长
-
-**`dashboard.overview.healthScore.excellentConsistency`**
-
-> EN — Excellent consistency
-
-非常稳定
-
-**`dashboard.overview.healthScore.justStarting`**
-
-> EN — Just getting started
-
-刚刚起步
-
-**`dashboard.overview.healthScore.strongProgress`**
-
-> EN — Strong progress
-
-进展强劲
-
-**`dashboard.overview.healthScore.suggestion.consistency`**
-
-> EN — Try logging something every day this week.
-
-试着这周每天都记录一些内容。
-
-**`dashboard.overview.healthScore.suggestion.coverage`**
-
-> EN — Try exploring a module you haven't used yet.
-
-试试探索一个你还没用过的模块。
-
-**`dashboard.overview.healthScore.suggestion.missionSteps`**
-
-> EN — Complete a plan step to keep your momentum going.
-
-完成一个计划步骤以保持你的势头。
-
-**`dashboard.overview.healthScore.title`**
-
-> EN — Business Health Score
-
-业务健康分数
-
-**`dashboard.overview.next.title`**
-
-> EN — Next
-
-接下来
-
-**`dashboard.overview.nextAction.continueMission`**
-
-> EN — Continue: {step} from your "{goal}" plan
-
-继续：来自你的"{goal}"计划的 {step}
-
-**`dashboard.overview.nextAction.cta`**
-
-> EN — Go there →
-
-前往 →
-
-**`dashboard.overview.setupProgress.count`**
-
-> EN — {done} of {total} steps
-
-{total} 步中的 {done} 步
-
-**`dashboard.overview.setupProgress.steps.firstEntry`**
-
-> EN — Log your first entry
-
-记录你的第一条条目
-
-**`dashboard.overview.setupProgress.steps.mission`**
-
-> EN — Set a goal
-
-设定一个目标
-
-**`dashboard.overview.setupProgress.steps.onboarding`**
-
-> EN — Finish the welcome questions
-
-完成欢迎问题
-
-**`dashboard.overview.setupProgress.steps.secondModule`**
-
-> EN — Log something in a second area
-
-在第二个领域记录一些内容
-
-**`dashboard.overview.setupProgress.title`**
-
-> EN — Setup progress
-
-设置进度
-
-**`dashboard.overview.statRow.creditsExplain`**
-
-> EN — What is left of this month's allowance for AI work.
-
-本月 AI 额度的剩余部分。
-
-**`dashboard.overview.statRow.creditsRemaining`**
-
-> EN — Credits Remaining
-
-剩余额度
-
-**`dashboard.overview.statRow.fillsAfter`**
-
-> EN — Fills in after {count} entries
-
-记录 {count} 条后填充
-
-**`dashboard.overview.statRow.fromEntries`**
-
-> EN — {count, plural, one {from # entry} other {from # entries}}
-
-{count, plural, other {来自 # 条记录}}
-
-**`dashboard.overview.statRow.mostActive`**
-
-> EN — Most Active
-
-最活跃
-
-**`dashboard.overview.statRow.ofTotal`**
-
-> EN — {count, plural, one {of # in total} other {of # in total}}
-
-{count, plural, other {共 # 条中的}}
-
-**`dashboard.overview.statRow.openCredits`**
-
-> EN — See the ledger →
-
-查看明细 →
-
-**`dashboard.overview.statRow.openEntries`**
-
-> EN — See the entries →
-
-查看条目 →
-
-**`dashboard.overview.statRow.thisWeek`**
-
-> EN — This Week
-
-本周
-
-**`dashboard.overview.statRow.totalEntries`**
-
-> EN — Total Entries
-
-总记录数
-
-**`dashboard.overview.statRow.totalEntriesExplain`**
-
-> EN — Everything you have logged, in every module, since you started.
-
-你在所有模块中记录过的全部内容。
-
-**`dashboard.overview.whatChanged.entries`**
-
-> EN — new entries
-
-条新记录
-
-**`dashboard.overview.whatChanged.insights`**
-
-> EN — new insights
-
-条新洞察
-
-**`dashboard.overview.whatChanged.since`**
-
-> EN — since {when}
-
-自 {when} 起
-
-**`dashboard.overview.whatChanged.title`**
-
-> EN — What changed
-
-有什么变化
 
 **`errors.boundary.section`**
 
@@ -2854,6 +2212,12 @@ DevOps
 
 查看 {module} →
 
+**`dashboard.createAnything.accomplishPlaceholder`**
+
+> EN — What do you want to accomplish?
+
+你想完成什么？
+
 **`dashboard.createAnything.attachImage`**
 
 > EN — Attach image
@@ -2908,132 +2272,6 @@ DevOps
 
 有一张或多张图片上传失败。
 
-**`dashboard.energyCheckIn.change`**
-
-> EN — Change
-
-更改
-
-**`dashboard.energyCheckIn.checkedInToday`**
-
-> EN — Today's energy: {level}/5.
-
-今天的能量:{level}/5。
-
-**`dashboard.energyCheckIn.levelLabel`**
-
-> EN — Energy level {level}
-
-能量等级 {level}
-
-**`dashboard.energyCheckIn.logged`**
-
-> EN — Energy logged
-
-能量已记录
-
-**`dashboard.energyCheckIn.notePlaceholder`**
-
-> EN — Optional note...
-
-可选备注...
-
-**`dashboard.energyCheckIn.prompt`**
-
-> EN — How's your energy today?
-
-你今天的能量如何?
-
-**`dashboard.energyCheckIn.scaleHigh`**
-
-> EN — 5 = great
-
-5 = 状态很好
-
-**`dashboard.energyCheckIn.scaleLow`**
-
-> EN — 1 = exhausted
-
-1 = 精疲力尽
-
-**`dashboard.energyCheckIn.title`**
-
-> EN — Energy Check-In
-
-能量签到
-
-**`dashboard.firstScreen.build.example`**
-
-> EN — Build a website for my shop
-
-为我的店铺做一个网站
-
-**`dashboard.firstScreen.build.verb`**
-
-> EN — Build
-
-构建
-
-**`dashboard.firstScreen.cost.charged`**
-
-> EN — Uses credits
-
-消耗额度
-
-**`dashboard.firstScreen.cost.free`**
-
-> EN — Free
-
-免费
-
-**`dashboard.firstScreen.cost.freeAllowance`**
-
-> EN — Free up to your monthly limit
-
-在每月额度内免费
-
-**`dashboard.firstScreen.label`**
-
-> EN — Press one — it runs right away
-
-点一个 — 立刻运行
-
-**`dashboard.firstScreen.repeat.example`**
-
-> EN — Every Monday, a summary of my sales
-
-每周一，给我一份销售汇总
-
-**`dashboard.firstScreen.repeat.verb`**
-
-> EN — Repeat
-
-重复
-
-**`dashboard.firstScreen.understand.example`**
-
-> EN — What do my numbers say this week?
-
-我这周的数据说明了什么？
-
-**`dashboard.firstScreen.understand.verb`**
-
-> EN — Understand
-
-理解
-
-**`dashboard.overview.recentEntries.empty`**
-
-> EN — No entries yet.
-
-还没有条目。
-
-**`dashboard.overview.recentEntries.title`**
-
-> EN — Recent Entries
-
-最近条目
-
 **`errors.creditHistory`**
 
 > EN — See credit history
@@ -3064,25 +2302,7 @@ DevOps
 
 早上好
 
-**`sampleData.load`**
-
-> EN — See it with sample data
-
-用示例数据查看
-
-**`sampleData.loadFailed`**
-
-> EN — That did not work. Try again.
-
-没有成功，请重试。
-
-**`sampleData.loading`**
-
-> EN — Loading…
-
-加载中…
-
-## Tier 3 — Further in — only if you have time (210)
+## Tier 3 — Further in — only if you have time (208)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3161,18 +2381,6 @@ _Reachable from these screens but deeper in: shared components, error states, th
 > EN — Notifications
 
 通知
-
-**`common.switchToDarkMode`**
-
-> EN — Switch to dark mode
-
-切换到深色主题
-
-**`common.switchToLightMode`**
-
-> EN — Switch to light mode
-
-切换到浅色主题
 
 **`common.toggleMenu`**
 

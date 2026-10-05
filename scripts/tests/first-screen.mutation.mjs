@@ -34,7 +34,6 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/first-screen.test.mjs";
 const LIB = "src/lib/overview/first-screen-examples.ts";
-const STRIP = "src/components/overview/first-screen-examples.tsx";
 const GREETING = "src/components/overview/greeting-header.tsx";
 const OVERVIEW = "src/app/dashboard/overview/page.tsx";
 const CHAT_PAGE = "src/app/dashboard/chat/page.tsx";
@@ -43,7 +42,7 @@ const AGENTS_WS = "src/components/agents/agents-workspace.tsx";
 const EN = "messages/en.json";
 const EL = "messages/el.json";
 const TEMPLATES_ROUTE = "src/app/api/agents/templates/route.ts";
-const TARGETS = [LIB, STRIP, GREETING, OVERVIEW, CHAT_PAGE, CHAT_WS, AGENTS_WS, EN, EL, TEMPLATES_ROUTE];
+const TARGETS = [GATE, LIB, GREETING, OVERVIEW, CHAT_PAGE, CHAT_WS, AGENTS_WS, EN, EL, TEMPLATES_ROUTE];
 
 const MUTANTS = [
   // ---- A. THE CAPABILITIES ------------------------------------------
@@ -159,11 +158,14 @@ const MUTANTS = [
   },
   {
     dimension: "I. price is visible",
-    name: "the card stops showing what it costs",
-    file: STRIP,
-    from: "                    {t(`cost.${example.cost}`)}",
-    to: "                    {null}",
-    expect: "the strip renders the cost of every card",
+    // RE-AIMED 2026-10-04: the strip left Home with the owner's design,
+    // so the defect is a screen drawing the examples again without the
+    // cost beside them.
+    name: "a screen draws the examples without what they cost",
+    file: OVERVIEW,
+    from: "        <QuickActions />",
+    to: "        <QuickActions />\n        {FIRST_SCREEN_EXAMPLES.map((example) => <p key={example.id}>{example.id}</p>)}",
+    expect: "every screen that draws an example draws its cost",
   },
   {
     dimension: "I. price is visible",
@@ -245,13 +247,15 @@ const MUTANTS = [
   },
 
   // ---- F. THE HIERARCHY ---------------------------------------------
+  // RE-AIMED 2026-10-04 to the owner's design of Home: the greeting is
+  // the headline, the field comes before the four quick actions.
   {
     dimension: "F. hierarchy",
     name: "the vague question comes back as the headline",
     file: GREETING,
-    from: '          {tPromise("oneSentence")}\n        </h1>',
-    to: '          {t("heroQuestion")}\n        </h1>',
-    expect: "the one sentence IS the headline",
+    from: "        {tPromise(`greeting.${greeting.part}`)}",
+    to: '        {tPromise("heroQuestion")}',
+    expect: "the greeting IS the headline",
   },
   {
     dimension: "F. hierarchy",
@@ -263,47 +267,50 @@ const MUTANTS = [
   },
   {
     dimension: "F. hierarchy",
-    name: "the greeting climbs back above the headline",
+    name: "a second line comes back beside the greeting",
     file: GREETING,
-    from: '      <div className="flex flex-wrap items-center justify-center gap-3">',
-    to: '      <p className="mt-2 text-sm text-muted">{greeting.part}</p>\n      <div className="flex flex-wrap items-center justify-center gap-3">',
-    expect: "is still below the headline",
+    from: '    <div className="flex items-center gap-4">',
+    to: '    <div className="flex items-center gap-4">\n      <p>{tPromise("oneSentence")}</p>',
+    expect: "the sentence is not drawn beside it",
   },
   {
     dimension: "F. hierarchy",
-    name: "the examples move above the input",
+    name: "the quick actions move above the input",
     file: OVERVIEW,
-    // `hero` since redesign phase 1 — the field is 46vh on Home now, and
-    // this anchor moved with it.
-    from: "          <CreateChat showHeading={false} hero />",
-    to: "          <FirstScreenExamples />\n          <CreateChat showHeading={false} hero />",
+    from: '        <div className="mt-6">\n          <WidgetBoundary label="create-chat"',
+    to: '        <QuickActions />\n        <div className="mt-6">\n          <WidgetBoundary label="create-chat"',
     expect: "below the input, not above it",
   },
   {
     dimension: "F. hierarchy",
-    name: "the strip is taken off the first screen",
+    name: "the quick actions are taken off Home",
     file: OVERVIEW,
-    from: "          <FirstScreenExamples />",
-    to: "          {null}",
-    expect: "the overview renders the examples",
+    from: "        <QuickActions />",
+    to: "        {null}",
+    expect: "Home renders the quick actions",
   },
 
   // ---- G. THE INSTRUMENTS -------------------------------------------
   {
     dimension: "G. instruments",
-    name: "the strip stops reading the shared list and writes its own",
-    file: STRIP,
-    from: "        {FIRST_SCREEN_EXAMPLES.map((example) => {",
-    to: "        {[].map((example) => {",
-    expect: "the strip is driven by the shared list",
+    // The renderer census is a scan, and a scan that reads one folder
+    // finds no renderer anywhere and agrees with every claim.
+    name: "the renderer scan reads one folder instead of the tree",
+    file: GATE,
+    from: '})("src");',
+    to: '})("src/lib/overview");',
+    expect: "the tree was scanned",
   },
   {
     dimension: "G. instruments",
-    name: "the strip hardcodes an example instead of translating it",
-    file: STRIP,
-    from: "          const sentence = t(`${example.id}.example`);",
-    to: '          const sentence = "Build a website for my shop";',
-    expect: "and writes no example of its own",
+    // The page the hierarchy checks read. A gate pointed at a file that is
+    // not there reads "" — and `read` returns "" on purpose, so a missing
+    // path must fail on what it was supposed to find, not pass on nothing.
+    name: "the hierarchy is read from a page that does not exist",
+    file: GATE,
+    from: "const overview = read(OVERVIEW);",
+    to: 'const overview = read(OVERVIEW + ".gone");',
+    expect: "Home renders the quick actions",
   },
 ];
 

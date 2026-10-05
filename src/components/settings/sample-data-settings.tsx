@@ -37,7 +37,7 @@ export function SampleDataSettings({ loaded }: { loaded: boolean }) {
       className="mb-6 scroll-mt-20 space-y-3 surface"
     >
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <FlaskConical className="h-4 w-4 text-emerald-400/80" aria-hidden="true" /> {t("title")}
+        <FlaskConical className="h-4 w-4 text-success/80" aria-hidden="true" /> {t("title")}
       </h2>
       <p className="text-xs text-muted">{t("description")}</p>
 
@@ -47,7 +47,7 @@ export function SampleDataSettings({ loaded }: { loaded: boolean }) {
           <SampleDataClearButton />
           <Link
             href={OVERVIEW_NAV_ITEM.href}
-            className="inline-flex min-h-[44px] items-center text-xs font-medium text-orange-400 underline-offset-2 hover:underline"
+            className="inline-flex min-h-[44px] items-center text-xs font-medium text-foreground underline-offset-2 hover:underline"
           >
             {t("open")}
           </Link>

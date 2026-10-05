@@ -135,7 +135,7 @@ export function StudioChat({ context }: { context: string }) {
           messages.map((message) =>
             message.role === "user" ? (
               <div key={message.id} className="flex justify-end">
-                <p className="max-w-[85%] rounded-2xl rounded-tr-sm bg-orange-500 px-3.5 py-2 text-sm text-black">
+                <p className="max-w-[85%] rounded-card rounded-tr-item bg-button px-3.5 py-2 text-sm text-button-ink">
                   {message.content}
                 </p>
               </div>
@@ -157,7 +157,7 @@ export function StudioChat({ context }: { context: string }) {
         <button
           type="button"
           onClick={jumpToBottom}
-          className="absolute bottom-2 left-1/2 z-10 inline-flex min-h-[36px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-orange-500/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-orange-300 shadow-lg transition-colors duration-150 hover:border-orange-500 hover:bg-orange-500/10"
+          className="absolute bottom-2 left-1/2 z-10 inline-flex min-h-[44px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-foreground/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:bg-foreground/10"
         >
           <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
           {tCommon("newMessagesBelow")}
@@ -166,7 +166,7 @@ export function StudioChat({ context }: { context: string }) {
       </div>
 
       {error && (
-        <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+        <p className="rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
           {error}
         </p>
       )}
@@ -184,7 +184,7 @@ export function StudioChat({ context }: { context: string }) {
           type="submit"
           disabled={sending || !input.trim()}
           aria-label={t("chatSend")}
-          className="absolute bottom-1.5 end-1.5 flex h-8 w-8 items-center justify-center rounded-full border border-orange-500/60 text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+          className="absolute bottom-1.5 end-1.5 flex h-11 w-11 items-center justify-center rounded-full border border-foreground/60 text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ArrowUp className="h-4 w-4" aria-hidden="true" />
         </button>

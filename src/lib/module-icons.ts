@@ -12,6 +12,7 @@ import {
   FolderOpen,
   GitBranch,
   Gauge,
+  LayoutDashboard,
   Globe,
   GraduationCap,
   History,
@@ -90,6 +91,8 @@ export const MODULE_ICONS: Record<string, LucideIcon> = {
 };
 
 export const OVERVIEW_ICON: LucideIcon = Home;
+// The cards Home used to carry, on their own page since 2026-10-04.
+export const ACTIVITY_ICON: LucideIcon = LayoutDashboard;
 export const CREATE_ICON: LucideIcon = Sparkles;
 export const CHAT_ICON: LucideIcon = MessageCircle;
 export const SETTINGS_ICON: LucideIcon = Settings;

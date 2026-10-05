@@ -30,7 +30,8 @@ const TOOLTIPS = "scripts/tests/sidebar-and-tooltips.test.mjs";
 const NAV = "src/lib/sidebar-nav.ts";
 const SIDEBAR = "src/components/dashboard/sidebar.tsx";
 const PALETTE = "src/components/dashboard/command-palette.tsx";
-const TOOLS_PAGE = "src/app/dashboard/tools/page.tsx";
+// The groups are assembled and drawn by the grid the page renders (D.6).
+const TOOLS_PAGE = "src/components/tools/tools-grid.tsx";
 const TARGETS = [NAV, SIDEBAR, PALETTE, TOOLS_PAGE];
 
 const MUTANTS = [
@@ -113,10 +114,13 @@ const MUTANTS = [
     // review as a small convenience and is the exact state production
     // reported as "the sidebar shows Run and NO rows".
     name: "the collapse returns, defaulted to open",
-    file: SIDEBAR,
-    from: "    if (group.items.length === 0) return null;",
-    to: "    const expanded = true;\n    void expanded;\n    if (group.items.length === 0) return null;\n    if (!expanded) return <p key={group.heading} />;",
-    expect: "renderGroup has one guard and one render",
+    // RE-ANCHORED 2026-10-04: the groups are drawn on All tools now
+    // (the sidebar of ΣΥΣΤΗΜΑ DESIGN has none), so that is where it
+    // would come back.
+    file: TOOLS_PAGE,
+    from: "<ul className={GRID}>{group.items.map(tile)}</ul>",
+    to: "<ul className={GRID}>{expanded ? group.items.map(tile) : null}</ul>",
+    expect: "every row is drawn, unconditionally",
   },
   {
     dimension: "C. four groups",
@@ -156,10 +160,12 @@ const MUTANTS = [
   {
     dimension: "R. the rail",
     gate: TOOLTIPS,
-    name: "the sidebar starts storing its own state again, beside the recent list",
+    // RE-ANCHORED 2026-10-04: the recent list is the account's now, and
+    // the regression is the browser keeping it again.
+    name: "the sidebar starts keeping the recent list in the browser again",
     file: SIDEBAR,
-    from: "        window.localStorage.setItem(RECENT_TOOLS_KEY, JSON.stringify(next));",
-    to: '        window.localStorage.setItem(RECENT_TOOLS_KEY, JSON.stringify(next));\n        window.localStorage.setItem("ionexa.sidebarOpen", "1");',
+    from: '        window.localStorage.setItem(COLLAPSED_KEY, c ? "0" : "1");',
+    to: '        window.localStorage.setItem(COLLAPSED_KEY, c ? "0" : "1");\n        window.localStorage.setItem("ionexa.recentTools", "[]");',
     expect: "the only thing remembered across a reload",
   },
   {
@@ -167,8 +173,8 @@ const MUTANTS = [
     gate: TOOLTIPS,
     name: "the All tools grid lists the hidden trackers",
     file: TOOLS_PAGE,
-    from: "sidebarGroups(MAIN_SIDEBAR_GROUPS, isAdminEmail(user.email))",
-    to: "visibleGroups(MAIN_SIDEBAR_GROUPS, isAdminEmail(user.email))",
+    from: "sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner)",
+    to: "visibleGroups(MAIN_SIDEBAR_GROUPS, isOwner)",
     expect: "...and so does the All tools page",
   },
 
@@ -180,17 +186,18 @@ const MUTANTS = [
     file: SIDEBAR,
     // RE-ANCHORED 2026-10-02: the rail draws New, Recent and All tools,
     // and the tool list reaches it only through the Recent lookup below.
-    from: "    () => sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).flatMap((g) => g.items),",
-    to: "    () => visibleGroups(MAIN_SIDEBAR_GROUPS, isOwner).flatMap((g) => g.items),",
+    from: "    () => sidebarGroups([...MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP], isOwner).flatMap((g) => g.items),",
+    to: "    () => visibleGroups([...MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP], isOwner).flatMap((g) => g.items),",
     expect: "hidden",
   },
   {
     dimension: "D. one action",
     gate: TOOLTIPS,
     name: "Settings stops being its own group",
-    file: SIDEBAR,
-    from: "            {sidebarGroups([SETTINGS_GROUP], isOwner).map(renderGroup)}",
-    to: "            {null}",
+    // RE-ANCHORED 2026-10-04: drawn on All tools now.
+    file: TOOLS_PAGE,
+    from: ", ...sidebarGroups([SETTINGS_GROUP], isOwner)],",
+    to: "],",
     expect: "Settings",
   },
 ];

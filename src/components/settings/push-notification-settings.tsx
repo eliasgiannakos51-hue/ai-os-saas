@@ -205,12 +205,12 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="flex items-center gap-2 text-sm font-semibold">
-            <Bell className="h-4 w-4 text-orange-400" aria-hidden="true" />
+            <Bell className="h-4 w-4 text-foreground" aria-hidden="true" />
             {t("title")}
           </h2>
           <p className="mt-1 text-xs text-muted">{t("perDevice")}</p>
           {iosNeedsInstall && (
-            <p className="mt-2 rounded-lg border border-border bg-black/20 px-2.5 py-2 text-[11px] leading-relaxed text-muted">
+            <p className="mt-2 rounded-item border border-border bg-background/20 px-2.5 py-2 text-[11px] leading-relaxed text-muted">
               {t("iosNeedsInstall")}
             </p>
           )}
@@ -219,7 +219,7 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
           type="button"
           disabled={busy}
           onClick={subscribed ? disable : enable}
-          className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition hover:text-orange-400 disabled:opacity-50"
+          className="shrink-0 rounded-item border border-border px-3 py-1.5 text-xs font-medium transition hover:text-foreground disabled:opacity-50"
         >
           {busy ? "…" : subscribed ? t("turnOff") : t("turnOn")}
         </button>
@@ -245,7 +245,7 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
               >
                 <span
                   className={`absolute top-0.5 h-4 w-4 rounded-full transition-all ${
-                    (prefs[type.key] ?? true) ? "start-[1.125rem] bg-panel" : "start-0.5 bg-white"
+                    (prefs[type.key] ?? true) ? "start-[1.125rem] bg-panel" : "start-0.5 bg-paper"
                   }`}
                 />
               </button>

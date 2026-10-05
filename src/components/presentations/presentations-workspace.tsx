@@ -363,7 +363,7 @@ export function PresentationsWorkspace({
           onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_CHARS))}
           placeholder={t("form.descriptionPlaceholder")}
           rows={5}
-          className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+          className="mt-2 w-full rounded-card border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-foreground/40"
         />
         <div className="mt-3 flex flex-wrap items-end gap-4">
           <div>
@@ -374,7 +374,7 @@ export function PresentationsWorkspace({
               id="deck-slides"
               value={slideCount}
               onChange={(e) => setSlideCount(Number(e.target.value))}
-              className="mt-1 block min-h-[44px] rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+              className="mt-1 block min-h-[44px] rounded-item border border-border bg-background px-3 text-sm text-foreground"
             >
               {slideOptions.map((n) => (
                 <option key={n} value={n}>
@@ -391,8 +391,8 @@ export function PresentationsWorkspace({
                 return (
                   <label
                     key={source}
-                    className={`inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm ${
-                      imageSource === source ? "border-orange-500/60 text-foreground" : "border-border text-muted"
+                    className={`inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-item border px-3 text-sm ${
+                      imageSource === source ? "border-foreground/60 text-foreground" : "border-border text-muted"
                     } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
                   >
                     <input
@@ -438,7 +438,7 @@ export function PresentationsWorkspace({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={ownFiles.length >= MAX_OWN_IMAGES}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 text-xs font-medium text-muted hover:text-foreground disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 text-xs font-medium text-muted hover:text-foreground disabled:opacity-50"
             >
               <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
               {t("form.addPhotos")} ({t("form.photosSelected", { count: ownFiles.length, max: MAX_OWN_IMAGES })})
@@ -453,13 +453,13 @@ export function PresentationsWorkspace({
                       width={96}
                       height={64}
                       unoptimized
-                      className="h-16 w-24 rounded-md object-cover"
+                      className="h-16 w-24 rounded-item object-cover"
                     />
                     <button
                       type="button"
                       onClick={() => removeOwnFile(i)}
                       aria-label={t("form.remove")}
-                      className="absolute -end-1 -top-1 rounded-full bg-background p-0.5 text-muted shadow"
+                      className="absolute -end-1 -top-1 rounded-full bg-background p-0.5 text-muted"
                     >
                       <X className="h-3 w-3" aria-hidden="true" />
                     </button>
@@ -484,7 +484,7 @@ export function PresentationsWorkspace({
             <button
               type="button"
               onClick={stopRun}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-border px-4 text-sm font-medium text-foreground"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-item border border-border px-4 text-sm font-medium text-foreground"
             >
               <Square className="h-3.5 w-3.5" aria-hidden="true" />
               {tSteps("stop")}
@@ -495,7 +495,7 @@ export function PresentationsWorkspace({
               data-testid="deck-generate"
               onClick={generate}
               disabled={!description.trim()}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-4 text-sm font-semibold text-black hover:bg-orange-400 disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-item bg-button px-4 text-sm font-semibold text-button-ink hover:bg-button disabled:opacity-50"
             >
               <Play className="h-3.5 w-3.5" aria-hidden="true" />
               {t("form.generate")}
@@ -509,7 +509,7 @@ export function PresentationsWorkspace({
         <section className="surface" data-testid="deck-result" aria-label={t("result.title")}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="truncate text-lg font-semibold text-foreground">{selected.deck.title}</h2>
+              <h2 className="break-words text-lg font-semibold text-foreground">{selected.deck.title}</h2>
               <p className="text-xs text-muted">
                 {t("result.slidesCount", { count: selected.deck.slides.length })}
                 {selected.creditsCharged > 0 ? ` · ${t("result.charged", { credits: selected.creditsCharged })}` : ""}
@@ -521,7 +521,7 @@ export function PresentationsWorkspace({
                   type="button"
                   onClick={() => exportPptx(selected.id as string)}
                   disabled={exporting}
-                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-60"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-60"
                 >
                   <FileDown className="h-3.5 w-3.5" aria-hidden="true" />
                   {exporting ? t("result.preparing") : t("result.exportPptx")}
@@ -550,7 +550,7 @@ export function PresentationsWorkspace({
               already separates this from the deck above it, so the
               outline was a second way of saying the same thing. */}
           {selected.id && (
-            <div className="mt-4 rounded-xl bg-panel-hover/40 p-3">
+            <div className="mt-4 rounded-card bg-panel-hover/40 p-3">
               <label htmlFor="deck-instruction" className="text-sm font-semibold text-foreground">
                 {t("edit.title")}
               </label>
@@ -562,7 +562,7 @@ export function PresentationsWorkspace({
                   placeholder={t("edit.placeholder")}
                   rows={2}
                   disabled={applying}
-                  className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-orange-500/40 disabled:opacity-60"
+                  className="min-w-0 flex-1 rounded-item border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-foreground/40 disabled:opacity-60"
                 />
                 <button
                   type="button"
@@ -583,7 +583,7 @@ export function PresentationsWorkspace({
                   // A panel fill satisfies all three: quieter than the
                   // generate button, no new border, and a dark ground
                   // the accent mark is visible on.
-                  className="inline-flex min-h-[44px] items-center justify-center gap-2 self-start rounded-lg bg-panel-hover px-4 text-sm font-semibold text-foreground hover:bg-panel disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-2 self-start rounded-item bg-panel-hover px-4 text-sm font-semibold text-foreground hover:bg-panel disabled:opacity-50"
                 >
                   {applying ? (
                     <>
@@ -618,7 +618,7 @@ export function PresentationsWorkspace({
             {selected.deck.slides.map((slide, index) => {
               const url = imageUrlFor(slide);
               return (
-                <li key={index} className="rounded-xl border border-border bg-background p-4">
+                <li key={index} className="rounded-card border border-border bg-background p-4">
                   <p className="text-[11px] uppercase tracking-wide text-muted">
                     {index + 1} · {t(`result.layout.${slide.layout}`)}
                   </p>
@@ -631,7 +631,7 @@ export function PresentationsWorkspace({
                         width={640}
                         height={360}
                         unoptimized
-                        className="h-36 w-full rounded-md object-cover"
+                        className="h-36 w-full rounded-item object-cover"
                       />
                       {slide.image?.kind === "unsplash" && (
                         <figcaption className="mt-1 text-[10px] text-muted">
@@ -686,7 +686,7 @@ export function PresentationsWorkspace({
                   onClick={() => row.deck && setSelected({ id: row.id, deck: row.deck, creditsCharged: row.creditsCharged })}
                   className="min-w-0 flex-1 text-start disabled:cursor-default"
                 >
-                  <p className="truncate text-sm text-foreground">{row.title}</p>
+                  <p className="break-words text-sm text-foreground">{row.title}</p>
                   <p className="text-[11px] text-muted">
                     {row.deck
                       ? t("history.slides", { count: row.deck.slides.length })
@@ -699,7 +699,7 @@ export function PresentationsWorkspace({
                   type="button"
                   onClick={() => remove(row.id)}
                   aria-label={t("history.delete")}
-                  className="rounded-md p-2 text-muted hover:text-foreground"
+                  className="rounded-item p-2 text-muted hover:text-foreground"
                 >
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -708,10 +708,10 @@ export function PresentationsWorkspace({
             {orderedNotes.map((row) => (
               <li
                 key={row.id}
-                className={`flex items-center justify-between gap-3 py-2 ${row.id === requestedRecord ? "rounded-lg bg-orange-500/10 px-2" : ""}`}
+                className={`flex items-center justify-between gap-3 py-2 ${row.id === requestedRecord ? "rounded-item bg-foreground/10 px-2" : ""}`}
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-foreground">{row.title}</p>
+                  <p className="break-words text-sm text-foreground">{row.title}</p>
                   <p className="text-[11px] text-muted">
                     {t("history.noteFromBefore")}
                     {row.slideCount ? ` · ${t("history.slides", { count: row.slideCount })}` : ""}
@@ -724,7 +724,7 @@ export function PresentationsWorkspace({
                   type="button"
                   onClick={() => remove(row.id)}
                   aria-label={t("history.delete")}
-                  className="rounded-md p-2 text-muted hover:text-foreground"
+                  className="rounded-item p-2 text-muted hover:text-foreground"
                 >
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>

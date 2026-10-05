@@ -41,7 +41,9 @@ const MUTANTS = [
     // numbers say", so the old anchor matched nothing and this mutation
     // applied to nothing — the runner's STALE line is what said so.
     // Copied from messages/en.json as it stands.
-    from: '"coding": "AI Coding",\n      "dataAnalysis": "See what the numbers say",',
+    // RE-ANCHORED 2026-10-04: "AI Coding" became "Coding", the design's
+    // one name for the rail row, the heading and the tile.
+    from: '"coding": "Coding",\n      "dataAnalysis": "See what the numbers say",',
     to: '"coding": "Coding notes",\n      "dataAnalysis": "Analysis notes",',
     expect: "en: the nav and the heading agree",
   },

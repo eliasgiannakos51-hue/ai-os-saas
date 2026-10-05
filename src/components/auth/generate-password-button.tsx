@@ -9,7 +9,7 @@ export function GeneratePasswordButton({ onGenerate }: { onGenerate: (password: 
     <button
       type="button"
       onClick={() => onGenerate(generateStrongPassword())}
-      className="text-xs font-medium text-orange-400 underline underline-offset-2 transition-colors duration-150 hover:text-orange-300"
+      className="text-xs font-medium text-foreground underline underline-offset-2 transition-colors duration-150 hover:text-foreground"
     >
       {t("generateStrongPassword")}
     </button>

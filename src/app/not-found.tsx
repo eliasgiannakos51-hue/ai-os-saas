@@ -21,7 +21,7 @@ export default async function NotFound() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 text-center">
-      <p className="text-sm tracking-widest text-orange-500">Ionexa AI</p>
+      <p className="text-sm tracking-widest text-foreground">Ionexa AI</p>
       <h1 className="mt-2 text-6xl font-bold text-foreground sm:text-7xl">
         404
       </h1>
@@ -31,7 +31,7 @@ export default async function NotFound() {
 
       <Link
         href="/dashboard/overview"
-        className="mt-10 inline-flex min-h-[44px] items-center justify-center rounded bg-orange-500 px-6 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+        className="mt-10 inline-flex min-h-[44px] items-center justify-center rounded-item bg-button px-6 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
       >
         {t("notFoundAction")}
       </Link>

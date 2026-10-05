@@ -48,7 +48,7 @@ export default async function FavoritesPage() {
   const favorites = await loadAllFavorites(supabase, user.id);
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         {/* The starred tip, not the timeline one: "starring does not copy
             or move anything" is the thing a person needs told here. */}

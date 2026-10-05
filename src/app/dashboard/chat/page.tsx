@@ -12,6 +12,7 @@ import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { loadFavoriteIds } from "@/lib/favorites";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
+import { readWorkMode } from "@/lib/chat/work-modes";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.chat");
@@ -24,7 +25,7 @@ export default async function ChatPage({
   // lib/overview/first-screen-examples.ts). The name is a runtime string
   // on both sides — nothing here would stop compiling if the link sent
   // `?question=` instead — so first-screen.test.mjs compares the two.
-  searchParams: { preset?: string; c?: string; ask?: string; project?: string };
+  searchParams: { preset?: string; c?: string; ask?: string; project?: string; mode?: string };
 }) {
   const supabase = createClient();
 
@@ -78,15 +79,15 @@ export default async function ChatPage({
     ? null
     : await getFreeChatStatus(user.id, plan?.slug ?? "free", legacy);
 
-  const userInitial = (user.email?.[0] ?? "?").toUpperCase();
   const initialMentorPreset =
     searchParams.preset === "trading" ? "trading" : searchParams.preset === "product" ? "product" : undefined;
 
   return (
-    <div className="h-[calc(100vh-4rem)]">
+    // Below md the bottom bar takes 4rem more (mobile-tab-bar.tsx), and
+    // the composer must stay above it.
+    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
       <ChatWorkspace
         initialConversations={conversations}
-        userInitial={userInitial}
         initialMentorPreset={initialMentorPreset}
         // Deep link from /dashboard/favorites. Validated against the
         // user's own list rather than trusted: an id in the URL must not
@@ -101,6 +102,10 @@ export default async function ChatPage({
         // comes out of a URL anyone can edit, and the send path charges
         // credits.
         initialAsk={readExampleParam(searchParams.ask)}
+        // THE WAY OF WORKING a Home quick action opened this in
+        // (lib/chat/work-modes.ts). Read through readWorkMode, so a URL
+        // anyone can edit names one of four modes or none.
+        initialWorkMode={readWorkMode(searchParams.mode) ?? undefined}
         // THE PROJECT A NEW CONVERSATION STARTS IN, and the only moment
         // it can be chosen. It is validated against the person's OWN
         // projects rather than trusted, exactly as `?c=` is above: an id

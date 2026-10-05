@@ -64,13 +64,6 @@ export const ABSENT_ON_PURPOSE = {
       "gate checks a POPULATION rather than the one file the defect was found in.",
     paths: ["components/library/library-search.tsx"],
   },
-  "scripts/tests/light-theme-contrast.test.mjs": {
-    reason:
-      "Quotes quick-action-card as an example of the ring-1 ring-inset pattern. The file was " +
-      "deleted on 2026-09-20 as a component no page imports; the pattern it illustrates is " +
-      "still in the tree, so the sentence is kept and the path is known-absent.",
-    paths: ["components/overview/quick-action-card.tsx"],
-  },
   "docs/unmerged-branches.md": {
     reason:
       "A REPORT ABOUT OTHER BRANCHES. Every path in it is a file that exists on a branch " +

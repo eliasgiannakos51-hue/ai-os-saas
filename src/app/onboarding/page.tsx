@@ -63,7 +63,7 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-dot-grid">
+    <main className="min-h-screen">
       <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
         <PageHeader icon={Rocket} title={t("title")} description={t("description")} />
 

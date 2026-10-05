@@ -255,10 +255,10 @@ export function AiMemoryList({
                         and this is the same distinction the prompt now
                         makes — shown here so the person can see why one
                         line carries more weight than another. */}
-                    <span className="rounded-md bg-panel-hover px-1.5 py-0.5">
+                    <span className="rounded-item bg-panel-hover px-1.5 py-0.5">
                       {t(`surfaces.${row.surface}`)}
                     </span>
-                    <span className={row.timesSeen > 1 ? "text-orange-300" : undefined}>
+                    <span className={row.timesSeen > 1 ? "text-foreground" : undefined}>
                       {row.timesSeen > 1 ? t("repeated", { count: row.timesSeen }) : t("once")}
                     </span>
                     <span>{t("learned", { date: formatDate(row.createdAt, locale) })}</span>
@@ -269,7 +269,7 @@ export function AiMemoryList({
                     {row.conversationId ? (
                       <Link
                         href={`/dashboard/chat?c=${row.conversationId}`}
-                        className="inline-flex items-center gap-1 text-orange-300 hover:underline"
+                        className="inline-flex items-center gap-1 text-foreground hover:underline"
                       >
                         <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
                         {t("openConversation")}
@@ -290,7 +290,7 @@ export function AiMemoryList({
                       setEditingId(row.id);
                       setDraft(row.text);
                     }}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-muted hover:bg-panel-hover hover:text-foreground"
+                    className="flex h-11 w-11 items-center justify-center rounded-card text-muted hover:bg-panel-hover hover:text-foreground"
                   >
                     <Pencil className="h-4 w-4" aria-hidden="true" />
                   </button>
@@ -300,7 +300,7 @@ export function AiMemoryList({
                     title={t("deleteLabel")}
                     disabled={busyId === row.id}
                     onClick={() => deleteOne(row.id)}
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-muted hover:bg-panel-hover hover:text-foreground"
+                    className="flex h-11 w-11 items-center justify-center rounded-card text-muted hover:bg-panel-hover hover:text-foreground"
                   >
                     <X className="h-4 w-4" aria-hidden="true" />
                   </button>
@@ -331,8 +331,8 @@ export function AiMemoryList({
                   aria-label={t(`surfaces.${surface}`)}
                   disabled={savingSurface === surface}
                   onClick={() => toggleSurface(surface)}
-                  className={`min-h-[44px] rounded-xl px-3 text-xs font-medium transition-colors ${
-                    off ? "text-muted hover:text-foreground" : "text-orange-300"
+                  className={`min-h-[44px] rounded-card px-3 text-xs font-medium transition-colors ${
+                    off ? "text-muted hover:text-foreground" : "text-foreground"
                   }`}
                 >
                   {off ? t("surfaceOff") : t("surfaceOn")}

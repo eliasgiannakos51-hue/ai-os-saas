@@ -43,7 +43,7 @@ export function StorageDiagnostics() {
           type="button"
           onClick={() => void run()}
           disabled={running}
-          className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-white/5 disabled:opacity-50"
+          className="rounded-item border border-border px-3 py-1.5 text-xs font-medium hover:bg-foreground/5 disabled:opacity-50"
           data-testid="storage-diagnostics-run"
         >
           {running ? (
@@ -61,7 +61,7 @@ export function StorageDiagnostics() {
       </p>
 
       {failed && (
-        <p className="mt-3 rounded-lg border border-red-500/30 bg-red-500/[0.05] p-3 text-xs text-red-300">
+        <p className="mt-3 rounded-item border border-danger/30 bg-danger/[0.05] p-3 text-xs text-danger">
           The check itself failed to run — see the function logs for /api/system-health/files.
         </p>
       )}
@@ -70,7 +70,7 @@ export function StorageDiagnostics() {
         <ul className="mt-3 space-y-1.5" data-testid="storage-diagnostics-results">
           {result.checks.map((check) => (
             <li key={check.name} className="flex items-start gap-2 text-xs">
-              <span className={check.ok ? "text-emerald-400" : "text-red-400"} aria-hidden>
+              <span className={check.ok ? "text-success" : "text-danger"} aria-hidden>
                 {check.ok ? "✓" : "✕"}
               </span>
               <span>
@@ -80,7 +80,7 @@ export function StorageDiagnostics() {
             </li>
           ))}
           {result.remedy && (
-            <li className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/[0.05] p-3 text-xs text-amber-300">
+            <li className="mt-2 rounded-item border border-warning/30 bg-warning/[0.05] p-3 text-xs text-warning">
               {result.remedy}
             </li>
           )}

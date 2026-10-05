@@ -33,16 +33,16 @@ export function ScheduledRunsList({ runs }: { runs: ScheduledAgentRun[] }) {
   return (
     <div className="mb-6 surface-tight">
       <div className="mb-2 flex items-center gap-2">
-        <CalendarClock className="h-4 w-4 text-orange-400" aria-hidden="true" />
+        <CalendarClock className="h-4 w-4 text-foreground" aria-hidden="true" />
         <p className="text-sm font-semibold text-foreground">{t("scheduledSectionTitle")}</p>
       </div>
       <ul className="space-y-1.5">
         {runs.map((run) => (
           <li
             key={run.id}
-            className="flex items-center justify-between gap-2 rounded-lg border border-border bg-input px-3 py-2"
+            className="flex items-center justify-between gap-2 rounded-item border border-border bg-input px-3 py-2"
           >
-            <span className="min-w-0 flex-1 truncate text-xs text-foreground">{run.step_text}</span>
+            <span className="min-w-0 flex-1 break-words text-xs text-foreground">{run.step_text}</span>
             <span className="shrink-0 text-[11px] text-muted">
               {t("scheduledForDate", { date: run.scheduled_for })}
             </span>
@@ -52,7 +52,7 @@ export function ScheduledRunsList({ runs }: { runs: ScheduledAgentRun[] }) {
               disabled={cancellingId === run.id}
               aria-label={t("cancelScheduled")}
               title={t("cancelScheduled")}
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>

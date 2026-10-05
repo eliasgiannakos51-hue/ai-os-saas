@@ -11,7 +11,6 @@ import { CheckoutNotice } from "@/components/billing/checkout-notice";
 import { PasswordChangeForm } from "@/components/settings/password-change-form";
 import { ChatMemorySettings } from "@/components/settings/chat-memory-settings";
 import { AccessibilitySettings } from "@/components/settings/accessibility-settings";
-import { ThemeSettings } from "@/components/settings/theme-settings";
 import { LanguageSettings } from "@/components/settings/language-settings";
 import { SampleDataSettings } from "@/components/settings/sample-data-settings";
 import { findSampleImport } from "@/lib/sample-data/apply";
@@ -249,7 +248,7 @@ export default async function SettingsPage() {
             <a
               key={link.href}
               href={link.href}
-              className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+              className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
             >
               {link.label}
             </a>
@@ -350,8 +349,6 @@ export default async function SettingsPage() {
             find it and asked whether it had ever been built. */}
         <Reveal><SampleDataSettings loaded={sampleLoaded} /></Reveal>
 
-        <Reveal><ThemeSettings /></Reveal>
-
         <Reveal><AccessibilitySettings /></Reveal>
 
         {/* Minutes left this month and what each kind of voice work
@@ -413,7 +410,7 @@ export default async function SettingsPage() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+                className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
               >
                 {tKey(`landing.${link.labelKey}`)}
               </Link>

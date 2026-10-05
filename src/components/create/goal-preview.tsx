@@ -40,7 +40,7 @@ function Heard({ heard }: { heard?: string }) {
   if (!heard) return null;
   return (
     <p className="mb-2 flex items-start gap-1.5 text-sm text-foreground">
-      <Mic className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-400" aria-hidden="true" />
+      <Mic className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground" aria-hidden="true" />
       <span>{t("heard", { heard })}</span>
     </p>
   );
@@ -80,18 +80,18 @@ function ConfirmCard({
 }) {
   const t = useTranslations("dashboard.goal");
   return (
-    <div className="mb-3 rounded-2xl border border-orange-500/30 bg-panel p-4" role="status" aria-live="polite">
+    <div className="mb-3 rounded-card border border-foreground/30 bg-panel p-4" role="status" aria-live="polite">
       <Heard heard={heard} />
       <p className="text-sm text-foreground">{line}</p>
       <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
-        <Zap className="h-3 w-3 text-orange-400/70" aria-hidden="true" />
+        <Zap className="h-3 w-3 text-foreground/70" aria-hidden="true" />
         {cost}
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={onConfirm}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-4 text-sm font-semibold text-black hover:bg-orange-400"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-item bg-button px-4 text-sm font-semibold text-button-ink hover:bg-button"
         >
           {confirmIcon}
           {confirmLabel}
@@ -104,7 +104,7 @@ function ConfirmCard({
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex min-h-[44px] items-center rounded-lg px-3 text-sm text-muted hover:text-foreground"
+            className="inline-flex min-h-[44px] items-center rounded-item px-3 text-sm text-muted hover:text-foreground"
           >
             {t("dismiss")}
           </button>
@@ -183,7 +183,7 @@ export function GoalQuestion({
             key={key}
             type="button"
             onClick={() => onPick(key)}
-            className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-3 text-sm font-medium text-foreground hover:border-orange-500/60"
+            className="inline-flex min-h-[44px] items-center rounded-item border border-border px-3 text-sm font-medium text-foreground hover:border-foreground/60"
           >
             {tKey(PRODUCER_SPECS[key].destinationKey)}
           </button>
@@ -191,7 +191,7 @@ export function GoalQuestion({
         <button
           type="button"
           onClick={onDismiss}
-          className="inline-flex min-h-[44px] items-center rounded-lg px-3 text-sm text-muted hover:text-foreground"
+          className="inline-flex min-h-[44px] items-center rounded-item px-3 text-sm text-muted hover:text-foreground"
         >
           {t("dismiss")}
         </button>
@@ -283,7 +283,7 @@ export function RouteLine({
         <>
           <span>{t("goingTo")}</span>
           <span className="inline-flex items-center gap-1 rounded-full bg-panel px-2.5 py-0.5 font-medium text-foreground">
-            <ArrowRight className="h-3.5 w-3.5 text-orange-400" aria-hidden="true" />
+            <ArrowRight className="h-3.5 w-3.5 text-foreground" aria-hidden="true" />
             {destination}
           </span>
         </>

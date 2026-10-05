@@ -308,7 +308,7 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
         return (
           <>
             <Icon
-              className={`h-4 w-4 shrink-0 ${active ? "text-orange-400" : "text-orange-500/40"}`}
+              className={`h-4 w-4 shrink-0 ${active ? "text-foreground" : "text-foreground/40"}`}
               aria-hidden="true"
             />
             {translatedLabel(item.label)}
@@ -333,19 +333,19 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
             const segments = snippetSegments(result.snippet);
             return (
               <div className="flex min-w-0 flex-1 items-start gap-2">
-                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-orange-500/40" aria-hidden="true" />
+                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-foreground/40" aria-hidden="true" />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate">{result.title}</span>
+                  <span className="block break-words">{result.title}</span>
                   {/* THE PREVIEW. Rendered as text nodes and a <mark>,
                       never as HTML — ts_headline's <<…>> markers are
                       split in lib/search/unified-search.ts precisely so
                       nothing calls dangerouslySetInnerHTML on a string
                       that came out of a database. */}
                   {segments.length > 0 && (
-                    <span className="mt-0.5 block truncate text-[11px] text-muted">
+                    <span className="mt-0.5 block break-words text-[11px] text-muted">
                       {segments.map((seg, i) =>
                         seg.match ? (
-                          <mark key={i} className="bg-orange-500/25 text-foreground">
+                          <mark key={i} className="bg-foreground/25 text-foreground">
                             {seg.text}
                           </mark>
                         ) : (
@@ -440,7 +440,7 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
   function chipClass(selected: boolean): string {
     return `rounded-full border px-2.5 py-1 text-[11px] transition-colors duration-150 ${
       selected
-        ? "border-orange-500/40 bg-orange-500/15 text-orange-300"
+        ? "border-foreground/40 bg-foreground/15 text-foreground"
         : "border-border text-muted hover:text-foreground"
     }`;
   }
@@ -449,7 +449,7 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
     <div className="fixed inset-0 z-[60] flex items-start justify-center px-4 pt-[12vh]">
       <div
         onClick={close}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 bg-background/60 backdrop-blur-sm"
         aria-hidden="true"
       />
 
@@ -457,7 +457,7 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
         role="dialog"
         aria-modal="true"
         aria-label={tCommon("commandPalette")}
-        className="palette-enter relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-panel"
+        className="palette-enter relative w-full max-w-lg overflow-hidden rounded-card border border-border bg-panel"
       >
         <div className="relative border-b border-border">
           <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
@@ -590,9 +590,9 @@ export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
                     type="button"
                     onClick={() => goTo(entry.href)}
                     onMouseEnter={() => setActiveIndex(index)}
-                    className={`flex min-h-[44px] w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-start text-sm transition-colors duration-150 ${
+                    className={`flex min-h-[44px] w-full items-center gap-2.5 rounded-item px-3 py-2.5 text-start text-sm transition-colors duration-150 ${
                       active
-                        ? "bg-orange-500/10 text-orange-400"
+                        ? "bg-foreground/10 text-foreground"
                         : "text-foreground hover:bg-panel-hover"
                     }`}
                   >

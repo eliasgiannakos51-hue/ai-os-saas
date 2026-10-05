@@ -34,14 +34,14 @@ export function ToastContainer() {
           // ring pulse on non-error toasts — the app's confirmation
           // moment. Errors deliberately don't get it: a success cue on a
           // failure message is exactly the wrong signal.
-          className={`cursor-pointer rounded-md border px-3 py-2 text-xs shadow-lg backdrop-blur-sm transition-all duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500/70 ${
+          className={`cursor-pointer rounded-item border px-3 py-2 text-xs  transition-all duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground/70 ${
             toast.leaving
               ? "translate-y-1 opacity-0"
               : "animate-fade-in translate-y-0 opacity-100"
           } ${toast.type === "error" || toast.leaving ? "" : "success-flash"} ${
             toast.type === "error"
-              ? "border-red-800 bg-red-950/90 text-red-300"
-              : "border-orange-800 bg-black/90 text-orange-400"
+              ? "border-danger/40 bg-danger/10 text-danger"
+              : "border-border bg-background/90 text-foreground"
           }`}
         >
           {toast.message}

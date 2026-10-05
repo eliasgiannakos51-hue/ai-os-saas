@@ -167,7 +167,7 @@ export function GenericRecordDetail({
             onClick={onClose}
             aria-label={tCommon("cancel")}
             title={tCommon("cancel")}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="flex h-11 w-11 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -183,7 +183,7 @@ export function GenericRecordDetail({
               type="submit"
               form={formId}
               disabled={saving}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-item border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-50"
             >
               {saving ? t("saving") : t("save")}
             </button>
@@ -193,7 +193,7 @@ export function GenericRecordDetail({
                 setForm(formStateFor(module, record));
                 setTab("details");
               }}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-item border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
             >
               {tCommon("cancel")}
             </button>
@@ -232,7 +232,7 @@ export function GenericRecordDetail({
           ) : (
             detailFields.map((field) => (
               <div key={field.key}>
-                <dt className="text-[11px] font-medium uppercase tracking-wide text-orange-500/80">
+                <dt className="text-[11px] font-medium uppercase tracking-wide text-foreground/80">
                   {tKey(field.labelKey)}
                 </dt>
                 <dd className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">
@@ -254,7 +254,7 @@ export function GenericRecordDetail({
               >
                 <span className="mb-1 block">
                   {tKey(field.labelKey)}
-                  {field.required && <span className="text-red-400"> *</span>}
+                  {field.required && <span className="text-danger"> *</span>}
                 </span>
                 {field.type === "textarea" ? (
                   <TextActionsTextarea
@@ -296,7 +296,7 @@ export function GenericRecordDetail({
           </div>
 
           {error && (
-            <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+            <p className="rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
               {error}
             </p>
           )}

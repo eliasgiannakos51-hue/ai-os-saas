@@ -105,13 +105,13 @@ export function PredictionsPanel({ initial }: { initial: Insight[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-panel/50 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border bg-panel/50 p-4">
         <p className="max-w-prose text-sm text-muted">{t("whatItDoes")}</p>
         <button
           type="button"
           onClick={run}
           disabled={running}
-          className="flex min-h-[44px] shrink-0 items-center gap-2 rounded-xl bg-orange-500 px-4 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex min-h-[44px] shrink-0 items-center gap-2 rounded-card bg-button px-4 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {/* NOT A SPINNER. A model call is running behind this button —
               the narration pass in api/insights/generate — and this
@@ -129,7 +129,7 @@ export function PredictionsPanel({ initial }: { initial: Insight[] }) {
       </div>
       {credits > 0 ? (
         <p className="flex items-center gap-1.5 text-[11px] text-muted">
-          <Zap className="h-3 w-3 text-orange-400/70" aria-hidden="true" />
+          <Zap className="h-3 w-3 text-foreground/70" aria-hidden="true" />
           {tCredits("approx", { count: credits })}
         </p>
       ) : null}
@@ -140,7 +140,7 @@ export function PredictionsPanel({ initial }: { initial: Insight[] }) {
           onDismissed={(id) => setInsights((current) => current.filter((i) => i.id !== id))}
         />
       ) : (
-        <div className="rounded-2xl border border-border bg-panel/50 p-6">
+        <div className="rounded-card border border-border bg-panel/50 p-6">
           <p className="text-sm font-semibold text-foreground">
             {needMoreData ? t("needMoreData") : ran ? t("foundNothing") : t("neverRun")}
           </p>

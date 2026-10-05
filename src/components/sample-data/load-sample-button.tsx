@@ -44,13 +44,13 @@ export function LoadSampleButton({ className = "" }: { className?: string }) {
         type="button"
         onClick={load}
         disabled={loading}
-        className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-200 disabled:opacity-60"
+        className="inline-flex min-h-[44px] items-center gap-2 rounded-card border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors duration-150 hover:border-foreground/50 hover:text-foreground disabled:opacity-60"
       >
-        <FlaskConical className="h-4 w-4 shrink-0 text-emerald-400/70" aria-hidden="true" />
+        <FlaskConical className="h-4 w-4 shrink-0 text-success/70" aria-hidden="true" />
         {loading ? t("loading") : t("load")}
       </button>
       <span className="text-xs text-muted">{t("loadFree")}</span>
-      {failed && <span className="text-xs text-red-300">{t("loadFailed")}</span>}
+      {failed && <span className="text-xs text-danger">{t("loadFailed")}</span>}
     </div>
   );
 }

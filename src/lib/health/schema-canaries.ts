@@ -379,6 +379,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "no job records its steps, so the timeline under a finished agent run stays empty",
   },
   {
+    kind: "column",
+    table: "user_websites",
+    column: "timeline",
+    migration: "20261008000000_website_timeline.sql",
+    breaks: "a website generation records no phases, so the builder falls back to rotating messages and shows no timeline or per-step credits",
+  },
+  {
     kind: "function",
     fn: "chat_memory_fold",
     migration: "20261004100000_chat_memory_fold_matches_app.sql",

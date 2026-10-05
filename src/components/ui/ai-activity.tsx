@@ -50,7 +50,7 @@ export function AiActivity({
       <ThinkingIndicator size="sm" />
       {code ? t(code) : null}
       {steps.length > 1 && (
-        <span className="text-muted/60">
+        <span className="text-muted">
           {t("counter", { step: Math.min(stepIndex + 1, steps.length), total: steps.length })}
         </span>
       )}

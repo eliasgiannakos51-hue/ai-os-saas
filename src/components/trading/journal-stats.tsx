@@ -31,14 +31,14 @@ function Figure({
 }) {
   const t = useTranslations("dashboard.trading");
   return (
-    <div className="rounded-xl border border-border bg-panel px-3 py-2.5">
+    <div className="rounded-card border border-border bg-panel px-3 py-2.5">
       <p className="text-[10px] uppercase tracking-wide text-muted">{label}</p>
       {value === null ? (
         <p className="mt-0.5 text-[11px] leading-snug text-muted">{hint ?? t("stats.notEnough")}</p>
       ) : (
         <p
           className={`mt-0.5 text-lg font-semibold tabular-nums ${
-            tone === "good" ? "text-emerald-400" : tone === "bad" ? "text-red-400" : "text-foreground"
+            tone === "good" ? "text-success" : tone === "bad" ? "text-danger" : "text-foreground"
           }`}
         >
           {value}
@@ -182,7 +182,7 @@ function BucketTable({
                 </td>
                 <td
                   className={`py-1.5 tabular-nums ${
-                    bucket.stats.netPnl > 0 ? "text-emerald-400" : bucket.stats.netPnl < 0 ? "text-red-400" : "text-muted"
+                    bucket.stats.netPnl > 0 ? "text-success" : bucket.stats.netPnl < 0 ? "text-danger" : "text-muted"
                   }`}
                 >
                   {formatNumber(Math.round(bucket.stats.netPnl * 100) / 100, locale)}
@@ -233,7 +233,7 @@ function EquityCurve({ points }: { points: EquityPoint[] }) {
           <polyline
             points={path}
             fill="none"
-            stroke={up ? "rgb(52 211 153)" : "rgb(248 113 113)"}
+            stroke={up ? "rgb(var(--success))" : "rgb(var(--danger))"}
             strokeWidth="2"
             vectorEffect="non-scaling-stroke"
           />

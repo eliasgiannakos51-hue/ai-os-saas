@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { ResponsiveContainer, LineChart, Line } from "recharts";
-import { useCountUp, splitLeadingNumber } from "@/hooks/use-count-up";
+import { useCountUp } from "@/hooks/use-count-up";
+import { splitLeadingNumber } from "@/lib/leading-number";
 import { usePulseOnChange } from "@/hooks/use-pulse-on-change";
 import { formatNumber } from "@/lib/format-number";
 import { useLocale } from "next-intl";
@@ -86,19 +87,19 @@ export function HomeStatCard({
   // shows its destination on hover and reaches the keyboard for free.
   const Shell = href ? Link : "div";
   const shellProps = href
-    ? { href, className: "glass-card group relative block overflow-hidden rounded-2xl p-4 transition-colors duration-150 hover:border-orange-500/40" }
-    : { className: "glass-card relative overflow-hidden rounded-2xl p-4" };
+    ? { href, className: "glass-card group relative block overflow-hidden rounded-card p-4 transition-colors duration-150 hover:border-foreground/40" }
+    : { className: "glass-card relative overflow-hidden rounded-card p-4" };
 
   return (
     <Shell {...(shellProps as { href: string; className: string })}>
       <div className="relative z-[1] flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate text-[11px] uppercase tracking-wider text-muted">{label}</p>
-          <p className="mt-1.5 truncate text-2xl font-bold leading-none text-foreground sm:text-[1.75rem]">
+          <p className="break-words text-[11px] uppercase tracking-wider text-muted">{label}</p>
+          <p className="mt-1.5 break-words text-2xl font-bold leading-none text-foreground sm:text-[1.75rem]">
             <CountUpValue value={value} />
           </p>
         </div>
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/25 to-purple-500/20 text-orange-300 ring-1 ring-inset ring-white/10">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-card bg-panel-hover text-foreground ring-1 ring-inset ring-foreground/10">
           {icon}
         </span>
       </div>
@@ -116,10 +117,10 @@ export function HomeStatCard({
       {!hasTrend && placeholderLabel && chartData && (
         <div className="relative z-[1] mt-3 h-8 w-full">
           <div
-            className="absolute inset-x-0 top-1/2 h-px bg-[repeating-linear-gradient(90deg,rgb(255_255_255/0.14)_0_6px,transparent_6px_12px)]"
+            className="absolute inset-x-0 top-1/2 border-t border-dashed border-foreground/15"
             aria-hidden="true"
           />
-          <p className="absolute inset-x-0 bottom-0 truncate text-[10px] leading-none text-muted">
+          <p className="absolute inset-x-0 bottom-0 break-words text-[10px] leading-none text-muted">
             {placeholderLabel}
           </p>
         </div>
@@ -131,7 +132,7 @@ export function HomeStatCard({
               <Line
                 type="monotone"
                 dataKey="count"
-                stroke="#f97316"
+                stroke="rgb(var(--chart-1))"
                 strokeWidth={2}
                 dot={false}
                 // recharts' own animation is left off and the draw-in is
@@ -152,10 +153,10 @@ export function HomeStatCard({
           when somebody is reading rather than pointing. */}
       <p className="relative z-[1] mt-2 text-[11px] leading-snug text-muted">{explain}</p>
       {basis && (
-        <p className="relative z-[1] mt-0.5 text-[10px] leading-none text-muted/70">{basis}</p>
+        <p className="relative z-[1] mt-0.5 text-[10px] leading-none text-muted">{basis}</p>
       )}
       {href && (
-        <span className="relative z-[1] mt-1.5 block text-[10px] font-medium text-muted transition-colors duration-150 group-hover:text-orange-300">
+        <span className="relative z-[1] mt-1.5 block text-[10px] font-medium text-muted transition-colors duration-150 group-hover:text-foreground">
           {openLabel}
         </span>
       )}

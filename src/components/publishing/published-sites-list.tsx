@@ -169,7 +169,7 @@ export function PublishedSitesList({
         newAction={
           <Link
             href="/dashboard/website-builder"
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-card bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90"
           >
             <Globe className="h-4 w-4" aria-hidden="true" />
             {t("goToBuilder")}
@@ -255,7 +255,7 @@ export function PublishedSitesList({
                         href={site.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-xs text-foreground transition-colors duration-150 hover:bg-panel-hover"
+                        className="flex w-full items-center gap-2 rounded-item px-3 py-2 text-start text-xs text-foreground transition-colors duration-150 hover:bg-panel-hover"
                       >
                         <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                         {t("viewLive")}
@@ -274,7 +274,7 @@ export function PublishedSitesList({
         <section className="space-y-3 surface-tight">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="truncate text-base font-semibold text-foreground">
+              <h2 className="break-words text-base font-semibold text-foreground">
                 {selected.website_name}
               </h2>
               <p className="mt-0.5 break-all text-xs text-muted">{selected.url}</p>
@@ -322,7 +322,7 @@ export function PublishedSitesList({
                       type="button"
                       onClick={() => void rollback(selected, version)}
                       disabled={busyId === selected.id}
-                      className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-1 text-[11px] font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-40"
+                      className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 py-1 text-[11px] font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:opacity-40"
                     >
                       <Undo2 className="h-3 w-3" aria-hidden="true" />
                       {t("rollback")}

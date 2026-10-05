@@ -86,7 +86,7 @@ export default async function ModulePage({
   }
 
   return (
-    <div className="min-h-full bg-dot-grid">
+    <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader
           icon={MODULE_ICONS[moduleConfig.slug]}

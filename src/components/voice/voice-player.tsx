@@ -157,7 +157,7 @@ export function VoicePlayer({ text, compact }: { text: string; compact?: boolean
           onClick={() => void play()}
           disabled={loading || !availability.hasMinutes || trimmed.length === 0}
           aria-label={playing ? t("pause") : t("listen")}
-          className="flex min-h-[36px] items-center gap-1.5 rounded-lg border border-border px-2.5 text-xs text-foreground transition-colors hover:bg-panel-hover disabled:opacity-40"
+          className="flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-foreground transition-colors hover:bg-panel-hover disabled:opacity-40"
         >
           {/* Same reasoning as the microphone button: the wait is a
               speech model producing the clip, not a round trip to our
@@ -183,7 +183,7 @@ export function VoicePlayer({ text, compact }: { text: string; compact?: boolean
                 if (audioRef.current) audioRef.current.playbackRate = next;
               }}
               aria-label={t("speed")}
-              className="min-h-[36px] rounded-lg border border-border bg-panel px-2 text-xs text-foreground"
+              className="min-h-[44px] rounded-item border border-border bg-panel px-2 text-xs text-foreground"
             >
               {PLAYBACK_RATES.map((r) => (
                 <option key={r} value={r}>
@@ -200,7 +200,7 @@ export function VoicePlayer({ text, compact }: { text: string; compact?: boolean
                 teardown();
               }}
               aria-label={t("voice")}
-              className="min-h-[36px] rounded-lg border border-border bg-panel px-2 text-xs text-foreground"
+              className="min-h-[44px] rounded-item border border-border bg-panel px-2 text-xs text-foreground"
             >
               {VOICES.map((v) => (
                 <option key={v.key} value={v.key}>
@@ -218,7 +218,7 @@ export function VoicePlayer({ text, compact }: { text: string; compact?: boolean
       {playing && wordIndex >= 0 && words[wordIndex] && (
         <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground" aria-hidden="true">
           {text.slice(0, words[wordIndex].start)}
-          <mark className="bg-blue-500/25 text-foreground">{words[wordIndex].word}</mark>
+          <mark className="bg-foreground/25 text-foreground">{words[wordIndex].word}</mark>
           {text.slice(words[wordIndex].end)}
         </p>
       )}

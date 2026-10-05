@@ -83,10 +83,10 @@ export function InsightList({
         return (
           <li
             key={key}
-            className="rounded-2xl border border-orange-500/30 bg-orange-500/[0.04] p-4"
+            className="rounded-card border border-foreground/30 bg-foreground/[0.04] p-4"
           >
             <div className="flex items-start gap-3">
-              <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
+              <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-foreground" aria-hidden="true" />
               <div className="min-w-0 flex-1 space-y-1.5">
                 <p className="text-sm font-semibold leading-snug text-foreground">{insight.headline}</p>
                 <p className="text-xs leading-relaxed text-muted">{insight.detail}</p>
@@ -109,7 +109,7 @@ export function InsightList({
                   {route && (
                     <Link
                       href={route}
-                      className="-my-3 inline-flex min-h-[44px] items-center gap-1 text-[11px] font-medium text-orange-400 transition-colors duration-150 hover:text-orange-300"
+                      className="-my-3 inline-flex min-h-[44px] items-center gap-1 text-[11px] font-medium text-foreground transition-colors duration-150 hover:text-foreground"
                     >
                       {t("checkIt")}
                       <ArrowRight className="h-3 w-3" aria-hidden="true" />
@@ -131,10 +131,10 @@ export function InsightList({
                     panel — it is the evidence, and it is here so a user
                     can disagree with the conclusion on the facts. */}
                 {isOpen && (
-                  <dl className="mt-1 grid grid-cols-1 gap-x-4 gap-y-0.5 rounded-lg border border-border bg-panel/60 p-2.5 sm:grid-cols-2">
+                  <dl className="mt-1 grid grid-cols-1 gap-x-4 gap-y-0.5 rounded-item border border-border bg-panel/60 p-2.5 sm:grid-cols-2">
                     {Object.entries(insight.evidence).map(([name, value]) => (
                       <div key={name} className="flex items-baseline justify-between gap-2">
-                        <dt className="truncate font-mono text-[10px] text-muted">{name}</dt>
+                        <dt className="break-words font-mono text-[10px] text-muted">{name}</dt>
                         <dd className="shrink-0 font-mono text-[10px] text-foreground">
                           {Array.isArray(value) ? value.join(", ") : String(value)}
                         </dd>
@@ -150,7 +150,7 @@ export function InsightList({
                   onClick={() => void dismiss(insight.id!)}
                   disabled={busy === insight.id}
                   aria-label={t("dismiss")}
-                  className="-me-1 -mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
+                  className="-me-1 -mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
                 >
                   <X className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>

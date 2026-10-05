@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
-import { Logo } from "@/components/logo";
+import { Earth } from "@/components/brand/earth";
 import { getErrorMessage } from "@/lib/get-error-message";
 
 type Status = "idle" | "loading" | "done";
@@ -56,11 +56,11 @@ export function ConfirmDeleteAccountForm() {
     <main className="flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4">
       <div className="w-full max-w-md text-center">
         <div className="mb-6 flex items-center justify-center">
-          <Logo className="h-[168px] w-auto max-w-full" />
+          <Earth variant="large" px={160} label="Ionexa" />
         </div>
 
-        <div className="rounded-2xl border border-red-900/50 bg-red-500/[0.03] p-6">
-          <h1 className="flex items-center justify-center gap-2 text-lg font-semibold text-red-400">
+        <div className="rounded-card border border-danger/40 bg-danger/[0.03] p-6">
+          <h1 className="flex items-center justify-center gap-2 text-lg font-semibold text-danger">
             <AlertTriangle className="h-5 w-5" /> {t("title")}
           </h1>
 
@@ -75,7 +75,7 @@ export function ConfirmDeleteAccountForm() {
               </p>
 
               {error && (
-                <p className="mt-4 rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+                <p className="mt-4 rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                   {error}
                 </p>
               )}
@@ -84,7 +84,7 @@ export function ConfirmDeleteAccountForm() {
                 type="button"
                 onClick={confirmDeletion}
                 disabled={status === "loading"}
-                className="mt-5 inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(220,38,38,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-5 inline-flex min-h-[44px] w-full items-center justify-center rounded-card bg-danger px-4 py-2.5 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {status === "loading" ? t("deleting") : t("confirmButton")}
               </button>
@@ -92,7 +92,7 @@ export function ConfirmDeleteAccountForm() {
           )}
 
           <p className="mt-4 text-center text-xs text-muted">
-            <Link href="/" className="text-orange-400 underline underline-offset-2">
+            <Link href="/" className="text-foreground underline underline-offset-2">
               {t("cancel")}
             </Link>
           </p>

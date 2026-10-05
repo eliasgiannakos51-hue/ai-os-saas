@@ -146,7 +146,7 @@ function Margin({ value, projected = false }: { value: number | null; projected?
   if (value === null) return <span className="text-muted">—</span>;
   return (
     <span
-      className={value < MARGIN_TARGET ? "font-semibold text-red-400" : "text-emerald-400"}
+      className={value < MARGIN_TARGET ? "font-semibold text-danger" : "text-success"}
     >
       {value.toFixed(2)}x{projected && <span className="ms-0.5 font-normal text-muted">*</span>}
     </span>
@@ -155,10 +155,10 @@ function Margin({ value, projected = false }: { value: number | null; projected?
 
 function SummaryTile({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-xl border border-border bg-input p-3">
+    <div className="rounded-card border border-border bg-input p-3">
       <p className="text-[11px] uppercase tracking-wide text-muted">{label}</p>
       <p className="mt-1 text-lg font-bold text-foreground">{value}</p>
-      {hint && <p className="mt-0.5 text-[11px] leading-snug text-muted/80">{hint}</p>}
+      {hint && <p className="mt-0.5 text-[11px] leading-snug text-muted">{hint}</p>}
     </div>
   );
 }
@@ -188,16 +188,16 @@ export async function MarginReportView({
   return (
     <section id="margin-report" className="mb-6 surface">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <TrendingUp className="h-4 w-4 text-orange-400" aria-hidden="true" />
+        <TrendingUp className="h-4 w-4 text-foreground" aria-hidden="true" />
         {t("title")}
-        <span className="rounded-full border border-orange-500/40 bg-orange-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange-400">
+        <span className="rounded-full border border-foreground/40 bg-foreground/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
           {t("ownerOnly")}
         </span>
       </h2>
       <p className="mt-2 text-xs text-muted">{t("description", { days: MARGIN_REPORT_WINDOW_DAYS })}</p>
 
       {failed ? (
-        <p className="mt-4 text-xs text-red-400">{t("unavailable")}</p>
+        <p className="mt-4 text-xs text-danger">{t("unavailable")}</p>
       ) : rows.length === 0 ? (
         <p className="mt-4 text-xs text-muted">{t("empty")}</p>
       ) : (
@@ -239,7 +239,7 @@ export async function MarginReportView({
               When nothing charged, say so in words rather than leaving a
               column of dashes to be interpreted. */}
           {summary.projectionOnly && (
-            <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-orange-500/30 bg-orange-500/[0.05] px-3 py-2 text-[11px] leading-relaxed text-orange-300">
+            <p className="mt-3 flex items-start gap-1.5 rounded-item border border-foreground/30 bg-foreground/[0.05] px-3 py-2 text-[11px] leading-relaxed text-foreground">
               <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
               {t("projectionOnly")}
             </p>
@@ -253,9 +253,9 @@ export async function MarginReportView({
               unexamined one. */}
           {summary.absorbedRefusals && (
             <p
-              className={`mt-3 flex items-start gap-1.5 rounded-lg border px-3 py-2 text-[11px] leading-relaxed ${
+              className={`mt-3 flex items-start gap-1.5 rounded-item border px-3 py-2 text-[11px] leading-relaxed ${
                 summary.absorbedRefusals.overBudget
-                  ? "border-red-800 bg-red-950/30 text-red-300"
+                  ? "border-danger/40 bg-danger/10 text-danger"
                   : "border-border bg-panel/60 text-muted"
               }`}
             >
@@ -276,7 +276,7 @@ export async function MarginReportView({
           )}
 
           {summary.belowTarget.length > 0 && (
-            <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-red-800 bg-red-950/30 px-3 py-2 text-[11px] leading-relaxed text-red-300">
+            <p className="mt-3 flex items-start gap-1.5 rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-[11px] leading-relaxed text-danger">
               <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
               {t("belowTargetAlert", {
                 count: summary.belowTarget.length,
@@ -306,7 +306,7 @@ export async function MarginReportView({
                   return (
                     <tr
                       key={row.feature}
-                      className={`border-b border-border/50 last:border-0 ${flagged ? "bg-red-950/20" : ""}`}
+                      className={`border-b border-border/50 last:border-0 ${flagged ? "bg-danger/10" : ""}`}
                     >
                       <td className="py-2 pe-3 text-foreground">{row.feature}</td>
                       <td className="py-2 pe-3 text-end text-muted">{formatNumber(row.calls, locale)}</td>
@@ -371,7 +371,7 @@ export async function MarginReportView({
                     ever served back. Named features, so the fix has an
                     address. */}
                 {cacheSummary.miscached.length > 0 && (
-                  <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-red-800 bg-red-950/30 px-3 py-2 text-[11px] leading-relaxed text-red-300">
+                  <p className="mt-3 flex items-start gap-1.5 rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-[11px] leading-relaxed text-danger">
                     <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
                     {t("cacheMiscachedAlert", { features: cacheSummary.miscached.join(", ") })}
                   </p>
@@ -392,14 +392,14 @@ export async function MarginReportView({
                       {cacheRows.map((row) => (
                         <tr
                           key={row.feature}
-                          className={`border-b border-border/50 last:border-0 ${row.writingWithoutReading ? "bg-red-950/20" : ""}`}
+                          className={`border-b border-border/50 last:border-0 ${row.writingWithoutReading ? "bg-danger/10" : ""}`}
                         >
                           <td className="py-2 pe-3 text-foreground">{row.feature}</td>
                           <td className="py-2 pe-3 text-end">
                             {row.hitRate === null ? (
                               <span className="text-muted">—</span>
                             ) : (
-                              <span className={row.hitRate > 0 ? "text-emerald-400" : "text-muted"}>
+                              <span className={row.hitRate > 0 ? "text-success" : "text-muted"}>
                                 {(row.hitRate * 100).toFixed(1)}%
                               </span>
                             )}

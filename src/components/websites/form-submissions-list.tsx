@@ -147,8 +147,8 @@ export function FormSubmissionsList({
   return (
     <div className="space-y-4">
       {deliveryFault && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm">
-          <p className="flex items-center gap-2 font-medium text-amber-300">
+        <div className="rounded-card border border-warning/30 bg-warning/10 p-4 text-sm">
+          <p className="flex items-center gap-2 font-medium text-warning">
             <MailWarning className="h-4 w-4 shrink-0" aria-hidden="true" />
             {t(`delivery.${deliveryFault}`)}
           </p>
@@ -159,7 +159,7 @@ export function FormSubmissionsList({
               says what to change, and paraphrasing it would lose the
               domain name it usually contains. */}
           {deliveryFaultDetail && (
-            <p className="mt-2 break-words rounded-lg bg-black/20 p-2 font-mono text-[11px] text-muted">
+            <p className="mt-2 break-words rounded-item bg-background/20 p-2 font-mono text-[11px] text-muted">
               {deliveryFaultDetail}
             </p>
           )}
@@ -177,7 +177,7 @@ export function FormSubmissionsList({
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               aria-label={t("filterType")}
-              className="min-h-[36px] rounded-lg border border-border bg-panel px-2 text-xs text-foreground"
+              className="min-h-[44px] rounded-item border border-border bg-panel px-2 text-xs text-foreground"
             >
               <option value="">{t("allTypes")}</option>
               {FORM_TYPES.map((type) => (
@@ -191,7 +191,7 @@ export function FormSubmissionsList({
                 value={siteFilter}
                 onChange={(e) => setSiteFilter(e.target.value)}
                 aria-label={t("filterSite")}
-                className="min-h-[36px] max-w-[200px] rounded-lg border border-border bg-panel px-2 text-xs text-foreground"
+                className="min-h-[44px] max-w-[200px] rounded-item border border-border bg-panel px-2 text-xs text-foreground"
               >
                 <option value="">{t("allSites")}</option>
                 {sites.map(([id, name]) => (
@@ -210,7 +210,7 @@ export function FormSubmissionsList({
               type="button"
               onClick={exportCsv}
               disabled={visible.length === 0}
-              className="flex min-h-[36px] items-center gap-1.5 rounded-lg border border-border px-2.5 text-xs text-foreground transition-colors hover:bg-panel-hover disabled:opacity-40"
+              className="flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-foreground transition-colors hover:bg-panel-hover disabled:opacity-40"
             >
               <Download className="h-3.5 w-3.5" aria-hidden="true" />
               {t("exportCsv")}
@@ -234,8 +234,8 @@ export function FormSubmissionsList({
               return (
                 <li
                   key={row.id}
-                  className={`rounded-xl border p-3 transition-colors ${
-                    row.read_at ? "border-border bg-panel/50" : "border-orange-500/30 bg-panel"
+                  className={`rounded-card border p-3 transition-colors ${
+                    row.read_at ? "border-border bg-panel/50" : "border-foreground/30 bg-panel"
                   }`}
                 >
                   <button
@@ -249,19 +249,19 @@ export function FormSubmissionsList({
                   >
                     <span className="min-w-0 flex-1">
                       <span className="flex flex-wrap items-center gap-2">
-                        <span className="truncate text-sm font-medium text-foreground">
+                        <span className="break-words text-sm font-medium text-foreground">
                           {headline ?? t("noName")}
                         </span>
                         <span className="rounded-full border border-border px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted">
                           {formTypeLabel(row.form_type)}
                         </span>
                         {!row.read_at && (
-                          <span className="rounded-full bg-orange-500/20 px-2 py-0.5 text-[10px] text-orange-300">
+                          <span className="rounded-full bg-foreground/20 px-2 py-0.5 text-[10px] text-foreground">
                             {t("new")}
                           </span>
                         )}
                       </span>
-                      <span className="mt-1 block truncate text-[11px] text-muted">
+                      <span className="mt-1 block break-words text-[11px] text-muted">
                         {row.website_name} · {formatDateTime(row.created_at, locale)}
                       </span>
                     </span>
@@ -272,14 +272,14 @@ export function FormSubmissionsList({
                           did not. */}
                       {isDeliveryFault(row.email_status) ? (
                         <MailWarning
-                          className="h-4 w-4 text-amber-400"
+                          className="h-4 w-4 text-warning"
                           aria-label={t(`delivery.${row.email_status}` as never)}
                         />
                       ) : row.email_status === "sent" ? (
-                        <Mail className="h-4 w-4 text-emerald-400/70" aria-label={t("delivery.sent")} />
+                        <Mail className="h-4 w-4 text-success/70" aria-label={t("delivery.sent")} />
                       ) : null}
                       {row.consent ? (
-                        <ShieldCheck className="h-4 w-4 text-emerald-400/70" aria-label={t("consentGiven")} />
+                        <ShieldCheck className="h-4 w-4 text-success/70" aria-label={t("consentGiven")} />
                       ) : (
                         <ShieldAlert className="h-4 w-4 text-muted" aria-label={t("consentMissing")} />
                       )}
@@ -291,7 +291,7 @@ export function FormSubmissionsList({
                       <dl className="space-y-1.5">
                         {Object.entries(row.fields).map(([key, value]) => (
                           <div key={key} className="grid grid-cols-[minmax(0,7rem)_1fr] gap-2 text-xs">
-                            <dt className="truncate text-muted">{key}</dt>
+                            <dt className="break-words text-muted">{key}</dt>
                             <dd className="whitespace-pre-wrap break-words text-foreground">{value}</dd>
                           </div>
                         ))}
@@ -304,7 +304,7 @@ export function FormSubmissionsList({
                       </p>
 
                       {row.email_detail && (
-                        <p className="break-words rounded-lg bg-black/20 p-2 font-mono text-[11px] text-muted">
+                        <p className="break-words rounded-item bg-background/20 p-2 font-mono text-[11px] text-muted">
                           {row.email_detail}
                         </p>
                       )}
@@ -313,7 +313,7 @@ export function FormSubmissionsList({
                         type="button"
                         onClick={() => void remove(row)}
                         disabled={busyId === row.id}
-                        className="flex min-h-[36px] items-center gap-1.5 rounded-lg border border-red-500/30 px-2.5 text-xs text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-40"
+                        className="flex min-h-[44px] items-center gap-1.5 rounded-item border border-danger/30 px-2.5 text-xs text-danger transition-colors hover:bg-danger/10 disabled:opacity-40"
                       >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         {t("delete")}

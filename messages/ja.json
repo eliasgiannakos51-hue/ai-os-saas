@@ -29,8 +29,6 @@
       "long": "これは AI が生成した内容です。誤りが含まれる場合があります。重要な点は確認してください。"
     },
     "close": "閉じる",
-    "switchToDarkMode": "ダークテーマに切り替える",
-    "switchToLightMode": "ライトテーマに切り替える",
     "showPassword": "パスワードを表示",
     "hidePassword": "パスワードを非表示",
     "networkErrorCheckConnection": "ネットワークエラー — 接続を確認してもう一度お試しください。",
@@ -63,7 +61,6 @@
       "lastResortBody": "新しいデータを読み込むには接続が必要です。すでに開いたページはこの端末のキャッシュから引き続き見られます。作業中の内容はサーバー上に安全に保存されています。"
     },
     "creditsUnlimited": "無制限",
-    "whatIsThis": "これは何ですか？",
     "examplesLabel": "例：",
     "newMessagesBelow": "下に新しいメッセージ",
     "downloadPdf": {
@@ -128,7 +125,7 @@
       "apps": "アプリのアイデア",
       "images": "画像のアイデア",
       "videos": "動画のアイデア",
-      "coding": "AI コーディング",
+      "coding": "コーディング",
       "dataAnalysis": "数字が語ることを見る",
       "documents": "ドキュメント",
       "presentations": "プレゼンテーション",
@@ -225,7 +222,8 @@
       "personalShopping": "買い物",
       "personalFinance": "家計",
       "personalJournal": "ジャーナリング",
-      "personalLifeOs": "ライフOS"
+      "personalLifeOs": "ライフOS",
+      "activity": "アクティビティ"
     },
     "hints": {
       "chat": "何でも聞けます — どのモジュールにも紐づきません。",
@@ -286,13 +284,31 @@
       "posts": "一度書けば、プラットフォームごとにその長さとトーンの投稿文ができます。何も投稿はしません。コピーして、あなたが投稿します。",
       "projects": "目標のあるフォルダー。入れたものだけが入っています。",
       "aiMemory": "チャットがあなたについて保持している内容と、その消し方。",
-      "meetings": "録音を文字起こし・要約・自分で選ぶアクションに変えます。"
+      "meetings": "録音を文字起こし・要約・自分で選ぶアクションに変えます。",
+      "activity": "次の一歩、変化したこと、進捗、そして数字"
     },
     "closeMenu": "メニューを閉じる",
     "rail": {
       "new": "新規",
-      "recent": "最近",
-      "allTools": "すべてのツール"
+      "chat": "チャット",
+      "coding": "コーディング",
+      "allTools": "すべてのツール",
+      "recentTools": "最近使ったツール",
+      "settings": "設定",
+      "pin": "{tool}をピン留め",
+      "unpin": "{tool}のピン留めを外す",
+      "remove": "{tool}を最近使ったツールから外す",
+      "collapse": "サイドバーを折りたたむ",
+      "expand": "サイドバーを広げる",
+      "label": "メインメニュー",
+      "saveFailed": "変更を保存できませんでした。もう一度お試しください。"
+    },
+    "tabs": {
+      "home": "ホーム",
+      "chat": "チャット",
+      "tools": "ツール",
+      "you": "あなた",
+      "label": "メインナビゲーション"
     }
   },
   "landing": {
@@ -1049,7 +1065,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "最もアクティブなモジュール",
-      "acrossAllModules": "全モジュール合計",
       "entry": "{count} 件のエントリー",
       "statRow": {
         "totalEntries": "合計エントリー数",
@@ -1292,6 +1307,10 @@
       "clarificationAnswerPlaceholder": "あなたの答え...",
       "sources": {
         "title": "出典"
+      },
+      "workMode": {
+        "active": "モード: {mode}",
+        "clear": "作業モードを解除"
       }
     },
     "create": {
@@ -1338,7 +1357,9 @@
         "why": "自動的に書かれていきます。どのモジュールで記録したものもここに一本の流れとして集まり、「先月は結局なにをしたか」に答えられます。"
       },
       "tabAll": "すべて",
-      "tabStarred": "お気に入り"
+      "tabStarred": "お気に入り",
+      "filterSection": "セクション",
+      "filterPeriod": "期間"
     },
     "favorites": {
       "title": "お気に入り",
@@ -1729,7 +1750,8 @@
       "clarifyTitle": "簡単な質問がいくつかあります:",
       "clarifySkip": "スキップしてこのまま記録",
       "clarifyContinue": "続ける",
-      "clarifyAnswerPlaceholder": "あなたの回答..."
+      "clarifyAnswerPlaceholder": "あなたの回答...",
+      "accomplishPlaceholder": "何を達成したいですか？"
     },
     "createStudio": {
       "title": "何でもつくる",
@@ -2747,7 +2769,20 @@
     "tools": {
       "title": "すべてのツール",
       "description": "各ツールと、その働きを一行で。",
-      "orPress": "または ⌘K を押して名前を入力するか、ホームの入力欄で説明してください。"
+      "orPress": "または ⌘K を押して名前を入力するか、ホームの入力欄で説明してください。",
+      "search": "ツールを探す",
+      "searchLabel": "ツールを検索",
+      "noMatch": "「{query}」という名前のツールはありません。ホームの入力欄で説明してください。",
+      "beta": "ベータ",
+      "betaHint": "テスト中：動作しますが、まだすべての機能が揃っていません。"
+    },
+    "home": {
+      "actions": {
+        "research": "リサーチ",
+        "create": "作成",
+        "run": "実行",
+        "analyze": "分析"
+      }
     }
   },
   "module": {
@@ -2801,7 +2836,6 @@
       "images": "料金ページのメイン画像",
       "videos": "60秒のプロダクト紹介",
       "coding": "Stripe の入金を照合するスクリプト",
-      "data-analysis": "解約率がいちばん低いプランは？",
       "campaigns": "9月のローンチ — メール＋LinkedIn",
       "presentations": "第3四半期の取締役会報告 — 要点",
       "ideas": "表計算から乗り換えた人向けのニュースレター"
@@ -3222,9 +3256,24 @@
         "files": "{count, plural, other {#件のファイル}}",
         "parts": "{count, plural, other {#回に分けて}}",
         "planSteps": "{count, plural, other {#ステップ}}",
-        "sources": "{count, plural, other {#件の情報源}}"
+        "sources": "{count, plural, other {#件の情報源}}",
+        "pages": "{count, plural, other {#ページ}}",
+        "photos": "{count, plural, =0 {写真なし} other {#枚の写真}}"
       },
       "writing": "レポートを作成"
+    },
+    "website": {
+      "preparing": "依頼内容を準備しています",
+      "writing": "ページを書いています",
+      "photos": "写真を配置しています",
+      "checking": "サイトを確認しています",
+      "saving": "保存しています"
+    },
+    "chatTimeline": {
+      "thinking": "考えています",
+      "searching_web": "ウェブを検索しています",
+      "searching_data": "あなたのデータを検索しています",
+      "writing": "回答を書いています"
     }
   },
   "problem": {
@@ -3316,7 +3365,7 @@
       "does": "プランの変更、クレジットの購入、言語とテーマの設定、アシスタントの名前づけ、そしてアカウント内のすべての記録を1つのファイルとしてダウンロードできます。",
       "doesNot": "記録そのものはここにはありません——各モジュールがそれぞれ保持しています。また「アカウントの削除」は、中身を片づけて始め直すための手段ではありません。アカウントごと終了し、すべてを持ち去り、取り消せません。先にエクスポートしてください。"
     },
-    "overview": {
+    "activity": {
       "is": "記録してきた内容の要約と、次にやること一つ。",
       "does": "各モジュールのあなた自身の記録を読み、ヘルススコア、最近の変化、次の一手の提案を表示します。",
       "doesNot": "銀行・CRM・メールには接続しません。ここの数字はすべて、あなたかエージェントが入力したものから来ています。空の週は本当に空であって、読み込み中ではありません。"
@@ -3808,7 +3857,7 @@
     }
   },
   "coding": {
-    "title": "AI コーディング",
+    "title": "コーディング",
     "description": "できること五つ、しないこと四つ。すべて入力欄のテキストだけを対象にします。",
     "code": "コード",
     "copy": "コピー",

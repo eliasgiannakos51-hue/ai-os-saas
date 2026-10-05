@@ -125,6 +125,10 @@ checkList(
 // reason rather than left as an absence.
 const NO_HEADER_EXEMPT = new Map([
   [
+    "src/app/dashboard/overview/page.tsx",
+    "Home is the design's one block — the earth and the greeting, the field, four quick actions, «Τίποτα άλλο στην οθόνη» (docs/CONTEXT.md, 2026-10-04). Its old tip explained the cards, and it moved with them to /dashboard/activity",
+  ],
+  [
     "src/app/dashboard/documents/[id]/page.tsx",
     "one open document, not a feature: its name is whatever the person typed, and the Documents list that got them here carries the tip",
   ],

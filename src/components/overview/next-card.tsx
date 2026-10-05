@@ -35,7 +35,7 @@ export function NextCard({
   return (
     <section className="mt-6 surface">
       <div className="flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400">
+        <span className="flex h-8 w-8 items-center justify-center rounded-item bg-foreground/10 text-foreground">
           <Compass className="h-4 w-4" aria-hidden="true" />
         </span>
         <h2 className="text-sm font-semibold text-foreground">{title}</h2>
@@ -62,7 +62,7 @@ export function NextCard({
               simply one filled button on the screen again. */}
           <Link
             href={action.href}
-            className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:border-orange-500 hover:bg-orange-500/10"
+            className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-card border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:bg-foreground/10"
           >
             {action.ctaLabel}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -79,18 +79,18 @@ export function NextCard({
       {plan && (
         <div className="mt-3 border-t border-border/60 pt-3">
           <div className="flex items-center justify-between gap-3">
-            <p className="min-w-0 flex-1 truncate text-xs font-medium text-foreground/90">{plan.goal}</p>
+            <p className="min-w-0 flex-1 break-words text-xs font-medium text-foreground/90">{plan.goal}</p>
             <span className="shrink-0 text-xs text-muted">{plan.stepsLabel}</span>
           </div>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-input">
             <div
-              className="h-full rounded-full bg-orange-500/70"
+              className="h-full rounded-full bg-foreground/70"
               style={{ width: `${Math.max(0, Math.min(100, plan.progressPercent))}%` }}
             />
           </div>
           <Link
             href={plan.href}
-            className="mt-2 inline-flex min-h-[44px] items-center gap-1 text-xs font-medium text-orange-400 transition-colors duration-150 hover:text-orange-300"
+            className="mt-2 inline-flex min-h-[44px] items-center gap-1 text-xs font-medium text-foreground transition-colors duration-150 hover:text-foreground"
           >
             {plan.openLabel}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

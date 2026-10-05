@@ -51,12 +51,12 @@ export function VoiceWorkbench() {
   return (
     <div className="space-y-4">
       {/* READ THIS OUT ------------------------------------------------ */}
-      <section className="rounded-2xl border border-border bg-panel/50 p-4">
+      <section className="rounded-card border border-border bg-panel/50 p-4">
         <h2 className="text-sm font-semibold text-foreground">{t("speakTitle")}</h2>
         <p className="mt-1 max-w-prose text-sm text-muted">{t("speakWhat")}</p>
 
         {availability.loaded && !availability.speakAvailable ? (
-          <p className="mt-3 rounded-xl border border-border bg-background/40 p-3 text-xs text-muted">
+          <p className="mt-3 rounded-card border border-border bg-background/40 p-3 text-xs text-muted">
             {!availability.configured.speak ? t("speakNotConfigured") : t("speakNotAvailable")}
           </p>
         ) : (
@@ -71,7 +71,7 @@ export function VoiceWorkbench() {
               rows={4}
               maxLength={MAX_TEXT_LENGTH}
               placeholder={t("speakPlaceholder")}
-              className="mt-3 w-full rounded-xl border border-border bg-background/60 p-3 text-sm text-foreground placeholder:text-muted focus:border-orange-500/50 focus:outline-none"
+              className="mt-3 w-full rounded-card border border-border bg-background/60 p-3 text-sm text-foreground placeholder:text-muted focus:border-foreground/50 focus:outline-none"
             />
             <div className="mt-3 flex items-center gap-3">
               {/* The player prices and meters the call itself, and refuses
@@ -86,12 +86,12 @@ export function VoiceWorkbench() {
       </section>
 
       {/* WRITE DOWN WHAT I SAY ---------------------------------------- */}
-      <section className="rounded-2xl border border-border bg-panel/50 p-4">
+      <section className="rounded-card border border-border bg-panel/50 p-4">
         <h2 className="text-sm font-semibold text-foreground">{t("transcribeTitle")}</h2>
         <p className="mt-1 max-w-prose text-sm text-muted">{t("transcribeWhat")}</p>
 
         {availability.loaded && !availability.transcribeAvailable ? (
-          <p className="mt-3 rounded-xl border border-border bg-background/40 p-3 text-xs text-muted">
+          <p className="mt-3 rounded-card border border-border bg-background/40 p-3 text-xs text-muted">
             {!availability.configured.transcribe
               ? t("transcribeNotConfigured")
               : t("transcribeNotAvailable")}
@@ -113,15 +113,15 @@ export function VoiceWorkbench() {
                   value={transcript}
                   onChange={(e) => setTranscript(e.target.value)}
                   rows={5}
-                  className="w-full rounded-xl border border-border bg-background/60 p-3 text-sm text-foreground focus:border-orange-500/50 focus:outline-none"
+                  className="w-full rounded-card border border-border bg-background/60 p-3 text-sm text-foreground focus:border-foreground/50 focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={copyTranscript}
-                  className="mt-2 flex min-h-[44px] items-center gap-2 rounded-xl border border-border px-3 text-sm text-foreground transition-colors duration-150 hover:border-orange-500/50"
+                  className="mt-2 flex min-h-[44px] items-center gap-2 rounded-card border border-border px-3 text-sm text-foreground transition-colors duration-150 hover:border-foreground/50"
                 >
                   {copied ? (
-                    <Check className="h-4 w-4 text-orange-400" aria-hidden="true" />
+                    <Check className="h-4 w-4 text-foreground" aria-hidden="true" />
                   ) : (
                     <Copy className="h-4 w-4" aria-hidden="true" />
                   )}

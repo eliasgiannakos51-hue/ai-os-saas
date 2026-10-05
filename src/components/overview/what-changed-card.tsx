@@ -35,7 +35,7 @@ export function WhatChangedCard({
   return (
     <section className="mt-6 surface">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400">
+        <span className="flex h-8 w-8 items-center justify-center rounded-item bg-foreground/10 text-muted">
           <History className="h-4 w-4" aria-hidden="true" />
         </span>
         <h2 className="text-sm font-semibold text-foreground">{title}</h2>

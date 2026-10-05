@@ -34,12 +34,13 @@ export const MAX_DISPLAY_NAME_LENGTH = 40;
  *
  * In order: what the person typed under Settings → "What should we call
  * you?" (user_metadata.display_name, used exactly as written — in Greek
- * that is the vocative, "Ηλία", which no rule here could derive safely);
+ * that is the vocative, "Νίκο", which no rule here could derive safely);
  * then the first name a Google sign-in supplies (given_name, or the first
  * word of full_name / name). Otherwise null, and the greeting has no name.
  *
- * NOT the email. "eliasgiannakos51" became "Eliasgiannakos", which is not
- * anybody's name; a greeting without one reads better than a wrong one.
+ * NOT the email. A local part like "nikos84" became "Nikos" at best and a
+ * handle at worst, which is not anybody's name; a greeting without one
+ * reads better than a wrong one.
  */
 export function greetingName(metadata: Record<string, unknown> | null | undefined): string | null {
   const text = (v: unknown) => (typeof v === "string" ? v.trim().slice(0, MAX_DISPLAY_NAME_LENGTH) : "");

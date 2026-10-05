@@ -1,12 +1,12 @@
 # The first run — el
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **718 strings**. The whole product is 3443, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **586 strings**. The whole product is 3480, which is why this file exists.
 
-**Start with tier 1. It is 49 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 459 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 357 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (49)
+## Tier 1 — THE SENTENCES — read these (21)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -126,163 +126,7 @@ CSV ή tab-separated, έως {max}. Το διαβάζουμε και σου δε
 
 Αυτές οι καταχωρήσεις είναι δείγμα — το τρίμηνο ενός μικρού γραφείου σχεδιασμού. Δεν είναι δικές σου.
 
-**`sidebar.hints.aiMemory`**
-
-> EN — What the chat has kept about you, and how to remove it.
-
-Τι κράτησε η συνομιλία για σένα, και πώς να το σβήσεις.
-
-**`sidebar.hints.apps`**
-
-> EN — Keep track of apps you are planning or have already shipped. It does not build them.
-
-Κράτα σημειώσεις για εφαρμογές που σχεδιάζεις ή έχεις ήδη βγάλει. Δεν τις φτιάχνει.
-
-**`sidebar.hints.coding`**
-
-> EN — Write, explain, fix, convert and test snippets of code. It does not run code or open a repository.
-
-Γράψε, εξήγησε, διόρθωσε, μετέτρεψε και δοκίμασε κομμάτια κώδικα. Δεν εκτελεί κώδικα ούτε ανοίγει αποθετήριο.
-
-**`sidebar.hints.create`**
-
-> EN — Describe what you want in one sentence; it works out the rest.
-
-Περίγραψε τι θέλεις σε μία πρόταση· τα υπόλοιπα τα βρίσκει μόνο του.
-
-**`sidebar.hints.deepResearch`**
-
-> EN — Give it a topic and it searches, cross-checks and writes a sourced report
-
-Δώσε ένα θέμα και ψάχνει, διασταυρώνει και γράφει αναφορά με πηγές
-
-**`sidebar.hints.files`**
-
-> EN — Upload PDFs, Word and Excel files and ask the AI questions about them
-
-Ανέβασε PDF, Word και Excel και ρώτα το AI για αυτά
-
-**`sidebar.hints.images`**
-
-> EN — Keep track of images you are planning or have already made. It does not generate them.
-
-Κράτα σημειώσεις για εικόνες που σχεδιάζεις ή έχεις ήδη φτιάξει. Δεν τις δημιουργεί.
-
-**`sidebar.hints.integrations`**
-
-> EN — Connect Gmail, Drive and Slack so the AI can work with your real data
-
-Σύνδεσε Gmail, Drive και Slack ώστε το AI να δουλεύει με τα πραγματικά σου δεδομένα
-
-**`sidebar.hints.library`**
-
-> EN — Starred, recent and search — all your own entries in one place
-
-Αγαπημένα, πρόσφατα και αναζήτηση — όλα σου τα δεδομένα μαζί
-
-**`sidebar.hints.marketplace`**
-
-> EN — Share an agent's shape as a template, and start from one someone else shared.
-
-Μοιράσου τη δομή ενός agent ως πρότυπο και ξεκίνα από ένα που μοιράστηκε κάποιος άλλος.
-
-**`sidebar.hints.meetings`**
-
-> EN — Turn a recording into a transcript, a summary, and actions you choose from.
-
-Κάνε μια ηχογράφηση κείμενο, σύνοψη και ενέργειες που διαλέγεις εσύ.
-
-**`sidebar.hints.posts`**
-
-> EN — Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.
-
-Πες το μία φορά και πάρε μια ανάρτηση ανά πλατφόρμα, στο μήκος και στο ύφος της. Δεν δημοσιεύει τίποτα — αντιγράφεις και αναρτάς εσύ.
-
-**`sidebar.hints.predictions`**
-
-> EN — Patterns found in your own rows, each with the number of entries it rests on and a link to them.
-
-Μοτίβα στις δικές σου καταχωρήσεις, με το πλήθος των εγγραφών που τα στηρίζει και σύνδεσμο σε αυτές.
-
-**`sidebar.hints.presentations`**
-
-> EN — Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.
-
-Περίγραψε μια παρουσίαση και πάρε τις διαφάνειες — PowerPoint ή PDF, με φωτογραφίες από το Unsplash ή δικές σου. Δεν σχεδιάζει γραφήματα.
-
-**`sidebar.hints.projects`**
-
-> EN — A folder with a goal. What you put in is what is in it — nothing is dragged in with it.
-
-Φάκελος με στόχο. Ό,τι βάζεις είναι ό,τι έχει — τίποτα δεν μπαίνει μόνο του.
-
-**`sidebar.hints.published`**
-
-> EN — Every site you have live on the web, with its traffic and version history
-
-Κάθε site σου που είναι ζωντανό στο διαδίκτυο, με την επισκεψιμότητα και το ιστορικό εκδόσεων
-
-**`sidebar.hints.records`**
-
-> EN — Every log in one place — filter by type instead of hunting the menu
-
-Όλες οι καταχωρήσεις σε ένα σημείο — φιλτράρισμα κατά τύπο αντί για ψάξιμο στο μενού
-
-**`sidebar.hints.videos`**
-
-> EN — Keep track of videos you are planning or have already made. It does not generate them.
-
-Κράτα σημειώσεις για βίντεο που σχεδιάζεις ή έχεις ήδη φτιάξει. Δεν τα δημιουργεί.
-
-**`sidebar.hints.voice`**
-
-> EN — Have text read out loud, or speak and have it written down. Minutes are metered and the price per minute is on the page.
-
-Άκου ένα κείμενο ή μίλα και γράφεται. Τα λεπτά μετριούνται και η τιμή ανά λεπτό είναι στη σελίδα.
-
 ### first result
-
-**`dashboard.overview.healthScore.suggestion.recency`**
-
-> EN — You haven't logged anything in a while — add a new entry to pick things back up.
-
-Δεν έχεις καταγράψει κάτι εδώ και καιρό — πρόσθεσε μια νέα εγγραφή για να συνεχίσεις.
-
-**`dashboard.overview.nextAction.revisitLink`**
-
-> EN — You linked "{source}" to "{target}" a few days ago — worth revisiting?
-
-Σύνδεσες το "{source}" με το "{target}" πριν από λίγες μέρες — αξίζει να το ξανακοιτάξεις;
-
-**`dashboard.overview.nextAction.startNew`**
-
-> EN — No new activity in the last 3 days — ready to start something new?
-
-Καμία νέα δραστηριότητα τις τελευταίες 3 μέρες — έτοιμος/η να ξεκινήσεις κάτι νέο;
-
-**`dashboard.overview.setupProgress.suggestion`**
-
-> EN — Your activity score appears once you have logged {count} entries — enough that no single one decides it.
-
-Το σκορ δραστηριότητας εμφανίζεται μόλις καταχωρήσεις {count} καταχωρήσεις — αρκετές ώστε να μην το κρίνει μία μόνο.
-
-**`dashboard.overview.statRow.mostActiveExplain`**
-
-> EN — The module you have written in most. Where your attention has gone.
-
-Η ενότητα όπου γράφεις περισσότερο. Εκεί πάει η προσοχή σου.
-
-**`dashboard.overview.statRow.thisWeekExplain`**
-
-> EN — Logged in the last seven days — how active this week has been.
-
-Καταχωρήθηκαν τις τελευταίες επτά μέρες — πόσο δραστήρια ήταν η εβδομάδα.
-
-**`common.betaExpiry`**
-
-> EN — Your beta access expires in {days, plural, one {# day} other {# days}}. <link>Upgrade to keep full access</link>.
-
-Η beta πρόσβασή σου λήγει σε {days, plural, one {# ημέρα} other {# ημέρες}}. <link>Αναβάθμισε για να κρατήσεις πλήρη πρόσβαση</link>.
 
 **`common.listCapped`**
 
@@ -302,19 +146,7 @@ CSV ή tab-separated, έως {max}. Το διαβάζουμε και σου δε
 
 Περίγραψε οτιδήποτε — μια ιδέα προϊόντος, μια συναλλαγή, ένα σχόλιο χρήστη, έναν δείκτη — και καταλήγει αυτόματα στο σωστό module.
 
-**`dashboard.energyCheckIn.whatItDoes`**
-
-> EN — Ionexa uses this to pick which plan step to suggest next — lighter work when you're low, demanding work when you're not.
-
-Το Ionexa το χρησιμοποιεί για να διαλέξει ποιο βήμα του σχεδίου θα σου προτείνει — ελαφριά δουλειά όταν είσαι χαμηλά, απαιτητική όταν δεν είσαι.
-
-**`sampleData.loadFree`**
-
-> EN — Free — nothing is generated, and you can remove it in one click
-
-Δωρεάν — δεν παράγεται τίποτα, και το σβήνεις με ένα κλικ
-
-## Tier 2 — The labels — skim these (459)
+## Tier 2 — The labels — skim these (357)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1550,311 +1382,11 @@ Email
 
 Κλείσιμο μενού
 
-**`sidebar.groups.ask`**
+**`sidebar.items.activity`**
 
-> EN — Ask
+> EN — Activity
 
-Ρώτα
-
-**`sidebar.groups.business`**
-
-> EN — Business
-
-Επιχείρηση
-
-**`sidebar.groups.connect`**
-
-> EN — Connect
-
-Σύνδεση
-
-**`sidebar.groups.engineering`**
-
-> EN — Engineering
-
-Μηχανική
-
-**`sidebar.groups.make`**
-
-> EN — Make
-
-Φτιάξε
-
-**`sidebar.groups.organise`**
-
-> EN — Organise
-
-Οργάνωσε
-
-**`sidebar.groups.personal`**
-
-> EN — Personal
-
-Προσωπικά
-
-**`sidebar.groups.run`**
-
-> EN — Run
-
-Τρέξε
-
-**`sidebar.groups.see`**
-
-> EN — See
-
-Δες
-
-**`sidebar.groups.settings`**
-
-> EN — Settings
-
-Ρυθμίσεις
-
-**`sidebar.groups.verify`**
-
-> EN — Verify
-
-Έλεγχος
-
-**`sidebar.hints.affiliate`**
-
-> EN — Your referral link, what you've earned, and how you get paid.
-
-Ο σύνδεσμος πρόσκλησης, τι έχεις κερδίσει και πώς πληρώνεσαι.
-
-**`sidebar.hints.agents`**
-
-> EN — Plan the agents you want. A tracker, not a runtime.
-
-Σχεδίασε τους agents που θέλεις. Καταγραφή, όχι εκτέλεση.
-
-**`sidebar.hints.analytics`**
-
-> EN — Metrics you're watching.
-
-Μετρήσεις που παρακολουθείς.
-
-**`sidebar.hints.automation`**
-
-> EN — Things that run on a schedule.
-
-Πράγματα που τρέχουν προγραμματισμένα.
-
-**`sidebar.hints.businessHealth`**
-
-> EN — MRR, margin, churn and runway. Owner only.
-
-MRR, περιθώριο, απώλεια πελατών και ρευστότητα. Μόνο για τον ιδιοκτήτη.
-
-**`sidebar.hints.campaigns`**
-
-> EN — Plan campaigns — channel, budget, status.
-
-Σχεδίασε καμπάνιες — κανάλι, budget, κατάσταση.
-
-**`sidebar.hints.chat`**
-
-> EN — Ask anything — not tied to any module.
-
-Ρώτα οτιδήποτε — δεν συνδέεται με κάποιο module.
-
-**`sidebar.hints.competitors`**
-
-> EN — Track rival products, pricing and positioning.
-
-Παρακολούθησε ανταγωνιστικά προϊόντα, τιμές και τοποθέτηση.
-
-**`sidebar.hints.content`**
-
-> EN — Content ideas, captions and threads.
-
-Ιδέες περιεχομένου, λεζάντες και threads.
-
-**`sidebar.hints.costs`**
-
-> EN — What every AI call has cost, per model and per day.
-
-Τι κόστισε κάθε κλήση AI, ανά μοντέλο και ανά ημέρα.
-
-**`sidebar.hints.dataAnalysis`**
-
-> EN — Analysis requests and what you found.
-
-Αιτήματα ανάλυσης και τι βρήκες.
-
-**`sidebar.hints.decisions`**
-
-> EN — Weigh the options before you decide.
-
-Ζύγισε τις επιλογές πριν αποφασίσεις.
-
-**`sidebar.hints.documents`**
-
-> EN — Freeform notes and documents you write yourself.
-
-Ελεύθερες σημειώσεις και έγγραφα που γράφεις εσύ.
-
-**`sidebar.hints.favorites`**
-
-> EN — Everything you've starred.
-
-Όλα όσα έχεις σημειώσει με αστέρι.
-
-**`sidebar.hints.feedback`**
-
-> EN — What users told you, in one place.
-
-Τι σου είπαν οι χρήστες, σε ένα σημείο.
-
-**`sidebar.hints.finance`**
-
-> EN — Log income and expenses.
-
-Κατέγραψε έσοδα και έξοδα.
-
-**`sidebar.hints.formSubmissions`**
-
-> EN — Everything visitors sent through a form on your published sites
-
-Ό,τι έστειλαν οι επισκέπτες μέσα από φόρμα στα δημοσιευμένα σας sites
-
-**`sidebar.hints.help`**
-
-> EN — Answers to the questions people ask most — no credits used.
-
-Απαντήσεις στις πιο συχνές ερωτήσεις — χωρίς χρέωση credits.
-
-**`sidebar.hints.home`**
-
-> EN — Your dashboard — activity, stats and quick actions.
-
-Ο πίνακάς σου — δραστηριότητα, στατιστικά και γρήγορες ενέργειες.
-
-**`sidebar.hints.ideas`**
-
-> EN — Capture new ideas before you forget them.
-
-Κατέγραψε νέες ιδέες πριν τις ξεχάσεις.
-
-**`sidebar.hints.learning`**
-
-> EN — Track what you're studying.
-
-Παρακολούθησε τι μαθαίνεις.
-
-**`sidebar.hints.memory`**
-
-> EN — Search across everything you have saved.
-
-Ψάξε σε ό,τι έχεις καταχωρήσει.
-
-**`sidebar.hints.mine`**
-
-> EN — Everything you have made, newest first — with a starred-only tab
-
-Ό,τι έχεις φτιάξει, με τα πιο πρόσφατα πρώτα — και καρτέλα μόνο για τα αγαπημένα
-
-**`sidebar.hints.missionControl`**
-
-> EN — Set a goal, AI breaks it into steps.
-
-Βάλε στόχο, το AI τον σπάει σε βήματα.
-
-**`sidebar.hints.newEntry`**
-
-> EN — Write anything down — it files itself
-
-Γράψε οτιδήποτε — μπαίνει μόνο του στη θέση του
-
-**`sidebar.hints.products`**
-
-> EN — Product plans — pricing, roadmap, launch.
-
-Σχέδια προϊόντων — τιμολόγηση, roadmap, launch.
-
-**`sidebar.hints.productWorkflow`**
-
-> EN — Your products, patterns and mentor in one view.
-
-Τα προϊόντα, τα μοτίβα και ο μέντοράς σου σε μία όψη.
-
-**`sidebar.hints.reflection`**
-
-> EN — A weekly summary of your progress.
-
-Εβδομαδιαία σύνοψη της προόδου σου.
-
-**`sidebar.hints.research`**
-
-> EN — Save research, sources and summaries.
-
-Αποθήκευσε έρευνα, πηγές και συνόψεις.
-
-**`sidebar.hints.routing`**
-
-> EN — Which model each kind of request is sent to.
-
-Σε ποιο μοντέλο πηγαίνει κάθε είδος αιτήματος.
-
-**`sidebar.hints.sales`**
-
-> EN — Leads, outreach and next steps.
-
-Leads, επικοινωνία και επόμενα βήματα.
-
-**`sidebar.hints.settings`**
-
-> EN — Account, billing, language and preferences.
-
-Λογαριασμός, χρεώσεις, γλώσσα και προτιμήσεις.
-
-**`sidebar.hints.systemHealth`**
-
-> EN — Whether the database, the queues and the providers are answering.
-
-Αν απαντούν η βάση, οι ουρές και οι πάροχοι.
-
-**`sidebar.hints.team`**
-
-> EN — Invite people to your workspace.
-
-Πρόσκαλεσε άτομα στον χώρο εργασίας σου.
-
-**`sidebar.hints.timeline`**
-
-> EN — Everything you've done, in order.
-
-Όλη σου η δραστηριότητα, χρονολογικά.
-
-**`sidebar.hints.trading`**
-
-> EN — Trade log — symbol, direction, result, P&L.
-
-Ημερολόγιο trades — σύμβολο, κατεύθυνση, αποτέλεσμα, P&L.
-
-**`sidebar.hints.tradingJournal`**
-
-> EN — Your trades, with the reasoning you wrote at the time.
-
-Οι συναλλαγές σου, με το σκεπτικό που έγραψες τότε.
-
-**`sidebar.hints.tradingWorkflow`**
-
-> EN — Your trades, patterns and mentor in one view.
-
-Τα trades, τα μοτίβα και ο μέντοράς σου σε μία όψη.
-
-**`sidebar.hints.websiteBuilder`**
-
-> EN — Describe a site and AI generates the real page.
-
-Περίγραψε έναν ιστότοπο και το AI φτιάχνει την πραγματική σελίδα.
-
-**`sidebar.hints.websites`**
-
-> EN — Track sites you own — name, URL, status. No generation.
-
-Παρακολούθησε ιστότοπους που έχεις — όνομα, URL, κατάσταση. Χωρίς δημιουργία.
+Δραστηριότητα
 
 **`sidebar.items.affiliate`**
 
@@ -1978,9 +1510,9 @@ AI που δουλεύει για σένα
 
 **`sidebar.items.coding`**
 
-> EN — AI Coding
+> EN — Coding
 
-Κώδικας με AI
+Κώδικας
 
 **`sidebar.items.competitors`**
 
@@ -2540,17 +2072,83 @@ Projects
 
 Όλα τα εργαλεία
 
+**`sidebar.rail.chat`**
+
+> EN — Chat
+
+Συνομιλία
+
+**`sidebar.rail.coding`**
+
+> EN — Coding
+
+Κώδικας
+
+**`sidebar.rail.collapse`**
+
+> EN — Collapse sidebar
+
+Σύμπτυξη πλαϊνής μπάρας
+
+**`sidebar.rail.expand`**
+
+> EN — Expand sidebar
+
+Ανάπτυξη πλαϊνής μπάρας
+
+**`sidebar.rail.label`**
+
+> EN — Main
+
+Κύριο μενού
+
 **`sidebar.rail.new`**
 
 > EN — New
 
 Νέο
 
-**`sidebar.rail.recent`**
+**`sidebar.rail.pin`**
 
-> EN — Recent
+> EN — Pin {tool}
 
-Πρόσφατα
+Καρφίτσωμα: {tool}
+
+**`sidebar.rail.recentTools`**
+
+> EN — Recent tools
+
+Πρόσφατα εργαλεία
+
+**`sidebar.rail.remove`**
+
+> EN — Remove {tool} from Recent tools
+
+Αφαίρεση του {tool} από τα πρόσφατα
+
+**`sidebar.rail.saveFailed`**
+
+> EN — Could not save that change. Try again.
+
+Η αλλαγή δεν αποθηκεύτηκε. Δοκίμασε ξανά.
+
+**`sidebar.rail.settings`**
+
+> EN — Settings
+
+Ρυθμίσεις
+
+**`sidebar.rail.unpin`**
+
+> EN — Unpin {tool}
+
+Ξεκαρφίτσωμα: {tool}
+
+**`sidebar.tabs.label`**
+
+> EN — Main navigation
+
+Κύρια πλοήγηση
 
 ### first result
 
@@ -2559,246 +2157,6 @@ Projects
 > EN — Could not load your ideas: {message}
 
 Δεν ήταν δυνατή η φόρτωση των ιδεών σου: {message}
-
-**`dashboard.insights.title`**
-
-> EN — What I noticed
-
-Τι πρόσεξα
-
-**`dashboard.overview.activeMission.open`**
-
-> EN — Open the plan
-
-Άνοιξε το σχέδιο
-
-**`dashboard.overview.activeMission.stepsLabel`**
-
-> EN — {completed}/{total} steps completed
-
-{completed}/{total} βήματα ολοκληρώθηκαν
-
-**`dashboard.overview.aiCoach.entryCount`**
-
-> EN — {count, plural, one {# new {module} entry} other {# new {module} entries}}
-
-{count, plural, one {# νέα καταχώρηση στο {module}} other {# νέες καταχωρήσεις στο {module}}}
-
-**`dashboard.overview.aiCoach.mostActiveIn`**
-
-> EN — Most active in {module}
-
-Πιο ενεργό/ή στο {module}
-
-**`dashboard.overview.aiCoach.noActivity`**
-
-> EN — No activity yet this week — log something to get started.
-
-Καμία δραστηριότητα ακόμα αυτή την εβδομάδα — καταχώρησε κάτι για να ξεκινήσεις.
-
-**`dashboard.overview.betaFeedback.linkLabel`**
-
-> EN — Share feedback
-
-Στείλε feedback
-
-**`dashboard.overview.betaFeedback.message`**
-
-> EN — Thanks for testing Ionexa AI. Your feedback is welcome.
-
-Ευχαριστούμε που δοκιμάζεις το Ionexa AI. Τα σχόλιά σου είναι ευπρόσδεκτα.
-
-**`dashboard.overview.healthScore.buildingMomentum`**
-
-> EN — Building momentum
-
-Χτίζεις φόρα
-
-**`dashboard.overview.healthScore.excellentConsistency`**
-
-> EN — Excellent consistency
-
-Εξαιρετική συνέπεια
-
-**`dashboard.overview.healthScore.justStarting`**
-
-> EN — Just getting started
-
-Μόλις ξεκινάς
-
-**`dashboard.overview.healthScore.strongProgress`**
-
-> EN — Strong progress
-
-Ισχυρή πρόοδος
-
-**`dashboard.overview.healthScore.suggestion.consistency`**
-
-> EN — Try logging something every day this week.
-
-Δοκίμασε να καταγράφεις κάτι κάθε μέρα αυτή την εβδομάδα.
-
-**`dashboard.overview.healthScore.suggestion.coverage`**
-
-> EN — Try exploring a module you haven't used yet.
-
-Δοκίμασε να εξερευνήσεις μια ενότητα που δεν έχεις χρησιμοποιήσει ακόμα.
-
-**`dashboard.overview.healthScore.suggestion.missionSteps`**
-
-> EN — Complete a plan step to keep your momentum going.
-
-Ολοκλήρωσε ένα βήμα του σχεδίου για να διατηρήσεις τη φόρα σου.
-
-**`dashboard.overview.healthScore.title`**
-
-> EN — Business Health Score
-
-Σκορ Υγείας Επιχείρησης
-
-**`dashboard.overview.next.title`**
-
-> EN — Next
-
-Επόμενο
-
-**`dashboard.overview.nextAction.continueMission`**
-
-> EN — Continue: {step} from your "{goal}" plan
-
-Συνέχισε: {step} από το σχέδιο "{goal}"
-
-**`dashboard.overview.nextAction.cta`**
-
-> EN — Go there →
-
-Πήγαινε →
-
-**`dashboard.overview.setupProgress.count`**
-
-> EN — {done} of {total} steps
-
-{done} από {total} βήματα
-
-**`dashboard.overview.setupProgress.steps.firstEntry`**
-
-> EN — Log your first entry
-
-Κάνε την πρώτη σου καταχώρηση
-
-**`dashboard.overview.setupProgress.steps.mission`**
-
-> EN — Set a goal
-
-Όρισε έναν στόχο
-
-**`dashboard.overview.setupProgress.steps.onboarding`**
-
-> EN — Finish the welcome questions
-
-Ολοκλήρωσε τις ερωτήσεις υποδοχής
-
-**`dashboard.overview.setupProgress.steps.secondModule`**
-
-> EN — Log something in a second area
-
-Καταχώρησε κάτι σε δεύτερη περιοχή
-
-**`dashboard.overview.setupProgress.title`**
-
-> EN — Setup progress
-
-Πρόοδος ρύθμισης
-
-**`dashboard.overview.statRow.creditsExplain`**
-
-> EN — What is left of this month's allowance for AI work.
-
-Ό,τι απομένει από το μηνιαίο σου όριο για δουλειά με AI.
-
-**`dashboard.overview.statRow.creditsRemaining`**
-
-> EN — Credits Remaining
-
-Credits που Απομένουν
-
-**`dashboard.overview.statRow.fillsAfter`**
-
-> EN — Fills in after {count} entries
-
-Γεμίζει μετά από {count} καταχωρήσεις
-
-**`dashboard.overview.statRow.fromEntries`**
-
-> EN — {count, plural, one {from # entry} other {from # entries}}
-
-{count, plural, one {από # καταχώρηση} other {από # καταχωρήσεις}}
-
-**`dashboard.overview.statRow.mostActive`**
-
-> EN — Most Active
-
-Πιο Ενεργό
-
-**`dashboard.overview.statRow.ofTotal`**
-
-> EN — {count, plural, one {of # in total} other {of # in total}}
-
-{count, plural, one {από # συνολικά} other {από # συνολικά}}
-
-**`dashboard.overview.statRow.openCredits`**
-
-> EN — See the ledger →
-
-Δες το ιστορικό →
-
-**`dashboard.overview.statRow.openEntries`**
-
-> EN — See the entries →
-
-Δες τις καταχωρήσεις →
-
-**`dashboard.overview.statRow.thisWeek`**
-
-> EN — This Week
-
-Αυτή την Εβδομάδα
-
-**`dashboard.overview.statRow.totalEntries`**
-
-> EN — Total Entries
-
-Σύνολο Εγγραφών
-
-**`dashboard.overview.statRow.totalEntriesExplain`**
-
-> EN — Everything you have logged, in every module, since you started.
-
-Ό,τι έχεις καταχωρήσει, σε κάθε ενότητα, από την αρχή.
-
-**`dashboard.overview.whatChanged.entries`**
-
-> EN — new entries
-
-νέες καταχωρήσεις
-
-**`dashboard.overview.whatChanged.insights`**
-
-> EN — new insights
-
-νέες παρατηρήσεις
-
-**`dashboard.overview.whatChanged.since`**
-
-> EN — since {when}
-
-από {when}
-
-**`dashboard.overview.whatChanged.title`**
-
-> EN — What changed
-
-Τι άλλαξε
 
 **`errors.boundary.section`**
 
@@ -2854,6 +2212,12 @@ Credits που Απομένουν
 
 Άνοιγμα: {module} →
 
+**`dashboard.createAnything.accomplishPlaceholder`**
+
+> EN — What do you want to accomplish?
+
+Τι θέλεις να πετύχεις;
+
 **`dashboard.createAnything.attachImage`**
 
 > EN — Attach image
@@ -2908,132 +2272,6 @@ Credits που Απομένουν
 
 Δεν ήταν δυνατή η μεταφόρτωση μίας ή περισσότερων εικόνων.
 
-**`dashboard.energyCheckIn.change`**
-
-> EN — Change
-
-Άλλαξε
-
-**`dashboard.energyCheckIn.checkedInToday`**
-
-> EN — Today's energy: {level}/5.
-
-Σημερινή ενέργεια: {level}/5.
-
-**`dashboard.energyCheckIn.levelLabel`**
-
-> EN — Energy level {level}
-
-Επίπεδο ενέργειας {level}
-
-**`dashboard.energyCheckIn.logged`**
-
-> EN — Energy logged
-
-Η ενέργεια καταγράφηκε
-
-**`dashboard.energyCheckIn.notePlaceholder`**
-
-> EN — Optional note...
-
-Προαιρετική σημείωση...
-
-**`dashboard.energyCheckIn.prompt`**
-
-> EN — How's your energy today?
-
-Πώς είναι η ενέργειά σου σήμερα;
-
-**`dashboard.energyCheckIn.scaleHigh`**
-
-> EN — 5 = great
-
-5 = τέλεια
-
-**`dashboard.energyCheckIn.scaleLow`**
-
-> EN — 1 = exhausted
-
-1 = εξαντλημένος
-
-**`dashboard.energyCheckIn.title`**
-
-> EN — Energy Check-In
-
-Έλεγχος Ενέργειας
-
-**`dashboard.firstScreen.build.example`**
-
-> EN — Build a website for my shop
-
-Φτιάξε site για το μαγαζί μου
-
-**`dashboard.firstScreen.build.verb`**
-
-> EN — Build
-
-Φτιάξε
-
-**`dashboard.firstScreen.cost.charged`**
-
-> EN — Uses credits
-
-Χρεώνει credits
-
-**`dashboard.firstScreen.cost.free`**
-
-> EN — Free
-
-Δωρεάν
-
-**`dashboard.firstScreen.cost.freeAllowance`**
-
-> EN — Free up to your monthly limit
-
-Δωρεάν μέχρι το μηνιαίο όριο
-
-**`dashboard.firstScreen.label`**
-
-> EN — Press one — it runs right away
-
-Πάτα ένα — τρέχει αμέσως
-
-**`dashboard.firstScreen.repeat.example`**
-
-> EN — Every Monday, a summary of my sales
-
-Κάθε Δευτέρα, σύνοψη των πωλήσεών μου
-
-**`dashboard.firstScreen.repeat.verb`**
-
-> EN — Repeat
-
-Επανάλαβε
-
-**`dashboard.firstScreen.understand.example`**
-
-> EN — What do my numbers say this week?
-
-Τι δείχνουν τα νούμερά μου αυτή τη βδομάδα;
-
-**`dashboard.firstScreen.understand.verb`**
-
-> EN — Understand
-
-Κατάλαβε
-
-**`dashboard.overview.recentEntries.empty`**
-
-> EN — No entries yet.
-
-Καμία καταχώρηση ακόμα.
-
-**`dashboard.overview.recentEntries.title`**
-
-> EN — Recent Entries
-
-Πρόσφατες Καταχωρήσεις
-
 **`errors.creditHistory`**
 
 > EN — See credit history
@@ -3064,25 +2302,7 @@ Credits που Απομένουν
 
 Καλημέρα
 
-**`sampleData.load`**
-
-> EN — See it with sample data
-
-Δες το με δείγμα δεδομένων
-
-**`sampleData.loadFailed`**
-
-> EN — That did not work. Try again.
-
-Δεν πέτυχε. Δοκίμασε ξανά.
-
-**`sampleData.loading`**
-
-> EN — Loading…
-
-Φορτώνει…
-
-## Tier 3 — Further in — only if you have time (210)
+## Tier 3 — Further in — only if you have time (208)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3161,18 +2381,6 @@ _Reachable from these screens but deeper in: shared components, error states, th
 > EN — Notifications
 
 Ειδοποιήσεις
-
-**`common.switchToDarkMode`**
-
-> EN — Switch to dark mode
-
-Εναλλαγή σε σκούρο θέμα
-
-**`common.switchToLightMode`**
-
-> EN — Switch to light mode
-
-Εναλλαγή σε ανοιχτό θέμα
 
 **`common.toggleMenu`**
 

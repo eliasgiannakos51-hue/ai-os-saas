@@ -72,7 +72,7 @@ const MUTANTS = [
     // fails even at full strength.
     name: "the muted token is dimmed until a full-strength cross fails too",
     file: CSS,
-    from: "  --muted: 138 138 138;",
+    from: "  --muted: 141 150 168;",
     to: "  --muted: 44 44 44;",
     expect: "against the panel (needs 3)",
   },

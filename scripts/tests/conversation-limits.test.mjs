@@ -282,7 +282,7 @@ check("an emptied box is sent, not swallowed", !/if \(!trimmed\) return/.test(in
 // wall arrives too late to change what you were typing.
 check("a counter appears as the limit approaches", /remaining <= 20 &&/.test(inlineCode));
 check("counting down from the shared constant", /MAX_CONVERSATION_TITLE_LENGTH - value\.length/.test(inlineCode));
-check("and it warns at zero", /remaining === 0 \? "text-amber-400"/.test(inlineCode));
+check("and it warns at zero", /remaining === 0 \? "text-warning"/.test(inlineCode));
 check("the field is labelled for screen readers", /aria-label=\{t\("renameLabel"/.test(inlineCode));
 check("the rename goes through the route", /fetch\(`\/api\/conversations\/\$\{id\}`[\s\S]{0,200}JSON\.stringify\(\{ title \}\)/.test(workspaceCode));
 // The server trims; if the client kept its own optimistic string the

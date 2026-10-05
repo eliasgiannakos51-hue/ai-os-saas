@@ -2,7 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { stepLabelKey } from "@/lib/jobs/step-labels";
-import type { ClientStep } from "@/lib/jobs/job-timeline";
+import type { ClientStep, EvidenceKey } from "@/lib/jobs/job-timeline";
 
 // What a step found, by key — the worker stores a key and a number, never
 // a sentence (lib/jobs/job-timeline.ts EVIDENCE_KEYS). Named rather than
@@ -12,7 +12,9 @@ const EVIDENCE_MESSAGE = {
   parts: "timeline.evidence.parts",
   planSteps: "timeline.evidence.planSteps",
   sources: "timeline.evidence.sources",
-} as const;
+  pages: "timeline.evidence.pages",
+  photos: "timeline.evidence.photos",
+} as const satisfies Record<EvidenceKey, string>;
 
 /**
  * WHAT A JOB DID, STEP BY STEP — V6.2 2.1 (lib/jobs/job-timeline.ts).
@@ -29,6 +31,7 @@ const EVIDENCE_MESSAGE = {
 export function AiJobTimeline({
   job,
   labelFor,
+  defaultOpen = false,
   className = "",
 }: {
   // A background job (lib/jobs/use-ai-job), or anything else that keeps
@@ -37,6 +40,9 @@ export function AiJobTimeline({
   // For a caller whose labels are its own keys rather than JOB_STEPS.
   // Returns null to fall through to the job wording, or the raw label.
   labelFor?: (label: string | null) => string | null;
+  // Open while the work runs, so the steps are seen as they happen;
+  // folded once it is done, under an answer that already says enough.
+  defaultOpen?: boolean;
   className?: string;
 }) {
   // NAMESPACED, so the dashboard's message slice can be bounded
@@ -49,7 +55,7 @@ export function AiJobTimeline({
   if (!job || steps.length === 0) return null;
 
   return (
-    <details className={`text-xs text-muted ${className}`} data-testid="ai-job-timeline">
+    <details open={defaultOpen} className={`text-xs text-muted ${className}`} data-testid="ai-job-timeline">
       <summary className="cursor-pointer select-none py-1">{tSteps("timeline.title")}</summary>
       <ol className="mt-1 space-y-1 border-s border-border ps-3">
         {steps.map((s) => {

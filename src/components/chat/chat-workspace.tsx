@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, AudioLines, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react";
+import { ArrowDown, AudioLines, Compass, Gift, PanelLeftClose, PanelLeftOpen, X, Zap } from "lucide-react";
+import { Earth } from "@/components/brand/earth";
 import { useTranslations } from "next-intl";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { AiActivity } from "@/components/ui/ai-activity";
@@ -30,6 +31,19 @@ import { ProvenanceLine } from "@/components/chat/provenance-line";
 import { TransitionButton } from "@/components/transitions/transition-button";
 import type { Provenance } from "@/lib/chat/provenance";
 import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
+import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
+import type { ClientStep } from "@/lib/jobs/job-timeline";
+import type { WorkMode } from "@/lib/chat/work-modes";
+import { chatTimelineWorthShowing, isChatStep, readChatStepFrame, type ChatStep } from "@/lib/chat/chat-timeline";
+
+// What each phase of an answer is called on screen (lib/chat/chat-timeline.ts).
+// Named rather than built from the step, so every message is a literal.
+const CHAT_STEP_MESSAGE = {
+  thinking: "chatTimeline.thinking",
+  searching_web: "chatTimeline.searching_web",
+  searching_data: "chatTimeline.searching_data",
+  writing: "chatTimeline.writing",
+} as const satisfies Record<ChatStep, string>;
 
 // Remembered across visits, per the focus-mode toggle below.
 const CHAT_SIDEBAR_STORAGE_KEY = "chat-sidebar";
@@ -64,28 +78,28 @@ function nextLocalId(prefix: string) {
   return `${prefix}-${localIdCounter}`;
 }
 
-function AssistantAvatar() {
-  return (
-    <span
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-500/10 text-orange-400"
-      aria-hidden="true"
-    >
-      <MessageCircle className="h-4 w-4" />
-    </span>
-  );
+/**
+ * THE SMALL EARTH BESIDE EVERY ANSWER (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN,
+ * «Η ΓΗ»: «η ίδια μικρή γη δίπλα σε κάθε απάντηση του Ionexa. Γυρίζει
+ * πιο γρήγορα όσο δουλεύει και ηρεμεί όταν τελειώσει»). 32px: the 64px
+ * of Home beside every turn would be wider than the indent of the text.
+ * Only the answer being written and the latest one move; older ones are
+ * drawn still, so a long thread does not run a canvas per turn.
+ */
+function AssistantAvatar({ working = false, still = false }: { working?: boolean; still?: boolean }) {
+  return <Earth variant="small" px={32} working={working} still={still} className="mt-0.5 shrink-0" />;
 }
 
 export function ChatWorkspace({
   initialConversations,
-  userInitial,
   initialMentorPreset,
   initialFreeChatRemaining,
   initialConversationId,
   initialAsk,
   initialProjectId,
+  initialWorkMode,
 }: {
   initialConversations: ChatConversation[];
-  userInitial: string;
   /** Conversation to open on load — the `?c=` deep link a starred
    *  conversation on /dashboard/favorites points at. Already checked
    *  against the user's own list server-side. */
@@ -111,6 +125,11 @@ export function ChatWorkspace({
    */
   initialAsk?: string;
   /**
+   * The way of working a Home quick action chose (lib/chat/work-modes.ts).
+   * Sent with every message until the person clears it.
+   */
+  initialWorkMode?: WorkMode;
+  /**
    * The project a conversation STARTED here belongs to, for the whole of
    * its life. Chosen on arrival (/dashboard/projects/[id] links here with
    * it) and never switched: lib/projects/project.ts's budget is only
@@ -127,6 +146,8 @@ export function ChatWorkspace({
   const tProduct = useTranslations("dashboard.productWorkflow");
   const tFree = useTranslations("credits.freeChat");
   const t = useTranslations("dashboard.chat");
+  const tSteps = useTranslations("aiSteps");
+  const chatStepLabel = (label: string | null) => (isChatStep(label) ? tSteps(CHAT_STEP_MESSAGE[label]) : null);
   const tVoice = useTranslations("voice");
   const { refresh: refreshCredits, reportUsage } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
@@ -137,7 +158,9 @@ export function ChatWorkspace({
   // parallel map: a reply and the list of entries it was built from are
   // one thing, and two structures keyed by id drift the moment a message
   // is removed from one of them.
-  const [messages, setMessages] = useState<(ChatMessage & { provenance?: Provenance })[]>([]);
+  const [messages, setMessages] = useState<(ChatMessage & { provenance?: Provenance; timeline?: ClientStep[] })[]>([]);
+  // The one answer whose earth keeps turning, calmly, once it is done.
+  const lastAnswerId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
   // The text being typed lives INSIDE ChatComposer, not here: as state on
   // this component, every keystroke re-rendered the whole workspace —
   // thread, sidebar, header — measured at 128ms median per key with a
@@ -166,8 +189,13 @@ export function ChatWorkspace({
   // NEXT message sent, same as the API route treating it as a per-request
   // flag (see api/chat/route.ts) rather than conversation state.
   const [mentorMode, setMentorMode] = useState(initialMentorPreset != null);
+  const [workMode, setWorkMode] = useState<WorkMode | null>(initialWorkMode ?? null);
+  const tModes = useTranslations("dashboard.home.actions");
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState<string | null>(null);
+  // The answer's steps while it streams, replaced whole by every
+  // `timeline` frame (app/api/chat/route.ts).
+  const [liveTimeline, setLiveTimeline] = useState<ClientStep[]>([]);
   // THE STOP BUTTON — V4.6. One controller per send; pressing ✕ aborts
   // the fetch, which is what the server reads as "stop" (api/chat). The
   // text already on screen is kept, the box is handed back at once, and
@@ -498,6 +526,7 @@ export function ChatWorkspace({
     ]);
     setSending(true);
     setStreamingText(null);
+    setLiveTimeline([]);
     setStoppedNote(false);
     const controller = new AbortController();
     abortRef.current = controller;
@@ -517,6 +546,7 @@ export function ChatWorkspace({
           // mid-conversation switch that would rewrite the cached prefix.
           ...(initialProjectId && !sentFromId ? { projectId: initialProjectId } : {}),
           ...(mentorPreset ? { mentorPreset } : {}),
+          ...(workMode ? { workMode } : {}),
           ...(options.skipClarification ? { skipClarification: true } : {}),
         }),
       });
@@ -543,12 +573,17 @@ export function ChatWorkspace({
       let usageEvent: unknown = null;
       let provenance: Provenance | null = null;
       let finalContent: string | null = null;
+      let finishedTimeline: ClientStep[] | undefined;
       const { interrupted } = await readNdjsonStream(res.body, (event) => {
         if (event.type === "done") {
           usageEvent = event;
           // With web sources the server sends the answer back numbered
           // (lib/chat/web-sources.ts); without them, what streamed stands.
           if (typeof event.content === "string" && event.content.trim()) finalContent = event.content;
+          finishedTimeline = keepChatSteps(event.timeline);
+        }
+        if (event.type === "timeline") {
+          setLiveTimeline(keepChatSteps(event.steps) ?? []);
         }
         if (event.type === "meta") {
           resolvedConversationId = (event.conversationId as string | null) ?? null;
@@ -616,6 +651,7 @@ export function ChatWorkspace({
             content: finalContent ?? accumulatedText,
             created_at: new Date().toISOString(),
             provenance: provenance ?? undefined,
+            timeline: finishedTimeline,
           },
         ]);
         if (resolvedConversationId) {
@@ -670,6 +706,7 @@ export function ChatWorkspace({
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
       setStreamingText(null);
+      setLiveTimeline([]);
       setSending(false);
     }
   }
@@ -712,7 +749,7 @@ export function ChatWorkspace({
           type="button"
           aria-label={t("hideConversations")}
           onClick={toggleSidebar}
-          className="absolute inset-0 z-20 bg-black/50 xl:hidden"
+          className="absolute inset-0 z-20 bg-background/50 xl:hidden"
         />
       )}
 
@@ -733,7 +770,7 @@ export function ChatWorkspace({
               onClick={toggleSidebar}
               aria-expanded={sidebarOpen}
               aria-label={sidebarOpen ? t("hideConversations") : t("showConversations")}
-              className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground sm:h-9"
+              className="flex h-11 min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-item px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               {sidebarOpen ? (
                 <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -742,7 +779,7 @@ export function ChatWorkspace({
               )}
               {/* Hidden below sm only — at 375px the composer needs the
                   width more than the label does. */}
-              <span className="hidden truncate text-xs sm:inline">
+              <span className="hidden break-words text-xs sm:inline">
                 {sidebarOpen ? t("hideConversations") : t("focusMode")}
               </span>
             </button>
@@ -779,7 +816,7 @@ export function ChatWorkspace({
                 editing={headerRenaming}
                 onEditingChange={setHeaderRenaming}
                 onRename={(next) => void renameConversation(activeConversation.id, next)}
-                className="min-w-0 truncate text-sm font-medium text-foreground"
+                className="min-w-0 break-words text-sm font-medium text-foreground"
               />
             </div>
           )}
@@ -811,10 +848,8 @@ export function ChatWorkspace({
               {tCommon("loading")}
             </div>
           ) : messages.length === 0 && !sending ? (
-            <div className="mx-auto flex h-full max-w-md flex-col items-center justify-center text-center">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-400">
-                <MessageCircle className="h-6 w-6" aria-hidden="true" />
-              </span>
+            <div className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center py-6 text-center">
+              <Earth variant="small" px={64} />
               <h1 className="mt-4 text-xl font-bold tracking-wide text-foreground">{t("title")}</h1>
               {/* Was three hardcoded English sentences. A Greek user opening
                   Chat met an English explanation of what it is for — which
@@ -827,7 +862,7 @@ export function ChatWorkspace({
                   is the only moment the expectation is still being set.
                   The same three sentences are in the chat's help entry;
                   one wording, two places. */}
-              <div className="mt-5 w-full rounded-xl border border-border bg-panel/60 px-4 py-3 text-start">
+              <div className="mt-5 w-full rounded-card border border-border bg-panel/60 px-4 py-3 text-start">
                 <p className="text-xs font-semibold text-foreground/80">{t("dataScope.title")}</p>
                 <p className="mt-1 text-xs leading-relaxed text-muted">{t("dataScope.body")}</p>
               </div>
@@ -844,7 +879,7 @@ export function ChatWorkspace({
             </div>
           ) : (
             /* NO BUBBLE ON THE ANSWER — V4.6 #12.
-               The reply used to sit in `rounded-2xl border border-border
+               The reply used to sit in `rounded-card border border-border
                bg-panel`, an opaque card that covered the backdrop the
                product is built around. The answer is the page; a card
                around it says the page is a container for messages.
@@ -862,7 +897,7 @@ export function ChatWorkspace({
                nothing to tell a question from an answer once both are
                bare text on the same surface. It is a quiet one: the
                panel colour with an accent EDGE, not the filled
-               `bg-orange-500 text-black` slab it was. Opaque on purpose
+               `bg-button text-button-ink` slab it was. Opaque on purpose
                — a translucent tint over a moving wireframe is a
                contrast figure that changes with the pixel underneath.
 
@@ -875,41 +910,22 @@ export function ChatWorkspace({
             <div className="chat-measure space-y-8">
               {messages.map((msg) =>
                 msg.role === "user" ? (
-                  <div key={msg.id} className="flex items-start justify-end gap-2">
-                    {/* NO BOX. Reported from live production twice: "the
-                        text is inside a frame, I want it across the
-                        width". The ANSWER lost its card on 2026-09-04 —
-                        see the note above — and the QUESTION kept one,
-                        so what was left read as a frame around half the
-                        conversation.
-
-                        WHAT REPLACES IT, because a bubble was doing two
-                        jobs. Telling the speakers apart is done by the
-                        things that were already there: the turn is
-                        right-aligned, the avatar sits beside it, and
-                        space-y-8 between turns is four times the gap
-                        inside one. What the border added on top of that
-                        was a rectangle, and the rectangle is what was
-                        asked to go.
-
-                        The 85% cap goes with it: it existed to stop a
-                        bubble spanning the pane, and there is no bubble.
-                        Line length is still governed by .chat-measure,
-                        which is a measured readability cap and not a
-                        box — see globals.css. */}
-                    <div className="min-w-0 whitespace-pre-wrap px-1 py-0.5 text-right text-foreground">
+                  <div key={msg.id} className="flex justify-end">
+                    {/* ON A SURFACE AGAIN, by the owner's design of
+                        2026-10-04 (docs/CONTEXT.md, «ΣΥΝΟΜΙΛΙΑ»: «Το
+                        μήνυμα του χρήστη δεξιά, σε επιφάνεια #0D1220»).
+                        What was asked to go in September was the FRAME —
+                        a border around half the conversation; this is a
+                        fill with no border, and the answer stays bare.
+                        The 85% cap comes back with the surface, so a
+                        long question does not paint the whole pane. */}
+                    <div className="min-w-0 max-w-[85%] whitespace-pre-wrap rounded-card bg-panel px-4 py-2.5 text-foreground">
                       {msg.content}
                     </div>
-                    <span
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-panel text-xs font-semibold text-muted"
-                      aria-hidden="true"
-                    >
-                      {userInitial}
-                    </span>
                   </div>
                 ) : (
                   <div key={msg.id} className="flex items-start gap-2.5">
-                    <AssistantAvatar />
+                    <AssistantAvatar still={sending || msg.id !== lastAnswerId} />
                     {/* THE GROUND UNDER THE ANSWER — V4.6, decided
                         2026-09-04 from the screenshots: `dim`. A 62%
                         page-colour pane over the answer's own rectangle,
@@ -944,6 +960,10 @@ export function ChatWorkspace({
                           "Listen" is: half a sentence points nowhere. */}
                       <TransitionButton text={msg.content} />
                       <ProvenanceLine provenance={msg.provenance} />
+                      {/* What the answer did, step by step — only on an
+                          answer that searched, and only in this page:
+                          a reloaded conversation has none (not stored). */}
+                      <AiJobTimeline job={{ kind: "chat", timeline: msg.timeline }} labelFor={chatStepLabel} />
                       {/* EU AI Act art. 50 — on the reply itself, not in
                           metadata. */}
                       <AiGeneratedNotice />
@@ -954,12 +974,17 @@ export function ChatWorkspace({
 
               {sending && (
                 <div className="flex items-start gap-2.5">
-                  <AssistantAvatar />
+                  <AssistantAvatar working />
                   {streamingText !== null ? (
                     <div className="chat-ground-dim min-w-0 flex-1 text-foreground">
+                      {chatTimelineWorthShowing(liveTimeline) && (
+                        <AiJobTimeline job={{ kind: "chat", timeline: liveTimeline }} labelFor={chatStepLabel} defaultOpen className="mb-2" />
+                      )}
                       <MessageContent content={streamingText} className="leading-relaxed" />
                       <AiGeneratedNotice />
                     </div>
+                  ) : chatTimelineWorthShowing(liveTimeline) ? (
+                    <AiJobTimeline job={{ kind: "chat", timeline: liveTimeline }} labelFor={chatStepLabel} defaultOpen className="py-1" />
                   ) : (
                     <AiActivity kind="chat" className="py-1" />
                   )}
@@ -972,7 +997,7 @@ export function ChatWorkspace({
                   product rather than four. */}
               {clarify && !sending && (
                 <div className="flex items-start gap-2.5" data-testid="chat-clarify">
-                  <AssistantAvatar />
+                  <AssistantAvatar still />
                   <div className="min-w-0 flex-1">
                     <ClarificationQuestions
                       questions={clarify.questions}
@@ -1007,7 +1032,7 @@ export function ChatWorkspace({
             type="button"
             onClick={jumpToBottom}
             data-testid="chat-jump-to-latest"
-            className="absolute bottom-3 left-1/2 z-10 inline-flex min-h-[36px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-orange-500/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-orange-300 shadow-lg transition-colors duration-150 hover:border-orange-500 hover:bg-orange-500/10"
+            className="absolute bottom-3 left-1/2 z-10 inline-flex min-h-[44px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-foreground/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-foreground/40 hover:bg-foreground/10"
           >
             <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
             {tCommon("newMessagesBelow")}
@@ -1053,10 +1078,22 @@ export function ChatWorkspace({
                   // aria-describedby so a screen reader gets it with the
                   // button rather than as a separate paragraph.
                   aria-describedby={talkBlockedReason ? "talk-blocked-reason" : undefined}
-                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-orange-500/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <AudioLines className="h-3.5 w-3.5" aria-hidden="true" />
                   {tVoice("conversation.start")}
+                </button>
+              )}
+              {workMode && (
+                <button
+                  type="button"
+                  onClick={() => setWorkMode(null)}
+                  aria-label={t("workMode.clear")}
+                  data-testid="work-mode-chip"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-foreground/60 bg-foreground/10 px-3 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/15"
+                >
+                  {t("workMode.active", { mode: tModes(workMode) })}
+                  <X className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
               )}
               <button
@@ -1066,8 +1103,8 @@ export function ChatWorkspace({
                 title={t("mentorModeHint")}
                 className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 ${
                   mentorMode
-                    ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
-                    : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
+                    ? "border-foreground/60 bg-foreground/10 text-foreground"
+                    : "border-border text-muted hover:border-foreground/40 hover:text-foreground"
                 }`}
               >
                 <Compass className="h-3.5 w-3.5" aria-hidden="true" />
@@ -1084,10 +1121,10 @@ export function ChatWorkspace({
             )}
             {error && (
               <p
-                className={`mb-3 rounded-xl border px-3 py-2 text-xs ${
+                className={`mb-3 rounded-card border px-3 py-2 text-xs ${
                   isRateLimitNotice
-                    ? "border-orange-900/50 bg-orange-500/5 text-orange-400"
-                    : "border-red-900 bg-red-950/40 text-red-400"
+                    ? "border-border bg-foreground/5 text-foreground"
+                    : "border-danger/40 bg-danger/10 text-danger"
                 }`}
               >
                 {error}
@@ -1106,14 +1143,14 @@ export function ChatWorkspace({
               initialText={composerInitialText}
             >
               {largeMessageCredits !== null && (
-                <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-orange-300/90">
-                  <Zap className="h-3 w-3 text-orange-400/80" aria-hidden="true" />
+                <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
+                  <Zap className="h-3 w-3 text-foreground/80" aria-hidden="true" />
                   {tFree("largeMessage", { count: largeMessageCredits })}
                 </p>
               )}
               {freeRemaining !== null && (
                 <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
-                  <Gift className="h-3 w-3 text-emerald-400/80" aria-hidden="true" />
+                  <Gift className="h-3 w-3 text-success/80" aria-hidden="true" />
                   {freeRemaining > 0
                     ? tFree("remaining", { count: freeRemaining })
                     : tFree("exhausted")}
@@ -1146,4 +1183,19 @@ export function ChatWorkspace({
       )}
     </div>
   );
+}
+
+// A `timeline` or `done` frame's steps, kept only when every one is a
+// well-formed chat step — a frame from an older server, or anything
+// else, is dropped rather than drawn.
+function keepChatSteps(raw: unknown): ClientStep[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const steps = raw.filter(
+    (s): s is ClientStep =>
+      !!s &&
+      typeof s === "object" &&
+      typeof (s as ClientStep).step === "number" &&
+      readChatStepFrame({ label: (s as ClientStep).label, at: (s as ClientStep).startedAt }) !== null
+  );
+  return steps.length === raw.length ? steps : undefined;
 }

@@ -5,9 +5,8 @@
 // judgement that produced a 2.11:1 accent on white. A ratio is a number;
 // either it clears the threshold or it does not.
 //
-// Pure and dependency-free on purpose: scripts/tests/light-theme-contrast
-// .test.mjs runs this against the real values in src/app/globals.css and
-// the real Tailwind palette, inside the build gate.
+// Pure and dependency-free on purpose, so a gate or a script can run it
+// against the real values in src/app/globals.css without a browser.
 
 /** WCAG 1.4.3 — normal-size body text. */
 export const WCAG_TEXT_MIN = 4.5;

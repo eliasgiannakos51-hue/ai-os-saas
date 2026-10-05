@@ -440,44 +440,25 @@ ok(
   "every state has its own colour variable",
   new Set(Object.values(STATE_COLOR_VAR)).size === VOICE_STATES.length,
 );
-// THE LIGHT BLOCK, BRACE-MATCHED. Slicing the file from the first
-// `[data-theme="light"]` to the end was the bug: everything defined
-// AFTER that point — including the dark `:root` voice tokens — fell
-// inside the slice, so the "light" assertion was reading the dark
-// definition and passing on it. Deleting the light palette entirely left
-// the gate green.
-const lightBlocks = cssBlocks(css, '[data-theme="light"]');
-const lightVoiceBlock = lightBlocks.find((b) => b.includes("--voice-")) ?? "";
-ok(
-  'a [data-theme="light"] block actually defines voice colours',
-  lightVoiceBlock.length > 0,
-  `${lightBlocks.length} light blocks, none with --voice-`,
-);
+// ONE THEME SINCE 2026-10-04 (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN). The light
+// block these checks used to read is gone with the light theme; what
+// stays true is that every state is DEFINED, and that listening and
+// speaking are different colours a person can tell apart without a label.
 const rootBlocks = cssBlocks(css, ":root");
 const darkVoiceBlock = rootBlocks.find((b) => b.includes("--voice-")) ?? "";
-ok("a :root block defines the dark voice colours", darkVoiceBlock.length > 0);
+ok("a :root block defines the voice colours", darkVoiceBlock.length > 0);
+ok("no light block redefines them, because there is no light theme", !/data-theme="light"/.test(css));
+const voiceValue = (varName) => darkVoiceBlock.match(new RegExp(`${varName}\\s*:\\s*([^;]+);`))?.[1]?.trim();
 for (const state of VOICE_STATES) {
   const varName = STATE_COLOR_VAR[state];
-  const declared = new RegExp(`${varName}\\s*:`);
-  ok(`${varName} is defined for the dark theme`, declared.test(darkVoiceBlock));
-  ok(
-    `${varName} is redefined for the light theme`,
-    declared.test(lightVoiceBlock),
-  );
-  // Same name, different value — otherwise "redefined" means "copied",
-  // which is the light-contrast bug this project has already shipped once.
-  const darkValue = darkVoiceBlock
-    .match(new RegExp(`${varName}\\s*:\\s*([^;]+);`))?.[1]
-    ?.trim();
-  const lightValue = lightVoiceBlock
-    .match(new RegExp(`${varName}\\s*:\\s*([^;]+);`))?.[1]
-    ?.trim();
-  ok(
-    `${varName} is a DIFFERENT colour in the light theme, not the dark one copied across`,
-    Boolean(darkValue) && Boolean(lightValue) && darkValue !== lightValue,
-    `dark ${darkValue} / light ${lightValue}`,
-  );
+  ok(`${varName} is defined`, Boolean(voiceValue(varName)));
 }
+ok(
+  "listening and speaking are different colours, not one copied across",
+  Boolean(voiceValue(STATE_COLOR_VAR.listening)) &&
+    voiceValue(STATE_COLOR_VAR.listening) !== voiceValue(STATE_COLOR_VAR.speaking),
+  `${voiceValue(STATE_COLOR_VAR.listening)} / ${voiceValue(STATE_COLOR_VAR.speaking)}`,
+);
 
 ok(
   "rotation never exceeds a full turn (it is fed straight into rotate())",

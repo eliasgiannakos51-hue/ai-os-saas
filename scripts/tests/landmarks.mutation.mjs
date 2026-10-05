@@ -41,22 +41,23 @@ const MUTANTS = [
   {
     name: "the dashboard layout's landmark becomes a plain div",
     file: LAYOUT,
-    from: '<main id="main-content" className="flex-1">',
-    to: '<div id="main-content" className="flex-1">',
+    // RE-ANCHORED 2026-10-04: the body leaves room for the phone's bar.
+    from: '<main id="main-content" className="flex-1 pb-16 md:pb-0">',
+    to: '<div id="main-content" className="flex-1 pb-16 md:pb-0">',
     expect: "the layout renders a <main>",
   },
   {
     name: "the landmark keeps its element and loses the id the skip link targets",
     file: LAYOUT,
-    from: '<main id="main-content" className="flex-1">',
-    to: '<main className="flex-1">',
+    from: '<main id="main-content" className="flex-1 pb-16 md:pb-0">',
+    to: '<main className="flex-1 pb-16 md:pb-0">',
     expect: "an id a skip link can target",
   },
   {
     name: "the landmark moves outward and starts announcing the chrome as content",
     file: LAYOUT,
-    from: '<main id="main-content" className="flex-1">',
-    to: '<main id="main-content" className="flex-1"><nav aria-label="stray" />',
+    from: '<main id="main-content" className="flex-1 pb-16 md:pb-0">',
+    to: '<main id="main-content" className="flex-1 pb-16 md:pb-0"><nav aria-label="stray" />',
     expect: "wrapping the page body, not the sidebar or the top bar",
   },
   {

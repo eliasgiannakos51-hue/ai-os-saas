@@ -65,7 +65,7 @@ export function ConversationSidebar({
         <button
           type="button"
           onClick={onNewChat}
-          className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10"
+          className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-card border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10"
         >
           <Plus className="h-4 w-4" /> {t("newChat")}
         </button>
@@ -74,7 +74,7 @@ export function ConversationSidebar({
       <div className="flex-1 space-y-4 overflow-y-auto px-3 pb-3">
         {groups.length === 0 ? (
           <div className="mt-6 flex flex-col items-center gap-2 px-2 text-center">
-            <MessageCircle className="h-5 w-5 text-muted/80" aria-hidden="true" />
+            <MessageCircle className="h-5 w-5 text-muted" aria-hidden="true" />
             <p className="text-xs text-muted">{t("noConversations")}</p>
           </div>
         ) : (
@@ -101,15 +101,15 @@ export function ConversationSidebar({
                           if (isRenaming) return;
                           handleSelect(conversation.id);
                         }}
-                        className={`flex min-w-0 flex-1 items-center gap-1.5 rounded-lg py-2 ps-2.5 pe-1 text-start text-sm transition-colors duration-150 ${
+                        className={`flex min-w-0 flex-1 items-center gap-1.5 rounded-item py-2 ps-2.5 pe-1 text-start text-sm transition-colors duration-150 ${
                           active
-                            ? "bg-orange-500/10 font-medium text-orange-400"
+                            ? "bg-foreground/10 font-medium text-foreground"
                             : "text-muted hover:bg-panel-hover hover:text-foreground"
                         }`}
                       >
                         {conversation.is_pinned && (
                           <Pin
-                            className="h-3 w-3 shrink-0 fill-current text-orange-400"
+                            className="h-3 w-3 shrink-0 fill-current text-foreground"
                             aria-hidden="true"
                           />
                         )}
@@ -119,7 +119,7 @@ export function ConversationSidebar({
                           editing={isRenaming}
                           onEditingChange={(on) => setRenamingId(on ? conversation.id : null)}
                           onRename={(next) => onRename(conversation.id, next)}
-                          className="min-w-0 flex-1 truncate"
+                          className="min-w-0 flex-1 break-words"
                         />
                       </button>
                       {/* Starred conversations stay visible at rest; an
@@ -151,7 +151,7 @@ export function ConversationSidebar({
                         aria-label={tModule("actionsFor", { name: conversation.title })}
                         // 36px to match the star beside it — two adjacent
                         // controls at different sizes read as a mistake.
-                        className={`me-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-muted opacity-0 transition-opacity duration-150 hover:bg-panel-hover hover:text-foreground group-hover/row:opacity-100 ${
+                        className={`me-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-card text-muted opacity-0 transition-opacity duration-150 hover:bg-panel-hover hover:text-foreground group-hover/row:opacity-100 ${
                           menuOpenId === conversation.id ? "opacity-100" : ""
                         }`}
                       >
@@ -159,14 +159,14 @@ export function ConversationSidebar({
                       </button>
 
                       {menuOpenId === conversation.id && (
-                        <div className="absolute end-0 top-full z-10 mt-1 w-36 rounded-xl border border-border bg-panel p-1 shadow-lg">
+                        <div className="absolute end-0 top-full z-10 mt-1 w-36 rounded-card border border-border bg-panel p-1">
                           <button
                             type="button"
                             onClick={() => {
                               onTogglePin(conversation.id);
                               setMenuOpenId(null);
                             }}
-                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                            className="flex w-full items-center gap-2 rounded-item px-2.5 py-1.5 text-start text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
                           >
                             <Pin className="h-3.5 w-3.5" aria-hidden="true" />
                             {conversation.is_pinned ? t("unpin") : t("pin")}
@@ -174,7 +174,7 @@ export function ConversationSidebar({
                           <button
                             type="button"
                             onClick={() => startRename(conversation)}
-                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                            className="flex w-full items-center gap-2 rounded-item px-2.5 py-1.5 text-start text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
                           >
                             <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                             {t("rename")}
@@ -182,7 +182,7 @@ export function ConversationSidebar({
                           <button
                             type="button"
                             onClick={() => handleDelete(conversation)}
-                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-xs text-red-400 transition-colors duration-150 hover:bg-red-500/10"
+                            className="flex w-full items-center gap-2 rounded-item px-2.5 py-1.5 text-start text-xs text-danger transition-colors duration-150 hover:bg-danger/10"
                           >
                             <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                             {tModule("delete")}

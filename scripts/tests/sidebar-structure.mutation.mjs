@@ -39,8 +39,10 @@ const NAV = "src/lib/sidebar-nav.ts";
 const VISIBILITY = "src/lib/sidebar-visibility.ts";
 const TOOLTIPS = "scripts/tests/sidebar-and-tooltips.test.mjs";
 const SIDEBAR = "src/components/dashboard/sidebar.tsx";
+// The groups are assembled and drawn by the grid the page renders (D.6).
+const TOOLS_PAGE = "src/components/tools/tools-grid.tsx";
 
-const TARGETS = [STRUCTURE, SIZE, NAMING, HINTS, NAV, VISIBILITY, SIDEBAR, SOURCE, "docs/analytics-queries.sql"];
+const TARGETS = [STRUCTURE, SIZE, NAMING, HINTS, NAV, VISIBILITY, SIDEBAR, TOOLS_PAGE, SOURCE, "docs/analytics-queries.sql"];
 
 const MUTANTS = [
   // ---- THE DECLARED POSITIONS, 2026-09-12 ---------------------------
@@ -113,38 +115,43 @@ const MUTANTS = [
   // mutation-anchors.test.mjs caught them in `npm run build` the day
   // after it started gating that, which is the only reason they were
   // replaced rather than left.
+  // RE-ANCHORED 2026-10-04: the sidebar of ΣΥΣΤΗΜΑ DESIGN draws no
+  // group (docs/CONTEXT.md); the groups are on the All tools page, and
+  // the one heading left in the sidebar is Recent tools. The three
+  // defects are the same; they are put where they could happen now.
   {
     gate: TOOLTIPS,
-    // A heading over nothing, put back the crude way.
-    name: "a group with no rows is drawn anyway",
+    // A heading over nothing, put back the crude way: Recent tools drawn
+    // for a new person, whose list is empty.
+    name: "the Recent tools heading is drawn with nothing under it",
     file: SIDEBAR,
-    from: "    if (group.items.length === 0) return null;",
-    to: "    if (group.items.length === 0) return <p key={group.heading}>{translatedHeading(group.heading)}</p>;",
+    from: "          {list.length > 0 && (",
+    to: "          {list.length >= 0 && (",
     expect: "a heading with no rows under it is not drawn at all",
   },
   {
     gate: TOOLTIPS,
     // THE COLLAPSE, REINTRODUCED WITHOUT ITS VOCABULARY. No isExpanded,
     // no aria-expanded, no `collapsible` — a word search for any of them
-    // stays green, which is why the check it trips counts renderGroup's
-    // exits instead.
+    // stays green, which is why the check it trips counts the group
+    // renderer's exits instead.
     name: "a collapse comes back under another name",
-    file: SIDEBAR,
-    from: "    if (group.items.length === 0) return null;",
-    to: "    const shown = group.heading === \"Make\";\n    if (group.items.length === 0) return null;\n    if (!shown) return <p key={group.heading}>{translatedHeading(group.heading)}</p>;",
-    expect: "renderGroup has one guard and one render",
+    file: TOOLS_PAGE,
+    from: "<ul className={GRID}>{group.items.map(tile)}</ul>",
+    to: "<ul className={GRID}>{group.heading === \"Make\" && group.items.map(tile)}</ul>",
+    expect: "every row is drawn, unconditionally",
   },
   {
     gate: TOOLTIPS,
-    // Since the rail (2026-10-02) the recent-tools list is the ONE thing
-    // remembered; anything else stored is a regression on its own — and
-    // the check reads the source with comments STRIPPED, because the
-    // component explains what it stores.
-    name: "the sidebar starts storing something besides the recent list",
+    // Whether the sidebar is narrow is the ONE thing a browser keeps;
+    // anything else stored is a regression on its own — and the check
+    // reads the source with comments STRIPPED, because the component
+    // explains what it stores.
+    name: "the sidebar starts storing something besides whether it is narrow",
     file: SIDEBAR,
-    from: "  function renderGroup(group: SidebarGroupConfig) {",
-    to: "  function persistOpen(v: string) {\n    window.localStorage.setItem(\"ionexa:sidebar-open\", v);\n  }\n\n  function renderGroup(group: SidebarGroupConfig) {\n    void persistOpen;",
-    expect: "the only thing remembered across a reload is the recent-tools list",
+    from: '        window.localStorage.setItem(COLLAPSED_KEY, c ? "0" : "1");',
+    to: '        window.localStorage.setItem(COLLAPSED_KEY, c ? "0" : "1");\n        window.localStorage.setItem("ionexa:sidebar-open", "1");',
+    expect: "the only thing remembered across a reload is whether the sidebar is narrow",
   },
 
   // ---- the order, the names, the count ------------------------------
@@ -289,11 +296,12 @@ const MUTANTS = [
     expect: "rows drawn,",
   },
   {
+    // RE-ANCHORED 2026-10-04: the block is drawn on All tools now.
     name: "Settings stops being its own block",
-    file: "src/components/dashboard/sidebar.tsx",
-    from: "{sidebarGroups([SETTINGS_GROUP], isOwner).map(renderGroup)}",
-    to: "{sidebarGroups([], isOwner).map(renderGroup)}",
-    expect: "...and the component draws the main groups before it",
+    file: TOOLS_PAGE,
+    from: ", ...sidebarGroups([SETTINGS_GROUP], isOwner)],",
+    to: ", ...sidebarGroups([], isOwner)],",
+    expect: "...and All tools draws the main groups before it, and it last",
   },
 
   // ---- and now each gate, emptied -----------------------------------

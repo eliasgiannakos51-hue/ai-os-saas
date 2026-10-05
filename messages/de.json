@@ -29,8 +29,6 @@
       "long": "Von KI erzeugter Inhalt. Er kann Fehler enthalten — prüfen Sie Wichtiges, bevor Sie sich darauf verlassen."
     },
     "close": "Schließen",
-    "switchToDarkMode": "Zum dunklen Design wechseln",
-    "switchToLightMode": "Zum hellen Design wechseln",
     "showPassword": "Passwort anzeigen",
     "hidePassword": "Passwort verbergen",
     "networkErrorCheckConnection": "Netzwerkfehler — bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
@@ -63,7 +61,6 @@
       "lastResortBody": "Ionexa braucht eine Verbindung, um neue Daten zu laden. Bereits geöffnete Seiten sind weiterhin aus dem Cache dieses Geräts verfügbar — und woran du gearbeitet hast, liegt sicher auf dem Server."
     },
     "creditsUnlimited": "Unbegrenzt",
-    "whatIsThis": "Was ist das?",
     "examplesLabel": "Probier:",
     "newMessagesBelow": "Neue Nachricht unten",
     "downloadPdf": {
@@ -128,7 +125,7 @@
       "apps": "App-Ideen",
       "images": "Bild-Ideen",
       "videos": "Video-Ideen",
-      "coding": "Programmieren mit KI",
+      "coding": "Code",
       "dataAnalysis": "Sieh, was die Zahlen sagen",
       "documents": "Dokumente",
       "presentations": "Präsentationen",
@@ -225,7 +222,8 @@
       "personalShopping": "Einkaufen",
       "personalFinance": "Persönliche Finanzen",
       "personalJournal": "Tagebuch",
-      "personalLifeOs": "Life OS"
+      "personalLifeOs": "Life OS",
+      "activity": "Aktivität"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -286,13 +284,31 @@
       "posts": "Sag es einmal und erhalte pro Plattform einen Beitrag in ihrer Länge und ihrem Ton. Es veröffentlicht nichts – du kopierst und postest.",
       "projects": "Ein Ordner mit einem Ziel. Was du hineinlegst, ist drin — nichts kommt von selbst.",
       "aiMemory": "Was der Chat über dich behalten hat und wie du es löschst.",
-      "meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst."
+      "meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst.",
+      "activity": "Dein nächster Schritt, was sich geändert hat, dein Fortschritt und deine Zahlen"
     },
     "closeMenu": "Menü schließen",
     "rail": {
       "new": "Neu",
-      "recent": "Zuletzt",
-      "allTools": "Alle Werkzeuge"
+      "chat": "Chat",
+      "coding": "Code",
+      "allTools": "Alle Werkzeuge",
+      "recentTools": "Zuletzt genutzt",
+      "settings": "Einstellungen",
+      "pin": "{tool} anheften",
+      "unpin": "{tool} lösen",
+      "remove": "{tool} aus „Zuletzt genutzt“ entfernen",
+      "collapse": "Seitenleiste einklappen",
+      "expand": "Seitenleiste ausklappen",
+      "label": "Hauptmenü",
+      "saveFailed": "Die Änderung wurde nicht gespeichert. Bitte erneut versuchen."
+    },
+    "tabs": {
+      "home": "Start",
+      "chat": "Chat",
+      "tools": "Werkzeuge",
+      "you": "Du",
+      "label": "Hauptnavigation"
     }
   },
   "landing": {
@@ -1049,7 +1065,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "Aktivstes Modul",
-      "acrossAllModules": "über alle Module hinweg",
       "entry": "{count, plural, one {# Eintrag} other {# Einträge}}",
       "statRow": {
         "totalEntries": "Einträge insgesamt",
@@ -1292,6 +1307,10 @@
       "clarificationAnswerPlaceholder": "Deine Antwort...",
       "sources": {
         "title": "Quellen"
+      },
+      "workMode": {
+        "active": "Modus: {mode}",
+        "clear": "Arbeitsweise entfernen"
       }
     },
     "create": {
@@ -1338,7 +1357,9 @@
         "why": "Das schreibt sich von selbst. Alles, was du in irgendeinem Modul erfasst, landet hier in einem Strom — so beantwortest du \"was habe ich letzten Monat eigentlich getan\"."
       },
       "tabAll": "Alles",
-      "tabStarred": "Favoriten"
+      "tabStarred": "Favoriten",
+      "filterSection": "Bereich",
+      "filterPeriod": "Zeitraum"
     },
     "favorites": {
       "title": "Favoriten",
@@ -1729,7 +1750,8 @@
       "clarifyTitle": "Zwei kurze Fragen:",
       "clarifySkip": "Überspringen und trotzdem speichern",
       "clarifyContinue": "Weiter",
-      "clarifyAnswerPlaceholder": "Deine Antwort..."
+      "clarifyAnswerPlaceholder": "Deine Antwort...",
+      "accomplishPlaceholder": "Was möchtest du erreichen?"
     },
     "createStudio": {
       "title": "Mach irgendwas",
@@ -2747,7 +2769,20 @@
     "tools": {
       "title": "Alle Werkzeuge",
       "description": "Jedes Werkzeug, mit einer Zeile dazu, was es tut.",
-      "orPress": "Oder drücke ⌘K und tippe den Namen – oder beschreibe es im Feld auf der Startseite."
+      "orPress": "Oder drücke ⌘K und tippe den Namen – oder beschreibe es im Feld auf der Startseite.",
+      "search": "Werkzeug finden",
+      "searchLabel": "Werkzeuge durchsuchen",
+      "noMatch": "Kein Werkzeug heißt „{query}“. Beschreibe es stattdessen im Feld auf der Startseite.",
+      "beta": "Beta",
+      "betaHint": "In Erprobung: Es funktioniert, kann aber noch nicht alles, was es soll."
+    },
+    "home": {
+      "actions": {
+        "research": "Recherche",
+        "create": "Erstellen",
+        "run": "Ausführen",
+        "analyze": "Analysieren"
+      }
     }
   },
   "module": {
@@ -2801,7 +2836,6 @@
       "images": "Titelbild für die Preisseite",
       "videos": "60-Sekunden-Produktrundgang",
       "coding": "Skript zum Abgleich der Stripe-Auszahlungen",
-      "data-analysis": "Welcher Tarif hat die niedrigste Abwanderung?",
       "campaigns": "September-Launch — E-Mail + LinkedIn",
       "presentations": "Q3-Update fürs Board — Kernaussagen",
       "ideas": "Ein Newsletter für alle, die von Tabellen umgestiegen sind"
@@ -3222,9 +3256,24 @@
         "files": "{count, plural, one {# Datei} other {# Dateien}}",
         "parts": "{count, plural, one {in # Teil} other {in # Teilen}}",
         "planSteps": "{count, plural, one {# Schritt} other {# Schritte}}",
-        "sources": "{count, plural, one {# Quelle} other {# Quellen}}"
+        "sources": "{count, plural, one {# Quelle} other {# Quellen}}",
+        "pages": "{count, plural, one {# Seite} other {# Seiten}}",
+        "photos": "{count, plural, =0 {keine Fotos} one {# Foto} other {# Fotos}}"
       },
       "writing": "Bericht schreiben"
+    },
+    "website": {
+      "preparing": "Ich bereite die Beschreibung vor",
+      "writing": "Ich schreibe die Seiten",
+      "photos": "Ich setze Fotos ein",
+      "checking": "Ich prüfe die Website",
+      "saving": "Ich speichere"
+    },
+    "chatTimeline": {
+      "thinking": "Ich denke nach",
+      "searching_web": "Ich suche im Web",
+      "searching_data": "Ich suche in deinen Daten",
+      "writing": "Ich schreibe die Antwort"
     }
   },
   "problem": {
@@ -3316,7 +3365,7 @@
       "does": "Tarif wechseln, Credits kaufen, Sprache und Design festlegen, dem Assistenten einen Namen geben und jeden Datensatz des Kontos als eine Datei herunterladen.",
       "doesNot": "Deine Datensätze liegen nicht hier — jedes Modul verwaltet seine eigenen. Und Konto löschen ist kein Weg, sie zu bereinigen und neu anzufangen: es beendet das Konto, nimmt alles mit, und es gibt kein Zurück. Vorher exportieren."
     },
-    "overview": {
+    "activity": {
       "is": "Eine Übersicht dessen, was Sie erfasst haben — und ein nächster Schritt.",
       "does": "Liest Ihre eigenen Einträge aus allen Modulen und zeigt einen Health-Score, die jüngsten Änderungen und einen Vorschlag, was als Nächstes zu tun ist.",
       "doesNot": "Es verbindet sich nicht mit Ihrer Bank, Ihrem CRM oder Ihrem Postfach. Jede Zahl hier stammt aus etwas, das Sie oder Ihre Agenten eingetragen haben — eine leere Woche ist also wirklich leer und kein Ladeproblem."
@@ -3808,7 +3857,7 @@
     }
   },
   "coding": {
-    "title": "Programmieren mit KI",
+    "title": "Code",
     "description": "Fünf Dinge, die es tut, und vier, die es nicht tut. Alles arbeitet genau auf dem Text im Feld.",
     "code": "Code",
     "copy": "Kopieren",

@@ -95,7 +95,7 @@ const MUTANTS = [
         file: PAGE,
         from:
           "        {error ? (\n" +
-          '          <p className="rounded-xl border border-red-900 bg-red-950/40 px-4 py-3 text-sm text-red-400">\n' +
+          '          <p className="rounded-card border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">\n' +
           '            {t("loadError")}\n' +
           "          </p>\n" +
           "        ) : (\n" +

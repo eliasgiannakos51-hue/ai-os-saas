@@ -10,7 +10,7 @@ export function PasswordStrengthChecklist({ password }: { password: string }) {
           <li
             key={rule.id}
             className={`flex items-center gap-1.5 text-xs transition-colors duration-150 ${
-              passed ? "text-emerald-400" : "text-muted"
+              passed ? "text-success" : "text-muted"
             }`}
           >
             {passed ? (

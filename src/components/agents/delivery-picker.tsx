@@ -220,16 +220,16 @@ export function DeliveryPicker({
               data-testid={`delivery-channel-${channel}`}
               onClick={() => select(channel)}
               aria-pressed={active}
-              className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border px-3 py-2 text-xs transition-colors duration-150 sm:min-h-[36px] ${
+              className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-card border px-3 py-2 text-xs transition-colors duration-150 sm:min-h-[36px] ${
                 active
-                  ? "border-orange-500 bg-orange-500/15 font-medium text-orange-300"
-                  : "border-border text-muted hover:border-orange-500/50 hover:text-foreground"
+                  ? "border-foreground/40 bg-foreground/15 font-medium text-foreground"
+                  : "border-border text-muted hover:border-foreground/50 hover:text-foreground"
               }`}
             >
               <Icon className="h-3.5 w-3.5" aria-hidden="true" />
               {t(`channels.${channel}`)}
               {(channel === "telegram" || channel === "discord") && connected(channel) && (
-                <Check className="h-3 w-3 text-emerald-400" aria-hidden="true" />
+                <Check className="h-3 w-3 text-success" aria-hidden="true" />
               )}
             </button>
           );
@@ -249,7 +249,7 @@ export function DeliveryPicker({
              rather than being decorated. It also names in-app delivery,
              because a reader who cannot use email needs somewhere to go,
              not only bad news. */
-          <p className="text-[11px] leading-relaxed text-amber-400">
+          <p className="text-[11px] leading-relaxed text-warning">
             {t("emailNotDeliverable")}
           </p>
         ))}
@@ -258,7 +258,7 @@ export function DeliveryPicker({
       {value === "slack" && (
         <div>
           {slackChannels.length === 0 ? (
-            <p className="text-[11px] text-amber-400/90">{t("slackNotConnected")}</p>
+            <p className="text-[11px] text-warning/90">{t("slackNotConnected")}</p>
           ) : (
             <select
               value={target}
@@ -292,7 +292,7 @@ export function DeliveryPicker({
                   data-testid="delivery-test-telegram"
                   onClick={() => void test("telegram")}
                   disabled={testing === "telegram" || connecting === "telegram"}
-                  className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-orange-500/40 px-3 py-1 text-xs font-medium text-orange-300 transition-colors duration-150 hover:bg-orange-500/10 disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/40 px-3 py-1 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:opacity-50"
                 >
                   {testing === "telegram" ? (
                     <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
@@ -305,7 +305,7 @@ export function DeliveryPicker({
                   type="button"
                   onClick={() => void disconnect("telegram")}
                   disabled={connecting === "telegram"}
-                  className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center rounded-item border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
                 >
                   {t("disconnect")}
                 </button>
@@ -346,7 +346,7 @@ export function DeliveryPicker({
                 type="button"
                 onClick={() => void connect("telegram")}
                 disabled={connecting === "telegram"}
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-50 sm:min-h-[36px]"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-50 sm:min-h-[36px]"
               >
                 {connecting === "telegram" && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
                 {t("connect")}
@@ -369,7 +369,7 @@ export function DeliveryPicker({
                   data-testid="delivery-test-discord"
                   onClick={() => void test("discord")}
                   disabled={testing === "discord" || connecting === "discord"}
-                  className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-orange-500/40 px-3 py-1 text-xs font-medium text-orange-300 transition-colors duration-150 hover:bg-orange-500/10 disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/40 px-3 py-1 text-xs font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10 disabled:opacity-50"
                 >
                   {testing === "discord" ? (
                     <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
@@ -382,7 +382,7 @@ export function DeliveryPicker({
                   type="button"
                   onClick={() => void disconnect("discord")}
                   disabled={connecting === "discord"}
-                  className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center rounded-item border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
                 >
                   {t("disconnect")}
                 </button>
@@ -415,7 +415,7 @@ export function DeliveryPicker({
                 type="button"
                 onClick={() => void connect("discord")}
                 disabled={connecting === "discord"}
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-orange-500/60 px-4 py-2 text-xs font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10 disabled:opacity-50 sm:min-h-[36px]"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-foreground/60 px-4 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10 disabled:opacity-50 sm:min-h-[36px]"
               >
                 {connecting === "discord" && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
                 {t("connect")}

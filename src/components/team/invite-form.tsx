@@ -106,19 +106,19 @@ export function InviteForm() {
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-card bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <UserPlus className="h-4 w-4" />
           {loading ? t("sending") : t("sendInvite")}
         </button>
       </div>
       {error && (
-        <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+        <p className="rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
           {error}
         </p>
       )}
       {success && (
-        <p className="rounded-lg border border-emerald-800 bg-emerald-950/30 px-3 py-2 text-xs text-emerald-400">
+        <p className="rounded-item border border-success/40 bg-success/10 px-3 py-2 text-xs text-success">
           {success}
         </p>
       )}
@@ -133,7 +133,7 @@ export function InviteForm() {
           {notEmailed.signupUrl && (
             <p className="leading-relaxed">
               {t("inviteShareLink")}{" "}
-              <span className="select-all break-all font-mono text-amber-200">
+              <span className="select-all break-all font-mono text-warning">
                 {notEmailed.signupUrl}
               </span>
             </p>

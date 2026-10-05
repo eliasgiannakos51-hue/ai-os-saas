@@ -105,7 +105,9 @@ const MUTANTS = [
     // 67 -> 70 in phase 2: projects-workspace, project-detail and the
     // project page all reach a status or a section through a template
     // literal over a declared array.
-    from: "    unbounded: 71,",
+    // 70 -> 69 in design D.4 (2026-10-04): the Home examples strip
+    // (first-screen-examples.tsx) was removed with the cards.
+    from: "    unbounded: 69,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`
@@ -113,7 +115,9 @@ const MUTANTS = [
     // A `to` that can occur legitimately elsewhere in the same file
     // cannot distinguish "mutated" from "normal".
     to: "    unbounded: 1,",
-    expect: "dashboard: 71 unbounded component(s)",
+    // NO NUMBER IN THE EXPECTATION: it said "71" while the record said
+    // 70 and then 69, so the suite reported WRONG on a mutant it caught.
+    expect: "unbounded component(s), recorded as 1",
   },
   {
     // With no prefix the dashboard stops claiming its own routes, they

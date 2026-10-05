@@ -96,7 +96,7 @@ export function RecordsDirectory({ groups }: { groups: DirectoryGroup[] }) {
           placeholder={t("searchLabel")}
           // text-base, not text-sm: iOS Safari zooms the whole page in on
           // focus for any input under 16px.
-          className="min-h-[44px] w-full rounded-xl border border-border bg-panel py-2 ps-9 pe-3 text-base text-foreground placeholder:text-muted focus:border-orange-500/50 focus:outline-none"
+          className="min-h-[44px] w-full rounded-card border border-border bg-panel py-2 ps-9 pe-3 text-base text-foreground placeholder:text-muted focus:border-foreground/50 focus:outline-none"
         />
       </label>
 
@@ -110,8 +110,8 @@ export function RecordsDirectory({ groups }: { groups: DirectoryGroup[] }) {
               aria-pressed={groupId === chip.id}
               className={`min-h-[44px] rounded-full border px-3.5 py-2 text-sm transition-colors duration-150 ${
                 groupId === chip.id
-                  ? "border-orange-500/50 bg-orange-500/15 font-semibold text-orange-200"
-                  : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
+                  ? "border-foreground/50 bg-foreground/15 font-semibold text-foreground"
+                  : "border-border text-muted hover:border-foreground/40 hover:text-foreground"
               }`}
             >
               {chip.heading}
@@ -139,13 +139,13 @@ export function RecordsDirectory({ groups }: { groups: DirectoryGroup[] }) {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="flex min-h-[44px] items-start gap-3 surface-tight transition-colors duration-150 hover:border-orange-500/40 hover:bg-panel-hover"
+                      className="flex min-h-[44px] items-start gap-3 surface-tight transition-colors duration-150 hover:border-foreground/40 hover:bg-panel-hover"
                     >
                       {Icon && (
-                        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400/50" aria-hidden="true" />
+                        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-success/50" aria-hidden="true" />
                       )}
                       <span className="min-w-0">
-                        <span className="block truncate text-sm font-medium text-foreground">
+                        <span className="block break-words text-sm font-medium text-foreground">
                           {item.label}
                         </span>
                         {item.hint && <span className="mt-0.5 block text-xs text-muted">{item.hint}</span>}

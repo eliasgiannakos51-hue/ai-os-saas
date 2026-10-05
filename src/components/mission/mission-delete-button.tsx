@@ -42,7 +42,7 @@ export function MissionDeleteButton({
         data-testid="mission-delete"
         onClick={() => void handleDelete()}
         disabled={deleting}
-        className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-red-500/40 px-3 py-1 text-xs font-medium text-red-300 transition-colors duration-150 hover:bg-red-500/10 disabled:opacity-50"
+        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-danger/40 px-3 py-1 text-xs font-medium text-danger transition-colors duration-150 hover:bg-danger/10 disabled:opacity-50"
       >
         {deleting ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -61,7 +61,7 @@ export function MissionDeleteButton({
       onClick={() => void handleDelete()}
       disabled={deleting}
       aria-label={t("deleteMission")}
-      className="rounded-lg p-1.5 text-muted transition-colors duration-150 hover:bg-red-500/10 hover:text-red-300 disabled:opacity-50"
+      className="rounded-item p-1.5 text-muted transition-colors duration-150 hover:bg-danger/10 hover:text-danger disabled:opacity-50"
     >
       {deleting ? (
         <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

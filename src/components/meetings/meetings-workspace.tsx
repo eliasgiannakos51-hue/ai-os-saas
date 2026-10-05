@@ -347,6 +347,7 @@ export function MeetingsWorkspace({
           type="file"
           accept="audio/*"
           className="sr-only"
+          aria-label={t("pick")}
           data-testid="meeting-file"
           onChange={(e) => choose(e.target.files?.[0] ?? null)}
         />
@@ -388,7 +389,7 @@ export function MeetingsWorkspace({
             </p>
             {!durationRead && <p className="mt-2 text-xs text-muted">{t("costUnknown")}</p>}
             {tooLong && (
-              <p data-testid="meeting-too-long" className="mt-2 text-xs text-amber-300">
+              <p data-testid="meeting-too-long" className="mt-2 text-xs text-warning">
                 {tooLong}
               </p>
             )}
@@ -432,13 +433,13 @@ export function MeetingsWorkspace({
                 setTicked(new Set());
               }}
               aria-pressed={m.id === openId}
-              className={`min-h-[44px] rounded-xl border px-3 text-start text-xs transition-colors duration-150 ${
+              className={`min-h-[44px] rounded-card border px-3 text-start text-xs transition-colors duration-150 ${
                 m.id === openId
-                  ? "border-orange-500/60 bg-panel text-foreground"
-                  : "border-border bg-panel/60 text-muted hover:border-orange-500/40"
+                  ? "border-foreground/60 bg-panel text-foreground"
+                  : "border-border bg-panel/60 text-muted hover:border-foreground/40"
               }`}
             >
-              <span className="block max-w-[16rem] truncate">{m.title || t("title")}</span>
+              <span className="block max-w-[16rem] break-words">{m.title || t("title")}</span>
             </button>
           ))}
         </div>
@@ -459,7 +460,7 @@ export function MeetingsWorkspace({
               type="button"
               onClick={() => remove(open.id)}
               aria-label={t("delete")}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted transition-colors duration-150 hover:border-red-500/60 hover:text-red-300"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-item border border-border text-muted transition-colors duration-150 hover:border-danger/60 hover:text-danger"
             >
               <Trash2 className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -550,7 +551,7 @@ export function MeetingsWorkspace({
                     onClick={() => keep(open.id)}
                     disabled={ticked.size === 0}
                     data-testid="meeting-keep"
-                    className="mt-3 inline-flex min-h-[44px] items-center rounded-xl bg-orange-500 px-4 text-sm font-semibold text-black transition-colors duration-150 hover:bg-orange-400 disabled:opacity-50"
+                    className="mt-3 inline-flex min-h-[44px] items-center rounded-card bg-button px-4 text-sm font-semibold text-button-ink transition-colors duration-150 hover:bg-button disabled:opacity-50"
                   >
                     {ticked.size === 0 ? t("keepNone") : t("keepSelected", { count: ticked.size })}
                   </button>

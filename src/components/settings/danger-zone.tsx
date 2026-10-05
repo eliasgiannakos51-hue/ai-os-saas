@@ -57,17 +57,17 @@ export function DangerZone({ email }: { email: string }) {
   }
 
   return (
-    <div className="rounded-2xl border border-red-900/50 bg-red-500/[0.03] p-5">
-      <h2 className="flex items-center gap-2 text-sm font-semibold text-red-400">
+    <div className="rounded-card border border-danger/40 bg-danger/[0.03] p-5">
+      <h2 className="flex items-center gap-2 text-sm font-semibold text-danger">
         <AlertTriangle className="h-4 w-4" /> {t("title")}
       </h2>
       <p className="mt-2 text-xs text-muted">{t("description")}</p>
 
       {requested ? (
-        <p className="mt-4 flex items-start gap-2 rounded-lg border border-emerald-800 bg-emerald-950/30 px-3 py-2.5 text-xs text-emerald-400">
+        <p className="mt-4 flex items-start gap-2 rounded-item border border-success/40 bg-success/10 px-3 py-2.5 text-xs text-success">
           <MailCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           {t.rich("checkEmail", {
-            highlight: (chunks) => <span className="text-emerald-300">{chunks}</span>,
+            highlight: (chunks) => <span className="text-success">{chunks}</span>,
             email,
           })}
         </p>
@@ -75,7 +75,7 @@ export function DangerZone({ email }: { email: string }) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="mt-4 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-red-800 px-4 py-2 text-sm text-red-400 transition-colors duration-150 hover:border-red-500 hover:bg-red-950/30"
+          className="mt-4 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-item border border-danger/40 px-4 py-2 text-sm text-danger transition-colors duration-150 hover:border-danger hover:bg-danger/10"
         >
           <Trash2 className="h-4 w-4" /> {t("deleteAccount")}
         </button>
@@ -84,7 +84,7 @@ export function DangerZone({ email }: { email: string }) {
           <label className="block text-xs text-muted">
             <span className="mb-1 block">
               {t.rich("typeToConfirm", {
-                highlight: (chunks) => <span className="text-red-400">{chunks}</span>,
+                highlight: (chunks) => <span className="text-danger">{chunks}</span>,
                 email,
               })}
             </span>
@@ -93,14 +93,14 @@ export function DangerZone({ email }: { email: string }) {
               required
               value={confirmEmail}
               onChange={(e) => setConfirmEmail(e.target.value)}
-              className="w-full rounded-lg border border-red-900 bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 focus:border-red-500"
+              className="w-full rounded-item border border-danger/40 bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 focus:border-danger"
               placeholder={email}
               autoComplete="off"
             />
           </label>
 
           {error && (
-            <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+            <p className="rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
               {tCommon("errorWithMessage", { message: error })}
             </p>
           )}
@@ -109,7 +109,7 @@ export function DangerZone({ email }: { email: string }) {
             <button
               type="submit"
               disabled={loading || !confirmed}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(220,38,38,0.35)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-none"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-item bg-danger px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-none"
             >
               {loading ? t("sending") : t("sendConfirmationEmail")}
             </button>
@@ -117,7 +117,7 @@ export function DangerZone({ email }: { email: string }) {
               type="button"
               onClick={cancel}
               disabled={loading}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-item border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:opacity-50"
             >
               {tCommon("cancel")}
             </button>

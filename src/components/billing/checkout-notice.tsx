@@ -41,8 +41,8 @@ export function CheckoutNotice() {
       role="status"
       className={
         state === "success"
-          ? "mb-6 flex items-center gap-2 rounded-2xl border border-emerald-800 bg-emerald-950/30 px-4 py-3 text-xs text-emerald-400"
-          : "mb-6 rounded-2xl border border-border bg-panel px-4 py-3 text-xs text-muted"
+          ? "mb-6 flex items-center gap-2 rounded-card border border-success/40 bg-success/10 px-4 py-3 text-xs text-success"
+          : "mb-6 rounded-card border border-border bg-panel px-4 py-3 text-xs text-muted"
       }
     >
       {state === "success" && <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />}

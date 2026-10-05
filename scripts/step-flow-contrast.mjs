@@ -12,15 +12,16 @@
 // that a browser can measure a colour a static reader cannot and a
 // static reader can see a call site a browser does not visit.
 //
-// It found one thing this round: the digit inside the current step's
-// chip read 4.44:1 in the light theme with text-orange-300, which is
-// under AA for 11px text. The class is text-orange-500 now — 6.27:1
-// light, 5.35:1 dark — and the comment beside it carries the numbers.
+// It found one thing on 2026-09: the digit inside the current step's
+// chip read 4.44:1 in the light theme with text-orange-300, under AA for
+// 11px text. Since 2026-10-04 there is one theme and no accent colour:
+// the digit is text-foreground on a 15% wash of it, measured 14.62:1
+// that day, and every other part at 5.34:1 or more.
 //
 // Measured: WCAG 2.1 relative-luminance contrast with every translucent
 // ground composited back to front, touch-target height, and horizontal
 // overflow; at 1920/1440/768/390/375, in Greek, Arabic (RTL) and
-// Chinese, in BOTH themes. 180 measurements, and it exits 1 if it
+// Chinese, in the one theme. 90 measurements, and it exits 1 if it
 // collected any other number of them.
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { chromium } from "playwright";
@@ -45,7 +46,7 @@ function page(loc, theme) {
       const here = i === 1;
       return `<li class="flex items-center gap-1.5" ${here ? 'aria-current="step"' : ""} data-step="${i}">
         ${i > 0 ? '<span class="me-1 h-px w-3 bg-border"></span>' : ""}
-        <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${here ? "bg-orange-500/15 text-orange-500" : "bg-panel-hover text-muted"}" data-marker="${i}">${i + 1}</span>
+        <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${here ? "bg-foreground/15 text-foreground" : "bg-panel-hover text-muted"}" data-marker="${i}">${i + 1}</span>
         <span class="${here ? "font-semibold text-foreground" : "text-muted"}" data-label="${i}">${s}</span>
       </li>`;
     })
@@ -57,8 +58,8 @@ function page(loc, theme) {
     <p class="mt-1.5 text-xs text-muted" data-hint>${w.hint}</p>
   </div>
   <div class="flex flex-wrap gap-2">
-    <button data-primary class="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90">${w.primary}</button>
-    <button data-secondary class="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-orange-500/60 px-4 py-2 text-sm font-semibold text-orange-300 transition-all duration-200 hover:bg-orange-500/10">${w.secondary}</button>
+    <button data-primary class="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-button px-4 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90">${w.primary}</button>
+    <button data-secondary class="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-foreground/60 px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-foreground/10">${w.secondary}</button>
   </div>
 </div></div></body></html>`;
 }
@@ -84,7 +85,8 @@ function over(fg, bgs) {
 
 const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" });
 const rows = [];
-for (const theme of ["dark", "light"]) {
+// One theme since 2026-10-04 (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN).
+for (const theme of ["dark"]) {
   for (const loc of Object.keys(WORDS)) {
     for (const width of [1920, 1440, 768, 390, 375]) {
       const ctx = await browser.newContext({ viewport: { width, height: 900 }, deviceScaleFactor: 1 });
@@ -134,7 +136,7 @@ for (const theme of ["dark", "light"]) {
 await browser.close();
 
 // A FLOOR, because a table with no rows passes every assertion below it.
-const EXPECTED = 2 * 3 * 5 * 6;
+const EXPECTED = 1 * 3 * 5 * 6;
 if (rows.length !== EXPECTED) {
   console.log(`MEASURED ${rows.length} of ${EXPECTED} — the harness did not run what it claims`);
   process.exit(1);
@@ -144,7 +146,7 @@ for (const r of rows) {
   const k = r.part;
   if (!worst[k] || r.contrast < worst[k].contrast) worst[k] = r;
 }
-console.log(`${rows.length} measurements: 2 themes x 3 locales x 5 widths x 6 parts\n`);
+console.log(`${rows.length} measurements: 1 theme x 3 locales x 5 widths x 6 parts\n`);
 console.log("part        worst contrast   where                     height");
 for (const [k, r] of Object.entries(worst)) {
   console.log(`${k.padEnd(11)} ${String(r.contrast).padStart(6)}:1        ${r.theme}/${r.loc}/${r.width}`.padEnd(52) + `${r.height}px`);

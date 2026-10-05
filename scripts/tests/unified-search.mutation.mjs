@@ -287,8 +287,8 @@ const MUTANTS = [
   {
     name: "the snippet is rendered as HTML",
     file: PALETTE,
-    from: "                    <span className=\"mt-0.5 block truncate text-[11px] text-muted\">",
-    to: "                    <span dangerouslySetInnerHTML={{ __html: result.snippet }} className=\"mt-0.5 block truncate text-[11px] text-muted\">",
+    from: "                    <span className=\"mt-0.5 block break-words text-[11px] text-muted\">",
+    to: "                    <span dangerouslySetInnerHTML={{ __html: result.snippet }} className=\"mt-0.5 block break-words text-[11px] text-muted\">",
   },
 
   // ------------------------------------------------------------------

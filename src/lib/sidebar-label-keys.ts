@@ -89,6 +89,7 @@ export const GROUP_HEADING_KEYS: Record<string, string> = {
 // label sidebar-nav.ts renders without a key here.
 export const ITEM_LABEL_KEYS: Record<string, string> = {
   Home: "home",
+  Activity: "activity",
   // The four routes that were in no nav config at all until round 5, and
   // the timeline row, which the owner's structure renames from "Mine".
   // The row the owner's structure calls Timeline; the product has always

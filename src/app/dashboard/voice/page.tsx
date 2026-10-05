@@ -39,7 +39,7 @@ export default async function VoicePage() {
     <div className="space-y-6">
       <PageHeader icon={VOICE_ICON} title={t("title")} description={t("description")} helpKey="help.voice" />
       <VoiceWorkbench />
-      <section className="rounded-2xl border border-border bg-panel/50 p-4">
+      <section className="rounded-card border border-border bg-panel/50 p-4">
         <h2 className="text-sm font-semibold text-foreground">{t("usageTitle")}</h2>
         <div className="mt-3">
           <VoiceSettings />

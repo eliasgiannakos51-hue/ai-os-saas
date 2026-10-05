@@ -29,12 +29,12 @@ export type KeyInventoryRow = {
 };
 
 const STATUS_TEXT: Record<KeyStatus, { text: string; tone: string }> = {
-  ok: { text: "works", tone: "text-emerald-400" },
-  invalid: { text: "rejected (401) — the provider does not know this key", tone: "text-red-400" },
-  forbidden: { text: "refused (403) — real key, not allowed this call", tone: "text-amber-300" },
-  "rate-limited": { text: "out of quota right now (429)", tone: "text-amber-300" },
-  "unknown-endpoint": { text: "check URL is wrong (404) — not the key's fault", tone: "text-amber-300" },
-  unreachable: { text: "could not reach the provider", tone: "text-amber-300" },
+  ok: { text: "works", tone: "text-success" },
+  invalid: { text: "rejected (401) — the provider does not know this key", tone: "text-danger" },
+  forbidden: { text: "refused (403) — real key, not allowed this call", tone: "text-warning" },
+  "rate-limited": { text: "out of quota right now (429)", tone: "text-warning" },
+  "unknown-endpoint": { text: "check URL is wrong (404) — not the key's fault", tone: "text-warning" },
+  unreachable: { text: "could not reach the provider", tone: "text-warning" },
   "not-set": { text: "not set", tone: "text-muted" },
   "no-check": { text: "set — this provider has no free call to test it", tone: "text-muted" },
 };
@@ -90,7 +90,7 @@ export function KeyChecks({ rows }: { rows: KeyInventoryRow[] }) {
           type="button"
           onClick={() => void run()}
           disabled={running}
-          className="rounded-lg bg-white/5 px-3 py-1.5 text-xs font-medium hover:bg-white/10 disabled:opacity-50"
+          className="rounded-item bg-foreground/5 px-3 py-1.5 text-xs font-medium hover:bg-foreground/10 disabled:opacity-50"
           data-testid="key-checks-run"
         >
           {running ? CHECKING : RUN}
@@ -103,7 +103,7 @@ export function KeyChecks({ rows }: { rows: KeyInventoryRow[] }) {
       </p>
 
       {failed && (
-        <p className="mt-3 rounded-lg bg-red-500/[0.08] p-3 text-xs text-red-300">
+        <p className="mt-3 rounded-item bg-danger/[0.08] p-3 text-xs text-danger">
           The check itself failed to run — see the function logs for /api/system-health/keys.
         </p>
       )}
@@ -123,7 +123,7 @@ export function KeyChecks({ rows }: { rows: KeyInventoryRow[] }) {
               </div>
               <p className="text-muted">Role: {row.roles.join("; ")}</p>
               {row.readBy.length === 0 && (
-                <p className="text-amber-300" data-testid={`key-${row.id}-unread`}>
+                <p className="text-warning" data-testid={`key-${row.id}-unread`}>
                   {row.set ? UNREAD_BUT_SET : UNREAD}
                 </p>
               )}

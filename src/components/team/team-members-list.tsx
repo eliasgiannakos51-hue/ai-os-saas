@@ -79,10 +79,10 @@ export function TeamMembersList({ members: initialMembers }: { members: TeamMemb
       {members.map((member) => (
         <div
           key={member.id}
-          className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-panel px-4 py-3"
+          className="flex items-center justify-between gap-3 rounded-card border border-border bg-panel px-4 py-3"
         >
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-foreground">
+            <p className="break-words text-sm font-medium text-foreground">
               {member.member_email}
               {member.role && (
                 <span className="ms-2 text-xs font-normal text-muted">— {member.role}</span>
@@ -102,8 +102,8 @@ export function TeamMembersList({ members: initialMembers }: { members: TeamMemb
             <span
               className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
                 member.status === "active"
-                  ? "border-emerald-800 bg-emerald-950/30 text-emerald-400"
-                  : "border-orange-800 bg-orange-950/30 text-orange-400"
+                  ? "border-success/40 bg-success/10 text-success"
+                  : "border-border bg-panel-hover/30 text-foreground"
               }`}
             >
               {member.status === "active" ? (
@@ -119,7 +119,7 @@ export function TeamMembersList({ members: initialMembers }: { members: TeamMemb
               disabled={removingId === member.id}
               aria-label={t("removeLabel", { email: member.member_email })}
               title={t("removeTitle")}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-red-400/70 transition-colors duration-150 hover:bg-red-950/30 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-8 w-8 items-center justify-center rounded-item text-danger/70 transition-colors duration-150 hover:bg-danger/10 hover:text-danger disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Trash2 className="h-4 w-4" aria-hidden="true" />
             </button>

@@ -38,8 +38,8 @@ const MUTANTS = [
     // this one attribute.
     name: "the <html> element loses its dir again",
     file: LAYOUT,
-    from: "<html lang={locale} dir={dirAttribute(locale)} className=",
-    to: "<html lang={locale} className=",
+    from: "<html lang={locale} dir={dirAttribute(locale)} data-theme=",
+    to: "<html lang={locale} data-theme=",
     expect: "puts dir on <html>",
   },
   {
@@ -129,8 +129,8 @@ const MUTANTS = [
     // sideways scroll in rtl.
     name: "the mobile drawer is pinned to the physical left again",
     file: SIDEBAR,
-    from: "fixed inset-y-0 start-0 z-50 w-64",
-    to: "fixed inset-y-0 left-0 z-50 w-64",
+    from: "fixed inset-y-0 start-0 z-50 flex w-64",
+    to: "fixed inset-y-0 left-0 z-50 flex w-64",
     expect: "the mobile drawer hangs off the leading edge",
   },
   {
@@ -183,11 +183,11 @@ const MUTANTS = [
   {
     // 13. THE GLOW ORB GOES BACK TO A NEGATIVE PHYSICAL OFFSET, in a
     // parent that does not clip it — the prompt's rule 3, in the app.
-    name: "a GlowOrb is placed at a negative physical offset again",
+    name: "an element is placed at a negative physical offset again",
     file: HEADER,
-    from: '<GlowOrb className="-start-8 -top-16 -z-10 h-40 w-40" />',
-    to: '<GlowOrb className="-left-8 -top-16 -z-10 h-40 w-40" />',
-    expect: "no GlowOrb is placed with a negative physical offset",
+    from: '<div className="relative mb-6 flex items-center gap-3">',
+    to: '<div className="relative -left-2 mb-6 flex items-center gap-3">',
+    expect: "no element is placed with a negative physical offset",
   },
   {
     // 14. THE CATALOGUE STOPS REACHING THE MODELS. The section is still
@@ -207,8 +207,8 @@ const MUTANTS = [
     // to be tight enough that re-introducing physical utilities trips it.
     name: "physical reading-order utilities come back in a component",
     file: SIDEBAR,
-    from: 'className="flex items-center"',
-    to: 'className="flex items-center text-left ml-2 pl-4 pr-4 border-l"',
+    from: 'className="flex min-h-[44px] items-center rounded-item px-1"',
+    to: 'className="flex min-h-[44px] items-center rounded-item px-1 text-left ml-2 pl-4 pr-4 border-l"',
     expect: "physical reading-order utilities remain",
   },
 ];

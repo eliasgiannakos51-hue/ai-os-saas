@@ -164,12 +164,12 @@ export function classifyVerdict(verdict: string | null | undefined): VerdictTone
 export function verdictBadgeClasses(verdict: string | null | undefined): string {
   switch (classifyVerdict(verdict)) {
     case "go":
-      return "border-emerald-800 bg-emerald-950/30 text-emerald-400";
+      return "border-success/40 bg-success/10 text-success";
     case "no":
-      return "border-red-900 bg-red-950/30 text-red-400";
+      return "border-danger/40 bg-danger/10 text-danger";
     case "watch":
     case "unclear":
-      return "border-orange-800 bg-orange-950/30 text-orange-400";
+      return "border-border bg-panel-hover/30 text-foreground";
     default:
       return "border-border bg-input text-muted";
   }

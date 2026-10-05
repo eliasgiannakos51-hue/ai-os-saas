@@ -44,12 +44,21 @@ check(`whatChanged in all ten locales (${LOCALES.length - noWhat.length}/10)`, n
 console.log("\n== 3. both are RENDERED, not merely translated ==");
 // The merge dropped <FirstScreenExamples/> from the page while every
 // string survived, and only a gate that reads the page could tell.
+//
+// THE STRIP LEFT HOME ON 2026-10-04, by the owner's design (docs/
+// CONTEXT.md, «ΑΡΧΙΚΗ»): four quick actions in its place, and the cards —
+// what changed among them — on /dashboard/activity. The examples
+// themselves live on as deep links (src/lib/overview/first-screen-
+// examples.ts), which first-screen.test.mjs holds. So what is asserted
+// here is where each line is rendered NOW, read from the pages.
 const overview = readFileSync("src/app/dashboard/overview/page.tsx", "utf8");
-check("the overview renders the examples strip", /<FirstScreenExamples\s*\/?>/.test(overview),
+const activity = readFileSync("src/app/dashboard/activity/page.tsx", "utf8");
+check("Home renders the quick actions where the strip was", /<QuickActions\s*\/>/.test(overview),
   "every string can be present and the component still absent — that is what happened");
-check("...and the what-changed card", /WhatChangedCard|whatChanged/.test(overview));
-check("the examples component exists", existsSync("src/components/overview/first-screen-examples.tsx"));
-check("the one sentence is rendered by the greeting header",
+check("the examples strip is gone from the tree, not merely unrendered",
+  !existsSync("src/components/overview/first-screen-examples.tsx") && !/FirstScreenExamples/.test(overview));
+check("...and the what-changed card is rendered on Activity", /<WhatChangedCard\b/.test(activity));
+check("the greeting header greets from the promise namespace",
   /useTranslations\("promise"\)|getTranslations\("promise"\)/.test(readFileSync("src/components/overview/greeting-header.tsx", "utf8")));
 
 console.log("\n== 4. and the strings they replaced are gone ==");

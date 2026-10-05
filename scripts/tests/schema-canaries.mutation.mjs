@@ -112,11 +112,16 @@ const MUTANTS = [
     // reached. It was a mutant for one check wearing the name of
     // another. A migration losing its canary is a DELETED entry, which
     // is also how it really happened.
+    //
+    // RE-ANCHORED 2026-10-05: three security migrations pushed the posts
+    // and projects files out of the newest-12 window, so the deleted
+    // canary is now the meetings one, the newest file with a table.
     name: "a migration in the window loses its canary — the state all three new screens were in",
     file: CANARIES,
-    from: '  {\n    kind: "table",\n    table: "generated_posts",\n    migration: "20260930000000_generated_posts.sql",\n    breaks: "Posts: every generated post fails to save after the model has run; the person waits, is charged, and gets nothing",\n  },\n',
+    // Still a DELETION: the whole entry goes, its comment with it.
+    from: "  {\n    // THE EXPENSIVE ORDER. The meeting row is written AFTER the\n    // transcription has run and settled, so a missing table is not a page\n    // that fails to load \u2014 it is a person who uploaded a recording,\n    // waited, paid for the minutes, and got a transcript that vanishes\n    // when they close the tab. The route hands the text back anyway for\n    // exactly that reason, which makes the failure survivable and\n    // completely invisible without this line.\n    kind: \"table\",\n    table: \"meetings\",\n    migration: \"20261006000000_meetings.sql\",\n    breaks:\n      \"Meetings: a recording is transcribed and CHARGED, and then the row fails to save \u2014 the person pays for minutes and keeps nothing\",\n  },\n",
     to: "",
-    expect: "20260930000000_generated_posts.sql",
+    expect: "20261006000000_meetings.sql",
   },
   {
     // 8b. AND THE CLAUSE THE OLD MUTANT WAS ACTUALLY DRIVING, kept —
@@ -137,7 +142,7 @@ const MUTANTS = [
     name: "a migration that really does add a table is excused as unprobeable",
     file: GATE,
     from: 'const NOT_PROBEABLE = {',
-    to: 'const NOT_PROBEABLE = {\n  "20261001000000_projects.sql": "excused by a mutation, with a reason long enough to clear the length check",',
+    to: 'const NOT_PROBEABLE = {\n  "20261006000000_meetings.sql": "excused by a mutation, with a reason long enough to clear the length check",',
     expect: "it really adds nothing canaried",
   },
   {

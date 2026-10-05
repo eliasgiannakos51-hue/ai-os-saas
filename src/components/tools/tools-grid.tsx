@@ -2,43 +2,67 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Search } from "lucide-react";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Pin, PinOff, Search } from "lucide-react";
 import { MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";
 import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { filterAndRankCandidates } from "@/lib/command-palette-match";
 import { aliasesFor } from "@/lib/palette-aliases";
-import { isBetaTool } from "@/lib/nav/tool-status";
+import { ALL_TOOLS_GROUPS } from "@/lib/nav/all-tools";
+import { NEVER_RECENT } from "@/lib/nav/recent-tools";
+import { useToast } from "@/components/toast/toast-context";
 
 /**
- * ALL TOOLS AS TILES (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN, «ALL TOOLS»):
- * small tiles in groups, a search on top, an icon and a name on each, the
- * description on hover, a discreet beta tag, and all of it on one desktop
- * screen with no scroll.
+ * ALL TOOLS (ΣΥΣΤΗΜΑ DESIGN §6, 2026-10-05): big square tiles, four in a
+ * row on a computer and two on a phone, in four groups — Make, Ask,
+ * Organise, Business — with a search on top and no «beta» anywhere. Each
+ * square: a 28px icon top left, a pin top right, and at the bottom the
+ * name with one plain line on what it does.
  *
- * THE SAME LIST AS EVERYWHERE ELSE. The groups are lib/sidebar-nav.ts
- * through sidebarGroups() with the owner filter — the tools, then the
- * Settings block last — so every gate on that list holds over this page.
+ * WHICH TOOLS, AND WHERE: lib/nav/all-tools.ts, by the owner's rule of
+ * 2026-10-05 (shown when it does its main job end to end; hidden when it
+ * is only a screen, produces nothing, or its name promises more). The
+ * Settings block follows the four groups, because Integrations and Help
+ * are reached from nowhere else.
  *
- * THE SAME SEARCH AS ⌘K. A tile answers to its name on screen, its
- * English name, the words in lib/palette-aliases.ts and its description,
- * ranked by lib/command-palette-match.ts — so "slides" finds
- * Presentations here exactly as it does in the palette (BUILD-SPECS 2.4,
- * scenario 10).
+ * THE SAME SEARCH AS ⌘K: a tile answers to its name on screen, its English
+ * name, lib/palette-aliases.ts and its one-line description, ranked by
+ * lib/command-palette-match.ts — "slides" finds Presentations here as in
+ * the palette.
+ *
+ * THE PIN is the only way to put a tool in the sidebar at once (the
+ * Recent tools rule, ΣΥΣΤΗΜΑ DESIGN §3); it writes through the same
+ * /api/nav/recent-tools the sidebar uses. Chat and Coding have rows of
+ * their own and are never in Recent tools, so their squares have no pin.
  */
-export function ToolsGrid({ isOwner }: { isOwner: boolean }) {
+export function ToolsGrid({ isOwner, pinned = [] }: { isOwner: boolean; pinned?: string[] }) {
   const t = useTranslations("dashboard.tools");
   const tSidebar = useTranslations("sidebar");
   const tCommon = useTranslations("common");
   const locale = useLocale();
+  const router = useRouter();
+  const { addToast } = useToast();
   const [query, setQuery] = useState("");
+  const [pins, setPins] = useState<string[]>(pinned);
 
-  const groups = useMemo(
-    () => [...sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner), ...sidebarGroups([SETTINGS_GROUP], isOwner)],
-    [isOwner]
-  );
-  const heading = (h: string) => (GROUP_HEADING_KEYS[h] ? tSidebar(`groups.${GROUP_HEADING_KEYS[h]}`) : h);
+  const groups = useMemo(() => {
+    const byHref = new Map(
+      sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).flatMap((g) => g.items.map((i) => [i.href, i] as const))
+    );
+    const tools = ALL_TOOLS_GROUPS.map((g) => ({
+      key: g.key,
+      heading: t(`groups.${g.key}`),
+      items: g.hrefs.map((h) => byHref.get(h)).filter((i): i is SidebarItem => Boolean(i)),
+    })).filter((g) => g.items.length > 0);
+    const settings = sidebarGroups([SETTINGS_GROUP], isOwner).map((g) => ({
+      key: "settings",
+      heading: GROUP_HEADING_KEYS[g.heading] ? tSidebar(`groups.${GROUP_HEADING_KEYS[g.heading]}`) : g.heading,
+      items: g.items,
+    }));
+    return [...tools, ...settings];
+  }, [isOwner, t, tSidebar]);
+
   const label = (item: SidebarItem) =>
     item.label === "Create Studio"
       ? tCommon("createStudio")
@@ -59,33 +83,62 @@ export function ToolsGrid({ isOwner }: { isOwner: boolean }) {
       )
     : null;
 
+  const togglePin = async (href: string) => {
+    const action = pins.includes(href) ? "unpin" : "pin";
+    const before = pins;
+    setPins((p) => (action === "pin" ? [...p, href] : p.filter((h) => h !== href)));
+    try {
+      const res = await fetch("/api/nav/recent-tools", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, href }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      router.refresh();
+    } catch {
+      setPins(before);
+      addToast(tSidebar("rail.saveFailed"), "error");
+    }
+  };
+
   const tile = (item: SidebarItem) => {
     const Icon = item.icon;
+    const name = label(item);
     const description = hint(item);
+    const canPin = !NEVER_RECENT.includes(item.href) && !item.href.startsWith("/help") && item.href !== "/dashboard/settings";
+    const isPinned = pins.includes(item.href);
     return (
-      <li key={item.href}>
-        <Tooltip content={description} side="top">
-          <Link
-            href={item.href}
-            data-testid="tool-tile"
-            className="flex min-h-[44px] items-center gap-2.5 rounded-item px-3 py-2 text-sm text-foreground transition-colors duration-150 hover:bg-panel-hover"
+      <li key={item.href} className="relative">
+        <Link
+          href={item.href}
+          data-testid="tool-tile"
+          className="flex aspect-square flex-col justify-between rounded-card border border-border bg-panel p-4 transition-colors duration-150 hover:border-foreground focus-visible:border-foreground"
+        >
+          <Icon className="h-7 w-7 text-foreground" aria-hidden="true" />
+          <span className="min-w-0">
+            <span className="block break-words text-sm font-medium text-foreground">{name}</span>
+            {description && <span className="mt-1 block break-words text-xs text-muted">{description}</span>}
+          </span>
+        </Link>
+        {canPin && (
+          <button
+            type="button"
+            onClick={() => togglePin(item.href)}
+            aria-pressed={isPinned}
+            aria-label={tSidebar(isPinned ? "rail.unpin" : "rail.pin", { tool: name })}
+            data-testid="tool-pin"
+            className={`absolute end-1 top-1 flex h-11 w-11 items-center justify-center rounded-item hover:bg-panel-hover hover:text-foreground ${
+              isPinned ? "text-foreground" : "text-muted"
+            }`}
           >
-            <Icon className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
-            <span className="min-w-0 break-words">{label(item)}</span>
-            {description && <span className="sr-only">{description}</span>}
-            {isBetaTool(item.href) && (
-              <span className="ms-auto shrink-0 rounded-full bg-tag px-1.5 py-0.5 text-[10px] leading-none text-muted">
-                {t("beta")}
-                <span className="sr-only">{t("betaHint")}</span>
-              </span>
-            )}
-          </Link>
-        </Tooltip>
+            {isPinned ? <PinOff className="h-4 w-4" aria-hidden="true" /> : <Pin className="h-4 w-4" aria-hidden="true" />}
+          </button>
+        )}
       </li>
     );
   };
 
-  const GRID = "grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5";
+  const GRID = "grid grid-cols-2 gap-3 lg:grid-cols-4";
 
   return (
     <div>
@@ -109,11 +162,11 @@ export function ToolsGrid({ isOwner }: { isOwner: boolean }) {
           <p className="mt-6 text-sm text-muted">{t("noMatch", { query: query.trim() })}</p>
         )
       ) : (
-        <div className="mt-5 space-y-4">
+        <div className="mt-6 space-y-8">
           {groups.map((group) => (
-            <section key={group.heading} aria-labelledby={`tools-${group.heading}`}>
-              <h2 id={`tools-${group.heading}`} className="mb-1 px-3 text-xs text-muted">
-                {heading(group.heading)}
+            <section key={group.key} aria-labelledby={`tools-${group.key}`}>
+              <h2 id={`tools-${group.key}`} className="mb-3 text-xs text-muted">
+                {group.heading}
               </h2>
               <ul className={GRID}>{group.items.map(tile)}</ul>
             </section>

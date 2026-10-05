@@ -139,13 +139,20 @@ sessions ξαναβγαίνουν από τους πίνακες με την ε�
    NEEDS 24.
 9. **Telegram: «message our bot and paste the chat ID it replies with»**
    (`:981`). Το bot δεν απαντά ποτέ· στον κώδικα δεν υπάρχει webhook.
+   **Διορθώθηκε 2026-10-05** (Α.8): η σελίδα ονομάζει το bot (από το
+   `getMe`) με σύνδεσμο, και το chat ID έρχεται από το @userinfobot· χωρίς
+   όνομα bot το Telegram δεν προσφέρεται (`notifications` §7c).
 10. **Έξι είδη ειδοποιήσεων με διακόπτες ανά κανάλι που δεν στέλνονται
     ποτέ** (`:933-957`, `src/components/settings/notification-settings.tsx:288`):
     «Agent found something», «Website published», «Research ready»,
     «Payment failed», «New team member», «Something needs you». Το
     `dispatchNotification` καλείται μόνο για χαμηλά credits.
+    **Διορθώθηκε 2026-10-05** (Α.8): οι Ρυθμίσεις δείχνουν διακόπτες μόνο
+    για ό,τι στέλνεται· το `notifications` §7b συγκρίνει τη λίστα με τις
+    κλήσεις του κώδικα και προς τις δύο κατευθύνσεις.
 11. **Συνδέσεις, «…mail, calendar, files»** (`:2127`). Πάροχος ημερολογίου
-    δεν υπάρχει (`src/lib/integrations/providers.ts:12`).
+    δεν υπάρχει (`src/lib/integrations/providers.ts:12`). **Διορθώθηκε
+    2026-10-05** (Α.8), σε 10 γλώσσες.
 12. **Onboarding, «Connect Gmail or Drive»** (`:2335`,
     `src/components/onboarding/onboarding-flow.tsx:328-333`). Η κάρτα
     εμφανίζεται πάντα· χωρίς τα κλειδιά OAuth η σύνδεση δεν γίνεται

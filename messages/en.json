@@ -978,7 +978,7 @@
         "testSent": "Connected — check for our test message.",
         "testFailed": "We couldn't deliver a test message there, so nothing was saved.",
         "telegram": {
-          "help": "Message our bot, then paste the chat ID it replies with.",
+          "help": "Open @{bot} in Telegram and press Start, so it is allowed to message you. Then send any message to @userinfobot — it replies with your chat ID — and paste that number here.",
           "placeholder": "Chat ID"
         },
         "discord": {
@@ -2124,7 +2124,7 @@
     "integrations": {
       "title": "Integrations",
       "emptyTitle": "Nothing connected yet",
-      "emptyBody": "Connect an account and the AI can read from it — your mail, your calendar, your files — instead of only knowing what you typed in by hand.",
+      "emptyBody": "Connect an account and the AI can read from it — your mail, your files — instead of only knowing what you typed in by hand.",
       "description": "Connect the tools you already use, so the AI can work with your real data.",
       "privacyNotice": "Connections are read-only unless stated otherwise. Tokens are encrypted with a key that is not stored in our database, they never appear in logs, and disconnecting revokes the access at the provider and deletes everything we hold — including the record of what was read.",
       "notConfigured": "Integrations aren't set up on this deployment yet, so connecting is disabled.",

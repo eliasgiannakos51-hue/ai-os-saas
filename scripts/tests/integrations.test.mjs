@@ -667,5 +667,32 @@ console.log("\n== 9. the schema ==");
   );
 }
 
+console.log("\n== the copy offers only what can be connected (2026-10-05) ==");
+{
+  // "your mail, your calendar, your files" — and no calendar provider.
+  // The population is the provider registry, so a calendar provider that
+  // ships lifts this on its own.
+  const providerIds = [...read("src/lib/integrations/providers.ts").matchAll(/^\s+id: "(\w+)"/gm)].map((m) => m[1]);
+  checkTrue(`providers were read (${providerIds.length})`, providerIds.length >= 3, providerIds.join(", "));
+  if (!providerIds.some((id) => /calendar/.test(id))) {
+    for (const [locale, word] of [["en", /calendar/i], ["el", /ημερολόγιο/i]]) {
+      const body = JSON.parse(read(`messages/${locale}.json`)).dashboard.integrations.emptyBody;
+      checkTrue(`${locale}: the empty state does not offer a calendar`, !word.test(body), body);
+    }
+  }
+  // The onboarding card "Connect Gmail or Drive" led to a page with
+  // nothing to connect when the Google OAuth client is not configured.
+  const page = read("src/app/onboarding/page.tsx");
+  const flow = read("src/components/onboarding/onboarding-flow.tsx");
+  checkTrue(
+    "onboarding is told whether Gmail or Drive can be connected",
+    /integrationsAvailable=\{providerConfigured\("gmail"\) \|\| providerConfigured\("google_drive"\)\}/.test(page)
+  );
+  checkTrue(
+    "…and shows the card only then",
+    /\{integrationsAvailable \? \(\s*<SourceCard\s+icon=\{Plug\}/.test(flow)
+  );
+}
+
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

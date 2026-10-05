@@ -36,6 +36,18 @@ export const NOTIFICATION_TYPES = [
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 
+/**
+ * THE ONES SOMETHING ACTUALLY SENDS, which is what Settings shows.
+ *
+ * The seven above are the product's list; on 2026-10-05 one of them had a
+ * caller. Settings drew a row of channel switches for all seven, so a
+ * person could turn on "Website published" by Telegram and never hear a
+ * thing — a switch for an event nothing raises. A type joins this list in
+ * the commit that adds its dispatchNotification() call, and
+ * scripts/tests/notifications.test.mjs §7b compares the two both ways.
+ */
+export const SENT_NOTIFICATION_TYPES: readonly NotificationType[] = ["credits_low"];
+
 export function isNotificationType(value: unknown): value is NotificationType {
   return typeof value === "string" && (NOTIFICATION_TYPES as readonly string[]).includes(value);
 }

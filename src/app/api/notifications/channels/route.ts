@@ -5,7 +5,7 @@ import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getSiteUrl } from "@/lib/site-url";
 import { saveChatTarget, type ChatKind } from "@/lib/notify/preferences";
-import { sendTelegram, telegramConfigured } from "@/lib/notify/channels/telegram";
+import { sendTelegram, telegramBotUsername, telegramConfigured } from "@/lib/notify/channels/telegram";
 import { checkDiscordWebhook, sendDiscord } from "@/lib/notify/channels/discord";
 import { emailIsDeliverable } from "@/lib/email/resend-config";
 
@@ -58,12 +58,18 @@ export async function GET() {
     return NextResponse.json({ error: "channels_unreadable" }, { status: 500 });
   }
 
+  // The bot's name, which the person needs in order to open it: a bot
+  // cannot message anyone who has not started a chat with it.
+  const telegramBot = telegramConfigured() ? await telegramBotUsername() : null;
+
   return NextResponse.json({
     channels: data ?? [],
     // What the SERVER can do, which is not the same as what the user has
     // connected: without TELEGRAM_BOT_TOKEN there is no bot to send with,
-    // and the UI must say so rather than offering a field that cannot work.
-    telegramAvailable: telegramConfigured(),
+    // and without its name nobody can open it to be sent to — either way
+    // the UI must say so rather than offering a field that cannot work.
+    telegramAvailable: telegramBot !== null,
+    telegramBot,
     // AND EMAIL, WHICH USED TO BE ASSUMED. The panel treated email as
     // always available — `if (channel === "in_app" || channel === "email")
     // return true` — which is right about in_app and was wrong about

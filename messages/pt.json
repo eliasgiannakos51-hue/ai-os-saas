@@ -978,7 +978,7 @@
         "testSent": "Ligado — procura a nossa mensagem de teste.",
         "testFailed": "Não conseguimos entregar uma mensagem de teste aí, por isso nada foi guardado.",
         "telegram": {
-          "help": "Escreve ao nosso bot e cola o ID de chat que ele responder.",
+          "help": "Abra @{bot} no Telegram e toque em Iniciar para que ele possa enviar mensagens para você. Depois envie qualquer mensagem para @userinfobot (ele responde com o seu chat ID) e cole esse número aqui.",
           "placeholder": "ID de chat"
         },
         "discord": {
@@ -2124,7 +2124,7 @@
     "integrations": {
       "title": "Integrações",
       "emptyTitle": "Ainda não há nada ligado",
-      "emptyBody": "Ligue uma conta e a IA passa a poder ler dela — o seu email, o seu calendário, os seus ficheiros — em vez de saber só o que escreveu à mão.",
+      "emptyBody": "Ligue uma conta e a IA passa a poder ler dela — o seu email, os seus ficheiros — em vez de saber só o que escreveu à mão.",
       "description": "Ligue as ferramentas que já usa, para a IA trabalhar com os seus dados reais.",
       "privacyNotice": "As ligações são apenas de leitura salvo indicação em contrário. Os tokens são cifrados com uma chave que não está na nossa base de dados, nunca aparecem nos registos, e desligar revoga o acesso no fornecedor e apaga tudo o que guardamos, incluindo o histórico do que foi lido.",
       "notConfigured": "As integrações ainda não estão configuradas nesta instalação, por isso ligar está desativado.",

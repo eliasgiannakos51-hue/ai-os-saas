@@ -978,7 +978,7 @@
         "testSent": "Verbunden — schau nach unserer Testnachricht.",
         "testFailed": "Wir konnten dort keine Testnachricht zustellen, deshalb wurde nichts gespeichert.",
         "telegram": {
-          "help": "Schreib unserem Bot und füge die Chat-ID ein, die er dir antwortet.",
+          "help": "Öffne @{bot} in Telegram und tippe auf Starten, damit er dir schreiben darf. Schick dann eine beliebige Nachricht an @userinfobot (er antwortet mit deiner Chat-ID) und füge diese Nummer hier ein.",
           "placeholder": "Chat-ID"
         },
         "discord": {
@@ -2124,7 +2124,7 @@
     "integrations": {
       "title": "Integrationen",
       "emptyTitle": "Noch nichts verbunden",
-      "emptyBody": "Verbinde ein Konto, und die KI kann daraus lesen — Mail, Kalender, Dateien — statt nur zu kennen, was du von Hand eingetippt hast.",
+      "emptyBody": "Verbinde ein Konto, und die KI kann daraus lesen — Mail, Dateien — statt nur zu kennen, was du von Hand eingetippt hast.",
       "description": "Verbinden Sie die Werkzeuge, die Sie ohnehin nutzen, damit die KI mit Ihren echten Daten arbeitet.",
       "privacyNotice": "Verbindungen sind schreibgeschützt, sofern nicht anders angegeben. Tokens werden mit einem Schlüssel verschlüsselt, der nicht in unserer Datenbank liegt, erscheinen nie in Logs, und beim Trennen widerrufen wir den Zugriff beim Anbieter und löschen alles, was wir halten — einschließlich der Aufzeichnung darüber, was gelesen wurde.",
       "notConfigured": "Integrationen sind auf diesem Deployment noch nicht eingerichtet, Verbinden ist daher deaktiviert.",

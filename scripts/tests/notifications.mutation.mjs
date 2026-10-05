@@ -47,8 +47,39 @@ const ENGAGEMENT = "src/lib/notify/engagement.ts";
 const DIGEST = "src/lib/notify/digest.ts";
 const DISPATCH = "src/lib/notify/dispatch.ts";
 const SQL = "supabase/migrations/20260901000000_notifications.sql";
+const SETTINGS = "src/components/settings/notification-settings.tsx";
+const OVERAGE = "src/lib/billing/overage-store.ts";
+const CHANNELS = "src/app/api/notifications/channels/route.ts";
 
 const MUTANTS = [
+  // ------------------------------------------------------------------
+  // §7b — a switch only for what something sends (2026-10-05).
+  // ------------------------------------------------------------------
+  {
+    name: "Settings draws a switch for every type again",
+    file: SETTINGS,
+    from: "{SENT_NOTIFICATION_TYPES.map((type) => {",
+    to: "{NOTIFICATION_TYPES.map((type) => {",
+  },
+  {
+    name: "a type nothing raises is listed as sent",
+    file: TYPES,
+    from: 'SENT_NOTIFICATION_TYPES: readonly NotificationType[] = ["credits_low"];',
+    to: 'SENT_NOTIFICATION_TYPES: readonly NotificationType[] = ["credits_low", "website_published"];',
+  },
+  {
+    // §7c: the field nobody could complete, offered again.
+    name: "Telegram is offered on the token alone, with no bot to open",
+    file: CHANNELS,
+    from: "    telegramAvailable: telegramBot !== null,",
+    to: "    telegramAvailable: telegramConfigured(),",
+  },
+  {
+    name: "a caller raises a type Settings does not show",
+    file: OVERAGE,
+    from: 'type: "credits_low",',
+    to: 'type: "payment_failed",',
+  },
   // ------------------------------------------------------------------
   // RULE 1 — never a notification without value.
   // ------------------------------------------------------------------

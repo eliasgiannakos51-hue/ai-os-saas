@@ -978,7 +978,7 @@
         "testSent": "Connecté — cherchez notre message de test.",
         "testFailed": "Nous n'avons pas pu y livrer de message de test, donc rien n'a été enregistré.",
         "telegram": {
-          "help": "Écrivez à notre bot, puis collez l'identifiant de discussion qu'il vous renvoie.",
+          "help": "Ouvrez @{bot} dans Telegram et appuyez sur Démarrer pour qu’il puisse vous écrire. Envoyez ensuite un message à @userinfobot (il répond avec votre chat ID) et collez ce numéro ici.",
           "placeholder": "Identifiant de discussion"
         },
         "discord": {
@@ -2124,7 +2124,7 @@
     "integrations": {
       "title": "Intégrations",
       "emptyTitle": "Rien n'est encore connecté",
-      "emptyBody": "Connectez un compte et l'IA pourra y lire — vos e-mails, votre agenda, vos fichiers — au lieu de ne connaître que ce que vous avez saisi.",
+      "emptyBody": "Connectez un compte et l'IA pourra y lire — vos e-mails, vos fichiers — au lieu de ne connaître que ce que vous avez saisi.",
       "description": "Connectez les outils que vous utilisez déjà, pour que l'IA travaille sur vos vraies données.",
       "privacyNotice": "Les connexions sont en lecture seule sauf mention contraire. Les jetons sont chiffrés avec une clé absente de notre base de données, n'apparaissent jamais dans les journaux, et la déconnexion révoque l'accès chez le fournisseur et supprime tout ce que nous conservons, y compris l'historique de ce qui a été lu.",
       "notConfigured": "Les intégrations ne sont pas encore configurées sur ce déploiement, la connexion est donc désactivée.",

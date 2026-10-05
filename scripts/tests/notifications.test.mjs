@@ -41,7 +41,7 @@
 //   appear — the ones computed from a baseline that does not exist.
 //
 // Run: node scripts/tests/notifications.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 
 let pass = 0;
@@ -623,6 +623,63 @@ console.log("\n== 7. the wiring the compiler cannot see ==");
   const dc = readFileSync("src/lib/notify/channels/discord.ts", "utf8");
   ok("Discord posts cannot ping a server", dc.includes("allowed_mentions"));
   ok("…and the webhook host is checked at SEND time, not only at save time", dc.includes("checkDiscordWebhook(params.webhookUrl)"));
+}
+
+// =====================================================================
+console.log("\n== 7b. Settings shows a switch only for what something sends ==");
+// =====================================================================
+// Settings drew channel switches for all seven types on 2026-10-05, when
+// only credits_low had a caller: a switch for an event nothing raises.
+// The callers are read from the source, not listed here.
+{
+  const walk = (dir) =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+      e.isDirectory() ? walk(`${dir}/${e.name}`) : [`${dir}/${e.name}`]
+    );
+  const files = walk("src").filter((f) => /\.(ts|tsx)$/.test(f) && !f.endsWith("lib/notify/dispatch.ts"));
+  ok(`the source tree was walked (${files.length} files)`, files.length > 500);
+  const raised = new Set();
+  let calls = 0;
+  for (const file of files) {
+    const src = readFileSync(file, "utf8").replace(/^\s*(\/\/|\*).*$/gm, "");
+    for (const m of src.matchAll(/dispatchNotification\(\{[\s\S]*?\btype:\s*"(\w+)"/g)) {
+      calls++;
+      raised.add(m[1]);
+    }
+  }
+  ok(`dispatchNotification calls were found (${calls}, raising ${raised.size} type(s))`, calls > 0 && raised.size > 0);
+  const sent = new Set(types.SENT_NOTIFICATION_TYPES ?? []);
+  const unlisted = [...raised].filter((t) => !sent.has(t));
+  const silent = [...sent].filter((t) => !raised.has(t));
+  ok("every type something sends is listed as sent", unlisted.length === 0, unlisted.join(", ") + " — add it to SENT_NOTIFICATION_TYPES so Settings shows it");
+  ok("every type listed as sent has a caller", silent.length === 0, silent.join(", ") + " — nothing raises it, so its switch would do nothing");
+  const settings = readFileSync("src/components/settings/notification-settings.tsx", "utf8");
+  ok("the Settings matrix renders the sent types", /\{SENT_NOTIFICATION_TYPES\.map\(\(type\)/.test(settings));
+  ok("…and not the full list", !/\{NOTIFICATION_TYPES\.map\(\(type\)/.test(settings));
+}
+
+// =====================================================================
+console.log("\n== 7c. Telegram names the bot a person has to open ==");
+// =====================================================================
+// The help text said "message our bot, then paste the chat ID it replies
+// with". No screen named the bot, and the bot never replies — nothing in
+// src/ reads Telegram updates. A bot cannot message anyone who has not
+// opened it, so the field could not be completed by anybody.
+{
+  const route = readFileSync("src/app/api/notifications/channels/route.ts", "utf8").replace(/^\s*(\/\/|\*).*$/gm, "");
+  ok("the channels route asks Telegram for the bot's name", /await telegramBotUsername\(\)/.test(route));
+  ok("…and offers Telegram only when it has one", /telegramAvailable:\s*telegramBot !== null/.test(route));
+  const settings = readFileSync("src/components/settings/notification-settings.tsx", "utf8");
+  ok("Settings passes the bot's name into the help text", /t\(`chat\.\$\{kind\}\.help`,\s*\{\s*bot:/.test(settings));
+  ok("…and links to it", /href=\{`https:\/\/t\.me\/\$\{telegramBot\}`\}/.test(settings));
+  const LOCALES = ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
+  const missing = LOCALES.filter((l) => {
+    const m = JSON.parse(readFileSync(`messages/${l}.json`, "utf8"));
+    return !String(m?.settings?.notifications?.chat?.telegram?.help ?? "").includes("@{bot}");
+  });
+  ok(`the help names @{bot} in all ten (${LOCALES.length - missing.length}/10)`, missing.length === 0, missing.join(", "));
+  const en = JSON.parse(readFileSync("messages/en.json", "utf8")).settings.notifications.chat.telegram.help;
+  ok("…and no longer says our bot replies", !/our bot, then paste the chat ID it replies with/.test(en), en);
 }
 
 // =====================================================================

@@ -9,6 +9,7 @@ import {
   NOTIFICATION_CHANNELS,
   NOTIFICATION_SPECS,
   NOTIFICATION_TYPES,
+  SENT_NOTIFICATION_TYPES,
   resolveChannels,
   type NotificationChannel,
   type NotificationType,
@@ -48,6 +49,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
   const [offset, setOffset] = useState(0);
   const [chats, setChats] = useState<ChatRow[]>([]);
   const [telegramAvailable, setTelegramAvailable] = useState(false);
+  const [telegramBot, setTelegramBot] = useState<string | null>(null);
   // TRUE UNTIL THE SERVER SAYS OTHERWISE. The fetch below is the only
   // thing that can set it false, and a panel that rendered "email is not
   // set up" for the half-second before that answer arrived would be
@@ -102,6 +104,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
       if (channelsResponse) {
         setChats((channelsResponse.channels ?? []) as ChatRow[]);
         setTelegramAvailable(Boolean(channelsResponse.telegramAvailable));
+        setTelegramBot(typeof channelsResponse.telegramBot === "string" ? channelsResponse.telegramBot : null);
         setEmailAvailable(channelsResponse.emailAvailable !== false);
       }
     })();
@@ -285,7 +288,8 @@ export function NotificationSettings({ userId }: { userId: string }) {
             </tr>
           </thead>
           <tbody>
-            {NOTIFICATION_TYPES.map((type) => {
+            {/* Only what something sends: lib/notify/types.ts says why. */}
+            {SENT_NOTIFICATION_TYPES.map((type) => {
               const spec = NOTIFICATION_SPECS[type];
               const pref = prefs[type];
               const enabled = pref?.enabled ?? true;
@@ -425,7 +429,17 @@ export function NotificationSettings({ userId }: { userId: string }) {
                       keys: the orphan-key gate understands a `${prop}.literalSuffix`
                       template and cannot see inside a ternary, so the ternary form
                       made four real, rendered keys look unreachable. */}
-                  <p className="text-xs text-muted">{t(`chat.${kind}.help`)}</p>
+                  <p className="text-xs text-muted">{t(`chat.${kind}.help`, { bot: telegramBot ?? "" })}</p>
+                  {kind === "telegram" && telegramBot ? (
+                    <a
+                      href={`https://t.me/${telegramBot}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-[44px] items-center text-xs text-foreground underline"
+                    >
+                      t.me/{telegramBot}
+                    </a>
+                  ) : null}
                   <div className="flex flex-wrap gap-2">
                     <input
                       type="text"

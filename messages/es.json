@@ -978,7 +978,7 @@
         "testSent": "Conectado — busca nuestro mensaje de prueba.",
         "testFailed": "No pudimos entregar un mensaje de prueba ahí, así que no se guardó nada.",
         "telegram": {
-          "help": "Escribe a nuestro bot y pega el ID de chat que te responda.",
+          "help": "Abre @{bot} en Telegram y pulsa Iniciar para que pueda escribirte. Luego envía cualquier mensaje a @userinfobot (te responde con tu chat ID) y pega ese número aquí.",
           "placeholder": "ID de chat"
         },
         "discord": {
@@ -2124,7 +2124,7 @@
     "integrations": {
       "title": "Integraciones",
       "emptyTitle": "Aún no hay nada conectado",
-      "emptyBody": "Conecte una cuenta y la IA podrá leer de ella —su correo, su calendario, sus archivos— en vez de saber solo lo que escribió a mano.",
+      "emptyBody": "Conecte una cuenta y la IA podrá leer de ella —su correo, sus archivos— en vez de saber solo lo que escribió a mano.",
       "description": "Conecta las herramientas que ya usas para que la IA trabaje con tus datos reales.",
       "privacyNotice": "Las conexiones son de solo lectura salvo que se indique lo contrario. Los tokens se cifran con una clave que no está en nuestra base de datos, nunca aparecen en los registros, y al desconectar revocamos el acceso en el proveedor y borramos todo lo que guardamos, incluido el historial de lo que se leyó.",
       "notConfigured": "Las integraciones aún no están configuradas en esta instalación, así que conectar está desactivado.",

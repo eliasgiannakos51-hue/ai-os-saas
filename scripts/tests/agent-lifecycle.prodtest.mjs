@@ -512,9 +512,14 @@ try {
     // must have really moved through steps.
     tables.ai_jobs.some((j) => j.status === "done" && j.step >= 4)
   );
+  // configure_agent is the build. evaluate_request_clarity is NOT
+  // required any more: a request the free detector reads as clear skips
+  // that paid call (lib/clarification.ts, willSpendOnQuestion), which is
+  // the saving it was built for — requiring it went red on a run that did
+  // the right thing (QUEUE Α.13, 2026-10-05). At most once, though.
   check(
     `the model was actually called (${modelCalls.join(", ")})`,
-    modelCalls.includes("evaluate_request_clarity") && modelCalls.includes("configure_agent")
+    modelCalls.includes("configure_agent") && modelCalls.filter((c) => c === "evaluate_request_clarity").length <= 1
   );
 
   console.log("\n== 3. delivery channels are offered AT CREATION ==");

@@ -151,6 +151,10 @@ const created = new Set(
 // source simply did not carry the ALTER TABLE, so the check had nothing
 // to see.
 const ADMIN_ONLY_TABLES = new Set([
+  // The owner's switches for new tools (MASTER Μέρος 13 Β, 2026-10-05):
+  // deny-all to every client, read and written through createAdminClient()
+  // only, the write behind isAdminEmail().
+  "feature_flags",
   "rate_limit_log",
   "daily_ai_spend_tracking",
   "account_deletion_requests",

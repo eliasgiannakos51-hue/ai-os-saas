@@ -1336,6 +1336,17 @@
         "bad": "Mauvaise réponse",
         "retry": "Redemander",
         "ratingFailed": "La note n’a pas été enregistrée. Réessayez."
+      },
+      "workArea": {
+        "label": "Résultat",
+        "back": "Retour à la conversation",
+        "tabText": "Texte",
+        "tabCode": "Source",
+        "copy": "Copier",
+        "download": "Télécharger {file}",
+        "close": "Fermer la zone de travail",
+        "open": "Ouvrir à côté de la conversation",
+        "isOpen": "Ouvert à côté de la conversation · appuyez pour fermer"
       }
     },
     "create": {
@@ -2412,7 +2423,17 @@
       "dismissError": "Impossible de l'ignorer."
     },
     "systemHealth": {
-      "toggleStackTrace": "Afficher ou masquer la trace d'appels"
+      "toggleStackTrace": "Afficher ou masquer la trace d'appels",
+      "flags": {
+        "title": "Interrupteurs",
+        "hint": "Qui voit chaque nouvel outil ou grand changement. Effet immédiat, sans nouveau déploiement.",
+        "saveFailed": "L’interrupteur n’a pas été enregistré. Réessayez.",
+        "audience": {
+          "off": "Personne",
+          "staff": "Vous et le compte de test",
+          "everyone": "Tout le monde"
+        }
+      }
     },
     "ideas": {
       "new": "Nouvelle idée",

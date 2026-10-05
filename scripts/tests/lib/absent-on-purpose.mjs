@@ -45,8 +45,10 @@ export const ABSENT_ON_PURPOSE = {
       "THE OWNER'S MESSAGE, SAVED WORD FOR WORD ON 2026-10-05, ORDERS THESE; IT DOES NOT DESCRIBE " +
       "THEM. 5.24 says to make the capability catalogue and the planning section says to group every " +
       "point into packages. Neither exists yet. Editing the message to match the tree would make it " +
-      "stop being his words; each path goes stale, and this entry with it, the day the file is written.",
-    paths: ["docs/CATALOG.md", "docs/PACKAGES.md"],
+      "stop being his words; each path goes stale, and this entry with it, the day the file is written. " +
+      "Part 13 (2026-10-05) adds three more, queued in Wave 8: the owner's handbook, the architecture " +
+      "guide and the acceptance list.",
+    paths: ["docs/CATALOG.md", "docs/PACKAGES.md", "docs/OWNER.md", "docs/ARCHITECTURE.md", "docs/ACCEPTANCE.md"],
   },
   "docs/BUILD-SPECS.md": {
     reason:

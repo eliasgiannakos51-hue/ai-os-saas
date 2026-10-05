@@ -1336,6 +1336,17 @@
         "bad": "良くない回答",
         "retry": "もう一度聞く",
         "ratingFailed": "評価を保存できませんでした。もう一度お試しください。"
+      },
+      "workArea": {
+        "label": "結果",
+        "back": "会話に戻る",
+        "tabText": "テキスト",
+        "tabCode": "コード",
+        "copy": "コピー",
+        "download": "{file} をダウンロード",
+        "close": "作業エリアを閉じる",
+        "open": "会話の横に開く",
+        "isOpen": "会話の横に表示中 · 押すと閉じます"
       }
     },
     "create": {
@@ -2412,7 +2423,17 @@
       "dismissError": "閉じられませんでした。"
     },
     "systemHealth": {
-      "toggleStackTrace": "スタックトレースの表示を切り替える"
+      "toggleStackTrace": "スタックトレースの表示を切り替える",
+      "flags": {
+        "title": "スイッチ",
+        "hint": "新しいツールや大きな変更を誰に見せるか。デプロイなしですぐに反映されます。",
+        "saveFailed": "スイッチを保存できませんでした。もう一度お試しください。",
+        "audience": {
+          "off": "誰にも見せない",
+          "staff": "あなたとテスト用アカウント",
+          "everyone": "全員"
+        }
+      }
     },
     "ideas": {
       "new": "新しいアイデア",

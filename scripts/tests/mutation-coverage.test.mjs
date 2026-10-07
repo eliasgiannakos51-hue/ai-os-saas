@@ -270,7 +270,9 @@ console.log(
 // the run.
 // 261 -> 263 on 2026-10-07: file-pages (MASTER 16, package 12) covered
 // two more. Read off the run.
-const RATCHET = 263;
+// 263 -> 264 on 2026-10-07: image-studio (MASTER 16, package 19) covered
+// one more. Read off the run.
+const RATCHET = 264;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

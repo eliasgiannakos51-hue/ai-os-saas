@@ -128,7 +128,8 @@ if (suites.length === 0) {
 // brand-memory, chat-opens-tools, chat-attachments, site-pages,
 // research-slides and the rest of that round). Read off the run.
 // 242 -> 243 on 2026-10-07: file-pages (MASTER 16, package 12).
-const FLOOR = 243;
+// 243 -> 244 on 2026-10-07: image-studio (MASTER 16, package 19).
+const FLOOR = 244;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

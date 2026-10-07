@@ -2254,6 +2254,11 @@
           "sees": "File names, owners and modification dates when searching; the text of a document only when you ask it to read that document.",
           "consent": "The AI will be able to search your Drive and read documents you point it at. It can't create, change or delete anything."
         },
+        "googleCalendar": {
+          "summary": "Read your meetings so the AI can answer “what do I have tomorrow?”.",
+          "sees": "The title, time, place and organiser of meetings on the days you ask about. Never an invitation's description, never any calendar but your main one.",
+          "consent": "The AI will be able to read the events in your main calendar to answer the questions you ask. It reads only when a question needs it — never in the background — and it can't create, change or delete anything."
+        },
         "slack": {
           "summary": "Read channels the app is in, and let agents post results there.",
           "sees": "Recent messages in the public channels you invite the Ionexa app into. It can't see private channels or direct messages.",

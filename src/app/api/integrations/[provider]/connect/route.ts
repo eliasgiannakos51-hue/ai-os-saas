@@ -17,6 +17,7 @@ import {
 } from "@/lib/integrations/oauth";
 import { countConnectedIntegrations } from "@/lib/integrations/store";
 import { maxIntegrationsForPlan } from "@/lib/integrations/limits";
+import { providersOpenTo } from "@/lib/integrations/switches";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,10 @@ export async function GET(request: Request, props: { params: Promise<{ provider:
       return NextResponse.json({ ok: false, error: "Unknown provider." }, { status: 404 });
     }
     const provider = getProvider(params.provider)!;
+    // A provider behind a closed switch does not exist for this person.
+    if (!(await providersOpenTo(user)).has(provider.id)) {
+      return NextResponse.json({ ok: false, error: "Unknown provider." }, { status: 404 });
+    }
 
     // Rate limited even though it costs us nothing: this endpoint mints
     // signed state and sets a cookie, and an unbounded loop of it is a

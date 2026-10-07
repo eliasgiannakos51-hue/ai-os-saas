@@ -9,7 +9,7 @@
 // NOTHING SECRET IS IN THIS FILE. Client ids and secrets are read from the
 // environment inside lib/integrations/oauth.ts, which is `server-only`.
 
-export type ProviderId = "gmail" | "google_drive" | "slack";
+export type ProviderId = "gmail" | "google_drive" | "google_calendar" | "slack";
 
 export type IntegrationAccess = "read" | "read_write";
 
@@ -32,6 +32,13 @@ export type ProviderMeta = {
    * having someone create two Google projects.
    */
   oauthFamily: "google" | "slack";
+  /**
+   * A provider added behind a switch (src/lib/flags/flags.ts): its card,
+   * its connect route and its reads in Chat all ask the same switch.
+   * String, not FlagKey, because this file is client-safe and flags.ts
+   * is not; integrations.test.mjs holds the name to a declared switch.
+   */
+  behindSwitch?: string;
 };
 
 // Gmail and Drive are deliberately SEPARATE integrations even though they
@@ -60,6 +67,23 @@ export const PROVIDERS: ProviderMeta[] = [
     scopes: ["https://www.googleapis.com/auth/drive.readonly"],
     requiredEnv: ["GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET"],
     oauthFamily: "google",
+  },
+  // MASTER 16, package 31. THE NARROWEST CALENDAR SCOPE THERE IS:
+  // events, read-only — not calendar.readonly, which also reads the list
+  // of every calendar and its sharing settings. It is a Google "sensitive"
+  // scope, not a "restricted" one like gmail.readonly, so it needs Google's
+  // app verification but not the CASA security review (NEEDS 10). The same
+  // Google OAuth client as Gmail and Drive; its own row, consent and
+  // revocation, for the reason above.
+  {
+    id: "google_calendar",
+    name: "Google Calendar",
+    key: "googleCalendar",
+    access: "read",
+    scopes: ["https://www.googleapis.com/auth/calendar.events.readonly"],
+    requiredEnv: ["GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET"],
+    oauthFamily: "google",
+    behindSwitch: "google-calendar",
   },
   {
     id: "slack",

@@ -2254,6 +2254,11 @@
           "sees": "Dateinamen, Eigentümer und Änderungsdaten bei der Suche; den Text eines Dokuments nur, wenn Sie darum bitten.",
           "consent": "Die KI kann Ihr Drive durchsuchen und Dokumente lesen, auf die Sie sie hinweisen. Sie kann nichts anlegen, ändern oder löschen."
         },
+        "googleCalendar": {
+          "summary": "Liest deine Termine, damit die KI „Was habe ich morgen?“ beantworten kann.",
+          "sees": "Titel, Uhrzeit, Ort und Organisator der Termine an den Tagen, nach denen du fragst. Nie die Beschreibung einer Einladung, nie einen anderen Kalender als deinen Hauptkalender.",
+          "consent": "Die KI kann die Termine deines Hauptkalenders lesen, um deine Fragen zu beantworten. Sie liest nur, wenn eine Frage es braucht — nie im Hintergrund — und kann nichts anlegen, ändern oder löschen."
+        },
         "slack": {
           "summary": "Kanäle lesen, in denen die App ist, und Agenten dort posten lassen.",
           "sees": "Aktuelle Nachrichten in den öffentlichen Kanälen, in die Sie die Ionexa-App einladen. Private Kanäle und Direktnachrichten sieht sie nicht.",

@@ -2254,6 +2254,11 @@
           "sees": "Nomes de ficheiros, proprietários e datas de modificação na pesquisa; o texto de um documento apenas quando lhe pedir para o ler.",
           "consent": "A IA poderá pesquisar no seu Drive e ler documentos que lhe indicar. Não pode criar, alterar nem apagar nada."
         },
+        "googleCalendar": {
+          "summary": "Lê as tuas reuniões para que a IA possa responder «o que tenho amanhã?».",
+          "sees": "O título, a hora, o local e o organizador das reuniões nos dias que perguntares. Nunca a descrição de um convite, nunca outro calendário além do principal.",
+          "consent": "A IA poderá ler os eventos do teu calendário principal para responder às tuas perguntas. Só lê quando uma pergunta precisa — nunca em segundo plano — e não pode criar, alterar nem apagar nada."
+        },
         "slack": {
           "summary": "Ler os canais onde a app está e deixar os agentes publicarem lá.",
           "sees": "Mensagens recentes nos canais públicos para onde convidar a app Ionexa. Não vê canais privados nem mensagens diretas.",

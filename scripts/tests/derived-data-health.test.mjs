@@ -64,8 +64,12 @@ ok("the route imports the probe", /from "@\/lib\/health\/derived-data"/.test(rou
 ok("...and calls it", /await derivedDataHealth\(createAdminClient\(\)\)/.test(route));
 ok("...and reports 'unchecked' rather than nothing when it cannot ask",
   /body\.derived = \{[\s\S]{0,260}verdict: "unchecked"/.test(route));
+// Asked of what decides `ok` and the status, not of how near the word
+// "derived" sits to "status:": the stranger's view (2026-10-05) put the
+// redaction of `derived` right above the response, and a distance check
+// read that as the verdict deciding the code.
 ok("...outside `ok` and the status code, like schema and nav",
-  !/derived[\s\S]{0,120}status:/.test(route),
+  !/body\.ok\s*=[^;]*derived/.test(route) && !/status:[^,}\n]*derived/.test(route),
   "an index that needs a backfill is not an outage");
 
 // ---------------------------------------------------------------------

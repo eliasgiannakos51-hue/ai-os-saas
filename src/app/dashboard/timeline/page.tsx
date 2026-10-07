@@ -91,7 +91,7 @@ export default async function TimelinePage(
     return (
       <div className="min-h-full">
         <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-          <PageHeader helpKey="help.timeline" icon={TIMELINE_ICON} title={tLibrary("title")} description={tLibrary("description")} />
+          <PageHeader helpKey="help.timeline" icon={TIMELINE_ICON} title={t("title")} description={tLibrary("description")} />
           <TimelineTabs view="library" library />
           <LibraryView items={items} kind={kind} query={query} failed={failed} />
         </div>

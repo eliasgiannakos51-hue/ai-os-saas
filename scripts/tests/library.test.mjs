@@ -272,8 +272,7 @@ const tabs = code("src/components/timeline/timeline-tabs.tsx");
 check("with the switch on, the entries are one tab along", /href: library \? "\/dashboard\/timeline\?view=entries" : "\/dashboard\/timeline"/.test(tabs));
 check("with it off, no Library tab", /\.\.\.\(library \? \[\{ id: "library"/.test(tabs));
 check("the filters stay on the entries tab", /if \(entriesView\) params\.set\("view", "entries"\)/.test(code("src/components/timeline/timeline-filters.tsx")));
-const flags = await loadTs("src/lib/flags/flags.ts").catch(() => null);
-check('"library" is declared as a switch', flags ? Object.prototype.hasOwnProperty.call(flags.FLAGS, "library") : /\blibrary: "/.test(read("src/lib/flags/flags.ts")));
+check('"library" is declared as a switch', /\n  library: "/.test(code("src/lib/flags/flags.ts")));
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. pressing one opens it in its tool, on that item ==");
@@ -308,7 +307,8 @@ for (const [file, shape] of SHELL_OPENS) {
 // ---------------------------------------------------------------------
 console.log("\n== 6. the words, in every language ==");
 // ---------------------------------------------------------------------
-const KEYS = ["title", "description", "tab", "searchLabel", "searchPlaceholder", "searchButton", "searchScope", "kindsLabel", "all", "failed", "untitled", "empty.title", "empty.why", "noMatch.title", "noMatch.why", ...sources.LIBRARY_KINDS.map((k) => `kinds.${k}`)];
+const KEYS = ["description", "tab", "searchLabel", "searchPlaceholder", "searchButton", "searchScope", "kindsLabel", "all", "failed", "untitled", "empty.title", "empty.why", "noMatch.title", "noMatch.why", ...sources.LIBRARY_KINDS.map((k) => `kinds.${k}`)];
+check(`the words to look for (${KEYS.length})`, KEYS.length >= 21);
 for (const locale of readdirSync("messages").filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5))) {
   const lib = JSON.parse(read(`messages/${locale}.json`)).dashboard?.library ?? {};
   const get = (k) => k.split(".").reduce((o, p) => (o ? o[p] : undefined), lib);

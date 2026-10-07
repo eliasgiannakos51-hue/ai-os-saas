@@ -2900,7 +2900,6 @@
       }
     },
     "library": {
-      "title": "资料库",
       "description": "你在每个工具中做过的一切，最新的在前。",
       "tab": "资料库",
       "searchLabel": "搜索资料库",

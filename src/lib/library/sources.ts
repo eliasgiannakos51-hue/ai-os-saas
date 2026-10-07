@@ -1,4 +1,3 @@
-// BOUNDARY-FORMAT: html
 import { normalizeForSearch } from "@/lib/text/search-match";
 import { truncate } from "@/lib/text/truncate";
 

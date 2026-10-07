@@ -2900,7 +2900,6 @@
       }
     },
     "library": {
-      "title": "Biblioteca",
       "description": "Tudo o que você criou, em cada ferramenta, o mais recente primeiro.",
       "tab": "Biblioteca",
       "searchLabel": "Pesquisar na Biblioteca",

@@ -2900,7 +2900,6 @@
       }
     },
     "library": {
-      "title": "Library",
       "description": "Everything you have made, in every tool, newest first.",
       "tab": "Library",
       "searchLabel": "Search the Library",

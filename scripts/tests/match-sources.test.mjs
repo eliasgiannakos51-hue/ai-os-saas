@@ -254,6 +254,14 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     // third time — which is the argument for leaving the ceiling at the
     // measured value rather than raising it by one each time.
     "src/lib/ai/workspace-context.ts",
+    // THE LIBRARY'S SNIPPET (package 5, 2026-10-07). The match itself is
+    // matchesSearch, section 4's list filter over the user's own rows; what
+    // folds here is only snippetAround, which finds WHERE in an item's own
+    // text the query landed, so the card can show those words. It relies
+    // on the fold being index-stable (unicode-patterns.ts) and
+    // scripts/tests/library.test.mjs checks the sentence it cuts. The
+    // ceiling caught it on the build that introduced it.
+    "src/lib/library/sources.ts",
   ]);
   const unaccounted = users.filter((f) => !ACCOUNTED.has(f));
 

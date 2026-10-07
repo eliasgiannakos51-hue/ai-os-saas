@@ -162,7 +162,10 @@ try {
     page.on("pageerror", (err) => pageErrors.push(String(err?.message ?? err)));
     const cdp = device.touch ? await context.newCDPSession(page) : null;
     async function press(locator) {
-      await locator.scrollIntoViewIfNeeded();
+      // To the middle of the screen, not just into it: on a phone the
+      // bottom bar is fixed over the last row, and a finger there presses
+      // the bar.
+      await locator.evaluate((e) => e.scrollIntoView({ block: "center" }));
       if (!cdp) return locator.click();
       const box = await locator.boundingBox();
       const x = box.x + box.width / 2, y = box.y + box.height / 2;
@@ -179,7 +182,7 @@ try {
 
     // ---- the switch on: what was made, in three tools, in one place
     await page.goto(`${ON}/dashboard/timeline`, { waitUntil: "networkidle" });
-    check("switch on: the page is the Library", (await page.locator("h1").first().innerText()).trim() === L.title);
+    check("switch on: the page opens on the Library tab", (await page.getByRole("tab", { name: L.tab }).getAttribute("aria-selected")) === "true");
     check("...with the site, the deck and the posts, newest first", (await kinds()) === "posts,site,slides", await kinds());
     check("...and not the site that failed", (await page.getByText("Δεν βγήκε").count()) === 0);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -212,8 +215,13 @@ try {
     await press(items.filter({ hasText: DECK.title }));
     await page.waitForURL(new RegExp(`/dashboard/presentations\\?record=${DECK_ID}`));
     await page.waitForLoadState("networkidle");
-    check("the deck opens in Slides, on that deck", (await page.locator('[data-testid="tool-shell-work"]').count()) === 1
-      && (await page.locator('[data-testid="tool-shell-work"]').innerText()).includes("Τριπλάσια ζήτηση το καλοκαίρι"));
+    const work = page.locator('[data-testid="tool-shell-work"]');
+    // A press on a card is a client-side navigation: the address changes
+    // before the tool has drawn, so wait for the work itself.
+    const workDrawn = (text) => page.waitForFunction((t) => document.querySelector('[data-testid="tool-shell-work"]')?.innerText.includes(t), text, { timeout: 15000 }).catch(() => null);
+    const workText = async () => ((await work.count()) === 1 ? (await work.innerText()).replace(/\s+/g, " ").slice(0, 300) : `${await work.count()} work panes`);
+    await workDrawn("Τριπλάσια ζήτηση το καλοκαίρι");
+    check("the deck opens in Slides, on that deck", (await work.count()) === 1 && (await work.innerText()).includes("Τριπλάσια ζήτηση το καλοκαίρι"), await workText());
 
     await page.goto(`${ON}/dashboard/timeline`, { waitUntil: "networkidle" });
     await press(items.filter({ hasText: "Camping Νάξος" }));
@@ -226,8 +234,8 @@ try {
     await press(items.filter({ hasText: "Εγκαίνια του camping" }));
     await page.waitForURL(new RegExp(`/dashboard/posts\\?record=${POSTS_ID}`));
     await page.waitForLoadState("networkidle");
-    check("the posts open in Posts, on those posts", (await page.locator('[data-testid="tool-shell-work"]').count()) === 1
-      && (await page.locator('[data-testid="tool-shell-work"]').innerText()).includes("Ανοίγουμε το Σάββατο στη Νάξο."));
+    await workDrawn("Ανοίγουμε το Σάββατο στη Νάξο.");
+    check("the posts open in Posts, on those posts", (await work.count()) === 1 && (await work.innerText()).includes("Ανοίγουμε το Σάββατο στη Νάξο."), await workText());
 
     // ---- the entries, one tab along
     await page.goto(`${ON}/dashboard/timeline`, { waitUntil: "networkidle" });

@@ -88,10 +88,7 @@ export function LibraryView({
             className="min-h-[44px] w-full rounded-full border border-border bg-transparent py-2 pe-4 ps-9 text-sm text-foreground placeholder:text-muted focus:border-foreground/50 focus:outline-none"
           />
         </label>
-        <button
-          type="submit"
-          className="min-h-[44px] shrink-0 rounded-full border border-border px-4 text-sm text-foreground hover:border-foreground/50"
-        >
+        <button type="submit" className="chip-link shrink-0 px-4 text-sm text-foreground">
           {t("searchButton")}
         </button>
       </form>
@@ -106,11 +103,7 @@ export function LibraryView({
               href={hrefFor(k)}
               aria-current={active ? "page" : undefined}
               data-testid="library-kind"
-              className={`inline-flex min-h-[44px] items-center rounded-full border px-4 py-2 text-sm transition-colors duration-150 ${
-                active
-                  ? "border-foreground/50 bg-foreground/15 font-semibold text-foreground"
-                  : "border-border text-muted hover:border-foreground/40 hover:text-foreground"
-              }`}
+              className={`chip-link px-4 text-sm ${active ? "bg-foreground/15 font-semibold text-foreground" : ""}`}
             >
               {k ? kindNames[k] : t("all")}
             </Link>
@@ -119,7 +112,7 @@ export function LibraryView({
       </nav>
 
       {failed.length > 0 && (
-        <p role="status" className="mt-4 rounded-item border border-border px-3 py-2 text-sm text-foreground">
+        <p role="status" className="mt-4 text-sm text-foreground">
           {t("failed", { tools: failed.map((k) => kindNames[k]).join(", ") })}
         </p>
       )}

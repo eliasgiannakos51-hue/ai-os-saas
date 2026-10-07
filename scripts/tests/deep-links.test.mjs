@@ -256,7 +256,11 @@ for (const l of favLinks) {
 // check now lives only in the palette's own gates.
 // 53 -> 54 (2026-10-05): /verify-email, linked from the middleware and the
 // confirmation flow (lib/auth/confirm-email.ts).
-const DEEP_LINK_FLOOR = 54;
+// 54 -> 58 (2026-10-07): the Library (package 5) opens what it lists in
+// its own tool — /dashboard/posts?record=, /dashboard/deep-research?record=,
+// /dashboard/files?record= — and keeps the entries at
+// /dashboard/timeline?view=entries; each read by the page it points at.
+const DEEP_LINK_FLOOR = 58;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

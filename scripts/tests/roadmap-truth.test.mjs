@@ -25,7 +25,7 @@
 // must exist on disk.
 //
 // Run: node scripts/tests/roadmap-truth.test.mjs
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 
 let pass = 0;
 const failures = [];
@@ -80,14 +80,12 @@ const EVIDENCE = new Map([
       ],
     },
   ],
+  // 2026-10-05: was `produces: [route.ts, registry.ts]`, and both files
+  // exist, which is all §2 could check. route.ts serves no request; §5
+  // below counts its callers instead of its existence.
   [
     "router",
-    {
-      produces: [
-        "src/lib/ai/routing/route.ts",
-        "src/lib/ai/providers/registry.ts",
-      ],
-    },
+    { produces: null, plan: "the model chosen by the request, measured in the shadow first" },
   ],
   [
     "marketplace",
@@ -416,6 +414,62 @@ console.log("\n== 4. the copy does not promise a different product ==");
       !SELLING.test("無料です — 売買はありません。".replace(DENIAL, "")) &&
       SELLING.test("エージェントの売買ができます。".replace(DENIAL, "")),
   );
+}
+
+console.log("\n== 5. the router is filed by its callers, not by its files ==");
+{
+  // A file that exists is not a feature that runs. "available" was granted
+  // to the router on the strength of route.ts and registry.ts existing,
+  // while the only thing that read route.ts was the admin page that
+  // reports on it. So: who calls it, outside its own directory and that
+  // page?
+  const walk = (dir) =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+      e.isDirectory() ? walk(`${dir}/${e.name}`) : [`${dir}/${e.name}`],
+    );
+  const src = walk("src").filter((f) => /\.(ts|tsx)$/.test(f));
+  ok(`the source tree was walked (${src.length} files)`, src.length > 500);
+  const importers = src.filter((f) =>
+    /from "@\/lib\/ai\/routing\/route"/.test(readFileSync(f, "utf8")),
+  );
+  ok(
+    `route.ts has importers to classify (${importers.length})`,
+    importers.length > 0,
+    "if nothing imports it at all, this section is measuring nothing",
+  );
+  const callers = importers.filter(
+    (f) =>
+      !f.startsWith("src/lib/ai/routing/") &&
+      !f.startsWith("src/app/dashboard/routing/"),
+  );
+  const soon = byStatus.get("soon") ?? [];
+  const available = byStatus.get("available") ?? [];
+  if (soon.includes("router")) {
+    ok(
+      `while the router is "soon", no request path calls it (${callers.length})`,
+      callers.length === 0,
+      callers.join(", ") + " — it serves requests now: move it to available with this as evidence",
+    );
+  } else {
+    ok(
+      `the router is "available" only with a caller (${callers.length})`,
+      available.includes("router") && callers.length > 0,
+      "nothing outside lib/ai/routing and its admin page calls route.ts",
+    );
+  }
+
+  // The descriptions that sold more than the code does, retracted by
+  // their own words (2026-10-05, docs/REMAINING.md).
+  const en = JSON.parse(readFileSync("messages/en.json", "utf8")).roadmap.items;
+  for (const [key, claim] of [
+    ["agentBuilder", /autonomous agent/i],
+    ["automationBuilder", /not just logged ideas|^Real /i],
+    ["aiMemory", /cross-project/i],
+    ["coding", /full app generation/i],
+  ]) {
+    const text = `${en[key]?.title ?? ""} ${en[key]?.description ?? ""}`;
+    ok(`${key} no longer claims ${claim.source}`, text.trim() !== "" && !claim.test(text), text.slice(0, 80));
+  }
 }
 
 console.log(

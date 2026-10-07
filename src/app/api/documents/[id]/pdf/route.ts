@@ -73,8 +73,9 @@ export const maxDuration = 120; // @function-limit 120
  * The charge is reported back in a header the dialog reads, because the
  * body is the PDF and has no room for a receipt.
  */
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

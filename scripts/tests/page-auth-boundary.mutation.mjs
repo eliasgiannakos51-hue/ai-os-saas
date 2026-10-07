@@ -30,7 +30,7 @@ import { runMutations } from "./lib/mutation-runner.mjs";
 
 const GATE = "scripts/tests/page-auth-boundary.test.mjs";
 const LAYOUT = "src/app/dashboard/layout.tsx";
-const MIDDLEWARE = "src/middleware.ts";
+const MIDDLEWARE = "src/proxy.ts";
 const ONBOARDING = "src/app/onboarding/page.tsx";
 const TIMELINE = "src/app/dashboard/timeline/page.tsx";
 

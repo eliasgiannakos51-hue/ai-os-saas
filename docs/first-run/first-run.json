@@ -1,6 +1,6 @@
 {
-  "total": 3526,
-  "onPath": 586,
+  "total": 3548,
+  "onPath": 589,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -10,13 +10,13 @@
       "n": 1,
       "title": "THE SENTENCES — read these",
       "note": "On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that.",
-      "count": 21
+      "count": 23
     },
     {
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 357
+      "count": 358
     },
     {
       "n": 3,
@@ -50,6 +50,18 @@
         },
         {
           "key": "auth.signup.change",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.checkEmailBody",
+          "depth": 0,
+          "tier": 1,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
+          "key": "auth.signup.checkEmailTitle",
           "depth": 0,
           "tier": 2,
           "file": "src/app/signup/signup-flow.tsx"
@@ -628,6 +640,12 @@
           "key": "auth.login.email",
           "depth": 0,
           "tier": 2,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.emailNotConfirmed",
+          "depth": 0,
+          "tier": 1,
           "file": "src/app/login/login-form.tsx"
         },
         {

@@ -47,7 +47,7 @@ function readSubscription(body: SubscriptionBody): { endpoint: string; p256dh: s
  */
 export async function GET(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
     if (!isPushConfigured()) {
       return NextResponse.json({ ok: false, error: "Push notifications are not configured." }, { status: 503 });
     }
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -136,7 +136,7 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -181,7 +181,7 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

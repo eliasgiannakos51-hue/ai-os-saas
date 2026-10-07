@@ -19,8 +19,9 @@ export const runtime = "nodejs";
  * Same posture as the .pptx route beside it: the person's own session
  * client reads the row, so RLS decides; no model call, no charge.
  */
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function GET(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

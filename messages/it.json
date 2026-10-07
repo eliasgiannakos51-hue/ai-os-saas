@@ -232,7 +232,7 @@
       "missionControl": "Fissa un obiettivo, l'IA lo divide in passaggi.",
       "documents": "Note e documenti liberi che scrivi tu.",
       "websites": "Tieni traccia dei siti che hai — nome, URL, stato. Nessuna generazione.",
-      "agents": "Pianifica gli agenti che vuoi. Un registro, non un runtime.",
+      "agents": "Agenti che cercano sul web secondo un orario e ti inviano via email ciò che hanno trovato.",
       "finance": "Registra entrate e uscite.",
       "sales": "Contatti, messaggi e prossimi passi.",
       "content": "Idee di contenuto, didascalie e thread.",
@@ -271,7 +271,7 @@
       "affiliate": "Il tuo link di invito, quanto hai guadagnato e come vieni pagato.",
       "formSubmissions": "Tutto ciò che i visitatori hanno inviato tramite un modulo sui tuoi siti pubblicati",
       "businessHealth": "MRR, margine, abbandono e liquidità. Solo il proprietario.",
-      "mine": "Tutto ciò che hai creato, dal più recente, con una scheda solo preferiti",
+      "mine": "Le tue voci registrate, dalla più recente, con una scheda solo preferiti",
       "records": "Tutti i record in un unico posto: filtra per tipo invece di cercare nel menu",
       "library": "Preferiti, recenti e ricerca — tutto il tuo in un posto",
       "newEntry": "Scrivi qualsiasi cosa — si archivia da sola",
@@ -337,16 +337,16 @@
     "contactSales": "Contatta le vendite",
     "getPlan": "Scegli {plan}",
     "teamBannerTitle": "Lavori in team?",
-    "teamBannerBody": "Invita i tuoi colleghi a lavorare direttamente nel tuo spazio di lavoro — ogni membro ottiene accesso completo al livello del tuo piano, non una vista ospite limitata. Con Professional, aggiungi membri per +{price}/membro/mese, fatturati mensilmente per posto. Ultimate ed Enterprise includono posti team illimitati senza costi aggiuntivi, quindi tutto il tuo team partecipa gratis. Gestisci gli inviti e revoca l'accesso in qualsiasi momento dalla pagina Team in Impostazioni.",
+    "teamBannerBody": "Dai il tuo piano ai colleghi: ogni membro accede al proprio account e ottiene il livello del tuo piano, non una vista ospite limitata. Il lavoro non è ancora condiviso tra gli account: ognuno tiene il proprio. Su Professional, aggiungi membri per +{price}/membro/mese, con addebito mensile per postazione. Ultimate ed Enterprise includono postazioni di team illimitate senza costi aggiuntivi. Gestisci gli inviti e revoca l'accesso quando vuoi dalla pagina Team nelle Impostazioni.",
     "comparePlans": "Confronta i piani",
     "feature": "Funzionalità",
     "backToHome": "← Torna a Ionexa AI",
     "rows": {
       "creditsPerMonth": "Crediti / mese",
-      "aiAgents": "Agenti AI",
-      "websiteBuilder": "Website Builder e automazioni",
+      "aiAgents": "Agenti programmati che cercano sul web",
+      "websiteBuilder": "Website Builder",
       "aiMemory": "Memoria AI",
-      "teamCollaboration": "Collaborazione in team",
+      "teamCollaboration": "I membri ottengono il tuo piano",
       "teamSeatsAddOn": "Posti team",
       "freeChatMessages": "Messaggi chat gratuiti / mese",
       "deepResearch": "Esecuzioni Deep Research / mese",
@@ -365,7 +365,7 @@
       "projects": "Progetti",
       "missionControl": "Obiettivi e piani",
       "helpCentre": "Centro assistenza",
-      "createStudio": "Crea qualsiasi cosa",
+      "createStudio": "Descrivilo e apre lo strumento giusto",
       "voiceMinutes": "Minuti di voce / mese",
       "chatMemory": "Dati ricordati dalla chat",
       "chatPins": "Conversazioni fissate",
@@ -391,10 +391,10 @@
     },
     "businessTitle": "Business",
     "businessSubtitle": "Per team che costruiscono insieme",
-    "businessExplanation": "Scegli Professional o Ultimate come piano base — entrambi includono la collaborazione in team. Poi invita i membri del team: ognuno ottiene accesso completo al livello del tuo piano, per +{price}/membro/mese su Professional, o incluso gratuitamente su Ultimate.",
-    "businessCardDescription": "Inizia con qualsiasi piano come base per il tuo team, poi invita membri per +{price}/mese ciascuno — tutti ottengono accesso completo al livello del tuo piano. Perfetto per i team che lavorano insieme.",
+    "businessExplanation": "Scegli Professional o Ultimate come piano base: entrambi permettono di aggiungere membri. Ogni membro ottiene il livello del tuo piano sul proprio account, per +{price}/membro/mese su Professional, o gratis su Ultimate. Il lavoro non è ancora condiviso tra gli account.",
+    "businessCardDescription": "Parti da Professional o Ultimate come base del tuo team, poi invita membri per +{price}/mese ciascuno: tutti ottengono il livello del tuo piano sul proprio account.",
     "businessFeatureBase": "Scegli Professional o Ultimate come piano base",
-    "businessFeatureFullAccess": "Ogni membro ottiene accesso completo al livello del tuo piano",
+    "businessFeatureFullAccess": "Ogni membro ottiene il livello del tuo piano sul proprio account",
     "businessFeatureFreeOnUltimate": "Posti team inclusi gratuitamente con Ultimate",
     "businessFeatureManage": "Gestisci i posti in qualsiasi momento dalle impostazioni Team",
     "setUpTeam": "Configura Team",
@@ -402,11 +402,11 @@
       "basicAiChat": "Chat IA di base",
       "creditsPerMonth": "{count, plural, one {# credito} other {# crediti}}/mese",
       "aiMemory": "Memoria IA",
-      "websiteAutomationBuilderAccess": "Accesso a Website & Automation Builder",
+      "websiteAutomationBuilderAccess": "Website Builder e automazioni che girano una volta al giorno",
       "everythingInStarter": "Tutto ciò che include Starter",
-      "upTo100AiAgents": "Fino a 100 agenti IA",
+      "upTo100AiAgents": "Fino a 100 agenti programmati che cercano sul web",
       "everythingInGrowth": "Tutto ciò che include Growth",
-      "teamCollaboration": "Collaborazione in team",
+      "teamCollaboration": "Postazioni di team: i membri ottengono il tuo piano",
       "everythingInProfessional": "Tutto ciò che include Professional",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Postazioni team illimitate incluse — nessun costo per membro",
       "extendedChatMemoryRetention100Vs20RecentFact": "Conservazione estesa della memoria chat (100 contro 20 fatti recenti)",
@@ -414,10 +414,10 @@
       "everythingInUltimate": "Tutto ciò che include Ultimate",
       "unlimitedMembers": "Membri illimitati",
       "customCredits": "Crediti personalizzati",
-      "upTo2AiAgents": "Fino a 2 agenti IA",
-      "upTo5AiAgents": "Fino a 5 agenti IA",
-      "upTo15AiAgentsTeams": "Fino a 15 agenti IA e team",
-      "upTo50AiAgents": "Fino a 50 agenti IA"
+      "upTo2AiAgents": "Fino a 2 agenti programmati che cercano sul web",
+      "upTo5AiAgents": "Fino a 5 agenti programmati che cercano sul web",
+      "upTo15AiAgentsTeams": "Fino a 15 agenti programmati che cercano sul web",
+      "upTo50AiAgents": "Fino a 50 agenti programmati che cercano sul web"
     },
     "values": {
       "unlimited": "Illimitato",
@@ -432,7 +432,7 @@
     },
     "seatNote": {
       "included": "Postazioni team illimitate incluse — nessun addebito per membro",
-      "perMember": "+ {currency}{price}/mese per membro del team — ogni membro ottiene accesso completo al livello del tuo piano"
+      "perMember": "+ {currency}{price}/mese per membro del team — ogni membro ottiene il livello del tuo piano sul proprio account"
     },
     "metaDescription": "Prezzi di Ionexa AI — piani Free, Starter, Growth, Professional, Ultimate ed Enterprise.",
     "billingMonthly": "Mensile",
@@ -450,7 +450,8 @@
       "limits": "Limiti",
       "support": "Assistenza"
     },
-    "comparisonRowCount": "Funzioni confrontate: {count}"
+    "comparisonRowCount": "Funzioni confrontate: {count}",
+    "paymentPending": "Il pagamento per questa modifica non è andato a buon fine, quindi il tuo piano non è cambiato."
   },
   "roadmap": {
     "title": "Roadmap",
@@ -463,12 +464,12 @@
     },
     "items": {
       "modules": {
-        "title": "13 moduli business",
-        "description": "Idee, Concorrenti, Ricerca, Finanza, Apprendimento, Trading, Decisioni, Prodotti, Contenuti, Vendite/CRM, Feedback, Analytics e note di Automazione."
+        "title": "13 elenchi di voci",
+        "description": "Tieni le tue voci in 13 elenchi, da «I miei record»: Idee, Concorrenti, Ricerca, Finanza, Apprendimento, Trading, Decisioni, Prodotti, Contenuti, Vendite/CRM, Feedback, Analytics e note di Automazione."
       },
       "createAnything": {
-        "title": "Crea Qualsiasi Cosa",
-        "description": "Descrivi qualsiasi cosa in testo libero e l'IA la archivia automaticamente nel modulo giusto."
+        "title": "Descrivilo una volta",
+        "description": "Descrivi ciò che ti serve in testo semplice: apre lo strumento giusto con le tue parole, o archivia una nota nel modulo corretto."
       },
       "chat": {
         "title": "Ionexa Chat",
@@ -480,23 +481,23 @@
       },
       "team": {
         "title": "Collaborazione in team",
-        "description": "Invita colleghi e concedi loro accesso completo al livello del tuo piano."
+        "description": "Invita colleghi: ognuno ottiene il livello del tuo piano sul proprio account. Il lavoro condiviso non è ancora stato costruito."
       },
       "agentBuilder": {
         "title": "AI Agent Builder",
-        "description": "Descrivi un obiettivo e ottieni un agente autonomo funzionante che lo persegue."
+        "description": "Descrivi un obiettivo e ottieni un agente che lo cerca sul web secondo la pianificazione che imposti e ti invia ciò che ha trovato."
       },
       "websiteBuilder": {
         "title": "Website Builder",
         "description": "Siti web generati dall'IA a partire da un singolo prompt."
       },
       "automationBuilder": {
-        "title": "Vero Automation Builder",
-        "description": "Automazione dei flussi di lavoro reale ed eseguibile — non solo idee registrate."
+        "title": "Automazioni",
+        "description": "Descrivi un'attività in una frase: viene eseguita una volta al giorno e salva il risultato. Passaggi e condizioni non esistono ancora."
       },
       "aiMemory": {
         "title": "Memoria AI",
-        "description": "Contesto e memoria tra progetti, così l'IA ricorda ciò che conta."
+        "description": "La chat ricorda ciò che le dici su di te e sulla tua attività, e gli strumenti per siti, presentazioni e post lo usano. Puoi vedere ed eliminare ogni elemento."
       },
       "mobileApps": {
         "title": "App mobili e desktop",
@@ -520,7 +521,7 @@
       },
       "coding": {
         "title": "Assistente di coding AI",
-        "description": "Generazione di app complete, non solo frammenti di codice."
+        "description": "Scrive codice da una descrizione, oppure spiega, corregge, converte o testa il codice che incolli. Non esegue codice e non apre repository."
       },
       "dataAnalysis": {
         "title": "Analisi dati AI",
@@ -594,7 +595,8 @@
       "resetSuccess": "Password aggiornata — accedi con la tua nuova password.",
       "failed": "Non siamo riusciti ad accedere. Controlla email e password, oppure reimposta la password se non sei sicuro.",
       "oauthFailed": "L'accesso non è stato completato. Riprova oppure usa email e password qui sotto.",
-      "sharedSignInFirst": "Accedi per salvare ciò che hai condiviso."
+      "sharedSignInFirst": "Accedi per salvare ciò che hai condiviso.",
+      "emailNotConfirmed": "Conferma prima la tua email. Ti abbiamo appena inviato un nuovo link."
     },
     "signup": {
       "chooseYourPlan": "Scegli il tuo piano",
@@ -622,7 +624,9 @@
       "mostPopular": "Più popolare",
       "mustAgreeToTerms": "Devi accettare i Termini di servizio e l'Informativa sulla privacy per creare un account.",
       "passwordRequirementsNotMet": "Scegli una password che soddisfi tutti i requisiti sopra indicati.",
-      "failed": "Non siamo riusciti a creare l'account. Controlla i dati e riprova — non ti è stato addebitato nulla."
+      "failed": "Non siamo riusciti a creare l'account. Controlla i dati e riprova — non ti è stato addebitato nulla.",
+      "checkEmailTitle": "Controlla la tua email",
+      "checkEmailBody": "Abbiamo inviato un link a {email}. Aprilo per confermare il tuo indirizzo e iniziare a usare il tuo account."
     },
     "forgotPassword": {
       "title": "Reimposta password",
@@ -662,7 +666,18 @@
       "cancel": "Annulla e torna indietro",
       "confirmFailed": "Non siamo riusciti a completare l'eliminazione. Il tuo account esiste ancora — riprova il link o contatta l'assistenza."
     },
-    "generateStrongPassword": "Genera una password sicura"
+    "generateStrongPassword": "Genera una password sicura",
+    "verifyEmail": {
+      "title": "Conferma la tua email",
+      "body": "Ti abbiamo inviato un link via email. Aprilo per iniziare a usare il tuo account.",
+      "linkInvalid": "Il link è scaduto o è già stato usato. Richiedine uno nuovo qui sotto.",
+      "resend": "Invia un nuovo link",
+      "sending": "Invio…",
+      "sent": "Un nuovo link è in arrivo. Controlla la posta in arrivo e lo spam.",
+      "failed": "Non è stato possibile inviare l’email. Riprova tra qualche minuto.",
+      "rateLimited": "Troppi link nell’ultima ora. Riprova più tardi.",
+      "signedOut": "Accedi con email e password e ti verrà inviato un nuovo link."
+    }
   },
   "settings": {
     "title": "Impostazioni",
@@ -978,7 +993,7 @@
         "testSent": "Collegato — cerca il nostro messaggio di prova.",
         "testFailed": "Non siamo riusciti a consegnare un messaggio di prova lì, quindi non è stato salvato nulla.",
         "telegram": {
-          "help": "Scrivi al nostro bot e incolla l'ID chat che ti risponde.",
+          "help": "Apri @{bot} su Telegram e premi Avvia, così potrà scriverti. Poi invia un messaggio qualsiasi a @userinfobot (risponde con il tuo chat ID) e incolla qui quel numero.",
           "placeholder": "ID chat"
         },
         "discord": {
@@ -1587,7 +1602,6 @@
       "statusCompleted": "Pronto",
       "statusFlagged": "Segnalato",
       "flaggedTitle": "Segnalato dal nostro controllo di sicurezza",
-      "regenerateFree": "Rigenera (gratis)",
       "editUnavailable": "Potrai richiedere modifiche una volta terminata la generazione del sito.",
       "design": {
         "title": "Design",
@@ -1635,7 +1649,6 @@
         "photoSourceNeedsUpload": "Allega le tue foto sopra, altrimenti verranno usate foto stock."
       },
       "imageIntro": "Il tuo logo, foto dei prodotti o del locale: quello che vuoi nella pagina o che deve dare lo stile.",
-      "regenerateAlreadyUsed": "Hai già usato la rigenerazione gratuita per questo sito. Crea un nuovo sito con una descrizione diversa.",
       "regenerateNoBrief": "Questo sito è stato creato prima che salvassimo la descrizione originale, quindi non può essere rigenerato automaticamente. Crea un nuovo sito con la stessa descrizione.",
       "empty": {
         "title": "Descrivi il sito, ottieni il sito",
@@ -1675,7 +1688,9 @@
           "quota": "{count, plural, one {Una immagine} other {# immagini}} non sono state aggiunte: la libreria di foto ha rifiutato altre richieste per ora. Riprova tra un'ora o aggiungi immagini tue.",
           "noMatch": "{count, plural, one {È stata richiesta una immagine} other {Sono state richieste # immagini}} e nessuna fotografia corrispondeva. Non è stato messo nulla di estraneo al suo posto — descrivere il soggetto in modo diverso di solito aiuta."
         }
-      }
+      },
+      "regeneratePaid": "Rigenera · circa {count} crediti",
+      "regenerateNoCredits": "Crediti insufficienti per un'altra rigenerazione: ne servono circa {needed}, ne hai {available}. Non è stato avviato nulla."
     },
     "marketplace": {
       "title": "Aiutanti pronti",
@@ -2113,7 +2128,7 @@
       "reasonBadEdges": "Non può iniziare né finire con un trattino.",
       "reasonReserved": "Questo indirizzo è riservato. Scegline un altro.",
       "reasonTaken": "Questo indirizzo è già occupato. Provane un altro.",
-      "disabledFlagged": "Questo sito è stato trattenuto dalla nostra revisione di sicurezza e non può andare online. Vedi i dettagli qui sotto: puoi rigenerarlo una volta gratuitamente.",
+      "disabledFlagged": "Questo sito è stato trattenuto dalla nostra revisione di sicurezza e non può andare online. Vedi i dettagli qui sotto: puoi rigenerarlo, e il pulsante indica quanto costa.",
       "disabledFailed": "La generazione di questo sito non è stata completata, quindi non c’è ancora nulla da pubblicare.",
       "disabledGenerating": "Generazione in corso. Potrai pubblicarlo appena sarà pronto.",
       "empty": {
@@ -2124,7 +2139,7 @@
     "integrations": {
       "title": "Integrazioni",
       "emptyTitle": "Ancora nessuna connessione",
-      "emptyBody": "Collega un account e l'AI potrà leggerne i contenuti — posta, calendario, file — invece di conoscere solo ciò che hai digitato a mano.",
+      "emptyBody": "Collega un account e l'AI potrà leggerne i contenuti — posta, file — invece di conoscere solo ciò che hai digitato a mano.",
       "description": "Collega gli strumenti che già usi, così l'IA lavora sui tuoi dati reali.",
       "privacyNotice": "Le connessioni sono in sola lettura salvo diversa indicazione. I token sono cifrati con una chiave che non sta nel nostro database, non compaiono mai nei log, e disconnettere revoca l'accesso presso il fornitore ed elimina tutto ciò che conserviamo, incluso lo storico di ciò che è stato letto.",
       "notConfigured": "Le integrazioni non sono ancora configurate su questa installazione, quindi la connessione è disattivata.",
@@ -3558,7 +3573,9 @@
     "costs": "Costi",
     "acceptableUseDescription": "Cosa puoi e cosa non puoi fare con Ionexa AI.",
     "aiTransparencyDescription": "Quali modelli di IA usa Ionexa, cosa fanno e quali dati vedono.",
-    "contactDescription": "Contatta il team di Ionexa AI."
+    "contactDescription": "Contatta il team di Ionexa AI.",
+    "verifyEmail": "Conferma email",
+    "verifyEmailDescription": "Conferma l’indirizzo email del tuo account Ionexa AI."
   },
   "errors": {
     "retry": "Riprova",
@@ -4145,7 +4162,7 @@
   },
   "routing": {
     "title": "Quale IA viene usata",
-    "description": "Quale modello ha servito quale richiesta negli ultimi 30 giorni, quanto è costato e quanto ha risparmiato l'instradamento.",
+    "description": "Quale modello ha servito quale richiesta negli ultimi 30 giorni e quanto è costato. Il router non sceglie ancora i modelli, quindi questa tabella resta vuota; ciò che avrebbe scelto è nella pagina Costi.",
     "empty": "Non è ancora stata registrata alcuna decisione di instradamento. Questa tabella si riempie quando le richieste iniziano a passare dal router: non mostra zeri, non mostra nulla.",
     "decisions": "Decisioni",
     "charged": "Addebitato ai clienti",
@@ -4158,7 +4175,7 @@
     "overrideSaving": "Risparmio da deroga",
     "learnedTitle": "Cosa ha imparato il router",
     "learnedIntro": "Tasso di successo per capacità e modello su 30 giorni. Un modello sotto il {rate}% smette di essere scelto per quella capacità, ma solo dopo almeno {samples} esecuzioni, perché due fallimenti su due non sono una prova.",
-    "learnedEmpty": "Niente di conclusivo per ora. Finché una coppia capacità-modello non ha abbastanza esecuzioni, l'instradamento resta sulla sua mappa statica dei livelli.",
+    "learnedEmpty": "Ancora nulla di conclusivo. Nulla di questo cambia il modello usato: ogni funzione usa il modello scritto nel proprio codice.",
     "runs": "{rate}% su {samples} esecuzioni",
     "routedUp": "instradato più in alto",
     "notEnough": "non ancora sufficiente"
@@ -4293,7 +4310,7 @@
     "pruneConfirm": "Cancellare {count} righe dette una sola volta e mai più tornate in sei mesi? Tutto ciò che si ripete resta.",
     "pruned": "{count} rimosse.",
     "surfacesTitle": "Quali funzioni ricordano",
-    "surfacesHelp": "Disattivata, una funzione non legge la memoria né vi aggiunge nulla. Nulla di già salvato viene cancellato.",
+    "surfacesHelp": "Attiva, una funzione legge ciò che la chat ricorda di te; solo la chat aggiunge qualcosa. Disattivata, non fa né l’una né l’altra cosa. Nulla di ciò che è già salvato viene eliminato.",
     "surfaceOn": "Ricorda",
     "surfaceOff": "Disattivata",
     "surfaceSaveFailed": "Impossibile salvare questa impostazione.",
@@ -4454,6 +4471,15 @@
         "trafficUp": "il traffico del sito è salito del {percent}%",
         "trafficDown": "il traffico del sito è sceso del {percent}%"
       }
+    },
+    "confirm": {
+      "subject": "Conferma la tua email per Ionexa AI",
+      "preheader": "Un clic e il tuo account è pronto.",
+      "label": "conferma email",
+      "title": "Conferma che sei tu",
+      "body": "Premi il pulsante per confermare questo indirizzo e aprire il tuo account Ionexa AI.",
+      "button": "Conferma email",
+      "ignore": "Se non hai creato tu questo account, ignora questa email: senza il link non succede nulla."
     }
   },
   "routerReport": {

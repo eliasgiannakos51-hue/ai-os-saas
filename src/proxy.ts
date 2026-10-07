@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { PERMANENT_MOVES, onboardingRedirectTarget, teamRedirectTarget } from "@/lib/nav/early-redirects";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // NO x-pathname HEADER. One was set here for a single deploy, so the
   // root layout could trim the message catalogue per path. It could not:
   // a shared layout is not re-rendered across client-side navigations, so
@@ -135,6 +135,32 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return withRefreshedCookies(NextResponse.redirect(url));
+  }
+
+  // AN ADDRESS NOT YET PROVED (NEEDS 22, lib/auth/confirm-email.ts). An
+  // account opened with a password has no session until its link is
+  // followed; this is the second wall, for a session that exists anyway
+  // (a sign-in the Supabase project let through). Pages go to
+  // /verify-email; API calls are refused by code — except the two that
+  // exist to get out of this state, and sign-out.
+  if (user && !user.email_confirmed_at) {
+    const path = request.nextUrl.pathname;
+    const isApi = path.startsWith("/api/");
+    const exempt =
+      path.startsWith("/api/auth/resend-confirmation") ||
+      path.startsWith("/auth/") ||
+      path === "/verify-email";
+    if (!exempt && isApi) {
+      return withRefreshedCookies(
+        NextResponse.json({ ok: false, code: "email_not_confirmed" }, { status: 403 })
+      );
+    }
+    if (!exempt && (isDashboardRoute || path.startsWith("/onboarding"))) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/verify-email";
+      url.search = "";
+      return withRefreshedCookies(NextResponse.redirect(url));
+    }
   }
 
   // REDIRECTS DECIDED HERE, NOT IN THE PAGE (issue #61, React #310).

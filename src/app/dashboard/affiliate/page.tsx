@@ -26,7 +26,7 @@ export const fetchCache = "force-no-store";
 
 export default async function AffiliatePage() {
   const t = await getTranslations("dashboard.affiliate");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
   if (!user) redirect("/login");

@@ -31,7 +31,7 @@ const DATE_ORDERS: DateOrder[] = ["dmy", "mdy", "ymd"];
  */
 export async function POST(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

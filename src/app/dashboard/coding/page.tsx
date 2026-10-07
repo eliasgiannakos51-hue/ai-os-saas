@@ -27,13 +27,14 @@ export function generateMetadata(): Promise<Metadata> {
 // by CodingWorkspace rather than left to the name.
 // The brief Home routed here, read through the shared clamp — see the
 // note in the deep-research page for why the name is checked by a gate.
-export default async function CodingPage({
-  searchParams,
-}: {
-  searchParams: { brief?: string };
-}) {
+export default async function CodingPage(
+  props: {
+    searchParams: Promise<{ brief?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const t = await getTranslations("coding");
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

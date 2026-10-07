@@ -10,9 +10,8 @@
 // runtime (an upgrade wall renders INSTEAD of a list) — so it reads high:
 // eight for Settings against five actually painted. And it reads BLIND in
 // the other direction, because it only looks at <button>, <a> and <Link>:
-// ten drifting <span> dots from components/ui/ambient-dots.tsx are orange
-// on every dashboard page and no source-level button scan will ever see
-// them.
+// an orange <span> — the ten drifting dots this file used to count, until
+// Design D.1 deleted them — is invisible to a source-level button scan.
 //
 // So: the source gate holds the button rule, and this holds the total.
 //
@@ -373,17 +372,21 @@ for (const [url, allowed] of Object.entries(ALLOWED)) {
 }
 
 console.log("\n== 3. the decorative accent, counted rather than argued about ==");
-// TEN DRIFTING DOTS, on every dashboard page, from ambient-dots.tsx
-// (DOT_COUNT = 10, mounted once in dashboard/layout.tsx). They are
-// aria-hidden, 3-6px and pointer-events-none, so they are not competing
-// for a click — but they ARE ten orange marks beside the one control that
-// is supposed to be the loudest thing on the screen, and no source-level
-// button scan can see them. Pinned at ten: an eleventh is a decision.
+// NONE, since Design D.1 (eafcd3a6, merged in #223): the accent colour
+// belongs to the earth and the logo only (docs/CONTEXT.md, ΣΥΣΤΗΜΑ
+// DESIGN §1; scripts/tests/design-tokens.test.mjs holds it in source),
+// and the ten drifting dots that used to be pinned here were deleted with
+// their component. This nightly check still said ten, and went red on
+// main the first night it ran against the new design (issue #237) — the
+// pin was right about the old screen and wrong about the one shipping.
+// Zero, measured in a real browser: a decorative orange surface is the
+// thing the design rule forbids, and the source gate cannot see one that
+// arrives through a computed style.
 for (const url of PAGES) {
   const decorative = seen[url].filled.filter((f) => !f.pressable);
   checkTrue(
     `${url}: ${decorative.length} decorative accent surfaces`,
-    decorative.length === 10,
+    decorative.length === 0,
     decorative.map((f) => `${f.tag} ${f.w}x${f.h}`).join(", ")
   );
 }

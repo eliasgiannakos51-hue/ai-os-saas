@@ -18,9 +18,10 @@ const MAX_FILES_PER_COLLECTION = 200;
  * must agree about ownership is two chances to get it wrong. The client
  * sends the list it wants; this route makes that list true.
  */
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -135,9 +136,10 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 /** Delete a collection. The FILES are untouched — a collection is a way
  *  of grouping documents, and deleting the group must never be a way to
  *  lose the documents. `on delete cascade` clears the membership rows. */
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

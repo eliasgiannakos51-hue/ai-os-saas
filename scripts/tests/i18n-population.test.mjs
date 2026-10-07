@@ -167,7 +167,7 @@ check("every reason is an argument", shortReasons.length === 0, shortReasons.map
 // scope, outside any request — so the catalogue plainly does load there.
 // And the language was on the ACCOUNT the whole time:
 // src/lib/locale-preference.ts writes
-// raw_user_meta_data.preferred_locale and src/middleware.ts reads it
+// raw_user_meta_data.preferred_locale and src/proxy.ts reads it
 // back.
 //
 // What was actually true was narrower: the send functions took an
@@ -210,6 +210,7 @@ check(
 const EMAIL_ENGLISH_ON_PURPOSE = {
   "src/lib/email/error-alert.ts": "an operator alert to ADMIN_EMAILS. The reader is the owner, and the subject carries a route name and a provider message that do not translate.",
   "src/lib/email/margin-alert.ts": "the same: a margin figure and a feature name, sent to the owner and to nobody else.",
+  "src/lib/email/login-failure-alert.ts": "the same: a count of failed sign-ins, sent to ADMIN_EMAILS and to nobody else.",
   // FOUND BY WIDENING THE WALK, not by anybody remembering it. It sends
   // to ADMIN_EMAILS with a subject that begins "[Ionexa cost alert]" and
   // it sat outside every i18n instrument this project has, purely because
@@ -248,7 +249,10 @@ check(
 // that accepts a locale nobody passes renders English for everybody and
 // looks converted.
 const TRANSLATED_EMAILS = {
-  "src/lib/email/send-welcome-email.ts": "src/app/api/signup/route.ts",
+  // Since 2026-10-05 the first is the confirmation link (NEEDS 22), and the
+  // welcome waits for the address to be proved.
+  "src/lib/email/send-confirm-email.ts": "src/app/api/signup/route.ts",
+  "src/lib/email/send-welcome-email.ts": "src/app/auth/confirm/route.ts",
   "src/lib/email/send-new-device-login-email.ts": "src/app/api/auth/device-check/route.ts",
   "src/lib/email/send-delete-account-confirmation-email.ts": "src/app/api/delete-account/request/route.ts",
   "src/lib/email/send-subscription-cancelled-email.ts": "src/app/api/billing/cancel/route.ts",

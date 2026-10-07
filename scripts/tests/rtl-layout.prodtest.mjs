@@ -285,7 +285,7 @@ const measured = new Map();
 
 try {
   for (const locale of LOCALES) {
-    // The account is what middleware.ts reads to decide the locale, and
+    // The account is what proxy.ts reads to decide the locale, and
     // changing it needs no second `next build` — the build inlines the
     // Supabase URL, not its answers.
     harness.setUserMetadata({

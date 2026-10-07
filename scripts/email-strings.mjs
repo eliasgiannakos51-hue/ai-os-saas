@@ -42,7 +42,8 @@ export const SENTENCE_WORDS = 5;
  * is the judgement that decides tier 1, written down rather than inferred.
  */
 export const EMAIL_GROUPS = [
-  { group: "welcome", likely: true, why: "every account gets it, minutes after signing up" },
+  { group: "confirm", likely: true, why: "every new account gets it first: the link that proves the address (NEEDS 22)" },
+  { group: "welcome", likely: true, why: "every account gets it, minutes after confirming its address" },
   { group: "newDevice", likely: true, why: "a sign-in from a new device — a security email, read closely" },
   { group: "stuck", likely: true, why: "a website generation that did not finish" },
   { group: "scheduledRun", likely: true, why: "a scheduled job finished" },

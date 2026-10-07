@@ -1092,6 +1092,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "signup",
       "auth/login",
       "auth/device-check",
+      "auth/resend-confirmation",
       "health",
     ],
     charges: false,

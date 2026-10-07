@@ -45,8 +45,8 @@ const MUTANTS = [
   {
     name: "a grant appears where a request can name the account",
     file: CODING,
-    from: "  const supabase = createClient();",
-    to: "  await grantCredits(body.userId, 1000, \"gift\");\n  const supabase = createClient();",
+    from: "  const supabase = await createClient();",
+    to: "  await grantCredits(body.userId, 1000, \"gift\");\n  const supabase = await createClient();",
     expect: "grants credits to an account a request named",
   },
   {

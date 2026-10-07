@@ -62,7 +62,7 @@ export default async function SettingsPage() {
   // already existed; nothing was reaching them.
   const tAchievements = await getTranslations("achievements");
   const tVoice = await getTranslations("voice");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

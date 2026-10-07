@@ -8,7 +8,7 @@
  * its own proxy, and both are far happier with a plain static file on a
  * CDN than with a dynamically rendered route that has no file extension.
  * A `.png` URL is also the only form that Next's middleware matcher
- * already excludes (see src/middleware.ts) — the extensionless
+ * already excludes (see src/proxy.ts) — the extensionless
  * /email-logo route went through middleware, which does a Supabase
  * auth round-trip, on every single image fetch from every inbox.
  *

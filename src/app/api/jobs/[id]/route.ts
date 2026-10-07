@@ -26,9 +26,10 @@ export const dynamic = "force-dynamic";
  * the page is exactly the person who should not have to wait for a nightly
  * sweep to be told the truth.
  */
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

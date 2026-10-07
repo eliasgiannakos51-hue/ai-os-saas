@@ -42,7 +42,7 @@ export default async function RoutingPage() {
   // set to, so the same page renders 1,234 for one reader and 1.234 for
   // another with nothing choosing between them.
   const locale = await getLocale();
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (!isAdminEmail(user.email)) notFound();

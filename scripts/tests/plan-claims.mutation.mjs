@@ -132,8 +132,8 @@ const MUTANTS = [
     // from the catalogue, so a missing one has to be loud.
     name: "a rendered row has no label in Greek",
     file: "messages/el.json",
-    from: '"teamCollaboration": "Συνεργασία ομάδας"',
-    to: '"teamCollaborationRenamed": "Συνεργασία ομάδας"',
+    from: '"teamCollaboration": "Τα μέλη παίρνουν το πλάνο σου"',
+    to: '"teamCollaborationRenamed": "Τα μέλη παίρνουν το πλάνο σου"',
     expect: "exists for every rendered row in all ten locales",
   },
 ];

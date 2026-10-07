@@ -40,7 +40,7 @@ export const fetchCache = "force-no-store";
 // done. Nothing here runs on its own.
 export default async function MissionPage() {
   const t = await getTranslations("dashboard.mission");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // TEMPORARY diagnostic logging for the "missions disappear on refresh"
   // investigation — every request to this page logs its own auth + query

@@ -41,7 +41,7 @@ const MINI_TIMELINE_LIMIT = 10;
 // scope prop were all reused completely unchanged.
 export default async function ProductWorkflowPage() {
   const t = await getTranslations("dashboard.productWorkflow");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

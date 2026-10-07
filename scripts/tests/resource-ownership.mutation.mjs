@@ -38,7 +38,7 @@ const MUTANTS = [
   {
     name: "cancelling a website stops reading through the caller's own client",
     file: CANCEL,
-    from: "    const supabase = createClient();",
+    from: "    const supabase = await createClient();",
     to: "    const supabase = createAdminClient();",
     expect: "establishes ownership first",
   },

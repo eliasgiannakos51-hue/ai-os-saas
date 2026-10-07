@@ -45,13 +45,14 @@ export const dynamic = "force-dynamic";
  * scripts/tests/trading-journal.test.mjs fails the build if a surface
  * reading this data omits it.
  */
-export default async function TradingJournalPage({
-  searchParams,
-}: {
-  searchParams: { account?: string };
-}) {
+export default async function TradingJournalPage(
+  props: {
+    searchParams: Promise<{ account?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const t = await getTranslations("dashboard.trading");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
   if (!user) redirect("/login");

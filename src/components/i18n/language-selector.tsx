@@ -12,7 +12,7 @@ import { persistLocalePreference } from "@/lib/locale-preference";
 // landing page has, which is why it stays.
 //
 // IT WRITES THE ACCOUNT TOO, via the shared helper, and that is not
-// tidiness. middleware.ts now pushes the account's preferred_locale onto
+// tidiness. proxy.ts now pushes the account's preferred_locale onto
 // the NEXT_LOCALE cookie on every request, so a selector that wrote only
 // the cookie would have its choice reverted on the very next navigation —
 // the language would change and then change back. Both entry points write

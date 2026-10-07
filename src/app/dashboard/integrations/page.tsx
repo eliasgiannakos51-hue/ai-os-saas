@@ -25,7 +25,7 @@ export function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function IntegrationsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

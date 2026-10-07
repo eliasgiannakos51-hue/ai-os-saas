@@ -19,7 +19,7 @@ export const fetchCache = "force-no-store";
  * and a 404 to anybody else so the route does not advertise itself.
  */
 export async function GET() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

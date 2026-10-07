@@ -5,7 +5,7 @@
 //
 //   the account   A language chosen on a laptop was not the language on
 //                 the phone, and clearing site data reset it to English.
-//                 Fixed in middleware.ts, which refreshes the cookie from
+//                 Fixed in proxy.ts, which refreshes the cookie from
 //                 raw_user_meta_data.preferred_locale on every request.
 //                 Held by settings-language.prodtest.mjs, which needs a
 //                 browser.
@@ -113,7 +113,8 @@ if (localeFromAcceptLanguage) {
 // cookie and watching this stay green. Both positions are now the calls.
 {
   const cookieAt = source.indexOf("cookieStore.get(LOCALE_COOKIE)");
-  const headerAt = source.indexOf("localeFromAcceptLanguage(headers()");
+  // `(await headers())` since Next 15/16, where headers() is a promise.
+  const headerAt = source.indexOf("localeFromAcceptLanguage((await headers())");
   check(
     "the cookie is consulted before Accept-Language",
     cookieAt > -1 && headerAt > cookieAt,
@@ -121,7 +122,7 @@ if (localeFromAcceptLanguage) {
   );
 }
 check("Accept-Language is only a fallback, not an override",
-  /includes\(chosen \?\? ""\)/.test(source) && /localeFromAcceptLanguage\(headers\(\)/.test(source));
+  /includes\(chosen \?\? ""\)/.test(source) && /localeFromAcceptLanguage\(\(await headers\(\)\)/.test(source));
 check("English is the last resort",
   /\?\? DEFAULT_LOCALE/.test(source));
 // The account is authoritative but must NOT be read here: this runs on

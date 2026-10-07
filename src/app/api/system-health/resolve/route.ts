@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 // Marks one deduplicated error as resolved. Owner-only — the table holds
 // platform-wide stack traces, so the gate here has to match the page's.
 export async function POST(request: Request) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

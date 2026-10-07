@@ -380,7 +380,7 @@ checkTrue("...and out of route revalidation", /revalidate = 0/.test(publicRouteC
 checkTrue("counting is one atomic RPC, not read-then-write", /rpc\("record_site_view"/.test(publicRoute));
 
 // The middleware must not run an auth round trip on public traffic.
-const middleware = read("src/middleware.ts");
+const middleware = read("src/proxy.ts");
 checkTrue("published sites are excluded from the auth middleware", /\|s\/\|/.test(middleware));
 
 // ---------------------------------------------------------------------

@@ -26,14 +26,15 @@ export const dynamic = "force-dynamic";
 // content was already live once: the scanner's rules can have tightened
 // since, and "it passed last month" is not the claim being made when we
 // serve it today.
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const publishedSiteId = params.id;
     if (!publishedSiteId) {
       return NextResponse.json({ ok: false, error: "Missing site id." }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

@@ -58,7 +58,10 @@ const SENDER = "src/lib/email/resend-config.ts";
 const ZH = "messages/zh.json";
 const AR = "messages/ar.json";
 
-const TARGETS = [GATE, LINKS, LAYOUT, PRIVACY, TRANSPARENCY, ROUTE, FORM, SETTINGS, SENDER, ZH, AR];
+const ENV_CHECK = "src/lib/env-check.ts";
+const VOICE = "src/lib/voice/voice-providers.ts";
+const REGISTRY = "src/lib/ai/providers/registry.ts";
+const TARGETS = [GATE, LINKS, LAYOUT, PRIVACY, TRANSPARENCY, ROUTE, FORM, SETTINGS, SENDER, ZH, AR, ENV_CHECK, VOICE, REGISTRY];
 
 const MUTANTS = [
   // ---- the absence this gate exists for ------------------------------
@@ -117,6 +120,46 @@ const MUTANTS = [
     from: "<strong>AI Coding</strong>: five operations over code you paste in.",
     to: "<strong>Presentations</strong>: the model researches and writes slides with cited sources.",
     expect: "retracted:",
+  },
+
+  // ---- 2026-10-05: the routing claim and the four-name privacy list ---
+  {
+    name: "the transparency page says a router picks the model again",
+    file: TRANSPARENCY,
+    from: "<strong>Each feature uses the model written into its own code.</strong> Nothing\n          chooses a model per request.",
+    to: "Ionexa routes each call to a model rather than being wired to one.",
+    expect: "retracted: routes each call",
+  },
+  {
+    name: "/privacy drops a company the code sends data to",
+    file: PRIVACY,
+    from: '<span className="text-foreground/90">ElevenLabs</span>',
+    to: "a voice provider",
+    expect: "/privacy names ElevenLabs",
+  },
+  {
+    // A new vendor's key arrives in env-check.ts and nobody decides
+    // whether /privacy must name it.
+    name: "a new credential is declared with no company and no exception",
+    file: ENV_CHECK,
+    from: '    name: "ELEVENLABS_API_KEY",',
+    to: '    name: "NEWVENDOR_API_KEY",\n  },\n  {\n    name: "ELEVENLABS_API_KEY",',
+    expect: "every credential is a named company or a stated exception",
+  },
+  {
+    // An excused key that some code starts sending data with.
+    name: "an inventory-only key starts being used by real code",
+    file: VOICE,
+    from: "const ELEVENLABS_TTS_URL",
+    to: "export const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY;\nconst ELEVENLABS_TTS_URL",
+    expect: "DEEPGRAM_API_KEY is still read only by the key inventory",
+  },
+  {
+    name: "a second text provider is switched on by default",
+    file: REGISTRY,
+    from: 'DEFAULT_PROVIDER_ORDER: readonly AiProvider[] = ["anthropic"];',
+    to: 'DEFAULT_PROVIDER_ORDER: readonly AiProvider[] = ["anthropic", "groq"];',
+    expect: "the default text provider order is still anthropic alone",
   },
 
   // ---- the mailer state -----------------------------------------------

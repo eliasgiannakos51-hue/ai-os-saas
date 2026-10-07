@@ -34,12 +34,13 @@ export const dynamic = "force-dynamic";
 //
 // Any one of them failing sends the user back with an error and stores
 // nothing.
-export async function GET(request: Request, { params }: { params: { provider: string } }) {
+export async function GET(request: Request, props: { params: Promise<{ provider: string }> }) {
+  const params = await props.params;
   const back = (status: string) =>
     NextResponse.redirect(`${getSiteUrl().replace(/\/+$/, "")}/dashboard/integrations?status=${status}`);
 
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -77,7 +78,7 @@ export async function GET(request: Request, { params }: { params: { provider: st
     // ...and the session must be the user the flow was started by.
     if (!secretsMatch(stateCheck.payload.u, user.id)) return back("invalid_state");
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const raw = cookieStore.get(OAUTH_STATE_COOKIE)?.value;
     if (!raw) return back("invalid_state");
 

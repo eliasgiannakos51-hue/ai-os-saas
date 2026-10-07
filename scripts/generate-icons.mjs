@@ -20,7 +20,7 @@
  *
  * 2. apple-icon was a DYNAMIC route (apple-icon.tsx -> ImageResponse),
  *    which Next serves at the extensionless path "/apple-icon". The
- *    middleware matcher in src/middleware.ts excludes static assets BY
+ *    middleware matcher in src/proxy.ts excludes static assets BY
  *    EXTENSION, so "/apple-icon" matched nothing in the exclusion list and
  *    every fetch of it ran the auth middleware — a full Supabase getUser()
  *    round trip to serve an icon. This is the identical root cause as the

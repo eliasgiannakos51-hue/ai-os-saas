@@ -32,6 +32,43 @@ export function telegramConfigured(): boolean {
   return typeof token === "string" && token.trim().length > 0;
 }
 
+/**
+ * THE BOT'S OWN NAME, from Telegram rather than from a setting.
+ *
+ * A bot cannot message somebody who has not opened a chat with it first,
+ * so a person who is never told which bot to open can never connect. The
+ * help text used to say "message our bot" and name no bot anywhere.
+ * getMe answers with the username the token belongs to; it is cached per
+ * token for the life of the instance, and anything other than a clean
+ * answer is null — which the channels route treats as "Telegram is not
+ * available", because a field nobody can complete is not a feature.
+ */
+let cachedBot: { token: string; username: string | null } | null = null;
+
+export async function telegramBotUsername(): Promise<string | null> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token || !token.trim()) return null;
+  if (cachedBot && cachedBot.token === token) return cachedBot.username;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), CONTROL_TIMEOUT_MS);
+  try {
+    const response = await fetch(`${API}/bot${token}/getMe`, { signal: controller.signal });
+    if (!response.ok) return null;
+    const body = (await response.json()) as { ok?: unknown; result?: { username?: unknown } };
+    const raw = body?.ok === true ? body.result?.username : null;
+    // Telegram usernames: 5–32 of [A-Za-z0-9_]. Anything else is not
+    // rendered into a link.
+    const username = typeof raw === "string" && /^[A-Za-z0-9_]{5,32}$/.test(raw) ? raw : null;
+    cachedBot = { token, username };
+    return username;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export type ChannelSend =
   | { ok: true }
   | { ok: false; kind: "not_configured" | "rejected" | "unreachable"; detail: string };

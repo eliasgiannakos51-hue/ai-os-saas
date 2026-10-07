@@ -19,7 +19,7 @@ export function generateMetadata(): Promise<Metadata> {
 // Agent (lib/reflection-agent.ts) for a short, honest synthesis.
 export default async function ReflectionPage() {
   const t = await getTranslations("dashboard.reflection");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

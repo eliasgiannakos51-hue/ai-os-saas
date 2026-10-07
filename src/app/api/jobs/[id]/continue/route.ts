@@ -34,7 +34,8 @@ export const maxDuration = 800; // @function-limit 800
 // claimJob is what stops the two racing into two concurrent billed runs:
 // the first to flip `running` false -> true does the work, the other is
 // told the job is already in hand and returns.
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const jobId = params.id;
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -57,7 +58,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     if (!job) return NextResponse.json({ ok: false, error: "Job not found." }, { status: 404 });
 
     if (!isInternal) {
-      const supabase = createClient();
+      const supabase = await createClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();

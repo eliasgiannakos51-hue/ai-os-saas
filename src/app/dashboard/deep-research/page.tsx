@@ -25,12 +25,13 @@ export function generateMetadata(): Promise<Metadata> {
 // the same clamp the first-screen examples use, and
 // scripts/tests/producer-routes.test.mjs compares this parameter's name
 // against the one lib/create-studio/producer-routes.ts emits.
-export default async function DeepResearchPage({
-  searchParams,
-}: {
-  searchParams: { brief?: string };
-}) {
-  const supabase = createClient();
+export default async function DeepResearchPage(
+  props: {
+    searchParams: Promise<{ brief?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

@@ -30,7 +30,7 @@ export const fetchCache = "force-no-store";
 type Check = { name: string; ok: boolean; detail: string };
 
 export async function GET() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

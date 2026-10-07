@@ -388,7 +388,7 @@ const nowHrefs = new Set(parsedItems.map((i) => CONSTANT_HREFS[i.href] ?? i.href
 // palette can still reach, so a redirect into nowhere is still a loss.
 //
 // Since 2026-10-04 the target may come from PERMANENT_MOVES in
-// lib/nav/early-redirects.ts, which middleware.ts answers first (issue
+// lib/nav/early-redirects.ts, which proxy.ts answers first (issue
 // #61). The route still has to name the table for its own address, so a
 // deleted page is still a loss; the table is run, not read.
 const { PERMANENT_MOVES } = await loadTsLinked("src/lib/nav/early-redirects.ts");

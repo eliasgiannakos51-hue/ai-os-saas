@@ -42,7 +42,7 @@ import {
  * the other.
  */
 export async function MarginReport() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

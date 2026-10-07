@@ -33,13 +33,13 @@ export const dynamic = "force-dynamic";
 export default async function OverviewPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  const supabase = createClient();
+  const supabase = await createClient();
   const tErr = await getTranslations("errors");
 
   // A brand-new account goes through the first-run flow once.
   // AN ERROR IS NOT A STATE: a failed read is never treated as "has not
   // onboarded" — that guess once bounced every established account out
-  // of Home (scripts/tests/error-is-not-a-state.test.mjs). middleware.ts
+  // of Home (scripts/tests/error-is-not-a-state.test.mjs). proxy.ts
   // makes this decision first, with the same function; this is the
   // fallback.
   const { data: onboardingState, error: onboardingError } = await supabase

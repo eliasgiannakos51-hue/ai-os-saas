@@ -8,7 +8,7 @@
 // in all ten languages — so the name had to move, and the name moving
 // means the URL moves with it.
 //
-// middleware.ts answers this address first (lib/nav/early-redirects.ts,
+// proxy.ts answers this address first (lib/nav/early-redirects.ts,
 // issue #61); this page is the fallback.
 //
 // A permanent redirect rather than a deleted route: this address has been

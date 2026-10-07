@@ -22,7 +22,8 @@ export const dynamic = "force-dynamic";
 //   IT DOES NOT REDIRECT ANYWHERE THE CODE ASKS FOR. The destination is
 //   always /signup. A ?next= here would be an open redirect on a URL
 //   designed to be shared by strangers.
-export async function GET(request: Request, { params }: { params: { code: string } }) {
+export async function GET(request: Request, props: { params: Promise<{ code: string }> }) {
+  const params = await props.params;
   const url = new URL(request.url);
   const code = params.code?.toUpperCase() ?? "";
   const destination = new URL("/signup", url.origin);

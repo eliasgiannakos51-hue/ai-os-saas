@@ -38,9 +38,10 @@ export function generateMetadata(): Promise<Metadata> {
  * by which table each member came from. They are not seven queries and
  * they cannot disagree with each other.
  */
-export default async function ProjectPage({ params }: { params: { id: string } }) {
+export default async function ProjectPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const t = await getTranslations("projects");
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

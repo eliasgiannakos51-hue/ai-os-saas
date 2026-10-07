@@ -79,6 +79,19 @@ export function generateMetadata(): Promise<Metadata> {
  *      than back to the August sentence: it still does not research and
  *      it still cites nothing.
  *
+ *   6. (2026-10-05) "Ionexa routes each call to a model rather than
+ *      being wired to one" and "simple replies go to the smallest model …
+ *      A request can move up that ladder when the cheaper model fails".
+ *      FALSE. Every feature passes a model fixed in its own code (most
+ *      of them claude-sonnet-4-6) to lib/ai/providers/complete.ts, and
+ *      the tier ladder in lib/ai/routing/route.ts is read by
+ *      /dashboard/routing and nothing else; the classifier of
+ *      lib/ai/routing/categorize.ts runs in the shadow and changes no
+ *      model. "Anthropic answers every call" was false too: speech goes
+ *      to OpenAI and ElevenLabs (lib/voice/voice-providers.ts). Section 2
+ *      now says what runs. The failover clause stays, because it is
+ *      true: substituteModel() never picks a lower tier.
+ *
  * Two features that did not exist in August are now here (AI Coding and
  * Data Analysis, both calling lib/ai/providers/complete.ts), and section
  * 7 is new: the checks that run on model output, which the August draft
@@ -103,7 +116,7 @@ export default function AiTransparencyPage() {
   return (
     <LegalLayout
       titleKey="landing.footer.aiTransparency"
-      updated="2026-09-02"
+      updated="2026-10-05"
       notice="factual"
     >
       <LegalSection title="1. You are interacting with an AI system">
@@ -118,25 +131,35 @@ export default function AiTransparencyPage() {
 
       <LegalSection title="2. Which models run">
         <p>
-          Ionexa routes each call to a model rather than being wired to one. The models it
-          can route to are Anthropic&apos;s Claude family (Haiku 4.5, Sonnet 4.6, Opus 4.6),
-          OpenAI&apos;s GPT-5 family, Google&apos;s Gemini 2.5 family, and open models served
-          by Groq.
+          <strong>Each feature uses the model written into its own code.</strong> Nothing
+          chooses a model per request. Most features — chat, the site builder, research,
+          presentations, coding, meetings and analysis — use Anthropic&apos;s Claude Sonnet 4.6.
+          AI Agents are the exception you control: each one uses a smaller or a larger
+          Claude model depending on the depth you set for it, and filling in an
+          agent&apos;s message template uses Claude Haiku 4.5.
         </p>
         <p>
-          <strong>Anthropic is the only one switched on by default.</strong> A second
-          provider serves nothing until an operator both supplies its API key and names it
-          explicitly in the provider order; a key on its own is not consent — the deployment
-          has to say so. Today, on this deployment, Anthropic answers every call.
+          <strong>Speech is the one place a second company takes part.</strong> When you use
+          voice or upload a meeting recording, the audio is sent to OpenAI to be turned into
+          text, and when you ask for text to be read aloud, it is sent to ElevenLabs. Neither
+          is called for anything else, and neither is called on a deployment where the
+          operator has not configured it. A meeting recording is held in memory for that one
+          request and is not stored by Ionexa.
         </p>
         <p>
-          Within that, the work decides the model, not the price: short classifications and
-          simple replies go to the smallest model, ordinary generation to the mid model,
-          and the hardest requests to the largest. A request can move <em>up</em> that
-          ladder when the cheaper model fails. It is never quietly moved down — if a
-          fallback provider has nothing of at least the same capability, it is skipped
-          rather than substituted, because an answer from a weaker model looks exactly like
-          an answer from the right one.
+          For text, <strong>Anthropic is the only one switched on by default.</strong> The
+          code can also call OpenAI&apos;s GPT-5 family, Google&apos;s Gemini 2.5 family and
+          open models served by Groq, but none of them serves a text request until an
+          operator both supplies its API key and names it explicitly in the provider order.
+          If that is done and a provider fails, a request moves only to a model at least as
+          capable — never quietly down, because an answer from a weaker model looks exactly
+          like an answer from the right one.
+        </p>
+        <p>
+          A routing layer that would pick the model by the difficulty of the request is being
+          measured. Today it only records, next to each call, which model it would have
+          chosen; it does not change the model that answers. This page will say so when it
+          does.
         </p>
         <p>
           <strong>What is recorded, and who can see it.</strong> Every attempt is written to

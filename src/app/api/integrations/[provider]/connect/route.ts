@@ -27,9 +27,10 @@ export const dynamic = "force-dynamic";
 // the only way to tell them "your plan does not include this" is to bring
 // them back and explain — having already asked them to approve access to
 // their mail. Refusing before the redirect is both cheaper and honest.
-export async function GET(request: Request, { params }: { params: { provider: string } }) {
+export async function GET(request: Request, props: { params: Promise<{ provider: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

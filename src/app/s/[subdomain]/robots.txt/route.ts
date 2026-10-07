@@ -25,7 +25,8 @@ export const revalidate = 0;
  * owners ask about, and because publishing one that is WRONG later is
  * harder than publishing the right one now.
  */
-export async function GET(request: Request, { params }: { params: { subdomain: string } }) {
+export async function GET(request: Request, props: { params: Promise<{ subdomain: string }> }) {
+  const params = await props.params;
   try {
     if (!publicRequestAllowed(request)) {
       return new Response("Too many requests.", {

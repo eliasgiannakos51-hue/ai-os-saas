@@ -7,11 +7,11 @@
 // Team to /dashboard/settings. Every dashboard page renders under
 // app/dashboard/loading.tsx, so such a redirect reaches the browser as a
 // client-side `navigate` racing the router's prefetches, which is where
-// React 18's #310 comes from. Moving Home's decision into middleware.ts
+// React 18's #310 comes from. Moving Home's decision into proxy.ts
 // took it from 3-5 crashes in 300 loads to 0, with Team, left alone as
 // the control, still at 4.
 //
-// So: the decisions live in src/lib/nav/early-redirects.ts, middleware.ts
+// So: the decisions live in src/lib/nav/early-redirects.ts, proxy.ts
 // makes them, and the pages repeat them through the same functions. And
 // every OTHER redirect a dashboard page makes is listed below with the
 // reason it cannot cause the crash, so a new one has to be argued for.
@@ -60,7 +60,7 @@ check(`a plan owner WITH team collaboration stays (${withTeams.join(", ")})`, wi
 check(`a plan owner WITHOUT it is sent to Settings (${withoutTeams.join(", ")})`, withoutTeams.length > 0 && withoutTeams.every((slug) => teamRedirectTarget({ isAdmin: false, userMetadata: { ...owner, subscription_tier: slug }, setupParam: null }) === "/dashboard/settings"));
 
 console.log("\n== 2. middleware makes them, the pages repeat them ==");
-const MW = stripComments(readFileSync("src/middleware.ts", "utf8"));
+const MW = stripComments(readFileSync("src/proxy.ts", "utf8"));
 const authAt = MW.indexOf("if (user && isAuthRoute)");
 const earlyAt = MW.indexOf("if (user && isDashboardRoute)");
 check("middleware has the dashboard-redirect block, before the auth-route one", earlyAt > 0 && earlyAt < authAt);

@@ -232,7 +232,7 @@
       "missionControl": "设定目标，AI 拆成步骤。",
       "documents": "你自己撰写的自由笔记和文档。",
       "websites": "记录你拥有的网站——名称、网址、状态。不生成。",
-      "agents": "规划你想要的智能体。这是记录，不是运行时。",
+      "agents": "按计划搜索网络并通过电子邮件把结果发给你的代理。",
       "finance": "记录收入和支出。",
       "sales": "线索、触达和后续动作。",
       "content": "内容创意、文案和推文串。",
@@ -271,7 +271,7 @@
       "affiliate": "你的推广链接、已赚金额，以及如何收款。",
       "formSubmissions": "访客通过已发布网站上的表单提交的全部内容",
       "businessHealth": "MRR、毛利、流失与现金。仅限所有者。",
-      "mine": "你创建的全部内容，最新在前，并有仅收藏标签页",
+      "mine": "你记录的条目，最新在前，并有仅收藏标签页",
       "records": "所有记录集中在一处——按类型筛选，不必在菜单里找",
       "library": "收藏、最近和搜索 —— 你的东西都在这里",
       "newEntry": "随便写点什么 —— 它会自己归位",
@@ -337,16 +337,16 @@
     "contactSales": "联系销售",
     "getPlan": "选择 {plan}",
     "teamBannerTitle": "和团队一起使用？",
-    "teamBannerBody": "邀请队友直接在你的工作区中协作——每位成员都能获得你所在方案等级的完整权限，而不是受限的访客视图。在 Professional 方案中，可按 +{price}/成员/月 添加成员，按席位按月计费。Ultimate 和 Enterprise 方案包含无限团队席位，不收取额外费用，因此你的整个团队都能免费加入。你可以随时在「设置」的「团队」页面管理邀请和移除访问权限。",
+    "teamBannerBody": "把你的方案给团队成员：每位成员登录自己的账户，获得你方案的等级，而不是受限的访客视图。账户之间暂不共享工作——每个人保留自己的内容。在 Professional 方案中，每增加一位成员需 +{price}/成员/月，按席位每月计费。Ultimate 和 Enterprise 包含无限团队席位，无需额外费用。可随时在设置中的团队页面管理邀请和移除访问权限。",
     "comparePlans": "对比方案",
     "feature": "功能",
     "backToHome": "← 返回 Ionexa AI",
     "rows": {
       "creditsPerMonth": "每月额度",
-      "aiAgents": "AI 智能体",
-      "websiteBuilder": "网站与自动化构建器",
+      "aiAgents": "定时网络搜索代理",
+      "websiteBuilder": "Website Builder",
       "aiMemory": "AI 记忆",
-      "teamCollaboration": "团队协作",
+      "teamCollaboration": "成员获得你的方案",
       "teamSeatsAddOn": "团队席位",
       "freeChatMessages": "每月免费聊天消息",
       "deepResearch": "每月深度研究次数",
@@ -365,7 +365,7 @@
       "projects": "项目",
       "missionControl": "目标与计划",
       "helpCentre": "帮助中心",
-      "createStudio": "创建任何东西",
+      "createStudio": "描述一下，它会打开合适的工具",
       "voiceMinutes": "语音分钟数 / 月",
       "chatMemory": "对话记住的信息",
       "chatPins": "置顶的对话",
@@ -391,10 +391,10 @@
     },
     "businessTitle": "商业版",
     "businessSubtitle": "为共同打造的团队而生",
-    "businessExplanation": "选择 Professional 或 Ultimate 作为你的基础方案 — 两者都包含团队协作。然后邀请团队成员：每位成员都可获得与你方案同等级别的完整访问权限，Professional 方案每位成员每月 +{price}，Ultimate 方案则免费包含。",
-    "businessCardDescription": "选择任意方案作为团队的基础方案,然后以每位成员 +{price}/月 的价格邀请成员 — 每个人都能获得与您方案同等级别的完整访问权限。非常适合共同协作的团队。",
+    "businessExplanation": "选择 Professional 或 Ultimate 作为基础方案——两者都可以添加团队成员。每位成员在自己的账户中获得你方案的等级，Professional 为 +{price}/成员/月，Ultimate 免费包含。账户之间暂不共享工作。",
+    "businessCardDescription": "以 Professional 或 Ultimate 作为团队的基础方案，然后以每人 +{price}/月邀请成员——每个人都在自己的账户中获得你方案的等级。",
     "businessFeatureBase": "选择 Professional 或 Ultimate 作为基础方案",
-    "businessFeatureFullAccess": "每位成员都能获得与您方案同等级别的完整访问权限",
+    "businessFeatureFullAccess": "每位成员在自己的账户中获得你方案的等级",
     "businessFeatureFreeOnUltimate": "Ultimate 方案免费包含团队席位",
     "businessFeatureManage": "随时在团队设置中管理席位",
     "setUpTeam": "设置团队",
@@ -402,11 +402,11 @@
       "basicAiChat": "基础 AI 聊天",
       "creditsPerMonth": "{count} 积分/月",
       "aiMemory": "AI 记忆",
-      "websiteAutomationBuilderAccess": "网站与自动化构建器访问权限",
+      "websiteAutomationBuilderAccess": "Website Builder，以及每天运行一次的自动化",
       "everythingInStarter": "包含 Starter 的全部功能",
-      "upTo100AiAgents": "最多 100 个 AI 智能体",
+      "upTo100AiAgents": "最多 100 个定时网络搜索代理",
       "everythingInGrowth": "包含 Growth 的全部功能",
-      "teamCollaboration": "团队协作",
+      "teamCollaboration": "团队席位：成员获得你的方案",
       "everythingInProfessional": "包含 Professional 的全部功能",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "包含无限团队席位——不按成员收费",
       "extendedChatMemoryRetention100Vs20RecentFact": "扩展的聊天记忆保留（100 条对比 20 条近期信息）",
@@ -414,10 +414,10 @@
       "everythingInUltimate": "包含 Ultimate 的全部功能",
       "unlimitedMembers": "无限成员",
       "customCredits": "定制积分",
-      "upTo2AiAgents": "最多 2 个 AI 智能体",
-      "upTo5AiAgents": "最多 5 个 AI 智能体",
-      "upTo15AiAgentsTeams": "最多 15 个 AI 智能体与团队",
-      "upTo50AiAgents": "最多 50 个 AI 智能体"
+      "upTo2AiAgents": "最多 2 个定时网络搜索代理",
+      "upTo5AiAgents": "最多 5 个定时网络搜索代理",
+      "upTo15AiAgentsTeams": "最多 15 个定时网络搜索代理",
+      "upTo50AiAgents": "最多 50 个定时网络搜索代理"
     },
     "values": {
       "unlimited": "无限",
@@ -432,7 +432,7 @@
     },
     "seatNote": {
       "included": "包含无限团队席位 — 无需按成员付费",
-      "perMember": "+ 每位团队成员每月 {currency}{price} — 每位成员均可获得您所在套餐等级的完整访问权限"
+      "perMember": "+ 每位团队成员每月 {currency}{price} — 每位成员在自己的账户中获得您方案的等级"
     },
     "metaDescription": "Ionexa AI 价格 — Free、Starter、Growth、Professional、Ultimate 和 Enterprise 方案。",
     "billingMonthly": "按月",
@@ -450,7 +450,8 @@
       "limits": "限额",
       "support": "支持"
     },
-    "comparisonRowCount": "对比的功能项：{count}"
+    "comparisonRowCount": "对比的功能项：{count}",
+    "paymentPending": "此项变更的付款未完成，因此你的套餐没有变化。"
   },
   "roadmap": {
     "title": "路线图",
@@ -463,12 +464,12 @@
     },
     "items": {
       "modules": {
-        "title": "13 个业务模块",
-        "description": "创意、竞争对手、调研、财务、学习、交易、决策、产品、内容、销售/CRM、反馈、数据统计和自动化笔记。"
+        "title": "13 个业务记录列表",
+        "description": "在「我的记录」中用 13 个列表保存你自己的记录：创意、竞争对手、调研、财务、学习、交易、决策、产品、内容、销售/CRM、反馈、数据统计和自动化笔记。"
       },
       "createAnything": {
-        "title": "创建任何内容",
-        "description": "用自然语言描述任何内容，AI 会自动将其归档到正确的模块。"
+        "title": "描述一次即可",
+        "description": "用简单文字描述你的需要：它会带着你的描述打开合适的工具，或把笔记归入正确的模块。"
       },
       "chat": {
         "title": "Ionexa 对话",
@@ -480,23 +481,23 @@
       },
       "team": {
         "title": "团队协作",
-        "description": "邀请团队成员，并让他们获得你所在方案等级的完整权限。"
+        "description": "邀请团队成员：每个人在自己的账户中获得你方案的等级。共享工作尚未构建。"
       },
       "agentBuilder": {
         "title": "AI 智能体构建器",
-        "description": "描述一个目标，即可获得一个可自主执行该目标的智能体。"
+        "description": "描述一个目标，即可获得一个按你设定的时间在网上搜索并把结果发给你的智能体。"
       },
       "websiteBuilder": {
         "title": "网站构建器",
         "description": "根据单条提示词由 AI 生成网站。"
       },
       "automationBuilder": {
-        "title": "真正的自动化构建器",
-        "description": "真实可运行的工作流自动化——而不仅仅是记录下来的想法。"
+        "title": "自动化",
+        "description": "用一句话描述任务：它每天运行一次并保存结果。多步骤和条件尚未提供。"
       },
       "aiMemory": {
         "title": "AI 记忆",
-        "description": "跨项目的上下文与记忆，让 AI 记住重要信息。"
+        "description": "聊天会记住你告诉它的关于你和你业务的信息，网站、演示文稿和帖子工具都会使用。你可以查看并删除每一条。"
       },
       "mobileApps": {
         "title": "移动端与桌面应用",
@@ -520,7 +521,7 @@
       },
       "coding": {
         "title": "AI 编程助手",
-        "description": "生成完整应用，而不只是代码片段。"
+        "description": "根据描述编写代码，或解释、排查、转换你粘贴的代码并为其编写测试。它不会运行代码，也不会打开代码仓库。"
       },
       "dataAnalysis": {
         "title": "AI 数据分析",
@@ -594,7 +595,8 @@
       "resetSuccess": "密码已更新——请使用新密码登录。",
       "failed": "无法登录。请检查邮箱和密码，如不确定可重置密码。",
       "oauthFailed": "该登录未完成。请重试，或在下方使用邮箱和密码登录。",
-      "sharedSignInFirst": "登录后即可保存你分享的内容。"
+      "sharedSignInFirst": "登录后即可保存你分享的内容。",
+      "emailNotConfirmed": "请先确认你的邮箱。我们刚刚向你发送了新链接。"
     },
     "signup": {
       "chooseYourPlan": "选择你的方案",
@@ -622,7 +624,9 @@
       "mostPopular": "最受欢迎",
       "mustAgreeToTerms": "您必须同意服务条款和隐私政策才能创建账户。",
       "passwordRequirementsNotMet": "请选择满足以上所有要求的密码。",
-      "failed": "无法创建账户。请检查填写的信息后重试 — 未向你收费。"
+      "failed": "无法创建账户。请检查填写的信息后重试 — 未向你收费。",
+      "checkEmailTitle": "查看你的邮箱",
+      "checkEmailBody": "我们已向 {email} 发送了一个链接。打开它以确认地址并开始使用你的账户。"
     },
     "forgotPassword": {
       "title": "重置密码",
@@ -662,7 +666,18 @@
       "cancel": "取消并返回",
       "confirmFailed": "无法完成删除。你的账户仍然存在 — 请重新点击链接，或联系客服。"
     },
-    "generateStrongPassword": "生成高强度密码"
+    "generateStrongPassword": "生成高强度密码",
+    "verifyEmail": {
+      "title": "确认你的邮箱",
+      "body": "我们已向你的邮箱发送了一个链接。打开它即可开始使用你的账户。",
+      "linkInvalid": "该链接已过期或已被使用。请在下方重新获取。",
+      "resend": "发送新链接",
+      "sending": "发送中…",
+      "sent": "新链接已发送。请查看收件箱和垃圾邮件。",
+      "failed": "邮件发送失败。请几分钟后重试。",
+      "rateLimited": "过去一小时内发送的链接过多。请稍后再试。",
+      "signedOut": "使用邮箱和密码登录，系统会发送新链接。"
+    }
   },
   "settings": {
     "title": "设置",
@@ -978,7 +993,7 @@
         "testSent": "已连接——请查收我们的测试消息。",
         "testFailed": "我们无法向那里投递测试消息，因此什么都没有保存。",
         "telegram": {
-          "help": "给我们的机器人发条消息，然后粘贴它回复的 chat ID。",
+          "help": "在 Telegram 中打开 @{bot} 并点击“开始”，以便它可以给你发消息。然后给 @userinfobot 发送任意消息（它会回复你的 chat ID），并把该号码粘贴到这里。",
           "placeholder": "会话 ID"
         },
         "discord": {
@@ -1587,7 +1602,6 @@
       "statusCompleted": "已就绪",
       "statusFlagged": "已标记",
       "flaggedTitle": "已被我们的安全审核标记",
-      "regenerateFree": "重新生成（免费）",
       "editUnavailable": "网站生成完成后即可提出修改要求。",
       "design": {
         "title": "设计",
@@ -1635,7 +1649,6 @@
         "photoSourceNeedsUpload": "请在上方添加照片，否则将使用图库照片。"
       },
       "imageIntro": "你的标志、产品照片、店内照片——想放到页面上的，或想让它决定风格的。",
-      "regenerateAlreadyUsed": "您已使用过此站点的免费重新生成。请用其他描述创建新站点。",
       "regenerateNoBrief": "此站点创建于我们开始保存原始描述之前，因此无法自动重新生成。请用相同描述创建新站点。",
       "empty": {
         "title": "描述这个网站，拿到这个网站",
@@ -1675,7 +1688,9 @@
           "quota": "有 {count} 张图片无法添加：图片库暂时拒绝了更多请求。请一小时后重试，或添加你自己的图片。",
           "noMatch": "请求了 {count} 张图片，但没有匹配的照片。我们没有放入无关的图片——换一种方式描述主题通常会有帮助。"
         }
-      }
+      },
+      "regeneratePaid": "重新生成 · 约 {count} 积分",
+      "regenerateNoCredits": "积分不足,无法再次重新生成:大约需要 {needed},你有 {available}。未开始任何操作。"
     },
     "marketplace": {
       "title": "现成的助手",
@@ -2113,7 +2128,7 @@
       "reasonBadEdges": "不能以连字符开头或结尾。",
       "reasonReserved": "该网址已被保留，请另选一个。",
       "reasonTaken": "该网址已被占用，请换一个。",
-      "disabledFlagged": "此站点被安全审核暂留，因此无法上线。请查看下方详情 — 您可以免费重新生成一次。",
+      "disabledFlagged": "此站点被安全审核暂留，因此无法上线。请查看下方详情 — 您可以重新生成，按钮上会显示所需费用。",
       "disabledFailed": "此站点尚未生成完成，暂无内容可发布。",
       "disabledGenerating": "正在生成。完成后即可发布。",
       "empty": {
@@ -2124,7 +2139,7 @@
     "integrations": {
       "title": "集成",
       "emptyTitle": "还没有连接任何账户",
-      "emptyBody": "连接一个账户，AI 就能从中读取——邮件、日历、文件——而不是只知道你手工输入的内容。",
+      "emptyBody": "连接一个账户，AI 就能从中读取——邮件、文件——而不是只知道你手工输入的内容。",
       "description": "连接你已经在用的工具，让 AI 处理你真实的数据。",
       "privacyNotice": "除非另有说明，连接均为只读。令牌使用不存放于我们数据库中的密钥加密，绝不会出现在日志里；断开连接会在服务商处撤销授权，并删除我们保存的一切，包括读取记录。",
       "notConfigured": "此部署尚未配置集成，因此无法连接。",
@@ -3558,7 +3573,9 @@
     "costs": "成本",
     "acceptableUseDescription": "使用 Ionexa AI 时哪些行为允许、哪些不允许。",
     "aiTransparencyDescription": "Ionexa 使用哪些 AI 模型、它们做什么，以及它们能看到哪些数据。",
-    "contactDescription": "与 Ionexa AI 团队取得联系。"
+    "contactDescription": "与 Ionexa AI 团队取得联系。",
+    "verifyEmail": "确认邮箱",
+    "verifyEmailDescription": "确认你的 Ionexa AI 账户邮箱地址。"
   },
   "errors": {
     "retry": "重试",
@@ -4145,7 +4162,7 @@
   },
   "routing": {
     "title": "用的是哪个 AI",
-    "description": "过去 30 天内哪个模型处理了哪些请求、花费多少，以及路由节省了多少。",
+    "description": "过去 30 天中每个请求由哪个模型处理，以及花费多少。路由器尚未选择模型，因此此表为空；它本会选择的模型显示在“成本”页面。",
     "empty": "尚未记录任何路由决策。当请求开始经过路由器时，此表会自动填充——它显示的不是零，而是空。",
     "decisions": "决策数",
     "charged": "向客户收取",
@@ -4158,7 +4175,7 @@
     "overrideSaving": "覆盖节省",
     "learnedTitle": "路由器学到了什么",
     "learnedIntro": "30 天内按能力与模型统计的成功率。低于 {rate}% 的模型不再被该能力选用——但需至少 {samples} 次运行，因为两次中失败两次不构成证据。",
-    "learnedEmpty": "目前还没有确定性结论。在某个能力与模型组合累积足够运行次数之前，路由将保持其静态分级映射。",
+    "learnedEmpty": "尚无确定结论。这里的内容不会改变所用模型：每个功能都使用其代码中写定的模型。",
     "runs": "{samples} 次运行中 {rate}%",
     "routedUp": "已上调",
     "notEnough": "样本仍不足"
@@ -4293,7 +4310,7 @@
     "pruneConfirm": "删除 {count} 条只说过一次、六个月没再出现的记录？重复出现的都会保留。",
     "pruned": "已移除 {count} 条。",
     "surfacesTitle": "哪些功能会记住",
-    "surfacesHelp": "关闭后，该功能既不读取已记住的内容，也不再添加。已保存的内容不会被删除。",
+    "surfacesHelp": "开启时，功能会读取聊天记住的关于你的信息；只有聊天会添加内容。关闭时两者都不做。已保存的内容不会被删除。",
     "surfaceOn": "会记住",
     "surfaceOff": "已关闭",
     "surfaceSaveFailed": "这个开关没能保存。",
@@ -4454,6 +4471,15 @@
         "trafficUp": "网站访问量上升了 {percent}%",
         "trafficDown": "网站访问量下降了 {percent}%"
       }
+    },
+    "confirm": {
+      "subject": "确认你的 Ionexa AI 邮箱",
+      "preheader": "点击一下，你的账户即可使用。",
+      "label": "确认邮箱",
+      "title": "确认是你本人",
+      "body": "点击按钮确认此地址并打开你的 Ionexa AI 账户。",
+      "button": "确认邮箱",
+      "ignore": "如果你没有创建此账户，请忽略此邮件：不点击链接就不会有任何变化。"
     }
   },
   "routerReport": {

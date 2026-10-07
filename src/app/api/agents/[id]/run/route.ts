@@ -20,14 +20,15 @@ export const maxDuration = 300; // @function-limit 300
 // agent's schedule or its failure streak — a user pressing "Run now" three
 // times while tweaking a task must never be able to auto-disable their own
 // agent, and must never shift when it next fires on its own.
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const agentId = params.id;
     if (!agentId) {
       return NextResponse.json({ ok: false, error: "Missing agent id." }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

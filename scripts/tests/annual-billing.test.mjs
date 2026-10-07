@@ -307,9 +307,44 @@ check(
   // one in the file and blanked everything between.
   /scope: "subscription_change"/.test(checkoutSrc) && /idempotencyKey: .sub_update:/.test(checkoutSrc)
 );
+// NO PLAN WITHOUT PAYMENT (ΑΣ-4.3, 2026-10-05). The update used to be one
+// object for both directions, `proration_behavior: isUpgrade ? … : …`, and
+// Stripe's default payment behaviour applies the new price at once and
+// leaves the invoice to be paid later — while the webhook reads the plan
+// from that price. The two directions are two objects now, and the
+// upgrade's carries the pending update.
+const updateStart = checkoutSrc.indexOf("const subscriptionUpdate = isUpgrade");
+const updateSplit = checkoutSrc.indexOf("\n            : {\n", updateStart);
+const updateEnd = checkoutSrc.indexOf("};", updateSplit);
+const upgradeUpdate = updateStart >= 0 && updateSplit > updateStart ? checkoutSrc.slice(updateStart, updateSplit) : "";
+const downgradeUpdate = updateSplit > 0 && updateEnd > updateSplit ? checkoutSrc.slice(updateSplit, updateEnd) : "";
+check("the upgrade and the downgrade are two update objects", upgradeUpdate !== "" && downgradeUpdate !== "");
 check(
-  "…with proration",
-  /proration_behavior: isUpgrade \? "always_invoice" : "create_prorations"/.test(checkoutSrc)
+  "…with proration: the upgrade invoices now, the downgrade credits the next invoice",
+  /proration_behavior: "always_invoice"/.test(upgradeUpdate) && /proration_behavior: "create_prorations"/.test(downgradeUpdate)
+);
+check(
+  "an upgrade applies only once its invoice is paid (pending update)",
+  /payment_behavior: "pending_if_incomplete"/.test(upgradeUpdate),
+  "without it the subscription takes the bigger price before anyone has paid for it"
+);
+check(
+  "…and the downgrade, which costs nothing now, applies at once",
+  !/pending_if_incomplete/.test(downgradeUpdate) && !/always_invoice/.test(downgradeUpdate)
+);
+check(
+  "an unpaid upgrade sends the customer to pay, and reports the plan unchanged",
+  /if \(updated\.pending_update\)/.test(checkoutSrc) && /hosted_invoice_url/.test(checkoutSrc) && /pendingPayment: true/.test(checkoutSrc)
+);
+check(
+  "…and a refused one is said in the reader's language, not as English from the server",
+  /data\.code === "payment_pending" \? t\("paymentPending"\)/.test(readFileSync("src/components/billing/subscribe-button.tsx", "utf8")) &&
+    /code: "payment_pending" \}/.test(checkoutSrc)
+);
+check(
+  "…and that check comes before the success answer",
+  checkoutSrc.indexOf("if (updated.pending_update)") > 0 &&
+    checkoutSrc.indexOf("if (updated.pending_update)") < checkoutSrc.indexOf("return NextResponse.json({ ok: true, updated: true, redirectPath: successPath });")
 );
 check(
   "…charging the difference now on an upgrade, crediting the next invoice on a downgrade",

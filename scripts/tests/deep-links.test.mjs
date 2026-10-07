@@ -120,10 +120,11 @@ function paramsReadIn(src) {
   }
   // The server-page shape: the TYPE of the searchParams prop is the
   // declaration of which parameters the page understands.
-  for (const m of stripped.matchAll(/searchParams\s*:\s*\{([^}]*)\}/g)) {
+  // Since Next 15 the prop is a promise: `searchParams: Promise<{ … }>`.
+  for (const m of stripped.matchAll(/searchParams\s*:\s*(?:Promise<\s*)?\{([^}]*)\}/g)) {
     for (const k of m[1].matchAll(/([a-zA-Z_][a-zA-Z0-9_]*)\s*\??\s*:/g)) found.add(k[1]);
   }
-  for (const m of stripped.matchAll(/searchParams\.([a-zA-Z_][a-zA-Z0-9_]*)\b/g)) {
+  for (const m of stripped.matchAll(/searchParams\??\.([a-zA-Z_][a-zA-Z0-9_]*)\b/g)) {
     found.add(m[1]);
   }
   return found;
@@ -165,6 +166,14 @@ check(
 check(
   "...and a server page's property access",
   paramsReadIn('const view = searchParams.view === "fav" ? "fav" : "all";').has("view")
+);
+check(
+  "...the Next 15+ promise TYPE of the same prop",
+  paramsReadIn("searchParams: Promise<{ setup?: string }>;").has("setup")
+);
+check(
+  "...and an optional-chained access to it",
+  paramsReadIn('const done = searchParams?.setup === "success";').has("setup")
 );
 check(
   "a read inside a comment is not a read",
@@ -245,7 +254,9 @@ for (const l of favLinks) {
 // `/api/search?${key}`, so no literal `q=` is in the tree any more and
 // this file cannot check that /api/search reads its q parameter. That
 // check now lives only in the palette's own gates.
-const DEEP_LINK_FLOOR = 53;
+// 53 -> 54 (2026-10-05): /verify-email, linked from the middleware and the
+// confirmation flow (lib/auth/confirm-email.ts).
+const DEEP_LINK_FLOOR = 54;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

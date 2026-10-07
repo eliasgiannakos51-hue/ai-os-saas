@@ -42,14 +42,15 @@ export const fetchCache = "force-no-store";
  * notFound() rather than a redirect or a "not allowed" page: a customer
  * should not learn that a page showing every account's spend exists.
  */
-export default async function CostsPage({
-  searchParams,
-}: {
-  searchParams: { days?: string };
-}) {
+export default async function CostsPage(
+  props: {
+    searchParams: Promise<{ days?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const locale = await getLocale();
   const routerPeriod = readRouterPeriod(searchParams.days);
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (!isAdminEmail(user.email)) notFound();

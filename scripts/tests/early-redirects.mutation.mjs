@@ -15,7 +15,7 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/early-redirects.test.mjs";
 const LIB = "src/lib/nav/early-redirects.ts";
-const MW = "src/middleware.ts";
+const MW = "src/proxy.ts";
 const OVERVIEW = "src/app/dashboard/overview/page.tsx";
 const TARGETS = [GATE, LIB, MW, OVERVIEW];
 

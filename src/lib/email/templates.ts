@@ -24,7 +24,7 @@ const MONO_STACK = "'Courier New', Courier, monospace";
 // reasons, all of which this file's URL choice now avoids:
 //
 //   1. /email-logo has no file extension, so it did NOT match
-//      src/middleware.ts's matcher exclusion (which only skips paths
+//      src/proxy.ts's matcher exclusion (which only skips paths
 //      ending .svg/.png/.jpg/...). Every image fetch from every inbox
 //      therefore ran the auth middleware, including a Supabase
 //      getUser() round trip, before the image was produced.
@@ -167,6 +167,44 @@ export function welcomeEmailHtml({ email, locale = "en" }: { email: string; loca
 
   return layout({
     preheader: escapeHtml(t("email.welcome.preheader")),
+    bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
+  });
+}
+
+/**
+ * The address check every new account goes through (lib/auth/confirm-email.ts).
+ * The link is the whole message: one button, and the plain URL under it
+ * for a mail client that strips buttons.
+ */
+export function confirmEmailHtml({
+  email,
+  confirmUrl,
+  locale = "en",
+}: {
+  email: string;
+  confirmUrl: string;
+  locale?: string;
+}): string {
+  const t = emailTranslator(locale);
+  const href = escapeHtml(confirmUrl);
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.confirm.label"))} · ${escapeHtml(email)}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">${escapeHtml(t("email.confirm.title"))}</h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      ${escapeHtml(t("email.confirm.body"))}
+    </p>
+    <p style="margin:0 0 20px;">
+      <a href="${href}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        ${escapeHtml(t("email.confirm.button"))}
+      </a>
+    </p>
+    <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:0 0 12px; word-break:break-all;">${href}</p>
+    <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:0;">${escapeHtml(t("email.confirm.ignore"))}</p>
+  `;
+  return layout({
+    preheader: escapeHtml(t("email.confirm.preheader")),
     bodyHtml,
     dir: isRtlLocale(locale) ? "rtl" : "ltr",
     footer: escapeHtml(t("email.footer")),

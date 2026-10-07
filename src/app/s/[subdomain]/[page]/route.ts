@@ -54,7 +54,11 @@ export const revalidate = 0;
 //
 // Path-based (/s/acme) until there is a wildcard domain to serve
 // acme.ionexa.ai from — see publishedSiteUrl().
-export async function GET(request: Request, { params }: { params: { subdomain: string; page: string } }) {
+export async function GET(
+  request: Request,
+  props: { params: Promise<{ subdomain: string; page: string }> }
+) {
+  const params = await props.params;
   try {
     if (!publicRequestAllowed(request)) {
       return new Response("Too many requests.", {

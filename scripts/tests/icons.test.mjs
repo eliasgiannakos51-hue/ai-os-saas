@@ -102,7 +102,7 @@ for (const f of ["src/app/icon.tsx", "src/app/opengraph-image.tsx"]) {
 console.log("\n== 3. every icon path skips the auth middleware ==");
 // Reproduce the real matcher against the real paths, rather than trusting
 // that it mentions the right extensions.
-const middleware = readFileSync("src/middleware.ts", "utf8");
+const middleware = readFileSync("src/proxy.ts", "utf8");
 const matcher = middleware.match(/matcher:\s*\[([\s\S]*?)\]/)?.[1] ?? "";
 const negative = matcher.match(/"\/\(\(\?!([\s\S]*?)\)\.\*\)"/)?.[1];
 checkTrue("the matcher's exclusion list was parsed", Boolean(negative));

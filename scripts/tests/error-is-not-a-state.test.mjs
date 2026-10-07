@@ -120,7 +120,7 @@ console.log("\n== the page that went down reads its error ==");
   const page = readFileSync("src/app/dashboard/overview/page.tsx", "utf8");
   check("overview reads the user_onboarding error", /error:\s*onboardingError/.test(page));
   // The rule moved into lib/nav/early-redirects.ts on 2026-10-04, shared
-  // with middleware.ts (issue #61). So the page must hand it the error,
+  // with proxy.ts (issue #61). So the page must hand it the error,
   // and the function must refuse to redirect on one — RUN, not read.
   const { onboardingRedirectTarget } = await loadTsLinked("src/lib/nav/early-redirects.ts");
   check(

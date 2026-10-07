@@ -9,6 +9,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import {
   ADDONS,
   ADDON_SLUGS,
+  addonOffered,
   addonAvailability,
   addonIsActive,
   checkPurchase,
@@ -35,7 +36,7 @@ export const dynamic = "force-dynamic";
  * click would be keeping their money and their agents.
  */
 export async function GET() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -45,7 +46,11 @@ export async function GET() {
   const now = new Date();
 
   return NextResponse.json({
-    addons: ADDON_SLUGS.map((slug) => {
+    // A withdrawn add-on (lib/billing/addons.ts) is listed only to an
+    // account that holds one, so it can still be cancelled.
+    addons: ADDON_SLUGS.filter(
+      (slug) => addonOffered(slug) || held.some((h) => h.slug === slug && addonIsActive(h, now))
+    ).map((slug) => {
       const spec = ADDONS[slug];
       const availability = addonAvailability(slug);
       const mine = held.filter((h) => h.slug === slug && addonIsActive(h, now));
@@ -59,14 +64,14 @@ export async function GET() {
         // it is the NAME of a variable, never its value.
         notConfiguredVar: availability.available ? null : availability.envVar,
         owned: mine.reduce((sum, h) => sum + (spec.stackable ? h.quantity : 1), 0),
-        canBuy: availability.available && checkPurchase({ slug, held, now }).ok,
+        canBuy: addonOffered(slug) && availability.available && checkPurchase({ slug, held, now }).ok,
       };
     }),
   });
 }
 
 export async function POST(request: Request) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -85,6 +90,8 @@ export async function POST(request: Request) {
     if (!isAddonSlug(body.slug)) return NextResponse.json({ error: "unknown_addon" }, { status: 400 });
     const slug = body.slug;
     const spec = ADDONS[slug];
+    // Withdrawn from sale (NEEDS 17): refused here, not only hidden.
+    if (!addonOffered(slug)) return NextResponse.json({ error: "withdrawn" }, { status: 410 });
 
     const availability = addonAvailability(slug);
     if (!availability.available) {
@@ -151,7 +158,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -51,8 +51,15 @@ const src = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 // invocation may simply never perform — the failure the residual wait
 // exists to prevent — and it would leave this file's shape assertions
 // entirely happy.
+// 2026-10-05 (NEEDS 22): the first mail is the confirmation link, and
+// nobody is signed in at signup any more — the session opens when the
+// link is followed (src/app/auth/confirm/route.ts).
 const BACKGROUND_JOBS = [
-  { name: "the welcome email", promise: "welcomeEmail", startedBy: "const welcomeEmail = sendWelcomeEmail(email, null, signupLocale)" },
+  {
+    name: "the confirmation email",
+    promise: "confirmEmail",
+    startedBy: "const confirmEmail = (confirmUrl ? sendConfirmEmail(email, confirmUrl, signupLocale)",
+  },
   {
     name: "the affiliate attribution",
     promise: "referralAttribution",
@@ -62,7 +69,6 @@ const BACKGROUND_JOBS = [
 
 console.log("== 1. the background work overlaps the critical path, instead of following it ==");
 const grantAt = src.indexOf("await grantCredits(");
-const signInAt = src.indexOf("supabase.auth.signInWithPassword(");
 const raceMatch = /await Promise\.race\(\[[\s\S]*?\n {4}\]\);/.exec(src);
 const awaitedAt = raceMatch ? raceMatch.index : -1;
 const raceBlock = raceMatch?.[0] ?? "";
@@ -70,8 +76,7 @@ for (const job of BACKGROUND_JOBS) {
   const startedAt = src.indexOf(job.startedBy);
   check(`${job.name} is started`, startedAt > 0);
   check(`  BEFORE the credit grant`, startedAt > 0 && grantAt > 0 && startedAt < grantAt);
-  check(`  and before the sign-in`, startedAt > 0 && signInAt > 0 && startedAt < signInAt);
-  check(`  but only awaited after both`, awaitedAt > grantAt && awaitedAt > signInAt);
+  check(`  but only awaited after it`, awaitedAt > grantAt);
   check(`  and it IS awaited — inside the residual race`, new RegExp(`\\b${job.promise}\\b`).test(raceBlock));
 }
 // Started-and-not-awaited-for-several-statements is exactly the shape that
@@ -79,7 +84,10 @@ for (const job of BACKGROUND_JOBS) {
 // The argument list gained the signup locale when the welcome email
 // started being sent in the account's own language; the property this
 // asserts is the .catch, not the arity.
-check("the welcome email cannot reject unhandled", /sendWelcomeEmail\([^)]*\)\.catch\(/.test(src));
+check("the confirmation email cannot reject unhandled", /sendConfirmEmail\([^)]*\)[^;]*?\)\.catch\(/.test(src));
+check("the account is created unconfirmed", /email_confirm: false/.test(src) && !/email_confirm: true/.test(src));
+check("…and nobody is signed in at signup", !/signInWithPassword\(/.test(src));
+check("…and the client is told to check the inbox", /confirmEmail: true/.test(src));
 check("nor can the attribution write", /attributeReferral\(\{[\s\S]*?\}\)\.catch\(/.test(src));
 
 console.log("\n== 2. the residual wait is a tail, not the whole send ==");
@@ -105,7 +113,7 @@ check(
 );
 
 console.log("\n== 3. every stage is still measurable from the deployment ==");
-for (const stage of ["rate_limit", "create_user", "grant_credits", "welcome_email", "sign_in"]) {
+for (const stage of ["rate_limit", "create_user", "confirm_link", "grant_credits", "confirm_email"]) {
   check(`${stage} is marked`, new RegExp(`mark\\("${stage}"\\)`).test(src));
 }
 check("the timings are printed behind the diagnostic flag", /diagLog\(`\[signup\] stage timings/.test(src));
@@ -125,7 +133,9 @@ const allowed = new Set([
   // sign-in below must land on an account whose plan is already set.
   "mergeUserMetadata",
   "grantCredits",
-  "supabase.auth.signInWithPassword",
+  // The confirmation link (2026-10-05): awaited because the mail started
+  // right after it needs the URL; it replaced the sign-in, which is gone.
+  "confirmLinkFor",
   "Promise.race",
   "cookies",
   "headers",

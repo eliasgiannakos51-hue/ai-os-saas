@@ -45,10 +45,11 @@ export const maxDuration = 300; // @function-limit 300
  * api/meetings/[id]/actions/route.ts, which requires the user to have
  * chosen.
  */
-export async function POST(_request: Request, { params }: { params: { id: string } }) {
+export async function POST(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const meetingId = params.id;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

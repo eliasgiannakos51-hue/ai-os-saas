@@ -32,10 +32,11 @@ export const maxDuration = 60; // @function-limit 60
  *
  * So the text comes out of the row, by index, every time.
  */
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const meetingId = params.id;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

@@ -138,12 +138,40 @@ const nextConfig = {
     NEXT_PUBLIC_BUILD_COMMIT_DATE: BUILD_COMMIT_DATE,
     NEXT_PUBLIC_BUILD_AT: new Date().toISOString(),
   },
+  // THE FONTS ARE DATA, NOT IMPORTS. Nothing in the code `import`s a .ttf —
+  // registerPdfFonts() reads them from disk by path — so Next's file
+  // tracing sees no reference and ships none of them. Without this entry
+  // every PDF route throws on the first request in production and works
+  // perfectly in development, which is the worst shape a deployment bug
+  // can have.
+  //
+  // AT THE TOP LEVEL since Next 15 (this was under `experimental` on 14.2).
+  // In the wrong place the key is ignored with only a build warning — the
+  // same bug as having no entry at all, wearing a green build.
+  outputFileTracingIncludes: {
+    "/api/**": ["./src/lib/pdf/fonts/*.ttf"],
+  },
+  // AND WHAT MUST NEVER GO IN. registerPdfFonts reads its files through
+  // `path.join(process.cwd(), ...)`, which Next's tracer cannot resolve
+  // statically, so it falls back to including far more of the repository
+  // than the route needs. Measured on the documents PDF route: 16.4 MB of
+  // `.git/objects`, plus 1.4 MB screenshots from agent-shots/ and
+  // files-shots/ — none of which any function reads, all of which would be
+  // uploaded on every deploy.
+  outputFileTracingExcludes: {
+    "*": [
+      "./.git/**",
+      "./agent-shots/**",
+      "./files-shots/**",
+      "./scripts/**",
+      "./supabase/**",
+      "./.next/cache/**",
+    ],
+  },
+  // src/instrumentation.ts (the environment report at startup, see
+  // lib/env-check.ts) runs by default since Next 15; the 14.2 flag is gone.
   experimental: {
-    // Enables src/instrumentation.ts, which reports the environment once
-    // at server startup (see lib/env-check.ts). Next 14 requires the flag;
-    // it becomes the default in 15.
-    instrumentationHook: true,
-    // Next 14.2's client Router Cache defaults dynamic-route entries to a
+    // The client Router Cache (Next 14.2 onwards) defaults dynamic-route entries to a
     // 30s staleTime (node_modules/next/dist/server/config-shared.js) — this
     // is SEPARATE from the server-side Data/Full Route Cache that
     // `export const dynamic = "force-dynamic"` controls. Every dashboard
@@ -159,36 +187,6 @@ const nextConfig = {
     // every dynamic-route soft navigation refetch fresh, every time.
     staleTimes: {
       dynamic: 0,
-    },
-    // THE FONTS ARE DATA, NOT IMPORTS. Nothing in the code `import`s a .ttf —
-    // registerPdfFonts() reads them from disk by path — so Next's file
-    // tracing sees no reference and ships none of them. Without this entry
-    // every PDF route throws on the first request in production and works
-    // perfectly in development, which is the worst shape a deployment bug
-    // can have.
-    //
-    // UNDER `experimental`, because this is Next 14.2. At the top level the
-    // key is silently ignored with only a build warning — which is the same
-    // bug as having no entry at all, wearing a green build.
-    outputFileTracingIncludes: {
-      "/api/**": ["./src/lib/pdf/fonts/*.ttf"],
-    },
-    // AND WHAT MUST NEVER GO IN. registerPdfFonts reads its files through
-    // `path.join(process.cwd(), ...)`, which Next's tracer cannot resolve
-    // statically, so it falls back to including far more of the repository
-    // than the route needs. Measured on the documents PDF route: 16.4 MB of
-    // `.git/objects`, plus 1.4 MB screenshots from agent-shots/ and
-    // files-shots/ — none of which any function reads, all of which would be
-    // uploaded on every deploy.
-    outputFileTracingExcludes: {
-      "*": [
-        "./.git/**",
-        "./agent-shots/**",
-        "./files-shots/**",
-        "./scripts/**",
-        "./supabase/**",
-        "./.next/cache/**",
-      ],
     },
   },
 };

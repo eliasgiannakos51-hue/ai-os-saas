@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     const q = (url.searchParams.get("q") ?? "").trim().slice(0, MAX_QUERY_LENGTH);
     if (q.length < MIN_QUERY_LENGTH) return NextResponse.json({ ok: true, results: [] });
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

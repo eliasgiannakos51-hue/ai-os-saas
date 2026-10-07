@@ -76,7 +76,7 @@ export async function POST(request: Request) {
     }
     if (!agentId) return NextResponse.json({ ok: false, error: "Missing agent." }, { status: 400 });
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -191,7 +191,7 @@ export async function DELETE(request: Request) {
     const slug = (url.searchParams.get("slug") ?? "").trim();
     if (!slug) return NextResponse.json({ ok: false, error: "Missing template." }, { status: 400 });
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

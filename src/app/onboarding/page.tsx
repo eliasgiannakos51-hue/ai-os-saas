@@ -8,6 +8,7 @@ import { logApiError } from "@/lib/log-error";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { activationAvailable } from "@/lib/import/activation";
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
+import { providerConfigured } from "@/lib/integrations/oauth";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,7 @@ export function generateMetadata(): Promise<Metadata> {
  * invitation to wander off into an empty product.
  */
 export default async function OnboardingPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },
@@ -73,7 +74,10 @@ export default async function OnboardingPage() {
           {t("privacyNotice")}
         </p>
 
-        <OnboardingFlow activationFree={await activationAvailable(user.id)} />
+        <OnboardingFlow
+          activationFree={await activationAvailable(user.id)}
+          integrationsAvailable={providerConfigured("gmail") || providerConfigured("google_drive")}
+        />
       </div>
     </main>
   );

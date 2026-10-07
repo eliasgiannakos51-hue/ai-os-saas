@@ -25,9 +25,10 @@ export const fetchCache = "force-no-store";
  * left pointing at them, counted against nobody's quota and deletable by
  * no one.
  */
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -106,9 +107,10 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
  * them. New handlers stop adding to that count; the old one is left
  * alone rather than rewritten inside an unrelated change.
  */
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

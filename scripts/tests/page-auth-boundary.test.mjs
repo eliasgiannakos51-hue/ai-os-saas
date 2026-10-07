@@ -8,7 +8,7 @@
 //     const user = await getCurrentUser();
 //     if (!user) { redirect("/login"); }
 //
-// and behind one regex in src/middleware.ts's matcher, which decides
+// and behind one regex in src/proxy.ts's matcher, which decides
 // whether the middleware runs its own getUser for a given path at all.
 //
 // Neither was read by any of the 262 gates. owner-only-access.test.mjs
@@ -124,6 +124,7 @@ const PUBLIC_ON_PURPOSE = {
   "src/app/terms/page.tsx": "a legal page that must be readable before agreeing to it.",
   "src/app/privacy/page.tsx": "the same, and linked from the footer of every public page.",
   "src/app/cookies/page.tsx": "the same, and the one a consent banner links to before any session exists.",
+  "src/app/verify-email/page.tsx": "where an account whose address is not yet proved is sent (src/proxy.ts), and where a used confirmation link lands; it shows two fixed sentences and a resend button whose route reads the session itself, so a stranger sees nothing of anybody's.",
   "src/app/acceptable-use/page.tsx": "the same: a rule nobody can read before accepting is not a rule.",
   "src/app/ai-transparency/page.tsx": "what the product does with a model, published so it can be read without an account.",
   "src/app/roadmap/page.tsx": "what is coming, linked from the public footer.",
@@ -215,7 +216,7 @@ check(
 // web with no session at all). A pattern that began excluding /dashboard
 // would remove that layer silently, and the app would still work.
 // ---------------------------------------------------------------------
-const MIDDLEWARE = "src/middleware.ts";
+const MIDDLEWARE = "src/proxy.ts";
 check("the middleware exists", existsSync(MIDDLEWARE));
 const mw = existsSync(MIDDLEWARE) ? strip(readFileSync(MIDDLEWARE, "utf8")) : "";
 check("...and resolves the user itself", RESOLVES.test(blankStrings(mw)), "the middleware no longer authenticates anything");

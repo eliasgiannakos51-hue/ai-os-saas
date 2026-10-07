@@ -23,7 +23,7 @@ const TOP_N = 3;
 // number in this sentence to match.
 export async function GET() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

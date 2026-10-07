@@ -17,13 +17,14 @@ export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.team");
 }
 
-export default async function TeamPage({
-  searchParams,
-}: {
-  searchParams: { setup?: string };
-}) {
+export default async function TeamPage(
+  props: {
+    searchParams: Promise<{ setup?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const t = await getTranslations("dashboard.team");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 
@@ -60,7 +61,7 @@ export default async function TeamPage({
   // set too, but no stripe_subscription_id of their own, so this correctly
   // excludes them.
   //
-  // middleware.ts decides this first, with the same function
+  // proxy.ts decides this first, with the same function
   // (lib/nav/early-redirects.ts): a redirect from here arrives after the
   // page began streaming, as the client-side navigation behind issue #61.
   // This is the fallback.

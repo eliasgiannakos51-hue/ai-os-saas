@@ -156,7 +156,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, destination: free.id, source: "offline" });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

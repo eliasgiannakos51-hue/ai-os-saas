@@ -1,16 +1,22 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **586 strings**. The whole product is 3526, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **589 strings**. The whole product is 3548, which is why this file exists.
 
-**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 357 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 358 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (21)
+## Tier 1 — THE SENTENCES — read these (23)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
 ### signup
+
+**`auth.signup.checkEmailBody`**
+
+> EN — We sent a link to {email}. Open it to confirm your address and start using your account.
+
+我们已向 {email} 发送了一个链接。打开它以确认地址并开始使用你的账户。
 
 **`auth.signup.failed`**
 
@@ -26,11 +32,17 @@ _On the first screens, 12 words or more. This is prose somebody wrote, and prose
 
 **`pricing.businessCardDescription`**
 
-> EN — Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.
+> EN — Start with Professional or Ultimate as your team's base, then invite members for +{price}/month each — everyone gets your plan's tier on their own account.
 
-选择任意方案作为团队的基础方案,然后以每位成员 +{price}/月 的价格邀请成员 — 每个人都能获得与您方案同等级别的完整访问权限。非常适合共同协作的团队。
+以 Professional 或 Ultimate 作为团队的基础方案，然后以每人 +{price}/月邀请成员——每个人都在自己的账户中获得你方案的等级。
 
 ### login
+
+**`auth.login.emailNotConfirmed`**
+
+> EN — Confirm your email first. We just sent a new link to your inbox.
+
+请先确认你的邮箱。我们刚刚向你发送了新链接。
 
 **`auth.login.failed`**
 
@@ -146,7 +158,7 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 描述任何内容——一个产品创意、一笔交易、一条用户反馈、一项指标——它会自动归入正确的模块。
 
-## Tier 2 — The labels — skim these (357)
+## Tier 2 — The labels — skim these (358)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -175,6 +187,12 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 > EN — change
 
 更改
+
+**`auth.signup.checkEmailTitle`**
+
+> EN — Check your email
+
+查看你的邮箱
 
 **`auth.signup.chooseYourPlan`**
 
@@ -310,9 +328,9 @@ Ultimate 方案免费包含团队席位
 
 **`pricing.businessFeatureFullAccess`**
 
-> EN — Every member gets full access at your plan's tier
+> EN — Every member gets your plan's tier on their own account
 
-每位成员都能获得与您方案同等级别的完整访问权限
+每位成员在自己的账户中获得你方案的等级
 
 **`pricing.businessFeatureManage`**
 
@@ -370,9 +388,9 @@ Ultimate 方案免费包含团队席位
 
 **`pricing.rows.aiAgents`**
 
-> EN — AI agents
+> EN — Scheduled web-research agents
 
-AI 智能体
+定时网络搜索代理
 
 **`pricing.rows.aiChat`**
 
@@ -442,9 +460,9 @@ AI 编程
 
 **`pricing.rows.createStudio`**
 
-> EN — Make anything
+> EN — Describe it, it opens the right tool
 
-创建任何东西
+描述一下，它会打开合适的工具
 
 **`pricing.rows.creditsPerMonth`**
 
@@ -592,9 +610,9 @@ AI 编程
 
 **`pricing.rows.teamCollaboration`**
 
-> EN — Team collaboration
+> EN — Members get your plan
 
-团队协作
+成员获得你的方案
 
 **`pricing.rows.teamMembers`**
 
@@ -622,9 +640,9 @@ AI 编程
 
 **`pricing.rows.websiteBuilder`**
 
-> EN — Website & Automation Builder
+> EN — Website Builder
 
-网站与自动化构建器
+Website Builder
 
 **`pricing.rows.websiteImageStorage`**
 

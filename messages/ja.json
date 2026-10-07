@@ -232,7 +232,7 @@
       "missionControl": "目標を決めると AI がステップに分解します。",
       "documents": "自分で書く自由形式のメモと文書。",
       "websites": "持っているサイトを記録 — 名前・URL・状態。生成はしません。",
-      "agents": "欲しいエージェントを計画。記録であり実行環境ではありません。",
+      "agents": "スケジュールに沿ってウェブを検索し、見つけた内容をメールで送るエージェント。",
       "finance": "収入と支出を記録。",
       "sales": "リード、アプローチ、次の一手。",
       "content": "コンテンツ案・キャプション・スレッド。",
@@ -271,7 +271,7 @@
       "affiliate": "紹介リンク、これまでの報酬、受け取り方法。",
       "formSubmissions": "公開サイトのフォームから訪問者が送った内容のすべて",
       "businessHealth": "MRR、粗利、解約、手元資金。オーナー専用。",
-      "mine": "作成したものすべてを新しい順に。お気に入りだけのタブもあります",
+      "mine": "記録した項目を新しい順に。お気に入りだけのタブもあります",
       "records": "すべての記録を一か所に。メニューを探さず種類で絞り込めます",
       "library": "お気に入り・最近・検索 — 自分のものを一か所に",
       "newEntry": "何でも書いてください — 自動で仕分けされます",
@@ -337,16 +337,16 @@
     "contactSales": "営業に問い合わせる",
     "getPlan": "{plan} を選択",
     "teamBannerTitle": "チームで利用しますか？",
-    "teamBannerBody": "チームメンバーを招待して、あなたのワークスペース内で直接一緒に作業できます — 各メンバーは制限されたゲスト表示ではなく、あなたのプランと同じレベルの完全なアクセス権を得られます。Professional プランでは +{price}/メンバー/月 でメンバーを追加でき、シートごとに毎月請求されます。Ultimate と Enterprise プランは追加料金なしで無制限のチームシートが含まれるため、チーム全員が無料で参加できます。招待の管理やアクセスの削除は、設定内のチームページからいつでも行えます。",
+    "teamBannerBody": "チームメンバーにあなたのプランを：各メンバーは自分のアカウントにログインし、制限付きのゲスト表示ではなく、あなたのプランのレベルを利用できます。アカウント間で作業はまだ共有されません。各自が自分の作業を保持します。Professional では、メンバーを +{price}/メンバー/月 で追加でき、席ごとに毎月請求されます。Ultimate と Enterprise には追加料金なしで無制限のチーム席が含まれます。招待の管理やアクセスの削除は、設定のチームページからいつでも行えます。",
     "comparePlans": "プランを比較",
     "feature": "機能",
     "backToHome": "← Ionexa AI に戻る",
     "rows": {
       "creditsPerMonth": "クレジット / 月",
-      "aiAgents": "AI エージェント",
-      "websiteBuilder": "ウェブサイト＆自動化ビルダー",
+      "aiAgents": "スケジュール実行のウェブ検索エージェント",
+      "websiteBuilder": "Website Builder",
       "aiMemory": "AI メモリー",
-      "teamCollaboration": "チームコラボレーション",
+      "teamCollaboration": "メンバーがあなたのプランを利用",
       "teamSeatsAddOn": "チームシート",
       "freeChatMessages": "無料チャットメッセージ / 月",
       "deepResearch": "ディープリサーチ実行回数 / 月",
@@ -365,7 +365,7 @@
       "projects": "プロジェクト",
       "missionControl": "目標とプラン",
       "helpCentre": "ヘルプセンター",
-      "createStudio": "何でもつくる",
+      "createStudio": "説明すると適切なツールが開きます",
       "voiceMinutes": "音声の分数 / 月",
       "chatMemory": "チャットが覚える情報",
       "chatPins": "固定した会話",
@@ -391,10 +391,10 @@
     },
     "businessTitle": "ビジネス",
     "businessSubtitle": "チームで共に構築する",
-    "businessExplanation": "ベースプランとしてProfessionalまたはUltimateを選択してください — どちらもチームコラボレーションを含みます。その後チームメンバーを招待しましょう。各メンバーはあなたのプランと同じ機能に完全アクセスでき、Professionalでは+{price}/メンバー/月、Ultimateでは無料で利用できます。",
-    "businessCardDescription": "どのプランでもチームのベースとして始められます。その後、メンバーを1人あたり+{price}/月で招待できます — 全員があなたのプランと同じレベルの完全アクセスを得られます。共同作業をするチームに最適です。",
+    "businessExplanation": "基本プランとして Professional または Ultimate を選択してください。どちらもチームメンバーを追加できます。各メンバーは自分のアカウントであなたのプランのレベルを利用でき、Professional では +{price}/メンバー/月、Ultimate では無料で含まれます。アカウント間で作業はまだ共有されません。",
+    "businessCardDescription": "Professional または Ultimate をチームの基本にして、メンバーを1人あたり +{price}/月 で招待しましょう。全員が自分のアカウントであなたのプランのレベルを利用できます。",
     "businessFeatureBase": "ベースプランとしてProfessionalまたはUltimateを選択",
-    "businessFeatureFullAccess": "各メンバーはあなたのプランと同じレベルの完全アクセスを取得",
+    "businessFeatureFullAccess": "各メンバーは自分のアカウントであなたのプランのレベルを利用できます",
     "businessFeatureFreeOnUltimate": "Ultimateではチームシートが無料付帯",
     "businessFeatureManage": "チーム設定からいつでもシートを管理可能",
     "setUpTeam": "チームを設定",
@@ -402,11 +402,11 @@
       "basicAiChat": "基本のAIチャット",
       "creditsPerMonth": "{count} クレジット/月",
       "aiMemory": "AIメモリ",
-      "websiteAutomationBuilderAccess": "ウェブサイト＆自動化ビルダーへのアクセス",
+      "websiteAutomationBuilderAccess": "Website Builder と、1日1回実行される自動化",
       "everythingInStarter": "Starterのすべて",
-      "upTo100AiAgents": "AIエージェント最大100体",
+      "upTo100AiAgents": "スケジュール実行のウェブ検索エージェント最大100個",
       "everythingInGrowth": "Growthのすべて",
-      "teamCollaboration": "チームコラボレーション",
+      "teamCollaboration": "チーム席：メンバーがあなたのプランを利用",
       "everythingInProfessional": "Professionalのすべて",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "チーム席数無制限（メンバーごとの追加料金なし）",
       "extendedChatMemoryRetention100Vs20RecentFact": "チャットメモリの保持拡張（直近100件、通常は20件）",
@@ -414,10 +414,10 @@
       "everythingInUltimate": "Ultimateのすべて",
       "unlimitedMembers": "メンバー無制限",
       "customCredits": "カスタムクレジット",
-      "upTo2AiAgents": "AIエージェント最大2体",
-      "upTo5AiAgents": "AIエージェント最大5体",
-      "upTo15AiAgentsTeams": "AIエージェント最大15体・チーム",
-      "upTo50AiAgents": "AIエージェント最大50体"
+      "upTo2AiAgents": "スケジュール実行のウェブ検索エージェント最大2個",
+      "upTo5AiAgents": "スケジュール実行のウェブ検索エージェント最大5個",
+      "upTo15AiAgentsTeams": "スケジュール実行のウェブ検索エージェント最大15個",
+      "upTo50AiAgents": "スケジュール実行のウェブ検索エージェント最大50個"
     },
     "values": {
       "unlimited": "無制限",
@@ -432,7 +432,7 @@
     },
     "seatNote": {
       "included": "無制限のチームシートを含む — メンバーごとの追加料金なし",
-      "perMember": "+ チームメンバー1人あたり月額{currency}{price} — 各メンバーはご利用プランの階層で全機能を利用できます"
+      "perMember": "+ チームメンバー1人あたり月額{currency}{price} — 各メンバーは自分のアカウントでご利用プランのレベルを利用できます"
     },
     "metaDescription": "Ionexa AI の料金 — Free、Starter、Growth、Professional、Ultimate、Enterprise の各プラン。",
     "billingMonthly": "月額",
@@ -450,7 +450,8 @@
       "limits": "上限",
       "support": "サポート"
     },
-    "comparisonRowCount": "比較した機能: {count}"
+    "comparisonRowCount": "比較した機能: {count}",
+    "paymentPending": "この変更のお支払いが完了しなかったため、プランは変更されていません。"
   },
   "roadmap": {
     "title": "ロードマップ",
@@ -463,12 +464,12 @@
     },
     "items": {
       "modules": {
-        "title": "13のビジネスモジュール",
-        "description": "アイデア、競合、リサーチ、財務、学習、トレーディング、意思決定、プロダクト、コンテンツ、営業/CRM、フィードバック、アナリティクス、自動化メモ。"
+        "title": "13 のビジネス記録リスト",
+        "description": "「マイレコード」から、13 のリストに自分の記録を保存できます：アイデア、競合、リサーチ、財務、学習、トレーディング、意思決定、プロダクト、コンテンツ、営業/CRM、フィードバック、アナリティクス、自動化メモ。"
       },
       "createAnything": {
-        "title": "何でも作成",
-        "description": "自然な文章で何でも説明するだけで、AI が自動的に適切なモジュールに振り分けます。"
+        "title": "一度説明するだけ",
+        "description": "必要なことを普通の文章で説明してください。あなたの言葉で適切なツールを開くか、メモを正しいモジュールに保存します。"
       },
       "chat": {
         "title": "Ionexa Chat",
@@ -480,23 +481,23 @@
       },
       "team": {
         "title": "チームコラボレーション",
-        "description": "チームメンバーを招待し、あなたのプランと同じレベルの完全なアクセス権を付与。"
+        "description": "チームメンバーを招待：各自が自分のアカウントであなたのプランのレベルを利用できます。共有作業はまだ構築されていません。"
       },
       "agentBuilder": {
         "title": "AI エージェントビルダー",
-        "description": "目標を説明するだけで、それを遂行する自律型エージェントが完成。"
+        "description": "目標を説明すると、設定したスケジュールでウェブを検索し、見つけた内容を送ってくれるエージェントができます。"
       },
       "websiteBuilder": {
         "title": "ウェブサイトビルダー",
         "description": "ひとつのプロンプトから AI がウェブサイトを生成。"
       },
       "automationBuilder": {
-        "title": "本格的な自動化ビルダー",
-        "description": "記録されたアイデアだけでなく、実際に動作するワークフロー自動化。"
+        "title": "オートメーション",
+        "description": "タスクを一文で説明すると、1日1回実行して結果を保存します。ステップや条件はまだありません。"
       },
       "aiMemory": {
         "title": "AI メモリー",
-        "description": "プロジェクトをまたいだコンテキストと記憶で、AI が重要なことを覚えている。"
+        "description": "チャットはあなたやあなたのビジネスについて伝えたことを覚え、サイト・プレゼンテーション・投稿のツールがそれを使います。各項目を確認・削除できます。"
       },
       "mobileApps": {
         "title": "モバイル＆デスクトップアプリ",
@@ -520,7 +521,7 @@
       },
       "coding": {
         "title": "AI コーディングアシスタント",
-        "description": "コード断片だけでなく、アプリ全体を生成。"
+        "description": "説明からコードを書くほか、貼り付けたコードの説明・デバッグ・変換・テスト作成を行います。コードの実行やリポジトリを開くことはしません。"
       },
       "dataAnalysis": {
         "title": "AI データ分析",
@@ -594,7 +595,8 @@
       "resetSuccess": "パスワードを更新しました — 新しいパスワードでログインしてください。",
       "failed": "サインインできませんでした。メールアドレスとパスワードをご確認いただくか、不明な場合はパスワードを再設定してください。",
       "oauthFailed": "そのサインインは完了しませんでした。もう一度お試しいただくか、下のメールアドレスとパスワードをお使いください。",
-      "sharedSignInFirst": "共有した内容を保存するにはサインインしてください。"
+      "sharedSignInFirst": "共有した内容を保存するにはサインインしてください。",
+      "emailNotConfirmed": "先にメールアドレスを確認してください。新しいリンクを送信しました。"
     },
     "signup": {
       "chooseYourPlan": "プランを選択",
@@ -622,7 +624,9 @@
       "mostPopular": "一番人気",
       "mustAgreeToTerms": "アカウントを作成するには、利用規約とプライバシーポリシーに同意する必要があります。",
       "passwordRequirementsNotMet": "上記のすべての条件を満たすパスワードを選んでください。",
-      "failed": "アカウントを作成できませんでした。入力内容をご確認のうえお試しください — 請求は発生していません。"
+      "failed": "アカウントを作成できませんでした。入力内容をご確認のうえお試しください — 請求は発生していません。",
+      "checkEmailTitle": "メールを確認してください",
+      "checkEmailBody": "{email} にリンクを送信しました。開いてアドレスを確認し、アカウントを使い始めてください。"
     },
     "forgotPassword": {
       "title": "パスワードをリセット",
@@ -662,7 +666,18 @@
       "cancel": "キャンセルして戻る",
       "confirmFailed": "削除を完了できませんでした。アカウントは残っています — リンクをもう一度お試しいただくか、サポートにご連絡ください。"
     },
-    "generateStrongPassword": "強力なパスワードを生成"
+    "generateStrongPassword": "強力なパスワードを生成",
+    "verifyEmail": {
+      "title": "メールアドレスを確認してください",
+      "body": "メールでリンクをお送りしました。開くとアカウントを使い始められます。",
+      "linkInvalid": "このリンクは期限切れか、すでに使用されています。下から新しいリンクをリクエストしてください。",
+      "resend": "新しいリンクを送信",
+      "sending": "送信中…",
+      "sent": "新しいリンクを送信しました。受信トレイと迷惑メールを確認してください。",
+      "failed": "メールを送信できませんでした。数分後にもう一度お試しください。",
+      "rateLimited": "この1時間に送信したリンクが多すぎます。後でもう一度お試しください。",
+      "signedOut": "メールアドレスとパスワードでログインすると、新しいリンクが送信されます。"
+    }
   },
   "settings": {
     "title": "設定",
@@ -978,7 +993,7 @@
         "testSent": "接続しました — テストメッセージをご確認ください。",
         "testFailed": "そこへテストメッセージを届けられなかったため、何も保存していません。",
         "telegram": {
-          "help": "ボットにメッセージを送り、返ってきた chat ID を貼り付けてください。",
+          "help": "Telegram で @{bot} を開いて「開始」を押すと、メッセージを受け取れるようになります。次に @userinfobot に何かメッセージを送り（chat ID が返信されます）、その番号をここに貼り付けてください。",
           "placeholder": "チャット ID"
         },
         "discord": {
@@ -1587,7 +1602,6 @@
       "statusCompleted": "完成",
       "statusFlagged": "フラグ付き",
       "flaggedTitle": "安全性レビューによりフラグが付けられました",
-      "regenerateFree": "再生成（無料）",
       "editUnavailable": "ウェブサイトの生成が完了すると変更をリクエストできます。",
       "design": {
         "title": "デザイン",
@@ -1635,7 +1649,6 @@
         "photoSourceNeedsUpload": "上で写真を追加してください。なければストック写真になります。"
       },
       "imageIntro": "ロゴ、商品写真、店内の写真など。ページに載せたいもの、雰囲気の参考にしたいもの。",
-      "regenerateAlreadyUsed": "このサイトの無料再生成はすでに使用済みです。別の内容で新しいサイトを作成してください。",
       "regenerateNoBrief": "このサイトは元の説明文を保存する前に作成されたため、自動で再生成できません。同じ説明で新しいサイトを作成してください。",
       "empty": {
         "title": "サイトを説明すれば、サイトができる",
@@ -1675,7 +1688,9 @@
           "quota": "{count, plural, other {画像#点}}を追加できませんでした。写真ライブラリが現在これ以上のリクエストを拒否しています。1時間後に再試行するか、ご自身の画像を追加してください。",
           "noMatch": "{count, plural, other {画像が#点}}要求されましたが、一致する写真がありませんでした。無関係なものを代わりに入れることはしていません。題材の書き方を変えると見つかることが多いです。"
         }
-      }
+      },
+      "regeneratePaid": "再生成 · 約 {count} クレジット",
+      "regenerateNoCredits": "再生成に必要なクレジットが足りません。約 {needed} 必要で、残りは {available} です。何も開始されていません。"
     },
     "marketplace": {
       "title": "すぐ使える助っ人",
@@ -2113,7 +2128,7 @@
       "reasonBadEdges": "ハイフンで始めたり終えたりはできません。",
       "reasonReserved": "このアドレスは予約済みです。別のものを選んでください。",
       "reasonTaken": "このアドレスは既に使われています。別のものをお試しください。",
-      "disabledFlagged": "このサイトは安全性レビューにより保留されているため、公開できません。下の詳細をご確認ください。一度に限り無料で再生成できます。",
+      "disabledFlagged": "このサイトは安全性レビューにより保留されているため、公開できません。下の詳細をご確認ください。再生成でき、ボタンに費用が表示されます。",
       "disabledFailed": "このサイトは生成が完了していないため、まだ公開するものがありません。",
       "disabledGenerating": "生成中です。完了次第公開できます。",
       "empty": {
@@ -2124,7 +2139,7 @@
     "integrations": {
       "title": "連携",
       "emptyTitle": "まだ何も接続されていません",
-      "emptyBody": "アカウントを接続すると、AIがメールやカレンダー、ファイルを読めるようになります。手入力した内容だけに縛られなくなります。",
+      "emptyBody": "アカウントを接続すると、AIがメールやファイルを読めるようになります。手入力した内容だけに縛られなくなります。",
       "description": "すでに使っているツールを connect して、AI が実際のデータを扱えるようにします。",
       "privacyNotice": "特に記載がない限り、連携は読み取り専用です。トークンは当社データベースに保存されない鍵で暗号化され、ログに出ることはありません。解除するとプロバイダー側のアクセスを取り消し、読み取り履歴を含め当社が保持するすべてを削除します。",
       "notConfigured": "このデプロイでは連携が未設定のため、接続できません。",
@@ -3558,7 +3573,9 @@
     "costs": "コスト",
     "acceptableUseDescription": "Ionexa AI でしてよいことと、してはいけないこと。",
     "aiTransparencyDescription": "Ionexa が使う AI モデル、その役割、そして見えるデータについて。",
-    "contactDescription": "Ionexa AI チームにご連絡ください。"
+    "contactDescription": "Ionexa AI チームにご連絡ください。",
+    "verifyEmail": "メールアドレスの確認",
+    "verifyEmailDescription": "Ionexa AI アカウントのメールアドレスを確認します。"
   },
   "errors": {
     "retry": "もう一度試す",
@@ -4145,7 +4162,7 @@
   },
   "routing": {
     "title": "どの AI を使うか",
-    "description": "直近30日間でどのモデルがどのリクエストを処理し、いくらかかり、ルーティングでいくら節約できたか。",
+    "description": "過去30日間にどのモデルがどのリクエストを処理し、いくらかかったか。ルーターはまだモデルを選んでいないため、この表は空のままです。選んでいたはずのモデルはコストのページにあります。",
     "empty": "ルーティングの判断はまだ記録されていません。リクエストがルーターを通り始めるとこの表が埋まります。ゼロを表示しているのではなく、何も表示していません。",
     "decisions": "判断回数",
     "charged": "顧客への請求",
@@ -4158,7 +4175,7 @@
     "overrideSaving": "上書きによる節約",
     "learnedTitle": "ルーターが学習した内容",
     "learnedIntro": "30日間の機能・モデル別の成功率です。{rate}%を下回るモデルはその機能に選ばれなくなります — ただし{samples}回以上の実行があってからです。2回中2回の失敗は根拠になりません。",
-    "learnedEmpty": "まだ確定的なものはありません。機能とモデルの組み合わせに十分な実行数が貯まるまで、ルーティングは静的なティア表のままです。",
+    "learnedEmpty": "まだ結論は出ていません。ここでの結果は使用モデルを変えません。各機能は自身のコードに書かれたモデルを使います。",
     "runs": "{samples}回中 {rate}%",
     "routedUp": "上位へ回送",
     "notEnough": "まだ不足"
@@ -4293,7 +4310,7 @@
     "pruneConfirm": "一度だけ出てきて 6 か月出てこなかった {count} 件を削除しますか？繰り返されたものはすべて残ります。",
     "pruned": "{count} 件を削除しました。",
     "surfacesTitle": "記憶する機能",
-    "surfacesHelp": "オフにすると、その機能は記憶を読み込まず、追加もしません。すでに保存された内容が消えることはありません。",
+    "surfacesHelp": "オンにすると、その機能はチャットが覚えている内容を読み取ります（追加するのはチャットだけです）。オフにするとどちらも行いません。保存済みの内容は削除されません。",
     "surfaceOn": "記憶する",
     "surfaceOff": "オフ",
     "surfaceSaveFailed": "この設定を保存できませんでした。",
@@ -4454,6 +4471,15 @@
         "trafficUp": "サイトの訪問数が {percent}% 増えました",
         "trafficDown": "サイトの訪問数が {percent}% 減りました"
       }
+    },
+    "confirm": {
+      "subject": "Ionexa AI のメールアドレスを確認してください",
+      "preheader": "ワンクリックでアカウントの準備が整います。",
+      "label": "メールアドレスの確認",
+      "title": "ご本人であることを確認してください",
+      "body": "ボタンを押してこのアドレスを確認し、Ionexa AI のアカウントを開いてください。",
+      "button": "メールアドレスを確認",
+      "ignore": "このアカウントを作成していない場合は、このメールを無視してください。リンクを開かない限り何も起こりません。"
     }
   },
   "routerReport": {

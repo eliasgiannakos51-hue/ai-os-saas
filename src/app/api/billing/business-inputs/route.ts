@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
  * it THROUGH the service role.
  */
 async function requireOwner() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

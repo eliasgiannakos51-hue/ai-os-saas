@@ -57,7 +57,7 @@ const MAX_MEMORY_RESULTS = 200;
 
 export default async function MemoryPage() {
   const t = await getTranslations("dashboard.memory");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

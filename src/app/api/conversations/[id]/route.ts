@@ -55,9 +55,10 @@ function fail(code: ConversationErrorCode, status: number, extra?: Record<string
   return NextResponse.json({ ok: false, code, ...extra }, { status });
 }
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

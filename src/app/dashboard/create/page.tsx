@@ -18,7 +18,7 @@ export function generateMetadata(): Promise<Metadata> {
 // shows them what it understood along with the real cost and time range,
 // and only then creates anything.
 export default async function CreatePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

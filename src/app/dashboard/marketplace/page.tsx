@@ -57,7 +57,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function MarketplacePage() {
   const t = await getTranslations("dashboard.marketplace");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
   if (!user) redirect("/login");

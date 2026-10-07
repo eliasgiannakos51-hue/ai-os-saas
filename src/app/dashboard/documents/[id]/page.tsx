@@ -14,8 +14,9 @@ export function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-export default async function DocumentEditorPage({ params }: { params: { id: string } }) {
-  const supabase = createClient();
+export default async function DocumentEditorPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

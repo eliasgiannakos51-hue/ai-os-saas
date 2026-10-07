@@ -430,9 +430,12 @@ console.log("\n== 5. a disabled Publish button explains itself ==");
   for (const key of ["disabledFlagged", "disabledFailed", "disabledGenerating"]) {
     check(`the builder supplies a reason for ${key}`, workspace.includes(key), true);
   }
+  // Since NEEDS 24 (2026-10-05) the regenerate is never a dead end: the
+  // button stays and says its price (regenerate-cost.test.mjs). The panel
+  // still says why there is no button when the site has no brief to rerun.
   check(
-    "the flagged panel says why there is no free regenerate",
-    workspace.includes("regenerateAlreadyUsed") && workspace.includes("regenerateNoBrief"),
+    "the flagged panel prices the regenerate, and says why there is none without a brief",
+    workspace.includes("regeneratePaid") && workspace.includes("regenerateNoBrief"),
     true
   );
 
@@ -446,11 +449,11 @@ console.log("\n== 5. a disabled Publish button explains itself ==");
     for (const key of ["disabledFlagged", "disabledFailed", "disabledGenerating"]) {
       if (!j?.dashboard?.publishing?.[key]) missing.push(`${f}:publishing.${key}`);
     }
-    for (const key of ["regenerateAlreadyUsed", "regenerateNoBrief"]) {
+    for (const key of ["regeneratePaid", "regenerateNoCredits", "regenerateNoBrief"]) {
       if (!j?.dashboard?.websiteBuilder?.[key]) missing.push(`${f}:websiteBuilder.${key}`);
     }
   }
-  check(`all 5 new strings present in all ${langs.length} locales`, missing, []);
+  check(`all 6 new strings present in all ${langs.length} locales`, missing, []);
 }
 
 console.log(`\n  ${pass} passed, ${fail} failed`);

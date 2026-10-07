@@ -21,9 +21,10 @@ export const maxDuration = 60; // @function-limit 60
  * it in the same statement rather than being left as orphans pointing at
  * a meeting that no longer exists.
  */
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

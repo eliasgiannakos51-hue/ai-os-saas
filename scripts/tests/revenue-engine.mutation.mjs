@@ -50,8 +50,26 @@ const ROUTE = "src/app/api/billing/overage/route.ts";
 const AGENTS_ROUTE = "src/app/api/agents/route.ts";
 const UI = "src/components/settings/overage-settings.tsx";
 const SQL = "supabase/migrations/20260903000000_revenue_engine.sql";
+const ADDONS_ROUTE = "src/app/api/billing/addons/route.ts";
 
 const MUTANTS = [
+  // ------------------------------------------------------------------
+  // NEEDS 17 (2026-10-05): two add-ons withdrawn from sale.
+  // ------------------------------------------------------------------
+  {
+    gate: GATE,
+    name: "a withdrawn add-on is offered again",
+    file: ADDONS,
+    from: 'export const WITHDRAWN_ADDONS: readonly AddonSlug[] = ["storage_10gb", "priority"];',
+    to: 'export const WITHDRAWN_ADDONS: readonly AddonSlug[] = ["storage_10gb"];',
+  },
+  {
+    gate: GATE,
+    name: "the purchase route sells a withdrawn add-on",
+    file: ADDONS_ROUTE,
+    from: '    if (!addonOffered(slug)) return NextResponse.json({ error: "withdrawn" }, { status: 410 });\n',
+    to: "",
+  },
   // ------------------------------------------------------------------
   // A CHARGE NOBODY AGREED TO.
   // ------------------------------------------------------------------

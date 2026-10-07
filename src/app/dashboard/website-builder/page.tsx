@@ -44,18 +44,19 @@ export function generateMetadata(): Promise<Metadata> {
 //
 // The gate is here now, and the same one is in api/websites/generate —
 // a page that hides a button is not a paywall.
-export default async function WebsiteBuilderPage({
-  searchParams,
-}: {
-  // `brief` is the Home screen's "build" example (see
-  // lib/overview/first-screen-examples.ts). A runtime string on both
-  // sides — rename it in the link and this page still compiles and still
-  // renders, it just stops doing anything — so first-screen.test.mjs
-  // compares the two names.
-  searchParams: { brief?: string };
-}) {
+export default async function WebsiteBuilderPage(
+  props: {
+    // `brief` is the Home screen's "build" example (see
+    // lib/overview/first-screen-examples.ts). A runtime string on both
+    // sides — rename it in the link and this page still compiles and still
+    // renders, it just stops doing anything — so first-screen.test.mjs
+    // compares the two names.
+    searchParams: Promise<{ brief?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const t = await getTranslations("dashboard.websiteBuilder");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

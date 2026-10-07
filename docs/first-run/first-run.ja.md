@@ -1,16 +1,22 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **586 strings**. The whole product is 3526, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **589 strings**. The whole product is 3548, which is why this file exists.
 
-**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 357 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 358 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (21)
+## Tier 1 — THE SENTENCES — read these (23)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
 ### signup
+
+**`auth.signup.checkEmailBody`**
+
+> EN — We sent a link to {email}. Open it to confirm your address and start using your account.
+
+{email} にリンクを送信しました。開いてアドレスを確認し、アカウントを使い始めてください。
 
 **`auth.signup.failed`**
 
@@ -26,11 +32,17 @@ _On the first screens, 12 words or more. This is prose somebody wrote, and prose
 
 **`pricing.businessCardDescription`**
 
-> EN — Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.
+> EN — Start with Professional or Ultimate as your team's base, then invite members for +{price}/month each — everyone gets your plan's tier on their own account.
 
-どのプランでもチームのベースとして始められます。その後、メンバーを1人あたり+{price}/月で招待できます — 全員があなたのプランと同じレベルの完全アクセスを得られます。共同作業をするチームに最適です。
+Professional または Ultimate をチームの基本にして、メンバーを1人あたり +{price}/月 で招待しましょう。全員が自分のアカウントであなたのプランのレベルを利用できます。
 
 ### login
+
+**`auth.login.emailNotConfirmed`**
+
+> EN — Confirm your email first. We just sent a new link to your inbox.
+
+先にメールアドレスを確認してください。新しいリンクを送信しました。
 
 **`auth.login.failed`**
 
@@ -146,7 +158,7 @@ CSV またはタブ区切り、最大 {max}。保存する前に読み取り結�
 
 何でも書いてください — 製品のアイデア、トレード、ユーザーからのフィードバック、指標 — 自動的に適切なモジュールに入ります。
 
-## Tier 2 — The labels — skim these (357)
+## Tier 2 — The labels — skim these (358)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -175,6 +187,12 @@ _On the same screens, shorter than a sentence. Buttons, headings, menu items. A 
 > EN — change
 
 変更
+
+**`auth.signup.checkEmailTitle`**
+
+> EN — Check your email
+
+メールを確認してください
 
 **`auth.signup.chooseYourPlan`**
 
@@ -310,9 +328,9 @@ Ultimateではチームシートが無料付帯
 
 **`pricing.businessFeatureFullAccess`**
 
-> EN — Every member gets full access at your plan's tier
+> EN — Every member gets your plan's tier on their own account
 
-各メンバーはあなたのプランと同じレベルの完全アクセスを取得
+各メンバーは自分のアカウントであなたのプランのレベルを利用できます
 
 **`pricing.businessFeatureManage`**
 
@@ -370,9 +388,9 @@ Ultimateではチームシートが無料付帯
 
 **`pricing.rows.aiAgents`**
 
-> EN — AI agents
+> EN — Scheduled web-research agents
 
-AI エージェント
+スケジュール実行のウェブ検索エージェント
 
 **`pricing.rows.aiChat`**
 
@@ -442,9 +460,9 @@ AI コーディング
 
 **`pricing.rows.createStudio`**
 
-> EN — Make anything
+> EN — Describe it, it opens the right tool
 
-何でもつくる
+説明すると適切なツールが開きます
 
 **`pricing.rows.creditsPerMonth`**
 
@@ -592,9 +610,9 @@ AI コーディング
 
 **`pricing.rows.teamCollaboration`**
 
-> EN — Team collaboration
+> EN — Members get your plan
 
-チームコラボレーション
+メンバーがあなたのプランを利用
 
 **`pricing.rows.teamMembers`**
 
@@ -622,9 +640,9 @@ AI コーディング
 
 **`pricing.rows.websiteBuilder`**
 
-> EN — Website & Automation Builder
+> EN — Website Builder
 
-ウェブサイト＆自動化ビルダー
+Website Builder
 
 **`pricing.rows.websiteImageStorage`**
 

@@ -227,6 +227,8 @@ const senders = routes.filter((f) => SENDS_OUTWARD.test(SOURCE.get(f)));
 check(`routes that send a message outward (${senders.length})`, senders.length >= 5, "the outbound detector matched almost nothing");
 
 const SENDS_WITHOUT_A_LIMIT = {
+  "src/app/auth/confirm/route.ts":
+    "the landing of the confirmation mail. It sends the welcome email once per account: verifyOtp consumes a single-use token first, and welcome_sent_at is written before the send, so a replayed link verifies nothing and a second confirmation finds the mark already set.",
   "src/app/auth/callback/route.ts":
     "the OAuth landing. It sends the welcome email once, on the exchange of a single-use code the provider minted — a loop of this route exchanges nothing twice, so there is no second email to send.",
   "src/app/api/billing/cancel/route.ts":

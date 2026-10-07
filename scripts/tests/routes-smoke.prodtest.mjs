@@ -501,7 +501,7 @@ async function inspect(context, route) {
   // #61 until 2026-10-04, when its cause was found: a dashboard page that
   // redirected from its server component, after the page had started
   // streaming, so the redirect reached the router as a navigation racing
-  // its prefetches. Those redirects are decided in middleware.ts now
+  // its prefetches. Those redirects are decided in proxy.ts now
   // (lib/nav/early-redirects.ts; scripts/tests/early-redirects.test.mjs),
   // and 300 loads of hook-order.repro.mjs gave 0. A #310 here is a real
   // failure again.
@@ -550,7 +550,7 @@ for (const route of PUBLIC_ROUTES) {
 // answers 200 and does not bounce to /login. Nothing anywhere asserted
 // the other direction: that WITHOUT the cookie it does bounce. The whole
 // auth boundary — one redirect in src/app/dashboard/layout.tsx, one
-// matcher in src/middleware.ts — was verified by reading source, by
+// matcher in src/proxy.ts — was verified by reading source, by
 // page-auth-boundary.test.mjs, which is a text scan however careful it
 // is. A regex cannot tell you that Next.js actually ran the layout.
 //

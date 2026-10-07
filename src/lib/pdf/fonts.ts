@@ -19,7 +19,14 @@ export {
  * the PDF engine.
  */
 
-const FONT_DIR = path.join(process.cwd(), PDF_FONT_DIR);
+// A LITERAL PATH, the same as PDF_FONT_DIR. Turbopack (the Next 16 build)
+// traces a path it can read statically to that folder only; built from a
+// variable, it traces the whole repository into every PDF function. The
+// check below keeps the two from drifting apart.
+const FONT_DIR = path.join(process.cwd(), "src", "lib", "pdf", "fonts");
+if (path.relative(process.cwd(), FONT_DIR).split(path.sep).join("/") !== PDF_FONT_DIR) {
+  throw new Error(`pdf fonts: FONT_DIR and PDF_FONT_DIR disagree (${PDF_FONT_DIR})`);
+}
 
 let registered = false;
 

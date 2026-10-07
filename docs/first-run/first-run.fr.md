@@ -1,16 +1,22 @@
 # The first run — fr
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **586 strings**. The whole product is 3526, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **589 strings**. The whole product is 3548, which is why this file exists.
 
-**Start with tier 1. It is 21 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 357 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 358 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (21)
+## Tier 1 — THE SENTENCES — read these (23)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
 ### signup
+
+**`auth.signup.checkEmailBody`**
+
+> EN — We sent a link to {email}. Open it to confirm your address and start using your account.
+
+Nous avons envoyé un lien à {email}. Ouvrez-le pour confirmer votre adresse et commencer à utiliser votre compte.
 
 **`auth.signup.failed`**
 
@@ -26,11 +32,17 @@ Vous devez accepter les Conditions d'utilisation et la Politique de confidential
 
 **`pricing.businessCardDescription`**
 
-> EN — Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.
+> EN — Start with Professional or Ultimate as your team's base, then invite members for +{price}/month each — everyone gets your plan's tier on their own account.
 
-Commencez avec n'importe quel plan comme base pour votre équipe, puis invitez des membres pour +{price}/mois chacun — tout le monde obtient un accès complet au niveau de votre plan. Parfait pour les équipes qui travaillent ensemble.
+Commencez avec Professional ou Ultimate comme base de votre équipe, puis invitez des membres pour +{price}/mois chacun — chacun obtient le niveau de votre offre sur son propre compte.
 
 ### login
+
+**`auth.login.emailNotConfirmed`**
+
+> EN — Confirm your email first. We just sent a new link to your inbox.
+
+Confirmez d’abord votre e-mail. Nous venons de vous envoyer un nouveau lien.
 
 **`auth.login.failed`**
 
@@ -146,7 +158,7 @@ Cela ressemble à une question. Dois-je y répondre ou l'enregistrer ?
 
 Décrivez n'importe quoi — une idée de produit, une opération, le retour d'un utilisateur, un indicateur — et cela atterrit automatiquement dans le bon module.
 
-## Tier 2 — The labels — skim these (357)
+## Tier 2 — The labels — skim these (358)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -175,6 +187,12 @@ et la
 > EN — change
 
 modifier
+
+**`auth.signup.checkEmailTitle`**
+
+> EN — Check your email
+
+Vérifiez vos e-mails
 
 **`auth.signup.chooseYourPlan`**
 
@@ -310,9 +328,9 @@ Sièges d'équipe inclus gratuitement avec Ultimate
 
 **`pricing.businessFeatureFullAccess`**
 
-> EN — Every member gets full access at your plan's tier
+> EN — Every member gets your plan's tier on their own account
 
-Chaque membre obtient un accès complet au niveau de votre plan
+Chaque membre obtient le niveau de votre offre sur son propre compte
 
 **`pricing.businessFeatureManage`**
 
@@ -370,9 +388,9 @@ Exécutions d’agents
 
 **`pricing.rows.aiAgents`**
 
-> EN — AI agents
+> EN — Scheduled web-research agents
 
-Agents IA
+Agents programmés de recherche sur le web
 
 **`pricing.rows.aiChat`**
 
@@ -442,9 +460,9 @@ Formulaire de contact
 
 **`pricing.rows.createStudio`**
 
-> EN — Make anything
+> EN — Describe it, it opens the right tool
 
-Créer n’importe quoi
+Décrivez-le, il ouvre le bon outil
 
 **`pricing.rows.creditsPerMonth`**
 
@@ -592,9 +610,9 @@ Stockage
 
 **`pricing.rows.teamCollaboration`**
 
-> EN — Team collaboration
+> EN — Members get your plan
 
-Collaboration d'équipe
+Les membres obtiennent votre offre
 
 **`pricing.rows.teamMembers`**
 
@@ -622,9 +640,9 @@ Minutes de voix / mois
 
 **`pricing.rows.websiteBuilder`**
 
-> EN — Website & Automation Builder
+> EN — Website Builder
 
-Créateur de sites web et d'automatisations
+Website Builder
 
 **`pricing.rows.websiteImageStorage`**
 

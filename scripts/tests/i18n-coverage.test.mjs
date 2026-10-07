@@ -790,7 +790,7 @@ const clientFallbacks = sources.flatMap((f) => [
 // memory (posts, presentations, the website worker, coding, the agent
 // executor) plus the settings route, and each carries the sentence about
 // which predicate decides whether the feature participates.
-const SERVER_PROSE_BASELINE = 671;
+const SERVER_PROSE_BASELINE = 670;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error
@@ -843,7 +843,9 @@ const SERVER_PROSE_BASELINE = 671;
 // three and stayed at three long after they were paid off". The gap is
 // a number somebody else reads now — see lib/baseline.mjs and
 // baselines.test.mjs.
-const CLIENT_FALLBACK_BASELINE = 28;
+// 28 -> 27 (2026-10-05): the login form's unconfirmed-address case reads a
+// translated key instead of falling back to English.
+const CLIENT_FALLBACK_BASELINE = 27;
 reportBaseline("SERVER_PROSE_BASELINE", SERVER_PROSE_BASELINE, serverErrorProse.length);
 checkTrue(
   `server-side English error prose has not grown (${serverErrorProse.length} <= ${SERVER_PROSE_BASELINE})`,
@@ -924,9 +926,15 @@ const LEGAL_BASELINE = {
   "src/app/acceptable-use/page.tsx": 19,
   // 58 -> 57: V5 #21 rewrote the presentations paragraph as one paragraph
   // rather than two, which is one text node fewer.
-  "src/app/ai-transparency/page.tsx": 57,
+  // 57 -> 60 (2026-10-05): section 2 rewritten to what runs — a fixed model
+  // per feature, the two speech providers, a router that only records —
+  // as four paragraphs where there were three.
+  "src/app/ai-transparency/page.tsx": 60,
   "src/app/cookies/page.tsx": 19,
-  "src/app/privacy/page.tsx": 17,
+  // 17 -> 24 (2026-10-05): the sub-processor list grew from four companies
+  // to every one the code sends data to (legal-pages.test.mjs §5b derives
+  // that set from lib/env-check.ts), plus a paragraph on recordings.
+  "src/app/privacy/page.tsx": 24,
   "src/app/terms/page.tsx": 10,
 };
 

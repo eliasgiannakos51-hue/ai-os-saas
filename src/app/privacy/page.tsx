@@ -9,26 +9,32 @@ export function generateMetadata(): Promise<Metadata> {
 
 export default function PrivacyPage() {
   return (
-    <LegalLayout titleKey="landing.footer.privacy" updated="2026-07-30">
+    <LegalLayout titleKey="landing.footer.privacy" updated="2026-10-05">
       <LegalSection title="1. Data Collection">
         <p>
           We collect the email address you sign up with, the password you
-          choose (stored hashed, never in plain text), and whatever you
-          enter into Ionexa AI&apos;s modules or the &quot;Create Anything&quot;
-          box — ideas, notes, metrics, and similar content you choose to
-          log. We don&apos;t collect data beyond what&apos;s needed to run
-          the Service.
+          choose (stored hashed, never in plain text), and what you put into
+          Ionexa AI: what you type into chat and the tools, the entries you
+          log, the files you upload, the sites, documents and presentations
+          you create, and the accounts you choose to connect. We also keep a
+          record of what each AI action cost, so your credits can be counted.
+          We don&apos;t collect data beyond what&apos;s needed to run the
+          Service.
+        </p>
+        <p>
+          Voice and meeting recordings are not stored: the audio is sent for
+          transcription, held only for that one request, and what is kept is
+          the text.
         </p>
       </LegalSection>
 
       <LegalSection title="2. Data Use">
         <p>
           Your data is used to operate Ionexa AI for you: authenticating your
-          account, displaying and searching your entries, generating the
-          Overview summary, and — when you use &quot;Create Anything&quot; —
-          classifying your free-text message into the right module. We do
-          not sell your data or use it to train models beyond what a given
-          request to a third-party AI provider requires (see below).
+          account, showing and searching what you have saved, and sending to
+          an AI model the part of it a feature needs to do what you asked.
+          We do not sell your data or use it to train models beyond what a
+          given request to a third-party AI provider requires (see below).
         </p>
       </LegalSection>
 
@@ -42,42 +48,74 @@ export default function PrivacyPage() {
 
       <LegalSection title="4. Sub-processors">
         <p>
-          We use trusted third-party service providers to operate Ionexa AI,
-          including cloud infrastructure providers, AI model providers, and
-          email delivery services. These providers process data solely to
-          provide the Service and are contractually bound to protect your
-          information.
+          These are the companies that process data so that Ionexa AI can
+          run. Each one receives only what its part of the Service needs, and
+          the ones marked &quot;only if&quot; receive nothing unless you use
+          that feature.
         </p>
         <ul className="list-disc space-y-1 ps-5">
           <li>
-            <span className="text-foreground/90">Supabase</span> — database
-            hosting and authentication infrastructure.
+            <span className="text-foreground/90">Supabase</span> — database,
+            file storage and authentication.
           </li>
           <li>
             <span className="text-foreground/90">Vercel</span> — application
             hosting and content delivery.
           </li>
           <li>
-            <span className="text-foreground/90">Anthropic</span> — AI model
-            provider used to classify &quot;Create Anything&quot; submissions
-            into the right module and extract structured fields.
+            <span className="text-foreground/90">Anthropic</span> — the AI
+            model behind every text feature: chat, sites, research,
+            presentations, posts, coding, analysis, files, meetings and
+            agents. It receives what you send to that feature and the context
+            the feature uses.
           </li>
           <li>
-            <span className="text-foreground/90">Resend</span> — transactional
-            email delivery (e.g. the welcome email sent on signup).
+            <span className="text-foreground/90">OpenAI</span> — only if you
+            use voice or upload a meeting recording: turns the audio into
+            text.
+          </li>
+          <li>
+            <span className="text-foreground/90">ElevenLabs</span> — only if
+            you ask for text to be read aloud: receives that text.
+          </li>
+          <li>
+            <span className="text-foreground/90">Stripe</span> — payments.
+            Your card details go to Stripe and never reach Ionexa.
+          </li>
+          <li>
+            <span className="text-foreground/90">Resend</span> — email
+            delivery (for example the welcome email, and agent results you
+            chose to receive by email).
+          </li>
+          <li>
+            <span className="text-foreground/90">Unsplash</span> — photo
+            search for sites and presentations. It receives search words, not
+            your account details.
+          </li>
+          <li>
+            <span className="text-foreground/90">Google</span> and{" "}
+            <span className="text-foreground/90">Slack</span> — only if you
+            connect them: Ionexa reads from them what you ask it to, and
+            sends to Slack what you set an agent to send there.
+          </li>
+          <li>
+            <span className="text-foreground/90">Telegram</span> and{" "}
+            <span className="text-foreground/90">Discord</span> — only if you
+            choose them as a destination for notifications or agent results:
+            they receive that message.
           </li>
         </ul>
       </LegalSection>
 
       <LegalSection title="5. User Rights">
         <p>
-          You can download a complete copy of your data at any time — go to{" "}
-          <span className="text-foreground/90">Settings → export_all_data()</span>{" "}
-          for a single JSON file with everything you&apos;ve logged across
-          all 13 modules. You can also permanently delete your account and
-          every record tied to it from{" "}
-          <span className="text-foreground/90">Settings → danger_zone</span>.
-          Account deletion is immediate and cannot be undone.
+          You can download a copy of your data at any time from{" "}
+          <span className="text-foreground/90">Settings → Export Data</span>,
+          as a single file with every record stored for your account. You can
+          also permanently delete your account and every record tied to it
+          from <span className="text-foreground/90">Settings → Danger Zone</span>:
+          we send a confirmation link to your email, and once you open it and
+          confirm, the deletion happens and cannot be undone.
         </p>
       </LegalSection>
     </LegalLayout>

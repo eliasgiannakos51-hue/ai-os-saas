@@ -42,7 +42,7 @@ Sessions: εκτίμηση της 2026-10-05, από τη στήλη Sessions τ
 | 13 | Τα πολύ δύσκολα, αφού δεις τα σενάρια | 72 |
 | | **Σύνολο** | **≈520** |
 
-Το `docs/REMAINING.md` αθροίζει ≈737. Η διαφορά είναι δουλειά που οι
+Το `docs/REMAINING.md` αθροίζει ≈735,5. Η διαφορά είναι δουλειά που οι
 προδιαγραφές περιγράφουν δύο φορές: το BUILD-SPECS 4.3 ξαναπαραθέτει τα
 εργαλεία του 3, το v6-master ξαναλέει πολλά του 2, οι Συνδέσεις του 2.8
 και του v6-master 75 είναι οι ίδιες. Εδώ μετρούν μία φορά.
@@ -54,19 +54,21 @@ Sessions: εκτίμηση της 2026-10-05, από τη στήλη Sessions τ
 | # | Εργασία | Κατάσταση | Σημείωση |
 |---|---|---|---|
 | Α.1 | Στοιχεία πλάνου μόνο από τον server, overage μόνο για συνδρομητές, κωδικός beta μόνο από το περιβάλλον, add-on χωρίς αλλαγή πλάνου, δύο έλεγχοι ιδιοκτησίας, κεφαλίδες ασφαλείας | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-security`· το migration περιμένει το NEEDS 20 | `entitlement-trust` 24 έλεγχοι, 13/13 mutations· `entitlement-metadata.dbtest` 18 |
-| Α.2 | Έλεγχος χρέωσης κατά την αλλαγή πλάνου (ΑΣ-4.3) | εκκρεμεί | Χρήματα: πρώτα η περιγραφή στον ιδιοκτήτη |
+| Α.2 | Έλεγχος χρέωσης κατά την αλλαγή πλάνου (ΑΣ-4.3) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-plan-payment`· με την έγκριση του ιδιοκτήτη | Η αναβάθμιση εφαρμόζεται μόνο αφού πληρωθεί· `annual-billing` §5, 3/3 mutations. Billing portal: NEEDS 32 |
 | Α.3 | Έλεγχος πρόσβασης στην έρευνα (ΑΣ-4.4) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-research`· το migration περιμένει το NEEDS 25 | `entitlement-trust` §9, 16/16 mutations· `research-reports-writes.dbtest` 7, κόκκινο χωρίς το migration |
 | Α.4α | Κόστος και μοντέλα έξω από ό,τι διαβάζει ο χρήστης: αρχείο κόστους και αρχείο παρόχων (ΑΣ-3.2, μέρος 1) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-cost-visibility`· το migration περιμένει το NEEDS 26 | `entitlement-trust` §10, 19/19 mutations· `cost-log-reads.dbtest` 5, κόκκινο χωρίς το migration |
 | Α.4β | Το ίδιο για τα πεδία κόστους στις εργασίες και στην έρευνα (ΑΣ-3.2, μέρος 2) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-cost-visibility-2`· το migration περιμένει το NEEDS 27 | `entitlement-trust` §11, 22/22 mutations· `cost-columns.dbtest` 13, 7 κόκκινοι χωρίς το migration |
 | Α.4γ | Εγγραφές πινάκων με όρια μόνο από τον server (ΑΣ-1.6): ομάδα, αρχεία, δημοσιευμένα sites | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-table-writes`· το migration περιμένει το NEEDS 28 | `entitlement-trust` §12, 25/25 mutations· `server-written-tables.dbtest` 18, 12 κόκκινοι χωρίς το migration |
 | Α.4δ | Το ίδιο για agents και sites (ΑΣ-1.6, υπόλοιπο) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-agents-sites`· το migration περιμένει το NEEDS 29 | `entitlement-trust` §13, 28/28 mutations· `server-written-tables.dbtest` 30, 7 κόκκινοι χωρίς το migration. Μια γραμμή «pending» υπάρχει πλέον μόνο μετά τους ελέγχους του `/generate`, άρα και το `/process` δεν τρέχει χωρίς αυτούς |
 | Α.5 | Φωνή και συσκέψεις χρεώνονται από τη διάρκεια του παρόχου (ΑΣ-4.9) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-voice-duration` | `voice` §8, 52/52 mutations. Χωρίς migration |
-| Α.6 | Ομάδες, επιβεβαίωση email, `next` | μπλοκαρισμένο / εκκρεμεί | NEEDS 22, 24· η αναβάθμιση του `next` είναι μεγάλη αλλαγή έκδοσης |
+| Α.6 | Ομάδες, επιβεβαίωση email, `next` | επιβεβαίωση email φτιαγμένη (2026-10-05), branch `claude/keen-turing-bv8gw4-email-confirm`· ομάδες, αναδημιουργία με κόστος πριν και «ποτέ πάνω από το υπόλοιπο» (NEEDS 24) φτιαγμένα (2026-10-05), branch `claude/keen-turing-bv8gw4-needs24`· η δωρεάν πρώτη αναδημιουργία: NEEDS 33· `next`: Α.9 | `email-confirmation` 22, 5/5· `signup-latency` 26· `team-grant` §6, 3/3· `regenerate-cost` 14, 4/4. Χωρίς migration |
 | Α.7 | Β1: ο πλήρης έλεγχος λαθών σε browser | μπλοκαρισμένο | NEEDS 2 |
-| Α.8 | Κείμενα που υπόσχονται κάτι που ο κώδικας δεν κάνει (`docs/REMAINING.md`, «Υποσχέσεις χωρίς αντίκρισμα», 16): πρώτα το `/ai-transparency` και το `/privacy`, μετά roadmap, hints, ειδοποιήσεις, Telegram, Συνδέσεις, onboarding | εκκρεμεί | Χωρίς απόφαση όσα δεν αγγίζουν τι πωλείται. Όσα είναι στις τιμές (βοηθοί, ομάδα, Automation Builder, add-ons, «δωρεάν» αναδημιουργία) αλλάζουν τι αγοράζει ο πελάτης: πρώτα σε σένα (NEEDS 17, 24). 2 sessions |
-| Α.9 | Αναβάθμιση `next` και των βιβλιοθηκών με γνωστά κενά (ΑΣ-8.1) | εκκρεμεί | Μεγάλη αλλαγή έκδοσης· 2 sessions |
-| Α.10 | Ειδοποίηση στον διαχειριστή για αποτυχημένες συνδέσεις (ΑΣ-8.5) | εκκρεμεί | 0,5 session |
+| Α.8 | Κείμενα που υπόσχονται κάτι που ο κώδικας δεν κάνει (`docs/REMAINING.md`, «Υποσχέσεις χωρίς αντίκρισμα», 16): πρώτα το `/ai-transparency` και το `/privacy`, μετά roadmap, hints, ειδοποιήσεις, Telegram, Συνδέσεις, onboarding | σε εξέλιξη: `/ai-transparency`, `/privacy`, roadmap, ειδοποιήσεις, Telegram, Συνδέσεις, onboarding, μνήμη, «Τα δικά μου», routing φτιαγμένα (2026-10-05)· add-ons (NEEDS 17), αναδημιουργία (NEEDS 24) και κείμενα τιμών (NEEDS 31, branch `claude/keen-turing-bv8gw4-pricing-texts`, `pricing-promises` 20, 4/4) φτιαγμένα (2026-10-05)· μένει η δωρεάν αναδημιουργία (NEEDS 33), branch `claude/keen-turing-bv8gw4-promises`· `legal-pages` 135 έλεγχοι, 25/25 mutations· `roadmap-truth` 25, 4/4 | Χωρίς απόφαση όσα δεν αγγίζουν τι πωλείται. Όσα είναι στις τιμές (βοηθοί, ομάδα, Automation Builder, add-ons, «δωρεάν» αναδημιουργία) αλλάζουν τι αγοράζει ο πελάτης: πρώτα σε σένα (NEEDS 17, 24). 2 sessions |
+| Α.9 | Αναβάθμιση `next` και των βιβλιοθηκών με γνωστά κενά (ΑΣ-8.1) | φτιαγμένο (2026-10-05): `sharp`, `nanoid` (branch `claude/keen-turing-bv8gw4-deps`) και `next` 14 → 16.3.8 με React 19 (branch `claude/keen-turing-bv8gw4-next16`) | `dependency-floors` 17, 6/6· `routes-smoke` 662/662 σε production build· prodtests: τα 23 που αποτυγχάνουν αποτυγχάνουν ίδια και στο 14 (Α.13). Μένει το `pptxgenjs` (καμία διόρθωση στη σειρά 4.x) |
+| Α.10 | Ειδοποίηση στον διαχειριστή για αποτυχημένες συνδέσεις (ΑΣ-8.5) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-login-alert` | `login-failure-alert` 17, 4/4 mutations. Ένα email ανά ώρα ανά αιτία· ο λογαριασμός κρατιέται μόνο ως hash. Το email φτάνει όταν μπουν τα `ADMIN_EMAILS` και `RESEND_API_KEY` (NEEDS 4, 8). Χωρίς migration |
 | Α.11 | Αντίγραφα ασφαλείας της βάσης (ΑΣ-8.4) | μπλοκαρισμένο | NEEDS 23 |
+| Α.12 | Add-ons «10 GB» και «προτεραιότητα» εκτός πώλησης (NEEDS 17, απόφαση 2026-10-05) | φτιαγμένο (2026-10-05), branch `claude/keen-turing-bv8gw4-addons` | `revenue-engine` §9, 43/43 mutations. Όποιος τα έχει τα βλέπει για να τα ακυρώσει· η επιστροφή χρημάτων είναι του ιδιοκτήτη |
+| Α.13 | Τα prodtests που έμειναν πίσω από το design του #223 (23 αρχεία: sidebar, αρχική, γη, overview, publish dialog κ.ά.) | εκκρεμεί | Μετρημένο 2026-10-05: αποτυγχάνουν με τις ίδιες γραμμές σε Next 14 και 16, άρα δεν είναι της αναβάθμισης. Τρέχουν μόνο τη νύχτα (issue #237). Μπαίνουν μαζί με το design, ομάδα 2 |
 
 ## Ομάδα 2 — design: να φανεί (13 sessions)
 

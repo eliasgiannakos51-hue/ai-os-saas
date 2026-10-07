@@ -45,14 +45,15 @@ const OWN_IMAGE_URL_TTL_SECONDS = 60 * 60;
 // route and dropped the id would be the defect scripts/tests/
 // deep-links.test.mjs was written for — the link works, the page loads,
 // and the reader sees the newest deck instead of theirs.
-export default async function PresentationsPage({
-  searchParams,
-}: {
-  searchParams?: { record?: string; brief?: string };
-}) {
+export default async function PresentationsPage(
+  props: {
+    searchParams?: Promise<{ record?: string; brief?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const t = await getTranslations("presentations");
   const requestedRecord = typeof searchParams?.record === "string" ? searchParams.record : null;
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

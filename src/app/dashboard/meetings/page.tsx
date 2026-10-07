@@ -70,7 +70,7 @@ export default async function MeetingsPage() {
 
   const limitMinutes = voiceMinutesForPlan(plan.slug);
   const pricingConfig = resolvePricingConfig();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // FOUR READS, ONE WAIT. None of them needs another's answer: the pack
   // price, the monthly meter and the two tables are independent, and

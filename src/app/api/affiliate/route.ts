@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 // requests cannot produce two accounts for one person.
 export async function POST(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

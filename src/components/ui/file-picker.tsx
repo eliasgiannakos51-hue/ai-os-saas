@@ -32,7 +32,7 @@ export function FilePicker({
   selectedCount?: number;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
   /** Optional parent ref, so the parent can still reset the input value. */
-  inputRef?: React.RefObject<HTMLInputElement>;
+  inputRef?: React.RefObject<HTMLInputElement | null>;
 }) {
   const t = useTranslations("common");
   const localRef = useRef<HTMLInputElement>(null);

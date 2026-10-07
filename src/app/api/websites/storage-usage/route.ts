@@ -20,7 +20,7 @@ export const fetchCache = "force-no-store";
  * lib/website-reference-image.ts).
  */
 export async function GET() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

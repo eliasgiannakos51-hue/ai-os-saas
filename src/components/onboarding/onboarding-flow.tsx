@@ -62,7 +62,16 @@ const GOALS = ["trading", "freelance", "startup", "agency", "other"] as const;
  *   3. WHEN THERE IS NOTHING TO SAY, IT SAYS SO. The one thing this
  *      screen must never do is manufacture a finding to justify itself.
  */
-export function OnboardingFlow({ activationFree }: { activationFree: boolean }) {
+export function OnboardingFlow({
+  activationFree,
+  integrationsAvailable,
+}: {
+  activationFree: boolean;
+  /** Gmail or Drive can actually be connected on this deployment (the
+   *  Google OAuth client is configured). Without it the card led to a
+   *  page with nothing to connect. */
+  integrationsAvailable: boolean;
+}) {
   const t = useTranslations("dashboard.onboarding");
   const tPromise = useTranslations("promise");
   const locale = useLocale();
@@ -326,12 +335,14 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
               description={t("sourcePasteHint")}
               onSelect={() => setStep("paste")}
             />
-            <SourceCard
-              icon={Plug}
-              title={t("sourceIntegrations")}
-              description={t("sourceIntegrationsHint")}
-              onSelect={() => router.push("/dashboard/integrations")}
-            />
+            {integrationsAvailable ? (
+              <SourceCard
+                icon={Plug}
+                title={t("sourceIntegrations")}
+                description={t("sourceIntegrationsHint")}
+                onSelect={() => router.push("/dashboard/integrations")}
+              />
+            ) : null}
             <SourceCard
               icon={PencilLine}
               title={t("sourceManual")}

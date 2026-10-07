@@ -19,7 +19,7 @@ const DELETE_REQUEST_WINDOW_MINUTES = 60;
 export async function POST() {
   let userId: string | undefined;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

@@ -35,7 +35,7 @@ export function generateMetadata(): Promise<Metadata> {
 const ANALYTICS_WINDOW_DAYS = 7;
 
 export default async function PublishedSitesPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getCurrentUser();
 

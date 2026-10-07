@@ -19,8 +19,9 @@ export const dynamic = "force-dynamic";
  * Content-Disposition header — a header-injection whose payload is a
  * field the user typed themselves.
  */
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -40,8 +40,8 @@ const MUTANTS = [
     // template, sender, call site — and this removes the last one.
     name: "the signup route stops handing over the language it knows",
     file: "src/app/api/signup/route.ts",
-    from: "sendWelcomeEmail(email, null, signupLocale)",
-    to: "sendWelcomeEmail(email)",
+    from: "sendConfirmEmail(email, confirmUrl, signupLocale)",
+    to: 'sendConfirmEmail(email, confirmUrl, "en")',
     expect: "caller supplies the account",
   },
   {

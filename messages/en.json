@@ -232,7 +232,7 @@
       "missionControl": "Set a goal, AI breaks it into steps.",
       "documents": "Freeform notes and documents you write yourself.",
       "websites": "Track sites you own — name, URL, status. No generation.",
-      "agents": "Plan the agents you want. A tracker, not a runtime.",
+      "agents": "Agents that search the web on a schedule and email you what they found.",
       "finance": "Log income and expenses.",
       "sales": "Leads, outreach and next steps.",
       "content": "Content ideas, captions and threads.",
@@ -271,7 +271,7 @@
       "affiliate": "Your referral link, what you've earned, and how you get paid.",
       "formSubmissions": "Everything visitors sent through a form on your published sites",
       "businessHealth": "MRR, margin, churn and runway. Owner only.",
-      "mine": "Everything you have made, newest first — with a starred-only tab",
+      "mine": "Your logged entries, newest first — with a starred-only tab",
       "records": "Every log in one place — filter by type instead of hunting the menu",
       "library": "Starred, recent and search — all your own entries in one place",
       "newEntry": "Write anything down — it files itself",
@@ -337,16 +337,16 @@
     "contactSales": "Contact Sales",
     "getPlan": "Get {plan}",
     "teamBannerTitle": "Building with a team?",
-    "teamBannerBody": "Invite teammates to work directly inside your workspace — every member gets full access at your plan's tier, not a limited guest view. On Professional, add members for +{price}/member/month, billed monthly per seat. Ultimate and Enterprise include unlimited team seats at no extra charge, so your whole team joins for free. Manage invites and remove access anytime from the Team page in Settings.",
+    "teamBannerBody": "Give teammates your plan: each member signs in to their own account and gets your plan's tier, not a limited guest view. Work is not shared between accounts yet — each person keeps their own. On Professional, add members for +{price}/member/month, billed monthly per seat. Ultimate and Enterprise include unlimited team seats at no extra charge. Manage invites and remove access anytime from the Team page in Settings.",
     "comparePlans": "Compare plans",
     "feature": "Feature",
     "backToHome": "← Back to Ionexa AI",
     "rows": {
       "creditsPerMonth": "Credits / month",
-      "aiAgents": "AI agents",
-      "websiteBuilder": "Website & Automation Builder",
+      "aiAgents": "Scheduled web-research agents",
+      "websiteBuilder": "Website Builder",
       "aiMemory": "AI Memory",
-      "teamCollaboration": "Team collaboration",
+      "teamCollaboration": "Members get your plan",
       "teamSeatsAddOn": "Team seats",
       "freeChatMessages": "Free chat messages / month",
       "deepResearch": "Deep Research runs / month",
@@ -365,7 +365,7 @@
       "projects": "Projects",
       "missionControl": "Goals & Plans",
       "helpCentre": "Help Centre",
-      "createStudio": "Make anything",
+      "createStudio": "Describe it, it opens the right tool",
       "voiceMinutes": "Voice minutes / month",
       "chatMemory": "Facts remembered in chat",
       "chatPins": "Pinned conversations",
@@ -391,10 +391,10 @@
     },
     "businessTitle": "Business",
     "businessSubtitle": "For teams building together",
-    "businessExplanation": "Choose Professional or Ultimate as your base plan — both include team collaboration. Then invite team members: each one gets full access at your plan's tier, for +{price}/member/month on Professional, or included free on Ultimate.",
-    "businessCardDescription": "Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.",
+    "businessExplanation": "Choose Professional or Ultimate as your base plan — both let you add team members. Each member gets your plan's tier on their own account, for +{price}/member/month on Professional, or included free on Ultimate. Work is not shared between accounts yet.",
+    "businessCardDescription": "Start with Professional or Ultimate as your team's base, then invite members for +{price}/month each — everyone gets your plan's tier on their own account.",
     "businessFeatureBase": "Choose Professional or Ultimate as your base plan",
-    "businessFeatureFullAccess": "Every member gets full access at your plan's tier",
+    "businessFeatureFullAccess": "Every member gets your plan's tier on their own account",
     "businessFeatureFreeOnUltimate": "Team seats included free on Ultimate",
     "businessFeatureManage": "Manage seats anytime from Team settings",
     "setUpTeam": "Set Up Team",
@@ -402,11 +402,11 @@
       "basicAiChat": "Basic AI chat",
       "creditsPerMonth": "{count, plural, one {# credit} other {# credits}}/month",
       "aiMemory": "AI Memory",
-      "websiteAutomationBuilderAccess": "Website & Automation Builder access",
+      "websiteAutomationBuilderAccess": "Website Builder, and automations that run once a day",
       "everythingInStarter": "Everything in Starter",
-      "upTo100AiAgents": "Up to 100 AI agents",
+      "upTo100AiAgents": "Up to 100 scheduled web-research agents",
       "everythingInGrowth": "Everything in Growth",
-      "teamCollaboration": "Team collaboration",
+      "teamCollaboration": "Team seats: members get your plan",
       "everythingInProfessional": "Everything in Professional",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Unlimited team seats included — no per-member charge",
       "extendedChatMemoryRetention100Vs20RecentFact": "Extended chat memory retention (100 vs 20 recent facts)",
@@ -414,10 +414,10 @@
       "everythingInUltimate": "Everything in Ultimate",
       "unlimitedMembers": "Unlimited members",
       "customCredits": "Custom credits",
-      "upTo2AiAgents": "Up to 2 AI agents",
-      "upTo5AiAgents": "Up to 5 AI agents",
-      "upTo15AiAgentsTeams": "Up to 15 AI agents & teams",
-      "upTo50AiAgents": "Up to 50 AI agents"
+      "upTo2AiAgents": "Up to 2 scheduled web-research agents",
+      "upTo5AiAgents": "Up to 5 scheduled web-research agents",
+      "upTo15AiAgentsTeams": "Up to 15 scheduled web-research agents",
+      "upTo50AiAgents": "Up to 50 scheduled web-research agents"
     },
     "values": {
       "unlimited": "Unlimited",
@@ -432,7 +432,7 @@
     },
     "seatNote": {
       "included": "Unlimited team seats included — no per-member charge",
-      "perMember": "+ {currency}{price}/month per team member — each member gets full access at your plan's tier"
+      "perMember": "+ {currency}{price}/month per team member — each member gets your plan's tier on their own account"
     },
     "metaDescription": "Ionexa AI pricing — Free, Starter, Growth, Professional, Ultimate, and Enterprise plans.",
     "billingMonthly": "Monthly",
@@ -450,7 +450,8 @@
       "limits": "Limits",
       "support": "Support"
     },
-    "comparisonRowCount": "Features compared: {count}"
+    "comparisonRowCount": "Features compared: {count}",
+    "paymentPending": "The payment for this change did not go through, so your plan has not changed."
   },
   "roadmap": {
     "title": "Roadmap",
@@ -463,12 +464,12 @@
     },
     "items": {
       "modules": {
-        "title": "13 Business Modules",
-        "description": "Ideas, Competitors, Research, Finance, Learning, Trading, Decisions, Products, Content, Sales/CRM, Feedback, Analytics, and Automation notes."
+        "title": "13 Business Entry Lists",
+        "description": "Keep your own entries in 13 lists, from My records: Ideas, Competitors, Research, Finance, Learning, Trading, Decisions, Products, Content, Sales/CRM, Feedback, Analytics, and Automation notes."
       },
       "createAnything": {
-        "title": "Create Anything",
-        "description": "Describe anything in plain text and AI files it into the right module automatically."
+        "title": "Describe it once",
+        "description": "Describe what you need in plain text: it opens the right tool with your words, or files a note into the right module."
       },
       "chat": {
         "title": "Ionexa Chat",
@@ -480,23 +481,23 @@
       },
       "team": {
         "title": "Team Collaboration",
-        "description": "Invite teammates and give them full access at your plan's tier."
+        "description": "Invite teammates: each one gets your plan's tier on their own account. Shared work is not built yet."
       },
       "agentBuilder": {
         "title": "AI Agent Builder",
-        "description": "Describe a goal and get a working autonomous agent that pursues it."
+        "description": "Describe a goal and get an agent that searches the web for it on the schedule you set and sends you what it found."
       },
       "websiteBuilder": {
         "title": "Website Builder",
         "description": "AI-generated websites from a single prompt."
       },
       "automationBuilder": {
-        "title": "Real Automation Builder",
-        "description": "Actual workflow automation that runs — not just logged ideas."
+        "title": "Automations",
+        "description": "Describe a task in a sentence: it runs once a day and saves the result for you. Steps and conditions are not built yet."
       },
       "aiMemory": {
         "title": "AI Memory",
-        "description": "Cross-project context and recall, so AI remembers what matters."
+        "description": "Chat remembers what you tell it about you and your business, and the site, presentation and post tools use it. You can see and delete every item."
       },
       "mobileApps": {
         "title": "Mobile & Desktop Apps",
@@ -520,7 +521,7 @@
       },
       "coding": {
         "title": "AI Coding Assistant",
-        "description": "Full app generation, not just snippets."
+        "description": "Writes code from a description, or explains, debugs, converts or writes tests for code you paste in. It does not run code or open a repository."
       },
       "dataAnalysis": {
         "title": "AI Data Analysis",
@@ -594,7 +595,8 @@
       "resetSuccess": "Password updated — sign in with your new password.",
       "failed": "We couldn't sign you in. Check the email and password, or reset your password if you're not sure.",
       "oauthFailed": "That sign-in didn't complete. Try again, or use your email and password below.",
-      "sharedSignInFirst": "Sign in to save what you shared."
+      "sharedSignInFirst": "Sign in to save what you shared.",
+      "emailNotConfirmed": "Confirm your email first. We just sent a new link to your inbox."
     },
     "signup": {
       "chooseYourPlan": "Choose your plan",
@@ -622,7 +624,9 @@
       "mostPopular": "Most Popular",
       "mustAgreeToTerms": "You must agree to the Terms of Service and Privacy Policy to create an account.",
       "passwordRequirementsNotMet": "Please choose a password that meets every requirement above.",
-      "failed": "We couldn't create the account. Check the details and try again — you have not been charged."
+      "failed": "We couldn't create the account. Check the details and try again — you have not been charged.",
+      "checkEmailTitle": "Check your email",
+      "checkEmailBody": "We sent a link to {email}. Open it to confirm your address and start using your account."
     },
     "forgotPassword": {
       "title": "Reset password",
@@ -662,7 +666,18 @@
       "cancel": "Cancel and go back",
       "confirmFailed": "We couldn't complete the deletion. Your account is still here — try the link again, or contact support."
     },
-    "generateStrongPassword": "Generate strong password"
+    "generateStrongPassword": "Generate strong password",
+    "verifyEmail": {
+      "title": "Confirm your email",
+      "body": "We sent a link to your email. Open it to start using your account.",
+      "linkInvalid": "That link has expired or was already used. Ask for a new one below.",
+      "resend": "Send a new link",
+      "sending": "Sending…",
+      "sent": "A new link is on its way. Check your inbox and spam folder.",
+      "failed": "The email could not be sent. Try again in a few minutes.",
+      "rateLimited": "Too many links in the last hour. Try again later.",
+      "signedOut": "Sign in with your email and password, and a new link will be sent."
+    }
   },
   "settings": {
     "title": "Settings",
@@ -978,7 +993,7 @@
         "testSent": "Connected — check for our test message.",
         "testFailed": "We couldn't deliver a test message there, so nothing was saved.",
         "telegram": {
-          "help": "Message our bot, then paste the chat ID it replies with.",
+          "help": "Open @{bot} in Telegram and press Start, so it is allowed to message you. Then send any message to @userinfobot — it replies with your chat ID — and paste that number here.",
           "placeholder": "Chat ID"
         },
         "discord": {
@@ -1587,7 +1602,6 @@
       "statusCompleted": "Ready",
       "statusFlagged": "Flagged",
       "flaggedTitle": "Flagged by our safety review",
-      "regenerateFree": "Regenerate (free)",
       "editUnavailable": "You can request changes once this website has finished generating.",
       "design": {
         "title": "Design",
@@ -1635,7 +1649,6 @@
         "photoSourceNeedsUpload": "Attach your photos above, or this falls back to stock."
       },
       "imageIntro": "Your logo, product shots, photos of the place — anything you want on the page or want the style taken from.",
-      "regenerateAlreadyUsed": "You’ve already used the free regeneration for this site. Create a new website to try a different brief.",
       "regenerateNoBrief": "This site was made before we started saving the original brief, so it can’t be regenerated automatically. Create a new website with the same description.",
       "empty": {
         "title": "Describe the site, get the site",
@@ -1675,7 +1688,9 @@
           "quota": "{count, plural, one {One picture} other {# pictures}} could not be added: the photo library refused more requests for now. Try again in an hour, or add your own images.",
           "noMatch": "{count, plural, one {One picture was} other {# pictures were}} asked for and no photograph matched. Nothing unrelated was put in its place — describing the subject differently usually helps."
         }
-      }
+      },
+      "regeneratePaid": "Regenerate · about {count} credits",
+      "regenerateNoCredits": "Not enough credits for another regeneration: it needs about {needed}, you have {available}. Nothing was started."
     },
     "marketplace": {
       "title": "Ready-made helpers",
@@ -2113,7 +2128,7 @@
       "reasonBadEdges": "It can't start or end with a hyphen.",
       "reasonReserved": "That address is reserved. Please pick another.",
       "reasonTaken": "That address is already taken. Try a different one.",
-      "disabledFlagged": "This site was held by our safety review, so it can’t go live. See the details below — you can regenerate it once for free.",
+      "disabledFlagged": "This site was held by our safety review, so it can’t go live. See the details below — you can regenerate it, and the button shows what that costs.",
       "disabledFailed": "This site didn’t finish generating, so there’s nothing to publish yet.",
       "disabledGenerating": "Still generating. You can publish as soon as it’s finished.",
       "empty": {
@@ -2124,7 +2139,7 @@
     "integrations": {
       "title": "Integrations",
       "emptyTitle": "Nothing connected yet",
-      "emptyBody": "Connect an account and the AI can read from it — your mail, your calendar, your files — instead of only knowing what you typed in by hand.",
+      "emptyBody": "Connect an account and the AI can read from it — your mail, your files — instead of only knowing what you typed in by hand.",
       "description": "Connect the tools you already use, so the AI can work with your real data.",
       "privacyNotice": "Connections are read-only unless stated otherwise. Tokens are encrypted with a key that is not stored in our database, they never appear in logs, and disconnecting revokes the access at the provider and deletes everything we hold — including the record of what was read.",
       "notConfigured": "Integrations aren't set up on this deployment yet, so connecting is disabled.",
@@ -3558,7 +3573,9 @@
     "costs": "Costs",
     "acceptableUseDescription": "What you may and may not do with Ionexa AI.",
     "aiTransparencyDescription": "Which AI models Ionexa uses, what they do, and what data they see.",
-    "contactDescription": "Get in touch with the Ionexa AI team."
+    "contactDescription": "Get in touch with the Ionexa AI team.",
+    "verifyEmail": "Confirm Your Email",
+    "verifyEmailDescription": "Confirm the email address of your Ionexa AI account."
   },
   "errors": {
     "retry": "Try again",
@@ -4145,7 +4162,7 @@
   },
   "routing": {
     "title": "Which AI is used",
-    "description": "Which model served which request over the last 30 days, what it cost, and what routing saved.",
+    "description": "Which model served which request over the last 30 days, and what it cost. The router does not choose models yet, so this table stays empty; what it would have chosen is on the Costs page.",
     "empty": "No routing decisions have been recorded yet. This table fills in once requests start flowing through the router — it is not showing zeros, it is showing nothing.",
     "decisions": "Decisions",
     "charged": "Charged to customers",
@@ -4158,7 +4175,7 @@
     "overrideSaving": "Override saving",
     "learnedTitle": "What the router has learned",
     "learnedIntro": "Success rate per feature and model over 30 days. A model below {rate}% stops being chosen for that feature — but only once it has at least {samples} runs, because two failures out of two is not evidence.",
-    "learnedEmpty": "Nothing conclusive yet. Until a feature and model pair has enough runs, routing stays on its static tier map.",
+    "learnedEmpty": "Nothing conclusive yet. Nothing here changes which model is used: every feature uses the model written into its own code.",
     "runs": "{rate}% over {samples} runs",
     "routedUp": "routed up",
     "notEnough": "not enough yet"
@@ -4293,7 +4310,7 @@
     "pruneConfirm": "Delete {count} lines that were said once and have not come up in six months? Anything repeated is kept.",
     "pruned": "{count} removed.",
     "surfacesTitle": "Which features remember",
-    "surfacesHelp": "Switched off, a feature neither reads what is remembered nor adds to it. Nothing already saved is deleted.",
+    "surfacesHelp": "On, a feature reads what the chat has remembered about you; only the chat adds to it. Off, it does neither. Nothing already saved is deleted.",
     "surfaceOn": "Remembers",
     "surfaceOff": "Off",
     "surfaceSaveFailed": "Could not save that switch.",
@@ -4454,6 +4471,15 @@
         "trafficUp": "site traffic is up {percent}%",
         "trafficDown": "site traffic is down {percent}%"
       }
+    },
+    "confirm": {
+      "subject": "Confirm your email for Ionexa AI",
+      "preheader": "One click and your account is ready.",
+      "label": "confirm your email",
+      "title": "Confirm it's you",
+      "body": "Press the button to confirm this address and open your Ionexa AI account.",
+      "button": "Confirm email",
+      "ignore": "If you did not create this account, ignore this email: nothing happens without the link."
     }
   },
   "routerReport": {

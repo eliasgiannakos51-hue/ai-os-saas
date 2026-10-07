@@ -10,7 +10,7 @@ export const fetchCache = "force-no-store";
  *  somebody who has already said they know. */
 export async function GET() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

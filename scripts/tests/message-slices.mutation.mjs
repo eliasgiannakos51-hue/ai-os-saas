@@ -27,7 +27,7 @@ const GATE = "scripts/tests/message-slices.test.mjs";
 const LIB = "src/lib/i18n/message-slices.ts";
 const GRAPH = "scripts/lib/route-graph.mjs";
 const BANNER = "src/components/cookie-consent-banner.tsx";
-const MIDDLEWARE = "src/middleware.ts";
+const MIDDLEWARE = "src/proxy.ts";
 const LAYOUT = "src/app/layout.tsx";
 const TARGETS = [GATE, LIB, GRAPH, BANNER, MIDDLEWARE, LAYOUT];
 

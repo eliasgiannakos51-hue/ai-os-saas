@@ -62,8 +62,8 @@ const MUTANTS = [
   {
     name: "a payment is described as a reward again",
     file: EN,
-    from: "both include team collaboration",
-    to: "both unlock team collaboration",
+    from: "both let you add team members",
+    to: "both unlock team members",
     expect: '"unlock" appears nowhere',
   },
   {

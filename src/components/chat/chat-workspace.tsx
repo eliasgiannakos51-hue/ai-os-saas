@@ -19,7 +19,7 @@ import { SourceCards } from "@/components/chat/source-cards";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { alignSuggestions, appendClarificationAnswers } from "@/lib/clarification-client";
 import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
-import { ExamplePrompts } from "@/components/ai/example-prompts";
+import { timeOfDayGreeting } from "@/lib/greeting";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useCredits } from "@/components/credits/credits-context";
 import { VoicePlayer } from "@/components/voice/voice-player";
@@ -94,6 +94,7 @@ export function ChatWorkspace({
   initialProjectId,
   initialWorkMode,
   workArea = false,
+  greeting = null,
 }: {
   initialConversations: ChatConversation[];
   /** Conversation to open on load — the `?c=` deep link a starred
@@ -128,6 +129,9 @@ export function ChatWorkspace({
   /** The switch "chat-work-area" (src/lib/flags/flags.ts), read by the
    *  page: whether a produced answer opens beside the conversation. */
   workArea?: boolean;
+  /** The name the empty Chat greets with (lib/greeting.ts, greetingName),
+   *  or null when it is not known — then the greeting has no name. */
+  greeting?: string | null;
   /**
    * The project a conversation STARTED here belongs to, for the whole of
    * its life. Chosen on arrival (/dashboard/projects/[id] links here with
@@ -148,6 +152,13 @@ export function ChatWorkspace({
   const tSteps = useTranslations("aiSteps");
   const chatStepLabel = (label: string | null) => (isChatStep(label) ? tSteps(CHAT_STEP_MESSAGE[label]) : null);
   const tVoice = useTranslations("voice");
+  const tPromise = useTranslations("promise");
+  // The hour's greeting, as on Home (components/overview/greeting-header.tsx):
+  // the device's clock on first render, then the browser's own time zone.
+  const [dayPart, setDayPart] = useState(() => timeOfDayGreeting().part);
+  useEffect(() => {
+    setDayPart(timeOfDayGreeting(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone).part);
+  }, []);
   const { refresh: refreshCredits, reportUsage } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -229,6 +240,9 @@ export function ChatWorkspace({
     abortRef.current?.abort();
   }
   const [loadingMessages, setLoadingMessages] = useState(false);
+  // NO MESSAGE YET: the screen of MASTER 14.2 — the earth, the greeting
+  // and the field, nothing else.
+  const isEmpty = !loadingMessages && messages.length === 0 && !sending;
   const [error, setError] = useState<string | null>(null);
   const [isRateLimitNotice, setIsRateLimitNotice] = useState(false);
   const composerRef = useRef<ChatComposerHandle>(null);
@@ -851,35 +865,25 @@ export function ChatWorkspace({
             <div className="flex h-full items-center justify-center text-sm text-muted">
               {tCommon("loading")}
             </div>
-          ) : messages.length === 0 && !sending ? (
-            <div className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center py-6 text-center">
-              <Earth variant="small" px={64} />
-              <h1 className="mt-4 text-xl font-bold tracking-wide text-foreground">{t("title")}</h1>
-              {/* Was three hardcoded English sentences. A Greek user opening
-                  Chat met an English explanation of what it is for — which
-                  is the one moment the explanation has to land. */}
-              <p className="mt-2 text-sm text-muted">{t("emptyHint")}</p>
-              {/* WHAT IT CAN SEE — V4.6 #9, on the first screen.
-                  "The user does not know what data the AI is reading.
-                  That creates both anxiety and wrong expectations." This
-                  is the one moment before they have typed anything, which
-                  is the only moment the expectation is still being set.
-                  The same three sentences are in the chat's help entry;
-                  one wording, two places. */}
-              <div className="mt-5 w-full rounded-card border border-border bg-panel/60 px-4 py-3 text-start">
-                <p className="text-xs font-semibold text-foreground/80">{t("dataScope.title")}</p>
-                <p className="mt-1 text-xs leading-relaxed text-muted">{t("dataScope.body")}</p>
-              </div>
-              {/* AND WHAT TO ACTUALLY SAY. "Ask anything" is true and
-                  useless: the reported confusion was somebody deciding this
-                  product was "several LLMs in one, cheaper", which is
-                  exactly the conclusion you reach from a blank box that
-                  accepts anything. */}
-              <ExamplePrompts
-                surface="chat"
-                onPick={(text) => composerRef.current?.setText(text)}
-                className="mt-5 w-full text-start"
-              />
+          ) : isEmpty ? (
+            /* CHAT WITH NO MESSAGE (MASTER Μέρος 14.2, 2026-10-07): «στο
+               κέντρο η γη του Ionexa με τον χαιρετισμό, και από κάτω το
+               πεδίο. Όχι άλλο εικονίδιο, όχι κάρτες, όχι λίστες.» The
+               earth and the greeting sit at the foot of this area, the
+               field follows, and a spacer of the same height under the
+               field puts the three together in the middle of the screen.
+               What used to be here moved, nothing was removed: what the
+               AI can see is the «?» in the bar above (HelpTip, scopeKey
+               dashboard.chat.dataScope), and the examples are on Home. */
+            <div data-testid="chat-empty" className="mx-auto flex min-h-full max-w-md flex-col items-center justify-end pb-2 text-center">
+              <Earth variant="small" px={96} />
+              <h1
+                className="mt-4 break-words text-2xl font-semibold tracking-tight text-foreground"
+                suppressHydrationWarning
+              >
+                {tPromise(`greeting.${dayPart}`)}
+                {greeting ? `, ${greeting}` : ""}
+              </h1>
             </div>
           ) : (
             /* NO BUBBLE ON THE ANSWER — V4.6 #12.
@@ -1066,36 +1070,20 @@ export function ChatWorkspace({
         )}
         </div>
 
-        <div className="border-t border-border p-4 sm:p-6">
+        <div className={`p-4 sm:p-6 ${isEmpty ? "" : "border-t border-border"}`}>
           {/* THE COMPOSER SHARES THE THREAD'S MEASURE. It was
               `max-w-2xl` while the thread was too, so they lined up by
               coincidence rather than by construction; the moment the
               thread's cap became a character count they would have
               drifted apart at every breakpoint. One class, one rule. */}
           <div className="chat-measure">
+            {/* THE ROW OVER THE FIELD, only once there is a conversation
+                or a mode is already on: the empty Chat is the earth, the
+                greeting and the field (MASTER 14.2). A mode chosen on the
+                way in (?mode=, ?preset=) stays visible, because it is
+                sent with the first message and must be clearable. */}
+            {(!isEmpty || workMode || mentorMode) && (
             <div className="mb-2 flex flex-wrap justify-end gap-2">
-              {/* PRESS ONCE, THEN TALK (#2). DRAWN ONLY WHEN IT CAN
-                  START: the hands-free loop needs BOTH keys,
-                  transcription (OPENAI_API_KEY) and speech
-                  (ELEVENLABS_API_KEY), the plan and minutes left. Until
-                  2026-10-05 it was drawn inert with the reason under it;
-                  the owner's rule since (the voice brief «ΦΩΝΗ ΣΤΟ CHAT», Μέρος Α)
-                  is «Κουμπί που δεν κάνει τίποτα δεν μένει στην οθόνη»,
-                  and scenario 11 names this button. The reason lives on
-                  the Voice settings screen. Held by
-                  scripts/tests/chat-dictation.prodtest.mjs. */}
-              {talkAvailable && (
-                <button
-                  type="button"
-                  onClick={() => setTalking(true)}
-                  disabled={sending}
-                  data-testid="voice-conversation-start"
-                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <AudioLines className="h-3.5 w-3.5" aria-hidden="true" />
-                  {tVoice("conversation.start")}
-                </button>
-              )}
               {workMode && (
                 <button
                   type="button"
@@ -1123,6 +1111,7 @@ export function ChatWorkspace({
                 {t("mentorMode")}
               </button>
             </div>
+            )}
             {error && (
               <p
                 className={`mb-3 rounded-card border px-3 py-2 text-xs ${
@@ -1145,6 +1134,33 @@ export function ChatWorkspace({
               onSend={(text) => void handleSend(text)}
               onStop={stopGeneration}
               initialText={composerInitialText}
+              beside={
+                /* PRESS ONCE, THEN TALK (#2), INSIDE THE FIELD beside the
+                   microphone since 2026-10-07 (MASTER 13.2: «Δεύτερο
+                   κουμπί δίπλα στο μικρόφωνο»). DRAWN ONLY WHEN IT CAN
+                   START: the hands-free loop needs BOTH keys,
+                   transcription (OPENAI_API_KEY) and speech
+                   (ELEVENLABS_API_KEY), the plan and minutes left. Until
+                   2026-10-05 it was drawn inert with the reason under it;
+                   the owner's rule since (the voice brief «ΦΩΝΗ ΣΤΟ
+                   CHAT», Μέρος Α) is «Κουμπί που δεν κάνει τίποτα δεν
+                   μένει στην οθόνη», and scenario 11 names this button.
+                   The reason lives on the Voice settings screen. Held by
+                   scripts/tests/chat-dictation.prodtest.mjs. */
+                talkAvailable && (
+                  <button
+                    type="button"
+                    onClick={() => setTalking(true)}
+                    disabled={sending}
+                    aria-label={tVoice("conversation.start")}
+                    title={tVoice("conversation.start")}
+                    data-testid="voice-conversation-start"
+                    className="flex h-11 w-11 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <AudioLines className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                )
+              }
             >
               {largeMessageCredits !== null && (
                 <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
@@ -1163,6 +1179,10 @@ export function ChatWorkspace({
             </ChatComposer>
           </div>
         </div>
+        {/* The same height as the thread area above while Chat is empty,
+            so the earth, the greeting and the field sit together in the
+            middle of the screen (MASTER 14.2). */}
+        {isEmpty && <div className="min-h-0 flex-1" aria-hidden="true" />}
       </div>
 
       {openWorkItem && <WorkArea item={openWorkItem} onClose={() => setOpenWorkId(null)} />}

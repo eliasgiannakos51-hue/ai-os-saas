@@ -66,8 +66,15 @@ for (const surface of reg.AI_SURFACES) {
   check(`${surface} has a home`, Boolean(file), "add it to SURFACE_FILES");
   if (!file) continue;
   const src = readFileSync(file, "utf8");
+  if (reg.NO_CHIPS_ON_SCREEN[surface]) {
+    check(`${surface} draws no chips, on purpose: ${reg.NO_CHIPS_ON_SCREEN[surface]}`,
+      !new RegExp(`surface="${surface}"`).test(src) && !/<ExamplePrompts\b/.test(src));
+    continue;
+  }
   check(`${surface} renders the shared chips`, new RegExp(`surface="${surface}"`).test(src));
 }
+check("...and every surface without chips is a declared surface, with a reason",
+  Object.entries(reg.NO_CHIPS_ON_SCREEN).every(([s, why]) => reg.AI_SURFACES.includes(s) && String(why).length > 30));
 // And nothing renders it with a surface the registry does not know.
 function walk(dir) {
   const out = [];
@@ -274,7 +281,9 @@ const chatUi = readFileSync("src/components/chat/chat-workspace.tsx", "utf8");
 check("the composer placeholder is translated", !/placeholder="Message Ionexa/.test(chatUi));
 check("the empty-state explanation too", !/Ask anything — general knowledge/.test(chatUi));
 check("and the send button's label", !/aria-label="Send"/.test(chatUi));
-check("the title reuses the key that was already translated", /\{t\("title"\)\}/.test(chatUi));
+// Since MASTER 14.2 (2026-10-07) the empty Chat has no title: it greets,
+// with the words Home uses.
+check("the greeting reuses the words that were already translated", /\{tPromise\(`greeting\.\$\{dayPart\}`\)\}/.test(chatUi) && /useTranslations\("promise"\)/.test(chatUi));
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

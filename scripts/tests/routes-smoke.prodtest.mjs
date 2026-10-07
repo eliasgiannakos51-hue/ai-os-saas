@@ -792,7 +792,10 @@ console.log("\n== 4. every AI box says what it accepts, and what it will not do 
     { name: "createStudio", url: "/dashboard/create", input: "#studio-input" },
     { name: "mission", url: "/dashboard/mission", input: "#mission-goal", open: "New Mission" },
     { name: "research", url: "/dashboard/deep-research", input: "#research-topic" },
-    { name: "chat", url: "/dashboard/chat", input: "textarea" },
+    // NO CHIPS ON PURPOSE since MASTER 14.2 (2026-10-07): the empty Chat
+    // is the earth, the greeting and the field (src/lib/ai/example-prompts.ts,
+    // NO_CHIPS_ON_SCREEN). Visited all the same, to see that none came back.
+    { name: "chat", url: "/dashboard/chat", input: "textarea", noChips: true },
   ];
   for (const surface of SURFACES) {
     const page = await authed.newPage();
@@ -808,6 +811,11 @@ console.log("\n== 4. every AI box says what it accepts, and what it will not do 
       }
       const chips = page.locator(`[data-testid="examples-${surface.name}"] [data-testid="ai-example"]`);
       const count = await chips.count();
+      if (surface.noChips) {
+        checkTrue(`${surface.name}: no examples on the page, on purpose (${count})`,
+          count === 0 && (await page.locator('[data-testid="ai-example"]').count()) === 0);
+        continue;
+      }
       if (count === 0) {
         // WHAT THE PAGE ACTUALLY SHOWED. "0 examples" has three very
         // different causes — the surface is behind a toggle, the account
@@ -1648,14 +1656,21 @@ console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
   });
   const chat = await textAndPlaceholders();
   for (const [what, needle] of [
-    ["the empty-state heading", "Ionexa Συνομιλία"],
     ["the composer placeholder", "Γράψε στο Ionexa..."],
-    ["the Mentor Mode toggle", "Λειτουργία μέντορα"],
     ["the new-chat button", "Νέα συνομιλία"],
     ["the empty conversation list", "Καμία συνομιλία ακόμα."],
   ]) {
     checkTrue(`${what} is Greek`, chat.includes(needle));
   }
+  // THE EMPTY CHAT GREETS (MASTER 14.2, 2026-10-07): the earth, the
+  // hour's greeting and the field. The greeting depends on the hour, so
+  // any of the three Greek ones, read from messages/el.json; and the
+  // title and the Mentor Mode chip that used to be here are not.
+  const { readFileSync: readMessages } = await import("node:fs");
+  const chatGreetings = Object.values(JSON.parse(readMessages("messages/el.json", "utf8")).promise.greeting);
+  checkTrue("the empty-state greeting is Greek", chatGreetings.some((g) => chat.includes(g)), chatGreetings.join(" / "));
+  checkTrue("...and the old title and the Mentor Mode chip are not on it",
+    !chat.includes("Ionexa Συνομιλία") && !chat.includes("Λειτουργία μέντορα"), chat.slice(0, 200));
   // The empty-state BODY was pinned to "Ρώτησε ό,τι θέλεις", which the
   // copy no longer says. The five above are labels on controls and are
   // stable; a body paragraph is prose and will be rewritten again. So the

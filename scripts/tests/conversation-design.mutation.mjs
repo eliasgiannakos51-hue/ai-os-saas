@@ -22,8 +22,8 @@ const MUTANTS = [
   {
     name: "the empty conversation is clipped at the top on a phone again",
     file: WS,
-    from: '<div className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center py-6 text-center">',
-    to: '<div className="mx-auto flex h-full max-w-md flex-col items-center justify-center text-center">',
+    from: '<div data-testid="chat-empty" className="mx-auto flex min-h-full max-w-md flex-col items-center justify-end pb-2 text-center">',
+    to: '<div data-testid="chat-empty" className="mx-auto flex h-full max-w-md flex-col items-center justify-center text-center">',
     expect: "rather than losing its top",
   },
   {
@@ -87,9 +87,38 @@ const MUTANTS = [
   {
     name: "the empty conversation loses its earth",
     file: WS,
-    from: '              <Earth variant="small" px={64} />',
+    from: '              <Earth variant="small" px={96} />',
     to: "",
-    expect: "the empty conversation opens with the earth too",
+    expect: "the empty conversation opens with the earth",
+  },
+  // MASTER 14.2 (2026-10-07).
+  {
+    name: "a card comes back onto the empty Chat",
+    file: WS,
+    from: '                {greeting ? `, ${greeting}` : ""}\n              </h1>\n',
+    to: '                {greeting ? `, ${greeting}` : ""}\n              </h1>\n              <p className="mt-2 text-sm text-muted">{t("emptyHint")}</p>\n',
+    expect: "and nothing else",
+  },
+  {
+    name: "the empty Chat greets nobody by name",
+    file: WS,
+    from: '                {greeting ? `, ${greeting}` : ""}\n',
+    to: "",
+    expect: "the hour's greeting, with the name Home uses",
+  },
+  {
+    name: "the mentor chip is drawn over the empty field again",
+    file: WS,
+    from: "            {(!isEmpty || workMode || mentorMode) && (",
+    to: "            {(true || workMode || mentorMode) && (",
+    expect: "the row over the field waits",
+  },
+  {
+    name: "the empty field sinks back to the bottom",
+    file: WS,
+    from: '        {isEmpty && <div className="min-h-0 flex-1" aria-hidden="true" />}\n',
+    to: "",
+    expect: "the field follows right under it",
   },
   {
     name: "the microphone moves back to the right, over the text",

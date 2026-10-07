@@ -172,6 +172,12 @@ const MUTANTS = [
     to: "voiceAvailability.loaded && voiceAvailability.transcribeAvailable && voiceAvailability.hasMinutes;",
   },
   {
+    name: "Talk leaves the field, so it is no longer beside the microphone (MASTER 13.2)",
+    file: "src/components/chat/chat-composer.tsx",
+    from: "          {beside}\n",
+    to: "",
+  },
+  {
     name: "the explanation is skipped and the browser's bare permission prompt is the first thing seen",
     file: INPUT,
     from: "    if (!explainedRef.current) {\n      setExplaining(true);\n      return;\n    }",

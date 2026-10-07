@@ -25,6 +25,9 @@
  *   5. RECENT, by the rule of 2026-10-05 (src/lib/nav/recent-tools.ts):
  *      a tool merely OPENED from All tools does not appear under Recent
  *      tools; one PINNED there does, at once.
+ *   6. CHAT WITH NO MESSAGE (MASTER 14.2, 2026-10-07): the earth, the
+ *      greeting and the field, together in the middle of the screen, and
+ *      nothing else drawn there — no card, no examples, no chip.
  *
  * BOTH DEVICES: 1440x900 with a mouse, 390x844 with Input.dispatchTouchEvent.
  */
@@ -84,6 +87,8 @@ const W = {
   railRecent: el.sidebar.rail.recentTools,
   // The square's one-word name since MASTER 14.1 (2026-10-07).
   posts: el.dashboard.tools.names.posts,
+  greetings: Object.values(el.promise.greeting),
+  mentor: el.dashboard.chat.mentorMode,
   oldHeadings: ["make", "ask", "run", "see", "organise"].map((k) => el.sidebar.groups[k]),
   menu: el.common.toggleMenu,
   palette: el.common.jumpToPage,
@@ -277,6 +282,38 @@ try {
     const railPinned = await railNow();
     check("...and then it IS under Recent tools", railPinned.includes(W.railRecent) && railPinned.includes(W.posts), railPinned.slice(0, 300));
     await shot("5-recent");
+
+    // ---- 6. chat with no message
+    await page.goto(`${ORIGIN}/dashboard/chat`, { waitUntil: "networkidle" });
+    const empty = page.locator('[data-testid="chat-empty"]');
+    const emptyShown = await empty.waitFor({ state: "visible", timeout: 10000 }).then(() => true, () => false);
+    check("the empty Chat is drawn", emptyShown);
+    const greetingText = emptyShown ? (await empty.locator("h1").innerText()).trim() : "";
+    check(`...and it greets by the hour ("${greetingText}")`, W.greetings.some((g) => greetingText.startsWith(g)), W.greetings.join(" / "));
+    // NOTHING ELSE IN THE CONVERSATION AREA: its only text is the
+    // greeting, and nothing in it can be pressed.
+    const thread = await page.locator('[data-testid="chat-thread"]').evaluate((n) => ({
+      text: (n.innerText ?? "").trim(),
+      pressable: n.querySelectorAll("button, a, input, [role=button]").length,
+    }));
+    check("...the conversation area holds the greeting and nothing else", thread.text === greetingText && thread.pressable === 0,
+      JSON.stringify(thread).slice(0, 200));
+    check("...and no Mentor Mode chip over the field", (await page.getByRole("button", { name: W.mentor }).count()) === 0);
+    // TOGETHER, IN THE MIDDLE: the field right under the greeting, and
+    // the group's middle near the middle of the Chat column.
+    const geo = await page.evaluate(() => {
+      const r = (el) => el?.getBoundingClientRect();
+      const h1 = r(document.querySelector('[data-testid="chat-empty"] h1'));
+      const field = r(document.querySelector("form textarea"));
+      const earth = r(document.querySelector('[data-testid="chat-empty"]')?.firstElementChild);
+      const column = r(document.querySelector('[data-testid="chat-thread"]')?.parentElement?.parentElement);
+      return h1 && field && earth && column
+        ? { gap: field.top - h1.bottom, groupMid: (earth.top + field.bottom) / 2, colMid: (column.top + column.bottom) / 2, colH: column.height }
+        : null;
+    });
+    check("...the field sits right under the greeting", Boolean(geo) && geo.gap >= 0 && geo.gap <= 120, JSON.stringify(geo));
+    check("...and the three are in the middle of the screen", Boolean(geo) && Math.abs(geo.groupMid - geo.colMid) <= geo.colH * 0.15, JSON.stringify(geo));
+    await shot("6-chat-empty");
     await context.close();
   }
 } finally {

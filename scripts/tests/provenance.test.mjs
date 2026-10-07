@@ -244,15 +244,18 @@ check("it says what it sees", /entries/i.test(en), en);
 check("it says what it does not see", /not see/i.test(en), en);
 check("it says it changes nothing unasked", /not change/i.test(en), en);
 const wsSrc = stripComments(readFileSync("src/components/chat/chat-workspace.tsx", "utf8"));
-check("it is on the first screen", /t\("dataScope\.title"\)/.test(wsSrc) && /t\("dataScope\.body"\)/.test(wsSrc));
-check('it is in the chat\'s "?"', /scopeKey="dashboard\.chat\.dataScope"/.test(wsSrc));
+// Since MASTER 14.2 (2026-10-07) the empty Chat is the earth, the
+// greeting and the field, with no cards: the statement left the first
+// screen and lives in the chat's "?", which is in the bar on every screen
+// of Chat, the empty one included.
+check('it is in the chat\'s "?"', /<HelpTip helpKey="help\.chat" scopeKey="dashboard\.chat\.dataScope" \/>/.test(wsSrc));
 const tipSrc = stripComments(readFileSync("src/components/ui/help-tip.tsx", "utf8"));
 check("...and the popover renders what it is handed", /t\(`\$\{scopeKey\}\.body`\)/.test(tipSrc));
-// ONE WORDING, TWO PLACES. Two copies drift the first time one is edited.
+// ONE WORDING, ONE PLACE. A second copy drifts the first time one is edited.
 check(
-  "both places read the same key",
-  (wsSrc.match(/dataScope/g) ?? []).length >= 3,
-  "the first screen and the help popover must not hold separate copies"
+  "...and the workspace holds no second copy of it",
+  (wsSrc.match(/dataScope/g) ?? []).length === 1,
+  "the help popover reads the key; nothing else in Chat should write the statement out"
 );
 
 // ICU: `#` does the formatting inside a plural. A formatNumber() around

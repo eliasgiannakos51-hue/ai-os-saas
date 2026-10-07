@@ -118,12 +118,19 @@ const CLASSIFIED = {
     "src/app/api/documents/[id]/pdf/route.ts",
     "src/lib/research/research.ts",
     "src/lib/agents/agent-runner.ts",
+    // Package 30: an AI box's answer is what the automation sends or
+    // saves. Through modelText, and a cut one says so (readAiAnswer).
+    "src/lib/automations/runner.ts",
     "src/lib/jobs/handlers/file-ask.ts",
     "src/lib/website-builder.ts",
   ],
   structured: [
     "src/lib/agents/template-fill.ts",
     "src/lib/agents/agent-builder.ts",
+    // Package 30: one forced tool call returning a row of at most eight
+    // boxes; a cut reply carries no complete tool_use block and is
+    // refused as "unusable" by readBuilt / readChanged.
+    "src/lib/automations/builder.ts",
     "src/lib/import/map-columns.ts",
     "src/lib/import/paste.ts",
     "src/lib/clarification.ts",

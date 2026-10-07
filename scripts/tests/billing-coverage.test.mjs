@@ -145,6 +145,16 @@ const DECLARED = {
       "runCompletion() call site to feed the returned usage to a CostAccumulator. The adapter itself " +
       "settles nothing and reserves nothing; it returns tokens and the caller pays for them.",
   },
+  "src/lib/automations/builder.ts": {
+    calls: 2,
+    billing: "settled",
+    note: "Package 30, automations as boxes. Two forced-tool calls: making a row of boxes from a sentence (api/automations/flows) and changing one box with words (api/automations/flows/[id]/change). Each route holds the automationBuild estimate before and settles on the usage recorded here — a question back, or an answer that is not a row of boxes, still SETTLES rather than releasing, because the tokens were spent; only a provider failure releases.",
+  },
+  "src/lib/automations/runner.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "Package 30. One call per AI box of a run, tried at most twice onto ONE accumulator per box; each box is held (automationStep, sized on the most of a read that reaches the model) and settled on its own before the next box runs, so the automation's own cost limit is checked against what was really charged. A box whose two attempts both fail releases its hold.",
+  },
   "src/lib/agents/agent-runner.ts": {
     calls: 1,
     billing: "settled",

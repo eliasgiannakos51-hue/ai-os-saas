@@ -262,6 +262,19 @@ const DECLARED = {
   "integrations/[provider]/connect": { bound: "artefact", why: "mints an OAuth state and redirects; it is rate limited on integration_connect, but nothing here spends, so the limit is not what excuses it" },
   "cron/monthly-credits": { bound: "artefact", why: "cron, guarded by CRON_SECRET; it GRANTS credits rather than consuming anything" },
 
+  // --- automations as boxes (package 30) ---
+  // The runner reserves and settles every AI box itself
+  // (lib/automations/runner.ts), two hops from these routes; what stops a
+  // loop of the ROUTE is named here.
+  "automations/flows/[id]/run": { bound: "limited", scope: "automation_run", why: "«Δοκιμή» and «Εκτέλεση τώρα», started by hand; each AI box is held and settled in the runner against the automation's own limit" },
+  "automations/events": { bound: "limited", scope: "automation_events", why: "runs the caller's own queued file runs, at most three a call; each AI box is held and settled in the runner" },
+  "automations/flows/[id]": { bound: "artefact", why: "edits or deletes the person's own automation row; the telegram URL is in lib/agents/delivery-store.ts, imported to ask WHETHER Telegram is connected" },
+  "automations/flows/[id]/active": { bound: "artefact", why: "switches an automation on or off; same closure — it asks whether Telegram and the calendar are connected, it sends nothing" },
+  "automations/flows/[id]/undo": { bound: "artefact", why: "puts back the previous version of the boxes; same closure as the edit" },
+  "automations/flows/[id]/runs": { bound: "artefact", why: "reads the person's own run history; the closure reaches the delivery store through the shared access module, and nothing is sent" },
+  "automations/runs/[runId]/cancel": { bound: "artefact", why: "cancels the person's own waiting run in one conditional update; nothing is sent or charged" },
+  "cron/automation-flows": { bound: "none", why: "cron, guarded by CRON_SECRET; the caller is Vercel, bounded per tick and per person, and every AI box is held and settled in the runner on the automation's owner" },
+
   // --- not a user-facing route at all ---
   "cron/website-storage-cleanup": { bound: "none", why: "cron, guarded by CRON_SECRET; the caller is Vercel and there is no user to charge" },
   "system-health/files": { bound: "none", why: "owner-only (isAdminEmail); writes and removes one canary object per call" },

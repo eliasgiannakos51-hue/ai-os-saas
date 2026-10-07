@@ -299,6 +299,24 @@ export const ACTION_PROFILES = {
   // baseOutputChars is the tier's output ceiling in characters
   // (outputTokens x CHARS_PER_TOKEN). A profile tuned to hit a price
   // instead would be a hold that does not cover what the run does.
+  // ONE AI BOX OF AN AUTOMATION'S RUN (MASTER 16, package 30): one call,
+  // the box's instruction plus what the boxes above it read, answered in
+  // at most RUN_MAX_TOKENS (lib/automations/runner.ts, 1,500 tokens —
+  // ~6,000 characters, the ceiling, as for agentRun).
+  automationStep: {
+    systemPromptTokens: 400,
+    auxiliaryCalls: [],
+    baseOutputChars: 6000,
+    outputCharsPerInputChar: 0,
+  },
+  // Making an automation from words, or changing one box with words: one
+  // forced-tool call (lib/automations/builder.ts, at most 1,500 tokens).
+  automationBuild: {
+    systemPromptTokens: 900,
+    auxiliaryCalls: [],
+    baseOutputChars: 6000,
+    outputCharsPerInputChar: 0,
+  },
   agentRun: {
     systemPromptTokens: 800,
     auxiliaryCalls: [{ inputTokens: 900, outputTokens: 900 }],

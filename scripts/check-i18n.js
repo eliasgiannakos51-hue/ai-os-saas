@@ -58,6 +58,12 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.tools.names.site",
   "pt:dashboard.tools.names.site",
   "fr:dashboard.tools.names.finances",
+  // The kinds of box in an automation (package 30): "Condition" and
+  // "Action" are the French words, "Start" is the German one (as on
+  // every German start button).
+  "fr:dashboard.automations.kinds.condition",
+  "fr:dashboard.automations.kinds.action",
+  "de:dashboard.automations.kinds.start",
   // "menu" is the French, Italian and Portuguese word for a site's menu
   // too: the name of a box in Site (package 4, dashboard.toolShell.box).
   // The Library's kinds (package 5, 2026-10-07): "Sites", "Documents"

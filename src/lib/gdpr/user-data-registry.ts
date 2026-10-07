@@ -193,6 +193,13 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // erasure empties (20261019000000_generated_images.sql puts it in
   // delete_user_storage_objects' list).
   { table: "generated_images", label: "generated_images", scope: "user_content" },
+  // MASTER 16, package 30. The automation as the person said it and as
+  // they changed it, every version of its boxes, and every run with its
+  // steps and its result (automation_runs.state): their own words and
+  // what their own automation made from their own data.
+  { table: "automation_flows", label: "automation_flows", scope: "user_content" },
+  { table: "automation_flow_versions", label: "automation_flow_versions", scope: "user_content" },
+  { table: "automation_runs", label: "automation_runs", scope: "user_content" },
   // Redesign phase 2: the folder and its goal, both written by the person.
   // The MEMBERSHIP rows are entity_links, already listed elsewhere in this
   // registry, so an export carries the project and the edges that say what

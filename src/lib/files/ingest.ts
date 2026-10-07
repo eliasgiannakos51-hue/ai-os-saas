@@ -16,6 +16,7 @@ import {
 import { maxFilesForPlan, maxStorageBytesForPlan } from "@/lib/files/limits";
 import { extractText, ExtractionError, serialisePages } from "@/lib/files/extract";
 import { usedStorageBytes } from "@/lib/files/store";
+import { queueFileRuns } from "@/lib/automations/file-event";
 
 /**
  * Everything between "we have the bytes" and "the row exists", shared by
@@ -52,7 +53,8 @@ export type IngestRefusal = {
   detail?: string;
 };
 
-export type IngestSuccess = { ok: true; file: Record<string, unknown> };
+/** `automations`: how many automations this file started (lib/automations/file-event.ts). */
+export type IngestSuccess = { ok: true; file: Record<string, unknown>; automations: number };
 export type IngestResult = IngestSuccess | IngestRefusal;
 
 export const FILES_STORAGE_REPAIR_SQL =
@@ -282,5 +284,8 @@ export async function ingestFileBytes(opts: {
     };
   }
 
-  return { ok: true, file: row };
+  // A file that was read starts the person's «όταν ανεβάζω αρχείο»
+  // automations: queued here, run elsewhere, never failing the upload.
+  const automations = status === "ready" ? await queueFileRuns(user, String(row.id)) : 0;
+  return { ok: true, file: row, automations };
 }

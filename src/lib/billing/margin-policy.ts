@@ -235,6 +235,9 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   transitionDetect: "transition_detect",
   createStudioDetect: "create_studio_detect",
   automationCreate: "automation_run",
+  // Package 30: both settle under the same feature as every automation.
+  automationStep: "automation_run",
+  automationBuild: "automation_run",
   agentBuild: "agent_build",
   agentRun: "agent_run",
   // Voice. Both settle under one feature so CREDIT_MARGIN_VOICE governs

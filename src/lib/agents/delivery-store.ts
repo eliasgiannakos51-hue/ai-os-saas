@@ -248,7 +248,7 @@ export async function deleteDeliveryChannel(userId: string, channel: CredentialC
  *  user chose is a way to hold a serverless invocation open. */
 const VERIFY_TIMEOUT_MS = 8_000;
 
-async function postJson(url: string, body: unknown): Promise<{ status: number; text: string } | null> {
+async function postTestMessage(url: string, body: unknown): Promise<{ status: number; text: string } | null> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), VERIFY_TIMEOUT_MS);
   try {
@@ -270,7 +270,7 @@ async function postJson(url: string, body: unknown): Promise<{ status: number; t
 }
 
 async function verifyTelegram(token: string, chat: string): Promise<{ ok: true } | { ok: false; message: string }> {
-  const result = await postJson(`https://api.telegram.org/bot${encodeURIComponent(token)}/sendMessage`, {
+  const result = await postTestMessage(`https://api.telegram.org/bot${encodeURIComponent(token)}/sendMessage`, {
     chat_id: chat,
     text: "Ionexa is connected. Your agent results will arrive here.",
     disable_notification: true,
@@ -296,7 +296,7 @@ async function verifyTelegram(token: string, chat: string): Promise<{ ok: true }
 }
 
 async function verifyDiscord(webhookUrl: string): Promise<{ ok: true } | { ok: false; message: string }> {
-  const result = await postJson(webhookUrl, {
+  const result = await postTestMessage(webhookUrl, {
     content: "Ionexa is connected. Your agent results will arrive here.",
   });
   if (!result) return { ok: false, message: "Discord did not respond — check the address and try again." };

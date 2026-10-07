@@ -53,6 +53,7 @@ import type { WorkspaceFile, WorkspaceCollection, Answer } from "@/lib/files/ans
 import { answerFromResult, answerForClipboard, type Citation } from "@/lib/files/answer";
 import { CitedAnswerText, CitedPages, PageView } from "@/components/files/cited-answer";
 import { pagesRead, uniquePages } from "@/lib/files/page-refs";
+import { startQueuedAutomations } from "@/lib/automations/kick";
 
 /**
  * The File Workspace.
@@ -160,6 +161,8 @@ export function FilesWorkspace({
     ok?: boolean;
     error?: string;
     file?: WorkspaceFile;
+    /** Automations this file started (lib/automations/file-event.ts). */
+    automations?: number;
   };
 
   function applyIngest(data: IngestResponse, file: File) {
@@ -168,6 +171,7 @@ export function FilesWorkspace({
       return;
     }
     setFiles((current) => [data.file as WorkspaceFile, ...current]);
+    startQueuedAutomations(data.automations);
     // A file that stored but could not be READ is not a success, and
     // saying "uploaded" over it is how somebody comes to believe the AI
     // can see a scan that it cannot.

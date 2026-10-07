@@ -461,6 +461,7 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/cron/reset-credits/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",
+  "src/app/api/cron/automation-flows/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED; runs every due automation (package 30) and the runs uploaded files queued, each charged per AI box to the automation's owner, so it spends real money on many accounts per call",
   "src/app/api/cron/affiliate-payouts/route.ts":
     "authenticated by CRON_SECRET (lib/cron-auth.ts); moves real money to affiliates' Stripe Connect accounts, so the claim of accrued commissions is atomic (claim_affiliate_commissions) and each transfer carries an idempotency key",
   "src/app/r/[code]/route.ts":

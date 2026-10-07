@@ -183,12 +183,12 @@ try {
     await answer.waitFor({ timeout: 10000 }).catch(() => null);
     const text = await page.locator("main").innerText();
     check("the answer is on the screen", text.includes("Το μίσθωμα είναι 4.820 ευρώ"), text.slice(0, 300));
-    check("...saying which pages of the PDF it never read", (await page.locator('[data-testid="files-unread"]').count()) >= 1 && text.includes(fill(W.unread, { name: NAME, read: 50, total: 51 })));
+    if (run.flags["file-pages"] !== "off") check("...saying which pages of the PDF it never read", (await page.locator('[data-testid="files-unread"]').count()) >= 1 && text.includes(fill(W.unread, { name: NAME, read: 50, total: 51 })));
 
     if (run.flags["file-pages"] === "off") {
       check("with the switch off, no reference is a button", (await page.locator('[data-testid="files-cite"], [data-testid="files-page"]').count()) === 0);
       check("...the answer reads as before, its list as text", text.includes(`[${NAME}, Page 37]`) && text.includes(`${NAME} — Page 37`));
-      check("...and the file's line does not speak of pages", !text.includes(fill(el.pagesPartRead, { read: 50, total: 51 })));
+      check("...and nothing new speaks of pages", !text.includes(fill(el.pagesPartRead, { read: 50, total: 51 })) && !text.includes(fill(W.unread, { name: NAME, read: 50, total: 51 })));
       check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
       await context.close();
       continue;
@@ -218,7 +218,7 @@ try {
     const viewed = await page.request.get(`${ON}/api/files/${FID}/view?page=37`, { maxRedirects: 0 });
     check("...which is a redirect to the file itself, at #page=37, never cached or referred",
       viewed.status() === 302 && /#page=37$/.test(viewed.headers().location ?? "") && viewed.headers()["cache-control"] === "no-store" && viewed.headers()["referrer-policy"] === "no-referrer",
-      `${viewed.status()} ${viewed.headers().location}`);
+      `${viewed.status()} ${viewed.headers().location} cache-control=${viewed.headers()["cache-control"]} referrer-policy=${viewed.headers()["referrer-policy"]}`);
 
     // ---- page 12: empty; page 51: not there; a page that did not open
     await press(listed.nth(1));

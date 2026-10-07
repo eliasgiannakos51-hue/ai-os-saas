@@ -20,6 +20,7 @@ const REFS = "src/lib/files/page-refs.ts";
 const ONE = "src/app/api/files/[id]/route.ts";
 const VIEW = "src/app/api/files/[id]/view/route.ts";
 const HANDLER = "src/lib/jobs/handlers/file-ask.ts";
+const WS = "src/components/files/files-workspace.tsx";
 
 const MUTANTS = [
   {
@@ -107,11 +108,18 @@ const MUTANTS = [
     to: "",
     expect: "...signed briefly, opened rather than saved, never cached or referred",
   },
+  {
+    name: "the Files page lists a page once per mention",
+    file: WS,
+    from: "{(pages ? uniquePages(answer.citations) : answer.citations).map((citation, i) =>",
+    to: "{answer.citations.map((citation, i) =>",
+    expect: "page: each page is listed once there too",
+  },
 ];
 
 runMutations({
   name: "file-pages",
   gate: GATE,
-  targets: [ASK, REFS, ONE, VIEW, HANDLER],
+  targets: [ASK, REFS, ONE, VIEW, HANDLER, WS],
   mutants: MUTANTS,
 });

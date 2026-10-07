@@ -106,6 +106,7 @@ check("shell: the page opens under its own answer", /\{pages && openPage\?\.turn
 check("shell: a file read only in part says so on its line", /pages && pagesRead\(file\.file_type, file\.page_count\)/.test(shell));
 const ws = code("src/components/files/files-workspace.tsx");
 check("page: the answer and its list open pages, with the switch", /\{pages \? \(\s*<>\s*<CitedAnswerText answer=\{answer\} onOpen=\{setOpenPage\} \/>/.test(ws) && /onClick=\{\(\) => setOpenPage\(citation\)\}/.test(ws));
+check("page: each page is listed once there too", /\{\(pages \? uniquePages\(answer\.citations\) : answer\.citations\)\.map\(\(citation, i\) =>/.test(ws));
 check("page: a file read only in part says so on its card", /pages && pagesRead\(file\.file_type, file\.page_count\)/.test(ws));
 check("the shell draws no empty paragraph for an answer it draws itself", /\{turn\.text && \(\s*<p/.test(code("src/components/shell/tool-shell.tsx")));
 

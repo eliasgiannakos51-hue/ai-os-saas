@@ -52,7 +52,7 @@ export type { WorkspaceFile, WorkspaceCollection } from "@/lib/files/answer";
 import type { WorkspaceFile, WorkspaceCollection, Answer } from "@/lib/files/answer";
 import { answerFromResult, answerForClipboard, type Citation } from "@/lib/files/answer";
 import { CitedAnswerText, CitedPages, PageView } from "@/components/files/cited-answer";
-import { pagesRead } from "@/lib/files/page-refs";
+import { pagesRead, uniquePages } from "@/lib/files/page-refs";
 
 /**
  * The File Workspace.
@@ -1095,7 +1095,7 @@ export function FilesWorkspace({
               <div>
                 <p className="mb-1 text-[11px] font-medium text-muted">{t("citations")}</p>
                 <ul className="space-y-0.5">
-                  {answer.citations.map((citation, i) => (
+                  {(pages ? uniquePages(answer.citations) : answer.citations).map((citation, i) => (
                     <li
                       key={`${citation.filename}-${citation.label}-${i}`}
                       className="flex items-center gap-1.5 text-[11px] text-muted"

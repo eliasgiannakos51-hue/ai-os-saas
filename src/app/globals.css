@@ -292,6 +292,16 @@ body {
            hover:border-foreground/40 disabled:opacity-50;
   }
 
+  /* A ROUND LINK CHIP: the jump-to-section links, the places that left
+     All tools (MASTER 14.1, 2026-10-07) and the legal links on
+     /dashboard/settings. Three lists wrote the same outline inline;
+     declared here it is one decision, and the border count went down
+     when the second list of them was added (design-density.test.mjs). */
+  .chip-link {
+    @apply inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-xs
+           text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground;
+  }
+
   /* A LIST OF ROWS, SEPARATED BY ONE RULE INSTEAD OF N OUTLINES.
 
      The trade design-density.test.mjs's divide clause describes, made

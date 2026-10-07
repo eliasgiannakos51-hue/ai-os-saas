@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Pin, PinOff, Search } from "lucide-react";
-import { MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";
-import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
+import { MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";
+import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { filterAndRankCandidates } from "@/lib/command-palette-match";
 import { aliasesFor } from "@/lib/palette-aliases";
-import { ALL_TOOLS_GROUPS, type AllToolsGroupKey } from "@/lib/nav/all-tools";
+import { ALL_TOOLS_GROUPS, ALL_TOOLS_NAMES, type AllToolsGroupKey, type AllToolsNameKey } from "@/lib/nav/all-tools";
 import { NEVER_RECENT } from "@/lib/nav/recent-tools";
 import { useToast } from "@/components/toast/toast-context";
 
@@ -22,9 +22,10 @@ import { useToast } from "@/components/toast/toast-context";
  *
  * WHICH TOOLS, AND WHERE: lib/nav/all-tools.ts, by the owner's rule of
  * 2026-10-05 (shown when it does its main job end to end; hidden when it
- * is only a screen, produces nothing, or its name promises more). The
- * Settings block follows the four groups, because Integrations and Help
- * are reached from nowhere else.
+ * is only a screen, produces nothing, or its name promises more). Since
+ * MASTER 14.1 (2026-10-07) only the tools it names, each under its
+ * one-word name; Settings, Integrations, Help and Team are reached from
+ * the Settings page (app/dashboard/settings/page.tsx).
  *
  * THE SAME SEARCH AS ⌘K: a tile answers to its name on screen, its English
  * name, lib/palette-aliases.ts and its one-line description, ranked by
@@ -58,20 +59,39 @@ export function ToolsGrid({ isOwner, pinned = [] }: { isOwner: boolean; pinned?:
       organise: t("groups.organise"),
       business: t("groups.business"),
     };
-    const tools = ALL_TOOLS_GROUPS.map((g) => ({
+    // ONLY THE TOOLS (MASTER 14.1): Settings, Integrations and the Help
+    // Centre are in Settings, and the sidebar's Settings row opens it.
+    return ALL_TOOLS_GROUPS.map((g) => ({
       key: g.key,
       heading: headings[g.key],
       items: g.hrefs.map((h) => byHref.get(h)).filter((i): i is SidebarItem => Boolean(i)),
     })).filter((g) => g.items.length > 0);
-    const settings = sidebarGroups([SETTINGS_GROUP], isOwner).map((g) => ({
-      key: "settings",
-      heading: GROUP_HEADING_KEYS[g.heading] ? tSidebar(`groups.${GROUP_HEADING_KEYS[g.heading]}`) : g.heading,
-      items: g.items,
-    }));
-    return [...tools, ...settings];
-  }, [isOwner, t, tSidebar]);
+  }, [isOwner, t]);
 
-  const label = (item: SidebarItem) =>
+  // THE ONE-WORD NAMES (MASTER 14.1), through literal keys for the same
+  // reason as the headings above.
+  const names: Record<AllToolsNameKey, string> = {
+    site: t("names.site"),
+    slides: t("names.slides"),
+    posts: t("names.posts"),
+    research: t("names.research"),
+    analyze: t("names.analyze"),
+    files: t("names.files"),
+    automations: t("names.automations"),
+    projects: t("names.projects"),
+    goals: t("names.goals"),
+    meetings: t("names.meetings"),
+    library: t("names.library"),
+    memory: t("names.memory"),
+    finances: t("names.finances"),
+    sales: t("names.sales"),
+    trading: t("names.trading"),
+  };
+
+  const label = (item: SidebarItem) => (ALL_TOOLS_NAMES[item.href] ? names[ALL_TOOLS_NAMES[item.href]] : longLabel(item));
+  // The sidebar's longer name stays a search word: "Build a site" still
+  // finds Site, and "παρουσ" still finds Slides in Greek.
+  const longLabel = (item: SidebarItem) =>
     item.label === "Create Studio"
       ? tCommon("createStudio")
       : ITEM_LABEL_KEYS[item.label]
@@ -85,7 +105,7 @@ export function ToolsGrid({ isOwner, pinned = [] }: { isOwner: boolean; pinned?:
           .flatMap((g) => g.items)
           .map((item) => ({
             item,
-            candidates: [label(item), item.label, ...aliasesFor(ITEM_LABEL_KEYS[item.label] ?? "", locale), hint(item)],
+            candidates: [label(item), longLabel(item), item.label, ...aliasesFor(ITEM_LABEL_KEYS[item.label] ?? "", locale), hint(item)],
           })),
         query
       )

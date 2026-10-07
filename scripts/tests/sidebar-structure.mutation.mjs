@@ -42,7 +42,10 @@ const SIDEBAR = "src/components/dashboard/sidebar.tsx";
 // The groups are assembled and drawn by the grid the page renders (D.6).
 const TOOLS_PAGE = "src/components/tools/tools-grid.tsx";
 
-const TARGETS = [STRUCTURE, SIZE, NAMING, HINTS, NAV, VISIBILITY, SIDEBAR, TOOLS_PAGE, SOURCE, "docs/analytics-queries.sql"];
+// Since MASTER 14.1 (2026-10-07) the Settings block's rows are linked from here.
+const SETTINGS_PAGE = "src/app/dashboard/settings/page.tsx";
+
+const TARGETS = [STRUCTURE, SIZE, NAMING, HINTS, NAV, VISIBILITY, SIDEBAR, TOOLS_PAGE, SETTINGS_PAGE, SOURCE, "docs/analytics-queries.sql"];
 
 const MUTANTS = [
   // ---- THE DECLARED POSITIONS, 2026-09-12 ---------------------------
@@ -296,13 +299,20 @@ const MUTANTS = [
     expect: "rows drawn,",
   },
   {
-    // RE-ANCHORED 2026-10-05: All tools draws the four groups of
-    // lib/nav/all-tools.ts, then the Settings block.
-    name: "Settings stops being its own block",
+    // RE-ANCHORED 2026-10-07: All tools no longer draws the Settings
+    // block (MASTER 14.1); the Settings page links its rows instead.
+    name: "the Help Centre loses its door on the Settings page",
+    file: SETTINGS_PAGE,
+    from: '              { href: "/help", label: tKey("sidebar.items.help") },\n',
+    to: "",
+    expect: "every visible row of that block has a door",
+  },
+  {
+    name: "the Settings block comes back onto All tools",
     file: TOOLS_PAGE,
-    from: "    return [...tools, ...settings];",
-    to: "    return [...tools];",
-    expect: "...and All tools draws the main groups before it, and it last",
+    from: 'import { MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
+    to: 'import { MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
+    expect: "All tools draws the main groups' tools only",
   },
 
   // ---- and now each gate, emptied -----------------------------------

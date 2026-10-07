@@ -46,6 +46,18 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // The one-word tool names on All tools (MASTER 14.1, 2026-10-07).
+  // "Trading" is the word the de, fr, es, it and pt trading apps use;
+  // "Site" is the everyday French and Portuguese word for a website, and
+  // "Finances" is French for finances.
+  "de:dashboard.tools.names.trading",
+  "fr:dashboard.tools.names.trading",
+  "es:dashboard.tools.names.trading",
+  "it:dashboard.tools.names.trading",
+  "pt:dashboard.tools.names.trading",
+  "fr:dashboard.tools.names.site",
+  "pt:dashboard.tools.names.site",
+  "fr:dashboard.tools.names.finances",
   // "Name" is the German word for name, capital and all — the column
   // heading of a table on the owner-only cost page (QUEUE E.2).
   "de:routerReport.colName",

@@ -684,6 +684,9 @@
   "settings": {
     "title": "Ρυθμίσεις",
     "signedInAs": "Συνδεδεμένος ως",
+    "places": {
+      "title": "Συνδέσεις, βοήθεια και ομάδα"
+    },
     "changePassword": {
       "title": "Αλλαγή Κωδικού",
       "newPassword": "νέος κωδικός",
@@ -2824,6 +2827,23 @@
         "ask": "Ρώτα",
         "organise": "Οργάνωσε",
         "business": "Επιχείρηση"
+      },
+      "names": {
+        "site": "Ιστότοπος",
+        "slides": "Διαφάνειες",
+        "posts": "Αναρτήσεις",
+        "research": "Έρευνα",
+        "analyze": "Ανάλυση",
+        "files": "Αρχεία",
+        "automations": "Αυτοματισμοί",
+        "projects": "Έργα",
+        "goals": "Στόχοι",
+        "meetings": "Συναντήσεις",
+        "library": "Βιβλιοθήκη",
+        "memory": "Μνήμη",
+        "finances": "Οικονομικά",
+        "sales": "Πωλήσεις",
+        "trading": "Συναλλαγές"
       }
     },
     "home": {

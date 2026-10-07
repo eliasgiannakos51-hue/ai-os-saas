@@ -585,26 +585,36 @@ for (const declared of DECLARED) {
 
 // ---------------------------------------------------------------------
 console.log("\n== 3. Settings is a separate block, not the sixth group ==");
-// The groups are drawn on the All tools page now (the rail has none), and
-// it draws MAIN_SIDEBAR_GROUPS and then SETTINGS_GROUP. Both facts are
+// The groups are drawn on the All tools page now (the rail has none).
+// Since MASTER 14.1 (2026-10-07) that page draws only tools, and every
+// visible row of SETTINGS_GROUP is reached from the Settings page (or,
+// for Settings itself, from the sidebar's own row). Both facts are
 // load-bearing: if Settings ever became the sixth entry of
-// MAIN_SIDEBAR_GROUPS the order above would still pass; and if the page
-// stopped drawing SETTINGS_GROUP, Integrations and the Help Centre would
-// have no row anywhere, because the rail has none for them.
+// MAIN_SIDEBAR_GROUPS the order above would still pass; and if the
+// Settings page stopped linking a row, Integrations or the Help Centre
+// would have no door anywhere, because the rail has none for them.
 ok("SETTINGS_GROUP is declared apart from MAIN_SIDEBAR_GROUPS",
   /export const SETTINGS_GROUP: SidebarGroupConfig = \{/.test(navSrc) &&
   /export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig\[\] = \[/.test(navSrc));
 // The page renders components/tools/tools-grid.tsx, and that is where the
-// blocks are assembled: since ΣΥΣΤΗΜΑ DESIGN §6 (2026-10-05) the tools in
-// the four groups of lib/nav/all-tools.ts, looked up among the main
-// groups, and the Settings block after them.
+// blocks are assembled: the tools in the four groups of
+// lib/nav/all-tools.ts, looked up among the main groups, and nothing else.
 const toolsSrc = stripComments(readFileSync("src/components/tools/tools-grid.tsx", "utf8"));
-const mainAt = toolsSrc.indexOf("sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner)");
-const settingsAt = toolsSrc.indexOf("sidebarGroups([SETTINGS_GROUP], isOwner)");
-ok("...and All tools draws the main groups before it, and it last",
-  mainAt >= 0 && settingsAt > mainAt &&
-  /return \[\.\.\.tools, \.\.\.settings\];/.test(toolsSrc) &&
+ok("...and All tools draws the main groups' tools only, not the Settings block",
+  toolsSrc.includes("sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner)") && !toolsSrc.includes("SETTINGS_GROUP") &&
   /\{groups\.map\(\(group\) =>/.test(toolsSrc));
+// THE POPULATION IS THE BLOCK: every row of SETTINGS_GROUP that is not
+// hidden, read from the declaration rather than listed here.
+const settingsBlock = navSrc.slice(navSrc.indexOf("export const SETTINGS_GROUP"), navSrc.indexOf("export const ALL_SIDEBAR_GROUPS"));
+const settingsRows = settingsBlock.split(/href:\s*/).slice(1)
+  .filter((chunk) => !/hidden:\s*true/.test(chunk.split(/\n\s*\{/)[0]))
+  .map((chunk) => chunk.match(/^["'`]([^"'`]+)["'`]/)?.[1] ?? chunk.match(/^([A-Z_]+)\.href/)?.[1] ?? "?");
+const settingsPageSrc = stripComments(readFileSync("src/app/dashboard/settings/page.tsx", "utf8"));
+const sidebarRowSrc = stripComments(readFileSync("src/components/dashboard/sidebar.tsx", "utf8"));
+const doorless = settingsRows.filter((h) =>
+  h === "SETTINGS_NAV_ITEM" ? !/row\(\s*SETTINGS_HREF,/.test(sidebarRowSrc) : !settingsPageSrc.includes(`{ href: "${h}",`));
+ok(`...and every visible row of that block has a door: the Settings page, or the sidebar's own row (${settingsRows.length} rows)`,
+  settingsRows.length >= 3 && doorless.length === 0, doorless.join(", "));
 ok("Settings is the last declared block", DECLARED[DECLARED.length - 1].heading === "Settings");
 
 // ---------------------------------------------------------------------

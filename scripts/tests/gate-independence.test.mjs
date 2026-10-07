@@ -171,6 +171,9 @@ const KNOWN_CLAIMS = {
   "annual-billing.test.mjs":
     "'each card' ranges over the PLANS.map inside pricing/page.tsx, not over pages. " +
     "The token it checks sits inside that map.",
+  "all-tools.test.mjs":
+    "'every locale' ranges over the ten messages/*.json files, which the check reads in " +
+    "full; settings/page.tsx is read only for the one t(\"places.title\") call that uses the key.",
   "transition-buttons.test.mjs":
     "'no button' is a statement about one route's behaviour on a hedged answer, not " +
     "about a population of buttons.",

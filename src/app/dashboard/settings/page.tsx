@@ -252,7 +252,7 @@ export default async function SettingsPage() {
             <a
               key={link.href}
               href={link.href}
-              className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
+              className="chip-link"
             >
               {link.label}
             </a>
@@ -263,6 +263,30 @@ export default async function SettingsPage() {
           <p className="text-xs text-muted">{t("signedInAs")}</p>
           <p className="mt-1 text-sm text-foreground">{user.email}</p>
         </div>
+
+        {/* WHAT LEFT ALL TOOLS LIVES HERE (MASTER 14.1, 2026-10-07):
+            Integrations, the Help Centre and Team are not tools, so they
+            are not squares on /dashboard/tools; this is where they are
+            reached from, and their own pages are unchanged. */}
+        <nav aria-label={t("places.title")} className="mb-6 space-y-3 surface">
+          <h2 className="text-sm font-semibold text-foreground">{t("places.title")}</h2>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { href: "/dashboard/integrations", label: tKey("sidebar.items.integrations") },
+              { href: "/help", label: tKey("sidebar.items.help") },
+              { href: "/dashboard/team", label: tKey("sidebar.items.team") },
+            ].map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                data-testid="settings-place"
+                className="chip-link"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
 
         <DisplayNameSettings
           initialName={typeof user.user_metadata?.display_name === "string" ? user.user_metadata.display_name : ""}
@@ -414,7 +438,7 @@ export default async function SettingsPage() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground"
+                className="chip-link"
               >
                 {tKey(`landing.${link.labelKey}`)}
               </Link>

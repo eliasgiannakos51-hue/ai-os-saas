@@ -684,6 +684,9 @@
   "settings": {
     "title": "Paramètres",
     "signedInAs": "Connecté en tant que",
+    "places": {
+      "title": "Intégrations, aide et équipe"
+    },
     "changePassword": {
       "title": "Changer le mot de passe",
       "newPassword": "nouveau mot de passe",
@@ -2824,6 +2827,23 @@
         "ask": "Demander",
         "organise": "Organiser",
         "business": "Entreprise"
+      },
+      "names": {
+        "site": "Site",
+        "slides": "Diapos",
+        "posts": "Publications",
+        "research": "Recherche",
+        "analyze": "Analyse",
+        "files": "Fichiers",
+        "automations": "Automatisations",
+        "projects": "Projets",
+        "goals": "Objectifs",
+        "meetings": "Réunions",
+        "library": "Bibliothèque",
+        "memory": "Mémoire",
+        "finances": "Finances",
+        "sales": "Ventes",
+        "trading": "Trading"
       }
     },
     "home": {

@@ -684,6 +684,9 @@
   "settings": {
     "title": "Impostazioni",
     "signedInAs": "Accesso effettuato come",
+    "places": {
+      "title": "Integrazioni, aiuto e team"
+    },
     "changePassword": {
       "title": "Cambia password",
       "newPassword": "nuova password",
@@ -2824,6 +2827,23 @@
         "ask": "Chiedi",
         "organise": "Organizza",
         "business": "Attività"
+      },
+      "names": {
+        "site": "Sito",
+        "slides": "Slide",
+        "posts": "Post",
+        "research": "Ricerca",
+        "analyze": "Analisi",
+        "files": "File",
+        "automations": "Automazioni",
+        "projects": "Progetti",
+        "goals": "Obiettivi",
+        "meetings": "Riunioni",
+        "library": "Libreria",
+        "memory": "Memoria",
+        "finances": "Finanze",
+        "sales": "Vendite",
+        "trading": "Trading"
       }
     },
     "home": {

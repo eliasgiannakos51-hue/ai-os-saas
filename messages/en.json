@@ -684,6 +684,9 @@
   "settings": {
     "title": "Settings",
     "signedInAs": "Signed in as",
+    "places": {
+      "title": "Integrations, help and team"
+    },
     "changePassword": {
       "title": "Change Password",
       "newPassword": "new password",
@@ -2824,6 +2827,23 @@
         "ask": "Ask",
         "organise": "Organise",
         "business": "Business"
+      },
+      "names": {
+        "site": "Site",
+        "slides": "Slides",
+        "posts": "Posts",
+        "research": "Research",
+        "analyze": "Analyze",
+        "files": "Files",
+        "automations": "Automations",
+        "projects": "Projects",
+        "goals": "Goals",
+        "meetings": "Meetings",
+        "library": "Library",
+        "memory": "Memory",
+        "finances": "Finances",
+        "sales": "Sales",
+        "trading": "Trading"
       }
     },
     "home": {

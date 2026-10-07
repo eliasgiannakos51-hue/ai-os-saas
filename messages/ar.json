@@ -684,6 +684,9 @@
   "settings": {
     "title": "الإعدادات",
     "signedInAs": "تم تسجيل الدخول باسم",
+    "places": {
+      "title": "التكاملات والمساعدة والفريق"
+    },
     "changePassword": {
       "title": "تغيير كلمة المرور",
       "newPassword": "كلمة المرور الجديدة",
@@ -2824,6 +2827,23 @@
         "ask": "اسأل",
         "organise": "تنظيم",
         "business": "الأعمال"
+      },
+      "names": {
+        "site": "الموقع",
+        "slides": "الشرائح",
+        "posts": "المنشورات",
+        "research": "البحث",
+        "analyze": "التحليل",
+        "files": "الملفات",
+        "automations": "الأتمتة",
+        "projects": "المشاريع",
+        "goals": "الأهداف",
+        "meetings": "الاجتماعات",
+        "library": "المكتبة",
+        "memory": "الذاكرة",
+        "finances": "المالية",
+        "sales": "المبيعات",
+        "trading": "التداول"
       }
     },
     "home": {

@@ -97,7 +97,11 @@ console.log("\n== 2. the lines ==");
 // shared ConfirmCard, with its outline as `.btn-outline`, the two cards
 // cost one frame between them and the count went one below where the
 // feature found it.
-ok(`border utilities (${r.counts.borders}), ceiling 577`, r.counts.borders <= 577);
+// 577 -> 575 on 2026-10-07. Settings gained a third list of round link
+// chips (the places that left All tools, MASTER 14.1), which written
+// inline took this to 578. The three lists now share `.chip-link` in
+// globals.css, and the count went two below where the change found it.
+ok(`border utilities (${r.counts.borders}), ceiling 575`, r.counts.borders <= 575);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

@@ -6,6 +6,9 @@
  * sitting in two, a stale entry, a hidden tool with no reason, the square
  * losing its 28px icon or its shape, a name cut with an ellipsis, the pin
  * writing somewhere else or appearing on Chat, and a beta tag coming back.
+ * Since MASTER 14.1 (2026-10-07): the Settings block coming back, the
+ * long name replacing the one word, a square losing its name, and Settings
+ * no longer linking to what left All tools.
  *
  * Run: node scripts/tests/all-tools.mutation.mjs
  */
@@ -17,14 +20,15 @@ const GATE = "scripts/tests/all-tools.test.mjs";
 const GRID = "src/components/tools/tools-grid.tsx";
 const GROUPS = "src/lib/nav/all-tools.ts";
 const ALIASES = "src/lib/palette-aliases.ts";
-const TARGETS = [GATE, GRID, GROUPS, ALIASES];
+const SETTINGS = "src/app/dashboard/settings/page.tsx";
+const TARGETS = [GATE, GRID, GROUPS, ALIASES, SETTINGS];
 
 const MUTANTS = [
   {
     name: "the search stops knowing synonyms",
     file: GRID,
-    from: '            candidates: [label(item), item.label, ...aliasesFor(ITEM_LABEL_KEYS[item.label] ?? "", locale), hint(item)],',
-    to: "            candidates: [label(item), item.label, hint(item)],",
+    from: '            candidates: [label(item), longLabel(item), item.label, ...aliasesFor(ITEM_LABEL_KEYS[item.label] ?? "", locale), hint(item)],',
+    to: "            candidates: [label(item), longLabel(item), item.label, hint(item)],",
     expect: "the grid builds its candidates the way the palette does",
   },
   {
@@ -47,8 +51,8 @@ const MUTANTS = [
   {
     name: "a group names a screen the grid cannot draw",
     file: GROUPS,
-    from: '      "/dashboard/coding",\n',
-    to: '      "/dashboard/coding",\n      "/dashboard/films",\n',
+    from: '      "/dashboard/meetings",\n',
+    to: '      "/dashboard/meetings",\n      "/dashboard/films",\n',
     expect: "every href in all-tools.ts is a tool the grid can draw",
   },
   {
@@ -113,6 +117,35 @@ const MUTANTS = [
     from: '            <span className="block break-words text-sm font-medium text-foreground">{name}</span>',
     to: '            <span className="block break-words text-sm font-medium text-foreground">{name}</span>\n            <span className="bg-tag">beta</span>',
     expect: "the grid draws no tag",
+  },
+  // MASTER 14.1 (2026-10-07).
+  {
+    name: "the Settings block comes back onto All tools",
+    file: GRID,
+    from: 'import { MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
+    to: 'import { MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
+    expect: "no Settings block",
+  },
+  {
+    name: "the square shows the sidebar's long name instead of the one word",
+    file: GRID,
+    from: "  const label = (item: SidebarItem) => (ALL_TOOLS_NAMES[item.href] ? names[ALL_TOOLS_NAMES[item.href]] : longLabel(item));",
+    to: "  const label = (item: SidebarItem) => longLabel(item);",
+    expect: "the square draws the one-word name",
+  },
+  {
+    name: "a square loses its one-word name",
+    file: GROUPS,
+    from: '  "/dashboard/timeline": "library",\n',
+    to: "",
+    expect: "every grouped tool has a one-word name",
+  },
+  {
+    name: "Settings stops linking to Integrations, so it is reached from nowhere",
+    file: SETTINGS,
+    from: '              { href: "/dashboard/integrations", label: tKey("sidebar.items.integrations") },\n',
+    to: "",
+    expect: "Settings links to each of them",
   },
 ];
 

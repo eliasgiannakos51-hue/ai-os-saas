@@ -33,6 +33,7 @@ import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync } from "node:fs";
 import { chromium } from "playwright";
 import { startMockSupabase, MOCK_USER } from "../lib/mock-supabase.mjs";
+import { loadTs } from "./load-ts.mjs";
 
 let pass = 0;
 const failures = [];
@@ -81,7 +82,8 @@ const W = {
   railNew: el.sidebar.rail.new,
   railAll: el.sidebar.rail.allTools,
   railRecent: el.sidebar.rail.recentTools,
-  posts: el.sidebar.items.posts,
+  // The square's one-word name since MASTER 14.1 (2026-10-07).
+  posts: el.dashboard.tools.names.posts,
   oldHeadings: ["make", "ask", "run", "see", "organise"].map((k) => el.sidebar.groups[k]),
   menu: el.common.toggleMenu,
   palette: el.common.jumpToPage,
@@ -237,7 +239,11 @@ try {
     const cards = page.locator('[data-testid="tool-tile"]');
     const n = await cards.count();
     const cardInfo = await cards.evaluateAll((els) => els.map((a) => ({ text: a.innerText.trim(), lines: a.innerText.trim().split("\n").filter(Boolean).length })));
-    check(`All tools draws the tool list (${n} cards)`, n >= 20);
+    // EXACTLY the squares lib/nav/all-tools.ts groups (MASTER 14.1): no
+    // Settings block, nothing hidden coming back.
+    const { ALL_TOOLS_GROUPS } = await loadTs("src/lib/nav/all-tools.ts");
+    const squares = ALL_TOOLS_GROUPS.flatMap((g) => g.hrefs).length;
+    check(`All tools draws exactly its ${squares} squares (${n} cards)`, n === squares && squares >= 15);
     check("...and every card has a name AND a one-line hint", cardInfo.every((c) => c.lines >= 2), cardInfo.filter((c) => c.lines < 2).map((c) => c.text).join(" | "));
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     check("...and the page does not scroll sideways", overflow <= 1, `${overflow}px`);

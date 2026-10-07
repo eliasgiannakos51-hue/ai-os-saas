@@ -684,6 +684,9 @@
   "settings": {
     "title": "Configuración",
     "signedInAs": "Sesión iniciada como",
+    "places": {
+      "title": "Integraciones, ayuda y equipo"
+    },
     "changePassword": {
       "title": "Cambiar contraseña",
       "newPassword": "nueva contraseña",
@@ -2824,6 +2827,23 @@
         "ask": "Preguntar",
         "organise": "Organizar",
         "business": "Negocio"
+      },
+      "names": {
+        "site": "Sitio",
+        "slides": "Diapositivas",
+        "posts": "Publicaciones",
+        "research": "Investigación",
+        "analyze": "Análisis",
+        "files": "Archivos",
+        "automations": "Automatizaciones",
+        "projects": "Proyectos",
+        "goals": "Objetivos",
+        "meetings": "Reuniones",
+        "library": "Biblioteca",
+        "memory": "Memoria",
+        "finances": "Finanzas",
+        "sales": "Ventas",
+        "trading": "Trading"
       }
     },
     "home": {

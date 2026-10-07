@@ -166,13 +166,30 @@ check("an upload whose registration does not land is removed from the bucket",
   /if \(data\?\.ok && data\.file\) return \{ ok: true, file: data\.file \};\s*try \{\s*await createBrowserSupabase\(\)\.storage\.from\(FILE_BUCKET\)\.remove\(\[path\]\);/.test(uploadLib));
 check("a file that stored but could not be read is not called a success", /outcome\.file\.processing_status === "failed"/.test(filesShell));
 
+console.log("\n== 9. Site, in the shell ==");
+const site = read("src/components/website-builder/website-shell.tsx");
+check("a description said in the field builds the site through the page's two requests, then the status is watched",
+  /fetchWithAuthRetry\("\/api\/websites\/generate"/.test(site) && /fetch\("\/api\/websites\/generate\/process"/.test(site) && /fetch\(`\/api\/websites\/status\?id=\$\{id\}`\)/.test(site));
+check("...asking its questions first, answered in the field or skipped",
+  /if \(data\.needsClarification\)/.test(site) && /appendClarificationAnswers\(pending\.description, pending\.questions/.test(site) && /data-testid="site-skip-questions"/.test(site));
+check("...with the design chosen under the field folded into the brief", /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: 0 \}\)/.test(site) && /<DesignControls value=\{design\} onChange=\{setDesign\}/.test(site));
+check("while it builds, Stop is offered", /data-testid="website-stop"/.test(site) && /\/api\/websites\/\$\{current\.id\}\/cancel/.test(site));
+check("while a finished site is the current one, what is said changes it", /if \(current && current\.status === "completed"\) \{\s*void change\(text\);/.test(site) && /fetchWithAuthRetry\("\/api\/websites\/edit"/.test(site));
+check("the price shows before sending, from the server's own estimator", /estimateForAction\(\s*"websiteGenerate"/.test(site) && /t\("estimatedCost", \{ count: estimatedCost \}\)/.test(site));
+check("the site beside the conversation is sandboxed, marked as made by AI, and says what it still lacks",
+  /srcDoc=\{html\} sandbox=""/.test(site) && /<AiGeneratedNotice variant="block" \/>/.test(site) && /findUnfilledPlaceholders\(html\)/.test(site) && /t\("unfilledTitle"/.test(site));
+check("...and accuses no number the person typed: only for a site whose every request is in this conversation",
+  /asked\[current\.id\] \? findInventedNumbers\(html, asked\[current\.id\]\.join\("\\n"\)\) : \[\]/.test(site));
+check("Publish is on top of it", /<PublishControl websiteId=\{current\.id\}/.test(site));
+
 const LOCALES = ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"];
 for (const l of LOCALES) {
   const m = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).dashboard?.toolShell ?? {};
   check(`${l}: the shell's words`, ["open", "isOpen", "back", "close"].every((k) => typeof m[k] === "string" && m[k]) &&
     ["done", "platforms", "copyAll", "copyOne"].every((k) => typeof m.posts?.[k] === "string" && m.posts[k]) && /\{count, plural/.test(m.posts?.done ?? "") &&
     ["done", "changed", "new"].every((k) => typeof m.slides?.[k] === "string" && m.slides[k]) && /\{title\}[\s\S]*\{count, plural/.test(m.slides?.done ?? "") &&
-    typeof m.recent === "string" && m.recent && typeof m.analyze?.needFile === "string" && m.analyze.needFile);
+    typeof m.recent === "string" && m.recent && typeof m.analyze?.needFile === "string" && m.analyze.needFile &&
+    ["done", "changed", "building", "questions", "skip", "new", "design"].every((k) => typeof m.site?.[k] === "string" && m.site[k]));
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

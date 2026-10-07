@@ -58,6 +58,9 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.tools.names.site",
   "pt:dashboard.tools.names.site",
   "fr:dashboard.tools.names.finances",
+  // "Design" is the German word for a site's look (das Design), as the
+  // German site builders call the same control.
+  "de:dashboard.toolShell.site.design",
   // "Name" is the German word for name, capital and all — the column
   // heading of a table on the owner-only cost page (QUEUE E.2).
   "de:routerReport.colName",

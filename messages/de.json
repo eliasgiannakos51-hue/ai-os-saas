@@ -2873,6 +2873,15 @@
       "recent": "Zuletzt",
       "analyze": {
         "needFile": "Lade zuerst eine Datei hoch, mit „Datei hochladen“ unter dem Feld."
+      },
+      "site": {
+        "done": "„{name}“ ist fertig und neben dem Gespräch geöffnet. Was du als Nächstes schreibst, ändert es.",
+        "changed": "Geändert. Die neue Fassung ist neben dem Gespräch geöffnet.",
+        "building": "Ich baue „{name}“…",
+        "questions": "Bevor ich anfange, ein paar Fragen. Beantworte sie im Feld oder mach ohne weiter:",
+        "skip": "Ohne weitermachen",
+        "new": "Neue Website",
+        "design": "Design"
       }
     }
   },

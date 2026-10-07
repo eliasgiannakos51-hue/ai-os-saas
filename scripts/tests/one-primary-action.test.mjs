@@ -500,6 +500,13 @@ const REPLACEMENT_SURFACES = [
     walk: true,
     why: "Files in the shell: the field's send asks the ticked files; upload is an option",
   },
+  {
+    file: "src/components/website-builder/website-shell.tsx",
+    tag: "<WebsiteShell",
+    budget: 1,
+    walk: true,
+    why: "Site in the shell: the field's send builds or changes the site; Publish is outlined, as on the page",
+  },
 ];
 const replacementFiles = new Set(REPLACEMENT_SURFACES.map((r) => r.file));
 const walkedReplacements = new Set(REPLACEMENT_SURFACES.filter((r) => r.walk).map((r) => r.file));

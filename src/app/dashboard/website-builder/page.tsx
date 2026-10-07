@@ -6,6 +6,8 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { WebsiteBuilderWorkspace } from "@/components/website-builder/website-builder-workspace";
+import { WebsiteShell } from "@/components/website-builder/website-shell";
+import { isFeatureOn } from "@/lib/flags/flags";
 import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import { loadFavoriteIds } from "@/lib/favorites";
 import type { UserWebsite } from "@/types/user-website";
@@ -92,6 +94,17 @@ export default async function WebsiteBuilderPage(
   const favoritedWebsiteIds = [
     ...(await loadFavoriteIds(supabase, user.id, "user_websites", websiteRows.map((w) => w.id))),
   ];
+
+  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same sites,
+  // drawn as conversation and work. Reference photos and the version
+  // history stay on the page.
+  if (await isFeatureOn("tool-shell", user)) {
+    return (
+      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+        <WebsiteShell initialWebsites={websiteRows} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full">

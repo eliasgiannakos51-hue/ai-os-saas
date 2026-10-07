@@ -2873,6 +2873,15 @@
       "recent": "Recenti",
       "analyze": {
         "needFile": "Carica prima un file, con «Carica un file» sotto il campo."
+      },
+      "site": {
+        "done": "«{name}» è pronto, aperto accanto alla conversazione. Ciò che scrivi ora lo modifica.",
+        "changed": "Modificato. La nuova versione è aperta accanto alla conversazione.",
+        "building": "Sto costruendo «{name}»…",
+        "questions": "Prima di iniziare, qualche domanda. Rispondi nel campo, o continua senza:",
+        "skip": "Continua senza",
+        "new": "Nuovo sito",
+        "design": "Aspetto"
       }
     }
   },

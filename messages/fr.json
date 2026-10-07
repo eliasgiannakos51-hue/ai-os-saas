@@ -2873,6 +2873,15 @@
       "recent": "Récents",
       "analyze": {
         "needFile": "Importe d’abord un fichier, avec « Importer un fichier » sous le champ."
+      },
+      "site": {
+        "done": "« {name} » est prêt, ouvert à côté de la conversation. Ce que tu écris ensuite le modifie.",
+        "changed": "Modifié. La nouvelle version est ouverte à côté de la conversation.",
+        "building": "Je construis « {name} »…",
+        "questions": "Avant de commencer, quelques questions. Réponds dans le champ, ou continue sans :",
+        "skip": "Continuer sans",
+        "new": "Nouveau site",
+        "design": "Apparence"
       }
     }
   },

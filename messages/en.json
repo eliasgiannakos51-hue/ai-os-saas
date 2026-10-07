@@ -2873,6 +2873,15 @@
       "recent": "Recent",
       "analyze": {
         "needFile": "Upload a file first, with “Upload a file” under the field."
+      },
+      "site": {
+        "done": "“{name}” is ready, open beside the conversation. What you write next changes it.",
+        "changed": "Changed. The new version is open beside the conversation.",
+        "building": "Building “{name}”…",
+        "questions": "Before I start, a few questions. Answer them in the field, or go on without:",
+        "skip": "Go on without",
+        "new": "New site",
+        "design": "Design"
       }
     }
   },

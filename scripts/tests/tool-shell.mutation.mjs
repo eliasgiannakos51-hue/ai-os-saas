@@ -23,7 +23,8 @@ const RESEARCH = "src/components/research/research-shell.tsx";
 const ANALYZE = "src/components/data-analysis/analysis-shell.tsx";
 const FILES = "src/components/files/files-shell.tsx";
 const UPLOAD = "src/lib/files/upload-file.ts";
-const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD];
+const SITE = "src/components/website-builder/website-shell.tsx";
+const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD, SITE];
 
 const MUTANTS = [
   {
@@ -186,6 +187,27 @@ const MUTANTS = [
     from: '<ul data-testid="files-citations" className="mt-1 space-y-0.5">',
     to: '<ul className="mt-1 space-y-0.5">',
     expect: "the page it came from",
+  },
+  {
+    name: "Site: the preview runs the generated page's scripts",
+    file: SITE,
+    from: 'srcDoc={html} sandbox=""',
+    to: 'srcDoc={html} sandbox="allow-scripts"',
+    expect: "is sandboxed",
+  },
+  {
+    name: "Site: a change to a finished site builds a new one instead",
+    file: SITE,
+    from: '    if (current && current.status === "completed") {',
+    to: "    if (false) {",
+    expect: "what is said changes it",
+  },
+  {
+    name: "Site: the invented-number check accuses numbers typed in an earlier visit",
+    file: SITE,
+    from: 'asked[current.id] ? findInventedNumbers(html, asked[current.id].join("\\n")) : []',
+    to: 'findInventedNumbers(html, (asked[current.id] ?? []).join("\\n"))',
+    expect: "accuses no number the person typed",
   },
 ];
 

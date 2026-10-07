@@ -405,6 +405,50 @@ try {
       askedFiles.length === 1 && askedFiles[0]?.fileIds?.[0] === "55555555-5555-4555-8555-555555555555" && cited &&
         (await page.locator('[data-testid="files-citations"]').innerText()).includes("σελ. 3"), JSON.stringify(askedFiles));
 
+    // ---- Site: built, watched, previewed, then changed from the field
+    const SID = "77777777-7777-4777-8777-777777777777";
+    const HTML = "<!doctype html><html><head><title>Φούρνος</title></head><body><h1>Ο φούρνος της γειτονιάς</h1><p>Πρωινό στο γραφείο σας.</p></body></html>";
+    const siteRecord = (status, html) => ({
+      id: SID, user_id: MOCK_USER.id, name: "Φούρνος", html_content: html, status, error_message: null, description: "Site για φούρνο",
+      reference_image_url: null, has_reference_images: false, is_large_request: false, free_retry_used: false, created_at: "2026-10-07T10:00:00Z",
+    });
+    const built = [];
+    const changes = [];
+    let statusCalls = 0;
+    await page.route("**/api/websites/generate", (r) => {
+      built.push(r.request().postDataJSON());
+      return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, generated: true, record: siteRecord("processing", "") }) });
+    });
+    await page.route("**/api/websites/generate/process", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) }));
+    await page.route(`**/api/websites/status?id=${SID}`, (r) => {
+      statusCalls++;
+      const done = statusCalls >= 2;
+      return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, record: siteRecord(done ? "completed" : "processing", done ? HTML : "") }) });
+    });
+    await page.route("**/api/websites/edit", (r) => {
+      changes.push(r.request().postDataJSON());
+      return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, edited: true, record: siteRecord("completed", HTML.replace("Πρωινό", "Μεσημεριανό")) }) });
+    });
+    await page.goto(`${ON}/dashboard/website-builder`, { waitUntil: "networkidle" });
+    check("Site, switch on: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
+    const siteOptions = await page.locator('[data-testid="tool-shell-options"] > *').count();
+    check(`...with at most four options (${siteOptions})`, siteOptions >= 1 && siteOptions <= 4);
+    const siteField = page.locator("main textarea");
+    await siteField.fill("Site για τον φούρνο μας, με πρωινό στα γραφεία.");
+    await siteField.press("Enter");
+    const previewShown = await page.locator('[data-testid="site-preview"] iframe').waitFor({ state: "visible", timeout: 20000 }).then(() => true, () => false);
+    check("the description built a site, and the finished site opens beside the conversation, sandboxed",
+      built.length === 1 && previewShown && (await page.locator('[data-testid="site-preview"] iframe').getAttribute("sandbox")) === "", JSON.stringify({ built: built.length, statusCalls }));
+    if (device.touch) {
+      await press(page.getByRole("button", { name: W.back }));
+      await page.waitForTimeout(300);
+    }
+    await siteField.fill("Άλλαξε το πρωινό σε μεσημεριανό.");
+    await siteField.press("Enter");
+    await page.waitForTimeout(800);
+    check("the next thing said CHANGED the site instead of building another",
+      built.length === 1 && changes.length === 1 && changes[0]?.changeRequest === "Άλλαξε το πρωινό σε μεσημεριανό." && changes[0]?.websiteId === SID, JSON.stringify(changes));
+
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }

@@ -2343,7 +2343,18 @@
       "sharedReason": "原因：{reason}",
       "sharedRateLimit": "过去一小时上传次数过多，请稍后再共享。",
       "sharedDropped": "仅接收了前 {max} 个文件。",
-      "openedFromDevice": "已从你的设备打开 {count} 个文件。"
+      "openedFromDevice": "已从你的设备打开 {count} 个文件。",
+      "pagesPartRead": "读取 {total} 页中的前 {read} 页",
+      "pageRefs": {
+        "open": "打开：{name}，{label}",
+        "close": "关闭页面",
+        "loading": "正在打开页面…",
+        "empty": "此页面没有可读取的文字（可能是图片）。",
+        "missing": "此页面已不在文件中。",
+        "failed": "页面未能打开。请重试。",
+        "openPdf": "在此页打开 PDF",
+        "unread": "“{name}”共 {total} 页，只读取了前 {read} 页；之后的内容不在此回答中。"
+      }
     },
     "deepResearch": {
       "title": "好好查一下",

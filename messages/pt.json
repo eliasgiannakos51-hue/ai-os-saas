@@ -2343,7 +2343,18 @@
       "sharedReason": "Motivo: {reason}",
       "sharedRateLimit": "Demasiados carregamentos na última hora. Tente partilhar daqui a pouco.",
       "sharedDropped": "Só foram aceites os primeiros {max} ficheiros.",
-      "openedFromDevice": "{count, plural, one {# ficheiro aberto} other {# ficheiros abertos}} do seu dispositivo."
+      "openedFromDevice": "{count, plural, one {# ficheiro aberto} other {# ficheiros abertos}} do seu dispositivo.",
+      "pagesPartRead": "São lidas as primeiras {read} de {total} páginas",
+      "pageRefs": {
+        "open": "Abrir: {name}, {label}",
+        "close": "Fechar a página",
+        "loading": "A abrir a página…",
+        "empty": "Esta página não tinha texto legível (talvez seja uma imagem).",
+        "missing": "Esta página já não está no ficheiro.",
+        "failed": "A página não abriu. Tente novamente.",
+        "openPdf": "Abrir o PDF nesta página",
+        "unread": "De «{name}» só foram lidas as primeiras {read} de {total} páginas; o que vem depois não está nesta resposta."
+      }
     },
     "deepResearch": {
       "title": "Procura a fundo",

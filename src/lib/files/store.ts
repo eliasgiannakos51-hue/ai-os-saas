@@ -73,12 +73,12 @@ export async function loadReadableFiles(
   supabase: SupabaseClient,
   userId: string,
   fileIds: string[]
-): Promise<{ id: string; filename: string; extracted_text: string | null }[] | null> {
+): Promise<{ id: string; filename: string; extracted_text: string | null; page_count: number | null }[] | null> {
   if (fileIds.length === 0) return [];
 
   const { data, error } = await supabase
     .from("user_files")
-    .select("id, filename, extracted_text")
+    .select("id, filename, extracted_text, page_count")
     .eq("user_id", userId)
     .eq("processing_status", "ready")
     .in("id", fileIds);

@@ -17,6 +17,9 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { ACCEPT_ATTRIBUTE, MAX_FILE_BYTES, MAX_FILES_PER_QUESTION, MAX_QUESTION_CHARS, formatBytes, kindFromExtension } from "@/lib/files/file-types";
 import { answerForClipboard, answerFromResult, type Answer, type WorkspaceFile } from "@/lib/files/answer";
 import { uploadFile } from "@/lib/files/upload-file";
+import { CitedAnswerText, CitedPages, PageView } from "@/components/files/cited-answer";
+import { pagesRead } from "@/lib/files/page-refs";
+import type { Citation } from "@/lib/files/answer";
 
 type Turn = { id: string; role: "user" | "tool"; text: string; answer?: Answer };
 
@@ -37,10 +40,13 @@ type Turn = { id: string; role: "user" | "tool"; text: string; answer?: Answer }
 export function FilesShell({
   initialFiles,
   initialOpenId = null,
+  pages = false,
 }: {
   initialFiles: WorkspaceFile[];
   /** A file to open on arrival — `?record=` from the Library: it is ticked, so the next question is asked of it. */
   initialOpenId?: string | null;
+  /** The switch "file-pages" (package 12): an answer's pages are pressed to open them. */
+  pages?: boolean;
 }) {
   const t = useTranslations("dashboard.files");
   const tAsk = useTranslations("aiSteps.file_ask");
@@ -57,6 +63,8 @@ export function FilesShell({
   const [asking, setAsking] = useState(false);
   const [askStep, setAskStep] = useState<string | null>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
+  // The page opened from an answer, with the turn it belongs to.
+  const [openPage, setOpenPage] = useState<{ turnId: string; citation: Citation } | null>(null);
   const [pane, setPane] = useState<"files" | null>(asked ? "files" : null);
   const heldAskStep = useHeldStepLabel(askStep);
   // The worker's real step, through literal keys so the message slicer can
@@ -234,11 +242,20 @@ export function FilesShell({
     ...turns.map((turn) => ({
       id: turn.id,
       role: turn.role,
-      text: turn.text,
+      // With the switch, the answer is drawn below with its pages pressable.
+      text: pages && turn.answer ? "" : turn.text,
       extra: turn.answer ? (
         <div data-testid="files-answer" className="mt-2 space-y-2">
           {!turn.answer.fromDocuments && <p className="text-xs text-warning">{t("notInDocuments")}</p>}
-          {turn.answer.citations.length > 0 ? (
+          {pages && <CitedAnswerText answer={turn.answer} onOpen={(citation) => setOpenPage({ turnId: turn.id, citation })} />}
+          {pages && turn.answer.citations.length > 0 ? (
+            <div>
+              <p className="text-[11px] font-medium text-muted">{t("citations")}</p>
+              <CitedPages answer={turn.answer} onOpen={(citation) => setOpenPage({ turnId: turn.id, citation })} />
+            </div>
+          ) : pages ? (
+            turn.answer.fromDocuments && <p className="text-xs text-warning">{t("uncitedAnswer")}</p>
+          ) : turn.answer.citations.length > 0 ? (
             <div>
               <p className="text-[11px] font-medium text-muted">{t("citations")}</p>
               <ul data-testid="files-citations" className="mt-1 space-y-0.5">
@@ -252,6 +269,10 @@ export function FilesShell({
           ) : (
             turn.answer.fromDocuments && <p className="text-xs text-warning">{t("uncitedAnswer")}</p>
           )}
+          {pages && openPage?.turnId === turn.id && openPage.citation.fileId && (
+            <PageView key={`${openPage.citation.fileId}-${openPage.citation.page}`} citation={openPage.citation} onClose={() => setOpenPage(null)} />
+          )}
+          {pages && turn.answer.citations.length === 0 && turn.answer.unreadPages.length > 0 && <CitedPages answer={{ ...turn.answer, citations: [] }} onOpen={() => {}} />}
           {turn.answer.removedCitations > 0 && <p className="text-[11px] text-muted">{t("removedCitations", { count: turn.answer.removedCitations })}</p>}
           {turn.answer.truncated && <p className="text-[11px] text-warning">{t("truncatedWarning")}</p>}
           {turn.answer.skippedFiles.length > 0 && <p className="text-[11px] text-muted">{t("skippedFiles", { names: turn.answer.skippedFiles.join(", ") })}</p>}
@@ -292,7 +313,15 @@ export function FilesShell({
                         <span className="min-w-0 flex-1">
                           <span className="block break-words text-sm text-foreground">{file.filename}</span>
                           <span className="block text-[11px] text-muted">
-                            {ready ? (file.page_count ? t("pages", { count: file.page_count }) : t("statusReady")) : file.processing_status === "failed" ? t("statusFailed") : t("statusProcessing")}
+                            {ready
+                              ? pages && pagesRead(file.file_type, file.page_count)
+                                ? t("pagesPartRead", { read: pagesRead(file.file_type, file.page_count)!.read, total: pagesRead(file.file_type, file.page_count)!.total })
+                                : file.page_count
+                                  ? t("pages", { count: file.page_count })
+                                  : t("statusReady")
+                              : file.processing_status === "failed"
+                                ? t("statusFailed")
+                                : t("statusProcessing")}
                             {" · "}
                             {formatBytes(file.size_bytes)}
                           </span>

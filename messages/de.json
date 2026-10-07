@@ -2343,7 +2343,18 @@
       "sharedReason": "Grund: {reason}",
       "sharedRateLimit": "Zu viele Uploads in der letzten Stunde. Versuchen Sie es gleich noch einmal.",
       "sharedDropped": "Es wurden nur die ersten {max} Dateien übernommen.",
-      "openedFromDevice": "{count, plural, one {# Datei} other {# Dateien}} von Ihrem Gerät geöffnet."
+      "openedFromDevice": "{count, plural, one {# Datei} other {# Dateien}} von Ihrem Gerät geöffnet.",
+      "pagesPartRead": "Die ersten {read} von {total} Seiten werden gelesen",
+      "pageRefs": {
+        "open": "Öffnen: {name}, {label}",
+        "close": "Seite schließen",
+        "loading": "Die Seite wird geöffnet…",
+        "empty": "Diese Seite enthielt keinen lesbaren Text (vielleicht ist sie ein Bild).",
+        "missing": "Diese Seite ist nicht mehr in der Datei.",
+        "failed": "Die Seite wurde nicht geöffnet. Versuche es erneut.",
+        "openPdf": "PDF auf dieser Seite öffnen",
+        "unread": "Von „{name}“ wurden nur die ersten {read} von {total} Seiten gelesen; was danach kommt, ist nicht in dieser Antwort."
+      }
     },
     "deepResearch": {
       "title": "Gründlich nachsehen",

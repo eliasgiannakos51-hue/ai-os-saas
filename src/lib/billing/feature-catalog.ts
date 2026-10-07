@@ -735,6 +735,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "files/register",
       "files/[id]",
       "files/[id]/download",
+      "files/[id]/view",
       "files/collections",
       "files/collections/[id]",
     ],

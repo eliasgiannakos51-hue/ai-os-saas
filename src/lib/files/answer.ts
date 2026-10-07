@@ -1,3 +1,5 @@
+import { readUnreadPages, type UnreadPages } from "@/lib/files/page-refs";
+
 export type WorkspaceFile = {
   id: string;
   filename: string;
@@ -17,7 +19,8 @@ export type WorkspaceCollection = {
   fileIds: string[];
 };
 
-export type Citation = { filename: string; label: string };
+/** A checked page reference; `fileId` and `page` open it (package 12), absent on answers from before. */
+export type Citation = { filename: string; label: string; fileId?: string; page?: number };
 
 /**
  * What "copy the answer" puts on the clipboard.
@@ -45,6 +48,8 @@ export type Answer = {
    *  question; more means the answer was combined from parts. */
   parts: number;
   credits: number;
+  /** Files read only in part (a PDF past the page limit), said with the answer. */
+  unreadPages: UnreadPages[];
   disclosure: string;
   /** The job that produced it, carried so the answer can report itself
    *  seen. An answer the user has read must not be offered back to them
@@ -79,6 +84,7 @@ export function answerFromResult(
     // silently claim to have read the whole document in one go.
     parts: Number(result.parts ?? 1),
     credits,
+    unreadPages: readUnreadPages(result.unreadPages),
     disclosure: String(result.disclosure ?? ""),
     jobId,
   };

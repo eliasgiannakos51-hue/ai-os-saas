@@ -2343,7 +2343,18 @@
       "sharedReason": "Motivo: {reason}",
       "sharedRateLimit": "Troppi caricamenti nell'ultima ora. Riprova a condividere fra poco.",
       "sharedDropped": "Sono stati presi solo i primi {max} file.",
-      "openedFromDevice": "{count, plural, one {# file aperto} other {# file aperti}} dal tuo dispositivo."
+      "openedFromDevice": "{count, plural, one {# file aperto} other {# file aperti}} dal tuo dispositivo.",
+      "pagesPartRead": "Si leggono le prime {read} di {total} pagine",
+      "pageRefs": {
+        "open": "Apri: {name}, {label}",
+        "close": "Chiudi la pagina",
+        "loading": "Apertura della pagina…",
+        "empty": "Questa pagina non aveva testo leggibile (forse è un’immagine).",
+        "missing": "Questa pagina non è più nel file.",
+        "failed": "La pagina non si è aperta. Riprova.",
+        "openPdf": "Apri il PDF a questa pagina",
+        "unread": "Di «{name}» sono state lette solo le prime {read} di {total} pagine; ciò che segue non è in questa risposta."
+      }
     },
     "deepResearch": {
       "title": "Cercalo a fondo",

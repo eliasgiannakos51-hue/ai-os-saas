@@ -26,6 +26,7 @@ export const FLAGS = {
   "chat-work-area": "Chat: the work area beside the conversation, and the card that reopens it (ΣΥΣΤΗΜΑ DESIGN §5, Δ.2)",
   "tool-shell": "Every tool in one shell: the conversation on the left, the work on the right, one field and at most four options (MASTER 14.3, package 3)",
   "chat-opens-tools": "Chat opens tools: «φτιάξε μου site για το camping» opens the Site beside the conversation, with its price, and builds it there on one press (MASTER 2.3, package 7)",
+  "file-pages": "Files that say where: every page an answer cites is pressed to read that page, or to open the PDF at it, and a PDF read only in part says which pages it did not read (MASTER 16, package 12)",
   "research-slides": "Research you can follow and present: every [n] in a report opens its source, and one press makes a presentation of the report in Slides, with its sources (MASTER 16, package 11)",
   "site-pages": "Site with pages: ask for one, three or five pages, see and change every page in the Site, take back the last change, and download the whole site (MASTER 16, package 10)",
   "chat-attachments": "Chat reads what you give it: PDFs and images attached to a message, asked about, and under the answer the remembered facts it used (MASTER 16, package 9)",

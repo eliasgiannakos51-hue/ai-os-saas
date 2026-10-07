@@ -107,8 +107,14 @@ export async function DELETE(_request: Request, props: { params: Promise<{ id: s
  * them. New handlers stop adding to that count; the old one is left
  * alone rather than rewritten inside an unrelated change.
  */
-export async function GET(_request: Request, props: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
+  // ONE PAGE (package 12, «σε ποια σελίδα το βρήκε»): `?page=N` answers
+  // with that page alone, so a reference in an answer opens on its own
+  // words rather than on the whole document.
+  const pageParam = new URL(request.url).searchParams.get("page");
+  const wantedPage = pageParam === null ? null : /^\d{1,6}$/.test(pageParam) ? Number(pageParam) : -1;
+  if (wantedPage !== null && wantedPage < 1) return NextResponse.json({ ok: false, code: "bad_page" }, { status: 400 });
   try {
     const supabase = await createClient();
     const {
@@ -143,6 +149,11 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
     }
 
     const pages = deserialisePages(stored);
+    if (wantedPage !== null) {
+      const one = pages.find((page) => page.pageNumber === wantedPage);
+      if (!one) return NextResponse.json({ ok: false, code: "no_such_page", pages: pages.length }, { status: 404 });
+      return NextResponse.json({ ok: true, filename: file.filename, page: { number: one.pageNumber, label: one.label, text: one.text }, pages: pages.length });
+    }
     const text = pages.map((page) => `--- ${page.label} ---\n${page.text}`).join("\n\n");
 
     return NextResponse.json({ ok: true, filename: file.filename, text, pages: pages.length });

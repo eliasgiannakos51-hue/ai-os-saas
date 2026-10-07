@@ -2343,7 +2343,18 @@
       "sharedReason": "理由: {reason}",
       "sharedRateLimit": "直近 1 時間のアップロードが多すぎます。少し待って共有し直してください。",
       "sharedDropped": "最初の {max} 件のみを取り込みました。",
-      "openedFromDevice": "端末から {count} 件のファイルを開きました。"
+      "openedFromDevice": "端末から {count} 件のファイルを開きました。",
+      "pagesPartRead": "{total} ページ中、最初の {read} ページを読み取ります",
+      "pageRefs": {
+        "open": "開く: {name}、{label}",
+        "close": "ページを閉じる",
+        "loading": "ページを開いています…",
+        "empty": "このページには読み取れるテキストがありませんでした（画像の可能性があります）。",
+        "missing": "このページはもうファイルにありません。",
+        "failed": "ページを開けませんでした。もう一度お試しください。",
+        "openPdf": "このページで PDF を開く",
+        "unread": "「{name}」は {total} ページ中、最初の {read} ページだけを読みました。それ以降の内容はこの回答に含まれていません。"
+      }
     },
     "deepResearch": {
       "title": "じっくり調べる",

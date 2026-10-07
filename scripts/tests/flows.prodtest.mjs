@@ -332,7 +332,7 @@ try {
     }
   }
   const ON = await start(base);
-  browser = await chromium.launch();
+  browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
   setFlags({ flows: "staff", "image-studio": "staff" });
 
   // =================================================================

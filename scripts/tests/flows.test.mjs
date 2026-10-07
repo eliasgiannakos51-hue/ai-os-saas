@@ -150,6 +150,7 @@ check("each step is its own tool's request", ['startSiteGeneration(', '"/api/ima
 check("a deck after a research is made from it", /\.\.\.\(input\.researchId \? \{ researchId: input\.researchId \} : \{\}\)/.test(run));
 const shell = code("src/components/flows/flow-shell.tsx");
 check("nothing starts before «Έγκριση», and a large total asks again", /onApprove=\{\(\) => withConfirm\(totalOf\(draft\), \(\) => void approve\(id\)\)\}/.test(shell) && /async function approve\([\s\S]*?fetch\("\/api\/flows"[\s\S]*?if \(!response\.ok \|\| !data\?\.ok\) \{[\s\S]*?return;[\s\S]*?advance\(flow\.id/.test(shell));
+check("a step that ends is seen by the next at once, so what waited for it starts", /flowsRef\.current = \{ \.\.\.flowsRef\.current, \[flowId\]: \{ \.\.\.flow, states \} \};\s*setFlows\(flowsRef\.current\);/.test(shell) && /finally \{\s*runningHere\.current\.delete\(key\);\s*if \(mounted\.current\) advance\(flowId\);/.test(shell));
 check("a site or research left running is followed, not started again", /if \(state\?\.status === "running" && state\.row && \(step\.kind === "site" \|\| step\.kind === "research"\)\) void runOne\(flow\.id, step\.id, state\.row, true\);/.test(shell));
 
 // ---------------------------------------------------------------------

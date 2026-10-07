@@ -130,6 +130,13 @@ const MUTANTS = [
     expect: "nothing starts before «Έγκριση», and a large total asks again",
   },
   {
+    name: "a deck waits for a research the screen has already seen finish",
+    file: SHELL,
+    from: "          flowsRef.current = { ...flowsRef.current, [flowId]: { ...flow, states } };\n          setFlows(flowsRef.current);",
+    to: "          setFlows((prev) => ({ ...prev, [flowId]: { ...prev[flowId], states } }));",
+    expect: "a step that ends is seen by the next at once, so what waited for it starts",
+  },
+  {
     name: "the browser may write its own flows",
     file: MIGRATION,
     from: "revoke insert, update, delete on public.project_flows from authenticated;",

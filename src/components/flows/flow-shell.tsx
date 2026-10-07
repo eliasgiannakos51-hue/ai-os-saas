@@ -137,7 +137,13 @@ export function FlowShell({
       if (data?.ok && data.steps) {
         const flow = flowsRef.current[flowId];
         const states = flow ? readStepStates(data.steps, flow.plan) : {};
-        if (flow && mounted.current) setFlows((prev) => ({ ...prev, [flowId]: { ...prev[flowId], states } }));
+        // Into the ref AT ONCE, not on the next render: advance() reads it
+        // the moment this step ends, and a deck waiting for its research
+        // would otherwise see the research still running, and never start.
+        if (flow && mounted.current) {
+          flowsRef.current = { ...flowsRef.current, [flowId]: { ...flow, states } };
+          setFlows(flowsRef.current);
+        }
         return { ok: true, states };
       }
       return { ok: false, code: data?.code ?? "failed" };

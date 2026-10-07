@@ -1044,9 +1044,9 @@ export function ChatWorkspace({
                         fill with no border, and the answer stays bare.
                         The 85% cap comes back with the surface, so a
                         long question does not paint the whole pane. */}
-                    <div className="flex min-w-0 max-w-[85%] flex-col items-end">
+                    <div className="flex w-full min-w-0 flex-col items-end">
                       <SentAttachments attachments={msg.attachments} previews={msg.previews} />
-                      <div className="min-w-0 max-w-full whitespace-pre-wrap rounded-card bg-panel px-4 py-2.5 text-foreground">
+                      <div className="min-w-0 max-w-[85%] whitespace-pre-wrap rounded-card bg-panel px-4 py-2.5 text-foreground">
                         {msg.content}
                       </div>
                     </div>

@@ -71,8 +71,8 @@ const MUTANTS = [
     name: "the prompt stops saying whether a fact was repeated",
     gate: UNIT,
     file: PROMPT,
-    from: "      return `- ${m.text} (${weight}${age})`;",
-    to: "      return `- ${m.text}`;",
+    from: "      return `${options.numbered ? `[${i + 1}]` : \"-\"} ${m.text} (${weight}${age})`;",
+    to: "      return `${options.numbered ? `[${i + 1}]` : \"-\"} ${m.text}`;",
     expect: "presented as repeated",
   },
   {

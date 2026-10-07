@@ -54,7 +54,9 @@ export function useChatAttachments(onRefused: (lines: string[]) => void) {
   function refusalLine(name: string, why: AttachRefusal): string {
     if (why === "tooManyPdfs") return t("tooManyPdfs", { max: MAX_CHAT_FILES });
     if (why === "tooManyImages") return t("tooManyImages", { max: MAX_ATTACHMENT_IMAGES });
-    return t(why, { name });
+    if (why === "pdfTooLarge") return t("pdfTooLarge", { name });
+    if (why === "imageTooLarge") return t("imageTooLarge", { name });
+    return t("type", { name });
   }
 
   function add(files: File[]) {
@@ -155,13 +157,13 @@ export function AttachmentTray({ items, onRemove, holdReason }: { items: TrayIte
             key={item.key}
             data-testid="chat-attach-chip"
             data-state={item.state}
-            className={`flex min-h-[44px] max-w-full items-center gap-2 rounded-item border px-2 py-1 text-xs ${
-              item.state === "failed" ? "border-danger/60 text-danger" : "border-border text-foreground"
+            className={`flex min-h-[44px] max-w-full items-center gap-2 rounded-item bg-panel px-2 py-1 text-xs ${
+              item.state === "failed" ? "text-danger" : "text-foreground"
             }`}
           >
             {item.kind === "image" && item.preview ? (
               // eslint-disable-next-line @next/next/no-img-element -- an on-page object URL, not an optimisable asset
-              <img src={item.preview} alt="" className="h-8 w-8 shrink-0 rounded object-cover" />
+              <img src={item.preview} alt="" className="h-8 w-8 shrink-0 rounded-item object-cover" />
             ) : (
               <FileText className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
             )}
@@ -170,7 +172,7 @@ export function AttachmentTray({ items, onRemove, holdReason }: { items: TrayIte
               <span className="block text-[11px] text-muted" aria-live="polite">
                 {item.state === "reading" ? (
                   <span className="inline-flex items-center gap-1">
-                    <ThinkingIndicator size="sm" tone="inherit" />
+                    <ThinkingIndicator size="sm" />
                     {t("reading")}
                   </span>
                 ) : item.state === "failed" ? (
@@ -220,7 +222,7 @@ function SentImage({ path, name, preview }: { path: string; name: string; previe
   }, [path, preview]);
   if (!src || gone) {
     return (
-      <span className="inline-flex min-h-[32px] items-center gap-1.5 rounded-item border border-border px-2 text-xs text-muted">
+      <span className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-panel px-2 text-xs text-muted">
         <ImageIcon className="h-3.5 w-3.5" aria-hidden="true" />
         {name}
       </span>
@@ -229,7 +231,7 @@ function SentImage({ path, name, preview }: { path: string; name: string; previe
   return (
     <a href={src} target="_blank" rel="noopener noreferrer" title={name} className="block">
       {/* eslint-disable-next-line @next/next/no-img-element -- a signed link to a private object */}
-      <img src={src} alt={name} className="h-20 w-20 rounded-item border border-border object-cover" />
+      <img src={src} alt={name} className="h-20 w-20 rounded-item object-cover" />
     </a>
   );
 }
@@ -246,7 +248,7 @@ export function SentAttachments({ attachments, previews }: { attachments: ChatAt
             <Link
               href={`/dashboard/files?record=${encodeURIComponent(a.fileId)}`}
               title={t("openInFiles")}
-              className="inline-flex min-h-[32px] max-w-[16rem] items-center gap-1.5 rounded-item border border-border px-2 text-xs text-foreground hover:bg-panel-hover"
+              className="inline-flex min-h-[44px] max-w-[16rem] items-center gap-1.5 rounded-item bg-panel px-2 text-xs text-foreground hover:bg-panel-hover"
             >
               <FileText className="h-3.5 w-3.5 shrink-0 text-muted" aria-hidden="true" />
               <span className="truncate">{a.name}</span>
@@ -279,7 +281,7 @@ export function MemoriesUsed({ memories }: { memories: MemoryUsed[] | undefined 
           </li>
         ))}
       </ul>
-      <Link href="/dashboard/ai-memory" className="mt-2 inline-flex min-h-[32px] items-center text-xs text-muted underline decoration-dotted underline-offset-2 hover:text-foreground">
+      <Link href="/dashboard/ai-memory" className="mt-2 inline-flex min-h-[44px] items-center text-xs text-muted underline decoration-dotted underline-offset-2 hover:text-foreground">
         {t("manageMemory")}
       </Link>
     </details>

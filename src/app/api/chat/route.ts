@@ -465,7 +465,7 @@ export async function POST(request: Request) {
     const readAttachments = readChatAttachments(rawAttachments, user.id);
     if (!readAttachments.ok || (!attachmentsOn && readAttachments.list.length > 0)) {
       return NextResponse.json(
-        { ok: false, reason: "bad_attachments", error: "Those attachments cannot be sent." },
+        { ok: false, reason: "bad_attachments" },
         { status: 400 }
       );
     }
@@ -477,7 +477,7 @@ export async function POST(request: Request) {
       currentAttachments.length > 0 ? await loadAttachmentContent(supabase, user.id, currentAttachments, "/api/chat") : null;
     if (currentAttachmentContent && currentAttachmentContent.missing.length > 0) {
       return NextResponse.json(
-        { ok: false, reason: "attachment_not_ready", names: currentAttachmentContent.missing, error: "An attachment could not be read yet." },
+        { ok: false, reason: "attachment_not_ready", names: currentAttachmentContent.missing },
         { status: 409 }
       );
     }
@@ -948,11 +948,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const history = ((historyRows ?? []) as unknown as {
+    const history = (historyRows ?? []).reverse() as unknown as {
       role: "user" | "assistant";
       content: string;
       attachments?: unknown;
-    }[]).reverse();
+    }[];
     // What the conversation carried before this message, within the caps,
     // read now; this message's own were read above.
     const earlierAttachments = attachmentsOn

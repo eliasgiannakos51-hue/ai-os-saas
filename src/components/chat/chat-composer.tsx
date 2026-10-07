@@ -177,7 +177,7 @@ export const ChatComposer = forwardRef<
           // πεδίο μένει κάτω, ίδιο με της αρχικής»): the controls sit on
           // a row under the text — voice bottom-left, send bottom-right —
           // so the text has the full width and never runs under a button.
-          className={`focus-glow max-h-[45vh] min-h-[6.5rem] w-full resize-none overflow-y-auto rounded-field border bg-panel px-4 pb-14 pt-3.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-foreground/60 ${dragging ? "border-foreground/60" : "border-border"}`}
+          className={`focus-glow max-h-[45vh] min-h-[6.5rem] w-full resize-none overflow-y-auto rounded-field border border-border bg-panel px-4 pb-14 pt-3.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-foreground/60 ${dragging ? "ring-1 ring-foreground/60" : ""}`}
           autoFocus
         />
         {/* THE MICROPHONE SITS BESIDE THE BOX, NEVER INSTEAD OF IT, and

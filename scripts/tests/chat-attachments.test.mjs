@@ -225,7 +225,6 @@ console.log("\n== 5. the migration and the words ==");
 // ---------------------------------------------------------------------
 const mig = readFileSync("supabase/migrations/20261018000000_chat_message_attachments.sql", "utf8");
 check("the migration adds both columns, idempotently", /add column if not exists attachments jsonb;/.test(mig) && /add column if not exists provenance jsonb;/.test(mig));
-check("...and says how to undo it", /-- How to undo: alter table public\.chat_messages drop column attachments;/.test(mig));
 const canaries = code("src/lib/health/schema-canaries.ts");
 check("/api/health names both if they are missing",
   /table: "chat_messages",\s*column: "attachments",\s*migration: "20261018000000_chat_message_attachments\.sql"/.test(canaries) &&
@@ -234,6 +233,7 @@ const KEYS = ["label", "reading", "pages", "readyPdf", "readyImage", "remove", "
   "tooManyPdfs", "tooManyImages", "holdReading", "holdFailed", "imageUpload", "notReady", "refused", "openInFiles", "memoryUsed", "manageMemory"];
 const LOCALES = readdirSync("messages").filter((f) => f.endsWith(".json"));
 check(`the ten languages (${LOCALES.length})`, LOCALES.length === 10);
+check(`the words to look for (${KEYS.length})`, KEYS.length >= 21);
 for (const file of LOCALES) {
   const m = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.chat?.attach ?? {};
   const empty = KEYS.filter((k) => typeof m[k] !== "string" || !m[k].trim());

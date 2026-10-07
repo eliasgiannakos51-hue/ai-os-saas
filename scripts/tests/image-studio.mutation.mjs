@@ -156,11 +156,18 @@ const MUTANTS = [
     to: "        onCloseWork={() => {\n          setOpen(null);\n          setChosen(null);\n        }}",
     expect: "the choice outlives the pane",
   },
+  {
+    name: "on a phone, the large-action question sits under the pictures",
+    file: "src/components/credits/cost-estimate.tsx",
+    from: "overlay-fade-in fixed inset-0 z-[70]",
+    to: "overlay-fade-in fixed inset-0 z-50",
+    expect: "the question is ABOVE the work pane",
+  },
 ];
 
 runMutations({
   name: "image-studio",
   gate: GATE,
-  targets: [GENERATE, EDIT, FULL, DOWNLOAD, DELETE, REMAKE, ACCESS, ANSWER, STUDIO, PRICING, SHELL, MIGRATION],
+  targets: ["src/components/credits/cost-estimate.tsx", GENERATE, EDIT, FULL, DOWNLOAD, DELETE, REMAKE, ACCESS, ANSWER, STUDIO, PRICING, SHELL, MIGRATION],
   mutants: MUTANTS,
 });

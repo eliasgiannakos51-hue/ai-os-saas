@@ -35,6 +35,12 @@ export function CostEstimateHint({ credits }: { credits: number }) {
 /**
  * Confirmation for an action above LARGE_ACTION_CONFIRM_THRESHOLD.
  *
+ * ABOVE THE WORK PANE. On a phone a tool's work covers the screen at
+ * z-[60] (components/shell/tool-shell.tsx); at z-50 this sat underneath
+ * it, so a large action asked a question nobody could see or answer —
+ * found on the Image tool's largest size (image-studio.prodtest.mjs,
+ * 2026-10-07).
+ *
  * Deliberately blocking: the threshold exists because spending 50+ credits
  * by accident is the kind of surprise that loses trust, and an undoable
  * charge deserves an explicit yes.
@@ -53,7 +59,7 @@ export function LargeActionConfirm({
 
   return (
     <div
-      className="overlay-fade-in fixed inset-0 z-50 flex items-center justify-center bg-background/70 p-4"
+      className="overlay-fade-in fixed inset-0 z-[70] flex items-center justify-center bg-background/70 p-4"
       role="dialog"
       aria-modal="true"
     >

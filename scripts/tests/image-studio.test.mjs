@@ -172,6 +172,10 @@ check("...with the prices of this account, and whether pictures can be made at a
 const shell = code("src/components/images/image-shell.tsx");
 check("the price is on the screen before it is spent: four, one change, the largest size",
   /t\("priceVariants", \{ count: prices\.variants, n: IMAGE_VARIANTS \}\)/.test(shell) && /t\("priceEdit", \{ count: prices\.edit \}\)/.test(shell) && /t\("price", \{ count: prices\.full \}\)/.test(shell));
+const zOf = (src, marker) => Number((new RegExp(`${marker}[^"]*\\bz-\\[(\\d+)\\]`).exec(src) ?? [])[1] ?? 0);
+const dialogZ = zOf(code("src/components/credits/cost-estimate.tsx"), "overlay-fade-in fixed inset-0");
+const paneZ = zOf(code("src/components/shell/tool-shell.tsx"), 'data-testid="tool-shell-work"\\s+className="fixed inset-0');
+check(`...and the question is ABOVE the work pane a phone shows full screen (${dialogZ} over ${paneZ})`, paneZ > 0 && dialogZ > paneZ);
 check("...and a large one asks once more", /needsLargeActionConfirmation\(credits, DEFAULTS\)/.test(shell) && /<LargeActionConfirm/.test(shell));
 check("a chosen picture is changed with words, the others are not", /if \(editing && shown && chosen !== null\) \{[\s\S]{0,200}change\(text\.slice\(0, MAX_IMAGE_INSTRUCTION_CHARS\), target, index\)/.test(shell) && /`\/api\/images\/\$\{image\.id\}\/edit`, \{ variant: index, instruction \}/.test(shell));
 check("without the provider's key it says so, sends nothing, charges nothing", /if \(!configured\) \{\s*say\("tool", t\("notConfigured"\)\);\s*return;/.test(shell));

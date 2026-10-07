@@ -131,7 +131,11 @@ check("Slides: each slide is pressed to choose it", /onClick=\{\(\) => onSelect\
 check("Slides: the change goes with the slide", /\.\.\.\(box === null \? \{\} : \{ slideIndex: box \}\)/.test(slides));
 check("Slides: another deck opening forgets the chosen slide", /const setOpen = \(next: Open \| null\) => \{\s*setOpenDeck\(next\);\s*setBox\(null\);/.test(slides));
 check("Site: each part is pressed to choose it", /data-testid="site-box"[\s\S]{0,200}setBox\(chosen === i \? null : \{ siteId: current\.id, index: i \}\)/.test(site));
-check("Site: the change goes with the part", /\.\.\.\(part === null \? \{\} : \{ section: part \}\)/.test(site));
+// The request is shared with the Site beside Chat (lib/website-builder/site-requests.ts).
+const siteRequests = stripComments(readFileSync("src/lib/website-builder/site-requests.ts", "utf8"));
+check("Site: the change goes with the part",
+  /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part \}\)/.test(site)
+    && /\.\.\.\(input\.section === null \|\| input\.section === undefined \? \{\} : \{ section: input\.section \}\)/.test(siteRequests));
 check("Site: a chosen part on another site is no choice", /const chosen = box && current && box\.siteId === current\.id && box\.index < boxes\.length \? box\.index : null;/.test(site));
 check("Site: the preview stays without scripts while a part is chosen",
   /srcDoc=\{chosen === null \? html : outlineBoxes\(html, chosen\)\}\s*sandbox=""/.test(site) && !/allow-scripts/.test(site));

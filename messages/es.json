@@ -1350,6 +1350,17 @@
         "close": "Cerrar el área de trabajo",
         "open": "Abrir junto a la conversación",
         "isOpen": "Abierto junto a la conversación · pulsa para cerrar"
+      },
+      "sitePane": {
+        "label": "Sitio",
+        "willMake": "Crearé este sitio junto a la conversación:",
+        "make": "Crearlo",
+        "notNow": "Ahora no",
+        "openInSite": "Abrir en Sitio",
+        "building": "Creando el sitio… tarda unos minutos.",
+        "changing": "Cambiando el sitio…",
+        "nextChanges": "Lo que escribas ahora en la conversación cambia este sitio.",
+        "reopen": "Mostrar el sitio"
       }
     },
     "create": {

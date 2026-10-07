@@ -128,8 +128,10 @@ check("the site reads the business under the website memory rule AND the switch"
   /memoryActiveFor\(\{ surface: "website", user, planLimit: [^}]+\}\) &&\s*\(await isFeatureOn\("brand-memory", user\)\)\s*\?\s*brandBriefFor\(readBrand\(await loadMemories\(supabase, user\.id,/.test(site));
 check("...and the model is sent the brief with it", /generateWebsiteHtml\(\s*apiKey,\s*`\$\{description\}\$\{brand\?\.brief \?\? ""\}`,/.test(site));
 check("...and what was used is a note on the row", /notes\.push\(\{ kind: "fromMemory", name: brand\.used\.name, colours: brand\.used\.colours \}\)/.test(site));
-check("the Site shell says it after the site is made", /parseGenerationNotes\(record\.generation_notes\)\.find\(\(n\) => n\.kind === "fromMemory"\)/.test(code("src/components/website-builder/website-shell.tsx")));
-check("...and so does the old page", /case "fromMemory":[\s\S]{0,300}notes\.fromMemory\.both/.test(code("src/components/website-builder/website-builder-workspace.tsx")));
+const line = code("src/components/website-builder/use-remembered-line.ts");
+check("one sentence for it, from the note on the row", /parseGenerationNotes\(record\.generation_notes\)\.find\(\(n\): n is FromMemory => n\.kind === "fromMemory"\)/.test(line) && /notes\.fromMemory\.both/.test(line));
+check("the Site shell says it after the site is made", /const fromMemory = remembered\.forRecord\(record\);\s*if \(fromMemory\) say\(/.test(code("src/components/website-builder/website-shell.tsx")));
+check("...and so does the old page", /case "fromMemory":\s*return remembered\.sentence\(note\);/.test(code("src/components/website-builder/website-builder-workspace.tsx")));
 
 // ---------------------------------------------------------------------
 console.log("\n== 6. the note ==");

@@ -1350,6 +1350,17 @@
         "close": "关闭工作区",
         "open": "在对话旁打开",
         "isOpen": "已在对话旁打开 · 点击关闭"
+      },
+      "sitePane": {
+        "label": "网站",
+        "willMake": "我将在对话旁边制作这个网站：",
+        "make": "制作",
+        "notNow": "暂不",
+        "openInSite": "在网站中打开",
+        "building": "正在制作网站… 需要几分钟。",
+        "changing": "正在修改网站…",
+        "nextChanges": "你现在在对话中写的内容会修改这个网站。",
+        "reopen": "显示网站"
       }
     },
     "create": {

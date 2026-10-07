@@ -9,9 +9,9 @@ import { useToast } from "@/components/toast/toast-context";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { PublishControl } from "@/components/publishing/publish-control";
 import { DesignControls } from "@/components/website-builder/design-controls";
-import { parseGenerationNotes } from "@/lib/website-generation-notes";
+import { useRememberedLine } from "@/components/website-builder/use-remembered-line";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
-import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
+import { isSiteRunning, requestSiteChange, requestSiteStop, startSiteGeneration, watchSite } from "@/lib/website-builder/site-requests";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { websiteNameFrom } from "@/lib/website-name";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
@@ -28,7 +28,6 @@ import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 20000;
-const POLL_INTERVAL_MS = 2500;
 
 type Turn = { id: string; role: "user" | "tool"; text: string; siteId?: string; questions?: string[] };
 
@@ -97,54 +96,28 @@ export function WebsiteShell({
 
   const say = (turn: Omit<Turn, "id">) => setTurns((prev) => [...prev, { ...turn, id: `${turn.role}${prev.length}` }]);
   const current = websites.find((w) => w.id === currentId) ?? null;
-  const running = (w: UserWebsite | null) => Boolean(w && (w.status === "pending" || w.status === "processing"));
+  const running = isSiteRunning;
+  const remembered = useRememberedLine();
+
 
   function poll(id: string) {
-    async function tick() {
-      let record: UserWebsite;
-      let usage: unknown = null;
-      try {
-        const res = await fetch(`/api/websites/status?id=${id}`);
-        const data = await res.json();
-        if (!res.ok || !data.ok) {
-          if (mountedRef.current) setTimeout(tick, POLL_INTERVAL_MS);
-          return;
+    watchSite(id, {
+      alive: () => mountedRef.current,
+      onRecord: (record) => setWebsites((prev) => prev.map((w) => (w.id === id ? record : w))),
+      onDone: (record, usage) => {
+        void reportUsage(usage);
+        if (record.status === "completed") {
+          say({ role: "tool", text: tShell("site.done", { name: record.name }), siteId: id });
+          // What the brief took from memory (package 6), said in the
+          // conversation so a wrong name or colour is seen at once.
+          const fromMemory = remembered.forRecord(record);
+          if (fromMemory) say({ role: "tool", text: fromMemory });
+          setPane("site");
+        } else {
+          say({ role: "tool", text: record.error_message ?? t("generateFailed") });
         }
-        record = data.record as UserWebsite;
-        usage = data;
-      } catch {
-        if (mountedRef.current) setTimeout(tick, POLL_INTERVAL_MS);
-        return;
-      }
-      if (!mountedRef.current) return;
-      setWebsites((prev) => prev.map((w) => (w.id === id ? record : w)));
-      if (running(record)) {
-        setTimeout(tick, POLL_INTERVAL_MS);
-        return;
-      }
-      void reportUsage(usage);
-      if (record.status === "completed") {
-        say({ role: "tool", text: tShell("site.done", { name: record.name }), siteId: id });
-        // What the brief took from memory (package 6), said in the
-        // conversation so a wrong name or colour is seen at once.
-        const remembered = parseGenerationNotes(record.generation_notes).find((n) => n.kind === "fromMemory");
-        if (remembered && remembered.kind === "fromMemory") {
-          say({
-            role: "tool",
-            text:
-              remembered.name !== null && remembered.colours.length > 0
-                ? t("notes.fromMemory.both", { name: remembered.name, colours: remembered.colours.join(", ") })
-                : remembered.name !== null
-                  ? t("notes.fromMemory.name", { name: remembered.name })
-                  : t("notes.fromMemory.colours", { colours: remembered.colours.join(", ") }),
-          });
-        }
-        setPane("site");
-      } else {
-        say({ role: "tool", text: record.error_message ?? t("generateFailed") });
-      }
-    }
-    void tick();
+      },
+    });
   }
 
   // Anything still building when the page loaded is watched again.
@@ -156,41 +129,27 @@ export function WebsiteShell({
   async function generate(name: string, description: string, skipClarification: boolean) {
     setBusy(true);
     try {
-      const res = await fetchWithAuthRetry("/api/websites/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, referenceImagePaths: [], skipClarification }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        say({ role: "tool", text: getErrorMessage(data?.error, t("generateFailed")) });
+      const outcome = await startSiteGeneration({ name, description, skipClarification });
+      if (outcome.kind === "refused") {
+        say({ role: "tool", text: getErrorMessage(outcome.error, t("generateFailed")) });
         return;
       }
-      if (data.needsClarification) {
-        const questions = data.questions as string[];
-        setPending({ questions, name, description });
-        say({ role: "tool", text: tShell("site.questions"), questions });
+      if (outcome.kind === "questions") {
+        setPending({ questions: outcome.questions, name, description });
+        say({ role: "tool", text: tShell("site.questions"), questions: outcome.questions });
         void refreshCredits();
         return;
       }
-      if (!data.generated) {
-        say({ role: "tool", text: data.message ?? t("generateFailed") });
+      if (outcome.kind === "notMade") {
+        say({ role: "tool", text: outcome.message ?? t("generateFailed") });
         return;
       }
-      const record = data.record as UserWebsite;
+      const record = outcome.record;
       setPending(null);
       setWebsites((prev) => (prev.some((w) => w.id === record.id) ? prev : [record, ...prev]));
       setCurrentId(record.id);
       setAsked((prev) => ({ ...prev, [record.id]: [description] }));
       say({ role: "tool", text: tShell("site.building", { name: record.name }) });
-      if (!data.duplicateSuppressed) {
-        void fetch("/api/websites/generate/process", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          keepalive: true,
-          body: JSON.stringify({ websiteId: record.id, description, referenceImagePaths: [] }),
-        });
-      }
       poll(record.id);
     } catch (err) {
       say({ role: "tool", text: err instanceof TypeError ? tCommon("networkErrorCheckConnection") : getErrorMessage(err, t("generateFailed")) });
@@ -205,26 +164,21 @@ export function WebsiteShell({
     const partLabel = chosenLabel;
     setBusy(true);
     try {
-      const res = await fetchWithAuthRetry("/api/websites/edit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ websiteId: current.id, changeRequest: request, referenceImagePaths: [], pageSlug: "", ...(part === null ? {} : { section: part }) }),
-      });
-      const data = await res.json();
+      const outcome = await requestSiteChange({ websiteId: current.id, changeRequest: request, section: part });
       void refreshCredits();
-      if (!res.ok || !data.ok || !data.edited) {
+      if (outcome.kind === "refused") {
         say({
           role: "tool",
           text:
-            data?.reason === "unknown_page" || data?.reason === "invalid_page"
+            outcome.reason === "pageGone"
               ? t("editPageGone")
-              : data?.reason === "box_lost" || data?.reason === "bad_section"
+              : outcome.reason === "boxLost"
                 ? tShell("box.lost")
-                : getErrorMessage(data?.error ?? data?.message, t("generateFailed")),
+                : getErrorMessage(outcome.error, t("generateFailed")),
         });
         return;
       }
-      const record = data.record as UserWebsite;
+      const record = outcome.record;
       setWebsites((prev) => prev.map((w) => (w.id === record.id ? record : w)));
       setAsked((prev) => ({ ...prev, [record.id]: [...(prev[record.id] ?? []), request] }));
       say({ role: "tool", text: part === null ? tShell("site.changed") : tShell("box.partChanged", { name: partLabel }), siteId: record.id });
@@ -419,8 +373,8 @@ export function WebsiteShell({
                 type="button"
                 data-testid="website-stop"
                 onClick={() => {
-                  void fetch(`/api/websites/${current.id}/cancel`, { method: "POST" }).then(
-                    (res) => addToast(res.ok ? tSteps("stopping") : t("generateFailed"), res.ok ? undefined : "error"),
+                  void requestSiteStop(current.id).then(
+                    (ok) => addToast(ok ? tSteps("stopping") : t("generateFailed"), ok ? undefined : "error"),
                     () => addToast(t("generateFailed"), "error")
                   );
                 }}

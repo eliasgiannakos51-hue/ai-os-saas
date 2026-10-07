@@ -1350,6 +1350,17 @@
         "close": "Arbeitsbereich schließen",
         "open": "Neben dem Gespräch öffnen",
         "isOpen": "Neben dem Gespräch geöffnet · zum Schließen tippen"
+      },
+      "sitePane": {
+        "label": "Website",
+        "willMake": "Ich erstelle diese Website neben dem Gespräch:",
+        "make": "Erstellen",
+        "notNow": "Nicht jetzt",
+        "openInSite": "In Website öffnen",
+        "building": "Die Website wird erstellt… das dauert ein paar Minuten.",
+        "changing": "Die Website wird geändert…",
+        "nextChanges": "Was du jetzt im Gespräch schreibst, ändert diese Website.",
+        "reopen": "Website zeigen"
       }
     },
     "create": {

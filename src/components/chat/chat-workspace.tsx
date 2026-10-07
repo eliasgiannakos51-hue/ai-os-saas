@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, AudioLines, Compass, Gift, PanelLeftClose, PanelLeftOpen, X, Zap } from "lucide-react";
 import { Earth } from "@/components/brand/earth";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { AiActivity } from "@/components/ui/ai-activity";
 import { createClient } from "@/lib/supabase/client";
@@ -31,6 +31,8 @@ import { ProvenanceLine } from "@/components/chat/provenance-line";
 import { TransitionButton } from "@/components/transitions/transition-button";
 import { AnswerActions } from "@/components/chat/answer-actions";
 import { ResultCard, WorkArea } from "@/components/chat/work-area";
+import { SitePane, type SitePaneHandle } from "@/components/chat/site-pane";
+import { openSiteFor } from "@/lib/chat/open-tool";
 import { workItemFrom, type WorkItem } from "@/lib/chat/work-area";
 import type { Provenance } from "@/lib/chat/provenance";
 import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
@@ -94,6 +96,7 @@ export function ChatWorkspace({
   initialProjectId,
   initialWorkMode,
   workArea = false,
+  opensTools = false,
   greeting = null,
 }: {
   initialConversations: ChatConversation[];
@@ -129,6 +132,9 @@ export function ChatWorkspace({
   /** The switch "chat-work-area" (src/lib/flags/flags.ts), read by the
    *  page: whether a produced answer opens beside the conversation. */
   workArea?: boolean;
+  /** The switch "chat-opens-tools" (package 7): a request for a site opens
+   *  the Site beside the conversation instead of being answered in words. */
+  opensTools?: boolean;
   /** The name the empty Chat greets with (lib/greeting.ts, greetingName),
    *  or null when it is not known — then the greeting has no name. */
   greeting?: string | null;
@@ -166,6 +172,13 @@ export function ChatWorkspace({
   // the conversation, if any. Closed when the conversation changes.
   const [openWorkId, setOpenWorkId] = useState<string | null>(null);
   useEffect(() => setOpenWorkId(null), [activeId]);
+  // THE TOOL OPENED FROM CHAT (package 7): the brief a site was asked for
+  // in, while its pane is open beside the conversation.
+  const [siteBrief, setSiteBrief] = useState<string | null>(null);
+  const sitePaneRef = useRef<SitePaneHandle>(null);
+  useEffect(() => setSiteBrief(null), [activeId]);
+  const [siteHidden, setSiteHidden] = useState(false);
+  const locale = useLocale();
   const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
   const [headerRenaming, setHeaderRenaming] = useState(false);
   // The provenance rides on the message it belongs to rather than in a
@@ -519,6 +532,31 @@ export function ChatWorkspace({
   async function handleSend(text: string, options: { skipClarification?: boolean } = {}) {
     if (!text || sending) return;
     setClarify(null);
+
+    // «ΦΤΙΑΞΕ ΜΟΥ SITE ΓΙΑ ΤΟ CAMPING» OPENS THE SITE BESIDE THE
+    // CONVERSATION (MASTER 16, package 7). The same free matcher Home uses
+    // (lib/create-studio/producer-routes.ts) recognises a request for a
+    // site; the pane then says what it will make and what it costs, and
+    // nothing is spent until it is pressed. No model is called to decide.
+    // While a site is open beside the conversation, what is said next is
+    // the Site's: an answer to its questions, or a change to it.
+    const showMine = () =>
+      setMessages((m) => [
+        ...m,
+        { id: nextLocalId("optimistic-user"), conversation_id: activeId ?? "", role: "user", content: text, created_at: new Date().toISOString() },
+      ]);
+    if (opensTools && openSiteFor(text, locale)) {
+      showMine();
+      setOpenWorkId(null);
+      setSiteHidden(false);
+      setSiteBrief(text);
+      return;
+    }
+    if (siteBrief !== null && sitePaneRef.current?.take(text)) {
+      showMine();
+      setSiteHidden(false);
+      return;
+    }
 
     setError(null);
     setIsRateLimitNotice(false);
@@ -1128,6 +1166,14 @@ export function ChatWorkspace({
                 {t("stopped")}
               </p>
             )}
+            {/* THE SITE, PUT ASIDE ON A PHONE: back to the conversation keeps
+                it open, so the next sentence still changes it, and one press
+                shows it again (package 7). */}
+            {siteBrief !== null && siteHidden && (
+              <button type="button" onClick={() => setSiteHidden(false)} data-testid="chat-site-reopen" className="chip-link mb-3">
+                {t("sitePane.reopen")}
+              </button>
+            )}
             <ChatComposer
               ref={composerRef}
               sending={sending}
@@ -1186,6 +1232,16 @@ export function ChatWorkspace({
       </div>
 
       {openWorkItem && <WorkArea item={openWorkItem} onClose={() => setOpenWorkId(null)} />}
+      {siteBrief !== null && (
+        <SitePane
+          ref={sitePaneRef}
+          key={siteBrief}
+          brief={siteBrief}
+          hidden={siteHidden}
+          onBack={() => setSiteHidden(true)}
+          onClose={() => setSiteBrief(null)}
+        />
+      )}
 
       {/* THE HANDS-FREE LOOP. Seeded with the conversation that is open,
           so what is said out loud lands in the same thread rather than in

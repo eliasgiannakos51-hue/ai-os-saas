@@ -1350,6 +1350,17 @@
         "close": "Close the work area",
         "open": "Open beside the conversation",
         "isOpen": "Open beside the conversation · press to close"
+      },
+      "sitePane": {
+        "label": "Site",
+        "willMake": "I will make this site beside the conversation:",
+        "make": "Make it",
+        "notNow": "Not now",
+        "openInSite": "Open in Site",
+        "building": "Building the site… it takes a few minutes.",
+        "changing": "Changing the site…",
+        "nextChanges": "Anything you write in the conversation now changes this site.",
+        "reopen": "Show the site"
       }
     },
     "create": {

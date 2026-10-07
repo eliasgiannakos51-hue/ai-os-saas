@@ -115,6 +115,9 @@ export default async function ChatPage(
         // THE SWITCH "chat-work-area" (MASTER Μέρος 13 Β): the work area
         // beside the conversation, for you and the test account first.
         workArea={await isFeatureOn("chat-work-area", user)}
+        // THE SWITCH "chat-opens-tools" (package 7): «φτιάξε μου site»
+        // opens the Site beside the conversation.
+        opensTools={await isFeatureOn("chat-opens-tools", user)}
         // THE PROJECT A NEW CONVERSATION STARTS IN, and the only moment
         // it can be chosen. It is validated against the person's OWN
         // projects rather than trusted, exactly as `?c=` is above: an id

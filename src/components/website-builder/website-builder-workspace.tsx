@@ -25,6 +25,7 @@ import { StepFlow } from "@/components/ui/step-flow";
 import { findUnfilledPlaceholders, type UnfilledPlaceholder } from "@/lib/website-placeholders";
 import { findInventedNumbers, type SuspectNumber } from "@/lib/website-invented-numbers";
 import { parseGenerationNotes, type GenerationNote } from "@/lib/website-generation-notes";
+import { useRememberedLine } from "@/components/website-builder/use-remembered-line";
 import { useTranslations, useLocale } from "next-intl";
 import { normalisePages, type WebsitePage } from "@/lib/publishing/website-pages";
 import { censusSiteImages, shouldOfferOwnPhotos } from "@/lib/website-image-census";
@@ -1098,6 +1099,7 @@ export function WebsiteBuilderWorkspace({
     () => (previewWebsite && !viewingVersion ? parseGenerationNotes(previewWebsite.generation_notes) : []),
     [previewWebsite, viewingVersion]
   );
+  const remembered = useRememberedLine();
   const describeNote = (note: GenerationNote): string => {
     switch (note.kind) {
       case "removedFeature":
@@ -1125,11 +1127,7 @@ export function WebsiteBuilderWorkspace({
       case "fromMemory":
         // Where the name and the colours came from, so a wrong one is
         // corrected in Chat (or on the memory page) and not argued with here.
-        return note.name !== null && note.colours.length > 0
-          ? t("notes.fromMemory.both", { name: note.name, colours: note.colours.join(", ") })
-          : note.name !== null
-            ? t("notes.fromMemory.name", { name: note.name })
-            : t("notes.fromMemory.colours", { colours: note.colours.join(", ") });
+        return remembered.sentence(note);
       case "spelling":
         // The words themselves, joined — the owner is the only one who can
         // say whether "ρεμπα" is a typo or a brand, and they can only say

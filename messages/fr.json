@@ -1350,6 +1350,17 @@
         "close": "Fermer la zone de travail",
         "open": "Ouvrir à côté de la conversation",
         "isOpen": "Ouvert à côté de la conversation · appuyez pour fermer"
+      },
+      "sitePane": {
+        "label": "Site",
+        "willMake": "Je vais créer ce site à côté de la conversation :",
+        "make": "Le créer",
+        "notNow": "Pas maintenant",
+        "openInSite": "Ouvrir dans Site",
+        "building": "Création du site… cela prend quelques minutes.",
+        "changing": "Modification du site…",
+        "nextChanges": "Ce que vous écrivez maintenant dans la conversation modifie ce site.",
+        "reopen": "Afficher le site"
       }
     },
     "create": {

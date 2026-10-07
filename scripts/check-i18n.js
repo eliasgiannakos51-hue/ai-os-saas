@@ -64,6 +64,9 @@ const LOCALE_ALLOWED = new Set([
   // and "Analyses" are the French plurals, spelled as in English; "Sites"
   // and "Slides" are what Portuguese software calls them, as
   // dashboard.tools.names.site already says.
+  // "Site" is the everyday French and Portuguese word, as for the tool's own name.
+  "fr:dashboard.chat.sitePane.label",
+  "pt:dashboard.chat.sitePane.label",
   "fr:dashboard.library.kinds.site",
   "fr:dashboard.library.kinds.document",
   "fr:dashboard.library.kinds.analysis",

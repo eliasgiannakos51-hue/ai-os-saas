@@ -168,13 +168,18 @@ check("a file that stored but could not be read is not called a success", /outco
 
 console.log("\n== 9. Site, in the shell ==");
 const site = read("src/components/website-builder/website-shell.tsx");
-check("a description said in the field builds the site through the page's two requests, then the status is watched",
-  /fetchWithAuthRetry\("\/api\/websites\/generate"/.test(site) && /fetch\("\/api\/websites\/generate\/process"/.test(site) && /fetch\(`\/api\/websites\/status\?id=\$\{id\}`\)/.test(site));
+// THE REQUESTS ARE SHARED with the Site opened beside Chat (package 7):
+// lib/website-builder/site-requests.ts makes them, the shell calls it.
+const siteRequests = read("src/lib/website-builder/site-requests.ts");
+check("the shared requests: generate, then the worker, then the status is watched",
+  /fetchWithAuthRetry\("\/api\/websites\/generate"/.test(siteRequests) && /fetch\("\/api\/websites\/generate\/process"/.test(siteRequests) && /fetch\(`\/api\/websites\/status\?id=\$\{encodeURIComponent\(id\)\}`\)/.test(siteRequests));
+check("a description said in the field builds the site through them, then the status is watched",
+  /await startSiteGeneration\(\{ name, description, skipClarification \}\)/.test(site) && /watchSite\(id, \{/.test(site) && !/fetch\("\/api\/websites\/generate/.test(site));
 check("...asking its questions first, answered in the field or skipped",
-  /if \(data\.needsClarification\)/.test(site) && /appendClarificationAnswers\(pending\.description, pending\.questions/.test(site) && /data-testid="site-skip-questions"/.test(site));
+  /if \(data\.needsClarification\) return \{ kind: "questions"/.test(siteRequests) && /if \(outcome\.kind === "questions"\)/.test(site) && /appendClarificationAnswers\(pending\.description, pending\.questions/.test(site) && /data-testid="site-skip-questions"/.test(site));
 check("...with the design chosen under the field folded into the brief", /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: 0 \}\)/.test(site) && /<DesignControls value=\{design\} onChange=\{setDesign\}/.test(site));
-check("while it builds, Stop is offered", /data-testid="website-stop"/.test(site) && /\/api\/websites\/\$\{current\.id\}\/cancel/.test(site));
-check("while a finished site is the current one, what is said changes it", /if \(current && current\.status === "completed"\) \{\s*void change\(text\);/.test(site) && /fetchWithAuthRetry\("\/api\/websites\/edit"/.test(site));
+check("while it builds, Stop is offered", /data-testid="website-stop"/.test(site) && /requestSiteStop\(current\.id\)/.test(site) && /\/api\/websites\/\$\{encodeURIComponent\(websiteId\)\}\/cancel/.test(siteRequests));
+check("while a finished site is the current one, what is said changes it", /if \(current && current\.status === "completed"\) \{\s*void change\(text\);/.test(site) && /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part \}\)/.test(site) && /fetchWithAuthRetry\("\/api\/websites\/edit"/.test(siteRequests));
 check("the price shows before sending, from the server's own estimator", /estimateForAction\(\s*"websiteGenerate"/.test(site) && /t\("estimatedCost", \{ count: estimatedCost \}\)/.test(site));
 check("the site beside the conversation is sandboxed, marked as made by AI, and says what it still lacks",
   /srcDoc=\{chosen === null \? html : outlineBoxes\(html, chosen\)\}\s*sandbox=""/.test(site) && /<AiGeneratedNotice variant="block" \/>/.test(site) && /findUnfilledPlaceholders\(html\)/.test(site) && /t\("unfilledTitle"/.test(site));

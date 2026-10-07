@@ -22,6 +22,8 @@
  * request is sent.
  */
 
+import { foldForMatch } from "@/lib/text/unicode-patterns";
+
 /** What the text looks like, before any model has seen it. */
 export type TextIntent = "question" | "command" | "ambiguous";
 
@@ -89,10 +91,10 @@ const QUESTION_MARKS = /[?？;؟]\s*$/;
  * written without spaces (Han, Hiragana, Katakana) there is no such
  * boundary to test, so containment is the whole test.
  */
-const NO_SPACE_SCRIPT = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
+const NO_SPACE_SCRIPT_INTENT = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
 
 function containsWord(text: string, phrase: string): boolean {
-  if (NO_SPACE_SCRIPT.test(phrase)) return text.includes(phrase);
+  if (NO_SPACE_SCRIPT_INTENT.test(phrase)) return text.includes(phrase);
   let from = 0;
   for (;;) {
     const at = text.indexOf(phrase, from);
@@ -114,7 +116,7 @@ function startsWithWord(text: string, phrase: string): boolean {
   const rest = text.slice(phrase.length);
   if (rest.length === 0) return true;
   if (!/^\p{L}/u.test(rest)) return true;
-  return NO_SPACE_SCRIPT.test(phrase);
+  return NO_SPACE_SCRIPT_INTENT.test(phrase);
 }
 
 /** Leading politeness and filler that sits in front of the real opener. */
@@ -169,4 +171,44 @@ export function classifyTextIntent(raw: string, locale = "en"): TextIntent {
  *  decision in one place. */
 export function shouldAskBeforeCreating(raw: string, locale = "en"): boolean {
   return classifyTextIntent(raw, locale) === "question";
+}
+
+/**
+ * "I want …" and its kin, per language: an ask for a thing, not a
+ * question about it. Not in IMPERATIVES because Create Anything already
+ * reads silence as an instruction; Chat does not (see below).
+ */
+const WANTS: Record<string, string[]> = {
+  en: ["i want", "i need", "i would like", "i'd like"],
+  el: ["θέλω", "θα ήθελα", "χρειάζομαι"],
+  de: ["ich will", "ich möchte", "ich brauche"],
+  es: ["quiero", "necesito", "me gustaría"],
+  fr: ["je veux", "je voudrais", "j'ai besoin"],
+  it: ["voglio", "vorrei", "ho bisogno"],
+  pt: ["quero", "preciso", "gostaria"],
+  ar: ["أريد", "أحتاج"],
+  ja: ["欲しい"],
+  zh: ["我想要", "我需要"],
+};
+
+/**
+ * Does the text OPEN with an instruction or an ask — "φτιάξε μου…",
+ * "θέλω ένα…", "make me…" — and is it not a question?
+ *
+ * STRICTER THAN classifyTextIntent ON PURPOSE. In Create Anything a
+ * sentence with no shape is a brief, because that is what the box is for.
+ * In Chat it is conversation: "μου αρέσει το site της Apple" names a site
+ * and asks for nothing, and opening a tool on it would be answering a
+ * remark with a bill. So Chat opens a tool only on an opener, and both
+ * sides are folded (case, accents, final sigma), because "φτιαξε μου site"
+ * typed without accents is the same instruction.
+ */
+export function opensWithInstruction(raw: string, locale = "en"): boolean {
+  const text = foldForMatch(normalise(raw));
+  if (!text) return false;
+  const opens = (map: Record<string, string[]>) => allPhrases(map, locale).some((p) => startsWithWord(text, foldForMatch(p)));
+  if (opens(IMPERATIVES)) return true;
+  if (!opens(WANTS)) return false;
+  // "θέλω να μάθω πώς…" opens with a want and is a question.
+  return !allPhrases(INTERROGATIVES, locale).some((p) => containsWord(text, foldForMatch(p))) && !QUESTION_MARKS.test(raw.trim());
 }

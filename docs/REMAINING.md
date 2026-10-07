@@ -502,8 +502,8 @@ Predictions και Projects, που λένε ρητά τι δεν κάνουν·
 | 3Α Κώδικας σεν. 11 | «Πες τι να αλλάξω» με επισήμανση και αναίρεση | δεν ξεκίνησε | κανένα | καμία συνέχεια πάνω στο αποτέλεσμα | 1 |
 | 3Β Chat σεν. 1 | Σταδιακή απάντηση, πρώτο κείμενο σε 2 δευτερόλεπτα | μισό | chat-measure.test.mjs, ndjson-stream.test.mjs | τα 2 δευτερόλεπτα δεν μετριούνται (QUEUE E.5) | 1 |
 | 3Β Chat σεν. 2 | Ανοίγει οποιοδήποτε εργαλείο από μία πρόταση | μισό | transition-buttons.test.mjs, producer-routes.test.mjs | 5 προορισμοί, χωρίς συμπλήρωση· μητρώο (QUEUE 1.3) | 3 |
-| 3Β Chat σεν. 3 | Δείχνει ποια στοιχεία μνήμης χρησιμοποίησε | δεν ξεκίνησε | κανένα | η γραμμή προέλευσης μετρά καταχωρίσεις, όχι μνήμη· QUEUE 1.2 | 1 |
-| 3Β Chat σεν. 4 | Δέχεται αρχεία και εικόνες, απαντά πάνω τους | δεν ξεκίνησε | κανένα | — | 2 |
+| 3Β Chat σεν. 3 | Δείχνει ποια στοιχεία μνήμης χρησιμοποίησε | φτιαγμένο πίσω από τον διακόπτη `chat-attachments` (2026-10-07, πακέτο 9): «Από τη μνήμη (N)» κάτω από την απάντηση, μόνο όσα δήλωσε η απάντηση ότι χρησιμοποίησε, και μετά από ανανέωση | chat-attachments.test.mjs, .itest.mjs, .mutation.mjs, .prodtest.mjs | migration 20261018000000· ο διακόπτης στο «Όλοι» | 0 |
+| 3Β Chat σεν. 4 | Δέχεται αρχεία και εικόνες, απαντά πάνω τους | φτιαγμένο για PDF, JPG, PNG πίσω από τον διακόπτη `chat-attachments` (2026-10-07, πακέτο 9): «+», επικόλληση, σύρσιμο· το PDF μπαίνει στα Αρχεία και διαβάζεται με σελίδες· ως 3 PDF και 3 εικόνες ανά μήνυμα | chat-attachments.test.mjs, .itest.mjs, .mutation.mjs, .prodtest.mjs | Word, Excel και άλλοι τύποι όχι ακόμα στο Chat (υπάρχουν στα Αρχεία)· migration 20261018000000 | 0.5 |
 | 3Β Chat σεν. 5 | Αναζήτηση στο web με πηγές | μισό | web-sources.test.mjs, chat-timeline.test.mjs | — | 0.5 |
 | 3Β Chat σεν. 6 | Συνεχίζει δουλειά από προηγούμενη συνομιλία | μισό | conversation-limits.test.mjs | — | 0.5 |
 | 3Β Chat σεν. 7 | Υπαγόρευση και ανάγνωση απάντησης | μισό | voice.test.mjs, voice-reach.test.mjs | κλειδιά OpenAI/ElevenLabs στην παραγωγή: άγνωστο (NEEDS 4) | 0.5 |
@@ -760,7 +760,7 @@ Predictions και Projects, που λένε ρητά τι δεν κάνουν·
 | Β5. Ανέβασμα αρχείων και εικόνων στο Chat | Το Chat δέχεται αρχεία και εικόνες | δεν ξεκίνησε | κανένα | Κανένα. Στο Chat δεν υπάρχει πεδίο αρχείου (`src/components/chat/`, `src/app/api/chat/route.ts`). Η Αρχική δέχεται φωτογραφίες | 2 |
 | Β6. Εκτέλεση κώδικα σε απομονωμένο περιβάλλον | Απομόνωση, όρια, διακοπή βρόχου, αποτέλεσμα | δεν ξεκίνησε | κανένα | Επιλογή πληρωμένου παρόχου απομόνωσης (QUEUE 2.1· δεν έχει γραμμή στο NEEDS) | 5 |
 | Β7. Κουμπί σχολίων | Κουμπί σε κάθε οθόνη, με εργαλείο και βήμα | δεν ξεκίνησε | κανένα | Κανένα. Ο πίνακας `feedback` υπάρχει στο baseline αλλά δεν γράφεται από πουθενά. Υπάρχει μόνο το banner των beta με σύνδεσμο (`src/components/overview/beta-feedback-banner.tsx`) | 1 |
-| Γ1. Chat | Όλα τα σενάρια 3Β Chat | μισό | `chat-memory.test.mjs`, `chat-stop.test.mjs`, `chat-timeline.test.mjs` | Βιβλιοθήκη (Β3), ανέβασμα αρχείων (Β5), μητρώο (Β2) | 3 |
+| Γ1. Chat | Όλα τα σενάρια 3Β Chat | μισό | `chat-memory.test.mjs`, `chat-stop.test.mjs`, `chat-timeline.test.mjs`, `chat-attachments.test.mjs` | Βιβλιοθήκη (Β3), μητρώο (Β2)· το ανέβασμα PDF και εικόνας φτιάχτηκε 2026-10-07 (πακέτο 9) | 2.5 |
 | Γ2. Site | Όλα τα σενάρια 3Α Site | μισό | `multipage-websites.test.mjs`, `website-timeline.test.mjs` και περίπου 20 ακόμα `website-*` | Cinematic: NEEDS 5, 6, 7. Έλεγχος με δύο κύκλους πριν από την παράδοση | 3 |
 | Γ3. Files | Όλα τα σενάρια 3Δ Αρχεία | μισό | `file-extraction.test.mjs`, `file-ask-depth.test.mjs`, `upload-reversibility.test.mjs` | OCR: χρειάζεται επιλογή παρόχου. Παραπομπή σε σελίδα ή κελί | 2 |
 | Γ4. Research | Όλα τα σενάρια 3Β Έρευνα | μισό | `research-entries.test.mjs`, `research-timeline.test.mjs`, `research-reliability.test.mjs` | Το migration `20261011000000_research_reports_server_writes.sql` (NEEDS 25) | 2 |
@@ -1114,7 +1114,7 @@ DESIGN της 2026-10-05 ζητά περισσότερα: κέλυφος, κου
 | §4 Αρχική | Γη + χαιρετισμός, πεδίο, Research/Create/Run/Analyze, τίποτα άλλο | λειτουργικό (`src/app/dashboard/overview/page.tsx`, `src/components/home/quick-actions.tsx`) | home-design.test.mjs | — | 0 |
 | §5 Συνομιλία | Στήλη ≤720, χρήστης δεξιά σε #0D1220 με 16px, απάντηση χωρίς πλαίσιο | μισό: όλα εκτός από τη γωνία, που είναι 14px (`chat-workspace.tsx:922`) | conversation-design.test.mjs, chat-measure.test.mjs | — | 0 (με τις γωνίες) |
 | §5 Σειρά κάτω από την απάντηση | Γη 26px, αντιγραφή, θετική/αρνητική αξιολόγηση, ξανά | φτιαγμένο (2026-10-05, Δ.2): `src/components/chat/answer-actions.tsx`· η αξιολόγηση γράφεται στο `chat_messages.rating` | conversation-design.test.mjs, chat-rating.test.mjs | NEEDS 34 (migration) | 0 |
-| §5 Πεδίο ίδιο παντού | «+», πλέγμα προς All tools, μικρόφωνο, λευκή αποστολή | μισό: πλέγμα (2026-10-05, Δ.2), μικρόφωνο και αποστολή υπάρχουν (`chat-composer.tsx`)· το «+» δεν υπάρχει· το Coding έχει άλλο πεδίο | conversation-design.test.mjs | το «+» θέλει ανέβασμα αρχείων στο chat (ΛΘ-4) | 2 |
+| §5 Πεδίο ίδιο παντού | «+», πλέγμα προς All tools, μικρόφωνο, λευκή αποστολή | μισό: πλέγμα (2026-10-05, Δ.2), μικρόφωνο και αποστολή υπάρχουν (`chat-composer.tsx`)· το «+» στο Chat φτιαγμένο πίσω από τον διακόπτη `chat-attachments` (2026-10-07, πακέτο 9), για PDF και εικόνα· το «+» δεν ανοίγει ακόμα τη Βιβλιοθήκη· το Coding έχει άλλο πεδίο | conversation-design.test.mjs, chat-attachments.test.mjs | «+» προς Βιβλιοθήκη (5.3Β) | 1 |
 | §5 Σταδιακή απάντηση | Η απάντηση εμφανίζεται σταδιακά | λειτουργικό | ndjson-stream.test.mjs, chat-stop.test.mjs | — | 0 |
 | §5 Βήματα μεγάλης εργασίας | Activity Timeline μέσα στη συνομιλία, κλείνει σε μία γραμμή | μισό: υπάρχει στο chat. Έρευνα και site το δείχνουν στη δική τους σελίδα, όχι σε συνομιλία | chat-timeline.test.mjs, job-timeline.test.mjs | το κέλυφος | 0 (με το κέλυφος) |
 | §5 Περιοχή δουλειάς | Χωρισμός 40/60, #0A0E18, γραμμή ενεργειών, κλείσιμο, κινητό | μισό: στο Chat φτιαγμένη (2026-10-05, Δ.2), πίσω από τον διακόπτη `chat-work-area` (`src/components/chat/work-area.tsx`)· τα άλλα εργαλεία δεν έχουν περάσει στο κέλυφος, και το Site έχει ακόμα δικό του χωρισμό (`website-builder-workspace.tsx:1325`) | chat-work-area.test.mjs | — | 2 |
@@ -1304,7 +1304,7 @@ agents-sites}`. Έξι από αυτές θέλουν και migration με το
 | Β: διορθωμένα | ΛΘ-3, 6, 8 | μισό: μόνο στα branches | router-model-table.test.mjs, recent-tools.test.mjs, entitlement-trust.test.mjs | merge | 0 |
 | ΛΘ-2 | Router που τρέχει, σελίδα που λέει αλήθεια | μισό | router-classify.test.mjs, routing-report.test.mjs | E.4 | 0 (= v6-master router) |
 | ΛΘ-5 | Το sidebar δεν αλλάζει με το «All tools» | μισό (ανεπιβεβαίωτο) | κανένα | NEEDS 2 | 0 |
-| ΛΘ-4 | Chat με ανέβασμα αρχείων | δεν ξεκίνησε | κανένα | — | 0 (= ΣΥΣΤΗΜΑ DESIGN §5 πεδίο) |
+| ΛΘ-4 | Chat με ανέβασμα αρχείων | φτιαγμένο για PDF και εικόνα πίσω από τον διακόπτη `chat-attachments` (2026-10-07, πακέτο 9) | chat-attachments.test.mjs, .itest.mjs, .mutation.mjs, .prodtest.mjs | migration 20261018000000 | 0 |
 | ΛΘ-7 | «Regenerate (free)» χρεώνεται | λειτουργικό (2026-10-05): γράφει το κόστος | `regenerate-cost` | δωρεάν πρώτη: NEEDS 33 | 0 |
 | ΛΘ-9…15 | Ομάδα, σφάλματα, webhook, όριο έρευνας, σχόλιο, CSV, add-on | δεν ξεκίνησε | κανένα | NEEDS 24 (ΛΘ-9) | 0.5 (τα 9–12 είναι στα μέτρια του Α) |
 | Β1 πλήρης έλεγχος | Κάθε σελίδα, φόρμα, εργαλείο, 10 γλώσσες, TODO, issues, νεκρός κώδικας | δεν ξεκίνησε | κανένα | NEEDS 2 | 3 |

@@ -610,7 +610,10 @@ if (!DB) {
   // timed out on every push in between, so nothing reached either.
   // 111 -> 112 on 2026-10-05: feature_flags (20261017), the owner's
   // switches for new tools (MASTER Μέρος 13 Β).
-  check(`112 tables`, tables === 112, `got ${tables}`);
+  // 112 -> 116 on 2026-10-07: generated_images (20261019, package 19) and
+  // automation_flows, automation_flow_versions, automation_runs (20261021,
+  // package 30); credit-flow.dbtest.mjs measured 116 in CI on #271.
+  check(`116 tables`, tables === 116, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 

@@ -185,7 +185,11 @@ console.log("== 0. the database really is the one the migrations build ==");
 // 111 -> 112 on 2026-10-05: 20261017000000_feature_flags.sql adds
 // feature_flags, the owner's switches for new tools (MASTER Μέρος 13 Β).
 // Caught by this line in CI on the first push that carried it (#248).
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 112);
+// 112 -> 116 on 2026-10-07: 20261019000000_generated_images.sql adds
+// generated_images (package 19), 20261021000000_automation_flows.sql adds
+// automation_flows, automation_flow_versions and automation_runs
+// (package 30). Measured by this line in CI on #271 (got 116).
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 116);
 eq(
   "the credit functions exist",
   Number(

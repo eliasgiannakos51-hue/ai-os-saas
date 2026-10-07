@@ -17,7 +17,7 @@ export const fetchCache = "force-no-store";
  *   2. is the user_files table readable?              (caller's session)
  *   3. do the bucket's INSERT/DELETE policies let an
  *      authenticated user write their own folder?     (canary object)
- *   4. does user_files RLS let them insert/delete?    (canary row)
+ *   4. is user_files written by the server only?      (canary row)
  *
  * Checks 3 and 4 run AS THE CALLING ADMIN — a real session through the
  * real policies, not the service role, because the service role bypasses
@@ -108,7 +108,10 @@ export async function GET() {
     }
   }
 
-  // 4. user_files INSERT + DELETE RLS, with a canary row.
+  // 4. user_files is written by the server only
+  // (20261014000000_server_written_tables.sql). The canary insert through
+  // the user's own client must be REFUSED; one that lands means the
+  // migration has not run, and the canary is removed by the server.
   {
     const { data: row, error: insError } = await supabase
       .from("user_files")
@@ -126,20 +129,21 @@ export async function GET() {
       })
       .select("id")
       .single();
-    if (insError || !row) {
+    if (row) {
+      await createAdminClient().from("user_files").delete().eq("id", row.id).eq("user_id", user.id);
       checks.push({
-        name: "user_files RLS",
+        name: "user_files writes",
         ok: false,
-        detail: `canary insert refused: ${insError?.message ?? "no row returned"}`,
+        detail: "the account can still insert file rows directly: run 20261014000000_server_written_tables.sql",
       });
     } else {
-      const { error: delError } = await supabase.from("user_files").delete().eq("id", row.id);
+      const refused = /permission denied/i.test(insError?.message ?? "");
       checks.push({
-        name: "user_files RLS",
-        ok: !delError,
-        detail: delError
-          ? `canary row inserted but delete refused: ${delError.message}`
-          : "canary row inserted and removed through RLS",
+        name: "user_files writes",
+        ok: refused,
+        detail: refused
+          ? "a direct insert by the account is refused; the server writes file rows"
+          : `canary insert failed for another reason: ${insError?.message ?? "no row returned"}`,
       });
     }
   }

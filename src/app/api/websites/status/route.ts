@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isGenerationJobStale } from "@/lib/website-generation-limits";
 import { logApiError } from "@/lib/log-error";
 import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
@@ -23,13 +24,13 @@ export const dynamic = "force-dynamic";
 // only ever sees this polled row. The figure therefore has to be read
 // back from the settled cost-log row. Best-effort: a missing row just
 // means no message, never a failed poll.
-async function readUsageForWebsite(
-  supabase: ReturnType<typeof createClient>,
-  userId: string,
-  websiteId: string
-) {
+//
+// THE SERVER'S READ: the account cannot read ai_cost_log itself
+// (20261012000000_cost_log_server_reads.sql); this reads one row, the
+// caller's own, and returns only the receipt built from it.
+async function readUsageForWebsite(userId: string, websiteId: string) {
   try {
-    const { data } = await supabase
+    const { data } = await createAdminClient()
       .from("ai_cost_log")
       .select("credits_charged, metadata")
       .eq("user_id", userId)
@@ -129,7 +130,7 @@ export async function GET(request: Request) {
         typedRecord.is_large_request
       )
     ) {
-      const { data: failedRecord, error: staleUpdateError } = await supabase
+      const { data: failedRecord, error: staleUpdateError } = await createAdminClient()
         .from("user_websites")
         .update({
           status: "failed",
@@ -140,6 +141,7 @@ export async function GET(request: Request) {
         // written by the worker in the small window between our SELECT
         // above and this UPDATE.
         .eq("id", id)
+        .eq("user_id", user.id)
         .eq("status", typedRecord.status)
         .select()
         .maybeSingle();
@@ -174,7 +176,7 @@ export async function GET(request: Request) {
     // row exists.
     const usage =
       record.status === "completed" || record.status === "flagged"
-        ? await readUsageForWebsite(supabase, user.id, String(record.id))
+        ? await readUsageForWebsite(user.id, String(record.id))
         : null;
     return NextResponse.json({ ok: true, record: withClientTimeline(record, usage?.creditsCharged ?? null), usage });
   } catch (err) {

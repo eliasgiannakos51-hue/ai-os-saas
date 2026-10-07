@@ -185,8 +185,10 @@ run(
   [
     [
       GENERATE,
-      '      .eq("id", websiteId)\n      .eq("status", "pending")\n      .eq("attempt_count", website.attempt_count)\n      .select("id");',
-      '      .eq("id", websiteId)\n      .select("id");',
+      // RE-ANCHORED 2026-10-05: the claim is the server's write now, scoped
+      // to the caller as well (20261015000000_agents_websites_server_written.sql).
+      '      .eq("id", websiteId)\n      .eq("user_id", writerUserId)\n      .eq("status", "pending")\n      .eq("attempt_count", website.attempt_count)\n      .select("id");',
+      '      .eq("id", websiteId)\n      .eq("user_id", writerUserId)\n      .select("id");',
     ],
   ],
   true

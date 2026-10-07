@@ -1,6 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
@@ -241,7 +242,11 @@ export async function ingestFileBytes(opts: {
     error = err instanceof ExtractionError ? err.message : "This file could not be read.";
   }
 
-  const { data: row, error: insertError } = await supabase
+  // THE SERVER'S WRITE: the account cannot insert file rows itself
+  // (20261014000000_server_written_tables.sql), so every row passes the
+  // count cap, the storage quota and the type sniffing above, and its
+  // size_bytes is the size measured here.
+  const { data: row, error: insertError } = await createAdminClient()
     .from("user_files")
     .insert({
       user_id: user.id,

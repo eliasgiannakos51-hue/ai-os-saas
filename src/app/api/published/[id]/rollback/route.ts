@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSiteHostname } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
 import { logSecurityCheck } from "@/lib/security-check-log";
@@ -139,7 +140,10 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
 
     const nowIso = new Date().toISOString();
-    const { error: updateError } = await supabase
+    // THE SERVER'S WRITE: the account cannot write published_sites itself
+    // (20261014000000_server_written_tables.sql); this one runs after the
+    // strip and the scan above, scoped to the caller.
+    const { error: updateError } = await createAdminClient()
       .from("published_sites")
       .update({
         html_content: html,
@@ -148,7 +152,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
         is_active: true,
         updated_at: nowIso,
       })
-      .eq("id", publishedSiteId);
+      .eq("id", publishedSiteId)
+      .eq("user_id", user.id);
     if (updateError) {
       logApiError("/api/published/[id]/rollback", updateError, { stage: "update" });
       return NextResponse.json({ ok: false, error: "Could not roll that back." }, { status: 500 });

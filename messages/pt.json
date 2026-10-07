@@ -1009,7 +1009,8 @@
       "agreedRate": "A {price} € por crédito, a tarifa que aceitou.",
       "capReached": "Atingiu o seu limite. Nada mais será cobrado até o aumentar.",
       "turnOff": "Desligar uso adicional",
-      "turnOffNote": "Desligar para as cobranças futuras. O que já foi usado este mês continua a ser faturado."
+      "turnOffNote": "Desligar para as cobranças futuras. O que já foi usado este mês continua a ser faturado.",
+      "needsSubscription": "O pagamento por uso é para planos pagos: é cobrado na sua próxima fatura. Escolha primeiro um plano."
     },
     "addons": {
       "title": "Extras",
@@ -4454,5 +4455,52 @@
         "trafficDown": "o tráfego do site desceu {percent}%"
       }
     }
+  },
+  "routerReport": {
+    "title": "O roteador, na sombra",
+    "intro": "Quanto custou cada pedido cobrado e que modelo o roteador teria escolhido. Ainda nada é roteado por isto: até o conjunto de qualidade medir um modelo mais barato, cada pedido mantém o modelo que tem hoje.",
+    "period": "Período",
+    "day": "Dia",
+    "week": "Semana",
+    "month": "Mês",
+    "requests": "Pedidos",
+    "avgCost": "Custo médio por pedido",
+    "revenue": "Receita em créditos",
+    "margin": "Margem",
+    "cached": "Tokens de entrada em cache",
+    "fallback": "Respondido pelo reserva",
+    "escalated": "Passado a um modelo mais forte",
+    "bumped": "Nível subido por baixa certeza",
+    "notRecorded": "Ainda não registado",
+    "unavailable": "Não foi possível ler",
+    "unclassified": "{count} pedidos sem decisão: cobrados antes de a sombra existir, ou não são texto.",
+    "byCategory": "Custo por tipo de trabalho",
+    "byTier": "Custo por nível",
+    "byModel": "Custo por modelo",
+    "byFeature": "Custo por ferramenta",
+    "colName": "Nome",
+    "colRequests": "Pedidos",
+    "colShare": "Parcela",
+    "colCost": "Custo",
+    "colAvg": "Por pedido",
+    "shadowTitle": "Projeção da sombra",
+    "shadowBody": "Os mesmos tokens no modelo escolhido pelo roteador teriam custado {projected}, contra {actual} gastos de facto, em {rows} pedidos. Uma projeção, não uma poupança: não sabe se esse modelo precisaria de mais tokens, usaria a cache de outra forma ou falharia.",
+    "shadowNone": "Nenhum pedido deste período regista o suficiente para projetar.",
+    "tableTitle": "A tabela de modelos (versão {version}, {source})",
+    "sourceEnv": "de AI_MODEL_TABLE",
+    "sourceDefault": "a predefinida",
+    "tableRejected": "AI_MODEL_TABLE foi recusada, por isso vale a predefinida: {problems}",
+    "colCategory": "Tipo de trabalho",
+    "colTier": "Nível",
+    "colPrimary": "Principal",
+    "colFallback": "Reserva",
+    "colPrice": "USD por 1000 tokens (entrada / saída)",
+    "colWait": "Espera máxima",
+    "colQuality": "Qualidade",
+    "notMeasured": "Não medida",
+    "seconds": "{n} s",
+    "pricePer1k": "${input} / ${output}",
+    "truncated": "Só foram lidos os {cap} pedidos mais recentes; os números referem-se a esses.",
+    "empty": "Nenhum pedido cobrado neste período."
   }
 }

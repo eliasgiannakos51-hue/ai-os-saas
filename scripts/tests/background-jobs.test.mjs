@@ -223,7 +223,16 @@ console.log("\n== 7. coming back sees the right state ==");
 // is running while a worker spends their credits.
 check("there is a server-side 'is anything running' query", /kind=/.test(listSrc) || /searchParams\.get\("kind"\)/.test(listSrc));
 check("scoped to unfinished jobs by default", /\.in\("status", \["queued", "running"\]\)/.test(listSrc));
-check("read through the user's own client, so RLS scopes it", /createClient\(\)/.test(listSrc) && !/createAdminClient/.test(listSrc));
+// THE ONE SERVER READ (2026-10-05): a stale row's credit hold, a column
+// the account may not read, fetched for the row the user's own read just
+// returned — by id AND user_id. Every other read is the user's client.
+const listAdminUses = [...listSrc.matchAll(/createAdminClient\(\)/g)].length;
+check(
+  "read through the user's own client, so RLS scopes it",
+  /createClient\(\)/.test(listSrc) &&
+    listAdminUses === 1 &&
+    /createAdminClient\(\)\s*\.from\("ai_jobs"\)\s*\.select\("reservation_id"\)\s*\.eq\("id", String\(activeRow\.id\)\)\s*\.eq\("user_id", user\.id\)/.test(listSrc)
+);
 const workspace = readFileSync("src/components/agents/agents-workspace.tsx", "utf8");
 check("the agents page asks on mount", /fetch\("\/api\/jobs\?kind=agent_build"\)/.test(workspace));
 check("and adopts the running job", /setJobId\(String\(data\.job\.id\)\)/.test(workspace));
@@ -273,9 +282,15 @@ check("the table is created if not exists", /create table if not exists public\.
 check("indexes too", (migration.match(/create index if not exists/g) ?? []).length >= 2);
 check("the policy is dropped before being created", /drop policy if exists/.test(migration));
 check("the trigger too", /drop trigger if exists/.test(migration));
-// A column list fails the WHOLE query when one column is missing, so an
-// un-migrated deployment would 500 on every poll rather than degrade.
-check("the poll selects *", /\.from\("ai_jobs"\)\s*\.select\("\*"\)/.test(pollSrc));
+// THE ACCOUNT READS LISTED COLUMNS SINCE 2026-10-05
+// (20261013000000_cost_columns_server_only.sql), so `*` would be refused.
+// The list is one shared constant, every name on it predates that
+// migration, and the cost columns come from the server after the read.
+check("the poll selects the account's columns", /\.from\("ai_jobs"\)\.select\(JOB_CLIENT_COLUMNS\)/.test(pollSrc));
+check(
+  "...and the server's, for the row that read proved is the caller's",
+  /createAdminClient\(\)\s*\.from\("ai_jobs"\)\s*\.select\("reservation_id, usage_entries, running, timeline"\)\s*\.eq\("id", params\.id\)\s*\.eq\("user_id", user\.id\)/.test(pollSrc)
+);
 
 console.log("\n== 11. the client watches rows, and stops when there is nothing to watch ==");
 check("the hook polls by job id", /\/api\/jobs\/\$\{jobId\}/.test(hookSrc));

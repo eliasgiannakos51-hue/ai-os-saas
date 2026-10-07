@@ -160,9 +160,17 @@ check("the inventory is not empty", inv.tables.length > 40 && inv.functions.leng
   const inPublic = new Set();
   const onStorage = new Set();
   const templated = new Set();
+  // DROPPED LATER, AND NEVER RE-CREATED (2026-10-05). A migration may take
+  // a policy away on purpose — 20261011000000_research_reports_server_writes.sql
+  // drops two — so the files are read IN THE ORDER THEY RUN, statements in
+  // the order they appear, and a DROP POLICY removes what came before it.
+  // `droppedForGood` keeps those, and the check below them requires the
+  // generated query NOT to expect them: both directions.
+  const droppedForGood = new Set();
   const sqlFiles = [
     ...readdirSync("supabase/migrations")
       .filter((f) => f.endsWith(".sql"))
+      .sort()
       .map((f) => path.join("supabase/migrations", f)),
     "scripts/db/bootstrap-supabase.sql",
   ];
@@ -170,8 +178,15 @@ check("the inventory is not empty", inv.tables.length > 40 && inv.functions.leng
   for (const f of sqlFiles) {
     const text = readFileSync(f, "utf8").replace(/--[^\n]*/g, "");
     for (const m of text.matchAll(
-      /create\s+policy\s+(?:"([^"]+)"|([a-z0-9_%$]+))\s+on\s+([a-z0-9_]+)\.?"?([a-z0-9_]*)"?/gi
+      /(create|drop)\s+policy\s+(?:if\s+exists\s+)?(?:"([^"]+)"|([a-z0-9_%$]+))\s+on\s+([a-z0-9_]+)\.?"?([a-z0-9_]*)"?/gi
     )) {
+      if (m[1].toLowerCase() === "drop") {
+        const dSchema = m[5] ? m[4] : "public";
+        const dKey = `${m[5] || m[4]} ${m[2] ?? m[3]}`;
+        if (dSchema === "public" && inPublic.delete(dKey)) droppedForGood.add(dKey);
+        continue;
+      }
+      m.splice(1, 1); // drop the verb group: the indices below are the CREATE pattern's
       const name = m[1] ?? m[2];
       // `create policy x on public.t` and `create policy x on t` both name
       // the table t; `create policy x on storage.objects` names another
@@ -181,7 +196,10 @@ check("the inventory is not empty", inv.tables.length > 40 && inv.functions.leng
       if (!m[1]) unquoted++;
       if (/%\d*\$/.test(name)) templated.add(name);
       else if (schema === "storage") onStorage.add(`${schema}.${table} ${name}`);
-      else inPublic.add(`${table} ${name}`);
+      else {
+        inPublic.add(`${table} ${name}`);
+        droppedForGood.delete(`${table} ${name}`);
+      }
     }
   }
   // FLOORS, NOT THE MEASUREMENT ITSELF. Today this finds 188 distinct
@@ -236,6 +254,12 @@ check("the inventory is not empty", inv.tables.length > 40 && inv.functions.leng
     `every literal CREATE POLICY on a public table reaches expected_policies (${inPublic.size} statements, ${invisible.length} invisible)`,
     invisible.length === 0,
     invisible.slice(0, 8).join(" | ") + (invisible.length > 8 ? ` … and ${invisible.length - 8} more` : "")
+  );
+  const stillExpected = [...droppedForGood].filter((k) => derived.has(`public.${k}`)).sort();
+  check(
+    `a policy a later migration drops for good is not expected (${droppedForGood.size} dropped, ${stillExpected.length} still expected)`,
+    droppedForGood.size >= 2 && stillExpected.length === 0,
+    stillExpected.join(" | ") || `only ${droppedForGood.size} found: the drop scan is reading nothing`
   );
 
   // AND THE STORAGE ONES, WHICH THIS CLAUSE USED TO COUNT AS EXCLUDED.

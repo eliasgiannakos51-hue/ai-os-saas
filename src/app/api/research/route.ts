@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
@@ -250,7 +251,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: report, error } = await supabase
+    // The server's write: the account cannot insert reports itself
+    // (20261011000000_research_reports_server_writes.sql), so a report
+    // exists only once this route has planned it. user_id is the session's.
+    const { data: report, error } = await createAdminClient()
       .from("research_reports")
       .insert({
         user_id: user.id,

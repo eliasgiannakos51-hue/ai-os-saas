@@ -1009,7 +1009,8 @@
       "agreedRate": "A {price} € por crédito, la tarifa que aceptaste.",
       "capReached": "Has alcanzado tu límite. No se cobrará nada más hasta que lo subas.",
       "turnOff": "Desactivar uso adicional",
-      "turnOffNote": "Desactivarlo detiene los cobros futuros. Lo ya usado este mes se factura igualmente."
+      "turnOffNote": "Desactivarlo detiene los cobros futuros. Lo ya usado este mes se factura igualmente.",
+      "needsSubscription": "El pago por uso es para planes de pago: se cobra con tu próxima factura. Elige primero un plan."
     },
     "addons": {
       "title": "Complementos",
@@ -4454,5 +4455,52 @@
         "trafficDown": "el tráfico de la web ha bajado un {percent}%"
       }
     }
+  },
+  "routerReport": {
+    "title": "El enrutador, en la sombra",
+    "intro": "Lo que costó cada solicitud cobrada y qué modelo habría elegido el enrutador. Todavía no se enruta nada con esto: hasta que el conjunto de calidad mida un modelo más barato, cada solicitud conserva el modelo que tiene hoy.",
+    "period": "Periodo",
+    "day": "Día",
+    "week": "Semana",
+    "month": "Mes",
+    "requests": "Solicitudes",
+    "avgCost": "Coste medio por solicitud",
+    "revenue": "Ingresos en créditos",
+    "margin": "Margen",
+    "cached": "Tokens de entrada en caché",
+    "fallback": "Respondido por el respaldo",
+    "escalated": "Pasado a un modelo más potente",
+    "bumped": "Nivel subido por baja certeza",
+    "notRecorded": "Aún no se registra",
+    "unavailable": "No se pudo leer",
+    "unclassified": "{count} solicitudes sin decisión: cobradas antes de que existiera la sombra, o no son texto.",
+    "byCategory": "Coste por tipo de trabajo",
+    "byTier": "Coste por nivel",
+    "byModel": "Coste por modelo",
+    "byFeature": "Coste por herramienta",
+    "colName": "Nombre",
+    "colRequests": "Solicitudes",
+    "colShare": "Proporción",
+    "colCost": "Coste",
+    "colAvg": "Por solicitud",
+    "shadowTitle": "Proyección de la sombra",
+    "shadowBody": "Los mismos tokens con el modelo que elegiría el enrutador habrían costado {projected}, frente a {actual} gastados de verdad, en {rows} solicitudes. Una proyección, no un ahorro: no sabe si ese modelo habría necesitado más tokens, usado la caché de otro modo o fallado.",
+    "shadowNone": "Ninguna solicitud de este periodo registra lo suficiente para proyectar.",
+    "tableTitle": "La tabla de modelos (versión {version}, {source})",
+    "sourceEnv": "desde AI_MODEL_TABLE",
+    "sourceDefault": "la predeterminada",
+    "tableRejected": "AI_MODEL_TABLE fue rechazada, así que se usa la predeterminada: {problems}",
+    "colCategory": "Tipo de trabajo",
+    "colTier": "Nivel",
+    "colPrimary": "Principal",
+    "colFallback": "Respaldo",
+    "colPrice": "USD por 1000 tokens (entrada / salida)",
+    "colWait": "Espera máxima",
+    "colQuality": "Calidad",
+    "notMeasured": "Sin medir",
+    "seconds": "{n} s",
+    "pricePer1k": "${input} / ${output}",
+    "truncated": "Solo se leyeron las {cap} solicitudes más recientes; las cifras se refieren a ellas.",
+    "empty": "No hay solicitudes cobradas en este periodo."
   }
 }

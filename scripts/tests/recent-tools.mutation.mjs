@@ -24,25 +24,28 @@ const TARGETS = [GATE, LIB, RAIL, SIDEBAR, LAYOUT, ROUTE];
 
 const MUTANTS = [
   {
-    name: "one use is enough to appear",
+    // RE-ANCHORED 2026-10-05: the rule became 3 finished uses on 2 days.
+    name: "two finished uses are enough to appear",
     file: LIB,
-    from: "export const USES_TO_APPEAR = 2;",
-    to: "export const USES_TO_APPEAR = 1;",
-    expect: "one use is not enough",
+    from: "export const USES_TO_APPEAR = 3;",
+    to: "export const USES_TO_APPEAR = 2;",
+    expect: "two tasks on two days are not enough",
   },
   {
-    name: "every open counts as a use, a reload included",
+    // RE-ANCHORED 2026-10-05: the same-session merge is gone with page
+    // opens; what can break now is the two-days half of the rule.
+    name: "three uses on one day are enough",
     file: LIB,
-    from: "    if (t - last > SAME_USE_MINUTES * 60_000) uses++;",
-    to: "    uses++;",
-    expect: "two opens a few minutes apart are ONE use",
+    from: "export const DAYS_TO_APPEAR = 2;",
+    to: "export const DAYS_TO_APPEAR = 1;",
+    expect: "three finished tasks on the same day: not yet",
   },
   {
     name: "the window is no longer thirty days",
     file: LIB,
     from: "export const RECENT_WINDOW_DAYS = 30;",
     to: "export const RECENT_WINDOW_DAYS = 60;",
-    expect: "a use older than 30 days does not count",
+    expect: "30 days without a use: it goes",
   },
   {
     name: "a sixth tool fits",
@@ -75,8 +78,8 @@ const MUTANTS = [
   {
     name: "a pinned tool is listed a second time among the used ones",
     file: LIB,
-    from: "    .filter(([href, times]) => !pinned.includes(href) && countUses(times) >= USES_TO_APPEAR)",
-    to: "    .filter(([href, times]) => countUses(times) >= USES_TO_APPEAR)",
+    from: "    .filter(([href, times]) => !pinned.includes(href) && qualifies(times))",
+    to: "    .filter(([href, times]) => qualifies(times))",
     expect: "a pinned tool that is also the most used is listed once",
   },
   {
@@ -112,7 +115,23 @@ const MUTANTS = [
     file: LAYOUT,
     from: '      .eq("user_id", user.id)',
     to: "",
-    expect: "the layout reads the person's own last 30 days of nav_events",
+    expect: "the layout reads the person's own last 30 days of settled work",
+  },
+  {
+    // THE BUG OF 2026-10-05: a click from All tools put the tool in the
+    // sidebar, because a use was an opened page.
+    name: "page opens are fed to the rule again",
+    file: LAYOUT,
+    from: "    const events = [...completionEvents(settled.data ?? []), ...savedEvents(saved.data ?? [])];",
+    to: '    const opens = await supabase.from("nav_events").select("path, created_at").eq("user_id", user.id);\n    const events = [...(opens.data ?? []), ...completionEvents(settled.data ?? []), ...savedEvents(saved.data ?? [])];',
+    expect: "ten opens with nothing done",
+  },
+  {
+    name: "a refunded task is credited to its tool",
+    file: LIB,
+    from: "    const href = COMPLETION_TOOLS[r.feature];",
+    to: '    const href = COMPLETION_TOOLS[r.feature.replace(/_(refunded|stopped|cannot_complete)$/, "")];',
+    expect: "a failed, cancelled or refunded task does not count",
   },
   {
     name: "a pin is stored for a tool the person cannot see",

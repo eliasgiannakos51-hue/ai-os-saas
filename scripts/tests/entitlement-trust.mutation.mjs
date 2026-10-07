@@ -1,0 +1,272 @@
+#!/usr/bin/env node
+/*
+ * CAN entitlement-trust.test.mjs SEE A FIXED ACCESS CHECK COME UNDONE?
+ *
+ * Each mutant puts one of the 2026-10-05 fixes back the way it was, or
+ * blinds the gate's own scan:
+ *
+ *   1. a key the billing code reads drops off the migration's list
+ *   2. the guard fences every role but Supabase Auth's
+ *   3. signup asks Supabase Auth for the starting plan again
+ *   4. the beta code gets a default in the source again
+ *   5. signup accepts a code when none is configured
+ *   6. overage no longer asks for a subscription
+ *   7. the plan sync no longer skips an add-on
+ *   8. the scheduled-runs cron no longer checks the mission's owner
+ *   9. the create job downloads every path it was handed
+ *  10. a security header goes missing
+ *  11. the framework announces itself again
+ *  12. a hand-off secret is compared with === again
+ *  13. the billing scan reads no files, so section 1 checks nothing
+ *  14. the research migration leaves the account able to write
+ *  15. a research route writes through the user's client again
+ *  16. the research scan matches nothing, so section 9 checks nothing
+ *  17. the cost-log migration leaves the account able to read
+ *  18. a page reads the cost log through the user's client again
+ *  19. the export reads the cost log in full again
+ *  20. the column migration grants the cost record too
+ *  21. a column the migrations create is on neither list
+ *  22. the job poll asks for `*` through the user's client again
+ *  23. the three-table migration leaves file rows writable
+ *  24. a team invite is written through the user's client again
+ *  25. the files diagnostic accepts a direct insert as healthy
+ *  26. the agents migration leaves agents writable
+ *  27. an agent edit is written through the user's client again
+ *  28. a site update in the generation route loses its owner scope
+ *
+ * Run: node scripts/tests/entitlement-trust.mutation.mjs
+ */
+import { runMutations } from "./lib/mutation-runner.mjs";
+
+const GATE = "scripts/tests/entitlement-trust.test.mjs";
+const MIGRATION = "supabase/migrations/20261010000000_guard_entitlement_metadata.sql";
+const SIGNUP = "src/app/api/signup/route.ts";
+const BETA = "src/lib/beta.ts";
+const OVERAGE = "src/app/api/billing/overage/route.ts";
+const WEBHOOK = "src/app/api/webhooks/stripe/route.ts";
+const CRON = "src/app/api/cron/scheduled-runs/route.ts";
+const CREATE_JOB = "src/lib/jobs/handlers/create.ts";
+const CONFIG = "next.config.mjs";
+const JOBS_CONTINUE = "src/app/api/jobs/[id]/continue/route.ts";
+const RESEARCH_MIGRATION = "supabase/migrations/20261011000000_research_reports_server_writes.sql";
+const RESEARCH_START = "src/app/api/research/route.ts";
+const COST_MIGRATION = "supabase/migrations/20261012000000_cost_log_server_reads.sql";
+const SETTINGS_PAGE = "src/app/dashboard/settings/page.tsx";
+const REGISTRY = "src/lib/gdpr/user-data-registry.ts";
+const COLUMN_MIGRATION = "supabase/migrations/20261013000000_cost_columns_server_only.sql";
+const CLIENT_COLUMNS = "src/lib/billing/client-columns.ts";
+const JOB_POLL = "src/app/api/jobs/[id]/route.ts";
+const WRITES_MIGRATION = "supabase/migrations/20261014000000_server_written_tables.sql";
+const TEAM_INVITE = "src/app/api/team/invite/route.ts";
+const FILES_DIAGNOSTIC = "src/app/api/system-health/files/route.ts";
+const AGENTS_MIGRATION = "supabase/migrations/20261015000000_agents_websites_server_written.sql";
+const AGENT_EDIT = "src/app/api/agents/[id]/route.ts";
+const SITE_PROCESS = "src/app/api/websites/generate/process/route.ts";
+
+// Top-level declaration under the name the reader looks for — see the
+// SHAPE note in scripts/tests/lib/mutation-runner.mjs.
+const MUTANTS = [
+  {
+    name: "a key the billing code reads drops off the list",
+    file: MIGRATION,
+    from: "    'billing_interval',\n",
+    to: "",
+    expect: "every one is on the server-only list",
+  },
+  {
+    name: "the guard fences every role but Supabase Auth's",
+    file: MIGRATION,
+    from: "if current_user <> 'supabase_auth_admin' then",
+    to: "if current_user = 'supabase_auth_admin' then",
+    expect: "the guard fences Supabase Auth's own role",
+  },
+  {
+    name: "signup asks Supabase Auth for the starting plan again",
+    file: SIGNUP,
+    from: "        terms_accepted_at: new Date().toISOString(),\n",
+    to: '        terms_accepted_at: new Date().toISOString(),\n        subscription_tier: isValidBetaCode ? "ultimate" : "free",\n',
+    expect: "it asks Supabase Auth for no entitlement key",
+  },
+  {
+    name: "the beta code gets a default in the source again",
+    file: BETA,
+    from: "return code ? code : null;",
+    to: 'return code ? code : "MUTANTCODE";',
+    expect: "the code is the environment's or nothing",
+  },
+  {
+    name: "signup accepts a code when none is configured",
+    file: SIGNUP,
+    from: "const isValidBetaCode = Boolean(betaCode && inviteCode && inviteCode === betaCode);",
+    to: "const isValidBetaCode = Boolean(inviteCode && inviteCode === betaCode);",
+    expect: "signup refuses every code when none is set",
+  },
+  {
+    name: "overage no longer asks for a subscription",
+    file: OVERAGE,
+    from: '    if (!isSubscriber) return NextResponse.json({ error: "needs_subscription" }, { status: 403 });\n',
+    to: "",
+    expect: "switching overage on refuses an account with no subscription",
+  },
+  {
+    name: "the plan sync no longer skips an add-on",
+    file: WEBHOOK,
+    from: "  if (subscription.metadata?.addon_slug) return;\n",
+    to: "",
+    expect: "the plan sync returns on an add-on subscription",
+  },
+  {
+    name: "the scheduled-runs cron no longer checks the mission's owner",
+    file: CRON,
+    from: "if (missionError || !mission || (mission as { user_id?: string }).user_id !== run.user_id) {",
+    to: "if (missionError || !mission) {",
+    expect: "a scheduled run whose mission is someone else's is refused",
+  },
+  {
+    name: "the create job downloads every path it was handed",
+    file: CREATE_JOB,
+    from: 'await downloadAttachmentImages(admin, ownPaths, "jobs:create")',
+    to: 'await downloadAttachmentImages(admin, imagePaths, "jobs:create")',
+    expect: "attachment paths are filtered to the account's folder",
+  },
+  {
+    name: "a security header goes missing",
+    file: CONFIG,
+    from: '  { key: "X-Content-Type-Options", value: "nosniff" },\n',
+    to: "",
+    expect: "no content-type guessing",
+  },
+  {
+    name: "the framework announces itself again",
+    file: CONFIG,
+    from: "  poweredByHeader: false,",
+    to: "  poweredByHeader: true,",
+    expect: "the framework is not announced",
+  },
+  {
+    name: "a hand-off secret is compared with === again",
+    file: JOBS_CONTINUE,
+    from: "secretsMatch(presented, expected)",
+    to: "presented === expected",
+    expect: "compared with secretsMatch",
+  },
+  {
+    name: "the billing scan reads no files, so section 1 checks nothing",
+    file: GATE,
+    from: 'const BILLING_FILES = ["src/lib/beta.ts", ...BILLING_DIRS.flatMap((d) => walk(d))];',
+    to: "const BILLING_FILES = [];",
+    expect: "the scan found the billing code's reads",
+  },
+  {
+    name: "the research migration leaves the account able to write",
+    file: RESEARCH_MIGRATION,
+    from: "revoke insert, update on public.research_reports from authenticated;",
+    to: "revoke insert on public.research_reports from anon;",
+    expect: "the account loses INSERT and UPDATE on research_reports",
+  },
+  {
+    name: "a research route writes through the user's client again",
+    file: RESEARCH_START,
+    from: "const { data: report, error } = await createAdminClient()",
+    to: "const { data: report, error } = await supabase",
+    expect: "every one goes through the admin client",
+  },
+  {
+    name: "the research scan matches nothing, so section 9 checks nothing",
+    file: GATE,
+    from: '.from\\(\\s*"research_reports"\\s*\\)',
+    to: '.from\\(\\s*"no_such_table"\\s*\\)',
+    expect: "the scan found the writes",
+  },
+  {
+    name: "the cost-log migration leaves the account able to read",
+    file: COST_MIGRATION,
+    from: "revoke select on public.ai_cost_log from anon, authenticated;",
+    to: "revoke select on public.ai_cost_log from anon;",
+    expect: "the account loses SELECT on both",
+  },
+  {
+    name: "a page reads the cost log through the user's client again",
+    file: SETTINGS_PAGE,
+    from: "const { data: bypassRows } = await createAdminClient()",
+    to: "const { data: bypassRows } = await supabase",
+    expect: "every one goes through the admin client",
+  },
+  {
+    name: "the export reads the cost log in full again",
+    file: REGISTRY,
+    from: 'serverExportColumns: ["id", "feature", "credits_charged", "created_at"],',
+    to: 'serverExportColumns: ["id", "feature", "credits_charged", "real_cost_usd", "created_at"],',
+    expect: "the export reads them by the server",
+  },
+  {
+    name: "the column migration grants the cost record too",
+    file: COLUMN_MIGRATION,
+    from: "consumed_at, cancel_requested_at) on public.ai_jobs to authenticated;",
+    to: "consumed_at, cancel_requested_at, usage_entries) on public.ai_jobs to authenticated;",
+    expect: "ai_jobs: the migration grants exactly the client list",
+  },
+  {
+    name: "a column the migrations create is on neither list",
+    file: CLIENT_COLUMNS,
+    from: 'export const JOB_SERVER_ONLY_COLUMNS = ["reservation_id", "usage_entries", "running", "timeline"] as const;',
+    to: 'export const JOB_SERVER_ONLY_COLUMNS = ["reservation_id", "usage_entries", "running"] as const;',
+    expect: "ai_jobs: every column the migrations create is on one of the two lists",
+  },
+  {
+    name: "the job poll asks for * through the user's client again",
+    file: JOB_POLL,
+    from: '.from("ai_jobs").select(JOB_CLIENT_COLUMNS).eq("id", params.id)',
+    to: '.from("ai_jobs").select("*").eq("id", params.id)',
+    expect: "no read through the user's client asks for",
+  },
+  {
+    name: "the three-table migration leaves file rows writable",
+    file: WRITES_MIGRATION,
+    from: "revoke insert, update, delete on public.user_files from anon, authenticated;",
+    to: "revoke insert on public.user_files from anon, authenticated;",
+    expect: "user_files: the account loses INSERT, UPDATE and DELETE",
+  },
+  {
+    name: "a team invite is written through the user's client again",
+    file: TEAM_INVITE,
+    from: "const { error: insertError } = await createAdminClient()",
+    to: "const { error: insertError } = await supabase",
+    expect: "every one goes through the admin client",
+  },
+  {
+    name: "the files diagnostic accepts a direct insert as healthy",
+    file: FILES_DIAGNOSTIC,
+    from: 'const refused = /permission denied/i.test(insError?.message ?? "");',
+    to: "const refused = true;",
+    expect: "the diagnostic expects its insert to be refused",
+  },
+  {
+    name: "the agents migration leaves agents writable",
+    file: AGENTS_MIGRATION,
+    from: "revoke insert, update, delete on public.user_agents from anon, authenticated;",
+    to: "revoke delete on public.user_agents from anon, authenticated;",
+    expect: "the account loses the writes on both",
+  },
+  {
+    name: "an agent edit is written through the user's client again",
+    file: AGENT_EDIT,
+    from: "const { data: updated, error: updateError } = await createAdminClient()",
+    to: "const { data: updated, error: updateError } = await supabase",
+    expect: "no insert or update of either goes through the user's client",
+  },
+  {
+    name: "a site update in the generation route loses its owner scope",
+    file: SITE_PROCESS,
+    from: '.update({ status: isFlagged ? "flagged" : "completed" })\n      .eq("id", websiteId)\n      .eq("user_id", writerUserId);',
+    to: '.update({ status: isFlagged ? "flagged" : "completed" })\n      .eq("id", websiteId);',
+    expect: "every site update in the routes is scoped to the caller",
+  },
+];
+
+runMutations({
+  name: "entitlement-trust",
+  gate: GATE,
+  targets: [GATE, MIGRATION, SIGNUP, BETA, OVERAGE, WEBHOOK, CRON, CREATE_JOB, CONFIG, JOBS_CONTINUE, RESEARCH_MIGRATION, RESEARCH_START, COST_MIGRATION, SETTINGS_PAGE, REGISTRY, COLUMN_MIGRATION, CLIENT_COLUMNS, JOB_POLL, WRITES_MIGRATION, TEAM_INVITE, FILES_DIAGNOSTIC, AGENTS_MIGRATION, AGENT_EDIT, SITE_PROCESS],
+  mutants: MUTANTS,
+});

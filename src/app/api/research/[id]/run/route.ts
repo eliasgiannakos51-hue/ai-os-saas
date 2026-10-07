@@ -160,9 +160,16 @@ export async function POST(_request: Request, { params }: { params: { id: string
       }
     }
 
+    // EVERY WRITE TO THE ROW IS THE SERVER'S (2026-10-05): the account can
+    // read and delete its reports but not change them
+    // (supabase/migrations/20261011000000_research_reports_server_writes.sql),
+    // so each write below goes through the admin client, still scoped to
+    // this user's own row.
+    const admin = createAdminClient();
+
     // THE CLAIM — exactly-once, enforced by the database rather than by
     // checking first and writing second.
-    const { data: claimed, error: claimError } = await supabase
+    const { data: claimed, error: claimError } = await admin
       .from("research_reports")
       .update({
         status: "researching" satisfies ResearchStatus,
@@ -197,7 +204,7 @@ export async function POST(_request: Request, { params }: { params: { id: string
         estimatedCredits: estimate.estimatedCredits,
       });
       if (!reservation.ok) {
-        await supabase
+        await admin
           .from("research_reports")
           .update({
             status: "failed" satisfies ResearchStatus,
@@ -226,7 +233,6 @@ export async function POST(_request: Request, { params }: { params: { id: string
     // Refusing here is cheap: the run has not started, so releasing the
     // hold now costs the user nothing and leaves the report exactly as it
     // was.
-    const admin = createAdminClient();
     const { error: holdError } = await admin
       .from("research_reports")
       .update({ reservation_id: reservationId || null })
@@ -234,7 +240,7 @@ export async function POST(_request: Request, { params }: { params: { id: string
     if (holdError) {
       logApiError("/api/research/[id]/run", holdError, { stage: "record_reservation", reportId: report.id });
       await releaseReservation(user.id, reservationId);
-      await supabase
+      await admin
         .from("research_reports")
         .update({ status: "failed" satisfies ResearchStatus, error: "Could not start the report.", processing_started_at: null })
         .eq("id", report.id)

@@ -1009,7 +1009,8 @@
       "agreedRate": "同意された価格、1クレジットあたり€{price}です。",
       "capReached": "上限に達しました。引き上げるまで追加の請求は発生しません。",
       "turnOff": "追加利用をオフにする",
-      "turnOffNote": "オフにすると今後の請求は止まります。今月すでに使った分は請求されます。"
+      "turnOffNote": "オフにすると今後の請求は止まります。今月すでに使った分は請求されます。",
+      "needsSubscription": "従量課金は有料プラン向けです。次回の請求書で請求されます。先にプランを選んでください。"
     },
     "addons": {
       "title": "アドオン",
@@ -4454,5 +4455,52 @@
         "trafficDown": "サイトの訪問数が {percent}% 減りました"
       }
     }
+  },
+  "routerReport": {
+    "title": "影のルーター",
+    "intro": "課金された各リクエストの費用と、ルーターが選んだはずのモデル。まだこれでルーティングはしていません。品質セットがより安いモデルを測定するまで、各リクエストは現在のモデルのままです。",
+    "period": "期間",
+    "day": "日",
+    "week": "週",
+    "month": "月",
+    "requests": "リクエスト",
+    "avgCost": "リクエストあたりの平均費用",
+    "revenue": "クレジット収入",
+    "margin": "マージン",
+    "cached": "キャッシュされた入力トークン",
+    "fallback": "予備モデルが応答",
+    "escalated": "より強いモデルへ移行",
+    "bumped": "確信度が低いため段階を上げた",
+    "notRecorded": "まだ記録していません",
+    "unavailable": "読み取れませんでした",
+    "unclassified": "{count} 件のリクエストに判断がありません。影の導入前に課金されたか、テキストではありません。",
+    "byCategory": "作業の種類別の費用",
+    "byTier": "段階別の費用",
+    "byModel": "モデル別の費用",
+    "byFeature": "ツール別の費用",
+    "colName": "名前",
+    "colRequests": "リクエスト",
+    "colShare": "割合",
+    "colCost": "費用",
+    "colAvg": "1件あたり",
+    "shadowTitle": "影の試算",
+    "shadowBody": "同じトークンをルーターが選ぶモデルで処理すると {projected}、実際の支出は {actual}（{rows} 件）。節約ではなく試算です。そのモデルがより多くのトークンを要したか、キャッシュの効き方が違ったか、失敗したかは分かりません。",
+    "shadowNone": "この期間のリクエストには試算に足る記録がありません。",
+    "tableTitle": "モデル表（バージョン {version}、{source}）",
+    "sourceEnv": "AI_MODEL_TABLE から",
+    "sourceDefault": "既定",
+    "tableRejected": "AI_MODEL_TABLE は拒否されたため、既定の表を使っています: {problems}",
+    "colCategory": "作業の種類",
+    "colTier": "段階",
+    "colPrimary": "主モデル",
+    "colFallback": "予備モデル",
+    "colPrice": "1,000 トークンあたりの USD（入力 / 出力）",
+    "colWait": "最長待機",
+    "colQuality": "品質",
+    "notMeasured": "未測定",
+    "seconds": "{n} 秒",
+    "pricePer1k": "${input} / ${output}",
+    "truncated": "最新の {cap} 件のみ読み込みました。数値はそれらが対象です。",
+    "empty": "この期間に課金されたリクエストはありません。"
   }
 }

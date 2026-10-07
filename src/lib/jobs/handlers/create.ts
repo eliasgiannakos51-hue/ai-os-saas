@@ -114,8 +114,14 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
   // Optional attached image(s) — real vision context, e.g. a photo of a
   // product alongside "log this as a new product idea". Independently
   // best-effort per image; a bad one is excluded rather than fatal.
+  //
+  // ONLY THE ACCOUNT'S OWN FOLDER (ownership check, 2026-10-05). The
+  // download uses the admin client, so the check is this filter: every
+  // upload lands under `<userId>/` (create-attachments bucket), and nothing
+  // else is read.
+  const ownPaths = imagePaths.filter((p) => p.startsWith(`${ctx.userId}/`) && !p.includes(".."));
   const attachmentImages =
-    imagePaths.length > 0 ? await downloadAttachmentImages(admin, imagePaths, "jobs:create") : [];
+    ownPaths.length > 0 ? await downloadAttachmentImages(admin, ownPaths, "jobs:create") : [];
 
   await ctx.progress(2, steps[1]);
 

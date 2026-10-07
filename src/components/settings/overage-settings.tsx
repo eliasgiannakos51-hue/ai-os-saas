@@ -78,7 +78,11 @@ export function OverageSettings() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setError(String(data.detail ?? data.error ?? tCommon("networkError")));
+        setError(
+          data.error === "needs_subscription"
+            ? t("needsSubscription")
+            : String(data.detail ?? data.error ?? tCommon("networkError"))
+        );
         return;
       }
       setSaved(true);

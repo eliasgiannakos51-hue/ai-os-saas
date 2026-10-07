@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { JOB_CLIENT_COLUMNS } from "@/lib/billing/client-columns";
 import { logApiError } from "@/lib/log-error";
 import { reapJob } from "@/lib/jobs/run-job";
 import { isJobStale, jobPercent } from "@/lib/jobs/job-types";
@@ -32,10 +34,11 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
 
-    // select("*"), never a column list. A column list fails the WHOLE
-    // query when one column does not exist yet, so an un-migrated
-    // deployment would 500 on every poll rather than degrade.
-    const { data, error } = await supabase.from("ai_jobs").select("*").eq("id", params.id).maybeSingle();
+    // THE ACCOUNT'S COLUMNS, then the server's. The account may read only
+    // JOB_CLIENT_COLUMNS (20261013000000_cost_columns_server_only.sql);
+    // this read through its own client is also the ownership check. Every
+    // name on the list has existed since 20261004200000 or earlier.
+    const { data, error } = await supabase.from("ai_jobs").select(JOB_CLIENT_COLUMNS).eq("id", params.id).maybeSingle();
 
     if (error) {
       logApiError("/api/jobs/[id]", error, { jobId: params.id });
@@ -43,9 +46,19 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     }
     // 404 rather than 403: a 403 would confirm that a job with this id
     // exists and belongs to somebody else.
-    if (!data) return NextResponse.json({ ok: false, error: "Job not found." }, { status: 404 });
+    const notFound = () => NextResponse.json({ ok: false, error: "Job not found." }, { status: 404 });
+    if (!data) return notFound();
 
-    let job = data as Record<string, unknown>;
+    // The hold, the cost record and the step timeline: server-only
+    // columns, read for the row the account just proved is its own.
+    const { data: serverSide } = await createAdminClient()
+      .from("ai_jobs")
+      .select("reservation_id, usage_entries, running, timeline")
+      .eq("id", params.id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!serverSide) return notFound();
+    let job = { ...(data as Record<string, unknown>), ...(serverSide as Record<string, unknown>) };
 
     if (isJobStale(String(job.status), job.updated_at as string | null, job.created_at as string | null)) {
       const reaped = await reapJob({

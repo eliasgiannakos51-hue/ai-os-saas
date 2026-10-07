@@ -400,7 +400,7 @@ console.log("\n== 4. the write that failed is no longer discarded ==");
   const source = readFileSync(path.join(ROOT, "src/app/api/websites/generate/process/route.ts"), "utf8");
   check(
     "the final status update captures its error",
-    /const\s*\{\s*error:\s*finalStatusError\s*\}\s*=\s*await\s+supabase/.test(source),
+    /const\s*\{\s*error:\s*finalStatusError\s*\}\s*=\s*await\s+(?:supabase|websiteWriter)/.test(source),
     true
   );
   check("...and logs it", source.includes("finalStatusError"), true);

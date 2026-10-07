@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { exportableTables, redactRow } from "@/lib/gdpr/user-data-registry";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -80,9 +81,11 @@ export async function GET() {
     // request is a good way to exhaust the connection pool for everyone
     // else on the instance. An export is not latency-sensitive.
     for (const t of tables) {
-      const { data: rows, error } = await supabase
-        .from(t.table)
-        .select("*")
+      // A table the account cannot read itself is read by the server,
+      // its own rows and the listed columns only (user-data-registry.ts).
+      const { data: rows, error } = await (t.serverExportColumns
+        ? createAdminClient().from(t.table).select(t.serverExportColumns.join(", "))
+        : supabase.from(t.table).select(t.exportColumns ?? "*"))
         .eq("user_id", user.id)
         .limit(MAX_ROWS_PER_TABLE);
 
@@ -97,7 +100,7 @@ export async function GET() {
 
       const list = rows ?? [];
       if (list.length >= MAX_ROWS_PER_TABLE) truncated.push(t.table);
-      data[t.label] = list.map((row) => redactRow(row as Record<string, unknown>, t.redactColumns));
+      data[t.label] = list.map((row) => redactRow(row as unknown as Record<string, unknown>, t.redactColumns));
     }
 
     const payload = {

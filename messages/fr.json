@@ -1009,7 +1009,8 @@
       "agreedRate": "À {price} € par crédit, le tarif que vous avez accepté.",
       "capReached": "Vous avez atteint votre plafond. Rien ne sera facturé de plus tant que vous ne l'aurez pas relevé.",
       "turnOff": "Désactiver le dépassement",
-      "turnOffNote": "La désactivation arrête les prochains frais. Ce qui a déjà été utilisé ce mois-ci reste facturé."
+      "turnOffNote": "La désactivation arrête les prochains frais. Ce qui a déjà été utilisé ce mois-ci reste facturé.",
+      "needsSubscription": "Le paiement à l’usage est réservé aux forfaits payants : il est facturé avec votre prochaine facture. Choisissez d’abord un forfait."
     },
     "addons": {
       "title": "Options",
@@ -4454,5 +4455,52 @@
         "trafficDown": "le trafic du site a baissé de {percent}%"
       }
     }
+  },
+  "routerReport": {
+    "title": "Le routeur, dans l’ombre",
+    "intro": "Ce qu’a coûté chaque requête facturée, et le modèle que le routeur aurait choisi. Rien n’est encore routé par ce biais : tant que le jeu de qualité n’a pas mesuré un modèle moins cher, chaque requête garde son modèle actuel.",
+    "period": "Période",
+    "day": "Jour",
+    "week": "Semaine",
+    "month": "Mois",
+    "requests": "Requêtes",
+    "avgCost": "Coût moyen par requête",
+    "revenue": "Recettes en crédits",
+    "margin": "Marge",
+    "cached": "Jetons d’entrée en cache",
+    "fallback": "Répondu par le secours",
+    "escalated": "Passé à un modèle plus puissant",
+    "bumped": "Niveau relevé faute de certitude",
+    "notRecorded": "Pas encore enregistré",
+    "unavailable": "Illisible",
+    "unclassified": "{count} requêtes sans décision : facturées avant l’existence de l’ombre, ou hors texte.",
+    "byCategory": "Coût par type de travail",
+    "byTier": "Coût par niveau",
+    "byModel": "Coût par modèle",
+    "byFeature": "Coût par outil",
+    "colName": "Nom",
+    "colRequests": "Requêtes",
+    "colShare": "Part",
+    "colCost": "Coût",
+    "colAvg": "Par requête",
+    "shadowTitle": "Projection de l’ombre",
+    "shadowBody": "Les mêmes jetons au modèle choisi par le routeur auraient coûté {projected}, contre {actual} réellement dépensés, sur {rows} requêtes. Une projection, pas une économie : elle ignore si ce modèle aurait eu besoin de plus de jetons, mis en cache autrement ou échoué.",
+    "shadowNone": "Aucune requête de cette période ne contient assez d’éléments pour une projection.",
+    "tableTitle": "La table des modèles (version {version}, {source})",
+    "sourceEnv": "depuis AI_MODEL_TABLE",
+    "sourceDefault": "par défaut",
+    "tableRejected": "AI_MODEL_TABLE a été refusée, la table par défaut s’applique : {problems}",
+    "colCategory": "Type de travail",
+    "colTier": "Niveau",
+    "colPrimary": "Principal",
+    "colFallback": "Secours",
+    "colPrice": "USD pour 1 000 jetons (entrée / sortie)",
+    "colWait": "Attente maximale",
+    "colQuality": "Qualité",
+    "notMeasured": "Non mesurée",
+    "seconds": "{n} s",
+    "pricePer1k": "${input} / ${output}",
+    "truncated": "Seules les {cap} requêtes les plus récentes ont été lues ; les chiffres portent sur celles-ci.",
+    "empty": "Aucune requête facturée sur cette période."
   }
 }

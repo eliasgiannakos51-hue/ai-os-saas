@@ -1,40 +1,98 @@
 /**
  * RECENT TOOLS — the sidebar's one moving part (docs/CONTEXT.md,
- * ΣΥΣΤΗΜΑ DESIGN, SIDEBAR):
+ * ΣΥΣΤΗΜΑ DESIGN §3 and «RECENT TOOLS, Ο ΣΩΣΤΟΣ ΚΑΝΟΝΑΣ», 2026-10-05):
  *
+ *   - a USE is finished work only: a result produced, something saved,
+ *     a task run to the end. Opening a page, a click from All tools,
+ *     browsing, and a task that was cancelled or failed are not uses;
+ *   - a tool appears after 3 uses on at least 2 different days within
+ *     the last 30 days, and leaves after 30 days without one;
+ *   - at most five; past five, the five most recently used stay, and a
+ *     pinned tool is never pushed out;
+ *   - pinning (from All tools) is the only way in at once; any tool can
+ *     be removed;
  *   - empty for a new person, and then the heading is not drawn either;
- *   - a tool appears once it has been used twice within 30 days;
- *   - at most five; a sixth pushes out the one unused for longest;
- *   - the person can remove a tool from it, or pin it so it stays;
- *   - kept on the ACCOUNT, not in the browser;
- *   - Chat and Coding never appear, because they are already above.
+ *   - Chat and Coding never appear, because they are already above;
+ *   - kept on the ACCOUNT, not in the browser.
  *
- * WHERE "USED" COMES FROM. nav_events (migration
- * 20260915000000_nav_events.sql) already records every screen a person
- * opens, server-side, per account, for 90 days — so a use is an opened
- * tool, and nothing new is written to find out. Opens of the same tool
- * less than SAME_USE_MINUTES apart are ONE use: reloading a page, or
- * going back to it a minute later, is not using it twice.
+ * WHERE A USE COMES FROM, with nothing new written to find out:
+ *
+ *   ai_cost_log    one row per SETTLED action — settlement happens only
+ *                  when the work finished. The job runner's refunded,
+ *                  stopped and cannot-complete rows carry a suffix, match
+ *                  no tool and are not uses (completionEvents below).
+ *   search_index   one row per thing SAVED (a file, a record, a project,
+ *                  a site), kept by triggers on every table it indexes;
+ *                  its `href` names the tool. An edit updates the row and
+ *                  is not a new use.
+ *
+ * Until 2026-10-05 a use was an OPENED page (nav_events), which is why a
+ * tool clicked once from All tools showed up in the sidebar.
  *
  * WHERE PINS AND REMOVALS LIVE. In the account's user_metadata, under
- * `recent_tools` — on the account, as the design asks, and with no new
- * table, so no migration has to be run for this to work. A removal is a
- * date: the tool comes back only if it is used twice AFTER it.
+ * `recent_tools` — no new table, so no migration. A removal is a date:
+ * the tool comes back only if it qualifies again on uses AFTER it.
  *
  * Pure: no database, no clock (`now` is passed in), so the gate runs it.
  */
 
 export const RECENT_TOOLS_MAX = 5;
 export const RECENT_WINDOW_DAYS = 30;
-export const USES_TO_APPEAR = 2;
-export const SAME_USE_MINUTES = 30;
+export const USES_TO_APPEAR = 3;
+export const DAYS_TO_APPEAR = 2;
 /** Already at the top of the sidebar, so never repeated below it. */
 export const NEVER_RECENT: readonly string[] = ["/dashboard/chat", "/dashboard/coding"];
 
 export type RecentPrefs = { pinned: string[]; removed: Record<string, string> };
 export type RecentTool = { href: string; pinned: boolean; lastUsed: string | null };
+/** One finished piece of work: where it happened, and when. */
 export type NavEvent = { path: string; created_at: string };
 export type RecentAction = "pin" | "unpin" | "remove";
+
+/**
+ * Settlement feature → the tool it was done in. A feature not listed
+ * here (a pre-check, a clarifying question, an import during onboarding)
+ * is not a use of any one tool.
+ */
+export const COMPLETION_TOOLS: Readonly<Record<string, string>> = {
+  website_generate: "/dashboard/website-builder",
+  website_edit: "/dashboard/website-builder",
+  deep_research: "/dashboard/deep-research",
+  research_plan: "/dashboard/deep-research",
+  presentation_generate: "/dashboard/presentations",
+  presentation_edit: "/dashboard/presentations",
+  posts_generate: "/dashboard/posts",
+  data_analysis: "/dashboard/data-analysis",
+  meeting_analyse: "/dashboard/meetings",
+  document_translate: "/dashboard/documents",
+  file_ask: "/dashboard/files",
+  insight_narrate: "/dashboard/predictions",
+  mission_plan: "/dashboard/mission",
+  mission_review: "/dashboard/mission",
+  agent_build: "/dashboard/agents",
+  agent_run: "/dashboard/agents",
+  scheduled_agent_run: "/dashboard/agents",
+  agent_run_batch: "/dashboard/agents",
+  automation_run: "/dashboard/automation",
+  voice: "/dashboard/voice",
+};
+
+/** ai_cost_log rows → finished-work events. The lookup is by EXACT
+ *  feature, so the job runner's `_refunded`, `_stopped` and
+ *  `_cannot_complete` rows — work that did not finish — match nothing. */
+export function completionEvents(rows: readonly { feature: string; created_at: string }[]): NavEvent[] {
+  const out: NavEvent[] = [];
+  for (const r of rows) {
+    const href = COMPLETION_TOOLS[r.feature];
+    if (href) out.push({ path: href, created_at: r.created_at });
+  }
+  return out;
+}
+
+/** search_index rows → saved-work events (the row's href is its tool). */
+export function savedEvents(rows: readonly { href: string; created_at: string }[]): NavEvent[] {
+  return rows.filter((r) => typeof r.href === "string" && r.href.length > 0).map((r) => ({ path: r.href, created_at: r.created_at }));
+}
 
 /** Whatever user_metadata holds, the part that is well-formed. */
 export function readRecentPrefs(meta: unknown): RecentPrefs {
@@ -50,27 +108,23 @@ export function readRecentPrefs(meta: unknown): RecentPrefs {
   return { pinned: [...new Set(pinned)].slice(0, RECENT_TOOLS_MAX), removed };
 }
 
-/** The tool a path belongs to, on a segment boundary. */
+/** The tool a path belongs to, on a segment boundary; a query or a
+ *  fragment is not part of the path. */
 export function toolForPath(path: string, toolHrefs: readonly string[]): string | null {
+  const bare = path.split(/[?#]/)[0];
   for (const href of toolHrefs) {
-    if (path === href || path.startsWith(`${href}/`)) return href;
+    if (bare === href || bare.startsWith(`${href}/`)) return href;
   }
   return null;
 }
 
-/** How many separate uses a list of open times makes. */
-export function countUses(times: number[]): number {
-  const sorted = [...times].sort((a, b) => a - b);
-  let uses = 0;
-  let last = -Infinity;
-  for (const t of sorted) {
-    if (t - last > SAME_USE_MINUTES * 60_000) uses++;
-    last = t;
-  }
-  return uses;
+/** Enough finished work to earn a row: 3 uses, on at least 2 days. */
+export function qualifies(times: readonly number[]): boolean {
+  const days = new Set(times.map((t) => new Date(t).toISOString().slice(0, 10)));
+  return times.length >= USES_TO_APPEAR && days.size >= DAYS_TO_APPEAR;
 }
 
-/** The list the sidebar draws, newest first after the pinned ones. */
+/** The list the sidebar draws: pinned first, then most recently used. */
 export function recentTools(input: {
   events: readonly NavEvent[];
   toolHrefs: readonly string[];
@@ -79,7 +133,7 @@ export function recentTools(input: {
 }): RecentTool[] {
   const candidates = input.toolHrefs.filter((h) => !NEVER_RECENT.includes(h));
   const since = input.now.getTime() - RECENT_WINDOW_DAYS * 86_400_000;
-  const opens = new Map<string, number[]>();
+  const uses = new Map<string, number[]>();
   for (const e of input.events) {
     const at = Date.parse(e.created_at);
     if (Number.isNaN(at) || at < since || at > input.now.getTime()) continue;
@@ -87,17 +141,17 @@ export function recentTools(input: {
     if (!href) continue;
     const removedAt = input.prefs.removed[href];
     if (removedAt && at <= Date.parse(removedAt)) continue;
-    const list = opens.get(href) ?? [];
+    const list = uses.get(href) ?? [];
     list.push(at);
-    opens.set(href, list);
+    uses.set(href, list);
   }
   const lastUsed = (href: string) => {
-    const list = opens.get(href);
+    const list = uses.get(href);
     return list && list.length ? Math.max(...list) : null;
   };
   const pinned = input.prefs.pinned.filter((h) => candidates.includes(h)).slice(0, RECENT_TOOLS_MAX);
-  const used = [...opens.entries()]
-    .filter(([href, times]) => !pinned.includes(href) && countUses(times) >= USES_TO_APPEAR)
+  const used = [...uses.entries()]
+    .filter(([href, times]) => !pinned.includes(href) && qualifies(times))
     .map(([href]) => href)
     .sort((a, b) => (lastUsed(b) ?? 0) - (lastUsed(a) ?? 0))
     .slice(0, RECENT_TOOLS_MAX - pinned.length);

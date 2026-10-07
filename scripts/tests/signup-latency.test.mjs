@@ -119,6 +119,11 @@ const allowed = new Set([
   "request.json",
   "checkRateLimit",
   "admin.auth.admin.createUser",
+  // The starting plan (2026-10-05): Supabase Auth can no longer write it
+  // (supabase/migrations/20261010000000_guard_entitlement_metadata.sql),
+  // so the server merges it after createUser. Awaited on purpose: the
+  // sign-in below must land on an account whose plan is already set.
+  "mergeUserMetadata",
   "grantCredits",
   "supabase.auth.signInWithPassword",
   "Promise.race",

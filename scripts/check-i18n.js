@@ -46,6 +46,9 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // "Name" is the German word for name, capital and all — the column
+  // heading of a table on the owner-only cost page (QUEUE E.2).
+  "de:routerReport.colName",
   // "Marketing" IS the word in five European languages — Spanish,
   // French, German, Italian and Portuguese all borrowed it whole, and
   // every one of their own marketing departments is called that.
@@ -557,6 +560,10 @@ const LOCALE_ALLOWED = new Set([
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
+  // THE MODEL TABLE'S PRICE CELL (QUEUE E.2, owner-only /dashboard/costs).
+  // Two numbers in US dollars, the currency the providers bill in; the
+  // column heading around it (colPrice) is translated in all ten.
+  "routerReport.pricePer1k",
   // THE BETA TAG ON AN ALL TOOLS TILE (design D.6, 2026-10-04). "Beta"
   // is the word software uses for this state in Greek, German, Spanish,
   // Italian and Portuguese alike — the owner's own Greek design text

@@ -1375,6 +1375,41 @@ ok(
 );
 
 // ===========================================================================
+console.log("\n== 8. a transcription is billed on the provider's length (2026-10-05) ==");
+// ===========================================================================
+{
+  const { billableTranscribeSeconds } = pricing;
+  ok("the provider's longer figure wins", billableTranscribeSeconds(1, 1800.4) === 1801);
+  ok("...and a longer reported figure is not shrunk by it", billableTranscribeSeconds(90, 30) === 90);
+  ok("a missing provider figure leaves the reported one", billableTranscribeSeconds(42, undefined) === 42);
+  ok(
+    "...and so does a nonsense one",
+    billableTranscribeSeconds(42, "1800") === 42 && billableTranscribeSeconds(42, -5) === 42 && billableTranscribeSeconds(42, NaN) === 42
+  );
+  ok("never below one second", billableTranscribeSeconds(0, 0) === 1);
+
+  const stripC = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+  const providers = stripC(readFileSync("src/lib/voice/voice-providers.ts", "utf8"));
+  ok(
+    "the provider's duration is read from the response and priced",
+    /const seconds = billableTranscribeSeconds\(params\.durationSeconds, data\.duration\);/.test(providers) &&
+      /usdCost: transcribeCostUsd\(seconds\),\s*seconds,/.test(providers) &&
+      !/usdCost: transcribeCostUsd\(params\.durationSeconds\)/.test(providers)
+  );
+  for (const route of ["src/app/api/voice/transcribe/route.ts", "src/app/api/meetings/transcribe/route.ts"]) {
+    const src = stripC(readFileSync(route, "utf8"));
+    const after = src.slice(src.indexOf("const billedSeconds = result.seconds;"));
+    ok(`${route}: bills the provider's seconds`, src.includes("const billedSeconds = result.seconds;") && /units: billedSeconds,/.test(after));
+    ok(
+      `${route}: ...and meters the seconds past the cap check`,
+      /await recordExtraVoiceSeconds\(admin, \{ userId: user\.id, seconds: billedSeconds - seconds, kind: "transcribe" \}\);/.test(src) &&
+        src.indexOf("const billedSeconds = result.seconds;") < src.indexOf("recordExtraVoiceSeconds(admin") &&
+        src.indexOf("recordExtraVoiceSeconds(admin") < src.indexOf("settleReservation(")
+    );
+  }
+}
+
+// ===========================================================================
 console.log(`\n${pass} passed, ${failures.length} failed`);
 if (failures.length) {
   console.log("FAILURES:\n  " + failures.join("\n  "));

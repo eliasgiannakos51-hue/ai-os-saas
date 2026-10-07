@@ -646,6 +646,12 @@ if (!DB) {
     subscriber_months: "per-account monthly revenue — the single most sensitive table in the product",
     revenue_snapshots: "the company's daily MRR, ARR and AI cost; nothing a customer has any claim on",
     business_inputs: "marketing spend, fixed costs and the bank balance, typed in by the owner",
+    // 2026-10-05, 20261012000000_cost_log_server_reads.sql. Each row is
+    // the customer's own action, but it carries what it cost US, the
+    // margin and the model; the screens that need a column of it read it
+    // through the service role, scoped to the caller.
+    ai_cost_log: "the real cost, margin and model breakdown behind every charge; the account's screens read the columns they need via service role",
+    ai_provider_log: "which provider and model answered and why it failed over; the export reads purpose and outcome via service role",
   };
   const noPolicy = sql(`select coalesce(string_agg(c.relname, ', '), '') from pg_class c
       join pg_namespace ns on ns.oid = c.relnamespace

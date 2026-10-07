@@ -276,7 +276,9 @@ console.log(
 // covered one more. Read off the run.
 // 265 -> 266 on 2026-10-07: automations (MASTER 16, package 30) covered
 // one more. Read off the run.
-const RATCHET = 266;
+// 266 -> 267 on 2026-10-07: flows (MASTER 16, package 36) covered one
+// more. Read off the run.
+const RATCHET = 267;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

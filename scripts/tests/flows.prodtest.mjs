@@ -485,7 +485,8 @@ try {
     const researchStarts = askedOf("research").length;
     const { context, page, press } = await open(ON, desktop);
     await page.goto(`${ON}/dashboard/projects`, { waitUntil: "networkidle" });
-    check("«Τα έργα μου» says a flow is running", (await page.locator('[data-testid="flow-mine"]').innerText()).includes(fill(el.mineRunning.replace(/\{count, plural,[\s\S]*$/, ""), {}).trim().slice(0, 4)) || (await page.locator('[data-testid="flow-mine"]').innerText()) !== el.mine);
+    const mine = (await page.locator('[data-testid="flow-mine"]').innerText()).trim();
+    check("«Τα έργα μου» says a flow is running", mine !== el.mine && /1/.test(mine), mine);
     await press(page.locator('[data-testid="flow-mine"]'));
     await press(page.locator('[data-testid="flow-running"] button').first());
     await page.locator('[data-testid="flow-step"]').first().waitFor({ timeout: 10000 });

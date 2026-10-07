@@ -429,6 +429,11 @@ try {
       changes.push(r.request().postDataJSON());
       return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, edited: true, record: siteRecord("completed", HTML.replace("Πρωινό", "Μεσημεριανό")) }) });
     });
+    // THE BRIEF FROM HOME ARRIVES IN THE FIELD: Home's router opens
+    // /dashboard/website-builder?brief=…, and the shell once dropped it.
+    await page.goto(`${ON}/dashboard/website-builder?brief=${encodeURIComponent("Site για καφετέρια")}`, { waitUntil: "networkidle" });
+    check("Site, switch on: the brief sent from Home is already in the field",
+      (await page.locator("main textarea").inputValue()) === "Site για καφετέρια", await page.locator("main textarea").inputValue());
     await page.goto(`${ON}/dashboard/website-builder`, { waitUntil: "networkidle" });
     check("Site, switch on: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
     const siteOptions = await page.locator('[data-testid="tool-shell-options"] > *').count();

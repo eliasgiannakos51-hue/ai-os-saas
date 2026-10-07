@@ -220,6 +220,16 @@ console.log("\n== 4. every producer page READS the brief it is sent ==");
     ok(`${key}: ${file.replace("src/app/dashboard/", "")} really reads searchParams.${param}`,
       reads.test(src),
       "the brief is emitted and dropped — the page renders and the person retypes it");
+    // EVERY BODY THE PAGE CAN DRAW. Behind the switch "tool-shell" a page
+    // draws a shell INSTEAD of its old body, and a read in the old body
+    // alone satisfied the line above while the shell dropped the brief —
+    // the Site shell did, until 2026-10-07.
+    const shells = [...src.matchAll(/<([A-Z]\w*Shell)\b[\s\S]*?\/>/g)];
+    for (const [element, name] of shells) {
+      ok(`${key}: ${file.replace("src/app/dashboard/", "")} really reads searchParams.${param} in <${name}> too`,
+        reads.test(element),
+        element.slice(0, 160));
+    }
   }
 }
 

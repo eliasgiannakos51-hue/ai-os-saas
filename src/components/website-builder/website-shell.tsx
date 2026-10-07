@@ -43,7 +43,7 @@ type Turn = { id: string; role: "user" | "tool"; text: string; siteId?: string; 
  * made before, and a new site. Price before, as on the page: the same
  * estimator the server reserves against.
  */
-export function WebsiteShell({ initialWebsites }: { initialWebsites: UserWebsite[] }) {
+export function WebsiteShell({ initialWebsites, initialBrief }: { initialWebsites: UserWebsite[]; initialBrief?: string }) {
   const t = useTranslations("dashboard.websiteBuilder");
   const tShell = useTranslations("dashboard.toolShell");
   const tNames = useTranslations("dashboard.tools.names");
@@ -58,7 +58,7 @@ export function WebsiteShell({ initialWebsites }: { initialWebsites: UserWebsite
   const [design, setDesign] = useState<WebsiteDesignChoices>(DEFAULT_DESIGN_CHOICES);
   const [choosingDesign, setChoosingDesign] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [length, setLength] = useState(0);
+  const [length, setLength] = useState(initialBrief?.length ?? 0);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [pending, setPending] = useState<{ questions: string[]; name: string; description: string } | null>(null);
   // What was asked of each site in THIS conversation, so the invented-number
@@ -345,6 +345,7 @@ export function WebsiteShell({ initialWebsites }: { initialWebsites: UserWebsite
       placeholder={current?.status === "completed" && !pending ? t("editPlaceholder") : t("descriptionPlaceholder")}
       sending={busy}
       onSend={send}
+      initialText={initialBrief}
       onLengthChange={setLength}
       options={[
         <span key="design" className="relative">

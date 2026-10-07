@@ -101,7 +101,7 @@ export default async function WebsiteBuilderPage(
   if (await isFeatureOn("tool-shell", user)) {
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <WebsiteShell initialWebsites={websiteRows} />
+        <WebsiteShell initialWebsites={websiteRows} initialBrief={readExampleParam(searchParams.brief)} />
       </div>
     );
   }

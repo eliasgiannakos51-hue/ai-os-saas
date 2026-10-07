@@ -280,7 +280,9 @@ console.log(
 // more. Read off the run.
 // 267 -> 268 on 2026-10-07: first-task (MASTER 16, package 39) covered
 // one more. Read off the run.
-const RATCHET = 268;
+// 268 -> 270 on 2026-10-07: owner-manual and acceptance (MASTER 16,
+// package 40) covered two more. Read off the run.
+const RATCHET = 270;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

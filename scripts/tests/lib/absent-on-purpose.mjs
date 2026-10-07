@@ -47,8 +47,8 @@ export const ABSENT_ON_PURPOSE = {
       "point into packages. Neither exists yet. Editing the message to match the tree would make it " +
       "stop being his words; each path goes stale, and this entry with it, the day the file is written. " +
       "Part 13 (2026-10-05) adds three more, queued in Wave 8: the owner's handbook, the architecture " +
-      "guide and the acceptance list.",
-    paths: ["docs/CATALOG.md", "docs/PACKAGES.md", "docs/OWNER.md", "docs/ARCHITECTURE.md", "docs/ACCEPTANCE.md"],
+      "guide and the acceptance list. The handbook and the acceptance list exist since 2026-10-07 (package 40).",
+    paths: ["docs/CATALOG.md", "docs/PACKAGES.md", "docs/ARCHITECTURE.md"],
   },
   "docs/BUILD-SPECS.md": {
     reason:

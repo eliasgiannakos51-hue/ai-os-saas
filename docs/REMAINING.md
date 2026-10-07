@@ -615,10 +615,10 @@ Predictions και Projects, που λένε ρητά τι δεν κάνουν·
 | 3Δ Βιβλιοθήκη σεν. 8 | Ολόκληρη πρώτη εκδοχή από περιγραφή | δεν ξεκίνησε | κανένα | δεν είναι σαφές τι σημαίνει εδώ (απόφαση) | 0.5 |
 | 3Δ Βιβλιοθήκη σεν. 9 | «Πες τι να αλλάξω» με επισήμανση και αναίρεση | δεν ξεκίνησε | κανένα | — | 1 |
 | 3Δ Αρχεία σεν. 1 | Ανέβασμα PDF, Word, Excel και εικόνων | μισό | file-extraction.test.mjs, upload-reversibility.test.mjs | pdf/docx/xlsx/txt/csv/md· εικόνες όχι· NEEDS 28 | 1 |
-| 3Δ Αρχεία σεν. 2 | Παραπομπή σε σελίδα ή κελί | μισό | file-ask-depth.test.mjs | σελίδα ναι, ελεγμένη· κελί όχι | 1 |
+| 3Δ Αρχεία σεν. 2 | Παραπομπή σε σελίδα ή κελί | σελίδα φτιαγμένη: ελεγμένη, και πίσω από τον διακόπτη `file-pages` (2026-10-07, πακέτο 12) πατιέται και ανοίγει τα λόγια της σελίδας και το PDF σε εκείνη τη σελίδα· κελί όχι | file-ask-depth.test.mjs, file-pages.test.mjs, .itest.mjs, .mutation.mjs, .prodtest.mjs | κελί σε Excel όχι | 0.5 |
 | 3Δ Αρχεία σεν. 3 | Ερώτηση σε πολλά αρχεία μαζί | μισό | file-ask-depth.test.mjs | — | 0.5 |
 | 3Δ Αρχεία σεν. 4 | Αναγνώριση κειμένου σε σκαναρισμένα | δεν ξεκίνησε | κανένα | επιλογή παρόχου OCR | 2 |
-| 3Δ Αρχεία σεν. 5 | Μεγάλα αρχεία με ορατή πρόοδο | μισό | files-workspace.prodtest.mjs, background-jobs.test.mjs | όριο 20 MB και 50 σελίδες | 0.5 |
+| 3Δ Αρχεία σεν. 5 | Μεγάλα αρχεία με ορατή πρόοδο | μισό | files-workspace.prodtest.mjs, background-jobs.test.mjs, file-pages.prodtest.mjs | όριο 20 MB και 50 σελίδες· από τον διακόπτη `file-pages` (2026-10-07) η απάντηση λέει ποιες σελίδες δεν διάβασε | 0.5 |
 | 3Δ Αρχεία σεν. 6 | Λέει όταν η απάντηση δεν υπάρχει | μισό | file-ask-depth.test.mjs | — | 0.5 |
 | 3Δ Αρχεία σεν. 7 | Φάκελοι και αρχεία σε πλέγμα ή λίστα | μισό | files-workspace.prodtest.mjs | λίστα και συλλογές | 1 |
 | 3Δ Αρχεία σεν. 8 | Ολόκληρη πρώτη εκδοχή από περιγραφή | δεν ξεκίνησε | κανένα | — | 0.5 |
@@ -762,7 +762,7 @@ Predictions και Projects, που λένε ρητά τι δεν κάνουν·
 | Β7. Κουμπί σχολίων | Κουμπί σε κάθε οθόνη, με εργαλείο και βήμα | δεν ξεκίνησε | κανένα | Κανένα. Ο πίνακας `feedback` υπάρχει στο baseline αλλά δεν γράφεται από πουθενά. Υπάρχει μόνο το banner των beta με σύνδεσμο (`src/components/overview/beta-feedback-banner.tsx`) | 1 |
 | Γ1. Chat | Όλα τα σενάρια 3Β Chat | μισό | `chat-memory.test.mjs`, `chat-stop.test.mjs`, `chat-timeline.test.mjs`, `chat-attachments.test.mjs` | Βιβλιοθήκη (Β3), μητρώο (Β2)· το ανέβασμα PDF και εικόνας φτιάχτηκε 2026-10-07 (πακέτο 9) | 2.5 |
 | Γ2. Site | Όλα τα σενάρια 3Α Site | μισό | `multipage-websites.test.mjs`, `website-timeline.test.mjs` και περίπου 20 ακόμα `website-*` | Cinematic: NEEDS 5, 6, 7. Έλεγχος με δύο κύκλους πριν από την παράδοση | 3 |
-| Γ3. Files | Όλα τα σενάρια 3Δ Αρχεία | μισό | `file-extraction.test.mjs`, `file-ask-depth.test.mjs`, `upload-reversibility.test.mjs` | OCR: χρειάζεται επιλογή παρόχου. Παραπομπή σε σελίδα ή κελί | 2 |
+| Γ3. Files | Όλα τα σενάρια 3Δ Αρχεία | μισό | `file-extraction.test.mjs`, `file-ask-depth.test.mjs`, `upload-reversibility.test.mjs`, `file-pages.test.mjs` | OCR: χρειάζεται επιλογή παρόχου. Παραπομπή σε κελί (η σελίδα ανοίγει από 2026-10-07, πακέτο 12, διακόπτης `file-pages`) | 1.5 |
 | Γ4. Research | Όλα τα σενάρια 3Β Έρευνα | μισό | `research-entries.test.mjs`, `research-timeline.test.mjs`, `research-reliability.test.mjs` | Το migration `20261011000000_research_reports_server_writes.sql` (NEEDS 25) | 2 |
 | Γ5. Image | Βλ. 4.6 | μόνο οθόνη | κανένα | Βλ. 4.6 | — |
 | Γ6. Document | Όλα τα σενάρια 3Α Έγγραφο | μισό | `documents-pdf-language.test.mjs`, `pdf-real-files.test.mjs` | Κανένα. Δεν γράφει με AI | 2 |

@@ -307,6 +307,8 @@ try {
 
     // ---- what goes wrong is said
     generateAnswer = () => ({ status: 422, body: { ok: false, code: "refused" } });
+    // On a phone the pictures cover the conversation: back to it, as a person would.
+    if (device.touch && (await page.locator('[data-testid="tool-shell-back"]').isVisible().catch(() => false))) await press(page.locator('[data-testid="tool-shell-back"]'));
     if (await page.locator('[data-testid="box-clear"]').isVisible().catch(() => false)) await press(page.locator('[data-testid="box-clear"]'));
     await say(page, press, "κάτι που ο πάροχος αρνείται");
     await page.waitForTimeout(300);

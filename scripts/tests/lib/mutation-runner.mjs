@@ -95,11 +95,17 @@ export function runMutations({ name, gate, targets, mutants }) {
   let caught = 0;
   const missed = [];
   try {
-    const base = runGate(gate);
-    console.log(`baseline: the gate is ${base.green ? "GREEN" : "RED"} on the unmutated tree`);
-    if (!base.green) {
-      console.log(`\nBASELINE IS RED — no result below would mean anything.\n  ${base.failed.join("\n  ")}`);
-      process.exit(1);
+    // A MUTANT MAY NAME ITS OWN GATE (m.gate): a suite whose clauses live
+    // in a gate AND an itest (chat-opens-tools: the requests run in the
+    // itest, the wiring is read in the gate) mutates both from one file.
+    // Every gate any mutant uses must be green on the unmutated tree.
+    for (const g of new Set([gate, ...mutants.map((m) => m.gate).filter(Boolean)])) {
+      const base = runGate(g);
+      console.log(`baseline: ${g.replace(/^.*\//, "")} is ${base.green ? "GREEN" : "RED"} on the unmutated tree`);
+      if (!base.green) {
+        console.log(`\nBASELINE IS RED — no result below would mean anything.\n  ${base.failed.join("\n  ")}`);
+        process.exit(1);
+      }
     }
 
     for (const m of mutants) {
@@ -117,7 +123,7 @@ export function runMutations({ name, gate, targets, mutants }) {
       writeFileSync(m.file, original.replace(m.from, m.to));
       let result;
       try {
-        result = runGate(gate);
+        result = runGate(m.gate ?? gate);
       } finally {
         restoreAll();
       }

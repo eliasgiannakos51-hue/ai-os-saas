@@ -282,7 +282,7 @@ export const SitePane = forwardRef<
         {showPreview && (
           <div data-testid="chat-site-preview" className="flex min-h-[60vh] flex-1 flex-col gap-2">
             <AiGeneratedNotice variant="block" />
-            <iframe title={site?.name ?? t("label")} srcDoc={html} sandbox="" className="min-h-[60vh] w-full flex-1 rounded-card border border-border bg-white" />
+            <iframe title={site?.name ?? t("label")} srcDoc={html} sandbox="" className="min-h-[60vh] w-full flex-1 rounded-card border border-border bg-panel" />
             <p className="text-xs text-muted">{t("nextChanges")}</p>
           </div>
         )}

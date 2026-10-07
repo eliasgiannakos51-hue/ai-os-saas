@@ -165,7 +165,8 @@ try {
     });
     const pane = page.locator('[data-testid="chat-site-pane"]');
     async function say(text) {
-        await press(field);
+      const field = page.locator("textarea").first();
+      await press(field);
       await field.fill(text);
       await field.press("Enter");
       await page.waitForTimeout(600);

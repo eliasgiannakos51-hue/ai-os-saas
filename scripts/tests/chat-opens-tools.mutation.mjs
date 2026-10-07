@@ -15,6 +15,7 @@
 import { runMutations } from "./lib/mutation-runner.mjs";
 
 const GATE = "scripts/tests/chat-opens-tools.test.mjs";
+const RUN = "scripts/tests/chat-opens-tools.itest.mjs";
 const OPEN = "src/lib/chat/open-tool.ts";
 const INTENT = "src/lib/create-studio/intent-signals.ts";
 const REQ = "src/lib/website-builder/site-requests.ts";
@@ -47,6 +48,7 @@ const MUTANTS = [
   },
   {
     name: "a second worker for a suppressed duplicate",
+    gate: RUN,
     file: REQ,
     from: "  if (!data.duplicateSuppressed) {",
     to: "  if (true) {",
@@ -54,6 +56,7 @@ const MUTANTS = [
   },
   {
     name: "questions are taken for a site",
+    gate: RUN,
     file: REQ,
     from: '  if (data.needsClarification) return { kind: "questions", questions: (data.questions as string[]) ?? [] };\n',
     to: "",
@@ -61,6 +64,7 @@ const MUTANTS = [
   },
   {
     name: "a failed read ends the watch",
+    gate: RUN,
     file: REQ,
     from: "      if (!res.ok || !data.ok) {\n        if (handlers.alive()) setTimeout(tick, SITE_POLL_INTERVAL_MS);\n        return;\n      }",
     to: "      if (!res.ok || !data.ok) {\n        return;\n      }",
@@ -68,6 +72,7 @@ const MUTANTS = [
   },
   {
     name: "the watch outlives its screen",
+    gate: RUN,
     file: REQ,
     from: "    if (!handlers.alive()) return;\n    let record",
     to: "    let record",
@@ -75,6 +80,7 @@ const MUTANTS = [
   },
   {
     name: "every change is sent with a part",
+    gate: RUN,
     file: REQ,
     from: "      ...(input.section === null || input.section === undefined ? {} : { section: input.section }),",
     to: "      section: input.section ?? 0,",

@@ -268,6 +268,12 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     // runs it word by word); and the remembered name, against the brief,
     // only to avoid saying it twice. Neither decides what is shown to whom.
     "src/lib/memory/brand.ts",
+    // OPENERS, NOT CONTENT (package 7, 2026-10-07). opensWithInstruction
+    // folds only to compare the first words of a Chat message against
+    // its own lists of instructions and questions ("φτιαξε" typed without
+    // accents is "φτιάξε"); scripts/tests/chat-opens-tools.test.mjs runs it
+    // on sentences in five languages, both ways.
+    "src/lib/create-studio/intent-signals.ts",
   ]);
   const unaccounted = users.filter((f) => !ACCOUNTED.has(f));
 

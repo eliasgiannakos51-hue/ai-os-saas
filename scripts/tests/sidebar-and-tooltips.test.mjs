@@ -178,9 +178,9 @@ checkTrue(
 );
 checkTrue(
   "...and a heading with no rows under it is not drawn at all",
-  /\)\)\.filter\(\(g\) => g\.items\.length > 0\);/.test(toolsGridSrc) && /sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)/.test(toolsGridSrc) &&
+  /\)\)\.filter\(\(g\) => g\.items\.length > 0\);/.test(toolsGridSrc) &&
     /\{list\.length > 0 && \([\s\S]{0,200}t\("rail\.recentTools"\)/.test(stripComments(sidebarForOpen)),
-  "the page's four groups drop any that end up empty, and the Settings block comes from sidebarGroups(), which drops an empty group; the sidebar's one heading, Recent tools, sits under the guard on its list",
+  "the page's four groups drop any that end up empty; the sidebar's one heading, Recent tools, sits under the guard on its list",
 );
 // WHAT THE SIDEBAR MAY REMEMBER. Until 2026-10-02 the answer was
 // "nothing"; from then to 2026-10-04 it was the recent-tools list, kept
@@ -233,10 +233,14 @@ checkTrue(
   /visibleGroups\(ALL_SIDEBAR_GROUPS, isOwner\)\.flatMap\(\(group\) => group\.items\);/.test(paletteSrc) && !/\.hidden\b/.test(paletteSrc),
   "the palette is dropping hidden items, so a hidden page has no entry point at all",
 );
+// Since MASTER 14.1 (2026-10-07) the Settings block is not on All tools:
+// Integrations and the Help Centre are linked from the Settings page,
+// held by sidebar-structure.test.mjs over every visible row of the block.
 checkTrue(
-  "Settings is drawn as its own group below the main ones, on All tools",
-  /const settings = sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)/.test(toolsGridSrc) && /return \[\.\.\.tools, \.\.\.settings\];/.test(toolsGridSrc),
-  "Integrations and the Help Centre have no row in the rail, so without this group they have none anywhere",
+  "Integrations and the Help Centre are reached from the Settings page, since they are not on All tools",
+  !/SETTINGS_GROUP/.test(toolsGridSrc) &&
+    ["/dashboard/integrations", "/help"].every((h) => stripComments(readFileSync("src/app/dashboard/settings/page.tsx", "utf8")).includes(`{ href: "${h}",`)),
+  "Integrations and the Help Centre have no row in the rail, so without these links they have none anywhere",
 );
 // EVERY HEADING IS A CAPTION, not a control — there is nothing to toggle.
 // A <button> that does nothing is worse for a screen reader than no

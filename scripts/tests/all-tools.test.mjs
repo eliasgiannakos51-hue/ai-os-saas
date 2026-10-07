@@ -7,7 +7,10 @@
 // Organise, Business; a search on top; no beta tag, so what is not working
 // is not shown. WHICH tools is the owner's rule of 2026-10-05 (NEEDS 19),
 // in src/lib/nav/all-tools.ts — held here BOTH ways against the tools the
-// grid can draw, for a member and for the owner.
+// grid can draw, for a member and for the owner. Since 2026-10-07 (MASTER
+// Μέρος 14.1) that is exactly the tools 14.1 names, each under its
+// one-word name, with Document hidden while it only keeps notes and
+// nothing from the Settings block — which is reached from Settings.
 //
 // The search is RUN — the palette's own matcher over the same candidates
 // the grid builds (the grid's line that builds them is checked to be
@@ -36,8 +39,8 @@ const grid = stripComments(readFileSync("src/components/tools/tools-grid.tsx", "
 
 // The drawn tools, parsed from lib/sidebar-nav.ts (it imports fifty
 // icons, so it is read rather than loaded) and filtered by the real
-// sidebarGroups(), tools first and the Settings block last — the order
-// the grid draws them.
+// sidebarGroups(). The Settings block is not drawn on All tools (MASTER
+// 14.1), so it is not in the population.
 const navSrc = readFileSync("src/lib/sidebar-nav.ts", "utf8");
 const modules = await loadTs("src/lib/modules.ts");
 const { sidebarGroups } = await loadTs("src/lib/sidebar-visibility.ts");
@@ -57,15 +60,12 @@ const parsed = groupBlocks(navSrc).map((mark) => ({
     };
   }),
 }));
-const settingsAt = parsed.findIndex((g) => g.heading === "Settings");
-const ordered = [...parsed.filter((_, i) => i !== settingsAt), parsed[settingsAt]].filter(Boolean);
-const drawnFor = (isOwner) => sidebarGroups(ordered, isOwner);
-const drawn = drawnFor(false);
-const tools = drawn.flatMap((g) => g.items);
+const drawnFor = (isOwner) => sidebarGroups(parsed, isOwner);
+const drawn = drawnFor(false).filter((g) => g.heading !== "Settings");
+const allDrawn = drawnFor(false).flatMap((g) => g.items);
 
 console.log("== 0. the population ==");
-check(`the drawn tools were read (${tools.length} in ${drawn.length} groups)`, tools.length >= 20 && drawn.length >= 4);
-check("the Settings block is drawn last", drawn[drawn.length - 1]?.heading === "Settings");
+check(`the sidebar's tools were read (${allDrawn.length} in ${drawn.length} groups and Settings)`, allDrawn.length >= 20 && drawn.length >= 4);
 
 console.log("\n== 0b. every tool is in exactly one group, or hidden with a reason ==");
 const { ALL_TOOLS_GROUPS, HIDDEN_FROM_ALL_TOOLS } = await loadTs("src/lib/nav/all-tools.ts");
@@ -86,27 +86,62 @@ check("...in exactly one place: no tool in two groups, none both grouped and hid
 const bare = hidden.filter((h) => String(HIDDEN_FROM_ALL_TOOLS[h] ?? "").trim().length < 20);
 check("...and every hidden tool says why, in a sentence", bare.length === 0, bare.join(", "));
 check(
-  "the grid draws the tools through those groups, and the Settings block after them",
-  /ALL_TOOLS_GROUPS\.map\(/.test(grid) && /g\.hrefs\.map\(\(h\) => byHref\.get\(h\)\)/.test(grid) && /\[\.\.\.tools, \.\.\.settings\]/.test(grid)
+  "the grid draws the tools through those groups, and nothing else",
+  /return ALL_TOOLS_GROUPS\.map\(/.test(grid) && /g\.hrefs\.map\(\(h\) => byHref\.get\(h\)\)/.test(grid)
 );
+check("...and no Settings block: Settings, Integrations and Help are reached from Settings (MASTER 14.1)",
+  !/SETTINGS_GROUP|\.\.\.settings\b/.test(grid));
+
+const settingsPage = stripComments(readFileSync("src/app/dashboard/settings/page.tsx", "utf8"));
+const settingsHrefs = Object.fromEntries(["/dashboard/integrations", "/help", "/dashboard/team"].map((h) => [h, new RegExp(`\\{ href: "${h.replace(/\//g, "\\/")}", label: tKey\\("sidebar\\.items\\.`).test(settingsPage)]));
+check("...and Settings links to each of them, so nothing is lost", Object.values(settingsHrefs).every(Boolean), JSON.stringify(settingsHrefs));
+check("...under a heading worded in every locale", /t\("places\.title"\)/.test(settingsPage) && LOCALES.every((l) => typeof messages[l].settings?.places?.title === "string" && messages[l].settings.places.title.length > 0));
+
+console.log("\n== 0c. exactly the tools MASTER 14.1 names, each under its one-word name ==");
+const { ALL_TOOLS_NAMES } = await loadTs("src/lib/nav/all-tools.ts");
+// MASTER 14.1, word for word: «Site, Document, Slides, Posts, Research,
+// Analyze, Files, Automations, Projects, Goals, Meetings, Finances, Sales,
+// Trading, Library, Memory». Document is the one hidden today (below).
+const MASTER_14_1 = ["Site", "Document", "Slides", "Posts", "Research", "Analyze", "Files", "Automations", "Projects", "Goals", "Meetings", "Finances", "Sales", "Trading", "Library", "Memory"];
+const enNames = messages.en.dashboard?.tools?.names ?? {};
+const shownNames = grouped.map((h) => enNames[ALL_TOOLS_NAMES[h]]);
+const expected = MASTER_14_1.filter((n) => n !== "Document");
+check(`every grouped tool has a one-word name (${grouped.length} squares)`, grouped.every((h) => ALL_TOOLS_NAMES[h]), grouped.filter((h) => !ALL_TOOLS_NAMES[h]).join(", "));
+check("...and the English names are exactly 14.1's list, Document aside",
+  [...shownNames].sort().join(",") === [...expected].sort().join(","), `shown ${shownNames.join(", ")}`);
+check("...and no name is given to a tool that is not shown", Object.keys(ALL_TOOLS_NAMES).every((h) => grouped.includes(h)));
+check("Document is hidden, with the reason 14.1 gives (notes only)", /notes/.test(HIDDEN_FROM_ALL_TOOLS["/dashboard/documents"] ?? ""));
+for (const l of LOCALES) {
+  const n = messages[l].dashboard?.tools?.names ?? {};
+  const keys = Object.values(ALL_TOOLS_NAMES);
+  const bad = keys.filter((k) => typeof n[k] !== "string" || n[k].trim() === "" || /\s/.test(n[k].trim()));
+  check(`${l}: every square's name is one word`, bad.length === 0, bad.map((k) => `${k}=${JSON.stringify(n[k])}`).join(", "));
+}
+check("the square draws the one-word name, and falls back to the sidebar's only for a tool without one",
+  /const label = \(item: SidebarItem\) => \(ALL_TOOLS_NAMES\[item\.href\] \? names\[ALL_TOOLS_NAMES\[item\.href\]\] : longLabel\(item\)\);/.test(grid));
+check("no «In testing…» line on the page (MASTER 14.1)",
+  !/inTesting|In testing/i.test(grid) && LOCALES.every((l) => !/in testing/i.test(JSON.stringify(messages[l].dashboard?.tools ?? {}))));
 
 console.log("\n== 1. the search finds a tool by a word it is not called ==");
 const match = await loadTs("src/lib/command-palette-match.ts");
 const { ITEM_LABEL_KEYS } = await loadTs("src/lib/sidebar-label-keys.ts");
 const { aliasesFor } = await loadTs("src/lib/palette-aliases.ts");
 check(
-  "the grid builds its candidates the way the palette does, plus the description",
-  /candidates: \[label\(item\), item\.label, \.\.\.aliasesFor\(ITEM_LABEL_KEYS\[item\.label\] \?\? "", locale\), hint\(item\)\]/.test(grid) &&
+  "the grid builds its candidates the way the palette does, plus the one-word name and the description",
+  /candidates: \[label\(item\), longLabel\(item\), item\.label, \.\.\.aliasesFor\(ITEM_LABEL_KEYS\[item\.label\] \?\? "", locale\), hint\(item\)\]/.test(grid) &&
     /filterAndRankCandidates\(/.test(grid)
 );
+const tools = grouped.map((h) => allDrawn.find((i) => i.href === h)).filter(Boolean);
 const search = (locale, query) => {
   const m = messages[locale].sidebar;
+  const names = messages[locale].dashboard.tools.names;
   return match.filterAndRankCandidates(
     tools.map((item) => {
       const key = ITEM_LABEL_KEYS[item.label];
+      const long = key ? m.items[key] : item.label;
       return {
         item,
-        candidates: [key ? m.items[key] : item.label, item.label, ...aliasesFor(key ?? "", locale), m.hints?.[key] ?? ""],
+        candidates: [ALL_TOOLS_NAMES[item.href] ? names[ALL_TOOLS_NAMES[item.href]] : long, long, item.label, ...aliasesFor(key ?? "", locale), m.hints?.[key] ?? ""],
       };
     }),
     query
@@ -116,8 +151,10 @@ const hrefsOf = (r) => r.map((i) => i.href);
 check('"slides" finds Presentations, in English', hrefsOf(search("en", "slides"))[0] === "/dashboard/presentations", hrefsOf(search("en", "slides")).join(", "));
 check('...and in Greek, where the English synonyms still count', hrefsOf(search("el", "slides")).includes("/dashboard/presentations"));
 check('"παρουσ" finds it by its Greek name', hrefsOf(search("el", "παρουσ")).includes("/dashboard/presentations"));
+check('"site" finds Site', hrefsOf(search("en", "site"))[0] === "/dashboard/website-builder", hrefsOf(search("en", "site")).join(", "));
+check('"ιστότ" finds it by its one-word Greek name', hrefsOf(search("el", "ιστότ")).includes("/dashboard/website-builder"));
 check("a word that is nothing finds nothing", search("en", "qqzzxx").length === 0);
-check("an empty search is every tool, in order", search("en", "").length === tools.length);
+check(`an empty search is every square, in order (${tools.length})`, search("en", "").length === tools.length && tools.length === grouped.length);
 for (const l of LOCALES) {
   const t = messages[l].dashboard?.tools ?? {};
   check(`${l}: the search, its label, the empty result and the four group headings are worded`,

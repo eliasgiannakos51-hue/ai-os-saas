@@ -5,6 +5,26 @@
 
 ## 2026-10-07
 
+**Πακέτο 1 (MASTER 14.1): το All tools δείχνει μόνο τα εργαλεία, με όνομα μίας λέξης.**
+- 15 τετράγωνα σε τέσσερις ομάδες: Site, Slides, Posts · Research, Analyze,
+  Files · Automations, Projects, Goals, Meetings, Library, Memory ·
+  Finances, Sales, Trading. Τα ονόματα σε 10 γλώσσες
+  (`dashboard.tools.names`).
+- Κρυμμένα, με τον λόγο το καθένα στο `src/lib/nav/all-tools.ts`:
+  Document (κρατά μόνο σημειώσεις), Predictions, Chat, Coding, Voice,
+  Search, Activity, Your week, Team, Business health. Όλα ανοίγουν ακόμα
+  από τη διεύθυνσή τους και από το ⌘K.
+- Το μπλοκ Settings φεύγει από το All tools. Integrations, Help Centre
+  και Team έχουν πλέον συνδέσμους στην κορυφή των Ρυθμίσεων.
+- Οι τρεις λίστες με «κουμπάκια» στις Ρυθμίσεις μοιράζονται πλέον το
+  `.chip-link`. Το όριο των border έπεσε από 577 σε 575.
+- Έλεγχοι:
+  - `all-tools`: 59 έλεγχοι, 17/17 mutations. Με τον παλιό κώδικα: 2
+    κόκκινοι στο πλέγμα και 2 στις Ρυθμίσεις.
+  - `sidebar-structure`: 27/27 mutations.
+  - `sidebar-groups`: 12/12 mutations.
+  - Όλα τα gates: 0 αποτυχίες.
+
 **MASTER Μέρη 13–17: αποθηκεύτηκαν, και η σειρά του Μέρους 17 ισχύει.**
 - Τα Μέρη 13 (φωνή), 14 (All tools και Chat), 15 (κλείσιμο), 16 (τα 40
   πακέτα) και 17 (η σειρά) μπήκαν στο `docs/MASTER.md` μετά το Μέρος 12,

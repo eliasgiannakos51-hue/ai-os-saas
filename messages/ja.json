@@ -684,6 +684,9 @@
   "settings": {
     "title": "設定",
     "signedInAs": "ログイン中のアカウント",
+    "places": {
+      "title": "連携、ヘルプ、チーム"
+    },
     "changePassword": {
       "title": "パスワードを変更",
       "newPassword": "新しいパスワード",
@@ -2824,6 +2827,23 @@
         "ask": "聞く",
         "organise": "整理する",
         "business": "ビジネス"
+      },
+      "names": {
+        "site": "サイト",
+        "slides": "スライド",
+        "posts": "投稿",
+        "research": "リサーチ",
+        "analyze": "分析",
+        "files": "ファイル",
+        "automations": "自動化",
+        "projects": "プロジェクト",
+        "goals": "目標",
+        "meetings": "会議",
+        "library": "ライブラリ",
+        "memory": "メモリ",
+        "finances": "財務",
+        "sales": "営業",
+        "trading": "トレード"
       }
     },
     "home": {

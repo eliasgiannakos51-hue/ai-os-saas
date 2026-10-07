@@ -21,7 +21,7 @@ export function generateMetadata(): Promise<Metadata> {
  * every tool"). Since ΣΥΣΤΗΜΑ DESIGN §6 (2026-10-05) it is big squares in
  * four groups with a search on top — components/tools/tools-grid.tsx,
  * grouped by lib/nav/all-tools.ts over the same sidebarGroups() and owner
- * filter, the Settings block last. Each square's pin is the only way to
+ * filter; since MASTER 14.1 (2026-10-07) without the Settings block. Each square's pin is the only way to
  * put a tool in the sidebar at once, so the page hands it this person's
  * pins.
  */

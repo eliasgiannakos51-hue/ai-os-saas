@@ -32,7 +32,9 @@ const SIDEBAR = "src/components/dashboard/sidebar.tsx";
 const PALETTE = "src/components/dashboard/command-palette.tsx";
 // The groups are assembled and drawn by the grid the page renders (D.6).
 const TOOLS_PAGE = "src/components/tools/tools-grid.tsx";
-const TARGETS = [NAV, SIDEBAR, PALETTE, TOOLS_PAGE];
+// Since MASTER 14.1 (2026-10-07) Integrations and Help are linked from here.
+const SETTINGS_PAGE = "src/app/dashboard/settings/page.tsx";
+const TARGETS = [NAV, SIDEBAR, PALETTE, TOOLS_PAGE, SETTINGS_PAGE];
 
 const MUTANTS = [
   // ---- A. NOTHING BECAME UNREACHABLE --------------------------------
@@ -193,13 +195,13 @@ const MUTANTS = [
   {
     dimension: "D. one action",
     gate: TOOLTIPS,
-    name: "Settings stops being its own group",
-    // RE-ANCHORED 2026-10-05: All tools draws its four groups, then
-    // this block (ΣΥΣΤΗΜΑ DESIGN §6).
-    file: TOOLS_PAGE,
-    from: "    return [...tools, ...settings];",
-    to: "    return [...tools];",
-    expect: "Settings",
+    name: "Integrations loses its only door",
+    // RE-ANCHORED 2026-10-07: All tools no longer draws the Settings
+    // block (MASTER 14.1); the Settings page links Integrations instead.
+    file: SETTINGS_PAGE,
+    from: '              { href: "/dashboard/integrations", label: tKey("sidebar.items.integrations") },\n',
+    to: "",
+    expect: "Integrations and the Help Centre are reached from the Settings page",
   },
 ];
 

@@ -684,6 +684,9 @@
   "settings": {
     "title": "设置",
     "signedInAs": "当前登录账户",
+    "places": {
+      "title": "集成、帮助和团队"
+    },
     "changePassword": {
       "title": "修改密码",
       "newPassword": "新密码",
@@ -2824,6 +2827,23 @@
         "ask": "提问",
         "organise": "整理",
         "business": "业务"
+      },
+      "names": {
+        "site": "网站",
+        "slides": "幻灯片",
+        "posts": "帖子",
+        "research": "研究",
+        "analyze": "分析",
+        "files": "文件",
+        "automations": "自动化",
+        "projects": "项目",
+        "goals": "目标",
+        "meetings": "会议",
+        "library": "资料库",
+        "memory": "记忆",
+        "finances": "财务",
+        "sales": "销售",
+        "trading": "交易"
       }
     },
     "home": {

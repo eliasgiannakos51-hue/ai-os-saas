@@ -16,6 +16,8 @@ import { MODULE_ICONS } from "@/lib/module-icons";
 import { CREATE_ATTACHMENT_BUCKET } from "@/lib/create-attachment-image";
 import { isUnsplashConfigured } from "@/lib/unsplash";
 import { parseStoredDeck } from "@/lib/presentations/deck";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { PresentationsShell } from "@/components/presentations/presentations-shell";
 import {
   PresentationsWorkspace,
   type DeckRow,
@@ -123,6 +125,22 @@ export default async function PresentationsPage(
     for (const entry of signed ?? []) {
       if (entry.path && entry.signedUrl) ownImageUrls[entry.path] = entry.signedUrl;
     }
+  }
+
+  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same decks,
+  // notes and photographs, drawn as conversation and work.
+  if (await isFeatureOn("tool-shell", user)) {
+    return (
+      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+        <PresentationsShell
+          initialDescription={readExampleParam(searchParams?.brief)}
+          decks={decks}
+          notes={notes}
+          ownImageUrls={ownImageUrls}
+          unsplashConfigured={isUnsplashConfigured()}
+        />
+      </div>
+    );
   }
 
   return (

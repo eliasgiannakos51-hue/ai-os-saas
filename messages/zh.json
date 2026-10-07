@@ -2864,6 +2864,11 @@
         "platforms": "{count, plural, other {# 个平台}}",
         "copyAll": "全部复制",
         "copyOne": "复制 {platform} 的帖子"
+      },
+      "slides": {
+        "done": "我做好了“{title}”，{count, plural, other {共 # 张幻灯片}}。它已在对话旁打开；你接下来写的内容会修改它。",
+        "changed": "已修改。新版本已在对话旁打开。",
+        "new": "新建演示"
       }
     }
   },

@@ -59,13 +59,27 @@ const users = files.filter((f) => /<ToolShell\b/.test(read(f)));
 check(`the tools in the shell were found (${users.length})`, users.length >= 1, "a rule over no tools passes for nothing");
 for (const f of users) {
   const src = read(f);
+  // THE WHOLE ARRAY, by matching brackets: the first "]}" after it can be
+  // an index inside an option (`{names[source]}`), which once cut the
+  // count short and let a fifth option through.
   const at = src.indexOf("options={[");
-  const block = at < 0 ? "" : src.slice(at, src.indexOf("]}", at));
+  let block = "";
+  if (at >= 0) {
+    let depth = 0;
+    for (let i = at + "options={".length; i < src.length; i++) {
+      if (src[i] === "[") depth++;
+      else if (src[i] === "]" && --depth === 0) {
+        block = src.slice(at, i + 1);
+        break;
+      }
+    }
+  }
   // COUNTED BY KEY: every option is an element in the array, and React
   // needs each to carry a key, so the keys are the options.
   const options = (block.match(/\bkey="[^"]+"/g) ?? []).length;
   check(`${f}: ${options} options, at most four`, options <= 4 && (at < 0 || options >= 1), block.slice(0, 120));
-  check(`${f}: nothing to type into but the shell's field`, !/<textarea\b|<input\b(?![^>]*type="checkbox")/.test(src));
+  // A checkbox, a radio or a file picker takes no text; anything else does.
+  check(`${f}: nothing to type into but the shell's field`, !/<textarea\b|<input\b(?![^>]*type="(?:checkbox|radio|file)")/.test(src));
   check(`${f}: no steps on top, no box of limits`, !/<StepFlow\b|_LIMITS\.map\(/.test(src));
   check(`${f}: imports no page component, so the old page is not drawn behind it`, !/from "@\/components\/[^"]+-workspace"/.test(src));
 }
@@ -97,11 +111,28 @@ check("the posts open beside the conversation, one per platform with its copy", 
 check("what was written before is one press away, and deletes through RLS", /data-testid="posts-recent"/.test(posts) && /from\("generated_posts"\)\.delete\(\)\.eq\("id", id\)/.test(posts));
 check("what it does not do is one line, not a box", /<p className="mt-1\.5 text-\[11px\] text-muted">\{t\("limits\.no_publish"\)\}<\/p>/.test(posts));
 
+console.log("\n== 5. Slides, in the shell ==");
+const slides = read("src/components/presentations/presentations-shell.tsx");
+check("the first thing said writes the deck, through the same route as the old page",
+  /fetch\("\/api\/presentations\/generate"/.test(slides) && /slideCount, imageSource, ownImagePaths, locale \}\)/.test(slides));
+check("...and while a saved deck is open, what is said next changes it",
+  /const editing = Boolean\(open\?\.id\);/.test(slides) && /onSend=\{\(text\) => void \(editing \? change\(text\) : write\(text\)\)\}/.test(slides) &&
+    /fetch\(`\/api\/presentations\/\$\{open\.id\}\/edit`/.test(slides));
+check("the price shows before sending, for a new deck and for a change",
+  /<CostEstimateHint credits=\{editing \? editEstimate\.credits : estimate\.credits\} \/>/.test(slides) && /deckEditEstimateInputChars\(open\.deck, length\)/.test(slides));
+check("the photographs are removed again when no deck comes back for them",
+  (slides.match(/await discardUploads\(\);/g) ?? []).length === 2 && /storage\.from\(CREATE_ATTACHMENT_BUCKET\)\.remove\(paths\)/.test(slides));
+check("PowerPoint and PDF are on top of the slides",
+  /fetch\(`\/api\/presentations\/\$\{id\}\/pptx`\)/.test(slides) && /saveFileResponse\(/.test(slides) && /href=\{`\/api\/presentations\/\$\{open\.id\}\/pdf`\}/.test(slides));
+check("the slides are drawn by the same component as on the page",
+  /<DeckSlides deck=\{open\.deck\} imageUrlFor=\{imageUrlFor\} \/>/.test(slides) && /<DeckSlides deck=\{selected\.deck\} imageUrlFor=\{imageUrlFor\}/.test(read("src/components/presentations/presentations-workspace.tsx")));
+
 const LOCALES = ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"];
 for (const l of LOCALES) {
   const m = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).dashboard?.toolShell ?? {};
   check(`${l}: the shell's words`, ["open", "isOpen", "back", "close"].every((k) => typeof m[k] === "string" && m[k]) &&
-    ["done", "platforms", "copyAll", "copyOne"].every((k) => typeof m.posts?.[k] === "string" && m.posts[k]) && /\{count, plural/.test(m.posts?.done ?? ""));
+    ["done", "platforms", "copyAll", "copyOne"].every((k) => typeof m.posts?.[k] === "string" && m.posts[k]) && /\{count, plural/.test(m.posts?.done ?? "") &&
+    ["done", "changed", "new"].every((k) => typeof m.slides?.[k] === "string" && m.slides[k]) && /\{title\}[\s\S]*\{count, plural/.test(m.slides?.done ?? ""));
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

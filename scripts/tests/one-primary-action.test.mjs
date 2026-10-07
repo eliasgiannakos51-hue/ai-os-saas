@@ -472,6 +472,13 @@ const REPLACEMENT_SURFACES = [
     walk: true,
     why: "Posts in the shell: the field's send is the one action that starts the work",
   },
+  {
+    file: "src/components/presentations/presentations-shell.tsx",
+    tag: "<PresentationsShell",
+    budget: 1,
+    walk: true,
+    why: "Slides in the shell: the field's send writes or changes the deck",
+  },
 ];
 const replacementFiles = new Set(REPLACEMENT_SURFACES.map((r) => r.file));
 const walkedReplacements = new Set(REPLACEMENT_SURFACES.filter((r) => r.walk).map((r) => r.file));

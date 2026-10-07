@@ -2864,6 +2864,11 @@
         "platforms": "{count, plural, one {# platform} other {# platforms}}",
         "copyAll": "Copy all",
         "copyOne": "Copy the {platform} post"
+      },
+      "slides": {
+        "done": "I made “{title}”, {count, plural, one {# slide} other {# slides}}. It is open beside the conversation; what you write next changes it.",
+        "changed": "Changed. The new version is open beside the conversation.",
+        "new": "New deck"
       }
     }
   },

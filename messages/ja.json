@@ -2864,6 +2864,11 @@
         "platforms": "{count, plural, other {#個のプラットフォーム}}",
         "copyAll": "すべてコピー",
         "copyOne": "{platform}の投稿をコピー"
+      },
+      "slides": {
+        "done": "「{title}」を作成しました（{count, plural, other {#枚}}）。会話の横に開いています。次に書く内容で変更されます。",
+        "changed": "変更しました。新しい版を会話の横に開いています。",
+        "new": "新しいプレゼンテーション"
       }
     }
   },

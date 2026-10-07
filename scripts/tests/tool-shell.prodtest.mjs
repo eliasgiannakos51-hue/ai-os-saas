@@ -11,7 +11,9 @@
  * under it, nothing else on the page takes text, there are no steps on
  * top; a brief sent there writes the posts and they open beside the
  * conversation on a computer and over it on a phone, with a way back.
- * With the switch off, the old page is drawn exactly as before.
+ * With the switch off, the old page is drawn exactly as before. Slides
+ * the same, and there the second thing said in the field CHANGES the open
+ * deck through /api/presentations/[id]/edit rather than writing a new one.
  *
  * /api/posts/generate is answered by the browser (page.route), so no
  * model is called and nothing is charged; what is tested is the screen.
@@ -89,6 +91,15 @@ async function start(env) {
   }
   throw new Error("the production server did not start");
 }
+
+const DECK = {
+  title: "Πρωινό στο γραφείο",
+  slides: [
+    { layout: "title", title: "Πρωινό στο γραφείο", bullets: [] },
+    { layout: "bullets", title: "Τι φέρνουμε", bullets: ["Ψωμί της ημέρας", "Καφές", "Φρούτα"] },
+    { layout: "bullets", title: "Τιμές", bullets: ["Από δέκα άτομα", "Παραγγελία ως τις 18:00"] },
+  ],
+};
 
 const SET = {
   version: 1,
@@ -183,7 +194,11 @@ try {
     const work = page.locator('[data-testid="tool-shell-work"]');
     const opened = await work.waitFor({ state: "visible", timeout: 10000 }).then(() => true, () => false);
     check("the brief went to /api/posts/generate once, with every platform", sent.length === 1 && Array.isArray(sent[0]?.platforms) && sent[0].platforms.length === 5, JSON.stringify(sent[0] ?? null));
-    check("the posts open in the work area", opened && (await work.locator('[data-testid="posts-result"] > li').count()) === 2);
+    // Two posts came back for five platforms: two cards, and a line for
+    // each of the three that are missing.
+    const cards = opened ? await work.locator('[data-testid="posts-result"] > li h3').count() : 0;
+    const lines = opened ? await work.locator('[data-testid="posts-result"] > li').count() : 0;
+    check(`the posts open in the work area (${cards} posts, ${lines - cards} missing)`, opened && cards === 2 && lines === 5);
     check("...and the conversation keeps the brief and a card that opens them again",
       (await page.locator('[data-testid="tool-shell-thread"] [data-role="user"]').count()) === 1 && (await page.locator('[data-testid="tool-shell-card"]').count()) === 1);
     const geo = await page.evaluate(() => {
@@ -203,6 +218,42 @@ try {
       check("computer: the work is beside the conversation, about 60%",
         geo.work && geo.thread && geo.shell && geo.work.left >= geo.thread.right - 1 && Math.abs(geo.work.width / geo.shell.width - 0.6) < 0.08, JSON.stringify(geo));
     }
+
+    // ---- Slides: written, then changed, from the same field
+    const generated = [];
+    const edits = [];
+    await page.route("**/api/presentations/generate", (r) => {
+      generated.push(r.request().postDataJSON());
+      return r.fulfill({ contentType: "application/json", body: JSON.stringify({ id: "11111111-1111-4111-8111-111111111111", deck: DECK, creditsCharged: 4 }) });
+    });
+    await page.route("**/api/presentations/*/edit", (r) => {
+      edits.push(r.request().postDataJSON());
+      return r.fulfill({ contentType: "application/json", body: JSON.stringify({ id: "11111111-1111-4111-8111-111111111111", deck: { ...DECK, title: "Πρωινό στο γραφείο, σύντομα" }, creditsCharged: 2 }) });
+    });
+    await page.goto(`${OFF}/dashboard/presentations`, { waitUntil: "networkidle" });
+    check("Slides, switch off: the old page is drawn", (await page.locator('[data-testid="deck-generate"]').count()) === 1 && (await page.locator('[data-testid="tool-shell"]').count()) === 0);
+    await page.goto(`${ON}/dashboard/presentations`, { waitUntil: "networkidle" });
+    check("Slides, switch on: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1 && (await page.locator('[data-testid="deck-generate"]').count()) === 0);
+    const slideOptions = await page.locator('[data-testid="tool-shell-options"] > *').count();
+    check(`...with at most four options (${slideOptions})`, slideOptions >= 1 && slideOptions <= 4);
+    const slideField = page.locator("main textarea");
+    await slideField.fill("Παρουσίαση του πρωινού για γραφεία, σε τρεις διευθυντές.");
+    await slideField.press("Enter");
+    const deckOpen = await page.locator('[data-testid="tool-shell-work"]').waitFor({ state: "visible", timeout: 10000 }).then(() => true, () => false);
+    check("the brief wrote a deck, and its slides open in the work area",
+      generated.length === 1 && deckOpen && (await page.locator('[data-testid="tool-shell-work"] ol > li').count()) === 3, JSON.stringify(generated[0] ?? null));
+    check("...with PowerPoint on top", (await page.locator('[data-testid="slides-pptx"]').count()) === 1);
+    if (device.touch) {
+      // On a phone the deck covers the conversation: back first, then say
+      // the change. The deck is still the current one.
+      await press(page.getByRole("button", { name: W.back }));
+      await page.waitForTimeout(300);
+    }
+    await slideField.fill("Κάν' το πιο σύντομο.");
+    await slideField.press("Enter");
+    await page.waitForTimeout(800);
+    check("the next thing said CHANGED the open deck instead of writing another",
+      generated.length === 1 && edits.length === 1 && edits[0]?.instruction === "Κάν' το πιο σύντομο.", JSON.stringify({ generated: generated.length, edits }));
     await context.close();
   }
 } catch (err) {

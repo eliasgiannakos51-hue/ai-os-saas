@@ -17,7 +17,9 @@ const GATE = "scripts/tests/tool-shell.test.mjs";
 const SHELL = "src/components/shell/tool-shell.tsx";
 const POSTS = "src/components/posts/posts-shell.tsx";
 const PAGE = "src/app/dashboard/posts/page.tsx";
-const TARGETS = [GATE, SHELL, POSTS, PAGE];
+const SLIDES = "src/components/presentations/presentations-shell.tsx";
+const SLIDES_PAGE = "src/app/dashboard/presentations/page.tsx";
+const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE];
 
 const MUTANTS = [
   {
@@ -89,6 +91,41 @@ const MUTANTS = [
     from: 'import { ToolShell, OPTION, type ShellTurn } from "@/components/shell/tool-shell";',
     to: 'import { ToolShell, OPTION, type ShellTurn } from "@/components/shell/tool-shell";\nimport { PostsWorkspace } from "@/components/posts/posts-workspace";',
     expect: "imports no page component",
+  },
+  {
+    name: "Slides: a fifth option",
+    file: SLIDES,
+    from: '      options={[\n',
+    to: '      options={[\n        <button key="x" type="button" />,\n',
+    expect: "at most four",
+  },
+  {
+    name: "Slides: what is said to an open deck writes a new one instead of changing it",
+    file: SLIDES,
+    from: "      onSend={(text) => void (editing ? change(text) : write(text))}",
+    to: "      onSend={(text) => void write(text)}",
+    expect: "what is said next changes it",
+  },
+  {
+    name: "Slides: the photographs stay behind after a refusal",
+    file: SLIDES,
+    from: '        say("tool", refusal(String(body?.error ?? ""), MAX_DESCRIPTION_CHARS));\n        await discardUploads();',
+    to: '        say("tool", refusal(String(body?.error ?? ""), MAX_DESCRIPTION_CHARS));',
+    expect: "the photographs are removed again",
+  },
+  {
+    name: "Slides: the shell is drawn without its switch",
+    file: SLIDES_PAGE,
+    from: '  if (await isFeatureOn("tool-shell", user)) {',
+    to: "  if (true) {",
+    expect: "only behind the switch",
+  },
+  {
+    name: "Slides: the price of a change is not shown",
+    file: SLIDES,
+    from: "<CostEstimateHint credits={editing ? editEstimate.credits : estimate.credits} />",
+    to: "<CostEstimateHint credits={estimate.credits} />",
+    expect: "the price shows before sending, for a new deck and for a change",
   },
 ];
 

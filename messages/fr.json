@@ -2864,6 +2864,11 @@
         "platforms": "{count, plural, one {# plateforme} other {# plateformes}}",
         "copyAll": "Tout copier",
         "copyOne": "Copier la publication {platform}"
+      },
+      "slides": {
+        "done": "J’ai créé « {title} », {count, plural, one {# diapo} other {# diapos}}. Elle est ouverte à côté de la conversation ; ce que tu écris ensuite la modifie.",
+        "changed": "Modifiée. La nouvelle version est ouverte à côté de la conversation.",
+        "new": "Nouvelle présentation"
       }
     }
   },

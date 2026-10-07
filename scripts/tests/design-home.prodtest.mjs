@@ -186,6 +186,26 @@ try {
     check("...and a Commissioner face is actually LOADED, not only named", font.loaded >= 1, `${font.loaded} loaded faces`);
     check("...and it covers Greek text", font.greek === true);
 
+    // ---- 1b. the greeting over the field (the owner, 2026-10-07: «η γη
+    // και ο χαιρετισμός μαζί ακριβώς στο κέντρο, πάνω από το πεδίο»). The
+    // pair is measured as drawn — the earth's left edge to the end of the
+    // greeting's TEXT, not the h1's box — against the field's own middle.
+    const centre = await page.evaluate(() => {
+      const h1 = document.querySelector("main h1");
+      const earth = h1?.parentElement?.firstElementChild;
+      const field = document.querySelector("main textarea");
+      if (!h1 || !earth || earth === h1 || !field) return null;
+      const range = document.createRange();
+      range.selectNodeContents(h1);
+      const text = [...range.getClientRects()];
+      const left = Math.min(earth.getBoundingClientRect().left, ...text.map((r) => r.left));
+      const right = Math.max(...text.map((r) => r.right));
+      const f = field.getBoundingClientRect();
+      return { pairMid: Math.round((left + right) / 2), fieldMid: Math.round((f.left + f.right) / 2) };
+    });
+    check("the earth and the greeting are centred over the field", Boolean(centre) && Math.abs(centre.pairMid - centre.fieldMid) <= 4, JSON.stringify(centre));
+    await shot("0-home");
+
     // ---- 2. the rail
     await openRail();
     const aside = page.locator("aside").first();

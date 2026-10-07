@@ -148,6 +148,20 @@ try {
         { name: "NEXT_LOCALE", value: "el", url: ON },
       ].map(({ domain, path, ...c }) => c)
     );
+    // THE NAME THE PAGE GIVES THE FILE, read where the page sets it.
+    // Measured 2026-10-07 in this headless Chromium: the Site's download
+    // arrived named "download" with the anchor saying "Αύρα Νάξος.zip",
+    // both before and after it moved to saveBlob, and a bare test page's
+    // <a download="site.zip"> blob did not arrive as a download at all. So
+    // suggestedFilename is no evidence here either way; the bytes are
+    // still the download's own.
+    await context.addInitScript(() => {
+      const click = HTMLAnchorElement.prototype.click;
+      HTMLAnchorElement.prototype.click = function () {
+        if (this.href.startsWith("blob:")) (window).__savedAs = this.download;
+        return click.call(this);
+      };
+    });
     const page = await context.newPage();
     pageErrors.length = 0;
     page.on("pageerror", (err) => pageErrors.push(String(err?.message ?? err)));
@@ -251,7 +265,7 @@ try {
     let entries = 0;
     let name = "";
     if (download) {
-      name = download.suggestedFilename();
+      name = await page.evaluate(() => (window).__savedAs ?? "");
       const bytes = readFileSync(await download.path());
       for (let i = 0; i + 3 < bytes.length; i++) if (bytes[i] === 0x50 && bytes[i + 1] === 0x4b && bytes[i + 2] === 3 && bytes[i + 3] === 4) entries++;
     }

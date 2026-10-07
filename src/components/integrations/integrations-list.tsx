@@ -252,7 +252,7 @@ export function IntegrationsList({
                       onClick={() => setConsentFor(provider.id)}
                       aria-label={t("connectTo", { name: provider.name })}
                       data-testid="integration-connect"
-                      className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-accent px-3 text-xs font-medium text-foreground transition-colors duration-200 hover:bg-panel-hover disabled:opacity-50"
+                      className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-panel px-3 text-xs font-medium text-foreground transition-colors duration-200 hover:bg-panel-hover disabled:opacity-50"
                     >
                       <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
                       {t("connect")}

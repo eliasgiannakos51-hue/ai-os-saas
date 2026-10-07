@@ -813,4 +813,7 @@ if (!DB) {
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
-process.exit(failures.length === 0 ? 0 : 1);
+// exitCode, NOT process.exit(): a process.exit() with output still queued
+// in a full pipe drops it, and db-migrations.mutation.mjs then read a red
+// gate with no FAIL line (seen 2026-10-07, under a parallel sweep).
+process.exitCode = failures.length === 0 ? 0 : 1;

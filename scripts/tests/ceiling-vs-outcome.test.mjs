@@ -142,5 +142,9 @@ check(
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length) {
   for (const f of failures) console.log(`  - ${f}`);
-  process.exit(1);
+  // exitCode, NOT process.exit(), for billing-coverage.test.mjs's reason:
+  // a failing run prints past 64 KB, and process.exit() on a full pipe
+  // drops the tail — this list — so the mutation suite read a red gate
+  // with no failure named (seen 2026-10-07 under a parallel sweep).
+  process.exitCode = 1;
 }

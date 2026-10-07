@@ -255,7 +255,7 @@
       "memory": "Procure em tudo o que guardou.",
       "favorites": "Tudo o que marcou.",
       "marketplace": "Partilhe a forma de um agente como modelo e comece a partir de um que outra pessoa partilhou.",
-      "team": "Convide pessoas para o seu espaço.",
+      "team": "Dá o teu plano a outras pessoas, cada uma na sua própria conta.",
       "apps": "Acompanhe as apps que está a planear ou já lançou. Não as constrói.",
       "images": "Acompanhe as imagens que está a planear ou já fez. Não as gera.",
       "videos": "Acompanhe os vídeos que está a planear ou já fez. Não os gera.",
@@ -301,7 +301,9 @@
       "collapse": "Recolher a barra lateral",
       "expand": "Expandir a barra lateral",
       "label": "Menu principal",
-      "saveFailed": "Não foi possível guardar a alteração. Tente de novo."
+      "saveFailed": "Não foi possível guardar a alteração. Tente de novo.",
+      "recentChats": "Conversas recentes",
+      "untitledChat": "Nova conversa"
     },
     "tabs": {
       "home": "Início",
@@ -1327,6 +1329,24 @@
       "workMode": {
         "active": "Modo: {mode}",
         "clear": "Remover o modo de trabalho"
+      },
+      "answer": {
+        "copy": "Copiar a resposta",
+        "good": "Boa resposta",
+        "bad": "Má resposta",
+        "retry": "Perguntar de novo",
+        "ratingFailed": "A avaliação não foi guardada. Tenta outra vez."
+      },
+      "workArea": {
+        "label": "Resultado",
+        "back": "Voltar à conversa",
+        "tabText": "Texto",
+        "tabCode": "Código",
+        "copy": "Copiar",
+        "download": "Descarregar {file}",
+        "close": "Fechar a área de trabalho",
+        "open": "Abrir ao lado da conversa",
+        "isOpen": "Aberto ao lado da conversa · carrega para fechar"
       }
     },
     "create": {
@@ -2403,7 +2423,17 @@
       "dismissError": "Não foi possível dispensar."
     },
     "systemHealth": {
-      "toggleStackTrace": "Mostrar ou ocultar o stack trace"
+      "toggleStackTrace": "Mostrar ou ocultar o stack trace",
+      "flags": {
+        "title": "Interruptores",
+        "hint": "Quem vê cada ferramenta nova ou grande mudança. Aplica-se logo, sem novo deploy.",
+        "saveFailed": "O interruptor não foi guardado. Tenta outra vez.",
+        "audience": {
+          "off": "Ninguém",
+          "staff": "Tu e a conta de teste",
+          "everyone": "Todos"
+        }
+      }
     },
     "ideas": {
       "new": "Nova ideia",
@@ -2789,8 +2819,12 @@
       "search": "Encontrar uma ferramenta",
       "searchLabel": "Pesquisar ferramentas",
       "noMatch": "Nenhuma ferramenta se chama «{query}». Descreva-a no campo do Início.",
-      "beta": "Beta",
-      "betaHint": "Em teste: funciona, mas ainda não faz tudo o que deveria."
+      "groups": {
+        "make": "Criar",
+        "ask": "Perguntar",
+        "organise": "Organizar",
+        "business": "Negócio"
+      }
     },
     "home": {
       "actions": {
@@ -3724,7 +3758,6 @@
     "startListening": "Fala em vez de escrever",
     "stopListening": "Parar",
     "costPerMinute": "{credits, plural, one {# crédito} other {# créditos}} por minuto de fala",
-    "outOfMinutes": "Sem minutos de voz este mês",
     "states": {
       "idle": "Pronto",
       "listening": "A ouvir-te",
@@ -3784,14 +3817,7 @@
       "tapToSpeak": "Carrega em qualquer sítio e fala. Deixa de ouvir sozinho quando paras.",
       "tapToInterrupt": "Carrega em qualquer sítio para interromper e voltar a falar.",
       "hint": "Fala normalmente — a vez termina quando paras.",
-      "empty": "Tudo o que é dito aparece aqui também como texto.",
-      "blocked": {
-        "notConfigured": "Falar em modo mãos-livres precisa de dois fornecedores de voz e esta instalação não tem nenhuma chave, por isso o botão não consegue iniciar uma conversa.",
-        "notConfiguredTranscribe": "Falar em modo mãos-livres precisa de uma chave de voz para texto e esta instalação não tem nenhuma, por isso o botão não consegue iniciar uma conversa.",
-        "notConfiguredSpeak": "Falar em modo mãos-livres precisa de uma chave de texto para voz e esta instalação não tem nenhuma, por isso o botão não consegue iniciar uma conversa.",
-        "notIncluded": "Falar em modo mãos-livres não está incluído no seu plano. Pode continuar a escrever aqui e a ler todas as respostas.",
-        "outOfMinutes": "Não restam minutos de voz este mês, por isso a conversa em modo mãos-livres não pode começar. Escrever aqui continua a funcionar."
-      }
+      "empty": "Tudo o que é dito aparece aqui também como texto."
     },
     "settings": {
       "description": "Fala em vez de escrever e ouve as respostas. Escrever e ler nunca são retirados — cada controlo de voz fica ao lado do texto, não no lugar dele.",

@@ -26,7 +26,6 @@
 // Run: node scripts/tests/navigation-latency.prodtest.mjs
 import http from "node:http";
 import { spawn } from "node:child_process";
-import { readFileSync } from "node:fs";
 
 let pass = 0;
 const failures = [];
@@ -201,22 +200,30 @@ if (!(await waitForServer())) {
 }
 console.log(`production server up on :${PORT}\n`);
 
-// The routes a user moves between, not every route that exists. These are
-// the sidebar's own destinations plus the two heaviest pages.
+// The routes a user moves between, not every route that exists — each
+// clicked from WHERE THE DESIGN PUTS ITS LINK (ΣΥΣΤΗΜΑ DESIGN §3, the
+// sidebar of 2026-10-04): Chat, All tools and Settings are fixed rows of
+// the rail, so they are clicked from Home; every other tool is a square on
+// All tools (src/lib/nav/all-tools.ts), so it is clicked from there.
+//
+// REWRITTEN 2026-10-05 (QUEUE Α.13). Every route used to be clicked from
+// Home's sidebar, which carried 79 rows; the design's carries five, and
+// six of the nine routes read as "unreachable" when they were one page
+// further away, where the design meant them to be. Agents and Ideas
+// (/dashboard) are no longer measured: neither has a link anywhere in the
+// design (Agents left the sidebar on purpose, and Ideas is a hidden row).
+const ALL_TOOLS = "/dashboard/tools";
+const HOME = "/dashboard/overview";
 const ROUTES = [
-  { path: "/dashboard/overview", name: "Home" },
-  { path: "/dashboard/chat", name: "Chat" },
-  { path: "/dashboard/files", name: "Files" },
-  { path: "/dashboard/agents", name: "AI Agents" },
-  { path: "/dashboard/mission", name: "Mission Control" },
-  { path: "/dashboard/timeline", name: "Timeline" },
-  { path: "/dashboard/website-builder", name: "Website Builder" },
-  { path: "/dashboard/documents", name: "Documents" },
-  { path: "/dashboard/settings", name: "Settings" },
-  // Ideas is served from /dashboard itself (lib/classifier-modules.ts,
-  // moduleHref: the first module has no sub-path), so that is the href the
-  // sidebar carries and the one a click actually follows.
-  { path: "/dashboard", name: "Ideas" },
+  { path: HOME, name: "Home", from: HOME },
+  { path: "/dashboard/chat", name: "Chat", from: HOME },
+  { path: ALL_TOOLS, name: "All tools", from: HOME },
+  { path: "/dashboard/settings", name: "Settings", from: HOME },
+  { path: "/dashboard/files", name: "Files", from: ALL_TOOLS },
+  { path: "/dashboard/mission", name: "Mission Control", from: ALL_TOOLS },
+  { path: "/dashboard/timeline", name: "Timeline", from: ALL_TOOLS },
+  { path: "/dashboard/website-builder", name: "Website Builder", from: ALL_TOOLS },
+  { path: "/dashboard/documents", name: "Documents", from: ALL_TOOLS },
 ];
 
 // ---------------------------------------------------------------------------
@@ -338,8 +345,10 @@ await page.waitForSelector("h1", { timeout: 30000 }).catch(() => null);
 
 const SAMPLES = 3;
 for (const route of ROUTES) {
-  if (route.path === "/dashboard/overview") continue;
+  if (route.path === HOME) continue;
   label = route.path;
+  await page.goto(`http://127.0.0.1:${PORT}${route.from}`, { waitUntil: "domcontentloaded", timeout: 60000 });
+  await page.waitForSelector("h1", { timeout: 30000 }).catch(() => null);
   const link = page.locator(`a[href="${route.path}"]`).first();
   if ((await link.count()) === 0) {
     // Not "skip": a missing sidebar link means the page under the cursor
@@ -448,8 +457,8 @@ for (const route of ROUTES) {
       }
     }
     await page.waitForTimeout(200);
-    // Back to Home so every sample starts from the same place.
-    await page.goto(`http://127.0.0.1:${PORT}/dashboard/overview`, { waitUntil: "domcontentloaded", timeout: 60000 });
+    // Back to where the link is, so every sample starts from the same place.
+    await page.goto(`http://127.0.0.1:${PORT}${route.from}`, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForSelector("h1", { timeout: 30000 }).catch(() => null);
   }
   const median = (xs) => (xs.length ? [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)] : null);
@@ -556,37 +565,15 @@ for (const route of ROUTES) {
     `${shape.count} queries across ${shape.tables.length} tables`
   );
 }
-// A MISSING SIDEBAR LINK IS ONLY ACCEPTABLE IF THE CONFIG SAYS SO.
-//
-// V4.6 #3 marked twenty-nine rows `hidden: true` — present in the command
-// palette and on the hub, absent from the sidebar. Two of the routes
-// measured here are among them (/dashboard/documents, and /dashboard,
-// which is the Ideas module's href), so this check reported them as
-// unreachable and was right about the observation and wrong about the
-// verdict. This file's own comment still said "/dashboard ... is the
-// href the sidebar carries", which stopped being true and, being a
-// comment, went on being read.
-//
-// Read from lib/sidebar-nav.ts rather than listed here, so the next row
-// that is hidden or un-hidden does not need this file edited. Regex over
-// the config text because loadTs cannot import it (its icons come from
-// lucide-react), which is why the count is asserted too: a regex that
-// silently matches nothing would excuse every missing link.
-const navSrc = readFileSync("src/lib/sidebar-nav.ts", "utf8");
-const HIDDEN_HREFS = new Set(
-  [...navSrc.matchAll(/href:\s*"([^"]+)"[^}]*hidden:\s*true/g)].map((m) => m[1])
-);
-checkTrue(
-  `the sidebar config named its hidden rows (${HIDDEN_HREFS.size})`,
-  HIDDEN_HREFS.size >= 10,
-  `${HIDDEN_HREFS.size} — too few to be the real list, so every missing link below would be excused`
-);
-const unexplained = missingLinks.filter((m) => !HIDDEN_HREFS.has(m.split(" ")[0]));
-const explained = missingLinks.length - unexplained.length;
+// EVERY ROUTE HAS ITS LINK WHERE THE DESIGN PUTS IT. No route above is
+// excused: each was chosen because the design links it from `from`, so a
+// missing link is the rail or All tools losing a row (QUEUE Α.13 removed
+// the old excuse — "hidden in lib/sidebar-nav.ts" — with the routes it
+// excused, 2026-10-05).
 check(
-  `every route is reachable, or marked hidden (${ROUTES.length - 1 - unexplained.length}/${ROUTES.length - 1}, ${explained} hidden by config)`,
-  unexplained.length === 0,
-  unexplained.join("\n        ") + "\n        not in the sidebar and not marked hidden in lib/sidebar-nav.ts"
+  `every route is reachable from where the design links it (${ROUTES.length - 1 - missingLinks.length}/${ROUTES.length - 1})`,
+  missingLinks.length === 0,
+  missingLinks.join("\n        ")
 );
 check(`the mock was never asked for something it does not implement (${unimplemented.length})`,
   unimplemented.length === 0, unimplemented.slice(0, 8).join("\n        "));

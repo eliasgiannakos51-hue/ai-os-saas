@@ -9,7 +9,8 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { ArrowUp, Square } from "lucide-react";
+import Link from "next/link";
+import { ArrowUp, LayoutGrid, Square } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { VoiceInput } from "@/components/voice/voice-input";
@@ -56,6 +57,7 @@ export const ChatComposer = forwardRef<
   }
 >(function ChatComposer({ sending, onSend, onStop, initialText = "", children }, ref) {
   const t = useTranslations("dashboard.chat");
+  const tRail = useTranslations("sidebar.rail");
   const [input, setInput] = useState(initialText);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -133,7 +135,21 @@ export const ChatComposer = forwardRef<
             and fix — it does not send. Renders nothing at all when the
             deployment has no transcription provider or the plan does not
             include voice (components/voice/voice-input.tsx). */}
-        <div className="absolute bottom-2 start-2">
+        {/* THE GRID THAT OPENS ALL TOOLS (ΣΥΣΤΗΜΑ DESIGN §5, «Πεδίο κάτω,
+            ίδιο παντού»), before the microphone. A link, so it opens in a
+            new tab like any other and needs nothing from this component.
+            The «+» for an attachment is not here yet: Chat has no upload
+            path to put it on (docs/REMAINING.md, «§5 Πεδίο ίδιο παντού»). */}
+        <div className="absolute bottom-2 start-2 flex items-center gap-1">
+          <Link
+            href="/dashboard/tools"
+            aria-label={tRail("allTools")}
+            title={tRail("allTools")}
+            data-testid="composer-all-tools"
+            className="flex h-11 w-11 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+          >
+            <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+          </Link>
           <VoiceInput
             disabled={sending}
             onTranscript={(text) => {

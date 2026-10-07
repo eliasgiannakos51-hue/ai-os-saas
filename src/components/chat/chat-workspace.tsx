@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, AudioLines, Compass, Gift, PanelLeftClose, PanelLeftOpen, X, Zap } from "lucide-react";
 import { Earth } from "@/components/brand/earth";
 import { useTranslations } from "next-intl";
@@ -29,6 +29,9 @@ import { useStickToBottom } from "@/hooks/use-stick-to-bottom";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
 import { ProvenanceLine } from "@/components/chat/provenance-line";
 import { TransitionButton } from "@/components/transitions/transition-button";
+import { AnswerActions } from "@/components/chat/answer-actions";
+import { ResultCard, WorkArea } from "@/components/chat/work-area";
+import { workItemFrom, type WorkItem } from "@/lib/chat/work-area";
 import type { Provenance } from "@/lib/chat/provenance";
 import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
 import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
@@ -78,17 +81,9 @@ function nextLocalId(prefix: string) {
   return `${prefix}-${localIdCounter}`;
 }
 
-/**
- * THE SMALL EARTH BESIDE EVERY ANSWER (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN,
- * «Η ΓΗ»: «η ίδια μικρή γη δίπλα σε κάθε απάντηση του Ionexa. Γυρίζει
- * πιο γρήγορα όσο δουλεύει και ηρεμεί όταν τελειώσει»). 32px: the 64px
- * of Home beside every turn would be wider than the indent of the text.
- * Only the answer being written and the latest one move; older ones are
- * drawn still, so a long thread does not run a canvas per turn.
- */
-function AssistantAvatar({ working = false, still = false }: { working?: boolean; still?: boolean }) {
-  return <Earth variant="small" px={32} working={working} still={still} className="mt-0.5 shrink-0" />;
-}
+/** A row the server has written has a uuid; one only this page knows
+ *  (nextLocalId) does not, and cannot be rated yet. */
+const PERSISTED_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function ChatWorkspace({
   initialConversations,
@@ -98,6 +93,7 @@ export function ChatWorkspace({
   initialAsk,
   initialProjectId,
   initialWorkMode,
+  workArea = false,
 }: {
   initialConversations: ChatConversation[];
   /** Conversation to open on load — the `?c=` deep link a starred
@@ -129,6 +125,9 @@ export function ChatWorkspace({
    * Sent with every message until the person clears it.
    */
   initialWorkMode?: WorkMode;
+  /** The switch "chat-work-area" (src/lib/flags/flags.ts), read by the
+   *  page: whether a produced answer opens beside the conversation. */
+  workArea?: boolean;
   /**
    * The project a conversation STARTED here belongs to, for the whole of
    * its life. Chosen on arrival (/dashboard/projects/[id] links here with
@@ -152,6 +151,10 @@ export function ChatWorkspace({
   const { refresh: refreshCredits, reportUsage } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
+  // THE WORK AREA (ΣΥΣΤΗΜΑ DESIGN §5, Δ.2): which answer is open beside
+  // the conversation, if any. Closed when the conversation changes.
+  const [openWorkId, setOpenWorkId] = useState<string | null>(null);
+  useEffect(() => setOpenWorkId(null), [activeId]);
   const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
   const [headerRenaming, setHeaderRenaming] = useState(false);
   // The provenance rides on the message it belongs to rather than in a
@@ -161,6 +164,25 @@ export function ChatWorkspace({
   const [messages, setMessages] = useState<(ChatMessage & { provenance?: Provenance; timeline?: ClientStep[] })[]>([]);
   // The one answer whose earth keeps turning, calmly, once it is done.
   const lastAnswerId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
+  // What each finished answer produced, if anything (lib/chat/work-area.ts).
+  // Empty while the switch is off, so nothing below draws a card.
+  const workItems = useMemo(() => {
+    const map = new Map<string, WorkItem>();
+    if (!workArea) return map;
+    for (const m of messages) {
+      if (m.role !== "assistant") continue;
+      const item = workItemFrom(m.content);
+      if (item) map.set(m.id, item);
+    }
+    return map;
+  }, [messages, workArea]);
+  const openWorkItem = openWorkId ? workItems.get(openWorkId) ?? null : null;
+  // What "again" asks: the person's message right before the latest answer.
+  const retryText = (() => {
+    const at = messages.findIndex((m) => m.id === lastAnswerId);
+    for (let i = at - 1; i >= 0; i--) if (messages[i].role === "user") return messages[i].content;
+    return null;
+  })();
   // The text being typed lives INSIDE ChatComposer, not here: as state on
   // this component, every keystroke re-rendered the whole workspace —
   // thread, sidebar, header — measured at 128ms median per key with a
@@ -216,42 +238,21 @@ export function ChatWorkspace({
   const [talking, setTalking] = useState(false);
   const voiceAvailability = useVoiceAvailability();
   /**
-   * WHY THE HANDS-FREE LOOP CANNOT START, or null when it can.
-   *
-   * Null is the ONLY value that enables the Talk button, so there is no
-   * way to disable it without producing a sentence — which is the whole
-   * point. The previous version derived `disabled` from four booleans
-   * and the explanation from a separate ternary in a `title`, and the
-   * two could not be kept in step by anything but care.
-   *
-   * THE TWO KEYS ARE NAMED SEPARATELY because they fail separately and
-   * an operator fixes them separately: OPENAI_API_KEY transcribes,
-   * ELEVENLABS_API_KEY speaks, and a deployment with one of the two is
-   * the state lib/voice/voice-providers.ts already distinguishes.
-   * `voice.settings.notConfigured` says "the buttons do not appear",
-   * which is no longer true of THIS button, so these are their own
-   * strings rather than that one reused.
+   * WHETHER THE HANDS-FREE LOOP CAN START HERE: both provider keys
+   * (OPENAI_API_KEY transcribes, ELEVENLABS_API_KEY speaks), the plan,
+   * and minutes left. False draws no Talk button at all — see the button
+   * below for why it is not drawn inert any more.
    */
-  const talkBlockedReason: string | null = (() => {
-    if (!voiceAvailability.loaded) return null;
-    const { configured, included, hasMinutes } = voiceAvailability;
-    if (!configured.transcribe && !configured.speak) return tVoice("conversation.blocked.notConfigured");
-    if (!configured.transcribe) return tVoice("conversation.blocked.notConfiguredTranscribe");
-    if (!configured.speak) return tVoice("conversation.blocked.notConfiguredSpeak");
-    if (!included) return tVoice("conversation.blocked.notIncluded");
-    if (!hasMinutes) return tVoice("conversation.blocked.outOfMinutes");
-    return null;
-  })();
+  const talkAvailable =
+    voiceAvailability.loaded && voiceAvailability.transcribeAvailable && voiceAvailability.speakAvailable && voiceAvailability.hasMinutes;
 
-  // Focus mode: hides the conversation list so the thread gets the full
-  // width, the way ChatGPT and Claude do it.
-  //
-  // Starts CLOSED on the very first render and is opened by the effect
-  // below rather than defaulting to open. That order matters: the server
-  // has no idea how wide the viewport is, and a 256px sidebar rendered
-  // into a 375px phone before hydration is a visible, ugly flash of a
-  // layout that immediately disappears. Closed-then-open is invisible on
-  // desktop and correct on mobile.
+  // THE CONVERSATION LIST IS A DRAWER, CLOSED UNTIL ASKED FOR (Δ.2,
+  // 2026-10-05). ΣΥΣΤΗΜΑ DESIGN §3: one sidebar, the same everywhere —
+  // and the app's sidebar already lists the latest conversations. This
+  // list stays one press away because it is the only place that holds
+  // EVERY conversation, with rename, pin, star and delete; removing it
+  // would lose those («Καμία λειτουργία δεν χάνεται», §9). Opened once,
+  // the choice is remembered on this device.
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarResolved, setSidebarResolved] = useState(false);
 
@@ -263,13 +264,8 @@ export function ChatWorkspace({
       // Private browsing / storage disabled — fall through to the
       // width-based default rather than failing to render a sidebar.
     }
-    if (stored === "open" || stored === "closed") {
-      setSidebarOpen(stored === "open");
-    } else {
-      // No stored preference: open on a desktop-width viewport, closed on
-      // a phone, where it would otherwise cover most of the thread.
-      setSidebarOpen(window.innerWidth >= SIDEBAR_BREAKPOINT_PX);
-    }
+    // No stored preference is closed, at every width.
+    setSidebarOpen(stored === "open");
     setSidebarResolved(true);
   }, []);
 
@@ -574,6 +570,7 @@ export function ChatWorkspace({
       let provenance: Provenance | null = null;
       let finalContent: string | null = null;
       let finishedTimeline: ClientStep[] | undefined;
+      let savedId: string | null = null;
       const { interrupted } = await readNdjsonStream(res.body, (event) => {
         if (event.type === "done") {
           usageEvent = event;
@@ -581,6 +578,7 @@ export function ChatWorkspace({
           // (lib/chat/web-sources.ts); without them, what streamed stands.
           if (typeof event.content === "string" && event.content.trim()) finalContent = event.content;
           finishedTimeline = keepChatSteps(event.timeline);
+          if (typeof event.messageId === "string" && PERSISTED_ID.test(event.messageId)) savedId = event.messageId;
         }
         if (event.type === "timeline") {
           setLiveTimeline(keepChatSteps(event.steps) ?? []);
@@ -642,10 +640,16 @@ export function ChatWorkspace({
       });
 
       if (accumulatedText) {
+        const answerId = savedId ?? nextLocalId("assistant");
+        // An answer that produced something opens beside the conversation
+        // at once — «η οθόνη χωρίζεται στα δύο».
+        if (workArea && workItemFrom(finalContent ?? accumulatedText)) setOpenWorkId(answerId);
         setMessages((m) => [
           ...m,
           {
-            id: nextLocalId("assistant"),
+            // The server's id when it sent one, so the answer can be rated
+            // at once; a local one otherwise (a stopped or cut-off reply).
+            id: answerId,
             conversation_id: resolvedConversationId ?? "",
             role: "assistant",
             content: finalContent ?? accumulatedText,
@@ -924,8 +928,7 @@ export function ChatWorkspace({
                     </div>
                   </div>
                 ) : (
-                  <div key={msg.id} className="flex items-start gap-2.5">
-                    <AssistantAvatar still={sending || msg.id !== lastAnswerId} />
+                  <div key={msg.id}>
                     {/* THE GROUND UNDER THE ANSWER — V4.6, decided
                         2026-09-04 from the screenshots: `dim`. A 62%
                         page-colour pane over the answer's own rectangle,
@@ -940,11 +943,35 @@ export function ChatWorkspace({
                       {/* NUMBERED WEB SOURCES — only when the answer searched
                           the web; the numbers in the prose above link here. */}
                       <SourceCards content={msg.content} />
+                      {/* THE ROW UNDER THE ANSWER (ΣΥΣΤΗΜΑ DESIGN §5): the
+                          26px earth, copy, the thumbs, again
+                          (components/chat/answer-actions.tsx). Again only
+                          under the latest answer, and not while one is
+                          being written. */}
+                      <AnswerActions
+                        key={`${msg.id}:${msg.rating ?? 0}`}
+                        messageId={msg.id}
+                        text={msg.content}
+                        rating={msg.rating === 1 || msg.rating === -1 ? msg.rating : null}
+                        persisted={PERSISTED_ID.test(msg.id)}
+                        still={sending || msg.id !== lastAnswerId}
+                        onRetry={!sending && msg.id === lastAnswerId && retryText ? () => void handleSend(retryText) : undefined}
+                        onRated={(rating) => setMessages((m) => m.map((x) => (x.id === msg.id ? { ...x, rating } : x)))}
+                      />
+                      {/* THE CARD THAT REOPENS THE WORK AREA (§5), on an
+                          answer that produced something. */}
+                      {workItems.get(msg.id) && (
+                        <ResultCard
+                          item={workItems.get(msg.id)!}
+                          open={openWorkId === msg.id}
+                          onOpen={() => setOpenWorkId((id) => (id === msg.id ? null : msg.id))}
+                        />
+                      )}
                       {/* "LISTEN" — on the finished answer only. Never on
                           the one still streaming: half a sentence read
                           aloud is a clip charged for text that changed a
                           second later. */}
-                      <div className="mt-2">
+                      <div className="mt-1">
                         <VoicePlayer text={msg.content} compact />
                       </div>
                       {/* WHERE IT CAME FROM — V4.6 #9. Only on messages
@@ -973,14 +1000,14 @@ export function ChatWorkspace({
               )}
 
               {sending && (
-                <div className="flex items-start gap-2.5">
-                  <AssistantAvatar working />
+                <div>
                   {streamingText !== null ? (
                     <div className="chat-ground-dim min-w-0 flex-1 text-foreground">
                       {chatTimelineWorthShowing(liveTimeline) && (
                         <AiJobTimeline job={{ kind: "chat", timeline: liveTimeline }} labelFor={chatStepLabel} defaultOpen className="mb-2" />
                       )}
                       <MessageContent content={streamingText} className="leading-relaxed" />
+                      <AnswerActions messageId="streaming" text={streamingText} persisted={false} working />
                       <AiGeneratedNotice />
                     </div>
                   ) : chatTimelineWorthShowing(liveTimeline) ? (
@@ -996,9 +1023,8 @@ export function ChatWorkspace({
                   use, so a person meets one shape of question across the
                   product rather than four. */}
               {clarify && !sending && (
-                <div className="flex items-start gap-2.5" data-testid="chat-clarify">
-                  <AssistantAvatar still />
-                  <div className="min-w-0 flex-1">
+                <div data-testid="chat-clarify">
+                  <div className="min-w-0">
                     <ClarificationQuestions
                       questions={clarify.questions}
                       suggestions={clarify.suggestions}
@@ -1048,36 +1074,22 @@ export function ChatWorkspace({
               drifted apart at every breakpoint. One class, one rule. */}
           <div className="chat-measure">
             <div className="mb-2 flex flex-wrap justify-end gap-2">
-              {/* PRESS ONCE, THEN TALK (#2). DRAWN WHENEVER THE
-                  AVAILABILITY CALL HAS ANSWERED — the hands-free loop
-                  needs BOTH keys, transcription (OPENAI_API_KEY) and
-                  speech (ELEVENLABS_API_KEY), and "the button is not
-                  there" was once reported as the feature not existing.
-                  So it is here, inert, and it SAYS WHY. */}
-              {voiceAvailability.loaded && (
+              {/* PRESS ONCE, THEN TALK (#2). DRAWN ONLY WHEN IT CAN
+                  START: the hands-free loop needs BOTH keys,
+                  transcription (OPENAI_API_KEY) and speech
+                  (ELEVENLABS_API_KEY), the plan and minutes left. Until
+                  2026-10-05 it was drawn inert with the reason under it;
+                  the owner's rule since (the voice brief «ΦΩΝΗ ΣΤΟ CHAT», Μέρος Α)
+                  is «Κουμπί που δεν κάνει τίποτα δεν μένει στην οθόνη»,
+                  and scenario 11 names this button. The reason lives on
+                  the Voice settings screen. Held by
+                  scripts/tests/chat-dictation.prodtest.mjs. */}
+              {talkAvailable && (
                 <button
                   type="button"
                   onClick={() => setTalking(true)}
-                  disabled={sending || talkBlockedReason !== null}
+                  disabled={sending}
                   data-testid="voice-conversation-start"
-                  // NO `title`. THIS IS THE DEFECT, REPORTED FROM
-                  // PRODUCTION ON 2026-09-19: "I press Talk, nothing
-                  // happens, no explanation."
-                  //
-                  // The reason WAS here, in a title attribute, which
-                  // needs a mouse to hover and a second of patience. On
-                  // a phone there is no hover at all, so the button was
-                  // a control that did nothing and said nothing — which
-                  // is worse than a button that is absent, because
-                  // absent at least does not promise.
-                  //
-                  // components/publishing/publish-control.tsx already
-                  // had the right shape and the argument for it, in its
-                  // own words: the reason is "rendered as VISIBLE text".
-                  // This is the same, below, wired with
-                  // aria-describedby so a screen reader gets it with the
-                  // button rather than as a separate paragraph.
-                  aria-describedby={talkBlockedReason ? "talk-blocked-reason" : undefined}
                   className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <AudioLines className="h-3.5 w-3.5" aria-hidden="true" />
@@ -1111,14 +1123,6 @@ export function ChatWorkspace({
                 {t("mentorMode")}
               </button>
             </div>
-            {/* WHY TALK CANNOT START, ON SCREEN. See the button above for
-                what this replaces. Rendered only when there is a reason,
-                so a working deployment carries no extra line. */}
-            {voiceAvailability.loaded && talkBlockedReason && (
-              <p id="talk-blocked-reason" className="mb-2 text-end text-[11px] leading-relaxed text-muted">
-                {talkBlockedReason}
-              </p>
-            )}
             {error && (
               <p
                 className={`mb-3 rounded-card border px-3 py-2 text-xs ${
@@ -1160,6 +1164,8 @@ export function ChatWorkspace({
           </div>
         </div>
       </div>
+
+      {openWorkItem && <WorkArea item={openWorkItem} onClose={() => setOpenWorkId(null)} />}
 
       {/* THE HANDS-FREE LOOP. Seeded with the conversation that is open,
           so what is said out loud lands in the same thread rather than in

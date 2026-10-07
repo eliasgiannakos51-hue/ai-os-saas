@@ -28,10 +28,12 @@
   --background: 7 10 18;        /* #070A12 */
   --panel: 13 18 32;            /* #0D1220 — surface */
   --panel-hover: 15 21 36;      /* #0F1524 — active menu item, hover */
+  --workspace: 10 14 24;        /* #0A0E18 — the work area and code */
   --border: 34 42 61;           /* #222A3D — fields and cards */
   --divider: 22 29 46;          /* #161D2E — separators */
   --tag: 30 38 56;              /* #1E2638 — tag outlines */
   --foreground: 245 247 251;    /* #F5F7FB */
+  --body: 220 226 238;          /* #DCE2EE — body text; headings stay --foreground */
   --muted: 141 150 168;         /* #8D96A8 */
   --button: 245 247 251;        /* #F5F7FB — buttons */
   --button-ink: 7 10 18;        /* #070A12 — text and icons on buttons */
@@ -80,7 +82,7 @@
 
   /* Radii: 18px the main field, 14px cards, 10px menu items. */
   --radius-field: 18px;
-  --radius-card: 14px;
+  --radius-card: 16px;
   --radius-item: 10px;
 }
 
@@ -150,7 +152,10 @@ body {
 
 body {
   background: rgb(var(--background));
-  color: rgb(var(--foreground));
+  /* Running text is #DCE2EE, one step below the headings' #F5F7FB: the
+     design's "Κείμενο σώματος". Anything marked text-foreground keeps the
+     brighter ink. */
+  color: rgb(var(--body));
   font-family: "Commissioner", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
 }
@@ -1250,7 +1255,16 @@ html[data-motion="reduce"] .voice-orb-ring {
    English is narrower than Greek and holds a few more; the prodtest
    measures it too and fails above 75. The AFTER numbers are in that
    test's own table, not here — a number in a comment is a number
-   nothing checks. */
+   nothing checks.
+
+   LOWERED — 2026-10-05, QUEUE Α.13. The design set the body in
+   Commissioner (ΣΥΣΤΗΜΑ DESIGN §2), whose letters are narrower against
+   its "0" than the face the ratios above were taken in. Measured on
+   2026-10-05 at 61ch, 16px/17px: English 86 characters a line (1.41 per
+   ch), Greek 77 (1.26) — both past 75, on every desktop width. The cap
+   that keeps English under 75 and Greek over 60 lies between 48 and 53ch;
+   51ch puts English near 72 and Greek near 64, at every breakpoint,
+   because the ratio does not move with the font size. */
 .chat-measure {
   width: 100%;
   margin-inline: auto;
@@ -1301,21 +1315,21 @@ html[data-motion="reduce"] .voice-orb-ring {
 
 @media (min-width: 640px) {
   .chat-measure {
-    max-width: 60ch;
+    max-width: 51ch;
   }
 }
 
 @media (min-width: 1024px) {
   .chat-measure {
     font-size: 16px;
-    max-width: 61ch;
+    max-width: 51ch;
   }
 }
 
 @media (min-width: 1536px) {
   .chat-measure {
     font-size: 17px;
-    max-width: 61ch;
+    max-width: 51ch;
   }
 }
 

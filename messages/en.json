@@ -255,7 +255,7 @@
       "memory": "Search across everything you have saved.",
       "favorites": "Everything you've starred.",
       "marketplace": "Share an agent's shape as a template, and start from one someone else shared.",
-      "team": "Invite people to your workspace.",
+      "team": "Give people your plan, each on their own account.",
       "apps": "Keep track of apps you are planning or have already shipped. It does not build them.",
       "images": "Keep track of images you are planning or have already made. It does not generate them.",
       "videos": "Keep track of videos you are planning or have already made. It does not generate them.",
@@ -301,7 +301,9 @@
       "collapse": "Collapse sidebar",
       "expand": "Expand sidebar",
       "label": "Main",
-      "saveFailed": "Could not save that change. Try again."
+      "saveFailed": "Could not save that change. Try again.",
+      "recentChats": "Recent chats",
+      "untitledChat": "New conversation"
     },
     "tabs": {
       "home": "Home",
@@ -1327,6 +1329,24 @@
       "workMode": {
         "active": "Mode: {mode}",
         "clear": "Clear the way of working"
+      },
+      "answer": {
+        "copy": "Copy the answer",
+        "good": "Good answer",
+        "bad": "Bad answer",
+        "retry": "Ask again",
+        "ratingFailed": "The rating was not saved. Try again."
+      },
+      "workArea": {
+        "label": "Result",
+        "back": "Back to the conversation",
+        "tabText": "Text",
+        "tabCode": "Code",
+        "copy": "Copy",
+        "download": "Download {file}",
+        "close": "Close the work area",
+        "open": "Open beside the conversation",
+        "isOpen": "Open beside the conversation · press to close"
       }
     },
     "create": {
@@ -2403,7 +2423,17 @@
       "dismissError": "That could not be dismissed."
     },
     "systemHealth": {
-      "toggleStackTrace": "Toggle stack trace"
+      "toggleStackTrace": "Toggle stack trace",
+      "flags": {
+        "title": "Switches",
+        "hint": "Who sees each new tool or big change. Changes apply at once, with no deploy.",
+        "saveFailed": "The switch was not saved. Try again.",
+        "audience": {
+          "off": "Nobody",
+          "staff": "You and the test account",
+          "everyone": "Everyone"
+        }
+      }
     },
     "ideas": {
       "new": "New Idea",
@@ -2789,8 +2819,12 @@
       "search": "Find a tool",
       "searchLabel": "Search tools",
       "noMatch": "No tool is called “{query}”. Describe it in the field on Home instead.",
-      "beta": "Beta",
-      "betaHint": "In testing: it works, but it does not do everything it should yet."
+      "groups": {
+        "make": "Make",
+        "ask": "Ask",
+        "organise": "Organise",
+        "business": "Business"
+      }
     },
     "home": {
       "actions": {
@@ -3724,7 +3758,6 @@
     "startListening": "Speak instead of typing",
     "stopListening": "Stop",
     "costPerMinute": "{credits, plural, one {# credit} other {# credits}} per minute of speech",
-    "outOfMinutes": "No voice minutes left this month",
     "states": {
       "idle": "Ready",
       "listening": "Listening to you",
@@ -3784,14 +3817,7 @@
       "tapToSpeak": "Press anywhere and speak. It stops listening by itself when you stop.",
       "tapToInterrupt": "Press anywhere to interrupt and speak again.",
       "hint": "Speak normally — the turn ends when you stop.",
-      "empty": "Everything said appears here as text as well.",
-      "blocked": {
-        "notConfigured": "Hands-free talking needs two speech providers and this deployment has neither key set, so the button cannot start a conversation.",
-        "notConfiguredTranscribe": "Hands-free talking needs a speech-to-text key, and this deployment has none set, so the button cannot start a conversation.",
-        "notConfiguredSpeak": "Hands-free talking needs a text-to-speech key, and this deployment has none set, so the button cannot start a conversation.",
-        "notIncluded": "Hands-free talking is not included on your plan. You can still type here, and read every answer.",
-        "outOfMinutes": "No voice minutes left this month, so hands-free talking cannot start. Typing here still works."
-      }
+      "empty": "Everything said appears here as text as well."
     },
     "settings": {
       "description": "Speak instead of typing, and have answers read back. Typing and reading are never taken away — every voice control sits beside the text one.",

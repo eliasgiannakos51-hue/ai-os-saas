@@ -255,7 +255,7 @@
       "memory": "Cerca in tutto quello che hai salvato.",
       "favorites": "Tutto quello che hai messo tra i preferiti.",
       "marketplace": "Condividi la forma di un agente come modello e parti da uno condiviso da qualcun altro.",
-      "team": "Invita persone nel tuo spazio.",
+      "team": "Dai il tuo piano ad altre persone, ognuna sul proprio account.",
       "apps": "Tieni traccia delle app che stai pianificando o hai già pubblicato. Non le costruisce.",
       "images": "Tieni traccia delle immagini che stai pianificando o hai già fatto. Non le genera.",
       "videos": "Tieni traccia dei video che stai pianificando o hai già fatto. Non li genera.",
@@ -301,7 +301,9 @@
       "collapse": "Comprimi la barra laterale",
       "expand": "Espandi la barra laterale",
       "label": "Menu principale",
-      "saveFailed": "Impossibile salvare la modifica. Riprova."
+      "saveFailed": "Impossibile salvare la modifica. Riprova.",
+      "recentChats": "Chat recenti",
+      "untitledChat": "Nuova conversazione"
     },
     "tabs": {
       "home": "Home",
@@ -1327,6 +1329,24 @@
       "workMode": {
         "active": "Modalità: {mode}",
         "clear": "Togli la modalità di lavoro"
+      },
+      "answer": {
+        "copy": "Copia la risposta",
+        "good": "Risposta buona",
+        "bad": "Risposta pessima",
+        "retry": "Chiedi di nuovo",
+        "ratingFailed": "La valutazione non è stata salvata. Riprova."
+      },
+      "workArea": {
+        "label": "Risultato",
+        "back": "Torna alla conversazione",
+        "tabText": "Testo",
+        "tabCode": "Codice",
+        "copy": "Copia",
+        "download": "Scarica {file}",
+        "close": "Chiudi l’area di lavoro",
+        "open": "Apri accanto alla conversazione",
+        "isOpen": "Aperto accanto alla conversazione · premi per chiudere"
       }
     },
     "create": {
@@ -2403,7 +2423,17 @@
       "dismissError": "Impossibile ignorarlo."
     },
     "systemHealth": {
-      "toggleStackTrace": "Mostra o nascondi lo stack trace"
+      "toggleStackTrace": "Mostra o nascondi lo stack trace",
+      "flags": {
+        "title": "Interruttori",
+        "hint": "Chi vede ogni nuovo strumento o grande modifica. Vale subito, senza un nuovo deploy.",
+        "saveFailed": "L’interruttore non è stato salvato. Riprova.",
+        "audience": {
+          "off": "Nessuno",
+          "staff": "Tu e l’account di prova",
+          "everyone": "Tutti"
+        }
+      }
     },
     "ideas": {
       "new": "Nuova idea",
@@ -2789,8 +2819,12 @@
       "search": "Trova uno strumento",
       "searchLabel": "Cerca strumenti",
       "noMatch": "Nessuno strumento si chiama «{query}». Descrivilo nel campo della Home.",
-      "beta": "Beta",
-      "betaHint": "In prova: funziona, ma non fa ancora tutto ciò che dovrebbe."
+      "groups": {
+        "make": "Crea",
+        "ask": "Chiedi",
+        "organise": "Organizza",
+        "business": "Attività"
+      }
     },
     "home": {
       "actions": {
@@ -3724,7 +3758,6 @@
     "startListening": "Parla invece di scrivere",
     "stopListening": "Ferma",
     "costPerMinute": "{credits, plural, one {# credito} other {# crediti}} al minuto di parlato",
-    "outOfMinutes": "Nessun minuto di voce rimasto questo mese",
     "states": {
       "idle": "Pronto",
       "listening": "Ti sta ascoltando",
@@ -3784,14 +3817,7 @@
       "tapToSpeak": "Premi ovunque e parla. Smette di ascoltare da solo quando ti fermi.",
       "tapToInterrupt": "Premi ovunque per interrompere e riprendere a parlare.",
       "hint": "Parla normalmente: il turno finisce quando ti fermi.",
-      "empty": "Tutto ciò che viene detto appare anche qui come testo.",
-      "blocked": {
-        "notConfigured": "Parlare a mani libere richiede due fornitori vocali e questa installazione non ha alcuna chiave, quindi il pulsante non può avviare una conversazione.",
-        "notConfiguredTranscribe": "Parlare a mani libere richiede una chiave per la trascrizione vocale e questa installazione non ne ha, quindi il pulsante non può avviare una conversazione.",
-        "notConfiguredSpeak": "Parlare a mani libere richiede una chiave per la sintesi vocale e questa installazione non ne ha, quindi il pulsante non può avviare una conversazione.",
-        "notIncluded": "Parlare a mani libere non è incluso nel tuo piano. Qui puoi comunque scrivere e leggere ogni risposta.",
-        "outOfMinutes": "Questo mese non restano minuti vocali, quindi la conversazione a mani libere non può iniziare. Scrivere qui funziona ancora."
-      }
+      "empty": "Tutto ciò che viene detto appare anche qui come testo."
     },
     "settings": {
       "description": "Parla invece di scrivere e fatti leggere le risposte. Scrivere e leggere non vengono mai tolti: ogni comando vocale sta accanto al testo, non al suo posto.",

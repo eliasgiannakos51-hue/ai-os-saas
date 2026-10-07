@@ -386,6 +386,19 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "a website generation records no phases, so the builder falls back to rotating messages and shows no timeline or per-step credits",
   },
   {
+    kind: "table",
+    table: "feature_flags",
+    migration: "20261017000000_feature_flags.sql",
+    breaks: "every switch on /dashboard/system-health reads as 'you and the test account' and cannot be changed, so a finished tool cannot be opened to everyone",
+  },
+  {
+    kind: "column",
+    table: "chat_messages",
+    column: "rating",
+    migration: "20261016000000_chat_message_rating.sql",
+    breaks: "thumbs up and down under a Chat answer fail to save, and say so",
+  },
+  {
     kind: "function",
     fn: "chat_memory_fold",
     migration: "20261004100000_chat_memory_fold_matches_app.sql",

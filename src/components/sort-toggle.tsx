@@ -23,7 +23,10 @@ export function SortToggle({
     : ["newest", "oldest"];
 
   return (
-    <div className="flex items-center gap-2 text-xs text-muted">
+    // WRAPS: in Greek on a 375px phone the label and four orders are a few
+    // pixels wider than the screen (layout-stress.prodtest.mjs, 2026-10-05),
+    // so the label goes above the orders rather than past the edge.
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
       <span>{t("label")}</span>
       <div className="inline-flex items-center gap-0.5 rounded-full border border-border p-0.5">
         {orders.map((order) => (

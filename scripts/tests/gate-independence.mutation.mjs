@@ -66,7 +66,7 @@ const MUTANTS = [
     // nothing left to disagree with.
     name: "a gate loses its only reference and lands at NONE unannounced",
     file: LITERAL_GATE,
-    from: "const CHARS_PER_CH = { en: 1.22, el: 1.11 };",
+    from: "const CHARS_PER_CH = { en: 1.41, el: 1.26 };",
     to: "const CHARS_PER_CH = JSON.parse(process.env.RATIOS ?? '{}');",
     expect: "chat-measure.test.mjs is a known one",
   },

@@ -1,8 +1,8 @@
 # The first run — fr
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **589 strings**. The whole product is 3548, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **588 strings**. The whole product is 3566, which is why this file exists.
 
-**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 358 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 360 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -158,7 +158,7 @@ Cela ressemble à une question. Dois-je y répondre ou l'enregistrer ?
 
 Décrivez n'importe quoi — une idée de produit, une opération, le retour d'un utilisateur, un indicateur — et cela atterrit automatiquement dans le bon module.
 
-## Tier 2 — The labels — skim these (358)
+## Tier 2 — The labels — skim these (360)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -2132,6 +2132,12 @@ Nouveau
 
 Épingler {tool}
 
+**`sidebar.rail.recentChats`**
+
+> EN — Recent chats
+
+Discussions récentes
+
 **`sidebar.rail.recentTools`**
 
 > EN — Recent tools
@@ -2161,6 +2167,12 @@ Paramètres
 > EN — Unpin {tool}
 
 Désépingler {tool}
+
+**`sidebar.rail.untitledChat`**
+
+> EN — New conversation
+
+Nouvelle conversation
 
 **`sidebar.tabs.label`**
 
@@ -2320,7 +2332,7 @@ Bonsoir
 
 Bonjour
 
-## Tier 3 — Further in — only if you have time (208)
+## Tier 3 — Further in — only if you have time (205)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3194,12 +3206,6 @@ Impossible de vérifier les minutes de voix pour le moment.
 
 Parlez, puis appuyez sur Arrêter. Rien n'est envoyé avant que vous l'ayez lu.
 
-**`voice.outOfMinutes`**
-
-> EN — No voice minutes left this month
-
-Plus de minutes de voix ce mois-ci
-
 **`voice.permission.allow`**
 
 > EN — Open the microphone
@@ -3241,18 +3247,6 @@ L'enregistrement ne démarre qu'à votre appui et s'arrête au suivant.
 > EN — Before the microphone opens
 
 Avant l'ouverture du micro
-
-**`voice.settings.notConfigured`**
-
-> EN — Voice is not set up on this deployment, so the microphone and Listen buttons do not appear.
-
-La voix n'est pas configurée sur cette installation : les boutons micro et Écouter n'apparaissent pas.
-
-**`voice.settings.notIncluded`**
-
-> EN — Voice is not included on your plan. Everything here can still be typed and read.
-
-La voix n'est pas incluse dans votre offre. Tout ici reste accessible en écrivant et en lisant.
 
 **`voice.startListening`**
 

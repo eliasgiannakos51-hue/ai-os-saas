@@ -1,8 +1,8 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **589 strings**. The whole product is 3548, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **588 strings**. The whole product is 3566, which is why this file exists.
 
-**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 358 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 360 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -158,7 +158,7 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 描述任何内容——一个产品创意、一笔交易、一条用户反馈、一项指标——它会自动归入正确的模块。
 
-## Tier 2 — The labels — skim these (358)
+## Tier 2 — The labels — skim these (360)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -2132,6 +2132,12 @@ DevOps
 
 固定 {tool}
 
+**`sidebar.rail.recentChats`**
+
+> EN — Recent chats
+
+最近的对话
+
 **`sidebar.rail.recentTools`**
 
 > EN — Recent tools
@@ -2161,6 +2167,12 @@ DevOps
 > EN — Unpin {tool}
 
 取消固定 {tool}
+
+**`sidebar.rail.untitledChat`**
+
+> EN — New conversation
+
+新对话
 
 **`sidebar.tabs.label`**
 
@@ -2320,7 +2332,7 @@ DevOps
 
 早上好
 
-## Tier 3 — Further in — only if you have time (208)
+## Tier 3 — Further in — only if you have time (205)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3194,12 +3206,6 @@ AI 服务当前没有响应。
 
 说完后按停止。在你读过之前，什么都不会发送。
 
-**`voice.outOfMinutes`**
-
-> EN — No voice minutes left this month
-
-本月的语音分钟数已用完
-
 **`voice.permission.allow`**
 
 > EN — Open the microphone
@@ -3241,18 +3247,6 @@ AI 服务当前没有响应。
 > EN — Before the microphone opens
 
 在打开麦克风之前
-
-**`voice.settings.notConfigured`**
-
-> EN — Voice is not set up on this deployment, so the microphone and Listen buttons do not appear.
-
-此部署尚未配置语音，因此不会出现麦克风和朗读按钮。
-
-**`voice.settings.notIncluded`**
-
-> EN — Voice is not included on your plan. Everything here can still be typed and read.
-
-你的方案不包含语音。这里的一切仍然可以打字和阅读。
 
 **`voice.startListening`**
 

@@ -178,9 +178,9 @@ checkTrue(
 );
 checkTrue(
   "...and a heading with no rows under it is not drawn at all",
-  /\(\) => \[\.\.\.sidebarGroups\(/.test(toolsGridSrc) &&
+  /\)\)\.filter\(\(g\) => g\.items\.length > 0\);/.test(toolsGridSrc) && /sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)/.test(toolsGridSrc) &&
     /\{list\.length > 0 && \([\s\S]{0,200}t\("rail\.recentTools"\)/.test(stripComments(sidebarForOpen)),
-  "the page's groups come only from sidebarGroups(), which drops an empty group; the sidebar's one heading, Recent tools, sits under the guard on its list",
+  "the page's four groups drop any that end up empty, and the Settings block comes from sidebarGroups(), which drops an empty group; the sidebar's one heading, Recent tools, sits under the guard on its list",
 );
 // WHAT THE SIDEBAR MAY REMEMBER. Until 2026-10-02 the answer was
 // "nothing"; from then to 2026-10-04 it was the recent-tools list, kept
@@ -219,7 +219,7 @@ checkTrue(
 checkTrue(
   "...and so does the All tools page",
   /const isOwner = isAdminEmail\(user\.email\);/.test(toolsPageSrc) &&
-    /<ToolsGrid isOwner=\{isOwner\} \/>/.test(toolsPageSrc) &&
+    /<ToolsGrid isOwner=\{isOwner\}[^>]*\/>/.test(toolsPageSrc) &&
     /sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\)/.test(toolsGridSrc) &&
     !/visibleGroups\(/.test(toolsPageSrc + toolsGridSrc),
   "the grid would show the hidden trackers the sidebar has always kept out",
@@ -235,7 +235,7 @@ checkTrue(
 );
 checkTrue(
   "Settings is drawn as its own group below the main ones, on All tools",
-  /\.\.\.sidebarGroups\(MAIN_SIDEBAR_GROUPS, isOwner\), \.\.\.sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)\]/.test(toolsGridSrc),
+  /const settings = sidebarGroups\(\[SETTINGS_GROUP\], isOwner\)/.test(toolsGridSrc) && /return \[\.\.\.tools, \.\.\.settings\];/.test(toolsGridSrc),
   "Integrations and the Help Centre have no row in the rail, so without this group they have none anywhere",
 );
 // EVERY HEADING IS A CAPTION, not a control — there is nothing to toggle.
@@ -243,7 +243,7 @@ checkTrue(
 // button at all.
 checkTrue(
   "the heading is a caption, not a button that does nothing",
-  /<h2[\s\S]{0,200}\{heading\(group\.heading\)\}/.test(groupRenderer) && !/<button/.test(groupRenderer),
+  /<h2[\s\S]{0,200}\{group\.heading\}/.test(groupRenderer) && !/<button/.test(groupRenderer),
   "a control that cannot change anything is announced to a screen reader as something to press",
 );
 // AND NO CHEVRON BESIDE IT. The turning marker was the affordance that

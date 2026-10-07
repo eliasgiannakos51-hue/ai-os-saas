@@ -255,7 +255,7 @@
       "memory": "搜索你保存过的一切。",
       "favorites": "你收藏的一切。",
       "marketplace": "把一个智能体的结构作为模板分享，也可以从别人分享的模板开始。",
-      "team": "邀请他人加入你的工作区。",
+      "team": "把你的套餐分给其他人，每人使用自己的账户。",
       "apps": "记录你正在筹划或已经上线的应用。它不会构建应用。",
       "images": "记录你正在筹划或已经做好的图片。它不会生成图片。",
       "videos": "记录你正在筹划或已经做好的视频。它不会生成视频。",
@@ -301,7 +301,9 @@
       "collapse": "收起侧边栏",
       "expand": "展开侧边栏",
       "label": "主菜单",
-      "saveFailed": "无法保存此更改，请重试。"
+      "saveFailed": "无法保存此更改，请重试。",
+      "recentChats": "最近的对话",
+      "untitledChat": "新对话"
     },
     "tabs": {
       "home": "首页",
@@ -1327,6 +1329,24 @@
       "workMode": {
         "active": "模式：{mode}",
         "clear": "取消工作模式"
+      },
+      "answer": {
+        "copy": "复制回答",
+        "good": "好的回答",
+        "bad": "不好的回答",
+        "retry": "再问一次",
+        "ratingFailed": "评分未保存，请重试。"
+      },
+      "workArea": {
+        "label": "结果",
+        "back": "返回对话",
+        "tabText": "文本",
+        "tabCode": "代码",
+        "copy": "复制",
+        "download": "下载 {file}",
+        "close": "关闭工作区",
+        "open": "在对话旁打开",
+        "isOpen": "已在对话旁打开 · 点击关闭"
       }
     },
     "create": {
@@ -2403,7 +2423,17 @@
       "dismissError": "无法忽略该项。"
     },
     "systemHealth": {
-      "toggleStackTrace": "展开或收起调用栈"
+      "toggleStackTrace": "展开或收起调用栈",
+      "flags": {
+        "title": "开关",
+        "hint": "每个新工具或重大更改对谁可见。立即生效，无需重新部署。",
+        "saveFailed": "开关未保存，请重试。",
+        "audience": {
+          "off": "所有人都不可见",
+          "staff": "你和测试账户",
+          "everyone": "所有人"
+        }
+      }
     },
     "ideas": {
       "new": "新建创意",
@@ -2789,8 +2819,12 @@
       "search": "查找工具",
       "searchLabel": "搜索工具",
       "noMatch": "没有名为“{query}”的工具。请在首页的输入框中描述它。",
-      "beta": "测试版",
-      "betaHint": "测试中：可以使用，但尚未具备全部功能。"
+      "groups": {
+        "make": "创建",
+        "ask": "提问",
+        "organise": "整理",
+        "business": "业务"
+      }
     },
     "home": {
       "actions": {
@@ -3724,7 +3758,6 @@
     "startListening": "用说的，不用打字",
     "stopListening": "停止",
     "costPerMinute": "每分钟语音 {credits} 积分",
-    "outOfMinutes": "本月的语音分钟数已用完",
     "states": {
       "idle": "就绪",
       "listening": "正在听你说",
@@ -3784,14 +3817,7 @@
       "tapToSpeak": "在任意位置按一下再开口。你停下时它会自己停止收听。",
       "tapToInterrupt": "在任意位置按一下即可打断并重新开口。",
       "hint": "正常说话——你停下时这一轮就结束。",
-      "empty": "说过的内容也会在这里以文字呈现。",
-      "blocked": {
-        "notConfigured": "免提通话需要两个语音服务商，而此部署未设置任何密钥，因此该按钮无法开始对话。",
-        "notConfiguredTranscribe": "免提通话需要语音转文字密钥，而此部署未设置，因此该按钮无法开始对话。",
-        "notConfiguredSpeak": "免提通话需要文字转语音密钥，而此部署未设置，因此该按钮无法开始对话。",
-        "notIncluded": "你的套餐不包含免提通话。你仍然可以在这里输入，并阅读每一条回复。",
-        "outOfMinutes": "本月语音时长已用完，无法开始免提通话。在这里输入仍然可用。"
-      }
+      "empty": "说过的内容也会在这里以文字呈现。"
     },
     "settings": {
       "description": "用说的代替打字，也可以让它把答案读给你听。打字和阅读永远不会被取代——每个语音控件都在文字旁边，而不是取代它。",

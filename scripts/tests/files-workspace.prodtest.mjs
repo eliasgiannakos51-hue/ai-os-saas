@@ -25,7 +25,7 @@
 // Run: node scripts/tests/files-workspace.prodtest.mjs [--out DIR] [--before]
 import http from "node:http";
 import { spawn } from "node:child_process";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 // The upload-failure toast is asserted against the locale the page is in.
 // Typed in English, the two checks below would have gone red on a Greek
@@ -456,14 +456,20 @@ try {
     check(`there are exactly three steps (${await stepItems.count()})`, (await stepItems.count()) === 3);
     const stepText = await steps.innerText();
     check("step 1 is about uploading", /upload/i.test(stepText), stepText);
-    check("step 2 is about choosing which files", /choose|select/i.test(stepText), stepText);
+    // Step 2 has been "Ask" since redesign phase 4 moved the steps into
+    // components/ui/step-flow.tsx; what makes it about CHOOSING is the one
+    // line under the current step, "Tick one or more files…". Read from
+    // the shipped messages, not a guessed verb (QUEUE Α.13, 2026-10-05).
+    const FLOW = JSON.parse(readFileSync("messages/en.json", "utf8")).stepFlow;
+    check("step 2 is about choosing which files", stepText.includes(FLOW.steps.ask) && /tick/i.test(FLOW.hints.ask), stepText);
     check("step 3 is about asking", /ask/i.test(stepText), stepText);
     // With files present but nothing ticked, the user is on step 2.
     const current = page.locator('[data-testid="step-flow-files"] li[aria-current="step"]');
     check("exactly one step is marked current", (await current.count()) === 1);
     check(
       `and with files uploaded but none selected it is step 2 ("${(await current.innerText()).replace(/\n/g, " ")}")`,
-      /choose|select/i.test(await current.innerText())
+      (await current.innerText()).includes(FLOW.steps.ask) && stepText.includes(FLOW.hints.ask),
+      `the line under it: ${stepText.split("\n").pop()}`
     );
 
     console.log("\n== 2. selection is unmissable and counted ==");

@@ -9,6 +9,27 @@ unblocked (a key now present in the environment), run the gates, and
 continue from the first item in progress or pending. Before ending, bring
 those files up to date — in the same commit as the work.
 
+## Every change ships so it can be taken back (MASTER Μέρος 13 Β, 2026-10-05)
+
+From 2026-10-05, for every pull request:
+
+- **A new tool or a big change goes behind a switch.** Declare it in
+  `src/lib/flags/flags.ts`, read it with `isFeatureOn(key, user)`, and it
+  starts at "you and the test account" (`ADMIN_EMAILS` plus
+  `TEST_ACCOUNT_EMAILS`). The owner opens it to everyone on
+  `/dashboard/system-health`, with no deploy. `feature-flags.test.mjs`
+  fails on a switch that no code reads.
+- **The PR body says how to take it back**, in steps the owner can do
+  alone (`.github/pull_request_template.md`, «Πώς γυρίζει πίσω»).
+- **Every migration says how to undo it** (`-- How to undo: …`) or says it
+  cannot and why (`-- No undo: …`). `migration-undo.test.mjs` holds every
+  file from `20261016000000` on.
+- **Nobody loses anything.** When a tool moves to a new system, count
+  before and after, and put both numbers in the PR.
+- **After every production deploy** the bot job in `.github/workflows/verify.yml`
+  signs in and checks Home, Chat, the Website Builder, the schema and the
+  credit balance (`checks/basic.md`). A failure opens the `ci-red` issue.
+
 ## Migrations are applied by hand — say so, every time
 
 There is no migration runner, no CI step and no ledger table. Every file in

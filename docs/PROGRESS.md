@@ -21,7 +21,16 @@
     στοιχείο της άδειας οθόνης· επιτρέπονται μόνο τα Earth, div και h1.
   - `provenance`: 19/19 mutations.
   - `voice`: 55/55 mutations.
-  - `design-home.prodtest`: νέα ενότητα 6, σε υπολογιστή και κινητό.
+  - `design-home.prodtest`: νέα ενότητα 6, σε υπολογιστή και κινητό·
+    54/54 σε production build, μετρημένο 2026-10-07.
+  - `chat-dictation.prodtest`: 30/30.
+  - `routes-smoke.prodtest`: το Chat ελέγχεται πλέον ότι δεν έχει
+    παραδείγματα.
+- Ξεχωριστό, δεν το προκαλεί αυτή η αλλαγή: το
+  `chat-streaming-contrast.prodtest` αποτυγχάνει στο «an answer is
+  mid-stream right now», με τον ίδιο τρόπο και στον κλάδο
+  `claude/keen-turing-bv8gw4` χωρίς το πακέτο 2 (μετρημένο 2026-10-07,
+  6 περνούν, 4 αποτυγχάνουν και στα δύο).
 
 **Πακέτο 1 (MASTER 14.1): το All tools δείχνει μόνο τα εργαλεία, με όνομα μίας λέξης.**
 - 15 τετράγωνα σε τέσσερις ομάδες: Site, Slides, Posts · Research, Analyze,

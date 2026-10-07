@@ -4,7 +4,8 @@
  *
  * Reads docs/ACCEPTANCE.md, runs once every check a task names under
  * «Αυτόματα», and prints one line per task: ΠΕΡΝΑ, ΔΕΝ ΠΕΡΝΑ,
- * ΔΕΝ ΦΤΙΑΧΤΗΚΕ (the task says so under «Σήμερα»), or ΧΩΡΙΣ ΑΥΤΟΜΑΤΟ
+ * ΠΕΡΝΑ ΤΟ ΜΙΣΟ (a task «μισό» whose checks pass), ΔΕΝ ΦΤΙΑΧΤΗΚΕ (the task
+ * says so under «Σήμερα»), or ΧΩΡΙΣ ΑΥΤΟΜΑΤΟ
  * (its «Αυτόματα» says «χειροκίνητο»). A check named by two tasks runs
  * once. Exits 1 when any task that is built has a check that failed.
  *
@@ -75,7 +76,9 @@ function main() {
     let verdict;
     if (t.state === "δεν φτιάχτηκε") verdict = "ΔΕΝ ΦΤΙΑΧΤΗΚΕ";
     else if (t.manual || t.checks.length === 0) verdict = "ΧΩΡΙΣ ΑΥΤΟΜΑΤΟ";
-    else if (t.checks.every((c) => result.get(c) === "pass")) verdict = "ΠΕΡΝΑ";
+    // A half-built task whose checks pass has passed its HALF: said so, so
+    // the table never reads as the whole line of Part 16 being done.
+    else if (t.checks.every((c) => result.get(c) === "pass")) verdict = t.state === "μισό" ? "ΠΕΡΝΑ ΤΟ ΜΙΣΟ" : "ΠΕΡΝΑ";
     else {
       verdict = "ΔΕΝ ΠΕΡΝΑ";
       failed++;
@@ -83,8 +86,10 @@ function main() {
     const bad = t.checks.filter((c) => result.get(c) && result.get(c) !== "pass");
     console.log(`  Α${String(t.number).padEnd(3)} ${verdict.padEnd(15)} ${t.title}${bad.length ? `  (${bad.join(", ")})` : ""}`);
   }
-  const count = (v) => tasks.filter((t) => (v === "ΠΕΡΝΑ" ? t.state !== "δεν φτιάχτηκε" && !t.manual && t.checks.length && t.checks.every((c) => result.get(c) === "pass") : false)).length;
-  console.log(`\n${count("ΠΕΡΝΑ")} pass, ${failed} fail, ${tasks.filter((t) => t.state === "δεν φτιάχτηκε").length} not built, ${tasks.filter((t) => t.state !== "δεν φτιάχτηκε" && (t.manual || !t.checks.length)).length} by hand only`);
+  const passing = (t) => t.state !== "δεν φτιάχτηκε" && !t.manual && t.checks.length > 0 && t.checks.every((c) => result.get(c) === "pass");
+  const whole = tasks.filter((t) => passing(t) && t.state === "φτιαγμένο").length;
+  const half = tasks.filter((t) => passing(t) && t.state === "μισό").length;
+  console.log(`\n${whole} pass, ${half} pass their half, ${failed} fail, ${tasks.filter((t) => t.state === "δεν φτιάχτηκε").length} not built, ${tasks.filter((t) => t.state !== "δεν φτιάχτηκε" && (t.manual || !t.checks.length)).length} by hand only`);
   return failed ? 1 : 0;
 }
 

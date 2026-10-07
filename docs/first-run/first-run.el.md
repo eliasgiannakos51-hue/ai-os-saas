@@ -1,12 +1,12 @@
 # The first run — el
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **588 strings**. The whole product is 3958, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **601 strings**. The whole product is 3971, which is why this file exists.
 
-**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 360 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 368 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (23)
+## Tier 1 — THE SENTENCES — read these (25)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -69,6 +69,18 @@ _On the first screens, 12 words or more. This is prose somebody wrote, and prose
 > EN — Your data stays yours. It is stored privately, only you can read it, and it is never used to train anything. You can delete it, or your whole account, at any time.
 
 Τα δεδομένα σου παραμένουν δικά σου. Αποθηκεύονται ιδιωτικά, μόνο εσύ τα διαβάζεις, και δεν χρησιμοποιούνται ποτέ για εκπαίδευση. Μπορείς να τα διαγράψεις, ή όλο τον λογαριασμό, όποτε θέλεις.
+
+**`dashboard.firstTask.lead`**
+
+> EN — Pick something to get done now. The answer arrives in a few seconds.
+
+Διάλεξε κάτι να γίνει τώρα. Η απάντηση έρχεται σε λίγα δευτερόλεπτα.
+
+**`dashboard.firstTask.tasks.explain.text`**
+
+> EN — Explain in plain words what makes a good business description on Google
+
+Εξήγησέ μου με απλά λόγια τι κάνει καλή μια περιγραφή επιχείρησης στο Google
 
 **`dashboard.onboarding.analysingHint`**
 
@@ -158,7 +170,7 @@ CSV ή tab-separated, έως {max}. Το διαβάζουμε και σου δε
 
 Περίγραψε οτιδήποτε — μια ιδέα προϊόντος, μια συναλλαγή, ένα σχόλιο χρήστη, έναν δείκτη — και καταλήγει αυτόματα στο σωστό module.
 
-## Tier 2 — The labels — skim these (360)
+## Tier 2 — The labels — skim these (368)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -809,6 +821,72 @@ Email
 > EN — Let's make this yours
 
 Ας το κάνουμε δικό σου
+
+**`dashboard.firstTask.cost`**
+
+> EN — Free, within this month's free messages.
+
+Δωρεάν, μέσα στα δωρεάν μηνύματα του μήνα.
+
+**`dashboard.firstTask.import`**
+
+> EN — Bring your data from a CSV file
+
+Φέρε τα δεδομένα σου από ένα αρχείο CSV
+
+**`dashboard.firstTask.ownLabel`**
+
+> EN — Or write what you want
+
+Ή γράψε τι θέλεις
+
+**`dashboard.firstTask.ownPlaceholder`**
+
+> EN — Or write what you want done…
+
+Ή γράψε τι θέλεις να γίνει…
+
+**`dashboard.firstTask.send`**
+
+> EN — Start
+
+Ξεκίνα
+
+**`dashboard.firstTask.skip`**
+
+> EN — Skip
+
+Παράλειψη
+
+**`dashboard.firstTask.tasks.explain.label`**
+
+> EN — Learn
+
+Μάθε
+
+**`dashboard.firstTask.tasks.plan.label`**
+
+> EN — Plan
+
+Οργάνωσε
+
+**`dashboard.firstTask.tasks.plan.text`**
+
+> EN — Make me a plan to find my first customers this month
+
+Φτιάξε μου ένα πλάνο για να βρω τους πρώτους μου πελάτες αυτόν τον μήνα
+
+**`dashboard.firstTask.tasks.write.label`**
+
+> EN — Write
+
+Γράψε
+
+**`dashboard.firstTask.tasks.write.text`**
+
+> EN — Write a short email asking a supplier for a quote
+
+Γράψε ένα σύντομο email που ζητά προσφορά από έναν προμηθευτή
 
 **`dashboard.onboarding.analyseError`**
 
@@ -2314,25 +2392,7 @@ Projects
 
 Δοκίμασε ξανά
 
-**`promise.greeting.afternoon`**
-
-> EN — Good afternoon
-
-Καλό απόγευμα
-
-**`promise.greeting.evening`**
-
-> EN — Good evening
-
-Καλησπέρα
-
-**`promise.greeting.morning`**
-
-> EN — Good morning
-
-Καλημέρα
-
-## Tier 3 — Further in — only if you have time (205)
+## Tier 3 — Further in — only if you have time (208)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2391,6 +2451,24 @@ _Reachable from these screens but deeper in: shared components, error states, th
 > EN — Show the numbers
 
 Δείξε τους αριθμούς
+
+**`promise.greeting.afternoon`**
+
+> EN — Good afternoon
+
+Καλό απόγευμα
+
+**`promise.greeting.evening`**
+
+> EN — Good evening
+
+Καλησπέρα
+
+**`promise.greeting.morning`**
+
+> EN — Good morning
+
+Καλημέρα
 
 ### dashboard chrome
 

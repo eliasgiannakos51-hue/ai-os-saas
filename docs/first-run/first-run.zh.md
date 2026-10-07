@@ -1,12 +1,12 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **588 strings**. The whole product is 3958, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **601 strings**. The whole product is 3971, which is why this file exists.
 
-**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 360 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 368 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (23)
+## Tier 1 — THE SENTENCES — read these (25)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -69,6 +69,18 @@ _On the first screens, 12 words or more. This is prose somebody wrote, and prose
 > EN — Your data stays yours. It is stored privately, only you can read it, and it is never used to train anything. You can delete it, or your whole account, at any time.
 
 你的数据始终属于你。它以私有方式存储，只有你能读取，且绝不会用于训练任何模型。你可以随时删除数据或整个账户。
+
+**`dashboard.firstTask.lead`**
+
+> EN — Pick something to get done now. The answer arrives in a few seconds.
+
+选一件现在就要完成的事。几秒钟内就会得到回答。
+
+**`dashboard.firstTask.tasks.explain.text`**
+
+> EN — Explain in plain words what makes a good business description on Google
+
+用简单的话解释一下，什么样的 Google 商家介绍才算好
 
 **`dashboard.onboarding.analysingHint`**
 
@@ -158,7 +170,7 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 描述任何内容——一个产品创意、一笔交易、一条用户反馈、一项指标——它会自动归入正确的模块。
 
-## Tier 2 — The labels — skim these (360)
+## Tier 2 — The labels — skim these (368)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -809,6 +821,72 @@ Website Builder
 > EN — Let's make this yours
 
 让它成为你的
+
+**`dashboard.firstTask.cost`**
+
+> EN — Free, within this month's free messages.
+
+免费，在本月免费消息额度内。
+
+**`dashboard.firstTask.import`**
+
+> EN — Bring your data from a CSV file
+
+从 CSV 文件导入你的数据
+
+**`dashboard.firstTask.ownLabel`**
+
+> EN — Or write what you want
+
+或者写下你想要的
+
+**`dashboard.firstTask.ownPlaceholder`**
+
+> EN — Or write what you want done…
+
+或者写下你想完成的事…
+
+**`dashboard.firstTask.send`**
+
+> EN — Start
+
+开始
+
+**`dashboard.firstTask.skip`**
+
+> EN — Skip
+
+跳过
+
+**`dashboard.firstTask.tasks.explain.label`**
+
+> EN — Learn
+
+了解
+
+**`dashboard.firstTask.tasks.plan.label`**
+
+> EN — Plan
+
+规划
+
+**`dashboard.firstTask.tasks.plan.text`**
+
+> EN — Make me a plan to find my first customers this month
+
+帮我制定一个本月找到第一批客户的计划
+
+**`dashboard.firstTask.tasks.write.label`**
+
+> EN — Write
+
+写作
+
+**`dashboard.firstTask.tasks.write.text`**
+
+> EN — Write a short email asking a supplier for a quote
+
+写一封简短的邮件，向供应商询价
 
 **`dashboard.onboarding.analyseError`**
 
@@ -2314,25 +2392,7 @@ DevOps
 
 重试
 
-**`promise.greeting.afternoon`**
-
-> EN — Good afternoon
-
-下午好
-
-**`promise.greeting.evening`**
-
-> EN — Good evening
-
-晚上好
-
-**`promise.greeting.morning`**
-
-> EN — Good morning
-
-早上好
-
-## Tier 3 — Further in — only if you have time (205)
+## Tier 3 — Further in — only if you have time (208)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2391,6 +2451,24 @@ _Reachable from these screens but deeper in: shared components, error states, th
 > EN — Show the numbers
 
 查看数据
+
+**`promise.greeting.afternoon`**
+
+> EN — Good afternoon
+
+下午好
+
+**`promise.greeting.evening`**
+
+> EN — Good evening
+
+晚上好
+
+**`promise.greeting.morning`**
+
+> EN — Good morning
+
+早上好
 
 ### dashboard chrome
 

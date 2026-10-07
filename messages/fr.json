@@ -3319,6 +3319,29 @@
         "failed": "Un problème est survenu. Rien n’a été facturé.",
         "offline": "Pas de connexion. Vérifiez le réseau et réessayez."
       }
+    },
+    "firstTask": {
+      "lead": "Choisis quelque chose à faire maintenant. La réponse arrive en quelques secondes.",
+      "cost": "Gratuit, dans la limite des messages gratuits du mois.",
+      "tasks": {
+        "write": {
+          "label": "Écrire",
+          "text": "Écris un court e-mail pour demander un devis à un fournisseur"
+        },
+        "plan": {
+          "label": "Organiser",
+          "text": "Fais-moi un plan pour trouver mes premiers clients ce mois-ci"
+        },
+        "explain": {
+          "label": "Apprendre",
+          "text": "Explique-moi simplement ce qui fait une bonne description d'entreprise sur Google"
+        }
+      },
+      "ownLabel": "Ou écris ce que tu veux",
+      "ownPlaceholder": "Ou écris ce que tu veux faire…",
+      "send": "Commencer",
+      "import": "Importe tes données depuis un fichier CSV",
+      "skip": "Passer"
     }
   },
   "module": {

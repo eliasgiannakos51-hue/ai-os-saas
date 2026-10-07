@@ -3319,6 +3319,29 @@
         "failed": "Something went wrong. Nothing was charged.",
         "offline": "No connection. Check the network and try again."
       }
+    },
+    "firstTask": {
+      "lead": "Pick something to get done now. The answer arrives in a few seconds.",
+      "cost": "Free, within this month's free messages.",
+      "tasks": {
+        "write": {
+          "label": "Write",
+          "text": "Write a short email asking a supplier for a quote"
+        },
+        "plan": {
+          "label": "Plan",
+          "text": "Make me a plan to find my first customers this month"
+        },
+        "explain": {
+          "label": "Learn",
+          "text": "Explain in plain words what makes a good business description on Google"
+        }
+      },
+      "ownLabel": "Or write what you want",
+      "ownPlaceholder": "Or write what you want done…",
+      "send": "Start",
+      "import": "Bring your data from a CSV file",
+      "skip": "Skip"
     }
   },
   "module": {

@@ -200,5 +200,6 @@ Removing one from the product is always allowed.
 | dashboard.automations.example.finance | an example prompt the reader would type |
 | dashboard.flows.help | quotes an example prompt the reader would type |
 | dashboard.flows.example.site | an example prompt the reader would type |
+| dashboard.firstTask.tasks.plan.text | an example prompt the reader would type |
 <!-- USERVOICE:END -->
 

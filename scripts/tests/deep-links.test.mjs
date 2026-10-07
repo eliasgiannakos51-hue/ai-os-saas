@@ -267,7 +267,11 @@ for (const l of favLinks) {
 // 60 -> 61 (2026-10-07): an automation waiting for approval notifies
 // with /dashboard/automation?run=<id> (lib/automations/runner.ts), read
 // by lib/automations/page-data.ts through the module page (package 30).
-const DEEP_LINK_FLOOR = 61;
+// 61 -> 63 (2026-10-07): the first task (package 39) opens
+// /dashboard/chat?mode=&ask=, read by app/dashboard/chat/page.tsx, and
+// keeps the questionnaire at /onboarding?classic=1, read by
+// app/onboarding/page.tsx.
+const DEEP_LINK_FLOOR = 63;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

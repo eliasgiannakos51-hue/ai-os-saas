@@ -3319,6 +3319,29 @@
         "failed": "Algo correu mal. Nada foi cobrado.",
         "offline": "Sem ligação. Verifique a rede e tente novamente."
       }
+    },
+    "firstTask": {
+      "lead": "Escolhe algo para fazer agora. A resposta chega em poucos segundos.",
+      "cost": "Grátis, dentro das mensagens gratuitas deste mês.",
+      "tasks": {
+        "write": {
+          "label": "Escrever",
+          "text": "Escreve um email curto a pedir um orçamento a um fornecedor"
+        },
+        "plan": {
+          "label": "Planear",
+          "text": "Faz-me um plano para encontrar os meus primeiros clientes este mês"
+        },
+        "explain": {
+          "label": "Aprender",
+          "text": "Explica-me em palavras simples o que torna boa uma descrição de empresa no Google"
+        }
+      },
+      "ownLabel": "Ou escreve o que queres",
+      "ownPlaceholder": "Ou escreve o que queres que se faça…",
+      "send": "Começar",
+      "import": "Traz os teus dados de um ficheiro CSV",
+      "skip": "Saltar"
     }
   },
   "module": {

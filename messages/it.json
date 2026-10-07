@@ -3319,6 +3319,29 @@
         "failed": "Qualcosa è andato storto. Non è stato addebitato nulla.",
         "offline": "Nessuna connessione. Controlla la rete e riprova."
       }
+    },
+    "firstTask": {
+      "lead": "Scegli qualcosa da fare adesso. La risposta arriva in pochi secondi.",
+      "cost": "Gratis, entro i messaggi gratuiti del mese.",
+      "tasks": {
+        "write": {
+          "label": "Scrivi",
+          "text": "Scrivi una breve email per chiedere un preventivo a un fornitore"
+        },
+        "plan": {
+          "label": "Organizza",
+          "text": "Fammi un piano per trovare i miei primi clienti questo mese"
+        },
+        "explain": {
+          "label": "Impara",
+          "text": "Spiegami in parole semplici cosa rende buona la descrizione di un'attività su Google"
+        }
+      },
+      "ownLabel": "Oppure scrivi cosa vuoi",
+      "ownPlaceholder": "Oppure scrivi cosa vuoi fare…",
+      "send": "Inizia",
+      "import": "Porta i tuoi dati da un file CSV",
+      "skip": "Salta"
     }
   },
   "module": {

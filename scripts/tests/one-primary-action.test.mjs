@@ -525,6 +525,13 @@ const REPLACEMENT_SURFACES = [
     walk: true,
     why: "Flows on the Projects page (package 36): the field's send makes the plan; approve, open and again are quiet panels",
   },
+  {
+    file: "src/components/onboarding/first-task.tsx",
+    tag: "<FirstTask",
+    budget: 1,
+    walk: true,
+    why: "The first task on /onboarding (package 39), INSTEAD of the questionnaire: the field's send is the one filled control; the three tasks are quiet panels",
+  },
 ];
 const replacementFiles = new Set(REPLACEMENT_SURFACES.map((r) => r.file));
 const walkedReplacements = new Set(REPLACEMENT_SURFACES.filter((r) => r.walk).map((r) => r.file));

@@ -3319,6 +3319,29 @@
         "failed": "Etwas ist schiefgelaufen. Es wurde nichts berechnet.",
         "offline": "Keine Verbindung. Prüf das Netzwerk und versuch es noch einmal."
       }
+    },
+    "firstTask": {
+      "lead": "Wähle etwas, das jetzt erledigt werden soll. Die Antwort kommt in wenigen Sekunden.",
+      "cost": "Kostenlos, innerhalb der kostenlosen Nachrichten dieses Monats.",
+      "tasks": {
+        "write": {
+          "label": "Schreiben",
+          "text": "Schreib eine kurze E-Mail, die einen Lieferanten um ein Angebot bittet"
+        },
+        "plan": {
+          "label": "Planen",
+          "text": "Erstelle mir einen Plan, um diesen Monat meine ersten Kunden zu finden"
+        },
+        "explain": {
+          "label": "Lernen",
+          "text": "Erklär mir in einfachen Worten, was eine gute Unternehmensbeschreibung bei Google ausmacht"
+        }
+      },
+      "ownLabel": "Oder schreib, was du möchtest",
+      "ownPlaceholder": "Oder schreib, was erledigt werden soll…",
+      "send": "Los",
+      "import": "Bring deine Daten aus einer CSV-Datei mit",
+      "skip": "Überspringen"
     }
   },
   "module": {

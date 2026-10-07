@@ -1,6 +1,6 @@
 {
-  "total": 3958,
-  "onPath": 588,
+  "total": 3971,
+  "onPath": 601,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -10,19 +10,19 @@
       "n": 1,
       "title": "THE SENTENCES — read these",
       "note": "On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that.",
-      "count": 23
+      "count": 25
     },
     {
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 360
+      "count": 368
     },
     {
       "n": 3,
       "title": "Further in — only if you have time",
       "note": "Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour.",
-      "count": 205
+      "count": 208
     }
   ],
   "screens": [
@@ -739,6 +739,84 @@
           "file": "src/app/onboarding/page.tsx"
         },
         {
+          "key": "dashboard.firstTask.cost",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/first-task.tsx"
+        },
+        {
+          "key": "dashboard.firstTask.import",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/first-task.tsx"
+        },
+        {
+          "key": "dashboard.firstTask.lead",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/onboarding/first-task.tsx"
+        },
+        {
+          "key": "dashboard.firstTask.ownLabel",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/first-task.tsx"
+        },
+        {
+          "key": "dashboard.firstTask.ownPlaceholder",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/first-task.tsx"
+        },
+        {
+          "key": "dashboard.firstTask.send",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/first-task.tsx"
+        },
+        {
+          "key": "dashboard.firstTask.skip",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/first-task.tsx"
+        },
+        {
+          "key": "dashboard.firstTask.tasks.explain.label",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/first-task.tsx"
+        },
+        {
+          "key": "dashboard.firstTask.tasks.explain.text",
+          "depth": 1,
+          "tier": 1,
+          "file": "src/components/onboarding/first-task.tsx"
+        },
+        {
+          "key": "dashboard.firstTask.tasks.plan.label",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/first-task.tsx"
+        },
+        {
+          "key": "dashboard.firstTask.tasks.plan.text",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/first-task.tsx"
+        },
+        {
+          "key": "dashboard.firstTask.tasks.write.label",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/first-task.tsx"
+        },
+        {
+          "key": "dashboard.firstTask.tasks.write.text",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/onboarding/first-task.tsx"
+        },
+        {
           "key": "dashboard.onboarding.analyseError",
           "depth": 1,
           "tier": 2,
@@ -1139,6 +1217,24 @@
           "depth": 2,
           "tier": 3,
           "file": "src/components/onboarding/insight-list.tsx"
+        },
+        {
+          "key": "promise.greeting.afternoon",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/overview/greeting-header.tsx"
+        },
+        {
+          "key": "promise.greeting.evening",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/overview/greeting-header.tsx"
+        },
+        {
+          "key": "promise.greeting.morning",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/overview/greeting-header.tsx"
         }
       ]
     },
@@ -2519,24 +2615,6 @@
           "depth": 1,
           "tier": 2,
           "file": "src/components/error-message.tsx"
-        },
-        {
-          "key": "promise.greeting.afternoon",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/greeting-header.tsx"
-        },
-        {
-          "key": "promise.greeting.evening",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/greeting-header.tsx"
-        },
-        {
-          "key": "promise.greeting.morning",
-          "depth": 1,
-          "tier": 2,
-          "file": "src/components/overview/greeting-header.tsx"
         },
         {
           "key": "common.cancel",

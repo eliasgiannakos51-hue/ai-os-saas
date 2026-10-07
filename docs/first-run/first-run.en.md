@@ -1,14 +1,14 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **588 strings**. The whole product is 3958, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **601 strings**. The whole product is 3971, which is why this file exists.
 
-**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 360 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 368 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
 _This is the English original. It is here so a reader of another file can be sent both._
 
-## Tier 1 — THE SENTENCES — read these (23)
+## Tier 1 — THE SENTENCES — read these (25)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -62,6 +62,16 @@ Bring in some real data and the AI will tell you something about your business i
 
 
 Your data stays yours. It is stored privately, only you can read it, and it is never used to train anything. You can delete it, or your whole account, at any time.
+
+**`dashboard.firstTask.lead`**
+
+
+Pick something to get done now. The answer arrives in a few seconds.
+
+**`dashboard.firstTask.tasks.explain.text`**
+
+
+Explain in plain words what makes a good business description on Google
 
 **`dashboard.onboarding.analysingHint`**
 
@@ -137,7 +147,7 @@ That looks like a question. Should I answer it, or record it?
 
 Describe anything — a product idea, a trade, feedback from a user, a metric — and it lands in the right module automatically.
 
-## Tier 2 — The labels — skim these (360)
+## Tier 2 — The labels — skim these (368)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -681,6 +691,61 @@ Working...
 
 
 Let's make this yours
+
+**`dashboard.firstTask.cost`**
+
+
+Free, within this month's free messages.
+
+**`dashboard.firstTask.import`**
+
+
+Bring your data from a CSV file
+
+**`dashboard.firstTask.ownLabel`**
+
+
+Or write what you want
+
+**`dashboard.firstTask.ownPlaceholder`**
+
+
+Or write what you want done…
+
+**`dashboard.firstTask.send`**
+
+
+Start
+
+**`dashboard.firstTask.skip`**
+
+
+Skip
+
+**`dashboard.firstTask.tasks.explain.label`**
+
+
+Learn
+
+**`dashboard.firstTask.tasks.plan.label`**
+
+
+Plan
+
+**`dashboard.firstTask.tasks.plan.text`**
+
+
+Make me a plan to find my first customers this month
+
+**`dashboard.firstTask.tasks.write.label`**
+
+
+Write
+
+**`dashboard.firstTask.tasks.write.text`**
+
+
+Write a short email asking a supplier for a quote
 
 **`dashboard.onboarding.analyseError`**
 
@@ -1936,22 +2001,7 @@ See credit history
 
 Try again
 
-**`promise.greeting.afternoon`**
-
-
-Good afternoon
-
-**`promise.greeting.evening`**
-
-
-Good evening
-
-**`promise.greeting.morning`**
-
-
-Good morning
-
-## Tier 3 — Further in — only if you have time (205)
+## Tier 3 — Further in — only if you have time (208)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2001,6 +2051,21 @@ Hide the numbers
 
 
 Show the numbers
+
+**`promise.greeting.afternoon`**
+
+
+Good afternoon
+
+**`promise.greeting.evening`**
+
+
+Good evening
+
+**`promise.greeting.morning`**
+
+
+Good morning
 
 ### dashboard chrome
 

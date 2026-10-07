@@ -2210,6 +2210,7 @@
       "used": "{used} από {cap} συνδεδεμένες",
       "usedUnlimited": "{used} συνδεδεμένες",
       "connect": "Σύνδεση",
+      "connectTo": "Σύνδεση με {name}",
       "disconnect": "Αποσύνδεση",
       "cancel": "Άκυρο",
       "statusConnected": "Συνδεδεμένο",

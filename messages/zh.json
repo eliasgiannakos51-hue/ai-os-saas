@@ -2210,6 +2210,7 @@
       "used": "已连接 {used} / {cap}",
       "usedUnlimited": "已连接 {used} 个",
       "connect": "连接",
+      "connectTo": "连接 {name}",
       "disconnect": "断开",
       "cancel": "取消",
       "statusConnected": "已连接",

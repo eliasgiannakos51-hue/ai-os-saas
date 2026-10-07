@@ -18,6 +18,7 @@ import { providerConfigured } from "@/lib/integrations/oauth";
 import { PROVIDERS, type ProviderId } from "@/lib/integrations/providers";
 import { IntegrationsList } from "@/components/integrations/integrations-list";
 import { providersOpenTo } from "@/lib/integrations/switches";
+import { isFeatureOn } from "@/lib/flags/flags";
 
 export const dynamic = "force-dynamic";
 
@@ -82,6 +83,7 @@ export default async function IntegrationsPage() {
             cap={cap}
             configured={configured}
             shown={shown}
+            connectButton={await isFeatureOn("connections", user)}
             encryptionReady={encryptionAvailable()}
           />
         </Suspense>

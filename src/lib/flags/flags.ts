@@ -23,7 +23,7 @@ import { FLAG_AUDIENCES, type FlagAudience } from "@/lib/flags/audience";
 export { FLAG_AUDIENCES, type FlagAudience };
 
 export const FLAGS = {
-  "google-calendar": "Connections: Google Calendar connected with one consent, and Chat answering «τι έχω αύριο;» from it (MASTER 16, package 31)",
+  "connections": "Connections in one press: a Connect button on every card that opens what the AI will read, Google Calendar as a connection, and Chat answering «τι έχω αύριο;» from it (MASTER 16, package 31)",
   "image-studio": "Image: four pictures from one description, one of them changed with words, and downloaded at the largest size the provider makes (MASTER 16, package 19)",
   "chat-work-area": "Chat: the work area beside the conversation, and the card that reopens it (ΣΥΣΤΗΜΑ DESIGN §5, Δ.2)",
   "tool-shell": "Every tool in one shell: the conversation on the left, the work on the right, one field and at most four options (MASTER 14.3, package 3)",

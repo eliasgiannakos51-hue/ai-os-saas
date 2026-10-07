@@ -2210,6 +2210,7 @@
       "used": "{used} من {cap} مرتبط",
       "usedUnlimited": "{used} مرتبط",
       "connect": "ربط",
+      "connectTo": "ربط {name}",
       "disconnect": "إلغاء الربط",
       "cancel": "إلغاء",
       "statusConnected": "مرتبط",

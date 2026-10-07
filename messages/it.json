@@ -2210,6 +2210,7 @@
       "used": "{used} di {cap} collegate",
       "usedUnlimited": "{used} collegate",
       "connect": "Collega",
+      "connectTo": "Collega {name}",
       "disconnect": "Scollega",
       "cancel": "Annulla",
       "statusConnected": "Collegato",

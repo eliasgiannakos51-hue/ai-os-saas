@@ -2210,6 +2210,7 @@
       "used": "{used} de {cap} ligadas",
       "usedUnlimited": "{used} ligadas",
       "connect": "Ligar",
+      "connectTo": "Ligar {name}",
       "disconnect": "Desligar",
       "cancel": "Cancelar",
       "statusConnected": "Ligado",

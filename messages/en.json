@@ -2210,6 +2210,7 @@
       "used": "{used} of {cap} connected",
       "usedUnlimited": "{used} connected",
       "connect": "Connect",
+      "connectTo": "Connect {name}",
       "disconnect": "Disconnect",
       "cancel": "Cancel",
       "statusConnected": "Connected",

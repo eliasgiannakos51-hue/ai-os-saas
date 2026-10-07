@@ -2210,6 +2210,7 @@
       "used": "{cap} 件中 {used} 件を連携中",
       "usedUnlimited": "{used} 件を連携中",
       "connect": "接続",
+      "connectTo": "{name}を接続",
       "disconnect": "解除",
       "cancel": "キャンセル",
       "statusConnected": "接続済み",

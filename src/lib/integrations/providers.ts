@@ -83,7 +83,7 @@ export const PROVIDERS: ProviderMeta[] = [
     scopes: ["https://www.googleapis.com/auth/calendar.events.readonly"],
     requiredEnv: ["GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET"],
     oauthFamily: "google",
-    behindSwitch: "google-calendar",
+    behindSwitch: "connections",
   },
   {
     id: "slack",

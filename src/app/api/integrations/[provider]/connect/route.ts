@@ -46,7 +46,7 @@ export async function GET(request: Request, props: { params: Promise<{ provider:
     const provider = getProvider(params.provider)!;
     // A provider behind a closed switch does not exist for this person.
     if (!(await providersOpenTo(user)).has(provider.id)) {
-      return NextResponse.json({ ok: false, error: "Unknown provider." }, { status: 404 });
+      return NextResponse.json({ ok: false, code: "unknown_provider" }, { status: 404 });
     }
 
     // Rate limited even though it costs us nothing: this endpoint mints

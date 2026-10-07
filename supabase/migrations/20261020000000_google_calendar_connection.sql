@@ -25,3 +25,17 @@
 alter table public.user_integrations drop constraint if exists user_integrations_provider_check;
 alter table public.user_integrations add constraint user_integrations_provider_check
   check (provider in ('gmail', 'google_drive', 'google_calendar', 'slack'));
+
+-- It says so if it did not take, rather than leaving the first Calendar
+-- connection to find out.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+     where conname = 'user_integrations_provider_check'
+       and conrelid = 'public.user_integrations'::regclass
+       and pg_get_constraintdef(oid) like '%google_calendar%'
+  ) then
+    raise exception '20261020000000: user_integrations_provider_check does not allow google_calendar';
+  end if;
+end $$;

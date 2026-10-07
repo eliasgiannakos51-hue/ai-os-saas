@@ -4,6 +4,7 @@ import { logApiError } from "@/lib/log-error";
 import { getUsableAccessToken, recordSync } from "@/lib/integrations/store";
 import type { ProviderId } from "@/lib/integrations/providers";
 import { matchesSearch } from "@/lib/text/search-match";
+import { calendarWindow } from "@/lib/integrations/calendar-window";
 
 // Reading the user's real data.
 //
@@ -349,33 +350,6 @@ export async function listSlackChannels(
 // ---------------------------------------------------------------------
 // Google Calendar (read-only, events only). MASTER 16, package 31.
 // ---------------------------------------------------------------------
-
-/** The longest period one read may cover: a year. */
-const MAX_CALENDAR_SPAN_DAYS = 366;
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-/**
- * The period a calendar question covers. A question about a calendar is
- * mostly a question about WHEN ("τι έχω αύριο;"), which keywords cannot
- * express, so the model may name the days; without them it is the coming
- * month and yesterday. A period the wrong way round is turned the right
- * way; one longer than a year is cut to a year from its start.
- */
-export function calendarWindow(from: unknown, to: unknown, now: Date = new Date()): { timeMin: string; timeMax: string } {
-  const read = (value: unknown): number | null => {
-    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}(?:[T ][\d:.]+(?:Z|[+-]\d{2}:?\d{2})?)?$/.test(value.trim())) return null;
-    const t = Date.parse(value.trim());
-    return Number.isFinite(t) ? t : null;
-  };
-  let start = read(from) ?? now.getTime() - DAY_MS;
-  let end = read(to) ?? (read(from) !== null ? start + DAY_MS : now.getTime() + 30 * DAY_MS);
-  // A day named alone ("2026-10-08") means that whole day.
-  if (typeof to === "string" && /^\d{4}-\d{2}-\d{2}$/.test(to.trim())) end += DAY_MS;
-  if (end < start) [start, end] = [end, start];
-  if (end - start > MAX_CALENDAR_SPAN_DAYS * DAY_MS) end = start + MAX_CALENDAR_SPAN_DAYS * DAY_MS;
-  if (end === start) end = start + DAY_MS;
-  return { timeMin: new Date(start).toISOString(), timeMax: new Date(end).toISOString() };
-}
 
 type CalendarTime = { dateTime?: string; date?: string };
 const whenOf = (t: CalendarTime | undefined): string => t?.dateTime ?? t?.date ?? "";

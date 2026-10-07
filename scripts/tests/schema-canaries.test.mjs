@@ -181,6 +181,8 @@ console.log("\n== 3. every migration in the window has a canary, or says why it 
 // object exist"; a file that only revokes, grants, or replaces the body of
 // a function that already existed cannot be seen that way, by anybody.
 const NOT_PROBEABLE = {
+  "20261020000000_google_calendar_connection.sql":
+    "widens a CHECK constraint on user_integrations to a fourth provider name. It creates no object, and a constraint is not in the database API's OpenAPI document, so /api/health cannot see it; the migration raises at the end if the constraint does not name google_calendar, and until it runs the Calendar callback's save is refused and says so",
   "20261015000000_agents_websites_server_written.sql":
     "drops five write policies and revokes INSERT and UPDATE (and DELETE on agents) on two tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write what it should not, and server-written-tables.dbtest.mjs checks it against a real Postgres",
   "20261014000000_server_written_tables.sql":
